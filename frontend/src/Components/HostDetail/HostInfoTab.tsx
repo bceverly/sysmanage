@@ -31,6 +31,7 @@ import StopIcon from '@mui/icons-material/Stop';
 import { useTranslation } from 'react-i18next';
 import MaintenanceWindowCard from '../MaintenanceWindowCard';
 import HostCapabilitiesCard from './HostCapabilitiesCard';
+import ConfigManagementPrereqCard from '../ConfigManagementPrereqCard';
 import { hasPermissionSync, SecurityRoles } from '../../Services/permissions';
 import { SysManageHost } from '../../Services/hosts';
 import { OpenTelemetryStatus } from './hostDetailTypes';
@@ -60,6 +61,7 @@ interface HostInfoTabProps {
     selectedTagToAdd: string;
     setSelectedTagToAdd: (value: string) => void;
     canEditTags: boolean;
+    canAddPackage: boolean;
     handleAddTag: () => void;
     handleRemoveTag: (tagId: string) => void;
     handleShowDialog: (title: string, content: string) => void;
@@ -649,6 +651,7 @@ const HostInfoTab: React.FC<HostInfoTabProps> = ({
     selectedTagToAdd,
     setSelectedTagToAdd,
     canEditTags,
+    canAddPackage,
     handleAddTag,
     handleRemoveTag,
     handleShowDialog,
@@ -685,6 +688,17 @@ const HostInfoTab: React.FC<HostInfoTabProps> = ({
                         report={host.agent_capabilities}
                         limited={host.agent_capabilities_limited}
                         updatedAt={host.agent_capabilities_updated_at}
+                    />
+                </Grid>
+
+                {/* Config-management prerequisite (Phase 20.1) */}
+                <Grid size={{ xs: 12, md: 6 }} sx={{ display: 'flex' }}>
+                    <ConfigManagementPrereqCard
+                        hostId={hostId || ''}
+                        canInstall={canAddPackage}
+                        isHostActive={host?.active || false}
+                        isAgentPrivileged={host?.is_agent_privileged || false}
+                        sx={{ height: '100%', width: '100%' }}
                     />
                 </Grid>
 

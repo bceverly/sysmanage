@@ -3410,5 +3410,27 @@
     "unlockSelected": "Geselecteerde ontgrendelen",
     "unlocked": "Ontgrendeld"
   },
-  "pluginOnlyKey": "[ONTHEEF:pluginOnlyKey]"
+  "pluginOnlyKey": "[ONTHEEF:pluginOnlyKey]",
+  "configManagement": {
+    "prereqBundled": "Meebeleggen met de agent",
+    "prereqBundledDetail": "Windows-hosts gebruiken DSC, dat meebeleggen is met de SysManage-agent. Er is niets te installeren.",
+    "prereqEngine": "Motor",
+    "prereqError": "Kon de status van de vereiste voor configuratiebeheer niet laden",
+    "prereqInstall": "Vereiste installeren",
+    "prereqInstallError": "Kon de installatie van de vereiste voor configuratiebeheer niet aanvragen",
+    "prereqInstallPending": "Installatie is al aangevraagd",
+    "prereqInstallRequested": "Installatie aangevraagd. Deze kaart wordt bijgewerkt zodra de host terugmeldt.",
+    "prereqInstalledVersion": "Geïnstalleerde versie",
+    "prereqMinimumVersion": "Minimale versie",
+    "prereqMissing": "Niet geïnstalleerd",
+    "prereqMissingDetail": "Configuratieprofielen kunnen niet worden toegepast op deze host totdat de engine is geïnstalleerd.",
+    "prereqReady": "Klaar",
+    "prereqReadyDetail": "Deze host heeft de software die nodig is om configuratieprofielen toe te passen.",
+    "prereqStatus": "Status",
+    "prereqTitle": "Beheer van configuratie",
+    "prereqTooOld": "Te oude versie",
+    "prereqTooOldDetail": "De geïnstalleerde versie is ouder dan vereist voor configuratiebeheer. Installeren zal deze upgraden.",
+    "prereqUnsupported": "Niet beschikbaar op deze platform",
+    "prereqUnsupportedDetail": "SysManage heeft geen geverifieerde manier om de engine voor configuratiebeheer te installeren op dit besturingssysteem."
+  }
 }

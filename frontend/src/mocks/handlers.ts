@@ -207,6 +207,30 @@ export const handlers = [
     });
   }),
 
+  // Config-management prerequisite (Phase 20.1).  Defaults to satisfied so
+  // the host-detail tests are not forced to care about a card they are not
+  // exercising; tests that DO care override this per-test.
+  http.get('*/api/v1/hosts/*/config-management/prerequisite', () => {
+    return HttpResponse.json({
+      host_id: 'test-host',
+      executor: 'ansible-core',
+      status: 'satisfied',
+      installed_version: '2.20.1',
+      minimum_version: '2.20',
+      can_install: false,
+      detail: null,
+      package_name: 'ansible-core'
+    });
+  }),
+
+  http.post('*/api/v1/hosts/*/config-management/prerequisite/install', () => {
+    return HttpResponse.json({
+      host_id: 'test-host',
+      queued: true,
+      message: 'Installation of the config-management prerequisite was requested'
+    });
+  }),
+
   // Fallback for non-API requests
   http.all('*', ({ request }) => {
     const url = new globalThis.URL(request.url);

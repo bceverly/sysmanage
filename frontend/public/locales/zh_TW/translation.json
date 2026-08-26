@@ -3410,5 +3410,27 @@
     "unlockSelected": "解除鎖定所選項目",
     "unlocked": "已解除鎖定"
   },
-  "pluginOnlyKey": "插件僅限鍵缺失"
+  "pluginOnlyKey": "插件僅限鍵缺失",
+  "configManagement": {
+    "prereqBundled": "包含於代理中",
+    "prereqBundledDetail": "Windows 主機使用 DSC，而 SysManage 代理隨附了 DSC。無需安裝。",
+    "prereqEngine": "引擎",
+    "prereqError": "載入配置管理必要條件狀態失敗",
+    "prereqInstall": "安裝必要條件",
+    "prereqInstallError": "請求安裝配置管理必要條件失敗",
+    "prereqInstallPending": "已請求安裝",
+    "prereqInstallRequested": "已請求安裝。此卡片在主機回報後更新。",
+    "prereqInstalledVersion": "已安裝版本",
+    "prereqMinimumVersion": "最低版本",
+    "prereqMissing": "未安裝",
+    "prereqMissingDetail": "無法將配置資料庫套用到此主機，直到安裝引擎。",
+    "prereqReady": "準備就緒",
+    "prereqReadyDetail": "此主機具備套用配置資料庫所需的軟體。",
+    "prereqStatus": "狀態",
+    "prereqTitle": "配置管理",
+    "prereqTooOld": "版本過舊",
+    "prereqTooOldDetail": "已安裝版本比配置管理需要的舊。安裝將升級它。",
+    "prereqUnsupported": "在此平台上不可用",
+    "prereqUnsupportedDetail": "SysManage 無法驗證在這個作業系統上安裝配置管理引擎的方法。"
+  }
 }

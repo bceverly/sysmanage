@@ -3410,5 +3410,27 @@
     "unlockSelected": "Desbloquear selecionados",
     "unlocked": "Desbloqueado"
   },
-  "pluginOnlyKey": "[FALTANDO:pluginOnlyKey]"
+  "pluginOnlyKey": "[FALTANDO:pluginOnlyKey]",
+  "configManagement": {
+    "prereqBundled": "Incluído com o agente",
+    "prereqBundledDetail": "Hosts Windows usam DSC, que vem com o agente SysManage. Nada a instalar.",
+    "prereqEngine": "Motor",
+    "prereqError": "Falha ao carregar o status dos requisitos de gestão de configuração",
+    "prereqInstall": "Instalar requisito",
+    "prereqInstallError": "Falha ao solicitar a instalação do requisito de gestão de configuração",
+    "prereqInstallPending": "Solicitação de instalação já feita",
+    "prereqInstallRequested": "Solicitação de instalação. Este cartão é atualizado uma vez que o host informa de volta.",
+    "prereqInstalledVersion": "Versão instalada",
+    "prereqMinimumVersion": "Versão mínima",
+    "prereqMissing": "Não instalado",
+    "prereqMissingDetail": "Perfis de configuração não podem ser aplicados a este host até que o motor seja instalado.",
+    "prereqReady": "Pronto",
+    "prereqReadyDetail": "Este host possui o software necessário para aplicar perfis de configuração.",
+    "prereqStatus": "Status",
+    "prereqTitle": "Gestão de Configuração",
+    "prereqTooOld": "Versão muito antiga",
+    "prereqTooOldDetail": "A versão instalada é mais antiga do que os requisitos de gestão de configuração. A instalação atualizará.",
+    "prereqUnsupported": "Não disponível nesta plataforma",
+    "prereqUnsupportedDetail": "SysManage não tem um método verificado para instalar o motor de gestão de configuração neste sistema operacional."
+  }
 }

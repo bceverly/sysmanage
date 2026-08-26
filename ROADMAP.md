@@ -7319,10 +7319,15 @@ any engine code, and it moved two decisions:
     `dsc 3.2.3` enumerated **25 resources** on the same box and in the same
     probe run where `Invoke-DscResource` failed with a WS-Management connection
     error. One run, one host, both paths — the dependency difference is not
-    inferred, it is observed. NOTE what this does and does not prove: the engine
-    LOADS and enumerates without WinRM. A get/test/**set** round trip through
-    `dsc.exe` with WinRM off is still outstanding and is the remaining gate on
-    this decision.
+    inferred, it is observed.
+
+    **The full round trip is CONFIRMED**, not just resource enumeration. With
+    WinRM still `Stopped/Disabled`: `Microsoft.DSC.Debug/Echo` get+test both
+    ok, and `Microsoft.Windows/Registry` under `HKCU` ran
+    get -> set -> get(`value_present=yes`) -> set-again -> delete, every step
+    ok, leaving the box as it was found. Input was fed over **stdin**
+    (`--file -`). DSC v3 therefore performs real state changes on a host where
+    the v1/v2 path cannot run at all, which settles the decision.
     It also gives Windows the **same shape as POSIX**: the agent subprocesses a
     binary and reads JSON off stdout, so one result-ingestion path serves both.
 
@@ -7382,6 +7387,73 @@ any engine code, and it moved two decisions:
     including the failure path (exit code 2, `failures: 1`), so the agent can
     detect failure without parsing text.
 
+**Prerequisite surfacing — LANDED 2026-08-26 (uncommitted).** Before any
+profile can run, the host needs its executor, and an operator needs to be able
+to see that and fix it in one press.  Built as the child-host enablement flow
+is built (status card + action button), not as a documentation note:
+
+  * `backend/services/config_mgmt_plan_builder.py` — per-platform install plans
+    dispatched through the existing `APPLY_DEPLOYMENT_PLAN` path.  Every
+    package name is MEASURED, not guessed (guessing was wrong twice: FreeBSD's
+    `py312-` prefix tracks the default Python, and plain `ansible` on the BSDs
+    pulls the ~14.x bundle rather than core).  Unknown Linux returns **no plan
+    at all** rather than firing a package manager that is not there.
+  * `backend/services/config_mgmt_prereq.py` — readiness DERIVED from the
+    `software_package` inventory the agent already reports, so this needed no
+    agent change, no capability-schema change and no extra round trip.  Cost
+    stated in the module docstring: bounded freshness, and pipx/source installs
+    are invisible (a false negative, which is the right failure direction).
+  * Five-valued status, not a boolean — `satisfied` / `not_required` (Windows
+    vendors `dsc.exe`) / `missing` / `too_old` / `unsupported`.  Collapsing
+    those loses the distinction between "press this" and "there is nothing to
+    press here".
+  * `GET|POST /api/v1/hosts/{id}/config-management/prerequisite[/install]`,
+    gated on the existing `ADD_PACKAGE` role.  The install queues an inventory
+    refresh BEHIND the plan so the card notices without waiting for the next
+    scheduled collection.
+  * `ConfigManagementPrereqCard` on the host Info tab, beside the Phase 19
+    capabilities card.
+  * 97 tests (81 backend, 16 frontend). Version comparison is tuple-based and
+    separately tested: `"2.9" > "2.20"` lexically, so a string compare would
+    silently pass a host that is two years stale.
+
+**No packaging change was required** — the agent's sudoers already grant the
+bare package manager on Linux/FreeBSD/NetBSD and OpenBSD's doas grants
+`pkg_add`.
+
+**macOS goes through the agent's existing brew path (corrected 2026-08-26).**
+The first draft emitted a raw `brew install ansible` command step with
+`sudo: false`, which would have failed on **every** Mac: the agent is a
+LaunchDaemon with no `UserName` key, so it runs as root, and Homebrew refuses
+to run as root — and the plan executor has no run-as-user support, only a
+sudo-if-not-root branch. The agent already solved this years earlier:
+`_get_brew_command` reads the owner of the Homebrew prefix and emits
+`sudo -u <owner> brew` when privileged, and `install_package` →
+`_install_with_brew` uses it. So macOS emits `packages` rather than `commands`
+and inherits a mechanism already in service for inventory and updates. The
+lesson is the reusable part: **check for an existing agent capability before
+adding a plan primitive.**
+
+**FreeBSD is the one platform that must shell out**, because the agent's
+`_install_with_pkg` runs `pkg install -y <name>` with no `-g`, so a glob handed
+to the `packages` path would be taken literally. Verified by dry run on
+FreeBSD 14.4 (2026-08-26): `pkg install -n -g 'py3*-ansible-core'` resolves
+unambiguously and does **not** also match the version-pinned
+`py312-ansible-core218..221` ports.
+
+- [x] Vendor `dsc.exe` in the Windows MSI — **DONE 2026-08-26.**
+      `installer/windows/build-msi.ps1` downloads the DSC v3 build matching
+      `-Architecture` (`DSC-3.2.3-{aarch64,x86_64}-pc-windows-msvc.zip`, both
+      asset URLs confirmed to resolve) and **hard-fails** if it cannot — an MSI
+      that silently omitted the executor would make the server's "Windows is
+      ready" report a lie on every Windows host. The payload is staged to
+      `installer/windows/dsc/` (gitignored, fetched per build, never committed)
+      and harvested into the MSI with a WiX `<Files Include="dsc\**">` group
+      rather than hand-written components, because the file list changes
+      between upstream releases. The whole tree ships, not just `dsc.exe`: the
+      engine discovers resources from the manifests beside it. Arch is taken
+      from the MSI target, not the build host — the ARM64 MSI is cross-built on
+      an x64 runner.
 - [ ] Desired-state config-as-code: Ansible role/playbook execution at scale (job templates; inventories from SysManage hosts/tags/sites) with results + idempotency reporting
 - [ ] Config profiles assignable per host/tag/site, enforced on a schedule
 - [ ] Remediation playbooks (apply to bring a host into compliance)

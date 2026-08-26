@@ -400,6 +400,7 @@ const HostDetailTabContent: React.FC<HostDetailTabContentProps> = (props) => {
                     selectedTagToAdd={selectedTagToAdd}
                     setSelectedTagToAdd={setSelectedTagToAdd}
                     canEditTags={canEditTags}
+                    canAddPackage={canAddPackage}
                     handleAddTag={handleAddTag}
                     handleRemoveTag={handleRemoveTag}
                     handleShowDialog={handleShowDialog}

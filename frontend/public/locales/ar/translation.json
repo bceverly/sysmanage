@@ -3410,5 +3410,27 @@
     "updated": "تم الإبلاغ عنه"
   },
   "greeting": "[فقدان: التحية]",
-  "pluginOnlyKey": "([مفقود: pluginOnlyKey)]"
+  "pluginOnlyKey": "([مفقود: pluginOnlyKey)]",
+  "configManagement": {
+    "prereqBundled": "متضمن مع الوكيل",
+    "prereqBundledDetail": "تستخدم مضيفات Windows DSC، والتي تأتي مع وكيل SysManage. لا يوجد شيء لتثبيته.",
+    "prereqEngine": "المحرك",
+    "prereqError": "فشل تحميل حالة المتطلبات الأساسية لإدارة التكوين",
+    "prereqInstall": "تثبيت المتطلبات الأساسية",
+    "prereqInstallError": "فشل طلب تثبيت المتطلبات الأساسية لإدارة التكوين",
+    "prereqInstallPending": "تم بالفعل طلب التثبيت",
+    "prereqInstallRequested": "تم طلب التثبيت. يتم تحديث هذه البطاقة بمجرد أن يقوم المضيف بإرسال تقريره.",
+    "prereqInstalledVersion": "الإصدار المثبت",
+    "prereqMinimumVersion": "الإصدار الأدنى",
+    "prereqMissing": "غير مثبت",
+    "prereqMissingDetail": "لا يمكن تطبيق ملفات تعريف التكوين على هذا المضيف حتى تثبيت المحرك.",
+    "prereqReady": "جاهز",
+    "prereqReadyDetail": "يملك هذا المضيف البرمجيات اللازمة لتطبيق ملفات تعريف التكوين.",
+    "prereqStatus": "الحالة",
+    "prereqTitle": "إدارة التكوين",
+    "prereqTooOld": "الإصدار قديم جداً",
+    "prereqTooOldDetail": "الإصدار المثبت أقدم من المتطلبات الأساسية لإدارة التكوين. سيتم تثبيته لتحديثه.",
+    "prereqUnsupported": "غير متوفر على هذا المنصة",
+    "prereqUnsupportedDetail": "لا يمتلك SysManage طريقة موثوقة لتثبيت محرك إدارة التكوين على هذا النظام الأساسي."
+  }
 }

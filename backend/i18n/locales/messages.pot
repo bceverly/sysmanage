@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-08-14 05:12-0400\n"
+"POT-Creation-Date: 2026-08-26 10:30-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -160,7 +160,7 @@ msgstr ""
 #: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:62
 #: backend/api/package_handlers.py:547 backend/api/package_compliance.py:319
 #: backend/api/package_compliance.py:445 backend/api/grafana_integration.py:330
-#: backend/api/image_mode_actions.py:69 backend/api/host_graylog.py:131
+#: backend/api/image_mode_actions.py:86 backend/api/host_graylog.py:131
 #: backend/api/tag.py:499 backend/api/tag.py:653
 #: backend/api/airgap_repository_buckets.py:65
 #: backend/api/updates/report_routes.py:34
@@ -632,7 +632,7 @@ msgstr ""
 msgid "User Security Roles (RBAC)"
 msgstr ""
 
-#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:530
+#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:534
 msgid "Audit Log"
 msgstr ""
 
@@ -1723,6 +1723,19 @@ msgstr ""
 msgid "SAML sign-in failed: %s"
 msgstr ""
 
+#: backend/api/config_mgmt_prereq.py:168 backend/api/packages_operations.py:76
+msgid "Permission denied: ADD_PACKAGE role required"
+msgstr ""
+
+#: backend/api/config_mgmt_prereq.py:183
+msgid ""
+"No config-management prerequisite install is available for this platform"
+msgstr ""
+
+#: backend/api/config_mgmt_prereq.py:244
+msgid "Installation of the config-management prerequisite was requested"
+msgstr ""
+
 #: backend/api/grafana_integration.py:320
 msgid "Permission denied: ENABLE_GRAFANA_INTEGRATION role required"
 msgstr ""
@@ -2425,13 +2438,13 @@ msgstr ""
 msgid "No published version %s"
 msgstr ""
 
-#: backend/api/image_mode_actions.py:58
+#: backend/api/image_mode_actions.py:75
 msgid ""
 "Image-mode host management requires a SysManage Enterprise license. Please "
 "upgrade to access this feature."
 msgstr ""
 
-#: backend/api/image_mode_actions.py:73
+#: backend/api/image_mode_actions.py:90
 msgid "This host is not an image-mode (bootc / rpm-ostree) host."
 msgstr ""
 
@@ -2824,7 +2837,7 @@ msgstr ""
 msgid "Missing agent connection token"
 msgstr ""
 
-#: backend/api/agent_poll.py:120
+#: backend/api/agent_poll.py:125
 msgid "Invalid or expired connection token"
 msgstr ""
 
@@ -2878,10 +2891,6 @@ msgstr ""
 #: backend/api/message_handlers.py:560
 #, python-format
 msgid "Failed to update package installation status: %s"
-msgstr ""
-
-#: backend/api/packages_operations.py:76
-msgid "Permission denied: ADD_PACKAGE role required"
 msgstr ""
 
 #: backend/api/packages_operations.py:104
@@ -3091,16 +3100,16 @@ msgstr ""
 msgid "No OS upgrades available for this host"
 msgstr ""
 
-#: backend/api/updates/os_upgrade_routes.py:353
+#: backend/api/updates/os_upgrade_routes.py:359
 #, python-format
 msgid "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
 msgstr ""
 
-#: backend/api/updates/os_upgrade_routes.py:384
+#: backend/api/updates/os_upgrade_routes.py:390
 msgid "OS upgrade command queued for host"
 msgstr ""
 
-#: backend/api/updates/os_upgrade_routes.py:394
+#: backend/api/updates/os_upgrade_routes.py:400
 msgid "Failed to queue OS upgrade command"
 msgstr ""
 
@@ -4100,15 +4109,15 @@ msgstr ""
 msgid "Unsupported export format: %s"
 msgstr ""
 
-#: backend/api/audit_log.py:532
+#: backend/api/audit_log.py:536
 msgid "Generated"
 msgstr ""
 
-#: backend/api/audit_log.py:534
+#: backend/api/audit_log.py:538
 msgid "Total Entries"
 msgstr ""
 
-#: backend/api/audit_log.py:541
+#: backend/api/audit_log.py:545
 msgid "No audit log entries found."
 msgstr ""
 
@@ -4642,11 +4651,11 @@ msgstr ""
 msgid "Rate limit exceeded. Please retry later."
 msgstr ""
 
-#: backend/services/agent_capability_service.py:209
+#: backend/services/agent_capability_service.py:217
 msgid "this host"
 msgstr ""
 
-#: backend/services/agent_capability_service.py:212
+#: backend/services/agent_capability_service.py:220
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "

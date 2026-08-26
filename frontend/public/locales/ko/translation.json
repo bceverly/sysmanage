@@ -3410,5 +3410,27 @@
     "unlockSelected": "선택 항목 잠금 해제",
     "unlocked": "잠금 해제됨"
   },
-  "pluginOnlyKey": "플러그인 전용 키가 누락되었습니다."
+  "pluginOnlyKey": "플러그인 전용 키가 누락되었습니다.",
+  "configManagement": {
+    "prereqBundled": "에이전에 포함된",
+    "prereqBundledDetail": "Windows 호스트는 SysManage 에이전에 포함된 DSC를 사용합니다. 설치할 것이 없음.",
+    "prereqEngine": "엔진",
+    "prereqError": "구성 관리 필수 상태를 로드하는 데 실패했습니다",
+    "prereqInstall": "필수 설치",
+    "prereqInstallError": "구성 관리 필수 설치 요청에 실패했습니다",
+    "prereqInstallPending": "설치 이미 요청됨",
+    "prereqInstallRequested": "설치가 요청되었습니다. 호스트가 보고한 후 이 카드가 업데이트됩니다.",
+    "prereqInstalledVersion": "설치된 버전",
+    "prereqMinimumVersion": "최소 버전",
+    "prereqMissing": "설치되지 않음",
+    "prereqMissingDetail": "엔진이 설치될 때까지 이 호스트에 구성 프로필을 적용할 수 없습니다.",
+    "prereqReady": "준비됨",
+    "prereqReadyDetail": "이 호스트는 구성 프로필을 적용하기 위해 필요한 소프트웨어를 가지고 있습니다.",
+    "prereqStatus": "상태",
+    "prereqTitle": "구성 관리",
+    "prereqTooOld": "버전이 너무 오래된",
+    "prereqTooOldDetail": "설치된 버전은 구성 관리가 요구하는 것보다 오래되었습니다. 설치하면 업그레이드됩니다.",
+    "prereqUnsupported": "이 플랫폼에서 사용할 수 없음",
+    "prereqUnsupportedDetail": "SysManage는 이 운영 체제에서 구성 관리 엔진을 설치하는 검증된 방법을 가지고 있지 않습니다."
+  }
 }

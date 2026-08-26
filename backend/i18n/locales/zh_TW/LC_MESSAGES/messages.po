@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-14 05:12-0400\n"
+"POT-Creation-Date: 2026-08-26 10:30-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -152,7 +152,7 @@ msgstr "主機ID格式無效"
 #: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:62
 #: backend/api/package_handlers.py:547 backend/api/package_compliance.py:319
 #: backend/api/package_compliance.py:445
-#: backend/api/grafana_integration.py:330 backend/api/image_mode_actions.py:69
+#: backend/api/grafana_integration.py:330 backend/api/image_mode_actions.py:86
 #: backend/api/host_graylog.py:131 backend/api/tag.py:499
 #: backend/api/tag.py:653 backend/api/airgap_repository_buckets.py:65
 #: backend/api/updates/report_routes.py:34
@@ -625,7 +625,7 @@ msgstr "商業防毒軟體狀態"
 msgid "User Security Roles (RBAC)"
 msgstr "使用者安全角色 (RBAC)"
 
-#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:530
+#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:534
 msgid "Audit Log"
 msgstr "稽核日誌"
 
@@ -1726,6 +1726,19 @@ msgstr "無效或已過期的 SAML RelayState。"
 msgid "SAML sign-in failed: %s"
 msgstr "SAML 登入失敗：%s"
 
+#: backend/api/config_mgmt_prereq.py:168 backend/api/packages_operations.py:76
+msgid "Permission denied: ADD_PACKAGE role required"
+msgstr "權限被拒絕：需要 ADD_PACKAGE 角色"
+
+#: backend/api/config_mgmt_prereq.py:183
+msgid ""
+"No config-management prerequisite install is available for this platform"
+msgstr "此平台無可用配置管理先決條件安裝"
+
+#: backend/api/config_mgmt_prereq.py:244
+msgid "Installation of the config-management prerequisite was requested"
+msgstr "需要安裝配置管理的先決條件"
+
 #: backend/api/grafana_integration.py:320
 msgid "Permission denied: ENABLE_GRAFANA_INTEGRATION role required"
 msgstr "權限 denied: ENABLE_GRAFANA_INTEGRATION 角色所需"
@@ -2439,13 +2452,13 @@ msgstr "沒有較早的已發布版本進行比較"
 msgid "No published version %s"
 msgstr "未發布版本 %s"
 
-#: backend/api/image_mode_actions.py:58
+#: backend/api/image_mode_actions.py:75
 msgid ""
 "Image-mode host management requires a SysManage Enterprise license. Please "
 "upgrade to access this feature."
 msgstr "圖像模式主機管理需要 SysManage Enterprise 許可證。請升級以使用此功能。"
 
-#: backend/api/image_mode_actions.py:73
+#: backend/api/image_mode_actions.py:90
 msgid "This host is not an image-mode (bootc / rpm-ostree) host."
 msgstr "此主機不是圖像模式（bootc / rpm-ostree）主機。"
 
@@ -2841,7 +2854,7 @@ msgstr "主機 '%(fqdn)s' 通過註冊密鑰 '%(key_name)s' 加入（自動批�
 msgid "Missing agent connection token"
 msgstr "缺少代理連接令牌"
 
-#: backend/api/agent_poll.py:120
+#: backend/api/agent_poll.py:125
 msgid "Invalid or expired connection token"
 msgstr "無效或已過期的連接令牌"
 
@@ -2896,10 +2909,6 @@ msgstr "代理程式 {hostname} 上的包安裝 {status}"
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "更新套件安裝狀態失敗：%s"
-
-#: backend/api/packages_operations.py:76
-msgid "Permission denied: ADD_PACKAGE role required"
-msgstr "權限被拒絕：需要 ADD_PACKAGE 角色"
 
 #: backend/api/packages_operations.py:104
 msgid "No packages specified for installation"
@@ -3110,17 +3119,17 @@ msgstr "這是圖像模式主機；更新作業系統映像而不是套用套件
 msgid "No OS upgrades available for this host"
 msgstr "此主機沒有可用的作業系統升級"
 
-#: backend/api/updates/os_upgrade_routes.py:353
+#: backend/api/updates/os_upgrade_routes.py:359
 #, python-format
 msgid ""
 "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
 msgstr "在主機 %(fqdn)s 上啟動了 OS 升級，升級數量為 %(upgrade_count)d"
 
-#: backend/api/updates/os_upgrade_routes.py:384
+#: backend/api/updates/os_upgrade_routes.py:390
 msgid "OS upgrade command queued for host"
 msgstr "主機的OS升級命令已排隊"
 
-#: backend/api/updates/os_upgrade_routes.py:394
+#: backend/api/updates/os_upgrade_routes.py:400
 msgid "Failed to queue OS upgrade command"
 msgstr "無法將作業系統升級命令加入佇列"
 
@@ -4128,15 +4137,15 @@ msgid "Unsupported export format: %s"
 msgstr "不支援的匯出格式: %s"
 
 # Reports-related strings
-#: backend/api/audit_log.py:532
+#: backend/api/audit_log.py:536
 msgid "Generated"
 msgstr "已產生"
 
-#: backend/api/audit_log.py:534
+#: backend/api/audit_log.py:538
 msgid "Total Entries"
 msgstr "總條目數"
 
-#: backend/api/audit_log.py:541
+#: backend/api/audit_log.py:545
 msgid "No audit log entries found."
 msgstr "未找到稽核日誌條目。"
 
@@ -4683,11 +4692,11 @@ msgstr "伺服器消息佇列管理器初始化完成"
 msgid "Rate limit exceeded. Please retry later."
 msgstr "超出速率限制。請稍後再試。"
 
-#: backend/services/agent_capability_service.py:209
+#: backend/services/agent_capability_service.py:217
 msgid "this host"
 msgstr "此主機"
 
-#: backend/services/agent_capability_service.py:212
+#: backend/services/agent_capability_service.py:220
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "

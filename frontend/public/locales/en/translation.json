@@ -3410,5 +3410,27 @@
     "requiresUnlockedSelection": "Select at least one unlocked user"
   },
   "greeting": "[MISSING:greeting]",
-  "pluginOnlyKey": "[MISSING:pluginOnlyKey]"
+  "pluginOnlyKey": "[MISSING:pluginOnlyKey]",
+  "configManagement": {
+    "prereqBundled": "Included with the agent",
+    "prereqBundledDetail": "Windows hosts use DSC, which ships with the SysManage agent. Nothing to install.",
+    "prereqEngine": "Engine",
+    "prereqError": "Failed to load configuration management prerequisite status",
+    "prereqInstall": "Install prerequisite",
+    "prereqInstallError": "Failed to request installation of the configuration management prerequisite",
+    "prereqInstallPending": "Installation already requested",
+    "prereqInstallRequested": "Installation requested. This card updates once the host reports back.",
+    "prereqInstalledVersion": "Installed version",
+    "prereqMinimumVersion": "Minimum version",
+    "prereqMissing": "Not installed",
+    "prereqMissingDetail": "Configuration profiles cannot be applied to this host until the engine is installed.",
+    "prereqReady": "Ready",
+    "prereqReadyDetail": "This host has the software it needs to apply configuration profiles.",
+    "prereqStatus": "Status",
+    "prereqTitle": "Configuration Management",
+    "prereqTooOld": "Version too old",
+    "prereqTooOldDetail": "The installed version is older than configuration management requires. Installing will upgrade it.",
+    "prereqUnsupported": "Not available on this platform",
+    "prereqUnsupportedDetail": "SysManage does not have a verified way to install the configuration management engine on this operating system."
+  }
 }

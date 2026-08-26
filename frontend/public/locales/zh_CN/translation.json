@@ -3410,5 +3410,27 @@
     "updated": "已报告"
   },
   "greeting": "[缺失：问候语]",
-  "pluginOnlyKey": "插件仅键缺失"
+  "pluginOnlyKey": "插件仅键缺失",
+  "configManagement": {
+    "prereqBundled": "包含于代理中",
+    "prereqBundledDetail": "Windows主机使用DSC，与SysManage代理一起提供。无需安装。",
+    "prereqEngine": "引擎",
+    "prereqError": "加载配置管理必要条件状态失败",
+    "prereqInstall": "安装必要条件",
+    "prereqInstallError": "请求安装配置管理必要条件失败",
+    "prereqInstallPending": "已请求安装",
+    "prereqInstallRequested": "已请求安装。此卡在主机报告后更新一次。",
+    "prereqInstalledVersion": "已安装版本",
+    "prereqMinimumVersion": "最小版本",
+    "prereqMissing": "未安装",
+    "prereqMissingDetail": "在引擎安装之前，无法将配置文件应用到此主机。",
+    "prereqReady": "准备就绪",
+    "prereqReadyDetail": "此主机具有应用配置文件所需的软件。",
+    "prereqStatus": "状态",
+    "prereqTitle": "配置管理",
+    "prereqTooOld": "版本过旧",
+    "prereqTooOldDetail": "已安装版本比配置管理需要的旧。安装将升级它。",
+    "prereqUnsupported": "在此平台上不可用",
+    "prereqUnsupportedDetail": "SysManage无法验证在该操作系统上安装配置管理引擎的方法。"
+  }
 }

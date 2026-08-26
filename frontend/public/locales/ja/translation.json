@@ -3410,5 +3410,27 @@
     "unlockSelected": "選択項目のロック解除",
     "unlocked": "ロック解除済み"
   },
-  "pluginOnlyKey": "[欠落: pluginOnlyKey]"
+  "pluginOnlyKey": "[欠落: pluginOnlyKey]",
+  "configManagement": {
+    "prereqBundled": "エージェントに含まれています",
+    "prereqBundledDetail": "Windowsホストは、SysManageエージェントに含まれるDSCを使用します。インストールするものはありません。",
+    "prereqEngine": "エンジン",
+    "prereqError": "構成管理の要件の読み込みに失敗しました",
+    "prereqInstall": "要件のインストール",
+    "prereqInstallError": "構成管理の要件のインストールリクエストに失敗しました",
+    "prereqInstallPending": "インストールが既にリクエストされています",
+    "prereqInstallRequested": "インストールがリクエストされました。ホストがレポートするまでは、このカードは更新されません。",
+    "prereqInstalledVersion": "インストール済みバージョン",
+    "prereqMinimumVersion": "最小バージョン",
+    "prereqMissing": "インストールされていません",
+    "prereqMissingDetail": "エンジンインストール前には、このホストに構成プロファイルを適用できません。",
+    "prereqReady": "準備完了",
+    "prereqReadyDetail": "このホストは、構成プロファイルを適用するために必要なソフトウェアを備えています。",
+    "prereqStatus": "ステータス",
+    "prereqTitle": "構成管理",
+    "prereqTooOld": "バージョンが古すぎます",
+    "prereqTooOldDetail": "インストール済みバージョンは、構成管理が要求するバージョンより古いです。インストールすることでアップグレードされます。",
+    "prereqUnsupported": "このプラットフォームでは利用できません",
+    "prereqUnsupportedDetail": "SysManageはこのオペレーティングシステムに構成管理エンジンをインストールする信頼できる方法を確認していません。"
+  }
 }
