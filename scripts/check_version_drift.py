@@ -46,6 +46,21 @@ TRACKED_FILES = [
     ("installer/alpine/APKBUILD", "apkbuild"),
     ("frontend/package.json", "npm-root"),
     ("frontend/package-lock.json", "npm-lock"),
+    # The FreeBSD port VENDORS byte-identical copies of the two files above
+    # (USES=npm builds from the copy, so lint-freebsd-port compares them
+    # byte-for-byte).  They are the one deliberate exception to the
+    # "packaging/* is excluded" rule at the top of this comment block: they
+    # are NOT 0.0.0 stubs, they are real copies that must track the frontend
+    # exactly.  Bump them in lockstep here or EVERY release fails the port
+    # gate after lint-version-fix moves the originals and leaves these behind.
+    (
+        "packaging/freebsd-ports/sysutils/sysmanage/files/packagejsons/frontend/package.json",
+        "npm-root",
+    ),
+    (
+        "packaging/freebsd-ports/sysutils/sysmanage/files/packagejsons/frontend/package-lock.json",
+        "npm-lock",
+    ),
 ]
 
 
