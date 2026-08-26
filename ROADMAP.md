@@ -7249,6 +7249,67 @@ Consequences to design around, all of them deliberate:
   * Results/idempotency reporting flows back over the same WebSocket as every
     other command result; no new ingress path.
 
+**Spike findings 2026-08-26 (`scripts/probe-ansible-support.sh`).** Run before
+any engine code, and it moved two decisions:
+
+  * **Windows gets its own executor — DECIDED (Bryan).** `ansible-core` declares
+    `Operating System :: POSIX` and nothing else; Windows is a MANAGED node,
+    never a controller, and pull-style makes every host its own controller. So
+    Windows is served by a **DSC / PowerShell executor behind the same profile
+    abstraction** (the same shape the optional Puppet/Salt adapters take).
+    Rejected: push-style over WinRM for Windows only — it would reintroduce the
+    inbound credentials and reachability that the Phase 19 "443 only" item
+    deliberately removed.
+  * **Capability must be VERSION-QUALIFIED, not boolean.** The controller Python
+    floor climbs steeply — core 2.15 needs py>=3.9, 2.16/2.17 >=3.10, 2.18
+    >=3.11, 2.21 >=3.12 — while the agent supports py3.9+. So an old host can
+    only host an old core. The agent therefore advertises the DETECTED
+    ansible-core and Python versions, every profile declares a
+    `min_ansible_core`, and the server computes applicability per host up front
+    ("not applicable on 4 hosts — core 2.15 < required 2.18") instead of letting
+    a profile fail at runtime. Profiles built only from a **curated baseline
+    module set** (copy/file/template/service/package/user/group/lineinfile/
+    command — stable for a decade) are marked universally applicable, and that
+    is where most real config management lives.
+  * **Do NOT set the supported floor yet.** Whether 2.15/py3.9 is worth a matrix
+    cell depends on how many hosts are actually on py3.9, which is currently a
+    guess. Decide after the probe data is in from every platform.
+  * **The agent must SUBPROCESS ansible, never import it.** On FreeBSD 14 the
+    system `python3` is 3.13.15 while `py312-ansible-core` runs
+    `/usr/local/bin/python3.12` — ansible-core lives in a *different
+    interpreter* than the platform default, and therefore than the agent's.
+    `import ansible` inside the agent would fail or silently pick up the wrong
+    tree; the agent invokes `ansible-playbook` as a child process and reads the
+    JSON-lines callback off its stdout. It also means the core-version ceiling
+    is governed by **ansible's** python, not the system's — the probe reports
+    both and warns when they differ, because computing the ceiling from the
+    wrong interpreter is an easy and invisible mistake (the probe made it on
+    its first draft).
+  * **Observed packaging matrix (2026-08-26, real boxes, not guesses).**
+
+    | platform | python | ansible-core available | notes |
+    |---|---|---|---|
+    | OpenBSD 7.8 | 3.13.13 | **2.20.4** (installed, working) | `pkg_add ansible` pulls core as a dep |
+    | FreeBSD 14 | 3.12 (`py312-*`) | **2.21.1** | also ships PINNED ports: `-core218/219/220/221` |
+    | NetBSD (pkgsrc) | 3.13 | 2.20.3 (2026Q1) / 2.21.3 (current) | |
+    | Ubuntu | 3.14 | 2.20.1 (apt) | |
+
+    Two consequences. First, **every POSIX platform we ship on packages core
+    2.20+, which already requires py>=3.12** — so the py3.9/core-2.15 cell is
+    theoretical for the BSDs and only reachable on old Linux LTS (20.04 = py3.8,
+    RHEL 8). Second, FreeBSD's version-pinned ports mean we can **standardise on
+    a single core minor** rather than accepting whatever each platform defaults
+    to, which collapses most of the compatibility matrix. Settle the exact floor
+    once macOS and NetBSD are probed.
+  * **Results ingestion needs a callback we ship ourselves — no new dependency.**
+    `ansible-core` bundles only the default/junit/minimal/oneline/tree callbacks;
+    there is no `json`, and `tree` overwrites per host so it cannot report
+    per-task state. A ~40-line JSON-lines stdout callback shipped with the agent
+    gives per-task ok/changed/failed/skipped/unreachable plus a recap, keeps the
+    schema ours, and stays air-gap clean. Verified end to end in the spike,
+    including the failure path (exit code 2, `failures: 1`), so the agent can
+    detect failure without parsing text.
+
 - [ ] Desired-state config-as-code: Ansible role/playbook execution at scale (job templates; inventories from SysManage hosts/tags/sites) with results + idempotency reporting
 - [ ] Config profiles assignable per host/tag/site, enforced on a schedule
 - [ ] Remediation playbooks (apply to bring a host into compliance)
