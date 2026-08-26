@@ -45,6 +45,17 @@ except:
 " 2>/dev/null
 }
 
+# Drop our own pid and our ancestors from a kill list.  The fstat fallback
+# below cannot distinguish a listener from a client, so this is the backstop
+# that keeps stop.sh from killing the very shell (or test runner) invoking it.
+exclude_self() {
+self=$$
+parent=$(ps -p $$ -o ppid= 2>/dev/null | tr -d " ")
+for p in "$@"; do
+if [ "$p" != "$self" ] && [ "$p" != "$parent" ]; then printf "%s " "$p"; fi
+done
+}
+
 # Function to kill process by PID file
 kill_by_pidfile() {
 pidfile=$1
@@ -115,28 +126,35 @@ fi
 
 FRONTEND_PORT=3000  # React dev server default
 
-# Backend port
+# Backend port.
+# -sTCP:LISTEN is NOT optional: bare `lsof -i:PORT` matches every process
+# holding a socket on that port, CLIENTS INCLUDED.  Without it this killed
+# whatever happened to be talking to the backend -- including the pytest
+# process that had just probed /api/health one line earlier (FreeBSD,
+# 2026-08-26: a bare "Killed", no traceback, nothing in dmesg, because it is
+# a userspace kill -9 and not the OOM killer).  A browser tab open on the UI
+# port is the same hazard.  start.sh already filters this way.
 if command -v lsof >/dev/null 2>&1; then
-    backend_pid=$(lsof -ti:$BACKEND_PORT 2>/dev/null)
+backend_pid=$(lsof -ti:$BACKEND_PORT -sTCP:LISTEN 2>/dev/null)
 else
-    # OpenBSD uses fstat
-    backend_pid=$(fstat | awk "\$9 ~ /:$BACKEND_PORT\$/ {print \$3}" | head -1 2>/dev/null)
+backend_pid=$(fstat | awk "\$9 ~ /:$BACKEND_PORT\$/ {print \$3}" | head -1 2>/dev/null)
 fi
+backend_pid=$(exclude_self $backend_pid)
 if [ -n "$backend_pid" ]; then
-    echo "Killing process on port $BACKEND_PORT (PID: $backend_pid)..."
-    kill -9 $backend_pid 2>/dev/null
+echo "Killing process on port $BACKEND_PORT (PID: $backend_pid)..."
+kill -9 $backend_pid 2>/dev/null
 fi
 
-# Frontend port
+# Frontend port -- same listener-only rule as the backend above.
 if command -v lsof >/dev/null 2>&1; then
-    frontend_pid=$(lsof -ti:$FRONTEND_PORT 2>/dev/null)
+frontend_pid=$(lsof -ti:$FRONTEND_PORT -sTCP:LISTEN 2>/dev/null)
 else
-    # OpenBSD uses fstat
-    frontend_pid=$(fstat | awk "\$9 ~ /:$FRONTEND_PORT\$/ {print \$3}" | head -1 2>/dev/null)
+frontend_pid=$(fstat | awk "\$9 ~ /:$FRONTEND_PORT\$/ {print \$3}" | head -1 2>/dev/null)
 fi
+frontend_pid=$(exclude_self $frontend_pid)
 if [ -n "$frontend_pid" ]; then
-    echo "Killing process on port $FRONTEND_PORT (PID: $frontend_pid)..."
-    kill -9 $frontend_pid 2>/dev/null
+echo "Killing process on port $FRONTEND_PORT (PID: $frontend_pid)..."
+kill -9 $frontend_pid 2>/dev/null
 fi
 
 # Clean up PID files and process environment

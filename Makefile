@@ -1869,9 +1869,13 @@ test-ui: $(VENV_ACTIVATE)
 ifeq ($(OS),Windows_NT)
 	@echo "[SKIP] Use 'make test-e2e' for Playwright E2E tests on Windows"
 else
-	@if [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ] || [ "$(shell uname -s)" = "NetBSD" ]; then \
+	@if [ "$(shell uname -s)" = "NetBSD" ]; then \
 		echo "=== Running UI Integration Tests (Selenium) ==="; \
-		echo "[INFO] Using Selenium fallback on BSD systems (OpenBSD/FreeBSD/NetBSD)"; \
+		echo "[SKIP] Browser automation is not runnable on NetBSD: both Chromium and Firefox crash in headless mode."; \
+		echo "       Same treatment as Playwright and artillery above -- a platform that cannot run the tool, not a product failure."; \
+	elif [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ]; then \
+		echo "=== Running UI Integration Tests (Selenium) ==="; \
+		echo "[INFO] Using Selenium fallback on BSD systems (OpenBSD/FreeBSD)"; \
 		OTEL_ENABLED=false PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_selenium.py tests/ui/test_hosts_selenium.py tests/ui/test_updates_selenium.py --confcutdir=tests/ui -p tests.ui.conftest_selenium -v --tb=short || { echo "[FAIL] Selenium UI integration tests failed"; exit 1; }; \
 		echo "[OK] Selenium UI integration tests completed"; \
 	else \
