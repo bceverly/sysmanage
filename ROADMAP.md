@@ -7274,10 +7274,14 @@ any engine code, and it moved two decisions:
   * **Do NOT set the supported floor yet.** Whether 2.15/py3.9 is worth a matrix
     cell depends on how many hosts are actually on py3.9, which is currently a
     guess. Decide after the probe data is in from every platform.
-  * **The agent must SUBPROCESS ansible, never import it.** On FreeBSD 14 the
-    system `python3` is 3.13.15 while `py312-ansible-core` runs
-    `/usr/local/bin/python3.12` — ansible-core lives in a *different
-    interpreter* than the platform default, and therefore than the agent's.
+  * **The agent must SUBPROCESS ansible, never import it.** On one FreeBSD 14.4
+    box, `python3` resolved to 3.13.15 in one shell and 3.12 in another — it
+    follows whichever virtualenv is active — while `py312-ansible-core` always
+    runs `/usr/local/bin/python3.12`. So "the interpreter running the agent" and
+    "the interpreter hosting ansible-core" are independent, and the drift is
+    invisible: both shells looked normal. (The first draft of this note asserted
+    a fixed system python and was wrong; the venv-dependence is the real and
+    stronger point.)
     `import ansible` inside the agent would fail or silently pick up the wrong
     tree; the agent invokes `ansible-playbook` as a child process and reads the
     JSON-lines callback off its stdout. It also means the core-version ceiling
@@ -7285,22 +7289,37 @@ any engine code, and it moved two decisions:
     both and warns when they differ, because computing the ceiling from the
     wrong interpreter is an easy and invisible mistake (the probe made it on
     its first draft).
+  * **Pull-style execution VERIFIED on every POSIX platform (2026-08-26).** A
+    `connection: local` play runs cleanly on **all five**: Linux (2.21.3),
+    FreeBSD 14.4 (2.21.1), OpenBSD 7.9 (2.20.4), NetBSD 10.1 (2.21.0) and
+    macOS 15 arm64 (2.21.3), all reporting `ok=2,changed=1` — the second task rewrites
+    identical content and correctly reports unchanged, which is the idempotency
+    signal 20.1 depends on. No sandbox obstruction of the kind `ProtectHome`
+    caused for the air-gap ISO work.
   * **Observed packaging matrix (2026-08-26, real boxes, not guesses).**
 
     | platform | python | ansible-core available | notes |
     |---|---|---|---|
-    | OpenBSD 7.8 | 3.13.13 | **2.20.4** (installed, working) | `pkg_add ansible` pulls core as a dep |
-    | FreeBSD 14 | 3.12 (`py312-*`) | **2.21.1** | also ships PINNED ports: `-core218/219/220/221` |
-    | NetBSD (pkgsrc) | 3.13 | 2.20.3 (2026Q1) / 2.21.3 (current) | |
+    | OpenBSD 7.9 | 3.13.13 | **2.20.4** verified | standalone `ansible-core` pkg exists |
+    | FreeBSD 14.4 | 3.12.13 | **2.21.1** verified | also ships PINNED ports: `-core218/219/220/221` |
+    | NetBSD 10.1 | 3.13.14 | **2.21.0** verified | ansible on `/usr/pkg/bin/python3.13` |
     | Ubuntu | 3.14 | 2.20.1 (apt) | |
+    | macOS 15 (arm64) | 3.13.15 | **2.21.3** verified | brew has NO `ansible-core`; `ansible` bundles it |
 
     Two consequences. First, **every POSIX platform we ship on packages core
     2.20+, which already requires py>=3.12** — so the py3.9/core-2.15 cell is
     theoretical for the BSDs and only reachable on old Linux LTS (20.04 = py3.8,
     RHEL 8). Second, FreeBSD's version-pinned ports mean we can **standardise on
     a single core minor** rather than accepting whatever each platform defaults
-    to, which collapses most of the compatibility matrix. Settle the exact floor
-    once macOS and NetBSD are probed.
+    to, which collapses most of the compatibility matrix. The matrix is now
+    CLOSED for POSIX, and on this evidence the floor lands at **2.20** — the
+    old-Python/old-core compatibility work is a Linux-LTS concern, not a
+    cross-platform one.
+
+    macOS also supplied the clearest proof of the interpreter split: Homebrew
+    vendors its own python (3.14.7, under `Cellar/ansible/*/libexec`) while the
+    system `python3` is 3.13.15, and the probe's mismatch warning fired on a
+    real box for the first time there.
   * **Results ingestion needs a callback we ship ourselves — no new dependency.**
     `ansible-core` bundles only the default/junit/minimal/oneline/tree callbacks;
     there is no `json`, and `tree` overwrites per host so it cannot report

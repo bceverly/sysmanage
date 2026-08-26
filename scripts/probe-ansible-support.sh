@@ -17,9 +17,10 @@
 #     2.16/2.17 need >=3.10, 2.18 needs >=3.11, 2.21 needs >=3.12.  The agent
 #     supports py3.9+, so an old host may only be able to run an old core.
 #
-# READ-ONLY.  This installs nothing; it reports what the platform already has
-# and prints the command that WOULD install it.  Run it on each platform and
-# collect the PROBE-RESULT lines.
+# Installs nothing, and writes nothing outside a temp directory (the local-play
+# check does need to write one file, the same way the DSC probe does).  It
+# reports what the platform already has and prints the command that WOULD
+# install it.  Run it on each platform and collect the PROBE-RESULT lines.
 #
 # Usage:  sh scripts/probe-ansible-support.sh
 
@@ -37,8 +38,22 @@ PY=""
 for c in python3 python3.14 python3.13 python3.12 python3.11 python3.10 python3.9 python; do
 if command -v "$c" >/dev/null 2>&1; then PY="$c"; break; fi
 done
-if [ -n "$PY" ]; then PYV=$("$PY" -c 'import sys;print("%d.%d"%sys.version_info[:2])' 2>/dev/null); else PYV="none"; fi
+# Resolve the FULL path and real executable, not just the name.  "python3" is
+# whatever the active virtualenv points at, which is the whole trap this probe
+# exists to expose -- reporting the bare name hides it.
+if [ -n "$PY" ]; then
+PYV=$("$PY" -c 'import sys;print("%d.%d"%sys.version_info[:2])' 2>/dev/null)
+PYWHICH=$(command -v "$PY" 2>/dev/null)
+PYREAL=$("$PY" -c 'import sys;print(sys.executable)' 2>/dev/null)
+PYBASE=$("$PY" -c 'import sys;print(getattr(sys,"_base_executable",sys.executable))' 2>/dev/null)
+else
+PYV="none"; PYWHICH="none"; PYREAL="none"; PYBASE="none"
+fi
+[ -z "$PYV" ] && PYV="unparsed"
 echo "python=$PY version=$PYV"
+echo "python_path=$PYWHICH"
+echo "python_executable=$PYREAL"
+[ "$PYBASE" != "$PYREAL" ] && echo "python_base_executable=$PYBASE   # <- inside a virtualenv"
 
 # Highest ansible-core the controller Python can host (see table above).
 CORE_MAX="none"
@@ -93,12 +108,30 @@ if command -v pkg_info >/dev/null 2>&1; then PKGAVAIL=$(pkg_info -Q ansible-core
 PKGCMD="pkg_add ansible-core"
 ;;
 NetBSD)
-if command -v pkgin >/dev/null 2>&1; then PKGAVAIL=$(pkgin -p search '^ansible-core' 2>/dev/null | head -5 | cut -d';' -f1 | tr '\n' ',' | sed 's/,$//'); fi
+# pkgin appends a multi-line legend ("=: package is installed and up-to-date"
+# ...) after the results; keep only lines that actually start with the package
+# name, or the legend ends up in the reported value.
+if command -v pkgin >/dev/null 2>&1; then PKGAVAIL=$(pkgin -p search '^ansible-core' 2>/dev/null | grep -E '^ansible-core-[0-9]' | cut -d';' -f1 | head -5 | tr '\n' ',' | sed 's/,$//'); fi
 PKGCMD="pkgin install ansible-core"
 ;;
 Darwin)
+# Homebrew has NO `ansible-core` formula -- only `ansible`, which bundles core
+# (verified against formulae.brew.sh 2026-08-26: ansible 14.3.1 -> core 2.21.x).
+# It also vendors its OWN python under libexec, which is why the interpreter
+# mismatch warning above fires here.
 PKGCMD="brew install ansible"
-if command -v brew >/dev/null 2>&1; then PKGAVAIL=$(brew info --json=v2 ansible 2>/dev/null | grep -o '"versions":{"stable":"[^"]*"' | head -1 | sed 's/.*"stable":"//;s/"//'); fi
+if command -v brew >/dev/null 2>&1; then
+PKGAVAIL=$(brew list --versions ansible 2>/dev/null | head -1)
+# Not installed?  Ask the API via python rather than grepping nested JSON,
+# which is what the first version got wrong.
+if [ -z "$PKGAVAIL" ] && [ -n "$PY" ]; then PKGAVAIL=$(brew info --json=v2 ansible 2>/dev/null | "$PY" -c 'import sys,json
+try:
+    d=json.load(sys.stdin)
+    f=(d.get("formulae") or [{}])[0]
+    print(f.get("versions",{}).get("stable",""))
+except Exception:
+    pass' 2>/dev/null); fi
+fi
 ;;
 Linux)
 if command -v apt-cache >/dev/null 2>&1; then PKGCMD="apt-get install ansible-core"; PKGAVAIL=$(apt-cache policy ansible-core 2>/dev/null | sed -n 's/ *Candidate: //p'); fi
