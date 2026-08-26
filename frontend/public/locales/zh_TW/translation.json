@@ -3444,6 +3444,6 @@
     "runsEmpty": "此主機尚未應用任何配置資料庫。",
     "runsError": "無法載入配置執行歷史記錄",
     "runsTitle": "配置執行歷史記錄",
-    "runNoProfile": "[TODO] No profile"
+    "runNoProfile": "沒有配置檔"
   }
 }

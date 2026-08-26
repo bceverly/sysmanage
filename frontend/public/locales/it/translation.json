@@ -3444,6 +3444,6 @@
     "runsEmpty": "Non sono stati applicati profili di configurazione a questo host.",
     "runsError": "Impossibile caricare la storia delle esecuzioni di configurazione",
     "runsTitle": "Storia delle esecuzioni di configurazione",
-    "runNoProfile": "[TODO] No profile"
+    "runNoProfile": "Nessun profilo"
   }
 }

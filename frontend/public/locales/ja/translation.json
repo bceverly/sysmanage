@@ -3444,6 +3444,6 @@
     "runsEmpty": "このホストにはまだ適用されていない構成プロファイルがあります。",
     "runsError": "構成実行履歴の読み込みに失敗しました",
     "runsTitle": "構成実行履歴",
-    "runNoProfile": "[TODO] No profile"
+    "runNoProfile": "プロファイルがありません"
   }
 }

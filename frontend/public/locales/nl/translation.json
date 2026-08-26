@@ -3444,6 +3444,6 @@
     "runsEmpty": "Er zijn nog geen configuratieprofielen toegepast op deze host.",
     "runsError": "Kon de geschiedenis van configuratieruns niet laden",
     "runsTitle": "Configuratie Run Geschiedenis",
-    "runNoProfile": "[TODO] No profile"
+    "runNoProfile": "Geen profiel"
   }
 }

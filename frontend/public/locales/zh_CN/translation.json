@@ -3444,6 +3444,6 @@
     "runsEmpty": "此主机尚未应用任何配置文件。",
     "runsError": "无法加载配置运行历史记录",
     "runsTitle": "配置运行历史记录",
-    "runNoProfile": "[TODO] No profile"
+    "runNoProfile": "没有配置文件"
   }
 }

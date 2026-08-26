@@ -3444,6 +3444,6 @@
     "runsEmpty": "Auf diesem Host wurden noch keine Konfigurationsprofile angewendet.",
     "runsError": "Fehler beim Laden der Konfigurationslaufhistorie",
     "runsTitle": "Konfigurationslaufhistorie",
-    "runNoProfile": "[TODO] No profile"
+    "runNoProfile": "Kein Profil"
   }
 }

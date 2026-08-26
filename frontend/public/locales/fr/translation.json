@@ -3444,6 +3444,6 @@
     "runsEmpty": "Aucun profil de configuration n'a encore été appliqué à cet hôte.",
     "runsError": "Échec du chargement de l'historique des exécutions de configuration",
     "runsTitle": "Historique des exécutions de configuration",
-    "runNoProfile": "[TODO] No profile"
+    "runNoProfile": "Aucun profil"
   }
 }

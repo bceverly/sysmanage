@@ -272,19 +272,64 @@ def _needs_translation(key: str, en_src: str, value, lang: str) -> bool:
 # forever.
 
 
+def _report_stuck(stuck_report: Dict[str, List[str]]) -> None:
+    """Explain strings the service refused to change, and how to resolve them.
+
+    Split out so the JSON and .po paths cannot drift: both can hit this, and a
+    message that only appeared for one of them would send the operator looking
+    for a difference between frontend and backend that does not exist.
+    """
+    if not stuck_report:
+        return
+    every = sorted({k for keys in stuck_report.values() for k in keys})
+    rule_langs = ", ".join(sorted(stuck_report))
+    lines = [
+        "",
+        "  " + "-" * 63,
+        "  These strings came back UNCHANGED from the service. Re-running",
+        "  will produce the same result, so this is not a retry situation:",
+    ]
+    for key in every:
+        where = sorted(lang for lang, keys in stuck_report.items() if key in keys)
+        lines.append(f"    {key}   [{', '.join(where)}]")
+    lines += [
+        "",
+        "  Two real fixes, and which one applies is a judgement call:",
+        "    1. REWORD the English when it is a loanword that is the same",
+        "       word in those languages -- no correct translation CAN",
+        "       differ, so the gate can never close. The English is often",
+        "       jargon anyway, and rewording improves it.",
+        "    2. BLESS it in i18n-allow.txt when staying English is right",
+        "       (product names, protocol tokens, CLI invocations). Scope",
+        "       the rule to the locales that need it:",
+        f"           {rule_langs}: <the.dotted.key>",
+        "  " + "-" * 63,
+        "",
+    ]
+    for line in lines:
+        print(line, flush=True)
+
+
 def _translate_uniq(
     service: str, uniq: List[str], lang: str, client_batch: int
-) -> Dict[str, str]:
+) -> Tuple[Dict[str, str], List[str]]:
     """``{source: translation}`` for the strings the service translated.
 
     Sources the service reports as a fallback are omitted, so the caller leaves
-    them as gaps for a later pass — no re-request from here.
+    them as gaps — but they are also returned separately, because "the service
+    could not change this string" is NOT a transient condition.  Re-running
+    will produce the identical result forever, so telling the operator to retry
+    is worse than useless: it hides the only two real remedies (reword the
+    English, or bless it in i18n-allow.txt) behind a loop that never converges.
     """
     resolved: Dict[str, str] = {}
+    unchanged: List[str] = []
     for src, (text, ok) in zip(uniq, translate_to(service, uniq, lang, client_batch)):
         if ok:
             resolved[src] = text
-    return resolved
+        else:
+            unchanged.append(src)
+    return resolved, unchanged
 
 
 def run_json(
@@ -306,6 +351,10 @@ def run_json(
     # stale check.  See i18n_hashes for the full rule.
     translated_keys: set = set()
     locale_flats: Dict[str, Dict[str, str]] = {}
+    # Keys the service reported it could NOT change, per locale.  Collected so
+    # the run can end with an actionable summary instead of a retry count that
+    # will never go down.
+    stuck_report: Dict[str, List[str]] = {}
 
     for lang in langs:
         path = base / template.format(lang=lang)
@@ -353,9 +402,11 @@ def run_json(
 
         # Dedup identical English strings; translate once each (with retry).
         uniq = sorted({src for _, src in gaps})
-        translations = _translate_uniq(service, uniq, lang, client_batch)
+        translations, unchanged = _translate_uniq(service, uniq, lang, client_batch)
+        unchanged_set = set(unchanged)
 
         wrote = skipped = 0
+        stuck: List[str] = []
         for key, en_src in gaps:
             cand = translations.get(en_src)
             if cand is not None:
@@ -364,11 +415,30 @@ def run_json(
                 wrote += 1
             else:
                 skipped += 1
+                if en_src in unchanged_set:
+                    stuck.append(key)
         path.write_text(
             json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
         locale_flats[lang] = _flatten(doc)
-        print(f"  {lang}: wrote {wrote}, left {skipped} gap(s) for retry", flush=True)
+        if stuck:
+            stuck_report.setdefault(lang, []).extend(sorted(stuck))
+        # Only call it "for retry" when retrying can actually help.  A string
+        # the service refused to change is stuck until a human acts on it.
+        if skipped and not stuck:
+            print(
+                f"  {lang}: wrote {wrote}, left {skipped} gap(s) for retry", flush=True
+            )
+        elif stuck:
+            print(
+                f"  {lang}: wrote {wrote}, {len(stuck)} string(s) the service "
+                f"cannot translate (retrying will not help)",
+                flush=True,
+            )
+        else:
+            print(f"  {lang}: wrote {wrote}, 0 gap(s)", flush=True)
+
+    _report_stuck(stuck_report)
 
     # Record the English these translations were made FROM, so i18n_strict can
     # tell a later English edit from a current translation.  Doing it here --
@@ -393,6 +463,7 @@ def run_po(
     client_batch: int,
     limit: Optional[int],
 ) -> None:
+    stuck_report: Dict[str, List[str]] = {}
     try:
         import polib  # noqa: PLC0415
     except ImportError:
@@ -451,9 +522,11 @@ def run_po(
             continue
 
         uniq = sorted({e.msgid for e in gap_entries})
-        translations = _translate_uniq(service, uniq, lang, client_batch)
+        translations, unchanged = _translate_uniq(service, uniq, lang, client_batch)
+        unchanged_set = set(unchanged)
 
         wrote = skipped = 0
+        stuck = []
         for e in gap_entries:
             cand = translations.get(e.msgid)
             if cand is not None:
@@ -461,8 +534,24 @@ def run_po(
                 wrote += 1
             else:
                 skipped += 1
+                if e.msgid in unchanged_set:
+                    stuck.append(e.msgid)
         po.save(str(path))
-        print(f"  {lang}: wrote {wrote}, left {skipped} gap(s) for retry", flush=True)
+        if stuck:
+            stuck_report.setdefault(lang, []).extend(sorted(set(stuck)))
+            print(
+                f"  {lang}: wrote {wrote}, {len(stuck)} string(s) the service "
+                f"cannot translate (retrying will not help)",
+                flush=True,
+            )
+        elif skipped:
+            print(
+                f"  {lang}: wrote {wrote}, left {skipped} gap(s) for retry", flush=True
+            )
+        else:
+            print(f"  {lang}: wrote {wrote}, 0 gap(s)", flush=True)
+
+    _report_stuck(stuck_report)
 
 
 # ---------------------------------------------------------------------------

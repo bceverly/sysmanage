@@ -3444,6 +3444,6 @@
     "runsEmpty": "لم يتم تطبيق أي ملفات تكوين على هذا المضيف حتى الآن.",
     "runsError": "فشل في تحميل سجل تشغيل التكوين",
     "runsTitle": "سجل تشغيل التكوين",
-    "runNoProfile": "[TODO] No profile"
+    "runNoProfile": "لا ملف تعريف"
   }
 }

@@ -3444,6 +3444,6 @@
     "runsEmpty": "이 호스트에는 아직 적용된 구성 프로필이 없습니다.",
     "runsError": "구성 실행 기록 로드 실패",
     "runsTitle": "구성 실행 기록",
-    "runNoProfile": "[TODO] No profile"
+    "runNoProfile": "프로필이 없습니다."
   }
 }
