@@ -47,7 +47,6 @@ describe("UbuntuProSettings", () => {
     vi.mocked(axiosInstance.put).mockResolvedValue({ data: {} });
     vi.mocked(axiosInstance.delete).mockResolvedValue({ data: {} });
     vi.mocked(hasPermission).mockResolvedValue(true);
-    vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => vi.restoreAllMocks());

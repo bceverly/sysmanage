@@ -138,7 +138,6 @@ describe("UserDetail", () => {
       role_ids: ["r1"],
     });
     grantAll();
-    vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => {

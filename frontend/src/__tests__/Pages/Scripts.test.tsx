@@ -92,7 +92,6 @@ const anExecution = (over: Record<string, unknown> = {}) => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   m(scriptsService.getSavedScripts).mockResolvedValue([aScript()]);
   m(scriptsService.getActiveHosts).mockResolvedValue([
     { id: "h1", fqdn: "a.test", status: "up", active: true, platform: "Linux" },

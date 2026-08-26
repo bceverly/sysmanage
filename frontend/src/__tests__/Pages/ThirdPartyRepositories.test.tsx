@@ -55,7 +55,6 @@ const renderPage = (over: Record<string, unknown> = {}) =>
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   m(hasPermission).mockResolvedValue(true);
   m(axiosInstance.get).mockResolvedValue({
     data: { repositories: [{ name: "ppa:deadsnakes/ppa", type: "ppa", enabled: true }] },

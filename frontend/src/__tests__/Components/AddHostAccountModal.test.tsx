@@ -45,7 +45,6 @@ describe("AddHostAccountModal", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(axiosInstance.post).mockResolvedValue({ data: {} });
-    vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => vi.restoreAllMocks());

@@ -71,7 +71,6 @@ describe("OSUpgrades", () => {
     } as never);
     vi.mocked(updatesService.getOSUpgradesSummary).mockResolvedValue(SUMMARY as never);
     vi.mocked(updatesService.executeOSUpgrades).mockResolvedValue(undefined as never);
-    vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => vi.restoreAllMocks());

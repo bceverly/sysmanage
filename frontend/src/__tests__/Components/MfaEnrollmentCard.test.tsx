@@ -65,7 +65,6 @@ describe("MfaEnrollmentCard", () => {
       backup_codes: ["ccc-333"],
       enrolled_at: "2026-08-20T00:00:00Z",
     });
-    vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => vi.restoreAllMocks());

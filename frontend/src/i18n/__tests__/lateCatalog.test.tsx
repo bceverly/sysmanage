@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { createInstance } from 'i18next';
 import { I18nextProvider, initReactI18next, useTranslation } from 'react-i18next';
@@ -68,7 +68,12 @@ describe('language switching with lazily fetched catalogs', () => {
             expect(screen.getByTestId('greeting').textContent).toBe('Hosts'),
         );
 
-        await i18n.changeLanguage('nl');
+        // changeLanguage re-renders every subscribed component, so it has to
+        // happen inside act() -- otherwise React warns that the update escaped
+        // the test's control.
+        await act(async () => {
+            await i18n.changeLanguage('nl');
+        });
 
         // The catalog is still in flight here; what matters is that the UI
         // catches up on its own once it lands.

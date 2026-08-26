@@ -48,7 +48,10 @@ api:
   port: 8080
 
 # Database connection (PostgreSQL required).
-database:
+registry:
+  # The registry/bootstrap database.  Renamed from 'database:' -- the
+  # loader still honours the old key but warns, so shipping it here made
+  # every fresh install emit a deprecation warning about our own template.
   user: "sysmanage"
   password: "CHANGE_ME_IN_PRODUCTION"   # ⚠ change this
   host: "localhost"

@@ -61,7 +61,6 @@ const aSecret = (over: Record<string, unknown> = {}) => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   m(hasPermission).mockResolvedValue(true);
   m(secretsService.getSecrets).mockResolvedValue([aSecret()]);
   m(secretsService.getSecretTypes).mockResolvedValue({

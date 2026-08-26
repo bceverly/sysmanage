@@ -77,7 +77,6 @@ describe("ReportTemplatesSettings", () => {
     vi.mocked(reportTemplatesService.create).mockResolvedValue(TEMPLATE);
     vi.mocked(reportTemplatesService.update).mockResolvedValue(TEMPLATE);
     vi.mocked(reportTemplatesService.remove).mockResolvedValue(undefined);
-    vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => vi.restoreAllMocks());

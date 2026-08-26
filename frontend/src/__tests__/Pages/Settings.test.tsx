@@ -77,7 +77,6 @@ const setHash = (h: string) => {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   pluginTabs.length = 0;
   setHash("");
   m(axiosInstance.get).mockResolvedValue({ data: [] });

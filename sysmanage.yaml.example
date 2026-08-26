@@ -39,7 +39,10 @@ api:
   host: "localhost"
   port: 8080
 
-database:
+registry:
+  # The registry/bootstrap database.  Renamed from 'database:' -- the
+  # loader still honours the old key but warns, so shipping it here made
+  # every fresh install emit a deprecation warning about our own template.
   user: "sysmanage"
   # The DB password is the one bootstrap credential the server needs before it
   # can reach OpenBAO; secure-installation also stores it in OpenBAO.

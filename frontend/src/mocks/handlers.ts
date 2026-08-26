@@ -9,8 +9,29 @@ declare const process: { env: { CI?: string } } | undefined;
 
 // Simplified approach - use broad patterns and check URLs in the handler
 export const handlers = [
-  // Catch all /api/ requests and handle them dynamically
-  http.get('http://localhost:8080/api/*', ({ request }) => {
+  // Column preferences: an OBJECT, not the catch-all's empty array.  Declared
+  // before the catch-all so it wins.
+  http.get('*/api/v1/user-preferences/column-preferences/*', ({ request }) => {
+    const path = new globalThis.URL(request.url).pathname;
+    return HttpResponse.json({
+      id: '00000000-0000-0000-0000-000000000000',
+      user_id: '00000000-0000-0000-0000-000000000001',
+      grid_identifier: path.split('/').pop() ?? '',
+      hidden_columns: [],
+      created_at: '2026-01-01T00:00:00Z',
+      updated_at: '2026-01-01T00:00:00Z',
+    });
+  }),
+
+  // Catch all /api/ requests and handle them dynamically.
+  //
+  // ORIGIN IS A WILDCARD ON PURPOSE.  These were pinned to
+  // `http://localhost:8080` while jsdom serves the app from `localhost:3000`,
+  // so every relative-URL request the app makes missed all four handlers and
+  // fell through unmocked -- silently, because onUnhandledRequest was 'warn'.
+  // Match any origin so the mock covers both the configured API base and the
+  // document origin.
+  http.get('*/api/*', ({ request }) => {
     const url = new globalThis.URL(request.url);
     const path = url.pathname;
 
@@ -159,7 +180,7 @@ export const handlers = [
   }),
 
   // Handle POST requests for package installation
-  http.post('http://localhost:8080/api/v1/packages/install/*', async ({ request }) => {
+  http.post('*/api/v1/packages/install/*', async ({ request }) => {
     const body = await request.json() as { package_names: string[]; requested_by: string };
 
     return HttpResponse.json({
@@ -170,7 +191,7 @@ export const handlers = [
   }),
 
   // Handle POST requests for package uninstallation
-  http.post('http://localhost:8080/api/v1/packages/uninstall/*', async () => {
+  http.post('*/api/v1/packages/uninstall/*', async () => {
     return HttpResponse.json({
       success: true,
       message: 'Package uninstallation has been queued',
@@ -179,7 +200,7 @@ export const handlers = [
   }),
 
   // Handle PUT requests for dashboard preferences
-  http.put('http://localhost:8080/api/v1/user-preferences/dashboard-cards', async ({ request }) => {
+  http.put('*/api/v1/user-preferences/dashboard-cards', async ({ request }) => {
     const body = await request.json() as { preferences: Array<{ card_identifier: string; visible: boolean }> };
     return HttpResponse.json({
       preferences: body.preferences

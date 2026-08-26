@@ -46,7 +46,6 @@ describe("ReportBrandingSettings", () => {
     vi.mocked(reportBrandingService.uploadLogo).mockResolvedValue(WITH_LOGO);
     vi.mocked(reportBrandingService.deleteLogo).mockResolvedValue(BRANDING);
     vi.mocked(reportBrandingService.fetchLogoObjectUrl).mockResolvedValue(null);
-    vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => vi.restoreAllMocks());

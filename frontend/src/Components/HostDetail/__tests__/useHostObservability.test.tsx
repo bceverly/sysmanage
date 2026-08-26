@@ -92,11 +92,20 @@ describe('useHostObservability', () => {
         vi.useRealTimers();
     });
 
-    test('initial state', () => {
+    test('initial state', async () => {
         const { result } = setup();
         expect(result.current.openTelemetryStatus).toBeNull();
         expect(result.current.graylogAttached).toBe(false);
         expect(result.current.graylogAttachModalOpen).toBe(false);
+
+        // The mount effects kick off fetches whose promises settle AFTER a
+        // synchronous test body returns, so their state updates landed outside
+        // act() and React warned.  Flush them here: the assertions above have
+        // already captured the pre-resolution state, which is what this test
+        // is about.
+        await act(async () => {
+            await Promise.resolve();
+        });
     });
 
     describe('fetchOpenTelemetryStatus', () => {

@@ -47,7 +47,6 @@ describe("AuditLogViewer", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     listOk();
-    vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => vi.restoreAllMocks());

@@ -108,7 +108,6 @@ describe("ProcessesPanel", () => {
       message: "Kill queued",
     } as never);
     vi.mocked(hasPermission).mockResolvedValue(true);
-    vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => vi.restoreAllMocks());

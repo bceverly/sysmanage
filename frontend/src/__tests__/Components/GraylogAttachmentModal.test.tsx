@@ -55,7 +55,6 @@ describe("GraylogAttachmentModal", () => {
     vi.mocked(axiosInstance.get).mockResolvedValue({
       data: { use_managed_server: true, host: { ipv4: "10.0.0.5" } },
     });
-    vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => vi.restoreAllMocks());

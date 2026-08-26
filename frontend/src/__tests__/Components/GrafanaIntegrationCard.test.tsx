@@ -59,7 +59,6 @@ describe("GrafanaIntegrationCard", () => {
     routeGets();
     vi.mocked(axiosInstance.post).mockResolvedValue({ data: {} });
     vi.mocked(hasPermission).mockResolvedValue(true);
-    vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => vi.restoreAllMocks());

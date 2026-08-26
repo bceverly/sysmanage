@@ -7365,6 +7365,85 @@ not the moat.**
 
 **Estimated Size:** ~2,500 lines
 
+#### 21.4 Threat Model Wizard & Posture Punch List (Enterprise)
+
+*Added 2026-08-26 (Bryan).* Everything we ship today answers "what IS my fleet?"
+and "what is wrong with it against a FIXED yardstick" (CIS, STIG, CVE severity).
+Nobody has told the product **what the operator is actually trying to protect
+against** — and that varies enormously. A hobbyist homelab, a dentist's office
+holding PHI, and a defence subcontractor get the same recommendations today,
+which means the list is simultaneously too noisy for one and too lax for
+another. This closes that gap: derive the threat model, then judge the
+installation against **that** rather than against a generic baseline.
+
+It belongs here, after 21.2, because it is a **consumer** of the advisor rather
+than a parallel engine — it reuses `advisor_engine`'s rule evaluation, risk
+scoring and remediation generation, and reasons over the 21.1 osquery facts.
+Building it before 21.2 would mean duplicating all three.
+
+> **⚠️ Multi-tenancy storage (same rule as 14.1/14.3).** The shipped
+> **questionnaire and the rule-applicability metadata are global reference data**
+> → `shared` partition, one copy, offline-updatable. The tenant's **answers, the
+> derived threat model, punch-list state and every waiver** are tenant data →
+> `tenant` partition, soft-referencing the shared question/rule id (no
+> cross-partition FK).
+
+> **⚠️ "AI" here must degrade to deterministic.** Air-gapped deployments are a
+> first-class shipping configuration with no reachable model, so the
+> recommendation core is **rule-based and reproducible**: threat-model attributes
+> gate which `advisor_engine` rules apply, and the punch list is computed, not
+> generated. Any LLM involvement is confined to *narrative* — restating the
+> derived model in prose, explaining why an item is recommended — and its absence
+> must change nothing about which items appear. A punch list that differs between
+> two runs on identical inputs is a defect, and an operator cannot be asked to
+> accept a compliance obligation from a black box.
+
+- [ ] **Threat-model Q&A wizard** — a guided questionnaire run post-install (and
+      re-runnable) that establishes what is being protected (data classes,
+      regulatory obligations), from whom (opportunistic vs targeted vs insider),
+      exposure (internet-facing, air-gapped, third-party access) and risk
+      tolerance. Questions are **branching** — answers suppress irrelevant
+      branches — and every question carries a plain-language "why we ask".
+- [ ] **Derived threat model, versioned and human-readable** — a persisted,
+      diffable artifact with an operator-facing summary page. Versioned because
+      re-running the wizard must show *what changed and what that changed about
+      the punch list*, not silently replace the previous model.
+- [ ] **Threat-model-conditioned recommendations** — extend `advisor_engine`
+      rules with applicability predicates keyed to threat-model attributes, then
+      evaluate against the state SysManage already holds (host facts, packages,
+      CVE, compliance, firewall, logging, MFA, FIPS, air-gap/federation posture).
+      Output is per-installation, not per-host: these are *configuration* gaps.
+- [ ] **Punch list with a genuine tri-state** — every recommendation is
+      **satisfied** (green), **open** (red), or **waived** (explicitly neutral —
+      NOT a green tick, because the risk was accepted rather than eliminated, and
+      conflating the two is how an accepted risk quietly becomes an invisible
+      one). Waiving is reversible: re-enabling restores it to open and it counts
+      as a discrepancy again.
+- [ ] **Waivers are audit artifacts, not UI state** — a waiver records who, when
+      and why, and is written through `audit_service` like any other privileged
+      action. A waiver is scoped to the *rationale* that justified it: if the
+      underlying rule's basis materially changes, the waiver is flagged
+      **stale — needs re-review** rather than continuing to suppress the item.
+- [ ] **Close the loop with our own capabilities** — each open item offers
+      remediation through the engines that already implement it (enable
+      centralized logging, turn on FIPS mode, deploy antivirus, tighten firewall
+      roles, enrol MFA, apply a config profile), reusing 21.2's remediation
+      generation gated behind operator approval + maintenance windows. An item
+      with no automatable path says so plainly instead of offering a dead button.
+- [ ] **Re-evaluation on drift** — the punch list is recomputed as the fleet
+      changes, so an item that was satisfied and later regresses reopens itself;
+      this is a standing posture view, not a one-shot report.
+- [ ] i18n/l10n
+
+**Estimated Size:** ~4,500 lines
+
+**Open questions to settle before build:** (a) does the threat model scope to the
+whole installation, or per site/tag for federated fleets that span trust
+boundaries; (b) does a waiver survive a threat-model re-derivation that changes
+the item's risk score, or is re-affirmation required; (c) is the questionnaire
+itself a shared, versioned artifact operators can extend, like the compliance
+rule packs.
+
 ### Exit Criteria
 
 - [ ] **Coverage ladder rung: OSS frontend `lines` floor to 70** — the last rung before GA verifies it (added 2026-08-07 with the 20/21 rungs).
@@ -7938,7 +8017,7 @@ The operational product: getting devices enrolled at scale.
 | 18.2 | v3.5.x | Bare-Metal PXE & Discovery | Readiness preflight + config advisor, PXE/kickstart, host discovery, ISO provisioning |
 | 19 | v3.6.0.0 | Stabilization | Content lifecycle + provisioning hardening; agent capability advertisement |
 | 20 | v3.7.0.0 | Configuration Management & Drift | Ansible desired-state config, config profiles, drift detection + remediate-to-baseline |
-| 21 | v3.8.0.0 | Endpoint Facts & Proactive Advisor | osquery fact substrate, Insights-style recommendations, malware detection |
+| 21 | v3.8.0.0 | Endpoint Facts & Proactive Advisor | osquery fact substrate, Insights-style recommendations, malware detection, threat-model wizard + posture punch list |
 | 22 | **v4.0.0.0** | Mobile Fleet Visibility & UEM Ingestion | **MAJOR — a new device class enters the product.** Device model, manual/API registration, ingest-from-UEM — **air-gap compatible** |
 | 23 | v4.1.0.0 | Mobile Companion App & Compliance | First-party BYOD self-report app; mobile EOL/patch compliance, alerting + enforcement |
 | 24 | **v5.0.0.0** | Market-Parity GA | **MAJOR — market parity reached.** All gap features hardened; v5.0 GA |

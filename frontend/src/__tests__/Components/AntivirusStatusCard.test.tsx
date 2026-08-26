@@ -46,7 +46,6 @@ describe("AntivirusStatusCard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(getAntivirusStatus).mockResolvedValue(DEPLOYED);
-    vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => vi.restoreAllMocks());

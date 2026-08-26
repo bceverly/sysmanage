@@ -88,7 +88,6 @@ const updatesResponse = (updates: unknown[] = [anUpdate()]) => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   searchParams.get.mockReturnValue(null);
   m(updatesService.getUpdatesSummary).mockResolvedValue(summary());
   m(updatesService.getAllUpdates).mockResolvedValue(updatesResponse());

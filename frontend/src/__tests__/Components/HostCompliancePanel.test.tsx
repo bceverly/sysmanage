@@ -96,7 +96,6 @@ describe("HostCompliancePanel", () => {
     vi.mocked(packageProfilesService.dispatchToAgent).mockResolvedValue({
       status: "queued",
     });
-    vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => vi.restoreAllMocks());

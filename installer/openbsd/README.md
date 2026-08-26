@@ -56,7 +56,7 @@ doas vi /etc/sysmanage.yaml
 
 Update the database connection string:
 ```yaml
-database:
+registry:
   url: "postgresql://sysmanage:password@localhost/sysmanage"
 ```
 

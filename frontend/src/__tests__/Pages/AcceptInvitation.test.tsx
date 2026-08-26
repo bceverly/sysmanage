@@ -66,7 +66,6 @@ describe("AcceptInvitation", () => {
     mockSearch = "?token=inv-token";
     vi.mocked(doValidateInvitation).mockResolvedValue(INVITATION);
     vi.mocked(doAcceptInvitation).mockResolvedValue(undefined as never);
-    vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => vi.restoreAllMocks());

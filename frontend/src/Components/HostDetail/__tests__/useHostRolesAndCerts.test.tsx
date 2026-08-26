@@ -44,7 +44,6 @@ const role = (id: string, service_name: string | null = 'nginx') =>
 
 beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(globalThis.console, 'error').mockImplementation(() => undefined);
 });
 afterEach(() => {
     vi.restoreAllMocks();

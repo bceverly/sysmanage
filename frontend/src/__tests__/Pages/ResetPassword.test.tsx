@@ -46,7 +46,6 @@ describe("ResetPassword", () => {
     mockSearch = "?token=good-token";
     vi.mocked(axiosInstance.get).mockResolvedValue({ data: {} });
     vi.mocked(axiosInstance.post).mockResolvedValue({ data: {} });
-    vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => {

@@ -109,7 +109,6 @@ describe("AirgapCollections", () => {
     vi.mocked(axiosInstance.get).mockResolvedValue({ data: [RUN] });
     vi.mocked(axiosInstance.post).mockResolvedValue({ data: {} });
     vi.mocked(axiosInstance.delete).mockResolvedValue({ data: {} });
-    vi.spyOn(globalThis.console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => {

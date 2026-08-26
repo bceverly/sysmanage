@@ -26,10 +26,10 @@ import { configure } from '@testing-library/dom';
 configure({ asyncUtilTimeout: 5000 });
 
 // Declare process.env for TypeScript
-declare const process: { env: { CI?: string } } | undefined;
+declare const process: { env: { CI?: string; VITEST_VERBOSE_CONSOLE?: string } } | undefined;
 
 // Setup MSW for all tests
-import { beforeAll, afterEach, afterAll } from 'vitest';
+import { beforeAll, beforeEach, afterEach, afterAll } from 'vitest';
 import { server } from './mocks/node';
 
 // Start MSW server before all tests
@@ -37,8 +37,14 @@ beforeAll(() => {
   // Enable MSW request logging in CI
   const isCI = process !== undefined && process.env?.CI === 'true';
 
+  // 'error', not 'warn'.  An unhandled request is ALWAYS a mocking gap, never
+  // something a test legitimately wants -- and while this was 'warn' the
+  // handlers sat pinned to http://localhost:8080 while jsdom serves the app
+  // from :3000, so every relative-URL request missed all four handlers and
+  // fell through to the real network.  That went unnoticed for as long as the
+  // warning was only scrollback.
   server.listen({
-    onUnhandledRequest: 'warn', // Warn about unhandled requests
+    onUnhandledRequest: 'error',
   });
 
   if (isCI) {
@@ -60,6 +66,78 @@ afterAll(() => {
   }
 
   server.close();
+});
+
+
+// ---------------------------------------------------------------------------
+// Console policy: buffer, then discard on pass / replay on fail
+// ---------------------------------------------------------------------------
+// Most console output in this suite is EXPECTED: a test that exercises an
+// error path asserts the snackbar, and the component logs on its way there.
+// Printing it unconditionally buried the runs in scrollback -- 82 blocks across
+// 16 files -- which is how genuine problems (an MSW origin mismatch, React
+// act() warnings) sat unnoticed in plain sight for months.
+//
+// So: capture output per test instead of printing it. A passing test discards
+// it; a FAILING test replays everything it logged, so the breadcrumbs are
+// there exactly when they are useful. Set VITEST_VERBOSE_CONSOLE=1 to pass
+// everything straight through while debugging.
+//
+// This deliberately does NOT use per-file `vi.spyOn(console, 'error')`: a spy
+// replaces the wrapper below, which would also opt that file out of the fatal
+// checks -- and the hook tests that log the most are precisely where the act()
+// warnings turned up.
+const FATAL_CONSOLE_PATTERNS = ['not wrapped in act('];
+
+const VERBOSE_CONSOLE =
+  process !== undefined && process.env?.VITEST_VERBOSE_CONSOLE === '1';
+
+type ConsoleMethod = 'log' | 'info' | 'warn' | 'error' | 'debug';
+const CAPTURED_METHODS: ConsoleMethod[] = ['log', 'info', 'warn', 'error', 'debug'];
+
+let buffered: string[] = [];
+let fatalConsoleHits: string[] = [];
+
+const realConsole: Partial<Record<ConsoleMethod, (...args: unknown[]) => void>> = {};
+for (const method of CAPTURED_METHODS) {
+  realConsole[method] = globalThis.console[method].bind(globalThis.console);
+  globalThis.console[method] = (...args: unknown[]) => {
+    const text = args.map((a) => String(a)).join(' ');
+    if (FATAL_CONSOLE_PATTERNS.some((pattern) => text.includes(pattern))) {
+      fatalConsoleHits.push(text.split('\n')[0]);
+    }
+    if (VERBOSE_CONSOLE) {
+      realConsole[method]!(...args);
+      return;
+    }
+    buffered.push(`[console.${method}] ${text}`);
+  };
+}
+
+beforeEach(() => {
+  buffered = [];
+  fatalConsoleHits = [];
+});
+
+afterEach((ctx: { task?: { result?: { state?: string } } }) => {
+  const failed = ctx?.task?.result?.state === 'fail';
+  const hits = fatalConsoleHits;
+  const captured = buffered;
+  buffered = [];
+  fatalConsoleHits = [];
+
+  // Replay for a failing test -- that is when the log actually helps.
+  if (failed && captured.length > 0) {
+    realConsole.error!(
+      `--- console output from the failing test above ---\n${captured.join('\n')}`,
+    );
+  }
+
+  if (hits.length > 0) {
+    throw new Error(
+      `Console output that must never occur was emitted during this test:\n  - ${hits.join('\n  - ')}`,
+    );
+  }
 });
 
 // Fix for React 19 compatibility in JSDOM environment
