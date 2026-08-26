@@ -170,9 +170,7 @@ class _Dispatch:
         return (
             patch(
                 f"{DISPATCH}.enqueue_apply_plan",
-                side_effect=lambda host_id, plan, timeout: self.enqueue(
-                    host_id, plan, timeout
-                ),
+                side_effect=self.enqueue,
             ),
             patch(
                 f"{DISPATCH}.register_airgap_run_correlation",

@@ -300,7 +300,7 @@ class TestExecuteOsUpgrades:
         user = _user(SecurityRoles.APPLY_HOST_OS_UPGRADE)
         user._role_cache = None
         loaded = []
-        user.load_role_cache = lambda s: loaded.append(s)
+        user.load_role_cache = loaded.append
         await self._execute(self._session(User=[user]))
         assert loaded
 

@@ -333,7 +333,7 @@ class TestUpdateSettings:
         user = _user()
         user._role_cache = None
         loaded = []
-        user.load_role_cache = lambda s: loaded.append(s)
+        user.load_role_cache = loaded.append
         # Without the load a cold cache would deny every caller.
         await self._post(self._session(User=[user]))
         assert loaded

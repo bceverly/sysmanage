@@ -175,7 +175,7 @@ class TestAuthorizeViewAuditLog:
     def test_a_cold_role_cache_is_loaded_before_the_check(self):
         user = _user(role_cache=None)
         loaded = []
-        user.load_role_cache = lambda s: loaded.append(s)
+        user.load_role_cache = loaded.append
         maker, _ = _authorized(user)
         with maker:
             al._authorize_view_audit_log(_FakeSession(), "admin@invalid")

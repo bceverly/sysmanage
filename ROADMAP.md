@@ -560,13 +560,24 @@ the explicit bullet is added to the in-progress and future phases.)
   in latency/throughput/memory).
 - **SonarQube/SonarCloud scans are issue-free** — 0 new bugs, 0
   vulnerabilities, 0 code smells above threshold, security hotspots
-  reviewed, and the coverage ratchet (backend `--cov-fail-under` +
-  frontend `coverage.thresholds`) is green and not lowered.  The **OSS
+  reviewed (a hotspot only clears when marked **Safe** in the SonarCloud
+  UI — an in-code justification comment or `nosec` does NOT clear it),
+  **CodeQL** alerts on `main` at zero, and the coverage ratchet (backend `--cov-fail-under` +
+  frontend `coverage.thresholds`) is green and not lowered.
+  The **OSS
   frontend line-coverage floor must ramp +10 points this phase** (never
   down) on its climb to parity with the Python 75% gate — a phase is not
   "done" until that phase's rung (see "Frontend Test Coverage") is both
   reached in measured coverage and locked in as the enforced `lines`
   floor in `frontend/vite.config.ts`.
+  **Scope of the scan requirement:** it applies to the three AGPL repos
+  (`sysmanage`, `sysmanage-agent`, `sysmanage-docs`).
+  `sysmanage-professional-plus` is closed commercial source and is
+  **deliberately absent from public SonarCloud** — a public project would
+  publish proprietary source — so "no SonarCloud project" is the intended
+  state there, NOT a gate failure to be fixed by adding a scan (see the
+  header of its `sonar-project.properties`).  Its quality bar is carried
+  by `make lint` + its own test suite instead.
 - **`sysmanage-docs` documents EVERYTHING this phase added** — every
   user-visible feature shipped this phase has matching documentation on
   the docs site, landed *in the same phase*, not deferred:
@@ -6868,7 +6879,7 @@ Some platforms this phase reaches can't run the *full* agent: a native library m
       One genuine leftover found and fixed: `sysmanage-docs/README.md` still
       documented the `[trusted=yes]` line — the user-facing
       `docs/agent/installation.html` had been correct since 2026-08-16.)*
-- [ ] Docs + 14-language i18n complete
+- [x] Docs + 14-language i18n complete
       *(PARTIAL 2026-08-25 — the one identified gap is closed.  Added a
       "Host Update Drivers (Zincati)" section to
       `sysmanage-docs/docs/professional-plus/image-mode-hosts.html`: why
@@ -6929,9 +6940,46 @@ Some platforms this phase reaches can't run the *full* agent: a native library m
       carries a distinct border AND heading colour so the distinction survives
       greyscale and colour blindness.
 
-      24 new en.json keys total, seeded to all 14 locales (312 placeholders);
-      `--validate` and `make i18n-strict` both green.  Awaiting
-      `make translate`.)*
+      TRANSLATION COMPLETE 2026-08-25 — 51 keys, 0 gaps in all 13 non-English
+      locales; `make lint` green in sysmanage-docs (i18n-validate + i18n-strict
+      + the markup gate).  Getting there took four passes and two WRONG
+      diagnoses of mine, both worth recording because they cost the most time:
+
+        1. I first blamed STRING LENGTH and split the paragraphs (median 336 ->
+           130 chars).  That took failures from ~100% to ~15% but was not the
+           cause.
+        2. I then blamed run-to-run NONDETERMINISM and looped `make translate`,
+           which burned GPU time for nothing (59 -> 58 -> 54, mostly "wrote 0
+           new").  Sending one string to one locale three times returned the
+           IDENTICAL verdict every time: failures are deterministic per
+           (string, locale).  What looked like randomness was one string
+           passing for `nl` and failing for `ko`.
+
+      The actual rule, measured: INLINE MARKUP COUNT.  Four tags failed almost
+      everywhere; TWO tags still failed in about a third of locales (13 of the
+      14 stubborn failures were two-tag strings); ZERO tags passed.  Rewriting
+      those 13 to carry no inline markup -- keeping `<code>` styling by moving
+      it OUTSIDE the translated span -- cleared 12 of 13 locales in one pass.
+      Also cleared 169 stale translations: several of those keys had SUCCEEDED
+      in some locales, so those held translations of the old English with the
+      old tags, which would have passed the gap check while being wrong.
+
+      The last holdout was a 29-character, tag-free heading ("Host Update
+      Drivers (Zincati)") that `nl` simply echoed back -- a noun-pile of
+      technical terms gives the model nothing to anchor on.  Candidate rewrites
+      were tested against the live service, which surfaced a trap: "Update
+      drivers on the host" PASSES the guard and is WRONG -- Dutch read it as the
+      verb ("Drivers bijwerken op de host") rather than the compound noun.  The
+      guard checks placeholder integrity and that something changed; it cannot
+      catch a fluent mistranslation.  Settled on "When the host has its own
+      update driver (Zincati)", verified to read as a noun in nl/de/ja.
+
+      Both constraints are now written into the authoring guidance --
+      `sysmanage-docs/README.md` -> "Writing translatable strings" (long form,
+      with before/after) and `sysmanage/scripts/translation-service/README.md`
+      (short form, against the service internals).  Both say plainly that
+      failures are deterministic and re-running only helps after a change,
+      because the opposite advice is what wasted the afternoon.)*
 - [x] **Coverage push (+5% backend; frontend ladder milestone):** frontend
       floors raised to **OSS 50% / license-server 55% / Pro+ components 50%**
       and the ratchet thresholds bumped to match
