@@ -7454,6 +7454,19 @@ unambiguously and does **not** also match the version-pinned
       engine discovers resources from the manifests beside it. Arch is taken
       from the MSI target, not the build host — the ARM64 MSI is cross-built on
       an x64 runner.
+
+      **Verified on hardware 2026-08-26** (`make installer-msi-arm64`, Windows
+      11 ARM64): the DSC fetch succeeded on the first attempt with the correct
+      `aarch64` asset. The same run surfaced a **pre-existing CI-vs-local
+      parity gap** — `sysmanage-agent.wxs` ships `sbom/sysmanage-agent-sbom.json`
+      as a component, but only the CI workflow ever generated it, so a local
+      MSI build on a clean checkout died with a bare `WIX0103` naming a path
+      nothing local creates. Fixed in `build-msi.ps1`, which now generates the
+      SBOM from `requirements-prod.txt` (the input CI uses — `make sbom` uses
+      `requirements.txt`, which would list dev deps the MSI does not ship).
+      A placeholder fallback exists for offline dev machines and is **refused
+      under `CI`/`GITHUB_ACTIONS`**: an empty dependency inventory is tolerable
+      in a throwaway local build and is not tolerable in a release artifact.
 - [ ] Desired-state config-as-code: Ansible role/playbook execution at scale (job templates; inventories from SysManage hosts/tags/sites) with results + idempotency reporting
 - [ ] Config profiles assignable per host/tag/site, enforced on a schedule
 - [ ] Remediation playbooks (apply to bring a host into compliance)
