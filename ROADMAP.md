@@ -7296,6 +7296,34 @@ any engine code, and it moved two decisions:
     identical content and correctly reports unchanged, which is the idempotency
     signal 20.1 depends on. No sandbox obstruction of the kind `ProtectHome`
     caused for the air-gap ISO work.
+  * **Windows: DSC v1/v2 is DISQUALIFIED; target DSC v3 (2026-08-26).** Probed
+    on Windows 11 Pro ARM64 (`scripts/probe-dsc-support.ps1`), elevated:
+    PowerShell 5.1 Desktop, `PSDesiredStateConfiguration` 1.1 present,
+    `Invoke-DscResource` available, LCM in PUSH mode — and the imperative apply
+    still **FAILED**, because `WinRM` was `Stopped/Disabled` and
+    `Invoke-DscResource` on 5.1 goes through the local WS-Management stack even
+    for a purely local apply ("The client cannot connect to the destination").
+
+    That is not a broken box, it is a HARDENED one, and many customers will
+    look exactly like it. The documented remedy — `winrm quickconfig` — creates
+    a listener and a firewall rule, i.e. it spends the Phase 19 "agent→server,
+    443 only, no inbound" guarantee to enable a *local* operation. Not
+    acceptable.
+
+    **Decision: the Windows executor targets DSC v3** (`dsc.exe`), which is a
+    standalone engine with no WinRM and no LCM. Verified GA at v3.2.3 with a
+    build for the exact hardware in play — `DSC-3.2.3-aarch64-pc-windows-msvc`
+    (11 MiB) — plus x86_64 Windows, both macOS arches and both Linux arches.
+    It also gives Windows the **same shape as POSIX**: the agent subprocesses a
+    binary and reads JSON off stdout, so one result-ingestion path serves both.
+
+    Consequences to settle: (a) do we vendor `dsc.exe` in the MSI or require it
+    as a prerequisite — vendoring keeps air-gap installs working, which argues
+    for it; (b) PowerShell 7 is NOT present on that box (`pwsh=none`), so the
+    executor cannot assume anything beyond Windows PowerShell 5.1 for its own
+    scripting; (c) fallback if v3 proves insufficient is plain PowerShell over
+    the existing `execute_script` path with our own idempotency conventions —
+    no resource model, but no new dependency and no WinRM either.
   * **Observed packaging matrix (2026-08-26, real boxes, not guesses).**
 
     | platform | python | ansible-core available | notes |

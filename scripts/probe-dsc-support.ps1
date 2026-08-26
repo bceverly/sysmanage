@@ -49,8 +49,8 @@ Write-Output "powershell_version=$psVersion edition=$psEd"
 
 # Both matter: 5.1 has DSC v1/v2 built in, PS7 does not and needs a module or
 # the standalone DSC v3 engine. An executor may well have to target 5.1.
-$winPs = Get-Safe { (Get-Command powershell.exe -ErrorAction Stop).Source }
-$pwsh  = Get-Safe { (Get-Command pwsh.exe -ErrorAction Stop).Source }
+$winPs = Get-Safe { (Get-Command powershell.exe -ErrorAction Stop).Source } 'none'
+$pwsh  = Get-Safe { (Get-Command pwsh.exe -ErrorAction Stop).Source } 'none'
 Write-Output "windows_powershell=$winPs"
 Write-Output "pwsh=$pwsh"
 
@@ -72,11 +72,11 @@ $dscModule = Get-Safe {
   if ($m) { "$($m.Version)" } else { 'none' } }
 Write-Output "psdesiredstateconfiguration_module=$dscModule"
 
-$invokeDsc = Get-Safe { if (Get-Command Invoke-DscResource -ErrorAction Stop) { 'available' } else { 'none' } }
+$invokeDsc = Get-Safe { if (Get-Command Invoke-DscResource -ErrorAction Stop) { 'available' } else { 'none' } } 'none'
 Write-Output "invoke_dscresource=$invokeDsc"
 
 # DSC v3 is a standalone cross-platform engine, not a PowerShell module.
-$dscV3 = Get-Safe { (Get-Command dsc.exe -ErrorAction Stop).Source }
+$dscV3 = Get-Safe { (Get-Command dsc.exe -ErrorAction Stop).Source } 'none'
 Write-Output "dsc_v3_binary=$dscV3"
 
 $lcm = Get-Safe { [string](Get-DscLocalConfigurationManager -ErrorAction Stop).RefreshMode }
@@ -119,7 +119,24 @@ if ($invokeDsc -eq 'available') {
 }
 Write-Output "imperative_apply=$applyResult"
 
+# --- DSC v3, if present ------------------------------------------------------
+# v1/v2 via Invoke-DscResource needs the WinRM service even for a purely local
+# apply (confirmed on Windows 11 ARM64, 2026-08-26: WinRM Stopped/Disabled ->
+# "client cannot connect to the destination").  DSC v3 is a standalone engine
+# with no WinRM and no LCM, so the decisive question is simply whether it RUNS
+# on a host with WinRM off.  Listing resources is enough to answer that; we do
+# not assert any particular resource name here.
+$dscV3Version = 'n/a'
+$dscV3List = 'n/a'
+if ($dscV3 -ne 'none' -and $dscV3 -ne 'error') {
+  $dscV3Version = Get-Safe { (& dsc.exe --version 2>&1 | Select-Object -First 1) } 'error'
+  $dscV3List = Get-Safe { $r = & dsc.exe resource list 2>&1; "count=" + (@($r).Count) } 'error'
+}
+Write-Output "dsc_v3_version=$dscV3Version"
+Write-Output "dsc_v3_resource_list=$dscV3List"
+
 # --- one greppable line to send back ----------------------------------------
 Write-Output ("PROBE-RESULT os=windows version=$osVersion arch=$arch ps=$psVersion/$psEd " +
   "elevated=$elevated dsc_module=$dscModule invoke_dsc=$invokeDsc dsc_v3=$dscV3 " +
-  "lcm=$lcm winrm=$winrmSvc/$winrmStart apply=$applyResult")
+  "lcm=$lcm winrm=$winrmSvc/$winrmStart apply=$applyResult " +
+  "dsc_v3_version=$dscV3Version dsc_v3_list=$dscV3List")
