@@ -3431,6 +3431,19 @@
     "prereqTooOld": "バージョンが古すぎます",
     "prereqTooOldDetail": "インストール済みバージョンは、構成管理が要求するバージョンより古いです。インストールすることでアップグレードされます。",
     "prereqUnsupported": "このプラットフォームでは利用できません",
-    "prereqUnsupportedDetail": "SysManageはこのオペレーティングシステムに構成管理エンジンをインストールする信頼できる方法を確認していません。"
+    "prereqUnsupportedDetail": "SysManageはこのオペレーティングシステムに構成管理エンジンをインストールする信頼できる方法を確認していません。",
+    "runAdHoc": "[TODO] Ad-hoc",
+    "runChanged": "[TODO] Changed",
+    "runCheckMode": "[TODO] Dry run",
+    "runFailed": "[TODO] Failed",
+    "runNoChanges": "[TODO] No changes",
+    "runOutcome": "[TODO] Outcome",
+    "runProfile": "[TODO] Profile",
+    "runTaskCounts": "[TODO] {{ok}} ok, {{changed}} changed, {{failed}} failed",
+    "runTasks": "[TODO] Tasks",
+    "runWhen": "[TODO] When",
+    "runsEmpty": "[TODO] No configuration profiles have been applied to this host yet.",
+    "runsError": "[TODO] Failed to load configuration run history",
+    "runsTitle": "[TODO] Configuration Run History"
   }
 }

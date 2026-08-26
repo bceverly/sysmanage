@@ -3431,6 +3431,19 @@
     "prereqTooOld": "Version zu alt",
     "prereqTooOldDetail": "Die installierte Version ist älter als die Anforderungen der Konfigurationsverwaltung. Die Installation wird sie aktualisieren.",
     "prereqUnsupported": "Nicht auf dieser Plattform verfügbar",
-    "prereqUnsupportedDetail": "SysManage verfügt über keinen verifizierten Weg, um den Konfigurationsmanagement-Motor auf diesem Betriebssystem zu installieren."
+    "prereqUnsupportedDetail": "SysManage verfügt über keinen verifizierten Weg, um den Konfigurationsmanagement-Motor auf diesem Betriebssystem zu installieren.",
+    "runAdHoc": "[TODO] Ad-hoc",
+    "runChanged": "[TODO] Changed",
+    "runCheckMode": "[TODO] Dry run",
+    "runFailed": "[TODO] Failed",
+    "runNoChanges": "[TODO] No changes",
+    "runOutcome": "[TODO] Outcome",
+    "runProfile": "[TODO] Profile",
+    "runTaskCounts": "[TODO] {{ok}} ok, {{changed}} changed, {{failed}} failed",
+    "runTasks": "[TODO] Tasks",
+    "runWhen": "[TODO] When",
+    "runsEmpty": "[TODO] No configuration profiles have been applied to this host yet.",
+    "runsError": "[TODO] Failed to load configuration run history",
+    "runsTitle": "[TODO] Configuration Run History"
   }
 }

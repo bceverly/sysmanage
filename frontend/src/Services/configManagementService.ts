@@ -53,3 +53,62 @@ export const installConfigMgmtPrereq = async (
   );
   return response.data;
 };
+
+/** One recorded application of a profile to a host. */
+export interface ConfigProfileRun {
+  id: string;
+  host_id: string;
+  profile_id: string | null;
+  profile_name: string | null;
+  executor: string | null;
+  check_mode: boolean;
+  success: boolean;
+  changed: boolean;
+  exit_code: number | null;
+  tasks_ok: number;
+  tasks_changed: number;
+  tasks_failed: number;
+  tasks_skipped: number;
+  tasks_unreachable: number;
+  reason: string | null;
+  completed_at: string | null;
+}
+
+export interface ConfigProfileRunTask {
+  host?: string | null;
+  task?: string | null;
+  status?: string | null;
+  changed?: boolean;
+  msg?: string | null;
+}
+
+export interface ConfigProfileRunDetail extends ConfigProfileRun {
+  tasks: ConfigProfileRunTask[];
+  error_output: string | null;
+}
+
+/**
+ * Recent runs for a host, newest first.
+ *
+ * Unchanged runs are included deliberately: the thing an operator looks for is
+ * the quiet streak that means the host has converged, and filtering no-ops out
+ * as uninteresting would hide exactly that.
+ */
+export const getConfigProfileRuns = async (
+  hostId: string,
+  limit = 25,
+): Promise<ConfigProfileRun[]> => {
+  const response = await axiosInstance.get<ConfigProfileRun[]>(
+    `/api/v1/hosts/${hostId}/config-management/runs?limit=${limit}`,
+  );
+  return response.data;
+};
+
+export const getConfigProfileRun = async (
+  runId: string,
+): Promise<ConfigProfileRunDetail> => {
+  const response = await axiosInstance.get<ConfigProfileRunDetail>(
+    `/api/v1/config-management/runs/${runId}`,
+  );
+  return response.data;
+};

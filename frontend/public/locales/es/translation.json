@@ -3431,6 +3431,19 @@
     "prereqTooOld": "Versión demasiado antigua",
     "prereqTooOldDetail": "La versión instalada es anterior a los requisitos de gestión de configuración. La instalación la actualizará.",
     "prereqUnsupported": "No disponible en esta plataforma",
-    "prereqUnsupportedDetail": "SysManage no tiene un método verificado para instalar el motor de gestión de configuración en este sistema operativo."
+    "prereqUnsupportedDetail": "SysManage no tiene un método verificado para instalar el motor de gestión de configuración en este sistema operativo.",
+    "runAdHoc": "[TODO] Ad-hoc",
+    "runChanged": "[TODO] Changed",
+    "runCheckMode": "[TODO] Dry run",
+    "runFailed": "[TODO] Failed",
+    "runNoChanges": "[TODO] No changes",
+    "runOutcome": "[TODO] Outcome",
+    "runProfile": "[TODO] Profile",
+    "runTaskCounts": "[TODO] {{ok}} ok, {{changed}} changed, {{failed}} failed",
+    "runTasks": "[TODO] Tasks",
+    "runWhen": "[TODO] When",
+    "runsEmpty": "[TODO] No configuration profiles have been applied to this host yet.",
+    "runsError": "[TODO] Failed to load configuration run history",
+    "runsTitle": "[TODO] Configuration Run History"
   }
 }

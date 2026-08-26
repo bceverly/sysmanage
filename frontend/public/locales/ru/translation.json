@@ -3431,6 +3431,19 @@
     "prereqTooOld": "Версия слишком старая",
     "prereqTooOldDetail": "Установленная версия старше, чем требуется управление конфигурацией. Установка обновит ее.",
     "prereqUnsupported": "Недоступно на этой платформе",
-    "prereqUnsupportedDetail": "SysManage не имеет проверенного способа установить движок управления конфигурацией на эту операционную систему."
+    "prereqUnsupportedDetail": "SysManage не имеет проверенного способа установить движок управления конфигурацией на эту операционную систему.",
+    "runAdHoc": "[TODO] Ad-hoc",
+    "runChanged": "[TODO] Changed",
+    "runCheckMode": "[TODO] Dry run",
+    "runFailed": "[TODO] Failed",
+    "runNoChanges": "[TODO] No changes",
+    "runOutcome": "[TODO] Outcome",
+    "runProfile": "[TODO] Profile",
+    "runTaskCounts": "[TODO] {{ok}} ok, {{changed}} changed, {{failed}} failed",
+    "runTasks": "[TODO] Tasks",
+    "runWhen": "[TODO] When",
+    "runsEmpty": "[TODO] No configuration profiles have been applied to this host yet.",
+    "runsError": "[TODO] Failed to load configuration run history",
+    "runsTitle": "[TODO] Configuration Run History"
   }
 }

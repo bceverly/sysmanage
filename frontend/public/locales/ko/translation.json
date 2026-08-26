@@ -3431,6 +3431,19 @@
     "prereqTooOld": "버전이 너무 오래된",
     "prereqTooOldDetail": "설치된 버전은 구성 관리가 요구하는 것보다 오래되었습니다. 설치하면 업그레이드됩니다.",
     "prereqUnsupported": "이 플랫폼에서 사용할 수 없음",
-    "prereqUnsupportedDetail": "SysManage는 이 운영 체제에서 구성 관리 엔진을 설치하는 검증된 방법을 가지고 있지 않습니다."
+    "prereqUnsupportedDetail": "SysManage는 이 운영 체제에서 구성 관리 엔진을 설치하는 검증된 방법을 가지고 있지 않습니다.",
+    "runAdHoc": "[TODO] Ad-hoc",
+    "runChanged": "[TODO] Changed",
+    "runCheckMode": "[TODO] Dry run",
+    "runFailed": "[TODO] Failed",
+    "runNoChanges": "[TODO] No changes",
+    "runOutcome": "[TODO] Outcome",
+    "runProfile": "[TODO] Profile",
+    "runTaskCounts": "[TODO] {{ok}} ok, {{changed}} changed, {{failed}} failed",
+    "runTasks": "[TODO] Tasks",
+    "runWhen": "[TODO] When",
+    "runsEmpty": "[TODO] No configuration profiles have been applied to this host yet.",
+    "runsError": "[TODO] Failed to load configuration run history",
+    "runsTitle": "[TODO] Configuration Run History"
   }
 }
