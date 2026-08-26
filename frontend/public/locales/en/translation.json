@@ -3432,7 +3432,6 @@
     "prereqTooOldDetail": "The installed version is older than configuration management requires. Installing will upgrade it.",
     "prereqUnsupported": "Not available on this platform",
     "prereqUnsupportedDetail": "SysManage does not have a verified way to install the configuration management engine on this operating system.",
-    "runAdHoc": "Ad-hoc",
     "runChanged": "Changed",
     "runCheckMode": "Dry run",
     "runFailed": "Failed",
@@ -3444,6 +3443,7 @@
     "runWhen": "When",
     "runsEmpty": "No configuration profiles have been applied to this host yet.",
     "runsError": "Failed to load configuration run history",
-    "runsTitle": "Configuration Run History"
+    "runsTitle": "Configuration Run History",
+    "runNoProfile": "No profile"
   }
 }

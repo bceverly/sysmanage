@@ -7538,8 +7538,33 @@ production defect if guessed:
      `changedProperties: []`. Correct desired-state semantics, but it means
      "changed" answers "did declared state move", not "did anything happen".
 
-- [ ] Translate the one new agent msgid (`make i18n-fix SERVICE=...`) — the
-      only gate not green in sysmanage-agent
+**Results + idempotency reporting — LANDED 2026-08-26.** The half of the
+"execution at scale ... with results + idempotency reporting" bullet that is
+OSS-side is done end to end:
+
+  * `config_profile_run` table + migration `c20cfgrun01` (expand-only, single
+    alembic head verified with real alembic). **A row per run, including the
+    no-ops** — idempotency reporting is a claim about HISTORY, so "the last
+    three runs changed nothing" is unanswerable if unchanged runs are dropped
+    as uninteresting.
+  * `api/handlers/config_mgmt_handlers.py`, routed on **`command_type` rather
+    than payload shape**: a refused run is just
+    `{"success": false, "reason": ...}` and shares no field with a successful
+    one, so shape-sniffing would silently swallow every failure. Storage is
+    bounded (an unbounded `Text` column fed by a remote host is a
+    disk-exhaustion path) and the handler never raises — it runs on the shared
+    queue processor, where one bad payload must not stall every other host.
+  * `GET /hosts/{id}/config-management/runs` + `/config-management/runs/{id}`,
+    newest-first and page-capped. Truncated per-task detail degrades to "no
+    detail" rather than 500ing, because truncation on ingest makes an
+    unparsable JSON tail EXPECTED.
+  * `ConfigProfileRunHistory` panel. **"Changed" and "No changes" are visually
+    distinct** rather than both reading as a green tick: a converged profile
+    SHOULD change nothing, and seeing that streak is the entire point. Dry runs
+    are labelled so they can never be mistaken for an applied change.
+
+Still Pro+ and unstarted: profile authoring, fleet-scale job templates,
+inventories from hosts/tags/sites, and scheduling.
 - [ ] Desired-state config-as-code: Ansible role/playbook execution at scale (job templates; inventories from SysManage hosts/tags/sites) with results + idempotency reporting
 - [ ] Config profiles assignable per host/tag/site, enforced on a schedule
 - [ ] Remediation playbooks (apply to bring a host into compliance)

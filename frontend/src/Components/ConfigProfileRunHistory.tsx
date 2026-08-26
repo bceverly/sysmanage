@@ -189,7 +189,7 @@ const ConfigProfileRunHistory: React.FC<ConfigProfileRunHistoryProps> = ({
                       <Stack direction="row" spacing={1} alignItems="center">
                         <span>
                           {run.profile_name ||
-                            t("configManagement.runAdHoc", "Ad-hoc")}
+                            t("configManagement.runNoProfile", "No profile")}
                         </span>
                         {run.check_mode && (
                           <Chip

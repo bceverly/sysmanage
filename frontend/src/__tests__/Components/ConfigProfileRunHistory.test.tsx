@@ -121,12 +121,12 @@ describe("ConfigProfileRunHistory", () => {
     ).toBeInTheDocument();
   });
 
-  test("a run with no profile name reads as ad-hoc", async () => {
+  test("a run with no profile name says so", async () => {
     vi.mocked(getConfigProfileRuns).mockResolvedValue([
       run({ profile_name: null }),
     ]);
     render(<ConfigProfileRunHistory hostId="h1" />);
-    expect(await screen.findByText("Ad-hoc")).toBeInTheDocument();
+    expect(await screen.findByText("No profile")).toBeInTheDocument();
   });
 
   test("a host with no runs says so rather than showing an empty table", async () => {
