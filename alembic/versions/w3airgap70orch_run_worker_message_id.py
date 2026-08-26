@@ -30,9 +30,9 @@ re-running on a partially-migrated DB is a no-op.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 
+from alembic import op
 
 revision: str = "w3airgap70orch"
 down_revision: Union[str, None] = "v2mirror70peraction"

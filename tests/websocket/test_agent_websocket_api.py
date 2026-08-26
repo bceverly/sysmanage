@@ -15,12 +15,12 @@ import pytest
 from fastapi import WebSocket, WebSocketDisconnect
 
 from backend.api.agent import (
+    _handle_message_by_type,
+    _handle_system_info_message,
+    _process_websocket_message,
+    _validate_and_get_host,
     agent_connect,
     authenticate_agent,
-    _process_websocket_message,
-    _handle_message_by_type,
-    _validate_and_get_host,
-    _handle_system_info_message,
 )
 from backend.websocket.messages import MessageType
 

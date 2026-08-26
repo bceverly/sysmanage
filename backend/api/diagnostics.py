@@ -15,11 +15,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
 
-from backend.api.host_utils import validate_host_approval_status
 from backend.api.error_constants import (
     error_diagnostic_not_found,
     error_invalid_diagnostic_id,
 )
+from backend.api.host_utils import validate_host_approval_status
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.persistence import db as db_module

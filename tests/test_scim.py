@@ -22,8 +22,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from backend.api import scim
-from backend.persistence.db import Base
 from backend.persistence import models
+from backend.persistence.db import Base
 
 PROVIDER_ID = uuid.uuid4()
 TOKEN = "scim-secret-token"

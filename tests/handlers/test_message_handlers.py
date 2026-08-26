@@ -16,10 +16,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from backend.api.message_handlers import (
+    handle_command_acknowledgment,
     handle_command_result,
     handle_config_acknowledgment,
     handle_diagnostic_result,
-    handle_command_acknowledgment,
     handle_installation_status,
 )
 

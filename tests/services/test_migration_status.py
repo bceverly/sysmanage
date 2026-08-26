@@ -17,7 +17,7 @@ from backend.services import migration_status
 
 
 def _tenant(db_session, slug):
-    from backend.persistence.models import RegistryTenant, TENANT_STATUS_ACTIVE
+    from backend.persistence.models import TENANT_STATUS_ACTIVE, RegistryTenant
 
     t = RegistryTenant(name=slug.title(), slug=slug, status=TENANT_STATUS_ACTIVE)
     db_session.add(t)

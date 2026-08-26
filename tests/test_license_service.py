@@ -67,8 +67,8 @@ class TestLicenseServiceProperties:
 
     def test_license_tier_with_license(self):
         """Test license_tier when license is present."""
-        from backend.licensing.license_service import LicenseService
         from backend.licensing.features import LicenseTier
+        from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
         mock_license = MagicMock()
@@ -244,16 +244,16 @@ class TestLicenseServiceHasFeature:
 
     def test_has_feature_no_license(self):
         """Test has_feature when no license."""
-        from backend.licensing.license_service import LicenseService
         from backend.licensing.features import FeatureCode
+        from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
         assert service.has_feature(FeatureCode.HEALTH_ANALYSIS) is False
 
     def test_has_feature_with_license(self):
         """Test has_feature when license has feature."""
-        from backend.licensing.license_service import LicenseService
         from backend.licensing.features import FeatureCode
+        from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
         mock_license = MagicMock()
@@ -269,8 +269,8 @@ class TestLicenseServiceHasModule:
 
     def test_has_module_no_license(self):
         """Test has_module when no license."""
-        from backend.licensing.license_service import LicenseService
         from backend.licensing.features import ModuleCode
+        from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
         assert service.has_module(ModuleCode.HEALTH_ENGINE) is False

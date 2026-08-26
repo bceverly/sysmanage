@@ -29,8 +29,9 @@ Revises: x3pkgfp
 from typing import Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
+
+from alembic import op
 
 revision: str = "x4instwhy"
 down_revision: Union[str, None] = "x3pkgfp"

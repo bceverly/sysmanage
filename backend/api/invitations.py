@@ -27,13 +27,13 @@ from backend.api.error_constants import error_user_not_found
 from backend.api.password_reset import get_dynamic_hostname
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.config import config
+from backend.config.public_url import build_public_base_url
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
 from backend.services import invitation_service
 from backend.services.email_service import email_service
 from backend.services.tenant_directory import resolve_tenant_for_email
-from backend.config.public_url import build_public_base_url
 
 router = APIRouter(prefix="/invitations", tags=["invitations"])
 

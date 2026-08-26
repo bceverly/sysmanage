@@ -15,10 +15,10 @@ and rotation_schedule tables for Phase 2 Pro+ features.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 from sqlalchemy.dialects import postgresql
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "g3h4i5j6k7l8"
@@ -53,9 +53,7 @@ def upgrade() -> None:
                 sa.Column("content_hash", sa.String(length=64), nullable=True),
                 sa.Column("created_at", sa.DateTime(), nullable=True),
                 sa.Column("created_by", sa.String(length=255), nullable=True),
-                sa.Column(
-                    "change_description", sa.String(length=500), nullable=True
-                ),
+                sa.Column("change_description", sa.String(length=500), nullable=True),
                 sa.PrimaryKeyConstraint("id"),
                 sa.ForeignKeyConstraint(
                     ["secret_id"],
@@ -72,9 +70,7 @@ def upgrade() -> None:
                 sa.Column("content_hash", sa.String(length=64), nullable=True),
                 sa.Column("created_at", sa.DateTime(), nullable=True),
                 sa.Column("created_by", sa.String(length=255), nullable=True),
-                sa.Column(
-                    "change_description", sa.String(length=500), nullable=True
-                ),
+                sa.Column("change_description", sa.String(length=500), nullable=True),
                 sa.PrimaryKeyConstraint("id"),
                 sa.ForeignKeyConstraint(
                     ["secret_id"],
@@ -97,9 +93,7 @@ def upgrade() -> None:
                 "rotation_schedule",
                 sa.Column("id", sa.UUID(), nullable=False),
                 sa.Column("secret_id", sa.UUID(), nullable=False),
-                sa.Column(
-                    "frequency", sa.String(length=20), nullable=False
-                ),
+                sa.Column("frequency", sa.String(length=20), nullable=False),
                 sa.Column(
                     "notify_days_before",
                     sa.Integer(),
@@ -134,9 +128,7 @@ def upgrade() -> None:
                 "rotation_schedule",
                 sa.Column("id", sa.String(36), nullable=False),
                 sa.Column("secret_id", sa.String(36), nullable=False),
-                sa.Column(
-                    "frequency", sa.String(length=20), nullable=False
-                ),
+                sa.Column("frequency", sa.String(length=20), nullable=False),
                 sa.Column(
                     "notify_days_before",
                     sa.Integer(),

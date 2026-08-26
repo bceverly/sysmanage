@@ -31,11 +31,10 @@ INSERT; no dialect-specific DDL).
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect, text
 
+from alembic import op
 from backend.persistence.models.core import GUID
-
 
 revision: str = "y5srvcfg"
 down_revision: Union[str, None] = "x4airgap80optB"
@@ -72,10 +71,7 @@ def upgrade() -> None:
     ).fetchone()
     if not existing:
         bind.execute(
-            text(
-                f"INSERT INTO {_TABLE} (id, server_role) "
-                "VALUES (:id, :role)"
-            ),
+            text(f"INSERT INTO {_TABLE} (id, server_role) " "VALUES (:id, :role)"),
             {"id": _SINGLETON_ID, "role": "standard"},
         )
 

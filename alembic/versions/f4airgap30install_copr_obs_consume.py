@@ -43,9 +43,9 @@ Idempotent: re-running just re-sets the same string.
 
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 revision: str = "f4airgap30install"
 down_revision: Union[str, None] = "e3airgap20repo"
@@ -84,14 +84,12 @@ def _update_commands(bind, name_pattern: str, commands: str) -> int:
     is_sqlite = bind.dialect.name == "sqlite"
     timestamp_expr = "CURRENT_TIMESTAMP" if is_sqlite else "NOW()"
     result = bind.execute(
-        text(
-            f"""
+        text(f"""
             UPDATE child_host_distribution SET
                 agent_install_commands = :commands,
                 updated_at = {timestamp_expr}
             WHERE distribution_name LIKE :name_pattern
-            """
-        ),
+            """),
         {"commands": commands, "name_pattern": name_pattern},
     )
     return result.rowcount or 0

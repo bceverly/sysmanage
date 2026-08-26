@@ -19,9 +19,9 @@ Revises: s4oslifecycle
 from typing import Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 
+from alembic import op
 from backend.persistence.models.core import GUID
 
 revision: str = "s10clmviews"
@@ -105,9 +105,7 @@ def upgrade() -> None:
                 ["content_view_id"], ["%s.id" % _CV], ondelete="CASCADE"
             ),
         )
-        op.create_index(
-            "ix_%s_content_view_id" % _FILTER, _FILTER, ["content_view_id"]
-        )
+        op.create_index("ix_%s_content_view_id" % _FILTER, _FILTER, ["content_view_id"])
         op.create_index("ix_%s_filter_type" % _FILTER, _FILTER, ["filter_type"])
 
     if not insp.has_table(_VERSION):

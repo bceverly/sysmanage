@@ -16,11 +16,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from backend.services.vault_service import (
-    VAULT_DATA_PATH,
-    VaultError,
-    VaultService,
-)
+from backend.services.vault_service import VAULT_DATA_PATH, VaultError, VaultService
 
 
 @pytest.fixture(autouse=True)

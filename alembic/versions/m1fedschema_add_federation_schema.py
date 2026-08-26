@@ -27,8 +27,8 @@ Create Date: 2026-05-20
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "m1fedschema"
@@ -88,9 +88,7 @@ def _coordinator_tables():
                 sa.Column("location_label", sa.String(255), nullable=True),
                 sa.Column("url", sa.String(512), nullable=False),
                 sa.Column("tls_cert_pem", sa.Text(), nullable=True),
-                sa.Column(
-                    "enrollment_token_hash", sa.String(128), nullable=True
-                ),
+                sa.Column("enrollment_token_hash", sa.String(128), nullable=True),
                 sa.Column(
                     "status",
                     sa.String(32),
@@ -134,9 +132,7 @@ def _coordinator_tables():
                 sa.Column(
                     "site_id",
                     guid,
-                    sa.ForeignKey(
-                        "federation_sites.id", ondelete="CASCADE"
-                    ),
+                    sa.ForeignKey("federation_sites.id", ondelete="CASCADE"),
                     nullable=False,
                 ),
                 sa.Column("fqdn", sa.String(255), nullable=False),
@@ -183,9 +179,7 @@ def _coordinator_tables():
                 sa.Column(
                     "site_id",
                     guid,
-                    sa.ForeignKey(
-                        "federation_sites.id", ondelete="CASCADE"
-                    ),
+                    sa.ForeignKey("federation_sites.id", ondelete="CASCADE"),
                     nullable=False,
                 ),
                 sa.Column("snapshot_at", sa.DateTime(), nullable=False),
@@ -222,9 +216,7 @@ def _coordinator_tables():
                 sa.Column(
                     "site_id",
                     guid,
-                    sa.ForeignKey(
-                        "federation_sites.id", ondelete="CASCADE"
-                    ),
+                    sa.ForeignKey("federation_sites.id", ondelete="CASCADE"),
                     nullable=False,
                 ),
                 sa.Column("baseline", sa.String(64), nullable=False),
@@ -267,9 +259,7 @@ def _coordinator_tables():
                 sa.Column(
                     "site_id",
                     guid,
-                    sa.ForeignKey(
-                        "federation_sites.id", ondelete="CASCADE"
-                    ),
+                    sa.ForeignKey("federation_sites.id", ondelete="CASCADE"),
                     nullable=False,
                 ),
                 sa.Column("snapshot_at", sa.DateTime(), nullable=False),
@@ -363,17 +353,13 @@ def _coordinator_tables():
                 sa.Column(
                     "policy_id",
                     guid,
-                    sa.ForeignKey(
-                        "federation_policies.id", ondelete="CASCADE"
-                    ),
+                    sa.ForeignKey("federation_policies.id", ondelete="CASCADE"),
                     primary_key=True,
                 ),
                 sa.Column(
                     "site_id",
                     guid,
-                    sa.ForeignKey(
-                        "federation_sites.id", ondelete="CASCADE"
-                    ),
+                    sa.ForeignKey("federation_sites.id", ondelete="CASCADE"),
                     primary_key=True,
                 ),
                 sa.Column("assigned_at", sa.DateTime(), nullable=False),
@@ -408,9 +394,7 @@ def _coordinator_tables():
                 sa.Column(
                     "target_site_id",
                     guid,
-                    sa.ForeignKey(
-                        "federation_sites.id", ondelete="CASCADE"
-                    ),
+                    sa.ForeignKey("federation_sites.id", ondelete="CASCADE"),
                     nullable=False,
                 ),
                 sa.Column("target_host_ids_json", sa.Text(), nullable=True),
@@ -479,9 +463,7 @@ def _site_tables():
             "columns": [
                 sa.Column("id", guid, primary_key=True),
                 sa.Column("coordinator_url", sa.String(512), nullable=True),
-                sa.Column(
-                    "coordinator_tls_cert_pem", sa.Text(), nullable=True
-                ),
+                sa.Column("coordinator_tls_cert_pem", sa.Text(), nullable=True),
                 sa.Column("site_id", guid, nullable=True),
                 sa.Column("site_tls_cert_pem", sa.Text(), nullable=True),
                 sa.Column(
@@ -578,9 +560,7 @@ def _site_tables():
                 sa.Column("id", guid, primary_key=True),
                 sa.Column("command_type", sa.String(64), nullable=False),
                 sa.Column("parameters_json", sa.Text(), nullable=True),
-                sa.Column(
-                    "target_host_ids_json", sa.Text(), nullable=True
-                ),
+                sa.Column("target_host_ids_json", sa.Text(), nullable=True),
                 sa.Column("received_at", sa.DateTime(), nullable=False),
                 sa.Column(
                     "status",
@@ -634,9 +614,7 @@ def upgrade() -> None:
 
         # Indexes — checked separately so re-runs after a partial
         # CREATE TABLE pick up missing indexes.
-        existing_indexes = {
-            idx["name"] for idx in inspector.get_indexes(table_name)
-        }
+        existing_indexes = {idx["name"] for idx in inspector.get_indexes(table_name)}
         for index_name, index_cols in table_def["indexes"]:
             if index_name not in existing_indexes:
                 op.create_index(
@@ -669,9 +647,7 @@ def downgrade() -> None:
         # Drop indexes first — most engines drop them automatically
         # with the table but being explicit makes the downgrade safe
         # to re-run.
-        existing_indexes = {
-            idx["name"] for idx in inspector.get_indexes(table_name)
-        }
+        existing_indexes = {idx["name"] for idx in inspector.get_indexes(table_name)}
         for index_name, _ in table_def["indexes"]:
             if index_name in existing_indexes:
                 op.drop_index(index_name, table_name=table_name)

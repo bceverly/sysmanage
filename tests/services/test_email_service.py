@@ -11,7 +11,6 @@ for sending emails via SMTP.
 
 from unittest.mock import MagicMock, patch
 
-
 from backend.services.email_service import EmailService, email_service
 
 

@@ -23,7 +23,7 @@ from backend.services import enrollment_service
 
 
 def _tenant(db_session, slug="enroll-reg"):
-    from backend.persistence.models import RegistryTenant, TENANT_STATUS_ACTIVE
+    from backend.persistence.models import TENANT_STATUS_ACTIVE, RegistryTenant
 
     t = RegistryTenant(name="Enroll Reg", slug=slug, status=TENANT_STATUS_ACTIVE)
     db_session.add(t)

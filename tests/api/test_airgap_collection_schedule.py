@@ -10,7 +10,6 @@
 from contextlib import contextmanager
 from unittest.mock import MagicMock, patch
 
-
 from backend.api import airgap_collection_schedule as sched_module
 
 

@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
-from backend.api.error_constants import error_host_not_registered, TIMEZONE_UTC_SUFFIX
+from backend.api.error_constants import TIMEZONE_UTC_SUFFIX, error_host_not_registered
 from backend.i18n import _
 from backend.persistence.models import Host, HostCertificate, HostRole
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result

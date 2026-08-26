@@ -125,9 +125,7 @@ class HostRegistrationLegacy(BaseModel):
 
 def _limited_flag(host):
     """Three-valued limited flag — see agent_capability_service.limited_flag."""
-    from backend.services.agent_capability_service import (  # noqa: PLC0415
-        limited_flag,
-    )
+    from backend.services.agent_capability_service import limited_flag  # noqa: PLC0415
 
     return limited_flag(host)
 
@@ -140,9 +138,9 @@ def _capability_report(host):
     ships only the boolean (a fleet-wide query should not carry a command list
     per host).
     """
-    from backend.services.agent_capability_service import (  # noqa: PLC0415
+    from backend.services.agent_capability_service import (
         get_capability_report,
-    )
+    )  # noqa: PLC0415
 
     return get_capability_report(host)
 
@@ -811,9 +809,9 @@ async def register_host(registration_data: HostRegistration):
         # the first SYSTEM_INFO would leave the host with an unknown capability
         # set for a full collection interval, during which the dispatch gate
         # cannot tell "does not support" from "not yet reported".
-        from backend.services.agent_capability_service import (  # noqa: PLC0415
+        from backend.services.agent_capability_service import (
             apply_capability_report,
-        )
+        )  # noqa: PLC0415
 
         apply_capability_report(host, registration_data.agent_capabilities)
 

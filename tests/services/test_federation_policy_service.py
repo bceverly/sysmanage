@@ -445,7 +445,8 @@ class TestPushBackoffAndDeadLetter:
         # ``now`` far in the future so the new (zero) attempts +
         # never-attempted ``last_push_attempt_at`` clearly pass the
         # backoff filter.
-        from datetime import datetime as _dt, timedelta
+        from datetime import datetime as _dt
+        from datetime import timedelta
 
         future = _dt.utcnow().replace(tzinfo=None) + timedelta(hours=2)
         pending = psvc.list_all_pending_pushes(session, now=future)
@@ -470,7 +471,8 @@ class TestPushBackoffAndDeadLetter:
 
     def test_backoff_releases_after_window(self, session, enrolled_site):
         # ``now`` far in the future → past the backoff cap, ready.
-        from datetime import datetime as _dt, timedelta
+        from datetime import datetime as _dt
+        from datetime import timedelta
 
         p = psvc.create_policy(session, policy_type="x", name="y", definition={})
         psvc.assign_policy_to_sites(session, p.id, [enrolled_site.id])

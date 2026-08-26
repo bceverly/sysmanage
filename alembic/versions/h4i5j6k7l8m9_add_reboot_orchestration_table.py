@@ -15,9 +15,9 @@ sequences on parent hosts with running child hosts (Phase 2.5).
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "h4i5j6k7l8m9"

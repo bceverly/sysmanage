@@ -23,9 +23,9 @@ Idempotent: re-runs over the same rows simply re-set the same string.
 
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 revision: str = "q9b5s7c8u9m0"
 down_revision: Union[str, None] = "p8a4r5b6t7l8"
@@ -57,16 +57,14 @@ def _update_commands(bind, version: str, commands: str) -> None:
     is_sqlite = bind.dialect.name == "sqlite"
     timestamp_expr = "CURRENT_TIMESTAMP" if is_sqlite else "NOW()"
     bind.execute(
-        text(
-            f"""
+        text(f"""
             UPDATE child_host_distribution SET
                 agent_install_commands = :agent_install_commands,
                 updated_at = {timestamp_expr}
             WHERE child_type = 'kvm'
               AND distribution_name = 'FreeBSD'
               AND distribution_version = :version
-            """
-        ),
+            """),
         {"version": version, "agent_install_commands": commands},
     )
 

@@ -16,7 +16,6 @@ from fastapi import APIRouter
 
 from backend.api.child_host_control import router as control_router
 from backend.api.child_host_crud import router as crud_router
-from backend.api.child_host_virtualization import router as virtualization_router
 
 # Re-export models for backwards compatibility
 from backend.api.child_host_models import (  # noqa: F401  # pylint: disable=unused-import
@@ -27,6 +26,7 @@ from backend.api.child_host_models import (  # noqa: F401  # pylint: disable=unu
     EnableWslRequest,
     VirtualizationSupportResponse,
 )
+from backend.api.child_host_virtualization import router as virtualization_router
 
 router = APIRouter()
 

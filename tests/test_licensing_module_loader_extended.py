@@ -458,8 +458,9 @@ class TestDownloadAndCacheModule:
 
     @pytest.mark.asyncio
     async def test_network_error_returns_false_and_cleans_temp(self, tmp_path):
-        from backend.licensing.module_loader import ModuleLoader
         import aiohttp
+
+        from backend.licensing.module_loader import ModuleLoader
 
         loader = ModuleLoader()
         modules_path = tmp_path / "mods"
@@ -616,8 +617,9 @@ class TestQueryServerVersions:
 
     @pytest.mark.asyncio
     async def test_network_error_returns_empty(self):
-        from backend.licensing.module_loader import ModuleLoader
         import aiohttp
+
+        from backend.licensing.module_loader import ModuleLoader
 
         loader = ModuleLoader()
 

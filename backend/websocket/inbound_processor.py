@@ -37,9 +37,7 @@ def _resolve_host_via_index(host_id):
     from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
 
     from backend.persistence.models import Host  # noqa: PLC0415
-    from backend.persistence.partitions import (  # noqa: PLC0415
-        tenant_engine_for_host,
-    )
+    from backend.persistence.partitions import tenant_engine_for_host  # noqa: PLC0415
 
     try:
         engine = tenant_engine_for_host(host_id)
@@ -92,9 +90,7 @@ def _find_host_in_tenant_dbs(host_id, hostname):
     scanning the tenant databases by fqdn for hostname-only messages or when the
     index lags.
     """
-    from backend.persistence.partitions import (  # noqa: PLC0415
-        iter_host_databases,
-    )
+    from backend.persistence.partitions import iter_host_databases  # noqa: PLC0415
 
     # Authoritative fast path: the index resolves the owning tenant from host_id.
     host, session = _resolve_host_via_index(host_id)
@@ -532,9 +528,9 @@ async def process_validated_message(message, host, db: Session, host_db=None) ->
         # null-host path, which the loop-level hook missed.  Best-effort
         # and self-throttling: a no-op unless the role is 'repository'
         # and the agent's mirror config actually needs to change.
-        from backend.services import (  # pylint: disable=import-outside-toplevel
+        from backend.services import (
             airgap_repoint_service,
-        )
+        )  # pylint: disable=import-outside-toplevel
 
         airgap_repoint_service.maybe_repoint(handler_db, host)
 

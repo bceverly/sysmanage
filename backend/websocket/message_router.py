@@ -48,8 +48,8 @@ from backend.api.message_handlers import (
 from backend.api.package_handlers import (
     handle_packages_batch,
     handle_packages_batch_end,
-    handle_packages_delta,
     handle_packages_batch_start,
+    handle_packages_delta,
 )
 from backend.api.update_handlers import handle_update_apply_result
 from backend.i18n import _

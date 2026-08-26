@@ -178,9 +178,9 @@ def _try_content_view_sync(session: Session, cmd, summary: Dict[str, Any]) -> bo
     """
     if cmd.command_type != "content_view_sync":
         return False
-    from backend.services.content_lifecycle_federation_sync import (  # pylint: disable=import-outside-toplevel
+    from backend.services.content_lifecycle_federation_sync import (
         handle_content_view_sync,
-    )
+    )  # pylint: disable=import-outside-toplevel
 
     try:
         handle_content_view_sync(session, cmd)
@@ -278,15 +278,15 @@ def fanout_queued_commands(
     bad command never blocks the rest.
     """
     if queue_ops is None:
-        from backend.websocket.queue_operations import (  # pylint: disable=import-outside-toplevel
+        from backend.websocket.queue_operations import (
             QueueOperations,
-        )
+        )  # pylint: disable=import-outside-toplevel
 
         queue_ops = QueueOperations()
 
-    from backend.services.proplus_dispatch import (  # pylint: disable=import-outside-toplevel
+    from backend.services.proplus_dispatch import (
         register_federation_command_correlation,
-    )
+    )  # pylint: disable=import-outside-toplevel
 
     summary = {"dispatched": 0, "messages": 0, "failed": 0}
     queued = inbox_svc.list_queued_commands(session, limit=limit)

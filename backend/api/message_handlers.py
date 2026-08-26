@@ -12,21 +12,22 @@ This module is the main entry point that re-exports handlers from sub-modules:
 
 import logging
 from datetime import datetime, timezone
+from typing import Optional
 
 from sqlalchemy import update
 from sqlalchemy.orm import Session
 
+from backend.api.message_handlers_core import (
+    handle_heartbeat,
+    handle_system_info,
+    validate_host_authentication,
+)
 from backend.i18n import _
 from backend.persistence.models import Host, SoftwareInstallationLog
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 # Re-export core handlers for backwards compatibility
 from backend.utils.verbosity_logger import sanitize_log
-from backend.api.message_handlers_core import (
-    validate_host_authentication,
-    handle_system_info,
-    handle_heartbeat,
-)
 
 # Use standard logger that respects /etc/sysmanage.yaml configuration
 logger = logging.getLogger(__name__)
@@ -42,6 +43,13 @@ __all__ = [
     "handle_command_acknowledgment",
     "handle_installation_status",
 ]
+
+
+def command_type_of(message_data: dict) -> Optional[str]:
+    """The command a result belongs to, from either place agents put it."""
+    return message_data.get("command_type") or (message_data.get("data") or {}).get(
+        "command_type"
+    )
 
 
 async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
@@ -79,6 +87,16 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
                 return None
         except Exception as exc:
             logger.warning("Pro+ command_result routing failed: %s", exc)
+
+    # Phase 20.1 config profiles.  Routed on command_type rather than on a
+    # field in the payload: a successful run and a refused one look nothing
+    # alike (the latter is just {"success": false, "reason": ...}), so shape
+    # sniffing would silently drop every failure.
+    if command_type_of(message_data) == "apply_config_profile":
+        logger.info("Detected config profile result, routing to handler")
+        from backend.api.handlers import handle_config_profile_result
+
+        return await handle_config_profile_result(db, connection, message_data)
 
     # Check if this is a script execution result
     if "execution_id" in message_data:
@@ -122,10 +140,10 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
             "Detected child host control result (%s), routing to handler", command_type
         )
         from backend.api.handlers.child_host_handlers import (
+            handle_child_host_delete_result,
+            handle_child_host_restart_result,
             handle_child_host_start_result,
             handle_child_host_stop_result,
-            handle_child_host_restart_result,
-            handle_child_host_delete_result,
         )
 
         handler_map = {
@@ -189,9 +207,7 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
         logger.info(
             "Detected GPG key command result (%s), routing to handler", command_type
         )
-        from backend.api.handlers.gpg_key_handlers import (
-            handle_gpg_key_command_result,
-        )
+        from backend.api.handlers.gpg_key_handlers import handle_gpg_key_command_result
 
         return await handle_gpg_key_command_result(db, connection, message_data)
 

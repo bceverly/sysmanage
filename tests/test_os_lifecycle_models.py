@@ -10,11 +10,7 @@ from datetime import datetime
 import pytest
 from sqlalchemy.exc import IntegrityError
 
-from backend.persistence.models import (
-    Host,
-    ReleaseUpgradeJob,
-    SharedOsLifecycle,
-)
+from backend.persistence.models import Host, ReleaseUpgradeJob, SharedOsLifecycle
 
 NOW = datetime(2026, 7, 13, 12, 0)
 

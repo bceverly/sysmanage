@@ -28,11 +28,11 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import (
+    JSON,
     Boolean,
     Column,
     DateTime,
     ForeignKey,
-    JSON,
     LargeBinary,
     String,
     Text,

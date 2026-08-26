@@ -15,10 +15,10 @@ automatic CVE database updates from security data sources.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 from sqlalchemy.dialects import postgresql
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "b8c9d0e1f2a3"
@@ -69,9 +69,7 @@ def upgrade() -> None:
             op.create_table(
                 "cve_refresh_settings",
                 sa.Column("id", sa.String(36), nullable=False),
-                sa.Column(
-                    "enabled", sa.Boolean(), nullable=False, server_default="1"
-                ),
+                sa.Column("enabled", sa.Boolean(), nullable=False, server_default="1"),
                 sa.Column(
                     "refresh_interval_hours",
                     sa.Integer(),
@@ -94,7 +92,10 @@ def upgrade() -> None:
 
         # Create index on id for faster lookups
         op.create_index(
-            op.f("ix_cve_refresh_settings_id"), "cve_refresh_settings", ["id"], unique=False
+            op.f("ix_cve_refresh_settings_id"),
+            "cve_refresh_settings",
+            ["id"],
+            unique=False,
         )
 
 
@@ -106,6 +107,8 @@ def downgrade() -> None:
 
     if "cve_refresh_settings" in tables:
         # Drop index first
-        op.drop_index(op.f("ix_cve_refresh_settings_id"), table_name="cve_refresh_settings")
+        op.drop_index(
+            op.f("ix_cve_refresh_settings_id"), table_name="cve_refresh_settings"
+        )
         # Drop the table
         op.drop_table("cve_refresh_settings")

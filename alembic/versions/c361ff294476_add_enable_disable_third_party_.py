@@ -9,15 +9,16 @@ Revises: ef29aad92797
 Create Date: 2025-10-06 17:06:44.318633
 
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = 'c361ff294476'
-down_revision: Union[str, None] = 'ef29aad92797'
+revision: str = "c361ff294476"
+down_revision: Union[str, None] = "ef29aad92797"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -25,8 +26,8 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     # Detect database type
     bind = op.get_bind()
-    is_sqlite = bind.dialect.name == 'sqlite'
-    uuid_cast = '' if is_sqlite else '::uuid'
+    is_sqlite = bind.dialect.name == "sqlite"
+    uuid_cast = "" if is_sqlite else "::uuid"
 
     # Add Enable/Disable Third-Party Repository roles to the Package group
     # Using role IDs 44-45 to continue the sequence
@@ -40,8 +41,8 @@ def upgrade() -> None:
 def downgrade() -> None:
     # Detect database type
     bind = op.get_bind()
-    is_sqlite = bind.dialect.name == 'sqlite'
-    uuid_cast = '' if is_sqlite else '::uuid'
+    is_sqlite = bind.dialect.name == "sqlite"
+    uuid_cast = "" if is_sqlite else "::uuid"
 
     # Remove the Enable/Disable Third-Party Repository roles
     op.execute(f"""

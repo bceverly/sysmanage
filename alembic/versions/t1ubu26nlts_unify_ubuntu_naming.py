@@ -31,9 +31,9 @@ dialect-specific syntax used.
 
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "t1ubu26nlts"
@@ -79,30 +79,22 @@ def upgrade() -> None:
     # 1. child_host_distribution: rename "Ubuntu Server" → "Ubuntu"
     #    Drop the "Server" suffix from display_name.
     # ------------------------------------------------------------------
-    bind.execute(
-        text(
-            """
+    bind.execute(text("""
             UPDATE child_host_distribution
             SET distribution_name = 'Ubuntu',
                 display_name = REPLACE(display_name, 'Ubuntu Server', 'Ubuntu')
             WHERE distribution_name = 'Ubuntu Server'
-            """
-        )
-    )
+            """))
 
     # ------------------------------------------------------------------
     # 2. host_child: rename live "Ubuntu Server" rows to "Ubuntu" so
     #    the host-detail column matches the new naming.
     # ------------------------------------------------------------------
-    bind.execute(
-        text(
-            """
+    bind.execute(text("""
             UPDATE host_child
             SET distribution = 'Ubuntu'
             WHERE distribution = 'Ubuntu Server'
-            """
-        )
-    )
+            """))
 
     # ------------------------------------------------------------------
     # 3. host_child: remap leaked Ubuntu codenames →
@@ -110,14 +102,12 @@ def upgrade() -> None:
     # ------------------------------------------------------------------
     for codename, version in UBUNTU_CODENAME_TO_VERSION.items():
         bind.execute(
-            text(
-                """
+            text("""
                 UPDATE host_child
                 SET distribution_version = :version
                 WHERE distribution = 'Ubuntu'
                   AND distribution_version = :codename
-                """
-            ),
+                """),
             {"codename": codename, "version": version},
         )
 
@@ -128,14 +118,12 @@ def upgrade() -> None:
     # ------------------------------------------------------------------
     for codename, version in DEBIAN_CODENAME_TO_VERSION.items():
         bind.execute(
-            text(
-                """
+            text("""
                 UPDATE host_child
                 SET distribution_version = :version
                 WHERE distribution = 'Debian'
                   AND distribution_version = :codename
-                """
-            ),
+                """),
             {"codename": codename, "version": version},
         )
 
@@ -150,25 +138,17 @@ def downgrade() -> None:
     """
     bind = op.get_bind()
 
-    bind.execute(
-        text(
-            """
+    bind.execute(text("""
             UPDATE child_host_distribution
             SET distribution_name = 'Ubuntu Server',
                 display_name = REPLACE(display_name, 'Ubuntu ', 'Ubuntu Server ')
             WHERE child_type IN ('kvm', 'vmm')
               AND distribution_name = 'Ubuntu'
-            """
-        )
-    )
+            """))
 
-    bind.execute(
-        text(
-            """
+    bind.execute(text("""
             UPDATE host_child
             SET distribution = 'Ubuntu Server'
             WHERE child_type IN ('kvm', 'vmm')
               AND distribution = 'Ubuntu'
-            """
-        )
-    )
+            """))

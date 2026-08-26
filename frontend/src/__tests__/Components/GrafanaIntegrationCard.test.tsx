@@ -47,11 +47,32 @@ const routeGets = (
   s: Record<string, unknown> = settings(),
 ) =>
   vi.mocked(axiosInstance.get).mockImplementation(async (url: string) => {
-    if (url.includes("grafana-servers")) return { data: { grafana_servers: servers } };
+    if (url.includes("grafana-servers"))
+      return { data: { grafana_servers: servers } };
     if (url.includes("/settings")) return { data: s };
-    if (url.includes("/health")) return { data: { healthy: true, version: "11.0.0" } };
+    if (url.includes("/health"))
+      return { data: { healthy: true, version: "11.0.0" } };
     return { data: {} };
   });
+
+/**
+ * Render the card and wait until it has actually finished loading.
+ *
+ * `findByText("Grafana Integration")` is NOT a readiness anchor: while
+ * `loading` is true the card renders that same title in its CardHeader beside
+ * a CircularProgress (GrafanaIntegrationCard.tsx), so the query resolves
+ * immediately and every synchronous query after it races the two mocked GETs.
+ * That is why this file passed locally and failed in CI, where coverage
+ * instrumentation slows the microtask turnaround enough to lose the race --
+ * the DOM at the point of failure was just the spinner.
+ *
+ * The enable switch only exists in the loaded branch, so awaiting it means
+ * loading is genuinely done.
+ */
+const renderLoaded = async () => {
+  render(<GrafanaIntegrationCard />);
+  await screen.findByLabelText("Enable Grafana Integration");
+};
 
 describe("GrafanaIntegrationCard", () => {
   beforeEach(() => {
@@ -64,8 +85,8 @@ describe("GrafanaIntegrationCard", () => {
   afterEach(() => vi.restoreAllMocks());
 
   test("renders the card once loaded", async () => {
-    render(<GrafanaIntegrationCard />);
-    expect(await screen.findByText("Grafana Integration")).toBeInTheDocument();
+    await renderLoaded();
+    expect(screen.getByText("Grafana Integration")).toBeInTheDocument();
   });
 
   test("reports a load failure with the server's detail", async () => {
@@ -94,15 +115,13 @@ describe("GrafanaIntegrationCard", () => {
   });
 
   test("shows Unknown when enabled but not yet health-checked", async () => {
-    render(<GrafanaIntegrationCard />);
-    await screen.findByText("Grafana Integration");
+    await renderLoaded();
     // The card does not auto-probe, so status stays Unknown until asked.
     expect(screen.getByText("Unknown")).toBeInTheDocument();
   });
 
   test("a health check reports a healthy server and its version", async () => {
-    render(<GrafanaIntegrationCard />);
-    await screen.findByText("Grafana Integration");
+    await renderLoaded();
     fireEvent.click(screen.getByRole("button", { name: "Check Health" }));
     expect(await screen.findByText("Healthy")).toBeInTheDocument();
     // Rendered twice: the health chip and the server list entry.
@@ -110,8 +129,7 @@ describe("GrafanaIntegrationCard", () => {
   });
 
   test("a failed health check reports unhealthy with the reason", async () => {
-    render(<GrafanaIntegrationCard />);
-    await screen.findByText("Grafana Integration");
+    await renderLoaded();
     vi.mocked(axiosInstance.get).mockRejectedValue({
       isAxiosError: true,
       response: { data: { detail: "connection refused" } },
@@ -125,14 +143,11 @@ describe("GrafanaIntegrationCard", () => {
     routeGets([SERVER], settings({ enabled: false }));
     render(<GrafanaIntegrationCard />);
     await screen.findByText("Disabled");
-    expect(
-      screen.getByRole("button", { name: "Check Health" }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Check Health" })).toBeDisabled();
   });
 
   test("saving posts the current settings", async () => {
-    render(<GrafanaIntegrationCard />);
-    await screen.findByText("Grafana Integration");
+    await renderLoaded();
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     await waitFor(() =>
       expect(axiosInstance.post).toHaveBeenCalledWith(
@@ -147,16 +162,14 @@ describe("GrafanaIntegrationCard", () => {
       isAxiosError: true,
       response: { data: { detail: "api key rejected" } },
     });
-    render(<GrafanaIntegrationCard />);
-    await screen.findByText("Grafana Integration");
+    await renderLoaded();
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(await screen.findByText("api key rejected")).toBeInTheDocument();
   });
 
   test("without the enable permission the save control is hidden", async () => {
     vi.mocked(hasPermission).mockResolvedValue(false);
-    render(<GrafanaIntegrationCard />);
-    await screen.findByText("Grafana Integration");
+    await renderLoaded();
     expect(
       screen.queryByRole("button", { name: "Save" }),
     ).not.toBeInTheDocument();
@@ -164,28 +177,25 @@ describe("GrafanaIntegrationCard", () => {
 
   test("an empty server list says so", async () => {
     routeGets([], settings({ host_id: undefined }));
-    render(<GrafanaIntegrationCard />);
-    await screen.findByText("Grafana Integration");
+    await renderLoaded();
     // The placeholder lives in a MenuItem, which only mounts once the Select
     // is opened.
     // The MUI Select label is not associated with a form control, so go
     // via the combobox role.
-    fireEvent.mouseDown(screen.getAllByRole("combobox")[0]);
+    fireEvent.mouseDown((await screen.findAllByRole("combobox"))[0]);
     expect(
       await screen.findByText("No Grafana servers found"),
     ).toBeInTheDocument();
   });
 
   test("toggling the integration off flips the status text", async () => {
-    render(<GrafanaIntegrationCard />);
-    await screen.findByText("Grafana Integration");
+    await renderLoaded();
     fireEvent.click(screen.getByLabelText("Enable Grafana Integration"));
     expect(await screen.findByText("Disabled")).toBeInTheDocument();
   });
 
   test("refresh re-reads servers and settings", async () => {
-    render(<GrafanaIntegrationCard />);
-    await screen.findByText("Grafana Integration");
+    await renderLoaded();
     vi.mocked(axiosInstance.get).mockClear();
     routeGets();
     fireEvent.click(screen.getByRole("button", { name: /Refresh/ }));

@@ -22,15 +22,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from backend.auth.auth_bearer import (
-    JWTBearer,
-    require_authenticated_user,
-)
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.licensing.feature_gate import require_module_loaded
 from backend.licensing.features import ModuleCode
 from backend.persistence import models
-from backend.persistence.partitions import get_tenant_db
 from backend.persistence.models.dynamic_secrets import (
     LEASE_KIND_DATABASE,
     LEASE_KIND_SSH,
@@ -38,12 +34,13 @@ from backend.persistence.models.dynamic_secrets import (
     LEASE_KINDS,
     LEASE_STATUSES,
 )
+from backend.persistence.partitions import get_tenant_db
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.services.dynamic_secrets import (
-    DynamicSecretError,
     TTL_DEFAULT_SECONDS,
     TTL_MAX_SECONDS,
     TTL_MIN_SECONDS,
+    DynamicSecretError,
     issue_lease,
     reconcile_expired,
     revoke_lease,

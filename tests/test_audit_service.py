@@ -210,11 +210,7 @@ class TestAuditServiceLog:
     @patch("backend.services.audit_service.AuditLog")
     def test_log_creates_entry(self, mock_audit_log_class):
         """Test that log creates an audit entry."""
-        from backend.services.audit_service import (
-            ActionType,
-            AuditService,
-            EntityType,
-        )
+        from backend.services.audit_service import ActionType, AuditService, EntityType
 
         mock_session = MagicMock()
         mock_entry = MagicMock()
@@ -300,11 +296,7 @@ class TestAuditServiceLogCreate:
     @patch("backend.services.audit_service.AuditService.log")
     def test_log_create_calls_log(self, mock_log):
         """Test that log_create calls log with correct parameters."""
-        from backend.services.audit_service import (
-            ActionType,
-            AuditService,
-            EntityType,
-        )
+        from backend.services.audit_service import ActionType, AuditService, EntityType
 
         mock_session = MagicMock()
         user_id = uuid.uuid4()
@@ -335,11 +327,7 @@ class TestAuditServiceLogUpdate:
     @patch("backend.services.audit_service.AuditService.log")
     def test_log_update_calls_log(self, mock_log):
         """Test that log_update calls log with correct parameters."""
-        from backend.services.audit_service import (
-            ActionType,
-            AuditService,
-            EntityType,
-        )
+        from backend.services.audit_service import ActionType, AuditService, EntityType
 
         mock_session = MagicMock()
 
@@ -362,11 +350,7 @@ class TestAuditServiceLogDelete:
     @patch("backend.services.audit_service.AuditService.log")
     def test_log_delete_calls_log(self, mock_log):
         """Test that log_delete calls log with correct parameters."""
-        from backend.services.audit_service import (
-            ActionType,
-            AuditService,
-            EntityType,
-        )
+        from backend.services.audit_service import ActionType, AuditService, EntityType
 
         mock_session = MagicMock()
 

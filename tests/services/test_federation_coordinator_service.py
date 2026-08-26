@@ -22,9 +22,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 
 from backend.persistence.db import Base
-from backend.persistence.models.federation import (
-    SINGLETON_FEDERATION_COORDINATOR_ID,
-)
+from backend.persistence.models.federation import SINGLETON_FEDERATION_COORDINATOR_ID
 from backend.services import federation_coordinator_service as csvc
 
 FEDERATION_TABLE_NAMES = [

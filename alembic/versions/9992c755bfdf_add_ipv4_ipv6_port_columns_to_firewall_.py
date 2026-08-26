@@ -9,15 +9,16 @@ Revises: d44688bd27aa
 Create Date: 2025-10-11 09:55:34.674498
 
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = '9992c755bfdf'
-down_revision: Union[str, None] = 'd44688bd27aa'
+revision: str = "9992c755bfdf"
+down_revision: Union[str, None] = "d44688bd27aa"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -31,19 +32,23 @@ def upgrade() -> None:
     # Check if columns already exist
     conn = op.get_bind()
     inspector = sa.inspect(conn)
-    columns = [col['name'] for col in inspector.get_columns('firewall_status')]
+    columns = [col["name"] for col in inspector.get_columns("firewall_status")]
 
     # Add new columns for IPv4 and IPv6 ports only if they don't exist
     # Each column stores a JSON array of objects like: [{"port": "22", "protocols": ["tcp"]}, {"port": "8080", "protocols": ["tcp", "udp"]}]
-    if 'ipv4_ports' not in columns:
-        op.add_column('firewall_status', sa.Column('ipv4_ports', sa.Text(), nullable=True))
-    if 'ipv6_ports' not in columns:
-        op.add_column('firewall_status', sa.Column('ipv6_ports', sa.Text(), nullable=True))
+    if "ipv4_ports" not in columns:
+        op.add_column(
+            "firewall_status", sa.Column("ipv4_ports", sa.Text(), nullable=True)
+        )
+    if "ipv6_ports" not in columns:
+        op.add_column(
+            "firewall_status", sa.Column("ipv6_ports", sa.Text(), nullable=True)
+        )
 
 
 def downgrade() -> None:
     """
     Remove IPv4 and IPv6 port columns from firewall_status table.
     """
-    op.drop_column('firewall_status', 'ipv6_ports')
-    op.drop_column('firewall_status', 'ipv4_ports')
+    op.drop_column("firewall_status", "ipv6_ports")
+    op.drop_column("firewall_status", "ipv4_ports")

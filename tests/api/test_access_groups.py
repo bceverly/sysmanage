@@ -464,6 +464,7 @@ class TestRegistrationKeyModel:
 
     def test_expired_key_not_usable(self):
         from datetime import datetime, timedelta, timezone
+
         from backend.persistence.models import RegistrationKey  # noqa: WPS433
 
         key = RegistrationKey(

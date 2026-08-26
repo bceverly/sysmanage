@@ -13,6 +13,7 @@ Create Date: 2025-11-26 12:00:00.000000
 from typing import Sequence, Union
 
 import sqlalchemy as sa
+
 from alembic import op
 from backend.persistence.models.core import GUID
 
@@ -67,8 +68,12 @@ def upgrade() -> None:
             sa.Column("id", GUID(), nullable=False),
             sa.Column("firewall_role_id", GUID(), nullable=False),
             sa.Column("port_number", sa.Integer, nullable=False),
-            sa.Column("tcp", sa.Boolean, nullable=False, server_default=sa.text("true")),
-            sa.Column("udp", sa.Boolean, nullable=False, server_default=sa.text("false")),
+            sa.Column(
+                "tcp", sa.Boolean, nullable=False, server_default=sa.text("true")
+            ),
+            sa.Column(
+                "udp", sa.Boolean, nullable=False, server_default=sa.text("false")
+            ),
             sa.PrimaryKeyConstraint("id"),
             sa.ForeignKeyConstraint(
                 ["firewall_role_id"],
@@ -95,8 +100,12 @@ def upgrade() -> None:
             sa.Column("id", GUID(), nullable=False),
             sa.Column("firewall_role_id", GUID(), nullable=False),
             sa.Column("port_number", sa.Integer, nullable=False),
-            sa.Column("tcp", sa.Boolean, nullable=False, server_default=sa.text("true")),
-            sa.Column("udp", sa.Boolean, nullable=False, server_default=sa.text("false")),
+            sa.Column(
+                "tcp", sa.Boolean, nullable=False, server_default=sa.text("true")
+            ),
+            sa.Column(
+                "udp", sa.Boolean, nullable=False, server_default=sa.text("false")
+            ),
             sa.PrimaryKeyConstraint("id"),
             sa.ForeignKeyConstraint(
                 ["firewall_role_id"],
@@ -155,12 +164,10 @@ def upgrade() -> None:
             sa.text(f"SELECT COUNT(*) FROM security_roles WHERE name = '{role_name}'")
         )
         if result.scalar() == 0:
-            op.execute(
-                f"""
+            op.execute(f"""
                 INSERT INTO security_roles (id, name, description, group_id)
                 VALUES ('{role_id}'{uuid_cast}, '{role_name}', '{role_desc}', '{settings_group_id}'{uuid_cast})
-                """
-            )
+                """)
 
 
 def downgrade() -> None:

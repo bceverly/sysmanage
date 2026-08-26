@@ -88,9 +88,9 @@ def _read_settings_bag() -> Optional[dict]:
         # Late imports avoid an import cycle (db/models) and keep this module
         # importable in contexts that never touch the DB.
         from backend.persistence.db import get_db  # noqa: PLC0415
-        from backend.persistence.models.server_configuration import (  # noqa: PLC0415
+        from backend.persistence.models.server_configuration import (
             ServerConfiguration,
-        )
+        )  # noqa: PLC0415
 
         db_gen = get_db()
         session = next(db_gen)
@@ -193,9 +193,7 @@ def set_setting(key: str, value: Any) -> bool:
 def _read_tenant_settings_bag(tenant_id: str) -> Optional[dict]:
     """Return ``registry_tenant.settings`` for ``tenant_id``; None on failure."""
     try:
-        from backend.persistence.models.tenancy import (  # noqa: PLC0415
-            RegistryTenant,
-        )
+        from backend.persistence.models.tenancy import RegistryTenant  # noqa: PLC0415
         from backend.persistence.partitions import (  # noqa: PLC0415
             PARTITION_REGISTRY,
             partition_session,
@@ -242,9 +240,7 @@ def set_tenant_setting(tenant_id: str, key: str, value: Any) -> bool:
     (tenants are created via the control plane), so this never creates it.
     """
     try:
-        from backend.persistence.models.tenancy import (  # noqa: PLC0415
-            RegistryTenant,
-        )
+        from backend.persistence.models.tenancy import RegistryTenant  # noqa: PLC0415
         from backend.persistence.partitions import (  # noqa: PLC0415
             PARTITION_REGISTRY,
             partition_session,

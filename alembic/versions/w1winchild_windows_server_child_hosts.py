@@ -34,8 +34,9 @@ import uuid
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import text
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "w1winchild"
@@ -98,14 +99,12 @@ def upgrade() -> None:
     for dist in WINDOWS_KVM_DISTRIBUTIONS:
         exists = (
             bind.execute(
-                text(
-                    """
+                text("""
                     SELECT COUNT(*) FROM child_host_distribution
                     WHERE child_type = :child_type
                       AND distribution_name = :distribution_name
                       AND distribution_version = :distribution_version
-                    """
-                ),
+                    """),
                 {
                     "child_type": dist["child_type"],
                     "distribution_name": dist["distribution_name"],
@@ -119,8 +118,7 @@ def upgrade() -> None:
         params = dict(dist, is_active=True)
         if exists:
             bind.execute(
-                text(
-                    """
+                text("""
                     UPDATE child_host_distribution SET
                         display_name = :display_name,
                         install_identifier = :install_identifier,
@@ -130,15 +128,13 @@ def upgrade() -> None:
                     WHERE child_type = :child_type
                       AND distribution_name = :distribution_name
                       AND distribution_version = :distribution_version
-                    """
-                ),
+                    """),
                 params,
             )
             continue
         params["id"] = str(uuid.uuid4())
         bind.execute(
-            text(
-                """
+            text("""
                 INSERT INTO child_host_distribution (
                     id, child_type, distribution_name, distribution_version,
                     display_name, install_identifier, notes, is_active,
@@ -148,8 +144,7 @@ def upgrade() -> None:
                     :display_name, :install_identifier, :notes, :is_active,
                     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
                 )
-                """
-            ),
+                """),
             params,
         )
 
@@ -158,14 +153,12 @@ def downgrade() -> None:
     bind = op.get_bind()
     for dist in WINDOWS_KVM_DISTRIBUTIONS:
         bind.execute(
-            text(
-                """
+            text("""
                 DELETE FROM child_host_distribution
                 WHERE child_type = :child_type
                   AND distribution_name = :distribution_name
                   AND distribution_version = :distribution_version
-                """
-            ),
+                """),
             {
                 "child_type": dist["child_type"],
                 "distribution_name": dist["distribution_name"],

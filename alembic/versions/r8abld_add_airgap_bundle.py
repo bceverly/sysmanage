@@ -22,8 +22,8 @@ Reversible — downgrade drops the table.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 
+from alembic import op
 
 revision: str = "r8abld"
 down_revision: Union[str, None] = "r7hardening"

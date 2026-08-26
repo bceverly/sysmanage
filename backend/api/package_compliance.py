@@ -28,13 +28,10 @@ from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
-from backend.i18n import _, N_
+from backend.i18n import N_, _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
-from backend.persistence.models.package_compliance import (
-    CONSTRAINT_TYPES,
-    VERSION_OPS,
-)
+from backend.persistence.models.package_compliance import CONSTRAINT_TYPES, VERSION_OPS
 from backend.persistence.partitions import get_tenant_db
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.services.package_compliance import evaluate_host_against_profile

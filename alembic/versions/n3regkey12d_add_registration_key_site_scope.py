@@ -25,8 +25,8 @@ Create Date: 2026-05-20
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "n3regkey12d"
@@ -68,9 +68,7 @@ def upgrade() -> None:
         # add the column without the FK then attach it via batch
         # alter — alembic's ``batch_alter_table`` handles the table-
         # rebuild dance on SQLite while emitting a plain ALTER on PG.
-        op.add_column(
-            _TABLE, sa.Column(_COLUMN_NAME, _guid_type(), nullable=True)
-        )
+        op.add_column(_TABLE, sa.Column(_COLUMN_NAME, _guid_type(), nullable=True))
 
         # Only attempt the named FK on PostgreSQL — SQLite's
         # ``ALTER TABLE ADD CONSTRAINT`` would require a batch
@@ -107,9 +105,7 @@ def downgrade() -> None:
         # Drop the FK before the column.  ``op.drop_constraint`` is a
         # no-op-with-warning when the constraint name doesn't exist,
         # so the partial-rollback case stays safe.
-        existing_fks = {
-            fk.get("name") for fk in inspector.get_foreign_keys(_TABLE)
-        }
+        existing_fks = {fk.get("name") for fk in inspector.get_foreign_keys(_TABLE)}
         if _FK_NAME in existing_fks:
             op.drop_constraint(_FK_NAME, _TABLE, type_="foreignkey")
 

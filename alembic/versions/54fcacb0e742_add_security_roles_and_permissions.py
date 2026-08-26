@@ -9,16 +9,17 @@ Revises: e8ed9f2e620f
 Create Date: 2025-10-03 12:00:00.000000
 
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import UUID
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = '54fcacb0e742'
-down_revision: Union[str, None] = 'e8ed9f2e620f'
+revision: str = "54fcacb0e742"
+down_revision: Union[str, None] = "e8ed9f2e620f"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -26,57 +27,91 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     # Detect database type
     bind = op.get_bind()
-    is_sqlite = bind.dialect.name == 'sqlite'
+    is_sqlite = bind.dialect.name == "sqlite"
 
     # Check if tables already exist
     inspector = sa.inspect(bind)
     tables = inspector.get_table_names()
 
     # Create security_role_groups table
-    if 'security_role_groups' not in tables:
+    if "security_role_groups" not in tables:
         op.create_table(
-            'security_role_groups',
-            sa.Column('id', UUID(as_uuid=True), nullable=False, server_default=sa.text('gen_random_uuid()')),
-            sa.Column('name', sa.String(length=100), nullable=False),
-            sa.Column('description', sa.Text(), nullable=True),
-            sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-            sa.PrimaryKeyConstraint('id'),
-            sa.UniqueConstraint('name')
+            "security_role_groups",
+            sa.Column(
+                "id",
+                UUID(as_uuid=True),
+                nullable=False,
+                server_default=sa.text("gen_random_uuid()"),
+            ),
+            sa.Column("name", sa.String(length=100), nullable=False),
+            sa.Column("description", sa.Text(), nullable=True),
+            sa.Column(
+                "created_at",
+                sa.DateTime(),
+                nullable=False,
+                server_default=sa.text("CURRENT_TIMESTAMP"),
+            ),
+            sa.PrimaryKeyConstraint("id"),
+            sa.UniqueConstraint("name"),
         )
 
     # Create security_roles table
-    if 'security_roles' not in tables:
+    if "security_roles" not in tables:
         op.create_table(
-            'security_roles',
-            sa.Column('id', UUID(as_uuid=True), nullable=False, server_default=sa.text('gen_random_uuid()')),
-            sa.Column('name', sa.String(length=100), nullable=False),
-            sa.Column('description', sa.Text(), nullable=True),
-            sa.Column('group_id', UUID(as_uuid=True), nullable=False),
-            sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-            sa.PrimaryKeyConstraint('id'),
-            sa.ForeignKeyConstraint(['group_id'], ['security_role_groups.id'], ondelete='CASCADE'),
-            sa.UniqueConstraint('name')
+            "security_roles",
+            sa.Column(
+                "id",
+                UUID(as_uuid=True),
+                nullable=False,
+                server_default=sa.text("gen_random_uuid()"),
+            ),
+            sa.Column("name", sa.String(length=100), nullable=False),
+            sa.Column("description", sa.Text(), nullable=True),
+            sa.Column("group_id", UUID(as_uuid=True), nullable=False),
+            sa.Column(
+                "created_at",
+                sa.DateTime(),
+                nullable=False,
+                server_default=sa.text("CURRENT_TIMESTAMP"),
+            ),
+            sa.PrimaryKeyConstraint("id"),
+            sa.ForeignKeyConstraint(
+                ["group_id"], ["security_role_groups.id"], ondelete="CASCADE"
+            ),
+            sa.UniqueConstraint("name"),
         )
 
     # Create user_security_roles mapping table
-    if 'user_security_roles' not in tables:
+    if "user_security_roles" not in tables:
         op.create_table(
-            'user_security_roles',
-            sa.Column('id', UUID(as_uuid=True), nullable=False, server_default=sa.text('gen_random_uuid()')),
-            sa.Column('user_id', UUID(as_uuid=True), nullable=False),
-            sa.Column('role_id', UUID(as_uuid=True), nullable=False),
-            sa.Column('granted_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-            sa.Column('granted_by', UUID(as_uuid=True), nullable=True),
-            sa.PrimaryKeyConstraint('id'),
-            sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='CASCADE'),
-            sa.ForeignKeyConstraint(['role_id'], ['security_roles.id'], ondelete='CASCADE'),
-            sa.ForeignKeyConstraint(['granted_by'], ['user.id'], ondelete='SET NULL'),
-            sa.UniqueConstraint('user_id', 'role_id', name='unique_user_role')
+            "user_security_roles",
+            sa.Column(
+                "id",
+                UUID(as_uuid=True),
+                nullable=False,
+                server_default=sa.text("gen_random_uuid()"),
+            ),
+            sa.Column("user_id", UUID(as_uuid=True), nullable=False),
+            sa.Column("role_id", UUID(as_uuid=True), nullable=False),
+            sa.Column(
+                "granted_at",
+                sa.DateTime(),
+                nullable=False,
+                server_default=sa.text("CURRENT_TIMESTAMP"),
+            ),
+            sa.Column("granted_by", UUID(as_uuid=True), nullable=True),
+            sa.PrimaryKeyConstraint("id"),
+            sa.ForeignKeyConstraint(["user_id"], ["user.id"], ondelete="CASCADE"),
+            sa.ForeignKeyConstraint(
+                ["role_id"], ["security_roles.id"], ondelete="CASCADE"
+            ),
+            sa.ForeignKeyConstraint(["granted_by"], ["user.id"], ondelete="SET NULL"),
+            sa.UniqueConstraint("user_id", "role_id", name="unique_user_role"),
         )
 
     # Insert security role groups using raw SQL to work with UUIDs
     # SQLite doesn't support ::uuid type casting, PostgreSQL requires it
-    uuid_cast = '' if is_sqlite else '::uuid'
+    uuid_cast = "" if is_sqlite else "::uuid"
 
     # Check if data already exists before inserting
     result = bind.execute(sa.text("SELECT COUNT(*) FROM security_role_groups"))
@@ -157,27 +192,33 @@ def upgrade() -> None:
 
     # Create indexes for better performance
     # Check if indexes already exist
-    indexes_security_roles = inspector.get_indexes('security_roles')
-    index_names_security_roles = [idx['name'] for idx in indexes_security_roles]
+    indexes_security_roles = inspector.get_indexes("security_roles")
+    index_names_security_roles = [idx["name"] for idx in indexes_security_roles]
 
-    indexes_user_security_roles = inspector.get_indexes('user_security_roles')
-    index_names_user_security_roles = [idx['name'] for idx in indexes_user_security_roles]
+    indexes_user_security_roles = inspector.get_indexes("user_security_roles")
+    index_names_user_security_roles = [
+        idx["name"] for idx in indexes_user_security_roles
+    ]
 
-    if 'idx_security_roles_group_id' not in index_names_security_roles:
-        op.create_index('idx_security_roles_group_id', 'security_roles', ['group_id'])
-    if 'idx_user_security_roles_user_id' not in index_names_user_security_roles:
-        op.create_index('idx_user_security_roles_user_id', 'user_security_roles', ['user_id'])
-    if 'idx_user_security_roles_role_id' not in index_names_user_security_roles:
-        op.create_index('idx_user_security_roles_role_id', 'user_security_roles', ['role_id'])
+    if "idx_security_roles_group_id" not in index_names_security_roles:
+        op.create_index("idx_security_roles_group_id", "security_roles", ["group_id"])
+    if "idx_user_security_roles_user_id" not in index_names_user_security_roles:
+        op.create_index(
+            "idx_user_security_roles_user_id", "user_security_roles", ["user_id"]
+        )
+    if "idx_user_security_roles_role_id" not in index_names_user_security_roles:
+        op.create_index(
+            "idx_user_security_roles_role_id", "user_security_roles", ["role_id"]
+        )
 
 
 def downgrade() -> None:
     # Drop indexes
-    op.drop_index('idx_user_security_roles_role_id', table_name='user_security_roles')
-    op.drop_index('idx_user_security_roles_user_id', table_name='user_security_roles')
-    op.drop_index('idx_security_roles_group_id', table_name='security_roles')
+    op.drop_index("idx_user_security_roles_role_id", table_name="user_security_roles")
+    op.drop_index("idx_user_security_roles_user_id", table_name="user_security_roles")
+    op.drop_index("idx_security_roles_group_id", table_name="security_roles")
 
     # Drop tables in reverse order
-    op.drop_table('user_security_roles')
-    op.drop_table('security_roles')
-    op.drop_table('security_role_groups')
+    op.drop_table("user_security_roles")
+    op.drop_table("security_roles")
+    op.drop_table("security_role_groups")

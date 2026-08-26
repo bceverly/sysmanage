@@ -74,9 +74,9 @@ Why this matters:
 
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 revision: str = "j8install08ppacopr"
 down_revision: Union[str, None] = "i7airgap60cron"
@@ -153,10 +153,7 @@ def _openbsd_commands(version_nodot: str) -> list:
     (see ``.github/workflows/build-and-release.yml`` line 1654 in
     sysmanage-agent).
     """
-    api_url = (
-        "https://api.github.com/repos/bceverly/sysmanage-agent/"
-        "releases/latest"
-    )
+    api_url = "https://api.github.com/repos/bceverly/sysmanage-agent/" "releases/latest"
     release_url = (
         "https://github.com/bceverly/sysmanage-agent/releases/download/"
         "${LATEST}/sysmanage-agent-${VERSION}-openbsd" + version_nodot + ".tgz"
@@ -165,8 +162,7 @@ def _openbsd_commands(version_nodot: str) -> list:
         # ftp -V silences progress; ``-o -`` writes the API JSON to
         # stdout.  Grep extracts the ``tag_name`` field.
         (
-            "LATEST=$(ftp -V -o - " + api_url +
-            " | grep -o '\"tag_name\": *\"[^\"]*\"' | "
+            "LATEST=$(ftp -V -o - " + api_url + ' | grep -o \'"tag_name": *"[^"]*"\' | '
             "grep -o 'v[0-9.]*')"
         ),
         "VERSION=${LATEST#v}",
@@ -245,11 +241,7 @@ def downgrade() -> None:
     # the misconfiguration loudly rather than silently shipping a stale
     # recipe).
     bind = op.get_bind()
-    rows = (
-        _TARGETS_PPA
-        + _TARGETS_COPR
-        + [(t[0], t[1], t[2]) for t in _TARGETS_OPENBSD]
-    )
+    rows = _TARGETS_PPA + _TARGETS_COPR + [(t[0], t[1], t[2]) for t in _TARGETS_OPENBSD]
     for child_type, name, version in rows:
         bind.execute(
             text(

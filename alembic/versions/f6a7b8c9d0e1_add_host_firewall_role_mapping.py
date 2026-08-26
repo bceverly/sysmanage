@@ -13,8 +13,8 @@ Create Date: 2025-11-28 16:00:00.000000
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 
+from alembic import op
 from backend.persistence.models.core import GUID
 
 # revision identifiers, used by Alembic.
@@ -86,11 +86,12 @@ def upgrade() -> None:
 
     # Check if the role already exists
     result = connection.execute(
-        sa.text("SELECT COUNT(*) FROM security_roles WHERE name = 'Assign Host Firewall Roles'")
+        sa.text(
+            "SELECT COUNT(*) FROM security_roles WHERE name = 'Assign Host Firewall Roles'"
+        )
     )
     if result.scalar() == 0:
-        op.execute(
-            f"""
+        op.execute(f"""
             INSERT INTO security_roles (id, name, description, group_id)
             VALUES (
                 '10000000-0000-0000-0000-000000000074'{uuid_cast},
@@ -98,8 +99,7 @@ def upgrade() -> None:
                 'Assign firewall roles to hosts',
                 '{host_mgmt_group_id}'{uuid_cast}
             )
-            """
-        )
+            """)
 
 
 def downgrade() -> None:

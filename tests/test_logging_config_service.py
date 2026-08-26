@@ -8,8 +8,8 @@ import logging
 
 import pytest
 
-from backend.services import logging_config_service as svc
 from backend.persistence.models.logging_config import SCOPE_AGENT, SCOPE_SERVER
+from backend.services import logging_config_service as svc
 
 
 class TestOsFamily:

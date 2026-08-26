@@ -26,8 +26,8 @@ from backend.i18n import _
 from backend.persistence import db as db_module
 from backend.persistence.models import HostTag, Tag
 from backend.persistence.partitions import get_request_engine, get_tenant_db
-from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 router = APIRouter()
 

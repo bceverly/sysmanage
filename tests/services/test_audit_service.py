@@ -11,14 +11,8 @@ for logging user actions and system changes.
 
 import uuid
 
-
 from backend.persistence.models import AuditLog
-from backend.services.audit_service import (
-    ActionType,
-    AuditService,
-    EntityType,
-    Result,
-)
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 
 class TestActionTypeEnum:

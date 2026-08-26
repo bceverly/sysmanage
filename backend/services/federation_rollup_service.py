@@ -50,9 +50,7 @@ from backend.persistence.models.federation import (
     FederationSite,
     FederationVulnerabilityRollup,
 )
-from backend.services.federation_site_service import (
-    record_sync,
-)
+from backend.services.federation_site_service import record_sync
 
 # ---------------------------------------------------------------------
 # Errors

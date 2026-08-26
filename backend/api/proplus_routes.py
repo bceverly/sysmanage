@@ -207,9 +207,7 @@ def _provisioning_secret_resolver(credential_ref):
     both are sensitive (matches ``secrets_service``'s clear-text discipline).
     """
     try:
-        from backend.services.vault_service import (  # noqa: PLC0415
-            VaultService,
-        )
+        from backend.services.vault_service import VaultService  # noqa: PLC0415
 
         data = VaultService().retrieve_secret(credential_ref)
         return data or None
@@ -231,9 +229,7 @@ def _provisioning_secret_path(resource_id):
     ``/provisioning/`` segment is also the guard the deleter uses to avoid ever
     purging a bring-your-own credential path.
     """
-    from backend.persistence.tenant_context import (  # noqa: PLC0415
-        get_active_tenant,
-    )
+    from backend.persistence.tenant_context import get_active_tenant  # noqa: PLC0415
     from backend.services.vault_service import VaultService  # noqa: PLC0415
 
     mount = VaultService().mount_path
@@ -253,8 +249,8 @@ def _provisioning_secret_writer(resource_id, fields):
     failure so the create surfaces an error rather than silently persisting a
     resource whose credential wasn't saved.  NEVER logs the fields.
     """
-    from backend.services.vault_service import (  # noqa: PLC0415
-        VaultService,
+    from backend.services.vault_service import (
+        VaultService,  # noqa: PLC0415
         run_with_vault_retry,
     )
 
@@ -272,9 +268,7 @@ def _provisioning_secret_deleter(credential_ref):
     if not credential_ref or "/provisioning/" not in credential_ref:
         return
     try:
-        from backend.services.vault_service import (  # noqa: PLC0415
-            VaultService,
-        )
+        from backend.services.vault_service import VaultService  # noqa: PLC0415
 
         VaultService().delete_secret(credential_ref)
     except Exception as exc:  # noqa: BLE001  (row already gone; never leak ref)
@@ -295,12 +289,8 @@ def _provisioning_session_factory_dependency():
     fresh, correctly-scoped session (per ``request_sessionmaker`` guidance in
     persistence/partitions.py).  Works with multi-tenancy on or off.
     """
-    from backend.persistence.partitions import (  # noqa: PLC0415
-        request_sessionmaker,
-    )
-    from backend.persistence.tenant_context import (  # noqa: PLC0415
-        get_active_tenant,
-    )
+    from backend.persistence.partitions import request_sessionmaker  # noqa: PLC0415
+    from backend.persistence.tenant_context import get_active_tenant  # noqa: PLC0415
 
     return request_sessionmaker(tenant_id=get_active_tenant())
 
@@ -319,9 +309,9 @@ def _provisioning_boot_session_iterator():
     ENGINE owns closing every session it is handed (matching the
     ``iter_host_databases`` contract).
     """
-    from backend.persistence.partitions import (  # pylint: disable=import-outside-toplevel
+    from backend.persistence.partitions import (
         iter_host_databases,
-    )
+    )  # pylint: disable=import-outside-toplevel
 
     return iter_host_databases()
 
@@ -368,9 +358,9 @@ def _provisioning_enrollment_token_fn(
         PARTITION_REGISTRY,
         partition_session,
     )
-    from backend.services import (  # pylint: disable=import-outside-toplevel
+    from backend.services import (
         enrollment_service,
-    )
+    )  # pylint: disable=import-outside-toplevel
 
     expires_at = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=1)
     kwargs = {
@@ -685,9 +675,9 @@ def _federation_role() -> str:
     dependency; degrades to ``none`` (mount nothing) if the DB isn't ready.
     """
     try:
-        from backend.services.server_config_service import (  # noqa: PLC0415  # pylint: disable=import-outside-toplevel
+        from backend.services.server_config_service import (
             get_federation_role,
-        )
+        )  # noqa: PLC0415  # pylint: disable=import-outside-toplevel
 
         return get_federation_role()
     except Exception:  # pylint: disable=broad-exception-caught

@@ -23,9 +23,9 @@ import uuid
 
 import pytest
 import sqlalchemy as sa
+
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
-
 from backend.persistence.db import Base
 from backend.persistence.models.federation import (
     SINGLETON_FEDERATION_COORDINATOR_ID,

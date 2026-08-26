@@ -121,7 +121,7 @@ class TestSaveCachedKey:
     @patch("backend.licensing.public_key.CACHE_DIR")
     def test_save_cached_key_success(self, mock_cache_dir, mock_cache_file):
         """Test saves key to file and memory."""
-        from backend.licensing.public_key import _save_cached_key, _cache
+        from backend.licensing.public_key import _cache, _save_cached_key
 
         mock_cache_dir.mkdir = MagicMock()
         mock_cache_file.write_text = MagicMock()
@@ -137,7 +137,7 @@ class TestSaveCachedKey:
     @patch("backend.licensing.public_key.CACHE_DIR")
     def test_save_cached_key_file_write_error(self, mock_cache_dir, mock_cache_file):
         """Test keeps in memory even when file write fails."""
-        from backend.licensing.public_key import _save_cached_key, _cache
+        from backend.licensing.public_key import _cache, _save_cached_key
 
         mock_cache_dir.mkdir.side_effect = Exception("Permission denied")
 
@@ -322,7 +322,7 @@ class TestClearCache:
     @patch("backend.licensing.public_key.CACHE_FILE")
     def test_clear_cache_success(self, mock_cache_file):
         """Test clears memory and file cache."""
-        from backend.licensing.public_key import clear_cache, _cache
+        from backend.licensing.public_key import _cache, clear_cache
 
         mock_cache_file.exists.return_value = True
         mock_cache_file.unlink = MagicMock()
@@ -336,7 +336,7 @@ class TestClearCache:
     @patch("backend.licensing.public_key.CACHE_FILE")
     def test_clear_cache_file_not_exists(self, mock_cache_file):
         """Test handles missing file gracefully."""
-        from backend.licensing.public_key import clear_cache, _cache
+        from backend.licensing.public_key import _cache, clear_cache
 
         mock_cache_file.exists.return_value = False
 
@@ -348,7 +348,7 @@ class TestClearCache:
     @patch("backend.licensing.public_key.CACHE_FILE")
     def test_clear_cache_delete_error(self, mock_cache_file):
         """Test handles file delete error gracefully."""
-        from backend.licensing.public_key import clear_cache, _cache
+        from backend.licensing.public_key import _cache, clear_cache
 
         mock_cache_file.exists.return_value = True
         mock_cache_file.unlink.side_effect = Exception("Delete failed")

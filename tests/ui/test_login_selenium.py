@@ -17,11 +17,12 @@ Sync checklist:
 - Test names and descriptions should align
 """
 
-import time
 import contextlib
+import time
+
 import pytest
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 
 def test_login_selenium(selenium_page, test_user, ui_config, start_server):

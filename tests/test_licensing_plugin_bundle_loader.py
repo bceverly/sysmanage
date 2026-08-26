@@ -8,8 +8,9 @@ Tests plugin bundle downloading, verification, and caching.
 """
 
 import os
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
 
 
 class TestPluginBundleLoaderInit:
@@ -112,9 +113,10 @@ class TestComputeFileHash:
 
     def test_computes_sha512_hash(self):
         """Test computes SHA-512 hash of file."""
-        from backend.licensing.plugin_bundle_loader import PluginBundleLoader
-        import tempfile
         import hashlib
+        import tempfile
+
+        from backend.licensing.plugin_bundle_loader import PluginBundleLoader
 
         loader = PluginBundleLoader()
 
@@ -135,8 +137,9 @@ class TestComputeFileHash:
 
     def test_hash_is_lowercase_hex(self):
         """Test hash is lowercase hexadecimal."""
-        from backend.licensing.plugin_bundle_loader import PluginBundleLoader
         import tempfile
+
+        from backend.licensing.plugin_bundle_loader import PluginBundleLoader
 
         loader = PluginBundleLoader()
 

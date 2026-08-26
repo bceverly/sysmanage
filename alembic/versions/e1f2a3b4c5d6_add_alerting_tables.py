@@ -15,10 +15,10 @@ and alert tables for the alerting_engine Pro+ module.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 from sqlalchemy.dialects import postgresql
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "e1f2a3b4c5d6"
@@ -56,9 +56,7 @@ def upgrade() -> None:
                 sa.Column("name", sa.String(length=255), nullable=False),
                 sa.Column("channel_type", sa.String(length=50), nullable=False),
                 sa.Column("config", sa.Text(), nullable=False),
-                sa.Column(
-                    "enabled", sa.Boolean(), nullable=False, server_default="1"
-                ),
+                sa.Column("enabled", sa.Boolean(), nullable=False, server_default="1"),
                 sa.Column("created_at", sa.DateTime(), nullable=False),
                 sa.Column("updated_at", sa.DateTime(), nullable=False),
                 sa.PrimaryKeyConstraint("id"),
@@ -100,9 +98,7 @@ def upgrade() -> None:
                 sa.Column("condition_type", sa.String(length=50), nullable=False),
                 sa.Column("condition_params", sa.Text(), nullable=False),
                 sa.Column("severity", sa.String(length=20), nullable=False),
-                sa.Column(
-                    "enabled", sa.Boolean(), nullable=False, server_default="1"
-                ),
+                sa.Column("enabled", sa.Boolean(), nullable=False, server_default="1"),
                 sa.Column(
                     "cooldown_minutes",
                     sa.Integer(),
@@ -180,9 +176,7 @@ def upgrade() -> None:
                 sa.Column("details", postgresql.JSON(), nullable=True),
                 sa.Column("triggered_at", sa.DateTime(), nullable=False),
                 sa.Column("acknowledged_at", sa.DateTime(), nullable=True),
-                sa.Column(
-                    "acknowledged_by", sa.String(length=255), nullable=True
-                ),
+                sa.Column("acknowledged_by", sa.String(length=255), nullable=True),
                 sa.Column("resolved_at", sa.DateTime(), nullable=True),
                 sa.Column(
                     "notification_sent",
@@ -194,9 +188,7 @@ def upgrade() -> None:
                 sa.ForeignKeyConstraint(
                     ["rule_id"], ["alert_rule.id"], ondelete="SET NULL"
                 ),
-                sa.ForeignKeyConstraint(
-                    ["host_id"], ["host.id"], ondelete="CASCADE"
-                ),
+                sa.ForeignKeyConstraint(["host_id"], ["host.id"], ondelete="CASCADE"),
             )
         else:
             op.create_table(
@@ -210,9 +202,7 @@ def upgrade() -> None:
                 sa.Column("details", sa.Text(), nullable=True),
                 sa.Column("triggered_at", sa.DateTime(), nullable=False),
                 sa.Column("acknowledged_at", sa.DateTime(), nullable=True),
-                sa.Column(
-                    "acknowledged_by", sa.String(length=255), nullable=True
-                ),
+                sa.Column("acknowledged_by", sa.String(length=255), nullable=True),
                 sa.Column("resolved_at", sa.DateTime(), nullable=True),
                 sa.Column(
                     "notification_sent",
@@ -224,9 +214,7 @@ def upgrade() -> None:
                 sa.ForeignKeyConstraint(
                     ["rule_id"], ["alert_rule.id"], ondelete="SET NULL"
                 ),
-                sa.ForeignKeyConstraint(
-                    ["host_id"], ["host.id"], ondelete="CASCADE"
-                ),
+                sa.ForeignKeyConstraint(["host_id"], ["host.id"], ondelete="CASCADE"),
             )
 
         # Note: Primary keys already have implicit indexes, no need to create explicit index on id

@@ -15,12 +15,12 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
 
-from backend.api.host_utils import validate_host_approval_status
 from backend.api.error_constants import (
     GRAFANA_API_KEY,
     GRAFANA_API_KEY_LABEL,
     MONITORING_SERVER,
 )
+from backend.api.host_utils import validate_host_approval_status
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models

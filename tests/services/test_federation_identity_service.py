@@ -103,9 +103,7 @@ class TestPeerKeyring:
     def _a_peer_pem(self, keydirs):
         # Generate a SECOND keypair to use as a "peer" key.
         from cryptography.hazmat.primitives import serialization
-        from cryptography.hazmat.primitives.asymmetric.ed25519 import (
-            Ed25519PrivateKey,
-        )
+        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
         pub = Ed25519PrivateKey.generate().public_key()
         return pub.public_bytes(
@@ -158,18 +156,19 @@ class TestWireSigning:
     def test_wrong_cert_fails(self, keydirs):
         sig = fid.sign_federation_request(b"payload")
         # A different self-signed cert (different key) must not verify.
+        import datetime  # pylint: disable=import-outside-toplevel
+
         from cryptography import x509  # pylint: disable=import-outside-toplevel
         from cryptography.hazmat.primitives import (  # pylint: disable=import-outside-toplevel
             hashes,
             serialization,
         )
-        from cryptography.hazmat.primitives.asymmetric import (  # pylint: disable=import-outside-toplevel
+        from cryptography.hazmat.primitives.asymmetric import (
             rsa,
-        )
-        from cryptography.x509.oid import (  # pylint: disable=import-outside-toplevel
+        )  # pylint: disable=import-outside-toplevel
+        from cryptography.x509.oid import (
             NameOID,
-        )
-        import datetime  # pylint: disable=import-outside-toplevel
+        )  # pylint: disable=import-outside-toplevel
 
         key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
         name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "other")])

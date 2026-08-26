@@ -13,10 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session, sessionmaker
 
-from backend.api.error_constants import (
-    error_host_not_active,
-    error_host_not_found,
-)
+from backend.api.error_constants import error_host_not_active, error_host_not_found
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.persistence import db as db_module

@@ -268,6 +268,76 @@ class ScriptExecutionLog(Base):
         return f"<ScriptExecutionLog(id={self.id}, execution_id='{self.execution_id}', status='{self.status}', host_id={self.host_id})>"
 
 
+class ConfigProfileRun(Base):
+    """One application of a configuration profile to one host (Phase 20.1).
+
+    WHY THE RESULT IS STORED AT ALL
+    -------------------------------
+    Idempotency reporting is the point of desired-state config management: an
+    operator needs to see that the second run of a profile changed nothing.
+    That is a claim about HISTORY, so a row per run is the minimum that makes
+    it answerable -- a "current state" column could never show that the last
+    three runs were no-ops.
+
+    ``changed`` is stored as reported by the executor, never inferred from
+    text.  Both executors supply it directly (ansible's per-task ``changed``,
+    dsc's ``changedProperties``), and one caveat travels with the dsc side:
+    it reports resource STATE deltas, not side effects, so ``changed`` answers
+    "did declared state move", not "did anything happen".
+
+    ``profile_id``/``profile_name`` are nullable because profile AUTHORING is a
+    Pro+ concern while run history is not.  An OSS install can record an
+    ad-hoc application without a profile table existing to point at.
+    """
+
+    __tablename__ = "config_profile_run"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False)
+    # Correlates with the queue message so a result can be matched to its
+    # dispatch, the same way script executions are matched.
+    command_id = Column(String(36), nullable=True, index=True)
+    profile_id = Column(GUID(), nullable=True, index=True)
+    profile_name = Column(String(255), nullable=True)
+    # "ansible-core" or "dsc" -- which engine actually ran.
+    executor = Column(String(50), nullable=True)
+    # True when this was a dry run (ansible --check / dsc config test), which
+    # must never be mistaken for an applied change.
+    check_mode = Column(Boolean, nullable=False, default=False)
+    success = Column(Boolean, nullable=False, default=False)
+    changed = Column(Boolean, nullable=False, default=False)
+    exit_code = Column(Integer, nullable=True)
+    # Recap counters, flattened rather than buried in JSON so the UI can sort
+    # and filter on them without reading every row's blob.
+    tasks_ok = Column(Integer, nullable=False, default=0)
+    tasks_changed = Column(Integer, nullable=False, default=0)
+    tasks_failed = Column(Integer, nullable=False, default=0)
+    tasks_skipped = Column(Integer, nullable=False, default=0)
+    tasks_unreachable = Column(Integer, nullable=False, default=0)
+    # Per-task detail, as reported. Text rather than JSON so the column works
+    # identically on every backend this project supports.
+    task_detail = Column(Text, nullable=True)
+    # Truncated by the agent before it is ever sent; stored for diagnosis only.
+    error_output = Column(Text, nullable=True)
+    reason = Column(String(50), nullable=True)
+    started_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, nullable=False)
+
+    host = relationship("Host", back_populates="config_profile_runs")
+
+    __table_args__ = (
+        # The dominant query is "show me this host's recent runs, newest
+        # first", which is a scan without this.
+        Index("ix_config_profile_run_host_completed", "host_id", "completed_at"),
+    )
+
+    def __repr__(self):
+        return (
+            f"<ConfigProfileRun(id={self.id}, host_id={self.host_id}, "
+            f"success={self.success}, changed={self.changed})>"
+        )
+
+
 class DiagnosticReport(Base):
     """
     This class holds the object mapping for the diagnostic_report table in the

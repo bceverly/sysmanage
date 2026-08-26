@@ -15,7 +15,6 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import (
-    false,
     Boolean,
     Column,
     DateTime,
@@ -24,6 +23,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    false,
 )
 from sqlalchemy.orm import relationship
 

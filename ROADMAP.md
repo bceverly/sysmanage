@@ -7467,6 +7467,79 @@ unambiguously and does **not** also match the version-pinned
       A placeholder fallback exists for offline dev machines and is **refused
       under `CI`/`GITHUB_ACTIONS`**: an empty dependency inventory is tolerable
       in a throwaway local build and is not tolerable in a release artifact.
+**Agent-side foundations — LANDED 2026-08-26 (uncommitted).**
+
+  * `operations/config_mgmt_locator.py` — finds this host's executor as a pure
+    filesystem lookup. On Windows the **vendored `dsc.exe` beats PATH** (and a
+    test asserts PATH is not even consulted): the MSI ships a version we tested
+    against, and silently preferring a developer's global install would run an
+    unvalidated engine invisibly. Resolves relative to the module's own
+    location rather than hardcoding `C:\Program Files\SysManage Agent`, so
+    per-user, relocated and checkout installs all work. Probes
+    `ansible-playbook`, **not** `ansible` — some minimal packagings ship the
+    wrapper without the playbook runner. The no-subprocess rule that
+    `capability_probes` depends on is pinned by two tests, one of which asserts
+    the module never imports `subprocess` at all.
+  * `operations/ansible_callbacks/sysmanage_json.py` — the JSON-lines stdout
+    callback. Runs inside ANSIBLE's interpreter (Homebrew's python on macOS,
+    `/usr/pkg/bin/python3.13` on NetBSD), so it must not import
+    `sysmanage_agent`; the duplicated contract is pinned by drift tests.
+  * `operations/config_mgmt_results.py` — parses that stream. Ansible writes
+    deprecation warnings to the same stdout, so non-JSON lines are counted and
+    skipped rather than fatal. The exit code participates in the verdict
+    instead of being trusted alone, because a playbook that dies before any
+    recap leaves it as the only evidence.
+
+  **Validated against real ansible-core 2.21.3, not just unit-tested.** Fresh
+  run → `changed=True`; second run of the same playbook → `changed=False`
+  (the idempotency property the whole feature rests on); failing playbook →
+  `success=False`, exit 2.
+
+  That run found a defect no unit test would have: ansible's
+  `AggregateStats.summarize()` reports failures under **`failures`**, so the
+  recap's `summary.get("failed")` returned 0 for every failed run. The per-task
+  status and exit code still produced the right verdict — defence in depth
+  worked — but the counts an operator reads were wrong. Fixed and pinned.
+
+**Executor + handler — LANDED 2026-08-26 (uncommitted).**
+`operations/config_mgmt_operations.py` applies a profile with the host's native
+executor and hands back ONE result shape for both, so the server and UI never
+branch on platform. Wired end to end: `main.py` → `agent_delegators` →
+`apply_config_profile` in the handler map → a `config_management` capability
+group → a `capability_probes` entry.
+
+  * **`-c local` is pinned into the argv**, not inherited from the profile.
+    Pull-style makes every host its own controller, so a stray `hosts:` entry
+    must not be able to become an outbound SSH attempt — that would spend the
+    Phase 19 "443 only, no inbound" guarantee where it is least visible. There
+    is a test for it.
+  * The probe needed a **new table**, `_REQUIRED_LOCATORS`, because `dsc.exe`
+    is vendored off-PATH: a plain `_REQUIRED_TOOLS` entry would have reported
+    every Windows host as missing config management — precisely the false
+    negative design rule 2 warns about. Its predicate takes the same injected
+    `lookup` AND `system` the tables use; honouring one but not the other
+    silently probes the wrong branch.
+
+**Validated against real binaries, both executors** (ansible-core 2.21.3 and
+dsc 3.2.3, the latter via its Linux build so the Windows path is not shipped
+unrun):
+
+    ansible  run1 changed=True → run2 changed=False → --check → failure exit 2
+    dsc      set ok → RunCommandOnSet side effect → bad resource → test mode
+
+Three behaviours were **observed, not assumed**, and each would have been a
+production defect if guessed:
+  1. `dsc` writes ANSI-coloured logs to **stderr** and results to stdout;
+     merging the streams corrupts the JSON parse, so they are captured apart.
+  2. A failing `dsc` run prints **nothing at all** to stdout — the exit code is
+     the only evidence, so it carries the verdict.
+  3. `dsc`'s `changedProperties` reports resource **state deltas, not side
+     effects**: `RunCommandOnSet` really did run its command while reporting
+     `changedProperties: []`. Correct desired-state semantics, but it means
+     "changed" answers "did declared state move", not "did anything happen".
+
+- [ ] Translate the one new agent msgid (`make i18n-fix SERVICE=...`) — the
+      only gate not green in sysmanage-agent
 - [ ] Desired-state config-as-code: Ansible role/playbook execution at scale (job templates; inventories from SysManage hosts/tags/sites) with results + idempotency reporting
 - [ ] Config profiles assignable per host/tag/site, enforced on a schedule
 - [ ] Remediation playbooks (apply to bring a host into compliance)

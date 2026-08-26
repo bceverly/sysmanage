@@ -10,8 +10,9 @@ what the LOADER does when verification fails, as opposed to
 ``test_licensing_module_signature.py``, which tests the verifier itself.
 """
 
-import pytest
 from unittest.mock import AsyncMock, patch
+
+import pytest
 
 
 class TestUnverifiableCacheHandling:

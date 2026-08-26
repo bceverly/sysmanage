@@ -25,7 +25,7 @@ from pydantic import BaseModel, validator
 from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
-from backend.i18n import _, N_
+from backend.i18n import N_, _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.partitions import get_shared_db

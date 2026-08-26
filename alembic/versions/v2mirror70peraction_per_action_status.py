@@ -38,9 +38,9 @@ so re-running on a partially-migrated DB is a no-op.  SQLite-safe via
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 
+from alembic import op
 
 revision: str = "v2mirror70peraction"
 down_revision: Union[str, None] = "u1mirror60ubresolute"

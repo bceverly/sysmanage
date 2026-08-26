@@ -15,9 +15,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from backend.api.message_handlers_core import (
-    validate_host_authentication,
-    handle_system_info,
     handle_heartbeat,
+    handle_system_info,
+    validate_host_authentication,
 )
 
 

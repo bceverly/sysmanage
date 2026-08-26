@@ -36,13 +36,13 @@ from uuid import UUID
 from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
-from backend.services import federation_retry_policy as retry_policy
 from backend.persistence.models.federation import (
     FederationAuditLog,
     FederationPolicy,
     FederationPolicyAssignment,
     FederationSite,
 )
+from backend.services import federation_retry_policy as retry_policy
 
 # ---------------------------------------------------------------------
 # Status constants — mirrored in the engine + UI to avoid string typos.

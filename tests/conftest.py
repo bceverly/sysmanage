@@ -52,9 +52,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from backend.api.proplus_routes import mount_proplus_stub_routes
 from backend.auth.auth_bearer import JWTBearer
 from backend.main import app
-from backend.api.proplus_routes import mount_proplus_stub_routes
 from backend.persistence.db import Base, get_db
 from backend.persistence.models import *  # Import all models explicitly
 from backend.websocket.connection_manager import ConnectionManager
@@ -165,17 +165,19 @@ def session(db_session):
 @pytest.fixture
 def client(engine, db_session, mock_config):
     """Create a test client with test database and mocked config."""
+    import hashlib
+    from uuid import UUID
+
+    from argon2 import PasswordHasher
+
     from backend.auth.auth_bearer import get_current_user
     from backend.persistence.models import (
-        User,
         SecurityRole,
         SecurityRoleGroup,
+        User,
         UserSecurityRole,
     )
-    from argon2 import PasswordHasher
     from backend.security.roles import SecurityRoles
-    from uuid import UUID
-    import hashlib
 
     # Create security role groups and roles in test database
     groups = [
@@ -377,17 +379,19 @@ def client(engine, db_session, mock_config):
 @pytest.fixture
 def authenticated_client(db_session, mock_config):
     """Create a test client with test database and mocked JWT auth."""
+    import hashlib
     from unittest.mock import patch
+    from uuid import UUID
+
+    from argon2 import PasswordHasher
+
     from backend.persistence.models import (
-        User,
         SecurityRole,
         SecurityRoleGroup,
+        User,
         UserSecurityRole,
     )
-    from argon2 import PasswordHasher
     from backend.security.roles import SecurityRoles
-    from uuid import UUID
-    import hashlib
 
     # Create security role groups and roles in test database
     groups = [
@@ -614,6 +618,7 @@ def auth_headers(client, mock_config):
     # The test user is already created in the client fixture
     # Create a valid JWT token for the test user
     import time
+
     import jwt
 
     payload = {
@@ -713,7 +718,6 @@ def real_engine():
     from unittest.mock import MagicMock
 
     from backend.multitenancy import seam
-
     from tests._engine_loader import require_engine
 
     mod = require_engine("multitenancy_engine")

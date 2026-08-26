@@ -286,10 +286,7 @@ def _enqueue_logging_update(db: Session, host_id: str, resolved) -> None:
     override (``{}``) — the agent treats that as "revert to yaml".
     """
     # Imported lazily to avoid a heavy import at module load.
-    from backend.websocket.messages import (  # noqa: PLC0415
-        Message,
-        MessageType,
-    )
+    from backend.websocket.messages import Message, MessageType  # noqa: PLC0415
     from backend.websocket.queue_enums import QueueDirection  # noqa: PLC0415
     from backend.websocket.queue_operations import QueueOperations  # noqa: PLC0415
 

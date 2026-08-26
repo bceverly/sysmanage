@@ -201,9 +201,9 @@ async def _handle_system_info_impl(db: Session, connection, message_data: dict):
         # ``connection.hostname`` was still None at receive time.  Now that
         # registration is complete, replay them through the normal enqueue
         # path so they're persisted with proper ``_connection_info``.
-        from backend.api.agent import (  # pylint: disable=import-outside-toplevel
+        from backend.api.agent import (
             flush_pending_inbound_messages,
-        )
+        )  # pylint: disable=import-outside-toplevel
 
         flush_pending_inbound_messages(connection, db)
 
@@ -288,6 +288,7 @@ def _auto_approve_via_child_token(db, host, hostname, auto_approve_token):
 
     # Generate client certificate for the auto-approved host
     from cryptography import x509  # noqa: PLC0415
+
     from backend.security.certificate_manager import (
         certificate_manager,
     )  # noqa: PLC0415
@@ -335,9 +336,9 @@ def _auto_approve_via_child_token(db, host, hostname, auto_approve_token):
     # child hosts created through the manage-children flow weren't picking up
     # their default mirror.  Best-effort: any failure is logged and swallowed.
     try:
-        from backend.api.repository_mirroring import (  # pylint: disable=import-outside-toplevel
+        from backend.api.repository_mirroring import (
             apply_default_mirrors_for_new_host,
-        )
+        )  # pylint: disable=import-outside-toplevel
 
         apply_default_mirrors_for_new_host(str(host.id))
     except (
@@ -400,9 +401,9 @@ def _build_system_info_update_values(message_data, connection, host, platform):
     # stays NULL, host_supports() answers "unknown" for every host, and the
     # dispatch gate in queue_operations can never fire.  An unusable report
     # yields {} and leaves any previous advertisement in place.
-    from backend.services.agent_capability_service import (  # noqa: PLC0415
+    from backend.services.agent_capability_service import (
         capability_update_values,
-    )
+    )  # noqa: PLC0415
 
     update_values.update(
         capability_update_values(message_data.get("agent_capabilities"))
@@ -467,9 +468,7 @@ async def _process_approved_system_info(
     # config for its OS family (if any) so DB settings win over its yaml and a
     # fresh/reconnecting agent converges without waiting for the next UI save.
     try:
-        from backend.services import (  # noqa: PLC0415
-            logging_config_service as _logsvc,
-        )
+        from backend.services import logging_config_service as _logsvc  # noqa: PLC0415
 
         _logsvc.push_logging_to_host(db, host)
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -664,9 +663,9 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                 # config push, etc.  Never create the orphan for a host_id we
                 # know is tenant-bound — the heartbeat is also processed on the
                 # tenant DB via the inbound queue.
-                from backend.persistence.partitions import (  # noqa: PLC0415
+                from backend.persistence.partitions import (
                     tenant_engine_for_host,
-                )
+                )  # noqa: PLC0415
 
                 agent_host_id = message_data.get("host_id") or connection.host_id
                 if (
@@ -718,9 +717,9 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                     # capability advertisement until its NEXT SYSTEM_INFO, so a
                     # freshly enrolled limited agent would look full-capability
                     # for one cycle.  Same rule, applied at birth.
-                    from backend.services.agent_capability_service import (  # noqa: PLC0415
+                    from backend.services.agent_capability_service import (
                         apply_capability_report,
-                    )
+                    )  # noqa: PLC0415
 
                     apply_capability_report(
                         host, message_data.get("agent_capabilities")

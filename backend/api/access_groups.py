@@ -25,7 +25,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
-from backend.i18n import _, N_
+from backend.i18n import N_, _
 from backend.licensing.feature_gate import require_module_loaded
 from backend.licensing.features import ModuleCode
 from backend.persistence import models

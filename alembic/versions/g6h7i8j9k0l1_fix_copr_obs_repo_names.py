@@ -9,11 +9,12 @@ Revises: d4e5f6g7h8i9
 Create Date: 2025-12-03 14:00:00.000000
 
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "g6h7i8j9k0l1"
@@ -39,8 +40,7 @@ def upgrade() -> None:
     # Only update if the record has the old incorrect value (idempotent)
     if is_sqlite:
         bind.execute(
-            text(
-                """
+            text("""
                 UPDATE child_host_distribution
                 SET agent_install_commands = :new_commands,
                     updated_at = CURRENT_TIMESTAMP
@@ -48,14 +48,12 @@ def upgrade() -> None:
                   AND agent_install_method = 'dnf_copr'
                   AND agent_install_commands LIKE '%bceverly/sysmanage"%'
                   AND agent_install_commands NOT LIKE '%bceverly/sysmanage-agent%'
-                """
-            ),
+                """),
             {"new_commands": CORRECT_FEDORA_COMMANDS},
         )
     else:
         bind.execute(
-            text(
-                """
+            text("""
                 UPDATE child_host_distribution
                 SET agent_install_commands = :new_commands,
                     updated_at = NOW()
@@ -63,8 +61,7 @@ def upgrade() -> None:
                   AND agent_install_method = 'dnf_copr'
                   AND agent_install_commands LIKE '%bceverly/sysmanage"%'
                   AND agent_install_commands NOT LIKE '%bceverly/sysmanage-agent%'
-                """
-            ),
+                """),
             {"new_commands": CORRECT_FEDORA_COMMANDS},
         )
 
@@ -72,8 +69,7 @@ def upgrade() -> None:
     # Only update if the record has the old incorrect value (idempotent)
     if is_sqlite:
         bind.execute(
-            text(
-                """
+            text("""
                 UPDATE child_host_distribution
                 SET agent_install_commands = :new_commands,
                     updated_at = CURRENT_TIMESTAMP
@@ -81,14 +77,12 @@ def upgrade() -> None:
                   AND agent_install_method = 'zypper_obs'
                   AND agent_install_commands LIKE '%home:/bceverly%'
                   AND agent_install_commands NOT LIKE '%home:/bryaneverly%'
-                """
-            ),
+                """),
             {"new_commands": CORRECT_TUMBLEWEED_COMMANDS},
         )
     else:
         bind.execute(
-            text(
-                """
+            text("""
                 UPDATE child_host_distribution
                 SET agent_install_commands = :new_commands,
                     updated_at = NOW()
@@ -96,8 +90,7 @@ def upgrade() -> None:
                   AND agent_install_method = 'zypper_obs'
                   AND agent_install_commands LIKE '%home:/bceverly%'
                   AND agent_install_commands NOT LIKE '%home:/bryaneverly%'
-                """
-            ),
+                """),
             {"new_commands": CORRECT_TUMBLEWEED_COMMANDS},
         )
 
@@ -110,59 +103,51 @@ def downgrade() -> None:
     # Revert Fedora
     if is_sqlite:
         bind.execute(
-            text(
-                """
+            text("""
                 UPDATE child_host_distribution
                 SET agent_install_commands = :old_commands,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE install_identifier = 'Fedora'
                   AND agent_install_method = 'dnf_copr'
                   AND agent_install_commands LIKE '%bceverly/sysmanage-agent%'
-                """
-            ),
+                """),
             {"old_commands": OLD_FEDORA_COMMANDS},
         )
     else:
         bind.execute(
-            text(
-                """
+            text("""
                 UPDATE child_host_distribution
                 SET agent_install_commands = :old_commands,
                     updated_at = NOW()
                 WHERE install_identifier = 'Fedora'
                   AND agent_install_method = 'dnf_copr'
                   AND agent_install_commands LIKE '%bceverly/sysmanage-agent%'
-                """
-            ),
+                """),
             {"old_commands": OLD_FEDORA_COMMANDS},
         )
 
     # Revert openSUSE Tumbleweed
     if is_sqlite:
         bind.execute(
-            text(
-                """
+            text("""
                 UPDATE child_host_distribution
                 SET agent_install_commands = :old_commands,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE install_identifier = 'openSUSE-Tumbleweed'
                   AND agent_install_method = 'zypper_obs'
                   AND agent_install_commands LIKE '%home:/bryaneverly%'
-                """
-            ),
+                """),
             {"old_commands": OLD_TUMBLEWEED_COMMANDS},
         )
     else:
         bind.execute(
-            text(
-                """
+            text("""
                 UPDATE child_host_distribution
                 SET agent_install_commands = :old_commands,
                     updated_at = NOW()
                 WHERE install_identifier = 'openSUSE-Tumbleweed'
                   AND agent_install_method = 'zypper_obs'
                   AND agent_install_commands LIKE '%home:/bryaneverly%'
-                """
-            ),
+                """),
             {"old_commands": OLD_TUMBLEWEED_COMMANDS},
         )

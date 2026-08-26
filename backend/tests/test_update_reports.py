@@ -26,8 +26,8 @@ from pydantic import ValidationError
 
 from backend.api.updates.models import (
     PackageUpdateInfo,
-    UpdatesReport,
     UpdateExecutionRequest,
+    UpdatesReport,
     UpdateStatsSummary,
 )
 

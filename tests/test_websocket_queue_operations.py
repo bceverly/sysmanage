@@ -8,9 +8,10 @@ Tests core queue operations including enqueue, dequeue, and status updates.
 """
 
 import json
-import pytest
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 class TestQueueOperationsEnqueue:
@@ -18,8 +19,8 @@ class TestQueueOperationsEnqueue:
 
     def test_enqueue_generates_message_id(self):
         """Test that message ID is generated if not provided."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueDirection
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -44,8 +45,8 @@ class TestQueueOperationsEnqueue:
 
     def test_enqueue_uses_provided_message_id(self):
         """Test that provided message ID is used."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueDirection
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -69,8 +70,8 @@ class TestQueueOperationsEnqueue:
 
     def test_enqueue_validates_host_id(self):
         """Test that host ID is validated."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueDirection
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -90,8 +91,8 @@ class TestQueueOperationsEnqueue:
 
     def test_enqueue_skips_duplicate_message_id(self):
         """Test that duplicate message IDs are skipped."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueDirection
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -121,8 +122,8 @@ class TestQueueOperationsEnqueue:
 
     def test_enqueue_converts_enum_to_string(self):
         """Test that enums are converted to string values."""
+        from backend.websocket.queue_enums import Priority, QueueDirection
         from backend.websocket.queue_operations import QueueOperations
-        from backend.websocket.queue_enums import QueueDirection, Priority
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -152,8 +153,8 @@ class TestQueueOperationsDequeue:
 
     def test_dequeue_returns_pending_messages(self):
         """Test that pending messages are returned."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueDirection
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -175,8 +176,8 @@ class TestQueueOperationsDequeue:
 
     def test_dequeue_respects_limit(self):
         """Test that limit is respected."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueDirection
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -199,8 +200,8 @@ class TestQueueOperationsDequeue:
 
     def test_dequeue_sorts_by_priority(self):
         """Test that messages are sorted by priority."""
+        from backend.websocket.queue_enums import Priority, QueueDirection
         from backend.websocket.queue_operations import QueueOperations
-        from backend.websocket.queue_enums import QueueDirection, Priority
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -235,8 +236,8 @@ class TestQueueOperationsDequeueBroadcast:
 
     def test_dequeue_broadcast_returns_messages(self):
         """Test that broadcast messages are returned."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueDirection
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -259,8 +260,8 @@ class TestQueueOperationsMarkProcessing:
 
     def test_mark_processing_success(self):
         """Test successfully marking message as processing."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueStatus
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -292,8 +293,8 @@ class TestQueueOperationsMarkProcessing:
 
     def test_mark_processing_wrong_status(self):
         """Test marking message with wrong status."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueStatus
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -328,8 +329,8 @@ class TestQueueOperationsMarkCompleted:
 
     def test_mark_completed_success(self):
         """Test successfully marking message as completed."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueStatus
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -377,8 +378,8 @@ class TestQueueOperationsMarkSent:
 
     def test_mark_sent_success(self):
         """Test successfully marking message as sent."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueStatus
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -426,8 +427,8 @@ class TestQueueOperationsMarkAcknowledged:
 
     def test_mark_acknowledged_success(self):
         """Test successfully marking sent message as acknowledged."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueStatus
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -458,8 +459,8 @@ class TestQueueOperationsMarkAcknowledged:
 
     def test_mark_acknowledged_wrong_status(self):
         """Test acknowledging message not in SENT status."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueStatus
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -476,8 +477,8 @@ class TestQueueOperationsMarkAcknowledged:
 
     def test_mark_acknowledged_already_completed(self):
         """Test acknowledging already completed message returns True."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueStatus
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -512,8 +513,8 @@ class TestQueueOperationsMarkFailed:
 
     def test_mark_failed_with_retry(self):
         """Test marking message as failed with retry available."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueStatus
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -535,8 +536,8 @@ class TestQueueOperationsMarkFailed:
 
     def test_mark_failed_max_retries_reached(self):
         """Test marking message as permanently failed."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueStatus
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -556,8 +557,8 @@ class TestQueueOperationsMarkFailed:
 
     def test_mark_failed_no_retry(self):
         """Test marking message as failed without retry."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueStatus
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -608,8 +609,8 @@ class TestQueueOperationsRetryUnacknowledged:
 
     def test_retry_unacknowledged_success(self):
         """Test retrying unacknowledged messages."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueStatus
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -646,8 +647,8 @@ class TestQueueOperationsRetryUnacknowledged:
 
     def test_retry_unacknowledged_create_child_host(self):
         """Test retry logging for create_child_host command."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueStatus
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -742,8 +743,8 @@ class TestQueueOperationsWithSelfManagedSession:
 
     def test_enqueue_with_self_managed_session(self):
         """Test enqueue with self-managed session."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueDirection
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
@@ -770,8 +771,8 @@ class TestQueueOperationsWithSelfManagedSession:
 
     def test_mark_processing_with_self_managed_session(self):
         """Test mark_processing with self-managed session."""
-        from backend.websocket.queue_operations import QueueOperations
         from backend.websocket.queue_enums import QueueStatus
+        from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()

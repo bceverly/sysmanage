@@ -26,8 +26,8 @@ any row's size_bytes exceeds INT4_MAX at that time.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 
+from alembic import op
 
 revision: str = "a3snapsize"
 down_revision: Union[str, None] = "z7mirrorfail"

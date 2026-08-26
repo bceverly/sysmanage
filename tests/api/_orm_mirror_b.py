@@ -276,9 +276,9 @@ class AirgapMediaManifest(TestBase):
 
 
 # Phase 8.3 — package compliance (test-side mirrors).
-from sqlalchemy import (  # pylint: disable=ungrouped-imports
+from sqlalchemy import (  # pylint: disable=ungrouped-imports; local import — only needed here
     JSON as _JSON,
-)  # local import — only needed here
+)
 
 
 class PackageProfile(TestBase):

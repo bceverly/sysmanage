@@ -10,7 +10,6 @@ Tests the message classes and factory functions for WebSocket communication.
 from datetime import datetime, timezone
 from unittest.mock import patch
 
-
 from backend.websocket.messages import (
     CommandMessage,
     CommandResultMessage,

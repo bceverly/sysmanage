@@ -22,8 +22,9 @@ Create Date: 2026-06-26
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
+
+from alembic import op
 
 revision: str = "e4scimprovider"
 down_revision: Union[str, None] = "e3idpuserlink"

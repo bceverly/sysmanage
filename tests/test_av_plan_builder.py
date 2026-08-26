@@ -141,9 +141,9 @@ import pytest
 
 from backend.services.av_plan_builder import (
     _basic_freshclam_conf,
-    _validate_scan_schedule,
     _cron_line_for_schedule,
     _scan_command_for_paths,
+    _validate_scan_schedule,
     build_disable_plan,
 )
 

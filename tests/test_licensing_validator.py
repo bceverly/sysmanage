@@ -420,8 +420,8 @@ class TestLicensePayload:
 
     def test_license_payload_creation(self):
         """Test creating a LicensePayload instance."""
-        from backend.licensing.validator import LicensePayload
         from backend.licensing.features import LicenseTier
+        from backend.licensing.validator import LicensePayload
 
         now = datetime.now(timezone.utc)
         payload = LicensePayload(
@@ -442,8 +442,8 @@ class TestLicensePayload:
 
     def test_license_payload_optional_fields(self):
         """Test LicensePayload optional fields default to None."""
-        from backend.licensing.validator import LicensePayload
         from backend.licensing.features import LicenseTier
+        from backend.licensing.validator import LicensePayload
 
         now = datetime.now(timezone.utc)
         payload = LicensePayload(
@@ -467,8 +467,8 @@ class TestValidationResult:
 
     def test_validation_result_valid(self):
         """Test creating a valid ValidationResult."""
-        from backend.licensing.validator import ValidationResult, LicensePayload
         from backend.licensing.features import LicenseTier
+        from backend.licensing.validator import LicensePayload, ValidationResult
 
         now = datetime.now(timezone.utc)
         payload = LicensePayload(
@@ -512,8 +512,8 @@ class TestHasFeature:
 
     def test_has_feature_true(self):
         """Test has_feature returns True when feature is present."""
-        from backend.licensing.validator import has_feature, LicensePayload
-        from backend.licensing.features import LicenseTier, FeatureCode
+        from backend.licensing.features import FeatureCode, LicenseTier
+        from backend.licensing.validator import LicensePayload, has_feature
 
         now = datetime.now(timezone.utc)
         payload = LicensePayload(
@@ -531,8 +531,8 @@ class TestHasFeature:
 
     def test_has_feature_false(self):
         """Test has_feature returns False when feature is not present."""
-        from backend.licensing.validator import has_feature, LicensePayload
-        from backend.licensing.features import LicenseTier, FeatureCode
+        from backend.licensing.features import FeatureCode, LicenseTier
+        from backend.licensing.validator import LicensePayload, has_feature
 
         now = datetime.now(timezone.utc)
         payload = LicensePayload(
@@ -553,8 +553,8 @@ class TestHasModule:
 
     def test_has_module_true(self):
         """Test has_module returns True when module is present."""
-        from backend.licensing.validator import has_module, LicensePayload
         from backend.licensing.features import LicenseTier, ModuleCode
+        from backend.licensing.validator import LicensePayload, has_module
 
         now = datetime.now(timezone.utc)
         payload = LicensePayload(
@@ -572,8 +572,8 @@ class TestHasModule:
 
     def test_has_module_false(self):
         """Test has_module returns False when module is not present."""
-        from backend.licensing.validator import has_module, LicensePayload
         from backend.licensing.features import LicenseTier, ModuleCode
+        from backend.licensing.validator import LicensePayload, has_module
 
         now = datetime.now(timezone.utc)
         payload = LicensePayload(

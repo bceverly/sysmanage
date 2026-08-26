@@ -47,6 +47,7 @@ so re-running against a database that already has these is a no-op.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
+
 from alembic import op
 
 # revision identifiers, used by Alembic.

@@ -7,8 +7,9 @@ Tests for backend/websocket/message_router.py module.
 Tests message routing to appropriate handlers.
 """
 
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
 
 
 class TestRouteInboundMessage:

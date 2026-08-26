@@ -20,14 +20,7 @@ Tenant-partition tables: table names are UNPREFIXED (no ``registry_``/
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import (
-    Boolean,
-    Column,
-    DateTime,
-    ForeignKey,
-    String,
-    Text,
-)
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import backref, relationship
 
 from backend.persistence.db import Base

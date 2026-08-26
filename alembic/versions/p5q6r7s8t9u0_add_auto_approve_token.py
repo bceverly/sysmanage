@@ -15,10 +15,10 @@ to enable automatic approval of child hosts created via sysmanage.
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy import text
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "p5q6r7s8t9u0"
@@ -39,14 +39,10 @@ def upgrade() -> None:
         if "auto_approve_token" in columns:
             return  # Column already exists
     else:
-        result = bind.execute(
-            text(
-                """
+        result = bind.execute(text("""
                 SELECT column_name FROM information_schema.columns
                 WHERE table_name = 'host_child' AND column_name = 'auto_approve_token'
-                """
-            )
-        )
+                """))
         if result.fetchone() is not None:
             return  # Column already exists
 

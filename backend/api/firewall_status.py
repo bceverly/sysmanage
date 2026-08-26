@@ -28,10 +28,10 @@ from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import firewall_plan_builder
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.messages import CommandType, Message, MessageType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
-from backend.utils.verbosity_logger import sanitize_log
 
 
 def _host_info_for_planner(host: models.Host) -> dict:

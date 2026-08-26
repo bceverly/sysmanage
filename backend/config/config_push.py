@@ -30,10 +30,10 @@ from sqlalchemy.orm import Session
 
 from backend.persistence import models
 from backend.security.communication_security import message_encryption
+from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.messages import Message, MessageType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
-from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 

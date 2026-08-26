@@ -192,12 +192,12 @@ def _child_enrollment_token(parent_host_id) -> Optional[str]:
     if not parent_host_id:
         return None
     try:
-        from backend.api.proplus_routes import (  # pylint: disable=import-outside-toplevel
+        from backend.api.proplus_routes import (
             _provisioning_enrollment_token_fn,
-        )
-        from backend.services.host_tenant_index import (  # pylint: disable=import-outside-toplevel
+        )  # pylint: disable=import-outside-toplevel
+        from backend.services.host_tenant_index import (
             tenant_for_host,
-        )
+        )  # pylint: disable=import-outside-toplevel
 
         tenant_id = tenant_for_host(parent_host_id)
         if not tenant_id:

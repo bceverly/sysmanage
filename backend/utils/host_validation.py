@@ -40,9 +40,9 @@ def _host_exists_in_other_partition(host_id: str, hostname: str = None) -> bool:
         return False
 
     try:
-        from backend.websocket.inbound_processor import (  # noqa: PLC0415
+        from backend.websocket.inbound_processor import (
             _find_host_in_tenant_dbs,
-        )
+        )  # noqa: PLC0415
 
         found, session = _find_host_in_tenant_dbs(host_id, hostname)
     except (

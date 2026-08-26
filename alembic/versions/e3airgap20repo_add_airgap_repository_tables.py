@@ -23,9 +23,9 @@ import uuid
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 
+from alembic import op
 from backend.persistence.models.core import GUID
 
 revision: str = "e3airgap20repo"
@@ -94,7 +94,8 @@ def upgrade() -> None:
             sa.Column("last_ingest_at", sa.DateTime(), nullable=True),
             sa.Column("package_count", sa.Integer(), nullable=True),
             sa.UniqueConstraint(
-                "distro", "version",
+                "distro",
+                "version",
                 name="uq_airgap_local_repository_distro_version",
             ),
         )

@@ -23,9 +23,9 @@ import uuid
 from datetime import datetime, timezone
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "4b3a68c8beee"
@@ -71,14 +71,12 @@ def upgrade() -> None:
         if result.scalar() != 0:
             continue
         conn.execute(
-            text(
-                """
+            text("""
                 INSERT INTO antivirus_default
                   (id, os_name, antivirus_package, created_at, updated_at)
                 VALUES
                   (:id, :os_name, :antivirus_package, :created_at, :updated_at)
-                """
-            ),
+                """),
             {
                 "id": str(uuid.uuid4()),
                 "os_name": os_name,

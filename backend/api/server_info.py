@@ -39,12 +39,7 @@ from backend.persistence.models.server_configuration import (
     VALID_SERVER_ROLES,
 )
 from backend.services import server_config_service
-from backend.services.audit_service import (
-    ActionType,
-    AuditService,
-    EntityType,
-    Result,
-)
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 logger = logging.getLogger(__name__)
 
@@ -228,9 +223,9 @@ def set_server_role_endpoint(
     # surfaces a clear error if the key is still missing at sign time.
     if new_role == "collector":
         try:
-            from backend.services.airgap_signing_service import (  # pylint: disable=import-outside-toplevel
+            from backend.services.airgap_signing_service import (
                 ensure_collector_keypair,
-            )
+            )  # pylint: disable=import-outside-toplevel
 
             ensure_collector_keypair()
         except Exception:  # pylint: disable=broad-exception-caught
@@ -373,9 +368,7 @@ def _resolve_license_tier() -> str:
     ``community`` even when a valid Pro+ license was loaded).
     """
     try:
-        from backend.licensing.license_service import (
-            license_service,
-        )
+        from backend.licensing.license_service import license_service
 
         tier = license_service.license_tier
         if tier is None:

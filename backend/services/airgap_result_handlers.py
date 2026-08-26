@@ -142,9 +142,9 @@ def _apply_airgap_ingest_result(
 
     # Late import: the orchestrator late-imports proplus_dispatch for
     # dispatch helpers, so importing it at module top here would cycle.
-    from backend.services import (  # pylint: disable=import-outside-toplevel
+    from backend.services import (
         airgap_ingest_tick,
-    )
+    )  # pylint: disable=import-outside-toplevel
 
     session_local = db.get_session_local()
     with session_local() as session:

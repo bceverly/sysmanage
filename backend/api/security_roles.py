@@ -14,8 +14,8 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from backend.api.error_constants import error_current_user_not_found
-from backend.i18n import _
 from backend.auth.auth_bearer import get_current_user
+from backend.i18n import _
 from backend.persistence.db import get_db
 from backend.persistence.models import (
     SecurityRole,

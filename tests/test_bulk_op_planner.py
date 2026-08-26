@@ -10,10 +10,7 @@ Tests for the open-source bulk operation planner.
 
 import pytest
 
-from backend.services.bulk_op_planner import (
-    OPEN_SOURCE_OP_TYPES,
-    expand_bulk_operation,
-)
+from backend.services.bulk_op_planner import OPEN_SOURCE_OP_TYPES, expand_bulk_operation
 
 
 class TestExpandBulkOperation:

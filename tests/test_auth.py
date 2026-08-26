@@ -28,8 +28,9 @@ class TestUserLogin:
 
     def test_user_login_email_validation(self):
         """Test UserLogin validates email format."""
-        from backend.api.auth import UserLogin
         from pydantic import ValidationError
+
+        from backend.api.auth import UserLogin
 
         with pytest.raises(ValidationError):
             UserLogin(userid="not-an-email", password="password123")
@@ -379,8 +380,9 @@ class TestHandleFailedPassword:
     @patch("backend.api.auth._log_login_attempt")
     def test_handle_failed_password_not_locked(self, mock_log, mock_login_security):
         """Test handling failed password without account lock."""
-        from backend.api.auth import UserLogin, _handle_failed_password
         from fastapi import HTTPException
+
+        from backend.api.auth import UserLogin, _handle_failed_password
 
         mock_login_security.record_failed_login_for_user.return_value = False
 
@@ -400,8 +402,9 @@ class TestHandleFailedPassword:
     @patch("backend.api.auth._log_login_attempt")
     def test_handle_failed_password_locked(self, mock_log, mock_login_security):
         """Test handling failed password with account lock."""
-        from backend.api.auth import UserLogin, _handle_failed_password
         from fastapi import HTTPException
+
+        from backend.api.auth import UserLogin, _handle_failed_password
 
         mock_login_security.record_failed_login_for_user.return_value = True
 

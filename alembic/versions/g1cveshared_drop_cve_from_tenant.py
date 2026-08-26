@@ -27,8 +27,9 @@ Revises: f1apikey01
 
 from typing import Union
 
-from alembic import op
 from sqlalchemy import inspect
+
+from alembic import op
 
 revision: str = "g1cveshared"
 down_revision: Union[str, None] = "f1apikey01"

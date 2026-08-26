@@ -33,12 +33,7 @@ from backend.i18n import N_, _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
-from backend.services.audit_service import (
-    ActionType,
-    AuditService,
-    EntityType,
-    Result,
-)
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 logger = logging.getLogger(__name__)
 

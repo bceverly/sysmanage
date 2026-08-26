@@ -14,7 +14,6 @@ from typing import Sequence, Union
 
 from alembic import op
 
-
 # revision identifiers, used by Alembic.
 revision: str = "i4j5k6l7m8n9"
 down_revision: Union[str, None] = "h3i4j5k6l7m8"
@@ -31,8 +30,7 @@ def upgrade() -> None:
     # Add the Edit Host Hostname role to the Host Management group
     # Host Management group ID: 00000000-0000-0000-0000-000000000002
     # Next available role ID: 10000000-0000-0000-0000-000000000093
-    op.execute(
-        f"""
+    op.execute(f"""
         INSERT INTO security_roles (id, name, description, group_id)
         SELECT
             '10000000-0000-0000-0000-000000000093'{uuid_cast},
@@ -43,8 +41,7 @@ def upgrade() -> None:
             SELECT 1 FROM security_roles
             WHERE id = '10000000-0000-0000-0000-000000000093'{uuid_cast}
         )
-    """
-    )
+    """)
 
 
 def downgrade() -> None:
@@ -54,9 +51,7 @@ def downgrade() -> None:
     uuid_cast = "" if is_sqlite else "::uuid"
 
     # Remove the Edit Host Hostname role
-    op.execute(
-        f"""
+    op.execute(f"""
         DELETE FROM security_roles
         WHERE id = '10000000-0000-0000-0000-000000000093'{uuid_cast}
-    """
-    )
+    """)

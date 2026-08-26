@@ -60,6 +60,7 @@ def _bench(client, method, path, rounds=200):
 @pytest.fixture(scope="module")
 def client():
     from fastapi.testclient import TestClient
+
     from backend.main import app
 
     return TestClient(app)

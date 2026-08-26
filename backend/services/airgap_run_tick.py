@@ -57,8 +57,8 @@ import socket
 from datetime import datetime, timezone
 
 from backend.licensing.module_loader import module_loader
-from backend.persistence.db import get_db
 from backend.persistence import models
+from backend.persistence.db import get_db
 
 logger = logging.getLogger(__name__)
 
@@ -118,9 +118,9 @@ def _sign_manifest_or_raw(engine, manifest: dict) -> dict:
         )
         return manifest
     try:
-        from backend.services.airgap_signing_service import (  # pylint: disable=import-outside-toplevel
+        from backend.services.airgap_signing_service import (
             get_collector_private_key_pem,
-        )
+        )  # pylint: disable=import-outside-toplevel
 
         private_pem = get_collector_private_key_pem()
         if not private_pem:

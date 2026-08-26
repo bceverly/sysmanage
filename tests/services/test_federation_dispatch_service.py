@@ -384,7 +384,8 @@ class TestPushAttemptsAndBackoff:
         assert not_yet == []
 
     def test_ready_only_releases_after_window(self, session, enrolled_site):
-        from datetime import datetime as _dt, timedelta
+        from datetime import datetime as _dt
+        from datetime import timedelta
 
         cmd = dsvc.dispatch_command(
             session,

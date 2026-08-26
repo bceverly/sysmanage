@@ -195,9 +195,9 @@ def maybe_repoint(db, host, _connection_send=None) -> None:
         if _LAST_REPOINT.get(host_id) == signature:
             return  # already repointed with this exact config
 
-        from backend.services.proplus_dispatch import (  # pylint: disable=import-outside-toplevel
+        from backend.services.proplus_dispatch import (
             enqueue_apply_plan,
-        )
+        )  # pylint: disable=import-outside-toplevel
 
         enqueue_apply_plan(host_id=host_id, plan=plan, timeout=600)
         _LAST_REPOINT[host_id] = signature

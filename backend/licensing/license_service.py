@@ -508,9 +508,9 @@ class LicenseService:
         """
         # Local import keeps the licensing layer free of a hard dependency on the
         # tenant-edition seam (and any import cycle through the engine seam).
-        from backend.services.tenant_edition import (  # noqa: PLC0415
+        from backend.services.tenant_edition import (
             edition_for_active_tenant,
-        )
+        )  # noqa: PLC0415
 
         edition = edition_for_active_tenant()
         if edition is None:

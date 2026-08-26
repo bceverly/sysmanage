@@ -31,6 +31,7 @@ from typing import Dict, List, Optional
 
 from fastapi import WebSocket
 from websockets.exceptions import ConnectionClosed
+
 from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
@@ -388,6 +389,7 @@ class ConnectionManager:
         message.  Agents that fail to receive are disconnected so the
         next broadcast doesn't double-fail on them."""
         from sqlalchemy.orm import sessionmaker  # local import — keeps the
+
         from backend.persistence import db, models  # module import graph tidy
 
         session_local = sessionmaker(

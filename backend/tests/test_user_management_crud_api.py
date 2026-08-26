@@ -17,6 +17,13 @@ import pytest
 from argon2 import PasswordHasher
 from fastapi import HTTPException
 
+from backend.api.password_reset import (
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
+    forgot_password,
+    reset_password,
+    validate_reset_token,
+)
 from backend.api.user import (
     User,
     add_user,
@@ -27,13 +34,6 @@ from backend.api.user import (
     lock_user,
     unlock_user,
     update_user,
-)
-from backend.api.password_reset import (
-    ForgotPasswordRequest,
-    ResetPasswordRequest,
-    forgot_password,
-    reset_password,
-    validate_reset_token,
 )
 
 argon2_hasher = PasswordHasher()

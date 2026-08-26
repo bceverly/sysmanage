@@ -110,9 +110,7 @@ def _run_one_pass() -> int:
     """
     # Late import: avoid an import cycle (partitions -> models -> ... ) at
     # module import time, matching the other background services.
-    from backend.persistence.partitions import (  # noqa: PLC0415
-        iter_host_databases,
-    )
+    from backend.persistence.partitions import iter_host_databases  # noqa: PLC0415
 
     retention_days = _config.get_custom_metrics_retention_days()
     total_deleted = 0

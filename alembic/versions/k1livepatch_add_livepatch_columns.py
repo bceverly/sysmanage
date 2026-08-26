@@ -18,8 +18,9 @@ Revises: j1killproc
 from typing import Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
+
+from alembic import op
 
 revision: str = "k1livepatch"
 down_revision: Union[str, None] = "j1killproc"

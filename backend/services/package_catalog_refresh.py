@@ -82,16 +82,9 @@ def request_refresh_for_stale_hosts(session, models, now: datetime) -> int:
     """
     # Late imports: avoid an import cycle at module import time, matching the
     # other background services.
-    from backend.websocket.messages import (  # noqa: PLC0415
-        create_command_message,
-    )
-    from backend.websocket.queue_manager import (  # noqa: PLC0415
-        server_queue_manager,
-    )
-    from backend.websocket.queue_enums import (  # noqa: PLC0415
-        Priority,
-        QueueDirection,
-    )
+    from backend.websocket.messages import create_command_message  # noqa: PLC0415
+    from backend.websocket.queue_enums import Priority, QueueDirection  # noqa: PLC0415
+    from backend.websocket.queue_manager import server_queue_manager  # noqa: PLC0415
 
     hosts = (
         session.query(models.Host)
@@ -137,9 +130,7 @@ def request_refresh_for_stale_hosts(session, models, now: datetime) -> int:
 def _run_one_pass() -> int:
     """Ask every stale host across all tenant databases.  Never raises."""
     from backend.persistence import models  # noqa: PLC0415
-    from backend.persistence.partitions import (  # noqa: PLC0415
-        iter_host_databases,
-    )
+    from backend.persistence.partitions import iter_host_databases  # noqa: PLC0415
 
     now = datetime.now(timezone.utc)
     total = 0

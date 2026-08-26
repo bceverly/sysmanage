@@ -11,9 +11,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from backend.websocket.inbound_processor import (
-    process_validated_message,
-)
+from backend.websocket.inbound_processor import process_validated_message
 from backend.websocket.queue_manager import QueueDirection, QueueStatus
 
 

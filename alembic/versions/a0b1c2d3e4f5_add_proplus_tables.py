@@ -17,11 +17,13 @@ Tables added:
 - proplus_module_cache: Cache of downloaded Cython modules
 - host_health_analysis: AI health analysis results for hosts
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "a0b1c2d3e4f5"

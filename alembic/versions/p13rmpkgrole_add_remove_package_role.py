@@ -19,8 +19,9 @@ Revises: o12mgttenant
 Create Date: 2026-06-17 00:00:00.000000
 """
 
-from alembic import op
 from sqlalchemy import inspect
+
+from alembic import op
 
 revision = "p13rmpkgrole"
 down_revision = "o12mgttenant"
@@ -53,8 +54,7 @@ def upgrade() -> None:
     cast = "::uuid" if is_pg else ""
 
     if _has_table(bind, "security_roles"):
-        op.execute(
-            f"""
+        op.execute(f"""
             INSERT INTO security_roles (id, name, description, group_id)
             SELECT '{REMOVE_PACKAGE_ROLE_ID}'{cast}, 'Remove Package',
                    'Remove packages from hosts',
@@ -62,16 +62,14 @@ def upgrade() -> None:
             WHERE NOT EXISTS (
                 SELECT 1 FROM security_roles WHERE id = '{REMOVE_PACKAGE_ROLE_ID}'{cast}
             );
-            """
-        )
+            """)
 
     # Backfill: grant "Remove Package" to every user who already holds
     # "Add Package", so install/uninstall stay paired for existing users.
     if _has_table(bind, "user_security_roles"):
         new_id = "gen_random_uuid()" if is_pg else _SQLITE_UUID
         now = "now()" if is_pg else "datetime('now')"
-        op.execute(
-            f"""
+        op.execute(f"""
             INSERT INTO user_security_roles (id, user_id, role_id, granted_at)
             SELECT {new_id}, usr.user_id, '{REMOVE_PACKAGE_ROLE_ID}'{cast}, {now}
             FROM user_security_roles usr
@@ -81,8 +79,7 @@ def upgrade() -> None:
                 WHERE ex.user_id = usr.user_id
                   AND ex.role_id = '{REMOVE_PACKAGE_ROLE_ID}'{cast}
               );
-            """
-        )
+            """)
 
 
 def downgrade() -> None:

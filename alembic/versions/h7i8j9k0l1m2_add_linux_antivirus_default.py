@@ -9,12 +9,13 @@ Revises: g6h7i8j9k0l1
 Create Date: 2025-12-04 02:55:00.000000
 
 """
+
 from typing import Sequence, Union
 from uuid import uuid4
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "h7i8j9k0l1m2"
@@ -44,12 +45,10 @@ def upgrade() -> None:
 
             # Insert entry
             bind.execute(
-                text(
-                    """
+                text("""
                     INSERT INTO antivirus_default (id, os_name, antivirus_package, created_at, updated_at)
                     VALUES (:id, :os_name, 'clamav', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-                    """
-                ),
+                    """),
                 {"id": new_uuid, "os_name": os_name},
             )
 

@@ -16,11 +16,10 @@ for managing virtual machines and child hosts (WSL, LXD, etc.).
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 
+from alembic import op
 from backend.persistence.models.core import GUID
-
 
 # revision identifiers, used by Alembic.
 revision: str = "a1c2d3e4f5g6"
@@ -92,9 +91,7 @@ def upgrade() -> None:
         )
 
         # Create indexes
-        op.create_index(
-            "idx_host_child_parent", "host_child", ["parent_host_id"]
-        )
+        op.create_index("idx_host_child_parent", "host_child", ["parent_host_id"])
         op.create_index("idx_host_child_child", "host_child", ["child_host_id"])
         op.create_index("idx_host_child_status", "host_child", ["status"])
 
@@ -114,9 +111,7 @@ def upgrade() -> None:
             sa.Column("agent_install_method", sa.String(50), nullable=True),
             sa.Column("agent_install_commands", sa.Text(), nullable=True),
             # Metadata
-            sa.Column(
-                "is_active", sa.Boolean(), nullable=False, server_default="true"
-            ),
+            sa.Column("is_active", sa.Boolean(), nullable=False, server_default="true"),
             sa.Column("min_agent_version", sa.String(20), nullable=True),
             sa.Column("notes", sa.Text(), nullable=True),
             # Timestamps
@@ -165,7 +160,5 @@ def downgrade() -> None:
 
     # Drop index and child_host_distribution table
     if "child_host_distribution" in tables:
-        op.drop_index(
-            "idx_child_host_dist_type", table_name="child_host_distribution"
-        )
+        op.drop_index("idx_child_host_dist_type", table_name="child_host_distribution")
         op.drop_table("child_host_distribution")

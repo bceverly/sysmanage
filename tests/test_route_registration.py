@@ -46,8 +46,8 @@ class TestRegisterRoutes:
     def test_register_routes_includes_health_routes(self):
         """Test register_routes includes health endpoints when app routes are registered."""
         from backend.startup.route_registration import (
-            register_routes,
             register_app_routes,
+            register_routes,
         )
 
         app = FastAPI()
@@ -124,9 +124,9 @@ class TestRegisterAppRoutes:
     @pytest.mark.asyncio
     async def test_root_endpoint_returns_message(self):
         """Test root endpoint returns expected message."""
-        from backend.startup.route_registration import register_app_routes
-
         from fastapi.testclient import TestClient
+
+        from backend.startup.route_registration import register_app_routes
 
         app = FastAPI()
         register_app_routes(app)
@@ -140,9 +140,9 @@ class TestRegisterAppRoutes:
     @pytest.mark.asyncio
     async def test_health_endpoint_returns_status(self):
         """Test health endpoint returns healthy status."""
-        from backend.startup.route_registration import register_app_routes
-
         from fastapi.testclient import TestClient
+
+        from backend.startup.route_registration import register_app_routes
 
         app = FastAPI()
         register_app_routes(app)
@@ -161,9 +161,9 @@ class TestRegisterAppRoutes:
     @pytest.mark.asyncio
     async def test_db_readiness_endpoint_reports_database(self):
         """/api/health/db does the DB probe and reports connectivity (Phase 15.1)."""
-        from backend.startup.route_registration import register_app_routes
-
         from fastapi.testclient import TestClient
+
+        from backend.startup.route_registration import register_app_routes
 
         app = FastAPI()
         register_app_routes(app)
@@ -179,9 +179,9 @@ class TestRegisterAppRoutes:
     @pytest.mark.asyncio
     async def test_health_endpoint_supports_head(self):
         """Test health endpoint supports HEAD request."""
-        from backend.startup.route_registration import register_app_routes
-
         from fastapi.testclient import TestClient
+
+        from backend.startup.route_registration import register_app_routes
 
         app = FastAPI()
         register_app_routes(app)

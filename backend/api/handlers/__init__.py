@@ -23,14 +23,23 @@ from backend.api.handlers.child_host_handlers import (
     handle_child_host_created,
     handle_child_host_creation_progress,
     handle_child_hosts_list_update,
-    handle_virtualization_support_update,
-    handle_wsl_enable_result,
-    handle_lxd_initialize_result,
-    handle_vmm_initialize_result,
     handle_kvm_initialize_result,
-    handle_kvm_modules_enable_result,
     handle_kvm_modules_disable_result,
+    handle_kvm_modules_enable_result,
+    handle_lxd_initialize_result,
+    handle_virtualization_support_update,
+    handle_vmm_initialize_result,
+    handle_wsl_enable_result,
 )
+
+# Import from software_package_handlers
+from backend.api.handlers.config_mgmt_handlers import handle_config_profile_result
+
+# Import from custom_metric_handlers (Custom Metrics & Graphs — Slice 3b)
+from backend.api.handlers.custom_metric_handlers import handle_custom_metric_samples
+
+# Import from hostname_handler
+from backend.api.handlers.hostname_handler import handle_hostname_changed
 
 # Import from infrastructure_handlers
 from backend.api.handlers.infrastructure_handlers import (
@@ -49,7 +58,8 @@ from backend.api.handlers.os_hardware_handlers import (
     is_new_os_version_combination,
 )
 
-# Import from software_package_handlers
+# Import from process_handlers (Phase 13.3)
+from backend.api.handlers.process_handlers import handle_process_status_update
 from backend.api.handlers.software_package_handlers import (
     handle_antivirus_status_update,
     handle_commercial_antivirus_status_update,
@@ -68,21 +78,6 @@ from backend.api.handlers.user_access_handlers import (
     handle_user_access_update,
 )
 
-# Import from hostname_handler
-from backend.api.handlers.hostname_handler import (
-    handle_hostname_changed,
-)
-
-# Import from process_handlers (Phase 13.3)
-from backend.api.handlers.process_handlers import (
-    handle_process_status_update,
-)
-
-# Import from custom_metric_handlers (Custom Metrics & Graphs — Slice 3b)
-from backend.api.handlers.custom_metric_handlers import (
-    handle_custom_metric_samples,
-)
-
 __all__ = [
     # OS and Hardware handlers
     "is_new_os_version_combination",
@@ -98,6 +93,7 @@ __all__ = [
     "handle_package_updates_update",
     "handle_package_collection",
     "handle_third_party_repository_update",
+    "handle_config_profile_result",
     "handle_antivirus_status_update",
     "handle_commercial_antivirus_status_update",
     "handle_firewall_status_update",

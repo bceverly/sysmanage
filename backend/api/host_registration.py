@@ -38,9 +38,9 @@ def _refresh_existing_host(session, existing_host, registration_data) -> "models
         # OS upgrade) re-registers long before its next SYSTEM_INFO, and a
         # stale advertisement makes the dispatch gate refuse work the agent can
         # now do.  A payload without capabilities leaves the stored set alone.
-        from backend.services.agent_capability_service import (  # noqa: PLC0415
+        from backend.services.agent_capability_service import (
             apply_capability_report,
-        )
+        )  # noqa: PLC0415
 
         apply_capability_report(
             existing_host, getattr(registration_data, "agent_capabilities", None)
@@ -155,9 +155,9 @@ def _reject_if_fqdn_belongs_to_tenant(fqdn):
     if not _config.is_multitenancy_enabled():
         return
 
-    from backend.websocket.inbound_processor import (  # noqa: PLC0415
+    from backend.websocket.inbound_processor import (
         _find_host_in_tenant_dbs,
-    )
+    )  # noqa: PLC0415
 
     host, tenant_session = _find_host_in_tenant_dbs(None, fqdn)
     if host is None:

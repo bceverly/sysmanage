@@ -33,9 +33,9 @@ from argon2.exceptions import VerifyMismatchError
 from sqlalchemy.orm import Session
 
 from backend.persistence.models import (
+    SINGLETON_MFA_SETTINGS_ID,
     MfaEmailChallenge,
     MfaSettings,
-    SINGLETON_MFA_SETTINGS_ID,
     UserMfaEnrollment,
 )
 from backend.security import mfa_crypto
@@ -361,12 +361,10 @@ def request_email_otp(
         # applies.  None → server scope (single-tenant default).  Wrapping in
         # the scope (rather than passing tenant_id) keeps the injected
         # email_send_fn signature unchanged.
-        from backend.persistence.tenant_context import (  # noqa: PLC0415
-            tenant_scope,
-        )
-        from backend.services.tenant_directory import (  # noqa: PLC0415
+        from backend.persistence.tenant_context import tenant_scope  # noqa: PLC0415
+        from backend.services.tenant_directory import (
             resolve_tenant_for_email,
-        )
+        )  # noqa: PLC0415
 
         with tenant_scope(resolve_tenant_for_email(user_email)):
             sent = bool(

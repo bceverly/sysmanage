@@ -7,14 +7,15 @@ Fixed basic tests for data handlers focusing on core functionality.
 Tests basic operations with correct function signatures and behavior.
 """
 
-import pytest
-from unittest.mock import Mock, patch
 from datetime import datetime, timezone
+from unittest.mock import Mock, patch
+
+import pytest
 
 from backend.api.handlers import (
-    is_new_os_version_combination,
     handle_os_version_update,
     handle_reboot_status_update,
+    is_new_os_version_combination,
 )
 from backend.api.handlers.user_access_handlers import (
     _create_user_account_with_security_id,

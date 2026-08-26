@@ -15,6 +15,7 @@ Single-row table: a fixed sentinel UUID guarantees there's exactly one
 row.  Future server-wide knobs add columns here rather than new tables.
 """
 
+import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, String
@@ -22,8 +23,6 @@ from sqlalchemy.dialects.postgresql import JSON
 
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
-
-import uuid
 
 # Fixed sentinel id so the row is a true singleton (same pattern as
 # ``SINGLETON_MIRROR_SETTINGS_ID``).  Distinct value so the two

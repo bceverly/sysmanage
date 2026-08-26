@@ -19,8 +19,9 @@ Revises: r3hostsite
 from typing import Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
+
+from alembic import op
 
 revision: str = "r4compresconfig"
 down_revision: Union[str, None] = "r3hostsite"
@@ -34,9 +35,7 @@ def upgrade() -> None:
         return
     cols = {c["name"] for c in insp.get_columns("compute_resource")}
     if "config" not in cols:
-        op.add_column(
-            "compute_resource", sa.Column("config", sa.JSON(), nullable=True)
-        )
+        op.add_column("compute_resource", sa.Column("config", sa.JSON(), nullable=True))
 
 
 def downgrade() -> None:

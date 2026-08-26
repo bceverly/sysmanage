@@ -20,8 +20,8 @@ import pytest
 from fastapi import FastAPI
 
 from backend.api.proplus_routes import (
-    mount_alerting_routes,
     mount_advisory_routes,
+    mount_alerting_routes,
     mount_compliance_routes,
     mount_federation_controller_routes,
     mount_federation_site_routes,
@@ -573,6 +573,7 @@ class TestFederationControllerStubRoutes:
         with a no-op so the stubs don't need a real auth token.
         """
         from fastapi import FastAPI
+
         from backend.auth.auth_bearer import get_current_user
 
         app = FastAPI()
@@ -847,6 +848,7 @@ class TestFederationSiteStubRoutes:
     @pytest.fixture
     def stub_only_app(self):
         from fastapi import FastAPI
+
         from backend.auth.auth_bearer import get_current_user
 
         app = FastAPI()

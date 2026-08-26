@@ -32,8 +32,8 @@ Create Date: 2026-05-20
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "m2fed12c"

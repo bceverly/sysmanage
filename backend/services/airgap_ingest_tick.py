@@ -68,8 +68,8 @@ from datetime import datetime, timezone
 
 from backend.config import config as config_module
 from backend.licensing.module_loader import module_loader
-from backend.persistence.db import get_db
 from backend.persistence import models
+from backend.persistence.db import get_db
 
 logger = logging.getLogger(__name__)
 
@@ -281,9 +281,9 @@ def _pem_fingerprint(pem: str) -> str:
     is the source of truth, so a "" return (unparseable) just deprioritises.
     """
     try:
-        from cryptography.hazmat.primitives import (  # pylint: disable=import-outside-toplevel
+        from cryptography.hazmat.primitives import (
             serialization,
-        )
+        )  # pylint: disable=import-outside-toplevel
 
         pub = serialization.load_pem_public_key(
             pem.encode("utf-8") if isinstance(pem, str) else pem

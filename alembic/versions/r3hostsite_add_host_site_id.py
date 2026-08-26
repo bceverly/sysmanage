@@ -18,8 +18,9 @@ Revises: r2userlasttenant
 from typing import Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
+
+from alembic import op
 
 revision: str = "r3hostsite"
 down_revision: Union[str, None] = "r2userlasttenant"

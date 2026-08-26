@@ -21,24 +21,17 @@ from datetime import datetime, timezone
 from unittest.mock import MagicMock
 
 import pytest
-from sqlalchemy import (
-    create_engine,
-    Column,
-    String,
-    Boolean,
-    DateTime,
-    Text,
-)
+from sqlalchemy import Boolean, Column, DateTime, String, Text, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from backend.api.child_host_models import (
     ChildHostResponse,
+    ConfigureKvmNetworkingRequest,
     CreateChildHostRequest,
     CreateWslChildHostRequest,
     DistributionResponse,
     VirtualizationSupportResponse,
-    ConfigureKvmNetworkingRequest,
 )
 from backend.persistence.models.core import GUID
 

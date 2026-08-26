@@ -310,8 +310,8 @@ class TestConfigManagementConstants:
     def test_config_constants(self):
         """Test config management constants exist."""
         from backend.api.error_constants import (
-            CONFIG_SPECIFIC_HOSTNAME_DESC,
             CONFIG_PUSH_ALL_DESC,
+            CONFIG_SPECIFIC_HOSTNAME_DESC,
         )
 
         assert CONFIG_SPECIFIC_HOSTNAME_DESC == "Specific hostname to target"
@@ -334,8 +334,8 @@ class TestSecretConstants:
     def test_secret_key_constants(self):
         """Test secret key constants exist."""
         from backend.api.error_constants import (
-            SECRETS_NOT_FOUND_KEY,
             SECRETS_INVALID_ID_KEY,
+            SECRETS_NOT_FOUND_KEY,
         )
 
         assert SECRETS_NOT_FOUND_KEY == "secrets.not_found"
@@ -348,9 +348,9 @@ class TestOpenBAOConstants:
     def test_openbao_constants(self):
         """Test OpenBAO constants exist."""
         from backend.api.error_constants import (
-            OPENBAO_NOT_RUNNING_KEY,
-            OPENBAO_GENERIC_ERROR_KEY,
             OPENBAO_DEFAULT_URL,
+            OPENBAO_GENERIC_ERROR_KEY,
+            OPENBAO_NOT_RUNNING_KEY,
             SCHTASKS_PATH,
         )
 
@@ -366,10 +366,10 @@ class TestReportConstants:
     def test_report_constants(self):
         """Test report constants exist."""
         from backend.api.error_constants import (
-            REPORT_IP_ADDRESS,
-            REPORT_OS_VERSION,
             FILTER_BY_OS_NAME,
             FILTER_BY_OS_VERSION,
+            REPORT_IP_ADDRESS,
+            REPORT_OS_VERSION,
         )
 
         assert REPORT_IP_ADDRESS == "IP Address"

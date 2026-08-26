@@ -9,7 +9,6 @@ Tests password policy validation and requirements text generation.
 
 from unittest.mock import patch
 
-
 from backend.utils.password_policy import PasswordPolicy, password_policy
 
 

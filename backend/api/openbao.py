@@ -6,8 +6,8 @@
 This module contains the API implementation for OpenBAO (Vault) management in the system.
 """
 
-import logging
 import contextlib
+import logging
 import os
 import platform
 import subprocess  # nosec B404  # required for OpenBAO process management
@@ -15,10 +15,7 @@ from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from backend.api.error_constants import (
-    error_openbao_not_running,
-    SCHTASKS_PATH,
-)
+from backend.api.error_constants import SCHTASKS_PATH, error_openbao_not_running
 from backend.auth.auth_bearer import JWTBearer
 from backend.config import config
 from backend.i18n import _

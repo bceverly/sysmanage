@@ -483,11 +483,7 @@ class TestMessageRouterCoverage:
         from backend.websocket import message_router  # noqa: F401
 
     def test_messages_dataclass_round_trip(self):
-        from backend.websocket.messages import (
-            CommandType,
-            Message,
-            MessageType,
-        )
+        from backend.websocket.messages import CommandType, Message, MessageType
 
         msg = Message(
             message_type=MessageType.COMMAND,

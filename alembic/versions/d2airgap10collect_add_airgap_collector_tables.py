@@ -29,9 +29,9 @@ import uuid
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 
+from alembic import op
 from backend.persistence.models.core import GUID
 
 revision: str = "d2airgap10collect"
@@ -93,7 +93,8 @@ def upgrade() -> None:
                 nullable=True,
             ),
             sa.UniqueConstraint(
-                "iso_label", "created_at",
+                "iso_label",
+                "created_at",
                 name="uq_airgap_collection_run_label_time",
             ),
         )
@@ -148,7 +149,9 @@ def upgrade() -> None:
                 nullable=False,
                 server_default="ed25519",
             ),
-            sa.Column("format_version", sa.Integer(), nullable=False, server_default="1"),
+            sa.Column(
+                "format_version", sa.Integer(), nullable=False, server_default="1"
+            ),
             sa.Column(
                 "created_at",
                 sa.DateTime(),
@@ -156,7 +159,8 @@ def upgrade() -> None:
                 server_default=sa.func.now(),
             ),
             sa.UniqueConstraint(
-                "run_id", "disc_index",
+                "run_id",
+                "disc_index",
                 name="uq_airgap_media_manifest_run_disc",
             ),
         )

@@ -13,6 +13,7 @@ Create Date: 2025-11-30 12:00:00.000000
 from typing import Sequence, Union
 
 import sqlalchemy as sa
+
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -80,16 +81,14 @@ def upgrade() -> None:
 
     if not group_exists:
         # Create the Host Account Management security role group
-        op.execute(
-            f"""
+        op.execute(f"""
             INSERT INTO security_role_groups (id, name, description)
             VALUES (
                 '{HOST_ACCOUNT_GROUP_ID}'{uuid_cast},
                 'Host Account Management',
                 'Permissions for managing user accounts and groups on remote hosts'
             )
-            """
-        )
+            """)
 
     # Add host account roles
     for role_id, role_name, role_desc in HOST_ACCOUNT_ROLES:
@@ -100,8 +99,7 @@ def upgrade() -> None:
         role_exists = result.scalar() > 0
 
         if not role_exists:
-            op.execute(
-                f"""
+            op.execute(f"""
                 INSERT INTO security_roles (id, name, description, group_id)
                 VALUES (
                     '{role_id}'{uuid_cast},
@@ -109,8 +107,7 @@ def upgrade() -> None:
                     '{role_desc}',
                     '{HOST_ACCOUNT_GROUP_ID}'{uuid_cast}
                 )
-                """
-            )
+                """)
 
     # Add host group roles
     for role_id, role_name, role_desc in HOST_GROUP_ROLES:
@@ -121,8 +118,7 @@ def upgrade() -> None:
         role_exists = result.scalar() > 0
 
         if not role_exists:
-            op.execute(
-                f"""
+            op.execute(f"""
                 INSERT INTO security_roles (id, name, description, group_id)
                 VALUES (
                     '{role_id}'{uuid_cast},
@@ -130,8 +126,7 @@ def upgrade() -> None:
                     '{role_desc}',
                     '{HOST_ACCOUNT_GROUP_ID}'{uuid_cast}
                 )
-                """
-            )
+                """)
 
 
 def downgrade() -> None:
@@ -147,9 +142,7 @@ def downgrade() -> None:
     op.execute(f"DELETE FROM security_roles WHERE id IN ({role_ids_str})")
 
     # Remove the security role group
-    op.execute(
-        f"""
+    op.execute(f"""
         DELETE FROM security_role_groups
         WHERE id = '{HOST_ACCOUNT_GROUP_ID}'{uuid_cast}
-        """
-    )
+        """)

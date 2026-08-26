@@ -11,7 +11,6 @@ import uuid
 from datetime import datetime, timezone
 from unittest.mock import patch
 
-
 from backend.websocket.messages import (
     CommandMessage,
     CommandResultMessage,

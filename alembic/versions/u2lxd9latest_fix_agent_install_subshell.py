@@ -28,9 +28,9 @@ subshell that consumes it.  Five entries instead of six.
 
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 revision: str = "u2lxd9latest"
 down_revision: Union[str, None] = "t1ubu26nlts"
@@ -63,15 +63,13 @@ def _update_commands(bind, child_type: str, name_pattern: str, commands: str) ->
     is_sqlite = bind.dialect.name == "sqlite"
     timestamp_expr = "CURRENT_TIMESTAMP" if is_sqlite else "NOW()"
     bind.execute(
-        text(
-            f"""
+        text(f"""
             UPDATE child_host_distribution SET
                 agent_install_commands = :agent_install_commands,
                 updated_at = {timestamp_expr}
             WHERE child_type = :child_type
               AND distribution_name LIKE :name_pattern
-            """
-        ),
+            """),
         {
             "child_type": child_type,
             "name_pattern": name_pattern,

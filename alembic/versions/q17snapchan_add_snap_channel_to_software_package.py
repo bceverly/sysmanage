@@ -20,6 +20,7 @@ Revises: q16clmexport
 from typing import Union
 
 import sqlalchemy as sa
+
 from alembic import op
 
 revision: str = "q17snapchan"

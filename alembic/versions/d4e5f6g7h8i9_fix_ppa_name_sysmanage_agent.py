@@ -9,11 +9,12 @@ Revises: f6g7h8i9j0k1
 Create Date: 2025-12-02 17:20:00.000000
 
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "d4e5f6g7h8i9"
@@ -35,8 +36,7 @@ def upgrade() -> None:
     # Only update if the record exists and has the old incorrect value (idempotent)
     if is_sqlite:
         bind.execute(
-            text(
-                """
+            text("""
                 UPDATE child_host_distribution
                 SET agent_install_commands = :new_commands,
                     updated_at = CURRENT_TIMESTAMP
@@ -44,14 +44,12 @@ def upgrade() -> None:
                   AND agent_install_method = 'apt_launchpad'
                   AND agent_install_commands LIKE '%ppa:bceverly/sysmanage"%'
                   AND agent_install_commands NOT LIKE '%ppa:bceverly/sysmanage-agent%'
-                """
-            ),
+                """),
             {"new_commands": CORRECT_PPA_COMMANDS},
         )
     else:
         bind.execute(
-            text(
-                """
+            text("""
                 UPDATE child_host_distribution
                 SET agent_install_commands = :new_commands,
                     updated_at = NOW()
@@ -59,8 +57,7 @@ def upgrade() -> None:
                   AND agent_install_method = 'apt_launchpad'
                   AND agent_install_commands LIKE '%ppa:bceverly/sysmanage"%'
                   AND agent_install_commands NOT LIKE '%ppa:bceverly/sysmanage-agent%'
-                """
-            ),
+                """),
             {"new_commands": CORRECT_PPA_COMMANDS},
         )
 
@@ -72,29 +69,25 @@ def downgrade() -> None:
 
     if is_sqlite:
         bind.execute(
-            text(
-                """
+            text("""
                 UPDATE child_host_distribution
                 SET agent_install_commands = :old_commands,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE child_type = 'wsl'
                   AND agent_install_method = 'apt_launchpad'
                   AND agent_install_commands LIKE '%ppa:bceverly/sysmanage-agent%'
-                """
-            ),
+                """),
             {"old_commands": OLD_PPA_COMMANDS},
         )
     else:
         bind.execute(
-            text(
-                """
+            text("""
                 UPDATE child_host_distribution
                 SET agent_install_commands = :old_commands,
                     updated_at = NOW()
                 WHERE child_type = 'wsl'
                   AND agent_install_method = 'apt_launchpad'
                   AND agent_install_commands LIKE '%ppa:bceverly/sysmanage-agent%'
-                """
-            ),
+                """),
             {"old_commands": OLD_PPA_COMMANDS},
         )

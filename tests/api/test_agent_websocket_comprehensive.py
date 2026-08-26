@@ -9,12 +9,10 @@ Tests core WebSocket message processing with correct mocking.
 
 import json
 from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
 
-from backend.api.agent import (
-    _process_websocket_message,
-    _handle_message_by_type,
-)
+from backend.api.agent import _handle_message_by_type, _process_websocket_message
 from backend.websocket.messages import MessageType
 
 

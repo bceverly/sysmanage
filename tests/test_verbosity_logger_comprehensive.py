@@ -10,7 +10,6 @@ Tests the FlexibleLogger class and logging configuration.
 import logging
 from unittest.mock import Mock, patch
 
-
 from backend.utils.verbosity_logger import FlexibleLogger, get_logger
 
 

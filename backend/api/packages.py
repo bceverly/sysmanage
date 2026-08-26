@@ -18,10 +18,10 @@ from sqlalchemy.orm import Session
 from backend.api.error_constants import FILTER_BY_OS_NAME, FILTER_BY_OS_VERSION
 from backend.api.package_host_selector import find_hosts_for_os
 from backend.api.packages_helpers import (
+    _parse_host_os,
     get_packages_summary_sync,
     search_packages_count_sync,
     search_packages_sync,
-    _parse_host_os,
 )
 from backend.api.packages_models import (
     InstallationCompletionRequest,
@@ -41,13 +41,13 @@ from backend.api.packages_operations import (
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence.db import get_db
-from backend.persistence.partitions import get_tenant_db
 from backend.persistence.models import (
     AvailablePackage,
     Host,
     InstallationPackage,
     InstallationRequest,
 )
+from backend.persistence.partitions import get_tenant_db
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_manager import (
     Priority,

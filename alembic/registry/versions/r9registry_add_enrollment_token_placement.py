@@ -18,8 +18,9 @@ Revises: r8registry
 from typing import Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
+
+from alembic import op
 
 revision: str = "r9registry"
 down_revision: Union[str, None] = "r8registry"

@@ -157,8 +157,9 @@ class TestSendCommand:
     @patch("backend.api.fleet.queue_ops")
     def test_send_command_success(self, mock_queue_ops, client, auth_headers, session):
         """Test successfully sending command to agent."""
-        from backend.persistence.models import Host
         import uuid
+
+        from backend.persistence.models import Host
 
         # Create host in database
         host = Host(
@@ -261,8 +262,9 @@ class TestShellCommand:
         self, mock_queue_ops, client, auth_headers, session
     ):
         """Test successfully sending shell command to agent."""
-        from backend.persistence.models import Host
         import uuid
+
+        from backend.persistence.models import Host
 
         # Create host in database
         host = Host(
@@ -336,8 +338,9 @@ class TestPackageManagement:
         self, mock_queue_ops, client, auth_headers, session
     ):
         """Test successfully sending package install command."""
-        from backend.persistence.models import Host
         import uuid
+
+        from backend.persistence.models import Host
 
         # Create host in database
         host = Host(
@@ -390,8 +393,9 @@ class TestServiceManagement:
         self, mock_queue_ops, client, auth_headers, session
     ):
         """Test successfully sending service restart command."""
-        from backend.persistence.models import Host
         import uuid
+
+        from backend.persistence.models import Host
 
         # Create host in database
         host = Host(
@@ -439,8 +443,9 @@ class TestSystemCommands:
     @patch("backend.api.fleet.queue_ops")
     def test_update_system_success(self, mock_queue_ops, client, auth_headers, session):
         """Test successfully sending system update command."""
-        from backend.persistence.models import Host
         import uuid
+
+        from backend.persistence.models import Host
 
         # Create host in database
         host = Host(
@@ -473,8 +478,9 @@ class TestSystemCommands:
     @patch("backend.api.fleet.queue_ops")
     def test_reboot_system_success(self, mock_queue_ops, client, auth_headers, session):
         """Test successfully sending system reboot command."""
-        from backend.persistence.models import Host
         import uuid
+
+        from backend.persistence.models import Host
 
         # Create host in database
         host = Host(
@@ -512,8 +518,9 @@ class TestBroadcastCommand:
     ):
         """Broadcast enqueues one OUTBOUND row per active host (no direct
         websocket fan-out); ``sent_to`` is the count of rows enqueued."""
-        from backend.persistence.models import Host
         import uuid
+
+        from backend.persistence.models import Host
 
         # Three active hosts → expect three enqueues.
         for fqdn in ("a.example.com", "b.example.com", "c.example.com"):

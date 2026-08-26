@@ -19,9 +19,9 @@ import uuid
 from datetime import datetime, timezone
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "s8t9u0v1w2x3"
@@ -47,12 +47,10 @@ def upgrade() -> None:
 
         # Insert Debian with clamav as default
         conn.execute(
-            text(
-                """
+            text("""
                 INSERT INTO antivirus_default (id, os_name, antivirus_package, created_at, updated_at)
                 VALUES (:id, :os_name, :antivirus_package, :created_at, :updated_at)
-                """
-            ),
+                """),
             {
                 "id": new_id,
                 "os_name": "Debian",
@@ -66,6 +64,4 @@ def upgrade() -> None:
 def downgrade() -> None:
     """Remove Debian from antivirus_default table if exists."""
     conn = op.get_bind()
-    conn.execute(
-        text("DELETE FROM antivirus_default WHERE os_name = 'Debian'")
-    )
+    conn.execute(text("DELETE FROM antivirus_default WHERE os_name = 'Debian'"))

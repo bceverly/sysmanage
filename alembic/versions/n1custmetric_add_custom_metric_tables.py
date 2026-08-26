@@ -36,9 +36,9 @@ import uuid
 from typing import Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 
+from alembic import op
 from backend.persistence.models.core import GUID
 
 revision: str = "n1custmetric"
@@ -107,9 +107,7 @@ def upgrade() -> None:
             _CUSTOM_METRIC_TAG,
             ["custom_metric_id"],
         )
-        op.create_index(
-            "ix_custom_metric_tag_tag_id", _CUSTOM_METRIC_TAG, ["tag_id"]
-        )
+        op.create_index("ix_custom_metric_tag_tag_id", _CUSTOM_METRIC_TAG, ["tag_id"])
 
     if not insp.has_table(_CUSTOM_METRIC_SAMPLE):
         op.create_table(
@@ -129,9 +127,7 @@ def upgrade() -> None:
             sa.ForeignKeyConstraint(
                 ["custom_metric_id"], ["custom_metric.id"], ondelete="CASCADE"
             ),
-            sa.ForeignKeyConstraint(
-                ["host_id"], ["host.id"], ondelete="CASCADE"
-            ),
+            sa.ForeignKeyConstraint(["host_id"], ["host.id"], ondelete="CASCADE"),
         )
         op.create_index(
             "ix_custom_metric_sample_custom_metric_id",

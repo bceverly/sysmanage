@@ -25,7 +25,7 @@ from fastapi.testclient import TestClient
 
 from backend.api import control_plane
 from backend.auth.auth_handler import sign_jwt
-from backend.persistence.models import RegistryTenant, TENANT_STATUS_ACTIVE
+from backend.persistence.models import TENANT_STATUS_ACTIVE, RegistryTenant
 from backend.persistence.partitions import get_registry_db
 
 

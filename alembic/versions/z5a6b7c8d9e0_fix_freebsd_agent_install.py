@@ -23,9 +23,9 @@ The install commands now:
 
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "z5a6b7c8d9e0"
@@ -74,16 +74,14 @@ def upgrade() -> None:
     for version in FREEBSD_VERSIONS:
         if is_sqlite:
             bind.execute(
-                text(
-                    """
+                text("""
                     UPDATE child_host_distribution SET
                         agent_install_commands = :agent_install_commands,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE child_type = 'kvm'
                       AND distribution_name = 'FreeBSD'
                       AND distribution_version = :version
-                    """
-                ),
+                    """),
                 {
                     "version": version,
                     "agent_install_commands": NEW_INSTALL_COMMANDS,
@@ -91,16 +89,14 @@ def upgrade() -> None:
             )
         else:
             bind.execute(
-                text(
-                    """
+                text("""
                     UPDATE child_host_distribution SET
                         agent_install_commands = :agent_install_commands,
                         updated_at = NOW()
                     WHERE child_type = 'kvm'
                       AND distribution_name = 'FreeBSD'
                       AND distribution_version = :version
-                    """
-                ),
+                    """),
                 {
                     "version": version,
                     "agent_install_commands": NEW_INSTALL_COMMANDS,
@@ -122,16 +118,14 @@ def downgrade() -> None:
 
         if is_sqlite:
             bind.execute(
-                text(
-                    """
+                text("""
                     UPDATE child_host_distribution SET
                         agent_install_commands = :agent_install_commands,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE child_type = 'kvm'
                       AND distribution_name = 'FreeBSD'
                       AND distribution_version = :version
-                    """
-                ),
+                    """),
                 {
                     "version": version,
                     "agent_install_commands": old_commands,
@@ -139,16 +133,14 @@ def downgrade() -> None:
             )
         else:
             bind.execute(
-                text(
-                    """
+                text("""
                     UPDATE child_host_distribution SET
                         agent_install_commands = :agent_install_commands,
                         updated_at = NOW()
                     WHERE child_type = 'kvm'
                       AND distribution_name = 'FreeBSD'
                       AND distribution_version = :version
-                    """
-                ),
+                    """),
                 {
                     "version": version,
                     "agent_install_commands": old_commands,

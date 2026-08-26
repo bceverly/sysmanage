@@ -16,7 +16,7 @@ import asyncio
 import contextlib
 import socket
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, PropertyMock
+from unittest.mock import AsyncMock, MagicMock, Mock, PropertyMock, patch
 
 import pytest
 from sqlalchemy import create_engine

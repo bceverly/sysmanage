@@ -116,9 +116,9 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
 
             from backend.config import config as _cfg  # noqa: PLC0415
             from backend.persistence import db as _db  # noqa: PLC0415
-            from backend.services import (  # noqa: PLC0415
+            from backend.services import (
                 logging_config_service as _logsvc,
-            )
+            )  # noqa: PLC0415
 
             with sessionmaker(bind=_db.get_engine())() as _log_session:
                 _logsvc.apply_server_native_logging(
@@ -625,9 +625,9 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         if not _custom_metric_retention_started:
             logger.info("=== CUSTOM METRIC RETENTION STARTUP ===")
             try:
-                from backend.services.custom_metric_retention import (  # noqa: PLC0415
+                from backend.services.custom_metric_retention import (
                     run_custom_metric_retention_loop,
-                )
+                )  # noqa: PLC0415
 
                 _track_background_task(
                     asyncio.create_task(run_custom_metric_retention_loop())
@@ -649,9 +649,9 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         if not _package_catalog_refresh_started:
             logger.info("=== PACKAGE CATALOG REFRESH STARTUP ===")
             try:
-                from backend.services.package_catalog_refresh import (  # noqa: PLC0415
+                from backend.services.package_catalog_refresh import (
                     run_package_catalog_refresh_loop,
-                )
+                )  # noqa: PLC0415
 
                 _track_background_task(
                     asyncio.create_task(run_package_catalog_refresh_loop())

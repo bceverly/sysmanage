@@ -16,9 +16,9 @@ the GitHub API.
 
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "i5j6k7l8m9n0"
@@ -88,27 +88,23 @@ def upgrade() -> None:
 
     # Update bhyve Ubuntu distributions
     bind.execute(
-        text(
-            """
+        text("""
             UPDATE child_host_distribution
             SET agent_install_commands = :commands
             WHERE child_type = 'bhyve'
               AND distribution_name = 'Ubuntu'
-            """
-        ),
+            """),
         {"commands": UBUNTU_COMMANDS},
     )
 
     # Update bhyve Debian distributions
     bind.execute(
-        text(
-            """
+        text("""
             UPDATE child_host_distribution
             SET agent_install_commands = :commands
             WHERE child_type = 'bhyve'
               AND distribution_name = 'Debian'
-            """
-        ),
+            """),
         {"commands": DEBIAN_COMMANDS},
     )
 
@@ -118,25 +114,21 @@ def downgrade() -> None:
     bind = op.get_bind()
 
     bind.execute(
-        text(
-            """
+        text("""
             UPDATE child_host_distribution
             SET agent_install_commands = :commands
             WHERE child_type = 'bhyve'
               AND distribution_name = 'Ubuntu'
-            """
-        ),
+            """),
         {"commands": OLD_UBUNTU_COMMANDS},
     )
 
     bind.execute(
-        text(
-            """
+        text("""
             UPDATE child_host_distribution
             SET agent_install_commands = :commands
             WHERE child_type = 'bhyve'
               AND distribution_name = 'Debian'
-            """
-        ),
+            """),
         {"commands": OLD_DEBIAN_COMMANDS},
     )

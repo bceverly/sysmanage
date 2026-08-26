@@ -18,8 +18,9 @@ Revises: r1relupgrade
 from typing import Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
+
+from alembic import op
 
 revision: str = "r2fipsmode"
 down_revision: Union[str, None] = "r1relupgrade"

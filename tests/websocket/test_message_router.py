@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from backend.websocket.message_router import route_inbound_message, log_message_data
+from backend.websocket.message_router import log_message_data, route_inbound_message
 from backend.websocket.messages import MessageType
 
 

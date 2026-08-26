@@ -9,7 +9,6 @@ Tests server-side message queue manager.
 
 from unittest.mock import MagicMock, patch
 
-
 from backend.websocket.queue_enums import QueueDirection
 
 

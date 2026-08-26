@@ -15,10 +15,10 @@ tables for the compliance_engine Pro+ module.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 from sqlalchemy.dialects import postgresql
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "c9d0e1f2a3b4"
@@ -68,9 +68,7 @@ def upgrade() -> None:
                     nullable=False,
                     server_default="CUSTOM",
                 ),
-                sa.Column(
-                    "enabled", sa.Boolean(), nullable=False, server_default="1"
-                ),
+                sa.Column("enabled", sa.Boolean(), nullable=False, server_default="1"),
                 sa.Column("rules", sa.Text(), nullable=True),
                 sa.Column("created_at", sa.DateTime(), nullable=False),
                 sa.Column("updated_at", sa.DateTime(), nullable=False),
@@ -150,13 +148,9 @@ def upgrade() -> None:
                 ),
                 sa.Column("summary", sa.Text(), nullable=True),
                 sa.Column("results", postgresql.JSON(), nullable=True),
-                sa.Column(
-                    "scanner_version", sa.String(length=20), nullable=True
-                ),
+                sa.Column("scanner_version", sa.String(length=20), nullable=True),
                 sa.PrimaryKeyConstraint("id"),
-                sa.ForeignKeyConstraint(
-                    ["host_id"], ["host.id"], ondelete="CASCADE"
-                ),
+                sa.ForeignKeyConstraint(["host_id"], ["host.id"], ondelete="CASCADE"),
                 sa.ForeignKeyConstraint(
                     ["profile_id"],
                     ["compliance_profile.id"],
@@ -226,13 +220,9 @@ def upgrade() -> None:
                 ),
                 sa.Column("summary", sa.Text(), nullable=True),
                 sa.Column("results", sa.Text(), nullable=True),
-                sa.Column(
-                    "scanner_version", sa.String(length=20), nullable=True
-                ),
+                sa.Column("scanner_version", sa.String(length=20), nullable=True),
                 sa.PrimaryKeyConstraint("id"),
-                sa.ForeignKeyConstraint(
-                    ["host_id"], ["host.id"], ondelete="CASCADE"
-                ),
+                sa.ForeignKeyConstraint(["host_id"], ["host.id"], ondelete="CASCADE"),
                 sa.ForeignKeyConstraint(
                     ["profile_id"],
                     ["compliance_profile.id"],

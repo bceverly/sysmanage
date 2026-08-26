@@ -15,10 +15,10 @@ and audit_log_archive tables for Phase 2 Pro+ features.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 from sqlalchemy.dialects import postgresql
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "f2a3b4c5d6e7"
@@ -73,9 +73,7 @@ def upgrade() -> None:
                     nullable=False,
                     server_default="pdf",
                 ),
-                sa.Column(
-                    "enabled", sa.Boolean(), nullable=False, server_default="1"
-                ),
+                sa.Column("enabled", sa.Boolean(), nullable=False, server_default="1"),
                 sa.Column("last_run_at", sa.DateTime(), nullable=True),
                 sa.Column("next_run_at", sa.DateTime(), nullable=True),
                 sa.Column("created_by", sa.String(length=255), nullable=False),
@@ -171,9 +169,7 @@ def upgrade() -> None:
                 sa.Column("action", sa.String(length=20), nullable=False),
                 sa.Column("entity_types", sa.Text(), nullable=True),
                 sa.Column("action_types", sa.Text(), nullable=True),
-                sa.Column(
-                    "enabled", sa.Boolean(), nullable=False, server_default="1"
-                ),
+                sa.Column("enabled", sa.Boolean(), nullable=False, server_default="1"),
                 sa.Column("last_run_at", sa.DateTime(), nullable=True),
                 sa.Column("next_run_at", sa.DateTime(), nullable=True),
                 sa.Column(

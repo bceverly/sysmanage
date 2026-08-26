@@ -39,7 +39,7 @@ def target_engine():
 
 
 def _tenant(db_session, slug="mover-co"):
-    from backend.persistence.models import RegistryTenant, TENANT_STATUS_ACTIVE
+    from backend.persistence.models import TENANT_STATUS_ACTIVE, RegistryTenant
 
     t = RegistryTenant(name="Mover Co", slug=slug, status=TENANT_STATUS_ACTIVE)
     db_session.add(t)

@@ -14,7 +14,7 @@ from backend.services import tenant_directory
 
 
 def _make_tenant(db_session, slug="acme-dir"):
-    from backend.persistence.models import RegistryTenant, TENANT_STATUS_ACTIVE
+    from backend.persistence.models import TENANT_STATUS_ACTIVE, RegistryTenant
 
     tenant = RegistryTenant(name="Acme", slug=slug, status=TENANT_STATUS_ACTIVE)
     db_session.add(tenant)

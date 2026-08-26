@@ -33,9 +33,9 @@ class PasswordPolicy:
         """Override ``self.policy`` from DB Settings when an operator set one."""
         try:
             from backend.config import settings_service  # noqa: PLC0415
-            from backend.persistence.tenant_context import (  # noqa: PLC0415
+            from backend.persistence.tenant_context import (
                 get_active_tenant,
-            )
+            )  # noqa: PLC0415
 
             db_policy = None
             tenant_id = get_active_tenant()

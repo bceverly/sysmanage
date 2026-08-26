@@ -29,13 +29,6 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
-from backend.utils.verbosity_logger import sanitize_log
-
-# Re-exported here under the legacy private name so the sister test module
-# ``test_proplus_dispatch_parsers`` doesn't have to chase the rename.
-from backend.services.proplus_capability_parser import (
-    parse_capability_probe_stdout as _parse_capability_probe_stdout,
-)
 
 # VM/child-host stdout parsers + engine-path result-apply handlers live in
 # sibling modules (extracted to keep this file under pylint's max-module-lines);
@@ -68,6 +61,18 @@ from backend.services.child_host_result_handlers import (  # pylint: disable=unu
     _apply_child_host_update_agent_result,
     _outcome_error_text,
 )
+from backend.services.content_lifecycle_result_handlers import (  # pylint: disable=unused-import
+    _apply_content_lifecycle_op_result,
+)
+
+# Re-exported here under the legacy private name so the sister test module
+# ``test_proplus_dispatch_parsers`` doesn't have to chase the rename.
+from backend.services.proplus_capability_parser import (
+    parse_capability_probe_stdout as _parse_capability_probe_stdout,
+)
+from backend.services.provisioning_result_handlers import (  # pylint: disable=unused-import
+    _apply_provisioning_op_result,
+)
 
 # Repository-mirroring engine-path result handlers also live in a sibling module
 # (this file is the correlation/result-routing hub; the mirror-specific row
@@ -85,12 +90,7 @@ from backend.services.repo_mirror_result_handlers import (  # pylint: disable=un
     _post_snapshot_outcome,
     _queue_followup_setup_check,
 )
-from backend.services.content_lifecycle_result_handlers import (  # pylint: disable=unused-import
-    _apply_content_lifecycle_op_result,
-)
-from backend.services.provisioning_result_handlers import (  # pylint: disable=unused-import
-    _apply_provisioning_op_result,
-)
+from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.messages import CommandType, Message, MessageType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
@@ -179,9 +179,7 @@ def _enqueue_apply_plan(host_id: str, plan: dict, timeout: int = 300) -> str:
         get_request_engine,
         tenant_engine_for_host,
     )
-    from backend.persistence.tenant_context import (  # noqa: PLC0415
-        get_active_tenant,
-    )
+    from backend.persistence.tenant_context import get_active_tenant  # noqa: PLC0415
 
     # Resolve the database that actually holds this host so the OUTBOUND command
     # lands in its per-tenant queue and enqueue_message's host-existence check
@@ -667,9 +665,7 @@ def _apply_list_child_hosts_result(host_id: str, outcome: Dict[str, Any]) -> Non
     # pylint: disable=import-outside-toplevel
     import asyncio
 
-    from backend.api.handlers.child_host.listing import (
-        handle_child_hosts_list_update,
-    )
+    from backend.api.handlers.child_host.listing import handle_child_hosts_list_update
     from backend.persistence import db as _db
 
     # Synthesize what the legacy handler expects.
@@ -809,7 +805,8 @@ def _queue_capability_followup_probe(action: str, host_id: str) -> None:
 
 def _now_naive():
     """Return a naive UTC datetime — matches the column type on every model."""
-    from datetime import datetime, timezone as _tz
+    from datetime import datetime
+    from datetime import timezone as _tz
 
     return datetime.now(_tz.utc).replace(tzinfo=None)
 

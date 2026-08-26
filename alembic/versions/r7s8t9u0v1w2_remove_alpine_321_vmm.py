@@ -19,9 +19,9 @@ The migration is idempotent - it only deletes if the record exists.
 
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "r7s8t9u0v1w2"
@@ -62,14 +62,12 @@ def upgrade() -> None:
 
     # Check if the distribution exists before deleting (idempotent)
     result = bind.execute(
-        text(
-            """
+        text("""
             SELECT COUNT(*) FROM child_host_distribution
             WHERE child_type = :child_type
               AND distribution_name = :distribution_name
               AND distribution_version = :distribution_version
-            """
-        ),
+            """),
         ALPINE_321_VMM,
     )
     exists = result.scalar() > 0
@@ -77,14 +75,12 @@ def upgrade() -> None:
     if exists:
         # Delete the Alpine 3.21 VMM distribution
         bind.execute(
-            text(
-                """
+            text("""
                 DELETE FROM child_host_distribution
                 WHERE child_type = :child_type
                   AND distribution_name = :distribution_name
                   AND distribution_version = :distribution_version
-                """
-            ),
+                """),
             ALPINE_321_VMM,
         )
 
@@ -98,14 +94,12 @@ def downgrade() -> None:
 
     # Check if the distribution already exists (idempotent)
     result = bind.execute(
-        text(
-            """
+        text("""
             SELECT COUNT(*) FROM child_host_distribution
             WHERE child_type = :child_type
               AND distribution_name = :distribution_name
               AND distribution_version = :distribution_version
-            """
-        ),
+            """),
         {
             "child_type": ALPINE_321_RESTORE["child_type"],
             "distribution_name": ALPINE_321_RESTORE["distribution_name"],
@@ -119,8 +113,7 @@ def downgrade() -> None:
 
         if is_sqlite:
             bind.execute(
-                text(
-                    """
+                text("""
                     INSERT INTO child_host_distribution (
                         id, child_type, distribution_name, distribution_version,
                         display_name, install_identifier, executable_name,
@@ -132,8 +125,7 @@ def downgrade() -> None:
                         :agent_install_method, :agent_install_commands, :notes,
                         1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
                     )
-                    """
-                ),
+                    """),
                 {
                     "id": dist_id,
                     "child_type": ALPINE_321_RESTORE["child_type"],
@@ -143,14 +135,15 @@ def downgrade() -> None:
                     "install_identifier": ALPINE_321_RESTORE["install_identifier"],
                     "executable_name": ALPINE_321_RESTORE["executable_name"],
                     "agent_install_method": ALPINE_321_RESTORE["agent_install_method"],
-                    "agent_install_commands": ALPINE_321_RESTORE["agent_install_commands"],
+                    "agent_install_commands": ALPINE_321_RESTORE[
+                        "agent_install_commands"
+                    ],
                     "notes": ALPINE_321_RESTORE["notes"],
                 },
             )
         else:
             bind.execute(
-                text(
-                    """
+                text("""
                     INSERT INTO child_host_distribution (
                         id, child_type, distribution_name, distribution_version,
                         display_name, install_identifier, executable_name,
@@ -162,8 +155,7 @@ def downgrade() -> None:
                         :agent_install_method, :agent_install_commands, :notes,
                         true, NOW(), NOW()
                     )
-                    """
-                ),
+                    """),
                 {
                     "id": dist_id,
                     "child_type": ALPINE_321_RESTORE["child_type"],
@@ -173,7 +165,9 @@ def downgrade() -> None:
                     "install_identifier": ALPINE_321_RESTORE["install_identifier"],
                     "executable_name": ALPINE_321_RESTORE["executable_name"],
                     "agent_install_method": ALPINE_321_RESTORE["agent_install_method"],
-                    "agent_install_commands": ALPINE_321_RESTORE["agent_install_commands"],
+                    "agent_install_commands": ALPINE_321_RESTORE[
+                        "agent_install_commands"
+                    ],
                     "notes": ALPINE_321_RESTORE["notes"],
                 },
             )

@@ -13,7 +13,6 @@ import time
 from datetime import datetime, timezone
 from unittest.mock import patch
 
-
 from backend.security.communication_security import (
     MessageEncryption,
     WebSocketSecurityManager,

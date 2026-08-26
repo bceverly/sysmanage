@@ -28,15 +28,7 @@ Three tables back the Pro+ ``external_idp_engine`` integration:
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import (
-    Boolean,
-    Column,
-    DateTime,
-    ForeignKey,
-    Integer,
-    String,
-    Text,
-)
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
 
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID

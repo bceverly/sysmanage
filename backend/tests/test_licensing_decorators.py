@@ -27,17 +27,13 @@ from cryptography.hazmat.primitives.serialization import (
 )
 from fastapi import HTTPException
 
-from backend.licensing.features import (
-    FeatureCode,
-    LicenseTier,
-    ModuleCode,
-)
 from backend.licensing.feature_gate import (
     LicenseRequiredError,
     requires_feature,
     requires_module,
     requires_pro_plus,
 )
+from backend.licensing.features import FeatureCode, LicenseTier, ModuleCode
 from backend.licensing.validator import (
     EXPIRATION_GRACE_DAYS,
     LicensePayload,

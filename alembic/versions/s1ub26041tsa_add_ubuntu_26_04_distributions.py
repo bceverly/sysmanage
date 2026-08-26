@@ -20,9 +20,9 @@ PostgreSQL (the only difference is the timestamp expression).
 import uuid
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "s1ub26041tsa"
@@ -103,12 +103,10 @@ def _column_exists(bind, table: str, column: str) -> bool:
         return any(row[1] == column for row in rows)
     # postgresql / others
     result = bind.execute(
-        text(
-            """
+        text("""
             SELECT 1 FROM information_schema.columns
             WHERE table_name = :table AND column_name = :column
-            """
-        ),
+            """),
         {"table": table, "column": column},
     )
     return result.first() is not None
@@ -116,14 +114,12 @@ def _column_exists(bind, table: str, column: str) -> bool:
 
 def _exists(bind, dist) -> bool:
     result = bind.execute(
-        text(
-            """
+        text("""
             SELECT COUNT(*) FROM child_host_distribution
             WHERE child_type = :child_type
               AND distribution_name = :distribution_name
               AND distribution_version = :distribution_version
-            """
-        ),
+            """),
         {
             "child_type": dist["child_type"],
             "distribution_name": dist["distribution_name"],
@@ -157,8 +153,7 @@ def _update(bind, dist, has_cloud_columns: bool) -> None:
         params["iso_url"] = dist["iso_url"]
 
     bind.execute(
-        text(
-            f"""
+        text(f"""
             UPDATE child_host_distribution SET
                 display_name = :display_name,
                 install_identifier = :install_identifier,
@@ -170,8 +165,7 @@ def _update(bind, dist, has_cloud_columns: bool) -> None:
             WHERE child_type = :child_type
               AND distribution_name = :distribution_name
               AND distribution_version = :distribution_version
-            """
-        ),
+            """),
         params,
     )
 
@@ -202,8 +196,7 @@ def _insert(bind, dist, has_cloud_columns: bool) -> None:
         params["iso_url"] = dist["iso_url"]
 
     bind.execute(
-        text(
-            f"""
+        text(f"""
             INSERT INTO child_host_distribution (
                 id, child_type, distribution_name, distribution_version,
                 display_name, install_identifier, executable_name,
@@ -215,8 +208,7 @@ def _insert(bind, dist, has_cloud_columns: bool) -> None:
                 :agent_install_method, :agent_install_commands, :notes,
                 {is_active_expr}, {now_expr}, {now_expr}{extra_vals}
             )
-            """
-        ),
+            """),
         params,
     )
 
@@ -241,14 +233,12 @@ def downgrade() -> None:
 
     for dist in UBUNTU_26_04_DISTRIBUTIONS:
         bind.execute(
-            text(
-                """
+            text("""
                 DELETE FROM child_host_distribution
                 WHERE child_type = :child_type
                   AND distribution_name = :distribution_name
                   AND distribution_version = :distribution_version
-                """
-            ),
+                """),
             {
                 "child_type": dist["child_type"],
                 "distribution_name": dist["distribution_name"],

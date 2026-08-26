@@ -21,7 +21,6 @@ either external dependency.
 import io
 import os
 import tarfile
-
 from unittest.mock import MagicMock, patch
 
 import pytest

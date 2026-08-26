@@ -11,7 +11,6 @@ which provide role-based access control functionality.
 
 import uuid
 
-
 from backend.security.roles import (
     SecurityRoles,
     UserRoleCache,
@@ -238,8 +237,9 @@ class TestLoadUserRoles:
 
     def test_load_user_roles_returns_cache(self, session):
         """Test load_user_roles returns a UserRoleCache object."""
-        from backend.persistence.models import User
         from argon2 import PasswordHasher
+
+        from backend.persistence.models import User
 
         # Create a test user
         ph = PasswordHasher()

@@ -16,10 +16,10 @@ from their install_identifier field.
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy import text
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "v1w2x3y4z5a6"
@@ -46,30 +46,22 @@ def upgrade() -> None:
     )
 
     # Populate cloud_image_url for existing KVM distributions from install_identifier
-    bind.execute(
-        text(
-            """
+    bind.execute(text("""
             UPDATE child_host_distribution
             SET cloud_image_url = install_identifier
             WHERE child_type = 'kvm'
               AND install_identifier IS NOT NULL
               AND install_identifier LIKE 'http%'
-            """
-        )
-    )
+            """))
 
     # Populate iso_url for existing VMM distributions from install_identifier
-    bind.execute(
-        text(
-            """
+    bind.execute(text("""
             UPDATE child_host_distribution
             SET iso_url = install_identifier
             WHERE child_type = 'vmm'
               AND install_identifier IS NOT NULL
               AND install_identifier LIKE 'http%'
-            """
-        )
-    )
+            """))
 
 
 def downgrade() -> None:

@@ -13,11 +13,12 @@ from ppa:sysmanage/sysmanage-agent to ppa:bceverly/sysmanage-agent.
 The seeder migration k0l1m2n3o4p5 had an incorrect PPA name.
 
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "l1m2n3o4p5q6"
@@ -34,9 +35,7 @@ def upgrade() -> None:
     # Update all LXD distributions that have the incorrect PPA name
     # This is idempotent - it only updates records with the wrong value
     if is_sqlite:
-        bind.execute(
-            text(
-                """
+        bind.execute(text("""
                 UPDATE child_host_distribution
                 SET agent_install_commands = REPLACE(
                     agent_install_commands,
@@ -46,13 +45,9 @@ def upgrade() -> None:
                 updated_at = CURRENT_TIMESTAMP
                 WHERE child_type = 'lxd'
                   AND agent_install_commands LIKE '%ppa:sysmanage/sysmanage-agent%'
-                """
-            )
-        )
+                """))
     else:
-        bind.execute(
-            text(
-                """
+        bind.execute(text("""
                 UPDATE child_host_distribution
                 SET agent_install_commands = REPLACE(
                     agent_install_commands,
@@ -62,9 +57,7 @@ def upgrade() -> None:
                 updated_at = NOW()
                 WHERE child_type = 'lxd'
                   AND agent_install_commands LIKE '%ppa:sysmanage/sysmanage-agent%'
-                """
-            )
-        )
+                """))
 
 
 def downgrade() -> None:
@@ -73,9 +66,7 @@ def downgrade() -> None:
     is_sqlite = bind.dialect.name == "sqlite"
 
     if is_sqlite:
-        bind.execute(
-            text(
-                """
+        bind.execute(text("""
                 UPDATE child_host_distribution
                 SET agent_install_commands = REPLACE(
                     agent_install_commands,
@@ -85,13 +76,9 @@ def downgrade() -> None:
                 updated_at = CURRENT_TIMESTAMP
                 WHERE child_type = 'lxd'
                   AND agent_install_commands LIKE '%ppa:bceverly/sysmanage-agent%'
-                """
-            )
-        )
+                """))
     else:
-        bind.execute(
-            text(
-                """
+        bind.execute(text("""
                 UPDATE child_host_distribution
                 SET agent_install_commands = REPLACE(
                     agent_install_commands,
@@ -101,6 +88,4 @@ def downgrade() -> None:
                 updated_at = NOW()
                 WHERE child_type = 'lxd'
                   AND agent_install_commands LIKE '%ppa:bceverly/sysmanage-agent%'
-                """
-            )
-        )
+                """))

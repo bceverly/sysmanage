@@ -45,8 +45,8 @@ import logging
 from datetime import datetime, timezone
 
 from backend.licensing.module_loader import module_loader
-from backend.persistence.db import get_db
 from backend.persistence import models
+from backend.persistence.db import get_db
 
 logger = logging.getLogger(__name__)
 

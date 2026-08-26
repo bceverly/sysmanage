@@ -198,12 +198,12 @@ def test_teardown_openbao_revokes_then_deletes(real_engine):
 
 def test_delete_registry_records_removes_all(real_engine, db_session):
     from backend.persistence.models import (
+        TENANT_STATUS_ACTIVE,
         RegistryTenant,
         RegistryTenantEmailDomain,
         RegistryTenantPlacement,
         RegistryUser,
         RegistryUserTenantGrant,
-        TENANT_STATUS_ACTIVE,
     )
 
     tenant = RegistryTenant(name="Acme", slug="acme-del", status=TENANT_STATUS_ACTIVE)

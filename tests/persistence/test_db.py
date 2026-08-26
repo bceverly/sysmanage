@@ -9,16 +9,17 @@ This module tests the database connection and session management
 functionality in backend/persistence/db.py.
 """
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 from backend.persistence.db import (
     Base,
     enter_test_mode,
     exit_test_mode,
+    get_database_url,
     get_db,
     get_engine,
-    get_database_url,
     get_session_local,
 )
 
@@ -222,8 +223,8 @@ class TestLegacyFunctions:
 
     def test_set_test_engine_calls_enter_test_mode(self):
         """Test that set_test_engine is an alias for enter_test_mode."""
-        from backend.persistence.db import set_test_engine
         from backend.persistence import db
+        from backend.persistence.db import set_test_engine
 
         # Store original values
         original_is_test = db.IS_TEST_MODE
@@ -242,8 +243,8 @@ class TestLegacyFunctions:
 
     def test_reset_database_calls_exit_test_mode(self):
         """Test that reset_database is an alias for exit_test_mode."""
-        from backend.persistence.db import reset_database
         from backend.persistence import db
+        from backend.persistence.db import reset_database
 
         # Store original values
         original_is_test = db.IS_TEST_MODE

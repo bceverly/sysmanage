@@ -7,8 +7,9 @@ Tests for backend/websocket/inbound_processor.py module.
 Tests inbound message processing for the WebSocket queue.
 """
 
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
 
 
 class TestProcessPendingMessages:

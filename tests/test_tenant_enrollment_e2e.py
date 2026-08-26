@@ -34,9 +34,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from backend.config import config
-from backend.persistence import partitions
 from backend.persistence import db as db_module
-from backend.persistence import models
+from backend.persistence import models, partitions
 from backend.persistence.db import Base
 from backend.services import enrollment_service, host_tenant_index
 from backend.websocket import inbound_processor

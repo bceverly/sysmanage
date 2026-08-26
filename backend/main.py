@@ -128,10 +128,11 @@ from backend.startup.tenant_middleware import ActiveTenantMiddleware  # noqa: E4
 app.add_middleware(ActiveTenantMiddleware)
 startup_logger.info("Active-tenant middleware added")
 
+from backend.config.bind_policy import check_api_bind, resolve_api_bind_host
+
 # Request rate limiting (Phase 13.2).  Opt-in (disabled by default); added
 # inside CORS so CORS preflight is handled first and never counted.
 from backend.startup.rate_limit_middleware import RateLimitMiddleware  # noqa: E402
-from backend.config.bind_policy import check_api_bind, resolve_api_bind_host
 
 app.add_middleware(RateLimitMiddleware)
 startup_logger.info("Rate-limit middleware added")

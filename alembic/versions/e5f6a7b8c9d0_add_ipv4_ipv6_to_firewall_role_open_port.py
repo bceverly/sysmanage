@@ -13,6 +13,7 @@ Create Date: 2025-11-28 14:00:00.000000
 from typing import Sequence, Union
 
 import sqlalchemy as sa
+
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -47,7 +48,9 @@ def upgrade() -> None:
                 "ipv4",
                 sa.Boolean(),
                 nullable=False,
-                server_default=sa.text("1" if connection.dialect.name == "sqlite" else "true"),
+                server_default=sa.text(
+                    "1" if connection.dialect.name == "sqlite" else "true"
+                ),
             ),
         )
 
@@ -59,7 +62,9 @@ def upgrade() -> None:
                 "ipv6",
                 sa.Boolean(),
                 nullable=False,
-                server_default=sa.text("1" if connection.dialect.name == "sqlite" else "true"),
+                server_default=sa.text(
+                    "1" if connection.dialect.name == "sqlite" else "true"
+                ),
             ),
         )
 

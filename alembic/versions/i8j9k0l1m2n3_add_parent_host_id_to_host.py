@@ -9,11 +9,12 @@ Revises: h7i8j9k0l1m2
 Create Date: 2025-12-04 03:15:00.000000
 
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "i8j9k0l1m2n3"

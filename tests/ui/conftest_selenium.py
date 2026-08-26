@@ -15,24 +15,25 @@ Cross-browser testing requirements:
 If either browser/driver is missing, tests will be skipped for that browser.
 """
 
-import os
 import contextlib
+import os
 import signal
 import subprocess
 import time
+import uuid
+
 import pytest
 import yaml
-import uuid
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options as ChromeOptions
-from selenium.webdriver.firefox.service import Service as FirefoxService
-from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 

@@ -20,8 +20,9 @@ Revises: q19imagecontent
 from typing import Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
+
+from alembic import op
 
 revision: str = "q20imagemode"
 down_revision: Union[str, None] = "q19imagecontent"

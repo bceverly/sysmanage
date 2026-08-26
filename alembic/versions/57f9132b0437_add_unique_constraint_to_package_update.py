@@ -9,15 +9,16 @@ Revises: 8b9c0d1e2f3a
 Create Date: 2025-11-19 09:47:38.699720
 
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = '57f9132b0437'
-down_revision: Union[str, None] = '8b9c0d1e2f3a'
+revision: str = "57f9132b0437"
+down_revision: Union[str, None] = "8b9c0d1e2f3a"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -28,7 +29,7 @@ def upgrade() -> None:
     dialect_name = bind.dialect.name
 
     # Remove duplicate package_update entries
-    if dialect_name == 'postgresql':
+    if dialect_name == "postgresql":
         # PostgreSQL supports window functions in DELETE
         op.execute("""
             DELETE FROM package_update
@@ -59,24 +60,25 @@ def upgrade() -> None:
     # Add unique constraint on (host_id, package_name, package_manager)
     # Check if constraint already exists to make this idempotent
     from sqlalchemy import inspect
-    inspector = inspect(bind)
-    constraints = inspector.get_unique_constraints('package_update')
-    constraint_names = [c['name'] for c in constraints]
 
-    if 'uq_package_update_host_package_manager' not in constraint_names:
-        if dialect_name == 'sqlite':
+    inspector = inspect(bind)
+    constraints = inspector.get_unique_constraints("package_update")
+    constraint_names = [c["name"] for c in constraints]
+
+    if "uq_package_update_host_package_manager" not in constraint_names:
+        if dialect_name == "sqlite":
             # SQLite requires batch mode for adding constraints
-            with op.batch_alter_table('package_update', schema=None) as batch_op:
+            with op.batch_alter_table("package_update", schema=None) as batch_op:
                 batch_op.create_unique_constraint(
-                    'uq_package_update_host_package_manager',
-                    ['host_id', 'package_name', 'package_manager']
+                    "uq_package_update_host_package_manager",
+                    ["host_id", "package_name", "package_manager"],
                 )
         else:
             # PostgreSQL can add constraints directly
             op.create_unique_constraint(
-                'uq_package_update_host_package_manager',
-                'package_update',
-                ['host_id', 'package_name', 'package_manager']
+                "uq_package_update_host_package_manager",
+                "package_update",
+                ["host_id", "package_name", "package_manager"],
             )
 
 
@@ -85,17 +87,14 @@ def downgrade() -> None:
     bind = op.get_bind()
     dialect_name = bind.dialect.name
 
-    if dialect_name == 'sqlite':
+    if dialect_name == "sqlite":
         # SQLite requires batch mode for dropping constraints
-        with op.batch_alter_table('package_update', schema=None) as batch_op:
+        with op.batch_alter_table("package_update", schema=None) as batch_op:
             batch_op.drop_constraint(
-                'uq_package_update_host_package_manager',
-                type_='unique'
+                "uq_package_update_host_package_manager", type_="unique"
             )
     else:
         # PostgreSQL can drop constraints directly
         op.drop_constraint(
-            'uq_package_update_host_package_manager',
-            'package_update',
-            type_='unique'
+            "uq_package_update_host_package_manager", "package_update", type_="unique"
         )

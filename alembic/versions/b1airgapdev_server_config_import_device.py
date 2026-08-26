@@ -20,8 +20,8 @@ is supported by both PostgreSQL and SQLite, so no dialect guard needed.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 
+from alembic import op
 
 revision: str = "b1airgapdev"
 down_revision: Union[str, None] = "a3snapsize"

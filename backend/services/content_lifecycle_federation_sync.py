@@ -49,10 +49,8 @@ def announce_promotion_to_sites(cv, to_env, version, shared_db, tenant_db) -> No
     if not subs:
         return
 
-    from backend.api.content_lifecycle import (
-        _host_fqdn,  # noqa: PLC0415
-        _resolve_cv_serving_host,
-    )
+    from backend.api.content_lifecycle import _host_fqdn  # noqa: PLC0415
+    from backend.api.content_lifecycle import _resolve_cv_serving_host
 
     try:
         host_id = _resolve_cv_serving_host(cv, shared_db, tenant_db)[0]

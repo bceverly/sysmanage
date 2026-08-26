@@ -14,7 +14,7 @@ Tests cover:
 
 import sys
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, Mock, patch, PropertyMock
+from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 import pytest
 from sqlalchemy import create_engine

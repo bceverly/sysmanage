@@ -13,6 +13,7 @@ Create Date: 2025-11-28 12:00:00.000000
 from typing import Sequence, Union
 
 import sqlalchemy as sa
+
 from alembic import op
 from backend.persistence.models.core import GUID
 

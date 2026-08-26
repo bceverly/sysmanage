@@ -143,11 +143,7 @@ class TestDecodeJWT:
         """Test decode_jwt with expired token."""
         import jwt
 
-        from backend.auth.auth_handler import (
-            JWT_ALGORITHM,
-            JWT_SECRET,
-            decode_jwt,
-        )
+        from backend.auth.auth_handler import JWT_ALGORITHM, JWT_SECRET, decode_jwt
 
         # Create an expired token
         payload = {
@@ -210,11 +206,7 @@ class TestDecodeJWT:
         """Test decode_jwt with token missing expires field."""
         import jwt
 
-        from backend.auth.auth_handler import (
-            JWT_ALGORITHM,
-            JWT_SECRET,
-            decode_jwt,
-        )
+        from backend.auth.auth_handler import JWT_ALGORITHM, JWT_SECRET, decode_jwt
 
         # Create a token without expires field
         payload = {"user_id": "test@example.com"}

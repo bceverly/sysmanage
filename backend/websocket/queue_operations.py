@@ -85,9 +85,9 @@ class QueueOperations:
         # without a host.)
         session_provided = db is not None
         if not session_provided:
-            from backend.persistence.partitions import (  # noqa: PLC0415
+            from backend.persistence.partitions import (
                 tenant_engine_for_host,
-            )
+            )  # noqa: PLC0415
 
             tenant_engine = tenant_engine_for_host(host_id)
             if tenant_engine is None:
@@ -116,9 +116,9 @@ class QueueOperations:
                 and direction == QueueDirection.OUTBOUND
                 and host_id is not None
             ):
-                from backend.services.agent_capability_service import (  # noqa: PLC0415
+                from backend.services.agent_capability_service import (
                     assert_host_supports,
-                )
+                )  # noqa: PLC0415
 
                 assert_host_supports(host, message_data.get("command_type"))
 

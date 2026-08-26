@@ -18,10 +18,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from backend.persistence.db import Base
-from backend.persistence.models.tenancy import (
-    RegistryTenant,
-    RegistryUserTenantGrant,
-)
+from backend.persistence.models.tenancy import RegistryTenant, RegistryUserTenantGrant
 from backend.services import registry_service
 
 TENANT = uuid.uuid4()

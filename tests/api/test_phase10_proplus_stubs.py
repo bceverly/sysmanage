@@ -270,22 +270,14 @@ class TestPhase10FeatureCodesRegistered:
         ModuleCode.from_string("observability_engine")
 
     def test_enterprise_tier_includes_phase10_features(self):
-        from backend.licensing.features import (
-            FeatureCode,
-            LicenseTier,
-            TIER_FEATURES,
-        )
+        from backend.licensing.features import TIER_FEATURES, FeatureCode, LicenseTier
 
         ent = TIER_FEATURES[LicenseTier.ENTERPRISE]
         assert FeatureCode.VIRTUALIZATION_KVM_LIFECYCLE in ent
         assert FeatureCode.OBSERVABILITY_OTEL_DEPLOY in ent
 
     def test_enterprise_tier_includes_phase10_modules(self):
-        from backend.licensing.features import (
-            LicenseTier,
-            ModuleCode,
-            TIER_MODULES,
-        )
+        from backend.licensing.features import TIER_MODULES, LicenseTier, ModuleCode
 
         ent = TIER_MODULES[LicenseTier.ENTERPRISE]
         assert ModuleCode.VIRTUALIZATION_ENGINE in ent

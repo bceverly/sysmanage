@@ -16,6 +16,7 @@ associated roles for managing child hosts (WSL, LXD, VirtualBox, etc.).
 from typing import Sequence, Union
 
 import sqlalchemy as sa
+
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -84,16 +85,14 @@ def upgrade() -> None:
 
     if not group_exists:
         # Create the Virtualization security role group
-        op.execute(
-            f"""
+        op.execute(f"""
             INSERT INTO security_role_groups (id, name, description)
             VALUES (
                 '{VIRTUALIZATION_GROUP_ID}'{uuid_cast},
                 'Virtualization',
                 'Permissions for managing virtual machines, containers, and WSL instances'
             )
-            """
-        )
+            """)
 
     # Add virtualization roles
     for role_id, role_name, role_desc in VIRTUALIZATION_ROLES:
@@ -104,8 +103,7 @@ def upgrade() -> None:
         role_exists = result.scalar() > 0
 
         if not role_exists:
-            op.execute(
-                f"""
+            op.execute(f"""
                 INSERT INTO security_roles (id, name, description, group_id)
                 VALUES (
                     '{role_id}'{uuid_cast},
@@ -113,8 +111,7 @@ def upgrade() -> None:
                     '{role_desc}',
                     '{VIRTUALIZATION_GROUP_ID}'{uuid_cast}
                 )
-                """
-            )
+                """)
 
 
 def downgrade() -> None:
@@ -130,9 +127,7 @@ def downgrade() -> None:
     op.execute(f"DELETE FROM security_roles WHERE id IN ({role_ids_str})")
 
     # Remove the security role group
-    op.execute(
-        f"""
+    op.execute(f"""
         DELETE FROM security_role_groups
         WHERE id = '{VIRTUALIZATION_GROUP_ID}'{uuid_cast}
-        """
-    )
+        """)

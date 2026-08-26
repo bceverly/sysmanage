@@ -7,9 +7,10 @@ Tests for backend/licensing/public_key.py module.
 Tests public key fetching, caching, and management.
 """
 
-import pytest
 from pathlib import Path
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 class TestGetLicenseServerUrl:
@@ -252,6 +253,7 @@ class TestFetchPublicKey:
     async def test_fetch_network_error(self):
         """Test handles network errors."""
         import aiohttp
+
         from backend.licensing import public_key
 
         with patch("aiohttp.ClientSession") as mock_session_class:

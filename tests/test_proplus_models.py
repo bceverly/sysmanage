@@ -701,9 +701,9 @@ class TestProPlusConstants:
     def test_constants_exist(self):
         """Test module-level constants exist."""
         from backend.persistence.models.proplus import (
-            HOST_ID_FK,
-            CASCADE_DELETE,
             CASCADE_ALL_DELETE_ORPHAN,
+            CASCADE_DELETE,
+            HOST_ID_FK,
         )
 
         assert HOST_ID_FK == "host.id"

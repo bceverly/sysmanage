@@ -22,9 +22,8 @@ from __future__ import annotations
 import logging
 import os
 import uuid
-from typing import List, Optional
-
 from datetime import datetime, timezone
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
@@ -36,16 +35,11 @@ from backend.auth.auth_handler import (
     decode_airgap_download_token,
     sign_airgap_download_token,
 )
-from backend.i18n import _, N_
+from backend.i18n import N_, _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
-from backend.services.audit_service import (
-    ActionType,
-    AuditService,
-    EntityType,
-    Result,
-)
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 logger = logging.getLogger(__name__)
 
@@ -306,9 +300,7 @@ def _derive_target_meta(
     # than an ORM relationship (a cross-partition relationship cannot eager-load
     # across databases).  The loaded row's columns stay readable after the
     # session closes.
-    from backend.persistence.partitions import (  # noqa: PLC0415
-        shared_sessionmaker,
-    )
+    from backend.persistence.partitions import shared_sessionmaker  # noqa: PLC0415
 
     with shared_sessionmaker()() as _shared:
         known = (

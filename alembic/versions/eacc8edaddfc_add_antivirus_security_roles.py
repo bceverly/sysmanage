@@ -9,15 +9,16 @@ Revises: eccf2a93022b
 Create Date: 2025-10-08 09:49:48.785538
 
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = 'eacc8edaddfc'
-down_revision: Union[str, None] = 'eccf2a93022b'
+revision: str = "eacc8edaddfc"
+down_revision: Union[str, None] = "eccf2a93022b"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -25,8 +26,8 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     # Detect database type
     bind = op.get_bind()
-    is_sqlite = bind.dialect.name == 'sqlite'
-    uuid_cast = '' if is_sqlite else '::uuid'
+    is_sqlite = bind.dialect.name == "sqlite"
+    uuid_cast = "" if is_sqlite else "::uuid"
 
     # Add Antivirus roles to the Package group
     # Using role IDs 46-47 to continue the sequence (42-45 are already used)
@@ -40,8 +41,8 @@ def upgrade() -> None:
 def downgrade() -> None:
     # Detect database type
     bind = op.get_bind()
-    is_sqlite = bind.dialect.name == 'sqlite'
-    uuid_cast = '' if is_sqlite else '::uuid'
+    is_sqlite = bind.dialect.name == "sqlite"
+    uuid_cast = "" if is_sqlite else "::uuid"
 
     # Remove the Antivirus roles
     op.execute(f"""

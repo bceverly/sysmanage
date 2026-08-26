@@ -24,9 +24,9 @@ Revises: r2fipsmode
 from typing import Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 
+from alembic import op
 from backend.persistence.models.core import GUID
 
 revision: str = "q15clmbind"
@@ -59,9 +59,7 @@ def upgrade() -> None:
                 "environment_id", "content_view_id", name="uq_env_content_binding"
             ),
         )
-        op.create_index(
-            "ix_%s_environment_id" % _BINDING, _BINDING, ["environment_id"]
-        )
+        op.create_index("ix_%s_environment_id" % _BINDING, _BINDING, ["environment_id"])
         op.create_index(
             "ix_%s_content_view_id" % _BINDING, _BINDING, ["content_view_id"]
         )
@@ -79,9 +77,7 @@ def upgrade() -> None:
             sa.Column("note", sa.Text(), nullable=True),
             sa.Column("at", sa.DateTime(), nullable=False),
         )
-        op.create_index(
-            "ix_%s_content_view_id" % _AUDIT, _AUDIT, ["content_view_id"]
-        )
+        op.create_index("ix_%s_content_view_id" % _AUDIT, _AUDIT, ["content_view_id"])
         op.create_index("ix_%s_action" % _AUDIT, _AUDIT, ["action"])
         op.create_index("ix_%s_at" % _AUDIT, _AUDIT, ["at"])
 
@@ -96,9 +92,7 @@ def upgrade() -> None:
                 "environment_id", "site_id", name="uq_env_site_subscription"
             ),
         )
-        op.create_index(
-            "ix_%s_environment_id" % _SUB, _SUB, ["environment_id"]
-        )
+        op.create_index("ix_%s_environment_id" % _SUB, _SUB, ["environment_id"])
         op.create_index("ix_%s_site_id" % _SUB, _SUB, ["site_id"])
 
 

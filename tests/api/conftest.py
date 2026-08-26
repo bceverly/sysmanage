@@ -59,7 +59,6 @@ def test_db():
     # classes live in ``_orm_mirror_a`` / ``_orm_mirror_b`` (split for file
     # size) and all register on the shared ``TestBase``.
     # ⚠️  ADD NEW MODELS to the appropriate _orm_mirror_* module.
-    from tests.api._orm_mirror_base import TestBase
     from tests.api._orm_mirror_a import (  # noqa: F401  pylint: disable=unused-import
         AuditLog,
         AvailablePackage,
@@ -86,8 +85,8 @@ def test_db():
     )
     from tests.api._orm_mirror_b import (  # noqa: F401  pylint: disable=unused-import
         AccessGroup,
-        AirGapBundle,
         AirgapAgentChannelMirror,
+        AirGapBundle,
         AirgapCollectionRun,
         AirgapCollectionSchedule,
         AirgapCollectionTarget,
@@ -119,6 +118,7 @@ def test_db():
         UserAccessGroup,
         UserMfaEnrollment,
     )
+    from tests.api._orm_mirror_base import TestBase
 
     # Create all tables with test models
     TestBase.metadata.create_all(bind=test_engine)

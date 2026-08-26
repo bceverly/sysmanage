@@ -17,8 +17,8 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 from backend.persistence.models.provisioning import (
-    INSTALL_ASSIGNMENT_STATES,
     INSTALL_ASSIGNMENT_DISARMING_STATES,
+    INSTALL_ASSIGNMENT_STATES,
     INSTALL_TEMPLATE_TYPES,
     HostInstallAssignment,
     InstallSource,

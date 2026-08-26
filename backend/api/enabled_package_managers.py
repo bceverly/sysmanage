@@ -25,10 +25,10 @@ from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import AuditService, EntityType
+from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
-from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 

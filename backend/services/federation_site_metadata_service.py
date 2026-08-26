@@ -30,10 +30,8 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from backend.persistence.models.core import Host
-from backend.services import (
-    federation_coordinator_service as coord_svc,
-    federation_sync_queue_service as sync_svc,
-)
+from backend.services import federation_coordinator_service as coord_svc
+from backend.services import federation_sync_queue_service as sync_svc
 
 # Single pending metadata row at a time — re-collecting replaces it.
 SITE_METADATA_PAYLOAD_TYPE = "site_metadata"
@@ -45,9 +43,9 @@ def _resolve_version() -> str:
     try:
         # backend/__init__.py is generated at build time with __version__;
         # pylint can't see it statically, hence the disable.
-        from backend import (  # type: ignore[attr-defined]  # noqa: PLC0415  # pylint: disable=no-name-in-module
+        from backend import (
             __version__,
-        )
+        )  # type: ignore[attr-defined]  # noqa: PLC0415  # pylint: disable=no-name-in-module
 
         return str(__version__)
     except Exception:  # pylint: disable=broad-exception-caught
@@ -62,9 +60,7 @@ def _loaded_capabilities() -> list:
     capability set rather than failing metadata collection.
     """
     try:
-        from backend.licensing.module_loader import (  # noqa: PLC0415
-            module_loader,
-        )
+        from backend.licensing.module_loader import module_loader  # noqa: PLC0415
 
         # ``loaded_modules`` is a @property returning a dict, not a method.
         return sorted(module_loader.loaded_modules.keys())

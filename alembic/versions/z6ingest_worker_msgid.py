@@ -29,8 +29,9 @@ SQLite- and PostgreSQL-safe.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
+
+from alembic import op
 
 revision: str = "z6ingest"
 down_revision: Union[str, None] = "y5srvcfg"

@@ -10,7 +10,11 @@ import { vi, beforeEach, afterEach, test, expect } from "vitest";
 let errSpy: ReturnType<typeof vi.spyOn>;
 
 vi.mock("react-i18next", () => {
-  const t = (key: string, fallback?: string, opts?: Record<string, unknown>) => {
+  const t = (
+    key: string,
+    fallback?: string,
+    opts?: Record<string, unknown>,
+  ) => {
     let s = fallback || key;
     if (opts) {
       for (const [k, v] of Object.entries(opts)) {
@@ -81,9 +85,7 @@ afterEach(() => {
 test("renders the card with disabled status after load", async () => {
   render(<GraylogIntegrationCard />);
   expect(await screen.findByText("Graylog Integration")).toBeInTheDocument();
-  await waitFor(() =>
-    expect(screen.getByText("Disabled")).toBeInTheDocument(),
-  );
+  await waitFor(() => expect(screen.getByText("Disabled")).toBeInTheDocument());
   expect(m(axiosInstance.get)).toHaveBeenCalledWith(
     "/api/v1/graylog/graylog-servers",
   );
@@ -91,11 +93,12 @@ test("renders the card with disabled status after load", async () => {
 
 test("enabling the integration reveals the managed-server controls", async () => {
   render(<GraylogIntegrationCard />);
-  await screen.findByText("Graylog Integration");
-
-  const enableSwitch = screen.getByLabelText(
+  // The header renders WHILE the card is still loading, so it is not a
+  // readiness anchor -- wait for the switch itself, which only exists once
+  // the async load resolves.
+  const enableSwitch = (await screen.findByLabelText(
     "Enable Graylog Integration",
-  ) as HTMLInputElement;
+  )) as HTMLInputElement;
   fireEvent.click(enableSwitch);
 
   await waitFor(() =>
@@ -122,10 +125,12 @@ test("saves settings via the save button", async () => {
 
 test("reloads data when Refresh is clicked", async () => {
   render(<GraylogIntegrationCard />);
-  await screen.findByText("Graylog Integration");
+  // Same trap as above: anchor on a control that only the loaded card has,
+  // otherwise mockClear() can wipe the calls the initial load is still making.
+  const refresh = await screen.findByRole("button", { name: /Refresh/ });
   m(axiosInstance.get).mockClear();
 
-  fireEvent.click(screen.getByRole("button", { name: /Refresh/ }));
+  fireEvent.click(refresh);
 
   await waitFor(() =>
     expect(m(axiosInstance.get)).toHaveBeenCalledWith(

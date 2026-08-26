@@ -37,8 +37,8 @@ from backend.services import federation_rollup_service as rollup_svc
 from backend.services import federation_secret_lease_service as lease_svc
 from backend.services import federation_secret_request_service as secret_req_svc
 from backend.services import federation_site_service as site_svc
-from tests.federation_crypto import enroll_site
 from backend.services import federation_sync_queue_service as sync_svc
+from tests.federation_crypto import enroll_site
 
 pytestmark = pytest.mark.integration
 

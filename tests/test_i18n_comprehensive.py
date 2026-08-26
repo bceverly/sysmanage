@@ -10,7 +10,6 @@ Tests language selection, translation loading, and message translation.
 import gettext
 from unittest.mock import Mock, patch
 
-
 from backend.i18n import (
     DEFAULT_LANGUAGE,
     _,

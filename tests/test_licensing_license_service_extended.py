@@ -395,8 +395,9 @@ class TestPhoneHomeHttpPaths:
 
     @pytest.mark.asyncio
     async def test_phone_home_network_error_falls_back_to_offline_grace(self):
-        from backend.licensing.license_service import LicenseService
         import aiohttp
+
+        from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
         service._cached_license = _payload()

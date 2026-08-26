@@ -29,7 +29,7 @@ def _utcnow():
 
 
 def _tenant(db_session, slug="enroll-co"):
-    from backend.persistence.models import RegistryTenant, TENANT_STATUS_ACTIVE
+    from backend.persistence.models import TENANT_STATUS_ACTIVE, RegistryTenant
 
     tenant = RegistryTenant(name="Enroll Co", slug=slug, status=TENANT_STATUS_ACTIVE)
     db_session.add(tenant)

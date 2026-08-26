@@ -24,8 +24,8 @@ drops all four tables in dependency order.  Round-trip verified by the
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "p8a1k0r2g3s4"
@@ -71,7 +71,9 @@ def upgrade() -> None:
             sa.ForeignKey("access_groups.id", ondelete="SET NULL"),
             nullable=True,
         ),
-        sa.Column("auto_approve", sa.Boolean(), nullable=False, server_default=sa.false()),
+        sa.Column(
+            "auto_approve", sa.Boolean(), nullable=False, server_default=sa.false()
+        ),
         sa.Column("revoked", sa.Boolean(), nullable=False, server_default=sa.false()),
         sa.Column("max_uses", sa.Integer(), nullable=True),
         sa.Column("use_count", sa.Integer(), nullable=False, server_default="0"),

@@ -55,21 +55,13 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
-from backend.auth.auth_handler import (
-    decode_mfa_pending_token,
-    sign_jwt,
-)
+from backend.auth.auth_handler import decode_mfa_pending_token, sign_jwt
 from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
 from backend.services import mfa_service
-from backend.services.audit_service import (
-    ActionType,
-    AuditService,
-    EntityType,
-    Result,
-)
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 logger = logging.getLogger(__name__)
 argon2_hasher = PasswordHasher()

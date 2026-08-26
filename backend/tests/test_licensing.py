@@ -30,11 +30,11 @@ from cryptography.hazmat.primitives.serialization import (
 )
 
 from backend.licensing.features import (
+    TIER_FEATURES,
+    TIER_MODULES,
     FeatureCode,
     LicenseTier,
     ModuleCode,
-    TIER_FEATURES,
-    TIER_MODULES,
 )
 from backend.licensing.validator import (
     EXPIRATION_GRACE_DAYS,

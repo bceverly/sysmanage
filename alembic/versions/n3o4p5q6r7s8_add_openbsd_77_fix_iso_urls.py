@@ -18,9 +18,9 @@ This migration:
 import uuid
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "n3o4p5q6r7s8"
@@ -69,16 +69,14 @@ def upgrade() -> None:
     for update in OPENBSD_URL_UPDATES:
         if is_sqlite:
             bind.execute(
-                text(
-                    """
+                text("""
                     UPDATE child_host_distribution SET
                         install_identifier = :new_url,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE child_type = 'vmm'
                       AND distribution_name = 'OpenBSD'
                       AND distribution_version = :distribution_version
-                    """
-                ),
+                    """),
                 {
                     "distribution_version": update["distribution_version"],
                     "new_url": update["new_url"],
@@ -86,16 +84,14 @@ def upgrade() -> None:
             )
         else:
             bind.execute(
-                text(
-                    """
+                text("""
                     UPDATE child_host_distribution SET
                         install_identifier = :new_url,
                         updated_at = NOW()
                     WHERE child_type = 'vmm'
                       AND distribution_name = 'OpenBSD'
                       AND distribution_version = :distribution_version
-                    """
-                ),
+                    """),
                 {
                     "distribution_version": update["distribution_version"],
                     "new_url": update["new_url"],
@@ -107,14 +103,12 @@ def upgrade() -> None:
     dist_id = str(uuid.uuid4())
 
     result = bind.execute(
-        text(
-            """
+        text("""
             SELECT COUNT(*) FROM child_host_distribution
             WHERE child_type = :child_type
               AND distribution_name = :distribution_name
               AND distribution_version = :distribution_version
-            """
-        ),
+            """),
         {
             "child_type": dist["child_type"],
             "distribution_name": dist["distribution_name"],
@@ -127,8 +121,7 @@ def upgrade() -> None:
         # Update existing record
         if is_sqlite:
             bind.execute(
-                text(
-                    """
+                text("""
                     UPDATE child_host_distribution SET
                         display_name = :display_name,
                         install_identifier = :install_identifier,
@@ -140,8 +133,7 @@ def upgrade() -> None:
                     WHERE child_type = :child_type
                       AND distribution_name = :distribution_name
                       AND distribution_version = :distribution_version
-                    """
-                ),
+                    """),
                 {
                     "child_type": dist["child_type"],
                     "distribution_name": dist["distribution_name"],
@@ -156,8 +148,7 @@ def upgrade() -> None:
             )
         else:
             bind.execute(
-                text(
-                    """
+                text("""
                     UPDATE child_host_distribution SET
                         display_name = :display_name,
                         install_identifier = :install_identifier,
@@ -169,8 +160,7 @@ def upgrade() -> None:
                     WHERE child_type = :child_type
                       AND distribution_name = :distribution_name
                       AND distribution_version = :distribution_version
-                    """
-                ),
+                    """),
                 {
                     "child_type": dist["child_type"],
                     "distribution_name": dist["distribution_name"],
@@ -187,8 +177,7 @@ def upgrade() -> None:
         # Insert new record
         if is_sqlite:
             bind.execute(
-                text(
-                    """
+                text("""
                     INSERT INTO child_host_distribution (
                         id, child_type, distribution_name, distribution_version,
                         display_name, install_identifier, executable_name,
@@ -200,8 +189,7 @@ def upgrade() -> None:
                         :agent_install_method, :agent_install_commands, :notes,
                         1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
                     )
-                    """
-                ),
+                    """),
                 {
                     "id": dist_id,
                     "child_type": dist["child_type"],
@@ -217,8 +205,7 @@ def upgrade() -> None:
             )
         else:
             bind.execute(
-                text(
-                    """
+                text("""
                     INSERT INTO child_host_distribution (
                         id, child_type, distribution_name, distribution_version,
                         display_name, install_identifier, executable_name,
@@ -230,8 +217,7 @@ def upgrade() -> None:
                         :agent_install_method, :agent_install_commands, :notes,
                         true, NOW(), NOW()
                     )
-                    """
-                ),
+                    """),
                 {
                     "id": dist_id,
                     "child_type": dist["child_type"],
@@ -253,16 +239,12 @@ def downgrade() -> None:
     is_sqlite = bind.dialect.name == "sqlite"
 
     # Remove OpenBSD 7.7
-    bind.execute(
-        text(
-            """
+    bind.execute(text("""
             DELETE FROM child_host_distribution
             WHERE child_type = 'vmm'
               AND distribution_name = 'OpenBSD'
               AND distribution_version = '7.7'
-            """
-        )
-    )
+            """))
 
     # Revert URLs back to cdn.openbsd.org
     cdn_url_reverts = [
@@ -279,16 +261,14 @@ def downgrade() -> None:
     for revert in cdn_url_reverts:
         if is_sqlite:
             bind.execute(
-                text(
-                    """
+                text("""
                     UPDATE child_host_distribution SET
                         install_identifier = :old_url,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE child_type = 'vmm'
                       AND distribution_name = 'OpenBSD'
                       AND distribution_version = :distribution_version
-                    """
-                ),
+                    """),
                 {
                     "distribution_version": revert["distribution_version"],
                     "old_url": revert["old_url"],
@@ -296,16 +276,14 @@ def downgrade() -> None:
             )
         else:
             bind.execute(
-                text(
-                    """
+                text("""
                     UPDATE child_host_distribution SET
                         install_identifier = :old_url,
                         updated_at = NOW()
                     WHERE child_type = 'vmm'
                       AND distribution_name = 'OpenBSD'
                       AND distribution_version = :distribution_version
-                    """
-                ),
+                    """),
                 {
                     "distribution_version": revert["distribution_version"],
                     "old_url": revert["old_url"],

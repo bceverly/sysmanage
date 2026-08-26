@@ -15,11 +15,10 @@ Pro+ JavaScript plugin bundles.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 
+from alembic import op
 from backend.persistence.models.core import GUID
-
 
 # revision identifiers, used by Alembic.
 revision: str = "d0e1f2a3b4c5"

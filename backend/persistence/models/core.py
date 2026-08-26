@@ -11,7 +11,6 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import (
-    false,
     BigInteger,
     Boolean,
     Column,
@@ -22,6 +21,7 @@ from sqlalchemy import (
     LargeBinary,
     String,
     Text,
+    false,
 )
 from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import relationship
@@ -287,6 +287,12 @@ class Host(Base):
         "ThirdPartyRepository",
         back_populates="host",
         cascade=CASCADE_DELETE_ORPHAN,
+    )
+    config_profile_runs = relationship(
+        "ConfigProfileRun",
+        back_populates="host",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
     antivirus_status = relationship(
         "AntivirusStatus",

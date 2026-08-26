@@ -42,7 +42,7 @@ from backend.auth.auth_handler import (
     sign_airgap_bundle_token,
 )
 from backend.config import config
-from backend.i18n import _, N_
+from backend.i18n import N_, _
 from backend.licensing.feature_gate import requires_pro_plus
 from backend.persistence import db, models
 from backend.services import airgap_bundle_builder

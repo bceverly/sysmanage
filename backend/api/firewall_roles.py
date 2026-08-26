@@ -22,15 +22,6 @@ from backend.api.error_constants import (
     error_invalid_firewall_role_id,
     error_view_firewall_roles_required,
 )
-from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
-from backend.i18n import _
-from backend.persistence import db as db_module
-from backend.persistence import models
-from backend.persistence.partitions import get_tenant_db
-from backend.security.roles import SecurityRoles
-from backend.services.audit_service import AuditService, EntityType
-
-from backend.utils.verbosity_logger import sanitize_log
 from backend.api.firewall_roles_helpers import (
     COMMON_PORTS,
     CommonPortsResponse,
@@ -46,6 +37,14 @@ from backend.api.firewall_roles_helpers import (
     role_to_response_dict,
     update_firewall_status_remove_ports,
 )
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
+from backend.i18n import _
+from backend.persistence import db as db_module
+from backend.persistence import models
+from backend.persistence.partitions import get_tenant_db
+from backend.security.roles import SecurityRoles
+from backend.services.audit_service import AuditService, EntityType
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 

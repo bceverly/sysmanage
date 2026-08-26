@@ -20,6 +20,7 @@ Revises: n1custmetric
 from typing import Union
 
 import sqlalchemy as sa
+
 from alembic import op
 
 revision: str = "o1logremote"

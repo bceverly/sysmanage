@@ -26,10 +26,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 
 from backend.persistence.db import Base
-from backend.persistence.models.federation import (
-    FederationAuditLog,
-    FederationSite,
-)
+from backend.persistence.models.federation import FederationAuditLog, FederationSite
 from backend.services import federation_site_service as svc
 from tests.federation_crypto import (
     enroll_site,
@@ -585,8 +582,8 @@ class TestCancelEnrollment:
         svc.cancel_enrollment(session, site.id, actor_userid="admin@x")
         session.commit()
         from backend.persistence.models.federation import (
-            FederationAuditLog,  # noqa: PLC0415
-        )
+            FederationAuditLog,
+        )  # noqa: PLC0415
 
         entries = (
             session.query(FederationAuditLog)
@@ -671,8 +668,8 @@ class TestRegenerateEnrollmentToken:
         svc.regenerate_enrollment_token(session, site.id, actor_userid="admin@x")
         session.commit()
         from backend.persistence.models.federation import (
-            FederationAuditLog,  # noqa: PLC0415
-        )
+            FederationAuditLog,
+        )  # noqa: PLC0415
 
         entries = (
             session.query(FederationAuditLog)

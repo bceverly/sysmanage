@@ -33,9 +33,9 @@ import uuid
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 
+from alembic import op
 from backend.persistence.models.core import GUID
 
 revision: str = "y6idp10extauth"
@@ -56,7 +56,9 @@ def upgrade() -> None:
             sa.Column("id", GUID(), primary_key=True),
             sa.Column("name", sa.String(length=120), nullable=False),
             sa.Column("type", sa.String(length=20), nullable=False),
-            sa.Column("enabled", sa.Boolean(), nullable=False, server_default=sa.true()),
+            sa.Column(
+                "enabled", sa.Boolean(), nullable=False, server_default=sa.true()
+            ),
             sa.Column("ldap_server_url", sa.String(length=500), nullable=True),
             sa.Column("ldap_bind_dn", sa.String(length=500), nullable=True),
             sa.Column(
@@ -189,9 +191,7 @@ def upgrade() -> None:
                 )
             if needs_subject:
                 batch.add_column(
-                    sa.Column(
-                        "external_subject", sa.String(length=500), nullable=True
-                    )
+                    sa.Column("external_subject", sa.String(length=500), nullable=True)
                 )
 
 

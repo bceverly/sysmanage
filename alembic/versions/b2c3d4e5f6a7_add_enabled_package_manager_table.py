@@ -12,10 +12,10 @@ Create Date: 2025-11-26 00:00:00.000000
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
-from backend.persistence.models.core import GUID
 
+from alembic import op
+from backend.persistence.models.core import GUID
 
 # revision identifiers, used by Alembic.
 revision: str = "b2c3d4e5f6a7"
@@ -76,18 +76,18 @@ def upgrade() -> None:
     # Ensure the Settings role group exists (it should from the default_repository migration)
     settings_group_id = "00000000-0000-0000-0000-000000000010"
     result = bind.execute(
-        sa.text(f"SELECT COUNT(*) FROM security_role_groups WHERE id = '{settings_group_id}'")
+        sa.text(
+            f"SELECT COUNT(*) FROM security_role_groups WHERE id = '{settings_group_id}'"
+        )
     )
     group_exists = result.scalar() > 0
 
     if not group_exists:
-        op.execute(
-            f"""
+        op.execute(f"""
             INSERT INTO security_role_groups (id, name, description)
             VALUES ('{settings_group_id}', 'Settings',
                     'Permissions related to system settings and host defaults')
-            """
-        )
+            """)
 
     # Add the enabled package manager management roles (check if they exist first)
     roles_to_add = [
@@ -114,12 +114,10 @@ def upgrade() -> None:
             sa.text(f"SELECT COUNT(*) FROM security_roles WHERE name = '{role_name}'")
         )
         if result.scalar() == 0:
-            op.execute(
-                f"""
+            op.execute(f"""
                 INSERT INTO security_roles (id, name, description, group_id)
                 VALUES ('{role_id}'{uuid_cast}, '{role_name}', '{role_desc}', '{settings_group_id}'{uuid_cast})
-                """
-            )
+                """)
 
 
 def downgrade() -> None:
@@ -143,12 +141,10 @@ def downgrade() -> None:
     ]
 
     for role_name in roles_to_delete:
-        op.execute(
-            f"""
+        op.execute(f"""
             DELETE FROM security_roles
             WHERE name = '{role_name}'
-            """
-        )
+            """)
 
     if "enabled_package_manager" in tables:
         # Drop indexes first

@@ -19,9 +19,9 @@ see Phase 10.5 footgun in the y6idp10extauth migration).
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 
+from alembic import op
 from backend.persistence.models.core import GUID
 
 revision: str = "h6airgap50delta"

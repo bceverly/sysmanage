@@ -30,9 +30,8 @@ from sqlalchemy.pool import StaticPool
 
 from backend.config import config
 from backend.persistence import db as db_module
-from backend.persistence import models, partitions
+from backend.persistence import models, partitions, tenant_context
 from backend.persistence.db import Base
-from backend.persistence import tenant_context
 from backend.services import enrollment_service, host_tenant_index
 
 TENANT_A = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"

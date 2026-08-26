@@ -21,8 +21,8 @@ Reversible — downgrade drops the three tables in dependency order.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 
+from alembic import op
 
 revision: str = "p8a4r5b6t7l8"
 down_revision: Union[str, None] = "p8a3p4k5g6c7"
@@ -125,9 +125,7 @@ def downgrade() -> None:
     op.drop_index("ix_dynamic_secret_lease_kind", table_name="dynamic_secret_lease")
     op.drop_table("dynamic_secret_lease")
 
-    op.drop_index(
-        "ix_report_template_base_report_type", table_name="report_template"
-    )
+    op.drop_index("ix_report_template_base_report_type", table_name="report_template")
     op.drop_table("report_template")
 
     op.drop_table("report_branding")

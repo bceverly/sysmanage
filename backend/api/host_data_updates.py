@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from backend.api.error_constants import error_host_not_found
 from backend.api.host_utils import (
     get_host_network_interfaces,
     get_host_software_packages,
@@ -19,7 +20,6 @@ from backend.api.host_utils import (
     get_host_users_with_groups,
     validate_host_approval_status,
 )
-from backend.api.error_constants import error_host_not_found
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence import models

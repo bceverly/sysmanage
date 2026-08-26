@@ -24,8 +24,8 @@ import pytest
 import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 
-from backend.persistence.db import Base
 from backend.persistence import models  # noqa: F401  # register all models
+from backend.persistence.db import Base
 from backend.services import federation_coordinator_service as csvc
 from backend.services import federation_identity_service as idsvc
 from backend.services import federation_site_service as ssvc

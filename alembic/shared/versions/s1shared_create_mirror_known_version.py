@@ -30,9 +30,9 @@ import uuid
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect, text
 
+from alembic import op
 from backend.persistence.models.core import GUID
 
 revision: str = "s1shared"

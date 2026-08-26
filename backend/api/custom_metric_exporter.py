@@ -81,8 +81,8 @@ def _collect_series_for_session(session, tenant_id):
     """
     # Late import to avoid an import cycle at module import time (models pull in
     # db, which pulls in config, etc.) — mirrors the other API modules.
-    from backend.persistence.models import (  # noqa: PLC0415
-        CustomMetric,
+    from backend.persistence.models import (
+        CustomMetric,  # noqa: PLC0415
         CustomMetricSample,
         Host,
     )
@@ -169,9 +169,7 @@ def _render_exposition() -> str:
     """
     # Late import: partitions -> models -> ... import cycle guard, matching the
     # retention service.
-    from backend.persistence.partitions import (  # noqa: PLC0415
-        iter_host_databases,
-    )
+    from backend.persistence.partitions import iter_host_databases  # noqa: PLC0415
 
     body_lines = []
 

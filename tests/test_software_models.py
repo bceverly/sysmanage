@@ -840,8 +840,8 @@ class TestSoftwareModuleConstants:
     def test_constants_exist(self):
         """Test module-level constants exist."""
         from backend.persistence.models.software import (
-            HOST_ID_FK,
             CASCADE_DELETE_ORPHAN,
+            HOST_ID_FK,
             SET_NULL_ACTION,
             USER_ID_FK,
         )

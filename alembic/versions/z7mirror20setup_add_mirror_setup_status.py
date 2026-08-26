@@ -37,9 +37,9 @@ which lands as TEXT on SQLite and as JSON on PostgreSQL.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 
+from alembic import op
 from backend.persistence.models.core import GUID
 
 revision: str = "z7mirror20setup"
@@ -61,7 +61,9 @@ def upgrade() -> None:
                 sa.ForeignKey("host.id", ondelete="CASCADE"),
                 primary_key=True,
             ),
-            sa.Column("tools", sa.JSON(), nullable=False, server_default=sa.text("'{}'")),
+            sa.Column(
+                "tools", sa.JSON(), nullable=False, server_default=sa.text("'{}'")
+            ),
             sa.Column("platform", sa.String(length=40), nullable=True),
             sa.Column("distro", sa.String(length=40), nullable=True),
             sa.Column("last_check_at", sa.DateTime(timezone=False), nullable=True),
@@ -74,9 +76,7 @@ def upgrade() -> None:
                 server_default="idle",
             ),
             sa.Column("last_install_at", sa.DateTime(timezone=False), nullable=True),
-            sa.Column(
-                "last_install_message_id", sa.String(length=36), nullable=True
-            ),
+            sa.Column("last_install_message_id", sa.String(length=36), nullable=True),
             sa.Column("last_install_error", sa.Text(), nullable=True),
             sa.Column(
                 "created_at",

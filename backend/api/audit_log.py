@@ -23,7 +23,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from backend.api.error_constants import error_user_not_found
 from backend.auth.auth_bearer import JWTBearer, get_current_user
-from backend.i18n import _, N_
+from backend.i18n import N_, _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db as db_module
 from backend.persistence import models
@@ -428,6 +428,7 @@ def _stream_audit_csv(entries):
     """Stream a CSV of audit-log entries — RFC 4180 compliant."""
     import csv  # local import — only needed on this code path
     import io
+
     from fastapi.responses import StreamingResponse
 
     def _generator():
@@ -482,9 +483,10 @@ def _stream_audit_pdf(entries):
     header on each page.  Used by the operator-facing CSV/PDF export
     UI in Reports → Audit Log."""
     import io
+
     from fastapi.responses import Response
     from reportlab.lib import colors
-    from reportlab.lib.pagesizes import landscape, A4
+    from reportlab.lib.pagesizes import A4, landscape
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
     from reportlab.platypus import (
         Paragraph,

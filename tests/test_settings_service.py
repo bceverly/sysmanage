@@ -69,7 +69,7 @@ def test_never_raises_without_test_mode():
 
 
 def _make_tenant(db_session):
-    from backend.persistence.models import RegistryTenant, TENANT_STATUS_ACTIVE
+    from backend.persistence.models import TENANT_STATUS_ACTIVE, RegistryTenant
 
     tenant = RegistryTenant(
         name="Acme", slug="acme-settings", status=TENANT_STATUS_ACTIVE

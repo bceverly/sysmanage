@@ -25,10 +25,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from backend.persistence.models.core import Host
-from backend.services import (
-    federation_coordinator_service as coord_svc,
-    federation_sync_queue_service as sync_svc,
-)
+from backend.services import federation_coordinator_service as coord_svc
+from backend.services import federation_sync_queue_service as sync_svc
 
 HOST_DIRECTORY_PAYLOAD_TYPE = "host_directory"
 HOST_DIRECTORY_DEDUP_KEY = "host_directory:self"

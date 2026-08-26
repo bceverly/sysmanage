@@ -12,9 +12,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from backend.monitoring.heartbeat_monitor import (
-    check_host_heartbeats,
-)
+from backend.monitoring.heartbeat_monitor import check_host_heartbeats
 
 
 class TestCheckHostHeartbeats:

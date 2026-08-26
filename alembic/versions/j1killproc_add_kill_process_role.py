@@ -18,6 +18,7 @@ import uuid
 from typing import Union
 
 import sqlalchemy as sa
+
 from alembic import op
 
 revision: str = "j1killproc"

@@ -19,7 +19,6 @@ preferable to a noisy error.
 
 from __future__ import annotations
 
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 

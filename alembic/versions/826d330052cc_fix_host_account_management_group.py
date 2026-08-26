@@ -19,6 +19,7 @@ taken by the Settings group. This migration:
 from typing import Sequence, Union
 
 import sqlalchemy as sa
+
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -61,26 +62,22 @@ def upgrade() -> None:
 
     if not group_exists:
         # Create the Host Account Management security role group
-        op.execute(
-            f"""
+        op.execute(f"""
             INSERT INTO security_role_groups (id, name, description)
             VALUES (
                 '{HOST_ACCOUNT_GROUP_ID}'{uuid_cast},
                 'Host Account Management',
                 'Permissions for managing user accounts and groups on remote hosts'
             )
-            """
-        )
+            """)
 
     # Update the roles to point to the correct group
     role_ids_str = ", ".join([f"'{rid}'{uuid_cast}" for rid in HOST_ACCOUNT_ROLE_IDS])
-    op.execute(
-        f"""
+    op.execute(f"""
         UPDATE security_roles
         SET group_id = '{HOST_ACCOUNT_GROUP_ID}'{uuid_cast}
         WHERE id IN ({role_ids_str})
-        """
-    )
+        """)
 
 
 def downgrade() -> None:
@@ -91,18 +88,14 @@ def downgrade() -> None:
 
     # Move roles back to the Settings group
     role_ids_str = ", ".join([f"'{rid}'{uuid_cast}" for rid in HOST_ACCOUNT_ROLE_IDS])
-    op.execute(
-        f"""
+    op.execute(f"""
         UPDATE security_roles
         SET group_id = '{OLD_GROUP_ID}'{uuid_cast}
         WHERE id IN ({role_ids_str})
-        """
-    )
+        """)
 
     # Remove the Host Account Management security role group
-    op.execute(
-        f"""
+    op.execute(f"""
         DELETE FROM security_role_groups
         WHERE id = '{HOST_ACCOUNT_GROUP_ID}'{uuid_cast}
-        """
-    )
+        """)

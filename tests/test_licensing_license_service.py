@@ -7,9 +7,10 @@ Tests for backend/licensing/license_service.py module.
 Tests Pro+ license service functionality.
 """
 
-import pytest
 from datetime import datetime, timedelta
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 class TestLicenseServiceProperties:
@@ -239,8 +240,9 @@ class TestLicenseServiceShutdown:
     @pytest.mark.asyncio
     async def test_shutdown_cancels_tasks(self):
         """Test shutdown cancels background tasks."""
-        from backend.licensing.license_service import LicenseService
         import asyncio
+
+        from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
 
@@ -262,16 +264,16 @@ class TestLicenseServiceFeatureChecks:
 
     def test_has_feature_false_without_license(self):
         """Test has_feature returns False without license."""
-        from backend.licensing.license_service import LicenseService
         from backend.licensing.features import FeatureCode
+        from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
         assert service.has_feature(FeatureCode.HEALTH_ANALYSIS) is False
 
     def test_has_feature_true_with_feature(self):
         """Test has_feature returns True when feature is included."""
-        from backend.licensing.license_service import LicenseService
         from backend.licensing.features import FeatureCode
+        from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
         mock_license = MagicMock()
@@ -282,8 +284,8 @@ class TestLicenseServiceFeatureChecks:
 
     def test_has_feature_false_without_feature(self):
         """Test has_feature returns False when feature is not included."""
-        from backend.licensing.license_service import LicenseService
         from backend.licensing.features import FeatureCode
+        from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
         mock_license = MagicMock()
@@ -294,16 +296,16 @@ class TestLicenseServiceFeatureChecks:
 
     def test_has_module_false_without_license(self):
         """Test has_module returns False without license."""
-        from backend.licensing.license_service import LicenseService
         from backend.licensing.features import ModuleCode
+        from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
         assert service.has_module(ModuleCode.HEALTH_ENGINE) is False
 
     def test_has_module_true_with_module(self):
         """Test has_module returns True when module is included."""
-        from backend.licensing.license_service import LicenseService
         from backend.licensing.features import ModuleCode
+        from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
         mock_license = MagicMock()
@@ -314,8 +316,8 @@ class TestLicenseServiceFeatureChecks:
 
     def test_has_module_false_without_module(self):
         """Test has_module returns False when module is not included."""
-        from backend.licensing.license_service import LicenseService
         from backend.licensing.features import ModuleCode
+        from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
         mock_license = MagicMock()
@@ -574,10 +576,7 @@ class TestLicenseServiceGlobal:
 
     def test_license_service_is_license_service(self):
         """Test that global instance is LicenseService type."""
-        from backend.licensing.license_service import (
-            license_service,
-            LicenseService,
-        )
+        from backend.licensing.license_service import LicenseService, license_service
 
         assert isinstance(license_service, LicenseService)
 

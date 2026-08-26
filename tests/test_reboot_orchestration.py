@@ -12,7 +12,7 @@ Tests cover:
 
 import json
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
 
 # =============================================================================
@@ -124,6 +124,7 @@ class TestRebootOrchestrationModel:
     def test_model_cascade_delete(self, db_session):
         """Test that deleting the parent host cascades to orchestration records."""
         from sqlalchemy import text
+
         from backend.persistence.models import Host, RebootOrchestration
 
         # SQLite requires PRAGMA foreign_keys = ON to enforce CASCADE
@@ -376,18 +377,14 @@ class TestHandleAgentReconnect:
 
     def test_no_active_orchestration(self, db_session):
         """Test that nothing happens when there's no orchestration in rebooting state."""
-        from backend.services.reboot_orchestration_service import (
-            handle_agent_reconnect,
-        )
+        from backend.services.reboot_orchestration_service import handle_agent_reconnect
 
         handle_agent_reconnect(db_session, uuid.uuid4())
 
     def test_agent_reconnect_starts_children(self, db_session):
         """Test that agent reconnect transitions to restarting and enqueues start commands."""
         from backend.persistence.models import Host, RebootOrchestration
-        from backend.services.reboot_orchestration_service import (
-            handle_agent_reconnect,
-        )
+        from backend.services.reboot_orchestration_service import handle_agent_reconnect
 
         host = Host(
             fqdn="parent.example.com",
@@ -448,18 +445,14 @@ class TestCheckRestartProgress:
 
     def test_no_active_orchestration(self, db_session):
         """Test that nothing happens when there's no orchestration in restarting state."""
-        from backend.services.reboot_orchestration_service import (
-            check_restart_progress,
-        )
+        from backend.services.reboot_orchestration_service import check_restart_progress
 
         check_restart_progress(db_session, uuid.uuid4())
 
     def test_partial_restart(self, db_session):
         """Test that orchestration stays in restarting when some children haven't started."""
         from backend.persistence.models import Host, HostChild, RebootOrchestration
-        from backend.services.reboot_orchestration_service import (
-            check_restart_progress,
-        )
+        from backend.services.reboot_orchestration_service import check_restart_progress
 
         host = Host(
             fqdn="parent.example.com",
@@ -533,9 +526,7 @@ class TestCheckRestartProgress:
     def test_all_children_restarted(self, db_session):
         """Test that orchestration completes when all children are running."""
         from backend.persistence.models import Host, HostChild, RebootOrchestration
-        from backend.services.reboot_orchestration_service import (
-            check_restart_progress,
-        )
+        from backend.services.reboot_orchestration_service import check_restart_progress
 
         host = Host(
             fqdn="parent.example.com",
@@ -611,9 +602,7 @@ class TestCheckRestartProgress:
     def test_restart_with_failures(self, db_session):
         """Test that orchestration completes with error message when some children fail."""
         from backend.persistence.models import Host, HostChild, RebootOrchestration
-        from backend.services.reboot_orchestration_service import (
-            check_restart_progress,
-        )
+        from backend.services.reboot_orchestration_service import check_restart_progress
 
         host = Host(
             fqdn="parent.example.com",

@@ -20,8 +20,8 @@ Reversible — downgrade drops the three tables in dependency order.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 
+from alembic import op
 
 revision: str = "p8a3p4k5g6c7"
 down_revision: Union[str, None] = "p8a2u3p4r5o6"

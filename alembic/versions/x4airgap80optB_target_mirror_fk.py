@@ -34,11 +34,10 @@ re-running on a partially-migrated DB is a no-op.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 
+from alembic import op
 from backend.persistence.models.core import GUID
-
 
 revision: str = "x4airgap80optB"
 down_revision: Union[str, None] = "w3airgap70orch"
@@ -63,9 +62,7 @@ def upgrade() -> None:
                 ondelete="SET NULL",
             )
         if "source_snapshot_id" not in existing:
-            batch.add_column(
-                sa.Column("source_snapshot_id", GUID(), nullable=True)
-            )
+            batch.add_column(sa.Column("source_snapshot_id", GUID(), nullable=True))
             batch.create_foreign_key(
                 "fk_airgap_collection_target_source_snapshot_id",
                 "mirror_snapshot",

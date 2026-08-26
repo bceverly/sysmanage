@@ -35,8 +35,9 @@ without ORM bootstrap.
 
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import inspect, text
+
+from alembic import op
 
 revision: str = "b9mirror40pmtabs"
 down_revision: Union[str, None] = "a8mirror30platform"

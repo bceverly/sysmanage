@@ -10,7 +10,6 @@ Tests security validation and enhancement for SysManage server.
 from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
-
 from backend.security.login_security import (
     LoginSecurityValidator,
     PasswordSecurityValidator,

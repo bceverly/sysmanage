@@ -9,16 +9,17 @@ Revises: 8a0423f9a92f
 Create Date: 2025-09-28 15:43:04.114408
 
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
+
+from alembic import op
 from backend.persistence.models.core import GUID
 
-
 # revision identifiers, used by Alembic.
-revision: str = 'f02c3958456f'
-down_revision: Union[str, None] = '8a0423f9a92f'
+revision: str = "f02c3958456f"
+down_revision: Union[str, None] = "8a0423f9a92f"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -31,20 +32,21 @@ def upgrade() -> None:
     inspector = sa.inspect(connection)
     tables = inspector.get_table_names()
 
-    if 'host_roles' not in tables:
-        op.create_table('host_roles',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('host_id', GUID(), nullable=False),
-        sa.Column('role', sa.String(length=100), nullable=False),
-        sa.Column('package_name', sa.String(length=255), nullable=False),
-        sa.Column('package_version', sa.String(length=100), nullable=True),
-        sa.Column('service_name', sa.String(length=255), nullable=True),
-        sa.Column('service_status', sa.String(length=20), nullable=True),
-        sa.Column('is_active', sa.Boolean(), nullable=True),
-        sa.Column('detected_at', sa.DateTime(), nullable=True),
-        sa.Column('updated_at', sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(['host_id'], ['host.id'], ondelete='CASCADE'),
-        sa.PrimaryKeyConstraint('id')
+    if "host_roles" not in tables:
+        op.create_table(
+            "host_roles",
+            sa.Column("id", sa.Integer(), nullable=False),
+            sa.Column("host_id", GUID(), nullable=False),
+            sa.Column("role", sa.String(length=100), nullable=False),
+            sa.Column("package_name", sa.String(length=255), nullable=False),
+            sa.Column("package_version", sa.String(length=100), nullable=True),
+            sa.Column("service_name", sa.String(length=255), nullable=True),
+            sa.Column("service_status", sa.String(length=20), nullable=True),
+            sa.Column("is_active", sa.Boolean(), nullable=True),
+            sa.Column("detected_at", sa.DateTime(), nullable=True),
+            sa.Column("updated_at", sa.DateTime(), nullable=True),
+            sa.ForeignKeyConstraint(["host_id"], ["host.id"], ondelete="CASCADE"),
+            sa.PrimaryKeyConstraint("id"),
         )
 
     # For SQLite compatibility, we need to use a different approach
@@ -55,65 +57,101 @@ def upgrade() -> None:
     # This is idempotent - if index already exists, it will be skipped
 
     try:
-        op.drop_index('ix_diagnostic_report_collection_id', table_name='diagnostic_report')
+        op.drop_index(
+            "ix_diagnostic_report_collection_id", table_name="diagnostic_report"
+        )
     except:
         pass  # Index might not exist or might be named differently
     try:
-        op.create_index(op.f('ix_diagnostic_report_collection_id'), 'diagnostic_report', ['collection_id'], unique=True)
+        op.create_index(
+            op.f("ix_diagnostic_report_collection_id"),
+            "diagnostic_report",
+            ["collection_id"],
+            unique=True,
+        )
     except:
         pass  # Index might already exist with correct settings
 
     try:
-        op.drop_index('ix_password_reset_token_token', table_name='password_reset_token')
+        op.drop_index(
+            "ix_password_reset_token_token", table_name="password_reset_token"
+        )
     except:
         pass  # Index might not exist or might be named differently
     try:
-        op.create_index(op.f('ix_password_reset_token_token'), 'password_reset_token', ['token'], unique=True)
+        op.create_index(
+            op.f("ix_password_reset_token_token"),
+            "password_reset_token",
+            ["token"],
+            unique=True,
+        )
     except:
         pass  # Index might already exist with correct settings
 
     try:
-        op.drop_index('ix_script_execution_log_execution_id', table_name='script_execution_log')
+        op.drop_index(
+            "ix_script_execution_log_execution_id", table_name="script_execution_log"
+        )
     except:
         pass  # Index might not exist or might be named differently
     try:
-        op.create_index(op.f('ix_script_execution_log_execution_id'), 'script_execution_log', ['execution_id'], unique=True)
+        op.create_index(
+            op.f("ix_script_execution_log_execution_id"),
+            "script_execution_log",
+            ["execution_id"],
+            unique=True,
+        )
     except:
         pass  # Index might already exist with correct settings
 
     try:
-        op.drop_index('ix_script_execution_log_execution_uuid', table_name='script_execution_log')
+        op.drop_index(
+            "ix_script_execution_log_execution_uuid", table_name="script_execution_log"
+        )
     except:
         pass  # Index might not exist or might be named differently
     try:
-        op.create_index(op.f('ix_script_execution_log_execution_uuid'), 'script_execution_log', ['execution_uuid'], unique=True)
+        op.create_index(
+            op.f("ix_script_execution_log_execution_uuid"),
+            "script_execution_log",
+            ["execution_uuid"],
+            unique=True,
+        )
     except:
         pass  # Index might already exist with correct settings
 
     try:
-        op.drop_index('ix_software_installation_log_installation_id', table_name='software_installation_log')
+        op.drop_index(
+            "ix_software_installation_log_installation_id",
+            table_name="software_installation_log",
+        )
     except:
         pass  # Index might not exist or might be named differently
     try:
-        op.create_index(op.f('ix_software_installation_log_installation_id'), 'software_installation_log', ['installation_id'], unique=True)
+        op.create_index(
+            op.f("ix_software_installation_log_installation_id"),
+            "software_installation_log",
+            ["installation_id"],
+            unique=True,
+        )
     except:
         pass  # Index might already exist with correct settings
 
     try:
-        op.drop_index('ix_tags_name', table_name='tags')
+        op.drop_index("ix_tags_name", table_name="tags")
     except:
         pass  # Index might not exist or might be named differently
     try:
-        op.create_index(op.f('ix_tags_name'), 'tags', ['name'], unique=True)
+        op.create_index(op.f("ix_tags_name"), "tags", ["name"], unique=True)
     except:
         pass  # Index might already exist with correct settings
 
     try:
-        op.drop_index('ix_user_userid', table_name='user')
+        op.drop_index("ix_user_userid", table_name="user")
     except:
         pass  # Index might not exist or might be named differently
     try:
-        op.create_index(op.f('ix_user_userid'), 'user', ['userid'], unique=True)
+        op.create_index(op.f("ix_user_userid"), "user", ["userid"], unique=True)
     except:
         pass  # Index might already exist with correct settings
     # ### end Alembic commands ###
@@ -126,65 +164,101 @@ def downgrade() -> None:
     # and try to restore the original constraint structure
 
     try:
-        op.drop_index('ix_user_userid', table_name='user')
+        op.drop_index("ix_user_userid", table_name="user")
     except:
         pass  # Index might not exist
     try:
-        op.create_index(op.f('ix_user_userid'), 'user', ['userid'], unique=False)
+        op.create_index(op.f("ix_user_userid"), "user", ["userid"], unique=False)
     except:
         pass  # Index might already exist
 
     try:
-        op.drop_index('ix_tags_name', table_name='tags')
+        op.drop_index("ix_tags_name", table_name="tags")
     except:
         pass  # Index might not exist
     try:
-        op.create_index(op.f('ix_tags_name'), 'tags', ['name'], unique=False)
+        op.create_index(op.f("ix_tags_name"), "tags", ["name"], unique=False)
     except:
         pass  # Index might already exist
 
     try:
-        op.drop_index('ix_software_installation_log_installation_id', table_name='software_installation_log')
+        op.drop_index(
+            "ix_software_installation_log_installation_id",
+            table_name="software_installation_log",
+        )
     except:
         pass  # Index might not exist
     try:
-        op.create_index(op.f('ix_software_installation_log_installation_id'), 'software_installation_log', ['installation_id'], unique=False)
+        op.create_index(
+            op.f("ix_software_installation_log_installation_id"),
+            "software_installation_log",
+            ["installation_id"],
+            unique=False,
+        )
     except:
         pass  # Index might already exist
 
     try:
-        op.drop_index('ix_script_execution_log_execution_uuid', table_name='script_execution_log')
+        op.drop_index(
+            "ix_script_execution_log_execution_uuid", table_name="script_execution_log"
+        )
     except:
         pass  # Index might not exist
     try:
-        op.create_index(op.f('ix_script_execution_log_execution_uuid'), 'script_execution_log', ['execution_uuid'], unique=False)
+        op.create_index(
+            op.f("ix_script_execution_log_execution_uuid"),
+            "script_execution_log",
+            ["execution_uuid"],
+            unique=False,
+        )
     except:
         pass  # Index might already exist
 
     try:
-        op.drop_index('ix_script_execution_log_execution_id', table_name='script_execution_log')
+        op.drop_index(
+            "ix_script_execution_log_execution_id", table_name="script_execution_log"
+        )
     except:
         pass  # Index might not exist
     try:
-        op.create_index(op.f('ix_script_execution_log_execution_id'), 'script_execution_log', ['execution_id'], unique=False)
+        op.create_index(
+            op.f("ix_script_execution_log_execution_id"),
+            "script_execution_log",
+            ["execution_id"],
+            unique=False,
+        )
     except:
         pass  # Index might already exist
 
     try:
-        op.drop_index('ix_password_reset_token_token', table_name='password_reset_token')
+        op.drop_index(
+            "ix_password_reset_token_token", table_name="password_reset_token"
+        )
     except:
         pass  # Index might not exist
     try:
-        op.create_index(op.f('ix_password_reset_token_token'), 'password_reset_token', ['token'], unique=False)
+        op.create_index(
+            op.f("ix_password_reset_token_token"),
+            "password_reset_token",
+            ["token"],
+            unique=False,
+        )
     except:
         pass  # Index might already exist
 
     try:
-        op.drop_index('ix_diagnostic_report_collection_id', table_name='diagnostic_report')
+        op.drop_index(
+            "ix_diagnostic_report_collection_id", table_name="diagnostic_report"
+        )
     except:
         pass  # Index might not exist
     try:
-        op.create_index(op.f('ix_diagnostic_report_collection_id'), 'diagnostic_report', ['collection_id'], unique=False)
+        op.create_index(
+            op.f("ix_diagnostic_report_collection_id"),
+            "diagnostic_report",
+            ["collection_id"],
+            unique=False,
+        )
     except:
         pass  # Index might already exist
 
@@ -193,6 +267,6 @@ def downgrade() -> None:
     inspector = sa.inspect(connection)
     tables = inspector.get_table_names()
 
-    if 'host_roles' in tables:
-        op.drop_table('host_roles')
+    if "host_roles" in tables:
+        op.drop_table("host_roles")
     # ### end Alembic commands ###

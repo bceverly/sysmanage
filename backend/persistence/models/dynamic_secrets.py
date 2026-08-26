@@ -24,15 +24,7 @@ does not constrain re-issuing.
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import (
-    Column,
-    DateTime,
-    ForeignKey,
-    JSON,
-    Integer,
-    String,
-    Text,
-)
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String, Text
 
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID

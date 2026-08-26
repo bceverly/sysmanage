@@ -28,8 +28,9 @@ Revises: x2pkghost
 from typing import Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
+
+from alembic import op
 
 revision: str = "x3pkgfp"
 down_revision: Union[str, None] = "x2pkghost"

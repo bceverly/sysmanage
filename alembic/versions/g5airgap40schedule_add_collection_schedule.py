@@ -26,9 +26,9 @@ import uuid
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 
+from alembic import op
 from backend.persistence.models.core import GUID
 
 revision: str = "g5airgap40schedule"
@@ -81,9 +81,7 @@ def upgrade() -> None:
                 nullable=False,
                 server_default=sa.func.now(),
             ),
-            sa.UniqueConstraint(
-                "name", name="uq_airgap_collection_schedule_name"
-            ),
+            sa.UniqueConstraint("name", name="uq_airgap_collection_schedule_name"),
         )
 
 

@@ -38,12 +38,12 @@ from uuid import UUID
 from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
-from backend.services import federation_retry_policy as retry_policy
 from backend.persistence.models.federation import (
     FederationAuditLog,
     FederationDispatchedCommand,
     FederationSite,
 )
+from backend.services import federation_retry_policy as retry_policy
 
 # ---------------------------------------------------------------------
 # State constants

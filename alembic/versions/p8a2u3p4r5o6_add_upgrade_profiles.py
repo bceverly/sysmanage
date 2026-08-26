@@ -22,8 +22,8 @@ Reversible — downgrade drops the table and its indexes.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 
+from alembic import op
 
 revision: str = "p8a2u3p4r5o6"
 down_revision: Union[str, None] = "p8a1k0r2g3s4"
@@ -82,10 +82,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_index(
-        "ix_upgrade_profiles_tag_id", table_name="upgrade_profiles"
-    )
-    op.drop_index(
-        "ix_upgrade_profiles_enabled_next_run", table_name="upgrade_profiles"
-    )
+    op.drop_index("ix_upgrade_profiles_tag_id", table_name="upgrade_profiles")
+    op.drop_index("ix_upgrade_profiles_enabled_next_run", table_name="upgrade_profiles")
     op.drop_table("upgrade_profiles")

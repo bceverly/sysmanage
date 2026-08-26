@@ -15,9 +15,9 @@ removing the package when dependencies can't be resolved.
 
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "e0f1g2h3i4j5"
@@ -63,27 +63,23 @@ def upgrade() -> None:
 
     # Update Ubuntu distributions
     bind.execute(
-        text(
-            """
+        text("""
             UPDATE child_host_distribution
             SET agent_install_commands = :commands
             WHERE child_type = 'bhyve'
               AND distribution_name = 'Ubuntu'
-            """
-        ),
+            """),
         {"commands": UBUNTU_COMMANDS},
     )
 
     # Update Debian distributions
     bind.execute(
-        text(
-            """
+        text("""
             UPDATE child_host_distribution
             SET agent_install_commands = :commands
             WHERE child_type = 'bhyve'
               AND distribution_name = 'Debian'
-            """
-        ),
+            """),
         {"commands": DEBIAN_COMMANDS},
     )
 
@@ -123,25 +119,21 @@ def downgrade() -> None:
 ]"""
 
     bind.execute(
-        text(
-            """
+        text("""
             UPDATE child_host_distribution
             SET agent_install_commands = :commands
             WHERE child_type = 'bhyve'
               AND distribution_name = 'Ubuntu'
-            """
-        ),
+            """),
         {"commands": ubuntu_commands_old},
     )
 
     bind.execute(
-        text(
-            """
+        text("""
             UPDATE child_host_distribution
             SET agent_install_commands = :commands
             WHERE child_type = 'bhyve'
               AND distribution_name = 'Debian'
-            """
-        ),
+            """),
         {"commands": debian_commands_old},
     )

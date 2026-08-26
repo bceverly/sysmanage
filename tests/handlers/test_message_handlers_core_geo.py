@@ -19,7 +19,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from backend.api.message_handlers_core import handle_heartbeat
-from backend.services.geolocation_service import GeoResult, NO_GEO_TRACK_TAG
+from backend.services.geolocation_service import NO_GEO_TRACK_TAG, GeoResult
 
 
 def _stub_geo_result():
@@ -136,6 +136,7 @@ class TestHeartbeatGeoResolution:
         geo service AND must not have its public_ip column populated.
         Privacy contract: tag the host, server forgets about it."""
         from datetime import datetime, timezone
+
         from backend.persistence.models import Host, HostTag, Tag
 
         host = Host(

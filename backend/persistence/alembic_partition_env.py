@@ -46,9 +46,7 @@ def _resolve_database_url() -> str:
     if url:
         return url
     try:
-        from backend.persistence.db import (  # noqa: PLC0415
-            get_database_url,
-        )
+        from backend.persistence.db import get_database_url  # noqa: PLC0415
 
         url = get_database_url()
     except Exception as exc:  # pragma: no cover - CI fallback
@@ -103,8 +101,8 @@ def run_migrations(
     # Populate Base.metadata with every model (so autogenerate diffs work)
     # then point the run at it.  Importing the models package registers all
     # tables on the shared Base; the include filter scopes this chain.
-    from backend.persistence.db import Base  # noqa: PLC0415
     import backend.persistence.models  # noqa: F401, PLC0415  # pylint: disable=unused-import
+    from backend.persistence.db import Base  # noqa: PLC0415
 
     target_metadata = Base.metadata
 

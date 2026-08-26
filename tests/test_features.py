@@ -269,7 +269,7 @@ class TestTierFeatures:
 
     def test_professional_has_features(self):
         """Test professional tier has features."""
-        from backend.licensing.features import TIER_FEATURES, LicenseTier, FeatureCode
+        from backend.licensing.features import TIER_FEATURES, FeatureCode, LicenseTier
 
         pro_features = TIER_FEATURES[LicenseTier.PROFESSIONAL]
         assert len(pro_features) > 0
@@ -278,7 +278,7 @@ class TestTierFeatures:
 
     def test_professional_features_specific(self):
         """Test professional tier has specific features."""
-        from backend.licensing.features import TIER_FEATURES, LicenseTier, FeatureCode
+        from backend.licensing.features import TIER_FEATURES, FeatureCode, LicenseTier
 
         pro_features = TIER_FEATURES[LicenseTier.PROFESSIONAL]
         expected = {
@@ -322,7 +322,7 @@ class TestTierFeatures:
 
     def test_enterprise_has_exclusive_features(self):
         """Test enterprise has features not in professional."""
-        from backend.licensing.features import TIER_FEATURES, LicenseTier, FeatureCode
+        from backend.licensing.features import TIER_FEATURES, FeatureCode, LicenseTier
 
         ent_features = TIER_FEATURES[LicenseTier.ENTERPRISE]
         assert FeatureCode.COMPLIANCE_REPORTS in ent_features

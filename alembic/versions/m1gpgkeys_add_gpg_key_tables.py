@@ -24,9 +24,9 @@ import uuid
 from typing import Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
 
+from alembic import op
 from backend.persistence.models.core import GUID
 
 revision: str = "m1gpgkeys"
@@ -84,9 +84,7 @@ def upgrade() -> None:
             sa.Column("assigned_by", GUID(), nullable=True),
             sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
             sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
-            sa.ForeignKeyConstraint(
-                ["gpg_key_id"], ["gpg_key.id"], ondelete="CASCADE"
-            ),
+            sa.ForeignKeyConstraint(["gpg_key_id"], ["gpg_key.id"], ondelete="CASCADE"),
             sa.ForeignKeyConstraint(["host_id"], ["host.id"], ondelete="CASCADE"),
         )
         op.create_index(

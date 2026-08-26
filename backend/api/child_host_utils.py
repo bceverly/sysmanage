@@ -113,12 +113,8 @@ def audit_log(
     from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
 
     from backend.persistence import db  # noqa: PLC0415
-    from backend.services.audit_service import (
-        ActionType,  # noqa: PLC0415
-        AuditService,
-        EntityType,
-        Result,
-    )
+    from backend.services.audit_service import ActionType  # noqa: PLC0415
+    from backend.services.audit_service import AuditService, EntityType, Result
 
     action_type = {
         "CREATE": ActionType.CREATE,

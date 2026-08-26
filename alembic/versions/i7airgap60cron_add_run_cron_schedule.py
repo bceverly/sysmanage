@@ -25,8 +25,9 @@ production.  No FKs on this column (it's a plain VARCHAR).
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
+
+from alembic import op
 
 revision: str = "i7airgap60cron"
 down_revision: Union[str, None] = "h6airgap50delta"

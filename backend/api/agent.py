@@ -571,8 +571,9 @@ async def _validate_and_get_host(message_data, connection, db):  # NOSONAR
     Returns:
         tuple: (host_object, error_message) - host_object is None if validation fails
     """
-    from backend.persistence.models import Host
     from sqlalchemy import func
+
+    from backend.persistence.models import Host
 
     logger.debug(
         "Validating host with message data keys: %s",

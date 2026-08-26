@@ -239,9 +239,9 @@ async def handle_os_version_update(  # NOSONAR
                     and host.approval_status == "approved"
                 ):
                     try:
-                        from backend.api.repository_mirroring import (  # pylint: disable=import-outside-toplevel
+                        from backend.api.repository_mirroring import (
                             apply_default_mirrors_for_new_host,
-                        )
+                        )  # pylint: disable=import-outside-toplevel
 
                         dispatched = apply_default_mirrors_for_new_host(str(host.id))
                         if dispatched:

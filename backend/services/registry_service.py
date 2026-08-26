@@ -25,11 +25,11 @@ from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
 from backend.persistence.models.tenancy import (
+    TENANT_STATUS_ACTIVE,
     RegistryTenant,
     RegistryTenantEmailDomain,
     RegistryUser,
     RegistryUserTenantGrant,
-    TENANT_STATUS_ACTIVE,
 )
 
 logger = logging.getLogger(__name__)

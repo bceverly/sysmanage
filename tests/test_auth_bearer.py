@@ -7,7 +7,7 @@ Tests for backend/auth/auth_bearer.py module.
 Tests JWT bearer authentication.
 """
 
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -105,8 +105,9 @@ class TestJWTBearerCall:
     @patch("backend.auth.auth_bearer.decode_jwt")
     async def test_call_valid_bearer_token(self, mock_decode):
         """Test __call__ with valid bearer token."""
-        from backend.auth.auth_bearer import JWTBearer
         from fastapi.security import HTTPAuthorizationCredentials
+
+        from backend.auth.auth_bearer import JWTBearer
 
         mock_decode.return_value = {"user_id": "test@example.com"}
 
@@ -129,8 +130,9 @@ class TestJWTBearerCall:
     @pytest.mark.asyncio
     async def test_call_invalid_scheme(self):
         """Test __call__ with non-Bearer scheme."""
-        from backend.auth.auth_bearer import JWTBearer
         from fastapi.security import HTTPAuthorizationCredentials
+
+        from backend.auth.auth_bearer import JWTBearer
 
         bearer = JWTBearer()
         mock_request = MagicMock()
@@ -154,8 +156,9 @@ class TestJWTBearerCall:
     @patch("backend.auth.auth_bearer.decode_jwt")
     async def test_call_expired_token(self, mock_decode):
         """Test __call__ with expired token."""
-        from backend.auth.auth_bearer import JWTBearer
         from fastapi.security import HTTPAuthorizationCredentials
+
+        from backend.auth.auth_bearer import JWTBearer
 
         mock_decode.return_value = None  # Expired/invalid token
         bearer = JWTBearer()

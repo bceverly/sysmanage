@@ -103,8 +103,9 @@ def test_every_shipped_server_template_binds_loopback():
     One of them shipping a wildcard would publish the API on every machine that
     used it, which is precisely the failure this module exists to make visible.
     """
-    import yaml  # noqa: PLC0415
     from pathlib import Path  # noqa: PLC0415
+
+    import yaml  # noqa: PLC0415
 
     repo = Path(__file__).resolve().parent.parent
     templates = sorted(repo.glob("installer/**/sysmanage.yaml.example"))

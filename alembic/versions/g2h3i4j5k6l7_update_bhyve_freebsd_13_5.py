@@ -18,12 +18,12 @@ Changes:
 - Adds FreeBSD 15.0 as the newest release
 """
 
+import uuid
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
-import uuid
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "g2h3i4j5k6l7"
@@ -51,9 +51,7 @@ def upgrade() -> None:
 
     # Step 1: Update FreeBSD 13.4 to 13.5
     if is_sqlite:
-        bind.execute(
-            text(
-                """
+        bind.execute(text("""
                 UPDATE child_host_distribution SET
                     distribution_version = '13.5',
                     display_name = 'FreeBSD 13.5-RELEASE',
@@ -64,13 +62,9 @@ def upgrade() -> None:
                 WHERE child_type = 'bhyve'
                   AND distribution_name = 'FreeBSD'
                   AND distribution_version = '13.4'
-                """
-            )
-        )
+                """))
     else:
-        bind.execute(
-            text(
-                """
+        bind.execute(text("""
                 UPDATE child_host_distribution SET
                     distribution_version = '13.5',
                     display_name = 'FreeBSD 13.5-RELEASE',
@@ -81,15 +75,11 @@ def upgrade() -> None:
                 WHERE child_type = 'bhyve'
                   AND distribution_name = 'FreeBSD'
                   AND distribution_version = '13.4'
-                """
-            )
-        )
+                """))
 
     # Step 2: Update FreeBSD 14.2 to 14.3
     if is_sqlite:
-        bind.execute(
-            text(
-                """
+        bind.execute(text("""
                 UPDATE child_host_distribution SET
                     distribution_version = '14.3',
                     display_name = 'FreeBSD 14.3-RELEASE',
@@ -100,13 +90,9 @@ def upgrade() -> None:
                 WHERE child_type = 'bhyve'
                   AND distribution_name = 'FreeBSD'
                   AND distribution_version = '14.2'
-                """
-            )
-        )
+                """))
     else:
-        bind.execute(
-            text(
-                """
+        bind.execute(text("""
                 UPDATE child_host_distribution SET
                     distribution_version = '14.3',
                     display_name = 'FreeBSD 14.3-RELEASE',
@@ -117,39 +103,28 @@ def upgrade() -> None:
                 WHERE child_type = 'bhyve'
                   AND distribution_name = 'FreeBSD'
                   AND distribution_version = '14.2'
-                """
-            )
-        )
+                """))
 
     # Step 3: Remove FreeBSD 14.1 (duplicate - we now have 14.3)
-    bind.execute(
-        text(
-            """
+    bind.execute(text("""
             DELETE FROM child_host_distribution
             WHERE child_type = 'bhyve'
               AND distribution_name = 'FreeBSD'
               AND distribution_version = '14.1'
-            """
-        )
-    )
+            """))
 
     # Step 4: Add FreeBSD 15.0 if it doesn't exist
-    result = bind.execute(
-        text(
-            """
+    result = bind.execute(text("""
             SELECT COUNT(*) FROM child_host_distribution
             WHERE child_type = 'bhyve'
               AND distribution_name = 'FreeBSD'
               AND distribution_version = '15.0'
-            """
-        )
-    )
+            """))
     if result.scalar() == 0:
         dist_id = str(uuid.uuid4())
         if is_sqlite:
             bind.execute(
-                text(
-                    """
+                text("""
                     INSERT INTO child_host_distribution (
                         id, child_type, distribution_name, distribution_version,
                         display_name, install_identifier, cloud_image_url, executable_name,
@@ -163,14 +138,12 @@ def upgrade() -> None:
                         'FreeBSD 15.0-RELEASE - Newest release. Native bhyve guest with cloud-init support.',
                         1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
                     )
-                    """
-                ),
+                    """),
                 {"id": dist_id, "agent_commands": FREEBSD_AGENT_INSTALL_COMMANDS},
             )
         else:
             bind.execute(
-                text(
-                    """
+                text("""
                     INSERT INTO child_host_distribution (
                         id, child_type, distribution_name, distribution_version,
                         display_name, install_identifier, cloud_image_url, executable_name,
@@ -184,16 +157,13 @@ def upgrade() -> None:
                         'FreeBSD 15.0-RELEASE - Newest release. Native bhyve guest with cloud-init support.',
                         true, NOW(), NOW()
                     )
-                    """
-                ),
+                    """),
                 {"id": dist_id, "agent_commands": FREEBSD_AGENT_INSTALL_COMMANDS},
             )
 
     # Step 5: Ensure 13.5 and 14.3 have correct URLs (idempotent)
     if is_sqlite:
-        bind.execute(
-            text(
-                """
+        bind.execute(text("""
                 UPDATE child_host_distribution SET
                     display_name = 'FreeBSD 13.5-RELEASE',
                     install_identifier = 'FreeBSD-13.5',
@@ -203,12 +173,8 @@ def upgrade() -> None:
                 WHERE child_type = 'bhyve'
                   AND distribution_name = 'FreeBSD'
                   AND distribution_version = '13.5'
-                """
-            )
-        )
-        bind.execute(
-            text(
-                """
+                """))
+        bind.execute(text("""
                 UPDATE child_host_distribution SET
                     display_name = 'FreeBSD 14.3-RELEASE',
                     install_identifier = 'FreeBSD-14.3',
@@ -218,13 +184,9 @@ def upgrade() -> None:
                 WHERE child_type = 'bhyve'
                   AND distribution_name = 'FreeBSD'
                   AND distribution_version = '14.3'
-                """
-            )
-        )
+                """))
     else:
-        bind.execute(
-            text(
-                """
+        bind.execute(text("""
                 UPDATE child_host_distribution SET
                     display_name = 'FreeBSD 13.5-RELEASE',
                     install_identifier = 'FreeBSD-13.5',
@@ -234,12 +196,8 @@ def upgrade() -> None:
                 WHERE child_type = 'bhyve'
                   AND distribution_name = 'FreeBSD'
                   AND distribution_version = '13.5'
-                """
-            )
-        )
-        bind.execute(
-            text(
-                """
+                """))
+        bind.execute(text("""
                 UPDATE child_host_distribution SET
                     display_name = 'FreeBSD 14.3-RELEASE',
                     install_identifier = 'FreeBSD-14.3',
@@ -249,9 +207,7 @@ def upgrade() -> None:
                 WHERE child_type = 'bhyve'
                   AND distribution_name = 'FreeBSD'
                   AND distribution_version = '14.3'
-                """
-            )
-        )
+                """))
 
 
 def downgrade() -> None:
@@ -260,22 +216,16 @@ def downgrade() -> None:
     is_sqlite = bind.dialect.name == "sqlite"
 
     # Remove 15.0
-    bind.execute(
-        text(
-            """
+    bind.execute(text("""
             DELETE FROM child_host_distribution
             WHERE child_type = 'bhyve'
               AND distribution_name = 'FreeBSD'
               AND distribution_version = '15.0'
-            """
-        )
-    )
+            """))
 
     # Revert 14.3 back to 14.2 (note: URL won't work)
     if is_sqlite:
-        bind.execute(
-            text(
-                """
+        bind.execute(text("""
                 UPDATE child_host_distribution SET
                     distribution_version = '14.2',
                     display_name = 'FreeBSD 14.2-RELEASE',
@@ -286,13 +236,9 @@ def downgrade() -> None:
                 WHERE child_type = 'bhyve'
                   AND distribution_name = 'FreeBSD'
                   AND distribution_version = '14.3'
-                """
-            )
-        )
+                """))
     else:
-        bind.execute(
-            text(
-                """
+        bind.execute(text("""
                 UPDATE child_host_distribution SET
                     distribution_version = '14.2',
                     display_name = 'FreeBSD 14.2-RELEASE',
@@ -303,15 +249,11 @@ def downgrade() -> None:
                 WHERE child_type = 'bhyve'
                   AND distribution_name = 'FreeBSD'
                   AND distribution_version = '14.3'
-                """
-            )
-        )
+                """))
 
     # Revert 13.5 back to 13.4 (note: URL won't work)
     if is_sqlite:
-        bind.execute(
-            text(
-                """
+        bind.execute(text("""
                 UPDATE child_host_distribution SET
                     distribution_version = '13.4',
                     display_name = 'FreeBSD 13.4-RELEASE',
@@ -322,13 +264,9 @@ def downgrade() -> None:
                 WHERE child_type = 'bhyve'
                   AND distribution_name = 'FreeBSD'
                   AND distribution_version = '13.5'
-                """
-            )
-        )
+                """))
     else:
-        bind.execute(
-            text(
-                """
+        bind.execute(text("""
                 UPDATE child_host_distribution SET
                     distribution_version = '13.4',
                     display_name = 'FreeBSD 13.4-RELEASE',
@@ -339,8 +277,6 @@ def downgrade() -> None:
                 WHERE child_type = 'bhyve'
                   AND distribution_name = 'FreeBSD'
                   AND distribution_version = '13.5'
-                """
-            )
-        )
+                """))
 
     # Note: We don't restore 14.1 as it was a duplicate entry

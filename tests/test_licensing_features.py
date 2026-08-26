@@ -212,7 +212,7 @@ class TestTierFeatures:
 
     def test_professional_has_features(self):
         """Test that professional tier has features."""
-        from backend.licensing.features import TIER_FEATURES, LicenseTier, FeatureCode
+        from backend.licensing.features import TIER_FEATURES, FeatureCode, LicenseTier
 
         prof_features = TIER_FEATURES[LicenseTier.PROFESSIONAL]
         assert FeatureCode.HEALTH_ANALYSIS in prof_features
@@ -229,7 +229,7 @@ class TestTierFeatures:
 
     def test_enterprise_has_all_professional_features(self):
         """Test that enterprise tier includes professional features."""
-        from backend.licensing.features import TIER_FEATURES, LicenseTier, FeatureCode
+        from backend.licensing.features import TIER_FEATURES, FeatureCode, LicenseTier
 
         ent_features = TIER_FEATURES[LicenseTier.ENTERPRISE]
         assert FeatureCode.HEALTH_ANALYSIS in ent_features
@@ -238,7 +238,7 @@ class TestTierFeatures:
 
     def test_enterprise_has_exclusive_features(self):
         """Test that enterprise has features not in professional."""
-        from backend.licensing.features import TIER_FEATURES, LicenseTier, FeatureCode
+        from backend.licensing.features import TIER_FEATURES, FeatureCode, LicenseTier
 
         prof_features = TIER_FEATURES[LicenseTier.PROFESSIONAL]
         ent_features = TIER_FEATURES[LicenseTier.ENTERPRISE]

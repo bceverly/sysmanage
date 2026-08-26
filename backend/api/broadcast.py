@@ -46,10 +46,10 @@ from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.persistence.partitions import iter_host_databases
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.messages import MessageType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
-from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 queue_ops = QueueOperations()

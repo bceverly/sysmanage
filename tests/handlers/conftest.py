@@ -8,8 +8,9 @@ Pytest configuration for message handler tests.
 This conftest inherits fixtures from the parent tests/conftest.py.
 """
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 # Import fixtures from parent conftest - pytest will auto-discover them
 # These fixtures are available: engine, db_session, session, mock_config

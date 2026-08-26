@@ -22,10 +22,8 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from backend.services import (
-    federation_coordinator_service as coord_svc,
-    federation_sync_queue_service as sync_svc,
-)
+from backend.services import federation_coordinator_service as coord_svc
+from backend.services import federation_sync_queue_service as sync_svc
 
 VULN_ROLLUP_PAYLOAD_TYPE = "vulnerability_rollup"
 VULN_ROLLUP_DEDUP_KEY = "vulnerability_rollup:self"

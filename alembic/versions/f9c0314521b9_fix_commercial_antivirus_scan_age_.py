@@ -9,15 +9,16 @@ Revises: 7ee1f0bd6b87
 Create Date: 2025-10-10 16:24:17.242504
 
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = 'f9c0314521b9'
-down_revision: Union[str, None] = '7ee1f0bd6b87'
+revision: str = "f9c0314521b9"
+down_revision: Union[str, None] = "7ee1f0bd6b87"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -26,34 +27,34 @@ def upgrade() -> None:
     # Change full_scan_age and quick_scan_age from INTEGER to BIGINT
     # This fixes overflow with Windows Defender's 4294967295 (2^32-1) for "never scanned"
     # Use batch mode for SQLite compatibility
-    with op.batch_alter_table('commercial_antivirus_status', schema=None) as batch_op:
+    with op.batch_alter_table("commercial_antivirus_status", schema=None) as batch_op:
         batch_op.alter_column(
-            'full_scan_age',
+            "full_scan_age",
             existing_type=sa.Integer(),
             type_=sa.BigInteger(),
-            existing_nullable=True
+            existing_nullable=True,
         )
         batch_op.alter_column(
-            'quick_scan_age',
+            "quick_scan_age",
             existing_type=sa.Integer(),
             type_=sa.BigInteger(),
-            existing_nullable=True
+            existing_nullable=True,
         )
 
 
 def downgrade() -> None:
     # Revert back to INTEGER (may lose data if values exceed INTEGER range)
     # Use batch mode for SQLite compatibility
-    with op.batch_alter_table('commercial_antivirus_status', schema=None) as batch_op:
+    with op.batch_alter_table("commercial_antivirus_status", schema=None) as batch_op:
         batch_op.alter_column(
-            'quick_scan_age',
+            "quick_scan_age",
             existing_type=sa.BigInteger(),
             type_=sa.Integer(),
-            existing_nullable=True
+            existing_nullable=True,
         )
         batch_op.alter_column(
-            'full_scan_age',
+            "full_scan_age",
             existing_type=sa.BigInteger(),
             type_=sa.Integer(),
-            existing_nullable=True
+            existing_nullable=True,
         )

@@ -11,9 +11,10 @@ When adding/modifying tests, ensure feature parity across platforms.
 """
 
 import time
+
 import pytest
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 
 def login_helper(selenium_page, test_user):

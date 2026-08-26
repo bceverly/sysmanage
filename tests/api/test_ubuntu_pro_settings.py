@@ -10,7 +10,6 @@ Tests the /api/v1/ubuntu-pro/ endpoints with various scenarios.
 from datetime import datetime, timezone
 from unittest.mock import patch
 
-
 from backend.persistence import models
 
 

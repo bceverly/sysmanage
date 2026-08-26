@@ -18,6 +18,7 @@ Works on both PostgreSQL and SQLite.
 from typing import Sequence, Union
 
 import sqlalchemy as sa
+
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -53,8 +54,7 @@ def upgrade() -> None:
     role_exists = result.scalar() > 0
 
     if not role_exists:
-        op.execute(
-            f"""
+        op.execute(f"""
             INSERT INTO security_roles (id, name, description, group_id)
             VALUES (
                 '{role_id}'{uuid_cast},
@@ -62,8 +62,7 @@ def upgrade() -> None:
                 '{role_desc}',
                 '{VIRTUALIZATION_GROUP_ID}'{uuid_cast}
             )
-            """
-        )
+            """)
 
 
 def downgrade() -> None:

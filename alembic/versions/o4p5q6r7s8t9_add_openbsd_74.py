@@ -16,9 +16,9 @@ Uses ftp.openbsd.org since older versions are not on the CDN.
 import uuid
 from typing import Sequence, Union
 
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "o4p5q6r7s8t9"
@@ -56,14 +56,12 @@ def upgrade() -> None:
 
     # Check if this distribution already exists (idempotent)
     result = bind.execute(
-        text(
-            """
+        text("""
             SELECT COUNT(*) FROM child_host_distribution
             WHERE child_type = :child_type
               AND distribution_name = :distribution_name
               AND distribution_version = :distribution_version
-            """
-        ),
+            """),
         {
             "child_type": dist["child_type"],
             "distribution_name": dist["distribution_name"],
@@ -76,8 +74,7 @@ def upgrade() -> None:
         # Update existing record
         if is_sqlite:
             bind.execute(
-                text(
-                    """
+                text("""
                     UPDATE child_host_distribution SET
                         display_name = :display_name,
                         install_identifier = :install_identifier,
@@ -89,8 +86,7 @@ def upgrade() -> None:
                     WHERE child_type = :child_type
                       AND distribution_name = :distribution_name
                       AND distribution_version = :distribution_version
-                    """
-                ),
+                    """),
                 {
                     "child_type": dist["child_type"],
                     "distribution_name": dist["distribution_name"],
@@ -105,8 +101,7 @@ def upgrade() -> None:
             )
         else:
             bind.execute(
-                text(
-                    """
+                text("""
                     UPDATE child_host_distribution SET
                         display_name = :display_name,
                         install_identifier = :install_identifier,
@@ -118,8 +113,7 @@ def upgrade() -> None:
                     WHERE child_type = :child_type
                       AND distribution_name = :distribution_name
                       AND distribution_version = :distribution_version
-                    """
-                ),
+                    """),
                 {
                     "child_type": dist["child_type"],
                     "distribution_name": dist["distribution_name"],
@@ -136,8 +130,7 @@ def upgrade() -> None:
         # Insert new record
         if is_sqlite:
             bind.execute(
-                text(
-                    """
+                text("""
                     INSERT INTO child_host_distribution (
                         id, child_type, distribution_name, distribution_version,
                         display_name, install_identifier, executable_name,
@@ -149,8 +142,7 @@ def upgrade() -> None:
                         :agent_install_method, :agent_install_commands, :notes,
                         1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
                     )
-                    """
-                ),
+                    """),
                 {
                     "id": dist_id,
                     "child_type": dist["child_type"],
@@ -166,8 +158,7 @@ def upgrade() -> None:
             )
         else:
             bind.execute(
-                text(
-                    """
+                text("""
                     INSERT INTO child_host_distribution (
                         id, child_type, distribution_name, distribution_version,
                         display_name, install_identifier, executable_name,
@@ -179,8 +170,7 @@ def upgrade() -> None:
                         :agent_install_method, :agent_install_commands, :notes,
                         true, NOW(), NOW()
                     )
-                    """
-                ),
+                    """),
                 {
                     "id": dist_id,
                     "child_type": dist["child_type"],
@@ -200,13 +190,9 @@ def downgrade() -> None:
     """Remove OpenBSD 7.4."""
     bind = op.get_bind()
 
-    bind.execute(
-        text(
-            """
+    bind.execute(text("""
             DELETE FROM child_host_distribution
             WHERE child_type = 'vmm'
               AND distribution_name = 'OpenBSD'
               AND distribution_version = '7.4'
-            """
-        )
-    )
+            """))

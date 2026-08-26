@@ -158,9 +158,9 @@ def get_request_engine(tenant_id=None):
     if not config.is_multitenancy_enabled():
         return db.get_engine()
     if tenant_id is None:
-        from backend.persistence.tenant_context import (  # noqa: PLC0415
+        from backend.persistence.tenant_context import (
             get_active_tenant,
-        )
+        )  # noqa: PLC0415
 
         tenant_id = get_active_tenant()
     if not tenant_id:
@@ -359,9 +359,7 @@ def iter_request_host_databases():
     The CALLER MUST ``close()`` every yielded session (matches
     :func:`iter_host_databases`).
     """
-    from backend.persistence.tenant_context import (  # noqa: PLC0415
-        get_active_tenant,
-    )
+    from backend.persistence.tenant_context import get_active_tenant  # noqa: PLC0415
 
     active = get_active_tenant()
     if active and config.is_multitenancy_enabled():
@@ -387,9 +385,8 @@ def tenant_engine_for_host(host_id):
     """
     if host_id is None or not config.is_multitenancy_enabled():
         return None
-    from backend.services import host_tenant_index  # noqa: PLC0415
-
     from backend.persistence.db_retry import run_with_db_retry  # noqa: PLC0415
+    from backend.services import host_tenant_index  # noqa: PLC0415
 
     try:
         # Idempotent, fresh-session read → safe to retry through the brief

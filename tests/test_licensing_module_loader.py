@@ -7,10 +7,11 @@ Tests for backend/licensing/module_loader.py module.
 Tests Pro+ Cython module loading functionality.
 """
 
-import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
-import tempfile
 import os
+import tempfile
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 class TestModuleLoaderProperties:
@@ -282,8 +283,9 @@ class TestModuleLoaderUnload:
 
     def test_unload_module_success(self):
         """Test unload_module removes module."""
-        from backend.licensing.module_loader import ModuleLoader
         import sys
+
+        from backend.licensing.module_loader import ModuleLoader
 
         loader = ModuleLoader()
         mock_module = MagicMock()
@@ -480,7 +482,7 @@ class TestModuleLoaderGlobal:
 
     def test_module_loader_is_module_loader(self):
         """Test that global instance is ModuleLoader type."""
-        from backend.licensing.module_loader import module_loader, ModuleLoader
+        from backend.licensing.module_loader import ModuleLoader, module_loader
 
         assert isinstance(module_loader, ModuleLoader)
 

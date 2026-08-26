@@ -49,9 +49,9 @@ from datetime import datetime, timezone
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import text
 
+from alembic import op
 
 revision: str = "v3uchildist0"
 down_revision: Union[str, None] = "u2lxd9latest"
@@ -84,7 +84,7 @@ _NEW_RPM_KVM_COMMANDS = [
     "dnf install -y curl ca-certificates",
     "curl -fL -o /tmp/sysmanage-agent.rpm "
     "$(curl -sL https://api.github.com/repos/bceverly/sysmanage-agent/releases/latest "
-    "| grep -o '\"browser_download_url\": *\"[^\"]*\\.rpm\"' "
+    '| grep -o \'"browser_download_url": *"[^"]*\\.rpm"\' '
     "| grep -o 'https://[^\"]*\\.rpm' "
     "| head -1)",
     "dnf install -y /tmp/sysmanage-agent.rpm",

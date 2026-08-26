@@ -11,24 +11,17 @@ All models are re-exported here for backward compatibility.
 
 # Re-export all models for backward compatibility
 from .access_groups import *
-from .api_key import *
+from .advisory import *
 from .airgap import *
 from .airgap_bundle import *
+from .api_key import *
 from .child_host import *
+from .content_lifecycle import *
 from .core import *
 from .custom_metric import *
 from .dynamic_secrets import *
 from .external_idp import *
 from .federation import *
-from .mfa import *
-from .package_compliance import *
-from .report_branding import *
-from .provisioning import *
-from .advisory import *
-from .os_lifecycle import *
-from .repository_mirroring import *
-from .content_lifecycle import *
-from .upgrade_profiles import *
 from .gpg_key import *
 from .grafana_integration import *
 from .graylog_attachment import *
@@ -38,13 +31,20 @@ from .host_certificate import *
 from .host_role import *
 from .logging_config import *
 from .maintenance_windows import *
+from .mfa import *
 from .operations import *
+from .os_lifecycle import *
+from .package_compliance import *
 from .processes import *
 from .proplus import *
+from .provisioning import *
+from .report_branding import *
+from .repository_mirroring import *
 from .secret import *
 from .server_configuration import *
 from .software import *
 from .tenancy import *
+from .upgrade_profiles import *
 
 __all__ = [
     # Core models
@@ -99,6 +99,7 @@ __all__ = [
     "MessageQueue",
     "QueueMetrics",
     "SavedScript",
+    "ConfigProfileRun",
     "ScriptExecutionLog",
     "DiagnosticReport",
     # Organization models

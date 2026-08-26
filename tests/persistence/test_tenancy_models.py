@@ -17,12 +17,12 @@ import pytest
 from sqlalchemy.exc import IntegrityError
 
 from backend.persistence.models import (
+    TENANT_STATUS_ACTIVE,
+    TENANT_TIER_SILO,
     RegistryTenant,
     RegistryTenantPlacement,
     RegistryUser,
     RegistryUserTenantGrant,
-    TENANT_STATUS_ACTIVE,
-    TENANT_TIER_SILO,
 )
 
 

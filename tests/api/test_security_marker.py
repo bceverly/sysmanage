@@ -357,9 +357,9 @@ def test_valid_token_authenticates(
 
 def _ws_close_code(client, path):
     """Open a WS, expect immediate close, return the close code (or None)."""
-    from starlette.testclient import (  # pylint: disable=import-outside-toplevel
+    from starlette.testclient import (
         WebSocketDisconnect,
-    )
+    )  # pylint: disable=import-outside-toplevel
 
     try:
         with client.websocket_connect(path) as ws:

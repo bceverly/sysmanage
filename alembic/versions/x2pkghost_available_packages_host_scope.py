@@ -32,8 +32,9 @@ Revises: x1agentcap
 from typing import Union
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy import inspect
+
+from alembic import op
 
 revision: str = "x2pkghost"
 down_revision: Union[str, None] = "x1agentcap"

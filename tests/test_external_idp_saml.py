@@ -22,8 +22,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from backend.api import external_idp
-from backend.persistence.db import Base
 from backend.persistence import models
+from backend.persistence.db import Base
 
 PROVIDER_ID = uuid.uuid4()
 
