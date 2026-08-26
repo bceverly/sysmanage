@@ -7314,6 +7314,15 @@ any engine code, and it moved two decisions:
     standalone engine with no WinRM and no LCM. Verified GA at v3.2.3 with a
     build for the exact hardware in play — `DSC-3.2.3-aarch64-pc-windows-msvc`
     (11 MiB) — plus x86_64 Windows, both macOS arches and both Linux arches.
+
+    **Confirmed on hardware 2026-08-26:** with `WinRM Stopped/Disabled`,
+    `dsc 3.2.3` enumerated **25 resources** on the same box and in the same
+    probe run where `Invoke-DscResource` failed with a WS-Management connection
+    error. One run, one host, both paths — the dependency difference is not
+    inferred, it is observed. NOTE what this does and does not prove: the engine
+    LOADS and enumerates without WinRM. A get/test/**set** round trip through
+    `dsc.exe` with WinRM off is still outstanding and is the remaining gate on
+    this decision.
     It also gives Windows the **same shape as POSIX**: the agent subprocesses a
     binary and reads JSON off stdout, so one result-ingestion path serves both.
 

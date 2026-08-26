@@ -135,8 +135,57 @@ if ($dscV3 -ne 'none' -and $dscV3 -ne 'error') {
 Write-Output "dsc_v3_version=$dscV3Version"
 Write-Output "dsc_v3_resource_list=$dscV3List"
 
+# --- DSC v3: does it actually APPLY state with WinRM off? --------------------
+# Listing resources only proves the engine loads.  This does the round trip.
+#
+# How input reaches dsc.exe is itself a finding: Windows PowerShell 5.1 does not
+# escape embedded double quotes when passing arguments to native executables, so
+# `--input '{"a":"b"}'` is unreliable.  Try stdin first, fall back to --input,
+# and REPORT which worked -- the executor has to pick one deliberately.
+$script:DscInputMode = 'unknown'
+function Invoke-DscV3 { param([string]$Op, [string]$Resource, [string]$Json)
+  if ($script:DscInputMode -eq 'unknown' -or $script:DscInputMode -eq 'stdin') {
+    $o = ($Json | & dsc.exe resource $Op --resource $Resource 2>&1 | Out-String)
+    if ($LASTEXITCODE -eq 0) { $script:DscInputMode = 'stdin'; return @{ ok = $true; out = $o } }
+  }
+  $o = (& dsc.exe resource $Op --resource $Resource --input $Json 2>&1 | Out-String)
+  if ($LASTEXITCODE -eq 0) { $script:DscInputMode = '--input'; return @{ ok = $true; out = $o } }
+  return @{ ok = $false; out = $o }
+}
+
+$v3Echo = 'n/a'
+$v3Registry = 'n/a'
+if ($dscV3 -ne 'none' -and $dscV3 -ne 'error') {
+  # Echo is side-effect free AND advertises `test`, so it exercises the whole
+  # get/test pipeline without touching the machine.
+  $echoJson = (@{ output = 'sysmanage-probe' } | ConvertTo-Json -Compress)
+  $g = Invoke-DscV3 'get' 'Microsoft.DSC.Debug/Echo' $echoJson
+  $t = if ($g.ok) { Invoke-DscV3 'test' 'Microsoft.DSC.Debug/Echo' $echoJson } else { @{ ok = $false } }
+  $v3Echo = "get=$(if($g.ok){'ok'}else{'FAILED'});test=$(if($t.ok){'ok'}else{'FAILED'})"
+
+  # Registry under HKCU: a REAL state change, no elevation needed, and the
+  # resource advertises `delete` so the probe puts the box back as it found it.
+  # Note Registry does NOT advertise `test` (capabilities `gs--d--`), which is
+  # itself the finding: the executor cannot assume a test capability exists and
+  # must fall back to get-compare-get for idempotency.
+  $regProps = @{ keyPath = 'HKCU\Software\SysManageProbe'; valueName = 'probe'; valueData = @{ String = 'sysmanage' } }
+  $regJson = ($regProps | ConvertTo-Json -Compress -Depth 5)
+  $r1 = Invoke-DscV3 'get' 'Microsoft.Windows/Registry' $regJson
+  $r2 = Invoke-DscV3 'set' 'Microsoft.Windows/Registry' $regJson
+  $r3 = Invoke-DscV3 'get' 'Microsoft.Windows/Registry' $regJson
+  $r4 = Invoke-DscV3 'set' 'Microsoft.Windows/Registry' $regJson
+  $present = if ($r3.ok -and $r3.out -match 'sysmanage') { 'yes' } else { 'no' }
+  $r5 = Invoke-DscV3 'delete' 'Microsoft.Windows/Registry' $regJson
+  $v3Registry = "get1=$(if($r1.ok){'ok'}else{'FAILED'});set=$(if($r2.ok){'ok'}else{'FAILED'});get2=$(if($r3.ok){'ok'}else{'FAILED'});value_present=$present;reset=$(if($r4.ok){'ok'}else{'FAILED'});delete=$(if($r5.ok){'ok'}else{'FAILED'})"
+  if (-not $r2.ok) { $v3Registry = $v3Registry + ";err=" + (($r2.out -replace '[\r\n]+',' ') -replace ',',';').Trim() }
+}
+Write-Output "dsc_v3_input_mode=$script:DscInputMode"
+Write-Output "dsc_v3_echo=$v3Echo"
+Write-Output "dsc_v3_registry=$v3Registry"
+
 # --- one greppable line to send back ----------------------------------------
 Write-Output ("PROBE-RESULT os=windows version=$osVersion arch=$arch ps=$psVersion/$psEd " +
   "elevated=$elevated dsc_module=$dscModule invoke_dsc=$invokeDsc dsc_v3=$dscV3 " +
   "lcm=$lcm winrm=$winrmSvc/$winrmStart apply=$applyResult " +
-  "dsc_v3_version=$dscV3Version dsc_v3_list=$dscV3List")
+  "dsc_v3_version=$dscV3Version dsc_v3_list=$dscV3List " +
+  "dsc_v3_input=$script:DscInputMode dsc_v3_echo=$v3Echo dsc_v3_registry=$v3Registry")
