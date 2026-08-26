@@ -551,7 +551,7 @@ class TestCheckHealth:
         # The three shapes are real: they come from different vault backends
         # and versions, and a missed one silently drops to unauthenticated.
         row = _settings_row(api_token_vault_token="vt")
-        out, calls = await self._health(
+        out, _ = await self._health(
             self._session(row, [SimpleNamespace(vault_path="vp")]),
             [_Response(), _Response(json_data={"version": "6.0.1"})],
             secret=secret_data,
