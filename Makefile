@@ -1872,7 +1872,7 @@ else
 	@if [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ] || [ "$(shell uname -s)" = "NetBSD" ]; then \
 		echo "=== Running UI Integration Tests (Selenium) ==="; \
 		echo "[INFO] Using Selenium fallback on BSD systems (OpenBSD/FreeBSD/NetBSD)"; \
-		OTEL_ENABLED=false PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_selenium.py tests/ui/test_hosts_selenium.py tests/ui/test_updates_selenium.py --confcutdir=tests/ui -p tests.ui.conftest_selenium -v --tb=short; \
+		OTEL_ENABLED=false PYTHONPATH=tests/ui:$$PYTHONPATH $(PYTHON) -m pytest tests/ui/test_login_selenium.py tests/ui/test_hosts_selenium.py tests/ui/test_updates_selenium.py --confcutdir=tests/ui -p tests.ui.conftest_selenium -v --tb=short || { echo "[FAIL] Selenium UI integration tests failed"; exit 1; }; \
 		echo "[OK] Selenium UI integration tests completed"; \
 	else \
 		echo "[SKIP] Use 'make test-e2e' for Playwright E2E tests on $(shell uname -s)"; \

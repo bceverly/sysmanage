@@ -242,7 +242,7 @@ describe('ReportViewer Page', () => {
 
     // Mock PDF fetch
     mockApiGet.mockResolvedValueOnce({
-      data: new Blob(['mock-pdf'], { type: 'application/pdf' }),
+      data: new globalThis.Blob(['mock-pdf'], { type: 'application/pdf' }),
     });
 
     const pdfButton = screen.getByText('Generate PDF');
@@ -387,7 +387,7 @@ describe('ReportViewer Page', () => {
   });
 
   test('PDF download creates proper blob URL and triggers download', async () => {
-    const mockBlob = new Blob(['mock-pdf'], { type: 'application/pdf' });
+    const mockBlob = new globalThis.Blob(['mock-pdf'], { type: 'application/pdf' });
 
     // Mock HTML fetch
     mockApiGet.mockResolvedValueOnce({

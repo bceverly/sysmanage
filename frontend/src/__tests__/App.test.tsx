@@ -34,7 +34,7 @@ vi.mock('../Pages/Hosts', () => ({
 
 // Mock ConnectionProvider to avoid async issues
 vi.mock('../Components/ConnectionProvider', () => ({
-  default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>
+  default: ({ children }: { children: import("react").ReactNode }) => <div>{children}</div>
 }));
 
 // Mock SecurityWarningBanner

@@ -471,7 +471,7 @@ drifted down as feature pages shipped without tests.
 
 | Frontend | Path | Baseline (2026-06) | After Phase 13 | Enforced floor |
 |---|---|---|---|---|
-| OSS SysManage | `sysmanage/frontend/src` | ~9% | ~12% | **≥12% lines** |
+| OSS SysManage | `sysmanage/frontend/src` | ~9% | ~12% | **≥60% lines** (raised 2026-08-26; measured 62.35%) |
 | License server (admin portal) | `sysmanage-professional-plus/frontend/src` | ~23% | **~50%** | **≥48% lines** |
 | Pro+ components (plugin bundles) | `sysmanage-professional-plus/frontend/plugin-src` | ~7% | **~54%** | **≥53% lines** |
 
@@ -7231,6 +7231,24 @@ Some platforms this phase reaches can't run the *full* agent: a native library m
 
 #### 20.1 config_management_engine (Enterprise)
 
+**DECIDED 2026-08-26 (Bryan): PULL-style execution, not push.** Ansible is
+conventionally push-based — a control node SSHing into each target — and that
+would undo the Phase 19 item "One port to rule them all: agent↔server needs 443
+only", which explicitly rules out any additional port and would otherwise
+reintroduce SSH reachability plus credentials for every managed host.  Instead
+the server ships the playbook DOWN the existing WebSocket and the agent runs it
+locally against `localhost`, exactly as `execute_script` already does.
+Consequences to design around, all of them deliberate:
+  * `ansible-core` becomes an AGENT-side dependency, packaged on every platform
+    we ship an agent for — not a server-side one.  On platforms where it cannot
+    be installed, the host simply does not advertise the capability.
+  * Gate dispatch on **agent capability advertisement** (shipped in Phase 19):
+    add a config-management capability rather than inventing a parallel probe,
+    so a host that cannot run playbooks shows the existing "limited" badge and
+    the don't-dispatch-what-a-host-can't-run rule applies unchanged.
+  * Results/idempotency reporting flows back over the same WebSocket as every
+    other command result; no new ingress path.
+
 - [ ] Desired-state config-as-code: Ansible role/playbook execution at scale (job templates; inventories from SysManage hosts/tags/sites) with results + idempotency reporting
 - [ ] Config profiles assignable per host/tag/site, enforced on a schedule
 - [ ] Remediation playbooks (apply to bring a host into compliance)
@@ -7250,7 +7268,20 @@ Some platforms this phase reaches can't run the *full* agent: a native library m
 
 ### Exit Criteria
 
-- [ ] **Coverage ladder rung: OSS frontend `lines` floor to 60.** Added 2026-08-07
+- [x] **Coverage ladder rung: OSS frontend `lines` floor to 60.**
+      *(DONE 2026-08-26 — measured lines 52.02% -> 62.35% (statements 51.05 ->
+      61.09, functions 43.67 -> 51.07, branches 33.06 -> 41.38) over 1,321
+      tests, and the enforced `lines` floor in `frontend/vite.config.ts` raised
+      50 -> 60 with the trailing metrics ratcheted to 58/48/38.  Sixteen
+      previously-untested files, taken worst-first by uncovered-line count:
+      Pages UserDetail, OSUpgrades, ResetPassword, AcceptInvitation,
+      AuditLogViewer, AirgapCollections; Components MfaEnrollmentCard,
+      AntivirusStatusCard, ReportTemplatesSettings, ReportBrandingSettings,
+      HostCompliancePanel, GrafanaIntegrationCard, GraylogAttachmentModal,
+      AddHostAccountModal, ProcessesPanel, UbuntuProSettings.  Pulled forward
+      into Phase 20's opening rather than left to its exit, so the rung is met
+      BEFORE the 20.1/20.2 feature work adds new pages to cover.)*
+      Added 2026-08-07
       to fix a contradiction — the ladder climbs +10 per stabilization phase, but
       only 19 and 22 remained before GA while 22 demanded ≥70, a 20-point jump
       that skipped a defined rung.  Rungs now sit in 19 (50), 20 (60) and 21 (70),

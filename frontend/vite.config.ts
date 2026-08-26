@@ -343,12 +343,25 @@ export default defineConfig({
       // ThirdPartyRepositories, Secrets -- each with its heavy children stubbed.
       // Floors again locked ~2-3pts under measured, and they FOLLOW coverage,
       // never lead it.
-      // Next rung: push measured lines past ~62% then raise `lines` to 60.
+      // Phase 20 rung: line floor 60 REACHED, which was the previous plan's
+      // stated trigger ("push measured lines past ~62% then raise the `lines`
+      // floor to 60").  Measured 2026-08-26 at lines 62.36% / statements
+      // 61.10% / functions 51.07% / branches 41.39% over 1325 tests, up from
+      // 52.02 / 51.05 / 43.67 / 33.06.  The lift came from sixteen
+      // previously-untested Pages and Components, taken worst-first by
+      // uncovered-line count: UserDetail, OSUpgrades, ResetPassword,
+      // AcceptInvitation, AuditLogViewer, AirgapCollections, and the
+      // MfaEnrollment / AntivirusStatus / ReportTemplates / ReportBranding /
+      // HostCompliance / GrafanaIntegration / GraylogAttachment /
+      // AddHostAccount / Processes / UbuntuPro components.
+      // Floors again locked ~2-3pts under measured, and they FOLLOW coverage,
+      // never lead it.
+      // Next rung: push measured lines past ~72% then raise `lines` to 70.
       thresholds: {
-        lines: 50,
-        statements: 48,
-        functions: 40,
-        branches: 30,
+        lines: 60,
+        statements: 58,
+        functions: 48,
+        branches: 38,
       },
       exclude: [
         'node_modules/',

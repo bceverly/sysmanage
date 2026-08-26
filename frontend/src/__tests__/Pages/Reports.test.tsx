@@ -128,7 +128,7 @@ describe('Reports Page', () => {
       if (url.includes('/api/v1/reporting/generate/')) {
         // Default mock for report generation
         return Promise.resolve({
-          data: new Blob(['mock pdf content'], { type: 'application/pdf' }),
+          data: new globalThis.Blob(['mock pdf content'], { type: 'application/pdf' }),
           headers: {
             'content-disposition': 'attachment; filename="report.pdf"',
           },
@@ -242,7 +242,7 @@ describe('Reports Page', () => {
       }
       // Second call - PDF generation
       return Promise.resolve({
-        data: new Blob(['mock-pdf'], { type: 'application/pdf' }),
+        data: new globalThis.Blob(['mock-pdf'], { type: 'application/pdf' }),
         headers: {
           'content-disposition': 'attachment; filename="hosts_report.pdf"'
         }
@@ -454,7 +454,7 @@ describe('Reports Page', () => {
       originalConsoleError(...args);
     };
 
-    const mockBlob = new Blob(['mock-pdf'], { type: 'application/pdf' });
+    const mockBlob = new globalThis.Blob(['mock-pdf'], { type: 'application/pdf' });
 
     // Reset and setup fresh mock - need to handle permissions call first
     mockApiGet.mockReset();

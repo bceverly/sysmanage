@@ -287,9 +287,12 @@ def _create_firefox_driver():
             break
 
     if not firefox_binary:
-        pytest.fail(
-            "Firefox binary not found. Install firefox before running the " "UI tests.",
-            pytrace=False,
+        # Skip for the same reason as the missing-geckodriver case below: an
+        # uninstalled optional browser is "this host cannot run the Firefox
+        # leg", not a defect in the product.
+        pytest.skip(
+            "Firefox binary not found; skipping the Firefox leg. Install "
+            "firefox to run it."
         )
 
     # Set GeckoDriver path based on platform
@@ -313,10 +316,15 @@ def _create_firefox_driver():
             break
 
     if not geckodriver_path:
-        pytest.fail(
-            "GeckoDriver not found. Install geckodriver matching your "
-            "Firefox version before running the UI tests.",
-            pytrace=False,
+        # SKIP, not fail: a missing optional browser driver means "this host
+        # cannot run the Firefox leg", which is exactly how Playwright and
+        # artillery are already treated on BSD.  Failing here turned an
+        # un-installed dependency into 10 red ERRORs on every FreeBSD run and
+        # buried the one real failure (the WebUI being down) in the noise.
+        pytest.skip(
+            "GeckoDriver not found; skipping the Firefox leg. Install "
+            "geckodriver matching your Firefox version to run it.",
+            allow_module_level=False,
         )
 
     # Create Firefox service with explicit driver path and longer timeout
@@ -353,25 +361,42 @@ def start_server(ui_config):
 
     print("Checking if SysManage server is already running...")
 
-    # First, check if server is already running
-    server_running = False
+    # Check BOTH halves.  The API (:8080) and the WebUI (:3000) are separate
+    # processes on separate ports, and Selenium drives the WebUI -- so proving
+    # the API is up says nothing about whether these tests can run.  This used
+    # to check only /api/health and then print "Server already running at
+    # <WEBUI url>", which is how a FreeBSD box with a live backend and a dead
+    # vite reported [OK] and then handed every test ERR_CONNECTION_REFUSED.
+    api_ok = False
     try:
-        response = requests.get(f"{ui_config.api_url}/api/health", timeout=5)
-        if response.status_code == 200:
-            server_running = True
-            print(f"[OK] Server already running at {ui_config.base_url}")
-    except Exception as e:
-        print(f"Health check failed: {e}")
-        # Also try just hitting the root endpoint
-        try:
-            response = requests.get(f"{ui_config.base_url}/", timeout=5)
-            if response.status_code in [200, 404]:  # 404 might be OK if no root handler
-                server_running = True
-                print(
-                    f"[OK] Server detected running at {ui_config.base_url} (via root endpoint)"
-                )
-        except Exception:  # noqa: BLE001
-            _ = None  # empty-except: failure here is non-fatal; see code above
+        api_ok = (
+            requests.get(f"{ui_config.api_url}/api/health", timeout=5).status_code
+            == 200
+        )
+    except Exception as e:  # noqa: BLE001
+        print(f"API health check failed at {ui_config.api_url}: {e}")
+
+    webui_ok = False
+    try:
+        # 404 is acceptable: it proves something is LISTENING and speaking
+        # HTTP, which is all the browser needs to reach the SPA.
+        webui_ok = requests.get(f"{ui_config.base_url}/", timeout=5).status_code in (
+            200,
+            404,
+        )
+    except Exception as e:  # noqa: BLE001
+        print(f"WebUI check failed at {ui_config.base_url}: {e}")
+
+    server_running = api_ok and webui_ok
+    if server_running:
+        print(
+            f"[OK] Server already running (API {ui_config.api_url}, WebUI {ui_config.base_url})"
+        )
+    elif api_ok:
+        print(
+            f"[INFO] API is up at {ui_config.api_url} but the WebUI at "
+            f"{ui_config.base_url} is NOT -- starting the full stack."
+        )
 
     server_process = None
     if not server_running:
@@ -391,11 +416,15 @@ def start_server(ui_config):
             if not os.path.exists(run_script):
                 raise FileNotFoundError(f"start.sh not found at {run_script}")
 
-            server_process = subprocess.Popen(
+            # DEVNULL, not PIPE: nothing ever drains these, so a chatty
+            # server would eventually fill the pipe buffer and BLOCK.  It also
+            # removes the "unclosed file <_io.BufferedReader>" ResourceWarnings
+            # that failed the OpenBSD run at teardown (2026-08-26).
+            server_process = subprocess.Popen(  # pylint: disable=consider-using-with
                 [run_script],
                 cwd=project_root,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
                 preexec_fn=os.setsid if os.name != "nt" else None,
             )
 
@@ -493,12 +522,13 @@ def start_server(ui_config):
             stop_script = os.path.join(project_root, "scripts", "stop.sh")
             if os.path.exists(stop_script):
                 # Run stop script in a subshell to completely suppress output
-                result = subprocess.run(
+                subprocess.run(
                     ["sh", "-c", f"'{stop_script}' >/dev/null 2>&1"],
                     cwd=project_root,
                     timeout=10,
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
+                    check=False,
                 )
                 print("[OK] Server stopped successfully using stop.sh")
             else:
@@ -511,6 +541,24 @@ def start_server(ui_config):
                 print("[OK] Server stopped successfully")
         except Exception as e:
             print(f"[WARNING] Error stopping server: {e}")
+
+        # Reap it either way.  stop.sh ends the SERVER, but this Popen object
+        # still owns a child that Python has never waited on, and its
+        # __del__ raises "subprocess <pid> is still running" during GC --
+        # which pytest turns into an unraisable-exception ERROR even when
+        # every test passed (observed on OpenBSD 2026-08-26: 10 passed,
+        # 1 error).
+        try:
+            server_process.wait(timeout=10)
+        except Exception:  # noqa: BLE001
+            try:
+                if os.name != "nt":
+                    os.killpg(os.getpgid(server_process.pid), signal.SIGKILL)
+                else:
+                    server_process.kill()
+                server_process.wait(timeout=5)
+            except Exception:  # noqa: BLE001
+                _ = None  # nothing more we can do; the run is over
     else:
         print("[OK] UI tests completed - leaving pre-existing server running")
 

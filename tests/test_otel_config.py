@@ -173,7 +173,25 @@ class TestOtlpExporterIsIndependentlyOptional:
             importlib.import_module("backend.telemetry.otel_config")
 
     def test_otlp_available_when_exporter_present(self):
-        """Sanity check the flag is not just hardcoded False."""
+        """Sanity check the flag is not just hardcoded False.
+
+        Conditional on the exporter ACTUALLY being installed, because it
+        legitimately is not everywhere.  The OTLP exporter drags in grpcio,
+        which has no wheel on several platforms we support -- requirements.txt
+        already excludes it on Windows ARM64 for exactly this reason, and
+        NetBSD hits the same wall (observed 2026-08-26: this assert was the only
+        failure in an otherwise green 7273-test run).  Asserting True
+        unconditionally tested the build environment, not the code: on a host
+        without the exporter, `OTLP_AVAILABLE is False` is the CORRECT answer
+        and the module's own try/except is what makes that safe.
+        """
+        import pytest
+
+        try:
+            import opentelemetry.exporter.otlp.proto.grpc.trace_exporter  # noqa: F401
+        except ImportError as exc:
+            pytest.skip(f"OTLP exporter not installed on this platform: {exc}")
+
         from backend.telemetry import otel_config
 
         assert otel_config.OTLP_AVAILABLE is True
