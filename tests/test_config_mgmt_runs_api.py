@@ -454,9 +454,15 @@ class TestApplyLicensing:
 
     @pytest.mark.asyncio
     async def test_a_licensed_puppet_apply_goes_through(self):
+        # The module must be present as well as licensed: a licensed engine is
+        # dispatched as a spec the Pro+ module builds, so mocking only the
+        # licence gate leaves nothing to send (and correctly 503s).
         session = _Session(Host=[_host()])
         with _Env() as env, patch(
             "backend.api.config_mgmt_runs.require_module", return_value=None
+        ), patch(
+            "backend.api.config_mgmt_runs.spec_shim.build_licensed_spec",
+            return_value={"engine": "puppet", "argv": ["puppet", "apply"]},
         ):
             out = await api.apply_config_profile(
                 str(HOST_ID),
@@ -487,6 +493,9 @@ class TestApplyLicensing:
         session = _Session(Host=[_host()])
         with _Env() as env, patch(
             "backend.api.config_mgmt_runs.require_module", return_value=None
+        ), patch(
+            "backend.api.config_mgmt_runs.spec_shim.build_licensed_spec",
+            return_value={"engine": "salt", "argv": ["salt-call"]},
         ):
             await api.apply_config_profile(
                 str(HOST_ID),
@@ -495,3 +504,86 @@ class TestApplyLicensing:
                 _user(SecurityRoles.RUN_SCRIPT),
             )
         assert env.audits[0]["details"]["executor"] == "salt"
+
+
+class TestApplySpecDispatch:
+    """A licensed engine is dispatched as a SPEC built by the Pro+ module.
+
+    The agent deliberately cannot drive Puppet/Salt/Chef itself, so without a
+    spec there is nothing to send. The two failure modes must stay distinct:
+    403 means the customer is unlicensed, 503 means the module is licensed but
+    absent -- an administrator problem, not a sales one.
+    """
+
+    @pytest.mark.asyncio
+    async def test_a_licensed_engine_dispatches_the_engines_spec(self):
+        spec = {"engine": "puppet", "argv": ["puppet", "apply", "{profile}"]}
+        session = _Session(Host=[_host()])
+        with _Env() as env, patch(
+            "backend.api.config_mgmt_runs.require_module", return_value=None
+        ), patch(
+            "backend.api.config_mgmt_runs.spec_shim.build_licensed_spec",
+            return_value=spec,
+        ):
+            await api.apply_config_profile(
+                str(HOST_ID),
+                _req(playbook="class x {}", engine="puppet"),
+                session,
+                _user(SecurityRoles.RUN_SCRIPT),
+            )
+        params = env.enqueued[0]["message_data"]["data"]["parameters"]
+        assert params["spec"] is spec
+
+    @pytest.mark.asyncio
+    async def test_a_licensed_but_unloaded_module_is_a_503_not_a_403(self):
+        # 403 would tell a paying customer to buy something they already have.
+        session = _Session(Host=[_host()])
+        with _Env() as env, patch(
+            "backend.api.config_mgmt_runs.require_module", return_value=None
+        ), patch(
+            "backend.api.config_mgmt_runs.spec_shim.build_licensed_spec",
+            return_value=None,
+        ):
+            with pytest.raises(HTTPException) as exc:
+                await api.apply_config_profile(
+                    str(HOST_ID),
+                    _req(playbook="class x {}", engine="puppet"),
+                    session,
+                    _user(SecurityRoles.RUN_SCRIPT),
+                )
+        assert exc.value.status_code == 503
+        assert env.enqueued == [], "nothing may be queued without a spec"
+
+    @pytest.mark.asyncio
+    async def test_a_free_engine_never_consults_the_pro_plus_module(self):
+        # ansible-core is driven by the agent's own path; reaching for the
+        # engine would make a free feature depend on a licensed module.
+        session = _Session(Host=[_host()])
+        with _Env() as env, patch(
+            "backend.api.config_mgmt_runs.spec_shim.build_licensed_spec"
+        ) as builder:
+            await api.apply_config_profile(
+                str(HOST_ID),
+                _req(playbook="- hosts: all"),
+                session,
+                _user(SecurityRoles.RUN_SCRIPT),
+            )
+        builder.assert_not_called()
+        assert "spec" not in env.enqueued[0]["message_data"]["data"]["parameters"]
+
+    @pytest.mark.asyncio
+    async def test_check_mode_and_timeout_reach_the_spec_builder(self):
+        session = _Session(Host=[_host()])
+        with _Env(), patch(
+            "backend.api.config_mgmt_runs.require_module", return_value=None
+        ), patch(
+            "backend.api.config_mgmt_runs.spec_shim.build_licensed_spec",
+            return_value={"engine": "salt", "argv": ["salt-call"]},
+        ) as builder:
+            await api.apply_config_profile(
+                str(HOST_ID),
+                _req(playbook="state:", engine="salt", check_mode=True, timeout=99),
+                session,
+                _user(SecurityRoles.RUN_SCRIPT),
+            )
+        builder.assert_called_once_with("salt", "state:", check_mode=True, timeout=99)

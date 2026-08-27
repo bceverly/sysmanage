@@ -34,6 +34,7 @@ from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import config_mgmt_engines as engines
 from backend.services import config_mgmt_plan_builder as planner
+from backend.services import config_mgmt_spec_shim as spec_shim
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.messages import CommandType, Message, MessageType
@@ -281,6 +282,31 @@ async def apply_config_profile(
         "profile": profile,
         "check_mode": bool(request.check_mode),
     }
+
+    # A licensed engine is driven by a SPEC the Pro+ module builds. The agent
+    # deliberately does not know how to run Puppet/Salt/Chef -- see
+    # sysmanage-agent operations/config_mgmt_spec.py for why that indirection
+    # exists -- so without a spec there is nothing to dispatch.
+    if engines.requires_license(executor):
+        spec = spec_shim.build_licensed_spec(
+            executor,
+            request.playbook or "",
+            check_mode=bool(request.check_mode),
+            timeout=request.timeout,
+        )
+        if spec is None:
+            # The licence check above already passed, so this is a broken
+            # install (module not loaded for this Python version) rather than
+            # an unlicensed customer. 503, not 403 -- they need an
+            # administrator, not a salesperson.
+            raise HTTPException(
+                status_code=503,
+                detail=_(
+                    "The configuration management engine is licensed but not "
+                    "available on this server"
+                ),
+            )
+        parameters["spec"] = spec
     if request.profile_name:
         parameters["profile_name"] = request.profile_name
     if request.timeout:

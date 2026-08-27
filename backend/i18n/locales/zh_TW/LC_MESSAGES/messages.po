@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-27 08:21-0400\n"
+"POT-Creation-Date: 2026-08-27 11:40-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1054,7 +1054,7 @@ msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
 msgstr "權限 denied: EDIT_HOST_HOSTNAME 角色所需"
 
 #: backend/api/host_hostname.py:75 backend/api/reboot_orchestration.py:119
-#: backend/api/config_mgmt_runs.py:241 backend/api/error_constants.py:43
+#: backend/api/config_mgmt_runs.py:242 backend/api/error_constants.py:43
 #: backend/api/child_host_utils.py:91
 #: backend/api/scripts/routes_executions.py:81
 msgid "Host is not active"
@@ -3622,25 +3622,31 @@ msgstr "安裝完成記錄"
 msgid "Internal server error"
 msgstr "內部伺服器錯誤"
 
-#: backend/api/config_mgmt_runs.py:234
+#: backend/api/config_mgmt_runs.py:235
 #: backend/api/scripts/routes_executions.py:67
 msgid "Permission denied: RUN_SCRIPT role required"
 msgstr "權限 denied: RUN_SCRIPT 角色所需"
 
-#: backend/api/config_mgmt_runs.py:254
+#: backend/api/config_mgmt_runs.py:255
 #, python-format
 msgid "Unknown configuration management engine: %s"
 msgstr "未知的配置管理引擎: %s"
 
-#: backend/api/config_mgmt_runs.py:269
+#: backend/api/config_mgmt_runs.py:270
 msgid "This host uses DSC; provide 'resources', not 'playbook'"
 msgstr "此主機使用 DSC；請提供 '資源'，而非 '腳本' "
 
-#: backend/api/config_mgmt_runs.py:276
+#: backend/api/config_mgmt_runs.py:277
 msgid "This host uses ansible-core; provide 'playbook'"
 msgstr "此主機使用 ansible-core；請提供 '腳本'"
 
-#: backend/api/config_mgmt_runs.py:338
+#: backend/api/config_mgmt_runs.py:305
+msgid ""
+"The configuration management engine is licensed but not available on this "
+"server"
+msgstr "這個配置管理引擎已授權，但在此伺服器上不可用"
+
+#: backend/api/config_mgmt_runs.py:364
 msgid "Configuration profile was queued for this host"
 msgstr "這個主機已排隊配置資料夾"
 
