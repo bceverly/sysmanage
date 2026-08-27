@@ -3444,6 +3444,19 @@
     "runsEmpty": "Aucun profil de configuration n'a encore été appliqué à cet hôte.",
     "runsError": "Échec du chargement de l'historique des exécutions de configuration",
     "runsTitle": "Historique des exécutions de configuration",
-    "runNoProfile": "Aucun profil"
+    "runNoProfile": "Aucun profil",
+    "applyAction": "Appliquer",
+    "applyDryRun": "Exécution en mode sec (affichage des modifications sans exécution)",
+    "applyDryRunAction": "Aperçu des modifications",
+    "applyError": "Échec de la mise en file d'attente du profil de configuration",
+    "applyHelpAnsible": "Cet hôte applique une configuration avec ansible-core. Collez un playbook ; il s'exécute localement contre cet hôte uniquement.",
+    "applyHelpDsc": "Cet hôte applique une configuration avec DSC. Collez un tableau JSON de ressources DSC.",
+    "applyInvalidJson": "Les ressources doivent être un tableau JSON d'objets de ressources DSC.",
+    "applyLiveWarning": "Cela apportera des modifications réelles à cet hôte.",
+    "applyPlaybook": "Contenu du playbook (YAML)",
+    "applyProfile": "Profil appliqué",
+    "applyProfileName": "Nom du profil (facultatif)",
+    "applyResources": "Ressources DSC (JSON)",
+    "applyTitle": "Appliquer un profil de configuration"
   }
 }

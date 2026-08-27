@@ -3444,6 +3444,19 @@
     "runsEmpty": "Auf diesem Host wurden noch keine Konfigurationsprofile angewendet.",
     "runsError": "Fehler beim Laden der Konfigurationslaufhistorie",
     "runsTitle": "Konfigurationslaufhistorie",
-    "runNoProfile": "Kein Profil"
+    "runNoProfile": "Kein Profil",
+    "applyAction": "Anwenden",
+    "applyDryRun": "Trockenlauf (Änderungen melden, ohne sie vorzunehmen)",
+    "applyDryRunAction": "Änderungen Vorschau",
+    "applyError": "Fehler beim Einreihen des Konfigurationsprofils",
+    "applyHelpAnsible": "Dieser Host wendet Konfiguration mit `ansible-core` an. Fügen Sie ein Playbook ein; es wird lokal gegen diesen Host ausgeführt.",
+    "applyHelpDsc": "Dieser Host wendet Konfiguration mit DSC an. Fügen Sie ein JSON-Array von DSC-Ressourcen ein.",
+    "applyInvalidJson": "Die Ressourcen müssen ein JSON-Array von DSC-Ressourcenelementen sein.",
+    "applyLiveWarning": "Dadurch werden echte Änderungen an diesem Host vorgenommen.",
+    "applyPlaybook": "Playbook-Inhalt (YAML)",
+    "applyProfile": "Profil anwenden",
+    "applyProfileName": "Profilname (optional)",
+    "applyResources": "DSC-Ressourcen (JSON)",
+    "applyTitle": "Eine Konfigurationsprofil anwenden"
   }
 }

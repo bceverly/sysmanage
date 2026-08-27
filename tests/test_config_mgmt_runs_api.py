@@ -16,13 +16,15 @@ hour ago can appear to be several hours in the future.
 
 import json
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import pytest
 from fastapi import HTTPException
 
 from backend.api import config_mgmt_runs as api
+from backend.security.roles import SecurityRoles
 
 HOST_ID = uuid.UUID("22222222-2222-4222-8222-222222222222")
 RUN_ID = uuid.UUID("33333333-3333-4333-8333-333333333333")
@@ -57,6 +59,19 @@ class _Session:
     def __init__(self, **by_name):
         self._by_name = by_name
         self.queries = []
+        self.commits = 0
+
+    def commit(self):
+        self.commits += 1
+
+    def __call__(self, *_a, **_k):
+        return self
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_exc):
+        return False
 
     def query(self, entity):
         q = _Query(self._by_name.get(entity.__name__, []))
@@ -65,26 +80,26 @@ class _Session:
 
 
 def run(**over):
-    base = dict(
-        id=RUN_ID,
-        host_id=HOST_ID,
-        profile_id=None,
-        profile_name="baseline",
-        executor="ansible-core",
-        check_mode=False,
-        success=True,
-        changed=False,
-        exit_code=0,
-        tasks_ok=3,
-        tasks_changed=0,
-        tasks_failed=0,
-        tasks_skipped=1,
-        tasks_unreachable=0,
-        reason=None,
-        task_detail=None,
-        error_output=None,
-        completed_at=datetime(2026, 8, 26, 12, 0, 0),
-    )
+    base = {
+        "id": RUN_ID,
+        "host_id": HOST_ID,
+        "profile_id": None,
+        "profile_name": "baseline",
+        "executor": "ansible-core",
+        "check_mode": False,
+        "success": True,
+        "changed": False,
+        "exit_code": 0,
+        "tasks_ok": 3,
+        "tasks_changed": 0,
+        "tasks_failed": 0,
+        "tasks_skipped": 1,
+        "tasks_unreachable": 0,
+        "reason": None,
+        "task_detail": None,
+        "error_output": None,
+        "completed_at": datetime(2026, 8, 26, 12, 0, 0),
+    }
     base.update(over)
     return SimpleNamespace(**base)
 
@@ -190,3 +205,211 @@ class TestDetail:
         with pytest.raises(HTTPException) as exc:
             await api.get_config_profile_run("nope", _Session())
         assert exc.value.status_code == 400
+
+
+class _Env:
+    """Patches the queue, audit trail and audit engine for the apply route."""
+
+    def __init__(self):
+        self.enqueued = []
+        self.audits = []
+
+    def _enqueue(self, **kwargs):
+        self.enqueued.append(kwargs)
+        return "msg-1"
+
+    def __enter__(self):
+        self._patches = [
+            patch(
+                "backend.api.config_mgmt_runs.queue_ops.enqueue_message",
+                side_effect=self._enqueue,
+            ),
+            patch("backend.api.config_mgmt_runs.persistence_db.get_engine"),
+            patch("backend.api.config_mgmt_runs.sessionmaker", return_value=_Session()),
+            patch(
+                "backend.api.config_mgmt_runs.AuditService.log",
+                side_effect=lambda **kw: self.audits.append(kw),
+            ),
+        ]
+        for patcher in self._patches:
+            patcher.start()
+        return self
+
+    def __exit__(self, *_exc):
+        for patcher in self._patches:
+            patcher.stop()
+        return False
+
+
+def _user(*roles):
+    granted = set(roles)
+    return SimpleNamespace(
+        id="u1", userid="admin@invalid", has_role=lambda role: role in granted
+    )
+
+
+def _host(platform="Linux", release="Ubuntu 24.04", active=True):
+    return SimpleNamespace(
+        id=HOST_ID,
+        fqdn="host.invalid",
+        platform=platform,
+        platform_release=release,
+        platform_version="24.04",
+        active=active,
+    )
+
+
+def _req(**over):
+    return api.ConfigProfileApplyRequest(**over)
+
+
+class TestApply:
+    """Applying an ad-hoc profile.
+
+    A playbook can run anything the agent can, so this is remote code
+    execution by another name. The role gate and the active-host check are the
+    two things standing between a UI button and arbitrary root on a fleet.
+    """
+
+    @pytest.mark.asyncio
+    async def test_it_requires_the_run_script_role(self):
+        # Deliberately the SAME role as running a script, because the blast
+        # radius is identical. A softer config-specific role would be a
+        # privilege-escalation path dressed up as a feature.
+        session = _Session(Host=[_host()])
+        with _Env():
+            with pytest.raises(HTTPException) as exc:
+                await api.apply_config_profile(
+                    str(HOST_ID), _req(playbook="- hosts: all"), session, _user()
+                )
+        assert exc.value.status_code == 403
+
+    @pytest.mark.asyncio
+    async def test_an_inactive_host_is_refused_rather_than_queued(self):
+        # Queuing for an inactive host buries the work in a queue that may
+        # never drain while the operator is told it was accepted.
+        session = _Session(Host=[_host(active=False)])
+        with _Env() as env:
+            with pytest.raises(HTTPException) as exc:
+                await api.apply_config_profile(
+                    str(HOST_ID),
+                    _req(playbook="- hosts: all"),
+                    session,
+                    _user(SecurityRoles.RUN_SCRIPT),
+                )
+        assert exc.value.status_code == 400
+        assert env.enqueued == []
+
+    @pytest.mark.asyncio
+    async def test_a_posix_host_gets_its_playbook_queued(self):
+        session = _Session(Host=[_host()])
+        with _Env() as env:
+            out = await api.apply_config_profile(
+                str(HOST_ID),
+                _req(playbook="- hosts: all", profile_name="baseline"),
+                session,
+                _user(SecurityRoles.RUN_SCRIPT),
+            )
+        assert out.queued is True
+        params = env.enqueued[0]["message_data"]["data"]["parameters"]
+        assert params["profile"]["playbook"] == "- hosts: all"
+        assert params["profile_name"] == "baseline"
+
+    @pytest.mark.asyncio
+    async def test_a_windows_host_gets_its_resources_queued(self):
+        session = _Session(Host=[_host(platform="Windows", release="")])
+        with _Env() as env:
+            await api.apply_config_profile(
+                str(HOST_ID),
+                _req(resources=[{"name": "n", "type": "T"}]),
+                session,
+                _user(SecurityRoles.RUN_SCRIPT),
+            )
+        params = env.enqueued[0]["message_data"]["data"]["parameters"]
+        assert params["profile"]["resources"] == [{"name": "n", "type": "T"}]
+
+    @pytest.mark.asyncio
+    async def test_a_playbook_sent_to_windows_is_refused_up_front(self):
+        # Letting this through fails at the far end, where the reason is far
+        # less obvious than a 400 saying which field the host wants.
+        session = _Session(Host=[_host(platform="Windows", release="")])
+        with _Env() as env:
+            with pytest.raises(HTTPException) as exc:
+                await api.apply_config_profile(
+                    str(HOST_ID),
+                    _req(playbook="- hosts: all"),
+                    session,
+                    _user(SecurityRoles.RUN_SCRIPT),
+                )
+        assert exc.value.status_code == 400
+        assert env.enqueued == []
+
+    @pytest.mark.asyncio
+    async def test_dsc_resources_sent_to_linux_are_refused_up_front(self):
+        session = _Session(Host=[_host()])
+        with _Env() as env:
+            with pytest.raises(HTTPException) as exc:
+                await api.apply_config_profile(
+                    str(HOST_ID),
+                    _req(resources=[{"name": "n"}]),
+                    session,
+                    _user(SecurityRoles.RUN_SCRIPT),
+                )
+        assert exc.value.status_code == 400
+        assert env.enqueued == []
+
+    @pytest.mark.asyncio
+    async def test_an_empty_playbook_is_refused(self):
+        session = _Session(Host=[_host()])
+        with _Env():
+            with pytest.raises(HTTPException) as exc:
+                await api.apply_config_profile(
+                    str(HOST_ID),
+                    _req(playbook="   "),
+                    session,
+                    _user(SecurityRoles.RUN_SCRIPT),
+                )
+        assert exc.value.status_code == 400
+
+    @pytest.mark.asyncio
+    async def test_check_mode_is_passed_through_and_reported(self):
+        session = _Session(Host=[_host()])
+        with _Env() as env:
+            out = await api.apply_config_profile(
+                str(HOST_ID),
+                _req(playbook="- hosts: all", check_mode=True),
+                session,
+                _user(SecurityRoles.RUN_SCRIPT),
+            )
+        assert out.check_mode is True
+        params = env.enqueued[0]["message_data"]["data"]["parameters"]
+        assert params["check_mode"] is True
+
+    @pytest.mark.asyncio
+    async def test_the_profile_body_is_never_written_to_the_audit_log(self):
+        # Profiles can carry secrets, and the audit log is readable by more
+        # people than the profile is.
+        secret = "- hosts: all\n  vars:\n    db_password: hunter2\n"
+        session = _Session(Host=[_host()])
+        with _Env() as env:
+            await api.apply_config_profile(
+                str(HOST_ID),
+                _req(playbook=secret),
+                session,
+                _user(SecurityRoles.RUN_SCRIPT),
+            )
+        recorded = json.dumps(env.audits[0], default=str)
+        assert "hunter2" not in recorded
+        assert env.audits[0]["details"]["executor"] == "ansible-core"
+
+    @pytest.mark.asyncio
+    async def test_unknown_host_is_a_404(self):
+        with _Env():
+            with pytest.raises(HTTPException) as exc:
+                await api.apply_config_profile(
+                    str(HOST_ID),
+                    _req(playbook="- hosts: all"),
+                    _Session(Host=[]),
+                    _user(SecurityRoles.RUN_SCRIPT),
+                )
+        assert exc.value.status_code == 404

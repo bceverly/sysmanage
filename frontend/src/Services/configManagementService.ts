@@ -112,3 +112,35 @@ export const getConfigProfileRun = async (
   );
   return response.data;
 };
+
+export interface ConfigProfileApplyRequest {
+  playbook?: string;
+  resources?: Record<string, unknown>[];
+  profile_name?: string;
+  check_mode?: boolean;
+}
+
+export interface ConfigProfileApplyResult {
+  host_id: string;
+  queued: boolean;
+  check_mode: boolean;
+  message: string;
+}
+
+/**
+ * Queue an ad-hoc configuration profile for one host.
+ *
+ * The server decides which field a host's executor wants and rejects the wrong
+ * one with a 400 naming the right field, so callers should surface the
+ * server's detail rather than guessing.
+ */
+export const applyConfigProfile = async (
+  hostId: string,
+  request: ConfigProfileApplyRequest,
+): Promise<ConfigProfileApplyResult> => {
+  const response = await axiosInstance.post<ConfigProfileApplyResult>(
+    `/api/v1/hosts/${hostId}/config-management/apply`,
+    request,
+  );
+  return response.data;
+};

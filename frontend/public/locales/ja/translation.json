@@ -3444,6 +3444,19 @@
     "runsEmpty": "このホストにはまだ適用されていない構成プロファイルがあります。",
     "runsError": "構成実行履歴の読み込みに失敗しました",
     "runsTitle": "構成実行履歴",
-    "runNoProfile": "プロファイルがありません"
+    "runNoProfile": "プロファイルがありません",
+    "applyAction": "適用",
+    "applyDryRun": "ドライラン (変更点を報告するが実行しない)",
+    "applyDryRunAction": "変更内容をプレビュー",
+    "applyError": "構成プロファイルのキューに失敗しました",
+    "applyHelpAnsible": "このホストは、ansible-core を使用して構成を適用します。プレイブックを貼り付けてください。これはローカルでこのホストに対してのみ実行されます。",
+    "applyHelpDsc": "このホストは、DSCを使用して構成を適用します。JSON配列のDSCリソースを貼り付けてください。",
+    "applyInvalidJson": "リソースは、DSCリソースオブジェクトのJSON配列でなければなりません。",
+    "applyLiveWarning": "この操作により、このホストに実際の変更が適用されます。",
+    "applyPlaybook": "Playbookコンテンツ (YAML)",
+    "applyProfile": "プロファイルを適用する",
+    "applyProfileName": "プロファイル名 (オプション)",
+    "applyResources": "DSCリソース (JSON)",
+    "applyTitle": "構成プロファイルを適用する"
   }
 }

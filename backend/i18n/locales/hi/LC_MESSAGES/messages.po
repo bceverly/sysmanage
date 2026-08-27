@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-26 10:30-0400\n"
+"POT-Creation-Date: 2026-08-26 15:50-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -142,8 +142,8 @@ msgstr "CA प्रमाणपत्र प्राप्त करने म
 #: backend/api/certificates.py:84 backend/api/certificates.py:139
 #: backend/api/host_graylog.py:89 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:474
-#: backend/api/firewall_roles.py:545
+#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:473
+#: backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "अमान्य होस्ट ID फॉर्मेट"
@@ -151,11 +151,11 @@ msgstr "अमान्य होस्ट ID फॉर्मेट"
 #: backend/api/certificates.py:95 backend/api/certificates.py:165
 #: backend/api/fips_actions.py:84 backend/api/fips_actions.py:174
 #: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:62
-#: backend/api/package_handlers.py:547 backend/api/package_compliance.py:319
-#: backend/api/package_compliance.py:445
+#: backend/api/package_handlers.py:547 backend/api/package_compliance.py:316
+#: backend/api/package_compliance.py:442
 #: backend/api/grafana_integration.py:330 backend/api/image_mode_actions.py:86
 #: backend/api/host_graylog.py:131 backend/api/tag.py:499
-#: backend/api/tag.py:653 backend/api/airgap_repository_buckets.py:65
+#: backend/api/tag.py:653 backend/api/airgap_repository_buckets.py:64
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:54
 #: backend/api/updates/query_routes.py:123
@@ -175,10 +175,10 @@ msgid "Host is not approved"
 msgstr "होस्ट की पार्सनल है"
 
 #: backend/api/certificates.py:156 backend/api/security_roles.py:161
-#: backend/api/security_roles.py:204 backend/api/auth_mfa.py:157
-#: backend/api/airgap_collection_schedule.py:144
+#: backend/api/security_roles.py:204 backend/api/auth_mfa.py:149
+#: backend/api/airgap_collection_schedule.py:139
 #: backend/api/graylog_integration.py:172 backend/api/broadcast.py:128
-#: backend/api/queue.py:122 backend/api/airgap_collector_runs.py:94
+#: backend/api/queue.py:122 backend/api/airgap_collector_runs.py:88
 #: backend/api/access_groups.py:140 backend/api/grafana_integration.py:314
 #: backend/api/opentelemetry/deployment.py:67
 #: backend/api/opentelemetry/deployment.py:220
@@ -292,7 +292,7 @@ msgstr "प्रक्रिया स्थिति अद्यतन सं
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:441 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:457 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "होस्ट पंजीकृत नहीं है"
@@ -433,7 +433,7 @@ msgid "Missing request_id in installation_complete"
 msgstr "installation_complete में request_id नहीं पाया गया"
 
 #: backend/api/handlers/software_package_handlers.py:955
-#: backend/api/agent.py:747 backend/api/packages.py:486
+#: backend/api/agent.py:748 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "इनस्टॉलेशन अनुरोध %s के लिए मिल नहीं पाया"
@@ -448,8 +448,8 @@ msgstr "इंस्टॉलेशन पूर्णता रिकॉर्�
 msgid "Report template not found"
 msgstr "रिपोर्ट प्रतिक्रिया नहीं मिली"
 
-#: backend/api/report_templates.py:177 backend/api/package_compliance.py:141
-#: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:110
+#: backend/api/report_templates.py:177 backend/api/package_compliance.py:138
+#: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:107
 #: backend/api/upgrade_profiles.py:128
 #: backend/api/repository_mirroring_helpers.py:154
 #, python-format
@@ -485,27 +485,27 @@ msgstr "रिपोर्ट टेम्पलेट '%s' हटाया ग�
 msgid "Report template deleted"
 msgstr "रिपोर्ट टेम्पलेट हटाया गया"
 
-#: backend/api/auth_mfa.py:254
+#: backend/api/auth_mfa.py:246
 msgid "Call enroll/start before enroll/complete."
 msgstr "enroll/start से पहले enroll/complete करना होता है."
 
-#: backend/api/auth_mfa.py:266 backend/api/auth_mfa.py:515
+#: backend/api/auth_mfa.py:258 backend/api/auth_mfa.py:507
 msgid "Invalid TOTP code."
 msgstr "गलत TOTP कोड।"
 
-#: backend/api/auth_mfa.py:304 backend/api/auth_mfa.py:366
+#: backend/api/auth_mfa.py:296 backend/api/auth_mfa.py:358
 msgid "MFA challenge expired — please log in again."
 msgstr "MFA चालेंज समाप्त हो गया — कृपया पुनः लॉग इन करें।"
 
-#: backend/api/auth_mfa.py:309
+#: backend/api/auth_mfa.py:301
 msgid "Invalid MFA challenge."
 msgstr "गलत MFA चेलेंज।"
 
-#: backend/api/auth_mfa.py:321
+#: backend/api/auth_mfa.py:313
 msgid "Invalid MFA code."
 msgstr "गलत MFA कोड।"
 
-#: backend/api/auth_mfa.py:412
+#: backend/api/auth_mfa.py:404
 msgid ""
 "If your account has MFA configured, an email with a verification code has "
 "been dispatched."
@@ -513,19 +513,19 @@ msgstr ""
 "अगर अपने खाते में MFA सेट किया गया है, तो आपको एक ऑटोथीटिकेशन कोड वाला ईमेल "
 "प्राप्त हुआ है।"
 
-#: backend/api/auth_mfa.py:442
+#: backend/api/auth_mfa.py:434
 msgid "Invalid password."
 msgstr "अमान्य पासवर्ड।"
 
-#: backend/api/auth_mfa.py:448
+#: backend/api/auth_mfa.py:440
 msgid "MFA disabled."
 msgstr "MFA विलग कर दिया गया।"
 
-#: backend/api/auth_mfa.py:503
+#: backend/api/auth_mfa.py:495
 msgid "MFA is not enrolled for this account."
 msgstr "इस खाते के लिए MFA सक्रिय नहीं है।"
 
-#: backend/api/auth_mfa.py:565
+#: backend/api/auth_mfa.py:557
 msgid "Editing MFA settings requires admin privileges."
 msgstr "MFA सेटिंग्स को संपादित करने के लिए प्रबंधक अधिकार आवश्यक है।"
 
@@ -642,7 +642,7 @@ msgstr "वाणिज्यिक एंटीवायरस स्थित�
 msgid "User Security Roles (RBAC)"
 msgstr "उपयोगकर्ता सुरक्षा भूमिकाएँ (RBAC)"
 
-#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:534
+#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:536
 msgid "Audit Log"
 msgstr "ऑडिट लॉग"
 
@@ -658,16 +658,16 @@ msgstr "PDF उत्पादन उपलब्ध नहीं है। क�
 msgid "Report"
 msgstr "रिपोर्ट"
 
-#: backend/api/airgap_collection_schedule.py:53
+#: backend/api/airgap_collection_schedule.py:48
 msgid "Air-gap collection schedule not found"
 msgstr "एयर-गैप संग्रह अनुसूची नहीं मिली"
 
-#: backend/api/airgap_collection_schedule.py:54
+#: backend/api/airgap_collection_schedule.py:49
 #, python-format
 msgid "Invalid UUID for schedule_id: %s"
 msgstr "schedule_id के लिए अमान्य UUID: %s"
 
-#: backend/api/airgap_collection_schedule.py:63
+#: backend/api/airgap_collection_schedule.py:58
 msgid ""
 "Air-gap collection schedules require a SysManage Professional+ license with "
 "the air-gap collector engine. Please upgrade to access this feature."
@@ -675,42 +675,42 @@ msgstr ""
 "एयर-गैप संग्रह अनुसूचियों के लिए एयर-गैप संग्राहक इंजन के साथ SysManage "
 "Professional+ लाइसेंस आवश्यक है। कृपया अपग्रेड करें।"
 
-#: backend/api/airgap_collection_schedule.py:89
+#: backend/api/airgap_collection_schedule.py:84
 msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
 msgstr "अमान्य cron अभिव्यक्ति: 5 फ़ील्ड अपेक्षित (m h dom mon dow)"
 
-#: backend/api/airgap_collection_schedule.py:98
+#: backend/api/airgap_collection_schedule.py:93
 #: backend/api/upgrade_profiles.py:148
 #, python-format
 msgid "Invalid cron expression: %s"
 msgstr "अमान्य क्रॉन एक्सप्रेशन: %s"
 
-#: backend/api/airgap_collection_schedule.py:176
-#: backend/api/airgap_collection_schedule.py:259
+#: backend/api/airgap_collection_schedule.py:171
+#: backend/api/airgap_collection_schedule.py:254
 #, python-format
 msgid "Invalid target_request: %s"
 msgstr "अमान्य target_request: %s"
 
-#: backend/api/airgap_collection_schedule.py:194
+#: backend/api/airgap_collection_schedule.py:189
 #, python-format
 msgid "Created air-gap collection schedule '%s'"
 msgstr "एयर-गैप संग्रह अनुसूची '%s' बनाई गई"
 
-#: backend/api/airgap_collection_schedule.py:270
+#: backend/api/airgap_collection_schedule.py:265
 #, python-format
 msgid "Updated air-gap collection schedule '%s'"
 msgstr "एयर-गैप संग्रह अनुसूची '%s' अद्यतन की गई"
 
-#: backend/api/airgap_collection_schedule.py:309
+#: backend/api/airgap_collection_schedule.py:304
 #, python-format
 msgid "Deleted air-gap collection schedule '%s'"
 msgstr "एयर-गैप संग्रह अनुसूची '%s' हटाई गई"
 
-#: backend/api/airgap_collection_schedule.py:314
+#: backend/api/airgap_collection_schedule.py:309
 msgid "Air-gap collection schedule deleted"
 msgstr "एयर-गैप संग्रह अनुसूची हटाई गई"
 
-#: backend/api/airgap_collection_schedule.py:378
+#: backend/api/airgap_collection_schedule.py:373
 msgid ""
 "automation_engine not loaded; next_run timestamps not advanced. Schedules "
 "will fire only on the current tick window until the Pro+ license includes "
@@ -781,119 +781,119 @@ msgstr "कनेक्शन विफल - Graylog सर्वर डाउ�
 msgid "Unexpected error checking Graylog health"
 msgstr "Graylog स्वास्थ्य जांचने में अप्रत्याशित त्रुटि"
 
-#: backend/api/openbao.py:61
+#: backend/api/openbao.py:58
 msgid "Invalid PID file"
 msgstr "अवैध PID फाइल"
 
-#: backend/api/openbao.py:102
+#: backend/api/openbao.py:99
 msgid "OpenBAO process not found"
 msgstr "OpenBAO प्रोसेस नहीं मिला"
 
-#: backend/api/openbao.py:189
+#: backend/api/openbao.py:186
 msgid "OpenBAO is running"
 msgstr "OpenBAO चल रहा है"
 
-#: backend/api/openbao.py:247
+#: backend/api/openbao.py:244
 msgid "OpenBAO is already running"
 msgstr "OpenBAO जारी है"
 
-#: backend/api/openbao.py:273
+#: backend/api/openbao.py:270
 msgid "OpenBAO start script not found"
 msgstr "OpenBAO शुरू करने का स्क्रिप्ट नहीं मिला"
 
-#: backend/api/openbao.py:368
+#: backend/api/openbao.py:365
 msgid "Internal error occurred while starting OpenBAO"
 msgstr "OpenBAO शुरू करने में आंतरिक त्रुटि हो गई"
 
-#: backend/api/openbao.py:402
+#: backend/api/openbao.py:399
 msgid "OpenBAO started successfully"
 msgstr "OpenBAO सफलतापूर्वक शुरू हुआ"
 
-#: backend/api/openbao.py:409 backend/api/openbao.py:757
+#: backend/api/openbao.py:406 backend/api/openbao.py:754
 msgid "Failed to start OpenBAO"
 msgstr "OpenBAO शुरू करने में विफलता हुई"
 
-#: backend/api/openbao.py:416
+#: backend/api/openbao.py:413
 msgid "OpenBAO start timed out"
 msgstr "OpenBAO शुरू होने में काउंटडाउन में हुई"
 
-#: backend/api/openbao.py:423 backend/api/openbao.py:765
+#: backend/api/openbao.py:420 backend/api/openbao.py:762
 msgid "An error occurred while starting OpenBAO"
 msgstr "OpenBAO शुरू करने में एक त्रुटि हो गई"
 
-#: backend/api/openbao.py:461
+#: backend/api/openbao.py:458
 msgid "OpenBAO stop script not found"
 msgstr "OpenBAO रोकने का स्क्रिप्ट नहीं मिला"
 
-#: backend/api/openbao.py:516
+#: backend/api/openbao.py:513
 msgid "OpenBAO stopped successfully"
 msgstr "OpenBAO सफलतापूर्वक रोका"
 
-#: backend/api/openbao.py:523 backend/api/openbao.py:779
+#: backend/api/openbao.py:520 backend/api/openbao.py:776
 msgid "Failed to stop OpenBAO"
 msgstr "OpenBAO रोकने में विफलता हुई"
 
-#: backend/api/openbao.py:530
+#: backend/api/openbao.py:527
 msgid "OpenBAO stop timed out"
 msgstr "OpenBAO रोकने में काउंटडाउन में हुई"
 
-#: backend/api/openbao.py:539 backend/api/openbao.py:787
+#: backend/api/openbao.py:536 backend/api/openbao.py:784
 msgid "An error occurred while stopping OpenBAO"
 msgstr "OpenBAO को stop करने के दौरान एक त्रुटि हुई"
 
-#: backend/api/openbao.py:561
+#: backend/api/openbao.py:558
 msgid "OpenBAO is already sealed"
 msgstr "OpenBAO सील किया गया है"
 
-#: backend/api/openbao.py:571 backend/api/openbao.py:674
+#: backend/api/openbao.py:568 backend/api/openbao.py:671
 msgid "OpenBAO binary not found"
 msgstr "OpenBAO बाइनरी नहीं मिला"
 
-#: backend/api/openbao.py:607
+#: backend/api/openbao.py:604
 msgid "OpenBAO sealed successfully"
 msgstr "OpenBAO सील करके सफलतापूर्वक"
 
-#: backend/api/openbao.py:614 backend/api/openbao.py:822
+#: backend/api/openbao.py:611 backend/api/openbao.py:819
 msgid "Failed to seal OpenBAO"
 msgstr "OpenBAO सील करने में विफलता हुई"
 
-#: backend/api/openbao.py:622
+#: backend/api/openbao.py:619
 msgid "OpenBAO seal operation timed out"
 msgstr "OpenBAO सील ऑपरेशन काउंटडाउन में हुई"
 
-#: backend/api/openbao.py:631
+#: backend/api/openbao.py:628
 msgid "Error sealing OpenBAO"
 msgstr "OpenBAO सील करने में त्रुटि हो गई"
 
-#: backend/api/openbao.py:654
+#: backend/api/openbao.py:651
 msgid "OpenBAO is already unsealed"
 msgstr "OpenBAO अनसील किया गया है"
 
-#: backend/api/openbao.py:664
+#: backend/api/openbao.py:661
 msgid "Automatic unseal is only supported in development mode"
 msgstr "ऑटोमैटिक अनसील विकास रिंग में ही समर्थित है"
 
-#: backend/api/openbao.py:712
+#: backend/api/openbao.py:709
 msgid "OpenBAO unsealed successfully"
 msgstr "OpenBAO अनसील करके सफलतापूर्वक"
 
-#: backend/api/openbao.py:719 backend/api/openbao.py:844
+#: backend/api/openbao.py:716 backend/api/openbao.py:841
 msgid "Failed to unseal OpenBAO"
 msgstr "OpenBAO अनसील करने में विफलता हुई"
 
-#: backend/api/openbao.py:727
+#: backend/api/openbao.py:724
 msgid "OpenBAO unseal operation timed out"
 msgstr "OpenBAO अनसील ऑपरेशन काउंटडाउन में हुई"
 
-#: backend/api/openbao.py:734
+#: backend/api/openbao.py:731
 msgid "Error unsealing OpenBAO"
 msgstr "OpenBAO अनसील करने में त्रुटि हो गई"
 
-#: backend/api/openbao.py:830
+#: backend/api/openbao.py:827
 msgid "An error occurred while sealing OpenBAO"
 msgstr "OpenBAO को seal करने के दौरान एक त्रुटि हुई"
 
-#: backend/api/openbao.py:852
+#: backend/api/openbao.py:849
 msgid "An error occurred while unsealing OpenBAO"
 msgstr "OpenBAO को unseal करने के दौरान एक त्रुटि हुई"
 
@@ -1080,7 +1080,8 @@ msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
 msgstr "प्रवेश नहीं: EDIT_HOST_HOSTNAME भूमिका की आवश्यकता है"
 
 #: backend/api/host_hostname.py:75 backend/api/reboot_orchestration.py:119
-#: backend/api/error_constants.py:43 backend/api/child_host_utils.py:91
+#: backend/api/config_mgmt_runs.py:235 backend/api/error_constants.py:43
+#: backend/api/child_host_utils.py:91
 #: backend/api/scripts/routes_executions.py:81
 msgid "Host is not active"
 msgstr "होस्ट ऑनलाइन नहीं है"
@@ -1138,12 +1139,12 @@ msgstr "पासवर्ड कम से कम 8 अक्षरों त�
 msgid "Your account is ready. You can now log in."
 msgstr "आपका खाता तैयार है। अब आप लॉग इन कर सकते हैं।"
 
-#: backend/api/server_info.py:249
+#: backend/api/server_info.py:244
 #, python-format
 msgid "Set server role to '%s'"
 msgstr "'%s' के रूप में सर्वर भूमिका सेट करें"
 
-#: backend/api/server_info.py:335
+#: backend/api/server_info.py:330
 #, python-format
 msgid "Set federation role to '%s'"
 msgstr "'%s' संघ भूमिका को सेट करें"
@@ -1308,17 +1309,17 @@ msgstr "संदेश नहीं पाया गया या प्रल�
 msgid "Failed to fetch message details"
 msgstr "संदेश विवरण प्राप्त करने में विफल हो गया"
 
-#: backend/api/host_account_management.py:78
+#: backend/api/host_account_management.py:75
 msgid "Permission denied: ADD_HOST_ACCOUNT role required"
 msgstr "प्रवेश नहीं: ADD_HOST_ACCOUNT भूमिका की आवश्यकता है"
 
-#: backend/api/host_account_management.py:102
+#: backend/api/host_account_management.py:99
 msgid "Agent must be running in privileged mode to manage user accounts"
 msgstr ""
 "एजेंट को यूजर खातों प्रबंधन करने के लिए प्राइवीलेज्ड मोड में चलता हुआ होना "
 "आवश्यक है"
 
-#: backend/api/host_account_management.py:176
+#: backend/api/host_account_management.py:173
 msgid ""
 "User account creation requested. The user list will update automatically "
 "after creation."
@@ -1326,16 +1327,16 @@ msgstr ""
 "उपयोगकर्ता खाता निर्माण की आवश्यकता है। उपयोगकर्ता सूची को अनुसरण करके बदलाव"
 " करेगी।"
 
-#: backend/api/host_account_management.py:200
+#: backend/api/host_account_management.py:197
 msgid "Permission denied: ADD_HOST_GROUP role required"
 msgstr "प्रवेश नहीं: ADD_HOST_GROUP भूमिका की आवश्यकता है"
 
-#: backend/api/host_account_management.py:223
+#: backend/api/host_account_management.py:220
 msgid "Agent must be running in privileged mode to manage groups"
 msgstr ""
 "एजेंट को ग्रुप्स पर नियंत्रण लगाने के लिए प्राइवीलेज्ड मॉड में चलना होगा"
 
-#: backend/api/host_account_management.py:280
+#: backend/api/host_account_management.py:277
 msgid ""
 "Group creation requested. The group list will update automatically after "
 "creation."
@@ -1343,17 +1344,17 @@ msgstr ""
 "ग्रुप निर्माण की प्रतीक्षा है। ग्रुप सूची को निर्माण के बाद स्वयं अपडेट "
 "करेगी।"
 
-#: backend/api/host_account_management.py:307
+#: backend/api/host_account_management.py:304
 msgid "Permission denied: DELETE_HOST_ACCOUNT role required"
 msgstr "प्रवेश नहीं: DELETE_HOST_ACCOUNT भूमिका की आवश्यकता है"
 
-#: backend/api/host_account_management.py:331
+#: backend/api/host_account_management.py:328
 msgid "Agent must be running in privileged mode to delete user accounts"
 msgstr ""
 "एजेंट को यूजर खातों को हटाने के लिए प्राइवीलेज्ड मोड में चल रहा होना आवश्यक "
 "है"
 
-#: backend/api/host_account_management.py:384
+#: backend/api/host_account_management.py:381
 msgid ""
 "User account deletion requested. The user list will update automatically "
 "after deletion."
@@ -1361,15 +1362,15 @@ msgstr ""
 "उपयोगकर्ता खाता को हटाने की आवश्यकता है। उपयोगकर्ता सूची को अनुसरण करके "
 "बदलाव करेगी।"
 
-#: backend/api/host_account_management.py:410
+#: backend/api/host_account_management.py:407
 msgid "Permission denied: DELETE_HOST_GROUP role required"
 msgstr "प्रवेश नहीं: DELETE_HOST_GROUP भूमिका की आवश्यकता है"
 
-#: backend/api/host_account_management.py:433
+#: backend/api/host_account_management.py:430
 msgid "Agent must be running in privileged mode to delete groups"
 msgstr "एजेंट को ग्रुप्स हटाने के लिए प्राइवीलेज्ड मॉड में चलना होगा"
 
-#: backend/api/host_account_management.py:483
+#: backend/api/host_account_management.py:480
 msgid ""
 "Group deletion requested. The group list will update automatically after "
 "deletion."
@@ -1419,25 +1420,25 @@ msgstr ""
 msgid "Unknown (platform, version, os_family) tuple"
 msgstr "अज्ञात (प्लेटफอร्म, वर्झन, os_family) संयुक्त क्रम"
 
-#: backend/api/airgap_collector_runs.py:71
+#: backend/api/airgap_collector_runs.py:65
 msgid "Air-gap collection run not found"
 msgstr "Air-gap collection run नहीं मिला"
 
-#: backend/api/airgap_collector_runs.py:72
+#: backend/api/airgap_collector_runs.py:66
 msgid "Air-gap media manifest not found"
 msgstr "Air-gap media manifest नहीं मिला"
 
-#: backend/api/airgap_collector_runs.py:73
+#: backend/api/airgap_collector_runs.py:67
 #, python-format
 msgid "Invalid UUID for run_id: %s"
 msgstr "run_id के लिए अमान्य UUID: %s"
 
-#: backend/api/airgap_collector_runs.py:74
+#: backend/api/airgap_collector_runs.py:68
 #, python-format
 msgid "Invalid UUID for manifest_id: %s"
 msgstr "manifest_id के लिए अमान्य UUID: %s"
 
-#: backend/api/airgap_collector_runs.py:83
+#: backend/api/airgap_collector_runs.py:77
 msgid ""
 "Air-gap collection runs require a SysManage Professional+ license with the "
 "air-gap collector engine. Please upgrade to access this feature."
@@ -1446,7 +1447,7 @@ msgstr ""
 "air-gap संग्रहकर्ता इंजन को समर्थित करता है। कृपया अपडेट करके इस विशेषण की "
 "पहुँच पाएं।"
 
-#: backend/api/airgap_collector_runs.py:224
+#: backend/api/airgap_collector_runs.py:218
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be"
 " loaded — the collector reads each target's bundle from a snapshot of its "
@@ -1456,7 +1457,7 @@ msgstr ""
 "आवश्यक है — संग्रहकर्ता प्रत्येक लक्षण के बंडल को इसकी माइरोर ट्री की एक "
 "संपीड़ित छवि से पढ़ता है।"
 
-#: backend/api/airgap_collector_runs.py:235
+#: backend/api/airgap_collector_runs.py:229
 msgid ""
 "Global mirror settings missing or mirror_root_path not configured.  "
 "Configure mirror settings before creating a collection run."
@@ -1464,7 +1465,7 @@ msgstr ""
 "ग्लोबल माइरर सेटिंग्स नहीं मिले या mirror_root_path की सेटिंग नहीं की गई है।"
 "  माइरर सेटिंग्स को सेट करने से पहले संकलन चलाएं।"
 
-#: backend/api/airgap_collector_runs.py:295
+#: backend/api/airgap_collector_runs.py:289
 #, python-format
 msgid ""
 "Mirror %r has no known_version_id set; Option-B collection runs need the "
@@ -1475,7 +1476,7 @@ msgstr ""
 "लिए माइरर को कैटलोग वर्सन से जोड़ना होता है ताकि डिस्ट्रो / वर्सन की "
 "परिकल्पना की जा सके। माइरर को संपादित करें और ड्रॉडाउन में एक वर्सन चुनें"
 
-#: backend/api/airgap_collector_runs.py:326
+#: backend/api/airgap_collector_runs.py:318
 #, python-format
 msgid ""
 "Mirror %r references a catalog version that no longer exists.  Re-pick a "
@@ -1484,29 +1485,29 @@ msgstr ""
 "माइरर %r एक कैटलोग वर्सन संदर्भित करता है जो अब नहीं मौजूद है। माइरर पर फिर "
 "से एक वर्सन चुनें"
 
-#: backend/api/airgap_collector_runs.py:410
-#: backend/api/airgap_collector_runs.py:489
+#: backend/api/airgap_collector_runs.py:402
+#: backend/api/airgap_collector_runs.py:481
 msgid "At least one target is required to create a collection run."
 msgstr "कम से कम एक लक्ष्य होना आवश्यक है जिससे एक संग्रह चलाना बनाया जा सके."
 
-#: backend/api/airgap_collector_runs.py:420
+#: backend/api/airgap_collector_runs.py:412
 #, python-format
 msgid "Invalid UUID for mirror_id: %s"
 msgstr "गलत UUID मिरर_आइडी: %s के लिए"
 
-#: backend/api/airgap_collector_runs.py:430
+#: backend/api/airgap_collector_runs.py:422
 #, python-format
 msgid "Mirror %s not found"
 msgstr "माइरर %s पाया नहीं गया"
 
-#: backend/api/airgap_collector_runs.py:436
+#: backend/api/airgap_collector_runs.py:428
 #, python-format
 msgid ""
 "Mirror %r is disabled; enable + sync it before using it in a collection run."
 msgstr ""
 "माइरर %r अक्षम है; प्रयोग से पहले यह सक्रिय करें + संकेतिका लाने के लिए"
 
-#: backend/api/airgap_collector_runs.py:447
+#: backend/api/airgap_collector_runs.py:439
 #, python-format
 msgid ""
 "All target mirrors must live on the same host (the collection plan "
@@ -1515,7 +1516,7 @@ msgstr ""
 "सभी लक्ष माइरोर्स समान होस्ट पर रहने चाहिए (संग्रह कार्यक्रम एकल एजेंट को "
 "डिपचेस्ट करता है)। चयनित माइरोर्स %d होस्टों को पारिभाषित करते हैं।"
 
-#: backend/api/airgap_collector_runs.py:543
+#: backend/api/airgap_collector_runs.py:535
 #, python-format
 msgid ""
 "Created one-shot air-gap collection run '%(iso_label)s' with "
@@ -1524,7 +1525,7 @@ msgstr ""
 "'%(iso_label)s' एअर-गैप कलेक्शन चलानी को बनाई गई है; %(mirror_count)d लक्ष "
 "मिरर संपर्क के लिए स्नैपशट डिस्पच किया गया है।"
 
-#: backend/api/airgap_collector_runs.py:666
+#: backend/api/airgap_collector_runs.py:658
 #, python-format
 msgid ""
 "ISO is not ready for download yet (status: %s). Wait until the run reaches "
@@ -1533,7 +1534,7 @@ msgstr ""
 "ISO अभी तक डाउनलोड के लिए तैयर नहीं है (स्थिति: %s)। ISO_BUILT तक रन पहुँच "
 "जाने दें।"
 
-#: backend/api/airgap_collector_runs.py:676
+#: backend/api/airgap_collector_runs.py:668
 msgid ""
 "ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
 " the collection to rebuild."
@@ -1541,39 +1542,39 @@ msgstr ""
 "ISO फाइल नहीं है; स्टेजिंग वोल्यूम को सफाई दे दिया गया हो सकता है। संग्रहण "
 "पुनः करें।"
 
-#: backend/api/airgap_collector_runs.py:693
+#: backend/api/airgap_collector_runs.py:685
 msgid "ISO file not found."
 msgstr "ISO फाइल नहीं पाई।"
 
-#: backend/api/airgap_collector_runs.py:713
+#: backend/api/airgap_collector_runs.py:705
 #, python-format
 msgid "Disc %(disc)d not found for this run.  Available discs: %(available)s"
 msgstr "डिस्क %(disc)d इस रन के लिए नहीं मिला। उपलब्ध डिस्केज़: %(available)s"
 
-#: backend/api/airgap_collector_runs.py:798
+#: backend/api/airgap_collector_runs.py:790
 msgid "Invalid or expired download token."
 msgstr "अमान्य या सक्रिय की समय सीमा पर होने वाला डाउनलोड टोकन।"
 
-#: backend/api/airgap_collector_runs.py:831
+#: backend/api/airgap_collector_runs.py:823
 #, python-format
 msgid "Deleted air-gap collection run '%s'"
 msgstr "एक बार का एयर-गैप संग्रह चलाना '%s' हटा दिया गया है"
 
-#: backend/api/airgap_collector_runs.py:903
+#: backend/api/airgap_collector_runs.py:895
 #, python-format
 msgid "Run is not COMPLETE yet (status: %s)"
 msgstr "पूरा नहीं हो गया है (स्थिति: %s)"
 
-#: backend/api/airgap_collector_runs.py:909
+#: backend/api/airgap_collector_runs.py:901
 #, python-format
 msgid "ISO file is no longer on disk: %s"
 msgstr "ISO फाइल नहीं है: %s"
 
-#: backend/api/package_compliance.py:59
+#: backend/api/package_compliance.py:56
 msgid "Package profile not found"
 msgstr "Package profile नहीं मिला"
 
-#: backend/api/package_compliance.py:76
+#: backend/api/package_compliance.py:73
 msgid ""
 "Package compliance profiles require a SysManage Professional license. Please"
 " upgrade to access this feature."
@@ -1582,26 +1583,26 @@ msgstr ""
 "Professional लाइसेंस की आवश्यकता है। इस सुविधा को पहुंचने के लिए अपग्रेड "
 "करें।"
 
-#: backend/api/package_compliance.py:203
+#: backend/api/package_compliance.py:200
 #, python-format
 msgid "Created package profile '%s'"
 msgstr "पैकेज प्रोफ़ाइल '%s' बनाई गई"
 
-#: backend/api/package_compliance.py:255
+#: backend/api/package_compliance.py:252
 #, python-format
 msgid "Updated package profile '%s'"
 msgstr "पैकेज प्रोफ़ाइल '%s' अपडेट"
 
-#: backend/api/package_compliance.py:285
+#: backend/api/package_compliance.py:282
 #, python-format
 msgid "Deleted package profile '%s'"
 msgstr "पैकेज प्रोफ़ाइल '%s' हटाई गई"
 
-#: backend/api/package_compliance.py:290
+#: backend/api/package_compliance.py:287
 msgid "Package profile deleted"
 msgstr "पैकेज प्रोफ़ाइल हटाई गई"
 
-#: backend/api/package_compliance.py:377
+#: backend/api/package_compliance.py:374
 #, python-format
 msgid ""
 "Scanned host '%(host_fqdn)s' against profile '%(profile_name)s': %(status)s "
@@ -1610,7 +1611,7 @@ msgstr ""
 "'%(profile_name)s' प्रोफाइल के लिए '%(host_fqdn)s' होस्ट की स्कैनिंग: "
 "%(status)s (%(violation_count)d विपरीत)"
 
-#: backend/api/package_compliance.py:503
+#: backend/api/package_compliance.py:500
 #, python-format
 msgid ""
 "Dispatched compliance check to agent '%(host_fqdn)s' for profile "
@@ -2409,21 +2410,21 @@ msgstr "एजेंट पहचान विफल हो गई: मैने
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "ID %s वाले होस्ट पंजीकृत नहीं है। कृपया पुनः पंजीकरण करें।"
 
-#: backend/api/message_handlers_core.py:245 backend/api/agent.py:649
+#: backend/api/message_handlers_core.py:245 backend/api/agent.py:650
 msgid "Host registration pending approval"
 msgstr "होस्ट रजिस्ट्रेशन पार्टी के लिए"
 
-#: backend/api/message_handlers_core.py:359
+#: backend/api/message_handlers_core.py:360
 msgid "Host auto-approved via child host creation"
 msgstr ""
 "HostException: बच्चा होस्ट निर्माण के माध्यम से होस्ट कॉर्ट अपवीक्षित किया "
 "गया"
 
-#: backend/api/message_handlers_core.py:455
+#: backend/api/message_handlers_core.py:456
 msgid "Agent registered and connected successfully"
 msgstr "एजेंट की पंजीकरण और संपर्क सफलतापूर्वक हुआ"
 
-#: backend/api/message_handlers_core.py:771
+#: backend/api/message_handlers_core.py:770
 msgid "Failed to process heartbeat"
 msgstr "हैर्टबीट प्रोसेस करने में विफल हुए"
 
@@ -2963,23 +2964,23 @@ msgstr "पैकेज गिने फ़ालतू हुई: %s"
 msgid "Failed to search packages: %s"
 msgstr "पैकेज खोजने में विफल: %s"
 
-#: backend/api/host.py:186
+#: backend/api/host.py:184
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "प्रवेश नहीं: DELETE_HOST भूमिका की आवश्यकता है"
 
-#: backend/api/host.py:250
+#: backend/api/host.py:248
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "प्रवेश नहीं: VIEW_HOST_DETAILS भूमिका की आवश्यकता है"
 
-#: backend/api/host.py:665
+#: backend/api/host.py:663
 msgid "Host already exists"
 msgstr "होस्ट पहले से मौजूद है"
 
-#: backend/api/host.py:774
+#: backend/api/host.py:772
 msgid "Registration absorbed: host was recently deleted"
 msgstr "रजिस्ट्रेशन अवशोषित: होस्ट पहले से ही हटा दिया गया था"
 
-#: backend/api/host.py:848
+#: backend/api/host.py:846
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -2991,7 +2992,7 @@ msgstr ""
 "\\u092c\\u0947\\u0938\\u094d\\u0930\\u094b\\u091f\\u093e\\u0935\\u0946\\u0902"
 " \\u092a\\u0947\\u0938\\u094d\\u092c\\u094b"
 
-#: backend/api/host.py:865
+#: backend/api/host.py:863
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -3034,30 +3035,30 @@ msgstr "target_hostname, target_platform, या push_to_all निर्दि�
 msgid "Configuration acknowledgment processed"
 msgstr "कॉन्फ़िगरेशन स्वीकृति प्रसंस्कृत की गई"
 
-#: backend/api/message_handlers.py:318
+#: backend/api/message_handlers.py:334
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "डायग्नोस्टिक रिजल्ट को प्रोसेस करने में असफल हुआ: %s"
 
-#: backend/api/message_handlers.py:352
+#: backend/api/message_handlers.py:368
 msgid "Missing message_id in command acknowledgment"
 msgstr "कमांड अद्यावरण के लिए message_id नहीं पाया गया या गलत है"
 
-#: backend/api/message_handlers.py:465
+#: backend/api/message_handlers.py:481
 msgid "Missing installation_id in package installation status"
 msgstr "पैकेज इनस्टलेशन स्थिति में इनस्टॉलेशन ID नहीं पाया गया"
 
-#: backend/api/message_handlers.py:485
+#: backend/api/message_handlers.py:501
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "इनस्टॉलेशन लॉग एंट्री ID: %s के लिए नहीं मिला"
 
-#: backend/api/message_handlers.py:531
+#: backend/api/message_handlers.py:547
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "पैकेज इनस्टल करने की {status} एजेंट {hostname} पर"
 
-#: backend/api/message_handlers.py:560
+#: backend/api/message_handlers.py:576
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "पैकेज इनस्तॉलेशन संतुलन का अपडेट वापरे में विफल: %s"
@@ -3355,12 +3356,12 @@ msgstr "अपडेट निष्पादित करने में अ�
 msgid "Failed to get execution log: %s"
 msgstr "निष्पादन लॉग प्राप्त करने में असफल: %s"
 
-#: backend/api/dynamic_secrets.py:133 backend/api/dynamic_secrets.py:195
+#: backend/api/dynamic_secrets.py:130 backend/api/dynamic_secrets.py:192
 #, python-format
 msgid "Unknown kind: %(kind)s (allowed: %(allowed)s)"
 msgstr "अज्ञात प्रकार: %(kind)s (संभव: %(allowed)s)"
 
-#: backend/api/dynamic_secrets.py:156
+#: backend/api/dynamic_secrets.py:153
 #, python-format
 msgid ""
 "Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
@@ -3369,16 +3370,16 @@ msgstr ""
 "प्रदान की गई डायनामिक सेक्रेट '%(name)s' (काइंड=%(kind)s, रोल=%(role)s, "
 "ttl=%(ttl)ds)"
 
-#: backend/api/dynamic_secrets.py:189
+#: backend/api/dynamic_secrets.py:186
 #, python-format
 msgid "Unknown status: %(status)s (allowed: %(allowed)s)"
 msgstr "अज्ञात स्थिति: %(status)s (संभव: %(allowed)s)"
 
-#: backend/api/dynamic_secrets.py:217
+#: backend/api/dynamic_secrets.py:214
 msgid "Lease not found"
 msgstr "लीज़ नहीं मिली"
 
-#: backend/api/dynamic_secrets.py:239
+#: backend/api/dynamic_secrets.py:236
 #, python-format
 msgid "Revoked dynamic secret lease '%s'"
 msgstr "डायनामिक सीक्रेट लीज़ '%s' रद्द"
@@ -3799,39 +3800,57 @@ msgstr "अनरजिस्ट्रेड होस्ट से एजें
 msgid "Agent message from unapproved host: {hostname}"
 msgstr "अनुमोदित नहीं किया गया होस्ट से एजेंट मैसेज: {hostname}"
 
-#: backend/api/agent.py:591
+#: backend/api/agent.py:592
 msgid "Message must include hostname or host_id for host validation"
 msgstr "संदेश में होस्टनेम या host_id की जरूरत है होस्ट संशोधन के लिए"
 
-#: backend/api/agent.py:609
+#: backend/api/agent.py:610
 msgid "Host ID no longer valid - please re-register"
 msgstr "होस्ट ID अकारात्मक नहीं है - कृपया पुनः रजिस्टर करें"
 
-#: backend/api/agent.py:621
+#: backend/api/agent.py:622
 msgid "Host ID and hostname mismatch - please re-register"
 msgstr ""
 "HostException और होस्टनेम मतलब असाइन करने से भिन्न हैं - कृपया पुनः रजिस्त्र"
 " करें"
 
-#: backend/api/agent.py:638
+#: backend/api/agent.py:639
 msgid "Host must register before sending inventory data"
 msgstr "होस्ट की रजिस्ट्रेशन करना होता है पहले इनवेंटरी डेटा भेजने से"
 
-#: backend/api/agent.py:709
+#: backend/api/agent.py:710
 msgid "Missing or invalid authorization header"
 msgstr "अधिकारिता मेम्बर नहीं पाया गया या गलत है"
 
-#: backend/api/agent.py:734
+#: backend/api/agent.py:735
 msgid "Invalid host authentication"
 msgstr "अवैध मेट्रिक्स प्रमाणीकरण"
 
-#: backend/api/agent.py:775 backend/api/packages.py:498
+#: backend/api/agent.py:776 backend/api/packages.py:498
 msgid "Installation completion recorded"
 msgstr "इनस्तॉलेशन पूरा होने का रिकॉर्ड बनाया गया है"
 
-#: backend/api/agent.py:781 backend/api/error_constants.py:193
+#: backend/api/agent.py:782 backend/api/error_constants.py:193
 msgid "Internal server error"
 msgstr "आंतरिक सर्वर त्रुटि"
+
+#: backend/api/config_mgmt_runs.py:228
+#: backend/api/scripts/routes_executions.py:67
+msgid "Permission denied: RUN_SCRIPT role required"
+msgstr "प्रवेश नहीं: RUN_SCRIPT भूमिका की आवश्यकता है"
+
+#: backend/api/config_mgmt_runs.py:250
+msgid "This host uses DSC; provide 'resources', not 'playbook'"
+msgstr ""
+"इस होस्ट DSC का उपयोग करता है; 'रिसोर्सेज़' प्रदान करें, न कि 'प्लेबुक'"
+
+#: backend/api/config_mgmt_runs.py:257
+msgid "This host uses ansible-core; provide 'playbook'"
+msgstr "इस होस्ट ansible-core का उपयोग करता है; 'प्लेबुक' प्रदान करें"
+
+#: backend/api/config_mgmt_runs.py:319
+msgid "Configuration profile was queued for this host"
+msgstr "इस होस्ट के लिए कॉन्फ़िगरेशन प्रोफ़ाइल को कतार में रखा गया है"
 
 #: backend/api/diagnostics.py:198
 msgid "Diagnostic collection requested"
@@ -4163,88 +4182,88 @@ msgstr "कोई लोगो कॉन्फ़िगर नहीं"
 msgid "Removed report branding logo"
 msgstr "रिपोर्ट ब्रांडिंग लोगो हटाया गया"
 
-#: backend/api/firewall_roles.py:101
+#: backend/api/firewall_roles.py:100
 #, python-format
 msgid "Failed to retrieve firewall roles: %s"
 msgstr "%s के फायरवॉल रोल्स प्राप्त करने में विफल हुए:"
 
-#: backend/api/firewall_roles.py:153
+#: backend/api/firewall_roles.py:152
 #, python-format
 msgid "Failed to retrieve firewall role: %s"
 msgstr "%s के फायरवॉल रोल प्राप्त करने में विफल हुए"
 
-#: backend/api/firewall_roles.py:173
+#: backend/api/firewall_roles.py:172
 msgid "Permission denied: ADD_FIREWALL_ROLE role required"
 msgstr "प्रवेश नहीं: ADD_FIREWALL_ROLE भूमिका की आवश्यकता है"
 
-#: backend/api/firewall_roles.py:189 backend/api/firewall_roles.py:306
+#: backend/api/firewall_roles.py:188 backend/api/firewall_roles.py:305
 #, python-format
 msgid "Firewall role '%s' already exists"
 msgstr "फाइरवॉल भूमिका '%s' पहले से ही मौजूद है"
 
-#: backend/api/firewall_roles.py:245
+#: backend/api/firewall_roles.py:244
 #, python-format
 msgid "Failed to create firewall role: %s"
 msgstr "%s के फायरवॉल रोल का निर्माण विफल हुआ"
 
-#: backend/api/firewall_roles.py:266
+#: backend/api/firewall_roles.py:265
 msgid "Permission denied: EDIT_FIREWALL_ROLE role required"
 msgstr "प्रवेश नहीं: EDIT_FIREWALL_ROLE भूमिका की आवश्यकता है"
 
-#: backend/api/firewall_roles.py:366
+#: backend/api/firewall_roles.py:365
 #, python-format
 msgid "Failed to update firewall role: %s"
 msgstr "फाइरवॉल भूमिका का अपडेट वापरे में विफल: %s"
 
-#: backend/api/firewall_roles.py:386
+#: backend/api/firewall_roles.py:385
 msgid "Permission denied: DELETE_FIREWALL_ROLE role required"
 msgstr "प्रवेश नहीं: DELETE_FIREWALL_ROLE रोल की आवश्यकता है"
 
-#: backend/api/firewall_roles.py:433
+#: backend/api/firewall_roles.py:432
 msgid "Firewall role deleted successfully"
 msgstr "फाइरवॉल भूमिका को सफलतापूर्वक हटा दिया गया"
 
-#: backend/api/firewall_roles.py:443
+#: backend/api/firewall_roles.py:442
 #, python-format
 msgid "Failed to delete firewall role: %s"
 msgstr "%s के फायरवॉल रोल को हटाने में विफल हुए"
 
-#: backend/api/firewall_roles.py:514
+#: backend/api/firewall_roles.py:513
 #, python-format
 msgid "Failed to retrieve host firewall roles: %s"
 msgstr "HostException: मेट्रिक्स छात्रवृत्ति प्रदान करने में विफल: %s"
 
-#: backend/api/firewall_roles.py:602
+#: backend/api/firewall_roles.py:601
 #, python-format
 msgid "Failed to retrieve expected ports: %s"
 msgstr "उपेक्षित पोर्ट्स लाना में विफल हुए: %s"
 
-#: backend/api/firewall_roles.py:627 backend/api/firewall_roles.py:754
+#: backend/api/firewall_roles.py:626 backend/api/firewall_roles.py:753
 msgid "Permission denied: ASSIGN_HOST_FIREWALL_ROLES role required"
 msgstr "प्रवेश नहीं: ASSIGN_HOST_FIREWALL_ROLES रोल की आवश्यकता है"
 
-#: backend/api/firewall_roles.py:639 backend/api/firewall_roles.py:766
+#: backend/api/firewall_roles.py:638 backend/api/firewall_roles.py:765
 msgid "Invalid ID format"
 msgstr "गलत ID प्रारूप"
 
-#: backend/api/firewall_roles.py:675
+#: backend/api/firewall_roles.py:674
 msgid "Firewall role already assigned to this host"
 msgstr "फाइरवॉल भूमिका इस होस्ट के लिए प्रतिस्थापन नहीं मिला"
 
-#: backend/api/firewall_roles.py:733
+#: backend/api/firewall_roles.py:732
 #, python-format
 msgid "Failed to assign firewall role: %s"
 msgstr "फ़ायरवॉल भूमिका सौदा नहीं हुआ: %s"
 
-#: backend/api/firewall_roles.py:782
+#: backend/api/firewall_roles.py:781
 msgid "Firewall role assignment not found"
 msgstr "फाइरवॉल भूमिका संबंध नहीं मिला"
 
-#: backend/api/firewall_roles.py:832
+#: backend/api/firewall_roles.py:831
 msgid "Firewall role removed from host successfully"
 msgstr "फाइरवॉल भूमिका को होस्ट से सफलतापूर्वक हटा दिया गया"
 
-#: backend/api/firewall_roles.py:844
+#: backend/api/firewall_roles.py:843
 #, python-format
 msgid "Failed to remove firewall role: %s"
 msgstr "%s के फायरवॉल रोल हटाने में विफल हुए"
@@ -4364,15 +4383,15 @@ msgid "Unsupported export format: %s"
 msgstr "असमर्थित एक्सपोर्ट प्रारूप: %s"
 
 # Reports-related strings
-#: backend/api/audit_log.py:536
+#: backend/api/audit_log.py:538
 msgid "Generated"
 msgstr "उत्पन्न"
 
-#: backend/api/audit_log.py:538
+#: backend/api/audit_log.py:540
 msgid "Total Entries"
 msgstr "कुल प्रविष्टियाँ"
 
-#: backend/api/audit_log.py:545
+#: backend/api/audit_log.py:547
 msgid "No audit log entries found."
 msgstr "कोई ऑडिट लॉग प्रविष्टियाँ नहीं मिलीं।"
 
@@ -4509,10 +4528,6 @@ msgstr ""
 #: backend/api/scripts/models.py:132
 msgid "shell_type is required for ad-hoc scripts"
 msgstr "shell_type के लिए अद्होक्रमिक स्क्रिप्ट का प्रयोग है"
-
-#: backend/api/scripts/routes_executions.py:67
-msgid "Permission denied: RUN_SCRIPT role required"
-msgstr "प्रवेश नहीं: RUN_SCRIPT भूमिका की आवश्यकता है"
 
 #: backend/api/scripts/routes_executions.py:100
 msgid "Saved script not found"
@@ -4686,13 +4701,13 @@ msgstr "किंचित फ़ैलेन मेसेजज को हट�
 msgid "Mock connection: would send message %s"
 msgstr "मोक कनेक्शन: message %s को भेजने के लिए संदेश भेजेंगे"
 
-#: backend/websocket/inbound_processor.py:128
+#: backend/websocket/inbound_processor.py:124
 #, python-format
 msgid "Host %(hostname)s not found for message %(message_id)s, deleting"
 msgstr ""
 "होस्ट %(hostname)s के लिए मेसेज %(message_id)s पाया नहीं गया, हटा देते हैं"
 
-#: backend/websocket/inbound_processor.py:139
+#: backend/websocket/inbound_processor.py:135
 #, python-format
 msgid ""
 "Host %(hostname)s not approved (status: %(status)s) for message "
@@ -4701,7 +4716,7 @@ msgstr ""
 "होस्ट %(hostname)s की प्रतिष्ठा नहीं मिली (साथ: %(status)s) संदेश "
 "%(message_id)s के लिए, हटा देते हैं"
 
-#: backend/websocket/inbound_processor.py:156
+#: backend/websocket/inbound_processor.py:152
 #, python-format
 msgid ""
 "Processing NULL host_id message for approved host %(hostname)s (ID: "
@@ -4710,7 +4725,7 @@ msgstr ""
 "NULL host_id संदेश के लिए %(hostname)s (ID: %(host_id)s) को प्रोसेसिंग किया "
 "जा रहा है"
 
-#: backend/websocket/inbound_processor.py:273
+#: backend/websocket/inbound_processor.py:269
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
@@ -4721,7 +4736,7 @@ msgstr ""
 "दोबारा प्रयास करने के लिए इंतजार कर रहा हूँ (हटाने से पहले नहीं) — यह एक "
 "अधिकतम ट्रांसफर ऑर्डर या हटा दिया गया होस्ट हो सकता है"
 
-#: backend/websocket/inbound_processor.py:290
+#: backend/websocket/inbound_processor.py:286
 #, python-format
 msgid ""
 "Host %(host_id)s (FQDN: %(fqdn)s) no longer approved (status: %(status)s), "
@@ -4730,46 +4745,46 @@ msgstr ""
 "होस्ट %(host_id)s (FQDN: %(fqdn)s) अधिकृत नहीं है (साथ: %(status)s), काउन्टर"
 " से सभी इसके मेसेजज़ को हटा रहा है"
 
-#: backend/websocket/inbound_processor.py:300
+#: backend/websocket/inbound_processor.py:296
 #, python-format
 msgid "Deleted %(count)d messages for unapproved host %(host_id)s"
 msgstr ""
 "%(count)d संदेश अनुमोदित न होकर बाध्यता से %(host_id)s इनहोस्ट के लिए हटा "
 "दिए गए"
 
-#: backend/websocket/inbound_processor.py:307
+#: backend/websocket/inbound_processor.py:303
 #, python-format
 msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"
 msgstr ""
 "%(host_id)s (FQDN: %(fqdn)s) के लिए संदेश को प्रोसेसिंग किया जा रहा है"
 
-#: backend/websocket/inbound_processor.py:332
+#: backend/websocket/inbound_processor.py:328
 #, python-format
 msgid "Processing message with NULL host_id: %s"
 msgstr "NULL host_id वाले मेसेज को प्रक्रिया कर रहे हैं: %s"
 
-#: backend/websocket/inbound_processor.py:343
+#: backend/websocket/inbound_processor.py:339
 #, python-format
 msgid "Processing SYSTEM_INFO registration message %s"
 msgstr "SYSTEM_INFO रजिस्ट्रेशन मेसेज प्रक्रिया कर रहे हैं: %s"
 
-#: backend/websocket/inbound_processor.py:366
+#: backend/websocket/inbound_processor.py:362
 #, python-format
 msgid "Message %s missing hostname and host_id, deleting"
 msgstr "संदेश %s में होस्टनेम और होस्ट_आइड की कमी है, हटा दिया जाएगा"
 
-#: backend/websocket/inbound_processor.py:406
+#: backend/websocket/inbound_processor.py:402
 #, python-format
 msgid "Error processing NULL host_id message %(message_id)s: %(error)s"
 msgstr ""
 "%(message_id)s इनपुट में NULL host_id के साथ एरोर प्रोसेसिंग: %(error)s"
 
-#: backend/websocket/inbound_processor.py:443
+#: backend/websocket/inbound_processor.py:439
 #, python-format
 msgid "Could not mark message %s as processing"
 msgstr "संदेश %s को प्रक्रिया में रखने में विफल हुआ"
 
-#: backend/websocket/inbound_processor.py:471
+#: backend/websocket/inbound_processor.py:467
 #, python-format
 msgid ""
 "Processing queued message: %(message_id)s (type: %(message_type)s, host: "
@@ -4778,7 +4793,7 @@ msgstr ""
 "प्यूशड मेसेज प्रोसेसिंग: %(message_id)s (टाइप: %(message_type)s, होस्ट: "
 "%(host)s)"
 
-#: backend/websocket/inbound_processor.py:504
+#: backend/websocket/inbound_processor.py:500
 #, python-format
 msgid ""
 "Successfully processed and completed message: %(message_id)s for host "
@@ -4787,24 +4802,24 @@ msgstr ""
 "होस्ट %(host)s के लिए मेसेज ID %(message_id)s को सफलतापूर्वक प्रोसेसिंग और "
 "पूरा किया गया"
 
-#: backend/websocket/inbound_processor.py:522
+#: backend/websocket/inbound_processor.py:518
 #, python-format
 msgid "Failed to process message %s: unknown message type"
 msgstr "%s संदेश प्रोसेस करने में विफल: अज्ञात संदेश प्रकार"
 
-#: backend/websocket/inbound_processor.py:543
+#: backend/websocket/inbound_processor.py:539
 #, python-format
 msgid "Error processing message %(message_id)s for host %(host)s: %(error)s"
 msgstr ""
 "%(message_id)s के लिए %(host)s होस्ट के लिए मेसेज प्रोसेसिंग करने में "
 "त्रुटि: %(error)s"
 
-#: backend/websocket/inbound_processor.py:573
+#: backend/websocket/inbound_processor.py:569
 #, python-format
 msgid "Could not mark SYSTEM_INFO message %s as processing"
 msgstr "संवर्धन सूचना संदेश %s को प्रक्रिया में रखने में असफलता"
 
-#: backend/websocket/inbound_processor.py:605
+#: backend/websocket/inbound_processor.py:601
 #, python-format
 msgid "Error processing SYSTEM_INFO message %(message_id)s: %(error)s"
 msgstr "SYSTEM_INFO संदेश %(message_id)s प्रोसेस करने में त्रुटि: %(error)s"

@@ -3444,6 +3444,19 @@
     "runsEmpty": "此主机尚未应用任何配置文件。",
     "runsError": "无法加载配置运行历史记录",
     "runsTitle": "配置运行历史记录",
-    "runNoProfile": "没有配置文件"
+    "runNoProfile": "没有配置文件",
+    "applyAction": "应用",
+    "applyDryRun": "干运行（报告更改而不实际应用）",
+    "applyDryRunAction": "预览更改",
+    "applyError": "无法将配置资料入队列",
+    "applyHelpAnsible": "此主机使用ansible-core进行配置。请粘贴Playbook；它将在本地仅针对此主机运行。",
+    "applyHelpDsc": "此主机使用DSC进行配置。请粘贴一个JSON数组的DSC资源。",
+    "applyInvalidJson": "资源必须是一个JSON数组的DSC资源对象。",
+    "applyLiveWarning": "这将对该主机实际进行更改。",
+    "applyPlaybook": "Playbook内容（YAML）",
+    "applyProfile": "应用资料",
+    "applyProfileName": "资料名称（可选）",
+    "applyResources": "DSC资源（JSON）",
+    "applyTitle": "应用配置资料"
   }
 }

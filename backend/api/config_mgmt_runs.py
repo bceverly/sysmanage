@@ -21,16 +21,26 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from backend.api.error_constants import error_host_not_found, error_invalid_host_id
-from backend.auth.auth_bearer import JWTBearer
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
+from backend.i18n import _
+from backend.persistence import db as persistence_db
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
+from backend.security.roles import SecurityRoles
+from backend.services import config_mgmt_plan_builder as planner
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.utils.verbosity_logger import sanitize_log
+from backend.websocket.messages import CommandType, Message, MessageType
+from backend.websocket.queue_enums import QueueDirection
+from backend.websocket.queue_operations import QueueOperations
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+queue_ops = QueueOperations()
 
 # The history panel shows a page, not an archive.  Capped so a caller cannot
 # ask for every run a long-lived host ever recorded in one request.
@@ -169,4 +179,142 @@ async def get_config_profile_run(
 
     return ConfigProfileRunDetailResponse(
         **_base_fields(run), tasks=tasks, error_output=run.error_output
+    )
+
+
+class ConfigProfileApplyRequest(BaseModel):
+    """An ad-hoc profile to apply to one host.
+
+    Exactly one of ``playbook`` (POSIX) or ``resources`` (Windows/DSC) is
+    expected, and it must match the host's executor -- see the route.
+    """
+
+    playbook: Optional[str] = None
+    resources: Optional[List[Dict[str, Any]]] = None
+    profile_name: Optional[str] = None
+    check_mode: bool = False
+    timeout: Optional[int] = None
+
+
+class ConfigProfileApplyResponse(BaseModel):
+    """Result of queuing a profile application."""
+
+    host_id: str
+    queued: bool
+    check_mode: bool
+    message: str
+
+
+@router.post(
+    "/hosts/{host_id}/config-management/apply",
+    response_model=ConfigProfileApplyResponse,
+)
+async def apply_config_profile(
+    host_id: str,
+    request: ConfigProfileApplyRequest,
+    db_session: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+):
+    """Queue an ad-hoc configuration profile for one host.
+
+    Gated on RUN_SCRIPT, deliberately, and not on a softer config-specific
+    role: a playbook can run anything the agent can, so the blast radius is
+    identical to executing a script. Inventing a weaker permission for the same
+    capability would be a privilege-escalation path dressed up as a feature.
+    """
+    if not current_user.has_role(SecurityRoles.RUN_SCRIPT):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: RUN_SCRIPT role required"),
+        )
+
+    host = _require_host(db_session, host_id)
+    if not host.active:
+        # Queuing for an inactive host buries the work in a queue that may
+        # never drain, and the operator sees "queued" and assumes it ran.
+        raise HTTPException(status_code=400, detail=_("Host is not active"))
+
+    host_info = {
+        "platform": host.platform,
+        "platform_release": host.platform_release,
+        "platform_version": host.platform_version,
+    }
+    executor = planner.executor_for(host_info)
+
+    # Refuse a payload the host's executor cannot consume, rather than letting
+    # it fail at the far end where the reason is far less obvious.
+    if executor == planner.WINDOWS_EXECUTOR:
+        if not request.resources:
+            raise HTTPException(
+                status_code=400,
+                detail=_("This host uses DSC; provide 'resources', not 'playbook'"),
+            )
+        profile: Dict[str, Any] = {"resources": request.resources}
+    else:
+        if not request.playbook or not request.playbook.strip():
+            raise HTTPException(
+                status_code=400,
+                detail=_("This host uses ansible-core; provide 'playbook'"),
+            )
+        profile = {"playbook": request.playbook}
+
+    parameters: Dict[str, Any] = {
+        "profile": profile,
+        "check_mode": bool(request.check_mode),
+    }
+    if request.profile_name:
+        parameters["profile_name"] = request.profile_name
+    if request.timeout:
+        parameters["timeout"] = request.timeout
+
+    command_message = Message(
+        message_type=MessageType.COMMAND,
+        data={
+            "command_type": CommandType.APPLY_CONFIG_PROFILE,
+            "parameters": parameters,
+        },
+    )
+    queue_ops.enqueue_message(
+        message_type="command",
+        message_data=command_message.to_dict(),
+        direction=QueueDirection.OUTBOUND,
+        host_id=str(host.id),
+        db=db_session,
+    )
+    db_session.commit()
+
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=persistence_db.get_engine()
+    )
+    with session_local() as audit_session:
+        AuditService.log(
+            db=audit_session,
+            user_id=current_user.id,
+            username=current_user.userid,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=str(host.id),
+            entity_name=host.fqdn,
+            description=f"Applied configuration profile to host {host.fqdn}",
+            result=Result.SUCCESS,
+            # The profile body is NOT audited: it can carry secrets, and the
+            # audit log is readable by more people than the profile is.
+            details={
+                "executor": executor,
+                "check_mode": bool(request.check_mode),
+                "profile_name": request.profile_name,
+            },
+        )
+
+    logger.info(
+        "Config profile queued for host %s (%s), check_mode=%s",
+        host.fqdn,
+        sanitize_log(str(host.id)),
+        bool(request.check_mode),
+    )
+    return ConfigProfileApplyResponse(
+        host_id=str(host.id),
+        queued=True,
+        check_mode=bool(request.check_mode),
+        message=_("Configuration profile was queued for this host"),
     )

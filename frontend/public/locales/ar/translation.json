@@ -3444,6 +3444,19 @@
     "runsEmpty": "لم يتم تطبيق أي ملفات تكوين على هذا المضيف حتى الآن.",
     "runsError": "فشل في تحميل سجل تشغيل التكوين",
     "runsTitle": "سجل تشغيل التكوين",
-    "runNoProfile": "لا ملف تعريف"
+    "runNoProfile": "لا ملف تعريف",
+    "applyAction": "تطبيق",
+    "applyDryRun": "تجربة تشغيل (إعداد تقرير عن التغييرات دون تنفيذها)",
+    "applyDryRunAction": "معاينة التغييرات",
+    "applyError": "فشل في وضع ملف التكوين في الطابور",
+    "applyHelpAnsible": "يُطبق هذا المضيف التكوين باستخدام ansible-core. قم بلصق Playbook؛ سيتم تشغيله محليًا ضد هذا المضيف فقط.",
+    "applyHelpDsc": "يُطبق هذا المضيف التكوين باستخدام DSC. قم بلصق مصفوفة JSON من موارد DSC.",
+    "applyInvalidJson": "يجب أن تكون الموارد مصفوفة JSON من كائنات موارد DSC.",
+    "applyLiveWarning": "سيؤدي ذلك إلى إجراء تغييرات فعلية على هذا المضيف.",
+    "applyPlaybook": "محتوى Playbook (YAML)",
+    "applyProfile": "تطبيق الملف",
+    "applyProfileName": "اسم الملف (اختياري)",
+    "applyResources": "موارد DSC (JSON)",
+    "applyTitle": "تطبيق ملف تكوين"
   }
 }

@@ -812,6 +812,9 @@ const HostInfoTab: React.FC<HostInfoTabProps> = ({
   handleAttachToGraylog,
 }) => {
   const { t } = useTranslation();
+  // Bumped when a profile is applied so the run-history panel re-reads instead
+  // of leaving the operator staring at a stale list wondering if it took.
+  const [configRunsRefresh, setConfigRunsRefresh] = React.useState(0);
   return (
     <Grid container spacing={3}>
       {/* Maintenance window status (Phase 14.2) */}
@@ -832,6 +835,7 @@ const HostInfoTab: React.FC<HostInfoTabProps> = ({
         <ConfigManagementPrereqCard
           hostId={hostId || ""}
           canInstall={canAddPackage}
+          onProfileApplied={() => setConfigRunsRefresh((n) => n + 1)}
           isHostActive={host?.active || false}
           isAgentPrivileged={host?.is_agent_privileged || false}
           sx={{ height: "100%", width: "100%" }}
@@ -842,7 +846,10 @@ const HostInfoTab: React.FC<HostInfoTabProps> = ({
                     it is a table, and squeezing it into a half column makes
                     every row wrap. */}
       <Grid size={{ xs: 12 }}>
-        <ConfigProfileRunHistory hostId={hostId || ""} />
+        <ConfigProfileRunHistory
+          hostId={hostId || ""}
+          refreshTrigger={configRunsRefresh}
+        />
       </Grid>
 
       {/* Basic Information */}

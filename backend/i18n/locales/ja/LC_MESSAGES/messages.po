@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-26 10:30-0400\n"
+"POT-Creation-Date: 2026-08-26 15:50-0400\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -141,8 +141,8 @@ msgstr "CA証明書の取得に失敗しました: %s"
 #: backend/api/certificates.py:84 backend/api/certificates.py:139
 #: backend/api/host_graylog.py:89 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:474
-#: backend/api/firewall_roles.py:545
+#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:473
+#: backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "ホストIDの形式が無効です"
@@ -150,11 +150,11 @@ msgstr "ホストIDの形式が無効です"
 #: backend/api/certificates.py:95 backend/api/certificates.py:165
 #: backend/api/fips_actions.py:84 backend/api/fips_actions.py:174
 #: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:62
-#: backend/api/package_handlers.py:547 backend/api/package_compliance.py:319
-#: backend/api/package_compliance.py:445
+#: backend/api/package_handlers.py:547 backend/api/package_compliance.py:316
+#: backend/api/package_compliance.py:442
 #: backend/api/grafana_integration.py:330 backend/api/image_mode_actions.py:86
 #: backend/api/host_graylog.py:131 backend/api/tag.py:499
-#: backend/api/tag.py:653 backend/api/airgap_repository_buckets.py:65
+#: backend/api/tag.py:653 backend/api/airgap_repository_buckets.py:64
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:54
 #: backend/api/updates/query_routes.py:123
@@ -174,10 +174,10 @@ msgid "Host is not approved"
 msgstr "ホストは承認されていません"
 
 #: backend/api/certificates.py:156 backend/api/security_roles.py:161
-#: backend/api/security_roles.py:204 backend/api/auth_mfa.py:157
-#: backend/api/airgap_collection_schedule.py:144
+#: backend/api/security_roles.py:204 backend/api/auth_mfa.py:149
+#: backend/api/airgap_collection_schedule.py:139
 #: backend/api/graylog_integration.py:172 backend/api/broadcast.py:128
-#: backend/api/queue.py:122 backend/api/airgap_collector_runs.py:94
+#: backend/api/queue.py:122 backend/api/airgap_collector_runs.py:88
 #: backend/api/access_groups.py:140 backend/api/grafana_integration.py:314
 #: backend/api/opentelemetry/deployment.py:67
 #: backend/api/opentelemetry/deployment.py:220
@@ -279,7 +279,7 @@ msgstr "プロセス状態の更新の処理に失敗しました: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:441 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:457 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "ホストが登録されていません"
@@ -420,7 +420,7 @@ msgid "Missing request_id in installation_complete"
 msgstr "インストール完了リクエストに request_id が含まれていません"
 
 #: backend/api/handlers/software_package_handlers.py:955
-#: backend/api/agent.py:747 backend/api/packages.py:486
+#: backend/api/agent.py:748 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "インストール要求が見つかりません: %s"
@@ -435,8 +435,8 @@ msgstr "インストール完了の記録に失敗しました: %s"
 msgid "Report template not found"
 msgstr "レポートテンプレートが見つかりません"
 
-#: backend/api/report_templates.py:177 backend/api/package_compliance.py:141
-#: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:110
+#: backend/api/report_templates.py:177 backend/api/package_compliance.py:138
+#: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:107
 #: backend/api/upgrade_profiles.py:128
 #: backend/api/repository_mirroring_helpers.py:154
 #, python-format
@@ -472,45 +472,45 @@ msgstr "レポートテンプレート '%s' を削除しました"
 msgid "Report template deleted"
 msgstr "レポートテンプレートを削除しました"
 
-#: backend/api/auth_mfa.py:254
+#: backend/api/auth_mfa.py:246
 msgid "Call enroll/start before enroll/complete."
 msgstr "enroll/startを呼び出す前にenroll/completeを呼び出してください。"
 
-#: backend/api/auth_mfa.py:266 backend/api/auth_mfa.py:515
+#: backend/api/auth_mfa.py:258 backend/api/auth_mfa.py:507
 msgid "Invalid TOTP code."
 msgstr "無効なTOTPコードです。"
 
-#: backend/api/auth_mfa.py:304 backend/api/auth_mfa.py:366
+#: backend/api/auth_mfa.py:296 backend/api/auth_mfa.py:358
 msgid "MFA challenge expired — please log in again."
 msgstr "MFA シャレンジが期限切れです — 再びログインしてください。"
 
-#: backend/api/auth_mfa.py:309
+#: backend/api/auth_mfa.py:301
 msgid "Invalid MFA challenge."
 msgstr "無効なMFAチャレンジです。"
 
-#: backend/api/auth_mfa.py:321
+#: backend/api/auth_mfa.py:313
 msgid "Invalid MFA code."
 msgstr "無効なMFAコードです。"
 
-#: backend/api/auth_mfa.py:412
+#: backend/api/auth_mfa.py:404
 msgid ""
 "If your account has MFA configured, an email with a verification code has "
 "been dispatched."
 msgstr "アカウントにMFAが設定されている場合は、認証コード付きのメールを送信しました。"
 
-#: backend/api/auth_mfa.py:442
+#: backend/api/auth_mfa.py:434
 msgid "Invalid password."
 msgstr "無効なパスワード。"
 
-#: backend/api/auth_mfa.py:448
+#: backend/api/auth_mfa.py:440
 msgid "MFA disabled."
 msgstr "MFA無効化。"
 
-#: backend/api/auth_mfa.py:503
+#: backend/api/auth_mfa.py:495
 msgid "MFA is not enrolled for this account."
 msgstr "このアカウントではMFAが登録されていません。"
 
-#: backend/api/auth_mfa.py:565
+#: backend/api/auth_mfa.py:557
 msgid "Editing MFA settings requires admin privileges."
 msgstr "MFA 設定の編集には管理者権限が必要です。"
 
@@ -625,7 +625,7 @@ msgstr "商用アンチウイルスステータス"
 msgid "User Security Roles (RBAC)"
 msgstr "ユーザーセキュリティロール (RBAC)"
 
-#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:534
+#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:536
 msgid "Audit Log"
 msgstr "監査ログ"
 
@@ -641,16 +641,16 @@ msgstr "PDF生成は利用できません。reportlabパッケージをインス
 msgid "Report"
 msgstr "レポート"
 
-#: backend/api/airgap_collection_schedule.py:53
+#: backend/api/airgap_collection_schedule.py:48
 msgid "Air-gap collection schedule not found"
 msgstr "エアギャップ収集スケジュールが見つかりません"
 
-#: backend/api/airgap_collection_schedule.py:54
+#: backend/api/airgap_collection_schedule.py:49
 #, python-format
 msgid "Invalid UUID for schedule_id: %s"
 msgstr "schedule_id の UUID が無効です: %s"
 
-#: backend/api/airgap_collection_schedule.py:63
+#: backend/api/airgap_collection_schedule.py:58
 msgid ""
 "Air-gap collection schedules require a SysManage Professional+ license with "
 "the air-gap collector engine. Please upgrade to access this feature."
@@ -658,42 +658,42 @@ msgstr ""
 "エアギャップ収集スケジュールには、エアギャップコレクターエンジン付きの SysManage Professional+ "
 "ライセンスが必要です。アップグレードしてください。"
 
-#: backend/api/airgap_collection_schedule.py:89
+#: backend/api/airgap_collection_schedule.py:84
 msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
 msgstr "無効な cron 式: 5 つのフィールド (m h dom mon dow) が必要です"
 
-#: backend/api/airgap_collection_schedule.py:98
+#: backend/api/airgap_collection_schedule.py:93
 #: backend/api/upgrade_profiles.py:148
 #, python-format
 msgid "Invalid cron expression: %s"
 msgstr "無効な cron 式: %s"
 
-#: backend/api/airgap_collection_schedule.py:176
-#: backend/api/airgap_collection_schedule.py:259
+#: backend/api/airgap_collection_schedule.py:171
+#: backend/api/airgap_collection_schedule.py:254
 #, python-format
 msgid "Invalid target_request: %s"
 msgstr "無効な target_request: %s"
 
-#: backend/api/airgap_collection_schedule.py:194
+#: backend/api/airgap_collection_schedule.py:189
 #, python-format
 msgid "Created air-gap collection schedule '%s'"
 msgstr "エアギャップ収集スケジュール '%s' を作成しました"
 
-#: backend/api/airgap_collection_schedule.py:270
+#: backend/api/airgap_collection_schedule.py:265
 #, python-format
 msgid "Updated air-gap collection schedule '%s'"
 msgstr "エアギャップ収集スケジュール '%s' を更新しました"
 
-#: backend/api/airgap_collection_schedule.py:309
+#: backend/api/airgap_collection_schedule.py:304
 #, python-format
 msgid "Deleted air-gap collection schedule '%s'"
 msgstr "エアギャップ収集スケジュール '%s' を削除しました"
 
-#: backend/api/airgap_collection_schedule.py:314
+#: backend/api/airgap_collection_schedule.py:309
 msgid "Air-gap collection schedule deleted"
 msgstr "エアギャップ収集スケジュールを削除しました"
 
-#: backend/api/airgap_collection_schedule.py:378
+#: backend/api/airgap_collection_schedule.py:373
 msgid ""
 "automation_engine not loaded; next_run timestamps not advanced. Schedules "
 "will fire only on the current tick window until the Pro+ license includes "
@@ -761,119 +761,119 @@ msgstr "接続失敗 - Graylogサーバーがダウンしているか到達で�
 msgid "Unexpected error checking Graylog health"
 msgstr "Graylogヘルスチェック中に予期しないエラーが発生しました"
 
-#: backend/api/openbao.py:61
+#: backend/api/openbao.py:58
 msgid "Invalid PID file"
 msgstr "PIDファイルが無効です"
 
-#: backend/api/openbao.py:102
+#: backend/api/openbao.py:99
 msgid "OpenBAO process not found"
 msgstr "OpenBAOプロセスが見つかりません"
 
-#: backend/api/openbao.py:189
+#: backend/api/openbao.py:186
 msgid "OpenBAO is running"
 msgstr "OpenBAOは実行中です"
 
-#: backend/api/openbao.py:247
+#: backend/api/openbao.py:244
 msgid "OpenBAO is already running"
 msgstr "OpenBAOはすでに実行中です"
 
-#: backend/api/openbao.py:273
+#: backend/api/openbao.py:270
 msgid "OpenBAO start script not found"
 msgstr "OpenBAOの起動スクリプトが見つかりません"
 
-#: backend/api/openbao.py:368
+#: backend/api/openbao.py:365
 msgid "Internal error occurred while starting OpenBAO"
 msgstr "OpenBAOの起動中に内部エラーが発生しました"
 
-#: backend/api/openbao.py:402
+#: backend/api/openbao.py:399
 msgid "OpenBAO started successfully"
 msgstr "OpenBAOを正常に起動しました"
 
-#: backend/api/openbao.py:409 backend/api/openbao.py:757
+#: backend/api/openbao.py:406 backend/api/openbao.py:754
 msgid "Failed to start OpenBAO"
 msgstr "OpenBAOの起動に失敗しました"
 
-#: backend/api/openbao.py:416
+#: backend/api/openbao.py:413
 msgid "OpenBAO start timed out"
 msgstr "OpenBAOの起動にタイムアウトしました"
 
-#: backend/api/openbao.py:423 backend/api/openbao.py:765
+#: backend/api/openbao.py:420 backend/api/openbao.py:762
 msgid "An error occurred while starting OpenBAO"
 msgstr "OpenBAOの起動中にエラーが発生しました"
 
-#: backend/api/openbao.py:461
+#: backend/api/openbao.py:458
 msgid "OpenBAO stop script not found"
 msgstr "OpenBAOの停止スクリプトが見つかりません"
 
-#: backend/api/openbao.py:516
+#: backend/api/openbao.py:513
 msgid "OpenBAO stopped successfully"
 msgstr "OpenBAOを正常に停止しました"
 
-#: backend/api/openbao.py:523 backend/api/openbao.py:779
+#: backend/api/openbao.py:520 backend/api/openbao.py:776
 msgid "Failed to stop OpenBAO"
 msgstr "OpenBAOの停止に失敗しました"
 
-#: backend/api/openbao.py:530
+#: backend/api/openbao.py:527
 msgid "OpenBAO stop timed out"
 msgstr "OpenBAOの停止にタイムアウトしました"
 
-#: backend/api/openbao.py:539 backend/api/openbao.py:787
+#: backend/api/openbao.py:536 backend/api/openbao.py:784
 msgid "An error occurred while stopping OpenBAO"
 msgstr "OpenBAO停止中にエラーが発生しました"
 
-#: backend/api/openbao.py:561
+#: backend/api/openbao.py:558
 msgid "OpenBAO is already sealed"
 msgstr "OpenBAOはすでにシールされています"
 
-#: backend/api/openbao.py:571 backend/api/openbao.py:674
+#: backend/api/openbao.py:568 backend/api/openbao.py:671
 msgid "OpenBAO binary not found"
 msgstr "OpenBAOバイナリが見つかりません"
 
-#: backend/api/openbao.py:607
+#: backend/api/openbao.py:604
 msgid "OpenBAO sealed successfully"
 msgstr "OpenBAOをシールするのに成功しました"
 
-#: backend/api/openbao.py:614 backend/api/openbao.py:822
+#: backend/api/openbao.py:611 backend/api/openbao.py:819
 msgid "Failed to seal OpenBAO"
 msgstr "OpenBAOをシールできませんでした"
 
-#: backend/api/openbao.py:622
+#: backend/api/openbao.py:619
 msgid "OpenBAO seal operation timed out"
 msgstr "OpenBAOのシール操作がタイムアウトしました"
 
-#: backend/api/openbao.py:631
+#: backend/api/openbao.py:628
 msgid "Error sealing OpenBAO"
 msgstr "OpenBAOをシールする際にエラーが発生しました"
 
-#: backend/api/openbao.py:654
+#: backend/api/openbao.py:651
 msgid "OpenBAO is already unsealed"
 msgstr "OpenBAOはすでに解凍されています"
 
-#: backend/api/openbao.py:664
+#: backend/api/openbao.py:661
 msgid "Automatic unseal is only supported in development mode"
 msgstr "自動解凍は開発モードでのみサポートされています"
 
-#: backend/api/openbao.py:712
+#: backend/api/openbao.py:709
 msgid "OpenBAO unsealed successfully"
 msgstr "OpenBAOを正常に解凍しました"
 
-#: backend/api/openbao.py:719 backend/api/openbao.py:844
+#: backend/api/openbao.py:716 backend/api/openbao.py:841
 msgid "Failed to unseal OpenBAO"
 msgstr "OpenBAOの解凍に失敗しました"
 
-#: backend/api/openbao.py:727
+#: backend/api/openbao.py:724
 msgid "OpenBAO unseal operation timed out"
 msgstr "OpenBAOの解凍操作がタイムアウトしました"
 
-#: backend/api/openbao.py:734
+#: backend/api/openbao.py:731
 msgid "Error unsealing OpenBAO"
 msgstr "OpenBAOの解凍時にエラーが発生しました"
 
-#: backend/api/openbao.py:830
+#: backend/api/openbao.py:827
 msgid "An error occurred while sealing OpenBAO"
 msgstr "OpenBAOのシーリング中にエラーが発生しました"
 
-#: backend/api/openbao.py:852
+#: backend/api/openbao.py:849
 msgid "An error occurred while unsealing OpenBAO"
 msgstr "OpenBAOのアンシール中にエラーが発生しました"
 
@@ -1057,7 +1057,8 @@ msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
 msgstr "許可が拒否されました: EDIT_HOST_HOSTNAME ロールが必要です"
 
 #: backend/api/host_hostname.py:75 backend/api/reboot_orchestration.py:119
-#: backend/api/error_constants.py:43 backend/api/child_host_utils.py:91
+#: backend/api/config_mgmt_runs.py:235 backend/api/error_constants.py:43
+#: backend/api/child_host_utils.py:91
 #: backend/api/scripts/routes_executions.py:81
 msgid "Host is not active"
 msgstr "ホストはアクティブではありません"
@@ -1115,12 +1116,12 @@ msgstr "パスワードは最低8文字以上でなければなりません"
 msgid "Your account is ready. You can now log in."
 msgstr "アカウントの準備ができました。ログインできます。"
 
-#: backend/api/server_info.py:249
+#: backend/api/server_info.py:244
 #, python-format
 msgid "Set server role to '%s'"
 msgstr "サーバー役割を'%s'に設定"
 
-#: backend/api/server_info.py:335
+#: backend/api/server_info.py:330
 #, python-format
 msgid "Set federation role to '%s'"
 msgstr "'%s'の連合ロールを設定する"
@@ -1281,57 +1282,57 @@ msgstr "メッセージが見つからないか、期限切れです"
 msgid "Failed to fetch message details"
 msgstr "メッセージ詳細の取得に失敗しました"
 
-#: backend/api/host_account_management.py:78
+#: backend/api/host_account_management.py:75
 msgid "Permission denied: ADD_HOST_ACCOUNT role required"
 msgstr "アクセス権限がありません: ADD_HOST_ACCOUNT ロールが必要です"
 
-#: backend/api/host_account_management.py:102
+#: backend/api/host_account_management.py:99
 msgid "Agent must be running in privileged mode to manage user accounts"
 msgstr "特権モードで実行されている Agent はユーザーアカウントを管理できません"
 
-#: backend/api/host_account_management.py:176
+#: backend/api/host_account_management.py:173
 msgid ""
 "User account creation requested. The user list will update automatically "
 "after creation."
 msgstr "ユーザー アカウント作成が要求されました。作成後、ユーザー リストは自動的に更新されます。"
 
-#: backend/api/host_account_management.py:200
+#: backend/api/host_account_management.py:197
 msgid "Permission denied: ADD_HOST_GROUP role required"
 msgstr "アクセス権限がありません: ADD_HOST_GROUP ロールが必要です"
 
-#: backend/api/host_account_management.py:223
+#: backend/api/host_account_management.py:220
 msgid "Agent must be running in privileged mode to manage groups"
 msgstr "特権モードで実行されている Agent はグループを管理できません"
 
-#: backend/api/host_account_management.py:280
+#: backend/api/host_account_management.py:277
 msgid ""
 "Group creation requested. The group list will update automatically after "
 "creation."
 msgstr "グループの作成が要求されました。グループリストは自動的に更新されます。"
 
-#: backend/api/host_account_management.py:307
+#: backend/api/host_account_management.py:304
 msgid "Permission denied: DELETE_HOST_ACCOUNT role required"
 msgstr "アクセス権限がありません: DELETE_HOST_ACCOUNT ロールが必要です"
 
-#: backend/api/host_account_management.py:331
+#: backend/api/host_account_management.py:328
 msgid "Agent must be running in privileged mode to delete user accounts"
 msgstr "特権モードで実行されている Agent はユーザーアカウントを管理できません"
 
-#: backend/api/host_account_management.py:384
+#: backend/api/host_account_management.py:381
 msgid ""
 "User account deletion requested. The user list will update automatically "
 "after deletion."
 msgstr "ユーザー アカウント削除が要求されました。削除後、ユーザー リストは自動的に更新されます。"
 
-#: backend/api/host_account_management.py:410
+#: backend/api/host_account_management.py:407
 msgid "Permission denied: DELETE_HOST_GROUP role required"
 msgstr "アクセス権限がありません: DELETE_HOST_GROUP ロールが必要です"
 
-#: backend/api/host_account_management.py:433
+#: backend/api/host_account_management.py:430
 msgid "Agent must be running in privileged mode to delete groups"
 msgstr "特権モードで実行されている Agent はグループを削除できません"
 
-#: backend/api/host_account_management.py:483
+#: backend/api/host_account_management.py:480
 msgid ""
 "Group deletion requested. The group list will update automatically after "
 "deletion."
@@ -1377,25 +1378,25 @@ msgstr ""
 msgid "Unknown (platform, version, os_family) tuple"
 msgstr "(プラットフォーム、バージョン、OSファミリー)の組み合わせが不明です"
 
-#: backend/api/airgap_collector_runs.py:71
+#: backend/api/airgap_collector_runs.py:65
 msgid "Air-gap collection run not found"
 msgstr "エアギャップ収集実行が見つかりません"
 
-#: backend/api/airgap_collector_runs.py:72
+#: backend/api/airgap_collector_runs.py:66
 msgid "Air-gap media manifest not found"
 msgstr "エアギャップメディアマニフェストが見つかりません"
 
-#: backend/api/airgap_collector_runs.py:73
+#: backend/api/airgap_collector_runs.py:67
 #, python-format
 msgid "Invalid UUID for run_id: %s"
 msgstr "run_id 用の無効な UUID: %s"
 
-#: backend/api/airgap_collector_runs.py:74
+#: backend/api/airgap_collector_runs.py:68
 #, python-format
 msgid "Invalid UUID for manifest_id: %s"
 msgstr "manifest_id 用の無効な UUID: %s"
 
-#: backend/api/airgap_collector_runs.py:83
+#: backend/api/airgap_collector_runs.py:77
 msgid ""
 "Air-gap collection runs require a SysManage Professional+ license with the "
 "air-gap collector engine. Please upgrade to access this feature."
@@ -1403,7 +1404,7 @@ msgstr ""
 "オフライン収集の実行には SysManage Professional+ ライセンスが必要です。air-gap collector engine "
 "も必要です。ライセンスをアップグレードしてこの機能を利用してください。"
 
-#: backend/api/airgap_collector_runs.py:224
+#: backend/api/airgap_collector_runs.py:218
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be"
 " loaded — the collector reads each target's bundle from a snapshot of its "
@@ -1412,14 +1413,14 @@ msgstr ""
 "オフライン収集の実行には repository_mirroring_engine モジュールがロードされている必要があります — "
 "コレクタは各ターゲットのバンドルをミラーツリーからのスナップショットから読み取ります。"
 
-#: backend/api/airgap_collector_runs.py:235
+#: backend/api/airgap_collector_runs.py:229
 msgid ""
 "Global mirror settings missing or mirror_root_path not configured.  "
 "Configure mirror settings before creating a collection run."
 msgstr ""
 "グローバルミラーセッティングが欠落またはmirror_root_pathが設定されていません。コレクションランを作成する前に、ミラー設定を構成してください。"
 
-#: backend/api/airgap_collector_runs.py:295
+#: backend/api/airgap_collector_runs.py:289
 #, python-format
 msgid ""
 "Mirror %r has no known_version_id set; Option-B collection runs need the "
@@ -1429,35 +1430,35 @@ msgstr ""
 "ミラー %r には known_version_id "
 "が設定されていません；オプションBのコレクション実行では、ミラーをカタログバージョンに結びつける必要があります。ミラーを編集し、ドロップダウンからバージョンを選択してください。"
 
-#: backend/api/airgap_collector_runs.py:326
+#: backend/api/airgap_collector_runs.py:318
 #, python-format
 msgid ""
 "Mirror %r references a catalog version that no longer exists.  Re-pick a "
 "version on the mirror."
 msgstr "ミラー %r が参照しているカタログバージョンは存在しません。ミラーのバージョンを再選択してください。"
 
-#: backend/api/airgap_collector_runs.py:410
-#: backend/api/airgap_collector_runs.py:489
+#: backend/api/airgap_collector_runs.py:402
+#: backend/api/airgap_collector_runs.py:481
 msgid "At least one target is required to create a collection run."
 msgstr "コレクション実行を作成するには、少なくとも1つのターゲットが必要です。"
 
-#: backend/api/airgap_collector_runs.py:420
+#: backend/api/airgap_collector_runs.py:412
 #, python-format
 msgid "Invalid UUID for mirror_id: %s"
 msgstr "ミラーアイデンティファイアのUUIDが無効: %s"
 
-#: backend/api/airgap_collector_runs.py:430
+#: backend/api/airgap_collector_runs.py:422
 #, python-format
 msgid "Mirror %s not found"
 msgstr "ミラー %s が見つかりません"
 
-#: backend/api/airgap_collector_runs.py:436
+#: backend/api/airgap_collector_runs.py:428
 #, python-format
 msgid ""
 "Mirror %r is disabled; enable + sync it before using it in a collection run."
 msgstr "ミラー %r は無効になっています；使用する前に有効にして同期させてください。"
 
-#: backend/api/airgap_collector_runs.py:447
+#: backend/api/airgap_collector_runs.py:439
 #, python-format
 msgid ""
 "All target mirrors must live on the same host (the collection plan "
@@ -1466,7 +1467,7 @@ msgstr ""
 "すべてのターゲットミラーは同じホスト上に存在する必要があり、収集計画は単一の Agent に対してディスパッチされます。選択されたミラーが %d "
 "ホストを跨いでいます。"
 
-#: backend/api/airgap_collector_runs.py:543
+#: backend/api/airgap_collector_runs.py:535
 #, python-format
 msgid ""
 "Created one-shot air-gap collection run '%(iso_label)s' with "
@@ -1475,52 +1476,52 @@ msgstr ""
 "一時的なオフライン収集実行 '%(iso_label)s' を %(mirror_count)d "
 "のターゲットミラーで作成し、スナップショットを配信しました"
 
-#: backend/api/airgap_collector_runs.py:666
+#: backend/api/airgap_collector_runs.py:658
 #, python-format
 msgid ""
 "ISO is not ready for download yet (status: %s). Wait until the run reaches "
 "ISO_BUILT."
 msgstr "ISOはまだダウンロード可能ではありません（ステータス：%s）。ISO_BUILTに達するまで待ってください。"
 
-#: backend/api/airgap_collector_runs.py:676
+#: backend/api/airgap_collector_runs.py:668
 msgid ""
 "ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
 " the collection to rebuild."
 msgstr "ステージングボリュームのクリーニングにより、ISOファイルがディスクから削除されました。収集を再実行して再構築してください。"
 
-#: backend/api/airgap_collector_runs.py:693
+#: backend/api/airgap_collector_runs.py:685
 msgid "ISO file not found."
 msgstr "ISOファイルが見つかりません。"
 
-#: backend/api/airgap_collector_runs.py:713
+#: backend/api/airgap_collector_runs.py:705
 #, python-format
 msgid "Disc %(disc)d not found for this run.  Available discs: %(available)s"
 msgstr "ディスク %(disc)d を見つけることができません。利用可能なディスク: %(available)s"
 
-#: backend/api/airgap_collector_runs.py:798
+#: backend/api/airgap_collector_runs.py:790
 msgid "Invalid or expired download token."
 msgstr "無効または期限切れのダウンロードトークンです。"
 
-#: backend/api/airgap_collector_runs.py:831
+#: backend/api/airgap_collector_runs.py:823
 #, python-format
 msgid "Deleted air-gap collection run '%s'"
 msgstr "空き収集実行 '%s' を削除しました"
 
-#: backend/api/airgap_collector_runs.py:903
+#: backend/api/airgap_collector_runs.py:895
 #, python-format
 msgid "Run is not COMPLETE yet (status: %s)"
 msgstr "実行はまだ完了していません（状態：%s）"
 
-#: backend/api/airgap_collector_runs.py:909
+#: backend/api/airgap_collector_runs.py:901
 #, python-format
 msgid "ISO file is no longer on disk: %s"
 msgstr "ISOファイルがディスク上に存在しません：%s"
 
-#: backend/api/package_compliance.py:59
+#: backend/api/package_compliance.py:56
 msgid "Package profile not found"
 msgstr "パッケージプロファイルが見つかりません"
 
-#: backend/api/package_compliance.py:76
+#: backend/api/package_compliance.py:73
 msgid ""
 "Package compliance profiles require a SysManage Professional license. Please"
 " upgrade to access this feature."
@@ -1528,26 +1529,26 @@ msgstr ""
 "パッケージコンプライアンスプロファイルはSysManage "
 "Professionalライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
 
-#: backend/api/package_compliance.py:203
+#: backend/api/package_compliance.py:200
 #, python-format
 msgid "Created package profile '%s'"
 msgstr "パッケージプロファイル '%s' を作成しました"
 
-#: backend/api/package_compliance.py:255
+#: backend/api/package_compliance.py:252
 #, python-format
 msgid "Updated package profile '%s'"
 msgstr "パッケージプロファイル '%s' を更新"
 
-#: backend/api/package_compliance.py:285
+#: backend/api/package_compliance.py:282
 #, python-format
 msgid "Deleted package profile '%s'"
 msgstr "パッケージプロファイル '%s' を削除しました"
 
-#: backend/api/package_compliance.py:290
+#: backend/api/package_compliance.py:287
 msgid "Package profile deleted"
 msgstr "パッケージプロファイルを削除しました"
 
-#: backend/api/package_compliance.py:377
+#: backend/api/package_compliance.py:374
 #, python-format
 msgid ""
 "Scanned host '%(host_fqdn)s' against profile '%(profile_name)s': %(status)s "
@@ -1556,7 +1557,7 @@ msgstr ""
 "プロファイル '%(profile_name)s' を使用してスキャンしたホスト '%(host_fqdn)s': %(status)s "
 "(%(violation_count)d の違反)"
 
-#: backend/api/package_compliance.py:503
+#: backend/api/package_compliance.py:500
 #, python-format
 msgid ""
 "Dispatched compliance check to agent '%(host_fqdn)s' for profile "
@@ -2328,19 +2329,19 @@ msgstr "Agent 認証に失敗しました：無効なホスト ID"
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "ID %s のホストは登録されていません。再登録をお願いします。"
 
-#: backend/api/message_handlers_core.py:245 backend/api/agent.py:649
+#: backend/api/message_handlers_core.py:245 backend/api/agent.py:650
 msgid "Host registration pending approval"
 msgstr "ホスト登録が承認待ちです"
 
-#: backend/api/message_handlers_core.py:359
+#: backend/api/message_handlers_core.py:360
 msgid "Host auto-approved via child host creation"
 msgstr "ホストは自動的に承認されました（子ホスト作成時）"
 
-#: backend/api/message_handlers_core.py:455
+#: backend/api/message_handlers_core.py:456
 msgid "Agent registered and connected successfully"
 msgstr "Agent の登録と接続に成功しました"
 
-#: backend/api/message_handlers_core.py:771
+#: backend/api/message_handlers_core.py:770
 msgid "Failed to process heartbeat"
 msgstr "ハートビートの処理に失敗しました"
 
@@ -2851,29 +2852,29 @@ msgstr "パッケージのカウントに失敗しました: %s"
 msgid "Failed to search packages: %s"
 msgstr "パッケージの検索に失敗しました: %s"
 
-#: backend/api/host.py:186
+#: backend/api/host.py:184
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "アクセス権限がありません: DELETE_HOST ロールが必要です"
 
-#: backend/api/host.py:250
+#: backend/api/host.py:248
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "許可が拒否されました: VIEW_HOST_DETAILS ロールが必要です"
 
-#: backend/api/host.py:665
+#: backend/api/host.py:663
 msgid "Host already exists"
 msgstr "ホストは既に存在しています"
 
-#: backend/api/host.py:774
+#: backend/api/host.py:772
 msgid "Registration absorbed: host was recently deleted"
 msgstr "登録が吸収されました: ホストは最近削除されました"
 
-#: backend/api/host.py:848
+#: backend/api/host.py:846
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "'%(fqdn)s' のホストはテナント %(tenant_id)s に登録トークンで登録されました"
 
-#: backend/api/host.py:865
+#: backend/api/host.py:863
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -2914,30 +2915,30 @@ msgstr "target_hostname、target_platform、またはpush_to_allを指定する�
 msgid "Configuration acknowledgment processed"
 msgstr "設定の確認応答を処理しました"
 
-#: backend/api/message_handlers.py:318
+#: backend/api/message_handlers.py:334
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "診断結果の処理に失敗しました: %s"
 
-#: backend/api/message_handlers.py:352
+#: backend/api/message_handlers.py:368
 msgid "Missing message_id in command acknowledgment"
 msgstr "コマンド確認メッセージに message_id が含まれていません"
 
-#: backend/api/message_handlers.py:465
+#: backend/api/message_handlers.py:481
 msgid "Missing installation_id in package installation status"
 msgstr "パッケージインストール状態にインストールIDが含まれていません"
 
-#: backend/api/message_handlers.py:485
+#: backend/api/message_handlers.py:501
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "ID:%s のインストールログエントリが見つかりませんでした。"
 
-#: backend/api/message_handlers.py:531
+#: backend/api/message_handlers.py:547
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "エージェント {hostname} 上でのパッケージインストール {status}"
 
-#: backend/api/message_handlers.py:560
+#: backend/api/message_handlers.py:576
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "パッケージのインストール状態を更新できませんでした: %s"
@@ -3223,28 +3224,28 @@ msgstr "更新の実行に失敗しました: %s"
 msgid "Failed to get execution log: %s"
 msgstr "実行ログの取得に失敗しました: %s"
 
-#: backend/api/dynamic_secrets.py:133 backend/api/dynamic_secrets.py:195
+#: backend/api/dynamic_secrets.py:130 backend/api/dynamic_secrets.py:192
 #, python-format
 msgid "Unknown kind: %(kind)s (allowed: %(allowed)s)"
 msgstr "未知の種類: %(kind)s (許可された値: %(allowed)s)"
 
-#: backend/api/dynamic_secrets.py:156
+#: backend/api/dynamic_secrets.py:153
 #, python-format
 msgid ""
 "Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
 "ttl=%(ttl)ds)"
 msgstr "動的シークレット '%(name)s' (種類=%(kind)s, ロール=%(role)s, TTL=%(ttl)ds) を発行しました"
 
-#: backend/api/dynamic_secrets.py:189
+#: backend/api/dynamic_secrets.py:186
 #, python-format
 msgid "Unknown status: %(status)s (allowed: %(allowed)s)"
 msgstr "未知のステータス: %(status)s (許可された値: %(allowed)s)"
 
-#: backend/api/dynamic_secrets.py:217
+#: backend/api/dynamic_secrets.py:214
 msgid "Lease not found"
 msgstr "リースが見つかりません"
 
-#: backend/api/dynamic_secrets.py:239
+#: backend/api/dynamic_secrets.py:236
 #, python-format
 msgid "Revoked dynamic secret lease '%s'"
 msgstr "動的シークレットリース '%s' を取り消しました"
@@ -3630,37 +3631,54 @@ msgstr "{hostname} から登録されていないホストの Agent メッセー
 msgid "Agent message from unapproved host: {hostname}"
 msgstr "{hostname} からの未承認ホストの Agent メッセージ"
 
-#: backend/api/agent.py:591
+#: backend/api/agent.py:592
 msgid "Message must include hostname or host_id for host validation"
 msgstr "ホスト検証のためにメッセージにホスト名またはhost_idを含める必要があります"
 
-#: backend/api/agent.py:609
+#: backend/api/agent.py:610
 msgid "Host ID no longer valid - please re-register"
 msgstr "ホストIDが無効になりました - 再登録をお願いします"
 
-#: backend/api/agent.py:621
+#: backend/api/agent.py:622
 msgid "Host ID and hostname mismatch - please re-register"
 msgstr "ホストIDとホスト名が一致しません - 再登録をお願いします"
 
-#: backend/api/agent.py:638
+#: backend/api/agent.py:639
 msgid "Host must register before sending inventory data"
 msgstr "ホストが登録されるまではインベントリデータを送信することはできません"
 
-#: backend/api/agent.py:709
+#: backend/api/agent.py:710
 msgid "Missing or invalid authorization header"
 msgstr "認証ヘッダーが見つからないか、無効です"
 
-#: backend/api/agent.py:734
+#: backend/api/agent.py:735
 msgid "Invalid host authentication"
 msgstr "ホスト認証が無効です"
 
-#: backend/api/agent.py:775 backend/api/packages.py:498
+#: backend/api/agent.py:776 backend/api/packages.py:498
 msgid "Installation completion recorded"
 msgstr "インストール完了が記録されました。"
 
-#: backend/api/agent.py:781 backend/api/error_constants.py:193
+#: backend/api/agent.py:782 backend/api/error_constants.py:193
 msgid "Internal server error"
 msgstr "内部サーバーエラー"
+
+#: backend/api/config_mgmt_runs.py:228
+#: backend/api/scripts/routes_executions.py:67
+msgid "Permission denied: RUN_SCRIPT role required"
+msgstr "許可が拒否されました: RUN_SCRIPT ロールが必要です"
+
+#: backend/api/config_mgmt_runs.py:250
+msgid "This host uses DSC; provide 'resources', not 'playbook'"
+msgstr "このホストはDSCを使用しています； 'リソース' を提供してください、'プレイブック' ではありません"
+
+#: backend/api/config_mgmt_runs.py:257
+msgid "This host uses ansible-core; provide 'playbook'"
+msgstr "このホストは ansible-core を使用しています； 'プレイブック' を提供してください"
+
+#: backend/api/config_mgmt_runs.py:319
+msgid "Configuration profile was queued for this host"
+msgstr "このホストは構成プロファイルがキューに入れられました"
 
 #: backend/api/diagnostics.py:198
 msgid "Diagnostic collection requested"
@@ -3989,88 +4007,88 @@ msgstr "ロゴが設定されていません"
 msgid "Removed report branding logo"
 msgstr "レポートブランディングロゴを削除しました"
 
-#: backend/api/firewall_roles.py:101
+#: backend/api/firewall_roles.py:100
 #, python-format
 msgid "Failed to retrieve firewall roles: %s"
 msgstr "ファイアウォールロールの一覧の取得に失敗しました: %s"
 
-#: backend/api/firewall_roles.py:153
+#: backend/api/firewall_roles.py:152
 #, python-format
 msgid "Failed to retrieve firewall role: %s"
 msgstr "ファイアウォールロールの取得に失敗しました: %s"
 
-#: backend/api/firewall_roles.py:173
+#: backend/api/firewall_roles.py:172
 msgid "Permission denied: ADD_FIREWALL_ROLE role required"
 msgstr "アクセス権限がありません: ADD_FIREWALL_ROLE ロールが必要です"
 
-#: backend/api/firewall_roles.py:189 backend/api/firewall_roles.py:306
+#: backend/api/firewall_roles.py:188 backend/api/firewall_roles.py:305
 #, python-format
 msgid "Firewall role '%s' already exists"
 msgstr "ファイアウォール役割 '%s' はすでに存在しています"
 
-#: backend/api/firewall_roles.py:245
+#: backend/api/firewall_roles.py:244
 #, python-format
 msgid "Failed to create firewall role: %s"
 msgstr "ファイアウォールロールを作成できませんでした: %s"
 
-#: backend/api/firewall_roles.py:266
+#: backend/api/firewall_roles.py:265
 msgid "Permission denied: EDIT_FIREWALL_ROLE role required"
 msgstr "許可が拒否されました: EDIT_FIREWALL_ROLE ロールが必要です"
 
-#: backend/api/firewall_roles.py:366
+#: backend/api/firewall_roles.py:365
 #, python-format
 msgid "Failed to update firewall role: %s"
 msgstr "ファイアウォールロールの更新に失敗しました: %s"
 
-#: backend/api/firewall_roles.py:386
+#: backend/api/firewall_roles.py:385
 msgid "Permission denied: DELETE_FIREWALL_ROLE role required"
 msgstr "アクセス権限がありません: DELETE_FIREWALL_ROLE ロールが必要です"
 
-#: backend/api/firewall_roles.py:433
+#: backend/api/firewall_roles.py:432
 msgid "Firewall role deleted successfully"
 msgstr "ファイアウォールロールが正常に削除されました"
 
-#: backend/api/firewall_roles.py:443
+#: backend/api/firewall_roles.py:442
 #, python-format
 msgid "Failed to delete firewall role: %s"
 msgstr "ファイアウォールロールを削除できませんでした: %s"
 
-#: backend/api/firewall_roles.py:514
+#: backend/api/firewall_roles.py:513
 #, python-format
 msgid "Failed to retrieve host firewall roles: %s"
 msgstr "ホストファイアウォールロールの取得に失敗しました: %s"
 
-#: backend/api/firewall_roles.py:602
+#: backend/api/firewall_roles.py:601
 #, python-format
 msgid "Failed to retrieve expected ports: %s"
 msgstr "予想されるポートの取得に失敗しました: %s"
 
-#: backend/api/firewall_roles.py:627 backend/api/firewall_roles.py:754
+#: backend/api/firewall_roles.py:626 backend/api/firewall_roles.py:753
 msgid "Permission denied: ASSIGN_HOST_FIREWALL_ROLES role required"
 msgstr "アクセス権限がありません: ASSIGN_HOST_FIREWALL_ROLES ロールが必要です"
 
-#: backend/api/firewall_roles.py:639 backend/api/firewall_roles.py:766
+#: backend/api/firewall_roles.py:638 backend/api/firewall_roles.py:765
 msgid "Invalid ID format"
 msgstr "無効なID形式"
 
-#: backend/api/firewall_roles.py:675
+#: backend/api/firewall_roles.py:674
 msgid "Firewall role already assigned to this host"
 msgstr "ファイアウォール役割はすでにこのホストに割り当てられています"
 
-#: backend/api/firewall_roles.py:733
+#: backend/api/firewall_roles.py:732
 #, python-format
 msgid "Failed to assign firewall role: %s"
 msgstr "ファイアウォール役割の割り当てに失敗しました: %s"
 
-#: backend/api/firewall_roles.py:782
+#: backend/api/firewall_roles.py:781
 msgid "Firewall role assignment not found"
 msgstr "ファイアウォールロールアサインメントが見つかりません"
 
-#: backend/api/firewall_roles.py:832
+#: backend/api/firewall_roles.py:831
 msgid "Firewall role removed from host successfully"
 msgstr "ファイアウォール役割がホストから正常に削除されました"
 
-#: backend/api/firewall_roles.py:844
+#: backend/api/firewall_roles.py:843
 #, python-format
 msgid "Failed to remove firewall role: %s"
 msgstr "ファイアウォールロールの削除に失敗しました: %s"
@@ -4186,15 +4204,15 @@ msgid "Unsupported export format: %s"
 msgstr "サポートされていないエクスポート形式: %s"
 
 # Reports-related strings
-#: backend/api/audit_log.py:536
+#: backend/api/audit_log.py:538
 msgid "Generated"
 msgstr "生成済み"
 
-#: backend/api/audit_log.py:538
+#: backend/api/audit_log.py:540
 msgid "Total Entries"
 msgstr "合計エントリ数"
 
-#: backend/api/audit_log.py:545
+#: backend/api/audit_log.py:547
 msgid "No audit log entries found."
 msgstr "監査ログエントリが見つかりません。"
 
@@ -4323,10 +4341,6 @@ msgstr "saved_script_id もしくは script_content のいずれかを指定し�
 #: backend/api/scripts/models.py:132
 msgid "shell_type is required for ad-hoc scripts"
 msgstr "ad-hoc スクリプト用に shell_type が必要です"
-
-#: backend/api/scripts/routes_executions.py:67
-msgid "Permission denied: RUN_SCRIPT role required"
-msgstr "許可が拒否されました: RUN_SCRIPT ロールが必要です"
 
 #: backend/api/scripts/routes_executions.py:100
 msgid "Saved script not found"
@@ -4499,13 +4513,13 @@ msgstr "失敗したメッセージを削除できませんでした: %s"
 msgid "Mock connection: would send message %s"
 msgstr "モック接続：メッセージ %s を送信します"
 
-#: backend/websocket/inbound_processor.py:128
+#: backend/websocket/inbound_processor.py:124
 #, python-format
 msgid "Host %(hostname)s not found for message %(message_id)s, deleting"
 msgstr ""
 "メッセージ %(message_id)s に該当するホスト '%(hostname)s' を見つけることができません。メッセージを削除します"
 
-#: backend/websocket/inbound_processor.py:139
+#: backend/websocket/inbound_processor.py:135
 #, python-format
 msgid ""
 "Host %(hostname)s not approved (status: %(status)s) for message "
@@ -4514,14 +4528,14 @@ msgstr ""
 "ステータス：%(status)s のホスト '%(hostname)s' がメッセージ %(message_id)s "
 "に対して承認されていません。メッセージを削除します"
 
-#: backend/websocket/inbound_processor.py:156
+#: backend/websocket/inbound_processor.py:152
 #, python-format
 msgid ""
 "Processing NULL host_id message for approved host %(hostname)s (ID: "
 "%(host_id)s)"
 msgstr "承認済みホスト %(hostname)s (ID: %(host_id)s) の NULL host_id メッセージを処理しています"
 
-#: backend/websocket/inbound_processor.py:273
+#: backend/websocket/inbound_processor.py:269
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
@@ -4531,7 +4545,7 @@ msgstr ""
 "ホスト %(host_id)s "
 "がこのデータベースに存在しません；%(count)d件のキューされたメッセージを再試行のために保留します（削除はしない）——登録処理中か、または既に削除されたホストかもしれません"
 
-#: backend/websocket/inbound_processor.py:290
+#: backend/websocket/inbound_processor.py:286
 #, python-format
 msgid ""
 "Host %(host_id)s (FQDN: %(fqdn)s) no longer approved (status: %(status)s), "
@@ -4540,42 +4554,42 @@ msgstr ""
 "ホスト %(host_id)s (FQDN: %(fqdn)s) "
 "の承認が解除されました（ステータス：%(status)s）。キューからそのメッセージをすべて削除します"
 
-#: backend/websocket/inbound_processor.py:300
+#: backend/websocket/inbound_processor.py:296
 #, python-format
 msgid "Deleted %(count)d messages for unapproved host %(host_id)s"
 msgstr "承認されていないホスト %(host_id)s に属する %(count)d のメッセージを削除しました"
 
-#: backend/websocket/inbound_processor.py:307
+#: backend/websocket/inbound_processor.py:303
 #, python-format
 msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"
 msgstr "承認済みホスト %(host_id)s (FQDN: %(fqdn)s) のメッセージを処理しています"
 
-#: backend/websocket/inbound_processor.py:332
+#: backend/websocket/inbound_processor.py:328
 #, python-format
 msgid "Processing message with NULL host_id: %s"
 msgstr "NULL host_id のメッセージを処理中: %s"
 
-#: backend/websocket/inbound_processor.py:343
+#: backend/websocket/inbound_processor.py:339
 #, python-format
 msgid "Processing SYSTEM_INFO registration message %s"
 msgstr "SYSTEM_INFO 登録メッセージ %s を処理中"
 
-#: backend/websocket/inbound_processor.py:366
+#: backend/websocket/inbound_processor.py:362
 #, python-format
 msgid "Message %s missing hostname and host_id, deleting"
 msgstr "メッセージ %s にホスト名と host_id が欠落しているため、削除します"
 
-#: backend/websocket/inbound_processor.py:406
+#: backend/websocket/inbound_processor.py:402
 #, python-format
 msgid "Error processing NULL host_id message %(message_id)s: %(error)s"
 msgstr "NULL ホスト ID のメッセージ %(message_id)s の処理中にエラーが発生しました: %(error)s"
 
-#: backend/websocket/inbound_processor.py:443
+#: backend/websocket/inbound_processor.py:439
 #, python-format
 msgid "Could not mark message %s as processing"
 msgstr "メッセージ %s を処理中としてマークすることができません"
 
-#: backend/websocket/inbound_processor.py:471
+#: backend/websocket/inbound_processor.py:467
 #, python-format
 msgid ""
 "Processing queued message: %(message_id)s (type: %(message_type)s, host: "
@@ -4584,29 +4598,29 @@ msgstr ""
 "キューに登録されたメッセージ %(message_id)s (タイプ: %(message_type)s, ホスト: %(host)s) "
 "を処理しています"
 
-#: backend/websocket/inbound_processor.py:504
+#: backend/websocket/inbound_processor.py:500
 #, python-format
 msgid ""
 "Successfully processed and completed message: %(message_id)s for host "
 "%(host)s"
 msgstr "メッセージの処理と完了が成功しました: %(message_id)s ホスト %(host)s"
 
-#: backend/websocket/inbound_processor.py:522
+#: backend/websocket/inbound_processor.py:518
 #, python-format
 msgid "Failed to process message %s: unknown message type"
 msgstr "メッセージ%sの処理に失敗しました: 知らないメッセージタイプ"
 
-#: backend/websocket/inbound_processor.py:543
+#: backend/websocket/inbound_processor.py:539
 #, python-format
 msgid "Error processing message %(message_id)s for host %(host)s: %(error)s"
 msgstr "ホスト %(host)s に対するメッセージ %(message_id)s の処理中にエラーが発生しました: %(error)s"
 
-#: backend/websocket/inbound_processor.py:573
+#: backend/websocket/inbound_processor.py:569
 #, python-format
 msgid "Could not mark SYSTEM_INFO message %s as processing"
 msgstr "SYSTEM_INFOメッセージ %s を処理中としてマークすることができません"
 
-#: backend/websocket/inbound_processor.py:605
+#: backend/websocket/inbound_processor.py:601
 #, python-format
 msgid "Error processing SYSTEM_INFO message %(message_id)s: %(error)s"
 msgstr "SYSTEM_INFO メッセージ %(message_id)s の処理中にエラーが発生しました: %(error)s"

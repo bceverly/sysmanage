@@ -6,7 +6,11 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { vi, describe, beforeEach, afterEach, test, expect } from "vitest";
 
 vi.mock("react-i18next", () => {
-  const t = (key: string, fallback?: string, opts?: Record<string, unknown>) => {
+  const t = (
+    key: string,
+    fallback?: string,
+    opts?: Record<string, unknown>,
+  ) => {
     let s = typeof fallback === "string" ? fallback : key;
     if (opts) {
       for (const [k, v] of Object.entries(opts)) {
@@ -23,7 +27,13 @@ vi.mock("react-i18next", () => {
 // about Scripts.tsx and off MUI DataGrid internals (whose CSS var shorthand
 // trips jsdom's cssstyle), mirroring the MaintenanceWindows page test.
 vi.mock("../../Components/scripts/ScriptLibraryTab", () => ({
-  default: ({ filteredScripts, loading }: { filteredScripts: unknown[]; loading: boolean }) => (
+  default: ({
+    filteredScripts,
+    loading,
+  }: {
+    filteredScripts: unknown[];
+    loading: boolean;
+  }) => (
     <div data-testid="library">
       {loading ? "loading" : `scripts:${filteredScripts.length}`}
     </div>
@@ -39,9 +49,15 @@ vi.mock("../../Components/scripts/ExecutionHistoryTab", () => ({
     <div data-testid="history">{`executions:${executions?.length ?? 0}`}</div>
   ),
 }));
-vi.mock("../../Components/scripts/ScriptViewDialog", () => ({ default: () => null }));
-vi.mock("../../Components/scripts/ExecutionViewDialog", () => ({ default: () => null }));
-vi.mock("../../Components/scripts/AddEditScriptDialog", () => ({ default: () => null }));
+vi.mock("../../Components/scripts/ScriptViewDialog", () => ({
+  default: () => null,
+}));
+vi.mock("../../Components/scripts/ExecutionViewDialog", () => ({
+  default: () => null,
+}));
+vi.mock("../../Components/scripts/AddEditScriptDialog", () => ({
+  default: () => null,
+}));
 
 vi.mock("../../Services/scripts", async (orig) => {
   const actual = await orig<typeof import("../../Services/scripts")>();
@@ -111,7 +127,9 @@ afterEach(() => {
 describe("initial load", () => {
   test("loads scripts and renders the library tab", async () => {
     render(<Scripts />);
-    await waitFor(() => expect(screen.getByTestId("library")).toHaveTextContent("scripts:1"));
+    await waitFor(() =>
+      expect(screen.getByTestId("library")).toHaveTextContent("scripts:1"),
+    );
     expect(scriptsService.getSavedScripts).toHaveBeenCalled();
   });
 
@@ -120,8 +138,13 @@ describe("initial load", () => {
     // one endpoint should not cost the operator the whole screen.
     m(scriptsService.getSavedScripts).mockRejectedValue(new Error("boom"));
     render(<Scripts />);
-    await waitFor(() => expect(screen.getByTestId("library")).toBeInTheDocument());
-    expect(screen.getByTestId("library")).toHaveTextContent("scripts:0");
+    // Wait for the CONTENT, not merely for the element: the library div is in
+    // the document while the page is still "loading", so asserting its text
+    // synchronously after toBeInTheDocument races the rejected fetch. That is
+    // what made this pass locally and fail under a loaded CI run.
+    await waitFor(() =>
+      expect(screen.getByTestId("library")).toHaveTextContent("scripts:0"),
+    );
   });
 
   test("permissions are resolved on mount", async () => {
@@ -134,14 +157,18 @@ describe("initial load", () => {
   test("a permission lookup failure does not break the page", async () => {
     m(hasPermission).mockRejectedValue(new Error("no session"));
     render(<Scripts />);
-    await waitFor(() => expect(screen.getByTestId("library")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByTestId("library")).toBeInTheDocument(),
+    );
   });
 });
 
 describe("tabs", () => {
   test("renders all three tab labels", async () => {
     render(<Scripts />);
-    await waitFor(() => expect(screen.getByTestId("library")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByTestId("library")).toBeInTheDocument(),
+    );
     expect(screen.getAllByRole("tab").length).toBe(3);
   });
 
@@ -149,7 +176,9 @@ describe("tabs", () => {
     // TabPanel unmounts inactive children, so the Execute/History services must
     // not have been asked for anything just by loading the page.
     render(<Scripts />);
-    await waitFor(() => expect(screen.getByTestId("library")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByTestId("library")).toBeInTheDocument(),
+    );
     expect(screen.queryByTestId("execute")).not.toBeInTheDocument();
     expect(screen.queryByTestId("history")).not.toBeInTheDocument();
   });
@@ -159,14 +188,20 @@ describe("data shaping", () => {
   test("an empty script list renders zero without erroring", async () => {
     m(scriptsService.getSavedScripts).mockResolvedValue([]);
     render(<Scripts />);
-    await waitFor(() => expect(screen.getByTestId("library")).toHaveTextContent("scripts:0"));
+    await waitFor(() =>
+      expect(screen.getByTestId("library")).toHaveTextContent("scripts:0"),
+    );
   });
 
   test("a non-array response degrades to an empty list", async () => {
     // Defensive: the page indexes into this value, so a malformed payload must
     // not produce "filteredScripts.length of undefined".
-    m(scriptsService.getSavedScripts).mockResolvedValue(undefined as unknown as []);
+    m(scriptsService.getSavedScripts).mockResolvedValue(
+      undefined as unknown as [],
+    );
     render(<Scripts />);
-    await waitFor(() => expect(screen.getByTestId("library")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByTestId("library")).toBeInTheDocument(),
+    );
   });
 });

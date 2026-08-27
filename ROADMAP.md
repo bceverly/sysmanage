@@ -7231,6 +7231,30 @@ Some platforms this phase reaches can't run the *full* agent: a native library m
 
 #### 20.1 config_management_engine (Enterprise)
 
+**CURRENT SLICE (as of 2026-08-27).** The OSS half of 20.1 is COMPLETE: prerequisite surfacing + install, vendored `dsc.exe`, the agent-side
+executor and capability probe, results ingestion, run history, and ad-hoc
+single-host apply. Remaining work, in the order it should be done:
+
+  1. ~~Apply-profile UI~~ — **DONE 2026-08-27.** The OSS half of 20.1 is now
+     complete and drivable from a browser end to end.
+  2. **Per-engine refactor + Puppet/Salt/Chef adapters.** MOVED AHEAD of the
+     Pro+ engine on 2026-08-27, deliberately. The Pro+ engine will encode the
+     executor into profile storage, dispatch and scheduling; if it is built
+     while `executor_for()` still returns one executor per PLATFORM, that
+     assumption gets baked into a schema and a scheduler and has to be
+     retrofitted. Doing it now is cheap — the surface is four files (plan
+     builder, prerequisite evaluator, locator, capability probe) plus one card
+     — and doing it later is not. Spike each engine first, as ansible-core and
+     DSC were.
+  3. **Pro+ `config_management_engine`** — profile authoring/storage,
+     assignment per host/tag/site, scheduling, fleet-scale dispatch and job
+     templates. Lives in `sysmanage-professional-plus`, and is a substantially
+     larger lift than everything landed so far; scope it deliberately rather
+     than drifting into it. Build it against the per-engine model from step 2.
+  4. **Remediation playbooks** — largely blocked on 20.2 drift detection, which
+     is what determines *what* needs remediating.
+  5. **Final i18n pass** once the remaining UI exists.
+
 **DECIDED 2026-08-26 (Bryan): PULL-style execution, not push.** Ansible is
 conventionally push-based — a control node SSHing into each target — and that
 would undo the Phase 19 item "One port to rule them all: agent↔server needs 443
@@ -7387,7 +7411,7 @@ any engine code, and it moved two decisions:
     including the failure path (exit code 2, `failures: 1`), so the agent can
     detect failure without parsing text.
 
-**Prerequisite surfacing — LANDED 2026-08-26 (uncommitted).** Before any
+**Prerequisite surfacing — LANDED 2026-08-26.** Before any
 profile can run, the host needs its executor, and an operator needs to be able
 to see that and fix it in one press.  Built as the child-host enablement flow
 is built (status card + action button), not as a documentation note:
@@ -7467,7 +7491,7 @@ unambiguously and does **not** also match the version-pinned
       A placeholder fallback exists for offline dev machines and is **refused
       under `CI`/`GITHUB_ACTIONS`**: an empty dependency inventory is tolerable
       in a throwaway local build and is not tolerable in a release artifact.
-**Agent-side foundations — LANDED 2026-08-26 (uncommitted).**
+**Agent-side foundations — LANDED 2026-08-26.**
 
   * `operations/config_mgmt_locator.py` — finds this host's executor as a pure
     filesystem lookup. On Windows the **vendored `dsc.exe` beats PATH** (and a
@@ -7501,7 +7525,7 @@ unambiguously and does **not** also match the version-pinned
   status and exit code still produced the right verdict — defence in depth
   worked — but the counts an operator reads were wrong. Fixed and pinned.
 
-**Executor + handler — LANDED 2026-08-26 (uncommitted).**
+**Executor + handler — LANDED 2026-08-26.**
 `operations/config_mgmt_operations.py` applies a profile with the host's native
 executor and hands back ONE result shape for both, so the server and UI never
 branch on platform. Wired end to end: `main.py` → `agent_delegators` →
@@ -7563,12 +7587,226 @@ OSS-side is done end to end:
     SHOULD change nothing, and seeing that streak is the entire point. Dry runs
     are labelled so they can never be mistaken for an applied change.
 
-Still Pro+ and unstarted: profile authoring, fleet-scale job templates,
-inventories from hosts/tags/sites, and scheduling.
+**Ad-hoc apply — LANDED 2026-08-26.**
+`POST /api/v1/hosts/{id}/config-management/apply` dispatches a single profile
+to one host. Until this existed **nothing could populate the runs table**, so
+every piece above was only ever validated in isolation; this is what closes the
+loop dispatch → execute → ingest → display.
+
+  * Gated on the existing **`RUN_SCRIPT`** role, not a softer
+    config-specific one. A playbook runs anything the agent can, so the blast
+    radius is identical to executing a script — a weaker permission for the
+    same capability would be a privilege-escalation path dressed up as a
+    feature.
+  * **The profile body is never audited.** Profiles carry variables (passwords,
+    keys) and the audit log is readable by more people than the profile is; the
+    record keeps executor/check_mode/profile-name only. A test plants a
+    password in a playbook and asserts it never reaches the audit record.
+  * Payload/executor mismatch (a playbook aimed at Windows, DSC resources aimed
+    at Linux) is refused with a 400 naming the field that host wants, rather
+    than failing at the far end where the cause is much harder to see.
+  * Inactive hosts are refused, not queued — otherwise the work sits in a queue
+    that may never drain while the operator has been told it was accepted.
+  * `CommandType.APPLY_CONFIG_PROFILE` is its own command rather than a flavour
+    of `APPLY_DEPLOYMENT_PLAN`: a plan is an imperative list of
+    packages/files/commands, a profile is handed whole to an external engine
+    that owns convergence. Folding them would make the agent guess which shape
+    it received.
+
+- [x] **Apply-profile UI — DONE 2026-08-27.** `ApplyConfigProfileDialog`,
+      opened from the prerequisite card: a playbook/resources box, an optional
+      profile name, and a **Dry run** toggle wired to `check_mode`. Applying
+      bumps the run-history panel so the result appears without a reload.
+
+      * **Dry run is ON by default.** This form runs arbitrary code as root on
+        a managed host; the safe option must be the one you get by not thinking
+        about it, and making real changes has to be a deliberate act. Turning
+        it off raises a warning before anything is sent. Pinned by tests rather
+        than left to survive a refactor.
+      * **The card checks RUN_SCRIPT itself** rather than having it threaded
+        down from the page. Same role the API enforces — a looser UI gate would
+        only render a button that 403s — and it fails CLOSED if the check
+        errors. Owning it locally also keeps the page, the tab, the tab-content
+        switch and the shared permissions hook from needing to know this card
+        exists (the `GrafanaIntegrationCard` precedent).
+      * Offered only when an executor is actually present (`satisfied` or
+        `not_required`); on a host with none, the button would be an invitation
+        to a guaranteed `executor_missing`.
+      * DSC JSON is parsed client-side so a typo reads as "that isn't a JSON
+        array" instead of an opaque 422, and the **server's own error detail
+        wins** over any generic message — it is the only thing that names which
+        field a mismatched host actually wants.
+
+Still Pro+ and unstarted: profile authoring/storage, fleet-scale job templates,
+inventories from hosts/tags/sites, and scheduling. Note
+`config_profile_run.profile_id` is deliberately nullable so profile storage can
+land later without migrating the rows recorded before it existed.
 - [ ] Desired-state config-as-code: Ansible role/playbook execution at scale (job templates; inventories from SysManage hosts/tags/sites) with results + idempotency reporting
+      *(the results + idempotency-reporting half is DONE, as is single-host
+      execution; what remains is the fleet half — job templates and inventories)*
 - [ ] Config profiles assignable per host/tag/site, enforced on a schedule
 - [ ] Remediation playbooks (apply to bring a host into compliance)
-- [ ] (Optional) Puppet/Salt adapters behind the same profile abstraction
+- [ ] **Puppet, Salt and Chef adapters behind the same profile abstraction —
+      a committed deliverable, not a maybe.** Reworded 2026-08-26, Salt added
+      2026-08-27 (Bryan): the previous "(Optional)" was being read as "we might
+      never build this". The distinction that matters: WHICH engine an operator
+      uses is their choice — most will stay on ansible-core/DSC — but SHIPPING
+      that choice is required. A site already standardised on Puppet, Salt or
+      Chef should not have to abandon it to adopt SysManage.
+
+      **This breaks a live assumption.** `config_mgmt_plan_builder.executor_for()`
+      currently returns exactly ONE executor per host, derived from the
+      platform (`dsc` on Windows, `ansible-core` everywhere else). Once a host
+      can have several engines, the executor becomes a property of the
+      **profile**, not the platform. Concretely:
+
+        * `executor_for()` gains a profile-aware form; the platform answer
+          survives only as the default when a profile does not name an engine.
+        * The prerequisite card stops meaning "the executor" and starts meaning
+          "these engines are available here" — its five-valued status is
+          per-engine, and the install button becomes per-engine too.
+        * `capability_probes` currently answers one boolean via
+          `_REQUIRED_LOCATORS`; it needs to report WHICH engines a host can
+          run, or the server will dispatch a Puppet profile to a host that has
+          only ansible.
+        * `config_mgmt_locator` similarly returns one path; it needs a lookup
+          keyed by engine.
+        * **No migration needed**: `config_profile_run.executor` is already a
+          free-text column and takes `"puppet"`/`"chef"` as-is.
+
+      **Both fit the architecture already built** — subprocess a binary, read
+      structured output, report per-task changed/failed — so this is adapter
+      work, not a redesign. Worth a spike first, exactly as ansible-core and
+      DSC got one, because the details below are UNVERIFIED and the last two
+      spikes each overturned an assumption:
+
+        * **Puppet — SPIKED 2026-08-27 against puppet 8.10.0.** `puppet apply
+          <manifest> --detailed-exitcodes --color=false`. Measured exit codes:
+          **0 = no changes, 2 = changes made, 4 = failures** (6 = both). For a
+          REAL run that is the cleanest idempotency signal of the four — no
+          parsing at all.
+
+          Two traps:
+
+            1. **`--noop` destroys the changed signal.** With changes pending,
+               `--noop --detailed-exitcodes` still exits **0**, so a dry run is
+               indistinguishable from "already converged" by exit code.
+               Verified directly. The fix is the last-run report
+               (`puppet config print lastrunreport` →
+               `~/.puppet/cache/state/last_run_report.yaml`), where a
+               would-change resource carries `out_of_sync: true` with
+               `changed: false` and `status: noop`. It is YAML, and the agent
+               already depends on PyYAML, so no new dependency.
+            2. Puppet **colourises even when stdout is not a TTY**, so
+               `--color=false` is required or ANSI escapes land in the output.
+
+          There is no JSON log destination in Puppet 8 — `--logdest json` is
+          rejected outright ("Unknown destination type json"), so the report
+          file is the structured path.
+
+        * **Chef — SPIKED 2026-08-27 against Chef Infra Client 18.11.11.**
+          `chef-client --local-mode --config <client.rb> -o <cookbook>`;
+          `--why-run` is the dry run and genuinely makes no changes (verified:
+          the target directory was not created). Exit is **0 on success
+          regardless of whether anything changed**, 1 on failure — so unlike
+          Puppet, the exit code carries success/failure only, never `changed`.
+
+          **Chef has NO JSON formatter** (`-F json` fails: available are
+          null/doc/minimal/min), which suggested we would have to ship a Ruby
+          report handler the way we ship the ansible callback. Measuring showed
+          we do NOT: the BUILT-IN `Chef::Handler::JsonFile`, registered as a
+          `report_handlers`/`exception_handlers` pair in `client.rb`, writes a
+          run report containing `success`, `updated_resources`, `all_resources`
+          and `exception`. `changed` = `updated_resources` non-empty.
+
+          The catch is plumbing, not semantics: the report is written to a
+          timestamped FILE in a directory, not to stdout. So Chef is the one
+          engine whose runner points the handler at a temp dir and reads the
+          newest file back, where the other three read stdout.
+
+          `CHEF_LICENSE=accept` must be in the child environment or the client
+          refuses to run non-interactively.
+        * Chef's pull equivalent is local/zero mode
+          (`chef-client --local-mode`); dry run is `--why-run`.
+          **DECIDED 2026-08-27 (Bryan): target Chef, not cinc-client** — with
+          the explicit proviso that we must not paint ourselves into a corner
+          if licensing later forces the switch. That costs nothing if the
+          ENGINE and its BINARY are kept separate:
+            - the engine identity is `"chef"`, and that is what
+              `config_profile_run.executor` stores and what a profile names.
+              `cinc-client` is a *distribution* of the same engine, not a
+              different one, so swapping it must not change stored rows,
+              profile documents, or the API surface;
+            - the locator and probe look up an ORDERED LIST of acceptable
+              binaries, so adding `cinc-client` as an alternate is a one-line
+              table change. `capability_probes._REQUIRED_TOOLS` already works
+              exactly this way — `("virsh", "qemu-system-x86_64", "qemu-kvm")`
+              — so the mechanism exists and needs no design work;
+            - only the per-platform install path is genuinely cinc-specific,
+              and that already varies per platform anyway.
+          Getting this wrong looks like hardcoding `"chef-client"` as the
+          executor name in a column or a profile schema, which would make a
+          later switch a migration instead of a table edit.
+        * **Salt — SPIKED 2026-08-27 against salt 3008.2 (Argon), findings
+          below are measured, not assumed.** Masterless
+          `salt-call --local --config-dir=<dir> --out=json state.apply <sls>`
+          works with no master and no daemon; `test=True` is the dry run. Of
+          the four it is the closest fit to the shape already built, because
+          JSON is first-class rather than something we ship a callback for.
+          Result shape is `{"local": {"<state_key>": {...}}}`, one entry per
+          state, each with `changes`, `result`, `comment` and `__id__`.
+
+          Two traps, both the same shape as the ansible `failures` bug — i.e.
+          the kind that produces a confidently wrong answer:
+
+            1. **In test mode `result` is `None` when a state WOULD change**,
+               `True` when it is already correct. `None` is falsy, so mapping
+               result to success with a truthiness check reports every useful
+               dry run as a FAILURE. The rule is `success = result is not
+               False`; `changed` comes from non-empty `changes`, which in test
+               mode means "would change".
+            2. **The exit code is not authoritative.** Salt has historically
+               returned 0 even when states fail unless `--retcode-passthrough`
+               is passed; 3008.2 returns 1 by default and 2 with the flag.
+               Since the value is both version- and flag-dependent, treat any
+               non-zero as failure but take the VERDICT from the per-state
+               `result` fields. Verified both ways on the same box.
+
+          Unlike ansible there is no callback plugin to ship, and unlike DSC
+          the results arrive on stdout as one JSON document with nothing
+          interleaved.
+        * Both need per-platform install paths added to the plan builder and
+          the prerequisite evaluator, measured on real boxes rather than
+          guessed — the ansible package names were wrong twice when guessed.
+
+      **Windows is not locked to DSC.** Puppet, Salt and Chef all ship Windows
+      agents, so on Windows `dsc` becomes the DEFAULT rather than the only
+      option — another reason executor selection has to key off the profile
+      rather than the platform.
+
+      **Prerequisite UI: per-engine, but an absent engine is NOT a
+      deficiency.** DECIDED 2026-08-27 (Bryan): each engine gets its own
+      install action — nobody who wants only Salt should be pushed into
+      installing four engines — but the card must not become a stack of half a
+      dozen buttons, and it must not read as a checklist of things the host is
+      missing. Design rules that follow:
+
+        * **Neutral, not red.** A host without Puppet is not broken; it simply
+          does not use Puppet. Not-installed reads as *available* — a quiet
+          "Install" action on that row — and NEVER as an error. The only time
+          a missing engine is a real problem is when a profile actually targets
+          it, and that is the moment to surface it as one. (Same neutral-state
+          idea as the Phase 21.4 threat-model punch list.)
+        * **One row per engine, not one button per engine.** A compact list —
+          engine name, status chip, and an inline action only where an action
+          exists — stays scannable at four engines and does not grow into a
+          button wall. The current single-executor card becomes this list.
+        * **Lead with what the host has.** Installed engines sort first; the
+          rest are available below rather than demanding attention.
+        * The existing five-valued status (`satisfied` / `not_required` /
+          `missing` / `too_old` / `unsupported`) already carries this: it is
+          per-engine now, and `not_required` is what a vendored/bundled engine
+          reports (DSC on Windows today).
 - [ ] i18n/l10n
 
 **Estimated Size:** ~6,000 lines

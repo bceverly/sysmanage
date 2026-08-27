@@ -3444,6 +3444,19 @@
     "runsEmpty": "Non sono stati applicati profili di configurazione a questo host.",
     "runsError": "Impossibile caricare la storia delle esecuzioni di configurazione",
     "runsTitle": "Storia delle esecuzioni di configurazione",
-    "runNoProfile": "Nessun profilo"
+    "runNoProfile": "Nessun profilo",
+    "applyAction": "Applica",
+    "applyDryRun": "Modalità Dry Run (visualizza i cambiamenti senza applicarli)",
+    "applyDryRunAction": "Anteprima modifiche",
+    "applyError": "Impossibile inserire in coda il profilo di configurazione",
+    "applyHelpAnsible": "Questo host applica la configurazione con ansible-core. Incolla un playbook; verrà eseguito localmente su questo host.",
+    "applyHelpDsc": "Questo host applica la configurazione con DSC. Incolla un array JSON di risorse DSC.",
+    "applyInvalidJson": "Le risorse devono essere un array JSON di oggetti DSC.",
+    "applyLiveWarning": "Questo comporterà modifiche effettive a questo host.",
+    "applyPlaybook": "Contenuto del playbook (YAML)",
+    "applyProfile": "Applica il profilo",
+    "applyProfileName": "Nome del profilo (facoltativo)",
+    "applyResources": "Risorse DSC (JSON)",
+    "applyTitle": "Applica un profilo di configurazione"
   }
 }

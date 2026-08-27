@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-26 10:30-0400\n"
+"POT-Creation-Date: 2026-08-26 15:50-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -141,8 +141,8 @@ msgstr "取得 CA 憑證失敗：%s"
 #: backend/api/certificates.py:84 backend/api/certificates.py:139
 #: backend/api/host_graylog.py:89 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:474
-#: backend/api/firewall_roles.py:545
+#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:473
+#: backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "主機ID格式無效"
@@ -150,11 +150,11 @@ msgstr "主機ID格式無效"
 #: backend/api/certificates.py:95 backend/api/certificates.py:165
 #: backend/api/fips_actions.py:84 backend/api/fips_actions.py:174
 #: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:62
-#: backend/api/package_handlers.py:547 backend/api/package_compliance.py:319
-#: backend/api/package_compliance.py:445
+#: backend/api/package_handlers.py:547 backend/api/package_compliance.py:316
+#: backend/api/package_compliance.py:442
 #: backend/api/grafana_integration.py:330 backend/api/image_mode_actions.py:86
 #: backend/api/host_graylog.py:131 backend/api/tag.py:499
-#: backend/api/tag.py:653 backend/api/airgap_repository_buckets.py:65
+#: backend/api/tag.py:653 backend/api/airgap_repository_buckets.py:64
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:54
 #: backend/api/updates/query_routes.py:123
@@ -174,10 +174,10 @@ msgid "Host is not approved"
 msgstr "主機尚未被批准"
 
 #: backend/api/certificates.py:156 backend/api/security_roles.py:161
-#: backend/api/security_roles.py:204 backend/api/auth_mfa.py:157
-#: backend/api/airgap_collection_schedule.py:144
+#: backend/api/security_roles.py:204 backend/api/auth_mfa.py:149
+#: backend/api/airgap_collection_schedule.py:139
 #: backend/api/graylog_integration.py:172 backend/api/broadcast.py:128
-#: backend/api/queue.py:122 backend/api/airgap_collector_runs.py:94
+#: backend/api/queue.py:122 backend/api/airgap_collector_runs.py:88
 #: backend/api/access_groups.py:140 backend/api/grafana_integration.py:314
 #: backend/api/opentelemetry/deployment.py:67
 #: backend/api/opentelemetry/deployment.py:220
@@ -279,7 +279,7 @@ msgstr "處理程序狀態更新失敗：%s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:441 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:457 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "主機未註冊"
@@ -420,7 +420,7 @@ msgid "Missing request_id in installation_complete"
 msgstr "缺少request_id在安裝完成中"
 
 #: backend/api/handlers/software_package_handlers.py:955
-#: backend/api/agent.py:747 backend/api/packages.py:486
+#: backend/api/agent.py:748 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "未找到安裝請求：%s"
@@ -435,8 +435,8 @@ msgstr "無法記錄安裝完成：%s"
 msgid "Report template not found"
 msgstr "報告模板未找到"
 
-#: backend/api/report_templates.py:177 backend/api/package_compliance.py:141
-#: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:110
+#: backend/api/report_templates.py:177 backend/api/package_compliance.py:138
+#: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:107
 #: backend/api/upgrade_profiles.py:128
 #: backend/api/repository_mirroring_helpers.py:154
 #, python-format
@@ -472,45 +472,45 @@ msgstr "已刪除報告範本「%s」"
 msgid "Report template deleted"
 msgstr "報告範本已刪除"
 
-#: backend/api/auth_mfa.py:254
+#: backend/api/auth_mfa.py:246
 msgid "Call enroll/start before enroll/complete."
 msgstr "請在 enroll/complete 之前呼叫 enroll/start。"
 
-#: backend/api/auth_mfa.py:266 backend/api/auth_mfa.py:515
+#: backend/api/auth_mfa.py:258 backend/api/auth_mfa.py:507
 msgid "Invalid TOTP code."
 msgstr "無效的 TOTP 碼。"
 
-#: backend/api/auth_mfa.py:304 backend/api/auth_mfa.py:366
+#: backend/api/auth_mfa.py:296 backend/api/auth_mfa.py:358
 msgid "MFA challenge expired — please log in again."
 msgstr "MFA挑戰已過期 — 請重新登錄。"
 
-#: backend/api/auth_mfa.py:309
+#: backend/api/auth_mfa.py:301
 msgid "Invalid MFA challenge."
 msgstr "無效的 MFA 挑戰。"
 
-#: backend/api/auth_mfa.py:321
+#: backend/api/auth_mfa.py:313
 msgid "Invalid MFA code."
 msgstr "無效的 MFA 碼。"
 
-#: backend/api/auth_mfa.py:412
+#: backend/api/auth_mfa.py:404
 msgid ""
 "If your account has MFA configured, an email with a verification code has "
 "been dispatched."
 msgstr "如果您帳戶啟用了多重因素驗證 (MFA)，已發送包含驗證碼的郵件。"
 
-#: backend/api/auth_mfa.py:442
+#: backend/api/auth_mfa.py:434
 msgid "Invalid password."
 msgstr "無效的密碼。"
 
-#: backend/api/auth_mfa.py:448
+#: backend/api/auth_mfa.py:440
 msgid "MFA disabled."
 msgstr "MFA已禁用。"
 
-#: backend/api/auth_mfa.py:503
+#: backend/api/auth_mfa.py:495
 msgid "MFA is not enrolled for this account."
 msgstr "此帳戶未註冊MFA。"
 
-#: backend/api/auth_mfa.py:565
+#: backend/api/auth_mfa.py:557
 msgid "Editing MFA settings requires admin privileges."
 msgstr "編輯 MFA 設定需要管理員權限。"
 
@@ -625,7 +625,7 @@ msgstr "商業防毒軟體狀態"
 msgid "User Security Roles (RBAC)"
 msgstr "使用者安全角色 (RBAC)"
 
-#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:534
+#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:536
 msgid "Audit Log"
 msgstr "稽核日誌"
 
@@ -641,57 +641,57 @@ msgstr "PDF產生不可用。請安裝reportlab套件。"
 msgid "Report"
 msgstr "報告"
 
-#: backend/api/airgap_collection_schedule.py:53
+#: backend/api/airgap_collection_schedule.py:48
 msgid "Air-gap collection schedule not found"
 msgstr "找不到氣隙採集排程"
 
-#: backend/api/airgap_collection_schedule.py:54
+#: backend/api/airgap_collection_schedule.py:49
 #, python-format
 msgid "Invalid UUID for schedule_id: %s"
 msgstr "schedule_id 的 UUID 無效: %s"
 
-#: backend/api/airgap_collection_schedule.py:63
+#: backend/api/airgap_collection_schedule.py:58
 msgid ""
 "Air-gap collection schedules require a SysManage Professional+ license with "
 "the air-gap collector engine. Please upgrade to access this feature."
 msgstr "氣隙採集排程需要包含氣隙採集器引擎的 SysManage Professional+ 授權。請升級以存取此功能。"
 
-#: backend/api/airgap_collection_schedule.py:89
+#: backend/api/airgap_collection_schedule.py:84
 msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
 msgstr "無效的 cron 運算式：需要 5 個欄位 (m h dom mon dow)"
 
-#: backend/api/airgap_collection_schedule.py:98
+#: backend/api/airgap_collection_schedule.py:93
 #: backend/api/upgrade_profiles.py:148
 #, python-format
 msgid "Invalid cron expression: %s"
 msgstr "無效的 cron 運算式: %s"
 
-#: backend/api/airgap_collection_schedule.py:176
-#: backend/api/airgap_collection_schedule.py:259
+#: backend/api/airgap_collection_schedule.py:171
+#: backend/api/airgap_collection_schedule.py:254
 #, python-format
 msgid "Invalid target_request: %s"
 msgstr "無效的 target_request: %s"
 
-#: backend/api/airgap_collection_schedule.py:194
+#: backend/api/airgap_collection_schedule.py:189
 #, python-format
 msgid "Created air-gap collection schedule '%s'"
 msgstr "已建立氣隙採集排程 '%s'"
 
-#: backend/api/airgap_collection_schedule.py:270
+#: backend/api/airgap_collection_schedule.py:265
 #, python-format
 msgid "Updated air-gap collection schedule '%s'"
 msgstr "已更新氣隙採集排程 '%s'"
 
-#: backend/api/airgap_collection_schedule.py:309
+#: backend/api/airgap_collection_schedule.py:304
 #, python-format
 msgid "Deleted air-gap collection schedule '%s'"
 msgstr "已刪除氣隙採集排程 '%s'"
 
-#: backend/api/airgap_collection_schedule.py:314
+#: backend/api/airgap_collection_schedule.py:309
 msgid "Air-gap collection schedule deleted"
 msgstr "氣隙採集排程已刪除"
 
-#: backend/api/airgap_collection_schedule.py:378
+#: backend/api/airgap_collection_schedule.py:373
 msgid ""
 "automation_engine not loaded; next_run timestamps not advanced. Schedules "
 "will fire only on the current tick window until the Pro+ license includes "
@@ -759,119 +759,119 @@ msgstr "連線失敗 - Graylog 伺服器可能已關閉或無法存取"
 msgid "Unexpected error checking Graylog health"
 msgstr "檢查 Graylog 健康狀態時發生意外錯誤"
 
-#: backend/api/openbao.py:61
+#: backend/api/openbao.py:58
 msgid "Invalid PID file"
 msgstr "PID 文件無效"
 
-#: backend/api/openbao.py:102
+#: backend/api/openbao.py:99
 msgid "OpenBAO process not found"
 msgstr "未找到 OpenBAO 程序"
 
-#: backend/api/openbao.py:189
+#: backend/api/openbao.py:186
 msgid "OpenBAO is running"
 msgstr "OpenBAO 正在運行"
 
-#: backend/api/openbao.py:247
+#: backend/api/openbao.py:244
 msgid "OpenBAO is already running"
 msgstr "OpenBAO 已經在運行"
 
-#: backend/api/openbao.py:273
+#: backend/api/openbao.py:270
 msgid "OpenBAO start script not found"
 msgstr "找不到啟動 OpenBAO 的腳本"
 
-#: backend/api/openbao.py:368
+#: backend/api/openbao.py:365
 msgid "Internal error occurred while starting OpenBAO"
 msgstr "啟動 OpenBAO 時發生內部錯誤"
 
-#: backend/api/openbao.py:402
+#: backend/api/openbao.py:399
 msgid "OpenBAO started successfully"
 msgstr "啟動 OpenBAO 成功"
 
-#: backend/api/openbao.py:409 backend/api/openbao.py:757
+#: backend/api/openbao.py:406 backend/api/openbao.py:754
 msgid "Failed to start OpenBAO"
 msgstr "啟動 OpenBAO 失敗"
 
-#: backend/api/openbao.py:416
+#: backend/api/openbao.py:413
 msgid "OpenBAO start timed out"
 msgstr "啟動 OpenBAO 超時"
 
-#: backend/api/openbao.py:423 backend/api/openbao.py:765
+#: backend/api/openbao.py:420 backend/api/openbao.py:762
 msgid "An error occurred while starting OpenBAO"
 msgstr "啟動 OpenBAO 時發生錯誤"
 
-#: backend/api/openbao.py:461
+#: backend/api/openbao.py:458
 msgid "OpenBAO stop script not found"
 msgstr "找不到停止 OpenBAO 的腳本"
 
-#: backend/api/openbao.py:516
+#: backend/api/openbao.py:513
 msgid "OpenBAO stopped successfully"
 msgstr "停止 OpenBAO 成功"
 
-#: backend/api/openbao.py:523 backend/api/openbao.py:779
+#: backend/api/openbao.py:520 backend/api/openbao.py:776
 msgid "Failed to stop OpenBAO"
 msgstr "停止 OpenBAO 失敗"
 
-#: backend/api/openbao.py:530
+#: backend/api/openbao.py:527
 msgid "OpenBAO stop timed out"
 msgstr "停止 OpenBAO 超時"
 
-#: backend/api/openbao.py:539 backend/api/openbao.py:787
+#: backend/api/openbao.py:536 backend/api/openbao.py:784
 msgid "An error occurred while stopping OpenBAO"
 msgstr "停止 OpenBAO 時發生錯誤"
 
-#: backend/api/openbao.py:561
+#: backend/api/openbao.py:558
 msgid "OpenBAO is already sealed"
 msgstr "OpenBAO 已經密封"
 
-#: backend/api/openbao.py:571 backend/api/openbao.py:674
+#: backend/api/openbao.py:568 backend/api/openbao.py:671
 msgid "OpenBAO binary not found"
 msgstr "找不到 OpenBAO 執行檔"
 
-#: backend/api/openbao.py:607
+#: backend/api/openbao.py:604
 msgid "OpenBAO sealed successfully"
 msgstr "OpenBAO 密封成功"
 
-#: backend/api/openbao.py:614 backend/api/openbao.py:822
+#: backend/api/openbao.py:611 backend/api/openbao.py:819
 msgid "Failed to seal OpenBAO"
 msgstr "密封 OpenBAO 失敗"
 
-#: backend/api/openbao.py:622
+#: backend/api/openbao.py:619
 msgid "OpenBAO seal operation timed out"
 msgstr "OpenBAO 封鎖操作超時"
 
-#: backend/api/openbao.py:631
+#: backend/api/openbao.py:628
 msgid "Error sealing OpenBAO"
 msgstr "密封 OpenBAO 時發生錯誤"
 
-#: backend/api/openbao.py:654
+#: backend/api/openbao.py:651
 msgid "OpenBAO is already unsealed"
 msgstr "OpenBAO 已經解封"
 
-#: backend/api/openbao.py:664
+#: backend/api/openbao.py:661
 msgid "Automatic unseal is only supported in development mode"
 msgstr "自動解封僅在開發模式下受支援"
 
-#: backend/api/openbao.py:712
+#: backend/api/openbao.py:709
 msgid "OpenBAO unsealed successfully"
 msgstr "解封 OpenBAO 成功"
 
-#: backend/api/openbao.py:719 backend/api/openbao.py:844
+#: backend/api/openbao.py:716 backend/api/openbao.py:841
 msgid "Failed to unseal OpenBAO"
 msgstr "解封 OpenBAO 失敗"
 
-#: backend/api/openbao.py:727
+#: backend/api/openbao.py:724
 msgid "OpenBAO unseal operation timed out"
 msgstr "OpenBAO 解封操作超時"
 
-#: backend/api/openbao.py:734
+#: backend/api/openbao.py:731
 msgid "Error unsealing OpenBAO"
 msgstr "解封 OpenBAO 時發生錯誤"
 
-#: backend/api/openbao.py:830
+#: backend/api/openbao.py:827
 msgid "An error occurred while sealing OpenBAO"
 msgstr "封裝 OpenBAO 時發生錯誤"
 
-#: backend/api/openbao.py:852
+#: backend/api/openbao.py:849
 msgid "An error occurred while unsealing OpenBAO"
 msgstr "解封 OpenBAO 時發生錯誤"
 
@@ -1054,7 +1054,8 @@ msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
 msgstr "權限 denied: EDIT_HOST_HOSTNAME 角色所需"
 
 #: backend/api/host_hostname.py:75 backend/api/reboot_orchestration.py:119
-#: backend/api/error_constants.py:43 backend/api/child_host_utils.py:91
+#: backend/api/config_mgmt_runs.py:235 backend/api/error_constants.py:43
+#: backend/api/child_host_utils.py:91
 #: backend/api/scripts/routes_executions.py:81
 msgid "Host is not active"
 msgstr "主機不是活動狀態"
@@ -1112,12 +1113,12 @@ msgstr "密碼必須至少 8 個字符長"
 msgid "Your account is ready. You can now log in."
 msgstr "您的帳戶已就緒。您現在可以登入。"
 
-#: backend/api/server_info.py:249
+#: backend/api/server_info.py:244
 #, python-format
 msgid "Set server role to '%s'"
 msgstr "將伺服器角色設置為 '%s'"
 
-#: backend/api/server_info.py:335
+#: backend/api/server_info.py:330
 #, python-format
 msgid "Set federation role to '%s'"
 msgstr "將聯邦角色設置為 '%s'"
@@ -1277,57 +1278,57 @@ msgstr "消息未找到或已過期"
 msgid "Failed to fetch message details"
 msgstr "無法取得消息詳細資料"
 
-#: backend/api/host_account_management.py:78
+#: backend/api/host_account_management.py:75
 msgid "Permission denied: ADD_HOST_ACCOUNT role required"
 msgstr "權限被拒絕：需要 ADD_HOST_ACCOUNT 角色"
 
-#: backend/api/host_account_management.py:102
+#: backend/api/host_account_management.py:99
 msgid "Agent must be running in privileged mode to manage user accounts"
 msgstr "Agent 必須在特權模式下運行才能管理用戶帳戶"
 
-#: backend/api/host_account_management.py:176
+#: backend/api/host_account_management.py:173
 msgid ""
 "User account creation requested. The user list will update automatically "
 "after creation."
 msgstr "用戶帳戶創建請求。創建後，用戶列表將自動更新。"
 
-#: backend/api/host_account_management.py:200
+#: backend/api/host_account_management.py:197
 msgid "Permission denied: ADD_HOST_GROUP role required"
 msgstr "權限被拒絕：需要 ADD_HOST_GROUP 角色"
 
-#: backend/api/host_account_management.py:223
+#: backend/api/host_account_management.py:220
 msgid "Agent must be running in privileged mode to manage groups"
 msgstr "Agent 必須在特權模式下運行才能管理群組"
 
-#: backend/api/host_account_management.py:280
+#: backend/api/host_account_management.py:277
 msgid ""
 "Group creation requested. The group list will update automatically after "
 "creation."
 msgstr "群組建立請求。建立後，群組列表將自動更新。"
 
-#: backend/api/host_account_management.py:307
+#: backend/api/host_account_management.py:304
 msgid "Permission denied: DELETE_HOST_ACCOUNT role required"
 msgstr "權限被拒絕：需要 DELETE_HOST_ACCOUNT 角色"
 
-#: backend/api/host_account_management.py:331
+#: backend/api/host_account_management.py:328
 msgid "Agent must be running in privileged mode to delete user accounts"
 msgstr "Agent 必須在特權模式下運行才能刪除用戶帳戶"
 
-#: backend/api/host_account_management.py:384
+#: backend/api/host_account_management.py:381
 msgid ""
 "User account deletion requested. The user list will update automatically "
 "after deletion."
 msgstr "用戶帳戶刪除請求。刪除後，用戶列表將自動更新。"
 
-#: backend/api/host_account_management.py:410
+#: backend/api/host_account_management.py:407
 msgid "Permission denied: DELETE_HOST_GROUP role required"
 msgstr "權限被拒絕：需要 DELETE_HOST_GROUP 角色"
 
-#: backend/api/host_account_management.py:433
+#: backend/api/host_account_management.py:430
 msgid "Agent must be running in privileged mode to delete groups"
 msgstr "Agent 必須在特權模式下運行才能刪除群組"
 
-#: backend/api/host_account_management.py:483
+#: backend/api/host_account_management.py:480
 msgid ""
 "Group deletion requested. The group list will update automatically after "
 "deletion."
@@ -1372,44 +1373,44 @@ msgstr "鏡像 %(mirror_name)s 是為 %(package_manager)s 準備的，不能分�
 msgid "Unknown (platform, version, os_family) tuple"
 msgstr "未知的 (平台, 版本, 操作系統類型) 元組"
 
-#: backend/api/airgap_collector_runs.py:71
+#: backend/api/airgap_collector_runs.py:65
 msgid "Air-gap collection run not found"
 msgstr "離線收集運行未找到"
 
-#: backend/api/airgap_collector_runs.py:72
+#: backend/api/airgap_collector_runs.py:66
 msgid "Air-gap media manifest not found"
 msgstr "離線媒體清單未找到"
 
-#: backend/api/airgap_collector_runs.py:73
+#: backend/api/airgap_collector_runs.py:67
 #, python-format
 msgid "Invalid UUID for run_id: %s"
 msgstr "run_id 的 UUID 非法: %s"
 
-#: backend/api/airgap_collector_runs.py:74
+#: backend/api/airgap_collector_runs.py:68
 #, python-format
 msgid "Invalid UUID for manifest_id: %s"
 msgstr "manifest_id 的 UUID 非法: %s"
 
-#: backend/api/airgap_collector_runs.py:83
+#: backend/api/airgap_collector_runs.py:77
 msgid ""
 "Air-gap collection runs require a SysManage Professional+ license with the "
 "air-gap collector engine. Please upgrade to access this feature."
 msgstr "隔離收集運行需要 SysManage Professional+ 許可證，該許可證包含隔離收集引擎。請升級以使用此功能。"
 
-#: backend/api/airgap_collector_runs.py:224
+#: backend/api/airgap_collector_runs.py:218
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be"
 " loaded — the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr "隔離收集運行需要載入 repository_mirroring_engine 模組——收集器從鏡像樹快照中讀取每個目標的捆綁包。"
 
-#: backend/api/airgap_collector_runs.py:235
+#: backend/api/airgap_collector_runs.py:229
 msgid ""
 "Global mirror settings missing or mirror_root_path not configured.  "
 "Configure mirror settings before creating a collection run."
 msgstr "全局鏡像設定缺失或 mirror_root_path 尚未配置。請在創建集合運行之前配置鏡像設定。"
 
-#: backend/api/airgap_collector_runs.py:295
+#: backend/api/airgap_collector_runs.py:289
 #, python-format
 msgid ""
 "Mirror %r has no known_version_id set; Option-B collection runs need the "
@@ -1418,119 +1419,119 @@ msgid ""
 msgstr ""
 "鏡像%r沒有已知的known_version_id設置；選項B收集需要鏡像與目錄版本綁定，以便推斷分發/版本。請編輯鏡像並從下拉菜單中選擇一個版本。"
 
-#: backend/api/airgap_collector_runs.py:326
+#: backend/api/airgap_collector_runs.py:318
 #, python-format
 msgid ""
 "Mirror %r references a catalog version that no longer exists.  Re-pick a "
 "version on the mirror."
 msgstr "鏡像%r引用的目錄版本已不存在。請重新選擇鏡像上的版本。"
 
-#: backend/api/airgap_collector_runs.py:410
-#: backend/api/airgap_collector_runs.py:489
+#: backend/api/airgap_collector_runs.py:402
+#: backend/api/airgap_collector_runs.py:481
 msgid "At least one target is required to create a collection run."
 msgstr "至少需要一個目標來建立集合運行。"
 
-#: backend/api/airgap_collector_runs.py:420
+#: backend/api/airgap_collector_runs.py:412
 #, python-format
 msgid "Invalid UUID for mirror_id: %s"
 msgstr "鏡像 ID 的 UUID 格式無效：%s"
 
-#: backend/api/airgap_collector_runs.py:430
+#: backend/api/airgap_collector_runs.py:422
 #, python-format
 msgid "Mirror %s not found"
 msgstr "找不到鏡像%s"
 
-#: backend/api/airgap_collector_runs.py:436
+#: backend/api/airgap_collector_runs.py:428
 #, python-format
 msgid ""
 "Mirror %r is disabled; enable + sync it before using it in a collection run."
 msgstr "鏡像%r已被禁用；啟用並同步後才能在收集運行中使用它。"
 
-#: backend/api/airgap_collector_runs.py:447
+#: backend/api/airgap_collector_runs.py:439
 #, python-format
 msgid ""
 "All target mirrors must live on the same host (the collection plan "
 "dispatches to a single agent). Selected mirrors span %d hosts."
 msgstr "所有目標鏡像必須位於同一主機上（收集計劃分派給單一 Agent）。選擇的鏡像跨越 %d 個主機。"
 
-#: backend/api/airgap_collector_runs.py:543
+#: backend/api/airgap_collector_runs.py:535
 #, python-format
 msgid ""
 "Created one-shot air-gap collection run '%(iso_label)s' with "
 "%(mirror_count)d target mirror(s); snapshots dispatched."
 msgstr "已為空氣隔離收集運行 '%(iso_label)s' 創建一次性快照，目標鏡像數量為 %(mirror_count)d；快照已發送。"
 
-#: backend/api/airgap_collector_runs.py:666
+#: backend/api/airgap_collector_runs.py:658
 #, python-format
 msgid ""
 "ISO is not ready for download yet (status: %s). Wait until the run reaches "
 "ISO_BUILT."
 msgstr "ISO 尚未準備好下載（狀態：%s）。請等待運行達到 ISO_BUILT 狀態。"
 
-#: backend/api/airgap_collector_runs.py:676
+#: backend/api/airgap_collector_runs.py:668
 msgid ""
 "ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
 " the collection to rebuild."
 msgstr "ISO 檔案已不在磁碟上；暫存卷可能已被清潔。重新執行收集以重建。"
 
-#: backend/api/airgap_collector_runs.py:693
+#: backend/api/airgap_collector_runs.py:685
 msgid "ISO file not found."
 msgstr "找不到 ISO 檔案。"
 
-#: backend/api/airgap_collector_runs.py:713
+#: backend/api/airgap_collector_runs.py:705
 #, python-format
 msgid "Disc %(disc)d not found for this run.  Available discs: %(available)s"
 msgstr "找不到 Disc %(disc)d。可用磁盤：%(available)s"
 
-#: backend/api/airgap_collector_runs.py:798
+#: backend/api/airgap_collector_runs.py:790
 msgid "Invalid or expired download token."
 msgstr "無效或已過期的下載令牌。"
 
-#: backend/api/airgap_collector_runs.py:831
+#: backend/api/airgap_collector_runs.py:823
 #, python-format
 msgid "Deleted air-gap collection run '%s'"
 msgstr "已刪除離線集合運行 '%s'"
 
-#: backend/api/airgap_collector_runs.py:903
+#: backend/api/airgap_collector_runs.py:895
 #, python-format
 msgid "Run is not COMPLETE yet (status: %s)"
 msgstr "運行尚未完成（狀態：%s）"
 
-#: backend/api/airgap_collector_runs.py:909
+#: backend/api/airgap_collector_runs.py:901
 #, python-format
 msgid "ISO file is no longer on disk: %s"
 msgstr "ISO 檔案已不在磁碟上：%s"
 
-#: backend/api/package_compliance.py:59
+#: backend/api/package_compliance.py:56
 msgid "Package profile not found"
 msgstr "套件配置文件未找到"
 
-#: backend/api/package_compliance.py:76
+#: backend/api/package_compliance.py:73
 msgid ""
 "Package compliance profiles require a SysManage Professional license. Please"
 " upgrade to access this feature."
 msgstr "包符合性配置檔需要 SysManage Professional 許可證。請升級以使用此功能。"
 
-#: backend/api/package_compliance.py:203
+#: backend/api/package_compliance.py:200
 #, python-format
 msgid "Created package profile '%s'"
 msgstr "已建立套件設定檔「%s」"
 
-#: backend/api/package_compliance.py:255
+#: backend/api/package_compliance.py:252
 #, python-format
 msgid "Updated package profile '%s'"
 msgstr "已更新套件設定檔「%s」"
 
-#: backend/api/package_compliance.py:285
+#: backend/api/package_compliance.py:282
 #, python-format
 msgid "Deleted package profile '%s'"
 msgstr "已刪除套件設定檔「%s」"
 
-#: backend/api/package_compliance.py:290
+#: backend/api/package_compliance.py:287
 msgid "Package profile deleted"
 msgstr "套件設定檔已刪除"
 
-#: backend/api/package_compliance.py:377
+#: backend/api/package_compliance.py:374
 #, python-format
 msgid ""
 "Scanned host '%(host_fqdn)s' against profile '%(profile_name)s': %(status)s "
@@ -1539,7 +1540,7 @@ msgstr ""
 "掃描主機 '%(host_fqdn)s' 對應配置文件 '%(profile_name)s': %(status)s "
 "(%(violation_count)d 項違規)"
 
-#: backend/api/package_compliance.py:503
+#: backend/api/package_compliance.py:500
 #, python-format
 msgid ""
 "Dispatched compliance check to agent '%(host_fqdn)s' for profile "
@@ -2301,19 +2302,19 @@ msgstr "Agent 認證失敗：無效的主機 ID"
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "ID 為 %s 的主機尚未註冊。請重新註冊。"
 
-#: backend/api/message_handlers_core.py:245 backend/api/agent.py:649
+#: backend/api/message_handlers_core.py:245 backend/api/agent.py:650
 msgid "Host registration pending approval"
 msgstr "主機註冊待批准"
 
-#: backend/api/message_handlers_core.py:359
+#: backend/api/message_handlers_core.py:360
 msgid "Host auto-approved via child host creation"
 msgstr "主機自動批准通過子主機建立"
 
-#: backend/api/message_handlers_core.py:455
+#: backend/api/message_handlers_core.py:456
 msgid "Agent registered and connected successfully"
 msgstr "Agent 註冊並成功連接"
 
-#: backend/api/message_handlers_core.py:771
+#: backend/api/message_handlers_core.py:770
 msgid "Failed to process heartbeat"
 msgstr "無法處理心跳"
 
@@ -2821,29 +2822,29 @@ msgstr "計算套件數量時失敗：%s"
 msgid "Failed to search packages: %s"
 msgstr "無法搜尋套件：%s"
 
-#: backend/api/host.py:186
+#: backend/api/host.py:184
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "權限被拒絕：需要 DELETE_HOST 角色"
 
-#: backend/api/host.py:250
+#: backend/api/host.py:248
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "權限 denied: VIEW_HOST_DETAILS 角色所需"
 
-#: backend/api/host.py:665
+#: backend/api/host.py:663
 msgid "Host already exists"
 msgstr "主機已存在"
 
-#: backend/api/host.py:774
+#: backend/api/host.py:772
 msgid "Registration absorbed: host was recently deleted"
 msgstr "註冊被吸收：主機最近已被刪除"
 
-#: backend/api/host.py:848
+#: backend/api/host.py:846
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "主機 '%(fqdn)s' 通過入網令牌加入租戶 %(tenant_id)s"
 
-#: backend/api/host.py:865
+#: backend/api/host.py:863
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -2882,30 +2883,30 @@ msgstr "必須指定 target_hostname、target_platform 或 push_to_all"
 msgid "Configuration acknowledgment processed"
 msgstr "設定確認已處理"
 
-#: backend/api/message_handlers.py:318
+#: backend/api/message_handlers.py:334
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "無法處理診斷結果：%s"
 
-#: backend/api/message_handlers.py:352
+#: backend/api/message_handlers.py:368
 msgid "Missing message_id in command acknowledgment"
 msgstr "缺少消息ID在命令確認中"
 
-#: backend/api/message_handlers.py:465
+#: backend/api/message_handlers.py:481
 msgid "Missing installation_id in package installation status"
 msgstr "缺少安裝ID在包安裝狀態中"
 
-#: backend/api/message_handlers.py:485
+#: backend/api/message_handlers.py:501
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "未找到 ID 為 %s 的安裝日誌條目"
 
-#: backend/api/message_handlers.py:531
+#: backend/api/message_handlers.py:547
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "代理程式 {hostname} 上的包安裝 {status}"
 
-#: backend/api/message_handlers.py:560
+#: backend/api/message_handlers.py:576
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "更新套件安裝狀態失敗：%s"
@@ -3191,28 +3192,28 @@ msgstr "執行更新失敗：%s"
 msgid "Failed to get execution log: %s"
 msgstr "取得執行記錄失敗：%s"
 
-#: backend/api/dynamic_secrets.py:133 backend/api/dynamic_secrets.py:195
+#: backend/api/dynamic_secrets.py:130 backend/api/dynamic_secrets.py:192
 #, python-format
 msgid "Unknown kind: %(kind)s (allowed: %(allowed)s)"
 msgstr "未知種類：%(kind)s (允許值：%(allowed)s)"
 
-#: backend/api/dynamic_secrets.py:156
+#: backend/api/dynamic_secrets.py:153
 #, python-format
 msgid ""
 "Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
 "ttl=%(ttl)ds)"
 msgstr "發行動態密鑰 '%(name)s'（類型=%(kind)s，角色=%(role)s，有效期=%(ttl)ds）"
 
-#: backend/api/dynamic_secrets.py:189
+#: backend/api/dynamic_secrets.py:186
 #, python-format
 msgid "Unknown status: %(status)s (allowed: %(allowed)s)"
 msgstr "未知狀態：%(status)s (允許值：%(allowed)s)"
 
-#: backend/api/dynamic_secrets.py:217
+#: backend/api/dynamic_secrets.py:214
 msgid "Lease not found"
 msgstr "找不到租約"
 
-#: backend/api/dynamic_secrets.py:239
+#: backend/api/dynamic_secrets.py:236
 #, python-format
 msgid "Revoked dynamic secret lease '%s'"
 msgstr "已撤銷動態密鑰租約「%s」"
@@ -3589,37 +3590,54 @@ msgstr "來自未註冊主機的 Agent 消息：{hostname}"
 msgid "Agent message from unapproved host: {hostname}"
 msgstr "來自未批准主機的 Agent 消息：{hostname}"
 
-#: backend/api/agent.py:591
+#: backend/api/agent.py:592
 msgid "Message must include hostname or host_id for host validation"
 msgstr "消息必須包含主機名或host_id以進行主機驗證"
 
-#: backend/api/agent.py:609
+#: backend/api/agent.py:610
 msgid "Host ID no longer valid - please re-register"
 msgstr "主機 ID 已不再有效 - 請重新註冊"
 
-#: backend/api/agent.py:621
+#: backend/api/agent.py:622
 msgid "Host ID and hostname mismatch - please re-register"
 msgstr "主機 ID 和主機名不匹配 - 請重新註冊"
 
-#: backend/api/agent.py:638
+#: backend/api/agent.py:639
 msgid "Host must register before sending inventory data"
 msgstr "主機必須先註冊才能發送存貨數據"
 
-#: backend/api/agent.py:709
+#: backend/api/agent.py:710
 msgid "Missing or invalid authorization header"
 msgstr "缺少或無效的授權頭信息"
 
-#: backend/api/agent.py:734
+#: backend/api/agent.py:735
 msgid "Invalid host authentication"
 msgstr "主機驗證無效"
 
-#: backend/api/agent.py:775 backend/api/packages.py:498
+#: backend/api/agent.py:776 backend/api/packages.py:498
 msgid "Installation completion recorded"
 msgstr "安裝完成記錄"
 
-#: backend/api/agent.py:781 backend/api/error_constants.py:193
+#: backend/api/agent.py:782 backend/api/error_constants.py:193
 msgid "Internal server error"
 msgstr "內部伺服器錯誤"
+
+#: backend/api/config_mgmt_runs.py:228
+#: backend/api/scripts/routes_executions.py:67
+msgid "Permission denied: RUN_SCRIPT role required"
+msgstr "權限 denied: RUN_SCRIPT 角色所需"
+
+#: backend/api/config_mgmt_runs.py:250
+msgid "This host uses DSC; provide 'resources', not 'playbook'"
+msgstr "此主機使用 DSC；請提供 '資源'，而非 '腳本' "
+
+#: backend/api/config_mgmt_runs.py:257
+msgid "This host uses ansible-core; provide 'playbook'"
+msgstr "此主機使用 ansible-core；請提供 '腳本'"
+
+#: backend/api/config_mgmt_runs.py:319
+msgid "Configuration profile was queued for this host"
+msgstr "這個主機已排隊配置資料夾"
 
 #: backend/api/diagnostics.py:198
 msgid "Diagnostic collection requested"
@@ -3946,88 +3964,88 @@ msgstr "未設定標誌"
 msgid "Removed report branding logo"
 msgstr "已移除報告品牌標誌"
 
-#: backend/api/firewall_roles.py:101
+#: backend/api/firewall_roles.py:100
 #, python-format
 msgid "Failed to retrieve firewall roles: %s"
 msgstr "無法取得防火牆角色列表：%s"
 
-#: backend/api/firewall_roles.py:153
+#: backend/api/firewall_roles.py:152
 #, python-format
 msgid "Failed to retrieve firewall role: %s"
 msgstr "無法取得防火牆角色：%s"
 
-#: backend/api/firewall_roles.py:173
+#: backend/api/firewall_roles.py:172
 msgid "Permission denied: ADD_FIREWALL_ROLE role required"
 msgstr "權限被拒絕：需要 ADD_FIREWALL_ROLE 角色"
 
-#: backend/api/firewall_roles.py:189 backend/api/firewall_roles.py:306
+#: backend/api/firewall_roles.py:188 backend/api/firewall_roles.py:305
 #, python-format
 msgid "Firewall role '%s' already exists"
 msgstr "防火牆角色 '%s' 已存在"
 
-#: backend/api/firewall_roles.py:245
+#: backend/api/firewall_roles.py:244
 #, python-format
 msgid "Failed to create firewall role: %s"
 msgstr "創建防火牆角色時失敗：%s"
 
-#: backend/api/firewall_roles.py:266
+#: backend/api/firewall_roles.py:265
 msgid "Permission denied: EDIT_FIREWALL_ROLE role required"
 msgstr "權限 denied: EDIT_FIREWALL_ROLE 角色所需"
 
-#: backend/api/firewall_roles.py:366
+#: backend/api/firewall_roles.py:365
 #, python-format
 msgid "Failed to update firewall role: %s"
 msgstr "更新防火牆角色失敗：%s"
 
-#: backend/api/firewall_roles.py:386
+#: backend/api/firewall_roles.py:385
 msgid "Permission denied: DELETE_FIREWALL_ROLE role required"
 msgstr "權限被拒絕：需要 DELETE_FIREWALL_ROLE 角色"
 
-#: backend/api/firewall_roles.py:433
+#: backend/api/firewall_roles.py:432
 msgid "Firewall role deleted successfully"
 msgstr "成功刪除防火牆角色"
 
-#: backend/api/firewall_roles.py:443
+#: backend/api/firewall_roles.py:442
 #, python-format
 msgid "Failed to delete firewall role: %s"
 msgstr "刪除防火牆角色時失敗：%s"
 
-#: backend/api/firewall_roles.py:514
+#: backend/api/firewall_roles.py:513
 #, python-format
 msgid "Failed to retrieve host firewall roles: %s"
 msgstr "無法取得主機防火牆角色：%s"
 
-#: backend/api/firewall_roles.py:602
+#: backend/api/firewall_roles.py:601
 #, python-format
 msgid "Failed to retrieve expected ports: %s"
 msgstr "無法取得預期埠口：%s"
 
-#: backend/api/firewall_roles.py:627 backend/api/firewall_roles.py:754
+#: backend/api/firewall_roles.py:626 backend/api/firewall_roles.py:753
 msgid "Permission denied: ASSIGN_HOST_FIREWALL_ROLES role required"
 msgstr "權限被拒絕：需要 ASSIGN_HOST_FIREWALL_ROLES 角色"
 
-#: backend/api/firewall_roles.py:639 backend/api/firewall_roles.py:766
+#: backend/api/firewall_roles.py:638 backend/api/firewall_roles.py:765
 msgid "Invalid ID format"
 msgstr "無效的 ID 格式"
 
-#: backend/api/firewall_roles.py:675
+#: backend/api/firewall_roles.py:674
 msgid "Firewall role already assigned to this host"
 msgstr "防火牆角色已分配給此主機"
 
-#: backend/api/firewall_roles.py:733
+#: backend/api/firewall_roles.py:732
 #, python-format
 msgid "Failed to assign firewall role: %s"
 msgstr "無法分配防火牆角色：%s"
 
-#: backend/api/firewall_roles.py:782
+#: backend/api/firewall_roles.py:781
 msgid "Firewall role assignment not found"
 msgstr "找不到防火牆角色分配"
 
-#: backend/api/firewall_roles.py:832
+#: backend/api/firewall_roles.py:831
 msgid "Firewall role removed from host successfully"
 msgstr "已從主機成功移除防火牆角色"
 
-#: backend/api/firewall_roles.py:844
+#: backend/api/firewall_roles.py:843
 #, python-format
 msgid "Failed to remove firewall role: %s"
 msgstr "無法移除防火牆角色：%s"
@@ -4137,15 +4155,15 @@ msgid "Unsupported export format: %s"
 msgstr "不支援的匯出格式: %s"
 
 # Reports-related strings
-#: backend/api/audit_log.py:536
+#: backend/api/audit_log.py:538
 msgid "Generated"
 msgstr "已產生"
 
-#: backend/api/audit_log.py:538
+#: backend/api/audit_log.py:540
 msgid "Total Entries"
 msgstr "總條目數"
 
-#: backend/api/audit_log.py:545
+#: backend/api/audit_log.py:547
 msgid "No audit log entries found."
 msgstr "未找到稽核日誌條目。"
 
@@ -4274,10 +4292,6 @@ msgstr "必須提供 saved_script_id 或 script_content 其一"
 #: backend/api/scripts/models.py:132
 msgid "shell_type is required for ad-hoc scripts"
 msgstr "ad-hoc 腳本需要 shell_type"
-
-#: backend/api/scripts/routes_executions.py:67
-msgid "Permission denied: RUN_SCRIPT role required"
-msgstr "權限 denied: RUN_SCRIPT 角色所需"
 
 #: backend/api/scripts/routes_executions.py:100
 msgid "Saved script not found"
@@ -4450,26 +4464,26 @@ msgstr "刪除失敗消息時失敗：%s"
 msgid "Mock connection: would send message %s"
 msgstr "模擬連接：將發送消息%s"
 
-#: backend/websocket/inbound_processor.py:128
+#: backend/websocket/inbound_processor.py:124
 #, python-format
 msgid "Host %(hostname)s not found for message %(message_id)s, deleting"
 msgstr "找不到消息 %(message_id)s 的主機 %(hostname)s，刪除"
 
-#: backend/websocket/inbound_processor.py:139
+#: backend/websocket/inbound_processor.py:135
 #, python-format
 msgid ""
 "Host %(hostname)s not approved (status: %(status)s) for message "
 "%(message_id)s, deleting"
 msgstr "主機 %(hostname)s 未批准（狀態：%(status)s）的消息 %(message_id)s，正在刪除"
 
-#: backend/websocket/inbound_processor.py:156
+#: backend/websocket/inbound_processor.py:152
 #, python-format
 msgid ""
 "Processing NULL host_id message for approved host %(hostname)s (ID: "
 "%(host_id)s)"
 msgstr "處理 NULL 主機 ID 消息，已批准主機為 %(hostname)s (ID: %(host_id)s)"
 
-#: backend/websocket/inbound_processor.py:273
+#: backend/websocket/inbound_processor.py:269
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
@@ -4478,78 +4492,78 @@ msgid ""
 msgstr ""
 "主機 %(host_id)s 在此資料庫中未找到；延期 %(count)d 個佇列中的訊息（不會刪除）——可能是正在進行的入網程序或已刪除的主機"
 
-#: backend/websocket/inbound_processor.py:290
+#: backend/websocket/inbound_processor.py:286
 #, python-format
 msgid ""
 "Host %(host_id)s (FQDN: %(fqdn)s) no longer approved (status: %(status)s), "
 "deleting all its messages from queue"
 msgstr "主機 %(host_id)s (FQDN: %(fqdn)s) 已不再批准（狀態：%(status)s），刪除其所有消息"
 
-#: backend/websocket/inbound_processor.py:300
+#: backend/websocket/inbound_processor.py:296
 #, python-format
 msgid "Deleted %(count)d messages for unapproved host %(host_id)s"
 msgstr "刪除未批准主機 %(host_id)s 的 %(count)d 條消息"
 
-#: backend/websocket/inbound_processor.py:307
+#: backend/websocket/inbound_processor.py:303
 #, python-format
 msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"
 msgstr "處理已批准主機的消訊：%(host_id)s (FQDN: %(fqdn)s)"
 
-#: backend/websocket/inbound_processor.py:332
+#: backend/websocket/inbound_processor.py:328
 #, python-format
 msgid "Processing message with NULL host_id: %s"
 msgstr "處理具有 NULL host_id 的消息：%s"
 
-#: backend/websocket/inbound_processor.py:343
+#: backend/websocket/inbound_processor.py:339
 #, python-format
 msgid "Processing SYSTEM_INFO registration message %s"
 msgstr "處理 SYSTEM_INFO 註冊消息 %s"
 
-#: backend/websocket/inbound_processor.py:366
+#: backend/websocket/inbound_processor.py:362
 #, python-format
 msgid "Message %s missing hostname and host_id, deleting"
 msgstr "消息%s缺少主機名稱和主機ID，刪除中"
 
-#: backend/websocket/inbound_processor.py:406
+#: backend/websocket/inbound_processor.py:402
 #, python-format
 msgid "Error processing NULL host_id message %(message_id)s: %(error)s"
 msgstr "處理主機 ID 為 NULL 的消息 %(message_id)s 時發生錯誤：%(error)s"
 
-#: backend/websocket/inbound_processor.py:443
+#: backend/websocket/inbound_processor.py:439
 #, python-format
 msgid "Could not mark message %s as processing"
 msgstr "無法將消息 %s 設為處理中"
 
-#: backend/websocket/inbound_processor.py:471
+#: backend/websocket/inbound_processor.py:467
 #, python-format
 msgid ""
 "Processing queued message: %(message_id)s (type: %(message_type)s, host: "
 "%(host)s)"
 msgstr "處理排隊消息：%(message_id)s (類型：%(message_type)s, 主機：%(host)s)"
 
-#: backend/websocket/inbound_processor.py:504
+#: backend/websocket/inbound_processor.py:500
 #, python-format
 msgid ""
 "Successfully processed and completed message: %(message_id)s for host "
 "%(host)s"
 msgstr "成功處理並完成消息：%(message_id)s，對應主機為 %(host)s"
 
-#: backend/websocket/inbound_processor.py:522
+#: backend/websocket/inbound_processor.py:518
 #, python-format
 msgid "Failed to process message %s: unknown message type"
 msgstr "無法處理消息%s：未知的消息類型"
 
-#: backend/websocket/inbound_processor.py:543
+#: backend/websocket/inbound_processor.py:539
 #, python-format
 msgid "Error processing message %(message_id)s for host %(host)s: %(error)s"
 msgstr "為主機 %(host)s 處理消息 %(message_id)s 時發生錯誤：%(error)s"
 
-#: backend/websocket/inbound_processor.py:573
+#: backend/websocket/inbound_processor.py:569
 #, python-format
 msgid "Could not mark SYSTEM_INFO message %s as processing"
 msgstr "無法將 SYSTEM_INFO 消息 %s 設為處理中"
 
-#: backend/websocket/inbound_processor.py:605
+#: backend/websocket/inbound_processor.py:601
 #, python-format
 msgid "Error processing SYSTEM_INFO message %(message_id)s: %(error)s"
 msgstr "處理 SYSTEM_INFO 消息 %(message_id)s 時發生錯誤：%(error)s"

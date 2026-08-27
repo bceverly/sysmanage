@@ -3444,6 +3444,19 @@
     "runsEmpty": "此主機尚未應用任何配置資料庫。",
     "runsError": "無法載入配置執行歷史記錄",
     "runsTitle": "配置執行歷史記錄",
-    "runNoProfile": "沒有配置檔"
+    "runNoProfile": "沒有配置檔",
+    "applyAction": "應用",
+    "applyDryRun": "乾跑 (只列印變更，不實際執行)",
+    "applyDryRunAction": "預覽變更",
+    "applyError": "未能排隊套用配置資料表",
+    "applyHelpAnsible": "此主機使用 ansible-core 套用配置。請貼上 Playbook；它會本地對這台主機執行。",
+    "applyHelpDsc": "此主機使用 DSC 套用配置。請貼上 DSC 資源的 JSON 陣列。",
+    "applyInvalidJson": "資源必須為 DSC 資源物件的 JSON 陣列。",
+    "applyLiveWarning": "這將實際更改這台主機。",
+    "applyPlaybook": "Playbook 內容 (YAML)",
+    "applyProfile": "套用資料表",
+    "applyProfileName": "資料表名稱 (可選)",
+    "applyResources": "DSC 資源 (JSON)",
+    "applyTitle": "套用配置資料表"
   }
 }

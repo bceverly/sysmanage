@@ -3444,6 +3444,19 @@
     "runsEmpty": "No configuration profiles have been applied to this host yet.",
     "runsError": "Failed to load configuration run history",
     "runsTitle": "Configuration Run History",
-    "runNoProfile": "No profile"
+    "runNoProfile": "No profile",
+    "applyAction": "Apply",
+    "applyDryRun": "Dry run (report changes without making them)",
+    "applyDryRunAction": "Preview changes",
+    "applyError": "Failed to queue the configuration profile",
+    "applyHelpAnsible": "This host applies configuration with ansible-core. Paste a playbook; it runs locally against this host only.",
+    "applyHelpDsc": "This host applies configuration with DSC. Paste a JSON array of DSC resources.",
+    "applyInvalidJson": "The resources must be a JSON array of DSC resource objects.",
+    "applyLiveWarning": "This will make real changes to this host.",
+    "applyPlaybook": "Playbook content (YAML)",
+    "applyProfile": "Apply profile",
+    "applyProfileName": "Profile name (optional)",
+    "applyResources": "DSC resources (JSON)",
+    "applyTitle": "Apply a configuration profile"
   }
 }

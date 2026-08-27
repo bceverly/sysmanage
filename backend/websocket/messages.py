@@ -121,6 +121,13 @@ class CommandType(str, Enum):
     GET_AVAILABLE_UPDATES = "get_available_updates"
     REBOOT_SYSTEM = "reboot_system"
     EXECUTE_SCRIPT = "execute_script"
+    # Phase 20.1 — desired-state config profiles.  Its own command rather than
+    # a flavour of APPLY_DEPLOYMENT_PLAN: a plan is an imperative list of
+    # packages/files/commands, while a profile is handed whole to an external
+    # engine (ansible-playbook / dsc.exe) that owns the convergence logic and
+    # reports per-task idempotency back.  Folding them together would mean the
+    # agent guessing which shape it received.
+    APPLY_CONFIG_PROFILE = "apply_config_profile"
     CHECK_REBOOT_STATUS = "check_reboot_status"
     COLLECT_DIAGNOSTICS = "collect_diagnostics"
     COLLECT_CERTIFICATES = "collect_certificates"

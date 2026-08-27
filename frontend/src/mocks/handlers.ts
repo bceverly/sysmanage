@@ -303,6 +303,15 @@ export const handlers = [
     });
   }),
 
+  http.post("*/api/v1/hosts/*/config-management/apply", () => {
+    return HttpResponse.json({
+      host_id: "test-host",
+      queued: true,
+      check_mode: true,
+      message: "Configuration profile was queued for this host",
+    });
+  }),
+
   // Fallback for non-API requests
   http.all("*", ({ request }) => {
     const url = new globalThis.URL(request.url);

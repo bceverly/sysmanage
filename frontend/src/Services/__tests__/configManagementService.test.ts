@@ -12,6 +12,7 @@
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
+  applyConfigProfile,
   getConfigMgmtPrereq,
   getConfigProfileRun,
   getConfigProfileRuns,
@@ -112,5 +113,33 @@ describe("Config Management Run History", () => {
   it("rethrows so the panel can show an error", async () => {
     vi.mocked(axiosInstance.get).mockRejectedValueOnce(new Error("boom"));
     await expect(getConfigProfileRuns("h1")).rejects.toThrow("boom");
+  });
+});
+
+describe("Config Management Apply", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("posts a playbook to the apply endpoint", async () => {
+    vi.mocked(axiosInstance.post).mockResolvedValueOnce({
+      data: { host_id: "h1", queued: true, check_mode: true, message: "ok" },
+    } as never);
+    const result = await applyConfigProfile("h1", {
+      playbook: "- hosts: localhost",
+      check_mode: true,
+    });
+    expect(result.queued).toBe(true);
+    expect(axiosInstance.post).toHaveBeenCalledWith(
+      "/api/v1/hosts/h1/config-management/apply",
+      { playbook: "- hosts: localhost", check_mode: true },
+    );
+  });
+
+  it("rethrows so the dialog can surface the server's detail", async () => {
+    vi.mocked(axiosInstance.post).mockRejectedValueOnce(new Error("nope"));
+    await expect(applyConfigProfile("h1", { playbook: "x" })).rejects.toThrow(
+      "nope",
+    );
   });
 });

@@ -25,11 +25,19 @@ vi.mock("react-i18next", () => {
   return { useTranslation: () => ({ t, i18n: { language: "en" } }) };
 });
 
+vi.mock("../../Services/permissions", async (orig) => {
+  const actual = await orig<typeof import("../../Services/permissions")>();
+  return { ...actual, hasPermission: vi.fn() };
+});
+
 vi.mock("../../Services/configManagementService", () => ({
   getConfigMgmtPrereq: vi.fn(),
   installConfigMgmtPrereq: vi.fn(),
+  // The card renders the apply dialog, which imports from this module.
+  applyConfigProfile: vi.fn(),
 }));
 
+import { hasPermission } from "../../Services/permissions";
 import {
   getConfigMgmtPrereq,
   installConfigMgmtPrereq,
@@ -60,6 +68,7 @@ describe("ConfigManagementPrereqCard", () => {
   // noise without hiding real errors (restored after each test).
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(hasPermission).mockResolvedValue(true);
     vi.spyOn(window.console, "error").mockImplementation(() => {});
   });
   afterEach(() => vi.restoreAllMocks());
@@ -219,5 +228,79 @@ describe("ConfigManagementPrereqCard", () => {
         "Failed to load configuration management prerequisite status",
       ),
     ).toBeInTheDocument();
+  });
+
+  describe("the apply-profile affordance", () => {
+    const APPLY = "Apply profile";
+
+    test("is offered when the executor is installed", async () => {
+      vi.mocked(getConfigMgmtPrereq).mockResolvedValue({
+        ...base,
+        status: "satisfied",
+        installed_version: "2.20.1",
+      });
+      render(<ConfigManagementPrereqCard {...ready} />);
+      expect(await screen.findByText(APPLY)).toBeInTheDocument();
+    });
+
+    test("is offered on Windows, where the executor is bundled", async () => {
+      // not_required is still a usable host -- dsc.exe ships with the agent.
+      vi.mocked(getConfigMgmtPrereq).mockResolvedValue({
+        ...base,
+        executor: "dsc",
+        status: "not_required",
+      });
+      render(<ConfigManagementPrereqCard {...ready} />);
+      expect(await screen.findByText(APPLY)).toBeInTheDocument();
+    });
+
+    test("is NOT offered when no executor is installed", async () => {
+      // Queuing here could only ever come back as executor_missing, so the
+      // button would be an invitation to a guaranteed failure.
+      vi.mocked(getConfigMgmtPrereq).mockResolvedValue({
+        ...base,
+        status: "missing",
+        can_install: true,
+      });
+      render(<ConfigManagementPrereqCard {...ready} />);
+      expect(await screen.findByText("Not installed")).toBeInTheDocument();
+      expect(screen.queryByText(APPLY)).not.toBeInTheDocument();
+    });
+
+    test("is NOT offered on an unsupported platform", async () => {
+      vi.mocked(getConfigMgmtPrereq).mockResolvedValue({
+        ...base,
+        status: "unsupported",
+      });
+      render(<ConfigManagementPrereqCard {...ready} />);
+      expect(
+        await screen.findByText("Not available on this platform"),
+      ).toBeInTheDocument();
+      expect(screen.queryByText(APPLY)).not.toBeInTheDocument();
+    });
+
+    test("is hidden without the run-script permission", async () => {
+      // The UI gate must match the API's RUN_SCRIPT gate exactly; a looser one
+      // here would just render a button that 403s.
+      vi.mocked(getConfigMgmtPrereq).mockResolvedValue({
+        ...base,
+        status: "satisfied",
+      });
+      vi.mocked(hasPermission).mockResolvedValue(false);
+      render(<ConfigManagementPrereqCard {...ready} />);
+      expect(await screen.findByText("Ready")).toBeInTheDocument();
+      expect(screen.queryByText(APPLY)).not.toBeInTheDocument();
+    });
+
+    test("is disabled with a reason on an inactive host", async () => {
+      vi.mocked(getConfigMgmtPrereq).mockResolvedValue({
+        ...base,
+        status: "satisfied",
+      });
+      render(<ConfigManagementPrereqCard {...ready} isHostActive={false} />);
+      const button = (await screen.findByText(APPLY)).closest("button")!;
+      expect(button).toBeDisabled();
+      expect(button.getAttribute("title")).toBe("Host is not active");
+    });
   });
 });

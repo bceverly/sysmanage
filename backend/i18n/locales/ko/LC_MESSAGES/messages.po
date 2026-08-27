@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-26 10:30-0400\n"
+"POT-Creation-Date: 2026-08-26 15:50-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -141,8 +141,8 @@ msgstr "CA 인증서 가져오기 실패: %s"
 #: backend/api/certificates.py:84 backend/api/certificates.py:139
 #: backend/api/host_graylog.py:89 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:474
-#: backend/api/firewall_roles.py:545
+#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:473
+#: backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "호스트 ID 형식이 잘못되었습니다"
@@ -150,11 +150,11 @@ msgstr "호스트 ID 형식이 잘못되었습니다"
 #: backend/api/certificates.py:95 backend/api/certificates.py:165
 #: backend/api/fips_actions.py:84 backend/api/fips_actions.py:174
 #: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:62
-#: backend/api/package_handlers.py:547 backend/api/package_compliance.py:319
-#: backend/api/package_compliance.py:445
+#: backend/api/package_handlers.py:547 backend/api/package_compliance.py:316
+#: backend/api/package_compliance.py:442
 #: backend/api/grafana_integration.py:330 backend/api/image_mode_actions.py:86
 #: backend/api/host_graylog.py:131 backend/api/tag.py:499
-#: backend/api/tag.py:653 backend/api/airgap_repository_buckets.py:65
+#: backend/api/tag.py:653 backend/api/airgap_repository_buckets.py:64
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:54
 #: backend/api/updates/query_routes.py:123
@@ -174,10 +174,10 @@ msgid "Host is not approved"
 msgstr "호스트가 승인이 되지 않았습니다."
 
 #: backend/api/certificates.py:156 backend/api/security_roles.py:161
-#: backend/api/security_roles.py:204 backend/api/auth_mfa.py:157
-#: backend/api/airgap_collection_schedule.py:144
+#: backend/api/security_roles.py:204 backend/api/auth_mfa.py:149
+#: backend/api/airgap_collection_schedule.py:139
 #: backend/api/graylog_integration.py:172 backend/api/broadcast.py:128
-#: backend/api/queue.py:122 backend/api/airgap_collector_runs.py:94
+#: backend/api/queue.py:122 backend/api/airgap_collector_runs.py:88
 #: backend/api/access_groups.py:140 backend/api/grafana_integration.py:314
 #: backend/api/opentelemetry/deployment.py:67
 #: backend/api/opentelemetry/deployment.py:220
@@ -280,7 +280,7 @@ msgstr "프로세스 상태 업데이트 처리에 실패했습니다: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:441 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:457 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "호스트가 등록되지 않음"
@@ -421,7 +421,7 @@ msgid "Missing request_id in installation_complete"
 msgstr "installation_complete에서 request_id가 누락됨"
 
 #: backend/api/handlers/software_package_handlers.py:955
-#: backend/api/agent.py:747 backend/api/packages.py:486
+#: backend/api/agent.py:748 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "설정 요청을 찾을 수 없습니다: %s"
@@ -436,8 +436,8 @@ msgstr "_INSTALLATION_COMPLETION_ 기록에 실패했습니다: %s"
 msgid "Report template not found"
 msgstr "보고서 템플릿을 찾을 수 없습니다."
 
-#: backend/api/report_templates.py:177 backend/api/package_compliance.py:141
-#: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:110
+#: backend/api/report_templates.py:177 backend/api/package_compliance.py:138
+#: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:107
 #: backend/api/upgrade_profiles.py:128
 #: backend/api/repository_mirroring_helpers.py:154
 #, python-format
@@ -473,45 +473,45 @@ msgstr "보고서 템플릿 '%s' 가 삭제되었습니다"
 msgid "Report template deleted"
 msgstr "보고서 템플릿이 삭제되었습니다"
 
-#: backend/api/auth_mfa.py:254
+#: backend/api/auth_mfa.py:246
 msgid "Call enroll/start before enroll/complete."
 msgstr "enroll/start 호출 전 enroll/complete를 호출해야 합니다."
 
-#: backend/api/auth_mfa.py:266 backend/api/auth_mfa.py:515
+#: backend/api/auth_mfa.py:258 backend/api/auth_mfa.py:507
 msgid "Invalid TOTP code."
 msgstr "유효하지 않은 TOTP 코드."
 
-#: backend/api/auth_mfa.py:304 backend/api/auth_mfa.py:366
+#: backend/api/auth_mfa.py:296 backend/api/auth_mfa.py:358
 msgid "MFA challenge expired — please log in again."
 msgstr "MFA 도전 시간 초과 — 다시 로그인해 주세요."
 
-#: backend/api/auth_mfa.py:309
+#: backend/api/auth_mfa.py:301
 msgid "Invalid MFA challenge."
 msgstr "유효하지 않은 MFA 도전."
 
-#: backend/api/auth_mfa.py:321
+#: backend/api/auth_mfa.py:313
 msgid "Invalid MFA code."
 msgstr "유효하지 않은 MFA 코드."
 
-#: backend/api/auth_mfa.py:412
+#: backend/api/auth_mfa.py:404
 msgid ""
 "If your account has MFA configured, an email with a verification code has "
 "been dispatched."
 msgstr "계정에 MFA 설정이 되어 있다면 인증 코드를 포함한 이메일이 발송되었습니다."
 
-#: backend/api/auth_mfa.py:442
+#: backend/api/auth_mfa.py:434
 msgid "Invalid password."
 msgstr "비밀번호가 잘못되었습니다."
 
-#: backend/api/auth_mfa.py:448
+#: backend/api/auth_mfa.py:440
 msgid "MFA disabled."
 msgstr "MFA가 비활성화되었습니다."
 
-#: backend/api/auth_mfa.py:503
+#: backend/api/auth_mfa.py:495
 msgid "MFA is not enrolled for this account."
 msgstr "이 계정에는 MFA 등록이 되어 있지 않습니다."
 
-#: backend/api/auth_mfa.py:565
+#: backend/api/auth_mfa.py:557
 msgid "Editing MFA settings requires admin privileges."
 msgstr "MFA 설정 편집은 관리자 권한이 필요합니다."
 
@@ -626,7 +626,7 @@ msgstr "상용 백신 상태"
 msgid "User Security Roles (RBAC)"
 msgstr "사용자 보안 역할 (RBAC)"
 
-#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:534
+#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:536
 msgid "Audit Log"
 msgstr "감사 로그"
 
@@ -642,58 +642,58 @@ msgstr "PDF 생성을 사용할 수 없습니다. reportlab 패키지를 설치�
 msgid "Report"
 msgstr "보고서"
 
-#: backend/api/airgap_collection_schedule.py:53
+#: backend/api/airgap_collection_schedule.py:48
 msgid "Air-gap collection schedule not found"
 msgstr "에어갭 수집 스케줄을 찾을 수 없음"
 
-#: backend/api/airgap_collection_schedule.py:54
+#: backend/api/airgap_collection_schedule.py:49
 #, python-format
 msgid "Invalid UUID for schedule_id: %s"
 msgstr "schedule_id의 UUID가 잘못됨: %s"
 
-#: backend/api/airgap_collection_schedule.py:63
+#: backend/api/airgap_collection_schedule.py:58
 msgid ""
 "Air-gap collection schedules require a SysManage Professional+ license with "
 "the air-gap collector engine. Please upgrade to access this feature."
 msgstr ""
 "에어갭 수집 스케줄에는 에어갭 수집기 엔진이 포함된 SysManage Professional+ 라이선스가 필요합니다. 업그레이드하세요."
 
-#: backend/api/airgap_collection_schedule.py:89
+#: backend/api/airgap_collection_schedule.py:84
 msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
 msgstr "잘못된 cron 표현식: 5개 필드 필요 (m h dom mon dow)"
 
-#: backend/api/airgap_collection_schedule.py:98
+#: backend/api/airgap_collection_schedule.py:93
 #: backend/api/upgrade_profiles.py:148
 #, python-format
 msgid "Invalid cron expression: %s"
 msgstr "잘못된 cron 표현식: %s"
 
-#: backend/api/airgap_collection_schedule.py:176
-#: backend/api/airgap_collection_schedule.py:259
+#: backend/api/airgap_collection_schedule.py:171
+#: backend/api/airgap_collection_schedule.py:254
 #, python-format
 msgid "Invalid target_request: %s"
 msgstr "잘못된 target_request: %s"
 
-#: backend/api/airgap_collection_schedule.py:194
+#: backend/api/airgap_collection_schedule.py:189
 #, python-format
 msgid "Created air-gap collection schedule '%s'"
 msgstr "에어갭 수집 스케줄 '%s' 생성됨"
 
-#: backend/api/airgap_collection_schedule.py:270
+#: backend/api/airgap_collection_schedule.py:265
 #, python-format
 msgid "Updated air-gap collection schedule '%s'"
 msgstr "에어갭 수집 스케줄 '%s' 업데이트됨"
 
-#: backend/api/airgap_collection_schedule.py:309
+#: backend/api/airgap_collection_schedule.py:304
 #, python-format
 msgid "Deleted air-gap collection schedule '%s'"
 msgstr "에어갭 수집 스케줄 '%s' 삭제됨"
 
-#: backend/api/airgap_collection_schedule.py:314
+#: backend/api/airgap_collection_schedule.py:309
 msgid "Air-gap collection schedule deleted"
 msgstr "에어갭 수집 스케줄 삭제됨"
 
-#: backend/api/airgap_collection_schedule.py:378
+#: backend/api/airgap_collection_schedule.py:373
 msgid ""
 "automation_engine not loaded; next_run timestamps not advanced. Schedules "
 "will fire only on the current tick window until the Pro+ license includes "
@@ -761,119 +761,119 @@ msgstr "연결 실패 - Graylog 서버가 다운되었거나 연결할 수 없�
 msgid "Unexpected error checking Graylog health"
 msgstr "Graylog 상태 확인 중 예기치 않은 오류 발생"
 
-#: backend/api/openbao.py:61
+#: backend/api/openbao.py:58
 msgid "Invalid PID file"
 msgstr "잘못된 PID 파일"
 
-#: backend/api/openbao.py:102
+#: backend/api/openbao.py:99
 msgid "OpenBAO process not found"
 msgstr "OpenBAO 프로세스를 찾을 수 없습니다"
 
-#: backend/api/openbao.py:189
+#: backend/api/openbao.py:186
 msgid "OpenBAO is running"
 msgstr "OpenBAO는 실행 중입니다"
 
-#: backend/api/openbao.py:247
+#: backend/api/openbao.py:244
 msgid "OpenBAO is already running"
 msgstr "OpenBAO는 이미 실행 중입니다"
 
-#: backend/api/openbao.py:273
+#: backend/api/openbao.py:270
 msgid "OpenBAO start script not found"
 msgstr "OpenBAO 시작 스크립트를 찾을 수 없습니다"
 
-#: backend/api/openbao.py:368
+#: backend/api/openbao.py:365
 msgid "Internal error occurred while starting OpenBAO"
 msgstr "OpenBAO 시작 중 내부 오류 발생"
 
-#: backend/api/openbao.py:402
+#: backend/api/openbao.py:399
 msgid "OpenBAO started successfully"
 msgstr "OpenBAO가 성공적으로 시작되었습니다"
 
-#: backend/api/openbao.py:409 backend/api/openbao.py:757
+#: backend/api/openbao.py:406 backend/api/openbao.py:754
 msgid "Failed to start OpenBAO"
 msgstr "OpenBAO 시작 실패"
 
-#: backend/api/openbao.py:416
+#: backend/api/openbao.py:413
 msgid "OpenBAO start timed out"
 msgstr "OpenBAO 시작 시간 초과"
 
-#: backend/api/openbao.py:423 backend/api/openbao.py:765
+#: backend/api/openbao.py:420 backend/api/openbao.py:762
 msgid "An error occurred while starting OpenBAO"
 msgstr "OpenBAO 시작 중 오류 발생"
 
-#: backend/api/openbao.py:461
+#: backend/api/openbao.py:458
 msgid "OpenBAO stop script not found"
 msgstr "OpenBAO 종료 스크립트를 찾을 수 없습니다"
 
-#: backend/api/openbao.py:516
+#: backend/api/openbao.py:513
 msgid "OpenBAO stopped successfully"
 msgstr "OpenBAO가 성공적으로 종료되었습니다"
 
-#: backend/api/openbao.py:523 backend/api/openbao.py:779
+#: backend/api/openbao.py:520 backend/api/openbao.py:776
 msgid "Failed to stop OpenBAO"
 msgstr "OpenBAO 종료 실패"
 
-#: backend/api/openbao.py:530
+#: backend/api/openbao.py:527
 msgid "OpenBAO stop timed out"
 msgstr "OpenBAO 종료 시간 초과"
 
-#: backend/api/openbao.py:539 backend/api/openbao.py:787
+#: backend/api/openbao.py:536 backend/api/openbao.py:784
 msgid "An error occurred while stopping OpenBAO"
 msgstr "OpenBAO 종료 중 오류가 발생했습니다."
 
-#: backend/api/openbao.py:561
+#: backend/api/openbao.py:558
 msgid "OpenBAO is already sealed"
 msgstr "OpenBAO는 이미 Sealed 상태입니다"
 
-#: backend/api/openbao.py:571 backend/api/openbao.py:674
+#: backend/api/openbao.py:568 backend/api/openbao.py:671
 msgid "OpenBAO binary not found"
 msgstr "OpenBAO 바이너리가 없습니다"
 
-#: backend/api/openbao.py:607
+#: backend/api/openbao.py:604
 msgid "OpenBAO sealed successfully"
 msgstr "OpenBAO가 성공적으로 Sealed되었습니다"
 
-#: backend/api/openbao.py:614 backend/api/openbao.py:822
+#: backend/api/openbao.py:611 backend/api/openbao.py:819
 msgid "Failed to seal OpenBAO"
 msgstr "OpenBAO Sealing 실패"
 
-#: backend/api/openbao.py:622
+#: backend/api/openbao.py:619
 msgid "OpenBAO seal operation timed out"
 msgstr "OpenBAO Seal 작업 시간 초과"
 
-#: backend/api/openbao.py:631
+#: backend/api/openbao.py:628
 msgid "Error sealing OpenBAO"
 msgstr "OpenBAO Sealing 중 오류 발생"
 
-#: backend/api/openbao.py:654
+#: backend/api/openbao.py:651
 msgid "OpenBAO is already unsealed"
 msgstr "OpenBAO는 이미 Unsealed 상태입니다"
 
-#: backend/api/openbao.py:664
+#: backend/api/openbao.py:661
 msgid "Automatic unseal is only supported in development mode"
 msgstr "자동 Unseal은 개발 모드에서만 지원됩니다"
 
-#: backend/api/openbao.py:712
+#: backend/api/openbao.py:709
 msgid "OpenBAO unsealed successfully"
 msgstr "OpenBAO가 성공적으로 Unsealed되었습니다"
 
-#: backend/api/openbao.py:719 backend/api/openbao.py:844
+#: backend/api/openbao.py:716 backend/api/openbao.py:841
 msgid "Failed to unseal OpenBAO"
 msgstr "OpenBAO Unsealing 실패"
 
-#: backend/api/openbao.py:727
+#: backend/api/openbao.py:724
 msgid "OpenBAO unseal operation timed out"
 msgstr "OpenBAO Unseal 작업 시간 초과"
 
-#: backend/api/openbao.py:734
+#: backend/api/openbao.py:731
 msgid "Error unsealing OpenBAO"
 msgstr "OpenBAO Unsealing 중 오류 발생"
 
-#: backend/api/openbao.py:830
+#: backend/api/openbao.py:827
 msgid "An error occurred while sealing OpenBAO"
 msgstr "OpenBAO 봉인 중 오류가 발생했습니다."
 
-#: backend/api/openbao.py:852
+#: backend/api/openbao.py:849
 msgid "An error occurred while unsealing OpenBAO"
 msgstr "OpenBAO 해제 중 오류가 발생했습니다."
 
@@ -1057,7 +1057,8 @@ msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
 msgstr "퍼미션 denied: EDIT_HOST_HOSTNAME 역할 필요"
 
 #: backend/api/host_hostname.py:75 backend/api/reboot_orchestration.py:119
-#: backend/api/error_constants.py:43 backend/api/child_host_utils.py:91
+#: backend/api/config_mgmt_runs.py:235 backend/api/error_constants.py:43
+#: backend/api/child_host_utils.py:91
 #: backend/api/scripts/routes_executions.py:81
 msgid "Host is not active"
 msgstr "호스트가 활성화되어 있지 않습니다."
@@ -1115,12 +1116,12 @@ msgstr "비밀번호는 최소 8자 이상이어야 합니다"
 msgid "Your account is ready. You can now log in."
 msgstr "계정이 준비되었습니다. 이제 로그인할 수 있습니다."
 
-#: backend/api/server_info.py:249
+#: backend/api/server_info.py:244
 #, python-format
 msgid "Set server role to '%s'"
 msgstr "서버 역할을 '%s'로 설정했습니다"
 
-#: backend/api/server_info.py:335
+#: backend/api/server_info.py:330
 #, python-format
 msgid "Set federation role to '%s'"
 msgstr "연방 역할을 '%s'로 설정했습니다"
@@ -1281,57 +1282,57 @@ msgstr "메시지가 없거나 만료되지 않았습니다"
 msgid "Failed to fetch message details"
 msgstr "메시지 세부 정보 가져오기 실패"
 
-#: backend/api/host_account_management.py:78
+#: backend/api/host_account_management.py:75
 msgid "Permission denied: ADD_HOST_ACCOUNT role required"
 msgstr "퍼미션 denied: ADD_HOST_ACCOUNT 역할 필요"
 
-#: backend/api/host_account_management.py:102
+#: backend/api/host_account_management.py:99
 msgid "Agent must be running in privileged mode to manage user accounts"
 msgstr "사용자를 관리하려면 에이전트가 특권 모드에서 실행되어야 합니다."
 
-#: backend/api/host_account_management.py:176
+#: backend/api/host_account_management.py:173
 msgid ""
 "User account creation requested. The user list will update automatically "
 "after creation."
 msgstr "사용자 계정 생성 요청됨. 생성 후 사용자 목록이 자동으로 업데이트됩니다."
 
-#: backend/api/host_account_management.py:200
+#: backend/api/host_account_management.py:197
 msgid "Permission denied: ADD_HOST_GROUP role required"
 msgstr "퍼미션 denied: ADD_HOST_GROUP 역할 필요"
 
-#: backend/api/host_account_management.py:223
+#: backend/api/host_account_management.py:220
 msgid "Agent must be running in privileged mode to manage groups"
 msgstr "그룹을 관리하려면 에이전트가 특권 모드에서 실행되어야 합니다."
 
-#: backend/api/host_account_management.py:280
+#: backend/api/host_account_management.py:277
 msgid ""
 "Group creation requested. The group list will update automatically after "
 "creation."
 msgstr "그룹 생성 요청됨. 그룹 목록은 생성 후 자동으로 업데이트됩니다."
 
-#: backend/api/host_account_management.py:307
+#: backend/api/host_account_management.py:304
 msgid "Permission denied: DELETE_HOST_ACCOUNT role required"
 msgstr "퍼미션 denied: DELETE_HOST_ACCOUNT 역할 필요"
 
-#: backend/api/host_account_management.py:331
+#: backend/api/host_account_management.py:328
 msgid "Agent must be running in privileged mode to delete user accounts"
 msgstr "사용자 계정을 삭제하려면 에이전트가 특권 모드에서 실행되어야 합니다."
 
-#: backend/api/host_account_management.py:384
+#: backend/api/host_account_management.py:381
 msgid ""
 "User account deletion requested. The user list will update automatically "
 "after deletion."
 msgstr "사용자 계정 삭제 요청됨. 삭제 후 사용자 목록이 자동으로 업데이트됩니다."
 
-#: backend/api/host_account_management.py:410
+#: backend/api/host_account_management.py:407
 msgid "Permission denied: DELETE_HOST_GROUP role required"
 msgstr "퍼미션 denied: DELETE_HOST_GROUP 역할 필요"
 
-#: backend/api/host_account_management.py:433
+#: backend/api/host_account_management.py:430
 msgid "Agent must be running in privileged mode to delete groups"
 msgstr "그룹을 삭제하려면 에이전트가 특권 모드에서 실행되어야 합니다."
 
-#: backend/api/host_account_management.py:483
+#: backend/api/host_account_management.py:480
 msgid ""
 "Group deletion requested. The group list will update automatically after "
 "deletion."
@@ -1378,25 +1379,25 @@ msgstr ""
 msgid "Unknown (platform, version, os_family) tuple"
 msgstr "알 수 없는 (플랫폼, 버전, os_family) 튜플"
 
-#: backend/api/airgap_collector_runs.py:71
+#: backend/api/airgap_collector_runs.py:65
 msgid "Air-gap collection run not found"
 msgstr "공기 격리 수집 실행을 찾을 수 없습니다."
 
-#: backend/api/airgap_collector_runs.py:72
+#: backend/api/airgap_collector_runs.py:66
 msgid "Air-gap media manifest not found"
 msgstr "공기 격리 미디어 맨IFEST를 찾을 수 없습니다."
 
-#: backend/api/airgap_collector_runs.py:73
+#: backend/api/airgap_collector_runs.py:67
 #, python-format
 msgid "Invalid UUID for run_id: %s"
 msgstr "run_id에 대한 유효하지 않은 UUID: %s"
 
-#: backend/api/airgap_collector_runs.py:74
+#: backend/api/airgap_collector_runs.py:68
 #, python-format
 msgid "Invalid UUID for manifest_id: %s"
 msgstr "manifest_id에 대한 유효하지 않은 UUID: %s"
 
-#: backend/api/airgap_collector_runs.py:83
+#: backend/api/airgap_collector_runs.py:77
 msgid ""
 "Air-gap collection runs require a SysManage Professional+ license with the "
 "air-gap collector engine. Please upgrade to access this feature."
@@ -1404,7 +1405,7 @@ msgstr ""
 "공기 격리 수집 실행을 위해서는 공기 격리 수집 엔진이 포함된 SysManage 프로페셔널+ 라이선스가 필요합니다. 이 기능에 "
 "액세스하려면 업그레이드해 주세요."
 
-#: backend/api/airgap_collector_runs.py:224
+#: backend/api/airgap_collector_runs.py:218
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be"
 " loaded — the collector reads each target's bundle from a snapshot of its "
@@ -1413,14 +1414,14 @@ msgstr ""
 "에어갭 컬렉션을 실행하려면 repository_mirroring_engine 모듈이 로드되어야 합니다. 컬렉터는 각 타겟의 번들 파일을 "
 "미러 트리 스냅샷에서 읽습니다."
 
-#: backend/api/airgap_collector_runs.py:235
+#: backend/api/airgap_collector_runs.py:229
 msgid ""
 "Global mirror settings missing or mirror_root_path not configured.  "
 "Configure mirror settings before creating a collection run."
 msgstr ""
 "전역 미러 설정 또는 mirror_root_path가 구성되지 않았습니다. 수집 실행을 생성하기 전에 미러 설정을 구성해야 합니다."
 
-#: backend/api/airgap_collector_runs.py:295
+#: backend/api/airgap_collector_runs.py:289
 #, python-format
 msgid ""
 "Mirror %r has no known_version_id set; Option-B collection runs need the "
@@ -1430,35 +1431,35 @@ msgstr ""
 "미러 %r의 known_version_id가 설정되어 있지 않습니다; 옵션-B 수집 작업은 미러가 카탈로그 버전에 연결되어 있어야 "
 "합니다. 이로써 배포판 / 버전을 파악할 수 있습니다. 미러를 편집하고 드롭다운에서 버전을 선택하세요."
 
-#: backend/api/airgap_collector_runs.py:326
+#: backend/api/airgap_collector_runs.py:318
 #, python-format
 msgid ""
 "Mirror %r references a catalog version that no longer exists.  Re-pick a "
 "version on the mirror."
 msgstr "미러 %r이 더 이상 존재하지 않는 카탈로그 버전을 참조합니다. 미러의 버전을 다시 선택하세요."
 
-#: backend/api/airgap_collector_runs.py:410
-#: backend/api/airgap_collector_runs.py:489
+#: backend/api/airgap_collector_runs.py:402
+#: backend/api/airgap_collector_runs.py:481
 msgid "At least one target is required to create a collection run."
 msgstr "수집 실행을 생성하려면 최소 한 개 이상의 대상이 필요합니다."
 
-#: backend/api/airgap_collector_runs.py:420
+#: backend/api/airgap_collector_runs.py:412
 #, python-format
 msgid "Invalid UUID for mirror_id: %s"
 msgstr "미러 ID(%s)에 대한 유효하지 않은 UUID 형식"
 
-#: backend/api/airgap_collector_runs.py:430
+#: backend/api/airgap_collector_runs.py:422
 #, python-format
 msgid "Mirror %s not found"
 msgstr "미러 %s을 찾을 수 없습니다"
 
-#: backend/api/airgap_collector_runs.py:436
+#: backend/api/airgap_collector_runs.py:428
 #, python-format
 msgid ""
 "Mirror %r is disabled; enable + sync it before using it in a collection run."
 msgstr "미러 %r이 비활성화되어 있습니다; 수집 실행에서 사용하기 전에 활성화하고 동기화하세요."
 
-#: backend/api/airgap_collector_runs.py:447
+#: backend/api/airgap_collector_runs.py:439
 #, python-format
 msgid ""
 "All target mirrors must live on the same host (the collection plan "
@@ -1467,7 +1468,7 @@ msgstr ""
 "모든 대상 미러는 동일한 호스트에 존재해야 합니다(수집 계획은 단일 에이전트로 디스패치됩니다). 선택된 미러가 %d개의 호스트를 "
 "포함합니다."
 
-#: backend/api/airgap_collector_runs.py:543
+#: backend/api/airgap_collector_runs.py:535
 #, python-format
 msgid ""
 "Created one-shot air-gap collection run '%(iso_label)s' with "
@@ -1475,78 +1476,78 @@ msgid ""
 msgstr ""
 "'%(iso_label)s' 일회성 공기 격리 수집 실행을 생성함; %(mirror_count)d 개의 대상 미러로 스냅샷 전송됨."
 
-#: backend/api/airgap_collector_runs.py:666
+#: backend/api/airgap_collector_runs.py:658
 #, python-format
 msgid ""
 "ISO is not ready for download yet (status: %s). Wait until the run reaches "
 "ISO_BUILT."
 msgstr "ISO가 아직 다운로드 준비가 되지 않았습니다(상태: %s). ISO_BUILT 상태까지 기다려주세요."
 
-#: backend/api/airgap_collector_runs.py:676
+#: backend/api/airgap_collector_runs.py:668
 msgid ""
 "ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
 " the collection to rebuild."
 msgstr "ISO 파일이 더 이상 디스크에 존재하지 않음; 스테이징 볼륨이 정리되었을 수 있습니다. 수집을 다시 실행하여 재구축하세요."
 
-#: backend/api/airgap_collector_runs.py:693
+#: backend/api/airgap_collector_runs.py:685
 msgid "ISO file not found."
 msgstr "ISO 파일을 찾을 수 없습니다."
 
-#: backend/api/airgap_collector_runs.py:713
+#: backend/api/airgap_collector_runs.py:705
 #, python-format
 msgid "Disc %(disc)d not found for this run.  Available discs: %(available)s"
 msgstr "디스크 %(disc)d이 이 실행에서 찾을 수 없습니다. 사용 가능한 디스크: %(available)s"
 
-#: backend/api/airgap_collector_runs.py:798
+#: backend/api/airgap_collector_runs.py:790
 msgid "Invalid or expired download token."
 msgstr "잘못된 또는 만료된 다운로드 토큰."
 
-#: backend/api/airgap_collector_runs.py:831
+#: backend/api/airgap_collector_runs.py:823
 #, python-format
 msgid "Deleted air-gap collection run '%s'"
 msgstr "오프라인 수집 실행 '%s' 삭제됨"
 
-#: backend/api/airgap_collector_runs.py:903
+#: backend/api/airgap_collector_runs.py:895
 #, python-format
 msgid "Run is not COMPLETE yet (status: %s)"
 msgstr "실행은 아직 완료되지 않았습니다 (상태: %s)"
 
-#: backend/api/airgap_collector_runs.py:909
+#: backend/api/airgap_collector_runs.py:901
 #, python-format
 msgid "ISO file is no longer on disk: %s"
 msgstr "ISO 파일이 더 이상 디스크에 존재하지 않음: %s"
 
-#: backend/api/package_compliance.py:59
+#: backend/api/package_compliance.py:56
 msgid "Package profile not found"
 msgstr "패키지 프로필을 찾을 수 없습니다."
 
-#: backend/api/package_compliance.py:76
+#: backend/api/package_compliance.py:73
 msgid ""
 "Package compliance profiles require a SysManage Professional license. Please"
 " upgrade to access this feature."
 msgstr ""
 "패키지 준수 프로필은 SysManage Professional 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드해 주세요."
 
-#: backend/api/package_compliance.py:203
+#: backend/api/package_compliance.py:200
 #, python-format
 msgid "Created package profile '%s'"
 msgstr "패키지 프로필 '%s' 가 생성되었습니다"
 
-#: backend/api/package_compliance.py:255
+#: backend/api/package_compliance.py:252
 #, python-format
 msgid "Updated package profile '%s'"
 msgstr "패키지 프로필 '%s' 가 업데이트되었습니다"
 
-#: backend/api/package_compliance.py:285
+#: backend/api/package_compliance.py:282
 #, python-format
 msgid "Deleted package profile '%s'"
 msgstr "패키지 프로필 '%s' 가 삭제되었습니다"
 
-#: backend/api/package_compliance.py:290
+#: backend/api/package_compliance.py:287
 msgid "Package profile deleted"
 msgstr "패키지 프로필이 삭제되었습니다"
 
-#: backend/api/package_compliance.py:377
+#: backend/api/package_compliance.py:374
 #, python-format
 msgid ""
 "Scanned host '%(host_fqdn)s' against profile '%(profile_name)s': %(status)s "
@@ -1555,7 +1556,7 @@ msgstr ""
 "프로필 '%(profile_name)s'을 사용하여 호스트 '%(host_fqdn)s'를 스캔했습니다: %(status)s "
 "(%(violation_count)d 위반사항)"
 
-#: backend/api/package_compliance.py:503
+#: backend/api/package_compliance.py:500
 #, python-format
 msgid ""
 "Dispatched compliance check to agent '%(host_fqdn)s' for profile "
@@ -2322,19 +2323,19 @@ msgstr "_AGENT 인증 실패: 유효하지 않은 호스트 ID"
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "ID %s의 호스트는 등록되지 않았습니다. 다시 등록해주세요."
 
-#: backend/api/message_handlers_core.py:245 backend/api/agent.py:649
+#: backend/api/message_handlers_core.py:245 backend/api/agent.py:650
 msgid "Host registration pending approval"
 msgstr "호스트 등록 승인 대기 중입니다."
 
-#: backend/api/message_handlers_core.py:359
+#: backend/api/message_handlers_core.py:360
 msgid "Host auto-approved via child host creation"
 msgstr "호스트 자동 승인됨(자식 호스트 생성 시)"
 
-#: backend/api/message_handlers_core.py:455
+#: backend/api/message_handlers_core.py:456
 msgid "Agent registered and connected successfully"
 msgstr "_AGENT이 성공적으로 등록되고 연결됨_"
 
-#: backend/api/message_handlers_core.py:771
+#: backend/api/message_handlers_core.py:770
 msgid "Failed to process heartbeat"
 msgstr "심장 박동 처리에 실패했습니다"
 
@@ -2846,29 +2847,29 @@ msgstr "패키지 개수 세는 데 실패했습니다: %s"
 msgid "Failed to search packages: %s"
 msgstr "패키지 검색 실패: %s"
 
-#: backend/api/host.py:186
+#: backend/api/host.py:184
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "퍼미션 denied: DELETE_HOST 역할 필요"
 
-#: backend/api/host.py:250
+#: backend/api/host.py:248
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "퍼미션 denied: VIEW_HOST_DETAILS 역할 필요"
 
-#: backend/api/host.py:665
+#: backend/api/host.py:663
 msgid "Host already exists"
 msgstr "호스트가 이미 존재합니다"
 
-#: backend/api/host.py:774
+#: backend/api/host.py:772
 msgid "Registration absorbed: host was recently deleted"
 msgstr "등록 흡수: 호스트가 최근에 삭제되었습니다"
 
-#: backend/api/host.py:848
+#: backend/api/host.py:846
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "'%(fqdn)s' 호스트가 '%(tenant_id)s' 테넌트로 등록됨 (등록 토큰 사용)"
 
-#: backend/api/host.py:865
+#: backend/api/host.py:863
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -2907,30 +2908,30 @@ msgstr "target_hostname, target_platform, 또는 push_to_all을 지정해야 합
 msgid "Configuration acknowledgment processed"
 msgstr "구성 확인 응답을 처리했습니다"
 
-#: backend/api/message_handlers.py:318
+#: backend/api/message_handlers.py:334
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "진단 결과 처리에 실패했습니다: %s"
 
-#: backend/api/message_handlers.py:352
+#: backend/api/message_handlers.py:368
 msgid "Missing message_id in command acknowledgment"
 msgstr "message_id가 누락된 명령 확인 응답"
 
-#: backend/api/message_handlers.py:465
+#: backend/api/message_handlers.py:481
 msgid "Missing installation_id in package installation status"
 msgstr "installation_id가 누락된 패키지 설치 상태"
 
-#: backend/api/message_handlers.py:485
+#: backend/api/message_handlers.py:501
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "ID: %s에 대한 설치 로그 항목을 찾을 수 없습니다."
 
-#: backend/api/message_handlers.py:531
+#: backend/api/message_handlers.py:547
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "Agent {hostname}의 패키지 설치 상태: {status}"
 
-#: backend/api/message_handlers.py:560
+#: backend/api/message_handlers.py:576
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "패키지 설치 상태를 업데이트하는 데 실패했습니다: %s"
@@ -3216,28 +3217,28 @@ msgstr "업데이트 실행 실패: %s"
 msgid "Failed to get execution log: %s"
 msgstr "실행 로그 가져오기 실패: %s"
 
-#: backend/api/dynamic_secrets.py:133 backend/api/dynamic_secrets.py:195
+#: backend/api/dynamic_secrets.py:130 backend/api/dynamic_secrets.py:192
 #, python-format
 msgid "Unknown kind: %(kind)s (allowed: %(allowed)s)"
 msgstr "알려지지 않은 종류: %(kind)s (허용된 값: %(allowed)s)"
 
-#: backend/api/dynamic_secrets.py:156
+#: backend/api/dynamic_secrets.py:153
 #, python-format
 msgid ""
 "Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
 "ttl=%(ttl)ds)"
 msgstr "동적 비밀번호 '%(name)s' (종류=%(kind)s, 역할=%(role)s, 만료 시간=%(ttl)ds)를 발급함"
 
-#: backend/api/dynamic_secrets.py:189
+#: backend/api/dynamic_secrets.py:186
 #, python-format
 msgid "Unknown status: %(status)s (allowed: %(allowed)s)"
 msgstr "알려지지 않은 상태: %(status)s (허용된 값: %(allowed)s)"
 
-#: backend/api/dynamic_secrets.py:217
+#: backend/api/dynamic_secrets.py:214
 msgid "Lease not found"
 msgstr "리스를 찾을 수 없습니다"
 
-#: backend/api/dynamic_secrets.py:239
+#: backend/api/dynamic_secrets.py:236
 #, python-format
 msgid "Revoked dynamic secret lease '%s'"
 msgstr "동적 시크릿 리스 '%s' 가 취소되었습니다"
@@ -3621,37 +3622,54 @@ msgstr "미등록 호스트에서의 에이전트 메시지: {hostname}"
 msgid "Agent message from unapproved host: {hostname}"
 msgstr "미승인 호스트에서의 에이전트 메시지: {hostname}"
 
-#: backend/api/agent.py:591
+#: backend/api/agent.py:592
 msgid "Message must include hostname or host_id for host validation"
 msgstr "메시지에는 호스트 검증을 위한 호스트명 또는 host_id가 포함되어야 합니다"
 
-#: backend/api/agent.py:609
+#: backend/api/agent.py:610
 msgid "Host ID no longer valid - please re-register"
 msgstr "호스트 ID가 더 이상 유효하지 않음 - 다시 등록해주세요"
 
-#: backend/api/agent.py:621
+#: backend/api/agent.py:622
 msgid "Host ID and hostname mismatch - please re-register"
 msgstr "호스트 ID와 호스트명이 일치하지 않음 - 다시 등록해주세요"
 
-#: backend/api/agent.py:638
+#: backend/api/agent.py:639
 msgid "Host must register before sending inventory data"
 msgstr "호스트는 등록 후 인벤토리 데이터 전송을 해야 합니다."
 
-#: backend/api/agent.py:709
+#: backend/api/agent.py:710
 msgid "Missing or invalid authorization header"
 msgstr "누락 또는 유효하지 않은 인증 헤더"
 
-#: backend/api/agent.py:734
+#: backend/api/agent.py:735
 msgid "Invalid host authentication"
 msgstr "호스트 인증 정보가 잘못되었습니다"
 
-#: backend/api/agent.py:775 backend/api/packages.py:498
+#: backend/api/agent.py:776 backend/api/packages.py:498
 msgid "Installation completion recorded"
 msgstr "설치 완료 기록 저장됨"
 
-#: backend/api/agent.py:781 backend/api/error_constants.py:193
+#: backend/api/agent.py:782 backend/api/error_constants.py:193
 msgid "Internal server error"
 msgstr "내부 서버 오류"
+
+#: backend/api/config_mgmt_runs.py:228
+#: backend/api/scripts/routes_executions.py:67
+msgid "Permission denied: RUN_SCRIPT role required"
+msgstr "퍼미션 denied: RUN_SCRIPT 역할 필요"
+
+#: backend/api/config_mgmt_runs.py:250
+msgid "This host uses DSC; provide 'resources', not 'playbook'"
+msgstr "이 호스트는 DSC를 사용합니다. '리소스'를 제공하세요, '플레이북'은 제공하지 마세요."
+
+#: backend/api/config_mgmt_runs.py:257
+msgid "This host uses ansible-core; provide 'playbook'"
+msgstr "이 호스트는 ansible-core를 사용합니다. '플레이북'을 제공하세요"
+
+#: backend/api/config_mgmt_runs.py:319
+msgid "Configuration profile was queued for this host"
+msgstr "이 호스트는 구성 프로필이 큐에 대기 중입니다."
 
 #: backend/api/diagnostics.py:198
 msgid "Diagnostic collection requested"
@@ -3978,88 +3996,88 @@ msgstr "구성된 로고가 없습니다"
 msgid "Removed report branding logo"
 msgstr "보고서 브랜딩 로고가 제거되었습니다"
 
-#: backend/api/firewall_roles.py:101
+#: backend/api/firewall_roles.py:100
 #, python-format
 msgid "Failed to retrieve firewall roles: %s"
 msgstr "방화벽 역할들을 가져오는데 실패했습니다: %s"
 
-#: backend/api/firewall_roles.py:153
+#: backend/api/firewall_roles.py:152
 #, python-format
 msgid "Failed to retrieve firewall role: %s"
 msgstr "방화벽 역할을 가져오는데 실패했습니다: %s"
 
-#: backend/api/firewall_roles.py:173
+#: backend/api/firewall_roles.py:172
 msgid "Permission denied: ADD_FIREWALL_ROLE role required"
 msgstr "퍼미션 denied: ADD_FIREWALL_ROLE 역할 필요"
 
-#: backend/api/firewall_roles.py:189 backend/api/firewall_roles.py:306
+#: backend/api/firewall_roles.py:188 backend/api/firewall_roles.py:305
 #, python-format
 msgid "Firewall role '%s' already exists"
 msgstr "방화벽 역할 '%s'은 이미 존재합니다"
 
-#: backend/api/firewall_roles.py:245
+#: backend/api/firewall_roles.py:244
 #, python-format
 msgid "Failed to create firewall role: %s"
 msgstr "방화벽 역할 생성 실패: %s"
 
-#: backend/api/firewall_roles.py:266
+#: backend/api/firewall_roles.py:265
 msgid "Permission denied: EDIT_FIREWALL_ROLE role required"
 msgstr "퍼미션 denied: EDIT_FIREWALL_ROLE 역할 필요"
 
-#: backend/api/firewall_roles.py:366
+#: backend/api/firewall_roles.py:365
 #, python-format
 msgid "Failed to update firewall role: %s"
 msgstr "방화벽 역할을 업데이트하는 데 실패했습니다: %s"
 
-#: backend/api/firewall_roles.py:386
+#: backend/api/firewall_roles.py:385
 msgid "Permission denied: DELETE_FIREWALL_ROLE role required"
 msgstr "퍼미션 denied: DELETE_FIREWALL_ROLE 역할 필요"
 
-#: backend/api/firewall_roles.py:433
+#: backend/api/firewall_roles.py:432
 msgid "Firewall role deleted successfully"
 msgstr "방화벽 역할을 성공적으로 삭제했습니다"
 
-#: backend/api/firewall_roles.py:443
+#: backend/api/firewall_roles.py:442
 #, python-format
 msgid "Failed to delete firewall role: %s"
 msgstr "방화벽 역할 지우기 실패: %s"
 
-#: backend/api/firewall_roles.py:514
+#: backend/api/firewall_roles.py:513
 #, python-format
 msgid "Failed to retrieve host firewall roles: %s"
 msgstr "호스트 방화벽 역할들을 가져오는데 실패했습니다: %s"
 
-#: backend/api/firewall_roles.py:602
+#: backend/api/firewall_roles.py:601
 #, python-format
 msgid "Failed to retrieve expected ports: %s"
 msgstr "예상 포트들을 가져오는데 실패했습니다: %s"
 
-#: backend/api/firewall_roles.py:627 backend/api/firewall_roles.py:754
+#: backend/api/firewall_roles.py:626 backend/api/firewall_roles.py:753
 msgid "Permission denied: ASSIGN_HOST_FIREWALL_ROLES role required"
 msgstr "퍼미션 denied: ASSIGN_HOST_FIREWALL_ROLES 역할 필요"
 
-#: backend/api/firewall_roles.py:639 backend/api/firewall_roles.py:766
+#: backend/api/firewall_roles.py:638 backend/api/firewall_roles.py:765
 msgid "Invalid ID format"
 msgstr "잘못된 ID 형식"
 
-#: backend/api/firewall_roles.py:675
+#: backend/api/firewall_roles.py:674
 msgid "Firewall role already assigned to this host"
 msgstr "이 호스트에 방화벽 역할이 이미 할당되어 있습니다"
 
-#: backend/api/firewall_roles.py:733
+#: backend/api/firewall_roles.py:732
 #, python-format
 msgid "Failed to assign firewall role: %s"
 msgstr "无法分配防火墙角色：%s"
 
-#: backend/api/firewall_roles.py:782
+#: backend/api/firewall_roles.py:781
 msgid "Firewall role assignment not found"
 msgstr "방화벽 역할 할당 정보가 없습니다"
 
-#: backend/api/firewall_roles.py:832
+#: backend/api/firewall_roles.py:831
 msgid "Firewall role removed from host successfully"
 msgstr "호스트에서 방화벽 역할을 성공적으로 제거했습니다"
 
-#: backend/api/firewall_roles.py:844
+#: backend/api/firewall_roles.py:843
 #, python-format
 msgid "Failed to remove firewall role: %s"
 msgstr "방화벽 역할 제거에 실패했습니다: %s"
@@ -4171,15 +4189,15 @@ msgid "Unsupported export format: %s"
 msgstr "지원되지 않는 내보내기 형식: %s"
 
 # Reports-related strings
-#: backend/api/audit_log.py:536
+#: backend/api/audit_log.py:538
 msgid "Generated"
 msgstr "생성됨"
 
-#: backend/api/audit_log.py:538
+#: backend/api/audit_log.py:540
 msgid "Total Entries"
 msgstr "총 항목 수"
 
-#: backend/api/audit_log.py:545
+#: backend/api/audit_log.py:547
 msgid "No audit log entries found."
 msgstr "감사 로그 항목을 찾을 수 없습니다."
 
@@ -4308,10 +4326,6 @@ msgstr "saved_script_id 또는 script_content 중 하나는 제공되어야 합�
 #: backend/api/scripts/models.py:132
 msgid "shell_type is required for ad-hoc scripts"
 msgstr "shell_type는 대시보드 스크립트를 위한 필수 항목입니다"
-
-#: backend/api/scripts/routes_executions.py:67
-msgid "Permission denied: RUN_SCRIPT role required"
-msgstr "퍼미션 denied: RUN_SCRIPT 역할 필요"
 
 #: backend/api/scripts/routes_executions.py:100
 msgid "Saved script not found"
@@ -4484,26 +4498,26 @@ msgstr "실패한 메시지 지우기 실패: %s"
 msgid "Mock connection: would send message %s"
 msgstr "모킹 연결: 메시지 %s를 전송합니다"
 
-#: backend/websocket/inbound_processor.py:128
+#: backend/websocket/inbound_processor.py:124
 #, python-format
 msgid "Host %(hostname)s not found for message %(message_id)s, deleting"
 msgstr "메시지 %(message_id)s에서 %(hostname)s 호스트가 존재하지 않아 삭제됨"
 
-#: backend/websocket/inbound_processor.py:139
+#: backend/websocket/inbound_processor.py:135
 #, python-format
 msgid ""
 "Host %(hostname)s not approved (status: %(status)s) for message "
 "%(message_id)s, deleting"
 msgstr "%(status)s 상태로 승인이 거부된 %(hostname)s 호스트에 대한 메시지 %(message_id)s를 삭제함"
 
-#: backend/websocket/inbound_processor.py:156
+#: backend/websocket/inbound_processor.py:152
 #, python-format
 msgid ""
 "Processing NULL host_id message for approved host %(hostname)s (ID: "
 "%(host_id)s)"
 msgstr "승인된 호스트 %(hostname)s (ID: %(host_id)s)의 NULL host_id 메시지를 처리합니다."
 
-#: backend/websocket/inbound_processor.py:273
+#: backend/websocket/inbound_processor.py:269
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
@@ -4513,7 +4527,7 @@ msgstr ""
 "호스트 %(host_id)s이(가) 이 데이터베이스에 존재하지 않음; %(count)d개의 대기 중인 메시지(들)을 재시도로 "
 "미루기(삭제하지 않음) — 등록 중일 수 있거나 삭제된 호스트일 수 있습니다"
 
-#: backend/websocket/inbound_processor.py:290
+#: backend/websocket/inbound_processor.py:286
 #, python-format
 msgid ""
 "Host %(host_id)s (FQDN: %(fqdn)s) no longer approved (status: %(status)s), "
@@ -4521,71 +4535,71 @@ msgid ""
 msgstr ""
 "%(status)s 상태로 승인되지 않은 %(host_id)s 호스트 (FQDN: %(fqdn)s)의 모든 메시지 대기열에서 삭제됨"
 
-#: backend/websocket/inbound_processor.py:300
+#: backend/websocket/inbound_processor.py:296
 #, python-format
 msgid "Deleted %(count)d messages for unapproved host %(host_id)s"
 msgstr "승인되지 않은 %(host_id)s 호스트에 대한 메시지 %(count)d 개 삭제됨"
 
-#: backend/websocket/inbound_processor.py:307
+#: backend/websocket/inbound_processor.py:303
 #, python-format
 msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"
 msgstr "승인된 호스트 %(host_id)s (FQDN: %(fqdn)s)에 대한 메시지 처리"
 
-#: backend/websocket/inbound_processor.py:332
+#: backend/websocket/inbound_processor.py:328
 #, python-format
 msgid "Processing message with NULL host_id: %s"
 msgstr "NULL host_id 메시지를 처리 중입니다: %s"
 
-#: backend/websocket/inbound_processor.py:343
+#: backend/websocket/inbound_processor.py:339
 #, python-format
 msgid "Processing SYSTEM_INFO registration message %s"
 msgstr "SYSTEM_INFO 등록 메시지 처리 중: %s"
 
-#: backend/websocket/inbound_processor.py:366
+#: backend/websocket/inbound_processor.py:362
 #, python-format
 msgid "Message %s missing hostname and host_id, deleting"
 msgstr "메시지 %s 호스트 이름 및 host_id 정보 없음, 삭제됨"
 
-#: backend/websocket/inbound_processor.py:406
+#: backend/websocket/inbound_processor.py:402
 #, python-format
 msgid "Error processing NULL host_id message %(message_id)s: %(error)s"
 msgstr "NULL 호스트 ID 메시지 %(message_id)s 처리 중 오류 발생: %(error)s"
 
-#: backend/websocket/inbound_processor.py:443
+#: backend/websocket/inbound_processor.py:439
 #, python-format
 msgid "Could not mark message %s as processing"
 msgstr "메시지 %s 를 처리 중으로 표시할 수 없습니다."
 
-#: backend/websocket/inbound_processor.py:471
+#: backend/websocket/inbound_processor.py:467
 #, python-format
 msgid ""
 "Processing queued message: %(message_id)s (type: %(message_type)s, host: "
 "%(host)s)"
 msgstr "대기열 메시지 처리: %(message_id)s (type: %(message_type)s, host: %(host)s)"
 
-#: backend/websocket/inbound_processor.py:504
+#: backend/websocket/inbound_processor.py:500
 #, python-format
 msgid ""
 "Successfully processed and completed message: %(message_id)s for host "
 "%(host)s"
 msgstr "호스트 %(host)s의 메시지 ID %(message_id)s 처리 및 완료 성공"
 
-#: backend/websocket/inbound_processor.py:522
+#: backend/websocket/inbound_processor.py:518
 #, python-format
 msgid "Failed to process message %s: unknown message type"
 msgstr "메시지 %s 처리에 실패했습니다: 알 수 없는 메시지 유형"
 
-#: backend/websocket/inbound_processor.py:543
+#: backend/websocket/inbound_processor.py:539
 #, python-format
 msgid "Error processing message %(message_id)s for host %(host)s: %(error)s"
 msgstr "%(host)s 호스트에 대한 메시지 %(message_id)s 처리 중 오류 발생: %(error)s"
 
-#: backend/websocket/inbound_processor.py:573
+#: backend/websocket/inbound_processor.py:569
 #, python-format
 msgid "Could not mark SYSTEM_INFO message %s as processing"
 msgstr "SYSTEM_INFO 메시지 %s 를 처리 중으로 표시할 수 없습니다."
 
-#: backend/websocket/inbound_processor.py:605
+#: backend/websocket/inbound_processor.py:601
 #, python-format
 msgid "Error processing SYSTEM_INFO message %(message_id)s: %(error)s"
 msgstr "SYSTEM_INFO 메시지 %(message_id)s 처리 중 오류 발생: %(error)s"

@@ -19,16 +19,21 @@ import TuneIcon from "@mui/icons-material/Tune";
 import WarningIcon from "@mui/icons-material/Warning";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import DownloadIcon from "@mui/icons-material/Download";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { useTranslation } from "react-i18next";
 import {
   ConfigMgmtPrereq,
   getConfigMgmtPrereq,
   installConfigMgmtPrereq,
 } from "../Services/configManagementService";
+import ApplyConfigProfileDialog from "./ApplyConfigProfileDialog";
+import { hasPermission, SecurityRoles } from "../Services/permissions";
 
 interface ConfigManagementPrereqCardProps {
   hostId: string;
   canInstall?: boolean;
+  /** Called after a profile is queued so the run history can refresh. */
+  onProfileApplied?: () => void;
   isHostActive?: boolean;
   isAgentPrivileged?: boolean;
   refreshTrigger?: number;
@@ -48,6 +53,7 @@ const IDLE_POLL_MS = 60000;
 const ConfigManagementPrereqCard: React.FC<ConfigManagementPrereqCardProps> = ({
   hostId,
   canInstall = false,
+  onProfileApplied,
   isHostActive = false,
   isAgentPrivileged = false,
   refreshTrigger = 0,
@@ -58,6 +64,30 @@ const ConfigManagementPrereqCard: React.FC<ConfigManagementPrereqCardProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [prereq, setPrereq] = useState<ConfigMgmtPrereq | null>(null);
   const [installing, setInstalling] = useState(false);
+  const [applyOpen, setApplyOpen] = useState(false);
+  // Checked here rather than threaded down from the page. Applying a profile
+  // is arbitrary code execution, so the UI gate must be the SAME role the API
+  // enforces (RUN_SCRIPT) -- a looser one would only render a button that
+  // 403s. Owning the check locally also keeps four unrelated files (the page,
+  // the tab, the tab-content switch and the shared permissions hook) from
+  // having to know this card exists.
+  const [canApply, setCanApply] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    hasPermission(SecurityRoles.RUN_SCRIPT)
+      .then((allowed) => {
+        if (!cancelled) setCanApply(allowed);
+      })
+      .catch(() => {
+        // Fail CLOSED: if the permission cannot be determined, do not offer
+        // the action.
+        if (!cancelled) setCanApply(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const isInitialLoad = useRef(true);
 
   const load = useCallback(async () => {
@@ -330,6 +360,41 @@ const ConfigManagementPrereqCard: React.FC<ConfigManagementPrereqCardProps> = ({
               </Alert>
             )}
           </Stack>
+        )}
+
+        {/* Applying is only meaningful once an executor is actually present:
+            "satisfied" (installed) or "not_required" (bundled, e.g. DSC).
+            Offering it on a host with no engine would queue work that can only
+            come back as executor_missing. */}
+        {canApply &&
+          prereq &&
+          (prereq.status === "satisfied" ||
+            prereq.status === "not_required") && (
+            <Box sx={{ mt: 3, display: "flex", gap: 1, flexWrap: "wrap" }}>
+              <Button
+                variant="outlined"
+                startIcon={<PlayArrowIcon />}
+                onClick={() => setApplyOpen(true)}
+                disabled={!isHostActive}
+                title={
+                  isHostActive
+                    ? ""
+                    : t("hostDetail.hostInactive", "Host is not active")
+                }
+              >
+                {t("configManagement.applyProfile", "Apply profile")}
+              </Button>
+            </Box>
+          )}
+
+        {prereq && (
+          <ApplyConfigProfileDialog
+            open={applyOpen}
+            hostId={hostId}
+            executor={prereq.executor}
+            onClose={() => setApplyOpen(false)}
+            onApplied={onProfileApplied}
+          />
         )}
 
         {prereq?.can_install && canInstall && (

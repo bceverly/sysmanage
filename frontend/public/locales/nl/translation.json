@@ -3444,6 +3444,19 @@
     "runsEmpty": "Er zijn nog geen configuratieprofielen toegepast op deze host.",
     "runsError": "Kon de geschiedenis van configuratieruns niet laden",
     "runsTitle": "Configuratie Run Geschiedenis",
-    "runNoProfile": "Geen profiel"
+    "runNoProfile": "Geen profiel",
+    "applyAction": "Toepassen",
+    "applyDryRun": "Droge loop (verslag van wijzigingen zonder deze aan te brengen)",
+    "applyDryRunAction": "Wijzigingen voorbeschouwen",
+    "applyError": "Kon het configuratieprofiel niet in de wachtrij plaatsen",
+    "applyHelpAnsible": "Deze host past configuratie toe met ansible-core. Plak een playbook; deze wordt lokaal uitgevoerd op deze host.",
+    "applyHelpDsc": "Deze host past configuratie toe met DSC. Plak een JSON-array van DSC-bronnen.",
+    "applyInvalidJson": "De bronnen moeten een JSON-array zijn van DSC-bronnenobjecten.",
+    "applyLiveWarning": "Dit zal echte wijzigingen aanbrengen op deze host.",
+    "applyPlaybook": "Playbook-inhoud (YAML)",
+    "applyProfile": "Profiel toepassen",
+    "applyProfileName": "Profielnaam (optioneel)",
+    "applyResources": "DSC-bronnen (JSON)",
+    "applyTitle": "Een configuratieprofiel toepassen"
   }
 }
