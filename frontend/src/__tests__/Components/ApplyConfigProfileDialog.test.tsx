@@ -35,7 +35,7 @@ import ApplyConfigProfileDialog from "../../Components/ApplyConfigProfileDialog"
 const base = {
   open: true,
   hostId: "h1",
-  executor: "ansible-core",
+  engines: ["ansible-core"],
   onClose: vi.fn(),
 };
 
@@ -72,6 +72,7 @@ describe("ApplyConfigProfileDialog", () => {
     fireEvent.click(screen.getByText("Preview changes"));
     await waitFor(() =>
       expect(applyConfigProfile).toHaveBeenCalledWith("h1", {
+        engine: "ansible-core",
         playbook: "- hosts: localhost",
         check_mode: true,
       }),
@@ -95,6 +96,7 @@ describe("ApplyConfigProfileDialog", () => {
     fireEvent.click(screen.getByText("Apply"));
     await waitFor(() =>
       expect(applyConfigProfile).toHaveBeenCalledWith("h1", {
+        engine: "ansible-core",
         playbook: "- hosts: localhost",
         check_mode: false,
       }),
@@ -125,6 +127,7 @@ describe("ApplyConfigProfileDialog", () => {
     fireEvent.click(screen.getByText("Preview changes"));
     await waitFor(() =>
       expect(applyConfigProfile).toHaveBeenCalledWith("h1", {
+        engine: "ansible-core",
         playbook: "- hosts: localhost",
         profile_name: "baseline",
         check_mode: true,
@@ -133,11 +136,12 @@ describe("ApplyConfigProfileDialog", () => {
   });
 
   test("a DSC host is asked for resources and sends them parsed", async () => {
-    render(<ApplyConfigProfileDialog {...base} executor="dsc" />);
+    render(<ApplyConfigProfileDialog {...base} engines={["dsc"]} />);
     typeBody('[{"name":"n","type":"T"}]');
     fireEvent.click(screen.getByText("Preview changes"));
     await waitFor(() =>
       expect(applyConfigProfile).toHaveBeenCalledWith("h1", {
+        engine: "dsc",
         resources: [{ name: "n", type: "T" }],
         check_mode: true,
       }),
@@ -145,7 +149,7 @@ describe("ApplyConfigProfileDialog", () => {
   });
 
   test("malformed DSC JSON is caught locally, not sent", async () => {
-    render(<ApplyConfigProfileDialog {...base} executor="dsc" />);
+    render(<ApplyConfigProfileDialog {...base} engines={["dsc"]} />);
     typeBody("{not json");
     fireEvent.click(screen.getByText("Preview changes"));
     expect(
@@ -157,7 +161,7 @@ describe("ApplyConfigProfileDialog", () => {
   });
 
   test("DSC resources that are not an array are rejected", async () => {
-    render(<ApplyConfigProfileDialog {...base} executor="dsc" />);
+    render(<ApplyConfigProfileDialog {...base} engines={["dsc"]} />);
     typeBody('{"name":"n"}');
     fireEvent.click(screen.getByText("Preview changes"));
     expect(
@@ -216,5 +220,41 @@ describe("ApplyConfigProfileDialog", () => {
     fireEvent.click(screen.getByText("Preview changes"));
     await screen.findByText("Failed to queue the configuration profile");
     expect(onClose).not.toHaveBeenCalled();
+  });
+
+  test("no engine selector is shown when there is nothing to choose", () => {
+    render(<ApplyConfigProfileDialog {...base} />);
+    expect(screen.queryByLabelText("Engine")).not.toBeInTheDocument();
+  });
+
+  test("a host with several engines lets the operator pick, and sends the pick", async () => {
+    render(
+      <ApplyConfigProfileDialog
+        {...base}
+        engines={["ansible-core", "puppet"]}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText("Engine"), {
+      target: { value: "puppet" },
+    });
+    typeBody("class x {}");
+    fireEvent.click(screen.getByText("Preview changes"));
+    await waitFor(() =>
+      expect(applyConfigProfile).toHaveBeenCalledWith("h1", {
+        engine: "puppet",
+        playbook: "class x {}",
+        check_mode: true,
+      }),
+    );
+  });
+
+  test("the first ready engine is the default", () => {
+    render(
+      <ApplyConfigProfileDialog
+        {...base}
+        engines={["puppet", "ansible-core"]}
+      />,
+    );
+    expect(screen.getByLabelText("Engine")).toHaveValue("puppet");
   });
 });

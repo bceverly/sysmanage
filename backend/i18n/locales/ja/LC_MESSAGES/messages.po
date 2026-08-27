@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-26 15:50-0400\n"
+"POT-Creation-Date: 2026-08-27 08:21-0400\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1057,7 +1057,7 @@ msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
 msgstr "許可が拒否されました: EDIT_HOST_HOSTNAME ロールが必要です"
 
 #: backend/api/host_hostname.py:75 backend/api/reboot_orchestration.py:119
-#: backend/api/config_mgmt_runs.py:235 backend/api/error_constants.py:43
+#: backend/api/config_mgmt_runs.py:241 backend/api/error_constants.py:43
 #: backend/api/child_host_utils.py:91
 #: backend/api/scripts/routes_executions.py:81
 msgid "Host is not active"
@@ -1748,16 +1748,16 @@ msgstr "無効または期限切れのSAML RelayStateです。"
 msgid "SAML sign-in failed: %s"
 msgstr "SAMLサインインに失敗しました: %s"
 
-#: backend/api/config_mgmt_prereq.py:168 backend/api/packages_operations.py:76
+#: backend/api/config_mgmt_prereq.py:193 backend/api/packages_operations.py:76
 msgid "Permission denied: ADD_PACKAGE role required"
 msgstr "アクセス権限がありません: ADD_PACKAGE ロールが必要です"
 
-#: backend/api/config_mgmt_prereq.py:183
+#: backend/api/config_mgmt_prereq.py:208
 msgid ""
 "No config-management prerequisite install is available for this platform"
 msgstr "このプラットフォームにはconfig管理の事前要件のインストールが利用できません"
 
-#: backend/api/config_mgmt_prereq.py:244
+#: backend/api/config_mgmt_prereq.py:269
 msgid "Installation of the config-management prerequisite was requested"
 msgstr "config管理の事前要件のインストールが要求されました"
 
@@ -3663,20 +3663,25 @@ msgstr "インストール完了が記録されました。"
 msgid "Internal server error"
 msgstr "内部サーバーエラー"
 
-#: backend/api/config_mgmt_runs.py:228
+#: backend/api/config_mgmt_runs.py:234
 #: backend/api/scripts/routes_executions.py:67
 msgid "Permission denied: RUN_SCRIPT role required"
 msgstr "許可が拒否されました: RUN_SCRIPT ロールが必要です"
 
-#: backend/api/config_mgmt_runs.py:250
+#: backend/api/config_mgmt_runs.py:254
+#, python-format
+msgid "Unknown configuration management engine: %s"
+msgstr "未知の構成管理エンジン: %s"
+
+#: backend/api/config_mgmt_runs.py:269
 msgid "This host uses DSC; provide 'resources', not 'playbook'"
 msgstr "このホストはDSCを使用しています； 'リソース' を提供してください、'プレイブック' ではありません"
 
-#: backend/api/config_mgmt_runs.py:257
+#: backend/api/config_mgmt_runs.py:276
 msgid "This host uses ansible-core; provide 'playbook'"
 msgstr "このホストは ansible-core を使用しています； 'プレイブック' を提供してください"
 
-#: backend/api/config_mgmt_runs.py:319
+#: backend/api/config_mgmt_runs.py:338
 msgid "Configuration profile was queued for this host"
 msgstr "このホストは構成プロファイルがキューに入れられました"
 

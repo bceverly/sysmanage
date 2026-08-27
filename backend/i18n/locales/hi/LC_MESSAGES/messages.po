@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-26 15:50-0400\n"
+"POT-Creation-Date: 2026-08-27 08:21-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1080,7 +1080,7 @@ msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
 msgstr "प्रवेश नहीं: EDIT_HOST_HOSTNAME भूमिका की आवश्यकता है"
 
 #: backend/api/host_hostname.py:75 backend/api/reboot_orchestration.py:119
-#: backend/api/config_mgmt_runs.py:235 backend/api/error_constants.py:43
+#: backend/api/config_mgmt_runs.py:241 backend/api/error_constants.py:43
 #: backend/api/child_host_utils.py:91
 #: backend/api/scripts/routes_executions.py:81
 msgid "Host is not active"
@@ -1806,18 +1806,18 @@ msgstr "वैध या समय सीमा पर होने वाला
 msgid "SAML sign-in failed: %s"
 msgstr "SAML साइन-इन विफल: %s"
 
-#: backend/api/config_mgmt_prereq.py:168 backend/api/packages_operations.py:76
+#: backend/api/config_mgmt_prereq.py:193 backend/api/packages_operations.py:76
 msgid "Permission denied: ADD_PACKAGE role required"
 msgstr "प्रवेश नहीं: ADD_PACKAGE रोल की आवश्यकता है"
 
-#: backend/api/config_mgmt_prereq.py:183
+#: backend/api/config_mgmt_prereq.py:208
 msgid ""
 "No config-management prerequisite install is available for this platform"
 msgstr ""
 "इस प्लेटफ़ॉर्म के लिए इस कॉन्फ़िगरेशन मैनेजमेंट पूर्वापेक्षा की स्थापना "
 "उपलब्ध नहीं है"
 
-#: backend/api/config_mgmt_prereq.py:244
+#: backend/api/config_mgmt_prereq.py:269
 msgid "Installation of the config-management prerequisite was requested"
 msgstr "कॉन्फ़िगरेशन मैनेजमेंट पूर्वापेक्षा की स्थापना का अनुरोध किया गया"
 
@@ -3834,21 +3834,26 @@ msgstr "इनस्तॉलेशन पूरा होने का रि�
 msgid "Internal server error"
 msgstr "आंतरिक सर्वर त्रुटि"
 
-#: backend/api/config_mgmt_runs.py:228
+#: backend/api/config_mgmt_runs.py:234
 #: backend/api/scripts/routes_executions.py:67
 msgid "Permission denied: RUN_SCRIPT role required"
 msgstr "प्रवेश नहीं: RUN_SCRIPT भूमिका की आवश्यकता है"
 
-#: backend/api/config_mgmt_runs.py:250
+#: backend/api/config_mgmt_runs.py:254
+#, python-format
+msgid "Unknown configuration management engine: %s"
+msgstr "अज्ञात कॉन्फ़िगरेशन मैनेजमेंट इंजन: %s"
+
+#: backend/api/config_mgmt_runs.py:269
 msgid "This host uses DSC; provide 'resources', not 'playbook'"
 msgstr ""
 "इस होस्ट DSC का उपयोग करता है; 'रिसोर्सेज़' प्रदान करें, न कि 'प्लेबुक'"
 
-#: backend/api/config_mgmt_runs.py:257
+#: backend/api/config_mgmt_runs.py:276
 msgid "This host uses ansible-core; provide 'playbook'"
 msgstr "इस होस्ट ansible-core का उपयोग करता है; 'प्लेबुक' प्रदान करें"
 
-#: backend/api/config_mgmt_runs.py:319
+#: backend/api/config_mgmt_runs.py:338
 msgid "Configuration profile was queued for this host"
 msgstr "इस होस्ट के लिए कॉन्फ़िगरेशन प्रोफ़ाइल को कतार में रखा गया है"
 

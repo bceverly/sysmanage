@@ -25,11 +25,14 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from backend.api.error_constants import error_host_not_found, error_invalid_host_id
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
+from backend.licensing.feature_gate import require_module
+from backend.licensing.features import ModuleCode
 from backend.i18n import _
 from backend.persistence import db as persistence_db
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
+from backend.services import config_mgmt_engines as engines
 from backend.services import config_mgmt_plan_builder as planner
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
@@ -191,6 +194,9 @@ class ConfigProfileApplyRequest(BaseModel):
 
     playbook: Optional[str] = None
     resources: Optional[List[Dict[str, Any]]] = None
+    # Which engine to apply with. Omitted, the host's platform default is used
+    # -- which is what keeps every existing caller working.
+    engine: Optional[str] = None
     profile_name: Optional[str] = None
     check_mode: bool = False
     timeout: Optional[int] = None
@@ -239,11 +245,24 @@ async def apply_config_profile(
         "platform_release": host.platform_release,
         "platform_version": host.platform_version,
     }
-    executor = planner.executor_for(host_info)
+    kind = planner.platform_kind(host_info)
+    executor = (request.engine or "").strip().lower() or engines.default_engine(kind)
+
+    if not engines.is_known(executor):
+        raise HTTPException(
+            status_code=400,
+            detail=_("Unknown configuration management engine: %s") % executor,
+        )
+
+    # Puppet/Salt/Chef are the licensed adapters. Refuse BEFORE queueing, so an
+    # unlicensed install never gets a half-applied profile and an operator gets
+    # a clear reason rather than a far-end failure.
+    if engines.requires_license(executor):
+        require_module(ModuleCode.CONFIG_MANAGEMENT_ENGINE)
 
     # Refuse a payload the host's executor cannot consume, rather than letting
     # it fail at the far end where the reason is far less obvious.
-    if executor == planner.WINDOWS_EXECUTOR:
+    if executor == engines.DSC:
         if not request.resources:
             raise HTTPException(
                 status_code=400,

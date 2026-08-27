@@ -7237,8 +7237,18 @@ single-host apply. Remaining work, in the order it should be done:
 
   1. ~~Apply-profile UI~~ — **DONE 2026-08-27.** The OSS half of 20.1 is now
      complete and drivable from a browser end to end.
-  2. **Per-engine refactor + Puppet/Salt/Chef adapters.** MOVED AHEAD of the
-     Pro+ engine on 2026-08-27, deliberately. The Pro+ engine will encode the
+  2. ~~Per-engine refactor (agent + server + UI) and licensing split~~ —
+     **DONE 2026-08-27.** `ConfigManagementEnginesCard` replaced the
+     single-executor card: one row per engine, quiet inline install only where
+     one applies, installed engines first, licensed adapters labelled
+     "Enterprise" rather than hidden. The apply dialog gained an engine picker
+     that appears only when there is a choice to make. What remains of this
+     item is the ADAPTERS themselves (running Puppet/Salt/Chef), which is
+     Pro+ engine work.
+  3. **Puppet/Salt/Chef adapter runners.** The registry, locator, probe,
+     server matrix, API and UI are all per-engine now; what is missing is the
+     code that actually drives the three engines. MOVED AHEAD of the Pro+
+     engine on 2026-08-27, deliberately. The Pro+ engine will encode the
      executor into profile storage, dispatch and scheduling; if it is built
      while `executor_for()` still returns one executor per PLATFORM, that
      assumption gets baked into a schema and a scheduler and has to be
@@ -7246,14 +7256,14 @@ single-host apply. Remaining work, in the order it should be done:
      builder, prerequisite evaluator, locator, capability probe) plus one card
      — and doing it later is not. Spike each engine first, as ansible-core and
      DSC were.
-  3. **Pro+ `config_management_engine`** — profile authoring/storage,
+  4. **Pro+ `config_management_engine`** — profile authoring/storage,
      assignment per host/tag/site, scheduling, fleet-scale dispatch and job
      templates. Lives in `sysmanage-professional-plus`, and is a substantially
      larger lift than everything landed so far; scope it deliberately rather
      than drifting into it. Build it against the per-engine model from step 2.
-  4. **Remediation playbooks** — largely blocked on 20.2 drift detection, which
+  5. **Remediation playbooks** — largely blocked on 20.2 drift detection, which
      is what determines *what* needs remediating.
-  5. **Final i18n pass** once the remaining UI exists.
+  6. **Final i18n pass** once the remaining UI exists.
 
 **DECIDED 2026-08-26 (Bryan): PULL-style execution, not push.** Ansible is
 conventionally push-based — a control node SSHing into each target — and that
@@ -7783,6 +7793,53 @@ land later without migrating the rows recorded before it existed.
       agents, so on Windows `dsc` becomes the DEFAULT rather than the only
       option — another reason executor selection has to key off the profile
       rather than the platform.
+
+      **LICENSING — DECIDED 2026-08-27 (Bryan).** `config_management_engine` is
+      registered as an **Enterprise** module, but the line is deliberately NOT
+      "config management is Enterprise":
+
+        * **OSS keeps ansible-core, DSC, and ad-hoc single-host apply.** The
+          open-source user's job-to-be-done here is thin — somebody with three
+          hosts already has `ansible-playbook` — and single-host apply is the
+          direct analogue of `execute_script`, which is free. Gating it would
+          be unenforceable (wrap the playbook in a shell script) as well as
+          mean-spirited. The prerequisite install button stays free too: it is
+          just "install a package on a host", which SysManage already does.
+        * **Enterprise gets the Puppet/Salt/Chef adapters**, plus profile
+          storage, assignment per host/tag/site, scheduling and fleet dispatch.
+          Their value is proportional to an existing estate of manifests and
+          cookbooks that nobody accumulates at three hosts, so the adapter is a
+          MIGRATION BRIDGE for an organisation — the classic thing you sell
+          rather than give away. They also carry a permanent maintenance
+          surface across four upstreams; the Salt `result: None`, Puppet
+          `--noop` and Chef missing-JSON traps found in the spike are the shape
+          of that churn, and it is far easier to justify against revenue.
+        * Same split as antivirus, where single-host deploy is OSS and
+          `av_management_engine` owns fleet policy.
+
+      Enforcement, all keyed off ONE rule
+      (`config_mgmt_engines.requires_license`) so the place that offers a
+      button and the place that refuses a request cannot drift:
+
+        * the apply endpoint refuses a licensed engine **before queueing** —
+          gating after dispatch would leave a half-applied profile and report
+          success;
+        * an unknown engine is a **400, not a 403** — nonsense is rejected as
+          nonsense rather than upsold as a licensing problem;
+        * licensed engines never offer an install button (it would 403 on
+          press) but their rows are **still returned**, so a Puppet shop
+          evaluating SysManage sees that Puppet is supported rather than
+          concluding it is missing.
+
+      Two open questions this decision surfaces, neither blocking:
+        * **The crutch can become a prosthetic.** If SysManage runs a customer's
+          Puppet forever, the migration to native capabilities never happens.
+          If the intent is transition, the product should say so — or better,
+          eventually offer "here is what this profile looks like natively".
+        * `require_module` (imperative, payload-dependent) was added to
+          `feature_gate.py` for this. Decorators and `Depends` both decide
+          before the handler sees the request, which cannot express "free with
+          ansible, licensed with Puppet".
 
       **Prerequisite UI: per-engine, but an absent engine is NOT a
       deficiency.** DECIDED 2026-08-27 (Bryan): each engine gets its own

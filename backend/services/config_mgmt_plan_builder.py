@@ -92,6 +92,21 @@ def _linux_distro_family(host_info: Dict[str, Any]) -> str:
     return ""
 
 
+def platform_kind(host_info: Dict[str, Any]) -> str:
+    """Public form of the platform bucket.
+
+    Exposed because the per-engine evaluator needs the same normalisation and
+    reaching into another module's private helper is how two copies of the
+    rules start disagreeing.
+    """
+    return _platform_kind(host_info)
+
+
+def linux_distro_family(host_info: Dict[str, Any]) -> str:
+    """Public form of the package-manager family (empty when undeterminable)."""
+    return _linux_distro_family(host_info)
+
+
 def executor_for(host_info: Dict[str, Any]) -> str:
     """Which executor this host's config-management path uses."""
     return (

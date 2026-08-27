@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-26 15:50-0400\n"
+"POT-Creation-Date: 2026-08-27 08:21-0400\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1054,7 +1054,7 @@ msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
 msgstr "权限 denied: 需要 EDIT_HOST_HOSTNAME 角色"
 
 #: backend/api/host_hostname.py:75 backend/api/reboot_orchestration.py:119
-#: backend/api/config_mgmt_runs.py:235 backend/api/error_constants.py:43
+#: backend/api/config_mgmt_runs.py:241 backend/api/error_constants.py:43
 #: backend/api/child_host_utils.py:91
 #: backend/api/scripts/routes_executions.py:81
 msgid "Host is not active"
@@ -1728,16 +1728,16 @@ msgstr "无效或已过期的SAML RelayState。"
 msgid "SAML sign-in failed: %s"
 msgstr "SAML登录失败：%s"
 
-#: backend/api/config_mgmt_prereq.py:168 backend/api/packages_operations.py:76
+#: backend/api/config_mgmt_prereq.py:193 backend/api/packages_operations.py:76
 msgid "Permission denied: ADD_PACKAGE role required"
 msgstr "缺少 ADD_PACKAGE 角色，无法执行操作"
 
-#: backend/api/config_mgmt_prereq.py:183
+#: backend/api/config_mgmt_prereq.py:208
 msgid ""
 "No config-management prerequisite install is available for this platform"
 msgstr "此平台未提供配置管理依赖项安装"
 
-#: backend/api/config_mgmt_prereq.py:244
+#: backend/api/config_mgmt_prereq.py:269
 msgid "Installation of the config-management prerequisite was requested"
 msgstr "安装配置管理依赖项被请求"
 
@@ -3619,20 +3619,25 @@ msgstr "安装完成记录"
 msgid "Internal server error"
 msgstr "内部服务器错误"
 
-#: backend/api/config_mgmt_runs.py:228
+#: backend/api/config_mgmt_runs.py:234
 #: backend/api/scripts/routes_executions.py:67
 msgid "Permission denied: RUN_SCRIPT role required"
 msgstr "权限 denied: 需要 RUN_SCRIPT 角色"
 
-#: backend/api/config_mgmt_runs.py:250
+#: backend/api/config_mgmt_runs.py:254
+#, python-format
+msgid "Unknown configuration management engine: %s"
+msgstr "未知的配置管理引擎: %s"
+
+#: backend/api/config_mgmt_runs.py:269
 msgid "This host uses DSC; provide 'resources', not 'playbook'"
 msgstr "该主机使用 DSC；请提供 '资源'，而非 '剧本' "
 
-#: backend/api/config_mgmt_runs.py:257
+#: backend/api/config_mgmt_runs.py:276
 msgid "This host uses ansible-core; provide 'playbook'"
 msgstr "该主机使用 ansible-core；请提供 '剧本'"
 
-#: backend/api/config_mgmt_runs.py:319
+#: backend/api/config_mgmt_runs.py:338
 msgid "Configuration profile was queued for this host"
 msgstr "该主机已排队配置"
 

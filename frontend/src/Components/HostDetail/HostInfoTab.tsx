@@ -31,7 +31,7 @@ import StopIcon from "@mui/icons-material/Stop";
 import { useTranslation } from "react-i18next";
 import MaintenanceWindowCard from "../MaintenanceWindowCard";
 import HostCapabilitiesCard from "./HostCapabilitiesCard";
-import ConfigManagementPrereqCard from "../ConfigManagementPrereqCard";
+import ConfigManagementEnginesCard from "../ConfigManagementEnginesCard";
 import ConfigProfileRunHistory from "../ConfigProfileRunHistory";
 import { hasPermissionSync, SecurityRoles } from "../../Services/permissions";
 import { SysManageHost } from "../../Services/hosts";
@@ -832,7 +832,7 @@ const HostInfoTab: React.FC<HostInfoTabProps> = ({
 
       {/* Config-management prerequisite (Phase 20.1) */}
       <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex" }}>
-        <ConfigManagementPrereqCard
+        <ConfigManagementEnginesCard
           hostId={hostId || ""}
           canInstall={canAddPackage}
           onProfileApplied={() => setConfigRunsRefresh((n) => n + 1)}

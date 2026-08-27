@@ -30,8 +30,9 @@ WHAT THIS COSTS, STATED PLAINLY
 
 import fnmatch
 import re
-from typing import Any, Dict, Iterable, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
+from backend.services import config_mgmt_engines as engines
 from backend.services import config_mgmt_plan_builder as planner
 
 # Status values the UI renders.  Deliberately three, not two: "not_required"
@@ -163,3 +164,155 @@ def evaluate(
         "detail": None,
         "package_name": found.get("package_name"),
     }
+
+
+# --- per-engine evaluation (Phase 20.1 multi-engine refactor) ----------------
+#
+# The single-engine ``evaluate`` above answers "is this host's default executor
+# ready", which was the right question while there was one engine per platform.
+# Once an operator can choose, the question becomes "which engines are ready
+# here" -- a LIST, because a host may have several and a profile picks one.
+
+
+def engine_package_pattern(engine: str, host_info: Dict[str, Any]) -> Optional[str]:
+    """The installed-package name to look for, per engine, as an fnmatch glob."""
+    if engine == engines.ANSIBLE:
+        # Keeps the measured per-platform quirks (FreeBSD's py3* prefix,
+        # Homebrew's bundle name) in one place rather than duplicating them.
+        return planner.expected_package_pattern(host_info)
+
+    kind = planner.platform_kind(host_info)
+    if kind == "windows":
+        # Windows package inventory does not report these the way a package
+        # manager would, so there is nothing reliable to match on. That is a
+        # DETECTION limit, not a platform limit -- Puppet, Salt and Chef all
+        # ship Windows agents and run there perfectly well.
+        return None
+
+    family = planner.linux_distro_family(host_info) if kind == "linux" else kind
+    if not family:
+        return None
+    package = engines.package_for(engine, family)
+    return package
+
+
+def evaluate_engine(
+    engine: str,
+    host_info: Dict[str, Any],
+    installed_packages: Optional[Iterable[Dict[str, Any]]] = None,
+) -> Dict[str, Any]:
+    """Readiness of ONE named engine on this host."""
+    kind = planner.platform_kind(host_info)
+
+    if engine not in engines.applicable(kind):
+        return {
+            "engine": engine,
+            "status": STATUS_UNSUPPORTED,
+            "installed_version": None,
+            "can_install": False,
+            "detail": "not_applicable_on_platform",
+        }
+
+    if engine in engines.VENDORED:
+        # Ships with the agent. Reported as not_required rather than satisfied
+        # so the UI can say "included with the agent" instead of implying
+        # somebody installed it.
+        return {
+            "engine": engine,
+            "status": STATUS_NOT_REQUIRED,
+            "installed_version": None,
+            "can_install": False,
+            "detail": "bundled_with_agent",
+        }
+
+    pattern = engine_package_pattern(engine, host_info)
+    if pattern is None:
+        # Three different situations collapse to "no pattern", and the UI must
+        # not describe them identically:
+        #
+        #   * on Windows we cannot READ the inventory for these engines, even
+        #     though they run there fine -- a detection limit;
+        #   * on a distro measured NOT to carry the package (Salt on Ubuntu),
+        #     an install genuinely cannot work from the default repos;
+        #   * anywhere else, we simply have not measured it yet.
+        #
+        # Calling the first of these "not available on this platform" would
+        # contradict the decision that Windows is not locked to DSC.
+        detail = (
+            "detection_unavailable_on_windows"
+            if kind == "windows"
+            else "no_known_package_for_platform"
+        )
+        return {
+            "engine": engine,
+            "status": STATUS_UNSUPPORTED,
+            "installed_version": None,
+            "can_install": False,
+            "detail": detail,
+        }
+
+    found = find_installed(installed_packages or [], pattern)
+    if not found:
+        return {
+            "engine": engine,
+            "status": STATUS_MISSING,
+            "installed_version": None,
+            "can_install": True,
+            "detail": "not_installed",
+            "package_pattern": pattern,
+        }
+
+    version = (found.get("package_version") or "").strip()
+    # Only ansible-core has a measured minimum; the others have no floor we
+    # have established, and inventing one would strand working hosts.
+    if engine == engines.ANSIBLE and not meets_minimum(
+        version, planner.MIN_ANSIBLE_CORE
+    ):
+        return {
+            "engine": engine,
+            "status": STATUS_TOO_OLD,
+            "installed_version": version or None,
+            "minimum_version": planner.MIN_ANSIBLE_CORE,
+            "can_install": True,
+            "detail": "below_minimum",
+            "package_name": found.get("package_name"),
+        }
+
+    return {
+        "engine": engine,
+        "status": STATUS_SATISFIED,
+        "installed_version": version or None,
+        "can_install": False,
+        "detail": None,
+        "package_name": found.get("package_name"),
+    }
+
+
+def evaluate_all(
+    host_info: Dict[str, Any],
+    installed_packages: Optional[Iterable[Dict[str, Any]]] = None,
+) -> List[Dict[str, Any]]:
+    """Readiness of every engine that could run on this host.
+
+    Ordered so the engines the host ACTUALLY HAS come first: the card should
+    lead with what is available, not with a list of things the operator is
+    "missing". An absent engine is not a deficiency -- a host without Puppet
+    simply does not use Puppet.
+    """
+    packages = list(installed_packages or [])
+    kind = planner.platform_kind(host_info)
+    results = [
+        evaluate_engine(engine, host_info, packages)
+        for engine in engines.applicable(kind)
+    ]
+    # Mark the licensed adapters so the UI can label them instead of offering
+    # an install button that would 403 on press. Reported as a FLAG rather than
+    # by hiding the row: a Puppet shop evaluating SysManage should be able to
+    # see that Puppet is supported, not conclude that it is missing.
+    for row in results:
+        row["requires_license"] = engines.requires_license(row["engine"])
+        if row["requires_license"]:
+            row["can_install"] = False
+
+    ready = (STATUS_SATISFIED, STATUS_NOT_REQUIRED)
+    return sorted(results, key=lambda r: (r["status"] not in ready, r["engine"]))

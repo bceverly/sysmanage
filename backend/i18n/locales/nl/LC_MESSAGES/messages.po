@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-26 15:50-0400\n"
+"POT-Creation-Date: 2026-08-27 08:21-0400\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1072,7 +1072,7 @@ msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
 msgstr "Toegang geweigerd: EDIT_HOST_HOSTNAME rol vereist"
 
 #: backend/api/host_hostname.py:75 backend/api/reboot_orchestration.py:119
-#: backend/api/config_mgmt_runs.py:235 backend/api/error_constants.py:43
+#: backend/api/config_mgmt_runs.py:241 backend/api/error_constants.py:43
 #: backend/api/child_host_utils.py:91
 #: backend/api/scripts/routes_executions.py:81
 msgid "Host is not active"
@@ -1797,18 +1797,18 @@ msgstr "Ongeldig of verlopen SAML RelayState."
 msgid "SAML sign-in failed: %s"
 msgstr "SAML inloggen mislukt: %s"
 
-#: backend/api/config_mgmt_prereq.py:168 backend/api/packages_operations.py:76
+#: backend/api/config_mgmt_prereq.py:193 backend/api/packages_operations.py:76
 msgid "Permission denied: ADD_PACKAGE role required"
 msgstr "Toegang geweigerd: rol ADD_PACKAGE vereist"
 
-#: backend/api/config_mgmt_prereq.py:183
+#: backend/api/config_mgmt_prereq.py:208
 msgid ""
 "No config-management prerequisite install is available for this platform"
 msgstr ""
 "Er is geen installatie van vereisten voor configuratiebeheer beschikbaar "
 "voor deze platform"
 
-#: backend/api/config_mgmt_prereq.py:244
+#: backend/api/config_mgmt_prereq.py:269
 msgid "Installation of the config-management prerequisite was requested"
 msgstr "De installatie van de vereiste voor configuratiebeheer is aangevraagd"
 
@@ -3808,20 +3808,25 @@ msgstr "Installatie voltooid geregistreerd"
 msgid "Internal server error"
 msgstr "Interne serverfout"
 
-#: backend/api/config_mgmt_runs.py:228
+#: backend/api/config_mgmt_runs.py:234
 #: backend/api/scripts/routes_executions.py:67
 msgid "Permission denied: RUN_SCRIPT role required"
 msgstr "Toegang geweigerd: RUN_SCRIPT rol vereist"
 
-#: backend/api/config_mgmt_runs.py:250
+#: backend/api/config_mgmt_runs.py:254
+#, python-format
+msgid "Unknown configuration management engine: %s"
+msgstr "Onbekende configuratiebeheersengine: %s"
+
+#: backend/api/config_mgmt_runs.py:269
 msgid "This host uses DSC; provide 'resources', not 'playbook'"
 msgstr "Deze host gebruikt DSC; geef 'bronnen' en niet 'playbook'"
 
-#: backend/api/config_mgmt_runs.py:257
+#: backend/api/config_mgmt_runs.py:276
 msgid "This host uses ansible-core; provide 'playbook'"
 msgstr "Deze host gebruikt ansible-core; geef 'playbook'"
 
-#: backend/api/config_mgmt_runs.py:319
+#: backend/api/config_mgmt_runs.py:338
 msgid "Configuration profile was queued for this host"
 msgstr "Configuratieprofiel is in de wachtrij voor deze host"
 

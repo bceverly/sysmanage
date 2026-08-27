@@ -22,8 +22,14 @@ import { applyConfigProfile } from "../Services/configManagementService";
 interface ApplyConfigProfileDialogProps {
   open: boolean;
   hostId: string;
-  /** "ansible-core" or "dsc" -- decides which field the server expects. */
-  executor: string;
+  /**
+   * Engines that are actually ready on this host, readiest first.
+   *
+   * A list, not one executor: a host may have several installed and the
+   * operator picks. The chosen engine decides which field the server expects
+   * (DSC takes `resources`, everything else takes a playbook/manifest).
+   */
+  engines: string[];
   onClose: () => void;
   /** Called after the profile is queued, so the run history can refresh. */
   onApplied?: () => void;
@@ -32,12 +38,13 @@ interface ApplyConfigProfileDialogProps {
 const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
   open,
   hostId,
-  executor,
+  engines,
   onClose,
   onApplied,
 }) => {
   const { t } = useTranslation();
-  const isDsc = executor === "dsc";
+  const [engine, setEngine] = useState(engines[0] || "ansible-core");
+  const isDsc = engine === "dsc";
   const [body, setBody] = useState("");
   const [profileName, setProfileName] = useState("");
   // Defaults to a DRY RUN on purpose. This dialog runs arbitrary code as root
@@ -48,6 +55,7 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   const reset = () => {
+    setEngine(engines[0] || "ansible-core");
     setBody("");
     setProfileName("");
     setCheckMode(true);
@@ -75,6 +83,7 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
         resources = parsed as Record<string, unknown>[];
       }
       await applyConfigProfile(hostId, {
+        engine,
         ...(isDsc ? { resources } : { playbook: body }),
         ...(profileName.trim() ? { profile_name: profileName.trim() } : {}),
         check_mode: checkMode,
@@ -126,6 +135,25 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
                   "This host applies configuration with ansible-core. Paste a playbook; it runs locally against this host only.",
                 )}
           </Typography>
+
+          {engines.length > 1 && (
+            <TextField
+              select
+              label={t("configManagement.applyEngine", "Engine")}
+              value={engine}
+              onChange={(event) => setEngine(event.target.value)}
+              size="small"
+              fullWidth
+              disabled={submitting}
+              slotProps={{ select: { native: true } }}
+            >
+              {engines.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </TextField>
+          )}
 
           <TextField
             label={t(

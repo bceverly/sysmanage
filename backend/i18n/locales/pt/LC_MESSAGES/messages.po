@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-26 15:50-0400\n"
+"POT-Creation-Date: 2026-08-27 08:21-0400\n"
 "Language: pt\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1076,7 +1076,7 @@ msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
 msgstr "Permissão negada: role EDIT_HOST_HOSTNAME requerida"
 
 #: backend/api/host_hostname.py:75 backend/api/reboot_orchestration.py:119
-#: backend/api/config_mgmt_runs.py:235 backend/api/error_constants.py:43
+#: backend/api/config_mgmt_runs.py:241 backend/api/error_constants.py:43
 #: backend/api/child_host_utils.py:91
 #: backend/api/scripts/routes_executions.py:81
 msgid "Host is not active"
@@ -1808,18 +1808,18 @@ msgstr "SAML RelayState inválido ou expirado."
 msgid "SAML sign-in failed: %s"
 msgstr "Falha no SAML sign-in: %s"
 
-#: backend/api/config_mgmt_prereq.py:168 backend/api/packages_operations.py:76
+#: backend/api/config_mgmt_prereq.py:193 backend/api/packages_operations.py:76
 msgid "Permission denied: ADD_PACKAGE role required"
 msgstr "Permissão negada: role ADD_PACKAGE requerida"
 
-#: backend/api/config_mgmt_prereq.py:183
+#: backend/api/config_mgmt_prereq.py:208
 msgid ""
 "No config-management prerequisite install is available for this platform"
 msgstr ""
 "Não está disponível nenhuma instalação de pré-requisito de gerenciamento de "
 "configuração para esta plataforma"
 
-#: backend/api/config_mgmt_prereq.py:244
+#: backend/api/config_mgmt_prereq.py:269
 msgid "Installation of the config-management prerequisite was requested"
 msgstr ""
 "Instalação do pré-requisito de gerenciamento de configuração foi solicitada"
@@ -3840,20 +3840,25 @@ msgstr "Registro de conclusão da instalação gravado"
 msgid "Internal server error"
 msgstr "Erro interno do servidor"
 
-#: backend/api/config_mgmt_runs.py:228
+#: backend/api/config_mgmt_runs.py:234
 #: backend/api/scripts/routes_executions.py:67
 msgid "Permission denied: RUN_SCRIPT role required"
 msgstr "Permissão negada: role RUN_SCRIPT requerida"
 
-#: backend/api/config_mgmt_runs.py:250
+#: backend/api/config_mgmt_runs.py:254
+#, python-format
+msgid "Unknown configuration management engine: %s"
+msgstr "Desconhecida ferramenta de gerenciamento de configuração: %s"
+
+#: backend/api/config_mgmt_runs.py:269
 msgid "This host uses DSC; provide 'resources', not 'playbook'"
 msgstr "Este host utiliza DSC; forneça 'recursos', não 'playbook'"
 
-#: backend/api/config_mgmt_runs.py:257
+#: backend/api/config_mgmt_runs.py:276
 msgid "This host uses ansible-core; provide 'playbook'"
 msgstr "Este host utiliza ansible-core; forneça 'playbook'"
 
-#: backend/api/config_mgmt_runs.py:319
+#: backend/api/config_mgmt_runs.py:338
 msgid "Configuration profile was queued for this host"
 msgstr "Perfil de configuração foi enfileirado para este host"
 

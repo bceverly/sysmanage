@@ -413,3 +413,85 @@ class TestApply:
                     _user(SecurityRoles.RUN_SCRIPT),
                 )
         assert exc.value.status_code == 404
+
+
+class TestApplyLicensing:
+    """Puppet/Salt/Chef are gated; ansible-core and DSC are not.
+
+    The refusal happens BEFORE the message is queued. Gating after dispatch
+    would leave a half-applied profile on the host and report success.
+    """
+
+    @pytest.mark.asyncio
+    async def test_ansible_needs_no_license(self):
+        session = _Session(Host=[_host()])
+        with _Env() as env:
+            out = await api.apply_config_profile(
+                str(HOST_ID),
+                _req(playbook="- hosts: all"),
+                session,
+                _user(SecurityRoles.RUN_SCRIPT),
+            )
+        assert out.queued is True
+        assert len(env.enqueued) == 1
+
+    @pytest.mark.asyncio
+    async def test_an_unlicensed_puppet_apply_is_refused_before_queueing(self):
+        session = _Session(Host=[_host()])
+        with _Env() as env, patch(
+            "backend.api.config_mgmt_runs.require_module",
+            side_effect=HTTPException(status_code=403, detail="pro_plus_required"),
+        ):
+            with pytest.raises(HTTPException) as exc:
+                await api.apply_config_profile(
+                    str(HOST_ID),
+                    _req(playbook="class x {}", engine="puppet"),
+                    session,
+                    _user(SecurityRoles.RUN_SCRIPT),
+                )
+        assert exc.value.status_code == 403
+        assert env.enqueued == [], "nothing may be dispatched when unlicensed"
+
+    @pytest.mark.asyncio
+    async def test_a_licensed_puppet_apply_goes_through(self):
+        session = _Session(Host=[_host()])
+        with _Env() as env, patch(
+            "backend.api.config_mgmt_runs.require_module", return_value=None
+        ):
+            out = await api.apply_config_profile(
+                str(HOST_ID),
+                _req(playbook="class x {}", engine="puppet"),
+                session,
+                _user(SecurityRoles.RUN_SCRIPT),
+            )
+        assert out.queued is True
+        assert env.audits[0]["details"]["executor"] == "puppet"
+
+    @pytest.mark.asyncio
+    async def test_an_unknown_engine_is_a_400_not_a_403(self):
+        # Rejected as nonsense, not upsold as a licensing problem.
+        session = _Session(Host=[_host()])
+        with _Env() as env:
+            with pytest.raises(HTTPException) as exc:
+                await api.apply_config_profile(
+                    str(HOST_ID),
+                    _req(playbook="x", engine="terraform"),
+                    session,
+                    _user(SecurityRoles.RUN_SCRIPT),
+                )
+        assert exc.value.status_code == 400
+        assert env.enqueued == []
+
+    @pytest.mark.asyncio
+    async def test_the_engine_is_recorded_so_history_shows_which_ran(self):
+        session = _Session(Host=[_host()])
+        with _Env() as env, patch(
+            "backend.api.config_mgmt_runs.require_module", return_value=None
+        ):
+            await api.apply_config_profile(
+                str(HOST_ID),
+                _req(playbook="x", engine="salt"),
+                session,
+                _user(SecurityRoles.RUN_SCRIPT),
+            )
+        assert env.audits[0]["details"]["executor"] == "salt"

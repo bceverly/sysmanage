@@ -291,3 +291,57 @@ class TestInstallRoute:
                 )
         assert exc.value.status_code == 400
         assert env.enqueued == []
+
+
+class TestEnginesEndpoint:
+    """The multi-engine view (Phase 20.1).
+
+    The inventory prefilter exists so a desktop's several-thousand-row package
+    list is not dragged into memory. Querying once per engine would undo that,
+    so the route de-duplicates patterns before it reads.
+    """
+
+    @pytest.mark.asyncio
+    async def test_lists_every_applicable_engine_readiest_first(self):
+        session = _FakeSession(
+            Host=[_host()],
+            SoftwarePackage=[_pkg("puppet-agent", "8.10.0", "apt")],
+        )
+        out = await api.list_config_mgmt_engines(str(HOST_ID), session)
+        assert out.host_id == str(HOST_ID)
+        assert out.default_engine == "ansible-core"
+        names = [e.engine for e in out.engines]
+        assert "dsc" not in names, "dsc must not be offered off Windows"
+        assert out.engines[0].engine == "puppet"
+        assert out.engines[0].status == "satisfied"
+
+    @pytest.mark.asyncio
+    async def test_windows_leads_with_the_bundled_engine(self):
+        session = _FakeSession(Host=[_host(platform="Windows")], SoftwarePackage=[])
+        out = await api.list_config_mgmt_engines(str(HOST_ID), session)
+        assert out.default_engine == "dsc"
+        assert out.engines[0].engine == "dsc"
+        assert out.engines[0].status == "not_required"
+
+    @pytest.mark.asyncio
+    async def test_the_inventory_is_not_queried_once_per_engine(self):
+        # Four engines apply on Linux but they do not need four reads; the
+        # route collapses duplicate patterns first.
+        session = _FakeSession(Host=[_host()], SoftwarePackage=[])
+        await api.list_config_mgmt_engines(str(HOST_ID), session)
+        package_queries = [q for q in session.queries if q is not session.queries[0]]
+        assert (
+            len(package_queries) <= 3
+        ), f"one query per engine defeats the prefilter: {len(package_queries)}"
+
+    @pytest.mark.asyncio
+    async def test_malformed_host_id_is_a_400(self):
+        with pytest.raises(HTTPException) as exc:
+            await api.list_config_mgmt_engines("nope", _FakeSession())
+        assert exc.value.status_code == 400
+
+    @pytest.mark.asyncio
+    async def test_unknown_host_is_a_404(self):
+        with pytest.raises(HTTPException) as exc:
+            await api.list_config_mgmt_engines(str(HOST_ID), _FakeSession(Host=[]))
+        assert exc.value.status_code == 404

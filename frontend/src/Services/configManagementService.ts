@@ -114,6 +114,7 @@ export const getConfigProfileRun = async (
 };
 
 export interface ConfigProfileApplyRequest {
+  engine?: string;
   playbook?: string;
   resources?: Record<string, unknown>[];
   profile_name?: string;
@@ -141,6 +142,42 @@ export const applyConfigProfile = async (
   const response = await axiosInstance.post<ConfigProfileApplyResult>(
     `/api/v1/hosts/${hostId}/config-management/apply`,
     request,
+  );
+  return response.data;
+};
+
+/** Readiness of one engine on one host. */
+export interface ConfigMgmtEngineStatus {
+  engine: string;
+  status: ConfigMgmtPrereqStatus;
+  installed_version: string | null;
+  minimum_version: string | null;
+  can_install: boolean;
+  detail: string | null;
+  package_name: string | null;
+  /** Puppet/Salt/Chef: supported, but only with an Enterprise licence. */
+  requires_license: boolean;
+}
+
+export interface ConfigMgmtEngines {
+  host_id: string;
+  default_engine: string;
+  engines: ConfigMgmtEngineStatus[];
+}
+
+/**
+ * Every engine that could run on a host, readiest first.
+ *
+ * Returns a list rather than one executor because a host may have several
+ * installed and the profile picks which applies. Licensed engines are included
+ * with `requires_license` set rather than omitted: hiding them would tell a
+ * Puppet shop that Puppet is unsupported when it is actually a paid adapter.
+ */
+export const getConfigMgmtEngines = async (
+  hostId: string,
+): Promise<ConfigMgmtEngines> => {
+  const response = await axiosInstance.get<ConfigMgmtEngines>(
+    `/api/v1/hosts/${hostId}/config-management/engines`,
   );
   return response.data;
 };

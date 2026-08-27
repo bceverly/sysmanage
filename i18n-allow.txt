@@ -35,6 +35,11 @@ re:^WSL: [\w.\-]+, LXD: [\w.:\-]+$
 re:^\{\{minutes\}\}m \{\{seconds\}\}s$
 # "{{target}} (Professional)" — the parenthetical is a licence tier name.
 re:^\{\{target\}\} \((Community|Professional|Enterprise)\)$
+# The bare "Enterprise" chip on the config-management engine rows (Phase 20.1)
+# is the same licence-tier proper noun, standing alone rather than inside the
+# parenthetical above. An exact key rather than a value regex, so it cannot
+# accidentally bless the word "Enterprise" in ordinary prose elsewhere.
+configManagement.engineEnterprise
 
 # --- shells, hypervisors, protocols, package managers -----------------------
 # Whole-value matches only (fullmatch).  These are names, not words: no locale

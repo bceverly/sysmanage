@@ -256,6 +256,22 @@ class ModuleCode(str, Enum):
     OCI_PROXY_ENGINE = "oci_proxy_engine"  # 17.2 container image content
     IMAGE_MODE_ENGINE = "image_mode_engine"  # 17.3 bootc / rpm-ostree hosts
 
+    # Phase 20.1 Enterprise module — Configuration Management.
+    #
+    # DECIDED 2026-08-27 (Bryan). The line is deliberately NOT "config
+    # management is Enterprise": the OSS build keeps ansible-core plus ad-hoc
+    # SINGLE-HOST apply, because that is the direct analogue of execute_script
+    # (which is free) and gating it would be both petty and trivially defeated
+    # by wrapping a playbook in a shell script.
+    #
+    # What this engine gates is the part with a genuine enterprise value
+    # curve: the Puppet/Salt/Chef adapters, whose worth is proportional to an
+    # existing estate of manifests and cookbooks nobody accumulates at three
+    # hosts, plus profile storage, assignment per host/tag/site, scheduling and
+    # fleet dispatch. Same split as antivirus, where single-host deploy is OSS
+    # and av_management_engine owns fleet policy.
+    CONFIG_MANAGEMENT_ENGINE = "config_management_engine"
+
     # Phase 18 — Provisioning & Discovery.  One engine serves both the Pro+
     # template surface and the Enterprise provisioning/compute/discovery surface;
     # it loads at the Professional tier (see TIER_MODULES) and the Enterprise-only
@@ -467,6 +483,10 @@ TIER_MODULES = {
         # Phase 12.5 — Child-host result handlers (tier per the engine's own
         # metadata.json: "enterprise")
         ModuleCode.CHILD_HOST_HANDLERS_ENGINE,
+        # Phase 20.1 — Configuration Management (Puppet/Salt/Chef adapters,
+        # profile storage, assignment, scheduling, fleet dispatch). OSS keeps
+        # ansible-core + single-host apply; see the ModuleCode comment.
+        ModuleCode.CONFIG_MANAGEMENT_ENGINE,
         # Phase 16 — Content Lifecycle Management
         ModuleCode.CONTENT_LIFECYCLE_ENGINE,
         # Phase 17 — Content Distribution & Image-Mode Hosts

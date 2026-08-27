@@ -158,6 +158,30 @@ def _check_module_loaded_sync(module_code: ModuleCode) -> None:
         )
 
 
+def require_module(module: ModuleCode | str) -> None:
+    """Imperative form of ``requires_module``, for gates that depend on INPUT.
+
+    The decorator and the ``Depends`` factory both decide before the handler
+    sees the request, which is fine when a whole endpoint is licensed. It does
+    not work when the gate depends on the PAYLOAD -- applying a config profile
+    is free with ansible-core and licensed with Puppet/Salt/Chef, so the engine
+    named in the body decides. Calling this inline keeps that decision in one
+    place instead of tempting callers into ``_check_module_*`` privates.
+
+    Raises:
+        HTTPException: 403 if unlicensed, 503 if licensed but not loaded.
+    """
+    if isinstance(module, str):
+        try:
+            module_code = ModuleCode(module)
+        except ValueError as exc:
+            raise ValueError(f"Unknown module code: {module}") from exc
+    else:
+        module_code = module
+    _check_module_licensed_http(module_code)
+    _check_module_loaded_http(module_code)
+
+
 def requires_module(module: ModuleCode | str) -> Callable:
     """
     Decorator to require a specific Pro+ module.

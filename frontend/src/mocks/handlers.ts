@@ -275,6 +275,28 @@ export const handlers = [
     });
   }),
 
+  // Config-management engines (Phase 20.1). Defaults to a ready ansible-core
+  // so host-detail tests are not forced to care about a card they are not
+  // exercising.
+  http.get("*/api/v1/hosts/*/config-management/engines", () => {
+    return HttpResponse.json({
+      host_id: "test-host",
+      default_engine: "ansible-core",
+      engines: [
+        {
+          engine: "ansible-core",
+          status: "satisfied",
+          installed_version: "2.20.1",
+          minimum_version: "2.20",
+          can_install: false,
+          detail: null,
+          package_name: "ansible-core",
+          requires_license: false,
+        },
+      ],
+    });
+  }),
+
   // Config-management run history (Phase 20.1).
   http.get("*/api/v1/hosts/*/config-management/runs", () => {
     return HttpResponse.json([]);

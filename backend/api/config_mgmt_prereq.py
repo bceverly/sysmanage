@@ -32,6 +32,7 @@ from backend.persistence import db as persistence_db
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
+from backend.services import config_mgmt_engines as engines
 from backend.services import config_mgmt_plan_builder as planner
 from backend.services import config_mgmt_prereq as prereq
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
@@ -62,6 +63,30 @@ class ConfigMgmtPrereqResponse(BaseModel):
     can_install: bool = False
     detail: Optional[str] = None
     package_name: Optional[str] = None
+
+
+class ConfigMgmtEngineStatus(BaseModel):
+    """Readiness of one engine on one host."""
+
+    engine: str
+    status: str
+    installed_version: Optional[str] = None
+    minimum_version: Optional[str] = None
+    can_install: bool = False
+    detail: Optional[str] = None
+    package_name: Optional[str] = None
+    # True for the Puppet/Salt/Chef adapters. The row is still returned so an
+    # evaluator can SEE the engine is supported; it just cannot be installed
+    # or dispatched without the config_management_engine module.
+    requires_license: bool = False
+
+
+class ConfigMgmtEnginesResponse(BaseModel):
+    """Every engine that could run on a host, readiest first."""
+
+    host_id: str
+    default_engine: str
+    engines: List[ConfigMgmtEngineStatus] = []
 
 
 class ConfigMgmtPrereqInstallResponse(BaseModel):
@@ -242,4 +267,44 @@ async def install_config_mgmt_prerequisite(
         host_id=str(host.id),
         queued=True,
         message=_("Installation of the config-management prerequisite was requested"),
+    )
+
+
+@router.get(
+    "/hosts/{host_id}/config-management/engines",
+    response_model=ConfigMgmtEnginesResponse,
+    dependencies=[Depends(JWTBearer())],
+)
+async def list_config_mgmt_engines(
+    host_id: str,
+    db_session: Session = Depends(get_tenant_db),
+):
+    """Which config-management engines this host can run, and their readiness.
+
+    Returns a LIST rather than the single executor the older endpoint reports:
+    a host may have several engines installed, and which one applies is a
+    property of the profile. The list is ordered readiest-first so the UI leads
+    with what the host has rather than with what it lacks.
+    """
+    host = _load_host(db_session, host_id)
+    host_info = _host_info(host)
+
+    # One inventory read covering every engine's pattern, rather than a query
+    # per engine: the whole point of the prefilter is to avoid dragging a
+    # desktop's software list into memory, and doing it five times would undo
+    # that.
+    packages: List[Dict[str, Any]] = []
+    seen = set()
+    for engine in engines.applicable(planner.platform_kind(host_info)):
+        pattern = prereq.engine_package_pattern(engine, host_info)
+        if not pattern or pattern in seen:
+            continue
+        seen.add(pattern)
+        packages.extend(_candidate_packages(db_session, host, pattern))
+
+    results = prereq.evaluate_all(host_info, packages)
+    return ConfigMgmtEnginesResponse(
+        host_id=str(host.id),
+        default_engine=engines.default_engine(planner.platform_kind(host_info)),
+        engines=[ConfigMgmtEngineStatus(**row) for row in results],
     )

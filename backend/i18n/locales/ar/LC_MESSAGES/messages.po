@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-26 15:50-0400\n"
+"POT-Creation-Date: 2026-08-27 08:21-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1071,7 +1071,7 @@ msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
 msgstr "تم رفض الإذن: يتطلب تحرير اسم المضيف"
 
 #: backend/api/host_hostname.py:75 backend/api/reboot_orchestration.py:119
-#: backend/api/config_mgmt_runs.py:235 backend/api/error_constants.py:43
+#: backend/api/config_mgmt_runs.py:241 backend/api/error_constants.py:43
 #: backend/api/child_host_utils.py:91
 #: backend/api/scripts/routes_executions.py:81
 msgid "Host is not active"
@@ -1779,16 +1779,16 @@ msgstr "SAML RelayState غير صالح أو منتهي الصلاحية."
 msgid "SAML sign-in failed: %s"
 msgstr "فشل تسجيل الدخول باستخدام SAML: %s"
 
-#: backend/api/config_mgmt_prereq.py:168 backend/api/packages_operations.py:76
+#: backend/api/config_mgmt_prereq.py:193 backend/api/packages_operations.py:76
 msgid "Permission denied: ADD_PACKAGE role required"
 msgstr " رفض الوصول: يتطلب دور ADD_PACKAGE"
 
-#: backend/api/config_mgmt_prereq.py:183
+#: backend/api/config_mgmt_prereq.py:208
 msgid ""
 "No config-management prerequisite install is available for this platform"
 msgstr "لا تتوفر عملية تثبيت للمتطلبات الأساسية لإدارة التكوين لهذه المنصة"
 
-#: backend/api/config_mgmt_prereq.py:244
+#: backend/api/config_mgmt_prereq.py:269
 msgid "Installation of the config-management prerequisite was requested"
 msgstr "تم طلب تثبيت المتطلبات الأساسية لإدارة التكوين"
 
@@ -3743,20 +3743,25 @@ msgstr "تم تسجيل انتهاء التثبيت"
 msgid "Internal server error"
 msgstr "خطأ خادم داخلي"
 
-#: backend/api/config_mgmt_runs.py:228
+#: backend/api/config_mgmt_runs.py:234
 #: backend/api/scripts/routes_executions.py:67
 msgid "Permission denied: RUN_SCRIPT role required"
 msgstr "تم رفض الإذن: يتطلب دور RUN_SCRIPT"
 
-#: backend/api/config_mgmt_runs.py:250
+#: backend/api/config_mgmt_runs.py:254
+#, python-format
+msgid "Unknown configuration management engine: %s"
+msgstr "غير معروف محرك إدارة تكوين: %s"
+
+#: backend/api/config_mgmt_runs.py:269
 msgid "This host uses DSC; provide 'resources', not 'playbook'"
 msgstr "يستخدم هذا المضيف DSC؛ قدم 'الموارد'، وليس 'السيناريو'"
 
-#: backend/api/config_mgmt_runs.py:257
+#: backend/api/config_mgmt_runs.py:276
 msgid "This host uses ansible-core; provide 'playbook'"
 msgstr "يستخدم هذا المضيف `ansible-core`؛ قدم `'playbook'`"
 
-#: backend/api/config_mgmt_runs.py:319
+#: backend/api/config_mgmt_runs.py:338
 msgid "Configuration profile was queued for this host"
 msgstr "تم وضع ملف تكوين هذا المضيف في قائمة الانتظار"
 
