@@ -32,9 +32,12 @@ from backend.persistence import db as persistence_db
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
+from backend.licensing.feature_gate import require_module
+from backend.licensing.features import ModuleCode
 from backend.services import config_mgmt_engines as engines
 from backend.services import config_mgmt_plan_builder as planner
 from backend.services import config_mgmt_prereq as prereq
+from backend.services import config_mgmt_spec_shim as spec_shim
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.messages import (
@@ -180,6 +183,10 @@ async def install_config_mgmt_prerequisite(
     host_id: str,
     db_session: Session = Depends(get_tenant_db),
     current_user=Depends(require_authenticated_user),
+    # Last on purpose: the dependency parameters are passed positionally by
+    # the tests, so inserting a query param ahead of them silently shifts the
+    # session into `engine` and hands `current_user` a Depends object.
+    engine: Optional[str] = None,
 ):
     """Queue the plan that installs this host's config-management executor.
 
@@ -196,7 +203,21 @@ async def install_config_mgmt_prerequisite(
     host = _load_host(db_session, host_id)
     host_info = _host_info(host)
 
-    plan = planner.build_install_plan(host_info)
+    target = (engine or "").strip().lower() or engines.default_engine(
+        planner.platform_kind(host_info)
+    )
+    if not engines.is_known(target):
+        raise HTTPException(
+            status_code=400,
+            detail=_("Unknown configuration management engine: %s") % target,
+        )
+
+    # Installing a licensed adapter needs the licence, for the same reason
+    # applying one does: it is part of the paid feature, not a free convenience.
+    if engines.requires_license(target):
+        require_module(ModuleCode.CONFIG_MANAGEMENT_ENGINE)
+
+    plan = planner.build_engine_install_plan(target, host_info)
     if plan is None:
         # Either nothing to install (Windows vendors dsc.exe) or we have no
         # measured install path for this platform.  Both are 400s: the caller
@@ -255,7 +276,10 @@ async def install_config_mgmt_prerequisite(
             entity_name=host.fqdn,
             description=f"Requested config-management prerequisite install for host {host.fqdn}",
             result=Result.SUCCESS,
-            details={"executor": planner.executor_for(host_info)},
+            # The engine actually being installed, not the platform default:
+            # auditing a Chef install as "ansible-core" would make the trail
+            # wrong in exactly the case somebody later needs it to be right.
+            details={"executor": target},
         )
 
     logger.info(
@@ -302,7 +326,10 @@ async def list_config_mgmt_engines(
         seen.add(pattern)
         packages.extend(_candidate_packages(db_session, host, pattern))
 
-    results = prereq.evaluate_all(host_info, packages)
+    # A licensed customer must be able to install the adapters they paid for.
+    results = prereq.evaluate_all(
+        host_info, packages, engine_licence_available=spec_shim.engine_available()
+    )
     return ConfigMgmtEnginesResponse(
         host_id=str(host.id),
         default_engine=engines.default_engine(planner.platform_kind(host_info)),

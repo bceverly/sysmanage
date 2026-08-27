@@ -16,6 +16,7 @@ from .airgap import *
 from .airgap_bundle import *
 from .api_key import *
 from .child_host import *
+from .config_management import *
 from .content_lifecycle import *
 from .core import *
 from .custom_metric import *
@@ -99,7 +100,10 @@ __all__ = [
     "MessageQueue",
     "QueueMetrics",
     "SavedScript",
+    "ConfigProfile",
+    "ConfigProfileAssignment",
     "ConfigProfileRun",
+    "ConfigProfileVersion",
     "ScriptExecutionLog",
     "DiagnosticReport",
     # Organization models

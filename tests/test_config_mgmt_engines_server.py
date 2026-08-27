@@ -19,6 +19,7 @@ false.
 """
 
 from backend.services import config_mgmt_engines as engines
+from backend.services import config_mgmt_plan_builder as planner
 from backend.services import config_mgmt_prereq as prereq
 
 
@@ -220,3 +221,91 @@ class TestLicensing:
         }
         assert results["ansible-core"]["can_install"] is True
         assert results["ansible-core"]["requires_license"] is False
+
+
+class TestLicensedInstall:
+    """A customer who paid for the adapters must be able to install them.
+
+    The first cut suppressed the install button for every licensed engine
+    unconditionally, reasoning that an unlicensed press would 403. That was
+    right for an unlicensed install and wrong for a paying one: it told a
+    customer who had just bought Puppet support to go install Puppet by hand,
+    which is the friction the prerequisite card exists to remove.
+    """
+
+    def test_unlicensed_offers_no_install_for_a_paid_adapter(self):
+        rows = {
+            r["engine"]: r
+            for r in prereq.evaluate_all(
+                host("Linux", "Ubuntu 24.04"), [], engine_licence_available=False
+            )
+        }
+        assert rows["puppet"]["can_install"] is False
+        assert rows["chef"]["can_install"] is False
+
+    def test_licensed_offers_the_install(self):
+        rows = {
+            r["engine"]: r
+            for r in prereq.evaluate_all(
+                host("Linux", "Ubuntu 24.04"), [], engine_licence_available=True
+            )
+        }
+        assert rows["puppet"]["can_install"] is True
+        assert rows["chef"]["can_install"] is True
+
+    def test_a_licence_cannot_conjure_a_package_that_does_not_exist(self):
+        # Salt is genuinely absent from Ubuntu's repositories. Paying for the
+        # adapter does not put it there, so the row stays unsupported.
+        rows = {
+            r["engine"]: r
+            for r in prereq.evaluate_all(
+                host("Linux", "Ubuntu 24.04"), [], engine_licence_available=True
+            )
+        }
+        assert rows["salt"]["status"] == prereq.STATUS_UNSUPPORTED
+        assert rows["salt"]["can_install"] is False
+
+    def test_the_free_engine_is_unaffected_by_licence_state(self):
+        for licensed in (False, True):
+            rows = {
+                r["engine"]: r
+                for r in prereq.evaluate_all(
+                    host("Linux", "Ubuntu 24.04"), [], engine_licence_available=licensed
+                )
+            }
+            assert rows["ansible-core"]["can_install"] is True
+
+
+class TestPerEngineInstallPlans:
+    def test_puppet_installs_the_agent_package_not_the_binary_name(self):
+        # `apt-cache policy puppet` has no candidate; /usr/bin/puppet ships in
+        # puppet-agent. Measured 2026-08-27.
+        plan = planner.build_engine_install_plan(
+            "puppet", host("Linux", "Ubuntu 24.04")
+        )
+        assert plan["packages"] == [{"manager": "apt", "name": "puppet-agent"}]
+
+    def test_chef_installs_under_its_own_name(self):
+        plan = planner.build_engine_install_plan("chef", host("Linux", "Ubuntu 24.04"))
+        assert plan["packages"] == [{"manager": "apt", "name": "chef"}]
+
+    def test_salt_has_no_plan_because_ubuntu_does_not_ship_it(self):
+        assert (
+            planner.build_engine_install_plan("salt", host("Linux", "Ubuntu 24.04"))
+            is None
+        )
+
+    def test_ansible_still_goes_through_its_measured_per_platform_path(self):
+        # FreeBSD's py3* glob is an ansible-specific quirk that must survive.
+        plan = planner.build_engine_install_plan("ansible-core", host("FreeBSD"))
+        assert "py3*-ansible-core" in plan["commands"][0]["argv"]
+
+    def test_an_omitted_engine_falls_back_to_the_platform_default(self):
+        assert planner.build_engine_install_plan(
+            "", host("Linux", "Ubuntu 24.04")
+        ) == planner.build_install_plan(host("Linux", "Ubuntu 24.04"))
+
+    def test_no_windows_plans_are_guessed(self):
+        # MSI/choco installs for these are unmeasured; refusing beats guessing.
+        for engine in ("puppet", "chef", "salt"):
+            assert planner.build_engine_install_plan(engine, host("Windows")) is None

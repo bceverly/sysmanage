@@ -291,8 +291,13 @@ def evaluate_engine(
 def evaluate_all(
     host_info: Dict[str, Any],
     installed_packages: Optional[Iterable[Dict[str, Any]]] = None,
+    engine_licence_available: bool = False,
 ) -> List[Dict[str, Any]]:
     """Readiness of every engine that could run on this host.
+
+    ``engine_licence_available`` says whether the config_management_engine
+    module is licensed AND loaded on this server; it decides whether the
+    licensed adapters may offer an install.
 
     Ordered so the engines the host ACTUALLY HAS come first: the card should
     lead with what is available, not with a list of things the operator is
@@ -305,13 +310,19 @@ def evaluate_all(
         evaluate_engine(engine, host_info, packages)
         for engine in engines.applicable(kind)
     ]
-    # Mark the licensed adapters so the UI can label them instead of offering
-    # an install button that would 403 on press. Reported as a FLAG rather than
-    # by hiding the row: a Puppet shop evaluating SysManage should be able to
-    # see that Puppet is supported, not conclude that it is missing.
+    # Mark the licensed adapters so the UI can label them. Reported as a FLAG
+    # rather than by hiding the row: a Puppet shop evaluating SysManage should
+    # be able to see that Puppet is supported, not conclude it is missing.
+    #
+    # The install button is suppressed only when the engine is licensed AND the
+    # licence is absent. Suppressing it unconditionally -- which is what the
+    # first cut did -- meant a customer who had just PAID for the adapters was
+    # still told to go install Puppet by hand, which is precisely the friction
+    # this card exists to remove.
     for row in results:
-        row["requires_license"] = engines.requires_license(row["engine"])
-        if row["requires_license"]:
+        licensed = engines.requires_license(row["engine"])
+        row["requires_license"] = licensed
+        if licensed and not engine_licence_available:
             row["can_install"] = False
 
     ready = (STATUS_SATISFIED, STATUS_NOT_REQUIRED)

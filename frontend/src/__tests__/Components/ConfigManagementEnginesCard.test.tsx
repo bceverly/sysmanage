@@ -130,8 +130,47 @@ describe("ConfigManagementEnginesCard", () => {
     render(<ConfigManagementEnginesCard {...ready} />);
     fireEvent.click(await screen.findByText("Install"));
     await waitFor(() =>
-      expect(installConfigMgmtPrereq).toHaveBeenCalledWith("h1"),
+      expect(installConfigMgmtPrereq).toHaveBeenCalledWith(
+        "h1",
+        "ansible-core",
+      ),
     );
+  });
+
+  test("each row installs ITS OWN engine, not the platform default", async () => {
+    // Without the engine argument the server installs the default, so every
+    // row's button would silently install ansible-core.
+    respond(
+      engine({
+        engine: "puppet",
+        status: "missing",
+        can_install: true,
+        installed_version: null,
+        requires_license: true,
+      }),
+    );
+    render(<ConfigManagementEnginesCard {...ready} />);
+    fireEvent.click(await screen.findByText("Install"));
+    await waitFor(() =>
+      expect(installConfigMgmtPrereq).toHaveBeenCalledWith("h1", "puppet"),
+    );
+  });
+
+  test("a licensed adapter offers install once the server says it can", async () => {
+    // can_install is the server's answer and already accounts for the licence;
+    // the card must not second-guess it by keying off requires_license.
+    respond(
+      engine({
+        engine: "chef",
+        status: "missing",
+        can_install: true,
+        installed_version: null,
+        requires_license: true,
+      }),
+    );
+    render(<ConfigManagementEnginesCard {...ready} />);
+    expect(await screen.findByText("Install")).toBeInTheDocument();
+    expect(screen.getByText("Enterprise")).toBeInTheDocument();
   });
 
   test("the bundled Windows engine reads as included, not installed", async () => {

@@ -110,7 +110,7 @@ const ConfigManagementEnginesCard: React.FC<
     setInstalling(engine);
     setError(null);
     try {
-      await installConfigMgmtPrereq(hostId);
+      await installConfigMgmtPrereq(hostId, engine);
     } catch (err) {
       console.error("Error requesting engine install:", err);
       // Do not strand the row in a pending state with no way to retry.

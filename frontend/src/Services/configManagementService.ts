@@ -47,9 +47,13 @@ export const getConfigMgmtPrereq = async (
 
 export const installConfigMgmtPrereq = async (
   hostId: string,
+  engine?: string,
 ): Promise<ConfigMgmtPrereqInstallResult> => {
+  // The engine is explicit: without it the server installs the platform
+  // default, so every row's Install button would install ansible-core.
+  const query = engine ? `?engine=${encodeURIComponent(engine)}` : "";
   const response = await axiosInstance.post<ConfigMgmtPrereqInstallResult>(
-    `/api/v1/hosts/${hostId}/config-management/prerequisite/install`,
+    `/api/v1/hosts/${hostId}/config-management/prerequisite/install${query}`,
   );
   return response.data;
 };

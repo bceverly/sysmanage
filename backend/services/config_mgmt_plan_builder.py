@@ -46,6 +46,8 @@ Homebrew prefix owner, so this plan just uses that path.
 
 from typing import Any, Dict, List, Optional
 
+from backend.services import config_mgmt_engines as engines
+
 # The floor the 20.1 executor targets.  Every platform we ship on packages
 # 2.20+ today (measured, see module docstring), and 2.20 already requires
 # Python >= 3.12 -- so the old-core/old-Python compatibility problem is a
@@ -121,6 +123,47 @@ def requires_install(host_info: Dict[str, Any]) -> bool:
     install button there would be offering a no-op.
     """
     return _platform_kind(host_info) != "windows"
+
+
+def build_engine_install_plan(
+    engine: str, host_info: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
+    """Build the plan that installs a NAMED engine.
+
+    ``build_install_plan`` below answers for ansible-core, which carries
+    per-platform quirks measured on real boxes (FreeBSD's py3* glob, Homebrew's
+    bundle name, macOS needing the agent's own brew path). The other engines
+    have no such quirks yet -- only apt names, measured 2026-08-27 -- so they
+    go through the package matrix.
+
+    ``None`` means "we do not know how to install this here" and the caller
+    must report that honestly rather than firing a package manager at a name
+    that may not exist. Salt on Ubuntu is the live example: it is genuinely
+    absent from the distro's repositories, so there is no plan to build.
+    """
+    name = (engine or "").strip().lower()
+    if name in ("", engines.ANSIBLE):
+        return build_install_plan(host_info)
+
+    kind = _platform_kind(host_info)
+    if kind == "windows":
+        # Windows installs for these engines are MSI/choco affairs nobody has
+        # measured yet; refusing beats guessing.
+        return None
+
+    family = _linux_distro_family(host_info) if kind == "linux" else kind
+    if not family:
+        return None
+
+    package = engines.package_for(name, family)
+    if not package:
+        return None
+
+    return {
+        "platform": kind,
+        "executor": name,
+        "packages": [{"manager": family, "name": package}],
+    }
 
 
 def build_install_plan(host_info: Dict[str, Any]) -> Optional[Dict[str, Any]]:

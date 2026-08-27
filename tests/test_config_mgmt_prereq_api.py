@@ -345,3 +345,111 @@ class TestEnginesEndpoint:
         with pytest.raises(HTTPException) as exc:
             await api.list_config_mgmt_engines(str(HOST_ID), _FakeSession(Host=[]))
         assert exc.value.status_code == 404
+
+
+class TestEngineAwareInstall:
+    """Installing a NAMED engine (Phase 20.1 multi-engine).
+
+    The install route gained an ``engine`` query parameter. It is last in the
+    signature deliberately: the dependency parameters are passed positionally
+    here, so a query param inserted ahead of them shifts the session into
+    ``engine`` and hands ``current_user`` a Depends object.
+    """
+
+    @pytest.mark.asyncio
+    async def test_omitting_the_engine_installs_the_platform_default(self):
+        session = _FakeSession(Host=[_host()])
+        with _Env() as env:
+            await api.install_config_mgmt_prerequisite(
+                str(HOST_ID), session, _user(SecurityRoles.ADD_PACKAGE)
+            )
+        plan = env.enqueued[0]["message_data"]["data"]["parameters"]["plan"]
+        assert plan["packages"] == [{"manager": "apt", "name": "ansible-core"}]
+
+    @pytest.mark.asyncio
+    async def test_a_licensed_engine_installs_its_own_package(self):
+        session = _FakeSession(Host=[_host()])
+        with _Env() as env, patch(
+            "backend.api.config_mgmt_prereq.require_module", return_value=None
+        ):
+            await api.install_config_mgmt_prerequisite(
+                str(HOST_ID),
+                session,
+                _user(SecurityRoles.ADD_PACKAGE),
+                engine="puppet",
+            )
+        plan = env.enqueued[0]["message_data"]["data"]["parameters"]["plan"]
+        assert plan["packages"] == [{"manager": "apt", "name": "puppet-agent"}]
+
+    @pytest.mark.asyncio
+    async def test_an_unlicensed_engine_install_is_refused(self):
+        session = _FakeSession(Host=[_host()])
+        with _Env() as env, patch(
+            "backend.api.config_mgmt_prereq.require_module",
+            side_effect=HTTPException(status_code=403, detail="pro_plus_required"),
+        ):
+            with pytest.raises(HTTPException) as exc:
+                await api.install_config_mgmt_prerequisite(
+                    str(HOST_ID),
+                    session,
+                    _user(SecurityRoles.ADD_PACKAGE),
+                    engine="chef",
+                )
+        assert exc.value.status_code == 403
+        assert env.enqueued == []
+
+    @pytest.mark.asyncio
+    async def test_the_free_engine_never_consults_the_licence(self):
+        session = _FakeSession(Host=[_host()])
+        with _Env(), patch("backend.api.config_mgmt_prereq.require_module") as gate:
+            await api.install_config_mgmt_prerequisite(
+                str(HOST_ID),
+                session,
+                _user(SecurityRoles.ADD_PACKAGE),
+                engine="ansible-core",
+            )
+        gate.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_an_unknown_engine_is_a_400(self):
+        session = _FakeSession(Host=[_host()])
+        with _Env() as env:
+            with pytest.raises(HTTPException) as exc:
+                await api.install_config_mgmt_prerequisite(
+                    str(HOST_ID),
+                    session,
+                    _user(SecurityRoles.ADD_PACKAGE),
+                    engine="terraform",
+                )
+        assert exc.value.status_code == 400
+        assert env.enqueued == []
+
+    @pytest.mark.asyncio
+    async def test_the_audit_records_the_engine_actually_installed(self):
+        # Auditing a Chef install as "ansible-core" would make the trail wrong
+        # in exactly the case somebody later needs it to be right.
+        session = _FakeSession(Host=[_host()])
+        with _Env() as env, patch(
+            "backend.api.config_mgmt_prereq.require_module", return_value=None
+        ):
+            await api.install_config_mgmt_prerequisite(
+                str(HOST_ID), session, _user(SecurityRoles.ADD_PACKAGE), engine="chef"
+            )
+        assert env.audits[0]["details"]["executor"] == "chef"
+
+    @pytest.mark.asyncio
+    async def test_an_engine_with_no_package_here_is_refused(self):
+        # Salt is not in Ubuntu's repositories; a licence does not change that.
+        session = _FakeSession(Host=[_host()])
+        with _Env() as env, patch(
+            "backend.api.config_mgmt_prereq.require_module", return_value=None
+        ):
+            with pytest.raises(HTTPException) as exc:
+                await api.install_config_mgmt_prerequisite(
+                    str(HOST_ID),
+                    session,
+                    _user(SecurityRoles.ADD_PACKAGE),
+                    engine="salt",
+                )
+        assert exc.value.status_code == 400
+        assert env.enqueued == []

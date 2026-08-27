@@ -65,3 +65,15 @@ def build_licensed_spec(
         # operator gets a clear refusal and the traceback goes to the log.
         logger.exception("Pro+ config-management engine raised: %s", exc)
         return None
+
+
+def engine_available() -> bool:
+    """Whether the Pro+ config-management module is licensed AND loaded.
+
+    Both halves matter and neither implies the other: a licence without the
+    module is a broken install, and a loaded module without a licence cannot
+    happen because the loader only fetches what the licence grants. Callers use
+    this to decide whether to OFFER an action, never to authorise one -- the
+    authorisation is ``feature_gate.require_module``, which raises.
+    """
+    return module_loader.get_module(ENGINE_CODE) is not None
