@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-08-27 20:04-0400\n"
+"POT-Creation-Date: 2026-08-27 20:44-0400\n"
 "Language: en\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1069,7 +1069,7 @@ msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
 msgstr "Permission denied: EDIT_HOST_HOSTNAME role required"
 
 #: backend/api/host_hostname.py:75 backend/api/reboot_orchestration.py:119
-#: backend/api/config_mgmt_runs.py:402 backend/api/error_constants.py:43
+#: backend/api/config_mgmt_runs.py:378 backend/api/error_constants.py:43
 #: backend/api/child_host_utils.py:91
 #: backend/api/scripts/routes_executions.py:81
 msgid "Host is not active"
@@ -1787,7 +1787,7 @@ msgstr "SAML sign-in failed: %s"
 msgid "Permission denied: ADD_PACKAGE role required"
 msgstr "Permission denied: ADD_PACKAGE role required"
 
-#: backend/api/config_mgmt_prereq.py:264 backend/api/config_mgmt_runs.py:293
+#: backend/api/config_mgmt_prereq.py:264 backend/api/config_mgmt_runs.py:269
 #, python-format
 msgid "Unknown configuration management engine: %s"
 msgstr "Unknown configuration management engine: %s"
@@ -3531,11 +3531,11 @@ msgstr "Firewall role name cannot be empty"
 msgid "Permission denied: %s role required"
 msgstr "Permission denied: %s role required"
 
-#: backend/api/config_mgmt_profiles.py:159 backend/api/config_mgmt_runs.py:263
+#: backend/api/config_mgmt_profiles.py:159 backend/api/config_mgmt_runs.py:239
 msgid "Invalid profile ID format"
 msgstr "Invalid profile ID format"
 
-#: backend/api/config_mgmt_profiles.py:164 backend/api/config_mgmt_runs.py:272
+#: backend/api/config_mgmt_profiles.py:164 backend/api/config_mgmt_runs.py:248
 msgid "Profile not found"
 msgstr "Profile not found"
 
@@ -3795,29 +3795,20 @@ msgstr "Installation completion recorded"
 msgid "Internal server error"
 msgstr "Internal server error"
 
-#: backend/api/config_mgmt_runs.py:240
-#, python-format
-msgid "Profile '%s' does not contain valid JSON"
-msgstr "Profile '%s' does not contain valid JSON"
-
-#: backend/api/config_mgmt_runs.py:245
-#, python-format
-msgid "Profile '%s' must contain a JSON array of DSC resources"
-msgstr "Profile '%s' must contain a JSON array of DSC resources"
-
-#: backend/api/config_mgmt_runs.py:276
+#: backend/api/config_mgmt_runs.py:252
 msgid "This profile is not active"
 msgstr "This profile is not active"
 
-#: backend/api/config_mgmt_runs.py:317
+#: backend/api/config_mgmt_runs.py:293
 msgid "This host uses DSC; provide 'resources', not 'playbook'"
 msgstr "This host uses DSC; provide 'resources', not 'playbook'"
 
-#: backend/api/config_mgmt_runs.py:324
+#: backend/api/config_mgmt_runs.py:300
 msgid "This host uses ansible-core; provide 'playbook'"
 msgstr "This host uses ansible-core; provide 'playbook'"
 
-#: backend/api/config_mgmt_runs.py:351
+#: backend/api/config_mgmt_runs.py:327
+#: backend/services/config_mgmt_dispatch.py:95
 msgid ""
 "The configuration management engine is licensed but not available on this "
 "server"
@@ -3825,12 +3816,12 @@ msgstr ""
 "The configuration management engine is licensed but not available on this "
 "server"
 
-#: backend/api/config_mgmt_runs.py:395
+#: backend/api/config_mgmt_runs.py:371
 #: backend/api/scripts/routes_executions.py:67
 msgid "Permission denied: RUN_SCRIPT role required"
 msgstr "Permission denied: RUN_SCRIPT role required"
 
-#: backend/api/config_mgmt_runs.py:478
+#: backend/api/config_mgmt_runs.py:450
 msgid "Configuration profile was queued for this host"
 msgstr "Configuration profile was queued for this host"
 
@@ -4940,6 +4931,16 @@ msgid ""
 msgstr ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "
 "capability set, so the command was not sent."
+
+#: backend/services/config_mgmt_dispatch.py:57
+#, python-format
+msgid "Profile '%s' does not contain valid JSON"
+msgstr "Profile '%s' does not contain valid JSON"
+
+#: backend/services/config_mgmt_dispatch.py:61
+#, python-format
+msgid "Profile '%s' must contain a JSON array of DSC resources"
+msgstr "Profile '%s' must contain a JSON array of DSC resources"
 
 #: backend/services/reboot_orchestration_service.py:253
 #, python-format

@@ -33,6 +33,7 @@ from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.utils.log_sanitize import scrub
+from backend.services import config_mgmt_dispatch as dispatch
 from backend.services import config_mgmt_engines as engines
 from backend.services import config_mgmt_plan_builder as planner
 from backend.services import config_mgmt_spec_shim as spec_shim
@@ -223,31 +224,6 @@ class ConfigProfileApplyResponse(BaseModel):
     message: str
 
 
-def _dsc_resources(profile):
-    """A stored DSC profile's body as a resource list, or None.
-
-    DSC bodies are stored as the JSON text the author typed. Parsing here
-    turns a bad stored body into a 400 naming the profile, rather than an
-    opaque failure on the host hours later.
-    """
-    if profile.engine != engines.DSC:
-        return None
-    try:
-        parsed = json.loads(profile.content)
-    except ValueError as exc:
-        raise HTTPException(
-            status_code=400,
-            detail=_("Profile '%s' does not contain valid JSON") % profile.name,
-        ) from exc
-    if not isinstance(parsed, list):
-        raise HTTPException(
-            status_code=400,
-            detail=_("Profile '%s' must contain a JSON array of DSC resources")
-            % profile.name,
-        )
-    return parsed
-
-
 def _load_stored_profile(db_session, profile_id: str):
     """The stored profile named by an apply request.
 
@@ -407,24 +383,20 @@ async def apply_config_profile(
         else None
     )
     if stored is not None:
-        # Rewrite the request into the ad-hoc shape so exactly one code path
-        # builds the command. Two paths would drift, and the stored one is the
-        # one nobody exercises by hand.
-        request = request.model_copy(
-            update={
-                "engine": stored.engine,
-                "playbook": stored.content,
-                "resources": _dsc_resources(stored),
-                "profile_name": stored.name,
-            }
-        )
-
-    executor = _resolve_executor(host, request)
-    parameters = _build_parameters(executor, request)
-    if stored is not None:
-        # Recorded on the run so history links back to the profile -- the
-        # column exists for exactly this.
-        parameters["profile_id"] = str(stored.id)
+        # The SAME builder the assignment tick uses. A scheduled apply that
+        # differs from a manual one is a bug nobody finds until a fleet
+        # drifts, so there is deliberately one implementation.
+        request = request.model_copy(update={"engine": stored.engine})
+        executor = _resolve_executor(host, request)
+        try:
+            parameters = dispatch.parameters_for(
+                stored, check_mode=bool(request.check_mode), timeout=request.timeout
+            )
+        except dispatch.DispatchError as exc:
+            raise HTTPException(status_code=exc.status, detail=exc.message) from exc
+    else:
+        executor = _resolve_executor(host, request)
+        parameters = _build_parameters(executor, request)
 
     command_message = Message(
         message_type=MessageType.COMMAND,

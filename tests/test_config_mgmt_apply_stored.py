@@ -21,6 +21,7 @@ import pytest
 from fastapi import HTTPException
 
 from backend.api import config_mgmt_runs as api
+from backend.services import config_mgmt_dispatch as dispatch
 
 PROFILE_ID = uuid.UUID("44444444-4444-4444-8444-444444444444")
 
@@ -100,24 +101,25 @@ class TestLoadStoredProfile:
 
 
 class TestDscResources:
-    def test_a_non_dsc_profile_has_none(self):
-        assert api._dsc_resources(profile()) is None
+    """Now owned by the dispatch service, shared with the assignment tick."""
+
+    def test_a_non_dsc_profile_yields_a_playbook(self):
+        assert dispatch.profile_body(profile()) == {"playbook": "- hosts: all\n"}
 
     def test_a_dsc_body_is_parsed_into_a_list(self):
         body = json.dumps([{"type": "Microsoft.Windows/Registry"}])
-        got = api._dsc_resources(profile(engine="dsc", content=body))
-        assert isinstance(got, list)
-        assert got[0]["type"] == "Microsoft.Windows/Registry"
+        got = dispatch.profile_body(profile(engine="dsc", content=body))
+        assert got["resources"][0]["type"] == "Microsoft.Windows/Registry"
 
     def test_unparsable_json_is_a_400_naming_the_profile(self):
         # Failing here beats failing on the host hours later with no context.
-        with pytest.raises(HTTPException) as err:
-            api._dsc_resources(profile(engine="dsc", content="{not json"))
-        assert err.value.status_code == 400
-        assert "baseline" in err.value.detail
+        with pytest.raises(dispatch.DispatchError) as err:
+            dispatch.profile_body(profile(engine="dsc", content="{not json"))
+        assert err.value.status == 400
+        assert "baseline" in err.value.message
 
     def test_a_json_object_is_refused_because_dsc_wants_an_array(self):
-        with pytest.raises(HTTPException) as err:
-            api._dsc_resources(profile(engine="dsc", content='{"a": 1}'))
-        assert err.value.status_code == 400
-        assert "baseline" in err.value.detail
+        with pytest.raises(dispatch.DispatchError) as err:
+            dispatch.profile_body(profile(engine="dsc", content='{"a": 1}'))
+        assert err.value.status == 400
+        assert "baseline" in err.value.message

@@ -7297,8 +7297,21 @@ single-host apply. Remaining work, in the order it should be done:
          field was sent, ignored, and the run history column was always empty.
          The echo now survives every outcome, including failures, which are
          the runs most worth tracing back to a profile.
-     Still to do: the scheduler tick that acts on assignments, fleet-scale
-     dispatch, and a `docs/professional-plus/` page.
+       * Assignment scheduler tick — `config_mgmt_assignment_tick`, started at
+         startup only when the module is loaded. Due-ness is DERIVED from
+         `last_applied_at` rather than stored in a `next_run` column: a cursor
+         has to be migrated when added, kept correct when the cron changes and
+         repaired when it drifts, and each of those is a way for a schedule to
+         silently stop. It also means an outage produces ONE apply rather than
+         replaying every occurrence slept through — a catch-up storm across a
+         fleet is worse than a late apply.
+       * `config_mgmt_dispatch` — one command builder shared by the apply
+         endpoint and the tick. A scheduled apply that differed from a manual
+         one would be a bug nobody finds until a fleet drifts, and the
+         scheduled path is the one nobody exercises by hand.
+     Still to do: fleet-scale dispatch (the tick queues per host serially,
+     which is fine for tens and unproven for thousands) and a
+     `docs/professional-plus/` page.
   5. **Remediation playbooks** — largely blocked on 20.2 drift detection, which
      is what determines *what* needs remediating.
   6. **Final i18n pass** once the remaining UI exists.

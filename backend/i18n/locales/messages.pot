@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-08-27 20:04-0400\n"
+"POT-Creation-Date: 2026-08-27 20:44-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1058,7 +1058,7 @@ msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
 msgstr ""
 
 #: backend/api/host_hostname.py:75 backend/api/reboot_orchestration.py:119
-#: backend/api/config_mgmt_runs.py:402 backend/api/error_constants.py:43
+#: backend/api/config_mgmt_runs.py:378 backend/api/error_constants.py:43
 #: backend/api/child_host_utils.py:91
 #: backend/api/scripts/routes_executions.py:81
 msgid "Host is not active"
@@ -1728,7 +1728,7 @@ msgstr ""
 msgid "Permission denied: ADD_PACKAGE role required"
 msgstr ""
 
-#: backend/api/config_mgmt_prereq.py:264 backend/api/config_mgmt_runs.py:293
+#: backend/api/config_mgmt_prereq.py:264 backend/api/config_mgmt_runs.py:269
 #, python-format
 msgid "Unknown configuration management engine: %s"
 msgstr ""
@@ -3389,11 +3389,11 @@ msgstr ""
 msgid "Permission denied: %s role required"
 msgstr ""
 
-#: backend/api/config_mgmt_profiles.py:159 backend/api/config_mgmt_runs.py:263
+#: backend/api/config_mgmt_profiles.py:159 backend/api/config_mgmt_runs.py:239
 msgid "Invalid profile ID format"
 msgstr ""
 
-#: backend/api/config_mgmt_profiles.py:164 backend/api/config_mgmt_runs.py:272
+#: backend/api/config_mgmt_profiles.py:164 backend/api/config_mgmt_runs.py:248
 msgid "Profile not found"
 msgstr ""
 
@@ -3640,40 +3640,31 @@ msgstr ""
 msgid "Internal server error"
 msgstr ""
 
-#: backend/api/config_mgmt_runs.py:240
-#, python-format
-msgid "Profile '%s' does not contain valid JSON"
-msgstr ""
-
-#: backend/api/config_mgmt_runs.py:245
-#, python-format
-msgid "Profile '%s' must contain a JSON array of DSC resources"
-msgstr ""
-
-#: backend/api/config_mgmt_runs.py:276
+#: backend/api/config_mgmt_runs.py:252
 msgid "This profile is not active"
 msgstr ""
 
-#: backend/api/config_mgmt_runs.py:317
+#: backend/api/config_mgmt_runs.py:293
 msgid "This host uses DSC; provide 'resources', not 'playbook'"
 msgstr ""
 
-#: backend/api/config_mgmt_runs.py:324
+#: backend/api/config_mgmt_runs.py:300
 msgid "This host uses ansible-core; provide 'playbook'"
 msgstr ""
 
-#: backend/api/config_mgmt_runs.py:351
+#: backend/api/config_mgmt_runs.py:327
+#: backend/services/config_mgmt_dispatch.py:95
 msgid ""
 "The configuration management engine is licensed but not available on this "
 "server"
 msgstr ""
 
-#: backend/api/config_mgmt_runs.py:395
+#: backend/api/config_mgmt_runs.py:371
 #: backend/api/scripts/routes_executions.py:67
 msgid "Permission denied: RUN_SCRIPT role required"
 msgstr ""
 
-#: backend/api/config_mgmt_runs.py:478
+#: backend/api/config_mgmt_runs.py:450
 msgid "Configuration profile was queued for this host"
 msgstr ""
 
@@ -4738,6 +4729,16 @@ msgstr ""
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "
 "capability set, so the command was not sent."
+msgstr ""
+
+#: backend/services/config_mgmt_dispatch.py:57
+#, python-format
+msgid "Profile '%s' does not contain valid JSON"
+msgstr ""
+
+#: backend/services/config_mgmt_dispatch.py:61
+#, python-format
+msgid "Profile '%s' must contain a JSON array of DSC resources"
 msgstr ""
 
 #: backend/services/reboot_orchestration_service.py:253

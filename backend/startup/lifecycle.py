@@ -458,6 +458,36 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                                 fed_e,
                             )
 
+                # Start the config-profile assignment tick if the config
+                # management engine is loaded.  Same gate as the air-gap tick
+                # below and for the same reason: assignments cannot exist
+                # without the module, so without it the loop would wake every
+                # minute to find nothing.
+                config_mgmt_engine_for_tick = module_loader.get_module(
+                    "config_management_engine"
+                )
+                if config_mgmt_engine_for_tick is not None:
+                    logger.info("=== CONFIG ASSIGNMENT TICK STARTUP ===")
+                    try:
+                        from backend.services.config_mgmt_assignment_tick import (
+                            config_mgmt_assignment_tick_service,
+                        )
+
+                        config_tick_task = asyncio.create_task(
+                            config_mgmt_assignment_tick_service()
+                        )
+                        logger.info(
+                            "Config assignment tick task started: %s",
+                            config_tick_task,
+                        )
+                    except Exception as tick_e:  # pylint: disable=broad-except
+                        # Never fatal: a scheduler that will not start must not
+                        # take the whole server with it.
+                        logger.warning(
+                            "Failed to start config assignment tick task: %s",
+                            tick_e,
+                        )
+
                 # Start air-gap collection schedule tick service if the
                 # collector engine is loaded.  The /tick endpoint and
                 # DB model are always available (OSS-side), but the
