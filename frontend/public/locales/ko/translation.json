@@ -2171,7 +2171,8 @@
     "toggleMenu": "메뉴 전환",
     "updates": "업데이트",
     "users": "사용자",
-    "vulnerabilities": "취약점"
+    "vulnerabilities": "취약점",
+    "configProfiles": "구성 프로필"
   },
   "notifications": {
     "applicationUpdates": "애플리케이션 업데이트",
@@ -3451,6 +3452,40 @@
     "engineTooOld": "버전이 너무 오래됨",
     "engineUnavailable": "여기서는 제공되지 않습니다.",
     "enginesError": "구성 관리 엔진을 로드하는 데 실패했습니다.",
-    "enginesTitle": "구성 관리"
+    "enginesTitle": "구성 관리",
+    "applyNoStored": "없음 — 아래에 붙여넣기",
+    "applyStoredChosen": "이것은 저장된 프로필 그대로 실행합니다. 실행 기록은 해당 프로필에 대해 수행됩니다.",
+    "applyStoredHelp": "저장된 프로필을 선택하거나, 이 필드를 비워 아래에 붙여넣기",
+    "applyStoredProfile": "저장된 프로필"
+  },
+  "configProfiles": {
+    "actions": "행동",
+    "active": "활성",
+    "activeNo": "비활성화",
+    "activeYes": "활성",
+    "addProfile": "새 프로필",
+    "contentBody": "프로필 내용 (YAML)",
+    "contentDsc": "DSC 리소스 (JSON)",
+    "createTitle": "새 구성 프로필",
+    "delete": "삭제",
+    "deleteBody": "이 프로필, 버전 역사 및 할당을 삭제합니다. 과거 실행 기록은 유지됩니다.",
+    "deleteFailed": "프로필을 삭제할 수 없습니다.",
+    "deleteTitle": "프로필 삭제",
+    "description": "설명",
+    "edit": "편집",
+    "editTitle": "구성 프로필 편집",
+    "engine": "엔진",
+    "history": "버전 역사",
+    "historyTitle": "버전 역사",
+    "intro": "한 번 구성을 작성하고 여러 호스트에 적용합니다. 엔진 또는 본문을 편집하면 이전 본문이 버전으로 유지되므로 실행 시 프로필이 어떤 내용을 포함했는지 항상 확인할 수 있습니다.",
+    "loadFailed": "구성 프로필을 로드할 수 없습니다.",
+    "name": "이름",
+    "noVersions": "이전 버전이 아직 없습니다. 엔진 또는 본문이 변경될 때마다 버전이 유지됩니다.",
+    "saveFailed": "프로필을 저장할 수 없습니다.",
+    "title": "구성 프로필",
+    "updated": "업데이트",
+    "version": "버전",
+    "versionLabel": "버전 {{n}}",
+    "versionsFailed": "버전 역사를 로드할 수 없습니다."
   }
 }

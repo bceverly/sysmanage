@@ -55,6 +55,55 @@ def _host_id_for(db, connection, message_data: Dict[str, Any]):
     return host.id if host else None
 
 
+def _profile_uuid(result: dict, message_data: dict):
+    """The profile this run belongs to, or None when it names none usable.
+
+    A malformed id must not lose the whole run -- the result is still worth
+    recording, just without the association.
+    """
+    profile_id = result.get("profile_id") or message_data.get("profile_id")
+    if not profile_id:
+        return None
+    try:
+        return uuid.UUID(str(profile_id))
+    except (ValueError, AttributeError, TypeError):
+        logger.warning("Config profile result carried an unusable profile_id")
+        return None
+
+
+def _run_row(host_id, result: dict, message_data: dict, now):
+    """The ConfigProfileRun this result describes."""
+    recap = result.get("recap") or {}
+    tasks = result.get("tasks") or []
+    return models.ConfigProfileRun(
+        host_id=host_id,
+        command_id=message_data.get("command_id"),
+        profile_id=_profile_uuid(result, message_data),
+        profile_name=result.get("profile_name") or message_data.get("profile_name"),
+        executor=result.get("executor"),
+        check_mode=bool(result.get("check_mode")),
+        success=bool(result.get("success")),
+        changed=bool(result.get("changed")),
+        exit_code=result.get("exit_code"),
+        tasks_ok=int(recap.get("ok") or 0),
+        tasks_changed=int(recap.get("changed") or 0),
+        tasks_failed=int(recap.get("failed") or 0),
+        tasks_skipped=int(recap.get("skipped") or 0),
+        tasks_unreachable=int(recap.get("unreachable") or 0),
+        task_detail=_truncate(
+            json.dumps(tasks, default=str) if tasks else None,
+            MAX_TASK_DETAIL_CHARS,
+        ),
+        error_output=_truncate(result.get("stderr"), MAX_ERROR_CHARS),
+        reason=result.get("reason"),
+        started_at=None,
+        completed_at=now,
+        created_at=now,
+    )
+
+
+# NOSONAR S7503 - async is required, not decorative: message_handlers.py awaits
+# this, and it is one of a uniform async dispatch table of result handlers.
 async def handle_config_profile_result(db, connection, message_data: dict):
     """Record one application of a configuration profile.
 
@@ -72,45 +121,10 @@ async def handle_config_profile_result(db, connection, message_data: dict):
         logger.warning("Config profile result from an unidentifiable host; ignoring")
         return {"success": False, "error": "unknown_host"}
 
-    recap = result.get("recap") or {}
-    tasks = result.get("tasks") or []
     now = datetime.now(timezone.utc).replace(tzinfo=None)
 
-    profile_id = result.get("profile_id") or message_data.get("profile_id")
     try:
-        profile_uuid = uuid.UUID(str(profile_id)) if profile_id else None
-    except (ValueError, AttributeError, TypeError):
-        # A malformed id must not lose the whole run -- the result is still
-        # worth recording, just without the association.
-        logger.warning("Config profile result carried an unusable profile_id")
-        profile_uuid = None
-
-    try:
-        run = models.ConfigProfileRun(
-            host_id=host_id,
-            command_id=message_data.get("command_id"),
-            profile_id=profile_uuid,
-            profile_name=result.get("profile_name") or message_data.get("profile_name"),
-            executor=result.get("executor"),
-            check_mode=bool(result.get("check_mode")),
-            success=bool(result.get("success")),
-            changed=bool(result.get("changed")),
-            exit_code=result.get("exit_code"),
-            tasks_ok=int(recap.get("ok") or 0),
-            tasks_changed=int(recap.get("changed") or 0),
-            tasks_failed=int(recap.get("failed") or 0),
-            tasks_skipped=int(recap.get("skipped") or 0),
-            tasks_unreachable=int(recap.get("unreachable") or 0),
-            task_detail=_truncate(
-                json.dumps(tasks, default=str) if tasks else None,
-                MAX_TASK_DETAIL_CHARS,
-            ),
-            error_output=_truncate(result.get("stderr"), MAX_ERROR_CHARS),
-            reason=result.get("reason"),
-            started_at=None,
-            completed_at=now,
-            created_at=now,
-        )
+        run = _run_row(host_id, result, message_data, now)
         db.add(run)
         db.commit()
     except Exception as exc:  # NOSONAR - see docstring: never stall the queue

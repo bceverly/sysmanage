@@ -225,9 +225,12 @@ export const handlers = [
     return HttpResponse.json({
       success: true,
       message: "Package installation has been queued",
+      // Deterministic, not random: a mock that returns a different id every
+      // call cannot be asserted against, and a PRNG here reads as a security
+      // question it isn't.
       installation_ids: body.package_names.map(
-        () => `uuid-${Math.random().toString(36).slice(2, 11)}`,
-      ), // NOSONAR - test mock data, not used for security
+        (name: string, index: number) => `uuid-install-${index}-${name}`,
+      ),
     });
   }),
 

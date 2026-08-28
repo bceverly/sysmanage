@@ -7245,22 +7245,60 @@ single-host apply. Remaining work, in the order it should be done:
      that appears only when there is a choice to make. What remains of this
      item is the ADAPTERS themselves (running Puppet/Salt/Chef), which is
      Pro+ engine work.
-  3. **Puppet/Salt/Chef adapter runners.** The registry, locator, probe,
-     server matrix, API and UI are all per-engine now; what is missing is the
-     code that actually drives the three engines. MOVED AHEAD of the Pro+
-     engine on 2026-08-27, deliberately. The Pro+ engine will encode the
-     executor into profile storage, dispatch and scheduling; if it is built
-     while `executor_for()` still returns one executor per PLATFORM, that
-     assumption gets baked into a schema and a scheduler and has to be
-     retrofitted. Doing it now is cheap — the surface is four files (plan
-     builder, prerequisite evaluator, locator, capability probe) plus one card
-     — and doing it later is not. Spike each engine first, as ansible-core and
-     DSC were.
+  3. ~~Puppet/Salt/Chef adapter runners~~ — **DONE 2026-08-27.** Moving this
+     AHEAD of the Pro+ engine paid for itself: the executor is now per-ENGINE
+     rather than per-PLATFORM everywhere, so nothing downstream had to be
+     retrofitted. All four engines were spiked against real binaries
+     (ansible-core 2.21.3, dsc 3.2.3, puppet 8.10.0, Chef Infra Client
+     18.11.11) and each shows genuine idempotency — a second run reports
+     `changed=false`.
+
+     The split that made this work: Pro+ builds an execution SPEC (argv, files,
+     stdin, env, result format) and the OSS agent executes it generically
+     against four result shapes (`json_lines`, `json_stdout`, `json_file`,
+     `exit_code`). The agent therefore gained the ability to run Puppet, Salt
+     and Chef without gaining any licensed knowledge of how to.
+
+     Engine IDENTITIES (`chef`) are kept distinct from BINARIES
+     (`("chef-client",)`) so a cinc-client switch is a one-tuple change rather
+     than a rename through three repositories.
   4. **Pro+ `config_management_engine`** — profile authoring/storage,
      assignment per host/tag/site, scheduling, fleet-scale dispatch and job
-     templates. Lives in `sysmanage-professional-plus`, and is a substantially
-     larger lift than everything landed so far; scope it deliberately rather
-     than drifting into it. Build it against the per-engine model from step 2.
+     templates. Lives in `sysmanage-professional-plus`. **PARTLY LANDED
+     2026-08-27:**
+       * Storage schema — `config_profile`, `config_profile_version`,
+         `config_profile_assignment` (migration `c21cfgprof01`). The tables
+         live in the OSS schema because the OSS server owns the database; what
+         is licensed is the BEHAVIOUR. `config_profile_run.profile_id` is
+         `ON DELETE SET NULL`, so deleting a profile cannot erase the record
+         that it ran.
+       * Engine-owned rules — validation, cron checking, version numbering and
+         snapshot semantics live in `config_profiles.pxi`, not in the API.
+         Versioning is snapshot-on-write of the OUTGOING body: a history whose
+         every row is the value that replaced it reads correctly right up
+         until somebody tries to restore from it.
+       * CRUD + assignment REST API — `backend/api/config_mgmt_profiles.py`,
+         gated at the ROUTER so a future endpoint added there is gated by
+         default.
+       * Profile authoring UI — `/config-profiles`, licence-gated at the route
+         AND in the nav. List, create, edit, delete, version history.
+       * Engine catalog endpoint — `GET /config-management/engines`, host
+         independent, so authoring has ONE source for the identities instead
+         of a second copy in the UI. Not licence-gated: knowing that "puppet"
+         is a word is worthless without the adapter, and an empty dropdown on
+         a page already behind the licence reads as a bug.
+       * Apply a STORED profile — `profile_id` on the apply request. The
+         server reads the profile's own engine and body, so the browser never
+         round-trips a body the server already has and cannot overwrite what
+         was saved with a stale tab. The run records `profile_id`, which is
+         what makes history link back to the profile.
+       * Fixed: the agent never echoed `profile_id`/`profile_name`, so every
+         stored run row had both NULL — the apply dialog's "Profile name"
+         field was sent, ignored, and the run history column was always empty.
+         The echo now survives every outcome, including failures, which are
+         the runs most worth tracing back to a profile.
+     Still to do: the scheduler tick that acts on assignments, fleet-scale
+     dispatch, and a `docs/professional-plus/` page.
   5. **Remediation playbooks** — largely blocked on 20.2 drift detection, which
      is what determines *what* needs remediating.
   6. **Final i18n pass** once the remaining UI exists.

@@ -48,6 +48,11 @@ from typing import Any, Dict, List, Optional
 
 from backend.services import config_mgmt_engines as engines
 
+# A GLOB, not a package name: FreeBSD names the port for the Python it was
+# built against (py311-ansible-core), so pinning one spells "works until the
+# default Python moves".
+_FREEBSD_ANSIBLE_PKG = "py3*-ansible-core"
+
 # The floor the 20.1 executor targets.  Every platform we ship on packages
 # 2.20+ today (measured, see module docstring), and 2.20 already requires
 # Python >= 3.12 -- so the old-core/old-Python compatibility problem is a
@@ -198,7 +203,7 @@ def build_install_plan(host_info: Dict[str, Any]) -> Optional[Dict[str, Any]]:
             "executor": POSIX_EXECUTOR,
             "commands": [
                 {
-                    "argv": ["pkg", "install", "-y", "-g", "py3*-ansible-core"],
+                    "argv": ["pkg", "install", "-y", "-g", _FREEBSD_ANSIBLE_PKG],
                     "sudo": True,
                     "timeout": 900,
                     "description": "install ansible-core (glob matches the current py3XX prefix)",
@@ -266,7 +271,7 @@ def expected_package_pattern(host_info: Dict[str, Any]) -> Optional[str]:
     if kind == "windows":
         return None
     if kind == "freebsd":
-        return "py3*-ansible-core"
+        return _FREEBSD_ANSIBLE_PKG
     if kind == "darwin":
         # Homebrew installs the bundle, which reports as ``ansible``.
         return "ansible"
@@ -285,7 +290,7 @@ def install_targets() -> List[Dict[str, str]]:
         {"platform": "linux/dnf", "package": "ansible-core"},
         {"platform": "linux/zypper", "package": "ansible"},
         {"platform": "linux/apk", "package": "ansible-core"},
-        {"platform": "freebsd", "package": "py3*-ansible-core"},
+        {"platform": "freebsd", "package": _FREEBSD_ANSIBLE_PKG},
         {"platform": "openbsd", "package": "ansible-core"},
         {"platform": "netbsd", "package": "ansible-core"},
         {"platform": "darwin", "package": "ansible (brew)"},

@@ -32,6 +32,7 @@ from backend.persistence import db as persistence_db
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
+from backend.utils.log_sanitize import scrub
 from backend.services import config_mgmt_engines as engines
 from backend.services import config_mgmt_plan_builder as planner
 from backend.services import config_mgmt_spec_shim as spec_shim
@@ -179,7 +180,9 @@ async def get_config_profile_run(
             if isinstance(decoded, list):
                 tasks = decoded
         except ValueError:
-            logger.debug("Run %s has unparsable (likely truncated) detail", run_id)
+            logger.debug(
+                "Run %s has unparsable (likely truncated) detail", scrub(run_id)
+            )
 
     return ConfigProfileRunDetailResponse(
         **_base_fields(run), tasks=tasks, error_output=run.error_output
@@ -187,16 +190,24 @@ async def get_config_profile_run(
 
 
 class ConfigProfileApplyRequest(BaseModel):
-    """An ad-hoc profile to apply to one host.
+    """A profile to apply to one host, stored or ad-hoc.
 
-    Exactly one of ``playbook`` (POSIX) or ``resources`` (Windows/DSC) is
-    expected, and it must match the host's executor -- see the route.
+    Two shapes, and ``profile_id`` decides which:
+
+    * **Stored (Enterprise).** ``profile_id`` names a saved profile; the
+      server reads its engine and body, so the browser never round-trips a
+      body it already stored, and the run is recorded AGAINST that profile.
+    * **Ad-hoc (open source).** Exactly one of ``playbook`` (POSIX) or
+      ``resources`` (Windows/DSC), matching the host's executor.
     """
 
+    profile_id: Optional[str] = None
     playbook: Optional[str] = None
     resources: Optional[List[Dict[str, Any]]] = None
     # Which engine to apply with. Omitted, the host's platform default is used
-    # -- which is what keeps every existing caller working.
+    # -- which is what keeps every existing caller working. Ignored when
+    # profile_id is given: the stored profile's own engine wins, because a
+    # profile written for Puppet is not a thing you can run with Salt.
     engine: Optional[str] = None
     profile_name: Optional[str] = None
     check_mode: bool = False
@@ -210,6 +221,155 @@ class ConfigProfileApplyResponse(BaseModel):
     queued: bool
     check_mode: bool
     message: str
+
+
+def _dsc_resources(profile):
+    """A stored DSC profile's body as a resource list, or None.
+
+    DSC bodies are stored as the JSON text the author typed. Parsing here
+    turns a bad stored body into a 400 naming the profile, rather than an
+    opaque failure on the host hours later.
+    """
+    if profile.engine != engines.DSC:
+        return None
+    try:
+        parsed = json.loads(profile.content)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=_("Profile '%s' does not contain valid JSON") % profile.name,
+        ) from exc
+    if not isinstance(parsed, list):
+        raise HTTPException(
+            status_code=400,
+            detail=_("Profile '%s' must contain a JSON array of DSC resources")
+            % profile.name,
+        )
+    return parsed
+
+
+def _load_stored_profile(db_session, profile_id: str):
+    """The stored profile named by an apply request.
+
+    Licence-gated HERE rather than at the router: ad-hoc apply is open source
+    and must keep working on an unlicensed server, so only the stored-profile
+    path can demand the module.
+    """
+    require_module(ModuleCode.CONFIG_MANAGEMENT_ENGINE)
+    try:
+        wanted = uuid.UUID(str(profile_id))
+    except (ValueError, AttributeError, TypeError) as exc:
+        raise HTTPException(
+            status_code=400, detail=_("Invalid profile ID format")
+        ) from exc
+
+    profile = (
+        db_session.query(models.ConfigProfile)
+        .filter(models.ConfigProfile.id == wanted)
+        .first()
+    )
+    if not profile:
+        raise HTTPException(status_code=404, detail=_("Profile not found"))
+    if not profile.is_active:
+        # An inactive profile is one somebody deliberately took out of service.
+        # Applying it anyway would make the flag decorative.
+        raise HTTPException(status_code=400, detail=_("This profile is not active"))
+    return profile
+
+
+def _resolve_executor(host, request: "ConfigProfileApplyRequest") -> str:
+    """The engine this apply will use, or 400/402 explaining why not."""
+    host_info = {
+        "platform": host.platform,
+        "platform_release": host.platform_release,
+        "platform_version": host.platform_version,
+    }
+    kind = planner.platform_kind(host_info)
+    executor = (request.engine or "").strip().lower() or engines.default_engine(kind)
+
+    if not engines.is_known(executor):
+        raise HTTPException(
+            status_code=400,
+            detail=_("Unknown configuration management engine: %s") % executor,
+        )
+
+    # Puppet/Salt/Chef are the licensed adapters. Refuse BEFORE queueing, so an
+    # unlicensed install never gets a half-applied profile and an operator gets
+    # a clear reason rather than a far-end failure.
+    if engines.requires_license(executor):
+        require_module(ModuleCode.CONFIG_MANAGEMENT_ENGINE)
+
+    return executor
+
+
+def _build_profile(
+    executor: str, request: "ConfigProfileApplyRequest"
+) -> Dict[str, Any]:
+    """The profile body for this executor.
+
+    Refuses a payload the host's executor cannot consume, rather than letting
+    it fail at the far end where the reason is far less obvious.
+    """
+    if executor == engines.DSC:
+        if not request.resources:
+            raise HTTPException(
+                status_code=400,
+                detail=_("This host uses DSC; provide 'resources', not 'playbook'"),
+            )
+        return {"resources": request.resources}
+
+    if not request.playbook or not request.playbook.strip():
+        raise HTTPException(
+            status_code=400,
+            detail=_("This host uses ansible-core; provide 'playbook'"),
+        )
+    return {"playbook": request.playbook}
+
+
+def _licensed_spec(executor: str, request: "ConfigProfileApplyRequest"):
+    """The execution spec for a licensed engine, or 503 if it cannot be built.
+
+    A licensed engine is driven by a SPEC the Pro+ module builds. The agent
+    deliberately does not know how to run Puppet/Salt/Chef -- see
+    sysmanage-agent operations/config_mgmt_spec.py for why that indirection
+    exists -- so without a spec there is nothing to dispatch.
+    """
+    spec = spec_shim.build_licensed_spec(
+        executor,
+        request.playbook or "",
+        check_mode=bool(request.check_mode),
+        timeout=request.timeout,
+    )
+    if spec is None:
+        # The licence check has already passed, so this is a broken install
+        # (module not loaded for this Python version) rather than an
+        # unlicensed customer. 503, not 403 -- they need an administrator,
+        # not a salesperson.
+        raise HTTPException(
+            status_code=503,
+            detail=_(
+                "The configuration management engine is licensed but not "
+                "available on this server"
+            ),
+        )
+    return spec
+
+
+def _build_parameters(
+    executor: str, request: "ConfigProfileApplyRequest"
+) -> Dict[str, Any]:
+    """The command parameters the agent will receive."""
+    parameters: Dict[str, Any] = {
+        "profile": _build_profile(executor, request),
+        "check_mode": bool(request.check_mode),
+    }
+    if engines.requires_license(executor):
+        parameters["spec"] = _licensed_spec(executor, request)
+    if request.profile_name:
+        parameters["profile_name"] = request.profile_name
+    if request.timeout:
+        parameters["timeout"] = request.timeout
+    return parameters
 
 
 @router.post(
@@ -241,76 +401,30 @@ async def apply_config_profile(
         # never drain, and the operator sees "queued" and assumes it ran.
         raise HTTPException(status_code=400, detail=_("Host is not active"))
 
-    host_info = {
-        "platform": host.platform,
-        "platform_release": host.platform_release,
-        "platform_version": host.platform_version,
-    }
-    kind = planner.platform_kind(host_info)
-    executor = (request.engine or "").strip().lower() or engines.default_engine(kind)
-
-    if not engines.is_known(executor):
-        raise HTTPException(
-            status_code=400,
-            detail=_("Unknown configuration management engine: %s") % executor,
+    stored = (
+        _load_stored_profile(db_session, request.profile_id)
+        if request.profile_id
+        else None
+    )
+    if stored is not None:
+        # Rewrite the request into the ad-hoc shape so exactly one code path
+        # builds the command. Two paths would drift, and the stored one is the
+        # one nobody exercises by hand.
+        request = request.model_copy(
+            update={
+                "engine": stored.engine,
+                "playbook": stored.content,
+                "resources": _dsc_resources(stored),
+                "profile_name": stored.name,
+            }
         )
 
-    # Puppet/Salt/Chef are the licensed adapters. Refuse BEFORE queueing, so an
-    # unlicensed install never gets a half-applied profile and an operator gets
-    # a clear reason rather than a far-end failure.
-    if engines.requires_license(executor):
-        require_module(ModuleCode.CONFIG_MANAGEMENT_ENGINE)
-
-    # Refuse a payload the host's executor cannot consume, rather than letting
-    # it fail at the far end where the reason is far less obvious.
-    if executor == engines.DSC:
-        if not request.resources:
-            raise HTTPException(
-                status_code=400,
-                detail=_("This host uses DSC; provide 'resources', not 'playbook'"),
-            )
-        profile: Dict[str, Any] = {"resources": request.resources}
-    else:
-        if not request.playbook or not request.playbook.strip():
-            raise HTTPException(
-                status_code=400,
-                detail=_("This host uses ansible-core; provide 'playbook'"),
-            )
-        profile = {"playbook": request.playbook}
-
-    parameters: Dict[str, Any] = {
-        "profile": profile,
-        "check_mode": bool(request.check_mode),
-    }
-
-    # A licensed engine is driven by a SPEC the Pro+ module builds. The agent
-    # deliberately does not know how to run Puppet/Salt/Chef -- see
-    # sysmanage-agent operations/config_mgmt_spec.py for why that indirection
-    # exists -- so without a spec there is nothing to dispatch.
-    if engines.requires_license(executor):
-        spec = spec_shim.build_licensed_spec(
-            executor,
-            request.playbook or "",
-            check_mode=bool(request.check_mode),
-            timeout=request.timeout,
-        )
-        if spec is None:
-            # The licence check above already passed, so this is a broken
-            # install (module not loaded for this Python version) rather than
-            # an unlicensed customer. 503, not 403 -- they need an
-            # administrator, not a salesperson.
-            raise HTTPException(
-                status_code=503,
-                detail=_(
-                    "The configuration management engine is licensed but not "
-                    "available on this server"
-                ),
-            )
-        parameters["spec"] = spec
-    if request.profile_name:
-        parameters["profile_name"] = request.profile_name
-    if request.timeout:
-        parameters["timeout"] = request.timeout
+    executor = _resolve_executor(host, request)
+    parameters = _build_parameters(executor, request)
+    if stored is not None:
+        # Recorded on the run so history links back to the profile -- the
+        # column exists for exactly this.
+        parameters["profile_id"] = str(stored.id)
 
     command_message = Message(
         message_type=MessageType.COMMAND,

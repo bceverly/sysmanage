@@ -52,6 +52,58 @@ from backend.websocket.queue_operations import QueueOperations
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+class ConfigMgmtEngineCatalogEntry(BaseModel):
+    """One engine the server knows about, independent of any host."""
+
+    engine: str
+    requires_license: bool
+    vendored: bool
+    windows_only: bool
+    is_default: bool
+
+
+class ConfigMgmtEngineCatalog(BaseModel):
+    """Every engine identity the server accepts."""
+
+    engines: List[ConfigMgmtEngineCatalogEntry]
+    default_engine: str
+
+
+@router.get(
+    "/config-management/engines",
+    response_model=ConfigMgmtEngineCatalog,
+    dependencies=[Depends(JWTBearer())],
+)
+async def list_config_mgmt_engine_catalog():
+    """The engine catalog, with no host in the question.
+
+    Exists so profile AUTHORING has a source for the engine list. The
+    per-host endpoint cannot serve that: authoring a profile is not about any
+    one host, and a profile written for Puppet is valid whether or not the
+    host you happen to be looking at has Puppet installed.
+
+    Not licence-gated. The identities are not the licensed part -- knowing
+    that "puppet" is a word is worthless without the adapter -- and gating it
+    would make the authoring dropdown empty on the very page that is already
+    behind the licence, which reads as a bug rather than as a limit.
+    """
+    return ConfigMgmtEngineCatalog(
+        engines=[
+            ConfigMgmtEngineCatalogEntry(
+                engine=engine,
+                requires_license=engines.requires_license(engine),
+                vendored=engine in engines.VENDORED,
+                windows_only=engine in engines.WINDOWS_ONLY,
+                is_default=engine == engines.DEFAULT_ENGINE,
+            )
+            for engine in engines.ALL_ENGINES
+        ],
+        default_engine=engines.DEFAULT_ENGINE,
+    )
+
+
 queue_ops = QueueOperations()
 
 

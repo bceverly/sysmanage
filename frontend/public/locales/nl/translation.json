@@ -2171,7 +2171,8 @@
     "toggleMenu": "Menu wisselen",
     "updates": "Bijwerkingen",
     "users": "Gebruikers",
-    "vulnerabilities": "Kwetsbaarheden"
+    "vulnerabilities": "Kwetsbaarheden",
+    "configProfiles": "Configuratieprofielen"
   },
   "notifications": {
     "applicationUpdates": "Applicatie Updates",
@@ -3451,6 +3452,40 @@
     "engineTooOld": "Te oude versie",
     "engineUnavailable": "Niet beschikbaar hier",
     "enginesError": "Kon configuratiebeheermotoren niet laden",
-    "enginesTitle": "Configuratiebeheer"
+    "enginesTitle": "Configuratiebeheer",
+    "applyNoStored": "Geen — plak hieronder",
+    "applyStoredChosen": "Dit voert het opgeslagen profiel uit zoals het is opgeslagen. De uitvoering wordt geregistreerd tegen dat profiel.",
+    "applyStoredHelp": "Kies een opgeslagen profiel, of laat dit veld leeg om er een onder te plakken.",
+    "applyStoredProfile": "Opgeslagen profiel"
+  },
+  "configProfiles": {
+    "actions": "Acties",
+    "active": "Actief",
+    "activeNo": "Inactief",
+    "activeYes": "Actief",
+    "addProfile": "Nieuwe profiel",
+    "contentBody": "Profielinhoud (YAML)",
+    "contentDsc": "DSC-bronnen (JSON)",
+    "createTitle": "Nieuw configuratieprofiel",
+    "delete": "Verwijderen",
+    "deleteBody": "Dit verwijdert het profiel, zijn versiegeschiedenis en zijn toewijzingen. Records van vorige uitvoeringen blijven bewaard.",
+    "deleteFailed": "Het profiel kon niet worden verwijderd",
+    "deleteTitle": "Profiel verwijderen",
+    "description": "Beschrijving",
+    "edit": "Bewerken",
+    "editTitle": "Configuratieprofiel bewerken",
+    "engine": "Motor",
+    "history": "Versiegeschiedenis",
+    "historyTitle": "Versiegeschiedenis",
+    "intro": "Maak één configuratie aan en pas deze toe op vele hosts. Het bewerken van de engine of het lichaam houdt de vorige inhoud als een versie, zodat je altijd kunt zien wat een profiel bevatte toen het uitgevoerd werd.",
+    "loadFailed": "Kon configuratieprofielen niet laden",
+    "name": "Naam",
+    "noVersions": "Er zijn nog geen eerdere versies. Er wordt een versie opgeslagen telkens wanneer de engine of het lichaam verandert.",
+    "saveFailed": "Kon het profiel niet opslaan",
+    "title": "Profielconfiguraties",
+    "updated": "Bijgewerkt",
+    "version": "Version",
+    "versionLabel": "Versie {{n}}",
+    "versionsFailed": "Kon de versiegeschiedenis niet laden"
   }
 }

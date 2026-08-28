@@ -2,7 +2,7 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Button,
@@ -17,7 +17,11 @@ import {
   Typography,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { applyConfigProfile } from "../Services/configManagementService";
+import {
+  applyConfigProfile,
+  getConfigProfiles,
+  ConfigProfile,
+} from "../Services/configManagementService";
 
 interface ApplyConfigProfileDialogProps {
   open: boolean;
@@ -43,6 +47,11 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
   onApplied,
 }) => {
   const { t } = useTranslation();
+  // Stored profiles, if this server has the Enterprise module. An empty list
+  // (including the 402 case) simply means the picker is not offered -- the
+  // ad-hoc path below is open source and must stay usable either way.
+  const [stored, setStored] = useState<ConfigProfile[]>([]);
+  const [profileId, setProfileId] = useState("");
   const [engine, setEngine] = useState(engines[0] || "ansible-core");
   const isDsc = engine === "dsc";
   const [body, setBody] = useState("");
@@ -54,7 +63,28 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!open) return;
+    const loadStored = async () => {
+      try {
+        const all = await getConfigProfiles();
+        setStored(all.filter((p) => p.is_active));
+      } catch {
+        // Unlicensed (402) or unreachable: fall back to ad-hoc only. This is
+        // an expected state on an open-source server, not an error worth
+        // showing an operator who never asked for stored profiles.
+        //
+        // The functional form matters: writing a fresh [] over an already
+        // empty list is a real re-render for no change, which on the common
+        // unlicensed path is pure noise.
+        setStored((prev) => (prev.length ? [] : prev));
+      }
+    };
+    loadStored();
+  }, [open]);
+
   const reset = () => {
+    setProfileId("");
     setEngine(engines[0] || "ansible-core");
     setBody("");
     setProfileName("");
@@ -73,7 +103,7 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
     setError(null);
     try {
       let resources: Record<string, unknown>[] | undefined;
-      if (isDsc) {
+      if (isDsc && !profileId) {
         // Parse locally so a typo is caught here, with a message about JSON,
         // rather than becoming an opaque 422 from the request body.
         const parsed = JSON.parse(body) as unknown;
@@ -82,12 +112,22 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
         }
         resources = parsed as Record<string, unknown>[];
       }
-      await applyConfigProfile(hostId, {
-        engine,
-        ...(isDsc ? { resources } : { playbook: body }),
-        ...(profileName.trim() ? { profile_name: profileName.trim() } : {}),
-        check_mode: checkMode,
-      });
+      await applyConfigProfile(
+        hostId,
+        profileId
+          ? // The server reads the stored profile's engine and body; sending
+            // ours too would let a stale copy in this tab overwrite what was
+            // saved.
+            { profile_id: profileId, check_mode: checkMode }
+          : {
+              engine,
+              ...(isDsc ? { resources } : { playbook: body }),
+              ...(profileName.trim()
+                ? { profile_name: profileName.trim() }
+                : {}),
+              check_mode: checkMode,
+            },
+      );
       reset();
       onClose();
       onApplied?.();
@@ -125,7 +165,12 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           <Typography variant="body2" color="text.secondary">
-            {isDsc
+            {profileId
+              ? t(
+                  "configManagement.applyStoredChosen",
+                  "This runs the saved profile as stored. The run is recorded against it.",
+                )
+              : isDsc
               ? t(
                   "configManagement.applyHelpDsc",
                   "This host applies configuration with DSC. Paste a JSON array of DSC resources.",
@@ -136,7 +181,36 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
                 )}
           </Typography>
 
-          {engines.length > 1 && (
+          {stored.length > 0 && (
+            <TextField
+              select
+              label={t(
+                "configManagement.applyStoredProfile",
+                "Stored profile",
+              )}
+              value={profileId}
+              onChange={(event) => setProfileId(event.target.value)}
+              size="small"
+              fullWidth
+              disabled={submitting}
+              helperText={t(
+                "configManagement.applyStoredHelp",
+                "Pick a saved profile, or leave this blank to paste one below.",
+              )}
+              slotProps={{ select: { native: true } }}
+            >
+              <option value="">
+                {t("configManagement.applyNoStored", "None — paste below")}
+              </option>
+              {stored.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} ({p.engine})
+                </option>
+              ))}
+            </TextField>
+          )}
+
+          {!profileId && engines.length > 1 && (
             <TextField
               select
               label={t("configManagement.applyEngine", "Engine")}
@@ -155,6 +229,7 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
             </TextField>
           )}
 
+          {!profileId && (
           <TextField
             label={t(
               "configManagement.applyProfileName",
@@ -166,23 +241,29 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
             fullWidth
             disabled={submitting}
           />
+          )}
 
-          <TextField
-            label={
-              isDsc
-                ? t("configManagement.applyResources", "DSC resources (JSON)")
-                : t("configManagement.applyPlaybook", "Playbook content (YAML)")
-            }
-            value={body}
-            onChange={(event) => setBody(event.target.value)}
-            multiline
-            minRows={10}
-            fullWidth
-            disabled={submitting}
-            slotProps={{
-              input: { sx: { fontFamily: "monospace", fontSize: "0.85rem" } },
-            }}
-          />
+          {!profileId && (
+            <TextField
+              label={
+                isDsc
+                  ? t("configManagement.applyResources", "DSC resources (JSON)")
+                  : t(
+                      "configManagement.applyPlaybook",
+                      "Playbook content (YAML)",
+                    )
+              }
+              value={body}
+              onChange={(event) => setBody(event.target.value)}
+              multiline
+              minRows={10}
+              fullWidth
+              disabled={submitting}
+              slotProps={{
+                input: { sx: { fontFamily: "monospace", fontSize: "0.85rem" } },
+              }}
+            />
+          )}
 
           <FormControlLabel
             control={
@@ -217,7 +298,9 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
         <Button
           variant="contained"
           onClick={handleApply}
-          disabled={submitting || !body.trim()}
+          // A stored profile has no pasted body -- the server reads it -- so
+          // requiring one here would leave the button permanently disabled.
+          disabled={submitting || (!profileId && !body.trim())}
         >
           {checkMode
             ? t("configManagement.applyDryRunAction", "Preview changes")

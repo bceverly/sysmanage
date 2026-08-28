@@ -27,9 +27,13 @@ vi.mock("react-i18next", () => {
 
 vi.mock("../../Services/configManagementService", () => ({
   applyConfigProfile: vi.fn(),
+  getConfigProfiles: vi.fn(),
 }));
 
-import { applyConfigProfile } from "../../Services/configManagementService";
+import {
+  applyConfigProfile,
+  getConfigProfiles,
+} from "../../Services/configManagementService";
 import ApplyConfigProfileDialog from "../../Components/ApplyConfigProfileDialog";
 
 const base = {
@@ -56,6 +60,11 @@ describe("ApplyConfigProfileDialog", () => {
       queued: true,
       check_mode: true,
       message: "ok",
+    });
+    // Default: an OPEN-SOURCE server. Stored profiles 402, and the ad-hoc
+    // path must keep working -- that is the licensing split.
+    vi.mocked(getConfigProfiles).mockRejectedValue({
+      response: { status: 402 },
     });
   });
   afterEach(() => vi.restoreAllMocks());
@@ -256,5 +265,123 @@ describe("ApplyConfigProfileDialog", () => {
       />,
     );
     expect(screen.getByLabelText("Engine")).toHaveValue("puppet");
+  });
+});
+
+describe("stored profiles", () => {
+  // Its own beforeEach: this block sits outside the describe above, so it
+  // does NOT inherit that one's setup. Without this, mocks leak across tests
+  // and `mock.calls[0]` reads a call some earlier test made.
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(applyConfigProfile).mockResolvedValue({
+      host_id: "h1",
+      queued: true,
+      check_mode: true,
+      message: "ok",
+    });
+    vi.mocked(getConfigProfiles).mockRejectedValue({
+      response: { status: 402 },
+    });
+  });
+
+  const storedProfile = (over = {}) => ({
+    id: "p1",
+    name: "baseline",
+    description: null,
+    engine: "puppet",
+    content: "class x {}",
+    version: 2,
+    is_active: true,
+    created_by: null,
+    updated_by: null,
+    created_at: null,
+    updated_at: null,
+    ...over,
+  });
+
+  test("an unlicensed server shows no picker and still applies ad-hoc", async () => {
+    render(<ApplyConfigProfileDialog {...base} />);
+    await waitFor(() => expect(getConfigProfiles).toHaveBeenCalled());
+    expect(screen.queryByLabelText("Stored profile")).toBeNull();
+
+    typeBody("- hosts: all");
+    fireEvent.click(screen.getByRole("button", { name: "Preview changes" }));
+    await waitFor(() => expect(applyConfigProfile).toHaveBeenCalled());
+    expect(vi.mocked(applyConfigProfile).mock.calls[0][1]).toMatchObject({
+      playbook: "- hosts: all",
+    });
+  });
+
+  test("inactive profiles are not offered", async () => {
+    vi.mocked(getConfigProfiles).mockResolvedValue([
+      storedProfile(),
+      storedProfile({ id: "p2", name: "retired", is_active: false }),
+    ]);
+    render(<ApplyConfigProfileDialog {...base} />);
+    expect(await screen.findByLabelText("Stored profile")).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: /baseline/ })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: /retired/ })).toBeNull();
+  });
+
+  test("picking one sends only its id, never a stale local copy", async () => {
+    vi.mocked(getConfigProfiles).mockResolvedValue([storedProfile()]);
+    render(<ApplyConfigProfileDialog {...base} />);
+    const picker = await screen.findByLabelText("Stored profile");
+    fireEvent.change(picker, { target: { value: "p1" } });
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview changes" }));
+    await waitFor(() => expect(applyConfigProfile).toHaveBeenCalled());
+    const sent = vi.mocked(applyConfigProfile).mock.calls[0][1];
+    expect(sent).toEqual({ profile_id: "p1", check_mode: true });
+    // Sending a body too would let this tab overwrite what was saved.
+    expect(sent).not.toHaveProperty("playbook");
+    expect(sent).not.toHaveProperty("engine");
+  });
+
+  test("the paste field disappears so no ignored box is shown", async () => {
+    vi.mocked(getConfigProfiles).mockResolvedValue([storedProfile()]);
+    render(<ApplyConfigProfileDialog {...base} />);
+    const picker = await screen.findByLabelText("Stored profile");
+    expect(screen.getByLabelText(/Playbook content/)).toBeInTheDocument();
+    fireEvent.change(picker, { target: { value: "p1" } });
+    expect(screen.queryByLabelText(/Playbook content/)).toBeNull();
+  });
+
+  test("apply is enabled with a stored profile and no pasted body", async () => {
+    vi.mocked(getConfigProfiles).mockResolvedValue([storedProfile()]);
+    render(<ApplyConfigProfileDialog {...base} />);
+    const picker = await screen.findByLabelText("Stored profile");
+    // Nothing typed: without the profile this button is correctly disabled.
+    expect(screen.getByRole("button", { name: "Preview changes" })).toBeDisabled();
+    fireEvent.change(picker, { target: { value: "p1" } });
+    expect(
+      screen.getByRole("button", { name: "Preview changes" }),
+    ).not.toBeDisabled();
+  });
+
+  test("switching back to None restores the ad-hoc form", async () => {
+    vi.mocked(getConfigProfiles).mockResolvedValue([storedProfile()]);
+    render(<ApplyConfigProfileDialog {...base} />);
+    const picker = await screen.findByLabelText("Stored profile");
+    fireEvent.change(picker, { target: { value: "p1" } });
+    fireEvent.change(picker, { target: { value: "" } });
+    expect(screen.getByLabelText(/Playbook content/)).toBeInTheDocument();
+  });
+
+  test("a stored DSC profile is not JSON-parsed in the browser", async () => {
+    // The body never leaves the server, so a client-side parse would reject a
+    // perfectly good profile it has no business inspecting.
+    vi.mocked(getConfigProfiles).mockResolvedValue([
+      storedProfile({ engine: "dsc", content: "not json at all" }),
+    ]);
+    render(<ApplyConfigProfileDialog {...base} engines={["dsc"]} />);
+    const picker = await screen.findByLabelText("Stored profile");
+    fireEvent.change(picker, { target: { value: "p1" } });
+    fireEvent.click(screen.getByRole("button", { name: "Preview changes" }));
+    await waitFor(() => expect(applyConfigProfile).toHaveBeenCalled());
+    expect(
+      screen.queryByText(/must be a JSON array/),
+    ).toBeNull();
   });
 });

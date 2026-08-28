@@ -24,6 +24,7 @@ import logging
 from typing import Any, Dict, Optional
 
 from backend.licensing.module_loader import module_loader
+from backend.utils.log_sanitize import scrub
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +50,7 @@ def build_licensed_spec(
         logger.warning(
             "Module '%s' is licensed but not loaded; cannot build a spec for %s",
             ENGINE_CODE,
-            engine,
+            scrub(engine),
         )
         return None
 

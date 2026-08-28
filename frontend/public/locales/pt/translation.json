@@ -2171,7 +2171,8 @@
     "toggleMenu": "Alternar menu",
     "updates": "Atualizações",
     "users": "Usuários",
-    "vulnerabilities": "Vulnerabilidades"
+    "vulnerabilities": "Vulnerabilidades",
+    "configProfiles": "Perfis de Configuração"
   },
   "notifications": {
     "applicationUpdates": "Atualizações de Aplicações",
@@ -3451,6 +3452,40 @@
     "engineTooOld": "Versão muito antiga",
     "engineUnavailable": "Não disponível aqui",
     "enginesError": "Falha ao carregar motores de gestão de configuração",
-    "enginesTitle": "Gestão de Configuração"
+    "enginesTitle": "Gestão de Configuração",
+    "applyNoStored": "Nenhum — cole abaixo",
+    "applyStoredChosen": "Isso executa o perfil salvo como está armazenado. A execução é registrada contra ele.",
+    "applyStoredHelp": "Escolha um perfil salvo, ou deixe este em branco para colar um abaixo.",
+    "applyStoredProfile": "Perfil salvo"
+  },
+  "configProfiles": {
+    "actions": "Ações",
+    "active": "Ativo",
+    "activeNo": "Inativo",
+    "activeYes": "Ativo",
+    "addProfile": "Novo Perfil",
+    "contentBody": "Conteúdo do perfil (YAML)",
+    "contentDsc": "Recursos DSC (JSON)",
+    "createTitle": "Novo Perfil de Configuração",
+    "delete": "Excluir",
+    "deleteBody": "Isso remove o perfil, seu histórico de versões e suas atribuições. Registros de execuções passadas são mantidos.",
+    "deleteFailed": "Não foi possível excluir o perfil",
+    "deleteTitle": "Excluir Perfil",
+    "description": "Descrição",
+    "edit": "Editar",
+    "editTitle": "Editar Perfil de Configuração",
+    "engine": "Motor",
+    "history": "Histórico de Versões",
+    "historyTitle": "Histórico de Versões",
+    "intro": "Escreva uma configuração uma vez e aplique-a a muitos hosts. Editar o motor ou o corpo mantém o corpo anterior como uma versão, de modo que você sempre possa ver o que um perfil continha quando foi executado.",
+    "loadFailed": "Não foi possível carregar perfis de configuração",
+    "name": "Nome",
+    "noVersions": "Ainda não há versões anteriores. Uma versão é mantida sempre que o motor ou o corpo são alterados.",
+    "saveFailed": "Não foi possível salvar o perfil",
+    "title": "Perfis de Configuração",
+    "updated": "Atualizado",
+    "version": "Version",
+    "versionLabel": "Versão {{n}}",
+    "versionsFailed": "Não foi possível carregar o histórico de versões"
   }
 }

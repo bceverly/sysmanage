@@ -2171,7 +2171,8 @@
     "toggleMenu": "Attiva/disattiva menu",
     "updates": "Aggiornamenti",
     "users": "Utenti",
-    "vulnerabilities": "Vulnerebilità"
+    "vulnerabilities": "Vulnerebilità",
+    "configProfiles": "Profili di Configurazione"
   },
   "notifications": {
     "applicationUpdates": "Aggiornamenti Applicazioni",
@@ -3451,6 +3452,40 @@
     "engineTooOld": "Versione troppo vecchia",
     "engineUnavailable": "Non disponibile qui",
     "enginesError": "Non è stato possibile caricare i motori di gestione della configurazione",
-    "enginesTitle": "Gestione della configurazione"
+    "enginesTitle": "Gestione della configurazione",
+    "applyNoStored": "Nessuno — incolla qui sotto",
+    "applyStoredChosen": "Esegue il profilo salvato come memorizzato. L'esecuzione viene registrata contro di esso.",
+    "applyStoredHelp": "Scegli un profilo salvato, o lascia questo campo vuoto per incollare uno qui sotto.",
+    "applyStoredProfile": "Profilo salvato"
+  },
+  "configProfiles": {
+    "actions": "Azioni",
+    "active": "Attivo",
+    "activeNo": "Inattivo",
+    "activeYes": "Attivo",
+    "addProfile": "Nuovo Profilo",
+    "contentBody": "Contenuto del Profilo (YAML)",
+    "contentDsc": "Risorse DSC (JSON)",
+    "createTitle": "Nuovo Profilo di Configurazione",
+    "delete": "Elimina",
+    "deleteBody": "Questo rimuove il profilo, la sua cronologia delle versioni e le sue assegnazioni. I registri delle esecuzioni passate rimangono.",
+    "deleteFailed": "Impossibile eliminare il profilo",
+    "deleteTitle": "Elimina Profilo",
+    "description": "Descrizione",
+    "edit": "Modifica",
+    "editTitle": "Modifica Profilo di Configurazione",
+    "engine": "Motore",
+    "history": "Storia delle Versioni",
+    "historyTitle": "Cronologia delle Versioni",
+    "intro": "Autore una configurazione una volta e applicala a molti host. Modificando il motore o il corpo, la versione precedente del corpo viene conservata come versione, quindi è sempre possibile vedere cosa conteneva un profilo quando è stato eseguito.",
+    "loadFailed": "Impossibile caricare i profili di configurazione",
+    "name": "Nome",
+    "noVersions": "Non ci sono ancora versioni precedenti. Una versione viene conservata ogni volta che il motore o il corpo vengono modificati.",
+    "saveFailed": "Impossibile salvare il profilo",
+    "title": "Configurazioni di Profilo",
+    "updated": "Aggiornato",
+    "version": "Version",
+    "versionLabel": "Versione {{n}}",
+    "versionsFailed": "Impossibile caricare la cronologia delle versioni"
   }
 }

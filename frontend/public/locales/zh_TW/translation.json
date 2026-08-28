@@ -2171,7 +2171,8 @@
     "toggleMenu": "切換選單",
     "updates": "更新",
     "users": "使用者",
-    "vulnerabilities": "漏洞"
+    "vulnerabilities": "漏洞",
+    "configProfiles": "配置配置文件"
   },
   "notifications": {
     "applicationUpdates": "應用程式更新",
@@ -3451,6 +3452,40 @@
     "engineTooOld": "版本過舊",
     "engineUnavailable": "在此處不可用",
     "enginesError": "無法載入配置管理引擎",
-    "enginesTitle": "配置管理"
+    "enginesTitle": "配置管理",
+    "applyNoStored": "無 — 請下方貼上",
+    "applyStoredChosen": "此將執行如實儲存的配置。執行記錄會與它相關聯。",
+    "applyStoredHelp": "選擇已儲存的配置，或在此處留空以下方貼上。",
+    "applyStoredProfile": "儲存的配置"
+  },
+  "configProfiles": {
+    "actions": "動作",
+    "active": "啟用",
+    "activeNo": "停用",
+    "activeYes": "啟用",
+    "addProfile": "新配置",
+    "contentBody": "配置文件內容 (YAML)",
+    "contentDsc": "DSC資源 (JSON)",
+    "createTitle": "新配置文件",
+    "delete": "刪除",
+    "deleteBody": "此動作將刪除配置文件、其版本歷史和分配，但會保留過去執行的記錄。",
+    "deleteFailed": "無法刪除配置文件",
+    "deleteTitle": "刪除配置文件",
+    "description": "描述",
+    "edit": "編輯",
+    "editTitle": "編輯配置文件",
+    "engine": "引擎",
+    "history": "版本歷史",
+    "historyTitle": "版本歷史",
+    "intro": "一次編寫配置，可應用於多個主機。編輯引擎或內容會保留之前的內容作為版本，讓您隨時查看配置檔在執行時的狀態。",
+    "loadFailed": "無法載入配置文件",
+    "name": "名稱",
+    "noVersions": "尚未有先前版本。每次引擎或內容發生變化時，會保留一個版本。",
+    "saveFailed": "無法儲存配置文件",
+    "title": "配置文件",
+    "updated": "更新",
+    "version": "版本",
+    "versionLabel": "版本 {{n}}",
+    "versionsFailed": "無法載入版本歷史"
   }
 }

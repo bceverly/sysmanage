@@ -80,6 +80,13 @@ re:\{\{\w+\}\} hosts?
 re:Host \{\{\w+\}\}
 re:Interface \{\{\w+\}\}
 re:Violations — \{\{\w+\}\}
+# "Version {{n}}" — "Version" is already blessed as a cognate for these
+# locales above (de,nl,fr,it,pt,es), and the rest of the string is the number
+# itself, so no correct de/fr rendering CAN differ from the English. Only de
+# and fr are listed: the other locales' service output genuinely differs, and
+# blessing them too would hide real gaps. An exact key, not a value regex, so
+# it cannot bless "Version ..." prose elsewhere.
+de,fr: configProfiles.versionLabel
 
 # === residue triage, 2026-08-05 ==============================================
 # Only names and identifiers below.  Ordinary words that happen to be cognates

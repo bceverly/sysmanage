@@ -1155,7 +1155,8 @@
     "gated": "[缺失：导航。网关]",
     "osLifecycle": "操作系统生命周期",
     "plain": "[缺失：导航。纯文本]",
-    "vulnerabilities": "漏洞"
+    "vulnerabilities": "漏洞",
+    "configProfiles": "配置配置文件"
   },
   "notifications": {
     "applicationUpdates": "应用程序更新",
@@ -3451,6 +3452,40 @@
     "engineTooOld": "版本过旧",
     "engineUnavailable": "在此处不可用",
     "enginesError": "加载配置管理引擎失败",
-    "enginesTitle": "配置管理"
+    "enginesTitle": "配置管理",
+    "applyNoStored": "无 — 粘贴下方",
+    "applyStoredChosen": "这将运行按原样保存的配置文件。运行记录将指向它。",
+    "applyStoredHelp": "选择已保存的配置文件，或留空以在下方粘贴",
+    "applyStoredProfile": "保存的配置文件"
+  },
+  "configProfiles": {
+    "actions": "操作",
+    "active": "活动",
+    "activeNo": "未活动",
+    "activeYes": "活动",
+    "addProfile": "新配置文件",
+    "contentBody": "配置文件内容（YAML）",
+    "contentDsc": "DSC资源（JSON）",
+    "createTitle": "新配置文件",
+    "delete": "删除",
+    "deleteBody": "这将删除配置文件、其版本历史及其分配，但会保留过去运行的记录。",
+    "deleteFailed": "无法删除配置文件",
+    "deleteTitle": "删除配置文件",
+    "description": "描述",
+    "edit": "编辑",
+    "editTitle": "编辑配置文件",
+    "engine": "引擎",
+    "history": "版本历史",
+    "historyTitle": "版本历史",
+    "intro": "编写配置一次，应用于多个主机。编辑引擎或正文会保留之前的正文作为版本，因此您总能看到一个配置文件运行时的内容。",
+    "loadFailed": "无法加载配置文件",
+    "name": "名称",
+    "noVersions": "尚未有之前的版本。每次引擎或正文发生变化时都会保留一个版本。",
+    "saveFailed": "无法保存配置文件",
+    "title": "配置文件",
+    "updated": "更新",
+    "version": "版本",
+    "versionLabel": "版本 {{n}}",
+    "versionsFailed": "无法加载版本历史"
   }
 }

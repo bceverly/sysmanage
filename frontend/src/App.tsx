@@ -45,6 +45,7 @@ import Profile from './Pages/Profile';
 import ApiKeys from './Pages/ApiKeys';
 import Settings from './Pages/Settings';
 import AirgapRepositories from './Pages/AirgapRepositories';
+import ConfigProfiles from './Pages/ConfigProfiles';
 import AirgapCollections from './Pages/AirgapCollections';
 import FederationAuditLog from './Pages/FederationAuditLog';
 import FederationHosts from './Pages/FederationHosts';
@@ -77,6 +78,10 @@ function AppRoutes() {
       <Route path="/maintenance-windows" element={<MaintenanceWindows />} />
       <Route path="/secrets" element={<Secrets />} />
       <Route path="/scripts" element={<Scripts />} />
+      {/* Storing/versioning/assigning profiles is the Enterprise half of
+          20.1 -- ad-hoc apply stays open-source on the host page. Guarded so
+          the page is unreachable by direct URL without the module. */}
+      <Route path="/config-profiles" element={<LicensedRoute module="config_management_engine"><ConfigProfiles /></LicensedRoute>} />
       <Route path="/reports" element={<Reports />} />
       <Route path="/reports/audit-log" element={<AuditLogViewer />} />
       <Route path="/reports/:reportId" element={<ReportViewer />} />

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-27 11:40-0400\n"
+"POT-Creation-Date: 2026-08-27 20:04-0400\n"
 "Language: es\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -141,10 +141,10 @@ msgid "Failed to get CA certificate: %s"
 msgstr "Error al obtener el certificado CA: %s"
 
 #: backend/api/certificates.py:84 backend/api/certificates.py:139
-#: backend/api/host_graylog.py:89 backend/api/diagnostics.py:87
-#: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:473
-#: backend/api/firewall_roles.py:544
+#: backend/api/host_graylog.py:89 backend/api/config_mgmt_profiles.py:340
+#: backend/api/diagnostics.py:87 backend/api/diagnostics.py:222
+#: backend/api/error_constants.py:48 backend/api/antivirus_status.py:213
+#: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "Formato de ID de host inválido"
@@ -1086,7 +1086,7 @@ msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
 msgstr "Permiso denegado: se requiere el rol EDIT_HOST_HOSTNAME"
 
 #: backend/api/host_hostname.py:75 backend/api/reboot_orchestration.py:119
-#: backend/api/config_mgmt_runs.py:242 backend/api/error_constants.py:43
+#: backend/api/config_mgmt_runs.py:402 backend/api/error_constants.py:43
 #: backend/api/child_host_utils.py:91
 #: backend/api/scripts/routes_executions.py:81
 msgid "Host is not active"
@@ -1817,18 +1817,23 @@ msgstr "El estado de reléa SAML es inválido o ha expirado."
 msgid "SAML sign-in failed: %s"
 msgstr "La autenticación SAML falló: %s"
 
-#: backend/api/config_mgmt_prereq.py:193 backend/api/packages_operations.py:76
+#: backend/api/config_mgmt_prereq.py:252 backend/api/packages_operations.py:76
 msgid "Permission denied: ADD_PACKAGE role required"
 msgstr "Permiso denegado: se requiere el rol ADD_PACKAGE"
 
-#: backend/api/config_mgmt_prereq.py:208
+#: backend/api/config_mgmt_prereq.py:264 backend/api/config_mgmt_runs.py:293
+#, python-format
+msgid "Unknown configuration management engine: %s"
+msgstr "Motor de gestión de configuración desconocido: %s"
+
+#: backend/api/config_mgmt_prereq.py:281
 msgid ""
 "No config-management prerequisite install is available for this platform"
 msgstr ""
 "No se dispone de instalación de requisitos previos de gestión de "
 "configuración para esta plataforma"
 
-#: backend/api/config_mgmt_prereq.py:269
+#: backend/api/config_mgmt_prereq.py:345
 msgid "Installation of the config-management prerequisite was requested"
 msgstr ""
 "Se solicitó la instalación de los requisitos previos de gestión de "
@@ -3638,6 +3643,50 @@ msgstr "El nombre del rol del firewall debe tener 100 caracteres o menos"
 msgid "Firewall role name cannot be empty"
 msgstr "El nombre del rol del firewall no puede estar vacío"
 
+#: backend/api/config_mgmt_profiles.py:136
+#: backend/api/secrets/permissions.py:50
+#, python-format
+msgid "Permission denied: %s role required"
+msgstr "Permiso denegado: se requiere el rol %s"
+
+#: backend/api/config_mgmt_profiles.py:159 backend/api/config_mgmt_runs.py:263
+msgid "Invalid profile ID format"
+msgstr "Formato de ID de perfil inválido"
+
+#: backend/api/config_mgmt_profiles.py:164 backend/api/config_mgmt_runs.py:272
+msgid "Profile not found"
+msgstr "Perfil no encontrado"
+
+#: backend/api/config_mgmt_profiles.py:199
+#: backend/api/config_mgmt_profiles.py:251
+#, python-format
+msgid "A profile named '%s' already exists"
+msgstr "Un perfil con el nombre '%s' ya existe"
+
+#: backend/api/config_mgmt_profiles.py:276
+msgid "Profile deleted"
+msgstr "Perfil eliminado"
+
+#: backend/api/config_mgmt_profiles.py:345
+msgid "Invalid tag ID format"
+msgstr "Formato de ID de etiqueta inválido"
+
+#: backend/api/config_mgmt_profiles.py:350
+msgid "Invalid site ID format"
+msgstr "Formato de ID de sitio inválido"
+
+#: backend/api/config_mgmt_profiles.py:377
+msgid "Invalid assignment ID format"
+msgstr "Formato de ID de asignación inválido"
+
+#: backend/api/config_mgmt_profiles.py:382
+msgid "Assignment not found"
+msgstr "Asignación no encontrada"
+
+#: backend/api/config_mgmt_profiles.py:385
+msgid "Assignment removed"
+msgstr "Asignación eliminada"
+
 #: backend/api/host_approval.py:54
 msgid "Permission denied: APPROVE_HOST_REGISTRATION role required"
 msgstr "Permiso denegado: se requiere el rol APPROVE_HOST_REGISTRATION"
@@ -3703,11 +3752,6 @@ msgstr "Use /api/v1/secrets/deploy-ssh-keys con licencia Pro+"
 #: backend/api/secrets/deployment.py:75
 msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
 msgstr "Use /api/v1/secrets/deploy-certificates con licencia Pro+"
-
-#: backend/api/secrets/permissions.py:50
-#, python-format
-msgid "Permission denied: %s role required"
-msgstr "Permiso denegado: se requiere el rol %s"
 
 #: backend/api/airgap_agent_mirrors.py:94
 msgid "Provisioning engine is not licensed on this server."
@@ -3878,25 +3922,29 @@ msgstr "Registro de finalización de instalación"
 msgid "Internal server error"
 msgstr "Error interno del servidor"
 
-#: backend/api/config_mgmt_runs.py:235
-#: backend/api/scripts/routes_executions.py:67
-msgid "Permission denied: RUN_SCRIPT role required"
-msgstr "Permiso denegado: se requiere el rol RUN_SCRIPT"
-
-#: backend/api/config_mgmt_runs.py:255
+#: backend/api/config_mgmt_runs.py:240
 #, python-format
-msgid "Unknown configuration management engine: %s"
-msgstr "Motor de gestión de configuración desconocido: %s"
+msgid "Profile '%s' does not contain valid JSON"
+msgstr "El perfil '%s' no contiene un JSON válido"
 
-#: backend/api/config_mgmt_runs.py:270
+#: backend/api/config_mgmt_runs.py:245
+#, python-format
+msgid "Profile '%s' must contain a JSON array of DSC resources"
+msgstr "El perfil '%s' debe contener un array JSON de recursos DSC"
+
+#: backend/api/config_mgmt_runs.py:276
+msgid "This profile is not active"
+msgstr "Este perfil no está activo"
+
+#: backend/api/config_mgmt_runs.py:317
 msgid "This host uses DSC; provide 'resources', not 'playbook'"
 msgstr "Este host utiliza DSC; proporcione 'recursos', no 'playbook'"
 
-#: backend/api/config_mgmt_runs.py:277
+#: backend/api/config_mgmt_runs.py:324
 msgid "This host uses ansible-core; provide 'playbook'"
 msgstr "Este host utiliza ansible-core; proporcione 'playbook'"
 
-#: backend/api/config_mgmt_runs.py:305
+#: backend/api/config_mgmt_runs.py:351
 msgid ""
 "The configuration management engine is licensed but not available on this "
 "server"
@@ -3904,7 +3952,12 @@ msgstr ""
 "El motor de gestión de configuración está licenciado pero no disponible en "
 "este servidor"
 
-#: backend/api/config_mgmt_runs.py:364
+#: backend/api/config_mgmt_runs.py:395
+#: backend/api/scripts/routes_executions.py:67
+msgid "Permission denied: RUN_SCRIPT role required"
+msgstr "Permiso denegado: se requiere el rol RUN_SCRIPT"
+
+#: backend/api/config_mgmt_runs.py:478
 msgid "Configuration profile was queued for this host"
 msgstr "Perfil de configuración fue encolado para este host"
 

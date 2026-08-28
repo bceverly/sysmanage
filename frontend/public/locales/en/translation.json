@@ -2170,7 +2170,8 @@
     "users": "Users",
     "vulnerabilities": "Vulnerabilities",
     "gated": "[MISSING:nav.gated]",
-    "plain": "[MISSING:nav.plain]"
+    "plain": "[MISSING:nav.plain]",
+    "configProfiles": "Config Profiles"
   },
   "notifications": {
     "applicationUpdates": "Application Updates",
@@ -3451,6 +3452,40 @@
     "engineTooOld": "Version too old",
     "engineUnavailable": "Not available here",
     "enginesError": "Failed to load configuration management engines",
-    "enginesTitle": "Configuration Management"
+    "enginesTitle": "Configuration Management",
+    "applyNoStored": "None — paste below",
+    "applyStoredChosen": "This runs the saved profile as stored. The run is recorded against it.",
+    "applyStoredHelp": "Pick a saved profile, or leave this blank to paste one below.",
+    "applyStoredProfile": "Stored profile"
+  },
+  "configProfiles": {
+    "actions": "Actions",
+    "active": "Active",
+    "activeNo": "Inactive",
+    "activeYes": "Active",
+    "addProfile": "New Profile",
+    "contentBody": "Profile content (YAML)",
+    "contentDsc": "DSC resources (JSON)",
+    "createTitle": "New Configuration Profile",
+    "delete": "Delete",
+    "deleteBody": "This removes the profile, its version history and its assignments. Records of past runs are kept.",
+    "deleteFailed": "Could not delete the profile",
+    "deleteTitle": "Delete Profile",
+    "description": "Description",
+    "edit": "Edit",
+    "editTitle": "Edit Configuration Profile",
+    "engine": "Engine",
+    "history": "Version history",
+    "historyTitle": "Version History",
+    "intro": "Author a configuration once and apply it to many hosts. Editing the engine or the body keeps the previous body as a version, so you can always see what a profile contained when it ran.",
+    "loadFailed": "Could not load configuration profiles",
+    "name": "Name",
+    "noVersions": "No earlier versions yet. A version is kept each time the engine or the body changes.",
+    "saveFailed": "Could not save the profile",
+    "title": "Configuration Profiles",
+    "updated": "Updated",
+    "version": "Version",
+    "versionLabel": "Version {{n}}",
+    "versionsFailed": "Could not load the version history"
   }
 }

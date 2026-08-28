@@ -2171,7 +2171,8 @@
     "toggleMenu": "Menü umschalten",
     "updates": "Aktualisierungen",
     "users": "Benutzer",
-    "vulnerabilities": "Sicherheitslücken"
+    "vulnerabilities": "Sicherheitslücken",
+    "configProfiles": "Konfigurationsprofile"
   },
   "notifications": {
     "applicationUpdates": "Anwendungs-Updates",
@@ -3451,6 +3452,40 @@
     "engineTooOld": "Zu alte Version",
     "engineUnavailable": "Nicht hier verfügbar",
     "enginesError": "Fehler beim Laden der Konfigurationsverwaltungs-Engines",
-    "enginesTitle": "Konfigurationsverwaltung"
+    "enginesTitle": "Konfigurationsverwaltung",
+    "applyNoStored": "Keine — unten einfügen",
+    "applyStoredChosen": "Dies führt das gespeicherte Profil aus, wie es gespeichert ist. Die Ausführung wird gegen dieses Profil protokolliert.",
+    "applyStoredHelp": "Wählen Sie ein gespeichertes Profil oder lassen Sie dieses Feld leer, um eines unten einzufügen.",
+    "applyStoredProfile": "Gespeichertes Profil"
+  },
+  "configProfiles": {
+    "actions": "Aktionen",
+    "active": "Aktiv",
+    "activeNo": "Inaktiv",
+    "activeYes": "Aktiv",
+    "addProfile": "Neues Profil erstellen",
+    "contentBody": "Profilinhalt (YAML)",
+    "contentDsc": "DSC-Ressourcen (JSON)",
+    "createTitle": "Neues Konfigurationsprofil erstellen",
+    "delete": "Löschen",
+    "deleteBody": "Dies löscht das Profil, seine Versionsgeschichte und seine Zuweisungen. Aufzeichnungen früherer Ausführungen bleiben erhalten.",
+    "deleteFailed": "Profil konnte nicht gelöscht werden",
+    "deleteTitle": "Profil löschen",
+    "description": "Beschreibung",
+    "edit": "Bearbeiten",
+    "editTitle": "Konfigurationsprofil bearbeiten",
+    "engine": "Motor",
+    "history": "Versionsgeschichte",
+    "historyTitle": "Versionsgeschichte",
+    "intro": "Konfiguration einmal erstellen und auf viele Hosts anwenden. Änderungen am Motor oder am Körper bewahren die vorherige Konfiguration als Version, sodass Sie immer sehen können, was ein Profil bei seiner Ausführung enthielt.",
+    "loadFailed": "Konfigurationsprofile konnten nicht geladen werden",
+    "name": "Name",
+    "noVersions": "Noch keine früheren Versionen vorhanden. Eine Version wird gespeichert, wenn der Motor oder der Körper geändert werden.",
+    "saveFailed": "Profil konnte nicht gespeichert werden",
+    "title": "Konfigurationsprofile",
+    "updated": "Aktualisiert",
+    "version": "Version",
+    "versionLabel": "Version {{n}}",
+    "versionsFailed": "Versionen der Konfigurationsgeschichte konnten nicht geladen werden"
   }
 }

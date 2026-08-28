@@ -2171,7 +2171,8 @@
     "toggleMenu": "Basculer le menu",
     "updates": "Mises à jour",
     "users": "Utilisateurs",
-    "vulnerabilities": "Vulnérabilités"
+    "vulnerabilities": "Vulnérabilités",
+    "configProfiles": "Profils de configuration"
   },
   "notifications": {
     "applicationUpdates": "Mises à jour d'Applications",
@@ -3451,6 +3452,40 @@
     "engineTooOld": "Version trop ancienne",
     "engineUnavailable": "Non disponible ici",
     "enginesError": "Échec du chargement des moteurs de gestion de la configuration",
-    "enginesTitle": "Gestion de la configuration"
+    "enginesTitle": "Gestion de la configuration",
+    "applyNoStored": "Aucun — coller ci-dessous",
+    "applyStoredChosen": "Ceci exécute le profil enregistré tel qu'il est stocké. L'exécution est enregistrée contre ce profil.",
+    "applyStoredHelp": "Sélectionnez un profil enregistré, ou laissez ce champ vide pour coller un profil ci-dessous.",
+    "applyStoredProfile": "Profil enregistré"
+  },
+  "configProfiles": {
+    "actions": "Actions",
+    "active": "Actif",
+    "activeNo": "Inactif",
+    "activeYes": "Actif",
+    "addProfile": "Nouveau profil",
+    "contentBody": "Contenu du profil (YAML)",
+    "contentDsc": "Ressources DSC (JSON)",
+    "createTitle": "Nouveau profil de configuration",
+    "delete": "Supprimer",
+    "deleteBody": "Cela supprime le profil, son historique des versions et ses affectations. Les enregistrements des exécutions passées sont conservés.",
+    "deleteFailed": "Impossible de supprimer le profil",
+    "deleteTitle": "Supprimer le profil",
+    "description": "Description",
+    "edit": "Modifier",
+    "editTitle": "Modifier le profil de configuration",
+    "engine": "Moteur",
+    "history": "Historique des versions",
+    "historyTitle": "Historique des versions",
+    "intro": "Auteurz une configuration une fois et appliquez-la à de nombreux hôtes. Modifier le moteur ou le corps conserve la version précédente du corps, vous pouvez donc toujours voir ce qu'un profil contenait lors de son exécution.",
+    "loadFailed": "Impossible de charger les profils de configuration",
+    "name": "Nom",
+    "noVersions": "Aucune version précédente disponible. Une version est conservée à chaque modification du moteur ou du corps.",
+    "saveFailed": "Impossible d'enregistrer le profil",
+    "title": "Profils de configuration",
+    "updated": "Mise à jour",
+    "version": "Version",
+    "versionLabel": "Version {{n}}",
+    "versionsFailed": "Impossible de charger l'historique des versions"
   }
 }

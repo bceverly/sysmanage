@@ -45,7 +45,7 @@ interface ConfigManagementEnginesCardProps {
 }
 
 /** Statuses that mean the engine can actually run a profile right now. */
-const READY = ["satisfied", "not_required"];
+const READY = new Set(["satisfied", "not_required"]);
 
 const ConfigManagementEnginesCard: React.FC<
   ConfigManagementEnginesCardProps
@@ -134,6 +134,20 @@ const ConfigManagementEnginesCard: React.FC<
    * wanted one. A missing engine only becomes a problem when a profile
    * actually targets it, which is a different screen.
    */
+  // Why the install button is disabled, in priority order. Named rather than
+  // nested inline: the button's own `disabled` already encodes the same two
+  // conditions, and two copies of that logic would drift into a button that
+  // is disabled with no tooltip saying why.
+  let blockedReason = "";
+  if (!isAgentPrivileged) {
+    blockedReason = t(
+      "hostDetail.notPrivileged",
+      "Agent not running in privileged mode",
+    );
+  } else if (!isHostActive) {
+    blockedReason = t("hostDetail.hostInactive", "Host is not active");
+  }
+
   const statusChip = (row: ConfigMgmtEngineStatus) => {
     if (row.status === "satisfied") {
       return (
@@ -184,7 +198,7 @@ const ConfigManagementEnginesCard: React.FC<
   };
 
   const readyEngines = engines
-    .filter((e) => READY.includes(e.status))
+    .filter((e) => READY.has(e.status))
     .map((e) => e.engine);
 
   if (loading) {
@@ -292,19 +306,7 @@ const ConfigManagementEnginesCard: React.FC<
                           !isHostActive ||
                           !isAgentPrivileged
                         }
-                        title={
-                          !isAgentPrivileged
-                            ? t(
-                                "hostDetail.notPrivileged",
-                                "Agent not running in privileged mode",
-                              )
-                            : !isHostActive
-                              ? t(
-                                  "hostDetail.hostInactive",
-                                  "Host is not active",
-                                )
-                              : ""
-                        }
+                        title={blockedReason}
                       >
                         {t("configManagement.engineInstall", "Install")}
                       </Button>

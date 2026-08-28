@@ -2171,7 +2171,8 @@
     "toggleMenu": "メニューを切り替え",
     "updates": "アップデート",
     "users": "ユーザー",
-    "vulnerabilities": "脆弱性"
+    "vulnerabilities": "脆弱性",
+    "configProfiles": "構成プロファイル"
   },
   "notifications": {
     "applicationUpdates": "アプリケーションアップデート",
@@ -3451,6 +3452,40 @@
     "engineTooOld": "バージョンが古すぎます",
     "engineUnavailable": "ここでは利用できません",
     "enginesError": "構成管理エンジンの読み込みに失敗しました",
-    "enginesTitle": "構成管理"
+    "enginesTitle": "構成管理",
+    "applyNoStored": "なし — 以下に貼り付け",
+    "applyStoredChosen": "これは、保存されたままのプロファイルを実行します。実行はそれに対して記録されます。",
+    "applyStoredHelp": "保存されたプロファイルを選択するか、このフィールドを空白のままにして、以下に貼り付けてください。",
+    "applyStoredProfile": "保存されたプロファイル"
+  },
+  "configProfiles": {
+    "actions": "アクション",
+    "active": "アクティブ",
+    "activeNo": "無効",
+    "activeYes": "アクティブ",
+    "addProfile": "新しいプロファイル",
+    "contentBody": "プロファイルコンテンツ (YAML)",
+    "contentDsc": "DSCリソース (JSON)",
+    "createTitle": "新しい構成プロファイル",
+    "delete": "削除",
+    "deleteBody": "この操作は、プロファイル、そのバージョン履歴、および割り当てを削除します。過去の実行記録は残ります。",
+    "deleteFailed": "プロファイルの削除に失敗しました",
+    "deleteTitle": "プロファイルの削除",
+    "description": "説明",
+    "edit": "編集",
+    "editTitle": "構成プロファイルの編集",
+    "engine": "エンジン",
+    "history": "バージョン履歴",
+    "historyTitle": "バージョン履歴",
+    "intro": "一度構成を作成し、複数のホストに適用します。エンジンまたはボディを編集すると、以前のボディがバージョンとして保持されるため、実行時のプロフィールの内容を常に確認できます。",
+    "loadFailed": "構成プロファイルの読み込みに失敗しました",
+    "name": "名前",
+    "noVersions": "以前のバージョンはまだありません。エンジンの変更やボディの変更ごとにバージョンとして保持されます。",
+    "saveFailed": "プロファイルの保存に失敗しました",
+    "title": "構成プロファイル",
+    "updated": "更新",
+    "version": "バージョン",
+    "versionLabel": "バージョン {{n}}",
+    "versionsFailed": "バージョン履歴の読み込みに失敗しました"
   }
 }

@@ -118,6 +118,14 @@ export const getConfigProfileRun = async (
 };
 
 export interface ConfigProfileApplyRequest {
+  /**
+   * Apply a STORED profile (Enterprise) instead of a pasted body.
+   *
+   * The server reads the profile's own engine and content, so the browser
+   * never round-trips a body the server already has, and the resulting run is
+   * recorded against the profile.
+   */
+  profile_id?: string;
   engine?: string;
   playbook?: string;
   resources?: Record<string, unknown>[];
@@ -185,3 +193,178 @@ export const getConfigMgmtEngines = async (
   );
   return response.data;
 };
+
+/**
+ * A stored configuration profile (Enterprise).
+ *
+ * Ad-hoc apply is open-source; NAMING, storing, versioning and assigning a
+ * profile is the licensed half, so every call below 402s without the
+ * `config_management_engine` module.
+ */
+export interface ConfigProfile {
+  id: string;
+  name: string;
+  description: string | null;
+  engine: string;
+  content: string;
+  version: number;
+  is_active: boolean;
+  created_by: string | null;
+  updated_by: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+/** A prior body of a profile, kept when engine or content changed. */
+export interface ConfigProfileVersion {
+  id: string;
+  profile_id: string;
+  version: number;
+  engine: string;
+  content: string;
+  created_by: string | null;
+  created_at: string | null;
+}
+
+export interface ConfigProfileAssignment {
+  id: string;
+  profile_id: string;
+  host_id: string | null;
+  tag_id: string | null;
+  site_id: string | null;
+  enabled: boolean;
+  schedule: string | null;
+  check_mode: boolean;
+  created_by: string | null;
+  created_at: string | null;
+  last_applied_at: string | null;
+}
+
+export interface ConfigProfileCreateRequest {
+  name: string;
+  engine: string;
+  content: string;
+  description?: string;
+}
+
+/** Omitted fields are left alone; the server only applies what is sent. */
+export interface ConfigProfileUpdateRequest {
+  name?: string;
+  engine?: string;
+  content?: string;
+  description?: string;
+  is_active?: boolean;
+}
+
+export const getConfigProfiles = async (
+  engine?: string,
+): Promise<ConfigProfile[]> => {
+  const query = engine ? `?engine=${encodeURIComponent(engine)}` : "";
+  const response = await axiosInstance.get<ConfigProfile[]>(
+    `/api/v1/config-management/profiles${query}`,
+  );
+  return response.data;
+};
+
+export const getConfigProfile = async (
+  profileId: string,
+): Promise<ConfigProfile> => {
+  const response = await axiosInstance.get<ConfigProfile>(
+    `/api/v1/config-management/profiles/${profileId}`,
+  );
+  return response.data;
+};
+
+/**
+ * Store a new profile.
+ *
+ * A duplicate name comes back as 409 with the conflicting name in `detail`;
+ * surface the server's message rather than inventing one, because the server
+ * is the only thing that can see the whole table.
+ */
+export const createConfigProfile = async (
+  request: ConfigProfileCreateRequest,
+): Promise<ConfigProfile> => {
+  const response = await axiosInstance.post<ConfigProfile>(
+    `/api/v1/config-management/profiles`,
+    request,
+  );
+  return response.data;
+};
+
+/**
+ * Change a profile.
+ *
+ * Editing the engine or the content snapshots the OUTGOING body as a new
+ * version; editing only the description does not, so the history stays
+ * readable instead of filling with rows nobody can tell apart.
+ */
+export const updateConfigProfile = async (
+  profileId: string,
+  request: ConfigProfileUpdateRequest,
+): Promise<ConfigProfile> => {
+  const response = await axiosInstance.put<ConfigProfile>(
+    `/api/v1/config-management/profiles/${profileId}`,
+    request,
+  );
+  return response.data;
+};
+
+/**
+ * Delete a profile, its versions and its assignments.
+ *
+ * Run HISTORY survives: the run's profile reference is ON DELETE SET NULL, so
+ * deleting a profile cannot erase the record that it ran.
+ */
+export const deleteConfigProfile = async (profileId: string): Promise<void> => {
+  await axiosInstance.delete(`/api/v1/config-management/profiles/${profileId}`);
+};
+
+export const getConfigProfileVersions = async (
+  profileId: string,
+): Promise<ConfigProfileVersion[]> => {
+  const response = await axiosInstance.get<ConfigProfileVersion[]>(
+    `/api/v1/config-management/profiles/${profileId}/versions`,
+  );
+  return response.data;
+};
+
+export const getConfigProfileAssignments = async (
+  profileId: string,
+): Promise<ConfigProfileAssignment[]> => {
+  const response = await axiosInstance.get<ConfigProfileAssignment[]>(
+    `/api/v1/config-management/profiles/${profileId}/assignments`,
+  );
+  return response.data;
+};
+
+/** One engine the server knows about, independent of any host. */
+export interface ConfigMgmtEngineCatalogEntry {
+  engine: string;
+  requires_license: boolean;
+  vendored: boolean;
+  windows_only: boolean;
+  is_default: boolean;
+}
+
+export interface ConfigMgmtEngineCatalog {
+  engines: ConfigMgmtEngineCatalogEntry[];
+  default_engine: string;
+}
+
+/**
+ * The engine catalog, with no host in the question.
+ *
+ * Authoring needs this rather than the per-host endpoint: a profile written
+ * for Puppet is valid whether or not the host you happen to be looking at has
+ * Puppet installed. Fetching it also keeps the identity list in ONE place --
+ * a second copy in the UI is how the server starts accepting a word the UI
+ * never offers.
+ */
+export const getConfigMgmtEngineCatalog =
+  async (): Promise<ConfigMgmtEngineCatalog> => {
+    const response = await axiosInstance.get<ConfigMgmtEngineCatalog>(
+      `/api/v1/config-management/engines`,
+    );
+    return response.data;
+  };

@@ -102,7 +102,7 @@ const realConsole: Partial<Record<ConsoleMethod, (...args: unknown[]) => void>> 
 for (const method of CAPTURED_METHODS) {
   realConsole[method] = globalThis.console[method].bind(globalThis.console);
   globalThis.console[method] = (...args: unknown[]) => {
-    const text = args.map((a) => String(a)).join(' ');
+    const text = args.map(String).join(' ');
     if (FATAL_CONSOLE_PATTERNS.some((pattern) => text.includes(pattern))) {
       fatalConsoleHits.push(text.split('\n')[0]);
     }

@@ -130,19 +130,25 @@ def upgrade() -> None:
 
     # SET NULL, never CASCADE: deleting a profile must not erase the record
     # that it ran. See the module docstring.
-    op.create_foreign_key(
-        _RUN_PROFILE_FK,
-        "config_profile_run",
-        "config_profile",
-        ["profile_id"],
-        ["id"],
-        ondelete="SET NULL",
-    )
+    #
+    # batch_alter_table rather than a bare create_foreign_key: SQLite cannot
+    # ALTER a constraint at all, so adding one has to go through the
+    # copy-and-move rebuild. recreate="auto" keeps this a plain ALTER on
+    # PostgreSQL, where the rebuild would be pointless work.
+    with op.batch_alter_table("config_profile_run", recreate="auto") as batch:
+        batch.create_foreign_key(
+            _RUN_PROFILE_FK,
+            "config_profile",
+            ["profile_id"],
+            ["id"],
+            ondelete="SET NULL",
+        )
 
 
 def downgrade() -> None:
     """Drop profile storage, leaving run history intact."""
-    op.drop_constraint(_RUN_PROFILE_FK, "config_profile_run", type_="foreignkey")
+    with op.batch_alter_table("config_profile_run", recreate="auto") as batch:
+        batch.drop_constraint(_RUN_PROFILE_FK, type_="foreignkey")
     op.drop_index("ix_config_profile_assignment_enabled", "config_profile_assignment")
     op.drop_index(
         "ix_config_profile_assignment_profile_id", "config_profile_assignment"
