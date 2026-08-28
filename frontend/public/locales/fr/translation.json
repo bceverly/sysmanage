@@ -2173,7 +2173,8 @@
     "updates": "Mises à jour",
     "users": "Utilisateurs",
     "vulnerabilities": "Vulnérabilités",
-    "configProfiles": "Profils de configuration"
+    "configProfiles": "Profils de configuration",
+    "configDrift": "Drift de configuration"
   },
   "notifications": {
     "applicationUpdates": "Mises à jour d'Applications",
@@ -3488,5 +3489,28 @@
     "version": "Version",
     "versionLabel": "Version {{n}}",
     "versionsFailed": "Impossible de charger l'historique des versions"
+  },
+  "configDrift": {
+    "actions": "Actions",
+    "confirmAction": "Remédier",
+    "confirmBody": "Cette exécution {{profile}} sur {{host}} pour de vrai et modifie l'hôte pour qu'il corresponde. Il est conservé jusqu'à la prochaine fenêtre de maintenance si une application a lieu.",
+    "confirmTitle": "Re-appliquer ce profil ?",
+    "days": "{{count}} jours",
+    "detailTitle": "Différences sur {{host}}",
+    "differences": "Différences",
+    "driftingFor": "En dérive depuis",
+    "findingsFailed": "Impossible de charger les résultats pour cet hôte",
+    "host": "Hôte",
+    "intro": "Les hôtes qui ne correspondent plus au profil assigné. La dérive est détectée par des exécutions à sec, donc rien n'a été modifié ici - la remédiation réapplique le profil pour de vrai.",
+    "loadFailed": "Impossible de charger l'état de dérive",
+    "noDetail": "Aucun détail supplémentaire signalé.",
+    "noDrift": "Chaque hôte correspond au profil qui lui est assigné.",
+    "noFindings": "Aucune différence ouverte pour cet hôte.",
+    "profiles": "Profils",
+    "remediate": "Remédier à la ligne de base",
+    "remediateFailed": "Impossible de mettre en file d'attente la remédiation",
+    "seenSince": "Premièrement observé",
+    "title": "Configuration en dérive",
+    "view": "Afficher"
   }
 }

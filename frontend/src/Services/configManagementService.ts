@@ -368,3 +368,77 @@ export const getConfigMgmtEngineCatalog =
     );
     return response.data;
   };
+
+/**
+ * One divergence between a host and the profile it should match.
+ *
+ * A finding is produced by a CHECK-MODE run: the task would have changed
+ * something, so the host is not in the state the profile describes. It carries
+ * its own lifespan because a run cannot answer "since when" — that is the
+ * number the dashboard exists to show.
+ */
+export interface ConfigDriftFinding {
+  id: string;
+  host_id: string;
+  host_fqdn: string | null;
+  profile_id: string | null;
+  profile_name: string | null;
+  task_name: string;
+  detail: string | null;
+  first_seen_at: string | null;
+  last_seen_at: string | null;
+  resolved_at: string | null;
+  last_run_id: string | null;
+}
+
+/** One drifting host, for the fleet view. */
+export interface ConfigDriftHostSummary {
+  host_id: string;
+  host_fqdn: string | null;
+  finding_count: number;
+  profile_names: string[];
+  drifting_since: string | null;
+}
+
+export interface ConfigDriftRemediateResult {
+  host_id: string;
+  profile_id: string;
+  queued: boolean;
+  message: string;
+}
+
+/** Every host with unresolved drift, longest-drifting first. */
+export const getDriftingHosts = async (): Promise<ConfigDriftHostSummary[]> => {
+  const response = await axiosInstance.get<ConfigDriftHostSummary[]>(
+    `/api/v1/config-management/drift`,
+  );
+  return response.data;
+};
+
+/** Unresolved findings for one host, longest-standing first. */
+export const getHostDrift = async (
+  hostId: string,
+): Promise<ConfigDriftFinding[]> => {
+  const response = await axiosInstance.get<ConfigDriftFinding[]>(
+    `/api/v1/hosts/${hostId}/config-management/drift`,
+  );
+  return response.data;
+};
+
+/**
+ * Re-apply a profile to bring a host back to baseline.
+ *
+ * Queues a LIVE apply. The findings are not cleared here — they resolve when
+ * the next check-mode run observes the host is back in line, so the dashboard
+ * never claims a fix the agent has not confirmed.
+ */
+export const remediateDrift = async (
+  hostId: string,
+  profileId: string,
+): Promise<ConfigDriftRemediateResult> => {
+  const response = await axiosInstance.post<ConfigDriftRemediateResult>(
+    `/api/v1/config-management/drift/remediate`,
+    { host_id: hostId, profile_id: profileId },
+  );
+  return response.data;
+};

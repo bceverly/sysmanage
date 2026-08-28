@@ -2173,7 +2173,8 @@
     "updates": "업데이트",
     "users": "사용자",
     "vulnerabilities": "취약점",
-    "configProfiles": "구성 프로필"
+    "configProfiles": "구성 프로필",
+    "configDrift": "구성 편향"
   },
   "notifications": {
     "applicationUpdates": "애플리케이션 업데이트",
@@ -3488,5 +3489,28 @@
     "version": "버전",
     "versionLabel": "버전 {{n}}",
     "versionsFailed": "버전 역사를 로드할 수 없습니다."
+  },
+  "configDrift": {
+    "actions": "행동",
+    "confirmAction": "치유",
+    "confirmBody": "이 실행은 {{profile}}를 실제 {{host}}로 실행하고 호스트가 이를 일치하도록 변경합니다. 다음 유지보수 창이 적용될 때까지 유지됩니다.",
+    "confirmTitle": "이 프로필을 다시 적용하시겠습니까?",
+    "days": "{{count}}일",
+    "detailTitle": "차이점 {{host}}",
+    "differences": "차이점",
+    "driftingFor": "편향되는 동안",
+    "findingsFailed": "이 호스트에 대한 결과를 로드할 수 없습니다.",
+    "host": "호스트",
+    "intro": "더 이상 할당된 프로필과 일치하지 않는 호스트. 편향은 드라이 런을 통해 감지되므로 여기에 변경 사항이 없습니다 — 치유는 실제 프로필을 다시 적용하여 수행됩니다.",
+    "loadFailed": "드rift 상태를 로드할 수 없습니다.",
+    "noDetail": "추가 세부 정보가 보고되지 않습니다.",
+    "noDrift": "모든 호스트가 할당된 프로필과 일치합니다.",
+    "noFindings": "이 호스트에 대한 개방된 차이점이 없습니다.",
+    "profiles": "프로필",
+    "remediate": "기준선으로 치유",
+    "remediateFailed": "치유 작업을 큐에 추가할 수 없습니다.",
+    "seenSince": "첫 번째 관찰",
+    "title": "구성 편향",
+    "view": "보기"
   }
 }

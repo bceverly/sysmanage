@@ -2173,7 +2173,8 @@
     "updates": "Atualizações",
     "users": "Usuários",
     "vulnerabilities": "Vulnerabilidades",
-    "configProfiles": "Perfis de Configuração"
+    "configProfiles": "Perfis de Configuração",
+    "configDrift": "Desvio de Configuração"
   },
   "notifications": {
     "applicationUpdates": "Atualizações de Aplicações",
@@ -3488,5 +3489,28 @@
     "version": "Version",
     "versionLabel": "Versão {{n}}",
     "versionsFailed": "Não foi possível carregar o histórico de versões"
+  },
+  "configDrift": {
+    "actions": "Ações",
+    "confirmAction": "Corrigir",
+    "confirmBody": "Este executa {{profile}} em {{host}} de verdade e altera o host para corresponder. É mantido até o próximo intervalo de manutenção se um for aplicado.",
+    "confirmTitle": "Reaplicar este perfil?",
+    "days": "{{count}} dias",
+    "detailTitle": "Diferenças em {{host}}",
+    "differences": "Diferenças",
+    "driftingFor": "Desviando para",
+    "findingsFailed": "Não foi possível carregar os resultados para este host",
+    "host": "Host",
+    "intro": "Hosts que não correspondem mais ao perfil atribuído. O desvio é detectado por execuções secas, então nada aqui foi alterado — a correção reaplica o perfil de verdade.",
+    "loadFailed": "Não foi possível carregar o status do desvio",
+    "noDetail": "Não há detalhes adicionais relatados.",
+    "noDrift": "Todos os hosts correspondem ao perfil atribuído.",
+    "noFindings": "Não há diferenças abertas para este host.",
+    "profiles": "Perfis",
+    "remediate": "Corrigir para o padrão",
+    "remediateFailed": "Não foi possível enfileirar a correção",
+    "seenSince": "Primeiro visto",
+    "title": "Desvio de Configuração",
+    "view": "Visualizar"
   }
 }

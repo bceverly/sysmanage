@@ -2173,7 +2173,8 @@
     "updates": "Actualizaciones",
     "users": "Usuarios",
     "vulnerabilities": "Vulnerabilidades",
-    "configProfiles": "Perfiles de Configuración"
+    "configProfiles": "Perfiles de Configuración",
+    "configDrift": "Desviación de configuración"
   },
   "notifications": {
     "applicationUpdates": "Actualizaciones de Aplicaciones",
@@ -3488,5 +3489,28 @@
     "version": "Version",
     "versionLabel": "Versión {{n}}",
     "versionsFailed": "No se pudo cargar el historial de versiones"
+  },
+  "configDrift": {
+    "actions": "Acciones",
+    "confirmAction": "Remediar",
+    "confirmBody": "Esta ejecución {{profile}} en {{host}} de verdad y cambia el host para que coincida. Se mantiene hasta la siguiente ventana de mantenimiento si se aplica una.",
+    "confirmTitle": "¿Reaplicar este perfil?",
+    "days": "{{count}} días",
+    "detailTitle": "Diferencias en {{host}}",
+    "differences": "Diferencias",
+    "driftingFor": "Desviado por",
+    "findingsFailed": "No se pudieron cargar los resultados para este host",
+    "host": "Host",
+    "intro": "Hosts que ya no coinciden con el perfil asignado. La desviación se detecta mediante ejecuciones secas, por lo que nada aquí ha cambiado - la remediación vuelve a aplicar el perfil en realidad.",
+    "loadFailed": "No se pudo cargar el estado de desviación",
+    "noDetail": "No se reportan más detalles.",
+    "noDrift": "Todos los hosts coinciden con su perfil asignado.",
+    "noFindings": "No hay diferencias abiertas para este host.",
+    "profiles": "Perfiles",
+    "remediate": "Remediar al estándar",
+    "remediateFailed": "No se pudo poner en cola la remediación",
+    "seenSince": "Primero visto",
+    "title": "Desviación de configuración",
+    "view": "Ver"
   }
 }

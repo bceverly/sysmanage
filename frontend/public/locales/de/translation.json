@@ -2173,7 +2173,8 @@
     "updates": "Aktualisierungen",
     "users": "Benutzer",
     "vulnerabilities": "Sicherheitslücken",
-    "configProfiles": "Konfigurationsprofile"
+    "configProfiles": "Konfigurationsprofile",
+    "configDrift": "Konfigurationsverschiebung"
   },
   "notifications": {
     "applicationUpdates": "Anwendungs-Updates",
@@ -3488,5 +3489,28 @@
     "version": "Version",
     "versionLabel": "Version {{n}}",
     "versionsFailed": "Versionen der Konfigurationsgeschichte konnten nicht geladen werden"
+  },
+  "configDrift": {
+    "actions": "Aktionen",
+    "confirmAction": "Korrektur anwenden",
+    "confirmBody": "Dies läuft {{profile}} auf {{host}} für echt und ändert den Host, um ihn zu passen. Es wird gehalten, bis zum nächsten Wartungsfenster, wenn eines angewendet wird.",
+    "confirmTitle": "Dieses Profil erneut anwenden?",
+    "days": "{{count}} Tage",
+    "detailTitle": "Unterschiede auf {{host}}",
+    "differences": "Unterschiede",
+    "driftingFor": "Driften seit",
+    "findingsFailed": "Könnte die Ergebnisse für diesen Host nicht laden",
+    "host": "Host",
+    "intro": "Hosts, die das ihnen zugewiesene Profil nicht mehr entsprechen. Drift wird durch Trockenläufe erkannt, daher wurde hier nichts geändert – Korrekturen wenden das Profil im Echtbetrieb an. Dies wird bis zum nächsten Wartungsfenster gehalten, falls eines angewendet wird.",
+    "loadFailed": "Könnte den Drift-Status nicht laden",
+    "noDetail": "Keine weiteren Details gemeldet.",
+    "noDrift": "Jeder Host entspricht dem ihm zugewiesenen Profil.",
+    "noFindings": "Für diesen Host keine offenen Unterschiede.",
+    "profiles": "Profile",
+    "remediate": "Zur Basislinie korrigieren",
+    "remediateFailed": "Könnte die Korrektur nicht in die Warteschlange stellen",
+    "seenSince": "Erste Sichtung",
+    "title": "Konfiguration driften",
+    "view": "Anzeigen"
   }
 }

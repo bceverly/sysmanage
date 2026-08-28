@@ -1157,7 +1157,8 @@
     "osLifecycle": "操作系统生命周期",
     "plain": "[缺失：导航。纯文本]",
     "vulnerabilities": "漏洞",
-    "configProfiles": "配置配置文件"
+    "configProfiles": "配置配置文件",
+    "configDrift": "配置漂移"
   },
   "notifications": {
     "applicationUpdates": "应用程序更新",
@@ -3488,5 +3489,28 @@
     "version": "版本",
     "versionLabel": "版本 {{n}}",
     "versionsFailed": "无法加载版本历史"
+  },
+  "configDrift": {
+    "actions": "操作",
+    "confirmAction": "修复",
+    "confirmBody": "此运行 {{profile}} 在 {{host}} 上进行实际更改并使主机匹配它。如果一个在下一次维护窗口应用，则保持直到该时间。",
+    "confirmTitle": "重新应用此配置文件？",
+    "days": "{{count}} 天",
+    "detailTitle": "差异于 {{host}}",
+    "differences": "差异",
+    "driftingFor": "漂移时间",
+    "findingsFailed": "无法加载此主机的结果",
+    "host": "主机",
+    "intro": "不再匹配其分配的配置文件的主机。漂移由干运行检测，因此这里没有报告任何更改 - 修复措施将重新应用配置文件。",
+    "loadFailed": "无法加载漂移状态",
+    "noDetail": "无更多详细信息报告",
+    "noDrift": "每个主机都匹配其分配的配置文件。",
+    "noFindings": "此主机无开放差异",
+    "profiles": "配置文件",
+    "remediate": "修复到基线",
+    "remediateFailed": "无法入队修复措施",
+    "seenSince": "首次出现",
+    "title": "配置漂移",
+    "view": "查看"
   }
 }

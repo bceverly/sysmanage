@@ -16,6 +16,7 @@ behind one bad payload. Every failure path returns a value instead.
 """
 
 import json
+import uuid
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -48,6 +49,24 @@ class FakeSession:
         if self._explode:
             raise RuntimeError("db is down")
         self.added.append(obj)
+
+    def flush(self):
+        """The real Session has this; the handler needs it.
+
+        Column defaults (including the run's own id) are applied by SQLAlchemy
+        at FLUSH time, not on construction -- so drift findings, which
+        reference the run id, cannot be written before one.
+        """
+        if self._explode:
+            raise RuntimeError("db is down")
+        for obj in self.added:
+            if getattr(obj, "id", None) is None:
+                obj.id = uuid.uuid4()
+
+    def all(self):
+        # Drift reconciliation queries existing findings; there are none in
+        # these tests, which exercise the run-recording path.
+        return []
 
     def commit(self):
         self.commits += 1

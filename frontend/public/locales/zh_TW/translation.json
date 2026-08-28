@@ -2173,7 +2173,8 @@
     "updates": "更新",
     "users": "使用者",
     "vulnerabilities": "漏洞",
-    "configProfiles": "配置配置文件"
+    "configProfiles": "配置配置文件",
+    "configDrift": "配置漂移"
   },
   "notifications": {
     "applicationUpdates": "應用程式更新",
@@ -3488,5 +3489,28 @@
     "version": "版本",
     "versionLabel": "版本 {{n}}",
     "versionsFailed": "無法載入版本歷史"
+  },
+  "configDrift": {
+    "actions": "動作",
+    "confirmAction": "修復",
+    "confirmBody": "此執行 {{profile}} 在 {{host}} 上以實際方式並改變主機以符合它。如果一個維護窗口適用於它，則保持直到下一次。",
+    "confirmTitle": "重新應用此配置文件？",
+    "days": "{{count}} 天",
+    "detailTitle": "差異於 {{host}}",
+    "differences": "差異",
+    "driftingFor": "漂移中",
+    "findingsFailed": "無法載入此主機的研究結果",
+    "host": "主機",
+    "intro": "不再符合其分配的配置文件的主機。漂移由乾跑檢測，因此這裡沒有任何更改 — 修復會重新應用配置文件。",
+    "loadFailed": "無法載入漂移狀態",
+    "noDetail": "無需再報告詳細資訊。",
+    "noDrift": "每個主機都符合其分配的配置文件。",
+    "noFindings": "此主機無開放差異。",
+    "profiles": "配置文件",
+    "remediate": "將配置恢復至基準",
+    "remediateFailed": "無法排隊修復",
+    "seenSince": "首次出現",
+    "title": "配置漂移",
+    "view": "查看"
   }
 }

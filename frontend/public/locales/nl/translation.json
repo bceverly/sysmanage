@@ -2173,7 +2173,8 @@
     "updates": "Bijwerkingen",
     "users": "Gebruikers",
     "vulnerabilities": "Kwetsbaarheden",
-    "configProfiles": "Configuratieprofielen"
+    "configProfiles": "Configuratieprofielen",
+    "configDrift": "Configuratieverschuiving"
   },
   "notifications": {
     "applicationUpdates": "Applicatie Updates",
@@ -3488,5 +3489,28 @@
     "version": "Version",
     "versionLabel": "Versie {{n}}",
     "versionsFailed": "Kon de versiegeschiedenis niet laden"
+  },
+  "configDrift": {
+    "actions": "Acties",
+    "confirmAction": "Herstellen",
+    "confirmBody": "Deze run {{profile}} op {{host}} in de praktijk en verandert de host om overeen te komen met het. Het wordt vastgehouden tot het volgende onderhoudsvenster als er een wordt toegepast.",
+    "confirmTitle": "Dit profiel opnieuw toepassen?",
+    "days": "{{count}} dagen",
+    "detailTitle": "Verschillen op {{host}}",
+    "differences": "Verschillen",
+    "driftingFor": "Drift voor",
+    "findingsFailed": "Kon de bevindingen voor deze host niet laden",
+    "host": "Host",
+    "intro": "Hosts die niet langer overeenkomen met het profiel dat aan hen is toegewezen. Drift wordt gedetecteerd door droge runs, dus hier is niets gewijzigd - herstel past het profiel in de praktijk toe. ",
+    "loadFailed": "Kon niet de status van de verschuiving laden",
+    "noDetail": "Geen verdere details gerapporteerd.",
+    "noDrift": "Elke host komt overeen met het toegewezen profiel.",
+    "noFindings": "Er zijn geen open verschillen voor deze host.",
+    "profiles": "Profielen",
+    "remediate": "Herstellen naar baseline",
+    "remediateFailed": "Kon het herstel in de wachtrij niet plaatsen",
+    "seenSince": "Eerst gezien",
+    "title": "Configuratieverschuiving",
+    "view": "Bekijken"
   }
 }

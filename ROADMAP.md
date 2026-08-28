@@ -7921,12 +7921,98 @@ land later without migrating the rows recorded before it existed.
 
 #### 20.2 Configuration Drift Analysis (Enterprise)
 
-- [ ] Baseline capture (per profile / per "golden host") + scheduled drift comparison
-- [ ] Drift findings (what changed, since when) + drift dashboard + alert rules (via `alerting_engine`)
-- [ ] One-click remediate-to-baseline (ties into 20.1)
+- [x] Baseline capture **per profile** + scheduled drift comparison — **DONE
+      2026-08-28 (S1).** No new collection path: a check-mode run already
+      answers "what would change here", so the assignment tick's dry runs ARE
+      the comparison and `config_mgmt_drift.reconcile_run` turns each result
+      into findings. *Golden-host baselines are NOT done — see S5.*
+- [x] Drift findings (what changed, since when) + drift dashboard — **DONE
+      2026-08-28 (S1/S2).** `config_drift_finding` stores only the LIFESPAN of
+      each divergence; the run rows stay the record of what happened.
+      Alert rules via `alerting_engine` remain open (S3, needs a Pro+ rebuild).
+- [x] One-click remediate-to-baseline — **DONE 2026-08-28 (S4).** Re-applies
+      through the same `config_mgmt_dispatch` builder as manual apply and the
+      tick, so a remediation cannot diverge from a normal apply. Inherits
+      capability gating (`enqueue_message`) and maintenance windows
+      (`outbound_processor`) rather than re-checking either.
+- [ ] Golden-host baseline over existing inventory (S5)
+- [ ] Alert rule condition `config_drift` (S3 — Pro+ rebuild + licence)
 - [ ] i18n/l10n
 
-**Estimated Size:** ~3,000 lines
+**Estimated Size:** ~3,000 lines *(scoped 2026-08-28: the profile-baseline half
+is far cheaper than that once 20.1 is reused — see the slice plan. The estimate
+holds only if golden-host drift is taken at full breadth, which S5 argues
+against.)*
+
+**SLICE PLAN (scoped 2026-08-28).**
+
+**The load-bearing observation: a check-mode run IS a drift report.**
+20.1 already ships `check_mode` end to end, and `config_profile_run` already
+records `changed`, `tasks_changed` and a per-task `task_detail`. A dry run of an
+assigned profile answers "what would change on this host" — which is the
+definition of drift against that profile. So drift-vs-profile needs a
+*scheduler and a reader*, not a new collection path. Building a parallel
+fact-diff engine for this case would be a second implementation of something
+that already works and is already tested.
+
+**Hard ordering constraint: 20.2 must not depend on osquery.** The fact
+substrate is 21.1, which lands AFTER this. Anything needing arbitrary file or
+config state has to wait; anything expressible as "run the profile in check
+mode" or "diff the inventory we already collect" can ship now. This is what
+splits the two baseline kinds below, and it is why they are not one feature.
+
+* **S1 — Drift detection from scheduled check-mode runs.**
+  A drift schedule is an assignment with `check_mode=true`; the existing
+  assignment tick already fires those. What is missing is the READING: a
+  finding is a task in a check-mode run whose `changed` is true.
+  The one genuinely new piece of state is **"since when"** — the roadmap asks
+  for it and a run row cannot answer it, because each run only knows about
+  itself. That needs a small `config_drift_finding` table keyed by
+  (host, profile, task-identity) carrying `first_seen_at` / `last_seen_at` /
+  `resolved_at`, updated as runs land. Deliberately NOT a copy of the run
+  detail: the run rows stay the record of what happened, and the finding table
+  only tracks the lifespan of each divergence.
+  **Decide before building:** what identifies "the same task" across runs.
+  Ansible task names are not unique and are editable; getting this wrong makes
+  every run look like brand-new drift and destroys the "since when" column that
+  is the point of the table.
+
+* **S2 — Drift dashboard.** Fleet view: which hosts have drifted, from which
+  profile, how long ago it started, and what specifically differs. Reads S1;
+  no new collection. Licence-gated at the router like the profiles page.
+
+* **S3 — Alert rule condition.** `AlertRule.condition_type` is an open string
+  with a documented set, so adding `config_drift` is natural — but the
+  EVALUATION lives in the licensed `alerting_engine`, so this slice needs a
+  Pro+ change, a module rebuild and a fresh licence before it can be tested.
+  Sequence it accordingly; it is the only slice with that coordination cost.
+
+* **S4 — Remediate-to-baseline.** Re-apply the same profile with
+  `check_mode=false`. Almost free given 20.1 and `config_mgmt_dispatch`.
+  **Maintenance windows come for free** — gating lives in
+  `outbound_processor` at DELIVERY time, so anything queued the normal way
+  inherits it; do not add a second check. What this slice does need is an
+  explicit operator confirmation naming the host and the profile, because the
+  same button on a fleet view is a fleet-wide change.
+
+* **S5 — Golden-host baseline. SCOPE THIS DOWN.** "Capture a reference host
+  and compare others to it" is unbounded without osquery. But we already store
+  a lot of per-host state — `software_package`, `available_packages`, user
+  accounts and groups, `network_interface`, `storage_device`,
+  `third_party_repository`, firewall status, certificates — so a diff over a
+  NAMED, bounded set of those is buildable today and useful on its own.
+  Recommendation: ship the bounded inventory diff in 20.2 and let arbitrary
+  file/config drift wait for 21.1 rather than inventing a second collector that
+  osquery will replace six weeks later.
+
+* **S6 — i18n, docs, tests.** The `docs/professional-plus/` page for drift, its
+  `shotlist.json` screenshots and seed data, and the 14-language seed. Sharing
+  a docs slice with 20.1's outstanding page is cheaper than doing them apart,
+  since both want screenshots of the same UI area.
+
+**Suggested order:** S1 → S2 → S4 → S5 → S3 → S6. S3 sits late because it is
+the only slice blocked on a Pro+ rebuild; S4 before S5 because remediation is
+nearly free and makes the dashboard actionable rather than merely informative.
 
 ### Exit Criteria
 
@@ -8105,6 +8191,63 @@ boundaries; (b) does a waiver survive a threat-model re-derivation that changes
 the item's risk score, or is re-affirmation required; (c) is the questionnaire
 itself a shared, versioned artifact operators can extend, like the compliance
 rule packs.
+
+#### 21.5 Built-in Metric Graphs over Collected Facts (Professional+)
+
+*Added 2026-08-28 (Bryan).* We already have Landscape **"Custom Graphs"**
+parity: a tag-targeted script producing one number, sampled on a cadence,
+graphed and alertable (shipped 2026-07). What we still lack parity on is the
+other half — Landscape graphs the things it **already collects** without asking
+anyone to author a script. Today an operator who wants to see a process's CPU
+or memory over time has to write a script to re-collect a number the agent is
+already sending us, which is busywork the product created.
+
+It belongs in 21 rather than earlier because it is a **consumer of the fact
+substrate**: 21.1 lands osquery, and the same charting surface should serve
+osquery-derived series and the ones we collect natively today, rather than
+being built twice.
+
+**THE BLOCKING CONSTRAINT — read before estimating.** The obvious first
+candidate, process CPU/memory, has **no history to graph**.
+`process_handlers.py` deletes every `host_process` row for a host and reinserts
+the new set on each report (a deliberate "replace the whole snapshot"), so the
+table is a point-in-time view, not a series. The same is true of most inventory
+tables. So the work here is NOT primarily charting — it is deciding **what to
+retain, at what resolution, for how long**, and that decision drives the entire
+cost. Charting a series you already have is a week; growing a retention tier
+under the fleet is not.
+
+  * Retaining every process on every host at report cadence is not viable —
+    it is the highest-cardinality data we collect, by a wide margin.
+  * The plausible shapes are (a) retain only host-level aggregates (total CPU,
+    total memory, load), (b) retain per-process series only for processes an
+    operator has explicitly pinned, or (c) downsample on ingest. **Decide this
+    before any UI work**; it is the difference between a small feature and a
+    time-series subsystem.
+
+**Reuse, do not rebuild.** Two existing decisions constrain this and must not
+be quietly reversed:
+  * The standing scope decision on Custom Metrics — *"do NOT rebuild a
+    Grafana-class dashboarding engine"* — applies here too. This is a chart
+    card over selected series, not a dashboard builder; heavy or ad-hoc
+    analysis stays with the Grafana integration.
+  * `custom_metric_sample` already has retention and pruning
+    (`custom_metric_retention.py`, `custom_metrics_retention_days`, default 90,
+    per-tenant). Whatever samples this feature retains should use that
+    machinery rather than inventing a second retention policy that drifts from
+    the first.
+
+- [ ] Decide the retention shape (aggregate / pinned / downsampled) — a written
+      decision with the storage cost per 1,000 hosts, BEFORE any other item
+- [ ] Sample retention for the chosen series, reusing the custom-metric prune
+- [ ] Operator-selected chart cards over those series (host page + fleet view)
+- [ ] Flow-through to the existing Prometheus exposition endpoint so Grafana
+      gets the same series for free
+- [ ] i18n/l10n
+
+**Estimated Size:** ~800 lines if the retention shape is aggregates-only;
+substantially more for per-process series, which is why that decision comes
+first.
 
 ### Exit Criteria
 

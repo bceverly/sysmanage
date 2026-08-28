@@ -36,6 +36,7 @@ from backend.api import (
     commercial_antivirus_status,
     config_management,
     config_mgmt_prereq,
+    config_mgmt_drift,
     config_mgmt_profiles,
     config_mgmt_runs,
     content_lifecycle,
@@ -404,6 +405,10 @@ def register_routes(app: FastAPI):
     logger.debug("Adding config-management profiles router (Phase 20.1)")
     _include_versioned(app, config_mgmt_profiles.router, tags=["config-management"])
     logger.debug("Config-management profiles router added")
+
+    logger.debug("Adding config-management drift router (Phase 20.2)")
+    _include_versioned(app, config_mgmt_drift.router, tags=["config-management"])
+    logger.debug("Config-management drift router added")
 
     logger.debug("Adding diagnostics router (native /api/v1 + alias)")
     _include_versioned(app, diagnostics.router, tags=["diagnostics"])

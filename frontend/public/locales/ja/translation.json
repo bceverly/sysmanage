@@ -2173,7 +2173,8 @@
     "updates": "アップデート",
     "users": "ユーザー",
     "vulnerabilities": "脆弱性",
-    "configProfiles": "構成プロファイル"
+    "configProfiles": "構成プロファイル",
+    "configDrift": "構成の漂白"
   },
   "notifications": {
     "applicationUpdates": "アプリケーションアップデート",
@@ -3488,5 +3489,28 @@
     "version": "バージョン",
     "versionLabel": "バージョン {{n}}",
     "versionsFailed": "バージョン履歴の読み込みに失敗しました"
+  },
+  "configDrift": {
+    "actions": "アクション",
+    "confirmAction": "修復",
+    "confirmBody": "これは {{profile}} を実際の {{host}} で実行し、ホストをそれに一致させます。次のメンテナンスウィンドウまで保持されます（適用される場合は)。",
+    "confirmTitle": "このプロファイルを再適用しますか？",
+    "days": "{{count}} 日",
+    "detailTitle": "相違点 {{host}}",
+    "differences": "相違点",
+    "driftingFor": "漂白しているもの",
+    "findingsFailed": "このホストの結果を読み込むことができません",
+    "host": "ホスト",
+    "intro": "割り当てられたプロファイルと一致しなくなったホスト。漂白はドライランで検出されるため、ここに記載されているものは変更されていません。修復処理はプロファイルを再適用します。",
+    "loadFailed": "漂白ステータスを読み込むことができません",
+    "noDetail": "詳細な情報は報告されません。",
+    "noDrift": "すべてのホストが割り当てられたプロファイルと一致しています。",
+    "noFindings": "このホストには開かれた相違点がありません。",
+    "profiles": "プロファイル",
+    "remediate": "基準値への修復",
+    "remediateFailed": "修復キューに追加できません",
+    "seenSince": "初めて確認された",
+    "title": "構成の漂白",
+    "view": "表示"
   }
 }

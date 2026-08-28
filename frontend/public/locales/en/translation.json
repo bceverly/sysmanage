@@ -2172,7 +2172,8 @@
     "vulnerabilities": "Vulnerabilities",
     "gated": "[MISSING:nav.gated]",
     "plain": "[MISSING:nav.plain]",
-    "configProfiles": "Config Profiles"
+    "configProfiles": "Config Profiles",
+    "configDrift": "Config Drift"
   },
   "notifications": {
     "applicationUpdates": "Application Updates",
@@ -3488,5 +3489,28 @@
     "version": "Version",
     "versionLabel": "Version {{n}}",
     "versionsFailed": "Could not load the version history"
+  },
+  "configDrift": {
+    "actions": "Actions",
+    "confirmAction": "Remediate",
+    "confirmBody": "This runs {{profile}} on {{host}} for real and changes the host to match it. It is held until the next maintenance window if one applies.",
+    "confirmTitle": "Re-apply this profile?",
+    "days": "{{count}} days",
+    "detailTitle": "Differences on {{host}}",
+    "differences": "Differences",
+    "driftingFor": "Drifting for",
+    "findingsFailed": "Could not load the findings for this host",
+    "host": "Host",
+    "intro": "Hosts that no longer match the profile assigned to them. Drift is detected by dry runs, so nothing here has been changed — remediating re-applies the profile for real.",
+    "loadFailed": "Could not load drift status",
+    "noDetail": "No further detail reported.",
+    "noDrift": "Every host matches its assigned profile.",
+    "noFindings": "No open differences for this host.",
+    "profiles": "Profiles",
+    "remediate": "Remediate to baseline",
+    "remediateFailed": "Could not queue remediation",
+    "seenSince": "First seen",
+    "title": "Configuration Drift",
+    "view": "View"
   }
 }

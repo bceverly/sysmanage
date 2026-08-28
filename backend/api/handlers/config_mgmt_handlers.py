@@ -25,6 +25,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from backend.persistence import models
+from backend.services import config_mgmt_drift as drift
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +54,18 @@ def _host_id_for(db, connection, message_data: Dict[str, Any]):
         return None
     host = db.query(models.Host).filter(models.Host.fqdn == hostname).first()
     return host.id if host else None
+
+
+def _config_engine_loaded() -> bool:
+    """Whether the licensed config-management module is present.
+
+    Drift findings are Enterprise. Imported inside the function because the
+    module loader pulls in licensing machinery that has no business being a
+    hard import of a websocket result handler.
+    """
+    from backend.licensing.module_loader import module_loader  # noqa: PLC0415
+
+    return module_loader.get_module("config_management_engine") is not None
 
 
 def _profile_uuid(result: dict, message_data: dict):
@@ -126,6 +139,18 @@ async def handle_config_profile_result(db, connection, message_data: dict):
     try:
         run = _run_row(host_id, result, message_data, now)
         db.add(run)
+        db.flush()
+
+        # Phase 20.2: a check-mode run IS a drift report, so reconcile it here
+        # rather than re-reading the runs later. Deliberately BEFORE the commit
+        # so the run and its findings land together -- a run recorded without
+        # its findings would leave drift looking resolved until the next check.
+        drift.reconcile_run(
+            db,
+            run,
+            result.get("tasks") or [],
+            module_loaded=_config_engine_loaded(),
+        )
         db.commit()
     except Exception as exc:  # NOSONAR - see docstring: never stall the queue
         db.rollback()

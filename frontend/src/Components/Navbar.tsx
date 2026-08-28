@@ -70,6 +70,7 @@ const PATH_CATEGORY: Record<string, CategoryId> = {
   '/gpg-keys': 'security',
   '/scripts': 'automation',
   '/config-profiles': 'automation',
+  '/config-drift': 'automation',
   '/custom-metrics': 'automation',
   '/reports': 'insights',
   '/audit-analytics': 'insights',
@@ -123,7 +124,7 @@ export function buildNavCategories(
   } = opts;
 
   // Paths hardcoded here — plugins must not duplicate these.
-  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/maintenance-windows', '/secrets', '/scripts', '/config-profiles', '/reports', '/airgap/repositories', '/airgap/collections']);
+  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/maintenance-windows', '/secrets', '/scripts', '/config-profiles', '/config-drift', '/reports', '/airgap/repositories', '/airgap/collections']);
   const hardcodedLabels = new Set([
     t('nav.secrets'),
     t('nav.scripts'),
@@ -160,6 +161,11 @@ export function buildNavCategories(
     activeLicenseModules.includes('config_management_engine'),
     '/config-profiles',
     t('nav.configProfiles', 'Config Profiles'),
+  );
+  pushIf(
+    activeLicenseModules.includes('config_management_engine'),
+    '/config-drift',
+    t('nav.configDrift', 'Config Drift'),
   );
   pushIf(
     activeLicenseModules.includes('reporting_engine') &&

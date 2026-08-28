@@ -2173,7 +2173,8 @@
     "updates": "Aggiornamenti",
     "users": "Utenti",
     "vulnerabilities": "Vulnerebilità",
-    "configProfiles": "Profili di Configurazione"
+    "configProfiles": "Profili di Configurazione",
+    "configDrift": "Drift di configurazione"
   },
   "notifications": {
     "applicationUpdates": "Aggiornamenti Applicazioni",
@@ -3488,5 +3489,28 @@
     "version": "Version",
     "versionLabel": "Versione {{n}}",
     "versionsFailed": "Impossibile caricare la cronologia delle versioni"
+  },
+  "configDrift": {
+    "actions": "Azioni",
+    "confirmAction": "Rimediale",
+    "confirmBody": "Questo esegue {{profile}} su {{host}} in modo reale e cambia l'host per corrispondere ad esso. Viene mantenuto fino alla prossima finestra di manutenzione se ne viene applicata una.",
+    "confirmTitle": "Re-applica questo profilo?",
+    "days": "{{count}} giorni",
+    "detailTitle": "Differenze su {{host}}",
+    "differences": "Differenze",
+    "driftingFor": "Drifta per",
+    "findingsFailed": "Impossibile caricare i risultati per questo host",
+    "host": "Host",
+    "intro": "Host che non corrispondono più al profilo assegnato a loro. Il drift viene rilevato dalle prove asciutte, quindi nulla è stato modificato qui - la rimediazione applica nuovamente il profilo in modo reale.",
+    "loadFailed": "Impossibile caricare lo stato del drift",
+    "noDetail": "Nessun ulteriore dettaglio segnalato.",
+    "noDrift": "Ogni host corrisponde al profilo assegnato.",
+    "noFindings": "Non ci sono differenze aperte per questo host.",
+    "profiles": "Profili",
+    "remediate": "Rimediale al baseline",
+    "remediateFailed": "Impossibile mettere in coda la rimediazione",
+    "seenSince": "Prima vista",
+    "title": "Drift di configurazione",
+    "view": "Visualizza"
   }
 }

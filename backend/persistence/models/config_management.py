@@ -26,6 +26,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
 
@@ -181,4 +182,82 @@ class ConfigProfileAssignment(Base):
         return (
             f"<ConfigProfileAssignment(id={self.id}, "
             f"profile_id={self.profile_id}, target={target})>"
+        )
+
+
+class ConfigDriftFinding(Base):
+    """One divergence between a host and a profile, and how long it has lasted.
+
+    WHY THIS EXISTS AT ALL, GIVEN ``config_profile_run``
+    ----------------------------------------------------
+    A check-mode run already says WHAT would change. What it cannot say is
+    SINCE WHEN -- each run only knows about itself, so "this host has been
+    drifting for nine days" is unanswerable from run rows without scanning the
+    whole history on every page load. This table is exactly that lifespan and
+    nothing else: the runs stay the record of what happened.
+
+    WHAT IDENTIFIES "THE SAME" DRIFT ACROSS RUNS
+    --------------------------------------------
+    ``(host_id, profile_id, task_name)``. That is the only identity the generic
+    result shape carries -- the agent reports a task NAME, and nothing more
+    stable travels with it.
+
+    The accepted cost: renaming a task in a profile starts its drift age over,
+    because the new name is a different row. That is the right trade rather
+    than matching on task ORDER, which would silently re-attribute one task's
+    history to another the moment somebody inserted a step -- a wrong date is
+    worse than a reset one, because a reset is visibly a reset.
+    """
+
+    __tablename__ = "config_drift_finding"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(
+        GUID(), ForeignKey(HOST_ID_FK, ondelete=CASCADE_DELETE), nullable=False
+    )
+    # Softened deliberately: a finding outlives the profile being deleted only
+    # long enough to be cleaned up, and a hard FK would take drift history with
+    # it. Mirrors config_profile_run.profile_id.
+    profile_id = Column(
+        GUID(),
+        ForeignKey("config_profile.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    profile_name = Column(String(255), nullable=True)
+    task_name = Column(String(500), nullable=False)
+    # The agent's own message for this task, when it gave one -- "would change
+    # permissions 0644 -> 0600" is the difference between a finding an operator
+    # can act on and a task name they have to go and read the profile for.
+    detail = Column(Text, nullable=True)
+
+    first_seen_at = Column(DateTime, nullable=False)
+    last_seen_at = Column(DateTime, nullable=False)
+    # NULL means still drifting. Set when a later SUCCESSFUL check-mode run of
+    # the same profile stops reporting this task as changed.
+    resolved_at = Column(DateTime, nullable=True)
+    # The run that most recently observed it, so the dashboard can link back to
+    # the full task detail rather than duplicating it here.
+    last_run_id = Column(GUID(), nullable=True)
+
+    __table_args__ = (
+        # The identity above, enforced. Without it a race between two ticks
+        # would open two rows for the same divergence and the age column would
+        # depend on which one the page happened to read.
+        UniqueConstraint(
+            "host_id",
+            "profile_id",
+            "task_name",
+            name="uq_config_drift_finding_identity",
+        ),
+        # The dashboard's query is "open findings, newest first".
+        Index("ix_config_drift_finding_open", "resolved_at", "last_seen_at"),
+        Index("ix_config_drift_finding_host", "host_id", "resolved_at"),
+    )
+
+    def __repr__(self):
+        state = "resolved" if self.resolved_at else "open"
+        return (
+            f"<ConfigDriftFinding(host_id={self.host_id}, "
+            f"task={self.task_name!r}, {state})>"
         )

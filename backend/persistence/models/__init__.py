@@ -102,6 +102,7 @@ __all__ = [
     "SavedScript",
     "ConfigProfile",
     "ConfigProfileAssignment",
+    "ConfigDriftFinding",
     "ConfigProfileRun",
     "ConfigProfileVersion",
     "ScriptExecutionLog",
