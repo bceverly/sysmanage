@@ -357,11 +357,19 @@ export default defineConfig({
       // Floors again locked ~2-3pts under measured, and they FOLLOW coverage,
       // never lead it.
       // Next rung: push measured lines past ~72% then raise `lines` to 70.
+      // Phase 20.1 rung. The ladder in ROADMAP.md ("Frontend Test Coverage")
+      // moves `lines` +10 per phase on its climb to parity with the Python
+      // gate; 60 -> 70 is this phase's step. NEVER lower these.
+      //
+      // Each floor sits below its measured value on purpose, so an ordinary
+      // refactor does not turn red before anyone has written a line of new
+      // code. Measured at the time of the bump: lines 71.59, statements
+      // 70.28, functions 58.61, branches 50.26.
       thresholds: {
-        lines: 60,
-        statements: 58,
-        functions: 48,
-        branches: 38,
+        lines: 70,
+        statements: 68,
+        functions: 56,
+        branches: 48,
       },
       exclude: [
         'node_modules/',

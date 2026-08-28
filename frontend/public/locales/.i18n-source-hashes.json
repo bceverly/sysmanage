@@ -216,6 +216,7 @@
   "airgapKeys.trusted.required": "5ca0e33653ed69c3",
   "airgapKeys.trusted.title": "fd47fb507a45b67f",
   "antivirus.description": "ec2535c319606345",
+  "antivirus.editDefaults": "93f7c3334f8a3d1f",
   "antivirus.errors.loadFailed": "1e28310654b43ce1",
   "antivirus.errors.permissionDenied": "a881c11739366b46",
   "antivirus.errors.saveFailed": "a53f690a5c7f8918",

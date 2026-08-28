@@ -11,7 +11,8 @@
     "save": "保存",
     "saveSuccess": "防病毒默认设置保存成功",
     "selectProgram": "选择防病毒程序",
-    "title": "防病毒"
+    "title": "防病毒",
+    "editDefaults": "编辑防病毒默认设置"
   },
   "auditLog": {
     "exportRequiresLicense": "审计日志导出需要 SysManage Professional+ 许可证。",

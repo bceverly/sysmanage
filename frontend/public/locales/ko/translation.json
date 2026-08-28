@@ -273,7 +273,8 @@
     "save": "저장",
     "saveSuccess": "바이러스 백신 기본값이 성공적으로 저장되었습니다",
     "selectProgram": "바이러스 백신 프로그램 선택",
-    "title": "바이러스 백신"
+    "title": "바이러스 백신",
+    "editDefaults": "안티바이러스 기본 설정 편집"
   },
   "apiKeys": {
     "active": "활성화됨",

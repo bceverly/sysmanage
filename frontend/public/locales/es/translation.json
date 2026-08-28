@@ -273,7 +273,8 @@
     "save": "Guardar",
     "saveSuccess": "Configuraciones predeterminadas de antivirus guardadas exitosamente",
     "selectProgram": "Seleccionar programa antivirus",
-    "title": "Antivirus"
+    "title": "Antivirus",
+    "editDefaults": "Editar configuraciones predeterminadas de antivirus"
   },
   "apiKeys": {
     "active": "Activo",

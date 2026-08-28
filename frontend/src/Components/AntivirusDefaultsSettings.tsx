@@ -218,7 +218,11 @@ const AntivirusDefaultsSettings: React.FC = () => {
                 </Box>
               </Box>
               {!editMode && canManageAntivirusDefaults && (
-                <IconButton onClick={handleEdit} color="primary">
+                <IconButton
+                  onClick={handleEdit}
+                  color="primary"
+                  aria-label={t('antivirus.editDefaults', 'Edit antivirus defaults')}
+                >
                   <EditIcon />
                 </IconButton>
               )}

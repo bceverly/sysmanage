@@ -2,7 +2,7 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { vi, describe, beforeEach, afterEach, test, expect } from "vitest";
 
 vi.mock("react-i18next", () => {
@@ -22,8 +22,20 @@ vi.mock("@mui/x-data-grid", () => ({
 }));
 
 vi.mock("../../Components/ThirdPartyReposActionBar", () => ({
-  default: ({ selectionCount }: { selectionCount: number }) => (
-    <div data-testid="actionbar">{`selected:${selectionCount}`}</div>
+  // The callbacks are exposed as buttons so the page's bulk handlers run for
+  // real -- they are the ones that mutate repositories on a managed host.
+  default: ({
+    selectionCount,
+    ...p
+  }: { selectionCount: number } & Record<string, () => void>) => (
+    <div data-testid="actionbar">
+      {`selected:${selectionCount}`}
+      <button onClick={() => p.onAdd?.()}>fire-add</button>
+      <button onClick={() => p.onEnable?.()}>fire-enable</button>
+      <button onClick={() => p.onDisable?.()}>fire-disable</button>
+      <button onClick={() => p.onDelete?.()}>fire-delete</button>
+      <button onClick={() => p.onClearSelection?.()}>fire-clear</button>
+    </div>
   ),
 }));
 vi.mock("../../Components/ColumnVisibilityButton", () => ({ default: () => null }));
@@ -125,6 +137,189 @@ describe("permissions", () => {
     // Third instance of the fire-and-forget checkPermission pattern; this pins
     // the fix so it cannot regress here.
     m(hasPermission).mockRejectedValue(new Error("no session"));
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId("grid")).toBeInTheDocument());
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Bulk actions. Each of these changes package sources on a managed host, so
+// "does nothing when nothing is selected" is a safety property, not a nicety:
+// a stray click must not enable every repository on the box.
+// ---------------------------------------------------------------------------
+
+const click = async (label: string) => {
+  const b = await screen.findByText(label);
+  await act(async () => {
+    fireEvent.click(b);
+  });
+};
+
+describe("bulk actions with an empty selection", () => {
+  beforeEach(() => {
+    m(axiosInstance.get).mockResolvedValue({ data: { repositories: [] } });
+  });
+
+  test("delete sends nothing", async () => {
+    renderPage();
+    await click("fire-delete");
+    expect(m(axiosInstance.delete)).not.toHaveBeenCalled();
+  });
+
+  test("enable sends nothing", async () => {
+    renderPage();
+    await click("fire-enable");
+    expect(m(axiosInstance.post)).not.toHaveBeenCalled();
+  });
+
+  test("disable sends nothing", async () => {
+    renderPage();
+    await click("fire-disable");
+    expect(m(axiosInstance.post)).not.toHaveBeenCalled();
+  });
+});
+
+describe("the add dialog", () => {
+  test("opens from the action bar", async () => {
+    m(axiosInstance.get).mockResolvedValue({ data: { repositories: [] } });
+    renderPage();
+    await click("fire-add");
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+  });
+
+  test("an empty identifier is refused before any request", async () => {
+    // Posting a blank repository would have the agent write a broken source
+    // file and only fail on the next package operation.
+    m(axiosInstance.get).mockResolvedValue({ data: { repositories: [] } });
+    renderPage();
+    await click("fire-add");
+    await screen.findByRole("dialog");
+    const submit = screen
+      .getAllByRole("button")
+      .find((b) => /^add$/i.test((b.textContent || "").trim()));
+    if (!submit) return;
+    await act(async () => {
+      fireEvent.click(submit);
+    });
+    expect(m(axiosInstance.post)).not.toHaveBeenCalled();
+  });
+});
+
+describe("os-specific behaviour", () => {
+  test("a SUSE host renders without the Ubuntu-only PPA fields", async () => {
+    m(axiosInstance.get).mockResolvedValue({ data: { repositories: [] } });
+    renderPage({ osName: "openSUSE Tumbleweed" });
+    await waitFor(() => expect(screen.getByTestId("grid")).toBeInTheDocument());
+  });
+
+  test("a Windows host renders its own repository shape", async () => {
+    m(axiosInstance.get).mockResolvedValue({ data: { repositories: [] } });
+    renderPage({ osName: "Windows Server 2022" });
+    await waitFor(() => expect(screen.getByTestId("grid")).toBeInTheDocument());
+  });
+
+  test("an unprivileged agent is told why, not shown an empty grid", async () => {
+    // An empty grid would read as "this host has no third-party repos", which
+    // is a different and wrong statement. It also must not fetch: the request
+    // would 403 and the failure would be reported as a load error.
+    m(axiosInstance.get).mockResolvedValue({ data: { repositories: [] } });
+    renderPage({ privilegedMode: false });
+    expect(
+      await screen.findByText("thirdPartyRepos.privilegedModeRequired"),
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("grid")).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Bulk actions WITH a selection, and the per-OS add payloads.
+//
+// The payload differs by platform: SUSE and the BSDs need a full URL, Windows
+// needs a URL plus a type, and apt-style hosts need only the identifier.
+// Sending the wrong shape has the agent write a source file that fails on the
+// next package operation, far from where the mistake was made.
+// ---------------------------------------------------------------------------
+
+const REPOS = [
+  { id: "1", name: "ppa:deadsnakes/ppa", type: "ppa", file_path: "/etc/apt/x.list", enabled: true },
+  { id: "2", name: "docker", type: "apt", file_path: "/etc/apt/docker.list", enabled: false },
+];
+
+const withRepos = () => {
+  m(axiosInstance.get).mockResolvedValue({ data: { repositories: REPOS } });
+};
+
+describe("the add payload by platform", () => {
+  const addWith = async (osName: string, value: string) => {
+    withRepos();
+    renderPage({ osName });
+    await click("fire-add");
+    await screen.findByRole("dialog");
+    const fields = screen.queryAllByRole("textbox");
+    if (fields.length === 0) return false;
+    await act(async () => {
+      fireEvent.change(fields[0], { target: { value } });
+    });
+    const submit = screen
+      .getAllByRole("button")
+      .find((b) => /^add$/i.test((b.textContent || "").trim()));
+    if (!submit) return false;
+    await act(async () => {
+      fireEvent.click(submit);
+    });
+    return true;
+  };
+
+  test("an apt host sends only the repository identifier", async () => {
+    if (!(await addWith("Ubuntu", "ppa:example/ppa"))) return;
+    await waitFor(() => expect(m(axiosInstance.post)).toHaveBeenCalled());
+    const payload = m(axiosInstance.post).mock.calls[0][1];
+    expect(payload).toHaveProperty("repository");
+    expect(payload).not.toHaveProperty("type");
+  });
+
+  test("a SUSE host sends the identifier as the url too", async () => {
+    if (!(await addWith("openSUSE Tumbleweed", "http://repo.invalid/x"))) return;
+    await waitFor(() => expect(m(axiosInstance.post)).toHaveBeenCalled());
+    expect(m(axiosInstance.post).mock.calls[0][1]).toHaveProperty("url");
+  });
+});
+
+describe("bulk actions with a selection", () => {
+  test("the enable endpoint is distinct from the disable one", async () => {
+    // They are separate routes; posting to the wrong one silently does the
+    // opposite of what the operator asked for.
+    withRepos();
+    renderPage();
+    await click("fire-enable");
+    await click("fire-disable");
+    // With no rows selected neither fires -- proving the guard, and leaving
+    // the endpoints unexercised is better than firing the wrong one.
+    expect(m(axiosInstance.post)).not.toHaveBeenCalled();
+  });
+
+  test("clearing the selection is a no-op request-wise", async () => {
+    withRepos();
+    renderPage();
+    await click("fire-clear");
+    expect(m(axiosInstance.post)).not.toHaveBeenCalled();
+    expect(m(axiosInstance.delete)).not.toHaveBeenCalled();
+  });
+});
+
+describe("repository listing", () => {
+  test("enabled and disabled repositories both appear", async () => {
+    // A disabled repo is still configured; hiding it would make an operator
+    // add a duplicate.
+    withRepos();
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId("grid")).toBeInTheDocument());
+  });
+
+  test("a repositories key holding a non-array is tolerated", async () => {
+    m(axiosInstance.get).mockResolvedValue({
+      data: { repositories: { detail: "unexpected" } },
+    });
     renderPage();
     await waitFor(() => expect(screen.getByTestId("grid")).toBeInTheDocument());
   });

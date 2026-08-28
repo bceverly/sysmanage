@@ -63,54 +63,64 @@ export const useHostPermissions = (): HostPermissions => {
     // Check permissions
     useEffect(() => {
         const checkPermissions = async () => {
-            const [editTags, editHostname, stopService, startService, restartService, addPackage, deploySshKey, deployCertificate, attachUbuntuPro, detachUbuntuPro, deployAntivirus, enableAntivirus, disableAntivirus, removeAntivirus, addHostAccount, addHostGroup, deleteHostAccount, deleteHostGroup, enableWsl, enableLxd, enableKvm, enableVmm, enableBhyve] = await Promise.all([
-                hasPermission(SecurityRoles.EDIT_TAGS),
-                hasPermission(SecurityRoles.EDIT_HOST_HOSTNAME),
-                hasPermission(SecurityRoles.STOP_HOST_SERVICE),
-                hasPermission(SecurityRoles.START_HOST_SERVICE),
-                hasPermission(SecurityRoles.RESTART_HOST_SERVICE),
-                hasPermission(SecurityRoles.ADD_PACKAGE),
-                hasPermission(SecurityRoles.DEPLOY_SSH_KEY),
-                hasPermission(SecurityRoles.DEPLOY_CERTIFICATE),
-                hasPermission(SecurityRoles.ATTACH_UBUNTU_PRO),
-                hasPermission(SecurityRoles.DETACH_UBUNTU_PRO),
-                hasPermission(SecurityRoles.DEPLOY_ANTIVIRUS),
-                hasPermission(SecurityRoles.ENABLE_ANTIVIRUS),
-                hasPermission(SecurityRoles.DISABLE_ANTIVIRUS),
-                hasPermission(SecurityRoles.REMOVE_ANTIVIRUS),
-                hasPermission(SecurityRoles.ADD_HOST_ACCOUNT),
-                hasPermission(SecurityRoles.ADD_HOST_GROUP),
-                hasPermission(SecurityRoles.DELETE_HOST_ACCOUNT),
-                hasPermission(SecurityRoles.DELETE_HOST_GROUP),
-                hasPermission(SecurityRoles.ENABLE_WSL),
-                hasPermission(SecurityRoles.ENABLE_LXD),
-                hasPermission(SecurityRoles.ENABLE_KVM),
-                hasPermission(SecurityRoles.ENABLE_VMM),
-                hasPermission(SecurityRoles.ENABLE_BHYVE)
-            ]);
-            setCanEditTags(editTags);
-            setCanEditHostname(editHostname);
-            setCanStopService(stopService);
-            setCanStartService(startService);
-            setCanRestartService(restartService);
-            setCanAddPackage(addPackage);
-            setCanDeploySshKey(deploySshKey);
-            setCanDeployCertificate(deployCertificate);
-            setCanAttachUbuntuPro(attachUbuntuPro);
-            setCanDetachUbuntuPro(detachUbuntuPro);
-            setCanDeployAntivirus(deployAntivirus);
-            setCanEnableAntivirus(enableAntivirus);
-            setCanDisableAntivirus(disableAntivirus);
-            setCanRemoveAntivirus(removeAntivirus);
-            setCanAddHostAccount(addHostAccount);
-            setCanAddHostGroup(addHostGroup);
-            setCanDeleteHostAccount(deleteHostAccount);
-            setCanDeleteHostGroup(deleteHostGroup);
-            setCanEnableWsl(enableWsl);
-            setCanEnableLxd(enableLxd);
-            setCanEnableKvm(enableKvm);
-            setCanEnableVmm(enableVmm);
-            setCanEnableBhyve(enableBhyve);
+            try {
+                    const [editTags, editHostname, stopService, startService, restartService, addPackage, deploySshKey, deployCertificate, attachUbuntuPro, detachUbuntuPro, deployAntivirus, enableAntivirus, disableAntivirus, removeAntivirus, addHostAccount, addHostGroup, deleteHostAccount, deleteHostGroup, enableWsl, enableLxd, enableKvm, enableVmm, enableBhyve] = await Promise.all([
+                        hasPermission(SecurityRoles.EDIT_TAGS),
+                        hasPermission(SecurityRoles.EDIT_HOST_HOSTNAME),
+                        hasPermission(SecurityRoles.STOP_HOST_SERVICE),
+                        hasPermission(SecurityRoles.START_HOST_SERVICE),
+                        hasPermission(SecurityRoles.RESTART_HOST_SERVICE),
+                        hasPermission(SecurityRoles.ADD_PACKAGE),
+                        hasPermission(SecurityRoles.DEPLOY_SSH_KEY),
+                        hasPermission(SecurityRoles.DEPLOY_CERTIFICATE),
+                        hasPermission(SecurityRoles.ATTACH_UBUNTU_PRO),
+                        hasPermission(SecurityRoles.DETACH_UBUNTU_PRO),
+                        hasPermission(SecurityRoles.DEPLOY_ANTIVIRUS),
+                        hasPermission(SecurityRoles.ENABLE_ANTIVIRUS),
+                        hasPermission(SecurityRoles.DISABLE_ANTIVIRUS),
+                        hasPermission(SecurityRoles.REMOVE_ANTIVIRUS),
+                        hasPermission(SecurityRoles.ADD_HOST_ACCOUNT),
+                        hasPermission(SecurityRoles.ADD_HOST_GROUP),
+                        hasPermission(SecurityRoles.DELETE_HOST_ACCOUNT),
+                        hasPermission(SecurityRoles.DELETE_HOST_GROUP),
+                        hasPermission(SecurityRoles.ENABLE_WSL),
+                        hasPermission(SecurityRoles.ENABLE_LXD),
+                        hasPermission(SecurityRoles.ENABLE_KVM),
+                        hasPermission(SecurityRoles.ENABLE_VMM),
+                        hasPermission(SecurityRoles.ENABLE_BHYVE)
+                    ]);
+                    setCanEditTags(editTags);
+                    setCanEditHostname(editHostname);
+                    setCanStopService(stopService);
+                    setCanStartService(startService);
+                    setCanRestartService(restartService);
+                    setCanAddPackage(addPackage);
+                    setCanDeploySshKey(deploySshKey);
+                    setCanDeployCertificate(deployCertificate);
+                    setCanAttachUbuntuPro(attachUbuntuPro);
+                    setCanDetachUbuntuPro(detachUbuntuPro);
+                    setCanDeployAntivirus(deployAntivirus);
+                    setCanEnableAntivirus(enableAntivirus);
+                    setCanDisableAntivirus(disableAntivirus);
+                    setCanRemoveAntivirus(removeAntivirus);
+                    setCanAddHostAccount(addHostAccount);
+                    setCanAddHostGroup(addHostGroup);
+                    setCanDeleteHostAccount(deleteHostAccount);
+                    setCanDeleteHostGroup(deleteHostGroup);
+                    setCanEnableWsl(enableWsl);
+                    setCanEnableLxd(enableLxd);
+                    setCanEnableKvm(enableKvm);
+                    setCanEnableVmm(enableVmm);
+                    setCanEnableBhyve(enableBhyve);
+            } catch (error) {
+                // Fail CLOSED -- every flag stays false -- but say so.
+                // An expired session or a network blip used to leave this
+                // Promise.all rejected and unhandled: the browser logged an
+                // unhandled rejection and the operator got a Host Detail page
+                // of dead buttons with nothing explaining why. Same remedy as
+                // Scripts.tsx, which hit this first.
+                console.error('Failed to resolve host permissions:', error);
+            }
         };
         checkPermissions();
     }, []);

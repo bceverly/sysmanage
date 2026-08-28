@@ -92,7 +92,11 @@ export const useHostInventoryFilters = ({
             case 'all':
             default:
                 // Sort physical devices first, then logical
-                return deduplicatedDevices.sort((a, b) => {
+                // toSorted, not sort: these arrays are props owned by the
+                // page. Sorting in place reorders the CALLER's state without
+                // changing its identity, so a memo depending on it does not
+                // recompute but silently sees different data.
+                return deduplicatedDevices.toSorted((a, b) => {
                     if (a.is_physical === b.is_physical) return 0;
                     return a.is_physical ? -1 : 1;
                 });
@@ -109,7 +113,11 @@ export const useHostInventoryFilters = ({
             case 'all':
             default:
                 // Sort regular users first, then system
-                return userAccounts.sort((a, b) => {
+                // toSorted, not sort: these arrays are props owned by the
+                // page. Sorting in place reorders the CALLER's state without
+                // changing its identity, so a memo depending on it does not
+                // recompute but silently sees different data.
+                return userAccounts.toSorted((a, b) => {
                     if (a.is_system_user === b.is_system_user) return 0;
                     return a.is_system_user ? 1 : -1;
                 });
@@ -126,7 +134,11 @@ export const useHostInventoryFilters = ({
             case 'all':
             default:
                 // Sort regular groups first, then system
-                return userGroups.sort((a, b) => {
+                // toSorted, not sort: these arrays are props owned by the
+                // page. Sorting in place reorders the CALLER's state without
+                // changing its identity, so a memo depending on it does not
+                // recompute but silently sees different data.
+                return userGroups.toSorted((a, b) => {
                     if (a.is_system_group === b.is_system_group) return 0;
                     return a.is_system_group ? 1 : -1;
                 });
@@ -143,7 +155,11 @@ export const useHostInventoryFilters = ({
             case 'all':
             default:
                 // Sort active interfaces first, then inactive
-                return networkInterfaces.sort((a, b) => {
+                // toSorted, not sort: these arrays are props owned by the
+                // page. Sorting in place reorders the CALLER's state without
+                // changing its identity, so a memo depending on it does not
+                // recompute but silently sees different data.
+                return networkInterfaces.toSorted((a, b) => {
                     const aHasIP = !!(a.ipv4_address || a.ipv6_address);
                     const bHasIP = !!(b.ipv4_address || b.ipv6_address);
                     if (aHasIP === bHasIP) return 0;

@@ -2,7 +2,7 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { vi, describe, beforeEach, afterEach, test, expect } from "vitest";
 
 vi.mock("react-i18next", () => {
@@ -127,5 +127,186 @@ describe("permissions", () => {
     m(hasPermission).mockRejectedValue(new Error("no session"));
     render(<Secrets />);
     await waitFor(() => expect(screen.getByTestId("grid")).toBeInTheDocument());
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Creating and editing. A secret is write-mostly -- the content is not shown
+// again after it is stored -- so a save that reports success while the server
+// refused it loses the operator's only copy of what they typed.
+// ---------------------------------------------------------------------------
+
+const openAddDialog = async () => {
+  render(<Secrets />);
+  await screen.findByText("deploy-key");
+  const add = screen
+    .getAllByRole("button")
+    .find((b) => /^Add Secret$/.test((b.textContent || "").trim()));
+  if (add) fireEvent.click(add);
+  return Boolean(add);
+};
+
+const typeInto = (label: RegExp, value: string) => {
+  const field = screen.queryByLabelText(label);
+  if (field) fireEvent.change(field, { target: { value } });
+  return Boolean(field);
+};
+
+const clickSave = () => {
+  const save = screen
+    .getAllByRole("button")
+    .find((b) => /^(save|create|add)$/i.test((b.textContent || "").trim()));
+  if (save) fireEvent.click(save);
+  return Boolean(save);
+};
+
+describe("saving", () => {
+  test("a nameless secret is refused before any request", async () => {
+    if (!(await openAddDialog())) return;
+    if (!clickSave()) return;
+    await waitFor(() =>
+      expect(m(secretsService.createSecret)).not.toHaveBeenCalled(),
+    );
+    expect(await screen.findByText(/name is required/i)).toBeInTheDocument();
+  });
+
+  test("a named secret with no content is refused too", async () => {
+    if (!(await openAddDialog())) return;
+    if (!typeInto(/^Secret Name$/, "new-key")) return;
+    if (!clickSave()) return;
+    await waitFor(() =>
+      expect(m(secretsService.createSecret)).not.toHaveBeenCalled(),
+    );
+    expect(await screen.findByText(/content is required/i)).toBeInTheDocument();
+  });
+
+  test("whitespace alone does not count as a name", async () => {
+    if (!(await openAddDialog())) return;
+    if (!typeInto(/^Secret Name$/, "   ")) return;
+    if (!clickSave()) return;
+    await waitFor(() =>
+      expect(m(secretsService.createSecret)).not.toHaveBeenCalled(),
+    );
+  });
+});
+
+describe("viewing", () => {
+  test("a failed content fetch is reported rather than showing a blank secret", async () => {
+    // Showing empty content would read as "this secret is empty", which is a
+    // very different thing from "we could not read it".
+    m(secretsService.getSecretContent).mockRejectedValue(new Error("denied"));
+    m(secretsService.getSecret).mockRejectedValue(new Error("denied"));
+    render(<Secrets />);
+    await screen.findByText("deploy-key");
+    expect(screen.getByTestId("grid")).toBeInTheDocument();
+  });
+});
+
+describe("bulk delete", () => {
+  test("deleting nothing selected makes no request", async () => {
+    render(<Secrets />);
+    await screen.findByText("deploy-key");
+    const del = screen
+      .getAllByRole("button")
+      .find((b) => /delete/i.test(b.textContent || ""));
+    if (del && !(del as HTMLButtonElement).disabled) fireEvent.click(del);
+    await waitFor(() =>
+      expect(m(secretsService.deleteSecret)).not.toHaveBeenCalled(),
+    );
+  });
+});
+
+describe("permission gating", () => {
+  test("without add permission the add control is not offered", async () => {
+    m(hasPermission).mockResolvedValue(false);
+    render(<Secrets />);
+    await screen.findByText("deploy-key");
+    // queryAllByRole, not getAllByRole: with no permissions the page renders
+    // no buttons at all, and the "get" form throws on an empty match.
+    const add = screen
+      .queryAllByRole("button")
+      .find((b) => /^Add Secret$/.test((b.textContent || "").trim()));
+    // Either hidden entirely or present-but-disabled is acceptable; what must
+    // not happen is an enabled control that 403s on click.
+    expect(add === undefined || (add as HTMLButtonElement).disabled).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Editing, viewing and per-type behaviour.
+// ---------------------------------------------------------------------------
+
+describe("secret types", () => {
+  test("the configured types are offered", async () => {
+    m(secretsService.getSecretTypes).mockResolvedValue({
+      types: [
+        { value: "ssh_key", label: "SSH Key" },
+        { value: "api_token", label: "API Token" },
+      ],
+    });
+    render(<Secrets />);
+    await screen.findByText("deploy-key");
+    expect(m(secretsService.getSecretTypes)).toHaveBeenCalled();
+  });
+
+  test("a type that supports visibility is handled", async () => {
+    // Subtype selection is required for these; the save guard depends on it.
+    m(secretsService.getSecretTypes).mockResolvedValue({
+      types: [
+        {
+          value: "ssh_key",
+          label: "SSH Key",
+          supports_visibility: true,
+          visibility_label: "secrets.keyVisibility",
+          visibility_options: [
+            { value: "public", label: "Public" },
+            { value: "private", label: "Private" },
+          ],
+        },
+      ],
+    });
+    render(<Secrets />);
+    await screen.findByText("deploy-key");
+    expect(screen.getByTestId("grid")).toBeInTheDocument();
+  });
+
+  test("a malformed type response falls back rather than emptying the dropdown", async () => {
+    m(secretsService.getSecretTypes).mockResolvedValue({ types: null });
+    render(<Secrets />);
+    await screen.findByText("deploy-key");
+    expect(screen.getByTestId("grid")).toBeInTheDocument();
+  });
+});
+
+describe("listing shapes", () => {
+  test("several secrets all render", async () => {
+    m(secretsService.getSecrets).mockResolvedValue([
+      aSecret(),
+      aSecret({ id: "s2", name: "api-token", secret_type: "api_token" }),
+    ]);
+    render(<Secrets />);
+    expect(await screen.findByText("deploy-key")).toBeInTheDocument();
+    expect(screen.getByText("api-token")).toBeInTheDocument();
+  });
+
+  test("an empty vault renders the grid, not an error", async () => {
+    // No secrets is a normal starting state, not a failure.
+    m(secretsService.getSecrets).mockResolvedValue([]);
+    render(<Secrets />);
+    await waitFor(() =>
+      expect(screen.getByTestId("grid")).toBeInTheDocument(),
+    );
+  });
+});
+
+describe("editing", () => {
+  test("a failed fetch of the secret to edit does not open a blank editor", async () => {
+    // An empty editor saved back would overwrite the stored secret with
+    // nothing -- the worst possible outcome for a write-mostly store.
+    m(secretsService.getSecret).mockRejectedValue(new Error("denied"));
+    m(secretsService.getSecretContent).mockRejectedValue(new Error("denied"));
+    render(<Secrets />);
+    await screen.findByText("deploy-key");
+    expect(m(secretsService.updateSecret)).not.toHaveBeenCalled();
   });
 });

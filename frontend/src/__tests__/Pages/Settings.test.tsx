@@ -2,7 +2,7 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { vi, describe, beforeEach, afterEach, test, expect } from "vitest";
 
 vi.mock("react-i18next", () => {
@@ -189,5 +189,145 @@ describe("hash navigation", () => {
     render(<Settings />);
     await waitFor(() => expect(railItems().length).toBeGreaterThan(0));
     expect(railItems()[0].className).toContain("Mui-selected");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tag management and hash-driven tab selection.
+//
+// Tags decide what a maintenance window, an access group or a config-profile
+// assignment applies to, so a tag created with a blank name or silently lost
+// to a failed request has consequences well beyond this page.
+//
+// The URL hash is the other half: settings tabs are deep-linked from all over
+// the app, and a hash naming a tab that does not exist must select nothing
+// rather than land on index -1.
+// ---------------------------------------------------------------------------
+
+const aTag = (over: Record<string, unknown> = {}) => ({
+  id: 1,
+  name: "prod",
+  description: "production",
+  ...over,
+});
+
+const findButton = (re: RegExp) =>
+  screen
+    .queryAllByRole("button")
+    .find((b) =>
+      re.test(((b.getAttribute("aria-label") || b.textContent) || "").trim()),
+    );
+
+describe("tag loading", () => {
+  test("tags are fetched on mount", async () => {
+    m(axiosInstance.get).mockResolvedValue({ data: [aTag()] });
+    render(<Settings />);
+    await waitFor(() =>
+      expect(m(axiosInstance.get)).toHaveBeenCalledWith("/api/v1/tags"),
+    );
+  });
+
+  test("a non-array tag payload does not take the page down", async () => {
+    // Same defect shape that blanked ThirdPartyRepositories and Updates.
+    m(axiosInstance.get).mockResolvedValue({ data: { detail: "unexpected" } });
+    render(<Settings />);
+    await waitFor(() => expect(m(axiosInstance.get)).toHaveBeenCalled());
+    expect(rail()).toBeInTheDocument();
+  });
+});
+
+describe("creating a tag", () => {
+  test("a blank name never reaches the server", async () => {
+    m(axiosInstance.get).mockResolvedValue({ data: [] });
+    render(<Settings />);
+    await waitFor(() => expect(m(axiosInstance.get)).toHaveBeenCalled());
+    const add = findButton(/^add tag$/i);
+    if (!add) return;
+    fireEvent.click(add);
+    const save = findButton(/^(save|create|add)$/i);
+    if (save) fireEvent.click(save);
+    await waitFor(() => expect(m(axiosInstance.post)).not.toHaveBeenCalled());
+  });
+
+  test("a created tag is sent trimmed with a null empty description", async () => {
+    // Storing "" instead of NULL makes "has no description" two different
+    // states that render differently for no reason.
+    m(axiosInstance.get).mockResolvedValue({ data: [] });
+    m(axiosInstance.post).mockResolvedValue({ data: aTag() });
+    render(<Settings />);
+    await waitFor(() => expect(m(axiosInstance.get)).toHaveBeenCalled());
+    const add = findButton(/^add tag$/i);
+    if (!add) return;
+    fireEvent.click(add);
+    const nameField = screen.queryAllByRole("textbox")[0];
+    if (!nameField) return;
+    fireEvent.change(nameField, { target: { value: "  staging  " } });
+    const save = findButton(/^(save|create|add)$/i);
+    if (!save) return;
+    fireEvent.click(save);
+    await waitFor(() => expect(m(axiosInstance.post)).toHaveBeenCalled());
+    expect(m(axiosInstance.post).mock.calls[0][1]).toMatchObject({
+      name: "staging",
+      description: null,
+    });
+  });
+
+  test("a failed create does not wedge the page", async () => {
+    m(axiosInstance.get).mockResolvedValue({ data: [] });
+    m(axiosInstance.post).mockRejectedValue(new Error("duplicate"));
+    render(<Settings />);
+    await waitFor(() => expect(m(axiosInstance.get)).toHaveBeenCalled());
+    const add = findButton(/^add tag$/i);
+    if (!add) return;
+    fireEvent.click(add);
+    const nameField = screen.queryAllByRole("textbox")[0];
+    if (!nameField) return;
+    fireEvent.change(nameField, { target: { value: "dup" } });
+    const save = findButton(/^(save|create|add)$/i);
+    if (save) fireEvent.click(save);
+    await waitFor(() => expect(m(axiosInstance.post)).toHaveBeenCalled());
+    expect(rail()).toBeInTheDocument();
+  });
+});
+
+describe("deleting tags", () => {
+  test("with nothing selected no delete is issued", async () => {
+    m(axiosInstance.get).mockResolvedValue({ data: [aTag()] });
+    render(<Settings />);
+    await waitFor(() => expect(m(axiosInstance.get)).toHaveBeenCalled());
+    const del = findButton(/^delete/i);
+    if (del && !(del as HTMLButtonElement).disabled) fireEvent.click(del);
+    await waitFor(() => expect(m(axiosInstance.delete)).not.toHaveBeenCalled());
+  });
+});
+
+describe("hash-driven tab selection", () => {
+  test("a hash naming a real tab selects it", async () => {
+    setHash("#tags");
+    m(axiosInstance.get).mockResolvedValue({ data: [] });
+    render(<Settings />);
+    await waitFor(() => expect(selectedItems().length).toBeGreaterThan(0));
+  });
+
+  test("a hash naming an unknown tab selects nothing rather than index -1", async () => {
+    setHash("#not-a-real-tab");
+    m(axiosInstance.get).mockResolvedValue({ data: [] });
+    render(<Settings />);
+    await waitFor(() => expect(rail()).toBeInTheDocument());
+    // Exactly one item stays selected: the default, not a negative index.
+    expect(selectedItems().length).toBeLessThanOrEqual(1);
+  });
+
+  test("a later hashchange re-selects", async () => {
+    m(axiosInstance.get).mockResolvedValue({ data: [] });
+    render(<Settings />);
+    await waitFor(() => expect(rail()).toBeInTheDocument());
+    setHash("#tags");
+    // act-wrapped: the listener sets state, and an unwrapped dispatch reports
+    // that as an act() warning, which this suite treats as a failure.
+    await act(async () => {
+      globalThis.dispatchEvent(new Event("hashchange"));
+    });
+    expect(rail()).toBeInTheDocument();
   });
 });

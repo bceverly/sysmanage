@@ -273,7 +273,8 @@
     "save": "儲存",
     "saveSuccess": "防毒預設值已成功儲存",
     "selectProgram": "選擇防毒程式",
-    "title": "防毒軟體"
+    "title": "防毒軟體",
+    "editDefaults": "編輯防病毒預設值"
   },
   "apiKeys": {
     "active": "啟用",

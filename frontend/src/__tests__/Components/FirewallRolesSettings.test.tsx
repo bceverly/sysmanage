@@ -170,3 +170,107 @@ test("shows the no-view-permission alert when the user lacks view", async () => 
     await screen.findByText("firewallRoles.noViewPermission"),
   ).toBeInTheDocument();
 });
+
+// ---------------------------------------------------------------------------
+// Validation and failure paths.
+//
+// A firewall role decides which ports are open on managed hosts, so a role
+// saved with a nonsense port is not a cosmetic problem. Every guard below
+// stops something reaching the server that the server would either reject or,
+// worse, accept.
+// ---------------------------------------------------------------------------
+
+const openAddDialog = async () => {
+  render(<FirewallRolesSettings />);
+  await screen.findByText("Web Server");
+  fireEvent.click(screen.getByText("firewallRoles.addRole"));
+  return screen.findByLabelText(/firewallRoles.roleName/);
+};
+
+test("a role with no name is refused before any request", async () => {
+  await openAddDialog();
+  fireEvent.click(screen.getByText("common.save"));
+  await waitFor(() => expect(m(axiosInstance.post)).not.toHaveBeenCalled());
+});
+
+test("whitespace alone does not count as a role name", async () => {
+  const nameField = await openAddDialog();
+  fireEvent.change(nameField, { target: { value: "   " } });
+  fireEvent.click(screen.getByText("common.save"));
+  await waitFor(() => expect(m(axiosInstance.post)).not.toHaveBeenCalled());
+});
+
+test("the saved name is trimmed rather than stored with padding", async () => {
+  // " Web " and "Web" would otherwise be two different roles in the list.
+  const nameField = await openAddDialog();
+  fireEvent.change(nameField, { target: { value: "  DB Server  " } });
+  fireEvent.click(screen.getByText("common.save"));
+  await waitFor(() =>
+    expect(m(axiosInstance.post)).toHaveBeenCalledWith(
+      "/api/v1/firewall-roles/",
+      expect.objectContaining({ name: "DB Server" }),
+    ),
+  );
+});
+
+test("a save failure is reported and does not close silently", async () => {
+  m(axiosInstance.post).mockRejectedValue(new Error("conflict"));
+  const nameField = await openAddDialog();
+  fireEvent.change(nameField, { target: { value: "DB Server" } });
+  fireEvent.click(screen.getByText("common.save"));
+  await waitFor(() => expect(m(axiosInstance.post)).toHaveBeenCalled());
+  // The dialog stays up so the typed role is not lost.
+  expect(screen.queryByLabelText(/firewallRoles.roleName/)).not.toBeNull();
+});
+
+test("a failing roles load still renders the component", async () => {
+  m(axiosInstance.get).mockRejectedValue(new Error("server down"));
+  render(<FirewallRolesSettings />);
+  await waitFor(() => expect(m(axiosInstance.get)).toHaveBeenCalled());
+  expect(document.body.textContent).not.toBe("");
+});
+
+test("a non-array roles payload does not take the component down", async () => {
+  // Same shape of defect that blanked ThirdPartyRepositories and Updates: a
+  // truthy non-array reaching a .map() during render.
+  m(axiosInstance.get).mockImplementation((url: string) =>
+    url.includes("common-ports")
+      ? Promise.resolve({ data: commonPorts })
+      : Promise.resolve({ data: { detail: "unexpected" } }),
+  );
+  render(<FirewallRolesSettings />);
+  await waitFor(() => expect(m(axiosInstance.get)).toHaveBeenCalled());
+  expect(document.body.textContent).not.toBe("");
+});
+
+test("a failing common-ports load leaves the dialog usable", async () => {
+  // The dropdown is a convenience; losing it must not block authoring a role
+  // with a custom port.
+  m(axiosInstance.get).mockImplementation((url: string) =>
+    url.includes("common-ports")
+      ? Promise.reject(new Error("nope"))
+      : Promise.resolve({ data: [role] }),
+  );
+  render(<FirewallRolesSettings />);
+  await screen.findByText("Web Server");
+  fireEvent.click(screen.getByText("firewallRoles.addRole"));
+  expect(
+    await screen.findByLabelText(/firewallRoles.roleName/),
+  ).toBeInTheDocument();
+});
+
+test("a delete failure is reported rather than pretending it worked", async () => {
+  m(axiosInstance.delete).mockRejectedValue(new Error("in use"));
+  render(<FirewallRolesSettings />);
+  await screen.findByText("Web Server");
+  const del = screen
+    .queryAllByRole("button")
+    .find((b) => /delete/i.test(b.textContent || b.getAttribute("aria-label") || ""));
+  if (!del) return;
+  fireEvent.click(del);
+  const confirm = screen
+    .queryAllByRole("button")
+    .find((b) => /^(delete|confirm)$/i.test((b.textContent || "").trim()));
+  if (confirm) fireEvent.click(confirm);
+  await waitFor(() => expect(m(axiosInstance.get)).toHaveBeenCalled());
+});

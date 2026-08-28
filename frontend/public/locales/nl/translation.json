@@ -273,7 +273,8 @@
     "save": "Opslaan",
     "saveSuccess": "Antivirusstandaardinstellingen succesvol opgeslagen",
     "selectProgram": "Selecteer antivirusprogramma",
-    "title": "Anti-virus"
+    "title": "Anti-virus",
+    "editDefaults": "Bewerk standaardinstellingen antivirus"
   },
   "apiKeys": {
     "active": "Actief",

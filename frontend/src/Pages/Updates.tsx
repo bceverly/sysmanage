@@ -172,7 +172,11 @@ const Updates: React.FC = () => {
           filters.application_only || undefined
         );
 
-        fetchedUpdates = response.updates;
+        // Array.isArray, not `|| []`: a truthy non-array (an error object, or a
+        // differently-shaped envelope) passes a `||` guard and then throws
+        // "updates is not iterable" during render, blanking the page.
+        // ThirdPartyRepositories hit exactly this shape on 2026-08-25.
+        fetchedUpdates = Array.isArray(response.updates) ? response.updates : [];
         setTotalCount(response.total_updates);
         setHostSpecificStats(response);
         setCurrentPage(0);
@@ -187,7 +191,7 @@ const Updates: React.FC = () => {
           page * ITEMS_PER_PAGE
         );
 
-        fetchedUpdates = response.updates;
+        fetchedUpdates = Array.isArray(response.updates) ? response.updates : [];
         setTotalCount(response.total_count);
         setHostSpecificStats(null);
         setCurrentPage(page);

@@ -273,7 +273,8 @@
     "save": "保存",
     "saveSuccess": "ウイルス対策のデフォルト設定が正常に保存されました",
     "selectProgram": "ウイルス対策プログラムを選択",
-    "title": "ウイルス対策"
+    "title": "ウイルス対策",
+    "editDefaults": "アンチウイルスデフォルトの編集"
   },
   "apiKeys": {
     "active": "有効",

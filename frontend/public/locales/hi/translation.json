@@ -11,7 +11,8 @@
     "save": "सहेजें",
     "saveSuccess": "एंटीवायरस डिफ़ॉल्ट सफलतापूर्वक सहेजे गए",
     "selectProgram": "एंटीवायरस प्रोग्राम चुनें",
-    "title": "एंटीवायरस"
+    "title": "एंटीवायरस",
+    "editDefaults": "एंटीवायरस डिफ़ॉल्ट संपादित करें"
   },
   "auditLog": {
     "exportRequiresLicense": "ऑडिट लॉग निर्यात के लिए SysManage Professional+ लाइसेंस आवश्यक है।",

@@ -152,6 +152,10 @@ export default [
         document: 'readonly',
         localStorage: 'readonly',
         HTMLInputElement: 'readonly',
+        HTMLButtonElement: 'readonly',
+        Event: 'readonly',
+        File: 'readonly',
+        URLSearchParams: 'readonly',
         setTimeout: 'readonly',
         URL: 'readonly'
       }
@@ -163,6 +167,11 @@ export default [
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
+      // The TS-aware rule is off above, which leaves the BASE no-unused-vars
+      // active -- and that one cannot tell a real parameter from a name in a
+      // TYPE annotation, so `(cb: (v: string) => void)` reads as an unused
+      // `v`. Same `^_` convention as the main block above.
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       'react/prop-types': 'off'
     }
   }

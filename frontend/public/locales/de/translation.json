@@ -273,7 +273,8 @@
     "save": "Speichern",
     "saveSuccess": "Antivirus-Standardeinstellungen erfolgreich gespeichert",
     "selectProgram": "Antivirus-Programm auswählen",
-    "title": "Antiviren"
+    "title": "Antiviren",
+    "editDefaults": "Antiviren-Standarde bearbeiten"
   },
   "apiKeys": {
     "active": "Aktiv",

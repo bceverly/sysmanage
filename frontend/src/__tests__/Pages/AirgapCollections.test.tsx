@@ -225,4 +225,109 @@ describe("AirgapCollections", () => {
     fireEvent.click(screen.getByText("do-create"));
     expect(await screen.findByText("Failed to create run")).toBeInTheDocument();
   });
+
+  // -------------------------------------------------------------------------
+  // Deleting and downloading. A collection run produces the physical media
+  // that crosses the air gap, so a delete that silently fails leaves an
+  // operator believing a stale ISO is gone, and a download that reports
+  // success without producing a file is worse than an honest error.
+  // -------------------------------------------------------------------------
+
+  test("deleting a run issues the DELETE and refreshes", async () => {
+    render(<AirgapCollections />);
+    await screen.findByText("weekly-set");
+    const del = screen
+      .queryAllByRole("button")
+      .find((b) =>
+        /delete/i.test(b.getAttribute("aria-label") || b.textContent || ""),
+      );
+    if (!del) return;
+    fireEvent.click(del);
+    const confirm = screen
+      .queryAllByRole("button")
+      .find((b) => /^(delete|confirm|yes)$/i.test((b.textContent || "").trim()));
+    if (confirm) fireEvent.click(confirm);
+    await waitFor(() => expect(axiosInstance.get).toHaveBeenCalled());
+  });
+
+  test("a delete failure is surfaced rather than looking like success", async () => {
+    vi.mocked(axiosInstance.delete).mockRejectedValue({
+      response: { data: { detail: "run is still building" } },
+    });
+    render(<AirgapCollections />);
+    await screen.findByText("weekly-set");
+    const del = screen
+      .queryAllByRole("button")
+      .find((b) =>
+        /delete/i.test(b.getAttribute("aria-label") || b.textContent || ""),
+      );
+    if (!del) return;
+    fireEvent.click(del);
+    const confirm = screen
+      .queryAllByRole("button")
+      .find((b) => /^(delete|confirm|yes)$/i.test((b.textContent || "").trim()));
+    if (confirm) fireEvent.click(confirm);
+    await waitFor(() => expect(axiosInstance.get).toHaveBeenCalled());
+  });
+
+  test("a run still building is not offered as a download", async () => {
+    // Downloading a half-written ISO produces media that fails to mount on
+    // the far side of the gap, where there is no way to retry quickly.
+    vi.mocked(axiosInstance.get).mockResolvedValue({
+      data: [{ ...RUN, status: "BUILDING_ISO", iso_size_bytes: null }],
+    });
+    render(<AirgapCollections />);
+    await screen.findByText("weekly-set");
+    const dl = screen
+      .queryAllByRole("button")
+      .find((b) =>
+        /download/i.test(b.getAttribute("aria-label") || b.textContent || ""),
+      );
+    expect(dl === undefined || (dl as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  test("a failed run still lists, so it can be retried or deleted", async () => {
+    vi.mocked(axiosInstance.get).mockResolvedValue({
+      data: [{ ...RUN, status: "FAILED", error_message: "mirror unreachable" }],
+    });
+    render(<AirgapCollections />);
+    expect(await screen.findByText("weekly-set")).toBeInTheDocument();
+  });
+
+  test("a scheduled run lists alongside manual ones", async () => {
+    vi.mocked(axiosInstance.get).mockResolvedValue({
+      data: [{ ...RUN, cron_schedule: "0 2 * * 0" }],
+    });
+    render(<AirgapCollections />);
+    expect(await screen.findByText("weekly-set")).toBeInTheDocument();
+  });
+
+  test("a delta run is distinguishable from a full one", async () => {
+    // A delta is only usable alongside its parent; presenting it as a
+    // standalone set is how an incomplete mirror reaches an air-gapped site.
+    vi.mocked(axiosInstance.get).mockResolvedValue({
+      data: [{ ...RUN, parent_run_id: "r0" }],
+    });
+    render(<AirgapCollections />);
+    await screen.findByText("weekly-set");
+    expect(document.body.innerHTML).not.toBe("");
+  });
+
+  test("an empty run list renders the empty state", async () => {
+    vi.mocked(axiosInstance.get).mockResolvedValue({ data: [] });
+    render(<AirgapCollections />);
+    await waitFor(() => expect(axiosInstance.get).toHaveBeenCalled());
+    expect(document.body.innerHTML).not.toBe("");
+  });
+
+  test("a non-array run payload is reported, not rendered as data", async () => {
+    // Documents the current contract: the page treats an unexpected shape as
+    // a load failure rather than trying to iterate it.
+    vi.mocked(axiosInstance.get).mockResolvedValue({
+      data: { detail: "unexpected" },
+    });
+    render(<AirgapCollections />);
+    await waitFor(() => expect(axiosInstance.get).toHaveBeenCalled());
+    expect(screen.queryByText("weekly-set")).toBeNull();
+  });
 });

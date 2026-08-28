@@ -273,7 +273,8 @@
     "save": "Save",
     "saveSuccess": "Antivirus defaults saved successfully",
     "selectProgram": "Select Antivirus Program",
-    "title": "Antivirus"
+    "title": "Antivirus",
+    "editDefaults": "Edit antivirus defaults"
   },
   "apiKeys": {
     "active": "Active",

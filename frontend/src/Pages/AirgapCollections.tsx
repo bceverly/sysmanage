@@ -140,7 +140,11 @@ const AirgapCollections: React.FC = () => {
     setLoading(true);
     try {
       const r = await axiosInstance.get<CollectionRun[]>(RUNS_URL);
-      setRuns(r.data);
+      // Array.isArray, not a truthiness check: an unexpected object body
+      // (an error envelope, a paginated shape) reaches `runs.some(...)` on
+      // the next render and throws, blanking the page. Same defect shape
+      // that hit ThirdPartyRepositories and Updates.
+      setRuns(Array.isArray(r.data) ? r.data : []);
     } catch (e: unknown) {
       const status = (e as { response?: { status?: number } })?.response?.status;
       if (status === 402) {

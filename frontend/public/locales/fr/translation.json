@@ -273,7 +273,8 @@
     "save": "Enregistrer",
     "saveSuccess": "Paramètres antivirus par défaut enregistrés avec succès",
     "selectProgram": "Sélectionner un programme antivirus",
-    "title": "antivirus"
+    "title": "antivirus",
+    "editDefaults": "Modifier les paramètres par défaut de l'antivirus"
   },
   "apiKeys": {
     "active": "Actif",
