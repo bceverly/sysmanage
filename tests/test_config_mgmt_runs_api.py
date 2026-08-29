@@ -316,6 +316,25 @@ class TestApply:
         assert params["profile_name"] == "baseline"
 
     @pytest.mark.asyncio
+    async def test_the_queue_row_carries_the_envelope_id_so_results_correlate(self):
+        # REGRESSION (2026-08-28). enqueue_message mints its OWN uuid when you
+        # don't pass one, but the agent echoes the ENVELOPE's message_id back as
+        # `command_id`. When those two differed, every config-profile result
+        # arrived un-correlatable and was dropped on the floor -- silently, with
+        # the run never recorded. Found by a real four-engine round trip, not by
+        # this suite, which is why it is now here.
+        session = _Session(Host=[_host()])
+        with _Env() as env:
+            await api.apply_config_profile(
+                str(HOST_ID),
+                _req(playbook="- hosts: all"),
+                session,
+                _user(SecurityRoles.RUN_SCRIPT),
+            )
+        row = env.enqueued[0]
+        assert row["message_id"] == row["message_data"]["message_id"]
+
+    @pytest.mark.asyncio
     async def test_a_windows_host_gets_its_resources_queued(self):
         session = _Session(Host=[_host(platform="Windows", release="")])
         with _Env() as env:

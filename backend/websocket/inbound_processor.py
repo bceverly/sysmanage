@@ -369,29 +369,7 @@ async def process_pending_messages(  # NOSONAR
                 )
                 continue
 
-            # Resolve the host.  ``host_id`` (when the agent sends one) is
-            # authoritative and is resolved FIRST across the bootstrap DB and
-            # every tenant DB — BEFORE any hostname fallback.  This matters in
-            # multi-tenancy: a host's row lives in its tenant DB, but a stale
-            # leftover row in the bootstrap DB can share the same fqdn.  If we
-            # let the bootstrap hostname lookup run first it would match that
-            # stale row (often ``pending``) and shadow the real, approved
-            # tenant host the agent identified by id — silently failing every
-            # inbound message as "not approved".  So: id everywhere, then
-            # hostname everywhere.
-            host = None
-            tenant_session = None
-            if host_id:
-                host = db.query(Host).filter(Host.id == host_id).first()
-                if not host:
-                    host, tenant_session = _find_host_in_tenant_dbs(host_id, None)
-
-            # Hostname fallback only when no host_id was provided, or it didn't
-            # resolve anywhere (e.g. hostname_changed before the index updates).
-            if not host and hostname:
-                host = db.query(Host).filter(Host.fqdn == hostname).first()
-                if not host:
-                    host, tenant_session = _find_host_in_tenant_dbs(None, hostname)
+            host, tenant_session = resolve_message_host(db, host_id, hostname)
 
             await _dispatch_null_host_message(
                 message, host, db, hostname, tenant_session
@@ -405,6 +383,51 @@ async def process_pending_messages(  # NOSONAR
             server_queue_manager.mark_failed(
                 message.message_id, f"Processing error: {str(e)}", db=db
             )
+
+
+def resolve_message_host(db, host_id, hostname):
+    """Find the host an inbound queue message belongs to, and the session its
+    data lives in.
+
+    Returns ``(host, tenant_session)``.  ``tenant_session`` is None when the
+    host was found in the bootstrap database (the caller then uses its own
+    session); otherwise it is an OPEN tenant session the caller must close.
+
+    WHY THE TWO LOOKUPS HAVE OPPOSITE PRECEDENCE
+    --------------------------------------------
+    ``host_id`` is resolved bootstrap-first, then across every tenant DB.  Ids
+    are globally unique, so whichever database answers first is the right one.
+
+    ``hostname`` is resolved TENANT-first, then bootstrap -- the reverse --
+    because FQDNs are NOT unique across databases.  Moving a host into a tenant
+    leaves its old bootstrap row behind under the same fqdn, and that stale row
+    is often still ``approved``, so nothing downstream rejects it.  Resolving
+    bootstrap-first therefore returns the stale row with ``tenant_session``
+    None, and the handler runs against a database that does not hold the host's
+    data -- succeeding, silently, having written nothing useful.
+
+    Observed 2026-08-28: command results for a tenant-bound host were processed
+    on bootstrap, where the originating command's queue row does not exist, so
+    every config-profile result was discarded without an error anywhere.
+    """
+    from backend.persistence.models import Host  # noqa: PLC0415
+
+    host = None
+    tenant_session = None
+
+    if host_id:
+        host = db.query(Host).filter(Host.id == host_id).first()
+        if not host:
+            host, tenant_session = _find_host_in_tenant_dbs(host_id, None)
+
+    # Only when no host_id was sent, or it resolved nowhere (e.g. a
+    # hostname_changed that landed before the index caught up).
+    if not host and hostname:
+        host, tenant_session = _find_host_in_tenant_dbs(None, hostname)
+        if not host:
+            host = db.query(Host).filter(Host.fqdn == hostname).first()
+
+    return host, tenant_session
 
 
 async def process_validated_message(message, host, db: Session, host_db=None) -> None:

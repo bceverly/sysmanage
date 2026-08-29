@@ -42,6 +42,7 @@ at startup keeps it from running at all.
 
 import asyncio
 import logging
+import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List
 
@@ -125,7 +126,16 @@ def _dispatch_one(db_session, host, parameters: Dict[str, Any]) -> bool:
     not advertised config-management support, must not stop the rest of the
     fleet from getting the same profile.
     """
+    # ONE id for both the envelope and the queue row, matching what
+    # proplus_dispatch does. The agent echoes the ENVELOPE's message_id back as
+    # `command_id`, so if the queue row carries a different id (which is what
+    # enqueue_message generates when you don't pass one) the result cannot be
+    # correlated to the command that produced it -- and config-profile results
+    # were silently dropped for exactly that reason. Found 2026-08-28 by a
+    # real round-trip.
+    command_id = str(uuid.uuid4())
     command = Message(
+        message_id=command_id,
         message_type=MessageType.COMMAND,
         data={
             "command_type": CommandType.APPLY_CONFIG_PROFILE,
@@ -135,6 +145,7 @@ def _dispatch_one(db_session, host, parameters: Dict[str, Any]) -> bool:
     try:
         QueueOperations().enqueue_message(
             message_type="command",
+            message_id=command_id,
             message_data=command.to_dict(),
             direction=QueueDirection.OUTBOUND,
             host_id=str(host.id),
@@ -214,7 +225,7 @@ def run_one_tick() -> Dict[str, Any]:
                 # A stored body that cannot be turned into a command. Advance
                 # the cursor anyway: re-deciding this every minute produces an
                 # identical failure and a flooded log.
-                logger.error(
+                logger.exception(
                     "Assignment %s cannot dispatch profile %s: %s",
                     assignment.id,
                     assignment.profile_id,

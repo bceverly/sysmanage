@@ -62,6 +62,73 @@ def changed_tasks(tasks: Iterable[Any]) -> List[Dict[str, Any]]:
     return out
 
 
+def _load_findings(db_session, run) -> Dict[str, Any]:
+    """Existing findings for this (host, profile), keyed by task name."""
+    return {
+        row.task_name: row
+        for row in db_session.query(models.ConfigDriftFinding)
+        .filter(
+            models.ConfigDriftFinding.host_id == run.host_id,
+            models.ConfigDriftFinding.profile_id == run.profile_id,
+        )
+        .all()
+    }
+
+
+def _record_sighting(db_session, run, existing, task, now, summary) -> None:
+    """Open a finding, or refresh the one that already tracks this task."""
+    detail = task["detail"]
+    detail = str(detail)[:MAX_DETAIL_CHARS] if detail else None
+    row = existing.get(task["name"])
+
+    if row is None:
+        db_session.add(
+            models.ConfigDriftFinding(
+                host_id=run.host_id,
+                profile_id=run.profile_id,
+                profile_name=run.profile_name,
+                task_name=task["name"],
+                detail=detail,
+                first_seen_at=now,
+                last_seen_at=now,
+                last_run_id=run.id,
+            )
+        )
+        summary["opened"] += 1
+        return
+
+    if row.resolved_at is not None:
+        # A REGRESSION. Clear the resolution and restart the clock: "drifting
+        # since" must describe the current episode, or it claims continuous
+        # drift across a period when the host was actually compliant.
+        row.resolved_at = None
+        row.first_seen_at = now
+        summary["opened"] += 1
+    else:
+        summary["still_open"] += 1
+
+    row.last_seen_at = now
+    row.last_run_id = run.id
+    row.detail = detail
+    row.profile_name = run.profile_name
+
+
+def _resolve_unseen(existing, observed_names, run, now, summary) -> None:
+    """Close findings a SUCCESSFUL run no longer reports.
+
+    Only a successful run may close anything: a failed check does not know the
+    host's state, so treating its silence as "the drift is gone" would resolve
+    findings on the strength of an error.
+    """
+    if not run.success:
+        return
+    for name, row in existing.items():
+        if name not in observed_names and row.resolved_at is None:
+            row.resolved_at = now
+            row.last_run_id = run.id
+            summary["resolved"] += 1
+
+
 def reconcile_run(
     db_session, run, tasks: Iterable[Any], *, module_loaded: bool
 ) -> Dict[str, int]:
@@ -74,64 +141,20 @@ def reconcile_run(
     summary = {"opened": 0, "still_open": 0, "resolved": 0}
 
     # Drift is Enterprise. Without the module there are no profiles to drift
-    # from, so there is nothing to reconcile.
+    # from, so there is nothing to reconcile. A LIVE run is not drift either --
+    # it changed things because we told it to.
     if not module_loaded or not run.check_mode or not run.profile_id:
         return summary
 
     try:
         now = _now()
         observed = changed_tasks(tasks)
-        observed_names = {t["name"] for t in observed}
-
-        existing = {
-            row.task_name: row
-            for row in db_session.query(models.ConfigDriftFinding)
-            .filter(
-                models.ConfigDriftFinding.host_id == run.host_id,
-                models.ConfigDriftFinding.profile_id == run.profile_id,
-            )
-            .all()
-        }
+        existing = _load_findings(db_session, run)
 
         for task in observed:
-            row = existing.get(task["name"])
-            detail = (task["detail"] or None) and str(task["detail"])[:MAX_DETAIL_CHARS]
-            if row is None:
-                db_session.add(
-                    models.ConfigDriftFinding(
-                        host_id=run.host_id,
-                        profile_id=run.profile_id,
-                        profile_name=run.profile_name,
-                        task_name=task["name"],
-                        detail=detail,
-                        first_seen_at=now,
-                        last_seen_at=now,
-                        last_run_id=run.id,
-                    )
-                )
-                summary["opened"] += 1
-                continue
+            _record_sighting(db_session, run, existing, task, now, summary)
 
-            # Seen again. If it had been resolved, this is a REGRESSION: clear
-            # the resolution and restart the clock, because "drifting since"
-            # must mean the current episode, not the first one ever.
-            if row.resolved_at is not None:
-                row.resolved_at = None
-                row.first_seen_at = now
-                summary["opened"] += 1
-            else:
-                summary["still_open"] += 1
-            row.last_seen_at = now
-            row.last_run_id = run.id
-            row.detail = detail
-            row.profile_name = run.profile_name
-
-        if run.success:
-            for name, row in existing.items():
-                if name not in observed_names and row.resolved_at is None:
-                    row.resolved_at = now
-                    row.last_run_id = run.id
-                    summary["resolved"] += 1
+        _resolve_unseen(existing, {t["name"] for t in observed}, run, now, summary)
     except Exception:  # pylint: disable=broad-except
         # The run row is the more valuable record; losing drift bookkeeping is
         # recoverable on the next check, losing the run is not.

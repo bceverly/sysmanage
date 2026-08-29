@@ -398,7 +398,16 @@ async def apply_config_profile(
         executor = _resolve_executor(host, request)
         parameters = _build_parameters(executor, request)
 
+    # ONE id for both the envelope and the queue row, matching what
+    # proplus_dispatch does. The agent echoes the ENVELOPE's message_id back as
+    # `command_id`, so if the queue row carries a different id (which is what
+    # enqueue_message generates when you don't pass one) the result cannot be
+    # correlated to the command that produced it -- and config-profile results
+    # were silently dropped for exactly that reason. Found 2026-08-28 by a
+    # real round-trip.
+    command_id = str(uuid.uuid4())
     command_message = Message(
+        message_id=command_id,
         message_type=MessageType.COMMAND,
         data={
             "command_type": CommandType.APPLY_CONFIG_PROFILE,
@@ -407,6 +416,7 @@ async def apply_config_profile(
     )
     queue_ops.enqueue_message(
         message_type="command",
+        message_id=command_id,
         message_data=command_message.to_dict(),
         direction=QueueDirection.OUTBOUND,
         host_id=str(host.id),

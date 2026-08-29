@@ -204,6 +204,35 @@ def _run(session, cron=None, engines_loaded=True, queued_ok=True, dispatched=Non
         return tick.run_one_tick(), calls
 
 
+class TestDispatchOne:
+    """The enqueue itself -- TestTick stubs _dispatch_one, so without this the
+    only code that actually builds the command message goes untested."""
+
+    def test_the_queue_row_carries_the_envelope_id_so_results_correlate(self):
+        # REGRESSION (2026-08-28). A scheduled check-mode run whose result
+        # cannot be correlated produces no run row and therefore no drift
+        # finding: the schedule appears to work and the dashboard stays empty.
+        # That is exactly what a real round trip found.
+        queued = {}
+
+        class FakeQueue:
+            def enqueue_message(self, **kwargs):
+                queued.update(kwargs)
+
+        with patch.object(tick, "QueueOperations", FakeQueue):
+            assert tick._dispatch_one(None, host(), {"profile_name": "baseline"})
+
+        assert queued["message_id"] == queued["message_data"]["message_id"]
+
+    def test_a_host_that_refuses_the_command_is_reported_not_raised(self):
+        class FakeQueue:
+            def enqueue_message(self, **_kwargs):
+                raise RuntimeError("agent cannot run playbooks")
+
+        with patch.object(tick, "QueueOperations", FakeQueue):
+            assert tick._dispatch_one(None, host(), {}) is False
+
+
 class TestTick:
     def test_unlicensed_is_inert_not_an_error(self):
         session = _Session()

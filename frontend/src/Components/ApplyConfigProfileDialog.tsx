@@ -157,6 +157,27 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
     }
   };
 
+  // Three mutually exclusive states, named rather than nested inline: a
+  // stored profile, a DSC host, or everything else. Chained ternaries in JSX
+  // read as one condition until you count the colons.
+  let helpText: string;
+  if (profileId) {
+    helpText = t(
+      "configManagement.applyStoredChosen",
+      "This runs the saved profile as stored. The run is recorded against it.",
+    );
+  } else if (isDsc) {
+    helpText = t(
+      "configManagement.applyHelpDsc",
+      "This host applies configuration with DSC. Paste a JSON array of DSC resources.",
+    );
+  } else {
+    helpText = t(
+      "configManagement.applyHelpAnsible",
+      "This host applies configuration with ansible-core. Paste a playbook; it runs locally against this host only.",
+    );
+  }
+
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle>
@@ -165,20 +186,7 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           <Typography variant="body2" color="text.secondary">
-            {profileId
-              ? t(
-                  "configManagement.applyStoredChosen",
-                  "This runs the saved profile as stored. The run is recorded against it.",
-                )
-              : isDsc
-              ? t(
-                  "configManagement.applyHelpDsc",
-                  "This host applies configuration with DSC. Paste a JSON array of DSC resources.",
-                )
-              : t(
-                  "configManagement.applyHelpAnsible",
-                  "This host applies configuration with ansible-core. Paste a playbook; it runs locally against this host only.",
-                )}
+            {helpText}
           </Typography>
 
           {stored.length > 0 && (

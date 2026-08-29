@@ -35,6 +35,8 @@ from backend.persistence.models.core import GUID
 
 HOST_ID_FK = "host.id"
 CASCADE_DELETE = "CASCADE"
+# Referenced by versions, assignments and drift findings.
+PROFILE_ID_FK = "config_profile.id"
 CASCADE_ALL_DELETE_ORPHAN = "all, delete-orphan"
 
 
@@ -105,7 +107,7 @@ class ConfigProfileVersion(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     profile_id = Column(
         GUID(),
-        ForeignKey("config_profile.id", ondelete=CASCADE_DELETE),
+        ForeignKey(PROFILE_ID_FK, ondelete=CASCADE_DELETE),
         nullable=False,
         index=True,
     )
@@ -146,7 +148,7 @@ class ConfigProfileAssignment(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     profile_id = Column(
         GUID(),
-        ForeignKey("config_profile.id", ondelete=CASCADE_DELETE),
+        ForeignKey(PROFILE_ID_FK, ondelete=CASCADE_DELETE),
         nullable=False,
         index=True,
     )
@@ -220,7 +222,7 @@ class ConfigDriftFinding(Base):
     # it. Mirrors config_profile_run.profile_id.
     profile_id = Column(
         GUID(),
-        ForeignKey("config_profile.id", ondelete="SET NULL"),
+        ForeignKey(PROFILE_ID_FK, ondelete="SET NULL"),
         nullable=True,
         index=True,
     )

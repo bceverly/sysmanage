@@ -7,10 +7,12 @@ Comprehensive unit tests for WebSocket inbound message processor.
 Tests processing of messages received from agents.
 """
 
+from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import pytest
 
+from backend.websocket import inbound_processor as inbound
 from backend.websocket.inbound_processor import process_validated_message
 from backend.websocket.queue_manager import QueueDirection, QueueStatus
 
@@ -324,3 +326,102 @@ class TestInboundProcessorModuleImports:
         """Test QueueDirection enum values are accessible."""
         assert hasattr(QueueDirection, "INBOUND")
         assert hasattr(QueueDirection, "OUTBOUND")
+
+
+class TestResolveMessageHost:
+    """Which database an inbound message's handler runs against.
+
+    Getting this wrong does not raise: the handler runs happily against a
+    database that does not hold the host's data and reports success, so these
+    are the only thing standing between a routing regression and silent data
+    loss.
+    """
+
+    @staticmethod
+    def _db(by_id=None, by_fqdn=None):
+        """A bootstrap session that answers the two filters this code issues."""
+
+        class _Q:
+            def __init__(self, outer):
+                self._outer = outer
+                self._want = None
+
+            def filter(self, criterion):
+                col = criterion.left.name
+                self._want = ("id" if col == "id" else "fqdn", criterion.right.value)
+                return self
+
+            def first(self):
+                key, value = self._want
+                row = by_id if key == "id" else by_fqdn
+                return row if row is not None and value is not None else None
+
+        class _Db:
+            def query(self, _model):
+                return _Q(self)
+
+        return _Db()
+
+    def test_a_tenant_host_wins_over_a_stale_bootstrap_row_of_the_same_name(self):
+        # THE 2026-08-28 BUG. Moving a host into a tenant leaves its bootstrap
+        # row behind under the same fqdn, still marked approved. Resolving
+        # bootstrap-first returned that stale row with no tenant session, so
+        # command results ran against the wrong database and were discarded.
+        stale = SimpleNamespace(id="stale", fqdn="h.invalid")
+        real = SimpleNamespace(id="real", fqdn="h.invalid")
+        session = object()
+        with patch.object(
+            inbound, "_find_host_in_tenant_dbs", lambda hid, name: (real, session)
+        ):
+            host, tenant_session = inbound.resolve_message_host(
+                self._db(by_fqdn=stale), None, "h.invalid"
+            )
+        assert host is real, "the tenant row must win, not the stale bootstrap one"
+        assert tenant_session is session, "handler must run on the tenant session"
+
+    def test_bootstrap_still_answers_for_a_host_no_tenant_has(self):
+        # The fix must not strand genuinely untenanted hosts.
+        only = SimpleNamespace(id="b", fqdn="h.invalid")
+        with patch.object(
+            inbound, "_find_host_in_tenant_dbs", lambda hid, name: (None, None)
+        ):
+            host, tenant_session = inbound.resolve_message_host(
+                self._db(by_fqdn=only), None, "h.invalid"
+            )
+        assert host is only
+        assert tenant_session is None
+
+    def test_an_id_resolves_from_bootstrap_without_scanning_tenants(self):
+        # Ids are globally unique, so bootstrap-first is safe -- and skipping
+        # the scan is the whole reason the two lookups differ.
+        row = SimpleNamespace(id="abc", fqdn="h.invalid")
+
+        def _boom(*_a):
+            raise AssertionError("must not scan tenants when bootstrap has the id")
+
+        with patch.object(inbound, "_find_host_in_tenant_dbs", _boom):
+            host, tenant_session = inbound.resolve_message_host(
+                self._db(by_id=row), "abc", "h.invalid"
+            )
+        assert host is row
+        assert tenant_session is None
+
+    def test_an_id_not_in_bootstrap_is_looked_for_in_the_tenants(self):
+        row = SimpleNamespace(id="abc", fqdn="h.invalid")
+        session = object()
+        with patch.object(
+            inbound, "_find_host_in_tenant_dbs", lambda hid, name: (row, session)
+        ):
+            host, tenant_session = inbound.resolve_message_host(self._db(), "abc", None)
+        assert host is row
+        assert tenant_session is session
+
+    def test_nothing_anywhere_is_reported_as_unresolved(self):
+        with patch.object(
+            inbound, "_find_host_in_tenant_dbs", lambda hid, name: (None, None)
+        ):
+            host, tenant_session = inbound.resolve_message_host(
+                self._db(), "abc", "h.invalid"
+            )
+        assert host is None
+        assert tenant_session is None

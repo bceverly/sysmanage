@@ -252,6 +252,29 @@ class TestRemediation:
         assert out.queued is True
 
     @pytest.mark.asyncio
+    async def test_the_queue_row_carries_the_envelope_id_so_results_correlate(self):
+        # REGRESSION (2026-08-28). The agent echoes the ENVELOPE's message_id
+        # back as `command_id`; enqueue_message mints a DIFFERENT uuid unless
+        # you pass one. While those diverged, a remediation ran on the host and
+        # its result could never be matched back to the command -- so the
+        # finding stayed open and the dashboard reported drift that was fixed.
+        session = _Session(Host=[host()], ConfigProfile=[profile()])
+        queued = {}
+
+        class FakeQueue:
+            def enqueue_message(self, **kwargs):
+                queued.update(kwargs)
+
+        with patch.object(api, "QueueOperations", FakeQueue):
+            await api.remediate_drift(
+                api.RemediateRequest(host_id=str(HOST), profile_id=str(PROFILE)),
+                session,
+                user(SecurityRoles.RUN_SCRIPT),
+            )
+
+        assert queued["message_id"] == queued["message_data"]["message_id"]
+
+    @pytest.mark.asyncio
     async def test_queuing_is_not_reported_as_fixed(self):
         # Findings resolve when the next CHECK run says so. Claiming success
         # here would be a dashboard that lies about the fleet.

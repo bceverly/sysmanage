@@ -7935,6 +7935,29 @@ land later without migrating the rows recorded before it existed.
       tick, so a remediation cannot diverge from a normal apply. Inherits
       capability gating (`enqueue_message`) and maintenance windows
       (`outbound_processor`) rather than re-checking either.
+- [x] **Live four-engine round trip — VERIFIED 2026-08-29.** ansible-core
+      2.20.1, puppet 8.10.0, chef 18.11.11 and salt 3008.2 each run in check
+      mode on a real tenant-bound host and each produces a named drift
+      finding. It took six bugs to get there, every one of them silent — the
+      feature reported success while doing nothing, which is why unit tests
+      alone never caught them:
+        1. Dispatchers let `enqueue_message` mint its own queue id while the
+           agent echoes the ENVELOPE id, so no result could be correlated.
+        2. Inbound host resolution preferred the bootstrap DB on the hostname
+           fallback, so results for a tenant host ran against the wrong
+           database (a stale bootstrap row keeps the same fqdn AND stays
+           `approved`, so no guard caught it).
+        3. `success`/`exit_code` were read from the nested result; agents put
+           them on the envelope — every successful run recorded as a FAILURE.
+        4. Only the built-in ansible path echoed `check_mode`, so the three
+           spec-driven engines produced no findings at all.
+        5. Chef's `name_key` was `id`, which does not exist in a Chef report
+           entry — every task arrived unnamed, and unnamed tasks are skipped.
+        6. Puppet's check spec declared `json_file` for a YAML report, so the
+           reader fell back to "no output" and reported a clean host.
+      Fixes 5 and 6 needed a `yaml_file` result shape (a fifth generic shape)
+      and a Pro+ module release; the spec `report_glob` extension must now
+      agree with the declared format, enforced by a contract test.
 - [ ] Golden-host baseline over existing inventory (S5)
 - [ ] Alert rule condition `config_drift` (S3 — Pro+ rebuild + licence)
 - [ ] i18n/l10n

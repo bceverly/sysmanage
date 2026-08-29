@@ -120,6 +120,49 @@ class TestRecording:
         assert db.commits == 1
 
     @pytest.mark.asyncio
+    async def test_success_is_read_from_the_envelope_where_agents_put_it(self):
+        # THE REAL WIRE SHAPE, captured from live ansible-core, puppet, chef
+        # and salt results on 2026-08-28: `success` and `exit_code` sit on the
+        # ENVELOPE next to command_id, and appear nowhere inside `result`.
+        #
+        # This suite's GOOD fixture had them nested, so every test passed while
+        # production recorded all four engines' successful runs as FAILURES --
+        # a history panel showing a fleet-wide outage that never happened.
+        db = FakeSession()
+        wire = {
+            "changed": True,
+            "executor": "puppet",
+            "recap": {"ok": 1, "changed": 1, "failed": 0},
+            "tasks": [],
+        }
+        await handler.handle_config_profile_result(
+            db, conn(), message(wire, success=True, exit_code=0)
+        )
+        row = db.added[0]
+        assert (
+            row.success is True
+        ), "envelope success must win over its absence in result"
+        assert row.exit_code == 0
+
+    @pytest.mark.asyncio
+    async def test_an_envelope_failure_is_recorded_as_a_failure(self):
+        db = FakeSession()
+        wire = {"changed": False, "executor": "chef", "tasks": []}
+        await handler.handle_config_profile_result(
+            db, conn(), message(wire, success=False, exit_code=1)
+        )
+        assert db.added[0].success is False
+        assert db.added[0].exit_code == 1
+
+    @pytest.mark.asyncio
+    async def test_a_nested_success_still_counts_for_older_agents(self):
+        # The envelope is preferred, not required: an agent that reports the
+        # old way must not start recording every run as failed.
+        db = FakeSession()
+        await handler.handle_config_profile_result(db, conn(), message(GOOD))
+        assert db.added[0].success is True
+
+    @pytest.mark.asyncio
     async def test_an_unchanged_run_is_still_recorded(self):
         # The whole point of idempotency reporting; dropping these as boring
         # makes "nothing changed for three runs" unanswerable.

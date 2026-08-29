@@ -95,9 +95,16 @@ def _run_row(host_id, result: dict, message_data: dict, now):
         profile_name=result.get("profile_name") or message_data.get("profile_name"),
         executor=result.get("executor"),
         check_mode=bool(result.get("check_mode")),
-        success=bool(result.get("success")),
+        # ENVELOPE first, then the nested result. The agent puts `success` and
+        # `exit_code` on the envelope alongside `command_id` -- confirmed
+        # 2026-08-28 against live ansible-core, puppet, chef and salt results,
+        # none of which carry either key inside `result`. Reading only the
+        # nested dict recorded every successful run as a FAILURE, which is
+        # worse than losing the row: the history panel showed a fleet-wide
+        # outage that never happened.
+        success=bool(message_data.get("success", result.get("success"))),
         changed=bool(result.get("changed")),
-        exit_code=result.get("exit_code"),
+        exit_code=message_data.get("exit_code", result.get("exit_code")),
         tasks_ok=int(recap.get("ok") or 0),
         tasks_changed=int(recap.get("changed") or 0),
         tasks_failed=int(recap.get("failed") or 0),
@@ -115,9 +122,11 @@ def _run_row(host_id, result: dict, message_data: dict, now):
     )
 
 
-# NOSONAR S7503 - async is required, not decorative: message_handlers.py awaits
-# this, and it is one of a uniform async dispatch table of result handlers.
-async def handle_config_profile_result(db, connection, message_data: dict):
+# S7503: `async` is required, not decorative. message_handlers.py AWAITS this,
+# and it is one of a uniform async dispatch table of result handlers -- dropping
+# the keyword would break the call site. The marker has to be on the reported
+# line itself; on the comment above it, Sonar never sees it.
+async def handle_config_profile_result(db, connection, message_data: dict):  # NOSONAR
     """Record one application of a configuration profile.
 
     Never raises for a malformed payload: a result that cannot be stored must

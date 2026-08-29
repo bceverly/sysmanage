@@ -10,6 +10,7 @@ This module is the main entry point that re-exports handlers from sub-modules:
 - Core handlers (authentication, system_info, heartbeat) from message_handlers_core
 """
 
+import json
 import logging
 from datetime import datetime, timezone
 from typing import Optional
@@ -23,6 +24,7 @@ from backend.api.message_handlers_core import (
     validate_host_authentication,
 )
 from backend.i18n import _
+from backend.persistence import models
 from backend.persistence.models import Host, SoftwareInstallationLog
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
@@ -50,6 +52,47 @@ def command_type_of(message_data: dict) -> Optional[str]:
     return message_data.get("command_type") or (message_data.get("data") or {}).get(
         "command_type"
     )
+
+
+def command_type_from_queue(db, message_data: dict) -> Optional[str]:
+    """Recover the command type by correlating on ``command_id``.
+
+    Agents do NOT echo ``command_type`` on a result -- verified against a live
+    agent 2026-08-28, where every inbound result carried ``command_type: None``
+    and config-profile results were therefore dropped on the floor: marked
+    completed, no run row, no drift finding.
+
+    They DO echo ``command_id``, which is the ENVELOPE's message_id. So the
+    command type is recoverable from the command we sent, without needing every
+    deployed agent to be upgraded first.
+
+    THE INVARIANT THIS DEPENDS ON: a dispatcher must pass its envelope's
+    message_id to ``enqueue_message`` as ``message_id=``. That is not automatic
+    -- enqueue_message mints a fresh uuid when the caller omits it, and a queue
+    row carrying that second uuid is unreachable from the id the agent sends
+    back. The config-management dispatchers omitted it and every result they
+    produced was silently unmatchable. Each of the three now has a test pinning
+    the two ids together; a new dispatcher needs the same.
+
+    Returns None rather than raising: a result whose command we can no longer
+    find is not worth failing the queue processor over.
+    """
+    command_id = message_data.get("command_id")
+    if not command_id:
+        return None
+    try:
+        row = (
+            db.query(models.MessageQueue)
+            .filter(models.MessageQueue.message_id == str(command_id))
+            .first()
+        )
+        if row is None or not row.message_data:
+            return None
+        payload = json.loads(row.message_data)
+        return (payload.get("data") or {}).get("command_type")
+    except Exception:  # pylint: disable=broad-except
+        logger.debug("Could not correlate command_id %s to a command", command_id)
+        return None
 
 
 async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
@@ -92,7 +135,10 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
     # field in the payload: a successful run and a refused one look nothing
     # alike (the latter is just {"success": false, "reason": ...}), so shape
     # sniffing would silently drop every failure.
-    if command_type_of(message_data) == "apply_config_profile":
+    if (
+        command_type_of(message_data) == "apply_config_profile"
+        or command_type_from_queue(db, message_data) == "apply_config_profile"
+    ):
         logger.info("Detected config profile result, routing to handler")
         from backend.api.handlers import handle_config_profile_result
 
