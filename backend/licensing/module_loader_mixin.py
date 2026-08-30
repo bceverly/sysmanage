@@ -29,6 +29,27 @@ logger = get_logger("backend.licensing.module_loader")
 VERSION_CHECK_TIMEOUT = 30
 
 
+def _version_tuple(version: str):
+    """``"1.0.19"`` -> ``(1, 0, 19)``; non-numeric parts sort as -1.
+
+    Purely numeric comparison on purpose: a string compare puts "1.0.8" AFTER
+    "1.0.19", which is precisely the mistake that let a downgrade look like an
+    upgrade.
+    """
+    parts = []
+    for part in str(version or "").split("."):
+        try:
+            parts.append(int(part))
+        except ValueError:
+            parts.append(-1)
+    return tuple(parts)
+
+
+def _is_newer(candidate: str, current: str) -> bool:
+    """Whether ``candidate`` is a strictly later version than ``current``."""
+    return _version_tuple(candidate) > _version_tuple(current)
+
+
 class ModuleLoaderUpdatesMixin:
     """License-server version query + module/plugin update flow for ModuleLoader."""
 
@@ -137,7 +158,7 @@ class ModuleLoaderUpdatesMixin:
                 # Module not downloaded yet
                 logger.debug("Module %s not yet downloaded", module_code)
                 updates_available.append(module_code)
-            elif local_version != server_version:
+            elif _is_newer(server_version, local_version):
                 logger.info(
                     "Module %s has update: %s -> %s",
                     module_code,
@@ -145,6 +166,20 @@ class ModuleLoaderUpdatesMixin:
                     server_version,
                 )
                 updates_available.append(module_code)
+            elif local_version != server_version:
+                # The server is BEHIND this machine. That is normal after a
+                # local `make build`, which installs engines here without
+                # publishing them -- and the license server only re-indexes on
+                # its own update. Treating "different" as "newer" made this a
+                # DOWNGRADE: on 2026-08-29 five engines were rolled back to
+                # pre-signing builds that then refused to load.
+                logger.info(
+                    "Module %s is NEWER here than on the license server "
+                    "(%s > %s); not downgrading",
+                    module_code,
+                    local_version,
+                    server_version,
+                )
             elif server_hash:
                 # Same version - compare file hashes to detect rebuilds
                 local_hash = self._get_cached_module_hash(module_code)
@@ -265,6 +300,14 @@ class ModuleLoaderUpdatesMixin:
         This should be called during application startup after license validation.
         """
         logger.info("Checking for module updates...")
+        # Recorded rather than raised. A failed update must not stop a server
+        # BOOTING -- a transient network blip would take the whole product down,
+        # and since verification now happens before the swap the existing
+        # install is still intact and loadable. Operator TOOLING reads this and
+        # exits non-zero, because there a wall of errors followed by "success"
+        # is how a broken deployment gets shipped (observed 2026-08-29: `make
+        # migrate` printed five REFUSING-to-load errors and exited 0).
+        self.last_update_failures = []
         try:
             results = await self.update_modules()
             if results:
@@ -273,8 +316,10 @@ class ModuleLoaderUpdatesMixin:
                 if updated:
                     logger.info("Updated modules: %s", ", ".join(updated))
                 if failed:
-                    logger.warning("Failed to update modules: %s", ", ".join(failed))
+                    self.last_update_failures = sorted(failed)
+                    logger.error("Failed to update modules: %s", ", ".join(failed))
             else:
                 logger.info("All modules are up to date")
         except Exception as e:
+            self.last_update_failures = ["<update check raised>"]
             logger.exception("Module update check failed: %s", e)

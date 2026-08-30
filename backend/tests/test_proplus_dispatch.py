@@ -9,6 +9,7 @@ between the Pro+ Cython engines and the OSS message queue.
 
 # pylint: disable=missing-class-docstring,missing-function-docstring,redefined-outer-name
 
+import sys
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
@@ -242,24 +243,80 @@ class TestRouteProplusCommandResult:
 
 
 class TestBuildHostProvider:
-    def test_provider_returns_hosts(self):
-        # Stub db_maker that yields a mock session whose query returns a list.
-        mock_session = MagicMock()
-        mock_session.query.return_value.all.return_value = ["host1", "host2"]
+    """The fleet scheduler's host list.
+
+    These tests patch ``iter_host_databases``.  They previously stubbed only
+    ``db_maker``, which stopped describing the code when the provider was
+    changed to read EVERY tenant database -- and worse, the unpatched
+    ``iter_host_databases`` then opened real sessions, so the suite read the
+    developer's live database and its result depended on which hosts happened
+    to exist locally.
+    """
+
+    @staticmethod
+    def _session(hosts=None, raises=None):
+        session = MagicMock()
+        if raises is not None:
+            session.query.side_effect = raises
+        else:
+            session.query.return_value.all.return_value = list(hosts or [])
+        return session
+
+    def test_aggregates_hosts_across_every_tenant_database(self):
+        # A tenant's hosts live in that tenant's database, so a provider that
+        # read only the bootstrap one returned an empty fleet per tenant and a
+        # scheduled op "fired" against nothing while reporting success.
+        a, b = self._session(["h1"]), self._session(["h2", "h3"])
+        rows = [("tenant-a", "ta", a), ("tenant-b", "tb", b)]
+        with patch(
+            "backend.persistence.partitions.iter_host_databases",
+            return_value=iter(rows),
+        ):
+            result = proplus_dispatch.build_host_provider(MagicMock())()
+        assert result == ["h1", "h2", "h3"]
+
+    def test_one_unreachable_tenant_does_not_empty_the_fleet(self):
+        # The whole point of the per-database error isolation: a tenant whose
+        # database is down must cost only its own hosts.
+        bad = self._session(raises=RuntimeError("tenant db down"))
+        good = self._session(["h9"])
+        rows = [("tenant-bad", "tb", bad), ("tenant-good", "tg", good)]
+        with patch(
+            "backend.persistence.partitions.iter_host_databases",
+            return_value=iter(rows),
+        ):
+            result = proplus_dispatch.build_host_provider(MagicMock())()
+        assert result == ["h9"]
+
+    def test_sessions_are_closed_even_when_the_query_raises(self):
+        bad = self._session(raises=RuntimeError("boom"))
+        good = self._session(["h1"])
+        rows = [("a", "ta", bad), ("b", "tb", good)]
+        with patch(
+            "backend.persistence.partitions.iter_host_databases",
+            return_value=iter(rows),
+        ):
+            proplus_dispatch.build_host_provider(MagicMock())()
+        bad.close.assert_called_once()
+        good.close.assert_called_once()
+
+    def test_falls_back_to_db_maker_when_partitions_unavailable(self):
+        # Losing the partition helper must degrade to the single application
+        # database rather than losing the fleet entirely.
+        session = self._session(["only-host"])
 
         def fake_db_maker():
-            yield mock_session
+            yield session
 
-        provider = proplus_dispatch.build_host_provider(fake_db_maker)
-        result = provider()
-        assert result == ["host1", "host2"]
+        with patch.dict(sys.modules, {"backend.persistence.partitions": None}):
+            result = proplus_dispatch.build_host_provider(fake_db_maker)()
+        assert result == ["only-host"]
 
-    def test_provider_returns_empty_on_no_session(self):
+    def test_fallback_returns_empty_when_db_maker_yields_nothing(self):
         def empty_maker():
-            return  # not even a generator
-            yield
+            return  # deliberately not a generator that yields
+            yield  # pragma: no cover
 
-        provider = proplus_dispatch.build_host_provider(empty_maker)
-        # Empty maker yields nothing → provider returns []
-        result = provider()
+        with patch.dict(sys.modules, {"backend.persistence.partitions": None}):
+            result = proplus_dispatch.build_host_provider(empty_maker)()
         assert result == []

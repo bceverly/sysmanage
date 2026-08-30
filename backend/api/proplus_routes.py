@@ -23,6 +23,7 @@ from backend.licensing.license_service import (  # pylint: disable=unused-import
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.persistence.partitions import get_tenant_db
 from backend.services.email_service import email_service
 from backend.utils.verbosity_logger import get_logger
 
@@ -84,6 +85,12 @@ def mount_vulnerability_routes(app: FastAPI) -> bool:
     try:
         with _cython_compat():
             router = vuln_engine.get_vulnerability_router(
+                # SELF-ROUTING engine. It resolves get_tenant_db (host data)
+                # and get_shared_db (the CVE catalog) internally and ignores what we
+                # pass here -- the value below is used ONLY as the fallback if
+                # `backend.persistence.partitions` cannot be imported, in which
+                # case get_db is exactly the right answer. So this is correct as
+                # written, not the multi-tenancy bug the other mounts had.
                 db_dependency=Depends(get_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
@@ -128,6 +135,12 @@ def mount_advisory_routes(app: FastAPI) -> bool:
     try:
         with _cython_compat():
             router = advisory_engine.get_advisory_router(
+                # SELF-ROUTING engine. It resolves get_tenant_db (host data)
+                # and get_shared_db (the advisory catalog) internally and ignores what we
+                # pass here -- the value below is used ONLY as the fallback if
+                # `backend.persistence.partitions` cannot be imported, in which
+                # case get_db is exactly the right answer. So this is correct as
+                # written, not the multi-tenancy bug the other mounts had.
                 db_dependency=Depends(get_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
@@ -173,6 +186,12 @@ def mount_lifecycle_routes(app: FastAPI) -> bool:
     try:
         with _cython_compat():
             router = lifecycle_engine.get_lifecycle_router(
+                # SELF-ROUTING engine. It resolves get_tenant_db (host data)
+                # and get_shared_db (the OS-lifecycle catalog) internally and ignores what we
+                # pass here -- the value below is used ONLY as the fallback if
+                # `backend.persistence.partitions` cannot be imported, in which
+                # case get_db is exactly the right answer. So this is correct as
+                # written, not the multi-tenancy bug the other mounts had.
                 db_dependency=Depends(get_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
@@ -438,7 +457,7 @@ def mount_provisioning_routes(app: FastAPI) -> bool:
     # DID support.  Same defensive shape as the ``agent_install_runcmd``
     # hasattr guard in provisioning_bundle.py.
     base_kwargs = {
-        "db_dependency": Depends(get_db),
+        "db_dependency": Depends(get_tenant_db),
         "auth_dependency": Depends(get_current_user),
         "feature_gate": _feature_dependency,
         "module_gate": _module_dependency,
@@ -509,7 +528,7 @@ def mount_health_routes(app: FastAPI) -> bool:
     try:
         with _cython_compat():
             router = health_engine.get_health_router(
-                db_dependency=Depends(get_db),
+                db_dependency=Depends(get_tenant_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
                 module_gate=_module_dependency,
@@ -554,7 +573,7 @@ def mount_compliance_routes(app: FastAPI) -> bool:
     try:
         with _cython_compat():
             router = compliance_engine.get_compliance_router(
-                db_dependency=Depends(get_db),
+                db_dependency=Depends(get_tenant_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
                 module_gate=_module_dependency,
@@ -599,7 +618,7 @@ def mount_alerting_routes(app: FastAPI) -> bool:
     try:
         with _cython_compat():
             router = alerting_engine.get_alerting_router(
-                db_dependency=Depends(get_db),
+                db_dependency=Depends(get_tenant_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
                 module_gate=_module_dependency,
@@ -645,7 +664,7 @@ def mount_reporting_routes(app: FastAPI) -> bool:
     try:
         with _cython_compat():
             router = reporting_engine.get_reporting_router(
-                db_dependency=Depends(get_db),
+                db_dependency=Depends(get_tenant_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
                 module_gate=_module_dependency,
@@ -723,7 +742,7 @@ def mount_federation_site_routes(app: FastAPI) -> bool:
     try:
         with _cython_compat():
             router = site_engine.get_federation_site_router(
-                db_dependency=Depends(get_db),
+                db_dependency=Depends(get_tenant_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
                 module_gate=_module_dependency,
@@ -777,7 +796,7 @@ def mount_federation_controller_routes(app: FastAPI) -> bool:
     try:
         with _cython_compat():
             router = federation_engine.get_federation_controller_router(
-                db_dependency=Depends(get_db),
+                db_dependency=Depends(get_tenant_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
                 module_gate=_module_dependency,

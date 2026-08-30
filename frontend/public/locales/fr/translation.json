@@ -3511,6 +3511,41 @@
     "remediateFailed": "Impossible de mettre en file d'attente la remédiation",
     "seenSince": "Premièrement observé",
     "title": "Configuration en dérive",
-    "view": "Afficher"
+    "view": "Afficher",
+    "days_one": "{{count}} jour",
+    "days_other": "{{count}} jours"
+  },
+  "baselineDiff": {
+    "category": {
+      "certificates": "Certificats",
+      "firewall": "Pare-feu",
+      "groups": "Groupes",
+      "interfaces": "Interfaces réseau",
+      "packages": "Paquets",
+      "repositories": "Répertoires",
+      "storage": "Stockage",
+      "users": "Utilisateurs"
+    },
+    "categoryMatches": "Cette catégorie correspond à l'hôte de référence",
+    "compare": "Comparer",
+    "description": "Comparez cet hôte à un hôte connu et bon à partir de l'inventaire déjà collecté. Utile lorsque aucun profil n'existe encore et qu'un hôte fonctionne tandis qu'un autre non.",
+    "differentCount": "{{count}} différent(s)",
+    "differentTitle": "Présents sur les deux, mais différents",
+    "error": "La comparaison a échoué",
+    "extraCount": "{{count}} seulement ici",
+    "extraTitle": "Sur cet hôte, pas sur la référence",
+    "field": "Champ",
+    "identical": "Cet hôte correspond à {{reference}} dans toutes les catégories.",
+    "matches": "Correspondances",
+    "missingCount": "{{count}} manquant(s)",
+    "missingTitle": "Sur la référence, pas sur cet hôte",
+    "name": "Nom",
+    "noOtherHosts": "Aucun autre hôte à comparer pour le moment",
+    "reference": "Hôte de référence",
+    "referenceHost": "Hôte de référence",
+    "summary": "Différence(s) de {{count}} par rapport à {{reference}}.",
+    "thisHost": "Cet hôte",
+    "title": "Comparer à un hôte de référence",
+    "truncated": "Seules les premières entrées sont listées ; les comptes ci-dessus sont exacts"
   }
 }

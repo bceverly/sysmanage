@@ -3511,6 +3511,41 @@
     "remediateFailed": "Kon het herstel in de wachtrij niet plaatsen",
     "seenSince": "Eerst gezien",
     "title": "Configuratieverschuiving",
-    "view": "Bekijken"
+    "view": "Bekijken",
+    "days_one": "{{count}} dag",
+    "days_other": "{{count}} dagen"
+  },
+  "baselineDiff": {
+    "category": {
+      "certificates": "Certificaten",
+      "firewall": "Firewall",
+      "groups": "Groepen",
+      "interfaces": "Netwerkinterfaces",
+      "packages": "Pakketten",
+      "repositories": "Repositories",
+      "storage": "Opslag",
+      "users": "Gebruikers"
+    },
+    "categoryMatches": "Deze categorie komt overeen met de referentiehost.",
+    "compare": "Vergelijken",
+    "description": "Vergelijk deze host met een bekende goede host uit de reeds verzamelde inventaris. Handig wanneer er nog geen profiel bestaat en één host werkt terwijl een andere dat niet doet.",
+    "differentCount": "{{count}} verschillend",
+    "differentTitle": "Op beide aanwezig, maar verschillend",
+    "error": "Vergelijking mislukt",
+    "extraCount": "Alleen hier {{count}}",
+    "extraTitle": "Op deze host, niet op de referentie",
+    "field": "Veld",
+    "identical": "Deze host komt overeen met {{reference}} in elke categorie.",
+    "matches": " overeenkomende items",
+    "missingCount": "{{count}} ontbrekend",
+    "missingTitle": "Op de referentie, niet op deze host",
+    "name": "Naam",
+    "noOtherHosts": "Er is geen andere host om mee te vergelijken.",
+    "reference": "Referentie",
+    "referenceHost": "Referentiehost",
+    "summary": "{{count}} verschil(en) van {{reference}}.",
+    "thisHost": "Deze host",
+    "title": "Vergelijk met referentiehost",
+    "truncated": "Alleen de eerste items worden vermeld; de bovenstaande tellen zijn exact."
   }
 }

@@ -27,6 +27,7 @@ from backend.licensing.module_signature import (
 )
 from backend.persistence import db as db_module
 from backend.persistence.models import ProPlusPluginCache
+from backend.licensing.module_loader_mixin import _is_newer
 from backend.utils.verbosity_logger import get_logger
 
 logger = get_logger("backend.licensing.plugin_bundle_loader")
@@ -395,7 +396,7 @@ class PluginBundleLoader:
             if local_version is None:
                 logger.debug("Plugin %s not yet downloaded", module_code)
                 updates_available.append(module_code)
-            elif local_version != server_version:
+            elif _is_newer(server_version, local_version):
                 logger.info(
                     "Plugin %s has update: %s -> %s",
                     module_code,
@@ -403,6 +404,19 @@ class PluginBundleLoader:
                     server_version,
                 )
                 updates_available.append(module_code)
+            elif local_version != server_version:
+                # Same rule as the engine loader: the license server being
+                # BEHIND this machine is normal after a local `make build`, and
+                # rolling forward to its older bundle is a downgrade. On
+                # 2026-08-29 that pulled pre-signing plugin bundles which were
+                # then refused, leaving those engines with no UI.
+                logger.info(
+                    "Plugin %s is NEWER here than on the license server "
+                    "(%s > %s); not downgrading",
+                    module_code,
+                    local_version,
+                    server_version,
+                )
             elif server_hash:
                 local_hash = self._get_cached_plugin_hash(module_code)
                 if local_hash and local_hash.lower() != server_hash.lower():

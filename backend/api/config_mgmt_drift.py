@@ -39,6 +39,7 @@ from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import config_mgmt_dispatch as dispatch
+from backend.services import config_mgmt_baseline as baseline
 from backend.services import config_mgmt_drift as drift
 from backend.websocket.messages import CommandType, Message, MessageType
 from backend.websocket.queue_enums import QueueDirection
@@ -266,3 +267,77 @@ async def remediate_drift(
         # agent has reported would be a dashboard that lies.
         message=_("Remediation was queued for this host"),
     )
+
+
+class BaselineCategoryCounts(BaseModel):
+    """Exact totals, even when the item lists below are capped."""
+
+    missing: int
+    extra: int
+    different: int
+    reference_total: int
+    target_total: int
+
+
+class BaselineCategoryResult(BaseModel):
+    """One inventory category compared between two hosts."""
+
+    missing: List[dict]
+    extra: List[dict]
+    different: List[dict]
+    counts: BaselineCategoryCounts
+    truncated: bool
+
+
+class BaselineDiffResponse(BaseModel):
+    """How a target host differs from a reference host."""
+
+    reference_host_id: str
+    reference_fqdn: Optional[str] = None
+    host_id: str
+    host_fqdn: Optional[str] = None
+    categories: dict
+    total_differences: int
+    identical: bool
+
+
+@router.get(
+    "/hosts/{host_id}/config-management/baseline-diff",
+    response_model=BaselineDiffResponse,
+)
+async def compare_against_baseline(
+    host_id: str,
+    reference_host_id: str,
+    categories: Optional[str] = None,
+    db_session: Session = Depends(get_tenant_db),
+):
+    """How this host differs from a reference ("golden") host.
+
+    The other kind of drift: ``/drift`` answers "does this host match its
+    assigned profile", this answers "does this host match that host" -- which is
+    what an operator reaches for when there is no profile yet and staging works
+    while production does not.
+
+    ``categories`` is an optional comma-separated subset; omit it to compare
+    every category. Bounded to inventory the agent already reports, so it needs
+    no new collection -- see ``config_mgmt_baseline`` for why that boundary is
+    deliberate.
+    """
+    wanted = categories.split(",") if categories else None
+    try:
+        return baseline.compare_hosts(
+            db_session, reference_host_id, host_id, categories=wanted
+        )
+    except baseline.BaselineError as exc:
+        raise HTTPException(status_code=exc.status, detail=exc.message) from exc
+
+
+@router.get("/config-management/baseline-categories", response_model=List[str])
+async def list_baseline_categories():
+    """The comparison categories this server supports.
+
+    Served rather than hard-coded in the UI so a category added server-side
+    appears without a frontend release, and so the UI cannot offer one the
+    server would refuse.
+    """
+    return list(baseline.CATEGORIES)

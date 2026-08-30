@@ -433,6 +433,13 @@ class TestDownloadAndCacheModule:
         ), patch(
             "backend.licensing.module_loader.aiohttp.ClientSession",
             return_value=_FakeAioSession(response),
+        ), patch(
+            # Authenticity is now checked during EXTRACTION, before the staging
+            # dir is swapped in, so this fixture's unsigned bundle no longer
+            # reaches the cache on its own. Stubbing the verifier keeps the test
+            # about download/extract/cache; signature behaviour has its own
+            # tests in test_licensing_module_update_safety.py.
+            "backend.licensing.module_loader.verify_module_dir"
         ), patch.object(
             loader, "_save_module_to_cache"
         ) as save_cache, patch.object(

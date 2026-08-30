@@ -48,7 +48,7 @@ from typing import Any, Dict, List
 
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
-from backend.persistence.db import get_db
+from backend.persistence.partitions import iter_host_databases
 from backend.services import config_mgmt_dispatch as dispatch
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
@@ -163,34 +163,14 @@ def _dispatch_one(db_session, host, parameters: Dict[str, Any]) -> bool:
         return False
 
 
-def run_one_tick() -> Dict[str, Any]:
-    """Fire every due assignment once. Never raises.
+def _tick_one_database(db_session, automation, now, summary) -> None:
+    """Run the tick against ONE database. Never raises.
 
-    Public rather than underscore-private so an operator-facing endpoint or a
-    test can drive exactly one tick without waiting a minute for the loop.
+    Isolated per database so one unreachable tenant cannot stop every other
+    tenant's schedules for the rest of the tick.
     """
-    summary: Dict[str, Any] = {
-        "due": 0,
-        "queued": 0,
-        "skipped_hosts": 0,
-        "no_cron_engine": False,
-    }
-
-    if module_loader.get_module("config_management_engine") is None:
-        # Assignments cannot exist without the module; nothing to do.
-        return summary
-
-    automation = module_loader.get_module("automation_engine")
-    if automation is None:
-        # Without a cron parser nothing can be judged due. Reported rather
-        # than guessed at -- firing everything would be worse than firing
-        # nothing.
-        summary["no_cron_engine"] = True
-        return summary
-
-    db_session = next(get_db())
     try:
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        due_here = 0
         assignments = (
             db_session.query(models.ConfigProfileAssignment)
             .join(
@@ -211,6 +191,7 @@ def run_one_tick() -> Dict[str, Any]:
             if not _is_due(automation, assignment, now):
                 continue
             summary["due"] += 1
+            due_here += 1
 
             profile = (
                 db_session.query(models.ConfigProfile)
@@ -242,13 +223,53 @@ def run_one_tick() -> Dict[str, Any]:
 
             assignment.last_applied_at = now
 
-        if summary["due"]:
+        # Per-DATABASE, not per-tick: ``summary`` accumulates across every
+        # tenant, so testing it here would commit this session on the strength
+        # of another tenant's work.
+        if due_here:
             db_session.commit()
     except Exception:  # pylint: disable=broad-except
         logger.exception("Config profile assignment tick failed")
         db_session.rollback()
-    finally:
-        db_session.close()
+
+
+def run_one_tick() -> Dict[str, Any]:
+    """Fire every due assignment once. Never raises.
+
+    Public rather than underscore-private so an operator-facing endpoint or a
+    test can drive exactly one tick without waiting a minute for the loop.
+    """
+    summary: Dict[str, Any] = {
+        "due": 0,
+        "queued": 0,
+        "skipped_hosts": 0,
+        "no_cron_engine": False,
+    }
+
+    if module_loader.get_module("config_management_engine") is None:
+        # Assignments cannot exist without the module; nothing to do.
+        return summary
+
+    automation = module_loader.get_module("automation_engine")
+    if automation is None:
+        # Without a cron parser nothing can be judged due. Reported rather
+        # than guessed at -- firing everything would be worse than firing
+        # nothing.
+        summary["no_cron_engine"] = True
+        return summary
+
+    # EVERY database, not just the bootstrap one. A tenant host's assignments,
+    # profiles and hosts all live in that tenant's database, so a tick reading
+    # only ``get_db()`` finds zero assignments and reports a clean due=0 --
+    # schedules silently never fire for anyone in multi-tenancy, and nothing
+    # errors anywhere. ``iter_host_databases`` is the established pattern for
+    # server-wide background operations; the CALLER closes each session.
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    for _label, _tenant, db_session in iter_host_databases():
+        try:
+            _tick_one_database(db_session, automation, now, summary)
+        finally:
+            db_session.close()
     return summary
 
 

@@ -192,9 +192,15 @@ def _run(session, cron=None, engines_loaded=True, queued_ok=True, dispatched=Non
         calls.append((host_row.id, parameters))
         return queued_ok
 
+    sessions = session if isinstance(session, list) else [session]
+
+    def fake_iter():
+        for i, one in enumerate(sessions):
+            yield (f"db{i}", None, one)
+
     with patch.object(
         tick.module_loader, "get_module", lambda name: mods.get(name)
-    ), patch.object(tick, "get_db", lambda: iter([session])), patch.object(
+    ), patch.object(tick, "iter_host_databases", fake_iter), patch.object(
         tick, "_dispatch_one", fake_dispatch
     ), patch.object(
         tick,
@@ -344,3 +350,51 @@ class TestHostResolution:
         session = _Session(hosts=[host()])
         got = tick._hosts_for(session, assignment(host_id=None))
         assert got == []
+
+
+class TestEveryTenantIsVisited:
+    """The tick is a server-wide operation, so it must visit EVERY database.
+
+    A tenant host's assignments, profiles and hosts all live in that tenant's
+    database. A tick that reads only the bootstrap session finds zero
+    assignments and reports a clean `due=0` -- so scheduled applies silently
+    never fire for anyone in multi-tenancy, and nothing anywhere errors.
+    Found 2026-08-29 while verifying S3, in code written the day before.
+    """
+
+    def test_assignments_in_a_second_database_are_not_missed(self):
+        empty = _Session()
+        tenant = _Session(hosts=[host()], assignments=[assignment()], profile=profile())
+        summary, calls = _run([empty, tenant])
+        assert summary["due"] == 1, "the tenant database's assignment was skipped"
+        assert summary["queued"] == 1
+        assert calls and calls[0][0] == HOST_ID
+
+    def test_every_session_is_closed_even_the_empty_ones(self):
+        # iter_host_databases documents that the CALLER closes each session;
+        # leaking one per tick exhausts the pool over a long-running server.
+        first, second = _Session(), _Session()
+        _run([first, second])
+        assert first.closed and second.closed
+
+    def test_one_tenants_failure_does_not_stop_the_others(self):
+        class _Exploding(_Session):
+            def query(self, entity):
+                raise RuntimeError("this tenant's database is unreachable")
+
+        broken = _Exploding()
+        healthy = _Session(
+            hosts=[host()], assignments=[assignment()], profile=profile()
+        )
+        summary, _calls = _run([broken, healthy])
+        assert summary["queued"] == 1, "a broken tenant must not stop the rest"
+        assert broken.closed and healthy.closed
+
+    def test_a_database_with_no_due_work_is_not_committed(self):
+        # summary accumulates across tenants, so committing on it would write
+        # this session on the strength of another tenant's work.
+        idle = _Session()
+        busy = _Session(hosts=[host()], assignments=[assignment()], profile=profile())
+        _run([idle, busy])
+        assert idle.committed == 0
+        assert busy.committed == 1

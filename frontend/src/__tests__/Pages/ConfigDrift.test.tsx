@@ -65,6 +65,20 @@ vi.mock("../../Services/configManagementService", () => ({
   getDriftingHosts: vi.fn(),
   getHostDrift: vi.fn(),
   remediateDrift: vi.fn(),
+  // Used by the embedded BaselineDiffPanel. Resolved rather than left
+  // undefined so the panel settles instead of leaving a pending promise that
+  // updates state after the test ends.
+  getBaselineCategories: vi.fn().mockResolvedValue([]),
+  getBaselineDiff: vi.fn(),
+}));
+
+// The panel loads its own candidate reference hosts.
+vi.mock("../../Services/scripts", () => ({
+  // NAMED export, matching the real module. Mocking a `default` here made the
+  // suite pass while the app failed to mount at all ("does not provide an
+  // export named 'default'") -- the mock invented an API the module has not
+  // got.
+  scriptsService: { getActiveHosts: vi.fn().mockResolvedValue([]) },
 }));
 
 import { hasPermission } from "../../Services/permissions";

@@ -24,7 +24,8 @@ from backend.api.proplus_routes_common import (
 from backend.auth.auth_bearer import get_current_user
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
-from backend.persistence.db import get_db, get_session_local
+from backend.persistence.db import get_session_local
+from backend.persistence.partitions import get_tenant_db
 
 
 def mount_audit_routes(app: FastAPI) -> bool:
@@ -56,7 +57,7 @@ def mount_audit_routes(app: FastAPI) -> bool:
         # the module does NOT wrap them internally.
         with _cython_compat():
             router = audit_engine.get_audit_router(
-                db_dependency=Depends(get_db),
+                db_dependency=Depends(get_tenant_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
                 module_gate=_module_dependency,
@@ -101,7 +102,7 @@ def mount_secrets_routes(app: FastAPI) -> bool:
     try:
         with _cython_compat():
             router = secrets_engine.get_secrets_router(
-                db_dependency=Depends(get_db),
+                db_dependency=Depends(get_tenant_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
                 module_gate=_module_dependency,
@@ -148,7 +149,7 @@ def mount_container_routes(app: FastAPI) -> bool:
     try:
         with _cython_compat():
             router = container_engine.get_container_router(
-                db_dependency=Depends(get_db),
+                db_dependency=Depends(get_tenant_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
                 module_gate=_module_dependency,
@@ -194,7 +195,7 @@ def mount_av_management_routes(app: FastAPI) -> bool:
     try:
         with _cython_compat():
             router = av_management_engine.get_av_management_router(
-                db_dependency=Depends(get_db),
+                db_dependency=Depends(get_tenant_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
                 module_gate=_module_dependency,
@@ -244,7 +245,7 @@ def mount_firewall_orchestration_routes(app: FastAPI) -> bool:
     try:
         with _cython_compat():
             router = firewall_orchestration_engine.get_firewall_orchestration_router(
-                db_dependency=Depends(get_db),
+                db_dependency=Depends(get_tenant_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
                 module_gate=_module_dependency,
@@ -289,7 +290,7 @@ def mount_automation_routes(app: FastAPI) -> bool:
     try:
         with _cython_compat():
             router = automation_engine.get_automation_router(
-                db_dependency=Depends(get_db),
+                db_dependency=Depends(get_tenant_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
                 module_gate=_module_dependency,
@@ -413,7 +414,7 @@ def mount_fleet_routes(app: FastAPI) -> bool:
     try:
         with _cython_compat():
             router = fleet_engine.get_fleet_router(
-                db_dependency=Depends(get_db),
+                db_dependency=Depends(get_tenant_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
                 module_gate=_module_dependency,
@@ -485,7 +486,7 @@ def mount_virtualization_routes(app: FastAPI) -> bool:
     try:
         with _cython_compat():
             router = virtualization_engine.get_virtualization_router(
-                db_dependency=Depends(get_db),
+                db_dependency=Depends(get_tenant_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
                 module_gate=_module_dependency,
@@ -557,7 +558,7 @@ def mount_observability_routes(app: FastAPI) -> bool:
     try:
         with _cython_compat():
             router = observability_engine.get_observability_router(
-                db_dependency=Depends(get_db),
+                db_dependency=Depends(get_tenant_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
                 module_gate=_module_dependency,

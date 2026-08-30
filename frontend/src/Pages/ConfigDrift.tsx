@@ -19,6 +19,9 @@ import Typography from '@mui/material/Typography';
 import BuildIcon from '@mui/icons-material/Build';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 
+import Divider from '@mui/material/Divider';
+
+import BaselineDiffPanel from '../Components/BaselineDiffPanel';
 import { formatUTCTimestamp } from '../utils/dateUtils';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import {
@@ -54,6 +57,7 @@ const ConfigDrift: React.FC = () => {
     const [detailHost, setDetailHost] = useState<ConfigDriftHostSummary | null>(null);
     const [findings, setFindings] = useState<ConfigDriftFinding[]>([]);
     const [findingsError, setFindingsError] = useState<string | null>(null);
+
 
     const [confirmTarget, setConfirmTarget] = useState<{
         host: ConfigDriftHostSummary;
@@ -308,6 +312,13 @@ const ConfigDrift: React.FC = () => {
                             </Box>
                         ))}
                     </Stack>
+
+                    {detailHost && (
+                        <>
+                            <Divider sx={{ my: 3 }} />
+                            <BaselineDiffPanel hostId={detailHost.host_id} />
+                        </>
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setDetailHost(null)}>

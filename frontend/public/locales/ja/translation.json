@@ -3511,6 +3511,41 @@
     "remediateFailed": "修復キューに追加できません",
     "seenSince": "初めて確認された",
     "title": "構成の漂白",
-    "view": "表示"
+    "view": "表示",
+    "days_one": "{{count}}日",
+    "days_other": "{{count}}日間"
+  },
+  "baselineDiff": {
+    "category": {
+      "certificates": "証明書",
+      "firewall": "ファイアウォール",
+      "groups": "グループ",
+      "interfaces": "ネットワークインターフェイス",
+      "packages": "パッケージ",
+      "repositories": "リポジトリ",
+      "storage": "ストレージ",
+      "users": "ユーザー"
+    },
+    "categoryMatches": "このカテゴリは参照ホストと一致します。",
+    "compare": "比較",
+    "description": "このホストを既に収集した在庫の既知の良好なホストと比較します。プロファイルがまだない場合や、1つのホストは動作するが別のホストは動作しない場合に役立ちます。",
+    "differentCount": "{{count}}が異なります",
+    "differentTitle": "両方に存在するが異なる",
+    "error": "比較に失敗しました",
+    "extraCount": "ここだけ{{count}}です",
+    "extraTitle": "このホストにはあるが参照にはない",
+    "field": "フィールド",
+    "identical": "このホストは、すべてのカテゴリで{{reference}}と完全に一致します。",
+    "matches": "一致",
+    "missingCount": "{{count}}が欠落しています",
+    "missingTitle": "参照にはあるがこのホストにはない",
+    "name": "名前",
+    "noOtherHosts": "比較する他のホストがありません。",
+    "reference": "参照",
+    "referenceHost": "参照ホスト",
+    "summary": "{{count}}の差分(差は) {{reference}} です。",
+    "thisHost": "このホスト",
+    "title": "参照ホストと比較",
+    "truncated": "最初のエントリのみがリストされます。上記のカウントは正確です。"
   }
 }

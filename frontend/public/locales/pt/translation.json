@@ -3511,6 +3511,41 @@
     "remediateFailed": "Não foi possível enfileirar a correção",
     "seenSince": "Primeiro visto",
     "title": "Desvio de Configuração",
-    "view": "Visualizar"
+    "view": "Visualizar",
+    "days_one": "{{count}} dia",
+    "days_other": "{{count}} dias"
+  },
+  "baselineDiff": {
+    "category": {
+      "certificates": "Certificados",
+      "firewall": "Firewall",
+      "groups": "Grupos",
+      "interfaces": "Interfaces de rede",
+      "packages": "Pacotes",
+      "repositories": "Repositórios",
+      "storage": "Armazenamento",
+      "users": "Usuários"
+    },
+    "categoryMatches": "Esta categoria corresponde ao host de referência.",
+    "compare": "Comparar",
+    "description": "Compare este host com um host conhecido bom a partir do inventário já coletado. Útil quando não há perfil ainda e um host funciona enquanto outro não.",
+    "differentCount": "{{count}} diferente(s)",
+    "differentTitle": "Presentes em ambos, mas diferentes",
+    "error": "Comparação falhou",
+    "extraCount": "{{count}} apenas aqui",
+    "extraTitle": "Neste host, não no host de referência",
+    "field": "Campo",
+    "identical": "Este host corresponde a {{reference}} em todas as categorias.",
+    "matches": "Corresponde",
+    "missingCount": "{{count}} faltando(s)",
+    "missingTitle": "No host de referência, não neste host",
+    "name": "Nome",
+    "noOtherHosts": "Não há outro host para comparar ainda.",
+    "reference": "Host de referência",
+    "referenceHost": "Host de referência",
+    "summary": "{{count}} diferença(s) de {{reference}}.",
+    "thisHost": "Este host",
+    "title": "Comparar a um host de referência",
+    "truncated": "Apenas os primeiros registros são listados; as contagens acima são exatas."
   }
 }

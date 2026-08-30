@@ -3511,6 +3511,41 @@
     "remediateFailed": "치유 작업을 큐에 추가할 수 없습니다.",
     "seenSince": "첫 번째 관찰",
     "title": "구성 편향",
-    "view": "보기"
+    "view": "보기",
+    "days_one": "{{count}} 일",
+    "days_other": "{{count}} 일"
+  },
+  "baselineDiff": {
+    "category": {
+      "certificates": "인증서",
+      "firewall": "방화벽",
+      "groups": "그룹",
+      "interfaces": "네트워크 인터페이스",
+      "packages": "패키지",
+      "repositories": "리포지토리",
+      "storage": "저장소",
+      "users": "사용자"
+    },
+    "categoryMatches": "이 카테고리는 참조 호스트와 일치합니다.",
+    "compare": "비교",
+    "description": "이 호스트를 이미 수집한 인벤토리에 알려진 좋은 호스트와 비교합니다. 프로필이 아직 없는 경우, 한 호스트는 작동하지만 다른 호스트는 그렇지 않은 경우에 유용합니다.",
+    "differentCount": "{{count}}이(가) 다릅니다.",
+    "differentTitle": "양쪽 모두에 있지만 다릅니다",
+    "error": "비교 실패",
+    "extraCount": "이곳에만 {{count}}",
+    "extraTitle": "이 호스트에는 있지만 참조에는 없는",
+    "field": "필드",
+    "identical": "이 호스트는 모든 범주에서 {{reference}}과 일치합니다.",
+    "matches": "매치",
+    "missingCount": "{{count}}이(가) 누락되었습니다.",
+    "missingTitle": "참조에는 있지만 이 호스트에는 없는",
+    "name": "이름",
+    "noOtherHosts": "비교할 다른 호스트가 아직 없습니다.",
+    "reference": "참조",
+    "referenceHost": "참조 호스트",
+    "summary": "{{count}}과 {{reference}}의 차이점(들)",
+    "thisHost": "이 호스트",
+    "title": "참조 호스트와 비교",
+    "truncated": "첫 번째 항목만 나열됩니다. 위의 카운트는 정확합니다."
   }
 }

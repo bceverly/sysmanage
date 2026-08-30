@@ -3511,6 +3511,41 @@
     "remediateFailed": "Impossibile mettere in coda la rimediazione",
     "seenSince": "Prima vista",
     "title": "Drift di configurazione",
-    "view": "Visualizza"
+    "view": "Visualizza",
+    "days_one": "{{count}} giorno",
+    "days_other": "{{count}} giorni"
+  },
+  "baselineDiff": {
+    "category": {
+      "certificates": "Certificati",
+      "firewall": "Firewall",
+      "groups": "Gruppi",
+      "interfaces": "Interfacce di rete",
+      "packages": "Pacchetti",
+      "repositories": "Repositori",
+      "storage": "Archiviazione",
+      "users": "Utenti"
+    },
+    "categoryMatches": "Questa categoria corrisponde all'host di riferimento.",
+    "compare": "Confronta",
+    "description": "Confronto tra questo host e un host noto in buone condizioni all'interno dell'inventario già raccolto. Utile quando non esiste ancora un profilo e un host funziona mentre un altro no.",
+    "differentCount": "{{count}} diverso",
+    "differentTitle": "Presenti su entrambi ma diversi",
+    "error": "Confronto fallito",
+    "extraCount": "{{count}} solo qui",
+    "extraTitle": "Su questo host, non sull'host di riferimento",
+    "field": "Campi",
+    "identical": "Questo host corrisponde a {{reference}} in ogni categoria.",
+    "matches": "Corrispondenze",
+    "missingCount": "{{count}} mancante",
+    "missingTitle": "Sull'host di riferimento, non su questo host",
+    "name": "Nome",
+    "noOtherHosts": "Non esiste un altro host da confrontare.",
+    "reference": "Host di riferimento",
+    "referenceHost": "Host di riferimento",
+    "summary": "{{count}} differenza(i) da {{reference}}.",
+    "thisHost": "Questo host",
+    "title": "Confronta con un host di riferimento",
+    "truncated": "Vengono elencati solo i primi elementi; i conteggi sopra riportati sono esatti."
   }
 }

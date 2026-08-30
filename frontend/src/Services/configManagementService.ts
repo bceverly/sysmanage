@@ -442,3 +442,83 @@ export const remediateDrift = async (
   );
   return response.data;
 };
+
+// --- Golden-host baseline diff (Phase 20.2, S5) ------------------------------
+
+/** One item in a comparison bucket: its identity plus the compared fields. */
+export interface BaselineItem {
+  name: string;
+  [field: string]: string | null;
+}
+
+/** One field that disagrees between the reference and the target. */
+export interface BaselineFieldDelta {
+  reference: string | null;
+  target: string | null;
+}
+
+/** An entry present on both hosts whose compared fields disagree. */
+export interface BaselineDifference {
+  name: string;
+  fields: Record<string, BaselineFieldDelta>;
+}
+
+export interface BaselineCategoryCounts {
+  missing: number;
+  extra: number;
+  different: number;
+  reference_total: number;
+  target_total: number;
+}
+
+export interface BaselineCategoryResult {
+  missing: BaselineItem[];
+  extra: BaselineItem[];
+  different: BaselineDifference[];
+  counts: BaselineCategoryCounts;
+  /** True when a bucket was capped; the counts above stay exact. */
+  truncated: boolean;
+}
+
+export interface BaselineDiff {
+  reference_host_id: string;
+  reference_fqdn: string | null;
+  host_id: string;
+  host_fqdn: string | null;
+  categories: Record<string, BaselineCategoryResult>;
+  total_differences: number;
+  identical: boolean;
+}
+
+/**
+ * The comparison categories this server supports.
+ *
+ * Fetched rather than hard-coded so a category added server-side appears
+ * without a frontend release, and so the UI cannot offer one the server
+ * would refuse.
+ */
+export const getBaselineCategories = async (): Promise<string[]> => {
+  const response = await axiosInstance.get<string[]>(
+    `/api/v1/config-management/baseline-categories`,
+  );
+  return response.data;
+};
+
+/** How `hostId` differs from the reference ("golden") host. */
+export const getBaselineDiff = async (
+  hostId: string,
+  referenceHostId: string,
+  categories?: string[],
+): Promise<BaselineDiff> => {
+  const params: Record<string, string> = {
+    reference_host_id: referenceHostId,
+  };
+  if (categories && categories.length > 0) {
+    params.categories = categories.join(",");
+  }
+  const response = await axiosInstance.get<BaselineDiff>(
+    `/api/v1/hosts/${hostId}/config-management/baseline-diff`,
+    { params },
+  );
+  return response.data;
+};

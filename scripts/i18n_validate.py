@@ -339,7 +339,7 @@ def cmd_strip_orphans() -> int:
         data = load_locale(lang)
         flat = flatten(data)
         orphans = [
-            k for k in (set(flat) - code_keys) if not _is_dynamic(k)
+            k for k in (set(flat) - code_keys) if not _is_live(k, code_keys)
         ]
         if not orphans:
             continue
@@ -356,6 +356,35 @@ def _is_dynamic(key: str) -> bool:
     return any(key.startswith(prefix) for prefix in DYNAMIC_KEY_PREFIXES)
 
 
+# i18next pluralisation turns ONE msgid into several catalogue keys, each
+# suffixed with a CLDR plural category: `x.days_one`, `x.days_other`, and for
+# languages with richer rules `_zero/_two/_few/_many` (plus `_ordinal_*`).
+# Code only ever names the BASE key -- t('x.days', { count }) -- and i18next
+# picks the form at runtime, so every suffixed form looks unreferenced.
+#
+# Without this the validator reports them as orphans and `--strip-orphans`
+# DELETES them, which means the tooling forbids correct pluralisation
+# outright. That is how "1 days" reached a documentation screenshot.
+_PLURAL_SUFFIX = re.compile(r"_(?:ordinal_)?(?:zero|one|two|few|many|other)$")
+
+
+def _plural_base(key: str) -> str:
+    """The key i18next was asked for, with any plural-category suffix removed."""
+    return _PLURAL_SUFFIX.sub("", key)
+
+
+def _is_live(key: str, code_keys) -> bool:
+    """Is this locale key actually reachable from code?"""
+    return (
+        key in code_keys
+        or _is_dynamic(key)
+        # Only count the stripped form when it really is a plural suffix: a
+        # base key that happens to end in "_one" is left alone because
+        # _PLURAL_SUFFIX would not have matched it any differently.
+        or (_plural_base(key) != key and _plural_base(key) in code_keys)
+    )
+
+
 def cmd_validate(seed: bool) -> int:
     code_keys = extract_keys()
     locales = list_locales()
@@ -365,7 +394,7 @@ def cmd_validate(seed: bool) -> int:
         missing = sorted(set(code_keys) - set(flat))
         # Dynamic-prefix keys are live even without a static reference.
         orphan = sorted(
-            k for k in (set(flat) - set(code_keys)) if not _is_dynamic(k)
+            k for k in (set(flat) - set(code_keys)) if not _is_live(k, set(code_keys))
         )
         if missing:
             print(f"{lang}: {len(missing)} keys missing in locale", file=sys.stderr)

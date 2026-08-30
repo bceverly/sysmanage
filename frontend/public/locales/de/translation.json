@@ -3511,6 +3511,41 @@
     "remediateFailed": "Könnte die Korrektur nicht in die Warteschlange stellen",
     "seenSince": "Erste Sichtung",
     "title": "Konfiguration driften",
-    "view": "Anzeigen"
+    "view": "Anzeigen",
+    "days_one": "{{count}} Tag",
+    "days_other": "{{count}} Tage"
+  },
+  "baselineDiff": {
+    "category": {
+      "certificates": "Zertifikate",
+      "firewall": "Firewall",
+      "groups": "Gruppen",
+      "interfaces": "Netzwerk-Schnittstellen",
+      "packages": "Pakete",
+      "repositories": "Repositorys",
+      "storage": "Speicher",
+      "users": "Benutzer"
+    },
+    "categoryMatches": "Diese Kategorie stimmt mit dem Referenz-Host überein.",
+    "compare": "Vergleichen",
+    "description": "Vergleiche diesen Host mit einem bekannten guten Host aus der bereits gesammelten Inventarliste. Nützlich, wenn noch kein Profil vorhanden ist und ein Host funktioniert, während ein anderer nicht funktioniert.",
+    "differentCount": "{{count}} unterschiedlich",
+    "differentTitle": "Auf beiden vorhanden, aber unterschiedlich",
+    "error": "Vergleich fehlgeschlagen",
+    "extraCount": "Nur hier {{count}}",
+    "extraTitle": "Auf diesem Host, aber nicht auf der Referenz",
+    "field": "Feld",
+    "identical": "Dieser Host stimmt in jeder Kategorie mit {{reference}} überein.",
+    "matches": "Übereinstimmungen",
+    "missingCount": "{{count}} fehlend",
+    "missingTitle": "Auf der Referenz, aber nicht auf diesem Host",
+    "name": "Name",
+    "noOtherHosts": "Es gibt keinen anderen Host zum Vergleichen.",
+    "reference": "Referenz-Host",
+    "referenceHost": "Referenz-Host",
+    "summary": "{{count}} Unterschied(e) von {{reference}}.",
+    "thisHost": "Dieser Host",
+    "title": "Mit Referenz-Host vergleichen",
+    "truncated": "Nur die ersten Einträge werden aufgelistet; die obigen Zählungen sind exakt."
   }
 }

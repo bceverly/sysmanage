@@ -3511,6 +3511,41 @@
     "remediateFailed": "无法入队修复措施",
     "seenSince": "首次出现",
     "title": "配置漂移",
-    "view": "查看"
+    "view": "查看",
+    "days_one": "{{count}} 天",
+    "days_other": "{{count}} 天差"
+  },
+  "baselineDiff": {
+    "category": {
+      "certificates": "证书",
+      "firewall": "防火墙",
+      "groups": "组",
+      "interfaces": "网络接口",
+      "packages": "包",
+      "repositories": "仓库",
+      "storage": "存储",
+      "users": "用户"
+    },
+    "categoryMatches": "此类别与参考主机匹配。",
+    "compare": "比较",
+    "description": "将此主机与已收集的清单中的已知良好主机进行比较。在没有配置文件的情况下，当一个主机正常工作而另一个主机不正常时，这很有用。",
+    "differentCount": "{{count}} 不同",
+    "differentTitle": "在两者中都存在但不同",
+    "error": "比较失败",
+    "extraCount": "只在此处{{count}}",
+    "extraTitle": "在此主机上存在但在参考主机上不存在",
+    "field": "字段",
+    "identical": "此主机在每个类别上都与 {{reference}} 匹配。",
+    "matches": "匹配",
+    "missingCount": "{{count}} 缺失",
+    "missingTitle": "在参考主机上存在但在此主机上不存在",
+    "name": "名称",
+    "noOtherHosts": "尚未有其他主机可进行比较。",
+    "reference": "参考",
+    "referenceHost": "参考主机",
+    "summary": "{{count}} 与 {{reference}} 不同。",
+    "thisHost": "此主机",
+    "title": "与参考主机比较",
+    "truncated": "仅列出前几个条目；上述计数是准确的"
   }
 }

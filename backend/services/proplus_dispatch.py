@@ -468,20 +468,49 @@ def build_host_provider(db_maker: Callable) -> Callable[[], List[Any]]:
     """
 
     def _provider():
-        # `db_maker` is `get_db` (a generator dependency).  Pull one session
-        # out of it just like the Pro+ background tasks for vuln/health do.
-        gen = db_maker()
+        # EVERY database, not just the bootstrap one. A tenant's hosts live in
+        # that tenant's database, so a provider reading only ``db_maker()``
+        # returns an empty fleet for every tenant -- and a scheduled fleet
+        # operation then "fires" against nothing, reporting success while
+        # touching no host. Fixed 2026-08-29 alongside the other Pro+
+        # background workers.
+        #
+        # Collapses to the single application database when multi-tenancy is
+        # off, so single-tenant behaviour is unchanged.
         try:
-            session = next(gen)
-        except (StopIteration, TypeError):
-            return []
-        try:
-            return session.query(models.Host).all()
-        finally:
+            from backend.persistence.partitions import (  # noqa: PLC0415
+                iter_host_databases,
+            )
+        except Exception:  # noqa: BLE001 - fall back rather than lose the fleet
+            iter_host_databases = None
+
+        if iter_host_databases is None:
+            gen = db_maker()
             try:
-                next(gen)
-            except StopIteration:
-                pass
+                session = next(gen)
+            except (StopIteration, TypeError):
+                return []
+            try:
+                return session.query(models.Host).all()
+            finally:
+                try:
+                    next(gen)
+                except StopIteration:
+                    pass
+
+        hosts: List[Any] = []
+        for label, _tenant, session in iter_host_databases():
+            try:
+                hosts.extend(session.query(models.Host).all())
+            except Exception:  # noqa: BLE001
+                # One unreachable tenant must not empty the whole fleet.
+                logger.exception(
+                    "fleet host provider: could not read hosts from %s",
+                    sanitize_log(label),
+                )
+            finally:
+                session.close()
+        return hosts
 
     return _provider
 

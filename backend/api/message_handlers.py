@@ -25,7 +25,7 @@ from backend.api.message_handlers_core import (
 )
 from backend.i18n import _
 from backend.persistence import models
-from backend.persistence.models import Host, SoftwareInstallationLog
+from backend.persistence.models import Host, MessageQueue, SoftwareInstallationLog
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 # Re-export core handlers for backwards compatibility
@@ -416,14 +416,10 @@ async def handle_command_acknowledgment(  # NOSONAR
         }
 
     # Look up the original message to get command details for logging
-    from backend.persistence.models import MessageQueue
-
     original_msg = db.query(MessageQueue).filter_by(message_id=message_id).first()
 
     if original_msg:
         try:
-            import json
-
             msg_data = (
                 json.loads(original_msg.message_data)
                 if isinstance(original_msg.message_data, str)

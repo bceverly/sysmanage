@@ -18,7 +18,7 @@ import sys
 import tarfile
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
 import aiofiles
 import aiohttp
@@ -56,6 +56,9 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
         self._loaded_modules: Dict[str, Any] = {}
         self._initialized = False
         self._plugin_loader = PluginBundleLoader()
+        # Module codes whose last update attempt failed. Operator tooling
+        # (sysmanage-migrate) turns a non-empty list into a non-zero exit.
+        self.last_update_failures: List[str] = []
 
     @property
     def loaded_modules(self) -> Dict[str, Any]:
@@ -565,6 +568,34 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
             if not compiled:
                 logger.error(
                     "No compiled module (.so/.pyd) in bundle for %s", module_code
+                )
+                return None
+            # AUTHENTICITY BEFORE THE SWAP, not after.
+            #
+            # This used to gate the swap on structure alone ("it contains a
+            # .so") and leave signature checking to load time -- i.e. AFTER the
+            # live directory had already been overwritten. A bundle that failed
+            # verification therefore destroyed a working install and left an
+            # unloadable one in its place, which is the exact opposite of this
+            # function's stated contract.
+            #
+            # Observed 2026-08-29: a routine `make migrate` pulled unsigned
+            # pre-signing builds over five working engines; alerting_engine went
+            # from a loading 1.0.19 to an unloadable 1.0.8 and the feature
+            # simply vanished.
+            try:
+                verify_module_dir(
+                    staging_dir,
+                    module_code,
+                    os.path.join(staging_dir, compiled[0]),
+                    self._get_platform_info(),
+                )
+            except ModuleSignatureError as exc:
+                logger.error(
+                    "REFUSING to install %s: %s. The existing install is left "
+                    "untouched.",
+                    module_code,
+                    exc,
                 )
                 return None
             # Bundle is good — atomically swap in: move the live dir aside (rename

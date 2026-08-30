@@ -22,6 +22,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from backend.persistence import models
 from backend.services import config_mgmt_drift as drift
 
 NOW = datetime(2026, 8, 28, 12, 0, 0)
@@ -263,3 +264,41 @@ class TestSerialisation:
 
     def test_as_utc_passes_none_through(self):
         assert drift.as_utc(None) is None
+
+
+class TestAlertingContract:
+    """Fields the Pro+ ``config_drift`` alert evaluator reads (Phase 20.2, S3).
+
+    That evaluator is compiled into the licensed alerting engine and is built
+    from a DIFFERENT repository, whose CI never checks this one out. So nothing
+    but this test connects a rename here to the breakage it causes there: the
+    evaluator would stop matching, the rule would quietly never fire, and a
+    silent alert rule is worse than no alert rule -- the operator believes they
+    are covered.
+
+    Renaming any of these is allowed. Renaming them WITHOUT updating
+    ``alerting_evaluators.pxi`` is the thing this catches.
+    """
+
+    REQUIRED = ("host_id", "resolved_at", "profile_name", "first_seen_at")
+
+    @pytest.mark.parametrize("field", REQUIRED)
+    def test_the_evaluator_can_still_filter_on_this_column(self, field):
+        column = getattr(models.ConfigDriftFinding, field, None)
+        assert column is not None, (
+            f"ConfigDriftFinding.{field} was removed or renamed; the Pro+ "
+            "config_drift alert evaluator filters on it"
+        )
+
+    def test_open_findings_are_expressed_as_a_null_resolved_at(self):
+        # The evaluator selects open findings with `resolved_at.is_(None)`.
+        # Were this to become a status enum, that filter would silently match
+        # everything.
+        assert models.ConfigDriftFinding.resolved_at.nullable is True
+
+    def test_first_seen_at_is_a_timestamp_the_evaluator_can_subtract(self):
+        # min_hours does `now - first_seen_at`; a string column would raise
+        # inside the evaluator, where the failure surfaces as a dropped alert.
+        from sqlalchemy import DateTime  # noqa: PLC0415
+
+        assert isinstance(models.ConfigDriftFinding.first_seen_at.type, DateTime)

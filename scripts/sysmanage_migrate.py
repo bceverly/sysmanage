@@ -149,6 +149,20 @@ def _ensure_multitenancy_engine() -> bool:
         await license_service.initialize()
         if not license_service.is_pro_plus_active:
             return False
+        # A module that could not be updated is FATAL here, unlike at server
+        # boot. This tool is an operator action, and on 2026-08-29 it printed
+        # five "REFUSING to load" errors and then exited 0 -- so a deployment
+        # with disabled licensed engines looked like a clean migration. An
+        # operator who wants to proceed anyway can re-run once the modules are
+        # fixed; silently continuing is not a choice they got to make.
+        failures = getattr(module_loader, "last_update_failures", [])
+        if failures:
+            raise RuntimeError(
+                "these licensed modules could not be updated: "
+                + ", ".join(failures)
+                + ". Refusing to continue: the engines they provide would be "
+                "missing or stale. Re-run once they resolve."
+            )
         module_loader.initialize()
         await module_loader.ensure_module_available("multitenancy_engine")
         engine_module = module_loader.get_module("multitenancy_engine")
@@ -158,6 +172,11 @@ def _ensure_multitenancy_engine() -> bool:
 
     try:
         return asyncio.run(_load_and_bridge())
+    except RuntimeError as exc:
+        # Raised above for a failed module update -- deliberately NOT swallowed
+        # into a warning like the load failures below.
+        print(f"     [ERROR] {exc}")
+        raise
     except Exception as exc:  # noqa: BLE001 - report, don't crash the whole run
         print(f"     [warn] could not load the multi-tenancy engine: {exc}")
         return False

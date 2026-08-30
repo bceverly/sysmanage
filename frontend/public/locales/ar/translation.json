@@ -3511,6 +3511,41 @@
     "remediateFailed": "تعذر وضع الإصلاح في الطابور",
     "seenSince": "أول مرة تم رصدها",
     "title": "انحراف التكوين",
-    "view": "عرض"
+    "view": "عرض",
+    "days_one": "يوم {{count}}",
+    "days_other": "أيام {{count}}"
+  },
+  "baselineDiff": {
+    "category": {
+      "certificates": "شهادات",
+      "firewall": "جدار الحماية",
+      "groups": "المجموعات",
+      "interfaces": "واجهات الشبكة",
+      "packages": "الحزم",
+      "repositories": "المستودعات",
+      "storage": "التخزين",
+      "users": "المستخدمون"
+    },
+    "categoryMatches": "تتوافق هذه الفئة مع المضيف المرجعي.",
+    "compare": "مقارنة",
+    "description": "قارن هذا المضيف مع مضيف جيد معروف عبر المخزون الذي تم جمعه بالفعل. مفيد عندما لا يوجد ملف تعريف بعد ومضيف يعمل بينما آخر لا يعمل.",
+    "differentCount": "مختلف ({{count}})",
+    "differentTitle": "حاضرة على كليهما ولكن مختلفة",
+    "error": "فشل المقارنة",
+    "extraCount": "{{count}} فقط هنا",
+    "extraTitle": "على هذا المضيف، ليس على المرجع",
+    "field": "حقل",
+    "identical": "هذا المضيف يطابق {{reference}} في كل فئة.",
+    "matches": "يتطابق",
+    "missingCount": "ناقص ({{count}})",
+    "missingTitle": "على المرجع، ليس على هذا المضيف",
+    "name": "الاسم",
+    "noOtherHosts": "لا يوجد مضيف آخر لمقارنته بعد.",
+    "reference": "مرجع",
+    "referenceHost": "مضيف مرجعي",
+    "summary": "فرق ({{count}}) عن {{reference}}.",
+    "thisHost": "هذا المضيف",
+    "title": "قارن بمضيف مرجعي",
+    "truncated": "تُدرج فقط المدخلات الأولى؛ تعد العدود أعلاه دقيقة."
   }
 }

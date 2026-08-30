@@ -510,9 +510,13 @@ class AlertRule(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
+    # Free-form on purpose: the evaluators live in the Pro+ alerting_engine, so
+    # constraining this to an enum here would mean an OSS migration every time
+    # a licensed engine gains a condition. The authoritative list is that
+    # engine's CONDITION_EVALUATORS map; this comment tracks it.
     condition_type = Column(
         String(50), nullable=False
-    )  # "host_down", "reboot_required", "updates_available", "disk_usage", "cve_severity", "custom_metric", "process_resource"
+    )  # "host_down", "reboot_required", "updates_available", "disk_usage", "cve_severity", "custom_metric", "process_resource", "config_drift"
     condition_params = Column(JSON, nullable=False)  # Condition-specific parameters
     severity = Column(
         String(20), nullable=False

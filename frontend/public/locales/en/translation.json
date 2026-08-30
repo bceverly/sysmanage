@@ -3511,6 +3511,41 @@
     "remediateFailed": "Could not queue remediation",
     "seenSince": "First seen",
     "title": "Configuration Drift",
-    "view": "View"
+    "view": "View",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days"
+  },
+  "baselineDiff": {
+    "category": {
+      "certificates": "Certificates",
+      "firewall": "Firewall",
+      "groups": "Groups",
+      "interfaces": "Network interfaces",
+      "packages": "Packages",
+      "repositories": "Repositories",
+      "storage": "Storage",
+      "users": "Users"
+    },
+    "categoryMatches": "This category matches the reference host.",
+    "compare": "Compare",
+    "description": "Compare this host against a known-good host across the inventory already collected. Useful when there is no profile yet and one host works while another does not.",
+    "differentCount": "{{count}} different",
+    "differentTitle": "Present on both, but different",
+    "error": "Comparison failed",
+    "extraCount": "{{count}} only here",
+    "extraTitle": "On this host, not on the reference",
+    "field": "Field",
+    "identical": "This host matches {{reference}} across every category compared.",
+    "matches": "Matches",
+    "missingCount": "{{count}} missing",
+    "missingTitle": "On the reference, not on this host",
+    "name": "Name",
+    "noOtherHosts": "There is no other host to compare against yet.",
+    "reference": "Reference",
+    "referenceHost": "Reference host",
+    "summary": "{{count}} difference(s) from {{reference}}.",
+    "thisHost": "This host",
+    "title": "Compare to a reference host",
+    "truncated": "Only the first entries are listed; the counts above are exact."
   }
 }

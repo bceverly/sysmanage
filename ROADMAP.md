@@ -7958,9 +7958,64 @@ land later without migrating the rows recorded before it existed.
       Fixes 5 and 6 needed a `yaml_file` result shape (a fifth generic shape)
       and a Pro+ module release; the spec `report_glob` extension must now
       agree with the declared format, enforced by a contract test.
-- [ ] Golden-host baseline over existing inventory (S5)
-- [ ] Alert rule condition `config_drift` (S3 — Pro+ rebuild + licence)
-- [ ] i18n/l10n
+- [x] **Multi-tenancy audit of Pro+ route mounts — DONE 2026-08-29.** Found while
+      verifying S3: a `config_drift` rule created through the tenant API was
+      written to the BOOTSTRAP database, and the evaluator then looked there
+      for drift findings that live in the tenant DB. All 19 Pro+ engine mounts
+      used `Depends(get_db)`; none used `get_tenant_db`, while the OSS API used
+      the tenant session throughout. 16 data-plane mounts switched;
+      advisory/vuln/lifecycle keep `get_db`, and that is CORRECT: their routers
+      SELF-ROUTE, importing `get_tenant_db` + `get_shared_db` and binding each
+      endpoint to the right partition, so what we pass is only the
+      import-failure fallback.
+      `tests/test_proplus_route_tenancy.py` pins the classification and fails
+      on any unclassified new mount.
+      Background workers ALSO fixed the same day: the alert evaluator,
+      report scheduler, audit retention, secrets rotation, federation push and
+      federation sync each now iterate every database, and the fleet
+      dispatcher's `build_host_provider` aggregates hosts across all of them
+      (OSS-only). `multitenancy.start_backup_orchestrator` correctly stays on
+      bootstrap (control plane), as does `cve_refresh_service` on the shared
+      partition. VERIFIED LIVE: a `config_drift` rule created through the
+      tenant API landed in the tenant DB (not bootstrap) and fired with
+      `finding_count=2` against the two findings older than its 10h threshold,
+      correctly excluding the two 1.8h ones.
+- [x] Golden-host baseline over existing inventory — BOUNDED inventory diff
+      (S5) — **DONE 2026-08-29.** `backend/services/config_mgmt_baseline.py`
+      compares a target host against a reference host across eight categories
+      (packages, repositories, users, groups, interfaces, storage,
+      certificates, firewall), each matched on the identity that makes two rows
+      the same thing across hosts and compared on the fields that make them
+      differ. Buckets are named from the TARGET's point of view
+      (missing/extra/different) because that is the host being fixed. Stores
+      nothing: a pure function of current inventory, with no lifespan to track
+      the way a profile finding has one. Item lists are capped, counts stay
+      exact, `truncated` says when a list was shortened.
+      `GET /hosts/{id}/config-management/baseline-diff` +
+      `GET /config-management/baseline-categories`.
+- [x] Alert rule condition `config_drift` — **DONE 2026-08-29 (S3).**
+      `evaluate_config_drift` in `alerting_evaluators.pxi`, registered in
+      `CONDITION_EVALUATORS`. Params: `min_findings`, `min_hours`,
+      `profile_name`. It reads FINDINGS rather than runs, because only the
+      finding table knows *since when* — and `min_hours` (UI default 24) is the
+      point: a check run moments after a deploy legitimately reports a
+      divergence the next run resolves by itself, and paging on those teaches
+      people to ignore the channel. Resolved findings never re-alert.
+      Registration points, all five: evaluator + map, `AlertRulesPage.tsx`,
+      `AlertingSettings.tsx`, plugin i18n (13 locales), engine catalog.
+      Also fixed in passing: `process_resource` was implemented in the engine
+      but missing from BOTH frontends, so it was API-only — and its param
+      template needed to be `cpu_percent`/`memory_percent`, since with neither
+      set that evaluator is a deliberate no-op.
+      A contract test in the OSS suite pins the `ConfigDriftFinding` columns
+      the evaluator filters on: Pro+ CI never checks out this repo, so nothing
+      else connects a rename here to a rule that silently stops firing.
+- [x] i18n/l10n + docs (S6) — **DONE 2026-08-29.** Two new Pro+ docs pages,
+      `configuration-management.html` (20.1) and `configuration-drift.html`
+      (20.2, including the S5 baseline diff), both linked from the Pro+ docs
+      index. 111 doc keys plus the new backend `_()` strings seeded and
+      translated into all 13 locales through the GPU service; docs i18n
+      validate/strict/markup gates green.
 
 **Estimated Size:** ~3,000 lines *(scoped 2026-08-28: the profile-baseline half
 is far cheaper than that once 20.1 is reused — see the slice plan. The estimate
@@ -8018,7 +8073,17 @@ splits the two baseline kinds below, and it is why they are not one feature.
   explicit operator confirmation naming the host and the profile, because the
   same button on a fleet view is a fleet-wide change.
 
-* **S5 — Golden-host baseline. SCOPE THIS DOWN.** "Capture a reference host
+* **S5 — Golden-host baseline. BOUNDED INVENTORY DIFF ONLY.**
+  DECIDED 2026-08-29: this stays in 20.2 rather than moving to 21.1, because
+  21.1's own checklist says it wires osquery INTO "the 20.2 drift baselines" --
+  i.e. it assumes this differ already exists and adds a fact source to it.
+  Moving S5 would make 21.1 build the differ AND wire osquery into it, and
+  leave 20.2 shipping only half of what its title promises.
+  The "don't build it yet" argument does not apply to the bounded form either:
+  the objection was to inventing a second COLLECTOR, and this invents none --
+  it diffs tables the agent already populates. osquery replaces collectors, not
+  differs.
+  Arbitrary file / config state is explicitly OUT and is called out in 21.1. "Capture a reference host
   and compare others to it" is unbounded without osquery. But we already store
   a lot of per-host state — `software_package`, `available_packages`, user
   accounts and groups, `network_interface`, `storage_device`,
@@ -8098,6 +8163,12 @@ not the moat.**
       `vuln_engine` (installed packages / listening ports), `fleet_engine`, and the
       **20.2** drift baselines — each following its own tier (**Professional /
       Enterprise**)
+- [ ] **Extend golden-host drift to arbitrary file / config state.** 20.2's S5
+      ships the BOUNDED half — a diff over inventory we already store (packages,
+      users/groups, interfaces, storage, repositories, firewall, certificates).
+      Comparing arbitrary files and config is the half that genuinely needs a
+      general fact collector, so it lands here rather than there. This EXTENDS
+      the 20.2 differ with new fact sources; it does not rebuild it.
 - [ ] i18n/l10n
 
 **Estimated Size:** ~3,500 lines
