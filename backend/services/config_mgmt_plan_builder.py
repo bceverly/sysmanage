@@ -130,6 +130,93 @@ def requires_install(host_info: Dict[str, Any]) -> bool:
     return _platform_kind(host_info) != "windows"
 
 
+# Salt is genuinely absent from Debian/Ubuntu's repositories, so unlike puppet
+# and chef it cannot be a one-line package-matrix cell. The vendor's own method
+# is a signed third-party repository, and these are the values measured on a
+# real box 2026-08-28 (installed keyring fingerprint
+# 1085 7FFD D3F9 1EAE 577A 21D6 64CB BC81 73D7 6B3F).
+#
+# The key is FETCHED at install time rather than embedded in this file. A
+# pinned copy works until the vendor rotates and then fails on every host at
+# once, with a signature error that reads like a compromised mirror; the repo
+# it guards has to be reachable anyway, so a stale key buys nothing.
+_SALT_APT_KEY_URL = (
+    "https://packages.broadcom.com/artifactory/api/security/keypair"
+    "/SaltProjectKey/public"
+)
+# ``.asc``, not ``.gpg``: the endpoint serves an ASCII-armored key and apt reads
+# armored keyrings directly, so we avoid needing ``gpg --dearmor`` -- which is
+# neither granted in the agent's sudoers nor guaranteed to be installed.
+_SALT_APT_KEYRING = "/etc/apt/keyrings/salt-archive-keyring.asc"
+_SALT_APT_SOURCES = "/etc/apt/sources.list.d/salt.list"
+_SALT_APT_REPO = "https://packages.broadcom.com/artifactory/saltproject-deb"
+# ``salt-call`` -- the masterless entry point the agent actually invokes --
+# ships in salt-common. salt-minion would pull in a minion DAEMON we never run.
+_SALT_APT_PACKAGE = "salt-common"
+
+
+def _salt_apt_install_plan() -> Dict[str, Any]:
+    """Bootstrap the Salt Project apt repository, then install salt-common.
+
+    Deliberately NO shell. The agent's sudoers grants bare binaries and
+    explicitly withholds ``sh`` ("sudo sh -c is arbitrary root execution"), so
+    the vendor's documented ``curl … | gpg --dearmor`` pipeline cannot be used
+    as-is. Every step here is a granted binary: ``mkdir``, ``curl``,
+    ``apt-get``, plus ``install -D`` inside the agent's own file deployment.
+
+    Phase ORDER matters and is fixed by the executor: files are deployed before
+    commands run. That is why the sources file is a ``files`` entry while the
+    package install is an ``apt-get`` COMMAND -- the ``packages`` phase runs
+    FIRST, before the repository exists, so a package entry here would look for
+    salt-common in the distro repos and fail.
+    """
+    return {
+        "platform": "linux",
+        "executor": engines.SALT,
+        "files": [
+            {
+                "path": _SALT_APT_SOURCES,
+                "content": (
+                    f"deb [signed-by={_SALT_APT_KEYRING}] {_SALT_APT_REPO} stable main\n"
+                ),
+                "permissions": "0644",
+            }
+        ],
+        "commands": [
+            {
+                "argv": ["mkdir", "-p", "/etc/apt/keyrings"],
+                "sudo": True,
+                "timeout": 60,
+                "description": "create the apt keyring directory",
+            },
+            {
+                # A failed fetch must NOT fall through to apt-get update: a
+                # truncated keyring reports as a signature failure, which reads
+                # like a hostile mirror rather than a network blip. Plan
+                # commands stop on the first nonzero exit, and curl -f exits
+                # nonzero on an HTTP error, so this is already the behaviour --
+                # do not add ignore_errors here.
+                "argv": ["curl", "-fsSL", "-o", _SALT_APT_KEYRING, _SALT_APT_KEY_URL],
+                "sudo": True,
+                "timeout": 120,
+                "description": "fetch the Salt Project signing key",
+            },
+            {
+                "argv": ["apt-get", "update"],
+                "sudo": True,
+                "timeout": 600,
+                "description": "refresh apt metadata for the Salt repository",
+            },
+            {
+                "argv": ["apt-get", "install", "-y", _SALT_APT_PACKAGE],
+                "sudo": True,
+                "timeout": 900,
+                "description": "install salt-common (provides salt-call)",
+            },
+        ],
+    }
+
+
 def build_engine_install_plan(
     engine: str, host_info: Dict[str, Any]
 ) -> Optional[Dict[str, Any]]:
@@ -159,6 +246,11 @@ def build_engine_install_plan(
     family = _linux_distro_family(host_info) if kind == "linux" else kind
     if not family:
         return None
+
+    # Salt on apt has no distro package at all; it needs its vendor repository
+    # bootstrapped first, so it cannot go through the package matrix.
+    if name == engines.SALT and family == "apt":
+        return _salt_apt_install_plan()
 
     package = engines.package_for(name, family)
     if not package:

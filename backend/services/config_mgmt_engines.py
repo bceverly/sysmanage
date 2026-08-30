@@ -29,8 +29,11 @@ Measured on Ubuntu 2026-08-27:
                                     EXIST; ``/usr/bin/puppet`` ships in
                                     ``puppet-agent``, confirmed with dpkg -S)
     chef     -> ``chef`` 18.11.11-1
-    salt     -> NOT PACKAGED in Ubuntu's repos at all; needs the Salt Project
-                repository or pip, so there is no apt cell to fill.
+    salt     -> NOT PACKAGED in Ubuntu's repos at all, so there is no apt cell
+                to fill.  It is installed instead by bootstrapping the Salt
+                Project repository -- see ``_salt_apt_install_plan`` in
+                config_mgmt_plan_builder, which is consulted BEFORE this matrix
+                for that one combination.
 """
 
 from typing import Dict, Optional, Tuple
@@ -73,7 +76,11 @@ _PACKAGES: Dict[Tuple[str, str], Optional[str]] = {
     # chef: apt measured 2026-08-27.
     (CHEF, "apt"): "chef",
     # salt: positively established as ABSENT from Ubuntu's repos, so an apt
-    # install cannot work. Left explicit so nobody "fixes" it by guessing.
+    # install cannot work from the matrix. Left explicit so nobody "fixes" it
+    # by guessing a package name -- the real install bootstraps the vendor
+    # repository first (``_salt_apt_install_plan``), which is why this stays
+    # None rather than naming salt-common: that package does not exist until
+    # the repository has been added.
     (SALT, "apt"): None,
 }
 

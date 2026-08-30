@@ -439,8 +439,11 @@ class TestEngineAwareInstall:
 
     @pytest.mark.asyncio
     async def test_an_engine_with_no_package_here_is_refused(self):
-        # Salt is not in Ubuntu's repositories; a licence does not change that.
-        session = _FakeSession(Host=[_host()])
+        # Salt on Fedora: unmeasured, so there is no plan to build and the
+        # API must refuse rather than fire dnf at a name that may not exist.
+        # (Salt on APT is no longer the example -- it now bootstraps the
+        # vendor repository and legitimately returns a plan.)
+        session = _FakeSession(Host=[_host(platform_release="Fedora 41")])
         with _Env() as env, patch(
             "backend.api.config_mgmt_prereq.require_module", return_value=None
         ):

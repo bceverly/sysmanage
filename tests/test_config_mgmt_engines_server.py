@@ -289,11 +289,22 @@ class TestPerEngineInstallPlans:
         plan = planner.build_engine_install_plan("chef", host("Linux", "Ubuntu 24.04"))
         assert plan["packages"] == [{"manager": "apt", "name": "chef"}]
 
-    def test_salt_has_no_plan_because_ubuntu_does_not_ship_it(self):
-        assert (
-            planner.build_engine_install_plan("salt", host("Linux", "Ubuntu 24.04"))
-            is None
-        )
+    def test_salt_on_apt_bootstraps_the_vendor_repository(self):
+        # Ubuntu still does not ship Salt -- that premise has not changed, and
+        # `package_for(salt, apt)` is still None. What changed 2026-08-30 is
+        # that "not in the distro" no longer means "no plan": apt gets the
+        # vendor repository added first, so the answer is an install rather
+        # than a shrug. dnf/zypper are still unmeasured and still get None.
+        plan = planner.build_engine_install_plan("salt", host("Linux", "Ubuntu 24.04"))
+        assert plan is not None
+        assert engines.package_for("salt", "apt") is None
+        assert ["apt-get", "install", "-y", "salt-common"] in [
+            c["argv"] for c in plan["commands"]
+        ]
+
+    def test_salt_elsewhere_still_has_no_plan(self):
+        for hostinfo in (host("Linux", "Fedora 41"), host("Linux", "openSUSE")):
+            assert planner.build_engine_install_plan("salt", hostinfo) is None
 
     def test_ansible_still_goes_through_its_measured_per_platform_path(self):
         # FreeBSD's py3* glob is an ansible-specific quirk that must survive.

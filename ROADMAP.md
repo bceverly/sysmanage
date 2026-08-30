@@ -7705,10 +7705,18 @@ land later without migrating the rows recorded before it existed.
 - [ ] Desired-state config-as-code: Ansible role/playbook execution at scale (job templates; inventories from SysManage hosts/tags/sites) with results + idempotency reporting
       *(the results + idempotency-reporting half is DONE, as is single-host
       execution; what remains is the fleet half — job templates and inventories)*
-- [ ] Config profiles assignable per host/tag/site, enforced on a schedule
+- [x] Config profiles assignable per host/tag/site, enforced on a schedule —
+      **DONE 2026-08-27.** `config_profile_assignment` carries `host_id` /
+      `tag_id` / `site_id` as three nullable FK columns (exactly one set, so an
+      assignment cannot outlive the host it names) plus a cron `schedule` and
+      `check_mode`; `config_mgmt_assignment_tick` enforces them, deriving
+      due-ness from `last_applied_at` rather than a stored cursor.
 - [ ] Remediation playbooks (apply to bring a host into compliance)
-- [ ] **Puppet, Salt and Chef adapters behind the same profile abstraction —
-      a committed deliverable, not a maybe.** Reworded 2026-08-26, Salt added
+- [x] **Puppet, Salt and Chef adapters behind the same profile abstraction —
+      a committed deliverable, not a maybe.** **DONE 2026-08-27**, and the
+      four-engine round trip was VERIFIED LIVE 2026-08-29 (see 20.2) against
+      real binaries, each producing a named drift finding. Reworded 2026-08-26,
+      Salt added
       2026-08-27 (Bryan): the previous "(Optional)" was being read as "we might
       never build this". The distinction that matters: WHICH engine an operator
       uses is their choice — most will stay on ansible-core/DSC — but SHIPPING
@@ -7915,7 +7923,10 @@ land later without migrating the rows recorded before it existed.
           `missing` / `too_old` / `unsupported`) already carries this: it is
           per-engine now, and `not_required` is what a vendored/bundled engine
           reports (DSC on Windows today).
-- [ ] i18n/l10n
+- [x] i18n/l10n — **DONE 2026-08-29 (S6).** `configProfiles` (28 keys) and the
+      drift/baseline UI strings are seeded and translated across all 13 locales;
+      frontend and docs i18n gates (validate / strict / markup / translate-check)
+      are green.
 
 **Estimated Size:** ~6,000 lines
 

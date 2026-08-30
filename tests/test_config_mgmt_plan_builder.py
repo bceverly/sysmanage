@@ -182,3 +182,81 @@ class TestFloor:
         platforms = {row["platform"] for row in builder.install_targets()}
         for expected in ("freebsd", "openbsd", "netbsd", "darwin", "windows"):
             assert expected in platforms
+
+
+class TestSaltAptRepositoryBootstrap:
+    """Salt on apt is the one engine with no distro package at all.
+
+    Verified against the vendor repo on 2026-08-30: the armored key is accepted
+    by apt directly (``signed-by=…​.asc``, no ``gpg --dearmor``), and
+    ``salt-common`` resolves from it at 3008.2 providing ``/usr/bin/salt-call``.
+    """
+
+    @staticmethod
+    def _plan():
+        return builder.build_engine_install_plan("salt", host("Linux", "Ubuntu 24.04"))
+
+    def test_apt_gets_a_repository_bootstrap_rather_than_no_plan(self):
+        # Before this, package_for(salt, apt) was None and the UI could only
+        # report "we don't know how to install this here".
+        assert self._plan() is not None
+
+    def test_installs_salt_common_not_salt_minion(self):
+        # salt-call is the masterless entry point the agent invokes and it
+        # ships in salt-common; salt-minion would add a daemon we never run.
+        argvs = [c["argv"] for c in self._plan()["commands"]]
+        assert ["apt-get", "install", "-y", "salt-common"] in argvs
+        assert not any("salt-minion" in a for argv in argvs for a in argv)
+
+    def test_package_install_is_a_command_not_a_packages_entry(self):
+        # The executor runs the `packages` phase BEFORE `files`, so a packages
+        # entry would look for salt-common before the repository exists.
+        plan = self._plan()
+        assert not plan.get("packages")
+        assert plan["files"] and plan["commands"]
+
+    def test_key_is_fetched_not_embedded(self):
+        # A pinned key works until the vendor rotates and then fails on every
+        # host at once, looking like a compromised mirror.
+        curl = [c for c in self._plan()["commands"] if c["argv"][0] == "curl"]
+        assert len(curl) == 1
+        assert curl[0]["argv"][-1].startswith("https://packages.broadcom.com/")
+
+    def test_key_fetch_must_not_ignore_errors(self):
+        # A truncated keyring surfaces later as a signature failure, which
+        # reads like a hostile mirror rather than a network blip.
+        for step in self._plan()["commands"]:
+            assert not step.get("ignore_errors")
+
+    def test_sources_line_is_signed_by_the_keyring_it_fetches(self):
+        plan = self._plan()
+        keyring = [c for c in plan["commands"] if c["argv"][0] == "curl"][0]["argv"][3]
+        assert f"signed-by={keyring}" in plan["files"][0]["content"]
+        # apt reads armored keyrings, which is what lets us skip gpg entirely.
+        assert keyring.endswith(".asc")
+
+    def test_uses_only_binaries_the_agent_sudoers_grants(self):
+        # The agent deliberately withholds `sh`; every step must be a bare
+        # binary that installer/ubuntu/sysmanage-agent.sudoers already allows.
+        granted = {"mkdir", "curl", "apt-get"}
+        for step in self._plan()["commands"]:
+            assert step["argv"][0] in granted, step["argv"]
+            assert step["argv"][0] not in ("sh", "bash", "dash")
+            assert not any("|" in a or "&&" in a or ";" in a for a in step["argv"])
+
+    def test_only_apt_gets_the_bootstrap(self):
+        # dnf/zypper Salt packaging has not been measured, and guessing a
+        # package name is how you fire a package manager at something that
+        # does not exist.
+        assert (
+            builder.build_engine_install_plan("salt", host("Linux", "Fedora 41"))
+            is None
+        )
+        assert builder.build_engine_install_plan("salt", host("Windows")) is None
+
+    def test_other_engines_still_use_the_package_matrix(self):
+        plan = builder.build_engine_install_plan(
+            "puppet", host("Linux", "Ubuntu 24.04")
+        )
+        assert plan["packages"] == [{"manager": "apt", "name": "puppet-agent"}]
+        assert "commands" not in plan
