@@ -23,7 +23,13 @@ from backend.licensing.license_service import (  # pylint: disable=unused-import
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
-from backend.persistence.partitions import get_tenant_db
+from backend.persistence.partitions import (
+    get_tenant_db,
+    iter_host_databases,
+    PARTITION_REGISTRY,
+    partition_session,
+    request_sessionmaker,
+)
 from backend.services.email_service import email_service
 from backend.utils.verbosity_logger import get_logger
 
@@ -308,7 +314,6 @@ def _provisioning_session_factory_dependency():
     fresh, correctly-scoped session (per ``request_sessionmaker`` guidance in
     persistence/partitions.py).  Works with multi-tenancy on or off.
     """
-    from backend.persistence.partitions import request_sessionmaker  # noqa: PLC0415
     from backend.persistence.tenant_context import get_active_tenant  # noqa: PLC0415
 
     return request_sessionmaker(tenant_id=get_active_tenant())
@@ -328,9 +333,6 @@ def _provisioning_boot_session_iterator():
     ENGINE owns closing every session it is handed (matching the
     ``iter_host_databases`` contract).
     """
-    from backend.persistence.partitions import (
-        iter_host_databases,
-    )  # pylint: disable=import-outside-toplevel
 
     return iter_host_databases()
 
@@ -373,10 +375,6 @@ def _provisioning_enrollment_token_fn(
         )
         return None
 
-    from backend.persistence.partitions import (  # pylint: disable=import-outside-toplevel
-        PARTITION_REGISTRY,
-        partition_session,
-    )
     from backend.services import (
         enrollment_service,
     )  # pylint: disable=import-outside-toplevel

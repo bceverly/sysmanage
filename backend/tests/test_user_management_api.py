@@ -19,7 +19,7 @@ import pytest
 from argon2 import PasswordHasher
 from fastapi import HTTPException
 
-from backend.api.auth import login, logout, refresh
+from backend.api.auth import login, logout, refresh, UserLogin
 from backend.auth.auth_handler import decode_jwt, sign_jwt, sign_refresh_token
 
 argon2_hasher = PasswordHasher()
@@ -258,7 +258,6 @@ class TestUserLogin:
         self, mock_config, mock_user, mock_request, mock_response
     ):
         """Test successful login with valid credentials."""
-        from backend.api.auth import UserLogin
 
         login_data = UserLogin(userid="test@example.com", password="TestPassword123!")
 
@@ -310,7 +309,6 @@ class TestUserLogin:
         self, mock_config, mock_request, mock_response
     ):
         """Test successful login with admin credentials from config."""
-        from backend.api.auth import UserLogin
 
         login_data = UserLogin(
             userid=TEST_CONFIG["security"]["admin_userid"],
@@ -345,7 +343,6 @@ class TestUserLogin:
         self, mock_config, mock_user, mock_request, mock_response
     ):
         """Test login failure with invalid password."""
-        from backend.api.auth import UserLogin
 
         login_data = UserLogin(userid="test@example.com", password="WrongPassword!")
 
@@ -385,7 +382,6 @@ class TestUserLogin:
         self, mock_config, mock_request, mock_response
     ):
         """Test login failure with nonexistent user."""
-        from backend.api.auth import UserLogin
 
         login_data = UserLogin(
             userid="nonexistent@example.com", password="SomePassword!"
@@ -425,7 +421,6 @@ class TestUserLogin:
         self, mock_config, mock_user, mock_request, mock_response
     ):
         """Test login failure with locked account."""
-        from backend.api.auth import UserLogin
 
         mock_user.is_locked = True
         mock_user.locked_at = datetime.now(timezone.utc)
@@ -465,7 +460,6 @@ class TestUserLogin:
     @pytest.mark.asyncio
     async def test_login_rate_limited(self, mock_config, mock_request, mock_response):
         """Test login failure when rate limited."""
-        from backend.api.auth import UserLogin
 
         login_data = UserLogin(userid="test@example.com", password="TestPassword123!")
 

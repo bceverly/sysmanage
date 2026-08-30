@@ -25,7 +25,7 @@ import json
 import logging
 
 from backend.licensing.module_loader import module_loader
-from backend.persistence import models
+from backend.persistence import db as db_module, models
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,6 @@ def announce_promotion_to_sites(cv, to_env, version, shared_db, tenant_db) -> No
 
     from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
 
-    from backend.persistence import db as db_module  # noqa: PLC0415
     from backend.services.federation_dispatch_service import (
         dispatch_command,
     )  # noqa: PLC0415

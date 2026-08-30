@@ -28,7 +28,7 @@ import threading
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from backend.licensing.module_loader import module_loader
-from backend.persistence import models
+from backend.persistence import db as _db, models
 
 # VM/child-host stdout parsers + engine-path result-apply handlers live in
 # sibling modules (extracted to keep this file under pylint's max-module-lines);
@@ -695,7 +695,6 @@ def _apply_list_child_hosts_result(host_id: str, outcome: Dict[str, Any]) -> Non
     import asyncio
 
     from backend.api.handlers.child_host.listing import handle_child_hosts_list_update
-    from backend.persistence import db as _db
 
     # Synthesize what the legacy handler expects.
     fake_message = {
@@ -739,7 +738,6 @@ def _apply_capability_probe_result(host_id: str, outcome: Dict[str, Any]) -> Non
     parsed = _parse_capability_probe_stdout(outcome.get("stdout") or "")
 
     # pylint: disable=import-outside-toplevel
-    from backend.persistence import db as _db
     from backend.persistence.models import Host
 
     session_local = _db.get_session_local()

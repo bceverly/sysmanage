@@ -659,7 +659,6 @@ class TestHostRegistration:
     async def test_register_new_host_rejected_at_tenant_limit(self, mock_config):
         """Phase 13.1.F: a tenant at its ``max_hosts`` quota gets 429 and no row
         is created."""
-        from fastapi import HTTPException
 
         from backend.api.host import HostRegistration, register_host
 

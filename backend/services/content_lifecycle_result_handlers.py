@@ -35,9 +35,15 @@ from backend.persistence.models.content_lifecycle import (
     CVV_DEPRECATED,
     CVV_FAILED,
     CVV_PUBLISHED,
+    EXPORT_COMPLETE,
+    EXPORT_FAILED,
     PROMOTION_PUBLISH,
 )
-from backend.persistence.partitions import shared_sessionmaker
+from backend.persistence.partitions import (
+    get_request_engine,
+    shared_sessionmaker,
+    tenant_engine_for_host,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -69,11 +75,6 @@ def _tenant_session_for_host(host_id: str):
     mode.  The promotion bindings/audit are TENANT-partition rows.
     """
     from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
-
-    from backend.persistence.partitions import (  # noqa: PLC0415
-        get_request_engine,
-        tenant_engine_for_host,
-    )
 
     engine = tenant_engine_for_host(host_id) or get_request_engine()
     return sessionmaker(autocommit=False, autoflush=False, bind=engine)()
@@ -374,10 +375,6 @@ def _apply_cv_export_result(
 ) -> None:
     """Flip a ``ContentViewExportRun`` COMPLETE/FAILED when its ISO build finishes
     on the mirror host (Slice 7a)."""
-    from backend.persistence.models.content_lifecycle import (  # noqa: PLC0415
-        EXPORT_COMPLETE,
-        EXPORT_FAILED,
-    )
     from backend.services.proplus_dispatch import (  # noqa: PLC0415
         _best_failure_text,
         _now_naive,

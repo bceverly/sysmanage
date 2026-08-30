@@ -189,8 +189,6 @@ async def enable_ubuntu_pro_service(host_id: str, request: UbuntuProServiceReque
     if not service:
         raise HTTPException(status_code=400, detail=_("Service name is required"))
 
-    from sqlalchemy.orm import sessionmaker
-
     # Capture the active tenant in the request's async context so the data
     # session routes to the right engine (inert in collapsed/single-tenant mode).
     tenant_id = get_active_tenant()
@@ -248,8 +246,6 @@ async def disable_ubuntu_pro_service(host_id: str, request: UbuntuProServiceRequ
     service = request.service.strip()
     if not service:
         raise HTTPException(status_code=400, detail=_("Service name is required"))
-
-    from sqlalchemy.orm import sessionmaker
 
     # Capture the active tenant in the request's async context so the data
     # session routes to the right engine (inert in collapsed/single-tenant mode).

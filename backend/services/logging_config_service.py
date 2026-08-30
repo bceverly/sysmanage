@@ -19,7 +19,7 @@ yaml value (or a sane default) is used.
 import logging
 from typing import Dict, List, Optional
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from backend.persistence.models import Host, LoggingSetting
 from backend.persistence.models.logging_config import (
@@ -187,7 +187,6 @@ def _agent_payload(resolved: dict) -> dict:
 
 def _main_session():
     """A session bound to the bootstrap/main engine (where settings live)."""
-    from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
 
     from backend.persistence import db as db_module  # noqa: PLC0415
 

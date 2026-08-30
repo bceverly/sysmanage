@@ -655,7 +655,7 @@ class TestUserHasRole:
         roles = SimpleNamespace(
             has_role=lambda r: r == SecurityRoles.EDIT_USER_SECURITY_ROLES
         )
-        with patch("backend.security.roles.load_user_roles", return_value=roles):
+        with patch("backend.api.auth_mfa.load_user_roles", return_value=roles):
             assert (
                 mfa._user_has_role(
                     _FakeSession(), _user(), SecurityRoles.EDIT_USER_SECURITY_ROLES

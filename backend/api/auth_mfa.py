@@ -59,7 +59,7 @@ from backend.auth.auth_handler import decode_mfa_pending_token, sign_jwt
 from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
-from backend.security.roles import SecurityRoles
+from backend.security.roles import load_user_roles, SecurityRoles
 from backend.services import mfa_service
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
@@ -582,7 +582,4 @@ async def update_mfa_settings(
 def _user_has_role(db: Session, user: models.User, role: SecurityRoles) -> bool:
     """Return True if ``user`` has the given role.  Mirrors the per-user
     role-cache pattern used elsewhere in the codebase."""
-    # pylint: disable=import-outside-toplevel
-    from backend.security.roles import load_user_roles
-
     return load_user_roles(db, user.id).has_role(role)

@@ -25,7 +25,10 @@ from backend.auth.auth_bearer import (
 )
 from backend.i18n import _
 from backend.persistence import db as db_module
-from backend.persistence.models import Host
+from backend.persistence.models import (
+    Host,
+    ThirdPartyRepository as ThirdPartyRepositoryModel,
+)
 from backend.persistence.partitions import get_request_engine, get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import AuditService, EntityType
@@ -163,9 +166,6 @@ def _list_third_party_repositories_sync(host_id: str, tenant_id=None):
         db.commit()
 
         # Query third-party repositories from database
-        from backend.persistence.models import (
-            ThirdPartyRepository as ThirdPartyRepositoryModel,
-        )
 
         repositories = (
             db.query(ThirdPartyRepositoryModel)

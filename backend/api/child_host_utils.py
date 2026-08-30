@@ -9,7 +9,7 @@ Helper functions for child host API endpoints.
 from fastapi import HTTPException
 
 from backend.i18n import _
-from backend.persistence import models
+from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
 
 
@@ -65,8 +65,6 @@ def authorize_on_main(current_user: str, required_role: SecurityRoles):
     # Imported here to avoid a module-level import cycle (db imports models).
     from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
 
-    from backend.persistence import db  # noqa: PLC0415
-
     auth_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
     with auth_local() as auth_session:
         user = get_user_with_role_check(auth_session, current_user, required_role)
@@ -112,7 +110,6 @@ def audit_log(
     # Imported here to avoid a module-level import cycle (db imports models).
     from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
 
-    from backend.persistence import db  # noqa: PLC0415
     from backend.services.audit_service import ActionType  # noqa: PLC0415
     from backend.services.audit_service import AuditService, EntityType, Result
 

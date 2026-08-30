@@ -26,7 +26,7 @@ from backend.config import config
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.login_security import login_security
-from backend.services import mfa_service
+from backend.services import mfa_service, registry_service
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 argon2_hasher = PasswordHasher()
@@ -599,7 +599,6 @@ async def list_accounts(current_user: str = Depends(get_current_user)):
         raise HTTPException(status_code=400, detail=_("Multi-tenancy is not enabled."))
 
     from backend.persistence.models.tenancy import RegistryTenant  # noqa: PLC0415
-    from backend.services import registry_service  # noqa: PLC0415
 
     session = _open_registry_session()
     try:
@@ -646,8 +645,6 @@ async def switch_account(
     """
     if not config.is_multitenancy_enabled():
         raise HTTPException(status_code=400, detail=_("Multi-tenancy is not enabled."))
-
-    from backend.services import registry_service  # noqa: PLC0415
 
     # Empty tenant_id → clear the active tenant (return to server scope).  No
     # grant needed to *leave* a tenant.

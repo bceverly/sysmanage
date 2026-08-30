@@ -12,7 +12,7 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
-from sqlalchemy import and_, select
+from sqlalchemy import and_, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -382,7 +382,6 @@ def _get_tag_hosts_sync(tag_id: str, tenant_id=None):
     Phase 13.1: routes to the active tenant's database (see ``_get_tags_sync``);
     server scope / single-tenant keeps using the main engine.
     """
-    from sqlalchemy import text
 
     bind = (
         db_module.get_engine() if tenant_id is None else get_request_engine(tenant_id)

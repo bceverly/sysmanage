@@ -572,7 +572,6 @@ class TestFederationControllerStubRoutes:
         the federation block.  ``get_current_user`` is overridden
         with a no-op so the stubs don't need a real auth token.
         """
-        from fastapi import FastAPI
 
         from backend.auth.auth_bearer import get_current_user
 
@@ -847,7 +846,6 @@ class TestFederationSiteStubRoutes:
 
     @pytest.fixture
     def stub_only_app(self):
-        from fastapi import FastAPI
 
         from backend.auth.auth_bearer import get_current_user
 

@@ -12,7 +12,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 
 from sqlalchemy import and_, asc, or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from backend.i18n import _
 from backend.persistence.db import get_db
@@ -93,7 +93,6 @@ class QueueOperations:
             if tenant_engine is None:
                 db = next(get_db())
             else:
-                from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
 
                 db = sessionmaker(bind=tenant_engine)()
 

@@ -39,7 +39,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from backend.persistence.models.federation import FederationSyncQueue
@@ -199,7 +199,6 @@ def peek_batch(
 def queue_depth(session: Session) -> int:
     """Number of unsent entries.  Drives the operator-facing
     sync-status dashboard tile (``/sync-queue/depth``)."""
-    from sqlalchemy import func  # noqa: PLC0415
 
     # pylint: disable=not-callable
     return int(
@@ -213,7 +212,6 @@ def queue_depth_by_payload_type(session: Session) -> Dict[str, int]:
     Useful when a site is far behind and the operator wants to know
     "is this 10k host_deltas or 1 stuck compliance_rollup?".
     """
-    from sqlalchemy import func  # noqa: PLC0415
 
     # pylint: disable=not-callable
     rows = session.execute(

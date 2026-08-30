@@ -32,7 +32,7 @@ all three chains resolve to the *same* URL, which is exactly what makes
 import os
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config, event, pool
 
 from alembic import context
 
@@ -155,7 +155,6 @@ def run_migrations(
     # journal per transaction, which can trigger "attempt to write a
     # readonly database" on FreeBSD under heavy parallel I/O.
     if connectable.url.get_backend_name() == "sqlite":
-        from sqlalchemy import event  # noqa: PLC0415
 
         @event.listens_for(connectable, "connect")
         def _set_sqlite_wal(dbapi_conn, _rec):

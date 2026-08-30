@@ -13,7 +13,7 @@ from typing import Optional
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import joinedload, sessionmaker
 
 from backend.api.error_constants import (
     GRAYLOG_API_TOKEN,
@@ -127,7 +127,6 @@ async def get_graylog_integration_settings():  # NOSONAR
     )
 
     with session_local() as session:
-        from sqlalchemy.orm import joinedload
 
         settings = (
             session.query(models.GraylogIntegrationSettings)
@@ -312,7 +311,6 @@ async def check_graylog_health():  # NOSONAR
     )
 
     with session_local() as session:
-        from sqlalchemy.orm import joinedload
 
         settings = (
             session.query(models.GraylogIntegrationSettings)

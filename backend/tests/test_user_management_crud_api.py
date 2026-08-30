@@ -25,7 +25,7 @@ from backend.api.password_reset import (
     validate_reset_token,
 )
 from backend.api.user import (
-    User,
+    _get_all_users_sync,
     add_user,
     delete_user,
     get_user,
@@ -34,6 +34,7 @@ from backend.api.user import (
     lock_user,
     unlock_user,
     update_user,
+    User,
 )
 
 argon2_hasher = PasswordHasher()
@@ -204,7 +205,6 @@ class TestUserCRUD:
                     mock_loop.return_value.run_in_executor.return_value = [mock_user]
 
                     # Call the sync helper directly for testing
-                    from backend.api.user import _get_all_users_sync
 
                     result = _get_all_users_sync()
 

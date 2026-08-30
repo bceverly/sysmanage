@@ -13,7 +13,7 @@ from typing import Optional
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import joinedload, sessionmaker
 
 from backend.api.error_constants import (
     GRAFANA_API_KEY,
@@ -269,7 +269,6 @@ async def get_grafana_integration_settings():  # NOSONAR
     )
 
     with session_local() as session:
-        from sqlalchemy.orm import joinedload
 
         settings = (
             session.query(models.GrafanaIntegrationSettings)
@@ -466,7 +465,6 @@ async def check_grafana_health():  # NOSONAR
     )
 
     with session_local() as session:
-        from sqlalchemy.orm import joinedload
 
         settings = (
             session.query(models.GrafanaIntegrationSettings)

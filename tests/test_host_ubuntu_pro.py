@@ -382,7 +382,7 @@ class TestEnableUbuntuProService:
     """Test enable_ubuntu_pro_service endpoint."""
 
     @pytest.mark.asyncio
-    @patch("sqlalchemy.orm.sessionmaker")  # Local import inside the function
+    @patch("backend.api.host_ubuntu_pro.sessionmaker")
     @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
@@ -460,7 +460,7 @@ class TestEnableUbuntuProService:
         assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
-    @patch("sqlalchemy.orm.sessionmaker")  # Local import inside the function
+    @patch("backend.api.host_ubuntu_pro.sessionmaker")
     @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
@@ -501,7 +501,7 @@ class TestDisableUbuntuProService:
     """Test disable_ubuntu_pro_service endpoint."""
 
     @pytest.mark.asyncio
-    @patch("sqlalchemy.orm.sessionmaker")  # Local import inside the function
+    @patch("backend.api.host_ubuntu_pro.sessionmaker")
     @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
@@ -579,7 +579,7 @@ class TestDisableUbuntuProService:
         assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
-    @patch("sqlalchemy.orm.sessionmaker")  # Local import inside the function
+    @patch("backend.api.host_ubuntu_pro.sessionmaker")
     @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")

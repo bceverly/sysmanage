@@ -22,7 +22,7 @@ from sqlalchemy.orm import sessionmaker
 from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
-from backend.persistence import db as db_module
+from backend.persistence import db as db_module, models
 from backend.persistence.partitions import request_sessionmaker
 from backend.persistence.tenant_context import get_active_tenant
 
@@ -127,7 +127,6 @@ def _build_report_html(reporting_engine, report_type, template_id, tenant_id):
     boundary.  Host data AND report branding are tenant-scoped, so both come
     from the active tenant's database (``tenant_id`` threaded in from the
     handler); users / RBAC / audit are server-global and stay on bootstrap."""
-    from backend.persistence import models
 
     bootstrap_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db_module.get_engine()
@@ -264,7 +263,6 @@ def _build_report_pdf(reporting_engine, report_type, template_id, tenant_id):
     active tenant's database (``tenant_id`` threaded in from the handler); the
     users/RBAC/audit generator and report templates stay server-global on
     bootstrap."""
-    from backend.persistence import models
 
     bootstrap_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db_module.get_engine()

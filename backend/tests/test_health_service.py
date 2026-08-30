@@ -21,7 +21,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from backend.health.health_service import HealthAnalysisError, HealthService
+from backend.health.health_service import (
+    health_service as global_instance,
+    health_service as instance2,
+    health_service as instance1,
+    HealthAnalysisError,
+    HealthService,
+)
 from backend.licensing.features import ModuleCode
 from backend.persistence import models
 
@@ -519,15 +525,12 @@ class TestGlobalHealthServiceInstance:
 
     def test_global_instance_exists(self):
         """Test that global health_service instance exists."""
-        from backend.health.health_service import health_service as global_instance
 
         assert global_instance is not None
         assert isinstance(global_instance, HealthService)
 
     def test_global_instance_is_singleton(self):
         """Test that importing health_service returns same instance."""
-        from backend.health.health_service import health_service as instance1
-        from backend.health.health_service import health_service as instance2
 
         # Both imports should return the same instance
         assert instance1 is instance2

@@ -454,8 +454,6 @@ async def refresh_child_hosts(
     with session_local() as session:
         host = get_host_or_404(session, host_id)
 
-        from backend.api.child_host_utils import verify_host_active
-
         verify_host_active(host)
 
         # Try the engine plan path first.

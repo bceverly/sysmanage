@@ -39,7 +39,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from backend.persistence.models.federation import (
@@ -334,7 +334,6 @@ def acknowledge_alert(session: Session, alert_id: Any) -> Optional[FederationAle
 def prune_resolved_alerts(session: Session, *, older_than_days: int = 30) -> int:
     """Delete resolved alerts older than ``older_than_days`` (retention).
     Returns the number removed.  Cross-dialect plain ORM delete."""
-    from sqlalchemy import delete  # pylint: disable=import-outside-toplevel
 
     cutoff = _utcnow_naive() - timedelta(days=older_than_days)
     result = session.execute(

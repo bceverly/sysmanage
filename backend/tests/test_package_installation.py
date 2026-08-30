@@ -8,7 +8,7 @@ Unit tests for the package installation API endpoints and functionality
 
 import uuid
 from datetime import datetime, timezone
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, patch as _patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -114,7 +114,6 @@ def client(test_session):
     Both unmount on fixture teardown.
     """
     import time
-    from unittest.mock import patch as _patch
 
     from backend.auth.auth_bearer import get_current_user
 

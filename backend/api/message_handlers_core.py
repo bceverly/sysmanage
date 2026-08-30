@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from backend.api.error_constants import error_host_not_registered
 from backend.i18n import _
-from backend.persistence.models import Host
+from backend.persistence.models import Host, HostChild
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
 
@@ -253,7 +253,6 @@ def _auto_approve_via_child_token(db, host, hostname, auto_approve_token):
     matches.  Extracted from ``_handle_system_info_impl`` to keep that handler's
     cognitive complexity in check.
     """
-    from backend.persistence.models import HostChild  # noqa: PLC0415
 
     if not (auto_approve_token and host.approval_status == "pending"):
         return

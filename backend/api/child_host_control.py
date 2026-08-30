@@ -26,7 +26,7 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import N_, _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db
-from backend.persistence.models import HostChild
+from backend.persistence.models import ChildHostDistribution, HostChild
 from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
 from backend.utils.verbosity_logger import sanitize_log
@@ -104,7 +104,6 @@ def _resolve_agent_install_commands(session, distribution_id: str) -> list:
     Returns an empty list when neither source produces a recipe.
     """
     # pylint: disable=import-outside-toplevel
-    from backend.persistence.models import ChildHostDistribution
 
     if not distribution_id:
         return []
@@ -479,7 +478,6 @@ async def update_child_agent(
         with ref_local() as ref_session:
             distribution_id = None
             if child.distribution and child.distribution_version:
-                from backend.persistence.models import ChildHostDistribution
 
                 dist_row = (
                     ref_session.query(ChildHostDistribution)

@@ -52,7 +52,6 @@ class CrossPlatformDateTime(TypeDecorator):  # pylint: disable=too-many-ancestor
             return value
 
         # Ensure we have a datetime object
-        from datetime import datetime
 
         if not isinstance(value, datetime):
             return value
@@ -60,10 +59,11 @@ class CrossPlatformDateTime(TypeDecorator):  # pylint: disable=too-many-ancestor
         if dialect.name == "sqlite":
             # For SQLite, ensure datetime is naive (no timezone)
             if hasattr(value, "tzinfo") and value.tzinfo is not None:
-                # Convert timezone-aware to naive UTC datetime
-                import datetime as dt
-
-                utc_dt = value.astimezone(dt.timezone.utc)
+                # Convert timezone-aware to naive UTC datetime.
+                # `timezone` is already imported at module scope; the local
+                # `import datetime as dt` was a second import of the same
+                # module (CodeQL: "Module is imported more than once").
+                utc_dt = value.astimezone(timezone.utc)
                 return utc_dt.replace(tzinfo=None)
             return value
 
@@ -81,7 +81,6 @@ class CrossPlatformDateTime(TypeDecorator):  # pylint: disable=too-many-ancestor
     @property
     def python_type(self):
         """Return the Python type."""
-        from datetime import datetime
 
         return datetime
 

@@ -9,7 +9,7 @@ Handles processing of messages received from agents.
 
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from backend.i18n import _
 from backend.utils.verbosity_logger import get_logger
@@ -33,8 +33,6 @@ def _resolve_host_via_index(host_id):
     """
     if not host_id:
         return None, None
-
-    from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
 
     from backend.persistence.models import Host  # noqa: PLC0415
     from backend.persistence.partitions import tenant_engine_for_host  # noqa: PLC0415

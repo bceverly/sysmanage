@@ -20,7 +20,7 @@ from fastapi import (
     WebSocketDisconnect,
 )
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from backend.api.handlers import handle_os_version_update  # re-export for tests
 from backend.api.message_handlers import (
@@ -32,7 +32,7 @@ from backend.api.message_handlers import (
 from backend.config.config_push import config_push_manager
 from backend.i18n import _
 from backend.persistence.db import get_db
-from backend.persistence.models import InstallationPackage, InstallationRequest
+from backend.persistence.models import Host, InstallationPackage, InstallationRequest
 from backend.security.communication_security import websocket_security
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import get_logger
@@ -227,8 +227,6 @@ async def _handle_time_sensitive_message(message, connection, db):
     if tenant_engine is None:
         await _handle_message_by_type(message, connection, db)
         return
-
-    from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
 
     tenant_db = sessionmaker(bind=tenant_engine)()
     try:
@@ -464,7 +462,6 @@ def _extract_host_identifier(message_data, connection, db):
 
 def _lookup_host_by_ip(connection, db):
     """Look up host by IP address and return hostname if found."""
-    from backend.persistence.models import Host
 
     if connection.ipv4:
         logger.debug("Attempting host lookup by IPv4: %s", connection.ipv4)
@@ -572,8 +569,6 @@ async def _validate_and_get_host(message_data, connection, db):  # NOSONAR
         tuple: (host_object, error_message) - host_object is None if validation fails
     """
     from sqlalchemy import func
-
-    from backend.persistence.models import Host
 
     logger.debug(
         "Validating host with message data keys: %s",
