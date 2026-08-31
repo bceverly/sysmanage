@@ -52,6 +52,7 @@ This document provides a detailed roadmap for realizing all features in both ope
 41. [Phase 26: Security Tooling Coexistence (Enterprise)](#phase-26-security-tooling-coexistence-enterprise)
 42. [Phase 27: Apple Native MDM (Enterprise)](#phase-27-apple-native-mdm-enterprise)
 43. [Phase 28: Android Native MDM & Zero-Touch Enrollment (Pro+ / Enterprise)](#phase-28-android-native-mdm--zero-touch-enrollment-pro--enterprise)
+44. [Phase 29: High Availability & Disaster Recovery (Enterprise)](#phase-29-high-availability--disaster-recovery-enterprise)
 44. [Release Schedule Summary](#release-schedule-summary)
 45. [Module Migration Plan](#module-migration-plan)
 
@@ -646,7 +647,7 @@ the explicit bullet is added to the in-progress and future phases.)
 
 ### Release Versioning
 
-**Current Version:** v3.6.0.0
+**Current Version:** v3.7.0.0
 
 *(This one line is HAND-maintained — it is NOT git-tag-derived like the
 on-disk markers are, which is exactly how it sat silently at v3.3.0.0
@@ -669,54 +670,108 @@ Each stabilization phase produces a release. Feature phases may produce one or m
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                              SYSMANAGE ROADMAP                                  │
+│                                SYSMANAGE ROADMAP                                │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                 │
-│  Phase 0: Current State                                             v1.1.0.0   │
-│     └── [DONE] Core platform + virtualization code (moving to Pro+)            │
-│                Pro+ modules: proplus_core, health, compliance, vuln, alerting  │
+│  Phase 0: Current State                                              v1.1.0.0   │
+│     └── [DONE] Core platform + virtualization code (moving to Pro+)             │
+│                Pro+ modules: proplus_core, health, compliance, vuln, alerting   │
 │                                                                                 │
-│  Phase 1: Stabilization                                             v1.2.0.0   │
-│     └── Unit tests, Playwright, SonarQube, Dependabot, Security audit          │
+│  Phase 1: Stabilization                                              v1.2.0.0   │
+│     └── Unit tests, Playwright, SonarQube, Dependabot, Security audit           │
 │                                                                                 │
-│  Phase 2: Pro+ Professional Tier                                    v1.3.0.0   │
-│     └── reporting, audit, secrets + container_engine (LXD, WSL)                │
+│  Phase 2: Pro+ Professional Tier                                     v1.3.0.0   │
+│     └── reporting, audit, secrets + container_engine (LXD, WSL)                 │
 │                                                                                 │
-│  Phase 3: Pro+ Enterprise Tier - Part 1                             v1.4.0.0   │
-│     └── av_management_engine, firewall_orchestration_engine (security first)   │
+│  Phase 3: Pro+ Enterprise Tier - Part 1                              v1.4.0.0   │
+│     └── av_management_engine, firewall_orchestration_engine (security first)    │
 │                                                                                 │
-│  Phase 4: Stabilization                                             v1.5.0.0   │
-│     └── Pro+ integration testing, license gating verification                  │
+│  Phase 4: Stabilization                                              v1.5.0.0   │
+│     └── Pro+ integration testing, license gating verification                   │
 │                                                                                 │
-│  Phase 5: Pro+ Enterprise Tier - Part 2                             v1.6.0.0   │
-│     └── automation_engine, fleet_engine                                        │
+│  Phase 5: Pro+ Enterprise Tier - Part 2                              v1.6.0.0   │
+│     └── automation_engine, fleet_engine                                         │
 │                                                                                 │
-│  Phase 6: Stabilization                                             v1.7.0.0   │
-│     └── Test coverage push, full i18n audit, performance baseline              │
+│  Phase 6: Stabilization                                              v1.7.0.0   │
+│     └── Test coverage push, full i18n audit, performance baseline               │
 │                                                                                 │
-│  Phase 7: Stabilization RC1                                         v1.8.0.0   │
-│     └── Integration testing, load testing, security penetration test           │
+│  Phase 7: Stabilization RC1                                          v1.8.0.0   │
+│     └── Integration testing, load testing, security penetration test            │
 │                                                                                 │
-│  Phase 8: Foundation Features (Open Source)                         v2.0.0.0   │
-│     └── Access Groups, Scheduled Updates, Compliance, Agent Generic Handlers   │
+│  Phase 8: Foundation Features (Open Source)                          v2.0.0.0   │
+│     └── Access groups, update profiles, compliance, agent generic handlers      │
 │                                                                                 │
-│  Phase 9: Stabilization RC2                                         v2.1.0.0   │
-│     └── Final polish, documentation completion, i18n verification              │
+│  Phase 9: Stabilization RC2                                          v2.1.0.0   │
+│     └── Final polish, docs complete                                             │
 │                                                                                 │
-│  Phase 10: Pro+ Enterprise Tier - Part 3                            v2.2.0.0   │
-│     └── virtualization_engine, observability_engine, MFA (largest/most complex)│
+│  Phase 10: Pro+ Enterprise Tier - Part 3                             v2.2.0.0   │
+│     └── virtualization, observability, external IdP + MFA                       │
 │                                                                                 │
-│  Phase 11: Air-Gapped Environment Support                           v2.3.0.0   │
-│     └── Dual-server architecture, optical media transfer, offline CVE sync     │
+│  Phase 11: Air-Gapped Environment Support                            v2.3.0.0   │
+│     └── Dual-server architecture, optical media transfer, offline CVE           │
 │                                                                                 │
-│  Phase 12: Multi-Site Federation                                    v2.4.0.0   │
+│  Phase 12: Multi-Site Federation                                     v2.4.0.0   │
 │     └── Coordinator + site servers, rollup reporting, command dispatch          │
 │                                                                                 │
-│  Phase 12.5: Windows Server Child Hosts                             v2.4.x    │
-│     └── Win Server 2022/2025 VMs on KVM parents; RDP+SSH+agent auto-register   │
+│  Phase 12.5: Windows Server Child Hosts                                v2.4.x   │
+│     └── Hyper-V / Windows child hosts under the container engine                │
 │                                                                                 │
-│  Phase 13: Major Enterprise GA                                      v3.0.0.0   │
-│     └── Multi-tenancy, API completeness, platform-native logging, GA release   │
+│  Phase 13: Major Enterprise GA                                       v3.0.0.0   │
+│     └── Multi-tenancy, API completeness, platform-native logging, GA release    │
+│                                                                                 │
+│  Phase 14: Patch & Maintenance Lifecycle                             v3.1.0.0   │
+│     └── Errata/advisory mgmt, maintenance windows, OS release-upgrade + EOL     │
+│                FIPS compliance-mode management                                  │
+│                                                                                 │
+│  Phase 15: Stabilization                                               v3.2.x   │
+│     └── PostgreSQL HA support, psycopg3 migration, integration testing          │
+│                                                                                 │
+│  Phase 16: Content Lifecycle Management                              v3.3.0.0   │
+│     └── Content Views + Lifecycle Environments + gated promotion                │
+│                                                                                 │
+│  Phase 17: Content Distribution & Image-Mode                         v3.4.0.0   │
+│     └── Snap proxy, container image content views, bootc/OSTree hosts           │
+│                                                                                 │
+│  Phase 18.1: Compute Provisioning & Auto-Enroll                      v3.5.0.0   │
+│     └── Compute providers (libvirt, Proxmox), templates, first-boot enroll      │
+│                                                                                 │
+│  Phase 18.2: Bare-Metal PXE & Discovery                                v3.5.x   │
+│     └── Readiness preflight, PXE/kickstart, discovery, ISO provisioning         │
+│                                                                                 │
+│  Phase 19: Stabilization                                             v3.6.0.0   │
+│     └── Content lifecycle + provisioning hardening; agent capabilities          │
+│                                                                                 │
+│  Phase 20: Configuration Management & Drift                          v3.7.0.0   │
+│     └── Desired-state config (5 engines), profiles, drift + remediate           │
+│                                                                                 │
+│  Phase 21: Endpoint Facts & Proactive Advisor                        v3.8.0.0   │
+│     └── osquery substrate, advisor, malware detection, threat-model wizard      │
+│                Unenrolled asset discovery + review                              │
+│                                                                                 │
+│  Phase 22: Mobile Fleet Visibility & UEM Ingestion                   v4.0.0.0   │
+│     └── MAJOR - a new device class. Model, registration, ingest-from-UEM        │
+│                                                                                 │
+│  Phase 23: Mobile Companion App & Compliance                         v4.1.0.0   │
+│     └── BYOD self-report app; mobile EOL/patch compliance + enforcement         │
+│                                                                                 │
+│  Phase 24: Market-Parity GA                                          v5.0.0.0   │
+│     └── MAJOR - market parity reached. All gap features hardened; v5.0 GA       │
+│                                                                                 │
+│  Phase 25: Expanded Agent Architecture                               v5.1.0.0   │
+│     └── ppc64le + s390x + riscv64 agent packaging/CI (Community/OSS)            │
+│                                                                                 │
+│  Phase 26: Security Tooling Coexistence                              v5.2.0.0   │
+│     └── Velociraptor IR/hunting + Wazuh ingestion                               │
+│                                                                                 │
+│  Phase 27: Apple Native MDM                                          v6.0.0.0   │
+│     └── MAJOR - device authority: Apple MDM protocol, APNs, remote wipe         │
+│                                                                                 │
+│  Phase 28: Android Native MDM & Zero-Touch                           v6.1.0.0   │
+│     └── Android Management API policy + bulk/zero-touch enrollment              │
+│                                                                                 │
+│  Phase 29: High Availability & Disaster Recovery                     v6.2.0.0   │
+│     └── Server pool behind a LB, leader-elected workers, Postgres failover      │
+│                Agent multi-endpoint failover to a DR site                       │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -8133,7 +8188,14 @@ nearly free and makes the dashboard actionable rather than merely informative.
       only 19 and 22 remained before GA while 22 demanded ≥70, a 20-point jump
       that skipped a defined rung.  Rungs now sit in 19 (50), 20 (60) and 21 (70),
       so 22's criterion becomes a verification rather than a cliff.
-- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
+- [x] **Audit ALL previous phases for stale open items — DONE 2026-08-30.**
+      Phases 0-19 hold 698 ticked boxes and **zero** open ones, in any marker
+      format, so nothing below this phase is stale and the 2026-08-04 cleanup
+      held. The drift was in Phase 20 itself: three of its own boxes had
+      shipped days earlier — assignment per host/tag/site with a schedule, the
+      Puppet/Salt/Chef adapters, and 20.1 i18n — each verified against the code
+      before ticking. Every remaining open box in the file belongs to phase 21+,
+      which is unstarted work rather than backlog drift.
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -8354,8 +8416,72 @@ be quietly reversed:
 substantially more for per-process series, which is why that decision comes
 first.
 
+#### 21.6 Unenrolled Asset Discovery & Review (Enterprise)
+
+**Added 2026-08-31 (Bryan).** "What is on my network that SysManage does not
+manage" is a question every operator has and none of our current surfaces
+answer. Phase 18.2's discovery only sees machines that **network-boot** — a
+box that is already running and never PXEs is invisible to it.
+
+**Scope boundary, decided up front: we DETECT, we do not force-enroll.**
+Enrolling a machine we have never seen requires SSH or WinRM plus credentials
+on the target, which is exactly the inbound reachability and credential
+sprawl that Phase 19's "agent→server, 443 only, no inbound" decision removed
+and that 20.1 went pull-style to avoid. So the deliverable is a **review
+queue**, not an onboarding pipeline: here are the addresses answering on your
+networks that are not in your fleet, decide what each one is. Anything that
+promises automatic enrollment is out of scope and should be rejected in
+review.
+
+**The agents do the looking, not the server.** Each agent already sits inside
+the network segment of interest, so neighbour discovery is a normal capability
+report over the existing WebSocket — no new listener, no scanning host, no
+server-side reachability requirement, and it works per-segment in routed
+networks where a central scanner would only ever see its own VLAN. It also
+inherits the Phase 19 capability advertisement: a host that cannot scan simply
+does not advertise it.
+
+**Passive first, active second — and active is opt-in.** ARP cache, neighbour
+tables and mDNS/SSDP observation cost nothing and are not scanning. An active
+sweep of a CIDR is a different act: it trips IDS, it is a hostile-looking event
+on a segment you may not own, and on some networks it is contractually
+forbidden. So active sweeps are **off by default, scoped to operator-specified
+CIDRs, rate-limited, and audited** — never a fleet-wide default.
+
+- [ ] `discovered_asset` schema/migration — MAC/IP/hostname, first-seen,
+      last-seen, which agents observed it, and the evidence for the guess
+      (OUI vendor, mDNS service names, open-port fingerprint). A device class
+      distinct from `host`: no shell, no package manager, no privileged
+      execution — the same distinction Phase 22.1 draws for `mobile_device`
+- [ ] Agent-side passive neighbour reporting (ARP/NDP cache, mDNS/SSDP) behind
+      a `network_discovery` capability, per-platform, defaulting to passive
+- [ ] Optional active sweep of operator-specified CIDRs — off by default,
+      rate-limited, audited on every run, with the target ranges recorded
+- [ ] **Correlation against the managed fleet** — an asset already covered by a
+      `host`, a `mobile_device`, a child host, or a known VIP/load-balancer
+      address must not appear as unmanaged. Getting this wrong makes the page
+      noise on day one and nobody opens it again
+- [ ] Review page: unenrolled assets with evidence, bulk triage, and a
+      **permanent allow-list exclusion** ("this is an IoT sensor / printer /
+      switch / appliance — never show it again") carrying a reason and an
+      actor. Exclusions are audit rows, not UI state, so "who decided this was
+      fine" survives
+- [ ] Re-identification is stable across DHCP churn — key on MAC where
+      available and fall back deliberately, or an excluded device reappears as
+      new every lease and the allow-list silently rots
+- [ ] Feeds 21.4's posture punch list ("11 unmanaged devices on 2 segments")
+      and is scoreable by 21.2's advisor; air-gap clean (no external lookups —
+      the OUI database ships with the server)
+- [ ] i18n/l10n
+
+**Estimated Size:** ~3,000 lines (agent-side collectors across five platforms
+are the bulk; the review UI is small).
+
 ### Exit Criteria
 
+- [ ] Unenrolled asset discovery validated on ≥2 network segments: passive
+      reporting finds a known-unmanaged device, correlation suppresses every
+      managed host, and an allow-list exclusion survives a DHCP lease change
 - [ ] **Coverage ladder rung: OSS frontend `lines` floor to 70** — the last rung before GA verifies it (added 2026-08-07 with the 20/21 rungs).
 - [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
@@ -8901,6 +9027,168 @@ The operational product: getting devices enrolled at scale.
 
 ---
 
+## Phase 29: High Availability & Disaster Recovery (Enterprise)
+
+**Target Release:** v6.2.0.0
+**Focus:** Survive losing a server, and survive losing a site. Multiple
+SysManage servers active behind a load balancer for local HA, and a warm
+secondary in another network that agents fail over to when the primary network
+becomes unreachable — the same shape operators already run PostgreSQL in, and
+deliberately built on top of it rather than beside it.
+
+**Added 2026-08-31 (Bryan).**
+
+**SEQUENCING NOTE — worth revisiting.** This is placed last because it does not
+block anything else, but it is the phase most likely to be pulled forward:
+enterprise procurement asks about HA at evaluation time, and Phase 24 claims
+"market parity" at v5.0 while a single server outage still takes the whole
+control plane down. If a deal needs it, moving this ahead of the mobile arc
+(22/23/27/28) costs nothing structurally — nothing in those phases depends on
+it. That call is Bryan's to make, not a silent reorder.
+
+**What makes this hard is NOT the load balancer.** Putting N FastAPI processes
+behind a VIP is an afternoon. The work is everything in the server that today
+quietly assumes it is the only one:
+
+  * **Agent connections are long-lived and pinned.** An agent holds ONE
+    WebSocket to ONE instance. A command raised on instance A for an agent
+    connected to instance B has nowhere to go today. This is the central
+    problem of the phase, and it must be solved before anything else is worth
+    building.
+  * **Background ticks would run N times.** The assignment scheduler
+    (`config_mgmt_assignment_tick`), drift comparison, mirror sync, retention
+    prunes, federation ticks and the queue processors all currently start at
+    startup and assume singleton. With three servers, a scheduled profile
+    applies three times. This is a correctness bug, not a performance one.
+  * **Local disk is load-bearing.** Air-gap ISOs, repository mirrors, content
+    views, snap/OCI blobs and agent packages live on the server's filesystem.
+    Two instances do not share one.
+  * **Migrations race on startup.** N servers starting together will all try
+    to run Alembic.
+
+#### 29.1 Make the server horizontally runnable (Enterprise)
+
+- [ ] **Connection registry + inter-server dispatch** — a shared record of
+      which instance holds which agent's socket, and a path to hand a command
+      to that instance. Decide the transport ONCE and write it down:
+      PostgreSQL `LISTEN`/`NOTIFY` (no new dependency, already deployed HA by
+      the customer) vs. a broker (Redis/NATS — better fan-out, another service
+      to make highly available, and an air-gap packaging burden). **Default to
+      LISTEN/NOTIFY unless measurement says otherwise**, because a broker that
+      is not itself HA just moves the single point of failure
+- [ ] **Leader election for every singleton worker** — one advisory-lock-based
+      leader, and an explicit inventory of which loops are leader-only vs.
+      per-instance. Audit ALL existing background tasks against that list; the
+      Pro+ bootstrap-db seam bit us four times already and this is the same
+      class of mistake at a different layer
+- [ ] **Migrations run once**, as a job or under the same lock — never N times
+      concurrently on startup
+- [ ] **Shared artifact storage** — S3-compatible object storage or a shared
+      filesystem for ISOs, mirrors, content-view and proxy blobs, and the
+      served agent packages. Air-gap must keep working, so an on-prem
+      S3-compatible target (MinIO) has to be a supported shape, not just AWS
+- [ ] **One server identity across instances** — the mTLS CA, the agent-facing
+      certificate, JWT signing keys and the air-gap/federation ed25519 identity
+      keys must be shared. Per-instance keys mean an agent's trust breaks the
+      moment the LB moves it
+- [ ] `/healthz` (process up) and `/readyz` (DB reachable, migrations current,
+      module loader settled) as distinct endpoints — a load balancer that
+      cannot tell "starting" from "healthy" will route to a server mid-migration
+- [ ] i18n/l10n
+
+**Estimated Size:** ~5,000 lines
+
+#### 29.2 Database high availability (Enterprise — integrate, don't build)
+
+**We do not write a Postgres failover system.** Patroni, repmgr and
+pg_auto_failover exist and customers already run them; building a fifth would
+be the worst possible use of this phase. What we owe is being a well-behaved
+client of one.
+
+- [ ] Connection handling that survives a primary failover — pooled
+      reconnection, bounded retry with backoff, and **no silent data loss on
+      in-flight agent results**; a result that arrives during a failover must
+      be retried or durably queued, not dropped
+- [ ] Documented, tested topologies (primary/replica with streaming
+      replication + a supported failover manager), including the multi-tenant
+      per-tenant-database case, where a failover touches many connection pools
+      at once
+- [ ] Read/write split decision, written down with its cost: replicas are
+      attractive for reporting but stale reads in a management plane cause
+      real confusion ("I approved that update and it still shows pending").
+      Default to primary-only reads unless a specific surface justifies the
+      staleness
+- [ ] Alembic under HA — migrations against a managed cluster, and what happens
+      to a rolling server upgrade mid-migration
+
+**Estimated Size:** ~2,000 lines
+
+#### 29.3 Cross-site failover / DR (Enterprise)
+
+- [ ] **Agent-side multi-endpoint failover** — the agent takes an ORDERED list
+      of server endpoints rather than one, health-checks, fails over with
+      backoff and fails back deliberately. Without this the whole feature is
+      theatre: a VIP that is unreachable because the *network* is gone cannot
+      be fixed by anything on the server side. This is the single most
+      important item in 29.3 and it lands in the OSS agent
+- [ ] Warm secondary: streaming replication to the DR site plus artifact
+      replication, with a measured and documented RPO
+- [ ] **Promotion is explicit and fenced, and the secondary is READ-ONLY until
+      promoted.** Two servers both accepting agent check-ins across a broken
+      link is split-brain with an audit trail on both sides and no way to
+      merge them. State the fencing rule before writing code
+- [ ] Failback: what happens to hosts that enrolled or drifted while the
+      primary was down
+- [ ] **Distinguish DR from federation, in the docs and in the model.**
+      Federation is many fleets under one coordinator; DR is ONE fleet with a
+      second copy. They share replication plumbing and nothing else, and
+      conflating them will produce a product nobody can explain
+- [ ] i18n/l10n
+
+**Estimated Size:** ~4,500 lines
+
+#### 29.4 Operating it (Enterprise)
+
+- [ ] Server Cluster page — instances and their health, which holds the leader
+      lock, how agents are distributed across instances, replication lag, and
+      DR site status
+- [ ] Alert rules for lost instance, replication lag beyond threshold, leader
+      churn, and DR unreachable
+- [ ] Runbooks: rolling upgrade with zero agent disconnection, planned
+      failover, unplanned failover, failback, and split-brain recovery
+- [ ] i18n/l10n
+
+**Estimated Size:** ~1,500 lines
+
+### Exit Criteria
+
+- [ ] **Kill an instance under load and lose nothing** — with 3 servers behind
+      a LB and agents connected across all of them, terminating one reconnects
+      its agents elsewhere with no lost command results and no duplicate
+      scheduled applies
+- [ ] **Scheduled work runs exactly once** across the pool — proven by
+      instrumenting the assignment tick and drift comparison with 3 instances
+      running, not by inspection
+- [ ] Database failover validated end-to-end against at least one supported
+      failover manager, with agent results in flight
+- [ ] Agent multi-endpoint failover validated on all five POSIX platforms and
+      Windows, including fail-back
+- [ ] DR promotion validated with the primary network genuinely unreachable
+      (not merely stopped), and the split-brain fence proven to hold
+- [ ] Air-gap: the HA and DR shapes work with on-prem object storage and no
+      internet reachability
+- [ ] Every capability 402-clean when unlicensed; a single-server deployment is
+      completely unaffected by all of the above
+- [ ] Docs + 14-language i18n complete
+- [ ] **Audit ALL previous phases for stale open items.** Same rule as every
+      phase: walk each earlier phase, check every unticked box against the
+      actual codebase, tick what is genuinely done, and for what is not say
+      plainly whether it is real work, blocked externally, or should move or
+      be dropped.
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
 ## Release Schedule Summary
 
 | Phase | Version | Focus | Key Deliverables |
@@ -8927,7 +9215,7 @@ The operational product: getting devices enrolled at scale.
 | 18.2 | v3.5.x | Bare-Metal PXE & Discovery | Readiness preflight + config advisor, PXE/kickstart, host discovery, ISO provisioning |
 | 19 | v3.6.0.0 | Stabilization | Content lifecycle + provisioning hardening; agent capability advertisement |
 | 20 | v3.7.0.0 | Configuration Management & Drift | Ansible desired-state config, config profiles, drift detection + remediate-to-baseline |
-| 21 | v3.8.0.0 | Endpoint Facts & Proactive Advisor | osquery fact substrate, Insights-style recommendations, malware detection, threat-model wizard + posture punch list |
+| 21 | v3.8.0.0 | Endpoint Facts & Proactive Advisor | osquery fact substrate, Insights-style recommendations, malware detection, threat-model wizard + posture punch list, unenrolled asset discovery |
 | 22 | **v4.0.0.0** | Mobile Fleet Visibility & UEM Ingestion | **MAJOR — a new device class enters the product.** Device model, manual/API registration, ingest-from-UEM — **air-gap compatible** |
 | 23 | v4.1.0.0 | Mobile Companion App & Compliance | First-party BYOD self-report app; mobile EOL/patch compliance, alerting + enforcement |
 | 24 | **v5.0.0.0** | Market-Parity GA | **MAJOR — market parity reached.** All gap features hardened; v5.0 GA |
@@ -8935,6 +9223,7 @@ The operational product: getting devices enrolled at scale.
 | 26 | v5.2.0.0 | Security Tooling Coexistence | Velociraptor IR/hunting + Wazuh ingestion (Enterprise) |
 | 27 | **v6.0.0.0** | Apple Native MDM | **MAJOR — SysManage becomes the device authority**, not just an observer: Apple MDM protocol, APNs, profiles, remote lock/wipe — **not air-gappable** |
 | 28 | v6.1.0.0 | Android Native MDM & Zero-Touch | Android Management API policy + bulk/zero-touch enrollment across both vendors — **not air-gappable** |
+| 29 | v6.2.0.0 | High Availability & Disaster Recovery | Active server pool behind a load balancer, leader-elected singleton workers, Postgres failover integration, agent multi-endpoint failover to a DR site |
 
 ---
 

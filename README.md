@@ -59,6 +59,9 @@ SysManage is a comprehensive system management solution that allows you to monit
 - 🌐 Multi-site federation: coordinator/site Server Roles with rollup reporting and command dispatch
 - 📦 Content lifecycle management: Satellite-style content views + lifecycle environments (Library → Dev → Test → Prod) with gated promotion, rollback, composites, air-gap export, and federated site sync
 - 🅢 Snap store proxy: capture Snapcraft packages by channel (offline assertions + blobs), promote them through content-view environments, and serve/install them on repointed agents — including air-gapped
+- ⚙️ Desired-state configuration management: profiles applied pull-style over the existing agent channel (Ansible, PowerShell DSC v3, Puppet, Salt, Chef), scheduled enforcement per host/tag/site, and run history with idempotency reporting
+- 🔎 Configuration drift analysis: per-profile baselines, golden-host comparison against live inventory, a drift dashboard with `config_drift` alert rules, and one-click remediate-to-baseline
+- 🛡️ PostgreSQL high availability: runs against a Patroni / pg_auto_failover / Stolon cluster and survives a primary failover unattended — proxy VIP or libpq multi-host DSN, with pre-ping reconnect and bounded retry through the promotion window
 
 ## Prerequisites
 
