@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Pre-commit hook — refuses commits whose staged Python files would be
-# reformatted by black.  This is the upstream-most defense against the
+# reformatted by black, or whose staged CSS files fail stylelint.  This is the upstream-most defense against the
 # "black silently rewrote my working tree but I forgot to git add" gap
 # that ``make lint``'s auto-fix behaviour can otherwise mask.
 #
 # Pairs with the ``pre-push`` hook (which runs the full ``make lint``):
-#   * pre-commit fires per commit, only on staged .py files, just runs
-#     ``black --check`` — cheap, fast, blocks bad commits before they
-#     even land in history.
+#   * pre-commit fires per commit, only on staged .py/.css files, runs
+#     ``black --check`` + ``stylelint`` — cheap, fast, blocks bad
+#     commits before they even land in history.
 #   * pre-push fires once per push, runs the full lint chain — catches
 #     anything that slipped through (e.g. ``--no-verify`` commits, or
 #     drift introduced by an editor between commit and push).
@@ -35,6 +35,58 @@ if [ -z "${REPO_ROOT}" ]; then
     exit 0
 fi
 cd "${REPO_ROOT}"
+
+# ---------------------------------------------------------------------------
+# CSS: stylelint on staged frontend stylesheets.
+#
+# Runs BEFORE the Python block on purpose.  That block ends in a bare
+# ``exit 0`` and short-circuits with one when nothing Python is staged, so
+# anything appended after it would silently never run for a CSS-only commit
+# — which is every commit this check exists to catch.
+#
+# stylelint writes its REPORT to stderr and exits 2, so ``2>/dev/null``
+# would throw away the very output the developer needs.  Same trap the
+# black check documents above; captured with 2>&1 here for the same reason.
+# ---------------------------------------------------------------------------
+STAGED_CSS=$(git diff --cached --name-only --diff-filter=ACMR -- \
+    'frontend/src/*.css' 'frontend/src/**/*.css' 2>/dev/null || true)
+
+STYLELINT=frontend/node_modules/.bin/stylelint
+
+if [ -n "${STAGED_CSS}" ] && [ ! -x "${STYLELINT}" ]; then
+echo ""
+echo "[pre-commit] stylelint is NOT INSTALLED."
+echo "             Your CSS is fine -- the linter never ran."
+echo ""
+echo "                 cd frontend && npm ci"
+echo ""
+exit 1
+fi
+
+if [ -n "${STAGED_CSS}" ]; then
+set +e
+CSS_OUT=$(cd frontend && ./node_modules/.bin/stylelint $(echo "${STAGED_CSS}" | sed 's|^frontend/||') 2>&1)
+CSS_RC=$?
+set -e
+fi
+
+if [ -n "${STAGED_CSS}" ] && [ "${CSS_RC}" -ne 0 ]; then
+echo ""
+echo "[pre-commit] stylelint found problems in staged CSS."
+echo ""
+echo "${CSS_OUT}"
+echo "             Most rules auto-fix.  Fix locally with:"
+echo ""
+echo "                 make lint-css-fix    # or: cd frontend && npm run lint:css:fix"
+echo "                 git add <files>"
+echo "                 git commit"
+echo ""
+echo "             Bypass with 'git commit --no-verify' if you must,"
+echo "             but pre-push and CI both run the same check and"
+echo "             will reject it later."
+echo ""
+exit 1
+fi
 
 # Collect staged .py files inside backend/ or tests/.  No staged
 # Python under those trees = nothing for this hook to do.

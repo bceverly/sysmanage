@@ -5,7 +5,7 @@
     left: 0;
     background-color: #121212;
     backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgb(255, 255, 255, 0.1);
     z-index: 1000;
     transition: top 0.3s ease;
   }
@@ -221,12 +221,12 @@
 
 .nav__role-chip--collector {
   background-color: #1e6091;
-  color: #ffffff;
+  color: #fff;
 }
 
 .nav__role-chip--repository {
   background-color: #2d5a3d;
-  color: #ffffff;
+  color: #fff;
 }
 
 /* Phase 12 federation chips — distinct hues from the air-gap chips so a
@@ -234,12 +234,12 @@
    Coordinator = purple, Site = teal. */
 .nav__federation-chip--coordinator {
   background-color: #5b3c88;
-  color: #ffffff;
+  color: #fff;
 }
 
 .nav__federation-chip--site {
   background-color: #1f7a7a;
-  color: #ffffff;
+  color: #fff;
 }
 
 /* Degraded state — the role-specific Pro+ engine isn't loaded.  Rendered
@@ -247,5 +247,5 @@
    after the role/federation color rules so it wins the cascade. */
 .nav__role-chip--degraded {
   background-color: #b32d2d;
-  color: #ffffff;
+  color: #fff;
 }

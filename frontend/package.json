@@ -55,7 +55,9 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:report": "playwright show-report",
     "preview": "vite preview",
-    "lint": "eslint src --ext .ts,.tsx,.js,.jsx --max-warnings 0"
+    "lint": "eslint src --ext .ts,.tsx,.js,.jsx --max-warnings 0",
+    "lint:css": "stylelint \"src/**/*.css\"",
+    "lint:css:fix": "stylelint \"src/**/*.css\" --fix"
   },
   "browserslist": {
     "production": [

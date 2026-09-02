@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: check-black check-msi-guids provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-semgrep security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
+.PHONY: check-black check-msi-guids provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript lint-css lint-css-fix security security-full security-python security-frontend security-secrets security-semgrep security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
 
 # Default target
 help:
@@ -1200,6 +1200,16 @@ endif
 	@echo "[OK] Python linting completed"
 
 # TypeScript/React linting
+lint-css:
+	@echo "=== CSS Linting (stylelint) ==="
+	@cd frontend && npm run lint:css
+	@echo "[OK] CSS linting completed"
+
+lint-css-fix:
+	@echo "=== CSS Auto-fix (stylelint --fix) ==="
+	@cd frontend && npm run lint:css:fix
+	@echo "[OK] CSS auto-fix completed"
+
 lint-typescript:
 	@echo "=== TypeScript/React Linting ==="
 	@cd frontend && npm run lint
@@ -1271,7 +1281,7 @@ lint-freebsd-port:
 	@$(PYTHON) scripts/check_freebsd_port.py
 
 
-lint: lint-file-length lint-python lint-typescript check-engine-codes check-nginx-configs check-msi-guids i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-markup i18n-complete lint-version check-migrations lint-freebsd-port
+lint: lint-file-length lint-python lint-typescript lint-css check-engine-codes check-nginx-configs check-msi-guids i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-markup i18n-complete lint-version check-migrations lint-freebsd-port
 	@echo "[OK] All linting completed successfully!"
 
 # Guard: the per-platform nginx configs are GENERATED from one template.
