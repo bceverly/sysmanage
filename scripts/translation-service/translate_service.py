@@ -60,6 +60,8 @@ import httpx
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
+import glossary
+
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
@@ -207,6 +209,14 @@ punctuation consistent with the source.
 do not translate word-for-word.
 5. If a string is only a placeholder/code/symbol with no translatable words, \
 return it unchanged.
+6. DOMAIN SENSE. Every noun below and throughout this product is a \
+SYSTEMS-ADMINISTRATION term. Render it in that sense, never its everyday one: \
+a "host" is a managed machine, not a guest; a "job" is scheduled work, not \
+employment. Where {language} has an established IT rendering, use it; where it \
+has none, KEEP THE ENGLISH TERM rather than invent a literal translation that \
+means something else. A fluent translation of the wrong sense is the most \
+common failure here and is worse than leaving the English. A further system \
+message may define specific terms for this batch; those definitions win.
 
 OUTPUT: Return ONLY a JSON object of the exact form \
 {"translations": ["...", "..."]} where "translations" is an array with EXACTLY \
@@ -610,6 +620,15 @@ async def _raw_chunk(
             },
         ],
     }
+    # Define only the domain terms this batch actually uses.  The dictionary
+    # spans all four repositories and would swamp the payload if sent whole;
+    # filtered, a small batch carries a handful of definitions.  Computed from
+    # the UNMASKED sources so that words inside markup still match.
+    gloss = glossary.render(
+        glossary.relevant(sources), language, glossary.protected(sources)
+    )
+    if gloss:
+        payload["messages"].insert(1, {"role": "system", "content": gloss})
     if any(masks):
         payload["messages"].insert(
             1,
