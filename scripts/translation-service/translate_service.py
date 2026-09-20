@@ -51,16 +51,38 @@ import json
 import os
 import re
 import subprocess
+import sys
 import unicodedata
 from collections import Counter
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import httpx
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-import glossary
+# The glossary lives at scripts/i18n_glossary.py -- ONE home, the same
+# relative path in all four repos, so `make i18n-strict` imports the very same
+# terms this service translates with.  Two copies of a terminology table would
+# drift the day someone edited one, and the drift would be invisible: the gate
+# would enforce words the translator was never told to use.
+#
+# sys.path[0] is the CWD for `uvicorn translate_service:app`, not this file's
+# directory, so resolve it from __file__.  If it is still missing, log loudly
+# and serve WITHOUT the glossary: a translator running degraded beats one that
+# will not start.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+try:
+    import i18n_glossary as glossary
+except ImportError as _exc:  # pragma: no cover - deployment accident
+    glossary = None
+    print(
+        f"WARNING: domain glossary unavailable ({_exc}); translations will "
+        "fall back to the everyday sense of product nouns. Expected at "
+        "scripts/i18n_glossary.py.",
+        file=sys.stderr,
+    )
 
 # ---------------------------------------------------------------------------
 # Config
@@ -624,8 +646,15 @@ async def _raw_chunk(
     # spans all four repositories and would swamp the payload if sent whole;
     # filtered, a small batch carries a handful of definitions.  Computed from
     # the UNMASKED sources so that words inside markup still match.
-    gloss = glossary.render(
-        glossary.relevant(sources), language, glossary.protected(sources)
+    gloss = (
+        glossary.render(
+            glossary.relevant(sources),
+            language,
+            lang_code,
+            glossary.protected(sources),
+        )
+        if glossary is not None
+        else ""
     )
     if gloss:
         payload["messages"].insert(1, {"role": "system", "content": gloss})

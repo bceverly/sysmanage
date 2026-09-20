@@ -59,6 +59,12 @@ SHARED = [
     # than redeclaring the table, so the body is identical in all four repos
     # and only the licence header differs.
     ("scripts/i18n_check_markup.py", "scripts/i18n_check_markup.py"),
+    # The terminology table.  It MUST travel with i18n_strict.py: the gate
+    # imports it, so a repo that received the gate without the glossary would
+    # silently stop checking wrong-sense translations -- passing while the
+    # defect it was added for walks straight through.  Same path everywhere,
+    # which is also the path the translation service imports.
+    ("scripts/i18n_glossary.py", "scripts/i18n_glossary.py"),
 ]
 
 # sysmanage keeps the translation backfill under scripts/translation-service/,
