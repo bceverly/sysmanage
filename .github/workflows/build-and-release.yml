@@ -524,13 +524,48 @@ jobs:
           # plus esbuild/rollup binaries that depend on the platform (freebsd)
           # but not on the point release.  Revisit if cross-platform-actions
           # ever offers a supported image.
+          # GENERATE the node-modules distfile explicitly, rather than
+          # relying on makesum to trigger it.  This job is what PUBLISHES that
+          # file to repo.sysmanage.org, so for a new version the MASTER_SITE
+          # cannot possibly hold it yet -- generation is the whole point of the
+          # step, and it should be asked for by name.
+          #
+          # npm.mk registers the generation as fetch-phase hooks
+          # (491:npm-fetch-node-modules, 492:npm-archive-node-modules) which
+          # sort ahead of 500:do-fetch.  On 3.8.0.0 those hooks did not run:
+          # do-fetch went straight to the absent MASTER_SITE and the job died
+          # on a 404 for a file it was supposed to be creating.  The port is
+          # configured correctly (USES=npm:npm,build, NPM_PKGFILE set, the
+          # package.json snapshot present and in sync with its lockfile), so
+          # rather than depend on that ordering, invoke the targets directly.
+          # makesum then finds the file already in DISTDIR and only checksums
+          # it.
+          #
+          # The -V dump runs first so that if this ever fails again the log
+          # alone says whether the prefetch machinery was even enabled --
+          # NPM_PREFETCH=no would mean npm.mk never saw the package.json
+          # snapshot, which looks identical from the outside.
+          echo "--- npm.mk state ---"
+          sudo make -C "$PORTDIR" ALLOW_UNSUPPORTED_SYSTEM=1 \
+            -V NPM_PREFETCH -V _NPM_EXISTS_PKGFILE -V PKGJSONSDIR \
+            -V NPM_PKGFILE -V _DISTFILE_prefetch -V DIST_SUBDIR \
+            -V DISTDIR -V DISTFILES
+          echo "--- generating node-modules distfile ---"
+          sudo make -C "$PORTDIR" ALLOW_UNSUPPORTED_SYSTEM=1 \
+            npm-fetch-node-modules npm-archive-node-modules
           sudo make -C "$PORTDIR" ALLOW_UNSUPPORTED_SYSTEM=1 makesum
           sudo cat "$PORTDIR/distinfo"
 
+          # DIST_SUBDIR matters: npm.mk writes to ${DISTDIR}/${DIST_SUBDIR},
+          # so assuming a bare DISTDIR would report "was not generated" for a
+          # file that exists one directory down -- a misleading error in the
+          # exact place this job already failed once.
           DISTDIR=$(make -C "$PORTDIR" ALLOW_UNSUPPORTED_SYSTEM=1 -V DISTDIR)
+          DIST_SUBDIR=$(make -C "$PORTDIR" ALLOW_UNSUPPORTED_SYSTEM=1 -V DIST_SUBDIR)
+          OUTDIR="${DISTDIR}${DIST_SUBDIR:+/${DIST_SUBDIR}}"
           FILE="sysmanage-${VERSION}-node-modules.tar.gz"
-          [ -s "${DISTDIR}/${FILE}" ] || { echo "ERROR: ${FILE} was not generated"; exit 1; }
-          cp "${DISTDIR}/${FILE}" "$GITHUB_WORKSPACE/${FILE}"
+          [ -s "${OUTDIR}/${FILE}" ] || { echo "ERROR: ${FILE} was not generated in ${OUTDIR}"; exit 1; }
+          cp "${OUTDIR}/${FILE}" "$GITHUB_WORKSPACE/${FILE}"
           sha256 -q "$GITHUB_WORKSPACE/${FILE}" > "$GITHUB_WORKSPACE/${FILE}.sha256"
 
           # Print both so a mismatch against the port's committed distinfo is
