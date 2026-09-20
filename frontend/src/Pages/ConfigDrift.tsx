@@ -15,13 +15,17 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Stack from '@mui/material/Stack';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 import BuildIcon from '@mui/icons-material/Build';
+import HealingIcon from '@mui/icons-material/Healing';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 
 import Divider from '@mui/material/Divider';
 
 import BaselineDiffPanel from '../Components/BaselineDiffPanel';
+import ConfigRemediationRulesPanel from '../Components/ConfigRemediationRulesPanel';
 import { formatUTCTimestamp } from '../utils/dateUtils';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import {
@@ -31,6 +35,11 @@ import {
     getHostDrift,
     remediateDrift,
 } from '../Services/configManagementService';
+import {
+    ConfigRemediationMatch,
+    getFindingRemediation,
+    repairFinding,
+} from '../Services/configFleetService';
 
 /** Pull the server's explanation out of an axios error, or fall back. */
 const messageFrom = (err: unknown, fallback: string): string => {
@@ -66,6 +75,14 @@ const ConfigDrift: React.FC = () => {
     } | null>(null);
     const [remediating, setRemediating] = useState(false);
     const [canRemediate, setCanRemediate] = useState(false);
+    const [tab, setTab] = useState(0);
+    // Which findings a remediation playbook covers, keyed by finding id.
+    // Fetched when the detail dialog opens rather than per row on hover:
+    // an operator deciding how to fix a host wants to see every option at
+    // once, not discover them one mouse-over at a time.
+    const [matches, setMatches] = useState<Record<string, ConfigRemediationMatch>>(
+        {},
+    );
 
     const load = useCallback(async () => {
         try {
@@ -100,9 +117,24 @@ const ConfigDrift: React.FC = () => {
     const openDetail = useCallback(async (row: ConfigDriftHostSummary) => {
         setDetailHost(row);
         setFindings([]);
+        setMatches({});
         setFindingsError(null);
         try {
-            setFindings(await getHostDrift(row.host_id));
+            const rows = await getHostDrift(row.host_id);
+            setFindings(rows);
+            // Settled, not all: one lookup failing must not hide every other
+            // finding's repair. A finding with no entry simply shows the
+            // baseline button, which is the behaviour before playbooks existed.
+            const resolved = await Promise.allSettled(
+                rows.map((finding) => getFindingRemediation(finding.id)),
+            );
+            const found: Record<string, ConfigRemediationMatch> = {};
+            resolved.forEach((result, index) => {
+                if (result.status === 'fulfilled' && result.value.matched) {
+                    found[rows[index].id] = result.value;
+                }
+            });
+            setMatches(found);
         } catch (err) {
             setFindingsError(
                 messageFrom(
@@ -112,6 +144,27 @@ const ConfigDrift: React.FC = () => {
             );
         }
     }, [t]);
+
+    const runRepair = async (findingId: string) => {
+        setRemediating(true);
+        try {
+            const result = await repairFinding(findingId);
+            setNotice(result.message);
+            setDetailHost(null);
+            // Deliberately NOT reloading: the finding stays open until a
+            // check-mode run confirms the fix, so a refresh would show
+            // unchanged drift and read as "the button did nothing".
+        } catch (err) {
+            setError(
+                messageFrom(
+                    err,
+                    t('configDrift.repairFailed', 'Could not queue the repair'),
+                ),
+            );
+        } finally {
+            setRemediating(false);
+        }
+    };
 
     const confirmRemediation = async () => {
         if (!confirmTarget) return;
@@ -228,25 +281,38 @@ const ConfigDrift: React.FC = () => {
                 </Alert>
             )}
 
-            {hosts.length === 0 ? (
-                <Alert severity="success">
-                    {t(
-                        'configDrift.noDrift',
-                        'Every host matches its assigned profile.',
-                    )}
-                </Alert>
-            ) : (
-                <div style={{ width: '100%', height: 520 }}>
-                    <DataGrid
-                        rows={hosts}
-                        columns={columns}
-                        getRowId={(row) => row.host_id}
-                        initialState={{ pagination: { paginationModel: { pageSize: 25 } } }}
-                        pageSizeOptions={[10, 25, 50]}
-                        disableRowSelectionOnClick
-                    />
-                </div>
-            )}
+            {/* Playbooks share this page rather than getting their own nav
+                entry: a rule is written in response to drift you are looking
+                at, so the two belong one click apart. */}
+            <Tabs value={tab} onChange={(_e, value) => setTab(value)} sx={{ mb: 2 }}>
+                <Tab label={t('configDrift.tabDrift', 'Drifting hosts')} />
+                <Tab label={t('configDrift.tabPlaybooks', 'Remediation playbooks')} />
+            </Tabs>
+
+            {tab === 1 && <ConfigRemediationRulesPanel canEdit={canRemediate} />}
+
+            {tab === 0 &&
+                (hosts.length === 0 ? (
+                    <Alert severity="success">
+                        {t(
+                            'configDrift.noDrift',
+                            'Every host matches its assigned profile.',
+                        )}
+                    </Alert>
+                ) : (
+                    <div style={{ width: '100%', height: 520 }}>
+                        <DataGrid
+                            rows={hosts}
+                            columns={columns}
+                            getRowId={(row) => row.host_id}
+                            initialState={{
+                                pagination: { paginationModel: { pageSize: 25 } },
+                            }}
+                            pageSizeOptions={[10, 25, 50]}
+                            disableRowSelectionOnClick
+                        />
+                    </div>
+                ))}
 
             <Dialog
                 open={Boolean(detailHost)}
@@ -291,23 +357,65 @@ const ConfigDrift: React.FC = () => {
                                         : ''}
                                     {finding.profile_name ? ` — ${finding.profile_name}` : ''}
                                 </Typography>
-                                {canRemediate && finding.profile_id && detailHost && (
-                                    <Box sx={{ mt: 1 }}>
-                                        <Button
-                                            size="small"
-                                            variant="outlined"
-                                            startIcon={<BuildIcon />}
-                                            onClick={() =>
-                                                setConfirmTarget({
-                                                    host: detailHost,
-                                                    profileId: finding.profile_id as string,
-                                                    profileName: finding.profile_name || '',
-                                                })
-                                            }
-                                        >
-                                            {t('configDrift.remediate', 'Remediate to baseline')}
-                                        </Button>
-                                    </Box>
+                                {canRemediate && detailHost && (
+                                    <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                                        {/* The targeted repair comes FIRST when one
+                                            exists: re-applying a four-hundred-task
+                                            baseline to fix one file mode is the
+                                            blunter of the two, and the order of the
+                                            buttons is what says so. */}
+                                        {matches[finding.id] &&
+                                            !matches[finding.id].unavailable && (
+                                                <Button
+                                                    size="small"
+                                                    variant="contained"
+                                                    startIcon={<HealingIcon />}
+                                                    disabled={remediating}
+                                                    onClick={() => runRepair(finding.id)}
+                                                >
+                                                    {t(
+                                                        'configDrift.repairWith',
+                                                        'Repair with {{profile}}',
+                                                        {
+                                                            profile:
+                                                                matches[finding.id]
+                                                                    .remediation_profile_name ||
+                                                                '',
+                                                        },
+                                                    )}
+                                                </Button>
+                                            )}
+                                        {matches[finding.id]?.unavailable && (
+                                            <Chip
+                                                size="small"
+                                                color="warning"
+                                                label={t(
+                                                    'configDrift.repairUnavailable',
+                                                    'Its repair profile is not active',
+                                                )}
+                                            />
+                                        )}
+                                        {finding.profile_id && (
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                startIcon={<BuildIcon />}
+                                                onClick={() =>
+                                                    setConfirmTarget({
+                                                        host: detailHost,
+                                                        profileId: finding.profile_id as string,
+                                                        profileName:
+                                                            finding.profile_name || '',
+                                                    })
+                                                }
+                                            >
+                                                {t(
+                                                    'configDrift.remediate',
+                                                    'Remediate to baseline',
+                                                )}
+                                            </Button>
+                                        )}
+                                    </Stack>
                                 )}
                             </Box>
                         ))}

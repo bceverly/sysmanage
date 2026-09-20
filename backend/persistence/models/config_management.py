@@ -263,3 +263,109 @@ class ConfigDriftFinding(Base):
             f"<ConfigDriftFinding(host_id={self.host_id}, "
             f"task={self.task_name!r}, {state})>"
         )
+
+
+class ConfigRemediationRule(Base):
+    """Which profile repairs a given drift finding (Phase 20.1).
+
+    WHY A RULE AND NOT A "PLAYBOOK" TABLE
+    -------------------------------------
+    The roadmap asks for "remediation playbooks (apply to bring a host into
+    compliance)", and the obvious reading is a new table holding playbook
+    bodies. That would be a second authoring surface with its own validation,
+    its own versioning, its own engine dispatch and its own run history --
+    four subsystems re-grown alongside the ones ``ConfigProfile`` already has,
+    and four places for the two copies to disagree.
+
+    A remediation playbook IS a profile. What did not exist is the BINDING:
+    "when this divergence shows up, that profile is what fixes it". So this
+    table holds only the binding, and everything else is reused -- authoring,
+    versions, the licensed spec builders, ``config_mgmt_dispatch``, and the
+    run rows that prove the repair ran.
+
+    WHY THIS IS NOT THE SAME AS REMEDIATE-TO-BASELINE
+    -------------------------------------------------
+    20.2's remediate button re-applies the WHOLE profile the host drifted
+    from. That is right when the profile is small and wrong when it is a
+    four-hundred-task baseline and the divergence is one file mode: the
+    operator wanted a permission fixed and got an hour of unrelated
+    convergence. A rule points one finding at the narrow thing that repairs
+    it, which is the difference between a scalpel and re-imaging.
+
+    MATCHING
+    --------
+    ``task_pattern`` is a glob matched against ``ConfigDriftFinding.task_name``
+    -- the only identity the generic result shape carries, as that model's
+    docstring explains. ``profile_id`` optionally narrows a rule to drift from
+    one profile; NULL means "this repair applies wherever this task drifts",
+    which is what makes a rule library worth having across profiles.
+
+    The engine owns the matching semantics (glob dialect, precedence, what a
+    tie means). This table only records intent -- the same split every other
+    row in this file follows.
+    """
+
+    __tablename__ = "config_remediation_rule"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    name = Column(String(255), nullable=False, unique=True, index=True)
+    description = Column(Text, nullable=True)
+
+    # Narrow this rule to drift from ONE profile, or NULL for any. Softened to
+    # SET NULL rather than CASCADE: deleting the profile a rule was scoped to
+    # should widen the rule, not silently delete the repair. It becomes a
+    # broader rule that still works, which an operator can see and fix; a
+    # vanished rule is a repair that stops happening with no trace.
+    profile_id = Column(
+        GUID(),
+        ForeignKey(PROFILE_ID_FK, ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    # Glob against ConfigDriftFinding.task_name.
+    task_pattern = Column(String(500), nullable=False)
+
+    # The profile that performs the repair. CASCADE, unlike profile_id above:
+    # a rule whose remediation is gone has nothing to run and is not a record
+    # worth keeping, whereas a rule whose SCOPE is gone still repairs things.
+    remediation_profile_id = Column(
+        GUID(),
+        ForeignKey(PROFILE_ID_FK, ondelete=CASCADE_DELETE),
+        nullable=False,
+        index=True,
+    )
+
+    enabled = Column(Boolean, nullable=False, default=True)
+    # Lowest number wins. An explicit column rather than ordering by
+    # specificity: "most specific pattern" is a rule nobody can predict from
+    # looking at two globs, and an operator who cannot predict which repair
+    # will fire will not enable automatic ones.
+    priority = Column(Integer, nullable=False, default=100)
+
+    # Whether the drift reconciler may fire this repair WITHOUT an operator.
+    # Default off, deliberately: automatic remediation across a fleet is the
+    # largest blast radius in this feature, and it should be something somebody
+    # switched on for a specific divergence they understand -- not the state a
+    # rule arrives in because that was the convenient default.
+    #
+    # Automatic firing still inherits both existing guards and must never
+    # re-implement either: enqueue_message refuses a host that has not
+    # advertised support (Phase 19), and outbound_processor holds delivery
+    # outside a maintenance window (Phase 14.2).
+    auto_apply = Column(Boolean, nullable=False, default=False)
+
+    created_by = Column(String(255), nullable=True)
+    updated_by = Column(String(255), nullable=True)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
+
+    __table_args__ = (
+        # The reconciler's query is "enabled auto-apply rules, in precedence
+        # order", run once per drift reconciliation.
+        Index("ix_config_remediation_rule_active", "enabled", "auto_apply", "priority"),
+    )
+
+    def __repr__(self):
+        return (
+            f"<ConfigRemediationRule(id={self.id}, name='{self.name}', "
+            f"pattern={self.task_pattern!r}, auto={self.auto_apply})>"
+        )

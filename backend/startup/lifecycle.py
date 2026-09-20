@@ -488,6 +488,29 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                             tick_e,
                         )
 
+                    # Fleet jobs share the gate: they cannot exist without the
+                    # module either, and the runner both launches scheduled
+                    # templates and releases the next wave of anything already
+                    # running -- the second of which has to survive a restart
+                    # mid-job, since a job's state lives in its rows.
+                    try:
+                        from backend.services.config_mgmt_job_runner import (
+                            config_mgmt_job_tick_service,
+                        )
+
+                        job_tick_task = asyncio.create_task(
+                            config_mgmt_job_tick_service()
+                        )
+                        logger.info(
+                            "Config fleet job tick task started: %s",
+                            job_tick_task,
+                        )
+                    except Exception as job_e:  # pylint: disable=broad-except
+                        logger.warning(
+                            "Failed to start config fleet job tick task: %s",
+                            job_e,
+                        )
+
                 # Start air-gap collection schedule tick service if the
                 # collector engine is loaded.  The /tick endpoint and
                 # DB model are always available (OSS-side), but the

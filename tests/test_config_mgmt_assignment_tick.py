@@ -219,23 +219,32 @@ class TestDispatchOne:
         # cannot be correlated produces no run row and therefore no drift
         # finding: the schedule appears to work and the dashboard stays empty.
         # That is exactly what a real round trip found.
+        #
+        # Since Phase 20.1 the enqueue itself lives in the shared
+        # ``config_mgmt_dispatch.queue_apply``, which imports QueueOperations
+        # lazily -- so the patch is on the class's method, which covers every
+        # caller regardless of where the import happens.
         queued = {}
 
-        class FakeQueue:
-            def enqueue_message(self, **kwargs):
-                queued.update(kwargs)
+        def capture(_self, **kwargs):
+            queued.update(kwargs)
+            return kwargs.get("message_id")
 
-        with patch.object(tick, "QueueOperations", FakeQueue):
+        with patch(
+            "backend.websocket.queue_operations.QueueOperations.enqueue_message",
+            side_effect=capture,
+            autospec=True,
+        ):
             assert tick._dispatch_one(None, host(), {"profile_name": "baseline"})
 
         assert queued["message_id"] == queued["message_data"]["message_id"]
 
     def test_a_host_that_refuses_the_command_is_reported_not_raised(self):
-        class FakeQueue:
-            def enqueue_message(self, **_kwargs):
-                raise RuntimeError("agent cannot run playbooks")
-
-        with patch.object(tick, "QueueOperations", FakeQueue):
+        with patch(
+            "backend.websocket.queue_operations.QueueOperations.enqueue_message",
+            side_effect=RuntimeError("agent cannot run playbooks"),
+            autospec=True,
+        ):
             assert tick._dispatch_one(None, host(), {}) is False
 
 

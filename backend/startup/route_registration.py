@@ -37,7 +37,10 @@ from backend.api import (
     config_management,
     config_mgmt_prereq,
     config_mgmt_drift,
+    config_mgmt_inventories,
+    config_mgmt_jobs,
     config_mgmt_profiles,
+    config_mgmt_remediation,
     config_mgmt_runs,
     content_lifecycle,
     content_lifecycle_diff,
@@ -409,6 +412,18 @@ def register_routes(app: FastAPI):
     logger.debug("Adding config-management drift router (Phase 20.2)")
     _include_versioned(app, config_mgmt_drift.router, tags=["config-management"])
     logger.debug("Config-management drift router added")
+
+    logger.debug("Adding config-management inventories router (Phase 20.1)")
+    _include_versioned(app, config_mgmt_inventories.router, tags=["config-management"])
+    logger.debug("Config-management inventories router added")
+
+    logger.debug("Adding config-management fleet jobs router (Phase 20.1)")
+    _include_versioned(app, config_mgmt_jobs.router, tags=["config-management"])
+    logger.debug("Config-management fleet jobs router added")
+
+    logger.debug("Adding config-management remediation router (Phase 20.1)")
+    _include_versioned(app, config_mgmt_remediation.router, tags=["config-management"])
+    logger.debug("Config-management remediation router added")
 
     logger.debug("Adding diagnostics router (native /api/v1 + alias)")
     _include_versioned(app, diagnostics.router, tags=["diagnostics"])

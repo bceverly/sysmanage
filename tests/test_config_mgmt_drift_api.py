@@ -98,6 +98,26 @@ def user(*roles):
     )
 
 
+def _queue_patch(sink):
+    """Capture what reaches the message queue, wherever it is called from.
+
+    Since Phase 20.1 remediation queues through the shared
+    ``config_mgmt_dispatch.queue_apply`` helper, which imports QueueOperations
+    lazily -- so the patch has to be on the class's method rather than on a
+    name bound in this API module.
+    """
+
+    def capture(_self, **kwargs):
+        sink.update(kwargs)
+        return kwargs.get("message_id")
+
+    return patch(
+        "backend.websocket.queue_operations.QueueOperations.enqueue_message",
+        side_effect=capture,
+        autospec=True,
+    )
+
+
 class TestFleetView:
     @pytest.mark.asyncio
     async def test_hosts_are_grouped_with_a_finding_count(self):
@@ -235,11 +255,7 @@ class TestRemediation:
         session = _Session(Host=[host()], ConfigProfile=[profile()])
         queued = {}
 
-        class FakeQueue:
-            def enqueue_message(self, **kwargs):
-                queued.update(kwargs)
-
-        with patch.object(api, "QueueOperations", FakeQueue):
+        with _queue_patch(queued):
             out = await api.remediate_drift(
                 api.RemediateRequest(host_id=str(HOST), profile_id=str(PROFILE)),
                 session,
@@ -261,11 +277,7 @@ class TestRemediation:
         session = _Session(Host=[host()], ConfigProfile=[profile()])
         queued = {}
 
-        class FakeQueue:
-            def enqueue_message(self, **kwargs):
-                queued.update(kwargs)
-
-        with patch.object(api, "QueueOperations", FakeQueue):
+        with _queue_patch(queued):
             await api.remediate_drift(
                 api.RemediateRequest(host_id=str(HOST), profile_id=str(PROFILE)),
                 session,
@@ -280,11 +292,7 @@ class TestRemediation:
         # here would be a dashboard that lies about the fleet.
         session = _Session(Host=[host()], ConfigProfile=[profile()])
 
-        class FakeQueue:
-            def enqueue_message(self, **_kwargs):
-                return None
-
-        with patch.object(api, "QueueOperations", FakeQueue):
+        with _queue_patch({}):
             out = await api.remediate_drift(
                 api.RemediateRequest(host_id=str(HOST), profile_id=str(PROFILE)),
                 session,

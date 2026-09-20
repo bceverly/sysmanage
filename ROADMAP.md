@@ -472,7 +472,7 @@ drifted down as feature pages shipped without tests.
 
 | Frontend | Path | Baseline (2026-06) | After Phase 13 | Enforced floor |
 |---|---|---|---|---|
-| OSS SysManage | `sysmanage/frontend/src` | ~9% | ~12% | **≥60% lines** (raised 2026-08-26; measured 62.35%) |
+| OSS SysManage | `sysmanage/frontend/src` | ~9% | ~12% | **≥70% lines** (raised to 60 on 2026-08-26, then to 70 during Phase 20; measured 71.88%) |
 | License server (admin portal) | `sysmanage-professional-plus/frontend/src` | ~23% | **~50%** | **≥48% lines** |
 | Pro+ components (plugin bundles) | `sysmanage-professional-plus/frontend/plugin-src` | ~7% | **~54%** | **≥53% lines** |
 
@@ -7364,12 +7364,19 @@ single-host apply. Remaining work, in the order it should be done:
          endpoint and the tick. A scheduled apply that differed from a manual
          one would be a bug nobody finds until a fleet drifts, and the
          scheduled path is the one nobody exercises by hand.
-     Still to do: fleet-scale dispatch (the tick queues per host serially,
-     which is fine for tens and unproven for thousands) and a
-     `docs/professional-plus/` page.
-  5. **Remediation playbooks** — largely blocked on 20.2 drift detection, which
-     is what determines *what* needs remediating.
-  6. **Final i18n pass** once the remaining UI exists.
+     ~~Still to do: fleet-scale dispatch and a `docs/professional-plus/`
+     page.~~ — **DONE 2026-09-19.** Fleet dispatch is `ConfigJob` +
+     `config_mgmt_job_runner`, which replaces the serial per-host queueing
+     with bounded waves; the docs page is
+     `docs/professional-plus/fleet-configuration-jobs.html`.
+  5. ~~**Remediation playbooks**~~ — **DONE 2026-09-19.** Was correctly
+     sequenced behind 20.2: drift detection is what determines *what* needs
+     remediating, and a rule keys on a drift finding's task name, which did
+     not exist until 20.2 S1 defined it.
+  6. ~~**Final i18n pass**~~ — **DONE 2026-09-19.** 81 frontend keys
+     (`configFleet`, `configRemediation`, the new `configDrift` entries) and
+     26 backend msgids seeded across all 14 locales; 73 docs-site keys seeded
+     for the new page and the playbooks section.
 
 **DECIDED 2026-08-26 (Bryan): PULL-style execution, not push.** Ansible is
 conventionally push-based — a control node SSHing into each target — and that
@@ -7753,20 +7760,109 @@ loop dispatch → execute → ingest → display.
         wins** over any generic message — it is the only thing that names which
         field a mismatched host actually wants.
 
-Still Pro+ and unstarted: profile authoring/storage, fleet-scale job templates,
-inventories from hosts/tags/sites, and scheduling. Note
-`config_profile_run.profile_id` is deliberately nullable so profile storage can
-land later without migrating the rows recorded before it existed.
-- [ ] Desired-state config-as-code: Ansible role/playbook execution at scale (job templates; inventories from SysManage hosts/tags/sites) with results + idempotency reporting
-      *(the results + idempotency-reporting half is DONE, as is single-host
-      execution; what remains is the fleet half — job templates and inventories)*
+Profile authoring/storage and scheduling landed 2026-08-27; fleet-scale job
+templates and inventories landed 2026-09-19 (see the box below). Note
+`config_profile_run.profile_id` is deliberately nullable so profile storage
+could land later without migrating the rows recorded before it existed.
+- [x] Desired-state config-as-code: Ansible role/playbook execution at scale (job templates; inventories from SysManage hosts/tags/sites) with results + idempotency reporting
+      **DONE 2026-09-19.** The fleet half. Five tables (`config_inventory`,
+      `config_inventory_member`, `config_job_template`, `config_job`,
+      `config_job_target`; migration `c23cfgfleet01`), a
+      `config_mgmt_job_runner` that releases in BOUNDED WAVES, and a
+      `/config-jobs` page with three tabs.
+
+      **What makes it fleet-scale rather than a bigger assignment.** The
+      assignment tick queues every matched host in one pass — correct for tens
+      and wrong for thousands in two ways: one transaction holding the whole
+      fleet, and a queue burst that arrives regardless of what the network and
+      the agents can absorb. A job never has more than its `concurrency` in
+      flight, and is paced by RESULTS rather than by the clock: closing a
+      target advances its job immediately, so a fleet is worked through as
+      fast as it answers. The 60-second tick is only the safety net.
+
+      **Inventories RESOLVE, they do not store a host list.** They name the
+      same host/tag/site selectors assignments use and resolve at launch, so a
+      host added to a tag is picked up. A copied list would be wrong the moment
+      that happened, and wrong SILENTLY — a job that misses machines looks
+      exactly like a job that succeeded. Same reason the host count is computed
+      on every read and there is a preview endpoint.
+
+      **A job with failures is `completed`, not `failed` — deliberately.** The
+      status answers "did this job do its work", not "is every host happy";
+      the counts answer that. On four thousand hosts a handful are always
+      offline or mid-reboot, and a status that goes red every single time is
+      ignored within a week — worth nothing on the day it means something. A
+      host that cannot take the command is SKIPPED with the reason on its row,
+      never failed, so a mixed fleet does not read as broken.
+
+      **Things that had to be decided.** A dispatched target that never
+      reports ages out after six hours (the engine's own timeout ceiling), or
+      a job whose agent vanished holds its slots forever and shows an
+      outstanding count that never moves — which reads as a broken feature
+      rather than a failed host. Cancelling leaves in-flight targets alone,
+      because the command is with the agent and claiming otherwise would be a
+      status that lies. Job history outlives its parents: every FK softens to
+      NULL beside a denormalised name, so deleting a template does not erase
+      the record that it changed four thousand hosts.
+
+      **Found while building it:** the "one id for the envelope AND the queue
+      row" block — the 2026-08-28 silent-result-drop trap — had been pasted
+      into THREE call sites with its warning comment. Fleet jobs needed a
+      fourth, and needed the id RETURNED (it is what closes a target). Now one
+      `dispatch.queue_apply`, and the three existing callers were moved onto
+      it.
+
+      Engine rules in `config_jobs.pxi`: concurrency clamp (1..500 — an
+      unbounded value is the same as having no runner), wave sizing, inventory
+      selectors, and the status semantics above.
 - [x] Config profiles assignable per host/tag/site, enforced on a schedule —
       **DONE 2026-08-27.** `config_profile_assignment` carries `host_id` /
       `tag_id` / `site_id` as three nullable FK columns (exactly one set, so an
       assignment cannot outlive the host it names) plus a cron `schedule` and
       `check_mode`; `config_mgmt_assignment_tick` enforces them, deriving
       due-ness from `last_applied_at` rather than a stored cursor.
-- [ ] Remediation playbooks (apply to bring a host into compliance)
+- [x] Remediation playbooks (apply to bring a host into compliance)
+      **DONE 2026-09-19.** 20.2's remediate button re-applies the WHOLE
+      profile. Right for a small profile, wrong when it is a four-hundred-task
+      baseline and the divergence is one file mode: the operator wanted a
+      permission fixed and got an hour of unrelated convergence inside a
+      window budgeted for one change.
+
+      **The design decision that shrank this from a subsystem to a table.** A
+      remediation playbook IS a `ConfigProfile`. The obvious reading of the
+      roadmap line was a new table holding playbook bodies — which would
+      re-grow authoring, validation, versioning, engine dispatch and run
+      history alongside the ones profiles already have, and give each of them
+      a second place to disagree. What did not exist was the BINDING, so
+      `config_remediation_rule` holds only that: a task-name glob, an optional
+      profile scope, the profile that repairs it, a priority and an
+      `auto_apply` flag.
+
+      **Matching is the licensed part** (`config_remediation.pxi`), because it
+      must be identical whether an operator pressed a button or the reconciler
+      fired unattended — two implementations is how a preview ends up
+      promising something the automatic path does not do. Globs not regexes
+      (`.` as a regex silently matches a task it should not); case-insensitive
+      (task names are hand-written prose across four engines); lowest priority
+      wins, profile-scoped beats global at a tie, then name — because database
+      order is not stable enough, and an operator who cannot predict which
+      repair fires will never turn auto-apply on. A bare `*` is refused: with
+      auto-apply it fires one profile at every divergence in the fleet, and it
+      looks like the system working.
+
+      **Auto-apply fires once per EPISODE, not once per check.** Only a
+      finding that just opened is eligible, so a divergence the playbook
+      cannot fix shows as persistent drift rather than an endless loop of
+      attempts; a regression re-opens the finding and does earn a fresh
+      attempt. Off by default. Inherits capability gating and maintenance
+      windows unchanged; a rule pointing at a retired profile applies nothing
+      and says so loudly, since silent breakage of a written-down repair is
+      what makes unattended remediation dangerous.
+
+      Surfaced as a Playbooks tab on the drift page — a rule is written in
+      response to drift you are looking at — plus a per-finding "Repair with
+      X" button that appears only when a rule matches, ordered ahead of the
+      blunter baseline re-apply.
 - [x] **Puppet, Salt and Chef adapters behind the same profile abstraction —
       a committed deliverable, not a maybe.** **DONE 2026-08-27**, and the
       four-engine round trip was VERIFIED LIVE 2026-08-29 (see 20.2) against
@@ -8197,6 +8293,62 @@ nearly free and makes the dashboard actionable rather than merely informative.
       before ticking. Every remaining open box in the file belongs to phase 21+,
       which is unstarted work rather than backlog drift.
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+      **Status 2026-09-20 — one item outstanding: the docs screenshots.**
+      Both feature boxes above are done; what remains is this gate.
+
+      *Verified:*
+      · **Tests** — sysmanage 7,793 + 565, agent 4,678, Pro+ 1,276 + 116
+        engine, frontend 1,760, plus E2E. Zero failures, zero unexpected skips.
+      · **Lint** — `make lint` clean in sysmanage, sysmanage-professional-plus
+        and sysmanage-docs.
+      · **Security** — Pro+ `make security` clean end to end. Closing it took
+        two fixes worth remembering: four `urllib` call sites carried
+        `# nosec B310` and still blocked Semgrep, because `# nosec` is bandit
+        and Semgrep needs its own `# nosemgrep` (neither implies the other);
+        and eight bandit findings in `module-source` test files — captured
+        Chef report data, and XML the tests render themselves — were invisible
+        until the Semgrep fix let the run reach `security-cython` at all.
+      · **SonarQube / CodeQL** — scans run; alerts at zero.
+      · **Performance** — load/perf benchmarks at or above the prior baseline.
+      · **Coverage** — backend 85.33% against the 83% gate; the new modules
+        measure 90%. Frontend lines 71.88% against the enforced floor of 70 —
+        this phase's rung — with statements/functions/branches at
+        70.57/58.83/51.61 over 68/56/48.
+      · **Migration** — `c23cfgfleet01` applies, downgrades and re-applies over
+        existing tables on SQLite, and has been run on PostgreSQL.
+      · **i18n** — 0 untranslated gaps in all 13 locales across all three
+        repos. The machine translation needed heavy correction: with no domain
+        glossary in the service prompt it took the everyday sense of every
+        term — `inventory` as warehouse stock, `fleet` as a naval fleet,
+        `drift` as physical floating, and Arabic/Dutch `host` as *guest*, which
+        inverts the meaning. All gate-green, because no completeness,
+        placeholder or markup check can catch a fluent translation of the
+        wrong sense. 403 frontend values and 114 docs paragraphs were
+        rewritten by hand. See the Phase 21 note about fixing this at source.
+      · **Docs** — new `fleet-configuration-jobs.html`, a playbooks section on
+        `configuration-drift.html`, index cards, four `shotlist.json` entries
+        and the seed data they need, roadmap page moved off "still ahead".
+        Also fixed a pipeline bug found on the way: English living in an
+        ATTRIBUTE (`data-i18n-attr`, e.g. `<meta content>`) was never
+        extracted, so 21 meta descriptions sat EMPTY in `en.json` — invisible
+        to every gate, since an empty value is not `[MISSING:]`, not `[TODO]`
+        and not English-identical. Extractor fixed and a gate added.
+      · **READMEs** — sysmanage, sysmanage-docs and Pro+ updated.
+        sysmanage-agent is deliberately unchanged: nothing agent-side shipped,
+        because fleet jobs and remediation both dispatch the existing
+        `APPLY_CONFIG_PROFILE` command.
+      · **Copyright headers** — every new file carries 2024-2026, AGPL in the
+        three open repos and PROPRIETARY in Pro+.
+      · **Version** — v3.7.0.0, the phase's target; engine bumped to 1.0.4.
+
+      *Outstanding:*
+      · **`make screenshots-enterprise`** — the four new PNGs
+        (`config-fleet-jobs`, `config-job-templates`, `config-inventories`,
+        `config-remediation-rules`) are not on disk, and four `<img>` tags
+        already reference them, so `make test-links` will flag them. The
+        shotlist entries and `seed_ent_config.py` demo data are in place; this
+        is the capture run itself, and the last thing between Phase 20 and
+        done.
 
 ---
 
@@ -8479,10 +8631,35 @@ are the bulk; the review UI is small).
 
 ### Exit Criteria
 
+- [ ] **Give the translation service a DOMAIN GLOSSARY before 21 adds strings.**
+      `SYSTEM_PROMPT` in `scripts/translation-service/translate_service.py`
+      protects brand and protocol names but never states what the product's own
+      nouns MEAN, so the model picks the everyday sense and the result passes
+      every gate. Measured on Phase 20's strings (2026-09-20), all gate-green:
+      `inventory` → 在庫 / 재고 / Voorraad / Инвентаризация (warehouse stock),
+      `fleet` → 艦隊 (naval) and 车队 (motorcade), `profile` → 个人资料 (a
+      personal bio), `drift` → "Nur treiben lassen" / 浮遊元のみ (physically
+      floating), `job` → "modèle d'emploi" (employment), and — inverted —
+      `Hosts` → الضيوف and `Every host` → "Elke gast", both meaning GUESTS.
+      No completeness, placeholder, markup or English-identity check can catch
+      a fluent translation of the WRONG SENSE; only reading it can, which cost
+      403 frontend values and 114 docs paragraphs of hand correction in Phase
+      20. A glossary block in the prompt (inventory = a named set of hosts;
+      fleet = the managed machines; profile = a configuration profile; drift =
+      configuration divergence; job = a unit of work; dry run = simulation)
+      fixes it once for every phase after. Worth doing FIRST: 21 is
+      string-heavy (advisor prose, threat-model questionnaire, punch list).
+      Also note the service returns long paragraphs UNCHANGED when they mix
+      inline markup with em-dashes and curly quotes — those still need hands.
 - [ ] Unenrolled asset discovery validated on ≥2 network segments: passive
       reporting finds a known-unmanaged device, correlation suppresses every
       managed host, and an allow-list exclusion survives a DHCP lease change
 - [ ] **Coverage ladder rung: OSS frontend `lines` floor to 70** — the last rung before GA verifies it (added 2026-08-07 with the 20/21 rungs).
+      *Already raised: Phase 20 took the enforced `lines` floor in
+      `frontend/vite.config.ts` from 60 to 70 (measured 71.88%), so this
+      box is a VERIFICATION, not a climb — 21 adds pages of its own and
+      has to show the floor still holds after them. Left unticked for
+      exactly that reason.*
 - [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 

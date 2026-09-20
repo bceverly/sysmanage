@@ -37,9 +37,7 @@ _VERSIONED_FIELDS = ("engine", "content")
 
 def _engine():
     """The Pro+ module, or None when it is not loaded."""
-    from backend.licensing.module_loader import module_loader  # noqa: PLC0415
-
-    return module_loader.get_module(shim.ENGINE_CODE)
+    return shim.engine_module()
 
 
 def validate_profile(name: str, engine: str, content: str) -> Optional[str]:

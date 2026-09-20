@@ -62,6 +62,7 @@ vi.mock("../../Services/permissions", async (orig) => {
 });
 
 vi.mock("../../Services/configManagementService", () => ({
+  getConfigProfiles: vi.fn().mockResolvedValue([]),
   getDriftingHosts: vi.fn(),
   getHostDrift: vi.fn(),
   remediateDrift: vi.fn(),
@@ -70,6 +71,27 @@ vi.mock("../../Services/configManagementService", () => ({
   // updates state after the test ends.
   getBaselineCategories: vi.fn().mockResolvedValue([]),
   getBaselineDiff: vi.fn(),
+}));
+
+// Remediation playbooks (Phase 20.1). Mocked even though the page tolerates a
+// rejection here: an unmocked service would make real HTTP calls from jsdom,
+// and a test whose result depends on a network timeout is not a test.
+vi.mock("../../Services/configFleetService", () => ({
+  getFindingRemediation: vi.fn().mockResolvedValue({
+    finding_id: "f1",
+    matched: false,
+    unavailable: false,
+    rule_id: null,
+    rule_name: null,
+    remediation_profile_id: null,
+    remediation_profile_name: null,
+    preview: null,
+  }),
+  repairFinding: vi.fn(),
+  getRemediationRules: vi.fn().mockResolvedValue([]),
+  createRemediationRule: vi.fn(),
+  updateRemediationRule: vi.fn(),
+  deleteRemediationRule: vi.fn(),
 }));
 
 // The panel loads its own candidate reference hosts.
@@ -87,6 +109,10 @@ import {
   getHostDrift,
   remediateDrift,
 } from "../../Services/configManagementService";
+import {
+  getFindingRemediation,
+  repairFinding,
+} from "../../Services/configFleetService";
 import ConfigDrift from "../../Pages/ConfigDrift";
 
 const m = (fn: unknown) => fn as ReturnType<typeof vi.fn>;
@@ -287,5 +313,113 @@ describe("remediation", () => {
     fireEvent.click(await screen.findByText("Remediate to baseline"));
     fireEvent.click(await screen.findByRole("button", { name: "Cancel" }));
     await waitFor(() => expect(m(remediateDrift)).not.toHaveBeenCalled());
+  });
+});
+
+describe("ConfigDrift — remediation playbooks", () => {
+  const openDetail = async () => {
+    render(<ConfigDrift />);
+    await screen.findByText("web01.invalid");
+    fireEvent.click(screen.getByRole("button", { name: "View" }));
+    await waitFor(() => expect(m(getHostDrift)).toHaveBeenCalledWith("h1"));
+  };
+
+  const matched = (over = {}) => ({
+    finding_id: "f1",
+    matched: true,
+    unavailable: false,
+    rule_id: "r1",
+    rule_name: "sshd repair",
+    remediation_profile_id: "p2",
+    remediation_profile_name: "sshd fix",
+    preview: { rule_name: "sshd repair" },
+    ...over,
+  });
+
+  test("a finding with no matching rule offers only the baseline re-apply", async () => {
+    // The behaviour before playbooks existed, and the right fallback: a rule
+    // library nobody has written yet must not remove the repair that works.
+    await openDetail();
+    expect(await screen.findByText("Remediate to baseline")).toBeInTheDocument();
+    expect(screen.queryByText(/Repair with/)).not.toBeInTheDocument();
+  });
+
+  test("a matched playbook is offered by name", async () => {
+    m(getFindingRemediation).mockResolvedValue(matched());
+    await openDetail();
+    expect(await screen.findByText("Repair with sshd fix")).toBeInTheDocument();
+  });
+
+  test("the targeted repair is offered ahead of the baseline re-apply", async () => {
+    // Re-applying a four-hundred-task baseline to fix one file mode is the
+    // blunter of the two, and button order is what says so.
+    m(getFindingRemediation).mockResolvedValue(matched());
+    await openDetail();
+    const targeted = await screen.findByText("Repair with sshd fix");
+    const baseline = screen.getByText("Remediate to baseline");
+    // DOCUMENT_POSITION_FOLLOWING (4) read off the element rather than the
+    // global `Node`, which the test lint config does not expose.
+    const FOLLOWING = 4;
+    expect(targeted.compareDocumentPosition(baseline) & FOLLOWING).toBeTruthy();
+  });
+
+  test("a rule whose repair profile was retired says so instead of offering it", async () => {
+    // Two different problems: "nothing knows how to fix this" sends you to
+    // write a rule, "the fix was turned off" sends you to turn it back on.
+    m(getFindingRemediation).mockResolvedValue(
+      matched({ unavailable: true, remediation_profile_name: null }),
+    );
+    await openDetail();
+    expect(
+      await screen.findByText("Its repair profile is not active"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Repair with/)).not.toBeInTheDocument();
+  });
+
+  test("the targeted repair fires without a second confirmation dialog", async () => {
+    // Unlike the baseline button, this one already names its subject on the
+    // face of it: "Repair with sshd fix" IS the confirmation.
+    m(getFindingRemediation).mockResolvedValue(matched());
+    m(repairFinding).mockResolvedValue({
+      finding_id: "f1",
+      host_id: "h1",
+      profile_id: "p2",
+      profile_name: "sshd fix",
+      queued: true,
+      message: "The repair was queued for this host",
+    });
+    await openDetail();
+    fireEvent.click(await screen.findByText("Repair with sshd fix"));
+    await waitFor(() => expect(m(repairFinding)).toHaveBeenCalledWith("f1"));
+    expect(
+      await screen.findByText("The repair was queued for this host"),
+    ).toBeInTheDocument();
+  });
+
+  test("a refused repair is reported with the server's reason", async () => {
+    m(getFindingRemediation).mockResolvedValue(matched());
+    m(repairFinding).mockRejectedValue({
+      response: { data: { detail: "Host is not active" } },
+    });
+    await openDetail();
+    fireEvent.click(await screen.findByText("Repair with sshd fix"));
+    expect(await screen.findByText("Host is not active")).toBeInTheDocument();
+  });
+
+  test("one failed lookup does not hide every other finding's repair", async () => {
+    // Promise.allSettled, not all: a single lookup error must not take the
+    // whole dialog's remediation options with it.
+    m(getFindingRemediation).mockRejectedValue(new Error("boom"));
+    await openDetail();
+    expect(await screen.findByText("Remediate to baseline")).toBeInTheDocument();
+  });
+
+  test("the playbooks tab is reachable from this page", async () => {
+    // A rule is written in response to drift you are looking at, so the two
+    // belong one click apart rather than in separate nav entries.
+    render(<ConfigDrift />);
+    expect(
+      await screen.findByText("Remediation playbooks"),
+    ).toBeInTheDocument();
   });
 });

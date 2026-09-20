@@ -160,6 +160,17 @@ async def handle_config_profile_result(db, connection, message_data: dict):  # N
             result.get("tasks") or [],
             module_loaded=_config_engine_loaded(),
         )
+
+        # Phase 20.1 fleet jobs: if this result answers a command a job
+        # dispatched, close that target and let the job release its next
+        # wave. Inside the same transaction as the run, deliberately -- a job
+        # whose progress and whose run rows can disagree is a progress bar
+        # nobody can trust. Imported here for the same reason drift is
+        # reconciled here rather than later: the handler already holds the
+        # session, and the alternative is a second pass that re-reads it.
+        from backend.services import config_mgmt_job_runner as jobs  # noqa: PLC0415
+
+        jobs.close_target_for_run(db, run)
         db.commit()
     except Exception as exc:  # NOSONAR - see docstring: never stall the queue
         db.rollback()

@@ -16,6 +16,7 @@ from .airgap import *
 from .airgap_bundle import *
 from .api_key import *
 from .child_host import *
+from .config_fleet import *
 from .config_management import *
 from .content_lifecycle import *
 from .core import *
@@ -105,6 +106,12 @@ __all__ = [
     "ConfigDriftFinding",
     "ConfigProfileRun",
     "ConfigProfileVersion",
+    "ConfigRemediationRule",
+    "ConfigInventory",
+    "ConfigInventoryMember",
+    "ConfigJob",
+    "ConfigJobTarget",
+    "ConfigJobTemplate",
     "ScriptExecutionLog",
     "DiagnosticReport",
     # Organization models

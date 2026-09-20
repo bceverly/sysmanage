@@ -138,6 +138,12 @@ es,it,nl,pt: re:firewall
 fr,it,nl,pt,zh_CN: re:ok
 de,fr,it,nl: re:audit
 de,fr,nl: re:(Agent|Distro)
+# "Jobs" is the German IT term (Cron-Job, Batch-Job, Job-Scheduler), and
+# the rest of the German fleet UI already says Job-Vorlage and
+# Konfigurationsjobs. Translating only the tab label to "Aufgaben" would
+# give one thing two names on the same page. Scoped to de: Dutch says
+# "Taken" and Spanish "Trabajos", and both do translate it.
+de: re:Jobs
 de,it,nl: re:(Dashboard|Repository|Server)
 fr,nl,pt: re:Sites?
 de,nl,pt: re:Status:

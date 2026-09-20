@@ -42,7 +42,6 @@ at startup keeps it from running at all.
 
 import asyncio
 import logging
-import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List
 
@@ -50,9 +49,6 @@ from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.partitions import iter_host_databases
 from backend.services import config_mgmt_dispatch as dispatch
-from backend.websocket.queue_enums import QueueDirection
-from backend.websocket.queue_operations import QueueOperations
-from backend.websocket.messages import CommandType, Message, MessageType
 
 logger = logging.getLogger(__name__)
 
@@ -126,31 +122,10 @@ def _dispatch_one(db_session, host, parameters: Dict[str, Any]) -> bool:
     not advertised config-management support, must not stop the rest of the
     fleet from getting the same profile.
     """
-    # ONE id for both the envelope and the queue row, matching what
-    # proplus_dispatch does. The agent echoes the ENVELOPE's message_id back as
-    # `command_id`, so if the queue row carries a different id (which is what
-    # enqueue_message generates when you don't pass one) the result cannot be
-    # correlated to the command that produced it -- and config-profile results
-    # were silently dropped for exactly that reason. Found 2026-08-28 by a
-    # real round-trip.
-    command_id = str(uuid.uuid4())
-    command = Message(
-        message_id=command_id,
-        message_type=MessageType.COMMAND,
-        data={
-            "command_type": CommandType.APPLY_CONFIG_PROFILE,
-            "parameters": parameters,
-        },
-    )
     try:
-        QueueOperations().enqueue_message(
-            message_type="command",
-            message_id=command_id,
-            message_data=command.to_dict(),
-            direction=QueueDirection.OUTBOUND,
-            host_id=str(host.id),
-            db=db_session,
-        )
+        # One shared builder, which generates a single id for the envelope and
+        # the queue row both -- see dispatch.queue_apply for why that matters.
+        dispatch.queue_apply(db_session, host.id, parameters)
         return True
     except Exception:  # pylint: disable=broad-except
         # Includes UnsupportedCapabilityError, which is an ordinary outcome

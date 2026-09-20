@@ -68,6 +68,17 @@ def build_licensed_spec(
         return None
 
 
+def engine_module():
+    """The Pro+ config-management module object, or None when not loaded.
+
+    The single accessor. Every caller that needs a RULE from the engine --
+    profile validation, fleet-job release policy, remediation matching --
+    comes through here rather than reaching into the module loader, so
+    "which module code is this engine" is written down once.
+    """
+    return module_loader.get_module(ENGINE_CODE)
+
+
 def engine_available() -> bool:
     """Whether the Pro+ config-management module is licensed AND loaded.
 
@@ -77,4 +88,4 @@ def engine_available() -> bool:
     this to decide whether to OFFER an action, never to authorise one -- the
     authorisation is ``feature_gate.require_module``, which raises.
     """
-    return module_loader.get_module(ENGINE_CODE) is not None
+    return engine_module() is not None

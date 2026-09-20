@@ -214,15 +214,21 @@ class _Env:
         self.enqueued = []
         self.audits = []
 
-    def _enqueue(self, **kwargs):
+    def _enqueue(self, _self, **kwargs):
         self.enqueued.append(kwargs)
         return "msg-1"
 
     def __enter__(self):
         self._patches = [
+            # Patched at the QUEUE rather than at the API: since Phase 20.1
+            # the apply route queues through the shared
+            # ``config_mgmt_dispatch.queue_apply`` helper, which imports
+            # QueueOperations lazily. Patching the class's method covers
+            # every caller and does not care where the import happens.
             patch(
-                "backend.api.config_mgmt_runs.queue_ops.enqueue_message",
+                "backend.websocket.queue_operations.QueueOperations" ".enqueue_message",
                 side_effect=self._enqueue,
+                autospec=True,
             ),
             patch("backend.api.config_mgmt_runs.persistence_db.get_engine"),
             patch("backend.api.config_mgmt_runs.sessionmaker", return_value=_Session()),

@@ -17,6 +17,7 @@ import besides. The API translates it to a status code.
 
 import json
 import logging
+import uuid
 from typing import Any, Dict, Optional
 
 from backend.i18n import _
@@ -102,3 +103,59 @@ def parameters_for(
     if timeout:
         parameters["timeout"] = timeout
     return parameters
+
+
+def queue_apply(db_session, host_id, parameters: Dict[str, Any]) -> str:
+    """Queue one APPLY_CONFIG_PROFILE command and return its command id.
+
+    WHY THIS IS A FUNCTION AND NOT SEVEN LINES AT EACH CALL SITE
+    -----------------------------------------------------------
+    It has to generate ONE id and use it for BOTH the envelope and the queue
+    row. The agent echoes the ENVELOPE's ``message_id`` back as ``command_id``
+    on its result, so a queue row carrying a different id -- which is exactly
+    what ``enqueue_message`` generates when you do not pass one -- leaves the
+    result uncorrelatable, and config-profile results were silently dropped
+    for precisely that reason until a real round trip found it on 2026-08-28.
+
+    That is a trap you fall into by writing the obvious code, so by Phase 20.2
+    the same seven lines and the same warning comment had been pasted into
+    three places. Fleet jobs would have made it four, and a fleet job NEEDS the
+    id returned -- ``ConfigJobTarget.command_id`` is the only thing that closes
+    a target when its result lands. One implementation, returning the id.
+
+    Raises whatever ``enqueue_message`` raises, including
+    ``UnsupportedCapabilityError`` for a host that has not advertised
+    config-management support (Phase 19). Callers decide whether that is a
+    failure or an ordinary skip; this function deliberately does not, because
+    it is an error for an operator pressing a button and a routine outcome for
+    a fleet job walking four thousand hosts.
+    """
+    # Imported here rather than at module scope: the queue package pulls in the
+    # websocket stack, and this module is imported by the assignment tick,
+    # which must stay importable in a plain unit test.
+    from backend.websocket.messages import (  # noqa: PLC0415
+        CommandType,
+        Message,
+        MessageType,
+    )
+    from backend.websocket.queue_enums import QueueDirection  # noqa: PLC0415
+    from backend.websocket.queue_operations import QueueOperations  # noqa: PLC0415
+
+    command_id = str(uuid.uuid4())
+    command = Message(
+        message_id=command_id,
+        message_type=MessageType.COMMAND,
+        data={
+            "command_type": CommandType.APPLY_CONFIG_PROFILE,
+            "parameters": parameters,
+        },
+    )
+    QueueOperations().enqueue_message(
+        message_type="command",
+        message_id=command_id,
+        message_data=command.to_dict(),
+        direction=QueueDirection.OUTBOUND,
+        host_id=str(host_id),
+        db=db_session,
+    )
+    return command_id

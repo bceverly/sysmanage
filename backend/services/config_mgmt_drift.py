@@ -75,35 +75,47 @@ def _load_findings(db_session, run) -> Dict[str, Any]:
     }
 
 
-def _record_sighting(db_session, run, existing, task, now, summary) -> None:
-    """Open a finding, or refresh the one that already tracks this task."""
+def _record_sighting(db_session, run, existing, task, now, summary, opened) -> None:
+    """Open a finding, or refresh the one that already tracks this task.
+
+    Newly-opened rows are collected into ``opened`` because they, and only
+    they, are eligible for automatic remediation. A finding that is merely
+    STILL open is not a new event: firing a repair at it on every check would
+    turn a divergence the playbook cannot fix into an endless loop of
+    attempts, when what an operator needs to see is persistent drift.
+    """
     detail = task["detail"]
     detail = str(detail)[:MAX_DETAIL_CHARS] if detail else None
     row = existing.get(task["name"])
 
     if row is None:
-        db_session.add(
-            models.ConfigDriftFinding(
-                host_id=run.host_id,
-                profile_id=run.profile_id,
-                profile_name=run.profile_name,
-                task_name=task["name"],
-                detail=detail,
-                first_seen_at=now,
-                last_seen_at=now,
-                last_run_id=run.id,
-            )
+        row = models.ConfigDriftFinding(
+            host_id=run.host_id,
+            profile_id=run.profile_id,
+            profile_name=run.profile_name,
+            task_name=task["name"],
+            detail=detail,
+            first_seen_at=now,
+            last_seen_at=now,
+            last_run_id=run.id,
         )
+        db_session.add(row)
         summary["opened"] += 1
+        opened.append(row)
         return
 
     if row.resolved_at is not None:
         # A REGRESSION. Clear the resolution and restart the clock: "drifting
         # since" must describe the current episode, or it claims continuous
         # drift across a period when the host was actually compliant.
+        #
+        # A regression IS a new event and does earn a fresh repair attempt:
+        # the host was compliant and has moved again, which is exactly the
+        # situation an unattended rule was written for.
         row.resolved_at = None
         row.first_seen_at = now
         summary["opened"] += 1
+        opened.append(row)
     else:
         summary["still_open"] += 1
 
@@ -138,7 +150,7 @@ def reconcile_run(
     must not fail the result handler and cost us the run record itself, which
     is the more valuable of the two.
     """
-    summary = {"opened": 0, "still_open": 0, "resolved": 0}
+    summary = {"opened": 0, "still_open": 0, "resolved": 0, "remediated": 0}
 
     # Drift is Enterprise. Without the module there are no profiles to drift
     # from, so there is nothing to reconcile. A LIVE run is not drift either --
@@ -150,11 +162,22 @@ def reconcile_run(
         now = _now()
         observed = changed_tasks(tasks)
         existing = _load_findings(db_session, run)
+        opened = []
 
         for task in observed:
-            _record_sighting(db_session, run, existing, task, now, summary)
+            _record_sighting(db_session, run, existing, task, now, summary, opened)
 
         _resolve_unseen(existing, {t["name"] for t in observed}, run, now, summary)
+
+        # Phase 20.1 remediation playbooks: a finding that just opened may have
+        # a rule its owner marked auto-apply. Imported here rather than at
+        # module scope because remediation reaches the dispatch and queue
+        # stack, which this module otherwise has no business pulling in.
+        from backend.services import (  # noqa: PLC0415
+            config_mgmt_remediation as remediation,
+        )
+
+        summary["remediated"] = remediation.auto_remediate(db_session, opened)["queued"]
     except Exception:  # pylint: disable=broad-except
         # The run row is the more valuable record; losing drift bookkeeping is
         # recoverable on the next check, losing the run is not.

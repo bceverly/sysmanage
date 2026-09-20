@@ -130,7 +130,7 @@ class TestGating:
         session = _Session()
         out = reconcile(session, run(), [task("a")], module_loaded=False)
         assert session.added == []
-        assert out == {"opened": 0, "still_open": 0, "resolved": 0}
+        assert out == {"opened": 0, "still_open": 0, "resolved": 0, "remediated": 0}
 
     def test_a_live_run_is_not_drift(self):
         # It changed things because we told it to.
@@ -238,7 +238,7 @@ class TestResilience:
                 raise RuntimeError("db is down")
 
         out = reconcile(Exploding(), run(), [task("a")])
-        assert out == {"opened": 0, "still_open": 0, "resolved": 0}
+        assert out == {"opened": 0, "still_open": 0, "resolved": 0, "remediated": 0}
 
 
 class TestSerialisation:

@@ -41,9 +41,6 @@ from backend.security.roles import SecurityRoles
 from backend.services import config_mgmt_dispatch as dispatch
 from backend.services import config_mgmt_baseline as baseline
 from backend.services import config_mgmt_drift as drift
-from backend.websocket.messages import CommandType, Message, MessageType
-from backend.websocket.queue_enums import QueueDirection
-from backend.websocket.queue_operations import QueueOperations
 
 logger = logging.getLogger(__name__)
 
@@ -227,30 +224,9 @@ async def remediate_drift(
     except dispatch.DispatchError as exc:
         raise HTTPException(status_code=exc.status, detail=exc.message) from exc
 
-    # ONE id for both the envelope and the queue row, matching what
-    # proplus_dispatch does. The agent echoes the ENVELOPE's message_id back as
-    # `command_id`, so if the queue row carries a different id (which is what
-    # enqueue_message generates when you don't pass one) the result cannot be
-    # correlated to the command that produced it -- and config-profile results
-    # were silently dropped for exactly that reason. Found 2026-08-28 by a
-    # real round-trip.
-    command_id = str(uuid.uuid4())
-    command = Message(
-        message_id=command_id,
-        message_type=MessageType.COMMAND,
-        data={
-            "command_type": CommandType.APPLY_CONFIG_PROFILE,
-            "parameters": parameters,
-        },
-    )
-    QueueOperations().enqueue_message(
-        message_type="command",
-        message_id=command_id,
-        message_data=command.to_dict(),
-        direction=QueueDirection.OUTBOUND,
-        host_id=str(host.id),
-        db=db_session,
-    )
+    # One shared builder: it generates a single id for the envelope and the
+    # queue row both, which is what makes the result correlatable.
+    dispatch.queue_apply(db_session, host.id, parameters)
     db_session.commit()
 
     logger.info(

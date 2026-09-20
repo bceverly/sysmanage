@@ -39,14 +39,10 @@ from backend.services import config_mgmt_plan_builder as planner
 from backend.services import config_mgmt_spec_shim as spec_shim
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
-from backend.websocket.messages import CommandType, Message, MessageType
-from backend.websocket.queue_enums import QueueDirection
-from backend.websocket.queue_operations import QueueOperations
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-queue_ops = QueueOperations()
 
 # The history panel shows a page, not an archive.  Capped so a caller cannot
 # ask for every run a long-lived host ever recorded in one request.
@@ -398,30 +394,9 @@ async def apply_config_profile(
         executor = _resolve_executor(host, request)
         parameters = _build_parameters(executor, request)
 
-    # ONE id for both the envelope and the queue row, matching what
-    # proplus_dispatch does. The agent echoes the ENVELOPE's message_id back as
-    # `command_id`, so if the queue row carries a different id (which is what
-    # enqueue_message generates when you don't pass one) the result cannot be
-    # correlated to the command that produced it -- and config-profile results
-    # were silently dropped for exactly that reason. Found 2026-08-28 by a
-    # real round-trip.
-    command_id = str(uuid.uuid4())
-    command_message = Message(
-        message_id=command_id,
-        message_type=MessageType.COMMAND,
-        data={
-            "command_type": CommandType.APPLY_CONFIG_PROFILE,
-            "parameters": parameters,
-        },
-    )
-    queue_ops.enqueue_message(
-        message_type="command",
-        message_id=command_id,
-        message_data=command_message.to_dict(),
-        direction=QueueDirection.OUTBOUND,
-        host_id=str(host.id),
-        db=db_session,
-    )
+    # One shared builder: it generates a single id for the envelope and the
+    # queue row both, which is what makes the result correlatable.
+    dispatch.queue_apply(db_session, host.id, parameters)
     db_session.commit()
 
     session_local = sessionmaker(
