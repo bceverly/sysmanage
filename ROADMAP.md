@@ -647,7 +647,7 @@ the explicit bullet is added to the in-progress and future phases.)
 
 ### Release Versioning
 
-**Current Version:** v3.7.0.0
+**Current Version:** v3.8.0.0
 
 *(This one line is HAND-maintained — it is NOT git-tag-derived like the
 on-disk markers are, which is exactly how it sat silently at v3.3.0.0
@@ -7279,7 +7279,7 @@ Some platforms this phase reaches can't run the *full* agent: a native library m
 
 ## Phase 20: Configuration Management & Drift (Enterprise)
 
-**Target Release:** v3.7.0.0
+**Target Release:** v3.8.0.0
 **Focus:** Move from ad-hoc script execution to desired-state config + drift detection.
 
 **Market gap addressed:** Satellite Ansible/Puppet config management; Insights configuration drift.
@@ -8292,9 +8292,9 @@ nearly free and makes the dashboard actionable rather than merely informative.
       Puppet/Salt/Chef adapters, and 20.1 i18n — each verified against the code
       before ticking. Every remaining open box in the file belongs to phase 21+,
       which is unstarted work rather than backlog drift.
-- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
-      **Status 2026-09-20 — one item outstanding: the docs screenshots.**
-      Both feature boxes above are done; what remains is this gate.
+- [x] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free — 2026-09-20
+      Closed 2026-09-20. Both feature boxes and every gate item below
+      are done.
 
       *Verified:*
       · **Tests** — sysmanage 7,793 + 565, agent 4,678, Pro+ 1,276 + 116
@@ -8339,22 +8339,47 @@ nearly free and makes the dashboard actionable rather than merely informative.
         `APPLY_CONFIG_PROFILE` command.
       · **Copyright headers** — every new file carries 2024-2026, AGPL in the
         three open repos and PROPRIETARY in Pro+.
-      · **Version** — v3.7.0.0, the phase's target; engine bumped to 1.0.4.
+      · **Version** — v3.8.0.0; engine bumped to 1.0.4. The phase was
+        originally targeted at v3.7.0.0 and shipped one minor higher, so
+        Phase 21 moved from v3.8.0.0 to v3.9.0.0 rather than collide with
+        it. The v4.0.0.0 anchor at Phase 22 is unchanged.
 
-      *Outstanding:*
-      · **`make screenshots-enterprise`** — the four new PNGs
-        (`config-fleet-jobs`, `config-job-templates`, `config-inventories`,
-        `config-remediation-rules`) are not on disk, and four `<img>` tags
-        already reference them, so `make test-links` will flag them. The
-        shotlist entries and `seed_ent_config.py` demo data are in place; this
-        is the capture run itself, and the last thing between Phase 20 and
-        done.
-
+      · **Screenshots** — `make screenshots` captures all 50 Enterprise
+        shots and `make test-links` passes (1608 OK, 0 errors), so the four
+        `<img>` tags resolve. The capture run surfaced three real defects
+        rather than just producing images:
+        **(a)** `seed_ent_config.py` died on a foreign-key violation, rolling
+        back the whole seed and leaving every config panel empty. The unit of
+        work takes its flush ORDER from `relationship()`, not from a
+        `ForeignKey` column, and `ConfigJob` deliberately carries no
+        relationship to `ConfigJobTemplate` (history outlives its parents), so
+        the jobs could be written before the templates they point at. Fixed
+        with the same explicit `session.flush()` the profiles already had.
+        **(b)** The demo hosts are REST fixtures that never heartbeat, so at
+        the 5-minute default the monitor marked every approved host down and
+        `active=false` PARTWAY THROUGH a capture — and `resolve_hosts()`
+        counts only active hosts, so the inventory chips read "0 hosts". The
+        screenshot VM now sets `monitoring.heartbeat_timeout` beyond the life
+        of the run; setting `status='up'` alone is not enough, because that is
+        precisely what re-arms the monitor.
+        **(c)** `configFleet.hostCount` rendered "1 hosts". It was authored as
+        a single key while this repo's convention (`configDrift.days`) is base
+        plus `_one`/`_other` in all 14 locales; `atATime` and `launched` had
+        the same gap. Fixed in every locale. The base key STAYS, because
+        i18next falls back to it — not to the English default in the call
+        site — for the categories `_one`/`_other` do not cover (ru few/many,
+        ar zero/two/few/many, fr many), which is what keeps those locales from
+        silently reverting to English.
+        Also hardened the harness: `selectMuiOption` now goes through
+        `clickWithRetry`, because a MUI Select re-mounts when its options
+        arrive and a plain click loses the node ("element was detached from
+        the DOM") — that failed `child-host-create-windows` on a full run
+        while it passed on either side.
 ---
 
 ## Phase 21: Endpoint Facts & Proactive Advisor (Enterprise)
 
-**Target Release:** v3.8.0.0
+**Target Release:** v3.9.0.0
 **Focus:** Insights-style proactive recommendations + malware detection — from reactive reporting to prescriptive guidance.
 
 **Market gap addressed:** Red Hat Insights advisor / recommendations + malware detection.
