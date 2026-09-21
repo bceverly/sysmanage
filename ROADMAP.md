@@ -8398,6 +8398,522 @@ have: collection breadth without writing per-OS collectors. Consistent with the
 governing principle — **we are the management/remediation plane; raw collection is
 not the moat.**
 
+**S0 SPIKE RESULT 2026-09-21 — osquery cannot be the substrate everywhere.**
+Measured against the real ports trees, not assumed:
+
+| platform | osquery | evidence |
+|---|---|---|
+| Linux / macOS / Windows | yes, upstream | official packages |
+| FreeBSD | ports `sysutils/osquery` 5.23.0 | but carries SEVEN downstream patches from a maintainer's personal fork (`ocochard/osquery`), so BSD support lives outside upstream and can rot |
+| OpenBSD | **absent** | no port in `sysutils/`, `security/` or elsewhere |
+| NetBSD | **absent** | no pkgsrc entry in `sysutils/`, `security/`, `databases/` |
+
+The agent ships on all six. Binding the fact model to osquery tables would
+therefore leave OpenBSD and NetBSD hosts with NO facts — and the failure mode
+is silent: `advisor_engine` would emit no recommendations for them, which
+reads to an operator as "compliant" rather than "not measured". That is the
+same class of defect as an empty punch list, and it is the reason this
+substrate must be defined as OUR fact schema with osquery as ONE PROVIDER
+behind it, never as a passthrough to osquery tables.
+
+Every platform must therefore reach the same fact interface:
+  · osquery provider — Linux, macOS, Windows, FreeBSD (opt-in, lifecycle-managed)
+  · native provider — the collectors the agent ALREADY has
+    (`software_inventory_bsd.py`, `hardware_collector_bsd.py`,
+    `package_collector_bsd.py`, `os_info_collection.py`), which is what
+    OpenBSD and NetBSD use, and what every platform falls back to when
+    osqueryd is absent or declined.
+Porting osquery to OpenBSD/NetBSD ourselves is NOT proposed: it is heavy C++
+with platform-specific table implementations, and we would own that port
+forever for two of six platforms.
+
+**Recorded debt (2026-09-21):**
+- [ ] **21.1 must ship the native provider FIRST, not second.** If the osquery
+      provider lands alone, the BSDs regress from "collected natively today" to
+      "no facts", and the gap would be invisible until an advisor rule
+      returned nothing.
+- [ ] **BSD integration tests run on demand / per release tag only**
+      (`bsd-tests.yml`, QEMU, deliberately not cron'd because it is slow). Any
+      fact-substrate work on the BSDs needs an explicit dispatch run before
+      the phase exit gate, because a push-green CI does NOT cover them.
+- [x] **sysmanage-agent README omitted NetBSD** — 2026-09-21. It claimed
+      "Linux, Windows, macOS, FreeBSD, OpenBSD" while the repo carries a full
+      pkgsrc package (Makefile/PLIST/distinfo/DESCR), a NetBSD `.tgz` build
+      job, a NetBSD 10.1 QEMU integration job and NetBSD branches in 13 source
+      files. First-class in engineering, invisible in the docs; fixed.
+
+**SLICE PLAN (21.1), drafted 2026-09-21.**
+
+THE ONE DECISION EVERYTHING ELSE INHERITS: **the fact schema IS osquery's
+schema** — a declared, versioned SUBSET of its table and column names — and on
+platforms without `osqueryd` we implement those same tables ourselves. Not a
+neutral schema of our own with osquery mapped into it.
+
+Why that way round. The phase's own rationale is collection BREADTH without
+writing per-OS collectors, and the value we are buying is the QUERY ECOSYSTEM:
+published packs, CIS content, and the rules 21.2 will carry. A schema of our
+own invention discards exactly that and leaves us hand-porting every query.
+With osquery's names as the contract, a pack is written once and runs on all
+six platforms.
+
+What makes that affordable on the BSDs: **`sqlite3` is in the Python standard
+library and the agent already runs on SQLite** (`agent.db`). The native
+provider does not have to emulate a query engine — it materialises the
+contracted tables into an in-memory SQLite database and executes THE SAME SQL.
+So a query pack is portable to OpenBSD and NetBSD without a second dialect,
+and without a new dependency on any platform.
+
+**VERIFIED AGAINST UPSTREAM SPECS 2026-09-21** (not recalled). These exist and
+are cross-platform (`specs/`): `os_version`, `system_info`, `users`, `groups`,
+`user_groups`, `interface_addresses`, `listening_ports`, `processes`,
+`certificates`; `mounts` is `specs/posix/`. Those are the v1 core.
+
+But the package tables are PER-PLATFORM by design — `deb_packages` and
+`rpm_packages` are `specs/linux/`, `homebrew_packages` is `specs/darwin/`,
+`programs` is `specs/windows/` — and **osquery has no spec directory for any
+BSD at all** (the set is darwin, linux, linwin, macwin, posix, sleuthkit,
+utility, windows). There is no `pkg_packages`. So even on FreeBSD, where the
+port exists, osquery offers NO package inventory — and installed packages are
+precisely what `vuln_engine` matches CVEs against.
+
+Therefore the contract is osquery's schema WHERE OSQUERY HAS A TABLE, plus a
+small namespaced extension set for facts it does not model:
+  · `sysmanage_packages` — one unified installed-package table that all six
+    platforms populate. Our own packs and `vuln_engine` read THIS, so package
+    facts are portable; the osquery-native `deb_packages`/`rpm_packages`/
+    `homebrew_packages`/`programs` stay available where they exist so
+    published ecosystem packs still run unmodified.
+  · `sysmanage_available_updates` — osquery models installed software, not
+    pending updates, and `update_detection_*` is a large part of this agent.
+  · further `sysmanage_*` tables as needed (antivirus state, Ubuntu Pro
+    contract, image-mode/bootc state) — all clearly namespaced, never
+    squatting on an osquery name with different semantics.
+
+Still to verify on real hardware: WHICH cross-platform tables the FreeBSD port
+actually builds. `specs/` membership is not proof the FreeBSD binary ships
+them, and that gap decides how much S2 must cover there. Needs a
+`bsd-tests.yml` dispatch run.
+
+- [x] **S1 — Fact schema contract + coverage advertisement.** — 2026-09-21 Pin the v1 table
+      subset: the nine cross-platform tables plus `mounts`, the per-platform
+      package tables where osquery has them, and the `sysmanage_*` extensions
+      above. Extend `capabilities.py` so the agent advertises, per table,
+      whether it is served and BY WHICH PROVIDER. **Do NOT bump
+      `CAPABILITY_SCHEMA_VERSION`** — the draft said to, and reading the module
+      proved that wrong: the version gates whether an older server can still
+      READ the report, `normalize_report` keeps only fields it knows, and
+      `MAX_SUPPORTED_SCHEMA_VERSION` REJECTS a newer report outright. Bumping
+      would make every host read as unknown-capability until the server caught
+      up. The fact contract carries its own `FACT_CONTRACT_VERSION` instead,
+      because the two move at different paces.
+      **"Not measured" must be distinguishable from "measured and empty"** at
+      every layer above. That is the whole safety property of this phase: an
+      unmeasured table that reads as an empty result turns into "no findings",
+      which an operator reads as "compliant". Server-side storage follows the
+      Phase 19 capability rows.
+      **Shipped 2026-09-21.** `sysmanage-agent/src/sysmanage_agent/core/
+      fact_schema.py`: 16 v1 tables (10 at osquery's own names, 4 per-platform
+      package tables, 2 `sysmanage_*` extensions), a provider registry that
+      `register_provider` gates against the contract, and
+      `build_fact_coverage()` folded into the capability report. Server:
+      `normalize_report` keeps `facts`, and an agent that never advertised
+      them stores `None` rather than `{}` — "never told us" is not "serves
+      nothing". Fact coverage is deliberately OUT of the `limited` rule, or
+      every host in the fleet would have flagged the day this landed. Coverage
+      reaches the host-detail API unchanged via `get_capability_report`.
+      Exhaustiveness is tested directly across all six platforms: every
+      contract table lands in exactly one of served / unsupported /
+      not_applicable, and a provider probe that RAISES reports
+      `provider_failed` rather than being counted as served. 9 agent tests +
+      4 server tests; both repos 10.00/10.
+
+- [x] **S2 — Native provider, and it ships FIRST.** — 2026-09-21 Materialise the v1 tables
+      from the collectors that already exist (`software_inventory_bsd.py`,
+      `hardware_collector_bsd.py`, `package_collector_bsd.py`,
+      `os_info_collection.py`, `certificate_collection.py`) into SQLite and run
+      the pack SQL against it. Ordered first deliberately: if the osquery
+      provider lands alone, OpenBSD and NetBSD REGRESS from "collected today"
+      to "no facts", and nothing would notice until an advisor rule returned
+      nothing. Conformance tests run the same pack against both providers on a
+      Linux box and diff the rows — that is what keeps the two implementations
+      honest, and it is the cheapest place to catch drift.
+      **Shipped 2026-09-21 — all 16 contract tables have a native provider.**
+      `core/fact_store.py`: contract tables materialised into in-memory SQLite
+      so PACK SQL runs unmodified where `osqueryd` cannot (every BSD).
+      Unfilled contract columns read as NULL, which is what lets a published
+      osquery pack select a column no provider populates and still run.
+      Tenant-authored pack SQL is untrusted by S4, so the store enforces
+      read-only via a sqlite3 AUTHORIZER plus single-statement execution —
+      INSERT/UPDATE/DELETE/DROP/CREATE/ATTACH and `SELECT 1; DROP TABLE` are
+      all refused, and a refusal does not brick the store for the next pack.
+
+      `collection/fact_native.py` maps EXISTING collectors onto `users`,
+      `groups`, `user_groups`, `os_version` and `sysmanage_packages`. Verified
+      on real data: 3,255 packages, 69 users, 101 groups, 89 memberships.
+      Fidelity beat coverage at three points, each one a silent-wrong-answer
+      if got wrong: osquery says `directory` not `home_directory` and
+      `groupname` not `group_name`; `is_system_user` is NOT mapped onto
+      `is_hidden` (osquery means hidden-from-login, not system account);
+      `users.gid` is left NULL because our collector reports group NAMES and a
+      plausible guess would make a gid filter select the wrong hosts. An
+      unresolvable `user_groups` name yields no row rather than an invented
+      gid. 22 tests; 10.00/10.
+
+      The remaining tables followed the same rule, and each one is a place a
+      careless map would have answered wrongly without ever erroring:
+      `processes.state` TRANSLATES psutil's word to osquery's /proc letter
+      (a pack filters on `state = 'R'`, which matches nothing against
+      "running"); `certificates.self_signed` is DERIVED as subject == issuer,
+      which is osquery's own definition rather than an invention;
+      `interface_addresses` emits ONE ROW PER ADDRESS, because collapsing v4
+      and v6 onto one row breaks any pack that counts them, and the v4 mask is
+      not restated on the v6 row; `system_info.physical_memory` is converted
+      MB -> BYTES, and `cpu_type` is the machine arch, NOT the vendor string;
+      `mounts` leaves the block and inode counts NULL rather than dividing a
+      byte size by an assumed block size. The osquery-named package tables are
+      filled from the same inventory, filtered by package manager, so a
+      PUBLISHED pack reading `deb_packages` works on a host with no osqueryd —
+      the rows are genuine dpkg data. `rpm_packages` correctly reports zero
+      rows on a Debian-family host: measured, found none.
+
+      `listening_ports` is the one that is WITHHELD rather than served when it
+      cannot be complete. Unprivileged `psutil` returns only the caller's
+      sockets, so the table would answer "nothing is listening on 22" with
+      sshd running — a false negative in exactly the security queries it
+      exists for. It reports the new `insufficient_privilege` reason instead,
+      which also drove `register_provider` to take the reason as a parameter:
+      telling an operator "tool missing" when the tool is fine and the agent
+      simply is not root sends them somewhere useless.
+
+      Verified end to end on real data: 3,255 portable packages, 3,220 deb,
+      964 processes, 246 certificates, 101 groups, 89 memberships, 61 mounts,
+      36 pending updates (18 security), 8 addresses. 31 tests across the three
+      modules, 53 with the capability suite, 10.00/10.
+
+      Still open for S3: the conformance test (same pack against both
+      providers, diff the rows) needs osquery to be the other side of it.
+      **Closed by S3** — `scripts/fact_conformance.py`. Written, lint-clean,
+      and NOT YET RUN: it needs a host that actually has osquery, which this
+      machine and every CI runner lack. Tracked in S3's open item.
+
+- [x] **S3 — osquery provider.** — 2026-09-21 Embed and lifecycle-manage `osqueryd`
+      where it exists (Linux, macOS, Windows, FreeBSD), behind the same
+      interface, opt-in, air-gap-clean, results up the existing
+      store-and-forward queue. Provider selection is per-table, not per-host:
+      prefer osquery when the daemon is healthy, fall back to native
+      otherwise, and SAY WHICH in the coverage advertisement. FreeBSD is
+      flagged as the fragile leg — its port carries seven downstream patches,
+      so a broken port must degrade to the native provider rather than to
+      nothing. **Community Edition.**
+      **Shipped 2026-09-21 — osquery is now an accelerator over the S2 floor.**
+
+      The registry became MULTI-PROVIDER first: a table had one provider slot,
+      so a second registration would have silently overwritten the first and
+      the fallback this slice is about could not exist. `PROVIDER_ORDER`
+      (osquery, then native) now decides preference, and `_choose_provider`
+      walks it — critically, **a probe that RAISES does not stop the walk**.
+      That is the FreeBSD leg made concrete: its port carries seven downstream
+      patches from a maintainer's personal fork, so "installed but broken" is
+      a state that will occur in the field, and it must cost fidelity rather
+      than coverage. A table both providers serve reads osquery; a table only
+      native serves stays native; a table whose ONLY provider is a broken
+      osquery reports `provider_failed` rather than an empty result — the
+      safety property holds at the provider layer too.
+
+      `collection/fact_osquery.py` shells out to `osqueryi --json`. Which
+      tables it serves is ASKED of the binary (`osquery_registry`), never
+      hand-listed, then intersected with the contract: osquery's table set
+      differs per platform and per build, the FreeBSD port has no package
+      tables at all, and a hand-maintained list would claim tables that return
+      "no such table" at query time. The probe is memoised because
+      `build_fact_coverage` walks every table and sixteen subprocess launches
+      per capability report is a self-inflicted performance bug. A failing
+      table is OMITTED from the result rather than returned empty, for the
+      same reason the whole substrate is built this way.
+
+      Two invocation details that are load-bearing rather than incidental:
+      `--disable_extensions` (we query only core tables, and discovery runs
+      under the same flags so a table we cannot load is a table we never
+      claim), and NO `--database_path` — osqueryi keeps its own ephemeral
+      database, which is exactly what lets it run on a host where `osqueryd`
+      already holds the RocksDB lock.
+
+      **A live defect from S2, found by wiring this up and fixed here:**
+      nothing ever bootstrapped the provider registry on the real path. It did
+      not fail — `build_fact_coverage` correctly reported that no provider was
+      registered, so every agent advertised a host with **zero** fact tables
+      while all sixteen collectors worked perfectly. `collection/fact_providers.py`
+      is now the one bootstrap, called from `build_capability_report`, and
+      `test_building_a_report_bootstraps_the_providers` is the test that
+      exists because the absence of this step looked exactly like success.
+      The report now advertises 13 served tables on this Linux box.
+
+      Opt-in is real, not nominal: `facts.osquery.enabled` defaults to
+      **false** in `sysmanage-agent-system.yaml`, so a host that merely
+      happens to have osquery installed keeps the native provider until an
+      operator decides otherwise. Air-gap-clean follows from the design —
+      nothing is ever downloaded; an absent binary is simply the native floor.
+
+      `scripts/fact_conformance.py` closes S2's open item: the same tables
+      through both providers on one live host, diffed. It is COVERAGE-AWARE
+      rather than a blind diff, because two differences are expected and
+      reporting them as failures would bury the real ones — a table only one
+      provider serves is skipped with the reason, and `listening_ports` /
+      `processes` are flagged privilege-sensitive (a root osqueryd and a
+      non-root agent disagree about privilege, not about facts). It compares
+      IDENTIFYING columns, not whole rows: native leaves `users.gid` NULL on
+      purpose, and demanding equality there would flag every row while saying
+      nothing about whether the two agree on who the users are. It also
+      normalises types — `osqueryi --json` returns every value as a string,
+      the native provider returns real ints, and a raw diff would call every
+      row different.
+
+      **Deliberately NOT done in S3, each with a reason rather than an
+      oversight:** (a) no `osqueryd` daemon supervision — one-shot `osqueryi`
+      answers every table in the v1 contract, and a supervised daemon on seven
+      platforms is real surface for no gain until EVENTED tables (FIM, process
+      events) are needed, which is 21.2's requirement, not this one; (b) no
+      binary embedded in the agent packages — that is a packaging decision per
+      platform and would put osquery's licence and CVE surface into every
+      agent, including the two platforms that cannot use it; (c) results do
+      not yet ride the store-and-forward queue because at S3 there is no pack
+      to produce results — the only S3 output is the coverage advertisement,
+      which already travels the registration/capability path. Pack execution
+      and result delivery are S4/S5 by construction.
+
+      54 tests across the two new modules (25 osquery + 7 bootstrap + the 22
+      from S1/S2 still green), 259 with the capability and registration
+      suites, 10.00/10 pylint, bandit and semgrep clean.
+
+      **Verified on real FreeBSD hardware, 2026-09-21** — freebsd.theeverlys.com
+      (14.4-RELEASE-p8) advertised `contract_version: 1` with **12 tables
+      served, all native, and `unsupported` EMPTY**. Two things that only a
+      real host could confirm: the package tables (`deb_packages`,
+      `rpm_packages`, `homebrew_packages`, `programs`) correctly land in
+      `not_applicable` rather than reading as gaps, and `listening_ports` IS
+      served there while it reports `insufficient_privilege` on the
+      unprivileged dev box — the privilege reason code doing exactly its job,
+      on the same build, distinguished only by how the agent runs.
+
+      **Still open, and it needs Bryan's rigs:** the conformance harness has
+      never been RUN — this machine has no osquery, and no CI runner does
+      either. It must be run on a Linux box and on FreeBSD (the fragile leg)
+      before the Phase 21 exit gate. Same standing gap as `bsd-tests.yml`.
+- [x] **S4 — Query packs as multi-tenant policy.** — 2026-09-21 Curated/shipped
+      pack DEFINITIONS are global reference data → `shared` partition, one
+      copy, offline-updatable; assignments to hosts/tags/sites and any
+      tenant-authored packs → `tenant` partition, soft-referencing the shared
+      pack id (no cross-partition FK). Scheduled collection paced by the
+      existing tick. **Professional** — this management plane is the value.
+      **Shipped 2026-09-21 — full stack, substrate stays Community.**
+
+      **Partition split, as the rule requires.** `s11qpacks` (shared chain)
+      creates `shared_query_pack` + `shared_query_pack_query`: one catalog for
+      every customer, because "listening ports on non-standard interfaces" is
+      the same query for everyone. `q2qpacks` (tenant chain) creates
+      `query_pack`, `query_pack_query`, `query_pack_assignment`,
+      `query_pack_run` and `query_pack_result_row`. An assignment carries
+      EITHER `pack_id` (real FK, same partition) OR `shared_pack_id` — no
+      ForeignKey, because under scale-out the catalog is a different database
+      where the constraint could not be enforced. Both chains upgrade AND
+      downgrade cleanly on SQLite; the prefix guard and shared-reference tests
+      pass unchanged.
+
+      Results are stored as ROWS, not one blob per run. Every S6 consumer asks
+      "which hosts returned a row matching X", which is a query over rows and
+      not a scan of documents.
+
+      **NEW Pro+ engine `query_pack_engine`** (Professional tier), registered
+      in the Pro+ `MODULES` dict and the OSS `ModuleCode`/`FeatureCode` enums
+      plus both `TIER_*` maps, with Enterprise's superset invariant restored.
+      Registration took TWO passes: the first missed the Pro+ repo's own
+      `PROFESSIONAL_FEATURES` list, which is what the licence-generation GUI
+      reads, so `query_pack_engine` would have been offered as a module while
+      `query_pack_manage` could never appear in any issued licence. Caught by
+      Bryan asking; see the licensing-gate note below.
+      Its own engine rather than a corner of `fleet_engine`: a pack is a
+      fact-query plane, not a fleet operation. It owns validation, assignment
+      precedence, due-ness and grading; the OSS side owns HTTP, persistence
+      and authorisation and re-implements none of them. 43 tests, built abi3.
+
+      Three engine rules are load-bearing, and each fails SILENTLY if wrong:
+
+      * **Writes are refused.** Pack SQL is tenant-authored from this slice
+        on. The engine rejects anything that is not a single SELECT/WITH —
+        including a write hidden behind a comment, since comments are stripped
+        BEFORE the statement count so a commented-out semicolon cannot smuggle
+        a second statement past the split. This is the *other half* of the
+        agent's sqlite authorizer, not a duplicate of it: the authorizer
+        protects the agent that has it, this protects a fleet that may include
+        agents too old to have one.
+      * **One pack reached three ways runs ONCE.** A host can match the same
+        pack directly, via a tag and via its site. Three runs would answer the
+        same question three times inside one window with nothing downstream
+        able to say which is authoritative. Direct wins (the more specific
+        statement of intent); between equals the SHORTER interval wins,
+        because an operator who asked for more frequent collection somewhere
+        should not silently get less.
+      * **An assignment with no target matches NOTHING.** Not a fleet-wide
+        wildcard — a policy that applied everywhere because a field was left
+        empty gets noticed only after it has run everywhere.
+
+      **The safety property survives the whole round trip.** `applicable_queries`
+      splits a pack against the host's own S1 coverage advertisement and
+      returns the uncovered queries rather than dropping them, carrying the
+      AGENT's reason code (`insufficient_privilege`, `wrong_platform`) rather
+      than a generic one — those send an operator to different places. Only
+      runnable queries are dispatched, because a query the host cannot answer
+      would come back an ERROR, which is a different and worse claim than
+      "does not serve those tables". `grade_run` counts not-covered separately
+      and returns `partial`, never `success`. The service writes one result row
+      for an unanswered query so the run records that the question was asked.
+      The page renders `partial` as WARNING with its own "Not covered" column.
+      A green tick at any of those layers would report a host compliant on a
+      question nobody ever asked it.
+
+      **Agent (`run_query_pack`, Community).** `collection/query_pack_runner.py`
+      materialises ONLY the declared tables — collecting all sixteen for a
+      one-table query would make every interval cost a full inventory sweep —
+      chooses each table's provider from the same coverage the server was told
+      about, and runs the SQL through the S2 fact store. Verified on real host
+      data: `users` and `os_version` answered, `listening_ports` came back
+      `not_covered/insufficient_privilege` on the unprivileged dev agent, and
+      `DROP TABLE users` was refused by the authorizer. Its own capability
+      group (`query_packs`) rather than folded into `inventory`: a host serves
+      fact tables whether or not it can run a pack over them, and merging would
+      report the whole inventory group degraded on a build that simply predates
+      this slice. Work runs in the executor — materialising tables is seconds
+      of blocking I/O that would otherwise stall the WebSocket and heartbeat.
+
+      **Two real defects caught by the tests, both silent:**
+      (a) `update_pack` returned the pack with its queries relationship loaded
+      BEFORE the swap, so a successful edit answered with the rows it had just
+      replaced; (b) the S3 provider bootstrap trusted a boolean flag that goes
+      stale the moment anything clears the registry — a stale flag meant the
+      bootstrap declined to re-register and the host advertised no facts at
+      all while every collector on it worked. `has_providers()` now asks the
+      registry, which cannot go stale.
+
+      **UI**: `/query-packs` (gated on the module, like the config pages) with
+      My Packs / Curated Catalog / Recent Runs, an authoring dialog with a
+      **Check** action that validates without storing — an author wants to know
+      the SQL is acceptable before committing a name, and a rejected save
+      leaves no draft behind. Navbar entry under Automation. 15 locales seeded
+      (`[TODO]`, pending `make translate`), backend + agent catalogs extracted
+      and merged.
+
+      Verified: 7,813 server + 4,775 agent + 565 Pro+ + 43 engine + 1,769
+      frontend tests, all green; 10.00/10 pylint across all three repos;
+      bandit clean; tsc and eslint clean; file-length, partition-prefix,
+      shared-reference and all i18n gates pass.
+
+      **Licensing gate extended, after this slice drifted three ways at once.**
+      `scripts/check_engine_codes.py` already caught an engine code missing
+      from `ModuleCode`/`TIER_MODULES`; it now also cross-checks FEATURE codes
+      against the Pro+ generator's `PROFESSIONAL_FEATURES` when that repo is
+      checked out beside this one (soft-skipped in CI, which clones one repo —
+      the same rule `sync_i18n_tooling.py` uses). It immediately found
+      pre-existing drift nobody had noticed: `secrets`, `containers` and
+      `multiuser` are issued in EVERY Professional licence and were absent
+      from `FeatureCode` entirely, so `FeatureCode(f)` over a real licence's
+      feature list raised on a perfectly valid licence. Never bit only because
+      those capabilities are gated by their modules instead. All three added;
+      the gate is negative-controlled (removing one fails it).
+
+      **Also fixed here, found by the full Pro+ run:** `agent_install.pxi`
+      reported as drifted in two engines when the three copies were in fact
+      byte-identical. The copyright-header pass had moved the per-engine
+      "Included by" line from index 1 to index 6, and both the test and
+      `sync_agent_install.py` hardcoded index 1 — so the guard was a false
+      alarm pointing at a "fix" that would have written the naming comment
+      over each mirror's PROPRIETARY licence line while not fixing anything.
+      Both now LOCATE the line instead of assuming its position.
+
+      **Shipped broken, found on first page load, fixed same day.** All seven
+      READ endpoints were gated on `SecurityRoles.VIEW_SCRIPT`, which does not
+      exist -- the script roles are ADD/EDIT/DELETE/RUN. Every GET returned
+      500 the moment the page opened. Nothing caught it: the reference sits
+      inside a handler body, so the module imports cleanly, pylint sees an
+      attribute on an imported name, and the 16 service-layer tests never
+      traverse a route. Reads now rely on the router's JWT + licence gate, as
+      the config-management endpoints do; roles stay on mutations.
+
+      Two guards added rather than just the fix, because it is a typo CLASS:
+      `tests/test_security_role_references.py` scans backend/api, services,
+      auth and security for `SecurityRoles.X` and asserts each member exists
+      (it immediately found a second, pre-existing instance --
+      `VIEW_CHILD_HOSTS` for the singular `VIEW_CHILD_HOST` in
+      `child_host_virtualization_enable.py`, which would have 500'd the
+      KVM-networks endpoint); and `tests/test_query_packs_api.py` exercises
+      the endpoints THROUGH the router, which is the coverage that was
+      missing -- it also pins that `/catalog` is not swallowed by
+      `/{pack_id}`, the two being indistinguishable but for declaration order.
+
+      **END-TO-END PROVEN ON REAL HOSTS, 2026-09-21.** A three-query pack
+      assigned to a Linux and a FreeBSD host, dispatched by the server's own
+      tick, run by both agents, graded on return:
+
+      | host | status | ok | not covered |
+      |---|---|---|---|
+      | gdr-t14 (Linux) | success | 3 | 0 |
+      | freebsd.theeverlys.com | **partial** | 2 | 1 (`wrong_platform`) |
+
+      The FreeBSD host returned `root` AND `toor` for `uid = 0` where Linux
+      returned only `root` -- real per-platform truth, not a canned answer --
+      and `deb_count` came back `not_covered` with a NULL payload rather than
+      `{"n": 0}`, which is the entire point of the phase arriving intact at
+      the database. Linux reported 3,220 deb packages and 45 listening ports;
+      FreeBSD 13.
+
+      Two defects only a live round trip could find, both fixed with tests:
+
+      * **Every result was discarded on the first attempt.** The agent's
+        reply did not echo `run_id`, so the server could not correlate the
+        results to the run it had opened at dispatch and dropped all three per
+        host. Not a partial failure -- a total loss that looks like a clean
+        run on the agent side. It was DIAGNOSED in one log line only because
+        the handler logs the discard with a count instead of no-opping. Both
+        halves of that contract are now pinned: the agent echoes the id, and
+        `tests/test_query_pack_handlers.py` feeds the handler exactly the
+        (double-nested) envelope an agent sends.
+      * **`listening_ports.protocol` was the socket type, not the IP protocol
+        number.** psutil reports SOCK_STREAM (1); osquery reports IPPROTO_TCP
+        (6). A published pack filtering TCP with `WHERE protocol = 6` matched
+        NOTHING, while `protocol = 1` -- ICMP in IANA terms -- matched every
+        TCP socket, and the query succeeded either way. Caught by reading the
+        returned rows: sshd on port 22 with protocol 1. `family` needed no map
+        (psutil's AddressFamily values already ARE the OS constants osquery
+        reports), which is why only one of the two was wrong.
+
+      Both are the same shape as the S2 `processes.state` trap the module
+      docstring warns about, and both slipped through because each side was
+      tested correctly in isolation while the CONTRACT between them was owned
+      by neither.
+
+      **Needs Bryan (license-server side):** `query_pack_engine` is new, so the
+      dev license must be regenerated to include the module before the page and
+      API become reachable locally, and the bundle published
+      (`make publish-modules`) before any other machine can load it. Until then
+      the router 403s and the navbar entry stays hidden — which is the correct
+      unlicensed behaviour, not a fault.
+- [ ] **S5 — Ad-hoc fleet-wide live query + results surface**, bounded the way
+      fleet jobs are (concurrency, timeout, per-host rows) rather than fanning
+      out to everything at once. **Professional.**
+- [ ] **S6 — Wire the tables into the consuming engines** — `compliance_engine`
+      (CIS), `vuln_engine` (installed packages / listening ports),
+      `fleet_engine`, and the 20.2 drift baselines — each at its own tier. Each
+      consumer must handle "table not covered on this host" explicitly; see S1.
+- [ ] **S7 — Extend golden-host drift to arbitrary file / config state**, the
+      fourth box above. This EXTENDS the 20.2 differ with new fact sources; it
+      does not rebuild it.
+
+Cross-cutting: i18n/l10n per slice (the glossary now carries the vocabulary —
+query pack, signature, asset, advisor); docs page + screenshots in the same
+phase; and an explicit `bsd-tests.yml` dispatch run before the exit gate,
+because push-green CI never covers the BSDs.
+
+
+
 - [ ] Agent embeds + lifecycle-manages `osqueryd`; results flow up the existing
       store-and-forward queue (opt-in; air-gap-clean, no phone-home) —
       **Community Edition** (better inventory drives adoption funnel)

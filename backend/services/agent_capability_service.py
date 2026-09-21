@@ -91,6 +91,29 @@ def normalize_report(report: Any) -> Optional[Dict[str, Any]]:
             return {}
         return {str(k): v for k, v in sorted(value.items())}
 
+    def _facts(value):
+        """Phase 21.1 fact coverage, or ``None`` when the agent sent none.
+
+        ``None`` rather than ``{}`` on purpose, and it is the same distinction
+        this whole slice is about: an agent that never advertised coverage has
+        not told us it serves nothing, it has told us NOTHING.  Collapsing the
+        two would let a pre-21.1 agent read as "serves no fact tables", which
+        a consumer would then render as an empty result -- and an empty result
+        is indistinguishable from "measured, found none".
+        """
+        if not isinstance(value, dict):
+            return None
+        version = value.get("contract_version")
+        if not isinstance(version, int) or version < 1:
+            logger.warning("agent fact coverage has no usable contract_version")
+            return None
+        return {
+            "contract_version": version,
+            "served": _str_map(value.get("served")),
+            "unsupported": _str_map(value.get("unsupported")),
+            "not_applicable": _str_map(value.get("not_applicable")),
+        }
+
     commands = _str_list(report.get("commands"))
     if not commands:
         # A report with no routable commands is not a limited agent, it is a
@@ -109,6 +132,10 @@ def normalize_report(report: Any) -> Optional[Dict[str, Any]]:
         # below: an agent is not degraded for lacking a facility its operating
         # system does not have.  Absent from pre-Phase-19 agents, hence {}.
         "not_applicable": _str_map(report.get("not_applicable")),
+        # Phase 21.1: which fact tables this host serves and by which provider.
+        # NOT consulted by the limited rule -- an agent whose fact providers
+        # have not shipped yet is not a degraded agent.
+        "facts": _facts(report.get("facts")),
     }
 
 

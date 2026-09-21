@@ -48,6 +48,7 @@ import AirgapRepositories from './Pages/AirgapRepositories';
 import ConfigDrift from './Pages/ConfigDrift';
 import ConfigJobs from './Pages/ConfigJobs';
 import ConfigProfiles from './Pages/ConfigProfiles';
+import QueryPacks from './Pages/QueryPacks';
 import AirgapCollections from './Pages/AirgapCollections';
 import FederationAuditLog from './Pages/FederationAuditLog';
 import FederationHosts from './Pages/FederationHosts';
@@ -86,6 +87,10 @@ function AppRoutes() {
       <Route path="/config-profiles" element={<LicensedRoute module="config_management_engine"><ConfigProfiles /></LicensedRoute>} />
       <Route path="/config-drift" element={<LicensedRoute module="config_management_engine"><ConfigDrift /></LicensedRoute>} />
       <Route path="/config-jobs" element={<LicensedRoute module="config_management_engine"><ConfigJobs /></LicensedRoute>} />
+      {/* Phase 21.1 S4 -- the fact SUBSTRATE is open-source on every agent;
+          this management plane is Professional. Guarded so the page is
+          unreachable by direct URL without the module. */}
+      <Route path="/query-packs" element={<LicensedRoute module="query_pack_engine"><QueryPacks /></LicensedRoute>} />
       <Route path="/reports" element={<Reports />} />
       <Route path="/reports/audit-log" element={<AuditLogViewer />} />
       <Route path="/reports/:reportId" element={<ReportViewer />} />

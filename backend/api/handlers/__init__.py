@@ -34,6 +34,7 @@ from backend.api.handlers.child_host_handlers import (
 
 # Import from software_package_handlers
 from backend.api.handlers.config_mgmt_handlers import handle_config_profile_result
+from backend.api.handlers.query_pack_handlers import handle_query_pack_result
 
 # Import from custom_metric_handlers (Custom Metrics & Graphs — Slice 3b)
 from backend.api.handlers.custom_metric_handlers import handle_custom_metric_samples
@@ -94,6 +95,7 @@ __all__ = [
     "handle_package_collection",
     "handle_third_party_repository_update",
     "handle_config_profile_result",
+    "handle_query_pack_result",
     "handle_antivirus_status_update",
     "handle_commercial_antivirus_status_update",
     "handle_firewall_status_update",

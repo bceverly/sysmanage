@@ -115,7 +115,7 @@ help:
 	@echo "  make check-nginx-configs - The per-platform nginx configs must match the template"
 	@echo "  make check-msi-guids   - WiX component GUIDs must be unique (a collision costs a release)"
 	@echo "  make check-migrations  - Migrations must be expand-contract for the rolling fleet"
-	@echo "  make check-engine-codes - Every dispatched Pro+ engine code is registered and licensable"
+	@echo "  make check-engine-codes - Pro+ engine + feature codes are registered and licensable"
 	@echo "  make security-semgrep  - Run Semgrep locally, matching what the pre-push hook does"
 	@echo ""
 	@echo "Setup, dev servers and misc:"
@@ -4954,6 +4954,9 @@ i18n-sync:
 # Gate: every Pro+ engine code this repo dispatches to must exist in ModuleCode
 # AND appear in a tier.  An unregistered engine can never be licensed, so the
 # shim answers "requires a Professional+ license" forever with nothing logged.
+# Also cross-checks FEATURE codes against the Pro+ licence generator when that
+# repo is checked out beside this one: a feature the generator issues but this
+# repo cannot name makes FeatureCode(value) raise on a valid licence.
 check-engine-codes:
 	@$(PYTHON) scripts/check_engine_codes.py
 

@@ -128,6 +128,8 @@ class CommandType(str, Enum):
     # reports per-task idempotency back.  Folding them together would mean the
     # agent guessing which shape it received.
     APPLY_CONFIG_PROFILE = "apply_config_profile"
+    # Phase 21.1 S4 — run a query pack against the host's fact tables.
+    RUN_QUERY_PACK = "run_query_pack"
     CHECK_REBOOT_STATUS = "check_reboot_status"
     COLLECT_DIAGNOSTICS = "collect_diagnostics"
     COLLECT_CERTIFICATES = "collect_certificates"

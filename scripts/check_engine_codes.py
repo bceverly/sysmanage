@@ -47,9 +47,17 @@ sys.path.insert(0, str(REPO))
 
 # pylint: disable=wrong-import-position  # import must follow the sys.path insert
 from backend.licensing.features import (  # noqa: E402
+    TIER_FEATURES,
     TIER_MODULES,
+    FeatureCode,
     ModuleCode,
 )
+
+# The Pro+ repo, when it happens to be checked out beside this one. CI clones
+# ONE repo, so its absence is not a failure -- the feature cross-check below
+# simply does not run there, exactly as sync_i18n_tooling.py treats a missing
+# sibling.
+PROPLUS = REPO.parent / "sysmanage-professional-plus"
 
 # ``module_loader.get_module("<code>")`` and the ``_ENGINE_CODE = "<code>"``
 # constant the shims assign it to.  Both are string literals, so they can be
@@ -78,6 +86,87 @@ def licensed_codes():
     for modules in TIER_MODULES.values():
         out |= {m.value for m in modules}
     return out
+
+
+def issued_feature_codes():
+    """Feature strings the Pro+ generator can put in a licence, or None.
+
+    ``None`` means the sibling repo is not checked out here, which is the
+    normal case in CI and not a failure.
+
+    Read with a regex rather than by importing: the two repos have separate
+    virtualenvs and separate ``backend`` packages, and importing the other
+    one's would shadow this one's on ``sys.path``.
+    """
+    path = PROPLUS / "backend" / "licensing" / "features.py"
+    if not path.exists():
+        return None
+    text = path.read_text(encoding="utf-8", errors="replace")
+    block = re.search(r"^PROFESSIONAL_FEATURES\s*=\s*\[(.*?)^\]", text, re.S | re.M)
+    if not block:
+        return None
+    return set(re.findall(r'["\']([a-z0-9_]+)["\']', block.group(1)))
+
+
+def check_features():
+    """Every feature a licence can carry must exist in FeatureCode.
+
+    THE BUG THIS CATCHES is the sibling of the module one above, and it had
+    already happened three times over before anyone looked: ``secrets``,
+    ``containers`` and ``multiuser`` were issued in every Professional licence
+    and were absent from ``FeatureCode`` entirely, so ``FeatureCode(f)`` over a
+    real licence's features raised on a perfectly valid licence. Nothing had
+    done that yet, which is the only reason it never bit -- those capabilities
+    are gated by their MODULES instead. A fourth one would have been just as
+    invisible.
+
+    Returns 0/1 like main(); prints its own diagnosis.
+    """
+    issued = issued_feature_codes()
+    if issued is None:
+        print(
+            "[skip] feature cross-check: sysmanage-professional-plus is not "
+            "checked out beside this repo"
+        )
+        return 0
+
+    known = {f.value for f in FeatureCode}
+    tiered = set()
+    for features in TIER_FEATURES.values():
+        tiered |= {f.value for f in features}
+
+    unknown = sorted(issued - known)
+    untiered = sorted((issued & known) - tiered)
+
+    if unknown:
+        print(
+            "ERROR: features the licence generator issues but MISSING from "
+            "FeatureCode:",
+            file=sys.stderr,
+        )
+        for code in unknown:
+            print(f"  {code}", file=sys.stderr)
+    if untiered:
+        print(
+            "ERROR: features in FeatureCode but in NO tier of TIER_FEATURES:",
+            file=sys.stderr,
+        )
+        for code in untiered:
+            print(f"  {code}", file=sys.stderr)
+
+    if unknown or untiered:
+        print(
+            "\nA licence carrying a feature this server cannot name is a "
+            "licence\nthis server cannot reason about: FeatureCode(value) "
+            "raises on it.\nFix: add the code to FeatureCode and to the tier "
+            "the Pro+ repo's\nPROFESSIONAL_FEATURES / ENTERPRISE_FEATURES "
+            "list puts it in.",
+            file=sys.stderr,
+        )
+        return 1
+
+    print(f"[OK] all {len(issued)} issuable feature code(s) are known and tiered")
+    return 0
 
 
 def main():
@@ -114,7 +203,7 @@ def main():
             "server never serves it, the runtime directory is never created, and\n"
             "the OSS shim answers 'requires a Professional+ license' forever.\n"
             "Fix: add the code to ModuleCode and to the tier named in the\n"
-            "engine's own module-source/<code>/metadata.json \"tier\" field.",
+            'engine\'s own module-source/<code>/metadata.json "tier" field.',
             file=sys.stderr,
         )
         return 1
@@ -123,7 +212,7 @@ def main():
         f"[OK] all {len(referenced_codes())} dispatched engine code(s) "
         "are registered and licensable"
     )
-    return 0
+    return check_features()
 
 
 if __name__ == "__main__":

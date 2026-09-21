@@ -759,12 +759,12 @@ async def list_kvm_networks(
     """
     List KVM/libvirt networks on a Linux host.
     Also returns available Linux bridges for bridged networking setup.
-    Requires VIEW_CHILD_HOSTS permission.
+    Requires VIEW_CHILD_HOST permission.
     """
     _check_container_module()
 
     # Authz is server-global; host data is tenant-scoped.
-    authorize_on_main(current_user, SecurityRoles.VIEW_CHILD_HOSTS)
+    authorize_on_main(current_user, SecurityRoles.VIEW_CHILD_HOST)
     session_local = request_sessionmaker()
 
     with session_local() as session:

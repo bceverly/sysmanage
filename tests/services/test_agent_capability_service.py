@@ -252,3 +252,55 @@ def test_a_report_without_not_applicable_still_normalizes():
     """Agents older than Phase 19 never send the key."""
     normalized = normalize_report(_report(["install_package"]))
     assert normalized["not_applicable"] == {}
+
+
+# ---------------------------------------------------------------------------
+# Phase 21.1 S1 — fact coverage ingestion.
+# ---------------------------------------------------------------------------
+
+
+def _facts(**over):
+    base = {
+        "contract_version": 1,
+        "served": {"users": "native"},
+        "unsupported": {"processes": "no_provider"},
+        "not_applicable": {"programs": "wrong_platform"},
+    }
+    base.update(over)
+    return base
+
+
+def test_fact_coverage_survives_normalization():
+    report = _report(["install_package"])
+    report["facts"] = _facts()
+    normalized = normalize_report(report)
+    assert normalized["facts"]["served"] == {"users": "native"}
+    assert normalized["facts"]["unsupported"] == {"processes": "no_provider"}
+    assert normalized["facts"]["contract_version"] == 1
+
+
+def test_an_agent_that_never_advertised_facts_is_none_not_empty():
+    """The distinction this whole slice exists for.
+
+    ``None`` means the agent never told us.  ``{}`` would mean it told us it
+    serves nothing — and a consumer rendering that as an empty result is
+    indistinguishable from "measured, found none", which reads as compliant.
+    """
+    normalized = normalize_report(_report(["install_package"]))
+    assert normalized["facts"] is None
+
+
+def test_malformed_fact_coverage_is_rejected_not_half_kept():
+    for bad in ({}, {"contract_version": 0}, {"contract_version": "1"}, "nope", []):
+        report = _report(["install_package"])
+        report["facts"] = bad
+        assert normalize_report(report)["facts"] is None, bad
+
+
+def test_fact_coverage_never_makes_an_agent_look_limited():
+    """Serving no fact tables is not a degraded agent — the providers simply
+    have not shipped yet.  Folding this into ``limited`` would flag every host
+    in the fleet the day S1 lands and tell an operator nothing true."""
+    report = _report(["install_package"])
+    report["facts"] = _facts(served={}, unsupported={"users": "no_provider"})
+    assert capability_update_values(report)["agent_capabilities_limited"] is False

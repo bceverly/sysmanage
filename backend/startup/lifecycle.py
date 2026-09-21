@@ -458,6 +458,29 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                                 fed_e,
                             )
 
+                # Start the query-pack collection tick if its engine is
+                # loaded.  Same gate and same reason as the config assignment
+                # tick below: assignments cannot exist without the module, so
+                # without it the loop would wake every minute to find nothing.
+                query_pack_engine_for_tick = module_loader.get_module(
+                    "query_pack_engine"
+                )
+                if query_pack_engine_for_tick is not None:
+                    logger.info("=== QUERY PACK TICK STARTUP ===")
+                    try:
+                        from backend.services.query_pack_tick import (
+                            query_pack_tick_service,
+                        )
+
+                        query_pack_task = asyncio.create_task(query_pack_tick_service())
+                        logger.info("Query pack tick task started: %s", query_pack_task)
+                    except Exception as tick_e:  # pylint: disable=broad-except
+                        # Never fatal: a scheduler that will not start must not
+                        # take the whole server with it.
+                        logger.warning(
+                            "Failed to start query pack tick task: %s", tick_e
+                        )
+
                 # Start the config-profile assignment tick if the config
                 # management engine is loaded.  Same gate as the air-gap tick
                 # below and for the same reason: assignments cannot exist

@@ -35,10 +35,10 @@ from backend.api import (
     child_host,
     commercial_antivirus_status,
     config_management,
-    config_mgmt_prereq,
     config_mgmt_drift,
     config_mgmt_inventories,
     config_mgmt_jobs,
+    config_mgmt_prereq,
     config_mgmt_profiles,
     config_mgmt_remediation,
     config_mgmt_runs,
@@ -79,6 +79,7 @@ from backend.api import (
     processes,
     profile,
     provisioning_bundle,
+    query_packs,
     queue,
     reboot_orchestration,
     report_branding,
@@ -408,6 +409,10 @@ def register_routes(app: FastAPI):
     logger.debug("Adding config-management profiles router (Phase 20.1)")
     _include_versioned(app, config_mgmt_profiles.router, tags=["config-management"])
     logger.debug("Config-management profiles router added")
+
+    logger.debug("Adding query-packs router (Phase 21.1 S4)")
+    _include_versioned(app, query_packs.router, tags=["query-packs"])
+    logger.debug("Query-packs router added")
 
     logger.debug("Adding config-management drift router (Phase 20.2)")
     _include_versioned(app, config_mgmt_drift.router, tags=["config-management"])

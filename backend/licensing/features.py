@@ -84,6 +84,26 @@ class FeatureCode(str, Enum):
     FLEET_SCHEDULED_OPERATIONS = "fleet_scheduled_operations"
     FLEET_CONFIG_DEPLOYMENT = "fleet_config_deployment"
 
+    # Query Packs over the Phase 21.1 fact substrate.  The SUBSTRATE is
+    # Community -- every agent serves the fact tables, because better
+    # inventory drives adoption.  Authoring packs, assigning them as policy
+    # per host/tag/site and scheduling collection is the management plane,
+    # and that is the value.
+    QUERY_PACK_MANAGE = "query_pack_manage"
+
+    # Issued by the licence generator in every Professional+ licence since
+    # the tiers were defined, but absent here until 2026-09-21 -- so
+    # ``FeatureCode(f)`` over a real licence's feature list raised on a
+    # perfectly valid licence. Nothing had done that yet, which is the only
+    # reason it never bit: the capabilities themselves are gated by their
+    # MODULES (secrets_engine, container_engine), not by these codes. Added
+    # rather than removed from the generator, because licences already in
+    # the field carry them and the consumer should understand what the
+    # issuer emits.
+    SECRETS_MANAGEMENT = "secrets"
+    CONTAINER_MANAGEMENT = "containers"
+    MULTI_USER = "multiuser"
+
     # Virtualization Engine (Phase 10.1)
     VIRTUALIZATION_KVM_LIFECYCLE = "virtualization_kvm_lifecycle"
     VIRTUALIZATION_KVM_CREATE = "virtualization_kvm_create"
@@ -278,6 +298,12 @@ class ModuleCode(str, Enum):
     # capabilities are feature-gated (PROVISIONING_MANAGE) inside it.
     PROVISIONING_ENGINE = "provisioning_engine"
 
+    # Phase 21.1 S4 — query packs as multi-tenant policy.  Its own engine
+    # rather than a corner of fleet_engine: a pack is a fact-query plane, not
+    # a fleet operation, and folding it in would change an existing subsystem
+    # as a side effect of adding a new one.  Loads at Professional.
+    QUERY_PACK_ENGINE = "query_pack_engine"
+
     @classmethod
     def from_string(cls, value: str) -> "ModuleCode":
         """Convert string to ModuleCode enum."""
@@ -319,6 +345,12 @@ TIER_FEATURES = {
         # Phase 18 — provisioning template authoring is Pro+ (the act of
         # provisioning is Enterprise-gated separately, below)
         FeatureCode.PROVISIONING_TEMPLATES_MANAGE,
+        # Phase 21.1 S4 — query-pack authoring, assignment and scheduling
+        FeatureCode.QUERY_PACK_MANAGE,
+        # Issued by the generator at this tier; see the FeatureCode comment.
+        FeatureCode.SECRETS_MANAGEMENT,
+        FeatureCode.CONTAINER_MANAGEMENT,
+        FeatureCode.MULTI_USER,
     },
     LicenseTier.ENTERPRISE: {
         # All professional features
@@ -419,6 +451,12 @@ TIER_FEATURES = {
         # template surface and the provisioning/compute/discovery surface)
         FeatureCode.PROVISIONING_TEMPLATES_MANAGE,
         FeatureCode.PROVISIONING_MANAGE,
+        # Phase 21.1 S4 — inherited from Professional (Enterprise is a superset)
+        FeatureCode.QUERY_PACK_MANAGE,
+        # Inherited from Professional; see the FeatureCode comment.
+        FeatureCode.SECRETS_MANAGEMENT,
+        FeatureCode.CONTAINER_MANAGEMENT,
+        FeatureCode.MULTI_USER,
     },
 }
 
@@ -441,6 +479,8 @@ TIER_MODULES = {
         # Phase 18 — provisioning engine loads at Professional so Pro+ can
         # author templates; Enterprise-only actions are feature-gated within it
         ModuleCode.PROVISIONING_ENGINE,
+        # Phase 21.1 S4 — query packs as multi-tenant policy
+        ModuleCode.QUERY_PACK_ENGINE,
     },
     LicenseTier.ENTERPRISE: {
         ModuleCode.HEALTH_ENGINE,
@@ -489,6 +529,9 @@ TIER_MODULES = {
         ModuleCode.CONFIG_MANAGEMENT_ENGINE,
         # Phase 16 — Content Lifecycle Management
         ModuleCode.CONTENT_LIFECYCLE_ENGINE,
+        # Phase 21.1 S4 — query packs (inherited from Professional; Enterprise
+        # is a superset, so every Professional module is re-listed here)
+        ModuleCode.QUERY_PACK_ENGINE,
         # Phase 17 — Content Distribution & Image-Mode Hosts
         ModuleCode.SNAP_PROXY_ENGINE,
         ModuleCode.OCI_PROXY_ENGINE,

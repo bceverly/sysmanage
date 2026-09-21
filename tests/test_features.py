@@ -299,6 +299,16 @@ class TestTierFeatures:
             # Phase 18 — provisioning TEMPLATE authoring is Pro+ (the act of
             # provisioning is Enterprise-gated via PROVISIONING_MANAGE).
             FeatureCode.PROVISIONING_TEMPLATES_MANAGE,
+            # Phase 21.1 S4 — query-pack authoring/assignment/scheduling
+            FeatureCode.QUERY_PACK_MANAGE,
+            # Issued by the Pro+ licence generator at this tier and absent
+            # here until 2026-09-21 — see the FeatureCode comment. This
+            # exact-set test could never have caught that: it asserts this
+            # repo's internal consistency, and the drift was ACROSS repos.
+            # scripts/check_engine_codes.py is the gate that catches it.
+            FeatureCode.SECRETS_MANAGEMENT,
+            FeatureCode.CONTAINER_MANAGEMENT,
+            FeatureCode.MULTI_USER,
         }
         assert pro_features == expected
 
@@ -372,6 +382,8 @@ class TestTierModules:
             # Phase 18 — provisioning engine loads at Professional so Pro+ can
             # author templates; provisioning actions are Enterprise-gated.
             ModuleCode.PROVISIONING_ENGINE,
+            # Phase 21.1 S4 — query packs as multi-tenant policy
+            ModuleCode.QUERY_PACK_ENGINE,
         }
         assert pro_modules == expected
 

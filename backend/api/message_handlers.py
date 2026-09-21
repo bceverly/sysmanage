@@ -144,6 +144,18 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
 
         return await handle_config_profile_result(db, connection, message_data)
 
+    # Phase 21.1 S4 query packs. Routed on command_type for the same reason
+    # config profiles are: a successful run and a refused one look nothing
+    # alike, so sniffing the payload shape would silently drop every failure.
+    if (
+        command_type_of(message_data) == "run_query_pack"
+        or command_type_from_queue(db, message_data) == "run_query_pack"
+    ):
+        logger.info("Detected query pack result, routing to handler")
+        from backend.api.handlers import handle_query_pack_result
+
+        return await handle_query_pack_result(db, connection, message_data)
+
     # Check if this is a script execution result
     if "execution_id" in message_data:
         logger.info("Detected script execution result, routing to script handler")

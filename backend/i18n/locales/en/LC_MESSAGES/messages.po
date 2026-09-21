@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-09-19 13:02-0400\n"
+"POT-Creation-Date: 2026-09-21 12:41-0400\n"
 "Language: en\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -140,11 +140,11 @@ msgstr "Failed to get CA certificate: %s"
 
 #: backend/api/certificates.py:84 backend/api/certificates.py:139
 #: backend/api/config_mgmt_drift.py:165 backend/api/config_mgmt_drift.py:198
-#: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
-#: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
-#: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:473
-#: backend/api/firewall_roles.py:544
+#: backend/api/query_packs.py:300 backend/api/config_mgmt_inventories.py:355
+#: backend/api/host_graylog.py:89 backend/api/config_mgmt_profiles.py:340
+#: backend/api/diagnostics.py:87 backend/api/diagnostics.py:222
+#: backend/api/error_constants.py:48 backend/api/antivirus_status.py:213
+#: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "Invalid host ID format"
@@ -284,7 +284,7 @@ msgstr "Failed to process process status update: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:499 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:511 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "Host not registered"
@@ -1612,7 +1612,7 @@ msgstr "Could not load or generate the federation TLS certificate."
 msgid "Could not load or generate the federation identity key."
 msgstr "Could not load or generate the federation identity key."
 
-#: backend/api/config_mgmt_drift.py:191
+#: backend/api/config_mgmt_drift.py:191 backend/api/query_packs.py:101
 #: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/config_mgmt_jobs.py:167 backend/api/config_mgmt_profiles.py:136
@@ -2523,6 +2523,41 @@ msgstr ""
 msgid "Child host creation requested. This may take several minutes."
 msgstr "Child host creation requested. This may take several minutes."
 
+#: backend/api/query_packs.py:120
+#, python-format
+msgid "The query pack was rejected: %s"
+msgstr "The query pack was rejected: %s"
+
+#: backend/api/query_packs.py:151 backend/api/query_packs.py:186
+#: backend/api/query_packs.py:208
+msgid "Invalid query pack ID format"
+msgstr "Invalid query pack ID format"
+
+#: backend/api/query_packs.py:153 backend/api/query_packs.py:188
+#: backend/api/query_packs.py:210
+msgid "Query pack not found"
+msgstr "Query pack not found"
+
+#: backend/api/query_packs.py:253
+msgid "Invalid ID format in the assignment"
+msgstr "Invalid ID format in the assignment"
+
+#: backend/api/query_packs.py:276 backend/api/config_mgmt_profiles.py:377
+msgid "Invalid assignment ID format"
+msgstr "Invalid assignment ID format"
+
+#: backend/api/query_packs.py:281 backend/api/config_mgmt_profiles.py:382
+msgid "Assignment not found"
+msgstr "Assignment not found"
+
+#: backend/api/query_packs.py:319
+msgid "Invalid run ID format"
+msgstr "Invalid run ID format"
+
+#: backend/api/query_packs.py:323
+msgid "Query pack run not found"
+msgstr "Query pack run not found"
+
 #: backend/api/config_mgmt_inventories.py:133
 #: backend/api/config_mgmt_jobs.py:222
 msgid "Invalid inventory ID format"
@@ -3140,30 +3175,30 @@ msgstr "This job has already finished"
 msgid "Cancelled by an operator"
 msgstr "Cancelled by an operator"
 
-#: backend/api/message_handlers.py:380
+#: backend/api/message_handlers.py:392
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "Failed to process diagnostic result: %s"
 
-#: backend/api/message_handlers.py:414
+#: backend/api/message_handlers.py:426
 msgid "Missing message_id in command acknowledgment"
 msgstr "Missing message_id in command acknowledgment"
 
-#: backend/api/message_handlers.py:523
+#: backend/api/message_handlers.py:535
 msgid "Missing installation_id in package installation status"
 msgstr "Missing installation_id in package installation status"
 
-#: backend/api/message_handlers.py:543
+#: backend/api/message_handlers.py:555
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "Installation log entry not found for ID: %s"
 
-#: backend/api/message_handlers.py:589
+#: backend/api/message_handlers.py:601
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "Package installation {status} on agent {hostname}"
 
-#: backend/api/message_handlers.py:618
+#: backend/api/message_handlers.py:630
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "Failed to update package installation status: %s"
@@ -3692,14 +3727,6 @@ msgstr "A profile named '%s' already exists"
 #: backend/api/config_mgmt_profiles.py:276
 msgid "Profile deleted"
 msgstr "Profile deleted"
-
-#: backend/api/config_mgmt_profiles.py:377
-msgid "Invalid assignment ID format"
-msgstr "Invalid assignment ID format"
-
-#: backend/api/config_mgmt_profiles.py:382
-msgid "Assignment not found"
-msgstr "Assignment not found"
 
 #: backend/api/config_mgmt_profiles.py:385
 msgid "Assignment removed"
@@ -5051,11 +5078,11 @@ msgstr "Server message queue manager initialized"
 msgid "Rate limit exceeded. Please retry later."
 msgstr "Rate limit exceeded. Please retry later."
 
-#: backend/services/agent_capability_service.py:217
+#: backend/services/agent_capability_service.py:244
 msgid "this host"
 msgstr "this host"
 
-#: backend/services/agent_capability_service.py:220
+#: backend/services/agent_capability_service.py:247
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "
