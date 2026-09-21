@@ -678,6 +678,17 @@ def do_requeue(english, stale):
     return total
 
 
+GLOSS_HINT = (
+    "  Wrong sense? The term is defined in scripts/i18n_glossary.py;\n"
+    "      retranslate (the service now sends the canonical word), or\n"
+    "      fix the value by hand. Widespread new term? Add it there.\n"
+)
+
+OK_MESSAGE = (
+    "OK: no English-identical, stale, wrong-language or wrong-sense translations"
+)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--baseline", action="store_true")
@@ -773,7 +784,7 @@ def main() -> int:
     if gloss:
         print("\nWRONG SENSE (domain glossary):", file=sys.stderr)
         for row in gloss[: args.limit]:
-            name, lang, path, key, _src, term, bad = row
+            name, lang, _path, key, _src, term, bad = row
             print(
                 f"  {name} {lang} {key}: '{term}' rendered as '{bad}'",
                 file=sys.stderr,
@@ -804,20 +815,12 @@ def main() -> int:
                 else ""
             )
             + "  Intentionally-English value? Add a tight rule to i18n-allow.txt.\n"
-            + (
-                "  Wrong sense? The term is defined in scripts/i18n_glossary.py;\n"
-                "      retranslate (the service now sends the canonical word), or\n"
-                "      fix the value by hand. Widespread new term? Add it there.\n"
-                if gloss
-                else ""
-            ),
+            + (GLOSS_HINT if gloss else ""),
             file=sys.stderr,
         )
         return 1
 
-    print(
-        "OK: no English-identical, stale, wrong-language or " "wrong-sense translations"
-    )
+    print(OK_MESSAGE)
     return 0
 
 

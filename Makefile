@@ -1281,7 +1281,7 @@ lint-freebsd-port:
 	@$(PYTHON) scripts/check_freebsd_port.py
 
 
-lint: lint-file-length lint-python lint-typescript lint-css check-engine-codes check-nginx-configs check-msi-guids i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-markup i18n-complete lint-version check-migrations lint-freebsd-port
+lint: lint-file-length lint-python lint-typescript lint-css check-engine-codes check-nginx-configs check-msi-guids i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-markup i18n-complete i18n-sync-check lint-version check-migrations lint-freebsd-port
 	@echo "[OK] All linting completed successfully!"
 
 # Guard: the per-platform nginx configs are GENERATED from one template.

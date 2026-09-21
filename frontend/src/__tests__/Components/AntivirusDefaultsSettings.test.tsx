@@ -93,7 +93,8 @@ describe("loading", () => {
       data: [{ os_name: "Ubuntu", antivirus_package: null }],
     });
     await ready();
-    expect(document.body.textContent).not.toBe("");
+    // Same race as above: wait for the row rather than for "any text".
+    expect(await screen.findByText("Ubuntu")).toBeInTheDocument();
   });
 });
 
@@ -108,7 +109,13 @@ describe("permission gating", () => {
     // Read-only is the point: seeing what is configured needs no privilege.
     m(hasPermission).mockResolvedValue(false);
     await ready();
-    expect(document.body.textContent).not.toBe("");
+    // Assert on the DEFAULTS, not on "the body has some text".  ready() only
+    // waits for the fetch to be ISSUED, and until it resolves the component
+    // renders a bare spinner with no text at all -- so the old check raced the
+    // state update and failed on the slower Windows runner while passing
+    // everywhere else.  findByText waits for the thing this test is about.
+    expect(await screen.findByText("Ubuntu")).toBeInTheDocument();
+    expect(await screen.findByText("clamav")).toBeInTheDocument();
   });
 
   test("a rejected permission lookup fails closed and is reported", async () => {

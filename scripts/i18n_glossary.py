@@ -308,9 +308,12 @@ TERMS: Dict[str, Dict[str, Dict[str, object]]] = {
             "ar": ["الضيوف", "ضيوف"],
             "de": ["Gastgeber"],
             "fr": ["animateur", "invité"],
-            "es": ["anfitrión", "invitado"],
+            # NOT "anfitrión"/"anfitrião": Spanish and Portuguese genuinely
+            # use them for a host SYSTEM (sistema anfitrión). Only the guest
+            # words are the inversion.
+            "es": ["invitado"],
             "it": ["ospite"],
-            "pt": ["anfitrião", "convidado"],
+            "pt": ["convidado"],
         },
     },
     "inventory": {
@@ -500,7 +503,8 @@ def _patterns() -> List[Tuple[str, re.Pattern]]:
             key=len,
             reverse=True,
         )
-        out.append((term, re.compile(r"\b(?:%s)\b" % "|".join(alts), re.I)))
+        alternation = "|".join(alts)
+        out.append((term, re.compile(rf"\b(?:{alternation})\b", re.I)))
     return out
 
 
@@ -525,7 +529,7 @@ def forbidden_matcher(form: str) -> re.Pattern:
     """
     if _CJK.search(form):
         return re.compile(re.escape(form))
-    return re.compile(r"\b%s\b" % re.escape(form), re.I)
+    return re.compile(rf"\b{re.escape(form)}\b", re.I)
 
 
 def patterns() -> List[Tuple[str, re.Pattern]]:
@@ -536,7 +540,7 @@ def patterns() -> List[Tuple[str, re.Pattern]]:
 # Brand/protocol names are matched literally (no plural, no case folding):
 # "Salt" the configuration tool must stay, but "salt" in a password-hashing
 # sentence is an ordinary English word and is none of our business.
-_PROTECTED = [(n, re.compile(r"\b%s\b" % re.escape(n))) for n in NEVER_TRANSLATE]
+_PROTECTED = [(n, re.compile(rf"\b{re.escape(n)}\b")) for n in NEVER_TRANSLATE]
 
 
 def protected(texts: Iterable[str]) -> List[str]:
@@ -557,7 +561,15 @@ def relevant(texts: Iterable[str], limit: int = MAX_ENTRIES) -> List[Tuple[str, 
     if not blob:
         return []
     hits = [(term, GLOSSARY[term]) for term, pat in _PATTERNS if pat.search(blob)]
-    hits.sort(key=lambda kv: (-len(kv[0]), kv[0]))
+    # Terms in TERMS come FIRST, whatever their length.  Sorting purely by
+    # length looks tidy and is wrong: the words that actually get
+    # mistranslated are the short ones -- fleet, host, job, drift -- so a
+    # batch matching more than `limit` terms dropped exactly the entries that
+    # matter and kept "reboot orchestration".  Measured: a docs run
+    # retranslated 66 zh_TW values straight back to 艦隊 (a navy) while the
+    # same sentence sent alone came back correct.  Within each group, longer
+    # first, so "job template" still outranks "job".
+    hits.sort(key=lambda kv: (kv[0] not in TERMS, -len(kv[0]), kv[0]))
     return hits[:limit]
 
 

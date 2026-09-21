@@ -78,6 +78,14 @@ HASHES_HOME = {
 
 TARGETS = ["sysmanage-agent", "sysmanage-professional-plus", "sysmanage-docs"]
 
+# Where a NEW file's licence header comes from.  It must be taken from a file
+# ALREADY in the target repo, never from the canonical copy: sysmanage is
+# AGPL and sysmanage-professional-plus is PROPRIETARY, so copying the header
+# with the body would put an AGPL notice on proprietary source.  i18n_strict.py
+# is the donor because every repo has one by definition -- it is the file this
+# script exists to keep in step.
+HEADER_DONOR = "scripts/i18n_strict.py"
+
 
 def split_header(text):
     """(licence header, everything from the module docstring onward).
@@ -147,9 +155,31 @@ def main():
             skipped.add(repo)
             continue
         if not target.exists():
-            missing.append(str(target))
+            # Bootstrap it, so adding a shared file to SHARED is one edit
+            # rather than an edit plus three hand-copies.  Two guards:
+            #   * the header must come from a file already in that repo, or we
+            #     would brand proprietary source with the AGPL notice; and
+            #   * a file carrying a per-repo SURFACES block is NOT created,
+            #     because that block has to be authored for the repo -- copying
+            #     sysmanage's would point the gate at surfaces that do not
+            #     exist there, and it would look like it passed.
+            donor = SIBLINGS / repo / HEADER_DONOR
+            canon_text = canon.read_text(encoding="utf-8")
+            if not donor.exists() or split_config(split_header(canon_text)[1])[1]:
+                missing.append(str(target))
+                continue
+            header, _ = split_header(donor.read_text(encoding="utf-8"))
+            _, canon_body = split_header(canon_text)
+            if args.check or args.diff:
+                drifted.append(f"{repo}/{target.name} (absent)")
+                continue
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(header + canon_body, encoding="utf-8")
+            wrote.append(f"{repo}/{target.name} (created)")
             continue
-        want = render(canon.read_text(encoding="utf-8"), target.read_text(encoding="utf-8"))
+        want = render(
+            canon.read_text(encoding="utf-8"), target.read_text(encoding="utf-8")
+        )
         have = target.read_text(encoding="utf-8")
         if want == have:
             continue
