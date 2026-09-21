@@ -381,7 +381,7 @@ msgstr "ソフトウェアインベントリが更新されました"
 
 #: backend/api/handlers/software_package_handlers.py:117
 msgid "Failed to update software inventory"
-msgstr "ソフトウェア在庫の更新に失敗しました"
+msgstr "ソフトウェアインベントリの更新に失敗しました"
 
 #: backend/api/handlers/software_package_handlers.py:295
 #: backend/api/updates/report_routes.py:75

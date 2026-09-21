@@ -2551,27 +2551,27 @@ msgstr "Een sub-host creëren wordt gevraagd. Dit kan enkele minuten duren."
 #: backend/api/config_mgmt_inventories.py:133
 #: backend/api/config_mgmt_jobs.py:222
 msgid "Invalid inventory ID format"
-msgstr "Ongeldige ID-indeling voor voorraad"
+msgstr "Ongeldig inventaris-ID formaat"
 
 #: backend/api/config_mgmt_inventories.py:138
 #: backend/api/config_mgmt_jobs.py:227 backend/api/config_mgmt_jobs.py:424
 msgid "Inventory not found"
-msgstr "Voorraad niet gevonden"
+msgstr "Inventaris niet gevonden"
 
 #: backend/api/config_mgmt_inventories.py:205
 #: backend/api/config_mgmt_inventories.py:266
 #, python-format
 msgid "An inventory named '%s' already exists"
-msgstr "Een voorraad met de naam '%s' bestaat al"
+msgstr "Een inventaris met de naam '%s' bestaat al"
 
 #: backend/api/config_mgmt_inventories.py:307
 #, python-format
 msgid "This inventory is used by %d job template(s)"
-msgstr "Deze voorraad wordt gebruikt door taaktemplate(s) '%d'"
+msgstr "Deze inventaris wordt gebruikt door %d taaktemplate(s)"
 
 #: backend/api/config_mgmt_inventories.py:314
 msgid "Inventory deleted"
-msgstr "Voorraad verwijderd"
+msgstr "Inventaris verwijderd"
 
 #: backend/api/config_mgmt_inventories.py:360
 #: backend/api/config_mgmt_profiles.py:345
@@ -2585,15 +2585,15 @@ msgstr "Ongeldig site-ID formaat"
 
 #: backend/api/config_mgmt_inventories.py:388
 msgid "Invalid inventory member ID format"
-msgstr "Ongeldige ID-indeling voor lid van voorraad"
+msgstr "Ongeldig ID-formaat voor inventarislid"
 
 #: backend/api/config_mgmt_inventories.py:393
 msgid "Inventory member not found"
-msgstr "Lid van voorraad niet gevonden"
+msgstr "Inventarislid niet gevonden"
 
 #: backend/api/config_mgmt_inventories.py:396
 msgid "Inventory member removed"
-msgstr "Lid van voorraad verwijderd"
+msgstr "Inventarislid verwijderd"
 
 #: backend/api/host_operations.py:81
 msgid "Software inventory update requested"

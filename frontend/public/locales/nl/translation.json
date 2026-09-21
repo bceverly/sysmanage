@@ -632,7 +632,7 @@
     "prereqInstallError": "Kon de installatie van de vereiste voor configuratiebeheer niet aanvragen",
     "prereqInstallRequested": "Installatie aangevraagd. Deze kaart wordt bijgewerkt zodra de host terugmeldt.",
     "runChanged": "Gewijzigd",
-    "runCheckMode": "Droogloop",
+    "runCheckMode": "simulatie",
     "runFailed": "Mislukt",
     "runNoChanges": "Geen wijzigingen",
     "runNoProfile": "Geen profiel",
@@ -2358,7 +2358,7 @@
     "cat": {
       "admin": "Beheer",
       "automation": "Automatisering",
-      "fleet": "Vloot",
+      "fleet": "Machinepark",
       "insights": "Inzichten",
       "patching": "Patchen",
       "security": "Beveiliging"

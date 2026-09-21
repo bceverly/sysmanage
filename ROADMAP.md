@@ -8656,7 +8656,7 @@ are the bulk; the review UI is small).
 
 ### Exit Criteria
 
-- [ ] **Give the translation service a DOMAIN GLOSSARY before 21 adds strings.**
+- [x] **Give the translation service a DOMAIN GLOSSARY before 21 adds strings.** — 2026-09-20
       `SYSTEM_PROMPT` in `scripts/translation-service/translate_service.py`
       protects brand and protocol names but never states what the product's own
       nouns MEAN, so the model picks the everyday sense and the result passes
@@ -8676,6 +8676,35 @@ are the bulk; the review UI is small).
       string-heavy (advisor prose, threat-model questionnaire, punch list).
       Also note the service returns long paragraphs UNCHANGED when they mix
       inline markup with em-dashes and curly quotes — those still need hands.
+
+      **Done 2026-09-20.** `scripts/i18n_glossary.py` — ONE home, the same
+      relative path in all four repos, imported by BOTH the translation
+      service and `i18n_strict.py`, because two terminology tables would drift
+      and the gate would then enforce words the translator was never given.
+      105 glosses and 83 never-translate names, harvested from 25,399 English
+      strings across the four repos; 7 terms carry 76 canonical renderings and
+      62 measured-wrong forms. Only the terms OCCURRING in a batch are sent,
+      so the table can grow without bloating every request.
+
+      `make i18n-strict` now fails on wrong sense, and it is DENY-first on
+      purpose: requiring the canonical word means asserting a substring across
+      thirteen morphologically rich languages, and a gate that cries wolf gets
+      allow-listed into uselessness. The first run proved it — 403 violations,
+      every one false, because Arabic مضيف (host) CONTAINS ضيف (guest).
+      Unicode word boundaries fixed it (none between م and ض), with substring
+      matching kept only for CJK, which has no boundaries to find; German has
+      the same trap from the other side, "bereitstellen" containing "stellen".
+
+      It then found 85 real defects still shipping: `profile` as 个人资料 (a
+      personal bio) ×18, `inventory` as warehouse stock ×34, `job` as
+      employment ×14, `drift` as ja 漂白 — *bleaching* — ×4. Requeue plus
+      `make translate` fixed 77 against the live service; the last 8 were
+      hand-corrected, and the two that resisted did so because Arabic had no
+      canonical rendering to reach for, which is the lesson: a prohibition
+      without a target just makes the model repeat itself. One entry of mine
+      was wrong and is now canonical — Arabic أسطول is the ordinary
+      fleet-of-vehicles word, not the naval-only sense that makes ja 艦隊 and
+      zh 车队 defects.
 - [ ] Unenrolled asset discovery validated on ≥2 network segments: passive
       reporting finds a known-unmanaged device, correlation suppresses every
       managed host, and an allow-list exclusion survives a DHCP lease change

@@ -2529,7 +2529,7 @@ msgstr "لم يتم العثور على المخزون"
 #: backend/api/config_mgmt_inventories.py:266
 #, python-format
 msgid "An inventory named '%s' already exists"
-msgstr "تم إنشاء مخزون باسم '%s' بالفعل"
+msgstr "توجد بالفعل قائمة مضيفات باسم '%s'"
 
 #: backend/api/config_mgmt_inventories.py:307
 #, python-format
@@ -2556,7 +2556,7 @@ msgstr "تنسيق معرف عضو المخزون غير صالح"
 
 #: backend/api/config_mgmt_inventories.py:393
 msgid "Inventory member not found"
-msgstr "لم يتم العثور على عضو مخزون"
+msgstr "لم يتم العثور على عضو في المخزون"
 
 #: backend/api/config_mgmt_inventories.py:396
 msgid "Inventory member removed"
@@ -2564,7 +2564,7 @@ msgstr "تم إزالة عضو المخزون"
 
 #: backend/api/host_operations.py:81
 msgid "Software inventory update requested"
-msgstr "تم طلب تحديث مخزون البرمجيات"
+msgstr "تم طلب تحديث لمخزون البرمجيات"
 
 #: backend/api/host_operations.py:100
 msgid "Permission denied: REBOOT_HOST role required"

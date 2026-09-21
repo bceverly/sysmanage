@@ -381,7 +381,7 @@ msgstr "软件清单已更新"
 
 #: backend/api/handlers/software_package_handlers.py:117
 msgid "Failed to update software inventory"
-msgstr "更新软件库存失败"
+msgstr "更新软件清单失败"
 
 #: backend/api/handlers/software_package_handlers.py:295
 #: backend/api/updates/report_routes.py:75
@@ -1039,19 +1039,19 @@ msgstr "读取上传文件时发生错误"
 
 #: backend/api/user.py:674 backend/api/profile.py:328
 msgid "Profile image uploaded successfully"
-msgstr "个人资料图片上传成功"
+msgstr "配置文件图片已成功上传"
 
 #: backend/api/user.py:698 backend/api/profile.py:356
 msgid "No profile image found"
-msgstr "未找到个人资料图片"
+msgstr "未找到配置文件图片"
 
 #: backend/api/user.py:739 backend/api/profile.py:397
 msgid "No profile image to delete"
-msgstr "没有可删除的个人资料图片"
+msgstr "无可删除的配置文件图片"
 
 #: backend/api/user.py:748 backend/api/profile.py:407
 msgid "Profile image deleted successfully"
-msgstr "个人资料图片删除成功"
+msgstr "配置文件图片已成功删除"
 
 #: backend/api/host_hostname.py:52
 msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
@@ -2448,27 +2448,27 @@ msgstr "请求创建子主机。这可能需要几分钟时间。"
 #: backend/api/config_mgmt_inventories.py:133
 #: backend/api/config_mgmt_jobs.py:222
 msgid "Invalid inventory ID format"
-msgstr "无效的库存 ID 格式"
+msgstr "无效的清单 ID 格式"
 
 #: backend/api/config_mgmt_inventories.py:138
 #: backend/api/config_mgmt_jobs.py:227 backend/api/config_mgmt_jobs.py:424
 msgid "Inventory not found"
-msgstr "未找到库存"
+msgstr "未找到清单"
 
 #: backend/api/config_mgmt_inventories.py:205
 #: backend/api/config_mgmt_inventories.py:266
 #, python-format
 msgid "An inventory named '%s' already exists"
-msgstr "一个名为 '%s' 的库存已经存在"
+msgstr "一个名为 '%s' 的清单已存在"
 
 #: backend/api/config_mgmt_inventories.py:307
 #, python-format
 msgid "This inventory is used by %d job template(s)"
-msgstr "此库存被 '%d' 作业模板使用"
+msgstr "该清单被 %d 作业模板使用"
 
 #: backend/api/config_mgmt_inventories.py:314
 msgid "Inventory deleted"
-msgstr "库存被删除"
+msgstr "清单已删除"
 
 #: backend/api/config_mgmt_inventories.py:360
 #: backend/api/config_mgmt_profiles.py:345
@@ -2482,15 +2482,15 @@ msgstr "无效的站点ID格式"
 
 #: backend/api/config_mgmt_inventories.py:388
 msgid "Invalid inventory member ID format"
-msgstr "无效的库存成员 ID 格式"
+msgstr "无效的清单成员 ID 格式"
 
 #: backend/api/config_mgmt_inventories.py:393
 msgid "Inventory member not found"
-msgstr "未找到库存成员"
+msgstr "未找到清单成员"
 
 #: backend/api/config_mgmt_inventories.py:396
 msgid "Inventory member removed"
-msgstr "库存成员被移除"
+msgstr "清单成员已移除"
 
 #: backend/api/host_operations.py:81
 msgid "Software inventory update requested"
@@ -3219,7 +3219,7 @@ msgstr "由于登录尝试失败次数过多，账户已被锁定"
 msgid ""
 "Multi-factor authentication is required for this account. Please enrol from "
 "your profile page before signing in."
-msgstr "此帐户需要多因素认证。请从个人资料页面进行注册后再登录。"
+msgstr "此账户需要多因素身份验证。请在配置文件页面注册后登录。"
 
 #: backend/api/auth.py:463
 msgid "Account locked due to too many failed login attempts"
@@ -3781,7 +3781,7 @@ msgstr "主机 ID 和主机名不符，请重新注册"
 
 #: backend/api/agent.py:634
 msgid "Host must register before sending inventory data"
-msgstr "主机必须先注册才能发送库存数据"
+msgstr "主机在发送清单数据前必须注册"
 
 #: backend/api/agent.py:705
 msgid "Missing or invalid authorization header"

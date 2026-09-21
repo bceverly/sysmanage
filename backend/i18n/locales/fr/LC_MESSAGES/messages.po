@@ -2621,7 +2621,7 @@ msgstr "Un inventaire nommé '%s' existe déjà"
 #: backend/api/config_mgmt_inventories.py:307
 #, python-format
 msgid "This inventory is used by %d job template(s)"
-msgstr "Cet inventaire est utilisé par les modèles d'emploi '%d'"
+msgstr "Cet inventaire est utilisé par les modèles de tâches '%d'"
 
 #: backend/api/config_mgmt_inventories.py:314
 msgid "Inventory deleted"
@@ -3209,28 +3209,28 @@ msgstr "Accusé de réception de configuration traité"
 
 #: backend/api/config_mgmt_jobs.py:183
 msgid "Invalid job template ID format"
-msgstr "Format d'ID de modèle d'emploi invalide"
+msgstr "Format d'identifiant de modèle de tâche invalide"
 
 #: backend/api/config_mgmt_jobs.py:188
 msgid "Job template not found"
-msgstr "Modèle d'emploi non trouvé"
+msgstr "Modèle de tâche non trouvé"
 
 #: backend/api/config_mgmt_jobs.py:195
 msgid "Invalid job ID format"
-msgstr "Format d'ID d'emploi invalide"
+msgstr "Format d'identifiant de tâche invalide"
 
 #: backend/api/config_mgmt_jobs.py:199
 msgid "Job not found"
-msgstr "Emploi non trouvé"
+msgstr "Tâche non trouvée"
 
 #: backend/api/config_mgmt_jobs.py:272 backend/api/config_mgmt_jobs.py:343
 #, python-format
 msgid "A job template named '%s' already exists"
-msgstr "Un modèle d'emploi nommé '%s' existe déjà"
+msgstr "Un modèle de tâche nommé '%s' existe déjà"
 
 #: backend/api/config_mgmt_jobs.py:389
 msgid "Job template deleted"
-msgstr "Modèle d'emploi supprimé"
+msgstr "Modèle de tâche supprimé"
 
 #: backend/api/config_mgmt_jobs.py:415
 msgid "The profile this template runs is not active"
@@ -3238,7 +3238,7 @@ msgstr "Le profil que ce modèle exécute n'est pas actif"
 
 #: backend/api/config_mgmt_jobs.py:524
 msgid "This job has already finished"
-msgstr "Cet emploi a déjà terminé"
+msgstr "Cette tâche s'est déjà terminée"
 
 #: backend/api/config_mgmt_jobs.py:526
 msgid "Cancelled by an operator"

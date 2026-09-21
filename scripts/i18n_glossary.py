@@ -325,6 +325,9 @@ TERMS: Dict[str, Dict[str, Dict[str, object]]] = {
             "es": "inventario",
             "it": "inventario",
             "pt": "inventário",
+            # No settled Arabic IT term; describe it instead of reaching for
+            # جرد/مخزون, which are both stock-taking.
+            "ar": "قائمة مضيفات",
         },
         # Warehouse stock, in seven of eight languages measured.
         "forbid": {
@@ -347,13 +350,19 @@ TERMS: Dict[str, Dict[str, Dict[str, object]]] = {
             "zh_CN": "主机群",
             "zh_TW": "主機群",
             "ru": "парк",
+            # Dutch says -park for a fleet of machines (serverpark,
+            # machinepark); vloot is ships.
+            "nl": "machinepark",
+            # أسطول is the ordinary Arabic fleet-of-vehicles word -- the same
+            # metaphor English uses -- not the naval-ONLY sense that makes
+            # ja 艦隊 and zh 车队 wrong. Canonical, not forbidden.
+            "ar": "أسطول",
         },
         "forbid": {
             "ja": ["艦隊"],
             "ko": ["함대"],
             "zh_CN": ["车队", "舰队"],
             "zh_TW": ["車隊", "艦隊"],
-            "ar": ["أسطول"],
             "ru": ["флот"],
             "nl": ["vloot"],
         },
@@ -392,6 +401,8 @@ TERMS: Dict[str, Dict[str, Dict[str, object]]] = {
             "ko": "작업",
             "zh_CN": "作业",
             "zh_TW": "作業",
+            # مهمة = task. وظيفة leans to employment or a code function.
+            "ar": "مهمة",
         },
         # Employment, occupations and job VACANCIES.
         "forbid": {

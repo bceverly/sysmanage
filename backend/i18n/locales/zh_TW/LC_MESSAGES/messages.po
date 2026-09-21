@@ -2451,27 +2451,27 @@ msgstr "請求創建子主機，這可能需要幾分鐘時間。"
 #: backend/api/config_mgmt_inventories.py:133
 #: backend/api/config_mgmt_jobs.py:222
 msgid "Invalid inventory ID format"
-msgstr "庫存 ID 格式無效"
+msgstr "無效的清單 ID 格式"
 
 #: backend/api/config_mgmt_inventories.py:138
 #: backend/api/config_mgmt_jobs.py:227 backend/api/config_mgmt_jobs.py:424
 msgid "Inventory not found"
-msgstr "未找到庫存"
+msgstr "未找到清單"
 
 #: backend/api/config_mgmt_inventories.py:205
 #: backend/api/config_mgmt_inventories.py:266
 #, python-format
 msgid "An inventory named '%s' already exists"
-msgstr "一個名為 '%s' 的庫存已存在"
+msgstr "一個名為 '%s' 的清單已存在"
 
 #: backend/api/config_mgmt_inventories.py:307
 #, python-format
 msgid "This inventory is used by %d job template(s)"
-msgstr "此庫存被 %d 工作模板使用"
+msgstr "這個清單被用於 %d 個工作範本"
 
 #: backend/api/config_mgmt_inventories.py:314
 msgid "Inventory deleted"
-msgstr "刪除了庫存"
+msgstr "清單已刪除"
 
 #: backend/api/config_mgmt_inventories.py:360
 #: backend/api/config_mgmt_profiles.py:345
@@ -2485,15 +2485,15 @@ msgstr "無效的網站ID格式"
 
 #: backend/api/config_mgmt_inventories.py:388
 msgid "Invalid inventory member ID format"
-msgstr "庫存成員 ID 格式無效"
+msgstr "無效的清單成員 ID 格式"
 
 #: backend/api/config_mgmt_inventories.py:393
 msgid "Inventory member not found"
-msgstr "未找到庫存成員"
+msgstr "未找到清單成員"
 
 #: backend/api/config_mgmt_inventories.py:396
 msgid "Inventory member removed"
-msgstr "刪除了庫存成員"
+msgstr "已從清單中移除清單成員"
 
 #: backend/api/host_operations.py:81
 msgid "Software inventory update requested"
@@ -3222,7 +3222,7 @@ msgstr "由於登入嘗試失敗次數過多，帳戶已被鎖定"
 msgid ""
 "Multi-factor authentication is required for this account. Please enrol from "
 "your profile page before signing in."
-msgstr "此帳戶需要多因素身份驗證。請從您的個人資料頁面進行註冊，然後再登錄。"
+msgstr "需要多因素驗證才能登入此帳戶。請在設定檔頁面註冊後再登入。"
 
 #: backend/api/auth.py:463
 msgid "Account locked due to too many failed login attempts"
