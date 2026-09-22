@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-22 06:27-0400\n"
+"POT-Creation-Date: 2026-09-22 10:45-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -139,6 +139,7 @@ msgid "Failed to get CA certificate: %s"
 msgstr "CA 인증서 가져오기 실패: %s"
 
 #: backend/api/certificates.py:84 backend/api/certificates.py:139
+#: backend/api/file_watches.py:216 backend/api/file_watches.py:420
 #: backend/api/config_mgmt_drift.py:165 backend/api/config_mgmt_drift.py:198
 #: backend/api/query_packs.py:344 backend/api/query_packs.py:440
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
@@ -1569,6 +1570,84 @@ msgid ""
 "'%(profile_name)s'"
 msgstr "'%(profile_name)s' 프로필을 위한 에이전트 '%(host_fqdn)s'에게 준수 확인을 배포함"
 
+#: backend/api/file_watches.py:107 backend/api/config_mgmt_drift.py:191
+#: backend/api/query_packs.py:116 backend/api/config_mgmt_inventories.py:110
+#: backend/api/config_mgmt_remediation.py:137
+#: backend/api/config_mgmt_jobs.py:167 backend/api/config_mgmt_profiles.py:136
+#: backend/api/secrets/permissions.py:50
+#, python-format
+msgid "Permission denied: %s role required"
+msgstr "%s 역할이 필요합니다. 권한 거부됨:"
+
+#: backend/api/file_watches.py:120
+msgid "A watch list must contain at least one path."
+msgstr "감시 목록은 적어도 하나의 경로를 포함해야 합니다."
+
+#: backend/api/file_watches.py:123
+#, python-format
+msgid "A watch list may contain at most %d paths."
+msgstr "감시 목록은 최대 %d개의 경로를 포함할 수 있습니다."
+
+#: backend/api/file_watches.py:129
+msgid "A watched path cannot be empty."
+msgstr "감시된 경로는 비어 있을 수 없습니다."
+
+#: backend/api/file_watches.py:135
+#, python-format
+msgid "Watched path must be absolute: %s"
+msgstr "감시된 경로는 절대 경로여야 합니다: %s"
+
+#: backend/api/file_watches.py:137
+#, python-format
+msgid "Duplicate watched path: %s"
+msgstr "중복 감시된 경로: %s"
+
+#: backend/api/file_watches.py:267 backend/api/file_watches.py:320
+#: backend/api/file_watches.py:366 backend/api/file_watches.py:410
+#: backend/api/file_watches.py:415
+msgid "Invalid watch ID format"
+msgstr "잘못된 감시 ID 형식"
+
+#: backend/api/file_watches.py:271 backend/api/file_watches.py:324
+#: backend/api/file_watches.py:370
+msgid "File watch not found"
+msgstr "파일 감시가 발견되지 않았습니다."
+
+#: backend/api/file_watches.py:387
+msgid "Specify exactly one of watch_id or shared_watch_id."
+msgstr "watch_id 또는 shared_watch_id 중 정확히 하나를 지정하세요."
+
+#: backend/api/file_watches.py:393
+msgid "Specify exactly one of host_id, tag_id or site_id."
+msgstr "host_id, tag_id 또는 site_id 중 정확히 하나를 지정하세요."
+
+#: backend/api/file_watches.py:403
+#, python-format
+msgid "Collection interval must be at least %d minutes."
+msgstr "수집 간격은 최소 %d분 이상이어야 합니다."
+
+#: backend/api/file_watches.py:425 backend/api/query_packs.py:355
+#: backend/api/config_mgmt_inventories.py:360
+#: backend/api/config_mgmt_profiles.py:345
+msgid "Invalid tag ID format"
+msgstr "잘못된 태그 ID 형식입니다."
+
+#: backend/api/file_watches.py:430 backend/api/query_packs.py:349
+#: backend/api/config_mgmt_inventories.py:365
+#: backend/api/config_mgmt_profiles.py:350
+msgid "Invalid site ID format"
+msgstr "잘못된 사이트 ID 형식입니다."
+
+#: backend/api/file_watches.py:455 backend/api/query_packs.py:281
+#: backend/api/config_mgmt_profiles.py:377
+msgid "Invalid assignment ID format"
+msgstr "잘못된 할당 ID 형식입니다."
+
+#: backend/api/file_watches.py:460 backend/api/query_packs.py:286
+#: backend/api/config_mgmt_profiles.py:382
+msgid "Assignment not found"
+msgstr "할당 값이 찾되지 않았습니다."
+
 #: backend/api/federation_identity.py:90
 msgid "Could not load or generate the federation TLS certificate."
 msgstr "연방 TLS 인증서를 로드하거나 생성할 수 없습니다."
@@ -1576,15 +1655,6 @@ msgstr "연방 TLS 인증서를 로드하거나 생성할 수 없습니다."
 #: backend/api/federation_identity.py:147
 msgid "Could not load or generate the federation identity key."
 msgstr "연방 ID 키를 로드하거나 생성할 수 없습니다."
-
-#: backend/api/config_mgmt_drift.py:191 backend/api/query_packs.py:116
-#: backend/api/config_mgmt_inventories.py:110
-#: backend/api/config_mgmt_remediation.py:137
-#: backend/api/config_mgmt_jobs.py:167 backend/api/config_mgmt_profiles.py:136
-#: backend/api/secrets/permissions.py:50
-#, python-format
-msgid "Permission denied: %s role required"
-msgstr "%s 역할이 필요합니다. 권한 거부됨:"
 
 #: backend/api/config_mgmt_drift.py:211
 #: backend/api/config_mgmt_remediation.py:181
@@ -2489,27 +2559,9 @@ msgstr "쿼리 팩이 발견되지 않았습니다."
 msgid "Invalid ID format in the assignment"
 msgstr "할당에서 무효한 ID 형식"
 
-#: backend/api/query_packs.py:281 backend/api/config_mgmt_profiles.py:377
-msgid "Invalid assignment ID format"
-msgstr "잘못된 할당 ID 형식입니다."
-
-#: backend/api/query_packs.py:286 backend/api/config_mgmt_profiles.py:382
-msgid "Assignment not found"
-msgstr "할당 값이 찾되지 않았습니다."
-
 #: backend/api/query_packs.py:339
 msgid "A live query targets exactly one of hosts, a tag or a site."
 msgstr "실시간 쿼리는 태그 또는 사이트와 연결된 호스트 중 정확히 하나를 대상으로 합니다."
-
-#: backend/api/query_packs.py:349 backend/api/config_mgmt_inventories.py:365
-#: backend/api/config_mgmt_profiles.py:350
-msgid "Invalid site ID format"
-msgstr "잘못된 사이트 ID 형식입니다."
-
-#: backend/api/query_packs.py:355 backend/api/config_mgmt_inventories.py:360
-#: backend/api/config_mgmt_profiles.py:345
-msgid "Invalid tag ID format"
-msgstr "잘못된 태그 ID 형식입니다."
 
 #: backend/api/query_packs.py:420
 msgid "Invalid live query ID format"
@@ -4997,16 +5049,21 @@ msgstr "%s 프로필은 DSC 리소스의 JSON 배열을 포함해야 합니다."
 msgid "%(failed_count)d of %(total_count)d child host(s) failed to restart"
 msgstr "%(failed_count)d of %(total_count)d 자식 호스트 중 재시작 실패"
 
-#: backend/services/config_mgmt_baseline.py:177
+#: backend/services/config_mgmt_files.py:156
+msgid ""
+"Neither host has a file watch list assigned, so there is nothing to compare."
+msgstr "호스트 중 하나에도 파일 감시 목록이 할당되지 않았으므로 비교할 항목이 없습니다."
+
+#: backend/services/config_mgmt_baseline.py:286
 #, python-format
 msgid "Unknown comparison category: %s"
 msgstr "알 수 없는 비교 카테고리: %s"
 
-#: backend/services/config_mgmt_baseline.py:203
+#: backend/services/config_mgmt_baseline.py:312
 msgid "Reference host not found"
 msgstr "참조 호스트가 찾히지 않았습니다"
 
-#: backend/services/config_mgmt_baseline.py:205
+#: backend/services/config_mgmt_baseline.py:314
 msgid "Target host not found"
 msgstr "타겟 호스트가 찾히지 않았습니다"
 

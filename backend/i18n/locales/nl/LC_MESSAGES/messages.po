@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-22 06:27-0400\n"
+"POT-Creation-Date: 2026-09-22 10:45-0400\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -139,6 +139,7 @@ msgid "Failed to get CA certificate: %s"
 msgstr "Ophalen van CA-certificaat mislukt: %s"
 
 #: backend/api/certificates.py:84 backend/api/certificates.py:139
+#: backend/api/file_watches.py:216 backend/api/file_watches.py:420
 #: backend/api/config_mgmt_drift.py:165 backend/api/config_mgmt_drift.py:198
 #: backend/api/query_packs.py:344 backend/api/query_packs.py:440
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
@@ -1617,6 +1618,84 @@ msgstr ""
 "Compliance-check verzonden naar agent '%(host_fqdn)s' voor profiel "
 "'%(profile_name)s'"
 
+#: backend/api/file_watches.py:107 backend/api/config_mgmt_drift.py:191
+#: backend/api/query_packs.py:116 backend/api/config_mgmt_inventories.py:110
+#: backend/api/config_mgmt_remediation.py:137
+#: backend/api/config_mgmt_jobs.py:167 backend/api/config_mgmt_profiles.py:136
+#: backend/api/secrets/permissions.py:50
+#, python-format
+msgid "Permission denied: %s role required"
+msgstr "Toegang geweigerd: %s rol vereist"
+
+#: backend/api/file_watches.py:120
+msgid "A watch list must contain at least one path."
+msgstr "Een waarschuwingslijst moet ten minste één pad bevatten."
+
+#: backend/api/file_watches.py:123
+#, python-format
+msgid "A watch list may contain at most %d paths."
+msgstr "Een waarschuwingslijst mag ten hoogste %d paden bevatten."
+
+#: backend/api/file_watches.py:129
+msgid "A watched path cannot be empty."
+msgstr "Een gemonitord pad mag niet leeg zijn."
+
+#: backend/api/file_watches.py:135
+#, python-format
+msgid "Watched path must be absolute: %s"
+msgstr "Het gemonitorde pad moet absoluut zijn: %s"
+
+#: backend/api/file_watches.py:137
+#, python-format
+msgid "Duplicate watched path: %s"
+msgstr "Dubbel gemonitord pad: %s"
+
+#: backend/api/file_watches.py:267 backend/api/file_watches.py:320
+#: backend/api/file_watches.py:366 backend/api/file_watches.py:410
+#: backend/api/file_watches.py:415
+msgid "Invalid watch ID format"
+msgstr "Ongeldig watch ID-formaat"
+
+#: backend/api/file_watches.py:271 backend/api/file_watches.py:324
+#: backend/api/file_watches.py:370
+msgid "File watch not found"
+msgstr "Bestandwaarschuwing niet gevonden"
+
+#: backend/api/file_watches.py:387
+msgid "Specify exactly one of watch_id or shared_watch_id."
+msgstr "Specificeer precies één van watch_id of shared_watch_id."
+
+#: backend/api/file_watches.py:393
+msgid "Specify exactly one of host_id, tag_id or site_id."
+msgstr "Specificeer precies één van host_id, tag_id of site_id."
+
+#: backend/api/file_watches.py:403
+#, python-format
+msgid "Collection interval must be at least %d minutes."
+msgstr "De verzamelingsinterval moet ten minste %d minuten zijn."
+
+#: backend/api/file_watches.py:425 backend/api/query_packs.py:355
+#: backend/api/config_mgmt_inventories.py:360
+#: backend/api/config_mgmt_profiles.py:345
+msgid "Invalid tag ID format"
+msgstr "Ongeldig tag-ID formaat"
+
+#: backend/api/file_watches.py:430 backend/api/query_packs.py:349
+#: backend/api/config_mgmt_inventories.py:365
+#: backend/api/config_mgmt_profiles.py:350
+msgid "Invalid site ID format"
+msgstr "Ongeldig site-ID formaat"
+
+#: backend/api/file_watches.py:455 backend/api/query_packs.py:281
+#: backend/api/config_mgmt_profiles.py:377
+msgid "Invalid assignment ID format"
+msgstr "Ongeldig toewijzings-ID formaat"
+
+#: backend/api/file_watches.py:460 backend/api/query_packs.py:286
+#: backend/api/config_mgmt_profiles.py:382
+msgid "Assignment not found"
+msgstr "Toewijzing niet gevonden"
+
 #: backend/api/federation_identity.py:90
 msgid "Could not load or generate the federation TLS certificate."
 msgstr "Kon federatie TLS-certificaat niet laden of genereren."
@@ -1624,15 +1703,6 @@ msgstr "Kon federatie TLS-certificaat niet laden of genereren."
 #: backend/api/federation_identity.py:147
 msgid "Could not load or generate the federation identity key."
 msgstr "Kon federatie-identiteits sleutel niet laden of genereren."
-
-#: backend/api/config_mgmt_drift.py:191 backend/api/query_packs.py:116
-#: backend/api/config_mgmt_inventories.py:110
-#: backend/api/config_mgmt_remediation.py:137
-#: backend/api/config_mgmt_jobs.py:167 backend/api/config_mgmt_profiles.py:136
-#: backend/api/secrets/permissions.py:50
-#, python-format
-msgid "Permission denied: %s role required"
-msgstr "Toegang geweigerd: %s rol vereist"
 
 #: backend/api/config_mgmt_drift.py:211
 #: backend/api/config_mgmt_remediation.py:181
@@ -2568,28 +2638,10 @@ msgstr "Query pack niet gevonden"
 msgid "Invalid ID format in the assignment"
 msgstr "Ongeldige ID-indeling in de binding"
 
-#: backend/api/query_packs.py:281 backend/api/config_mgmt_profiles.py:377
-msgid "Invalid assignment ID format"
-msgstr "Ongeldig toewijzings-ID formaat"
-
-#: backend/api/query_packs.py:286 backend/api/config_mgmt_profiles.py:382
-msgid "Assignment not found"
-msgstr "Toewijzing niet gevonden"
-
 #: backend/api/query_packs.py:339
 msgid "A live query targets exactly one of hosts, a tag or a site."
 msgstr ""
 "Een live-query richt zich precies op één van de hosts, een tag of een site."
-
-#: backend/api/query_packs.py:349 backend/api/config_mgmt_inventories.py:365
-#: backend/api/config_mgmt_profiles.py:350
-msgid "Invalid site ID format"
-msgstr "Ongeldig site-ID formaat"
-
-#: backend/api/query_packs.py:355 backend/api/config_mgmt_inventories.py:360
-#: backend/api/config_mgmt_profiles.py:345
-msgid "Invalid tag ID format"
-msgstr "Ongeldig tag-ID formaat"
 
 #: backend/api/query_packs.py:420
 msgid "Invalid live query ID format"
@@ -5194,16 +5246,23 @@ msgstr ""
 "%(failed_count)d van de %(total_count)d kind-host(s) is niet herstart "
 "geslaagd"
 
-#: backend/services/config_mgmt_baseline.py:177
+#: backend/services/config_mgmt_files.py:156
+msgid ""
+"Neither host has a file watch list assigned, so there is nothing to compare."
+msgstr ""
+"Geen van de hosts heeft een bestandwaarschuwingslijst toegewezen, dus er is "
+"niets te vergelijken."
+
+#: backend/services/config_mgmt_baseline.py:286
 #, python-format
 msgid "Unknown comparison category: %s"
 msgstr "Onbekende vergelijkingscategorie: %s"
 
-#: backend/services/config_mgmt_baseline.py:203
+#: backend/services/config_mgmt_baseline.py:312
 msgid "Reference host not found"
 msgstr "Verwijzingshost niet gevonden"
 
-#: backend/services/config_mgmt_baseline.py:205
+#: backend/services/config_mgmt_baseline.py:314
 msgid "Target host not found"
 msgstr "Doelhost niet gevonden"
 

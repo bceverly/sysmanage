@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-22 06:27-0400\n"
+"POT-Creation-Date: 2026-09-22 10:45-0400\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -140,6 +140,7 @@ msgid "Failed to get CA certificate: %s"
 msgstr "Fehler beim Abrufen des CA-Zertifikats: %s"
 
 #: backend/api/certificates.py:84 backend/api/certificates.py:139
+#: backend/api/file_watches.py:216 backend/api/file_watches.py:420
 #: backend/api/config_mgmt_drift.py:165 backend/api/config_mgmt_drift.py:198
 #: backend/api/query_packs.py:344 backend/api/query_packs.py:440
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
@@ -1649,6 +1650,84 @@ msgstr ""
 "Kompatibilitätstest an Agent '%(host_fqdn)s' für Profil '%(profile_name)s' "
 "versendet"
 
+#: backend/api/file_watches.py:107 backend/api/config_mgmt_drift.py:191
+#: backend/api/query_packs.py:116 backend/api/config_mgmt_inventories.py:110
+#: backend/api/config_mgmt_remediation.py:137
+#: backend/api/config_mgmt_jobs.py:167 backend/api/config_mgmt_profiles.py:136
+#: backend/api/secrets/permissions.py:50
+#, python-format
+msgid "Permission denied: %s role required"
+msgstr "Zugriff verweigert: %s-Rolle erforderlich"
+
+#: backend/api/file_watches.py:120
+msgid "A watch list must contain at least one path."
+msgstr "Eine Überwachungsliste muss mindestens einen Pfad enthalten."
+
+#: backend/api/file_watches.py:123
+#, python-format
+msgid "A watch list may contain at most %d paths."
+msgstr "Eine Überwachungsliste darf höchstens %d Pfade enthalten."
+
+#: backend/api/file_watches.py:129
+msgid "A watched path cannot be empty."
+msgstr "Ein überwachter Pfad darf nicht leer sein."
+
+#: backend/api/file_watches.py:135
+#, python-format
+msgid "Watched path must be absolute: %s"
+msgstr "Ein überwachter Pfad muss absolut sein: %s"
+
+#: backend/api/file_watches.py:137
+#, python-format
+msgid "Duplicate watched path: %s"
+msgstr "Duplizierter überwachter Pfad: %s"
+
+#: backend/api/file_watches.py:267 backend/api/file_watches.py:320
+#: backend/api/file_watches.py:366 backend/api/file_watches.py:410
+#: backend/api/file_watches.py:415
+msgid "Invalid watch ID format"
+msgstr "Ungültiges Watch-ID-Format"
+
+#: backend/api/file_watches.py:271 backend/api/file_watches.py:324
+#: backend/api/file_watches.py:370
+msgid "File watch not found"
+msgstr "Dateiüberwachung nicht gefunden"
+
+#: backend/api/file_watches.py:387
+msgid "Specify exactly one of watch_id or shared_watch_id."
+msgstr "Geben Sie genau einen von watch_id oder shared_watch_id an."
+
+#: backend/api/file_watches.py:393
+msgid "Specify exactly one of host_id, tag_id or site_id."
+msgstr "Geben Sie genau einen von host_id, tag_id oder site_id an."
+
+#: backend/api/file_watches.py:403
+#, python-format
+msgid "Collection interval must be at least %d minutes."
+msgstr "Sammlungsintervall muss mindestens %d Minuten betragen."
+
+#: backend/api/file_watches.py:425 backend/api/query_packs.py:355
+#: backend/api/config_mgmt_inventories.py:360
+#: backend/api/config_mgmt_profiles.py:345
+msgid "Invalid tag ID format"
+msgstr "Ungültiges Tag-ID-Format"
+
+#: backend/api/file_watches.py:430 backend/api/query_packs.py:349
+#: backend/api/config_mgmt_inventories.py:365
+#: backend/api/config_mgmt_profiles.py:350
+msgid "Invalid site ID format"
+msgstr "Ungültiges Site-ID-Format"
+
+#: backend/api/file_watches.py:455 backend/api/query_packs.py:281
+#: backend/api/config_mgmt_profiles.py:377
+msgid "Invalid assignment ID format"
+msgstr "Ungültiges Zuweisungs-ID-Format"
+
+#: backend/api/file_watches.py:460 backend/api/query_packs.py:286
+#: backend/api/config_mgmt_profiles.py:382
+msgid "Assignment not found"
+msgstr "Zuweisung nicht gefunden"
+
 #: backend/api/federation_identity.py:90
 msgid "Could not load or generate the federation TLS certificate."
 msgstr ""
@@ -1658,15 +1737,6 @@ msgstr ""
 msgid "Could not load or generate the federation identity key."
 msgstr ""
 "Federations-Identitätschlüssel konnte nicht geladen oder generiert werden."
-
-#: backend/api/config_mgmt_drift.py:191 backend/api/query_packs.py:116
-#: backend/api/config_mgmt_inventories.py:110
-#: backend/api/config_mgmt_remediation.py:137
-#: backend/api/config_mgmt_jobs.py:167 backend/api/config_mgmt_profiles.py:136
-#: backend/api/secrets/permissions.py:50
-#, python-format
-msgid "Permission denied: %s role required"
-msgstr "Zugriff verweigert: %s-Rolle erforderlich"
 
 #: backend/api/config_mgmt_drift.py:211
 #: backend/api/config_mgmt_remediation.py:181
@@ -2630,28 +2700,10 @@ msgstr "Abfragepaket nicht gefunden"
 msgid "Invalid ID format in the assignment"
 msgstr "Ungültige ID-Format im Binding"
 
-#: backend/api/query_packs.py:281 backend/api/config_mgmt_profiles.py:377
-msgid "Invalid assignment ID format"
-msgstr "Ungültiges Zuweisungs-ID-Format"
-
-#: backend/api/query_packs.py:286 backend/api/config_mgmt_profiles.py:382
-msgid "Assignment not found"
-msgstr "Zuweisung nicht gefunden"
-
 #: backend/api/query_packs.py:339
 msgid "A live query targets exactly one of hosts, a tag or a site."
 msgstr ""
 "Ein Live-Abfrage richtet sich genau an einen Host, eine Tag oder eine Site."
-
-#: backend/api/query_packs.py:349 backend/api/config_mgmt_inventories.py:365
-#: backend/api/config_mgmt_profiles.py:350
-msgid "Invalid site ID format"
-msgstr "Ungültiges Site-ID-Format"
-
-#: backend/api/query_packs.py:355 backend/api/config_mgmt_inventories.py:360
-#: backend/api/config_mgmt_profiles.py:345
-msgid "Invalid tag ID format"
-msgstr "Ungültiges Tag-ID-Format"
 
 #: backend/api/query_packs.py:420
 msgid "Invalid live query ID format"
@@ -5319,16 +5371,23 @@ msgid "%(failed_count)d of %(total_count)d child host(s) failed to restart"
 msgstr ""
 "%(failed_count)d von %(total_count)d Kind-Hosts fehlgeschlagen beim Neustart"
 
-#: backend/services/config_mgmt_baseline.py:177
+#: backend/services/config_mgmt_files.py:156
+msgid ""
+"Neither host has a file watch list assigned, so there is nothing to compare."
+msgstr ""
+"Kein Host hat eine Dateiüberwachungsliste zugewiesen, sodass nichts "
+"verglichen werden kann."
+
+#: backend/services/config_mgmt_baseline.py:286
 #, python-format
 msgid "Unknown comparison category: %s"
 msgstr "Unbekannte Vergleichskategorie: %s"
 
-#: backend/services/config_mgmt_baseline.py:203
+#: backend/services/config_mgmt_baseline.py:312
 msgid "Reference host not found"
 msgstr "Referenzhost nicht gefunden"
 
-#: backend/services/config_mgmt_baseline.py:205
+#: backend/services/config_mgmt_baseline.py:314
 msgid "Target host not found"
 msgstr "Zielhost nicht gefunden"
 
