@@ -9460,13 +9460,25 @@ them, and that gap decides how much S2 must cover there. Needs a
       Italian batch landed eight values off-by-one against their keys, and two
       ``<strong>`` spans in Japanese bolded the wrong half of the sentence.
 
-      One blind spot is left DELIBERATELY unfixed and is not mine to close
-      here: two allow-list value rules meant for short label-and-number pairs
-      (``i18n-allow.txt`` lines 49 and 178) fullmatch any prose whose tail
-      happens to be word characters, so ~30 site-wide keys may legitimately
-      stay English in every locale. Tightening the regex is a one-line change
-      that immediately fails ``i18n-strict`` on ~400 pre-existing values, so it
-      wants its own slice rather than riding along with this one.
+      **The allow-list blind spot, closed 2026-09-22.** Four value rules in
+      ``i18n-allow.txt`` fullmatched ordinary prose, so the keys they covered
+      could sit in English in all 13 locales while ``i18n-strict`` said OK.
+      Two were meant for short label-and-number pairs
+      (``<strong>Fedora</strong> - 40, 41``) and swallowed any sentence whose
+      tail was word characters; two more were meant for tier and product names
+      and swallowed anything starting with one. They hid 226 English values
+      behind 28 keys -- ``<strong>Scope</strong> - optionally narrow the
+      rule...``, ``Open-source core you can audit``, ``macOS is in Jamf.``
+
+      Fixed by kind, not by widening the regex. The label rules were replaced
+      with five NAMED KEYS (the version rows they actually existed for), which
+      cannot swallow anything. The tier and product rules kept their shape but
+      gained a negative lookahead on two consecutive lowercase words -- a label
+      never has a pair, a sentence nearly always does. All 226 values were then
+      hand-translated, and an audit of what remains exempt-and-English leaves
+      11 values, every one a shell command, an acronym expansion or an award
+      name. The four rules were docs-only; the other three repos' allow lists
+      carry none of them.
 
 Cross-cutting: i18n/l10n per slice (the glossary now carries the vocabulary —
 query pack, signature, asset, advisor); docs page + screenshots in the same
@@ -9490,13 +9502,13 @@ because push-green CI never covers the BSDs.
       `vuln_engine` (installed packages / listening ports), `fleet_engine`, and the
       **20.2** drift baselines — each following its own tier (**Professional /
       Enterprise**)
-- [ ] **Extend golden-host drift to arbitrary file / config state.** 20.2's S5
+- [x] **Extend golden-host drift to arbitrary file / config state.** 20.2's S5
       ships the BOUNDED half — a diff over inventory we already store (packages,
       users/groups, interfaces, storage, repositories, firewall, certificates).
       Comparing arbitrary files and config is the half that genuinely needs a
       general fact collector, so it lands here rather than there. This EXTENDS
       the 20.2 differ with new fact sources; it does not rebuild it.
-- [ ] i18n/l10n
+- [x] i18n/l10n
 
 **Estimated Size:** ~3,500 lines
 
@@ -9518,6 +9530,127 @@ because push-green CI never covers the BSDs.
 - [ ] i18n/l10n
 
 **Estimated Size:** ~5,000 lines
+
+**SLICE PLAN (21.2), drafted 2026-09-22.**
+
+THE ONE DECISION EVERYTHING ELSE INHERITS: **a rule DECLARES the evidence it
+needs, and a host that cannot supply that evidence gets `not_assessable` —
+never silence.** Not "evaluate and see what comes back".
+
+Why that way round, and why it is the whole ballgame here. 21.1 exists because
+an unmeasured table reported as zero rows reads as "no findings", which reads
+as compliant. An advisor makes that failure MUCH worse, because its output is
+a list and **an empty list reads as "your fleet is in good shape"** — the most
+dangerous false statement this product can make. Vuln at least shows you a
+host with no score; an advisor that silently skips the hosts it could not
+assess shows you a clean feed. So the requirement is not "handle missing data
+gracefully", it is: an unassessable host is a VISIBLE ROW with a reason, and
+the count travels with every aggregate.
+
+This is the same move S4 already made for query packs — each query declares
+its required tables rather than leaving them to be inferred from its SQL —
+applied one layer up. Inference fails in exactly the cases that matter (a rule
+joining facts to CVE data to a drift result), and a wrong inference here means
+a rule evaluated against evidence that was never collected, which produces a
+confident recommendation with nothing underneath it.
+
+Evidence is FOUR domains, not one: 21.1 fact tables (resolved through
+`host_facts.serves()` — note `serves`, not `answerable`: this is a new
+consumer and `UNKNOWN` must not let it claim an assessment), plus the
+server-side domains — vuln findings, compliance results, config/drift state.
+The fact half has a coverage advertisement to consult. The other three do not,
+and need the equivalent: "has this domain actually RUN for this host", which
+is not the same question as "did it return rows".
+
+**Tier and storage.** Enterprise. Curated/shipped rule packs are global
+reference data -> `shared` partition, one copy, offline-updatable;
+tenant-authored rules and every recommendation -> `tenant` partition, soft
+ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
+
+- [ ] **S0 — Spike: can a declarative rule actually say what we need?**
+      Before any schema. Hand-write 8-10 REAL rules against the live dev data
+      in this repo — at least two per lens (security / performance /
+      availability / stability), and at least one that must join facts to CVE
+      data to a drift result, because the cross-domain join is where a rule
+      language stops being expressive. Include a deliberate NEGATIVE CONTROL:
+      one rule we believe cannot be expressed declaratively, to find the shape
+      of the escape hatch BEFORE committing to a grammar rather than
+      discovering it at rule 40. Deliverable is the grammar, or the finding
+      that rules need code — which would invalidate "curated, versioned,
+      offline-updatable rule packs" and must be known now, not after S6 is
+      built on the assumption.
+
+- [ ] **S1 — Rule contract + evidence declaration.** The versioned rule
+      schema, pinned the way `FACT_CONTRACT_VERSION` is, because shipped rule
+      packs are content we have to keep readable across agent and server
+      versions. Every rule carries an explicit `requires` block naming fact
+      tables AND evidence domains. Resolution produces exactly three outcomes
+      per (rule, host) — fires / does not fire / `not_assessable` with the
+      SPECIFIC missing evidence — and the third is a first-class value in the
+      contract, not an error path. "Does not fire" and "could not be
+      evaluated" must never share a representation; that identity is the
+      defect this phase exists to prevent.
+
+- [ ] **S2 — `advisor_engine` + the partition split.** New Cython engine, the
+      FOUR registrations `make check-engine-codes` gates (Pro+ MODULES +
+      PROFESSIONAL_FEATURES, OSS `ModuleCode` + `TIER_MODULES`), shared chain
+      for the rule catalog, tenant chain for recommendations and
+      tenant-authored rules. Evaluation only: rules x hosts -> outcomes. No
+      scoring, no feed, no UI. Engine reads coverage through the frozen
+      `ProPlusServices` bundle (mounted by `call_engine_router`'s
+      `inspect.signature` gate — never passed as `services=`).
+
+- [ ] **S3 — Risk scoring that WITHHOLDS.** impact x likelihood, and the part
+      that is easy to get quietly wrong: a host whose evidence was
+      unassessable gets NO score and NO grade, not a low one. `vuln_engine`
+      already has the shape to copy (`RISK_LEVEL_UNKNOWN`, `unknown_hosts` /
+      `assessed_hosts` counted apart, excluded from the risk average). Fleet
+      rollups must exclude unassessed hosts from every average rather than
+      averaging them in as zero — otherwise adding blind spots improves the
+      score, which is precisely backwards.
+
+- [ ] **S4 — Recommendation feed + API.** Per-host and fleet. `not_assessable`
+      is its own column beside the findings and is NEVER folded into "no
+      recommendations" — same rule the Recent Runs screen follows for *Not
+      covered* beside *Failed*. Results stored per ROW (one row per
+      rule/host/outcome), not one document per evaluation: every consumer
+      wants "which hosts match this condition", which is a query over rows.
+
+- [ ] **S5 — Remediation generation, PROPOSAL ONLY.** Generates a config
+      profile or playbook through 20.1's existing adapters and dispatches via
+      `config_mgmt_dispatch.queue_apply` — the one dispatch path, one uuid for
+      envelope and queue row. It must NOT grow a second one. Gated behind
+      operator approval, then maintenance windows at `outbound_processor`
+      release time (fail-open, blackout wins) — the gate already exists and is
+      in the right place; advisor supplies the proposal, not a new scheduler.
+
+- [ ] **S6 — Curated rule packs as multi-tenant policy.** Shared catalog +
+      per-tenant assignment, offline-updatable for air-gap. Same catalog /
+      assignment split as advisories and query packs: one copy of the curated
+      packs, never per-tenant duplicates.
+
+- [ ] **S7 — Recommendations dashboard + per-host advisor tab.** The
+      unassessable bucket is rendered, with its reason, or the UI reintroduces
+      the exact defect S1 designed out. (S6 of 21.1 shipped a live one:
+      `comparable: false` was computed correctly and never rendered, so a
+      Windows host displayed a green "Matches" for mounts. Computing the
+      honest answer is half the work; showing it is the other half.)
+
+- [ ] **S8 — Docs, screenshots, i18n — LAST.** Page + `make screenshots`
+      shotlist entries + glossary nouns in the SAME change, seeded and
+      translated. Docs go last by decision: 21.1 proved things change while
+      building, and documenting a moving design costs more than documenting a
+      settled one. The seeded fixture must contain hosts that could NOT be
+      assessed, for the same reason 21.1's did — a fleet where everything
+      answers documents the feature without showing the thing it exists for.
+
+**Sequencing notes.** S0 gates S1: if the grammar cannot express the rules, the
+"curated packs" bullet is a fiction and the phase needs re-scoping before any
+schema is written. S1 gates everything else, because the rule contract is
+shipped CONTENT — getting it wrong means re-authoring every curated rule later,
+the same argument that put the fact schema first in 21.1. S3 before S4 so the
+feed never has a chance to display a score that should have been withheld.
+
 
 #### 21.3 Malware Detection (Enterprise)
 
