@@ -13,6 +13,9 @@ factories and compat shim live in ``proplus_routes_common``.  ``proplus_routes``
 re-imports these so its public surface (and test references) are unchanged.
 """
 
+import inspect
+from typing import Dict
+
 from fastapi import Depends, FastAPI, HTTPException, status
 
 from backend.api.proplus_routes_common import (
@@ -26,6 +29,60 @@ from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_session_local
 from backend.persistence.partitions import get_tenant_db
+from backend.api.proplus_services import build_services
+
+# Factories already asked about, so twenty-two mount sites do not each pay for
+# introspection on every server start.
+_ACCEPTS_SERVICES: Dict[int, bool] = {}
+
+
+def _accepts_services(factory) -> bool:
+    """Does this engine's router factory take a ``services`` bundle?
+
+    Engines are PREBUILT BINARIES pulled from the licence server, so an
+    install can be running an engine compiled before the bundle existed.
+    Passing ``services=`` to one of those raises ``TypeError: got an
+    unexpected keyword argument`` and the engine fails to mount -- the "stale
+    runtime engine" failure this project has hit before, where a new kwarg
+    took out a working install.
+
+    So it is asked, not assumed. ``inspect.signature`` works on compiled
+    Cython functions (verified 2026-09-22); if it ever does not, the
+    conservative answer is False -- an engine running without the bundle is
+    degraded, an engine that will not mount at all is broken.
+    """
+    key = id(factory)
+    cached = _ACCEPTS_SERVICES.get(key)
+    if cached is not None:
+        return cached
+    try:
+        params = inspect.signature(factory).parameters
+        accepts = "services" in params or any(
+            p.kind is inspect.Parameter.VAR_KEYWORD for p in params.values()
+        )
+    except (TypeError, ValueError):
+        accepts = False
+    _ACCEPTS_SERVICES[key] = accepts
+    return accepts
+
+
+def call_engine_router(engine_code: str, factory, **kwargs):
+    """Call an engine router factory, passing the services bundle if it takes one.
+
+    An engine that does not take it still mounts and works exactly as before;
+    it simply cannot use anything the bundle provides. That is logged at INFO
+    rather than passed over, because "this engine is running without fact
+    coverage" is a republish away from being fixed and an operator should be
+    able to find out why a consumer is not reporting "not covered".
+    """
+    if _accepts_services(factory):
+        return factory(services=build_services(), **kwargs)
+    logger.info(
+        "Engine %s was built before the services bundle; mounting without it. "
+        "Republish the engine to enable fact-coverage awareness.",
+        engine_code,
+    )
+    return factory(**kwargs)
 
 
 def mount_audit_routes(app: FastAPI) -> bool:
@@ -413,7 +470,9 @@ def mount_fleet_routes(app: FastAPI) -> bool:
 
     try:
         with _cython_compat():
-            router = fleet_engine.get_fleet_router(
+            router = call_engine_router(
+                "fleet_engine",
+                fleet_engine.get_fleet_router,
                 db_dependency=Depends(get_tenant_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,

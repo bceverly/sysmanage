@@ -1,0 +1,134 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
+"""What a host CAN answer — the shared reader for Phase 21.1 S6.
+
+S1 made every agent advertise which fact tables it serves and why it does not
+serve the rest. S6 is the other half: the consumers — compliance, vuln, fleet
+and the 20.2 drift baselines — reading that advertisement and saying "not
+covered here" instead of showing an empty result.
+
+WHY THIS IS FOUR-VALUED AND NOT A BOOLEAN
+------------------------------------------
+``covered(host, "mounts")`` returning True/False loses the distinction the
+whole phase exists for. The four answers are genuinely different actions:
+
+* ``SERVED``          — ask; the data is real.
+* ``NOT_APPLICABLE``  — a Windows host has no ``mounts``. Not a gap, not a
+                        defect, and NOT something to show an operator as a
+                        finding.
+* ``UNSUPPORTED``     — the host could serve it and cannot right now
+                        (unprivileged agent, broken provider). This IS worth
+                        showing: it is fixable.
+* ``UNKNOWN``         — the host never advertised. An agent older than 21.1,
+                        or one whose report could not be built.
+
+THE THIRD STATE IS THE ONE THAT BITES
+-------------------------------------
+``UNKNOWN`` must never be treated as "not covered". Every host in a fleet is
+pre-21.1 until it is upgraded, and a consumer that reads unknown as uncovered
+would switch off for the entire estate the day this shipped — while looking
+like it was working. It is the same trap ``limited_flag`` documents for
+capability gating: absence of an advertisement is not an advertisement of
+absence.
+
+So the rule for callers is: **UNKNOWN means proceed as before.** Consumers
+degrade only on a POSITIVE statement that the host cannot answer.
+"""
+
+import logging
+from typing import Any, Dict, Optional, Tuple
+
+from backend.services import agent_capability_service as caps
+
+logger = logging.getLogger(__name__)
+
+SERVED = "served"
+NOT_APPLICABLE = "not_applicable"
+UNSUPPORTED = "unsupported"
+UNKNOWN = "unknown"
+
+# The states in which a consumer should NOT report a finding built on this
+# table. ``UNKNOWN`` is deliberately absent -- see the module docstring.
+NOT_ANSWERABLE = (NOT_APPLICABLE, UNSUPPORTED)
+
+
+def coverage(host) -> Optional[Dict[str, Any]]:
+    """The host's fact-coverage advertisement, or None if it never sent one."""
+    report = caps.get_capability_report(host)
+    if not report:
+        return None
+    facts = report.get("facts")
+    return facts if isinstance(facts, dict) else None
+
+
+def contract_version(host) -> Optional[int]:
+    """Which fact contract this host speaks, or None.
+
+    Worth carrying into findings: a fleet upgrades gradually, so comparing
+    results across hosts can silently compare different contracts.
+    """
+    facts = coverage(host) or {}
+    version = facts.get("contract_version")
+    return version if isinstance(version, int) else None
+
+
+def table_state(host, table: str) -> Tuple[str, Optional[str]]:
+    """``(state, detail)`` for one contract table on one host.
+
+    ``detail`` is the provider for SERVED, the agent's own reason code for
+    NOT_APPLICABLE and UNSUPPORTED, and None for UNKNOWN. The agent's code is
+    passed through rather than reworded: "wrong_platform" and
+    "insufficient_privilege" send an operator to different places, and a
+    generic "unavailable" sends them to neither.
+    """
+    facts = coverage(host)
+    if not facts:
+        return UNKNOWN, None
+    served = facts.get("served") or {}
+    if table in served:
+        return SERVED, served[table]
+    not_applicable = facts.get("not_applicable") or {}
+    if table in not_applicable:
+        return NOT_APPLICABLE, not_applicable[table]
+    unsupported = facts.get("unsupported") or {}
+    if table in unsupported:
+        return UNSUPPORTED, unsupported[table]
+    # Advertised, but this table is in none of the three buckets. That should
+    # be impossible -- build_fact_coverage puts every contract table in
+    # exactly one -- so it means the host speaks a contract this server does
+    # not know, which is UNKNOWN rather than a denial.
+    return UNKNOWN, None
+
+
+def answerable(host, table: str) -> bool:
+    """Can a finding about ``table`` be built for this host?
+
+    True for SERVED and for UNKNOWN. Unknown proceeds because an agent that
+    has not upgraded must keep behaving exactly as it did before this slice.
+    """
+    state, _detail = table_state(host, table)
+    return state not in NOT_ANSWERABLE
+
+
+def explain(host, table: str) -> Optional[Dict[str, str]]:
+    """Why this host cannot answer, or None when it can.
+
+    Shaped for a consumer to attach verbatim to a result, so every surface
+    reports the same reason in the same words rather than inventing its own.
+    """
+    state, detail = table_state(host, table)
+    if state not in NOT_ANSWERABLE:
+        return None
+    return {"table": table, "state": state, "reason": detail or state}
+
+
+def missing_tables(host, tables) -> Dict[str, Dict[str, str]]:
+    """``{table: explanation}`` for each requested table the host cannot answer."""
+    out = {}
+    for table in tables or ():
+        reason = explain(host, table)
+        if reason is not None:
+            out[table] = reason
+    return out

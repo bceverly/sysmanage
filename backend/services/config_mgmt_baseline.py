@@ -34,6 +34,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from backend.i18n import _
 from backend.persistence import models
+from backend.services import host_facts
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,25 @@ logger = logging.getLogger(__name__)
 # makes them differ. Both are per category because there is no useful generic
 # answer -- packages match on name and differ on version, mounts match on mount
 # point and differ on filesystem.
+# Phase 21.1 S6: which fact table a category describes.
+#
+# Used ONLY to ask whether a host can answer for that category -- the rows
+# still come from the inventory models above. Without this, a host that cannot
+# report a category has zero rows, and every reference row lands in
+# ``missing``: a Windows box reads as "missing every mount" rather than "does
+# not have mounts", which is a fabricated divergence in a feature whose entire
+# job is reporting real ones.
+#
+# Categories with no fact-table counterpart are absent and always compare, as
+# they did before.
+_CATEGORY_FACT_TABLE: Dict[str, str] = {
+    "users": "users",
+    "groups": "groups",
+    "interfaces": "interface_addresses",
+    "storage": "mounts",
+    "certificates": "certificates",
+}
+
 _CATEGORIES: Dict[str, Tuple[Any, str, Tuple[str, ...]]] = {
     "packages": (models.SoftwarePackage, "package_name", ("package_version",)),
     "repositories": (models.ThirdPartyRepository, "name", ("url", "enabled")),
@@ -106,6 +126,49 @@ def _differences(reference, target, compared: Iterable[str]) -> Dict[str, Any]:
     return delta
 
 
+def _not_comparable(category: str, side: str, reason: Dict[str, str]) -> Dict:
+    """A category neither host can be judged on, shaped like a comparison.
+
+    Same keys as a real result so every caller and the UI can read one shape,
+    with ``comparable: False`` as the discriminator. Returning an empty
+    comparison instead would be indistinguishable from "these hosts agree",
+    which is the opposite of what is true.
+    """
+    return {
+        "missing": [],
+        "extra": [],
+        "different": [],
+        "counts": {
+            "missing": 0,
+            "extra": 0,
+            "different": 0,
+            "reference_total": 0,
+            "target_total": 0,
+        },
+        "truncated": False,
+        "comparable": False,
+        # Which host cannot answer, and why, in the agent's own words.
+        "not_comparable": {"side": side, **reason},
+    }
+
+
+def comparability(reference_host, target_host, category: str) -> Optional[Dict]:
+    """``None`` when the category can be compared, else why it cannot.
+
+    The TARGET is checked first: it is the host the operator is trying to fix,
+    so "your host cannot report this" is the more useful answer when neither
+    can.
+    """
+    table = _CATEGORY_FACT_TABLE.get(category)
+    if table is None:
+        return None
+    for side, host in (("target", target_host), ("reference", reference_host)):
+        reason = host_facts.explain(host, table)
+        if reason is not None:
+            return _not_comparable(category, side, reason)
+    return None
+
+
 def compare_category(db_session, category: str, reference_host_id, host_id) -> Dict:
     """Compare ONE category between a reference host and a target host.
 
@@ -141,6 +204,7 @@ def compare_category(db_session, category: str, reference_host_id, host_id) -> D
         bucket.sort(key=lambda item: item["name"])
 
     return {
+        "comparable": True,
         "missing": missing[:MAX_ITEMS_PER_BUCKET],
         "extra": extra[:MAX_ITEMS_PER_BUCKET],
         "different": different[:MAX_ITEMS_PER_BUCKET],
@@ -210,7 +274,13 @@ def compare_hosts(
 
     results = {}
     total_differences = 0
+    not_comparable = {}
     for category in wanted:
+        blocked = comparability(hosts["reference"], hosts["target"], category)
+        if blocked is not None:
+            results[category] = blocked
+            not_comparable[category] = blocked["not_comparable"]
+            continue
         outcome = compare_category(db_session, category, reference_host_id, host_id)
         results[category] = outcome
         total_differences += sum(
@@ -224,6 +294,12 @@ def compare_hosts(
         "host_fqdn": hosts["target"].fqdn,
         "categories": results,
         "total_differences": total_differences,
-        # The headline an operator wants before opening any category.
+        # Categories nobody could be judged on. Surfaced at the top level
+        # because an operator reading "identical: true" deserves to know it
+        # was reached without examining three of the eight categories.
+        "not_comparable": not_comparable,
+        # The headline an operator wants before opening any category -- and it
+        # is now honest: identical means "no differences in what COULD be
+        # compared", which is why not_comparable sits beside it.
         "identical": total_differences == 0,
     }

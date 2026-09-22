@@ -9152,10 +9152,127 @@ them, and that gap decides how much S2 must cover there. Needs a
       Verified: 7,837 server + 1,591 Pro+ (52 engine) + 1,778 frontend tests
       green; 10.00/10 pylint; tsc, eslint and all five i18n gates clean;
       migration round-trips on SQLite.
-- [ ] **S6 — Wire the tables into the consuming engines** — `compliance_engine`
+- [x] **S6 — Wire the tables into the consuming engines** — `compliance_engine`
       (CIS), `vuln_engine` (installed packages / listening ports),
       `fleet_engine`, and the 20.2 drift baselines — each at its own tier. Each
       consumer must handle "table not covered on this host" explicitly; see S1.
+      **DONE 2026-09-22 — foundation + all 4 consumers.**
+
+      **`backend/services/host_facts.py` — the shared reader every consumer
+      needs.** Four-valued, not boolean, because `covered(host, table)` as
+      True/False loses the distinction the phase exists for:
+      `SERVED` (ask it), `NOT_APPLICABLE` (a Windows host has no `mounts` --
+      not a gap and not a finding), `UNSUPPORTED` (could serve it, cannot now
+      -- unprivileged agent, broken provider -- and this one IS worth showing
+      because it is fixable), and `UNKNOWN`.
+
+      **`UNKNOWN` is the state that would have broken everything.** Every host
+      in a fleet is pre-21.1 until upgraded, so a consumer reading "never
+      advertised" as "not covered" would switch itself off for the entire
+      estate the day this shipped, while looking like it worked. Same trap
+      `limited_flag` documents for capability gating: absence of an
+      advertisement is not an advertisement of absence. The rule for callers
+      is therefore **UNKNOWN means proceed as before** — consumers degrade
+      only on a POSITIVE denial.
+
+      **20.2 drift baseline wired, fixing a LIVE defect.** `compare_category`
+      had no notion of "this host cannot report this", so a host with zero
+      rows put EVERY reference row into `missing`: a Windows box compared
+      against a Linux one read as *missing every mount* rather than *does not
+      have mounts*. A fabricated divergence in the one feature whose whole job
+      is reporting real ones. A category now maps to the fact table it
+      describes; when either host cannot answer, the category returns
+      `comparable: false` with the agent's own reason code and contributes
+      zero differences, and `not_comparable` is surfaced at the top level —
+      because an operator reading `identical: true` deserves to know it was
+      reached without examining three of the eight categories. Categories with
+      no fact-table counterpart (repositories, firewall, packages) compare
+      exactly as before.
+
+      18 tests; server suite 7,855 green; 10.00/10.
+
+      **The services bundle — how the other three consumers got wired.**
+      `compliance_engine`, `vuln_engine` and `fleet_engine` each receive a
+      FIXED injected dependency set, so reaching `host_facts` from inside them
+      meant changing that injection contract. Rather than add one more
+      positional dependency — and do it again for every future capability —
+      the OSS side now passes a single frozen `ProPlusServices` bundle
+      (`backend/api/proplus_services.py`, versioned, `host_facts` its first
+      member). One seam, extensible without another contract change.
+
+      **Engines are prebuilt binaries, so the bundle CANNOT simply be passed.**
+      The `.so` files come from the licence server and lag the OSS code; all 22
+      mount sites call router factories with keyword arguments, so
+      `services=...` against an older engine raises `TypeError: unexpected
+      keyword argument` and the whole feature fails to mount. That is the
+      "stale runtime engine" failure that caused the "No tenant" PXE enrol bug.
+      `call_engine_router()` in `proplus_routes_mounts.py` therefore inspects
+      each factory (`inspect.signature` works on compiled Cython) and passes
+      the bundle only to engines that accept it, logging INFO and calling
+      without when they do not. Verified both ways.
+
+      **`compliance_engine` — the defect found while scoping this slice.**
+      `evaluate_package_profile` read `SoftwarePackage` rows and evaluated
+      constraints against them. A host with NO package rows yields
+      `installed = []`, so a "must be installed" constraint fails and — far
+      worse — a "must NOT be installed" constraint PASSES: a confident
+      compliance verdict built on the absence of data, in the worst possible
+      place for one. Now returns a THIRD status, `not_assessable`, carrying
+      the agent's own reason code.
+
+      **`vuln_engine` — the same defect, with a grade attached.** A host that
+      never reported a package inventory scanned to `risk_level "NONE"`,
+      `risk_score 0`, which the presentation layer inverts into a security
+      score of 100 and a grade of **A+**. The host nobody was watching
+      outscored every host that was. Unmeasured scans are now `UNKNOWN` (never
+      `NONE` — "we looked and found nothing" and "we never looked" are
+      different claims and no longer share a value), and carry no score and no
+      grade at all. The card had to be fixed in the same breath:
+      `scan.grade ?? deriveGrade(...)` treats the engine's explicit `null` as
+      "old engine, derive it yourself" and would have handed back the very A+
+      the engine refused to give.
+
+      **The fleet rollup was the same lie at estate scale.** The bucketing
+      loop's final `else` swept every non-CRITICAL/HIGH/MEDIUM/LOW host into
+      `clean`, and the fleet risk score averaged over `total_hosts` — so the
+      more of your estate you could not see, the safer you looked. One
+      critical host among three unmeasured ones reported 25 / LOW. Now: an
+      `unknown` bucket that is never folded into `clean`, an `assessed_hosts`
+      denominator, and `UNKNOWN` as the fleet level when nothing is assessable.
+      Same example now reports 100 / CRITICAL.
+
+      **`fleet_engine` — a selector is a claim, and it was resolving silently
+      in two opposite directions.** Criteria on `platform` / `platform_release`
+      are statements about the `os_version` contract table. Evaluated against a
+      host that never reported one, `platform equals "linux"` silently DROPPED
+      it (the operator read a target count that looked complete) while
+      `platform not_equals "windows"` silently INCLUDED it, because
+      `None != "windows"` — a bulk reboot then ran against a host nobody had
+      classified. Such a host is now neither in nor out but UNRESOLVABLE:
+      excluded from the target list and returned beside it. A positive denial
+      from the substrate outranks a stale value still sitting in the column.
+      `tag` and `group` are exempt — those are assigned on the server, so an
+      empty list is a real answer, not a missing measurement. An operation that
+      targeted nothing is `incomplete` rather than `succeeded` when the reason
+      it matched nothing is that nothing could be evaluated.
+
+      Explicitly named `host_ids` are never unresolvable: that is an operator
+      decision, not an inference from a field we failed to read.
+
+      **`fleet.paused` had no label entry**, so a paused deployment rendered
+      the raw English identifier in all 14 locales — and passed every i18n
+      gate, because a string that never reaches a translation file cannot be
+      reported missing. Fixed alongside the new `incomplete`, with a test that
+      fails on any status the engine can emit but the card cannot label.
+
+      The glossary now carries `not assessable` (canonical in 13 languages,
+      with `compliant` / `clean` / `passed` / `not applicable` forbidden in
+      each) — the single most dangerous phrase in this phase to mistranslate,
+      because every one of those renderings turns "we do not know" into an
+      all-clear.
+
+      3 engines rebuilt and version-bumped; 49 fleet + 24 vuln + 11 compliance
+      engine tests, 12 vuln-card + 7 fleet-card front-end tests.
 - [ ] **S7 — Extend golden-host drift to arbitrary file / config state**, the
       fourth box above. This EXTENDS the 20.2 differ with new fact sources; it
       does not rebuild it.

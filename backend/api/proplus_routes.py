@@ -51,6 +51,7 @@ from backend.api.proplus_routes_common import (  # noqa: E402  pylint: disable=u
 # ``mount_*_routes`` name (and ``mount_proplus_stub_routes``) stays importable
 # from ``proplus_routes`` exactly as before.
 from backend.api.proplus_routes_mounts import (  # noqa: E402  pylint: disable=unused-import
+    call_engine_router,
     mount_audit_routes,
     mount_automation_routes,
     mount_av_management_routes,
@@ -90,7 +91,9 @@ def mount_vulnerability_routes(app: FastAPI) -> bool:
 
     try:
         with _cython_compat():
-            router = vuln_engine.get_vulnerability_router(
+            router = call_engine_router(
+                "vuln_engine",
+                vuln_engine.get_vulnerability_router,
                 # SELF-ROUTING engine. It resolves get_tenant_db (host data)
                 # and get_shared_db (the CVE catalog) internally and ignores what we
                 # pass here -- the value below is used ONLY as the fallback if
@@ -570,7 +573,9 @@ def mount_compliance_routes(app: FastAPI) -> bool:
 
     try:
         with _cython_compat():
-            router = compliance_engine.get_compliance_router(
+            router = call_engine_router(
+                "compliance_engine",
+                compliance_engine.get_compliance_router,
                 db_dependency=Depends(get_tenant_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
