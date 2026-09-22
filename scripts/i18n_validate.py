@@ -21,6 +21,7 @@ Common to all three: walks the locale tree at
 
 Run from the repo root.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -50,6 +51,12 @@ DYNAMIC_KEY_PREFIXES = (
     "maintenanceWindows.day.",  # Phase 14.2 — t(`maintenanceWindows.day.${d}`)
     "maintenanceWindows.state.",  # Phase 14.2 — t(`maintenanceWindows.state.${status.state}`)
     "nav.role.",  # Phase 11 — role chip uses t(`nav.role.${serverRole}`)
+    # Phase 21.1 S4 — the run-status chip uses
+    # t(`queryPacks.runStatus.${run.status}`).  NOT strippable: these four are
+    # live translations the scanner cannot see, and "partial" in particular
+    # carries the distinction the whole phase exists for -- a host that could
+    # not answer is not a host that answered "nothing".
+    "queryPacks.runStatus.",
     "scripts.status.",
     "secrets.api_provider.",
     "secrets.certificate_type.",
@@ -338,9 +345,7 @@ def cmd_strip_orphans() -> int:
     for lang in list_locales():
         data = load_locale(lang)
         flat = flatten(data)
-        orphans = [
-            k for k in (set(flat) - code_keys) if not _is_live(k, code_keys)
-        ]
+        orphans = [k for k in (set(flat) - code_keys) if not _is_live(k, code_keys)]
         if not orphans:
             continue
         for key in orphans:

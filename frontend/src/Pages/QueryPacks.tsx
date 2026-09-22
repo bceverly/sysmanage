@@ -337,7 +337,11 @@ const QueryPacks: React.FC = () => {
                 <Chip
                     size="small"
                     label={t(
-                        `queryPacks.status.${params.value}`,
+                        // NOT `queryPacks.status`: that key is the column
+                        // header above, a leaf string. Using one key as both a
+                        // leaf and a namespace makes the seeder flatten the
+                        // object and silently lose every label under it.
+                        `queryPacks.runStatus.${params.value}`,
                         STATUS_LABEL[String(params.value)] ?? String(params.value),
                     )}
                     color={STATUS_COLOR[String(params.value)] ?? 'default'}

@@ -136,6 +136,33 @@ def _service_ok(service: str) -> bool:
         return False
 
 
+def _translated_text(item: dict, lang: str) -> str:
+    """The translated string for ``lang``, or "" if the service sent junk.
+
+    The value is normally a plain string. On 2026-09-21 the service returned
+    its whole ``{lang: text}`` envelope for two German strings instead, and
+    because this took the value verbatim, the literal text
+    ``{'en': '...', 'de': '...'}`` was written into de/translation.json and
+    would have rendered on screen for German users.
+
+    It was caught only incidentally -- the placeholder gate flagged the braces
+    as a malformed placeholder -- so the shape is checked HERE, where it is a
+    definite answer rather than a lucky one.
+
+    An envelope is UNWRAPPED when it actually contains the language we asked
+    for: the translation exists and discarding it would send the string round
+    again for no reason. Anything else returns "" so the caller records a gap
+    and the string is re-queued -- a missing translation is visible, whereas a
+    wrong one ships.
+    """
+    value = (item.get("translations") or {}).get(lang)
+    if isinstance(value, str):
+        return value
+    if isinstance(value, dict) and isinstance(value.get(lang), str):
+        return value[lang]
+    return ""
+
+
 def translate_to(
     service: str, texts: List[str], lang: str, client_batch: int
 ) -> List[str]:
@@ -164,7 +191,7 @@ def translate_to(
             # strings used to be re-sent over the network forever.
             # An older service omits "status"; assume ok so this still works.
             status = (item.get("status") or {}).get(lang, "ok")
-            out.append((item["translations"][lang], status == "ok"))
+            out.append((_translated_text(item, lang), status == "ok"))
         print(f"      …{min(i + client_batch, len(texts))}/{len(texts)}", flush=True)
     return out
 

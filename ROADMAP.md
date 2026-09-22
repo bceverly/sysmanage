@@ -8695,10 +8695,180 @@ them, and that gap decides how much S2 must cover there. Needs a
       unprivileged dev box — the privilege reason code doing exactly its job,
       on the same build, distinguished only by how the agent runs.
 
-      **Still open, and it needs Bryan's rigs:** the conformance harness has
-      never been RUN — this machine has no osquery, and no CI runner does
-      either. It must be run on a Linux box and on FreeBSD (the fragile leg)
-      before the Phase 21 exit gate. Same standing gap as `bsd-tests.yml`.
+      **CONFORMANCE RUN ON FREEBSD, 2026-09-21 — and it paid for itself.**
+      osquery 5.23.0 installed on freebsd.theeverlys.com (14.4-RELEASE-p8).
+      First run: **4 of 9 tables agreed**. After the fixes below: **6 of 7**,
+      with the single remaining difference explained rather than unexplained.
+      98 substrate tests also pass on FreeBSD/Python 3.11 — the first time
+      they have run on a BSD at all.
+
+      **The open question is answered.** The FreeBSD port has 9 of the 12
+      applicable contract tables. The one it lacks is `user_groups`, which is
+      core on Linux and macOS — exactly the case the "ask the binary, never
+      hand-list" rule exists for.
+
+      **A bug in the HARNESS first.** It reported "native has nothing, osquery
+      has everything" for every table — confident and entirely wrong.
+      `NATIVE_TABLES` is filled by `register_native_provider()`, which the
+      harness never called, so `collect()` returned `{}` in silence. Both ends
+      fixed: the harness bootstraps, and `collect()` now registers itself
+      rather than answering nothing.
+
+      **Two defects in the FreeBSD osquery port, now denylisted.** A named
+      denylist with a measured reason, not a data-quality heuristic — guessing
+      at what garbage looks like would be worse, and a named table is
+      auditable and removable the day the port is fixed. Both matter because
+      osquery is PREFERRED when healthy, so without this, enabling it on
+      FreeBSD would replace correct native data with wrong data:
+      * `listening_ports` — 459 rows, **425 of them `port=0`**, with
+        `kinfo_getfile(): No such process` on stderr. The real listeners (22,
+        123, 443, 514, 3000, 43045) came from the native provider.
+      * `certificates` — **0 rows** on a host whose CA bundle holds 118
+        certificates. An empty answer from a table that HAS the data is the
+        worst kind: indistinguishable from "this host has no certificates".
+
+      **Three defects in OUR native provider, all found by the comparison:**
+      * `mounts` read the storage-device INVENTORY rather than the mount
+        table. A disk is not a mount: it produced raw devices with no mount
+        point and `type = 'unknown'` for every real filesystem, so
+        `WHERE type = 'zfs'` matched nothing while the query succeeded. Now
+        reads `psutil.disk_partitions(all=True)` — the same source osquery
+        uses — and agrees with osquery exactly, 27/27.
+      * `interface_addresses` omitted LOOPBACK entirely, and the inventory it
+        read could hold only one address per family per interface, so extras
+        vanished. Now reads `psutil.net_if_addrs`, each address carrying its
+        own mask. 5/5 agreement.
+      * `certificates.common_name` was always NULL, because the collector
+        leaves `certificate_name` unset for certificates read out of a bundle.
+        Now derived from the subject's CN — osquery's own definition. (The
+        FreeBSD CA root that surfaced this legitimately has NO CN, identifying
+        by OU, so `None` there is the correct answer.)
+
+      **And one outside the fact layer:** `CertificateCollector` emitted every
+      top-level certificate TWICE. `glob("**/…", recursive=True)` also matches
+      zero directories, so the "subdirectories" glob re-found everything the
+      "this directory" glob returned — invisible until now because the dedupe
+      keys on a fingerprint openssl does not supply on that path. Deduped and
+      sorted. This affects the shipped host-certificates feature, not just
+      facts.
+
+      **Documented, not fixed, because neither provider is wrong:** FreeBSD's
+      kernel keeps only MAXCOMLEN (19) characters of a process name, which is
+      what osquery reports, while psutil reads the full name from the
+      arguments — `gnome-session-binar` vs `gnome-session-binary`. A pack
+      matching `processes.name` exactly will differ by provider on FreeBSD.
+      The harness now prints that explanation next to the difference instead
+      of leaving it looking like a defect.
+
+      **CONFORMANCE RUN ON LINUX TOO, 2026-09-21** (osquery 5.20.0, Ubuntu
+      26.04). First run **7 of 12**, now **8 of 12**, and it found what the
+      FreeBSD run could not:
+
+      * `os_version.platform` is the DISTRIBUTION in osquery — `ubuntu`, from
+        os-release `ID` — and we reported `linux`. The documented osquery
+        idiom `WHERE platform = 'ubuntu'` matched nothing here while the query
+        succeeded. `version` likewise is os-release `VERSION` ("26.04.1 LTS
+        (Resolute Raccoon)"), not `VERSION_ID`, and `platform_like` was always
+        NULL. Fixed; the table now agrees. Only Linux needed it — osquery's
+        platform on the BSDs, macOS and Windows already matches
+        `platform.system()`, which is why FreeBSD agreed all along.
+      * The process-name truncation is a LINUX trap too, at a different width:
+        `TASK_COMM_LEN-1` is 15 there versus FreeBSD's 19
+        (`gnome-terminal-` vs `gnome-terminal-server`). Both are now annotated
+        in the harness.
+
+      `deb_packages` agrees exactly at 3,220 rows, which is the first direct
+      confirmation that the native package table matches osquery's.
+
+      **THE CERTIFICATE COLLECTOR, three nested defects, each hiding the next.**
+      Only the first was visible from the conformance report:
+      1. `glob("**/…", recursive=True)` also matches zero directories, so the
+         "subdirectories" pass re-found every file the "this directory" pass
+         returned and each was processed twice.
+      2. `openssl x509 -in` reads only the FIRST certificate in a PEM file, so
+         a bundle was reported as one certificate. FreeBSD's
+         `ca-root-nss.crt` holds 118; we reported 1.
+      3. And the reason neither showed up as obvious duplication: the
+         fingerprint parser matched `SHA256 Fingerprint=` exactly, while
+         OpenSSL 3.x prints `sha256 Fingerprint=`. It never matched, the
+         fingerprint stayed NULL, and the caller treats a missing fingerprint
+         as "include it anyway" — so the de-duplication had silently never
+         run on any OpenSSL 3 host, which is all of them.
+
+      Fixed together, because fixing 2 without 3 turns 118 certificates into
+      118 duplicates. Ubuntu 26.04 went 243 rows → **122, all fingerprinted
+      and all distinct**, against osquery's 121. FreeBSD went 1 → 118, with
+      115 carrying a real common name. This affects the shipped
+      host-certificates feature, not just the fact substrate.
+
+      **ALL SIX SUPPORTED PLATFORMS VALIDATED ON REAL HARDWARE, 2026-09-21.**
+      Every one registered with a live server and advertised contract v1 with
+      **zero unsupported tables**, and the per-platform applicability
+      arithmetic is exactly right:
+
+      | host | OS | served | not applicable |
+      |---|---|---|---|
+      | gdr-t14 | Ubuntu 26.04 | 14 | homebrew, programs |
+      | macbookair | macOS 15.6.1 | 13 | deb, rpm, programs |
+      | freebsd | FreeBSD 14.4 | 12 | deb, rpm, homebrew, programs |
+      | t480 | OpenBSD 7.9 | 12 | deb, rpm, homebrew, programs |
+      | netbsd | NetBSD 10.1 | 12 | deb, rpm, homebrew, programs |
+      | x13s | Windows 11 | 12 | deb, rpm, homebrew, mounts |
+
+      OpenBSD and NetBSD had never reported to a server before. Both came up
+      clean, which matters more than it sounds: they are the platforms with no
+      osquery port at all, so the native provider is not an accelerator there,
+      it is the ONLY implementation.
+
+      **Defects each first-run platform produced — every one silent:**
+      * **Windows `programs` described the wrong software.** The manager
+        filter was `{"winget", "chocolatey", "msi", "windows"}` and the real
+        value is `windows_registry`, matching none of them: the table reported
+        winget's 204 packages and excluded all 195 registry-installed
+        programs. osquery's `programs` IS the registry uninstall list, so we
+        were answering a different question than the one asked. Its
+        `publisher` column also carried the package SOURCE
+        ("winget_repository") where osquery reports the vendor ("Igor
+        Pavlov") — the inventory had the real value and it was not being read.
+      * **Privileged agents reported `agent_version = unknown`.** git refuses
+        a repository owned by another user ("dubious ownership") and exits
+        non-zero; the agent runs as ROOT from an operator-owned checkout,
+        which is exactly what `make start-privileged` does. Fixed with
+        `-c safe.directory=<repo>` scoped to that path for that one
+        read-only call. This is the SECOND distinct version-reporting defect
+        of the day, after the installed-package shadowing on FreeBSD.
+      * **macOS reported the wrong platform identifier and version.** osquery
+        calls macOS `darwin`; we said `macos`, so `WHERE platform = 'darwin'`
+        matched nothing on any Mac. Version was `Sequoia 15.6` on a host
+        running 15.6.1 — marketing name prefixed and a patch level behind.
+      * **OpenBSD lost every IPv4 netmask.** psutil returns `netmask=None` for
+        all v4 addresses there while filling v6 correctly — a gap in its BSD
+        implementation, not the OS, which prints them fine. Added an
+        `ifconfig` fallback that runs ONLY when psutil leaves one empty, so no
+        other platform pays for a subprocess.
+      * **NetBSD reported every installed package as upgradable.** `pkgin
+        list -u` is not an upgrade list — pkgin has no `-u` flag for `list`,
+        ignores it, and prints the installed-package list. 184 "updates" on a
+        host with 184 packages and 16 genuinely upgradable. Now reads
+        `pkgin -n upgrade` and parses only the "to upgrade" section.
+
+      **DECIDED 2026-09-21: the OS display label stays friendly.** macOS
+      reports `Sequoia 15.6` and Windows reports `11` in the HOST
+      registration record, rather than osquery's `15.6.1` and `10.0.26220`.
+      These are human labels on the host list and they group consistently.
+      The FACT substrate follows osquery's contract exactly — `os_version` on
+      a Mac is `15.6.1`/`darwin` — so packs written the osquery way are
+      unaffected. The two surfaces describing the same host differently is a
+      deliberate split, not drift: one is for people, one is for queries.
+
+      **Still open:** `listening_ports` could not be compared on Linux — it
+      needs root on both sides and this box has no passwordless sudo, so the
+      only root-to-root comparison remains the FreeBSD one. `certificates`
+      differs by PATH convention rather than content (we report the file we
+      read it from), and `mounts` differs on 4 systemd credential mounts where
+      psutil reports an empty device and osquery reports `none`. Neither is a
+      data defect. `bsd-tests.yml` still needs its workflow_dispatch run
+      before the phase exit gate.
 - [x] **S4 — Query packs as multi-tenant policy.** — 2026-09-21 Curated/shipped
       pack DEFINITIONS are global reference data → `shared` partition, one
       copy, offline-updatable; assignments to hosts/tags/sites and any
@@ -8889,6 +9059,22 @@ them, and that gap decides how much S2 must cover there. Needs a
       docstring warns about, and both slipped through because each side was
       tested correctly in isolation while the CONTRACT between them was owned
       by neither.
+
+      **i18n: one key cannot be both a leaf and a namespace.** The page used
+      `queryPacks.status` as a column-header string AND as the prefix for
+      `queryPacks.status.<run status>` chip labels. The seeder resolved the
+      conflict by flattening the object to the string "Status", silently
+      destroying all four run-status labels in all 14 locales. Renamed to
+      `queryPacks.runStatus.*`. Worth remembering: nothing failed -- the chips
+      kept rendering from their English code fallbacks, so only a catalog
+      inspection showed the labels were gone.
+
+      Two strings are now in `i18n-allow.txt` rather than translated:
+      `queryPacks.sql` ("SQL" is the technology's name, returned unchanged by
+      all thirteen locales and no correct translation could differ) and
+      `queryPacks.query` scoped to **nl only**, where "query" is the ordinary
+      Dutch word — the other twelve locales translated it normally, so the
+      rule is scoped rather than blanket.
 
       **Needs Bryan (license-server side):** `query_pack_engine` is new, so the
       dev license must be regenerated to include the module before the page and

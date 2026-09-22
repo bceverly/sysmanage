@@ -197,3 +197,14 @@ nav.fips
 settings.cat.general
 # "Administration" is the French word; de Verwaltung and es Administración differ.
 nav.cat.admin
+
+# --- Phase 21.1 S4 query packs ---------------------------------------------
+# "SQL" is the technology's name, identical in every language we ship; the
+# translation service returned it unchanged in all thirteen, and no correct
+# translation COULD differ. Blessing it rather than rewording, because the
+# field really is labelled SQL in the editor.
+queryPacks.sql
+# Dutch uses "query" as the ordinary word for a database query -- it came back
+# unchanged only for nl, while the other twelve locales translated it. Scoped
+# to nl alone rather than blanket-allowing the key.
+nl: queryPacks.query
