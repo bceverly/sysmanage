@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Query packs over the Phase 21.1 fact substrate (ROADMAP 21.1 S4).
+"""Query packs over the Phase 21.1 fact substrate (ROADMAP 21.1 S4 + S5).
 
 A pack is a named, versioned set of SQL queries run against the osquery-schema
 fact tables the agent serves (see the agent's ``core/fact_schema.py``).  S1-S3
@@ -23,6 +23,10 @@ the ``shared`` partition, exactly like ``shared_advisory`` and
   - ``QueryPack`` / ``QueryPackQuery`` -- packs a customer wrote themselves.
   - ``QueryPackAssignment`` -- which hosts/tags/sites run which pack.
   - ``QueryPackRun`` / ``QueryPackResultRow`` -- what came back.
+  - ``QueryPackLiveQuery`` (S5) -- one ad-hoc statement fanned out across a
+    fleet, bounded. Its targets ARE ``QueryPackRun`` rows, which is what lets
+    the agent command and the result-correlation path stay exactly as S4 left
+    them.
 
 "Distributed as multi-tenant policy" means ONE shared catalog plus per-tenant
 assignment -- never per-tenant copies of the curated packs.
@@ -95,11 +99,19 @@ MIN_INTERVAL_MINUTES = 5
 # tables.  Without it those hosts would read as ``success`` with fewer rows --
 # which is precisely the "measured and empty" confusion the substrate exists to
 # prevent.
+#
+# A live-query target that has been created but NOT yet released into a wave
+# (S5). Distinct from ``pending``, which means "dispatched, awaiting the
+# agent's answer" -- collapsing the two would make an unbounded fan-out
+# indistinguishable from a bounded one that has not finished yet, which is the
+# exact property S5 exists to provide.
+RUN_STATUS_WAITING = "waiting"
 RUN_STATUS_PENDING = "pending"
 RUN_STATUS_SUCCESS = "success"
 RUN_STATUS_PARTIAL = "partial"
 RUN_STATUS_FAILED = "failed"
 RUN_STATUSES = (
+    RUN_STATUS_WAITING,
     RUN_STATUS_PENDING,
     RUN_STATUS_SUCCESS,
     RUN_STATUS_PARTIAL,
@@ -112,6 +124,19 @@ QUERY_STATUS_OK = "ok"
 QUERY_STATUS_NOT_COVERED = "not_covered"
 QUERY_STATUS_ERROR = "error"
 QUERY_STATUSES = (QUERY_STATUS_OK, QUERY_STATUS_NOT_COVERED, QUERY_STATUS_ERROR)
+
+
+LIVE_PENDING = "pending"
+LIVE_RUNNING = "running"
+LIVE_COMPLETED = "completed"
+LIVE_CANCELED = "canceled"
+LIVE_STATUSES = (LIVE_PENDING, LIVE_RUNNING, LIVE_COMPLETED, LIVE_CANCELED)
+
+# Bounds. A live query is typed by a human at a console and fanned out to a
+# fleet, so every one of these is a guard against a keystroke costing more
+# than it should.
+DEFAULT_LIVE_CONCURRENCY = 20
+DEFAULT_LIVE_TIMEOUT_SECONDS = 120
 
 
 def _utcnow() -> datetime:
@@ -306,6 +331,79 @@ class QueryPackAssignment(Base):
         return f"<QueryPackAssignment(id={self.id}, target={target})>"
 
 
+class QueryPackLiveQuery(Base):
+    """One ad-hoc query fanned out across a fleet — ROADMAP 21.1 S5.
+
+    WHY THIS IS NOT JUST A PACK WITH ONE QUERY
+    -------------------------------------------
+    It is dispatched as one, deliberately, so the agent needs no new command
+    and the result path is the one S4 already proved. What a pack does NOT
+    carry is the thing this table exists for: an operator typed this at a
+    console and pointed it at a fleet, so it needs BOUNDS — how many hosts may
+    be in flight at once, how long to wait for a silent one, and how many rows
+    a single host may return.
+
+    Unbounded fan-out is the failure mode fleet jobs were built to replace,
+    and a live query is the easiest possible way to reintroduce it: one
+    keystroke, four thousand hosts. So the bounds are columns on the request
+    rather than a policy somewhere else, and they are recorded with the query
+    — what a run actually did stays answerable after the fact.
+
+    WHY RESULTS LIVE IN ``query_pack_run``
+    --------------------------------------
+    A target is a run: same host, same per-query outcomes, same grading, same
+    "not covered is not empty" property. A second results table would need its
+    own copy of all of that, and the two would drift.
+    """
+
+    __tablename__ = "query_pack_live_query"
+    __table_args__ = (
+        # NOT "ix_query_pack_live_query_status": that is the name SQLAlchemy
+        # auto-generates for ``status`` because the column carries
+        # index=True, and the two collide at create_all with "index already
+        # exists". Named for both columns, which reads better anyway.
+        Index("ix_query_pack_live_query_status_created", "status", "created_at"),
+    )
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    # Optional: an operator may name a query worth recognising later, but
+    # most are one-offs and forcing a name would just produce "test" a lot.
+    name = Column(String(255), nullable=True)
+    sql = Column(Text, nullable=False)
+    # DECLARED by the author, same contract as a pack query -- the agent
+    # compares it against its own coverage so a host that cannot answer says
+    # so rather than erroring.
+    required_tables = Column(JSON, nullable=True)
+
+    status = Column(String(20), nullable=False, default=LIVE_PENDING, index=True)
+    # How many targets may be in flight at once. Clamped by the engine.
+    concurrency = Column(Integer, nullable=False, default=DEFAULT_LIVE_CONCURRENCY)
+    # A host that never answers must not hold a slot forever -- without this
+    # one unreachable machine stalls the wave behind it indefinitely.
+    timeout_seconds = Column(
+        Integer, nullable=False, default=DEFAULT_LIVE_TIMEOUT_SECONDS
+    )
+
+    total_targets = Column(Integer, nullable=False, default=0)
+    completed_count = Column(Integer, nullable=False, default=0)
+    failed_count = Column(Integer, nullable=False, default=0)
+    # Counted SEPARATELY from failures: a host that does not serve the tables
+    # has not failed, and folding it into failed_count would make a Windows
+    # box look broken for lacking ``mounts``.
+    not_covered_count = Column(Integer, nullable=False, default=0)
+
+    requested_by = Column(String(255), nullable=True)
+    created_at = Column(DateTime, nullable=False, default=_utcnow)
+    started_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+
+    def __repr__(self):
+        return (
+            f"<QueryPackLiveQuery(id={self.id}, status={self.status}, "
+            f"targets={self.total_targets})>"
+        )
+
+
 class QueryPackRun(Base):
     """One execution of one pack on one host."""
 
@@ -314,6 +412,12 @@ class QueryPackRun(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
     assignment_id = Column(GUID(), nullable=True, index=True)
+    # Phase 21.1 S5. A run belongs to an ASSIGNMENT (scheduled) or a LIVE
+    # QUERY (ad-hoc), never both. Reusing this table rather than adding a
+    # parallel one is what lets the agent and the result handler stay
+    # untouched: a live query is dispatched as a one-query pack and its
+    # results correlate on ``run_id`` exactly as a scheduled run does.
+    live_query_id = Column(GUID(), nullable=True, index=True)
     pack_id = Column(GUID(), nullable=True, index=True)
     shared_pack_id = Column(GUID(), nullable=True, index=True)
     pack_name = Column(String(255), nullable=True)

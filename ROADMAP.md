@@ -9082,9 +9082,76 @@ them, and that gap decides how much S2 must cover there. Needs a
       (`make publish-modules`) before any other machine can load it. Until then
       the router 403s and the navbar entry stays hidden — which is the correct
       unlicensed behaviour, not a fault.
-- [ ] **S5 — Ad-hoc fleet-wide live query + results surface**, bounded the way
-      fleet jobs are (concurrency, timeout, per-host rows) rather than fanning
-      out to everything at once. **Professional.**
+- [x] **S5 — Ad-hoc fleet-wide live query + results surface** — 2026-09-22,
+      bounded the way fleet jobs are (concurrency, timeout, per-host rows)
+      rather than fanning out to everything at once. **Professional.**
+      **Shipped 2026-09-22 — and it needed no agent change at all.**
+
+      **The design decision that made this small.** A live query is DISPATCHED
+      as a one-query pack, and its targets ARE `QueryPackRun` rows. So the
+      agent command, the result-correlation path, the grading and the
+      "not covered is not empty" property are all S4's, reused rather than
+      reimplemented. The agent, `query_pack_runner`, and the result handler's
+      correlation logic were not touched. A parallel results table would have
+      needed its own copy of every one of those, and the two would have
+      drifted — which is exactly how a second dialect for the same idea gets
+      started.
+
+      `q3livequery` adds `query_pack_live_query` plus a nullable
+      `query_pack_run.live_query_id`: a run belongs to an assignment
+      (scheduled) or a live query (ad-hoc), never both, and existing scheduled
+      runs read as `live_query_id IS NULL`.
+
+      **What the slice actually is: the BOUND.** An ad-hoc query is one
+      keystroke against every host you own, which is precisely the unbounded
+      fan-out fleet jobs were built to replace. The engine owns the maths —
+      `clamp_concurrency`, `clamp_timeout`, `next_batch_size` — mirroring the
+      fleet-job shim, and the shim FAILS CLOSED: without the engine
+      `next_batch_size` returns **0**, not "all of them", so a server that
+      loses its licence mid-query stops dispatching rather than reverting to
+      the behaviour this exists to prevent.
+
+      Three decisions worth recording:
+      * **Every target row is created up front, in `waiting`.** The operator
+        sees "0 of 400" immediately; a total that grows as dispatch proceeds
+        is indistinguishable from a stalled fan-out. A host that is never
+        reached still has a row saying so.
+      * **The wave advances on RESULT ARRIVAL, not on a tick.** A live query
+        is interactive — waiting up to 60s to release each next host would
+        make a 400-host query take hours regardless of how fast hosts answer.
+        The tick-shaped part is only the timeout sweep, and even that also
+        runs on read, because the thing most likely to look at a running
+        query is the operator watching it.
+      * **There is no "wait forever" timeout.** One unreachable host would
+        hold its slot indefinitely and every host behind it would never be
+        asked — the query would appear to HANG rather than finish with that
+        host marked unreachable, which is a far worse answer than a late one.
+
+      **Cancel does not lie.** It stops releasing new targets and settles the
+      undispatched ones; hosts already holding the command are left alone and
+      still answer. A command on a host's queue cannot be recalled, and
+      reporting those hosts as cancelled would claim something untrue.
+
+      `not_covered_count` is tracked apart from `failed_count` throughout —
+      server, API and UI — because folding them together would make a Windows
+      box look broken for lacking `mounts`.
+
+      **UI**: a fourth tab on `/query-packs` with host selection and a polling
+      results surface that renders per-host outcomes as they land, including
+      `waiting` — the bound made visible. 15 locales seeded; the two new
+      dynamic key prefixes (`queryPacks.liveStatus.`,
+      `queryPacks.targetStatus.`) registered in `i18n_validate.py` so the
+      scanner does not report live translations as orphans and strip them.
+
+      **One defect caught by its own test:** both new chips fell back to the
+      RAW status string, so a missing catalog key would have shown an operator
+      `waiting` rather than "Waiting" — untranslated and easy to misread. Same
+      mistake as the S4 run-status chip, which I had fixed and not carried
+      over.
+
+      Verified: 7,837 server + 1,591 Pro+ (52 engine) + 1,778 frontend tests
+      green; 10.00/10 pylint; tsc, eslint and all five i18n gates clean;
+      migration round-trips on SQLite.
 - [ ] **S6 — Wire the tables into the consuming engines** — `compliance_engine`
       (CIS), `vuln_engine` (installed packages / listening ports),
       `fleet_engine`, and the 20.2 drift baselines — each at its own tier. Each

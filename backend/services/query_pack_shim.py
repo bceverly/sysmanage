@@ -41,6 +41,13 @@ ENGINE_CODE = "query_pack_engine"
 # is why the engine, not this constant, is what actually refuses.
 MIN_INTERVAL_MINUTES = 5
 DEFAULT_INTERVAL_MINUTES = 60
+DEFAULT_LIVE_TIMEOUT_SECONDS = 120
+
+# What concurrency to allow when the engine cannot be reached. ONE, not the
+# operator's requested value: a server that has lost the engine mid-query must
+# not honour "500 at once". It is deliberately not zero, because zero would
+# stall a query that is already running rather than let it drain slowly.
+FALLBACK_CONCURRENCY = 1
 
 
 def _engine():
@@ -122,6 +129,77 @@ def build_dispatch(
     except Exception:  # pylint: disable=broad-except
         logger.exception("query_pack_engine raised while building a dispatch")
         return None
+
+
+# ---------------------------------------------------------------------------
+# S5 -- live query bounds
+# ---------------------------------------------------------------------------
+
+
+def clamp_concurrency(value: Any) -> int:
+    """How many targets may be in flight. Falls back to a SAFE floor."""
+    engine = _engine()
+    if engine is None:
+        return FALLBACK_CONCURRENCY
+    try:
+        return int(engine.clamp_concurrency(value))
+    except Exception:  # pylint: disable=broad-except
+        logger.exception("query_pack_engine raised while clamping concurrency")
+        return FALLBACK_CONCURRENCY
+
+
+def clamp_timeout(value: Any) -> int:
+    """Per-host timeout in seconds."""
+    engine = _engine()
+    if engine is None:
+        return DEFAULT_LIVE_TIMEOUT_SECONDS
+    try:
+        return int(engine.clamp_timeout(value))
+    except Exception:  # pylint: disable=broad-except
+        logger.exception("query_pack_engine raised while clamping the timeout")
+        return DEFAULT_LIVE_TIMEOUT_SECONDS
+
+
+def next_batch_size(concurrency: int, in_flight: int, waiting: int) -> int:
+    """How many more targets may be released right now.
+
+    ZERO without the engine, not "all of them". A server that has lost its
+    licence mid-query must stop dispatching rather than fall back to the
+    unbounded behaviour this slice exists to prevent -- the same rule the
+    fleet-job shim follows.
+    """
+    engine = _engine()
+    if engine is None:
+        return 0
+    try:
+        return int(engine.next_batch_size(concurrency, in_flight, waiting))
+    except Exception:  # pylint: disable=broad-except
+        logger.exception("query_pack_engine raised while sizing a wave")
+        return 0
+
+
+def validate_live_query(sql: str, required_tables=None) -> List[str]:
+    """Problems with an ad-hoc statement. FAILS CLOSED without the engine."""
+    engine = _engine()
+    if engine is None:
+        return ["live queries are unavailable on this server"]
+    try:
+        return list(engine.validate_live_query(sql, required_tables))
+    except Exception:  # pylint: disable=broad-except
+        logger.exception("query_pack_engine raised while validating a live query")
+        return ["the query could not be validated"]
+
+
+def live_status_after(total: int, finished: int) -> str:
+    """The live query's status given how many targets have settled."""
+    engine = _engine()
+    if engine is None:
+        return "running"
+    try:
+        return str(engine.live_status_after(total, finished))
+    except Exception:  # pylint: disable=broad-except
+        logger.exception("query_pack_engine raised while grading a live query")
+        return "running"
 
 
 def grade_run(results: List[Dict[str, Any]]) -> Dict[str, Any]:

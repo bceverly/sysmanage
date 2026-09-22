@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-21 12:41-0400\n"
+"POT-Creation-Date: 2026-09-22 06:27-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -141,11 +141,12 @@ msgstr "CA प्रमाणपत्र प्राप्त करने म
 
 #: backend/api/certificates.py:84 backend/api/certificates.py:139
 #: backend/api/config_mgmt_drift.py:165 backend/api/config_mgmt_drift.py:198
-#: backend/api/query_packs.py:300 backend/api/config_mgmt_inventories.py:355
-#: backend/api/host_graylog.py:89 backend/api/config_mgmt_profiles.py:340
-#: backend/api/diagnostics.py:87 backend/api/diagnostics.py:222
-#: backend/api/error_constants.py:48 backend/api/antivirus_status.py:213
-#: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
+#: backend/api/query_packs.py:344 backend/api/query_packs.py:440
+#: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
+#: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
+#: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
+#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:473
+#: backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "अमान्य होस्ट ID फॉर्मेट"
@@ -1633,7 +1634,7 @@ msgstr "फ़ेडरेशन TLS प्रमाणपत्र को ल�
 msgid "Could not load or generate the federation identity key."
 msgstr "फ़ेडरेशन पहचान की कुंजी को लोड या बनाना विफल हुई"
 
-#: backend/api/config_mgmt_drift.py:191 backend/api/query_packs.py:101
+#: backend/api/config_mgmt_drift.py:191 backend/api/query_packs.py:116
 #: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/config_mgmt_jobs.py:167 backend/api/config_mgmt_profiles.py:136
@@ -2566,38 +2567,60 @@ msgstr ""
 "बच्चे मेंस का बनाना मांगा जा रहा है. इसकी संभावना है कि यह कई मिनट ले सकता "
 "है."
 
-#: backend/api/query_packs.py:120
+#: backend/api/query_packs.py:135
 #, python-format
 msgid "The query pack was rejected: %s"
 msgstr "क्वेरी पैक को अस्वीकार कर दिया गया: %s"
 
-#: backend/api/query_packs.py:151 backend/api/query_packs.py:186
-#: backend/api/query_packs.py:208
+#: backend/api/query_packs.py:160 backend/api/query_packs.py:195
+#: backend/api/query_packs.py:217
 msgid "Invalid query pack ID format"
 msgstr "असंगत क्वेरी पैक आईडी प्रारूप"
 
-#: backend/api/query_packs.py:153 backend/api/query_packs.py:188
-#: backend/api/query_packs.py:210
+#: backend/api/query_packs.py:162 backend/api/query_packs.py:197
+#: backend/api/query_packs.py:219
 msgid "Query pack not found"
 msgstr "क्वेरी पैक नहीं मिला"
 
-#: backend/api/query_packs.py:253
+#: backend/api/query_packs.py:258
 msgid "Invalid ID format in the assignment"
 msgstr "असंगत आईडी प्रारूप असाइनमेंट में"
 
-#: backend/api/query_packs.py:276 backend/api/config_mgmt_profiles.py:377
+#: backend/api/query_packs.py:281 backend/api/config_mgmt_profiles.py:377
 msgid "Invalid assignment ID format"
 msgstr "असाइनमेंट आईडी प्रारूप अमान्य है"
 
-#: backend/api/query_packs.py:281 backend/api/config_mgmt_profiles.py:382
+#: backend/api/query_packs.py:286 backend/api/config_mgmt_profiles.py:382
 msgid "Assignment not found"
 msgstr "असाइनमेंट नहीं मिला"
 
-#: backend/api/query_packs.py:319
+#: backend/api/query_packs.py:339
+msgid "A live query targets exactly one of hosts, a tag or a site."
+msgstr "एक लाइव क्वेरी एक होस्ट, टैग या साइट में से ठीक एक को लक्षित करती है।"
+
+#: backend/api/query_packs.py:349 backend/api/config_mgmt_inventories.py:365
+#: backend/api/config_mgmt_profiles.py:350
+msgid "Invalid site ID format"
+msgstr "साइट आईडी प्रारूप अमान्य है"
+
+#: backend/api/query_packs.py:355 backend/api/config_mgmt_inventories.py:360
+#: backend/api/config_mgmt_profiles.py:345
+msgid "Invalid tag ID format"
+msgstr "टैग आईडी प्रारूप अमान्य है"
+
+#: backend/api/query_packs.py:420
+msgid "Invalid live query ID format"
+msgstr "अवैध लाइव क्वेरी आईडी प्रारूप"
+
+#: backend/api/query_packs.py:425
+msgid "Live query not found"
+msgstr "लाइव क्वेरी नहीं मिली"
+
+#: backend/api/query_packs.py:457
 msgid "Invalid run ID format"
 msgstr "असंगत रन आईडी प्रारूप"
 
-#: backend/api/query_packs.py:323
+#: backend/api/query_packs.py:461
 msgid "Query pack run not found"
 msgstr "क्वेरी पैक रन नहीं मिला"
 
@@ -2625,16 +2648,6 @@ msgstr "यह इन्वेंटरी '%d' जॉब टेम्पले�
 #: backend/api/config_mgmt_inventories.py:314
 msgid "Inventory deleted"
 msgstr "इन्वेंटरी हटा दिया गया"
-
-#: backend/api/config_mgmt_inventories.py:360
-#: backend/api/config_mgmt_profiles.py:345
-msgid "Invalid tag ID format"
-msgstr "टैग आईडी प्रारूप अमान्य है"
-
-#: backend/api/config_mgmt_inventories.py:365
-#: backend/api/config_mgmt_profiles.py:350
-msgid "Invalid site ID format"
-msgstr "साइट आईडी प्रारूप अमान्य है"
 
 #: backend/api/config_mgmt_inventories.py:388
 msgid "Invalid inventory member ID format"

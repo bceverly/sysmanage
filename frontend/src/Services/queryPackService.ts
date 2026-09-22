@@ -189,3 +189,82 @@ export const getRun = async (runId: string): Promise<QueryPackRun> => {
   );
   return response.data;
 };
+
+/**
+ * A live query: one ad-hoc statement fanned out across a fleet, bounded.
+ *
+ * `concurrency` and `timeout_seconds` are not cosmetic. An ad-hoc query is
+ * one keystroke against every host you own, which is exactly the unbounded
+ * fan-out fleet jobs exist to prevent — so the server clamps both and records
+ * what it actually used.
+ */
+export type LiveQueryStatus = "pending" | "running" | "completed" | "canceled";
+
+export interface LiveQueryTarget {
+  run_id: string;
+  host_id: string;
+  /** `waiting` = not yet dispatched; `pending` = dispatched, awaiting answer. */
+  status: "waiting" | "pending" | "success" | "partial" | "failed";
+  queries_ok: number;
+  queries_not_covered: number;
+  error: string | null;
+  rows: {
+    status: "ok" | "not_covered" | "error";
+    reason: string | null;
+    columns: Record<string, unknown> | null;
+  }[];
+}
+
+export interface LiveQuery {
+  id: string;
+  name: string | null;
+  sql: string;
+  required_tables: string[];
+  status: LiveQueryStatus;
+  concurrency: number;
+  timeout_seconds: number;
+  total_targets: number;
+  completed_count: number;
+  failed_count: number;
+  /** Counted apart from failures: a host that cannot answer has not failed. */
+  not_covered_count: number;
+  requested_by: string | null;
+  created_at: string | null;
+  completed_at: string | null;
+  targets?: LiveQueryTarget[];
+}
+
+export const createLiveQuery = async (request: {
+  sql: string;
+  name?: string;
+  required_tables?: string[];
+  host_ids?: string[];
+  tag_id?: string;
+  site_id?: string;
+  concurrency?: number;
+  timeout_seconds?: number;
+}): Promise<LiveQuery> => {
+  const response = await axiosInstance.post<LiveQuery>(`${BASE}/live`, request);
+  return response.data;
+};
+
+export const getLiveQueries = async (): Promise<LiveQuery[]> => {
+  const response = await axiosInstance.get<LiveQuery[]>(`${BASE}/live`);
+  return response.data;
+};
+
+/** One live query with its per-host results. Also sweeps timed-out hosts. */
+export const getLiveQuery = async (liveId: string): Promise<LiveQuery> => {
+  const response = await axiosInstance.get<LiveQuery>(`${BASE}/live/${liveId}`);
+  return response.data;
+};
+
+export const cancelLiveQuery = async (
+  liveId: string,
+): Promise<{ status: string; targets_not_dispatched: number }> => {
+  const response = await axiosInstance.post<{
+    status: string;
+    targets_not_dispatched: number;
+  }>(`${BASE}/live/${liveId}/cancel`);
+  return response.data;
+};

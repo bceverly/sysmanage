@@ -44,6 +44,7 @@ from backend.licensing.features import ModuleCode
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
+from backend.services import query_pack_live as live_svc
 from backend.services import query_pack_service as svc
 from backend.services import query_pack_shim as shim
 
@@ -92,6 +93,20 @@ class AssignmentCreateRequest(BaseModel):
     site_id: Optional[str] = None
     interval_minutes: Optional[int] = None
     enabled: bool = True
+
+
+class LiveQueryRequest(BaseModel):
+    """An ad-hoc query and the fleet to run it against."""
+
+    sql: str
+    name: Optional[str] = None
+    required_tables: Optional[List[str]] = None
+    # Exactly one target selector, same rule as an assignment.
+    host_ids: Optional[List[str]] = None
+    tag_id: Optional[str] = None
+    site_id: Optional[str] = None
+    concurrency: Optional[int] = None
+    timeout_seconds: Optional[int] = None
 
 
 def _require_role(user, role) -> None:
@@ -272,6 +287,143 @@ async def delete_assignment(
     db.delete(assignment)
     db.commit()
     return {"status": "deleted"}
+
+
+@router.post("/query-packs/live")
+async def create_live_query(
+    request: LiveQueryRequest,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """Run one ad-hoc query across a fleet, bounded.
+
+    Gated on RUN_SCRIPT rather than the authoring roles: this executes
+    something against hosts right now, which is the script-RUN entitlement,
+    not the permission to save content for later.
+    """
+    _require_role(current_user, SecurityRoles.RUN_SCRIPT)
+
+    hosts = _live_targets(db, request)
+    live, problems = live_svc.create(
+        db,
+        request.sql,
+        hosts,
+        name=request.name,
+        required_tables=request.required_tables,
+        concurrency=request.concurrency,
+        timeout_seconds=request.timeout_seconds,
+        requested_by=current_user.userid,
+    )
+    if problems:
+        db.rollback()
+        _refuse(problems)
+
+    # Release the first wave before answering, so the operator's very first
+    # poll already shows work in flight rather than an idle query.
+    live_svc.advance(db, live)
+    db.commit()
+    return live_svc.live_dict(live)
+
+
+def _live_targets(db: Session, request: LiveQueryRequest) -> List[Any]:
+    """The active hosts this request names.
+
+    Inactive hosts are excluded: queuing for one buries the command in a queue
+    that may never drain while the operator watches a target that will never
+    answer.
+    """
+    selectors = [bool(request.host_ids), bool(request.tag_id), bool(request.site_id)]
+    if sum(1 for s in selectors if s) != 1:
+        raise HTTPException(
+            status_code=400,
+            detail=_("A live query targets exactly one of hosts, a tag or a site."),
+        )
+
+    query = db.query(models.Host).filter(models.Host.active.is_(True))
+    if request.host_ids:
+        ids = [_as_uuid(h, _("Invalid host ID format")) for h in request.host_ids]
+        return query.filter(models.Host.id.in_(ids)).all()
+    if request.site_id:
+        return query.filter(
+            models.Host.site_id
+            == _as_uuid(request.site_id, _("Invalid site ID format"))
+        ).all()
+    return (
+        query.join(models.HostTag, models.HostTag.host_id == models.Host.id)
+        .filter(
+            models.HostTag.tag_id
+            == _as_uuid(request.tag_id, _("Invalid tag ID format"))
+        )
+        .all()
+    )
+
+
+@router.get("/query-packs/live/{live_id}")
+async def get_live_query(
+    live_id: str,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """One live query with its per-host results.
+
+    Sweeps timeouts on read. A silent host would otherwise hold its slot until
+    something else happened to look, and the thing most likely to look is this
+    endpoint — the operator watching the query.
+    """
+    live = _load_live(db, live_id)
+    if live_svc.sweep_timeouts(db, live):
+        live_svc.advance(db, live)
+        db.commit()
+    return live_svc.live_dict(live, with_targets=True, db=db)
+
+
+@router.get("/query-packs/live")
+async def list_live_queries(
+    limit: int = 25,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> List[Dict[str, Any]]:
+    """Recent live queries, newest first."""
+    rows = (
+        db.query(models.QueryPackLiveQuery)
+        .order_by(models.QueryPackLiveQuery.created_at.desc())
+        .limit(max(1, min(limit, 200)))
+        .all()
+    )
+    return [live_svc.live_dict(r) for r in rows]
+
+
+@router.post("/query-packs/live/{live_id}/cancel")
+async def cancel_live_query(
+    live_id: str,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """Stop releasing new targets.
+
+    Already-dispatched hosts are left alone and will still answer: a command
+    on a host's queue cannot be recalled, and reporting those hosts as
+    cancelled would claim something untrue.
+    """
+    _require_role(current_user, SecurityRoles.RUN_SCRIPT)
+    live = _load_live(db, live_id)
+    stopped = live_svc.cancel(db, live)
+    db.commit()
+    return {"status": "canceled", "targets_not_dispatched": stopped}
+
+
+def _load_live(db: Session, live_id: str):
+    live = (
+        db.query(models.QueryPackLiveQuery)
+        .filter(
+            models.QueryPackLiveQuery.id
+            == _as_uuid(live_id, _("Invalid live query ID format"))
+        )
+        .one_or_none()
+    )
+    if live is None:
+        raise HTTPException(status_code=404, detail=_("Live query not found"))
+    return live
 
 
 @router.get("/query-packs/runs/recent")

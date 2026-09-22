@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-21 12:41-0400\n"
+"POT-Creation-Date: 2026-09-22 06:27-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -140,11 +140,12 @@ msgstr "فشل في الحصول على شهادة المرجع المعتمد: 
 
 #: backend/api/certificates.py:84 backend/api/certificates.py:139
 #: backend/api/config_mgmt_drift.py:165 backend/api/config_mgmt_drift.py:198
-#: backend/api/query_packs.py:300 backend/api/config_mgmt_inventories.py:355
-#: backend/api/host_graylog.py:89 backend/api/config_mgmt_profiles.py:340
-#: backend/api/diagnostics.py:87 backend/api/diagnostics.py:222
-#: backend/api/error_constants.py:48 backend/api/antivirus_status.py:213
-#: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
+#: backend/api/query_packs.py:344 backend/api/query_packs.py:440
+#: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
+#: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
+#: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
+#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:473
+#: backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "تنسيق ID المضيف غير صحيح"
@@ -1608,7 +1609,7 @@ msgstr "تعذر تحميل أو توليد شهادة TLS للاتحاد."
 msgid "Could not load or generate the federation identity key."
 msgstr "ไม่ يمكن تحميل أو إنشاء مفتاح الهوية الفيدرالية."
 
-#: backend/api/config_mgmt_drift.py:191 backend/api/query_packs.py:101
+#: backend/api/config_mgmt_drift.py:191 backend/api/query_packs.py:116
 #: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/config_mgmt_jobs.py:167 backend/api/config_mgmt_profiles.py:136
@@ -2515,38 +2516,60 @@ msgstr ""
 msgid "Child host creation requested. This may take several minutes."
 msgstr "تم طلب إنشاء مضيف فرعي. قد يستغرق ذلك عدة دقائق."
 
-#: backend/api/query_packs.py:120
+#: backend/api/query_packs.py:135
 #, python-format
 msgid "The query pack was rejected: %s"
 msgstr "تم رفض حزمة الاستعلامات: %s"
 
-#: backend/api/query_packs.py:151 backend/api/query_packs.py:186
-#: backend/api/query_packs.py:208
+#: backend/api/query_packs.py:160 backend/api/query_packs.py:195
+#: backend/api/query_packs.py:217
 msgid "Invalid query pack ID format"
 msgstr "تنسيق معرف حزمة الاستعلامات غير صالح"
 
-#: backend/api/query_packs.py:153 backend/api/query_packs.py:188
-#: backend/api/query_packs.py:210
+#: backend/api/query_packs.py:162 backend/api/query_packs.py:197
+#: backend/api/query_packs.py:219
 msgid "Query pack not found"
 msgstr "حزمة الاستعلامات غير موجودة"
 
-#: backend/api/query_packs.py:253
+#: backend/api/query_packs.py:258
 msgid "Invalid ID format in the assignment"
 msgstr "تنسيق معرف غير صالح في التعيين"
 
-#: backend/api/query_packs.py:276 backend/api/config_mgmt_profiles.py:377
+#: backend/api/query_packs.py:281 backend/api/config_mgmt_profiles.py:377
 msgid "Invalid assignment ID format"
 msgstr "تنسيق معرف التعيين غير صالح"
 
-#: backend/api/query_packs.py:281 backend/api/config_mgmt_profiles.py:382
+#: backend/api/query_packs.py:286 backend/api/config_mgmt_profiles.py:382
 msgid "Assignment not found"
 msgstr "لم يتم العثور على التعيين"
 
-#: backend/api/query_packs.py:319
+#: backend/api/query_packs.py:339
+msgid "A live query targets exactly one of hosts, a tag or a site."
+msgstr "استعلام حي يستهدف بالضبط مضيفًا واحدًا، أو علامة، أو موقعًا."
+
+#: backend/api/query_packs.py:349 backend/api/config_mgmt_inventories.py:365
+#: backend/api/config_mgmt_profiles.py:350
+msgid "Invalid site ID format"
+msgstr "تنسيق معرف الموقع غير صالح"
+
+#: backend/api/query_packs.py:355 backend/api/config_mgmt_inventories.py:360
+#: backend/api/config_mgmt_profiles.py:345
+msgid "Invalid tag ID format"
+msgstr "تنسيق معرف العلامة غير صالح"
+
+#: backend/api/query_packs.py:420
+msgid "Invalid live query ID format"
+msgstr "تنسيق غير صالح لمعرف الاستعلام الحي"
+
+#: backend/api/query_packs.py:425
+msgid "Live query not found"
+msgstr "لم يتم العثور على استعلام حي"
+
+#: backend/api/query_packs.py:457
 msgid "Invalid run ID format"
 msgstr "تنسيق معرف التشغيل غير صالح"
 
-#: backend/api/query_packs.py:323
+#: backend/api/query_packs.py:461
 msgid "Query pack run not found"
 msgstr "تشغيل حزمة الاستعلامات غير موجود"
 
@@ -2574,16 +2597,6 @@ msgstr "يستخدم هذا المخزون من قبل نموذج عمل '%d'"
 #: backend/api/config_mgmt_inventories.py:314
 msgid "Inventory deleted"
 msgstr "تم حذف المخزون"
-
-#: backend/api/config_mgmt_inventories.py:360
-#: backend/api/config_mgmt_profiles.py:345
-msgid "Invalid tag ID format"
-msgstr "تنسيق معرف العلامة غير صالح"
-
-#: backend/api/config_mgmt_inventories.py:365
-#: backend/api/config_mgmt_profiles.py:350
-msgid "Invalid site ID format"
-msgstr "تنسيق معرف الموقع غير صالح"
 
 #: backend/api/config_mgmt_inventories.py:388
 msgid "Invalid inventory member ID format"

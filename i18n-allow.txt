@@ -208,3 +208,9 @@ queryPacks.sql
 # unchanged only for nl, while the other twelve locales translated it. Scoped
 # to nl alone rather than blanket-allowing the key.
 nl: queryPacks.query
+# Phase 21.1 S5 — "Live Query". Dutch uses "query" as the ordinary word for a
+# database query (same reason queryPacks.query is blessed for nl above), so
+# "Live Query" comes back identical and no correct translation can differ.
+# Scoped to nl: the other twelve locales translated both keys normally.
+nl: queryPacks.liveTitle
+nl: queryPacks.tabLive

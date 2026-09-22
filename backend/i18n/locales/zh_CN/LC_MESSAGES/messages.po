@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-21 12:41-0400\n"
+"POT-Creation-Date: 2026-09-22 06:27-0400\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -140,11 +140,12 @@ msgstr "获取 CA 证书失败：%s"
 
 #: backend/api/certificates.py:84 backend/api/certificates.py:139
 #: backend/api/config_mgmt_drift.py:165 backend/api/config_mgmt_drift.py:198
-#: backend/api/query_packs.py:300 backend/api/config_mgmt_inventories.py:355
-#: backend/api/host_graylog.py:89 backend/api/config_mgmt_profiles.py:340
-#: backend/api/diagnostics.py:87 backend/api/diagnostics.py:222
-#: backend/api/error_constants.py:48 backend/api/antivirus_status.py:213
-#: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
+#: backend/api/query_packs.py:344 backend/api/query_packs.py:440
+#: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
+#: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
+#: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
+#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:473
+#: backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "无效的主机ID格式"
@@ -1561,7 +1562,7 @@ msgstr "无法加载或生成联邦 TLS 证书。"
 msgid "Could not load or generate the federation identity key."
 msgstr "无法加载或生成联邦身份密钥。"
 
-#: backend/api/config_mgmt_drift.py:191 backend/api/query_packs.py:101
+#: backend/api/config_mgmt_drift.py:191 backend/api/query_packs.py:116
 #: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/config_mgmt_jobs.py:167 backend/api/config_mgmt_profiles.py:136
@@ -2445,38 +2446,60 @@ msgstr "请求创建子主机。当该主机连接时，它将自动获得批准
 msgid "Child host creation requested. This may take several minutes."
 msgstr "请求创建子主机。这可能需要几分钟时间。"
 
-#: backend/api/query_packs.py:120
+#: backend/api/query_packs.py:135
 #, python-format
 msgid "The query pack was rejected: %s"
 msgstr "查询包被拒绝: %s"
 
-#: backend/api/query_packs.py:151 backend/api/query_packs.py:186
-#: backend/api/query_packs.py:208
+#: backend/api/query_packs.py:160 backend/api/query_packs.py:195
+#: backend/api/query_packs.py:217
 msgid "Invalid query pack ID format"
 msgstr "查询包ID格式无效"
 
-#: backend/api/query_packs.py:153 backend/api/query_packs.py:188
-#: backend/api/query_packs.py:210
+#: backend/api/query_packs.py:162 backend/api/query_packs.py:197
+#: backend/api/query_packs.py:219
 msgid "Query pack not found"
 msgstr "未找到查询包"
 
-#: backend/api/query_packs.py:253
+#: backend/api/query_packs.py:258
 msgid "Invalid ID format in the assignment"
 msgstr "分配中无效的ID格式"
 
-#: backend/api/query_packs.py:276 backend/api/config_mgmt_profiles.py:377
+#: backend/api/query_packs.py:281 backend/api/config_mgmt_profiles.py:377
 msgid "Invalid assignment ID format"
 msgstr "无效的分配ID格式"
 
-#: backend/api/query_packs.py:281 backend/api/config_mgmt_profiles.py:382
+#: backend/api/query_packs.py:286 backend/api/config_mgmt_profiles.py:382
 msgid "Assignment not found"
 msgstr "未找到分配"
 
-#: backend/api/query_packs.py:319
+#: backend/api/query_packs.py:339
+msgid "A live query targets exactly one of hosts, a tag or a site."
+msgstr "一个实时查询精确针对一个主机、一个标签或一个站点。"
+
+#: backend/api/query_packs.py:349 backend/api/config_mgmt_inventories.py:365
+#: backend/api/config_mgmt_profiles.py:350
+msgid "Invalid site ID format"
+msgstr "无效的站点ID格式"
+
+#: backend/api/query_packs.py:355 backend/api/config_mgmt_inventories.py:360
+#: backend/api/config_mgmt_profiles.py:345
+msgid "Invalid tag ID format"
+msgstr "无效的标签ID格式"
+
+#: backend/api/query_packs.py:420
+msgid "Invalid live query ID format"
+msgstr "无效的实时查询ID格式"
+
+#: backend/api/query_packs.py:425
+msgid "Live query not found"
+msgstr "未找到实时查询"
+
+#: backend/api/query_packs.py:457
 msgid "Invalid run ID format"
 msgstr "运行ID格式无效"
 
-#: backend/api/query_packs.py:323
+#: backend/api/query_packs.py:461
 msgid "Query pack run not found"
 msgstr "未找到查询包运行"
 
@@ -2504,16 +2527,6 @@ msgstr "该清单被 %d 作业模板使用"
 #: backend/api/config_mgmt_inventories.py:314
 msgid "Inventory deleted"
 msgstr "清单已删除"
-
-#: backend/api/config_mgmt_inventories.py:360
-#: backend/api/config_mgmt_profiles.py:345
-msgid "Invalid tag ID format"
-msgstr "无效的标签ID格式"
-
-#: backend/api/config_mgmt_inventories.py:365
-#: backend/api/config_mgmt_profiles.py:350
-msgid "Invalid site ID format"
-msgstr "无效的站点ID格式"
 
 #: backend/api/config_mgmt_inventories.py:388
 msgid "Invalid inventory member ID format"

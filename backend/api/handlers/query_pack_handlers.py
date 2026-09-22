@@ -56,6 +56,7 @@ async def handle_query_pack_result(
         return {"status": "ignored"}
 
     svc.record_results(db, run, payload)
+    _advance_live_query(db, run)
     db.commit()
     logger.info(
         "Query pack run %s graded %s (%d ok, %d not covered, %d failed)",
@@ -66,6 +67,37 @@ async def handle_query_pack_result(
         run.queries_failed,
     )
     return {"status": "recorded", "run_status": run.status}
+
+
+def _advance_live_query(db, run) -> None:
+    """Release the next wave of an ad-hoc query as this answer lands.
+
+    Phase 21.1 S5. Driven from the INGEST path rather than a tick because a
+    live query is interactive: waiting up to 60 seconds to release each next
+    host would make a 400-host query take hours no matter how fast the hosts
+    actually answer.
+
+    Never raises. A failure to advance must not lose the result we just
+    recorded -- that measurement cannot be retaken until the operator runs the
+    query again.
+    """
+    if not getattr(run, "live_query_id", None):
+        return
+    try:
+        from backend.services import query_pack_live  # noqa: PLC0415
+
+        live = (
+            db.query(models.QueryPackLiveQuery)
+            .filter(models.QueryPackLiveQuery.id == run.live_query_id)
+            .one_or_none()
+        )
+        if live is not None:
+            query_pack_live.advance(db, live)
+    except Exception:  # pylint: disable=broad-except
+        logger.exception(
+            "Could not advance live query %s; its result was still recorded",
+            scrub(run.live_query_id),
+        )
 
 
 def _find_run(db, run_id):

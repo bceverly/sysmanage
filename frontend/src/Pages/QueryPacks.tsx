@@ -24,7 +24,12 @@ import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+
+import LiveQueryPanel from '../Components/LiveQueryPanel';
+import { doGetHosts, SysManageHost } from '../Services/hosts';
 
 import { formatUTCTimestamp } from '../utils/dateUtils';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
@@ -131,6 +136,11 @@ const QueryPacks: React.FC = () => {
     const [canEdit, setCanEdit] = useState(false);
     const [canDelete, setCanDelete] = useState(false);
 
+    // Live-query host selection. Loaded lazily: the list is only needed once
+    // the operator opens that tab, and it is the one tab that needs it.
+    const [hosts, setHosts] = useState<SysManageHost[]>([]);
+    const [selectedHosts, setSelectedHosts] = useState<string[]>([]);
+
     const load = useCallback(async () => {
         try {
             const [mine, curated, recent] = await Promise.all([
@@ -154,6 +164,18 @@ const QueryPacks: React.FC = () => {
     useEffect(() => {
         load();
     }, [load]);
+
+    useEffect(() => {
+        if (tab !== 3 || hosts.length > 0) return;
+        doGetHosts()
+            .then((all) =>
+                // Only ACTIVE hosts: dispatching to an inactive one buries the
+                // command in a queue that may never drain, while the operator
+                // watches a target that will never answer.
+                setHosts(all.filter((h) => h.active && h.approval_status === 'approved')),
+            )
+            .catch(() => setHosts([]));
+    }, [tab, hosts.length]);
 
     useEffect(() => {
         const check = async () => {
@@ -421,6 +443,7 @@ const QueryPacks: React.FC = () => {
                 <Tab label={t('queryPacks.tabMine', 'My Packs')} />
                 <Tab label={t('queryPacks.tabCatalog', 'Curated Catalog')} />
                 <Tab label={t('queryPacks.tabRuns', 'Recent Runs')} />
+                <Tab label={t('queryPacks.tabLive', 'Live Query')} />
             </Tabs>
 
             {tab === 0 && (
@@ -443,6 +466,36 @@ const QueryPacks: React.FC = () => {
                 <div style={{ height: 480, width: '100%' }}>
                     <DataGrid rows={runs} columns={runColumns} getRowId={(r) => r.id} />
                 </div>
+            )}
+
+            {tab === 3 && (
+                <Box>
+                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                        {t('queryPacks.selectHosts', 'Hosts to query')}
+                    </Typography>
+                    <Box sx={{ maxHeight: 200, overflowY: 'auto', mb: 1 }}>
+                        {hosts.map((h) => (
+                            <FormControlLabel
+                                key={h.id}
+                                control={
+                                    <Checkbox
+                                        size="small"
+                                        checked={selectedHosts.includes(h.id)}
+                                        onChange={(e) =>
+                                            setSelectedHosts((prev) =>
+                                                e.target.checked
+                                                    ? [...prev, h.id]
+                                                    : prev.filter((x) => x !== h.id),
+                                            )
+                                        }
+                                    />
+                                }
+                                label={`${h.fqdn} (${h.platform ?? '?'})`}
+                            />
+                        ))}
+                    </Box>
+                    <LiveQueryPanel hostIds={selectedHosts} />
+                </Box>
             )}
 
             <Dialog

@@ -57,6 +57,13 @@ DYNAMIC_KEY_PREFIXES = (
     # carries the distinction the whole phase exists for -- a host that could
     # not answer is not a host that answered "nothing".
     "queryPacks.runStatus.",
+    # Phase 21.1 S5 — the live-query chips use
+    # t(`queryPacks.liveStatus.${live.status}`) and
+    # t(`queryPacks.targetStatus.${target.status}`). Same reason as
+    # runStatus above: dynamic keys are invisible to the scanner, and
+    # stripping them would delete live translations.
+    "queryPacks.liveStatus.",
+    "queryPacks.targetStatus.",
     "scripts.status.",
     "secrets.api_provider.",
     "secrets.certificate_type.",
