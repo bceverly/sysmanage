@@ -9273,7 +9273,7 @@ them, and that gap decides how much S2 must cover there. Needs a
 
       3 engines rebuilt and version-bumped; 49 fleet + 24 vuln + 11 compliance
       engine tests, 12 vuln-card + 7 fleet-card front-end tests.
-- [ ] **S7 — Extend golden-host drift to arbitrary file / config state**, the
+- [x] **S7 — Extend golden-host drift to arbitrary file / config state**, the
       fourth box above. This EXTENDS the 20.2 differ with new fact sources; it
       does not rebuild it.
       **PARTIAL 2026-09-22 — substrate + comparison done, management plane not.**
@@ -9410,8 +9410,63 @@ them, and that gap decides how much S2 must cover there. Needs a
       NOT be asked, because a fleet where everything answers would document
       the feature without showing the thing it exists for.
 
-      **STILL TO DO:** ``make translate`` for 79 docs keys x 13 locales, and
-      a screenshot capture run to produce the two new PNGs.
+      **Two screenshot defects worth recording, because both reported
+      success.** The shots were first tagged ``tier: "professional"`` where the
+      pipeline spells it ``pro``; they matched no run, were filtered out before
+      anything was attempted, and the capture printed *"21/21 captured, 0
+      failed"* while silently omitting both. Then ``query-packs.png`` was taken
+      mid-spinner -- the page fans out three requests on mount, one of which
+      reads the SHARED partition on its own connection -- and the run again
+      reported a tick on an image documenting nothing. ``capture.mjs`` now
+      rejects an unknown tier at startup and refuses to save a page that is
+      still loading (a visible spinner AND almost no text, so a button spinner
+      or an empty state does not false-positive). A per-shot ``settleMs``
+      override avoids slowing all 113 shots for one page.
+
+      The live-query shot was wrong in KIND rather than timing:
+      ``LiveQueryPanel`` holds a single client-side state set only when an
+      operator launches a query in that session, so a seeded row is unreachable
+      from the UI and no settle time could ever have produced it. Replaced with
+      **Recent Runs**, which is the better picture anyway -- *Not covered* is
+      its own column beside *Failed*, which is the distinction the slice exists
+      for. The unreachable fixture row was removed rather than left seeding
+      something no screen renders.
+
+      **i18n, hand-written.** 80 keys x 13 locales. The GPU service stalled
+      partway through repeatedly, so the remainder was translated by hand
+      against the glossary's canonical renderings rather than re-run; all four
+      docs gates (``i18n-validate``, ``i18n-markup``, ``i18n-strict``,
+      ``translate-check``) are green.
+
+      Doing it by hand surfaced two defect classes that every gate had passed.
+      **Reply envelopes as values:** 17 values across de/ja/nl held the literal
+      text ``{'original': ..., 'translated': ...}`` -- not a gap, not
+      ``[TODO]``, not English-identical, and carrying the markup of their
+      source, so nothing downstream had a reason to look.
+      ``translate_i18n._unwrap_envelope`` now unwraps what it can and REFUSES
+      the rest (a refused string stays a visible gap rather than becoming prose
+      no reader can use), mirrored into all three client copies, and
+      ``i18n_strict.is_envelope`` gates it in the same bucket as a leaked
+      placeholder. **Translated identifiers:** 55 values had the CONTENTS of
+      ``<code>`` elements translated -- ``mounts`` is a real osquery table
+      name and ``not_assessable`` a literal API value, so a reader following
+      the docs would look for things that do not exist. Restored positionally
+      from English.
+
+      Three meaning-level errors no mechanical check can reach were also
+      fixed: the Japanese ``coverage.screenshot`` asserted the exact OPPOSITE
+      of its source (that the Windows host grades *success* rather than
+      *partial* -- inverting the one point the shot exists to make), an
+      Italian batch landed eight values off-by-one against their keys, and two
+      ``<strong>`` spans in Japanese bolded the wrong half of the sentence.
+
+      One blind spot is left DELIBERATELY unfixed and is not mine to close
+      here: two allow-list value rules meant for short label-and-number pairs
+      (``i18n-allow.txt`` lines 49 and 178) fullmatch any prose whose tail
+      happens to be word characters, so ~30 site-wide keys may legitimately
+      stay English in every locale. Tightening the regex is a one-line change
+      that immediately fails ``i18n-strict`` on ~400 pre-existing values, so it
+      wants its own slice rather than riding along with this one.
 
 Cross-cutting: i18n/l10n per slice (the glossary now carries the vocabulary —
 query pack, signature, asset, advisor); docs page + screenshots in the same
