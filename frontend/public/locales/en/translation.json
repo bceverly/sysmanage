@@ -387,8 +387,11 @@
     "version": "Version"
   },
   "baselineDiff": {
+    "blindSpotCount": "{{count}} not compared",
+    "blindSpotsHelp": "These were not compared, because at least one host did not measure them. They are neither differences nor matches.",
     "category": {
       "certificates": "Certificates",
+      "files": "Watched files",
       "firewall": "Firewall",
       "groups": "Groups",
       "interfaces": "Network interfaces",
@@ -412,8 +415,21 @@
     "missingTitle": "On the reference, not on this host",
     "name": "Name",
     "noOtherHosts": "There is no other host to compare against yet.",
+    "notComparable": "Not compared",
+    "reason": {
+      "insufficientPrivilege": "The agent does not have permission to read this.",
+      "noWatchList": "Neither host has a file watch list assigned, so there is nothing to compare.",
+      "notWatched": "Not on this host’s watch list.",
+      "providerFailed": "The agent could not read this on its last attempt.",
+      "tooLarge": "Too large to hash, so it was not compared.",
+      "unknown": "This agent has not reported whether it can provide this. It may need upgrading.",
+      "unreadable": "The agent could not read this file.",
+      "wrongPlatform": "This operating system does not have this category."
+    },
+    "reasonColumn": "Reason",
     "reference": "Reference",
     "referenceHost": "Reference host",
+    "side": "Host",
     "summary": "{{count}} difference(s) from {{reference}}.",
     "thisHost": "This host",
     "title": "Compare to a reference host",
@@ -534,6 +550,7 @@
     "repairWith": "Repair with {{profile}}",
     "seenSince": "First seen",
     "tabDrift": "Drifting hosts",
+    "tabFileWatches": "Watched files",
     "tabPlaybooks": "Remediation playbooks",
     "title": "Configuration Drift",
     "view": "View"
@@ -968,6 +985,25 @@
       "description": "A subordinate server that runs autonomously and reports up to a coordinator. It keeps managing its own hosts even when the coordinator is unreachable, replaying queued data on reconnect.",
       "title": "Federation Site"
     }
+  },
+  "fileWatch": {
+    "add": "New list",
+    "cancel": "Cancel",
+    "contentNotice": "Only a checksum and file permissions are collected — never the contents. It is therefore safe to watch secrets, though drift will report that a file changed rather than what changed inside it.",
+    "delete": "Delete list",
+    "deleteError": "Could not delete the list",
+    "disabled": "Disabled",
+    "empty": "No file watch lists yet.",
+    "enabled": "Enabled",
+    "loadError": "Could not load file watch lists",
+    "name": "Name",
+    "pathCount": "Paths",
+    "paths": "Paths, one per line",
+    "pathsHelp": "Absolute paths only. A relative path resolves differently on each host, so the same list would watch different files.",
+    "save": "Save",
+    "saveError": "Could not save the list",
+    "status": "Status",
+    "title": "File watch lists"
   },
   "firewallRoles": {
     "addPort": "Add Port",

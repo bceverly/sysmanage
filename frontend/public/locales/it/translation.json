@@ -395,7 +395,8 @@
       "packages": "Pacchetti",
       "repositories": "Repositori",
       "storage": "Archiviazione",
-      "users": "Utenti"
+      "users": "Utenti",
+      "files": "File controllati"
     },
     "categoryMatches": "Questa categoria corrisponde all'host di riferimento.",
     "compare": "Confronta",
@@ -417,7 +418,22 @@
     "summary": "{{count}} differenza(i) da {{reference}}.",
     "thisHost": "Questo host",
     "title": "Confronta con un host di riferimento",
-    "truncated": "Vengono elencati solo i primi elementi; i conteggi sopra riportati sono esatti."
+    "truncated": "Vengono elencati solo i primi elementi; i conteggi sopra riportati sono esatti.",
+    "blindSpotCount": "{{count}} non confrontato",
+    "blindSpotsHelp": "Non sono stati confrontati, perché almeno un host non li ha misurati. Sono né differenze né corrispondenze.",
+    "notComparable": "Non confrontato",
+    "reason": {
+      "insufficientPrivilege": "L'agente non ha il permesso di leggere questo.",
+      "noWatchList": "Nessun host ha una lista di controllo dei file assegnata, quindi non c'è nulla da confrontare.",
+      "notWatched": "Non nella lista di controllo di questo host.",
+      "providerFailed": "L'agente non è stato in grado di leggere questo nel suo ultimo tentativo.",
+      "tooLarge": "Troppo grande per l'hashing, quindi non è stato confrontato.",
+      "unknown": "Questo agente non ha segnalato se può fornire questo. Potrebbe aver bisogno di un aggiornamento.",
+      "unreadable": "L'agente non è in grado di leggere questo file.",
+      "wrongPlatform": "Questo sistema operativo non ha questa categoria."
+    },
+    "reasonColumn": "Motivo",
+    "side": "Host"
   },
   "broadcast": {
     "confirm": "Inviare un broadcast di aggiornamento inventario a tutti gli agenti connessi?",
@@ -536,7 +552,8 @@
     "tabDrift": "Host in deriva",
     "tabPlaybooks": "Playbook di rimedio",
     "title": "Drift di configurazione",
-    "view": "Visualizza"
+    "view": "Visualizza",
+    "tabFileWatches": "File controllati"
   },
   "configFleet": {
     "allHosts": "Tutti gli host",
@@ -3708,5 +3725,24 @@
     "status": "Stato",
     "unlockSelected": "Sblocca selezionati",
     "unlocked": "Sbloccato"
+  },
+  "fileWatch": {
+    "add": "Nuova lista",
+    "cancel": "Annulla",
+    "contentNotice": "Vengono raccolti solo un checksum e i permessi del file — mai il contenuto. È quindi sicuro controllare i segreti, anche se la deriva segnalerà che un file è cambiato piuttosto che cosa sia cambiato al suo interno.",
+    "delete": "Elimina lista",
+    "deleteError": "Impossibile eliminare la lista",
+    "disabled": "Disabilitato",
+    "empty": "Ancora nessuna lista di controllo dei file.",
+    "enabled": "Abilitato",
+    "loadError": "Impossibile caricare le liste di controllo dei file",
+    "name": "Nome",
+    "pathCount": "Percorsi",
+    "paths": "Percorsi, uno per riga",
+    "pathsHelp": "Percorsi assoluti solo. Un percorso relativo risolve in modo diverso su ogni host, quindi la stessa lista controlla file diversi.",
+    "save": "Salva",
+    "saveError": "Impossibile salvare la lista",
+    "status": "Stato",
+    "title": "Liste di controllo dei file"
   }
 }

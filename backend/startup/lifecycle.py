@@ -481,6 +481,21 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                             "Failed to start query pack tick task: %s", tick_e
                         )
 
+                # File-watch collection tick (Phase 21.1 S7). Gated like the
+                # ticks around it -- run_one_tick() re-checks the same module.
+                if module_loader.get_module("config_management_engine"):
+                    try:
+                        from backend.services.file_watch_tick import (
+                            file_watch_tick_service,
+                        )
+
+                        asyncio.create_task(file_watch_tick_service())
+                        logger.info("File watch tick task started")
+                    except Exception as tick_e:  # pylint: disable=broad-except
+                        # Never fatal: a scheduler that will not start must
+                        # not take the whole server with it.
+                        logger.warning("File watch tick did not start: %s", tick_e)
+
                 # Start the config-profile assignment tick if the config
                 # management engine is loaded.  Same gate as the air-gap tick
                 # below and for the same reason: assignments cannot exist

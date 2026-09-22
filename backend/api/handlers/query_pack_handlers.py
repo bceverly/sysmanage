@@ -27,6 +27,7 @@ import logging
 from typing import Any, Dict, Optional
 
 from backend.persistence import models
+from backend.services import file_watch_service as fws
 from backend.services import query_pack_service as svc
 from backend.utils.log_sanitize import scrub
 
@@ -57,6 +58,7 @@ async def handle_query_pack_result(
 
     svc.record_results(db, run, payload)
     _advance_live_query(db, run)
+    _ingest_file_watch(db, run, payload)
     db.commit()
     logger.info(
         "Query pack run %s graded %s (%d ok, %d not covered, %d failed)",
@@ -67,6 +69,54 @@ async def handle_query_pack_result(
         run.queries_failed,
     )
     return {"status": "recorded", "run_status": run.status}
+
+
+def _ingest_file_watch(db, run, payload) -> None:
+    """Project a file-watch run's rows into ``host_file_state``.
+
+    Phase 21.1 S7. A file watch is dispatched AS a one-query pack, so its
+    results have already landed in ``query_pack_result_row`` like any other
+    pack's. They are ALSO upserted into ``host_file_state``, which is what the
+    golden-host differ reads: the result rows are an append-only history of
+    runs, while the differ needs "the current state of every watched path on
+    this host" -- a different question, and one that would otherwise be a
+    correlated subquery per path over the whole run history.
+
+    Never raises. A projection failure must not lose the measurements just
+    recorded; they cannot be retaken until the next interval.
+    """
+    results = [
+        r
+        for r in (payload or {}).get("results") or []
+        if r.get("name") == fws.WATCH_QUERY_NAME
+    ]
+    if not results:
+        return
+    try:
+        for result in results:
+            if result.get("status") != models.QUERY_STATUS_OK:
+                # The host was ASKED and could not answer. Ingesting an empty
+                # row set here would delete every path we hold for it and
+                # silently erase the baseline the differ compares against.
+                logger.warning(
+                    "File watch for host %s returned %s (%s); keeping the "
+                    "previously recorded state rather than clearing it",
+                    run.host_id,
+                    result.get("status"),
+                    result.get("reason") or result.get("error"),
+                )
+                continue
+            count = fws.ingest_rows(db, run.host_id, result.get("rows") or [])
+            logger.info(
+                "File watch recorded %d watched path(s) for host %s",
+                count,
+                run.host_id,
+            )
+    except Exception:  # pylint: disable=broad-except
+        logger.exception(
+            "Failed to project file watch results for run %s into host_file_state",
+            run.id,
+        )
 
 
 def _advance_live_query(db, run) -> None:

@@ -34,7 +34,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from backend.i18n import _
 from backend.persistence import models
-from backend.services import host_facts
+from backend.services import config_mgmt_files, host_facts
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +62,14 @@ _CATEGORY_FACT_TABLE: Dict[str, str] = {
     "certificates": "certificates",
 }
 
+# Categories added AFTER 21.1 S1, for which "the agent never advertised this
+# table" means "cannot compare" rather than "proceed as before". Keyed
+# separately from _CATEGORY_FACT_TABLE so the two gates cannot be confused --
+# see comparability().
+_SERVES_REQUIRED: Dict[str, str] = {
+    "files": "sysmanage_file_state",
+}
+
 _CATEGORIES: Dict[str, Tuple[Any, str, Tuple[str, ...]]] = {
     "packages": (models.SoftwarePackage, "package_name", ("package_version",)),
     "repositories": (models.ThirdPartyRepository, "name", ("url", "enabled")),
@@ -73,7 +81,19 @@ _CATEGORIES: Dict[str, Tuple[Any, str, Tuple[str, ...]]] = {
     "firewall": (models.FirewallStatus, "firewall_name", ("enabled",)),
 }
 
-CATEGORIES: Tuple[str, ...] = tuple(sorted(_CATEGORIES))
+# Categories that cannot use the generic identity -> fields comparison because
+# a row there records an OUTCOME, not just a value. They are real categories
+# everywhere else -- selectable, validated, reported -- and only the comparison
+# step diverges. Kept as a mapping rather than an ``if`` in compare_category so
+# that "every public category has an implementation" is a checkable property
+# and not a thing to remember.
+_SPECIAL_COMPARATORS = {
+    "files": config_mgmt_files.compare_files,
+}
+
+CATEGORIES: Tuple[str, ...] = tuple(
+    sorted(tuple(_CATEGORIES) + tuple(_SPECIAL_COMPARATORS))
+)
 
 # Comparing every package on two full workstations produces thousands of rows
 # that no operator reads. The counts stay exact; the per-item lists are capped
@@ -158,7 +178,28 @@ def comparability(reference_host, target_host, category: str) -> Optional[Dict]:
     The TARGET is checked first: it is the host the operator is trying to fix,
     so "your host cannot report this" is the more useful answer when neither
     can.
+
+    TWO DIFFERENT GATES, AND THE DIFFERENCE MATTERS
+    -----------------------------------------------
+    The 20.2 categories use ``host_facts.explain``, which lets UNKNOWN through:
+    they worked before 21.1 and must keep working against agents that have not
+    upgraded, so only a POSITIVE denial stops them.
+
+    ``files`` is new in S7 and has no such legacy to protect. An agent that
+    never advertised ``sysmanage_file_state`` has no file rows, and the
+    permissive gate would let the comparison run, find zero against zero, and
+    report the hosts identical -- a clean bill of health from a feature that
+    has never executed. It therefore requires a POSITIVE advertisement, via
+    ``host_facts.serves``. See that function's docstring.
     """
+    if category in _SERVES_REQUIRED:
+        table = _SERVES_REQUIRED[category]
+        for side, host in (("target", target_host), ("reference", reference_host)):
+            reason = host_facts.why_not_served(host, table)
+            if reason is not None:
+                return _not_comparable(category, side, reason)
+        return None
+
     table = _CATEGORY_FACT_TABLE.get(category)
     if table is None:
         return None
@@ -182,6 +223,10 @@ def compare_category(db_session, category: str, reference_host_id, host_id) -> D
     is trying to fix: "missing" is what it needs, "extra" is what it has that
     the reference does not.
     """
+    special = _SPECIAL_COMPARATORS.get(category)
+    if special is not None:
+        return special(db_session, reference_host_id, host_id)
+
     model, identity, compared = _CATEGORIES[category]
     ref_rows = _rows_by_identity(db_session, model, identity, reference_host_id)
     tgt_rows = _rows_by_identity(db_session, model, identity, host_id)
@@ -233,7 +278,7 @@ def resolve_categories(requested: Optional[Iterable[str]]) -> List[str]:
     if not requested:
         return list(CATEGORIES)
     wanted = [str(name).strip().lower() for name in requested if str(name).strip()]
-    unknown = [name for name in wanted if name not in _CATEGORIES]
+    unknown = [name for name in wanted if name not in CATEGORIES]
     if unknown:
         # Literal msgid: gettext keys on the English text, so the message has
         # to be a literal here rather than assembled at the raise site.

@@ -30,6 +30,7 @@ import { doGetHosts } from '../Services/hosts';
 import {
     BaselineCategoryResult,
     BaselineDiff,
+    BaselineNotComparable,
     getBaselineCategories,
     getBaselineDiff,
 } from '../Services/configManagementService';
@@ -160,14 +161,105 @@ const BaselineDiffPanel: React.FC<BaselineDiffPanelProps> = ({ hostId, hosts }) 
                 return t('baselineDiff.category.certificates', 'Certificates');
             case 'firewall':
                 return t('baselineDiff.category.firewall', 'Firewall');
+            case 'files':
+                return t('baselineDiff.category.files', 'Watched files');
             default:
                 return name;
         }
     };
 
+    /**
+     * Why a category was skipped, in the agent's own words where we have them.
+     *
+     * The reason CODE is what the server sends, because the server owns
+     * translation and 'wrong_platform' and 'insufficient_privilege' send an
+     * operator to completely different places. An unrecognised code degrades
+     * to itself rather than to a generic 'unavailable', which would send them
+     * to neither.
+     */
+    const notComparableReason = (nc: BaselineNotComparable): string => {
+        switch (nc.reason) {
+            case 'wrong_platform':
+                return t(
+                    'baselineDiff.reason.wrongPlatform',
+                    'This operating system does not have this category.',
+                );
+            case 'insufficient_privilege':
+                return t(
+                    'baselineDiff.reason.insufficientPrivilege',
+                    'The agent does not have permission to read this.',
+                );
+            case 'provider_failed':
+                return t(
+                    'baselineDiff.reason.providerFailed',
+                    'The agent could not read this on its last attempt.',
+                );
+            case 'no_watch_list':
+                return t(
+                    'baselineDiff.reason.noWatchList',
+                    'Neither host has a file watch list assigned, so there is nothing to compare.',
+                );
+            case 'unknown':
+                return t(
+                    'baselineDiff.reason.unknown',
+                    'This agent has not reported whether it can provide this. It may need upgrading.',
+                );
+            case 'not_watched':
+                return t(
+                    'baselineDiff.reason.notWatched',
+                    'Not on this host\u2019s watch list.',
+                );
+            case 'unreadable':
+                return t(
+                    'baselineDiff.reason.unreadable',
+                    'The agent could not read this file.',
+                );
+            case 'too_large':
+                return t(
+                    'baselineDiff.reason.tooLarge',
+                    'Too large to hash, so it was not compared.',
+                );
+            default:
+                return nc.reason;
+        }
+    };
+
     const renderCategory = (name: string, result: BaselineCategoryResult) => {
         const { missing, extra, different, counts, truncated } = result;
+        const blindSpots = result.blind_spots ?? [];
+        const blindCount = counts.blind_spots ?? blindSpots.length;
         const total = counts.missing + counts.extra + counts.different;
+
+        // A category the server REFUSED to compare must never render as a
+        // match. Before this branch existed, `comparable: false` arrived with
+        // all-zero counts and fell straight into the green "Matches" chip
+        // below — so a Windows host compared against a Linux one reported
+        // that its mounts matched, having never compared them.
+        if (result.comparable === false && result.not_comparable) {
+            return (
+                <Accordion key={name} disableGutters>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <Stack direction="row" spacing={1} alignItems="center" sx={{ width: '100%' }}>
+                            <Typography sx={{ flexGrow: 1, textTransform: 'capitalize' }}>
+                                {categoryLabel(name)}
+                            </Typography>
+                            <Chip
+                                size="small"
+                                color="default"
+                                variant="outlined"
+                                label={t('baselineDiff.notComparable', 'Not compared')}
+                            />
+                        </Stack>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Alert severity="info">
+                            {notComparableReason(result.not_comparable)}
+                        </Alert>
+                    </AccordionDetails>
+                </Accordion>
+            );
+        }
+
         return (
             <Accordion key={name} disableGutters>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -175,13 +267,24 @@ const BaselineDiffPanel: React.FC<BaselineDiffPanelProps> = ({ hostId, hosts }) 
                         <Typography sx={{ flexGrow: 1, textTransform: 'capitalize' }}>
                             {categoryLabel(name)}
                         </Typography>
-                        {total === 0 ? (
+                        {blindCount > 0 && (
+                            <Chip
+                                size="small"
+                                color="warning"
+                                variant="outlined"
+                                label={t('baselineDiff.blindSpotCount', {
+                                    defaultValue: '{{count}} not compared',
+                                    count: blindCount,
+                                })}
+                            />
+                        )}
+                        {total === 0 && blindCount === 0 ? (
                             <Chip
                                 size="small"
                                 color="success"
                                 label={t('baselineDiff.matches', 'Matches')}
                             />
-                        ) : (
+                        ) : total === 0 ? null : (
                             <>
                                 {counts.missing > 0 && (
                                     <Chip
@@ -225,6 +328,47 @@ const BaselineDiffPanel: React.FC<BaselineDiffPanelProps> = ({ hostId, hosts }) 
                                 'Only the first entries are listed; the counts above are exact.',
                             )}
                         </Alert>
+                    )}
+                    {blindSpots.length > 0 && (
+                        <>
+                            {/* Listed FIRST and outside the difference tables:
+                                these are not drift. An operator reading "no
+                                differences" is entitled to know how much of
+                                the watch list that verdict actually covers. */}
+                            <Alert severity="warning" sx={{ mb: 2 }}>
+                                {t(
+                                    'baselineDiff.blindSpotsHelp',
+                                    'These were not compared, because at least one host did not measure them. They are neither differences nor matches.',
+                                )}
+                            </Alert>
+                            <Table size="small" sx={{ mb: 2 }}>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>{t('baselineDiff.name', 'Name')}</TableCell>
+                                        <TableCell>{t('baselineDiff.side', 'Host')}</TableCell>
+                                        <TableCell>{t('baselineDiff.reasonColumn', 'Reason')}</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {blindSpots.map((spot) => (
+                                        <TableRow key={`${spot.name}-${spot.side}`}>
+                                            <TableCell>{spot.name}</TableCell>
+                                            <TableCell>
+                                                {spot.side === 'reference'
+                                                    ? t('baselineDiff.reference', 'Reference')
+                                                    : t('baselineDiff.thisHost', 'This host')}
+                                            </TableCell>
+                                            <TableCell>
+                                                {notComparableReason({
+                                                    side: spot.side,
+                                                    reason: spot.reason,
+                                                })}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </>
                     )}
                     {different.length > 0 && (
                         <>

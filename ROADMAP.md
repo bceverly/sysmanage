@@ -9276,6 +9276,142 @@ them, and that gap decides how much S2 must cover there. Needs a
 - [ ] **S7 — Extend golden-host drift to arbitrary file / config state**, the
       fourth box above. This EXTENDS the 20.2 differ with new fact sources; it
       does not rebuild it.
+      **PARTIAL 2026-09-22 — substrate + comparison done, management plane not.**
+
+      **Hash and metadata only; no file CONTENT is collected, stored or
+      returned, anywhere.** That is what lets an operator watch /etc/shadow, a
+      private key or a licence file without those bytes entering the server
+      database, its API responses, its backups or its logs. The cost was
+      accepted knowingly: drift reports THAT a file changed, not WHAT changed
+      inside it.
+
+      **A second, stricter coverage predicate — `host_facts.serves`.** S6's
+      rule is "UNKNOWN means proceed as before", which is right for consumers
+      that EXISTED before 21.1: reading "never advertised" as "cannot answer"
+      would switch them off for an entire estate on upgrade day. A category
+      added *now* has no such legacy, and the permissive reading inverts into
+      the defect the phase exists to prevent — comparing a table two hosts
+      never advertised finds zero rows on each side and reports them
+      IDENTICAL, a clean verdict from a feature that has never once run.
+      `serves` requires a positive advertisement; `answerable` still lets
+      unknown through, so the 20.2 categories are untouched. Both are tested
+      against the same host to keep the distinction from eroding.
+
+      **The contract is at v2 and the new table is deliberately NOT osquery's
+      `file`/`hash` pair.** osquery returns no row for a path that does not
+      exist, no row for one it could not read, and no row for one nobody asked
+      about — three different facts, one identical observation, fed straight
+      into a differ. `sysmanage_file_state` emits ONE ROW PER WATCHED PATH
+      carrying an explicit state: `present`, `absent`, `unreadable`,
+      `not_a_file`, `too_large`. Five states because they are five different
+      operator actions; `unreadable` is the one that matters most, since an
+      agent that loses permission would otherwise report a file as stable
+      forever. Nothing downstream infers meaning from a row's absence.
+
+      **`sysmanage_file_state` is the first PARAMETERIZED contract table.**
+      Every other table answers "what is true here"; a watch list answers
+      "what is true about THESE paths", and the paths are policy the server
+      holds. They travel with the dispatch through a new `table_params`
+      channel on `collect()` and `run_pack()`.
+
+      **Dispatched as a one-query pack**, exactly the trick S5 used for live
+      queries: no new agent command, and the result envelope, correlation and
+      grading are the ones S4 proved in production. Platform filtering happens
+      SERVER-side — a path declared for linux sent to a Windows host comes
+      back `absent`, and absent means "should be here and is not", so a
+      curated list naming /etc/ssh/sshd_config would show every Windows box as
+      having deleted it.
+
+      **The differ needed its own comparator, because a file row records an
+      OUTCOME, not just a value.** The generic identity->fields comparison
+      produces confident nonsense here: an unreadable file has a null sha256,
+      which reads as "different" against a real hash (a divergence invented
+      from a permission error) and as "identical" against another unreadable
+      host (two hosts agreeing because neither could look). A path watched on
+      only one side would read as a deletion. So every pair lands in drift,
+      agreement, or a third bucket no other category needs — `blind_spots`,
+      counted separately so they cannot inflate a drift report.
+
+      **The empty-watch-list trap, closed explicitly.** Two hosts with no list
+      assigned have zero rows each, and every set-difference over two empty
+      sets is empty — the category would announce that two hosts match having
+      compared nothing at all. A fabricated all-clear arriving through code
+      working exactly as written.
+
+      Proven end to end against real files: content drift on sshd_config,
+      PERMISSION drift on sudoers with byte-identical content, a deleted motd,
+      and /etc/shadow as a blind spot rather than fake drift.
+
+      Two migrations, one per chain, each a single linear head
+      (`q4filewatch`, `s12filewatch`). 61 new tests; agent suite 4,831 green
+      on the contract bump; server suite 7,885 green; 10.00/10 both repos.
+
+      **The management plane, completed 2026-09-22.** A collection tick that
+      mirrors the query-pack one rather than inventing a second scheduling
+      model (derived due-ness, per-tick bound, per-database isolation, same
+      licence gate as the differ it feeds). Two dispatch refusals matter,
+      because each would silently destroy the baseline: a host with NO PATHS
+      is skipped, since an empty watch list returns a clean success with zero
+      rows and ingestion would then delete every path recorded for it; and a
+      host that does not ADVERTISE the table is skipped, since an agent too
+      old for the contract answers with an error and the run grades as a
+      failure, which reads as "this host is broken" rather than "not equipped
+      yet". Ingestion likewise refuses to clear recorded state when a run came
+      back not-covered: the host was asked and could not answer, which is not
+      the same as answering "nothing".
+
+      REST API (10 routes) gated like the differ, with watch lists refused at
+      AUTHORING time rather than dropped at collection time -- a relative path
+      resolves against the agent's working directory and so watches a
+      different file on every host, and a path an operator believes is watched
+      produces a comparison that looks complete and is not.
+
+      **A LIVE S6 DEFECT, found while wiring the UI.** S6 made the server
+      return ``comparable: false`` for a category a host cannot report, but
+      nothing in the frontend ever read it -- the panel looked only at the
+      counts, which are all zero, and rendered the green **"Matches"** chip.
+      So a Windows host compared against a Linux one displayed *"mounts:
+      Matches"*, having never compared them. The server had been right since
+      S6 and the screen had been wrong the whole time. Fixed, with the
+      agent's own reason code translated rather than flattened into a generic
+      "unavailable" -- ``wrong_platform`` and ``insufficient_privilege`` send
+      an operator to completely different places.
+
+      The same rule now applies to blind spots: a category with zero
+      differences but unmeasured paths is NOT a match, and the chip says how
+      many were not compared.
+
+      ``baselineDiff.reason`` was nearly shipped as both a leaf (a column
+      header) and a namespace (the eight explanations) -- the exact collision
+      that flattened ``queryPacks.status`` and destroyed four labels across
+      fourteen locales in S4. Caught before seeding; the leaf is
+      ``reasonColumn``.
+
+      Glossary gained ``blind spot`` and ``watch list``, canonical in 13
+      languages, with *error*, *defect* and *fault* forbidden for the former
+      -- a blind spot is the ABSENCE of a finding, not a finding about the
+      thing, and every one of those renderings inverts it.
+
+      103 tests for the slice; server suite 7,929 green, frontend 1,796 green.
+      Both migrations applied (tenant ``q4filewatch``, shared
+      ``s12filewatch``); i18n complete in all 14 locales, with the glossary's
+      renderings confirmed in the output rather than assumed.
+
+      **Docs, 2026-09-22.** A new ``query-packs.html`` covering S3-S5 (the
+      substrate, why it is served natively where osquery has no port, the
+      four-valued coverage advertisement, packs as multi-tenant policy, live
+      queries, and what each consuming engine does with a host that cannot
+      answer), and a Watched files section on ``configuration-drift.html``
+      covering S7. The drift page's closing claim that arbitrary file state
+      "arrives with the osquery substrate" was stale the moment S7 landed and
+      has been corrected. A ``seed_facts.py`` seeder plus two shotlist entries
+      so both screenshots are reproducible through ``make screenshots`` rather
+      than hand-captured; the fixture deliberately contains hosts that could
+      NOT be asked, because a fleet where everything answers would document
+      the feature without showing the thing it exists for.
+
+      **STILL TO DO:** ``make translate`` for 79 docs keys x 13 locales, and
+      a screenshot capture run to produce the two new PNGs.
 
 Cross-cutting: i18n/l10n per slice (the glossary now carries the vocabulary —
 query pack, signature, asset, advisor); docs page + screenshots in the same
@@ -9284,10 +9420,10 @@ because push-green CI never covers the BSDs.
 
 
 
-- [ ] Agent embeds + lifecycle-manages `osqueryd`; results flow up the existing
+- [x] Agent embeds + lifecycle-manages `osqueryd`; results flow up the existing
       store-and-forward queue (opt-in; air-gap-clean, no phone-home) —
       **Community Edition** (better inventory drives adoption funnel)
-- [ ] Curated, versioned **query packs** distributed as multi-tenant policy
+- [x] Curated, versioned **query packs** distributed as multi-tenant policy
       (per host/tag/site); scheduled collection + ad-hoc fleet-wide live query —
       **Professional** (this management plane is the value). **MT storage (same
       rule as 14.1):** shipped/curated pack *definitions* are global reference data
@@ -9295,7 +9431,7 @@ because push-green CI never covers the BSDs.
       tenant-authored packs are `tenant` partition. "Distributed as multi-tenant
       policy" = one shared catalog + per-tenant assignment, **not** per-tenant
       copies of the curated packs.
-- [ ] Wire osquery tables into the consuming engines — `compliance_engine` (CIS),
+- [x] Wire osquery tables into the consuming engines — `compliance_engine` (CIS),
       `vuln_engine` (installed packages / listening ports), `fleet_engine`, and the
       **20.2** drift baselines — each following its own tier (**Professional /
       Enterprise**)

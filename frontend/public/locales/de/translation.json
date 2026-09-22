@@ -395,7 +395,8 @@
       "packages": "Pakete",
       "repositories": "Repositorys",
       "storage": "Speicher",
-      "users": "Benutzer"
+      "users": "Benutzer",
+      "files": "Überwachte Dateien"
     },
     "categoryMatches": "Diese Kategorie stimmt mit dem Referenz-Host überein.",
     "compare": "Vergleichen",
@@ -417,7 +418,22 @@
     "summary": "{{count}} Unterschied(e) von {{reference}}.",
     "thisHost": "Dieser Host",
     "title": "Mit Referenz-Host vergleichen",
-    "truncated": "Nur die ersten Einträge werden aufgelistet; die obigen Zählungen sind exakt."
+    "truncated": "Nur die ersten Einträge werden aufgelistet; die obigen Zählungen sind exakt.",
+    "blindSpotCount": "{{count}} wurde nicht verglichen",
+    "blindSpotsHelp": "Diese wurden nicht verglichen, weil mindestens ein Host sie nicht gemessen hat. Sie sind weder Unterschiede noch Übereinstimmungen.",
+    "notComparable": "Nicht verglichen",
+    "reason": {
+      "insufficientPrivilege": "Der Agent hat keine Berechtigung, diese zu lesen.",
+      "noWatchList": "Kein Host hat eine Dateiüberwachungsliste zugewiesen, sodass nichts verglichen werden kann.",
+      "notWatched": "Nicht in dieser Host-Überwachungsliste enthalten.",
+      "providerFailed": "Der Agent konnte dies auf seinem letzten Versuch nicht lesen.",
+      "tooLarge": "Zu groß zum Hashen, daher nicht verglichen.",
+      "unknown": "Dieser Agent hat nicht berichtet, ob er dies bereitstellen kann. Er könnte eine Aktualisierung benötigen.",
+      "unreadable": "Der Agent konnte diese Datei nicht lesen.",
+      "wrongPlatform": "Dieses Betriebssystem verfügt über keine solche Kategorie."
+    },
+    "reasonColumn": "Grund",
+    "side": "Host"
   },
   "broadcast": {
     "confirm": "Inventar-Aktualisierungs-Broadcast an alle verbundenen Agenten senden?",
@@ -536,7 +552,8 @@
     "tabDrift": "Schwankende Hosts",
     "tabPlaybooks": "Sanierungs-Playbooks",
     "title": "Konfiguration driften",
-    "view": "Anzeigen"
+    "view": "Anzeigen",
+    "tabFileWatches": "Überwachte Dateien"
   },
   "configFleet": {
     "allHosts": "Jeder Host",
@@ -3708,5 +3725,24 @@
     "status": "Status",
     "unlockSelected": "Ausgewählte entsperren",
     "unlocked": "Entsperrt"
+  },
+  "fileWatch": {
+    "add": "Neue Liste",
+    "cancel": "Abbrechen",
+    "contentNotice": "Nur Prüfsumme und Dateirechte werden erfasst – nie der Inhalt. Es ist daher sicher, Geheimnisse zu überwachen, obwohl Drift berichten wird, dass eine Datei geändert wurde, anstatt was sich darin verändert hat.",
+    "delete": "Liste löschen",
+    "deleteError": "Könnte die Liste nicht löschen",
+    "disabled": "Deaktiviert",
+    "empty": "Noch keine Dateiüberwachungslisten vorhanden.",
+    "enabled": "Aktiviert",
+    "loadError": "Könnte die Dateiüberwachungslisten nicht laden",
+    "name": "Name",
+    "pathCount": "Pfade",
+    "paths": "Pfade, eine pro Zeile",
+    "pathsHelp": "Absolut nur absolute Pfade. Ein relativer Pfad löst sich auf jedem Host anders, sodass die gleiche Liste unterschiedliche Dateien überwacht.",
+    "save": "Speichern",
+    "saveError": "Könnte die Liste nicht speichern",
+    "status": "Status",
+    "title": "Dateiüberwachungslisten"
   }
 }

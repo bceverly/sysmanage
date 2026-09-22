@@ -395,7 +395,8 @@
       "packages": "包",
       "repositories": "仓库",
       "storage": "存储",
-      "users": "用户"
+      "users": "用户",
+      "files": "被监视的文件"
     },
     "categoryMatches": "此类别与参考主机匹配。",
     "compare": "比较",
@@ -417,7 +418,22 @@
     "summary": "{{count}} 与 {{reference}} 不同。",
     "thisHost": "此主机",
     "title": "与参考主机比较",
-    "truncated": "仅列出前几个条目；上述计数是准确的"
+    "truncated": "仅列出前几个条目；上述计数是准确的",
+    "blindSpotCount": "{{count}} 未进行比较",
+    "blindSpotsHelp": "这些未进行比较，因为至少一个主机没有测量它们。它们既不是差异也不是匹配。",
+    "notComparable": "未比较",
+    "reason": {
+      "insufficientPrivilege": "代理没有权限读取此文件。",
+      "noWatchList": "没有主机分配文件监视列表，因此没有可比较的内容。",
+      "notWatched": "不在此主机的监视列表中。",
+      "providerFailed": "代理在最后一次尝试中无法读取此内容。",
+      "tooLarge": "太大无法哈希，因此未进行比较。",
+      "unknown": "此代理尚未报告它是否能提供此服务。可能需要升级。",
+      "unreadable": "代理无法读取此文件。",
+      "wrongPlatform": "此操作系统不支持此类别。"
+    },
+    "reasonColumn": "原因",
+    "side": "主机"
   },
   "broadcast": {
     "confirm": "向所有已连接的代理发送刷新清单广播？",
@@ -536,7 +552,8 @@
     "tabDrift": "漂移的主机",
     "tabPlaybooks": "修复剧本",
     "title": "配置漂移",
-    "view": "查看"
+    "view": "查看",
+    "tabFileWatches": "被监视的文件"
   },
   "configFleet": {
     "allHosts": "每个主机",
@@ -3708,5 +3725,24 @@
     "status": "状态",
     "unlockSelected": "解锁所选项",
     "unlocked": "已解锁"
+  },
+  "fileWatch": {
+    "add": "新列表",
+    "cancel": "取消",
+    "contentNotice": "仅收集校验和和文件权限——从未记录内容。因此，可以监视密钥，但配置漂移将报告文件更改而不是其中的内容。",
+    "delete": "删除列表",
+    "deleteError": "无法删除列表",
+    "disabled": "禁用",
+    "empty": "还没有文件监视列表。",
+    "enabled": "启用",
+    "loadError": "无法加载文件监视列表",
+    "name": "名称",
+    "pathCount": "路径",
+    "paths": "路径，每行一个",
+    "pathsHelp": "仅绝对路径。相对路径在每个主机上解析不同，因此相同的列表将监视不同的文件。",
+    "save": "保存",
+    "saveError": "无法保存列表",
+    "status": "状态",
+    "title": "文件监视列表"
   }
 }

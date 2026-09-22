@@ -395,7 +395,8 @@
       "packages": "Pacotes",
       "repositories": "Repositórios",
       "storage": "Armazenamento",
-      "users": "Usuários"
+      "users": "Usuários",
+      "files": "Arquivos monitorados"
     },
     "categoryMatches": "Esta categoria corresponde ao host de referência.",
     "compare": "Comparar",
@@ -417,7 +418,22 @@
     "summary": "{{count}} diferença(s) de {{reference}}.",
     "thisHost": "Este host",
     "title": "Comparar a um host de referência",
-    "truncated": "Apenas os primeiros registros são listados; as contagens acima são exatas."
+    "truncated": "Apenas os primeiros registros são listados; as contagens acima são exatas.",
+    "blindSpotCount": "{{count}} não comparado",
+    "blindSpotsHelp": "Não foram comparados, porque pelo menos um host não os mediu. Eles nem são diferenças nem correspondências.",
+    "notComparable": "Não comparado",
+    "reason": {
+      "insufficientPrivilege": "O agente não tem permissão para ler este arquivo.",
+      "noWatchList": "Nenhum host tem uma lista de monitoramento de arquivos atribuída, então não há nada para comparar.",
+      "notWatched": "Não está na lista de monitoramento deste host.",
+      "providerFailed": "O agente não conseguiu ler isto no seu último tentativa.",
+      "tooLarge": "Muito grande para ser hashado, então não foi comparado.",
+      "unknown": "Este agente não informou se pode fornecer isso. Pode precisar de uma atualização.",
+      "unreadable": "O agente não conseguiu ler este arquivo.",
+      "wrongPlatform": "Este sistema operacional não possui esta categoria."
+    },
+    "reasonColumn": "Razão",
+    "side": "Host"
   },
   "broadcast": {
     "confirm": "Enviar um broadcast de atualização de inventário para todos os agentes conectados?",
@@ -536,7 +552,8 @@
     "tabDrift": "Hostes flutuantes",
     "tabPlaybooks": "Playbooks de remediação",
     "title": "Desvio de Configuração",
-    "view": "Visualizar"
+    "view": "Visualizar",
+    "tabFileWatches": "Arquivos monitorados"
   },
   "configFleet": {
     "allHosts": "Todos os hosts",
@@ -3708,5 +3725,24 @@
     "status": "Estado",
     "unlockSelected": "Desbloquear selecionados",
     "unlocked": "Desbloqueado"
+  },
+  "fileWatch": {
+    "add": "Nova lista",
+    "cancel": "Cancelar",
+    "contentNotice": "Apenas um checksum e permissões de arquivo são coletados - nunca o conteúdo. Portanto, é seguro monitorar segredos, embora o desvio relate que um arquivo mudou em vez do que mudou dentro dele.",
+    "delete": "Excluir lista",
+    "deleteError": "Não foi possível excluir a lista",
+    "disabled": "Desabilitado",
+    "empty": "Ainda não existem listas de monitoramento de arquivos.",
+    "enabled": "Habilitado",
+    "loadError": "Não foi possível carregar as listas de monitoramento de arquivos",
+    "name": "Nome",
+    "pathCount": "Caminhos",
+    "paths": "Caminhos, um por linha",
+    "pathsHelp": "Apenas caminhos absolutos. Um caminho relativo é resolvido de forma diferente em cada host, então a mesma lista monitoraria arquivos diferentes.",
+    "save": "Salvar",
+    "saveError": "Não foi possível salvar a lista",
+    "status": "Status",
+    "title": "Listas de monitoramento de arquivos"
   }
 }

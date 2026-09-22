@@ -112,6 +112,45 @@ def answerable(host, table: str) -> bool:
     return state not in NOT_ANSWERABLE
 
 
+def serves(host, table: str) -> bool:
+    """Is this host KNOWN to serve ``table``? True only for SERVED.
+
+    THE DIFFERENCE FROM ``answerable`` -- and picking the wrong one is a live
+    defect, not a style choice.
+
+    ``answerable`` lets UNKNOWN through because a consumer that EXISTED before
+    21.1 must keep working against agents that have not upgraded: reading "never
+    advertised" as "cannot answer" would switch that consumer off for the whole
+    estate on upgrade day.
+
+    A consumer that is BRAND NEW has no such legacy to protect, and the
+    permissive reading inverts into the very defect this phase exists to
+    prevent. Comparing a new fact table across two hosts that never advertised
+    it finds zero rows on each side and reports them identical -- a fabricated
+    all-clear, produced by a feature that has never once run. Such a consumer
+    must require a POSITIVE advertisement.
+
+    Rule of thumb: ``answerable`` to keep old behavior, ``serves`` to gate new
+    behavior.
+    """
+    state, _detail = table_state(host, table)
+    return state == SERVED
+
+
+def why_not_served(host, table: str) -> Optional[Dict[str, str]]:
+    """Why ``serves`` said no, or None when it said yes.
+
+    Same shape as ``explain``, but it also reports UNKNOWN -- which ``explain``
+    deliberately does not, because for the pre-existing consumers UNKNOWN is
+    not a denial. Here it is the commonest answer: an agent too old to know the
+    table exists.
+    """
+    state, detail = table_state(host, table)
+    if state == SERVED:
+        return None
+    return {"table": table, "state": state, "reason": detail or state}
+
+
 def explain(host, table: str) -> Optional[Dict[str, str]]:
     """Why this host cannot answer, or None when it can.
 

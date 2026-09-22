@@ -467,17 +467,55 @@ export interface BaselineCategoryCounts {
   missing: number;
   extra: number;
   different: number;
+  /** Watched paths neither host could be compared on. `files` only. */
+  blind_spots?: number;
   reference_total: number;
   target_total: number;
+}
+
+/**
+ * Why a category could not be compared at all (Phase 21.1 S6).
+ *
+ * A Windows host has no `mounts`; an unprivileged agent cannot enumerate
+ * listening ports. Neither is a difference, and neither may be rendered as a
+ * match — "identical" over a comparison that never ran is the fabricated
+ * all-clear this whole phase exists to prevent.
+ */
+export interface BaselineNotComparable {
+  category?: string;
+  /** Which host could not answer: 'target', 'reference' or 'both'. */
+  side: string;
+  /** The agent's own reason code, e.g. 'wrong_platform'. */
+  reason: string;
+  table?: string;
+  state?: string;
+  detail?: string;
+}
+
+/**
+ * One watched path that could not be compared (Phase 21.1 S7, `files` only).
+ *
+ * NOT a difference and NOT agreement: at least one side did not measure it.
+ * Carried separately so it cannot inflate a drift count, and surfaced so
+ * "no differences" never hides how much of the watch list that covers.
+ */
+export interface BaselineBlindSpot {
+  name: string;
+  side: string;
+  reason: string;
 }
 
 export interface BaselineCategoryResult {
   missing: BaselineItem[];
   extra: BaselineItem[];
   different: BaselineDifference[];
+  blind_spots?: BaselineBlindSpot[];
   counts: BaselineCategoryCounts;
   /** True when a bucket was capped; the counts above stay exact. */
   truncated: boolean;
+  /** False when the comparison could not be performed; see not_comparable. */
+  comparable?: boolean;
+  not_comparable?: BaselineNotComparable;
 }
 
 export interface BaselineDiff {
@@ -488,6 +526,8 @@ export interface BaselineDiff {
   categories: Record<string, BaselineCategoryResult>;
   total_differences: number;
   identical: boolean;
+  /** Categories skipped entirely, keyed by name. See BaselineNotComparable. */
+  not_comparable?: Record<string, BaselineNotComparable>;
 }
 
 /**

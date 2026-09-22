@@ -395,7 +395,8 @@
       "packages": "Pakketten",
       "repositories": "Repositories",
       "storage": "Opslag",
-      "users": "Gebruikers"
+      "users": "Gebruikers",
+      "files": "Geobserveerde bestanden"
     },
     "categoryMatches": "Deze categorie komt overeen met de referentiehost.",
     "compare": "Vergelijken",
@@ -417,7 +418,22 @@
     "summary": "{{count}} verschil(en) van {{reference}}.",
     "thisHost": "Deze host",
     "title": "Vergelijk met referentiehost",
-    "truncated": "Alleen de eerste items worden vermeld; de bovenstaande tellen zijn exact."
+    "truncated": "Alleen de eerste items worden vermeld; de bovenstaande tellen zijn exact.",
+    "blindSpotCount": "{{count}} niet vergeleken",
+    "blindSpotsHelp": "Deze werden niet vergeleken omdat ten minste één host ze niet meet. Ze zijn noch verschillen noch overeenkomsten.",
+    "notComparable": "Niet vergeleken",
+    "reason": {
+      "insufficientPrivilege": "De agent heeft geen machtiging om dit te lezen.",
+      "noWatchList": "Geen enkele host heeft een lijst voor het bijhouden van bestanden toegewezen, dus er is niets om te vergelijken.",
+      "notWatched": "Is niet in deze lijst voor het bijhouden van bestanden op deze host.",
+      "providerFailed": "De agent kon dit niet lezen tijdens zijn laatste poging.",
+      "tooLarge": "Te groot om te hashen, dus het werd niet vergeleken.",
+      "unknown": "Deze agent heeft nog niet gerapporteerd of hij deze kan leveren. Hij moet mogelijk geüpgraded worden.",
+      "unreadable": "De agent kon dit bestand niet lezen.",
+      "wrongPlatform": "Dit besturingssysteem heeft deze categorie niet."
+    },
+    "reasonColumn": "Reden",
+    "side": "Host"
   },
   "broadcast": {
     "confirm": "Een inventaris-vernieuwing-broadcast naar alle verbonden agenten sturen?",
@@ -536,7 +552,8 @@
     "tabDrift": "Drijvende hosts",
     "tabPlaybooks": "Herstelplayboeken",
     "title": "Configuratieverschuiving",
-    "view": "Bekijken"
+    "view": "Bekijken",
+    "tabFileWatches": "Geobserveerde bestanden"
   },
   "configFleet": {
     "allHosts": "Elke host",
@@ -3708,5 +3725,24 @@
     "status": "Status",
     "unlockSelected": "Geselecteerde ontgrendelen",
     "unlocked": "Ontgrendeld"
+  },
+  "fileWatch": {
+    "add": "Nieuwe lijst",
+    "cancel": "Annuleren",
+    "contentNotice": "Alleen een checksum en bestandsmachtigingen worden verzameld - nooit de inhoud. Het is dus veilig om geheimen te observeren, hoewel afwijking zal rapporteren dat een bestand gewijzigd is in plaats van wat er binnenin veranderd is.",
+    "delete": "Lijst verwijderen",
+    "deleteError": "Kon de lijst niet verwijderen",
+    "disabled": "Uitschakelen",
+    "empty": "Er bestaan nog geen lijsten voor het bijhouden van bestanden.",
+    "enabled": "Inschakelen",
+    "loadError": "Kon de lijsten voor het bijhouden van bestanden niet laden",
+    "name": "Naam",
+    "pathCount": "Paden",
+    "paths": "Paden, één per regel",
+    "pathsHelp": "Absoluut paden alleen. Een relatief pad wordt op elke host anders geïnterpreteerd, dus dezelfde lijst zou verschillende bestanden observeren.",
+    "save": "Opslaan",
+    "saveError": "Kon de lijst niet opslaan",
+    "status": "Status",
+    "title": "Lijsten voor het bijhouden van bestanden"
   }
 }

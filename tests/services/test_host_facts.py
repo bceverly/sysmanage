@@ -115,3 +115,52 @@ class TestConsumerHelpers:
         compare different contracts."""
         assert host_facts.contract_version(host_with(version=1)) == 1
         assert host_facts.contract_version(FakeHost(advertised=False)) is None
+
+
+class TestServesIsStricterThanAnswerable:
+    """Phase 21.1 S7 added a second predicate, and picking the wrong one is a
+    live defect rather than a style choice.
+
+    ``answerable`` lets UNKNOWN through so consumers that existed before 21.1
+    keep working against agents that have not upgraded. ``serves`` refuses it,
+    for consumers that are brand new and would otherwise compare nothing
+    against nothing and report a clean result.
+    """
+
+    def test_served_satisfies_both(self):
+        host = host_with(served={"sysmanage_file_state": "native"})
+        assert host_facts.answerable(host, "sysmanage_file_state") is True
+        assert host_facts.serves(host, "sysmanage_file_state") is True
+
+    def test_unknown_is_answerable_but_not_served(self):
+        """The whole reason the second predicate exists. An agent older than
+        the table proceeds for legacy consumers and is refused by new ones."""
+        host = host_with(served={"users": "native"})
+        assert host_facts.answerable(host, "sysmanage_file_state") is True
+        assert host_facts.serves(host, "sysmanage_file_state") is False
+
+    def test_a_host_that_never_advertised_is_not_served(self):
+        host = FakeHost(advertised=False)
+        assert host_facts.answerable(host, "users") is True
+        assert host_facts.serves(host, "users") is False
+
+    def test_a_positive_denial_fails_both(self):
+        host = host_with(unsupported={"listening_ports": "insufficient_privilege"})
+        assert host_facts.answerable(host, "listening_ports") is False
+        assert host_facts.serves(host, "listening_ports") is False
+
+    def test_why_not_served_reports_unknown_where_explain_stays_silent(self):
+        """``explain`` deliberately says nothing about UNKNOWN -- for the old
+        consumers it is not a denial. For the new ones it is the commonest
+        answer, so it needs a reason an operator can act on."""
+        host = host_with(served={"users": "native"})
+        assert host_facts.explain(host, "sysmanage_file_state") is None
+        assert host_facts.why_not_served(host, "sysmanage_file_state") == {
+            "table": "sysmanage_file_state",
+            "state": host_facts.UNKNOWN,
+            "reason": host_facts.UNKNOWN,
+        }
+
+    def test_why_not_served_is_silent_when_the_table_is_served(self):
+        host = host_with(served={"sysmanage_file_state": "native"})
+        assert host_facts.why_not_served(host, "sysmanage_file_state") is None

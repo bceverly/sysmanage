@@ -41,6 +41,7 @@ from .processes import *
 from .proplus import *
 from .provisioning import *
 from .query_pack import *
+from .file_watch import *
 from .report_branding import *
 from .repository_mirroring import *
 from .secret import *

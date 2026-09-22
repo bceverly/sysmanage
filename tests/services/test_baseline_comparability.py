@@ -99,10 +99,60 @@ class TestNotComparable:
 class TestUnknownHostsStillCompare:
     def test_a_pre_21_1_agent_compares_exactly_as_before(self):
         """Every host is pre-21.1 until upgraded. Reading unknown as 'not
-        covered' would switch drift comparison off for the whole estate."""
+        covered' would switch drift comparison off for the whole estate.
+
+        Scoped to the categories that EXISTED before 21.1: that is what
+        "exactly as before" means, and it is the property being protected.
+        Categories added later have no prior behavior to preserve -- see
+        TestCategoriesAddedAfterS1.
+        """
         legacy = FakeHost(advertised=False)
-        for category in baseline.CATEGORIES:
+        legacy_categories = [
+            c for c in baseline.CATEGORIES if c not in baseline._SERVES_REQUIRED
+        ]
+        assert legacy_categories, "the legacy set must not be empty"
+        for category in legacy_categories:
             assert baseline.comparability(legacy, legacy, category) is None
+
+
+class TestCategoriesAddedAfterS1:
+    """The rule inverts for a category that did not exist before the substrate.
+
+    "Unknown means proceed as before" protects consumers with a BEFORE. A new
+    category has none: letting unknown through means comparing zero rows
+    against zero rows and reporting the hosts identical -- a clean verdict from
+    a comparison that never ran.
+    """
+
+    def test_files_refuses_a_pre_21_1_agent(self):
+        legacy = FakeHost(advertised=False)
+        blocked = baseline.comparability(legacy, legacy, "files")
+        assert blocked is not None
+        assert blocked["comparable"] is False
+        assert blocked["not_comparable"]["reason"] == "unknown"
+
+    def test_files_refuses_an_agent_too_old_for_the_table(self):
+        """Advertised, but on a contract that predates sysmanage_file_state."""
+        old = FakeHost(
+            {
+                "contract_version": 1,
+                "served": {"users": "native"},
+                "unsupported": {},
+                "not_applicable": {},
+            }
+        )
+        assert baseline.comparability(old, old, "files") is not None
+
+    def test_files_compares_between_two_current_agents(self):
+        current = FakeHost(
+            {
+                "contract_version": 2,
+                "served": {"sysmanage_file_state": "native"},
+                "unsupported": {},
+                "not_applicable": {},
+            }
+        )
+        assert baseline.comparability(current, current, "files") is None
 
 
 class TestCategoriesWithoutAFactTable:

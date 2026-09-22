@@ -395,7 +395,8 @@
       "packages": "Paquets",
       "repositories": "Répertoires",
       "storage": "Stockage",
-      "users": "Utilisateurs"
+      "users": "Utilisateurs",
+      "files": "Fichiers surveillés"
     },
     "categoryMatches": "Cette catégorie correspond à l'hôte de référence",
     "compare": "Comparer",
@@ -417,7 +418,22 @@
     "summary": "Différence(s) de {{count}} par rapport à {{reference}}.",
     "thisHost": "Cet hôte",
     "title": "Comparer à un hôte de référence",
-    "truncated": "Seules les premières entrées sont listées ; les comptes ci-dessus sont exacts"
+    "truncated": "Seules les premières entrées sont listées ; les comptes ci-dessus sont exacts",
+    "blindSpotCount": "{{count}} non comparé",
+    "blindSpotsHelp": "Ils n'ont pas été comparés, car au moins un hôte ne les a pas mesurés. Ils ne sont ni des différences ni des correspondances.",
+    "notComparable": "Non comparé",
+    "reason": {
+      "insufficientPrivilege": "L'agent n'a pas la permission de lire ceci.",
+      "noWatchList": "Aucun hôte n'a une liste de surveillance de fichiers assignée, il n'y a donc rien à comparer.",
+      "notWatched": "Ce fichier n'est pas dans la liste de surveillance de cet hôte.",
+      "providerFailed": "L'agent n'a pas pu lire cela lors de sa dernière tentative.",
+      "tooLarge": "Trop grand pour hacher, donc il n'a pas été comparé.",
+      "unknown": "Cet agent n'a pas signalé s'il peut fournir cela. Il pourrait avoir besoin d'être mis à jour.",
+      "unreadable": "L'agent n'a pas pu lire ce fichier.",
+      "wrongPlatform": "Ce système d'exploitation n'a pas cette catégorie."
+    },
+    "reasonColumn": "Raison",
+    "side": "Hôte"
   },
   "broadcast": {
     "confirm": "Envoyer une diffusion de rafraîchissement d'inventaire à tous les agents connectés ?",
@@ -536,7 +552,8 @@
     "tabDrift": "Hôtes errants",
     "tabPlaybooks": "Livres de remédiation",
     "title": "Configuration en dérive",
-    "view": "Afficher"
+    "view": "Afficher",
+    "tabFileWatches": "Fichiers surveillés"
   },
   "configFleet": {
     "allHosts": "Tous les hôtes",
@@ -3708,5 +3725,24 @@
     "status": "Statut",
     "unlockSelected": "Déverrouiller la sélection",
     "unlocked": "Déverrouillé"
+  },
+  "fileWatch": {
+    "add": "Nouvelle liste",
+    "cancel": "Annuler",
+    "contentNotice": "Seules un hachage et des permissions de fichiers sont collectés - jamais le contenu. Il est donc sûr de surveiller des secrets, bien que le dérive signalera qu'un fichier a changé plutôt que ce qui a changé à l'intérieur.",
+    "delete": "Supprimer la liste",
+    "deleteError": "Impossible de supprimer la liste",
+    "disabled": "Désactivé",
+    "empty": "Aucune liste de surveillance de fichiers encore.",
+    "enabled": "Activé",
+    "loadError": "Impossible de charger les listes de surveillance de fichiers",
+    "name": "Nom",
+    "pathCount": "Chemins",
+    "paths": "Chemins, un par ligne",
+    "pathsHelp": "Les chemins absolus uniquement. Un chemin relatif se résout différemment sur chaque hôte, donc la même liste surveillerait des fichiers différents.",
+    "save": "Enregistrer",
+    "saveError": "Impossible d'enregistrer la liste",
+    "status": "Statut",
+    "title": "Listes de surveillance de fichiers"
   }
 }

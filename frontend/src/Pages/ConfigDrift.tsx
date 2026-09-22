@@ -26,6 +26,7 @@ import Divider from '@mui/material/Divider';
 
 import BaselineDiffPanel from '../Components/BaselineDiffPanel';
 import ConfigRemediationRulesPanel from '../Components/ConfigRemediationRulesPanel';
+import FileWatchPanel from '../Components/FileWatchPanel';
 import { formatUTCTimestamp } from '../utils/dateUtils';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import {
@@ -287,9 +288,11 @@ const ConfigDrift: React.FC = () => {
             <Tabs value={tab} onChange={(_e, value) => setTab(value)} sx={{ mb: 2 }}>
                 <Tab label={t('configDrift.tabDrift', 'Drifting hosts')} />
                 <Tab label={t('configDrift.tabPlaybooks', 'Remediation playbooks')} />
+                <Tab label={t('configDrift.tabFileWatches', 'Watched files')} />
             </Tabs>
 
             {tab === 1 && <ConfigRemediationRulesPanel canEdit={canRemediate} />}
+            {tab === 2 && <FileWatchPanel canEdit={canRemediate} />}
 
             {tab === 0 &&
                 (hosts.length === 0 ? (

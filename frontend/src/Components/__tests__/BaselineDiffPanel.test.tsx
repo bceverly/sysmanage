@@ -309,3 +309,171 @@ describe('BaselineDiffPanel', () => {
     });
 
 });
+
+// ---------------------------------------------------------------------------
+// A verdict must never be shown for a comparison that did not happen
+// ---------------------------------------------------------------------------
+
+describe('BaselineDiffPanel uncomparable categories', () => {
+    beforeEach(() => {
+        vi.mocked(getBaselineCategories).mockResolvedValue(['packages']);
+        vi.mocked(doGetHosts).mockResolvedValue([]);
+    });
+
+    it('does not report a refused category as matching', async () => {
+        // THE DEFECT, and it was live: Phase 21.1 S6 made the server return
+        // `comparable: false` with all-zero counts for a category a host
+        // cannot report. The panel read only the counts, so a Windows host
+        // compared against a Linux one displayed a green "Matches" chip for
+        // mounts -- having never compared them.
+        vi.mocked(getBaselineDiff).mockResolvedValue(
+            diff({
+                categories: {
+                    packages: emptyCategory({
+                        comparable: false,
+                        not_comparable: {
+                            category: 'packages',
+                            side: 'target',
+                            reason: 'wrong_platform',
+                        },
+                    }),
+                },
+            }),
+        );
+        renderPanel();
+        await compare();
+
+        expect(await screen.findByText('Not compared')).toBeInTheDocument();
+        expect(screen.queryByText('Matches')).not.toBeInTheDocument();
+    });
+
+    it('explains the refusal in the agent’s own terms', async () => {
+        // 'wrong_platform' and 'insufficient_privilege' send an operator to
+        // completely different places; a generic "unavailable" sends them to
+        // neither.
+        vi.mocked(getBaselineDiff).mockResolvedValue(
+            diff({
+                categories: {
+                    packages: emptyCategory({
+                        comparable: false,
+                        not_comparable: {
+                            side: 'target',
+                            reason: 'insufficient_privilege',
+                        },
+                    }),
+                },
+            }),
+        );
+        renderPanel();
+        await compare();
+
+        expect(
+            await screen.findByText(/does not have permission to read this/i),
+        ).toBeInTheDocument();
+    });
+
+    it('degrades an unrecognised reason to the code rather than hiding it', async () => {
+        vi.mocked(getBaselineDiff).mockResolvedValue(
+            diff({
+                categories: {
+                    packages: emptyCategory({
+                        comparable: false,
+                        not_comparable: { side: 'target', reason: 'some_new_code' },
+                    }),
+                },
+            }),
+        );
+        renderPanel();
+        await compare();
+        expect(await screen.findByText('some_new_code')).toBeInTheDocument();
+    });
+});
+
+describe('BaselineDiffPanel watched-file blind spots', () => {
+    const withBlindSpots = (over = {}) =>
+        diff({
+            categories: {
+                files: emptyCategory({
+                    blind_spots: [
+                        { name: '/etc/shadow', side: 'target', reason: 'unreadable' },
+                    ],
+                    counts: {
+                        missing: 0,
+                        extra: 0,
+                        different: 0,
+                        blind_spots: 1,
+                        reference_total: 2,
+                        target_total: 2,
+                    },
+                }),
+            },
+            ...over,
+        });
+
+    beforeEach(() => {
+        vi.mocked(getBaselineCategories).mockResolvedValue(['files']);
+        vi.mocked(doGetHosts).mockResolvedValue([]);
+        vi.mocked(getBaselineDiff).mockResolvedValue(withBlindSpots());
+    });
+
+    it('does not call a category with blind spots a match', async () => {
+        // Zero differences is not "identical" when a watched path was never
+        // measured. The green chip would be a clean bill of health covering
+        // files nobody could read.
+        renderPanel();
+        await compare();
+
+        expect(await screen.findByText('1 not compared')).toBeInTheDocument();
+        expect(screen.queryByText('Matches')).not.toBeInTheDocument();
+    });
+
+    it('lists which paths were not compared, and why', async () => {
+        renderPanel();
+        await compare();
+
+        expect(await screen.findByText('/etc/shadow')).toBeInTheDocument();
+        expect(
+            screen.getByText(/could not read this file/i),
+        ).toBeInTheDocument();
+    });
+
+    it('says plainly that blind spots are neither differences nor matches', async () => {
+        renderPanel();
+        await compare();
+        expect(
+            await screen.findByText(/neither differences nor matches/i),
+        ).toBeInTheDocument();
+    });
+
+    it('still reports a match when the watch list was fully compared', async () => {
+        // The distinction only means anything if the honest match survives.
+        vi.mocked(getBaselineDiff).mockResolvedValue(
+            diff({
+                categories: {
+                    files: emptyCategory({
+                        blind_spots: [],
+                        counts: {
+                            missing: 0,
+                            extra: 0,
+                            different: 0,
+                            blind_spots: 0,
+                            reference_total: 2,
+                            target_total: 2,
+                        },
+                    }),
+                },
+            }),
+        );
+        renderPanel();
+        await compare();
+
+        expect(await screen.findByText('Matches')).toBeInTheDocument();
+        expect(screen.queryByText(/not compared/)).not.toBeInTheDocument();
+    });
+
+    it('labels the category rather than showing its identifier', async () => {
+        renderPanel();
+        await compare();
+        expect(await screen.findByText('Watched files')).toBeInTheDocument();
+    });
+});

@@ -56,6 +56,7 @@ from backend.api import (
     enabled_package_managers,
     external_idp,
     federation_identity,
+    file_watches,
     fips_actions,
     firewall_roles,
     firewall_status,
@@ -413,6 +414,10 @@ def register_routes(app: FastAPI):
     logger.debug("Adding query-packs router (Phase 21.1 S4)")
     _include_versioned(app, query_packs.router, tags=["query-packs"])
     logger.debug("Query-packs router added")
+
+    logger.debug("Adding file-watches router (Phase 21.1 S7)")
+    _include_versioned(app, file_watches.router, tags=["config-management"])
+    logger.debug("File-watches router added")
 
     logger.debug("Adding config-management drift router (Phase 20.2)")
     _include_versioned(app, config_mgmt_drift.router, tags=["config-management"])

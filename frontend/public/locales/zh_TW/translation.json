@@ -395,7 +395,8 @@
       "packages": "套件",
       "repositories": "存儲庫",
       "storage": "儲存",
-      "users": "用戶"
+      "users": "用戶",
+      "files": "監控的檔案"
     },
     "categoryMatches": "這個類別與參考主機相匹配。",
     "compare": "比較",
@@ -417,7 +418,22 @@
     "summary": "{{count}} 與 {{reference}} 差異(們)。",
     "thisHost": "這個主機",
     "title": "與參考主機比較",
-    "truncated": "僅列出前幾項；上方計數是準確的。"
+    "truncated": "僅列出前幾項；上方計數是準確的。",
+    "blindSpotCount": "{{count}} 未比較",
+    "blindSpotsHelp": "這些內容未比較，因為至少一個主機未測量它們。它們既不是差異，也不是匹配。",
+    "notComparable": "未比較",
+    "reason": {
+      "insufficientPrivilege": "代理沒有權限讀取此檔案。",
+      "noWatchList": "沒有任何一個主機分配了檔案監控清單，因此沒有可比較的內容。",
+      "notWatched": "不在此主機的監控清單上。",
+      "providerFailed": "代理在最後一次嘗試時無法讀取此檔案。",
+      "tooLarge": "太大以至於無法哈希，因此未比較。",
+      "unknown": "這個代理尚未報告它是否能提供此功能。可能需要升級。",
+      "unreadable": "代理無法讀取此檔案。",
+      "wrongPlatform": "這個作業系統不支援此類別。"
+    },
+    "reasonColumn": "原因",
+    "side": "主機"
   },
   "broadcast": {
     "confirm": "向所有已連線的代理傳送更新清單廣播？",
@@ -536,7 +552,8 @@
     "tabDrift": "漂移的主機",
     "tabPlaybooks": "修復腳本",
     "title": "配置漂移",
-    "view": "查看"
+    "view": "查看",
+    "tabFileWatches": "監控的檔案"
   },
   "configFleet": {
     "allHosts": "每個主機",
@@ -3708,5 +3725,24 @@
     "status": "狀態",
     "unlockSelected": "解除鎖定所選項目",
     "unlocked": "已解除鎖定"
+  },
+  "fileWatch": {
+    "add": "新清單",
+    "cancel": "取消",
+    "contentNotice": "僅收集檢查總和和檔案權限 — 從不收集內容。因此，監控密碼是安全的，但配置漂移會報告檔案變更，而不是其中變更了什麼。",
+    "delete": "刪除清單",
+    "deleteError": "無法刪除清單",
+    "disabled": "已禁用",
+    "empty": "還沒有檔案監控清單。",
+    "enabled": "已啟用",
+    "loadError": "無法載入檔案監控清單",
+    "name": "名稱",
+    "pathCount": "路徑",
+    "paths": "路徑，每行一個",
+    "pathsHelp": "僅限絕對路徑。相對路徑在每個主機上解析方式不同，因此相同的清單會監控不同的檔案。",
+    "save": "儲存",
+    "saveError": "無法儲存清單",
+    "status": "狀態",
+    "title": "檔案監控清單"
   }
 }

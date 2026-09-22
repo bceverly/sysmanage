@@ -72,8 +72,27 @@ class TestCategoryDefinitions:
             for field in compared:
                 assert field in cols, f"{name}: compared field {field!r} missing"
 
-    def test_the_public_category_list_matches_the_table(self):
-        assert set(baseline.CATEGORIES) == set(baseline._CATEGORIES)
+    def test_the_public_category_list_matches_the_implementations(self):
+        """Every advertised category must be backed by something that can
+        actually compare it, and nothing comparable may be left unadvertised.
+
+        Two ways to be comparable: the generic identity -> fields table, or a
+        dedicated comparator for categories whose rows record an OUTCOME rather
+        than a value (``files``). A category in neither would still be
+        selectable and validated, and would then fail or silently return
+        nothing at comparison time.
+        """
+        implemented = set(baseline._CATEGORIES) | set(baseline._SPECIAL_COMPARATORS)
+        assert set(baseline.CATEGORIES) == implemented
+
+    def test_no_category_is_both_generic_and_special(self):
+        """Overlap would mean the dispatch silently picks one and the other
+        definition rots unnoticed."""
+        assert not set(baseline._CATEGORIES) & set(baseline._SPECIAL_COMPARATORS)
+
+    def test_every_special_comparator_is_callable(self):
+        for name, fn in baseline._SPECIAL_COMPARATORS.items():
+            assert callable(fn), f"{name}: comparator is not callable"
 
 
 class TestComparison:
