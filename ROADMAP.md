@@ -8434,7 +8434,7 @@ forever for two of six platforms.
       returned nothing. -- **DISCHARGED 2026-09-21.** S2 (native provider) landed
       before S3 (osquery provider), in that order, and the native side is the
       floor on every platform rather than a BSD-only fallback.
-- [ ] **BSD integration tests run on demand / per release tag only**
+- [x] **BSD integration tests run on demand / per release tag only**
       (`bsd-tests.yml`, QEMU, deliberately not cron'd because it is slow). Any
       fact-substrate work on the BSDs needs an explicit dispatch run before
       the phase exit gate, because a push-green CI does NOT cover them.
@@ -8444,7 +8444,15 @@ forever for two of six platforms.
       `sysmanage_packages` where osquery has no package table, a pack executing
       through FactStore, and S7 file state. Before they landed a dispatch run
       would have executed 24 tests that touch none of the substrate and
-      reported success. THE DISPATCH ITSELF IS STILL OWED.
+      reported success. **DONE 2026-09-23: dispatch run green on FreeBSD,
+      OpenBSD and NetBSD.** Its first NetBSD attempt failed, and that failure
+      earned the run: `sysmanage_packages` came back EMPTY because NetBSD's
+      non-root PATH (`_PATH_DEFPATH`) has no `/usr/sbin`, so a bare `pkg_info`
+      lookup read as "no package manager" and the host reported zero packages
+      without a word. The same "measured, found nothing" defect this phase exists
+      to prevent. `software_inventory_bsd.py` now resolves `pkg_info` to an
+      absolute path (PATH, then `/usr/sbin`, then `/usr/pkg/sbin`) and warns when
+      a BSD finds no package tool at all.
 - [x] **sysmanage-agent README omitted NetBSD** -- 2026-09-21. It claimed
       "Linux, Windows, macOS, FreeBSD, OpenBSD" while the repo carries a full
       pkgsrc package (Makefile/PLIST/distinfo/DESCR), a NetBSD `.tgz` build
@@ -8910,10 +8918,9 @@ them, and that gap decides how much S2 must cover there. Needs a
       (`ssl-cert-snakeoil.pem`) that native reports and osquery structurally
       cannot see, because osquery reads only the CA bundle.
 
-      **Still open:** `bsd-tests.yml` needs its workflow_dispatch run before
-      the phase exit gate. It is now worth running: 13 integration tests
-      covering the substrate landed the same day, where before it would have
-      run 24 tests that said nothing about 21.1 and reported success.
+      **Closed 2026-09-23:** the `bsd-tests.yml` dispatch ran green on all
+      three BSDs after one real NetBSD fix (a bare `pkg_info` lookup missing
+      `/usr/sbin`; see the BSD item under the S0 result).
 - [x] **S4 -- Query packs as multi-tenant policy.** -- 2026-09-21 Curated/shipped
       pack DEFINITIONS are global reference data → `shared` partition, one
       copy, offline-updatable; assignments to hosts/tags/sites and any

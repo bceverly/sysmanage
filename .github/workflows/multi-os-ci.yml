@@ -331,7 +331,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: ['20']
+        node-version: ['22']
 
     steps:
     - name: Disable Microsoft Defender scanning (Windows CI speedup)
@@ -417,7 +417,7 @@ jobs:
       matrix:
         os: [windows-latest, macos-latest]
         python-version: ['3.12']
-        node-version: ['20']
+        node-version: ['22']
 
     steps:
     - name: Disable Microsoft Defender scanning (Windows CI speedup)

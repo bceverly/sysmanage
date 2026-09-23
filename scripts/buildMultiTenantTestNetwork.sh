@@ -818,11 +818,12 @@ echo "=== [1/10] OS dependencies ==="
 apt-get update -y
 apt-get install -y postgresql-client python3 python3-venv python3-pip gettext \
     build-essential libpq-dev git rsync curl jq unzip ca-certificates gnupg openssl
-# Node 20 for the React/Vite web UI (Ubuntu's default Node is too old for Vite).
-if ! node --version 2>/dev/null | grep -qE '^v(1[89]|2[0-9])\.'; then
+# Node 22 for the React/Vite web UI (Ubuntu's default Node is too old for Vite;
+# react-router 8 declares engines node >=22.22.0).
+if ! node -e 'const [a,b]=process.versions.node.split(".").map(Number);process.exit(a>22||(a===22&&b>=22)?0:1)' 2>/dev/null; then
     apt-get purge -y libnode-dev libnode72 nodejs npm >/dev/null 2>&1 || true
     apt-get autoremove -y >/dev/null 2>&1 || true
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
     apt-get install -y -o Dpkg::Options::="--force-overwrite" nodejs
 fi
 
