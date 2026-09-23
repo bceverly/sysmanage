@@ -647,7 +647,7 @@ the explicit bullet is added to the in-progress and future phases.)
 
 ### Release Versioning
 
-**Current Version:** v3.8.0.0
+**Current Version:** v3.9.0.0
 
 *(This one line is HAND-maintained — it is NOT git-tag-derived like the
 on-disk markers are, which is exactly how it sat silently at v3.3.0.0
@@ -741,10 +741,10 @@ Each stabilization phase produces a release. Feature phases may produce one or m
 │  Phase 19: Stabilization                                             v3.6.0.0   │
 │     └── Content lifecycle + provisioning hardening; agent capabilities          │
 │                                                                                 │
-│  Phase 20: Configuration Management & Drift                          v3.7.0.0   │
+│  Phase 20: Configuration Management & Drift                          v3.8.0.0   │
 │     └── Desired-state config (5 engines), profiles, drift + remediate           │
 │                                                                                 │
-│  Phase 21: Endpoint Facts & Proactive Advisor                        v3.8.0.0   │
+│  Phase 21: Endpoint Facts & Proactive Advisor                        v3.9.0.0   │
 │     └── osquery substrate, advisor, malware detection, threat-model wizard      │
 │                Unenrolled asset discovery + review                              │
 │                                                                                 │
@@ -8428,14 +8428,23 @@ with platform-specific table implementations, and we would own that port
 forever for two of six platforms.
 
 **Recorded debt (2026-09-21):**
-- [ ] **21.1 must ship the native provider FIRST, not second.** If the osquery
+- [x] **21.1 must ship the native provider FIRST, not second.** If the osquery
       provider lands alone, the BSDs regress from "collected natively today" to
       "no facts", and the gap would be invisible until an advisor rule
-      returned nothing.
+      returned nothing. — **DISCHARGED 2026-09-21.** S2 (native provider) landed
+      before S3 (osquery provider), in that order, and the native side is the
+      floor on every platform rather than a BSD-only fallback.
 - [ ] **BSD integration tests run on demand / per release tag only**
       (`bsd-tests.yml`, QEMU, deliberately not cron'd because it is slow). Any
       fact-substrate work on the BSDs needs an explicit dispatch run before
       the phase exit gate, because a push-green CI does NOT cover them.
+      **2026-09-23:** the tests to run now exist —
+      `tests/integration/test_fact_substrate_bsd.py`, 13 of them, covering the
+      no-osquery premise, stdlib-only import, the coverage advertisement,
+      `sysmanage_packages` where osquery has no package table, a pack executing
+      through FactStore, and S7 file state. Before they landed a dispatch run
+      would have executed 24 tests that touch none of the substrate and
+      reported success. THE DISPATCH ITSELF IS STILL OWED.
 - [x] **sysmanage-agent README omitted NetBSD** — 2026-09-21. It claimed
       "Linux, Windows, macOS, FreeBSD, OpenBSD" while the repo carries a full
       pkgsrc package (Makefile/PLIST/distinfo/DESCR), a NetBSD `.tgz` build
@@ -8861,14 +8870,50 @@ them, and that gap decides how much S2 must cover there. Needs a
       unaffected. The two surfaces describing the same host differently is a
       deliberate split, not drift: one is for people, one is for queries.
 
-      **Still open:** `listening_ports` could not be compared on Linux — it
-      needs root on both sides and this box has no passwordless sudo, so the
-      only root-to-root comparison remains the FreeBSD one. `certificates`
-      differs by PATH convention rather than content (we report the file we
-      read it from), and `mounts` differs on 4 systemd credential mounts where
-      psutil reports an empty device and osquery reports `none`. Neither is a
-      data defect. `bsd-tests.yml` still needs its workflow_dispatch run
-      before the phase exit gate.
+      **CLOSED 2026-09-23 by the root-to-root Linux run**, which is also a
+      correction: the earlier note here called the `certificates` and `mounts`
+      differences "not a data defect". Both WERE. Running the harness as root
+      on Linux found FIVE defects, four of them ours, and every one was the
+      same shape — information about incompleteness available and discarded.
+
+      * `listening_ports` advertised itself SERVED while never enumerating
+        AF_UNIX at all: psutil's `kind="inet"` excludes it, and psutil reports
+        unix sockets with `status == CONN_NONE` so the CONN_LISTEN filter
+        would drop them anyway. A query about unix sockets answered "no rows"
+        on a host running 1,538 of them. This phase's own central failure,
+        inside the substrate.
+      * `processes` inherited the operator snapshot's `MAX_PROCESSES = 1000`
+        cap and threw away the `truncated` flag the collector returns. Exactly
+        1,000 rows presented as the whole truth — and the list is sorted by
+        resource use, so idle daemons went first, which is precisely what a
+        security pack asks about. `WHERE name = 'sshd'` could answer "not
+        running". The fact provider now passes `limit=None`; the operator
+        snapshot is unchanged.
+      * `mounts.device` was psutil's normalization leaking through:
+        `psutil._pslinux` contains `if device == 'none': device = ''`, while
+        the kernel and osquery both say `none`. Reversed on Linux only, where
+        that substitution is verified.
+      * `certificates.serial` rendered `00` where osquery renders `0`
+        (BN_bn2hex). The obvious fix — strip leading zeros — would have
+        rewritten `02` and `0DD3E3BC6CF96BB1` into values neither provider
+        reports, turning 122 agreeing rows into 122 disagreeing ones.
+      * Two comparison IDENTITIES in the harness were hiding answers rather
+        than revealing them: `path` was missing from `listening_ports`, where
+        it IS a unix socket's identity (920 rows collapsed to one
+        indistinguishable tuple), and present in `certificates`, where the two
+        providers use different path conventions so every row differed.
+
+      Result: 9/12 tables agree, up from 8/12 where two of the "agreements"
+      were only agreements because nothing could be read. The three that
+      remain each explain themselves in the report — AF_PACKET plus container
+      namespaces, `TASK_COMM_LEN` truncation, and one host certificate
+      (`ssl-cert-snakeoil.pem`) that native reports and osquery structurally
+      cannot see, because osquery reads only the CA bundle.
+
+      **Still open:** `bsd-tests.yml` needs its workflow_dispatch run before
+      the phase exit gate. It is now worth running: 13 integration tests
+      covering the substrate landed the same day, where before it would have
+      run 24 tests that said nothing about 21.1 and reported success.
 - [x] **S4 — Query packs as multi-tenant policy.** — 2026-09-21 Curated/shipped
       pack DEFINITIONS are global reference data → `shared` partition, one
       copy, offline-updatable; assignments to hosts/tags/sites and any
