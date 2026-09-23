@@ -112,6 +112,7 @@ class Host(TestBase):
 
     # Software inventory fields
     software_updated_at = Column(DateTime, nullable=True)
+    updates_updated_at = Column(DateTime, nullable=True)
 
     # User access data timestamp
     user_access_updated_at = Column(DateTime, nullable=True)

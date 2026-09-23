@@ -9610,16 +9610,20 @@ Evidence is FOUR domains, not one: 21.1 fact tables (resolved through
 `host_facts.serves()` -- note `serves`, not `answerable`: this is a new
 consumer and `UNKNOWN` must not let it claim an assessment), plus the
 server-side domains -- vuln findings, compliance results, config/drift state.
-The fact half has a coverage advertisement to consult. The other three do not,
-and need the equivalent: "has this domain actually RUN for this host", which
-is not the same question as "did it return rows".
+The fact half has a coverage advertisement to consult. **Corrected
+2026-09-23:** the other three are NOT blind -- each already records, per host,
+that it ran (`HostVulnerabilityScan.scanned_at`, `HostComplianceScan.scanned_at`,
+check-mode `config_profile_run.completed_at`), so "has this domain actually
+RUN for this host" is answerable today and 21.2 builds no new machinery for
+it. What those records do NOT answer is whether the run is still RECENT enough
+to trust -- that is the open question, and S1 owns it.
 
 **Tier and storage.** Enterprise. Curated/shipped rule packs are global
 reference data -> `shared` partition, one copy, offline-updatable;
 tenant-authored rules and every recommendation -> `tenant` partition, soft
 ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
 
-- [ ] **S0 -- Spike: can a declarative rule actually say what we need?**
+- [x] **S0 -- Spike: can a declarative rule actually say what we need?**
       Before any schema. Hand-write 8-10 REAL rules against the live dev data
       in this repo -- at least two per lens (security / performance /
       availability / stability), and at least one that must join facts to CVE
@@ -9632,6 +9636,130 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       offline-updatable rule packs" and must be known now, not after S6 is
       built on the assumption.
 
+      **RESULT 2026-09-23 -- GREEN: rules are data; no rule needed code.** 13
+      rules (4 security, 2 performance, 2 availability, 2 stability, 2
+      cross-domain, 1 naive twin) run against the real `theeverlys` tenant (6
+      hosts, 6 platforms) with real facts from `gdr-t14`, collected by the
+      agent's own native provider. The grammar that held:
+      `requires {facts: {table: [columns]}, domains: [...]}` + a SQLite `when`
+      query + impact/likelihood + a remediation template, evaluated over a
+      per-host in-memory SQLite of contract fact tables plus `sm_*` views of
+      server evidence -- 21.1's dialect, so a rule pack is as portable as a
+      query pack. The facts x CVE x drift join (SEC-X01) fired on real data
+      (17 exposed ports, 41 critical CVEs, 4 drifted tasks) once evidence was
+      admitted as fresh. Strict freshness: 58 not_assessable / 17 does-not-fire
+      / 3 fires across 78 rule-host pairs, every not_assessable with its reason.
+
+      **Negative controls.** (1) Fleet-relative ("version lags the fleet") IS
+      expressible -- `scope: fleet`, one SQLite over all assessed hosts -- but
+      only meaningful with a declared `peer_group`: without one it compared
+      Ubuntu `curl 8.18.0-1ubuntu2.5` (backported fixes) against 8.21.0 on the
+      BSDs, a false finding. (2) Trend rules ("full within 7 days") are NOT a
+      grammar limit but an EVIDENCE one: nothing retains samples until 21.5, so
+      the rule declares `metric_history` and resolves `domain_unavailable`.
+      Neither needs an escape hatch into code.
+
+      **What S0 changed -- S1 inherits all of it:**
+      * **Four outcomes, not three.** `not_applicable` (x13s has no `mounts`:
+        `wrong_platform`) must not be shown as a gap -- host_facts already
+        says NOT_APPLICABLE is not a finding. fires / does_not_fire /
+        not_assessable / not_applicable.
+      * **Coverage must be COLUMN-level.** Native `mounts` serves the table but
+        populates only device/flags/path/type. "Filesystem > 90% full" with
+        table-level requires returned does_not_fire on a real host -- the
+        phase's defect, one level down. Rules declare columns; a provider
+        advertises the columns it populates (today inferred from rows in the
+        spike; S1 makes it part of the S1-of-21.1 advertisement).
+      * **Facts are served -> collected -> fresh, three checks.** The server
+        stores fact ROWS only as query-pack results, and the dev tenant has
+        zero pack runs: every host advertises 12-15 served tables and not one
+        row exists server-side. The advisor must drive collection of the
+        tables its assigned rules require (a pack assignment it owns), or every
+        fact rule is not_assessable forever.
+      * **"Inventory" is per source.** Heartbeat (`last_access`) proves the
+        agent is alive, not that its update list is current: updates ->
+        `updates_updated_at`, reboot -> `reboot_required_updated_at`, packages
+        -> `software_updated_at`, firewall -> `firewall_status.last_updated`.
+        **Corrected 2026-09-23:** this first said updates ->
+        `available_packages_fingerprint_at`, which stamps the available-
+        packages CATALOG, a different report. Nothing recorded when update
+        detection ran at all -- pending updates are replaced wholesale, so
+        "checked, none pending" and "never checked" were both zero rows. Added
+        `host.updates_updated_at` (migration `q5updatesat`), stamped on every
+        update report; NULL until a host's next update cycle, which is the
+        honest answer.
+      * **Fixed schemas everywhere.** Fact tables materialize from the
+        CONTRACT column list (NULL where unpopulated), server views from
+        declared columns -- a host with zero pending updates must have an
+        empty table, not no table.
+      * **Contract gap:** "a LISTENING service's own package has a critical CVE"
+        needs process -> owning package; no contract table provided it.
+        Closed the same day -- see the follow-ups below.
+
+      **Defects found and fixed in the same change.** Native `certificates`
+      broke every osquery-style pack: `ca` came from a path/subject heuristic
+      (ACCVRAIZ1, a root CA, read `ca=0`) and dates were ISO-8601 where osquery
+      reports epoch text, so `CAST(not_valid_after AS INTEGER)` read 2030 and
+      every certificate looked expired. Now `ca` = X509_check_ca via
+      `openssl -purpose` (121/122, matching osquery's 121) and dates are epoch
+      text; the Certificates tab's heuristic `is_ca` is untouched.
+      `tests/test_fact_native_certificates.py`. Note osquery's own
+      `not_valid_after` is off by the host's UTC offset (it reads GMT as local
+      time) -- native is right, and the conformance harness must not "fix" it.
+
+      **The firefox finding, CLOSED 2026-09-23 -- and it was not one bug.**
+      Not stale data: the CURRENT engine reproduced it. Three causes, in the
+      order they were peeled back:
+      * **Epoch ordering (fixed).** `vuln_engine` parsed "1:2.0" as 1 then
+        ":2" (below "2.0"); `advisory_engine` stripped epochs outright ("2:1.0"
+        below "1:9.9"). `compare()` is now pure dpkg/rpm EVR order in both.
+      * **Feeds drop epochs (fixed, conservatively).** Measured in the shared
+        catalog: Red Hat rows NEVER carry an epoch (0 of 6,164, openssl is
+        epoch 1), Ubuntu rows are upstream versions (447,205 of 451,740 have no
+        revision, 367 an epoch). Honoring the installed epoch against those
+        would read every epoch'd package as patched -- the missed-patch error.
+        So an INSTALLED-vs-FIXED check drops the installed epoch whenever the
+        bound has none (`VersionComparator._vs`, `_is_outdated`). Alone this
+        clears 28 of `gdr-t14`'s 1,959 findings, all legitimately (`file
+        1:5.46` vs a 4.20 fix, `xwayland 2:24.1.10-1` vs 24.1.10) and none of
+        its 41 criticals.
+      * **Cross-distro matching (FIXED 2026-09-23).** `get_vulnerability_data`
+        selected rows by package manager only, so every apt host was matched
+        against BOTH the Ubuntu and the Debian feeds -- the 1,588 firefox
+        findings (34 of 41 criticals) were Debian's firefox fixes applied to
+        Ubuntu's same-named transitional package. Now `_FEED_FAMILIES` maps
+        the host's OS to the feeds that speak for it (Ubuntu + derivatives ->
+        ubuntu, Debian/Raspbian -> debian, RHEL/Rocky/Alma/CentOS/Oracle ->
+        redhat, `yum` read as `dnf`), and an unmapped OS is `not_assessable`
+        with reason `vulnerability_feed` -- never "no known vulnerabilities".
+        The card says which gap it is (no feed vs no package inventory).
+      * **Also seen:** the Ubuntu fetcher keeps ONE row per (CVE, package)
+        across all releases -- whichever "released" status came first,
+        including the `upstream` pseudo-release -- so a host is judged against
+        another release's fix.
+      Same pass: the USN advisory fetcher asked for `limit=200` in one request
+      and Ubuntu's API now answers 422 above 20 -- every scheduled advisory
+      refresh failed while the live test (limit 5) stayed green. It pages now.
+
+      **Follow-ups DONE 2026-09-23 (fact contract v3).** (1) Native `mounts`
+      now fills its block/inode columns from `statvfs` -- ONLY for an
+      allow-list of local and kernel filesystem types, so an unreachable NFS,
+      CIFS, FUSE or autofs mount is never touched and stays NULL ("not
+      measured"). 71 of 71 measured mounts match osqueryi on `gdr-t14`.
+      (2) The contract gap closed as `sysmanage_process_packages`, NOT the
+      `sysmanage_package_files` named above: a full file -> package table is
+      hundreds of thousands of rows to answer a question about a few hundred
+      executables, and a path-parameterized one cannot serve the rule
+      (the advisor does not know the process paths in advance). One row per
+      running process -- pid, path, package, version, package_manager -- with
+      `state` owned / unowned / unreadable / unresolved kept apart. dpkg
+      (incl. merged-/usr spellings and `:arch` lists), rpm, snap, FreeBSD
+      `pkg which`, OpenBSD/NetBSD `+CONTENTS`, Homebrew Cellar; not Windows.
+      729 processes in 0.66s on `gdr-t14`. BSD resolvers are unit-tested but
+      unexercised on real hosts until the next `bsd-tests.yml` dispatch.
+      Reproduce: `sysmanage-professional-plus/scripts/advisor_spike.py`
+      (`--collect` in the agent venv, then evaluate in the server venv).
+
 - [ ] **S1 -- Rule contract + evidence declaration.** The versioned rule
       schema, pinned the way `FACT_CONTRACT_VERSION` is, because shipped rule
       packs are content we have to keep readable across agent and server
@@ -9642,6 +9770,22 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       contract, not an error path. "Does not fire" and "could not be
       evaluated" must never share a representation; that identity is the
       defect this phase exists to prevent.
+      **Evidence resolution per domain (added 2026-09-23, verified in code):**
+      facts -> `host_facts.serves()` / `why_not_served()`; vuln -> the host's
+      `HostVulnerabilityScan` row (`scanned_at`); compliance -> its
+      `HostComplianceScan` row (`scanned_at`); profile drift -> a SUCCESSFUL
+      check-mode `config_profile_run` for that profile (`completed_at`), since
+      `ConfigDriftFinding` only records divergences and its absence proves
+      nothing; golden-host drift (20.2 / 21.1 S7) is computed from facts, so it
+      resolves through `serves()` like any other fact consumer. No new "has it
+      run" machinery is needed -- see the correction above.
+      **Freshness is part of the contract, not a UI nicety.** A scan from
+      months ago is measured but no longer TRUE, and a rule fired on it is the
+      confident-recommendation-with-nothing-underneath this phase forbids.
+      Each domain carries a max evidence age (per-domain defaults, tenant
+      overridable); older evidence resolves to `not_assessable` with reason
+      `stale`, distinct from `missing`, so an operator knows whether to fix
+      coverage or just rescan.
 
 - [ ] **S2 -- `advisor_engine` + the partition split.** New Cython engine, the
       FOUR registrations `make check-engine-codes` gates (Pro+ MODULES +
@@ -9695,6 +9839,57 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       settled one. The seeded fixture must contain hosts that could NOT be
       assessed, for the same reason 21.1's did -- a fleet where everything
       answers documents the feature without showing the thing it exists for.
+
+- [ ] **Vulnerability feed coverage beyond Ubuntu / Debian / EL** (added
+      2026-09-23 with the feed mapping). Since that mapping, a host whose OS no
+      ingested feed covers is `not_assessable` -- which today is every FreeBSD,
+      OpenBSD, NetBSD, macOS and Windows host, and every Linux distro outside
+      the three families. That is honest, and it is also the advisor's single
+      biggest blind spot, so the feeds are real work here, not a nicety. Each
+      needs its OWN version comparator (dpkg ordering is wrong for all of them):
+      * **FreeBSD -- VuXML** (`vuln.xml`, what `pkg audit` reads): official,
+        per-package ranges in ports naming; exact match on `pkg` names. Needs
+        FreeBSD version order (`1.2.3_1,1` -- `_N` port revision, `,N` port
+        epoch at the END). Highest value per effort; do first.
+      * **NetBSD -- pkgsrc `pkg-vulnerabilities`** (what `pkg_admin audit`
+        reads): one signed file of package patterns; `nbN` revisions. Cheap.
+      * **Windows -- MSRC CVRF/CSAF** (a fetcher exists; its rows are keyed
+        `windows` and never match). Vulnerability is by OS BUILD + installed
+        KBs, not package names: the agent must report the full build (UBR) and
+        hotfix list. The most valuable for mixed fleets; medium-high effort.
+      * **macOS -- the OS itself** by version against Apple security releases /
+        NVD. Homebrew formulas and App Store apps only have fuzzy NVD CPE
+        matching: leave them not assessable rather than guess.
+      * **OpenBSD -- errata** (openbsd.org/errataNN.html). The BASE system,
+        not ports: ports have no official feed and stay not assessable. No
+        version comparator needed -- the agent already reports `syspatch -c`,
+        each missing erratum keyed by its patch id (`001_xserver`), which is
+        exactly the id advisory_engine's errata parser emits. So a security
+        erratum still pending on the host IS the finding, straight from
+        OpenBSD's own tool. Only 18 of 78 current errata cite a CVE, which is
+        why the CVE-keyed path could never have covered this. The scraper
+        itself was dead until 2026-09-23 (see below). **DONE 2026-09-23 as a
+        PARTIAL-COVERAGE verdict** (decided: base assessed, ports not, rather
+        than the whole host "not assessable"). Each SECURITY erratum for the
+        host's release is scored through the same scan_packages as every other
+        OS -- pending in `syspatch -c` = a finding, reliability errata never
+        are; findings soft-reference the shared_advisory row and read back as
+        `OpenBSD-7.9-001`. Not assessable, with the reason, when update
+        detection never ran (`host.updates_updated_at` NULL) or the catalog has
+        no errata for the release. A new `coverage` field (derived from the
+        host on every response) lists
+        what was assessed and every package manager that was not, with counts
+        -- ports on OpenBSD, and equally snaps on Ubuntu -- and the card shows
+        it beside the verdict.
+      * **advisory_engine errata scraper, FIXED 2026-09-23.** It was pinned to
+        7.5-7.7 while 7.8 and 7.9 were the supported releases, so every refresh
+        fetched errata for no supported host and reported success; releases are
+        now discovered from errata.html (the two newest), and a failure raises
+        instead of returning nothing. Summaries also lost the "> 001:" / "<li"
+        debris from slicing at the anchor attributes. Live: 78 errata (7.8 +
+        7.9), 40 security.
+      Every feed ingests server-side into the shared catalog, so it mirrors
+      into air-gap bundles like the existing ones.
 
 **Sequencing notes.** S0 gates S1: if the grammar cannot express the rules, the
 "curated packs" bullet is a fiction and the phase needs re-scoping before any

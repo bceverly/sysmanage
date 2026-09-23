@@ -2273,13 +2273,13 @@ jobs:
           sudo systemctl enable --now nginx
           \`\`\`
 
-          ### Alpine Linux (3.19, 3.20, 3.21)
+          ### Alpine Linux (3.20, 3.21, 3.22)
           \`\`\`bash
-          # Download the APK package for your Alpine version (e.g., alpine319, alpine320, alpine321)
-          wget https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-alpine320.apk
+          # Download the APK package for your Alpine version (alpine320, alpine321 or alpine322)
+          wget https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-alpine322.apk
 
           # Allow installation of unsigned packages (required for GitHub releases)
-          apk add --allow-untrusted ./sysmanage-${VERSION}-alpine320.apk
+          apk add --allow-untrusted ./sysmanage-${VERSION}-alpine322.apk
 
           # The package installs to /usr/libexec/sysmanage with pip packages in a subdirectory
           # Dependencies: python3, nginx, postgresql are automatically installed
@@ -2399,14 +2399,14 @@ jobs:
 
           **Alpine Linux:**
           \`\`\`bash
-          # For Alpine 3.19:
-          sha256sum -c sysmanage-${VERSION}-alpine319.apk.sha256
-
           # For Alpine 3.20:
           sha256sum -c sysmanage-${VERSION}-alpine320.apk.sha256
 
           # For Alpine 3.21:
           sha256sum -c sysmanage-${VERSION}-alpine321.apk.sha256
+
+          # For Alpine 3.22:
+          sha256sum -c sysmanage-${VERSION}-alpine322.apk.sha256
           \`\`\`
 
           **Windows:**
@@ -2446,7 +2446,7 @@ jobs:
 
           ## System Requirements
 
-          - **Operating System**: Ubuntu 22.04+, Debian 11+, Alpine Linux 3.19+, and other supported platforms
+          - **Operating System**: Ubuntu 22.04+, Debian 11+, Alpine Linux 3.20+, and other supported platforms
           - **Database**: PostgreSQL 12+ (recommended) or SQLite
           - **Web Server**: Nginx (for serving frontend)
           - **Python**: 3.10+ (included in package)

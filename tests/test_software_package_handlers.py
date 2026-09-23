@@ -329,6 +329,22 @@ class TestHandlePackageUpdatesUpdate:
         assert result["message_type"] == "success"
 
     @pytest.mark.asyncio
+    async def test_an_empty_report_still_records_that_detection_ran(
+        self, session, mock_connection, sample_host
+    ):
+        """Zero pending updates is a MEASUREMENT, not an absence of one. Without
+        the timestamp, "checked, nothing pending" and "never checked" were both
+        zero rows -- and an OpenBSD errata verdict read an unchecked host as
+        fully patched."""
+        assert sample_host.updates_updated_at is None
+        with patch("backend.utils.host_validation.validate_host_id"):
+            await handle_package_updates_update(
+                session, mock_connection, {"available_updates": []}
+            )
+        session.refresh(sample_host)
+        assert sample_host.updates_updated_at is not None
+
+    @pytest.mark.asyncio
     async def test_handle_package_updates_no_host_id(self, session):
         """Test package updates with missing host_id."""
         connection = Mock()

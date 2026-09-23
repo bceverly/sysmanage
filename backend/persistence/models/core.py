@@ -179,6 +179,12 @@ class Host(Base):
     # Software inventory fields
     software_updated_at = Column(DateTime, nullable=True)
 
+    # When update detection last REPORTED (migration q5updatesat).  Pending
+    # updates are replaced wholesale on every report, so without this "checked,
+    # nothing pending" and "never checked" were both zero rows -- and an
+    # OpenBSD errata verdict read an unchecked host as fully patched.
+    updates_updated_at = Column(DateTime, nullable=True)
+
     # User access data timestamp
     user_access_updated_at = Column(DateTime, nullable=True)
 

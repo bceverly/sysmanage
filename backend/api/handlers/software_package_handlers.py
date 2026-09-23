@@ -260,6 +260,15 @@ async def handle_package_updates_update(  # NOSONAR
                     str(e),
                 )
 
+        # When update detection last reported -- unconditionally, as
+        # software_updated_at is: a report replayed from the queue is still a
+        # report. This is what tells "nothing pending" from "never checked".
+        db.execute(
+            update(Host)
+            .where(Host.id == connection.host_id)
+            .values(updates_updated_at=datetime.now(timezone.utc).replace(tzinfo=None))
+        )
+
         # Only update host's last access timestamp if this is from a live connection
         # (not from background queue processing of old messages)
         if (
