@@ -147,7 +147,7 @@ class _Service:
 
 # Every route behind the Pro+ gate, with a zero-argument invocation.
 GATED = [
-    ("get_available_sources", lambda: cve.get_available_sources()),
+    ("get_available_sources", cve.get_available_sources),
     (
         "get_cve_refresh_settings",
         lambda: cve.get_cve_refresh_settings(db=_FakeSession()),

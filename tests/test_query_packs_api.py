@@ -67,8 +67,8 @@ class FakeDB:
 def client(monkeypatch):
     app = FastAPI()
     app.include_router(query_packs.router, prefix="/api/v1")
-    app.dependency_overrides[require_authenticated_user] = lambda: FakeUser()
-    app.dependency_overrides[get_tenant_db] = lambda: FakeDB()
+    app.dependency_overrides[require_authenticated_user] = FakeUser
+    app.dependency_overrides[get_tenant_db] = FakeDB
     # JWTBearer() and the licence gate are instances built at import time, so
     # they are overridden by identity off the router rather than by calling
     # the factories again — a fresh call makes a different object and the
@@ -143,9 +143,7 @@ class TestMutationsStillCarryARole:
             def has_role(self, _role):
                 return False
 
-        client.app.dependency_overrides[require_authenticated_user] = (
-            lambda: NoRoleUser()
-        )
+        client.app.dependency_overrides[require_authenticated_user] = NoRoleUser
         response = client.post(
             "/api/v1/query-packs",
             json={"name": "p", "queries": [{"name": "q", "sql": "SELECT 1"}]},

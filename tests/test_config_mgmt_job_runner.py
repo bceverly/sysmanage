@@ -514,7 +514,7 @@ class TestCancel:
         targets = [target(), target(), target("queued", command_id="c")]
         session = _Session(targets=targets, profiles=[profile()])
         the_job = job(status="running", started_at=NOW)
-        with patch.object(runner.fleet.shim, "engine_module", lambda: _Engine()):
+        with patch.object(runner.fleet.shim, "engine_module", _Engine):
             skipped = runner.cancel_job(session, the_job, "operator stopped it")
         assert skipped == 2
         assert the_job.status == "canceled"
@@ -524,7 +524,7 @@ class TestCancel:
         # marking it cancelled would claim something untrue.
         in_flight = target("queued", command_id="c")
         session = _Session(targets=[in_flight], profiles=[profile()])
-        with patch.object(runner.fleet.shim, "engine_module", lambda: _Engine()):
+        with patch.object(runner.fleet.shim, "engine_module", _Engine):
             runner.cancel_job(session, job(status="running"), "stop")
         assert in_flight.status == "queued"
 
@@ -540,7 +540,7 @@ class TestEmptyInventory:
         session = _Session(profiles=[profile()])
         inventory = SimpleNamespace(id=uuid.uuid4(), name="empty", all_hosts=False)
         with patch.object(runner.fleet, "resolve_hosts", lambda *_a: []):
-            with patch.object(runner.fleet.shim, "engine_module", lambda: _Engine()):
+            with patch.object(runner.fleet.shim, "engine_module", _Engine):
                 new_job = runner.create_job(
                     session,
                     SimpleNamespace(
@@ -575,7 +575,7 @@ class TestTickGating:
         # Stalling live dispatch because SCHEDULING is unavailable would be a
         # much larger failure than a late launch.
         session = _Session(targets=[target()], profiles=[profile()], jobs=[job()])
-        with patch.object(runner.shim, "engine_module", lambda: _Engine()):
+        with patch.object(runner.shim, "engine_module", _Engine):
             with patch.object(runner, "module_loader_automation", lambda: None):
                 with patch.object(
                     runner, "iter_host_databases", lambda: [("d", None, session)]

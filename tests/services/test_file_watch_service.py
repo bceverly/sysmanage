@@ -4,6 +4,7 @@
 
 """Resolving, dispatching and ingesting file watches — Phase 21.1 S7."""
 
+from keyword import iskeyword
 import json
 import uuid
 
@@ -165,6 +166,20 @@ class TestDispatch:
         assert "*" not in fws.WATCH_SQL
         for column in fws.WATCH_COLUMNS:
             assert column in fws.WATCH_SQL
+
+    def test_watch_sql_is_built_from_bare_identifiers(self):
+        """Keeps the ``# nosec B608`` on WATCH_SQL honest.
+
+        That suppression rests on both interpolated operands being constant
+        SQL identifiers. Nothing stops a later edit from putting an expression,
+        a quoted literal or a comma-carrying alias in the tuple, at which point
+        the suppression would be covering a real f-string-into-SQL hazard
+        rather than a false positive. Assert the premise instead of trusting
+        that a future reader re-derives it.
+        """
+        for name in (*fws.WATCH_COLUMNS, fws.WATCH_TABLE):
+            assert name.isidentifier(), name
+            assert not iskeyword(name), name
 
     def test_only_hosts_that_advertise_the_table_are_dispatched_to(self):
         assert fws.should_dispatch(FakeHost(serves=True)) is True

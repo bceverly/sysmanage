@@ -207,7 +207,7 @@ def job_row(**over):
 
 
 def _engine():
-    return patch.object(fleet.shim, "engine_module", lambda: _Engine())
+    return patch.object(fleet.shim, "engine_module", _Engine)
 
 
 class TestInventories:

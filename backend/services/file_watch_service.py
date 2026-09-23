@@ -64,7 +64,15 @@ WATCH_COLUMNS = (
     "type",
     "target",
 )
-WATCH_SQL = f"SELECT {', '.join(WATCH_COLUMNS)} FROM {WATCH_TABLE}"
+# B608 (hardcoded_sql_expressions) does not apply here on two counts, and the
+# suppression is narrow because of them. First, both operands are module
+# constants above -- no caller, request or database value reaches this string.
+# Second, and more to the point, the SERVER NEVER EXECUTES IT: the text is
+# shipped to the agent as a query pack's ``sql`` (see build_dispatch below) and
+# runs against the agent's in-memory SQLite fact database. There is no server
+# statement here to inject into. ``test_watch_sql_is_built_from_bare_identifiers``
+# keeps the first claim true if the column tuple is ever edited.
+WATCH_SQL = f"SELECT {', '.join(WATCH_COLUMNS)} FROM {WATCH_TABLE}"  # nosec B608
 
 
 def _utcnow() -> datetime:

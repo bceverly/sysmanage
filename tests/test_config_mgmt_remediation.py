@@ -166,7 +166,7 @@ class TestMatching:
         session = _Session(
             ConfigRemediationRule=[rule()], ConfigProfile=[repair_profile()]
         )
-        with patch.object(svc.shim, "engine_module", lambda: _Engine()):
+        with patch.object(svc.shim, "engine_module", _Engine):
             matched, profile = svc.match_for_finding(session, finding())
         assert matched.name == "sshd repair"
         assert profile.name == "sshd fix"
@@ -179,7 +179,7 @@ class TestMatching:
             ConfigRemediationRule=[rule()],
             ConfigProfile=[repair_profile(active=False)],
         )
-        with patch.object(svc.shim, "engine_module", lambda: _Engine()):
+        with patch.object(svc.shim, "engine_module", _Engine):
             matched, profile = svc.match_for_finding(session, finding())
         assert matched is not None
         assert profile is None
@@ -189,7 +189,7 @@ class TestMatching:
             ConfigRemediationRule=[rule()],
             ConfigProfile=[repair_profile(active=False)],
         )
-        with patch.object(svc.shim, "engine_module", lambda: _Engine()):
+        with patch.object(svc.shim, "engine_module", _Engine):
             with caplog.at_level("WARNING"):
                 svc.match_for_finding(session, finding())
         assert "missing or" in caplog.text
@@ -240,7 +240,7 @@ class TestAutoRemediation:
         assert summary["queued"] == 0
 
     def test_an_empty_findings_list_does_nothing(self):
-        with patch.object(svc.shim, "engine_module", lambda: _Engine()):
+        with patch.object(svc.shim, "engine_module", _Engine):
             assert svc.auto_remediate(_Session(), [])["queued"] == 0
 
     def test_a_host_that_refuses_the_command_does_not_stop_the_pass(self):
@@ -265,7 +265,7 @@ class TestAutoRemediation:
         broken = SimpleNamespace(
             query=lambda *_a: (_ for _ in ()).throw(RuntimeError("db gone"))
         )
-        with patch.object(svc.shim, "engine_module", lambda: _Engine()):
+        with patch.object(svc.shim, "engine_module", _Engine):
             assert svc.auto_remediate(broken, [finding()])["queued"] == 0
 
 
@@ -287,7 +287,7 @@ class TestRuleEndpoints:
     @pytest.mark.asyncio
     async def test_a_catch_all_pattern_is_refused_by_the_engine(self):
         session = _Session(ConfigProfile=[repair_profile()])
-        with patch.object(svc.shim, "engine_module", lambda: _Engine()):
+        with patch.object(svc.shim, "engine_module", _Engine):
             with pytest.raises(HTTPException) as err:
                 await api.create_rule(
                     api.RuleRequest(
@@ -305,7 +305,7 @@ class TestRuleEndpoints:
         session = _Session(
             ConfigRemediationRule=[rule()], ConfigProfile=[repair_profile()]
         )
-        with patch.object(svc.shim, "engine_module", lambda: _Engine()):
+        with patch.object(svc.shim, "engine_module", _Engine):
             with pytest.raises(HTTPException) as err:
                 await api.create_rule(
                     api.RuleRequest(
@@ -331,7 +331,7 @@ class TestFindingRepair:
     @pytest.mark.asyncio
     async def test_a_preview_reports_no_match_rather_than_failing(self):
         session = _Session(ConfigDriftFinding=[finding()], ConfigRemediationRule=[])
-        with patch.object(svc.shim, "engine_module", lambda: _Engine()):
+        with patch.object(svc.shim, "engine_module", _Engine):
             out = await api.match_finding(str(uuid.uuid4()), session)
         assert out.matched is False
 
@@ -342,7 +342,7 @@ class TestFindingRepair:
             ConfigRemediationRule=[rule()],
             ConfigProfile=[repair_profile(active=False)],
         )
-        with patch.object(svc.shim, "engine_module", lambda: _Engine()):
+        with patch.object(svc.shim, "engine_module", _Engine):
             out = await api.match_finding(str(uuid.uuid4()), session)
         assert out.matched is True
         assert out.unavailable is True
@@ -373,7 +373,7 @@ class TestFindingRepair:
     @pytest.mark.asyncio
     async def test_no_matching_rule_is_404(self):
         session = _Session(ConfigDriftFinding=[finding()], ConfigRemediationRule=[])
-        with patch.object(svc.shim, "engine_module", lambda: _Engine()):
+        with patch.object(svc.shim, "engine_module", _Engine):
             with pytest.raises(HTTPException) as err:
                 await api.repair_finding(
                     str(uuid.uuid4()), session, user(SecurityRoles.RUN_SCRIPT)
@@ -388,7 +388,7 @@ class TestFindingRepair:
             ConfigProfile=[repair_profile()],
             Host=[host(active=False)],
         )
-        with patch.object(svc.shim, "engine_module", lambda: _Engine()):
+        with patch.object(svc.shim, "engine_module", _Engine):
             with pytest.raises(HTTPException) as err:
                 await api.repair_finding(
                     str(uuid.uuid4()), session, user(SecurityRoles.RUN_SCRIPT)
@@ -405,7 +405,7 @@ class TestFindingRepair:
             ConfigProfile=[repair_profile()],
             Host=[host()],
         )
-        with patch.object(svc.shim, "engine_module", lambda: _Engine()):
+        with patch.object(svc.shim, "engine_module", _Engine):
             with patch.object(svc, "apply_remediation", lambda *_a, **_k: "cmd"):
                 out = await api.repair_finding(
                     str(uuid.uuid4()), session, user(SecurityRoles.RUN_SCRIPT)
@@ -421,7 +421,7 @@ class TestRuleEditing:
         session = _Session(
             ConfigRemediationRule=[row], ConfigProfile=[repair_profile()]
         )
-        with patch.object(svc.shim, "engine_module", lambda: _Engine()):
+        with patch.object(svc.shim, "engine_module", _Engine):
             out = await api.update_rule(
                 str(uuid.uuid4()),
                 api.RuleUpdateRequest(auto_apply=True),
@@ -437,7 +437,7 @@ class TestRuleEditing:
         session = _Session(
             ConfigRemediationRule=[rule()], ConfigProfile=[repair_profile()]
         )
-        with patch.object(svc.shim, "engine_module", lambda: _Engine()):
+        with patch.object(svc.shim, "engine_module", _Engine):
             with pytest.raises(HTTPException) as err:
                 await api.update_rule(
                     str(uuid.uuid4()),
@@ -464,7 +464,7 @@ class TestRuleEditing:
         session = _Session(
             ConfigRemediationRule=[row], ConfigProfile=[repair_profile()]
         )
-        with patch.object(svc.shim, "engine_module", lambda: _Engine()):
+        with patch.object(svc.shim, "engine_module", _Engine):
             out = await api.update_rule(
                 str(uuid.uuid4()),
                 api.RuleUpdateRequest(profile_id=None),
