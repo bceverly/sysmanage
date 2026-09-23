@@ -495,7 +495,7 @@ msgid "Invalid TOTP code."
 msgstr "Ungültiger TOTP-Code."
 
 #: backend/api/auth_mfa.py:296 backend/api/auth_mfa.py:358
-msgid "MFA challenge expired — please log in again."
+msgid "MFA challenge expired -- please log in again."
 msgstr "MFA-Ausforderung abgelaufen - bitte melden Sie sich erneut an."
 
 #: backend/api/auth_mfa.py:301
@@ -1423,10 +1423,10 @@ msgstr ""
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed"
+"Mirror %s has not completed a successful sync yet -- wait for sync to succeed"
 " before assigning it as a default."
 msgstr ""
-"Spiegel %s hat noch keine erfolgreiche Synchronisierung durchgeführt — "
+"Spiegel %s hat noch keine erfolgreiche Synchronisierung durchgeführt -- "
 "warten Sie darauf, dass die Synchronisierung erfolgreich verläuft, bevor Sie"
 " ihn als Standard festlegen."
 
@@ -1473,11 +1473,11 @@ msgstr ""
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be"
-" loaded — the collector reads each target's bundle from a snapshot of its "
+" loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 "Luftschicht-Sammlungen erfordern das Laden des Moduls "
-"repository_mirroring_engine — der Sammler liest jedes Zielpaket aus einem "
+"repository_mirroring_engine -- der Sammler liest jedes Zielpaket aus einem "
 "Spiegelbildbaum."
 
 #: backend/api/airgap_collector_runs.py:229
@@ -4141,12 +4141,12 @@ msgstr ""
 
 #: backend/api/agent.py:605
 msgid "Host ID no longer valid - please re-register"
-msgstr "Host-ID ist ungültig – bitte erneut registrieren"
+msgstr "Host-ID ist ungültig - bitte erneut registrieren"
 
 #: backend/api/agent.py:617
 msgid "Host ID and hostname mismatch - please re-register"
 msgstr ""
-"Host-ID und Hostname stimmen nicht überein – bitte erneut registrieren"
+"Host-ID und Hostname stimmen nicht überein - bitte erneut registrieren"
 
 #: backend/api/agent.py:634
 msgid "Host must register before sending inventory data"
@@ -5094,11 +5094,11 @@ msgstr ""
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
-"message(s) for retry (NOT deleting) — may be an in-flight enrollment or a "
+"message(s) for retry (NOT deleting) -- may be an in-flight enrollment or a "
 "deleted host"
 msgstr ""
 "Host %(host_id)s nicht in dieser Datenbank gefunden; verschiebe %(count)d "
-"Wartemeldung(en) zum erneuten Versuch (NICHT löschen) – kann eine laufende "
+"Wartemeldung(en) zum erneuten Versuch (NICHT löschen) - kann eine laufende "
 "Anmeldung oder ein gelöschter Host sein"
 
 #: backend/websocket/inbound_processor.py:284
@@ -5620,10 +5620,10 @@ msgstr "Ungültiges Geheimnisformat"
 #, python-format
 #~ msgid ""
 #~ "Host %s not found on this database; deferring %d queued message(s) for retry"
-#~ " (NOT deleting) — may be an in-flight enrollment or a deleted host"
+#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
 #~ "Host %s nicht in dieser Datenbank vorhanden; verschiebe %d "
-#~ "Warteschlangennachricht(en) auf erneuten Versuch (NICHT löschen) – kann eine"
+#~ "Warteschlangennachricht(en) auf erneuten Versuch (NICHT löschen) - kann eine"
 #~ " laufende Anmeldung oder ein gelöschter Host sein"
 
 #, python-format

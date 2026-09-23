@@ -35,7 +35,7 @@ def _alembic(args, db_path):
     env = {**os.environ, "DATABASE_URL": f"sqlite:///{db_path}"}
     # A real alembic error exits with a POSITIVE code + stderr traceback; a
     # NEGATIVE return code is a signal-kill (e.g. SIGPIPE = -13 under heavy xdist
-    # parallelism) with no stderr — an environmental flake. Migrations are
+    # parallelism) with no stderr -- an environmental flake. Migrations are
     # idempotent, so retry a signal-kill a few times before giving up.
     result = None
     for _attempt in range(4):

@@ -330,7 +330,7 @@ async def reboot_system(
 def _enqueue_command_for_hosts(db: Session, host_ids: list, message_dict: dict) -> int:
     """Enqueue one OUTBOUND row of ``message_dict`` per host_id.  Direct
     ``connection_manager.broadcast_to_*`` calls bypass the queue, lose
-    messages on transient disconnects, and never reach offline agents —
+    messages on transient disconnects, and never reach offline agents --
     fan-out must always go through the queue."""
     enqueued = 0
     for host_id in host_ids:

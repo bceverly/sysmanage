@@ -93,7 +93,7 @@ describe("ConfigProfileRunHistory", () => {
     expect(screen.queryByText("Changed")).not.toBeInTheDocument();
   });
 
-  test("a dry run is labelled so it cannot be read as applied", async () => {
+  test("a dry run is labeled so it cannot be read as applied", async () => {
     vi.mocked(getConfigProfileRuns).mockResolvedValue([
       run({ check_mode: true }),
     ]);

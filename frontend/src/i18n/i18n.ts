@@ -78,7 +78,7 @@ i18n.on('failedLoading', (lng, ns, msg) => {
   // eslint-disable-next-line no-console
   console.error(
     `[i18n] FAILED to load ${lng}/${ns} from ` +
-      `${(i18n.options.backend as { loadPath?: string } | undefined)?.loadPath} — ` +
+      `${(i18n.options.backend as { loadPath?: string } | undefined)?.loadPath} -- ` +
       `every string in ${lng} will silently fall back to English. Cause: ${msg}`,
   );
 });
@@ -125,7 +125,7 @@ export const installCatalogGuard = (instance: typeof i18n) => {
       await instance.reloadResources([lng], ['translation']);
     } catch {
       // Leave it to the failedLoading handler above to report; falling back to
-      // English is the pre-existing behaviour, not a new failure.
+      // English is the pre-existing behavior, not a new failure.
       delivered.delete(lng);
     }
   };

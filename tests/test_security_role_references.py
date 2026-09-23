@@ -6,7 +6,7 @@
 
 THE BUG THIS CATCHES
 --------------------
-``SecurityRoles.VIEW_SCRIPT`` does not exist — the script roles are ADD, EDIT,
+``SecurityRoles.VIEW_SCRIPT`` does not exist -- the script roles are ADD, EDIT,
 DELETE, RUN and DELETE_EXECUTION. Phase 21.1 S4 shipped seven read endpoints
 gated on it, and every one of them returned 500 the moment a page loaded:
 
@@ -15,7 +15,7 @@ gated on it, and every one of them returned 500 the moment a page loaded:
 Nothing caught it earlier because the reference sits INSIDE a handler body, so
 importing the module is clean, pylint sees an attribute on an imported name,
 and the service-layer tests never go through the router. It only fails when
-that specific endpoint is actually called — which, for a brand-new page, is
+that specific endpoint is actually called -- which, for a brand-new page, is
 the first time a human opens it.
 
 A whole-repo scan is the cheap guard: it is a typo class, it applies to every
@@ -29,7 +29,7 @@ from pathlib import Path
 from backend.security.roles import SecurityRoles
 
 REPO = Path(__file__).resolve().parents[1]
-# Where authorisation decisions are written.  Tests are excluded: they
+# Where authorization decisions are written.  Tests are excluded: they
 # legitimately construct bogus names to prove a refusal.
 SCANNED = ("backend/api", "backend/services", "backend/auth", "backend/security")
 

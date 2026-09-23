@@ -77,7 +77,7 @@ const validateWindowsPassword = (
     if (!password) {
         return t('hostAccount.passwordRequired', 'Password is required for Windows accounts');
     }
-    // Client-side confirm-password match on the user's OWN input — no
+    // Client-side confirm-password match on the user's OWN input -- no
     // stored secret and no attacker, so a constant-time compare isn't
     // warranted. (The rule is off in the main lint; suppress it for the
     // dedicated security scan too.)

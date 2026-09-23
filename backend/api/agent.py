@@ -214,7 +214,7 @@ async def _handle_time_sensitive_message(message, connection, db):
     touch host-scoped data (host status, the host's queue), so a bound host's
     must hit its tenant DB.  SYSTEM_INFO self-routes from its own host_id and the
     id isn't known on the first connection, so it stays on ``db`` here.  Inert
-    when MT is off / host unbound.  Commits the fresh tenant session — command-ack
+    when MT is off / host unbound.  Commits the fresh tenant session -- command-ack
     doesn't self-commit (heartbeat does, so the extra commit no-ops)."""
     from backend.persistence.partitions import tenant_engine_for_host  # noqa: PLC0415
 
@@ -304,18 +304,18 @@ def _enqueue_inbound_message(message, connection, db):
     Without this, messages that race ahead of registration end up
     persisted with ``_connection_info.hostname=null`` and the inbound
     processor's NULL-host_id path discards them as "Missing hostname
-    and host_id" — losing data entirely (the OS section of theol9
+    and host_id" -- losing data entirely (the OS section of theol9
     surfaced this: every ``os_version_update`` was dropped because the
     agent fired it ~340 ms before the SYSTEM_INFO handler set
     ``connection.hostname``).  Buffered messages are flushed by
     ``flush_pending_inbound_messages`` once registration completes.
 
-    SYSTEM_INFO messages are exempt from buffering — they ARE the
+    SYSTEM_INFO messages are exempt from buffering -- they ARE the
     registration handshake, and buffering them would deadlock the
     connection.  In production they take a separate immediate-handler
     path (``_handle_message_by_type``) and never arrive here, but this
     function is also exercised directly by unit tests, so the guard
-    keeps the behaviour correct in both call paths.
+    keeps the behavior correct in both call paths.
     """
     if not connection.hostname and message.message_type != MessageType.SYSTEM_INFO:
         existing = getattr(connection, "_pending_inbound_messages", None)
@@ -326,7 +326,7 @@ def _enqueue_inbound_message(message, connection, db):
             )
         existing.append(message)
         logger.info(
-            "Buffered %s message from connection %s — registration not "
+            "Buffered %s message from connection %s -- registration not "
             "yet complete (connection.hostname is None)",
             message.message_type,
             connection.agent_id,
@@ -363,12 +363,12 @@ def _enqueue_inbound_message(message, connection, db):
         db=db,
     )
     # Commit the enqueue NOW.  ``enqueue_message`` only FLUSHES when handed a
-    # session — the commit is the caller's job.  We must not rely on a later
+    # session -- the commit is the caller's job.  We must not rely on a later
     # handler committing this same ``db``: for a tenant-bound host the
     # time-sensitive handlers (heartbeat/ack) route to and commit the host's
     # TENANT session instead (see ``_handle_time_sensitive_message``), so this
     # bootstrap session would otherwise never be committed and the queued
-    # message would be silently rolled back — losing the agent's inventory/OS
+    # message would be silently rolled back -- losing the agent's inventory/OS
     # updates entirely.
     db.commit()
 
@@ -387,7 +387,7 @@ def flush_pending_inbound_messages(connection, db):
     re-enqueued with a complete ``_connection_info`` snapshot.
 
     Type-check the buffer with ``isinstance(..., list)`` instead of
-    relying on ``getattr(..., None)`` — Mock-based connection fixtures
+    relying on ``getattr(..., None)`` -- Mock-based connection fixtures
     in the unit tests auto-create attributes on access and would return
     a Mock instead of None, which then fails ``len()``.
     """

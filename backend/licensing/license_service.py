@@ -492,14 +492,14 @@ class LicenseService:
 
     @staticmethod
     def _allowed_for_active_tenant_edition(item, tier_map: dict) -> bool:
-        """Phase 13.1.J — gate ``item`` (a FeatureCode/ModuleCode) down to the
+        """Phase 13.1.J -- gate ``item`` (a FeatureCode/ModuleCode) down to the
         ACTIVE tenant's edition when one is in scope.
 
         With multi-tenancy the server may be licensed at the top SaaS tier (so it
         physically hosts every engine), but each tenant is independently assigned
         a Community / Professional / Enterprise edition.  When a tenant is in
         scope, an item is only available if it also belongs to that edition's
-        tier — so a Community tenant on an Enterprise-licensed server 402s on
+        tier -- so a Community tenant on an Enterprise-licensed server 402s on
         Pro+ surfaces, and an edition up/down-grade takes effect without a
         redeploy.  Resolution of *which* tenant is active (and its edition) lives
         in the licensed multitenancy_engine; this consults the OSS seam, which

@@ -8,18 +8,18 @@ Phase 12.1.C: enrollment refinements.
 
 Adds two timestamp columns to ``federation_sites``:
 
-  ``enrollment_token_expires_at``  — when the pending enrollment
+  ``enrollment_token_expires_at``  -- when the pending enrollment
                                      token stops being valid for
                                      ``complete_enrollment``.  NULL
                                      once the token is consumed or
                                      scrubbed.
-  ``enrolled_at``                  — when ``complete_enrollment``
+  ``enrolled_at``                  -- when ``complete_enrollment``
                                      last flipped the site to
                                      ``status='enrolled'``.  Survives
                                      suspend/resume cycles (those
                                      don't touch this column).
 
-Idempotent — re-runnable on a database that already has either
+Idempotent -- re-runnable on a database that already has either
 column.  Uses naive DateTime so it lands cleanly on both SQLite and
 PostgreSQL (matches the convention every other federation column
 already uses).

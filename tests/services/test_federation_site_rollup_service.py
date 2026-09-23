@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """Tests for the federation site-side compliance + vulnerability rollup
-producers — severity aggregation, latest-scan-per-host compliance rollup, and
+producers -- severity aggregation, latest-scan-per-host compliance rollup, and
 the enrolled/empty no-op paths.
 """
 

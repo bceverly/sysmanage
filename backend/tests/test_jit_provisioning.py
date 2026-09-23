@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Phase 13.1.E — JIT provisioning helpers in ``registry_service``.
+"""Phase 13.1.E -- JIT provisioning helpers in ``registry_service``.
 
 The security-critical property is **fail-closed**: an SSO identity may only
 auto-provision into a tenant when that tenant has an EXPLICIT email-domain
@@ -88,6 +88,6 @@ def test_ensure_grant_is_idempotent(session):
     )  # already exists
     assert g1.id == g2.id
     assert session.query(RegistryUserTenantGrant).count() == 1
-    # The first grant's role is retained (not overwritten) — admin escalation
+    # The first grant's role is retained (not overwritten) -- admin escalation
     # must go through the explicit control-plane path, not a re-login.
     assert g1.role == "member"

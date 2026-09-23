@@ -82,7 +82,7 @@ describe('CommandPalette', () => {
     ctrlK();
     expect(input()).toBeInTheDocument();
     ctrlK();
-    // MUI Dialog fades out on close — wait for the exit transition.
+    // MUI Dialog fades out on close -- wait for the exit transition.
     await waitFor(() =>
       expect(screen.queryByPlaceholderText(/Search pages/i)).toBeNull(),
     );

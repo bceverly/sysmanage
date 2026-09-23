@@ -52,7 +52,7 @@ rc_pre() {
 	# (not after start) and offers no post-start hook, so spawn the helper DETACHED
 	# here: it polls the loopback listener until bao (launched next by rc_start) is
 	# up, then initializes + unseals and writes the server's app token.  Runs on
-	# every boot — a reboot leaves bao sealed, and this re-unseals it from the
+	# every boot -- a reboot leaves bao sealed, and this re-unseals it from the
 	# stored init.json.  Output (incl. the "did not complete" path) -> its own log.
 	( /usr/local/bin/python3 \
 		/usr/local/libexec/sysmanage/scripts/openbao_init_unseal.py \

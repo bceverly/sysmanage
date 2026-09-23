@@ -4,21 +4,21 @@
 # See the LICENSE file in the project root for the full terms.
 
 #
-# build-libs.sh — assemble the "complete" OpenBSD distfile for the sysmanage
+# build-libs.sh -- assemble the "complete" OpenBSD distfile for the sysmanage
 # port so the port itself can build FULLY OFFLINE (no pip / npm / compiler at
 # port-build time; see installer/openbsd/Makefile).
 #
 # The distfile (sysmanage-<version>-openbsd.tar.gz, top dir
 # sysmanage-<version>-openbsd/) bundles:
 #   * the backend source,
-#   * the pre-built web UI (frontend/dist — must already exist under <srcdir>;
+#   * the pre-built web UI (frontend/dist -- must already exist under <srcdir>;
 #     it is built on Linux in CI because that is faster than the emulated VM),
 #   * the pure-Python dependency bundle (pip-packages/).
 #
 # The pip bundle is kept 100% pure-Python (no compiled .so) by taking the heavy
 # C/Rust deps from OpenBSD ports (they are RUN_DEPENDS of the port and are
 # pkg_add'd here only so the --system-site-packages venv treats them as already
-# satisfied — otherwise pip would rebuild cryptography/pydantic-core/... from
+# satisfied -- otherwise pip would rebuild cryptography/pydantic-core/... from
 # source).  That keeps the distfile one-size-fits-all across OpenBSD/python
 # versions.
 #
@@ -36,14 +36,14 @@ if [ -z "$VERSION" ] || [ -z "$SRC" ] || [ -z "$OUT" ]; then
 	exit 1
 fi
 if [ ! -d "$SRC/frontend/dist" ]; then
-	echo "ERROR: $SRC/frontend/dist is missing — build the frontend first." >&2
+	echo "ERROR: $SRC/frontend/dist is missing -- build the frontend first." >&2
 	exit 1
 fi
 
 TOP="sysmanage-${VERSION}-openbsd"
 STAGE="${OUT}/${TOP}"
 
-# PyPI distributions provided by OpenBSD ports (excluded from the bundle) — must
+# PyPI distributions provided by OpenBSD ports (excluded from the bundle) -- must
 # match RUN_DEPENDS in the port Makefile.  Their transitive C/Rust builders
 # (pydantic-core, greenlet, cffi, MarkupSafe, ...) are provided by those ports.
 PORT_PROVIDED="aiohttp alembic annotated-types argon2-cffi Babel bcrypt cffi \

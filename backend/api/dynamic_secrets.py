@@ -55,7 +55,7 @@ logger = logging.getLogger(__name__)
 # both halves move together.  The federation-aware lease channel
 # (coordinator owns the master Vault; sites request leases via the
 # downstream channel) lives in the engine module the Pro+ build wires
-# in — this OSS gate just denies the route until that engine loads.
+# in -- this OSS gate just denies the route until that engine loads.
 # Single Depends instance is shared across the router so the license
 # probe happens once per request.
 _SECRETS_GATE = Depends(require_module_loaded(ModuleCode.SECRETS_ENGINE))
@@ -79,7 +79,7 @@ class IssueRequest(BaseModel):
 
 class IssueResponse(BaseModel):
     lease: Dict[str, Any]
-    # Plaintext secret value — surfaced exactly ONCE in this response.
+    # Plaintext secret value -- surfaced exactly ONCE in this response.
     secret: str
 
 

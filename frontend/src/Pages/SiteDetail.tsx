@@ -15,7 +15,7 @@
  *
  * On OSS / Community / unlicensed Enterprise installs the backend
  * returns ``{licensed: false}`` and this page renders the Enterprise
- * upsell, identical to the /sites grid behaviour.  Network failures
+ * upsell, identical to the /sites grid behavior.  Network failures
  * surface as a generic error alert; "no such site" (engine returned
  * ``site: undefined``) shows a NotFound state.
  */
@@ -327,7 +327,7 @@ const SiteDetail: React.FC = () => {
     try {
       await doRemoveFederationSite(siteId);
       setConfirmRemoveOpen(false);
-      // After removal, fall back to the Sites grid — the row is
+      // After removal, fall back to the Sites grid -- the row is
       // soft-removed at the backend but the operator's mental model
       // is "this site is gone now", so we navigate away.
       navigate("/sites");
@@ -438,7 +438,7 @@ const SiteDetail: React.FC = () => {
           <Tooltip
             title={t(
               "sites.detail.pushPoliciesHint",
-              "Re-queue every policy for this site — including any stuck or dead-lettered deliveries — for immediate re-push.",
+              "Re-queue every policy for this site -- including any stuck or dead-lettered deliveries -- for immediate re-push.",
             )}
           >
             <span>
@@ -495,7 +495,7 @@ const SiteDetail: React.FC = () => {
                       ? t("sites.detail.syncIntervalValue", "{{seconds}}s", {
                           seconds: site.sync_interval_seconds,
                         })
-                      : "—"}
+                      : "--"}
                   </Typography>
                 </Box>
                 <Box>
@@ -572,7 +572,7 @@ const SiteDetail: React.FC = () => {
                           {t("sites.detail.lastSyncStatus", "Last sync status")}
                         </Typography>
                         <Typography variant="body2">
-                          {lastSyncStatus ?? "—"}
+                          {lastSyncStatus ?? "--"}
                         </Typography>
                       </Box>
                       <Box>
@@ -584,7 +584,7 @@ const SiteDetail: React.FC = () => {
                         </Typography>
                         <Typography variant="body2">
                           {syncStatus?.pending_queue_depth ??
-                            t("sites.detail.backlogUnknown", "—")}
+                            t("sites.detail.backlogUnknown", "--")}
                         </Typography>
                       </Box>
                       {site.agent_version_min && (

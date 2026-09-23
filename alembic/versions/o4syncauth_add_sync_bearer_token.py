@@ -4,12 +4,12 @@
 
 """add_sync_bearer_token
 
-Phase 12.6: federation wire protocol — bearer-token auth for site
+Phase 12.6: federation wire protocol -- bearer-token auth for site
 → coordinator HTTP push.
 
 Adds one nullable column to ``federation_sites``:
 
-  ``sync_bearer_token_hash``  — SHA-256 of the long-lived bearer
+  ``sync_bearer_token_hash``  -- SHA-256 of the long-lived bearer
                                 token the site presents on every
                                 inbound sync POST.  NULL until
                                 ``complete_enrollment`` mints one
@@ -21,7 +21,7 @@ Adds one nullable column to ``federation_sites``:
                                 coordinator never persists the
                                 plaintext.
 
-mTLS hardening is deferred to a follow-up slice — bearer-over-TLS
+mTLS hardening is deferred to a follow-up slice -- bearer-over-TLS
 is sufficient for v1 of the transport.
 
 Idempotent + cross-dialect (SQLite + PostgreSQL): guards on the

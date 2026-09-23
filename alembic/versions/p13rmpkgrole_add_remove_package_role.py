@@ -6,7 +6,7 @@
 
 Adds the ``Remove Package`` security role that gates package *uninstall*
 (``backend/api/packages_operations.py`` checks ``SecurityRoles.REMOVE_PACKAGE``
-for uninstall, mirroring ``ADD_PACKAGE`` for install — the role definition was
+for uninstall, mirroring ``ADD_PACKAGE`` for install -- the role definition was
 missing, so the check would raise ``AttributeError`` at runtime).
 
 Backfills it to every user who already holds ``Add Package`` so install/uninstall

@@ -34,8 +34,8 @@ load_rc_config $name
 : ${sysmanage_logdir:="/var/log/sysmanage"}
 # uvicorn takes its listen address on the COMMAND LINE, so it does not read
 # api.host / api.port from sysmanage.yaml.  This used to be hardcoded to
-# 0.0.0.0, which meant an admin who set api.host: "localhost" — the value the
-# shipped sample carries — still got a socket on every interface, with nothing
+# 0.0.0.0, which meant an admin who set api.host: "localhost" -- the value the
+# shipped sample carries -- still got a socket on every interface, with nothing
 # anywhere to say so.  Default to the loopback the bundled nginx sample already
 # proxies to (proxy_pass http://127.0.0.1:8080); set sysmanage_listen="0.0.0.0"
 # to expose the API directly instead of through nginx.
@@ -47,7 +47,7 @@ load_rc_config $name
 # /var/run is root-owned 0755, so the unprivileged service cannot write
 # there: "daemon: pidfile '/var/run/sysmanage.pid': Permission denied".
 # The agent does not hit this only because it runs as root.  /var/run is
-# volatile, so the directory cannot ship in the package — it is created at
+# volatile, so the directory cannot ship in the package -- it is created at
 # start time by the precmd below.
 pidfile="/var/run/${name}/${name}.pid"
 start_precmd="sysmanage_precmd"
@@ -60,7 +60,7 @@ sysmanage_precmd()
 command="/usr/sbin/daemon"
 # procname MUST be the interpreter, not $command.  rc.subr's check_process
 # matches the pid in $pidfile against a process named $procname, which
-# defaults to $command — here /usr/sbin/daemon.  But ``daemon -p`` writes
+# defaults to $command -- here /usr/sbin/daemon.  But ``daemon -p`` writes
 # the pid of the CHILD it supervises (python), so the name never matches
 # and both onestatus and onestop report "not running" while the service is
 # very much running.  Confirmed 2026-08-10: a second onestart answered
@@ -68,9 +68,9 @@ command="/usr/sbin/daemon"
 procname="%%PYTHON_CMD%%"
 # ``sysmanage_config`` was declared but never reached the process, so the
 # server used its built-in default of /etc/sysmanage.yaml while this port
-# installs the sample at %%PREFIX%%/etc — it started and could not find its
+# installs the sample at %%PREFIX%%/etc -- it started and could not find its
 # configuration.  ``SYSMANAGE_CONFIG_PATH`` is the override backend/config
-# already honours; set it from the rcvar so an admin overriding the rcvar gets
+# already honors; set it from the rcvar so an admin overriding the rcvar gets
 # what they expect.
 export SYSMANAGE_CONFIG_PATH="${sysmanage_config}"
 # The server GENERATES its mTLS CA and server certificate during FastAPI
@@ -78,10 +78,10 @@ export SYSMANAGE_CONFIG_PATH="${sysmanage_config}"
 # process cannot create; the code then falls back to a dot-directory INSIDE the
 # installed application tree, which in a package is root-owned and read-only.
 # Both fail, the lifespan raises, and uvicorn exits with "Application startup
-# failed" — the service simply never appears.  Found 2026-08-10 by running the
+# failed" -- the service simply never appears.  Found 2026-08-10 by running the
 # command from the rc script by hand as the service user; ``service onestart``
 # reported nothing at all.  Both variables are overrides the code already
-# honours, set from rcvars so an admin who relocates them gets what they expect.
+# honors, set from rcvars so an admin who relocates them gets what they expect.
 export SYSMANAGE_CERT_PATH="${sysmanage_certdir}"
 export SYSMANAGE_LOG_DIR="${sysmanage_logdir}"
 

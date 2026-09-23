@@ -3,11 +3,11 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Migration status — OSS shim (Pro+ relocation, Phase 2).
+Migration status -- OSS shim (Pro+ relocation, Phase 2).
 
 Detects tenant databases that lag the tenant Alembic chain's code head (drives
 the non-blocking UI banner).  The detection logic moved into the licensed
-engine; this shim returns the empty/zero result when the engine isn't loaded —
+engine; this shim returns the empty/zero result when the engine isn't loaded --
 single-tenant / unlicensed servers have no tenant databases to be behind.
 """
 

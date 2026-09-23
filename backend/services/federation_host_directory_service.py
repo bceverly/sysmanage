@@ -5,7 +5,7 @@
 """
 Cross-site federation host-directory search (Phase 12.1.E).
 
-Read-side queries against ``federation_host_directory`` — the
+Read-side queries against ``federation_host_directory`` -- the
 coordinator's host-directory tier, populated by 12.1.D's rollup
 ingestion.  The Pro+ engine wraps these as ``/api/v1/federation/hosts``
 endpoints; the OSS layer owns the actual SQLAlchemy logic so the
@@ -14,18 +14,18 @@ query semantics are testable without standing up the engine.
 Architectural constraint (see ROADMAP §12 "Data Architecture"):
 
   * Host-directory queries MUST be answerable from the coordinator's
-    own database — no fan-out to per-site servers.  The directory
+    own database -- no fan-out to per-site servers.  The directory
     tier exists so an operator can ask "all hosts with condition X
     across the entire fleet" without depending on every site being
     online.
   * Filters are limited to columns physically stored on the
     directory tier.  Anything deeper (e.g. "hosts running a specific
     package version") requires a drill-down to the originating
-    site — that's the detail-tier proxy path 12.1's router will
+    site -- that's the detail-tier proxy path 12.1's router will
     expose separately.
 """
 
-# ``sqlalchemy.func`` is a dynamic-attribute proxy — pylint can't
+# ``sqlalchemy.func`` is a dynamic-attribute proxy -- pylint can't
 # resolve ``func.count`` statically and emits ``not-callable`` for
 # every COUNT(*) clause below.  Disable at the file level because
 # every COUNT here is the same false positive.
@@ -43,7 +43,7 @@ from sqlalchemy.orm import Session
 from backend.persistence.models.federation import FederationHostDirectory
 
 # Maximum number of hosts a single search call can return.  At 1M-
-# host fleet scale, an unbounded LIMIT is a foot-gun — pagination is
+# host fleet scale, an unbounded LIMIT is a foot-gun -- pagination is
 # how the frontend handles big result sets, not "give me everything
 # and I'll filter client-side".
 DEFAULT_PAGE_LIMIT = 100
@@ -72,7 +72,7 @@ def _build_filter_clauses(
     """Translate the kwargs surface into a list of SQLAlchemy clauses.
 
     Extracted so :func:`search_hosts` and :func:`count_hosts` apply
-    the same filter logic — keeps the contract uniform.
+    the same filter logic -- keeps the contract uniform.
     """
     clauses = []
     if site_ids:
@@ -333,7 +333,7 @@ def country_breakdown(
 
 
 # ---------------------------------------------------------------------------
-# Write side — re-exported from ``federation_rollup_service``, which owns the
+# Write side -- re-exported from ``federation_rollup_service``, which owns the
 # canonical host-directory upsert/get (with fqdn + site validation).  The
 # Pro+ controller engine imports THIS module as ``host_dir_svc`` and calls
 # ``upsert_host_directory_entry`` / ``get_host_directory_entry`` on it during

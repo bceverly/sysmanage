@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Reboot orchestration service — state machine for safe parent host reboot.
+Reboot orchestration service -- state machine for safe parent host reboot.
 
 Manages the lifecycle:
     shutting_down → rebooting → pending_restart → restarting → completed | failed
@@ -74,7 +74,7 @@ def check_shutdown_progress(db, parent_host_id):
             )
             return
 
-        # Timeout exceeded — proceed anyway
+        # Timeout exceeded -- proceed anyway
         logger.warning(
             "Orchestration %s: shutdown timeout exceeded, proceeding with reboot "
             "(%d children still running)",
@@ -82,7 +82,7 @@ def check_shutdown_progress(db, parent_host_id):
             still_running,
         )
 
-    # All children stopped (or timeout) — issue reboot
+    # All children stopped (or timeout) -- issue reboot
     now = _now()
     orchestration.status = "rebooting"
     orchestration.shutdown_completed_at = now
@@ -151,7 +151,7 @@ def handle_agent_reconnect(db, host_id):
 
     # Enqueue start commands for each child that was running before reboot.
     # Audit gap (orchestrator preservation): mirror child_host_control.py's
-    # ``_try_lifecycle_plan_dispatch`` pattern — try the Pro+ engine path
+    # ``_try_lifecycle_plan_dispatch`` pattern -- try the Pro+ engine path
     # first, use the engine path; without it the route surfaces a 502 since the
     # isn't loaded.  Without this, after the agent's legacy
     # ``child_host_operations.py`` is deleted, the orchestrated reboot's

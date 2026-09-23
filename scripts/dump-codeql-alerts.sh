@@ -3,7 +3,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-# dump-codeql-alerts.sh — paginate the GitHub Code Scanning API
+# dump-codeql-alerts.sh -- paginate the GitHub Code Scanning API
 # and dump every open CodeQL alert on bceverly/sysmanage into a
 # single JSON array file.
 #
@@ -90,7 +90,7 @@ while :; do
     page=$((page + 1))
 done
 
-# Concatenate all per-page arrays into one big array via Python — way
+# Concatenate all per-page arrays into one big array via Python -- way
 # easier than wrangling brackets/commas in shell.  No stdout redirect
 # here: the python script writes to OUT itself.  An earlier version of
 # this used both ``python3 ... > OUT`` and ``json.dump(..., open(OUT))``,

@@ -1,4 +1,4 @@
-# sysmanage server winget manifest — Phase 11.8 server-side stub.
+# sysmanage server winget manifest -- Phase 11.8 server-side stub.
 #
 # Mirrors the agent's stub at sysmanage-agent/packaging/winget/
 # sysmanage.sysmanage-agent.yaml.  Singleton-form manifest for early
@@ -37,7 +37,7 @@ PackageIdentifier: sysmanage.sysmanage
 PackageVersion: 0.0.0
 PackageLocale: en-US
 # ``Publisher`` and ``PackageName`` MUST match the MSI's ARP metadata
-# (``Manufacturer`` and ``ProductName`` in the WiX source) — winget's
+# (``Manufacturer`` and ``ProductName`` in the WiX source) -- winget's
 # post-install Installation Verification step compares the manifest
 # against the Add/Remove Programs entry and rejects mismatches.  The
 # WiX source declares ``Manufacturer="SysManage"`` and

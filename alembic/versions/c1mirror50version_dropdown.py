@@ -57,7 +57,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 # ---------------------------------------------------------------------
-# Seed catalog — keep in sync with the engine's known-good upstreams.
+# Seed catalog -- keep in sync with the engine's known-good upstreams.
 # Each row: (platform, version_key, label, os_family, match_regex,
 #           default_upstream_url, default_suite, default_repoid,
 #           default_repo_alias, default_release)
@@ -100,7 +100,7 @@ _KNOWN_VERSIONS = [
         "noble",
         None,
         None,
-        None,  # placeholder — adjust suite when 26.04 lands
+        None,  # placeholder -- adjust suite when 26.04 lands
     ),
     (
         "apt",
@@ -130,7 +130,7 @@ _KNOWN_VERSIONS = [
     (
         "dnf",
         "ol9-baseos",
-        "Oracle Linux 9 — BaseOS",
+        "Oracle Linux 9 -- BaseOS",
         "oracle",
         r"\.el9|oracle\s*linux\s*9",
         "https://yum.oracle.com/repo/OracleLinux/OL9/baseos/latest/x86_64",
@@ -142,7 +142,7 @@ _KNOWN_VERSIONS = [
     (
         "dnf",
         "rhel9-baseos",
-        "RHEL 9 — BaseOS",
+        "RHEL 9 -- BaseOS",
         "rhel",
         r"\.el9|red\s*hat.*9|rhel.*9",
         "https://cdn.redhat.com/content/dist/rhel9/9/x86_64/baseos/os/",
@@ -154,7 +154,7 @@ _KNOWN_VERSIONS = [
     (
         "dnf",
         "rocky9-baseos",
-        "Rocky Linux 9 — BaseOS",
+        "Rocky Linux 9 -- BaseOS",
         "rocky",
         r"\.el9|rocky.*9",
         "https://dl.rockylinux.org/pub/rocky/9/BaseOS/x86_64/os/",
@@ -166,7 +166,7 @@ _KNOWN_VERSIONS = [
     (
         "dnf",
         "alma9-baseos",
-        "AlmaLinux 9 — BaseOS",
+        "AlmaLinux 9 -- BaseOS",
         "alma",
         r"\.el9|almalinux.*9",
         "https://repo.almalinux.org/almalinux/9/BaseOS/x86_64/os/",
@@ -178,7 +178,7 @@ _KNOWN_VERSIONS = [
     (
         "dnf",
         "fedora-41",
-        "Fedora 41 — Everything",
+        "Fedora 41 -- Everything",
         "fedora",
         r"\.fc41|fedora.*41",
         "https://dl.fedoraproject.org/pub/fedora/linux/releases/41/Everything/x86_64/os/",
@@ -190,7 +190,7 @@ _KNOWN_VERSIONS = [
     (
         "dnf",
         "fedora-40",
-        "Fedora 40 — Everything",
+        "Fedora 40 -- Everything",
         "fedora",
         r"\.fc40|fedora.*40",
         "https://dl.fedoraproject.org/pub/fedora/linux/releases/40/Everything/x86_64/os/",
@@ -203,7 +203,7 @@ _KNOWN_VERSIONS = [
     (
         "zypper",
         "leap-15.6",
-        "openSUSE Leap 15.6 — OSS",
+        "openSUSE Leap 15.6 -- OSS",
         "opensuse-leap",
         r"opensuse.*15\.6|leap.*15\.6",
         "http://download.opensuse.org/distribution/leap/15.6/repo/oss/",
@@ -215,7 +215,7 @@ _KNOWN_VERSIONS = [
     (
         "zypper",
         "leap-15.5",
-        "openSUSE Leap 15.5 — OSS",
+        "openSUSE Leap 15.5 -- OSS",
         "opensuse-leap",
         r"opensuse.*15\.5|leap.*15\.5",
         "http://download.opensuse.org/distribution/leap/15.5/repo/oss/",
@@ -240,7 +240,7 @@ _KNOWN_VERSIONS = [
     (
         "pkg",
         "freebsd-14",
-        "FreeBSD 14 — quarterly (amd64)",
+        "FreeBSD 14 -- quarterly (amd64)",
         "freebsd",
         r"freebsd\s*14",
         "https://pkg.FreeBSD.org/FreeBSD:14:amd64/quarterly",
@@ -252,7 +252,7 @@ _KNOWN_VERSIONS = [
     (
         "pkg",
         "freebsd-13",
-        "FreeBSD 13 — quarterly (amd64)",
+        "FreeBSD 13 -- quarterly (amd64)",
         "freebsd",
         r"freebsd\s*13",
         "https://pkg.FreeBSD.org/FreeBSD:13:amd64/quarterly",
@@ -297,7 +297,7 @@ def upgrade() -> None:
             ),
         )
 
-    # 2. Seed (idempotent — match on (platform, version_key)).
+    # 2. Seed (idempotent -- match on (platform, version_key)).
     for (
         platform,
         version_key,

@@ -9,7 +9,7 @@ OSS orchestration: mint a tenant enrollment token (optionally carrying site /
 access-group placement) and render a ready-to-embed cloud-init ``user-data``
 blob that makes a freshly-booted host install the agent and auto-enroll into
 that tenant/site.  This is the seam an EXTERNAL provisioner (PXE / MAAS /
-Terraform / a golden image) uses — the in-app provision wizard builds its own
+Terraform / a golden image) uses -- the in-app provision wizard builds its own
 seed inline.
 
 Reuses the Pro+ ``provisioning_engine`` render helpers (the moat) + the
@@ -64,7 +64,7 @@ class ProvisioningBundleRequest(BaseModel):
 
 
 class ProvisioningBundleResponse(BaseModel):
-    # The plaintext enrollment token — embedded in user_data + returned once.
+    # The plaintext enrollment token -- embedded in user_data + returned once.
     token: str
     hostname: str
     user_data: str

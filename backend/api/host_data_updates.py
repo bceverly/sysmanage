@@ -200,7 +200,7 @@ async def request_hardware_update_bulk(host_ids: list[str]):
         # Bulk-fetch all hosts in one query rather than per-id ``.first()``
         # (flagged in the Phase 6 N+1 audit).  Key the dict by str(id)
         # because the request payload arrives as a list of UUID strings
-        # while the model column is a GUID — string-keyed lookup matches
+        # while the model column is a GUID -- string-keyed lookup matches
         # both forms.
         hosts_by_id = {
             str(h.id): h

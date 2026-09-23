@@ -6,7 +6,7 @@
 
 Sits between the HTTP layer and the Pro+ engine. Every RULE -- what makes a
 profile valid, how versions are numbered, what a snapshot contains -- is asked
-of the engine; this module only serialises and persists.
+of the engine; this module only serializes and persists.
 
 That division is deliberate rather than tidy-minded. The engine is the licensed
 artefact and the rules are the licensed part; reimplementing "is this cron

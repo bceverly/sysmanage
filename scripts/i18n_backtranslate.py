@@ -9,7 +9,7 @@ Samples translated strings, asks the local model to translate them BACK
 to English, then to rate how well the round-trip preserved meaning.
 Surfaces likely mistranslations for a human (or native-speaker) review
 pass.  Runs against the same local OpenAI-compatible endpoint as
-``i18n_translate.py`` — it is a LOCAL QA tool, not a CI gate (CI uses
+``i18n_translate.py`` -- it is a LOCAL QA tool, not a CI gate (CI uses
 the deterministic ``i18n_check_translations.py`` instead, since the
 model isn't available in CI).
 
@@ -57,7 +57,7 @@ LANG_NAMES = {
 
 
 def _endpoint_display():
-    """Operator-facing (base, model) — reads NO secret, so it is safe to print."""
+    """Operator-facing (base, model) -- reads NO secret, so it is safe to print."""
     return (
         os.environ.get("I18N_LLM_BASE_URL", "http://localhost:11434/v1").rstrip("/"),
         os.environ.get("I18N_LLM_MODEL", "qwen2.5:32b-instruct"),
@@ -88,7 +88,7 @@ def _chat(base, model, key, system, user, timeout=120):
         method="POST",
     )
     # Dev-only CLI tool; the endpoint is an operator-configured LLM URL
-    # (I18N_LLM_BASE_URL), never request/user-derived — no SSRF surface.
+    # (I18N_LLM_BASE_URL), never request/user-derived -- no SSRF surface.
     # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
     with urllib.request.urlopen(req, timeout=timeout) as resp:  # nosec B310
         return json.loads(resp.read().decode("utf-8"))["choices"][0]["message"][
@@ -114,7 +114,7 @@ def _load(lang):
 
 
 def _sample(keys, n):
-    """Deterministic stride sample (no RNG — repeatable across runs)."""
+    """Deterministic stride sample (no RNG -- repeatable across runs)."""
     if n <= 0 or n >= len(keys):
         return keys
     step = max(1, len(keys) // n)

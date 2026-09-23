@@ -14,7 +14,7 @@ display a banner instructing the operator to run ``alembic upgrade head``.
 The check is a fallback: the normal path is for the operator to run
 migrations as part of their upgrade procedure.  This catches the case where
 a Pro+ module is downloaded after an OSS upgrade but before migrations have
-been applied — without it, the module would load against a stale schema
+been applied -- without it, the module would load against a stale schema
 and fail in subtle ways (missing columns, missing tables, etc.).
 """
 
@@ -166,7 +166,7 @@ def check_module_compatibility(
     """
     required = module_info.get("min_oss_alembic_revision")
     if not required:
-        # Module doesn't declare a minimum — assume compatible.
+        # Module doesn't declare a minimum -- assume compatible.
         _registry.clear(module_code)
         return None
 

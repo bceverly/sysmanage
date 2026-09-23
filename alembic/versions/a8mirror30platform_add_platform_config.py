@@ -29,7 +29,7 @@ Backfill rules:
   - Each existing ``mirror_repository`` row gets a ``platform_config_id``.
   - Mapping: package_manager ∈ {apt, dnf, zypper} → platform ``linux``;
     package_manager == pkg → platform ``freebsd``.
-  - One platform_config per (host_id, platform) tuple — multiple
+  - One platform_config per (host_id, platform) tuple -- multiple
     mirrors sharing a host + platform reuse the same config.
   - Defaults are copied from the singleton ``mirror_settings`` row
     when present, else hardcoded fallbacks (``/var/mirror``, 30-day

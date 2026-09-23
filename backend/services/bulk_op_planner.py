@@ -13,7 +13,7 @@ caller dispatches via the existing per-host queueing infrastructure.
 This is deliberately SIMPLE:
   * No persistence (no BulkOperation record, no per-host result tracking).
   * No batching, no rolling rollouts, no failure thresholds.
-  * No host-selector DSL — caller passes an explicit host_ids list.
+  * No host-selector DSL -- caller passes an explicit host_ids list.
 
 Pro+ licensees get the richer engine in
 sysmanage-professional-plus/module-source/fleet_engine which adds:

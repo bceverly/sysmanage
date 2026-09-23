@@ -204,15 +204,15 @@ class Host(Base):
     enabled_shells = Column(Text, nullable=True)
 
     # Phase 19 agent capability advertisement (JSON).  ``agent_capabilities``
-    # is the whole report the agent sent — schema_version, the supported
+    # is the whole report the agent sent -- schema_version, the supported
     # capability GROUPS the UI shows, the exact command types the dispatch gate
     # reads, and any unavailable/partial groups with a machine-readable reason.
     # Stored verbatim (sorted keys) rather than shredded into columns so a newer
     # agent can add capabilities without a server migration; the server ignores
-    # groups it does not recognise.  Mirrors how a federated site's
+    # groups it does not recognize.  Mirrors how a federated site's
     # ``capabilities_json`` is ingested.
     #
-    # NULL means "never told us" — an older agent, or one whose report could not
+    # NULL means "never told us" -- an older agent, or one whose report could not
     # be built.  That is deliberately NOT the same as "limited": a host we know
     # nothing about must not be flagged as reduced, and must not have its
     # commands gated.
@@ -240,7 +240,7 @@ class Host(Base):
     # NULL for standalone hosts, populated for child hosts
     parent_host_id = Column(GUID(), nullable=True, index=True)
 
-    # Phase 18.1 S4 — federation site placement.  A SOFT reference to
+    # Phase 18.1 S4 -- federation site placement.  A SOFT reference to
     # ``federation_sites.id`` (coordinator-scoped; no cross-partition FK).  Set
     # at registration when an enrollment token (or, later, a registration key)
     # carries a site; NULL for hosts not assigned to a site.
@@ -392,7 +392,7 @@ class User(Base):
     external_subject = Column(String(500), nullable=True)
 
     # Sticky last-selected tenant (Phase 13 convenience).  A SOFT reference to
-    # ``registry_tenant.id`` (cross-partition — no FK).  Written whenever the
+    # ``registry_tenant.id`` (cross-partition -- no FK).  Written whenever the
     # user switches tenants and populated on first login, so a multi-tenant user
     # lands back in the tenant they usually work in; NULL for single-tenant /
     # non-multi-tenant users.  Validated against a live grant before use.

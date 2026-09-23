@@ -3,12 +3,12 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Advisory action API (Phase 14.1) — "install by advisory".
+Advisory action API (Phase 14.1) -- "install by advisory".
 
 OSS orchestration: resolve an advisory's applicable packages for a host (from the
 tenant ``host_applicable_advisory`` rows the Pro+ engine computed) and dispatch an
 install through the EXISTING package-install path.  Gated behind the Professional
-``ADVISORY_MANAGEMENT`` feature (defence in depth; the UI hides it when unlicensed).
+``ADVISORY_MANAGEMENT`` feature (defense in depth; the UI hides it when unlicensed).
 """
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -36,7 +36,7 @@ def _dispatch_openbsd_syspatch(host_id, rows, db, current_user):
     OpenBSD base errata are applied with syspatch(8), NOT a package manager, so we
     can't reuse ``install_packages_operation`` (that would try to ``pkg_add`` the
     patch ids).  Instead enqueue the same ``apply_updates`` command the Updates page
-    uses — the agent routes package_manager ``syspatch`` to its syspatch executor
+    uses -- the agent routes package_manager ``syspatch`` to its syspatch executor
     (which applies all pending, all-or-nothing).  Enqueued OUTBOUND so Phase 14.2
     maintenance-window gating applies at release time automatically."""
     from backend.websocket.messages import create_command_message  # noqa: PLC0415

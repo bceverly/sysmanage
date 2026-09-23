@@ -125,7 +125,7 @@ const ConfigDrift: React.FC = () => {
             setFindings(rows);
             // Settled, not all: one lookup failing must not hide every other
             // finding's repair. A finding with no entry simply shows the
-            // baseline button, which is the behaviour before playbooks existed.
+            // baseline button, which is the behavior before playbooks existed.
             const resolved = await Promise.allSettled(
                 rows.map((finding) => getFindingRemediation(finding.id)),
             );
@@ -266,7 +266,7 @@ const ConfigDrift: React.FC = () => {
                 {t(
                     'configDrift.intro',
                     'Hosts that no longer match the profile assigned to them. Drift is ' +
-                        'detected by dry runs, so nothing here has been changed — ' +
+                        'detected by dry runs, so nothing here has been changed -- ' +
                         'remediating re-applies the profile for real.',
                 )}
             </Typography>
@@ -358,7 +358,7 @@ const ConfigDrift: React.FC = () => {
                                     {finding.first_seen_at
                                         ? `: ${formatUTCTimestamp(finding.first_seen_at)}`
                                         : ''}
-                                    {finding.profile_name ? ` — ${finding.profile_name}` : ''}
+                                    {finding.profile_name ? ` -- ${finding.profile_name}` : ''}
                                 </Typography>
                                 {canRemediate && detailHost && (
                                     <Stack direction="row" spacing={1} sx={{ mt: 1 }}>

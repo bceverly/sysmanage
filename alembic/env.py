@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Alembic environment for the **tenant** chain — the existing per-customer
+Alembic environment for the **tenant** chain -- the existing per-customer
 schema (the original 140+ migration chain).
 
 Phase 13.1 introduced two sibling partition chains (``registry`` and
@@ -11,7 +11,7 @@ Phase 13.1 introduced two sibling partition chains (``registry`` and
 and each chain's ``env.py`` is a thin call into it.  The tenant chain keeps
 the legacy ``alembic_version`` table (so the existing chain is untouched)
 and simply *excludes* the ``registry_*`` / ``shared_*`` tables from its
-autogenerate view — they belong to the other chains, even though all three
+autogenerate view -- they belong to the other chains, even though all three
 share one ``Base.metadata`` and (in collapsed mode) one database.
 """
 

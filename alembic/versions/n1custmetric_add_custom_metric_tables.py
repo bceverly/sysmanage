@@ -4,7 +4,7 @@
 
 """create custom_metric tables and seed 'Manage Custom Metrics' role
 
-Custom Metrics & Graphs (Slice 1 — OSS schema foundation).
+Custom Metrics & Graphs (Slice 1 -- OSS schema foundation).
 
 Landscape "Custom Graphs" parity: an operator defines a named custom metric =
 a small script emitting ONE numeric value, targeted by HOST TAG.  The agent
@@ -14,12 +14,12 @@ time-series for graphing + alerting.
 This is a Pro+ capability whose LOGIC lives in the ``observability_engine``.
 Only the SCHEMA + role belong in OSS (moat model).
 
-* ``custom_metric`` — the metric definition (script body, interpreter, unit,
+* ``custom_metric`` -- the metric definition (script body, interpreter, unit,
   cadence, enabled).
-* ``custom_metric_tag`` — targeting association (metric → host tag).  ``tags``
+* ``custom_metric_tag`` -- targeting association (metric → host tag).  ``tags``
   lives in the tenant partition (same as ``host``), so a REAL FK to ``tags.id``
   is used.
-* ``custom_metric_sample`` — time-series samples (value nullable when errored),
+* ``custom_metric_sample`` -- time-series samples (value nullable when errored),
   indexed on ``(custom_metric_id, host_id, collected_at)`` for time-series
   reads.
 * Seeds the ``Manage Custom Metrics`` security role in the Host group.

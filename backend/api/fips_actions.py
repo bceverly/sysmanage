@@ -3,20 +3,20 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-FIPS compliance-mode action API (Phase 14.4) — "enable/disable FIPS on a host"
+FIPS compliance-mode action API (Phase 14.4) -- "enable/disable FIPS on a host"
 and the fleet FIPS posture read.
 
-Detection ("is FIPS on?") is OSS — every agent reports its posture and the
+Detection ("is FIPS on?") is OSS -- every agent reports its posture and the
 ``handle_fips_compliance_update`` handler persists it on the host.  This module
 covers the ENTERPRISE surface:
 
-* enable/disable FIPS on a host — the Pro+ ``compliance_engine`` plans the change
-  (method inference: ``pro enable fips`` on Ubuntu, ``fips-mode-setup`` on RHEL —
+* enable/disable FIPS on a host -- the Pro+ ``compliance_engine`` plans the change
+  (method inference: ``pro enable fips`` on Ubuntu, ``fips-mode-setup`` on RHEL --
   the moat), and the command is dispatched to the agent through the EXISTING
   store-and-forward queue (so 14.2 maintenance-window gating applies).
 * the fleet FIPS posture summary that backs the compliance dashboard.
 
-Everything here is gated behind the Enterprise ``FIPS_MODE`` feature (defence in
+Everything here is gated behind the Enterprise ``FIPS_MODE`` feature (defense in
 depth; the UI hides it when unlicensed).
 """
 
@@ -75,7 +75,7 @@ def _compliance_engine():
 
 
 def _change_fips(host_id: str, enable: bool, body, tenant_db, current_user):
-    """Shared enable/disable orchestration (synchronous — no awaited I/O)."""
+    """Shared enable/disable orchestration (synchronous -- no awaited I/O)."""
     _require_fips_license()
     engine = _compliance_engine()
 

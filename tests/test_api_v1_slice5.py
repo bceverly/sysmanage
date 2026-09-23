@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Phase 13.2.1 — Slice 5 native ``/api/v1`` migration (settings / integrations).
+Phase 13.2.1 -- Slice 5 native ``/api/v1`` migration (settings / integrations).
 
 Dual-surface contract for: server_settings, config_management, email,
 ubuntu_pro_settings, grafana/graylog, telemetry/opentelemetry, firewall_roles,

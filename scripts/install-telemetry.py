@@ -48,7 +48,7 @@ def safe_extract_zip(zip_file, path):
 
     CodeQL's ``py/tarslip`` covers zip-slip.  We don't call
     ``zip_file.extract`` directly with the (potentially crafted)
-    member name — instead we read the bytes via ``zip_file.read`` and
+    member name -- instead we read the bytes via ``zip_file.read`` and
     write them under a path we construct ourselves after explicit
     sanitisation:
 
@@ -278,9 +278,9 @@ def install_prometheus():
             # standard /usr/local/bin convention for shipped binaries
             # (owner rwx, group/other rx).  CodeQL's
             # ``py/overly-permissive-file`` flags world-readable bits
-            # regardless of file type — false positive on executables
+            # regardless of file type -- false positive on executables
             # that have no business being mode 0o700.  Suppression is
-            # by inline ``lgtm`` directive which CodeQL still honours.
+            # by inline ``lgtm`` directive which CodeQL still honors.
             if platform_name != 'windows':
                 os.chmod(os.path.join(install_dir, prometheus_binary), 0o755)  # lgtm[py/overly-permissive-file]  nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
                 os.chmod(os.path.join(install_dir, promtool_binary), 0o755)  # lgtm[py/overly-permissive-file]  nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
@@ -799,7 +799,7 @@ receivers:
 
                 try:
                     shutil.copy2(binary_path, os.path.join(install_dir, 'otelcol-contrib'))
-                    # 0o755 — standard /usr/local/bin permissions for an
+                    # 0o755 -- standard /usr/local/bin permissions for an
                     # installed binary; see comment near the prometheus
                     # chmod block above for the CodeQL FP rationale.
                     os.chmod(os.path.join(install_dir, 'otelcol-contrib'), 0o755)  # lgtm[py/overly-permissive-file]
@@ -937,7 +937,7 @@ def install_otel_collector():
                             os.path.join(temp_dir, 'otelcol-contrib'),
                             os.path.join(install_dir, 'otelcol-contrib')
                         )
-                        # 0o755 — see prometheus chmod block for rationale.
+                        # 0o755 -- see prometheus chmod block for rationale.
                         os.chmod(os.path.join(install_dir, 'otelcol-contrib'), 0o755)  # lgtm[py/overly-permissive-file]  nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
                     except PermissionError:
                         print(f"⚠️  Need elevated privileges to install to {install_dir}")
@@ -1110,7 +1110,7 @@ def install_python_packages():
                                 # symlinks, race with concurrent pip runs).
                                 _ = None
                 except Exception:  # noqa: BLE001
-                    # Best-effort permission fix — don't block install.
+                    # Best-effort permission fix -- don't block install.
                     _ = None
 
         subprocess.run(cmd, check=True)

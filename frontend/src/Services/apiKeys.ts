@@ -3,9 +3,9 @@
 // See the LICENSE file in the project root for the full terms.
 
 /**
- * API key management client (Phase 13.2 — API Completeness).
+ * API key management client (Phase 13.2 -- API Completeness).
  *
- * Wraps ``/api/v1/api-keys`` — list/create/get/revoke of the current user's
+ * Wraps ``/api/v1/api-keys`` -- list/create/get/revoke of the current user's
  * programmatic-access keys.  The plaintext key is returned only by
  * ``createApiKey`` (once); it is never available afterwards.
  */
@@ -32,7 +32,7 @@ export interface ApiKeyCreate {
   scopes?: string | null;
 }
 
-/** Creation response — extends ApiKey with the one-time plaintext ``key``. */
+/** Creation response -- extends ApiKey with the one-time plaintext ``key``. */
 export interface ApiKeyCreated extends ApiKey {
   key: string;
 }

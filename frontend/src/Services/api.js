@@ -4,7 +4,7 @@
 
 import axios from "axios";
 
-// Same-origin baseURL — every backend route is now under /api, and both
+// Same-origin baseURL -- every backend route is now under /api, and both
 // nginx (production) and vite (dev) reverse-proxy /api/* to the backend.
 // Keeping requests relative means the browser never has to know what
 // host:port the backend bound to.
@@ -32,7 +32,7 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (res) => {
     // Successful response → mark connection healthy.  Dynamic import
-    // dodges the circular dep — connectionMonitor itself imports
+    // dodges the circular dep -- connectionMonitor itself imports
     // axiosInstance for /api/health pings, so a static top-level
     // import here would deadlock module evaluation.
     import('./connectionMonitor')
@@ -43,7 +43,7 @@ axiosInstance.interceptors.response.use(
   async (err) => handleResponseError(err)
 );
 
-// Network-level failure (backend unreachable / DNS / TLS / etc.) — no
+// Network-level failure (backend unreachable / DNS / TLS / etc.) -- no
 // response object to branch on, so the only signal is the absence of
 // err.response.  Notify connectionMonitor so ServerDownModal renders
 // instead of the browser surfacing a raw error.
@@ -57,7 +57,7 @@ function notifyNetworkFailure(err) {
     .catch(() => { /* monitor unavailable; bubble the error anyway */ });
 }
 
-// Redirect to the login page — but NEVER when we're already on it.  A protected
+// Redirect to the login page -- but NEVER when we're already on it.  A protected
 // request that 401/403s while /login is open (e.g. a component that fetches before
 // the user has authenticated) would otherwise reload /login, remount the
 // component, refire the request, and loop forever.  Guarding on the current path
@@ -69,7 +69,7 @@ function redirectToLogin() {
 }
 
 // Pro+ license checks and role-based permission denials must not
-// redirect — let the calling code show an error toast.  Only redirect
+// redirect -- let the calling code show an error toast.  Only redirect
 // to login for auth-related 403s (expired refresh token).
 function handle403(response) {
   const errorData = response.data;
@@ -83,7 +83,7 @@ function handle403(response) {
   }
 }
 
-// "Normal" expired-access-token path — try the refresh token, retry
+// "Normal" expired-access-token path -- try the refresh token, retry
 // the original request, or fall back to /login.
 async function handle401Refresh(originalConfig) {
   originalConfig._retry = true;
@@ -108,7 +108,7 @@ async function handleResponseError(err) {
     throw err;
   }
   const originalConfig = err.config;
-  // The login request itself failing (bad credentials) must short-circuit —
+  // The login request itself failing (bad credentials) must short-circuit --
   // don't try the refresh-token path on it.  Match by suffix because the
   // login endpoint is now versioned (``/api/v1/login``), not ``/login``.
   if (originalConfig.url?.endsWith("/login")) {

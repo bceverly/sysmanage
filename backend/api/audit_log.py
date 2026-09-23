@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/audit-log", tags=["audit-log"])
 
 
-# Reused 403 detail string — extracted so the wording can't drift
+# Reused 403 detail string -- extracted so the wording can't drift
 # between handlers and so SonarQube's duplication scanner is happy.
 _ERR_VIEW_AUDIT_LOG_DENIED = N_("Permission denied: VIEW_AUDIT_LOG role required")
 
@@ -324,7 +324,7 @@ async def export_audit_logs(
     ``json``, ``cef``, and ``leef`` for SIEM integration.  Output uses
     the same filters as the /list endpoint so operators can export
     exactly what they were viewing.  Stream is unbounded (no /list
-    limit/offset) — large filtered ranges may take a few seconds to
+    limit/offset) -- large filtered ranges may take a few seconds to
     materialize.
 
     Requires VIEW_AUDIT_LOG role."""
@@ -341,7 +341,7 @@ async def export_audit_logs(
     # The unbounded query AND the PDF render (reportlab ``doc.build``) are
     # blocking and can take many seconds on a large audit log.  Run them in a
     # thread pool so the synchronous reportlab build does NOT stall the event
-    # loop — a blocking build here freezes EVERY other request (including the
+    # loop -- a blocking build here freezes EVERY other request (including the
     # page waiting on this very download), which is what made the export hang.
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(
@@ -352,7 +352,7 @@ async def export_audit_logs(
 def _build_audit_export(filters, fmt_lower, current_user):
     """Materialize the filtered audit-log entries and render the export
     (CSV or PDF).  Runs in a worker thread (see ``export_audit_logs``), so it
-    opens its OWN main-engine session — the request session can't cross the
+    opens its OWN main-engine session -- the request session can't cross the
     thread boundary.  Audit logs are server-global (not tenant-partitioned)."""
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db_module.get_engine()
@@ -425,8 +425,8 @@ def _audit_log_row(entry) -> List[str]:
 
 
 def _stream_audit_csv(entries):
-    """Stream a CSV of audit-log entries — RFC 4180 compliant."""
-    import csv  # local import — only needed on this code path
+    """Stream a CSV of audit-log entries -- RFC 4180 compliant."""
+    import csv  # local import -- only needed on this code path
     import io
 
     from fastapi.responses import StreamingResponse
@@ -537,7 +537,7 @@ def _stream_audit_pdf(entries):
         Paragraph(
             f"{_('Generated')}: "
             f"{datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}"
-            f"  —  {_('Total Entries')}: {len(entries)}",
+            f"  --  {_('Total Entries')}: {len(entries)}",
             styles["Normal"],
         ),
         Spacer(1, 12),
@@ -553,7 +553,7 @@ def _stream_audit_pdf(entries):
         table.setStyle(
             TableStyle(
                 [
-                    ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.gray),
                     ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
                     ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
                     ("FONTSIZE", (0, 0), (-1, 0), 8),

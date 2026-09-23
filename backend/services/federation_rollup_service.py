@@ -13,7 +13,7 @@ layer owns the domain logic + validation + dedup-on-replay.
 
 Architectural notes (see ROADMAP §12 "Data Architecture"):
 
-  * ``federation_host_directory`` is the *hot* table — one row per
+  * ``federation_host_directory`` is the *hot* table -- one row per
     host fleet-wide.  ``upsert_host_directory_entry`` writes it via
     an explicit "SELECT existing, then INSERT or UPDATE" path that
     works on both PostgreSQL and SQLite without dialect-specific
@@ -29,7 +29,7 @@ Architectural notes (see ROADMAP §12 "Data Architecture"):
     just trusts incoming payloads and writes them.  If the same
     delta is replayed, the upsert is idempotent at the host-directory
     level (mtime is updated to whatever the site sent), and rollup
-    snapshots just get a duplicate row with the same data — the
+    snapshots just get a duplicate row with the same data -- the
     "latest" query still returns one result.
 """
 
@@ -74,7 +74,7 @@ class UnknownSiteError(FederationRollupError, LookupError):
 
 
 def _utcnow_naive() -> datetime:
-    """Naive UTC timestamp — matches every other federation column."""
+    """Naive UTC timestamp -- matches every other federation column."""
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
@@ -105,7 +105,7 @@ def _json_or_none(value: Any) -> Optional[str]:
 
     Used by columns ending in ``_json`` whose callers pass native
     Python dicts / lists.  Keeps the JSON-shape contract in one
-    place — every column that stores a JSON document goes through
+    place -- every column that stores a JSON document goes through
     this helper.
     """
     if value is None:
@@ -160,7 +160,7 @@ def upsert_host_directory_entry(
     1-per-host instead of growing unbounded log style.
 
     ``mtime`` defaults to "now" but the site can pass an explicit
-    timestamp — useful when replaying buffered offline deltas so
+    timestamp -- useful when replaying buffered offline deltas so
     the coordinator's ``mtime`` reflects when the change actually
     happened at the site, not when the coordinator received it.
 
@@ -186,7 +186,7 @@ def upsert_host_directory_entry(
         )
         session.add(entry)
     else:
-        # If the host moved between sites (rare but plausible — agent
+        # If the host moved between sites (rare but plausible -- agent
         # re-enrolled under a different coordinator-site mapping),
         # update site_id too.  This is what makes ``host_id`` a
         # globally-unique key.
@@ -236,7 +236,7 @@ def record_host_rollup_snapshot(
     """Append one ``federation_host_rollup`` row from a site's sync.
 
     ``host_count`` is also cached onto the parent ``FederationSite``
-    row by default — the Sites page card needs it and avoiding the
+    row by default -- the Sites page card needs it and avoiding the
     JOIN through the rollup table keeps the page fast.  Pass
     ``update_site_host_count=False`` for tests that exercise the
     rollup row independently.
@@ -261,7 +261,7 @@ def record_host_rollup_snapshot(
     if update_site_host_count:
         site.host_count = host_count
         # A successful rollup ingestion implies the site is talking
-        # to us — refresh ``last_sync_*`` so the Sites page traffic
+        # to us -- refresh ``last_sync_*`` so the Sites page traffic
         # light agrees with reality.
         record_sync(session, site.id, success=True, host_count=host_count)
     return row
@@ -349,7 +349,7 @@ def record_vulnerability_rollup_snapshot(
 
 # ---------------------------------------------------------------------
 # Retention sweeper (the append-only rollup tables would grow forever
-# otherwise — see the module docstring's "retention sweeper" note).
+# otherwise -- see the module docstring's "retention sweeper" note).
 # ---------------------------------------------------------------------
 
 # How many snapshots to keep per series (per site, or per (site, baseline)
@@ -517,7 +517,7 @@ def get_dashboard_rollup(session: Session, site_id: Any) -> Tuple[
 
     Returns a tuple so the engine's router can pack it into one
     JSON envelope without three round-trips.  The compliance list
-    is intentionally unbounded (one row per baseline) — sites
+    is intentionally unbounded (one row per baseline) -- sites
     typically evaluate against 1-3 baselines so unbounded is fine.
     """
     uid = _coerce_uuid(site_id)
@@ -615,7 +615,7 @@ def get_cross_site_report(
     list) reports on every *enrolled* site.  Returns one row per site (host
     counts, worst compliance baseline, CVE-severity counts) plus
     enterprise-wide totals so the UI can render a cross-site table without
-    N round-trips.  Read-only — safe from any report context.
+    N round-trips.  Read-only -- safe from any report context.
     """
     rows = [
         _cross_site_report_row(session, site)

@@ -106,7 +106,7 @@ elif [ ! -f /usr/local/etc/sysmanage/config.yaml ]; then
        /usr/local/etc/sysmanage/config.yaml
 fi
 
-# OpenBAO secrets broker — install binary, create user, enable + start
+# OpenBAO secrets broker -- install binary, create user, enable + start
 # (the openbao rc.d service runs init/unseal in its start_postcmd).
 if ! command -v bao >/dev/null 2>&1 && [ ! -x /usr/local/bin/bao ]; then
     pkg install -y openbao >/dev/null 2>&1 || true

@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""add snap channel/revision/confinement to software_package (Phase 17.1 — S2)
+"""add snap channel/revision/confinement to software_package (Phase 17.1 -- S2)
 
 Channel-aware snap detection: ``snap list`` exposes each snap's tracking
 channel, revision, and (best-effort) confinement, which the agent now captures

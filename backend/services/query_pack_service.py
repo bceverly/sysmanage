@@ -204,7 +204,7 @@ def update_pack(
     db.flush()
     if queries is not None:
         # The relationship was loaded BEFORE the swap, so without this the
-        # caller still sees the old queries -- and the API serialises the pack
+        # caller still sees the old queries -- and the API serializes the pack
         # it gets back from here, which means a successful edit would answer
         # with the rows it just replaced.
         db.expire(pack, ["queries"])
@@ -305,7 +305,7 @@ def assignment_dict(assignment) -> Dict[str, Any]:
 
 
 def resolve_pack(db: Session, resolved: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    """The pack an assignment names, with its queries — or None.
+    """The pack an assignment names, with its queries -- or None.
 
     ``None`` for a curated pack that no longer exists. Returning an empty
     query list instead would dispatch a pack that runs nothing and comes back

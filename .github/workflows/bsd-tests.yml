@@ -1,10 +1,10 @@
 name: BSD Integration Tests (FreeBSD/OpenBSD/NetBSD via QEMU)
 
 # Two triggers:
-#   1. workflow_dispatch — run on demand from the Actions UI.  BSD jobs
+#   1. workflow_dispatch -- run on demand from the Actions UI.  BSD jobs
 #      are slow (QEMU emulation, no KVM in GitHub-hosted runners), so
 #      cron is intentionally avoided.
-#   2. push of a release tag (v*.*.* or v*.*.*.*) — automatic per-
+#   2. push of a release tag (v*.*.* or v*.*.*.*) -- automatic per-
 #      release BSD coverage capture, mirroring build-and-release.yml.
 #      Tag-push runs use the dispatch defaults below since
 #      `workflow_dispatch.inputs.*` are empty on push events.
@@ -60,8 +60,8 @@ permissions:
 
 # ---------------------------------------------------------------------------
 # This workflow uses cross-platform-actions/action to spin up a BSD VM
-# inside QEMU on a Linux runner.  It's slow — boot + install takes 5-15 min
-# per OS — but it's free for public repos and gives real BSD coverage.
+# inside QEMU on a Linux runner.  It's slow -- boot + install takes 5-15 min
+# per OS -- but it's free for public repos and gives real BSD coverage.
 #
 # Each job clones sysmanage-agent and runs the agent's integration test
 # subset.  Server-side BSD is not tested (the server only ships for Linux).
@@ -77,12 +77,12 @@ permissions:
 #   2.  Create the venv with `--system-site-packages` so the venv inherits
 #       the OS-installed packages.
 #   3.  pip-install only the small pure-Python additions (pytest plugins).
-#   4.  Skip `pip install -r requirements.txt` entirely — too fragile.
+#   4.  Skip `pip install -r requirements.txt` entirely -- too fragile.
 #
 # Result: the agent's MODULE imports work because cryptography etc. are
 # present from pkg, and pytest can collect tests.  If a particular test
 # needs a dep that's not in the OS package set, that test will fail to
-# collect and surface the gap clearly — at which point either pin a
+# collect and surface the gap clearly -- at which point either pin a
 # wheel-having version or add the OS package.
 # ---------------------------------------------------------------------------
 
@@ -115,7 +115,7 @@ jobs:
         env:
           # Bind the user-controllable input to an env var that's forwarded into
           # the VM (environment_variables) so the script uses "$PYTEST_MARKER"
-          # instead of interpolating ${{ ... }} — closes the run-shell-injection
+          # instead of interpolating ${{ ... }} -- closes the run-shell-injection
           # semgrep finding.
           PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
         with:
@@ -128,7 +128,7 @@ jobs:
         run: |
           # FreeBSD's pkg repo ships only the DEFAULT python flavor, and that
           # default moves between releases (14.3 → 3.12, so py311-* no longer
-          # resolve — the per-package `|| true` loop then silently skips
+          # resolve -- the per-package `|| true` loop then silently skips
           # everything, leaving the venv empty).  Derive the flavor prefix from
           # the installed default python3 instead of hardcoding it.  pkg aborts
           # the whole batch on one unresolvable name, so install per-package.
@@ -148,7 +148,7 @@ jobs:
           . .venv/bin/activate
           python -m pip install --upgrade pip
           # pytest/pytest-asyncio/sqlalchemy/aiofiles/defusedxml aren't reliably
-          # packaged — pip them (wheels/pure Python).  websockets + PyYAML are
+          # packaged -- pip them (wheels/pure Python).  websockets + PyYAML are
           # hard imports in the agent's main.py; pip them too as a fallback for a
           # skipped py*-pkg (no-op in the --system-site-packages venv if the pkg
           # installed).
@@ -159,7 +159,7 @@ jobs:
           rc=$?
           set -e
           if [ $rc -eq 5 ]; then
-            echo "No agent tests tagged @pytest.mark.$PYTEST_MARKER — exiting clean."
+            echo "No agent tests tagged @pytest.mark.$PYTEST_MARKER -- exiting clean."
             exit 0
           fi
           exit $rc
@@ -207,7 +207,7 @@ jobs:
         run: |
           # OpenBSD packages use the version-agnostic py3- prefix.  Python is
           # pulled in automatically as a dep of any py3-* package.  pytest is not
-          # packaged for OpenBSD — install it via pip below.  pkg_add tolerates
+          # packaged for OpenBSD -- install it via pip below.  pkg_add tolerates
           # missing names (warns and continues), so a single batch is fine.
           sudo pkg_add -I \
             git py3-pip \
@@ -228,7 +228,7 @@ jobs:
           rc=$?
           set -e
           if [ $rc -eq 5 ]; then
-            echo "No agent tests tagged @pytest.mark.$PYTEST_MARKER — exiting clean."
+            echo "No agent tests tagged @pytest.mark.$PYTEST_MARKER -- exiting clean."
             exit 0
           fi
           exit $rc
@@ -277,18 +277,18 @@ jobs:
           # pkgsrc ships every python flavor (py311-*, py312-*, ...), so unlike
           # FreeBSD the py311 names stay valid across releases.  The image ships
           # pkgin pointed at ftp.NetBSD.org over FTP, which routinely times out
-          # fetching pkg_summary.gz — repoint at the HTTPS CDN mirror.
+          # fetching pkg_summary.gz -- repoint at the HTTPS CDN mirror.
           REL="$(uname -r)"
           echo "https://cdn.NetBSD.org/pub/pkgsrc/packages/NetBSD/amd64/${REL}/All" | sudo tee /usr/pkg/etc/pkgin/repositories.conf
           # Refresh the index + install the REQUIRED toolchain with retries so a
           # single transient mirror blip doesn't fail the whole job.
           n=0; until [ "$n" -ge 5 ]; do sudo pkgin -y update && sudo pkgin -y install python311 py311-pip git && break; n=$((n+1)); echo "pkgin core install attempt $n failed; retrying in 15s..."; sleep 15; done
-          # py311-pytest / py311-pytest-asyncio are not in pkgsrc — pip them in
+          # py311-pytest / py311-pytest-asyncio are not in pkgsrc -- pip them in
           # below.  These py311-* deps are best-effort; || true so a
           # renamed/missing pkg doesn't fail the job.
           sudo pkgin -y install py311-cryptography py311-yaml py311-aiohttp py311-websockets py311-sqlalchemy py311-bcrypt py311-psutil py311-aiofiles || true
           # Fail loudly (not at a downstream 127) if the mirror was unreachable.
-          command -v python3.11 >/dev/null 2>&1 || { echo "ERROR: python3.11 not installed — NetBSD pkg mirror unreachable after retries."; exit 1; }
+          command -v python3.11 >/dev/null 2>&1 || { echo "ERROR: python3.11 not installed -- NetBSD pkg mirror unreachable after retries."; exit 1; }
           cd sysmanage-agent
           python3.11 -m venv --system-site-packages .venv
           . .venv/bin/activate
@@ -304,7 +304,7 @@ jobs:
           rc=$?
           set -e
           if [ $rc -eq 5 ]; then
-            echo "No agent tests tagged @pytest.mark.$PYTEST_MARKER — exiting clean."
+            echo "No agent tests tagged @pytest.mark.$PYTEST_MARKER -- exiting clean."
             exit 0
           fi
           exit $rc

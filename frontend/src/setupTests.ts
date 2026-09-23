@@ -186,7 +186,7 @@ Object.defineProperty(globalThis, 'sessionStorage', {
 
 // JSDom lacks ResizeObserver, which our scrollable nav/button components
 // instantiate inside useEffect.  Provide a no-op stub so tests don't crash.
-// The methods deliberately do nothing — JSDom never fires resize events
+// The methods deliberately do nothing -- JSDom never fires resize events
 // in unit tests, so observation/teardown are inert by design.
 Object.defineProperty(globalThis, 'ResizeObserver', {
   writable: true,

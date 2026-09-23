@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-sysmanage load-test harness — entry point invoked by .github/workflows/load-tests.yml.
+sysmanage load-test harness -- entry point invoked by .github/workflows/load-tests.yml.
 
 Single-process asyncio harness.  Scenarios:
 
@@ -18,10 +18,10 @@ Single-process asyncio harness.  Scenarios:
                       high rate; the connect attempts will fail auth
                       (we have no host_token) but the connect-handshake
                       + immediate-close path is itself a useful scaling
-                      signal — it tells you how fast the server can
+                      signal -- it tells you how fast the server can
                       reject and clean up bad-auth clients.
 
-WebSocket reliability harness (Phase 8 — adds the three behaviors that
+WebSocket reliability harness (Phase 8 -- adds the three behaviors that
 ws-throughput's connect-and-reject probe does NOT cover):
 
   ws-reconnect-storm  N concurrent agents go through the full auth
@@ -34,13 +34,13 @@ ws-throughput's connect-and-reject probe does NOT cover):
                       replies with one error per message (validation
                       rejects unknown message_type).  Response count
                       must equal send count, and arrival order must
-                      match send order — verifies the server's receive
+                      match send order -- verifies the server's receive
                       loop is FIFO and drops nothing.
   ws-backpressure     Single authenticated WS session.  Ramps send rate
                       through 1k → 2k → 5k → 10k msgs/s until the
                       connection drops or the duration elapses.  Reports
                       the highest rate the server sustained without
-                      the connection going away — informational, not
+                      the connection going away -- informational, not
                       pass/fail.
 
 Usage (matches the workflow):
@@ -55,15 +55,15 @@ Usage (matches the workflow):
 
 Exit codes (the workflow distinguishes these):
 
-    0  — run completed; results.json written.
-    1  — server unreachable or other infrastructure failure.
-    2  — run completed but SLA threshold violated (p95 > 2s, or error
+    0  -- run completed; results.json written.
+    1  -- server unreachable or other infrastructure failure.
+    2  -- run completed but SLA threshold violated (p95 > 2s, or error
          rate > 50 %, or ws-ordering FIFO contract violated).  See
          _check_slas() below.
-    5  — scenario not implemented (workflow treats this as a soft skip).
+    5  -- scenario not implemented (workflow treats this as a soft skip).
 
 Caveats documented in the workflow comment block:  results from this
-harness are not representative of production hardware — server and
+harness are not representative of production hardware -- server and
 "agents" run on the same 4-vCPU GitHub-hosted runner over loopback.
 Numbers are good for catching regressions, not capacity planning.
 """
@@ -91,11 +91,11 @@ except ImportError:  # pragma: no cover
     websockets = None  # type: ignore[assignment]
 
 
-# SLA thresholds.  Anything stricter goes here — the workflow only
+# SLA thresholds.  Anything stricter goes here -- the workflow only
 # cares about exit code 2 vs 0, so fold all SLA logic into one place.
 # The 1000-agent tier is an OVERLOAD test (~1000 req/s offered vs ~385 req/s
 # single-worker capacity for the static /api/health), so its p95 is dominated
-# by queue depth — inherently high and noisy on a shared 4-vCPU GitHub runner
+# by queue depth -- inherently high and noisy on a shared 4-vCPU GitHub runner
 # (baseline ~2.1s).  3000ms gives CI-noise headroom over that baseline; tighten
 # on a dedicated perf box, or make the 1000 tier report-only if it still flakes.
 SLA_P95_MS = 3000.0
@@ -169,7 +169,7 @@ async def _http_worker(
     """One worker hits `url` until `deadline`; appends timings/errors to `result`."""
     timeout = aiohttp.ClientTimeout(total=10)
     # asyncio.CancelledError inherits from BaseException (Py 3.8+), so the
-    # broad `except Exception` below intentionally does not swallow it —
+    # broad `except Exception` below intentionally does not swallow it --
     # cancellation propagates out cleanly when the gather is torn down.
     while time.monotonic() < deadline:
         t0 = time.monotonic()
@@ -190,7 +190,7 @@ async def _http_worker(
 async def scenario_agents(
     server_url: str, agents: int, duration_seconds: int
 ) -> ScenarioResult:
-    """N concurrent agents — each one polls /api/health every second."""
+    """N concurrent agents -- each one polls /api/health every second."""
     result = ScenarioResult(name=f"agents-{agents}")
     if aiohttp is None:
         result.skipped = True
@@ -274,7 +274,7 @@ async def _ws_connect_once(ws_url: str, result: ScenarioResult) -> None:
         ) as ws:
             try:
                 await asyncio.wait_for(ws.send('{"message_type": "ping"}'), timeout=2)
-                # Server may reply with auth-required or close — either way
+                # Server may reply with auth-required or close -- either way
                 # we count the round-trip.  Don't fail on the recv side.
                 try:
                     await asyncio.wait_for(ws.recv(), timeout=2)
@@ -327,7 +327,7 @@ def _ws_url(server_url: str) -> str:
     # production load runs against staging, server_url is https://
     # which maps to wss://.  String literals split via ``+`` so
     # semgrep's detect-insecure-websocket rule doesn't pattern-match
-    # on the operational "ws" scheme here — the load harness
+    # on the operational "ws" scheme here -- the load harness
     # explicitly supports both insecure (dev) and secure (staging)
     # transports per its declared contract.
     http_scheme = "http" + "://"
@@ -363,7 +363,7 @@ async def scenario_ws_throughput(
 
     # Sequential connect loop with a small inter-connect pause.  Real
     # parallelism would just OOM on a 16 GB runner past a few hundred
-    # concurrent WS contexts — see audit doc.
+    # concurrent WS contexts -- see audit doc.
     while time.monotonic() < deadline:
         await _ws_connect_once(ws_url, result)
         await asyncio.sleep(0.05)
@@ -402,7 +402,7 @@ async def _reconnect_worker(
             async with websockets.connect(  # type: ignore[union-attr]
                 full_url, open_timeout=5, close_timeout=2, max_size=2**20
             ) as ws:
-                # Authenticated session is open.  Close immediately —
+                # Authenticated session is open.  Close immediately --
                 # this scenario measures *handshake under load*, not
                 # in-session traffic (that's ws-ordering / ws-backpressure).
                 await ws.close()
@@ -463,7 +463,7 @@ async def scenario_ws_reconnect_storm(
 async def scenario_ws_ordering(
     server_url: str, duration_seconds: int
 ) -> ScenarioResult:
-    """Single authenticated session — verify FIFO contract on the
+    """Single authenticated session -- verify FIFO contract on the
     server's receive loop.
 
     Sends a stream of messages with monotonically-increasing sequence
@@ -475,7 +475,7 @@ async def scenario_ws_ordering(
         responses arrive in send order           (TCP guarantee, but
                                                   also the server's
                                                   receive loop must be
-                                                  serial — async bugs
+                                                  serial -- async bugs
                                                   could re-order)
 
     A failure to satisfy either is recorded in `notes` and bumps
@@ -522,7 +522,7 @@ async def scenario_ws_ordering(
                     while time.monotonic() < deadline:
                         seq = sends
                         # message_type "harness-ping-N" is unknown to the
-                        # server — guarantees ErrorMessage reply, no DB
+                        # server -- guarantees ErrorMessage reply, no DB
                         # work, fastest server-side path.
                         msg = json.dumps(
                             {"message_type": f"harness-ping-{seq}", "seq": seq}
@@ -532,7 +532,7 @@ async def scenario_ws_ordering(
                             sends += 1
                         except Exception:  # pylint: disable=broad-exception-caught
                             return
-                        # Yield to receiver — keeps memory bounded.
+                        # Yield to receiver -- keeps memory bounded.
                         if sends % 100 == 0:
                             await asyncio.sleep(0)
 
@@ -597,12 +597,12 @@ async def scenario_ws_ordering(
 async def scenario_ws_backpressure(
     server_url: str, duration_seconds: int
 ) -> ScenarioResult:
-    """Single session — ramp send rate until the connection drops.
+    """Single session -- ramp send rate until the connection drops.
 
     Steps through 1k → 2k → 5k → 10k msgs/s in equal-time slices.  At
     each rate, records messages sent and whether the connection was
     still alive at the end of the slice.  Reports the highest rate
-    that completed without disconnect — that's the empirical
+    that completed without disconnect -- that's the empirical
     sustainable throughput for THIS commit on THIS hardware.
 
     Informational scenario:  no SLA gate.  The signal is "did the
@@ -622,7 +622,7 @@ async def scenario_ws_backpressure(
 
     # Rates to try, in msgs/sec.  Each rate gets duration_seconds/4
     # of wall time.  With duration_seconds=600 (the workflow default),
-    # that's 150s per rate — enough to settle.
+    # that's 150s per rate -- enough to settle.
     rates = [1000, 2000, 5000, 10000]
     per_rate_seconds = max(duration_seconds // len(rates), 5)
     breakpoint_rate: Optional[int] = None
@@ -679,7 +679,7 @@ async def scenario_ws_backpressure(
                                 f"{rate_sends} msgs ({type(e).__name__})"
                             )
                             break
-                        # Naive rate limiter — burst up to 100 then sleep.
+                        # Naive rate limiter -- burst up to 100 then sleep.
                         if rate_sends % 100 == 0:
                             elapsed = time.monotonic() - t0
                             target = rate_sends * interval
@@ -706,7 +706,7 @@ async def scenario_ws_backpressure(
 
 
 def _ping_server(server_url: str) -> bool:
-    """One synchronous probe — fail fast if the server isn't reachable.
+    """One synchronous probe -- fail fast if the server isn't reachable.
 
     Returns True on success, False on any error.
 
@@ -715,13 +715,13 @@ def _ping_server(server_url: str) -> bool:
     pins it to the localhost / staging URL of THIS run).  It is not
     user-controllable at runtime.  The probe URL is constructed with a
     fixed ``/api/health`` suffix, so the only attack surface is the
-    base URL itself — and the only operators who can set it are those
+    base URL itself -- and the only operators who can set it are those
     who can already run the load harness in CI.  semgrep flags it
     because the rule can't see the trust boundary; the nosemgrep
     below documents why this is safe.
     """
     probe_url = f"{server_url.rstrip('/')}/api/health"
-    # Enforce HTTP(S) only — explicit scheme allowlist closes the
+    # Enforce HTTP(S) only -- explicit scheme allowlist closes the
     # file:// concern semgrep raises.
     if not (probe_url.startswith("http://") or probe_url.startswith("https://")):
         return False

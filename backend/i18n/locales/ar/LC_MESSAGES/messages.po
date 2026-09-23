@@ -489,8 +489,8 @@ msgid "Invalid TOTP code."
 msgstr "رمز TOTP غير صالح."
 
 #: backend/api/auth_mfa.py:296 backend/api/auth_mfa.py:358
-msgid "MFA challenge expired — please log in again."
-msgstr "انتهى وقت تحدي MFA — يرجى تسجيل الدخول مرة أخرى."
+msgid "MFA challenge expired -- please log in again."
+msgstr "انتهى وقت تحدي MFA -- يرجى تسجيل الدخول مرة أخرى."
 
 #: backend/api/auth_mfa.py:301
 msgid "Invalid MFA challenge."
@@ -1383,10 +1383,10 @@ msgstr "يحتاج التحديث الدوري للمرآة إلى تفعيل خ
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed"
+"Mirror %s has not completed a successful sync yet -- wait for sync to succeed"
 " before assigning it as a default."
 msgstr ""
-"لم يتم تحديث المرآة %s بنجاح بعد — انتظر حتى يكتمل التحديث بنجاح قبل تعيينها"
+"لم يتم تحديث المرآة %s بنجاح بعد -- انتظر حتى يكتمل التحديث بنجاح قبل تعيينها"
 " كمرآة افتراضية."
 
 #: backend/api/repository_mirroring.py:613
@@ -1432,11 +1432,11 @@ msgstr ""
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be"
-" loaded — the collector reads each target's bundle from a snapshot of its "
+" loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 "تتطلب عمليات جمع الفجوة الهوائية تحميل وحدة معالجة نسخ المستودع "
-"(repository_mirroring_engine) — يقوم المجمع بقراءة حزمة كل هدف من صورة "
+"(repository_mirroring_engine) -- يقوم المجمع بقراءة حزمة كل هدف من صورة "
 "شجرتها المرآة"
 
 #: backend/api/airgap_collector_runs.py:229
@@ -4906,11 +4906,11 @@ msgstr ""
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
-"message(s) for retry (NOT deleting) — may be an in-flight enrollment or a "
+"message(s) for retry (NOT deleting) -- may be an in-flight enrollment or a "
 "deleted host"
 msgstr ""
 "المضيف %(host_id)s غير موجود في هذه قاعدة البيانات؛ تأجيل %(count)d رسالة "
-"معلقة للإعادة المحاولة (بدون حذف) — قد يكون هناك تسجيل جارٍ أو مضيف محذوف"
+"معلقة للإعادة المحاولة (بدون حذف) -- قد يكون هناك تسجيل جارٍ أو مضيف محذوف"
 
 #: backend/websocket/inbound_processor.py:284
 #, python-format
@@ -5405,10 +5405,10 @@ msgstr " định dạng bí mật không hợp lệ"
 #, python-format
 #~ msgid ""
 #~ "Host %s not found on this database; deferring %d queued message(s) for retry"
-#~ " (NOT deleting) — may be an in-flight enrollment or a deleted host"
+#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
 #~ "المضيف %s غير موجود في هذه قاعدة البيانات؛ سيتم تأجيل إعادة إرسال الرسائل "
-#~ "المتبقية (%d) — قد يكون هناك تسجيل جديد أو مضيف محذوف"
+#~ "المتبقية (%d) -- قد يكون هناك تسجيل جديد أو مضيف محذوف"
 
 #, python-format
 #~ msgid ""

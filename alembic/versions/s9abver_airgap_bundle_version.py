@@ -12,7 +12,7 @@ Captures the upstream sysmanage/sysmanage-agent release version that
 went into a given bundle (e.g. "2.4.0.2"), so the UI can display
 which build is baked into each ISO.
 
-Reversible — downgrade drops the column.
+Reversible -- downgrade drops the column.
 """
 
 from typing import Sequence, Union

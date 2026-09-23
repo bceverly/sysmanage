@@ -7,7 +7,7 @@ Tests for ``backend/services/airgap_signing_service.py``.
 
 Exercises the zero-touch collector keypair lifecycle and the
 repository-side trusted-collector keyring entirely against a temp
-directory — no real /etc paths are touched.  Config accessors
+directory -- no real /etc paths are touched.  Config accessors
 (``get_airgap_signing_key_file`` / ``get_airgap_collector_public_key_dir``)
 are monkeypatched to point inside ``tmp_path``.
 """
@@ -19,7 +19,7 @@ import sys
 
 import pytest
 
-# POSIX file modes (0o600 / 0o644) aren't enforced on Windows — ``os.chmod``
+# POSIX file modes (0o600 / 0o644) aren't enforced on Windows -- ``os.chmod``
 # only toggles the read-only bit there, so a hardened file still reports 0o666.
 # The service's chmod is best-effort POSIX hardening (Windows uses ACLs), so the
 # mode-assertion tests are POSIX-only.
@@ -134,7 +134,7 @@ class TestGetKeyPem:
         assert os.path.isfile(pub)
 
     def test_public_pem_none_when_nothing_exists(self, signing_paths):
-        # No private key at all — re-derive attempt still yields a fresh pair,
+        # No private key at all -- re-derive attempt still yields a fresh pair,
         # so a PEM comes back (ensure_collector_keypair generates it).
         pem = svc.get_collector_public_key_pem()
         assert pem is not None
@@ -266,7 +266,7 @@ class TestTrustedKeyring:
     def test_list_skips_non_pem_files(self, signing_paths):
         _, keyring_dir = signing_paths
         svc.import_trusted_collector("good", _make_public_pem())
-        # Drop a garbage file into the keyring — it should be listed with
+        # Drop a garbage file into the keyring -- it should be listed with
         # fingerprint None, not crash.
         os.makedirs(keyring_dir, exist_ok=True)
         with open(os.path.join(keyring_dir, "junk.pub"), "w", encoding="utf-8") as fh:

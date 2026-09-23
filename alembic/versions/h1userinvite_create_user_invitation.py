@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""create user_invitation (Phase 13.3 — Administrator Invitations)
+"""create user_invitation (Phase 13.3 -- Administrator Invitations)
 
 Pending admin invitations: an admin invites a person by email with a set of
 security roles; the recipient accepts via a one-time tokened link that creates

@@ -11,11 +11,11 @@ lands in the ``federation_received_commands`` inbox in status
 ``queued`` (see ``federation_inbox_service``).  Something on the site
 then has to actually *run* that command against the site's local
 agents and report the outcome back up.  This module is that
-"something" — the **command-fanout** half of the site's actuation
+"something" -- the **command-fanout** half of the site's actuation
 loop.  The Pro+ ``federation_site_engine`` background worker calls
 :func:`fanout_queued_commands` each tick.
 
-Architecture — *everything is queued, nothing is called directly* so
+Architecture -- *everything is queued, nothing is called directly* so
 the path survives network outages on both legs:
 
   1. **Fan-out (this server → its agents).**  For each queued
@@ -34,7 +34,7 @@ the path survives network outages on both legs:
      has reported, we transition the received-command to its terminal
      state and enqueue a ``command_result`` packet onto the federation
      *sync* queue.  The site's outbound sync worker (already built)
-     pushes that packet up to the coordinator on its next cycle — so
+     pushes that packet up to the coordinator on its next cycle -- so
      the upstream leg is queued too, never a blocking call.
 
 No direct HTTP is performed anywhere in this module.
@@ -173,8 +173,8 @@ def _try_content_view_sync(session: Session, cmd, summary: Dict[str, Any]) -> bo
 
     Such a command builds an HTTP-pull PLAN on the site's mirror host rather than
     forwarding a bare agent command, so it's owned by the CLM service (lazy import
-    to avoid coupling federation core to CLM).  Returns True when handled — the
-    caller should then ``continue`` — or False for any other command type.
+    to avoid coupling federation core to CLM).  Returns True when handled -- the
+    caller should then ``continue`` -- or False for any other command type.
     """
     if cmd.command_type != "content_view_sync":
         return False
@@ -256,7 +256,7 @@ def _dispatch_federated_command(
     summary["dispatched"] += 1
 
     # A command whose only targets were all unresolvable is already
-    # fully "reported" — settle it immediately.
+    # fully "reported" -- settle it immediately.
     if not hosts and missing:
         _settle_if_complete(session, cmd.id)
 
@@ -274,7 +274,7 @@ def fanout_queued_commands(
     command is advanced to ``in_progress`` before this function returns,
     so a re-entrant tick never double-dispatches.  Returns a summary
     ``{"dispatched": n_commands, "messages": n_agent_messages,
-       "failed": n_commands_failed}``.  Best-effort per command — one
+       "failed": n_commands_failed}``.  Best-effort per command -- one
     bad command never blocks the rest.
     """
     if queue_ops is None:

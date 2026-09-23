@@ -7,7 +7,7 @@ the LAN to turn English source strings into the **13 non-English locales**
 SysManage ships: `ar de es fr hi it ja ko nl pt ru zh_CN zh_TW`.
 
 The service is a thin FastAPI wrapper around a local instruction LLM served by
-**Ollama** — so there is no `torch`/`transformers`/CUDA in this directory; all
+**Ollama** -- so there is no `torch`/`transformers`/CUDA in this directory; all
 model work happens in Ollama.
 
 ## Why an instruction LLM (not classic MT)
@@ -27,7 +27,7 @@ enforces those rules.
    ```
 2. **Pull the model the service picks.** By default the service is turnkey: it
    detects your VRAM on startup and **auto-selects** the model (or a CPU model if
-   there's no GPU) — you do **not** set `TRANSLATION_MODEL` unless you want to pin
+   there's no GPU) -- you do **not** set `TRANSLATION_MODEL` unless you want to pin
    one. The startup banner prints the chosen tag and, if it isn't pulled yet, the
    exact `ollama pull` line to run. Easiest path: start the service once, read the
    banner, run the pull it prints, restart.
@@ -43,8 +43,8 @@ enforces those rules.
    2026-08-14, and on a 16 GB card that meant `qwen2.5:14b-instruct`, which
    bleeds its dominant language: on a long or tag-dense string it drifts into
    Chinese mid-sentence. It had written **1,146 corrupted values** across the
-   four repos — Arabic containing Chinese, Hindi containing Cyrillic
-   (`पлатफ़ोर्म`) and katakana (`सेटअップ`) — and every guard passed them.
+   four repos -- Arabic containing Chinese, Hindi containing Cyrillic
+   (`पлатफ़ोर्म`) and katakana (`सेटअップ`) -- and every guard passed them.
    Measured head to head on 20 known-bad strings:
 
    | model                  | clean          |
@@ -53,7 +53,7 @@ enforces those rules.
    | `aya-expanse:8b`       | 20 of 20       |
 
    Aya Expanse is purpose-built multilingual (23 languages) with no
-   Chinese-dominant bias. To pin something else — any Ollama tag — set
+   Chinese-dominant bias. To pin something else -- any Ollama tag -- set
    `TRANSLATION_MODEL` and pull it:
    ```bash
    ollama pull aya-expanse:8b     # or whatever the banner tells you
@@ -104,7 +104,7 @@ curl -s http://localhost:8765/health | python3 -m json.tool
 ## VRAM & model residency (does it reload per language?)
 
 **No.** There is **one** multilingual model. The target language is a prompt
-parameter, not a different model — translating to all 13 locales reuses the same
+parameter, not a different model -- translating to all 13 locales reuses the same
 resident weights with zero reloads between languages. (This is a key reason we
 chose an instruction LLM over classic MT: NLLB/Opus-MT *are* per-language-pair
 models and would swap per language.)
@@ -114,12 +114,12 @@ The only time weights leave VRAM is Ollama's **idle auto-unload** (default 5 min
 `-1` to pin it for the box's lifetime. During an active pass requests are
 continuous, so it stays warm regardless.
 
-**The service does this sizing for you** (see the auto-selection table above) —
+**The service does this sizing for you** (see the auto-selection table above) --
 this is just the reasoning. Single-resident-model footprints (rough Q4):
 `qwen2.5:7b` ≈ 5 GB, `:14b` ≈ 9 GB, `:32b` ≈ 20 GB, `:72b` ≈ 47 GB. If a pinned
-model is larger than VRAM, Ollama offloads layers to system RAM/CPU — **slower,
+model is larger than VRAM, Ollama offloads layers to system RAM/CPU -- **slower,
 but still no per-request reload.** (For reference, an RTX 4060 is 8 GB, a 4060 Ti
-is 16 GB; bigger numbers mean a bigger card or multi-GPU — `nvidia-smi` confirms.)
+is 16 GB; bigger numbers mean a bigger card or multi-GPU -- `nvidia-smi` confirms.)
 
 ## HTTP API
 
@@ -129,7 +129,7 @@ Liveness + whether the model is pulled.
 ### `GET /languages`
 The 13 supported target locales.
 
-### `POST /translate` — one string
+### `POST /translate` -- one string
 ```bash
 curl -s http://BEAST:8765/translate -H 'content-type: application/json' -d '{
   "text": "Delete {{count}} host(s)?"
@@ -140,7 +140,7 @@ curl -s http://BEAST:8765/translate -H 'content-type: application/json' -d '{
   "translations": { "de": "{{count}} Host(s) löschen?", "fr": "...", "...": "..." } }
 ```
 
-### `POST /translate/batch` — many strings (the efficient path)
+### `POST /translate/batch` -- many strings (the efficient path)
 Translate a whole list in one request. Optionally restrict `targets`.
 ```bash
 curl -s http://BEAST:8765/translate/batch -H 'content-type: application/json' -d '{
@@ -157,7 +157,7 @@ curl -s http://BEAST:8765/translate/batch -H 'content-type: application/json' -d
   ] }
 ```
 
-Always batch from the clients — one round-trip per chunk instead of per string.
+Always batch from the clients -- one round-trip per chunk instead of per string.
 
 ## Robustness contract (so a translation pass never half-dies)
 
@@ -166,7 +166,7 @@ Always batch from the clients — one round-trip per chunk instead of per string
 - A chunk whose JSON comes back the wrong length is retried **one string at a
   time**; anything still failing falls back to the **English source**, so every
   result is complete and index-aligned. The clients then simply re-run later to
-  pick up anything that fell back — the pass is resumable.
+  pick up anything that fell back -- the pass is resumable.
 
 ## The backfill client (`i18n_backfill.py`)
 
@@ -197,11 +197,11 @@ the repos live; defaults to the parent of the `sysmanage` repo),
 `--client-batch N` (strings per request, default 100). Service URL also reads
 `TRANSLATION_SERVICE_URL`.
 
-**Idempotent by design** — it only ever sends **untranslated** strings (`[TODO]`
+**Idempotent by design** -- it only ever sends **untranslated** strings (`[TODO]`
 placeholders or empty `msgstr`). Already-translated entries are never re-sent, so
 re-running is cheap and only fills genuine gaps.
 
-**Conservative** — if the service returns the English source for a string (its
+**Conservative** -- if the service returns the English source for a string (its
 placeholder guard couldn't translate it safely), the client **leaves that entry a
 gap** rather than writing English, so a later run retries it. Pure-placeholder
 strings (no letters) are written through unchanged as normal.
@@ -210,7 +210,7 @@ strings (no letters) are written through unchanged as normal.
 The normal i18n flow already seeds new strings as `[TODO] …` (JSON, via each
 project's `i18n_autotag`/`i18n_validate`) or empty `msgstr` (gettext, via
 `xgettext`/`msgmerge`). So after adding English UI/doc/log strings, run the
-relevant `--project` backfill and the new strings get translated automatically —
+relevant `--project` backfill and the new strings get translated automatically --
 nothing else to wire up.
 
 #### Write strings the guard can actually pass
@@ -221,17 +221,17 @@ whether it can pass. Two limits, measured against this service on 2026-08-25:
 - **No inline markup at all inside a translatable string.** Measured across 13
   locales on 2026-08-25: four tags failed almost everywhere, and TWO tags still
   failed in about a third of locales (13 of the 14 stubborn failures were
-  two-tag strings). Zero tags passed. Keep the `<code>`/`<strong>` — put it
+  two-tag strings). Zero tags passed. Keep the `<code>`/`<strong>` -- put it
   outside the translated span.
-- **Use literal `—` / `’` / `“ ”`, not `&mdash;` / `&rsquo;` / `&ldquo;`.**
+- **Use literal `--` / `’` / `“ ”`, not `&mdash;` / `&rsquo;` / `&ldquo;`.**
   Entities are matched by `_PLACEHOLDER_RE` and must be reproduced exactly, so
-  each one is another way to fail — for nothing, since the catalogs store UTF-8.
+  each one is another way to fail -- for nothing, since the catalogs store UTF-8.
   Keep `&lt;`, `&gt;`, `&amp;`: those are structural.
 
 **Failures are deterministic per (string, locale).** The same string sent three
 times to the same target returns the identical verdict. A key that fails for
 `ko` may pass for `nl`, which looks like randomness across a run summary and
-tempts you into re-running until it clears — it never does. The idempotent
+tempts you into re-running until it clears -- it never does. The idempotent
 client above exists so re-running is cheap after you CHANGE something, not as a
 way to wait out a bad string. If a key is still in the gap list, rewrite it.
 

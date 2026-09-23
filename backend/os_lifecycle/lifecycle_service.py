@@ -11,7 +11,7 @@ module.  Mirrors ``backend/advisory/advisory_service.py``.
 
 The heavy read/report endpoints are served directly by the engine's router
 (mounted MT-aware in ``proplus_routes.py``).  This wrapper exists for the OSS
-seam that needs to reach the engine *outside* a request — chiefly the
+seam that needs to reach the engine *outside* a request -- chiefly the
 release-upgrade **dispatch** action (``backend/api/lifecycle_actions.py``),
 which creates a job via the engine and then enqueues the command through the
 store-and-forward queue (maintenance-window aware).

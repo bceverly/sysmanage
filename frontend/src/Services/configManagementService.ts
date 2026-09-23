@@ -167,7 +167,7 @@ export interface ConfigMgmtEngineStatus {
   can_install: boolean;
   detail: string | null;
   package_name: string | null;
-  /** Puppet/Salt/Chef: supported, but only with an Enterprise licence. */
+  /** Puppet/Salt/Chef: supported, but only with an Enterprise license. */
   requires_license: boolean;
 }
 
@@ -374,7 +374,7 @@ export const getConfigMgmtEngineCatalog =
  *
  * A finding is produced by a CHECK-MODE run: the task would have changed
  * something, so the host is not in the state the profile describes. It carries
- * its own lifespan because a run cannot answer "since when" — that is the
+ * its own lifespan because a run cannot answer "since when" -- that is the
  * number the dashboard exists to show.
  */
 export interface ConfigDriftFinding {
@@ -428,7 +428,7 @@ export const getHostDrift = async (
 /**
  * Re-apply a profile to bring a host back to baseline.
  *
- * Queues a LIVE apply. The findings are not cleared here — they resolve when
+ * Queues a LIVE apply. The findings are not cleared here -- they resolve when
  * the next check-mode run observes the host is back in line, so the dashboard
  * never claims a fix the agent has not confirmed.
  */
@@ -478,7 +478,7 @@ export interface BaselineCategoryCounts {
  *
  * A Windows host has no `mounts`; an unprivileged agent cannot enumerate
  * listening ports. Neither is a difference, and neither may be rendered as a
- * match — "identical" over a comparison that never ran is the fabricated
+ * match -- "identical" over a comparison that never ran is the fabricated
  * all-clear this whole phase exists to prevent.
  */
 export interface BaselineNotComparable {

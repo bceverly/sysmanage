@@ -13,7 +13,7 @@ Targets the substantial uncovered paths the original test file leaves alone:
 - _check_offline_grace() expired-period and fail-open exception branches
 - _deactivate_license() exception handler
 - install_license() validation-success path including task restart
-- background loop functions (_phone_home_loop, _module_update_loop) — first
+- background loop functions (_phone_home_loop, _module_update_loop) -- first
   iteration only, with asyncio.sleep stubbed.
 
 The aiohttp client is faked with simple awaitable context managers so we never
@@ -36,7 +36,7 @@ def _create_task_closing(sentinel):
     """Stand-in for ``asyncio.create_task`` that doesn't run the coroutine.
 
     The background loops are mocked away so they never run, but the coroutine
-    the SUT hands to ``create_task`` must still be **closed** — otherwise it is
+    the SUT hands to ``create_task`` must still be **closed** -- otherwise it is
     an un-awaited coroutine that GC-finalizes later, surfacing as a flaky
     ``PytestUnraisableExceptionWarning`` on an unrelated test (Python 3.14).
     """
@@ -116,7 +116,7 @@ def _payload(modules=None, features=None, tier="professional"):
 
 
 # ---------------------------------------------------------------------------
-# initialize() — license-key happy path
+# initialize() -- license-key happy path
 # ---------------------------------------------------------------------------
 
 
@@ -156,7 +156,7 @@ class TestInitializeWithLicense:
         payload = _payload()
         valid = ValidationResult(valid=True, payload=payload, warning=None)
 
-        # Real asyncio task creation would warn on unawaited coroutine — wrap
+        # Real asyncio task creation would warn on unawaited coroutine -- wrap
         # with a stub that returns a sentinel Task-like object.
         sentinel_task = MagicMock(spec=asyncio.Task)
 
@@ -296,7 +296,7 @@ class TestLogValidationException:
         from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
-        # _log_validation does not call .query() — failure has to happen on
+        # _log_validation does not call .query() -- failure has to happen on
         # add() or commit(). Make commit() raise so the except branch runs.
         mock_session = MagicMock()
         mock_session.commit.side_effect = RuntimeError("db down")
@@ -316,7 +316,7 @@ class TestLogValidationException:
 
 
 # ---------------------------------------------------------------------------
-# _phone_home — HTTP branches
+# _phone_home -- HTTP branches
 # ---------------------------------------------------------------------------
 
 
@@ -484,7 +484,7 @@ class TestUpdatePhoneHomeTimestamp:
         service._cached_license = _payload()
         with _patch_session(rows=None) as session:
             service._update_phone_home_timestamp()
-        # No commit when there's no record to update — covers the if-branch.
+        # No commit when there's no record to update -- covers the if-branch.
         session.commit.assert_not_called()
 
     def test_db_error_rolls_back(self):
@@ -498,7 +498,7 @@ class TestUpdatePhoneHomeTimestamp:
 
 
 # ---------------------------------------------------------------------------
-# _check_offline_grace — expired and fail-open paths
+# _check_offline_grace -- expired and fail-open paths
 # ---------------------------------------------------------------------------
 
 
@@ -521,12 +521,12 @@ class TestCheckOfflineGraceExtra:
         service = LicenseService()
         service._cached_license = _payload()
         with _patch_session(raise_on_query=RuntimeError("db down")):
-            # Documented behaviour: fail open on DB errors.
+            # Documented behavior: fail open on DB errors.
             assert service._check_offline_grace() is True
 
 
 # ---------------------------------------------------------------------------
-# _deactivate_license — exception path
+# _deactivate_license -- exception path
 # ---------------------------------------------------------------------------
 
 
@@ -549,7 +549,7 @@ class TestDeactivateLicenseException:
 
 
 # ---------------------------------------------------------------------------
-# install_license — happy path
+# install_license -- happy path
 # ---------------------------------------------------------------------------
 
 
@@ -622,14 +622,14 @@ class TestInstallLicenseHappyPath:
 
 
 # ---------------------------------------------------------------------------
-# Background loops — first iteration only
+# Background loops -- first iteration only
 # ---------------------------------------------------------------------------
 
 
 class TestBackgroundLoops:
     @pytest.mark.asyncio
     async def test_phone_home_loop_calls_phone_home_then_sleeps(self):
-        """We can't let the loop run forever — patch asyncio.sleep so the
+        """We can't let the loop run forever -- patch asyncio.sleep so the
         second call raises CancelledError, which exits the loop cleanly."""
         from backend.licensing.license_service import LicenseService
 
@@ -673,7 +673,7 @@ class TestBackgroundLoops:
         ), patch.object(
             service, "_get_phone_home_interval", return_value=1
         ):
-            # A transient error in one iteration must not kill the loop —
+            # A transient error in one iteration must not kill the loop --
             # CancelledError from the sleep is the only way out.
             with pytest.raises(asyncio.CancelledError):
                 await service._phone_home_loop()

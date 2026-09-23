@@ -7,8 +7,8 @@ Per-channel private mirrors for the agent's OWN install channels (Phase 12).
 
 Phase 11.1 mirrors OS packages and repoints hosts that are already managed.
 This is the bootstrap end of the same loop: it tells provisioning where to
-install the *agent* from, so a host coming up in an air-gapped site — with no
-route to the Launchpad PPA, COPR, OBS, winget or the Homebrew tap — still gets
+install the *agent* from, so a host coming up in an air-gapped site -- with no
+route to the Launchpad PPA, COPR, OBS, winget or the Homebrew tap -- still gets
 an agent and enrolls.
 
 Configuration is per CHANNEL, not per distro: one ``copr`` row covers
@@ -17,7 +17,7 @@ Fedora/RHEL/Rocky/Alma, and a new RHEL-family distro inherits it for free.
 The list of configurable channels and the URL validation both come from the
 provisioning engine, which is the same code that renders the install commands.
 Duplicating either here would let the UI accept a channel or a URL that the
-renderer then refuses — a mismatch whose only symptom is a provisioned host
+renderer then refuses -- a mismatch whose only symptom is a provisioned host
 that silently never enrolls.
 """
 
@@ -60,7 +60,7 @@ def list_agent_mirrors(db: Session = Depends(get_db)):
     """Configured mirrors plus the channels that MAY be configured.
 
     ``available_channels`` is empty when the engine isn't loaded rather than a
-    hardcoded fallback list — the UI then shows nothing to configure, which is
+    hardcoded fallback list -- the UI then shows nothing to configure, which is
     honest, instead of offering channels nothing will ever read.
     """
     engine = _engine()
@@ -84,7 +84,7 @@ def upsert_agent_mirror(
 ):
     """Create or update one channel's mirror.
 
-    Validation happens HERE, when the operator types the URL — not hours later
+    Validation happens HERE, when the operator types the URL -- not hours later
     when a provisioning job renders a bootstrap script and refuses it.
     """
     engine = _engine()

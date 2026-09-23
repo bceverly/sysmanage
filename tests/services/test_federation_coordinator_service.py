@@ -143,7 +143,7 @@ class TestStartEnrollment:
 
     def test_re_start_with_same_url_refreshes_cert(self, session):
         """An operator re-running enrollment with the same coordinator
-        URL just freshens the cert — no FSM bounce."""
+        URL just freshens the cert -- no FSM bounce."""
         csvc.start_enrollment(
             session,
             coordinator_url="https://coord.x",

@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Running-process snapshot model (Phase 13.3 — Process Management).
+Running-process snapshot model (Phase 13.3 -- Process Management).
 
 Each row is one process from the most recent snapshot an agent reported for a
 host.  The ingest handler replaces the whole set per host on each update, so

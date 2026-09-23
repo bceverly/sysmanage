@@ -51,7 +51,7 @@ router.include_router(status_router)
 router.include_router(enable_router)
 
 
-# Secret type label for Windows licence keys, so they group in the Secrets UI.
+# Secret type label for Windows license keys, so they group in the Secrets UI.
 WINDOWS_LICENSE_KEY_TYPE = "windows_license"  # nosec B105  # label, not a password
 
 
@@ -72,7 +72,7 @@ def _parse_agent_install_commands(distribution):
     """Resolve the per-distro agent-install command list.
 
     Phase 11.8 sets the architectural rule that ``virtualization_engine``
-    is the single source of truth for these commands — the engine's
+    is the single source of truth for these commands -- the engine's
     ``_AGENT_INSTALL`` dispatch table emits the canonical PPA / Copr /
     OBS / winget / brew recipes per distro, version-templated where
     relevant.  This function calls into the engine first and falls
@@ -81,7 +81,7 @@ def _parse_agent_install_commands(distribution):
     or returns nothing (unknown distro).
 
     Why bypass the DB row when the engine has an answer?  Because
-    seeded DB rows drift — they get populated once and then quietly
+    seeded DB rows drift -- they get populated once and then quietly
     fall behind when the install recipe changes (Phase 11.8 PPA
     migration is the example: the table seed still carried the
     legacy direct-download path months after the engine was wired
@@ -108,7 +108,7 @@ def _parse_agent_install_commands(distribution):
         if engine_cmds:
             return list(engine_cmds)
 
-    # Fallback: DB-seeded commands.  Same parsing as before — string
+    # Fallback: DB-seeded commands.  Same parsing as before -- string
     # JSON or already-decoded list, anything else → empty.
     if not distribution.agent_install_commands:
         return []
@@ -140,7 +140,7 @@ def _get_cloud_image_url(distribution):
     Delegates to the Pro+ ``virtualization_engine.get_cloud_image_url`` so the
     interpretation of distribution-row fields lives with the (proprietary)
     seed data those rows hold.  Falls back to inline logic when the engine
-    isn't loaded — this branch only exists defensively; route-level guards
+    isn't loaded -- this branch only exists defensively; route-level guards
     elsewhere already ensure Pro+ is loaded before reaching this code path.
     """
     if distribution is None:
@@ -153,7 +153,7 @@ def _get_cloud_image_url(distribution):
                 or None
             )
         except Exception:  # pylint: disable=broad-exception-caught
-            # Engine raised — fall through to inline fallback below.
+            # Engine raised -- fall through to inline fallback below.
             pass  # nosec B110 - engine optional; OSS fallback below
     if distribution.cloud_image_url:
         return distribution.cloud_image_url
@@ -236,7 +236,7 @@ def _resolve_server_url(api_host):
             return resolved_ip
         # FQDN resolves to loopback; detect actual outbound IP using a
         # UDP socket.  connect() on SOCK_DGRAM merely selects the route
-        # — no packet is sent, so the destination address is irrelevant.
+        # -- no packet is sent, so the destination address is irrelevant.
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
             sock.connect(("8.8.8.8", 80))  # NOSONAR  # nosec B104
@@ -350,7 +350,7 @@ def _is_windows_distribution(install_identifier) -> bool:
 
     Mirrors ``virtualization_engine.is_windows_distribution``.  The check lives
     here too rather than calling the engine because the OSS server must decide
-    which fields to forward even when the Pro+ engine is not loaded — otherwise
+    which fields to forward even when the Pro+ engine is not loaded -- otherwise
     a Windows request silently degrades into a Linux one.
     """
     return (install_identifier or "").strip().lower().startswith("windows-server")
@@ -364,7 +364,7 @@ _WINDOWS_DEFAULTED = (
     ("windows_locale", "en-US"),
 )
 
-# Sent only when the operator set them — the engine carries its own defaults.
+# Sent only when the operator set them -- the engine carries its own defaults.
 _WINDOWS_OPTIONAL = (
     "windows_admin_password",
     "windows_product_key",
@@ -412,9 +412,9 @@ def _add_windows_params(params, request) -> None:
 
 
 def _store_windows_product_key(session, request, child_name):
-    """Put the licence key in OpenBAO and return the Secret row's id.
+    """Put the license key in OpenBAO and return the Secret row's id.
 
-    The key is NEVER written to ``host_child`` — only this id is, so the key
+    The key is NEVER written to ``host_child`` -- only this id is, so the key
     cannot be read out of the database.  It goes through the same Secret table
     as every other managed secret, which means it shows up in the Secrets
     screen and can be rotated or revoked there like anything else.
@@ -551,7 +551,7 @@ async def create_child_host_request(
             )
 
         # Look up the distribution to get agent install commands (server-global
-        # reference data — read on the bootstrap engine via ref_session).
+        # reference data -- read on the bootstrap engine via ref_session).
         distribution = (
             ref_session.query(ChildHostDistribution)
             .filter(

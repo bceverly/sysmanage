@@ -7,7 +7,7 @@ Dynamic-secret issuance backed by OpenBAO/Vault (Phase 8.7).
 
 This service is the bridge between the Pro+ secrets_engine module and
 the OpenBAO ``vault_service``.  We deliberately keep the implementation
-in the OSS layer — the value is in the operator workflow (issue → use
+in the OSS layer -- the value is in the operator workflow (issue → use
 → auto-expire), not in proprietary cryptography.
 
 Flow:
@@ -125,8 +125,8 @@ def issue_lease(
     try:
         vault = VaultService()
         # OpenBAO's KV doesn't natively expire individual keys but it
-        # does honour ``cas`` + ``delete_version_after``.  We send both
-        # — OpenBAO drops the version after the TTL whether or not we
+        # does honor ``cas`` + ``delete_version_after``.  We send both
+        # -- OpenBAO drops the version after the TTL whether or not we
         # come back to clean it up.
         vault._make_request(  # pylint: disable=protected-access
             "POST",
@@ -200,7 +200,7 @@ def renew_lease(
     WITHOUT the site ever touching OpenBAO.  Refreshes the local
     ``DynamicSecretLease`` row if one exists for this path.
 
-    The returned ``secret`` is the new plaintext — transient, delivered to the
+    The returned ``secret`` is the new plaintext -- transient, delivered to the
     site over the mTLS push channel and NEVER logged or persisted here.
     """
     if kind not in LEASE_KINDS:
@@ -265,7 +265,7 @@ def renew_lease(
 
 def revoke_lease(db, *, lease_id: uuid.UUID) -> Dict[str, Any]:
     """Mark a lease revoked AND delete it from OpenBAO so its content
-    can no longer be retrieved.  Idempotent — already-revoked /
+    can no longer be retrieved.  Idempotent -- already-revoked /
     expired leases stay in their terminal state."""
     lease = (
         db.query(models.DynamicSecretLease)

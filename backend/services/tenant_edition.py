@@ -2,19 +2,19 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Per-tenant edition resolution — OSS shim (Phase 13.1.J; engine-backed).
+"""Per-tenant edition resolution -- OSS shim (Phase 13.1.J; engine-backed).
 
-Each tenant is independently assigned a feature surface — ``community`` |
-``professional`` | ``enterprise`` — stored in ``registry_tenant.edition``.  Module
+Each tenant is independently assigned a feature surface -- ``community`` |
+``professional`` | ``enterprise`` -- stored in ``registry_tenant.edition``.  Module
 and feature gating should resolve against the **active tenant's** edition rather
 than one global license tier.
 
 Per the multi-tenancy moat, the actual resolution (which tenant is active, and
-its edition) — and the Platform-Operator authorization to change it — live in the
+its edition) -- and the Platform-Operator authorization to change it -- live in the
 licensed ``multitenancy_engine``.  This OSS shim is the seam the gating layer
 calls: it delegates to the engine when present and degrades to ``None`` when it
-isn't.  ``None`` means *no per-tenant edition is in scope* — gating then falls
-back to the global license tier, exactly the single-tenant / unlicensed behaviour
+isn't.  ``None`` means *no per-tenant edition is in scope* -- gating then falls
+back to the global license tier, exactly the single-tenant / unlicensed behavior
 callers already expect (multi-tenancy is exclusive to the top SaaS tier).
 """
 

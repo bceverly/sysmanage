@@ -24,7 +24,7 @@ ORDER MATTERS: ``types_router`` must be registered BEFORE ``crud_router`` so the
 
 from . import crud, deployment, types
 
-# Ordered tuple — route_registration mounts these under the feature prefix(es).
+# Ordered tuple -- route_registration mounts these under the feature prefix(es).
 ordered_routers = (types.router, crud.router, deployment.router)
 
 __all__ = ["ordered_routers"]

@@ -77,7 +77,7 @@ class TestReportBrandingCrud:
 
 
 class TestReportBrandingLogo:
-    # Smallest valid PNG (1×1 transparent pixel) — encodes cleanly.
+    # Smallest valid PNG (1×1 transparent pixel) -- encodes cleanly.
     _PNG_MIN = bytes.fromhex(
         "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4"
         "8900000a49444154789c63000100000500010d0a2db40000000049454e44ae42"

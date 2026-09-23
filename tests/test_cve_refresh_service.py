@@ -79,7 +79,7 @@ class TestCveRefreshServiceEnsureModuleConfigured:
         self, mock_get_module, mock_resolve_engine
     ):
         """Test _ensure_module_configured configures the module against the shared
-        partition engine (CVE data is shared platform truth — option B)."""
+        partition engine (CVE data is shared platform truth -- option B)."""
         from backend.vulnerability.cve_refresh_service import (
             PARTITION_SHARED,
             CveRefreshService,

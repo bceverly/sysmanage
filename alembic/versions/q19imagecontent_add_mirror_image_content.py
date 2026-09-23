@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""create mirror_image_content (tenant partition) — Phase 17.2 (S3)
+"""create mirror_image_content (tenant partition) -- Phase 17.2 (S3)
 
 One row per (mirror, container-image ref): the registry / repository / tag
 tracked for capture into a mirror, plus the pinned ``digest`` (once captured)

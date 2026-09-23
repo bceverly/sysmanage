@@ -22,7 +22,7 @@ Two new tables backing the OSS multi-factor authentication feature:
       admin_required=False, 14-day grace period) so the feature works
       out of the box without admin intervention.
 
-The migration is idempotent — re-running ``alembic upgrade head`` after
+The migration is idempotent -- re-running ``alembic upgrade head`` after
 a previous successful run is a no-op (table-create checks via
 ``inspect().has_table()``).
 """

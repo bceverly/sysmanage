@@ -2,10 +2,10 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""create host_applicable_advisory (tenant partition) — Phase 14.1
+"""create host_applicable_advisory (tenant partition) -- Phase 14.1
 
 Per-host advisory applicability lives in the TENANT partition (unprefixed).
-``advisory_id`` is a SOFT cross-partition reference to ``shared_advisory.id`` —
+``advisory_id`` is a SOFT cross-partition reference to ``shared_advisory.id`` --
 NO ForeignKey (the shared catalog lives in a different partition/engine under
 scale-out), matching ``host_vulnerability_finding.vulnerability_id``.  Advisory
 fields are denormalized so the tenant row is useful without a cross-engine join.
@@ -40,7 +40,7 @@ def upgrade() -> None:
         _TABLE,
         sa.Column("id", GUID(), primary_key=True),
         sa.Column("host_id", GUID(), nullable=False),
-        # SOFT ref to shared_advisory.id — no ForeignKey (cross-partition).
+        # SOFT ref to shared_advisory.id -- no ForeignKey (cross-partition).
         sa.Column("advisory_id", GUID(), nullable=False),
         sa.Column("advisory_identifier", sa.String(length=64), nullable=False),
         sa.Column("source", sa.String(length=50), nullable=True),

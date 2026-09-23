@@ -10,13 +10,13 @@ The coordinator defines policies centrally (``update_profile``,
 ``federation_received_policies`` inbox as ``applied=False`` (see
 ``federation_inbox_service``).  This module is the **apply worker** the
 inbox docstrings refer to: it drains the unapplied policies each tick
-and *materialises* each one into the site's own local tables — e.g. a
+and *materializes* each one into the site's own local tables -- e.g. a
 ``firewall_role`` policy becomes a real row in the site's
 ``firewall_role`` table, exactly as if a local operator had created it.
 
-Architecture: materialisation is a LOCAL database write only — no
+Architecture: materialisation is a LOCAL database write only -- no
 network call.  The coordinator → site transport is already queued
-(the push worker), and any agent-facing effect of a materialised
+(the push worker), and any agent-facing effect of a materialized
 policy (e.g. assigning a firewall role to hosts) flows through the
 existing queued command path.  So this module never calls out
 directly; it just writes local rows and records apply status.
@@ -24,7 +24,7 @@ directly; it just writes local rows and records apply status.
 Policy types are handled by a pluggable applier registry
 (:data:`_APPLIERS`).  An unregistered ``policy_type`` is recorded as a
 structured apply error and left ``applied=False`` (visible + retried on
-the next tick) rather than silently marked done — same honesty
+the next tick) rather than silently marked done -- same honesty
 contract as the command-fanout service's unsupported-command handling.
 """
 
@@ -42,13 +42,13 @@ from backend.services import federation_inbox_service as inbox_svc
 logger = logging.getLogger(__name__)
 
 # policy_type -> applier(session, definition) -> None.  An applier
-# materialises the policy into local tables and may raise on bad input;
+# materializes the policy into local tables and may raise on bad input;
 # the worker turns a raise into a recorded apply error.
 _APPLIERS: Dict[str, Callable[[Session, Dict[str, Any]], None]] = {}
 
 
 class PolicyApplyError(Exception):
-    """Raised by an applier when a policy definition can't be materialised."""
+    """Raised by an applier when a policy definition can't be materialized."""
 
 
 def register_applier(
@@ -98,7 +98,7 @@ def apply_firewall_role(session: Session, definition: Dict[str, Any]) -> None:
     Upserts the role by name and REPLACES its open-port set so the local
     role is an exact mirror of the coordinator's definition (idempotent:
     re-applying the same definition is a no-op net of timestamps).
-    Materialising the role does not assign it to any host — assignment
+    Materialising the role does not assign it to any host -- assignment
     stays a separate, explicit, queued operation.
     """
     name = (definition.get("name") or "").strip()
@@ -147,7 +147,7 @@ def apply_update_profile(session: Session, definition: Dict[str, Any]) -> None:
 
     Upserts by name so a centrally-defined patch policy becomes a real
     local UpgradeProfile, exactly as if an operator had created it.
-    Materialising does not run it — execution stays on the profile's own
+    Materialising does not run it -- execution stays on the profile's own
     cron / a separate queued operation.  ``package_managers`` accepts a
     list or a comma-separated string (NULL/empty ⇒ all managers).
     """
@@ -190,7 +190,7 @@ register_applier("update_profile", apply_update_profile)
 
 
 def apply_pending_policies(session: Session, *, limit: int = 100) -> Dict[str, Any]:
-    """Drain unapplied received-policies and materialise each locally.
+    """Drain unapplied received-policies and materialize each locally.
 
     Best-effort per policy: a failure on one (bad definition, missing
     applier) records a structured ``apply_error`` and leaves the row

@@ -156,8 +156,8 @@ class CertificateManager:
             )
 
         # Set restrictive permissions.  The CA *certificate* is a
-        # public artefact — agents need to read it to validate the
-        # server's TLS chain — so 0o644 (owner-rw, world-readable) is
+        # public artefact -- agents need to read it to validate the
+        # server's TLS chain -- so 0o644 (owner-rw, world-readable) is
         # the correct mode.  CodeQL ``py/overly-permissive-file`` flags
         # the world-readable bit but does not distinguish public certs
         # from private keys; for the key (above) we set 0o600.

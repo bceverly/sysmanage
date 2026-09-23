@@ -189,7 +189,7 @@ const HostSoftwareTab: React.FC<HostSoftwareTabProps> = ({
                                             <Grid container spacing={2}>
                                                 {softwarePackages.map((pkg: SoftwarePackage, index: number) => (
                                                 <Grid size={{ xs: 12, sm: 6, md: 4 }} key={pkg.id || index}>
-                                                    <Card sx={{ backgroundColor: 'grey.900', height: '100%' }}>
+                                                    <Card sx={{ backgroundColor: 'gray.900', height: '100%' }}>
                                                         <CardContent sx={{ p: 2 }}>
                                                             <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1, wordBreak: 'break-word' }}>
                                                                 {pkg.package_name || t('common.unknown', 'Unknown')}
@@ -221,7 +221,7 @@ const HostSoftwareTab: React.FC<HostSoftwareTabProps> = ({
                                                                 </Typography>
                                                             )}
                                                             {(pkg.size_bytes || pkg.install_date || pkg.vendor) && (
-                                                                <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid', borderColor: 'grey.700' }}>
+                                                                <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid', borderColor: 'gray.700' }}>
                                                                     {pkg.size_bytes && (
                                                                         <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
                                                                             {t('hostDetail.size', 'Size')}: {formatBytesWithCommas(t, pkg.size_bytes)}

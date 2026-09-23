@@ -487,8 +487,8 @@ msgid "Invalid TOTP code."
 msgstr "無效的 TOTP 碼。"
 
 #: backend/api/auth_mfa.py:296 backend/api/auth_mfa.py:358
-msgid "MFA challenge expired — please log in again."
-msgstr "MFA挑戰已過期 — 請重新登錄。"
+msgid "MFA challenge expired -- please log in again."
+msgstr "MFA挑戰已過期 -- 請重新登錄。"
 
 #: backend/api/auth_mfa.py:301
 msgid "Invalid MFA challenge."
@@ -1365,9 +1365,9 @@ msgstr "鏡像tick需要automation_engine進行cron評估。"
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed"
+"Mirror %s has not completed a successful sync yet -- wait for sync to succeed"
 " before assigning it as a default."
-msgstr "鏡像%s尚未完成成功的同步——等待同步成功後再設置為默認值。"
+msgstr "鏡像%s尚未完成成功的同步----等待同步成功後再設置為默認值。"
 
 #: backend/api/repository_mirroring.py:613
 #, python-format
@@ -1407,9 +1407,9 @@ msgstr "隔離收集運行需要 SysManage Professional+ 許可證，該許可�
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be"
-" loaded — the collector reads each target's bundle from a snapshot of its "
+" loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
-msgstr "隔離收集運行需要載入 repository_mirroring_engine 模組——收集器從鏡像樹快照中讀取每個目標的捆綁包。"
+msgstr "隔離收集運行需要載入 repository_mirroring_engine 模組----收集器從鏡像樹快照中讀取每個目標的捆綁包。"
 
 #: backend/api/airgap_collector_runs.py:229
 msgid ""
@@ -4766,10 +4766,10 @@ msgstr "處理 NULL 主機 ID 消息，已批准主機為 %(hostname)s (ID: %(ho
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
-"message(s) for retry (NOT deleting) — may be an in-flight enrollment or a "
+"message(s) for retry (NOT deleting) -- may be an in-flight enrollment or a "
 "deleted host"
 msgstr ""
-"主機 %(host_id)s 在此資料庫中未找到；延期 %(count)d 個佇列中的訊息（不會刪除）——可能是正在進行的入網程序或已刪除的主機"
+"主機 %(host_id)s 在此資料庫中未找到；延期 %(count)d 個佇列中的訊息（不會刪除）----可能是正在進行的入網程序或已刪除的主機"
 
 #: backend/websocket/inbound_processor.py:284
 #, python-format
@@ -5251,8 +5251,8 @@ msgstr "密鑰格式無效"
 #, python-format
 #~ msgid ""
 #~ "Host %s not found on this database; deferring %d queued message(s) for retry"
-#~ " (NOT deleting) — may be an in-flight enrollment or a deleted host"
-#~ msgstr "主機 '%s' 在此資料庫中不存在；將延遲 %d 個佇列中的消息（不會刪除）——可能是正在註冊或已刪除的主機"
+#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
+#~ msgstr "主機 '%s' 在此資料庫中不存在；將延遲 %d 個佇列中的消息（不會刪除）----可能是正在註冊或已刪除的主機"
 
 #, python-format
 #~ msgid ""

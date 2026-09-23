@@ -54,7 +54,7 @@ def test_resolve_engine_uses_registered_engine_for_tenant(engine):
 
 def test_resolve_engine_without_engine_raises(engine):
     # Phase 2 moat: the per-tenant resolver logic now lives ONLY in the licensed
-    # engine.  With no engine registered there is no OSS fallback — resolving a
+    # engine.  With no engine registered there is no OSS fallback -- resolving a
     # tenant database is impossible, and the resolver raises a clear error.
     with patch.object(partitions.config, "is_multitenancy_enabled", return_value=True):
         with pytest.raises(RuntimeError, match="licensed multi-tenancy engine"):

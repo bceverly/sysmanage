@@ -133,7 +133,7 @@ class TestHostFirewallRoleCreate:
 
 
 # ---------------------------------------------------------------------------
-# PortResponse / FirewallRoleResponse — UUID coercion
+# PortResponse / FirewallRoleResponse -- UUID coercion
 # ---------------------------------------------------------------------------
 
 
@@ -155,7 +155,7 @@ class TestResponseUuidCoercion:
 
 
 # ---------------------------------------------------------------------------
-# get_role_ports — pure data shaping
+# get_role_ports -- pure data shaping
 # ---------------------------------------------------------------------------
 
 
@@ -188,7 +188,7 @@ class TestGetRolePorts:
 
 
 # ---------------------------------------------------------------------------
-# get_host_firewall_ports — across multiple role assignments
+# get_host_firewall_ports -- across multiple role assignments
 # ---------------------------------------------------------------------------
 
 
@@ -281,7 +281,7 @@ class TestQueueRemoveFirewallPorts:
 
 
 # ---------------------------------------------------------------------------
-# update_firewall_status_remove_ports — JSON filtering surgery
+# update_firewall_status_remove_ports -- JSON filtering surgery
 # ---------------------------------------------------------------------------
 
 
@@ -369,7 +369,7 @@ class TestUpdateFirewallStatusRemovePorts:
         db = MagicMock()
         db.query.return_value.filter.return_value.first.return_value = row
 
-        # No exception — and the bad field is left alone.
+        # No exception -- and the bad field is left alone.
         update_firewall_status_remove_ports(
             db, "h", {"ipv4_ports": [], "ipv6_ports": []}
         )

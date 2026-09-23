@@ -2,11 +2,11 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Phase 13.1.F — per-tenant backup/RPO orchestration (OSS schema + read model).
+"""Phase 13.1.F -- per-tenant backup/RPO orchestration (OSS schema + read model).
 
 SysManage tracks each tenant's backup schedule (RPO target) and runs an
-operator-configured **external** backup command — pgBackRest / wal-g / a
-``pg_dump`` wrapper — on that cadence (orchestrate-only: the backup bytes live
+operator-configured **external** backup command -- pgBackRest / wal-g / a
+``pg_dump`` wrapper -- on that cadence (orchestrate-only: the backup bytes live
 wherever that tool puts them, never inside SysManage).  This module holds the
 OSS-side pieces:
 
@@ -33,7 +33,7 @@ from typing import Dict, Optional
 from backend.config import config as app_config
 from backend.config.settings_service import get_tenant_setting, set_tenant_setting
 
-# RPO compliance states — the read model the UI + alerting consume.
+# RPO compliance states -- the read model the UI + alerting consume.
 RPO_COMPLIANT = "compliant"
 RPO_AT_RISK = "at_risk"
 RPO_BREACHED = "breached"
@@ -82,12 +82,12 @@ class BackupConfig:
 def get_backup_config() -> BackupConfig:
     """Read the ``backup`` section of ``sysmanage.yaml`` into a BackupConfig.
 
-    Tolerant of a missing/!malformed section — an absent ``backup.command``
+    Tolerant of a missing/!malformed section -- an absent ``backup.command``
     simply means orchestration is disabled.
     """
     try:
         raw = app_config.config.get("backup", {}) or {}
-    except Exception:  # noqa: BLE001 — config read must never raise here
+    except Exception:  # noqa: BLE001 -- config read must never raise here
         raw = {}
 
     def _int(key: str, default: int) -> int:
@@ -118,11 +118,11 @@ def rpo_status(
     Pure read model (no I/O), so it is fully unit-tested OSS-side and shared by
     the engine + the control-plane API:
 
-      * ``unknown``   — no RPO target (backups disabled / not configured)
-      * ``breached``  — never backed up, or the last good backup is older than
+      * ``unknown``   -- no RPO target (backups disabled / not configured)
+      * ``breached``  -- never backed up, or the last good backup is older than
                         the target
-      * ``at_risk``   — within :data:`AT_RISK_FRACTION` of the target
-      * ``compliant`` — comfortably inside the window
+      * ``at_risk``   -- within :data:`AT_RISK_FRACTION` of the target
+      * ``compliant`` -- comfortably inside the window
     """
     if not rpo_seconds or rpo_seconds <= 0:
         return RPO_UNKNOWN
@@ -182,7 +182,7 @@ def render_backup_command(template: str, context: Dict[str, object]) -> list:
     operator's template fails loudly at exec time instead of crashing the tick.
 
     The operator-controlled *template* is tokenized first (``shlex.split``), then
-    each token is substituted — so a tenant-derived value (slug, dbname) can
+    each token is substituted -- so a tenant-derived value (slug, dbname) can
     never introduce extra argv tokens or flags no matter what it contains.  The
     command runs with ``shell=False`` on this argv, so there is no shell
     interpolation surface either.
@@ -190,7 +190,7 @@ def render_backup_command(template: str, context: Dict[str, object]) -> list:
     safe = {key: str(context.get(key, "")) for key in _TEMPLATE_KEYS}
 
     class _Defaulting(dict):
-        def __missing__(self, key):  # noqa: D401 — leave unknown placeholders literal
+        def __missing__(self, key):  # noqa: D401 -- leave unknown placeholders literal
             return "{" + key + "}"
 
     mapping = _Defaulting(safe)

@@ -5,7 +5,7 @@
 """
 Shared Alembic environment logic for the three partition chains.
 
-Phase 13.1 splits the schema into three independent Alembic chains —
+Phase 13.1 splits the schema into three independent Alembic chains --
 ``registry`` (``registry_*`` tables), ``shared`` (``shared_*`` reference
 tables), and ``tenant`` (the existing per-customer schema, unprefixed).
 Each chain is a single linear chain with **its own version table** so the
@@ -64,7 +64,7 @@ def _make_include_name(include_prefixes, exclude_prefixes):
 
     Only ``table`` names are filtered (so a chain's autogenerate sees only
     its own partition's tables); every other object type passes through.
-    This keeps the chains honest — the ``tenant`` chain will not try to
+    This keeps the chains honest -- the ``tenant`` chain will not try to
     create ``registry_*`` tables just because they share ``Base.metadata``.
     """
 
@@ -151,7 +151,7 @@ def run_migrations(
 
     # WAL journal mode is more reliable than the default DELETE mode when
     # multiple pytest-xdist workers run migrations against separate SQLite
-    # databases concurrently — DELETE mode creates/removes a rollback
+    # databases concurrently -- DELETE mode creates/removes a rollback
     # journal per transaction, which can trigger "attempt to write a
     # readonly database" on FreeBSD under heavy parallel I/O.
     if connectable.url.get_backend_name() == "sqlite":

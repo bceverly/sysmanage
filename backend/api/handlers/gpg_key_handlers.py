@@ -3,12 +3,12 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-GPG key command-result handlers (GPG Key Management — Slice 3b).
+GPG key command-result handlers (GPG Key Management -- Slice 3b).
 
 Consumes the agent's ``install_gpg_key`` / ``remove_gpg_key``
 ``command_result`` messages and flips the ``status`` on the matching
 ``gpg_key_assignment`` row.  This is a purely mechanical status update on an
-OSS table — the command DISPATCH and key material handling live in the
+OSS table -- the command DISPATCH and key material handling live in the
 licensed ``secrets_engine`` (Pro+); nothing here touches key material.
 
 ``db`` is the caller's session, already tenant-routed to the bound host's
@@ -92,7 +92,7 @@ async def handle_gpg_key_command_result(  # NOSONAR
     install the row's status becomes ``installed`` (or ``failed``).  For a
     remove a successful result deletes the row outright, while a failure sets
     ``failed`` so the (still-visible) assignment can be retried.  Missing host,
-    missing fields, or an absent assignment are handled gracefully — we never
+    missing fields, or an absent assignment are handled gracefully -- we never
     raise."""
     command_type, success, key_id, target_username = _extract_fields(message_data)
 
@@ -161,7 +161,7 @@ async def handle_gpg_key_command_result(  # NOSONAR
                 return {"message_type": "command_result_ack"}
 
             if success:
-                # Truly removed on the agent — drop the row for good.
+                # Truly removed on the agent -- drop the row for good.
                 db.delete(assignment)
                 db.commit()
                 logger.info(
@@ -171,7 +171,7 @@ async def handle_gpg_key_command_result(  # NOSONAR
                     target_username,
                 )
             else:
-                # Removal failed — keep the row visible/retryable.
+                # Removal failed -- keep the row visible/retryable.
                 assignment.status = ASSIGNMENT_FAILED
                 db.commit()
                 logger.info(

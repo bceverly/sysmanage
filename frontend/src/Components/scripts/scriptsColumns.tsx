@@ -205,7 +205,7 @@ export const buildExecutionColumns = ({
         sx={{
           color: 'primary.main',
           '&:disabled': {
-            color: 'grey.400'
+            color: 'gray.400'
           }
         }}
       >

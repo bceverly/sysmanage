@@ -38,7 +38,7 @@ export default defineConfig({
      of 50% of cores = 4 on an 8-core box).  Four Chromium workers PLUS the Vite
      dev server PLUS the Python backend badly oversubscribe 8 cores, which is
      what spiked timing-sensitive tests 2-8x (a 5s render took 41s) and drove
-     the flakes.  Two workers keeps every test near its baseline timing — the
+     the flakes.  Two workers keeps every test near its baseline timing -- the
      real fix for the flakiness, not raising individual waits.  CI stays at 3. */
   workers: process.env.CI ? 3 : 2,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -51,7 +51,7 @@ export default defineConfig({
     /* Browser channel.  Default to Playwright's bundled, version-matched
      * chromium.  Forcing the system-installed Chrome (channel:'chrome') was a
      * workaround for Linux distros Playwright's matrix doesn't list (e.g.
-     * Ubuntu 26.04) — but on macOS it launches the user's already-running
+     * Ubuntu 26.04) -- but on macOS it launches the user's already-running
      * Chrome install, and each automation process gets reclaimed by that Chrome
      * singleton and instantly closes ("browserContext.newPage: Target page,
      * context or browser has been closed"), failing every parallel worker.  The
@@ -74,7 +74,7 @@ export default defineConfig({
      * system `channel: 'chrome'` and never ran a full `npx playwright install`).
      * With video on, `on-first-retry` made every retry crash instantly in
      * `browserContext.newPage` ("ffmpeg Executable doesn't exist"), so the retry
-     * safety net above was DEAD — flakes never got their second chance.  `trace`
+     * safety net above was DEAD -- flakes never got their second chance.  `trace`
      * needs no ffmpeg and gives better debugging than video anyway. */
     video: 'off',
   },

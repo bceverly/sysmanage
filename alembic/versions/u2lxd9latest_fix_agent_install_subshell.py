@@ -16,7 +16,7 @@ The Linux KVM/LXD ``agent_install_commands`` introduced by
     "curl -fL -o /tmp/sysmanage-agent.deb \"$LATEST\"",
 
 That works in cloud-init's ``runcmd`` block on KVM **only** if the two
-entries happen to share a process — which they don't, each runcmd
+entries happen to share a process -- which they don't, each runcmd
 entry is a fresh ``sh -c``.  And it definitely doesn't work on LXD,
 where each entry runs as a separate ``lxc exec ... -- sh -c '<cmd>'``
 invocation: the variable evaporates between processes.
@@ -48,7 +48,7 @@ FIXED_INSTALL_COMMANDS = """[
     "rm -f /tmp/sysmanage-agent.deb"
 ]"""
 
-# The broken six-entry form from r0c6t8d9v0n1 — used by downgrade().
+# The broken six-entry form from r0c6t8d9v0n1 -- used by downgrade().
 BROKEN_INSTALL_COMMANDS = """[
     "apt-get update",
     "apt-get install -y curl ca-certificates",

@@ -59,7 +59,7 @@ router = APIRouter(
 # Bundle ISOs are multi-GB; a browser can't put the session JWT on a
 # plain download link and buffering the whole file through fetch() to
 # add the header OOMs the tab.  So this router carries NO blanket
-# JWTBearer — its one route is authorised by a short-lived single-bundle
+# JWTBearer -- its one route is authorized by a short-lived single-bundle
 # token minted by the authenticated POST /{id}/download-token below.
 download_router = APIRouter(
     prefix="/airgap-bundles",
@@ -115,7 +115,7 @@ class ResourceStatusResponse(BaseModel):
 
 # Resource thresholds for a Docker-driven multi-platform bundle build.
 # The dominant costs are per-distro ``pip wheel`` compilation (cryptography,
-# cffi, …) — each wants ~1 GB — plus a multi-GB staging tree and the ISO.
+# cffi, …) -- each wants ~1 GB -- plus a multi-GB staging tree and the ISO.
 # A host that can't cover these silently OOM-kills the per-distro builds
 # and ships a hollow ISO, so we gate the build on them up front.
 _MIN_BUILD_AVAIL_MB = 2048  # RAM + free swap below this -> block
@@ -124,7 +124,7 @@ _MIN_BUILD_DISK_GB = 5  # free disk below this -> block
 _SOFT_BUILD_DISK_GB = 10  # free disk below this -> warn
 
 # Where buildAirGapBundle.sh stages the build (its STAGING_DIR default).
-# We only ``stat`` its free space here — we never create a file in it — so
+# We only ``stat`` its free space here -- we never create a file in it -- so
 # the bandit hardcoded-tmp warning does not apply.
 _STAGING_PARENT = "/var/tmp"  # nosec B108  # NOSONAR S5443 - read-only disk_usage probe, never written to
 
@@ -177,7 +177,7 @@ def _check_build_resources() -> dict:
     """Assess whether the host can run a Docker bundle build.  Shape
     matches ``ResourceStatusResponse``."""
     # Disk: the build stages under /var/tmp and writes the ISO to
-    # BUNDLE_DIR — both need room, possibly on different filesystems.
+    # BUNDLE_DIR -- both need room, possibly on different filesystems.
     frees = [
         b
         for b in (
@@ -198,7 +198,7 @@ def _check_build_resources() -> dict:
     mem = _read_meminfo_mb()
     if mem is None:
         # Non-Linux / unreadable.  docker-status already blocks non-Linux
-        # hosts, so don't double-block here — report unknown but allow.
+        # hosts, so don't double-block here -- report unknown but allow.
         return {
             "ram_total_mb": None,
             "ram_available_mb": None,
@@ -235,13 +235,13 @@ def _check_build_resources() -> dict:
         if mem_avail < _SOFT_BUILD_RAM_MB:
             severity = "warn"
             reasons.append(
-                f"only {mem_avail} MB real RAM free — the build will lean on swap "
+                f"only {mem_avail} MB real RAM free -- the build will lean on swap "
                 f"and run slowly"
             )
         if disk_free_gb is not None and disk_free_gb < _SOFT_BUILD_DISK_GB:
             severity = "warn"
             reasons.append(
-                f"only {disk_free_gb} GB free disk — a full build can use several GB"
+                f"only {disk_free_gb} GB free disk -- a full build can use several GB"
             )
 
     return {
@@ -301,7 +301,7 @@ def _resolve_caller_user_id(current_user: str) -> Optional[uuid.UUID]:
 
 
 # ---------------------------------------------------------------------------
-# GET /airgap-bundles/docker-status — pre-flight check before kicking
+# GET /airgap-bundles/docker-status -- pre-flight check before kicking
 # off a build (the Settings UI uses this to surface a "Docker isn't
 # ready, here's how to install it" banner instead of letting the
 # build subprocess fail silently with a cryptic log file).
@@ -328,7 +328,7 @@ async def docker_status(
             permission_denied=False,
         )
 
-    # Identify the OS user this API process is running as — that's
+    # Identify the OS user this API process is running as -- that's
     # the user that needs docker socket access, since the build
     # subprocess inherits the same uid/gid set.  In a packaged
     # install it's the 'sysmanage' system user; in dev it's whoever
@@ -408,7 +408,7 @@ async def _docker_running_state(docker_path: str) -> Tuple[bool, Optional[str], 
     stderr_line = (err or "").strip().splitlines()
     error = stderr_line[0] if stderr_line else "docker info exited non-zero"
     # Differentiate "daemon down" from "daemon up but I can't read the
-    # socket" — the latter is a group-membership problem with very
+    # socket" -- the latter is a group-membership problem with very
     # different remediation.
     permission_denied = bool(error) and "permission denied" in error.lower()
     return False, error, permission_denied
@@ -418,7 +418,7 @@ def _user_in_docker_group() -> bool:
     """True if the current process user can reach the docker socket.
 
     Checks the *current process user* (who actually spawns the build
-    subprocess) — the 'sysmanage' system user in a packaged install, or
+    subprocess) -- the 'sysmanage' system user in a packaged install, or
     whoever started ``make run`` in dev.  Hardcoding 'sysmanage' would
     mis-flag dev hosts.
     """
@@ -438,7 +438,7 @@ def _user_in_docker_group() -> bool:
 
 
 # ---------------------------------------------------------------------------
-# GET /airgap-bundles/resource-status — RAM / swap / disk pre-flight.
+# GET /airgap-bundles/resource-status -- RAM / swap / disk pre-flight.
 # The Settings UI uses this to disable the Build buttons (and show a
 # banner) when the host can't take a build, rather than letting the
 # per-distro Docker builds get OOM-killed and silently ship a hollow ISO.
@@ -454,7 +454,7 @@ async def resource_status(
 
 
 # ---------------------------------------------------------------------------
-# POST /airgap-bundles — start a build
+# POST /airgap-bundles -- start a build
 # ---------------------------------------------------------------------------
 
 
@@ -470,7 +470,7 @@ async def create_bundle(
         )
 
     # Resource gate.  The server/agent builds run Docker per distro and
-    # compile wheels; refuse to start when the host can't take it — a
+    # compile wheels; refuse to start when the host can't take it -- a
     # too-small host OOM-kills the per-distro builds and ships a hollow
     # ISO.  Pro+ overlay bundles are a lightweight file copy and skip
     # this gate.  Enforced server-side so it can't be bypassed by a
@@ -508,7 +508,7 @@ async def create_bundle(
 
 
 # ---------------------------------------------------------------------------
-# GET /airgap-bundles — list (newest first)
+# GET /airgap-bundles -- list (newest first)
 # ---------------------------------------------------------------------------
 
 
@@ -528,7 +528,7 @@ async def list_bundles(
 
 
 # ---------------------------------------------------------------------------
-# GET /airgap-bundles/{id} — one bundle's status
+# GET /airgap-bundles/{id} -- one bundle's status
 # ---------------------------------------------------------------------------
 
 
@@ -551,15 +551,15 @@ async def get_bundle(
 
 
 # ---------------------------------------------------------------------------
-# GET /airgap-bundles/{id}/download — stream the ISO
+# GET /airgap-bundles/{id}/download -- stream the ISO
 # ---------------------------------------------------------------------------
 
 
 def _bundle_file_response(bundle_id: uuid.UUID) -> FileResponse:
     """Resolve a READY bundle to a streaming FileResponse, or raise.
 
-    FileResponse streams the file off disk in chunks — it never loads
-    the multi-GB ISO into memory — so this is safe for any size.  Shared
+    FileResponse streams the file off disk in chunks -- it never loads
+    the multi-GB ISO into memory -- so this is safe for any size.  Shared
     by the header-authed ``/download`` route and the token-authed
     ``/download-stream`` route.
     """
@@ -604,7 +604,7 @@ async def mint_bundle_download_token(
     bundle_id: uuid.UUID,
     current_user: str = Depends(get_current_user),  # noqa: ARG001
 ):
-    """Mint a short-lived token authorising one streaming bundle download.
+    """Mint a short-lived token authorizing one streaming bundle download.
 
     The UI POSTs here (authenticated), then points the browser straight
     at GET /{id}/download-stream?token=… so the browser streams the
@@ -632,7 +632,7 @@ async def download_bundle_stream(bundle_id: uuid.UUID, token: str = ""):
 
 
 # ---------------------------------------------------------------------------
-# DELETE /airgap-bundles/{id} — remove file + row
+# DELETE /airgap-bundles/{id} -- remove file + row
 # ---------------------------------------------------------------------------
 
 

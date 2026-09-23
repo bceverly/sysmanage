@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Custom Metrics & Graphs models (Custom Metrics — Slice 1).
+Custom Metrics & Graphs models (Custom Metrics -- Slice 1).
 
 Landscape "Custom Graphs" parity: an operator defines a named custom metric = a
 small script that outputs ONE numeric value.  The metric is targeted by HOST
@@ -19,7 +19,7 @@ Tenant-partition tables: table names are UNPREFIXED (no ``registry_``/
 
 Targeting FK note: the host tag table (``tags``) lives in the tenant partition
 (same partition as ``host``), so ``custom_metric_tag.tag_id`` is a REAL FK to
-``tags.id`` — not a soft reference.
+``tags.id`` -- not a soft reference.
 """
 
 import uuid

@@ -111,7 +111,7 @@ logger = get_logger("backend.startup.routes")
 def _include_versioned(app: FastAPI, router, *, suffix: str = "", tags=None):
     """Register a router natively under ``/api/v1`` (Phase 13.2.1 migration).
 
-    Mounts the router once, at ``/api/v1{suffix}`` — the canonical versioned
+    Mounts the router once, at ``/api/v1{suffix}`` -- the canonical versioned
     route.  The deprecated unversioned ``/api{suffix}`` alias was retired as the
     final Phase 13.2.1 action (the migration is complete: every feature is native
     ``/api/v1``, so the one-release back-compat window for pre-13.2.1 callers is
@@ -139,19 +139,19 @@ def _include_renamed(
 
 
 def check_route_collisions(app: FastAPI, *, strict: bool = False) -> dict:
-    """Surface routes that share the same (method, path) — Phase 13.2.1.
+    """Surface routes that share the same (method, path) -- Phase 13.2.1.
 
     The ``/api/v1`` native + ``/api`` alias mounts are DIFFERENT paths, so they
     are NOT collisions.  A genuine duplicate means one endpoint silently shadows
-    another (Starlette matches first-registered) — most dangerously across the
+    another (Starlette matches first-registered) -- most dangerously across the
     OSS↔Pro+ boundary, where the compiled engine mounts at runtime on licensed
     boxes and neither test suite covers the seam.  This guard turns that silent
     heisenbug into a **loud** one.
 
     Behaviour:
       * Always logs an ERROR (with the offending ``method path -> handlers``)
-        when collisions exist — so they're visible in every startup log / CI.
-      * ``strict=True`` *additionally* raises ``RuntimeError`` — for tests/CI
+        when collisions exist -- so they're visible in every startup log / CI.
+      * ``strict=True`` *additionally* raises ``RuntimeError`` -- for tests/CI
         that want to fail fast on a NEW collision.
 
     It deliberately does NOT crash startup by default: there are pre-existing,
@@ -184,7 +184,7 @@ def check_route_collisions(app: FastAPI, *, strict: bool = False) -> dict:
             for (method, path), names in sorted(collisions.items())
         )
         msg = (
-            "Route collision(s) detected — the same method+path is registered "
+            "Route collision(s) detected -- the same method+path is registered "
             "more than once, so one handler silently shadows another (commonly "
             "an OSS router and a Pro+ engine claiming the same /api/v1 path). "
             "Give them disjoint sub-paths.\n" + detail
@@ -216,17 +216,17 @@ def register_routes(app: FastAPI):
     logger.debug("Auth router added")
 
     logger.debug(
-        "Adding MFA router (no prefix — endpoints carry their own /api/auth prefix)"
+        "Adding MFA router (no prefix -- endpoints carry their own /api/auth prefix)"
     )
     app.include_router(auth_mfa.router)  # /api/auth/mfa/* + /api/settings/mfa
     logger.debug("MFA router added")
 
-    # Phase 11 server-info — public, unauthenticated.  Lets the frontend
+    # Phase 11 server-info -- public, unauthenticated.  Lets the frontend
     # render the role chip + monitoring identify the box without login.
     app.include_router(server_info.router)
     logger.debug("Server-info router added")
 
-    # Custom Metrics Prometheus exporter — UNAUTHENTICATED (Prometheus-scrape
+    # Custom Metrics Prometheus exporter -- UNAUTHENTICATED (Prometheus-scrape
     # convention).  Mounted at the app ROOT so the path is exactly
     # ``/metrics/custom-metrics`` (NOT under /api/v1), the way the infra/health
     # routes are.  Must be firewalled to the Prometheus host (see module
@@ -234,19 +234,19 @@ def register_routes(app: FastAPI):
     app.include_router(custom_metric_exporter.router)
     logger.debug("Custom-metric Prometheus exporter router added")
 
-    # Phase 13.1.H — server-scoped configuration settings (Settings →
+    # Phase 13.1.H -- server-scoped configuration settings (Settings →
     # Configuration UI).  Phase 13.2.1: native /api/v1/settings + /api alias.
     _include_versioned(app, server_settings.router, tags=["settings"])
     logger.debug("Server-settings router added")
 
-    # Phase 11 B2 — air-gap collection schedules.  Routes are
+    # Phase 11 B2 -- air-gap collection schedules.  Routes are
     # license-gated (collector engine) at the handler level, so it's
     # safe to mount on every server (the gate returns 402 on standard
     # / repository roles).
     app.include_router(airgap_collection_schedule.router)
     logger.debug("Air-gap collection schedule router added")
 
-    # Phase 11 — one-shot collector runs (ad-hoc UI-triggered).  Same
+    # Phase 11 -- one-shot collector runs (ad-hoc UI-triggered).  Same
     # license-gate-at-handler pattern as the schedules router; safe to
     # mount unconditionally because the handler returns 402 on non-
     # collector deployments.
@@ -257,17 +257,17 @@ def register_routes(app: FastAPI):
     app.include_router(airgap_collector_runs.download_router)
     logger.debug("Air-gap collector runs router added")
 
-    # Phase 11 B5 — host-scoped compliance bucket endpoint that feeds
+    # Phase 11 B5 -- host-scoped compliance bucket endpoint that feeds
     # the AirgapComplianceBucketsCard frontend component.
     app.include_router(airgap_repository_buckets.router)
     logger.debug("Air-gap repository buckets router added")
 
-    # Phase 11 B6 — list-all-repos + freshness endpoints feeding the
+    # Phase 11 B6 -- list-all-repos + freshness endpoints feeding the
     # AirgapRepositories dashboard and RepositoryFreshnessCard.
     app.include_router(airgap_repository_list.router)
     logger.debug("Air-gap repository list router added")
 
-    # Phase 12 — per-channel private mirrors for the AGENT's own install
+    # Phase 12 -- per-channel private mirrors for the AGENT's own install
     # channels, so an air-gapped host can bootstrap its agent at all.
     app.include_router(airgap_agent_mirrors.router)
     logger.debug("Air-gap agent channel mirrors router added")
@@ -288,11 +288,11 @@ def register_routes(app: FastAPI):
     app.include_router(airgap_devices.router)
     logger.debug("Air-gap devices router added")
 
-    # Phase 13.2.1 — Slice 8: native /api/v1/mirror-* (+ deprecated /api alias).
+    # Phase 13.2.1 -- Slice 8: native /api/v1/mirror-* (+ deprecated /api alias).
     _include_versioned(app, repository_mirroring.router, tags=["repository-mirroring"])
     logger.debug("Repository mirroring router added")
 
-    # Phase 16 — Content Lifecycle Management (Enterprise; 402-gated in OSS).
+    # Phase 16 -- Content Lifecycle Management (Enterprise; 402-gated in OSS).
     _include_versioned(app, content_lifecycle.router, tags=["content-lifecycle"])
     _include_versioned(
         app, content_lifecycle_promotion.router, tags=["content-lifecycle"]
@@ -304,10 +304,10 @@ def register_routes(app: FastAPI):
     _include_versioned(app, content_lifecycle_diff.router, tags=["content-lifecycle"])
     logger.debug("Content lifecycle router added")
 
-    # SSO/ACS/metadata callbacks — IdP-configured URLs, kept unversioned.
+    # SSO/ACS/metadata callbacks -- IdP-configured URLs, kept unversioned.
     logger.debug("Adding external IdP SSO callback router (unversioned /api/auth/*)")
     app.include_router(external_idp.router)
-    # Provider/settings management — native /api/v1 + deprecated /api alias.
+    # Provider/settings management -- native /api/v1 + deprecated /api alias.
     logger.debug("Adding external IdP management router (native /api/v1 + alias)")
     _include_versioned(app, external_idp.mgmt_router, tags=["external-idp"])
     logger.debug("External IdP routers added")
@@ -354,7 +354,7 @@ def register_routes(app: FastAPI):
     )  # /api/v1/forgot-password, /reset-password, /validate-reset-token (+ /api alias)
     logger.debug("Password reset router added")
 
-    # Phase 13.3 — administrator invitations (invite by email + role; recipient
+    # Phase 13.3 -- administrator invitations (invite by email + role; recipient
     # accepts via a tokened link that creates their account).
     logger.debug("Adding invitations router (native /api/v1 + deprecated alias)")
     _include_versioned(
@@ -470,7 +470,7 @@ def register_routes(app: FastAPI):
     app.include_router(api_keys.router, prefix="/api/v1/api-keys", tags=["api-keys"])
     logger.debug("API-keys router added")
 
-    # Deferred from 13.2.1: OSS `reports` stays on /api/reports — the Pro+
+    # Deferred from 13.2.1: OSS `reports` stays on /api/reports -- the Pro+
     # reporting_engine already owns the /api/v1/reports namespace, so moving OSS
     # there would shadow it. Needs the same namespace decision as OSS `secrets`.
     # Phase 13.2.1 (option A): OSS reports takes a distinct v1 name
@@ -569,7 +569,7 @@ def register_routes(app: FastAPI):
     logger.debug("Certificates auth router added")
 
     # NOTE: only the AUTH router migrates. host.public_router (/host/register)
-    # is agent-facing and stays unversioned (Phase 13.2.1 — fleet version skew).
+    # is agent-facing and stays unversioned (Phase 13.2.1 -- fleet version skew).
     logger.debug("Adding host auth router (native /api/v1 + deprecated /api alias)")
     _include_versioned(app, host.auth_router, tags=["hosts"])
     logger.debug("Host auth router added")
@@ -609,7 +609,7 @@ def register_routes(app: FastAPI):
     logger.debug(
         "Adding secrets routers (native /api/v1/stored-secrets + /api/secrets alias)"
     )
-    # Registered as ordered sub-routers (types before crud) — their collection
+    # Registered as ordered sub-routers (types before crud) -- their collection
     # routes use a bare "" path that needs the non-empty feature prefix.
     for _secrets_sub in secrets.ordered_routers:
         _include_renamed(
@@ -735,7 +735,7 @@ def register_routes(app: FastAPI):
 
     # NOTE: the multi-tenancy control-plane router is NOT mounted here.  It is
     # mounted at startup by ``mount_multitenancy_routes`` in
-    # ``backend/api/proplus_routes.py`` (Pro+ relocation, Phase 2) — after the
+    # ``backend/api/proplus_routes.py`` (Pro+ relocation, Phase 2) -- after the
     # licensed ``multitenancy_engine`` has loaded and been bridged into the seam,
     # so the engine's router (when present) serves the control plane, with the
     # built-in OSS router as the fallback.  Mounting here (import time) would be
@@ -779,13 +779,13 @@ def register_app_routes(app: FastAPI):
     @app.get("/api/health")
     @app.head("/api/health")
     async def health_check():
-        """Liveness check — intentionally cheap, touches no backing service.
+        """Liveness check -- intentionally cheap, touches no backing service.
 
         Every connected agent polls this every second and upstream load
         balancers hit it for basic liveness, so it MUST stay dependency-free:
         a database round-trip per request does not scale to thousands of
         agents (it saturates the threadpool + connection pool and blows the
-        load-test SLA — see the ``agents`` scenario in tests/load/run.py).
+        load-test SLA -- see the ``agents`` scenario in tests/load/run.py).
         Database connectivity for HA routing lives on ``/api/health/db``.
         """
         return {"status": "healthy"}
@@ -793,13 +793,13 @@ def register_app_routes(app: FastAPI):
     @app.get("/api/health/db")
     @app.head("/api/health/db")
     async def health_check_db():
-        """Readiness check — reports bootstrap-database connectivity (Phase 15.1).
+        """Readiness check -- reports bootstrap-database connectivity (Phase 15.1).
 
         Lets an upstream load balancer or orchestrator route around a server
         that has lost its database (e.g. mid-failover, before the pool
         pre-ping has reconnected). Returns HTTP 503 when the database is
         unreachable, 200 otherwise. The probe runs in a threadpool so a
-        connect hang can't block the event loop, and never raises — an
+        connect hang can't block the event loop, and never raises -- an
         unreachable DB is a reported state, not a 500. This endpoint does a
         real DB round-trip, so it is NOT for high-frequency polling; use
         ``/api/health`` (liveness) for that.
@@ -822,7 +822,7 @@ def register_app_routes(app: FastAPI):
                 return False
 
         if not await run_in_threadpool(_check_db):
-            logger.warning("DB readiness: database unreachable — reporting 503")
+            logger.warning("DB readiness: database unreachable -- reporting 503")
             return JSONResponse(
                 status_code=503,
                 content={"status": "unhealthy", "database": "down"},

@@ -3,12 +3,12 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Tests for the multi-tenancy control-plane ("registry") models — Phase 13.1.A.
+Tests for the multi-tenancy control-plane ("registry") models -- Phase 13.1.A.
 
 These verify that the ``registry_*`` tables are created by the shared
 ``Base.metadata`` (the collapsed/homelab path the whole test suite uses)
-and that the core constraints — unique slug/email, the email→tenant grant
-mapping, one-placement-per-tenant — hold.
+and that the core constraints -- unique slug/email, the email→tenant grant
+mapping, one-placement-per-tenant -- hold.
 """
 
 import uuid

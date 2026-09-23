@@ -6,7 +6,7 @@
 API tests for the Phase 12 federation role + identity-key endpoints that
 drive the federation card on Settings → Server Role.
 
-Federation role is a SEPARATE axis from the air-gap server_role — these
+Federation role is a SEPARATE axis from the air-gap server_role -- these
 verify the two coexist independently, plus the identity public-key copy +
 trusted-peer import surface.
 """
@@ -41,7 +41,7 @@ class TestFederationRoleEndpoint:
 
     # NB: the role-WRITE path (PUT) and its independence from server_role are
     # covered deterministically in
-    # ``tests/services/test_server_config_federation_role.py`` — the service
+    # ``tests/services/test_server_config_federation_role.py`` -- the service
     # uses ``db.get_session_local()`` (the real configured DB), so writing it
     # through the API client here would hit the live DB, the same reason the
     # air-gap server-role PUT isn't API-tested either.

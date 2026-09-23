@@ -8,18 +8,18 @@ Adds the SAML 2.0 columns to ``external_idp_provider`` so a provider row of
 ``type='saml'`` carries a full SP/IdP configuration alongside the existing
 LDAP/OIDC fields:
 
-  * ``saml_idp_entity_id`` / ``saml_idp_sso_url`` — the IdP's entityID and SSO
+  * ``saml_idp_entity_id`` / ``saml_idp_sso_url`` -- the IdP's entityID and SSO
     redirect endpoint.
-  * ``saml_idp_x509_cert`` — the IdP's PUBLIC signing certificate, used to
+  * ``saml_idp_x509_cert`` -- the IdP's PUBLIC signing certificate, used to
     verify assertion signatures (stored inline; it is not a secret).
-  * ``saml_sp_entity_id`` / ``saml_sp_acs_url`` — our SP entityID and Assertion
+  * ``saml_sp_entity_id`` / ``saml_sp_acs_url`` -- our SP entityID and Assertion
     Consumer Service URL.
-  * ``saml_sp_x509_cert`` — optional SP certificate (public).
-  * ``saml_sp_private_key_secret_id`` — Vault reference to the SP private key
+  * ``saml_sp_x509_cert`` -- optional SP certificate (public).
+  * ``saml_sp_private_key_secret_id`` -- Vault reference to the SP private key
     (the key itself never lives in the DB).
-  * ``saml_email_attribute`` — attribute carrying the email (NameID when empty).
-  * ``saml_group_attribute`` — attribute carrying group memberships.
-  * ``saml_want_assertions_signed`` — require signed assertions (safe default).
+  * ``saml_email_attribute`` -- attribute carrying the email (NameID when empty).
+  * ``saml_group_attribute`` -- attribute carrying group memberships.
+  * ``saml_want_assertions_signed`` -- require signed assertions (safe default).
 
 Idempotent and SQLite + PostgreSQL safe (inspector guard + batch_alter_table).
 Chains off ``e1idptenancy`` (the main-chain head).

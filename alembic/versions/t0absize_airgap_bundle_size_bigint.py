@@ -12,7 +12,7 @@ Multi-OS server bundles routinely exceed 2 GB (Postgres INT4_MAX is
 ~2.15 GB), which caused commit failures and left bundle rows stuck in
 the "building" state.  Widen to BigInteger (INT8).
 
-Reversible — downgrade narrows back to Integer.  Doesn't lose data
+Reversible -- downgrade narrows back to Integer.  Doesn't lose data
 because actual stored sizes will fit in Integer if-and-only-if the
 narrowing target is reached after they're cleared.  Downgrade will
 fail loudly if any row has size > INT4_MAX at the time.
@@ -33,7 +33,7 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     # SQLite has no ``ALTER COLUMN ... TYPE`` and its ``INTEGER`` is
     # already a dynamic, up-to-8-byte type that stores >INT4_MAX values
-    # fine — so widening to BigInteger is a no-op there.  Only emit the
+    # fine -- so widening to BigInteger is a no-op there.  Only emit the
     # real DDL on backends that need (and support) it.  Without this
     # guard alembic emits ``ALTER TABLE ... ALTER COLUMN ... TYPE BIGINT``
     # which SQLite rejects with "near 'ALTER': syntax error".

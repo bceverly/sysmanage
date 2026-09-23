@@ -7,9 +7,9 @@
  *
  * Both are Enterprise pages, so the first thing each must get right is the
  * unlicensed case: an empty page looks like a broken feature, whereas naming
- * the licence tells the operator what is actually going on.
+ * the license tells the operator what is actually going on.
  *
- * Enrollment is the sharp edge on the Sites page — it hands a subordinate
+ * Enrollment is the sharp edge on the Sites page -- it hands a subordinate
  * server the credentials to join this coordinator, so a failure must be
  * visible rather than leaving the operator to wonder whether it took.
  */
@@ -91,7 +91,7 @@ describe("Sites", () => {
     expect(document.body.textContent).not.toBe("");
   });
 
-  test("an unlicensed server names the licence rather than showing nothing", async () => {
+  test("an unlicensed server names the license rather than showing nothing", async () => {
     m(doListFederationSites).mockResolvedValue({ licensed: false, sites: [] });
     render(<Sites />);
     await waitFor(() => expect(m(doListFederationSites)).toHaveBeenCalled());

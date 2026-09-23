@@ -201,7 +201,7 @@ def test_result_is_idempotent_on_replay(session):
     actuation.fanout_queued_commands(session, queue_ops=FakeQueueOps())
 
     actuation.record_command_host_result(session, cmd.id, str(h1.id), success=True)
-    # Replay after terminal — must not raise or duplicate the sync packet.
+    # Replay after terminal -- must not raise or duplicate the sync packet.
     actuation.record_command_host_result(session, cmd.id, str(h1.id), success=True)
 
     assert (
@@ -216,7 +216,7 @@ def test_fanout_is_not_reentrant(session):
     _queue_command(session, "reboot", target_host_ids=None)
     actuation.fanout_queued_commands(session, queue_ops=FakeQueueOps())
 
-    # Second tick: the command is in_progress now, not queued — no re-dispatch.
+    # Second tick: the command is in_progress now, not queued -- no re-dispatch.
     qops2 = FakeQueueOps()
     summary = actuation.fanout_queued_commands(session, queue_ops=qops2)
     assert summary["dispatched"] == 0

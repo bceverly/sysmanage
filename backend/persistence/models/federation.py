@@ -9,7 +9,7 @@ This module defines the SQLAlchemy ORM classes for the federation
 data model.  The 13 tables here fall into two role groups:
 
   * **Coordinator-side** (9 tables): site registry + the three
-    architectural tiers from the ROADMAP — host directory, aggregate
+    architectural tiers from the ROADMAP -- host directory, aggregate
     rollups (host / compliance / vulnerability), policy push tracking,
     dispatched command tracking, federation audit log.
 
@@ -23,8 +23,8 @@ model definitions need to be importable before the Cython
 exist.  API-layer gating (402 stub when the appropriate engine isn't
 loaded) happens in 12.1 / 12.2 in the routers, NOT here.
 
-A given SysManage deployment plays exactly one role — coordinator OR
-site — but both sets of tables get created on every instance.  The
+A given SysManage deployment plays exactly one role -- coordinator OR
+site -- but both sets of tables get created on every instance.  The
 unused half is dead weight in row count (always zero rows) and well
 under a kilobyte of schema; conditional migrations would cost more
 in operator confusion than they'd save.
@@ -37,7 +37,7 @@ Architectural notes (see ROADMAP Phase 12 "Data Architecture"):
     log bodies, OS-specific facts) stays at the originating site
     and is proxied on drill-down.
   * The dedup key on ``federation_sync_queue`` is the
-    ``(host_id, field, mtime)`` triple from the ROADMAP — this is
+    ``(host_id, field, mtime)`` triple from the ROADMAP -- this is
     what makes offline-replay safe when a site reconnects and
     re-sends its queued deltas.
   * Geo columns mirror the Phase 12.7 ``host`` columns 1:1 so the
@@ -100,7 +100,7 @@ class FederationSite(Base):
     """Registered subordinate site server in the coordinator's registry.
 
     One row per enrolled site.  Created via the enrollment flow
-    (Phase 12.1) and never deleted on disenrollment — the row stays
+    (Phase 12.1) and never deleted on disenrollment -- the row stays
     with ``status='removed'`` so the federation audit log can still
     resolve historical references by ``site_id``.
 
@@ -123,7 +123,7 @@ class FederationSite(Base):
     # in OUT OF BAND by the operator when the site row is created.  At
     # ``complete_enrollment`` the coordinator requires the site to prove
     # possession of the matching private key over the exact TLS cert it
-    # presents — defeating an enrollment-time MITM.  Strict-by-default:
+    # presents -- defeating an enrollment-time MITM.  Strict-by-default:
     # enrollment is refused when this is NULL.
     site_identity_public_key_pem = Column(Text, nullable=True)
     # SHA-256 of the enrollment token, scrubbed after successful
@@ -134,7 +134,7 @@ class FederationSite(Base):
     # "no token outstanding" (already-enrolled or cancelled).
     enrollment_token_expires_at = Column(DateTime, nullable=True)
     # Phase 12.1.C: most recent time the site flipped to ``enrolled``.
-    # Survives suspend/resume cycles — only ``complete_enrollment``
+    # Survives suspend/resume cycles -- only ``complete_enrollment``
     # writes this column.  NULL until first enrollment completes.
     enrolled_at = Column(DateTime, nullable=True)
     # Phase 12.6: SHA-256 of the long-lived bearer token the site
@@ -147,7 +147,7 @@ class FederationSite(Base):
     # Phase 12.10 Slice 3: plaintext bearer the COORDINATOR presents on
     # every outbound push to this subordinate site (policy push, command
     # dispatch).  Stored as plaintext on this row because the coordinator
-    # is the SENDER for this direction — it needs the literal value to
+    # is the SENDER for this direction -- it needs the literal value to
     # set the ``Authorization`` header.  The site stores the SHA-256
     # equivalent in ``federation_coordinator.coordinator_inbound_bearer_token_hash``
     # so a leak on the verifier side never exposes a usable secret.
@@ -162,7 +162,7 @@ class FederationSite(Base):
     # Phase 12.2: latest site-reported metadata (from the site's
     # ``site_metadata`` sync payload).  ``sysmanage_version`` lets the
     # coordinator flag version-skewed sites; ``connection_state`` is the
-    # site's OWN view of its uplink (online/degraded/offline — i.e. whether
+    # site's OWN view of its uplink (online/degraded/offline -- i.e. whether
     # it is currently in local autonomy mode); ``capabilities_json`` is the
     # JSON list of loaded engine modules the site advertises.
     # ``last_metadata_at`` is when that report last landed.
@@ -170,7 +170,7 @@ class FederationSite(Base):
     connection_state = Column(String(16), nullable=True)
     capabilities_json = Column(Text, nullable=True)
     last_metadata_at = Column(DateTime, nullable=True)
-    # Minimum acceptable agent version on the site — used to gate
+    # Minimum acceptable agent version on the site -- used to gate
     # command dispatch (coordinator refuses to send a command that
     # the site is too old to handle).
     agent_version_min = Column(String(32), nullable=True)
@@ -189,13 +189,13 @@ class FederationSite(Base):
 
 
 class FederationHostDirectory(Base):
-    """Coordinator-side per-host index — the "host directory tier".
+    """Coordinator-side per-host index -- the "host directory tier".
 
     One row per host across the entire fleet, holding only the columns
     operators filter and search on.  Sized for ~1 KB × 1M hosts ≈ 1 GB
     in PostgreSQL.  Detail-tier data (software inventory, full audit
     log, OS-specific facts) stays at the originating site and is
-    proxied on drill-down — DO NOT add columns to this table without
+    proxied on drill-down -- DO NOT add columns to this table without
     a fleet-scale storage review.
 
     ``host_id`` is the host's primary-key UUID at its originating
@@ -220,7 +220,7 @@ class FederationHostDirectory(Base):
     platform = Column(String(64), nullable=True)
     status = Column(String(32), nullable=True)
     last_seen = Column(DateTime, nullable=True)
-    # JSON-encoded list of tag names — denormalized vs ``host_tags``
+    # JSON-encoded list of tag names -- denormalized vs ``host_tags``
     # at the site so cross-site filter queries don't have to join
     # over a separate table at 1M-host scale.  Maintained by the
     # site's upstream sync.
@@ -230,7 +230,7 @@ class FederationHostDirectory(Base):
     geo_city = Column(String(200), nullable=True)
     geo_latitude = Column(Float, nullable=True)
     geo_longitude = Column(Float, nullable=True)
-    # Last time the SITE updated this row — used by delta-sync
+    # Last time the SITE updated this row -- used by delta-sync
     # dedup-on-replay.  Distinct from ``last_seen`` (the agent's
     # heartbeat at the site).
     mtime = Column(DateTime, nullable=False, default=_utcnow_naive)
@@ -251,7 +251,7 @@ class FederationHostRollup(Base):
     """Aggregate host counts per site, sampled at ``snapshot_at``.
 
     Append-only.  Older snapshots are pruned by a retention sweeper
-    (Phase 12.1) — the Sites page reads only the latest row per
+    (Phase 12.1) -- the Sites page reads only the latest row per
     ``site_id``.
     """
 
@@ -284,7 +284,7 @@ class FederationComplianceRollup(Base):
     """Aggregate compliance scores per site per baseline.
 
     A site can be evaluated against multiple compliance baselines
-    (CIS, STIG, vendor-specific) — one row per (site, baseline,
+    (CIS, STIG, vendor-specific) -- one row per (site, baseline,
     snapshot).
     """
 
@@ -354,7 +354,7 @@ class FederationPolicy(Base):
     """Centrally defined policy that the coordinator pushes to sites.
 
     Polymorphic by ``policy_type`` (update_profile, firewall_role,
-    compliance_baseline, ...) with the type-specific body serialised
+    compliance_baseline, ...) with the type-specific body serialized
     into ``definition_json``.  Sites apply policies in version order
     (the highest ``version`` they've received for a given
     ``policy_id`` wins).
@@ -366,7 +366,7 @@ class FederationPolicy(Base):
     policy_type = Column(String(64), nullable=False)
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
-    # JSON body — shape depends on ``policy_type``.
+    # JSON body -- shape depends on ``policy_type``.
     definition_json = Column(Text, nullable=False)
     version = Column(Integer, nullable=False, default=1)
     created_by = Column(String(255), nullable=True)
@@ -374,7 +374,7 @@ class FederationPolicy(Base):
     updated_at = Column(
         DateTime, nullable=False, default=_utcnow_naive, onupdate=_utcnow_naive
     )
-    # ``True`` once an admin disables the policy — sites are notified
+    # ``True`` once an admin disables the policy -- sites are notified
     # on next sync to stop applying it, but the row stays for audit.
     is_active = Column(Boolean, nullable=False, default=True)
 
@@ -421,7 +421,7 @@ class FederationPolicyAssignment(Base):
     # (re-assignment).
     push_attempts = Column(Integer, nullable=False, default=0)
     # The version of ``federation_policies.version`` that was last
-    # successfully pushed to this site — lets the coordinator detect
+    # successfully pushed to this site -- lets the coordinator detect
     # when a policy edit needs to be re-pushed.
     pushed_version = Column(Integer, nullable=True)
 
@@ -443,7 +443,7 @@ class FederationDispatchedCommand(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     command_type = Column(String(64), nullable=False)
-    # JSON serialized command parameters — shape depends on
+    # JSON serialized command parameters -- shape depends on
     # ``command_type``.
     parameters_json = Column(Text, nullable=True)
     target_site_id = Column(
@@ -496,7 +496,7 @@ class FederationAuditLog(Base):
     actor_userid = Column(String(255), nullable=True)
     target_site_id = Column(GUID(), nullable=True)
     target_host_id = Column(GUID(), nullable=True)
-    # JSON object — operation-specific structured details.
+    # JSON object -- operation-specific structured details.
     details_json = Column(Text, nullable=True)
     created_at = Column(DateTime, nullable=False, default=_utcnow_naive)
 
@@ -519,7 +519,7 @@ class FederationAlert(Base):
     """A SITE-scoped alert fired on a cross-site rollup condition.
 
     Distinct from the host-scoped ``alert`` table (which requires a
-    ``host_id``) — these have only a ``site_id``.  An alert stays OPEN
+    ``host_id``) -- these have only a ``site_id``.  An alert stays OPEN
     (``resolved=False``) while its condition holds and auto-resolves
     when the condition clears; the operator can also acknowledge it.
     There is at most one open alert per (site, condition).
@@ -554,7 +554,7 @@ class FederationAlertConfig(Base):
     rollup-alert conditions (Phase 12.1 follow-up).
 
     Fixed PK (``SINGLETON_FEDERATION_ALERT_CONFIG_ID``) so the coordinator
-    upserts by PK.  All columns are nullable — a NULL means "use the
+    upserts by PK.  All columns are nullable -- a NULL means "use the
     built-in default" so an operator can override just the one threshold
     they care about and leave the rest on defaults.
     """
@@ -585,8 +585,8 @@ class FederationSiteSyncEvent(Base):
     One row per upstream sync the coordinator receives from a site (plus
     the metadata report that rides along).  Powers the per-site
     "sync status timeline" (latency / queue-depth / host-count over time)
-    on SiteDetail.  Pruned like the rollup series — capped per site and by
-    age — so the table can't grow without bound on a busy fleet.
+    on SiteDetail.  Pruned like the rollup series -- capped per site and by
+    age -- so the table can't grow without bound on a busy fleet.
     """
 
     __tablename__ = "federation_site_sync_event"
@@ -599,7 +599,7 @@ class FederationSiteSyncEvent(Base):
         index=True,
     )
     recorded_at = Column(DateTime, nullable=False, default=_utcnow_naive)
-    # success | error — mirrors ``federation_sites.last_sync_status``.
+    # success | error -- mirrors ``federation_sites.last_sync_status``.
     sync_status = Column(String(32), nullable=False)
     # Round-trip latency the site reported for this sync, if known.
     latency_ms = Column(Integer, nullable=True)
@@ -643,7 +643,7 @@ class FederationCoordinator(Base):
     # pasted in OUT OF BAND by the operator before enrolling.  During the
     # /enroll handshake the site requires the coordinator to prove possession
     # of the matching private key over the exact TLS cert it fetched, before
-    # pinning that cert — defeating an enrollment-time MITM.  Strict-by-default:
+    # pinning that cert -- defeating an enrollment-time MITM.  Strict-by-default:
     # enrollment is refused when this is NULL.
     coordinator_identity_public_key_pem = Column(Text, nullable=True)
     # The site_id the coordinator assigned us at enrollment time.
@@ -653,7 +653,7 @@ class FederationCoordinator(Base):
     # Phase 12.10 Slice 2: plaintext bearer this site presents on every
     # outbound sync POST.  Distinct from the coordinator's per-site
     # ``federation_sites.sync_bearer_token_hash`` (which only keeps the
-    # SHA-256) — the site MUST hold the literal value because every
+    # SHA-256) -- the site MUST hold the literal value because every
     # outbound HTTP request needs the original ``Authorization: Bearer
     # <token>`` header.  Rotation replaces this value via the
     # enrollment refresh flow.
@@ -678,12 +678,12 @@ class FederationCoordinator(Base):
     # failures.  ``consecutive_sync_failures`` drives the connection-state
     # classifier and the reconnect backoff.  ``connection_state`` is the
     # derived label the site engine + UI read:
-    #   online    — last attempt succeeded
-    #   degraded  — 1..(OFFLINE_AFTER_FAILURES-1) consecutive failures
-    #   offline   — >= OFFLINE_AFTER_FAILURES failures; site runs in local
+    #   online    -- last attempt succeeded
+    #   degraded  -- 1..(OFFLINE_AFTER_FAILURES-1) consecutive failures
+    #   offline   -- >= OFFLINE_AFTER_FAILURES failures; site runs in local
     #               autonomy mode (agents keep reporting, upgrades keep
     #               running, deltas keep queuing for replay on reconnect)
-    #   unknown   — never attempted a sync yet
+    #   unknown   -- never attempted a sync yet
     # ``next_reconnect_at`` is the backoff gate: the outbound tick skips
     # contacting the coordinator until this time passes, so a hard-down
     # coordinator isn't hammered every interval.
@@ -714,13 +714,13 @@ class FederationSyncQueue(Base):
     # host_delta / compliance_rollup / vulnerability_rollup /
     # audit_entry / heartbeat
     payload_type = Column(String(64), nullable=False)
-    # JSON serialized payload — shape depends on ``payload_type``.
+    # JSON serialized payload -- shape depends on ``payload_type``.
     payload_json = Column(Text, nullable=False)
     created_at = Column(DateTime, nullable=False, default=_utcnow_naive)
     attempts = Column(Integer, nullable=False, default=0)
     last_attempt_at = Column(DateTime, nullable=True)
     last_error = Column(Text, nullable=True)
-    # Optional dedup key — host-delta entries set this, rollups don't.
+    # Optional dedup key -- host-delta entries set this, rollups don't.
     dedup_key = Column(String(255), nullable=True)
 
     __table_args__ = (
@@ -741,7 +741,7 @@ class FederationReceivedPolicy(Base):
 
     __tablename__ = "federation_received_policies"
 
-    # Same UUID as ``federation_policies.id`` at the coordinator — the
+    # Same UUID as ``federation_policies.id`` at the coordinator -- the
     # site identifies a policy by its coordinator-assigned UUID.
     policy_id = Column(GUID(), primary_key=True)
     policy_type = Column(String(64), nullable=False)
@@ -823,9 +823,9 @@ class FederationSecretLease(Base):
     one of its hosts (upstream ``secret_lease_request`` sync payload); the
     coordinator issues it from the master Vault and tracks the lease here so
     a single coordinator-side reconcile loop can renew/revoke/expire every
-    site's leases — no per-site sweeper.
+    site's leases -- no per-site sweeper.
 
-    NEVER stores the secret value itself — only the Vault ``lease_id`` (for
+    NEVER stores the secret value itself -- only the Vault ``lease_id`` (for
     renew/revoke) and non-sensitive ``secret_metadata`` (e.g. generated
     username), mirroring ``DynamicSecretLease``.
     """
@@ -839,7 +839,7 @@ class FederationSecretLease(Base):
         nullable=False,
         index=True,
     )
-    # The requesting host at the site — opaque string to the coordinator.
+    # The requesting host at the site -- opaque string to the coordinator.
     host_id = Column(String(255), nullable=False)
     # Operator-facing name of the credential + the Vault backend role.
     secret_name = Column(String(255), nullable=False)
@@ -847,7 +847,7 @@ class FederationSecretLease(Base):
     kind = Column(String(40), nullable=False)
     # requested / active / revoked / expired / failed
     status = Column(String(20), nullable=False, default=FED_LEASE_REQUESTED)
-    # OpenBAO lease id — NULL until issued (or if issue failed).
+    # OpenBAO lease id -- NULL until issued (or if issue failed).
     vault_lease_id = Column(String(500), nullable=True, index=True)
     ttl_seconds = Column(Integer, nullable=True)
     requested_at = Column(DateTime, nullable=False, default=_utcnow_naive)
@@ -856,7 +856,7 @@ class FederationSecretLease(Base):
     last_renewed_at = Column(DateTime, nullable=True)
     revoked_at = Column(DateTime, nullable=True)
     # When the issued/rotated secret was successfully delivered to the site.
-    # NULL on an issued lease means "still needs delivery" — the reconcile loop
+    # NULL on an issued lease means "still needs delivery" -- the reconcile loop
     # rotates + re-delivers undelivered leases (so a site offline at issue time
     # gets a fresh credential when it returns).
     delivered_at = Column(DateTime, nullable=True)
@@ -876,7 +876,7 @@ class FederationReceivedSecretLease(Base):
 
     The coordinator echoes the lease outcome down to the requesting site so
     the site engine can deliver the credential to the host through the
-    agent's secure channel.  Status + non-sensitive metadata only — the
+    agent's secure channel.  Status + non-sensitive metadata only -- the
     secret value is delivered transiently by the engine and NEVER persisted.
     """
 

@@ -84,7 +84,7 @@ polib>=1.2.0  # PO file parsing for backend i18n validation
 reportlab==4.4.4
 safety==3.7.0
 safety-schemas==0.0.16
-# semgrep ships a compiled OCaml core with Linux/macOS wheels only — there is no
+# semgrep ships a compiled OCaml core with Linux/macOS wheels only -- there is no
 # OpenBSD/NetBSD/FreeBSD/Windows build, and pip would otherwise backtrack through
 # every sdist forever trying (and failing) to build it.  Gate it to the platforms
 # it actually supports; the BSDs run the rest of `make security` without it.
@@ -114,7 +114,7 @@ opentelemetry-instrumentation-requests>=0.48b0
 opentelemetry-instrumentation-logging>=0.48b0
 # grpcio (pulled transitively) ships no win_arm64 wheel, so on native ARM64 it is
 # built from source by scripts/build-grpcio-win-arm64.ps1 (run from `make install-dev`
-# before this install) — the same source-build approach the BSD platforms use.
+# before this install) -- the same source-build approach the BSD platforms use.
 # opentelemetry-exporter-otlp is EXCLUDED on Windows ARM64.  Its only reason to
 # exist here is OTLP export, and it drags in grpcio, which has no win_arm64 wheel
 # on PyPI.  Building grpcio from source there fails outright: it passes both

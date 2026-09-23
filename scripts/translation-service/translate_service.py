@@ -4,7 +4,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-SysManage translation service — GPU/LLM-backed localization for the i18n pass.
+SysManage translation service -- GPU/LLM-backed localization for the i18n pass.
 
 A small, self-contained FastAPI service you run on the GPU "beast" box.  It
 wraps a local instruction LLM (served by Ollama) behind a simple HTTP API: feed
@@ -20,10 +20,10 @@ translation verbatim.  A well-prompted LLM preserves those; classic MT models
 mangle them.
 
 Endpoints:
-  GET  /health              — model + Ollama reachability
-  GET  /languages           — the 13 supported target locales
-  POST /translate           — one string  -> {lang: translation, ...}
-  POST /translate/batch     — many strings -> aligned results (THE efficient path)
+  GET  /health              -- model + Ollama reachability
+  GET  /languages           -- the 13 supported target locales
+  POST /translate           -- one string  -> {lang: translation, ...}
+  POST /translate/batch     -- many strings -> aligned results (THE efficient path)
 
 Run it:
   pip install -r requirements.txt
@@ -98,7 +98,7 @@ NUM_CTX = int(os.getenv("NUM_CTX", "8192"))
 # Keep the (single, multilingual) model resident in VRAM between calls so a pass
 # never pays an idle-unload reload.  Ollama's default is 5m; "30m" gives slack
 # for slow client processing between batches, "-1" pins it forever.  There is no
-# per-language model — switching target language is a prompt change on the same
+# per-language model -- switching target language is a prompt change on the same
 # resident weights, so this one value covers all 13 languages.
 OLLAMA_KEEP_ALIVE = os.getenv("OLLAMA_KEEP_ALIVE", "30m")
 
@@ -116,7 +116,7 @@ OLLAMA_KEEP_ALIVE = os.getenv("OLLAMA_KEEP_ALIVE", "30m")
 # This ladder used to select qwen2.5, and on a 16 GiB card that meant
 # qwen2.5:14b-instruct.  That model BLEEDS ITS DOMINANT LANGUAGE: under a long
 # or tag-dense string it drifts back to Chinese mid-sentence.  It had written
-# 1,146 corrupted values across the four repos before anything caught it —
+# 1,146 corrupted values across the four repos before anything caught it --
 # Arabic containing Chinese, Hindi containing Cyrillic ("पлатफ़ोर्म"), Hindi
 # containing katakana ("सेटअップ"), one Arabic value carrying the model's own
 # commentary ("your answer seems to deviate from the task requirements") as if
@@ -134,7 +134,7 @@ OLLAMA_KEEP_ALIVE = os.getenv("OLLAMA_KEEP_ALIVE", "30m")
 _MODEL_TIERS = [
     (22.0, "aya-expanse:32b"),
     (6.0, "aya-expanse:8b"),
-    # Under 6 GiB aya:8b partially offloads to CPU — slow, but correct.  A
+    # Under 6 GiB aya:8b partially offloads to CPU -- slow, but correct.  A
     # smaller qwen would be faster and would quietly corrupt the output again,
     # which is not a trade worth making for a job that runs overnight.
     (0.0, "aya-expanse:8b"),
@@ -160,7 +160,7 @@ def _detect_vram_gib() -> Optional[float]:
         try:
             totals.append(int(line.strip()) / 1024)
         except ValueError:
-            # Non-numeric nvidia-smi output line (header/blank) — skip it.
+            # Non-numeric nvidia-smi output line (header/blank) -- skip it.
             continue
     return max(totals) if totals else None
 
@@ -204,7 +204,7 @@ LANGUAGES: Dict[str, str] = {
 }
 
 # A string with no letters at all (pure placeholders / punctuation / numbers /
-# code) is returned unchanged — never worth an LLM round-trip, and translating
+# code) is returned unchanged -- never worth an LLM round-trip, and translating
 # it risks corrupting a ``{{token}}`` or ``%s``.
 _HAS_LETTER = re.compile(r"[^\W\d_]", re.UNICODE)
 
@@ -212,7 +212,7 @@ SYSTEM_PROMPT = """You are a professional software-localization engine for the \
 SysManage product. You translate UI labels, documentation, log messages and \
 error messages from English into {language}.
 
-ABSOLUTE RULES — follow every one:
+ABSOLUTE RULES -- follow every one:
 1. Preserve, byte-for-byte and in place, anything that is not natural-language \
 prose:
    - interpolation placeholders in ANY syntax: {{name}}, {name}, %s, %d, %(x)s, \
@@ -227,7 +227,7 @@ Linux, Docker, Kubernetes, WSL, LXD, KVM, bhyve, JWT, mTLS, TLS, SSH, RBAC, \
 SAML, REST, API, CPU, GPU, RAM, UUID.
 3. Keep leading/trailing whitespace, capitalization style, and trailing \
 punctuation consistent with the source.
-4. Translate the meaning naturally and idiomatically for a technical audience — \
+4. Translate the meaning naturally and idiomatically for a technical audience -- \
 do not translate word-for-word.
 5. If a string is only a placeholder/code/symbol with no translatable words, \
 return it unchanged.
@@ -313,7 +313,7 @@ def _chunks(items: List[str], size: int) -> List[List[str]]:
 # model didn't drop/alter one (a 14b model occasionally drops e.g. {{count}} in a
 # lower-resource language).  Ordered so the most specific form matches first.
 # NB: the {{...}} form uses [^{}] rather than .*? so a match can't overlap
-# braces — .*? there backtracks polynomially on adversarial input (ReDoS).
+# braces -- .*? there backtracks polynomially on adversarial input (ReDoS).
 # Every quantifier below is UPPER-BOUNDED: this regex runs via ``findall`` over
 # uncontrolled translation text, and an unbounded terminator-seeking branch
 # (e.g. ``[^}]+\}`` or ``[a-zA-Z]+;``) with no terminator is O(n^2) across all
@@ -341,13 +341,13 @@ _PLACEHOLDER_RE = re.compile(
 
 def _placeholders_ok(src: str, translated: str) -> bool:
     """True iff ``translated`` carries EXACTLY the placeholders/tags/entities
-    of ``src`` — none dropped and none invented.
+    of ``src`` -- none dropped and none invented.
 
     The check used to be one-directional ("did every source token survive?"),
     which let an INVENTED placeholder through: the model returned
     ``'{{days}} الدرة إون ال{{at}}'`` for ``'{{days}} day(s) ago'``, the
     required ``{{days}}`` was present, so the guard passed and a bogus
-    ``{{at}}`` reached the locale file — surfacing hours later as a
+    ``{{at}}`` reached the locale file -- surfacing hours later as a
     ``make i18n-placeholders`` failure. Counted as a multiset so a token
     duplicated in the translation is caught too (the same bug appeared in the
     .po catalogs as a doubled ``%s``, which raises TypeError at runtime).
@@ -359,7 +359,7 @@ def _placeholders_ok(src: str, translated: str) -> bool:
 
 # Locales whose output must be written in a specific Unicode script.  The model
 # is prompted with the target language but sometimes answers in a DIFFERENT one
-# — and nothing here noticed, so it was returned and written to the locale file.
+# -- and nothing here noticed, so it was returned and written to the locale file.
 # Real damage, found 2026-08-05: the Arabic locale held Chinese in 52 places in
 # the frontend, 21 more in the backend catalogs and 363 in the docs; Hindi held
 # Korean and Japanese. Every wrong language observed was one of our own 13
@@ -387,7 +387,7 @@ _SCRIPT_TAGS = (
 
 # Advertised on /health so a deploy is verifiable.  Add a name here whenever a
 # new output guard lands, so `curl .../health` distinguishes builds.
-# "untranslated" is opt-in per request (require_change) — advertised so a
+# "untranslated" is opt-in per request (require_change) -- advertised so a
 # deploy is verifiable, same as the other two.
 SERVICE_GUARDS = ("placeholders", "language", "untranslated")
 
@@ -420,7 +420,7 @@ def _language_ok(lang_code: str, translated: str) -> bool:
 
         return not used or bool(used & set(expected))
 
-    which passes a MIXED answer — mostly-correct Arabic with Chinese spliced
+    which passes a MIXED answer -- mostly-correct Arabic with Chinese spliced
     into the middle intersects {ARABIC} and sails through.  That is precisely
     what this model produces when it loses the thread on a long string, and 410
     such values had accumulated in sysmanage-docs (ar 275, hi 50, de 40, ru 16,
@@ -433,7 +433,7 @@ def _language_ok(lang_code: str, translated: str) -> bool:
     names and paths still pass.
 
     A locale with no expectation (the Latin-script targets) now means EXACTLY
-    that — no non-Latin script at all.  Those locales were previously exempt
+    that -- no non-Latin script at all.  Those locales were previously exempt
     from this guard entirely, which is how German picked up 40 Chinese values.
     Telling French from Spanish still needs real language ID and is still out
     of scope; this only catches a different alphabet, which is unambiguous.
@@ -443,12 +443,12 @@ def _language_ok(lang_code: str, translated: str) -> bool:
     return not (used - expected)
 
 
-# Lone/unpaired UTF-16 surrogate code points (U+D800–U+DFFF).  The LLM
+# Lone/unpaired UTF-16 surrogate code points (U+D800-U+DFFF).  The LLM
 # occasionally emits one (e.g. a half-formed character or a broken \uDXXX JSON
 # escape); ``json.loads`` accepts it into a Python str, but it CANNOT be UTF-8
 # encoded, so FastAPI/pydantic crashes serializing the response
 # (PydanticSerializationError: surrogates not allowed).  Strip them so the
-# string is always valid UTF-8 — any resulting degradation is caught by the
+# string is always valid UTF-8 -- any resulting degradation is caught by the
 # placeholder guard / English fallback downstream.
 _SURROGATE_RE = re.compile(r"[\ud800-\udfff]")
 
@@ -461,7 +461,7 @@ def _correction_note(reason: str, src: str, lang_code: str) -> str:
     """A specific instruction for the retry, naming what went wrong.
 
     Sampling runs at ``temperature: 0``, so re-sending the SAME prompt is
-    deterministic — the retry reproduced the identical bad answer by
+    deterministic -- the retry reproduced the identical bad answer by
     construction and every failure burned a second GPU call for nothing.
     Changing the prompt is what makes the second attempt a real attempt.
     """
@@ -471,7 +471,7 @@ def _correction_note(reason: str, src: str, lang_code: str) -> str:
         return (
             "Your previous answer contained a ⟦n⟧ marker that was not in the "
             f"input. The input has exactly {count} marker(s), numbered ⟦0⟧ to "
-            f"⟦{max(count - 1, 0)}⟧. Reproduce those and only those — do not "
+            f"⟦{max(count - 1, 0)}⟧. Reproduce those and only those -- do not "
             "renumber them and do not add new ones."
         )
     if reason == "placeholders":
@@ -496,7 +496,7 @@ def _correction_note(reason: str, src: str, lang_code: str) -> str:
         return (
             "Your previous answer was identical to the English input. The caller "
             "has already filtered out the strings that are meant to stay English, "
-            f"so this one IS translatable — give the {language} translation."
+            f"so this one IS translatable -- give the {language} translation."
         )
     return ""
 
@@ -507,7 +507,7 @@ def _correction_note(reason: str, src: str, lang_code: str) -> str:
 # attributes, and the placeholder guard then rejects an otherwise good
 # translation.  Masking replaces each token with a short opaque marker BEFORE
 # the model sees it and restores the exact original afterwards, so tag fidelity
-# stops depending on the model at all — it only has to carry a marker through,
+# stops depending on the model at all -- it only has to carry a marker through,
 # which it is far better at.
 #
 # The marker uses mathematical white square brackets: not present in any source
@@ -517,7 +517,7 @@ _MASK_RE = re.compile(r"⟦\s*(\d{1,3})\s*⟧")
 
 
 def _mask_markup(text: str) -> Tuple[str, List[str]]:
-    """``(masked_text, originals)`` — every placeholder/tag replaced by ⟦n⟧."""
+    """``(masked_text, originals)`` -- every placeholder/tag replaced by ⟦n⟧."""
     originals: List[str] = []
 
     def swap(match: re.Match) -> str:
@@ -531,7 +531,7 @@ def _unmask_markup(text: str, originals: List[str]) -> str:
     """Restore ⟦n⟧ markers to their exact original tokens.
 
     An out-of-range index is left as-is; it then fails the placeholder guard,
-    which is the correct outcome — the model invented a marker.
+    which is the correct outcome -- the model invented a marker.
     """
 
     def swap(match: re.Match) -> str:
@@ -557,7 +557,7 @@ def _unmask_markup(text: str, originals: List[str]) -> str:
 # The whitespace run is BOUNDED, not `\s+`.  Unbounded, this is a polynomial
 # ReDoS on request-controlled text (CodeQL): for a long run of whitespace whose
 # lookahead fails, the engine retries a shrinking `\s+` from every position
-# inside the run — O(n^2) for a payload like ". " + " " * 100000.  Eight covers
+# inside the run -- O(n^2) for a payload like ". " + " " * 100000.  Eight covers
 # every real sentence separator (" ", "  ", "\n", "\n\n", CRLF); a longer run
 # simply is not treated as a sentence boundary, which is harmless because the
 # text is re-joined with the ORIGINAL separators either way.
@@ -566,7 +566,7 @@ _SENTENCE_SPLIT = re.compile(r"(?<=[.!?])(\s{1,8})(?=[A-Z<⟦])")
 
 # Abbreviations whose trailing period is NOT a sentence end.  Without this,
 # "Use e.g. Docker." is cut into "Use e.g." + "Docker." and the model is asked
-# to translate a two-word fragment with no subject — grammatical gender and
+# to translate a two-word fragment with no subject -- grammatical gender and
 # verb form then come out wrong in the Romance and Slavic targets.
 _ABBREV_END = re.compile(
     r"(?:^|[\s(])(?:e\.g|i\.e|etc|vs|cf|approx|incl|Dr|Mr|Mrs|Ms|St|Fig|No|Inc|Ltd)\.$"
@@ -594,7 +594,7 @@ def _segments(text: str) -> Tuple[List[str], List[str]]:
 
 
 def _rejoin(segments: List[str], separators: List[str]) -> str:
-    """Inverse of :func:`_segments` — exact, separator-for-separator."""
+    """Inverse of :func:`_segments` -- exact, separator-for-separator."""
     out: List[str] = []
     for idx, seg in enumerate(segments):
         out.append(seg)
@@ -678,7 +678,7 @@ async def _raw_chunk(
         payload["messages"].insert(1, {"role": "system", "content": correction})
     try:
         # OLLAMA_URL is operator config (env/default localhost), NOT request
-        # input — not attacker-controllable, so this is not SSRF.
+        # input -- not attacker-controllable, so this is not SSRF.
         resp = await client.post(  # nosemgrep: tainted-fastapi-http-request-httpx
             f"{OLLAMA_URL}/api/chat", json=payload, timeout=OLLAMA_TIMEOUT
         )
@@ -688,7 +688,7 @@ async def _raw_chunk(
         out = parsed["translations"] if isinstance(parsed, dict) else parsed
         if isinstance(out, list) and len(out) == len(sources):
             # Restore the masked markup, then strip lone surrogates the model may
-            # emit — they'd be valid here but crash JSON serialization of the
+            # emit -- they'd be valid here but crash JSON serialization of the
             # HTTP response.
             return [
                 _strip_surrogates(_unmask_markup(str(x), originals))
@@ -721,7 +721,7 @@ async def _ollama_translate_chunk(
     A translation that mangled its placeholders, or came back in the wrong
     language entirely, is retried once on its own; if it is still bad the
     English source is kept.  Returning English is the right failure mode for
-    both: a later pass can retry it, and the strict gate reports it — whereas
+    both: a later pass can retry it, and the strict gate reports it -- whereas
     shipping a placeholder-corrupted string breaks interpolation at runtime,
     and shipping Korean text to Arabic users is worse than shipping English.
     """
@@ -730,8 +730,8 @@ async def _ollama_translate_chunk(
         if _MASK_RE.search(txt):
             # A mask marker survived restoration, so the model invented one
             # (an index we never issued) or mangled its digits.  Unmasking
-            # leaves those literal, and _placeholders_ok would NOT catch it —
-            # ⟦9⟧ is not a placeholder — so a stray marker would land in the
+            # leaves those literal, and _placeholders_ok would NOT catch it --
+            # ⟦9⟧ is not a placeholder -- so a stray marker would land in the
             # locale file and render to users verbatim.
             return "markers"
         if not _placeholders_ok(src, txt):
@@ -758,7 +758,7 @@ async def _ollama_translate_chunk(
         # rather than letting the caller re-POST is the whole point: the
         # client cannot tell "the model legitimately kept this as-is" from
         # "we gave up and returned the English", so it used to re-send over
-        # the network and guess — which looped forever on strings whose
+        # the network and guess -- which looped forever on strings whose
         # correct answer IS the English.
         #
         # The retry carries a CORRECTION naming the specific failure.  Sampling
@@ -792,7 +792,7 @@ async def _ollama_translate_chunk(
             # come back with one untranslated sentence embedded in it.  The
             # stitched result would then differ from the English source, so
             # neither the require_change check here nor the strict gate
-            # downstream would notice — a silent half-translation.  Demand that
+            # downstream would notice -- a silent half-translation.  Demand that
             # every segment carrying letters actually moved.
             stalled = [
                 seg
@@ -831,7 +831,7 @@ async def _translate(
 ) -> Tuple[List[Dict[str, str]], List[Dict[str, str]]]:
     """Translate ``texts`` into every code in ``targets``.
 
-    Returns ``(translations, statuses)`` — one dict per input string each.
+    Returns ``(translations, statuses)`` -- one dict per input string each.
     ``statuses[i][lang]`` is ``"ok"`` or ``"fallback:<reason>"``, so the client
     never has to infer failure from "the output equals the input".
     Pure-placeholder/empty strings are passed through unchanged for every
@@ -866,7 +866,7 @@ async def _translate(
                 row[code], srow[code] = per_lang[code][back[i]]
             else:
                 # Pure placeholder/empty: never sent to the model, and the
-                # source IS the correct output — report it as ok so the client
+                # source IS the correct output -- report it as ok so the client
                 # writes it instead of treating "unchanged" as a failure.
                 row[code], srow[code] = src, "ok"
         results.append(row)
@@ -898,11 +898,11 @@ def _gpu_info() -> List[str]:
     if proc.returncode != 0:
         # nvidia-smi exists but failed. The common cause on a box that DOES have
         # a GPU is a driver/library version mismatch after an unrebooted driver
-        # update — name it explicitly with the fix, since the generic "no GPU"
+        # update -- name it explicitly with the fix, since the generic "no GPU"
         # line sent the operator on a hunt last time.
         err = (proc.stderr or proc.stdout or "").strip().splitlines()
         detail = err[0] if err else f"nvidia-smi exited {proc.returncode}"
-        out_lines = [f"GPU        : nvidia-smi FAILED — {detail}"]
+        out_lines = [f"GPU        : nvidia-smi FAILED -- {detail}"]
         low = detail.lower()
         if "mismatch" in low or "nvml" in low or "failed to initialize" in low:
             out_lines.append(
@@ -921,11 +921,11 @@ def _gpu_info() -> List[str]:
             total_gib = int(total_mib) / 1024
             free_gib = int(free_mib) / 1024
             lines.append(
-                f"GPU {idx}      : {name} — {total_gib:.1f} GiB total, "
+                f"GPU {idx}      : {name} -- {total_gib:.1f} GiB total, "
                 f"{free_gib:.1f} GiB free"
             )
         except ValueError:
-            lines.append(f"GPU {idx}      : {name} — {total_mib} MiB total")
+            lines.append(f"GPU {idx}      : {name} -- {total_mib} MiB total")
     return lines or ["GPU        : nvidia-smi reported no devices"]
 
 
@@ -937,7 +937,7 @@ def _remediation_lines() -> List[str]:
     the exact recovery commands right in the service's own output instead of
     making the operator reverse-engineer it from a failed ``make lint``.
     """
-    largest = _MODEL_TIERS[2][1]  # qwen2.5:14b-instruct — the usual GPU pick
+    largest = _MODEL_TIERS[2][1]  # qwen2.5:14b-instruct -- the usual GPU pick
     return [
         "no GPU detected -> using the CPU model, which may ECHO the source",
         "  to recover if this box HAS a GPU:",
@@ -981,7 +981,7 @@ async def lifespan(_app: FastAPI):
             print(f"  ollama     : model '{TRANSLATION_MODEL}' present ✓", flush=True)
         else:
             print(
-                f"  ollama     : '{TRANSLATION_MODEL}' NOT pulled — run:  "
+                f"  ollama     : '{TRANSLATION_MODEL}' NOT pulled -- run:  "
                 f"ollama pull {TRANSLATION_MODEL}",
                 flush=True,
             )
@@ -1018,7 +1018,7 @@ async def health() -> dict:
             models = [m["name"] for m in r.json().get("models", [])]
             ollama_ok = True
     except httpx.HTTPError:
-        # Ollama unreachable for the tags probe — report it as not-ready in the
+        # Ollama unreachable for the tags probe -- report it as not-ready in the
         # health payload rather than raising.
         pass
     model_pulled = any(
@@ -1036,7 +1036,7 @@ async def health() -> dict:
         "target_languages": list(LANGUAGES.keys()),
         # Which output guards this build enforces.  Deployment is a manual scp
         # to the GPU box, so without this there is no way to tell a restarted
-        # service from one still running the previous file — and the guards are
+        # service from one still running the previous file -- and the guards are
         # invisible when working (they only ever suppress bad output).
         "guards": sorted(SERVICE_GUARDS),
     }
@@ -1060,7 +1060,7 @@ async def translate_batch(req: BatchTranslateRequest) -> dict:
         "targets": targets,
         # ``status`` is per-language, alongside ``translations``: "ok" or
         # "fallback:<reason>".  Clients MUST branch on it rather than compare
-        # the output to the input — comparing is what made strings whose
+        # the output to the input -- comparing is what made strings whose
         # correct translation IS the English retry forever.
         "results": [
             {"source": src, "translations": row, "status": st}

@@ -3,7 +3,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-# buildServerIso.sh — Build an offline-install ISO for the sysmanage
+# buildServerIso.sh -- Build an offline-install ISO for the sysmanage
 # server containing:
 #   * the latest sysmanage .deb from the Launchpad PPA
 #   * every apt dependency the .deb declares (recursive closure)
@@ -16,8 +16,8 @@
 #
 # IMPORTANT: this script must be run on a host that matches the target
 # in BOTH dimensions:
-#   * Ubuntu release  — apt-get download grabs the host's archive versions
-#   * Python version  — pip download grabs wheels for the host's Python
+#   * Ubuntu release  -- apt-get download grabs the host's archive versions
+#   * Python version  -- pip download grabs wheels for the host's Python
 # If you run it on a different release/Python, the resulting bundle
 # won't install on the target.  The simplest setup: SSH into the
 # ``sysmanage-online`` VM from buildAirGapTestNetwork.sh (which is the
@@ -132,7 +132,7 @@ dpkg-deb --fsys-tarfile "$DEB_PATH" | tar -xO "$REQ_PATH_IN_DEB" > "$REQ_FILE" 2
 log "requirements.txt: $(grep -cE '^[a-zA-Z0-9]' "$REQ_FILE") top-level packages"
 
 # ---------------------------------------------------------------------------
-# 4. apt-get download — recursive deps of the .deb's Depends: line
+# 4. apt-get download -- recursive deps of the .deb's Depends: line
 # ---------------------------------------------------------------------------
 
 APT_DEPS_DIR="$STAGE/apt-deps"
@@ -140,7 +140,7 @@ mkdir -p "$APT_DEPS_DIR"
 
 log "Computing recursive apt dependency closure"
 # Pull direct deps from the .deb's control file (no PPA needed in apt
-# sources — we already have the .deb itself).
+# sources -- we already have the .deb itself).
 DIRECT_DEPS="$(
   dpkg-deb -f "$DEB_PATH" Depends \
     | tr ',' '\n' \
@@ -166,7 +166,7 @@ log "Running apt-get download into $APT_DEPS_DIR"
 (
   cd "$APT_DEPS_DIR"
   # apt-get download fails per-package on virtual packages; that's fine
-  # — those don't have a real .deb to download anyway.  We collect what
+  # -- those don't have a real .deb to download anyway.  We collect what
   # we can and the missing virtual entries get resolved transitively.
   echo "$ALL_DEPS" | xargs -n50 apt-get download 2>&1 \
     | grep -vE "Can't select (versions|provides) only candidate|Unable to locate" \
@@ -180,7 +180,7 @@ log "Downloaded $APT_DEB_COUNT apt .deb packages (before arch prune)"
 # build host has foreign architectures enabled (``dpkg --print-foreign-
 # architectures`` shows ``i386`` etc.), apt-cache depends walks
 # Multi-Arch: same/foreign packages and apt-get download fetches both
-# variants — those would be rejected by ``dpkg -i`` on the air-gap host
+# variants -- those would be rejected by ``dpkg -i`` on the air-gap host
 # with ``package architecture (i386) does not match system (amd64)``.
 # Keep ``Architecture: all`` packages (e.g., python3-pip-whl); they're
 # arch-independent and always valid.
@@ -193,7 +193,7 @@ APT_DEB_COUNT="$(find "$APT_DEPS_DIR" -maxdepth 1 -name '*.deb' | wc -l)"
 log "Final apt .deb count: $APT_DEB_COUNT"
 
 # ---------------------------------------------------------------------------
-# 5. pip download — wheels for requirements.txt + pip bootstrap deps
+# 5. pip download -- wheels for requirements.txt + pip bootstrap deps
 # ---------------------------------------------------------------------------
 
 WHEELS_DIR="$STAGE/wheels"
@@ -204,7 +204,7 @@ log "Running $PYTHON_BIN -m pip wheel into $WHEELS_DIR (this can take a few minu
 # pre-built wheel on PyPI gets COMPILED into a wheel here on the build
 # host.  Transitive build dependencies (e.g., Cython for PyYAML on
 # Python 3.14, where PyPI has no cp314 wheel) are fetched from PyPI as
-# part of the build and burned into the resulting wheel — the air-gap
+# part of the build and burned into the resulting wheel -- the air-gap
 # target then installs the wheel directly, no build step, no Cython.
 # Result: ``wheels/`` contains ONLY .whl files; the target's pip never
 # has to compile anything.
@@ -219,11 +219,11 @@ WHEEL_COUNT="$(find "$WHEELS_DIR" -maxdepth 1 -name '*.whl' | wc -l)"
 log "Built $WHEEL_COUNT wheels (sdists compiled on the build host)"
 
 # ---------------------------------------------------------------------------
-# 6. README — explains the offline install path
+# 6. README -- explains the offline install path
 # ---------------------------------------------------------------------------
 
 cat > "$STAGE/README.txt" <<EOF
-SysManage server — air-gap install bundle
+SysManage server -- air-gap install bundle
 ==========================================
 
 Built       : $(date -u +'%Y-%m-%dT%H:%M:%SZ')
@@ -236,14 +236,14 @@ wheels/     : ${WHEEL_COUNT} Python packages (requirements.txt closure + pip/set
 Install on the air-gapped host
 ------------------------------
 
-  sudo mount /dev/sr1 /mnt          # or /dev/sr0 — check 'lsblk -f' for the
+  sudo mount /dev/sr1 /mnt          # or /dev/sr0 -- check 'lsblk -f' for the
                                     # SYSMANAGE-SERVER label
   cd /mnt
 
   # Single command: dpkg resolves install order from the Depends: graph,
   # so giving it ALL the .debs at once works.  The PIP_NO_INDEX +
   # PIP_FIND_LINKS env vars are read by the sysmanage postinst's
-  # pip install step (which builds the /opt/sysmanage/.venv) — without
+  # pip install step (which builds the /opt/sysmanage/.venv) -- without
   # them, pip would try to reach PyPI and fail.
   sudo PIP_NO_INDEX=1 PIP_FIND_LINKS=/mnt/wheels \\
        dpkg -i apt-deps/*.deb ${DEB_NAME}
@@ -253,7 +253,7 @@ Install on the air-gapped host
   # this fixes it offline:
   sudo PIP_NO_INDEX=1 PIP_FIND_LINKS=/mnt/wheels dpkg --configure -a
 
-Post-install — PostgreSQL setup and first start
+Post-install -- PostgreSQL setup and first start
 -----------------------------------------------
 
   sudo cp /etc/sysmanage/sysmanage.yaml.example /etc/sysmanage.yaml
@@ -289,7 +289,7 @@ log "Building ISO with ${ISO_TOOL}"
 if [[ -e "$ISO_PATH" ]]; then
   # Best-effort remove.  If the file is owned by another user (e.g.,
   # from a prior sudo'd run) we'll fail silently here and the actual
-  # error will surface from xorriso below as "Permission denied" —
+  # error will surface from xorriso below as "Permission denied" --
   # which is clear enough to act on (chown / rm with sudo by hand).
   rm -f "$ISO_PATH" 2>/dev/null || true
 fi

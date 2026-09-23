@@ -15,7 +15,7 @@ WHY THE RULES LIVE IN THE ENGINE
 --------------------------------
 Validation, version numbering and snapshot semantics come from the Pro+
 module -- see ``config_mgmt_spec_shim``. This file owns HTTP, persistence and
-authorisation; it deliberately does not re-implement any rule the engine
+authorization; it deliberately does not re-implement any rule the engine
 already owns, because two copies of a rule is how they start disagreeing.
 
 ROLES
@@ -24,7 +24,7 @@ Reuses the SCRIPT roles rather than inventing profile-specific ones. A stored
 profile is the same class of object as a saved script -- executable content,
 authored once and run against hosts -- so the same entitlement should govern
 both, and a parallel set would need seeding into ``security_roles`` for no
-behavioural gain. Overridable if that turns out to be the wrong call.
+behavioral gain. Overridable if that turns out to be the wrong call.
 """
 
 import logging

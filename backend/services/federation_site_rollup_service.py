@@ -7,7 +7,7 @@
 Aggregates THIS site's local CVE findings and compliance-scan results into the
 rollup shapes the coordinator ingests at ``/sites/{id}/rollups/vulnerabilities``
 and ``/sites/{id}/rollups/compliance``, then enqueues them for the outbound
-sync tick — the same pattern as the metadata + host-directory producers.
+sync tick -- the same pattern as the metadata + host-directory producers.
 
 These read the Pro+ data tables (``host_vulnerability_finding`` /
 ``host_compliance_scan``); on a site that hasn't run a vuln/compliance scan yet

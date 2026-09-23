@@ -8,7 +8,7 @@ Phase 13.1.F (per-tenant backup/RPO orchestration): records every per-tenant
 backup attempt and every restore-verification so the control plane can report
 RPO compliance and prove restorability.  SysManage orchestrates the schedule and
 runs an operator-configured external backup command (orchestrate-only); it does
-not store the backup bytes — ``artifact_ref`` is the opaque handle that command
+not store the backup bytes -- ``artifact_ref`` is the opaque handle that command
 reports.  Only this run-history table is OSS; the orchestration logic lives in
 the licensed ``multitenancy_engine``.
 
@@ -85,6 +85,6 @@ def downgrade() -> None:
     ):
         try:
             op.drop_index(index, table_name=_TABLE)
-        except Exception:  # noqa: BLE001 — index may not exist; drop is best-effort
+        except Exception:  # noqa: BLE001 -- index may not exist; drop is best-effort
             pass
     op.drop_table(_TABLE)

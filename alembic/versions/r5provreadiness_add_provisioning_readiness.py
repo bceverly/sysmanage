@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""add provisioning_readiness (PXE preflight cache) — Phase 18.2 S1
+"""add provisioning_readiness (PXE preflight cache) -- Phase 18.2 S1
 
 One row per host caching the most recent PXE-readiness probe: which
 DHCP/TFTP/HTTP/boot-loader tools are present, what is already listening on

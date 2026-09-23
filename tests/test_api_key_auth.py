@@ -28,7 +28,7 @@ def _naive_utc(dt):
 
 
 class TestApiKeyHelpers:
-    """Pure helpers — no database."""
+    """Pure helpers -- no database."""
 
     def test_generate_shape(self):
         full, key_hash, prefix = generate_api_key()

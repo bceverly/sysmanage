@@ -5,11 +5,11 @@
 /**
  * Air-gap signing-key cards for Settings → Server Role.
  *
- *   * CollectorPublicKeyCard  — shown when role = collector.  Displays
+ *   * CollectorPublicKeyCard  -- shown when role = collector.  Displays
  *     this server's collector PUBLIC key + fingerprint with a one-click
  *     copy so the operator can hand it to a repository.  (The private
  *     signing key never leaves the box / is never exposed here.)
- *   * TrustedCollectorsCard   — shown when role = repository.  Import /
+ *   * TrustedCollectorsCard   -- shown when role = repository.  Import /
  *     list / remove the collector public keys this repository trusts
  *     when verifying signed media.
  *
@@ -150,7 +150,7 @@ export const CollectorPublicKeyCard: React.FC = () => {
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
         {t(
           'airgapKeys.collector.help',
-          'Copy this public key and import it on the Air-Gap Repository server so it will trust the signed media this collector produces. Only the public key is shown — the private signing key never leaves this server.',
+          'Copy this public key and import it on the Air-Gap Repository server so it will trust the signed media this collector produces. Only the public key is shown -- the private signing key never leaves this server.',
         )}
       </Typography>
 

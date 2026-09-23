@@ -34,7 +34,7 @@ def federation_request(request: Request) -> Request:
     """Pure-Python FastAPI dependency that simply returns the live Request.
 
     The Pro+ federation engines are Cython-compiled, and FastAPI CANNOT
-    introspect special parameters declared inside a compiled module — a
+    introspect special parameters declared inside a compiled module -- a
     ``request: Request`` parameter is mis-read as a required ``query.request``
     (HTTP 422), and a ``Header()`` default fails route registration outright
     ("Expected str, got Header").  ``Depends(...)`` markers DO work, so the
@@ -54,7 +54,7 @@ router = APIRouter(
 # A second router WITHOUT the JWT gate: the federation TLS certificate is
 # public material (it's exactly what a TLS peer sees in a handshake), and an
 # enrolling *site* must fetch the coordinator's cert to pin it BEFORE it has
-# any coordinator credentials.  Same prefix, distinct path — no collision.
+# any coordinator credentials.  Same prefix, distinct path -- no collision.
 public_router = APIRouter(
     prefix="/api/v1/federation",
     tags=["federation-identity"],
@@ -66,7 +66,7 @@ class TlsCertResponse(BaseModel):
     # Phase 12 strict trust: an Ed25519 signature, made with this server's
     # IDENTITY private key, over the fingerprint of the cert above (role-bound).
     # The enrolling site verifies it against the coordinator identity key it was
-    # given OUT OF BAND before pinning ``cert_pem`` — so a MITM that swaps the
+    # given OUT OF BAND before pinning ``cert_pem`` -- so a MITM that swaps the
     # cert here can't forge a matching proof.  ``identity_fingerprint`` lets the
     # operator eyeball-match the key out of band.
     identity_proof: str | None = None
@@ -135,7 +135,7 @@ def get_identity_key():
     """Return this server's federation public identity key + fingerprint.
 
     Auto-creates the keypair on first read, so this is available as soon as
-    the server is up — the operator copies it to hand to the peer.
+    the server is up -- the operator copies it to hand to the peer.
     """
     pem = federation_identity_service.get_federation_identity_public_key_pem()
     fingerprint = (

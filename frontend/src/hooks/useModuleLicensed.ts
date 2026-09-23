@@ -3,12 +3,12 @@
 // See the LICENSE file in the project root for the full terms.
 
 /**
- * useModuleLicensed — reactive Pro+ module-license gate.
+ * useModuleLicensed -- reactive Pro+ module-license gate.
  *
  * Returns ``true`` iff the cached license advertises ``moduleCode`` in its
  * ``modules`` list.  Backed by the license cache in ``Services/license`` and
  * subscribed via ``onLicenseChange``, so a component re-renders when the
- * license is (re)loaded — e.g. the Navbar's startup ``refreshLicenseCache``,
+ * license is (re)loaded -- e.g. the Navbar's startup ``refreshLicenseCache``,
  * or after a license-key install.
  *
  * Use this to AVOID calling Pro+/Enterprise-gated endpoints (which return
@@ -19,7 +19,7 @@
  *   if (!mirrorsLicensed) return null;   // hide the panel entirely
  *
  * Not-loaded-yet reads as ``false`` (same semantics as ``isModuleLicensed``),
- * so a feature is treated as unavailable until the license proves otherwise —
+ * so a feature is treated as unavailable until the license proves otherwise --
  * the cache flips it on (and re-renders) once it loads.
  */
 import { useSyncExternalStore } from 'react';

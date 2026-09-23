@@ -1,4 +1,4 @@
-/* Grouped "File-menu" navigation — Radix Menubar styled to the SysManage dark
+/* Grouped "File-menu" navigation -- Radix Menubar styled to the SysManage dark
    theme (#121212 header, rgb(36 157 239) accent).  Desktop only; the mobile
    drawer below reuses the same category data as grouped sections. */
 
@@ -20,7 +20,7 @@
   }
 }
 
-/* Top-level category triggers — look like the old nav links (they just don't
+/* Top-level category triggers -- look like the old nav links (they just don't
    navigate; they open a dropdown). */
 .menubar__trigger {
   all: unset;
@@ -47,7 +47,7 @@
   background-color: #132029;
 }
 
-/* The category that contains the current route — mirrors the old active link. */
+/* The category that contains the current route -- mirrors the old active link. */
 .menubar__trigger--active {
   color: rgb(36 157 239);
   font-weight: var(--font-bold);
@@ -87,7 +87,7 @@
   }
 }
 
-/* Dropdown items — the real navigable destinations. */
+/* Dropdown items -- the real navigable destinations. */
 .menubar__item {
   all: unset;
   display: flex;
@@ -109,7 +109,7 @@
   outline: none;
 }
 
-/* Current route — a small accent bar, echoing the old active underline. */
+/* Current route -- a small accent bar, echoing the old active underline. */
 .menubar__item--active {
   color: rgb(36 157 239);
 }

@@ -92,14 +92,14 @@ def _apply_child_host_op_result(
     HostChild update with the originating parent host in audit/diagnostics.
     Action drives what happens on success/failure:
 
-      * ``create`` — succeeded → status="running", clear error_message.
+      * ``create`` -- succeeded → status="running", clear error_message.
                      failed    → status="error", error_message=<stderr/error>.
-      * ``delete`` — succeeded → row deleted (cascades linked Host).
+      * ``delete`` -- succeeded → row deleted (cascades linked Host).
                      failed    → status="error", error_message set.
-      * ``start`` / ``stop`` / ``restart`` — succeeded → status="running"
+      * ``start`` / ``stop`` / ``restart`` -- succeeded → status="running"
                                               / "stopped" / "running",
                                               error_message cleared.
-      * ``update_agent`` — succeeded → no status change, just
+      * ``update_agent`` -- succeeded → no status change, just
                                        error_message cleared.
     """
     if ":" not in primary_id:

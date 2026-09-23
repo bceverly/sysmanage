@@ -7,7 +7,7 @@ Server-wide configuration singleton.
 
 Holds settings that describe *this* SysManage server instance rather
 than any managed host.  Currently just the air-gap ``server_role``
-(Phase 12 — moved out of ``sysmanage.yaml`` so operators set it via
+(Phase 12 -- moved out of ``sysmanage.yaml`` so operators set it via
 Settings → Server Role instead of hand-editing a config file and
 restarting).
 
@@ -37,7 +37,7 @@ VALID_SERVER_ROLES = ("standard", "collector", "repository")
 DEFAULT_SERVER_ROLE = "standard"
 
 # Phase 12: multi-site federation role.  INDEPENDENT of the air-gap
-# ``server_role`` axis above — a server can be, say, an air-gap
+# ``server_role`` axis above -- a server can be, say, an air-gap
 # ``collector`` AND a federation ``site`` at the same time.  ``none`` =
 # not part of any federation (the default).  ``coordinator`` = aggregates
 # subordinate site servers.  ``site`` = a subordinate that reports up to a
@@ -53,13 +53,13 @@ class ServerConfiguration(Base):
 
     id = Column(GUID(), primary_key=True, default=lambda: SINGLETON_SERVER_CONFIG_ID)
     # The air-gap topology role (renamed from ``server_role`` once
-    # ``federation_role`` was added — see migration n8agrole).
+    # ``federation_role`` was added -- see migration n8agrole).
     air_gap_role = Column(String(40), nullable=False, default=DEFAULT_SERVER_ROLE)
     # Block-device node (e.g. /dev/sr0) the operator picked as the
     # air-gap import drive on an Air-Gap Repository server.  NULL until
     # chosen; only meaningful when air_gap_role == 'repository'.
     airgap_import_device = Column(String(200), nullable=True)
-    # Phase 12: federation role — separate axis from air_gap_role.
+    # Phase 12: federation role -- separate axis from air_gap_role.
     federation_role = Column(
         String(40), nullable=False, default=DEFAULT_FEDERATION_ROLE
     )

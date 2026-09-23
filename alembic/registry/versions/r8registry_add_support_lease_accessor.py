@@ -4,7 +4,7 @@
 
 """add_support_lease_accessor
 
-Phase 13.1.E (vendor-support / break-glass grants — OpenBAO lease binding).
+Phase 13.1.E (vendor-support / break-glass grants -- OpenBAO lease binding).
 
 A support grant's ``expires_at`` already auto-revokes app access (the
 request-time ``has_active_grant`` gate refuses it the instant it lapses).  This
@@ -12,11 +12,11 @@ column binds the grant to a **live OpenBAO lease object**: when the grant is
 minted, the server creates a short-lived OpenBAO token whose TTL mirrors the
 grant window and records its *accessor* here.  That gives a vault-visible lease
 that auto-expires with the grant and can be revoked immediately (kill-the-
-break-glass) — ``revoke_support_grant`` expires the grant AND revokes this lease.
+break-glass) -- ``revoke_support_grant`` expires the grant AND revokes this lease.
 
 Nullable: leases are best-effort and only minted when OpenBAO is enabled, so a
 single-tenant / vault-less deployment simply leaves it NULL and relies on
-``expires_at`` alone (unchanged behaviour).
+``expires_at`` alone (unchanged behavior).
 
 Eighth migration in the **registry** chain (chains off ``r7registry``).
 Idempotent and identical on SQLite (test) + PostgreSQL (prod).

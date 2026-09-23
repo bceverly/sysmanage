@@ -3,7 +3,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-# buildAirGapBundle.sh — Build a multi-OS air-gap install ISO for the
+# buildAirGapBundle.sh -- Build a multi-OS air-gap install ISO for the
 # sysmanage server or sysmanage-agent.  The resulting ISO contains a
 # per-platform install bundle for every supported OS, plus a top-level
 # install.sh dispatcher that auto-detects the host OS and runs the
@@ -79,7 +79,7 @@ case "$PRODUCT" in
     PPA_NAME="bceverly/sysmanage"
     # Use the runtime-only requirements (no playwright/semgrep/pytest/…),
     # mirroring the agent.  The full requirements.txt drags dev tooling
-    # into every bundle and — critically — playwright has no musl wheel,
+    # into every bundle and -- critically -- playwright has no musl wheel,
     # which breaks the Alpine build.  Builders fall back to fetching this
     # file from the repo tag if the package doesn't ship it yet.
     REQ_PATH_IN_DEB="./opt/sysmanage/requirements-prod.txt"
@@ -98,7 +98,7 @@ case "$PRODUCT" in
     EXTRAS_APK=""
     ;;
   proplus)
-    # The Pro+ overlay doesn't bundle OS packages — it carries the
+    # The Pro+ overlay doesn't bundle OS packages -- it carries the
     # build host's Cython engine .so files, JS plugin shims, license
     # JWT, and cached public_key.pem.  None of the PKG_NAME / PPA /
     # EXTRAS variables apply; the proplus path short-circuits past
@@ -115,7 +115,7 @@ esac
 
 DEST_DIR="${DEST_DIR:-/tmp}"
 # Stage under /var/tmp, NOT /tmp.  On systemd 256+ (Ubuntu resolute,
-# Fedora 40+) /tmp defaults to tmpfs — i.e. RAM-backed — so staging the
+# Fedora 40+) /tmp defaults to tmpfs -- i.e. RAM-backed -- so staging the
 # multi-GB bundle tree (per-distro package + wheel closures, then the
 # assembled ISO image) there fills physical memory and the OOM killer
 # takes down whatever has the largest RSS, frequently the sysmanage
@@ -129,8 +129,8 @@ PLATFORMS="${PLATFORMS:-$PLATFORMS_ALL}"
 ISO_LABEL="SYSMANAGE-$(echo "$PRODUCT" | tr a-z A-Z)"
 ISO_PATH="${DEST_DIR}/sysmanage-${PRODUCT}-bundle.iso"
 
-# Per-platform build logs are preserved here — OUTSIDE the staging tree
-# so they never bloat the ISO — even when a platform fails and its
+# Per-platform build logs are preserved here -- OUTSIDE the staging tree
+# so they never bloat the ISO -- even when a platform fails and its
 # staging subdir is removed.  Without this the only evidence of WHY a
 # platform dropped out vanishes with _safe_rmdir, and the bundle
 # silently ships missing that platform's dependency closure.
@@ -142,7 +142,7 @@ BUNDLE_LOG_DIR="${BUNDLE_LOG_DIR:-${DEST_DIR}/sysmanage-${PRODUCT}-bundle-logs}"
 # subset (e.g. when you only care about a few platforms).
 ALLOW_PARTIAL_BUNDLE="${ALLOW_PARTIAL_BUNDLE:-0}"
 
-# Where on the host THIS script lives — needed to find installer assets
+# Where on the host THIS script lives -- needed to find installer assets
 # (the dispatcher install.sh) regardless of the cwd we're invoked from.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DISPATCHER_SH="${SCRIPT_DIR}/../installer/airgap-bundle/install.sh"
@@ -154,8 +154,8 @@ die()  { printf '\033[1;31m[ERROR]\033[0m %s\n' "$*" >&2; exit 1; }
 # Remove a staging subdir that may contain root-owned files left
 # behind by Docker (which runs containers as root by default and
 # bind-mounted /out is therefore populated as root, not the host
-# user).  Plain ``rm -rf`` returns non-zero on those files which —
-# under ``set -e`` — would kill the entire build prematurely.
+# user).  Plain ``rm -rf`` returns non-zero on those files which --
+# under ``set -e`` -- would kill the entire build prematurely.
 # Spin up a throwaway container to chown the tree back to us, then
 # rm.  Errors are always swallowed: cleanup is best-effort.
 _safe_rmdir() {
@@ -198,7 +198,7 @@ _linux_build_failed() {
   tail -30 "$outdir/build.log" 2>/dev/null || true
   mkdir -p "$BUNDLE_LOG_DIR"
   cp -f "$outdir/build.log" "$BUNDLE_LOG_DIR/${platform}.log" 2>/dev/null || true
-  warn "[$platform] docker build failed — skipping (full log: $BUNDLE_LOG_DIR/${platform}.log)"
+  warn "[$platform] docker build failed -- skipping (full log: $BUNDLE_LOG_DIR/${platform}.log)"
   _safe_rmdir "$outdir"
 }
 
@@ -234,7 +234,7 @@ preflight_resources() {
     warn "resource pre-flight skipped (SKIP_RESOURCE_CHECK=1)"
     return 0
   fi
-  [[ -r /proc/meminfo ]] || { warn "no /proc/meminfo — skipping resource pre-flight"; return 0; }
+  [[ -r /proc/meminfo ]] || { warn "no /proc/meminfo -- skipping resource pre-flight"; return 0; }
   local mem_avail swap_free avail disk_dest disk_stage disk_min
   mem_avail="$(_meminfo_mb MemAvailable)"; [[ "$mem_avail" =~ ^[0-9]+$ ]] || mem_avail=0
   swap_free="$(_meminfo_mb SwapFree)";     [[ "$swap_free" =~ ^[0-9]+$ ]] || swap_free=0
@@ -254,12 +254,12 @@ preflight_resources() {
     fatal=1
   fi
   if (( fatal )); then
-    die "insufficient resources for a bundle build — free up RAM/disk, or set SKIP_RESOURCE_CHECK=1 to try anyway."
+    die "insufficient resources for a bundle build -- free up RAM/disk, or set SKIP_RESOURCE_CHECK=1 to try anyway."
   fi
   (( mem_avail < SOFT_BUILD_RAM_MB )) \
-    && warn "only ${mem_avail}MB real RAM free — the build will lean on swap and run slowly"
+    && warn "only ${mem_avail}MB real RAM free -- the build will lean on swap and run slowly"
   (( disk_min < SOFT_BUILD_DISK_GB )) \
-    && warn "only ${disk_min}GB free disk — a full build can use several GB"
+    && warn "only ${disk_min}GB free disk -- a full build can use several GB"
   return 0
 }
 
@@ -294,7 +294,7 @@ log "Platforms : $PLATFORMS"
 # GitHub release tag.  We strip a leading "v" because tags are
 # typically vX.Y.Z but the user-facing version is X.Y.Z.  If the
 # fetch fails (rate-limited, offline, etc.) we leave the marker
-# empty and the API row stays version=null — non-fatal.
+# empty and the API row stays version=null -- non-fatal.
 if [[ -n "${BUNDLE_VERSION_FILE:-}" ]]; then
   case "$PRODUCT" in
     server)  _gh_repo="bceverly/sysmanage" ;;
@@ -313,7 +313,7 @@ if [[ -n "${BUNDLE_VERSION_FILE:-}" ]]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Pro+ overlay bundle — assembled from the build host's own license
+# Pro+ overlay bundle -- assembled from the build host's own license
 # artifacts (Cython engine .so files, JS plugin shims, license JWT,
 # cached public_key.pem).  No Docker, no per-distro builders; the
 # overlay is OS-agnostic because the engines are loaded by the
@@ -327,11 +327,11 @@ build_proplus() {
   local public_key_src="/var/lib/sysmanage/license/public_key.pem"
 
   [[ -r "$sysmanage_yaml" ]] \
-    || die "cannot read $sysmanage_yaml — build host must be a sysmanage server"
+    || die "cannot read $sysmanage_yaml -- build host must be a sysmanage server"
   [[ -d "$modules_src" ]] \
-    || die "modules dir not found at $modules_src — build host must have Pro+ active"
+    || die "modules dir not found at $modules_src -- build host must have Pro+ active"
   [[ -r "$public_key_src" ]] \
-    || die "license public key not found at $public_key_src — build host must have phoned home at least once"
+    || die "license public key not found at $public_key_src -- build host must have phoned home at least once"
 
   # Pull the license.key string from the yaml (one-line value or a
   # quoted string).  Use grep+sed rather than a yaml parser so this
@@ -349,7 +349,7 @@ build_proplus() {
     }
   ' "$sysmanage_yaml")"
   [[ -n "$license_key" ]] \
-    || die "license.key not set in $sysmanage_yaml — build host is not Pro+ licensed"
+    || die "license.key not set in $sysmanage_yaml -- build host is not Pro+ licensed"
 
   log "Staging Pro+ overlay (modules + license + public key)"
   mkdir -p "$STAGING_DIR/modules"
@@ -361,7 +361,7 @@ build_proplus() {
   # Embed the collector's manifest-signing PUBLIC key, if this build
   # host is a collector.  The repository server drops it into its
   # trusted-collectors keyring (see install.sh below) so it can verify
-  # air-gap media signed by THIS collector — establishing cross-air-gap
+  # air-gap media signed by THIS collector -- establishing cross-air-gap
   # trust through the same media the operator already hand-carries,
   # rather than a separate out-of-band key exchange.  Only the PUBLIC
   # key travels; the private signing key never leaves the collector.
@@ -373,14 +373,14 @@ build_proplus() {
     mkdir -p "$STAGING_DIR/trusted-collectors"
     # Name by sha256 of the key file so multiple collectors' keys can
     # coexist in one repository keyring without clobbering.  This is a
-    # cosmetic filename only — the repository recomputes the canonical
+    # cosmetic filename only -- the repository recomputes the canonical
     # fingerprint internally when matching a signature to a key.
     local fp
     fp="$(sha256sum "$collector_pub" | awk '{print $1}')"
     [[ -n "$fp" ]] || fp="collector"
     cp "$collector_pub" "$STAGING_DIR/trusted-collectors/${fp}.pub"
   else
-    warn "no collector signing key at $collector_pub — bundle ships without a trusted-collector key; the repository operator must add it manually before ingesting media"
+    warn "no collector signing key at $collector_pub -- bundle ships without a trusted-collector key; the repository operator must add it manually before ingesting media"
   fi
 
   # Idempotent installer that the air-gap target runs as root.  Uses
@@ -388,7 +388,7 @@ build_proplus() {
   # standalone yaml editor on the target.
   cat > "$STAGING_DIR/install.sh" <<'EOF'
 #!/bin/sh
-# Pro+ overlay installer for sysmanage.  Idempotent — safe to re-run.
+# Pro+ overlay installer for sysmanage.  Idempotent -- safe to re-run.
 #
 # Prerequisite: the sysmanage server package must already be installed
 # (i.e. the OS-level air-gap server bundle ran first).  This script
@@ -417,7 +417,7 @@ fi
 
 echo "[proplus] Installing Pro+ engine modules..."
 install -d -o sysmanage -g sysmanage -m 0750 /var/lib/sysmanage/modules
-# Copy then chown — using install(1) per-file would lose
+# Copy then chown -- using install(1) per-file would lose
 # subdirectories if the vendor ever adds them.
 cp -R modules/. /var/lib/sysmanage/modules/
 chown -R sysmanage:sysmanage /var/lib/sysmanage/modules
@@ -431,7 +431,7 @@ install -o sysmanage -g sysmanage -m 0644 public_key.pem \
 # Trusted-collector keyring: if the build host embedded a collector's
 # manifest-signing public key, drop it into the repository's keyring so
 # the ingestion orchestrator can verify air-gap media signed by that
-# collector.  Additive — never clears existing trusted keys, so an
+# collector.  Additive -- never clears existing trusted keys, so an
 # overlay re-run or a second collector's bundle just adds another key.
 if [ -d trusted-collectors ]; then
   echo "[proplus] Installing trusted-collector keyring..."
@@ -465,8 +465,8 @@ lic["key"] = key
 # stay Pro+-active for offline_days (~30) from the last successful
 # phone-home.  Operators must refresh this overlay before the grace
 # expires.  If we silenced phone_home_url, every shared copy of
-# this ISO would run Pro+ until the JWT's exp date — months or
-# years — with no revocation path.
+# this ISO would run Pro+ until the JWT's exp date -- months or
+# years -- with no revocation path.
 
 geo = data.setdefault("geo_lookup", {})
 geo["enabled"] = False
@@ -588,7 +588,7 @@ EOF
   log "ISO : $ISO_PATH ($(du -h "$ISO_PATH" | cut -f1))"
 }
 
-# Branch off here when building the Pro+ overlay — no per-platform
+# Branch off here when building the Pro+ overlay -- no per-platform
 # orchestration, no dispatcher install.sh.  build_proplus mints the
 # ISO itself and we exit clean.
 if [[ "$PRODUCT" == "proplus" ]]; then
@@ -619,7 +619,7 @@ set -eu
 cd "\$(dirname "\$0")"
 
 if ! command -v dpkg >/dev/null 2>&1; then
-  echo "ERROR: dpkg not found — this subdirectory is for Ubuntu/Debian only." >&2
+  echo "ERROR: dpkg not found -- this subdirectory is for Ubuntu/Debian only." >&2
   exit 2
 fi
 
@@ -632,7 +632,7 @@ if [ -z "\$MAIN_DEB" ]; then
 fi
 
 # apt-deps/ may be empty (e.g. a build host where the dep walk
-# produced nothing) — don't let the literal "apt-deps/*.deb" reach
+# produced nothing) -- don't let the literal "apt-deps/*.deb" reach
 # dpkg or it'll error before installing anything.
 DEP_COUNT=\$(ls -1 apt-deps/*.deb 2>/dev/null | wc -l)
 echo "Installing \$MAIN_DEB + \$DEP_COUNT deps..."
@@ -658,7 +658,7 @@ set -eu
 cd "\$(dirname "\$0")"
 
 if ! command -v ${tool} >/dev/null 2>&1; then
-  echo "ERROR: ${tool} not found — this subdirectory is for ${tool}-based systems." >&2
+  echo "ERROR: ${tool} not found -- this subdirectory is for ${tool}-based systems." >&2
   exit 2
 fi
 
@@ -668,7 +668,7 @@ if [ -z "\$MAIN_RPM" ]; then
   exit 3
 fi
 
-# rpm-deps/ may be empty — don't let the literal "rpm-deps/*.rpm"
+# rpm-deps/ may be empty -- don't let the literal "rpm-deps/*.rpm"
 # reach ${tool} or it'll error before installing anything.
 DEP_COUNT=\$(ls -1 rpm-deps/*.rpm 2>/dev/null | wc -l)
 echo "Installing \$MAIN_RPM + \$DEP_COUNT deps..."
@@ -695,7 +695,7 @@ EOF
 # after the container build (curl + jq are host requirements).
 _OPENBAO_REPO="openbao/openbao"
 # Phase 13.1.H: pin the staged OpenBAO to a specific release so air-gap bundles
-# are REPRODUCIBLE — a bundle built today and one built next month embed the same
+# are REPRODUCIBLE -- a bundle built today and one built next month embed the same
 # bao. Matches the version pinned by the online installers (installer/macos/
 # postinstall.sh). Override with OPENBAO_VERSION=x.y.z for a custom build.
 _OPENBAO_VERSION="${OPENBAO_VERSION:-2.5.4}"
@@ -821,7 +821,7 @@ build_ubuntu_like() {
       cd /out
       mkdir -p apt-deps wheels
 
-      # Main package — try PPA first, fall back to GitHub Releases.
+      # Main package -- try PPA first, fall back to GitHub Releases.
       # The PPA path fails when Launchpad has not yet built (or has
       # failed to build) the binary for this codename, even though
       # the source upload succeeded.  GitHub Releases ships a generic
@@ -829,7 +829,7 @@ build_ubuntu_like() {
       # (same glibc family, Architecture: all package), so it serves
       # as a resilient fallback.
       if ! apt-get download "$PKG" 2>/dev/null; then
-        echo "[$PKG] PPA download failed for ${PPA} — falling back to GitHub Releases ($REPO)"
+        echo "[$PKG] PPA download failed for ${PPA} -- falling back to GitHub Releases ($REPO)"
         ASSET_URL=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" \
                     | jq -r ".assets[] | select(.name | test(\"\\\\.deb$\")) | .browser_download_url" \
                     | head -1)
@@ -842,7 +842,7 @@ build_ubuntu_like() {
       fi
 
       # Recursive apt deps (filtered to amd64/all).  Note the
-      # triple-backslash on \\\${  — we want the inner bash to see
+      # triple-backslash on \\\${  -- we want the inner bash to see
       # \${ as four literal chars (one backslash + dollar + brace)
       # so grep gets the regex ^\${ to filter Debian-style unresolved
       # template deps like ${PYTHON3}.  A single \\ would make the
@@ -908,7 +908,7 @@ build_ubuntu_like() {
 
   _write_deb_installer "$outdir"
   _stage_openbao "$outdir" deb
-  log "[$platform] done — $(find "$outdir/apt-deps" -name '*.deb' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
+  log "[$platform] done -- $(find "$outdir/apt-deps" -name '*.deb' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
 }
 
 # Distro→image mapping for Debian.  We pull the .deb directly from
@@ -926,7 +926,7 @@ build_debian_like() {
   local platform="$1"           # e.g. debian-bookworm
   local codename="${platform#debian-}"
   local image; image=$(_debian_image "$codename")
-  [[ -n "$image" ]] || { warn "[$platform] unknown debian codename — skipping"; return; }
+  [[ -n "$image" ]] || { warn "[$platform] unknown debian codename -- skipping"; return; }
 
   local outdir="$STAGING_DIR/linux-${platform}"
   mkdir -p "$outdir"
@@ -952,7 +952,7 @@ build_debian_like() {
       # Pull the .deb from GitHub Releases.  Asset name pattern is the
       # standard one produced by the build-ubuntu job (which the .deb
       # is binary-compatible with on Debian for the architectures we
-      # ship — both Debian and Ubuntu use the same glibc family).
+      # ship -- both Debian and Ubuntu use the same glibc family).
       ASSET_URL=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" \
                   | jq -r ".assets[] | select(.name | test(\"\\\\.deb$\")) | .browser_download_url" \
                   | head -1)
@@ -961,7 +961,7 @@ build_debian_like() {
 
       # Recursive apt deps via apt-cache (Debian repos are configured
       # by default in the base image).  Same filter+loop pattern as
-      # the Ubuntu builder — see comment there for the rationale.
+      # the Ubuntu builder -- see comment there for the rationale.
       DIRECT="$(dpkg-deb -f ${PKG}.deb Depends | tr "," "\n" \
                 | awk "{print \$1}" | grep -v "^\\\${" | grep -vE "^$" | sort -u)"
       ROOTS="$DIRECT $EXTRAS"
@@ -985,7 +985,7 @@ build_debian_like() {
       done <<<"$DEP_PKGS"
       echo "downloaded $_ok apt deps; $_fail were unavailable/virtual"
       find . -maxdepth 1 -name "*.deb" ! -name "*_amd64.deb" ! -name "*_all.deb" -delete
-      # Same legacy-vs-stable filter as the Ubuntu builder — see the
+      # Same legacy-vs-stable filter as the Ubuntu builder -- see the
       # comment there for the rationale.
       for _stable in $(ls *-stable_*.deb 2>/dev/null); do
         _legacy="${_stable%%-stable_*}"
@@ -1007,7 +1007,7 @@ build_debian_like() {
 
   _write_deb_installer "$outdir"
   _stage_openbao "$outdir" deb
-  log "[$platform] done — $(find "$outdir/apt-deps" -name '*.deb' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
+  log "[$platform] done -- $(find "$outdir/apt-deps" -name '*.deb' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
 }
 
 # ----- Fedora / RHEL / openSUSE / Alpine -----------------------------------
@@ -1034,7 +1034,7 @@ build_fedora() {
     -e REQ_PATH_RPM="${REQ_PATH_IN_RPM#/}" \
     -e EXTRAS="$EXTRAS_RPM" \
     "fedora:$ver" bash -euxc '
-      # dnf-plugins-core provides the `dnf download` subcommand —
+      # dnf-plugins-core provides the `dnf download` subcommand --
       # absent in stock fedora images, so without it the download
       # step below silently no-ops and we ship a Fedora bundle with
       # only the main .rpm and no transitive deps.
@@ -1047,7 +1047,7 @@ build_fedora() {
 
       # Asset name pattern: build-centos (build-and-release.yml:353)
       # produces ONE generic ``sysmanage-agent-<ver>-*.rpm`` with no
-      # platform discriminator in the filename — it covers Fedora/RHEL
+      # platform discriminator in the filename -- it covers Fedora/RHEL
       # both.  We pick "any .rpm that does NOT have opensuse or sles in
       # the name" (those come from build-opensuse and are NOT cross-
       # compatible).
@@ -1090,10 +1090,10 @@ build_fedora() {
 
   _write_rpm_installer "$outdir" "dnf"
   _stage_openbao "$outdir" rpm
-  log "[$platform] done — $(find "$outdir/rpm-deps" -name '*.rpm' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
+  log "[$platform] done -- $(find "$outdir/rpm-deps" -name '*.rpm' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
 }
 
-# RHEL/Rocky/Alma — Rocky Linux 9 is the freely-available stand-in.
+# RHEL/Rocky/Alma -- Rocky Linux 9 is the freely-available stand-in.
 build_rhel() {
   local platform="$1"           # e.g. rhel-9
   local ver="${platform#rhel-}"
@@ -1109,7 +1109,7 @@ build_rhel() {
     -e EXTRAS="$EXTRAS_RPM" \
     "rockylinux:$ver" bash -euxc '
       # dnf-plugins-core provides `dnf download`; Rocky 9 stock image
-      # ships without it.  Use python3.12 (AppStream) — Rocky/RHEL 9 ships
+      # ships without it.  Use python3.12 (AppStream) -- Rocky/RHEL 9 ships
       # python3 = 3.9 by default, but the server requires >= 3.12 (e.g.
       # fastapi 0.129.0 dropped 3.9), so wheels must be built for 3.12.
       dnf install -y -q --allowerasing \
@@ -1119,7 +1119,7 @@ build_rhel() {
       cd /out
       mkdir -p rpm-deps wheels
 
-      # Prefer the EL9-specific RPM (sysmanage-<ver>-1.el9.x86_64.rpm) —
+      # Prefer the EL9-specific RPM (sysmanage-<ver>-1.el9.x86_64.rpm) --
       # its python3.12 deps resolve on Rocky/RHEL 9, where the generic
       # CentOS RPM (Requires: python3 >= 3.12) is unsatisfiable.  Fall
       # back to the generic non-openSUSE RPM for older releases that
@@ -1162,10 +1162,10 @@ build_rhel() {
 
   _write_rpm_installer "$outdir" "dnf"
   _stage_openbao "$outdir" rpm
-  log "[$platform] done — $(find "$outdir/rpm-deps" -name '*.rpm' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
+  log "[$platform] done -- $(find "$outdir/rpm-deps" -name '*.rpm' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
 }
 
-# openSUSE Leap — uses zypper, not dnf.  The build-opensuse matrix in
+# openSUSE Leap -- uses zypper, not dnf.  The build-opensuse matrix in
 # the agent workflow targets Leap 15.5; bump as needed.
 build_opensuse() {
   local platform="$1"           # opensuse-leap
@@ -1222,10 +1222,10 @@ build_opensuse() {
 
   _write_rpm_installer "$outdir" "zypper"
   _stage_openbao "$outdir" rpm
-  log "[$platform] done — $(find "$outdir/rpm-deps" -name '*.rpm' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
+  log "[$platform] done -- $(find "$outdir/rpm-deps" -name '*.rpm' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
 }
 
-# Alpine — apk-based, uses musl libc.  Different filename pattern:
+# Alpine -- apk-based, uses musl libc.  Different filename pattern:
 # .apk archives instead of .rpm/.deb.
 build_alpine() {
   local platform="$1"           # e.g. alpine-3.20
@@ -1278,7 +1278,7 @@ build_alpine() {
       # and (unlike the deb/rpm) does not ship requirements.txt at the
       # deb/rpm path, so extraction from the .apk misses.  Fall back to
       # the canonical requirements.txt from the repo at the released tag
-      # — the exact dependency list the venv is built from, independent
+      # -- the exact dependency list the venv is built from, independent
       # of how each platform package happens to be laid out.
       REQ=/tmp/req.txt
       tar -xzf "${PKG}.apk" -O "${REQ_PATH_RPM}" > "$REQ" 2>/dev/null || true
@@ -1299,12 +1299,12 @@ build_alpine() {
 set -eu
 cd "\$(dirname "\$0")"
 if ! command -v apk >/dev/null 2>&1; then
-  echo "ERROR: apk not found — this subdirectory is for Alpine only." >&2
+  echo "ERROR: apk not found -- this subdirectory is for Alpine only." >&2
   exit 2
 fi
 MAIN_APK="\$(ls -1 *.apk 2>/dev/null | head -1)"
 [ -n "\$MAIN_APK" ] || { echo "ERROR: no .apk found" >&2; exit 3; }
-# apk-deps/ may be empty — don't let the literal "apk-deps/*.apk"
+# apk-deps/ may be empty -- don't let the literal "apk-deps/*.apk"
 # reach apk add or it'll error before installing anything.
 DEP_COUNT=\$(ls -1 apk-deps/*.apk 2>/dev/null | wc -l)
 # OpenBAO ships no .apk; place the bundled static binary so the package
@@ -1323,13 +1323,13 @@ fi
 EOF
   chmod +x "$outdir/install.sh"
   _stage_openbao "$outdir" binary-linux
-  log "[$platform] done — $(find "$outdir/apk-deps" -name '*.apk' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
+  log "[$platform] done -- $(find "$outdir/apk-deps" -name '*.apk' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
 }
 
 # ----- Win / macOS / BSD: pull pre-built installers from GitHub Releases ---
 
 # GitHub Releases asset names are predictable from the workflow's matrix
-# build job — sysmanage-agent_<ver>-windows-x64.msi etc.  We fetch the
+# build job -- sysmanage-agent_<ver>-windows-x64.msi etc.  We fetch the
 # latest tagged release via the GH API (no auth needed for public repos)
 # and download the assets matching this platform.
 
@@ -1345,7 +1345,7 @@ _fetch_latest_release_asset() {
   # (optional, "" for none), $3 = output path.
   #
   # The previous implementation used awk against the raw JSON and
-  # tried to anchor patterns with `$` for end-of-line — but GitHub's
+  # tried to anchor patterns with `$` for end-of-line -- but GitHub's
   # pretty-printed JSON puts the URL inside quotes and often followed
   # by a comma, so end-of-line anchors never matched and every BSD/
   # macOS asset silently came back empty.  jq matches against the
@@ -1422,12 +1422,12 @@ build_windows() {
   if _fetch_latest_release_asset 'windows-x64.*\.msi' '' "$outdir/${PKG_NAME}-x64.msi"; then
     log "[windows] got x64 .msi"
   else
-    warn "[windows] no windows-x64 .msi found in latest release — skipping"
+    warn "[windows] no windows-x64 .msi found in latest release -- skipping"
   fi
   _fetch_latest_release_asset 'windows-arm64.*\.msi' '' "$outdir/${PKG_NAME}-arm64.msi" || true
   _stage_openbao "$outdir" binary-windows
   _stage_nginx_windows "$outdir"
-  # README — Windows install can't be scripted from POSIX sh; instruct user.
+  # README -- Windows install can't be scripted from POSIX sh; instruct user.
   cat > "$outdir/install.sh" <<EOF
 #!/bin/sh
 echo "Windows installer (.msi) is GUI-only.  Open ${PKG_NAME}-x64.msi or"
@@ -1447,11 +1447,11 @@ build_macos() {
     log "[macos] got .pkg"
     _stage_openbao "$outdir" binary-darwin
   else
-    warn "[macos] no macos .pkg found in latest release — skipping"
+    warn "[macos] no macos .pkg found in latest release -- skipping"
   fi
   cat > "$outdir/install.sh" <<EOF
 #!/bin/sh
-echo "macOS installer (.pkg) — run interactively:"
+echo "macOS installer (.pkg) -- run interactively:"
 echo "  sudo installer -pkg ${PKG_NAME}.pkg -target /"
 echo "Or double-click the .pkg from Finder."
 EOF
@@ -1499,7 +1499,7 @@ build_freebsd() {
     _write_bsd_installer "$outdir" "pkg add"
     _stage_openbao "$outdir" binary-freebsd
   else
-    warn "[freebsd] no non-macOS .pkg found in latest release — skipping"
+    warn "[freebsd] no non-macOS .pkg found in latest release -- skipping"
     _safe_rmdir "$outdir"
   fi
 }
@@ -1516,7 +1516,7 @@ build_netbsd() {
     _write_bsd_installer "$outdir" "pkg_add"
     _stage_openbao "$outdir" binary-netbsd
   else
-    warn "[netbsd] no non-openbsd .tgz found in latest release — skipping"
+    warn "[netbsd] no non-openbsd .tgz found in latest release -- skipping"
     _safe_rmdir "$outdir"
   fi
 }
@@ -1527,8 +1527,8 @@ build_openbsd() {
   log "[openbsd] fetching .tgz from GitHub Releases"
   # OpenBSD ships per-release builds: sysmanage-agent-<ver>-openbsd75.tgz,
   # ...-openbsd76.tgz, ...-openbsd77.tgz (build-and-release.yml:1667).
-  # We currently grab the first match — typically the newest by upload
-  # order — which lands the .tgz matching the latest supported OpenBSD
+  # We currently grab the first match -- typically the newest by upload
+  # order -- which lands the .tgz matching the latest supported OpenBSD
   # release.  The bundle dispatcher uses ``uname -r`` to confirm match.
   if _fetch_latest_release_asset 'openbsd[0-9]+\.tgz$' '' "$outdir/${PKG_NAME}.tgz"; then
     log "[openbsd] got .tgz"
@@ -1537,7 +1537,7 @@ build_openbsd() {
     # OpenBSD, so stage it like the other BSDs (air-gapped OpenBSD can't source-build).
     _stage_openbao "$outdir" binary-openbsd
   else
-    warn "[openbsd] no openbsd[NN].tgz found in latest release — skipping"
+    warn "[openbsd] no openbsd[NN].tgz found in latest release -- skipping"
     _safe_rmdir "$outdir"
   fi
 }
@@ -1561,7 +1561,7 @@ build_one() {
     freebsd)    build_freebsd ;;
     netbsd)     build_netbsd ;;
     openbsd)    build_openbsd ;;
-    *) warn "unknown platform key: $p — skipping" ;;
+    *) warn "unknown platform key: $p -- skipping" ;;
   esac
 }
 
@@ -1578,7 +1578,7 @@ else
     pids+=($!)
     if (( ${#pids[@]} >= PARALLEL )); then
       wait -n
-      # Drop completed pids — best-effort, bash doesn't tell us which.
+      # Drop completed pids -- best-effort, bash doesn't tell us which.
       pids=($(jobs -rp))
     fi
   done
@@ -1597,7 +1597,7 @@ chmod +x "$STAGING_DIR/install.sh"
 # DID make it and mysteriously fails offline on the ones that didn't.
 # But the two failure classes are NOT equal:
 #   * Linux platforms (ubuntu/debian/fedora/rhel/opensuse/alpine) carry
-#     the .deb/.rpm + wheel dependency closures — a Linux failure means
+#     the .deb/.rpm + wheel dependency closures -- a Linux failure means
 #     a genuinely broken bundle, so it's FATAL (this is the OOM/silent-
 #     hollow-bundle case we're guarding against).
 #   * Release-asset platforms (windows/macos/*bsd) just fetch a prebuilt
@@ -1621,16 +1621,16 @@ log "  succeeded     (${#_built[@]}): ${_built[*]:-none}"
 (( ${#_failed_linux[@]} )) \
   && warn "  FAILED Linux  (${#_failed_linux[@]}): ${_failed_linux[*]}  <-- missing dependency closures"
 (( ${#_failed_asset[@]} )) \
-  && warn "  no installer  (${#_failed_asset[@]}): ${_failed_asset[*]}  (not published for this product — skipped)"
+  && warn "  no installer  (${#_failed_asset[@]}): ${_failed_asset[*]}  (not published for this product -- skipped)"
 { (( ${#_failed_linux[@]} )) || (( ${#_failed_asset[@]} )); } && [[ -d "$BUNDLE_LOG_DIR" ]] \
   && warn "  failure logs: $BUNDLE_LOG_DIR/<platform>.log"
 log "============================================================"
 
 if (( ${#_built[@]} == 0 )); then
-  die "no platforms produced output — every builder failed or stubbed (logs: $BUNDLE_LOG_DIR)"
+  die "no platforms produced output -- every builder failed or stubbed (logs: $BUNDLE_LOG_DIR)"
 fi
 if (( ${#_failed_linux[@]} )) && [[ "$ALLOW_PARTIAL_BUNDLE" != "1" ]]; then
-  die "${#_failed_linux[@]} Linux platform(s) failed — the ISO would be missing their dependency closures and fail to install offline.
+  die "${#_failed_linux[@]} Linux platform(s) failed -- the ISO would be missing their dependency closures and fail to install offline.
 Fix the failures above (see $BUNDLE_LOG_DIR), or set ALLOW_PARTIAL_BUNDLE=1 to ship a partial bundle on purpose."
 fi
 
@@ -1640,7 +1640,7 @@ log "Staging tree size: $(du -sh "$STAGING_DIR" | cut -f1)"
 
 # README at root, links to dispatcher.
 cat > "$STAGING_DIR/README.txt" <<EOF
-SysManage ${PRODUCT} — air-gap install bundle (multi-OS)
+SysManage ${PRODUCT} -- air-gap install bundle (multi-OS)
 =========================================================
 
 Built : $(date -u +'%Y-%m-%dT%H:%M:%SZ')

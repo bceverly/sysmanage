@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""add available_packages.host_id — the catalog becomes per-host
+"""add available_packages.host_id -- the catalog becomes per-host
 
 ``available_packages`` was keyed only by (os_name, os_version, package_manager,
 package_name), i.e. ONE shared catalog per OS for the whole fleet.  Two
@@ -18,7 +18,7 @@ Host scoping removes both: a host only ever deletes and rewrites its own rows.
 
 The column is NULLABLE and carries no FK constraint:
   * nullable, because pre-existing rows have no owning host and back-filling
-    them would be a guess — they are left for the owning host to replace on its
+    them would be a guess -- they are left for the owning host to replace on its
     next report, and the readers treat NULL as "legacy, OS-scoped";
   * no FK, because SQLite cannot add one via ALTER and the codebase already
     uses soft references for host links elsewhere (see r3hostsite).

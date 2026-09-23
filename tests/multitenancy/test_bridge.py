@@ -60,7 +60,7 @@ def test_bridge_registers_engine_into_seam():
 
 
 def test_bridge_rejects_incomplete_module():
-    """A module missing a required hook must NOT be registered — OSS falls back
+    """A module missing a required hook must NOT be registered -- OSS falls back
     to its built-in single-tenant path rather than half-wiring the engine."""
     mod = MagicMock(name="partial_engine")
     mod.resolve_tenant_engine = "not callable"  # missing/invalid hook

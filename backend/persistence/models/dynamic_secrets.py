@@ -9,7 +9,7 @@ Tracks short-lived credentials issued through the Pro+
 ``secrets_engine`` against an OpenBAO/Vault dynamic-secrets backend
 (database, ssh, etc.).
 
-The actual secret value is NEVER persisted here — it is returned to
+The actual secret value is NEVER persisted here -- it is returned to
 the operator at issue time and from then on lives only in OpenBAO
 until its TTL expires.  This row is the audit + revocation hook:
 
@@ -29,7 +29,7 @@ from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String, Text
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
 
-# Lease backend kinds — mirrors OpenBAO secret-engine families.
+# Lease backend kinds -- mirrors OpenBAO secret-engine families.
 LEASE_KIND_DATABASE = "database"
 LEASE_KIND_SSH = "ssh"
 # nosec B105 -- enum literal naming the lease kind, not a credential
@@ -53,7 +53,7 @@ class DynamicSecretLease(Base):
     name = Column(String(255), nullable=False)
     kind = Column(String(40), nullable=False, index=True)  # one of LEASE_KINDS
     backend_role = Column(String(255), nullable=False)
-    # OpenBAO's lease_id — used for revoke + renew.  Nullable because we
+    # OpenBAO's lease_id -- used for revoke + renew.  Nullable because we
     # may have failed the issue call (status=FAILED) without ever
     # getting a lease back.
     vault_lease_id = Column(String(500), nullable=True, index=True)
@@ -66,7 +66,7 @@ class DynamicSecretLease(Base):
     expires_at = Column(DateTime, nullable=True, index=True)
     revoked_at = Column(DateTime, nullable=True)
     status = Column(String(20), nullable=False, default=LEASE_ACTIVE, index=True)
-    # Free-form metadata about the issued credential — e.g. for SSH
+    # Free-form metadata about the issued credential -- e.g. for SSH
     # leases the issued public key fingerprint, for DB leases the
     # generated username.  NEVER stores the secret value itself.
     secret_metadata = Column(JSON, nullable=True)

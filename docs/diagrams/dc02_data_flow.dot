@@ -1,6 +1,6 @@
 digraph DC02_Data_Flow {
     graph [
-        label = "DC-02: SysManage Data-Flow Diagram\n(Source-to-Destination — Telemetry, Commands, License/Module, Admin UI)\n",
+        label = "DC-02: SysManage Data-Flow Diagram\n(Source-to-Destination -- Telemetry, Commands, License/Module, Admin UI)\n",
         labelloc = "t",
         fontname = "Helvetica-Bold",
         fontsize = 18,

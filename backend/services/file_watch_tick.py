@@ -230,8 +230,8 @@ async def file_watch_tick_service() -> None:
                 )
             await asyncio.sleep(TICK_INTERVAL_SECONDS)
         except asyncio.CancelledError:
-            logger.info("File watch tick service cancelled — exiting loop")
+            logger.info("File watch tick service cancelled -- exiting loop")
             raise
         except Exception:  # pylint: disable=broad-except
-            logger.exception("File watch tick service error — sleeping then retrying")
+            logger.exception("File watch tick service error -- sleeping then retrying")
             await asyncio.sleep(ERROR_BACKOFF_SECONDS)

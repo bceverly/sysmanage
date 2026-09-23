@@ -251,7 +251,7 @@ if ($pyActual -ne $pyExpected) {
 Write-Host "  Checksum verified" -ForegroundColor Gray
 
 # Repack tar.gz -> zip.  install.ps1 uses Expand-Archive for every other payload
-# and Windows PowerShell 5.1 cannot read tar.gz natively, so normalising here
+# and Windows PowerShell 5.1 cannot read tar.gz natively, so normalizing here
 # keeps the install side uniform.  .pdb symbols are dropped: ~40% of the payload
 # for files an operator install never uses.
 $pyStage = Join-Path $pyCache "extract-$Architecture"
@@ -356,7 +356,7 @@ if ($Architecture -eq "arm64") {
         }
         # cryptography has no win_arm64 wheel for the CVE-patched pin, so it is built
         # from source. Link it against a STATIC OpenSSL + static CRT so its _rust
-        # extension carries no external OpenSSL/vcruntime deps — a dynamically-linked
+        # extension carries no external OpenSSL/vcruntime deps -- a dynamically-linked
         # build resolves those flakily at runtime on end-user machines ("procedure
         # could not be found"). Mirrors the Makefile's WIN_ARM64_ENV.
         if (-not (Test-Path "$vcpkgRoot\installed\arm64-windows-static\lib\libcrypto.lib")) {

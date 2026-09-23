@@ -43,7 +43,7 @@ class MockHost:
 class MockUser:
     """Mock authenticated User object (as returned by require_authenticated_user).
 
-    has_role() returns True for all roles, modelling a user with permission.
+    has_role() returns True for all roles, modeling a user with permission.
     """
 
     def __init__(self, userid="test@example.com", user_id=1):

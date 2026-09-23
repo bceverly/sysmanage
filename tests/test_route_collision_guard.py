@@ -6,7 +6,7 @@
 Tests for the route-collision guard (Phase 13.2.1).
 
 The guard makes a silent route-shadow (two routers claiming the same
-method+path — e.g. an OSS router and a Pro+ engine under a shared /api/v1
+method+path -- e.g. an OSS router and a Pro+ engine under a shared /api/v1
 namespace) into a loud startup error.
 """
 
@@ -23,12 +23,12 @@ def test_clean_app_passes():
     def _types():
         return {}
 
-    # Same prefix, DIFFERENT sub-path — the "C" model — must be fine.
+    # Same prefix, DIFFERENT sub-path -- the "C" model -- must be fine.
     @app.get("/api/v1/secrets/leases")
     def _leases():
         return {}
 
-    # Same path, different METHOD — not a collision.
+    # Same path, different METHOD -- not a collision.
     @app.post("/api/v1/secrets/types")
     def _create_type():
         return {}

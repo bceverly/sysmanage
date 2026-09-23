@@ -3,12 +3,12 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Tenant data-mover — OSS shim (Pro+ relocation, Phase 2).
+Tenant data-mover -- OSS shim (Pro+ relocation, Phase 2).
 
 Idempotently relocates per-tenant data from the bootstrap database into each
 tenant's database (the companion to per-domain data-plane routing, and the
 verify step that gates the eventual "burn the ships" drop).  The mover logic
-moved into the licensed engine — the OSS build has no copy — so this is a thin
+moved into the licensed engine -- the OSS build has no copy -- so this is a thin
 delegator: with no engine loaded it's a no-op (single-database / unlicensed has
 nowhere to move data to).
 """

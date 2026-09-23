@@ -2,14 +2,14 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Ad-hoc fleet-wide live queries — Phase 21.1 S5.
+"""Ad-hoc fleet-wide live queries -- Phase 21.1 S5.
 
-The behaviour worth pinning is the BOUND. A live query is one statement typed
+The behavior worth pinning is the BOUND. A live query is one statement typed
 at a console and pointed at a fleet, so the failure mode it must never have is
 the one fleet jobs were built to replace: four thousand hosts dispatched at
 once because somebody pressed enter.
 
-Everything else here — results, grading, "not covered is not empty" — is S4's,
+Everything else here -- results, grading, "not covered is not empty" -- is S4's,
 reused deliberately rather than reimplemented, which is why a live query's
 targets are ``QueryPackRun`` rows.
 """
@@ -70,7 +70,7 @@ def _add_hosts(session, fake_hosts):
 
 class TestBoundedFanOut:
     def test_only_concurrency_targets_go_out_at_once(self, session, engine_present):
-        """THE test. 100 hosts, concurrency 10 — ten dispatched, ninety
+        """THE test. 100 hosts, concurrency 10 -- ten dispatched, ninety
         waiting. Unbounded fan-out is what this slice exists to prevent."""
         fleet = hosts(100)
         _add_hosts(session, fleet)
@@ -131,8 +131,8 @@ class TestBoundedFanOut:
         assert in_flight == 5
 
     def test_no_engine_dispatches_nothing(self, session):
-        """A server that has lost its licence mid-query must STOP, not fall
-        back to the unbounded behaviour."""
+        """A server that has lost its license mid-query must STOP, not fall
+        back to the unbounded behavior."""
         fleet = hosts(10)
         _add_hosts(session, fleet)
         with patch.object(
@@ -152,7 +152,7 @@ class TestBoundedFanOut:
 class TestValidation:
     def test_an_invalid_statement_writes_nothing(self, session):
         """A stored, targeted query can be dispatched a moment later by the
-        advance path — and the SQL is operator-typed."""
+        advance path -- and the SQL is operator-typed."""
         with patch.object(
             live_svc.shim, "validate_live_query", return_value=["a query may only read"]
         ):

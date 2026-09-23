@@ -6,9 +6,9 @@
 Tests for the ``/api/v1/server-info`` endpoint introduced in Phase 11.
 
 Covers:
-  * default (``standard``) role — chip-hide path
-  * collector role with engine loaded — healthy path
-  * repository role without engine — degraded path
+  * default (``standard``) role -- chip-hide path
+  * collector role with engine loaded -- healthy path
+  * repository role without engine -- degraded path
   * shape stability of the response (frontend depends on these keys)
 
 The endpoint is unauthenticated by design (frontend renders the role
@@ -28,7 +28,7 @@ from backend.api import server_info as server_info_module
 def _override_loaded(modules: dict):
     """Swap the underlying ``_loaded_modules`` dict on the module_loader
     singleton for the duration of one test.  We can't ``patch`` the
-    public ``loaded_modules`` property — it has no setter — so reach
+    public ``loaded_modules`` property -- it has no setter -- so reach
     in and substitute the storage dict directly."""
     loader = server_info_module.module_loader
     saved = loader._loaded_modules  # pylint: disable=protected-access
@@ -131,7 +131,7 @@ class TestServerInfoFederationRole:
 
     def test_site_without_engine_is_degraded(self, client):
         # Operator set the federation role to site but the Pro+ engine isn't
-        # loaded (stale module cache, missing build, or license problem) —
+        # loaded (stale module cache, missing build, or license problem) --
         # the UI flips the federation chip to red.
         with patch(
             "backend.api.server_info.config_module.get_federation_role",
@@ -145,7 +145,7 @@ class TestServerInfoFederationRole:
 
 class TestServerInfoUnauthenticated:
     def test_works_without_bearer_token(self, client):
-        # Endpoint is intentionally public — Navbar.tsx fetches it pre-login
+        # Endpoint is intentionally public -- Navbar.tsx fetches it pre-login
         # to render the role chip.  No bearer token = still 200.
         response = client.get("/api/v1/server-info")
         assert response.status_code == 200

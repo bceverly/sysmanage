@@ -4,13 +4,13 @@ name: Build OpenBSD Packages
 # fully-offline port model (see installer/openbsd/Makefile + build-libs.sh).
 #
 # Two phases:
-#   1. build-libs  — build the single, version-independent "complete" distfile
+#   1. build-libs  -- build the single, version-independent "complete" distfile
 #      (backend source + built web UI + the pure-Python dependency bundle) and
 #      its distinfo.  The frontend is built on Linux; the pure-Python bundle is
 #      built in an OpenBSD VM (so it excludes the C/Rust deps that come from
 #      ports).  This distfile is what the release publishes to R2 and what the
 #      port fetches.
-#   2. build-openbsd (matrix 7.8/7.9) — stage the port with that distfile +
+#   2. build-openbsd (matrix 7.8/7.9) -- stage the port with that distfile +
 #      distinfo and build the pre-built .tgz FULLY OFFLINE (no pip/npm/compiler
 #      at port-build time).  Per-version because the .tgz records
 #      version-specific dependency-package pins.
@@ -113,7 +113,7 @@ jobs:
             mkdir -p "$DISTDIR"
             cp "/tmp/libout/sysmanage-${VERSION}-openbsd.tar.gz" "$DISTDIR/"
 
-            # 2. Generate distinfo (checksums the local distfile — no fetch).
+            # 2. Generate distinfo (checksums the local distfile -- no fetch).
             make makesum
             cat distinfo
 
@@ -173,7 +173,7 @@ jobs:
             ftp -4 -o /tmp/ports.tar.gz "https://ftp.openbsd.org/pub/OpenBSD/${OPENBSD_VERSION}/ports.tar.gz"
             tar xzf /tmp/ports.tar.gz -C /usr && rm /tmp/ports.tar.gz
 
-            # Stage the port + the pre-built distinfo (do NOT regenerate it —
+            # Stage the port + the pre-built distinfo (do NOT regenerate it --
             # end users get exactly this distinfo).
             PORT_DIR=/usr/ports/mystuff/www/sysmanage
             mkdir -p "$PORT_DIR"

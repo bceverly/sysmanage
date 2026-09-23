@@ -234,7 +234,7 @@ class TestProcessPendingMessages:
 
         Regression: a leftover bootstrap row (often ``pending``) matched the
         hostname fallback first and shadowed the real, approved tenant host the
-        agent identified by id — failing every inbound message as "not
+        agent identified by id -- failing every inbound message as "not
         approved".  host_id must be resolved (bootstrap + tenants) before any
         hostname fallback runs.
         """

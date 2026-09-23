@@ -80,7 +80,7 @@ export async function ensureAuthenticated(page: Page, targetPath: string): Promi
   }
 
   // Wait for the SPA to finish loading and any auth redirect to complete.
-  // networkidle alone isn't enough — the SPA may fire the redirect AFTER
+  // networkidle alone isn't enough -- the SPA may fire the redirect AFTER
   // network goes idle (React checks localStorage, then navigates).
   try {
     await page.waitForLoadState('networkidle', { timeout: 3000 });
@@ -88,14 +88,14 @@ export async function ensureAuthenticated(page: Page, targetPath: string): Promi
     // networkidle may timeout on slow CI, continue
   }
 
-  // Wait for URL to stabilize — catches the delayed SPA redirect to /login
+  // Wait for URL to stabilize -- catches the delayed SPA redirect to /login
   let stableUrl = await waitForUrlToStabilize(page);
 
   if (!stableUrl.includes('/login')) {
     return true; // Auth worked
   }
 
-  // Auth state wasn't picked up — re-authenticate inline
+  // Auth state wasn't picked up -- re-authenticate inline
   if (!(await doLogin(page))) {
     return false;
   }

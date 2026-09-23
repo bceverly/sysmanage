@@ -372,7 +372,7 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
 
             # The download is a single bundle tarball (<code>.so +
             # locales/<lang>/LC_MESSAGES/<code>.mo + metadata.json).  Extract it
-            # so locales/ sits beside the .so — the loader binds each module's
+            # so locales/ sits beside the .so -- the loader binds each module's
             # gettext catalog from <so_dir>/locales at load time.
             so_path = self._extract_module_bundle(
                 temp_path,
@@ -598,7 +598,7 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
                     exc,
                 )
                 return None
-            # Bundle is good — atomically swap in: move the live dir aside (rename
+            # Bundle is good -- atomically swap in: move the live dir aside (rename
             # onto a non-empty POSIX dir fails), then restore on failure.
             backup_dir = module_dir + ".old"
             shutil.rmtree(backup_dir, ignore_errors=True)
@@ -654,7 +654,7 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
         On incompatibility, records the entry in the migration_compat registry
         so the UI can show a banner.  On any internal error we fail-open
         (return True) to avoid breaking deployments that don't have an
-        alembic config available — the schema mismatch will surface as a
+        alembic config available -- the schema mismatch will surface as a
         runtime error instead.
         """
         try:

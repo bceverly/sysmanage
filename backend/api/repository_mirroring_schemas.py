@@ -72,7 +72,7 @@ class MirrorCreateRequest(BaseModel):
     sync_cron: str = Field(default="0 4 * * *")
     network_tier: Optional[str] = None
     enabled: bool = True
-    known_version_id: Optional[str] = None  # Phase 10.4.4 — set by the dropdown
+    known_version_id: Optional[str] = None  # Phase 10.4.4 -- set by the dropdown
 
 
 class MirrorUpdateRequest(BaseModel):
@@ -90,7 +90,7 @@ class MirrorUpdateRequest(BaseModel):
     sync_cron: Optional[str] = None
     network_tier: Optional[str] = None
     enabled: Optional[bool] = None
-    known_version_id: Optional[str] = None  # Phase 10.4.4 — set by the dropdown
+    known_version_id: Optional[str] = None  # Phase 10.4.4 -- set by the dropdown
 
 
 class MirrorSettingsRequest(BaseModel):
@@ -106,5 +106,5 @@ class MirrorSetupInstallRequest(BaseModel):
 
     package_manager: str = Field(
         ...,
-        description="apt | dnf | zypper | pkg — drives which install plan is emitted",
+        description="apt | dnf | zypper | pkg -- drives which install plan is emitted",
     )

@@ -15,7 +15,7 @@ loaded::
 
 For that engine to ever BE loaded it must also exist as a ``ModuleCode`` member
 and appear in at least one tier of ``TIER_MODULES`` -- that is what puts it in
-an issued licence, which is what makes the licence server serve it, which is
+an issued license, which is what makes the license server serve it, which is
 what creates the runtime directory the server loads from.
 
 Miss the registration and nothing anywhere errors.  The engine builds, the
@@ -89,7 +89,7 @@ def licensed_codes():
 
 
 def issued_feature_codes():
-    """Feature strings the Pro+ generator can put in a licence, or None.
+    """Feature strings the Pro+ generator can put in a license, or None.
 
     ``None`` means the sibling repo is not checked out here, which is the
     normal case in CI and not a failure.
@@ -109,13 +109,13 @@ def issued_feature_codes():
 
 
 def check_features():
-    """Every feature a licence can carry must exist in FeatureCode.
+    """Every feature a license can carry must exist in FeatureCode.
 
     THE BUG THIS CATCHES is the sibling of the module one above, and it had
     already happened three times over before anyone looked: ``secrets``,
-    ``containers`` and ``multiuser`` were issued in every Professional licence
+    ``containers`` and ``multiuser`` were issued in every Professional license
     and were absent from ``FeatureCode`` entirely, so ``FeatureCode(f)`` over a
-    real licence's features raised on a perfectly valid licence. Nothing had
+    real license's features raised on a perfectly valid license. Nothing had
     done that yet, which is the only reason it never bit -- those capabilities
     are gated by their MODULES instead. A fourth one would have been just as
     invisible.
@@ -140,7 +140,7 @@ def check_features():
 
     if unknown:
         print(
-            "ERROR: features the licence generator issues but MISSING from "
+            "ERROR: features the license generator issues but MISSING from "
             "FeatureCode:",
             file=sys.stderr,
         )
@@ -156,8 +156,8 @@ def check_features():
 
     if unknown or untiered:
         print(
-            "\nA licence carrying a feature this server cannot name is a "
-            "licence\nthis server cannot reason about: FeatureCode(value) "
+            "\nA license carrying a feature this server cannot name is a "
+            "license\nthis server cannot reason about: FeatureCode(value) "
             "raises on it.\nFix: add the code to FeatureCode and to the tier "
             "the Pro+ repo's\nPROFESSIONAL_FEATURES / ENTERPRISE_FEATURES "
             "list puts it in.",
@@ -199,7 +199,7 @@ def main():
 
     if unknown or unlicensed:
         print(
-            "\nAn unregistered engine is never put in a licence, so the licence\n"
+            "\nAn unregistered engine is never put in a license, so the license\n"
             "server never serves it, the runtime directory is never created, and\n"
             "the OSS shim answers 'requires a Professional+ license' forever.\n"
             "Fix: add the code to ModuleCode and to the tier named in the\n"

@@ -4,21 +4,21 @@
 
 """Move CVE reference tables into the shared partition (option B).
 
-CVE data is global platform truth — identical for every tenant — so it belongs
+CVE data is global platform truth -- identical for every tenant -- so it belongs
 in the ``shared`` partition, not per-tenant.  This relocates the CVE reference +
 config tables to the ``shared_*`` prefix.
 
 Unlike ``shared_mirror_known_version`` (seedable catalog), CVE rows are fetched
 external data (NVD/Ubuntu/...), so they must be **preserved**, not re-seeded:
 
-  * **Existing deployment** — the old unprefixed table exists (populated), so it
+  * **Existing deployment** -- the old unprefixed table exists (populated), so it
     is renamed in place to ``shared_*`` (rows preserved).
-  * **Fresh install** — no old table to rename, so an empty ``shared_*`` table is
+  * **Fresh install** -- no old table to rename, so an empty ``shared_*`` table is
     created (the CVE refresh pipeline populates it on first run).
 
 This chain runs BEFORE the tenant chain (see ``sysmanage_migrate.py``), so on the
 bootstrap/collapsed database the rename happens before the tenant chain's drop
-touches the same tables — populated CVE data is never dropped.
+touches the same tables -- populated CVE data is never dropped.
 
 Idempotent; safe on SQLite + PostgreSQL.
 

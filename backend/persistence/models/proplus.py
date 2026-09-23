@@ -148,7 +148,7 @@ class HostHealthAnalysis(Base):
 
     # Relationship to host
     # ``passive_deletes=True`` defers child-row cleanup to the DB's
-    # ON DELETE CASCADE on ``host_id`` — without it, SQLAlchemy
+    # ON DELETE CASCADE on ``host_id`` -- without it, SQLAlchemy
     # pre-emptively issues ``UPDATE host_health_analysis SET host_id=NULL``
     # before the parent DELETE, which trips the NOT NULL constraint
     # and surfaces as a 500 in the child-host-delete flow.
@@ -217,7 +217,7 @@ class PackageVulnerability(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
     vulnerability_id = Column(
         GUID(),
-        # Intra-shared FK (both tables live in the shared partition) — kept.
+        # Intra-shared FK (both tables live in the shared partition) -- kept.
         ForeignKey("shared_vulnerability.id", ondelete=CASCADE_DELETE),
         nullable=False,
         index=True,
@@ -328,7 +328,7 @@ class HostVulnerabilityFinding(Base):
     # Soft cross-partition reference to shared_vulnerability.id.  This is a
     # host-scoped (tenant) row pointing at shared CVE data, so it is NOT a DB
     # ForeignKey (the two tables live in different partitions/engines under
-    # scale-out — a hard FK would be a cross-partition constraint).  Callers
+    # scale-out -- a hard FK would be a cross-partition constraint).  Callers
     # resolve the CVE via the shared session (``cve_db``), not an ORM
     # relationship.  See ROADMAP option B.
     vulnerability_id = Column(
@@ -345,7 +345,7 @@ class HostVulnerabilityFinding(Base):
 
     # Relationship to the (tenant-local) scan only.  No ``vulnerability``
     # relationship: that target lives in the shared partition and cannot be
-    # ORM-joined across engines — resolve it explicitly via the shared session.
+    # ORM-joined across engines -- resolve it explicitly via the shared session.
     scan = relationship("HostVulnerabilityScan", back_populates="findings")
 
     def __repr__(self):

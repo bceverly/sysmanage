@@ -44,7 +44,7 @@ router = APIRouter()
 
 def _sessionmaker():
     """A sessionmaker bound to the active tenant's engine (main engine at server
-    scope) — maintenance windows are tenant-partition data."""
+    scope) -- maintenance windows are tenant-partition data."""
     from backend.persistence.partitions import get_request_engine  # noqa: PLC0415
     from backend.persistence.tenant_context import get_active_tenant  # noqa: PLC0415
 
@@ -118,7 +118,7 @@ def _validate_meta(payload: MaintenanceWindowIn) -> None:
             status_code=400,
             detail=_("recurrence must be 'once', 'daily', or 'weekly'."),
         )
-    # Timezone must be resolvable (defence for the recurrence evaluator).
+    # Timezone must be resolvable (defense for the recurrence evaluator).
     if mw.ZoneInfo is not None:
         try:
             mw.ZoneInfo(payload.timezone)

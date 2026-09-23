@@ -1,4 +1,4 @@
-# SysManage — Marketing Collateral
+# SysManage -- Marketing Collateral
 
 Source files for SysManage go-to-market collateral. Everything here is authored in
 Markdown as the master source and is designed to convert cleanly to **DOCX** and
@@ -8,7 +8,7 @@ Markdown as the master source and is designed to convert cleanly to **DOCX** and
 
 | File | Purpose |
 |---|---|
-| `executive-opportunity-brief.md` | The primary document — a ~12–15 page executive opportunity brief (strategy & commercial overview). |
+| `executive-opportunity-brief.md` | The primary document -- a ~12-15 page executive opportunity brief (strategy & commercial overview). |
 | `cover-email.md` | The outreach email that accompanies the brief when sent to colleagues for introductions. |
 | `images/` | Logo and screenshot/diagram assets referenced by the brief. |
 
@@ -36,7 +36,7 @@ Swap any of these for a different screenshot by overwriting the file in `images/
 (keep the name) or updating the reference in the brief. The full asset library lives at
 `../../sysmanage-docs/assets/images/` if you want a different shot.
 
-**Two figures still need a designer** — they are conceptual, so no screenshot exists.
+**Two figures still need a designer** -- they are conceptual, so no screenshot exists.
 They remain as `[FIGURE: ...]` placeholders in the brief, each with a full description:
 
 1. The fragmented **"before"** diagram (each OS wired to a different point tool).
@@ -53,17 +53,17 @@ repo root:
 ```
 
 That produces **both** `executive-opportunity-brief.docx` and
-`executive-opportunity-brief.pdf` — a fully branded document with a cover page, colored
+`executive-opportunity-brief.pdf` -- a fully branded document with a cover page, colored
 section headings, callout/thesis boxes, styled tables, embedded screenshots and
 diagrams, and a page-numbered footer. Iterate on the `.md`, re-run the script, done.
 (The `.docx`, `.pdf`, and the `.build/` cache are git-ignored build outputs.)
 
 > **Note on the DOCX vs. the PDF.** Word/LibreOffice may show faint white horizontal
-> lines across the diagrams *on screen* — that is a viewer scaling/interpolation
+> lines across the diagrams *on screen* -- that is a viewer scaling/interpolation
 > artifact, not corrupt image data. The exported **PDF renders the diagrams cleanly**
 > (verified), so send the PDF.
 
-### How it handles graphics — and the white-line fix
+### How it handles graphics -- and the white-line fix
 
 SVG diagrams are rasterized with a clean pipeline: **SVG → PDF (LibreOffice) → PNG
 (Ghostscript @300 DPI)**. ImageMagick's built-in SVG renderer produces the white
@@ -75,9 +75,9 @@ cached in `.build/` and only re-rendered when the source SVG changes. Requires
 ### Markdown conventions the script understands
 
 - `## Heading` → blue section heading with a hairline rule; `### Heading` → subheading.
-- `<!-- PAGEBREAK -->` → a real page break. (Only an exact `PAGEBREAK` marker counts —
+- `<!-- PAGEBREAK -->` → a real page break. (Only an exact `PAGEBREAK` marker counts --
   comments that merely mention the word, like this list, are ignored.)
-- `> **CALLOUT** —` / `> **THESIS** —` blockquotes → shaded callout boxes.
+- `> **CALLOUT** --` / `> **THESIS** --` blockquotes → shaded callout boxes.
 - Pipe tables with `:---:` alignment → styled tables (blue header, zebra rows).
 - `![alt](path)` → centered, width-fit image; `.svg` paths are auto-rasterized.
 - `**bold**`, `*italic*`, `` `code` ``, `[text](url)`, and `<https://autolink>` render
@@ -86,7 +86,7 @@ cached in `.build/` and only re-rendered when the source SVG changes. Requires
   company/product name (Microsoft®, Windows®, Jamf®, Red Hat Satellite®, Tanium®, the
   research firms, the OS names, etc.) gets the correct ® or ™ on every occurrence, so
   the Markdown source stays clean and editable. The mapping lives in the `TRADEMARKS`
-  dict in `scripts/build-marketing-brief.py` — add a name there if you introduce one.
+  dict in `scripts/build-marketing-brief.py` -- add a name there if you introduce one.
   The global attribution lives in the "Trademarks & Legal Notice" section of the `.md`.
   Caveat: names baked into the rasterized diagrams (e.g. PostgreSQL/Windows inside the
   architecture image) are pixels, not text, so they're covered by the notice rather
@@ -113,7 +113,7 @@ a starting point.
 ## Editorial guardrails (keep these true across every revision)
 
 - **Never** call SysManage a "side project." It is an early-stage enterprise software company.
-- **Never** sum the overlapping market segments into one TAM — sophisticated readers will
+- **Never** sum the overlapping market segments into one TAM -- sophisticated readers will
   catch it. Present them individually; the position, not a single number, is the point.
 - Keep the softened, defensible differentiator claim ("to the best of our knowledge, no
   commercially available platform...") rather than an absolute "no other product."

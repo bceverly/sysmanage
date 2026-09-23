@@ -11,7 +11,7 @@ Create Date: 2026-05-07 19:00:00.000000
 Three new tables backing the Pro+ ``repository_mirroring_engine``:
 
   mirror_repository
-      One row per mirrored upstream — config + per-row execution
+      One row per mirrored upstream -- config + per-row execution
       state.  Foreign-keyed to ``host`` (the agent that runs the
       sync plan owns the on-disk tree).
 
@@ -20,11 +20,11 @@ Three new tables backing the Pro+ ``repository_mirroring_engine``:
       Cascades on repo delete.
 
   mirror_settings
-      Singleton admin-controlled defaults — seeded with sensible
+      Singleton admin-controlled defaults -- seeded with sensible
       values (mirror_root=/var/mirror, 24-hour integrity cadence,
       30-day retention, no default bandwidth cap, keep 10 snapshots).
 
-Idempotent — re-running ``alembic upgrade head`` is a no-op via
+Idempotent -- re-running ``alembic upgrade head`` is a no-op via
 ``inspect().has_table()``.
 """
 

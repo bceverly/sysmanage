@@ -4,7 +4,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 #
-# diagnoseAirGapBundle.sh — one-shot diagnostics for air-gap bundle build
+# diagnoseAirGapBundle.sh -- one-shot diagnostics for air-gap bundle build
 # failures (hollow ISOs, exit 127, per-platform failures).
 #
 # Run on the build host (e.g. sysmanage-online) as root:
@@ -12,7 +12,7 @@
 #
 # READ-ONLY.  It inspects the deployed build script, the tools on PATH
 # (root AND the sysmanage service user, since the backend runs builds as
-# 'sysmanage'), and — the important part — the PER-PLATFORM output of the
+# 'sysmanage'), and -- the important part -- the PER-PLATFORM output of the
 # most recent server/agent builds.  Nothing is modified.
 
 set -uo pipefail
@@ -55,7 +55,7 @@ fi
 
 # ---------------------------------------------------------------------------
 # For a given product, dump the NEWEST build log with the per-platform
-# results.  The "[<platform>] done — N deps + M wheels" lines are the
+# results.  The "[<platform>] done -- N deps + M wheels" lines are the
 # smoking gun: a platform reporting "0 deps + 0 wheels" succeeded but is
 # EMPTY, which is what makes a bundle hollow even though the build "passes".
 _dump_build() {  # $1 = product (server|agent)
@@ -70,7 +70,7 @@ _dump_build() {  # $1 = product (server|agent)
   echo "when: $(stat -c '%y' "$log" 2>/dev/null)"
   echo
   echo "--- per-platform output (look for '0 deps + 0 wheels' = empty/hollow) ---"
-  grep -E "docker run .* to fetch|\] done —|no installer|\] .*failed — skipping" "$log"
+  grep -E "docker run .* to fetch|\] done --|no installer|\] .*failed -- skipping" "$log"
   echo
   echo "--- summary / result ---"
   grep -E "succeeded |FAILED Linux|no installer|Linux platform.*failed|Staging tree|ISO :|exited|no platforms produced" "$log"
@@ -95,4 +95,4 @@ for prod in server agent; do
   shopt -u nullglob
 done
 
-hr "DONE — paste this entire output back"
+hr "DONE -- paste this entire output back"

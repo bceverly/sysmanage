@@ -2,9 +2,9 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""add host.site_id — federation site placement (Phase 18.1 S4 auto-enroll)
+"""add host.site_id -- federation site placement (Phase 18.1 S4 auto-enroll)
 
-A SOFT reference to ``federation_sites.id`` (coordinator-scoped — no
+A SOFT reference to ``federation_sites.id`` (coordinator-scoped -- no
 cross-partition FK) on the ``host`` table (tenant partition + bootstrap DB).
 Set at registration when an enrollment token carries a site; NULL otherwise.
 There was no local host->site binding before this.

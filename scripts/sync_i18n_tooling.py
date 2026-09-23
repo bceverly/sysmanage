@@ -15,7 +15,7 @@ submodule, and nothing that notices when they diverge.
 
 They diverged.  Measured 2026-08-12: four copies of ``i18n_strict.py`` with
 four different hashes and five of ``i18n_validate.py`` with five, while only
-36 lines out of ~590 actually differ — and most of THAT is black re-wrapping
+36 lines out of ~590 actually differ -- and most of THAT is black re-wrapping
 noise.  The real per-repo difference is the ``SURFACES`` table and nothing
 else.  The cost is not theoretical: adding one line to the failure hint that
 day meant hand-editing three repos, which is exactly how the drift starts.
@@ -24,7 +24,7 @@ WHAT IS ALLOWED TO DIFFER
 -------------------------
 Two things, both preserved verbatim from the target:
 
-  * the **licence header** -- sysmanage-professional-plus is PROPRIETARY and
+  * the **license header** -- sysmanage-professional-plus is PROPRIETARY and
     must never carry the AGPL header the other three use; and
   * the **per-repo surfaces block**, delimited by the ``BEGIN``/``END``
     sentinels below.  Pro+ builds its list with a comprehension over
@@ -57,7 +57,7 @@ SHARED = [
     ("scripts/i18n_strict.py", "scripts/i18n_strict.py"),
     # No per-repo block at all: it imports SURFACES from i18n_strict rather
     # than redeclaring the table, so the body is identical in all four repos
-    # and only the licence header differs.
+    # and only the license header differs.
     ("scripts/i18n_check_markup.py", "scripts/i18n_check_markup.py"),
     # The terminology table.  It MUST travel with i18n_strict.py: the gate
     # imports it, so a repo that received the gate without the glossary would
@@ -78,7 +78,7 @@ HASHES_HOME = {
 
 TARGETS = ["sysmanage-agent", "sysmanage-professional-plus", "sysmanage-docs"]
 
-# Where a NEW file's licence header comes from.  It must be taken from a file
+# Where a NEW file's license header comes from.  It must be taken from a file
 # ALREADY in the target repo, never from the canonical copy: sysmanage is
 # AGPL and sysmanage-professional-plus is PROPRIETARY, so copying the header
 # with the body would put an AGPL notice on proprietary source.  i18n_strict.py
@@ -88,7 +88,7 @@ HEADER_DONOR = "scripts/i18n_strict.py"
 
 
 def split_header(text):
-    """(licence header, everything from the module docstring onward).
+    """(license header, everything from the module docstring onward).
 
     The header is the shebang plus the contiguous comment block above the
     docstring -- which is precisely the part that must NOT be copied between an

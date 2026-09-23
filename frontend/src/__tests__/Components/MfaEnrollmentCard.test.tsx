@@ -69,7 +69,7 @@ describe("MfaEnrollmentCard", () => {
 
   afterEach(() => vi.restoreAllMocks());
 
-  test("offers enrolment when MFA is off", async () => {
+  test("offers enrollment when MFA is off", async () => {
     render(<MfaEnrollmentCard />);
     expect(
       await screen.findByText("Two-Factor Authentication"),
@@ -96,7 +96,7 @@ describe("MfaEnrollmentCard", () => {
     ).toBeInTheDocument();
   });
 
-  test("starting enrolment shows the setup step", async () => {
+  test("starting enrollment shows the setup step", async () => {
     render(<MfaEnrollmentCard />);
     fireEvent.click(await screen.findByRole("button", { name: "Enable MFA" }));
     expect(
@@ -105,7 +105,7 @@ describe("MfaEnrollmentCard", () => {
     expect(enrollStart).toHaveBeenCalled();
   });
 
-  test("reports a failure to start enrolment", async () => {
+  test("reports a failure to start enrollment", async () => {
     vi.mocked(enrollStart).mockRejectedValue(new Error("nope"));
     render(<MfaEnrollmentCard />);
     fireEvent.click(await screen.findByRole("button", { name: "Enable MFA" }));
@@ -114,7 +114,7 @@ describe("MfaEnrollmentCard", () => {
     ).toBeInTheDocument();
   });
 
-  test("completing enrolment sends the trimmed code and reveals backup codes", async () => {
+  test("completing enrollment sends the trimmed code and reveals backup codes", async () => {
     render(<MfaEnrollmentCard />);
     fireEvent.click(await screen.findByRole("button", { name: "Enable MFA" }));
     fireEvent.change(await screen.findByLabelText(/^Code from authenticator/), {
@@ -138,7 +138,7 @@ describe("MfaEnrollmentCard", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Verify & Enrol" }));
     expect(
-      await screen.findByText("Invalid code — please try again."),
+      await screen.findByText("Invalid code -- please try again."),
     ).toBeInTheDocument();
   });
 
@@ -186,7 +186,7 @@ describe("MfaEnrollmentCard", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Disable" }));
     expect(
-      await screen.findByText("Could not disable MFA — check your password."),
+      await screen.findByText("Could not disable MFA -- check your password."),
     ).toBeInTheDocument();
   });
 
@@ -219,7 +219,7 @@ describe("MfaEnrollmentCard", () => {
     fireEvent.click(screen.getByRole("button", { name: "Regenerate" }));
     expect(
       await screen.findByText(
-        "Could not regenerate codes — check your TOTP code.",
+        "Could not regenerate codes -- check your TOTP code.",
       ),
     ).toBeInTheDocument();
   });

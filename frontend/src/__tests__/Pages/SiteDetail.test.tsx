@@ -7,7 +7,7 @@ import { MemoryRouter, Routes, Route } from "react-router";
 import { vi, beforeEach, test, expect } from "vitest";
 
 // `t` and the returned object MUST be stable across renders (the real
-// react-i18next memoises them) — a fresh `t` per call breaks downstream
+// react-i18next memoises them) -- a fresh `t` per call breaks downstream
 // useCallback/useEffect deps into an infinite render loop.
 vi.mock("react-i18next", () => {
   const t = (key: string, fallback?: string, opts?: Record<string, unknown>) => {
@@ -39,7 +39,7 @@ vi.mock("../../Services/federation", () => ({
 }));
 
 // Stub the dispatch dialog (covered by its own test) to keep this page
-// test's MUI render — and the worker heap — light.
+// test's MUI render -- and the worker heap -- light.
 vi.mock("../../Components/FederationCommandDispatchDialog", () => ({
   default: () => null,
 }));

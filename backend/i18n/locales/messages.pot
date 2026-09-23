@@ -494,7 +494,7 @@ msgid "Invalid TOTP code."
 msgstr ""
 
 #: backend/api/auth_mfa.py:296 backend/api/auth_mfa.py:358
-msgid "MFA challenge expired — please log in again."
+msgid "MFA challenge expired -- please log in again."
 msgstr ""
 
 #: backend/api/auth_mfa.py:301
@@ -1365,7 +1365,7 @@ msgstr ""
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed "
+"Mirror %s has not completed a successful sync yet -- wait for sync to succeed "
 "before assigning it as a default."
 msgstr ""
 
@@ -1407,7 +1407,7 @@ msgstr ""
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be "
-"loaded — the collector reads each target's bundle from a snapshot of its "
+"loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 
@@ -4733,7 +4733,7 @@ msgstr ""
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
-"message(s) for retry (NOT deleting) — may be an in-flight enrollment or a "
+"message(s) for retry (NOT deleting) -- may be an in-flight enrollment or a "
 "deleted host"
 msgstr ""
 

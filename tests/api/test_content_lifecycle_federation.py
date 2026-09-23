@@ -390,7 +390,7 @@ class TestOpResultDispatch:
     def test_unhandled_primary_id_is_logged_not_dropped(self):
         from backend.services import content_lifecycle_result_handlers as clrh
 
-        # An unroutable correlation must never raise or silently vanish — it hits
+        # An unroutable correlation must never raise or silently vanish -- it hits
         # the warn-and-return fallback (no tenant session is ever resolved).
         clrh._apply_content_lifecycle_op_result(
             "bogus-no-colon", "host-1", {"status": "succeeded"}

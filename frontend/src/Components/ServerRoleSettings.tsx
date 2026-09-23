@@ -58,8 +58,8 @@ const ServerRoleSettings: React.FC = () => {
   const [snackOpen, setSnackOpen] = useState(false);
 
   // Air-gap (collector/repository) and federation are ENTERPRISE features.
-  // Resolve their licensing so we never offer a role — or render the federation
-  // card — that this license can't actually use.  Default false: a Professional
+  // Resolve their licensing so we never offer a role -- or render the federation
+  // card -- that this license can't actually use.  Default false: a Professional
   // box sees only the always-applicable "Standard" role and no federation card.
   const [airgapCollectorLicensed, setAirgapCollectorLicensed] = useState(false);
   const [airgapRepositoryLicensed, setAirgapRepositoryLicensed] = useState(false);
@@ -132,7 +132,7 @@ const ServerRoleSettings: React.FC = () => {
       title: t('serverRole.standard.title', 'Standard (no air gap)'),
       description: t(
         'serverRole.standard.description',
-        'The default. This server manages hosts directly over the network with no air-gap separation. Choose this for any ordinary deployment — it is what every server runs as unless you specifically need one half of an air-gapped pair.',
+        'The default. This server manages hosts directly over the network with no air-gap separation. Choose this for any ordinary deployment -- it is what every server runs as unless you specifically need one half of an air-gapped pair.',
       ),
     },
     {
@@ -157,7 +157,7 @@ const ServerRoleSettings: React.FC = () => {
   ];
 
   // Standard is always offered; the air-gap roles only appear when their
-  // (Enterprise) engine is licensed — we don't show a role the operator
+  // (Enterprise) engine is licensed -- we don't show a role the operator
   // can't actually run.
   const visibleRoleOptions = roleOptions.filter(
     (opt) =>
@@ -176,7 +176,7 @@ const ServerRoleSettings: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* Page title — distinct from the per-card "Air-Gap Role" /
+      {/* Page title -- distinct from the per-card "Air-Gap Role" /
           "Federation Role" headings.  Also the canonical reference for the
           ``serverRole.menuTitle`` key used by the Settings menu item. */}
       <Typography variant="h5" gutterBottom>
@@ -288,7 +288,7 @@ const ServerRoleSettings: React.FC = () => {
 
         {/* Right card: federation role (independent axis). Federation is an
             ENTERPRISE feature, so the card only appears when its engine is
-            licensed — a Professional user is never offered Coordinator/Site. */}
+            licensed -- a Professional user is never offered Coordinator/Site. */}
         {federationLicensed && (
           <Grid size={{ xs: 12, md: 6 }}>
             <FederationRoleCard />

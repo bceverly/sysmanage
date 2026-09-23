@@ -10,7 +10,7 @@ These endpoints route through ``config_push_manager``, which (post Phase
 11.9 queue-compliance refactor) enqueues OUTBOUND queue rows instead of
 calling ``connection_manager`` directly.  The tests below mock
 ``config_push_manager`` at the API boundary, so the websocket layer is
-not exercised here — assertions verify that the endpoint dispatches the
+not exercised here -- assertions verify that the endpoint dispatches the
 right manager method with the right arguments, including the SQLAlchemy
 session that the new queue-based methods require.
 """

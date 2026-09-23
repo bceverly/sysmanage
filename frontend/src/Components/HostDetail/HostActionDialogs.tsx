@@ -281,7 +281,7 @@ const HostActionDialogs: React.FC<HostActionDialogsProps> = ({
                 maxWidth="md"
                 fullWidth
                 slotProps={{
-                    paper: { sx: { backgroundColor: 'grey.900', minHeight: '500px' } }
+                    paper: { sx: { backgroundColor: 'gray.900', minHeight: '500px' } }
                 }}
             >
                 <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold', fontSize: '1.25rem' }}>
@@ -319,7 +319,7 @@ const HostActionDialogs: React.FC<HostActionDialogsProps> = ({
                             <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
                                 {t('hostDetail.searchResults', 'Search Results')}
                             </Typography>
-                            <List sx={{ bgcolor: 'grey.800', borderRadius: 1, maxHeight: 300, overflow: 'auto' }}>
+                            <List sx={{ bgcolor: 'gray.800', borderRadius: 1, maxHeight: 300, overflow: 'auto' }}>
                                 {searchResults.map((pkg, index) => (
                                     <React.Fragment key={pkg.name}>
                                         <ListItem
@@ -502,7 +502,7 @@ const HostActionDialogs: React.FC<HostActionDialogsProps> = ({
                                     <Paper
                                         sx={{
                                             p: 2,
-                                            backgroundColor: 'grey.900',
+                                            backgroundColor: 'gray.900',
                                             maxHeight: 400,
                                             overflow: 'auto',
                                             fontFamily: 'monospace',

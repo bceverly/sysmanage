@@ -11,16 +11,16 @@ Two tables back the MFA feature:
       One row per user that has enrolled.  Stores the encrypted TOTP
       shared secret, the Argon2 hashes of the user's backup codes (so
       they can be checked but not exfiltrated), enrolled_at, and
-      last_used_at for audit.  Enrollment is opt-in — absence of a row
+      last_used_at for audit.  Enrollment is opt-in -- absence of a row
       means the user has no second factor.
 
   mfa_settings
       Singleton row of admin-controlled defaults: TOTP issuer name,
       number of digits, period, backup-code count to issue at enrollment,
       whether MFA is admin-required, and the grace period (in days) for
-      newly-created accounts to enrol before being locked out.
+      newly-created accounts to enroll before being locked out.
 
-MFA is intentionally an OSS feature — every operator should be able to
+MFA is intentionally an OSS feature -- every operator should be able to
 enable a second factor without paying for Pro+.  The implementation
 lives entirely in OSS code paths.
 """
@@ -42,11 +42,11 @@ from sqlalchemy import (
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
 
-# Sentinel id for the singleton MfaSettings row — same upsert pattern
+# Sentinel id for the singleton MfaSettings row -- same upsert pattern
 # used by ReportBranding.  Exactly one config row system-wide.
 SINGLETON_MFA_SETTINGS_ID = uuid.UUID("00000000-0000-0000-0000-000000000002")
 
-# Foreign-key target for the ``user`` table's primary key — reused by
+# Foreign-key target for the ``user`` table's primary key -- reused by
 # every MFA-side row that references a user.  Centralising the literal
 # means the ``user`` table can be renamed in one place if it ever needs
 # to be (and SonarQube no longer complains about the duplication).
@@ -77,7 +77,7 @@ class UserMfaEnrollment(Base):
     # from the list (one-time use).  Plaintext codes are returned to
     # the user exactly once at enrollment / regeneration time.
     backup_codes_hashed = Column(JSON, nullable=False, default=list)
-    # Telemetry — useful in audit logs and for the user-facing "last
+    # Telemetry -- useful in audit logs and for the user-facing "last
     # used your TOTP at HH:MM" display in the profile.
     enrolled_at = Column(
         DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
@@ -105,12 +105,12 @@ class UserMfaEnrollment(Base):
 
 
 class MfaEmailChallenge(Base):
-    """Short-lived email-OTP challenge — Phase 10.3 email fallback path.
+    """Short-lived email-OTP challenge -- Phase 10.3 email fallback path.
 
     A row is created when a user requests an email-OTP code (because
     they can't reach their authenticator app) and consumed when they
     submit the matching code at /verify.  Codes are Argon2-hashed so
-    the row's plaintext is never recoverable from the DB — same pattern
+    the row's plaintext is never recoverable from the DB -- same pattern
     as the backup-codes list in ``UserMfaEnrollment``.
 
     Rows are tombstoned by setting ``consumed_at`` rather than deleted
@@ -122,7 +122,7 @@ class MfaEmailChallenge(Base):
 
         consumed_at IS NULL AND expires_at > UTC-NOW
 
-    There is no rate-limit table — the service-layer ``request_email_otp``
+    There is no rate-limit table -- the service-layer ``request_email_otp``
     invalidates any unused challenge before issuing a new one, so a
     spammed Request endpoint at most rotates the live code rather than
     flooding the user's inbox with N codes.
@@ -137,7 +137,7 @@ class MfaEmailChallenge(Base):
         nullable=False,
         index=True,
     )
-    # Argon2 hash of the 6-digit OTP — never stored in plaintext.
+    # Argon2 hash of the 6-digit OTP -- never stored in plaintext.
     code_hash = Column(Text, nullable=False)
     created_at = Column(
         DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
@@ -147,7 +147,7 @@ class MfaEmailChallenge(Base):
     # ``<`` against utcnow rather than a recomputed timedelta.
     expires_at = Column(DateTime, nullable=False)
     consumed_at = Column(DateTime, nullable=True)
-    # Audit only — IP address of the request origin.  String form
+    # Audit only -- IP address of the request origin.  String form
     # (length 45) holds an IPv6 literal.
     ip_address = Column(String(45), nullable=True)
 
@@ -160,7 +160,7 @@ class MfaEmailChallenge(Base):
     def is_live(self) -> bool:
         """True iff this challenge is still consumable.
 
-        Compares against ``datetime.now(timezone.utc)`` — tz-naive
+        Compares against ``datetime.now(timezone.utc)`` -- tz-naive
         columns in the DB are treated as UTC by convention across
         the rest of the persistence layer.
         """
@@ -183,7 +183,7 @@ class MfaSettings(Base):
     backup_code_count = Column(Integer, nullable=False, default=10)
     # When ``admin_required`` is true and a user passes the grace
     # period without enrolling, the login flow returns 403 instead of
-    # a session token until they enrol.
+    # a session token until they enroll.
     admin_required = Column(Boolean, nullable=False, default=False)
     grace_period_days = Column(Integer, nullable=False, default=14)
     updated_at = Column(

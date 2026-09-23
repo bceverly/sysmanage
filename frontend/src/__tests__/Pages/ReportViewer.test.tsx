@@ -32,7 +32,7 @@ vi.mock('../../Services/api', () => ({
 }));
 
 // Mock react-i18next.  ``t`` MUST be a stable reference across renders (as the
-// real react-i18next ``t`` is) — ReportViewer puts ``t`` in a useCallback dep
+// real react-i18next ``t`` is) -- ReportViewer puts ``t`` in a useCallback dep
 // that an effect depends on, so a fresh ``t`` per render would loop the effect.
 vi.mock('react-i18next', () => {
   const t = (

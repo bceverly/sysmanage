@@ -5,7 +5,7 @@
 """PostgreSQL-backed migration smoke test (Phase 13.1.D follow-up).
 
 The SQLite-only ``test_alembic_prefix_guard`` cannot catch dialect-specific
-migration bugs — e.g. a column declared ``CHAR(36)`` that must be ``UUID`` on
+migration bugs -- e.g. a column declared ``CHAR(36)`` that must be ``UUID`` on
 PostgreSQL, or a foreign key whose name PostgreSQL auto-generates differently
 from SQLite.  Both bit Phase 13.1.D/F migrations precisely because the only
 migration test ran on SQLite.
@@ -125,7 +125,7 @@ def test_all_chains_apply_on_postgres(scratch_db):
     Runs registry → shared → tenant in sequence against a fresh scratch DB (the
     collapsed single-database deployment).  Exercising each chain's DDL on PG is
     the dialect coverage the SQLite-only ``test_alembic_prefix_guard`` cannot
-    give — this is what catches the ``r7registry`` (CHAR-vs-UUID FK),
+    give -- this is what catches the ``r7registry`` (CHAR-vs-UUID FK),
     ``s1shared``, and ``d1sharedmkv`` (PG auto-named FK) bugs that previously
     reached ``make migrate``.  An upgrade failure on any chain fails the test
     with alembic's stderr."""

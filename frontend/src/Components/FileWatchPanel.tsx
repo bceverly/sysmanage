@@ -96,7 +96,7 @@ const FileWatchPanel: React.FC<Props> = ({ canEdit }) => {
             setPaths('');
             await load();
         } catch (err) {
-            // The server refuses a list it cannot collect honestly — a
+            // The server refuses a list it cannot collect honestly -- a
             // relative path, a duplicate, an empty list. Surfaced verbatim
             // rather than replaced: a path an operator believes is watched,
             // and is not, produces a comparison that looks complete.
@@ -135,7 +135,7 @@ const FileWatchPanel: React.FC<Props> = ({ canEdit }) => {
             <Alert severity="info" sx={{ mb: 2 }}>
                 {t(
                     'fileWatch.contentNotice',
-                    'Only a checksum and file permissions are collected — never the contents. It is therefore safe to watch secrets, though drift will report that a file changed rather than what changed inside it.',
+                    'Only a checksum and file permissions are collected -- never the contents. It is therefore safe to watch secrets, though drift will report that a file changed rather than what changed inside it.',
                 )}
             </Alert>
 

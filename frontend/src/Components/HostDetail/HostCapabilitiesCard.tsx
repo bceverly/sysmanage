@@ -10,7 +10,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { useTranslation } from 'react-i18next';
 
 /**
- * What the agent on this host advertises it can do — ROADMAP Phase 19.
+ * What the agent on this host advertises it can do -- ROADMAP Phase 19.
  *
  * THREE states, deliberately, matching the server service:
  *   - a report with nothing missing .... full capability
@@ -45,7 +45,7 @@ interface HostCapabilitiesCardProps {
 const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, limited, updatedAt }) => {
     const { t } = useTranslation();
 
-    // Reason CODES come from the agent, never prose — so they can be localized
+    // Reason CODES come from the agent, never prose -- so they can be localized
     // here rather than shipped in whatever language the agent was built with.
     const reasonText = (code: string): string => {
         const known: Record<string, string> = {
@@ -143,7 +143,7 @@ const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, lim
                                         size="small"
                                         color="warning"
                                         variant="outlined"
-                                        label={`${group} — ${reasonText(unavailable[group])}`}
+                                        label={`${group} -- ${reasonText(unavailable[group])}`}
                                     />
                                 </Tooltip>
                             ))}

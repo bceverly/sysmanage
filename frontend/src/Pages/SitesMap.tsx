@@ -7,15 +7,15 @@
  *
  * Plots every enrolled site at its operator-supplied
  * ``(geo_latitude, geo_longitude)`` on an OpenStreetMap base layer.
- * Marker colour reflects status (enrolled green, pending yellow,
- * suspended red, other grey).  Clicking a marker opens a popup with
+ * Marker color reflects status (enrolled green, pending yellow,
+ * suspended red, other gray).  Clicking a marker opens a popup with
  * name + status + last-sync + a link to the site detail page.
  *
  * Differs from ``MapView`` (the per-host map from Phase 12.7) in
  * scale and density: sites are O(10-100), not O(1M), so no
  * clustering is needed.  Same Leaflet + OSM stack though.
  *
- * Sites without geo coordinates are silently skipped — the operator
+ * Sites without geo coordinates are silently skipped -- the operator
  * may not have supplied lat/lng at enrollment, in which case the
  * site still appears in the grid view but not the map.
  */
@@ -54,7 +54,7 @@ function colorForSiteStatus(status: FederationSiteSummary["status"]): string {
     case "suspended":
       return "#c62828"; // red
     default:
-      return "#757575"; // grey
+      return "#757575"; // gray
   }
 }
 
@@ -187,12 +187,12 @@ const SitesMap: React.FC = () => {
     }).addTo(map);
     mapRef.current = map;
 
-    // Same flex-layout-not-settled defence as MapView.
+    // Same flex-layout-not-settled defense as MapView.
     const invalidate = () => {
       try {
         map.invalidateSize();
       } catch {
-        // map already torn down — fine.
+        // map already torn down -- fine.
       }
     };
     const rafId = globalThis.requestAnimationFrame(invalidate);

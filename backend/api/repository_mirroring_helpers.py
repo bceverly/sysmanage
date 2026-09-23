@@ -26,13 +26,13 @@ logger = logging.getLogger(__name__)
 
 # i18n message keys reused by multiple 404 raises.  Extracting them as
 # module constants both deduplicates the strings (Sonar S1192) and
-# keeps the translation catalog source consistent — every call site
+# keeps the translation catalog source consistent -- every call site
 # produces the same locale lookup key.
 _MIRROR_NOT_FOUND = N_("Mirror not found")
 _PLATFORM_CONFIG_NOT_FOUND = N_("Platform config not found")
 
 # A mirror that fails this many syncs in a row is auto-disabled by the
-# tick so it stops re-dispatching every cron cycle — a mirror too large
+# tick so it stops re-dispatching every cron cycle -- a mirror too large
 # to sync without OOMing its host would otherwise fail forever.  The
 # counter resets to 0 on any successful sync (see proplus_dispatch).
 _MIRROR_MAX_SYNC_FAILURES = 5
@@ -185,7 +185,7 @@ def _tick_mirrors_one_db(session, engine, automation, now):
         if row.next_sync_at is not None and row.next_sync_at > now:
             continue
         if (row.consecutive_sync_failures or 0) >= _MIRROR_MAX_SYNC_FAILURES:
-            # Too many consecutive failures — stop re-dispatching.
+            # Too many consecutive failures -- stop re-dispatching.
             # Disable the mirror and surface why; an operator must fix
             # the root cause and re-enable it to resume syncing.
             row.enabled = False

@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""add install_source + host_install_assignment — Phase 18.2 S3
+"""add install_source + host_install_assignment -- Phase 18.2 S3
 
 The OS install-source catalog (os_family/version/arch -> kernel/initrd/install
 tree/answer-file dialect) and the per-MAC assignment the per-MAC iPXE endpoint
@@ -48,7 +48,7 @@ def _create_install_source(insp) -> None:
         sa.Column("install_tree_url", sa.String(length=1000), nullable=False),
         sa.Column("template_type", sa.String(length=30), nullable=False),
         sa.Column("boot_args", sa.Text(), nullable=True),
-        # Soft reference to the originating mirror — provenance, not a FK.
+        # Soft reference to the originating mirror -- provenance, not a FK.
         sa.Column("mirror_repository_id", GUID(), nullable=True),
         sa.Column("enabled", sa.Boolean(), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=True),

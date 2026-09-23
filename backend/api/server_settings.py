@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Server-scoped configuration settings API — Phase 13.1.H.
+Server-scoped configuration settings API -- Phase 13.1.H.
 
 Exposes the operational (C-bucket) ``sysmanage.yaml`` options that have moved
 to the DB-backed Settings table so they can be edited in the UI
@@ -15,7 +15,7 @@ The **email** group is per-tenant: when multi-tenancy is enabled and a tenant
 is active (bound from the JWT by the active-tenant middleware), email settings
 read/write the tenant's scope (``registry_tenant.settings`` + a per-tenant
 OpenBAO path) instead of the server scope.  In single-tenant / collapsed mode
-there is no active tenant, so email resolves to server scope — unchanged.
+there is no active tenant, so email resolves to server scope -- unchanged.
 
 See ``docs/planning/config-classification.md``.
 """
@@ -40,7 +40,7 @@ def _scoped_tenant(desc: dict):
 
     Only the email group is per-tenant; everything else (jwt timeouts, mq
     tunables, …) is server-wide.  When multi-tenancy is disabled the active
-    tenant is always None, so the email group resolves to server scope too —
+    tenant is always None, so the email group resolves to server scope too --
     the single-tenant default, unchanged.
     """
     if desc.get("group") != "email":
@@ -206,7 +206,7 @@ def _secret_configured(desc: dict) -> bool:
 
 def _effective(desc: dict) -> Any:
     if desc["type"] == "secret":
-        # Never return a secret's value to the UI — write-only.
+        # Never return a secret's value to the UI -- write-only.
         return ""
     tenant_id = _scoped_tenant(desc)
     if tenant_id:

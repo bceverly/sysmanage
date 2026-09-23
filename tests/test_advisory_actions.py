@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Tests for backend/api/advisory_actions.py — install by advisory (Phase 14.1)."""
+"""Tests for backend/api/advisory_actions.py -- install by advisory (Phase 14.1)."""
 
 import uuid
 from datetime import datetime

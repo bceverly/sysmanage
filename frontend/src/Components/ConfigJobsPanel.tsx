@@ -196,7 +196,7 @@ const ConfigJobsPanel: React.FC<Props> = ({ canCancel, refreshToken }) => {
                             <Typography variant="body2" color="text.secondary">
                                 {t(
                                     'configFleet.progress',
-                                    '{{done}} of {{total}} — {{ok}} succeeded, {{failed}} failed, {{skipped}} skipped',
+                                    '{{done}} of {{total}} -- {{ok}} succeeded, {{failed}} failed, {{skipped}} skipped',
                                     {
                                         done: doneCount(job),
                                         total: job.total_targets,

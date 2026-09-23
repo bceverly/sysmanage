@@ -81,14 +81,14 @@ async def get_graylog_servers():
     database, so this fans out across the bootstrap DB and every provisioned
     tenant DB and combines the results.  In single-tenant / multi-tenancy-off
     mode ``iter_host_databases`` yields only the bootstrap DB, so this is
-    identical to the prior single-query behaviour.
+    identical to the prior single-query behavior.
     """
     servers = []
     for label, _tenant, session in iter_host_databases():
         try:
             # Single query gets both the Host and its matching HostRole;
             # the previous code re-queried HostRole inside the loop (1+N
-            # queries — flagged in the Phase 6 N+1 audit).
+            # queries -- flagged in the Phase 6 N+1 audit).
             rows = (
                 session.query(models.Host, models.HostRole)
                 .join(models.HostRole)
@@ -109,7 +109,7 @@ async def get_graylog_servers():
                 )
                 for host, graylog_role in rows
             )
-        except Exception:  # noqa: BLE001 — one bad DB must not fail the list
+        except Exception:  # noqa: BLE001 -- one bad DB must not fail the list
             logger.exception("graylog-servers: query failed on %s; skipping", label)
         finally:
             session.close()

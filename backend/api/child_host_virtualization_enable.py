@@ -46,7 +46,7 @@ def _check_container_module():
 # Per-action timeout (seconds) for the engine apply_deployment_plan envelope.
 # The plan itself carries per-command timeouts; this is the outer ceiling.
 # Some init plans (KVM apt-get + libvirt install) can take a couple of
-# minutes — give them headroom.
+# minutes -- give them headroom.
 _INIT_ENGINE_TIMEOUT = 1500
 
 
@@ -717,7 +717,7 @@ async def configure_kvm_networking(
 
         # Both NAT and bridged map onto build_kvm_network_create_plan.
         # Bridged uses libvirt's bridge type, which requires the bridge
-        # interface to exist on the host (operator responsibility — host
+        # interface to exist on the host (operator responsibility -- host
         # OS-level bridge persistence in NetworkManager / netplan /
         # ifupdown is intentionally out of scope of the libvirt network
         # definition).

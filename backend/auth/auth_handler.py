@@ -41,8 +41,8 @@ def sign_jwt(user_id: str, tenant_id: Optional[str] = None):
 
     Phase 13.1.B: when ``tenant_id`` is provided the token carries the
     user's **active tenant** (the basis for tenant routing + account
-    switching).  When it is ``None`` — the single-tenant default and every
-    pre-13.1 caller — no ``tenant_id`` claim is added and the token shape
+    switching).  When it is ``None`` -- the single-tenant default and every
+    pre-13.1 caller -- no ``tenant_id`` claim is added and the token shape
     is byte-for-byte identical to before, so existing behavior is
     unchanged.
     """
@@ -85,14 +85,14 @@ def sign_refresh_token(user_id: str, tenant_id: Optional[str] = None):
 
 # MFA-pending tokens are short-lived (5 min default) so a stolen pending
 # token can't be sat on indefinitely.  They carry a ``mfa_pending: True``
-# claim that the JWTBearer dependency rejects — only the dedicated
+# claim that the JWTBearer dependency rejects -- only the dedicated
 # ``/api/auth/mfa/verify`` endpoint accepts them.
 _MFA_PENDING_TTL_SECONDS = 5 * 60
 
 
 def sign_mfa_pending_token(user_id: str) -> str:
     """Sign a short-lived token that authorises ``/api/auth/mfa/verify``
-    only — i.e. proof that the password check just succeeded but the
+    only -- i.e. proof that the password check just succeeded but the
     second factor still has to clear."""
     payload = {
         "user_id": user_id,
@@ -105,7 +105,7 @@ def sign_mfa_pending_token(user_id: str) -> str:
 def decode_mfa_pending_token(token: str):
     """Decode an MFA-pending token, returning its payload only when the
     ``mfa_pending`` claim is set and the token hasn't expired.  Used by
-    the verify endpoint to re-authorise the second-factor exchange.
+    the verify endpoint to re-authorize the second-factor exchange.
     """
     try:
         decoded = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
@@ -119,17 +119,17 @@ def decode_mfa_pending_token(token: str):
 
 
 # Air-gap ISO download tokens are short-lived, single-purpose tokens that
-# authorise ONE streaming ISO download.  A browser can't put the session
+# authorize ONE streaming ISO download.  A browser can't put the session
 # JWT in the Authorization header when it follows a plain download link,
 # and buffering a multi-GB ISO through fetch() to add the header OOMs the
-# tab — so the UI requests one of these (authenticated) and then navigates
+# tab -- so the UI requests one of these (authenticated) and then navigates
 # the browser straight to the token-authed download route.  Scoped to a
 # single run_id and expiring in minutes so a leaked URL is low-impact.
 _AIRGAP_DOWNLOAD_TTL_SECONDS = 5 * 60
 
 
 def sign_airgap_download_token(run_id: str) -> str:
-    """Sign a short-lived token authorising a streaming download of one
+    """Sign a short-lived token authorizing a streaming download of one
     air-gap collection run's ISO (and nothing else)."""
     payload = {
         "run_id": str(run_id),
@@ -154,9 +154,9 @@ def decode_airgap_download_token(token: str, run_id: str) -> bool:
 
 
 def sign_airgap_bundle_token(bundle_id: str) -> str:
-    """Sign a short-lived token authorising a streaming download of one
+    """Sign a short-lived token authorizing a streaming download of one
     air-gap bundle ISO (and nothing else).  Same rationale as
-    ``sign_airgap_download_token`` — a browser following a plain
+    ``sign_airgap_download_token`` -- a browser following a plain
     download link can't set the Authorization header, and buffering a
     multi-GB bundle through fetch() to add it OOMs the tab."""
     payload = {

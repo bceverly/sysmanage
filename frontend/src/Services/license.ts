@@ -95,7 +95,7 @@ export const onLicenseChange = (fn: () => void): (() => void) => {
 /**
  * True iff the cached license advertises ``featureCode`` in its
  * ``features`` array.  Returns false when the cache hasn't been
- * populated yet — components should treat "no license loaded" as
+ * populated yet -- components should treat "no license loaded" as
  * "feature unavailable" rather than rendering and 402-ing.
  */
 export const isFeatureLicensed = (featureCode: string): boolean =>
@@ -109,7 +109,7 @@ export const isFeatureLicensed = (featureCode: string): boolean =>
 export const isModuleLicensed = (moduleCode: string): boolean =>
     !!_cachedLicense?.modules?.includes(moduleCode);
 
-/** Clear the cached license — used by tests and on logout. */
+/** Clear the cached license -- used by tests and on logout. */
 export const clearLicenseCache = (): void => {
     _cachedLicense = null;
     _subscribers.forEach(fn => fn());

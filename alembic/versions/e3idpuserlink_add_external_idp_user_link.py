@@ -7,9 +7,9 @@
 Adds the columns that link a local ``user`` row to an external IdP identity, so
 LDAP/OIDC/SAML sign-in (and JIT provisioning) can find/attach the account:
 
-  * ``external_idp_provider_id`` — SOFT reference to ``external_idp_provider.id``
+  * ``external_idp_provider_id`` -- SOFT reference to ``external_idp_provider.id``
     (the account is authenticated by that provider instead of by Argon2).
-  * ``external_subject`` — the IdP's stable per-user identifier (OIDC ``sub`` /
+  * ``external_subject`` -- the IdP's stable per-user identifier (OIDC ``sub`` /
     SAML NameID).
 
 Both NULL for a normal password account.  The OIDC callback + the SAML ACS look

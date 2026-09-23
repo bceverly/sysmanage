@@ -7,7 +7,7 @@ Tests for the Phase 12.1.F dispatched-command tracking service.
 
 Covers:
   * ``dispatch_command`` writes a row, refuses non-enrolled sites,
-    serialises target_host_ids correctly.
+    serializes target_host_ids correctly.
   * FSM: every legal transition allowed, every illegal one raises.
   * Same-state replays are idempotent (offline reconnect safety).
   * Listing filters: by site, by status, ``open_only``.
@@ -209,7 +209,7 @@ class TestFsm:
         dsvc.update_command_status(session, cmd.id, new_status=dsvc.STATUS_IN_PROGRESS)
         session.commit()
         assert cmd.status == dsvc.STATUS_IN_PROGRESS
-        # Non-terminal — completed_at stays NULL.
+        # Non-terminal -- completed_at stays NULL.
         assert cmd.completed_at is None
 
     def test_in_progress_to_completed(self, session, enrolled_site):
@@ -263,7 +263,7 @@ class TestFsm:
             )
 
     def test_queued_to_completed_disallowed(self, session, enrolled_site):
-        """Sites must go through in_progress first — skipping it
+        """Sites must go through in_progress first -- skipping it
         would imply the command finished before it started."""
         cmd = self._new_cmd(session, enrolled_site)
         with pytest.raises(dsvc.InvalidDispatchStateError):

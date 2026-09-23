@@ -111,10 +111,10 @@ const HostDiagnosticsTab: React.FC<HostDiagnosticsTabProps> = ({
                                             <Grid size={{ xs: 12 }} key={diagnostic.id || index}>
                                                 <Card 
                                                     sx={{ 
-                                                        backgroundColor: 'grey.900',
+                                                        backgroundColor: 'gray.900',
                                                         cursor: 'pointer',
                                                         '&:hover': {
-                                                            backgroundColor: 'grey.800'
+                                                            backgroundColor: 'gray.800'
                                                         }
                                                     }}
                                                     onClick={() => handleViewDiagnosticDetail(diagnostic.id)}
@@ -153,7 +153,7 @@ const HostDiagnosticsTab: React.FC<HostDiagnosticsTabProps> = ({
                                                                 <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
                                                                     {t('hostDetail.systemLogs', 'System Logs')}
                                                                 </Typography>
-                                                                <Paper sx={{ p: 2, backgroundColor: 'grey.800', maxHeight: 200, overflow: 'auto' }}>
+                                                                <Paper sx={{ p: 2, backgroundColor: 'gray.800', maxHeight: 200, overflow: 'auto' }}>
                                                                     <Typography variant="body2" sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
                                                                         {typeof diagnostic.system_logs === 'string' 
                                                                             ? diagnostic.system_logs 
@@ -170,7 +170,7 @@ const HostDiagnosticsTab: React.FC<HostDiagnosticsTabProps> = ({
                                                                 <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
                                                                     {t('hostDetail.configurationFiles', 'Configuration Files')}
                                                                 </Typography>
-                                                                <Paper sx={{ p: 2, backgroundColor: 'grey.800', maxHeight: 200, overflow: 'auto' }}>
+                                                                <Paper sx={{ p: 2, backgroundColor: 'gray.800', maxHeight: 200, overflow: 'auto' }}>
                                                                     <Typography variant="body2" sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
                                                                         {typeof diagnostic.configuration_files === 'string' 
                                                                             ? diagnostic.configuration_files 
@@ -187,7 +187,7 @@ const HostDiagnosticsTab: React.FC<HostDiagnosticsTabProps> = ({
                                                                 <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
                                                                     {t('hostDetail.processList', 'Process List')}
                                                                 </Typography>
-                                                                <Paper sx={{ p: 2, backgroundColor: 'grey.800', maxHeight: 200, overflow: 'auto' }}>
+                                                                <Paper sx={{ p: 2, backgroundColor: 'gray.800', maxHeight: 200, overflow: 'auto' }}>
                                                                     <Typography variant="body2" sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
                                                                         {typeof diagnostic.process_list === 'string' 
                                                                             ? diagnostic.process_list 
@@ -204,7 +204,7 @@ const HostDiagnosticsTab: React.FC<HostDiagnosticsTabProps> = ({
                                                                 <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
                                                                     {t('hostDetail.systemInformation', 'System Information')}
                                                                 </Typography>
-                                                                <Paper sx={{ p: 2, backgroundColor: 'grey.800', maxHeight: 200, overflow: 'auto' }}>
+                                                                <Paper sx={{ p: 2, backgroundColor: 'gray.800', maxHeight: 200, overflow: 'auto' }}>
                                                                     <Typography variant="body2" sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
                                                                         {typeof diagnostic.system_information === 'string' 
                                                                             ? diagnostic.system_information 

@@ -2,13 +2,13 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""child host provision progress — Phase 12.5
+"""child host provision progress -- Phase 12.5
 
 Revision ID: w2winprog
 Revises: w1winchild
 Create Date: 2026-08-05 00:00:00.000000
 
-``host_child.installation_step`` already existed but nothing ever wrote it —
+``host_child.installation_step`` already existed but nothing ever wrote it --
 the agent's progress messages were logged and dropped server-side, so the
 column was permanently NULL and the UI had nothing to show.
 
@@ -26,7 +26,7 @@ UI cannot tell those apart from a step string alone:
       whose heartbeat stopped, and without a timestamp it is indistinguishable
       from a slow one.
 
-All nullable — every existing row predates progress reporting, and a child
+All nullable -- every existing row predates progress reporting, and a child
 created by an older agent will never populate them.
 """
 

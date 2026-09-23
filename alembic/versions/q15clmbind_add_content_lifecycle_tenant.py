@@ -2,16 +2,16 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""create content-lifecycle promotion state (tenant partition) — Phase 16
+"""create content-lifecycle promotion state (tenant partition) -- Phase 16
 
 Per-tenant promotion state: which content-view version is bound into which
 environment, the audit trail, and per-site environment subscriptions.  All
 references to the SHARED catalog IDs (environment / content view / version /
-site) are SOFT — NO ForeignKey (cross-partition), matching
+site) are SOFT -- NO ForeignKey (cross-partition), matching
 ``host_applicable_advisory``.
 
 Part of the TENANT chain (unprefixed tables), chained off the tenant head
-``r2fipsmode`` — SEPARATE from the shared CLM migration (``s10clmviews``), which
+``r2fipsmode`` -- SEPARATE from the shared CLM migration (``s10clmviews``), which
 lives in the shared chain.  The partition guard (test_alembic_prefix_guard)
 enforces that the tenant chain never creates ``shared_``/``registry_`` tables.
 
@@ -47,7 +47,7 @@ def upgrade() -> None:
         op.create_table(
             _BINDING,
             sa.Column("id", GUID(), primary_key=True),
-            # SOFT cross-partition refs to shared IDs — no FK.
+            # SOFT cross-partition refs to shared IDs -- no FK.
             sa.Column("environment_id", GUID(), nullable=False),
             sa.Column("content_view_id", GUID(), nullable=False),
             sa.Column("content_view_version_id", GUID(), nullable=False),

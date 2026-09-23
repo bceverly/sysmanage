@@ -40,7 +40,7 @@ STUB_ENDPOINTS = [
 def test_proplus_stub_requires_auth(
     client, method, path, expected_keys
 ):  # pylint: disable=unused-argument
-    """Every Pro+ stub endpoint sits behind get_current_user — anonymous → 401/403."""
+    """Every Pro+ stub endpoint sits behind get_current_user -- anonymous → 401/403."""
     resp = client.request(method, path)
     assert resp.status_code in (
         401,
@@ -57,7 +57,7 @@ def test_proplus_stub_returns_unlicensed_shape_when_authed(
     resp = client.request(method, path, headers=auth_headers)
     # Some stubs may 404 if the Pro+ module is loaded in this test env;
     # tests/conftest.py mounts the stub layer with results={}, which
-    # means every Pro+ module is treated as unloaded — so 404 here would
+    # means every Pro+ module is treated as unloaded -- so 404 here would
     # be a real wiring regression.
     assert resp.status_code == 200, (
         f"{method} {path} returned {resp.status_code} with auth; "
@@ -69,7 +69,7 @@ def test_proplus_stub_returns_unlicensed_shape_when_authed(
         body.get("licensed") is False
     ), f"{path} body missing 'licensed: false': {body!r}"
     # Each stub also publishes its expected secondary keys (scripts,
-    # groups, etc.) — assert they're present so a future refactor that
+    # groups, etc.) -- assert they're present so a future refactor that
     # drops them surfaces here.
     missing = expected_keys - set(body.keys())
     assert not missing, f"{path} body missing keys {missing}: {body!r}"

@@ -11,7 +11,7 @@ records the result in HostPackageComplianceStatus.
 
 Phase 11.5 moved the evaluator + remediation-plan builder into the Pro+
 ``compliance_engine`` Cython module.  Every route in this file is gated
-on the engine being loaded (``_check_compliance_module``) — the OSS
+on the engine being loaded (``_check_compliance_module``) -- the OSS
 deployment without a Professional license sees 402 from each endpoint
 and the frontend tab disappears.  Schema (PackageProfile,
 PackageProfileConstraint, HostPackageComplianceStatus) lives OSS-side
@@ -51,7 +51,7 @@ router = APIRouter(
 )
 
 
-# Reused 404 detail string — extracted so the wording can't drift
+# Reused 404 detail string -- extracted so the wording can't drift
 # between handlers and so SonarQube's duplication scanner is happy.
 _ERR_PACKAGE_PROFILE_NOT_FOUND = N_("Package profile not found")
 
@@ -142,7 +142,7 @@ def _parse_uuid_or_400(value: Optional[str], field: str) -> Optional[uuid.UUID]:
 
 def _replace_constraints(db: Session, profile, specs: List[ConstraintSpec]):
     """Drop the profile's existing constraints, then add the new spec list.
-    Used by both create and update — semantics are "set-this-list" not
+    Used by both create and update -- semantics are "set-this-list" not
     "append-or-merge"."""
     db.query(models.PackageProfileConstraint).filter(
         models.PackageProfileConstraint.profile_id == profile.id
@@ -470,7 +470,7 @@ async def dispatch_compliance_check_to_agent(
         db=db,
     )
 
-    # Mark the existing status row as PENDING — when the agent's reply
+    # Mark the existing status row as PENDING -- when the agent's reply
     # comes back via the WS handler, it'll upsert with the actual
     # status + violations.
     existing = (

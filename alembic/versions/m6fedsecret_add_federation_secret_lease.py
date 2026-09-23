@@ -2,12 +2,12 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Add federation secret-lease tables (Phase 12.5 — federation-aware leases).
+"""Add federation secret-lease tables (Phase 12.5 -- federation-aware leases).
 
 Coordinator-side ``federation_secret_lease`` tracks dynamic-secret leases
 the coordinator issues from its master Vault on behalf of hosts at
 subordinate sites; site-side ``federation_received_secret_lease`` is the
-inbox for the result echo.  Pure additive ``CREATE TABLE`` — idempotent and
+inbox for the result echo.  Pure additive ``CREATE TABLE`` -- idempotent and
 identical on SQLite and PostgreSQL.
 
 Revision ID: m6fedsecret

@@ -105,7 +105,7 @@ def create_job(
 ) -> models.ConfigJob:
     """Build a job and one pending target per selected host.
 
-    Targets are materialised up front rather than discovered wave by wave. It
+    Targets are materialized up front rather than discovered wave by wave. It
     costs one insert per host at launch and buys the thing the feature exists
     for: from the first second, the job can say how many hosts it is going to
     touch and which ones. A job that discovers its own size as it goes cannot
@@ -636,8 +636,8 @@ async def config_mgmt_job_tick_service() -> None:
                 )
             await asyncio.sleep(TICK_INTERVAL_SECONDS)
         except asyncio.CancelledError:
-            logger.info("Config fleet job tick service cancelled — exiting loop")
+            logger.info("Config fleet job tick service cancelled -- exiting loop")
             raise
         except Exception:  # pylint: disable=broad-except
-            logger.exception("Config fleet job tick service error — sleeping")
+            logger.exception("Config fleet job tick service error -- sleeping")
             await asyncio.sleep(ERROR_BACKOFF_SECONDS)

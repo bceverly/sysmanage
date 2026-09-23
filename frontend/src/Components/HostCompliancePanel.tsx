@@ -181,7 +181,7 @@ const HostCompliancePanel: React.FC<HostCompliancePanelProps> = ({ hostId }) => 
       showSuccess(
         t(
           'compliance.dispatchSent',
-          'Live-scan dispatched to agent — result will arrive shortly',
+          'Live-scan dispatched to agent -- result will arrive shortly',
         ),
       );
       await refresh();
@@ -238,7 +238,7 @@ const HostCompliancePanel: React.FC<HostCompliancePanelProps> = ({ hostId }) => 
       headerName: t('compliance.lastScan', 'Last Scan'),
       width: 180,
       valueGetter: (_v, row) =>
-        row.status?.last_scan_at ? formatUTCTimestamp(row.status.last_scan_at, '—') : '—',
+        row.status?.last_scan_at ? formatUTCTimestamp(row.status.last_scan_at, '--') : '--',
     },
     {
       field: 'actions',
@@ -295,7 +295,7 @@ const HostCompliancePanel: React.FC<HostCompliancePanelProps> = ({ hostId }) => 
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {/* Phase 11.3: surface the air-gap risk-assessment panel even
-            when no compliance profiles are defined — air-gap operators
+            when no compliance profiles are defined -- air-gap operators
             often care about transfer-cadence risk before they ever set
             up a profile.  Self-hides on non-repository deployments. */}
         <AirgapComplianceBucketsCard hostId={hostId} />
@@ -315,7 +315,7 @@ const HostCompliancePanel: React.FC<HostCompliancePanelProps> = ({ hostId }) => 
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {/* Phase 11.3 risk-assessment surface — only renders on
+      {/* Phase 11.3 risk-assessment surface -- only renders on
           ``role: repository`` deployments (the card hides itself
           otherwise). */}
       <AirgapComplianceBucketsCard hostId={hostId} />
@@ -337,7 +337,7 @@ const HostCompliancePanel: React.FC<HostCompliancePanelProps> = ({ hostId }) => 
           <Card key={`violations-${rowId}`} variant="outlined">
             <CardContent>
               <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                {t('compliance.violationsFor', 'Violations — {{name}}', {
+                {t('compliance.violationsFor', 'Violations -- {{name}}', {
                   name: row.profile.name,
                 })}
               </Typography>

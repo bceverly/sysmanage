@@ -1,6 +1,6 @@
 digraph DC01_Application_Architecture {
     graph [
-        label = "DC-01: SysManage Application Architecture\n(Tiered View — Open Source Server, Open Source Agent, Professional+ License Server)\n",
+        label = "DC-01: SysManage Application Architecture\n(Tiered View -- Open Source Server, Open Source Agent, Professional+ License Server)\n",
         labelloc = "t",
         fontname = "Helvetica-Bold",
         fontsize = 18,
@@ -85,7 +85,7 @@ digraph DC01_Application_Architecture {
 
     // ---------- AGENT TIER ----------
     subgraph cluster_agent {
-        label = "SysManage Agent (Open Source) — runs on each managed endpoint";
+        label = "SysManage Agent (Open Source) -- runs on each managed endpoint";
         style = "filled,rounded";
         fillcolor = "#E5F2E8";
         color = "#214E34";

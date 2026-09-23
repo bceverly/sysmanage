@@ -7,7 +7,7 @@
  *
  * Same per-site data as the Sites grid and the geographic map, rendered as
  * a hub-and-spoke board: the coordinator at top, every enrolled site below
- * as a status-coloured tile.  No geography — built to scan at a glance for
+ * as a status-colored tile.  No geography -- built to scan at a glance for
  * a war-room / wall display.  Like both other flavors it renders only at
  * SITE granularity, never individual agents.
  *
@@ -59,9 +59,9 @@ const ACCENT: Record<StatusColor, string> = {
 };
 
 function relativeSync(iso: string | null | undefined, locale: string): string {
-  if (!iso) return "—";
+  if (!iso) return "--";
   const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) return "—";
+  if (Number.isNaN(then)) return "--";
   const diffSec = Math.round((then - Date.now()) / 1000);
   const abs = Math.abs(diffSec);
   const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });

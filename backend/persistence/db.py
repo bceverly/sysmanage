@@ -19,11 +19,11 @@ def _psycopg_url(url: str) -> str:
     Converts ``postgresql://`` to ``postgresql+psycopg://`` so SQLAlchemy uses
     the psycopg3 driver, and forces ``client_encoding=utf8`` on the connection.
     Leaves SQLite / other schemes untouched. Apply ONLY to URLs handed to
-    SQLAlchemy's create_engine/engine_from_config — never to a raw libpq /
+    SQLAlchemy's create_engine/engine_from_config -- never to a raw libpq /
     psycopg.connect() conninfo (libpq does not understand the ``+psycopg`` tag).
 
-    The UTF-8 client encoding matters on clusters initialised with SQL_ASCII
-    encoding — the ``initdb`` default under a C/POSIX locale, as on NetBSD.
+    The UTF-8 client encoding matters on clusters initialized with SQL_ASCII
+    encoding -- the ``initdb`` default under a C/POSIX locale, as on NetBSD.
     Against a SQL_ASCII connection, psycopg3 hands back text query results as
     ``bytes`` rather than ``str``, which breaks SQLAlchemy's PostgreSQL dialect
     start-up (it runs ``re.match`` on the server-version string) and any code
@@ -59,7 +59,7 @@ def _apply_db_options(url: str, options) -> str:
 # proxy/server idle timeouts so long-lived connections don't accumulate.  These
 # are the single most important HA change and MUST be applied uniformly to every
 # engine: this module's bootstrap engine (which also backs the registry/shared
-# partitions in collapsed mode — see backend.persistence.partitions), and the
+# partitions in collapsed mode -- see backend.persistence.partitions), and the
 # per-tenant engines built in the licensed multitenancy engine (which already
 # sets the same, keyed to its OpenBAO lease duration).  Harmless on SQLite.
 HA_ENGINE_KWARGS = {"pool_pre_ping": True, "pool_recycle": 1800}

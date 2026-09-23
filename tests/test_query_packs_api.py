@@ -14,8 +14,8 @@ service directly and never traverse a route.
 So this suite asserts the thing those could not: that a request actually
 reaches a handler and comes back 2xx. The assertions are deliberately shallow
 -- status codes and shape -- because the depth is already covered elsewhere.
-What matters here is the wiring: dependencies resolve, authorisation names
-real roles, and response models serialise.
+What matters here is the wiring: dependencies resolve, authorization names
+real roles, and response models serialize.
 """
 
 import pytest
@@ -69,9 +69,9 @@ def client(monkeypatch):
     app.include_router(query_packs.router, prefix="/api/v1")
     app.dependency_overrides[require_authenticated_user] = FakeUser
     app.dependency_overrides[get_tenant_db] = FakeDB
-    # JWTBearer() and the licence gate are instances built at import time, so
+    # JWTBearer() and the license gate are instances built at import time, so
     # they are overridden by identity off the router rather than by calling
-    # the factories again — a fresh call makes a different object and the
+    # the factories again -- a fresh call makes a different object and the
     # override silently does not apply (which shows up as a 401).
     for dep in query_packs.router.dependencies:
         app.dependency_overrides[dep.dependency] = lambda: None
@@ -102,7 +102,7 @@ class TestRouteOrdering:
     """``/catalog`` must not be swallowed by ``/{pack_id}``.
 
     Both are one path segment, so the declaration order in the module is the
-    only thing keeping them apart — and a reordering would turn the catalog
+    only thing keeping them apart -- and a reordering would turn the catalog
     into a lookup for a pack whose id is the literal string "catalog".
     """
 
@@ -134,7 +134,7 @@ class TestValidationEndpoint:
 
 
 class TestMutationsStillCarryARole:
-    """Reads are gated by the router's JWT + licence dependencies; mutations
+    """Reads are gated by the router's JWT + license dependencies; mutations
     additionally require a role. Removing the bogus VIEW_SCRIPT check must not
     have removed the real ones."""
 

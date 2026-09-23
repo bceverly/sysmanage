@@ -61,7 +61,7 @@ setup('authenticate', async ({ page }) => {
     //
     // Wrap the evaluate in try/catch: if the page navigates between
     // ``locator.count()`` and ``locator.evaluate()`` (common in the post-
-    // login transition window — the navbar mounts while the router is
+    // login transition window -- the navbar mounts while the router is
     // still in flight, and Playwright tears down the execution context
     // mid-evaluate), the throw itself indicates login is in progress.
     // Swallow it and let the loop poll again; the next iteration will
@@ -80,7 +80,7 @@ setup('authenticate', async ({ page }) => {
       if (!message.includes('Execution context was destroyed')) {
         throw err;
       }
-      // Navigation race — try again next tick.
+      // Navigation race -- try again next tick.
     }
   }
 

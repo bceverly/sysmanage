@@ -136,7 +136,7 @@ export const PluginProvider: React.FC<PluginProviderProps> = ({ children }) => {
             pluginsLoaded,
         }),
         // ``revision`` IS the dependency that should trigger
-        // re-computation here — pluginManager's getters are not pure
+        // re-computation here -- pluginManager's getters are not pure
         // (they read from internal registries that ``revision`` tracks
         // changes to), so the linter's "unnecessary dependency"
         // detection is wrong about this case.

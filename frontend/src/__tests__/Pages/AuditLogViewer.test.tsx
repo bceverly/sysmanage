@@ -155,7 +155,7 @@ describe("AuditLogViewer", () => {
     vi.unstubAllGlobals();
   });
 
-  test("a 402 on export tells the user it needs a licence", async () => {
+  test("a 402 on export tells the user it needs a license", async () => {
     const alertSpy = vi
       .spyOn(globalThis, "alert")
       .mockImplementation(() => undefined);

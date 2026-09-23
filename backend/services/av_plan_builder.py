@@ -239,7 +239,7 @@ def _cron_line_for_schedule(schedule: Dict[str, Any], scan_command: str) -> str:
 def _scan_command_for_paths(scan_paths: List[str]) -> str:
     """
     Render the on-host scan command. `clamdscan -m` uses the running clamd
-    daemon, falling back to `clamscan` (slower) is the operator's call —
+    daemon, falling back to `clamscan` (slower) is the operator's call --
     we keep it simple here.
     """
     quoted = " ".join(f'"{p}"' for p in scan_paths)
@@ -260,8 +260,8 @@ def _linux_deploy(
     Build a Linux AV deploy plan.
 
     `options` may carry:
-        checks_per_day: int (1-50) — freshclam definition-update cadence
-        scan_schedule:  dict — see _validate_scan_schedule. When set, an
+        checks_per_day: int (1-50) -- freshclam definition-update cadence
+        scan_schedule:  dict -- see _validate_scan_schedule. When set, an
                        /etc/cron.d/sysmanage-clamscan file is added to
                        the plan with a cron entry that invokes clamdscan
                        on the configured paths and frequency.
@@ -270,7 +270,7 @@ def _linux_deploy(
     distro = (host_info.get("platform_release") or "").lower()
     pkgs, clamd_conf, fresh_conf, clamd_svc, fresh_svc = _linux_clamav_layout(distro)
     if antivirus_package and antivirus_package not in pkgs:
-        # Caller's choice of package wins — the OS defaults table may
+        # Caller's choice of package wins -- the OS defaults table may
         # specify something distro-specific.
         pkgs = list(pkgs) + [antivirus_package]
 
@@ -301,7 +301,7 @@ def _linux_deploy(
             {
                 "path": "/etc/cron.d/sysmanage-clamscan",
                 "content": (
-                    "# Managed by sysmanage av_plan_builder — DO NOT EDIT\n"
+                    "# Managed by sysmanage av_plan_builder -- DO NOT EDIT\n"
                     "SHELL=/bin/sh\n"
                     "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n"
                     f"{cron_line}\n"
@@ -420,7 +420,7 @@ def _bsd_deploy(
                 {
                     "path": "/etc/cron.d/sysmanage-clamscan",
                     "content": (
-                        "# Managed by sysmanage av_plan_builder — DO NOT EDIT\n"
+                        "# Managed by sysmanage av_plan_builder -- DO NOT EDIT\n"
                         "SHELL=/bin/sh\n"
                         "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n"
                         f"{cron_line}\n"
@@ -695,7 +695,7 @@ def build_disable_plan(host_info: Dict[str, Any]) -> Dict[str, Any]:
             ],
         }
     if kind == "windows":
-        # ClamWin has no daemon — disable is a no-op aside from removing
+        # ClamWin has no daemon -- disable is a no-op aside from removing
         # the scheduled update task if present.
         return {
             "platform": "windows",

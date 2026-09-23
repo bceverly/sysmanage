@@ -6,7 +6,7 @@ import React from 'react';
 import { vi, describe, test, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 
-// i18next's t(key, defaultValue) — return the English default so assertions
+// i18next's t(key, defaultValue) -- return the English default so assertions
 // read as the user sees them rather than as key strings.
 vi.mock('react-i18next', () => ({
     useTranslation: () => ({
@@ -75,7 +75,7 @@ describe('isWindowsDistribution', () => {
 });
 
 describe('WindowsChildHostFields', () => {
-    test('the licence key field is secret-typed', () => {
+    test('the license key field is secret-typed', () => {
         // ROADMAP requirement: the key must never be shoulder-readable.
         renderFields(baseForm());
         const key = screen.getByLabelText(/License key/i);

@@ -190,7 +190,7 @@ describe("ReportTemplatesSettings", () => {
     expect(await screen.findByText("name already taken")).toBeInTheDocument();
   });
 
-  test("cancelling the dialog writes nothing", async () => {
+  test("canceling the dialog writes nothing", async () => {
     render(<ReportTemplatesSettings />);
     await screen.findByText("Nightly hosts");
     fireEvent.click(screen.getByRole("button", { name: "Add Template" }));

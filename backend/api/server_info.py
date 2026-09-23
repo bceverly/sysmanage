@@ -11,7 +11,7 @@ active, and which Pro+ engines are loaded.  The frontend uses this to
 render the role chip in the header bar; monitoring and chat-ops use it
 to identify a box without having to log in.
 
-Public — no auth required.  All fields are non-secret.
+Public -- no auth required.  All fields are non-secret.
 """
 
 import logging
@@ -24,8 +24,8 @@ from pydantic import BaseModel
 # required by the test suite (tests patch
 # ``backend.api.server_info.config_module.get_server_role`` directly).
 # The route handler still wraps all usage of these in a broad-except so
-# a cold-start race on Windows CI — where a request can hit the worker
-# before app startup has finished wiring config — degrades gracefully
+# a cold-start race on Windows CI -- where a request can hit the worker
+# before app startup has finished wiring config -- degrades gracefully
 # instead of returning 500.
 from sqlalchemy.orm import Session
 
@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1", tags=["server-info"])
 
 
-# Static fallback envelope — what an unlicensed OSS deployment would
+# Static fallback envelope -- what an unlicensed OSS deployment would
 # legitimately return.  Used by the outermost ``try/except`` below so a
 # transient bootstrap failure can never escape as a 500 and flake the
 # Playwright ``should not have critical failed requests`` check on
@@ -98,7 +98,7 @@ def get_server_info():
     required).
 
     The whole body is wrapped in try/except so a transient failure
-    (e.g. module_loader being re-initialised between requests, or a
+    (e.g. module_loader being re-initialized between requests, or a
     config-read race during startup) returns a safe-degraded envelope
     rather than a 500.  The Playwright performance suite's
     ``should not have critical failed requests`` test treats any 5xx
@@ -106,8 +106,8 @@ def get_server_info():
     path (the frontend's role chip in the header bar calls it
     immediately on page load), and a 500 here flakes the whole CI run.
     The fallback envelope reports ``standard`` / ``community`` /
-    empty-engine-list — i.e. what an unlicensed OSS deployment would
-    legitimately return — and the real failure is captured via
+    empty-engine-list -- i.e. what an unlicensed OSS deployment would
+    legitimately return -- and the real failure is captured via
     ``logger.exception`` for post-mortem.
     """
     try:
@@ -118,7 +118,7 @@ def get_server_info():
         role_engine_loaded = expected_engine is None or expected_engine in loaded
         # Federation is an independent axis from the air-gap role: a server
         # can be e.g. an air-gap collector AND a federation site.  Same
-        # health-check shape — when the role is coordinator/site,
+        # health-check shape -- when the role is coordinator/site,
         # federation_engine_loaded is true only if the matching Pro+ engine
         # is currently loaded.
         federation_role = config_module.get_federation_role()
@@ -140,7 +140,7 @@ def get_server_info():
             "federation_engine_loaded": federation_engine_loaded,
         }
     except Exception:  # pylint: disable=broad-exception-caught
-        # See docstring above — the audit trail goes to logs;
+        # See docstring above -- the audit trail goes to logs;
         # callers get a degraded-but-valid envelope.  We return an
         # explicit JSONResponse rather than a dict so even if FastAPI's
         # response serialiser hits a problem (e.g. a Pydantic recursion
@@ -153,8 +153,8 @@ def get_server_info():
         except Exception:  # nosec B110  # pylint: disable=broad-exception-caught
             # Logging itself can fail during interpreter shutdown
             # (closed file handles, broken handlers).  We deliberately
-            # swallow because the alternative — re-raising from the
-            # fallback path — would 500 the cold-start /api/v1/server-info
+            # swallow because the alternative -- re-raising from the
+            # fallback path -- would 500 the cold-start /api/v1/server-info
             # request and re-trigger the Playwright failure that this
             # whole fallback chain exists to prevent.  Not a real
             # try/except/pass smell; the contract here is "never raise."
@@ -179,7 +179,7 @@ class ServerRoleUpdate(BaseModel):
 def get_server_role_endpoint():
     """Return the current server role + the set of valid choices.
 
-    Authenticated (any logged-in user) — drives the Settings → Server
+    Authenticated (any logged-in user) -- drives the Settings → Server
     Role radio UI.  The public ``/server-info`` endpoint also reports
     the role for the header chip; this one additionally hands back the
     valid-option list so the UI doesn't hardcode it.
@@ -205,8 +205,8 @@ def set_server_role_endpoint(
     Persists to the ``server_configuration`` singleton.  Validation
     failures become a 400.  Audit-logged with the acting user.  The
     role's cosmetic effects (header chip, server-info) update on the
-    next poll; any future role-gated engine behaviour takes effect on
-    the next server restart — surfaced to the operator in the UI copy.
+    next poll; any future role-gated engine behavior takes effect on
+    the next server restart -- surfaced to the operator in the UI copy.
     """
     try:
         new_role = server_config_service.set_server_role(payload.role)
@@ -216,10 +216,10 @@ def set_server_role_endpoint(
     # Collector keygen hook: setting the role to ``collector`` is the
     # natural trigger to mint the ed25519 manifest-signing keypair (the
     # role lives in the DB now, so "first boot" isn't a reliable
-    # trigger — a fresh server boots as ``standard``).  Idempotent and
+    # trigger -- a fresh server boots as ``standard``).  Idempotent and
     # never overwrites an existing key, so re-selecting collector is
     # safe.  Best-effort: a keygen failure logs but doesn't fail the
-    # role change — the operator can retry, and the collection-run path
+    # role change -- the operator can retry, and the collection-run path
     # surfaces a clear error if the key is still missing at sign time.
     if new_role == "collector":
         try:
@@ -246,7 +246,7 @@ def set_server_role_endpoint(
             result=Result.SUCCESS,
         )
     except Exception:  # pylint: disable=broad-exception-caught
-        # Audit logging is best-effort here — the role change already
+        # Audit logging is best-effort here -- the role change already
         # committed; a logging hiccup shouldn't 500 the operator.
         logger.warning("Failed to audit-log server role change", exc_info=True)
 
@@ -270,7 +270,7 @@ class FederationRoleUpdate(BaseModel):
 def get_federation_role_endpoint():
     """Return the current federation role + valid choices.
 
-    Independent of the air-gap ``server-role`` axis — drives the federation
+    Independent of the air-gap ``server-role`` axis -- drives the federation
     card on Settings → Server Role.
     """
     return FederationRoleResponse(
@@ -294,7 +294,7 @@ def set_federation_role_endpoint(
     Persists to the ``server_configuration`` singleton.  Choosing a real
     role (coordinator/site) ensures this server's federation identity
     keypair exists so the operator can immediately copy its public key.
-    Role-gated engine behaviour takes effect on the next restart.
+    Role-gated engine behavior takes effect on the next restart.
     """
     try:
         new_role = server_config_service.set_federation_role(payload.role)
@@ -304,7 +304,7 @@ def set_federation_role_endpoint(
     # Mint the federation identity keypair + TLS cert when joining a
     # federation (the identity key the peer pins, and the TLS cert the
     # enrollment handshake presents for mutual TLS).  Idempotent + never
-    # overwrites; best-effort — keygen failure shouldn't block the role save.
+    # overwrites; best-effort -- keygen failure shouldn't block the role save.
     if new_role in ("coordinator", "site"):
         try:
             from backend.services.federation_identity_service import (  # pylint: disable=import-outside-toplevel
@@ -342,7 +342,7 @@ def set_federation_role_endpoint(
 def _resolve_version() -> str:
     """Best-effort sysmanage version string.
 
-    Caught broadly — this is called from the fallback path of
+    Caught broadly -- this is called from the fallback path of
     ``get_server_info`` (when the primary path already raised) and
     *must not* itself raise; any uncaught exception here would propagate
     out as a 500 and re-trigger the Playwright performance check we
@@ -359,11 +359,11 @@ def _resolve_version() -> str:
 
 
 def _resolve_license_tier() -> str:
-    """Best-effort license tier — falls back to ``community`` if no
+    """Best-effort license tier -- falls back to ``community`` if no
     license is configured or the licensing service can't be reached.
 
     Uses the ``license_service`` singleton's ``license_tier`` property
-    (not a ``get_active_tier()`` module function — that name doesn't
+    (not a ``get_active_tier()`` module function -- that name doesn't
     exist and previously caused this helper to always return
     ``community`` even when a valid Pro+ license was loaded).
     """

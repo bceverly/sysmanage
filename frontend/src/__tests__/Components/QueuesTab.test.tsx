@@ -5,7 +5,7 @@
 /**
  * The Queues tab was lifted out of Settings.tsx, which had no test at all.
  *
- * The one behaviour that genuinely CHANGED in the move is pinned first: the
+ * The one behavior that genuinely CHANGED in the move is pinned first: the
  * page used to fetch the failed-message list from its tab-change handler, so
  * arriving at #queues by URL rendered an empty grid that never populated.  The
  * component now fetches on mount, which is the only way the deep link works.

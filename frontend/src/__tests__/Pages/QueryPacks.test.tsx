@@ -5,11 +5,11 @@
 /**
  * The Query Packs page (Phase 21.1 S4, Professional).
  *
- * The behaviour that matters most here is not CRUD. It is that a run graded
+ * The behavior that matters most here is not CRUD. It is that a run graded
  * `partial` must NOT render as a success.
  *
- * `partial` means some queries could not be answered on that host — the host
- * does not serve those fact tables — and a host that could not answer is not
+ * `partial` means some queries could not be answered on that host -- the host
+ * does not serve those fact tables -- and a host that could not answer is not
  * a host that answered "nothing found". The whole fact substrate exists to
  * keep those two apart, and this page is the last place the distinction can
  * be thrown away. A green tick here would report a host compliant on a
@@ -45,7 +45,7 @@ vi.mock("@mui/x-data-grid", () => ({
   DataGrid: ({ rows, columns }: { rows?: any[]; columns?: any[] }) => (
     <div data-testid="grid">
       {/* Headers too: "Not covered" being its OWN column is part of the
-          behaviour under test, and a stub that dropped headers would let that
+          behavior under test, and a stub that dropped headers would let that
           column be renamed or removed without a failure. */}
       <div data-testid="headers">
         {(columns ?? []).map((col: any) => (
@@ -141,11 +141,11 @@ describe("Query Packs", () => {
 
   test("a load failure surfaces the server's own words", async () => {
     (getPacks as any).mockRejectedValue({
-      response: { data: { detail: "Query packs require a Professional licence" } },
+      response: { data: { detail: "Query packs require a Professional license" } },
     });
     render(<QueryPacks />);
     expect(
-      await screen.findByText("Query packs require a Professional licence"),
+      await screen.findByText("Query packs require a Professional license"),
     ).toBeTruthy();
   });
 });

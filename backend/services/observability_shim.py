@@ -9,7 +9,7 @@ Phase 10.2 step 7 Phase D: when the Pro+ ``observability_engine`` module
 is loaded, the OSS endpoints at
 ``backend/api/opentelemetry/deployment.py`` route OTEL deploys through
 the engine's multi-platform plan builders and dispatch via
-``apply_deployment_plan`` — same path the engine's own
+``apply_deployment_plan`` -- same path the engine's own
 ``/api/v1/observability/...`` routes use.  When the engine is not
 loaded (free-tier deployments), the OSS endpoints fall back to the
 legacy ``deploy_opentelemetry`` WS command path, which the agent's
@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 # Map ``host.platform`` (the agent reports ``platform.system()``) to the
 # engine's platform tokens.  Linux is two-step because the engine
 # distinguishes ``linux_apt`` vs ``linux_dnf`` based on which package
-# manager the host actually uses — we look at the host's installed
+# manager the host actually uses -- we look at the host's installed
 # packages to pick.
 _PLATFORM_TO_NONLINUX_ENGINE_TOKEN = {
     "freebsd": "freebsd",
@@ -59,7 +59,7 @@ def _detect_otel_platform(host: models.Host, db: Session) -> Optional[str]:
 
     Returns one of ``SUPPORTED_OTEL_PLATFORMS`` (see
     ``observability_engine`` module) or ``None`` if the platform can't
-    be determined — caller falls back to the legacy WS command.
+    be determined -- caller falls back to the legacy WS command.
 
     Linux distinction (apt vs dnf) samples the host's recorded
     installed packages.  Behaviour when the host has no software
@@ -72,14 +72,14 @@ def _detect_otel_platform(host: models.Host, db: Session) -> Optional[str]:
         derivatives) dominate the Linux fleet, and the engine's
         ``build_otel_multiplatform_deploy_plan`` for ``linux_apt``
         uses ``apt-get install -y`` which dnf-family hosts will
-        cleanly reject (``apt: command not found``) — the operator
+        cleanly reject (``apt: command not found``) -- the operator
         will see a clear platform-mismatch error rather than a
         silent fallback to a now-deleted legacy code path.
       * Once the host has reported its first inventory cycle, this
         function picks the correct branch (linux_apt vs linux_dnf)
         from the real signal.
 
-    The default-to-linux-apt behaviour is logged at WARNING so
+    The default-to-linux-apt behavior is logged at WARNING so
     operators can spot mismatches in production logs without
     digging through audit records.
     """
@@ -96,7 +96,7 @@ def _detect_otel_platform(host: models.Host, db: Session) -> Optional[str]:
 
     # Signal 1 (most reliable): sample the host's known package
     # managers from its installed software inventory.  ``distinct().limit(8)``
-    # caps the query cost — we only need to see one apt or dnf entry
+    # caps the query cost -- we only need to see one apt or dnf entry
     # to decide.
     managers = {
         row[0]
@@ -115,7 +115,7 @@ def _detect_otel_platform(host: models.Host, db: Session) -> Optional[str]:
     # Signal 2 (available before software inventory completes): the
     # host's reported friendly distro string from the OS_INFO
     # collection.  OS_INFO runs at first connect (~1s) versus the
-    # software inventory cycle which can take minutes — this closes
+    # software inventory cycle which can take minutes -- this closes
     # most of the fresh-host race window for item C.  ``platform_release``
     # is a concatenated string like "Ubuntu 22.04 (Jammy Jellyfish)"
     # or "Rocky Linux 9.3 (Blue Onyx)".
@@ -129,7 +129,7 @@ def _detect_otel_platform(host: models.Host, db: Session) -> Optional[str]:
 
     # Signal 3 (last resort): default to linux_apt.  apt/dpkg-family
     # distros (Debian, Ubuntu and derivatives) dominate so this is
-    # the safer default — a dnf-family host hitting the engine plan
+    # the safer default -- a dnf-family host hitting the engine plan
     # will see ``apt-get not found`` and surface a clear platform-
     # mismatch error rather than a silent fallback to a (now-deleted)
     # legacy WS command branch.
@@ -242,7 +242,7 @@ def try_engine_graylog_attach(
 ) -> Optional[str]:
     """Attempt the engine-driven Graylog attach path.
 
-    Routes by host platform (no DB lookup needed — unlike the OTEL
+    Routes by host platform (no DB lookup needed -- unlike the OTEL
     deploy path, which has to sample SoftwarePackage rows to decide
     apt-vs-dnf on Linux, Graylog's Linux plan auto-detects rsyslog
     vs syslog-ng at agent execute-time via ``systemctl is-active``):
@@ -256,8 +256,8 @@ def try_engine_graylog_attach(
       * Windows + windows_sidecar      → ``build_graylog_sidecar_no_token_plan``
         (PowerShell-driven download + install of the Graylog Sidecar
         binary if missing; writes sidecar.yml with empty api_token
-        — operator fills it in via the Sidecar admin UI afterwards.
-        Mirrors the legacy ``_configure_windows_sidecar`` behaviour
+        -- operator fills it in via the Sidecar admin UI afterwards.
+        Mirrors the legacy ``_configure_windows_sidecar`` behavior
         added in the B1 phase of the 10.2 step 7 deletion close-out.)
       * anything else                  → ``None`` (no engine path; caller
         falls back to legacy ``ATTACH_TO_GRAYLOG`` WS command until
@@ -298,7 +298,7 @@ def try_engine_graylog_attach(
             plan = engine.build_graylog_bsd_syslog_append_plan(req)
         elif plat == "windows" and mechanism == "windows_sidecar":
             if not hasattr(engine, "build_graylog_sidecar_no_token_plan"):
-                # Older engine .so loaded — no B1 builder.  Defer to
+                # Older engine .so loaded -- no B1 builder.  Defer to
                 # legacy WS path so Windows attaches don't break on
                 # the in-between engine versions.
                 return None
@@ -362,7 +362,7 @@ def try_engine_otel_service_control(
 
     ``action`` is one of ``"start"``, ``"stop"``, ``"restart"``.
     Same engine-first / legacy-fallback contract as the deploy and
-    remove helpers above — returns the queued message_id on success
+    remove helpers above -- returns the queued message_id on success
     or ``None`` so the caller falls back to its legacy WS path.
     Never raises.
 
@@ -415,9 +415,9 @@ def try_engine_otel_grafana_connection(
     ``action`` is one of ``"connect"`` or ``"disconnect"``.  The
     Grafana connect path requires a non-empty ``grafana_url``; the
     disconnect path accepts an empty string (matching the legacy
-    agent's behaviour, which validated grafana_url on connect only).
+    agent's behavior, which validated grafana_url on connect only).
 
-    The plan itself is restart-only — neither connect nor disconnect
+    The plan itself is restart-only -- neither connect nor disconnect
     rewrites the OTEL config.  The config was pinned to the target
     Grafana endpoint at deploy time; this just triggers a restart so
     any out-of-band config edits take effect and the audit log

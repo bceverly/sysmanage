@@ -8,10 +8,10 @@ Strict-by-default enrollment requires each party to prove its identity with an
 Ed25519 key whose public half was exchanged OUT OF BAND, defeating an
 enrollment-time MITM that a network-fetched TLS cert + bearer token cannot.
 
-  * ``federation_sites.site_identity_public_key_pem`` — the site's identity
+  * ``federation_sites.site_identity_public_key_pem`` -- the site's identity
     public key, pasted in when the coordinator creates the site row; the
     coordinator verifies the site's enrollment proof against it.
-  * ``federation_coordinator.coordinator_identity_public_key_pem`` — the
+  * ``federation_coordinator.coordinator_identity_public_key_pem`` -- the
     coordinator's identity public key, pasted in on the site before enrolling;
     the site verifies the coordinator's enrollment proof against it.
 

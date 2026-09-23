@@ -314,7 +314,7 @@ def get_host_users_with_groups(host_id: str) -> List[Dict[str, Any]]:
 
         # Bulk-fetch group memberships for all users in one query
         # rather than per-user (flagged in the Phase 6 N+1 audit).
-        # Keep the ORM-shape query (Membership, Group) — extracting the
+        # Keep the ORM-shape query (Membership, Group) -- extracting the
         # FK column directly via ``query(Membership.user_account_id, ...)``
         # would change the row shape and break callers that mock the
         # Membership object.
@@ -670,12 +670,12 @@ def get_host_ubuntu_pro_info(host_id: str) -> Dict[str, Any]:
 
 
 def enforce_tenant_host_quota(session, tenant_id, fqdn) -> None:
-    """Phase 13.1.F — reject a new-host registration past the tenant's quota.
+    """Phase 13.1.F -- reject a new-host registration past the tenant's quota.
 
     ``session`` is bound to the enrolling tenant's database, so the host count is
     naturally tenant-scoped.  ``tenant_id`` of ``None`` (single-tenant /
     unlicensed) or an unset ``max_hosts`` means unlimited.  Raises HTTP 429 when
-    the tenant is already at its cap.  Call only for genuinely new hosts —
+    the tenant is already at its cap.  Call only for genuinely new hosts --
     re-registrations of existing hosts must still be able to refresh.
     """
     import logging  # noqa: PLC0415

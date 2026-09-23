@@ -2,12 +2,12 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Phase 13.1.F — cross-tenant data-isolation harness.
+"""Phase 13.1.F -- cross-tenant data-isolation harness.
 
 The enrollment e2e test (``test_tenant_enrollment_e2e.py``) proves ONE tenant's
 data plane composes.  This proves the property that actually matters for a SaaS:
 **with two provisioned tenants, no read path ever returns tenant A's data while
-tenant B is the one in scope** — through the routing seam every endpoint uses
+tenant B is the one in scope** -- through the routing seam every endpoint uses
 (``get_request_engine`` → ``resolve_engine``), through a real endpoint helper,
 through the active-tenant context, through the host→tenant index, and even when
 both tenants hold a row with the *same* fqdn.
@@ -83,7 +83,7 @@ def two_tenants(engine, monkeypatch):  # noqa: ARG001 - engine sets bootstrap
         raising=False,
     )
     # validate_and_consume returns the S4 placement dict (Phase 18.1), not the
-    # bare tenant_id string — host registration reads resolution["tenant_id"].
+    # bare tenant_id string -- host registration reads resolution["tenant_id"].
     _resolutions = {
         TOKEN_A: {"tenant_id": TENANT_A, "site_id": None, "access_group_id": None},
         TOKEN_B: {"tenant_id": TENANT_B, "site_id": None, "access_group_id": None},
@@ -98,7 +98,7 @@ def two_tenants(engine, monkeypatch):  # noqa: ARG001 - engine sets bootstrap
         yield {"a": eng_a, "b": eng_b, "by_tenant": by_tenant, "bindings": bindings}
     finally:
         # Dispose both StaticPool engines so their single sqlite connection is
-        # closed — otherwise pytest reports a ResourceWarning (unclosed database).
+        # closed -- otherwise pytest reports a ResourceWarning (unclosed database).
         eng_a.dispose()
         eng_b.dispose()
 
@@ -207,7 +207,7 @@ class TestCrossTenantIsolation:
 
     def test_active_tenant_context_switches_engine(self, two_tenants):
         """``get_request_engine()`` with no explicit id follows the active-tenant
-        ContextVar — switching tenants switches engines, reset → bootstrap."""
+        ContextVar -- switching tenants switches engines, reset → bootstrap."""
         tok = tenant_context.set_active_tenant(TENANT_A)
         try:
             assert partitions.get_request_engine() is two_tenants["a"]

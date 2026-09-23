@@ -186,7 +186,7 @@ const ReportBrandingSettings: React.FC = () => {
               slotProps={{ htmlInput: { maxLength: 500 } }}
               helperText={t(
                 'reportBranding.headerTextHelp',
-                'Appears alongside the logo in the report header (e.g. "Confidential — Internal Use").',
+                'Appears alongside the logo in the report header (e.g. "Confidential -- Internal Use").',
               )}
             />
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

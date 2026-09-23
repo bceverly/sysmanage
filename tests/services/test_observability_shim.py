@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Tests for backend.services.observability_shim — Phase 10.2 step 7 Phase D.
+Tests for backend.services.observability_shim -- Phase 10.2 step 7 Phase D.
 
 Covers the platform-detection mapping and the engine-first / legacy-fallback
 contract used by ``/hosts/{host_id}/deploy-opentelemetry`` and
@@ -11,7 +11,7 @@ contract used by ``/hosts/{host_id}/deploy-opentelemetry`` and
 
 The shim itself is small (~150 lines) but underpins the cutover from the
 agent's per-platform ``otel_deploy_*.py`` modules to the
-``apply_deployment_plan`` engine path; locking its behaviour down keeps the
+``apply_deployment_plan`` engine path; locking its behavior down keeps the
 fallback contract honest as the engine evolves.
 """
 
@@ -118,7 +118,7 @@ class TestDetectOtelPlatform:
         assert _detect_otel_platform(host, db) == "linux_apt"
 
     def test_linux_with_only_flatpak_defaults_to_linux_apt(self):
-        """Same rationale as the no-inventory case — flatpak / snap
+        """Same rationale as the no-inventory case -- flatpak / snap
         are universal package managers that give no distro signal."""
         host = _host("Linux", platform_release=None)
         db = _db_with_pms("flatpak", "snap")
@@ -163,7 +163,7 @@ class TestDetectOtelPlatform:
         self, platform_release
     ):
         """Signal 2 (dnf-family side): same as above but for RHEL/
-        Fedora/Rocky/etc — these resolve to linux_dnf without DB
+        Fedora/Rocky/etc -- these resolve to linux_dnf without DB
         inventory."""
         host = _host("Linux", platform_release=platform_release)
         db = _db_with_pms()  # zero rows
@@ -171,7 +171,7 @@ class TestDetectOtelPlatform:
 
     def test_inventory_signal_wins_over_os_info(self):
         """If both signals are present the inventory signal wins
-        (it's the more authoritative datum — actual installed
+        (it's the more authoritative datum -- actual installed
         packages vs friendly-string parsing)."""
         host = _host("Linux", platform_release="Rocky Linux 9.3")
         db = _db_with_pms("apt")  # apt inventory says apt-family
@@ -206,7 +206,7 @@ class TestTryEngineOtelDeploy:
     def test_returns_none_when_engine_missing_builder(self):
         """Defensive: a wrong .so loaded as observability_engine that
         doesn't expose build_otel_multiplatform_deploy_plan must not
-        crash — fall back to legacy."""
+        crash -- fall back to legacy."""
         bad_engine = MagicMock(spec=[])  # no attributes
         host = _host("Linux")
         db = _db_with_pms("apt")
@@ -220,8 +220,8 @@ class TestTryEngineOtelDeploy:
     def test_returns_none_when_platform_undetectable(self):
         """An unsupported platform string (not in the non-Linux map,
         not 'linux') yields None and falls back to legacy.  Fresh
-        Linux hosts no longer return None here — they default to
-        linux_apt as of the Phase 10.2 step 7 close-out — so we use
+        Linux hosts no longer return None here -- they default to
+        linux_apt as of the Phase 10.2 step 7 close-out -- so we use
         a clearly-unsupported platform name to exercise the None
         fallback."""
         engine = MagicMock()
@@ -346,7 +346,7 @@ class TestTryEngineOtelRemove:
 
 
 class TestTryEngineGraylogAttach:
-    """``try_engine_graylog_attach`` — Phase 10.2 step 7 Graylog OSS shim.
+    """``try_engine_graylog_attach`` -- Phase 10.2 step 7 Graylog OSS shim.
 
     Same engine-first / legacy-fallback contract as the OTEL helpers:
     return a queued message_id on success, ``None`` on any miss so the
@@ -380,7 +380,7 @@ class TestTryEngineGraylogAttach:
 
     def test_returns_none_when_engine_missing_linux_builder(self):
         """Defensive: an engine without ``build_graylog_linux_autodetect_plan``
-        must not be invoked — fall back to legacy."""
+        must not be invoked -- fall back to legacy."""
         engine = MagicMock(spec=["build_graylog_bsd_syslog_append_plan"])
         host = _host("Linux")
         with patch.object(
@@ -555,7 +555,7 @@ class TestTryEngineGraylogAttach:
     def test_windows_with_gelf_mechanism_still_returns_none(self):
         """Only the ``windows_sidecar`` mechanism is engine-routed on
         Windows.  ``gelf_tcp`` / ``syslog_*`` on Windows still falls
-        through — Windows hosts don't run syslog daemons and the
+        through -- Windows hosts don't run syslog daemons and the
         engine has no plan for those combos."""
         engine = MagicMock()
         engine.build_graylog_linux_autodetect_plan = MagicMock()
@@ -576,7 +576,7 @@ class TestTryEngineGraylogAttach:
 
     def test_windows_falls_back_when_engine_missing_no_token_builder(self):
         """Defensive: an engine .so without the B1 builder must NOT
-        crash — the shim falls through to legacy for Windows hosts."""
+        crash -- the shim falls through to legacy for Windows hosts."""
         engine = MagicMock(
             spec=[
                 "build_graylog_linux_autodetect_plan",
@@ -598,7 +598,7 @@ class TestTryEngineGraylogAttach:
 
 
 class TestTryEngineOtelServiceControl:
-    """``try_engine_otel_service_control`` — Phase 10.2 step 7 close-out item A.
+    """``try_engine_otel_service_control`` -- Phase 10.2 step 7 close-out item A.
 
     Replaces the legacy ``start_opentelemetry_service`` /
     ``stop_opentelemetry_service`` / ``restart_opentelemetry_service``
@@ -638,7 +638,7 @@ class TestTryEngineOtelServiceControl:
         engine.build_otel_service_control_plan.assert_called_once_with("REQ")
         _, kwargs = mock_enqueue.call_args
         assert kwargs["plan"] == {"plan": "SVC_CTRL"}
-        # Service-control operations are quick (no install) — 120s budget
+        # Service-control operations are quick (no install) -- 120s budget
         # is plenty.  Verifies we didn't accidentally inherit the 900s
         # deploy budget.
         assert kwargs["timeout"] == 120
@@ -699,11 +699,11 @@ class TestTryEngineOtelServiceControl:
 
 
 class TestTryEngineOtelGrafanaConnection:
-    """``try_engine_otel_grafana_connection`` — Phase 10.2 step 7 close-out item A.
+    """``try_engine_otel_grafana_connection`` -- Phase 10.2 step 7 close-out item A.
 
     Replaces the legacy ``connect_opentelemetry_grafana`` /
     ``disconnect_opentelemetry_grafana`` WS command targets.  The
-    engine plan is restart-only (matches legacy semantics) — config
+    engine plan is restart-only (matches legacy semantics) -- config
     rewrite happens at deploy time, not here.
     """
 
@@ -745,7 +745,7 @@ class TestTryEngineOtelGrafanaConnection:
 
     def test_disconnect_tolerates_empty_grafana_url(self):
         """Legacy disconnect didn't validate grafana_url; engine
-        path matches that — empty string is accepted for disconnect."""
+        path matches that -- empty string is accepted for disconnect."""
         engine = self._engine()
         host = _host("Darwin")
         db = _db_with_pms()

@@ -468,7 +468,7 @@ class TestChildHostCrudEndpoints:
 
     @pytest.mark.asyncio
     async def test_refresh_child_hosts(self, mock_db_session, mock_user, mock_host):
-        """Test refreshing child hosts list — engine plan path accepted."""
+        """Test refreshing child hosts list -- engine plan path accepted."""
         # The route uses an inline ``container_engine.build_list_child_hosts_plan``
         # call; mock module_loader.get_module to return an engine whose
         # builder + enqueue path succeed so ``used_plan_path = True``.
@@ -542,7 +542,7 @@ class TestVirtualizationStatusEndpoints:
     async def test_get_virtualization_support(
         self, mock_db_session, mock_user, mock_host
     ):
-        """Test getting virtualization support — engine plan path accepted."""
+        """Test getting virtualization support -- engine plan path accepted."""
         with patch(
             "backend.api.child_host_virtualization_status.request_sessionmaker"
         ) as mock_sessionmaker, patch(

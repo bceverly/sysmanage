@@ -92,7 +92,7 @@ def receive_policy(
 
     Upserts by ``policy_id`` (the coordinator's primary key, shared
     on both sides).  If a row with the same id already exists, this
-    is a re-push from the coordinator — we update only if the
+    is a re-push from the coordinator -- we update only if the
     incoming ``version`` is strictly greater than what we have.  The
     "applied" state is preserved on update so a re-push doesn't
     silently revert an applied policy back to unapplied.
@@ -125,7 +125,7 @@ def receive_policy(
         return row
 
     if version <= existing.version:
-        # Older / same-version replay — ignore.
+        # Older / same-version replay -- ignore.
         return existing
     # Newer version arrived: refresh fields, reset apply state.
     existing.policy_type = policy_type.strip()
@@ -153,7 +153,7 @@ def list_unapplied_policies(
     """Return policies waiting to be applied locally.
 
     The site engine's apply worker drains this list each tick,
-    materialises the policy into local tables (update profiles,
+    materializes the policy into local tables (update profiles,
     firewall roles, ...), and calls :func:`mark_policy_applied` /
     :func:`mark_policy_apply_failed` per row.
     """
@@ -169,7 +169,7 @@ def list_unapplied_policies(
 def mark_policy_applied(session: Session, policy_id: Any) -> FederationReceivedPolicy:
     """Record successful local application of a received policy.
 
-    Idempotent — applying twice is a no-op (the apply_at timestamp
+    Idempotent -- applying twice is a no-op (the apply_at timestamp
     stays at the first success).  ``apply_error`` is cleared in
     case the previous attempt had failed before this success.
     """
@@ -239,7 +239,7 @@ def receive_command(
     existing = session.get(FederationReceivedCommand, cid)
     if existing is not None:
         # Re-push from coordinator.  If we already finished the
-        # command, ignore — the site already pushed the result
+        # command, ignore -- the site already pushed the result
         # upstream; no need to re-do anything.  If still in flight
         # or queued, just refresh the parameters in case the
         # coordinator amended them.
@@ -329,7 +329,7 @@ def update_command_status(
         raise InvalidCommandStateError(
             f"Cannot transition received command {row.id} from "
             f"'{row.status}' to '{new_status}' "
-            f"(allowed: {sorted(allowed) or 'none — terminal'})"
+            f"(allowed: {sorted(allowed) or 'none -- terminal'})"
         )
 
     row.status = new_status

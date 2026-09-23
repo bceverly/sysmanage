@@ -185,7 +185,7 @@ class TestSearchHosts:
 
     def test_ipv4_contains(self, session, fleet):
         rows, total = hsvc.search_hosts(session, ipv4_contains="10.0.")
-        # 10.0.0.10, 10.0.0.11, 10.0.1.5 — the Cleveland /16.
+        # 10.0.0.10, 10.0.0.11, 10.0.1.5 -- the Cleveland /16.
         assert total == 3
 
     def test_geo_country_filter(self, session, fleet):
@@ -200,7 +200,7 @@ class TestSearchHosts:
         # Anything within the last hour.
         cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=1)
         rows, total = hsvc.search_hosts(session, last_seen_after=cutoff)
-        # web1.cle, db1.cle, web1.pit — three "current" hosts.
+        # web1.cle, db1.cle, web1.pit -- three "current" hosts.
         assert total == 3
 
     def test_free_text_or(self, session, fleet):
@@ -232,7 +232,7 @@ class TestSearchHosts:
     def test_order_by_status(self, session, fleet):
         rows, _ = hsvc.search_hosts(session, order_by="status", limit=100)
         # ``down`` < ``unknown`` < ``up`` lexically, with NULL first
-        # (varies by dialect — but at minimum the call must succeed).
+        # (varies by dialect -- but at minimum the call must succeed).
         assert len(rows) == 6
 
     def test_invalid_order_by_raises(self, session, fleet):

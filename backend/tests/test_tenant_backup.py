@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Phase 13.1.F — OSS backup orchestration helpers (``tenant_backup``).
+"""Phase 13.1.F -- OSS backup orchestration helpers (``tenant_backup``).
 
 The engine runs the actual per-tenant backup commands; the pure schedule math,
 config reading, and command templating live here so they are unit-testable
@@ -105,7 +105,7 @@ def test_render_substitutes_whitelisted_keys():
 
 
 def test_render_leaves_unknown_placeholders_literal():
-    # A typo'd placeholder isn't substituted (and doesn't raise) — it surfaces at
+    # A typo'd placeholder isn't substituted (and doesn't raise) -- it surfaces at
     # exec time rather than crashing the orchestrator tick.
     argv = tb.render_backup_command("backup {bogus}", {})
     assert argv == ["backup", "{bogus}"]

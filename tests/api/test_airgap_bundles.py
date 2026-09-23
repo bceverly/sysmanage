@@ -4,7 +4,7 @@
 
 """API tests for /api/v1/airgap-bundles endpoints.
 
-The build subprocess is patched out — we only verify the API surface
+The build subprocess is patched out -- we only verify the API surface
 (create → row inserted, list, get, delete) and the queued-state
 contract; the actual buildAirGapBundle.sh execution is its own beast
 (Docker per distro, takes minutes) and is exercised via the standalone
@@ -19,7 +19,7 @@ import pytest
 # The docker-status endpoint is Linux-only: it relies on pwd/grp/os.geteuid
 # to identify the OS user that owns the docker socket.  On a Windows runner
 # those are absent, so the endpoint returns a "not supported on Linux"
-# sentinel and the Linux-behaviour assertions below cannot hold.  Skip
+# sentinel and the Linux-behavior assertions below cannot hold.  Skip
 # those specific cases on Windows rather than assert platform-specific output.
 _skip_on_windows = pytest.mark.skipif(
     sys.platform == "win32",
@@ -37,7 +37,7 @@ class TestAirGapBundlesAPI:
         # Patch the builder so the POST doesn't actually spawn a thread
         # that would try to docker-run.
         # Also patch ``LicenseService.is_pro_plus_active`` (a property)
-        # to True — endpoints are Pro+-gated and the test fixture has
+        # to True -- endpoints are Pro+-gated and the test fixture has
         # no license configured.  PropertyMock is required because a
         # plain ``patch`` on a property has no deleter to restore.
         # Also force the resource pre-flight to "sufficient" so the
@@ -222,14 +222,14 @@ class TestAirGapBundlesAPI:
         ).json()
 
         rows = client.get("/api/v1/airgap-bundles", headers=auth_headers).json()
-        # Newest first by created_at ordering — second post should be first.
+        # Newest first by created_at ordering -- second post should be first.
         ids = [r["id"] for r in rows]
         assert second["id"] in ids
         assert first["id"] in ids
         assert ids.index(second["id"]) <= ids.index(first["id"])
 
     def test_anonymous_rejected(self, client):
-        # No auth header — JWTBearer should refuse before reaching the handler.
+        # No auth header -- JWTBearer should refuse before reaching the handler.
         resp = client.post("/api/v1/airgap-bundles", json={"product": "server"})
         assert resp.status_code in (401, 403)
 
@@ -288,7 +288,7 @@ class TestAirGapBundlesAPI:
     @_skip_on_windows
     def test_docker_status_permission_denied(self, client, auth_headers):
         # docker binary exists, daemon is up, but the calling user
-        # isn't in the docker group — the endpoint must flag this as
+        # isn't in the docker group -- the endpoint must flag this as
         # permission_denied=True so the UI shows the right remediation.
         with patch(
             "backend.api.airgap_bundles.shutil.which", return_value="/usr/bin/docker"
@@ -322,7 +322,7 @@ class TestAirGapBundlesProPlusGate:
     inherit the autouse license bypass from TestAirGapBundlesAPI."""
 
     def test_post_returns_403_on_community(self, client, auth_headers):
-        # No license patch — license_service.is_pro_plus_active is
+        # No license patch -- license_service.is_pro_plus_active is
         # whatever the test fixture's default is (False on Community).
         with patch.object(
             LicenseService,

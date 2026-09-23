@@ -6,14 +6,14 @@
 Federation command-dispatch tracking service (Phase 12.1.F).
 
 Records commands the coordinator dispatched to subordinate sites and
-the lifecycle of each — ``queued_at_site`` → ``in_progress`` →
+the lifecycle of each -- ``queued_at_site`` → ``in_progress`` →
 ``completed`` / ``partial`` / ``failed``.  The Pro+ engine wraps
 these as ``/api/v1/federation/commands*`` endpoints.
 
 The dispatch row IS the authoritative record at the coordinator;
 the actual command payload (reboot, apply_updates, deploy_packages,
 run_script, …) flows to the agent via the site's existing
-``MessageQueue`` infrastructure — this service only tracks the
+``MessageQueue`` infrastructure -- this service only tracks the
 "did we send it and what came back" view.
 
 State machine:
@@ -163,7 +163,7 @@ def dispatch_command(
     """Record a coordinator-initiated command for delivery to a site.
 
     ``target_host_ids=None`` (or an empty sequence) means "every host
-    at the target site".  The list is JSON-serialised; the site's
+    at the target site".  The list is JSON-serialized; the site's
     engine reads it to fan out to the right agents.
 
     Status starts at ``queued_at_site``.  The site's engine later
@@ -225,11 +225,11 @@ def list_dispatched_commands(
     """List dispatched commands, newest first.
 
     ``open_only=True`` filters to non-terminal statuses (queued /
-    in_progress) — used by the Coordinator's "active commands"
+    in_progress) -- used by the Coordinator's "active commands"
     dashboard widget.
 
     Phase 12.10 hardening: ``ready_only=True`` additionally applies
-    the exponential-backoff filter — rows whose ``push_attempts``
+    the exponential-backoff filter -- rows whose ``push_attempts``
     is > 0 and whose ``last_push_attempt_at + compute_backoff(...)
     > now`` are excluded.  Rows whose ``push_attempts >=
     MAX_ATTEMPTS`` are excluded entirely (the push worker won't
@@ -284,7 +284,7 @@ def mark_push_failed(
 
     Increments ``push_attempts``, stamps ``last_push_attempt_at`` +
     ``last_push_error``.  Does NOT advance the FSM unless the row
-    has exceeded ``retry_policy.MAX_ATTEMPTS`` — at that point we
+    has exceeded ``retry_policy.MAX_ATTEMPTS`` -- at that point we
     flip ``status='failed'`` (a terminal FSM state) to take the
     row out of the push worker's view.  Operator can dispatch a
     fresh command if they still want the work done.
@@ -333,7 +333,7 @@ def update_command_status(
         raise InvalidDispatchStateError(
             f"Cannot transition command {cmd.id} from "
             f"'{cmd.status}' to '{new_status}' "
-            f"(allowed: {sorted(allowed) or 'none — terminal'})"
+            f"(allowed: {sorted(allowed) or 'none -- terminal'})"
         )
 
     old_status = cmd.status

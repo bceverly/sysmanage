@@ -6,7 +6,7 @@
 
 Centralises DB access for server-instance-wide settings (currently
 just the air-gap ``server_role``) so the config module, the API
-handler, and any future caller share one code path — and so a missing
+handler, and any future caller share one code path -- and so a missing
 row degrades gracefully to the default instead of raising.
 """
 
@@ -31,7 +31,7 @@ def get_server_role() -> str:
 
     Reads the singleton ``server_configuration`` row.  Falls back to
     ``DEFAULT_SERVER_ROLE`` ("standard") when the row is missing or the
-    DB isn't reachable — the role is non-critical metadata, so a lookup
+    DB isn't reachable -- the role is non-critical metadata, so a lookup
     failure should degrade to "no air gap" rather than crash the caller.
     """
     try:
@@ -75,7 +75,7 @@ def set_server_role(role: str) -> str:
 def get_federation_role() -> str:
     """Return the configured federation role, or the default on any failure.
 
-    Separate axis from :func:`get_server_role` — reads ``federation_role``
+    Separate axis from :func:`get_server_role` -- reads ``federation_role``
     from the same singleton row.  Falls back to ``DEFAULT_FEDERATION_ROLE``
     ("none") when the row is missing or the DB isn't reachable.
     """

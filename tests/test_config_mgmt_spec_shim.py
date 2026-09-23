@@ -7,7 +7,7 @@
 The property worth defending is that "not licensed" and "not loaded" stay
 DISTINGUISHABLE. They look identical to a user and mean opposite things to an
 operator: the first is a sales conversation, the second is a broken install --
-usually a module with no build for this Python version on the licence server.
+usually a module with no build for this Python version on the license server.
 Collapsing them sends people to the wrong place.
 """
 

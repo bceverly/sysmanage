@@ -268,10 +268,10 @@ async def config_mgmt_assignment_tick_service() -> None:
                 )
             await asyncio.sleep(TICK_INTERVAL_SECONDS)
         except asyncio.CancelledError:
-            logger.info("Config assignment tick service cancelled — exiting loop")
+            logger.info("Config assignment tick service cancelled -- exiting loop")
             raise
         except Exception:  # pylint: disable=broad-except
             logger.exception(
-                "Config assignment tick service error — sleeping then retrying"
+                "Config assignment tick service error -- sleeping then retrying"
             )
             await asyncio.sleep(ERROR_BACKOFF_SECONDS)

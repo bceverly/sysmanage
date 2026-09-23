@@ -44,7 +44,7 @@ Write-Host "=== Provisioning native Windows ARM64 build toolchain ===" -Foregrou
 function Test-Elevated {
     # True if this process holds a full admin token (High integrity). An elevated
     # SSH session (password logon, or key logon with LocalAccountTokenFilterPolicy=1)
-    # is already elevated and needs no UAC prompt — which SSH couldn't display anyway.
+    # is already elevated and needs no UAC prompt -- which SSH couldn't display anyway.
     $id = [Security.Principal.WindowsIdentity]::GetCurrent()
     (New-Object Security.Principal.WindowsPrincipal($id)).IsInRole(
         [Security.Principal.WindowsBuiltinRole]::Administrator)
@@ -138,7 +138,7 @@ if (($userPath -split ';') -notcontains $vcpkgBin) {
 # --- 4b. Static ARM64 OpenSSL for cryptography's from-source build ------------
 # cryptography has no win_arm64 wheel for the CVE-patched pin, so it builds from
 # source. Linked against a STATIC OpenSSL (+ a static CRT via RUSTFLAGS, set by the
-# Makefile), its _rust extension carries no external OpenSSL/vcruntime deps — a
+# Makefile), its _rust extension carries no external OpenSSL/vcruntime deps -- a
 # dynamic build loads flakily against this box's multi-Python PATH.
 $osslStaticLib = Join-Path $vcpkg "installed\arm64-windows-static\lib\libcrypto.lib"
 if (Test-Path $osslStaticLib) {
@@ -153,8 +153,8 @@ if (Test-Path $osslStaticLib) {
 }
 
 # libpq + its runtime deps go next to the venv's python (.venv\Scripts, which is on
-# PATH when the venv is active) so pure-Python psycopg — which locates libpq via
-# ctypes/PATH — finds it without a fresh shell. (Mirrors the MSI's install.ps1.)
+# PATH when the venv is active) so pure-Python psycopg -- which locates libpq via
+# ctypes/PATH -- finds it without a fresh shell. (Mirrors the MSI's install.ps1.)
 $venvScripts = Join-Path (Get-Location) ".venv\Scripts"
 if (Test-Path $venvScripts) {
     foreach ($d in @("libpq.dll", "libcrypto-3-arm64.dll", "libssl-3-arm64.dll",

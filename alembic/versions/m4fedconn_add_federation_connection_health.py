@@ -19,7 +19,7 @@ Phase 12.2 site-engine work:
   sync-status timeline (latency / queue-depth / host-count over time).
 
 All operations are additive and guarded by inspector checks, so the
-migration is idempotent and identical on SQLite and PostgreSQL — every
+migration is idempotent and identical on SQLite and PostgreSQL -- every
 new column carries a ``server_default`` so the ADD COLUMN succeeds on a
 populated table without a batch rebuild.
 

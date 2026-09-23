@@ -176,7 +176,7 @@ const AirgapRepositories: React.FC = () => {
   }, [roleLoaded, loadRepos]);
 
   const aggregate = useMemo(() => {
-    // Prefer the backend-supplied aggregate when available — it
+    // Prefer the backend-supplied aggregate when available -- it
     // knows the configured stale threshold + already did the
     // signer_fingerprint join.  Local computation is only the
     // fallback for legacy deployments returning a flat list.
@@ -399,7 +399,7 @@ const AirgapRepositories: React.FC = () => {
                   >
                     {repo.signer_fingerprint
                       ? repo.signer_fingerprint
-                      : t('airgap.repositories.table.noFingerprint', '—')}
+                      : t('airgap.repositories.table.noFingerprint', '--')}
                   </TableCell>
                 </TableRow>
               );

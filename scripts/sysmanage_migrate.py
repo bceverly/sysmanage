@@ -4,7 +4,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-sysmanage-migrate — apply SysManage database migrations (production tool).
+sysmanage-migrate -- apply SysManage database migrations (production tool).
 
 Runs, from the SysManage server (the DB hosts are never touched directly):
 
@@ -126,11 +126,11 @@ def _ensure_multitenancy_engine() -> bool:
 
     Per-tenant provisioning logic lives in the compiled ``multitenancy_engine``
     (a Pro+ MULTITENANT_SAAS capability), so this operator tool must load and
-    bridge it exactly like the server does at startup — otherwise the fan-out's
+    bridge it exactly like the server does at startup -- otherwise the fan-out's
     ``provision_tenant_database`` calls hit the unlicensed shim and refuse.
 
     Best-effort and idempotent: returns True when the engine is bridged, False
-    (with an actionable message) when it can't be — e.g. unlicensed or no build
+    (with an actionable message) when it can't be -- e.g. unlicensed or no build
     cached for this platform/Python.  Loads from the local module cache (no
     network) when the engine was already fetched via ``make update``.
     """
@@ -200,7 +200,7 @@ def fan_out_tenants(dry_run: bool) -> int:
 
     print(f"  -> per-tenant databases: {total} to migrate", end="")
     if skipped:
-        print(f" ({len(skipped)} skipped: no openbao_role — {', '.join(skipped)})")
+        print(f" ({len(skipped)} skipped: no openbao_role -- {', '.join(skipped)})")
     else:
         print()
     if total == 0:
@@ -210,14 +210,14 @@ def fan_out_tenants(dry_run: bool) -> int:
             print(f"     [dry-run] would migrate tenant '{slug}'")
         return 0
 
-    # Per-tenant provisioning lives in the licensed engine — load + bridge it
+    # Per-tenant provisioning lives in the licensed engine -- load + bridge it
     # before the fan-out (the server does this at startup; this standalone tool
     # must do it too).  Without it every tenant would fail with the unlicensed
     # shim's refusal, so fail loudly + actionably instead.
     if not _ensure_multitenancy_engine():
         print(
             "  [FAIL] multi-tenancy is enabled but the licensed multitenancy_engine "
-            "is not loaded — cannot migrate per-tenant databases. Ensure the Pro+ "
+            "is not loaded -- cannot migrate per-tenant databases. Ensure the Pro+ "
             "MULTITENANT_SAAS license is active and run 'make update' so the engine "
             "is cached for this platform/Python."
         )

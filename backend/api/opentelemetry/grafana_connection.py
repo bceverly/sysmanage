@@ -90,7 +90,7 @@ async def connect_opentelemetry_to_grafana(
 
             validate_host_approval_status(host)
 
-            # Get Grafana configuration (server-global singleton — bootstrap db)
+            # Get Grafana configuration (server-global singleton -- bootstrap db)
             grafana_settings = (
                 db.query(models.GrafanaIntegrationSettings)
                 .filter_by(enabled=True)
@@ -114,7 +114,7 @@ async def connect_opentelemetry_to_grafana(
             host_fqdn = host.fqdn
 
             # Engine path only (Phase 10.2 step 7 close-out, 2026-05-14).
-            # Plan is restart-only (matches legacy semantics — config
+            # Plan is restart-only (matches legacy semantics -- config
             # was pinned at deploy time, connect just triggers a service
             # restart so any out-of-band edits take effect).
             engine_msg_id = try_engine_otel_grafana_connection(
@@ -236,7 +236,7 @@ async def disconnect_opentelemetry_from_grafana(
             # Capture host scalars for audit/logging after the session closes.
             host_fqdn = host.fqdn
 
-            # Engine path only — see connect endpoint above for rationale.
+            # Engine path only -- see connect endpoint above for rationale.
             engine_msg_id = try_engine_otel_grafana_connection(
                 host, "disconnect", "", tenant_session
             )

@@ -20,7 +20,7 @@ engine is missing, and ``resolve_assignments`` returns nothing rather than
 guessing. A licensed server with a broken module is a loud, fixable install
 problem; a quietly permissive one is not.
 
-The caller has already established the licence permits this engine (see
+The caller has already established the license permits this engine (see
 ``feature_gate.require_module_loaded`` on the router), so a missing module
 here means the artefact is absent or failed to load -- never that the customer
 is unlicensed.
@@ -45,7 +45,7 @@ DEFAULT_LIVE_TIMEOUT_SECONDS = 120
 
 # What concurrency to allow when the engine cannot be reached. ONE, not the
 # operator's requested value: a server that has lost the engine mid-query must
-# not honour "500 at once". It is deliberately not zero, because zero would
+# not honor "500 at once". It is deliberately not zero, because zero would
 # stall a query that is already running rather than let it drain slowly.
 FALLBACK_CONCURRENCY = 1
 
@@ -164,8 +164,8 @@ def next_batch_size(concurrency: int, in_flight: int, waiting: int) -> int:
     """How many more targets may be released right now.
 
     ZERO without the engine, not "all of them". A server that has lost its
-    licence mid-query must stop dispatching rather than fall back to the
-    unbounded behaviour this slice exists to prevent -- the same rule the
+    license mid-query must stop dispatching rather than fall back to the
+    unbounded behavior this slice exists to prevent -- the same rule the
     fleet-job shim follows.
     """
     engine = _engine()

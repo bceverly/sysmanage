@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""create mirror_snap_content (tenant partition) — Phase 17.1 (S3)
+"""create mirror_snap_content (tenant partition) -- Phase 17.1 (S3)
 
 One row per (mirror, snap): the snap name + channel tracked for capture into a
 mirror, plus capture bookkeeping (status / last message id / last capture time /

@@ -177,7 +177,7 @@ const Reports: React.FC = () => {
 
   // Federation is an ENTERPRISE feature (features.py: FEDERATION_* live in the
   // Enterprise tier, owned by federation_controller_engine). The Federation
-  // reports tab must NOT show to a Professional/Community user — we shouldn't
+  // reports tab must NOT show to a Professional/Community user -- we shouldn't
   // surface a feature they aren't licensed for. Gate on that engine being
   // licensed; default hidden until the license cache resolves.
   const [federationLicensed, setFederationLicensed] = useState(false);
@@ -193,7 +193,7 @@ const Reports: React.FC = () => {
     return () => { cancelled = true; };
   }, []);
 
-  // Tab names for URL hash — federation only present when licensed, so its
+  // Tab names for URL hash -- federation only present when licensed, so its
   // hash/index stay consistent with what's actually rendered.
   const tabNames = useMemo(
     () => ['hosts', 'users', 'security', ...(federationLicensed ? ['federation'] : [])],

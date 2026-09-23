@@ -16,7 +16,7 @@ test.describe('Settings Page', () => {
   });
 
   test('should display settings page', async ({ page }) => {
-    // If we landed back on /login, auth setup broke — fail loudly.
+    // If we landed back on /login, auth setup broke -- fail loudly.
     expect(page.url()).not.toContain('/login');
 
     await expect(page).toHaveURL(/\/settings/);
@@ -103,7 +103,7 @@ test.describe('Settings - System Configuration', () => {
       // networkidle may timeout, continue anyway
     }
 
-    // If we landed back on /login, auth setup broke — fail loudly.
+    // If we landed back on /login, auth setup broke -- fail loudly.
     expect(page.url()).not.toContain('/login');
 
     // Settings page should have tabs and/or a heading

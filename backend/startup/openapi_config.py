@@ -3,12 +3,12 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-OpenAPI metadata — Phase 13.2 (API Completeness).
+OpenAPI metadata -- Phase 13.2 (API Completeness).
 
 Centralises the FastAPI/OpenAPI document metadata (title, version, description,
 and tag groups) so ``backend.main`` stays focused on wiring.  The description
-documents the cross-cutting API conventions — versioning, authentication, and
-rate limiting — that aren't visible from any single endpoint.
+documents the cross-cutting API conventions -- versioning, authentication, and
+rate limiting -- that aren't visible from any single endpoint.
 """
 
 

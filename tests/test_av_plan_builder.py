@@ -344,7 +344,7 @@ def test_deploy_plan_openbsd_skips_cron_file_for_schedule():
     )
     cron_files = [f for f in plan["files"] if "cron.d" in f["path"]]
     assert cron_files == []
-    # But the schedule still propagates through the plan for callers to honour.
+    # But the schedule still propagates through the plan for callers to honor.
     assert plan["scan_schedule"] is not None
 
 
@@ -376,7 +376,7 @@ def test_disable_plan_bsd_uses_clamav_clamd_service():
 
 
 # ---------------------------------------------------------------------------
-# Linux distro layout coverage — SUSE, Arch
+# Linux distro layout coverage -- SUSE, Arch
 # ---------------------------------------------------------------------------
 
 
@@ -405,7 +405,7 @@ def test_deploy_arch_uses_clamav_etc_layout():
 
 
 # ---------------------------------------------------------------------------
-# BSD platform branches — NetBSD and macOS layouts
+# BSD platform branches -- NetBSD and macOS layouts
 # ---------------------------------------------------------------------------
 
 
@@ -424,7 +424,7 @@ def test_deploy_macos_uses_brew_layout():
 
 
 # ---------------------------------------------------------------------------
-# build_enable_plan — all three platforms
+# build_enable_plan -- all three platforms
 # ---------------------------------------------------------------------------
 
 
@@ -432,7 +432,7 @@ def test_enable_plan_linux_starts_clamav_services():
     plan = build_enable_plan({"platform": "Linux", "platform_release": "Ubuntu 24.04"})
     actions = [(a["service"], a["action"]) for a in plan["service_actions"]]
     assert ("clamav-daemon", "start") in actions
-    # build_enable_plan must NOT install anything — it's for hosts that
+    # build_enable_plan must NOT install anything -- it's for hosts that
     # already have AV.
     assert plan.get("files", []) == []
     assert plan.get("commands", []) == []
@@ -441,7 +441,7 @@ def test_enable_plan_linux_starts_clamav_services():
 def test_enable_plan_windows_emits_no_install_just_a_start():
     plan = build_enable_plan({"platform": "Windows"})
     # The Windows enable plan still uses commands (schtasks), but no
-    # package install — verify shape.
+    # package install -- verify shape.
     assert "av_product" in plan
 
 
@@ -462,7 +462,7 @@ def test_enable_plan_unknown_platform_falls_back_to_linux_default():
 
 
 # ---------------------------------------------------------------------------
-# Windows schedule — weekly and monthly cadences
+# Windows schedule -- weekly and monthly cadences
 # ---------------------------------------------------------------------------
 
 

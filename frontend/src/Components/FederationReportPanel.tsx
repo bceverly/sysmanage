@@ -3,12 +3,12 @@
 // See the LICENSE file in the project root for the full terms.
 
 /**
- * FederationReportPanel — the federated facet of the Reports page
+ * FederationReportPanel -- the federated facet of the Reports page
  * (Phase 12.3).  Lets an operator pick one or more enrolled sites (or
  * "all") and renders a cross-site rollup report: per-site host counts,
  * worst compliance baseline, and CVE-severity counts, plus
  * enterprise-wide totals.  Data is the coordinator's cached rollups, so
- * the report is a screen-of-glass aggregate — no per-host drill-down.
+ * the report is a screen-of-glass aggregate -- no per-host drill-down.
  *
  * Self-gating: when the federation controller engine isn't licensed it
  * renders the Enterprise upsell rather than an empty table.
@@ -189,7 +189,7 @@ const FederationReportPanel: React.FC = () => {
                       )}%`}
                     />
                   ) : (
-                    "—"
+                    "--"
                   )}
                 </TableCell>
                 <TableCell align="right">{row.critical_count}</TableCell>

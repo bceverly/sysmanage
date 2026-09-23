@@ -100,7 +100,7 @@ async def get_ubuntu_pro_settings(
     try:
         # Phase 13.1: the Ubuntu Pro settings record is tenant-scoped, so the
         # "get-or-create singleton" now routes to the active tenant's database
-        # via ``get_tenant_db`` — each tenant gets its own singleton (intended).
+        # via ``get_tenant_db`` -- each tenant gets its own singleton (intended).
         # Inert in collapsed/single-tenant mode (same engine as get_db).
         # Get or create the singleton settings record
         settings = db.query(models.UbuntuProSettings).first()

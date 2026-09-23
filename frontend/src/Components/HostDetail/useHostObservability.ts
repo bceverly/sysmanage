@@ -375,7 +375,7 @@ export const useHostObservability = ({
                 // Check if agent is running in privileged mode
                 setGraylogEligible(host.is_agent_privileged || false);
             } catch {
-                // Graylog not configured or unavailable — not an error condition
+                // Graylog not configured or unavailable -- not an error condition
                 setCanAttachGraylog(false);
                 setGraylogEligible(false);
             }

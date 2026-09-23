@@ -92,10 +92,10 @@ const config = loadConfig();
 
 // A backend may *bind* to a wildcard address (0.0.0.0 / ::) to listen on every
 // interface, but those are NOT valid *connect* targets for the dev-proxy client
-// — connecting to http://0.0.0.0:PORT is refused on Linux. Normalize wildcard
+// -- connecting to http://0.0.0.0:PORT is refused on Linux. Normalize wildcard
 // hosts to localhost so `/api` proxy requests actually reach the backend.
 // (Without this, an ``api.host: 0.0.0.0`` config silently breaks every proxied
-// request — e.g. the login POST fails with a network error and the UI just
+// request -- e.g. the login POST fails with a network error and the UI just
 // sits on /login.)
 const proxyConnectHost = (h?: string): string => {
   const v = (h || '').trim();
@@ -195,7 +195,7 @@ export default defineConfig({
     // Keep the HMR watcher off Playwright's own output dirs.  They live under
     // the Vite root (frontend/), so while a Playwright run writes its HTML
     // report / traces / screenshots, Vite sees those changes and fires
-    // full-page reloads at the very browser under test — the /login page then
+    // full-page reloads at the very browser under test -- the /login page then
     // reloads in a loop and never reaches the "load" event (manifests as a
     // 60s navigation timeout in auth.setup.ts).  Excluding them stops the loop
     // (and avoids the watcher churning over these dirs on NFS).
@@ -209,16 +209,16 @@ export default defineConfig({
     // Proxy API requests to backend server.
     //
     // Resolution order (first match wins):
-    //   1. VITE_BACKEND_HOST / VITE_BACKEND_PORT  — env vars from CI/dev shell
-    //   2. config.api.host / config.api.port      — yaml-loaded config
-    //   3. localhost:8080                          — package default
+    //   1. VITE_BACKEND_HOST / VITE_BACKEND_PORT  -- env vars from CI/dev shell
+    //   2. config.api.host / config.api.port      -- yaml-loaded config
+    //   3. localhost:8080                          -- package default
     //
     // Falling back from env -> yaml -> default matters on Windows CI:
     // ``loadConfig`` only looks at Unix-style paths (``/etc/sysmanage.yaml``,
     // ``../sysmanage-dev.yaml``) and can't find the Windows config at
     // ``C:\ProgramData\sysmanage\sysmanage.yaml``, so without the env-var
     // override the proxy defaulted to port 8080 while the backend was
-    // actually on 8001 — every ``/api/v1/server-info`` request returned
+    // actually on 8001 -- every ``/api/v1/server-info`` request returned
     // 500 from the proxy and the Playwright "no critical failed requests"
     // assertion failed.
     proxy: {
@@ -233,7 +233,7 @@ export default defineConfig({
       }
     }
   },
-  // Preview server — serves the pre-built ``dist/`` bundle (NOT the dev server
+  // Preview server -- serves the pre-built ``dist/`` bundle (NOT the dev server
   // that streams unbundled ESM modules one-per-request).  CI uses this for the
   // Playwright UI tests: the dev server makes every page load fetch hundreds of
   // module files, which never lets ``networkidle`` settle (so each wait burns
@@ -266,7 +266,7 @@ export default defineConfig({
     // Code-split heavy vendor groups so the main app chunk stays cacheable
     // and parses faster on first load.  Without this, everything lands in
     // a single ~2 MB index-*.js bundle.
-    // No `manualChunks` — Vite/Rollup's automatic chunk splitting is
+    // No `manualChunks` -- Vite/Rollup's automatic chunk splitting is
     // safe.  Custom splits are tempting (smaller initial parse, better
     // caching) but the React 19 + MUI 7 dependency graph has internal
     // circular imports that produce TDZ errors at runtime when chunks
@@ -281,7 +281,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
-    // Swallow i18next's Locize sponsor banner — a benign line printed on init
+    // Swallow i18next's Locize sponsor banner -- a benign line printed on init
     // in v25 (despite showSupportNotice:false) that only clutters test output.
     // (jsdom's "Not implemented: navigation" notice can't be filtered here: its
     // default VirtualConsole writes straight to process.stderr, below vitest's
@@ -315,13 +315,13 @@ export default defineConfig({
       reportsDirectory: './coverage',
       // Ratchet: floors set a couple points below today's measured coverage so
       // the run only fails on a regression.  vitest fails if any metric drops
-      // below these — raise them as coverage improves (never lower).
+      // below these -- raise them as coverage improves (never lower).
       //
       // RAMP PLAN: the LINE floor climbs ~10 points per phase until it is in
       // sync with the Python suite's 75% gate (which is a line-coverage number,
       // `--cov-fail-under=75`).  A floor can never exceed *actual* coverage
       // (vitest fails the run otherwise), so each rung is a test-writing push
-      // first, then a floor bump — the floor FOLLOWS coverage, never leads it:
+      // first, then a floor bump -- the floor FOLLOWS coverage, never leads it:
       //     line floor →   40  →  50  →  60  →  70  →  75  (== Python)
       // Raise to the next rung only once actual coverage clears it with headroom.
       // statements/functions/branches trail on their own tracks (like the backend,

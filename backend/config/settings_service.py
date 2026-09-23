@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Server-scoped settings accessor — Phase 13.1.H (config classification).
+Server-scoped settings accessor -- Phase 13.1.H (config classification).
 
 Implements the "**operational config goes to a Settings table**" rule from
 ``docs/planning/config-classification.md`` §1/§4 for **server-scoped**
@@ -19,7 +19,7 @@ This is the additive backbone: it changes no call sites on its own.  Each
 option is migrated by switching its accessor to call :func:`get_setting`
 with a ``yaml_getter`` that returns the legacy value, then dropping the
 YAML key in a later major.  Tenant-scoped settings (email, password policy)
-use ``registry_tenant.settings`` instead — added in a later slice.
+use ``registry_tenant.settings`` instead -- added in a later slice.
 
 All DB access is best-effort and never raises: if the DB/column isn't
 available (e.g. before the n11cfgsettings migration runs), it returns the
@@ -58,7 +58,7 @@ def _get_cached_settings_bag() -> Optional[dict]:
     """Return the settings bag, using a short-TTL cache.
 
     The cache is bypassed under the test harness, where each test gets its own
-    fresh in-memory database — caching there would leak one test's settings
+    fresh in-memory database -- caching there would leak one test's settings
     into the next.
     """
     global _cache_bag, _cache_expiry  # pylint: disable=global-statement
@@ -135,7 +135,7 @@ def get_setting(
             if key not in _warned:
                 logger.warning(
                     "Setting '%s' is being read from sysmanage.yaml. Operational "
-                    "config should live in the Settings DB — see "
+                    "config should live in the Settings DB -- see "
                     "docs/planning/config-classification.md (Phase 13.1.H). The "
                     "YAML fallback will be removed in a future major.",
                     key,
@@ -182,7 +182,7 @@ def set_setting(key: str, value: Any) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Tenant-scoped settings (Phase 13.1) — per-tenant operational config (email,
+# Tenant-scoped settings (Phase 13.1) -- per-tenant operational config (email,
 # password policy, …) stored in ``registry_tenant.settings``.  Only meaningful
 # when multi-tenancy is enabled; in single-tenant / collapsed mode callers use
 # the server-scoped accessors above.  Not cached: tenant reads are far less hot

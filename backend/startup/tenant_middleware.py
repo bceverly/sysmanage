@@ -3,14 +3,14 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Active-tenant middleware — Phase 13.1 (per-tenant config resolution).
+Active-tenant middleware -- Phase 13.1 (per-tenant config resolution).
 
 When multi-tenancy is enabled, sets the request's active tenant (from the JWT
 ``tenant_id`` claim) into the :mod:`backend.persistence.tenant_context`
 ContextVar so per-tenant configuration (e.g. each tenant's SMTP settings)
 resolves for the duration of the request.
 
-In single-tenant / collapsed mode (the default) this is a no-op — the active
+In single-tenant / collapsed mode (the default) this is a no-op -- the active
 tenant stays ``None`` and the server-scoped configuration is used, so behavior
 is unchanged.
 """

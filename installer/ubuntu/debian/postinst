@@ -36,7 +36,7 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 	.venv/bin/pip install --quiet --upgrade pip
 	# Install runtime-only deps.  The full requirements.txt carries dev
 	# tooling (pylint/astroid/pytest/playwright) that the server does not
-	# need to run AND that the air-gap wheel set does not contain — using
+	# need to run AND that the air-gap wheel set does not contain -- using
 	# it offline fails with "No matching distribution found for astroid".
 	# Fall back to requirements.txt only if the prod file isn't shipped.
 	if [ -f requirements-prod.txt ]; then
@@ -56,7 +56,7 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 	fi
 
 	# ---------------------------------------------------------------
-	# OpenBAO (secrets broker) — install + start + initialize/unseal.
+	# OpenBAO (secrets broker) -- install + start + initialize/unseal.
 	#
 	# OpenBAO is central to SysManage.  We install the native package
 	# (it provides the `bao` binary, the `openbao` service user, and the
@@ -153,7 +153,7 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 	echo "=========================================="
 	echo ""
 	echo "Your existing /etc/sysmanage.yaml was preserved and the service was"
-	echo "stopped for the upgrade.  It is NOT restarted automatically — two"
+	echo "stopped for the upgrade.  It is NOT restarted automatically -- two"
 	echo "manual steps remain:"
 	echo ""
 	echo "1. Apply database migrations"

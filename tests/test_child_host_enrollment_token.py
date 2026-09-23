@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""A child host must enrol into its PARENT's tenant, not into "No tenant".
+"""A child host must enroll into its PARENT's tenant, not into "No tenant".
 
 ``_build_agent_config_yaml`` emitted ``server.*``, ``logging``, ``websocket``,
 ``script_execution`` and optionally ``auto_approve.token`` -- but never
@@ -60,7 +60,7 @@ def test_child_config_carries_its_parents_enrollment_token():
 def test_enrollment_token_is_distinct_from_auto_approve():
     """Both may be present, and they are NOT interchangeable.
 
-    Emitting only auto_approve (the old behaviour) approves a host into no
+    Emitting only auto_approve (the old behavior) approves a host into no
     tenant at all.
     """
     with patch.object(dispatch, "_child_enrollment_token", return_value=TOKEN):

@@ -3,7 +3,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-# buildAgentIso.sh — Build an offline-install ISO for sysmanage-agent
+# buildAgentIso.sh -- Build an offline-install ISO for sysmanage-agent
 # containing:
 #   * the latest sysmanage-agent .deb from the Launchpad PPA
 #   * every apt dependency the .deb declares (recursive closure)
@@ -16,8 +16,8 @@
 #
 # IMPORTANT: this script must be run on a host that matches the target
 # in BOTH dimensions:
-#   * Ubuntu release  — apt-get download grabs the host's archive versions
-#   * Python version  — pip download grabs wheels for the host's Python
+#   * Ubuntu release  -- apt-get download grabs the host's archive versions
+#   * Python version  -- pip download grabs wheels for the host's Python
 # If you run it on a different release/Python, the resulting bundle
 # won't install on the target.  The simplest setup: SSH into the
 # ``sysmanage-online`` VM from buildAirGapTestNetwork.sh and run there.
@@ -27,7 +27,7 @@
 #       /tmp/sysmanage-agent_<version>_<arch>-bundle.iso --update --live
 #
 # (sysmanage-private-agent has no internet by design, same as
-# sysmanage-airgap — both consume the same offline-bundle pattern.)
+# sysmanage-airgap -- both consume the same offline-bundle pattern.)
 #
 # Then follow the README.txt embedded in the ISO root.
 #
@@ -134,7 +134,7 @@ dpkg-deb --fsys-tarfile "$DEB_PATH" | tar -xO "$REQ_PATH_IN_DEB" > "$REQ_FILE" 2
 log "requirements-prod.txt: $(grep -cE '^[a-zA-Z0-9]' "$REQ_FILE") top-level packages"
 
 # ---------------------------------------------------------------------------
-# 4. apt-get download — recursive deps of the .deb's Depends: line
+# 4. apt-get download -- recursive deps of the .deb's Depends: line
 # ---------------------------------------------------------------------------
 
 APT_DEPS_DIR="$STAGE/apt-deps"
@@ -176,7 +176,7 @@ log "Downloaded $APT_DEB_COUNT apt .deb packages (before arch prune)"
 # build host has foreign architectures enabled (``dpkg --print-foreign-
 # architectures`` shows ``i386`` etc.), apt-cache depends walks
 # Multi-Arch: same/foreign packages and apt-get download fetches both
-# variants — those would be rejected by ``dpkg -i`` on the air-gap host
+# variants -- those would be rejected by ``dpkg -i`` on the air-gap host
 # with ``package architecture (i386) does not match system (amd64)``.
 # Keep ``Architecture: all`` packages (e.g., python3-pip-whl); they're
 # arch-independent and always valid.
@@ -189,7 +189,7 @@ APT_DEB_COUNT="$(find "$APT_DEPS_DIR" -maxdepth 1 -name '*.deb' | wc -l)"
 log "Final apt .deb count: $APT_DEB_COUNT"
 
 # ---------------------------------------------------------------------------
-# 5. pip download — wheels for requirements-prod.txt + pip bootstrap deps
+# 5. pip download -- wheels for requirements-prod.txt + pip bootstrap deps
 # ---------------------------------------------------------------------------
 
 WHEELS_DIR="$STAGE/wheels"
@@ -200,7 +200,7 @@ log "Running $PYTHON_BIN -m pip wheel into $WHEELS_DIR (this can take a few minu
 # pre-built wheel on PyPI gets COMPILED into a wheel here on the build
 # host.  Transitive build dependencies (e.g., Cython for PyYAML on
 # Python 3.14, where PyPI has no cp314 wheel) are fetched from PyPI as
-# part of the build and burned into the resulting wheel — the air-gap
+# part of the build and burned into the resulting wheel -- the air-gap
 # target then installs the wheel directly, no build step, no Cython.
 # Result: ``wheels/`` contains ONLY .whl files; the target's pip never
 # has to compile anything.
@@ -215,11 +215,11 @@ WHEEL_COUNT="$(find "$WHEELS_DIR" -maxdepth 1 -name '*.whl' | wc -l)"
 log "Built $WHEEL_COUNT wheels (sdists compiled on the build host)"
 
 # ---------------------------------------------------------------------------
-# 6. README — explains the offline install path
+# 6. README -- explains the offline install path
 # ---------------------------------------------------------------------------
 
 cat > "$STAGE/README.txt" <<EOF
-SysManage Agent — air-gap install bundle
+SysManage Agent -- air-gap install bundle
 =========================================
 
 Built       : $(date -u +'%Y-%m-%dT%H:%M:%SZ')
@@ -232,14 +232,14 @@ wheels/     : ${WHEEL_COUNT} Python packages (requirements-prod.txt closure + pi
 Install on the air-gapped host
 ------------------------------
 
-  sudo mount /dev/sr1 /mnt          # or /dev/sr0 — check 'lsblk -f' for the
+  sudo mount /dev/sr1 /mnt          # or /dev/sr0 -- check 'lsblk -f' for the
                                     # SYSMANAGE-AGENT label
   cd /mnt
 
   # Single command: dpkg resolves install order from the Depends: graph.
   # The PIP_NO_INDEX + PIP_FIND_LINKS env vars are read by the
   # sysmanage-agent postinst's pip install step (which builds the
-  # /opt/sysmanage-agent/.venv) — without them, pip would try to
+  # /opt/sysmanage-agent/.venv) -- without them, pip would try to
   # reach PyPI and fail.
   sudo PIP_NO_INDEX=1 PIP_FIND_LINKS=/mnt/wheels \\
        dpkg -i apt-deps/*.deb ${DEB_NAME}
@@ -248,7 +248,7 @@ Install on the air-gapped host
   # offline:
   sudo PIP_NO_INDEX=1 PIP_FIND_LINKS=/mnt/wheels dpkg --configure -a
 
-Post-install — connect the agent to its server
+Post-install -- connect the agent to its server
 -----------------------------------------------
 
   sudo cp /etc/sysmanage-agent/sysmanage-agent.yaml.example /etc/sysmanage-agent.yaml
@@ -280,7 +280,7 @@ log "Building ISO with ${ISO_TOOL}"
 if [[ -e "$ISO_PATH" ]]; then
   # Best-effort remove.  If the file is owned by another user (e.g.,
   # from a prior sudo'd run) we'll fail silently here and the actual
-  # error will surface from xorriso below as "Permission denied" —
+  # error will surface from xorriso below as "Permission denied" --
   # which is clear enough to act on (chown / rm with sudo by hand).
   rm -f "$ISO_PATH" 2>/dev/null || true
 fi

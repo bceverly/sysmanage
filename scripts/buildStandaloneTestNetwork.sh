@@ -3,35 +3,35 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-# buildStandaloneTestNetwork.sh — Provision KVM VMs for a SINGLE-TENANT,
+# buildStandaloneTestNetwork.sh -- Provision KVM VMs for a SINGLE-TENANT,
 # STANDALONE sysmanage deployment on libvirt/KVM.
 #
 # This is the plain-vanilla topology: ONE sysmanage server talking to ONE
 # PostgreSQL database, managing ONE agent.  No multi-tenancy, no federation,
-# no air-gap.  It exists so you can exercise the classic 3-tier split — server,
-# database, and a managed host — each on its OWN VM, the way a small real
+# no air-gap.  It exists so you can exercise the classic 3-tier split -- server,
+# database, and a managed host -- each on its OWN VM, the way a small real
 # deployment looks (DB on a separate box from the app server):
 #
-#   sysmanage-st-db      (10.81.0.1)  — PostgreSQL for the server's ONE database.
+#   sysmanage-st-db      (10.81.0.1)  -- PostgreSQL for the server's ONE database.
 #                                       Comes up TURNKEY: cloud-init installs
 #                                       PostgreSQL, opens it on the isolated
 #                                       10.81.0.0/24 network, and creates the
 #                                       sysmanage role + database.  This is what
 #                                       /etc/sysmanage.yaml ``database:`` points
 #                                       at.
-#   sysmanage-st-server  (10.81.0.10) — The sysmanage SERVER (backend API + web
-#                                       UI).  A bare Ubuntu box — install
+#   sysmanage-st-server  (10.81.0.10) -- The sysmanage SERVER (backend API + web
+#                                       UI).  A bare Ubuntu box -- install
 #                                       sysmanage on it per the instructions
 #                                       printed at the end, then point its
 #                                       ``database:`` block at the DB VM.
-#   sysmanage-st-agent   (10.81.0.20) — A sysmanage-AGENT (a managed host).  Bare
-#                                       Ubuntu — install sysmanage-agent and
+#   sysmanage-st-agent   (10.81.0.20) -- A sysmanage-AGENT (a managed host).  Bare
+#                                       Ubuntu -- install sysmanage-agent and
 #                                       point it at the server, so you can test
 #                                       the full register -> approve -> report
 #                                       path end to end.
 #
 # The DB VM is turnkey; the server and agent VMs are bare Ubuntu (install
-# sysmanage / sysmanage-agent per the printed guide — mirrors
+# sysmanage / sysmanage-agent per the printed guide -- mirrors
 # buildFederationTestNetwork.sh and buildMultiTenantTestNetwork.sh).
 #
 # Usage:
@@ -66,7 +66,7 @@ OS_VARIANT="${OS_VARIANT:-ubuntu24.04}"
 USERNAME="ubuntu"
 PASSWORD='Ubuntu123$'
 
-# PostgreSQL role provisioned on the DB VM (alphanumeric on purpose — it goes
+# PostgreSQL role provisioned on the DB VM (alphanumeric on purpose -- it goes
 # through psql in cloud-init runcmd, so no shell-special characters).
 DB_ROLE="${DB_ROLE:-sysmanage}"
 DBPASS="${DBPASS:-SysMgrTest123}"
@@ -74,7 +74,7 @@ DBNAME="${DBNAME:-sysmanage}"
 
 # Default admin login the server is configured with (security: block).  Printed
 # in the guide so you know how to log into the UI.  NOTE: admin_userid MUST be a
-# valid EMAIL address — the /api/login model validates it as Pydantic EmailStr,
+# valid EMAIL address -- the /api/login model validates it as Pydantic EmailStr,
 # so a bare 'admin' (as in sysmanage.yaml.example) is rejected with HTTP 422
 # before any auth runs.
 ADMIN_USER="${ADMIN_USER:-admin@example.com}"
@@ -84,7 +84,7 @@ ADMIN_PASS="${ADMIN_PASS:-admin}"
 # internet (so cloud-init can apt-install PostgreSQL and the server/agent can
 # install sysmanage from the PPA) AND a static NIC on this bridge, giving the
 # nodes stable, known addresses.  The host gets an IP on the bridge too, so you
-# can SSH straight into any node — and reach the web UI — over 10.81.0.x.
+# can SSH straight into any node -- and reach the web UI -- over 10.81.0.x.
 #
 # 10.81.0.0/24 / virbr81 is deliberately distinct from the multi-tenant
 # (10.80/virbr80) and federation (10.70/virbr70) networks, so this stack can
@@ -419,18 +419,18 @@ ensure_vm() {
     if vm_running "$name"; then
       log "$name: already running"
     else
-      log "$name: defined but stopped — starting"
+      log "$name: defined but stopped -- starting"
       virsh_ start "$name" >/dev/null
       CREATED_COUNT=$((CREATED_COUNT + 1))
     fi
   else
-    log "$name: not defined — creating"
+    log "$name: not defined -- creating"
     "$create_fn"
     CREATED_COUNT=$((CREATED_COUNT + 1))
   fi
 }
 
-# get_nat_ip <vm> — DHCP-assigned IP (no CIDR) on the NAT NIC, empty if unknown.
+# get_nat_ip <vm> -- DHCP-assigned IP (no CIDR) on the NAT NIC, empty if unknown.
 # Filters out the static 10.81.x ST address so it never shadows the NAT one.
 get_nat_ip() {
   local name="$1"
@@ -449,7 +449,7 @@ print_vm_summary() {
   if [[ -n "$nat" ]]; then
     echo "  NAT     : $nat"
   else
-    echo "  NAT     : (pending — re-run '$0 status' once cloud-init finishes)"
+    echo "  NAT     : (pending -- re-run '$0 status' once cloud-init finishes)"
   fi
   echo "  ssh     : ssh ${USERNAME}@${st_ip}      (password: ${PASSWORD})"
   case "$role" in
@@ -460,14 +460,14 @@ print_vm_summary() {
     server)
       echo "  install : sudo add-apt-repository -y ppa:bceverly/sysmanage \\"
       echo "              && sudo apt update && sudo apt install -y sysmanage postgresql-client"
-      echo "  config  : edit /etc/sysmanage.yaml — point database: at ${DB_IP}, api/webui host 0.0.0.0"
+      echo "  config  : edit /etc/sysmanage.yaml -- point database: at ${DB_IP}, api/webui host 0.0.0.0"
       echo "  web ui  : http://${st_ip}:${WEBUI_PORT}     (login ${ADMIN_USER}/${ADMIN_PASS})"
       echo "  api     : http://${st_ip}:${API_PORT}       (the agent connects here)"
       ;;
     agent)
       echo "  install : sudo add-apt-repository -y ppa:bceverly/sysmanage-agent \\"
       echo "              && sudo apt update && sudo apt install -y sysmanage-agent"
-      echo "  config  : edit /etc/sysmanage-agent.yaml — server.hostname=${SERVER_IP} port=${API_PORT} use_https=false"
+      echo "  config  : edit /etc/sysmanage-agent.yaml -- server.hostname=${SERVER_IP} port=${API_PORT} use_https=false"
       ;;
   esac
   echo
@@ -526,26 +526,26 @@ cmd_start() {
 print_wiring_guide() {
   cat <<EOF
 ==========================================================================
-  Wiring it together — single-tenant standalone bring-up
+  Wiring it together -- single-tenant standalone bring-up
 ==========================================================================
-The DB VM is turnkey — cloud-init already created the role + database and opened
+The DB VM is turnkey -- cloud-init already created the role + database and opened
 PostgreSQL on the 10.81.0.0/24 network, so normally there's NOTHING to do here.
 Confirm it's reachable from the host:
 
   psql 'postgresql://${DB_ROLE}:${DBPASS}@${DB_IP}:5432/${DBNAME}' -c '\\conninfo'
 
 --------------------------------------------------------------------------
-0. DATABASE  —  do NOT set up a local DB on the server
+0. DATABASE  --  do NOT set up a local DB on the server
 --------------------------------------------------------------------------
    IMPORTANT: the sysmanage package's post-install message tells you to "set up
    a local database" with 'sudo apt install postgresql; sudo -u postgres
-   createuser/createdb ...'.  DO NOT run that on the SERVER VM — in this topology
+   createuser/createdb ...'.  DO NOT run that on the SERVER VM -- in this topology
    the database lives on the separate DB VM (${DB_IP}).  Point the server at it
    (step 1b) instead of standing up a local one.
 
    cloud-init already ran the equivalent ON THE DB VM.  If you're adapting this
    to your OWN database host, or need to (re)create the role/database, ssh to the
-   DB VM and run it there (as the postgres superuser — role/db creation can't be
+   DB VM and run it there (as the postgres superuser -- role/db creation can't be
    bootstrapped remotely):
 
      ssh ${USERNAME}@${DB_IP}          # password: ${PASSWORD}
@@ -568,9 +568,9 @@ Confirm it's reachable from the host:
      psql 'postgresql://${DB_ROLE}:${DBPASS}@${DB_IP}:5432/${DBNAME}' -c '\\conninfo'
 
 --------------------------------------------------------------------------
-1. SERVER  —  ssh ${USERNAME}@${SERVER_IP}   (password: ${PASSWORD})
+1. SERVER  --  ssh ${USERNAME}@${SERVER_IP}   (password: ${PASSWORD})
 --------------------------------------------------------------------------
-   a) Install sysmanage and the PostgreSQL CLIENT (psql) — the server talks to
+   a) Install sysmanage and the PostgreSQL CLIENT (psql) -- the server talks to
       the dedicated DB VM, so it needs the client to reach it (and for the
       verify steps below). The 'postgresql-client' package is just psql + libpq,
       NOT a local database server:
@@ -591,7 +591,7 @@ Confirm it's reachable from the host:
           port: 5432
           name: "${DBNAME}"
         security:
-          # admin_userid MUST be a valid email — /api/login validates it as
+          # admin_userid MUST be a valid email -- /api/login validates it as
           # EmailStr, so a bare 'admin' is rejected with HTTP 422 (NOT 401).
           admin_userid: "${ADMIN_USER}"
           admin_password: "${ADMIN_PASS}"
@@ -607,7 +607,7 @@ Confirm it's reachable from the host:
           level: "INFO|WARNING|ERROR|CRITICAL"
           format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         email:
-          # Email just needs to be ENABLED — no SMTP server or password required
+          # Email just needs to be ENABLED -- no SMTP server or password required
           # for this test.  The server fills the rest (host=localhost, port=587,
           # …) with defaults; without 'enabled: true' email-dependent flows are
           # off.
@@ -615,21 +615,21 @@ Confirm it's reachable from the host:
         cors:
           # The web UI auto-discovers allowed origins from the server's NICs, but
           # on a dual-NIC box it can pick the NAT interface and miss the isolated
-          # ${SERVER_IP} that your browser actually uses — which blocks the few
+          # ${SERVER_IP} that your browser actually uses -- which blocks the few
           # features the UI fetches from the API by absolute URL (e.g. Pro+ plugin
           # bundles).  List the browser's origin(s) explicitly so they're allowed:
           additional_origins:
             - "http://${SERVER_IP}:${WEBUI_PORT}"
             - "http://${SERVER_IP}:${API_PORT}"
 
-      (Two random secrets were generated above — paste them in as shown, or
+      (Two random secrets were generated above -- paste them in as shown, or
       run your own. Keep admin_password out of production configs.)
 
    c) Create the schema (alembic) against the DB VM, then start the server.
 
         # packaged install (systemd):
         sudo systemctl restart sysmanage
-        # — or, from a dev checkout in the repo:
+        # -- or, from a dev checkout in the repo:
         make migrate && make start
 
       Confirm the schema landed on the DB VM:
@@ -641,7 +641,7 @@ Confirm it's reachable from the host:
         http://${SERVER_IP}:${WEBUI_PORT}     login: ${ADMIN_USER} / ${ADMIN_PASS}
 
 --------------------------------------------------------------------------
-2. AGENT  —  ssh ${USERNAME}@${AGENT_IP}   (password: ${PASSWORD})
+2. AGENT  --  ssh ${USERNAME}@${AGENT_IP}   (password: ${PASSWORD})
 --------------------------------------------------------------------------
    a) Install sysmanage-agent:
 
@@ -690,9 +690,9 @@ cmd_stop() {
       virsh_ undefine "$name" --remove-all-storage --nvram >/dev/null 2>&1 \
         || virsh_ undefine "$name" --remove-all-storage >/dev/null 2>&1 \
         || virsh_ undefine "$name" >/dev/null 2>&1 \
-        || warn "$name: undefine failed — may need manual cleanup with 'virsh undefine $name --remove-all-storage'"
+        || warn "$name: undefine failed -- may need manual cleanup with 'virsh undefine $name --remove-all-storage'"
     else
-      log "$name: not defined — skipping undefine"
+      log "$name: not defined -- skipping undefine"
     fi
   done
 
@@ -758,7 +758,7 @@ usage() {
   cat <<EOF
 Usage: $0 {start|stop|status}
 
-  start   Create and start the standalone test VMs (idempotent — already
+  start   Create and start the standalone test VMs (idempotent -- already
           running VMs are reported, not re-created).  The DB VM comes up with
           PostgreSQL installed + a role/database created; the server and agent
           VMs are bare (install sysmanage / sysmanage-agent per the printed

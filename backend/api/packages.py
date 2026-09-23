@@ -67,7 +67,7 @@ async def get_packages_summary():
 
     Returns package counts for each OS/version/package manager combination.
     """
-    # Capture the active tenant before the thread-pool offload — the active-
+    # Capture the active tenant before the thread-pool offload -- the active-
     # tenant ContextVar is not visible inside the worker thread.
     from backend.persistence.tenant_context import get_active_tenant
 

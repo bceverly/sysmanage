@@ -10,7 +10,7 @@ CI guard: each Alembic partition chain only creates tables with its prefix
   * the ``shared`` chain creates only ``shared_*`` tables,
   * the ``tenant`` chain creates NEITHER prefix (its tables are unprefixed).
 
-This keeps the partition convention from rotting as the schema evolves —
+This keeps the partition convention from rotting as the schema evolves --
 especially in the unprefixed tenant chain, where a stray ``registry_``/
 ``shared_`` table would silently break split-ability.  Each chain is run on an
 isolated scratch SQLite database and its created tables are inspected.

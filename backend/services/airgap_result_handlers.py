@@ -49,7 +49,7 @@ def _apply_airgap_run_result(
     _ = host_id  # not used in row update; logged elsewhere for audit
     if ":" not in primary_id:
         logger.warning(
-            "airgap_run result with malformed primary_id %r — dropping",
+            "airgap_run result with malformed primary_id %r -- dropping",
             primary_id,
         )
         return
@@ -93,7 +93,7 @@ def _apply_airgap_run_result(
             run.error_message = None
         elif stage == "burning":
             # The burn plan is the last stage in the lifecycle when
-            # ``burn_device`` is set — go straight to COMPLETE rather
+            # ``burn_device`` is set -- go straight to COMPLETE rather
             # than detouring back through the tick.
             run.status = "COMPLETE"
             run.completed_at = _now_naive()
@@ -134,7 +134,7 @@ def _apply_airgap_ingest_result(
     _ = host_id  # logged elsewhere for audit; not needed for the row update
     if ":" not in primary_id:
         logger.warning(
-            "airgap_ingest result with malformed primary_id %r — dropping",
+            "airgap_ingest result with malformed primary_id %r -- dropping",
             primary_id,
         )
         return

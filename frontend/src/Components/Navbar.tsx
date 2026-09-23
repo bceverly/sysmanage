@@ -84,7 +84,7 @@ const PATH_CATEGORY: Record<string, CategoryId> = {
 };
 
 // Nav destinations that require a specific security ROLE to be usable. A user
-// who lacks the role has the item hidden outright — a menu entry that would
+// who lacks the role has the item hidden outright -- a menu entry that would
 // only 403 on click should never be shown. Keyed path -> role name (the backend
 // SecurityRoles value returned by /api/v1/user/permissions). A Map keeps the
 // dynamic lookup clear of the detect-object-injection lint rule.
@@ -125,7 +125,7 @@ export function buildNavCategories(
     serverRole,
   } = opts;
 
-  // Paths hardcoded here — plugins must not duplicate these.
+  // Paths hardcoded here -- plugins must not duplicate these.
   const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/maintenance-windows', '/secrets', '/scripts', '/config-profiles', '/config-drift', '/config-jobs', '/query-packs', '/reports', '/airgap/repositories', '/airgap/collections']);
   const hardcodedLabels = new Set([
     t('nav.secrets'),
@@ -242,11 +242,11 @@ const Navbar = () => {
   // than a useState counter whose value is never read) is the idiomatic
   // force-update.
   const [, bumpPermissionsVersion] = useReducer((n: number) => n + 1, 0);
-  // Phase 11 — server role chip ("Collector" / "Repository").  Hidden on
+  // Phase 11 -- server role chip ("Collector" / "Repository").  Hidden on
   // ``standard`` deployments so the OSS UI stays uncluttered.
   const [serverRole, setServerRole] = useState<string>("standard");
   const [roleEngineLoaded, setRoleEngineLoaded] = useState<boolean>(true);
-  // Phase 12 — federation role chip ("Coordinator" / "Site").  Independent
+  // Phase 12 -- federation role chip ("Coordinator" / "Site").  Independent
   // axis from the air-gap role above; hidden when federation_role is "none".
   const [federationRole, setFederationRole] = useState<string>("none");
   const [federationEngineLoaded, setFederationEngineLoaded] =
@@ -280,7 +280,7 @@ const Navbar = () => {
   // Load the caller's security-role permissions so the nav can HIDE
   // destinations they can't use (RBAC nav). ``hasPermissionSync`` reads the
   // module-scope cache this populates; bump local state so the nav re-renders
-  // once permissions land. Only when authenticated — no perms pre-login.
+  // once permissions land. Only when authenticated -- no perms pre-login.
   useEffect(() => {
     if (!localStorage.getItem('bearer_token')) return;
     let cancelled = false;
@@ -290,7 +290,7 @@ const Navbar = () => {
     return () => { cancelled = true; };
   }, []);
 
-  // Phase 11 — fetch the server-info once on mount so we can render the
+  // Phase 11 -- fetch the server-info once on mount so we can render the
   // role chip.  Only fetch when authenticated: the air-gap role is
   // operator-facing detail that must not leak to a pre-login visitor.
   useEffect(() => {
@@ -332,7 +332,7 @@ const Navbar = () => {
   const isCategoryActive = (items: NavLeaf[]) =>
     items.some(i => isItemActive(i.path));
 
-  // Phase 11 role chip — only renders when this is half of an air-gap pair.
+  // Phase 11 role chip -- only renders when this is half of an air-gap pair.
   const roleLabelFallback =
     serverRole === 'collector' ? 'Air-Gap Collector' : 'Air-Gapped Repository';
   const roleLabelText = t(`nav.role.${serverRole}`, roleLabelFallback);
@@ -349,7 +349,7 @@ const Navbar = () => {
     </span>
   );
 
-  // Phase 12 federation chip — independent of the air-gap chip above.
+  // Phase 12 federation chip -- independent of the air-gap chip above.
   const federationLabelFallback =
     federationRole === 'coordinator' ? 'Federation Coordinator' : 'Federation Site';
   const federationLabelText = t(`nav.federationRole.${federationRole}`, federationLabelFallback);
@@ -460,7 +460,7 @@ const Navbar = () => {
           </>
         )}
 
-        {/* Utility toolbar — language, connection, notifications, account. */}
+        {/* Utility toolbar -- language, connection, notifications, account. */}
         {menuVisible === "visible" && (
           <div className="nav__language-toolbar">
             {navbarWidgets

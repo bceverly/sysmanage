@@ -3,13 +3,13 @@
 // See the LICENSE file in the project root for the full terms.
 
 /**
- * FederationAlertConfig — operator-configurable rollup-alert thresholds
+ * FederationAlertConfig -- operator-configurable rollup-alert thresholds
  * (Phase 12.1).  A self-contained card that loads the effective thresholds
  * (operator overrides merged over built-in defaults) and lets the operator
  * override any subset.  A blank field clears that override (reverts to the
  * built-in default).
  *
- * Renders nothing when the federation controller engine isn't licensed —
+ * Renders nothing when the federation controller engine isn't licensed --
  * the host page already shows the Enterprise upsell, so this just stays out
  * of the way.
  */
@@ -188,7 +188,7 @@ const FederationAlertConfig: React.FC = () => {
               }
               helperText={
                 effective
-                  ? `${t(f.helpKey, f.helpFallback)} — ${t(
+                  ? `${t(f.helpKey, f.helpFallback)} -- ${t(
                       "federationAlertConfig.effective",
                       "effective",
                     )}: ${String(effective[f.key])}`

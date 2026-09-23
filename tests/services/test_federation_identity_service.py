@@ -5,7 +5,7 @@
 """
 Tests for the Phase 12 federation identity-key service (Server Role UI):
 keypair generation, public-key/fingerprint access, and the trusted-peer
-keyring (import / list / remove) — the federation mirror of the air-gap
+keyring (import / list / remove) -- the federation mirror of the air-gap
 collector key exchange.
 """
 
@@ -69,7 +69,7 @@ class TestIdentityKeypair:
         priv, pub = fid.ensure_federation_identity_keypair()
         assert os.path.isfile(priv) and os.path.isfile(pub)
         assert priv == key_file
-        # 0600 private, 0644 public — POSIX only (Windows ignores Unix modes).
+        # 0600 private, 0644 public -- POSIX only (Windows ignores Unix modes).
         if os.name == "posix":
             assert oct(os.stat(priv).st_mode)[-3:] == "600"
             assert oct(os.stat(pub).st_mode)[-3:] == "644"
@@ -84,7 +84,7 @@ class TestIdentityKeypair:
         assert second == first  # untouched
 
     def test_public_key_auto_creates_on_first_read(self, keydirs):
-        # No ensure() call first — the getter mints the keypair.
+        # No ensure() call first -- the getter mints the keypair.
         pem = fid.get_federation_identity_public_key_pem()
         assert pem and "PUBLIC KEY" in pem
 
@@ -132,7 +132,7 @@ class TestPeerKeyring:
     def test_import_dedups_whitespace_to_same_fingerprint(self, keydirs):
         pem = self._a_peer_pem(keydirs)
         r1 = fid.import_federation_peer("p", pem)
-        # Re-import the same key with extra blank lines — same fingerprint.
+        # Re-import the same key with extra blank lines -- same fingerprint.
         r2 = fid.import_federation_peer("p", "\n\n" + pem + "\n")
         assert r1["fingerprint"] == r2["fingerprint"]
 

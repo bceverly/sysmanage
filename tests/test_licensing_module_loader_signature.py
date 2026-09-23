@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""ModuleLoader's behaviour around the signature gate.
+"""ModuleLoader's behavior around the signature gate.
 
 Split out of ``test_licensing_module_loader_extended.py`` when that file hit
 the repo's 1000-line ceiling.  These belong together anyway: they are about

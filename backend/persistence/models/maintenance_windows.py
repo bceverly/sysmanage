@@ -6,23 +6,23 @@
 Maintenance-window models (Phase 14.2).
 
 Operator-defined change windows so that update installs and remote commands only
-reach agents inside allowed windows — with *blackout* windows that forbid changes
+reach agents inside allowed windows -- with *blackout* windows that forbid changes
 and an *emergency override* that bypasses gating (audited).  These are per-tenant
 operational policy, so they live in the **tenant** partition (unprefixed), soft-
-referencing ``host.id`` / ``tags.id`` (same partition — plain indexed GUIDs, no
+referencing ``host.id`` / ``tags.id`` (same partition -- plain indexed GUIDs, no
 hard FK, to keep the migration order-independent and idempotent).
 
 Model:
 
-* ``MaintenanceWindow`` — one window: a name, a *kind* (``allow`` vs ``blackout``),
+* ``MaintenanceWindow`` -- one window: a name, a *kind* (``allow`` vs ``blackout``),
   a recurrence (``once`` | ``daily`` | ``weekly``) with an IANA timezone, and an
   enabled flag.  A ``once`` window uses absolute ``starts_at`` / ``ends_at`` (naive
   UTC); ``daily`` / ``weekly`` use a local ``start_time`` (HH:MM) + ``duration_minutes``
   (weekly also uses ``days_of_week``).
-* ``MaintenanceWindowScope`` — what a window applies to: ``all`` hosts, a specific
+* ``MaintenanceWindowScope`` -- what a window applies to: ``all`` hosts, a specific
   ``host``, or a ``tag`` (every host carrying it).  A window with no scope rows
   applies to nothing (defensive default; the API always writes at least one).
-* ``MaintenanceOverride`` — a time-boxed emergency override for one host: dispatch
+* ``MaintenanceOverride`` -- a time-boxed emergency override for one host: dispatch
   is allowed regardless of windows until ``expires_at``.  Creation is audited.
 
 Gating policy (see ``maintenance_window_service``): a host with **no** allow-window

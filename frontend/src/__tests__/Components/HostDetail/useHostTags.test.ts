@@ -7,7 +7,7 @@
  *
  * The rule that matters most: the "add" dropdown must offer only tags the
  * host does NOT already carry. Offering an assigned tag invites an operator
- * to add a duplicate, which the server rejects — an error for doing exactly
+ * to add a duplicate, which the server rejects -- an error for doing exactly
  * what the UI suggested.
  *
  * The second rule is that a FAILED add or remove says so. Every one of these

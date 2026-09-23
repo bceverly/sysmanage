@@ -137,7 +137,7 @@ const HostUserAccessTab: React.FC<HostUserAccessTabProps> = ({
                                     <Grid container spacing={2}>
                                         {filteredUsers.map((user: UserAccount, index: number) => (
                                             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={user.id || index}>
-                                                <Card sx={{ backgroundColor: 'grey.900', height: '100%' }}>
+                                                <Card sx={{ backgroundColor: 'gray.900', height: '100%' }}>
                                                     <CardContent sx={{ p: 2 }}>
                                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                                                             <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
@@ -318,7 +318,7 @@ const HostUserAccessTab: React.FC<HostUserAccessTabProps> = ({
                                     <Grid container spacing={2}>
                                         {filteredGroups.map((group: UserGroup, index: number) => (
                                             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={group.id || index}>
-                                                <Card sx={{ backgroundColor: 'grey.900', height: '100%' }}>
+                                                <Card sx={{ backgroundColor: 'gray.900', height: '100%' }}>
                                                     <CardContent sx={{ p: 2 }}>
                                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                                                             <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>

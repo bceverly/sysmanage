@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Resolving, dispatching and ingesting file watches — Phase 21.1 S7."""
+"""Resolving, dispatching and ingesting file watches -- Phase 21.1 S7."""
 
 from keyword import iskeyword
 import json

@@ -5,21 +5,21 @@
 """
 Federation rollup alerting (Phase 12.1).
 
-Enterprise-wide alerts that fire on cross-SITE conditions — distinct
+Enterprise-wide alerts that fire on cross-SITE conditions -- distinct
 from the host-scoped ``alert`` table.  Three built-in conditions are
 evaluated against each enrolled site's synced state + latest rollups:
 
-  * ``site_offline``        — the site hasn't synced within a multiple
+  * ``site_offline``        -- the site hasn't synced within a multiple
                               of its configured ``sync_interval_seconds``
                               (it's gone dark).                 [critical]
-  * ``compliance_below``    — a compliance baseline's score dropped below
+  * ``compliance_below``    -- a compliance baseline's score dropped below
                               a threshold.                       [warning]
-  * ``vulnerabilities_high``— the site's critical-CVE count crossed a
+  * ``vulnerabilities_high``-- the site's critical-CVE count crossed a
                               threshold.                        [critical]
 
 Lifecycle: an alert is OPEN (``resolved=False``) while its condition
 holds and auto-resolves when the condition clears, so there's at most
-ONE open alert per (site, condition) — no cooldown bookkeeping and no
+ONE open alert per (site, condition) -- no cooldown bookkeeping and no
 duplicate spam.  Operators can additionally acknowledge an open alert.
 
 This is pure OSS domain logic (no network, no engine dependency); the
@@ -56,7 +56,7 @@ COND_SITE_OFFLINE = "site_offline"
 COND_COMPLIANCE_BELOW = "compliance_below"
 COND_VULNERABILITIES_HIGH = "vulnerabilities_high"
 
-# Defaults — overridable per call by the engine tick / an admin sweep.
+# Defaults -- overridable per call by the engine tick / an admin sweep.
 DEFAULT_OFFLINE_MULTIPLIER = 4  # × sync_interval before "offline"
 DEFAULT_MIN_OFFLINE_SECONDS = 900  # floor so fast intervals don't flap
 DEFAULT_COMPLIANCE_THRESHOLD = 70.0  # score_percent below this → alert
@@ -133,7 +133,7 @@ def _resolve(session: Session, site_id: Any, condition: str) -> bool:
 
 
 # ---------------------------------------------------------------------
-# Condition evaluators — each returns (triggered, title, message, details)
+# Condition evaluators -- each returns (triggered, title, message, details)
 # ---------------------------------------------------------------------
 
 

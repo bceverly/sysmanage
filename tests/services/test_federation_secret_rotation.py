@@ -2,13 +2,13 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Phase 12.5 — federation-aware dynamic-secret rotation + delivery.
+"""Phase 12.5 -- federation-aware dynamic-secret rotation + delivery.
 
 Two layers:
 
-  * Pure-OSS primitives — ``dynamic_secrets.renew_lease`` (in-place rotation)
+  * Pure-OSS primitives -- ``dynamic_secrets.renew_lease`` (in-place rotation)
     and the lease-service work-lists (``mark_delivered`` /
-    ``list_rotation_candidates``) — with a stubbed Vault.
+    ``list_rotation_candidates``) -- with a stubbed Vault.
   * The live controller-engine reconcile pass driven over a real in-memory DB +
     a stubbed Vault + a mocked push transport: a requested lease is issued AND
     delivered to the site; a delivery that fails is rotated + re-delivered on

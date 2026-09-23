@@ -109,7 +109,7 @@ const statusColor = (
 };
 
 const formatBytes = (n: number | null): string => {
-  if (n === null || n === undefined) return '—';
+  if (n === null || n === undefined) return '--';
   const units = ['B', 'KB', 'MB', 'GB'];
   let v = n;
   let u = 0;
@@ -169,7 +169,7 @@ const AirGapBundlesSettings: React.FC = () => {
       setDocker(r.data);
     } catch (e) {
       console.error(e);
-      // Don't snackbar — banner remains hidden if probe fails.
+      // Don't snackbar -- banner remains hidden if probe fails.
     }
   }, []);
 
@@ -211,7 +211,7 @@ const AirGapBundlesSettings: React.FC = () => {
     try {
       await axiosInstance.post('/api/v1/airgap-bundles', { product });
       showSuccess(
-        t('airgapBundles.queued', 'Bundle build queued — refreshing list'),
+        t('airgapBundles.queued', 'Bundle build queued -- refreshing list'),
       );
       await refresh();
     } catch (e: unknown) {
@@ -250,7 +250,7 @@ const AirGapBundlesSettings: React.FC = () => {
   const handleDownload = async (bundle: Bundle) => {
     // Bundle ISOs are multi-GB.  Buffering one through fetch()/Blob
     // (the old approach) loads the whole file into browser memory and
-    // OOM-crashes the tab — and on the server side it used to crash the
+    // OOM-crashes the tab -- and on the server side it used to crash the
     // backend too.  Instead: mint a short-lived single-bundle token
     // (authenticated POST), then point the browser straight at the
     // token-authed streaming route so it downloads to disk without
@@ -296,7 +296,7 @@ const AirGapBundlesSettings: React.FC = () => {
       field: 'version',
       headerName: t('airgapBundles.version', 'Version'),
       width: 120,
-      valueGetter: (_v, row) => row.version || '—',
+      valueGetter: (_v, row) => row.version || '--',
     },
     {
       field: 'status',
@@ -315,14 +315,14 @@ const AirGapBundlesSettings: React.FC = () => {
       headerName: t('airgapBundles.createdAt', 'Created'),
       width: 180,
       valueGetter: (_v, row) =>
-        row.created_at ? formatUTCTimestamp(row.created_at, '—') : '—',
+        row.created_at ? formatUTCTimestamp(row.created_at, '--') : '--',
     },
     {
       field: 'completed_at',
       headerName: t('airgapBundles.completedAt', 'Completed'),
       width: 180,
       valueGetter: (_v, row) =>
-        row.completed_at ? formatUTCTimestamp(row.completed_at, '—') : '—',
+        row.completed_at ? formatUTCTimestamp(row.completed_at, '--') : '--',
     },
     {
       field: 'size_bytes',
@@ -386,7 +386,7 @@ const AirGapBundlesSettings: React.FC = () => {
         variant="caption"
         sx={{ fontFamily: 'monospace', display: 'block', mt: 0.5 }}
       >
-        {`RAM available: ${resources.ram_available_mb ?? '—'} MB`}
+        {`RAM available: ${resources.ram_available_mb ?? '--'} MB`}
         {resources.swap_free_mb == null
           ? ''
           : ` · swap free: ${resources.swap_free_mb} MB`}
@@ -402,11 +402,11 @@ const AirGapBundlesSettings: React.FC = () => {
           {insufficient
             ? t(
                 'airgapBundles.resourcesInsufficient',
-                'This server does not have enough free memory or disk to build a Server or Agent bundle — those buttons are disabled until resources are freed (add swap or grow the VM).',
+                'This server does not have enough free memory or disk to build a Server or Agent bundle -- those buttons are disabled until resources are freed (add swap or grow the VM).',
               )
             : t(
                 'airgapBundles.resourcesLow',
-                'Low resources — the build can run but will lean on swap and may be slow.',
+                'Low resources -- the build can run but will lean on swap and may be slow.',
               )}
         </Typography>
         {resources.reason && (
@@ -433,13 +433,13 @@ const AirGapBundlesSettings: React.FC = () => {
 
   const renderDockerBanner = () => {
     if (docker === null) {
-      // Probe still pending — show the original neutral notice so
+      // Probe still pending -- show the original neutral notice so
       // the layout doesn't shift in/out.
       return (
         <Alert severity="info">
           {t(
             'airgapBundles.requiresDocker',
-            'Bundle builds require Docker to be installed and running on this server — needed to fetch per-distro Linux packages. Builds typically take 5-30 minutes depending on how many platforms are enabled.',
+            'Bundle builds require Docker to be installed and running on this server -- needed to fetch per-distro Linux packages. Builds typically take 5-30 minutes depending on how many platforms are enabled.',
           )}
         </Alert>
       );
@@ -448,7 +448,7 @@ const AirGapBundlesSettings: React.FC = () => {
       return (
         <Alert severity="success">
           {t('airgapBundles.dockerReady', 'Docker is ready')}
-          {docker.version ? ` — ${docker.version}` : ''}.{' '}
+          {docker.version ? ` -- ${docker.version}` : ''}.{' '}
           {t(
             'airgapBundles.dockerReadyHint',
             'Builds typically take 5-30 minutes depending on how many platforms are enabled.',
@@ -456,7 +456,7 @@ const AirGapBundlesSettings: React.FC = () => {
         </Alert>
       );
     }
-    // Something's off — describe what and offer the install line.
+    // Something's off -- describe what and offer the install line.
     let summary: string;
     if (!docker.installed) {
       summary = t(
@@ -512,10 +512,10 @@ const AirGapBundlesSettings: React.FC = () => {
             gap: 1,
             // Dark slab so text contrast is independent of the
             // Alert's warning palette (which tinted nested text yellow).
-            backgroundColor: 'grey.900',
+            backgroundColor: 'gray.900',
             color: 'common.white',
             border: '1px solid',
-            borderColor: 'grey.700',
+            borderColor: 'gray.700',
             borderRadius: 1,
             p: 1,
             fontFamily: 'monospace',
@@ -630,7 +630,7 @@ const AirGapBundlesSettings: React.FC = () => {
               >
                 {t('airgapBundles.buildAgent', 'Build Agent Bundle')}
               </Button>
-              {/* Pro+ overlay bundle.  Doesn't need Docker — just
+              {/* Pro+ overlay bundle.  Doesn't need Docker -- just
                   copies the build host's modules + license artifacts.
                   The whole tab is already Pro+-gated, so reaching
                   this button at all means the build host has the

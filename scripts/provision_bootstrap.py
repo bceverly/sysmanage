@@ -18,7 +18,7 @@ process never holds superuser/root:
      ``<mount>/data/sysmanage/provisioner`` so the server can read it
      just-in-time.
   4. Writes a scoped OpenBAO policy (``sysmanage-provisioner``) limited to the
-     paths self-service provisioning needs — attach it to the server's token /
+     paths self-service provisioning needs -- attach it to the server's token /
      AppRole rather than handing the server a root token.
 
 Idempotent: safe to re-run.  Secrets are never printed.
@@ -50,7 +50,7 @@ def _bao(addr, token, method, path, payload=None):
     req.add_header("Content-Type", "application/json")
     try:
         # URL is the operator-configured OpenBAO address (trusted config, not
-        # user input) — no SSRF surface; this is an operator-run bootstrap CLI.
+        # user input) -- no SSRF surface; this is an operator-run bootstrap CLI.
         # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
         with urllib.request.urlopen(req, timeout=15) as resp:  # nosec B310
             body = resp.read().decode() or "{}"
@@ -130,12 +130,12 @@ def _emit_pg_provisioner_sql(args, provisioner_password):
     generated provisioner password isn't world-readable.
     """
     role = args.provisioner_user
-    # Validate the identifier so it can't break out of the SQL — this file is
+    # Validate the identifier so it can't break out of the SQL -- this file is
     # applied by a superuser, so we never want surprises in it.
     if not re.match(r"^[a-z_][a-z0-9_]*$", role):
         raise SystemExit(f"[fail] invalid --provisioner-user identifier: {role!r}")
     # role is identifier-validated above; password is URL-safe (no quotes);
-    # file is 0600 and applied by the operator themselves — not a runtime query.
+    # file is 0600 and applied by the operator themselves -- not a runtime query.
     sql_text = (  # nosec B608
         "DO $$\nBEGIN\n"
         f"  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{role}') THEN\n"
@@ -175,7 +175,7 @@ def _store_provisioner_secret(addr, token, vault_mount, args, provisioner_passwo
 def _write_scoped_policy(addr, token, vault_mount, db_mount):
     """Write the least-privilege policy for the server's provisioning identity."""
     policy = f"""
-# SysManage self-service provisioning — least privilege.
+# SysManage self-service provisioning -- least privilege.
 path "sys/mounts/{db_mount}" {{ capabilities = ["create", "update", "read"] }}
 path "{db_mount}/config/*"   {{ capabilities = ["create", "update", "read"] }}
 path "{db_mount}/roles/*"    {{ capabilities = ["create", "update", "read"] }}
@@ -192,7 +192,7 @@ path "{vault_mount}/data/sysmanage/provisioner" {{ capabilities = ["read"] }}
     if status in (200, 204):
         print("[ok] wrote OpenBAO policy 'sysmanage-provisioner'")
         print(
-            "     attach it to the server's token/AppRole — do NOT give the "
+            "     attach it to the server's token/AppRole -- do NOT give the "
             "server a root token."
         )
     else:
@@ -208,7 +208,7 @@ def _write_server_policy(addr, token, vault_mount, db_mount):
     token instead of a root token.
     """
     policy = f"""
-# SysManage server runtime — least privilege.
+# SysManage server runtime -- least privilege.
 # KV v2 secrets the app stores/reads (config bag, per-tenant secrets, secrets engine).
 path "{vault_mount}/data/*"     {{ capabilities = ["create", "read", "update", "delete", "list"] }}
 path "{vault_mount}/metadata/*" {{ capabilities = ["read", "list", "delete"] }}
@@ -230,7 +230,7 @@ path "sys/leases/revoke-prefix/*"   {{ capabilities = ["update"] }}
 def _issue_server_token(addr, token):
     """Create a renewable, periodic, least-privilege token for the server.
 
-    Carries ``sysmanage-server`` + ``sysmanage-provisioner`` — everything the
+    Carries ``sysmanage-server`` + ``sysmanage-provisioner`` -- everything the
     runtime + self-service provisioning need, and nothing else.  Printed (not
     auto-installed) so the operator adopts it deliberately and can verify
     before pointing the server at it.
@@ -320,7 +320,7 @@ def main(argv=None):
         print(
             "[action required] No Postgres superuser password given (peer auth).\n"
             "Apply the provisioner role with your superuser.  Use a stdin "
-            "redirect (NOT -f) so your shell reads the 0600 file — the postgres "
+            "redirect (NOT -f) so your shell reads the 0600 file -- the postgres "
             "user can't open it directly:\n"
             f"  sudo -u postgres psql -d postgres < {pending_sql}\n"
             f"then delete it:  rm {pending_sql}\n"

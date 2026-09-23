@@ -73,7 +73,7 @@ def detect_firewall_flavor(
         return "windows"
     if plat in ("darwin", "macos"):
         return "macos"
-    # Unknown — fall back to ufw so we still produce a runnable plan.
+    # Unknown -- fall back to ufw so we still produce a runnable plan.
     return "ufw"
 
 
@@ -593,7 +593,7 @@ def _windows_remove_role_ports(
 
 
 # ---------------------------------------------------------------------------
-# macOS Application Firewall (socketfilterfw — port-based ops are no-ops here)
+# macOS Application Firewall (socketfilterfw -- port-based ops are no-ops here)
 # ---------------------------------------------------------------------------
 
 
@@ -676,7 +676,7 @@ def _macos_noop_role_ports() -> Dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# BSD pf (OpenBSD / FreeBSD) — basic on/off via pfctl
+# BSD pf (OpenBSD / FreeBSD) -- basic on/off via pfctl
 # ---------------------------------------------------------------------------
 
 
@@ -745,7 +745,7 @@ def _pf_restart_plan() -> Dict[str, Any]:
 
 
 def _pf_role_ports_unsupported() -> Dict[str, Any]:
-    # Open source emits no port commands for pf — pf needs a full pf.conf
+    # Open source emits no port commands for pf -- pf needs a full pf.conf
     # rewrite which only the Pro+ engine knows how to do safely.
     return {
         "flavor": "pf",
@@ -760,7 +760,7 @@ def _pf_role_ports_unsupported() -> Dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# NPF (NetBSD) — basic on/off
+# NPF (NetBSD) -- basic on/off
 # ---------------------------------------------------------------------------
 
 

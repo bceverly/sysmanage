@@ -22,7 +22,7 @@ class TestPackagesAPI:
         engine = session.get_bind()
         is_sqlite = "sqlite" in str(engine.url)
 
-        # AvailablePackage is used unconditionally below — import it
+        # AvailablePackage is used unconditionally below -- import it
         # outside the SQLite branch so py/uninitialized-local-variable
         # doesn't fire when the SQLite path is skipped.
         from backend.persistence.models.software import AvailablePackage
@@ -116,7 +116,7 @@ class TestPackagesAPI:
             try:
                 print(f"Response JSON: {response.json()}")
             except Exception:  # noqa: BLE001
-                # Diagnostic-only block — body isn't always JSON.
+                # Diagnostic-only block -- body isn't always JSON.
                 _ = None
 
         assert response.status_code == 200

@@ -514,7 +514,7 @@ class TestHostDataUpdates:
             # Phase 6 N+1 audit refactored ``request_hardware_update_bulk``
             # to bulk-fetch via ``.filter(Host.id.in_(host_ids)).all()``
             # and dict-lookup per id, instead of one ``.first()`` per
-            # host.  Mock ``.all()`` with only the host that "exists" —
+            # host.  Mock ``.all()`` with only the host that "exists" --
             # the missing id is reported as not-found by the dict
             # ``.get()`` returning ``None``.
             mock_session = MagicMock()

@@ -8,8 +8,8 @@ The coordinator is the federation choke point: every site pushes its full
 host directory up, and the Hosts / Sites / Reports pages then query the
 *aggregate* directory tier (potentially 100 sites x 10k hosts = 1M rows).
 This harness seeds that tier at a configurable scale and times the hot
-read paths — paginated search, the count/group-by aggregates, and the
-cross-site report — so a regression that turns one of them into a table
+read paths -- paginated search, the count/group-by aggregates, and the
+cross-site report -- so a regression that turns one of them into a table
 scan shows up as a wall-clock blow-up instead of a silent slowdown in
 production.
 
@@ -175,7 +175,7 @@ def test_seed_row_counts(seeded):
 
 
 def test_search_hosts_paginated(seeded):
-    """First page of an ordered, filtered cross-site search — the Hosts page
+    """First page of an ordered, filtered cross-site search -- the Hosts page
     hot path.  Must page (not materialize the whole tier) at any scale."""
     session, _site_ids = seeded
     with _timed("search_hosts (page 1, status=up, ordered)"):
@@ -208,7 +208,7 @@ def test_search_hosts_free_text(seeded):
 
 
 def test_count_and_breakdowns(seeded):
-    """Aggregates that power the dashboard tiles — full-tier GROUP BY."""
+    """Aggregates that power the dashboard tiles -- full-tier GROUP BY."""
     session, _site_ids = seeded
     with _timed("count_hosts (all)"):
         total = dir_svc.count_hosts(session)
@@ -224,7 +224,7 @@ def test_count_and_breakdowns(seeded):
 
 
 def test_cross_site_report(seeded):
-    """Cross-site Reports facet — one aggregate row per enrolled site."""
+    """Cross-site Reports facet -- one aggregate row per enrolled site."""
     session, _site_ids = seeded
     with _timed("get_cross_site_report"):
         report = rollup_svc.get_cross_site_report(session)

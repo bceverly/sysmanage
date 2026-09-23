@@ -146,7 +146,7 @@ export interface ChildHostFormData {
     windowsIsoPath: string;
     windowsTimezone: string;
     windowsLocale: string;
-    // Domain join is opt-in — an empty domain means a workgroup machine.
+    // Domain join is opt-in -- an empty domain means a workgroup machine.
     windowsJoinDomain: string;
     windowsDomainOu: string;
     windowsDomainUser: string;

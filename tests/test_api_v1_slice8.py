@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Phase 13.2.1 — Slice 8 native ``/api/v1`` migration (repository mirroring).
+Phase 13.2.1 -- Slice 8 native ``/api/v1`` migration (repository mirroring).
 
 Dual-surface contract for the ``repository_mirroring`` router: the mirror
 CRUD + sub-resources, per-platform configs, known-versions, host mirror
@@ -53,7 +53,7 @@ class TestParamRoutesVersioned:
         import backend.main as m  # noqa: PLC0415
 
         paths = {r.path for r in m.app.routes if hasattr(r, "path")}
-        # Distinct paths — /settings/mirror is a child, not a duplicate of
+        # Distinct paths -- /settings/mirror is a child, not a duplicate of
         # server_settings' /settings, so they coexist without shadowing.
         assert "/api/v1/settings/mirror" in paths
         assert "/api/v1/settings" in paths

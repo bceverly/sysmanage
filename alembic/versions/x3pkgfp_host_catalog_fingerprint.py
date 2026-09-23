@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""add host.available_packages_fingerprint — skip re-sending an unchanged catalog
+"""add host.available_packages_fingerprint -- skip re-sending an unchanged catalog
 
 The available-packages catalog is ~89k rows / ~11 MB per host and changes
 rarely, yet it was retransmitted in full every collection cycle because neither

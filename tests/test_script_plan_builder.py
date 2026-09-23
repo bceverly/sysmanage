@@ -61,6 +61,6 @@ class TestBuildAdhocScriptPlan:
 
     def test_all_documented_shells_accepted(self):
         for shell in SUPPORTED_SHELLS:
-            # Should not raise — each supported shell produces a valid plan
+            # Should not raise -- each supported shell produces a valid plan
             plan = build_adhoc_script_plan("noop", shell=shell)
             assert "commands" in plan and "files" in plan

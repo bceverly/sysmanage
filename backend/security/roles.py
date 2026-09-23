@@ -45,7 +45,7 @@ class SecurityRoles(str, Enum):
     STOP_HOST_SERVICE = "Stop Host Service"
     # - Host Process Operations (Phase 13.3)
     KILL_HOST_PROCESS = "Kill Host Process"
-    # - Custom Metrics & Graphs (Pro+ observability_engine — Slice 1)
+    # - Custom Metrics & Graphs (Pro+ observability_engine -- Slice 1)
     MANAGE_CUSTOM_METRICS = "Manage Custom Metrics"
 
     # Integration Management Roles

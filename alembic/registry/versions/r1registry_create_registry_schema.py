@@ -6,23 +6,23 @@
 
 Phase 13.1.A: multi-tenancy control-plane ("registry") schema.
 
-Creates the four ``registry_*`` control-plane tables — the source of
+Creates the four ``registry_*`` control-plane tables -- the source of
 truth for which tenants exist, who may reach them, and where each
 tenant's database lives:
 
-  * registry_tenant            — the tenant (account)
-  * registry_user              — global identity keyed by email
-  * registry_user_tenant_grant — the email→tenant mapping (least-privilege core)
-  * registry_tenant_placement  — per-tenant DB coordinates (NEVER credentials)
+  * registry_tenant            -- the tenant (account)
+  * registry_user              -- global identity keyed by email
+  * registry_user_tenant_grant -- the email→tenant mapping (least-privilege core)
+  * registry_tenant_placement  -- per-tenant DB coordinates (NEVER credentials)
 
-This is the ROOT of the **registry** Alembic chain — a separate
+This is the ROOT of the **registry** Alembic chain -- a separate
 environment with its own version table (``alembic_version_registry``),
 NOT a second head in the tenant chain.  Foreign keys here are
 intra-partition (all four tables always share one database) and so are
 allowed; no FK crosses a partition boundary.
 
 Idempotent (re-runnable on a database that already has any subset of the
-tables / indexes), and identical on SQLite (test) and PostgreSQL (prod) —
+tables / indexes), and identical on SQLite (test) and PostgreSQL (prod) --
 no dialect-specific types or DDL.
 
 Revision ID: r1registry

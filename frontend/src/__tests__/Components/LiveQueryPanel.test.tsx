@@ -7,7 +7,7 @@
  *
  * What matters here is that the BOUND is visible. A live query asks hosts in
  * waves, so at any moment some are answered, some are in flight and some have
- * not been asked at all — and an operator who cannot see that distinction
+ * not been asked at all -- and an operator who cannot see that distinction
  * cannot tell a bounded fan-out from a hung one.
  *
  * The second thing is the one this whole phase keeps insisting on: a host
@@ -99,7 +99,7 @@ const start = async () => {
 
 describe("the bound is visible", () => {
   test("a host that has not been asked yet shows as waiting", async () => {
-    // THE test. "waiting" is the bound made visible — without it, a bounded
+    // THE test. "waiting" is the bound made visible -- without it, a bounded
     // fan-out and a hung one look identical to the operator.
     (createLiveQuery as any).mockResolvedValue(liveQuery());
     (getLiveQuery as any).mockResolvedValue(
@@ -203,7 +203,7 @@ describe("guards", () => {
     expect(await screen.findByText("a query may only read")).toBeTruthy();
   });
 
-  test("cancelling stops the polling", async () => {
+  test("canceling stops the polling", async () => {
     (createLiveQuery as any).mockResolvedValue(liveQuery());
     (getLiveQuery as any).mockResolvedValue(liveQuery({ status: "running" }));
     (cancelLiveQuery as any).mockResolvedValue({

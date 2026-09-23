@@ -25,7 +25,7 @@ class TestBroadcastAuth:
 
 class TestBroadcastBasic:
     def test_broadcast_to_empty_fleet_returns_zero(self, client, auth_headers):
-        """No connected agents in the test harness — broadcast must
+        """No connected agents in the test harness -- broadcast must
         still return 200 with delivered_count=0, NEVER 500."""
         r = client.post(
             "/api/v1/broadcast",

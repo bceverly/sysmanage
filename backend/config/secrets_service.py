@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Config secrets accessor — Phase 13.1.H (config classification).
+Config secrets accessor -- Phase 13.1.H (config classification).
 
 Implements the "**secrets go to OpenBAO by default**" rule from
 ``docs/planning/config-classification.md`` §1/§3.  B-bucket secrets
@@ -14,8 +14,8 @@ honored as a fallback with a one-time deprecation warning.
 
 This is the additive backbone: it changes no call sites on its own.  Each
 option is migrated by switching its accessor to call :func:`get_secret`
-with a ``yaml_getter`` that returns the legacy value — a one-line change
-per secret — and then dropping the YAML key in a later major.
+with a ``yaml_getter`` that returns the legacy value -- a one-line change
+per secret -- and then dropping the YAML key in a later major.
 
 The OpenBAO read is best-effort and never raises: if vault is disabled or
 unreachable, it returns ``None`` and the YAML fallback (or ``default``)
@@ -79,7 +79,7 @@ def get_config_secret_bag() -> Optional[dict]:
         return None
     now = time.time()
     with _cache_lock:
-        # Serve from cache while fresh — including a cached miss (None), so an
+        # Serve from cache while fresh -- including a cached miss (None), so an
         # absent/down OpenBAO isn't re-probed on every lookup.
         if _cache_fetched and now < _cache_expiry:
             return _cache_bag
@@ -145,7 +145,7 @@ def store_config_secrets(secrets: dict) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Tenant-scoped secrets (Phase 13.1) — per-tenant config secrets (e.g. each
+# Tenant-scoped secrets (Phase 13.1) -- per-tenant config secrets (e.g. each
 # tenant's SMTP password) under a per-tenant OpenBAO path.  Only meaningful
 # when multi-tenancy is enabled; single-tenant deployments use the server
 # accessors above.  Not cached: tenant secret reads are far less hot than the
@@ -246,7 +246,7 @@ def get_secret(
             # that raises could embed the secret value in str(exc), and the key
             # name is itself treated as sensitive.  (Clears CodeQL
             # py/clear-text-logging-sensitive-data.)  Bare ``nosemgrep`` (the
-            # specific rule id would exceed the 100-char line cap) — this line
+            # specific rule id would exceed the 100-char line cap) -- this line
             # logs only ``type(exc).__name__``, never a secret value.
             logger.debug(  # nosemgrep
                 "YAML fallback lookup for a secret raised %s", type(exc).__name__
@@ -261,7 +261,7 @@ def get_secret(
                 # request context.
                 logger.warning(
                     "A secret is being read from sysmanage.yaml. Secrets should "
-                    "live in OpenBAO — see docs/planning/config-classification.md "
+                    "live in OpenBAO -- see docs/planning/config-classification.md "
                     "(Phase 13.1.H). The YAML fallback will be removed in a future "
                     "major."
                 )

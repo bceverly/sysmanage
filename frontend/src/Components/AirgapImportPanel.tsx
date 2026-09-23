@@ -9,8 +9,8 @@
  * button that's enabled only when that drive currently holds readable
  * ISO media.  A Rescan button re-probes after the operator fixes
  * something (inserts a disc, etc.).  Import queues an ingest run, then
- * this panel POLLS that run to COMPLETE/FAILED — showing the live stage
- * (QUEUED → VERIFYING_SIG → COPYING → COMPLETE) inline — and calls
+ * this panel POLLS that run to COMPLETE/FAILED -- showing the live stage
+ * (QUEUED → VERIFYING_SIG → COPYING → COMPLETE) inline -- and calls
  * ``onComplete`` so the parent refreshes the repository list without a
  * manual page reload.
  *
@@ -261,7 +261,7 @@ const AirgapImportPanel: React.FC<Props> = ({ onComplete }) => {
               <Alert severity="success" sx={{ mt: 1 }}>
                 {t(
                   'airgapImport.runDone',
-                  'Import complete — the repository list below is refreshed.',
+                  'Import complete -- the repository list below is refreshed.',
                 )}
               </Alert>
             )}

@@ -203,7 +203,7 @@ async def list_third_party_repositories(
     Requires the host to be approved and active.
     Runs the database query in a thread pool to avoid blocking the event loop.
     """
-    # Capture the active tenant HERE, in the request's async context — the
+    # Capture the active tenant HERE, in the request's async context -- the
     # ContextVar won't be visible inside the thread-pool worker below.
     from backend.persistence.tenant_context import get_active_tenant
 
@@ -402,7 +402,7 @@ async def delete_third_party_repositories(  # NOSONAR
         )
 
         # Bulk-delete with two queries (one per discriminator) rather
-        # than one DELETE per repo — the previous loop issued 1 query
+        # than one DELETE per repo -- the previous loop issued 1 query
         # per repository (flagged in the Phase 6 N+1 audit).
         file_paths = [
             r["file_path"] for r in request.repositories if r.get("file_path")

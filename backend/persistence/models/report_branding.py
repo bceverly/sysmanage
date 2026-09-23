@@ -42,7 +42,7 @@ from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
 
 # Sentinel id for the singleton ReportBranding row.  Using a fixed UUID
-# keeps the upsert pattern simple — there is exactly one branding row
+# keeps the upsert pattern simple -- there is exactly one branding row
 # system-wide (matches the user's "logo + header" feature).
 SINGLETON_BRANDING_ID = uuid.UUID("00000000-0000-0000-0000-000000000001")
 

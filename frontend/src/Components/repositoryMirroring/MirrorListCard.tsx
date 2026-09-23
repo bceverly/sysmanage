@@ -101,7 +101,7 @@ const MirrorListCard: React.FC<MirrorListCardProps> = ({
       return next;
     });
 
-  // Snap store proxy (Phase 17.1) is a separate Pro+ module — the tracked-snaps
+  // Snap store proxy (Phase 17.1) is a separate Pro+ module -- the tracked-snaps
   // panel + capture action only appear when snap_proxy_engine is licensed
   // (mirroring the backend's 402 gate).
   const snapLicensed = useModuleLicensed('snap_proxy_engine');
@@ -117,7 +117,7 @@ const MirrorListCard: React.FC<MirrorListCardProps> = ({
       return next;
     });
 
-  // OCI image content (Phase 17.2) is a separate Pro+ module — the tracked-
+  // OCI image content (Phase 17.2) is a separate Pro+ module -- the tracked-
   // images panel + capture action only appear when oci_proxy_engine is licensed
   // (mirroring the backend's 402 gate).
   const imageLicensed = useModuleLicensed('oci_proxy_engine');
@@ -135,7 +135,7 @@ const MirrorListCard: React.FC<MirrorListCardProps> = ({
       return next;
     });
 
-  // Load the catalog on mount + whenever the platform changes — used
+  // Load the catalog on mount + whenever the platform changes -- used
   // both by the Add/Edit dialog dropdown AND by the table to resolve
   // each row's known_version_id into a friendly OS/version label.
   useEffect(() => {
@@ -149,9 +149,9 @@ const MirrorListCard: React.FC<MirrorListCardProps> = ({
       const kv = knownVersions.find((v) => v.id === m.known_version_id);
       if (kv) return kv.label;
     }
-    // Legacy free-text rows (created before the dropdown landed) —
+    // Legacy free-text rows (created before the dropdown landed) --
     // fall back to whatever per-PM identifier the row carries.
-    return m.suite || m.repoid || m.repo_alias || m.release || '—';
+    return m.suite || m.repoid || m.repo_alias || m.release || '--';
   };
 
   const applyVersionToDraft = (versionId: string) => {
@@ -218,7 +218,7 @@ const MirrorListCard: React.FC<MirrorListCardProps> = ({
       setError(
         e instanceof Error
           ? e.message
-          : t('mirror.saveError', 'Could not save mirror — check the form.'),
+          : t('mirror.saveError', 'Could not save mirror -- check the form.'),
       );
     } finally {
       setBusy(false);
@@ -258,7 +258,7 @@ const MirrorListCard: React.FC<MirrorListCardProps> = ({
           <Table size="small">
             <TableHead>
               <TableRow>
-                {/* Expand chevron — narrow column so it doesn't steal layout. */}
+                {/* Expand chevron -- narrow column so it doesn't steal layout. */}
                 <TableCell sx={{ width: 32, p: 0 }} />
                 <TableCell>{t('mirror.col.name', 'Name')}</TableCell>
                 <TableCell>{t('mirror.col.osVersion', 'OS / Version')}</TableCell>
@@ -436,7 +436,7 @@ const MirrorListCard: React.FC<MirrorListCardProps> = ({
           {/* The first TextField gets an explicit top margin so its
               floating label has unconditional clearance from the
               DialogTitle.  ``pt: 4`` on DialogContent alone isn't
-              always enough — MUI's outlined label is positioned
+              always enough -- MUI's outlined label is positioned
               absolutely and can clip against an ``overflow-y: auto``
               parent on tight viewports. */}
           <Stack spacing={2} sx={{ mt: 1 }}>
@@ -468,7 +468,7 @@ const MirrorListCard: React.FC<MirrorListCardProps> = ({
                 'Lowercase letters, digits, hyphens, underscores. Spaces and dots become hyphens.',
               )}
             />
-            {/* Phase 10.4.4 — version dropdown sourced from the
+            {/* Phase 10.4.4 -- version dropdown sourced from the
                 pre-populated ``mirror_known_version`` catalog.  Picking
                 a row auto-fills upstream_url + the per-PM identifier
                 (suite/repoid/repo_alias/release) so we can't fat-finger
@@ -505,7 +505,7 @@ const MirrorListCard: React.FC<MirrorListCardProps> = ({
             />
 
             {/* Optional per-PM extras that aren't version identifiers
-                — components (apt), GPG/signing key URLs.  These stay
+                -- components (apt), GPG/signing key URLs.  These stay
                 free-text because they're per-deployment, not per-version. */}
             {draft.package_manager === 'apt' && (
               <>
@@ -574,7 +574,7 @@ const MirrorListCard: React.FC<MirrorListCardProps> = ({
           {/* Disable Save when any field the engine's
               ``validate_mirror_config`` would reject is empty.  This
               keeps the user from learning about required fields via a
-              400 round-trip — mirrors the server-side rules exactly so
+              400 round-trip -- mirrors the server-side rules exactly so
               a click that's enabled always corresponds to a server
               that'll accept it. */}
           <Button

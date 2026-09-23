@@ -132,7 +132,7 @@ export const useChildHosts = ({
         }
     }, []);
 
-    // Auto-detect child type based on platform — ONLY when the dialog
+    // Auto-detect child type based on platform -- ONLY when the dialog
     // was opened without an explicit type via openCreateDialogWithType.
     // We must NOT clear ``explicitChildTypeRef.current`` here: in React
     // 18 dev StrictMode the effect fires twice on mount/open, and on the
@@ -179,7 +179,7 @@ export const useChildHosts = ({
         if (!hostId) return;
         // Child-host management is a Professional+ feature (container_engine module).
         // Without the license the endpoint returns 402, so don't probe it in
-        // Community Edition — avoids noisy console errors on every host-detail load.
+        // Community Edition -- avoids noisy console errors on every host-detail load.
         if (!licenseModules.includes('container_engine')) return;
         try {
             if (showLoading) {
@@ -674,7 +674,7 @@ export const useChildHosts = ({
                         confirmRootPassword: '',
                         autoApprove: false,
                         // Cleared deliberately, not carried over: these hold a
-                        // licence key and domain credentials, and the dialog
+                        // license key and domain credentials, and the dialog
                         // stays open for the next create.
                         windowsEdition: 'standard-core',
                         windowsProductKey: '',

@@ -9,7 +9,7 @@ Three tables backing the Pro+ ``provisioning_engine`` module (net-new host
 provisioning):
 
   compute_resource
-      A configured compute backend (a provider endpoint) — remote libvirt,
+      A configured compute backend (a provider endpoint) -- remote libvirt,
       Proxmox, and later cloud/VMware.  Holds the connection URI and a
       ``credential_ref`` (an OpenBAO path); the secret itself is never stored
       in the row.
@@ -20,7 +20,7 @@ provisioning):
       Authoring is the Pro+ surface; the engine renders the final artifact.
 
   provisioning_job
-      A record of a provision request against a compute resource — its state,
+      A record of a provision request against a compute resource -- its state,
       the provider's handle once created, and free-form detail.
 
 These are per-tenant operational data (tenant partition under multi-tenancy;
@@ -52,9 +52,9 @@ from backend.persistence.models.core import GUID
 _HOST_ID_FK = "host.id"
 _TEMPLATE_ID_FK = "provisioning_template.id"
 
-# ON DELETE behaviours, named for the same reason.  The distinction is
+# ON DELETE behaviors, named for the same reason.  The distinction is
 # deliberate and worth keeping legible: a template going away must NOT delete
-# the job or assignment that referenced it (SET NULL — the record stays, it just
+# the job or assignment that referenced it (SET NULL -- the record stays, it just
 # loses its optional template), whereas a child row whose owner is deleted has
 # no meaning on its own (CASCADE).
 _ON_DELETE_SET_NULL = "SET NULL"
@@ -77,7 +77,7 @@ PROVISIONING_TEMPLATE_KINDS = (
 
 # Answer-file dialects a bare-metal install source can be driven by (Phase
 # 18.2).  Which one an OS needs is a property of the OS, not of the operator's
-# choice — Ubuntu server takes autoinstall, Debian preseed, RHEL kickstart,
+# choice -- Ubuntu server takes autoinstall, Debian preseed, RHEL kickstart,
 # SUSE AutoYaST, and FreeBSD a bsdinstall script.
 INSTALL_TEMPLATE_TYPES = (
     "autoinstall",
@@ -137,14 +137,14 @@ class ComputeResource(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     name = Column(String(255), nullable=False, unique=True)
-    # Provider kind — one of COMPUTE_PROVIDER_KINDS (validated in the engine).
+    # Provider kind -- one of COMPUTE_PROVIDER_KINDS (validated in the engine).
     kind = Column(String(50), nullable=False, index=True)
     connection_uri = Column(String(500), nullable=False)
     # OpenBAO path to the credential (e.g. an SSH key for qemu+ssh://).  The
     # secret is brokered from OpenBAO at connect time; only the path lives here.
     credential_ref = Column(String(500), nullable=True)
     # Non-secret provider settings (e.g. node_ssh_user, snippet_storage,
-    # node_ssh_host for cluster targeting).  NEVER holds credentials — secrets
+    # node_ssh_host for cluster targeting).  NEVER holds credentials -- secrets
     # live only in OpenBAO, referenced by credential_ref.
     config = Column(JSON, nullable=True)
     enabled = Column(Boolean, nullable=False, default=True)
@@ -182,7 +182,7 @@ class ProvisioningTemplate(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     name = Column(String(255), nullable=False, unique=True)
-    # Template kind — one of PROVISIONING_TEMPLATE_KINDS (validated in engine).
+    # Template kind -- one of PROVISIONING_TEMPLATE_KINDS (validated in engine).
     kind = Column(String(50), nullable=False, index=True)
     body = Column(Text, nullable=False)
     # Free-form parameter defaults/metadata the renderer interpolates.
@@ -237,7 +237,7 @@ class ProvisioningJob(Base):
     # pending | creating | running | stopped | error | absent
     state = Column(String(30), nullable=False, default="pending", index=True)
     # The provider's own handle for the created guest (libvirt domain UUID,
-    # Proxmox vmid, cloud instance id) — NULL until the provider creates it.
+    # Proxmox vmid, cloud instance id) -- NULL until the provider creates it.
     provider_id = Column(String(255), nullable=True)
     detail = Column(Text, nullable=True, default="")
 
@@ -278,7 +278,7 @@ class ProvisioningReadiness(Base):
     ``last_check_message_id`` is non-NULL.
 
     Bare-metal provisioning needs three services on the designated
-    provisioning-server host — DHCP, TFTP, and HTTP — and a boot loader to
+    provisioning-server host -- DHCP, TFTP, and HTTP -- and a boot loader to
     hand out.  Readiness gates PXE until they are present.
     """
 
@@ -287,7 +287,7 @@ class ProvisioningReadiness(Base):
     host_id = Column(
         GUID(), ForeignKey(_HOST_ID_FK, ondelete=_ON_DELETE_CASCADE), primary_key=True
     )
-    # {tool_name: "present" | "missing"} — commands AND boot-loader files.
+    # {tool_name: "present" | "missing"} -- commands AND boot-loader files.
     tools = Column(JSON, nullable=False, default=dict)
     # Observed runtime facts the advisor needs, e.g.
     # {"dhcp_port_67": "in_use" | "free", "tftp_port_69": ...}.  A DHCP server
@@ -352,11 +352,11 @@ class ProvisioningReadiness(Base):
         )
 
     def is_ready(self) -> bool:
-        """Every provisioning role satisfied — the gate PXE gets held behind."""
+        """Every provisioning role satisfied -- the gate PXE gets held behind."""
         return all(self.is_ready_for(r) for r in self.PROVISIONING_ROLES)
 
     def missing_for(self, role: str) -> list:
-        """Tools from the CHEAPEST unsatisfied group — what to offer to install.
+        """Tools from the CHEAPEST unsatisfied group -- what to offer to install.
 
         Returns the group needing the fewest additional tools, so a host that
         already has dnsmasq isn't told to install isc-dhcp-server.
@@ -435,7 +435,7 @@ class InstallSource(Base):
     dialect that OS speaks.
 
     ``mirror_repository_id`` is a SOFT reference (no FK) to the mirror the tree
-    came from — provenance only, and deliberately not a constraint so a mirror
+    came from -- provenance only, and deliberately not a constraint so a mirror
     can be retired without invalidating a working catalog entry.
     """
 
@@ -448,15 +448,15 @@ class InstallSource(Base):
     arch = Column(String(20), nullable=False, default="x86_64", index=True)
 
     # Netboot artifacts, as paths under the provisioning server's TFTP/HTTP
-    # root.  FreeBSD is the shape-breaker — it netboots pxeboot + an mfsroot
-    # rather than a Linux kernel+initrd — so initrd_path is nullable.
+    # root.  FreeBSD is the shape-breaker -- it netboots pxeboot + an mfsroot
+    # rather than a Linux kernel+initrd -- so initrd_path is nullable.
     kernel_path = Column(String(500), nullable=False)
     initrd_path = Column(String(500), nullable=True)
     # Where the installer pulls packages from (a mirrored repo or air-gap tree).
     install_tree_url = Column(String(1000), nullable=False)
-    # Answer-file dialect — one of INSTALL_TEMPLATE_TYPES.
+    # Answer-file dialect -- one of INSTALL_TEMPLATE_TYPES.
     template_type = Column(String(30), nullable=False)
-    # "install" (default) or "discovery" — see INSTALL_SOURCE_PURPOSES.  A
+    # "install" (default) or "discovery" -- see INSTALL_SOURCE_PURPOSES.  A
     # discovery image runs entirely in RAM and never touches the disk, so it
     # has no answer file; template_type is ignored for it.
     #
@@ -509,7 +509,7 @@ class HostInstallAssignment(Base):
     """A per-MAC pin: this machine gets this OS (Phase 18.2 S3).
 
     The per-MAC iPXE endpoint resolves against this table at boot.  MAC is the
-    key because a blank machine has no other stable identity — it has no agent,
+    key because a blank machine has no other stable identity -- it has no agent,
     no hostname, and no host row until it enrolls.
 
     ``state`` is load-bearing, not decorative: once a machine reaches
@@ -522,7 +522,7 @@ class HostInstallAssignment(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     # Normalised lowercase colon-separated form (aa:bb:cc:dd:ee:ff).  Callers
-    # go through the engine's normaliser — iPXE, pxelinux and operators each
+    # go through the engine's normaliser -- iPXE, pxelinux and operators each
     # spell MACs differently.
     mac_address = Column(String(17), nullable=False, unique=True, index=True)
     install_source_id = Column(
@@ -543,7 +543,7 @@ class HostInstallAssignment(Base):
     )
     # What the installed machine should call itself.
     hostname = Column(String(255), nullable=True)
-    # Placement for the enrollment token minted at install time — same pair the
+    # Placement for the enrollment token minted at install time -- same pair the
     # 18.1 S4 token carries.  Soft references (no FK): site/access-group live in
     # the registry partition under multi-tenancy.
     site_id = Column(GUID(), nullable=True)
@@ -578,7 +578,7 @@ class HostInstallAssignment(Base):
     def netboot_armed(self) -> bool:
         """Should this machine be served an installer on its next netboot?
 
-        False once installed — see the class docstring; this is the property
+        False once installed -- see the class docstring; this is the property
         that stops a finished machine from reinstalling itself forever.
         """
         return self.state in ("assigned", "building", "failed")
@@ -607,7 +607,7 @@ class HostInstallAssignment(Base):
             ),
             "state": self.state,
             "params": self.params or {},
-            # The token itself is never serialised — it is a bearer secret for
+            # The token itself is never serialized -- it is a bearer secret for
             # the answer-file URL.  Callers get told whether one exists.
             "has_boot_token": bool(self.boot_token),
             "boot_token_expires_at": (
@@ -647,7 +647,7 @@ class DiscoveredHost(Base):
     Keyed by MAC for the same reason the assignment is: a machine with no OS,
     no agent and no host row has no other stable identity.  ``facts`` is a free
     -form bag rather than columns because what a probe can see varies by
-    hardware, and none of it is queried structurally — it exists for a human
+    hardware, and none of it is queried structurally -- it exists for a human
     deciding what to install on this box.
     """
 
@@ -658,7 +658,7 @@ class DiscoveredHost(Base):
     mac_address = Column(String(17), nullable=False, unique=True, index=True)
     # One of DISCOVERED_HOST_STATES.
     state = Column(String(20), nullable=False, default="discovered", index=True)
-    # Address the probe reported from — useful for locating the machine, and
+    # Address the probe reported from -- useful for locating the machine, and
     # not authoritative for anything.
     ip_address = Column(String(45), nullable=True)
     hostname = Column(String(255), nullable=True)

@@ -5,7 +5,7 @@
 """
 Advisory / errata source registry (Phase 14.1).
 
-Declares the vendor advisory feeds the shared catalog is built from — the
+Declares the vendor advisory feeds the shared catalog is built from -- the
 advisory analogue of ``backend/vulnerability/cve_sources.py``.  A refresh runs
 **server-global** (once, into the ``shared`` partition), never per-tenant.  The
 actual fetch/parse/ingest logic lives in the Pro+ ``advisory_engine`` (moat); this

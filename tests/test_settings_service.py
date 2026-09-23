@@ -37,7 +37,7 @@ def test_get_falls_back_to_yaml_with_deprecation(engine, caplog):
     _reset_warned()
     with caplog.at_level(logging.WARNING):
         val = settings_service.get_setting("cookie_domain", lambda: "example.com")
-        # Second read: no DB value, same fallback — warning only once.
+        # Second read: no DB value, same fallback -- warning only once.
         settings_service.get_setting("cookie_domain", lambda: "example.com")
     assert val == "example.com"
     warnings = [r for r in caplog.records if "cookie_domain" in r.message]

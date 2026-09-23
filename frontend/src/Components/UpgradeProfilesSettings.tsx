@@ -215,7 +215,7 @@ const UpgradeProfilesSettings: React.FC = () => {
     try {
       const r = await upgradeProfilesService.trigger(p.id);
       showSuccess(
-        t('upgradeProfiles.triggered', 'Triggered against {{count}} host(s) — {{enqueued}} dispatched', {
+        t('upgradeProfiles.triggered', 'Triggered against {{count}} host(s) -- {{enqueued}} dispatched', {
           count: r.host_count,
           enqueued: r.enqueued_count,
         }),
@@ -281,20 +281,20 @@ const UpgradeProfilesSettings: React.FC = () => {
       headerName: t('upgradeProfiles.lastRun', 'Last Run'),
       width: 170,
       valueGetter: (_v, row) =>
-        row.last_run ? formatUTCTimestamp(row.last_run, '—') : '—',
+        row.last_run ? formatUTCTimestamp(row.last_run, '--') : '--',
     },
     {
       field: 'next_run',
       headerName: t('upgradeProfiles.nextRun', 'Next Run'),
       width: 170,
       valueGetter: (_v, row) =>
-        row.next_run ? formatUTCTimestamp(row.next_run, '—') : '—',
+        row.next_run ? formatUTCTimestamp(row.next_run, '--') : '--',
     },
     {
       field: 'last_status',
       headerName: t('upgradeProfiles.lastStatus', 'Last Status'),
       width: 130,
-      valueGetter: (_v, row) => row.last_status || '—',
+      valueGetter: (_v, row) => row.last_status || '--',
     },
     {
       field: 'actions',
@@ -401,7 +401,7 @@ const UpgradeProfilesSettings: React.FC = () => {
               fullWidth
               helperText={t(
                 'upgradeProfiles.cronHelp',
-                'POSIX cron — minute hour day-of-month month day-of-week',
+                'POSIX cron -- minute hour day-of-month month day-of-week',
               )}
               required
             />
@@ -440,7 +440,7 @@ const UpgradeProfilesSettings: React.FC = () => {
               slotProps={{ htmlInput: { min: 0, max: 720 } }}
               helperText={t(
                 'upgradeProfiles.windowHelp',
-                'Spread agent dispatches over this many minutes (0–720)',
+                'Spread agent dispatches over this many minutes (0-720)',
               )}
             />
             <FormControl fullWidth>

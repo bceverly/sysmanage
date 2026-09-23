@@ -425,7 +425,7 @@ const AuditLogViewer: React.FC = () => {
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 labelDisplayedRows={({ from, count: totalCount }) => {
                   const to = Math.min((page + 1) * rowsPerPage, totalCount);
-                  return `${from.toLocaleString(i18n.language)}–${to.toLocaleString(i18n.language)} ${t('common.of', 'of')} ${totalCount.toLocaleString(i18n.language)}`;
+                  return `${from.toLocaleString(i18n.language)}-${to.toLocaleString(i18n.language)} ${t('common.of', 'of')} ${totalCount.toLocaleString(i18n.language)}`;
                 }}
               />
             </>

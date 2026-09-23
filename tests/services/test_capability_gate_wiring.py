@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""The dispatch gate must be WIRED, not merely implemented — ROADMAP Phase 19.
+"""The dispatch gate must be WIRED, not merely implemented -- ROADMAP Phase 19.
 
 `assert_host_supports()` is unit-tested in test_agent_capability_service.py, but
 that proves only that the function works. The feature spent its first day fully
@@ -46,7 +46,7 @@ def _db_returning(host):
 
     Model-aware on purpose: enqueue_message also runs a duplicate-command
     lookup, and a mock that returns the Host for EVERY query hands a Host to
-    code expecting a MessageQueue row — which fails with an AttributeError that
+    code expecting a MessageQueue row -- which fails with an AttributeError that
     looks like a gate failure but is only the fake being too eager.
     """
     db = MagicMock()
@@ -60,7 +60,7 @@ def _db_returning(host):
         return q
 
     db.query.side_effect = _query
-    # Anything that reaches a write has cleared the gate — that is what we
+    # Anything that reaches a write has cleared the gate -- that is what we
     # want to observe, without standing up a real queue table.
     db.add.side_effect = _Sentinel()
     return db
@@ -104,7 +104,7 @@ def test_a_host_that_never_advertised_is_not_gated():
 
 
 def test_non_command_messages_are_never_gated():
-    """Not every queued message is a routed command — data messages must flow
+    """Not every queued message is a routed command -- data messages must flow
     regardless of what the agent advertises."""
     host = _Host(commands=["install_package"])
     with pytest.raises(_Sentinel):

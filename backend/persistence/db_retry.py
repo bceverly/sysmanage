@@ -8,15 +8,15 @@ During the few seconds a primary is being promoted there is no writable primary,
 so a connection opened *into that gap* raises ``OperationalError`` /
 ``InterfaceError``.  ``pool_pre_ping`` (see :data:`backend.persistence.db.
 HA_ENGINE_KWARGS`) already reconnects a *dead pooled* socket transparently on
-checkout; this helper covers the remaining case — a unit of work that begins
-mid-gap — by retrying with bounded exponential backoff until the new primary
+checkout; this helper covers the remaining case -- a unit of work that begins
+mid-gap -- by retrying with bounded exponential backoff until the new primary
 accepts connections.
 
-SAFETY — only for IDEMPOTENT / not-yet-committed work.  The wrapped callable
+SAFETY -- only for IDEMPOTENT / not-yet-committed work.  The wrapped callable
 MUST be safe to run again from the start with no partially-applied side effects:
 a read, or a self-contained ``with Session() as s: ...; s.commit()`` block that
 had not yet committed when it failed.  NEVER wrap a partially-committed
-multi-step transaction — a blind replay would double-apply it.  A non-transient
+multi-step transaction -- a blind replay would double-apply it.  A non-transient
 error (bad SQL, constraint violation, ...) is re-raised immediately, never
 retried.
 """
@@ -30,7 +30,7 @@ from sqlalchemy.exc import InterfaceError, OperationalError
 
 logger = logging.getLogger(__name__)
 
-# Errors that signal a lost/absent connection — transient during a failover —
+# Errors that signal a lost/absent connection -- transient during a failover --
 # as opposed to a query/logic error (IntegrityError, ProgrammingError, ...),
 # which must surface immediately rather than be replayed.
 TRANSIENT_DB_ERRORS = (OperationalError, InterfaceError)
@@ -52,7 +52,7 @@ def run_with_db_retry(
 
     Backoff is exponential and capped: ``base_delay * 2**(n-1)`` bounded by
     ``max_delay``.  Blocks the calling thread with ``time.sleep`` between tries,
-    so use from a sync context or a threadpool — never inline in the event loop.
+    so use from a sync context or a threadpool -- never inline in the event loop.
     Re-raises the last transient error once ``max_attempts`` is exhausted, and
     re-raises any non-transient error on the first occurrence.
     """
@@ -71,7 +71,7 @@ def run_with_db_retry(
                 raise
             delay = min(base_delay * (2 ** (attempt - 1)), max_delay)
             logger.warning(
-                "Transient DB error (attempt %d/%d) — retrying in %.1fs: %s",
+                "Transient DB error (attempt %d/%d) -- retrying in %.1fs: %s",
                 attempt,
                 max_attempts,
                 delay,
@@ -90,7 +90,7 @@ async def run_with_db_retry_async(
 ):
     """Async twin of :func:`run_with_db_retry`.
 
-    Awaits ``func(*args, **kwargs)`` and backs off with ``asyncio.sleep`` — so
+    Awaits ``func(*args, **kwargs)`` and backs off with ``asyncio.sleep`` -- so
     it yields the event loop during the promotion gap instead of blocking it.
     Use from an async request/handler boundary wrapping an awaitable idempotent
     unit of work.  Same transient-vs-fatal classification and give-up semantics.
@@ -110,7 +110,7 @@ async def run_with_db_retry_async(
                 raise
             delay = min(base_delay * (2 ** (attempt - 1)), max_delay)
             logger.warning(
-                "Transient DB error (async attempt %d/%d) — retrying in %.1fs: %s",
+                "Transient DB error (async attempt %d/%d) -- retrying in %.1fs: %s",
                 attempt,
                 max_attempts,
                 delay,

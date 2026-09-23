@@ -4,7 +4,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-migrate-tenant-data — relocate per-tenant rows from the bootstrap database into
+migrate-tenant-data -- relocate per-tenant rows from the bootstrap database into
 each tenant's database (Phase 13.1 data plane).
 
 Idempotent: run it repeatedly as each object is routed to the tenant partition.
@@ -31,7 +31,7 @@ from backend.services import tenant_data_mover  # noqa: E402
 
 def _print_move(report) -> int:
     if not report.get("_enabled", False):
-        print("Multi-tenancy disabled — nothing to move (single database).")
+        print("Multi-tenancy disabled -- nothing to move (single database).")
         return 0
     failures = 0
     for name, r in report.items():
@@ -78,7 +78,7 @@ def main(argv=None) -> int:
                 f"(unassigned={s['unassigned']}, still-to-move={placeable}) [{state}]"
             )
         print(
-            "\n[OK] All assigned rows have been moved — safe to drop legacy tables."
+            "\n[OK] All assigned rows have been moved -- safe to drop legacy tables."
             if ready
             else "\n[WAIT] Some assigned rows still live in the bootstrap DB."
         )
@@ -89,7 +89,7 @@ def main(argv=None) -> int:
         if not args.apply
         else ("move (copy + delete source)" if args.delete_source else "copy")
     )
-    print(f"=== Migrating tenant data — {mode} ===")
+    print(f"=== Migrating tenant data -- {mode} ===")
     report = tenant_data_mover.move_all(
         apply=args.apply, delete_source=args.delete_source
     )

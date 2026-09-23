@@ -24,7 +24,7 @@ import {
  * Ad-hoc fleet-wide live query (Phase 21.1 S5).
  *
  * The panel polls while a query is running, because results arrive per host
- * as each one answers — a single response at the end would make a bounded
+ * as each one answers -- a single response at the end would make a bounded
  * fan-out look identical to a hung one.
  */
 
@@ -34,7 +34,7 @@ const POLL_MS = 2000;
 /**
  * Human labels with REAL fallbacks, not the raw status string.
  *
- * `t(key, status)` would fall back to the bare value — so a missing catalog
+ * `t(key, status)` would fall back to the bare value -- so a missing catalog
  * key shows an operator `waiting` instead of "Waiting", untranslated and
  * easily misread. Same fix as the run-status chip on the packs page.
  */
@@ -54,7 +54,7 @@ const TARGET_STATUS_LABEL: Record<string, string> = {
     failed: 'Failed',
 };
 
-/** Per-host outcome colours. `not covered` is NOT an error — see below. */
+/** Per-host outcome colors. `not covered` is NOT an error -- see below. */
 const TARGET_COLOR: Record<string, 'success' | 'warning' | 'error' | 'default'> = {
     waiting: 'default',
     pending: 'default',

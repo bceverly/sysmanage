@@ -20,7 +20,7 @@ a constraint pass).
 Phase 11.5: the runtime evaluation path now goes through the Pro+
 ``compliance_engine`` Cython module (``evaluate_host_status`` /
 ``build_package_remediation_plan``) when loaded.  This file is kept
-as tested utility code — it's used as the legacy fallback when the
+as tested utility code -- it's used as the legacy fallback when the
 engine module isn't available (test stubs, dev environments) and it
 remains a useful reference for the engine's pure-Python equivalents.
 """
@@ -45,7 +45,7 @@ def _compare_versions(installed: str, op: str, target: str) -> Tuple[bool, str]:
     """Return (passes, reason).  ``reason`` is empty when passing or
     explanatory when not (UI will display this directly)."""
     if Version is None:
-        # packaging not installed — fall back to lexicographic.
+        # packaging not installed -- fall back to lexicographic.
         return _lex_compare(installed, op, target), ""
     try:
         iv = Version(installed)
@@ -195,7 +195,7 @@ def evaluate_host_against_profile(
         ``(status, violations)``.  ``status`` is COMPLIANT or
         NON_COMPLIANT; ``violations`` is a list of
         ``{constraint_id, package_name, reason}`` dicts.  An empty
-        violations list with NON_COMPLIANT status is impossible —
+        violations list with NON_COMPLIANT status is impossible --
         the function only returns NON_COMPLIANT when at least one
         violation is recorded.
     """

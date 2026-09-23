@@ -9,7 +9,7 @@ Unit tests cover each federation service in isolation; these exercise the
 WHOLE round-trip across the coordinator/site boundary using the REAL OSS
 service layer on TWO separate databases (one coordinator, one site) with a
 simulated wire transport.  They cover the three things the ROADMAP calls
-out — **sync, dispatch, and offline resilience** — plus the 12.5 secret-lease
+out -- **sync, dispatch, and offline resilience** -- plus the 12.5 secret-lease
 path, end to end.
 
 This deliberately stops short of spawning two OS processes + the Pro+ Cython
@@ -92,7 +92,7 @@ class FederationCluster:
 
         ``fail=True`` simulates the coordinator being unreachable: nothing is
         delivered, every entry is marked failed, and the site records a failed
-        sync attempt (so connection-health degrades) — exactly the offline
+        sync attempt (so connection-health degrades) -- exactly the offline
         path.  Returns the number of payloads delivered.
         """
         batch = sync_svc.peek_batch(self.site, limit=100)
@@ -190,7 +190,7 @@ def cluster():
     c = FederationCluster()
     c.enroll()
     yield c
-    # Close the sessions AND dispose their engines — otherwise each cluster's
+    # Close the sessions AND dispose their engines -- otherwise each cluster's
     # two in-memory sqlite connections are gc'd unclosed (ResourceWarning).
     for sess in (c.coord, c.site):
         bind = sess.get_bind()

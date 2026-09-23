@@ -21,7 +21,7 @@ from datetime import datetime
 #   "lower"  -> a regression occurs when current is meaningfully LESS than baseline
 #              (throughput, requests/sec)
 # Anything not in the table defaults to "higher" (the conservative choice for
-# perf metrics — most of what we record is latency-shaped).
+# perf metrics -- most of what we record is latency-shaped).
 METRIC_BAD_DIRECTION = {
     # Artillery-side metrics
     "response_time_p95": "higher",
@@ -30,7 +30,7 @@ METRIC_BAD_DIRECTION = {
     "response_time_median": "higher",
     "error_rate": "higher",
     "requests_per_second": "lower",
-    # Per-OS throughput variants emitted by the artillery harness —
+    # Per-OS throughput variants emitted by the artillery harness --
     # without these entries, the default-"higher" fallback flips an
     # ``increase`` (faster fleet) into a "regression" alarm.
     "linux_requests_per_second": "lower",
@@ -47,7 +47,7 @@ METRIC_BAD_DIRECTION = {
     "resource_count": None,
 }
 
-# p99 latency is dominated by the slowest single request in the window —
+# p99 latency is dominated by the slowest single request in the window --
 # one cold-start outlier can swing it 5-10x even when the rest of the run
 # is fine. Give it a much wider per-metric tolerance so it doesn't fail
 # every fresh-backend run; p95 + mean still catch real regressions.
@@ -65,7 +65,7 @@ PER_METRIC_TOLERANCE_OVERRIDE = {
 # percentage swing isn't statistically meaningful, so we don't fail the build
 # on it (still reported, informationally).  The floor is on the BASELINE, so a
 # genuine collapse from a healthy throughput (e.g. 100 -> 3 req/s) still fires
-# — only inherently-tiny runs are exempted.
+# -- only inherently-tiny runs are exempted.
 THROUGHPUT_NOISE_FLOOR = 50  # req/s
 
 
@@ -133,7 +133,7 @@ class PerformanceRegessionDetector:
         Check if current value represents a regression.
 
         Direction-aware: for "higher-is-bad" metrics (latency, error rate),
-        only an INCREASE counts as a regression — a decrease is improvement
+        only an INCREASE counts as a regression -- a decrease is improvement
         and is reported as such. Likewise for "lower-is-bad" metrics
         (throughput), only a decrease is bad.
 
@@ -165,7 +165,7 @@ class PerformanceRegessionDetector:
         ):
             return False, (
                 f"{deviation:.1f}% swing, but baseline {baseline:.1f} req/s is below "
-                f"the {THROUGHPUT_NOISE_FLOOR} req/s noise floor — load too light to "
+                f"the {THROUGHPUT_NOISE_FLOOR} req/s noise floor -- load too light to "
                 f"gate on (informational)"
             )
 
@@ -192,7 +192,7 @@ class PerformanceRegessionDetector:
         # Direction-aware verdict.
         bad_direction = METRIC_BAD_DIRECTION.get(metric_name, "higher")
         if bad_direction is None:
-            # Informational metric — always pass.
+            # Informational metric -- always pass.
             return False, (f"{deviation:.1f}% {direction_word} (informational metric)")
         is_regression = (bad_direction == "higher" and is_increase) or (
             bad_direction == "lower" and not is_increase
@@ -202,9 +202,9 @@ class PerformanceRegessionDetector:
                 True,
                 f"{deviation:.1f}% {direction_word} (threshold: {effective_tolerance:.1f}%)",
             )
-        # Bigger-than-threshold move in the GOOD direction — improvement, not a regression.
+        # Bigger-than-threshold move in the GOOD direction -- improvement, not a regression.
         return False, (
-            f"{deviation:.1f}% {direction_word} — improvement vs baseline "
+            f"{deviation:.1f}% {direction_word} -- improvement vs baseline "
             f"(threshold: {effective_tolerance:.1f}%)"
         )
 
@@ -310,13 +310,13 @@ class PerformanceRegessionDetector:
         # Drop synthetic environmental signals from the metrics that get
         # compared against baseline / persisted to history.  main() prefixes
         # raw metric names with the OS label, so the keys look like
-        # "linux__socket_timeouts" — match on substring rather than prefix.
+        # "linux__socket_timeouts" -- match on substring rather than prefix.
         env_signals = {
             k: current_results.pop(k)
             for k in list(current_results)
             if "_socket_timeout" in k
         }
-        # Aggregate the env signals across OS prefixes — the orchestrator only
+        # Aggregate the env signals across OS prefixes -- the orchestrator only
         # cares whether the run as a whole was healthy.
         env_summary = {
             "_socket_timeouts": sum(
@@ -356,7 +356,7 @@ class PerformanceRegessionDetector:
             print(
                 f"This run recorded {int(sock_timeouts)} socket timeouts "
                 f"({sock_timeout_rate:.1f}% of vusers).  That's an "
-                "environmental signal — the backend or load generator was "
+                "environmental signal -- the backend or load generator was "
                 "starved of resources, not a code regression."
             )
             print(
@@ -365,7 +365,7 @@ class PerformanceRegessionDetector:
             )
             print(
                 "Re-run when the system is idle (close other heavy "
-                "processes — SonarQube, browsers, IDEs)."
+                "processes -- SonarQube, browsers, IDEs)."
             )
             return [], []
 
@@ -474,11 +474,11 @@ def main():
             all_metrics.update(prefixed_metrics)
 
     if not all_metrics:
-        # Treat absence of data as a real failure — the calling Makefile target
+        # Treat absence of data as a real failure -- the calling Makefile target
         # ran us as part of a "performance tests passed" gate, and reporting
         # success when we couldn't analyze anything would silently mask a
         # broken artillery run, missing report file, or upstream collection
-        # failure (which we've been bitten by before — see git history for
+        # failure (which we've been bitten by before -- see git history for
         # the artillery-scenarios-misconfigured incident).
         print(
             "[ERROR] No performance results found to analyze.\n"

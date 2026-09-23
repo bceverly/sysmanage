@@ -9,7 +9,7 @@ import {
 } from '../../Services/repositoryMirroring';
 
 // Phase 10.4.3: each tab is one PM, so the package_manager dropdown
-// drops out of the Add Mirror dialog — the platform === the PM.
+// drops out of the Add Mirror dialog -- the platform === the PM.
 
 // Match a host's reported platform/release strings against the
 // distro family that natively runs the given PM.  Hosts that don't
@@ -17,7 +17,7 @@ import {
 // show up under the RHEL/Fedora tab (where ``dnf`` mirroring would
 // be meaningless).  We look at ``platform_release`` because it
 // carries either a friendly distro name (``Ubuntu 26.04``) or the
-// kernel uname (``5.15.0-...el9uek...``) — the ``.el`` substring
+// kernel uname (``5.15.0-...el9uek...``) -- the ``.el`` substring
 // is the canonical RHEL-family marker in kernel strings, which is
 // how Linux distros tag their kernel package builds.
 export const hostMatchesPm = (
@@ -50,7 +50,7 @@ export interface HostSummary {
 }
 
 // Client-side mirror of the engine's ``validate_mirror_config``
-// — returns true when every server-required field is populated for
+// -- returns true when every server-required field is populated for
 // the draft's package_manager.  Drives the Save button's disabled
 // state so the user can never submit a payload that would 400.
 //
@@ -92,7 +92,7 @@ export const EMPTY_DRAFT_FOR = (
   // apt sources MUST have at least one component (the engine's
   // ``validate_mirror_config`` rejects empty components with
   // "apt mirror requires non-empty components"), and ``main``
-  // is universally the safe default — covers the canonical
+  // is universally the safe default -- covers the canonical
   // Ubuntu/Debian-officially-supported subset.  Other PMs don't
   // use components at all, so leave undefined.
   components: pm === 'apt' ? 'main' : undefined,
@@ -115,7 +115,7 @@ export const formatElapsed = (since: Date): string => {
 };
 
 export const formatBytes = (bytes: number | null | undefined): string => {
-  if (bytes == null) return '—';
+  if (bytes == null) return '--';
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 ** 2) return `${(bytes / 1024).toFixed(1)} KB`;
   if (bytes < 1024 ** 3) return `${(bytes / 1024 ** 2).toFixed(1)} MB`;

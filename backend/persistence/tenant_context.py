@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Active-tenant request context — Phase 13.1 (per-tenant config resolution).
+Active-tenant request context -- Phase 13.1 (per-tenant config resolution).
 
 A process-wide :class:`contextvars.ContextVar` holding the *active tenant* for
 the current request/task.  It lets request-agnostic code (e.g. the email
@@ -11,8 +11,8 @@ sender in ``backend/config/config.py``) resolve per-tenant configuration
 without threading a ``tenant_id`` through every call site.
 
 Set per request by ``backend.startup.tenant_middleware`` from the JWT's
-``tenant_id`` claim (only when multi-tenancy is enabled).  When unset — the
-single-tenant / collapsed default — it is ``None`` and callers use the
+``tenant_id`` claim (only when multi-tenancy is enabled).  When unset -- the
+single-tenant / collapsed default -- it is ``None`` and callers use the
 server-scoped configuration, so behavior is unchanged.
 
 ContextVars do not automatically propagate into threads spawned by a request,
@@ -49,7 +49,7 @@ def reset_active_tenant(token) -> None:
         _active_tenant.reset(token)
     except (ValueError, LookupError, TypeError):
         # Stale/foreign token (the ContextVar was set in another context or
-        # already reset) — nothing to restore, so leave the active tenant as-is.
+        # already reset) -- nothing to restore, so leave the active tenant as-is.
         pass
 
 
@@ -57,8 +57,8 @@ def reset_active_tenant(token) -> None:
 def tenant_scope(tenant_id: Optional[str]):
     """Bind ``tenant_id`` as the active tenant for the duration of the block.
 
-    The explicit primitive for code that runs *outside* a request — background
-    tasks, scheduled jobs, threads, or pre-auth flows (e.g. password reset) —
+    The explicit primitive for code that runs *outside* a request -- background
+    tasks, scheduled jobs, threads, or pre-auth flows (e.g. password reset) --
     where the request middleware hasn't bound a tenant.
 
     ``tenant_id=None`` is a true no-op: it **preserves** whatever tenant is

@@ -49,8 +49,8 @@ from backend.persistence.models.core import GUID
 
 SINGLETON_MIRROR_SETTINGS_ID = uuid.UUID("00000000-0000-0000-0000-000000000003")
 
-# Reused FK targets — extracted as constants to dedupe the literal
-# strings (Sonar S1192) and centralise the cascade behaviour so a
+# Reused FK targets -- extracted as constants to dedupe the literal
+# strings (Sonar S1192) and centralise the cascade behavior so a
 # future change to either is a one-line edit.
 _HOST_ID_FK = "host.id"
 _FK_SET_NULL = "SET NULL"
@@ -85,7 +85,7 @@ class MirrorRepository(Base):
         String(40), nullable=True
     )  # free-form: "us-east", "edge", etc.
     enabled = Column(Boolean, nullable=False, default=True)
-    # Owner host — the agent on this host runs the engine plan; one
+    # Owner host -- the agent on this host runs the engine plan; one
     # mirror per host is the typical layout but nothing prevents
     # several repos pointing at the same host.
     host_id = Column(
@@ -93,26 +93,26 @@ class MirrorRepository(Base):
     )
     # Phase 10.4.2: each mirror hangs off a per-platform config that
     # owns the host + filesystem defaults.  Nullable for backwards
-    # compat — every row is backfilled at migration time.
+    # compat -- every row is backfilled at migration time.
     platform_config_id = Column(
         GUID(),
         ForeignKey("mirror_platform_config.id", ondelete=_FK_SET_NULL),
         nullable=True,
     )
-    # Phase 10.4.4 — picked from the dropdown (shared_mirror_known_version).
+    # Phase 10.4.4 -- picked from the dropdown (shared_mirror_known_version).
     # Free-text suite/repoid/etc. on this row are still authoritative
     # for plan emission, but ``known_version_id`` lets us know which
     # catalog entry the operator selected so default-mirror matching
     # can use the catalog's match_regex instead of guessing.
     #
-    # Phase 13.1.D: SOFT reference — no ForeignKey. The catalog lives in the
+    # Phase 13.1.D: SOFT reference -- no ForeignKey. The catalog lives in the
     # ``shared`` partition (``shared_mirror_known_version``); this mirror row
     # lives in the tenant partition. A hard cross-partition FK is unsatisfiable
     # once they are in different databases, so we store the bare UUID and resolve
     # the catalog row through a shared-partition session in app code (see
     # backend/api/repository_mirroring.py shared_known_version helpers).
     known_version_id = Column(GUID(), nullable=True)
-    # Execution state — one (at, status, error, message_id) group per
+    # Execution state -- one (at, status, error, message_id) group per
     # action.  Each group is written by the result handler in
     # backend/services/proplus_dispatch.py::_apply_mirror_sync_status.
     # ``last_*_message_id`` is stamped at dispatch and cleared on
@@ -230,7 +230,7 @@ class MirrorSnapshot(Base):
     # BigInteger: a mirror snapshot's byte total routinely exceeds the
     # 2.1 GB signed-32-bit INTEGER ceiling (e.g. a 9.7 GB Ubuntu mirror),
     # which made the snapshot-result UPDATE raise NumericValueOutOfRange,
-    # roll back, and leave the snapshot stuck DISPATCHED — blocking any
+    # roll back, and leave the snapshot stuck DISPATCHED -- blocking any
     # air-gap collection run sourcing from it.
     size_bytes = Column(BigInteger, nullable=True)
     file_count = Column(Integer, nullable=True)
@@ -310,7 +310,7 @@ class MirrorImageContent(Base):
     """A container image tracked for capture into a mirror (Phase 17.2).
 
     One row per (mirror, image ref): the registry / repository / tag to capture,
-    and — once captured — the pinned ``digest`` (the reproducible OCI manifest
+    and -- once captured -- the pinned ``digest`` (the reproducible OCI manifest
     digest).  The captured OCI layouts physically land under
     ``{mirror_root}/{mirror_name}/images/{slug}`` via the ``oci_proxy_engine``
     capture plan (``skopeo copy``); these rows record WHAT to capture and the
@@ -330,7 +330,7 @@ class MirrorImageContent(Base):
     registry = Column(String(255), nullable=False)  # docker.io, quay.io, ...
     repository = Column(String(255), nullable=False)  # library/nginx, org/app
     tag = Column(String(128), nullable=False)
-    digest = Column(String(255), nullable=True)  # sha256:... — the captured pin
+    digest = Column(String(255), nullable=True)  # sha256:... -- the captured pin
     # TRACKED -> DISPATCHED -> CAPTURED / FAILED
     capture_status = Column(String(20), nullable=False, default="TRACKED")
     last_capture_message_id = Column(String(80), nullable=True)
@@ -450,7 +450,7 @@ class MirrorKnownVersion(Base):
 
 class HostDefaultMirror(Base):
     """One row per (platform, version_key, os_family) tuple that has a
-    chosen default mirror.  Null ``mirror_id`` means "Cloud" — hosts
+    chosen default mirror.  Null ``mirror_id`` means "Cloud" -- hosts
     of that family/version are reverted to upstream.
     """
 
@@ -487,7 +487,7 @@ class MirrorPlatformConfig(Base):
     """One row per (platform, host) pair that owns a mirror tree.
 
     Replaces the old singleton ``MirrorSettings`` as the source of
-    truth for filesystem + retention defaults — those become per-platform
+    truth for filesystem + retention defaults -- those become per-platform
     so a Linux mirror on one host and a FreeBSD mirror on another can
     have independent root paths, retention windows, etc.
 

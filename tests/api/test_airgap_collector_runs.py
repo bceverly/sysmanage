@@ -6,7 +6,7 @@
 
 These mirror the ``test_airgap_collection_schedule.py`` style: every
 test patches ``module_loader.get_module`` so the collector engine
-appears loaded (so the 402 license gate doesn't fire) — the actual
+appears loaded (so the 402 license gate doesn't fire) -- the actual
 engine is never invoked because this API only manages row lifecycle
 and serves the produced ISO file.
 """
@@ -58,7 +58,7 @@ def _engine(loaded=True):
 
 class TestRunsAuth:
     def test_anonymous_rejected(self, client):
-        # No auth header — JWTBearer should refuse before reaching the
+        # No auth header -- JWTBearer should refuse before reaching the
         # handler, regardless of license state.
         r = client.post(
             "/api/v1/airgap/collector/runs",
@@ -110,7 +110,7 @@ class TestRunsCrud:
         assert body["media_size_bytes"] == 700_000_000
         assert body["include_cve"] is False
         assert body["include_compliance"] is True
-        # One-shot runs leave cron_schedule NULL — that's the whole
+        # One-shot runs leave cron_schedule NULL -- that's the whole
         # contract that distinguishes them from scheduled runs.
         assert body["cron_schedule"] is None
         assert body["id"]
@@ -245,7 +245,7 @@ class TestRunDownload:
             )
             assert create.status_code == 200, create.text
             run_id = create.json()["id"]
-            # Insert a manifest row via raw SQL — the shadow model lives
+            # Insert a manifest row via raw SQL -- the shadow model lives
             # in conftest's TestBase but we don't have a handle to it
             # here, so we hit the table directly.
             manifest_id = str(_uuid.uuid4())

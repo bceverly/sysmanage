@@ -12,7 +12,7 @@ Python service layer that the Pro+ ``federation_site_engine``
 wraps as router handlers.
 
 The federation_coordinator table has a fixed primary key
-(``SINGLETON_FEDERATION_COORDINATOR_ID``) — every helper here
+(``SINGLETON_FEDERATION_COORDINATOR_ID``) -- every helper here
 upserts the same row, mirroring the MFA / mirror-settings pattern.
 
 State machine for ``enrollment_status``:
@@ -57,7 +57,7 @@ CONN_UNKNOWN = "unknown"
 
 # How many *consecutive* failed sync attempts before the uplink is
 # considered fully offline (and the site flips into local autonomy mode).
-# Anything between 1 and this is "degraded" — a transient blip the operator
+# Anything between 1 and this is "degraded" -- a transient blip the operator
 # usually shouldn't be paged about.
 OFFLINE_AFTER_FAILURES = 3
 
@@ -87,7 +87,7 @@ class InvalidCoordinatorStateError(FederationCoordinatorError, ValueError):
 
 class CoordinatorIdentityProofError(FederationCoordinatorError, ValueError):
     """Raised when the coordinator fails strict out-of-band identity
-    verification during enrollment — no coordinator identity key was
+    verification during enrollment -- no coordinator identity key was
     pre-registered on this site, or the coordinator's Ed25519 proof didn't
     verify against it over the fetched TLS cert.  The site refuses to pin the
     cert (the engine maps this to a 401)."""
@@ -156,7 +156,7 @@ def get_coordinator(session: Session) -> Optional[FederationCoordinator]:
     """Return the coordinator row, or ``None`` if no enrollment has
     ever been started on this site.
 
-    Read-only — does NOT create the row.  Use this for "is this site
+    Read-only -- does NOT create the row.  Use this for "is this site
     federated at all?" probes (e.g. the OSS site engine's startup
     check before kicking off the sync worker).
     """
@@ -195,10 +195,10 @@ def start_enrollment(
     IDENTITY public key, exchanged OUT OF BAND and pasted in by the operator.
     It is the anchor :func:`verify_coordinator_identity_proof` checks the
     coordinator's enrollment proof against before the site pins the fetched
-    cert — closing the enrollment-time MITM.  Required for strict enrollment;
+    cert -- closing the enrollment-time MITM.  Required for strict enrollment;
     optional here only so a row can be staged before the key is supplied.
 
-    Idempotent on the input — re-calling with the same coordinator
+    Idempotent on the input -- re-calling with the same coordinator
     URL is fine and just refreshes the cert.  But re-calling with a
     DIFFERENT URL when already enrolled to a different coordinator
     raises :class:`InvalidCoordinatorStateError` (you can't be
@@ -238,7 +238,7 @@ def start_enrollment(
     if coordinator_identity_public_key_pem:
         row.coordinator_identity_public_key_pem = coordinator_identity_public_key_pem
     row.sync_interval_seconds = sync_interval_seconds
-    # Only flip status to ``pending`` when not already enrolled —
+    # Only flip status to ``pending`` when not already enrolled --
     # re-supplying the cert during an enrollment refresh shouldn't
     # demote a fully-enrolled site back to pending.
     if row.enrollment_status not in {STATUS_ENROLLED, STATUS_SUSPENDED}:
@@ -257,7 +257,7 @@ def verify_coordinator_identity_proof(
     Returns ``True`` only when the coordinator's pre-registered (out-of-band)
     identity key signed exactly ``coordinator_tls_cert_pem``.  ``False`` when no
     coordinator identity key was registered on this site, the proof is missing,
-    or it doesn't verify — in which case the site engine must abort enrollment
+    or it doesn't verify -- in which case the site engine must abort enrollment
     and NOT pin the fetched cert.  The site engine calls this after fetching the
     coordinator's cert + proof and before :func:`mark_enrolled`."""
     row = get_coordinator(session)
@@ -281,7 +281,7 @@ def mark_enrolled(
 ) -> FederationCoordinator:
     """Record a successful handshake response from the coordinator.
 
-    The coordinator assigns this site a ``site_id`` UUID — that's
+    The coordinator assigns this site a ``site_id`` UUID -- that's
     what every upstream sync payload carries.  The coordinator also
     pins the site's TLS cert (for the reverse direction of the mTLS
     handshake); we store the same cert here so the site engine can
@@ -330,8 +330,8 @@ def mark_enrolled(
 def mark_suspended(session: Session) -> FederationCoordinator:
     """Coordinator suspended this site.
 
-    The site server stays operational locally — agents continue
-    reporting, OS upgrades continue running — but the sync worker
+    The site server stays operational locally -- agents continue
+    reporting, OS upgrades continue running -- but the sync worker
     stops draining the upstream queue.  Called by the site engine
     when the coordinator's policy-pull endpoint reports our status
     as ``suspended``.
@@ -350,7 +350,7 @@ def mark_removed(session: Session) -> FederationCoordinator:
     """Coordinator removed this site's enrollment.
 
     Terminal.  The site server can be re-enrolled via a fresh
-    ``start_enrollment`` flow if the operator wants — that's what
+    ``start_enrollment`` flow if the operator wants -- that's what
     ``clear_enrollment`` is for; calling this just records the
     coordinator's verdict.
     """
@@ -365,7 +365,7 @@ def clear_enrollment(session: Session) -> FederationCoordinator:
     Wipes the coordinator URL + cert pin + site_id + sync bearer.
     Used when an operator wants to migrate this site to a different
     coordinator, or when a re-enrollment is needed after
-    ``mark_removed``.  The bearer scrub is critical — a stale bearer
+    ``mark_removed``.  The bearer scrub is critical -- a stale bearer
     pointed at a former coordinator would otherwise keep firing on
     every tick.
     """
@@ -399,7 +399,7 @@ def record_sync_attempt(
 
     Updates ``last_sync_at`` / ``last_sync_status`` (the most recent
     *attempt*) and, on success, ``last_successful_sync_at`` (the most
-    recent *success* — survives a run of failures so the UI can show "no
+    recent *success* -- survives a run of failures so the UI can show "no
     contact for 2h").  Maintains ``consecutive_sync_failures``, the derived
     ``connection_state`` (online / degraded / offline), and the
     ``next_reconnect_at`` backoff gate.
@@ -446,7 +446,7 @@ def should_attempt_sync(
     round-trip (it still drains/queues locally) until the gate opens.  A
     site that has never failed (gate is NULL) always returns True.
 
-    The site must also be enrolled (or suspended — a suspended site still
+    The site must also be enrolled (or suspended -- a suspended site still
     polls so it learns when the coordinator resumes it); ``pending`` /
     ``removed`` / ``not_enrolled`` short-circuit to False.
     """
@@ -467,7 +467,7 @@ def is_autonomous(session: Session) -> bool:
 
     In this state the site runs in *local autonomy mode*: agents keep
     reporting, OS upgrades keep running, and local deltas keep queuing in
-    ``federation_sync_queue`` for replay once the uplink recovers — nothing
+    ``federation_sync_queue`` for replay once the uplink recovers -- nothing
     blocks on the coordinator.  The flag exists so the UI can show an
     "operating independently" banner and the engine can suppress
     coordinator-dependent actions.

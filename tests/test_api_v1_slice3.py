@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Phase 13.2.1 — Slice 3 native ``/api/v1`` migration (packages / updates / repos).
+Phase 13.2.1 -- Slice 3 native ``/api/v1`` migration (packages / updates / repos).
 
 Dual-surface contract for the migrated routers: packages, updates, scripts,
 third_party_repos, default_repositories, enabled_package_managers,
@@ -13,7 +13,7 @@ endpoint resolves identically under ``/api/v1`` and the deprecated ``/api`` alia
 
 import pytest
 
-# All migrated endpoints — the v1 and the deprecated /api alias must behave
+# All migrated endpoints -- the v1 and the deprecated /api alias must behave
 # identically (includes the Pro+ license-gated profile routers, which return
 # 402 without a license but must do so on BOTH surfaces).
 DUAL_SURFACE_PATHS = [

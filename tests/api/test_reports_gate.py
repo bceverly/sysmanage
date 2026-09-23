@@ -6,7 +6,7 @@
 Phase 15 exit item: the OSS reports surface (``/api/v1/reporting/*``) delegates
 report rendering to the Pro+ ``reporting_engine``.  When that engine isn't
 loaded, ``view`` and ``generate`` must return a clean HTTP 402 (Payment
-Required) with an upgrade message — never a 500 or a crash.
+Required) with an upgrade message -- never a 500 or a crash.
 
 The gate lives in ``_check_reporting_module`` which inspects
 ``module_loader.get_module("reporting_engine")``; we patch that to return

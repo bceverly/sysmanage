@@ -11,7 +11,7 @@ signing key:
     at the configured canonical path the first time it's called with no
     existing private key (triggered when the operator sets the server
     role to ``collector``).  It NEVER overwrites an existing private
-    key — rotation is a deliberate operator action, not a side effect.
+    key -- rotation is a deliberate operator action, not a side effect.
   * ``get_collector_private_key_pem()`` / ``get_collector_public_key_pem()``
     read them back for the sign step / bundle-embed step.
 
@@ -68,7 +68,7 @@ def ensure_collector_keypair() -> Tuple[str, str]:
     os.makedirs(os.path.dirname(private_path), exist_ok=True)
 
     if os.path.isfile(private_path):
-        # Private key already present — never overwrite.  Just make sure
+        # Private key already present -- never overwrite.  Just make sure
         # the public sibling exists (re-derive if someone deleted it).
         if not os.path.isfile(public_path):
             _write_public_from_private(private_path, public_path)
@@ -146,7 +146,7 @@ def get_collector_public_key_pem() -> Optional[str]:
 # Fingerprints + trusted-collector keyring (repository side)
 # ---------------------------------------------------------------------------
 def _canonical_public_pem(pem: str | bytes) -> bytes:
-    """Load an Ed25519 public PEM and re-serialise it to the canonical
+    """Load an Ed25519 public PEM and re-serialize it to the canonical
     SubjectPublicKeyInfo PEM bytes.  Raises ``ValueError`` if the input
     isn't a valid Ed25519 public key.  Re-serialising means an operator
     can paste a key with odd whitespace and still get the same
@@ -163,7 +163,7 @@ def _canonical_public_pem(pem: str | bytes) -> bytes:
 
 
 def fingerprint_of_public_pem(pem: str | bytes) -> str:
-    """SHA-256 hex of the canonical public PEM — identical to the
+    """SHA-256 hex of the canonical public PEM -- identical to the
     ``signer_fingerprint`` the collector engine stamps into a manifest
     (``sha256(public_bytes(PEM, SubjectPublicKeyInfo))``).
     """
@@ -191,7 +191,7 @@ def _keyring_key_path(keyring_dir: str, name: str) -> str:
     keyring directory.
 
     ``_safe_key_name`` already strips path separators, but this adds an explicit
-    realpath-containment check on top — defence in depth against path traversal
+    realpath-containment check on top -- defense in depth against path traversal
     from the caller-supplied ``name``.  Raises ``ValueError`` if the resolved
     path's parent isn't the keyring dir.
     """
@@ -206,7 +206,7 @@ def _keyring_key_path(keyring_dir: str, name: str) -> str:
 def list_trusted_collectors() -> List[dict]:
     """List the repository's trusted-collector keys.
 
-    Returns ``[{"name", "fingerprint"}]`` — ``name`` is the filename
+    Returns ``[{"name", "fingerprint"}]`` -- ``name`` is the filename
     stem, ``fingerprint`` the sha256 of the canonical PEM (or None if
     the file isn't a parseable Ed25519 key).  Missing dir → empty list.
     """
@@ -243,7 +243,7 @@ def import_trusted_collector(name: str, public_key_pem: str) -> dict:
     keyring_dir = config_module.get_airgap_collector_public_key_dir()
     os.makedirs(keyring_dir, exist_ok=True)
     path = _keyring_key_path(keyring_dir, name)  # contained + traversal-safe
-    # Slug from the validated, contained filename — provably free of path
+    # Slug from the validated, contained filename -- provably free of path
     # separators / control characters, so it's safe to log + return.
     slug = os.path.splitext(os.path.basename(path))[0]
     _atomic_write(path, canonical, 0o644)

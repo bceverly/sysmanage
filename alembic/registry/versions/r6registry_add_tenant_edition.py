@@ -12,7 +12,7 @@ is OSS; the resolution + Platform-Operator authorization logic lives in the
 licensed ``multitenancy_engine``.
 
 Defaults to ``enterprise`` (``server_default``) so every tenant that existed
-before this migration keeps the exact behaviour it had — the GA assumption was
+before this migration keeps the exact behavior it had -- the GA assumption was
 that every tenant runs Enterprise, and this preserves it on upgrade.
 
 Sixth migration in the **registry** chain (chains off ``r5registry``).

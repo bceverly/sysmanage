@@ -160,7 +160,7 @@ const HostHardwareTab: React.FC<HostHardwareTabProps> = ({
                                             </ToggleButtonGroup>
                                         </Box>
                                         {filteredStorageDevices.map((device: StorageDeviceType, index: number) => (
-                                            <Box key={device.id || index} sx={{ mb: 3, p: 2, pb: 3, backgroundColor: 'grey.900', borderRadius: 1, minHeight: '140px', display: 'flex', flexDirection: 'column' }}>
+                                            <Box key={device.id || index} sx={{ mb: 3, p: 2, pb: 3, backgroundColor: 'gray.900', borderRadius: 1, minHeight: '140px', display: 'flex', flexDirection: 'column' }}>
                                                 <Grid container spacing={2} alignItems="flex-start">
                                                     <Grid size={{ xs: 12, md: 3 }}>
                                                         <Typography variant="body1" sx={{ fontWeight: 'medium', mb: 1 }}>
@@ -197,7 +197,7 @@ const HostHardwareTab: React.FC<HostHardwareTabProps> = ({
                                                                                             width: '100%', 
                                                                                             height: 8, 
                                                                                             borderRadius: 1,
-                                                                                            backgroundColor: 'grey.700'
+                                                                                            backgroundColor: 'gray.700'
                                                                                         }}
                                                                                     />
                                                                                     <Typography variant="body2" sx={{ minWidth: 45, textAlign: 'right' }}>
@@ -273,7 +273,7 @@ const HostHardwareTab: React.FC<HostHardwareTabProps> = ({
                                             </ToggleButtonGroup>
                                         </Box>
                                         {filteredNetworkInterfaces.map((iface: NetworkInterfaceType, index: number) => (
-                                            <Box key={iface.id || index} sx={{ mb: 3, p: 2, pb: 3, backgroundColor: 'grey.900', borderRadius: 1, minHeight: '140px', display: 'flex', flexDirection: 'column' }}>
+                                            <Box key={iface.id || index} sx={{ mb: 3, p: 2, pb: 3, backgroundColor: 'gray.900', borderRadius: 1, minHeight: '140px', display: 'flex', flexDirection: 'column' }}>
                                                 <Grid container spacing={2} alignItems="flex-start">
                                                     <Grid size={{ xs: 12, md: 3 }}>
                                                         <Typography variant="body1" sx={{ fontWeight: 'medium', mb: 1 }}>

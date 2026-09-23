@@ -17,7 +17,7 @@ trap {
     # script.  The operator-fixable "no suitable Python" case is raised inside the
     # main try/catch and never reaches here, so an exception that DOES reach this
     # trap is unexpected -- fail hard rather than landing a broken install that
-    # reports success.  ($SoftFailure may not be initialised yet if something
+    # reports success.  ($SoftFailure may not be initialized yet if something
     # throws very early, hence the null-safe test.)
     if ($script:SoftFailure -eq $true) {
         Write-Host "Install step had errors but MSI install will still complete."

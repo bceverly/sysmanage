@@ -23,7 +23,7 @@ Columns added:
 
   source_snapshot_id
       FK to mirror_snapshot.  Populated by the orchestrator when it
-      advances QUEUED → MIRRORING — at that point all per-target
+      advances QUEUED → MIRRORING -- at that point all per-target
       snapshots have completed and we pin the snapshot the rsync
       plan will read from.  Nullable until that transition.
 

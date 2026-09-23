@@ -3,12 +3,12 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Custom Metric sample ingest handler (Custom Metrics & Graphs — Slice 3b).
+Custom Metric sample ingest handler (Custom Metrics & Graphs -- Slice 3b).
 
 Consumes the agent's ``custom_metric_samples`` data message and stores each
 sample as a ``custom_metric_sample`` row in the bound host's tenant database.
 
-This is purely mechanical STORAGE into an OSS table — the metric DEFINITION,
+This is purely mechanical STORAGE into an OSS table -- the metric DEFINITION,
 targeting, scheduling and any graphing/alerting LOGIC live in the licensed
 ``observability_engine`` (Pro+).  Nothing here touches licensed logic.
 
@@ -30,7 +30,7 @@ Contract (from the agent):
 UTC (falls back to server now() when missing/unparseable).
 
 NOTE (follow-up, NOT in scope here): ``custom_metric_sample`` grows without
-bound — a retention/prune of old rows is required and is deferred to a later
+bound -- a retention/prune of old rows is required and is deferred to a later
 slice.
 """
 
@@ -79,8 +79,8 @@ async def handle_custom_metric_samples(  # NOSONAR
     sample's ``metric_id`` is validated against the ``CustomMetric`` table in
     this tenant DB; unknown metric_ids are skipped (debug log).  Samples are
     batch-inserted and committed once.  If the whole batch is dropped, a loud
-    warning (host_id + counts only — never raw script values) is logged per the
-    log-loudly convention.  Missing host / empty batch are handled gracefully —
+    warning (host_id + counts only -- never raw script values) is logged per the
+    log-loudly convention.  Missing host / empty batch are handled gracefully --
     we never raise."""
     host_id = getattr(connection, "host_id", None)
     if not host_id:
@@ -135,7 +135,7 @@ async def handle_custom_metric_samples(  # NOSONAR
                 continue
             metric_id = sample.get("metric_id")
             if metric_id is None or str(metric_id) not in known_ids:
-                # Unknown metric_id (deleted metric, wrong tenant, etc.) — skip.
+                # Unknown metric_id (deleted metric, wrong tenant, etc.) -- skip.
                 logger.debug(
                     "custom_metric_samples: skipping unknown metric_id for host %s",
                     host_id,
@@ -163,7 +163,7 @@ async def handle_custom_metric_samples(  # NOSONAR
 
         stored = len(rows)
         if stored == 0:
-            # Whole batch dropped — log loudly (counts only, never raw values).
+            # Whole batch dropped -- log loudly (counts only, never raw values).
             logger.warning(
                 "custom_metric_samples for host %s dropped ENTIRELY: "
                 "received=%s stored=0 skipped_unknown=%s",

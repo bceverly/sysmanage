@@ -7,11 +7,11 @@ Access groups + registration keys API (Phase 8.1).
 
 Two routers:
 
-  /api/access-groups        — CRUD on AccessGroup; tree operations
-  /api/registration-keys    — CRUD + revocation on RegistrationKey
+  /api/access-groups        -- CRUD on AccessGroup; tree operations
+  /api/registration-keys    -- CRUD + revocation on RegistrationKey
 
 Both require authentication.  RBAC scoping (which users can see which
-groups) is enforced via SecurityRoles — for now the gate is the same
+groups) is enforced via SecurityRoles -- for now the gate is the same
 EDIT_USER role; finer-grained access-group-aware scoping is a follow-up.
 """
 
@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 #  2. Prevents a deep-tree DoS via repeated parenting.
 _MAX_TREE_DEPTH = 10
 
-# Reused 404 detail strings — extracted so the wording can't drift
+# Reused 404 detail strings -- extracted so the wording can't drift
 # between handlers and so SonarQube's duplication scanner is happy.
 _ERR_ACCESS_GROUP_NOT_FOUND = N_("Access group not found")
 _ERR_REGISTRATION_KEY_NOT_FOUND = N_("Registration key not found")
@@ -102,7 +102,7 @@ class RegistrationKeyCreateRequest(BaseModel):
     access_group_id: Optional[str] = None
     # Phase 12.4: optional federation-site scope.  When set, hosts
     # presenting this key are accepted ONLY at the named subordinate
-    # site — coordinator-issued keys can be scoped per site so a
+    # site -- coordinator-issued keys can be scoped per site so a
     # leaked key from one site can't be reused to enroll into another.
     site_id: Optional[str] = None
     auto_approve: bool = False
@@ -115,7 +115,7 @@ class RegistrationKeyResponse(BaseModel):
     name: str
     access_group_id: Optional[str] = None
     # Phase 12.4: mirrors the request field.  NULL means the key
-    # works at any site (default OSS / single-server behaviour).
+    # works at any site (default OSS / single-server behavior).
     site_id: Optional[str] = None
     auto_approve: bool
     revoked: bool
@@ -162,7 +162,7 @@ def _check_no_cycle_and_depth(
     depth = 1  # the new edge group_id → proposed_parent_id
     while cur is not None:
         if cur in visited:
-            # Existing cycle in the data — defensive guard.
+            # Existing cycle in the data -- defensive guard.
             raise HTTPException(
                 status_code=400, detail=_("Cycle detected in access-group hierarchy")
             )
@@ -208,7 +208,7 @@ def _parse_uuid_or_400(value: Optional[str], field_name: str) -> Optional[uuid.U
 @groups_router.get("", response_model=List[AccessGroupResponse])
 async def list_access_groups(db: Session = Depends(get_db)):
     """List every access group (flat).  Tree assembly is the client's
-    job — each row carries ``parent_id``."""
+    job -- each row carries ``parent_id``."""
     rows = db.query(models.AccessGroup).order_by(models.AccessGroup.name).all()
     return [AccessGroupResponse(**r.to_dict()) for r in rows]
 
@@ -231,7 +231,7 @@ async def create_access_group(
         )
         if not parent_exists:
             raise HTTPException(status_code=404, detail=_("Parent group not found"))
-        # Cycle/depth check against (None, parent_uuid) — group_id is not
+        # Cycle/depth check against (None, parent_uuid) -- group_id is not
         # known yet since we're creating, so depth-check from parent up.
         _check_no_cycle_and_depth(db, None, parent_uuid)
 
@@ -369,7 +369,7 @@ async def create_registration_key(
     current_user: str = Depends(get_current_user),
 ):
     """Create a new registration key.  The plaintext key is returned
-    EXACTLY ONCE in the response — there is no recovery mechanism if
+    EXACTLY ONCE in the response -- there is no recovery mechanism if
     the operator loses it."""
     user = _get_user(db, current_user)
     ag_uuid = _parse_uuid_or_400(request.access_group_id, "access_group_id")
@@ -380,7 +380,7 @@ async def create_registration_key(
 
     # Phase 12.4: validate optional site scope.  If the caller
     # specified a ``site_id``, it must reference an existing,
-    # non-removed ``FederationSite`` — otherwise a typo or stale
+    # non-removed ``FederationSite`` -- otherwise a typo or stale
     # client cache would silently create an unusable key.
     site_uuid = _parse_uuid_or_400(request.site_id, "site_id")
     if site_uuid is not None:
@@ -429,7 +429,7 @@ async def revoke_registration_key(
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
-    """Mark a key as revoked.  Idempotent — already-revoked keys remain
+    """Mark a key as revoked.  Idempotent -- already-revoked keys remain
     revoked.  Existing host enrollments are NOT affected."""
     user = _get_user(db, current_user)
     key_uuid = _parse_uuid_or_400(key_id, "key_id")

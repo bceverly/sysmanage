@@ -8,7 +8,7 @@ Tests for backend.api.grafana_integration.
 Focuses on the testable surface that doesn't require GrafanaIntegrationSettings
 or HostRole models in the test conftest:
 
-- configure_prometheus_datasource — pure async helper, mocks vault + httpx
+- configure_prometheus_datasource -- pure async helper, mocks vault + httpx
 - the GrafanaHealthStatus / GrafanaServerInfo / GrafanaIntegrationRequest
   Pydantic schemas
 - check_grafana_health early-return branches via HTTPException
@@ -64,14 +64,14 @@ class TestSchemas:
 
 
 # ---------------------------------------------------------------------------
-# configure_prometheus_datasource — early-return branches
+# configure_prometheus_datasource -- early-return branches
 # ---------------------------------------------------------------------------
 
 
 class TestConfigurePrometheusDatasourceEarlyReturns:
     @pytest.mark.asyncio
     async def test_no_grafana_url_logs_and_returns(self):
-        # No httpx mock needed — function should bail before any HTTP call.
+        # No httpx mock needed -- function should bail before any HTTP call.
         with patch("backend.api.grafana_integration.httpx.AsyncClient") as cls:
             await configure_prometheus_datasource(
                 _settings(grafana_url=None), MagicMock()
@@ -118,7 +118,7 @@ class TestConfigurePrometheusDatasourceEarlyReturns:
 
 
 # ---------------------------------------------------------------------------
-# configure_prometheus_datasource — API key extraction paths
+# configure_prometheus_datasource -- API key extraction paths
 # ---------------------------------------------------------------------------
 
 
@@ -238,7 +238,7 @@ class TestConfigurePrometheusDatasourceApiKeyExtraction:
 
 
 # ---------------------------------------------------------------------------
-# configure_prometheus_datasource — datasource create / update branches
+# configure_prometheus_datasource -- datasource create / update branches
 # ---------------------------------------------------------------------------
 
 
@@ -279,7 +279,7 @@ class TestConfigurePrometheusDatasourceHttp:
         ), patch(
             "backend.api.grafana_integration.httpx.AsyncClient", return_value=client
         ):
-            # Function returns None whether or not create succeeded — must not raise.
+            # Function returns None whether or not create succeeded -- must not raise.
             await configure_prometheus_datasource(
                 _settings(grafana_url="http://g:3000", api_key_vault_token="t"),
                 session,

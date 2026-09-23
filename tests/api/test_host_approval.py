@@ -137,7 +137,7 @@ class TestApproveHostExtended:
             response = client.put(
                 f"/api/v1/host/{host.id}/approve", headers=auth_headers
             )
-        # Auto-link to child host runs queries that may or may not match — we
+        # Auto-link to child host runs queries that may or may not match -- we
         # accept 200 (happy) or 500 if the link logic encounters a schema gap
         # on the test host model.
         assert response.status_code in (200, 500)

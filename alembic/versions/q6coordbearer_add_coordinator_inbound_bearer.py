@@ -4,7 +4,7 @@
 
 """add_coordinator_inbound_bearer
 
-Phase 12.10 Slice 3: federation wire protocol — symmetric bearer
+Phase 12.10 Slice 3: federation wire protocol -- symmetric bearer
 for the coordinator → site direction.
 
 Slice 1 minted a one-way bearer the SITE uses to push data into
@@ -27,7 +27,7 @@ Adds two columns, one per side of the relationship:
 
 Plaintext lives on exactly one side per direction, just like the
 ``sync_bearer_token`` / ``sync_bearer_token_hash`` split from
-Slice 1 — a DB leak on the verifier side never exposes a
+Slice 1 -- a DB leak on the verifier side never exposes a
 usable secret.
 
 Idempotent + cross-dialect: guards on the column-exists check

@@ -3,12 +3,12 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Image-mode host action API (Phase 17.3) — "stage / apply / rollback an image".
+Image-mode host action API (Phase 17.3) -- "stage / apply / rollback an image".
 
 OSS orchestration for image-mode (bootc / rpm-ostree / OSTree) hosts: the Pro+
 ``image_mode_engine`` (Enterprise) builds the stage/apply/rollback command plan
 (the moat), and this router dispatches it to the agent through the EXISTING
-store-and-forward queue via the generic ``apply_deployment_plan`` handler — the
+store-and-forward queue via the generic ``apply_deployment_plan`` handler -- the
 same path the 17.1/17.2 repoint plans use, so agent delivery and maintenance-
 window gating (14.2) apply unchanged.
 
@@ -204,7 +204,7 @@ async def apply_host_image(
     tenant_db: Session = Depends(get_tenant_db),
     current_user=Depends(get_current_user),
 ):
-    """Apply the staged deployment — boot into the new image."""
+    """Apply the staged deployment -- boot into the new image."""
     return _dispatch(
         "apply",
         host_id,

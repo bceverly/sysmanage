@@ -49,9 +49,9 @@ class MessageType(str, Enum):
     COMMERCIAL_ANTIVIRUS_STATUS_UPDATE = "commercial_antivirus_status_update"
     FIREWALL_STATUS_UPDATE = "firewall_status_update"
     GRAYLOG_STATUS_UPDATE = "graylog_status_update"
-    # Phase 13.3 — running-process snapshot from the agent.
+    # Phase 13.3 -- running-process snapshot from the agent.
     PROCESS_STATUS_UPDATE = "process_status_update"
-    # Custom Metrics & Graphs (Slice 3b) — a batch of collected metric samples
+    # Custom Metrics & Graphs (Slice 3b) -- a batch of collected metric samples
     # from the agent, stored into the OSS ``custom_metric_sample`` tenant table.
     CUSTOM_METRIC_SAMPLES = "custom_metric_samples"
     HOSTNAME_CHANGED = "hostname_changed"
@@ -95,14 +95,14 @@ class MessageType(str, Enum):
     PING = "ping"
     SHUTDOWN = "shutdown"
     HOST_APPROVED = "host_approved"
-    # Phase 8.5 — fleet-wide broadcast.  Server fans out one message
+    # Phase 8.5 -- fleet-wide broadcast.  Server fans out one message
     # to every connected agent (or every agent matching a tag).
     BROADCAST = "broadcast"
-    # Configuration push — operator-initiated agent-config update.
+    # Configuration push -- operator-initiated agent-config update.
     # Always enqueued (never sent directly via connection_manager) so
     # offline agents receive it on reconnect.
     CONFIG_UPDATE = "config_update"
-    # Phase 13.3 — DB-stored logging configuration pushed to agents (plaintext;
+    # Phase 13.3 -- DB-stored logging configuration pushed to agents (plaintext;
     # non-sensitive).  Enqueued OUTBOUND so connected agents apply it live and
     # offline agents pick it up on reconnect.
     LOGGING_CONFIG_UPDATE = "logging_config_update"
@@ -121,25 +121,25 @@ class CommandType(str, Enum):
     GET_AVAILABLE_UPDATES = "get_available_updates"
     REBOOT_SYSTEM = "reboot_system"
     EXECUTE_SCRIPT = "execute_script"
-    # Phase 20.1 — desired-state config profiles.  Its own command rather than
+    # Phase 20.1 -- desired-state config profiles.  Its own command rather than
     # a flavour of APPLY_DEPLOYMENT_PLAN: a plan is an imperative list of
     # packages/files/commands, while a profile is handed whole to an external
     # engine (ansible-playbook / dsc.exe) that owns the convergence logic and
     # reports per-task idempotency back.  Folding them together would mean the
     # agent guessing which shape it received.
     APPLY_CONFIG_PROFILE = "apply_config_profile"
-    # Phase 21.1 S4 — run a query pack against the host's fact tables.
+    # Phase 21.1 S4 -- run a query pack against the host's fact tables.
     RUN_QUERY_PACK = "run_query_pack"
     CHECK_REBOOT_STATUS = "check_reboot_status"
     COLLECT_DIAGNOSTICS = "collect_diagnostics"
     COLLECT_CERTIFICATES = "collect_certificates"
-    # Phase 13.3 — process management.
+    # Phase 13.3 -- process management.
     COLLECT_PROCESSES = "collect_processes"
     KILL_PROCESS = "kill_process"
     # NOTE: The legacy DEPLOY_ANTIVIRUS / ENABLE_ANTIVIRUS / DISABLE_ANTIVIRUS /
     # REMOVE_ANTIVIRUS / DEPLOY_FIREWALL / ENABLE_FIREWALL / DISABLE_FIREWALL /
     # RESTART_FIREWALL / APPLY_FIREWALL_ROLES / REMOVE_FIREWALL_PORTS commands
-    # were removed when Phase 3 shipped — the open-source server now builds
+    # were removed when Phase 3 shipped -- the open-source server now builds
     # a declarative plan via backend/services/{firewall,av}_plan_builder.py
     # and dispatches it via APPLY_DEPLOYMENT_PLAN. Pro+ licensees get the
     # richer Cython engines but use the same handler on the agent.

@@ -47,8 +47,8 @@ def get_user_with_role_check(session, current_user: str, required_role: Security
 def authorize_on_main(current_user: str, required_role: SecurityRoles):
     """Authn/authz against the server-global (bootstrap) engine.
 
-    User and role data is server-global — it lives in the bootstrap database,
-    never in a per-tenant database — so authorization must NOT run on a tenant
+    User and role data is server-global -- it lives in the bootstrap database,
+    never in a per-tenant database -- so authorization must NOT run on a tenant
     session.  This runs the role check on a ``db.get_engine()`` session and
     returns the ``User``.  Its ``id`` / ``userid`` / role-cache are loaded
     while the session is open, so the detached object is safe to use afterward
@@ -70,7 +70,7 @@ def authorize_on_main(current_user: str, required_role: SecurityRoles):
         user = get_user_with_role_check(auth_session, current_user, required_role)
         # Touch the attributes used after the session closes (audit_log reads
         # user.id; handlers reference user.userid) so they are loaded before the
-        # instance detaches — avoids DetachedInstanceError on later access.
+        # instance detaches -- avoids DetachedInstanceError on later access.
         _ = (user.id, user.userid)
         return user
 
@@ -100,8 +100,8 @@ def audit_log(
 ):
     """Log an audit entry on the server-global (bootstrap) engine.
 
-    The audit trail is server-global, like authorization — it lives in the
-    bootstrap database, never in a per-tenant database — so it is written on its
+    The audit trail is server-global, like authorization -- it lives in the
+    bootstrap database, never in a per-tenant database -- so it is written on its
     own ``db.get_engine()`` session regardless of which tenant database served
     the host data for this request.  (Mirrors diagnostics.py, which audits on
     the MAIN engine after committing the host work.)  ``AuditService.log``

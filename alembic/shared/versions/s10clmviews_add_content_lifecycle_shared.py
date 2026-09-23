@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""create content-lifecycle shared catalog (shared partition) — Phase 16
+"""create content-lifecycle shared catalog (shared partition) -- Phase 16
 
 Lifecycle environments + content views + versions are platform truth, identical
 across tenants, so they live in the SHARED partition (``shared_*`` prefix).
@@ -81,7 +81,7 @@ def upgrade() -> None:
             _REPO,
             sa.Column("id", GUID(), primary_key=True),
             sa.Column("content_view_id", GUID(), nullable=False),
-            # SOFT ref to mirror_repository.id (tenant partition) — no FK.
+            # SOFT ref to mirror_repository.id (tenant partition) -- no FK.
             sa.Column("mirror_id", GUID(), nullable=True),
             sa.Column("component_content_view_id", GUID(), nullable=True),
             sa.Column("position", sa.Integer(), nullable=False, server_default="0"),

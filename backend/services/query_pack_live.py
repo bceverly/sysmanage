@@ -4,7 +4,7 @@
 
 """Ad-hoc fleet-wide live queries (Phase 21.1 S5).
 
-One statement, typed at a console, fanned out across a fleet — BOUNDED the way
+One statement, typed at a console, fanned out across a fleet -- BOUNDED the way
 fleet jobs are, rather than dispatched to everything at once.
 
 WHY TARGETS ARE CREATED UP FRONT BUT NOT DISPATCHED
@@ -13,7 +13,7 @@ Every targeted host gets a run row immediately, in ``waiting``. Only
 ``concurrency`` of them are released at a time. Two things fall out of that
 which matter more than they look:
 
-* the operator sees the TOTAL straight away — "0 of 400" rather than a number
+* the operator sees the TOTAL straight away -- "0 of 400" rather than a number
   that grows as dispatch proceeds, which is indistinguishable from a stalled
   fan-out; and
 * a host that is never reached still has a row saying so, instead of leaving
@@ -29,7 +29,7 @@ sweeper below exists only for the hosts that never answer at all.
 NOT MEASURED IS STILL NOT EMPTY
 -------------------------------
 ``not_covered_count`` is tracked separately from ``failed_count``. A host that
-does not serve the tables has not failed — folding the two together would make
+does not serve the tables has not failed -- folding the two together would make
 a Windows box look broken for lacking ``mounts``.
 """
 

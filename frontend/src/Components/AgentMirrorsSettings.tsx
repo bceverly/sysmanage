@@ -48,7 +48,7 @@ interface AgentMirror {
  *
  * The channel list comes from the server (which reads it from the provisioning
  * engine, the same code that renders the install commands) rather than being
- * hardcoded here — a hardcoded list would let this form offer a channel the
+ * hardcoded here -- a hardcoded list would let this form offer a channel the
  * renderer ignores, and the only symptom would be a provisioned host that
  * silently never enrolls.
  */
@@ -65,7 +65,7 @@ const AgentMirrorsSettings: React.FC = () => {
   const [url, setUrl] = useState('');
 
   // Deliberately depends on NOTHING.  Taking ``t`` as a dependency makes a new
-  // ``load`` on every render, which the mount effect then re-runs — an endless
+  // ``load`` on every render, which the mount effect then re-runs -- an endless
   // refetch loop.  The load-failure message is rendered from ``loadFailed``
   // below instead, where translating it costs nothing.
   const load = useCallback(async () => {
@@ -87,7 +87,7 @@ const AgentMirrorsSettings: React.FC = () => {
     void load();
   }, [load]);
 
-  // Only offer channels that aren't already configured — a second row for the
+  // Only offer channels that aren't already configured -- a second row for the
   // same channel is rejected server-side anyway (one row per channel), and
   // offering it invites the operator to think they can have two.
   const unconfigured = useMemo(() => {

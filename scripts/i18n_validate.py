@@ -34,30 +34,30 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = REPO_ROOT / "frontend" / "src"
 LOCALES_DIR = REPO_ROOT / "frontend" / "public" / "locales"
 
-# Prefixes used in template-literal ``t(`prefix.${var}`)`` lookups — the
+# Prefixes used in template-literal ``t(`prefix.${var}`)`` lookups -- the
 # regex extractor sees only the static prefix, so any nested key under one
 # of these is "live" even if no static reference matches it.  Keep this
 # list in sync with grep:
 #   grep -ohE "t\(\`[a-zA-Z][a-zA-Z0-9._]*\.\\\${" frontend/src/**/*.tsx
 DYNAMIC_KEY_PREFIXES = (
-    "airgap.freshness.label.",  # Phase 11 B4 — t(`airgap.freshness.label.${label}`)
-    "engine.",  # Phase 11 B7 — engine plan-description envelope: t(cmd.description_key, params)
+    "airgap.freshness.label.",  # Phase 11 B4 -- t(`airgap.freshness.label.${label}`)
+    "engine.",  # Phase 11 B7 -- engine plan-description envelope: t(cmd.description_key, params)
     "hostDetail.hypervisor.state.",
-    # Phase 12.5 — the Windows edition picker maps over WINDOWS_EDITIONS and
+    # Phase 12.5 -- the Windows edition picker maps over WINDOWS_EDITIONS and
     # calls t(edition.labelKey, edition.label), so the keys never appear as
     # literals.  The list is the engine's own edition keys; see
     # hostDetailTypes.WINDOWS_EDITIONS.
     "hostDetail.windowsEdition",
-    "maintenanceWindows.day.",  # Phase 14.2 — t(`maintenanceWindows.day.${d}`)
-    "maintenanceWindows.state.",  # Phase 14.2 — t(`maintenanceWindows.state.${status.state}`)
-    "nav.role.",  # Phase 11 — role chip uses t(`nav.role.${serverRole}`)
-    # Phase 21.1 S4 — the run-status chip uses
+    "maintenanceWindows.day.",  # Phase 14.2 -- t(`maintenanceWindows.day.${d}`)
+    "maintenanceWindows.state.",  # Phase 14.2 -- t(`maintenanceWindows.state.${status.state}`)
+    "nav.role.",  # Phase 11 -- role chip uses t(`nav.role.${serverRole}`)
+    # Phase 21.1 S4 -- the run-status chip uses
     # t(`queryPacks.runStatus.${run.status}`).  NOT strippable: these four are
     # live translations the scanner cannot see, and "partial" in particular
     # carries the distinction the whole phase exists for -- a host that could
     # not answer is not a host that answered "nothing".
     "queryPacks.runStatus.",
-    # Phase 21.1 S5 — the live-query chips use
+    # Phase 21.1 S5 -- the live-query chips use
     # t(`queryPacks.liveStatus.${live.status}`) and
     # t(`queryPacks.targetStatus.${target.status}`). Same reason as
     # runStatus above: dynamic keys are invisible to the scanner, and
@@ -75,7 +75,7 @@ DYNAMIC_KEY_PREFIXES = (
 
 # Match a JS string literal: ``"..."`` or ``'...'`` with backslash
 # escapes.  Crucially, the OPPOSITE quote character is freely allowed
-# inside — so the earlier ``[^'"\\]`` shape was wrong because it
+# inside -- so the earlier ``[^'"\\]`` shape was wrong because it
 # rejected apostrophes inside ``"don't"``.  Build the two forms
 # separately and union them.
 _DOUBLE_QUOTED = r'"(?:[^"\\]|\\.)*"'
@@ -86,12 +86,12 @@ _STRING_LITERAL = rf"(?:{_DOUBLE_QUOTED}|{_SINGLE_QUOTED})"
 # under the line-length cap.  Match one or more literals joined by ``+``.
 _CONCAT_STRING = rf"{_STRING_LITERAL}(?:\s*\+\s*{_STRING_LITERAL})*"
 
-# Match ``t('key.path' [, 'English fallback'])`` — the fallback is
+# Match ``t('key.path' [, 'English fallback'])`` -- the fallback is
 # optional because Pro+ tends to call ``t('login.title')`` without one
 # (relying on en/ as the source of truth) while OSS calls
 # ``t('mirror.add', 'Add Mirror')`` with the en value inline.  Both forms
 # are valid; we extract the key in either case and capture the fallback
-# only when present.  Ignores ``t(`template`)`` template literals — those
+# only when present.  Ignores ``t(`template`)`` template literals -- those
 # need DYNAMIC_KEY_PREFIXES coverage instead.
 T_CALL_WITH_FALLBACK = re.compile(
     rf"""\bt\(\s*['"]([\w.-]+)['"]\s*,\s*({_CONCAT_STRING})\s*[,)]""",
@@ -162,7 +162,7 @@ T_CALL_INTERP_TEMPLATE_FALLBACK = re.compile(
 )
 _INTERP_EXPR = re.compile(r"\$\{[^}]*\}")
 
-# Match ``t('key', { defaultValue: 'fallback', ...other options })`` — a
+# Match ``t('key', { defaultValue: 'fallback', ...other options })`` -- a
 # common i18next idiom when the call also passes interpolation params.
 # Restricted to single-line object literals to avoid back-tracking
 # explosions; multi-line cases would need a real JS parser.
@@ -213,7 +213,7 @@ def _extract_from_file(path: Path) -> dict[str, str]:
         text = path.read_text(encoding="utf-8")
     except UnicodeDecodeError:
         return found
-    # Two-arg form first — the fallback expression is the en authoritative
+    # Two-arg form first -- the fallback expression is the en authoritative
     # value.  The expression may be one literal, several literals joined
     # by ``+``, or contain the opposite quote character internally; the
     # decoder handles all three shapes.
@@ -233,13 +233,13 @@ def _extract_from_file(path: Path) -> dict[str, str]:
         literal = match.group(2)
         found[key] = literal[1:-1]  # strip surrounding backticks
     # ``defaultValue:`` option form: ``t('key', { defaultValue: '...' })``
-    # — common when the call also passes interpolation params.
+    # -- common when the call also passes interpolation params.
     for match in T_CALL_DEFAULTVALUE.finditer(text):
         key = match.group(1)
         if key in found and found[key]:
             continue
         found[key] = _decode_string_literal(match.group(2))
-    # Interpolated template-literal fallback — last-resort extraction so
+    # Interpolated template-literal fallback -- last-resort extraction so
     # ``t('key', `Hello ${name}`)`` doesn't end up with no fallback at
     # all.  ``${expr}`` is rewritten to ``{{}}`` so the resulting string
     # is human-readable (and i18next-compatible enough that calling
@@ -284,7 +284,7 @@ def insert_dotted(target: dict, dotted_key: str, value) -> None:
     key was originally a label like ``auditLog.actionType: 'Action Type'``
     and the code later started referencing nested children like
     ``auditLog.actionType.create``), the leaf is replaced with a dict.
-    The original leaf becomes orphaned — the validator's orphan list will
+    The original leaf becomes orphaned -- the validator's orphan list will
     surface it for cleanup if it's still needed under a renamed key.
     """
     parts = dotted_key.split(".")
@@ -345,7 +345,7 @@ def _delete_dotted(target: dict, dotted_key: str) -> bool:
 def cmd_strip_orphans() -> int:
     """Delete keys that are present in locale JSONs but not referenced in
     code (and not under a dynamic prefix).  Operates on every locale
-    consistently — a key is orphan only if no locale has a static-or-
+    consistently -- a key is orphan only if no locale has a static-or-
     dynamic reference for it."""
     code_keys = set(extract_keys())
     removed_total = 0
@@ -368,7 +368,7 @@ def _is_dynamic(key: str) -> bool:
     return any(key.startswith(prefix) for prefix in DYNAMIC_KEY_PREFIXES)
 
 
-# i18next pluralisation turns ONE msgid into several catalogue keys, each
+# i18next pluralisation turns ONE msgid into several catalog keys, each
 # suffixed with a CLDR plural category: `x.days_one`, `x.days_other`, and for
 # languages with richer rules `_zero/_two/_few/_many` (plus `_ordinal_*`).
 # Code only ever names the BASE key -- t('x.days', { count }) -- and i18next
@@ -419,11 +419,11 @@ def cmd_validate(seed: bool) -> int:
                 for key in missing:
                     en_value = code_keys[key]
                     if en_value:
-                        # Source code provided the en fallback inline — use it.
+                        # Source code provided the en fallback inline -- use it.
                         seeded = en_value if lang == "en" else f"[TODO] {en_value}"
                     else:
                         # Source code calls ``t('key')`` with no fallback string.
-                        # Don't seed an empty string — Playwright + screen-reader
+                        # Don't seed an empty string -- Playwright + screen-reader
                         # accessibility queries (getByRole heading by name)
                         # render empty strings as nameless elements that cannot
                         # be located.  Use a visible placeholder instead so the
@@ -452,11 +452,11 @@ def cmd_validate(seed: bool) -> int:
             file=sys.stderr,
         )
         # An "orphan" is a key in translation.json with no *static* t('...')
-        # reference.  There are exactly two legitimate causes — spell out both so
+        # reference.  There are exactly two legitimate causes -- spell out both so
         # this failure is self-service:
         print(
             "\nOrphan keys are NOT fixed by `make i18n-fix` -- deleting a\n"
-            "translation is a judgement call, so pick the cause:\n"
+            "translation is a judgment call, so pick the cause:\n"
             "  1. Genuinely unused (e.g. you deleted the component that used it)\n"
             "       -> make i18n-strip-orphans\n"
             "  2. Looked up dynamically, e.g. t(`foo.bar.${x}`), so the scanner\n"
@@ -470,7 +470,7 @@ def cmd_validate(seed: bool) -> int:
         return 1
     # stdout, deliberately.  Failures go to stderr, but a SUCCESS report on
     # stderr makes "passing" and "produced no output at all" look identical
-    # — that is how `make i18n-validate` got mistaken for a dead target
+    # -- that is how `make i18n-validate` got mistaken for a dead target
     # (2026-08-05).  Aligned across all four repos.
     print("\nOK: every code-referenced key exists in every locale")
     return 0

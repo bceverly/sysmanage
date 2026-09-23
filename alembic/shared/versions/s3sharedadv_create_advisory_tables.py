@@ -5,15 +5,15 @@
 """create advisory/errata catalog tables in the shared partition (Phase 14.1)
 
 Vendor advisories (USN / RHSA / SUSE-SU / DSA / FreeBSD-SA) are global reference
-data — identical for every tenant — so the catalog lives ONCE in the ``shared``
+data -- identical for every tenant -- so the catalog lives ONCE in the ``shared``
 partition, exactly like CVE data.  Brand-new tables (nothing to rename), created
 idempotently:
 
-  * ``shared_advisory`` — the advisory.
-  * ``shared_advisory_package`` — fixed packages per OS release (FK to advisory).
-  * ``shared_advisory_cve`` — advisory↔CVE links (FKs to advisory AND
-    ``shared_vulnerability`` — same partition, so real FKs are fine).
-  * ``shared_advisory_ingestion_log`` / ``shared_advisory_refresh_settings`` —
+  * ``shared_advisory`` -- the advisory.
+  * ``shared_advisory_package`` -- fixed packages per OS release (FK to advisory).
+  * ``shared_advisory_cve`` -- advisory↔CVE links (FKs to advisory AND
+    ``shared_vulnerability`` -- same partition, so real FKs are fine).
+  * ``shared_advisory_ingestion_log`` / ``shared_advisory_refresh_settings`` --
     server-global ingestion bookkeeping (mirrors the CVE equivalents).
 
 Idempotent; safe on SQLite + PostgreSQL.

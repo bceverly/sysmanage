@@ -9,7 +9,7 @@ The CVE reference + config tables moved to the shared partition (renamed to
 revision removes their old tenant-side footprint:
 
 * The cross-partition FK ``host_vulnerability_finding.vulnerability_id`` →
-  ``(shared_)vulnerability`` is dropped — it is a soft reference now (the target
+  ``(shared_)vulnerability`` is dropped -- it is a soft reference now (the target
   lives in the shared partition; callers resolve it via the shared session).
 * The old unprefixed CVE tables are dropped.  In the bootstrap/collapsed
   database the shared chain already renamed them away, so these are no-ops; in
@@ -17,7 +17,7 @@ revision removes their old tenant-side footprint:
   (incorrectly) tenant-partitioned.
 
 The shared chain runs before this one, so on the bootstrap database the rename
-has already happened — this never drops populated CVE data.
+has already happened -- this never drops populated CVE data.
 
 Idempotent; safe on SQLite + PostgreSQL.
 

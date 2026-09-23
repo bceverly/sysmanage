@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Tests for ``query_pack_service`` — Phase 21.1 S4.
+"""Tests for ``query_pack_service`` -- Phase 21.1 S4.
 
 The service owns the DATABASE and nothing else: every rule comes from the
 licensed engine through the shim. So these tests are about persistence and
@@ -12,7 +12,7 @@ about the two places where a wrong shape would quietly produce a wrong answer:
     assigned and dispatched before anyone finds out, and its SQL is
     tenant-authored; and
   * "not covered" must survive being written to the database. A query that
-    could not run gets a row saying so — without it, the run's counts would be
+    could not run gets a row saying so -- without it, the run's counts would be
     the only evidence the question was ever asked.
 """
 
@@ -126,7 +126,7 @@ class TestPackResolution:
 
     def test_a_missing_curated_pack_resolves_to_none_not_an_empty_pack(self, session):
         """An empty pack would dispatch, run nothing, and come back a clean
-        success — reporting a host as measured against a pack that is gone."""
+        success -- reporting a host as measured against a pack that is gone."""
         with patch.object(svc, "get_shared_pack", return_value=None):
             resolved = svc.resolve_pack(
                 session, {"shared_pack_id": uuid.uuid4(), "assignment_id": "a1"}
@@ -232,7 +232,7 @@ class TestResultRecording:
 
     def test_an_ok_query_returning_nothing_still_leaves_a_row(self, session):
         """'Measured, found none' is a real finding and must be recorded as
-        one — distinct from 'not measured', which is recorded differently."""
+        one -- distinct from 'not measured', which is recorded differently."""
         run = self._run(session)
         session.add(run)
         session.flush()

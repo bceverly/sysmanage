@@ -23,11 +23,11 @@ Default threshold is 20 %.  Override per-CI via --threshold.
 
 Exit codes:
 
-  0  — no regressions detected.
-  2  — one or more regressions found (workflow surfaces this as a job
+  0  -- no regressions detected.
+  2  -- one or more regressions found (workflow surfaces this as a job
        failure / PR check fail).  Same code as run.py uses for SLA
        violations so the workflow's existing handling fits.
-  1  — input error (missing files, malformed JSON, etc.).
+  1  -- input error (missing files, malformed JSON, etc.).
 
 Output:  human-readable diff to stdout, plus a one-line summary that
 the workflow uses for PR comments.
@@ -81,7 +81,7 @@ def _check_metric(
         return None
     if metric == "error_rate":
         # Absolute, not relative.  An error rate going from 0.001 to 0.04
-        # is +3,900 % but only +0.039 absolute — the latter is what we care.
+        # is +3,900 % but only +0.039 absolute -- the latter is what we care.
         delta = candidate - baseline
         if delta > 0.05:
             return (
@@ -196,7 +196,7 @@ def main() -> int:
         )
 
     if not common:
-        # Nothing comparable — informational, not a failure.  This
+        # Nothing comparable -- informational, not a failure.  This
         # happens when the baseline ran a different scenario set
         # (e.g., before the WS reliability suite was added).
         print("\nNo scenarios in common; nothing to compare.  Exiting clean.")

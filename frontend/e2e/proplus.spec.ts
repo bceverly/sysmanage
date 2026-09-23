@@ -41,7 +41,7 @@ test.describe('Pro+ Health Analysis', () => {
     await page.goto('/hosts');
     try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
-    // If we landed back on /login, auth setup broke — fail loudly.
+    // If we landed back on /login, auth setup broke -- fail loudly.
     expect(page.url()).not.toContain('/login');
 
     const dataGrid = page.locator('.MuiDataGrid-root');
@@ -249,7 +249,7 @@ test.describe('Pro+ Settings', () => {
   test('should display Pro+ settings if licensed', async ({ page }) => {
     test.setTimeout(60000);
     // ensureAuthenticated returns false only if auth never succeeded, which
-    // is a real failure — surface it.
+    // is a real failure -- surface it.
     expect(await ensureAuthenticated(page, '/settings')).toBe(true);
 
     // Look for Pro+ specific settings tabs
@@ -396,14 +396,14 @@ async function openSettingsTab(page: Page, tabName: RegExp): Promise<boolean> {
   // CRITICAL ordering: before deciding a specific tab is "gated away", wait
   // for the settings TAB BAR ITSELF to render (any tab attached).  Otherwise,
   // under load the ``/api/license`` fetch + tab render can outrun a per-tab
-  // attach wait, and a tab that is merely SLOW gets misclassified as ABSENT —
+  // attach wait, and a tab that is merely SLOW gets misclassified as ABSENT --
   // the caller then asserts ``count() === 0`` and fails because the tab does
   // in fact appear a moment later.  Waiting for the bar first makes the
   // gated-vs-present decision deterministic (the bar is rendered → the tab
   // list is final → a missing tab is genuinely gated).
   try {
     await page.getByRole('tab').first().waitFor({ state: 'attached', timeout: 20000 });
-  } catch { /* no tabs rendered at all — fall through to the per-tab check */ }
+  } catch { /* no tabs rendered at all -- fall through to the per-tab check */ }
 
   const tab = page.getByRole('tab', { name: tabName }).first();
   try {
@@ -421,7 +421,7 @@ async function openSettingsTab(page: Page, tabName: RegExp): Promise<boolean> {
 }
 
 /**
- * Pro+ settings-tab assertions — no-skip variant.
+ * Pro+ settings-tab assertions -- no-skip variant.
  *
  * Two failure modes that look identical without context:
  *   (a) The Pro+ engine isn't loaded → tab is correctly OSS-gated
@@ -438,10 +438,10 @@ async function openSettingsTab(page: Page, tabName: RegExp): Promise<boolean> {
  * The pattern below collapses both branches into one assertion: the
  * tab is either gated-away (count === 0 → assert it's NOT in the DOM
  * to lock in the gating contract) OR present (→ assert the canonical
- * functionality).  Both branches PASS — no skip.
+ * functionality).  Both branches PASS -- no skip.
  */
 
-test.describe('Pro+ Phase 8.7 — Report Branding settings', () => {
+test.describe('Pro+ Phase 8.7 -- Report Branding settings', () => {
   test('Report Branding tab is correctly gated or fully functional', async ({ page }) => {
     const opened = await openSettingsTab(page, /report branding/i);
     if (!opened) {
@@ -455,7 +455,7 @@ test.describe('Pro+ Phase 8.7 — Report Branding settings', () => {
     // Functional branch: tab is present → canonical fields render.  20s (the
     // expect default): the branding tabpanel form mounts after the tab-click
     // React transition + its GET /report-branding fetch, which can lag under
-    // load — 10s raced it.
+    // load -- 10s raced it.
     const company = page.getByRole('textbox', { name: /company/i }).first();
     await expect(company).toBeVisible({ timeout: 20000 });
     const header = page.getByRole('textbox', { name: /header/i }).first();
@@ -465,25 +465,25 @@ test.describe('Pro+ Phase 8.7 — Report Branding settings', () => {
   test('Report Branding logo upload is gated or rejects oversize', async ({ page }) => {
     const opened = await openSettingsTab(page, /report branding/i);
     if (!opened) {
-      // Gated path — assert tab really is absent and we're done.
+      // Gated path -- assert tab really is absent and we're done.
       const tab = page.getByRole('tab', { name: /report branding/i });
       expect(await tab.count()).toBe(0);
       return;
     }
-    // Tab present — verify the oversize-upload error path.  Inject a
+    // Tab present -- verify the oversize-upload error path.  Inject a
     // 2 MB buffer into the hidden ``<input type="file">`` to trigger
     // the server-side 1 MB cap.  We don't assert on the exact alert
-    // wording — only that the UI surfaces an error path AND the page
+    // wording -- only that the UI surfaces an error path AND the page
     // stays interactive (i.e. doesn't crash).
     //
     // The file input is part of the tabpanel content, which renders
     // AFTER the tab click triggers a React state transition.  Use
-    // ``waitFor`` instead of an instantaneous ``count()`` — the input
+    // ``waitFor`` instead of an instantaneous ``count()`` -- the input
     // is hidden via CSS so we wait for ``attached`` rather than
     // ``visible``.  Throws on timeout (functions as the assertion).
     const fileInput = page.locator('input[type="file"]').first();
     // 20s: the tabpanel content mounts after the tab-click React transition +
-    // its GET /report-branding fetch, which can lag under load — shorter waits
+    // its GET /report-branding fetch, which can lag under load -- shorter waits
     // raced it even though the input attaches moments later.
     await fileInput.waitFor({ state: 'attached', timeout: 20000 });
     const big = Buffer.alloc(2 * 1024 * 1024, 0xff);
@@ -493,14 +493,14 @@ test.describe('Pro+ Phase 8.7 — Report Branding settings', () => {
       buffer: big,
     });
     try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* ok */ }
-    // The Save button must still be around — nothing in this flow
+    // The Save button must still be around -- nothing in this flow
     // should leave the tab broken.
     const saveButton = page.getByRole('button', { name: /save/i }).first();
     await expect(saveButton).toBeVisible();
   });
 });
 
-test.describe('Pro+ Phase 8.7 — Report Templates settings', () => {
+test.describe('Pro+ Phase 8.7 -- Report Templates settings', () => {
   test('Report Templates tab is correctly gated or fully functional', async ({ page }) => {
     const opened = await openSettingsTab(page, /report templates/i);
     if (!opened) {
@@ -508,7 +508,7 @@ test.describe('Pro+ Phase 8.7 — Report Templates settings', () => {
       expect(await tab.count()).toBe(0);
       return;
     }
-    // Functional branch — the "Add Template" button is the canonical
+    // Functional branch -- the "Add Template" button is the canonical
     // entry point; its presence proves the tab loaded its CRUD UI.
     const addButton = page.getByRole('button', { name: /add.*template/i }).first();
     await expect(addButton).toBeVisible({ timeout: 10000 });
@@ -534,7 +534,7 @@ test.describe('Pro+ Phase 8.7 — Report Templates settings', () => {
   });
 });
 
-test.describe('Pro+ Phase 8.7 — Dynamic Secrets settings', () => {
+test.describe('Pro+ Phase 8.7 -- Dynamic Secrets settings', () => {
   test('Dynamic Secrets tab is correctly gated or fully functional', async ({ page }) => {
     const opened = await openSettingsTab(page, /dynamic secrets/i);
     if (!opened) {
@@ -566,7 +566,7 @@ test.describe('Pro+ Phase 8.7 — Dynamic Secrets settings', () => {
   });
 });
 
-test.describe('Phase 8.4 — Audit Log PDF export', () => {
+test.describe('Phase 8.4 -- Audit Log PDF export', () => {
   test('exposes both CSV and PDF export buttons', async ({ page }) => {
     await page.goto('/reports/audit-log');
     try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* ok */ }
@@ -595,7 +595,7 @@ test.describe('Phase 8.4 — Audit Log PDF export', () => {
     }
     // Visible path: clicking should trigger a download with .pdf
     // suffix.  Tolerate "no download fires" because the audit log may
-    // genuinely be empty in this test run — that's still a successful
+    // genuinely be empty in this test run -- that's still a successful
     // OSS-side render, not a regression.
     const downloadPromise = page.waitForEvent('download', { timeout: 30000 }).catch(() => null);
     await pdfButton.click();

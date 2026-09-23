@@ -122,15 +122,15 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
             # absolute path validated against an allowlist of system
             # locations + the OPENBAO_BIN env var.  OPENBAO_BIN is
             # operator-controlled (set in sysmanage.yaml or root-owned
-            # /etc/environment) — NOT request/user-controlled.  The
+            # /etc/environment) -- NOT request/user-controlled.  The
             # subprocess argv is a fixed list of literal strings + the
             # validated binary path; no user input reaches argv.
             #
             # Semgrep anchors ``dangerous-subprocess-use-tainted-env-args``
             # on the FIRST POSITIONAL ARGUMENT line (the ``[`` opener
             # below), NOT on the ``subprocess.run(`` call line.  Its
-            # nosemgrep matcher honours comments on the SAME line OR
-            # the line IMMEDIATELY before the anchor — so the
+            # nosemgrep matcher honors comments on the SAME line OR
+            # the line IMMEDIATELY before the anchor -- so the
             # suppression has to live on the ``subprocess.run(`` line
             # right above the ``[``.  Earlier placements on the
             # comment block two lines up were silently ignored.
@@ -578,7 +578,7 @@ def seal_openbao() -> Dict[str, Any]:
         # validated by find_bao_binary (see openbao.py:128 comment).
         # No user input reaches argv.  See openbao.py:128 for why
         # the nosemgrep marker has to live on the ``subprocess.run(``
-        # line — the rule anchors on the argv list opener below.
+        # line -- the rule anchors on the argv list opener below.
         result = subprocess.run(  # nosec B603
             [  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
                 bao_cmd,

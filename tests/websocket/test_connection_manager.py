@@ -463,7 +463,7 @@ class TestConnectionManager:
 
     @pytest.mark.asyncio
     async def test_send_to_host_routing_error_returns_false(self):
-        """A tenant-routing failure must not raise — leave the message queued."""
+        """A tenant-routing failure must not raise -- leave the message queued."""
         manager = ConnectionManager()
 
         with patch(

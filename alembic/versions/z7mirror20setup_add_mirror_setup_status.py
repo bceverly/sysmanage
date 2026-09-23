@@ -11,7 +11,7 @@ Create Date: 2026-05-07 21:00:00.000000
 One-row-per-host cache for the Repository Mirroring setup card.
 Backs the GET /api/mirror-repositories/setup-status/{host_id}
 endpoint without forcing a synchronous round-trip through the agent
-on every page render — the agent posts updates asynchronously via
+on every page render -- the agent posts updates asynchronously via
 the existing ``apply_deployment_plan`` + ``command_result`` path.
 
 Columns:
@@ -29,7 +29,7 @@ Columns:
   last_install_message_id  in-flight install message_id (NULL when idle)
   last_install_error       agent stderr from the last failed install
 
-Idempotent — re-running ``alembic upgrade head`` is a no-op via
+Idempotent -- re-running ``alembic upgrade head`` is a no-op via
 ``inspect().has_table()``.  SQLite + PostgreSQL safe; uses ``sa.JSON``
 which lands as TEXT on SQLite and as JSON on PostgreSQL.
 """

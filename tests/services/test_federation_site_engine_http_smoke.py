@@ -11,7 +11,7 @@ endpoints (coordinator → site) over real HTTP with a ``TestClient``.
 
 These inbound routes (``/site/policies``, ``/site/commands``) and their
 ``_verify_coordinator_bearer`` dependency are exactly where the site-side
-``Header``/``request: Request`` Cython-introspection bugs lived — this guards
+``Header``/``request: Request`` Cython-introspection bugs lived -- this guards
 that class of regression on the site engine, which nothing else covers.
 
 Skips automatically when the engine ``.so`` isn't built (OSS-only checkout).

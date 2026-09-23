@@ -8,7 +8,7 @@
 Phase 8 will ship at least 5 new tables (AccessGroup, RegistrationKey,
 UpgradeProfile, PackageProfile, HostComplianceStatus). A migration whose
 ``downgrade()`` doesn't faithfully undo its ``upgrade()`` only fails in
-production when an operator rolls back — which is the worst possible
+production when an operator rolls back -- which is the worst possible
 moment to discover the bug.
 
 Strategy:
@@ -17,7 +17,7 @@ Strategy:
      already does this; we run AFTER that).
   2. Capture the canonical schema (``pg_dump --schema-only``, with
      non-deterministic noise stripped).
-  3. ``alembic downgrade -1`` then ``alembic upgrade head`` — round
+  3. ``alembic downgrade -1`` then ``alembic upgrade head`` -- round
      the most recent migration through its full down/up cycle.
   4. Capture the schema again.  Diff the two snapshots.  Any
      difference is a round-trip failure.
@@ -33,7 +33,7 @@ locally against a disposable Postgres if you set ``DATABASE_URL``.
 
 import os
 import re
-import subprocess  # nosec B404 — orchestrating local CLI tools
+import subprocess  # nosec B404 -- orchestrating local CLI tools
 import sys
 import tempfile
 from pathlib import Path
@@ -45,7 +45,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 def _run(cmd: List[str], **kwargs) -> subprocess.CompletedProcess:
     """Run a subprocess; on failure, print stdout/stderr and re-raise."""
     print(f"$ {' '.join(cmd)}", flush=True)
-    return subprocess.run(  # nosec B603 — argv is constructed in this file, not user input
+    return subprocess.run(  # nosec B603 -- argv is constructed in this file, not user input
         cmd,
         check=True,
         text=True,
@@ -76,7 +76,7 @@ def _dump_schema(db_url: str, out_path: Path) -> None:
     """
     raw = out_path.with_suffix(".raw.sql")
     with open(raw, "w", encoding="utf-8") as fh:
-        subprocess.run(  # nosec B603,B607 — pg_dump invocation w/ CI-controlled URL
+        subprocess.run(  # nosec B603,B607 -- pg_dump invocation w/ CI-controlled URL
             ["pg_dump", "--schema-only", "--no-owner", "--no-privileges", db_url],
             check=True,
             stdout=fh,
@@ -97,7 +97,7 @@ def _dump_schema(db_url: str, out_path: Path) -> None:
         # \restrict / \unrestrict are per-dump random session-lock tokens
         # added by pg_dump 17+ to prevent concurrent modifications during
         # the dump.  They differ between every pg_dump invocation by
-        # design — strip them so they don't false-positive as drift.
+        # design -- strip them so they don't false-positive as drift.
         re.compile(r"^\\(?:un)?restrict .*"),
         re.compile(r"^\s*$"),
     ]

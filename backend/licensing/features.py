@@ -47,7 +47,7 @@ class FeatureCode(str, Enum):
     API_EXTENDED = "api"  # Matches license server feature code
     WEBHOOK_ADVANCED = "webhook_advanced"
 
-    # Operability — routing SysManage's OWN diagnostic logs (Phase 14.5).
+    # Operability -- routing SysManage's OWN diagnostic logs (Phase 14.5).
     # Local sinks (file / journald / local syslog / Windows Event Log) stay OSS;
     # this gates only REMOTE syslog forwarding (the ``syslog_remote`` target).
     LOG_ROUTING = "log_routing"
@@ -91,13 +91,13 @@ class FeatureCode(str, Enum):
     # and that is the value.
     QUERY_PACK_MANAGE = "query_pack_manage"
 
-    # Issued by the licence generator in every Professional+ licence since
+    # Issued by the license generator in every Professional+ license since
     # the tiers were defined, but absent here until 2026-09-21 -- so
-    # ``FeatureCode(f)`` over a real licence's feature list raised on a
-    # perfectly valid licence. Nothing had done that yet, which is the only
+    # ``FeatureCode(f)`` over a real license's feature list raised on a
+    # perfectly valid license. Nothing had done that yet, which is the only
     # reason it never bit: the capabilities themselves are gated by their
     # MODULES (secrets_engine, container_engine), not by these codes. Added
-    # rather than removed from the generator, because licences already in
+    # rather than removed from the generator, because licenses already in
     # the field carry them and the consumer should understand what the
     # issuer emits.
     SECRETS_MANAGEMENT = "secrets"
@@ -125,7 +125,7 @@ class FeatureCode(str, Enum):
     OBSERVABILITY_GRAFANA_PROVISION = "observability_grafana_provision"
     OBSERVABILITY_TELEMETRY_ROUTING = "observability_telemetry_routing"
 
-    # Air-Gap Collector (Phase 11.1) — public-side server features
+    # Air-Gap Collector (Phase 11.1) -- public-side server features
     AIRGAP_COLLECT_PACKAGES = "airgap_collect_packages"
     AIRGAP_COLLECT_CVE = "airgap_collect_cve"
     AIRGAP_COLLECT_COMPLIANCE = "airgap_collect_compliance"
@@ -133,18 +133,18 @@ class FeatureCode(str, Enum):
     AIRGAP_BURN_DISC = "airgap_burn_disc"
     AIRGAP_SIGN_MANIFEST = "airgap_sign_manifest"
 
-    # Air-Gap Repository (Phase 11.2) — private-side server features
+    # Air-Gap Repository (Phase 11.2) -- private-side server features
     AIRGAP_INGEST_MEDIA = "airgap_ingest_media"
     AIRGAP_HOST_REPOSITORY = "airgap_host_repository"
     AIRGAP_REPOINT_AGENTS = "airgap_repoint_agents"
     AIRGAP_VERIFY_FRESHNESS = "airgap_verify_freshness"
 
-    # CVE Feed Management (Phase 11.4) — paired with vuln_engine module.
+    # CVE Feed Management (Phase 11.4) -- paired with vuln_engine module.
     # The single feature code covers source CRUD, manual refresh, and the
     # tick driver hook; the engine itself owns cron/plan/apply logic.
     CVE_FEED_MANAGEMENT = "cve_feed_management"
 
-    # Federation Controller Engine (Phase 12.1) — coordinator-side
+    # Federation Controller Engine (Phase 12.1) -- coordinator-side
     # capabilities.  Split into seven feature codes so a future SKU
     # could license sites-registry-only deployments without policy
     # push, or read-only rollup access for auditors, etc.
@@ -156,17 +156,17 @@ class FeatureCode(str, Enum):
     FEDERATION_COMMAND_DISPATCH = "federation_command_dispatch"
     FEDERATION_AUDIT_READ = "federation_audit_read"
 
-    # Content Lifecycle Management (Phase 16, Enterprise) — Satellite-style
+    # Content Lifecycle Management (Phase 16, Enterprise) -- Satellite-style
     # versioned/filtered content views + lifecycle environments + gated promotion.
     CONTENT_LIFECYCLE_MANAGE = "content_lifecycle_manage"
 
-    # Content Distribution (Phase 17, Enterprise) — snap store proxy (17.1),
+    # Content Distribution (Phase 17, Enterprise) -- snap store proxy (17.1),
     # container-image content lifecycle (17.2), image-mode host management (17.3).
     SNAP_PROXY_MANAGE = "snap_proxy_manage"
     OCI_PROXY_MANAGE = "oci_proxy_manage"
     IMAGE_MODE_MANAGE = "image_mode_manage"
 
-    # Provisioning & Discovery (Phase 18) — split-tier gate: template authoring
+    # Provisioning & Discovery (Phase 18) -- split-tier gate: template authoring
     # is Pro+ (Professional), actual provisioning / compute / discovery is
     # Enterprise.  Both are served by the single PROVISIONING_ENGINE module,
     # which loads at the Professional tier so Pro+ can manage templates.
@@ -233,29 +233,29 @@ class ModuleCode(str, Enum):
     REPOSITORY_MIRRORING_ENGINE = "repository_mirroring_engine"
     EXTERNAL_IDP_ENGINE = "external_idp_engine"
 
-    # Phase 11 Enterprise modules — Air-Gapped Environment Support.
+    # Phase 11 Enterprise modules -- Air-Gapped Environment Support.
     # The two engines are paired but never co-loaded on a single server:
     # ``role: collector`` loads AIRGAP_COLLECTOR_ENGINE (public-side),
     # ``role: repository`` loads AIRGAP_REPOSITORY_ENGINE (private-side).
-    # One Enterprise license includes both — see Phase 11 in ROADMAP.md.
+    # One Enterprise license includes both -- see Phase 11 in ROADMAP.md.
     AIRGAP_COLLECTOR_ENGINE = "airgap_collector_engine"
     AIRGAP_REPOSITORY_ENGINE = "airgap_repository_engine"
 
-    # Phase 12 Enterprise modules — Multi-Site Federation.  Mutually
+    # Phase 12 Enterprise modules -- Multi-Site Federation.  Mutually
     # exclusive at the deployment level: a SysManage server runs as
     # EITHER the coordinator (loads FEDERATION_CONTROLLER_ENGINE) or
     # as a subordinate site (loads FEDERATION_SITE_ENGINE).  Both are
-    # bundled in one Enterprise SKU — see Phase 12 in ROADMAP.md.
+    # bundled in one Enterprise SKU -- see Phase 12 in ROADMAP.md.
     FEDERATION_CONTROLLER_ENGINE = "federation_controller_engine"
     FEDERATION_SITE_ENGINE = "federation_site_engine"
 
-    # Phase 12.5 — Child-host (KVM/LXD/bhyve/vmm/WSL) websocket result handlers.
+    # Phase 12.5 -- Child-host (KVM/LXD/bhyve/vmm/WSL) websocket result handlers.
     # The OSS server keeps only thin dispatch shims (backend/api/handlers/
     # child_host/) that delegate here when the engine is loaded; without it
     # child-host management answers "requires a Professional+ license".
     CHILD_HOST_HANDLERS_ENGINE = "child_host_handlers_engine"
 
-    # Phase 13 — Multi-Tenant SaaS.  Multi-tenancy is a commercial-only
+    # Phase 13 -- Multi-Tenant SaaS.  Multi-tenancy is a commercial-only
     # capability: the OSS build ships the schema (registry/shared/tenant tables
     # + migrations) and an inert seam, while this engine supplies the licensed
     # logic (per-tenant routing, control-plane orchestration, OpenBAO leasing,
@@ -267,16 +267,16 @@ class ModuleCode(str, Enum):
     LOG_ANALYZER = "log_analyzer"
     METRICS_AGGREGATOR = "metrics_aggregator"
 
-    # Phase 16 Enterprise module — Content Lifecycle Management (Satellite-style
+    # Phase 16 Enterprise module -- Content Lifecycle Management (Satellite-style
     # versioned/filtered content views promoted across lifecycle environments).
     CONTENT_LIFECYCLE_ENGINE = "content_lifecycle_engine"
 
-    # Phase 17 Enterprise modules — Content Distribution & Image-Mode Hosts.
+    # Phase 17 Enterprise modules -- Content Distribution & Image-Mode Hosts.
     SNAP_PROXY_ENGINE = "snap_proxy_engine"  # 17.1 snap store proxy
     OCI_PROXY_ENGINE = "oci_proxy_engine"  # 17.2 container image content
     IMAGE_MODE_ENGINE = "image_mode_engine"  # 17.3 bootc / rpm-ostree hosts
 
-    # Phase 20.1 Enterprise module — Configuration Management.
+    # Phase 20.1 Enterprise module -- Configuration Management.
     #
     # DECIDED 2026-08-27 (Bryan). The line is deliberately NOT "config
     # management is Enterprise": the OSS build keeps ansible-core plus ad-hoc
@@ -292,13 +292,13 @@ class ModuleCode(str, Enum):
     # and av_management_engine owns fleet policy.
     CONFIG_MANAGEMENT_ENGINE = "config_management_engine"
 
-    # Phase 18 — Provisioning & Discovery.  One engine serves both the Pro+
+    # Phase 18 -- Provisioning & Discovery.  One engine serves both the Pro+
     # template surface and the Enterprise provisioning/compute/discovery surface;
     # it loads at the Professional tier (see TIER_MODULES) and the Enterprise-only
     # capabilities are feature-gated (PROVISIONING_MANAGE) inside it.
     PROVISIONING_ENGINE = "provisioning_engine"
 
-    # Phase 21.1 S4 — query packs as multi-tenant policy.  Its own engine
+    # Phase 21.1 S4 -- query packs as multi-tenant policy.  Its own engine
     # rather than a corner of fleet_engine: a pack is a fact-query plane, not
     # a fleet operation, and folding it in would change an existing subsystem
     # as a side effect of adding a new one.  Loads at Professional.
@@ -322,8 +322,8 @@ class LicenseTier(str, Enum):
     PROFESSIONAL = "professional"
     ENTERPRISE = "enterprise"
     # Top commercial tier (Phase 13): a strict SUPERSET of Enterprise plus the
-    # multi-tenancy engine.  Multi-tenancy is exclusive to this tier — it never
-    # appears under Enterprise — which is the SaaS moat.
+    # multi-tenancy engine.  Multi-tenancy is exclusive to this tier -- it never
+    # appears under Enterprise -- which is the SaaS moat.
     MULTITENANT_SAAS = "multitenant_saas"
 
 
@@ -338,14 +338,14 @@ TIER_FEATURES = {
         FeatureCode.OS_LIFECYCLE,
         FeatureCode.ADVANCED_MONITORING,
         FeatureCode.CUSTOM_REPORTS,
-        # Phase 11.4 — CVE feed management (paired with VULN_ENGINE module)
+        # Phase 11.4 -- CVE feed management (paired with VULN_ENGINE module)
         FeatureCode.CVE_FEED_MANAGEMENT,
-        # Phase 14.5 — remote syslog forwarding of SysManage's own logs
+        # Phase 14.5 -- remote syslog forwarding of SysManage's own logs
         FeatureCode.LOG_ROUTING,
-        # Phase 18 — provisioning template authoring is Pro+ (the act of
+        # Phase 18 -- provisioning template authoring is Pro+ (the act of
         # provisioning is Enterprise-gated separately, below)
         FeatureCode.PROVISIONING_TEMPLATES_MANAGE,
-        # Phase 21.1 S4 — query-pack authoring, assignment and scheduling
+        # Phase 21.1 S4 -- query-pack authoring, assignment and scheduling
         FeatureCode.QUERY_PACK_MANAGE,
         # Issued by the generator at this tier; see the FeatureCode comment.
         FeatureCode.SECRETS_MANAGEMENT,
@@ -366,7 +366,7 @@ TIER_FEATURES = {
         FeatureCode.OS_LIFECYCLE,
         FeatureCode.COMPLIANCE_REPORTS,
         FeatureCode.SECURITY_HARDENING,
-        # Phase 14.4 — FIPS mode enable/disable + fleet posture (Enterprise only)
+        # Phase 14.4 -- FIPS mode enable/disable + fleet posture (Enterprise only)
         FeatureCode.FIPS_MODE,
         FeatureCode.AUTO_REMEDIATION,
         FeatureCode.WORKFLOW_AUTOMATION,
@@ -377,7 +377,7 @@ TIER_FEATURES = {
         FeatureCode.CUSTOM_REPORTS,
         FeatureCode.EXECUTIVE_DASHBOARD,
         FeatureCode.EXPORT_PDF,
-        # Phase 14.5 — remote syslog forwarding of SysManage's own logs
+        # Phase 14.5 -- remote syslog forwarding of SysManage's own logs
         FeatureCode.LOG_ROUTING,
         # Phase 3
         FeatureCode.AV_INSTALL,
@@ -400,7 +400,7 @@ TIER_FEATURES = {
         FeatureCode.FLEET_ROLLING_DEPLOYMENTS,
         FeatureCode.FLEET_SCHEDULED_OPERATIONS,
         FeatureCode.FLEET_CONFIG_DEPLOYMENT,
-        # Phase 10.1 — virtualization
+        # Phase 10.1 -- virtualization
         FeatureCode.VIRTUALIZATION_KVM_LIFECYCLE,
         FeatureCode.VIRTUALIZATION_KVM_CREATE,
         FeatureCode.VIRTUALIZATION_KVM_DELETE,
@@ -413,27 +413,27 @@ TIER_FEATURES = {
         FeatureCode.VIRTUALIZATION_VMM_CREATE,
         FeatureCode.VIRTUALIZATION_GUEST_PROVISIONING,
         FeatureCode.VIRTUALIZATION_SAFE_REBOOT,
-        # Phase 10.2 — observability
+        # Phase 10.2 -- observability
         FeatureCode.OBSERVABILITY_OTEL_DEPLOY,
         FeatureCode.OBSERVABILITY_OTEL_REMOVE,
         FeatureCode.OBSERVABILITY_GRAYLOG_DEPLOY,
         FeatureCode.OBSERVABILITY_GRAFANA_PROVISION,
         FeatureCode.OBSERVABILITY_TELEMETRY_ROUTING,
-        # Phase 11.1 — air-gap collector (public-side)
+        # Phase 11.1 -- air-gap collector (public-side)
         FeatureCode.AIRGAP_COLLECT_PACKAGES,
         FeatureCode.AIRGAP_COLLECT_CVE,
         FeatureCode.AIRGAP_COLLECT_COMPLIANCE,
         FeatureCode.AIRGAP_BUILD_ISO,
         FeatureCode.AIRGAP_BURN_DISC,
         FeatureCode.AIRGAP_SIGN_MANIFEST,
-        # Phase 11.2 — air-gap repository (private-side)
+        # Phase 11.2 -- air-gap repository (private-side)
         FeatureCode.AIRGAP_INGEST_MEDIA,
         FeatureCode.AIRGAP_HOST_REPOSITORY,
         FeatureCode.AIRGAP_REPOINT_AGENTS,
         FeatureCode.AIRGAP_VERIFY_FRESHNESS,
-        # Phase 11.4 — CVE feed management
+        # Phase 11.4 -- CVE feed management
         FeatureCode.CVE_FEED_MANAGEMENT,
-        # Phase 12.1 — federation controller features
+        # Phase 12.1 -- federation controller features
         FeatureCode.FEDERATION_SITES_MANAGE,
         FeatureCode.FEDERATION_HOSTS_SEARCH,
         FeatureCode.FEDERATION_ROLLUPS_READ,
@@ -441,17 +441,17 @@ TIER_FEATURES = {
         FeatureCode.FEDERATION_POLICY_PUSH,
         FeatureCode.FEDERATION_COMMAND_DISPATCH,
         FeatureCode.FEDERATION_AUDIT_READ,
-        # Phase 16 — Content Lifecycle Management
+        # Phase 16 -- Content Lifecycle Management
         FeatureCode.CONTENT_LIFECYCLE_MANAGE,
-        # Phase 17 — Content Distribution & Image-Mode Hosts
+        # Phase 17 -- Content Distribution & Image-Mode Hosts
         FeatureCode.SNAP_PROXY_MANAGE,
         FeatureCode.OCI_PROXY_MANAGE,
         FeatureCode.IMAGE_MODE_MANAGE,
-        # Phase 18 — Provisioning & Discovery (Enterprise gets both the
+        # Phase 18 -- Provisioning & Discovery (Enterprise gets both the
         # template surface and the provisioning/compute/discovery surface)
         FeatureCode.PROVISIONING_TEMPLATES_MANAGE,
         FeatureCode.PROVISIONING_MANAGE,
-        # Phase 21.1 S4 — inherited from Professional (Enterprise is a superset)
+        # Phase 21.1 S4 -- inherited from Professional (Enterprise is a superset)
         FeatureCode.QUERY_PACK_MANAGE,
         # Inherited from Professional; see the FeatureCode comment.
         FeatureCode.SECRETS_MANAGEMENT,
@@ -476,10 +476,10 @@ TIER_MODULES = {
         ModuleCode.SECRETS_ENGINE,
         ModuleCode.CONTAINER_ENGINE,
         ModuleCode.PROPLUS_CORE,
-        # Phase 18 — provisioning engine loads at Professional so Pro+ can
+        # Phase 18 -- provisioning engine loads at Professional so Pro+ can
         # author templates; Enterprise-only actions are feature-gated within it
         ModuleCode.PROVISIONING_ENGINE,
-        # Phase 21.1 S4 — query packs as multi-tenant policy
+        # Phase 21.1 S4 -- query packs as multi-tenant policy
         ModuleCode.QUERY_PACK_ENGINE,
     },
     LicenseTier.ENTERPRISE: {
@@ -511,40 +511,40 @@ TIER_MODULES = {
         ModuleCode.OBSERVABILITY_ENGINE,
         ModuleCode.REPOSITORY_MIRRORING_ENGINE,
         ModuleCode.EXTERNAL_IDP_ENGINE,
-        # Phase 11 — Air-Gap (one Enterprise SKU includes both engines;
+        # Phase 11 -- Air-Gap (one Enterprise SKU includes both engines;
         # ``role:`` in sysmanage.yaml picks which one this server loads)
         ModuleCode.AIRGAP_COLLECTOR_ENGINE,
         ModuleCode.AIRGAP_REPOSITORY_ENGINE,
-        # Phase 12 — Federation (one Enterprise SKU includes both
+        # Phase 12 -- Federation (one Enterprise SKU includes both
         # engines; ``role: coordinator`` vs ``role: site`` in
         # sysmanage.yaml picks which one this server loads)
         ModuleCode.FEDERATION_CONTROLLER_ENGINE,
         ModuleCode.FEDERATION_SITE_ENGINE,
-        # Phase 12.5 — Child-host result handlers (tier per the engine's own
+        # Phase 12.5 -- Child-host result handlers (tier per the engine's own
         # metadata.json: "enterprise")
         ModuleCode.CHILD_HOST_HANDLERS_ENGINE,
-        # Phase 20.1 — Configuration Management (Puppet/Salt/Chef adapters,
+        # Phase 20.1 -- Configuration Management (Puppet/Salt/Chef adapters,
         # profile storage, assignment, scheduling, fleet dispatch). OSS keeps
         # ansible-core + single-host apply; see the ModuleCode comment.
         ModuleCode.CONFIG_MANAGEMENT_ENGINE,
-        # Phase 16 — Content Lifecycle Management
+        # Phase 16 -- Content Lifecycle Management
         ModuleCode.CONTENT_LIFECYCLE_ENGINE,
-        # Phase 21.1 S4 — query packs (inherited from Professional; Enterprise
+        # Phase 21.1 S4 -- query packs (inherited from Professional; Enterprise
         # is a superset, so every Professional module is re-listed here)
         ModuleCode.QUERY_PACK_ENGINE,
-        # Phase 17 — Content Distribution & Image-Mode Hosts
+        # Phase 17 -- Content Distribution & Image-Mode Hosts
         ModuleCode.SNAP_PROXY_ENGINE,
         ModuleCode.OCI_PROXY_ENGINE,
         ModuleCode.IMAGE_MODE_ENGINE,
-        # Phase 18 — Provisioning & Discovery
+        # Phase 18 -- Provisioning & Discovery
         ModuleCode.PROVISIONING_ENGINE,
-        # NOTE: MULTITENANCY_ENGINE is intentionally NOT here — it is exclusive
+        # NOTE: MULTITENANCY_ENGINE is intentionally NOT here -- it is exclusive
         # to the MULTITENANT_SAAS tier (defined just below as an Enterprise
         # superset).  That exclusivity is the moat.
     },
 }
 
-# Phase 13 — Multi-Tenant SaaS is the top tier: a strict SUPERSET of Enterprise
+# Phase 13 -- Multi-Tenant SaaS is the top tier: a strict SUPERSET of Enterprise
 # plus the multi-tenancy engine.  Derived from the Enterprise sets (rather than
 # re-listed) so it can never silently drift behind Enterprise as features/modules
 # are added there.

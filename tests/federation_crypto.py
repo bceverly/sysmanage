@@ -10,7 +10,7 @@ valid enrollment proof binding the two.  The old fixtures used dummy strings
 (``tls_cert_pem="c"``) which no longer pass the strict gate, so these helpers
 mint the genuine artefacts once, in one place.
 
-Certs are Ed25519-signed (fast keygen, no key-size knob) — the fingerprint is
+Certs are Ed25519-signed (fast keygen, no key-size knob) -- the fingerprint is
 over the DER regardless of algorithm, so this is fine for tests even though
 production federation certs are RSA.
 """
@@ -67,7 +67,7 @@ def sign_enrollment_proof(
 ) -> str:
     """Sign the canonical enrollment proof for ``tls_cert_pem`` with a given
     identity private key (the peer's, not necessarily this server's on-disk
-    key) — exactly what the engine's signing side produces."""
+    key) -- exactly what the engine's signing side produces."""
     message = identity_svc.enrollment_proof_message(
         role=role, tls_cert_pem=tls_cert_pem
     )
@@ -77,8 +77,8 @@ def sign_enrollment_proof(
 def enroll_site(session, *, name: str, url: str, **create_kwargs):
     """Full strict coordinator-side enrollment with generated identity + cert.
 
-    Returns ``(site, sync_bearer, coord_outbound)`` — the tuple
-    ``complete_enrollment`` returns — so callers needing the bearers can use
+    Returns ``(site, sync_bearer, coord_outbound)`` -- the tuple
+    ``complete_enrollment`` returns -- so callers needing the bearers can use
     them.  See :func:`quick_enroll` when you only need the enrolled site."""
     from backend.services import federation_site_service as ssvc  # noqa: PLC0415
 

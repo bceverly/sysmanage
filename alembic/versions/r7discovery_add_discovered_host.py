@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""add discovered_host + install_source.purpose — Phase 18.2 S5
+"""add discovered_host + install_source.purpose -- Phase 18.2 S5
 
 The "discovered hosts" parking lot: unmanaged machines that netbooted the
 ephemeral RAM discovery probe and registered their hardware without touching
@@ -38,7 +38,7 @@ def upgrade() -> None:
         cols = {c["name"] for c in insp.get_columns("install_source")}
         if "purpose" not in cols:
             # Deliberately NOT indexed.  Two distinct values on a table with a
-            # handful of rows gains nothing — and on SQLite the downgrade's
+            # handful of rows gains nothing -- and on SQLite the downgrade's
             # batch_alter_table recreates the table and replays reflected
             # indexes, so an index over the column being dropped makes
             # downgrade fail with "no such column: purpose".

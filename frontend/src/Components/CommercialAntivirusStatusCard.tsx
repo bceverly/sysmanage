@@ -31,7 +31,7 @@ const BooleanStatus: React.FC<BooleanStatusProps> = ({ value, label }) => {
   if (value === null || value === undefined) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-        <WarningIcon sx={{ mr: 1, fontSize: '1rem', color: 'grey.500' }} />
+        <WarningIcon sx={{ mr: 1, fontSize: '1rem', color: 'gray.500' }} />
         <Typography variant="body2">
           {label}: {t('common.unknown', 'Unknown')}
         </Typography>

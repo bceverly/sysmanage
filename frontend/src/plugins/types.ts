@@ -71,9 +71,9 @@ export interface PluginSettingsTab {
      * Optional license-module gate.  When set, the tab is only
      * displayed if the active license includes this module code.
      * Mirrors the same field on ``PluginHostDetailTab`` and the
-     * hardcoded ``tabDefs`` filter in ``Pages/Settings.tsx`` —
+     * hardcoded ``tabDefs`` filter in ``Pages/Settings.tsx`` --
      * plugin tabs that omit ``moduleRequired`` stay always-visible
-     * (the pre-Phase-10.7 behaviour).
+     * (the pre-Phase-10.7 behavior).
      */
     moduleRequired?: string;
 }

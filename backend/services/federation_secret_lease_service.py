@@ -2,13 +2,13 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Federation-aware dynamic-secret leases — coordinator side (Phase 12.5).
+"""Federation-aware dynamic-secret leases -- coordinator side (Phase 12.5).
 
 The coordinator owns the master OpenBAO/Vault.  Restricted sites never need
 direct Vault access: a site requests a short-lived credential for one of its
 hosts (the upstream ``secret_lease_request`` sync payload), the coordinator
 issues it from the master Vault, and a SINGLE coordinator-side reconcile
-loop renews / revokes / expires every site's leases — there are no per-site
+loop renews / revokes / expires every site's leases -- there are no per-site
 sweepers because every lease lives in the one master Vault.
 
 This module is the pure-Python bookkeeping the Pro+ ``secrets_engine`` /
@@ -18,7 +18,7 @@ This module is the pure-Python bookkeeping the Pro+ ``secrets_engine`` /
   * this service records the lifecycle in ``federation_secret_lease`` and
     answers "what needs issuing / renewing / expiring now?".
 
-It NEVER stores the secret value — only the Vault ``lease_id`` (for
+It NEVER stores the secret value -- only the Vault ``lease_id`` (for
 renew/revoke) and non-sensitive metadata.
 """
 
@@ -134,7 +134,7 @@ def mark_issued(
 
     ``expires_at`` defaults to ``now + ttl_seconds`` when not supplied.
     Stores the Vault ``lease_id`` (needed to renew/revoke) and any
-    non-sensitive metadata — never the secret value.
+    non-sensitive metadata -- never the secret value.
     """
     import json  # noqa: PLC0415
 
@@ -172,7 +172,7 @@ def mark_renewed(
     expires_at: Optional[datetime] = None,
     ttl_seconds: Optional[int] = None,
 ) -> FederationSecretLease:
-    """Record a successful Vault renewal — pushes ``expires_at`` out."""
+    """Record a successful Vault renewal -- pushes ``expires_at`` out."""
     row = _require(session, lease_id)
     now = _utcnow_naive()
     row.last_renewed_at = now
@@ -237,7 +237,7 @@ def list_expiring(
     within_seconds: int,
     now: Optional[datetime] = None,
 ) -> List[FederationSecretLease]:
-    """Active leases whose ``expires_at`` is within ``within_seconds`` — the
+    """Active leases whose ``expires_at`` is within ``within_seconds`` -- the
     reconcile loop's renew candidates.  Leases with no expiry are skipped."""
     now = now or _utcnow_naive()
     horizon = now + timedelta(seconds=within_seconds)

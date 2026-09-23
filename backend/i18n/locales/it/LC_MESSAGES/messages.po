@@ -496,8 +496,8 @@ msgid "Invalid TOTP code."
 msgstr "Codice TOTP non valido."
 
 #: backend/api/auth_mfa.py:296 backend/api/auth_mfa.py:358
-msgid "MFA challenge expired — please log in again."
-msgstr "Sfida MFA scaduta — si prega di effettuare l'accesso di nuovo."
+msgid "MFA challenge expired -- please log in again."
+msgstr "Sfida MFA scaduta -- si prega di effettuare l'accesso di nuovo."
 
 #: backend/api/auth_mfa.py:301
 msgid "Invalid MFA challenge."
@@ -1425,10 +1425,10 @@ msgstr ""
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed"
+"Mirror %s has not completed a successful sync yet -- wait for sync to succeed"
 " before assigning it as a default."
 msgstr ""
-"Lo specchio %s non ha completato ancora una sincronizzazione corretta — "
+"Lo specchio %s non ha completato ancora una sincronizzazione corretta -- "
 "attendi che la sincronizzazione riesca prima di assegnarlo come predefinito."
 
 #: backend/api/repository_mirroring.py:613
@@ -1474,11 +1474,11 @@ msgstr ""
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be"
-" loaded — the collector reads each target's bundle from a snapshot of its "
+" loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 "Le raccolte di air-gap richiedono che il modulo repository_mirroring_engine "
-"sia caricato — il collector legge ogni pacchetto obiettivo dalla snapshot "
+"sia caricato -- il collector legge ogni pacchetto obiettivo dalla snapshot "
 "dell'albero mirror."
 
 #: backend/api/airgap_collector_runs.py:229
@@ -5072,11 +5072,11 @@ msgstr ""
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
-"message(s) for retry (NOT deleting) — may be an in-flight enrollment or a "
+"message(s) for retry (NOT deleting) -- may be an in-flight enrollment or a "
 "deleted host"
 msgstr ""
 "Host %(host_id)s non trovato su questo database; si differiscono %(count)d "
-"messaggio(i) in coda per un nuovo tentativo (NESSUNO verrà cancellato) — "
+"messaggio(i) in coda per un nuovo tentativo (NESSUNO verrà cancellato) -- "
 "potrebbe trattarsi di una registrazione in corso o di un host eliminato"
 
 #: backend/websocket/inbound_processor.py:284
@@ -5604,7 +5604,7 @@ msgstr "Formato segreto non valido"
 #, python-format
 #~ msgid ""
 #~ "Host %s not found on this database; deferring %d queued message(s) for retry"
-#~ " (NOT deleting) — may be an in-flight enrollment or a deleted host"
+#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
 #~ "Il sistema host '%s' non è presente in questo database; differendo %d "
 #~ "messaggio(i) in coda (NON eliminando) - potrebbe essere un'iscrizione in "

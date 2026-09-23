@@ -4,7 +4,7 @@
 
 """Inventory resolution and the engine boundary (Phase 20.1).
 
-Two things are worth pinning here and neither is serialisation.
+Two things are worth pinning here and neither is serialization.
 
 The first is that an inventory RESOLVES rather than stores. A tag that gains a
 host must gain a target, and the failure mode if it does not is silent: the
@@ -13,7 +13,7 @@ job succeeds, having simply missed machines.
 The second is what happens when the licensed module is absent. Every fallback
 in this module points the same way -- do LESS, never more -- because the
 alternative to a bounded release is the unbounded burst fleet jobs exist to
-replace, and a server that loses its licence mid-job must stop dispatching
+replace, and a server that loses its license mid-job must stop dispatching
 rather than quietly revert to it.
 """
 
@@ -125,8 +125,8 @@ class TestResolutionWithoutTheEngine:
             assert fleet.resolve_hosts(_Session(hosts=[host()]), inventory()) == []
 
     def test_batch_size_is_zero_without_the_engine(self):
-        # A server that loses its licence mid-job must STOP releasing, not
-        # fall back to the unbounded behaviour jobs exist to replace.
+        # A server that loses its license mid-job must STOP releasing, not
+        # fall back to the unbounded behavior jobs exist to replace.
         with patch.object(fleet.shim, "engine_module", lambda: None):
             assert fleet.next_batch_size(50, 0, 4000) == 0
 

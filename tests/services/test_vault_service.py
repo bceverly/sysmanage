@@ -7,7 +7,7 @@ Tests for backend.services.vault_service.
 
 These tests exercise the OpenBAO/Vault HTTP wrapper end-to-end with `requests`
 mocked at the session level. The goal is to cover the error branches and the
-multiple secret-type code paths that the service supports — those are the bits
+multiple secret-type code paths that the service supports -- those are the bits
 that are easy to regress when the secret taxonomy changes.
 """
 
@@ -183,7 +183,7 @@ class TestMakeRequestErrorBranches:
 class TestStoreSecretPathShaping:
     """The vault path is derived from secret_type + secret_subtype with several
     fallbacks. Each branch matters because it's how the UI later locates the
-    secret — bad paths mean orphaned data."""
+    secret -- bad paths mean orphaned data."""
 
     @pytest.fixture
     def svc(self):
@@ -252,7 +252,7 @@ class TestStoreSecretPathShaping:
 
     def test_store_secret_returns_none_version_when_missing(self):
         svc = _make_service()
-        # Vault sometimes returns no "data" — service should not blow up.
+        # Vault sometimes returns no "data" -- service should not blow up.
         svc.session.put.return_value = _response(json_body={})
         out = svc.store_secret("k", "d", "ssh_key", "public")
         assert out["version"] is None
@@ -302,7 +302,7 @@ class TestRetrieveSecret:
 
 
 # ---------------------------------------------------------------------------
-# delete_secret — the multi-step KV v2 destroy dance
+# delete_secret -- the multi-step KV v2 destroy dance
 # ---------------------------------------------------------------------------
 
 
@@ -331,7 +331,7 @@ class TestDeleteSecret:
 
     def test_secret_already_gone_returns_true(self):
         """If the GET for version returns an empty body, the secret was already
-        deleted — service should treat that as success."""
+        deleted -- service should treat that as success."""
         svc = _make_service()
         svc.session.get.return_value = _response(
             status_code=404, content=b""
@@ -361,14 +361,14 @@ class TestDeleteSecret:
             _response(content=b""),
         ]
         svc.session.put.return_value = _response(content=b"")
-        # Should still return True — soft-delete is best-effort.
+        # Should still return True -- soft-delete is best-effort.
         assert svc.delete_secret("secret/data/secrets/ssh/private/x") is True
 
     def test_destroy_failure_with_not_found_returns_true(self):
         svc = _make_service()
         self._wire_get_for_version(svc)
         svc.session.delete.return_value = _response(content=b"")
-        # Destroy responds 404 — service interprets "not found" as already gone.
+        # Destroy responds 404 -- service interprets "not found" as already gone.
         svc.session.put.return_value = _response(
             status_code=400, content=b"version not found"
         )

@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""What a host can answer — Phase 21.1 S6.
+"""What a host can answer -- Phase 21.1 S6.
 
 The reader every consumer shares. Its whole job is keeping four states apart
 where a boolean would keep two, and the state that matters most is the one
@@ -50,7 +50,7 @@ class TestFourStates:
         )
 
     def test_unsupported_is_distinct_from_not_applicable(self):
-        """One is a fact about the platform, the other is fixable — an
+        """One is a fact about the platform, the other is fixable -- an
         unprivileged agent can be given privilege."""
         host = host_with(unsupported={"listening_ports": "insufficient_privilege"})
         assert host_facts.table_state(host, "listening_ports") == (
@@ -68,7 +68,7 @@ class TestUnknownIsNotDenial:
 
     def test_unknown_hosts_remain_answerable(self):
         """A consumer that read unknown as 'not covered' would switch itself
-        off for the whole estate the day this shipped — while looking like it
+        off for the whole estate the day this shipped -- while looking like it
         was working."""
         host = FakeHost(advertised=False)
         assert host_facts.answerable(host, "users") is True

@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""add image-mode (bootc / rpm-ostree) host state to host (tenant partition) — Phase 17.3
+"""add image-mode (bootc / rpm-ostree) host state to host (tenant partition) -- Phase 17.3
 
 Per-host image-mode state is operational state, so it lives on the ``host``
 table in the TENANT partition (like the 14.3 release-upgrade job and the 14.4

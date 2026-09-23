@@ -3,18 +3,18 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Tenant enrollment tokens — OSS shim (Pro+ relocation, Phase 2).
+Tenant enrollment tokens -- OSS shim (Pro+ relocation, Phase 2).
 
 An admin generates a tenant-scoped enrollment token; an agent presents it at
-registration to enrol into that tenant.  The token logic (generation, hashing,
+registration to enroll into that tenant.  The token logic (generation, hashing,
 listing, revocation, validation/consumption) moved into the licensed
-``multitenancy_engine`` — the OSS build has no copy — so these are thin
+``multitenancy_engine`` -- the OSS build has no copy -- so these are thin
 delegators (session-in, passed straight through to the engine).
 
 The control-plane CRUD operations (generate/list/revoke) require the engine and
 raise a clear error without it (they're only reachable when multi-tenancy is
 enabled).  The registration read path (:func:`validate_and_consume`) degrades to
-``None`` — a single-tenant / unlicensed server has no enrollment tokens.
+``None`` -- a single-tenant / unlicensed server has no enrollment tokens.
 """
 
 from typing import List, Optional
@@ -74,7 +74,7 @@ def validate_and_consume(session, plaintext: str) -> Optional[dict]:
     """Resolve a plaintext token to its placement, consuming one use.
 
     Returns a dict ``{"tenant_id", "site_id", "access_group_id"}`` (site /
-    access-group ``None`` unless the token carries them — Phase 18.1 S4), or
+    access-group ``None`` unless the token carries them -- Phase 18.1 S4), or
     ``None`` when multi-tenancy isn't active (no tokens exist) or the token is
     unknown/invalid; the engine handles the valid case.
     """

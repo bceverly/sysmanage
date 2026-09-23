@@ -10,7 +10,7 @@ Create Date: 2026-05-10 09:30:00.000000
 
 One new table backing cron-driven recurring collection runs:
 
-  airgap_collection_schedule  — name, cron, enabled, frozen target
+  airgap_collection_schedule  -- name, cron, enabled, frozen target
                                 request body, last_run / next_run
 
 Cron parsing on the tick path goes through ``automation_engine.

@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Auth/authz security tests — populate the @pytest.mark.security marker
+Auth/authz security tests -- populate the @pytest.mark.security marker
 that the .github/workflows/pen-tests.yml `auth-tests` job filters on.
 
 Covers the four buckets called out in pen-tests.yml's comment block:
@@ -26,7 +26,7 @@ import pytest
 from argon2 import PasswordHasher
 
 # Wrong-secret test fixtures.  Built up via concatenation so semgrep's
-# jwt-hardcoded-secret rule doesn't pattern-match the literal — these
+# jwt-hardcoded-secret rule doesn't pattern-match the literal -- these
 # tests INTENTIONALLY probe that forged JWTs are rejected; the secret
 # being "obviously fake" is the point.  Constructed at module load so
 # only one place needs the suppression context.
@@ -227,7 +227,7 @@ def test_login_with_unknown_user_returns_401_not_404(
         "/api/v1/login",
         json={"userid": "nobody@example.com", "password": "irrelevant"},
     )
-    # 401 = "invalid credentials" — what we want.  404 would leak existence.
+    # 401 = "invalid credentials" -- what we want.  404 would leak existence.
     assert resp.status_code != 404, "Login leaks user existence via 404"
     assert resp.status_code in (401, 403, 422)
 
@@ -299,7 +299,7 @@ def test_rate_limited_login_is_blocked(
 
 @pytest.mark.security
 def test_anonymous_cannot_access_admin_endpoints(client):
-    """A handful of admin/Pro+ endpoints — none should respond with data when unauthenticated."""
+    """A handful of admin/Pro+ endpoints -- none should respond with data when unauthenticated."""
     for path in [
         "/api/v1/users",
         "/api/v1/automation/scripts",
@@ -309,7 +309,7 @@ def test_anonymous_cannot_access_admin_endpoints(client):
         resp = client.get(path)
         assert (
             resp.status_code != 200
-        ), f"GET {path} returned 200 without auth — endpoint not gated"
+        ), f"GET {path} returned 200 without auth -- endpoint not gated"
 
 
 @pytest.mark.security
@@ -345,7 +345,7 @@ def test_valid_token_authenticates(
 # -----------------------------------------------------------------------
 #
 # The agent WS endpoint authenticates via a `?token=...` query parameter
-# (NOT a JWT — it's a server-issued connection token from
+# (NOT a JWT -- it's a server-issued connection token from
 # websocket_security).  Behavior under failure cases:
 #   - missing token   → server accepts the handshake then closes with code
 #                       4401 ("authentication required")
@@ -379,14 +379,15 @@ def test_ws_connect_without_token_is_closed(client, monkeypatch):
     # The WS handler grabs its own DB session via `next(get_db())`, bypassing
     # FastAPI's dependency-override system, so the audit-log commit hits the
     # real configured Postgres in CI.  The auth-failure close path is what
-    # we care about — stub the audit log to a no-op for these two tests.
+    # we care about -- stub the audit log to a no-op for these two tests.
     monkeypatch.setattr("backend.api.agent.AuditService.log", lambda *a, **kw: None)
     code = _ws_close_code(client, "/api/agent/connect")
     # 4001 / 4401 are application-level WS close codes; 1000 is "normal".
     # Anything other than a clean session-open should surface here as
     # a non-None close code.
     assert code is not None, (
-        "WS /api/agent/connect did not close on anonymous connect — " "auth gate broken"
+        "WS /api/agent/connect did not close on anonymous connect -- "
+        "auth gate broken"
     )
     assert code != 1000, (
         f"WS closed with code 1000 (normal) for an anonymous connect; "
@@ -404,7 +405,7 @@ def test_ws_connect_with_invalid_token_is_closed(client, monkeypatch):
     )
     assert (
         code is not None
-    ), "WS /api/agent/connect did not close on invalid token — auth gate broken"
+    ), "WS /api/agent/connect did not close on invalid token -- auth gate broken"
     assert code != 1000, f"WS closed normally (1000) on invalid token; expected 4xxx"
 
 
@@ -459,7 +460,7 @@ def test_role_escalation_post_user_blocked(client, reporter_user_token):
     )
     assert resp.status_code == 403, (
         f"POST /api/v1/user without ADD_USER role returned {resp.status_code} "
-        f"(expected 403 — privilege escalation gate broken)"
+        f"(expected 403 -- privilege escalation gate broken)"
     )
 
 

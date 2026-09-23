@@ -4,8 +4,8 @@
 
 """Federation site-side host-directory producer (Phase 12 actuation).
 
-Builds the directory-tier snapshot of THIS site's hosts — just the columns the
-coordinator's cross-site search needs (name, IP, OS, status, geo) — and
+Builds the directory-tier snapshot of THIS site's hosts -- just the columns the
+coordinator's cross-site search needs (name, IP, OS, status, geo) -- and
 enqueues it for the outbound sync tick, mirroring
 ``federation_site_metadata_service``.  The coordinator upserts each entry into
 its host-directory table via ``POST /sites/{id}/host-directory``, which then

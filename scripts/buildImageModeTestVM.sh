@@ -3,20 +3,20 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 #
-# buildImageModeTestVM.sh — Provision an IMAGE-MODE Linux VM (bootc or
+# buildImageModeTestVM.sh -- Provision an IMAGE-MODE Linux VM (bootc or
 # rpm-ostree) on libvirt/KVM so Phase 17.3 (image-mode host management) can be
 # validated end to end against a REAL host: detection, then stage / apply /
 # rollback of the booted image.
 #
-# Two backends (image-mode distros do NOT use cloud-init — bootc/OSTree systems
+# Two backends (image-mode distros do NOT use cloud-init -- bootc/OSTree systems
 # are provisioned by Ignition or a bootc container install; this harness uses
 # the native mechanism for each):
 #
-#   rpm-ostree  — Fedora CoreOS (FCOS).  Provisioned by Ignition (Butane ->
+#   rpm-ostree  -- Fedora CoreOS (FCOS).  Provisioned by Ignition (Butane ->
 #                 Ignition).  `rpm-ostree status`, `rpm-ostree upgrade`,
 #                 `rpm-ostree rollback`.  This is the default (well-documented,
 #                 fully scriptable).
-#   bootc       — Fedora bootc.  A qcow2 built from the fedora-bootc container
+#   bootc       -- Fedora bootc.  A qcow2 built from the fedora-bootc container
 #                 with bootc-image-builder (needs podman on THIS host).  `bootc
 #                 status --json`, `bootc upgrade [--apply]`, `bootc rollback`.
 #
@@ -40,7 +40,7 @@
 # Network: reuses the isolated 10.90.0.0/24 "sysmanage-ha" libvirt bridge if it
 # exists (so the VM shares a subnet with a server started by another harness);
 # otherwise it falls back to the default NAT network.  THIS host reaches the VM
-# directly on that subnet — no tunnel needed.
+# directly on that subnet -- no tunnel needed.
 #
 # Credentials:  user = core (FCOS) / cloud-user (bootc);  SSH key = ~/.ssh/id_*.
 set -euo pipefail

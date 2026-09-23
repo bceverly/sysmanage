@@ -5,7 +5,7 @@
 /**
  * Settings panel for the Pro+ Repository Mirroring feature.
  *
- * Phase 10.4.2 layout — tab strip per platform:
+ * Phase 10.4.2 layout -- tab strip per platform:
  *
  *     [ Linux ] [ FreeBSD ]
  *     ────────────────────────────────────────────────────
@@ -20,7 +20,7 @@
  * empty-state "Configure {Platform} mirroring" form instead.
  *
  * The component is rendered from a Settings tab that's already
- * gated on ``isModuleLicensed('repository_mirroring_engine')`` —
+ * gated on ``isModuleLicensed('repository_mirroring_engine')`` --
  * we don't re-check inside.  All API calls 402 if the engine is
  * unlicensed; we surface those as inline error alerts.
  */

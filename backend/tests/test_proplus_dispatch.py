@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Tests for backend.services.proplus_dispatch — the schedule-dispatch glue
+Tests for backend.services.proplus_dispatch -- the schedule-dispatch glue
 between the Pro+ Cython engines and the OSS message queue.
 """
 
@@ -156,7 +156,7 @@ class TestRouteProplusCommandResult:
         with patch.object(
             proplus_dispatch.module_loader, "get_module", return_value=None
         ):
-            # Engine not loaded — still routes (returns True), correlation consumed
+            # Engine not loaded -- still routes (returns True), correlation consumed
             assert (
                 proplus_dispatch.route_proplus_command_result("m1", {"success": True})
                 is True

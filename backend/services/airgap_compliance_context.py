@@ -29,7 +29,7 @@ classification function; the actual scoring logic lives in the engines
 engine to call based on which is loaded).
 
 License gate: this module no-ops gracefully (returns ``label="never"``,
-empty buckets) when neither airgap engine is loaded — so a standard
+empty buckets) when neither airgap engine is loaded -- so a standard
 ``role: standard`` deployment that imports this file doesn't error,
 the compliance reports just don't show the air-gap context column.
 """
@@ -88,7 +88,7 @@ def classify_compliance_gap(
     ``host_packages``: list of ``{name, version, package_manager}``
         entries from the host's last package inventory.
     ``local_mirror_manifest``: latest verified manifest from the
-        repository — the union of what's available on-prem.
+        repository -- the union of what's available on-prem.
     ``public_cve_snapshot``: most-recent CVE/NVD data the collector
         had captured *at the time of last media transfer*.  Anything
         in here but not in the local mirror is "not yet transferred".

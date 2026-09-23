@@ -487,8 +487,8 @@ msgid "Invalid TOTP code."
 msgstr "無効なTOTPコードです。"
 
 #: backend/api/auth_mfa.py:296 backend/api/auth_mfa.py:358
-msgid "MFA challenge expired — please log in again."
-msgstr "MFA シャレンジが期限切れです — 再びログインしてください。"
+msgid "MFA challenge expired -- please log in again."
+msgstr "MFA シャレンジが期限切れです -- 再びログインしてください。"
 
 #: backend/api/auth_mfa.py:301
 msgid "Invalid MFA challenge."
@@ -1369,9 +1369,9 @@ msgstr "Mirror tick は cron 評価のために automation_engine を必要と�
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed"
+"Mirror %s has not completed a successful sync yet -- wait for sync to succeed"
 " before assigning it as a default."
-msgstr "ミラー %s はまだ成功した同期を完了していません — 同期が成功するまでデフォルトに割り当てないようにしてください。"
+msgstr "ミラー %s はまだ成功した同期を完了していません -- 同期が成功するまでデフォルトに割り当てないようにしてください。"
 
 #: backend/api/repository_mirroring.py:613
 #, python-format
@@ -1414,10 +1414,10 @@ msgstr ""
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be"
-" loaded — the collector reads each target's bundle from a snapshot of its "
+" loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
-"オフライン収集の実行には repository_mirroring_engine モジュールがロードされている必要があります — "
+"オフライン収集の実行には repository_mirroring_engine モジュールがロードされている必要があります -- "
 "コレクタは各ターゲットのバンドルをミラーツリーからのスナップショットから読み取ります。"
 
 #: backend/api/airgap_collector_runs.py:229
@@ -4818,11 +4818,11 @@ msgstr "承認済みホスト %(hostname)s (ID: %(host_id)s) の NULL host_id �
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
-"message(s) for retry (NOT deleting) — may be an in-flight enrollment or a "
+"message(s) for retry (NOT deleting) -- may be an in-flight enrollment or a "
 "deleted host"
 msgstr ""
 "ホスト %(host_id)s "
-"がこのデータベースに存在しません；%(count)d件のキューされたメッセージを再試行のために保留します（削除はしない）——登録処理中か、または既に削除されたホストかもしれません"
+"がこのデータベースに存在しません；%(count)d件のキューされたメッセージを再試行のために保留します（削除はしない）----登録処理中か、または既に削除されたホストかもしれません"
 
 #: backend/websocket/inbound_processor.py:284
 #, python-format
@@ -5185,7 +5185,7 @@ msgstr "シークレットフォーマットが無効です"
 
 #, python-format
 #~ msgid "Mirror %s is for %s, can't assign to a %s default"
-#~ msgstr "ミラー %s は %s のために作成されています — デフォルトには %s を指定できません"
+#~ msgstr "ミラー %s は %s のために作成されています -- デフォルトには %s を指定できません"
 
 #, python-format
 #~ msgid ""
@@ -5309,9 +5309,9 @@ msgstr "シークレットフォーマットが無効です"
 #, python-format
 #~ msgid ""
 #~ "Host %s not found on this database; deferring %d queued message(s) for retry"
-#~ " (NOT deleting) — may be an in-flight enrollment or a deleted host"
+#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
-#~ "データベースにホスト '%s' が存在しません；キューにある %d のメッセージを再試行のために保留（削除は行われません） — "
+#~ "データベースにホスト '%s' が存在しません；キューにある %d のメッセージを再試行のために保留（削除は行われません） -- "
 #~ "新規登録の途中か、または既に削除されたホストかもしれません"
 
 #, python-format

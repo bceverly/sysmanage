@@ -45,14 +45,14 @@ import {
 interface Props {
   hostId: string;
   hostFqdn?: string;
-  /** apt | dnf | zypper | pkg — which install plan to fire when the
+  /** apt | dnf | zypper | pkg -- which install plan to fire when the
    *  user clicks Install.  Driven by the package_manager field on the
    *  mirror_repository row this host owns. */
   packageManager: 'apt' | 'dnf' | 'zypper' | 'pkg';
   /** Notify the parent whenever the "tools all present" boolean flips,
    *  so it can ghost out the downstream cards (PlatformConfigCard,
    *  MirrorListCard) until setup passes green.  ``undefined`` while
-   *  the status is still loading or unknown — the parent should treat
+   *  the status is still loading or unknown -- the parent should treat
    *  that as "not yet ready" and keep the gate engaged. */
   onReadyChange?: (ready: boolean | undefined) => void;
 }
@@ -70,7 +70,7 @@ const IN_FLIGHT_TIMEOUT_MS = 5 * 60 * 1000;
 
 // Derives the in-flight / timeout state for the probe + install
 // operations.  Pulled out of the component body to keep its cognitive
-// complexity in check — pure function of the current status + clock.
+// complexity in check -- pure function of the current status + clock.
 const computeFlightState = (
   status: MirrorSetupStatus | null,
   now: number,
@@ -85,7 +85,7 @@ const computeFlightState = (
       : 0;
   const probeTimedOut = elapsedSinceCheckMs > IN_FLIGHT_TIMEOUT_MS;
   const installTimedOut = elapsedSinceInstallMs > IN_FLIGHT_TIMEOUT_MS;
-  // Treat a timed-out operation as no longer in-flight — stops the
+  // Treat a timed-out operation as no longer in-flight -- stops the
   // spinner + re-enables the buttons so the operator can retry.
   const probeInFlight = !!status?.last_check_message_id && !probeTimedOut;
   const installInFlight = !!status?.last_install_message_id && !installTimedOut;
@@ -165,7 +165,7 @@ const MirrorSetupStatusCard: React.FC<Props> = ({
     }
   };
 
-  // Tools we render in the status grid — only those relevant to this
+  // Tools we render in the status grid -- only those relevant to this
   // host's package manager.  The probe enumerates EVERY tool regardless
   // of PM (so the engine can give a complete picture for an audit log),
   // but the card only shows what's actually required + the shared
@@ -208,7 +208,7 @@ const MirrorSetupStatusCard: React.FC<Props> = ({
 
   // Surface the ready boolean upward so the parent section can ghost
   // out the downstream cards (config + mirror list + actions) until
-  // setup_check passes green.  ``undefined`` while loading — the
+  // setup_check passes green.  ``undefined`` while loading -- the
   // parent treats that as "keep the gate engaged" so the operator
   // can't queue a sync against a host with missing tooling.
   useEffect(() => {
@@ -217,7 +217,7 @@ const MirrorSetupStatusCard: React.FC<Props> = ({
     }
   }, [ready, onReadyChange]);
 
-  // Compute "in flight" but also a timeout — if the agent silently
+  // Compute "in flight" but also a timeout -- if the agent silently
   // swallowed our command (e.g. duplicate-skip without emitting a
   // result), the server-side ``last_*_message_id`` never clears and
   // we'd spin forever without this gate.
@@ -294,7 +294,7 @@ const MirrorSetupStatusCard: React.FC<Props> = ({
           <Alert severity="warning" sx={{ mt: 2 }}>
             {t(
               'mirror.setupStatus.timedOut',
-              'Agent did not respond within {{minutes}} minutes. The most likely causes are: the agent crashed mid-plan, the WebSocket dropped before the command_result was sent, or the agent silently de-duplicated the command without emitting a result. Check the agent log on this host and consider restarting the sysmanage-agent service. Click Refresh / Install Tools again to retry — the in-flight marker will be cleared and a fresh attempt dispatched.',
+              'Agent did not respond within {{minutes}} minutes. The most likely causes are: the agent crashed mid-plan, the WebSocket dropped before the command_result was sent, or the agent silently de-duplicated the command without emitting a result. Check the agent log on this host and consider restarting the sysmanage-agent service. Click Refresh / Install Tools again to retry -- the in-flight marker will be cleared and a fresh attempt dispatched.',
               { minutes: Math.round(IN_FLIGHT_TIMEOUT_MS / 60000) },
             )}
           </Alert>
@@ -304,7 +304,7 @@ const MirrorSetupStatusCard: React.FC<Props> = ({
           <Alert severity="info" sx={{ mt: 2 }}>
             {t(
               'mirror.setupStatus.notProbedYet',
-              'No probe has run yet — click Refresh to check this host.',
+              'No probe has run yet -- click Refresh to check this host.',
             )}
           </Alert>
         )}
@@ -348,7 +348,7 @@ const MirrorSetupStatusCard: React.FC<Props> = ({
                   )
                 : t(
                     'mirror.setupStatus.notReady',
-                    'Missing required tooling for {{pm}} — install before triggering a sync.',
+                    'Missing required tooling for {{pm}} -- install before triggering a sync.',
                     { pm: packageManager },
                   )}
               {status.platform && status.distro && (

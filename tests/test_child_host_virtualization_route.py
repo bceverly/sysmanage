@@ -5,7 +5,7 @@
 """The create-child-host route.
 
 Ordering is the substance here, not decoration.  The HostChild row is
-flushed BEFORE the licence key is vaulted so the Secret can be named for the
+flushed BEFORE the license key is vaulted so the Secret can be named for the
 child, and both sit inside one transaction so a vault failure rolls the child
 row back instead of leaving an orphan whose key was never stored.  Likewise
 every guard -- platform, privilege, duplicate name -- has to fire before the

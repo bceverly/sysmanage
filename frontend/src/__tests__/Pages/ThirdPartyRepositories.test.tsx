@@ -205,7 +205,7 @@ describe("the add dialog", () => {
   });
 });
 
-describe("os-specific behaviour", () => {
+describe("os-specific behavior", () => {
   test("a SUSE host renders without the Ubuntu-only PPA fields", async () => {
     m(axiosInstance.get).mockResolvedValue({ data: { repositories: [] } });
     renderPage({ osName: "openSUSE Tumbleweed" });

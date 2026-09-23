@@ -128,7 +128,7 @@ __all__ = [
     # GPG key management models
     "GpgKey",
     "GpgKeyAssignment",
-    # Custom metrics & graphs models (Pro+ observability_engine — Slice 1)
+    # Custom metrics & graphs models (Pro+ observability_engine -- Slice 1)
     "CustomMetric",
     "CustomMetricTag",
     "CustomMetricSample",

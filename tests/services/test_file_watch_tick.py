@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""The file-watch collection tick — Phase 21.1 S7.
+"""The file-watch collection tick -- Phase 21.1 S7.
 
 Without this loop an assignment is storage: an operator binds a watch list to
 a host and nothing ever collects it. The cases worth testing are the ones

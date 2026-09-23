@@ -73,7 +73,7 @@ class TestCronParse:
 
 
 class TestNextRun:
-    """next_run_from_cron is the load-bearing piece — verify the most
+    """next_run_from_cron is the load-bearing piece -- verify the most
     common patterns produce monotonically-increasing future timestamps."""
 
     def test_daily_at_3am(self):
@@ -164,8 +164,8 @@ class TestUpgradeProfilesProplusGate:
 # Engine-loaded fixture for route tests.
 #
 # Phase 10.6 gates every route on ``automation_engine`` being loaded.
-# These tests don't exercise the real Cython .so — they verify route
-# behaviour, so we hand the route a MagicMock whose methods delegate to
+# These tests don't exercise the real Cython .so -- they verify route
+# behavior, so we hand the route a MagicMock whose methods delegate to
 # the OSS ``upgrade_scheduler`` (cron) and a small inline implementation
 # of ``build_upgrade_profile_dispatch`` (the engine version is itself a
 # port of the OSS logic).  The Pro+ engine's own tests cover the
@@ -378,13 +378,13 @@ class TestUpgradeProfileDispatch:
         assert r.status_code == 200
         body = r.json()
         # enqueued_count must be present.  In the unit-test DB, no real
-        # hosts exist so it's 0 — that's the expected value.  We're
+        # hosts exist so it's 0 -- that's the expected value.  We're
         # checking the FIELD, not the count.
         assert "enqueued_count" in body
         assert body["enqueued_count"] >= 0
 
     def test_dispatch_helper_handles_zero_hosts(self, client, auth_headers):
-        """Empty target list must not raise — common when a profile is
+        """Empty target list must not raise -- common when a profile is
         scoped to a tag with no current hosts."""
         from backend.api.upgrade_profiles import _dispatch_profile_to_hosts
 
@@ -397,7 +397,7 @@ class TestUpgradeProfileDispatch:
             security_only=False,
             package_managers=None,
         )
-        # We pass a None DB — the function returns early on empty list,
+        # We pass a None DB -- the function returns early on empty list,
         # so the DB is never touched.
         result = _dispatch_profile_to_hosts(fake_profile, [], None)
         assert result == 0

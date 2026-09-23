@@ -14,7 +14,7 @@ planner know how to deploy, so the host detail page's lookup
 (`GET /api/antivirus-defaults/{os_name}`) returns 200 with a usable
 package name instead of a 404.
 
-Idempotent — uses an existence check before each INSERT, and the
+Idempotent -- uses an existence check before each INSERT, and the
 DELETE on downgrade is a no-op if rows are absent. Works on both
 PostgreSQL and SQLite (no provider-specific types or syntax).
 """

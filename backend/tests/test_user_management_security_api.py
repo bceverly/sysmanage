@@ -68,7 +68,7 @@ def _stub_auth_config_getters(mock_config_module):
     """Stub the config getters auth.py reads (Phase 13.1.H).
 
     The login path no longer reads ``the_config["security"][...]`` directly for
-    the recovery password / JWT refresh timeout / cookie domain — it goes through
+    the recovery password / JWT refresh timeout / cookie domain -- it goes through
     ``config.get_admin_password`` / ``get_jwt_refresh_timeout`` / ``get_cookie_domain``
     (DB/OpenBAO-first, YAML fallback).  Under a wholesale ``backend.api.auth.config``
     mock these would return MagicMocks, so resolve them to the TEST_CONFIG values.

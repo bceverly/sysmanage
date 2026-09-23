@@ -53,7 +53,7 @@ router = APIRouter(
 )
 
 
-# Reused 404 detail string — extracted so the wording can't drift
+# Reused 404 detail string -- extracted so the wording can't drift
 # between handlers and so SonarQube's duplication scanner is happy.
 _ERR_UPGRADE_PROFILE_NOT_FOUND = N_("Upgrade profile not found")
 
@@ -134,7 +134,7 @@ def _validate_and_compute_next_run(cron: str) -> datetime:
     """Validate ``cron`` and compute its next-run datetime via the
     ``automation_engine`` Pro+ module (Phase 10.6 migration).
 
-    The OSS ``upgrade_scheduler`` module is kept as a no-op shell —
+    The OSS ``upgrade_scheduler`` module is kept as a no-op shell --
     every route here is gated by ``_check_automation_module()`` first,
     so the engine is guaranteed to be loaded by the time we reach this
     helper.
@@ -306,12 +306,12 @@ def _dispatch_profile_to_hosts(profile, target_host_ids, db: Session) -> int:
     Phase 10.6: the per-host message-building (staggered window math,
     flag forwarding, command shape) lives in
     ``automation_engine.build_upgrade_profile_dispatch``.  This OSS
-    helper is just a thin enqueue loop — caller is already
+    helper is just a thin enqueue loop -- caller is already
     license-gated by ``_check_automation_module`` so the engine is
     guaranteed to be loaded.
 
     Returns the count of messages queued.  Failures on individual hosts
-    are tolerated — log + continue, so one offline host can't block
+    are tolerated -- log + continue, so one offline host can't block
     the rest of the fleet's update.
     """
     if not target_host_ids:
@@ -414,7 +414,7 @@ def _tick_profiles_one_db(session, now):
 
     Returns the list of fired profiles for this database.  Selecting due
     profiles, resolving each profile's target hosts, and enqueuing the
-    ``apply_updates`` commands all run on ``session`` — so a tenant's profiles,
+    ``apply_updates`` commands all run on ``session`` -- so a tenant's profiles,
     its hosts, and its outbound queue stay together in that tenant's DB.
     Commits ``session`` on the way out.
     """
@@ -461,17 +461,17 @@ async def tick():
     profile where ``next_run <= now``, fires it (updates last_run /
     next_run / status), and returns the list of fired profiles.
 
-    Phase 10.6: gated on the ``automation_engine`` Pro+ module — the
+    Phase 10.6: gated on the ``automation_engine`` Pro+ module -- the
     cron-recompute and per-host dispatch live there now.
 
     Phase 13.1: no logged-in user / active-tenant context here (an external
-    scheduler drives this), so — like the heartbeat sweep — it fans out across
+    scheduler drives this), so -- like the heartbeat sweep -- it fans out across
     EVERY host database via ``iter_host_databases()`` (bootstrap + each
     provisioned tenant DB).  A tenant's profiles and hosts live in its tenant
     database, so the bootstrap pass alone would never see them.  One bad tenant
     DB is logged and skipped without stalling the rest of the sweep.
 
-    Idempotent within a single tick — running the same tick twice in
+    Idempotent within a single tick -- running the same tick twice in
     quick succession will fire a profile only once because the FIRST
     invocation pushes ``next_run`` forward."""
     _check_automation_module()

@@ -3,18 +3,18 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-API-key management endpoints — Phase 13.2 (API Completeness).
+API-key management endpoints -- Phase 13.2 (API Completeness).
 
 CRUD for a user's own programmatic-access keys:
 
-  * ``POST   /api/api-keys``        — mint a key (plaintext returned ONCE)
-  * ``GET    /api/api-keys``        — list the caller's keys (never the secret)
-  * ``GET    /api/api-keys/{id}``   — fetch one of the caller's keys
-  * ``DELETE /api/api-keys/{id}``   — revoke a key
+  * ``POST   /api/api-keys``        -- mint a key (plaintext returned ONCE)
+  * ``GET    /api/api-keys``        -- list the caller's keys (never the secret)
+  * ``GET    /api/api-keys/{id}``   -- fetch one of the caller's keys
+  * ``DELETE /api/api-keys/{id}``   -- revoke a key
 
 Keys are scoped to the authenticated user and inherit that user's permissions.
-Management actions (create/revoke) deliberately reject API-key authentication —
-a key cannot mint or revoke keys — so an automation credential can't escalate
+Management actions (create/revoke) deliberately reject API-key authentication --
+a key cannot mint or revoke keys -- so an automation credential can't escalate
 into self-replication or lock out its owner.  Reads are allowed under either
 auth type.
 """
@@ -43,7 +43,7 @@ class ApiKeyCreate(BaseModel):
 
 
 class ApiKeyOut(BaseModel):
-    """An API key as returned to clients — never carries the secret."""
+    """An API key as returned to clients -- never carries the secret."""
 
     id: str
     user_id: str
@@ -59,12 +59,12 @@ class ApiKeyOut(BaseModel):
 
 
 class ApiKeyCreated(ApiKeyOut):
-    """Creation response — includes the plaintext key shown exactly once."""
+    """Creation response -- includes the plaintext key shown exactly once."""
 
     key: str = Field(
         ...,
         description=(
-            "The plaintext API key. Shown only at creation — store it now; "
+            "The plaintext API key. Shown only at creation -- store it now; "
             "it cannot be retrieved again."
         ),
     )
@@ -89,7 +89,7 @@ def _session():
 
     User identities are server-global (they live with the registry, not in a
     per-tenant database), and ``api_key`` rows FK ``user.id``, so both always
-    resolve on ``db.get_engine()`` regardless of the active tenant — mirroring
+    resolve on ``db.get_engine()`` regardless of the active tenant -- mirroring
     ``profile`` and ``require_authenticated_user``.
     """
     session_local = sessionmaker(
@@ -122,7 +122,7 @@ async def create_api_key(
 ):
     """Mint a new API key for the authenticated user.
 
-    The plaintext key is returned **once** in the ``key`` field — only its hash
+    The plaintext key is returned **once** in the ``key`` field -- only its hash
     is stored, so it can never be retrieved again.  In multi-tenant mode the key
     is pinned to the caller's active tenant.
     """

@@ -2,9 +2,9 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""add user.last_tenant_id — sticky last-selected tenant (Phase 13 convenience)
+"""add user.last_tenant_id -- sticky last-selected tenant (Phase 13 convenience)
 
-A SOFT reference to ``registry_tenant.id`` (cross-partition — no FK) on the
+A SOFT reference to ``registry_tenant.id`` (cross-partition -- no FK) on the
 server-global ``user`` table.  Written when a user switches tenants and
 populated on first login, so a multi-tenant user lands back in the tenant they
 usually work in.  NULL for single-tenant / non-multi-tenant users.

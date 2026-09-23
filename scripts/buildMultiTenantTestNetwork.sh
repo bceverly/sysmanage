@@ -3,32 +3,32 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-# buildMultiTenantTestNetwork.sh — Provision KVM VMs for sysmanage
+# buildMultiTenantTestNetwork.sh -- Provision KVM VMs for sysmanage
 # Phase 13.1 MULTI-TENANCY testing on libvirt/KVM.
 #
 # Multi-tenancy splits data across logical partitions, each of which can live
 # in its OWN physical database (design §5: same schema, layout chosen by config
-# not code).  This script gives every partition — and a second tenant — its own
+# not code).  This script gives every partition -- and a second tenant -- its own
 # VM, so you can exercise the real distributed-database topology instead of the
 # collapsed single-DB homelab default:
 #
-#   sysmanage-mt-registry  (10.80.0.1) — PostgreSQL for the REGISTRY / bootstrap
+#   sysmanage-mt-registry  (10.80.0.1) -- PostgreSQL for the REGISTRY / bootstrap
 #                                        database (the control plane: tenant
 #                                        registry + per-tenant placements).
 #                                        This is the DB your sysmanage.yaml
 #                                        ``registry:`` block points at.
-#   sysmanage-mt-shared    (10.80.0.2) — PostgreSQL for the SHARED reference
+#   sysmanage-mt-shared    (10.80.0.2) -- PostgreSQL for the SHARED reference
 #                                        database (``shared_*`` tables).  NOTE:
 #                                        in the current code (13.1.A) the shared
 #                                        partition still collapses onto the
 #                                        bootstrap engine; this VM is here so the
 #                                        topology is ready for the 13.1.C/D
 #                                        dedicated-engine wiring.
-#   sysmanage-mt-tenant-a  (10.80.0.3) — PostgreSQL for TENANT A's database.
-#   sysmanage-mt-tenant-b  (10.80.0.4) — PostgreSQL for TENANT B's database (the
-#                                        "additional tenant" — proves per-tenant
+#   sysmanage-mt-tenant-a  (10.80.0.3) -- PostgreSQL for TENANT A's database.
+#   sysmanage-mt-tenant-b  (10.80.0.4) -- PostgreSQL for TENANT B's database (the
+#                                        "additional tenant" -- proves per-tenant
 #                                        data really lands in separate DBs).
-#   sysmanage-mt-control   (10.80.0.10) — The CONTROL PLANE: runs the sysmanage
+#   sysmanage-mt-control   (10.80.0.10) -- The CONTROL PLANE: runs the sysmanage
 #                                        server + OpenBAO.  This is what actually
 #                                        routes requests across the databases
 #                                        above (get_request_engine seam + the
@@ -37,10 +37,10 @@
 #                                        Set INCLUDE_CONTROL_PLANE=0 to omit it
 #                                        and instead point your dev host's
 #                                        sysmanage at these DBs.
-#   sysmanage-mt-agent-a   (10.80.0.11) — A sysmanage-agent enrolled into TENANT
+#   sysmanage-mt-agent-a   (10.80.0.11) -- A sysmanage-agent enrolled into TENANT
 #                                        A (via a tenant-scoped enrollment token),
-#   sysmanage-mt-agent-b   (10.80.0.12) — and one into TENANT B, so each tenant
-#                                        database gets real host data flowing —
+#   sysmanage-mt-agent-b   (10.80.0.12) -- and one into TENANT B, so each tenant
+#                                        database gets real host data flowing --
 #                                        you can watch it survive a failover.
 #                                        Set PROVISION_AGENTS=0 to skip them.
 #
@@ -48,7 +48,7 @@
 # the isolated 10.80.0.0/24 network, and creates the role + database.  The
 # control-plane VM ALSO comes up turnkey by default (PROVISION_CONTROL=1): the
 # host rsyncs the local sysmanage checkout + the Pro+ prebuilt engine bundles
-# onto it and stands the whole multi-tenant stack up unattended — OpenBAO, the
+# onto it and stands the whole multi-tenant stack up unattended -- OpenBAO, the
 # licensed multitenancy_engine (self-signed multitenant_saas license), the three
 # alembic chains, provision-bootstrap, and two demo tenants placed + migrated
 # against the tenant DB VMs.  Then one agent VM per tenant is installed + enrolled
@@ -75,7 +75,7 @@ set -euo pipefail
 
 # ---------------------------------------------------------------------------
 # Optional HA mode: give tenant-a a streaming-replication STANDBY so you can
-# test a PostgreSQL failover of a tenant database (Phase 15.1) — including the
+# test a PostgreSQL failover of a tenant database (Phase 15.1) -- including the
 # OpenBAO dynamic-credential path, which reaches tenant DBs via leased creds.
 # Enable with the ``--ha`` flag (or HA=1).  Adds the ``failover`` / ``failback``
 # subcommands that drive that tenant-a primary/standby pair over SSH.
@@ -104,7 +104,7 @@ OS_VARIANT="${OS_VARIANT:-ubuntu24.04}"
 USERNAME="ubuntu"
 PASSWORD='Ubuntu123$'
 
-# PostgreSQL role provisioned on every DB VM (alphanumeric on purpose — it goes
+# PostgreSQL role provisioned on every DB VM (alphanumeric on purpose -- it goes
 # through psql in cloud-init runcmd, so no shell-special characters).
 DB_ROLE="${DB_ROLE:-sysmanage}"
 DBPASS="${DBPASS:-SysMgrTest123}"
@@ -124,7 +124,7 @@ MT_NET_HOST_IP="${MT_NET_HOST_IP:-10.80.0.254}"
 MT_NET_MASK="${MT_NET_MASK:-255.255.255.0}"
 MT_NET_CIDR="${MT_NET_CIDR:-10.80.0.0/24}"
 
-# Per-VM sizing.  Disk sizes are the max the FS can grow to — qcow2 is
+# Per-VM sizing.  Disk sizes are the max the FS can grow to -- qcow2 is
 # thin-allocated so unused space costs nothing on the host.
 DB_VCPUS="${DB_VCPUS:-1}"
 DB_RAM="${DB_RAM:-2048}"
@@ -163,12 +163,12 @@ TENANT_A_STANDBY_NAT_MAC="${TENANT_A_STANDBY_NAT_MAC:-52:54:00:80:50:05}"
 TENANT_A_STANDBY_MT_MAC="${TENANT_A_STANDBY_MT_MAC:-52:54:00:80:00:05}"
 TENANT_A_STANDBY_IP="${TENANT_A_STANDBY_IP:-10.80.0.5}"
 
-# The REGISTRY standby — the important one.  The registry/bootstrap DB is the
+# The REGISTRY standby -- the important one.  The registry/bootstrap DB is the
 # whole platform's single point of failure (every control-plane request and, in
 # collapsed mode, the shared partition live in it), so in --ha it gets its own
 # streaming standby and the control plane connects via a libpq multi-host DSN
 # (target_session_attrs=read-write) so a registry-primary failover is survived
-# automatically — no SaaS platform can accept one DB box taking the whole thing
+# automatically -- no SaaS platform can accept one DB box taking the whole thing
 # down.  tenant-b also gets a standby so every live DB is HA (tenant-a already is).
 REGISTRY_STANDBY_NAME="${REGISTRY_STANDBY_NAME:-sysmanage-mt-registry-standby}"
 REGISTRY_STANDBY_NAT_MAC="${REGISTRY_STANDBY_NAT_MAC:-52:54:00:80:50:06}"
@@ -395,7 +395,7 @@ EOF
 # (\$) so it survives this build-host heredoc into the guest unchanged.
 # mode = plain (role + db) | primary (role + db + replication config/role) |
 # standby (postgres + subnet + replication config so it is promotable, but NO
-# role/db — those arrive when 'failback' clones it from the primary via basebackup).
+# role/db -- those arrive when 'failback' clones it from the primary via basebackup).
 write_user_data_db() {
   local host="$1" dbname="$2" out="$3" mode="${4:-plain}"
   _user_data_header "$host" "$out" "true"
@@ -411,7 +411,7 @@ runcmd:
 EOF
   # Apply the replication config to BOTH the primary AND the standby.  A base
   # backup copies the data dir, not /etc, so these settings do not travel with
-  # the clone — and after a failover the promoted standby must itself be a valid
+  # the clone -- and after a failover the promoted standby must itself be a valid
   # replication PRIMARY (accept a 'host replication' connection so failback can
   # rebuild the old primary streaming FROM it).  'host all all' does not match
   # replication connections, so without this the first failover→failback cycle
@@ -589,7 +589,7 @@ create_control() {
   provision_vm "$CONTROL_NAME" "control" "-" "$CONTROL_VCPUS" "$CONTROL_RAM" "$CONTROL_DISK_GB" \
     "$CONTROL_NAT_MAC" "$CONTROL_MT_MAC" "$CONTROL_IP"
 }
-# Agent VMs come up bare (like the control plane) — they're installed + enrolled
+# Agent VMs come up bare (like the control plane) -- they're installed + enrolled
 # by provision_agents() after the tenants + their enrollment tokens exist.
 create_agent_a() {
   provision_vm "$AGENT_A_NAME" "control" "-" "$AGENT_VCPUS" "$AGENT_RAM" "$AGENT_DISK_GB" \
@@ -616,18 +616,18 @@ ensure_vm() {
     if vm_running "$name"; then
       log "$name: already running"
     else
-      log "$name: defined but stopped — starting"
+      log "$name: defined but stopped -- starting"
       virsh_ start "$name" >/dev/null
       CREATED_COUNT=$((CREATED_COUNT + 1))
     fi
   else
-    log "$name: not defined — creating"
+    log "$name: not defined -- creating"
     "$create_fn"
     CREATED_COUNT=$((CREATED_COUNT + 1))
   fi
 }
 
-# get_nat_ip <vm> — DHCP-assigned IP (no CIDR) on the NAT NIC, empty if unknown.
+# get_nat_ip <vm> -- DHCP-assigned IP (no CIDR) on the NAT NIC, empty if unknown.
 # Filters out the static 10.80.x MT address so it never shadows the NAT one.
 get_nat_ip() {
   local name="$1"
@@ -687,7 +687,7 @@ print_vm_summary() {
   if [[ -n "$nat" ]]; then
     echo "  NAT     : $nat"
   else
-    echo "  NAT     : (pending — re-run '$0 status' once cloud-init finishes)"
+    echo "  NAT     : (pending -- re-run '$0 status' once cloud-init finishes)"
   fi
   case "$role" in
     db)
@@ -718,7 +718,7 @@ print_vm_summary() {
 }
 
 # ---------------------------------------------------------------------------
-# Failover / failback helpers (HA mode — drive the tenant-a pair over SSH)
+# Failover / failback helpers (HA mode -- drive the tenant-a pair over SSH)
 # ---------------------------------------------------------------------------
 
 ha_ssh() {
@@ -752,7 +752,7 @@ pg_version() {
 }
 
 # ---------------------------------------------------------------------------
-# Turnkey control-plane provisioning (host-driven over SSH — it needs local
+# Turnkey control-plane provisioning (host-driven over SSH -- it needs local
 # artifacts: your sysmanage checkout + the Pro+ prebuilt engine bundles).
 # Mirrors the proven docs-screenshot provisioner (sysmanage-docs/screenshots/
 # provision.sh) for the Pro+ engine + self-signed-license mechanism, and the
@@ -840,7 +840,7 @@ JWT="$(openssl rand -hex 32)"; SALT="$(openssl rand -hex 32)"
 # HA: point the registry at a libpq multi-host list (primary,standby) and pin
 # writes to the writable node.  config.py normalizes registry -> database, and
 # db.py builds the URL with these options + pool_pre_ping (HA_ENGINE_KWARGS), so
-# a registry-primary failover is survived with no config change — the whole point
+# a registry-primary failover is survived with no config change -- the whole point
 # of registry HA.  Single-host otherwise.
 if [ "$REGISTRY_HA" = "1" ] && [ -n "$REGISTRY_STANDBY_IP" ]; then
     REG_HOST="${REGISTRY_IP},${REGISTRY_STANDBY_IP}"
@@ -895,14 +895,14 @@ cd "$SERVER"
 make setup-venv
 echo "  installing Python dependencies (a few minutes)..."
 .venv/bin/pip install -r requirements.txt
-# NOTE: psycopg2 is intentionally NOT installed — the repo is psycopg3-only
+# NOTE: psycopg2 is intentionally NOT installed -- the repo is psycopg3-only
 # (Phase 15.2).  The multitenancy_engine's _build_url now emits postgresql+psycopg;
 # make sure storage/modules ships that rebuilt engine (make build-modules) so
 # migrate-tenants doesn't hit "No module named 'psycopg2'" against an old bundle.
 # OpenBAO (per-tenant credential broker). Best-effort: the repo's installer, then
 # a fallback to the full dev install if that entrypoint has moved.
 .venv/bin/python scripts/install-openbao.py >/dev/null 2>&1 || make install-dev >/dev/null 2>&1 || \
-    echo "  WARN: could not auto-install OpenBAO — start-openbao.sh may fail (shakeout item)"
+    echo "  WARN: could not auto-install OpenBAO -- start-openbao.sh may fail (shakeout item)"
 
 echo "=== [5/10] start OpenBAO ==="
 ./scripts/start-openbao.sh || echo "  WARN: start-openbao returned non-zero"
@@ -928,7 +928,7 @@ PLAT=linux; ARCH=x86_64
 mkdir -p "$MODDIR" "$LICDIR"
 # Resolve from the Pro+ tree: 'cd "$PRO"' so python -c's implicit CWD entry on
 # sys.path is /opt/pro (not /opt/sysmanage, whose OSS backend.licensing.features
-# has no get_modules_for_tier — that's a signing-side Pro+ function).
+# has no get_modules_for_tier -- that's a signing-side Pro+ function).
 ENGINES="$(cd "$PRO" && PYTHONPATH="$PRO" "$SVPY" -c "from backend.licensing.features import get_modules_for_tier; print(' '.join(m for m in get_modules_for_tier('$TIER') if m != 'proplus_core'))")"
 [ -n "$ENGINES" ] || { echo "  ERROR: could not resolve engines for tier $TIER"; ENGINES=""; }
 for code in $ENGINES; do
@@ -937,7 +937,7 @@ for code in $ENGINES; do
         tb="$(ls -1 "$PRO"/storage/modules/"$code"/*/"$PLAT"/"$ARCH"/"$_abi"/"$code".tar.gz 2>/dev/null | sort -V | tail -1 || true)"
         [ -n "$tb" ] && break
     done
-    [ -n "$tb" ] || { echo "  WARN: no $PLAT/$ARCH bundle for $code — skipping"; continue; }
+    [ -n "$tb" ] || { echo "  WARN: no $PLAT/$ARCH bundle for $code -- skipping"; continue; }
     dest="$MODDIR/${code}_${PYVER}"; rm -rf "$dest"; mkdir -p "$dest"; tar -xzf "$tb" -C "$dest"; echo "  + $code"
 done
 for code in $ENGINES proplus_core; do
@@ -1021,7 +1021,7 @@ for i in $(seq 1 60); do
 done
 curl -fsS http://127.0.0.1:8080/api/v1/server-info 2>/dev/null \
     | "$SVPY" -c "import sys,json; d=json.load(sys.stdin); print('  tier:', d.get('license_tier'), '| engines:', d.get('loaded_engines'))" 2>/dev/null \
-    || echo "  (server-info unavailable — see /var/log/sysmanage-start.log)"
+    || echo "  (server-info unavailable -- see /var/log/sysmanage-start.log)"
 
 echo "=== [10/10] create + place + wire + migrate the two demo tenants ==="
 # Defensively clear any lockout on the admin from prior runs: failed logins
@@ -1060,7 +1060,7 @@ else
     # or migrate-tenants silently skips the tenant.
     bao_tenant() {  # $1=config/db_name $2=host(may be multi-host) $3=dbname $4=leaserole
         local primary="${2%%,*}" owner="${3}_owner"
-        # Stable NOLOGIN OWNER role that owns the tenant schema — mirrors the
+        # Stable NOLOGIN OWNER role that owns the tenant schema -- mirrors the
         # engine's create_tenant_database/configure_openbao_role.  Each rotating
         # OpenBAO lease role is created IN ROLE <owner> and defaults SET role to
         # <owner>, so objects a lease creates are owned by <owner> and EVERY lease
@@ -1086,7 +1086,7 @@ SQL
     }
     # HA: place each tenant at its primary+standby PAIR (libpq multi-host) so the
     # tenant's per-request engine (_build_url appends target_session_attrs=read-write)
-    # and migrate-tenants both survive a tenant-DB failover — the app-side rebind
+    # and migrate-tenants both survive a tenant-DB failover -- the app-side rebind
     # that makes 'failover tenant-a' keep the tenant serving, mirroring registry HA.
     if [ "$REGISTRY_HA" = "1" ]; then
         TA_HOST="${TENANT_A_IP},${TENANT_A_STANDBY_IP}"; TB_HOST="${TENANT_B_IP},${TENANT_B_STANDBY_IP}"
@@ -1138,7 +1138,7 @@ Set PRO_SRC=/path/to/sysmanage-professional-plus, or run with PROVISION_CONTROL=
 to leave the control VM bare and just print the manual wiring guide."
   [ -f "$PRO_KEYGEN" ]     || die "pro_keygen.py not found: $PRO_KEYGEN (set PRO_KEYGEN=...)"
   [ -e "$PRO_SRC/storage/modules/multitenancy_engine" ] \
-    || warn "No multitenancy_engine bundle under $PRO_SRC/storage/modules — run 'make pull-modules' in the Pro+ repo first, or the engine won't load."
+    || warn "No multitenancy_engine bundle under $PRO_SRC/storage/modules -- run 'make pull-modules' in the Pro+ repo first, or the engine won't load."
 
   local ip="$CONTROL_IP" i
   log "Control plane: waiting for SSH + cloud-init on $ip ..."
@@ -1165,7 +1165,7 @@ to leave the control VM bare and just print the manual wiring guide."
   log "Control plane: running unattended setup on $ip (several minutes; live output below,"
   log "also tee'd to /var/log/sysmanage-control-setup.log on the VM) ..."
   ha_ssh "$ip" "sudo bash /home/${USERNAME}/control-setup.sh" \
-    || warn "control-setup returned non-zero — inspect /var/log/sysmanage-control-setup.log on $ip"
+    || warn "control-setup returned non-zero -- inspect /var/log/sysmanage-control-setup.log on $ip"
 }
 
 # Write the root-run agent setup script.  Installs sysmanage-agent from the PPA
@@ -1253,8 +1253,8 @@ provision_agents() {
   tokens="$(ha_ssh "$CONTROL_IP" "sudo cat /root/tenant-enrollment.env 2>/dev/null" 2>/dev/null)"
   token_a="$(printf '%s\n' "$tokens" | sed -n 's/^TENANT_A_TOKEN=//p' | tr -d '[:space:]')"
   token_b="$(printf '%s\n' "$tokens" | sed -n 's/^TENANT_B_TOKEN=//p' | tr -d '[:space:]')"
-  [ -n "$token_a" ] || warn "no tenant-a enrollment token on the control plane — agent-a won't bind to a tenant (check the control-setup log)."
-  [ -n "$token_b" ] || warn "no tenant-b enrollment token on the control plane — agent-b won't bind to a tenant."
+  [ -n "$token_a" ] || warn "no tenant-a enrollment token on the control plane -- agent-a won't bind to a tenant (check the control-setup log)."
+  [ -n "$token_b" ] || warn "no tenant-b enrollment token on the control plane -- agent-b won't bind to a tenant."
   _provision_one_agent "$AGENT_A_NAME" "$AGENT_A_IP" "$token_a" "tenant-a"
   _provision_one_agent "$AGENT_B_NAME" "$AGENT_B_IP" "$token_b" "tenant-b"
 }
@@ -1268,10 +1268,10 @@ _provision_one_agent() {
   done
   setup="$WORKDIR/agent-setup-${label}.sh"
   emit_agent_setup "$setup" "$token"
-  ha_scp "$setup" "$ip" || { warn "agent [${label}] on ${ip} unreachable (scp failed) — skipping"; return 0; }
+  ha_scp "$setup" "$ip" || { warn "agent [${label}] on ${ip} unreachable (scp failed) -- skipping"; return 0; }
   log "Agent for ${label}: installing + enrolling (tee'd to /var/log/sysmanage-agent-setup.log on the VM)..."
   ha_ssh "$ip" "sudo bash /home/${USERNAME}/$(basename "$setup")" \
-    || warn "agent [${label}] setup returned non-zero — inspect /var/log/sysmanage-agent-setup.log on $ip"
+    || warn "agent [${label}] setup returned non-zero -- inspect /var/log/sysmanage-agent-setup.log on $ip"
 }
 
 # ---------------------------------------------------------------------------
@@ -1284,7 +1284,7 @@ cmd_start() {
   log "libvirt image pool: $IMG_POOL"
   log "libvirt URI       : $LIBVIRT_URI"
   log "control plane     : $([[ "$INCLUDE_CONTROL_PLANE" == "1" ]] && echo "included ($CONTROL_NAME)" || echo "skipped (INCLUDE_CONTROL_PLANE=0)")"
-  log "HA mode           : $([[ "$HA_MODE" == "1" ]] && echo "on — tenant-a gets a standby ($TENANT_A_STANDBY_NAME)" || echo "off (pass --ha to enable)")"
+  log "HA mode           : $([[ "$HA_MODE" == "1" ]] && echo "on -- tenant-a gets a standby ($TENANT_A_STANDBY_NAME)" || echo "off (pass --ha to enable)")"
 
   ensure_default_network
   ensure_mt_network
@@ -1315,26 +1315,26 @@ cmd_start() {
   fi
 
   # HA: clone every standby now so the topology is genuinely fault-tolerant the
-  # moment 'start' returns — the registry standby in particular, so the control
+  # moment 'start' returns -- the registry standby in particular, so the control
   # plane comes up already surviving a registry-primary failover.  Runs BEFORE
   # control-plane provisioning so the registry standby is streaming (in recovery,
-  # read-only) when the server first connects — the multi-host DSN's
+  # read-only) when the server first connects -- the multi-host DSN's
   # target_session_attrs=read-write then correctly pins writes to the primary.
   # Each provisioning phase is guarded with '|| warn' so that a partial failure
   # (an unreachable VM, a slow SSH, a non-zero setup step) NEVER aborts the run
-  # under 'set -e' — the end-of-run summary with every VM's login + IPs must
+  # under 'set -e' -- the end-of-run summary with every VM's login + IPs must
   # always print.  Individual steps already log their own WARNs.
   if [[ "$HA_MODE" == "1" ]]; then
     echo
     log "=== Building HA standbys (registry + tenant-a + tenant-b) ==="
-    ha_autobuild_standbys || warn "standby build hit an error (see above) — continuing to the summary"
+    ha_autobuild_standbys || warn "standby build hit an error (see above) -- continuing to the summary"
   fi
 
   # Turnkey control plane: stand the whole multi-tenant stack up unattended.
   if [[ "$INCLUDE_CONTROL_PLANE" == "1" && "$PROVISION_CONTROL" == "1" ]]; then
     echo
     log "=== Provisioning the control plane (unattended) ==="
-    provision_control_plane || warn "control-plane provisioning hit an error (see above) — continuing to the summary"
+    provision_control_plane || warn "control-plane provisioning hit an error (see above) -- continuing to the summary"
   fi
 
   # One agent per tenant, enrolled via the tenant's token, so each tenant DB gets
@@ -1342,7 +1342,7 @@ cmd_start() {
   if [[ "$_AGENTS_ON" == "1" ]]; then
     echo
     log "=== Provisioning per-tenant agents (agent-a -> tenant-a, agent-b -> tenant-b) ==="
-    provision_agents || warn "agent provisioning hit an error (see above) — continuing to the summary"
+    provision_agents || warn "agent provisioning hit an error (see above) -- continuing to the summary"
   fi
 
   echo
@@ -1381,9 +1381,9 @@ cmd_start() {
   echo "  tenant-a DB : ${TENANT_A_IP}   db=${TENANT_A_DBNAME}"
   echo "  tenant-b DB : ${TENANT_B_IP}   db=${TENANT_B_DBNAME}"
   if [[ "$HA_MODE" == "1" ]]; then
-  echo "  reg  stdby  : ${REGISTRY_STANDBY_IP}   (streaming standby of the registry DB — the platform-critical pair)"
+  echo "  reg  stdby  : ${REGISTRY_STANDBY_IP}   (streaming standby of the registry DB -- the platform-critical pair)"
   echo "  tnt-a stdby : ${TENANT_A_STANDBY_IP}   (streaming standby of tenant-a)"
-  echo "  tnt-b stdby : ${TENANT_B_STANDBY_IP}   (streaming standby of tenant-b — see HA guide below)"
+  echo "  tnt-b stdby : ${TENANT_B_STANDBY_IP}   (streaming standby of tenant-b -- see HA guide below)"
   fi
   [[ "$INCLUDE_CONTROL_PLANE" == "1" ]] && \
   echo "  control     : ${CONTROL_IP}  (sysmanage server + OpenBAO)"
@@ -1429,7 +1429,7 @@ cmd_start() {
 print_wiring_guide() {
   cat <<EOF
 ==========================================================================
-  Wiring it together — multi-tenant bring-up (run on the control plane)
+  Wiring it together -- multi-tenant bring-up (run on the control plane)
 ==========================================================================
 The four DB VMs are turnkey (PostgreSQL is installed, opened on 10.80.0.0/24,
 role '${DB_ROLE}' + per-VM database created).  Confirm one is reachable:
@@ -1456,16 +1456,16 @@ with INCLUDE_CONTROL_PLANE=0):
      multitenancy:
        enabled: true
        self_service_provisioning: true
-     vault:               # OpenBAO — brokers per-tenant DB credentials
+     vault:               # OpenBAO -- brokers per-tenant DB credentials
        url: http://localhost:8200
        ...
      security:
-       # admin_userid MUST be a valid email — /api/login validates it as
+       # admin_userid MUST be a valid email -- /api/login validates it as
        # EmailStr, so a bare 'admin' is rejected with HTTP 422 (NOT 401).
        admin_userid: admin@example.com
        admin_password: admin
      email:
-       enabled: true       # just the flag — no SMTP server/password needed for the test
+       enabled: true       # just the flag -- no SMTP server/password needed for the test
 
    NOTE: per-tenant DB routing requires the licensed multitenancy_engine to be
    loaded (it owns the per-tenant engine cache + OpenBAO dynamic-credential
@@ -1473,7 +1473,7 @@ with INCLUDE_CONTROL_PLANE=0):
    error instead of silently misrouting.
 
 3. RUN THE THREE ALEMBIC CHAINS (registry / shared / tenant) against the
-   registry DB.  'make migrate' drives scripts/sysmanage_migrate.py — with MT
+   registry DB.  'make migrate' drives scripts/sysmanage_migrate.py -- with MT
    on it starts OpenBAO for the per-tenant fan-out automatically:
 
      make migrate
@@ -1500,7 +1500,7 @@ with INCLUDE_CONTROL_PLANE=0):
    the agent.  The host's data then lands in that tenant's database.
 
 8. VERIFY ROUTING.  Switch the active tenant in the UI and confirm a host's
-   detail/data is served from its tenant DB — e.g. compare row counts:
+   detail/data is served from its tenant DB -- e.g. compare row counts:
 
      psql 'postgresql://${DB_ROLE}:${DBPASS}@${TENANT_A_IP}:5432/${TENANT_A_DBNAME}' -c 'SELECT count(*) FROM hosts;'
      psql 'postgresql://${DB_ROLE}:${DBPASS}@${TENANT_B_IP}:5432/${TENANT_B_DBNAME}' -c 'SELECT count(*) FROM hosts;'
@@ -1508,7 +1508,7 @@ with INCLUDE_CONTROL_PLANE=0):
 Caveat: in the current code (Phase 13.1.A) the registry and shared partitions
 both collapse onto the bootstrap engine; the dedicated registry/shared engines
 land in 13.1.C/D.  The ${SHARED_NAME} VM is provided so the topology is ready
-for that wiring — until then, the shared chain's tables live in the registry DB.
+for that wiring -- until then, the shared chain's tables live in the registry DB.
 ==========================================================================
 EOF
 }
@@ -1533,9 +1533,9 @@ cmd_stop() {
       virsh_ undefine "$name" --remove-all-storage --nvram >/dev/null 2>&1 \
         || virsh_ undefine "$name" --remove-all-storage >/dev/null 2>&1 \
         || virsh_ undefine "$name" >/dev/null 2>&1 \
-        || warn "$name: undefine failed — may need manual cleanup with 'virsh undefine $name --remove-all-storage'"
+        || warn "$name: undefine failed -- may need manual cleanup with 'virsh undefine $name --remove-all-storage'"
     else
-      log "$name: not defined — skipping undefine"
+      log "$name: not defined -- skipping undefine"
     fi
   done
 
@@ -1613,17 +1613,17 @@ cmd_status() {
 print_ha_guide() {
   cat <<EOF
 ==========================================================================
-  HA mode — every live DB has a streaming standby (Phase 15.1)
+  HA mode -- every live DB has a streaming standby (Phase 15.1)
 ==========================================================================
 'start' already CLONED and verified all three standbys (registry, tenant-a,
-tenant-b), so the topology is fault-tolerant right now — no single DB box can
+tenant-b), so the topology is fault-tolerant right now -- no single DB box can
 take the platform down.  The pairs:
 
   registry : ${REGISTRY_IP}  (primary)  +  ${REGISTRY_STANDBY_IP}  (standby)   <- platform-critical
   tenant-a : ${TENANT_A_IP}  (primary)  +  ${TENANT_A_STANDBY_IP}  (standby)
   tenant-b : ${TENANT_B_IP}  (primary)  +  ${TENANT_B_STANDBY_IP}  (standby)
 
-THE HEADLINE TEST — kill the registry primary, platform stays up:
+THE HEADLINE TEST -- kill the registry primary, platform stays up:
 
      $0 failover registry     # stop ${REGISTRY_IP}, promote ${REGISTRY_STANDBY_IP}
 
@@ -1631,7 +1631,7 @@ THE HEADLINE TEST — kill the registry primary, platform stays up:
   libpq multi-host list (host="${REGISTRY_IP},${REGISTRY_STANDBY_IP}"
   target_session_attrs=read-write) and every engine has pool_pre_ping, so dead
   pooled connections are discarded and re-resolved to the promoted node.  Reload
-  the UI at http://${CONTROL_IP}:3000 — it stays up.  Then repair replication:
+  the UI at http://${CONTROL_IP}:3000 -- it stays up.  Then repair replication:
 
      $0 failback registry     # rebuild ${REGISTRY_IP} as a fresh streaming standby
 
@@ -1647,7 +1647,7 @@ PER-TENANT failover is now automatic too (target tenant-a / tenant-b):
   connections re-resolve to the promoted node.  OpenBAO's own admin connection is
   pointed at the pair too, so it keeps minting tenant creds after a failover.
   (Caveat: that last part needs OpenBAO's postgres plugin to honor libpq
-  multi-host — modern pgx-based builds do; if yours is lib/pq, front the tenant
+  multi-host -- modern pgx-based builds do; if yours is lib/pq, front the tenant
   pair with a VIP/proxy and use that single address in the OpenBAO connection_url.)
 
 status shows each node's role:  $0 status
@@ -1676,7 +1676,7 @@ _ha_rebuild_standby() {
   [[ -n "$ver" ]] || { warn "[$label] can't determine PostgreSQL version on primary ${primary_ip}"; return 1; }
   log "[$label] rebuilding ${rebuild_ip} as a streaming standby of ${primary_ip} (pg ${ver})"
   # .pgpass BEFORE start: pg_basebackup -R omits the password from
-  # primary_conninfo, so ongoing WAL streaming can't auth under scram — without it
+  # primary_conninfo, so ongoing WAL streaming can't auth under scram -- without it
   # the base backup succeeds but streaming silently never starts, and a later
   # failover promotes a frozen snapshot missing every post-clone write.
   ha_ssh "$rebuild_ip" "\
@@ -1694,7 +1694,7 @@ _ha_rebuild_standby() {
     sleep 2
   done
   if [[ "$st" == "streaming" ]]; then
-    log "[$label] streaming verified — primary=${primary_ip}, standby=${rebuild_ip}"
+    log "[$label] streaming verified -- primary=${primary_ip}, standby=${rebuild_ip}"
     return 0
   fi
   warn "[$label] ${rebuild_ip} is NOT streaming (pg_stat_wal_receiver='${st:-<empty>}'); a failover now would lose writes."
@@ -1702,7 +1702,7 @@ _ha_rebuild_standby() {
 }
 
 # Clone EVERY HA standby at bring-up so the topology is genuinely HA the moment
-# 'start' finishes — the registry standby especially, so the control plane comes
+# 'start' finishes -- the registry standby especially, so the control plane comes
 # up already able to survive a registry failover.  Waits for each primary first.
 ha_autobuild_standbys() {
   check_ssh_deps
@@ -1715,7 +1715,7 @@ ha_autobuild_standbys() {
       sleep 5
     done
     if [[ "$(pg_role "$sip")" == "standby" ]]; then
-      log "[$label] standby ${sip} already streaming — skipping"
+      log "[$label] standby ${sip} already streaming -- skipping"
       continue
     fi
     _ha_rebuild_standby "$label" "$pip" "$sip" || warn "[$label] initial standby build did not verify (see above)"
@@ -1751,12 +1751,12 @@ cmd_failover() {
     || die "promote failed on ${standby_ip}"
 
   echo
-  log "[$target] failover complete — ${standby_ip} is now the ${target} primary."
+  log "[$target] failover complete -- ${standby_ip} is now the ${target} primary."
   if [[ "$target" == "registry" ]]; then
     log "The control plane should keep serving with NO manual step: its registry DSN is"
     log "the libpq multi-host list (target_session_attrs=read-write) + pool_pre_ping, so"
     log "dead pooled connections are discarded and re-resolved to the promoted node."
-    log "This is the proof point — one DB box died and the whole platform stayed up."
+    log "This is the proof point -- one DB box died and the whole platform stayed up."
   else
     log "The OpenBAO lease-acquisition retry (Phase 15.1) covers minting ${target} creds through the gap."
   fi
@@ -1778,7 +1778,7 @@ cmd_failback() {
   elif [[ "$s_role" == "primary" ]]; then
     primary_ip="$s_ip"; rebuild_ip="$p_ip"
   else
-    die "[$target] no primary is up (${a_role}/${s_role}) — start the ${target} primary before failback."
+    die "[$target] no primary is up (${a_role}/${s_role}) -- start the ${target} primary before failback."
   fi
 
   _ha_rebuild_standby "$target" "$primary_ip" "$rebuild_ip"
@@ -1789,7 +1789,7 @@ usage() {
   cat <<EOF
 Usage: $0 [--ha] {start|stop|status|failover|failback}
 
-  start     Create and start the multi-tenant test VMs (idempotent — already
+  start     Create and start the multi-tenant test VMs (idempotent -- already
             running VMs are reported, not re-created).  The four DB VMs come up
             with PostgreSQL installed + a role/database created; the control-plane
             VM is bare (install sysmanage + OpenBAO per the printed guide).
@@ -1806,7 +1806,7 @@ Usage: $0 [--ha] {start|stop|status|failover|failback}
 
 Options:
   --ha      Give the registry, tenant-a AND tenant-b DBs a streaming standby
-            each (so every live DB survives a single-box loss — no SaaS platform
+            each (so every live DB survives a single-box loss -- no SaaS platform
             can accept one DB failure taking the whole thing down) and enable
             failover/failback.  'start' auto-clones the standbys so the topology
             is HA immediately, and the control plane connects to the registry via

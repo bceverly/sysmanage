@@ -3,7 +3,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-# submit-winget.sh — submit sysmanage.sysmanage and
+# submit-winget.sh -- submit sysmanage.sysmanage and
 # sysmanage.sysmanage-agent to microsoft/winget-pkgs for a given
 # version.
 #
@@ -27,7 +27,7 @@
 #        a. ``komac new --dry-run --output <tmp>`` dumps fresh
 #           manifests for ``sysmanage.sysmanage`` /
 #           ``sysmanage.sysmanage-agent``.
-#        b. (Disabled — see WHY below.)  Set
+#        b. (Disabled -- see WHY below.)  Set
 #           ``INJECT_PYTHON_DEP=1`` to opt back into the legacy
 #           sed-injection of ``Dependencies: PackageDependencies:
 #           Python.Python.3.12``.  Reserved for the day winget
@@ -43,7 +43,7 @@
 #   ``APPINSTALLER_CLI_ERROR_INSTALL_MISSING_DEPENDENCY`` →
 #   "No suitable installer found for manifest Python.Python.3.12
 #   with version 3.12.10".  Despite the wording, the v3.12.10
-#   manifest *does* exist — winget choked because our MSI is
+#   manifest *does* exist -- winget choked because our MSI is
 #   ``Scope: machine`` (Program Files) while Python.org's winget
 #   manifest for the entire 3.12.x line carries only a user-scope
 #   installer.  Cross-scope dep resolution isn't supported, so the
@@ -57,7 +57,7 @@
 #
 #   Mitigation that lets the install succeed without the dep: the
 #   MSI's ``install.ps1`` + ``create-service.ps1`` already
-#   soft-fail when Python isn't present — the MSI lands cleanly,
+#   soft-fail when Python isn't present -- the MSI lands cleanly,
 #   the service-install step skips, and the post-install log tells
 #   the user to run ``winget install Python.Python.3.12``
 #   themselves.  This matches how the vast majority of packages in
@@ -67,7 +67,7 @@
 #   komac writes manifests with CRLF line endings (it's Rust +
 #   targets a Windows package manager).  A plain
 #   ``^ManifestType: installer$`` regex on Linux silently misses
-#   them — sed's ``$`` anchors before the ``\n`` byte but the
+#   them -- sed's ``$`` anchors before the ``\n`` byte but the
 #   literal ``\r`` is in the way.  The regex below tolerates the
 #   optional CR (``\r\?``), and the inserted lines themselves end
 #   in ``\r\`` so the file stays uniformly CRLF after the edit.
@@ -75,7 +75,7 @@
 set -euo pipefail
 
 # ---------------------------------------------------------------
-# Resolve VERSION — env override first, else latest GitHub tag.
+# Resolve VERSION -- env override first, else latest GitHub tag.
 #
 # We can't just take ``gh release list --limit 1`` because ``gh``
 # sorts releases by ``created_at desc``, not by semver: a stray
@@ -164,7 +164,7 @@ echo "Work directory: ${WORK_DIR}"
 # ---------------------------------------------------------------
 # Pre-flight 1: confirm the v${VERSION} GitHub releases exist with
 # downloadable MSIs.  Fail fast with a clear message if the tag
-# hasn't been built yet — saves a confusing komac error.
+# hasn't been built yet -- saves a confusing komac error.
 # ---------------------------------------------------------------
 preflight() {
     local url="$1"
@@ -189,20 +189,20 @@ echo "  All four MSIs reachable."
 
 # ---------------------------------------------------------------
 # Pre-flight 2: close every open sysmanage* PR from this author on
-# microsoft/winget-pkgs.  We do this UNCONDITIONALLY by default —
+# microsoft/winget-pkgs.  We do this UNCONDITIONALLY by default --
 # every prior submission (for ANY version) is superseded by the
 # v${VERSION} submission we're about to make, so leaving them open
 # just accumulates bot-template comments and confuses reviewers.
 #
-# Filter: title contains "sysmanage" — matches the standard komac
+# Filter: title contains "sysmanage" -- matches the standard komac
 # titles ("Add version: sysmanage.X version Y.Z" / "New package:
 # sysmanage.X version Y.Z").  Safe for this submitter because we
 # only ever submit sysmanage packages.
 #
-# Set ``SKIP_STALE_CLOSE=1`` to bypass (rare — e.g. if you've
+# Set ``SKIP_STALE_CLOSE=1`` to bypass (rare -- e.g. if you've
 # already closed prior PRs by hand and don't want the script
 # touching anything).
-# Set ``STALE_SCOPE=current`` to fall back to the prior behaviour
+# Set ``STALE_SCOPE=current`` to fall back to the prior behavior
 # of closing only same-version PRs (e.g. when running parallel
 # submissions for multiple distinct versions).
 # ---------------------------------------------------------------
@@ -226,7 +226,7 @@ if [ "${SKIP_STALE_CLOSE:-0}" != "1" ]; then
     if [ -z "${STALE_PRS}" ]; then
         echo "  No prior PRs found.  Proceeding to submission."
     else
-        STALE_COMMENT="Superseded by a fresh v${VERSION} submission with manifest + MSI fixes for the validation issue that bounced this PR.  See the linked v${VERSION} PR for details.  Closing in favour of the fresh PR."
+        STALE_COMMENT="Superseded by a fresh v${VERSION} submission with manifest + MSI fixes for the validation issue that bounced this PR.  See the linked v${VERSION} PR for details.  Closing in favor of the fresh PR."
         for pr in ${STALE_PRS}; do
             echo "  - PR #${pr}: posting supersede comment + closing"
             gh pr comment "${pr}" --repo microsoft/winget-pkgs --body "${STALE_COMMENT}" \
@@ -266,7 +266,7 @@ Dependencies:\r\
   PackageDependencies:\r\
   - PackageIdentifier: '"${PY_DEPENDENCY}"'\r\
 ' "$manifest"
-    # Verify the injection actually landed — silent no-op is the
+    # Verify the injection actually landed -- silent no-op is the
     # exact failure mode the CRLF tweaks above are guarding
     # against.  If the post-grep doesn't see our marker, bail so
     # the operator notices instead of submitting a broken
@@ -274,7 +274,7 @@ Dependencies:\r\
     if ! grep -q "PackageIdentifier: ${PY_DEPENDENCY}\b" "$manifest"; then
         echo "ERROR: sed-injection silently no-op'd on $(basename "$manifest")" >&2
         echo "       (expected to see 'PackageIdentifier: ${PY_DEPENDENCY}'" >&2
-        echo "        in the file after sed — manifest may have an" >&2
+        echo "        in the file after sed -- manifest may have an" >&2
         echo "        unexpected line-ending convention).  Aborting submit." >&2
         return 1
     fi
@@ -289,13 +289,13 @@ Dependencies:\r\
 # walkthrough (~11 KB).  The winget manifest schema for
 # ``defaultLocale.1.12.0`` caps ``ReleaseNotes`` at 10,000 chars.
 # Microsoft's pipeline didn't enforce that strictly on the
-# 2026-05-17 run, but the spec is the spec — and the long block also
+# 2026-05-17 run, but the spec is the spec -- and the long block also
 # makes the manifest hard for reviewers to scan.  We replace the
 # block with a single line that points back to ``ReleaseNotesUrl``
 # (which still resolves to the full release page).
 #
 # CRLF gotcha: komac writes the locale file with CRLF (see the
-# Python script's newline detection below — same reason the
+# Python script's newline detection below -- same reason the
 # ``inject_python_dependency`` regex carries ``\r\?`` anchors).
 # ---------------------------------------------------------------
 truncate_release_notes() {
@@ -322,13 +322,13 @@ pattern = re.compile(
     re.MULTILINE,
 )
 short_line = (
-    f"ReleaseNotes: SysManage v{version} — see ReleaseNotesUrl for "
+    f"ReleaseNotes: SysManage v{version} -- see ReleaseNotesUrl for "
     f"the full per-platform installation guide and changelog."
 ) + ("\r\n" if crlf else "\n")
 
 new_text, n = pattern.subn(short_line, text, count=1)
 if n == 0:
-    # No multi-line block — komac may have inlined a short value
+    # No multi-line block -- komac may have inlined a short value
     # already, or omitted ReleaseNotes entirely.  Leave the file
     # alone in either case.
     sys.exit(0)
@@ -384,7 +384,7 @@ process_package() {
     fi
     echo "  Manifest dir: $manifest_dir"
 
-    # Python.Python.3.12 dependency injection is off by default —
+    # Python.Python.3.12 dependency injection is off by default --
     # see header WHY-block for the winget cross-scope rejection
     # that drove PR #375209 + #375210 into Validation-Installation-Error
     # on 2026-05-15.  Set ``INJECT_PYTHON_DEP=1`` to opt back in once

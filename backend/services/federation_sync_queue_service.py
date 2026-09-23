@@ -26,7 +26,7 @@ deltas.  On reconnect:
   3. Site clears the payload from its queue only after a successful
      ack.
 
-``dedup_key`` is opaque to the site — typically a
+``dedup_key`` is opaque to the site -- typically a
 ``"host_id:field:mtime"`` triple for host-delta payloads, or the
 snapshot timestamp for rollup payloads.  Free-form so future
 payload types can pick their own dedup shape.
@@ -99,7 +99,7 @@ def enqueue(
     exists (regardless of payload_type), the existing row is REPLACED
     rather than a duplicate appended.  This makes "host X changed
     from up to down, then immediately back to up" produce a single
-    queued row carrying the latest state — common when an agent
+    queued row carrying the latest state -- common when an agent
     flaps and the coordinator only cares about the final value.
 
     Returns the persisted row (caller commits).
@@ -107,7 +107,7 @@ def enqueue(
     if not payload_type or not payload_type.strip():
         raise ValueError("payload_type is required")
     if not isinstance(payload, dict):
-        raise ValueError("payload must be a dict (will be JSON-serialised)")
+        raise ValueError("payload must be a dict (will be JSON-serialized)")
 
     # Dedup on insert: if there's an existing row with the same key,
     # overwrite its payload + reset its attempt counter.  This is
@@ -158,11 +158,11 @@ def peek_batch(
     The site engine's worker calls this to fetch a batch, sends them
     upstream, and then calls :func:`mark_sent` / :func:`mark_failed`
     per row based on the coordinator's response.  Because the worker
-    is single-threaded per process, no SELECT-FOR-UPDATE is needed —
+    is single-threaded per process, no SELECT-FOR-UPDATE is needed --
     the FIFO ordering keeps correctness simple.
 
     Phase 12.10 hardening: rows whose ``attempts > 0`` are gated by
-    :func:`federation_retry_policy.is_ready_for_retry` — entries
+    :func:`federation_retry_policy.is_ready_for_retry` -- entries
     still in their exponential-backoff window are skipped, so a
     down coordinator doesn't get hammered every tick.  Rows whose
     ``attempts >= MAX_ATTEMPTS`` are dead-lettered (never returned;
@@ -250,7 +250,7 @@ def mark_failed(
 
     Increments ``attempts``, stamps ``last_attempt_at`` / ``last_error``
     so the next drain cycle picks it up again.  Bounded retry / backoff
-    is the worker's responsibility — this service just records facts.
+    is the worker's responsibility -- this service just records facts.
     """
     if not error:
         raise ValueError("error string is required for mark_failed")

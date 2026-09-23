@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Tests for backend/api/lifecycle_actions.py — release-upgrade dispatch (Phase 14.3)."""
+"""Tests for backend/api/lifecycle_actions.py -- release-upgrade dispatch (Phase 14.3)."""
 
 import types
 import uuid

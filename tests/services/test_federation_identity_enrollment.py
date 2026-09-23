@@ -6,15 +6,15 @@
 
 Two layers:
 
-  * The crypto core in ``federation_identity_service`` — sign/verify, the
+  * The crypto core in ``federation_identity_service`` -- sign/verify, the
     canonical proof message, and that the proof is bound to the exact cert
     fingerprint, role, and key (so a swap, replay-across-role, or wrong key
     all fail).
-  * The strict enrollment gates in the coordinator + site services — that
+  * The strict enrollment gates in the coordinator + site services -- that
     enrollment is REFUSED without a registered identity key and a valid proof,
     and that the proof must match the presented cert.
 
-These are the tests that guard the actual MITM defence; if any of the
+These are the tests that guard the actual MITM defense; if any of the
 "tampered ... still verifies" assertions ever flip, the gate is broken.
 """
 
@@ -65,7 +65,7 @@ class TestProofCore:
         )
 
     def test_proof_is_bound_to_the_cert(self):
-        """A proof over cert A must NOT verify against cert B — this is the
+        """A proof over cert A must NOT verify against cert B -- this is the
         anti-cert-swap (MITM) guarantee."""
         priv, pub = make_identity_keypair()
         cert_a = make_self_signed_cert("a")
@@ -211,7 +211,7 @@ class TestCoordinatorEnrollmentGate:
 
     def test_proof_over_different_cert_refuses(self, session):
         """The site proves a cert, then presents a DIFFERENT one (the MITM
-        cert) — must be refused so the coordinator never pins it."""
+        cert) -- must be refused so the coordinator never pins it."""
         priv, _cert, token = self._create(session)
         signed_cert = make_self_signed_cert("real")
         presented_cert = make_self_signed_cert("mitm")

@@ -5,7 +5,7 @@
 """
 The content-lifecycle surface is gated behind the Enterprise
 ``content_lifecycle_engine``.  When that engine isn't loaded EVERY endpoint must
-return a clean HTTP 402 (Payment Required) — never a 500 or a crash — so the
+return a clean HTTP 402 (Payment Required) -- never a 500 or a crash -- so the
 frontend can render a license-upgrade prompt.
 
 The router is mounted at ``/api/v1`` (native).  The single gate helper
@@ -38,7 +38,7 @@ class TestContentLifecycleProplusGate:
     def _assert_402(self, resp):
         assert resp.status_code == 402, resp.text
         body = resp.json()
-        # Clean JSON body with an upgrade message — not a 500 stacktrace.
+        # Clean JSON body with an upgrade message -- not a 500 stacktrace.
         assert "Professional" in body["detail"]
 
     def test_list_environments_returns_402(self, client, auth_headers, _engine_absent):

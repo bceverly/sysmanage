@@ -6,8 +6,8 @@
  * Settings panel for the Pro+ External IdP feature (Phase 10.5).
  *
  * Cross-provider settings card on top, provider list below.  The
- * per-provider create/edit dialog branches its body on ``type`` —
- * LDAP form vs. OIDC form — to keep the field set focused.  Role
+ * per-provider create/edit dialog branches its body on ``type`` --
+ * LDAP form vs. OIDC form -- to keep the field set focused.  Role
  * mappings are managed through a sub-dialog opened from each
  * provider row.
  */
@@ -163,7 +163,7 @@ const AuthenticationProvidersSettings: React.FC = () => {
     setSaving(true);
     setError(null);
     try {
-      // An empty tenant id means "server-global" — send null, not "".
+      // An empty tenant id means "server-global" -- send null, not "".
       const payload = {
         ...draft,
         tenant_id: draft.tenant_id ? draft.tenant_id : null,
@@ -176,7 +176,7 @@ const AuthenticationProvidersSettings: React.FC = () => {
       setDialogOpen(false);
       await refresh();
     } catch {
-      setError(t('idp.saveError', 'Could not save provider — check the form.'));
+      setError(t('idp.saveError', 'Could not save provider -- check the form.'));
     } finally {
       setSaving(false);
     }
@@ -492,7 +492,7 @@ const AuthenticationProvidersSettings: React.FC = () => {
                 />
                 <TextField
                   label={t('idp.field.groupFilter', 'Group search filter (optional)')}
-                  helperText={t('idp.field.groupFilterHelp', 'e.g. (member=%s) — %s is the user DN')}
+                  helperText={t('idp.field.groupFilterHelp', 'e.g. (member=%s) -- %s is the user DN')}
                   value={draft.ldap_group_search_filter ?? ''}
                   onChange={(e) =>
                     setDraft({ ...draft, ldap_group_search_filter: e.target.value })
@@ -659,7 +659,7 @@ const AuthenticationProvidersSettings: React.FC = () => {
                 />
               </>
             )}
-            {/* SCIM 2.0 inbound provisioning — orthogonal to the auth protocol. */}
+            {/* SCIM 2.0 inbound provisioning -- orthogonal to the auth protocol. */}
             <FormControlLabel
               control={
                 <Switch

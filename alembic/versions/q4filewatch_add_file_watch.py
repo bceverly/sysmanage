@@ -7,17 +7,17 @@
 S7 extends the 20.2 golden-host differ to arbitrary file and config state. The
 tenant side of that is three things:
 
-  * ``file_watch`` / ``file_watch_path`` — watch lists a customer wrote.
-  * ``file_watch_assignment`` — which hosts watch which list. Mirrors
+  * ``file_watch`` / ``file_watch_path`` -- watch lists a customer wrote.
+  * ``file_watch_assignment`` -- which hosts watch which list. Mirrors
     ``query_pack_assignment``, including the SOFT ``shared_watch_id`` (no FK:
     it crosses the partition boundary).
-  * ``host_file_state`` — one row per (host, watched path), whatever happened
+  * ``host_file_state`` -- one row per (host, watched path), whatever happened
     to it. ``absent`` and ``unreadable`` are STORED, not omitted: a table
     holding only the files that exist makes a deleted config file
     indistinguishable from one nobody watched, and the differ then silently
     misses the deletion.
 
-No file CONTENT is stored anywhere here, deliberately — a sha256 answers "did
+No file CONTENT is stored anywhere here, deliberately -- a sha256 answers "did
 this change" without the bytes ever entering this database. That is what lets
 an operator watch /etc/shadow.
 
@@ -74,7 +74,7 @@ def upgrade() -> None:
             sa.Column("path", sa.String(length=1024), nullable=False),
             sa.Column("description", sa.Text(), nullable=True),
             # A list naming /etc/ssh/sshd_config must not make a Windows host
-            # report it ABSENT — absent means "should be here and is not",
+            # report it ABSENT -- absent means "should be here and is not",
             # which is drift, and that one would be fabricated.
             sa.Column("platforms", sa.JSON(), nullable=True),
             sa.ForeignKeyConstraint(
@@ -89,7 +89,7 @@ def upgrade() -> None:
             _ASSIGN,
             sa.Column("id", GUID(), primary_key=True),
             sa.Column("watch_id", GUID(), nullable=True),
-            # SOFT reference to shared_file_watch.id — no FK on purpose, the
+            # SOFT reference to shared_file_watch.id -- no FK on purpose, the
             # shared catalog can be a separate database under scale-out.
             sa.Column("shared_watch_id", GUID(), nullable=True),
             sa.Column("host_id", GUID(), nullable=True),

@@ -7,18 +7,18 @@
 A subordinate site periodically tells its coordinator who it is: what
 SysManage version it runs, how many hosts it manages (and their OS
 breakdown), which Pro+ engine modules it has loaded, and its own view of
-its uplink health (online / degraded / offline — i.e. whether it is
+its uplink health (online / degraded / offline -- i.e. whether it is
 currently operating in local autonomy mode).
 
 Like every other upstream report in the federation design, this does NOT
-call the coordinator directly — it ENQUEUES a ``site_metadata`` payload
+call the coordinator directly -- it ENQUEUES a ``site_metadata`` payload
 onto ``federation_sync_queue`` and the outbound tick worker ships it on
 the next cycle.  That keeps metadata reporting resilient to network
 outages: a site that's been cut off still records fresh metadata locally
 and replays it on reconnect.
 
 The queue entry uses a fixed ``dedup_key`` so only the LATEST metadata is
-ever pending — there's no value in shipping a backlog of stale snapshots,
+ever pending -- there's no value in shipping a backlog of stale snapshots,
 the coordinator only wants the current picture.
 """
 
@@ -33,7 +33,7 @@ from backend.persistence.models.core import Host
 from backend.services import federation_coordinator_service as coord_svc
 from backend.services import federation_sync_queue_service as sync_svc
 
-# Single pending metadata row at a time — re-collecting replaces it.
+# Single pending metadata row at a time -- re-collecting replaces it.
 SITE_METADATA_PAYLOAD_TYPE = "site_metadata"
 SITE_METADATA_DEDUP_KEY = "site_metadata:self"
 
@@ -55,7 +55,7 @@ def _resolve_version() -> str:
 def _loaded_capabilities() -> list:
     """Sorted list of loaded Pro+ engine module codes this site advertises.
 
-    Best-effort — if the module loader can't be imported (e.g. in a unit
+    Best-effort -- if the module loader can't be imported (e.g. in a unit
     test that doesn't stand up the licensing stack) we report an empty
     capability set rather than failing metadata collection.
     """
@@ -91,7 +91,7 @@ def _host_stats(session: Session) -> Dict[str, Any]:
 def collect_site_metadata(session: Session) -> Dict[str, Any]:
     """Build the current site-metadata snapshot (does not enqueue).
 
-    Pure read — safe to call from a health endpoint as well as the tick.
+    Pure read -- safe to call from a health endpoint as well as the tick.
     """
     health = coord_svc.connection_health(session)
     stats = _host_stats(session)
@@ -109,7 +109,7 @@ def collect_site_metadata(session: Session) -> Dict[str, Any]:
 def enqueue_site_metadata(session: Session) -> Optional[Any]:
     """Collect the current metadata and enqueue it for the next sync tick.
 
-    No-op (returns ``None``) when the site isn't enrolled — there's no
+    No-op (returns ``None``) when the site isn't enrolled -- there's no
     coordinator to report to, so we don't grow the queue.  Otherwise
     returns the queued ``FederationSyncQueue`` row.  Caller commits.
     """

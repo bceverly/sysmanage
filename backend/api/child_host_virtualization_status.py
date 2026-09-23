@@ -85,7 +85,7 @@ async def get_virtualization_support(
     """
     _check_container_module()
     # Authz is server-global (User lives in the bootstrap DB); host data is
-    # tenant-scoped — route it to the active tenant's database.
+    # tenant-scoped -- route it to the active tenant's database.
     authorize_on_main(current_user, SecurityRoles.VIEW_CHILD_HOST)
     session_local = request_sessionmaker()
 

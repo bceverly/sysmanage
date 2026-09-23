@@ -15,7 +15,7 @@ Three tables back the Pro+ ``external_idp_engine`` integration:
 
   idp_role_mapping
       Maps an external group (LDAP DN, OIDC group claim value) to a
-      sysmanage SecurityRole.  Many-to-one — one external group can
+      sysmanage SecurityRole.  Many-to-one -- one external group can
       grant several roles.  ``default_for_unmapped=True`` flags a
       catch-all mapping that fires when no other mapping matched.
 
@@ -45,12 +45,12 @@ class ExternalIdpProvider(Base):
     name = Column(String(120), unique=True, nullable=False)
     type = Column(String(20), nullable=False)  # 'ldap' | 'oidc' | 'saml'
     enabled = Column(Boolean, nullable=False, default=True)
-    # Phase 13.1.E — per-tenant IdP. SOFT reference to ``registry_tenant.id``
+    # Phase 13.1.E -- per-tenant IdP. SOFT reference to ``registry_tenant.id``
     # (no FK: the registry is a different partition). NULL means a server-global
-    # provider (the pre-13.1.E behaviour); a value scopes this provider to one
+    # provider (the pre-13.1.E behavior); a value scopes this provider to one
     # tenant, so a SaaS tenant brings its own Entra/Okta/OIDC directory.
     tenant_id = Column(GUID(), nullable=True)
-    # Phase 13.1.E — JIT provisioning. When True, a successful SSO login for a
+    # Phase 13.1.E -- JIT provisioning. When True, a successful SSO login for a
     # subject with no linked sysmanage account auto-creates the account + a grant
     # into this provider's tenant (gated by that tenant's email-domain allowlist).
     jit_provisioning = Column(Boolean, nullable=False, default=False)
@@ -78,7 +78,7 @@ class ExternalIdpProvider(Base):
     oidc_group_claim = Column(String(120), nullable=False, default="groups")
     # SAML 2.0 parameters (Phase 13.1.E).  The IdP signing certificate is PUBLIC
     # (used to VERIFY assertion signatures) so it is stored inline; the optional
-    # SP private key is a secret and lives in Vault — only its secret id is here.
+    # SP private key is a secret and lives in Vault -- only its secret id is here.
     saml_idp_entity_id = Column(String(500), nullable=True)
     saml_idp_sso_url = Column(String(500), nullable=True)
     saml_idp_x509_cert = Column(Text, nullable=True)
@@ -90,7 +90,7 @@ class ExternalIdpProvider(Base):
     # and the attribute carrying group memberships.
     saml_email_attribute = Column(String(255), nullable=True)
     saml_group_attribute = Column(String(255), nullable=False, default="groups")
-    # Security: require the IdP to sign assertions (the safe default — never
+    # Security: require the IdP to sign assertions (the safe default -- never
     # accept an unsigned assertion).
     saml_want_assertions_signed = Column(Boolean, nullable=False, default=True)
     # SCIM 2.0 inbound provisioning (Phase 13.1.E).  When enabled, the IdP PUSHES
@@ -157,7 +157,7 @@ class IdpRoleMapping(Base):
         ForeignKey("external_idp_provider.id", ondelete="CASCADE"),
         nullable=False,
     )
-    # External group identifier — for LDAP this is a group DN or short
+    # External group identifier -- for LDAP this is a group DN or short
     # name; for OIDC it's the claim value (e.g. ``sysmanage-admins``).
     external_group = Column(String(500), nullable=False)
     # Role name (string match against SecurityRoles enum value).

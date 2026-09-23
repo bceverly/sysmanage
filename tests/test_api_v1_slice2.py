@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Phase 13.2.1 — Slice 2 native ``/api/v1`` migration (hosts / fleet).
+Phase 13.2.1 -- Slice 2 native ``/api/v1`` migration (hosts / fleet).
 
 Verifies the dual-surface contract for the migrated routers (fleet, host auth,
 host_hostname, child_host, reboot_orchestration): representative endpoints
@@ -37,7 +37,7 @@ class TestDualSurface:
 
 
 class TestAgentEndpointStaysUnversioned:
-    """/host/register is agent-facing — it must stay a stable unversioned route.
+    """/host/register is agent-facing -- it must stay a stable unversioned route.
 
     (The v1→legacy bridge may still *serve* /api/v1/host/register at runtime,
     but that's incidental; the contract is that there is no NATIVE v1 route, so

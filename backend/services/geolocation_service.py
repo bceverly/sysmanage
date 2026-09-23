@@ -17,12 +17,12 @@ Designed to be consumed by:
 
 Privacy / safety:
   * Private / link-local / loopback / reserved IPs short-circuit to
-    None — no upstream lookup, no MaxMind read.  RFC 1918, RFC 6598
+    None -- no upstream lookup, no MaxMind read.  RFC 1918, RFC 6598
     (CGNAT 100.64/10), IPv6 ULA, link-local are all caught here.
   * The per-deployment ``geo_lookup.enabled`` config flag (default
-    True) disables the whole chain when False — airgapped deployments
+    True) disables the whole chain when False -- airgapped deployments
     and privacy-conscious operators leave it off.
-  * No reverse-geocoding of internal IPs ever happens — those would
+  * No reverse-geocoding of internal IPs ever happens -- those would
     resolve to NAT egress IPs (already known from the site-server row
     in federation contexts) or to garbage.
 
@@ -90,7 +90,7 @@ NO_GEO_TRACK_TAG = "no_geo_track"
 class GeoResult:
     """Resolved geographic location for an IP address.
 
-    All optional except ``country_code`` — the GeoLite2 database always
+    All optional except ``country_code`` -- the GeoLite2 database always
     has a country mapping even when subdivision / city are unavailable
     (e.g., for satellite-allocated IP blocks).  ``source`` documents
     which backend produced the result for audit / diagnostics.
@@ -123,13 +123,13 @@ def is_internal_ip(ip_str: str) -> bool:
 
     Used to short-circuit lookup for IPs that have no public-internet
     geo meaning.  Per the Phase 12.7 ROADMAP design, internal IPs are
-    silently skipped — they'd resolve to either nonsense or to the
+    silently skipped -- they'd resolve to either nonsense or to the
     site-server's NAT egress (already known elsewhere).
     """
     try:
         ip = ipaddress.ip_address(ip_str)
     except (ValueError, TypeError):
-        # Malformed input — treat as internal (i.e. skip).  We never
+        # Malformed input -- treat as internal (i.e. skip).  We never
         # forward malformed strings to MaxMind or ipapi.co.
         return True
 
@@ -137,7 +137,7 @@ def is_internal_ip(ip_str: str) -> bool:
         return True
     if ip.is_multicast or ip.is_unspecified:
         return True
-    # CGNAT range — explicit because some stdlib versions miss it.
+    # CGNAT range -- explicit because some stdlib versions miss it.
     if isinstance(ip, ipaddress.IPv4Address) and ip in _CGNAT_NETWORK:
         return True
     return False
@@ -278,7 +278,7 @@ def _lookup_via_ipapi(ip_str: str) -> Optional[GeoResult]:
 
     Returns None on timeout, network error, rate-limit, or malformed
     response.  Per the ROADMAP, this degrades silently rather than
-    raising — callers treat None as "unknown location" and leave the
+    raising -- callers treat None as "unknown location" and leave the
     host's geo columns at their previous value (or NULL).
     """
     if not is_geo_lookup_ipapi_fallback_enabled():
@@ -335,7 +335,7 @@ def lookup_ip(ip_str: str) -> Optional[GeoResult]:
         loopback, link-local, reserved, CGNAT);
       * both GeoLite2 and ipapi.co miss / fail.
 
-    Callers MUST treat None as "no update" — do not blank out
+    Callers MUST treat None as "no update" -- do not blank out
     previously-resolved geo columns just because a single lookup
     didn't find anything.
 
@@ -370,7 +370,7 @@ _DOWNLOAD_TIMEOUT_SECONDS = 300.0  # 75MB on a slow link
 
 # GeoLite2-City is ~75 MB compressed / ~120 MB on disk.  Cap the total
 # extracted size well above that so a malformed / malicious tarball can't
-# fill the disk (decompression-bomb defence), while still allowing normal
+# fill the disk (decompression-bomb defense), while still allowing normal
 # growth of the real DB.
 _MAX_EXTRACT_BYTES = 512 * 1024 * 1024  # 512 MB
 
@@ -403,9 +403,9 @@ def _safe_extract_tarball(tar: tarfile.TarFile, extract_dir: str) -> bool:
     base_prefix = str(base) + os.sep
     total = 0
     # Apply the PEP 706 ``data`` extraction filter to every ``extract`` on this
-    # archive as defence-in-depth on top of the per-member containment check
+    # archive as defense-in-depth on top of the per-member containment check
     # below, and because 3.12+ raises a DeprecationWarning for an unfiltered
-    # ``extract`` — which the test suite (warnings-as-errors) treats as a
+    # ``extract`` -- which the test suite (warnings-as-errors) treats as a
     # failure.  Set it on the object rather than passing a per-call ``filter=``
     # keyword, which some static analysers still flag as an unknown argument.
     # ``data_filter`` and the warning both arrived together (PEP 706, 3.12 /
@@ -450,7 +450,7 @@ def _install_mmdb_from_tarball(tarball_path: str, db_dir: str, db_path: str) -> 
     try:
         with tempfile.TemporaryDirectory(dir=db_dir) as extract_dir:
             # Extraction is size-capped + path-traversal-guarded in
-            # _safe_extract_tarball (decompression-bomb / Zip-Slip defence).
+            # _safe_extract_tarball (decompression-bomb / Zip-Slip defense).
             with tarfile.open(tarball_path, "r:gz") as tar:  # NOSONAR S5042
                 if not _safe_extract_tarball(tar, extract_dir):
                     return False
@@ -515,11 +515,11 @@ async def geolite_refresh_service() -> None:
 
     Started by the lifecycle hook in ``backend/startup/lifecycle.py``
     (added in a follow-up step).  Runs ``refresh_geolite_db`` then
-    sleeps; safe to cancel at any point — there's no in-flight state
+    sleeps; safe to cancel at any point -- there's no in-flight state
     to recover.
 
     Skips work entirely (just sleeps) if geo_lookup is disabled or no
-    MaxMind license key is configured — those operators don't want
+    MaxMind license key is configured -- those operators don't want
     weekly downloads they can't use.
     """
     while True:

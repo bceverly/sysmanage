@@ -5,7 +5,7 @@
 import { test, expect, Page } from '@playwright/test';
 
 /**
- * Phase 10.7 line 1829 — triple-tier license-matrix smoke test.
+ * Phase 10.7 line 1829 -- triple-tier license-matrix smoke test.
  *
  * Verifies that the OSS frontend's license-gating logic actually
  * hides Pro+ surfaces from Community-tier users and surfaces the
@@ -29,7 +29,7 @@ import { test, expect, Page } from '@playwright/test';
 // ``ModuleCode`` enum values; keep in sync if either side adds a
 // new module.
 const MODULES = {
-    // Professional tier — included in both Pro and Ent fixtures below.
+    // Professional tier -- included in both Pro and Ent fixtures below.
     HEALTH_ENGINE: 'health_engine',
     VULN_ENGINE: 'vuln_engine',
     COMPLIANCE_ENGINE: 'compliance_engine',
@@ -39,7 +39,7 @@ const MODULES = {
     SECRETS_ENGINE: 'secrets_engine',
     CONTAINER_ENGINE: 'container_engine',
     PROPLUS_CORE: 'proplus_core',
-    // Enterprise-only — included only in the Ent fixture.
+    // Enterprise-only -- included only in the Ent fixture.
     AV_MANAGEMENT_ENGINE: 'av_management_engine',
     FIREWALL_ORCHESTRATION_ENGINE: 'firewall_orchestration_engine',
     AUTOMATION_ENGINE: 'automation_engine',
@@ -82,9 +82,9 @@ const FIXTURES = {
         license_id: 'test-ent',
         modules: Object.values(MODULES),
         // A real enterprise license carries the full feature set (never empty).
-        // Some nav items gate on a FEATURE flag as well as the module — e.g. the
+        // Some nav items gate on a FEATURE flag as well as the module -- e.g. the
         // Reports link needs both ``reporting_engine`` and the ``reports``
-        // feature — so an empty list here would spuriously hide them.  Mirrors
+        // feature -- so an empty list here would spuriously hide them.  Mirrors
         // ENTERPRISE_FEATURES on the license server (professional + enterprise).
         features: [
             'health',
@@ -116,7 +116,7 @@ const FIXTURES = {
 async function mockLicense(page: Page, fixture: object): Promise<void> {
     // Phase 13.2.1: the license cache now calls /api/v1/license (with /api/license
     // kept as a deprecated alias). Match both so the mock intercepts the real call
-    // — a plain "**/api/license" glob does NOT match "/api/v1/license".
+    // -- a plain "**/api/license" glob does NOT match "/api/v1/license".
     await page.route(/\/api\/(v1\/)?license(\?.*)?$/, async route => {
         if (route.request().method() !== 'GET') {
             return route.continue();
@@ -215,7 +215,7 @@ function shouldBeVisible(
 }
 
 for (const tier of ['community', 'professional', 'enterprise'] as const) {
-    test.describe(`license matrix — ${tier}`, () => {
+    test.describe(`license matrix -- ${tier}`, () => {
         test.beforeEach(async ({ page }) => {
             await mockLicense(page, FIXTURES[tier]);
         });
@@ -241,7 +241,7 @@ for (const tier of ['community', 'professional', 'enterprise'] as const) {
                         `${tab.labelRegex} should be visible for ${tier}`,
                     ).toBeVisible({ timeout: 15000 });
                 } else {
-                    // Negative assertion — tab must not be in the DOM.
+                    // Negative assertion -- tab must not be in the DOM.
                     // ``toHaveCount(0)`` rather than ``not.toBeVisible``
                     // catches the case where the tab renders off-screen
                     // due to the scrollable Tabs strip.
@@ -255,7 +255,7 @@ for (const tier of ['community', 'professional', 'enterprise'] as const) {
     });
 }
 
-test.describe('license matrix — nav items follow the license', () => {
+test.describe('license matrix -- nav items follow the license', () => {
     test('community: /secrets and /reports nav links are hidden', async ({
         page,
     }) => {
@@ -292,7 +292,7 @@ test.describe('license matrix — nav items follow the license', () => {
 
         // Close the Security menu and WAIT for it to fully unmount before
         // opening the next category. Clicking the Insights trigger while the
-        // Security menu is still mid-close is racy under load — the Radix
+        // Security menu is still mid-close is racy under load -- the Radix
         // menubar swallows the click during the close transition, so Insights
         // never opens and Reports never mounts (manifests as a 20s timeout on
         // the assertion below). Gating on the Security destination being hidden

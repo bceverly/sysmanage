@@ -343,7 +343,7 @@ def test_manifest_paths_compare_as_posix_on_windows(signed_module, monkeypatch):
 
 
 def test_windows_separators_still_reject_an_unlisted_file(signed_module, monkeypatch):
-    """The POSIX normalisation must not become a way to smuggle a file in."""
+    """The POSIX normalization must not become a way to smuggle a file in."""
     import ntpath
 
     (signed_module / "locales" / "de" / "LC_MESSAGES" / "extra.mo").write_bytes(b"x")

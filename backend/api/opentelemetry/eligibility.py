@@ -92,7 +92,7 @@ async def check_opentelemetry_eligibility(  # NOSONAR
                     ),
                 )
 
-        # Host + software inventory are tenant-scoped — route them to the active
+        # Host + software inventory are tenant-scoped -- route them to the active
         # tenant's database.  (User RBAC above and Grafana settings below are
         # server-global and stay on the bootstrap session.)
         with request_sessionmaker()() as tenant_session:

@@ -3,12 +3,12 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 #
-# buildProxmoxTestVM.sh — Stand up a Proxmox VE hypervisor as a NESTED VM on
+# buildProxmoxTestVM.sh -- Stand up a Proxmox VE hypervisor as a NESTED VM on
 # libvirt/KVM so the Phase 18.1 (S5) provisioning "proxmox" compute-provider can
 # be validated end to end against a REAL Proxmox API (create / status / destroy
 # a guest, cloud-init, auto-enroll).
 #
-# Proxmox VE is its own bare-metal OS, so we DON'T install it on this host — we
+# Proxmox VE is its own bare-metal OS, so we DON'T install it on this host -- we
 # run it as a guest VM.  Its REST API (https://<vm-ip>:8006) is all the provider
 # needs; the VM gets a NAT IP THIS host reaches directly.  Nested virtualization
 # is enabled so the Proxmox VM can boot its own guests (needed for the full
@@ -41,7 +41,7 @@ set -euo pipefail
 # Config
 # --------------------------------------------------------------------------
 # 8.4-1 is the latest Debian-12-based release (matches --os-variant debian12
-# below).  Proxmox 9.x is Debian-13-based — if you bump to it, also set
+# below).  Proxmox 9.x is Debian-13-based -- if you bump to it, also set
 # VM_OS_VARIANT=debian13.  Current ISOs live at https://enterprise.proxmox.com/iso/
 PVE_VERSION="${PVE_VERSION:-8.4-1}"
 PVE_ISO_URL="${PVE_ISO_URL:-https://enterprise.proxmox.com/iso/proxmox-ve_${PVE_VERSION}.iso}"
@@ -95,7 +95,7 @@ download_iso() {
   [ -f "${ISO}" ] && { log "ISO ${ISO} present, reusing"; return; }
   command -v wget >/dev/null || die "wget not installed"
   if [ -n "${SUDO}" ]; then
-    log "writing to ${WORKDIR} needs root — you may be prompted for sudo."
+    log "writing to ${WORKDIR} needs root -- you may be prompted for sudo."
   fi
   log "downloading Proxmox VE ${PVE_VERSION} ISO (~1.3 GB)..."
   ${SUDO} wget -O "${ISO}.part" "${PVE_ISO_URL}" \
@@ -150,7 +150,7 @@ do_destroy() {
 }
 
 vm_ip() {
-  # Prefer the ARP source (the VM's ACTUAL current IP) over the DHCP lease — the
+  # Prefer the ARP source (the VM's ACTUAL current IP) over the DHCP lease -- the
   # installer boots via DHCP, but the installed Proxmox uses the static IP you
   # set, so the stale lease would otherwise report the wrong address.
   local ip
@@ -164,7 +164,7 @@ vm_ip() {
 do_status() {
   virsh dominfo "${VM_NAME}" 2>/dev/null || { log "${VM_NAME} not defined (run: start)"; return; }
   local ip; ip="$(vm_ip)"
-  log "IP: ${ip:-<none yet — finish the install / wait for boot>}"
+  log "IP: ${ip:-<none yet -- finish the install / wait for boot>}"
   if [ -n "${ip}" ]; then
     log "Proxmox web UI + API:  https://${ip}:8006/"
     log "Create an API token:   web UI -> Datacenter -> Permissions -> API Tokens"

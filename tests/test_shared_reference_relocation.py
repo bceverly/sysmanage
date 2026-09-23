@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Phase 13.1.D — the mirror version catalog relocates to the ``shared`` partition.
+"""Phase 13.1.D -- the mirror version catalog relocates to the ``shared`` partition.
 
 ``mirror_known_version`` (the Add-Mirror version dropdown catalog) is canonical
 reference data, identical for every tenant.  It moves out of the per-tenant
@@ -11,7 +11,7 @@ cross-partition FK on ``mirror_repository.known_version_id`` becomes a soft
 reference (bare UUID, no constraint).
 
 This guards the relocation end-to-end on a scratch SQLite (collapsed mode, where
-both chains target the same database — exactly how a default install runs):
+both chains target the same database -- exactly how a default install runs):
 
   * the shared chain creates + seeds ``shared_mirror_known_version``,
   * the tenant chain drops the old ``mirror_known_version``,
@@ -35,7 +35,7 @@ def _upgrade(chain: str, db_path: str) -> None:
     env = {**os.environ, "DATABASE_URL": f"sqlite:///{db_path}"}
     # A genuine migration error exits with a POSITIVE code and a stderr
     # traceback.  A NEGATIVE return code means the child was killed by a signal
-    # (e.g. SIGPIPE = -13 under heavy xdist parallelism) with no stderr — an
+    # (e.g. SIGPIPE = -13 under heavy xdist parallelism) with no stderr -- an
     # environmental flake, not a migration bug.  Our migrations are idempotent,
     # so re-running ``upgrade head`` safely resumes; retry a few times on a
     # signal-kill before giving up.

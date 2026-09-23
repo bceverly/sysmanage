@@ -39,7 +39,7 @@ test.describe('Child Host Management', () => {
     await page.goto('/hosts');
     try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
-    // If we landed back on /login, auth setup broke — fail loudly.
+    // If we landed back on /login, auth setup broke -- fail loudly.
     expect(page.url()).not.toContain('/login');
 
     // Wait for host list to load
@@ -56,7 +56,7 @@ test.describe('Child Host Management', () => {
     await page.goto('/hosts');
     try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
-    // If we landed back on /login, auth setup broke — fail loudly.
+    // If we landed back on /login, auth setup broke -- fail loudly.
     expect(page.url()).not.toContain('/login');
 
     const dataGrid = page.locator('.MuiDataGrid-root');

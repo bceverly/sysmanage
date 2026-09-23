@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Golden-host drift over watched FILES — Phase 21.1 S7.
+"""Golden-host drift over watched FILES -- Phase 21.1 S7.
 
 A file-state row records an OUTCOME, not just a value, and that is what makes
 this comparator different from every other category. The cases worth testing

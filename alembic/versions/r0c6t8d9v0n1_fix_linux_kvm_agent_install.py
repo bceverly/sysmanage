@@ -12,13 +12,13 @@ The Ubuntu/Debian KVM ``agent_install_commands`` previously relied on a
 Launchpad PPA (``add-apt-repository -y ppa:bceverly/sysmanage-agent``).
 That has two failure modes:
   1. The PPA may not publish a package for the exact Ubuntu codename in
-     question (noble, jammy, focal — release timing differs from the
+     question (noble, jammy, focal -- release timing differs from the
      distribution catalog we ship).
   2. ``add-apt-repository`` requires ``software-properties-common``,
      which means an apt round-trip before we even know whether the PPA
      will resolve.
 
-Switch to a direct .deb fetch from the latest GitHub release — same
+Switch to a direct .deb fetch from the latest GitHub release -- same
 pattern we already use for the FreeBSD KVM bootstrap.  The agent's
 release workflow publishes a Debian .deb at
 ``https://github.com/bceverly/sysmanage-agent/releases/latest`` for
@@ -51,7 +51,7 @@ NEW_INSTALL_COMMANDS = """[
     "rm -f /tmp/sysmanage-agent.deb"
 ]"""
 
-# Old install commands (for downgrade) — the PPA-based path that used
+# Old install commands (for downgrade) -- the PPA-based path that used
 # to be in the seed migrations.
 OLD_INSTALL_COMMANDS = """[
     "apt-get update",
@@ -84,10 +84,10 @@ def _update_commands(bind, child_type: str, name_pattern: str, commands: str) ->
 def upgrade() -> None:
     bind = op.get_bind()
     # KVM Linux guests boot from a cloud image and run cloud-init runcmd
-    # — the new commands fetch the agent .deb from GitHub releases.
+    # -- the new commands fetch the agent .deb from GitHub releases.
     _update_commands(bind, "kvm", "Ubuntu%", NEW_INSTALL_COMMANDS)
     _update_commands(bind, "kvm", "Debian%", NEW_INSTALL_COMMANDS)
-    # LXD containers run the same commands inside ``lxc exec`` — same
+    # LXD containers run the same commands inside ``lxc exec`` -- same
     # fetch path works (the LXD container has curl + dpkg available).
     _update_commands(bind, "lxd", "Ubuntu%", NEW_INSTALL_COMMANDS)
     _update_commands(bind, "lxd", "Debian%", NEW_INSTALL_COMMANDS)

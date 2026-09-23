@@ -40,7 +40,7 @@ class MessageProcessor:
     """
 
     # How often to purge old completed/expired queue rows (they're otherwise
-    # never deleted, so message_queue grows unbounded — observed 21 GB on an
+    # never deleted, so message_queue grows unbounded -- observed 21 GB on an
     # agent).  Cheap delete-by-index; once a day is plenty.
     _CLEANUP_INTERVAL = timedelta(hours=24)
 
@@ -116,12 +116,12 @@ class MessageProcessor:
 
     async def _process_pending_messages(self):
         """Drain the message queue in the bootstrap DB and every provisioned
-        tenant DB (Phase 13.1 #2 — per-tenant queues).
+        tenant DB (Phase 13.1 #2 -- per-tenant queues).
 
         Each database is drained INDEPENDENTLY: a failure on one is logged and
         isolated (rolled back) so it cannot stall the other tenants or the next
         cycle.  In collapsed/single-tenant mode this is exactly one pass over the
-        bootstrap DB, identical to the prior behaviour.
+        bootstrap DB, identical to the prior behavior.
         """
         now = datetime.now(timezone.utc)
         do_cleanup = (
@@ -161,7 +161,7 @@ class MessageProcessor:
                 logger.debug("Committed message processing changes (%s)", label)
             except (
                 Exception
-            ) as e:  # noqa: BLE001 — isolate per-DB; never stall the rest
+            ) as e:  # noqa: BLE001 -- isolate per-DB; never stall the rest
                 logger.exception(
                     "Error draining the %s message queue, rolling back: %s",
                     label,
@@ -187,7 +187,7 @@ class MessageProcessor:
         tenant DB.  The bootstrap DB is ALWAYS drained (single-tenant mode +
         unbound hosts whose messages live there); tenant DBs are drained only
         when multi-tenancy is enabled."""
-        # Bootstrap / main application DB — always.
+        # Bootstrap / main application DB -- always.
         yield ("bootstrap", self._bootstrap_session())
 
         if not config.is_multitenancy_enabled():
@@ -195,7 +195,7 @@ class MessageProcessor:
 
         # Per-tenant queues.  Bounded by the number of provisioned tenants; a
         # tenant whose engine can't be resolved this cycle is logged and skipped
-        # (never silently dropped — its queue just waits for the next cycle).
+        # (never silently dropped -- its queue just waits for the next cycle).
         for tenant_id in self._provisioned_tenant_ids():
             try:
                 engine = resolve_engine(partition=PARTITION_TENANT, tenant_id=tenant_id)
@@ -213,7 +213,7 @@ class MessageProcessor:
     def _provisioned_tenant_ids(self):
         """Tenant IDs that have a provisioned database (a placement in the
         registry).  Returns ``[]`` (bootstrap-only this cycle) if the registry
-        can't be read — logged, not silently swallowed."""
+        can't be read -- logged, not silently swallowed."""
         try:
             with partition_session(partition=PARTITION_REGISTRY) as session:
                 rows = session.query(RegistryTenantPlacement.tenant_id).distinct().all()

@@ -40,7 +40,7 @@ export interface RunTarget {
   source_snapshot_id?: string | null;
 }
 
-// Trimmed projection of a MirrorRepository row — just what the
+// Trimmed projection of a MirrorRepository row -- just what the
 // run-create dialog needs to render its picker.
 export interface MirrorPickItem {
   id: string;
@@ -119,7 +119,7 @@ export const statusColor = (
 };
 
 export const formatBytes = (n: number | null | undefined): string => {
-  if (n === null || n === undefined) return '—';
+  if (n === null || n === undefined) return '--';
   const units = ['B', 'KB', 'MB', 'GB'];
   let v = n;
   let u = 0;
@@ -140,7 +140,7 @@ export const formatElapsed = (since: Date): string => {
 /**
  * Status cell for a collection run.  For in-flight runs (QUEUED →
  * BURNING) it shows the status chip plus a live elapsed-time that
- * ticks every second — same UX as the mirror ActionStatusChip — so the
+ * ticks every second -- same UX as the mirror ActionStatusChip -- so the
  * operator can see at a glance that a run is progressing (or how long
  * it's been wedged at QUEUED, which is the symptom that says the
  * orchestrator isn't advancing it).  Self-tickers per in-flight row

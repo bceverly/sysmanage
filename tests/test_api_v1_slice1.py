@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Phase 13.2.1 — Slice 1 native ``/api/v1`` migration.
+Phase 13.2.1 -- Slice 1 native ``/api/v1`` migration.
 
 Verifies the dual-surface contract for the migrated routers (user, profile,
 tag, user_preferences): each representative endpoint resolves identically under
@@ -41,7 +41,7 @@ class TestDualSurface:
 
 
 class TestApiKeysV1Only:
-    """api_keys moved v1-only — the legacy unversioned path must be gone."""
+    """api_keys moved v1-only -- the legacy unversioned path must be gone."""
 
     def test_v1_works(self, client):
         assert client.get("/api/v1/api-keys").status_code == 200

@@ -79,9 +79,9 @@ class QueueOperations:
         # Phase 13.1 #2 (per-tenant queues): a host-targeted message is written
         # to that host's TENANT queue.  ``tenant_engine_for_host`` returns None
         # for unbound hosts / collapsed mode, so we stay on the default
-        # ``get_db()`` path (and existing behaviour) until a host is actually
-        # bound to a tenant.  (Messages with host_id=None — host determined
-        # during processing — stay on the main queue; they can't be routed
+        # ``get_db()`` path (and existing behavior) until a host is actually
+        # bound to a tenant.  (Messages with host_id=None -- host determined
+        # during processing -- stay on the main queue; they can't be routed
         # without a host.)
         session_provided = db is not None
         if not session_provided:
@@ -108,7 +108,7 @@ class QueueOperations:
             # Phase 19: refuse a command the agent has told us it cannot route.
             # Gated HERE rather than at the ~53 call sites of
             # ``create_command_message`` because this is the one place a target
-            # host and a command type are both in hand — so a new endpoint
+            # host and a command type are both in hand -- so a new endpoint
             # cannot forget the check, and none of the existing ones change.
             if (
                 message_type == "command"

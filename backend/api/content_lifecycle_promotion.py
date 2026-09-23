@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Content Lifecycle Management — promotion + rollback API (Phase 16, Slice 4).
+Content Lifecycle Management -- promotion + rollback API (Phase 16, Slice 4).
 
 The content-lifecycle state machine.  Promotion rebinds an environment to a
 published content-view version.  In this release an environment is served by a
@@ -225,7 +225,7 @@ async def list_content_view_bindings(
     shared_db: Session = Depends(get_shared_db),
     tenant_db: Session = Depends(get_tenant_db),
 ):
-    """Per-environment view of which version a CV currently occupies — one entry
+    """Per-environment view of which version a CV currently occupies -- one entry
     per environment along the ordered path (drives the promotion lane UI)."""
     _check_clm_module()
     cv = _get_cv_or_404(shared_db, cv_id)
@@ -258,8 +258,8 @@ async def promote_content_view(
     current_user=Depends(require_authenticated_user),
 ):
     """Promote the version currently in ``from_environment`` into
-    ``to_environment`` (forward-only along the path). Pure binding rebind — no
-    bytes move — plus an audit row."""
+    ``to_environment`` (forward-only along the path). Pure binding rebind -- no
+    bytes move -- plus an audit row."""
     _check_clm_module()
     cv = _get_cv_or_404(shared_db, cv_id)
     from_env = _get_env_or_404(shared_db, body.from_environment_id)

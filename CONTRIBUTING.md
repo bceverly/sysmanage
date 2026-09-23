@@ -1,6 +1,6 @@
 # Contributing to SysManage Server
 
-First off, thank you for your interest in contributing! SysManage is a complex, multi-component project, and community contributions—big or small—help make it better for everyone.
+First off, thank you for your interest in contributing! SysManage is a complex, multi-component project, and community contributions--big or small--help make it better for everyone.
 
 ---
 
@@ -79,7 +79,7 @@ emergencies with `git push --no-verify`.
 ## What Happens Next
 
 - Maintainers review your PR for correctness, style, and tests.
-- You may be asked for revisions—this helps improve quality.
+- You may be asked for revisions--this helps improve quality.
 - Once approved and merged, your contribution becomes part of SysManage!
 
 ---
@@ -101,23 +101,23 @@ Include a short note describing the translation changes in your PR.
 Frontend strings are referenced in code as `t('key', 'English fallback')`.
 The tooling keeps every locale in sync:
 
-- `make i18n-seed` — copy any new keys into all 14 locales, prefixing the
+- `make i18n-seed` -- copy any new keys into all 14 locales, prefixing the
   non-English ones with `[TODO] ` so they're easy to find.
-- `make i18n-translate` — fill the `[TODO]` strings via a **local**
+- `make i18n-translate` -- fill the `[TODO]` strings via a **local**
   OpenAI-compatible endpoint (vLLM / Ollama / llama.cpp). Runs entirely on
-  your own hardware — no external API. Configure with `I18N_LLM_BASE_URL`,
+  your own hardware -- no external API. Configure with `I18N_LLM_BASE_URL`,
   `I18N_LLM_MODEL`, `I18N_LLM_API_KEY`; scope with `LANG=de` (default `all`).
-- `make i18n-backtranslate` — local round-trip QA: samples translated
+- `make i18n-backtranslate` -- local round-trip QA: samples translated
   strings, back-translates them, and flags semantic drift for human review.
 
 `make lint` enforces three deterministic, **network-free** i18n gates (no
-model / translation service needed) — so a missing or untranslated string
+model / translation service needed) -- so a missing or untranslated string
 fails locally at `pre-push`, not in CI:
 
-- `make i18n-validate` — every code-referenced key exists in every locale.
-- `make i18n-placeholders` — every translated value preserves the exact
+- `make i18n-validate` -- every code-referenced key exists in every locale.
+- `make i18n-placeholders` -- every translated value preserves the exact
   interpolation tokens (`{{var}}`, `%s`, `<tags>`, …) of its English source.
-- `make i18n-complete` — **completeness**: every locale is fully translated
+- `make i18n-complete` -- **completeness**: every locale is fully translated
   (frontend JSON + backend `.po`), the same offline `i18n_backfill --check`
   CI runs. A new `t('key', 'English')` or `_("English")` with no translation
   is a hard failure.

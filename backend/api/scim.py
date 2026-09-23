@@ -10,7 +10,7 @@ provisioning to:
     /api/scim/v2/{provider_id}/Users          GET (list/filter) · POST (create)
     /api/scim/v2/{provider_id}/Users/{id}     GET · PUT · PATCH · DELETE
 
-These are NOT session endpoints — the IdP authenticates with a static bearer
+These are NOT session endpoints -- the IdP authenticates with a static bearer
 token (``provider.scim_bearer_token_secret_id`` → Vault), so there is no
 ``JWTBearer``.  The SCIM **protocol** logic (validate/parse/render/patch/filter)
 lives in the licensed ``external_idp_engine``; this layer authenticates the
@@ -67,7 +67,7 @@ def _scim_provider(db: Session, provider_id: str) -> models.ExternalIdpProvider:
         .first()
     )
     if provider is None or not provider.scim_enabled:
-        # Same 404 whether the provider is absent or SCIM is off — don't leak
+        # Same 404 whether the provider is absent or SCIM is off -- don't leak
         # which providers exist to an unauthenticated caller.
         raise HTTPException(status_code=404, detail=_("Unknown SCIM target"))
     return provider
@@ -287,7 +287,7 @@ async def scim_patch_user(
         if not result["ok"]:
             return _scim_response(engine.scim_error(400, result["error"]), 400)
         attrs = result["attrs"]
-        # The deprovision signal — Okta/Entra PATCH ``active=false``.
+        # The deprovision signal -- Okta/Entra PATCH ``active=false``.
         user.active = bool(attrs.get("active", user.active))
         if attrs.get("external_id") is not None:
             user.external_subject = attrs["external_id"]
@@ -304,7 +304,7 @@ async def scim_patch_user(
 
 @router.delete("/api/scim/v2/{provider_id}/Users/{user_id}")
 async def scim_delete_user(provider_id: str, user_id: str, request: Request):
-    """Deprovision — soft-deactivate (preserve the audit trail), 204."""
+    """Deprovision -- soft-deactivate (preserve the audit trail), 204."""
     _engine()
     db: Session = next(get_db())
     try:

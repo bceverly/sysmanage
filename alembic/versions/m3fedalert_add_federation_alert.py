@@ -2,14 +2,14 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Add federation_alert table (Phase 12.1 — rollup alerting).
+"""Add federation_alert table (Phase 12.1 -- rollup alerting).
 
 Records enterprise-wide alerts fired on cross-site rollup conditions
 (a site going offline, a site's compliance score dropping below a
 threshold, a site's critical-CVE count crossing a threshold).  These
 are SITE-scoped, so they can't live in the host-scoped ``alert`` table
 (``alert.host_id`` is NOT NULL); a dedicated additive table keeps the
-migration a pure ``CREATE TABLE`` — idempotent and identical on SQLite
+migration a pure ``CREATE TABLE`` -- idempotent and identical on SQLite
 and PostgreSQL, with no fragile ``ALTER COLUMN`` / batch rebuild.
 
 Revision ID: m3fedalert

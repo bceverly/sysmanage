@@ -111,7 +111,7 @@ class TestMessageProcessor:
     async def test_process_pending_messages_exception(
         self, mock_get_db, mock_inbound, mock_config
     ):
-        """A drain error is ISOLATED (logged + rolled back), not re-raised —
+        """A drain error is ISOLATED (logged + rolled back), not re-raised --
         Phase 13.1 #2 per-DB isolation."""
         mock_config.is_multitenancy_enabled.return_value = False
         processor = MessageProcessor()
@@ -123,7 +123,7 @@ class TestMessageProcessor:
         # Make inbound processor raise an exception
         mock_inbound.side_effect = Exception("Database error")
 
-        # Does NOT raise — contained to this DB.
+        # Does NOT raise -- contained to this DB.
         await processor._process_pending_messages()
 
         mock_db.rollback.assert_called_once()

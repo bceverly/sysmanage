@@ -62,7 +62,7 @@ def session():
 
 @pytest.fixture
 def enrolled_site(session):
-    """A site that's already finished enrollment — most rollup tests
+    """A site that's already finished enrollment -- most rollup tests
     just want a parent row to point at."""
     site = quick_enroll(session, name="Cleveland", url="https://a.x")
     session.commit()
@@ -189,7 +189,7 @@ class TestUpsertHostDirectory:
             )
 
     def test_explicit_mtime_preserved(self, session, enrolled_site):
-        """Site replays a buffered delta with an old timestamp — the
+        """Site replays a buffered delta with an old timestamp -- the
         coordinator's mtime should match what the site sent so dedup
         replay logic stays correct."""
         import uuid

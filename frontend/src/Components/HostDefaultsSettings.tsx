@@ -860,7 +860,7 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
         </Card>
       )}
 
-      {/* Phase 10.4.4 — sits below the existing host-defaults cards
+      {/* Phase 10.4.4 -- sits below the existing host-defaults cards
           and runs full-width since the (platform, version, os_family)
           assignment table needs the room. */}
       <Box sx={{ flexBasis: '100%' }}>

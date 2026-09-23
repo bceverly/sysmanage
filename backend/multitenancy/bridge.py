@@ -8,7 +8,7 @@ Bridge a loaded ``multitenancy_engine`` Pro+ module into the OSS seam.
 The Pro+ engine follows the standard SysManage engine convention: it is a
 *passive* compiled module that exports ``get_module_info()``, a
 ``get_multitenancy_engine_router(...)`` factory, and a ``resolve_tenant_engine``
-hook — discovered and loaded by ``backend.licensing.module_loader`` like every
+hook -- discovered and loaded by ``backend.licensing.module_loader`` like every
 other engine.  Engines never register themselves.
 
 This module is the OSS-side glue that *pulls* the loaded engine into the seam:
@@ -16,12 +16,12 @@ it wraps the engine's exported functions in an object satisfying the
 :class:`~backend.multitenancy.seam.MultitenancyEngine` protocol and calls
 ``seam.register_engine(...)``.  Keeping the engine passive (OSS pulls) matches
 how every other Pro+ engine integrates; keeping the seam as the internal plug
-point is what lets the *data-plane resolver* defer to the engine — something a
+point is what lets the *data-plane resolver* defer to the engine -- something a
 plain router-factory mount cannot express.
 
 Called once at server start, after ``module_loader`` has loaded modules (see
 ``backend/startup/lifecycle.py``).  With no engine loaded this is never called
-and the OSS built-in path stays in effect — i.e. single-tenant behaviour.
+and the OSS built-in path stays in effect -- i.e. single-tenant behavior.
 """
 
 import logging
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 class _EngineAdapter:
     """Adapt a loaded ``multitenancy_engine`` module to the seam protocol.
 
-    Thin delegation only — the engine module holds the logic.  Imports of OSS
+    Thin delegation only -- the engine module holds the logic.  Imports of OSS
     dependencies for the control-plane router are deferred to call time so this
     adapter has no import-time coupling to FastAPI or the route layer.
     """
@@ -51,7 +51,7 @@ class _EngineAdapter:
 
         The engine owns the entire control-plane surface (routes, models, and
         logic) and imports its own ``backend`` dependencies lazily, so no
-        dependency injection is needed here — it is mounted in place of the OSS
+        dependency injection is needed here -- it is mounted in place of the OSS
         501 stub by ``mount_multitenancy_routes`` when the engine is loaded.
         """
         return self._module.get_multitenancy_engine_router()
@@ -77,7 +77,7 @@ def bridge_loaded_engine(module) -> bool:
         if not callable(getattr(module, symbol, None)):
             logger.error(
                 "multitenancy_engine is loaded but missing required hook %r; "
-                "NOT bridging — falling back to the OSS built-in path.",
+                "NOT bridging -- falling back to the OSS built-in path.",
                 symbol,
             )
             return False

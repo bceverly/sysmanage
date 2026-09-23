@@ -8,10 +8,10 @@ Phase 12.4: optional federation-site scope on registration keys.
 
 Adds a nullable ``site_id`` column to ``registration_keys`` plus a
 covering index.  When set, a key restricts the hosts it can enroll
-to the named subordinate site — used by the coordinator's
+to the named subordinate site -- used by the coordinator's
 "generate enrollment key for site X" workflow.
 
-Idempotent — re-runnable on a database that already has the column
+Idempotent -- re-runnable on a database that already has the column
 or the index.  FK targets ``federation_sites.id`` (added by
 ``m1fedschema``) with ``ON DELETE SET NULL`` so removing a site
 preserves its historical keys.  Column is nullable and lacks a
@@ -42,7 +42,7 @@ _FK_NAME = "fk_registration_keys_site_id_federation_sites"
 
 
 def _guid_type():
-    """Dialect-portable UUID column type — mirrors the m1fedschema
+    """Dialect-portable UUID column type -- mirrors the m1fedschema
     helper so the two migrations agree on column type."""
     bind = op.get_bind()
     if bind.dialect.name == "postgresql":
@@ -56,7 +56,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
 
-    # Parent table check — if registration_keys doesn't exist yet
+    # Parent table check -- if registration_keys doesn't exist yet
     # (clean install before phase-8.1 migrations applied), let those
     # earlier revisions re-run first.
     if _TABLE not in set(inspector.get_table_names()):
@@ -66,11 +66,11 @@ def upgrade() -> None:
     if _COLUMN_NAME not in existing_columns:
         # SQLite can't add columns with inline FKs portably, so we
         # add the column without the FK then attach it via batch
-        # alter — alembic's ``batch_alter_table`` handles the table-
+        # alter -- alembic's ``batch_alter_table`` handles the table-
         # rebuild dance on SQLite while emitting a plain ALTER on PG.
         op.add_column(_TABLE, sa.Column(_COLUMN_NAME, _guid_type(), nullable=True))
 
-        # Only attempt the named FK on PostgreSQL — SQLite's
+        # Only attempt the named FK on PostgreSQL -- SQLite's
         # ``ALTER TABLE ADD CONSTRAINT`` would require a batch
         # rebuild, and the SET NULL semantic is already what we want
         # at the application layer.  The PG branch keeps referential

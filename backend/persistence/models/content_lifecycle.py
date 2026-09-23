@@ -10,24 +10,24 @@ on the ``repository_mirroring_engine`` snapshot substrate.  Licensed logic lives
 in the Enterprise ``content_lifecycle_engine``; the OSS build ships the schema +
 an inert gate (402 when the engine isn't loaded).
 
-Partition split (shared defs + tenant overlay — mirrors the advisory precedent):
+Partition split (shared defs + tenant overlay -- mirrors the advisory precedent):
 
-* **shared partition** (``shared_*`` prefix, shared alembic chain) — platform
+* **shared partition** (``shared_*`` prefix, shared alembic chain) -- platform
   truth, identical across tenants:
-  - ``SharedLifecycleEnvironment`` — the ordered path (Library -> Dev -> ...).
-  - ``SharedContentView`` — a named, filtered, versioned selection of mirrors.
-  - ``SharedContentViewRepo`` — CV membership (intra-shared FK to the CV;
-    ``mirror_id`` is a **soft** cross-partition ref to ``mirror_repository`` —
+  - ``SharedLifecycleEnvironment`` -- the ordered path (Library -> Dev -> ...).
+  - ``SharedContentView`` -- a named, filtered, versioned selection of mirrors.
+  - ``SharedContentViewRepo`` -- CV membership (intra-shared FK to the CV;
+    ``mirror_id`` is a **soft** cross-partition ref to ``mirror_repository`` --
     NO ForeignKey; component CVs use ``component_content_view_id``).
-  - ``SharedContentViewFilter`` — allow/deny/cutoff/security-only/by-date.
-  - ``SharedContentViewVersion`` — the immutable, physically-materialized
+  - ``SharedContentViewFilter`` -- allow/deny/cutoff/security-only/by-date.
+  - ``SharedContentViewVersion`` -- the immutable, physically-materialized
     published version (``store_path`` on the mirror host).
 
-* **tenant partition** (unprefixed, tenant alembic chain) — per-tenant promotion
+* **tenant partition** (unprefixed, tenant alembic chain) -- per-tenant promotion
   state.  All cross-partition references to the shared IDs are **soft** (no FK):
-  - ``EnvironmentContentBinding`` — which CVV is promoted into which env.
-  - ``ContentPromotionAudit`` — append-only publish/promote/rollback log.
-  - ``EnvironmentSiteSubscription`` — a federation site subscribes to an env
+  - ``EnvironmentContentBinding`` -- which CVV is promoted into which env.
+  - ``ContentPromotionAudit`` -- append-only publish/promote/rollback log.
+  - ``EnvironmentSiteSubscription`` -- a federation site subscribes to an env
     (orthogonal axes: env = content maturity, site = topology).
 """
 
@@ -82,7 +82,7 @@ PROMOTION_PUBLISH = "publish"
 PROMOTION_PROMOTE = "promote"
 PROMOTION_ROLLBACK = "rollback"
 
-# Air-gap export-run lifecycle (S7a) — mirrors AirgapCollectionRun's shape:
+# Air-gap export-run lifecycle (S7a) -- mirrors AirgapCollectionRun's shape:
 # QUEUED -> BUILDING_ISO -> COMPLETE | FAILED.
 EXPORT_QUEUED = "QUEUED"
 EXPORT_BUILDING_ISO = "BUILDING_ISO"
@@ -192,7 +192,7 @@ class SharedContentViewRepo(Base):
         nullable=False,
         index=True,
     )
-    # Soft cross-partition ref to ``mirror_repository`` (tenant partition) — NO
+    # Soft cross-partition ref to ``mirror_repository`` (tenant partition) -- NO
     # ForeignKey; null for a composite-CV component row.
     mirror_id = Column(GUID(), nullable=True, index=True)
     # For composite CVs: an intra-shared ref to a component content view.
@@ -265,7 +265,7 @@ class SharedContentViewVersion(Base):
 
 
 # =============================================================================
-# TENANT partition (unprefixed; all shared refs are SOFT — no FK)
+# TENANT partition (unprefixed; all shared refs are SOFT -- no FK)
 # =============================================================================
 
 
@@ -284,7 +284,7 @@ class EnvironmentContentBinding(Base):
     environment_id = Column(GUID(), nullable=False, index=True)
     content_view_id = Column(GUID(), nullable=False, index=True)
     content_view_version_id = Column(GUID(), nullable=False, index=True)
-    # The version bound before the current one — enables instant rollback.
+    # The version bound before the current one -- enables instant rollback.
     previous_version_id = Column(GUID(), nullable=True)
     promoted_at = Column(DateTime, nullable=False, default=_utcnow)
     promoted_by = Column(GUID(), nullable=True)  # soft ref to user

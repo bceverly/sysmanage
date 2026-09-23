@@ -33,7 +33,7 @@ interface WindowsChildHostFieldsProps {
  * on childType.  Keeping it here also means the section can be tested without
  * standing up the whole dialog.
  *
- * There is deliberately no "version" picker — the version IS the distribution
+ * There is deliberately no "version" picker -- the version IS the distribution
  * (Windows Server 2022 / 2025 are separate catalog entries), so a second
  * control would be a way for the two to disagree.
  */

@@ -82,7 +82,7 @@ class TestVerificationHappensBeforeTheSwap:
     """The live directory must survive a bundle that fails verification.
 
     ``_extract_module_bundle`` documents itself as leaving "a previously-working
-    install intact" when a download is bad. It honoured that for a corrupt
+    install intact" when a download is bad. It honored that for a corrupt
     archive but NOT for an inauthentic one, because the signature was checked
     later, at load time -- after the swap had already happened.
     """

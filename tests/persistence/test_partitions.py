@@ -3,10 +3,10 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Tests for the partition resolver — Phase 13.1.A.
+Tests for the partition resolver -- Phase 13.1.A.
 
 In the default (collapsed/homelab) deployment, multi-tenancy is disabled
-and every partition must resolve to the single application engine — the
+and every partition must resolve to the single application engine -- the
 property that makes "stuff it all in one database" work with zero config.
 """
 
@@ -34,7 +34,7 @@ def test_unknown_partition_rejected(engine):
 
 
 # ---------------------------------------------------------------------------
-# tenant_engine_for_host — the queue/processor resolver (Phase 13.1 #2).
+# tenant_engine_for_host -- the queue/processor resolver (Phase 13.1 #2).
 # Returns None ("use the default application session") unless MT is enabled AND
 # the host is bound, so the per-tenant-queue change is inert until binding.
 # ---------------------------------------------------------------------------
@@ -112,7 +112,7 @@ def test_tenant_routing_when_enabled(engine, monkeypatch):
     assert (
         partitions.resolve_engine(partition=partitions.PARTITION_REGISTRY) is not None
     )
-    # Tenant routing without the licensed engine fails loudly — the moat.
+    # Tenant routing without the licensed engine fails loudly -- the moat.
     with pytest.raises(RuntimeError, match="licensed multi-tenancy engine"):
         partitions.resolve_engine(
             partition=partitions.PARTITION_TENANT, tenant_id="some-id"

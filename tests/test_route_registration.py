@@ -153,7 +153,7 @@ class TestRegisterAppRoutes:
         assert response.status_code == 200
         body = response.json()
         assert body["status"] == "healthy"
-        # Liveness is intentionally dependency-free — no DB round-trip, so no
+        # Liveness is intentionally dependency-free -- no DB round-trip, so no
         # "database" field here (that lives on /api/health/db). Keeping it cheap
         # is what lets it scale to thousands of polling agents.
         assert "database" not in body

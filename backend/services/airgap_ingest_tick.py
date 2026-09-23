@@ -7,7 +7,7 @@
 This is the repository-half mirror of ``airgap_run_tick`` (the
 collector orchestrator).  The Pro+ ``airgap_repository_engine``'s
 ``POST /airgap/repository/ingest`` route inserts a row at
-``status=QUEUED`` and walks away — historically nothing drove it
+``status=QUEUED`` and walks away -- historically nothing drove it
 forward, so a freshly-transferred ISO sat at QUEUED forever (the exact
 gap the collector had before its orchestrator was built).
 
@@ -44,7 +44,7 @@ Trust model (v1): the signed manifest proves the media came from a
 trusted collector (the only key on the repository's keyring is the one
 embedded into the bundle at build time).  Per-package integrity is
 provided by the mirror's own upstream-signed ``Release`` / ``repodata``
-metadata, which apt/dnf verify at client ``update`` time — so we do not
+metadata, which apt/dnf verify at client ``update`` time -- so we do not
 re-hash every payload file here.  Per-file hash re-verification (using
 the manifest's ``files`` list) and disc-aware multi-disc merge are
 documented hardening follow-ups.
@@ -76,7 +76,7 @@ logger = logging.getLogger(__name__)
 TICK_INTERVAL_SECONDS = 30
 ERROR_BACKOFF_SECONDS = 30
 
-# Lifecycle constants — single source of truth shared with the result
+# Lifecycle constants -- single source of truth shared with the result
 # handler so both agree on the legal status strings.
 STATUS_QUEUED = "QUEUED"
 STATUS_VERIFYING_SIG = "VERIFYING_SIG"
@@ -110,7 +110,7 @@ def _find_repository_host(db) -> "models.Host | None":
     Same FQDN-then-hostname match the collector orchestrator uses: the
     repository server is the box holding the media, so we dispatch to
     the Host registered with this server's own hostname.  Returns None
-    when neither matches — the caller marks the run FAILED with a clear
+    when neither matches -- the caller marks the run FAILED with a clear
     message rather than dispatching into the void.
     """
     fqdn = socket.getfqdn()
@@ -156,7 +156,7 @@ def _build_mount_plan(iso_path: str) -> dict:
     A leading best-effort ``umount`` clears any stale mount left by a
     prior failed ingest (so the fresh ``mount`` to the same point never
     fails with "busy").  The final ``cat`` returns ``/manifest.json``'s
-    bytes in the command result's stdout — that's what the mount result
+    bytes in the command result's stdout -- that's what the mount result
     handler verifies against the keyring.  ``cat`` runs WITHOUT sudo:
     the manifest is world-readable, so no privileged read is needed (and
     none is granted in sudoers).
@@ -249,7 +249,7 @@ def load_trusted_keyring(keyring_dir: str) -> list:
     Returns ``[(path, pem_str), ...]`` for files that look like PEM
     public keys (contain a ``PUBLIC KEY`` header).  Missing directory or
     unreadable files degrade to an empty/partial list rather than
-    raising — the caller turns "no keys" into a clear ingest failure.
+    raising -- the caller turns "no keys" into a clear ingest failure.
     """
     keys: list = []
     try:
@@ -273,7 +273,7 @@ def load_trusted_keyring(keyring_dir: str) -> list:
 def _pem_fingerprint(pem: str) -> str:
     """sha256 over the *canonical* SubjectPublicKeyInfo PEM bytes.
 
-    Re-serialises the key through cryptography so the hash is byte-for-
+    Re-serializes the key through cryptography so the hash is byte-for-
     byte what the collector's ``sign_manifest`` computed
     (``sha256(public_bytes(PEM, SubjectPublicKeyInfo))``), regardless of
     trailing-whitespace differences in how the keyring file was stored.
@@ -300,14 +300,14 @@ def _pem_fingerprint(pem: str) -> str:
 def verify_envelope_against_keyring(engine, envelope, keyring_dir, strict) -> dict:
     """Verify a signed manifest envelope against the trusted keyring.
 
-    Tries the fingerprint-matched key first (cheap optimisation), then
-    falls back to every other key — the signature verification in
+    Tries the fingerprint-matched key first (cheap optimization), then
+    falls back to every other key -- the signature verification in
     ``engine.verify_signed_envelope`` is the real gate.  Returns the
     inner manifest dict on success.
 
     Raises the engine's ``MediaVerificationError`` when no trusted key
     validates the signature (or the keyring is empty), and re-raises
-    ``StaleManifestError`` immediately (a too-new format is terminal —
+    ``StaleManifestError`` immediately (a too-new format is terminal --
     no other key would help; the operator must upgrade the repository).
     """
     mv_err = getattr(engine, "MediaVerificationError", ValueError)
@@ -409,7 +409,7 @@ def process_mount_result(_session, run, outcome) -> None:
     if envelope is None:
         _fail(
             run,
-            "could not read /manifest.json from the mounted media — is this a "
+            "could not read /manifest.json from the mounted media -- is this a "
             "sysmanage air-gap ISO?",
         )
         return
@@ -455,7 +455,7 @@ def _mirror_base_url() -> str:
     Host is this server's own name (single-box air-gap deploy serves the
     mirror from the same host that runs sysmanage); port is the webui
     nginx port that serves ``/airgap-repo/`` (omitted when it's 80).
-    NOT ``localhost`` — other air-gapped agents have to resolve it.
+    NOT ``localhost`` -- other air-gapped agents have to resolve it.
     """
     host = socket.getfqdn() or socket.gethostname()
     port = 0
@@ -475,7 +475,7 @@ def _discover_apt_root(distro: str, version: str):
     nests the serveable tree under ``mirror/<upstream-host>/<path>`` (a
     metadata-only ``skel/`` sits alongside it).  Rather than assume a
     flat tree, find the directory that holds BOTH ``dists/`` and
-    ``pool/`` — that's the apt root.  Returns
+    ``pool/`` -- that's the apt root.  Returns
     ``(relpath_from_REPO_ROOT, deb_count)`` or ``(None, None)`` when the
     tree isn't found (best-effort; caller falls back).
     """
@@ -663,7 +663,7 @@ async def airgap_ingest_tick_service() -> None:
     """Background service: advance every ingestion run every tick.
 
     Started from ``backend/startup/lifecycle.py`` only when the
-    ``airgap_repository_engine`` Pro+ module is loaded — same gating
+    ``airgap_repository_engine`` Pro+ module is loaded -- same gating
     convention as the collector's run tick.
     """
     logger.info(

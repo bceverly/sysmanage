@@ -5,7 +5,7 @@
 """
 Tests for backend.api.handlers.hostname_handler.handle_hostname_changed.
 
-The handler is fire-and-forget — it returns None and writes side effects.
+The handler is fire-and-forget -- it returns None and writes side effects.
 The tests therefore inspect what was written to the mocked DB / connection
 rather than a return value.
 """
@@ -100,7 +100,7 @@ async def test_message_data_at_top_level_when_no_data_envelope():
 async def test_db_failure_rolls_back():
     db = MagicMock()
     db.query.side_effect = RuntimeError("db down")
-    # Must not raise — exceptions are logged and swallowed.
+    # Must not raise -- exceptions are logged and swallowed.
     await handle_hostname_changed(
         db,
         _connection(),

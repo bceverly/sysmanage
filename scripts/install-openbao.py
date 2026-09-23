@@ -22,7 +22,7 @@ import requests
 # Pinned, known-good OpenBAO version.  Used as the universal fallback and as the
 # REQUIRED version on OpenBSD, where the prebuilt is version-sensitive
 # (pinsyscalls/W^X) and v2.5.4 is the release verified to run on OpenBSD 7.9
-# (Phase 13.1.I — scripts/verify-openbao-openbsd.sh).
+# (Phase 13.1.I -- scripts/verify-openbao-openbsd.sh).
 _PINNED_VERSION = "v2.5.4"
 
 
@@ -209,7 +209,7 @@ def install_via_package_manager():
                         os.makedirs(install_path, exist_ok=True)
                         target_path = os.path.join(install_path, "bao")
                         shutil.copy2(built_binary, target_path)
-                        # 0o755 — installed bao binary in ~/.local/bin.
+                        # 0o755 -- installed bao binary in ~/.local/bin.
                         # CodeQL ``py/overly-permissive-file`` FP: an
                         # executable that no other user can read is no
                         # use to anyone on a multi-user box, and these
@@ -356,7 +356,7 @@ def install_via_package_manager():
                         os.makedirs(install_path, exist_ok=True)
                         target_path = os.path.join(install_path, "bao")
                         shutil.copy2(built_binary, target_path)
-                        # 0o755 — installed bao binary in ~/.local/bin.
+                        # 0o755 -- installed bao binary in ~/.local/bin.
                         # CodeQL ``py/overly-permissive-file`` FP: an
                         # executable that no other user can read is no
                         # use to anyone on a multi-user box, and these
@@ -521,7 +521,7 @@ def install_from_binary():
         platform_str = detect_platform()
         print(f"Detected platform: {platform_str}")
 
-        # NetBSD has no verified prebuilt; OpenBSD DOES (Phase 13.1.I — the
+        # NetBSD has no verified prebuilt; OpenBSD DOES (Phase 13.1.I -- the
         # official v2.5.4 binary is verified to run on OpenBSD 7.9), so only
         # NetBSD falls through to the source build here.
         if platform_str.startswith("netbsd"):
@@ -531,7 +531,7 @@ def install_from_binary():
             print("Please install manually or use the package manager option.")
             return False
 
-        # OpenBSD: pin to the verified version — the prebuilt is version-sensitive
+        # OpenBSD: pin to the verified version -- the prebuilt is version-sensitive
         # under pinsyscalls/W^X, and v2.5.4 is the release verified to run there.
         # Everything else tracks "latest" with the pinned version as a fallback.
         if platform_str.startswith("openbsd"):
@@ -582,7 +582,7 @@ def install_from_binary():
                 f"bao_{ver_clean}_Openbsd_{to_tar_arch(arch)}.tar.gz"
             )
         elif platform_str.startswith("linux"):
-            # Prefer the static tarball first — works without sudo and on any distro.
+            # Prefer the static tarball first -- works without sudo and on any distro.
             possible_filenames.append(
                 f"bao_{ver_clean}_Linux_{to_tar_arch(arch)}.tar.gz"
             )
@@ -713,7 +713,7 @@ def install_from_binary():
                     print(f"Binary {binary_name} not found in downloaded archive")
                     return False
 
-                # Make binary executable (Unix-like systems).  0o755 —
+                # Make binary executable (Unix-like systems).  0o755 --
                 # standard executable permissions.  CodeQL flags this
                 # as ``py/overly-permissive-file`` (world-readable);
                 # see the ~/.local/bin chmod block earlier for the FP
@@ -897,8 +897,8 @@ def main():
     system = platform.system().lower()
     if system == "openbsd":
         # Phase 13.1.I: the official prebuilt v2.5.4 is verified to run on
-        # OpenBSD (scripts/verify-openbao-openbsd.sh), so prefer it — no Go
-        # toolchain, works air-gapped — and fall back to the source build only
+        # OpenBSD (scripts/verify-openbao-openbsd.sh), so prefer it -- no Go
+        # toolchain, works air-gapped -- and fall back to the source build only
         # if the download/extract fails.
         print("OpenBSD detected - trying the prebuilt OpenBAO binary first...")
         if install_from_binary():
@@ -921,7 +921,7 @@ def main():
 
     if system == "netbsd":
         print("NetBSD detected - trying package installation...")
-        # No verified prebuilt for NetBSD — source build via the package-manager
+        # No verified prebuilt for NetBSD -- source build via the package-manager
         # path (which offers the build-from-source option).
         if install_via_package_manager() and check_openbao_installed():
             print("\nOpenBAO installation completed successfully!")

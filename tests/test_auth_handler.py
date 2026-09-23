@@ -185,7 +185,7 @@ class TestDecodeJWT:
             "user_id": "test@example.com",
             "expires": time.time() + 3600,
         }
-        # Wrong-key fixture — built via concatenation so semgrep's
+        # Wrong-key fixture -- built via concatenation so semgrep's
         # jwt-hardcoded-secret rule doesn't pattern-match.  This test
         # exists specifically to verify forged JWTs are rejected; the
         # key being obviously fake is the point of the test.

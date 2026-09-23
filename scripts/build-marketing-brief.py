@@ -158,7 +158,7 @@ def _add_page_number(paragraph):
 # projects, and firms where registration isn't asserted here.  A global
 # "Trademarks & Legal Notice" section in the Markdown carries the attributions.
 # NOTE: names baked into the rasterized SVG diagrams (e.g. PostgreSQL, Windows in
-# the architecture image) are pixels, not text — they are covered by the notice.
+# the architecture image) are pixels, not text -- they are covered by the notice.
 _R, _T = "®", "™"
 TRADEMARKS = {
     # Microsoft
@@ -171,7 +171,7 @@ TRADEMARKS = {
     # Red Hat
     "Red Hat Enterprise Linux": _R, "Red Hat Satellite": _R, "Red Hat": _R,
     "RHEL": _R, "Ansible": _R,
-    # Canonical  (only the full "Canonical Landscape" — bare "Landscape" is generic
+    # Canonical  (only the full "Canonical Landscape" -- bare "Landscape" is generic
     # English, e.g. the "Competitive Landscape" section heading)
     "Canonical Landscape": _T, "Canonical": _R, "Ubuntu": _R,
     # SUSE
@@ -199,7 +199,7 @@ def mark_trademarks(text):
     return _TM_RE.sub(lambda m: m.group(1) + TRADEMARKS[m.group(1)], text)
 
 
-# Trademark marking can be suspended for a region of the document — e.g. the
+# Trademark marking can be suspended for a region of the document -- e.g. the
 # founder's biography, where employer names should read cleanly without ® marks.
 # Wrap such regions in <!-- NO-TM-START --> ... <!-- NO-TM-END --> in the source.
 _MARK_ENABLED = True

@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""add airgap_agent_channel_mirror — Phase 12 private agent-install mirrors
+"""add airgap_agent_channel_mirror -- Phase 12 private agent-install mirrors
 
 Per-channel substitution of a private mirror for the upstream agent-install
 channels (PPA / COPR / OBS / apk / pkg / winget / brew).  Phase 11.1 already

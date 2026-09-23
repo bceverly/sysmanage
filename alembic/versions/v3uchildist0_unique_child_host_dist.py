@@ -14,7 +14,7 @@ unblocks the KVM-on-RHEL-family child-host create flow:
 1. Deduplicate ``child_host_distribution`` rows by
    ``(child_type, distribution_name, distribution_version)``.  Current
    data is already unique on that triple in production, so the dedupe
-   step is a defensive no-op — but it's there so the migration is safe
+   step is a defensive no-op -- but it's there so the migration is safe
    to re-run on a database that has drifted (e.g. a dev instance with
    re-applied seed data).
 2. Add a unique constraint on
@@ -22,7 +22,7 @@ unblocks the KVM-on-RHEL-family child-host create flow:
    seeders / manual inserts cannot reintroduce duplicates.
 3. Replace the KVM ``agent_install_commands`` for the RHEL / Rocky /
    Alma / Oracle family.  The previous payload ran
-   ``pip3 install sysmanage-agent`` — but the agent isn't published on
+   ``pip3 install sysmanage-agent`` -- but the agent isn't published on
    PyPI; cloud-init's runcmd block ran the dnf+pip steps without error,
    pip3 silently installed an unrelated (or no) package, and no agent
    ever registered.  Switch to the same GitHub-release-curl pattern
@@ -180,5 +180,5 @@ def downgrade() -> None:
         with op.batch_alter_table(_TABLE) as batch_op:
             batch_op.drop_constraint(_UQ_NAME, type_="unique")
     # We don't restore the broken ``pip3 install sysmanage-agent`` payload
-    # on downgrade — that's a "feature" we never want back.  The dedupe
+    # on downgrade -- that's a "feature" we never want back.  The dedupe
     # is also irreversible by design (deleted rows aren't kept around).

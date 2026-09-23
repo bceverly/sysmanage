@@ -24,7 +24,7 @@ describe('permissions service', () => {
     const result = await perms.fetchUserPermissions();
     expect(axiosInstance.get).toHaveBeenCalledWith('/api/v1/user/permissions');
     expect(result).toEqual(mockData);
-    // now cached — sync check reflects it
+    // now cached -- sync check reflects it
     expect(perms.hasPermissionSync('Manage Custom Metrics')).toBe(true);
     expect(perms.hasPermissionSync('Add User')).toBe(false);
     expect(perms.hasPermissionSync('Not A Real Role')).toBe(false);

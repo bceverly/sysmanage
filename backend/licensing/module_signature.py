@@ -6,14 +6,14 @@
 
 WHAT THIS REPLACES
 ------------------
-``ModuleLoader`` used to trust an ``X-Content-SHA512`` response header — the
+``ModuleLoader`` used to trust an ``X-Content-SHA512`` response header -- the
 hash arrived in the SAME response as the payload it vouched for, so anyone who
 could serve that response supplied both.  It also read
 
     if expected_hash and actual != expected:
 
 meaning an ABSENT header skipped verification altogether: an attacker needed
-only to omit it.  And nothing verified the cache path at all — once an engine
+only to omit it.  And nothing verified the cache path at all -- once an engine
 was on disk, it was loaded unconditionally on every subsequent start.
 
 These are native shared objects loaded into the server process, so that was a
@@ -41,7 +41,7 @@ TRUST ANCHOR
 ------------
 ``_TRUSTED_KEYS`` is compiled into the server deliberately.  Reading the key
 from a file beside the modules would mean an attacker who can replace a
-module can replace the key that vouches for it — the check would verify only
+module can replace the key that vouches for it -- the check would verify only
 that the attacker is self-consistent.  Rotation therefore ships as a server
 release; the list holds more than one key so a rotation can overlap.
 """
@@ -76,7 +76,7 @@ _TRUSTED_KEYS: List[str] = [
 
 
 # Plugin bundles are a bare ``<code>-plugin.iife.js``, served from a license
-# server API endpoint rather than as a static file — so unlike an engine there
+# server API endpoint rather than as a static file -- so unlike an engine there
 # is no container to carry a signature, and no second URL to fetch one from
 # without changing the license server.  The signature therefore travels INSIDE
 # the file, as a trailing JS line comment: the bundle stays a valid script,
@@ -256,8 +256,8 @@ def verify_module_dir(
 
     ``platform_info`` is the loader's own ``{platform, architecture,
     python_version}``.  Checking it matters: without it a correctly signed
-    bundle built for another platform — or a signed OLD version replayed over
-    a patched one — would verify happily.
+    bundle built for another platform -- or a signed OLD version replayed over
+    a patched one -- would verify happily.
     """
     manifest_bytes, signature = _read_manifest(module_dir)
     _verify_signature(manifest_bytes, signature)

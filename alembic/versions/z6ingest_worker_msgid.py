@@ -13,10 +13,10 @@ drives QUEUED ``AirgapIngestionRun`` rows through their lifecycle by
 dispatching mount/copy plans to the repository host's agent.  Two new
 columns:
 
-  * ``worker_message_id`` — the same in-flight marker the collector
+  * ``worker_message_id`` -- the same in-flight marker the collector
     orchestrator uses on ``airgap_collection_run``: stamped at dispatch,
     cleared on result, so a slow plan isn't double-dispatched next tick.
-  * ``manifest_json`` — the verified inner manifest captured at the
+  * ``manifest_json`` -- the verified inner manifest captured at the
     mount/verify step.  Persisted (rather than kept in memory) so the
     copy-complete step can register per-distro ``AirgapLocalRepository``
     rows from ``manifest['targets']`` even across a server restart, and

@@ -77,7 +77,7 @@ class TestClassifyComplianceGap:
 
 class TestClassifyComplianceGapPriority:
     """When a package is BOTH out-of-date AND has a CVE only in public
-    snapshot, ``not_applied`` wins — fixing locally is the cheaper path."""
+    snapshot, ``not_applied`` wins -- fixing locally is the cheaper path."""
 
     def test_not_applied_takes_precedence_over_not_transferred(self):
         host = [{"name": "nginx", "version": "1.18.0"}]

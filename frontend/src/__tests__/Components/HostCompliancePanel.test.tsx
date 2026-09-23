@@ -174,7 +174,7 @@ describe("HostCompliancePanel", () => {
     );
     expect(
       await screen.findByText(
-        "Live-scan dispatched to agent — result will arrive shortly",
+        "Live-scan dispatched to agent -- result will arrive shortly",
       ),
     ).toBeInTheDocument();
   });

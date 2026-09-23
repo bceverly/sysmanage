@@ -8,8 +8,8 @@ Sanitize untrusted values before interpolating them into log messages.
 Logging request-derived strings verbatim allows **log injection / log forging**
 (CWE-117): an attacker who controls the value can embed CR/LF and forge
 additional log lines (e.g. fake "login succeeded" entries) or break log
-parsers.  :func:`scrub` removes the line-break characters — the fix CodeQL's
-``py/log-injection`` query recognizes — and caps length so any request-derived
+parsers.  :func:`scrub` removes the line-break characters -- the fix CodeQL's
+``py/log-injection`` query recognizes -- and caps length so any request-derived
 value (tenant ids, slugs, setting keys, names) is safe to log.
 
 Use it on the *untrusted* argument only; static format strings and

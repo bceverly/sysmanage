@@ -50,7 +50,7 @@ def resolve_host_for_client(config_host):
         # dual-stack: curl's happy-eyeballs will happily satisfy a health check
         # against an unrelated IPv6 backend on ::1:PORT (e.g. a dev stack), so the
         # perf harness thinks a server is "already running" and skips starting its
-        # own — but Artillery/Node then connects to 127.0.0.1 and gets
+        # own -- but Artillery/Node then connects to 127.0.0.1 and gets
         # ECONNREFUSED for every VU.  Pinning to 127.0.0.1 (mirrors the e2e IPv4
         # pinning) keeps the pre-flight, the started backend, and the load client
         # all on the same address family.
@@ -67,7 +67,7 @@ def generate_artillery_config():
     - Health Check hits /api/health (the actual route registered by the server,
       see backend/startup/route_registration.py).
     - API Authentication Flow logs in via POST /api/v1/login (the native
-      versioned route — the /api/login bridge alias was retired). Body keys are
+      versioned route -- the /api/login bridge alias was retired). Body keys are
       'userid' (an EmailStr per backend.api.auth.UserLogin) and 'password'.
       Response is {"Authorization": "<token>"}. Credentials match
       scripts/e2e_test_user.py so 'make test-performance' can reuse the same
@@ -81,7 +81,7 @@ def generate_artillery_config():
       FastAPI's WebSocket-only route returns 404 to an HTTP GET (the route is
       registered for the WS protocol, not for HTTP), but we still want to
       verify the path is reachable through the routing layer. Accepted codes:
-      101 (upgrade succeeded — unlikely without WS handshake), 400/426
+      101 (upgrade succeeded -- unlikely without WS handshake), 400/426
       (protocol mismatch), 404 (HTTP method not allowed on a WS-only route).
     """
     config, config_path = load_sysmanage_config()
@@ -148,7 +148,7 @@ def generate_artillery_config():
                 "weight": 20,
                 "flow": [
                     # Inline login so we can reuse the captured token in the
-                    # next request — Artillery scopes captured variables to
+                    # next request -- Artillery scopes captured variables to
                     # a single scenario flow, not across scenarios.
                     {
                         "post": {

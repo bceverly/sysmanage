@@ -46,7 +46,7 @@ interface AxiosError {
 
 // WSL + LXD/LXC are container child hosts (container_engine = Professional).
 // Every other distribution type is a VM owned by the Enterprise-only
-// virtualization_engine, so it is hidden unless that engine is licensed — a
+// virtualization_engine, so it is hidden unless that engine is licensed -- a
 // Professional user must not be offered (or shown) VM distributions they
 // cannot create.
 const CONTAINER_CHILD_TYPES = new Set(['wsl', 'lxd']);

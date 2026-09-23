@@ -7,14 +7,14 @@ OS lifecycle / release-upgrade models (Phase 14.3).
 
 Two concerns:
 
-* **EOL / support-lifecycle tracking** — when does each OS release go end-of-life?
+* **EOL / support-lifecycle tracking** -- when does each OS release go end-of-life?
   That's **global reference data** (Ubuntu 22.04's EOL date is the same for every
   customer), so the lifecycle registry lives ONCE in the **shared** partition
   (``shared_os_lifecycle``), exactly like the CVE + advisory catalogs.  "Approaching
   EOL" per host and the fleet EOL report are *computed* by joining this registry
-  against each tenant's host inventory — no per-host EOL rows are stored.
+  against each tenant's host inventory -- no per-host EOL rows are stored.
 
-* **Release-upgrade orchestration** — an operator-driven, schedulable,
+* **Release-upgrade orchestration** -- an operator-driven, schedulable,
   maintenance-window-aware distro upgrade job (``do-release-upgrade`` / dnf
   system-upgrade / zypper dup / freebsd-update).  Jobs are per-host operational
   state → **tenant** partition (``release_upgrade_job``).
@@ -77,7 +77,7 @@ class SharedOsLifecycle(Base):
 
     Global reference data (endoflife.date-style): identical for every tenant, so
     stored once.  Per-host "approaching EOL" is computed by joining this against
-    ``host`` — no per-host rows are persisted.
+    ``host`` -- no per-host rows are persisted.
     """
 
     __tablename__ = "shared_os_lifecycle"

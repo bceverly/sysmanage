@@ -9,7 +9,7 @@
  * golden-host differ then compares those hashes between hosts.
  *
  * NO FILE CONTENT CROSSES THIS API, because none is collected. A path, a
- * sha256 and stat metadata are the whole vocabulary — which is what makes it
+ * sha256 and stat metadata are the whole vocabulary -- which is what makes it
  * safe to watch /etc/shadow or a private key.
  */
 

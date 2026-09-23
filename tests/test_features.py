@@ -287,22 +287,22 @@ class TestTierFeatures:
             FeatureCode.VULNERABILITY_SCANNING,
             FeatureCode.ADVANCED_MONITORING,
             FeatureCode.CUSTOM_REPORTS,
-            # Phase 11.4 — paired with VULN_ENGINE module which is already
+            # Phase 11.4 -- paired with VULN_ENGINE module which is already
             # in the Professional tier.
             FeatureCode.CVE_FEED_MANAGEMENT,
-            # Phase 14.5 — remote syslog forwarding.
+            # Phase 14.5 -- remote syslog forwarding.
             FeatureCode.LOG_ROUTING,
-            # Phase 14.1 — errata/advisory management.
+            # Phase 14.1 -- errata/advisory management.
             FeatureCode.ADVISORY_MANAGEMENT,
-            # Phase 14.3 — OS lifecycle / EOL + release upgrades.
+            # Phase 14.3 -- OS lifecycle / EOL + release upgrades.
             FeatureCode.OS_LIFECYCLE,
-            # Phase 18 — provisioning TEMPLATE authoring is Pro+ (the act of
+            # Phase 18 -- provisioning TEMPLATE authoring is Pro+ (the act of
             # provisioning is Enterprise-gated via PROVISIONING_MANAGE).
             FeatureCode.PROVISIONING_TEMPLATES_MANAGE,
-            # Phase 21.1 S4 — query-pack authoring/assignment/scheduling
+            # Phase 21.1 S4 -- query-pack authoring/assignment/scheduling
             FeatureCode.QUERY_PACK_MANAGE,
-            # Issued by the Pro+ licence generator at this tier and absent
-            # here until 2026-09-21 — see the FeatureCode comment. This
+            # Issued by the Pro+ license generator at this tier and absent
+            # here until 2026-09-21 -- see the FeatureCode comment. This
             # exact-set test could never have caught that: it asserts this
             # repo's internal consistency, and the drift was ACROSS repos.
             # scripts/check_engine_codes.py is the gate that catches it.
@@ -375,14 +375,14 @@ class TestTierModules:
             ModuleCode.SECRETS_ENGINE,
             ModuleCode.CONTAINER_ENGINE,
             ModuleCode.PROPLUS_CORE,
-            # Phase 14.1 — errata/advisory management engine.
+            # Phase 14.1 -- errata/advisory management engine.
             ModuleCode.ADVISORY_ENGINE,
-            # Phase 14.3 — OS lifecycle / release-upgrade engine.
+            # Phase 14.3 -- OS lifecycle / release-upgrade engine.
             ModuleCode.LIFECYCLE_ENGINE,
-            # Phase 18 — provisioning engine loads at Professional so Pro+ can
+            # Phase 18 -- provisioning engine loads at Professional so Pro+ can
             # author templates; provisioning actions are Enterprise-gated.
             ModuleCode.PROVISIONING_ENGINE,
-            # Phase 21.1 S4 — query packs as multi-tenant policy
+            # Phase 21.1 S4 -- query packs as multi-tenant policy
             ModuleCode.QUERY_PACK_ENGINE,
         }
         assert pro_modules == expected

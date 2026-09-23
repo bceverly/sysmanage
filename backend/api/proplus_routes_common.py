@@ -252,7 +252,7 @@ def _cython_compat():
 # Cython Module Route Mounting
 #
 # Standard pattern for all Cython modules:
-#   1. Wrap with _cython_compat() — patches Query() to return plain int/str
+#   1. Wrap with _cython_compat() -- patches Query() to return plain int/str
 #      values that satisfy Cython's cdef type checks (harmless when unused).
 #   2. Pass Depends(get_db) and Depends(get_current_user) pre-wrapped.
 #

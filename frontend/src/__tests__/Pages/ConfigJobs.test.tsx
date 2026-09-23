@@ -10,7 +10,7 @@
  *
  * Launching jumps to Jobs. A launch that leaves the operator staring at the
  * Templates tab looks exactly like nothing happened, and the first thing they
- * do is press it again — which on a fleet means two jobs.
+ * do is press it again -- which on a fleet means two jobs.
  */
 
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";

@@ -44,7 +44,7 @@ describe('LicensedRoute feature + module gating', () => {
 
   test('redirects when the module is licensed but the feature is not', async () => {
     // The exact FIPS/compliance leak: Professional has the engine module but
-    // not the Enterprise feature — the page must NOT be reachable.
+    // not the Enterprise feature -- the page must NOT be reachable.
     mockModule.mockReturnValue(true);
     mockFeature.mockReturnValue(false);
     render(
@@ -67,7 +67,7 @@ describe('LicensedRoute feature + module gating', () => {
     expect(await screen.findByTestId('redirect')).toBeInTheDocument();
   });
 
-  test('a feature-only gate is honoured', async () => {
+  test('a feature-only gate is honored', async () => {
     mockFeature.mockReturnValue(false);
     render(<LicensedRoute feature="fips_mode">{child}</LicensedRoute>);
     expect(await screen.findByTestId('redirect')).toBeInTheDocument();

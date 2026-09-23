@@ -207,7 +207,7 @@ const ConfigurationSettings: React.FC = () => {
                           s.configured
                             ? t(
                                 "configuration.secretSet",
-                                "•••••••• (stored — leave blank to keep)",
+                                "•••••••• (stored -- leave blank to keep)",
                               )
                             : t("configuration.secretUnset", "Not set")
                         }

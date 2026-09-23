@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Add airgap_bundle table — multi-OS air-gap install ISO builder.
+"""Add airgap_bundle table -- multi-OS air-gap install ISO builder.
 
 Revision ID: r8abld
 Revises: r7hardening
@@ -16,7 +16,7 @@ One new table:
                    | failed), where the resulting ISO lives on disk,
                    and which user triggered it.
 
-Reversible — downgrade drops the table.
+Reversible -- downgrade drops the table.
 """
 
 from typing import Sequence, Union

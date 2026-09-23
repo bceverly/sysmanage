@@ -7,25 +7,25 @@ Advisory / errata models (Phase 14.1).
 
 Vendor advisories (Ubuntu USN, Red Hat RHSA/RHBA/RHEA, SUSE-SU/openSUSE-SU,
 Debian DSA, FreeBSD-SA) are the "patch by advisory" abstraction on top of raw CVE
-+ package tracking.  Advisory data is **global reference data** — a USN is
-identical for every customer — so the catalog lives ONCE in the **shared**
++ package tracking.  Advisory data is **global reference data** -- a USN is
+identical for every customer -- so the catalog lives ONCE in the **shared**
 partition (``shared_*``), exactly like ``shared_vulnerability``.  Only the
 *per-host applicability* is tenant-scoped.
 
-Partition split (get this right — it mirrors the CVE precedent verbatim):
+Partition split (get this right -- it mirrors the CVE precedent verbatim):
 
 * **shared partition** (``shared_*`` prefix, shared alembic chain):
-  - ``SharedAdvisory`` — the advisory itself.
-  - ``SharedAdvisoryPackage`` — fixed-package rows (intra-shared FK to advisory).
-  - ``SharedAdvisoryCve`` — advisory↔CVE links (intra-shared FKs to advisory AND
-    ``shared_vulnerability`` — same partition, so real FKs are fine).
-  - ``AdvisoryIngestionLog`` / ``AdvisoryRefreshSettings`` — server-global
+  - ``SharedAdvisory`` -- the advisory itself.
+  - ``SharedAdvisoryPackage`` -- fixed-package rows (intra-shared FK to advisory).
+  - ``SharedAdvisoryCve`` -- advisory↔CVE links (intra-shared FKs to advisory AND
+    ``shared_vulnerability`` -- same partition, so real FKs are fine).
+  - ``AdvisoryIngestionLog`` / ``AdvisoryRefreshSettings`` -- server-global
     ingestion bookkeeping (mirrors the CVE equivalents).
 
 * **tenant partition** (unprefixed, tenant alembic chain):
-  - ``HostApplicableAdvisory`` — a host has advisory X applicable to package Y.
+  - ``HostApplicableAdvisory`` -- a host has advisory X applicable to package Y.
     ``advisory_id`` is a **soft** cross-partition reference to
-    ``shared_advisory.id`` — NO ForeignKey (the two tables live in different
+    ``shared_advisory.id`` -- NO ForeignKey (the two tables live in different
     partitions/engines under scale-out), matching ``host_vulnerability_finding``.
 """
 
@@ -48,7 +48,7 @@ from sqlalchemy.orm import relationship
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
 
-# Advisory kinds (Security / Bugfix / Enhancement) — drives the UI filter.
+# Advisory kinds (Security / Bugfix / Enhancement) -- drives the UI filter.
 ADVISORY_TYPE_SECURITY = "security"
 ADVISORY_TYPE_BUGFIX = "bugfix"
 ADVISORY_TYPE_ENHANCEMENT = "enhancement"
@@ -145,7 +145,7 @@ class SharedAdvisoryPackage(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
     advisory_row_id = Column(
         GUID(),
-        # Intra-shared FK (both tables live in the shared partition) — kept.
+        # Intra-shared FK (both tables live in the shared partition) -- kept.
         ForeignKey("shared_advisory.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
@@ -186,7 +186,7 @@ class SharedAdvisoryCve(Base):
         nullable=False,
         index=True,
     )
-    # Intra-shared FK to the CVE catalog (same partition) — nullable because an
+    # Intra-shared FK to the CVE catalog (same partition) -- nullable because an
     # advisory may cite a CVE we haven't ingested a vulnerability row for yet.
     vulnerability_id = Column(
         GUID(),
@@ -245,7 +245,7 @@ class HostApplicableAdvisory(Base):
     """An advisory applicable to a host (tenant partition).
 
     ``advisory_id`` is a **soft** cross-partition reference to
-    ``shared_advisory.id`` — NO ForeignKey (the shared catalog lives in a
+    ``shared_advisory.id`` -- NO ForeignKey (the shared catalog lives in a
     different partition/engine under scale-out).  Callers resolve the advisory
     via the shared session, not an ORM relationship.  Matches
     ``host_vulnerability_finding.vulnerability_id``.
@@ -269,7 +269,7 @@ class HostApplicableAdvisory(Base):
         nullable=False,
         index=True,
     )
-    # SOFT ref to shared_advisory.id (cross-partition) — NO ForeignKey().
+    # SOFT ref to shared_advisory.id (cross-partition) -- NO ForeignKey().
     advisory_id = Column(GUID(), nullable=False, index=True)
     # Denormalized advisory fields so the tenant row is useful without a shared
     # join (list/filter without cross-engine lookups).

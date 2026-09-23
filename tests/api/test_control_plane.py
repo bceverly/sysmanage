@@ -9,9 +9,9 @@ The entire control-plane surface moved into the licensed ``multitenancy_engine``
 (Pro+ relocation, moat slice 8); the OSS build ships only a 501 stub.  These
 tests therefore come in two flavours:
 
-* **Stub contract** (always runs) — mounts the OSS ``control_plane.router`` and
+* **Stub contract** (always runs) -- mounts the OSS ``control_plane.router`` and
   asserts the unlicensed 501 + the bearer-token gate.
-* **Behavioral** (skips without the compiled ``.so``) — builds the *engine's*
+* **Behavioral** (skips without the compiled ``.so``) -- builds the *engine's*
   router via the shared ``real_engine`` fixture and exercises every endpoint
   end-to-end, with the registry-session dependency overridden to the in-memory
   test database.  Relocated services (provisioning, orchestration, enrollment)
@@ -47,7 +47,7 @@ def _engine_client(db_session, engine_mod):
 
 
 # ---------------------------------------------------------------------------
-# Stub contract — always runs (no engine)
+# Stub contract -- always runs (no engine)
 # ---------------------------------------------------------------------------
 
 
@@ -79,7 +79,7 @@ def test_stub_returns_501_when_engine_absent():
 
 
 # ---------------------------------------------------------------------------
-# Behavioral — against the engine's real router (skips without the .so)
+# Behavioral -- against the engine's real router (skips without the .so)
 # ---------------------------------------------------------------------------
 
 

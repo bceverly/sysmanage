@@ -15,7 +15,7 @@ Three new tables backing the Pro+ ``reporting_engine`` and
   report_template         admin-defined custom report layouts
   dynamic_secret_lease    OpenBAO dynamic-secret lease audit + revocation hook
 
-Reversible — downgrade drops the three tables in dependency order.
+Reversible -- downgrade drops the three tables in dependency order.
 """
 
 from typing import Sequence, Union

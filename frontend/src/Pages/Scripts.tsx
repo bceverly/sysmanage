@@ -527,7 +527,7 @@ const Scripts: React.FC = () => {
   };
 
   // Execute-tab script dropdown change: mirror the original inline
-  // onChange — set the id, clear host + execution result, then load
+  // onChange -- set the id, clear host + execution result, then load
   // the script's details.
   const handleExecuteScriptSelect = (scriptId: string) => {
     setSavedScriptId(scriptId);

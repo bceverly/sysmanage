@@ -1,5 +1,5 @@
 #!/sbin/openrc-run
-# OpenRC service for OpenBAO — SysManage's local secrets broker.
+# OpenRC service for OpenBAO -- SysManage's local secrets broker.
 #
 # Alpine is musl and OpenBAO publishes no .apk, but `bao` is a static Go
 # binary that runs fine on musl, so the SysManage post-install drops it at

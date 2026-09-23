@@ -6,7 +6,7 @@
 
 The schedule-tick service (``airgap_schedule_tick.py``) and the
 ``POST /collection/runs`` endpoint both insert run rows at
-``status=QUEUED`` and then walk away — historically there was no
+``status=QUEUED`` and then walk away -- historically there was no
 in-process worker to take a QUEUED row through MIRRORING /
 STAGING_COMPLETE / BUILDING_ISO / ISO_BUILT.  An operator who clicked
 "New collection run" got a row that sat at QUEUED forever; the
@@ -20,7 +20,7 @@ a single failure poison the loop.
 Option-B sourcing: the collection plan rsyncs from each target's
 mirror snapshot dir (``<mirror_root>/<name>/.snapshots/<id>/``) into
 the staging tree.  No upstream apt-mirror / reposync runs at
-collection time — the source-of-truth fetch happened earlier inside
+collection time -- the source-of-truth fetch happened earlier inside
 ``repository_mirroring_engine`` when the operator synced their LAN
 mirrors.
 
@@ -62,14 +62,14 @@ from backend.persistence.db import get_db
 
 logger = logging.getLogger(__name__)
 
-# 30s — half the schedule-tick cadence.  Collection plans take minutes
+# 30s -- half the schedule-tick cadence.  Collection plans take minutes
 # to hours, so a finer tick gains nothing; a coarser one would make
 # the QUEUED→MIRRORING transition feel laggy in the UI.
 TICK_INTERVAL_SECONDS = 30
 ERROR_BACKOFF_SECONDS = 30
 
 
-# Lifecycle constants — single source of truth so the tick + result
+# Lifecycle constants -- single source of truth so the tick + result
 # handler agree on which strings are legal.
 STATUS_QUEUED = "QUEUED"
 STATUS_MIRRORING = "MIRRORING"
@@ -91,7 +91,7 @@ def _manifest_targets(run: "models.AirgapCollectionRun") -> list:
     The repository side reads this off the verified ``/manifest.json``
     to populate its per-distro ``AirgapLocalRepository`` rows (which
     drive freshness + compliance staleness) without having to re-scan
-    the copied tree.  Each entry is ``{distro, version}`` — the minimum
+    the copied tree.  Each entry is ``{distro, version}`` -- the minimum
     the repository needs to register what it just ingested.  Embedded
     inside the signed payload so a tampered target list is rejected.
     """
@@ -104,7 +104,7 @@ def _sign_manifest_or_raw(engine, manifest: dict) -> dict:
     Reads the collector's ed25519 private key and asks the engine's
     ``sign_manifest`` to wrap the manifest.  If the key is missing or
     the engine doesn't expose ``sign_manifest`` (older module), logs a
-    warning and returns the unsigned manifest — the ISO still builds
+    warning and returns the unsigned manifest -- the ISO still builds
     and downloads, it just won't pass a strict repository ingest.  That
     degrade-don't-crash choice keeps a key-misconfigured collector from
     failing the whole run; the operator sees unsigned bundles get
@@ -144,7 +144,7 @@ def _find_collector_host(db) -> "models.Host | None":
     on the collector itself, so we look up the Host row registered
     with the same FQDN as this server.  Falls back to the bare
     hostname if no FQDN match exists.  Returns None when neither
-    matches — the caller logs and marks the run FAILED.
+    matches -- the caller logs and marks the run FAILED.
 
     Defending against the ambiguous case (multiple hosts registered
     with the same hostname): if the lookup is non-unique we still
@@ -196,7 +196,7 @@ def _snapshot_paths_for_targets(db, run: models.AirgapCollectionRun) -> dict:
     """Build the per-target snapshot-dir map the engine needs.
 
     Returns ``{"<distro>:<version>": "<mirror_root>/<name>/.snapshots/<snap_id>/"}``.
-    Empty value for any target whose snapshot row is missing — caller
+    Empty value for any target whose snapshot row is missing -- caller
     treats that as a fatal error.
     """
     settings_row = db.query(models.MirrorSettings).first()
@@ -275,7 +275,7 @@ def _mark_failed(run: models.AirgapCollectionRun, reason: str) -> None:
 def _resolve_dispatch_host(db, run):
     """Run the QUEUED→MIRRORING gates and resolve the dispatch host.
 
-    Encapsulates steps 1–2 of :func:`_advance_queued_to_mirroring`:
+    Encapsulates steps 1-2 of :func:`_advance_queued_to_mirroring`:
     validate targets/mirror_ids, apply the snapshot-readiness gate
     (leaving the run QUEUED when snapshots are still in flight, or
     FAILED when one blew up), then locate the shared dispatch host.
@@ -287,7 +287,7 @@ def _resolve_dispatch_host(db, run):
     if not run.targets:
         _mark_failed(
             run,
-            "no targets configured on this run — add at least one "
+            "no targets configured on this run -- add at least one "
             "target via the runs API before retrying",
         )
         return None
@@ -304,7 +304,7 @@ def _resolve_dispatch_host(db, run):
     ready, still, failed = _targets_snapshot_state(run)
     if failed:
         joined = "; ".join(f"{name}: {err}" for name, err in failed)
-        _mark_failed(run, f"target snapshot(s) failed — {joined}")
+        _mark_failed(run, f"target snapshot(s) failed -- {joined}")
         return None
     if not ready:
         # In-flight; come back next tick.  Log on a coarse interval
@@ -316,7 +316,7 @@ def _resolve_dispatch_host(db, run):
         )
         return None
 
-    # All snapshots ready — figure out which host to dispatch to.
+    # All snapshots ready -- figure out which host to dispatch to.
     # In Option-B every target shares the same mirror.host_id (the
     # create_run endpoint validates this) so any target's host is
     # the right one.
@@ -325,7 +325,7 @@ def _resolve_dispatch_host(db, run):
     if host_id is None:
         _mark_failed(
             run,
-            "first target's mirror has no host_id — mirror was deleted?",
+            "first target's mirror has no host_id -- mirror was deleted?",
         )
         return None
     host = db.query(models.Host).filter(models.Host.id == host_id).first()
@@ -390,7 +390,7 @@ def _build_multidisc_plan(
         return None
     # Sign one manifest envelope; the engine stamps each disc's
     # own disc_index/disc_count onto a copy.  Same signed
-    # payload the single-disc path embeds — so a multi-disc
+    # payload the single-disc path embeds -- so a multi-disc
     # bundle passes the repository's strict verify too.
     multidisc_manifest = {
         "format_version": 1,
@@ -464,7 +464,7 @@ def _advance_queued_to_mirroring(db, run, engine) -> None:
          If any FAILED → flip the run to FAILED with the surfaced
          error so the operator sees what to fix.
       3. Build a snapshot-sourced collection plan via the engine's
-         ``build_snapshot_collection_run_plan`` — the plan rsyncs
+         ``build_snapshot_collection_run_plan`` -- the plan rsyncs
          each target's snapshot dir into the staging tree.
       4. Dispatch to the mirror's host (all targets share one host
          per create_run validation).  Status → MIRRORING.
@@ -499,8 +499,8 @@ def _advance_queued_to_mirroring(db, run, engine) -> None:
         # A run with no ``burn_device`` produces a downloadable ISO meant to
         # be attached as virtual media (e.g. a VM's CD/DVD drive), which has
         # no physical single-disc size limit.  Multi-disc splitting exists
-        # only to fit physical media — and v0.1.0 can't file-split a single
-        # oversize repo anyway — so when nobody is burning a disc, always
+        # only to fit physical media -- and v0.1.0 can't file-split a single
+        # oversize repo anyway -- so when nobody is burning a disc, always
         # emit ONE ISO regardless of size instead of failing the disc-fit
         # check.  The single-disc builder below has no size cap; xorriso /
         # UDF handle multi-GB ISOs fine.
@@ -573,7 +573,7 @@ def _advance_staging_complete_to_building_iso(db, run, engine) -> None:
         # Sign the manifest before embedding it.  The repository side
         # verifies the ``/manifest.json`` that lives ON the disc (not
         # the collector's DB row), and its ingest runs strict by
-        # default — an unsigned manifest is rejected at the air-gap
+        # default -- an unsigned manifest is rejected at the air-gap
         # crossing.  ``_sign_manifest_or_raw`` returns a signed envelope
         # when the collector key is present, or the bare manifest (with
         # a logged warning) when it isn't, so a misconfigured collector
@@ -593,7 +593,7 @@ def _advance_staging_complete_to_building_iso(db, run, engine) -> None:
     # The engine's build_iso_plan writes the ISO to
     # /var/lib/sysmanage/airgap-iso/<id>.iso but never creates that parent
     # directory, and xorriso/libburn refuse to create it themselves
-    # ("Neither stdio-path nor its directory exist") — so the build fails
+    # ("Neither stdio-path nor its directory exist") -- so the build fails
     # on any collector host where the dir doesn't already exist.  Prepend a
     # mkdir to the plan so the output dir is guaranteed before xorriso runs
     # (mkdir is already in the agent's sudoers allowlist).
@@ -627,7 +627,7 @@ def _advance_staging_complete_to_building_iso(db, run, engine) -> None:
 def _advance_iso_built_to_complete(run) -> None:
     """Final state transition: ISO is on disk, mark the run COMPLETE.
 
-    Only called when ``burn_device`` is NULL — when set, the run
+    Only called when ``burn_device`` is NULL -- when set, the run
     detours through BURNING via ``_advance_iso_built_to_burning``.
     """
     run.status = STATUS_COMPLETE
@@ -677,7 +677,7 @@ def _advance_iso_built_to_burning(db, run, engine) -> None:
 def _dispatch_run_advance(db, run, engine) -> None:
     """Drive the single state transition appropriate for ``run.status``.
 
-    Pure dispatch on the run's current status — the caller owns the
+    Pure dispatch on the run's current status -- the caller owns the
     surrounding skip-inflight check, the FAILED/advanced tallying, and
     the per-run exception handling.
     """
@@ -703,7 +703,7 @@ def _advance_one_run(db, run, engine, summary: dict) -> None:
     status-appropriate transition and tallies the outcome.
     """
     # Defense-in-depth: skip rows that still carry a non-NULL
-    # ``worker_message_id`` — the result handler should have cleared it
+    # ``worker_message_id`` -- the result handler should have cleared it
     # before the row could land in a ready-to-advance state, but if it
     # didn't (race with a crashed handler), don't re-dispatch.
     if run.worker_message_id is not None:
@@ -758,7 +758,7 @@ async def airgap_run_tick_service() -> None:
     """Background service: advance every collection run every TICK_INTERVAL_SECONDS.
 
     Started from ``backend/startup/lifecycle.py`` only when the
-    ``airgap_collector_engine`` Pro+ module is loaded — same gate as
+    ``airgap_collector_engine`` Pro+ module is loaded -- same gate as
     the schedule-tick.
     """
     logger.info(

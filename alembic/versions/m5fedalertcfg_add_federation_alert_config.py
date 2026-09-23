@@ -2,12 +2,12 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Add federation_alert_config singleton (Phase 12.1 — configurable thresholds).
+"""Add federation_alert_config singleton (Phase 12.1 -- configurable thresholds).
 
 Persists operator-chosen thresholds for the three built-in rollup-alert
 conditions (site_offline / compliance_below / vulnerabilities_high).  A
 single fixed-PK row; all threshold columns nullable so a NULL means "use
-the built-in default".  Pure additive ``CREATE TABLE`` — idempotent and
+the built-in default".  Pure additive ``CREATE TABLE`` -- idempotent and
 identical on SQLite and PostgreSQL.
 
 Revision ID: m5fedalertcfg

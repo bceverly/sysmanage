@@ -43,7 +43,7 @@ async def get_opentelemetry_status(
         OpenTelemetryStatusResponse with status details
     """
     try:
-        # Host + software inventory + roles are tenant-scoped — route them to the
+        # Host + software inventory + roles are tenant-scoped -- route them to the
         # active tenant's database.  Grafana settings (below) are a server-global
         # singleton and stay on the bootstrap session.
         with request_sessionmaker()() as tenant_session:

@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 def _refresh_existing_host(session, existing_host, registration_data) -> "models.Host":
     """Update an already-registered host's network/active fields from a
     re-registration payload.  Script-execution capability is intentionally
-    NOT touched — that's an admin-configured server-side setting."""
+    NOT touched -- that's an admin-configured server-side setting."""
     print("Updating existing host with minimal registration data...")
     try:
         existing_host.active = registration_data.active
@@ -83,8 +83,8 @@ def _resolve_enrollment_tenant(raw_token):
     """Validate + consume a tenant enrollment token; return its placement.
 
     Returns a dict ``{"tenant_id", "site_id", "access_group_id"}`` on success
-    (site / access-group ``None`` unless the token carries them — Phase 18.1 S4),
-    or ``None`` when multi-tenancy is DISABLED or no token was supplied — a
+    (site / access-group ``None`` unless the token carries them -- Phase 18.1 S4),
+    or ``None`` when multi-tenancy is DISABLED or no token was supplied -- a
     token-less registration is still a legitimate server-scoped ("No tenant")
     host while that concept exists.  Raises 403 for a supplied-but-invalid token
     (unknown / revoked / expired / out of uses).  Consumes one use on success
@@ -144,7 +144,7 @@ def _reject_if_fqdn_belongs_to_tenant(fqdn):
     A registration with no enrollment token writes to the no-tenant/bootstrap
     database.  Dedup is per-partition (there is no cross-partition lookup), so if
     this ``fqdn`` already lives in a TENANT database, creating a server-scoped row
-    here would be a cross-partition PHANTOM of a host that belongs to a tenant —
+    here would be a cross-partition PHANTOM of a host that belongs to a tenant --
     exactly the ghost-row bug we chased.  Reject loudly (403) so the agent
     surfaces its missing/bad tenant binding and re-enrolls with its token instead
     of accreting a duplicate.  No-op when multi-tenancy is off (no tenant DBs to
@@ -172,7 +172,7 @@ def _reject_if_fqdn_belongs_to_tenant(fqdn):
     # secret. See sanitize_log() and owner_fqdn = host.fqdn above.
     logger.warning(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
         "Rejected token-less registration for fqdn=%s: it already belongs to a "
-        "tenant database — a server-scoped row would be a phantom duplicate. The "
+        "tenant database -- a server-scoped row would be a phantom duplicate. The "
         "agent must re-register with its enrollment token.",
         sanitize_log(owner_fqdn),
     )

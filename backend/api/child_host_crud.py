@@ -50,7 +50,7 @@ def _effective_child_status(child) -> str:
     When a child host has a linked Host record (its own agent registered),
     use the linked Host's connectivity state so the child hosts screen is
     consistent with the main Hosts screen.  A bhyve VM process can be alive
-    while the agent inside it is unreachable — in that case the status
+    while the agent inside it is unreachable -- in that case the status
     should reflect the agent state, not the hypervisor state.
     """
     if child.child_host_id and child.child_host:
@@ -88,7 +88,7 @@ async def list_child_hosts(
     """
     _check_container_module()
     # Authz is server-global (User lives in the bootstrap DB); child-host data
-    # is tenant-scoped — route it to the active tenant's database.
+    # is tenant-scoped -- route it to the active tenant's database.
     authorize_on_main(current_user, SecurityRoles.VIEW_CHILD_HOST)
     session_local = request_sessionmaker()
 
@@ -269,7 +269,7 @@ def _try_kvm_plan_based_deletion(vm_name: str, host_id: str, child_id: str) -> b
     """Dispatch a KVM destroy/undefine plan via the virtualization_engine.
 
     Returns True if the plan was dispatched, False if the engine isn't
-    loaded (caller surfaces a 502 to the user — the agent stub does not honour the
+    loaded (caller surfaces a 502 to the user -- the agent stub does not honor the
     agent's native delete_child_host handler).
     """
     virt_engine = module_loader.get_module("virtualization_engine")
@@ -301,7 +301,7 @@ def _try_wsl_plan_based_deletion(distro_name: str, host_id: str, child_id: str) 
     """Dispatch a `wsl --unregister` plan via the container_engine.
 
     NOTE: the engine plan does NOT verify the registry GUID before
-    deleting (the legacy path does — see
+    deleting (the legacy path does -- see
     ``child_host_wsl_control._get_wsl_guid``).  Until a
     ``verify_guid`` step type is added to the apply_deployment_plan
     schema, callers should treat this as best-effort.

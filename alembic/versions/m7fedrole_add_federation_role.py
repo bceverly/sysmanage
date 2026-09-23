@@ -2,10 +2,10 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Add federation_role to server_configuration (Phase 12 — Server Role UI).
+"""Add federation_role to server_configuration (Phase 12 -- Server Role UI).
 
 The federation role (none/coordinator/site) moves into the
-``server_configuration`` DB singleton — set via Settings → Server Role —
+``server_configuration`` DB singleton -- set via Settings → Server Role --
 exactly like the air-gap ``server_role``.  It is an INDEPENDENT axis, so a
 single column added alongside ``server_role``.  Additive, idempotent,
 identical on SQLite + PostgreSQL.

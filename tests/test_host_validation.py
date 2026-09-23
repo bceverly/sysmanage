@@ -137,7 +137,7 @@ class TestValidateHostId:
     @pytest.mark.asyncio
     async def test_validate_host_id_absent_locally_but_in_tenant_db(self):
         """The root fix: a host missing from the handed (bootstrap) session but
-        present in a TENANT database is registered — return True and send NO
+        present in a TENANT database is registered -- return True and send NO
         host_not_registered (otherwise the agent would churn its identity)."""
         mock_db = MagicMock()
         mock_filter = MagicMock()

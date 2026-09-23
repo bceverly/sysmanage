@@ -9,7 +9,7 @@ Covers:
 - _feature_dependency / _module_dependency factories (decorator + Depends modes)
 - mount_*_routes for every engine: not-loaded, provides_routes=False, exception, success
 - mount_proplus_routes orchestration
-- The stub routes registered when modules aren't loaded — driven via TestClient
+- The stub routes registered when modules aren't loaded -- driven via TestClient
 """
 
 from unittest.mock import MagicMock, patch
@@ -33,7 +33,7 @@ class TestFeatureDependency:
             from backend.licensing.features import FeatureCode
 
             gate = proplus_routes._feature_dependency(FeatureCode.HEALTH_ANALYSIS)
-            # Dependency mode (no func arg) — runs the check.
+            # Dependency mode (no func arg) -- runs the check.
             gate()  # should not raise
 
     def test_dependency_mode_raises_when_feature_missing(self):
@@ -146,7 +146,7 @@ class TestModuleDependency:
 
 
 # ---------------------------------------------------------------------------
-# mount_*_routes — each follows same not-loaded / provides=False / exception / ok pattern
+# mount_*_routes -- each follows same not-loaded / provides=False / exception / ok pattern
 # ---------------------------------------------------------------------------
 
 
@@ -286,7 +286,7 @@ class TestMountProplusRoutes:
 
 
 # ---------------------------------------------------------------------------
-# Stub endpoints — exercised through TestClient on a dedicated mini-app
+# Stub endpoints -- exercised through TestClient on a dedicated mini-app
 # ---------------------------------------------------------------------------
 
 
@@ -460,7 +460,7 @@ class TestStubsSkippedWhenModuleLoaded:
                 "observability_engine": True,
                 "federation_controller_engine": True,
                 "federation_site_engine": True,
-                # Phase 18 — the provisioning surface has 402 stubs too, so a
+                # Phase 18 -- the provisioning surface has 402 stubs too, so a
                 # licensed server must not mount them either. This test caught
                 # the omission when they were added, which is exactly its job.
                 "provisioning_engine": True,
@@ -568,7 +568,7 @@ class TestProvisioningRouterVersionSkew:
     Phase 18.2 router seams.
 
     Regression: passing the 18.2 keywords unconditionally raised TypeError on an
-    older ``provisioning_engine`` build, which failed the mount outright — and
+    older ``provisioning_engine`` build, which failed the mount outright -- and
     that also removed the 18.1 compute-provisioning routes the old .so DID
     support.  A whole feature area disappeared with only a stack trace in the
     log to explain it.
@@ -618,7 +618,7 @@ class TestProvisioningRouterVersionSkew:
             proplus_routes.module_loader, "get_module", return_value=engine
         ):
             proplus_routes.mount_provisioning_routes(app)
-        # First attempt with the seams, second without — and the 18.1 arguments
+        # First attempt with the seams, second without -- and the 18.1 arguments
         # must survive the retry.
         assert engine.get_provisioning_router.call_count == 2
         retry_kwargs = engine.get_provisioning_router.call_args_list[1].kwargs
@@ -659,7 +659,7 @@ class TestProvisioningEnrollmentTokenSkew:
 
     Regression: ``site_id``/``access_group_id`` arrived with Phase 18.1 S4.  A
     ``multitenancy_engine`` built before that raises TypeError on them, the mint
-    failed, no token reached the bootstrap — and a bare-metal host completed a
+    failed, no token reached the bootstrap -- and a bare-metal host completed a
     25-minute install only to enroll with NO TENANT.  Enrolling into the right
     tenant without a site is strictly better than that, so degrade and warn.
     """

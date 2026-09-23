@@ -5,7 +5,7 @@
 """
 API routes for CVE database refresh settings management in SysManage.
 
-Phase 11.4 — every route here is gated on the Pro+ ``vuln_engine`` module
+Phase 11.4 -- every route here is gated on the Pro+ ``vuln_engine`` module
 being loaded.  When it isn't, the route returns 402 with a license-upgrade
 message; when it is, the route delegates the cron / fetch-plan / apply-plan
 heavy lifting into the engine (mirrors the Phase 10.6 upgrade-profile →

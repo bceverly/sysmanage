@@ -41,7 +41,7 @@ test.describe('Host List Page', () => {
   });
 
   test('should display host list page', async ({ page }) => {
-    // If we landed back on /login, auth setup broke — fail loudly.
+    // If we landed back on /login, auth setup broke -- fail loudly.
     expect(page.url()).not.toContain('/login');
 
     // Page should load successfully
@@ -54,7 +54,7 @@ test.describe('Host List Page', () => {
   });
 
   test('should display host data grid', async ({ page }) => {
-    // If we landed back on /login, auth setup broke — fail loudly.
+    // If we landed back on /login, auth setup broke -- fail loudly.
     expect(page.url()).not.toContain('/login');
     // Wait for the data grid to be visible
     const dataGrid = page.locator('.MuiDataGrid-root');
@@ -73,7 +73,7 @@ test.describe('Host List Page', () => {
   });
 
   test('should navigate to host detail on row click', async ({ page }) => {
-    // If we landed back on /login, auth setup broke — fail loudly.
+    // If we landed back on /login, auth setup broke -- fail loudly.
     expect(page.url()).not.toContain('/login');
     // Wait for grid to load
     const dataGrid = page.locator('.MuiDataGrid-root');
@@ -86,7 +86,7 @@ test.describe('Host List Page', () => {
   });
 
   test('should have approve/reject buttons for pending hosts', async ({ page }) => {
-    // If we landed back on /login, auth setup broke — fail loudly.
+    // If we landed back on /login, auth setup broke -- fail loudly.
     expect(page.url()).not.toContain('/login');
     // Check if there are any pending hosts that need approval
     const approveButton = page.getByRole('button', { name: /approve/i }).first();
@@ -118,7 +118,7 @@ test.describe('Host Detail Page', () => {
     await page.goto('/hosts');
     try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
-    // If we landed back on /login, auth setup broke — fail loudly.
+    // If we landed back on /login, auth setup broke -- fail loudly.
     expect(page.url()).not.toContain('/login');
 
     const dataGrid = page.locator('.MuiDataGrid-root');
@@ -232,7 +232,7 @@ test.describe('Host Actions', () => {
     await page.goto('/hosts');
 
     if (!(await navigateToFirstHostDetail(page))) {
-      // No hosts in the grid — nothing to refresh; treat as a no-op pass.
+      // No hosts in the grid -- nothing to refresh; treat as a no-op pass.
       return;
     }
 
@@ -242,14 +242,14 @@ test.describe('Host Actions', () => {
     // "Requesting..." (i18n keys hostDetail.requestHostData /
     // requestingDiagnostics) as ``diagnosticsLoading`` flips, so a
     // name-based locator drops the element the instant host-detail's
-    // initial fetch or periodic polling toggles that flag — the cause
+    // initial fetch or periodic polling toggles that flag -- the cause
     // of the intermittent "element(s) not found" failure.  The testid
     // is invariant across both states and is also unambiguous vs. the
     // global "Broadcast Refresh" / per-tab "Refresh" buttons.
     const refreshButton = page.getByTestId('request-host-data-button');
 
     // The button is disabled while a diagnostics request is in-flight.
-    // Wait for it to be both visible AND enabled before clicking — that
+    // Wait for it to be both visible AND enabled before clicking -- that
     // also lets host-detail's initial fetches settle, so we don't race
     // a re-render mid-click.
     try {

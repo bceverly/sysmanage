@@ -74,7 +74,7 @@ async def is_new_os_version_combination(  # NOSONAR
     legitimately differ: different enabled repositories) never arrived.
 
     ``host_id`` is optional so callers that genuinely want the OS-level question
-    keep working; without it this falls back to the old behaviour.
+    keep working; without it this falls back to the old behavior.
 
     CAUTION when changing this: the answer drives an automatic full-catalog
     request, and the ingest deletes before it inserts.  A predicate that goes
@@ -227,7 +227,7 @@ async def handle_os_version_update(  # NOSONAR
                 db.commit()
                 db.refresh(host)
 
-                # Phase 10.4.4 close-out — retry default-mirror auto-
+                # Phase 10.4.4 close-out -- retry default-mirror auto-
                 # apply now that we finally know the host's OS.  Only
                 # on the first-learn transition; subsequent
                 # os_version_update messages do not re-trigger (the
@@ -246,7 +246,7 @@ async def handle_os_version_update(  # NOSONAR
                         dispatched = apply_default_mirrors_for_new_host(str(host.id))
                         if dispatched:
                             debug_logger.info(
-                                "Default-mirror auto-apply retried for host %s after first OS learn — dispatched %d plan(s)",
+                                "Default-mirror auto-apply retried for host %s after first OS learn -- dispatched %d plan(s)",
                                 host.fqdn,
                                 len(dispatched),
                             )

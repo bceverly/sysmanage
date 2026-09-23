@@ -247,7 +247,7 @@ describe("UserDetail", () => {
     expect(await screen.findByText("sent to ana")).toBeInTheDocument();
   });
 
-  test("cancelling the reset dialog sends nothing", async () => {
+  test("canceling the reset dialog sends nothing", async () => {
     render(<UserDetail />);
     fireEvent.click(await screen.findByText("Reset Password"));
     await screen.findByText("Confirm Password Reset");
@@ -344,7 +344,7 @@ describe("UserDetail", () => {
     ).toBeInTheDocument();
   });
 
-  test("cancelling role edits restores the original selection", async () => {
+  test("canceling role edits restores the original selection", async () => {
     render(<UserDetail />);
     await screen.findByText("Alpha Group");
     fireEvent.click(screen.getByTestId("EditIcon").closest("button")!);

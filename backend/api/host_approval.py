@@ -93,7 +93,7 @@ async def approve_host(  # NOSONAR
         host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
         session.commit()
 
-        # Phase 10.4.4 — auto-apply default mirror assignments for the
+        # Phase 10.4.4 -- auto-apply default mirror assignments for the
         # newly-approved host.  Best-effort; any failure is logged and
         # swallowed so approval itself never breaks because of a
         # mirror engine quirk.

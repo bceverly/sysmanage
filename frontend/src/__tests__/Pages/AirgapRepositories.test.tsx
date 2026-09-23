@@ -8,8 +8,8 @@
  * This page has to survive three different servers: one where the air-gap
  * endpoint does not exist at all (404 on an older or non-repository build),
  * one that returns the current envelope, and one still returning the legacy
- * flat array. A 404 is not an error here — it means "this server does not do
- * this job" — and rendering it as a failure would tell an operator something
+ * flat array. A 404 is not an error here -- it means "this server does not do
+ * this job" -- and rendering it as a failure would tell an operator something
  * is broken when nothing is.
  */
 

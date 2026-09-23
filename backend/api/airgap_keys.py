@@ -6,10 +6,10 @@
 
 Two small operator surfaces that close the air-gap trust loop:
 
-  * **Collector side** — expose THIS server's collector *public* key +
+  * **Collector side** -- expose THIS server's collector *public* key +
     fingerprint so the operator can copy it and hand it to a repository.
     The private signing key never leaves the box.
-  * **Repository side** — import / list / remove trusted collector
+  * **Repository side** -- import / list / remove trusted collector
     public keys (the keyring the ingest path verifies signed media
     against).
 

@@ -185,7 +185,7 @@ async def get_module_compatibility(
 
     The UI displays a banner when this list is non-empty, instructing the
     operator to run ``alembic upgrade head``.  This is a fallback safety
-    net — the normal path is for migrations to be run as part of the
+    net -- the normal path is for migrations to be run as part of the
     upgrade procedure.
     """
     # pylint: disable=import-outside-toplevel

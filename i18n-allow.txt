@@ -1,4 +1,4 @@
-# i18n "intentionally English" allow-list — the escape hatch for the strict
+# i18n "intentionally English" allow-list -- the escape hatch for the strict
 # gate in scripts/i18n_strict.py (mirrors sysmanage-docs/assets/locales/
 # no-translate.txt, which predates it).
 #
@@ -14,7 +14,7 @@
 # Full-line comments start with '#'.
 #
 # Keep rules TIGHT.  A broad glob silently re-opens the hole this gate exists
-# to close — prefer three exact keys over one wildcard that also swallows the
+# to close -- prefer three exact keys over one wildcard that also swallows the
 # prose next to them.  Anchor value regexes with ^ and $.
 
 # --- shell / package-manager invocations quoted verbatim in the UI ----------
@@ -27,16 +27,16 @@ re:^(Ubuntu Pro|Launchpad|COPR|openSUSE Build Service|Homebrew|winget)$
 re:^(bootc|rpm-ostree|osquery|Ansible|Velociraptor|Wazuh)$
 
 # --- identifier lists and unit abbreviations that carry no prose -------------
-# "DNF (Fedora/RHEL/CentOS 8+)" — package manager + distro names, all proper.
+# "DNF (Fedora/RHEL/CentOS 8+)" -- package manager + distro names, all proper.
 re:^DNF \(Fedora/RHEL/CentOS 8\+\)$
-# "WSL: Ubuntu-24.04, LXD: ubuntu:24.04" — image identifiers, copied verbatim.
+# "WSL: Ubuntu-24.04, LXD: ubuntu:24.04" -- image identifiers, copied verbatim.
 re:^WSL: [\w.\-]+, LXD: [\w.:\-]+$
-# "{{minutes}}m {{seconds}}s" — interpolation plus conventional unit letters.
+# "{{minutes}}m {{seconds}}s" -- interpolation plus conventional unit letters.
 re:^\{\{minutes\}\}m \{\{seconds\}\}s$
-# "{{target}} (Professional)" — the parenthetical is a licence tier name.
+# "{{target}} (Professional)" -- the parenthetical is a license tier name.
 re:^\{\{target\}\} \((Community|Professional|Enterprise)\)$
 # The bare "Enterprise" chip on the config-management engine rows (Phase 20.1)
-# is the same licence-tier proper noun, standing alone rather than inside the
+# is the same license-tier proper noun, standing alone rather than inside the
 # parenthetical above. An exact key rather than a value regex, so it cannot
 # accidentally bless the word "Enterprise" in ordinary prose elsewhere.
 configManagement.engineEnterprise
@@ -72,15 +72,15 @@ nl: re:Interface \{\{number\}\}
 # --- placeholder-dominant strings where identical IS the translation --------
 # These looped forever in `make translate`: the backfill's _accept() holds back
 # any result that comes back identical AND contains a placeholder, treating it
-# as the service's English fallback.  For these the English IS correct — the
+# as the service's English fallback.  For these the English IS correct -- the
 # non-placeholder part is either nothing, a unit letter, or a term borrowed
 # unchanged ("Interface" in French, "hosts" in es/nl/pt, "Host" in German).
 re:\{\{\w+\}\}s
 re:\{\{\w+\}\} hosts?
 re:Host \{\{\w+\}\}
 re:Interface \{\{\w+\}\}
-re:Violations — \{\{\w+\}\}
-# "Version {{n}}" — "Version" is already blessed as a cognate for these
+re:Violations -- \{\{\w+\}\}
+# "Version {{n}}" -- "Version" is already blessed as a cognate for these
 # locales above (de,nl,fr,it,pt,es), and the rest of the string is the number
 # itself, so no correct de/fr rendering CAN differ from the English. Only de
 # and fr are listed: the other locales' service output genuinely differs, and
@@ -90,13 +90,13 @@ de,fr: configProfiles.versionLabel
 
 # === residue triage, 2026-08-05 ==============================================
 # Only names and identifiers below.  Ordinary words that happen to be cognates
-# ("Status", "Server", "Details") are deliberately NOT here — those are real
+# ("Status", "Server", "Details") are deliberately NOT here -- those are real
 # translation gaps in the locales where they came back English, and hiding
 # them behind a rule would defeat the gate.
 
 # --- i18n message KEYS leaking into the UI as display text ------------------
 # These are dotted identifiers, not prose.  Worth fixing at the source (the
-# code is rendering a key where it means to render a message) — until then
+# code is rendering a key where it means to render a message) -- until then
 # they cannot be translated because they are not language.
 re:openbao\.[a-z_]+
 re:vault\.[a-z_]+
@@ -121,7 +121,7 @@ re:(rbac|opensource|dead-letter)
 # === cognate/loanword triage, 2026-08-05 ====================================
 # Each rule is scoped to the locales where the English form IS the correct
 # word, verified per language.  Anything I could not vouch for is deliberately
-# absent and still fails the gate — see the "known misses" note at the end.
+# absent and still fails the gate -- see the "known misses" note at the end.
 
 # --- IT loanwords used unchanged across Western European locales -------------
 de,es,fr,it,nl,pt,zh_CN,zh_TW: re:Shell
@@ -170,17 +170,17 @@ es: re:(Error|roles)
 # --- shell program names (rendered next to their path, e.g. "(/bin/false)") --
 # hostAccount.shellFalse labels /bin/false and sits alongside Bash/Csh/Ksh/Zsh,
 # all left untranslated.  11 of 13 locales had rendered it as the BOOLEAN
-# ("Falsch", "Faux", "Ложь") — and the Arabic file held Chinese text — which is
+# ("Falsch", "Faux", "Ложь") -- and the Arabic file held Chinese text -- which is
 # a mistranslation of a program name, corrected 2026-08-05.
 re:False
 
-# "Edition" is the German word too — Microsoft's own German Windows UI uses it
+# "Edition" is the German word too -- Microsoft's own German Windows UI uses it
 # for exactly this control.  Scoped to de: Spanish wants "Edición", French
 # "Édition", so an unscoped rule would bless the English in all 13.
 de: re:^Edition$
 
 # Pure interpolation: two placeholders, a separator, and a third placeholder.
-# There is no prose here to translate — the description it carries is already
+# There is no prose here to translate -- the description it carries is already
 # localized by the engine that produced it.
 re:^\{\{step\}\}/\{\{total\}\} · \{\{description\}\}$
 
@@ -202,13 +202,13 @@ nav.cat.admin
 # "SQL" is the technology's name, identical in every language we ship; the
 # translation service returned it unchanged in all thirteen, and no correct
 # translation COULD differ. Blessing it rather than rewording, because the
-# field really is labelled SQL in the editor.
+# field really is labeled SQL in the editor.
 queryPacks.sql
 # Dutch uses "query" as the ordinary word for a database query -- it came back
 # unchanged only for nl, while the other twelve locales translated it. Scoped
 # to nl alone rather than blanket-allowing the key.
 nl: queryPacks.query
-# Phase 21.1 S5 — "Live Query". Dutch uses "query" as the ordinary word for a
+# Phase 21.1 S5 -- "Live Query". Dutch uses "query" as the ordinary word for a
 # database query (same reason queryPacks.query is blessed for nl above), so
 # "Live Query" comes back identical and no correct translation can differ.
 # Scoped to nl: the other twelve locales translated both keys normally.

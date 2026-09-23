@@ -48,7 +48,7 @@ const Hosts = () => {
     // Child host filter: 'all' = show all, 'parents' = hide child hosts, 'children' = child hosts only
     const [childHostFilter, setChildHostFilter] = useState<'all' | 'parents' | 'children'>(getFilterFromHash);
 
-    // Pro+ license module list — used to gate child-host UI (filter,
+    // Pro+ license module list -- used to gate child-host UI (filter,
     // badges).  Without ``container_engine`` loaded, the OSS server
     // refuses child-host operations entirely; the UI follows suit.
     const [licenseModules, setLicenseModules] = useState<string[]>([]);
@@ -652,7 +652,7 @@ const Hosts = () => {
                     sx={{ minWidth: 300, flexGrow: 1 }}
                 />
 
-                {/* Child Host Filter — Pro+ feature, hidden in OSS builds */}
+                {/* Child Host Filter -- Pro+ feature, hidden in OSS builds */}
                 {childHostsLicensed && (
                     <ToggleButtonGroup
                         value={childHostFilter}
@@ -716,7 +716,7 @@ const Hosts = () => {
                             labelRowsPerPage: t('common.rowsPerPage'),
                             labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) => {
                                 const countDisplay = count === -1 ? `${t('common.of')} ${to}` : count;
-                                return `${from}–${to} ${t('common.of')} ${countDisplay}`;
+                                return `${from}-${to} ${t('common.of')} ${countDisplay}`;
                             },
                         },
                         noRowsLabel: t('hosts.noRows'),

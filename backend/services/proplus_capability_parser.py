@@ -7,8 +7,8 @@ Parser for the section-delimited stdout produced by
 ``virtualization_engine.build_check_virtualization_support_plan``.
 
 Split out of ``proplus_dispatch`` so ``proplus_dispatch`` stays under the
-1000-line module cap pylint enforces.  The functions here are pure —
-they take a string and return a dict — and have no SQLAlchemy / queue /
+1000-line module cap pylint enforces.  The functions here are pure --
+they take a string and return a dict -- and have no SQLAlchemy / queue /
 network dependencies, which also makes them trivially unit-testable.
 
 The result dict shape matches what the legacy

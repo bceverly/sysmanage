@@ -330,7 +330,7 @@ async def add_user(
     # ``security.admin_userid`` is the recovery account; it has no DB
     # row but is implicitly granted every security role.  Without this
     # shortcut the recovery account can't create the very first real
-    # admin — the chicken-and-egg case the recovery account exists to
+    # admin -- the chicken-and-egg case the recovery account exists to
     # break.  Mirrors the equivalent special case in get_user_permissions.
     the_config = config.get_config()
     admin_userid = the_config.get("security", {}).get("admin_userid")

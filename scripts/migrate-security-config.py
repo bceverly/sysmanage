@@ -176,8 +176,8 @@ def get_config_file_path(explicit=None):
     unconditionally -- so on a host that also has a development config at /etc
     (any machine where SysManage was ever run from a source tree) the script
     rewrote the WRONG file and reported success.  SYSMANAGE_CONFIG_PATH is the
-    variable backend/config and the rc.d scripts already honour, so a service
-    manager that sets it gets consistent behaviour from this script too.
+    variable backend/config and the rc.d scripts already honor, so a service
+    manager that sets it gets consistent behavior from this script too.
     """
     if explicit:
         if not os.path.exists(explicit):
@@ -619,7 +619,7 @@ def main():
     #
     # EXCEPTION: if the salt is still the literal placeholder string the
     # .deb postinst drops in ("GENERATE_NEW_SALT_FOR_PRODUCTION"), the
-    # operator definitely wants it rotated — even with zero users, the
+    # operator definitely wants it rotated -- even with zero users, the
     # placeholder is not a usable salt and leaving it in place causes
     # the next account creation to silently use it.  Force the write
     # through in that case.

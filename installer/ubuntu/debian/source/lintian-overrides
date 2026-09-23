@@ -1,6 +1,6 @@
 # Lintian overrides for the sysmanage source package.
 #
-# Both entries below are justified — the bundled artifacts have
+# Both entries below are justified -- the bundled artifacts have
 # upstream source available in the same repo (just not in the form
 # lintian's heuristic looks for), and we ship them pre-built to keep
 # Launchpad's build farm out of the JavaScript / Windows toolchain
@@ -14,7 +14,7 @@
 # functional difference.  The .js.map sidecar files are present in the
 # same directory for anyone who wants to inspect the un-minified
 # output.  Lintian's ``source-is-missing`` heuristic doesn't look at
-# those — hence the override.
+# those -- hence the override.
 sysmanage source: source-is-missing frontend/dist/assets/*
 
 # nssm.exe is a third-party Windows service-supervisor binary
@@ -22,7 +22,7 @@ sysmanage source: source-is-missing frontend/dist/assets/*
 # under ``installer/windows/nssm/`` to install sysmanage as a Windows
 # service on .msi-installed deployments.  Building nssm from source
 # requires the Visual Studio toolchain on Windows, which is
-# fundamentally not reproducible from a Debian source package — the
+# fundamentally not reproducible from a Debian source package -- the
 # binary is pinned by SHA256 in the upstream README to give consumers
 # verification ammunition.  This file is never executed or shipped on
 # Linux; it is only used by the Windows .msi builder path elsewhere

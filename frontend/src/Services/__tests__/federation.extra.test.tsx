@@ -379,7 +379,7 @@ describe("probeFederationLicensed", () => {
     const first = await probeFederationLicensed();
     expect(first).toBe(true);
     expect(mockGet).toHaveBeenCalledTimes(1);
-    // Second call hits the module-scope cache — no new request.
+    // Second call hits the module-scope cache -- no new request.
     const second = await probeFederationLicensed();
     expect(second).toBe(true);
     expect(mockGet).toHaveBeenCalledTimes(1);
@@ -429,7 +429,7 @@ describe("useFederationLicensed", () => {
     expect(result.current.loading).toBe(false);
     expect(result.current.licensed).toBe(true);
     // The effect still kicks off a background re-probe whose resolved
-    // promise setState()s after this test body — flush it inside act() so
+    // promise setState()s after this test body -- flush it inside act() so
     // React doesn't warn about an update outside act().
     await act(async () => {
       await Promise.resolve();

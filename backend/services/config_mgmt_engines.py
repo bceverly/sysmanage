@@ -126,7 +126,7 @@ def package_for(engine: str, manager: str) -> Optional[str]:
 #
 # Puppet, Salt and Chef are different. Their value is proportional to an
 # existing estate of manifests and cookbooks that nobody accumulates at three
-# hosts, so the adapter is a MIGRATION BRIDGE for an organisation -- the
+# hosts, so the adapter is a MIGRATION BRIDGE for an organization -- the
 # classic thing you sell rather than give away. They also carry a permanent
 # maintenance surface across four upstreams (the Salt `result: None`, Puppet
 # `--noop` and Chef missing-JSON traps found during the 2026-08-27 spike are

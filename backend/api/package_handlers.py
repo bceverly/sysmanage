@@ -551,9 +551,9 @@ async def handle_packages_delta(db: Session, connection, message_data: dict):
         base = message_data.get("base_fingerprint")
         held = host.available_packages_fingerprint
         if not base or base != held:
-            # Not an error in the agent -- just a base we cannot honour.  Logged
+            # Not an error in the agent -- just a base we cannot honor.  Logged
             # at warning because a PERSISTENT mismatch means the two sides never
-            # re-synchronise, which is worth noticing.
+            # re-synchronize, which is worth noticing.
             debug_logger.warning(
                 "Rejecting package delta from host %s: base fingerprint %s does "
                 "not match the catalog we hold (%s); agent will send a full catalog",

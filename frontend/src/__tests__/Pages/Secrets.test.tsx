@@ -81,7 +81,7 @@ describe("initial load", () => {
 
   test("an unlicensed response yields an empty list, not a crash", async () => {
     // The service answers `{ licensed: false }` rather than erroring, so the
-    // page has to recognise that shape instead of treating it as a secret.
+    // page has to recognize that shape instead of treating it as a secret.
     m(secretsService.getSecrets).mockResolvedValue({ licensed: false, secrets: [] });
     render(<Secrets />);
     await waitFor(() => expect(screen.getByTestId("grid")).toHaveTextContent(""));
@@ -233,7 +233,7 @@ describe("permission gating", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Editing, viewing and per-type behaviour.
+// Editing, viewing and per-type behavior.
 // ---------------------------------------------------------------------------
 
 describe("secret types", () => {

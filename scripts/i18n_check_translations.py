@@ -12,7 +12,7 @@ other:
                    interpolation tokens ({{var}}, {var}, %s, %d,
                    %(x)s, <tags>) as its English source.  This catches a
                    machine translator dropping or mangling a placeholder
-                   — a real runtime bug.  SAFE TO ENABLE NOW: untranslated
+                   -- a real runtime bug.  SAFE TO ENABLE NOW: untranslated
                    ``[TODO] <english>`` values still carry the source
                    placeholders, so they pass.
 
@@ -20,7 +20,7 @@ other:
                    the backend gettext ``.po`` catalogs.  It used to
                    check only the frontend, and the backend catalogs
                    quietly accumulated the exact bug this gate exists to
-                   stop — four entries where the translator had emitted a
+                   stop -- four entries where the translator had emitted a
                    SECOND ``%s`` that the msgid does not have, e.g.
                    ``"Marked message as processing: %s"`` translated to
                    ``"메시지 '%s'를 처리 중으로 변경했습니다: %s"``.  Every one
@@ -33,7 +33,7 @@ other:
                    (``make i18n-translate`` on the local model) is done;
                    until then it will (correctly) fail.
 
-Default: run both.  Exit non-zero on any failure.  Pure stdlib — no
+Default: run both.  Exit non-zero on any failure.  Pure stdlib -- no
 network, deterministic, CI-friendly.
 """
 

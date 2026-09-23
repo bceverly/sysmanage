@@ -84,7 +84,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         )
 
         # Startup: enforce air-gap appliance invariants (fail fast on an
-        # unsupported combination — e.g. multi-tenancy or federation on a
+        # unsupported combination -- e.g. multi-tenancy or federation on a
         # repository-role / air-gapped deployment).  See
         # docs/planning/openbao-deployment-and-airgap.md §5.
         logger.info("=== DEPLOYMENT INVARIANT CHECK ===")
@@ -97,7 +97,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
 
         # Startup: overlay secrets from OpenBAO onto the in-memory config +
         # auth globals (jwt_secret / password_salt / admin_password / DB
-        # password).  No-op when OpenBAO is disabled/empty — the YAML values
+        # password).  No-op when OpenBAO is disabled/empty -- the YAML values
         # loaded at import remain in force.  See
         # docs/planning/config-classification.md (Phase 13.1.H).
         logger.info("=== SECRETS OVERLAY (OpenBAO) ===")
@@ -164,14 +164,14 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                     # log).  Anything gated on these engines stays disabled.
                     if failed_modules:
                         logger.error(
-                            "Pro+ ENGINES LICENSED BUT UNAVAILABLE (%d): %s — these "
+                            "Pro+ ENGINES LICENSED BUT UNAVAILABLE (%d): %s -- these "
                             "did not load (typically: no build for this platform/"
                             "Python on the license server); their features and any "
                             "orchestrators/ticks gated on them are DISABLED.",
                             len(failed_modules),
                             ", ".join(failed_modules),
                         )
-                # Bridge the multi-tenancy engine into the OSS seam if loaded —
+                # Bridge the multi-tenancy engine into the OSS seam if loaded --
                 # BEFORE mounting Pro+ routes, so mount_multitenancy_routes sees
                 # the registered engine and mounts ITS control-plane router (not
                 # the OSS fallback).  The bridge also feeds the data-plane
@@ -183,7 +183,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
 
                     bridge.bridge_loaded_engine(multitenancy_engine)
 
-                    # Phase 13.1.F — start the per-tenant backup/RPO orchestrator
+                    # Phase 13.1.F -- start the per-tenant backup/RPO orchestrator
                     # if the engine provides it AND backups are configured.  No-op
                     # otherwise (single-tenant, or no backup command in config), so
                     # we never spin an idle loop.
@@ -553,7 +553,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 # collector engine is loaded.  The /tick endpoint and
                 # DB model are always available (OSS-side), but the
                 # background tick driver only runs when the engine
-                # whose plans the tick produces is actually present —
+                # whose plans the tick produces is actually present --
                 # otherwise scheduled runs would queue forever with no
                 # consumer.
                 collector_engine_for_tick = module_loader.get_module(
@@ -581,7 +581,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
 
                     # And the run-lifecycle orchestrator.  The
                     # schedule-tick above CREATES QUEUED runs but
-                    # nothing else advances them — the run-tick is
+                    # nothing else advances them -- the run-tick is
                     # what actually walks a run through MIRRORING ->
                     # STAGING_COMPLETE -> BUILDING_ISO -> ISO_BUILT ->
                     # COMPLETE.  Same gate (collector engine present);
@@ -607,7 +607,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 # repository engine (the other half of the air gap):
                 # walks an AirgapIngestionRun through mount -> keyring
                 # verify -> copy -> COMPLETE.  Without it, a transferred
-                # ISO POSTed to /ingest queues forever with no consumer —
+                # ISO POSTed to /ingest queues forever with no consumer --
                 # the exact gap the collector run-tick above closed for
                 # the collector side.
                 repository_engine_for_tick = module_loader.get_module(
@@ -674,7 +674,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
             mount_proplus_routes(_fastapi_app)
 
         # Phase 13.2.1: now that OSS + Pro+ (engine or stub) routes are all
-        # mounted, fail fast if any two share the same method+path — this is the
+        # mounted, fail fast if any two share the same method+path -- this is the
         # only point where the OSS↔Pro+ route seam is fully assembled.
         from backend.startup.route_registration import (
             check_route_collisions,
@@ -691,7 +691,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
 
         # Phase 12.7: Start the GeoLite2 weekly-refresh background task.
         # Self-skipping when geo_lookup is disabled or no MaxMind license
-        # key is configured — operators who don't want geo-IP just leave
+        # key is configured -- operators who don't want geo-IP just leave
         # the config defaults and the task sleeps forever without doing
         # any work.  See backend/services/geolocation_service.py for
         # the refresh + ipapi.co fallback logic.
@@ -733,7 +733,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         # Startup: refresh every host's available-package catalog daily.
         #
         # Nothing did this before: a host was asked for its packages once, when
-        # it had no rows, and never again -- so the catalog froze at enrolment.
+        # it had no rows, and never again -- so the catalog froze at enrollment.
         # A bug was accidentally covering the gap by re-requesting forever; the
         # fix removed the accidental refresh along with the 9.4 GB of traffic.
         global _package_catalog_refresh_started  # pylint: disable=global-statement

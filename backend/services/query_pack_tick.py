@@ -227,7 +227,7 @@ def run_one_tick() -> Dict[str, Any]:
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     # EVERY database. A tenant's assignments, packs and hosts all live in that
     # tenant's database, so a tick reading only the bootstrap one finds zero
-    # assignments and reports a clean due=0 — collection silently never runs
+    # assignments and reports a clean due=0 -- collection silently never runs
     # for anyone under multi-tenancy, and nothing errors anywhere.
     for _label, _tenant, db_session in iter_host_databases():
         try:
@@ -258,8 +258,8 @@ async def query_pack_tick_service() -> None:
                 )
             await asyncio.sleep(TICK_INTERVAL_SECONDS)
         except asyncio.CancelledError:
-            logger.info("Query pack tick service cancelled — exiting loop")
+            logger.info("Query pack tick service cancelled -- exiting loop")
             raise
         except Exception:  # pylint: disable=broad-except
-            logger.exception("Query pack tick service error — sleeping then retrying")
+            logger.exception("Query pack tick service error -- sleeping then retrying")
             await asyncio.sleep(ERROR_BACKOFF_SECONDS)

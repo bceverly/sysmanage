@@ -11,7 +11,7 @@ start before it can serve secrets.  This script makes that hands-off:
 
   * waits for the local OpenBAO listener to come up;
   * if OpenBAO is **uninitialized**, initializes it (1 key share / threshold
-    1 — a single-node local appliance, auto-unsealed from local material)
+    1 -- a single-node local appliance, auto-unsealed from local material)
     and writes the root token + unseal key(s) to a **root-owned, 0600** file;
   * if OpenBAO is **sealed**, reads that file and unseals it;
   * if OpenBAO is already **unsealed**, does nothing.
@@ -22,7 +22,7 @@ the Python standard library (urllib) so it works with the system interpreter
 during package post-install, before the SysManage venv exists.
 
 Seal-key handling rationale: storing the unseal material locally (locked-down
-perms) is the documented shipping mechanism — it is what makes air-gapped
+perms) is the documented shipping mechanism -- it is what makes air-gapped
 deployments (where cloud-KMS auto-unseal is unreachable) come up cleanly, and
 an air-gapped network is hardened by design.  KMS/transit auto-unseal for
 internet-connected hardened deployments is a future enhancement.  See
@@ -73,7 +73,7 @@ def _wait_for_listener(addr: str, attempts: int = 30, delay: float = 1.0) -> boo
             if status == 200 and body is not None:
                 return True
         except (urllib.error.URLError, OSError) as exc:
-            # Listener not up yet — retry after the sleep below.
+            # Listener not up yet -- retry after the sleep below.
             logger.debug("OpenBAO listener not ready yet: %s", exc)
         time.sleep(delay)
     return False
@@ -140,7 +140,7 @@ def _write_app_token(app_token_file: str, owner, token: str) -> None:
         except (KeyError, OSError, ImportError) as exc:
             # Best-effort chown (owner may not exist / not permitted); the file
             # is still written 0640 and usable by root.
-            # Logs only the chown failure (a filesystem error) — no token value.
+            # Logs only the chown failure (a filesystem error) -- no token value.
             # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
             logger.debug("chown on app token file failed: %s", exc)
     print(f"App OpenBAO token written to {app_token_file} (0640).")

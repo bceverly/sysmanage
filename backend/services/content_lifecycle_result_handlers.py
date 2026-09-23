@@ -12,10 +12,10 @@ pylint's max-module-lines cap; re-imported there and registered in
 These handlers translate a completed ``content_lifecycle_engine`` plan
 ``outcome`` into database state.  Two actions are defined:
 
-* ``publish_materialize`` — stamp a ``SharedContentViewVersion``
+* ``publish_materialize`` -- stamp a ``SharedContentViewVersion``
   published/failed and, on success, bind the Library environment to the new
   version (the entry point of the promotion path) + run pin-aware retention GC.
-* ``reclaim`` — a best-effort store removal for a GC'd version; the row was
+* ``reclaim`` -- a best-effort store removal for a GC'd version; the row was
   already marked ``deprecated`` at dispatch time, so we only log the outcome.
 
 Content-view versions live in the SHARED partition, so we acquire a
@@ -81,7 +81,7 @@ def _tenant_session_for_host(host_id: str):
 
 
 def _pinned_version_ids(tenant_session, cv_id) -> set:
-    """Every version id a binding references for this CV — both the currently
+    """Every version id a binding references for this CV -- both the currently
     bound version AND each binding's ``previous_version_id`` (the rollback
     target).  A pinned version is NEVER reclaimed."""
     pinned = set()
@@ -193,7 +193,7 @@ def dispatch_env_symlink(host_id, mirror_root, cv_id, env_name, version) -> None
 def _reclaim_version(shared_session, engine, version, host_id) -> None:
     """Deprecate one version and dispatch a best-effort store removal.  The row
     is marked ``deprecated`` immediately; the physical ``rm`` is fire-and-schedule
-    (its result only logs — the version history row is retained)."""
+    (its result only logs -- the version history row is retained)."""
     store_path = version.store_path
     version.status = CVV_DEPRECATED
     version.store_path = None
@@ -226,7 +226,7 @@ def _reclaim_version(shared_session, engine, version, host_id) -> None:
 def _reap_unpinned_versions(shared_session, tenant_session, row, host_id) -> None:
     """Retention GC: reclaim published versions beyond the CV's ``keep_versions``
     that no binding pins.  Never touches the newest ``keep_versions`` and never a
-    pinned (bound or rollback-target) version — that is the rollback guarantee."""
+    pinned (bound or rollback-target) version -- that is the rollback guarantee."""
     cv = (
         shared_session.query(models.SharedContentView)
         .filter(models.SharedContentView.id == row.content_view_id)
@@ -253,7 +253,7 @@ def _reap_unpinned_versions(shared_session, tenant_session, row, host_id) -> Non
 def _finalize_publish(shared_session, row, host_id) -> None:
     """Post-publish side effects: bind Library -> new version + pin-aware GC.
 
-    Best-effort and heavily logged — the version is already committed
+    Best-effort and heavily logged -- the version is already committed
     ``published`` before we get here, so a hiccup binding or reaping must never
     unwind that."""
     try:
@@ -321,7 +321,7 @@ def _apply_publish_result(cvv_id: str, host_id: str, outcome: Dict[str, Any]) ->
 
 def _log_reclaim_result(cvv_id: str, host_id: str, outcome: Dict[str, Any]) -> None:
     """A reclaim plan finished; the row is already ``deprecated`` so we only log
-    (loudly on failure — orphaned bytes are worth a warning)."""
+    (loudly on failure -- orphaned bytes are worth a warning)."""
     if outcome.get("status") == "succeeded":
         logger.info(
             "content view version %s store reclaimed on host %s", cvv_id, host_id
@@ -524,7 +524,7 @@ def _apply_content_lifecycle_op_result(
     elif action in _LOG_ONLY_OPS:
         _log_op_result(action, cvv_id, host_id, outcome)
     else:
-        # Never silently drop an unroutable result — log it with context.
+        # Never silently drop an unroutable result -- log it with context.
         logger.warning(
             "content_lifecycle result: unhandled primary_id %r (host %s)",
             primary_id,

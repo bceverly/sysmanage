@@ -39,7 +39,7 @@ const Login = () => {
     const [rememberMe, setRememberMe] = useState(false);
     const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
     const [isLoggingIn, setIsLoggingIn] = useState(false);
-    // Phase 10.3 — MFA challenge state.  When the password login succeeds
+    // Phase 10.3 -- MFA challenge state.  When the password login succeeds
     // but the user has a second factor, the server returns
     // ``{mfa_required: true, pending_token: "..."}``.  We store the
     // pending token + user id and swap the form into the challenge view;
@@ -126,7 +126,7 @@ const Login = () => {
             if (detail.toLowerCase().includes("expired")) {
               setMfaPendingToken(null);
               setMfaCode("");
-              setMfaError(t('login.mfaExpired', 'Challenge expired — please log in again.'));
+              setMfaError(t('login.mfaExpired', 'Challenge expired -- please log in again.'));
             } else {
               setMfaError(t('login.mfaInvalidCode', 'Invalid code. Try again or use a backup code.'));
             }
@@ -146,7 +146,7 @@ const Login = () => {
     };
 
   // ------------------------------------------------------------------
-  // MFA challenge view — shown when the password step returned an
+  // MFA challenge view -- shown when the password step returned an
   // mfa_required response.  Rendered in place of the login form so the
   // user has nowhere to navigate until they finish the second factor.
   // ------------------------------------------------------------------

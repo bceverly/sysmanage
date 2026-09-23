@@ -140,7 +140,7 @@ const MaintenanceWindowCard: React.FC<Props> = ({ hostId }) => {
                     <Typography variant="body2" color="text.secondary">
                         {t(
                             'maintenanceWindows.unrestrictedHint',
-                            'No maintenance window applies — changes run immediately.',
+                            'No maintenance window applies -- changes run immediately.',
                         )}
                     </Typography>
                 )}

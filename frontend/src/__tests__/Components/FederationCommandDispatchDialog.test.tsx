@@ -7,7 +7,7 @@ import { vi, describe, beforeEach, test, expect } from "vitest";
 
 // i18n: return the fallback, applying simple {{var}} interpolation so
 // assertions on rendered text are stable.  `t` and the returned object MUST
-// be stable across renders (the real react-i18next memoises them) — a fresh
+// be stable across renders (the real react-i18next memoises them) -- a fresh
 // `t` per call breaks useCallback/useEffect deps into an infinite render loop.
 vi.mock("react-i18next", () => {
   const t = (key: string, fallback?: string, opts?: Record<string, unknown>) => {

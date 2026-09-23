@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Rate-limiting middleware — Phase 13.2 (API Completeness).
+Rate-limiting middleware -- Phase 13.2 (API Completeness).
 
 A lightweight, in-process fixed-window limiter that caps requests per client
 over a sliding-reset window and returns ``429 Too Many Requests`` (with a
@@ -18,7 +18,7 @@ Design choices, made deliberately to avoid regressions:
     ``SYSMANAGE_RATE_LIMIT_ENABLED`` env var) and tunes the limits for their
     deployment.
   * **Exemptions.** WebSockets, the health check, the root, and the agent
-    comms path are never limited — store-and-forward agent traffic must not be
+    comms path are never limited -- store-and-forward agent traffic must not be
     throttled.  Starlette's ``TestClient`` (client host ``testclient``) is
     exempt so the suite is unaffected.
   * **Proxy-aware keying.** Honours the first ``X-Forwarded-For`` hop when
@@ -88,7 +88,7 @@ class RateLimitMiddleware:
             return
 
         client_key = _client_key(scope)
-        if client_key == "testclient":  # Starlette TestClient — never limited
+        if client_key == "testclient":  # Starlette TestClient -- never limited
             await self.app(scope, receive, send)
             return
 

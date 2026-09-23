@@ -4,12 +4,12 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-i18n_backfill.py — idempotent translation-backfill client for the SysManage
+i18n_backfill.py -- idempotent translation-backfill client for the SysManage
 translation service (``translate_service.py``).
 
 Walks a locale store, finds the strings that are NOT yet translated (only the
 gaps), batch-translates them through the service, and writes them back into the
-existing i18n files.  Scoped to THIS repo's own locale stores only — it never
+existing i18n files.  Scoped to THIS repo's own locale stores only -- it never
 reaches into a sibling repository (docs / proplus / agent translate themselves
 via their own ``scripts/translate_i18n.py``):
 
@@ -17,14 +17,14 @@ via their own ``scripts/translate_i18n.py``):
   backend   backend/i18n/locales/<lang>/LC_MESSAGES/messages.po        (.po)
 
 Key properties:
-  * IDEMPOTENT — only untranslated entries are sent.  JSON gaps are ``[TODO] …``
+  * IDEMPOTENT -- only untranslated entries are sent.  JSON gaps are ``[TODO] …``
     placeholders or missing keys; ``.po`` gaps are empty ``msgstr``.  Already
     translated strings are never re-sent, so re-running is cheap and resumable.
-  * CONSERVATIVE — if the service returns the English source for a string (its
+  * CONSERVATIVE -- if the service returns the English source for a string (its
     placeholder-integrity guard could not safely translate it), that entry is
     LEFT as a gap rather than written as English, so a later run retries it.
-  * DEDUPED — identical English strings are translated once per language.
-  * BATCHED — one request per chunk (``--client-batch``) per language.
+  * DEDUPED -- identical English strings are translated once per language.
+  * BATCHED -- one request per chunk (``--client-batch``) per language.
 
 Usage:
   # service on the beast box:
@@ -86,7 +86,7 @@ TARGET_LANGS = [
 # identical" from "service fell back to English because it couldn't translate".
 _HAS_LETTER = re.compile(r"[^\W\d_]", re.UNICODE)
 
-# Placeholder/markup tokens — used to distinguish a placeholder-fallback
+# Placeholder/markup tokens -- used to distinguish a placeholder-fallback
 # (identical output because the service couldn't translate a {{…}}/%s/<tag>
 # safely) from a legitimately-identical term (acronyms like URL/IPv4 or words
 # the model keeps as-is, e.g. "Details"). Only the former is held back to retry.
@@ -98,7 +98,7 @@ _PLACEHOLDER_RE = re.compile(
 # project -> (format, repo-relative-path, per-language file template)
 #   {lang} in the template is replaced with the locale code.
 # THIS repo's own locale stores only.  Paths are relative to the sysmanage repo
-# root — intentionally NOT sibling-repo paths, so this client can never reach
+# root -- intentionally NOT sibling-repo paths, so this client can never reach
 # into another repository.  docs / proplus / agent each translate themselves via
 # their own self-contained scripts/translate_i18n.py.
 PRESETS: Dict[str, Tuple[str, str, str]] = {
@@ -228,7 +228,7 @@ def _allow():
 
     Returning None here silently disabled the allow-list for the WHOLE pass.
     On 2026-08-05 this resolver probed ``scripts/scripts/i18n_strict.py`` (the
-    parent was already ``scripts/``), found nothing, and fell back to None — so
+    parent was already ``scripts/``), found nothing, and fell back to None -- so
     every intentionally-English value was re-sent to the service on every run
     AND counted as a permanent gap by ``--check``, while ``i18n_strict.py``,
     which reads the same list correctly, reported OK.  Two gates, two answers,
@@ -272,7 +272,7 @@ def _needs_translation(key: str, en_src: str, value, lang: str) -> bool:
     The second half is the whole point: `make translate` used to look ONLY for
     gaps, so a string that came back English once was invisible to every
     subsequent run and stayed English forever.  There is deliberately NO
-    minimum length — a short label is as user-facing as a paragraph, and a
+    minimum length -- a short label is as user-facing as a paragraph, and a
     length floor is an invisible exemption nobody reviews.  Values that should
     stay English belong in i18n-allow.txt, where the decision is explicit.
     """
@@ -295,7 +295,7 @@ def _needs_translation(key: str, en_src: str, value, lang: str) -> bool:
 # from here was pure waste: a LAN round-trip to ask the same model the same
 # question, driven by a guess ("the output equals the input, so it must have
 # failed") that is wrong for every term whose correct translation IS the
-# English — which is exactly how {{seconds}}s and `pkg_info stderr: %s` looped
+# English -- which is exactly how {{seconds}}s and `pkg_info stderr: %s` looped
 # forever.
 
 
@@ -321,7 +321,7 @@ def _report_stuck(stuck_report: Dict[str, List[str]]) -> None:
         lines.append(f"    {key}   [{', '.join(where)}]")
     lines += [
         "",
-        "  Two real fixes, and which one applies is a judgement call:",
+        "  Two real fixes, and which one applies is a judgment call:",
         "    1. REWORD the English when it is a loanword that is the same",
         "       word in those languages -- no correct translation CAN",
         "       differ, so the gate can never close. The English is often",
@@ -343,7 +343,7 @@ def _translate_uniq(
     """``{source: translation}`` for the strings the service translated.
 
     Sources the service reports as a fallback are omitted, so the caller leaves
-    them as gaps — but they are also returned separately, because "the service
+    them as gaps -- but they are also returned separately, because "the service
     could not change this string" is NOT a transient condition.  Re-running
     will produce the identical result forever, so telling the operator to retry
     is worse than useless: it hides the only two real remedies (reword the
@@ -386,7 +386,7 @@ def run_json(
     for lang in langs:
         path = base / template.format(lang=lang)
         if not path.exists():
-            print(f"  {lang}: file missing ({path}) — skipped", flush=True)
+            print(f"  {lang}: file missing ({path}) -- skipped", flush=True)
             continue
         doc = json.loads(path.read_text(encoding="utf-8"))
         lang_flat = _flatten(doc)
@@ -395,7 +395,7 @@ def run_json(
         # i18n-allow.txt is deliberately never sent to the service, so if it is
         # sitting as a [TODO] (or was requeued into one) that placeholder can
         # never be cleared and the gate can never close.  Resolve it to its
-        # intended final value — plain English — up front.
+        # intended final value -- plain English -- up front.
         if service is not None and _ALLOW is not None:
             healed = 0
             for key, en_src in en_flat.items():
@@ -494,12 +494,12 @@ def run_po(
     try:
         import polib  # noqa: PLC0415
     except ImportError:
-        sys.exit("ERROR: the .po driver needs polib — run: pip install polib")
+        sys.exit("ERROR: the .po driver needs polib -- run: pip install polib")
 
     for lang in langs:
         path = base / template.format(lang=lang)
         if not path.exists():
-            print(f"  {lang}: file missing ({path}) — skipped", flush=True)
+            print(f"  {lang}: file missing ({path}) -- skipped", flush=True)
             continue
         po = polib.pofile(str(path))
         # Gap = a real message with an empty translation (skip header + obsolete).
@@ -524,7 +524,7 @@ def run_po(
                     flush=True,
                 )
 
-        # Empty msgstr OR one left identical to the msgid — the latter was
+        # Empty msgstr OR one left identical to the msgid -- the latter was
         # invisible to every previous run, so it stayed English forever.
         gap_entries = [
             e
@@ -591,7 +591,7 @@ def scan_gaps(
 ) -> Dict[str, List[str]]:
     """Re-read the locale files on disk and return {lang: [untranslated keys]}.
 
-    Authoritative — reads what was actually written, so it reflects strings the
+    Authoritative -- reads what was actually written, so it reflects strings the
     service held back (placeholder fallbacks) as well as any never filled."""
     result: Dict[str, List[str]] = {}
     if fmt == "json":
@@ -646,12 +646,12 @@ def enforce_no_gaps(
     """Exit NON-ZERO, loudly, if any locale still has untranslated strings.
 
     Wired into ``make translate`` so an incomplete locale set fails the build
-    instead of quietly sliding through — translations must be 100%."""
+    instead of quietly sliding through -- translations must be 100%."""
     offenders = {l: ks for l, ks in scan_gaps(base, template, langs, fmt).items() if ks}
     if not offenders:
         print(
             f"[OK] {project}: 0 untranslated gaps in {len(langs)} locale(s).\n"
-            "  (Gaps only — this does NOT check translation QUALITY.  Run\n"
+            "  (Gaps only -- this does NOT check translation QUALITY.  Run\n"
             "   `make i18n-strict` for English-identical / stale / wrong-language.)",
             flush=True,
         )
@@ -661,7 +661,7 @@ def enforce_no_gaps(
     lines = [
         "",
         sep,
-        f"  ✗✗✗  TRANSLATION INCOMPLETE — {project}: {total} untranslated string(s) "
+        f"  ✗✗✗  TRANSLATION INCOMPLETE -- {project}: {total} untranslated string(s) "
         f"in {len(offenders)} locale(s)  ✗✗✗",
         sep,
     ]
@@ -711,7 +711,7 @@ def main() -> None:
         "--check",
         action="store_true",
         help="offline completeness gate: scan locales and exit non-zero if any gap "
-        "remains. NO service calls, NO writes — safe for CI / release hooks.",
+        "remains. NO service calls, NO writes -- safe for CI / release hooks.",
     )
     args = ap.parse_args()
 
@@ -736,10 +736,10 @@ def main() -> None:
 
     print(f"project={args.project} format={fmt} base={base}", flush=True)
 
-    # Offline completeness gate — no service, no writes.  Scans the files on
+    # Offline completeness gate -- no service, no writes.  Scans the files on
     # disk and exits non-zero (loudly) if anything is still untranslated.
     if args.check:
-        print("mode=check (offline — no service calls, no writes)", flush=True)
+        print("mode=check (offline -- no service calls, no writes)", flush=True)
         enforce_no_gaps(args.project, base, template, langs, fmt)
         return
 

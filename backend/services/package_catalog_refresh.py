@@ -148,7 +148,7 @@ def _run_one_pass() -> int:
                 )
         except Exception:  # pylint: disable=broad-except
             logger.exception(
-                "package-catalog refresh failed for %s (tenant_id=%s) — "
+                "package-catalog refresh failed for %s (tenant_id=%s) -- "
                 "continuing with the other databases",
                 label,
                 tenant_id,
@@ -179,10 +179,10 @@ async def run_package_catalog_refresh_loop(
             )
             await asyncio.sleep(interval_seconds)
         except asyncio.CancelledError:
-            logger.info("Package-catalog refresh loop cancelled — exiting")
+            logger.info("Package-catalog refresh loop cancelled -- exiting")
             raise
         except Exception:  # pylint: disable=broad-except
             logger.exception(
-                "Package-catalog refresh loop error — backing off then retrying"
+                "Package-catalog refresh loop error -- backing off then retrying"
             )
             await asyncio.sleep(ERROR_BACKOFF_SECONDS)

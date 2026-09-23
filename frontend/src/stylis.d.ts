@@ -5,7 +5,7 @@
 // Ambient types for `stylis` v4, which ships no bundled `.d.ts` and has no
 // `@types/stylis` for the 4.x line.  We consume the `prefixer` middleware
 // (passed to Emotion's `stylisPlugins`), and `stylis-plugin-rtl` imports the
-// `Middleware` type from here too — so declare both.
+// `Middleware` type from here too -- so declare both.
 declare module "stylis" {
   export interface Element {
     type: string;

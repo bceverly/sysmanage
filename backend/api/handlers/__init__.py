@@ -36,7 +36,7 @@ from backend.api.handlers.child_host_handlers import (
 from backend.api.handlers.config_mgmt_handlers import handle_config_profile_result
 from backend.api.handlers.query_pack_handlers import handle_query_pack_result
 
-# Import from custom_metric_handlers (Custom Metrics & Graphs — Slice 3b)
+# Import from custom_metric_handlers (Custom Metrics & Graphs -- Slice 3b)
 from backend.api.handlers.custom_metric_handlers import handle_custom_metric_samples
 
 # Import from hostname_handler

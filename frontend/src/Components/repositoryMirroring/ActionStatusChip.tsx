@@ -14,14 +14,14 @@ import { formatElapsed } from './helpers';
 // restore, integrity, gc) that the old UI flattened onto one
 // ``last_sync_status`` column.  This chip renders ONE action's state:
 //
-//   never run        → muted "—"
+//   never run        → muted "--"
 //   DISPATCHED + msg → spinner + "Nm ago" elapsed-time
 //   SUCCESS          → green chip with absolute timestamp on hover
 //   FAILED           → red chip; hover reveals the full error text
 //
 // The chip is keyed off ``message_id`` (not ``status``) for the
 // in-flight check because the dispatch endpoints stamp message_id at
-// dispatch and the result handler clears it on success OR failure —
+// dispatch and the result handler clears it on success OR failure --
 // which means message_id is the load-bearing "is this still in
 // flight" signal.  ``status`` alone can lie (the DISPATCHED string
 // might linger on a stuck row whose result handler never fired).
@@ -45,7 +45,7 @@ const ActionStatusChip: React.FC<ActionStatusChipProps> = ({
   // Tick once per second WHILE in-flight so the elapsed-time label
   // advances smoothly.  ``formatElapsed`` reads ``Date.now()`` at
   // render, so the only thing missing was a reason to re-render
-  // between the parent's 10s data polls — this forces one every
+  // between the parent's 10s data polls -- this forces one every
   // second.  The interval is torn down the moment the op settles
   // (inFlight flips false), so idle chips never hold a timer.  Hooks
   // run unconditionally before the early returns below, per the rules

@@ -6,7 +6,7 @@
 Child host creation handlers.
 
 Public handlers dispatch to the Pro+ ``child_host_handlers_engine`` when
-loaded.  Without the engine, child-host management is not available —
+loaded.  Without the engine, child-host management is not available --
 the handlers return a ``feature_not_licensed`` error.  Child hosts are
 a Pro+ feature.
 """

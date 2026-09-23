@@ -313,7 +313,7 @@ def _licensed_spec(executor: str, request: "ConfigProfileApplyRequest"):
         timeout=request.timeout,
     )
     if spec is None:
-        # The licence check has already passed, so this is a broken install
+        # The license check has already passed, so this is a broken install
         # (module not loaded for this Python version) rather than an
         # unlicensed customer. 503, not 403 -- they need an administrator,
         # not a salesperson.

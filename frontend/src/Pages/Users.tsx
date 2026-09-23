@@ -451,7 +451,7 @@ const Users = () => {
                             labelRowsPerPage: t('common.rowsPerPage'),
                             labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) => {
                                 const countDisplay = count === -1 ? t('common.of') + ' ' + to : count;
-                                return from + '–' + to + ' ' + t('common.of') + ' ' + countDisplay;
+                                return from + '-' + to + ' ' + t('common.of') + ' ' + countDisplay;
                             },
                         },
                         noRowsLabel: t('users.noRows'),

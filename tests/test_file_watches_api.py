@@ -9,8 +9,8 @@ seven read endpoints gated on a ``SecurityRoles`` member that did not exist,
 and every GET returned 500 the first time a human opened the page. Service
 tests were green throughout, because they never traverse a route.
 
-So this suite asserts the wiring -- dependencies resolve, authorisation names
-REAL roles, route ordering holds, responses serialise -- and leaves the depth
+So this suite asserts the wiring -- dependencies resolve, authorization names
+REAL roles, route ordering holds, responses serialize -- and leaves the depth
 to the service tests.
 """
 
@@ -75,7 +75,7 @@ def client(monkeypatch):
     app.include_router(file_watches.router, prefix="/api/v1")
     app.dependency_overrides[require_authenticated_user] = FakeUser
     app.dependency_overrides[get_tenant_db] = FakeDB
-    # JWTBearer() and the licence gate are instances built at import time, so
+    # JWTBearer() and the license gate are instances built at import time, so
     # they are overridden by identity off the router rather than by calling
     # the factories again -- a fresh call makes a different object and the
     # override silently does not apply (which shows up as a 401).

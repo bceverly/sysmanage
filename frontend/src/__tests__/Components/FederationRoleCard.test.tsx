@@ -17,7 +17,7 @@ import { vi, beforeEach, test, expect } from "vitest";
 // fine in isolation), so give the async utilities more headroom here.
 configure({ asyncUtilTimeout: 5000 });
 
-// Stable `t` — FederationRoleCard puts `t` in useCallback/useEffect deps, so a
+// Stable `t` -- FederationRoleCard puts `t` in useCallback/useEffect deps, so a
 // fresh `t` per render would infinite-loop (see project memory).
 vi.mock("react-i18next", () => {
   const t = (key: string, fallback?: string, opts?: Record<string, unknown>) => {

@@ -6,7 +6,7 @@ import { vi, describe, beforeEach, afterEach, test, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import type { TFunction } from 'i18next';
 
-// Mock the axios instance the hook imports (via ../../Services/api) — same
+// Mock the axios instance the hook imports (via ../../Services/api) -- same
 // mocking style as the Services test suite (default export with the HTTP verbs).
 vi.mock('../../../Services/api', () => ({
     default: {

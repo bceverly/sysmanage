@@ -8,7 +8,7 @@ Snap-materialize helper for content-view publish (Phase 17.1, Slice 3).
 Extracted from ``backend.api.content_lifecycle`` to keep that module under the
 line-count cap.  When a content view is published, any snaps CAPTURED into its
 member mirrors are materialized into the same version store so they ride the
-air-gap ISO unchanged — gated on the Pro+ ``snap_proxy_engine`` being licensed.
+air-gap ISO unchanged -- gated on the Pro+ ``snap_proxy_engine`` being licensed.
 """
 
 from typing import List

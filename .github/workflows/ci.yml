@@ -3,9 +3,9 @@ name: CI/CD Pipeline
 on:
   # Tag-push only.  Day-to-day branch pushes and pull requests are
   # covered by ``multi-os-ci.yml`` (PostgreSQL + macOS + Windows on
-  # Python 3.12).  This workflow runs the *exhaustive* matrix —
+  # Python 3.12).  This workflow runs the *exhaustive* matrix --
   # Python 3.10 through 3.14 plus the full lint suite + coverage
-  # badge updates — only when an installer is being cut, which is
+  # badge updates -- only when an installer is being cut, which is
   # the moment a regression in any of those dimensions actually
   # gates a release.  The same trigger satisfies
   # ``build-and-release.yml``'s wait-on-check step, which polls for
@@ -114,8 +114,8 @@ jobs:
         EOF
 
     - name: Run backend database migrations
-      # Run ALL THREE partition chains on PostgreSQL — registry, shared, and
-      # tenant (the default section) — not just the tenant chain.  The
+      # Run ALL THREE partition chains on PostgreSQL -- registry, shared, and
+      # tenant (the default section) -- not just the tenant chain.  The
       # registry/shared chains were previously never exercised on PG in CI,
       # which let dialect-specific migration bugs (CHAR-vs-UUID, FK naming)
       # reach ``make migrate``.  tests/test_alembic_postgres.py additionally
@@ -138,8 +138,8 @@ jobs:
 
         # Backend Python tests run as TWO separate pytest processes that
         # accumulate into one coverage dataset via --cov-append:
-        #   1. tests/         — the canonical suite
-        #   2. backend/tests/ — a second tree (proplus dispatch/routes,
+        #   1. tests/         -- the canonical suite
+        #   2. backend/tests/ -- a second tree (proplus dispatch/routes,
         #                       federation services, host/user/tag/license
         #                       management APIs, ...) that was historically
         #                       NOT collected by CI, so the ~490 tests there
@@ -209,7 +209,7 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push' && matrix.python-version == '3.12'
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       with:
-        # Explicitly check out main rather than the trigger ref —
+        # Explicitly check out main rather than the trigger ref --
         # this step only runs on tag pushes (per the surrounding
         # ``if:`` guard), where the default checkout would land us
         # on the tag's commit in detached-HEAD state.  peter-evans/
@@ -440,7 +440,7 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       with:
-        # Explicitly check out main rather than the trigger ref —
+        # Explicitly check out main rather than the trigger ref --
         # this step only runs on tag pushes (per the surrounding
         # ``if:`` guard), where the default checkout would land us
         # on the tag's commit in detached-HEAD state.  peter-evans/
@@ -689,8 +689,8 @@ jobs:
         EOF
 
     - name: Run backend database migrations
-      # Run ALL THREE partition chains on PostgreSQL — registry, shared, and
-      # tenant (the default section) — not just the tenant chain.  The
+      # Run ALL THREE partition chains on PostgreSQL -- registry, shared, and
+      # tenant (the default section) -- not just the tenant chain.  The
       # registry/shared chains were previously never exercised on PG in CI,
       # which let dialect-specific migration bugs (CHAR-vs-UUID, FK naming)
       # reach ``make migrate``.  tests/test_alembic_postgres.py additionally
@@ -765,7 +765,7 @@ jobs:
         # :3000 and reverse-proxies /api/* + /ws to the backend on :8080.
         # We can't use ``npx serve`` here because the frontend bundle
         # makes relative API calls (/api/v1/login etc.) that need to reach
-        # the backend — ``serve -s`` would fall through to /index.html
+        # the backend -- ``serve -s`` would fall through to /index.html
         # for any /api/* path and login would silently get HTML back.
         #
         # Copy dist into /var/www/sysmanage rather than pointing nginx
@@ -815,7 +815,7 @@ jobs:
         sudo systemctl restart nginx
         echo "✅ nginx serving SPA + proxying /api/* to backend"
 
-        # No PID file to track — nginx is managed by systemd.  Write a
+        # No PID file to track -- nginx is managed by systemd.  Write a
         # sentinel value so later steps that look for the file don't fail.
         echo "nginx-managed-by-systemd" > /tmp/frontend.pid
         # Also write the access/error logs to /tmp/frontend.log so the
@@ -859,7 +859,7 @@ jobs:
         echo "Waiting for frontend..."
         if ! timeout 60 bash -c 'until curl -f http://localhost:3000/; do echo "Waiting for frontend..."; sleep 2; done'; then
           echo "❌ Frontend health check failed!"
-          echo "Frontend logs (nginx error log — /tmp/frontend.log is a placeholder):"
+          echo "Frontend logs (nginx error log -- /tmp/frontend.log is a placeholder):"
           sudo tail -100 /var/log/nginx/error.log || echo "No nginx error log"
           echo "Frontend logs (nginx access log):"
           sudo tail -50 /var/log/nginx/access.log || echo "No nginx access log"
@@ -972,7 +972,7 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       with:
-        # Explicitly check out main rather than the trigger ref —
+        # Explicitly check out main rather than the trigger ref --
         # this step only runs on tag pushes (per the surrounding
         # ``if:`` guard), where the default checkout would land us
         # on the tag's commit in detached-HEAD state.  peter-evans/
@@ -1025,7 +1025,7 @@ jobs:
         fi
         if [ -f /tmp/frontend.pid ]; then
           # Sentinel "nginx-managed-by-systemd" means we used nginx, not a
-          # PID — `kill` on that string would just print an error.
+          # PID -- `kill` on that string would just print an error.
           PID=$(cat /tmp/frontend.pid)
           if [[ "$PID" =~ ^[0-9]+$ ]]; then
             kill "$PID" || true
@@ -1043,7 +1043,7 @@ jobs:
     permissions:
       contents: write  # Allow writing to update README badge
       pull-requests: write  # Allow creating pull requests
-    needs: [ui-tests]  # ordering only — runs even if ui-tests failed so the
+    needs: [ui-tests]  # ordering only -- runs even if ui-tests failed so the
                        # artillery badge always reflects the latest tag build's
                        # actual artillery run (was being skipped on flaky ui-tests)
     if: ${{ !cancelled() }}
@@ -1142,8 +1142,8 @@ jobs:
         EOF
 
     - name: Run backend database migrations
-      # Run ALL THREE partition chains on PostgreSQL — registry, shared, and
-      # tenant (the default section) — not just the tenant chain.  The
+      # Run ALL THREE partition chains on PostgreSQL -- registry, shared, and
+      # tenant (the default section) -- not just the tenant chain.  The
       # registry/shared chains were previously never exercised on PG in CI,
       # which let dialect-specific migration bugs (CHAR-vs-UUID, FK naming)
       # reach ``make migrate``.  tests/test_alembic_postgres.py additionally
@@ -1368,7 +1368,7 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       with:
-        # Explicitly check out main rather than the trigger ref —
+        # Explicitly check out main rather than the trigger ref --
         # this step only runs on tag pushes (per the surrounding
         # ``if:`` guard), where the default checkout would land us
         # on the tag's commit in detached-HEAD state.  peter-evans/

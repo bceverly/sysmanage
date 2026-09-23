@@ -149,7 +149,7 @@ class TestGetCachedModulePath:
 
 
 # ---------------------------------------------------------------------------
-# ensure_module_available — non-proplus_core paths
+# ensure_module_available -- non-proplus_core paths
 # ---------------------------------------------------------------------------
 
 
@@ -288,7 +288,7 @@ class TestSaveModuleToCache:
 
         loader = ModuleLoader()
         with _patch_session(raise_on_query=RuntimeError("db down")) as session:
-            # Should not raise — errors are logged.
+            # Should not raise -- errors are logged.
             loader._save_module_to_cache(
                 module_code="x",
                 version="1",
@@ -437,7 +437,7 @@ class TestDownloadAndCacheModule:
             # Authenticity is now checked during EXTRACTION, before the staging
             # dir is swapped in, so this fixture's unsigned bundle no longer
             # reaches the cache on its own. Stubbing the verifier keeps the test
-            # about download/extract/cache; signature behaviour has its own
+            # about download/extract/cache; signature behavior has its own
             # tests in test_licensing_module_update_safety.py.
             "backend.licensing.module_loader.verify_module_dir"
         ), patch.object(
@@ -527,7 +527,7 @@ class TestLoadModuleFromPathSuccess:
 
 
 # ---------------------------------------------------------------------------
-# _get_cached_module_version / _hash — additional branches
+# _get_cached_module_version / _hash -- additional branches
 # ---------------------------------------------------------------------------
 
 
@@ -549,7 +549,7 @@ class TestGetCachedModuleHashFound:
 
 
 # ---------------------------------------------------------------------------
-# query_server_versions — happy path and error branches
+# query_server_versions -- happy path and error branches
 # ---------------------------------------------------------------------------
 
 
@@ -670,7 +670,7 @@ class TestQueryServerVersions:
 
 
 # ---------------------------------------------------------------------------
-# check_for_updates — version match, hash mismatch, up-to-date
+# check_for_updates -- version match, hash mismatch, up-to-date
 # ---------------------------------------------------------------------------
 
 
@@ -747,7 +747,7 @@ class TestCheckForUpdatesAdvanced:
                 return_value={"old_module": {"version": "1.0", "file_hash": ""}}
             ),
         ), patch.object(loader, "_get_cached_module_version", return_value=None):
-            # The loader pulls server_data.get("modules", server_data) — when
+            # The loader pulls server_data.get("modules", server_data) -- when
             # there is no "modules" key, it treats the whole dict as the
             # versions table.
             updates = await loader.check_for_updates()
@@ -893,7 +893,7 @@ class TestRemoveCachedModule:
             "backend.licensing.module_loader.os.remove",
             side_effect=OSError("perm denied"),
         ):
-            # Should not raise — just logs the warning.
+            # Should not raise -- just logs the warning.
             loader._remove_cached_module("m")
         session.delete.assert_called_once_with(entry)
         session.commit.assert_called_once()
@@ -982,5 +982,5 @@ class TestCheckAndUpdateOnStartup:
         with patch.object(
             loader, "update_modules", new=AsyncMock(side_effect=RuntimeError("x"))
         ):
-            # Must not propagate — startup hook is best-effort.
+            # Must not propagate -- startup hook is best-effort.
             await loader.check_and_update_on_startup()

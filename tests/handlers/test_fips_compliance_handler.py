@@ -4,7 +4,7 @@
 
 """
 Tests for backend.api.handlers.os_hardware_handlers.handle_fips_compliance_update
-(Phase 14.4 — OSS FIPS posture ingestion).
+(Phase 14.4 -- OSS FIPS posture ingestion).
 
 The DB is mocked; the test exercises the orchestration (validation, prefix
 stripping, the UPDATE payload) rather than the SQL itself.

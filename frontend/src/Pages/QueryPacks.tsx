@@ -67,7 +67,7 @@ const STATUS_COLOR: Record<string, 'success' | 'warning' | 'error' | 'default'> 
  *
  * The fallback is spelled out rather than reusing the raw status value: a
  * missing catalog key would otherwise show an operator the bare word
- * `partial`, which is both untranslated and — worse — easy to read as a
+ * `partial`, which is both untranslated and -- worse -- easy to read as a
  * lesser success rather than as "this host could not answer some of it".
  */
 const STATUS_LABEL: Record<string, string> = {
@@ -219,7 +219,7 @@ const QueryPacks: React.FC = () => {
      * Check without saving.
      *
      * Separate from save so an author can find out the SQL is acceptable
-     * before committing a name — a rejected save leaves no draft behind.
+     * before committing a name -- a rejected save leaves no draft behind.
      */
     const check = async () => {
         try {

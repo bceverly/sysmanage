@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Multi-tenancy engine seam — the OSS plug point for the licensed engine.
+Multi-tenancy engine seam -- the OSS plug point for the licensed engine.
 
 Phase 0 of the Pro+ relocation (see ``docs/multitenancy-proplus-relocation.md``).
 Multi-tenancy is becoming a commercial-only capability implemented in a compiled,
@@ -14,7 +14,7 @@ tenant behavior consult it here.
 **Open-source safety invariant:** when no engine is registered, every consult
 falls back to OSS's built-in behavior, so an OSS build (or the current
 pre-relocation state) works *exactly* as before.  As the implementation moves
-into the engine in later phases, those OSS fallbacks are removed — leaving the
+into the engine in later phases, those OSS fallbacks are removed -- leaving the
 licensed engine as the only provider.  That absence *is* the technical moat: a
 fork of the public repo has the schema + seams but none of the tenant logic.
 
@@ -38,7 +38,7 @@ class MultitenancyEngine(Protocol):
 
 _engine: Optional[MultitenancyEngine] = None
 # The raw loaded engine module, exposed for OSS *service shims* (modules whose
-# logic moved into the engine) that delegate to relocated functions by name —
+# logic moved into the engine) that delegate to relocated functions by name --
 # e.g. ``seam.engine_module().tenant_for_host(...)``.  Kept separate from the
 # protocol adapter above so the growing set of relocated service functions
 # doesn't bloat ``MultitenancyEngine``.

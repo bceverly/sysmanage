@@ -97,9 +97,9 @@ function AppRoutes() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/api-keys" element={<ApiKeys />} />
       <Route path="/settings" element={<Settings />} />
-      {/* Air-gap and federation pages are ENTERPRISE-only — guard the routes so
+      {/* Air-gap and federation pages are ENTERPRISE-only -- guard the routes so
           they're unreachable by direct URL on a license that lacks the engine
-          (defence-in-depth on top of the nav-level gating). */}
+          (defense-in-depth on top of the nav-level gating). */}
       <Route path="/airgap/repositories" element={<LicensedRoute module="airgap_repository_engine"><AirgapRepositories /></LicensedRoute>} />
       <Route path="/airgap/collections" element={<LicensedRoute module="airgap_collector_engine"><AirgapCollections /></LicensedRoute>} />
       <Route path="/map" element={<MapView />} />
@@ -116,8 +116,8 @@ function AppRoutes() {
       {routes.map(route => {
         // A plugin route that declares a feature/module gate is wrapped in the
         // license guard so it can't be reached by direct URL without the
-        // license — even when its nav link is hidden. Ungated routes (neither
-        // field set) render as-is, preserving the pre-gate behaviour.
+        // license -- even when its nav link is hidden. Ungated routes (neither
+        // field set) render as-is, preserving the pre-gate behavior.
         const RouteComponent = route.component;
         const element = (route.featureFlag || route.moduleRequired) ? (
           <LicensedRoute feature={route.featureFlag} module={route.moduleRequired}>
@@ -148,7 +148,7 @@ function PluginAppBanners() {
     // Don't fetch the license until the user is authenticated.  On /login there's
     // no bearer token, so GET /api/v1/license 401s; the axios interceptor then
     // runs its refresh→fail path and redirects to /login, remounting this banner
-    // and refetching — an infinite reload loop that makes the login page unusable
+    // and refetching -- an infinite reload loop that makes the login page unusable
     // (and broke the Playwright auth setup).  No banners render pre-login anyway.
     if (!localStorage.getItem('bearer_token')) {
       return;

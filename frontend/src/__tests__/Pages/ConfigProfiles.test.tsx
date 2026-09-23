@@ -5,7 +5,7 @@
 /**
  * The Configuration Profiles page (Phase 20.1, Enterprise).
  *
- * Two behaviours matter more than the CRUD plumbing.
+ * Two behaviors matter more than the CRUD plumbing.
  *
  * **A save error must not close the dialog.** The body of a profile is a
  * playbook somebody may have spent real time on; closing the dialog to show

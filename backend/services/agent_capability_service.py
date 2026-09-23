@@ -2,12 +2,12 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Ingest and query agent capability advertisements — ROADMAP Phase 19.
+"""Ingest and query agent capability advertisements -- ROADMAP Phase 19.
 
 WHERE "LIMITED" COMES FROM
 --------------------------
-Not from a baseline list kept on the server.  The obvious design — hold the
-full capability set here and flag anything smaller — needs a constant that
+Not from a baseline list kept on the server.  The obvious design -- hold the
+full capability set here and flag anything smaller -- needs a constant that
 mirrors the agent's taxonomy across two repositories, and that drifts the
 first time the agent gains a capability the server has not heard of: every
 up-to-date host would be flagged limited by a stale server.
@@ -17,14 +17,14 @@ command-handler map against its own taxonomy, so ``unavailable`` and
 ``partial`` are exactly "what this build cannot do relative to a full one".
 A host is limited when either is non-empty.  No server-side baseline, nothing
 to keep in sync, and a newer agent advertising capabilities this server has
-never seen is simply not limited — which is correct.
+never seen is simply not limited -- which is correct.
 
 WHY UNKNOWN IS NOT LIMITED
 --------------------------
 ``agent_capabilities IS NULL`` means the host never told us: an older agent, or
 one whose report could not be built.  That is a THIRD state, not a synonym for
 limited.  Flagging it limited would light up every pre-upgrade host in the
-fleet, and — worse — gating dispatch on it would break working hosts.  Unknown
+fleet, and -- worse -- gating dispatch on it would break working hosts.  Unknown
 hosts are therefore never flagged and never gated.
 """
 
@@ -52,7 +52,7 @@ def _utcnow_naive() -> datetime:
 def normalize_report(report: Any) -> Optional[Dict[str, Any]]:
     """Validate an advertisement and reduce it to the fields we store.
 
-    Returns ``None`` when the report is unusable — malformed, or a schema
+    Returns ``None`` when the report is unusable -- malformed, or a schema
     version this server does not implement.  Unknown KEYS inside a supported
     version are dropped rather than rejected, so a newer agent can add fields
     without breaking ingestion here (the same contract federation uses for a
@@ -71,7 +71,7 @@ def normalize_report(report: Any) -> Optional[Dict[str, Any]]:
         # forever with no clue why.
         logger.warning(
             "agent advertises capability schema v%s but this server implements "
-            "v%s — ignoring the report; upgrade the server to consume it",
+            "v%s -- ignoring the report; upgrade the server to consume it",
             # Scrubbed because it came out of the agent's report: the isinstance
             # guard above already proves it is an int, but the rule is "every
             # value off the wire goes through scrub" and an exception to that
@@ -117,7 +117,7 @@ def normalize_report(report: Any) -> Optional[Dict[str, Any]]:
     commands = _str_list(report.get("commands"))
     if not commands:
         # A report with no routable commands is not a limited agent, it is a
-        # broken report — an agent that can run nothing could not have sent it.
+        # broken report -- an agent that can run nothing could not have sent it.
         logger.warning("agent capability report lists no commands; ignoring")
         return None
 
@@ -145,7 +145,7 @@ def limited_flag(host) -> Optional[bool]:
     ``True`` limited, ``False`` full, ``None`` NEVER ADVERTISED.  The third is
     the one that needs saying out loud: ``bool(host.agent_capabilities_limited)``
     collapses a NULL column to ``False``, which presents every agent that has
-    not upgraded as full-capability — a claim the server cannot make.  That bug
+    not upgraded as full-capability -- a claim the server cannot make.  That bug
     was written and caught during Phase 19; this exists so the conversion has
     ONE definition rather than a copy in each serializer.
     """
@@ -159,7 +159,7 @@ def capability_update_values(report: Any) -> Dict[str, Any]:
 
     The SYSTEM_INFO handler builds an UPDATE payload rather than mutating an ORM
     object, so it needs the same decision in dict form.  Both shapes go through
-    here so the "limited" rule has exactly one definition — deriving it twice is
+    here so the "limited" rule has exactly one definition -- deriving it twice is
     how the two would drift.
 
     Returns ``{}`` when the report is unusable, which callers can ``update()``
@@ -213,10 +213,10 @@ def host_supports(host, command_type: str) -> Optional[bool]:
 
     Three-valued ON PURPOSE:
 
-    * ``True``  — advertised; dispatch it.
-    * ``False`` — the host told us it cannot route this; refuse with a clear
+    * ``True``  -- advertised; dispatch it.
+    * ``False`` -- the host told us it cannot route this; refuse with a clear
       message instead of letting it fail at runtime.
-    * ``None``  — unknown (older agent, or never advertised).  The caller MUST
+    * ``None``  -- unknown (older agent, or never advertised).  The caller MUST
       dispatch anyway.  Treating unknown as unsupported would break every host
       that has not yet upgraded, which is the opposite of the point.
     """
@@ -256,8 +256,8 @@ def assert_host_supports(host, command_type: Optional[str]) -> None:
     Deliberately permissive in two cases, because a false refusal is worse
     than a late failure:
 
-    * ``command_type`` missing — not a routed command; nothing to check.
-    * capability UNKNOWN (older agent) — dispatch anyway.  Gating unknown
+    * ``command_type`` missing -- not a routed command; nothing to check.
+    * capability UNKNOWN (older agent) -- dispatch anyway.  Gating unknown
       hosts would break every agent that has not yet upgraded.
 
     Only an explicit "I cannot route this" is refused.

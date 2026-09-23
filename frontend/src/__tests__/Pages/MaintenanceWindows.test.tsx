@@ -23,7 +23,7 @@ vi.mock("../../Services/api.js", () => ({
 }));
 
 // MUI X DataGrid's CSS (border shorthand with a CSS var) trips jsdom's cssstyle,
-// so stub it to a trivial row renderer — the page logic under test is the
+// so stub it to a trivial row renderer -- the page logic under test is the
 // toolbar/dialog, not the grid internals.
 vi.mock("@mui/x-data-grid", () => ({
   DataGrid: ({ rows }: { rows: Array<{ id: string; name: string }> }) => (
@@ -242,7 +242,7 @@ test("an empty list renders without erroring", async () => {
 });
 
 test("a failing tag lookup fails the whole load, windows included", async () => {
-  // Documents current behaviour rather than endorsing it: windows, tags and
+  // Documents current behavior rather than endorsing it: windows, tags and
   // hosts share one Promise.all, so a failure in the SCOPE PICKERS -- a
   // convenience -- discards the windows list too and reports "Failed to load
   // maintenance windows", which names the wrong thing. Worth splitting if it

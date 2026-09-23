@@ -53,12 +53,12 @@ class JWTBearer(HTTPBearer):
 
         MFA-pending tokens (carrying ``mfa_pending: True``) are
         deliberately rejected here so they can't be used to access
-        regular endpoints — their only valid recipient is
+        regular endpoints -- their only valid recipient is
         ``/api/auth/mfa/verify``, which decodes them via
         ``decode_mfa_pending_token`` directly.
 
         Phase 13.2: when the credential is not a valid JWT, it may be an API
-        key (``smk_`` prefix) presented in the same Bearer header — those are
+        key (``smk_`` prefix) presented in the same Bearer header -- those are
         validated against the ``api_key`` table so automation can reach every
         JWT-protected endpoint unchanged.
         """
@@ -89,7 +89,7 @@ async def get_current_user(  # NOSONAR
         # Any decode/validation problem falls through to the 401 below;
         # we intentionally swallow the specific exception details rather
         # than echoing them back to the client.
-        payload = None  # noqa: F841 — placates py/empty-except
+        payload = None  # noqa: F841 -- placates py/empty-except
 
     # Phase 13.2: fall back to API-key auth when the credential is an API key
     # rather than a JWT, so automation resolves to the owning user's identity.
@@ -105,8 +105,8 @@ def require_authenticated_user(current_user: str = Depends(get_current_user)):
     """Resolve the authenticated ``User`` (with security roles) on the MAIN engine.
 
     The data-plane authorization layer (Phase 13.1).  User identities and role
-    grants are **server-global** — they live with the registry, not in per-tenant
-    databases — so this dependency always loads the user from ``db.get_engine()``
+    grants are **server-global** -- they live with the registry, not in per-tenant
+    databases -- so this dependency always loads the user from ``db.get_engine()``
     regardless of the active tenant.  Data-plane handlers inject this for their
     permission checks and pair it with a tenant-routed data session
     (``get_tenant_db`` / ``request_sessionmaker``), so authz stays central while
@@ -114,7 +114,7 @@ def require_authenticated_user(current_user: str = Depends(get_current_user)):
 
     The returned ``User`` is **detached** with its role cache populated, so
     ``user.has_role(...)``, ``user.id`` and ``user.userid`` keep working after the
-    session closes — making this a drop-in for the old in-handler
+    session closes -- making this a drop-in for the old in-handler
     ``query(User) -> load_role_cache -> has_role`` pattern.
     """
     from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
@@ -142,11 +142,11 @@ def require_authenticated_user(current_user: str = Depends(get_current_user)):
 async def get_current_tenant(  # NOSONAR
     token: str = Depends(JWTBearer()),
 ) -> Optional[str]:
-    """Resolve and verify the request's active tenant — Phase 13.1.B.
+    """Resolve and verify the request's active tenant -- Phase 13.1.B.
 
     Behavior by deployment mode:
 
-    * **Multi-tenancy disabled (default).** Returns ``None`` — there is no
+    * **Multi-tenancy disabled (default).** Returns ``None`` -- there is no
       tenant scoping and every endpoint behaves exactly as in single-tenant
       mode.  No registry lookup is performed.
     * **Multi-tenancy enabled.** Reads the ``tenant_id`` claim from the
@@ -166,7 +166,7 @@ async def get_current_tenant(  # NOSONAR
         payload = {}
 
     # Phase 13.2: API keys carry their tenant pin in the api_key row, not a JWT
-    # claim — resolve the principal the same way when the credential is a key.
+    # claim -- resolve the principal the same way when the credential is a key.
     if not payload and looks_like_api_key(token):
         payload = authenticate_api_key(token) or {}
 

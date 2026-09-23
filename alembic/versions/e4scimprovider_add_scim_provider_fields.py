@@ -7,8 +7,8 @@
 Adds the columns that turn an ``external_idp_provider`` into a SCIM 2.0 target
 the IdP can PUSH user provisioning to:
 
-  * ``scim_enabled`` — gate the per-provider SCIM endpoints on/off.
-  * ``scim_bearer_token_secret_id`` — Vault reference to the bearer token the IdP
+  * ``scim_enabled`` -- gate the per-provider SCIM endpoints on/off.
+  * ``scim_bearer_token_secret_id`` -- Vault reference to the bearer token the IdP
     presents on every SCIM request (the token value never lives in the DB).
 
 Both default to "off"/NULL, so existing providers are unchanged.  Idempotent and

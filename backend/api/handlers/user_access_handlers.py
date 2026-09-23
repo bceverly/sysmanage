@@ -122,7 +122,7 @@ def _create_user_account_with_security_id(connection, account, now):  # NOSONAR
                     if rid < 1000:
                         is_system_user = True
                 except (ValueError, IndexError):
-                    # Malformed SID — fall back to username-based heuristic below.
+                    # Malformed SID -- fall back to username-based heuristic below.
                     is_system_user = is_system_user or False
 
     # Also check for common system usernames

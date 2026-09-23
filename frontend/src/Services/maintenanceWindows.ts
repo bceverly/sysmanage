@@ -33,7 +33,7 @@ export interface MaintenanceWindow {
     updated_at?: string | null;
 }
 
-// Create/update payload — the server assigns id/timestamps.
+// Create/update payload -- the server assigns id/timestamps.
 export interface MaintenanceWindowInput {
     name: string;
     description?: string | null;

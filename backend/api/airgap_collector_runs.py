@@ -10,7 +10,7 @@ recurring runs).  This module exposes the surface the operator UI needs:
 create a one-shot collection run, list / inspect prior runs, fetch the
 produced media manifests, and stream the signed ISO back to the browser.
 
-Routes are gated on ``airgap_collector_engine`` being loaded — the engine
+Routes are gated on ``airgap_collector_engine`` being loaded -- the engine
 being available is the Pro+ + role-collector check.  The actual run
 processing (mirroring, ISO build, signing) is handled by the engine's
 background worker; this module only manages the row lifecycle and serves
@@ -115,7 +115,7 @@ class RunTargetSpec(BaseModel):
     Option-B input shape: the operator picks a configured mirror by id
     and the server derives distro / version from the mirror's
     metadata.  The orchestrator pins a specific snapshot of that
-    mirror at QUEUED → MIRRORING — the bundle is then byte-for-byte
+    mirror at QUEUED → MIRRORING -- the bundle is then byte-for-byte
     that snapshot's tree.
 
     ``mirror_id`` is required on input.  ``distro``, ``version``,
@@ -133,7 +133,7 @@ class RunTargetSpec(BaseModel):
 
 class RunCreateRequest(BaseModel):
     iso_label: str = Field(..., min_length=1, max_length=80)
-    # 4.7 GB DVD-5 default — the engine's media-size ceiling for the
+    # 4.7 GB DVD-5 default -- the engine's media-size ceiling for the
     # single-disc happy path.  Operators can drop to CD-700M or jump
     # to BD-25 by passing this explicitly.
     media_size_bytes: int = Field(default=4_700_000_000, gt=0)
@@ -197,7 +197,7 @@ def _snapshot_mirrors_for_run(
 
     Returns ``{mirror_id_str: placeholder_snapshot_row}`` so the
     caller can stamp each target row's ``source_snapshot_id`` to the
-    placeholder snapshot id — that way the orchestrator can recognize
+    placeholder snapshot id -- that way the orchestrator can recognize
     the snapshot the run is waiting for even before the agent reports
     completion.
 
@@ -206,7 +206,7 @@ def _snapshot_mirrors_for_run(
     run-creation time, not some earlier state.
 
     Raises HTTPException(400) if the repository_mirroring engine
-    isn't loaded — Option-B runs need it.  Caller is responsible for
+    isn't loaded -- Option-B runs need it.  Caller is responsible for
     rolling back if any single dispatch fails (best-effort isn't OK
     here: a target missing its snapshot can never produce a bundle).
     """
@@ -216,7 +216,7 @@ def _snapshot_mirrors_for_run(
             status_code=400,
             detail=_(
                 "Air-gap collection runs require the "
-                "repository_mirroring_engine module to be loaded — "
+                "repository_mirroring_engine module to be loaded -- "
                 "the collector reads each target's bundle from a "
                 "snapshot of its mirror tree."
             ),
@@ -278,7 +278,7 @@ def _derive_target_meta(
     Pulled out of create_run so the same logic resolves both the
     insert-time stamping AND any later "re-derive after the operator
     edited the mirror" flow.  Requires the mirror to have
-    ``known_version_id`` set — the catalog row's ``os_family`` is the
+    ``known_version_id`` set -- the catalog row's ``os_family`` is the
     canonical distro identifier; rolling our own apt-mirror url
     parsing here would just duplicate that registry.
     """
@@ -310,7 +310,7 @@ def _derive_target_meta(
         )
     if known is None:
         # known_version_id non-NULL but the row was deleted out from
-        # under us — extremely rare.  Still a 400 since the operator
+        # under us -- extremely rare.  Still a 400 since the operator
         # needs to fix the mirror config before we can proceed.
         raise HTTPException(
             status_code=400,
@@ -357,7 +357,7 @@ def _run_to_response(run: models.AirgapCollectionRun) -> RunResponse:
     """Convert a run row + its eagerly-loaded targets into RunResponse.
 
     Centralises the serialization so every endpoint produces the same
-    shape — particularly important now that ``targets`` and
+    shape -- particularly important now that ``targets`` and
     ``burn_device`` join the existing scalar columns and the
     relationship lookup must happen under the session that's about
     to close.
@@ -388,7 +388,7 @@ def _resolve_target_mirrors(
     Enforces the Option-B invariants:
       * Each mirror_id exists.
       * Each mirror is enabled (a disabled mirror's tree is
-        unreliable — operator should re-enable + sync first).
+        unreliable -- operator should re-enable + sync first).
       * All picked mirrors share a single host_id (the collection
         plan dispatches to one host, so cross-host targets aren't
         supported in v1 of Option-B).
@@ -453,7 +453,7 @@ async def create_run(
 ):
     """Create a one-shot collection run (Option-B / snapshot-sourced).
 
-    ``cron_schedule`` is left NULL — recurring runs go through
+    ``cron_schedule`` is left NULL -- recurring runs go through
     ``airgap_collection_schedule.py``'s tick mechanism; this endpoint
     is strictly for ad-hoc UI-triggered runs.  The ``airgap_run_tick``
     background service picks the row up from ``status='QUEUED'`` and
@@ -463,7 +463,7 @@ async def create_run(
 
       1. Resolve every target's mirror, validate, derive (distro,
          version) from the mirror's known_version catalog row.
-      2. Dispatch one snapshot per target mirror — these are the
+      2. Dispatch one snapshot per target mirror -- these are the
          exact snapshots the bundle will rsync from.
       3. Insert AirgapCollectionTarget rows pointing at the mirror
          AND the placeholder snapshot row.
@@ -482,14 +482,14 @@ async def create_run(
         )
     user = _get_user(db, current_user)
 
-    # Resolve + validate before any side-effect — we want a clean 400
+    # Resolve + validate before any side-effect -- we want a clean 400
     # if anything's wrong, not a half-created run with a snapshot
     # dispatched to nowhere.
     mirrors = _resolve_target_mirrors(db, request.targets)
     target_meta = [_derive_target_meta(m) for m in mirrors]
 
     # Snapshot side-effect.  If any single dispatch raises we let it
-    # bubble out as a 500 — caller will see the run wasn't created
+    # bubble out as a 500 -- caller will see the run wasn't created
     # and can retry.  Previously-dispatched snapshots in this loop
     # will still complete server-side; they just won't be tied to a
     # run, which is fine (operator can restore from them if desired).
@@ -517,7 +517,7 @@ async def create_run(
                 distro=distro,
                 version=version,
                 # AirgapCollectionTarget stores ``repos`` as a CSV
-                # column — the engine consumes that same shape via
+                # column -- the engine consumes that same shape via
                 # ``target.repos.split(',')`` in the orchestrator.
                 repos=",".join(spec.repos) if spec.repos else None,
             )
@@ -570,7 +570,7 @@ async def get_run(run_id: str, db: Session = Depends(get_db)):
 
 
 # Where the orchestrator's build_iso_plan / multi-disc plan writes
-# its output.  Mirrors the path baked into airgap_run_tick — both
+# its output.  Mirrors the path baked into airgap_run_tick -- both
 # sides must agree or the download 410s.
 _ISO_OUTPUT_DIR = "/var/lib/sysmanage/airgap-iso"
 
@@ -676,9 +676,9 @@ def _assert_within_iso_dir(path: str) -> str:
     """Reject any ISO path that resolves outside ``_ISO_OUTPUT_DIR``.
 
     Defence in depth: the served paths come from a glob of the ISO dir or a
-    server-written DB column, so they're already contained — but this realpath
+    server-written DB column, so they're already contained -- but this realpath
     check guarantees a route-param/DB-derived path can never escape, and is the
-    form the path-traversal scanners recognise."""
+    form the path-traversal scanners recognize."""
     root = os.path.realpath(_ISO_OUTPUT_DIR)
     resolved = os.path.realpath(path)
     if not resolved.startswith(root + os.sep):
@@ -757,7 +757,7 @@ async def create_iso_download_token(
     """Mint a short-lived, single-run token for a native streaming ISO
     download.  The browser can't put the session JWT in the Authorization
     header when it follows a plain download link, and buffering a multi-GB
-    ISO through fetch() to add the header OOMs the tab — so the UI calls
+    ISO through fetch() to add the header OOMs the tab -- so the UI calls
     this (authenticated), then points the browser at GET /iso-download with
     the returned token, which streams straight to disk.
     """
@@ -780,7 +780,7 @@ async def download_run_iso_streamed(
     NOT on the header-authed router: the browser navigates here directly
     (so it can't carry the Authorization header), authenticating with the
     short-lived, single-run token minted by POST /runs/{id}/iso-token.  The
-    response streams straight to disk — no in-memory buffering — so a
+    response streams straight to disk -- no in-memory buffering -- so a
     multi-GB bundle downloads without OOMing the browser or the backend.
     """
     rid = _parse_run_uuid(run_id)
@@ -871,7 +871,7 @@ async def download_manifest_iso(
     """Stream the signed ISO referenced by ``manifest.iso_path``.
 
     The endpoint is wired here (rather than on the manifest's own
-    sub-resource) so it cleanly maps to "one ISO per manifest row" —
+    sub-resource) so it cleanly maps to "one ISO per manifest row" --
     multi-disc runs produce N manifest rows and the UI can hit this
     endpoint once per row to pull each disc.
     """

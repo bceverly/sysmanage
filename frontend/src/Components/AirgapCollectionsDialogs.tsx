@@ -5,7 +5,7 @@
 /**
  * Dialogs for the Air-Gap Collection Runs page: the "New Collection Run"
  * create dialog and the multi-disc download picker.  Both are purely
- * presentational — the owning page holds all state and passes it in via
+ * presentational -- the owning page holds all state and passes it in via
  * props.  Extracted from AirgapCollections.tsx to keep the page under the
  * max-lines budget.
  */
@@ -144,7 +144,7 @@ export const NewRunDialog: React.FC<NewRunDialogProps> = ({
           />
 
           {/* Mirror picker.  Option-B sources the bundle from
-              snapshots of configured mirror_repository rows — the
+              snapshots of configured mirror_repository rows -- the
               operator picks which ones to bundle and the backend
               handles snapshot dispatch + distro/version derivation. */}
           <Typography variant="subtitle2" sx={{ mt: 1 }}>
@@ -200,7 +200,7 @@ export const NewRunDialog: React.FC<NewRunDialogProps> = ({
                         component="span"
                       >
                         ({m.package_manager}
-                        {m.known_version_id ? '' : ' — no catalog version!'})
+                        {m.known_version_id ? '' : ' -- no catalog version!'})
                       </Typography>
                     </Typography>
                   </MenuItem>
@@ -284,7 +284,7 @@ export const DiscPickerDialog: React.FC<DiscPickerDialogProps> = ({
                 onSelect(run, d.disc_index);
               }}
             >
-              {t('airgapCollections.discPicker.row', 'Disc {{n}} — {{size}}', {
+              {t('airgapCollections.discPicker.row', 'Disc {{n}} -- {{size}}', {
                 n: d.disc_index,
                 size: formatBytes(d.size_bytes),
               })}

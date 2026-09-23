@@ -523,7 +523,7 @@ const ConfigProfiles: React.FC = () => {
                                             n: version.version,
                                         })}
                                         {version.created_at
-                                            ? ` — ${formatUTCTimestamp(version.created_at)}`
+                                            ? ` -- ${formatUTCTimestamp(version.created_at)}`
                                             : ''}
                                     </Typography>
                                     <TextField

@@ -30,9 +30,9 @@ import {
 } from '../Services/apiKeys';
 
 const formatDate = (value?: string | null): string => {
-    if (!value) return '—';
+    if (!value) return '--';
     const d = new Date(value);
-    return Number.isNaN(d.getTime()) ? '—' : d.toLocaleString();
+    return Number.isNaN(d.getTime()) ? '--' : d.toLocaleString();
 };
 
 const ApiKeys: React.FC = () => {
@@ -112,7 +112,7 @@ const ApiKeys: React.FC = () => {
             await globalThis.navigator.clipboard.writeText(createdKey);
             setCopied(true);
         } catch {
-            // Clipboard may be unavailable (insecure context) — the key is still
+            // Clipboard may be unavailable (insecure context) -- the key is still
             // shown for manual copy, so this is non-fatal.
             setCopied(false);
         }
@@ -281,7 +281,7 @@ const ApiKeys: React.FC = () => {
                     <Alert severity="warning" sx={{ mb: 2 }}>
                         {t(
                             'apiKeys.copyWarning',
-                            'Copy this key now — it will not be shown again.',
+                            'Copy this key now -- it will not be shown again.',
                         )}
                     </Alert>
                     <Stack direction="row" spacing={1} alignItems="center">

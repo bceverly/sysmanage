@@ -9,7 +9,7 @@
 # the online config builder at https://sysmanage.org/config-builder.html
 
 # Backend HTTP API.  Nginx (port 3000) reverse-proxies /api/* and /ws to
-# this socket.  Keep host=localhost — every backend route now lives under
+# this socket.  Keep host=localhost -- every backend route now lives under
 # /api so external clients reach the backend only through nginx; there's
 # no reason to expose the raw uvicorn port.
 # Development mode.
@@ -50,7 +50,7 @@ api:
 # Database connection (PostgreSQL required).
 registry:
   # The registry/bootstrap database.  Renamed from 'database:' -- the
-  # loader still honours the old key but warns, so shipping it here made
+  # loader still honors the old key but warns, so shipping it here made
   # every fresh install emit a deprecation warning about our own template.
   user: "sysmanage"
   password: "CHANGE_ME_IN_PRODUCTION"   # ⚠ change this
@@ -83,7 +83,7 @@ logging:
   level: "INFO"   # DEBUG | INFO | WARNING | ERROR | CRITICAL
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
-# Multi-tenancy (Phase 13.1) — OPT-IN. Leave disabled for single-tenant /
+# Multi-tenancy (Phase 13.1) -- OPT-IN. Leave disabled for single-tenant /
 # homelab / on-prem installs (the default: one implicit tenant). Enable only to
 # run a SaaS control plane hosting isolated tenants (one database per tenant).
 # See the canonical sysmanage.yaml.example for the accompanying registry: and
@@ -92,7 +92,7 @@ multitenancy:
   enabled: false
   self_service_provisioning: false
 
-# Pro+ license (optional — leave key empty for the Community Edition)
+# Pro+ license (optional -- leave key empty for the Community Edition)
 license:
   key: ""
   phone_home_url: "https://license.sysmanage.io"

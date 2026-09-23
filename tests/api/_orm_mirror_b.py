@@ -32,11 +32,11 @@ from backend.persistence.models.core import GUID
 from tests.api._orm_mirror_base import TestBase
 
 
-# Phase 12.6 — federation_sites mirror.  Tests that exercise
+# Phase 12.6 -- federation_sites mirror.  Tests that exercise
 # registration-key ``site_id`` validation (Phase 12.4) INSERT
 # rows directly via the production SQLAlchemy class, so the
 # test schema must include every column the production INSERT
-# emits — not just the ones the tests read.  Columns kept in
+# emits -- not just the ones the tests read.  Columns kept in
 # lockstep with ``backend/persistence/models/federation.py``.
 class FederationSite(TestBase):
     __tablename__ = "federation_sites"
@@ -45,7 +45,7 @@ class FederationSite(TestBase):
     location_label = Column(String(255), nullable=True)
     url = Column(String(512), nullable=False)
     tls_cert_pem = Column(Text, nullable=True)
-    # Phase 12 strict trust — out-of-band identity-key pinning.
+    # Phase 12 strict trust -- out-of-band identity-key pinning.
     site_identity_public_key_pem = Column(Text, nullable=True)
     enrollment_token_hash = Column(String(128), nullable=True)
     enrollment_token_expires_at = Column(DateTime, nullable=True)
@@ -57,7 +57,7 @@ class FederationSite(TestBase):
     last_sync_at = Column(DateTime, nullable=True)
     last_sync_status = Column(String(32), nullable=True)
     sync_interval_seconds = Column(Integer, nullable=False, default=300)
-    # Phase 12.2 — site-reported metadata (lockstep with the real model).
+    # Phase 12.2 -- site-reported metadata (lockstep with the real model).
     sysmanage_version = Column(String(32), nullable=True)
     connection_state = Column(String(16), nullable=True)
     capabilities_json = Column(Text, nullable=True)
@@ -70,7 +70,7 @@ class FederationSite(TestBase):
     updated_at = Column(DateTime, nullable=False)
 
 
-# Phase 8.1 — access groups + registration keys (test-side mirrors).
+# Phase 8.1 -- access groups + registration keys (test-side mirrors).
 class AccessGroup(TestBase):
     __tablename__ = "access_groups"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
@@ -100,7 +100,7 @@ class RegistrationKey(TestBase):
     )
     # Phase 12.4: federation-site scope.  No FK constraint here
     # because the test TestBase metadata doesn't include the
-    # ``federation_sites`` table — referential integrity is
+    # ``federation_sites`` table -- referential integrity is
     # enforced in production via the m1fedschema FK; tests just
     # need the column to exist for SELECT/INSERT.
     site_id = Column(GUID(), nullable=True)
@@ -143,7 +143,7 @@ class UserAccessGroup(TestBase):
     created_at = Column(DateTime, nullable=True)
 
 
-# Phase 8.2 — upgrade profiles (test-side mirror).
+# Phase 8.2 -- upgrade profiles (test-side mirror).
 class UpgradeProfile(TestBase):
     __tablename__ = "upgrade_profiles"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
@@ -165,8 +165,8 @@ class UpgradeProfile(TestBase):
     updated_at = Column(DateTime, nullable=True)
 
 
-# Phase 11 — air-gap tables (test-side mirrors).  These mirror the
-# production models in ``backend/persistence/models/airgap.py`` —
+# Phase 11 -- air-gap tables (test-side mirrors).  These mirror the
+# production models in ``backend/persistence/models/airgap.py`` --
 # the api conftest uses its own TestBase metadata so we have to
 # redeclare the schema for SQLite parity.
 class AirgapCollectionRun(TestBase):
@@ -180,9 +180,9 @@ class AirgapCollectionRun(TestBase):
     started_at = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
     error_message = Column(Text, nullable=True)
-    # Phase 11.1 follow-up — cron_schedule for re-firing runs via tick.
+    # Phase 11.1 follow-up -- cron_schedule for re-firing runs via tick.
     cron_schedule = Column(String(200), nullable=True)
-    # Phase 11 B3 — delta runs reference their parent.  Self-FK
+    # Phase 11 B3 -- delta runs reference their parent.  Self-FK
     # mirrors the real schema; included so the API's ORDER BY
     # SELECT doesn't crash against the SQLite test database.
     parent_run_id = Column(
@@ -194,7 +194,7 @@ class AirgapCollectionRun(TestBase):
     created_by = Column(
         GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
     )
-    # Phase 12 — orchestrator + optical burn opt-in.  Mirror the real
+    # Phase 12 -- orchestrator + optical burn opt-in.  Mirror the real
     # schema or every ``SELECT * FROM airgap_collection_run`` blows
     # up on the test SQLite session with "no such column".
     worker_message_id = Column(String(80), nullable=True)
@@ -220,7 +220,7 @@ class AirgapCollectionSchedule(TestBase):
     updated_at = Column(DateTime, nullable=True)
 
 
-# Phase 11 — per-distro target rows owned by a collection run.
+# Phase 11 -- per-distro target rows owned by a collection run.
 # The runs cascade-deletes them via the relationship; the table
 # must exist or DELETE on the parent row crashes the test session.
 class AirgapCollectionTarget(TestBase):
@@ -237,7 +237,7 @@ class AirgapCollectionTarget(TestBase):
     byte_count = Column(BigInteger, nullable=True)
     file_count = Column(Integer, nullable=True)
     status = Column(String(40), nullable=True)
-    # Phase 12 Option-B — each target binds to a specific mirror
+    # Phase 12 Option-B -- each target binds to a specific mirror
     # and the snapshot of that mirror the orchestrator pinned.
     mirror_id = Column(
         GUID(),
@@ -251,7 +251,7 @@ class AirgapCollectionTarget(TestBase):
     )
 
 
-# Phase 11 — produced-media manifests (test-side mirror for the
+# Phase 11 -- produced-media manifests (test-side mirror for the
 # collector runs API).  Mirrors backend/persistence/models/airgap.py
 # ``AirgapMediaManifest``; columns are kept minimal for SQLite parity.
 class AirgapMediaManifest(TestBase):
@@ -275,8 +275,8 @@ class AirgapMediaManifest(TestBase):
     created_at = Column(DateTime, nullable=True)
 
 
-# Phase 8.3 — package compliance (test-side mirrors).
-from sqlalchemy import (  # pylint: disable=ungrouped-imports; local import — only needed here
+# Phase 8.3 -- package compliance (test-side mirrors).
+from sqlalchemy import (  # pylint: disable=ungrouped-imports; local import -- only needed here
     JSON as _JSON,
 )
 
@@ -330,7 +330,7 @@ class HostPackageComplianceStatus(TestBase):
     updated_at = Column(DateTime, nullable=True)
 
 
-# Phase 8.7 — report branding singleton, custom report templates,
+# Phase 8.7 -- report branding singleton, custom report templates,
 # and dynamic-secret leases.
 class ReportBranding(TestBase):
     __tablename__ = "report_branding"
@@ -434,7 +434,7 @@ class MfaSettings(TestBase):
     )
 
 
-# Phase 10.4 — repository-mirroring tables.
+# Phase 10.4 -- repository-mirroring tables.
 class MirrorRepository(TestBase):
     __tablename__ = "mirror_repository"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
@@ -554,7 +554,7 @@ class MirrorSettings(TestBase):
     )
 
 
-# Phase 10.4.1 — mirror setup status (one row per host).
+# Phase 10.4.1 -- mirror setup status (one row per host).
 class MirrorSetupStatus(TestBase):
     __tablename__ = "mirror_setup_status"
     host_id = Column(
@@ -574,7 +574,7 @@ class MirrorSetupStatus(TestBase):
     updated_at = Column(DateTime, nullable=True)
 
 
-# Phase 10.5 — external IdP tables.
+# Phase 10.5 -- external IdP tables.
 class ExternalIdpProvider(TestBase):
     __tablename__ = "external_idp_provider"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
@@ -771,7 +771,7 @@ class ProvisioningReadiness(TestBase):
 
 
 class AirgapAgentChannelMirror(TestBase):
-    """Phase 12 — private mirror substituted for one upstream agent-install
+    """Phase 12 -- private mirror substituted for one upstream agent-install
     channel (ppa / copr / obs / apk / pkg / winget / brew)."""
 
     __tablename__ = "airgap_agent_channel_mirror"

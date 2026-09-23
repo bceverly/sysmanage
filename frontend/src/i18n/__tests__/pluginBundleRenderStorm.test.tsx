@@ -34,7 +34,7 @@
  *
  * So these tests do not guard a bug that exists. They pin the cheap shape in
  * place (so a future refactor that made registration asynchronous per language
- * would be caught at 280 rather than 20), and they close this line of enquiry
+ * would be caught at 280 rather than 20), and they close this line of inquiry
  * for whoever looks at the screenshot flake next.
  */
 

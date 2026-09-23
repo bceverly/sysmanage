@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Content Lifecycle Management — federated site sync API (Phase 16, Slice 7b).
+Content Lifecycle Management -- federated site sync API (Phase 16, Slice 7b).
 
 Coordinator-side management of which federation SITES subscribe to which
 lifecycle ENVIRONMENTS.  When a content-view version is promoted into a

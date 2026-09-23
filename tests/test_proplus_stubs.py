@@ -612,9 +612,9 @@ class TestProvisioningStubs:
     """The provisioning surface must answer 402 when unlicensed, not 404.
 
     Every provisioning endpoint lives inside the Pro+ engine, so on an
-    unlicensed server nothing was mounted at all and callers got a 404 —
+    unlicensed server nothing was mounted at all and callers got a 404 --
     indistinguishable from a typo in the URL, and for the 18.2 bare-metal
-    endpoints that meant a script could not tell "you need a licence" from
+    endpoints that meant a script could not tell "you need a license" from
     "that endpoint does not exist".  These stubs close that.
     """
 
@@ -646,7 +646,7 @@ class TestProvisioningStubs:
             assert "Professional+" in response.json()["detail"]
 
     def test_bare_metal_reads_return_402(self):
-        """Phase 18.2 — the catalog, assignments, discovery and boot media."""
+        """Phase 18.2 -- the catalog, assignments, discovery and boot media."""
         client, _ = self._client()
         for path in (
             "/api/v1/provisioning/install-sources",
@@ -659,7 +659,7 @@ class TestProvisioningStubs:
 
     def test_writes_return_402_rather_than_pretending_to_succeed(self):
         """The important half: a POST that would assign a machine an OS must not
-        answer 200 with {"licensed": false} — a caller would read that as done."""
+        answer 200 with {"licensed": false} -- a caller would read that as done."""
         client, _ = self._client()
         for path in (
             "/api/v1/provisioning/compute-resources",

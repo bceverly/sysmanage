@@ -8,7 +8,7 @@
 # As of v3.0, sysmanage.yaml is a MINIMAL BOOTSTRAP POINTER. The recommended
 # production path is to run `sudo scripts/sysmanage_secure_installation`, which
 # generates the secrets into OpenBAO, seeds the admin user + default settings in
-# the database, and writes a pointer-only YAML — you do NOT hand-edit secrets
+# the database, and writes a pointer-only YAML -- you do NOT hand-edit secrets
 # here. The fields below are still honored from YAML during migration (with a
 # one-release deprecation warning) so existing installs keep working:
 #   * Secrets (jwt_secret, password_salt, admin/db/SMTP passwords, license keys)
@@ -55,7 +55,7 @@ api:
 
 registry:
   # The registry/bootstrap database.  Renamed from 'database:' -- the
-  # loader still honours the old key but warns, so shipping it here made
+  # loader still honors the old key but warns, so shipping it here made
   # every fresh install emit a deprecation warning about our own template.
   user: "sysmanage"
   # The DB password is the one bootstrap credential the server needs before it
@@ -92,15 +92,15 @@ logging:
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
   # Platform-native logging: also emit to the OS log sink (in addition to the
   # rotating backend.log) so the server shows up in journalctl / syslog / Event
-  # Viewer — handy under systemd/launchd or when shipping to a log aggregator.
+  # Viewer -- handy under systemd/launchd or when shipping to a log aggregator.
   # native: false                 # set true to enable
   # native_target: "auto"         # auto | journald | syslog | eventlog | none
   #                               # auto = journald (Linux) / Event Log (Windows)
   #                               #        / syslog (macOS, BSD)
   # native_identifier: "sysmanage"   # tag/identifier for native log entries
 
-# Multi-tenancy (Phase 13.1) — OPT-IN. Leave disabled for homelab / on-prem /
-# single-tenant installs: that is the default (one implicit tenant, no behaviour
+# Multi-tenancy (Phase 13.1) -- OPT-IN. Leave disabled for homelab / on-prem /
+# single-tenant installs: that is the default (one implicit tenant, no behavior
 # change). Enable ONLY to run SysManage as a SaaS control plane that hosts
 # isolated tenants (one database per tenant). Federated and air-gapped
 # deployments are unaffected by this setting and are mutually exclusive with
@@ -111,7 +111,7 @@ multitenancy:
   # least-privilege provisioner identity. Off by default even in SaaS mode.
   self_service_provisioning: false
 
-# Control-plane registry (Phase 13.1) — only meaningful when multitenancy.enabled
+# Control-plane registry (Phase 13.1) -- only meaningful when multitenancy.enabled
 # is true. The registry records which tenants exist, who may reach them, and
 # where each tenant database lives. Tenant database placements are stored in the
 # registry, NEVER in this file. If omitted, the registry falls back to the
@@ -124,9 +124,9 @@ multitenancy:
 #   port: 5432
 #   name: "sysmanage_registry"
 
-# Per-tenant backup / RPO orchestration (Phase 13.1.F) — OPT-IN, multi-tenant
+# Per-tenant backup / RPO orchestration (Phase 13.1.F) -- OPT-IN, multi-tenant
 # only. SysManage runs `command` on each tenant's RPO cadence; it does NOT store
-# the backup bytes — your backup tool does (pgBackRest / wal-g / a pg_dump
+# the backup bytes -- your backup tool does (pgBackRest / wal-g / a pg_dump
 # wrapper). Templated placeholders: {tenant_id} {slug} {host} {port} {dbname}
 # {region}. Leave `command` empty (or omit this block) to disable orchestration.
 # backup:

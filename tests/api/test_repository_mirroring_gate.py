@@ -5,8 +5,8 @@
 """
 Phase 15 exit item: the repository-mirroring surface is gated behind the
 Pro+ ``repository_mirroring_engine``.  When that engine isn't loaded EVERY
-endpoint must return a clean HTTP 402 (Payment Required) — never a 500 or a
-crash — so the frontend can render a license-upgrade prompt.
+endpoint must return a clean HTTP 402 (Payment Required) -- never a 500 or a
+crash -- so the frontend can render a license-upgrade prompt.
 
 The router is mounted at ``/api/v1`` (native) with a retired ``/api`` alias,
 so all paths here use the ``/api/v1`` surface.  The single gate helper
@@ -42,7 +42,7 @@ class TestRepositoryMirroringProplusGate:
     def _assert_402(self, resp):
         assert resp.status_code == 402, resp.text
         body = resp.json()
-        # Clean JSON body with an upgrade message — not a 500 stacktrace.
+        # Clean JSON body with an upgrade message -- not a 500 stacktrace.
         assert "Professional" in body["detail"]
 
     def test_list_mirrors_returns_402(self, client, auth_headers, _engine_absent):

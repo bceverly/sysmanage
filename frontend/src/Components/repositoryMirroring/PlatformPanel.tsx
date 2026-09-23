@@ -36,7 +36,7 @@ const PlatformPanel: React.FC<PlatformPanelProps> = ({
   onChange,
 }) => {
   const { t } = useTranslation();
-  // ``undefined`` while the setup card is still loading — we treat
+  // ``undefined`` while the setup card is still loading -- we treat
   // that as "not yet ready" so the gate stays engaged on first paint
   // (no flash of fully-enabled UI before the probe result lands).
   const [setupReady, setSetupReady] = useState<boolean | undefined>(undefined);
@@ -60,9 +60,9 @@ const PlatformPanel: React.FC<PlatformPanelProps> = ({
       {/* Gate the mirror-config + mirror-list cards behind the setup
           probe.  When the host is missing required tooling (apt-mirror,
           createrepo_c, etc.) the operator should not be able to create
-          mirrors or queue syncs against it — running them against an
+          mirrors or queue syncs against it -- running them against an
           empty toolchain produces an opaque sudo-deny three steps in
-          and a stuck FAILED row.  We grey out + intercept pointer
+          and a stuck FAILED row.  We gray out + intercept pointer
           events on the downstream cards until setup_check returns
           green; the setup card itself stays interactive so the
           operator can hit "Install Tools" or "Refresh". */}

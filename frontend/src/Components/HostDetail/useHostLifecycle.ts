@@ -249,7 +249,7 @@ export const useHostLifecycle = ({
                 // Pro+: Use orchestrated reboot
                 const result = await doOrchestratedReboot(host.id);
                 setRebootOrchestrationId(result.orchestration_id);
-                setSnackbarMessage(t('hosts.rebootOrchestration.initiated', 'Orchestrated reboot initiated — stopping {{count}} child host(s)', { count: result.child_count }));
+                setSnackbarMessage(t('hosts.rebootOrchestration.initiated', 'Orchestrated reboot initiated -- stopping {{count}} child host(s)', { count: result.child_count }));
                 setSnackbarSeverity('success');
             } else {
                 // Standard reboot (no children or no Pro+)

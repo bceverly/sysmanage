@@ -134,7 +134,7 @@ def _rate_limit_cfg():
     """Return the ``api.rate_limit`` config sub-dict (or empty)."""
     try:
         return config.get("api", {}).get("rate_limit", {}) or {}
-    except Exception:  # noqa: BLE001 — never let config shape break the limiter
+    except Exception:  # noqa: BLE001 -- never let config shape break the limiter
         return {}
 
 
@@ -200,7 +200,7 @@ def get_jwt_refresh_timeout():
 def get_cookie_domain():
     """
     Get the refresh-cookie ``Domain`` attribute, or ``None`` to scope the cookie
-    to the serving host (RFC 6265 default — what most deployments want).  Phase
+    to the serving host (RFC 6265 default -- what most deployments want).  Phase
     13.1.H: server setting (DB-backed), with a one-release ``sysmanage.yaml``
     fallback.  An empty value is normalized to ``None``.
     """
@@ -218,7 +218,7 @@ def get_admin_password():
     OpenBAO, with a one-release ``sysmanage.yaml`` fallback.  The recovery
     account (see ``backend/api/auth.py``) still authenticates against this value;
     sourcing it from OpenBAO keeps the recovery credential out of plaintext YAML.
-    The recovery-account *userid* stays in YAML — it is a bootstrap identifier
+    The recovery-account *userid* stays in YAML -- it is a bootstrap identifier
     that must resolve even when the DB/vault is unavailable.
     """
     return _config_secret(
@@ -298,7 +298,7 @@ def _db_setting(key):
     Phase 13.1: when a tenant is active, the tenant-scoped value (in
     ``registry_tenant.settings``) takes precedence over the server-scoped
     value.  DB-only (no YAML fallback) so callers overlay it onto the existing
-    config dict *only when an operator has set it* — leaving the structure
+    config dict *only when an operator has set it* -- leaving the structure
     untouched otherwise.
     """
     try:
@@ -390,7 +390,7 @@ def get_registry_config():
 
     Phase 13.1: prefers the ``registry:`` block, falling back to the
     deprecated ``database:`` alias.  In collapsed (homelab) mode these
-    are the same connection.  This is the single bootstrap pointer — all
+    are the same connection.  This is the single bootstrap pointer -- all
     per-tenant placement lives in the registry database as data, never
     in YAML.
     """
@@ -402,10 +402,10 @@ def is_multitenancy_enabled() -> bool:
 
     When False (the default for homelab / on-prem / federated installs),
     the control-plane API does not mount and the partition resolver is
-    hardwired to the single engine — behavior is identical to today.
+    hardwired to the single engine -- behavior is identical to today.
 
     The ``SYSMANAGE_MULTITENANCY`` env var, when set, overrides
-    ``sysmanage.yaml`` entirely — any explicit value wins. This is the escape
+    ``sysmanage.yaml`` entirely -- any explicit value wins. This is the escape
     hatch the e2e harness uses to force single-tenant mode
     (``SYSMANAGE_MULTITENANCY=false``) regardless of the box's config, so the
     Playwright suite never needs OpenBAO or provisioned tenant DBs. Mirrors the
@@ -505,7 +505,7 @@ def get_license_config():
 
 def get_license_key():
     """
-    Get the Pro+ license key.  Phase 13.1.H: secret — OpenBAO first, YAML fallback.
+    Get the Pro+ license key.  Phase 13.1.H: secret -- OpenBAO first, YAML fallback.
     """
     return _config_secret(
         "license_key", lambda: config.get("license", {}).get("key", ""), default=""
@@ -567,7 +567,7 @@ def get_server_role():
     """
     Return the server role: ``standard``, ``collector``, or ``repository``.
 
-    Phase 11 air-gap topology — same binary runs as either half of an
+    Phase 11 air-gap topology -- same binary runs as either half of an
     air-gap pair, or as a standalone (``standard``) deployment.
 
     Phase 12: the role moved from ``sysmanage.yaml`` into the
@@ -632,7 +632,7 @@ def is_geo_lookup_enabled() -> bool:
 
 
 def get_geo_lookup_database_path() -> str:
-    """Filesystem path to the bundled GeoLite2-City.mmdb (bootstrap path — YAML)."""
+    """Filesystem path to the bundled GeoLite2-City.mmdb (bootstrap path -- YAML)."""
     return config.get("geo_lookup", {}).get(
         "database_path", "/var/lib/sysmanage/geoip/GeoLite2-City.mmdb"
     )
@@ -641,7 +641,7 @@ def get_geo_lookup_database_path() -> str:
 def get_geo_lookup_maxmind_license_key() -> str:
     """MaxMind license key for GeoLite2 downloads.  Empty -> ipapi.co only.
 
-    Phase 13.1.H: secret — OpenBAO first, YAML fallback.
+    Phase 13.1.H: secret -- OpenBAO first, YAML fallback.
     """
     return _config_secret(
         "maxmind_license_key",
@@ -751,7 +751,7 @@ def is_https_enabled() -> bool:
 
 
 def is_dev_mode() -> bool:
-    """True when this deployment is plain HTTP (no TLS) — treated as dev.
+    """True when this deployment is plain HTTP (no TLS) -- treated as dev.
 
     Security checks that would impede local testing (e.g. federation
     certificate-pin enforcement) auto-relax in dev mode, so an operator
@@ -766,7 +766,7 @@ def federation_enforce_cert_pinning() -> bool:
     """Whether to ENFORCE federation cert/identity pinning on the wire.
 
     Auto-derived from the deployment posture: warn-only in dev (plain HTTP),
-    enforced once the server runs HTTPS.  No dedicated config flag — HTTPS
+    enforced once the server runs HTTPS.  No dedicated config flag -- HTTPS
     *is* the signal that this is a real deployment.
     """
     return is_https_enabled()

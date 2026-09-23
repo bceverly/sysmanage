@@ -5,9 +5,9 @@
 """Prometheus exposition endpoint for user-defined Custom Metrics.
 
 This module exposes the LATEST successful sample of every user-defined custom
-metric (Custom Metrics — Slice 1) as a Prometheus text-exposition endpoint
-(``GET /metrics/custom-metrics``).  The existing Prometheus deployment — already
-wired to Grafana via ``configure_prometheus_datasource`` — can scrape this
+metric (Custom Metrics -- Slice 1) as a Prometheus text-exposition endpoint
+(``GET /metrics/custom-metrics``).  The existing Prometheus deployment -- already
+wired to Grafana via ``configure_prometheus_datasource`` -- can scrape this
 endpoint so custom-metric values flow through to Grafana dashboards.  This is
 "approach B": rather than push into Grafana, we surface the samples in a format
 the existing Prometheus already knows how to pull, hand-rendering the text
@@ -22,7 +22,7 @@ reach it (e.g. bind/allow only the Prometheus scraper's address, or place it
 behind a reverse-proxy allow-list).  Do not expose it to the public internet.
 
 A scrape must ALWAYS succeed: this handler never raises on a bad tenant or a bad
-row — it logs and continues, returning HTTP 200 with whatever series are
+row -- it logs and continues, returning HTTP 200 with whatever series are
 available.
 """
 
@@ -49,7 +49,7 @@ def _escape_label_value(value) -> str:
 
     Per the exposition format only three characters must be escaped inside a
     label value: backslash (``\\`` -> ``\\\\``), double-quote (``"`` ->
-    ``\\"``) and newline (``\\n`` -> ``\\n``).  Order matters — backslash is
+    ``\\"``) and newline (``\\n`` -> ``\\n``).  Order matters -- backslash is
     escaped FIRST so we don't double-escape the backslashes we introduce.
     """
     text = "" if value is None else str(value)
@@ -74,13 +74,13 @@ def _collect_series_for_session(session, tenant_id):
     series per (metric, host).  Metrics with no ok sample are simply absent.
 
     ``tenant_id`` is included as a ``tenant`` label ONLY when it is not ``None``
-    (i.e. only in multi-tenancy mode — the bootstrap/collapsed DB passes
+    (i.e. only in multi-tenancy mode -- the bootstrap/collapsed DB passes
     ``None`` and gets no tenant label).
 
     Never raises: any per-row problem is logged and that row is skipped.
     """
     # Late import to avoid an import cycle at module import time (models pull in
-    # db, which pulls in config, etc.) — mirrors the other API modules.
+    # db, which pulls in config, etc.) -- mirrors the other API modules.
     from backend.persistence.models import (
         CustomMetric,  # noqa: PLC0415
         CustomMetricSample,
@@ -156,7 +156,7 @@ def _collect_series_for_session(session, tenant_id):
 def _render_exposition() -> str:
     """Build the full Prometheus exposition body across every provisioned DB.
 
-    Walks ``iter_host_databases()`` — the shared per-tenant iteration seam also
+    Walks ``iter_host_databases()`` -- the shared per-tenant iteration seam also
     used by the custom-metric retention service.  In single-tenant /
     ``multitenancy.enabled`` false (collapsed) mode it yields ONLY the one
     bootstrap/main database (``tenant_id`` = ``None`` → no ``tenant`` label); in
@@ -201,7 +201,7 @@ def _render_exposition() -> str:
 async def custom_metrics_exposition() -> Response:
     """Prometheus text-exposition of the latest ok custom-metric values.
 
-    UNAUTHENTICATED (Prometheus-scrape convention) — see the module docstring:
+    UNAUTHENTICATED (Prometheus-scrape convention) -- see the module docstring:
     this endpoint should be firewalled to the Prometheus host.  Always returns
     HTTP 200 with a ``text/plain; version=0.0.4`` body; never raises on a bad
     tenant/row (logged and skipped) so a scrape never fails.

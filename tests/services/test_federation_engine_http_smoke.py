@@ -11,7 +11,7 @@ way ``proplus_routes.mount_federation_controller_routes`` does (under the
 ``_cython_compat`` shim), and drives the ingest endpoints over real HTTP with a
 ``TestClient``.
 
-This is the layer the stubbed tests can't reach — it is precisely what would
+This is the layer the stubbed tests can't reach -- it is precisely what would
 have caught the bugs that only surfaced against the live engine in production:
 
   * the ``Header()``-default parameter that failed route registration with
@@ -80,7 +80,7 @@ def harness(engine):
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    # Create the whole schema — the ingest path touches several federation
+    # Create the whole schema -- the ingest path touches several federation
     # tables (sites, host_directory, sync_event, …); ``backend.persistence
     # .models`` is imported above so every table is registered on Base.
     Base.metadata.create_all(sa_engine)
@@ -101,7 +101,7 @@ def harness(engine):
             sess.close()
 
     app = FastAPI()
-    # Mount EXACTLY as proplus_routes does — same kwargs, same compat shim.
+    # Mount EXACTLY as proplus_routes does -- same kwargs, same compat shim.
     # If the engine has a Header()/Query() default or request:Request bug, this
     # raises and every test in the module errors (the mount-time signal).
     with _cython_compat():

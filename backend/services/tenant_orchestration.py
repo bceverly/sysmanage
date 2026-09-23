@@ -3,12 +3,12 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Self-service tenant provisioning orchestration — OSS shim (Pro+ relocation,
+Self-service tenant provisioning orchestration -- OSS shim (Pro+ relocation,
 Phase 2).
 
 Creating a tenant's database + OpenBAO dynamic-creds role, recording placement,
 running the tenant migration chain, and tearing it all down moved into the
-licensed engine — the OSS build has no copy.  This module keeps the public
+licensed engine -- the OSS build has no copy.  This module keeps the public
 ``OrchestrationError`` (so callers/tests catch the same class the engine raises)
 and thin delegators: provisioning ops raise without the engine; the
 ``is_provisioner_configured`` probe degrades to False.

@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Tests for the registry service layer — Phase 13.1.B.
+Tests for the registry service layer -- Phase 13.1.B.
 
 Covers grant validity (active/expired/suspended-tenant), default-tenant
 resolution, and the email-domain allowlist semantics (empty = allow all).

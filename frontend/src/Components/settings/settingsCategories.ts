@@ -40,24 +40,24 @@ export interface SettingsTabDef {
   requiresLicense?: boolean;
 }
 
-// Tab definitions — each entry declares its hash id, label key, and the
+// Tab definitions -- each entry declares its hash id, label key, and the
 // module that must be licensed for the tab to be visible.  ``moduleRequired``
 // is undefined for OSS-appropriate tabs.  The order here is the visible
 // order in the UI.  License filtering is applied by the caller.
 export const SETTINGS_TAB_DEFS: SettingsTabDef[] = [
   // Fixed leading order (Bryan): Configuration, Server Role, Host
-  // Defaults — the most-used settings, with Configuration as the default
+  // Defaults -- the most-used settings, with Configuration as the default
   // landing tab for the settings gear.
   {
     id: 'configuration',
     labelKey: 'configuration.title',
     labelDefault: 'Configuration',
   },
-  // Server Role (air-gap topology) — ungated: every deployment,
+  // Server Role (air-gap topology) -- ungated: every deployment,
   // including standalone Community, can pick its role.  Replaces
   // the old sysmanage.yaml ``role:`` key.  The page hosts BOTH the
   // air-gap and federation role cards, so the menu item is "Server
-  // Role" — distinct from ``serverRole.heading`` (the air-gap card's
+  // Role" -- distinct from ``serverRole.heading`` (the air-gap card's
   // own "Air-Gap Role" title).
   {
     id: 'server-role',
@@ -96,7 +96,7 @@ export const SETTINGS_TAB_DEFS: SettingsTabDef[] = [
   // Dynamic Secrets has no entry here on purpose: the fold-in landed, so Pro+
   // contributes it at runtime from ``plugin-src/entries/secrets-entry.ts`` with
   // ``moduleRequired: 'secrets_engine'``.  Only its CATEGORY placement lives in
-  // this file (see SETTINGS_TAB_CATEGORY above) — adding a tab def here would
+  // this file (see SETTINGS_TAB_CATEGORY above) -- adding a tab def here would
   // render it twice, once ungated.
   //
   // Access Groups + Registration Keys (Phase 12.4): contributed at
@@ -143,7 +143,7 @@ export const SETTINGS_TAB_DEFS: SettingsTabDef[] = [
     labelDefault: 'Air-Gap Bundles',
     // Air-gap is an ENTERPRISE feature (features.py: AIRGAP_* live in the
     // Enterprise tier, paired with the airgap_collector_engine). Gate on
-    // that engine so the tab hides on Community AND Professional — a bare
+    // that engine so the tab hides on Community AND Professional -- a bare
     // ``requiresLicense`` leaked it onto Professional, which has no air-gap.
     moduleRequired: 'airgap_collector_engine',
   },
@@ -151,7 +151,7 @@ export const SETTINGS_TAB_DEFS: SettingsTabDef[] = [
     id: 'agent-mirrors',
     labelKey: 'agentMirrors.tabLabel',
     labelDefault: 'Agent Install Mirrors',
-    // Phase 12 — the channels the AGENT itself installs from.  Gated on the
+    // Phase 12 -- the channels the AGENT itself installs from.  Gated on the
     // provisioning engine because that engine both owns the channel list and
     // renders the install commands; without it there is nothing to configure.
     moduleRequired: 'provisioning_engine',

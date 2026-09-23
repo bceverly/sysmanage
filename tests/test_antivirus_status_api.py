@@ -156,7 +156,7 @@ class TestStatusResponseCoercion:
     """The response model normalises what SQLAlchemy hands it."""
 
     def test_uuid_columns_are_rendered_as_strings(self):
-        # Pydantic would otherwise serialise a UUID object and the frontend
+        # Pydantic would otherwise serialize a UUID object and the frontend
         # compares host_id against a string from the URL.
         out = av.AntivirusStatusResponse(
             id=uuid.uuid4(),

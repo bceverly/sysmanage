@@ -98,7 +98,7 @@ class TestAuditLogCsvExport:
 
     def test_export_json_without_proplus_returns_402(self, client, auth_headers):
         """JSON/CEF/LEEF require Pro+; OSS-only deployments must get 402
-        (Payment Required) — NOT a CSV in disguise."""
+        (Payment Required) -- NOT a CSV in disguise."""
         response = client.get("/api/v1/audit-log/export?fmt=json", headers=auth_headers)
         # 402 if authorized + OSS-only; 307 if Pro+ engine is loaded;
         # 401/403 if unauthorized.
@@ -106,7 +106,7 @@ class TestAuditLogCsvExport:
 
 
 class TestAuditLogPdfExport:
-    """Phase 8.4 closeout — OSS PDF export sibling of the CSV path."""
+    """Phase 8.4 closeout -- OSS PDF export sibling of the CSV path."""
 
     def test_export_pdf_authorized(self, client, auth_headers):
         """Authorized PDF export must return application/pdf (200) or 403
@@ -117,7 +117,7 @@ class TestAuditLogPdfExport:
             assert response.headers.get("content-type", "").startswith(
                 "application/pdf"
             )
-            # PDFs always start with a "%PDF-" header byte sequence —
+            # PDFs always start with a "%PDF-" header byte sequence --
             # asserting it confirms reportlab actually produced a doc
             # rather than e.g. an empty body or HTML error page.
             assert response.content[:5] == b"%PDF-"
@@ -126,7 +126,7 @@ class TestAuditLogPdfExport:
         """Filter passthrough:  PDF route consumes the same
         ``AuditLogFilters`` shape as CSV, so a filtered range must
         still produce a 200 + application/pdf response (even if zero
-        entries match — empty PDFs are still PDFs)."""
+        entries match -- empty PDFs are still PDFs)."""
         response = client.get(
             "/api/v1/audit-log/export?fmt=pdf&result=SUCCESS&entity_type=USER",
             headers=auth_headers,

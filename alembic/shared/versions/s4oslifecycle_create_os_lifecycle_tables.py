@@ -9,9 +9,9 @@ the same for every customer), so the registry lives ONCE in the ``shared``
 partition, like the CVE + advisory catalogs.  Brand-new tables, created
 idempotently:
 
-  * ``shared_os_lifecycle`` — per-release lifecycle (release/support/EOL dates,
+  * ``shared_os_lifecycle`` -- per-release lifecycle (release/support/EOL dates,
     LTS, recommended upgrade target).
-  * ``shared_os_lifecycle_ingestion_log`` — server-global refresh bookkeeping.
+  * ``shared_os_lifecycle_ingestion_log`` -- server-global refresh bookkeeping.
 
 Per-host "approaching EOL" is COMPUTED (join against ``host``), not stored.
 

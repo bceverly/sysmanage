@@ -95,7 +95,7 @@ const Settings: React.FC = () => {
   const { settingsTabs: pluginSettingsTabs } = usePlugins();
 
   // Active license modules (for Pro+ tab gating).  ``licenseActive``
-  // means "any Pro+ tier is licensed at all" — used by tabs like
+  // means "any Pro+ tier is licensed at all" -- used by tabs like
   // ``airgap-bundles`` that aren't tied to a specific engine but
   // still want to disappear on the Community edition.
   const [licenseModules, setLicenseModules] = useState<string[]>([]);
@@ -128,11 +128,11 @@ const Settings: React.FC = () => {
     });
   }, [licenseModules, licenseActive]);
 
-  // Plugin-contributed Settings tabs honour BOTH the ``moduleRequired`` gate
+  // Plugin-contributed Settings tabs honor BOTH the ``moduleRequired`` gate
   // (is the engine bundle licensed?) and the ``featureFlag`` gate (is this
   // specific capability licensed?).  The feature gate hides an Enterprise
   // capability that ships inside a Professional module.  Plugins that omit both
-  // fields stay always-visible (pre-Phase-10.7 behaviour).
+  // fields stay always-visible (pre-Phase-10.7 behavior).
   const visiblePluginSettingsTabs = useMemo(() => {
     return pluginSettingsTabs.filter(pt => {
       if (pt.moduleRequired && !licenseModules.includes(pt.moduleRequired)) return false;
@@ -141,7 +141,7 @@ const Settings: React.FC = () => {
     });
   }, [pluginSettingsTabs, licenseModules, licenseFeatures]);
 
-  // Tabs in display order: the hardcoded tabDefs, then plugin tabs — EXCEPT the
+  // Tabs in display order: the hardcoded tabDefs, then plugin tabs -- EXCEPT the
   // SysManage License ('proplus') tab, which is surfaced right after
   // Configuration so the license is easy to find.  This single ordered list
   // drives both the tab bar and ``tabNames`` so they never desync.
@@ -163,7 +163,7 @@ const Settings: React.FC = () => {
     return [...ordered, ...restPlugins];
   }, [tabDefs, visiblePluginSettingsTabs, t]);
 
-  // Tab IDs in display order — used for hash navigation (URL hash → activeTab
+  // Tab IDs in display order -- used for hash navigation (URL hash → activeTab
   // index) and ID-based dispatch in handleTabChange / tab content rendering.
   const tabNames = useMemo(
     () => orderedSettingsTabs.map(x => x.id),
@@ -203,7 +203,7 @@ const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState(getInitialTab);
 
   // Handle tab change and update URL hash.  Dispatch is keyed off the tab
-  // ID rather than the index — the visible tab list is filtered by license
+  // ID rather than the index -- the visible tab list is filtered by license
   // so indices are not stable across users.
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -263,7 +263,7 @@ const Settings: React.FC = () => {
   const [packageSummary, setPackageSummary] = useState<OSPackageSummary[]>([]);
   const [selectedOS, setSelectedOS] = useState<string>('');
   const [selectedManager, setSelectedManager] = useState<string>('');
-  // Scoping a search to ONE host answers the only actionable question — "can I
+  // Scoping a search to ONE host answers the only actionable question -- "can I
   // install this HERE?".  Unscoped results are a UNION across every host of the
   // OS, and two machines on the same release legitimately differ (a PPA here,
   // an internal mirror there), so the union can offer packages a given machine
@@ -466,7 +466,7 @@ const Settings: React.FC = () => {
       const response = await axiosInstance.get('/api/v1/packages/summary');
       setPackageSummary(response.data);
       // The host list powers the per-host scope.  Best-effort: losing it must
-      // not take the summary down — the search still works unscoped.
+      // not take the summary down -- the search still works unscoped.
       try {
         const hostsResponse = await axiosInstance.get('/api/v1/hosts');
         setPackageHosts(
@@ -746,7 +746,7 @@ const Settings: React.FC = () => {
       </Typography>
 
       {/* Two-pane layout: grouped category rail on the left, content on the
-          right — replaces the old overflowing horizontal tab strip. */}
+          right -- replaces the old overflowing horizontal tab strip. */}
       <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, minHeight: 0 }}>
         <Box component="nav" aria-label={t('settings.tabsAriaLabel', 'settings tabs')} sx={navRailContainerSx}>
           {settingsGroups.map(group => (
@@ -776,7 +776,7 @@ const Settings: React.FC = () => {
           ))}
         </Box>
 
-        {/* Content — keyed off the tab ID at the active index so the mapping is
+        {/* Content -- keyed off the tab ID at the active index so the mapping is
             stable when a Pro+-gated tab is filtered out for unlicensed users. */}
         <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto' }}>
         {tabNames[activeTab] === 'configuration' && <ConfigurationSettings />}

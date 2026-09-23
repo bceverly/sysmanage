@@ -12,9 +12,9 @@ One endpoint:
 Sends a single envelope to every connected agent (or every agent
 matching a tag).  Common payloads:
 
-  - ``broadcast_action="refresh_inventory"``  — operator-triggered
+  - ``broadcast_action="refresh_inventory"``  -- operator-triggered
     "ping every agent for fresh inventory" without per-host requests.
-  - ``broadcast_action="banner"`` + ``message`` — display a banner /
+  - ``broadcast_action="banner"`` + ``message`` -- display a banner /
     notification on the agent host.
 
 The actual semantic of the broadcast is interpreted by the agent's
@@ -23,7 +23,7 @@ broadcast handler.  This endpoint is the dispatcher.
 Architecture: this endpoint enqueues one OUTBOUND queue row per
 matching host (via ``QueueOperations``) and returns the number of
 rows enqueued.  The websocket outbound processor is responsible for
-actually delivering each envelope to its agent — agents that are
+actually delivering each envelope to its agent -- agents that are
 offline at enqueue time will receive the envelope when they next
 reconnect.  This endpoint must never call ``connection_manager``'s
 direct send/broadcast helpers; those bypass the queue and break
@@ -71,7 +71,7 @@ class BroadcastRequest(BaseModel):
         ...,
         min_length=1,
         max_length=120,
-        description="What the agent should do — e.g. 'refresh_inventory', 'banner'",
+        description="What the agent should do -- e.g. 'refresh_inventory', 'banner'",
     )
     message: Optional[str] = Field(
         None, max_length=4000, description="Optional human-readable text payload"
@@ -121,7 +121,7 @@ async def broadcast_to_fleet(
 
     Returns the number of agents that successfully received the
     message and how long the broadcast took (operators care about
-    both — delivered_count<expected means agents are offline,
+    both -- delivered_count<expected means agents are offline,
     elapsed_ms>5s means the dispatch path needs investigation)."""
     user = db.query(models.User).filter(models.User.userid == current_user).first()
     if not user:
@@ -129,7 +129,7 @@ async def broadcast_to_fleet(
 
     tag_uuid = _parse_tag_uuid_or_400(request.tag_id)
     if tag_uuid is not None:
-        # Verify the tag exists — bad UUIDs that happen to parse but
+        # Verify the tag exists -- bad UUIDs that happen to parse but
         # don't reference an actual tag would silently broadcast to
         # nobody, which is a worse failure mode than a 404.
         tag_exists = db.query(models.Tag.id).filter(models.Tag.id == tag_uuid).first()
@@ -149,7 +149,7 @@ async def broadcast_to_fleet(
 
     # Resolve target set + enqueue.  We pull the matching host_ids in
     # a single DB query, then enqueue one OUTBOUND row per host.  The
-    # outbound processor delivers each row independently — offline
+    # outbound processor delivers each row independently -- offline
     # agents pick theirs up on reconnect.
     started = time.monotonic()
     if tag_uuid is not None and request.platform:
@@ -170,7 +170,7 @@ async def broadcast_to_fleet(
     # bootstrap DB, so this is inert.  Authorization, the (server-global) tag
     # definition check, and the audit write stay on the request ``db``.
     # Run the bootstrap leg on the request's own ``db`` session (the one the
-    # dependency injected — and the one a test overrides) instead of letting
+    # dependency injected -- and the one a test overrides) instead of letting
     # iter_host_databases open a second, module-global session; only the extra
     # per-tenant sessions are opened (and closed) here.
     delivered = 0
@@ -190,7 +190,7 @@ async def broadcast_to_fleet(
                 sanitize_log(str(broadcast_db_error)),
             )
         finally:
-            # The request ``db`` is owned by the dependency — never close it here
+            # The request ``db`` is owned by the dependency -- never close it here
             # (the audit write below still needs it). Tenant sessions are ours.
             if host_session is not db:
                 host_session.close()
@@ -246,7 +246,7 @@ def _resolve_broadcast_targets(
 ) -> list:
     """Return the list of active Host.id values matching the requested
     tag/platform filters.  ``None`` for both filters means "all active
-    hosts".  All filtering is one DB query — no in-memory iteration over
+    hosts".  All filtering is one DB query -- no in-memory iteration over
     websocket connections, since broadcasts must reach agents that are
     currently offline too (they pick the queued envelope up on reconnect).
     """
@@ -285,7 +285,7 @@ def _enqueue_envelope_for_hosts(
             )
     if enqueued:
         # ``enqueue_message`` only flushes when given a session; commit is
-        # the caller's responsibility — without it the rows roll back when
+        # the caller's responsibility -- without it the rows roll back when
         # FastAPI's get_db() finalizes the request.
         db.commit()
     return enqueued

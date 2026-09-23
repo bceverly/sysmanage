@@ -97,7 +97,7 @@ const HostDetail = () => { // NOSONAR
 
     // Check if host supports child hosts (virtualization).
     // Child host management is a Professional+ feature, gated by the
-    // ``container_engine`` license module — without it the tab and its
+    // ``container_engine`` license module -- without it the tab and its
     // panel must not render in OSS builds.
     const supportsChildHosts = useCallback(() => {
         if (!host?.platform) return false;
@@ -236,7 +236,7 @@ const HostDetail = () => { // NOSONAR
     // its module gate (is the engine bundle licensed?) AND its feature gate
     // (is this specific capability licensed?) pass.  The feature gate is what
     // hides an Enterprise capability that ships inside a Professional module
-    // (e.g. the ``fips_mode`` tab inside ``compliance_engine``) — without it a
+    // (e.g. the ``fips_mode`` tab inside ``compliance_engine``) -- without it a
     // Professional user would see the tab and then hit a 402.
     const visiblePluginTabs = useMemo(() => {
         return pluginTabs.filter(pt => {
@@ -251,7 +251,7 @@ const HostDetail = () => { // NOSONAR
     }, [pluginTabs, licenseModules, licenseFeatures]);
 
     // Build ordered tab definitions array.  Plugin-registered tabs whose
-    // ``id`` collides with a hardcoded OSS tab are dropped — otherwise
+    // ``id`` collides with a hardcoded OSS tab are dropped -- otherwise
     // React warns about duplicate keys and BOTH tabs render their panel
     // content on click.  Pro+ plugins that want to provide a richer
     // version of an OSS tab should pick a distinct id (e.g. ``compliance-pro``).
@@ -277,7 +277,7 @@ const HostDetail = () => { // NOSONAR
             { id: 'security', icon: <ShieldIcon />, label: t('hostDetail.securityTab', 'Security') },
             // Compliance is an Enterprise capability: the ``compliance_engine``
             // module ships at Professional, but the compliance surface itself is
-            // gated on the Enterprise ``compliance`` feature — so require BOTH,
+            // gated on the Enterprise ``compliance`` feature -- so require BOTH,
             // otherwise a Professional user sees a tab that 402s on every call.
             ...((licenseModules.includes('compliance_engine') && licenseFeatures.includes('compliance')) ? [{ id: 'compliance', icon: <RuleIcon />, label: t('hostDetail.complianceTab', 'Compliance') }] : []),
             ...safePluginTabs.filter(p => p.position === 'after-security').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
@@ -604,7 +604,7 @@ const HostDetail = () => { // NOSONAR
             />
 
             {/* Two-pane layout: grouped category rail on the left, content on the
-                right — replaces the old overflowing horizontal tab strip. */}
+                right -- replaces the old overflowing horizontal tab strip. */}
             <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, minHeight: 0 }}>
                 <HostDetailNavRail
                     hostTabGroups={hostTabGroups}
@@ -613,7 +613,7 @@ const HostDetail = () => { // NOSONAR
                     handleTabChange={handleTabChange}
                 />
 
-                {/* Content — keyed off the tab ID at the active index so the
+                {/* Content -- keyed off the tab ID at the active index so the
                     mapping is stable when a Pro+-gated tab is filtered out. */}
                 <HostDetailTabContent
                     addRoleToSelection={addRoleToSelection}

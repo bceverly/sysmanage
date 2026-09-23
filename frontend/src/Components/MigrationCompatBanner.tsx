@@ -19,7 +19,7 @@ interface ModuleCompatibilityResponse {
 }
 
 /**
- * MigrationCompatBanner — fallback banner shown when one or more Pro+
+ * MigrationCompatBanner -- fallback banner shown when one or more Pro+
  * modules failed to load because the OSS database schema is older than
  * the module's declared minimum alembic revision.
  *
@@ -34,7 +34,7 @@ const MigrationCompatBanner: React.FC = () => {
   const ref = useRef<HTMLDivElement>(null);
 
   // Reserve layout space so the fixed banner pushes content down instead of
-  // overlaying it (and it sits BELOW the navbar — see the Box sx — so it never
+  // overlaying it (and it sits BELOW the navbar -- see the Box sx -- so it never
   // covers the menu bar).  Mirrors the tenant-migration banner.
   useEffect(() => {
     const root = document.documentElement;
@@ -116,7 +116,7 @@ const MigrationCompatBanner: React.FC = () => {
           {entries.map((e) => (
             <li key={e.module_code}>
               <strong>{e.module_code}</strong>
-              {' — '}
+              {' -- '}
               {t('migrationCompat.requires', 'requires')} {e.required_revision}
               {e.required_revision_human ? ` (${e.required_revision_human})` : ''}
               {e.current_revision

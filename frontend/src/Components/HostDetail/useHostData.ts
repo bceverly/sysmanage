@@ -89,7 +89,7 @@ export const useHostData = ({
                 setLicenseModules(licenseInfo.modules || []);
                 setLicenseFeatures(licenseInfo.features || []);
             } catch {
-                // License check unavailable — proceed without Pro+ features
+                // License check unavailable -- proceed without Pro+ features
                 setLicenseModules([]);
                 setLicenseFeatures([]);
             }

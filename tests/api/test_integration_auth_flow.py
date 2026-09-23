@@ -116,7 +116,7 @@ def test_failed_login_records_audit_attempt(
 def test_login_unknown_user_does_not_distinguish_from_wrong_password(
     client, mock_login_security
 ):
-    """Unknown userid must produce the same 401 as wrong-password —
+    """Unknown userid must produce the same 401 as wrong-password --
     no user-existence enumeration via response shape."""
     mock_login_security.validate_login_attempt.return_value = (True, "")
 

@@ -8,7 +8,7 @@ Tests for the result-parsing helpers in ``backend.services.proplus_dispatch``.
 Covers the parsers that translate engine-plan stdout (sectioned shell
 output from build_check_virtualization_support_plan and
 build_list_child_hosts_plan) into the structured dicts the legacy result
-handlers consume.  These parsers are load-bearing — without them the
+handlers consume.  These parsers are load-bearing -- without them the
 engine-path probes silently no-op.
 """
 
@@ -78,7 +78,7 @@ class TestParseLxdSection:
         assert pd._parse_lxd_section("[]") == []
 
     def test_invalid_json_returns_empty(self):
-        # Non-JSON text shouldn't crash — just empty list.
+        # Non-JSON text shouldn't crash -- just empty list.
         assert pd._parse_lxd_section("not json at all") == []
 
     def test_extracts_name_status_type(self):
@@ -250,9 +250,9 @@ class TestParseCapabilityProbeStdout:
         assert out["capabilities"]["kvm"]["available"] is True
         assert out["capabilities"]["kvm"]["enabled"] is True
         assert out["capabilities"]["kvm"]["running"] is True
-        # LXD section all "no" — should NOT be in supported_types.
+        # LXD section all "no" -- should NOT be in supported_types.
         assert "lxd" not in out["supported_types"]
-        # WSL "none" — not present.
+        # WSL "none" -- not present.
         assert "wsl" not in out["supported_types"]
 
     def test_amd_cpu_detected(self):

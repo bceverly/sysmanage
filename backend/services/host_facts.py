@@ -2,11 +2,11 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""What a host CAN answer — the shared reader for Phase 21.1 S6.
+"""What a host CAN answer -- the shared reader for Phase 21.1 S6.
 
 S1 made every agent advertise which fact tables it serves and why it does not
-serve the rest. S6 is the other half: the consumers — compliance, vuln, fleet
-and the 20.2 drift baselines — reading that advertisement and saying "not
+serve the rest. S6 is the other half: the consumers -- compliance, vuln, fleet
+and the 20.2 drift baselines -- reading that advertisement and saying "not
 covered here" instead of showing an empty result.
 
 WHY THIS IS FOUR-VALUED AND NOT A BOOLEAN
@@ -14,21 +14,21 @@ WHY THIS IS FOUR-VALUED AND NOT A BOOLEAN
 ``covered(host, "mounts")`` returning True/False loses the distinction the
 whole phase exists for. The four answers are genuinely different actions:
 
-* ``SERVED``          — ask; the data is real.
-* ``NOT_APPLICABLE``  — a Windows host has no ``mounts``. Not a gap, not a
+* ``SERVED``          -- ask; the data is real.
+* ``NOT_APPLICABLE``  -- a Windows host has no ``mounts``. Not a gap, not a
                         defect, and NOT something to show an operator as a
                         finding.
-* ``UNSUPPORTED``     — the host could serve it and cannot right now
+* ``UNSUPPORTED``     -- the host could serve it and cannot right now
                         (unprivileged agent, broken provider). This IS worth
                         showing: it is fixable.
-* ``UNKNOWN``         — the host never advertised. An agent older than 21.1,
+* ``UNKNOWN``         -- the host never advertised. An agent older than 21.1,
                         or one whose report could not be built.
 
 THE THIRD STATE IS THE ONE THAT BITES
 -------------------------------------
 ``UNKNOWN`` must never be treated as "not covered". Every host in a fleet is
 pre-21.1 until it is upgraded, and a consumer that reads unknown as uncovered
-would switch off for the entire estate the day this shipped — while looking
+would switch off for the entire estate the day this shipped -- while looking
 like it was working. It is the same trap ``limited_flag`` documents for
 capability gating: absence of an advertisement is not an advertisement of
 absence.

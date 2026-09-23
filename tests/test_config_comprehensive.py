@@ -22,7 +22,7 @@ def _restore_config_singleton():
     Several tests here ``importlib.reload(config)`` with a mocked minimal
     config (no database/registry/jwt timeouts) and never reload back, which
     left the singleton polluted for every later test sharing the same
-    pytest-xdist worker — a latent cross-test flake that surfaced as missing
+    pytest-xdist worker -- a latent cross-test flake that surfaced as missing
     keys in unrelated tests (e.g. registry mirroring, switch-account). Saving
     and restoring the singleton reference around each test contains it.
     """
@@ -582,7 +582,7 @@ class TestDevModeDetection:
             assert config.federation_enforce_cert_pinning() is False
 
     def test_dev_mode_when_only_one_of_cert_key_set(self):
-        # A half-configured TLS pair isn't HTTPS — stays dev (fail-safe).
+        # A half-configured TLS pair isn't HTTPS -- stays dev (fail-safe).
         with patch.object(config, "config", {"api": {"certFile": "/etc/ssl/cert.pem"}}):
             assert config.is_https_enabled() is False
             assert config.is_dev_mode() is True

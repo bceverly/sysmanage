@@ -138,7 +138,7 @@ class TestEmailServiceInitialization:
         """Test EmailService initialization.
 
         Phase 13.1: config is resolved lazily at send time (so the active
-        tenant governs), not snapshotted in __init__ — so construction must
+        tenant governs), not snapshotted in __init__ -- so construction must
         not read config at all.
         """
         with patch("backend.services.email_service.config") as mock_config:

@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""add livepatch columns to ubuntu_pro_info (Phase 13.3 — Livepatch Integration)
+"""add livepatch columns to ubuntu_pro_info (Phase 13.3 -- Livepatch Integration)
 
 Adds Canonical Livepatch detail columns reported by the agent (from
 ``canonical-livepatch status``) when the livepatch Ubuntu Pro service is

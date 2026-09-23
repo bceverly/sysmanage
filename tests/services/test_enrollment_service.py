@@ -7,7 +7,7 @@ Tests for the tenant enrollment-token OSS shim + the relocated engine logic.
 
 The token logic moved into the licensed engine (Pro+ relocation, Phase 2).  The
 OSS module is now a thin shim, so:
-  * shim-contract tests (always run) assert the no-engine behavior — CRUD raises,
+  * shim-contract tests (always run) assert the no-engine behavior -- CRUD raises,
     the registration read degrades to None;
   * behavioral tests run against the REAL compiled engine via the shim, exercising
     generate/validate/list/revoke against an in-memory registry DB.  They skip
@@ -38,7 +38,7 @@ def _tenant(db_session, slug="enroll-co"):
 
 
 # ---------------------------------------------------------------------------
-# Shim contract (always runs — no engine)
+# Shim contract (always runs -- no engine)
 # ---------------------------------------------------------------------------
 
 

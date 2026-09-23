@@ -45,7 +45,7 @@ router = APIRouter(
 )
 
 
-# Reused 404 detail string — extracted so the wording can't drift
+# Reused 404 detail string -- extracted so the wording can't drift
 # between handlers and so SonarQube's duplication scanner is happy.
 _ERR_TEMPLATE_NOT_FOUND = N_("Report template not found")
 
@@ -56,7 +56,7 @@ _LABEL_OS_VERSION = "OS Version"
 
 
 # Catalog of base report types and the field codes the renderer
-# understands for each.  Kept in sync with the Pro+ reporting_engine —
+# understands for each.  Kept in sync with the Pro+ reporting_engine --
 # adding a field on either side without updating the other is a bug.
 # Map: base_report_type -> [(field_code, default_label_msgid)]
 _BASE_REPORTS: Dict[str, List[Dict[str, str]]] = {

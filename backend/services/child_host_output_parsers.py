@@ -10,9 +10,9 @@ pylint's max-module-lines cap.  Every function here is re-imported back into
 ``proplus_dispatch`` under its original private name, so callers (and the
 sister test module ``test_proplus_dispatch_parsers``) see no change.
 
-These parsers turn the sectioned ``build_list_child_hosts_plan`` stdout — one
+These parsers turn the sectioned ``build_list_child_hosts_plan`` stdout -- one
 ``===SECTION===`` block per hypervisor (lxd / kvm / bhyve / bhyve_meta / vmm /
-wsl) — into the flat ``child_hosts`` list shape the listing handler consumes.
+wsl) -- into the flat ``child_hosts`` list shape the listing handler consumes.
 They are pure string/JSON parsing with no DB or engine dependencies.
 """
 
@@ -127,10 +127,10 @@ def _parse_bhyve_section(text: str) -> list:
         parts = s.split()
         if not parts:
             continue
-        # State is the trailing column(s); take the last 1–2 tokens that
+        # State is the trailing column(s); take the last 1-2 tokens that
         # form a recognizable state word.
         state = parts[-1] if parts else ""
-        # vm-bhyve emits "Running (PID)" — the (PID) is parts[-1] if present.
+        # vm-bhyve emits "Running (PID)" -- the (PID) is parts[-1] if present.
         if state.startswith("(") and len(parts) >= 2:
             state = parts[-2]
         out.append(
@@ -187,7 +187,7 @@ def _parse_bhyve_meta_section(text: str) -> Dict[str, Dict[str, Any]]:
 
     Returns a dict keyed by ``vm_name`` with whatever metadata fields
     were present (typically ``hostname``, ``distribution``, ``vm_ip``).
-    Malformed entries are silently skipped — listing enrichment is
+    Malformed entries are silently skipped -- listing enrichment is
     best-effort.
     """
     if not text or not text.strip():

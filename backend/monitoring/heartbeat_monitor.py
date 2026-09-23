@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 def _mark_stale_hosts_down(db, timeout_threshold, label):
     """Mark approved hosts in ``db`` that missed the heartbeat window as down.
 
-    Only approved hosts are marked — pending hosts are expected to have comms
+    Only approved hosts are marked -- pending hosts are expected to have comms
     gaps while awaiting approval."""
     stale_hosts = (
         db.query(Host)

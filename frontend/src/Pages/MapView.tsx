@@ -12,7 +12,7 @@
  * status / location + a link to the host detail page.
  *
  * Notable design choices:
- *   * No third-party tile provider — uses tile.openstreetmap.org
+ *   * No third-party tile provider -- uses tile.openstreetmap.org
  *     directly, matching the project's no-third-party-tracker stance.
  *   * Cluster plugin loaded via dynamic import inside useEffect so
  *     it stays out of the initial JS bundle for users who never
@@ -20,7 +20,7 @@
  *   * Self-bounding: on first load, the map zooms to fit all hosts'
  *     bounding box.  Empty fleet -> world view (0,0 zoom=2).
  *   * Marker color reflects host.status: green for "up", red for
- *     "down", grey for unknown.  Custom DivIcon avoids the default
+ *     "down", gray for unknown.  Custom DivIcon avoids the default
  *     "broken-image" sprite that Leaflet ships with (its bundled
  *     marker sprite paths don't resolve under Vite without extra
  *     plumbing).
@@ -44,7 +44,7 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { doGetHostGeolocations, HostGeolocation } from "../Services/geolocations";
 
 // Leaflet + leaflet.markercluster are both bundled by Vite from
-// node_modules — no runtime CDN, no third-party trackers, no
+// node_modules -- no runtime CDN, no third-party trackers, no
 // external font requests.  Tile imagery still comes from
 // tile.openstreetmap.org per the no-tracker compromise (OSM's tile
 // servers are donation-funded and don't log identifiers).
@@ -63,11 +63,11 @@ function colorForStatus(status: string | null): string {
     case "down":
       return "#c62828"; // MUI red 800
     default:
-      return "#757575"; // MUI grey 600
+      return "#757575"; // MUI gray 600
   }
 }
 
-/** Build a DivIcon for a host marker.  Pure HTML/CSS — no sprite. */
+/** Build a DivIcon for a host marker.  Pure HTML/CSS -- no sprite. */
 function makeHostIcon(status: string | null): L.DivIcon {
   const color = colorForStatus(status);
   return L.divIcon({
@@ -88,7 +88,7 @@ function makeHostIcon(status: string | null): L.DivIcon {
 }
 
 /**
- * Build a popup body for a host marker.  HTML string — Leaflet's
+ * Build a popup body for a host marker.  HTML string -- Leaflet's
  * default popup renderer takes that, and we keep this simple
  * rather than rendering a React component into the popup (which
  * react-leaflet supports but adds complexity we don't need here).
@@ -216,7 +216,7 @@ const MapView: React.FC = () => {
       try {
         map.invalidateSize();
       } catch {
-        // map already torn down — fine.
+        // map already torn down -- fine.
       }
     };
     const rafId = globalThis.requestAnimationFrame(invalidate);
@@ -243,7 +243,7 @@ const MapView: React.FC = () => {
     // leaflet.markercluster is statically imported at the top of this
     // file, so ``L.markerClusterGroup`` is available synchronously.
     // Fall back to a plain layer group if the plugin isn't present
-    // (defensive — shouldn't happen in a normal build).
+    // (defensive -- shouldn't happen in a normal build).
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const clusterFactory = (L as any).markerClusterGroup;
     const group: L.LayerGroup = clusterFactory

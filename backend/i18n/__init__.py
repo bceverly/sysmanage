@@ -49,7 +49,7 @@ def _(message: str, language: Optional[str] = None) -> str:
     """Translate a message.
 
     NOTE: ``language`` is the SECOND positional argument.  This is NOT the
-    i18next ``t(key, englishDefault)`` signature the frontend uses — passing
+    i18next ``t(key, englishDefault)`` signature the frontend uses -- passing
     English there asks gettext for a locale by that name, which falls back to
     ``NullTranslations`` and returns the msgid verbatim.  ``make lint`` gates
     against it (``scripts/i18n_check_msgid_style.py``).
@@ -63,7 +63,7 @@ def N_(message: str) -> str:  # NOSONAR  # pylint: disable=invalid-name
 
     (The name is not snake_case on purpose, hence the suppressions above:
     ``N_`` is the GNU gettext convention for a no-op extraction marker and
-    is recognised by xgettext, pybabel, poedit and every translator tool.
+    is recognized by xgettext, pybabel, poedit and every translator tool.
     Renaming it would also mean changing ``--keyword=N_`` / ``-k N_`` in
     the extractors, and would make the code less recognisable, not more.)
 
@@ -75,7 +75,7 @@ def N_(message: str) -> str:  # NOSONAR  # pylint: disable=invalid-name
         raise HTTPException(404, detail=_(_MIRROR_NOT_FOUND))
 
     is never extracted, never lands in a catalog, and therefore renders English
-    in all 13 locales forever — silently, because no gate can miss a msgid that
+    in all 13 locales forever -- silently, because no gate can miss a msgid that
     was never extracted.  A 2026-08-05 audit found 15 such constants feeding 48
     call sites.
 
@@ -104,7 +104,7 @@ def module_translation(domain: str, localedir: str):
 
     Pro+ engine modules are compiled ``.so`` files downloaded from the license
     server; their translatable strings live in a gettext catalog that ships in
-    the plugin bundle at ``<localedir>/<lang>/LC_MESSAGES/<domain>.mo`` — NOT in
+    the plugin bundle at ``<localedir>/<lang>/LC_MESSAGES/<domain>.mo`` -- NOT in
     the OSS ``messages`` domain compiled into this server.  The returned callable
     resolves each string against THAT catalog using the server's current request
     language (the same ``set_language`` state the core ``_()`` uses), so a module

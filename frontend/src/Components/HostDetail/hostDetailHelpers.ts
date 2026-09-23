@@ -320,7 +320,7 @@ export const runOptionalFetch = async (
     try {
         await fetcher();
     } catch (error) {
-        // Optional data — log but don't fail the page load
+        // Optional data -- log but don't fail the page load
         console.log("Optional data not available or failed to load:", label, error);
     }
 };
@@ -328,6 +328,6 @@ export const runOptionalFetch = async (
 // True when a child-host distribution is one of the Windows Server catalog
 // entries.  The check is on the install_identifier ("windows-server-2022" /
 // "windows-server-2025"), which is the same token virtualization_engine
-// dispatches on — display names are localized and must never be matched.
+// dispatches on -- display names are localized and must never be matched.
 export const isWindowsDistribution = (installIdentifier: string | undefined): boolean =>
     (installIdentifier ?? '').trim().toLowerCase().startsWith('windows-server');

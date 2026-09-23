@@ -378,7 +378,7 @@ const LoggingSettings: React.FC = () => {
                 </Alert>
             )}
 
-            {/* Server card — only the server OS's valid native targets are offered. */}
+            {/* Server card -- only the server OS's valid native targets are offered. */}
             <Card sx={{ mb: 3 }}>
                 <CardContent>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>

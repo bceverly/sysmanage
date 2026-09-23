@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Phase 13.1.J — per-tenant edition gating in ``LicenseService``.
+"""Phase 13.1.J -- per-tenant edition gating in ``LicenseService``.
 
 When a tenant is in scope, ``has_feature`` / ``has_module`` must gate down to
 that tenant's edition even though the server's global license is broader (the
@@ -62,7 +62,7 @@ class TestPerTenantEditionGating:
     def test_no_active_tenant_uses_global_license(
         self, enterprise_service, monkeypatch
     ):
-        """Server scope (no tenant) — the global license governs, unchanged."""
+        """Server scope (no tenant) -- the global license governs, unchanged."""
         _active_edition(monkeypatch, None)
         assert enterprise_service.has_feature(PRO_FEATURE) is True
         assert enterprise_service.has_module(ENT_ONLY_MODULE) is True

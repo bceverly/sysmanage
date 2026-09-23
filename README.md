@@ -58,15 +58,15 @@ SysManage is a comprehensive system management solution that allows you to monit
 - 🛰️ Air-gapped (offline) operation: key/device management, optical/USB media transfer, offline CVE & repository sync
 - 🌐 Multi-site federation: coordinator/site Server Roles with rollup reporting and command dispatch
 - 📦 Content lifecycle management: Satellite-style content views + lifecycle environments (Library → Dev → Test → Prod) with gated promotion, rollback, composites, air-gap export, and federated site sync
-- 🅢 Snap store proxy: capture Snapcraft packages by channel (offline assertions + blobs), promote them through content-view environments, and serve/install them on repointed agents — including air-gapped
+- 🅢 Snap store proxy: capture Snapcraft packages by channel (offline assertions + blobs), promote them through content-view environments, and serve/install them on repointed agents -- including air-gapped
 - ⚙️ Desired-state configuration management: profiles applied pull-style over the existing agent channel (Ansible, PowerShell DSC v3, Puppet, Salt, Chef), scheduled enforcement per host/tag/site, and run history with idempotency reporting
 - 🚀 Fleet-scale configuration jobs: reusable inventories built from hosts, tags and sites, job templates with per-template concurrency and cron scheduling, and bounded-wave dispatch that records a per-host outcome for every machine it touched
 - 🔎 Configuration drift analysis: per-profile baselines, golden-host comparison against live inventory, a drift dashboard with `config_drift` alert rules, one-click remediate-to-baseline, and remediation playbooks that repair a single divergence (optionally unattended) instead of re-applying a whole baseline
-- 🛡️ PostgreSQL high availability: runs against a Patroni / pg_auto_failover / Stolon cluster and survives a primary failover unattended — proxy VIP or libpq multi-host DSN, with pre-ping reconnect and bounded retry through the promotion window
+- 🛡️ PostgreSQL high availability: runs against a Patroni / pg_auto_failover / Stolon cluster and survives a primary failover unattended -- proxy VIP or libpq multi-host DSN, with pre-ping reconnect and bounded retry through the promotion window
 
 ## Prerequisites
 
-- **Python**: 3.10–3.14 (tested across the full range in CI)
+- **Python**: 3.10-3.14 (tested across the full range in CI)
 - **Node.js**: 20.x or higher (22.13+ recommended for Artillery performance testing)
 - **PostgreSQL**: 14 or higher
 - **OS**: Linux, macOS, Windows, FreeBSD, or OpenBSD
@@ -88,7 +88,7 @@ git clone https://github.com/bceverly/sysmanage.git
 cd sysmanage
 
 # 2. Create virtual environment
-python3.12 -m venv .venv  # any of Python 3.10–3.14
+python3.12 -m venv .venv  # any of Python 3.10-3.14
 source .venv/bin/activate
 # Note: On BSD systems (FreeBSD, OpenBSD, NetBSD), use: . .venv/bin/activate
 
@@ -144,7 +144,7 @@ make lint
 - **Backend**: Perfect 10.00/10 PyLint score, Black formatting, Bandit security scanning
 - **Frontend**: 0 ESLint warnings, TypeScript strict mode
 - **Security**: Comprehensive automated security scanning (Bandit, Semgrep, Safety, Snyk, TruffleHog)
-- **Testing**: Comprehensive pytest backend suite, Vitest frontend tests, and optional Playwright E2E. Coverage is enforced by a CI ratchet that only moves up — backend holds a ≥70% floor; the frontends climb toward backend parity per the ROADMAP coverage ladder
+- **Testing**: Comprehensive pytest backend suite, Vitest frontend tests, and optional Playwright E2E. Coverage is enforced by a CI ratchet that only moves up -- backend holds a ≥70% floor; the frontends climb toward backend parity per the ROADMAP coverage ladder
 
 ## Project Structure
 

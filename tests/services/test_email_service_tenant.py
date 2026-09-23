@@ -4,7 +4,7 @@
 
 """
 Tests that EmailService resolves config under the active tenant scope at send
-time (Phase 13.1) — closing the gap where background/pre-auth sends used the
+time (Phase 13.1) -- closing the gap where background/pre-auth sends used the
 server scope.
 """
 

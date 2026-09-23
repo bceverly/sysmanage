@@ -11,7 +11,7 @@ module (``module-source/federation_site_engine/federation_site_engine.pyx``);
 these tests import the compiled ``.so`` directly from the Pro+ repo's
 ``storage/modules/`` tree, drive its private ``_drain_once`` coroutine
 against a real in-memory SQLite + a mocked ``httpx.AsyncClient``, and
-assert end-to-end behaviour:
+assert end-to-end behavior:
 
   * Idle when not enrolled or missing bearer.
   * URL composition and ``Authorization: Bearer`` header.
@@ -21,7 +21,7 @@ assert end-to-end behaviour:
   * ``record_sync_attempt`` rolls the batch into the singleton's
     ``last_sync_*`` columns.
 
-Skipped automatically when the engine ``.so`` isn't on disk — that's
+Skipped automatically when the engine ``.so`` isn't on disk -- that's
 the expected state in a fresh OSS-only checkout.
 """
 

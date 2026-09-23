@@ -42,7 +42,7 @@ def test_db():
     """Create a fresh in-memory test database for each test.
 
     Uses in-memory SQLite with a ``StaticPool`` (one shared connection) rather
-    than a temp file.  File-based SQLite is pathologically slow on Windows CI —
+    than a temp file.  File-based SQLite is pathologically slow on Windows CI --
     every test paid real file create/fsync/delete plus Windows Defender scanning
     each op, which dominated the Windows backend test wall-clock.  In-memory
     eliminates all of that; ``StaticPool`` keeps the single connection alive so
@@ -475,7 +475,7 @@ def test_db():
                 "View firewall roles in the system",
                 "00000000-0000-0000-0000-000000000010",
             ),
-            # Host group — host firewall role assignment
+            # Host group -- host firewall role assignment
             (
                 "10000000-0000-0000-0000-000000000074",
                 "Assign Host Firewall Roles",
@@ -593,7 +593,7 @@ def test_db():
     models.FirewallRoleOpenPort = original_firewall_role_open_port
 
     # Clean up database connections.  In-memory DB: disposing the engine drops
-    # the StaticPool's single connection and the schema with it — no temp file
+    # the StaticPool's single connection and the schema with it -- no temp file
     # to close/unlink, and no Windows file-handle-release wait needed.
     test_engine.dispose()
 

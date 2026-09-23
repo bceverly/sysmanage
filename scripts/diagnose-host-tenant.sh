@@ -3,22 +3,22 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-# diagnose-host-tenant.sh — Reconcile a host's tenant binding (Phase 13.1).
+# diagnose-host-tenant.sh -- Reconcile a host's tenant binding (Phase 13.1).
 #
 # In multi-tenancy a host has TWO independent facts that must agree:
 #
 #   1. The host→tenant INDEX  (registry_host_tenant in the registry/bootstrap
-#      DB) — what BACKGROUND dispatch (schedulers, the queue processors) trusts
+#      DB) -- what BACKGROUND dispatch (schedulers, the queue processors) trusts
 #      to decide which tenant database to route a host's messages to.
-#   2. The host DATA location  (the ``host`` row + all host-scoped data) — which
+#   2. The host DATA location  (the ``host`` row + all host-scoped data) -- which
 #      tenant database the row actually lives in.  The UI reads this via the
 #      request's active tenant.
 #
 # Manual test setup (moving rows, re-issuing tokens) can leave these
-# DISAGREEING — the index says tenant A while the data is in tenant B.  The UI
+# DISAGREEING -- the index says tenant A while the data is in tenant B.  The UI
 # still works (it follows the active tenant), but background dispatch routes to
 # the wrong DB.  This script reports both facts and, when they disagree, prints
-# the exact SQL to reconcile them (it makes NO changes itself — you review + run).
+# the exact SQL to reconcile them (it makes NO changes itself -- you review + run).
 #
 # Usage:
 #   scripts/diagnose-host-tenant.sh <host_id>
@@ -50,7 +50,7 @@ index_row="$(pg "$REGISTRY_DB" "
   WHERE rht.host_id = '$HOST_ID';" || true)"
 
 if [[ -z "$index_row" ]]; then
-  echo "  (no binding — the host is NOT in the index; background dispatch will"
+  echo "  (no binding -- the host is NOT in the index; background dispatch will"
   echo "   treat it as server-scoped / unrouted)"
   index_slug=""
   index_tid=""
@@ -62,7 +62,7 @@ fi
 echo
 
 # ---------------------------------------------------------------------------
-# 2. Where the host DATA actually lives — scan every provisioned tenant DB
+# 2. Where the host DATA actually lives -- scan every provisioned tenant DB
 # ---------------------------------------------------------------------------
 echo "=== host DATA location (scanning every provisioned tenant database) ==="
 # tenant slug | tenant id | database name, one per line
@@ -96,7 +96,7 @@ echo "=== verdict ==="
 if (( ${#found_in[@]} == 0 )); then
   echo "  The host's data was found in NO tenant database."
   echo "  Either it lives in the bootstrap DB (single-tenant / not yet bound), or"
-  echo "  it was deleted.  Nothing to reconcile against — re-register the host via"
+  echo "  it was deleted.  Nothing to reconcile against -- re-register the host via"
   echo "  its tenant enrollment token to establish a clean binding + data."
   exit 0
 fi
@@ -112,7 +112,7 @@ fi
 IFS='|' read -r data_slug data_tid data_db <<< "${found_in[0]}"
 
 if [[ "$index_tid" == "$data_tid" && ${#found_in[@]} -eq 1 ]]; then
-  echo "  ✅ CONSISTENT — the index and the host data both point at tenant"
+  echo "  ✅ CONSISTENT -- the index and the host data both point at tenant"
   echo "     '$data_slug'.  No reconciliation needed."
   exit 0
 fi
@@ -135,5 +135,5 @@ else
 fi
 echo
 echo "  (Alternatively, if the host SHOULD belong to '${index_slug:-the indexed tenant}',"
-echo "   move the data instead — cleanest is to delete + re-register via that"
+echo "   move the data instead -- cleanest is to delete + re-register via that"
 echo "   tenant's enrollment token so the flow writes data + index together.)"

@@ -11,7 +11,7 @@ Why this exists
 Every Pro+ engine test used to carry its own ad-hoc loader, and they drifted
 out of sync with what ``make build`` actually produces:
 
-* the artifact path hardcoded ``linux/x86_64`` — never matches darwin/aarch64,
+* the artifact path hardcoded ``linux/x86_64`` -- never matches darwin/aarch64,
   so the engines were undiscoverable on macOS;
 * the build emits a ``<engine>.tar.gz`` *bundle* (``.so`` + ``metadata.json``),
   not a bare ``.so`` on disk, so the ``*.so`` globs found nothing;
@@ -22,7 +22,7 @@ The net effect was ~57 multitenancy/federation tests *silently skipping* no
 matter how many times the engines were rebuilt and pushed.  This module is the
 single source of truth: detect platform/arch/py the same way the build lays the
 tree out, read the ``.tar.gz`` bundle, extract the matching-ABI ``.so`` once,
-and load it — with the production and dev-build locations as fallbacks.
+and load it -- with the production and dev-build locations as fallbacks.
 
 ``require_engine`` additionally encodes the *policy*: a genuine OSS-only run
 (no Pro+ checkout) still skips, but a Pro+ checkout that can't yield a loadable
@@ -47,7 +47,7 @@ _STORAGE_MODULES = _PROPLUS_ROOT / "storage" / "modules"
 _PROD_MODULES = Path("/var/lib/sysmanage/modules")
 # Session cache for ``.so`` files extracted from bundles.
 # Namespaced by pytest-xdist worker: several workers extract the same engine
-# concurrently under -n auto, and a shared cache path races — one worker's write
+# concurrently under -n auto, and a shared cache path races -- one worker's write
 # hits a file another worker already holds open/loaded (on Windows the loaded .pyd
 # is a locked DLL -> PermissionError). A per-worker dir gives each its own copy.
 _WORKER = os.environ.get("PYTEST_XDIST_WORKER", "main")
@@ -101,7 +101,7 @@ def _bundle_for(name: str) -> Path | None:
     ):  # semver, not lexical
         # ``abi3`` is the current canonical layout (the abi3 bundle loads on every
         # CPython 3.10+); ``<py>`` (e.g. ``3.13``) is the legacy per-version layout,
-        # kept as a fallback. The bundle is the committed deliverable — the loader
+        # kept as a fallback. The bundle is the committed deliverable -- the loader
         # falls back to it when no loose per-arch binary has been built locally.
         for sub in ("abi3", py):
             bundle = version / plat / arch / sub / f"{name}.tar.gz"
@@ -115,7 +115,7 @@ def _abi3_binary_for(name: str) -> Path | None:
 
     The Pro+ build migrated from a per-Python-version ``.tar.gz`` bundle to a
     single **abi3** (CPython limited-API) binary that loads on 3.10+, laid out as
-    ``<version>/<plat>/<arch>/abi3/<name><ext>`` — a bare ``.pyd`` on Windows, a
+    ``<version>/<plat>/<arch>/abi3/<name><ext>`` -- a bare ``.pyd`` on Windows, a
     ``.so`` elsewhere. This is now the canonical layout; prefer it over the
     legacy per-version bundle.
     """
@@ -162,7 +162,7 @@ def _cache_copy(name: str, src: Path) -> Path:
 
     Loading the ``.pyd`` directly from ``storage/modules`` would lock that file on
     Windows (an in-use DLL cannot be deleted), which then breaks a subsequent
-    ``make build-modules`` — its clear-stale step can't unlink the loaded artifact.
+    ``make build-modules`` -- its clear-stale step can't unlink the loaded artifact.
     Load from a throwaway copy instead, mirroring ``_so_from_bundle``'s extract.
     """
     dest = _EXTRACT_DIR / name
@@ -179,11 +179,11 @@ def _so_from_bundle(name: str, bundle: Path) -> Path | None:
     Copies the member's bytes via ``extractfile`` rather than ``tar.extract``
     so we don't trip the Python 3.14 tar-extraction-filter ``DeprecationWarning``
     (the test suite runs with ``filterwarnings = error``), and so this works
-    unchanged on 3.10–3.14 (the ``filter=`` arg only exists from 3.12).
+    unchanged on 3.10-3.14 (the ``filter=`` arg only exists from 3.12).
     """
     # Match the compiled member by its generic platform suffix (``.so`` /
     # ``.pyd``): an abi3 bundle carries ``<name>.abi3.so`` while a legacy
-    # per-version bundle carries ``<name>.cpython-<py>-<plat>.so`` — both end in
+    # per-version bundle carries ``<name>.cpython-<py>-<plat>.so`` -- both end in
     # ``.so`` (``.pyd`` on Windows), so this finds either without pinning the
     # interpreter-specific ``EXT_SUFFIX`` (which never matches an abi3 build).
     suffix = ".pyd" if sys.platform == "win32" else ".so"
@@ -276,7 +276,7 @@ def require_engine(name: str):
 
     * No sibling Pro+ checkout      -> ``skip`` (legitimate OSS-only run).
     * Pro+ present but no loadable
-      engine for this platform/py   -> ``fail`` — a build/discovery problem we
+      engine for this platform/py   -> ``fail`` -- a build/discovery problem we
       want visible, not silently skipped.
     """
     import pytest  # local import: keeps this module importable outside pytest
@@ -286,16 +286,16 @@ def require_engine(name: str):
         # No loadable engine: skip on a genuine OSS-only run, else fail loudly.
         if not proplus_present():
             pytest.skip(
-                f"{name}: no sysmanage-professional-plus checkout — OSS-only run"
+                f"{name}: no sysmanage-professional-plus checkout -- OSS-only run"
             )
         # If the storage/modules tree doesn't exist at all, or there are no
         # builds for this engine on *any* platform, the engines simply haven't
-        # been compiled yet — skip rather than fail.
+        # been compiled yet -- skip rather than fail.
         engine_dir = _STORAGE_MODULES / name
         if not _STORAGE_MODULES.is_dir() or not engine_dir.is_dir():
             pytest.skip(
                 f"{name}: Pro+ checkout present but no engine builds exist yet "
-                f"(storage/modules/{name}/ not found) — run 'make build-modules'"
+                f"(storage/modules/{name}/ not found) -- run 'make build-modules'"
             )
         plat, arch, py = _plat_arch_py()
         ext = ".pyd" if sys.platform == "win32" else ".so"
@@ -306,6 +306,6 @@ def require_engine(name: str):
             f"{_STORAGE_MODULES}/{name}/<version>/{plat}/{arch}/abi3/{name}{ext} "
             f"(or the legacy per-version {py}/{name}.tar.gz bundle).\n"
             f"Build the Pro+ engines for this platform (make build-modules), or "
-            f"check the layout — this path used to skip silently."
+            f"check the layout -- this path used to skip silently."
         )
     return mod

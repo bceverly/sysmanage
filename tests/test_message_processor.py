@@ -207,7 +207,7 @@ class TestMessageProcessorProcessPendingMessages:
         mock_config,
     ):
         """A failure draining one DB is ISOLATED (logged + rolled back), NOT
-        re-raised — Phase 13.1 #2 per-DB isolation so one tenant can't stall the
+        re-raised -- Phase 13.1 #2 per-DB isolation so one tenant can't stall the
         others or the cycle."""
         from backend.websocket.message_processor import MessageProcessor
 
@@ -218,7 +218,7 @@ class TestMessageProcessorProcessPendingMessages:
 
         processor = MessageProcessor()
 
-        # Does NOT raise — the error is contained to this DB.
+        # Does NOT raise -- the error is contained to this DB.
         await processor._process_pending_messages()
 
         mock_db.rollback.assert_called_once()
@@ -243,7 +243,7 @@ class TestMessageProcessorProcessPendingMessages:
         mock_resolve_engine,
     ):
         """Phase 13.1 #2: with MT enabled and provisioned tenants, the processors
-        run once per DB — bootstrap + each tenant — each on its own session."""
+        run once per DB -- bootstrap + each tenant -- each on its own session."""
         from backend.websocket.message_processor import MessageProcessor
 
         mock_config.is_multitenancy_enabled.return_value = True

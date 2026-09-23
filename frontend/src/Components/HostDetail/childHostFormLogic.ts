@@ -24,8 +24,8 @@ const validateWindowsChildHost = (
     if (!isWindowsDistribution(formData.distribution)) {
         return null;
     }
-    // The ISO is not downloadable — Microsoft publishes no stable
-    // unauthenticated URL for Server media — so without a local path there is
+    // The ISO is not downloadable -- Microsoft publishes no stable
+    // unauthenticated URL for Server media -- so without a local path there is
     // nothing to install from and the VM stalls at the firmware.
     if (!formData.windowsIsoPath) {
         return t('hostDetail.windowsIsoPathRequired', 'Please enter the path to the Windows installation ISO');
@@ -82,7 +82,7 @@ export const validateChildHostForm = (
         return t('hostDetail.childHostHostnameRequired', 'Please enter a hostname');
     }
     // Windows configures the built-in Administrator account, so the dialog
-    // hides the username field on that path — demanding one here would dead-end
+    // hides the username field on that path -- demanding one here would dead-end
     // the operator on an error with no field to satisfy it.
     if (!formData.username && !isWindowsDistribution(formData.distribution)) {
         return t('hostDetail.childHostUsernameRequired', 'Please enter a username');

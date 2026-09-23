@@ -6,36 +6,36 @@
 Repository Mirroring API (Phase 10.4 + 10.4.2 + 10.4.3 + 10.4.4).
 
 Thin OSS routes that gate on the Pro+ ``repository_mirroring_engine``
-module — when it isn't loaded, every endpoint returns 402.  When it
+module -- when it isn't loaded, every endpoint returns 402.  When it
 is loaded, plan-builders in the engine produce the
 ``apply_deployment_plan`` payloads that the agent on the mirror host
 executes.
 
 Routes:
 
-  GET    /api/v1/mirror-repositories                — list mirrors (?platform_config_id filter)
-  POST   /api/v1/mirror-repositories                — create
-  GET    /api/v1/mirror-repositories/{id}           — get one
-  PUT    /api/v1/mirror-repositories/{id}           — update
-  DELETE /api/v1/mirror-repositories/{id}           — delete
-  POST   /api/v1/mirror-repositories/{id}/sync      — fire sync NOW
-  POST   /api/v1/mirror-repositories/{id}/snapshot  — take a snapshot
-  POST   /api/v1/mirror-repositories/{id}/restore/{snapshot_id} — restore
-  GET    /api/v1/mirror-repositories/{id}/snapshots — list snapshots
-  POST   /api/v1/mirror-repositories/tick           — sync-due driver hook
-  GET    /api/v1/settings/mirror                    — singleton settings (legacy)
-  PUT    /api/v1/settings/mirror                    — singleton update (legacy)
+  GET    /api/v1/mirror-repositories                -- list mirrors (?platform_config_id filter)
+  POST   /api/v1/mirror-repositories                -- create
+  GET    /api/v1/mirror-repositories/{id}           -- get one
+  PUT    /api/v1/mirror-repositories/{id}           -- update
+  DELETE /api/v1/mirror-repositories/{id}           -- delete
+  POST   /api/v1/mirror-repositories/{id}/sync      -- fire sync NOW
+  POST   /api/v1/mirror-repositories/{id}/snapshot  -- take a snapshot
+  POST   /api/v1/mirror-repositories/{id}/restore/{snapshot_id} -- restore
+  GET    /api/v1/mirror-repositories/{id}/snapshots -- list snapshots
+  POST   /api/v1/mirror-repositories/tick           -- sync-due driver hook
+  GET    /api/v1/settings/mirror                    -- singleton settings (legacy)
+  PUT    /api/v1/settings/mirror                    -- singleton update (legacy)
 
-Phase 10.4.2 — per-platform configs (replaces the singleton settings
+Phase 10.4.2 -- per-platform configs (replaces the singleton settings
 as the source of truth for filesystem + retention defaults):
 
-  GET    /api/v1/mirror-platform-configs            — list (one per platform)
-  POST   /api/v1/mirror-platform-configs            — create or upsert
-  GET    /api/v1/mirror-platform-configs/{id}       — get one
-  PUT    /api/v1/mirror-platform-configs/{id}       — update
-  DELETE /api/v1/mirror-platform-configs/{id}       — delete (cascades repos to NULL)
+  GET    /api/v1/mirror-platform-configs            -- list (one per platform)
+  POST   /api/v1/mirror-platform-configs            -- create or upsert
+  GET    /api/v1/mirror-platform-configs/{id}       -- get one
+  PUT    /api/v1/mirror-platform-configs/{id}       -- update
+  DELETE /api/v1/mirror-platform-configs/{id}       -- delete (cascades repos to NULL)
 
-Phase 10.4.1 — per-host setup status / install routes (still keyed by
+Phase 10.4.1 -- per-host setup status / install routes (still keyed by
 host_id since "is apt-mirror installed on this host" is a host-level
 question, not a platform-level one):
 
@@ -123,7 +123,7 @@ async def create_mirror(
     if not host:
         raise HTTPException(status_code=404, detail=_("Mirror host not found"))
 
-    # Phase 10.4.2 — every new mirror lives under a platform_config.
+    # Phase 10.4.2 -- every new mirror lives under a platform_config.
     # If one already exists for this (host, derived_platform) pair we
     # reuse it; otherwise we auto-create one with engine defaults so
     # the table is never the source of unparented rows.
@@ -371,11 +371,11 @@ async def tick_mirrors():
     """Driver hook for an external scheduler.  Selects every enabled
     mirror with ``next_sync_at <= now`` (or NULL) and dispatches a
     sync plan for it.  Recomputes ``next_sync_at`` from the cron.
-    Idempotent within a single tick — running twice is a no-op once
+    Idempotent within a single tick -- running twice is a no-op once
     next_sync_at has been pushed forward.
 
     Phase 13.1: there's no logged-in user / active-tenant context here (an
-    external scheduler drives this), so — like the heartbeat sweep — it fans
+    external scheduler drives this), so -- like the heartbeat sweep -- it fans
     out across EVERY host database via ``iter_host_databases()``: the bootstrap
     DB plus each provisioned tenant DB.  A tenant host's mirror rows live in its
     tenant database, so the bootstrap pass alone would never see them.  One bad
@@ -440,7 +440,7 @@ async def update_mirror_settings(
 
 
 # ---------------------------------------------------------------------
-# Known versions (Phase 10.4.4) — sourced from a pre-populated catalog
+# Known versions (Phase 10.4.4) -- sourced from a pre-populated catalog
 # so the Add Mirror dialog uses a dropdown instead of free-text and
 # operators can't fat-finger ``noblee`` and silently break a mirror.
 # ---------------------------------------------------------------------
@@ -469,7 +469,7 @@ async def list_known_versions(
 def _hosts_matching_version(db: Session, kv: "models.MirrorKnownVersion"):
     """Find every active host whose platform_release matches the
     catalog's match_regex.  Used when an admin (un)assigns a default
-    mirror — we need to dispatch apply or revert plans for each.
+    mirror -- we need to dispatch apply or revert plans for each.
     Case-insensitive Python regex; the catalog stores patterns as
     plain strings."""
     import re
@@ -601,7 +601,7 @@ def _resolve_assignment_mirror(db: Session, request, platform: str):
         raise HTTPException(
             status_code=409,
             detail=_(
-                "Mirror %s has not completed a successful sync yet — "
+                "Mirror %s has not completed a successful sync yet -- "
                 "wait for sync to succeed before assigning it as a default."
             )
             % mirror.name,
@@ -677,7 +677,7 @@ async def set_default_mirror_assignment(
     version_key, os_family) tuple.  Hard-blocks if the mirror hasn't
     completed a successful sync.  Queues apply or revert plans for
     every active host whose platform_release matches the catalog's
-    regex — simultaneous rollout, no staggered windows.  Returns the
+    regex -- simultaneous rollout, no staggered windows.  Returns the
     list of dispatched message_ids so the UI can poll completion."""
     engine = _check_mirror_module()
     # Phase 13.1.D: catalog row from the shared partition; everything else
@@ -732,8 +732,8 @@ def _resolve_mirror_url(mirror) -> str:
     # whose ``id == mirror.host_id``.  Host records are admin-curated
     # (created via the host registration flow); mirror.host_id is set
     # by the operator when defining the mirror in Settings → Repository
-    # Mirroring.  The URL is consumed by the agent's apt/dnf config —
-    # never by a request handler that proxies to it — so even a
+    # Mirroring.  The URL is consumed by the agent's apt/dnf config --
+    # never by a request handler that proxies to it -- so even a
     # compromised host_id would only point the AGENT at a bad mirror,
     # not enable SSRF from the SERVER.
     # nosemgrep: python.django.security.injection.tainted-url-host.tainted-url-host
@@ -776,7 +776,7 @@ def _default_mirror_plan_for(
     """Build the apply or revert plan for a single host, given the
     catalog row + the chosen mirror (or None for revert).  Returns
     None when no plan applies (e.g., zypper revert without an alias
-    in the catalog — shouldn't happen for seeded rows)."""
+    in the catalog -- shouldn't happen for seeded rows)."""
     if mirror is None:
         builder = _REVERT_BUILDERS.get(kv.platform)
         return builder(engine, kv) if builder else None
@@ -787,7 +787,7 @@ def _default_mirror_plan_for(
 
 
 def apply_default_mirrors_for_new_host(host_id: str) -> List[dict]:
-    """Registration hook — called when a host first comes active.  For
+    """Registration hook -- called when a host first comes active.  For
     every (platform, version_key, os_family) assignment whose match
     regex covers this host, queue an apply plan so the host points
     at the mirror without operator action.  Returns the list of
@@ -861,7 +861,7 @@ def apply_default_mirrors_for_new_host(host_id: str) -> List[dict]:
 
 # The setup-status card + platform-config CRUD endpoint groups live in a sibling
 # module (extracted to keep this file under the line-count cap).  Importing it
-# here — after ``router`` is defined and all other routes are registered —
+# here -- after ``router`` is defined and all other routes are registered --
 # registers those routes on the SAME ``router`` object, so every route that
 # existed before is still registered identically.
 from backend.api import (  # pylint: disable=wrong-import-position,unused-import

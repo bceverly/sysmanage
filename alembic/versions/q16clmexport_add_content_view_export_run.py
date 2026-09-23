@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""create content-view air-gap export runs (tenant partition) — Phase 16 (S7a)
+"""create content-view air-gap export runs (tenant partition) -- Phase 16 (S7a)
 
 One row per "export a published content-view version to signed air-gap media"
 job.  Per-tenant operation over a SHARED content-view version, so it lives in the
@@ -38,7 +38,7 @@ def upgrade() -> None:
         op.create_table(
             _EXPORT,
             sa.Column("id", GUID(), primary_key=True),
-            # SOFT cross-partition refs to shared catalog IDs — no FK.
+            # SOFT cross-partition refs to shared catalog IDs -- no FK.
             sa.Column("content_view_id", GUID(), nullable=False),
             sa.Column("content_view_version_id", GUID(), nullable=False),
             sa.Column("version", sa.Integer(), nullable=False),

@@ -49,11 +49,11 @@ async def install_packages_operation(  # NOSONAR
     TENANT-scoped ``db`` session (used for the install-request DATA) plus the
     ``current_user`` userid string.  User identities / roles are server-global
     and live on the MAIN engine, so authorization is resolved on an explicit
-    main-engine session below — never on the tenant ``db``.  The audit trail is
+    main-engine session below -- never on the tenant ``db``.  The audit trail is
     also server-global and is written on a separate main-engine session.
     """
     try:
-        # Resolve authorization on the MAIN engine — user/role data is
+        # Resolve authorization on the MAIN engine -- user/role data is
         # server-global and is NOT present in the tenant ``db``.
         main_session_local = sessionmaker(
             autocommit=False, autoflush=False, bind=db_module.get_engine()
@@ -168,7 +168,7 @@ async def install_packages_operation(  # NOSONAR
         # Final commit for status updates
         db.commit()
 
-        # Audit log the package installation request on the MAIN engine — the
+        # Audit log the package installation request on the MAIN engine -- the
         # audit trail is server-global, not tenant-scoped.
         with main_session_local() as audit_session:
             AuditService.log(
@@ -228,11 +228,11 @@ async def uninstall_packages_operation(  # NOSONAR
     TENANT-scoped ``db`` session (used for the request DATA) plus the
     ``current_user`` userid string.  User identities / roles are server-global
     and live on the MAIN engine, so authorization is resolved on an explicit
-    main-engine session below — never on the tenant ``db``.  The audit trail is
+    main-engine session below -- never on the tenant ``db``.  The audit trail is
     also server-global and is written on a separate main-engine session.
     """
     try:
-        # Resolve authorization on the MAIN engine — user/role data is
+        # Resolve authorization on the MAIN engine -- user/role data is
         # server-global and is NOT present in the tenant ``db``.
         main_session_local = sessionmaker(
             autocommit=False, autoflush=False, bind=db_module.get_engine()
@@ -347,7 +347,7 @@ async def uninstall_packages_operation(  # NOSONAR
         # Final commit for status updates
         db.commit()
 
-        # Audit log the package uninstallation request on the MAIN engine — the
+        # Audit log the package uninstallation request on the MAIN engine -- the
         # audit trail is server-global, not tenant-scoped.
         with main_session_local() as audit_session:
             AuditService.log(

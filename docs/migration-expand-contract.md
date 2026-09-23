@@ -13,7 +13,7 @@ There are two windows where the **running server code executes against an
 old schema**:
 
 - between "new package installed" and "operator ran `sysmanage-migrate`", and
-- **during the per-tenant fan-out itself** — tenant A is migrated, tenant B is
+- **during the per-tenant fan-out itself** -- tenant A is migrated, tenant B is
   not yet, and the same server process serves both.
 
 Therefore every migration must be **backward-compatible (expand-contract)**:
@@ -28,7 +28,7 @@ Therefore every migration must be **backward-compatible (expand-contract)**:
 ### Don't, in a single release
 - `DROP TABLE` / `DROP COLUMN` / `DROP CONSTRAINT` of something current code uses.
 - Rename a table or column (`ALTER ... RENAME`, `op.alter_column(new_column_name=...)`)
-  — that's a drop+add in disguise. Add the new name, dual-write, switch reads,
+  -- that's a drop+add in disguise. Add the new name, dual-write, switch reads,
   drop the old name a release later.
 - Add a `NOT NULL` column without a default (old rows / old code break).
 - Narrow a type or tighten a constraint that existing data/code may violate.

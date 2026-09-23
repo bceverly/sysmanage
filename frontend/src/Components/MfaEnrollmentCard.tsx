@@ -7,11 +7,11 @@
  *
  * Drives four UI states:
  *
- *   1. Not enrolled — "Enable MFA" button.
- *   2. Enrolling   — secret + provisioning URI + first-code field.
- *   3. Enrolled    — status summary + buttons to disable / regenerate
+ *   1. Not enrolled -- "Enable MFA" button.
+ *   2. Enrolling   -- secret + provisioning URI + first-code field.
+ *   3. Enrolled    -- status summary + buttons to disable / regenerate
  *                    backup codes.
- *   4. Codes-shown — backup codes panel after enroll/regenerate; user
+ *   4. Codes-shown -- backup codes panel after enroll/regenerate; user
  *                    must acknowledge before the panel hides them.
  *
  * Rendering rule for backup codes: server returns plaintext exactly
@@ -124,7 +124,7 @@ const MfaEnrollmentCard: React.FC = () => {
       setEnrollCode('');
       await refreshStatus();
     } catch {
-      setError(t('mfa.invalidCode', 'Invalid code — please try again.'));
+      setError(t('mfa.invalidCode', 'Invalid code -- please try again.'));
     } finally {
       setEnrolling(false);
     }
@@ -140,7 +140,7 @@ const MfaEnrollmentCard: React.FC = () => {
       setDisablePassword('');
       await refreshStatus();
     } catch {
-      setError(t('mfa.disableError', 'Could not disable MFA — check your password.'));
+      setError(t('mfa.disableError', 'Could not disable MFA -- check your password.'));
     } finally {
       setDisabling(false);
     }
@@ -158,7 +158,7 @@ const MfaEnrollmentCard: React.FC = () => {
       setRegenCode('');
       await refreshStatus();
     } catch {
-      setError(t('mfa.regenError', 'Could not regenerate codes — check your TOTP code.'));
+      setError(t('mfa.regenError', 'Could not regenerate codes -- check your TOTP code.'));
     } finally {
       setRegenerating(false);
     }
@@ -184,7 +184,7 @@ const MfaEnrollmentCard: React.FC = () => {
           <Box
             sx={{
               fontFamily: 'monospace',
-              backgroundColor: 'grey.100',
+              backgroundColor: 'gray.100',
               p: 2,
               borderRadius: 1,
               mb: 2,
@@ -249,7 +249,7 @@ const MfaEnrollmentCard: React.FC = () => {
               fontFamily: 'monospace',
               fontSize: '0.85rem',
               wordBreak: 'break-all',
-              backgroundColor: 'grey.100',
+              backgroundColor: 'gray.100',
               p: 1.5,
               borderRadius: 1,
               mb: 2,

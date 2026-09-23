@@ -81,7 +81,7 @@ def build_adhoc_script_plan(
         # uuid4().hex (128 bits of cryptographic randomness, unpredictable to
         # any local attacker) and the agent's deploy_files handler writes the
         # file atomically (sibling-temp + rename) with mode 0o700 set before
-        # the rename — a pre-existing symlink at this exact path is
+        # the rename -- a pre-existing symlink at this exact path is
         # essentially impossible AND would cause the rename to fail rather
         # than overwrite, so symlink attacks don't apply.
         script_path = f"/tmp/sysmanage_script_{uuid4().hex}.sh"  # nosec B108

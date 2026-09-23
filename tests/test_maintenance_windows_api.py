@@ -5,7 +5,7 @@
 """Tests for backend/api/maintenance_windows.py (Phase 14.2).
 
 Validation (400s), admin gating (403), a create→list→update→delete round-trip and
-the audited emergency override — all against the in-memory test engine.
+the audited emergency override -- all against the in-memory test engine.
 """
 
 import uuid

@@ -459,7 +459,7 @@ class UbuntuProInfo(Base):
     contract_name = Column(String(255), nullable=True)
     tech_support_level = Column(String(100), nullable=True)
     expires = Column(DateTime, nullable=True)
-    # Livepatch detail (Phase 13.3) — populated from canonical-livepatch status
+    # Livepatch detail (Phase 13.3) -- populated from canonical-livepatch status
     # when the livepatch Pro service is enabled; all nullable so non-livepatch
     # hosts simply leave them empty.
     livepatch_enabled = Column(Boolean, nullable=False, default=False)

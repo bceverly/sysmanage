@@ -315,7 +315,7 @@ def evaluate_all(
     # be able to see that Puppet is supported, not conclude it is missing.
     #
     # The install button is suppressed only when the engine is licensed AND the
-    # licence is absent. Suppressing it unconditionally -- which is what the
+    # license is absent. Suppressing it unconditionally -- which is what the
     # first cut did -- meant a customer who had just PAID for the adapters was
     # still told to go install Puppet by hand, which is precisely the friction
     # this card exists to remove.

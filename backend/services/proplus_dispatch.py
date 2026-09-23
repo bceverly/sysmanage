@@ -16,7 +16,7 @@ generic-deployment handler can run them.
 """
 
 # This module is the central correlation/result-routing hub for every
-# Pro+ engine — splitting it would just spread the result-router and
+# Pro+ engine -- splitting it would just spread the result-router and
 # its helpers across files that always have to be read together.
 
 from __future__ import annotations
@@ -107,7 +107,7 @@ _queue_ops = QueueOperations()
 # Phase 5 ships this in-process; Phase 5.x maintenance can promote to a DB
 # table once we have a use-case that survives a process restart (today the
 # engine in-memory registries don't survive restarts either, so a process
-# restart loses everything across the board — same blast radius).
+# restart loses everything across the board -- same blast radius).
 _CORRELATIONS: Dict[str, Tuple[str, str, str]] = {}
 _CORRELATIONS_LOCK = threading.Lock()
 
@@ -144,7 +144,7 @@ def _enqueue_apply_plan(host_id: str, plan: dict, timeout: int = 300) -> str:
 
     Returns the message_id assigned by the queue.  CRITICAL: this same
     UUID is used for BOTH the queue row id AND the inner Message
-    payload's ``message_id`` field — that's the value the agent echoes
+    payload's ``message_id`` field -- that's the value the agent echoes
     back in ``command_result.command_id``, and the value the correlation
     map is keyed on.  Prior to this we let ``Message.__init__`` mint its
     own UUID, which produced two different IDs and silently dropped
@@ -165,7 +165,7 @@ def _enqueue_apply_plan(host_id: str, plan: dict, timeout: int = 300) -> str:
     # Route the OUTBOUND command to the host's TENANT database so (a) the
     # per-tenant outbound processor delivers it and (b) enqueue_message's
     # host-existence check runs against the database that actually holds the
-    # host.  Forcing the bootstrap session here (the old behaviour) raised
+    # host.  Forcing the bootstrap session here (the old behavior) raised
     # "Host ID not found" for a tenant-bound host, which the engine-dispatch
     # callers swallow into a 502.  Prefer the host→tenant index (works in any
     # context, including background dispatch); fall back to the request's
@@ -185,11 +185,11 @@ def _enqueue_apply_plan(host_id: str, plan: dict, timeout: int = 300) -> str:
     # lands in its per-tenant queue and enqueue_message's host-existence check
     # passes:
     #   * Request context (a tenant is active): route to the request's ACTIVE
-    #     tenant — the SAME database the handler read the host from (get_host
+    #     tenant -- the SAME database the handler read the host from (get_host
     #     uses request_sessionmaker / get_request_engine, which honors this
     #     ContextVar).  This is authoritative for "where the user is acting"; the
     #     host→tenant index can lag or disagree with where the data actually is.
-    #   * Background context (no active tenant — scheduler/queue processor):
+    #   * Background context (no active tenant -- scheduler/queue processor):
     #     resolve via the host→tenant index, since there is no request tenant.
     # Both collapse to the bootstrap engine in single-tenant mode, so this is
     # inert there.
@@ -244,7 +244,7 @@ def register_child_host_correlation(
 def register_host_op_correlation(message_id: str, action: str, host_id: str) -> None:
     """Register an engine-path parent-host operation (init/disable/probe).
 
-    Used for actions where there's no HostChild row to update directly —
+    Used for actions where there's no HostChild row to update directly --
     e.g. KVM/bhyve/VMM/LXD init, virtualization capability probes.  On
     completion the result handler can refresh the host's
     ``virtualization_capabilities`` cache and emit an audit-style log
@@ -304,7 +304,7 @@ def register_provisioning_correlation(
     """Register a provisioning_engine readiness plan for result-routing.
 
     ``primary_id`` is the bare action (``provisioning_preflight`` /
-    ``provisioning_install`` / ``provisioning_apply``) — ``provisioning_readiness``
+    ``provisioning_install`` / ``provisioning_apply``) -- ``provisioning_readiness``
     is keyed by host alone, so there is no second id to encode the way
     repo-mirror ops encode a mirror_id.
     """
@@ -476,7 +476,7 @@ def build_host_provider(db_maker: Callable) -> Callable[[], List[Any]]:
         # background workers.
         #
         # Collapses to the single application database when multi-tenancy is
-        # off, so single-tenant behaviour is unchanged.
+        # off, so single-tenant behavior is unchanged.
         try:
             from backend.persistence.partitions import (  # noqa: PLC0415
                 iter_host_databases,
@@ -571,7 +571,7 @@ def queue_fleet_bulk_op(operation, schedule) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Result routing — call from handle_command_result
+# Result routing -- call from handle_command_result
 # ---------------------------------------------------------------------------
 
 
@@ -717,7 +717,7 @@ def _apply_list_child_hosts_result(host_id: str, outcome: Dict[str, Any]) -> Non
         try:
             asyncio.run(handle_child_hosts_list_update(session, stub, fake_message))
         except RuntimeError:
-            # Already inside a running event loop — schedule on a new loop.
+            # Already inside a running event loop -- schedule on a new loop.
             loop = asyncio.new_event_loop()
             try:
                 loop.run_until_complete(
@@ -767,7 +767,7 @@ def _apply_host_op_result(action: str, host_id: str, outcome: Dict[str, Any]) ->
         )
         return
 
-    # The capability probe's stdout IS the data — parse and persist directly.
+    # The capability probe's stdout IS the data -- parse and persist directly.
     if action == "check_virtualization_support":
         try:
             _apply_capability_probe_result(host_id, outcome)
@@ -792,7 +792,7 @@ def _apply_host_op_result(action: str, host_id: str, outcome: Dict[str, Any]) ->
             )
         return
 
-    # For init / enable / disable / modules — fire a follow-up probe via
+    # For init / enable / disable / modules -- fire a follow-up probe via
     # the container_engine plan path.
     _FOLLOWUP_PROBE_ACTIONS = (
         "enable_kvm_modules",
@@ -831,7 +831,7 @@ def _queue_capability_followup_probe(action: str, host_id: str) -> None:
 
 
 def _now_naive():
-    """Return a naive UTC datetime — matches the column type on every model."""
+    """Return a naive UTC datetime -- matches the column type on every model."""
     from datetime import datetime
     from datetime import timezone as _tz
 
@@ -919,7 +919,7 @@ def route_proplus_command_result(command_id: str, result_data: dict) -> bool:
     engine_name, primary_id, host_id = correlation
     outcome = _extract_command_outcome(result_data)
 
-    # Engine-path operations with a uniform result handler — child_host_op
+    # Engine-path operations with a uniform result handler -- child_host_op
     # / host_op (update the HostChild/parent row), repo_mirror_op (sync /
     # snapshot / restore / ...), airgap_run (mirroring / building_iso) and
     # airgap_ingest (mount / copy).  See ``_SIMPLE_RESULT_HANDLERS``.

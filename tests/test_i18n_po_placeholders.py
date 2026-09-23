@@ -7,7 +7,7 @@
 ``scripts/i18n_check_translations.py --placeholders`` used to read only the
 frontend JSON locales.  The backend gettext catalogs went unchecked, and four
 entries accumulated in which the machine translator had emitted a SECOND
-``%s`` the msgid does not have — for example::
+``%s`` the msgid does not have -- for example::
 
     msgid  "Marked message as processing: %s"
     msgstr "메시지 '%s'를 처리 중으로 변경했습니다: %s"
@@ -51,7 +51,7 @@ def test_reader_skips_the_catalog_header(checker, tmp_path):
 
 def test_reader_handles_multiline_entries(checker, tmp_path):
     """gettext wraps long strings across continuation lines; a reader that
-    only handles the single-line shape silently skips the longest messages —
+    only handles the single-line shape silently skips the longest messages --
     exactly the ones most likely to carry several placeholders."""
     path = _write_po(
         tmp_path,
@@ -67,7 +67,7 @@ def test_reader_handles_multiline_entries(checker, tmp_path):
 
 
 def test_reader_ignores_untranslated_entries(checker, tmp_path):
-    """An empty msgstr is a gap, not a mismatch — ``i18n-complete`` owns it."""
+    """An empty msgstr is a gap, not a mismatch -- ``i18n-complete`` owns it."""
     path = _write_po(tmp_path, 'msgid "Untranslated"\nmsgstr ""\n')
     assert checker._load_po(path) == {}
 

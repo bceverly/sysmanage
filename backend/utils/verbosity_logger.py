@@ -19,11 +19,11 @@ from backend.utils.logging_formatter import UTCTimestampFormatter
 def sanitize_log(value) -> str:
     """Sanitize a value for safe logging by stripping control chars (CWE-117).
 
-    Implementation note — this MUST use explicit chained ``str.replace``
+    Implementation note -- this MUST use explicit chained ``str.replace``
     rather than ``re.sub``: CodeQL's ``py/log-injection`` rule
     recognises ``str.replace('\\n', ...)`` / ``str.replace('\\r', ...)``
     as sanitizers via its built-in data-flow heuristics, but does NOT
-    recognise ``re.sub`` even when the regex matches the same control
+    recognize ``re.sub`` even when the regex matches the same control
     characters.  An earlier ``re.sub``-based implementation left every
     call site here flagged as ``py/log-injection`` because CodeQL
     treated this function as opaque.  Keep the chain; do not refactor

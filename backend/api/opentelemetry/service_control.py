@@ -215,7 +215,7 @@ async def stop_opentelemetry(
             # Capture host scalars for audit/logging after the session closes.
             host_fqdn = host.fqdn
 
-            # Engine path only — see start endpoint above for rationale.
+            # Engine path only -- see start endpoint above for rationale.
             engine_msg_id = try_engine_otel_service_control(
                 host, "stop", tenant_session
             )
@@ -323,7 +323,7 @@ async def restart_opentelemetry(
             # Capture host scalars for audit/logging after the session closes.
             host_fqdn = host.fqdn
 
-            # Engine path only — see start endpoint above for rationale.
+            # Engine path only -- see start endpoint above for rationale.
             engine_msg_id = try_engine_otel_service_control(
                 host, "restart", tenant_session
             )

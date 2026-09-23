@@ -1,9 +1,9 @@
 name: Load Testing (Agent Fleet / DB / WebSocket)
 
 # Two triggers:
-#   1. workflow_dispatch — run on demand from the Actions UI.  Inputs
+#   1. workflow_dispatch -- run on demand from the Actions UI.  Inputs
 #      let you pick scenario / duration / Python version.
-#   2. push of a release tag (v*.*.* or v*.*.*.*) — automatic baseline
+#   2. push of a release tag (v*.*.* or v*.*.*.*) -- automatic baseline
 #      capture per release, mirroring build-and-release.yml's trigger.
 #      Tag-push runs use the workflow's hard-coded defaults below since
 #      `workflow_dispatch.inputs.*` are empty on push events.
@@ -22,9 +22,9 @@ on:
           - "agents-1000"
           - "db-perf"
           - "ws-throughput"
-          - "ws-reconnect-storm"   # WS reliability harness — thundering herd
-          - "ws-ordering"          # WS reliability harness — FIFO contract
-          - "ws-backpressure"      # WS reliability harness — sustained-throughput probe
+          - "ws-reconnect-storm"   # WS reliability harness -- thundering herd
+          - "ws-ordering"          # WS reliability harness -- FIFO contract
+          - "ws-backpressure"      # WS reliability harness -- sustained-throughput probe
           - "all"
       duration_minutes:
         description: "Steady-state duration after warm-up"
@@ -64,7 +64,7 @@ permissions:
 # 16 GB.  All N "agents" run as asyncio tasks in a single Python process,
 # colocated with the FastAPI server on the same runner.  Numbers from this
 # workflow tell you "no regression vs last run on the same hardware shape"
-# — they are NOT representative of production hardware where server and
+# -- they are NOT representative of production hardware where server and
 # agents would run on separate hosts with a real network in between.
 #
 # Harness contract (so this workflow runs without modification once the
@@ -79,9 +79,9 @@ permissions:
 #       --output-json /path/to/results.json
 #
 # WebSocket reliability harness (Phase 8 additions):
-#   ws-reconnect-storm  — N agents cycle full auth handshake under load
-#   ws-ordering         — single session, verify FIFO contract on receive loop
-#   ws-backpressure     — single session, ramp send-rate; report breakpoint
+#   ws-reconnect-storm  -- N agents cycle full auth handshake under load
+#   ws-ordering         -- single session, verify FIFO contract on receive loop
+#   ws-backpressure     -- single session, ramp send-rate; report breakpoint
 #
 #   On exit:
 #     - exit 0  : run completed, results.json written
@@ -173,7 +173,7 @@ jobs:
           nohup python -m backend.main > .runtime-logs/server.log 2>&1 &
           echo $! > .runtime-logs/server.pid
           # Single worker on purpose: multi-worker was tried and REGRESSED
-          # throughput here — the lifespan starts per-worker background tasks
+          # throughput here -- the lifespan starts per-worker background tasks
           # (queue processors, telemetry) that compete for the runner's cores.
           # Wait for /api/health to return 200 (max 60s)
           for i in $(seq 1 60); do
@@ -194,14 +194,14 @@ jobs:
         env:
           PYTHONPATH: .
           # Bind inputs to env vars so the run: script never
-          # interpolates ${{ ... }} into shell — closes
+          # interpolates ${{ ... }} into shell -- closes
           # run-shell-injection.
           DURATION_MINUTES: ${{ inputs.duration_minutes || '10' }}
           SCENARIO_INPUT: ${{ inputs.scenario || 'agents-cascade' }}
         run: |
           if [ ! -f tests/load/run.py ]; then
             echo "::warning::tests/load/run.py does not exist yet."
-            echo "::warning::Load harness scaffolding TBD — see comment block at top of load-tests.yml for the contract."
+            echo "::warning::Load harness scaffolding TBD -- see comment block at top of load-tests.yml for the contract."
             mkdir -p .runtime-logs
             echo "{\"status\": \"harness-not-implemented\"}" > .runtime-logs/results.json
             exit 0
@@ -226,7 +226,7 @@ jobs:
             local rc=$?
             set -e
             if [ $rc -eq 5 ]; then
-              echo "::warning::Harness reported ${label} not implemented (exit 5) — treating as soft pass."
+              echo "::warning::Harness reported ${label} not implemented (exit 5) -- treating as soft pass."
               return 0
             fi
             return $rc
@@ -283,7 +283,7 @@ jobs:
       # ---------------------------------------------------------------------
       # Regression check vs the previous tag's baseline.  Best-effort:  if no
       # prior artifact exists (first run, deleted artifacts, mismatched
-      # scenario), the step warns and exits 0 — we don't want a missing
+      # scenario), the step warns and exits 0 -- we don't want a missing
       # baseline to block a release.  A genuine regression (>20 % p95,
       # >+5 pp error rate, etc.) DOES fail the job.
       # ---------------------------------------------------------------------
@@ -298,7 +298,7 @@ jobs:
           ARTIFACT_NAME="load-${SCENARIO}-${DURATION}min"
           mkdir -p .baseline
           # Find the most recent successful prior run of THIS workflow on a
-          # tag, excluding the current run.  Empty result is OK — handled
+          # tag, excluding the current run.  Empty result is OK -- handled
           # below.
           PREV_RUN_ID=$(gh run list \
               --workflow=load-tests.yml \

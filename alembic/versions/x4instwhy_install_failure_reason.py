@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""add host_install_assignment install_detail / install_log_tail — say WHY
+"""add host_install_assignment install_detail / install_log_tail -- say WHY
 
 A machine installed, silently did not enroll, and the reason (a broken apt
 repo) was three layers away and only findable by inference -- it existed solely

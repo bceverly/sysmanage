@@ -99,14 +99,14 @@ async def view_report_html(
 
     Delegates to reporting_engine Pro+ module when available.  Passing
     ``models=`` to the generator constructor is what enables Phase 8.7
-    branding injection — the Pro+ engine looks up ``ReportBranding``
+    branding injection -- the Pro+ engine looks up ``ReportBranding``
     via the ORM at render time.  Without it, branding silently falls
     back to no-op (which was the bug that landed branding "missing"
     on every report after Phase 8.7 shipped).
     """
     reporting_engine = _check_reporting_module()
 
-    # Capture the active tenant HERE, in the request's async context — the
+    # Capture the active tenant HERE, in the request's async context -- the
     # worker thread below has no active-tenant ContextVar, so it must be passed
     # explicitly (otherwise host-scoped queries silently hit the bootstrap DB).
     tenant_id = get_active_tenant()
@@ -134,7 +134,7 @@ def _build_report_html(reporting_engine, report_type, template_id, tenant_id):
     tenant_local = request_sessionmaker(tenant_id=tenant_id)
     with bootstrap_local() as db, tenant_local() as tenant_db:
         # ReportBranding is PER-TENANT (the branding CRUD writes it via
-        # get_tenant_db), so the generator must resolve it from tenant_db — not
+        # get_tenant_db), so the generator must resolve it from tenant_db -- not
         # bootstrap, which every tenant's report would otherwise share. Host rows
         # are fetched below on tenant_db and passed in as data.
         html_gen = reporting_engine.HtmlReportGeneratorImpl(tenant_db, _, models=models)
@@ -213,7 +213,7 @@ def _build_report_html(reporting_engine, report_type, template_id, tenant_id):
     # ``html.escape`` sanitiser on the data-flow path.
     # The Pro+ generator's f-string templates emit a leading newline
     # + indentation before ``<!DOCTYPE html>``, so lstrip() before the
-    # startswith() check — otherwise the trust branch is skipped and
+    # startswith() check -- otherwise the trust branch is skipped and
     # the entire HTML doc gets HTML-escaped, which the iframe srcDoc
     # then unescapes into visible markup text in the browser.
     safe_content = (
@@ -241,11 +241,11 @@ async def generate_report(
     reporting_engine = _check_reporting_module()
 
     # Capture the active tenant in the request's async context (the worker
-    # thread has no active-tenant ContextVar — pass it down explicitly).
+    # thread has no active-tenant ContextVar -- pass it down explicitly).
     tenant_id = get_active_tenant()
 
     # The DB queries + reportlab PDF build are blocking and run in a worker
-    # thread so they don't stall the event loop — a synchronous reportlab build
+    # thread so they don't stall the event loop -- a synchronous reportlab build
     # in the loop freezes every other request, including the one downloading
     # this PDF (the cause of the export "hang").
     loop = asyncio.get_event_loop()
@@ -272,7 +272,7 @@ def _build_report_pdf(reporting_engine, report_type, template_id, tenant_id):
         # Host generator's internal Host queries must hit the tenant DB.
         # NOTE: branding (ReportBranding, server-global) is also looked up via
         # this generator's session, so for a tenant host report branding would
-        # resolve against the tenant DB — fully separating host-data from
+        # resolve against the tenant DB -- fully separating host-data from
         # branding requires a reporting_engine change (the engine is being
         # migrated separately to accept a distinct bootstrap session for
         # branding).

@@ -12,7 +12,7 @@ interface ScrollableNavListProps {
    * The pre-rendered <li> children that make up the nav list.  Caller
    * is responsible for the items themselves; this component handles
    * overflow detection + horizontal scroll arrows that mirror MUI's
-   * Tabs variant="scrollable" behaviour.
+   * Tabs variant="scrollable" behavior.
    */
   children: React.ReactNode;
   /**

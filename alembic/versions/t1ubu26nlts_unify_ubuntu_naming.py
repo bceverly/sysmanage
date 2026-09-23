@@ -25,7 +25,7 @@ consistently across hypervisors:
    migration cleans up rows already inserted with the codename.
 
 The migration is fully idempotent: every UPDATE checks the current
-value before writing.  Works on both PostgreSQL and SQLite — no
+value before writing.  Works on both PostgreSQL and SQLite -- no
 dialect-specific syntax used.
 """
 
@@ -112,7 +112,7 @@ def upgrade() -> None:
         )
 
     # ------------------------------------------------------------------
-    # 4. host_child: same for Debian codenames (defensive — same agent
+    # 4. host_child: same for Debian codenames (defensive -- same agent
     #    code path could leak Debian codenames if a non-LTS version
     #    ships before the agent map is updated).
     # ------------------------------------------------------------------
@@ -131,7 +131,7 @@ def upgrade() -> None:
 def downgrade() -> None:
     """Reverse the rename (best-effort).
 
-    The codename → version remap is NOT reversed — there's no way to
+    The codename → version remap is NOT reversed -- there's no way to
     know which version-numbered rows were originally codenames vs which
     were always numeric, and re-introducing codenames would re-create
     the inconsistency this migration was meant to fix.

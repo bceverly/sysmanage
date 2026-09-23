@@ -140,7 +140,7 @@ const HostChildHostsTab: React.FC<HostChildHostsTabProps> = ({
 
                             {virtualizationStatus && (
                                 <Grid container spacing={2}>
-                                    {/* WSL Card — Windows + ``container_engine``.  The Initialize / Create
+                                    {/* WSL Card -- Windows + ``container_engine``.  The Initialize / Create
                                         buttons inside the card invoke Pro+ engine plans; without the
                                         engine licensed, the card simply hides per Phase 10.7. */}
                                     {host?.platform?.includes('Windows') && licenseModules.includes('container_engine') && (
@@ -160,7 +160,7 @@ const HostChildHostsTab: React.FC<HostChildHostsTabProps> = ({
                                         </Grid>
                                     )}
 
-                                    {/* LXD Card — Linux + ``container_engine``. */}
+                                    {/* LXD Card -- Linux + ``container_engine``. */}
                                     {host?.platform?.includes('Linux') && licenseModules.includes('container_engine') && (
                                         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                                             <HypervisorStatusCard
@@ -177,7 +177,7 @@ const HostChildHostsTab: React.FC<HostChildHostsTabProps> = ({
                                         </Grid>
                                     )}
 
-                                    {/* KVM Card — Linux + ``virtualization_engine``. */}
+                                    {/* KVM Card -- Linux + ``virtualization_engine``. */}
                                     {host?.platform?.includes('Linux') && licenseModules.includes('virtualization_engine') && (
                                         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                                             <HypervisorStatusCard
@@ -197,7 +197,7 @@ const HostChildHostsTab: React.FC<HostChildHostsTabProps> = ({
                                         </Grid>
                                     )}
 
-                                    {/* VMM Card — OpenBSD + ``virtualization_engine``. */}
+                                    {/* VMM Card -- OpenBSD + ``virtualization_engine``. */}
                                     {host?.platform?.includes('OpenBSD') && licenseModules.includes('virtualization_engine') && (
                                         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                                             <HypervisorStatusCard
@@ -214,7 +214,7 @@ const HostChildHostsTab: React.FC<HostChildHostsTabProps> = ({
                                         </Grid>
                                     )}
 
-                                    {/* bhyve Card — FreeBSD + ``virtualization_engine``. */}
+                                    {/* bhyve Card -- FreeBSD + ``virtualization_engine``. */}
                                     {host?.platform?.includes('FreeBSD') && licenseModules.includes('virtualization_engine') && (
                                         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                                             <HypervisorStatusCard
@@ -399,7 +399,7 @@ const HostChildHostsTab: React.FC<HostChildHostsTabProps> = ({
                                                                 require the right Pro+ engine.  WSL/LXD lifecycles run
                                                                 through ``container_engine``; KVM/bhyve/VMM through
                                                                 ``virtualization_engine``.  The read-only row stays
-                                                                visible for OSS deployments — only the action column
+                                                                visible for OSS deployments -- only the action column
                                                                 hides. */}
                                                             {(() => {
                                                                 const requiredEngine =

@@ -11,7 +11,7 @@ import logging
 # Silence FastAPI startup-phase logger chatter BEFORE we import backend.main.
 # That import builds the app (CORS generation, route registration,
 # exception-handler setup, websocket queue init, lifespan probe), and each
-# of those phases emits ~5–15 INFO lines.  Setting the floor to WARNING for
+# of those phases emits ~5-15 INFO lines.  Setting the floor to WARNING for
 # the relevant package roots keeps test output focused on actual test
 # results.  The pytest.ini ``log_level = WARNING`` covers test-time capture;
 # this block covers import-time logging.
@@ -29,9 +29,9 @@ for _noisy_logger in (
 
 # Silence FlexibleLogger.debug/info during the import of backend.main below.
 # FlexibleLogger (backend/utils/verbosity_logger.py) has its own gate that
-# bypasses the standard ``logging`` level system — it always installs a
+# bypasses the standard ``logging`` level system -- it always installs a
 # DEBUG-level handler and decides per-call from a parsed config.  Both
-# behaviours mean backend.main's ~50 import-time INFO lines reach stderr
+# behaviors mean backend.main's ~50 import-time INFO lines reach stderr
 # regardless of pytest.ini ``log_level``.  We swap the methods to no-ops
 # only for the duration of the import; tests that exercise
 # FlexibleLogger.debug/info directly (test_verbosity_logger_comprehensive)
@@ -100,8 +100,8 @@ def engine():
     """Create a test database engine with a fresh schema for each test.
 
     Uses an **in-memory** SQLite database shared across connections via
-    ``StaticPool`` (so separate sessions — e.g. the partition resolver's own
-    sessionmaker — see the same data).  In-memory avoids the per-test file
+    ``StaticPool`` (so separate sessions -- e.g. the partition resolver's own
+    sessionmaker -- see the same data).  In-memory avoids the per-test file
     create/fsync/unlink that makes the suite crawl on Windows; the DB is
     discarded when the engine is disposed at test teardown.
     """
@@ -136,7 +136,7 @@ def db_session(engine):
     """Create a test database session.
 
     The ``engine`` fixture already built the schema on a fresh per-test
-    in-memory database, so this just opens a session — no redundant
+    in-memory database, so this just opens a session -- no redundant
     drop/create (which doubled the schema work on every test) and no
     per-test debug output (slow on the Windows console).
     """
@@ -713,7 +713,7 @@ def real_engine():
     Discovery/loading is centralized in :mod:`tests._engine_loader`.
     ``require_engine`` skips only on a genuine OSS-only run (no Pro+ checkout)
     and fails loudly if the engine is present but won't load for this
-    platform/interpreter — so this stops silently skipping.
+    platform/interpreter -- so this stops silently skipping.
     """
     from unittest.mock import MagicMock
 

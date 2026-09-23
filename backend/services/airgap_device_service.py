@@ -11,7 +11,7 @@ importable ISO.
 
 Two deliberately-shallow heuristics, because the *real* trust decision
 happens later during ingest (the signed manifest is verified against
-the trusted-collector keyring — a wrong/forged disc simply FAILs):
+the trusted-collector keyring -- a wrong/forged disc simply FAILs):
 
   * enumeration excludes the OS disk (the one whose tree contains the
     ``/`` mountpoint) so the operator can't pick the system drive.
@@ -37,7 +37,7 @@ _ISO_FSTYPES = {"iso9660", "udf"}
 
 def _as_bool(value) -> bool:
     """lsblk reports rm/ro as JSON booleans on new versions and "0"/"1"
-    strings on old ones — coerce both (``bool("0")`` is True, so a naive
+    strings on old ones -- coerce both (``bool("0")`` is True, so a naive
     cast is wrong)."""
     if isinstance(value, bool):
         return value
@@ -89,7 +89,7 @@ def list_block_devices() -> List[dict]:
 
     Returns a list of dicts: ``name, path, type, size_bytes, removable,
     label, fstype, mountpoint, is_optical``.  Empty when lsblk is
-    unavailable (e.g. non-Linux) — the UI then shows "no devices".
+    unavailable (e.g. non-Linux) -- the UI then shows "no devices".
     """
     data = _run_lsblk()
     out: List[dict] = []
@@ -141,7 +141,7 @@ def probe_device(path: str) -> dict:
     """Decide whether ``path`` currently holds importable ISO media.
 
     ``ready`` is True when the device carries an iso9660/udf filesystem.
-    This intentionally does NOT verify the collector signature — that's
+    This intentionally does NOT verify the collector signature -- that's
     enforced during ingest, where a non-collector disc FAILs at manifest
     verification.  Returns ``{device, ready, reason, label, fstype}``.
     """

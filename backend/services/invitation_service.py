@@ -10,7 +10,7 @@ assigns the roles, sets their chosen password, and marks the invitation
 accepted.  Mirrors the password-reset token pattern but creates the account on
 accept (it does not exist beforehand).
 
-Pure data-layer helpers — the caller owns the session and commits.
+Pure data-layer helpers -- the caller owns the session and commits.
 """
 
 import uuid
@@ -21,7 +21,7 @@ from argon2 import PasswordHasher
 
 from backend.persistence import models
 
-# Invitations live longer than a password reset (24h) — a new hire may take a
+# Invitations live longer than a password reset (24h) -- a new hire may take a
 # few days to accept.
 INVITATION_TTL_DAYS = 7
 
@@ -157,7 +157,7 @@ def accept_invitation(
         session.query(models.User).filter(models.User.userid == inv.email).first()
         is not None
     ):
-        # Email got an account between invite and accept — don't double-create.
+        # Email got an account between invite and accept -- don't double-create.
         inv.revoked_at = _now()
         raise InvitationError("A user with that email already exists")
 

@@ -9,7 +9,7 @@ Revises: z7mirrorfail
 Create Date: 2026-06-02 12:00:00.000000
 
 A repository mirror snapshot's byte total routinely exceeds the
-signed-32-bit INTEGER ceiling (~2.15 GB) — e.g. a 9.7 GB Ubuntu mirror.
+signed-32-bit INTEGER ceiling (~2.15 GB) -- e.g. a 9.7 GB Ubuntu mirror.
 The agent's snapshot-result handler does
 ``UPDATE mirror_snapshot SET size_bytes=..., file_count=...`` which then
 raised ``psycopg2.errors.NumericValueOutOfRange`` ("integer out of
@@ -19,7 +19,7 @@ cleared.  That in turn blocked every air-gap collection run sourcing
 from the mirror (the run-tick waits at QUEUED for a snapshot that had
 actually completed).  Widen to BigInteger (INT8).
 
-Reversible — downgrade narrows back to Integer and will fail loudly if
+Reversible -- downgrade narrows back to Integer and will fail loudly if
 any row's size_bytes exceeds INT4_MAX at that time.
 """
 
@@ -37,7 +37,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     # SQLite's INTEGER is a dynamic up-to-8-byte type that already stores
-    # values > INT4_MAX fine, and it has no ``ALTER COLUMN ... TYPE`` —
+    # values > INT4_MAX fine, and it has no ``ALTER COLUMN ... TYPE`` --
     # so this is a no-op there.  Only emit the real DDL on backends that
     # need (and support) it; without this guard alembic would emit
     # ``ALTER TABLE ... ALTER COLUMN ... TYPE BIGINT`` which SQLite

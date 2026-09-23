@@ -1,9 +1,9 @@
-# proxyDHCP on real hardware — test plan
+# proxyDHCP on real hardware -- test plan
 
-**Status: PASSED 2026-08-24** — both legs and the negative control. The Phase 19
+**Status: PASSED 2026-08-24** -- both legs and the negative control. The Phase 19
 checkbox (`ROADMAP.md` → *"proxyDHCP validated on REAL HARDWARE"*) is ticked.
 **Jump to [§10](#10-result-of-the-2026-08-24-run) for what happened, the rig
-that was actually used, and the shipping bug this test found.** Sections 1–9 are
+that was actually used, and the shipping bug this test found.** Sections 1-9 are
 the plan as written on 2026-08-21 and are kept as-is so a re-run has a procedure
 to follow; §4.2 carries one correction.
 
@@ -19,8 +19,8 @@ the engine source or was measured on a dated run; nothing here is a guess.
 
 Our dnsmasq **proxyDHCP** config is believed correct and has never been
 executed by a non-iPXE PXE client. proxyDHCP is the mode that lets SysManage
-provision machines on a network whose DHCP server we do not own — the normal
-corporate case — so "believed correct" is not good enough to ship.
+provision machines on a network whose DHCP server we do not own -- the normal
+corporate case -- so "believed correct" is not good enough to ship.
 
 The claim under test, in one sentence:
 
@@ -36,7 +36,7 @@ Two legs, because the config serves two client architectures:
 | B | UEFI x86-64 | `pxe-service=tag:!ipxe,x86-64_EFI,...,sysmanage-ipxe.efi` | never executed at all |
 
 Leg B is a bonus that closes a second ROADMAP note ("UEFI + proxyDHCP is
-unproven"). Do leg A first — it is the one the config was designed around.
+unproven"). Do leg A first -- it is the one the config was designed around.
 
 ## 2. Why the VM harness cannot do this
 
@@ -61,18 +61,18 @@ harness is the problem, not our config:
   the harness was never the variable.
 
 Hence: a physical x86 box in CSM mode, a **Hyper-V Generation 1 VM**, or VMware
-with BIOS firmware. **Not VirtualBox** (ships iPXE — same dead end) and **not**
+with BIOS firmware. **Not VirtualBox** (ships iPXE -- same dead end) and **not**
 an ARM machine (ARM64 guests are UEFI-only, Hyper-V has no Gen 1 on ARM, and
 `build-embedded-ipxe.sh` produces an x86_64 image only).
 
 Hyper-V is the recommendation because its Gen 1 PXE ROM is Microsoft's own, not
-iPXE — which is precisely the missing client.
+iPXE -- which is precisely the missing client.
 
 ## 3. The rig
 
 Three things must be true at once, and only the third is fiddly:
 
-1. **Someone else owns DHCP on the segment.** The home router is ideal — that
+1. **Someone else owns DHCP on the segment.** The home router is ideal -- that
    IS the scenario. Do not disable it; proxyDHCP coexisting with it is the
    point.
 2. **A PXE client whose ROM is not iPXE** (see above).
@@ -105,7 +105,7 @@ Both are committed in the Pro+ repo at `storage/ipxe/`:
 
 Copy both into the TFTP root (`/var/lib/sysmanage/tftp` by default). If
 `sysmanage-ipxe.efi` is missing or a different size, rebuild it with
-`scripts/build-embedded-ipxe.sh` — it pins iPXE at SHA
+`scripts/build-embedded-ipxe.sh` -- it pins iPXE at SHA
 `e6d0a97c05d238c17eeae5116cb6e9c0fc9fdb56` and now asserts `HEAD == IPXE_REF`
 before building. (It once built against a stale tree and *succeeded*, which is
 the worst way to be wrong.)
@@ -139,7 +139,7 @@ Substitute your interface, subnet and server IP.
 > `dhcp-option-pxe=tag:ipxe,67,<url>` line. dnsmasq 2.90 rejects the whole file
 > with `bad option at line 11`, so the config this document called correct could
 > not start dnsmasq at all. The option is **real but newer than any supported
-> platform** — see §10.3. The line is gone from the engine;
+> platform** -- see §10.3. The line is gone from the engine;
 > `dhcp-boot=tag:ipxe` was always doing the work, and the run below proves it on
 > two real ROMs. See §10.
 
@@ -167,7 +167,7 @@ Two lines carry the whole design and are worth understanding before you debug
 anything:
 
 * `dhcp-match=set:ipxe,175` tags clients that are **already iPXE**. Those get
-  `dhcp-boot` (the HTTP boot script) and **no** `pxe-service` — deliberately,
+  `dhcp-boot` (the HTTP boot script) and **no** `pxe-service` -- deliberately,
   because a boot item turns the offer into a PXEBS menu. A vendor ROM is
   untagged, takes the `tag:!ipxe` menu path, and TFTPs the first stage.
   Confirmed on the wire 2026-08-24: `tags: ipxe, eth0` →
@@ -196,12 +196,12 @@ VM's MAC, and arm netboot. `boot.ipxe` is served by the sysmanage server, so it
 must be running and reachable from the segment at the `ipxe_boot_url` above.
 
 If the server genuinely cannot be stood up, a static iPXE script served over
-HTTP still proves the boot chain — but it does **not** prove per-MAC selection,
+HTTP still proves the boot chain -- but it does **not** prove per-MAC selection,
 so label the result accordingly rather than ticking the box.
 
 ## 5. Client-side setup (Hyper-V)
 
-### Leg A — Generation 1 (BIOS, `x86PC`)
+### Leg A -- Generation 1 (BIOS, `x86PC`)
 
 * Create a **Generation 1** VM.
 * Add a **Legacy Network Adapter** and attach it to the External switch. This
@@ -209,10 +209,10 @@ so label the result accordingly rather than ticking the box.
 * Set a **static MAC** and use it for the assignment in §4.4.
 * Boot order: network first.
 
-### Leg B — Generation 2 (UEFI, `x86-64_EFI`)
+### Leg B -- Generation 2 (UEFI, `x86-64_EFI`)
 
 * Create a **Generation 2** VM, standard network adapter, External switch.
-* **Disable Secure Boot** — `Set-VMFirmware -VMName <name> -EnableSecureBoot Off`.
+* **Disable Secure Boot** -- `Set-VMFirmware -VMName <name> -EnableSecureBoot Off`.
   Our `sysmanage-ipxe.efi` is not signed by the Microsoft UEFI CA, so Secure
   Boot will refuse it. A refusal here is a signing fact, not a config defect;
   do not chase it as one.
@@ -221,7 +221,7 @@ so label the result accordingly rather than ticking the box.
 ### Negative control (do not skip)
 
 Boot a **second** VM whose MAC has **no** assignment. Without it, "the client
-booted our installer" does not prove per-MAC selection — a config that served
+booted our installer" does not prove per-MAC selection -- a config that served
 every machine the same thing would look identical to success. This mirrors what
 `pxe_provision_spike.py` does on the virtual rig.
 
@@ -230,10 +230,10 @@ every machine the same thing would look identical to success. This mirrors what
 Leg A passes when **all** of these hold:
 
 1. The client gets its **address from the router**, and a **separate proxy
-   offer** from us — dnsmasq logs `DHCPOFFER ... proxy`, not a lease.
+   offer** from us -- dnsmasq logs `DHCPOFFER ... proxy`, not a lease.
 2. The client TFTPs **`sysmanage-ipxe.kpxe`** from our TFTP root (visible in
    `--log-dhcp` output and in the tcpdump on UDP 69).
-3. That iPXE performs an **ordinary DHCP** — no ProxyDHCP, no PXEBS — and
+3. That iPXE performs an **ordinary DHCP** -- no ProxyDHCP, no PXEBS -- and
    `dhcp-boot=tag:ipxe` hands it the HTTP boot URL.
 4. It fetches `boot.ipxe` and boots the assigned installer.
 5. The **negative control** does not boot our installer.
@@ -241,7 +241,7 @@ Leg A passes when **all** of these hold:
 Leg B is the same with `sysmanage-ipxe.efi` at step 2.
 
 Anything short of step 3 means the proxy hand-off failed, which is the thing
-being tested. Steps 4–5 then tell you whether per-MAC selection survived it.
+being tested. Steps 4-5 then tell you whether per-MAC selection survived it.
 
 ## 7. Evidence to capture
 
@@ -259,12 +259,12 @@ citable today because its capture was kept.
 
 | Symptom | Meaning |
 | :------ | :------ |
-| `PXEBS ... Connection timed out` | The client took the PXE **menu** path. On a vendor ROM this should not happen — check that the client really is not iPXE. |
-| `Nothing to boot` | Client stayed in plain ProxyDHCP and got an ACK with no filename. Expected on QEMU (§2); on real hardware it means the `tag:!ipxe` `pxe-service` did not match — check DHCP option 93 in the pcap against the arch entries. |
+| `PXEBS ... Connection timed out` | The client took the PXE **menu** path. On a vendor ROM this should not happen -- check that the client really is not iPXE. |
+| `Nothing to boot` | Client stayed in plain ProxyDHCP and got an ACK with no filename. Expected on QEMU (§2); on real hardware it means the `tag:!ipxe` `pxe-service` did not match -- check DHCP option 93 in the pcap against the arch entries. |
 | Client boots the router's own PXE, or nothing | Another PXE responder on the segment, or our `interface=` / `bind-interfaces` is pointed at the wrong NIC. |
 | Secure Boot rejects the image (leg B) | Expected with Secure Boot on. Turn it off; see §5. |
 | dnsmasq exits at startup | Port 53 already held (use `--port=0`), or the interface name is wrong. |
-| `dnsmasq: bad option at line N` | The rendered config contains something dnsmasq does not accept. Do **not** hand-edit it to get moving and call the result a pass — that is how the `dhcp-option-pxe` bug survived (§10). Find the offending line with `dnsmasq --test -C <file>`, fix the **engine**, re-render, re-run. |
+| `dnsmasq: bad option at line N` | The rendered config contains something dnsmasq does not accept. Do **not** hand-edit it to get moving and call the result a pass -- that is how the `dhcp-option-pxe` bug survived (§10). Find the offending line with `dnsmasq --test -C <file>`, fix the **engine**, re-render, re-run. |
 | UEFI client gets no answer at all | `ipxe_efi_image` was `None` when the config was rendered, so only `x86PC` was advertised. Re-render with it set. |
 
 ## 9. When it passes
@@ -291,14 +291,14 @@ vSwitch (`SysManage PXE Test`, 10.99.0.0/24) with no physical Ethernet, built by
 
 | Host | Role |
 | :--- | :--- |
-| `pxe-router` 10.99.0.1 | plain dnsmasq DHCP, range .100–.200 — plays the incumbent DHCP server the home router plays in §3 |
+| `pxe-router` 10.99.0.1 | plain dnsmasq DHCP, range .100-.200 -- plays the incumbent DHCP server the home router plays in §3 |
 | `pxe-server` 10.99.0.50 | Ubuntu 24.04.4, dnsmasq 2.90 proxyDHCP + TFTP, boot-script server on :8080 |
 | `pxe-client-bios` | Gen 1 + **Legacy** NIC, MAC `00:15:5D:A1:01:01` |
 | `pxe-client-uefi` | Gen 2, Secure Boot off, MAC `00:15:5D:A1:01:02` |
 | `pxe-client-control` | Gen 1 + Legacy NIC, MAC `00:15:5D:A1:01:99`, **no assignment** |
 
-This substitution is sound — §3's requirement is that *someone else* owns DHCP
-on the segment, not that it be a physical router — and it makes the test
+This substitution is sound -- §3's requirement is that *someone else* owns DHCP
+on the segment, not that it be a physical router -- and it makes the test
 self-contained on one laptop. The property that mattered is preserved: the
 client ROMs are Microsoft's, not iPXE.
 
@@ -318,13 +318,13 @@ is the **boot chain and per-MAC selection**, not the installer.
 All five §6 criteria held for both legs. The control took an identical path and
 diverged **only** at the boot script, which is what makes it a valid control.
 
-**The UDP 4011 PXEBS round trip completed** — captured as
+**The UDP 4011 PXEBS round trip completed** -- captured as
 `10.99.0.102.4011 > 10.99.0.50.4011` and its reply. That exchange timed out on
 every QEMU run and drove all of §2. On a real vendor ROM it simply works, so
 §2's "the harness is the problem, not our config" is now a measurement rather
 than an inference.
 
-Evidence: `pxe-server:~/evidence-2026-08-24/` — 60-packet pcap, dnsmasq
+Evidence: `pxe-server:~/evidence-2026-08-24/` -- 60-packet pcap, dnsmasq
 `--log-dhcp` logs, boot-server logs, both configs, dnsmasq/OS versions and
 SHA-256 of both iPXE artifacts.
 
@@ -340,31 +340,31 @@ Line 11 was `dhcp-option-pxe=tag:ipxe,67,<url>`. Anyone following the proxyDHCP
 config advisor got a dnsmasq that would not start.
 
 **Re-diagnosed 2026-08-24**, because the first reading of this was wrong in a way
-that matters. The option is not imaginary — it is **too new**:
+that matters. The option is not imaginary -- it is **too new**:
 
 | dnsmasq | ships in | `--dhcp-option-pxe` |
 | :------ | :------- | :------------------ |
 | 2.86 | Ubuntu 22.04 at release | **absent from the manual** |
-| 2.90 | Ubuntu 22.04 / 24.04 patched | rejected — `bad option` |
+| 2.90 | Ubuntu 22.04 / 24.04 patched | rejected -- `bad option` |
 | 2.92 | Ubuntu 26.04 | present in `--help` **and** the manual |
 
 Measured, not recalled: the 2.86 manual was extracted from
 `dnsmasq-base_2.86-1.1_amd64.deb` in the jammy pool and grepped; 2.92 was read
 on an Ubuntu 26.04 box, where the man text is almost verbatim the sentence the
-engine quoted — *"such options are sent in reply to PXE clients when dnsmasq is
+engine quoted -- *"such options are sent in reply to PXE clients when dnsmasq is
 acting as a PXE proxy, unlike other options. A typical use-case is option 175,
 sent to iPXE."* The original author had read a real manual; just not one any
 customer would have.
 
 So the defect is a **compatibility** defect: an option newer than our supported
 baseline, emitted unconditionally with no version gate. The impact is unchanged
-— it entered dnsmasq after every Ubuntu LTS through 24.04, so every supported
+-- it entered dnsmasq after every Ubuntu LTS through 24.04, so every supported
 platform got a config that would not start.
 
 It survived to Phase 19 for a specific and repeatable reason:
 `test_generated_dnsmasq_config_passes_dnsmasq_test` already existed, already ran
 `dnsmasq --test` on the rendered file, and would have caught this on its first
-execution — but it `pytest.skip`s when dnsmasq is missing, which is *always* on
+execution -- but it `pytest.skip`s when dnsmasq is missing, which is *always* on
 the Windows dev box and *always* in CI, because no workflow installed dnsmasq.
 Every other test asserted the rendered **string**, which can only confirm that
 what we wrote is what we wrote.
@@ -381,7 +381,7 @@ Fixed in `sysmanage-professional-plus`:
   above is not enough on its own. `dnsmasq --test` only ever validates against
   the version the *runner* happens to ship: `ubuntu-latest` is 24.04 (2.90)
   today and rejects the bad line, but on 2.92 that same check prints
-  `syntax check OK` for it — measured. When the runner image rolls forward the
+  `syntax check OK` for it -- measured. When the runner image rolls forward the
   gate would quietly stop covering customers on an LTS.
   `test_emitted_directives_exist_in_the_supported_dnsmasq_baseline` compares
   every directive the renderer can emit against a list verified line-by-line
@@ -389,13 +389,13 @@ Fixed in `sysmanage-professional-plus`:
   laptop, and on any runner with no dnsmasq installed. Confirmed to flag
   `dhcp-option-pxe` when replayed against the config that actually shipped.
 
-The final run above used the rebuilt engine's **unedited** output — the diagnostic
+The final run above used the rebuilt engine's **unedited** output -- the diagnostic
 run with the line hand-removed produced byte-identical config, and both passed.
 
 ### 10.4 For the next person
 
 * **Gen 2 clients need their boot order repaired** before they will PXE at all.
-  `pxe-client-uefi` showed "no install media" and sent nothing — not a proxyDHCP
+  `pxe-client-uefi` showed "no install media" and sent nothing -- not a proxyDHCP
   problem. `scripts/Fix-LegBBoot.ps1` diagnoses and repairs it (boot order,
   `PreferredNetworkBootProtocol`, Secure Boot, switch, MAC, checkpoints).
 * **Hyper-V saves VMs rather than shutting them down.** After a forced Windows

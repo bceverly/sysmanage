@@ -42,7 +42,7 @@ from backend.security import mfa_crypto
 
 logger = logging.getLogger(__name__)
 
-# Argon2 hasher for backup codes — separate instance from the password
+# Argon2 hasher for backup codes -- separate instance from the password
 # hasher so the parameters can drift independently if the password
 # hardening profile changes.  Backup codes are 8 chars of crockford
 # alphabet so brute force is hard but Argon2 doesn't need to be the
@@ -51,7 +51,7 @@ _BACKUP_CODE_HASHER = PasswordHasher()
 _BACKUP_CODE_ALPHABET = string.ascii_uppercase + string.digits  # 36 symbols
 _BACKUP_CODE_LENGTH = 8
 
-# pyotp default drift — accept a code within ±1 period (60s either way
+# pyotp default drift -- accept a code within ±1 period (60s either way
 # for the standard 30s period).  Mitigates clock skew on the user's
 # device without giving an attacker too long to replay a phished code.
 _TOTP_VALID_WINDOW = 1
@@ -132,7 +132,7 @@ def verify_totp(secret: str, code: str, settings: MfaSettings) -> bool:
 
 
 def generate_backup_codes(count: int) -> List[str]:
-    """Generate ``count`` backup codes — uppercase alphanumeric, length 8.
+    """Generate ``count`` backup codes -- uppercase alphanumeric, length 8.
 
     Format: ``XXXX-XXXX`` for readability, but the dash is stripped on
     verify so the user can paste either form.  The plaintext list is
@@ -157,7 +157,7 @@ def consume_backup_code(enrollment: UserMfaEnrollment, supplied: str) -> bool:
     match: remove the matched hash from the list (one-time use) and
     return True.  Returns False on miss.
 
-    The caller commits the session — we only mutate the ORM object.
+    The caller commits the session -- we only mutate the ORM object.
     """
     if not supplied:
         return False
@@ -256,7 +256,7 @@ def verify_user_code(db: Session, user_id, code: str) -> Tuple[bool, Optional[st
 # Email-OTP fallback (Phase 10.3 follow-up)
 # ---------------------------------------------------------------------
 
-# Numeric 6-digit code — same shape as the TOTP output so the user-
+# Numeric 6-digit code -- same shape as the TOTP output so the user-
 # facing input field can stay a single 6-digit box regardless of
 # which method delivered the code.  ``secrets.randbelow`` is the
 # crypto-strong path; ``zfill`` keeps leading zeros so the rendered
@@ -264,7 +264,7 @@ def verify_user_code(db: Session, user_id, code: str) -> Tuple[bool, Optional[st
 _EMAIL_OTP_DIGITS = 6
 _EMAIL_OTP_LIFETIME_MINUTES = 10
 
-# Argon2 hasher reused from backup-code path — same cost parameters
+# Argon2 hasher reused from backup-code path -- same cost parameters
 # are fine for short-lived codes since the value horizon is 10
 # minutes; a separate _EMAIL_CODE_HASHER would add a parameter knob
 # without a security argument behind it.
@@ -303,7 +303,7 @@ def request_email_otp(
          substitute a recorder.
 
     Returns True iff the email send succeeded (or the email service
-    is disabled — see below).  The challenge row is *always* written
+    is disabled -- see below).  The challenge row is *always* written
     on success of step 1+2, so a False return means a live challenge
     exists in the DB but the user never received it; the verify path
     will still accept the code if the user has it via another channel.
@@ -371,7 +371,7 @@ def request_email_otp(
                 email_send_fn(to_addresses=[user_email], subject=subject, body=body)
             )
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        # Don't surface SMTP failure to the caller as an exception —
+        # Don't surface SMTP failure to the caller as an exception --
         # the user-facing endpoint should always return a generic
         # "if your account exists we sent a code" response to avoid
         # user-enumeration leaks.  Log it for ops.

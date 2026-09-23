@@ -5,7 +5,7 @@
 """The fleet job runner (Phase 20.1).
 
 This is the part of fleet-scale config management that is not schema, and the
-behaviours worth pinning are the ones that only bite at four thousand hosts:
+behaviors worth pinning are the ones that only bite at four thousand hosts:
 
 * **The wave is bounded.** A job never has more than its concurrency in
   flight. Without this the runner is the all-at-once burst that
@@ -120,7 +120,7 @@ def profile(active=True):
 def _matches(clause, row) -> bool:
     """Evaluate one SQLAlchemy clause against a plain row object.
 
-    The fake session HAS to honour filters rather than ignore them. The runner
+    The fake session HAS to honor filters rather than ignore them. The runner
     asks for "pending targets" and then for "in-flight targets" against the
     same table, and a fake that returns everything to both makes the bounded
     release look broken when it is not -- or, far worse, makes an unbounded

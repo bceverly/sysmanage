@@ -3,11 +3,11 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Multi-tenancy control-plane ("registry") schema — Phase 13.1.A.
+Multi-tenancy control-plane ("registry") schema -- Phase 13.1.A.
 
 These are the **control-plane** tables: the source of truth for *which*
 tenants exist, *who* may reach them, and *where* each tenant's database
-lives.  They hold routing and authorization only — **never tenant
+lives.  They hold routing and authorization only -- **never tenant
 business data and never tenant DB credentials** (those are dynamic
 OpenBAO leases, see Phase 13.1.C).
 
@@ -55,7 +55,7 @@ from sqlalchemy.dialects.postgresql import JSON
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
 
-# FK target for the registry tenant primary key — referenced by every
+# FK target for the registry tenant primary key -- referenced by every
 # tenant-scoped registry table (grant/placement/email-domain/etc.).
 _TENANT_FK = "registry_tenant.id"
 
@@ -64,7 +64,7 @@ _TENANT_FK = "registry_tenant.id"
 #
 # v3.0 GA ships ``silo`` only (database-per-tenant).  ``pool`` (shared
 # DB + PostgreSQL RLS) is a designed-for-but-deferred SMB long-tail
-# tier — the column exists so a tenant can be migrated between tiers
+# tier -- the column exists so a tenant can be migrated between tiers
 # later without a schema change.  See design doc §3.
 # ---------------------------------------------------------------------
 TENANT_TIER_SILO = "silo"
@@ -83,7 +83,7 @@ TENANT_STATUSES = (
     TENANT_STATUS_DEPROVISIONING,
 )
 
-# Phase 13.1.J — per-tenant edition. Each tenant is independently assigned a
+# Phase 13.1.J -- per-tenant edition. Each tenant is independently assigned a
 # feature surface from the control plane; module/feature gating resolves against
 # the TENANT's edition (via the active-tenant context), not one global license
 # tier. The resolution + Platform-Operator authorization logic lives in the
@@ -98,7 +98,7 @@ TENANT_EDITIONS = (
     TENANT_EDITION_ENTERPRISE,
 )
 
-# Phase 13.1.F — per-tenant backup/RPO orchestration. SysManage tracks each
+# Phase 13.1.F -- per-tenant backup/RPO orchestration. SysManage tracks each
 # tenant's backup schedule (RPO) and verification status; the actual bytes are
 # produced by an operator-configured external command (orchestrate-only). The
 # orchestration logic lives in the licensed ``multitenancy_engine``; only this
@@ -133,7 +133,7 @@ def _utcnow() -> datetime:
 
 
 class RegistryTenant(Base):
-    """A tenant (customer account) — the unit of isolation.
+    """A tenant (customer account) -- the unit of isolation.
 
     In silo mode each tenant gets its own database (located via
     :class:`RegistryTenantPlacement`).  ``settings`` / ``limits`` hold
@@ -164,7 +164,7 @@ class RegistryTenant(Base):
 
 
 class RegistryUser(Base):
-    """A global identity keyed by email — one identity, many tenants.
+    """A global identity keyed by email -- one identity, many tenants.
 
     Owns authn for non-SSO users (``password_hash`` nullable so SSO-only
     identities carry no local secret).  Tenant membership is expressed
@@ -184,7 +184,7 @@ class RegistryUser(Base):
 
 
 class RegistryUserTenantGrant(Base):
-    """The explicit email→tenant mapping (1..*) — the least-privilege core.
+    """The explicit email→tenant mapping (1..*) -- the least-privilege core.
 
     Carries the user's role within the tenant, a default-tenant flag for
     account switching, and an optional ``expires_at`` for **time-boxed /
@@ -219,7 +219,7 @@ class RegistryUserTenantGrant(Base):
 
 
 class RegistryTenantPlacement(Base):
-    """Per-tenant database **coordinates only** — never credentials.
+    """Per-tenant database **coordinates only** -- never credentials.
 
     Tells the partition resolver which engine to build for a tenant.
     ``openbao_role`` names the OpenBAO database-secrets role that brokers
@@ -256,7 +256,7 @@ class RegistryTenantEmailDomain(Base):
     Enforced at provisioning time (invite / SSO-JIT / SCIM / grant
     creation): a user whose email domain is not in a tenant's allowlist
     cannot be added to that tenant.  An empty allowlist means "no domain
-    restriction" — the tenant accepts any domain until it configures one.
+    restriction" -- the tenant accepts any domain until it configures one.
 
     Domains are stored lowercased and bare (``example.com``, no ``@``).
     """
@@ -313,7 +313,7 @@ class RegistryTenantBackup(Base):
     can report RPO compliance ("how long since the last good backup?") and prove
     restorability.  SysManage orchestrates the schedule and runs an
     operator-configured external command (pgBackRest/wal-g/pg_dump); it does not
-    itself store the backup bytes — ``artifact_ref`` is whatever opaque handle
+    itself store the backup bytes -- ``artifact_ref`` is whatever opaque handle
     that command reports (a stanza label, object key, file path).
 
     ``kind`` distinguishes a backup run from a verify run; for verify runs,
@@ -360,7 +360,7 @@ class RegistryEnrollmentToken(Base):
     An admin generates a token bound to a tenant; an agent presents it at
     registration to be enrolled into that tenant (its host record is then
     created in the tenant's database).  Only the SHA-256 ``token_hash`` is
-    stored — the plaintext is shown once at creation and never persisted.
+    stored -- the plaintext is shown once at creation and never persisted.
 
     Optional ``expires_at`` and ``max_uses`` bound a token's blast radius;
     ``revoked`` disables it immediately.  ``use_count`` / ``last_used_at`` are
@@ -373,7 +373,7 @@ class RegistryEnrollmentToken(Base):
     tenant_id = Column(
         GUID(), ForeignKey(_TENANT_FK, ondelete="CASCADE"), nullable=False
     )
-    # SHA-256 hex of the plaintext token — looked up at enrollment.  Unique so
+    # SHA-256 hex of the plaintext token -- looked up at enrollment.  Unique so
     # a token maps to exactly one tenant.
     token_hash = Column(String(64), nullable=False, unique=True)
     label = Column(String(255), nullable=True)
@@ -384,7 +384,7 @@ class RegistryEnrollmentToken(Base):
     use_count = Column(Integer, nullable=False, default=0)
     last_used_at = Column(DateTime, nullable=True)
     revoked = Column(Boolean, nullable=False, default=False)
-    # Phase 18.1 S4 — auto-enroll placement.  SOFT references (no FK — these
+    # Phase 18.1 S4 -- auto-enroll placement.  SOFT references (no FK -- these
     # rows live outside the registry partition): when set, a host enrolled with
     # this token is also bound to the access group and/or site.  NULL = tenant
     # scope only, the pre-18.1 behavior.
@@ -401,14 +401,14 @@ class RegistryHostTenant(Base):
     """Server-global host→tenant index (Phase 13.1 data plane).
 
     A host's data lives in its tenant's database, but the websocket / queue
-    processors only know a host by its id (or token) — they can't query the
+    processors only know a host by its id (or token) -- they can't query the
     per-tenant DBs to discover *which* tenant owns a host without first knowing
     the tenant (chicken-and-egg).  This registry-level index resolves that:
     populated at enrollment, read by the data plane to route a host's
     operations to the right tenant database.
 
     One row per host (``host_id`` unique).  ``host_id`` is a soft reference to
-    the host row (which lives in the tenant DB) — no cross-partition FK.
+    the host row (which lives in the tenant DB) -- no cross-partition FK.
     """
 
     __tablename__ = "registry_host_tenant"

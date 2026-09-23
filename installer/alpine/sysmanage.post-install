@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ---------------------------------------------------------------
-# OpenBAO (secrets broker) — provision the binary + service.
+# OpenBAO (secrets broker) -- provision the binary + service.
 #
 # Alpine is musl and OpenBAO ships no .apk, but `bao` is a static Go binary
 # that runs on musl.  We install it to /usr/local/bin/bao from (1) a binary

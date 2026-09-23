@@ -6,7 +6,7 @@
  * Phase 12.3: federated cross-site host directory.
  *
  * Renders the coordinator's SYNCED, summary-tier view of every host
- * across every enrolled site — the data the sites push up, never a
+ * across every enrolled site -- the data the sites push up, never a
  * live query fanned out to subordinates.  Filters compose with AND and
  * ride the URL so SiteDetail's "See hosts at this site" button can
  * deep-link a single-site view (``?site_id=<id>``).
@@ -14,7 +14,7 @@
  * Drill-down is deliberately NAVIGATIONAL: the detail dialog shows the
  * synced summary plus the owning site's name and a deep-link into THAT
  * site's own web UI for live detail.  The coordinator never blocks on a
- * subordinate to answer a read — consistent with the queue-everything
+ * subordinate to answer a read -- consistent with the queue-everything
  * architecture.
  *
  * When the federation controller engine isn't loaded the OSS stub
@@ -78,7 +78,7 @@ function statusColor(status?: string | null): StatusColor {
 }
 
 function formatTimestamp(iso?: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "--";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   return date.toLocaleString();
@@ -100,7 +100,7 @@ const FederationHosts: React.FC = () => {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
-  // Working filter inputs — committed to the URL on "Apply" so a fetch
+  // Working filter inputs -- committed to the URL on "Apply" so a fetch
   // doesn't fire per keystroke.
   const [filterText, setFilterText] = useState(
     searchParams.get("free_text") ?? "",
@@ -444,13 +444,13 @@ const FederationHosts: React.FC = () => {
                     />
                   </TableCell>
                   <TableCell>{host.fqdn || host.host_id}</TableCell>
-                  <TableCell>{host.ipv4 || "—"}</TableCell>
+                  <TableCell>{host.ipv4 || "--"}</TableCell>
                   <TableCell>
                     {[host.os_family, host.os_version]
                       .filter(Boolean)
-                      .join(" ") || "—"}
+                      .join(" ") || "--"}
                   </TableCell>
-                  <TableCell>{host.platform || "—"}</TableCell>
+                  <TableCell>{host.platform || "--"}</TableCell>
                   <TableCell>
                     <Chip
                       label={host.status || "unknown"}
@@ -538,18 +538,18 @@ const FederationHosts: React.FC = () => {
               />
               <DetailRow
                 label={t("federationHosts.columns.ipv4", "IPv4")}
-                value={detailHost.ipv4 || "—"}
+                value={detailHost.ipv4 || "--"}
               />
               <DetailRow
                 label={t("federationHosts.detail.ipv6", "IPv6")}
-                value={detailHost.ipv6 || "—"}
+                value={detailHost.ipv6 || "--"}
               />
               <DetailRow
                 label={t("federationHosts.columns.os", "OS")}
                 value={
                   [detailHost.os_family, detailHost.os_version]
                     .filter(Boolean)
-                    .join(" ") || "—"
+                    .join(" ") || "--"
                 }
               />
               <DetailRow

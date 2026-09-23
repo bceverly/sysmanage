@@ -118,7 +118,7 @@ export const getStatusColor = (status: string): ChipColor => {
   }
 };
 
-// Shared MUI DataGrid ``localeText`` for the scripts grids — the
+// Shared MUI DataGrid ``localeText`` for the scripts grids -- the
 // pagination + row-selection strings are identical across the Library
 // and Executions tables; only the empty-state label differs.
 export const buildDataGridLocaleText = (

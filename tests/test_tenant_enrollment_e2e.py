@@ -191,7 +191,7 @@ class TestTenantEnrollmentEndToEnd:
 
     def test_system_info_routes_to_tenant_no_duplicate(self, mt_chain):
         """SYSTEM_INFO carrying the agent's host_id routes to the tenant DB and
-        updates the SAME host — no duplicate row appears in the bootstrap DB."""
+        updates the SAME host -- no duplicate row appears in the bootstrap DB."""
         from backend.api.message_handlers_core import handle_system_info
 
         host = _register()

@@ -125,7 +125,7 @@ const HostImageModeTab: React.FC<HostImageModeTabProps> = ({ host }) => {
 
     const renderDigest = (digest?: string) => {
         if (!digest) {
-            return <>—</>;
+            return <>--</>;
         }
         return (
             <Tooltip title={digest}>
@@ -232,7 +232,7 @@ const HostImageModeTab: React.FC<HostImageModeTabProps> = ({ host }) => {
                                                         {t('hostDetail.imageMode.imageRef', 'Image Reference')}
                                                     </TableCell>
                                                     <TableCell sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>
-                                                        {host.booted_image_ref || '—'}
+                                                        {host.booted_image_ref || '--'}
                                                     </TableCell>
                                                 </TableRow>
                                                 <TableRow>
@@ -270,7 +270,7 @@ const HostImageModeTab: React.FC<HostImageModeTabProps> = ({ host }) => {
                                         {hasStaged ? (
                                             <>
                                                 <Alert severity="warning" sx={{ mb: 2 }}>
-                                                    {t('hostDetail.imageMode.pendingReboot', 'Pending — reboot to apply')}
+                                                    {t('hostDetail.imageMode.pendingReboot', 'Pending -- reboot to apply')}
                                                 </Alert>
                                                 <Table size="small">
                                                     <TableBody>
@@ -279,7 +279,7 @@ const HostImageModeTab: React.FC<HostImageModeTabProps> = ({ host }) => {
                                                                 {t('hostDetail.imageMode.imageRef', 'Image Reference')}
                                                             </TableCell>
                                                             <TableCell sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>
-                                                                {host.staged_image_ref || '—'}
+                                                                {host.staged_image_ref || '--'}
                                                             </TableCell>
                                                         </TableRow>
                                                         <TableRow>

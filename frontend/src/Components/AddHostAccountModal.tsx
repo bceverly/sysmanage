@@ -105,7 +105,7 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
             setAccountDisabled(false);
             setError(null);
         }
-    // Intentionally omitting ``form`` setters from deps — the effect
+    // Intentionally omitting ``form`` setters from deps -- the effect
     // resets form state when the modal opens or platform changes; it
     // doesn't depend on the form itself.
     // eslint-disable-next-line react-hooks/exhaustive-deps

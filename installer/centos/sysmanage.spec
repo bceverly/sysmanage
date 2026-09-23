@@ -22,7 +22,7 @@ Source1:        %{name}-vendor-%{version}.tar.gz
 # (e.g. libcrypto-ea28cefb.so.1.1); RPM's auto-dep generator would emit
 # Requires on those phantom sonames that nothing provides, making the RPM
 # uninstallable via dnf.  The prior %{_libdir}/sysmanage/venv pattern never
-# matched — the real install path is /opt/sysmanage/.venv.
+# matched -- the real install path is /opt/sysmanage/.venv.
 %global __requires_exclude_from ^/opt/sysmanage/.venv/.*$
 %global __provides_exclude_from ^/opt/sysmanage/.venv/.*$
 
@@ -111,7 +111,7 @@ install -m 644 requirements-prod.txt %{buildroot}/opt/sysmanage/
 cp -r config %{buildroot}/opt/sysmanage/
 cp -r scripts %{buildroot}/opt/sysmanage/
 
-# Air-gap bundle dispatcher template — buildAirGapBundle.sh (in scripts/)
+# Air-gap bundle dispatcher template -- buildAirGapBundle.sh (in scripts/)
 # resolves this relative to itself (../installer/airgap-bundle/install.sh),
 # so it must be packaged alongside scripts/ or every bundle build dies at
 # the "dispatcher template not found" preflight.
@@ -149,7 +149,7 @@ install -m 644 installer/centos/sysmanage.yaml.example %{buildroot}/etc/sysmanag
 install -d %{buildroot}/usr/lib/systemd/system
 install -m 644 installer/centos/sysmanage.service %{buildroot}/usr/lib/systemd/system/
 
-# Install OpenBAO config + init/unseal one-shot (secrets broker — central to
+# Install OpenBAO config + init/unseal one-shot (secrets broker -- central to
 # SysManage; see docs/planning/openbao-deployment-and-airgap.md)
 install -d %{buildroot}/etc/openbao
 install -m 640 installer/openbao/openbao.hcl %{buildroot}/etc/openbao/openbao.hcl
@@ -235,7 +235,7 @@ fi
 # END GENERATED TLS PREFLIGHT
 
 # ---------------------------------------------------------------
-# OpenBAO (secrets broker) — install + start + initialize/unseal.
+# OpenBAO (secrets broker) -- install + start + initialize/unseal.
 # Native package provides the bao binary, the openbao user, and the
 # stock openbao.service; we drop our config + run an init/unseal one-shot.
 # ---------------------------------------------------------------

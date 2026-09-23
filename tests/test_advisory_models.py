@@ -113,7 +113,7 @@ class TestTenantApplicability:
 
         applicable = HostApplicableAdvisory(
             host_id=host.id,
-            advisory_id=adv.id,  # soft ref — no FK
+            advisory_id=adv.id,  # soft ref -- no FK
             advisory_identifier=adv.advisory_id,
             source=adv.source,
             advisory_type=adv.advisory_type,

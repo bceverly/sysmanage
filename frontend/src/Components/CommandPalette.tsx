@@ -63,7 +63,7 @@ const CommandPalette: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   // Cmd/Ctrl-K toggles; a custom event lets a toolbar button open it too. Only
-  // active when authenticated — no jump targets pre-login.
+  // active when authenticated -- no jump targets pre-login.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
@@ -84,7 +84,7 @@ const CommandPalette: React.FC = () => {
   }, []);
 
   // Computed each render (small list) so it always reflects the current license
-  // cache — which may populate after mount — and the current query.
+  // cache -- which may populate after mount -- and the current query.
   const license = getCachedLicense();
   const modules: string[] = license?.modules ?? [];
   const features: string[] = license?.features ?? [];

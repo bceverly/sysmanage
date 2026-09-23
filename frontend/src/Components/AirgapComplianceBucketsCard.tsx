@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 /**
- * Air-Gap Compliance Buckets card (Phase 11 B5) — surfaces the
+ * Air-Gap Compliance Buckets card (Phase 11 B5) -- surfaces the
  * three-bucket classification produced by
  * ``backend/services/airgap_compliance_context.classify_compliance_gap``:
  *
@@ -17,7 +17,7 @@
  *                            surfaced since last transfer.
  *
  * Visible only on ``role: repository`` deployments.  Loads its data
- * from a host-scoped endpoint passed in as ``hostId`` — caller is
+ * from a host-scoped endpoint passed in as ``hostId`` -- caller is
  * responsible for resolving the host context (HostDetail page, etc.).
  */
 
@@ -125,7 +125,7 @@ const AirgapComplianceBucketsCard: React.FC<Props> = ({ hostId }) => {
 
   // Phase 11.3 risk-assessment surface: red badge for not_transferred
   // (next media cycle required), yellow for not_applied (cheap to fix
-  // — package already on the local mirror).  Tooltips explain the
+  // -- package already on the local mirror).  Tooltips explain the
   // air-gap-transfer-cadence implication so an operator unfamiliar
   // with the dual-server model understands why one bucket is more
   // costly than the other.
@@ -135,7 +135,7 @@ const AirgapComplianceBucketsCard: React.FC<Props> = ({ hostId }) => {
   );
   const notAppliedTooltip = t(
     'airgap.compliance.tooltip.not_applied',
-    'These fixes are already on the local mirror. No new media transfer needed — the host just has not run its package manager yet.',
+    'These fixes are already on the local mirror. No new media transfer needed -- the host just has not run its package manager yet.',
   );
   const currentTooltip = t(
     'airgap.compliance.tooltip.current',

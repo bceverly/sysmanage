@@ -68,7 +68,7 @@ def _apply_repo_mirror_op_result(
         elif action == "setup_install":
             _apply_mirror_setup_install(session, host_id, outcome)
         elif action in ("default_apply", "default_revert"):
-            # Phase 10.4.4 — pointing a client host at (or away from)
+            # Phase 10.4.4 -- pointing a client host at (or away from)
             # the locally-hosted mirror.  No row update needed on the
             # OSS side since the assignment was committed BEFORE the
             # plan was queued; the result here is informational only.
@@ -252,7 +252,7 @@ def _apply_mirror_sync_status(
     Each action (sync/snapshot/restore/integrity_check/gc) writes to
     its own ``_at`` / ``_status`` / ``_error`` / ``_message_id`` columns
     so a failed snapshot no longer overwrites a previously successful
-    sync — the UI shows one chip per action.
+    sync -- the UI shows one chip per action.
 
     Side effects for snapshot:
         * Always clears the in-flight ``_message_id``.
@@ -279,7 +279,7 @@ def _apply_mirror_sync_status(
     prefix = _ACTION_COLUMN_PREFIX.get(action)
     if prefix is None:
         logger.warning(
-            "Mirror result for unknown action %r (mirror_id=%s) — no column to write",
+            "Mirror result for unknown action %r (mirror_id=%s) -- no column to write",
             action,
             mirror_id,
         )
@@ -293,7 +293,7 @@ def _apply_mirror_sync_status(
     setattr(row, f"{prefix}_at", now)
     setattr(row, f"{prefix}_status", status_value)
     setattr(row, f"{prefix}_error", error_value)
-    # Clear the in-flight marker regardless of outcome — the operator
+    # Clear the in-flight marker regardless of outcome -- the operator
     # needs the UI to leave the spinner state either way.
     setattr(row, f"{prefix}_message_id", None)
 
@@ -319,7 +319,7 @@ def _post_snapshot_outcome(
     """Reconcile the ``MirrorSnapshot`` placeholder row with the agent result.
 
     The dispatch endpoint inserts a snapshot row eagerly (so the UI
-    can show "in progress") — here we either fill in its size/file
+    can show "in progress") -- here we either fill in its size/file
     count on success, or delete it on failure so the list doesn't
     accumulate phantom snapshots.
     """
@@ -356,7 +356,7 @@ def _post_snapshot_outcome(
 def _post_restore_outcome(session, mirror_id: str, succeeded: bool) -> None:
     """Hook for future restore-side bookkeeping.
 
-    Currently a no-op — the restore action doesn't have per-snapshot
+    Currently a no-op -- the restore action doesn't have per-snapshot
     state to reconcile.  Carved out so the snapshot-side logic stays
     in its own helper and a future "mark snapshot as restored from"
     feature has an obvious place to live.

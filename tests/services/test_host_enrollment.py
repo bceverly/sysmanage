@@ -107,7 +107,7 @@ def test_reject_if_fqdn_belongs_to_tenant_noop_when_mt_off(db_session):
 
 def test_resolve_ignored_when_multitenancy_disabled(db_session):
     with patch("backend.config.config.is_multitenancy_enabled", return_value=False):
-        # When MT is off, any token is ignored (returns None) — the engine is
+        # When MT is off, any token is ignored (returns None) -- the engine is
         # never consulted.
         assert host_api._resolve_enrollment_tenant("sme_anything") is None
 

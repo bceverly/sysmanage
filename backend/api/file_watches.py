@@ -17,7 +17,7 @@ ROLES
 Reuses the SCRIPT roles, as query packs and configuration profiles do. A watch
 list is the same class of object: authored content, applied to hosts as
 policy. A parallel set would need seeding into ``security_roles`` for no
-behavioural gain.
+behavioral gain.
 
 NO FILE CONTENT CROSSES THIS SURFACE
 -------------------------------------
@@ -191,7 +191,7 @@ async def list_watches(db: Session = Depends(get_tenant_db)) -> List[Dict[str, A
 
 @router.get("/file-watches/catalog")
 async def list_catalog(include_deprecated: bool = False) -> List[Dict[str, Any]]:
-    """The curated catalog — global reference data, one copy for everyone."""
+    """The curated catalog -- global reference data, one copy for everyone."""
     return fws.list_shared_watches(include_deprecated=include_deprecated)
 
 

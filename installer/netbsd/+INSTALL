@@ -46,7 +46,7 @@ POST-INSTALL)
 	.venv/bin/pip install --quiet --upgrade pip
 	.venv/bin/pip install --quiet -r "$([ -f requirements-prod.txt ] && echo requirements-prod.txt || echo requirements.txt)"
 
-	# OpenBAO secrets broker — provision the static prebuilt binary (NetBSD
+	# OpenBAO secrets broker -- provision the static prebuilt binary (NetBSD
 	# has no OpenBAO package), install the rc.d service, create the user.
 	if [ ! -x /usr/pkg/bin/bao ] && [ ! -x /usr/local/bin/bao ]; then
 		OPENBAO_VERSION="2.5.4"

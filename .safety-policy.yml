@@ -1,7 +1,7 @@
 # SafetyCLI v3.0 policy file.  Schema source-of-truth:
 #   safety_schemas.config.schemas.v3_0.main.Config
 #
-# IMPORTANT — cloud-policy precedence: when authenticated to
+# IMPORTANT -- cloud-policy precedence: when authenticated to
 # safetycli.com, ``safety scan`` fetches the codebase's policy from the
 # Safety Platform and IGNORES this local file.  This file therefore
 # only takes effect for offline / CI runs, or when invoked with
@@ -16,19 +16,19 @@ version: "3.0"
 scanning-settings:
   max-depth: 6
   exclude:
-    # Vendored npm toolchain — node-gyp ships a Python ``gyp`` directory
+    # Vendored npm toolchain -- node-gyp ships a Python ``gyp`` directory
     # under node_modules with its own pyproject.toml that pins
     # setuptools loosely.  We don't manage this dep; it's npm's problem.
     - "frontend/node_modules"
     - "node_modules"
-    # Local Python venvs — Safety scans the installed packages too,
+    # Local Python venvs -- Safety scans the installed packages too,
     # which produces double-reporting against requirements.txt.  We
     # already pin the requirements; venv-resolved versions are downstream.
     - ".venv"
     - "venv"
     # Build artifacts + caches.  ``build-temp`` is a packaging staging dir that
     # holds a STALE COPY of requirements.txt (e.g. build-temp/sysmanage-3.0.0.7/)
-    # — scanning it double-reports against pre-fix pins, so exclude it.
+    # -- scanning it double-reports against pre-fix pins, so exclude it.
     - "dist"
     - "build"
     - "build-temp"

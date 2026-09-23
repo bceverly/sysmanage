@@ -140,7 +140,7 @@ class Host(TestBase):
     )  # Using String instead of Text for SQLite
 
     # Phase 19 agent capability advertisement.  This mirror is hand-maintained
-    # against backend/persistence/models/core.py — a column added there and NOT
+    # against backend/persistence/models/core.py -- a column added there and NOT
     # here makes the api tests fail with "no column named ...", so the two move
     # together.
     agent_capabilities = Column(String, nullable=True)
@@ -166,7 +166,7 @@ class Host(TestBase):
     parent_host_id = Column(
         GUID(), ForeignKey("host.id", ondelete="SET NULL"), nullable=True
     )
-    # Phase 18.1 S4 — federation site placement (soft ref; no FK)
+    # Phase 18.1 S4 -- federation site placement (soft ref; no FK)
     site_id = Column(GUID(), nullable=True)
 
     # Phase 12.7: agent-reported public IP + GeoLite2 resolution

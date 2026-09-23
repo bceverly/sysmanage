@@ -6,8 +6,8 @@
  * Clipboard helper that works in BOTH secure and non-secure browsing contexts.
  *
  * `navigator.clipboard` is only defined in a *secure context* (HTTPS or
- * localhost).  When SysManage is reached over plain HTTP by IP — common for a
- * freshly-installed server before TLS is set up — `navigator.clipboard` is
+ * localhost).  When SysManage is reached over plain HTTP by IP -- common for a
+ * freshly-installed server before TLS is set up -- `navigator.clipboard` is
  * `undefined`, so `writeText()` throws and the copy silently fails.  This was
  * the bug behind the Server Role / Air-Gap "Copy" buttons doing nothing.
  *
@@ -17,7 +17,7 @@
  * onClick handlers).
  *
  * Returns `true` if the text reached the clipboard, `false` if every strategy
- * failed — callers should surface an error on `false`.
+ * failed -- callers should surface an error on `false`.
  */
 export async function copyToClipboard(value: string): Promise<boolean> {
   const nav = globalThis.navigator;
@@ -27,7 +27,7 @@ export async function copyToClipboard(value: string): Promise<boolean> {
       return true;
     } catch {
       // Secure-context check passed but the write was rejected (permissions,
-      // focus, etc.) — fall through to the legacy path.
+      // focus, etc.) -- fall through to the legacy path.
     }
   }
   return legacyCopy(value);
@@ -35,7 +35,7 @@ export async function copyToClipboard(value: string): Promise<boolean> {
 
 // `document.execCommand('copy')` is the ONLY clipboard write available in a
 // non-secure context (plain HTTP by IP), where `navigator.clipboard` is
-// undefined — so the deprecated API is a deliberate, last-resort fallback.
+// undefined -- so the deprecated API is a deliberate, last-resort fallback.
 // Reference it through a local interface (without the lib's `@deprecated` tag)
 // so it doesn't trip deprecation lint while remaining typed.
 interface LegacyClipboardDocument {

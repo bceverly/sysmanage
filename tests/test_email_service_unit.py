@@ -18,7 +18,7 @@ class TestEmailServiceInit:
         """Config is resolved lazily at send time, not snapshotted in __init__.
 
         Phase 13.1: snapshotting would freeze the server scope and ignore the
-        active tenant — so __init__ must not read config at all.
+        active tenant -- so __init__ must not read config at all.
         """
         from backend.services.email_service import EmailService
 

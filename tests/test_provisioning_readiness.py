@@ -6,11 +6,11 @@
 Tests for the Phase 18.2 S1 provisioning-readiness preflight (OSS half).
 
 Two halves:
-  * ``ProvisioningReadiness`` role logic — which tool combinations satisfy
+  * ``ProvisioningReadiness`` role logic -- which tool combinations satisfy
     which provisioning role, what to offer installing, and the own-DHCP vs
     proxyDHCP recommendation.  This is the gate that decides whether PXE may
     be attempted at all.
-  * ``provisioning_result_handlers`` — parsing the agent probe's stdout and
+  * ``provisioning_result_handlers`` -- parsing the agent probe's stdout and
     upserting the row.
 """
 
@@ -35,7 +35,7 @@ def _row(tools=None, services=None):
 
 class TestRoleReadiness:
     def test_dnsmasq_alone_satisfies_dhcp_and_tftp(self):
-        """The property that makes dnsmasq the recommended stack — one package
+        """The property that makes dnsmasq the recommended stack -- one package
         covers both roles (exactly what libvirt's own dnsmasq did in the S0
         spike)."""
         row = _row({"dnsmasq": "present"})

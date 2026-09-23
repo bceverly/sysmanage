@@ -102,7 +102,7 @@ def _linux_distro_family(host_info: Dict[str, Any]) -> str:
 def platform_kind(host_info: Dict[str, Any]) -> str:
     """Public form of the platform bucket.
 
-    Exposed because the per-engine evaluator needs the same normalisation and
+    Exposed because the per-engine evaluator needs the same normalization and
     reaching into another module's private helper is how two copies of the
     rules start disagreeing.
     """
@@ -194,7 +194,7 @@ def _salt_apt_install_plan() -> Dict[str, Any]:
                 # truncated keyring reports as a signature failure, which reads
                 # like a hostile mirror rather than a network blip. Plan
                 # commands stop on the first nonzero exit, and curl -f exits
-                # nonzero on an HTTP error, so this is already the behaviour --
+                # nonzero on an HTTP error, so this is already the behavior --
                 # do not add ignore_errors here.
                 "argv": ["curl", "-fsSL", "-o", _SALT_APT_KEYRING, _SALT_APT_KEY_URL],
                 "sudo": True,
@@ -386,5 +386,5 @@ def install_targets() -> List[Dict[str, str]]:
         {"platform": "openbsd", "package": "ansible-core"},
         {"platform": "netbsd", "package": "ansible-core"},
         {"platform": "darwin", "package": "ansible (brew)"},
-        {"platform": "windows", "package": "(vendored dsc.exe — no install)"},
+        {"platform": "windows", "package": "(vendored dsc.exe -- no install)"},
     ]

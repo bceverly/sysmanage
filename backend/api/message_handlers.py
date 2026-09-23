@@ -98,8 +98,8 @@ def command_type_from_queue(db, message_data: dict) -> Optional[str]:
 async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
     """Handle command execution result from agent.
 
-    ``db`` is the caller's session — tenant-routed by the queue processor when
-    multi-tenancy is on — and is used for ALL downstream handlers so a bound
+    ``db`` is the caller's session -- tenant-routed by the queue processor when
+    multi-tenancy is on -- and is used for ALL downstream handlers so a bound
     host's command results land in its tenant database.  The caller owns the
     session lifecycle (we never open or close our own)."""
     logger.info(
@@ -120,7 +120,7 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
     # originating engine.  The dispatcher in proplus_dispatch.py registers
     # a correlation by the queue's message_id; the agent echoes that ID
     # back as command_id.  If we have a match, the engine handles it and
-    # we're done — otherwise let normal handler routing run.
+    # we're done -- otherwise let normal handler routing run.
     command_id = message_data.get("command_id")
     if command_id:
         try:
@@ -291,7 +291,7 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
         if isinstance(pkgs, dict) or isinstance(pkg_mgrs, dict):
             return True
         # ``package_managers`` as a list is the legacy "platform supports
-        # these managers" shape used by collection — accept that too.
+        # these managers" shape used by collection -- accept that too.
         if isinstance(pkg_mgrs, list) and pkg_mgrs:
             return True
         return False

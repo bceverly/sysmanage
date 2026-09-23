@@ -10,7 +10,7 @@ subprocess and reports progress through the ``airgap_bundle`` table.
 Designed to be invoked from the bundle API endpoint as a fire-and-
 forget thread so the API call returns immediately with a job id.
 
-The actual build is slow — Docker container per Linux distro, pip
+The actual build is slow -- Docker container per Linux distro, pip
 wheel compilation, ISO generation.  Expect 5-30 minutes depending on
 how many platforms are enabled.  The caller polls the row's
 ``status`` (or watches the build log) for progress.
@@ -43,7 +43,7 @@ BUNDLE_DIR = Path("/var/lib/sysmanage/airgap-bundles")
 # kicking off server + agent + proplus together) multiplies peak memory
 # and disk and OOM-kills the backend that launched them.  A plain
 # module-level lock makes concurrent build requests queue and run one at
-# a time — the extra daemon threads just block until their turn.
+# a time -- the extra daemon threads just block until their turn.
 _BUILD_LOCK = threading.Lock()
 
 # Where the build script lives relative to the repo root / install root.
@@ -107,7 +107,7 @@ def _run_build(bundle_id: uuid.UUID, product: str) -> None:
         )
         return
 
-    # Only one build at a time — see _BUILD_LOCK.  Extra concurrent
+    # Only one build at a time -- see _BUILD_LOCK.  Extra concurrent
     # build requests (their own daemon threads) block here until the
     # in-flight build finishes, instead of all running at once and
     # exhausting memory/disk.
@@ -117,7 +117,7 @@ def _run_build(bundle_id: uuid.UUID, product: str) -> None:
 
 def _cleanup_staging(staging: Path) -> None:
     """Remove a build's staging tree.  Docker writes into it as root, so a
-    plain rmtree fails on those files — fall back to a throwaway container
+    plain rmtree fails on those files -- fall back to a throwaway container
     that chowns the tree back to us, then remove it.  Best-effort."""
     if not staging.exists():
         return
@@ -143,7 +143,7 @@ def _cleanup_staging(staging: Path) -> None:
             timeout=120,
         )
     except (OSError, subprocess.SubprocessError):
-        # Best-effort ownership fix-up: a failure here must not abort teardown —
+        # Best-effort ownership fix-up: a failure here must not abort teardown --
         # the staging dir is removed unconditionally just below regardless.
         pass
     shutil.rmtree(staging, ignore_errors=True)
@@ -168,7 +168,7 @@ def _execute_build(bundle_id: uuid.UUID, product: str, script: Path) -> None:
 
     # Stage UNDER /var/lib/sysmanage (BUNDLE_DIR), NOT the script's default
     # /var/tmp.  The backend runs as a systemd service with PrivateTmp=yes,
-    # so its /tmp and /var/tmp are a private namespace — but the docker
+    # so its /tmp and /var/tmp are a private namespace -- but the docker
     # daemon bind-mounts the HOST's /var/tmp.  A staging path under /var/tmp
     # therefore resolves to two different directories: the per-distro
     # containers write their wheels/deps into the host view, while the
@@ -243,11 +243,11 @@ def _execute_build(bundle_id: uuid.UUID, product: str, script: Path) -> None:
             version = version_path.read_text(encoding="utf-8").strip() or None
         except OSError:
             version = None
-        # Tidy up — the per-bundle version marker file is consumed.
+        # Tidy up -- the per-bundle version marker file is consumed.
         try:
             version_path.unlink()
         except OSError:
-            # Already gone / not writable — harmless; the marker is transient.
+            # Already gone / not writable -- harmless; the marker is transient.
             pass
 
     _update_bundle(

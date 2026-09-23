@@ -6,13 +6,13 @@
 Tests for the Phase 11.4 CVE refresh-settings API gate.
 
 The CVE feed management routes are gated on the Pro+ ``vuln_engine``
-module being loaded.  Without it, every route returns 402 — these tests
+module being loaded.  Without it, every route returns 402 -- these tests
 verify that gate using the same pattern as
 ``test_upgrade_profiles.TestUpgradeProfilesProplusGate``.
 
-Engine-loaded behaviour (200 + delegate to engine helpers) is exercised
+Engine-loaded behavior (200 + delegate to engine helpers) is exercised
 in the engine's own test suite under
-``module-source/vuln_engine/test_vuln_engine_cve_refresh.py`` — there's
+``module-source/vuln_engine/test_vuln_engine_cve_refresh.py`` -- there's
 no DB-backed integration smoke here because the persisted-settings table
 is intentionally not part of the OSS API conftest's manual model
 mirror (Phase 11.4 keeps the schema unchanged, so DB-backed tests

@@ -365,7 +365,7 @@ Step "HTTPS responds over TLS" {
     # document root (this isolated test ships no frontend) the fallback
     # /index.html is missing too, so nginx internally redirects to it, re-enters
     # location /, detects the cycle and returns 500.  That is correct nginx
-    # behaviour and proves TLS + the server block are live -- which is what this
+    # behavior and proves TLS + the server block are live -- which is what this
     # step exists to prove.  A real install has index.html and returns 200.
     switch ($code) {
         "200" { return "200 - serving a real frontend" }

@@ -6,12 +6,12 @@
 
 Drive the device-based ISO import on an Air-Gap Repository:
 
-  * GET  /api/v1/airgap/block-devices       — enumerate candidate drives
-  * PUT  /api/v1/airgap/import-device        — persist the chosen drive
-  * GET  /api/v1/airgap/import-device/status — is the chosen drive ready?
+  * GET  /api/v1/airgap/block-devices       -- enumerate candidate drives
+  * PUT  /api/v1/airgap/import-device        -- persist the chosen drive
+  * GET  /api/v1/airgap/import-device/status -- is the chosen drive ready?
                                                (also the Rescan action)
   * POST /api/v1/airgap/repository/ingest-device
-                                             — queue an ingest from it
+                                             -- queue an ingest from it
 
 All authenticated.  The Import button on the Air-Gap Repositories page
 is gated on the ``status`` ``ready`` flag; pressing it calls

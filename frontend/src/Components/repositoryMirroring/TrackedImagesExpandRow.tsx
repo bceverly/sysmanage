@@ -33,13 +33,13 @@ import {
 } from '../../Services/repositoryMirroring';
 
 // ---------------------------------------------------------------------
-// Tracked-images expand row (Phase 17.2 — OCI image content lifecycle)
+// Tracked-images expand row (Phase 17.2 -- OCI image content lifecycle)
 //
 // One inline collapsible per mirror listing the container images tracked for
 // capture (registry/repository:tag + captured digest + capture status), with a
 // small "track image" form and an untrack action per row.  Loads lazily on
 // expand and re-polls every 10s so a DISPATCHED -> CAPTURED transition (after
-// "Capture images") — which also fills the pinned digest — appears without a
+// "Capture images") -- which also fills the pinned digest -- appears without a
 // manual refresh.  Modeled 1:1 on TrackedSnapsExpandRow (Phase 17.1).
 // ---------------------------------------------------------------------
 
@@ -56,7 +56,7 @@ const STATUS_COLOR: Record<
 // A captured digest is "sha256:<64 hex>"; show a readable stem in the table and
 // keep the full value in a tooltip.
 const shortDigest = (digest?: string | null): string => {
-  if (!digest) return '—';
+  if (!digest) return '--';
   const [algo, hex] = digest.split(':');
   return hex ? `${algo}:${hex.slice(0, 12)}` : digest.slice(0, 19);
 };

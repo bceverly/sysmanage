@@ -282,7 +282,7 @@ class QueryPackQuery(Base):
 
 
 class QueryPackAssignment(Base):
-    """Which hosts run which pack — the multi-tenant policy itself.
+    """Which hosts run which pack -- the multi-tenant policy itself.
 
     Exactly one of ``pack_id`` (tenant-authored) and ``shared_pack_id``
     (curated) is set.  ``shared_pack_id`` has NO ForeignKey on purpose: it
@@ -302,7 +302,7 @@ class QueryPackAssignment(Base):
     pack_id = Column(
         GUID(), ForeignKey(PACK_ID_FK, ondelete=CASCADE_DELETE), nullable=True
     )
-    # SOFT reference to shared_query_pack.id — see the class docstring.
+    # SOFT reference to shared_query_pack.id -- see the class docstring.
     shared_pack_id = Column(GUID(), nullable=True, index=True)
     host_id = Column(
         GUID(), ForeignKey(HOST_ID_FK, ondelete=CASCADE_DELETE), nullable=True
@@ -332,14 +332,14 @@ class QueryPackAssignment(Base):
 
 
 class QueryPackLiveQuery(Base):
-    """One ad-hoc query fanned out across a fleet — ROADMAP 21.1 S5.
+    """One ad-hoc query fanned out across a fleet -- ROADMAP 21.1 S5.
 
     WHY THIS IS NOT JUST A PACK WITH ONE QUERY
     -------------------------------------------
     It is dispatched as one, deliberately, so the agent needs no new command
     and the result path is the one S4 already proved. What a pack does NOT
     carry is the thing this table exists for: an operator typed this at a
-    console and pointed it at a fleet, so it needs BOUNDS — how many hosts may
+    console and pointed it at a fleet, so it needs BOUNDS -- how many hosts may
     be in flight at once, how long to wait for a silent one, and how many rows
     a single host may return.
 
@@ -347,7 +347,7 @@ class QueryPackLiveQuery(Base):
     and a live query is the easiest possible way to reintroduce it: one
     keystroke, four thousand hosts. So the bounds are columns on the request
     rather than a policy somewhere else, and they are recorded with the query
-    — what a run actually did stays answerable after the fact.
+    -- what a run actually did stays answerable after the fact.
 
     WHY RESULTS LIVE IN ``query_pack_run``
     --------------------------------------
@@ -366,7 +366,7 @@ class QueryPackLiveQuery(Base):
     )
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
-    # Optional: an operator may name a query worth recognising later, but
+    # Optional: an operator may name a query worth recognizing later, but
     # most are one-offs and forcing a name would just produce "test" a lot.
     name = Column(String(255), nullable=True)
     sql = Column(Text, nullable=False)
@@ -452,7 +452,7 @@ class QueryPackResultRow(Base):
     """One row returned by one query in one run.
 
     ``columns`` holds the row as JSON because a pack's shape is whatever its
-    SQL selects — there is no fixed column set to model. The rest is indexed so
+    SQL selects -- there is no fixed column set to model. The rest is indexed so
     S6's consumers can ask "which hosts returned a row for query X" without
     reading the payloads.
     """
@@ -469,7 +469,7 @@ class QueryPackResultRow(Base):
     )
     query_name = Column(String(128), nullable=False)
     # ``ok`` / ``not_covered`` / ``error``.  A ``not_covered`` query gets ONE
-    # row with a null payload — it is a record that the question was asked and
+    # row with a null payload -- it is a record that the question was asked and
     # could not be answered here, which is different from asking and getting
     # nothing back, and different again from never asking.
     status = Column(String(32), nullable=False, default=QUERY_STATUS_OK)

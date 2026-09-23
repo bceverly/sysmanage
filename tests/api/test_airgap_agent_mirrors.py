@@ -6,8 +6,8 @@
 
 The engine is mocked, but deliberately NOT with a bare ``MagicMock``: the
 whole point of this endpoint is that it defers the channel list and the URL
-validation to the provisioning engine — the same code that renders the install
-commands — so a permissive mock would let the tests pass while the real
+validation to the provisioning engine -- the same code that renders the install
+commands -- so a permissive mock would let the tests pass while the real
 pairing was broken.  ``_engine()`` therefore stands in a fake with the real
 engine's semantics.
 """
@@ -76,7 +76,7 @@ class TestList:
         assert "copr" in body["available_channels"]
 
     def test_aur_is_never_offered(self, client, auth_headers):
-        """An Arch package is built on the target — there is nothing to
+        """An Arch package is built on the target -- there is nothing to
         mirror, and offering it would look like a working air-gap config."""
         with _engine():
             r = client.get("/api/v1/airgap/agent-mirrors", headers=auth_headers)
@@ -110,7 +110,7 @@ class TestUpsert:
         assert [m["channel"] for m in listed] == ["copr"]
 
     def test_second_put_updates_rather_than_duplicating(self, client, auth_headers):
-        """One row per channel — a second row would make which mirror wins
+        """One row per channel -- a second row would make which mirror wins
         depend on row order."""
         second = "https://other.corp.example/rpm"
         with _engine():

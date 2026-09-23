@@ -7,7 +7,7 @@
  *
  * The coordinator only QUEUES the command (POST /federation/commands/dispatch).
  * The owning site's actuation worker then fans it out to local agents and
- * reports results back upstream — nothing runs synchronously from this
+ * reports results back upstream -- nothing runs synchronously from this
  * dialog.  Targets default to "all hosts at this site"; an operator can
  * narrow to specific host IDs (copyable from the cross-site Hosts page).
  */
@@ -259,7 +259,7 @@ const FederationCommandDispatchDialog: React.FC<Props> = ({
           {multi
             ? t(
                 "federationDispatch.subtitleMulti",
-                "Queue a command for {{hosts}} selected host(s) across {{sites}} site(s). Each site runs it and reports results back — nothing executes immediately.",
+                "Queue a command for {{hosts}} selected host(s) across {{sites}} site(s). Each site runs it and reports results back -- nothing executes immediately.",
                 {
                   hosts: hostTargets?.length ?? 0,
                   sites: multiSiteIds.length,
@@ -267,7 +267,7 @@ const FederationCommandDispatchDialog: React.FC<Props> = ({
               )
             : t(
                 "federationDispatch.subtitle",
-                "Queue a command for {{site}}. The site runs it on its hosts and reports results back — nothing executes immediately.",
+                "Queue a command for {{site}}. The site runs it on its hosts and reports results back -- nothing executes immediately.",
                 {
                   site: siteName || t("federationDispatch.thisSite", "this site"),
                 },
@@ -304,7 +304,7 @@ const FederationCommandDispatchDialog: React.FC<Props> = ({
                   ? t("federationDispatch.packages", "Package names")
                   : t(
                       "federationDispatch.packagesOptional",
-                      "Package names (optional — blank = all updates)",
+                      "Package names (optional -- blank = all updates)",
                     )
               }
               value={packages}

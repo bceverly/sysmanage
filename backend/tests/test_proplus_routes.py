@@ -128,7 +128,7 @@ class TestMountHealthRoutes:
         mock_module.get_health_router.return_value = mock_router
 
         # ``proplus_routes`` no longer re-exports ``requires_feature`` /
-        # ``requires_module`` — the gates are inlined as
+        # ``requires_module`` -- the gates are inlined as
         # ``_feature_dependency`` / ``_module_dependency``.  Patching
         # only the symbols that actually exist on the module today.
         with patch("backend.api.proplus_routes.module_loader") as mock_loader, patch(
@@ -416,7 +416,7 @@ class TestMountFederationControllerRoutes:
     The federation controller engine itself lives in the Pro+ source
     repo, NOT this OSS one, so on every OSS install ``get_module``
     returns ``None`` and the mount is a no-op.  The tests below pin
-    that no-op behaviour and verify the wiring is symmetric with the
+    that no-op behavior and verify the wiring is symmetric with the
     other engines so a future engine-side route renderer plugs in
     without OSS-side surgery.
     """
@@ -504,7 +504,7 @@ class TestFederationControllerStubRoutes:
     having to handle 404s.
     """
 
-    # All stub endpoints (method, path) — 22 in total.  When 12.1.B+
+    # All stub endpoints (method, path) -- 22 in total.  When 12.1.B+
     # lands real handlers in the engine, this list stays the same;
     # only the response bodies change.
     STUB_ENDPOINTS = [
@@ -535,20 +535,20 @@ class TestFederationControllerStubRoutes:
         ("GET", "/api/v1/federation/commands/cmd-1"),
         ("GET", "/api/v1/federation/audit"),
         ("GET", "/api/v1/federation/audit/entry-1"),
-        # Phase 12.2 — per-site sync timeline.
+        # Phase 12.2 -- per-site sync timeline.
         ("GET", "/api/v1/federation/sites/site-1/sync-timeline"),
-        # Phase 12.3 — per-site one-click policy re-push + federated report.
+        # Phase 12.3 -- per-site one-click policy re-push + federated report.
         ("POST", "/api/v1/federation/sites/site-1/repush-policies"),
         ("GET", "/api/v1/federation/reports/rollup"),
-        # Phase 12.1 — rollup alerts + configurable thresholds.
+        # Phase 12.1 -- rollup alerts + configurable thresholds.
         ("GET", "/api/v1/federation/alerts"),
         ("POST", "/api/v1/federation/alerts/alert-1/acknowledge"),
         ("GET", "/api/v1/federation/alert-config"),
         ("PUT", "/api/v1/federation/alert-config"),
-        # Phase 12.5 — federation-aware dynamic-secret leases.
+        # Phase 12.5 -- federation-aware dynamic-secret leases.
         ("GET", "/api/v1/federation/secret-leases"),
         ("POST", "/api/v1/federation/secret-leases/lease-1/revoke"),
-        # Phase 12.6 — sync ingest surface (site → coordinator).
+        # Phase 12.6 -- sync ingest surface (site → coordinator).
         # These return 401 in the engine (no bearer token) but the
         # OSS stub layer returns 200 ``{licensed: false}`` uniformly
         # so callers can detect "module not licensed" without auth.
@@ -557,9 +557,9 @@ class TestFederationControllerStubRoutes:
         ("POST", "/api/v1/federation/sites/site-1/rollups/vulnerabilities"),
         ("POST", "/api/v1/federation/sites/site-1/host-directory"),
         ("POST", "/api/v1/federation/sites/site-1/command-results"),
-        # Phase 12.2 — site metadata ingest.
+        # Phase 12.2 -- site metadata ingest.
         ("POST", "/api/v1/federation/sites/site-1/metadata"),
-        # Phase 12.5 — site secret-lease request ingest.
+        # Phase 12.5 -- site secret-lease request ingest.
         ("POST", "/api/v1/federation/sites/site-1/secret-lease-requests"),
     ]
 
@@ -585,7 +585,7 @@ class TestFederationControllerStubRoutes:
     def test_all_federation_stubs_respond_licensed_false(self, stub_only_app):
         """Every stub endpoint returns 200 with ``licensed: False``.
 
-        The shape is the contract for the frontend probe — if any
+        The shape is the contract for the frontend probe -- if any
         endpoint regresses to a different shape (e.g. 404 from a
         prefix typo), the federation UI's "is this licensed?"
         detection breaks."""
@@ -605,11 +605,11 @@ class TestFederationControllerStubRoutes:
 
     def test_federation_stub_count_locked(self, stub_only_app):
         """A safety net: the federation stub surface matches
-        ``STUB_ENDPOINTS`` exactly — Phase 12.1/12.3 + 12.6 ingest stubs,
+        ``STUB_ENDPOINTS`` exactly -- Phase 12.1/12.3 + 12.6 ingest stubs,
         plus the Phase 12.2 sync-timeline, alert-config (GET/PUT) and
         site-metadata ingest stubs.  If this count drifts unexpectedly,
         either someone added an endpoint without updating the test, or
-        removed one — both should be a deliberate decision.
+        removed one -- both should be a deliberate decision.
 
         Filter excludes ``/api/v1/federation/site/`` because Phase 12.2
         added a separate site-engine stub block at that prefix; those
@@ -717,7 +717,7 @@ class TestRouterConfiguration:
 
             # All include_router calls should land under /api.  Engines are
             # mounted either with an explicit prefix kwarg ("/api" legacy, or
-            # "/api/v1" canonical since Phase 13.2.1 — e.g. the multi-tenancy
+            # "/api/v1" canonical since Phase 13.2.1 -- e.g. the multi-tenancy
             # control plane is dual-mounted at "/api/v1" + "/api"), or with a
             # router that bakes its own full "/api/v1/..." prefix and is included
             # without the kwarg.

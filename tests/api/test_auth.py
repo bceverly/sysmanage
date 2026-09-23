@@ -102,8 +102,8 @@ class TestAuthLogin:
     ):
         """Inactive users (active=False) must be rejected at login.
 
-        Returns 401 with the generic "Invalid username or password" message —
-        same response as wrong-password / unknown-user — so callers cannot
+        Returns 401 with the generic "Invalid username or password" message --
+        same response as wrong-password / unknown-user -- so callers cannot
         probe whether a userid exists-but-disabled vs. doesn't-exist.
         """
         # Create an inactive test user

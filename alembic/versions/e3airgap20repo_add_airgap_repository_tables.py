@@ -10,10 +10,10 @@ Create Date: 2026-05-10 08:30:00.000000
 
 Two new tables backing the Pro+ ``airgap_repository_engine``:
 
-  airgap_ingestion_run        — one row per private-side ISO ingestion
-  airgap_local_repository     — locally-served mirror, keyed (distro, version)
+  airgap_ingestion_run        -- one row per private-side ISO ingestion
+  airgap_local_repository     -- locally-served mirror, keyed (distro, version)
 
-No cross-database FK to the collector tables — the two air-gap halves
+No cross-database FK to the collector tables -- the two air-gap halves
 never share a database.  The ingestion run records the manifest's
 ``signer_fingerprint`` + ``collector_iso_label`` so audit can correlate
 across the gap by inspecting both halves' DBs after the fact.

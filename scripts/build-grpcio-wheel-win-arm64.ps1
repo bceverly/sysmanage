@@ -13,7 +13,7 @@
   <TMP>\pip-wheel-<8>\grpcio_<32-hex>\ (~64 chars) or <TMP>\pip-install-<8>\grpcio_<32-hex>\,
   and 64 + 187 exceeds the Windows MAX_PATH (260) limit at LINK time, so link.exe fails
   with "LNK1181: cannot open input file ...upb_minitable.obj". Neither
-  `pip install --no-binary grpcio` nor `pip wheel grpcio` avoids this — both use that deep
+  `pip install --no-binary grpcio` nor `pip wheel grpcio` avoids this -- both use that deep
   temp layout.
 
   The fix is to build in a MANUALLY extracted, short source dir (C:\g\grpcio-<ver>, ~21

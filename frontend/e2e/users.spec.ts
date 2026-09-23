@@ -34,7 +34,7 @@ test.describe('User List Page', () => {
   });
 
   test('should display user list page', async ({ page }) => {
-    // ensureAuthenticated in beforeEach should land us on /users — if we're
+    // ensureAuthenticated in beforeEach should land us on /users -- if we're
     // back on /login, that's a real auth bug and the test must surface it.
     expect(page.url()).not.toContain('/login');
     await expect(page).toHaveURL(/\/users/);
@@ -55,7 +55,7 @@ test.describe('User List Page', () => {
     // The test user has all 93 security roles, so the Add User control
     // (button or FAB) MUST be present once permissions have loaded.
     //
-    // Locator.isVisible() is a one-shot synchronous check — it ignores
+    // Locator.isVisible() is a one-shot synchronous check -- it ignores
     // the {timeout} option, so the previous version of this test was
     // racing the React render and would flake on slow runs even when
     // the button was about to appear.  Locator.or() + expect.toBeVisible
@@ -64,7 +64,7 @@ test.describe('User List Page', () => {
     const fabButton = page.locator('.MuiFab-root').first();
     // 30s to match the sibling data-grid waits: the Add control renders only
     // after the grid + the 93-role permission load complete, so it's strictly
-    // later than "page ready" — a 20s budget was tighter than the grid's own
+    // later than "page ready" -- a 20s budget was tighter than the grid's own
     // 30s and lost the race under parallel-worker load.
     await expect(addButton.or(fabButton)).toBeVisible({ timeout: 30000 });
   });
@@ -333,7 +333,7 @@ test.describe('User Permissions', () => {
   test('should display current user role', async ({ page }) => {
     // Use 'domcontentloaded' instead of the default 'load' so we don't
     // block on plugin bundle fetches and other deferred network activity
-    // — the assertion below only needs the rendered DOM, not a fully
+    // -- the assertion below only needs the rendered DOM, not a fully
     // idle network. This matches the intent expressed by the
     // try/catch'd waitForLoadState('networkidle') below.
     await page.goto('/profile', { waitUntil: 'domcontentloaded' });

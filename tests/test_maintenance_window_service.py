@@ -65,7 +65,7 @@ class TestGatingPolicy:
             db_session,
             [("host", host, None)],
             start_time="10:00",
-            duration_minutes=240,  # 10:00–14:00 contains 12:00
+            duration_minutes=240,  # 10:00-14:00 contains 12:00
         )
         assert mw.is_dispatch_allowed(db_session, host, NOW) is True
 
@@ -75,7 +75,7 @@ class TestGatingPolicy:
             db_session,
             [("host", host, None)],
             start_time="02:00",
-            duration_minutes=60,  # 02:00–03:00 does NOT contain 12:00
+            duration_minutes=60,  # 02:00-03:00 does NOT contain 12:00
         )
         assert mw.is_dispatch_allowed(db_session, host, NOW) is False
 
@@ -105,7 +105,7 @@ class TestGatingPolicy:
             name="blackout",
             kind="blackout",
             start_time="11:30",
-            duration_minutes=60,  # 11:30–12:30 contains 12:00
+            duration_minutes=60,  # 11:30-12:30 contains 12:00
         )
         assert mw.is_dispatch_allowed(db_session, host, NOW) is False
 

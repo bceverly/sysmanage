@@ -200,7 +200,7 @@ class TestRegistrationKeys:
         assert list_resp.status_code == 200
         for entry in list_resp.json():
             if entry["id"] == key_id:
-                # Either the field is absent or it's None — never the secret.
+                # Either the field is absent or it's None -- never the secret.
                 assert entry.get("key") in (
                     None,
                     "",
@@ -244,7 +244,7 @@ class TestRegistrationKeys:
 
     def test_create_with_unknown_site_id_returns_404(self, client, auth_headers):
         """Validation must reject a ``site_id`` that doesn't reference an
-        existing FederationSite — otherwise a typo or stale client
+        existing FederationSite -- otherwise a typo or stale client
         cache would create an unusable key that silently rejects
         every enrolling agent."""
         r = client.post(
@@ -259,7 +259,7 @@ class TestRegistrationKeys:
 
     def test_create_without_site_id_keeps_field_null(self, client, auth_headers):
         """Default OSS / single-server keys have ``site_id=NULL`` so
-        they're not federation-scoped — pre-Phase-12.4 behaviour."""
+        they're not federation-scoped -- pre-Phase-12.4 behavior."""
         r = client.post(
             "/api/v1/registration-keys",
             json={"name": "any-site"},
@@ -279,7 +279,7 @@ class TestRegistrationKeys:
 
         Inserts the FederationSite directly via the SQLAlchemy session
         instead of going through the federation API (which the autouse
-        fixture grants the engine for) — fewer moving parts, just the
+        fixture grants the engine for) -- fewer moving parts, just the
         registration-key path under test."""
         import uuid
 
@@ -307,7 +307,7 @@ class TestRegistrationKeys:
         assert r.json()["site_id"] == str(site_id)
 
     def test_create_with_removed_site_returns_404(self, client, auth_headers, session):
-        """A removed site must not be a valid scope target — its row
+        """A removed site must not be a valid scope target -- its row
         is preserved for audit but can no longer accept enrollments."""
         import uuid
 
@@ -406,7 +406,7 @@ class TestRegistrationKeyEnrollmentFlow:
         # The /host/register endpoint serializes the Host model, but the
         # exact key name varies by SQLAlchemy version (some include
         # ``approval_status``, others wrap fields).  Verify approval via
-        # the list endpoint instead — that's the API surface operators use.
+        # the list endpoint instead -- that's the API surface operators use.
         list_resp = client.get("/api/v1/hosts", headers=auth_headers)
         assert list_resp.status_code == 200
         matching = [
@@ -453,7 +453,7 @@ class TestRegistrationKeyEnrollmentFlow:
 
 
 class TestRegistrationKeyModel:
-    """Unit tests for RegistrationKey.is_usable() — the gate the
+    """Unit tests for RegistrationKey.is_usable() -- the gate the
     registration handler will use to accept/reject incoming agents."""
 
     def test_revoked_key_not_usable(self):
@@ -501,7 +501,7 @@ class TestAccessGroupsFederationGate:
 
     The autouse fixture at the top of this file is skipped for this
     class so the real ``license_service`` / ``module_loader`` calls
-    fire — we patch them explicitly per test for the specific failure
+    fire -- we patch them explicitly per test for the specific failure
     mode we want to assert.
     """
 
@@ -543,7 +543,7 @@ class TestAccessGroupsFederationGate:
 
     def test_groups_create_is_gated(self, client, auth_headers):
         """Write-side endpoints share the router-level dependency, so
-        gating one read endpoint implicitly gates them all — but pin
+        gating one read endpoint implicitly gates them all -- but pin
         a write to defend against future per-handler override drift."""
         with patch("backend.licensing.feature_gate.license_service") as mock_license:
             mock_license.has_module.return_value = False

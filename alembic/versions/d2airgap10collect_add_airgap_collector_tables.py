@@ -10,11 +10,11 @@ Create Date: 2026-05-10 08:00:00.000000
 
 Three new tables backing the Pro+ ``airgap_collector_engine``:
 
-  airgap_collection_run      — one row per collection job
-  airgap_collection_target   — per-distro target list inside a run
-  airgap_media_manifest      — produced ISO + signed manifest envelope
+  airgap_collection_run      -- one row per collection job
+  airgap_collection_target   -- per-distro target list inside a run
+  airgap_media_manifest      -- produced ISO + signed manifest envelope
 
-Idempotent — re-running ``alembic upgrade head`` is a no-op via
+Idempotent -- re-running ``alembic upgrade head`` is a no-op via
 ``inspect().has_table()``.
 
 Lessons from Phase 10.5 SQLite breakage applied:

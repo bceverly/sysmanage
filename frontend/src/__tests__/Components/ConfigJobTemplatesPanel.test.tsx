@@ -5,14 +5,14 @@
 /**
  * Job templates.
  *
- * Two behaviours here are safety rails rather than features.
+ * Two behaviors here are safety rails rather than features.
  *
  * **Dry run is the default.** The first thing anybody should do with a new
  * template is find out what it WOULD change. Defaulting a fleet-wide run to
  * live is the one mistake this page can make that cannot be undone.
  *
  * **The launch dialog names the subject.** Profile, inventory, and whether it
- * is live — "are you sure?" without a subject is a speed bump, not a check.
+ * is live -- "are you sure?" without a subject is a speed bump, not a check.
  */
 
 import {
@@ -184,7 +184,7 @@ describe("ConfigJobTemplatesPanel", () => {
         }),
       ),
     );
-    // No clamp notice when the server honoured the request.
+    // No clamp notice when the server honored the request.
     expect(screen.queryByText(/adjusted to/i)).not.toBeInTheDocument();
   });
 

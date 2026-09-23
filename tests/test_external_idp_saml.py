@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Phase 13.1.E — SAML 2.0 external-IdP endpoints (OSS plumbing).
+"""Phase 13.1.E -- SAML 2.0 external-IdP endpoints (OSS plumbing).
 
 The cryptographic verification lives in the Pro+ ``external_idp_engine``; here we
 test the OSS endpoint layer that drives it: provider-type gating, the SP-metadata
@@ -133,7 +133,7 @@ async def test_saml_start_rejects_non_saml_provider(db):
 @pytest.mark.asyncio
 async def test_saml_acs_issues_jwt_for_linked_user(db):
     # A local account already linked to this IdP identity (set the external
-    # fields by attribute, mirroring the OIDC/JIT code path — User has a custom
+    # fields by attribute, mirroring the OIDC/JIT code path -- User has a custom
     # __init__ that doesn't take them as kwargs).
     linked = models.User(userid="user@acme.com", active=True, is_admin=False)
     linked.external_idp_provider_id = PROVIDER_ID

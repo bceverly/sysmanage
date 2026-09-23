@@ -4,7 +4,7 @@
 
 """Tests for backend/services/invitation_service.py (Phase 13.3).
 
-Uses the root ``db_session`` fixture (full ``Base`` schema — the
+Uses the root ``db_session`` fixture (full ``Base`` schema -- the
 ``tests/api`` curated ``TestBase`` does not include ``user_invitation``).
 """
 

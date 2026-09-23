@@ -83,7 +83,7 @@ class TestIsReadyForRetry:
         assert rp.is_ready_for_retry(None, 0, self._now()) is True
 
     def test_zero_attempts_is_ready_regardless_of_timestamp(self):
-        # A row with attempts=0 has no backoff to honour.
+        # A row with attempts=0 has no backoff to honor.
         assert rp.is_ready_for_retry(self._now(), 0, self._now()) is True
 
     def test_fresh_failure_is_not_ready(self):

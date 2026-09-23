@@ -105,7 +105,7 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
 
     Phase 13.1 #2: when the agent identifies itself with a ``host_id`` that is
     bound to a tenant, the host row and ALL its inventory writes must target
-    that tenant's database — the row was created there by ``/host/register``
+    that tenant's database -- the row was created there by ``/host/register``
     (see ``backend.api.host.register_host``).  We resolve the tenant from the
     agent-supplied ``host_id`` (NOT the inbound ``db``), because that's what
     keeps ``update_or_create_host`` (which looks the host up by FQDN) from
@@ -114,7 +114,7 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
 
     Fully inert when multi-tenancy is off, no ``host_id`` is supplied, or the
     host has no tenant binding: ``tenant_engine_for_host`` returns ``None`` and
-    the passed ``db`` is used unchanged (the single-tenant behaviour)."""
+    the passed ``db`` is used unchanged (the single-tenant behavior)."""
     from backend.persistence.partitions import tenant_engine_for_host
 
     agent_host_id = message_data.get("host_id")
@@ -197,7 +197,7 @@ async def _handle_system_info_impl(db: Session, connection, message_data: dict):
         connection.host_id = host.id
 
         # Drain any inbound messages the agent fired before this SYSTEM_INFO
-        # handshake landed — they were buffered on the connection because
+        # handshake landed -- they were buffered on the connection because
         # ``connection.hostname`` was still None at receive time.  Now that
         # registration is complete, replay them through the normal enqueue
         # path so they're persisted with proper ``_connection_info``.
@@ -329,7 +329,7 @@ def _auto_approve_via_child_token(db, host, hostname, auto_approve_token):
         matching_child.parent_host_id,
     )
 
-    # Phase 10.4.4 — auto-apply default mirror assignments for the freshly
+    # Phase 10.4.4 -- auto-apply default mirror assignments for the freshly
     # auto-approved host.  The HTTP /register and admin-approval paths do this
     # too; this path (auto-approval via child-host token) was missing it, so
     # child hosts created through the manage-children flow weren't picking up
@@ -369,7 +369,7 @@ def _auto_approve_via_child_token(db, host, hostname, auto_approve_token):
 def _build_system_info_update_values(message_data, connection, host, platform):
     """Assemble the ``Host`` update payload from a SYSTEM_INFO message.
 
-    Returns ``(update_values, is_privileged)`` — ``is_privileged`` is surfaced
+    Returns ``(update_values, is_privileged)`` -- ``is_privileged`` is surfaced
     because the approved-host audit log records it.
     """
     update_values = {
@@ -396,7 +396,7 @@ def _build_system_info_update_values(message_data, connection, host, platform):
         update_values["agent_version"] = agent_version
 
     # Phase 19: ingest the agent's capability advertisement.  Without this the
-    # whole feature is inert — the agent sends `agent_capabilities`, the column
+    # whole feature is inert -- the agent sends `agent_capabilities`, the column
     # stays NULL, host_supports() answers "unknown" for every host, and the
     # dispatch gate in queue_operations can never fire.  An unusable report
     # yields {} and leaves any previous advertisement in place.
@@ -568,13 +568,13 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                 # Runs in a worker thread because geolocation_service
                 # is synchronous (memory-mapped MaxMind read + optional
                 # httpx.get to ipapi.co).  We don't block the heartbeat
-                # ack on geo failure — None result leaves the existing
+                # ack on geo failure -- None result leaves the existing
                 # columns alone.
                 reported_public_ip = message_data.get("public_ip")
                 if reported_public_ip:
                     # Phase 12.7 privacy opt-out: a host carrying the
                     # ``no_geo_track`` tag is excluded from any
-                    # geo-resolution call — we don't persist the
+                    # geo-resolution call -- we don't persist the
                     # public IP, don't call MaxMind / ipapi.co, and
                     # don't touch the existing geo columns.  Operator-
                     # facing contract: tag the host, the map forgets
@@ -609,7 +609,7 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                                 Exception
                             ) as geo_err:  # pylint: disable=broad-exception-caught
                                 # Never let a geo lookup failure derail
-                                # the heartbeat write — the public_ip
+                                # the heartbeat write -- the public_ip
                                 # is already persisted above, geo
                                 # columns just stay at their previous
                                 # values until the next heartbeat
@@ -660,7 +660,7 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                 # DUPLICATE pending bootstrap orphan (a fresh id, same fqdn) that
                 # shadows the real, approved tenant host across inbound routing,
                 # config push, etc.  Never create the orphan for a host_id we
-                # know is tenant-bound — the heartbeat is also processed on the
+                # know is tenant-bound -- the heartbeat is also processed on the
                 # tenant DB via the inbound queue.
                 from backend.persistence.partitions import (
                     tenant_engine_for_host,

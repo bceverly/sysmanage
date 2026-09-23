@@ -6,7 +6,7 @@
 
 ``package_profiles`` is an unprefixed = TENANT-partition table (Phase 13.1).
 Its ``created_by`` column carried a hard foreign key to the server-global
-``user`` table — but once a profile lives in a tenant database that FK is
+``user`` table -- but once a profile lives in a tenant database that FK is
 unsatisfiable: the tenant DB's ``user`` table is empty (users are server-global,
 in the bootstrap/registry DB).  Creating a package profile while a tenant is
 active therefore failed with::
@@ -16,9 +16,9 @@ active therefore failed with::
 
 This drops the cross-partition FK, leaving ``created_by`` as a SOFT GUID
 reference (matching ``audit_log.user_id``, which is already a bare GUID).  No
-data is lost and no column is removed — the value still records who created the
+data is lost and no column is removed -- the value still records who created the
 profile; it simply isn't enforced across the partition boundary.  This is the
-"no cross-partition FKs — soft refs" invariant of the multi-tenancy design.
+"no cross-partition FKs -- soft refs" invariant of the multi-tenancy design.
 
 Idempotent and SQLite + PostgreSQL safe.
 
@@ -42,7 +42,7 @@ def upgrade():
     if bind.dialect.name == "postgresql":
         # expand-contract-ok: drops a cross-partition FK only.  The
         # ``created_by`` COLUMN is kept (as a soft GUID reference), so this is a
-        # pure loosening — old code that read created_by still works, and the FK
+        # pure loosening -- old code that read created_by still works, and the FK
         # was already unsatisfiable in tenant databases.  IF EXISTS makes it
         # idempotent (a fresh DB built from the now-FK-less model has nothing to
         # drop).
@@ -50,7 +50,7 @@ def upgrade():
     # SQLite: the FK is stored inline on the table and is unenforced by default
     # (PRAGMA foreign_keys is off), and in the collapsed/dev single-database mode
     # the ``user`` row is co-located so it never bites.  Fresh SQLite databases
-    # are built from the updated (FK-less) model.  Nothing to drop here — no-op.
+    # are built from the updated (FK-less) model.  Nothing to drop here -- no-op.
 
 
 def downgrade():
@@ -59,7 +59,7 @@ def downgrade():
         # Re-add the FK (idempotent).  NOTE: this only succeeds where the
         # referenced ``user`` rows are co-located (the bootstrap/collapsed DB);
         # downgrading a TENANT database would fail because its user table is
-        # empty — the expected consequence of reverting a soft ref back to a
+        # empty -- the expected consequence of reverting a soft ref back to a
         # hard cross-partition FK.
         op.execute(
             "DO $$ BEGIN "

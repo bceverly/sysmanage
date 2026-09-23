@@ -6,7 +6,7 @@
 
 Phase 13.1.B: per-tenant email-domain allowlist.
 
-Adds ``registry_tenant_email_domain`` — the per-tenant allowlist of email
+Adds ``registry_tenant_email_domain`` -- the per-tenant allowlist of email
 domains permitted to join the tenant (enforced at grant/provisioning
 time, design §10).  An empty allowlist for a tenant means "no domain
 restriction".

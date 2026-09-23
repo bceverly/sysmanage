@@ -50,7 +50,7 @@ class LoggingConfig(BaseModel):
     native_identifier: Optional[str] = None
     log_level: Optional[str] = None
     verbosity: Optional[str] = None
-    # Remote-syslog forwarding (Phase 14.5) — only for native_target=syslog_remote.
+    # Remote-syslog forwarding (Phase 14.5) -- only for native_target=syslog_remote.
     syslog_host: Optional[str] = None
     syslog_port: Optional[int] = None
     syslog_facility: Optional[str] = None
@@ -122,7 +122,7 @@ def _validate_syslog_remote(cfg: "LoggingConfig") -> None:
     """License-gate + validate the remote-syslog fields (Phase 14.5).
 
     Local sinks stay OSS; only ``syslog_remote`` requires the Professional
-    ``LOG_ROUTING`` feature.  Rejecting it here is the server-side defence in
+    ``LOG_ROUTING`` feature.  Rejecting it here is the server-side defense in
     depth behind the UI's disabled-with-a-hint option.
     """
     if cfg.native_target != "syslog_remote":

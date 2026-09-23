@@ -16,8 +16,8 @@ Settings → Server Role in the web UI.
 
 Creates a single-row ``server_configuration`` table (sentinel-UUID
 singleton, same pattern as ``mirror_settings``) and seeds the one row
-with ``server_role = 'standard'`` — i.e. "no air gap", the safe default
-that matches the pre-existing behaviour when ``role:`` was omitted from
+with ``server_role = 'standard'`` -- i.e. "no air gap", the safe default
+that matches the pre-existing behavior when ``role:`` was omitted from
 the YAML.  Operators with an existing ``role: collector`` /
 ``role: repository`` in their YAML re-pick it once via the new UI; the
 now-unused YAML key is harmlessly ignored.

@@ -63,7 +63,7 @@ class PackageProfile(Base):
     # bootstrap database).  ``package_profiles`` is an unprefixed = TENANT
     # partition table, so once a profile lives in a tenant database a hard
     # cross-partition FK to ``user`` is unsatisfiable (the tenant DB's user
-    # table is empty).  Phase 13.1 rule: "no cross-partition FKs — soft refs".
+    # table is empty).  Phase 13.1 rule: "no cross-partition FKs -- soft refs".
     # Mirrors ``audit_log.user_id``, which is likewise a bare GUID soft ref.
     created_by = Column(GUID())
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Phase 13.1.H — auth-path config getters (JWT timeouts, cookie domain,
+"""Phase 13.1.H -- auth-path config getters (JWT timeouts, cookie domain,
 recovery-account password).
 
 These accessors moved off direct ``sysmanage.yaml`` reads:
@@ -10,7 +10,7 @@ These accessors moved off direct ``sysmanage.yaml`` reads:
 * ``jwt_auth_timeout`` / ``jwt_refresh_timeout`` / ``cookie_domain`` resolve
   **DB-backed Settings first, YAML fallback** (operational config).
 * ``admin_password`` (the recovery-account secret) resolves **OpenBAO first,
-  YAML fallback** — so the recovery credential need not sit in plaintext YAML.
+  YAML fallback** -- so the recovery credential need not sit in plaintext YAML.
 
 The tests pin both halves of each accessor: the DB/OpenBAO-first path and the
 YAML-fallback path (simulated by having the service delegate to the

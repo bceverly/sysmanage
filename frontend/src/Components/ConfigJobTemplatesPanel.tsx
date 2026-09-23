@@ -356,7 +356,7 @@ const ConfigJobTemplatesPanel: React.FC<Props> = ({
                             }
                             label={t(
                                 'configFleet.checkModeLabel',
-                                'Dry run — report what would change, change nothing',
+                                'Dry run -- report what would change, change nothing',
                             )}
                         />
                     </Stack>

@@ -6,7 +6,7 @@
 
 Phase 12.6: multi-site federation database schema.
 
-Creates 13 tables — 9 coordinator-side, 4 site-side — that together
+Creates 13 tables -- 9 coordinator-side, 4 site-side -- that together
 form the data model for the federation Phase 12 deliverables.  Both
 sets of tables are created on every SysManage instance regardless of
 deployment role; the unused half stays empty (under a KB of dead
@@ -16,7 +16,7 @@ schema).  Role-specific gating happens at the API layer in Phase
 Idempotent: re-runnable on a database that already has any subset of
 the tables / indexes / unique constraints.  Type choices avoid
 PostgreSQL-only types (INET, NUMERIC(p,s)) so the same migration
-runs on SQLite — matching the pattern established by the Phase 12.7
+runs on SQLite -- matching the pattern established by the Phase 12.7
 geo migration.
 
 Revision ID: m1fedschema
@@ -328,7 +328,7 @@ def _coordinator_tables():
                     sa.Boolean(),
                     nullable=False,
                     # ``sa.true()`` emits ``TRUE`` on PostgreSQL and ``1``
-                    # on SQLite — a literal ``"1"`` works on SQLite but
+                    # on SQLite -- a literal ``"1"`` works on SQLite but
                     # raises ``DatatypeMismatch`` on PG where BOOLEAN is
                     # a real type rather than an aliased integer.
                     server_default=sa.true(),
@@ -612,7 +612,7 @@ def upgrade() -> None:
             op.create_table(table_name, *table_def["columns"], *uniques)
             existing_tables.add(table_name)
 
-        # Indexes — checked separately so re-runs after a partial
+        # Indexes -- checked separately so re-runs after a partial
         # CREATE TABLE pick up missing indexes.
         existing_indexes = {idx["name"] for idx in inspector.get_indexes(table_name)}
         for index_name, index_cols in table_def["indexes"]:
@@ -644,7 +644,7 @@ def downgrade() -> None:
         if table_name not in existing_tables:
             continue
 
-        # Drop indexes first — most engines drop them automatically
+        # Drop indexes first -- most engines drop them automatically
         # with the table but being explicit makes the downgrade safe
         # to re-run.
         existing_indexes = {idx["name"] for idx in inspector.get_indexes(table_name)}

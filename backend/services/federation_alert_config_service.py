@@ -101,7 +101,7 @@ _FIELDS = (
 def update_config(session: Session, overrides: Dict[str, Any]) -> FederationAlertConfig:
     """Apply operator overrides to the singleton.
 
-    Only the four known threshold fields are honoured; unknown keys are
+    Only the four known threshold fields are honored; unknown keys are
     ignored.  A field set to ``None`` clears that override (reverts to the
     built-in default).  Raises ``ValueError`` on an out-of-range value.
     Caller commits.

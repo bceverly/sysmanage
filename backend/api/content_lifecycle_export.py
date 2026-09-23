@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Content Lifecycle Management — air-gap media export API (Phase 16, Slice 7a).
+Content Lifecycle Management -- air-gap media export API (Phase 16, Slice 7a).
 
 Export a published content-view version to a signed, immutable ISO by reusing
 the air-gap COLLECTOR engine's ISO builders (``build_iso_plan`` + the collector's

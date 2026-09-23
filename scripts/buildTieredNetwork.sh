@@ -3,30 +3,30 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-# buildTieredNetwork.sh — Provision a 5-VM federated sysmanage test fabric
+# buildTieredNetwork.sh -- Provision a 5-VM federated sysmanage test fabric
 # on libvirt/KVM.
 #
-# Topology (all five VMs also get a NAT NIC for internet access — no
+# Topology (all five VMs also get a NAT NIC for internet access -- no
 # air gap here):
 #
-#   sysmanage-enterprise        — coordinator / "tier 0" server.  Has one
+#   sysmanage-enterprise        -- coordinator / "tier 0" server.  Has one
 #     vCPU/RAM/disk: 2/2GiB/16GiB    interface on every private tier so it
 #                                    can reach every site directly.
 #     NICs: NAT + tier0 (10.70.0.1)
 #                + tier1 (10.70.1.254)
 #                + tier2 (10.70.2.254)
 #
-#   sysmanage-site-1            — subordinate sysmanage server for site 1.
+#   sysmanage-site-1            -- subordinate sysmanage server for site 1.
 #     NICs: NAT + tier1 (10.70.1.1)
-#   sysmanage-site-1-agent      — agent on the site-1 fabric.
+#   sysmanage-site-1-agent      -- agent on the site-1 fabric.
 #     NICs: NAT + tier1 (10.70.1.2)
 #
-#   sysmanage-site-2            — subordinate sysmanage server for site 2.
+#   sysmanage-site-2            -- subordinate sysmanage server for site 2.
 #     NICs: NAT + tier2 (10.70.2.1)
-#   sysmanage-site-2-agent      — agent on the site-2 fabric.
+#   sysmanage-site-2-agent      -- agent on the site-2 fabric.
 #     NICs: NAT + tier2 (10.70.2.2)
 #
-# The tier1 / tier2 libvirt networks are isolated — site-1 cannot see
+# The tier1 / tier2 libvirt networks are isolated -- site-1 cannot see
 # site-2 (and vice versa) over those segments.  Both can still reach the
 # internet via their NAT NIC, and the enterprise VM can reach every
 # tier because it is multi-homed.
@@ -58,14 +58,14 @@ OS_VARIANT="${OS_VARIANT:-ubuntu24.04}"
 USERNAME="ubuntu"
 PASSWORD='Ubuntu123$'
 
-# Isolated tier networks.  No <forward>, no host IP — pure VM-to-VM
+# Isolated tier networks.  No <forward>, no host IP -- pure VM-to-VM
 # segments.  Inter-tier reachability is provided by enterprise being
 # multi-homed across all three.
 TIER0_NET="sysmanage-tier0"; TIER0_BRIDGE="virbr70"
 TIER1_NET="sysmanage-tier1"; TIER1_BRIDGE="virbr71"
 TIER2_NET="sysmanage-tier2"; TIER2_BRIDGE="virbr72"
 
-# VM specs — kept as small as Ubuntu 26.04 server will actually run.
+# VM specs -- kept as small as Ubuntu 26.04 server will actually run.
 # Enterprise + subordinate servers need to host postgres + sysmanage,
 # so 2 vCPU / 2 GiB.  Agents are lighter (1 vCPU / 1 GiB).
 ENTERPRISE_NAME="sysmanage-enterprise"
@@ -395,12 +395,12 @@ ensure_vm() {
     if vm_running "$name"; then
       log "$name: already running"
     else
-      log "$name: defined but stopped — starting"
+      log "$name: defined but stopped -- starting"
       virsh_ start "$name" >/dev/null
       CREATED_COUNT=$((CREATED_COUNT + 1))
     fi
   else
-    log "$name: not defined — creating"
+    log "$name: not defined -- creating"
     "$create_fn"
     CREATED_COUNT=$((CREATED_COUNT + 1))
   fi
@@ -429,7 +429,7 @@ print_vm_summary() {
   if [[ -n "$nat" ]]; then
     echo "  NAT     : $nat"
   else
-    echo "  NAT     : (pending — re-run with the status subcommand once cloud-init finishes)"
+    echo "  NAT     : (pending -- re-run with the status subcommand once cloud-init finishes)"
   fi
   case "$role" in
     server)
@@ -490,10 +490,10 @@ cmd_start() {
   echo "  user     = ${USERNAME}"
   echo "  password = ${PASSWORD}"
   echo
-  echo "sysmanage UI login — when you configure /etc/sysmanage.yaml on the server(s):"
+  echo "sysmanage UI login -- when you configure /etc/sysmanage.yaml on the server(s):"
   echo "  - security.admin_userid MUST be a valid EMAIL (login validates EmailStr;"
   echo "    a bare 'admin' -> HTTP 422, not 401). e.g. admin@example.com / admin"
-  echo "  - email.enabled: true  (just the flag — no SMTP server/password needed)."
+  echo "  - email.enabled: true  (just the flag -- no SMTP server/password needed)."
   echo
   echo "Re-check status :  $0 status"
   echo "Tear everything :  $0 stop"
@@ -513,7 +513,7 @@ cmd_stop() {
         || virsh_ undefine "$name" --remove-all-storage >/dev/null 2>&1 \
         || true
     else
-      log "$name: not defined — skipping"
+      log "$name: not defined -- skipping"
     fi
   done
 
@@ -590,7 +590,7 @@ usage() {
   cat <<EOF
 Usage: $0 {start|stop|status}
 
-  start   Create and start the 5-VM tiered fabric (idempotent — already-
+  start   Create and start the 5-VM tiered fabric (idempotent -- already-
           running VMs are reported, not re-created).
   stop    Destroy all five VMs, delete their disks and seed ISOs, and
           tear down the tier0/tier1/tier2 isolated networks.  The Ubuntu

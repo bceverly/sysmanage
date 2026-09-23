@@ -6,8 +6,8 @@
 Result handlers for provisioning_engine agent plans (Phase 18.2 S1).
 
 The bare-metal readiness preflight runs ON a managed host (the designated
-provisioning server), so unlike compute provisioning — which actuates a
-provider API from the control plane — it goes through the normal
+provisioning server), so unlike compute provisioning -- which actuates a
+provider API from the control plane -- it goes through the normal
 ``apply_deployment_plan`` agent path.  The engine's route stamps an in-flight
 message id; when the agent's command_result lands,
 ``proplus_dispatch.route_proplus_command_result`` calls in here and we upsert
@@ -165,7 +165,7 @@ def _apply_provisioning_op_result(
 ) -> None:
     """Handle completion of a provisioning_engine readiness plan.
 
-    ``primary_id`` is the bare action — the row is keyed by host alone, so
+    ``primary_id`` is the bare action -- the row is keyed by host alone, so
     unlike repo-mirror ops there is no second id to encode.
     """
     handler = _ACTION_HANDLERS.get(primary_id)

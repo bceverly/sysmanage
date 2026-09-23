@@ -83,7 +83,7 @@ Babel==2.18.0
 polib>=1.2.0  # PO file parsing for backend i18n validation
 reportlab==4.4.4
 
-# semgrep ships a compiled OCaml core with Linux/macOS wheels only — there is no
+# semgrep ships a compiled OCaml core with Linux/macOS wheels only -- there is no
 
 # OpenBSD/NetBSD/FreeBSD/Windows build, and pip would otherwise backtrack through
 
@@ -120,7 +120,7 @@ opentelemetry-instrumentation-logging>=0.48b0
 
 # built from source by scripts/build-grpcio-win-arm64.ps1 (run from `make install-dev`
 
-# before this install) — the same source-build approach the BSD platforms use.
+# before this install) -- the same source-build approach the BSD platforms use.
 
 # opentelemetry-exporter-otlp is EXCLUDED on Windows ARM64.  Its only reason to
 

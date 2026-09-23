@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-GPG key management models (GPG Key Management — Slice 1).
+GPG key management models (GPG Key Management -- Slice 1).
 
 Named GPG keys whose armored material lives in the OpenBAO vault (NEVER in the
 database or YAML).  Each ``gpg_key`` row holds only metadata plus an
@@ -57,7 +57,7 @@ def _utcnow():
 
 
 class GpgKey(Base):
-    """A named GPG key.  Metadata only — armored material lives in OpenBAO."""
+    """A named GPG key.  Metadata only -- armored material lives in OpenBAO."""
 
     __tablename__ = "gpg_key"
 

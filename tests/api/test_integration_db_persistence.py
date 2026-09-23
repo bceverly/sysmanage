@@ -8,7 +8,7 @@ End-to-end persistence-layer integration tests.
 Exercises the SQLAlchemy session + model layer the rest of the API
 sits on top of.  These run against the in-memory SQLite the test
 fixtures spin up locally and against real Postgres in the CI
-`integration-server` job — same code paths, different driver, so
+`integration-server` job -- same code paths, different driver, so
 this catches "works on SQLite, breaks on Postgres" regressions.
 """
 
@@ -93,7 +93,7 @@ def test_user_last_access_update_persists(session):
 
 @pytest.mark.integration
 def test_inactive_user_persists_active_false(session):
-    """active=False must round-trip correctly (auth flow depends on this — see test_security_marker)."""
+    """active=False must round-trip correctly (auth flow depends on this -- see test_security_marker)."""
     u = models.User(
         userid="inactive@example.com",
         hashed_password=argon2_hasher.hash("a"),

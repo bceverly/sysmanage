@@ -26,7 +26,7 @@ test.describe('Performance - Page Load', () => {
     // parallel-worker contention, where on-demand module compilation of the
     // first-hit route can spike to 20s+ even though warm/unloaded loads are
     // 2-9s.  The budget guards against a catastrophic hang/redirect-loop, not
-    // production latency (real perf is measured elsewhere) — keeping it at 15s
+    // production latency (real perf is measured elsewhere) -- keeping it at 15s
     // just produced load-induced flakes.
     expect(loadTime).toBeLessThan(30000);
 
@@ -53,7 +53,7 @@ test.describe('Performance - Page Load', () => {
 
     // Measure time-to-domcontentloaded (the route mounted), NOT time-to-
     // networkidle.  This app holds a persistent websocket + Pro+ dashboard-card
-    // polling, so networkidle never reliably settles — measuring against it
+    // polling, so networkidle never reliably settles -- measuring against it
     // made loadTime track the settle time (40s+ in loaded runs, right up against
     // the 60s budget) and flake.  DCL is the meaningful "page loaded" signal.
     await page.goto('/', { waitUntil: 'domcontentloaded' });
@@ -75,7 +75,7 @@ test.describe('Performance - Page Load', () => {
     const startTime = Date.now();
 
     // Measure time-to-domcontentloaded (route mounted), not time-to-networkidle
-    // — networkidle never reliably settles here (persistent websocket), so
+    // -- networkidle never reliably settles here (persistent websocket), so
     // measuring against it is flaky.  The data-grid render is verified
     // separately below with its own explicit visibility wait.
     await page.goto('/hosts', { waitUntil: 'domcontentloaded' });
@@ -119,7 +119,7 @@ test.describe('Performance - Network', () => {
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     // Bounded settle (not 60s): this app holds a persistent websocket + Pro+
-    // polling, so networkidle never reliably settles — a 60s wait here simply
+    // polling, so networkidle never reliably settles -- a 60s wait here simply
     // burns the whole test budget and times out.  The request listener has
     // already captured the initial-load burst by now; a short window is all
     // that's needed to catch a request storm (the actual point of the cap).
@@ -134,12 +134,12 @@ test.describe('Performance - Network', () => {
     // i18n + axios probes contribute a few more, and Vite dev mode
     // streams each module file individually so the count is naturally
     // chunk-heavy.  Bump the cap whenever a new plugin lands rather
-    // than over-tightening — the budget exists to catch accidental
+    // than over-tightening -- the budget exists to catch accidental
     // request storms (polling loops, redirect cycles), not to gate
     // legitimate growth.  The 1000-line-per-file refactor decomposed the
     // frontend into many smaller modules (e.g. HostDetail -> ~35 files);
     // Vite dev mode fetches each module as its own request, so the
-    // initial-load count grew — that's legitimate, so the cap moves with it.
+    // initial-load count grew -- that's legitimate, so the cap moves with it.
     expect(requests.length).toBeLessThan(750);
   });
 
@@ -169,7 +169,7 @@ test.describe('Performance - Network', () => {
 
     // No 5xx server errors should occur.  Include the URLs in the
     // assertion message so the workflow log captures *which* endpoint
-    // failed — Playwright artifacts (trace/screenshot/error-context.md)
+    // failed -- Playwright artifacts (trace/screenshot/error-context.md)
     // capture this too but only when downloaded; the log line is
     // visible in the run output without artifact download.
     if (failedRequests.length > 0) {
@@ -192,7 +192,7 @@ test.describe('Performance - Rendering', () => {
       // visibility wait below is the real synchronization.
     }
 
-    // If we landed back on /login, auth setup broke — fail loudly.
+    // If we landed back on /login, auth setup broke -- fail loudly.
     expect(page.url()).not.toContain('/login');
 
     // Grid should be visible (may already be rendered)
@@ -248,7 +248,7 @@ test.describe('Performance - Memory', () => {
   test('should not have memory leaks on navigation', async ({ page }) => {
     // Four navigations across the heaviest SPA routes is inherently slow
     // (~10s each even with domcontentloaded).  Mark it slow so the full
-    // 4-worker suite, under load, has headroom over the default 60s budget —
+    // 4-worker suite, under load, has headroom over the default 60s budget --
     // this test measures heap growth, not load speed, so the extra time is
     // free of any masking risk.
     test.slow();
@@ -259,7 +259,7 @@ test.describe('Performance - Memory', () => {
     for (const path of pagePaths) {
       // waitUntil:'domcontentloaded' (not the default 'load'): these heavy
       // SPA pages keep a websocket + data fetches in flight, so the window
-      // 'load' event can take 10-15s each — four back-to-back navigations
+      // 'load' event can take 10-15s each -- four back-to-back navigations
       // then blow the 60s test budget before we ever sample the heap.  This
       // test only needs the route mounted, not every subresource loaded.
       await page.goto(path, { waitUntil: 'domcontentloaded' });

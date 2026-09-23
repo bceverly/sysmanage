@@ -33,7 +33,7 @@ import {
 } from '../../Services/repositoryMirroring';
 
 // ---------------------------------------------------------------------
-// Tracked-snaps expand row (Phase 17.1 — snap store proxy)
+// Tracked-snaps expand row (Phase 17.1 -- snap store proxy)
 //
 // One inline collapsible per mirror listing the snaps tracked for capture
 // (name + channel + capture status), with a small "track snap" form and an

@@ -8,7 +8,7 @@ Adds a JSON ``settings`` key/value bag to the ``server_configuration``
 singleton to hold server-scoped runtime options migrated out of
 ``sysmanage.yaml`` (jwt timeouts, message-queue tunables, monitoring,
 etc.).  The config layer reads this first and falls back to YAML with a
-deprecation warning — see docs/planning/config-classification.md and
+deprecation warning -- see docs/planning/config-classification.md and
 backend/config/settings_service.py.
 
 Additive, idempotent, identical on SQLite + PostgreSQL.

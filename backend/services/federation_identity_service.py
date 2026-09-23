@@ -2,17 +2,17 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Federation identity-key management (Phase 12 — Server Role UI).
+"""Federation identity-key management (Phase 12 -- Server Role UI).
 
 Zero-touch ed25519 identity keypair for THIS server's federation trust
-anchor — the public key an operator hands to the peer (coordinator ⇄ site)
+anchor -- the public key an operator hands to the peer (coordinator ⇄ site)
 so each side can pin the other's identity, mirroring the air-gap
 collector/repository key exchange.
 
   * ``ensure_federation_identity_keypair()`` generates the private+public
     PEM pair at the configured path the first time it's needed (server
     startup / when a federation role is chosen).  NEVER overwrites an
-    existing private key — rotation is a deliberate operator action.
+    existing private key -- rotation is a deliberate operator action.
   * ``get_federation_identity_public_key_pem()`` / ``..._fingerprint()``
     read the key + its fingerprint for the operator to copy.
   * ``import_federation_peer`` / ``list`` / ``remove`` manage the trusted
@@ -46,7 +46,7 @@ from cryptography.x509.oid import NameOID
 from backend.config import config as config_module
 from backend.utils.verbosity_logger import sanitize_log
 
-# Federation TLS cert validity.  Long-lived (10y) — it's a pinned, self-
+# Federation TLS cert validity.  Long-lived (10y) -- it's a pinned, self-
 # signed identity cert, not a CA-chained web cert, so rotation is a
 # deliberate operator action rather than a calendar event.
 _TLS_CERT_DAYS = 3650
@@ -141,7 +141,7 @@ def get_federation_identity_public_key_pem() -> Optional[str]:
 #
 # The enrollment handshake exchanges X.509 certs so each side can pin the
 # other for mutual TLS.  We auto-mint a self-signed cert so the operator
-# never has to generate or paste one — enrollment is just URL + token.
+# never has to generate or paste one -- enrollment is just URL + token.
 
 
 def _tls_key_path(cert_path: str) -> str:
@@ -152,7 +152,7 @@ def _tls_key_path(cert_path: str) -> str:
 def ensure_federation_tls_cert() -> Tuple[str, str]:
     """Generate this server's self-signed federation TLS cert if absent.
 
-    Returns ``(cert_path, key_path)``.  Idempotent and NEVER overwrites — the
+    Returns ``(cert_path, key_path)``.  Idempotent and NEVER overwrites -- the
     cert is pinned by the peer at enrollment time, so regenerating it would
     silently break an existing federation relationship.  0644 cert / 0600 key.
     """
@@ -215,7 +215,7 @@ def get_federation_tls_cert_pem() -> Optional[str]:
 # Each federation wire request is signed with the sender's federation TLS
 # private key (RSA / PKCS1v15-SHA256 over the exact request bytes); the
 # receiver verifies against the cert it pinned for that peer at enrollment.
-# This is what turns the pinned certs from "stored" into "enforced" — a
+# This is what turns the pinned certs from "stored" into "enforced" -- a
 # leaked bearer alone can't impersonate a peer without its private key.  The
 # receiver only *enforces* under HTTPS (see ``config.federation_enforce_cert_pinning``);
 # on plain-HTTP dev deployments the signature is attached but ignored.
@@ -226,7 +226,7 @@ def sign_federation_request(body: bytes) -> Optional[str]:
 
     Returns a base64 signature, or ``None`` on any failure so the caller can
     fail open (send unsigned) rather than stall the federation on a keygen
-    hiccup — the receiver decides whether to require it.
+    hiccup -- the receiver decides whether to require it.
     """
     try:
         ensure_federation_tls_cert()
@@ -250,7 +250,7 @@ def verify_federation_request(
     """Verify a base64 signature over ``body`` against a peer's pinned cert.
 
     Returns ``False`` (never raises) on a bad signature, malformed cert, or
-    any decode error — the caller turns that into a 401.
+    any decode error -- the caller turns that into a 401.
     """
     if not signature_b64 or not peer_cert_pem:
         return False
@@ -262,7 +262,7 @@ def verify_federation_request(
         )
         cert = x509.load_pem_x509_certificate(raw_cert)
         # Verifies the PKCS#1 v1.5 signature made by ``sign_federation_request``
-        # against the pinned peer cert — see that function re: PKCS1v15 vs PSS.
+        # against the pinned peer cert -- see that function re: PKCS1v15 vs PSS.
         # nosemgrep: python.cryptography.cryptography-rsa-pkcs1-signature.cryptography-rsa-pkcs1-signature
         cert.public_key().verify(
             base64.b64decode(signature_b64),
@@ -283,7 +283,7 @@ def verify_federation_request(
 
 
 def _canonical_public_pem(pem: str | bytes) -> bytes:
-    """Re-serialise an Ed25519 public PEM to canonical bytes (so pasted
+    """Re-serialize an Ed25519 public PEM to canonical bytes (so pasted
     whitespace doesn't change the fingerprint).  Raises ``ValueError`` if
     it isn't a valid Ed25519 public key."""
     raw = pem.encode("utf-8") if isinstance(pem, str) else pem
@@ -322,7 +322,7 @@ def _keyring_key_path(keyring_dir: str, name: str) -> str:
     keyring directory.
 
     ``_safe_key_name`` already strips path separators, but this adds an explicit
-    realpath-containment check on top — defence in depth, and an unambiguous
+    realpath-containment check on top -- defense in depth, and an unambiguous
     guard against path traversal from the caller-supplied ``name``.  Raises
     ``ValueError`` if the resolved path's parent isn't the keyring dir.
     """
@@ -369,7 +369,7 @@ def import_federation_peer(name: str, public_key_pem: str) -> dict:
     keyring_dir = config_module.get_federation_peer_public_key_dir()
     os.makedirs(keyring_dir, exist_ok=True)
     path = _keyring_key_path(keyring_dir, name)  # contained + traversal-safe
-    # Slug is taken from the validated, contained filename — provably free of
+    # Slug is taken from the validated, contained filename -- provably free of
     # path separators / control characters, so it's safe to log + return.
     slug = os.path.splitext(os.path.basename(path))[0]
     _atomic_write(path, canonical, 0o644)
@@ -398,23 +398,23 @@ def remove_federation_peer(name: str) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Ed25519 identity signing + enrollment proof (Phase 12 — strict out-of-band
+# Ed25519 identity signing + enrollment proof (Phase 12 -- strict out-of-band
 # trust).
 #
 # The pinned TLS cert closes the channel AFTER enrollment, but the cert itself
-# is fetched over the (possibly hostile) network DURING enrollment — classic
+# is fetched over the (possibly hostile) network DURING enrollment -- classic
 # trust-on-first-use.  The enrollment token can't fix that: it's a bearer
 # secret that transits the same channel, so an active MITM relays it and pins
 # itself on both sides.
 #
 # The ed25519 identity key is the fix BECAUSE its private half never transits
 # the wire.  The operator exchanges the *public* identity key OUT OF BAND
-# (it's public — phone, wiki, config-mgmt — secrecy doesn't matter), the peer
+# (it's public -- phone, wiki, config-mgmt -- secrecy doesn't matter), the peer
 # signs the exact cert it's offering, and the receiver verifies that signature
 # against the pre-loaded public key before pinning.  A swapped cert fails; a
 # MITM without the private key can't forge the proof.  Bonus: because the proof
 # is over the cert *fingerprint*, rotating the TLS cert is just a re-sign by the
-# same identity — no re-exchange.
+# same identity -- no re-exchange.
 # ---------------------------------------------------------------------------
 
 ENROLLMENT_PROOF_CONTEXT = "sysmanage-federation-enroll-v1"
@@ -432,7 +432,7 @@ def _load_identity_private_key() -> Ed25519PrivateKey:
 
 
 def tls_cert_fingerprint(cert_pem: str | bytes) -> str:
-    """SHA-256 hex of a PEM X.509 cert's DER bytes — the standard cert
+    """SHA-256 hex of a PEM X.509 cert's DER bytes -- the standard cert
     fingerprint operators compare.  Raises ``ValueError`` on a non-cert."""
     raw = cert_pem.encode("utf-8") if isinstance(cert_pem, str) else cert_pem
     cert = x509.load_pem_x509_certificate(raw)
@@ -445,7 +445,7 @@ def sign_with_identity_key(message: bytes) -> Optional[str]:
     """Ed25519-sign ``message`` with this server's identity private key.
 
     Returns base64, or ``None`` on any failure so a keygen/IO hiccup can't
-    wedge the caller — the *receiver* decides whether a missing proof is fatal
+    wedge the caller -- the *receiver* decides whether a missing proof is fatal
     (in strict mode it is)."""
     try:
         key = _load_identity_private_key()
@@ -462,7 +462,7 @@ def verify_with_peer_identity_key(
     out-of-band-exchanged identity public key.
 
     Returns ``False`` (never raises) on a bad signature, non-Ed25519 key,
-    malformed PEM, or decode error — the caller turns that into a 401/400."""
+    malformed PEM, or decode error -- the caller turns that into a 401/400."""
     if not signature_b64 or not peer_public_pem:
         return False
     try:

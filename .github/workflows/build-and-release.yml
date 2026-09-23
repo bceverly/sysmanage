@@ -7,7 +7,7 @@ on:
       - 'v*.*.*'
       - 'v*.*.*.*'
 
-  # Manual dispatch — used to flip the Phase 11.8 upstream-publish jobs
+  # Manual dispatch -- used to flip the Phase 11.8 upstream-publish jobs
   # (winget-pkgs / homebrew-tap / AUR) from dry_run to publish without
   # re-cutting a tag.  The BSD ports trees always render artifacts on
   # release; ``bsd_ports_artifacts=no`` skips that for ad-hoc test
@@ -63,8 +63,8 @@ permissions:
   contents: write  # Needed for creating releases and pushing to repos
 
 jobs:
-  # Hard release gate: every locale must be 100% translated.  Offline — no
-  # translation service, no network — so it runs fine in CI where the GPU box
+  # Hard release gate: every locale must be 100% translated.  Offline -- no
+  # translation service, no network -- so it runs fine in CI where the GPU box
   # is unavailable.  Blocks the ENTIRE release on a single untranslated string.
   i18n-gate:
     name: i18n Completeness Gate
@@ -94,7 +94,7 @@ jobs:
       # NOTE: the release runs on a TAG push, where only ``ci.yml`` runs (the
       # exhaustive Python matrix + a single Frontend Tests job).  ``multi-os-ci.yml``
       # is branch/PR-only, so its ``Backend Tests (Linux + PostgreSQL)`` and
-      # per-OS ``Frontend Tests (<os>-latest)`` checks NEVER exist on a tag —
+      # per-OS ``Frontend Tests (<os>-latest)`` checks NEVER exist on a tag --
       # waiting on them made wait-on-check fail with "check was never run against
       # this ref".  So the check-names below must match ci.yml's job names.  The
       # Python matrix runs against a Postgres service, so Linux+Postgres coverage
@@ -284,7 +284,7 @@ jobs:
           path: |
             sbom/*.json
 
-  # OpenBSD Port Tarball Build — just the port RECIPE (Makefile, files, pkg,
+  # OpenBSD Port Tarball Build -- just the port RECIPE (Makefile, files, pkg,
   # build-libs.sh, and the CI-generated distinfo).  The port builds fully
   # offline from the libs distfile, so no frontend/SBOM build is needed here;
   # we only need the distinfo produced by build-openbsd-libs so end users get a
@@ -339,7 +339,7 @@ jobs:
             installer/dist/sysmanage-openbsd-port-*.tar.gz
             installer/dist/sysmanage-openbsd-port-*.tar.gz.sha256
 
-  # OpenBSD "libs" distfile — the single, version-independent distfile the port
+  # OpenBSD "libs" distfile -- the single, version-independent distfile the port
   # fetches (backend source + built web UI + the pure-Python dependency bundle),
   # plus its distinfo.  The frontend is built on Linux; the pure-Python bundle
   # is assembled in an OpenBSD VM by installer/openbsd/build-libs.sh (so it
@@ -794,7 +794,7 @@ jobs:
   # macros forced on so the dependency branch resolves to the python3.12
   # AppStream packages.  Rocky/RHEL 9's DEFAULT python3 is 3.9, so the
   # generic CentOS RPM's "Requires: python3 >= 3.12" is unsatisfiable
-  # there — and the same RPM can't also serve Fedora (which wants
+  # there -- and the same RPM can't also serve Fedora (which wants
   # python3-pip, not EL9's python3.12-pip).  Publishing a distinct
   # sysmanage-<ver>-1.el9.x86_64.rpm lets the air-gap builder select the
   # right RPM per distro.
@@ -881,7 +881,7 @@ jobs:
           # rpmbuild reads ~/.rpmmacros automatically.  Defining el9 + dist
           # here makes the shared spec take its EL9 branch (python3.12 /
           # python3.12-pip, present in Rocky/RHEL 9 AppStream) and tags the
-          # RPM filename with .el9 — no Makefile change needed.
+          # RPM filename with .el9 -- no Makefile change needed.
           printf '%%el9 1\n%%dist .el9\n' > "$HOME/.rpmmacros"
           cat "$HOME/.rpmmacros"
 
@@ -999,7 +999,7 @@ jobs:
           make installer-rpm-opensuse
           # The openSUSE spec emits the same sysmanage-<ver>-1.x86_64.rpm
           # filename as the CentOS/RHEL/Fedora spec, so the two collide as
-          # GitHub release assets — the survivor (openSUSE, which Requires:
+          # GitHub release assets -- the survivor (openSUSE, which Requires:
           # python311-pip) then gets pulled by the Fedora/RHEL air-gap
           # builders and fails with "nothing provides python311-pip".
           # Tag the openSUSE RPM with a distinct, discoverable name so the
@@ -1782,7 +1782,7 @@ jobs:
           sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20 && sudo apt-get install -y dpkg-dev
 
           # The apt index must cover EVERY version in the pool, so pull the
-          # current server/deb subtree from R2 first (small — just the pool).
+          # current server/deb subtree from R2 first (small -- just the pool).
           # Direct-download artifacts (mac/win/bsd/alpine/rpm) need no pull: we
           # only add a new version dir.
           mkdir -p repo/server/deb
@@ -1804,7 +1804,7 @@ jobs:
           # Pre-built binary packages (.tgz) per supported OpenBSD release.
           cp $RF/sysmanage-*-openbsd*.tgz "repo/server/openbsd/packages/$VERSION/" 2>/dev/null || true
           cp $RF/sysmanage-*-openbsd*.tgz.sha256 "repo/server/openbsd/packages/$VERSION/" 2>/dev/null || true
-          # The offline port's "libs" distfile — served flat at
+          # The offline port's "libs" distfile -- served flat at
           # server/openbsd/<file> to match the port's MASTER_SITES; the version
           # is in the filename (sysmanage-<ver>-openbsd.tar.gz).
           cp $RF/sysmanage-*-openbsd.tar.gz "repo/server/openbsd/" 2>/dev/null || true
@@ -1885,10 +1885,10 @@ jobs:
           fi
           cd "${{ github.workspace }}"
 
-          # Publish to R2 (additive — never deletes; retention is `make prune-repo`).
+          # Publish to R2 (additive -- never deletes; retention is `make prune-repo`).
           #
-          # NOT --size-only.  An apt `Release` is fixed-width — same headers,
-          # fixed-length hex digests — so a regenerated one is almost always
+          # NOT --size-only.  An apt `Release` is fixed-width -- same headers,
+          # fixed-length hex digests -- so a regenerated one is almost always
           # EXACTLY the same size as the one it replaces (2000 bytes today).
           # `aws s3 sync --size-only` compares size alone, decides it is
           # unchanged, and never uploads it, leaving a STALE Release describing
@@ -2028,7 +2028,7 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.version }}
           # Bind github context to env vars so the run: script never
-          # interpolates ${{ ... }} directly into the shell — an
+          # interpolates ${{ ... }} directly into the shell -- an
           # attacker who could push a malicious tag name could
           # otherwise inject commands.  See semgrep
           # ``run-shell-injection``.
@@ -2508,7 +2508,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     strategy:
       # Don't let one series' upload hiccup (e.g. a transient Launchpad SSH auth
-      # timeout, or a not-yet-open series) cancel the others — each PPA target
+      # timeout, or a not-yet-open series) cancel the others -- each PPA target
       # is independent, so a failure on resolute shouldn't abort noble/jammy.
       fail-fast: false
       matrix:
@@ -2632,7 +2632,7 @@ jobs:
 
           # dput-ng's sftp uploader uses paramiko, which does NOT parse
           # ~/.ssh/config and only auto-discovers keys at the default names.
-          # Load the key into an ssh-agent (paramiko honours allow_agent by
+          # Load the key into an ssh-agent (paramiko honors allow_agent by
           # default) and persist the agent socket into the job env so the
           # later dput step in this same runner can reach it.
           eval "$(ssh-agent -s)"
@@ -2740,10 +2740,10 @@ jobs:
 
           # Upload to Launchpad PPA over SFTP (the launchpad dput profile
           # uses method=sftp; see the SSH setup step above for why FTP was
-          # abandoned — it silently dropped the data channel from GitHub
+          # abandoned -- it silently dropped the data channel from GitHub
           # runners and Launchpad never received the files, Bug #1836059).
           # An sftp session can still hiccup mid-transfer (and Launchpad's SSH
-          # auth occasionally times out — paramiko then drops to an interactive
+          # auth occasionally times out -- paramiko then drops to an interactive
           # password prompt that can't be answered in CI), so retry up to 5×
           # with linear backoff before failing the workflow.  ``-f`` (force)
           # makes a retry re-send even if dput's local .upload log marks a prior
@@ -2844,7 +2844,7 @@ jobs:
         run: |
           echo "Checking out OBS package home:${OBS_USERNAME}/sysmanage"
           # OBS API can have transient connectivity blips, and a stale local
-          # cache can also break the checkout — start each retry from a clean
+          # cache can also break the checkout -- start each retry from a clean
           # directory and back off before failing the workflow.
           n=0; ok=0
           until [ "$n" -ge 5 ]; do
@@ -2939,14 +2939,14 @@ jobs:
           cp $WORKSPACE/installer/opensuse/*.example /tmp/$TAR_NAME/installer/opensuse/ || true
           cp $WORKSPACE/installer/opensuse/sysmanage-nginx.conf /tmp/$TAR_NAME/installer/opensuse/ || true
 
-          # Air-gap bundle dispatcher template — referenced by the spec's
+          # Air-gap bundle dispatcher template -- referenced by the spec's
           # %install (../installer/airgap-bundle/install.sh).  Hard copy (no
           # "|| true"): a missing file must fail the build here, not silently
           # produce a tarball that dies in %install on the OBS builder.
           mkdir -p /tmp/$TAR_NAME/installer/airgap-bundle
           cp $WORKSPACE/installer/airgap-bundle/install.sh /tmp/$TAR_NAME/installer/airgap-bundle/
 
-          # OpenBAO secrets-broker config + init unit — referenced by the
+          # OpenBAO secrets-broker config + init unit -- referenced by the
           # spec's %install; without them %install dies on the builder.
           mkdir -p /tmp/$TAR_NAME/installer/openbao
           cp $WORKSPACE/installer/openbao/openbao.hcl /tmp/$TAR_NAME/installer/openbao/
@@ -2969,7 +2969,7 @@ jobs:
 
           # Pass 1: Download Python 3.11 wheels for manylinux (x86_64 + aarch64).
           # We list the full ladder of manylinux tags wheel publishers may
-          # use — packages built more recently (e.g. ujson >=5.12) tag with
+          # use -- packages built more recently (e.g. ujson >=5.12) tag with
           # manylinux_2_24/_2_28 instead of the older _2_17/2014, so missing
           # those tags here causes a "No matching distribution" failure
           # against an otherwise-compatible wheel.
@@ -3106,7 +3106,7 @@ jobs:
           [ "$ok" = 1 ] || { echo "::error::apt-get install (copr build tools) failed after 3 attempts"; exit 1; }
 
           # Install copr-cli via pip (not available in Ubuntu repos).
-          # `rich` is an undeclared runtime dep in copr-cli >= 1.115 — without
+          # `rich` is an undeclared runtime dep in copr-cli >= 1.115 -- without
           # it, `copr-cli whoami` (or any subcommand) crashes with
           # `ModuleNotFoundError: No module named 'rich'` before sending a
           # request. Install both to keep the workflow stable across releases.
@@ -3207,14 +3207,14 @@ jobs:
           cp $WORKSPACE/installer/centos/*.conf /tmp/$TAR_NAME/installer/centos/ 2>/dev/null || true
           cp $WORKSPACE/installer/centos/*.example /tmp/$TAR_NAME/installer/centos/ 2>/dev/null || true
 
-          # Air-gap bundle dispatcher template — referenced by the spec's
+          # Air-gap bundle dispatcher template -- referenced by the spec's
           # %install (../installer/airgap-bundle/install.sh).  Hard copy (no
           # "|| true"): if it's ever missing the build must fail here, not
           # silently produce an SRPM that dies in %install on the COPR builder.
           mkdir -p /tmp/$TAR_NAME/installer/airgap-bundle
           cp $WORKSPACE/installer/airgap-bundle/install.sh /tmp/$TAR_NAME/installer/airgap-bundle/
 
-          # OpenBAO secrets-broker config + init unit — referenced by the
+          # OpenBAO secrets-broker config + init unit -- referenced by the
           # spec's %install; without them %install dies on the COPR builder.
           mkdir -p /tmp/$TAR_NAME/installer/openbao
           cp $WORKSPACE/installer/openbao/openbao.hcl /tmp/$TAR_NAME/installer/openbao/
@@ -3455,7 +3455,7 @@ jobs:
           echo "=========================================="
 
   # ============================================================================
-  # PHASE 11.8 — upstream-package publish jobs
+  # PHASE 11.8 -- upstream-package publish jobs
   # ============================================================================
   #
   # The jobs below publish each release to channels that need a per-
@@ -3478,7 +3478,7 @@ jobs:
     name: Homebrew tap (Casks/sysmanage.rb)
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # NO continue-on-error — see winget-manifest for the full rationale.
+    # NO continue-on-error -- see winget-manifest for the full rationale.
     # A publish channel that fails silently is one nobody notices is broken:
     # on 2026-08-07 an entire release shipped GREEN with winget broken, the
     # only clue a red X inside an apparently successful job.  Expected
@@ -3516,7 +3516,7 @@ jobs:
           # Pull the .pkg to compute sha256.  Homebrew refuses to install
           # a cask whose sha256 doesn't match the downloaded artifact, so
           # this MUST be the exact bytes the release attached.
-          # HARD FAIL — see the FreeBSD distinfo fix (2026-08-08).  Warning and
+          # HARD FAIL -- see the FreeBSD distinfo fix (2026-08-08).  Warning and
           # substituting zeros ships a manifest that looks complete and fails
           # checksum verification for every user.  `curl -f -o` also CREATES the
           # file on failure, so `[ -f ]` could hash an empty file: a plausible
@@ -3525,7 +3525,7 @@ jobs:
             echo "::error::Could not download /tmp/sysmanage.pkg from $PKG_URL"
             exit 1
           }
-          [ -s /tmp/sysmanage.pkg ] || { echo "::error::/tmp/sysmanage.pkg is empty — refusing to render a bogus checksum"; exit 1; }
+          [ -s /tmp/sysmanage.pkg ] || { echo "::error::/tmp/sysmanage.pkg is empty -- refusing to render a bogus checksum"; exit 1; }
           SHA=$(sha256sum /tmp/sysmanage.pkg | awk '{print $1}')
 
           # The cask stub uses Ruby ``#{version}`` interpolation in the
@@ -3607,7 +3607,7 @@ jobs:
     name: winget-pkgs manifest (komac)
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # NO continue-on-error — deliberately unlike the sibling publish jobs.
+    # NO continue-on-error -- deliberately unlike the sibling publish jobs.
     # On 2026-08-07 the agent repo's winget submission failed for an entire
     # release while the run showed GREEN; the only clue was a red X on a step
     # inside an apparently successful job.  A publish channel that fails
@@ -3643,8 +3643,8 @@ jobs:
           MSI_X64_URL="https://github.com/bceverly/sysmanage/releases/download/v${VERSION}/sysmanage-${VERSION}-windows-x64.msi"
           MSI_ARM64_URL="https://github.com/bceverly/sysmanage/releases/download/v${VERSION}/sysmanage-${VERSION}-windows-arm64.msi"
 
-          # Compute sha256 for each MSI — winget-pkgs validates both.
-          # HARD FAIL — see the FreeBSD distinfo fix (2026-08-08).  Warning and
+          # Compute sha256 for each MSI -- winget-pkgs validates both.
+          # HARD FAIL -- see the FreeBSD distinfo fix (2026-08-08).  Warning and
           # substituting zeros ships a manifest that looks complete and fails
           # checksum verification for every user.  `curl -f -o` also CREATES the
           # file on failure, so `[ -f ]` could hash an empty file: a plausible
@@ -3653,9 +3653,9 @@ jobs:
             echo "::error::Could not download /tmp/sysmanage-x64.msi from $MSI_X64_URL"
             exit 1
           }
-          [ -s /tmp/sysmanage-x64.msi ] || { echo "::error::/tmp/sysmanage-x64.msi is empty — refusing to render a bogus checksum"; exit 1; }
+          [ -s /tmp/sysmanage-x64.msi ] || { echo "::error::/tmp/sysmanage-x64.msi is empty -- refusing to render a bogus checksum"; exit 1; }
           SHA_X64=$(sha256sum /tmp/sysmanage-x64.msi | awk '{print toupper($1)}')
-          # HARD FAIL — see the FreeBSD distinfo fix (2026-08-08).  Warning and
+          # HARD FAIL -- see the FreeBSD distinfo fix (2026-08-08).  Warning and
           # substituting zeros ships a manifest that looks complete and fails
           # checksum verification for every user.  `curl -f -o` also CREATES the
           # file on failure, so `[ -f ]` could hash an empty file: a plausible
@@ -3664,12 +3664,12 @@ jobs:
             echo "::error::Could not download /tmp/sysmanage-arm64.msi from $MSI_ARM64_URL"
             exit 1
           }
-          [ -s /tmp/sysmanage-arm64.msi ] || { echo "::error::/tmp/sysmanage-arm64.msi is empty — refusing to render a bogus checksum"; exit 1; }
+          [ -s /tmp/sysmanage-arm64.msi ] || { echo "::error::/tmp/sysmanage-arm64.msi is empty -- refusing to render a bogus checksum"; exit 1; }
           SHA_ARM64=$(sha256sum /tmp/sysmanage-arm64.msi | awk '{print toupper($1)}')
 
           # Render the singleton manifest for the dry-run preview.  In
           # publish mode we hand the MSI URLs to ``komac``, which builds
-          # the v1.6 multi-file manifest on the fly — we only need this
+          # the v1.6 multi-file manifest on the fly -- we only need this
           # rendering for the dry-run echo.
           mkdir -p /tmp/winget-out
           export VERSION SHA_X64 SHA_ARM64
@@ -3735,7 +3735,7 @@ jobs:
             echo "::warning::     'public_repo' AND 'workflow' scopes.  'workflow'"
             echo "::warning::     is NOT optional: winget-pkgs contains Actions"
             echo "::warning::     workflow files and GitHub refuses a PAT without"
-            echo "::warning::     it any push that touches them — reported as a"
+            echo "::warning::     it any push that touches them -- reported as a"
             echo "::warning::     confusing CreateRef permission error."
             echo "::warning::     (Fine-grained: Contents R+W AND Pull requests R+W.)"
             echo "::warning::  3. Paste the PAT into this repo's secrets as"
@@ -3745,7 +3745,7 @@ jobs:
 
           # Same preflight as sysmanage-agent: catch a missing 'workflow' scope
           # here, in one line, instead of after a full release run.  Diagnosed
-          # 2026-08-07 — the token was valid and could create refs directly, and
+          # 2026-08-07 -- the token was valid and could create refs directly, and
           # komac still failed with a permissions error that named neither the
           # scope nor the workflow file responsible.
           scopes=$(curl -sSI -H "Authorization: Bearer ${WINGET_PKGS_TOKEN}" \
@@ -3771,7 +3771,7 @@ jobs:
           #     "Ref cannot be created / failed to create branch ..."
           # which names neither the account nor the repo.  On 2026-08-09 the scope
           # preflight above passed (repo, workflow) and the agent's run still failed,
-          # while the same check by hand from a laptop showed a writable fork — so
+          # while the same check by hand from a laptop showed a writable fork -- so
           # "which identity is CI actually using" was the question the log could not
           # answer.  Answer it here, before komac runs.
           login=$(curl -sS -H "Authorization: token $WINGET_PKGS_TOKEN" \
@@ -3827,13 +3827,13 @@ jobs:
           fi
 
           # Resolve the komac release asset for Linux x86_64.  komac
-          # v2.16+ dropped the musl build — current Linux assets ship
+          # v2.16+ dropped the musl build -- current Linux assets ship
           # as ``x86_64-unknown-linux-gnu.tar.gz`` (glibc) only.  Match
           # by individual substrings rather than a hyphenated full
           # name so renames in either direction (gnu→musl→…) keep
           # working without further patches.
           #
-          # The asset is a TARBALL, not a raw binary — extract it
+          # The asset is a TARBALL, not a raw binary -- extract it
           # before invoking (an earlier version of this step
           # ``chmod +x``'d the tarball and got "Exec format error").
           # Fetch + parse in two steps so a 403/empty body surfaces as a
@@ -3879,7 +3879,7 @@ jobs:
           # to ``komac new`` for the first submission.  Subsequent
           # releases succeed on the update path.
           #
-          # komac v2.16 also dropped ``--identifier <id>`` — the
+          # komac v2.16 also dropped ``--identifier <id>`` -- the
           # identifier is the trailing positional now.
           set +e
           "$KOMAC" update \
@@ -3893,7 +3893,7 @@ jobs:
 
           if [ "$update_rc" -ne 0 ]; then
             if grep -q "does not exist in microsoft/winget-pkgs" /tmp/komac.out; then
-              # ``komac new`` is interactive — it prompts for Publisher,
+              # ``komac new`` is interactive -- it prompts for Publisher,
               # License, ShortDescription, etc. and fails in CI with
               # "The input device is not a TTY".  This matches
               # winget-pkgs's design: first-time submissions are
@@ -3937,7 +3937,7 @@ jobs:
     name: AUR (sysmanage)
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # NO continue-on-error — see winget-manifest for the full rationale.
+    # NO continue-on-error -- see winget-manifest for the full rationale.
     # A publish channel that fails silently is one nobody notices is broken:
     # on 2026-08-07 an entire release shipped GREEN with winget broken, the
     # only clue a red X inside an apparently successful job.  Expected
@@ -3974,7 +3974,7 @@ jobs:
 
           # Compute sha256 against the GitHub source tarball.  AUR users'
           # makepkg will refuse to build if this doesn't match.
-          # HARD FAIL — see the FreeBSD distinfo fix (2026-08-08).  Warning and
+          # HARD FAIL -- see the FreeBSD distinfo fix (2026-08-08).  Warning and
           # substituting zeros ships a manifest that looks complete and fails
           # checksum verification for every user.  `curl -f -o` also CREATES the
           # file on failure, so `[ -f ]` could hash an empty file: a plausible
@@ -3983,7 +3983,7 @@ jobs:
             echo "::error::Could not download /tmp/sysmanage-src.tar.gz from $TARBALL_URL"
             exit 1
           }
-          [ -s /tmp/sysmanage-src.tar.gz ] || { echo "::error::/tmp/sysmanage-src.tar.gz is empty — refusing to render a bogus checksum"; exit 1; }
+          [ -s /tmp/sysmanage-src.tar.gz ] || { echo "::error::/tmp/sysmanage-src.tar.gz is empty -- refusing to render a bogus checksum"; exit 1; }
           SHA=$(sha256sum /tmp/sysmanage-src.tar.gz | awk '{print $1}')
 
           mkdir -p /tmp/aur-out
@@ -3996,10 +3996,10 @@ jobs:
           # Regenerate .SRCINFO via makepkg in an Arch container.  AUR
           # rejects pushes whose .SRCINFO doesn't match the PKGBUILD,
           # so this MUST be regenerated by makepkg itself (sed isn't
-          # enough — package() output formatting can drift).
+          # enough -- package() output formatting can drift).
           #
           # Capture the host runner's UID/GID before chown'ing to
-          # builder so we can restore ownership on exit — otherwise
+          # builder so we can restore ownership on exit -- otherwise
           # the runner can't read /pkg back ("Permission denied" on
           # the subsequent ``cp`` step) since container ``b`` has a
           # UID that isn't a real user on the host.
@@ -4063,7 +4063,7 @@ jobs:
           WORK=$(mktemp -d)
 
           # aur.archlinux.org goes down for maintenance periodically.  That is
-          # an UPSTREAM outage, not a packaging failure — v3.5.1.7 hit exactly
+          # an UPSTREAM outage, not a packaging failure -- v3.5.1.7 hit exactly
           # this on 2026-08-07 ("The AUR is down due to maintenance") and failed
           # a release whose artifacts were all fine.  Retry for a blip, then
           # classify: an outage warns and skips, anything else (bad key, missing
@@ -4091,18 +4091,18 @@ jobs:
               # One line on purpose: a multi-line heredoc/script here falls
               # outside this block scalar's indentation and silently truncates
               # the YAML.
-              # Fetch to a FILE, then parse it — do not pipe curl into an
+              # Fetch to a FILE, then parse it -- do not pipe curl into an
               # interpreter.  Semgrep flags `curl ... | python3 -c` as the
               # "curl | bash" install pattern (gha-curl-pipe-shell).  Here the
               # remote body is data for json.load and is never executed, so the
-              # alert was a false positive in substance — but the rule's advice
+              # alert was a false positive in substance -- but the rule's advice
               # (download first, then process) is the better shape regardless,
               # and it removes a finding from a queue people actually read.
               curl -sS -g --max-time 20 -o /tmp/aur-info.json \
                 "https://aur.archlinux.org/rpc/v5/info?arg[]=sysmanage" 2>/dev/null || true
               published=$(python3 -c "import json;print(((json.load(open('/tmp/aur-info.json')).get('results') or [{}])[0]).get('Version','unknown'))" 2>/dev/null || echo unknown)
               {
-                echo "### ⚠️ AUR publish SKIPPED — upstream maintenance"
+                echo "### ⚠️ AUR publish SKIPPED -- upstream maintenance"
                 echo ""
                 echo "| | |"
                 echo "|---|---|"
@@ -4110,7 +4110,7 @@ jobs:
                 echo "| Currently on AUR | \`${published}\` |"
                 echo ""
                 echo "aur.archlinux.org is refusing git operations while its web"
-                echo "and API stay up. Nothing to fix on our side — re-run this job"
+                echo "and API stay up. Nothing to fix on our side -- re-run this job"
                 echo "once it is back. If the versions above keep diverging over"
                 echo "several releases, the outage is no longer transient."
               } >> "$GITHUB_STEP_SUMMARY"
@@ -4148,7 +4148,7 @@ jobs:
     name: FreeBSD ports tree (artifact)
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # NO continue-on-error — see winget-manifest for the full rationale.
+    # NO continue-on-error -- see winget-manifest for the full rationale.
     # A publish channel that fails silently is one nobody notices is broken:
     # on 2026-08-07 an entire release shipped GREEN with winget broken, the
     # only clue a red X inside an apparently successful job.  Expected
@@ -4214,7 +4214,7 @@ jobs:
           # We shipped ``sysmanage/v${VERSION}.tar.gz`` instead, so the
           # framework looked up a key that was not in the file and every fetch
           # failed checksum verification.  Confirmed against `make makesum` on
-          # a real ports tree, 2026-08-08 — the SHA and SIZE were always right,
+          # a real ports tree, 2026-08-08 -- the SHA and SIZE were always right,
           # only the key was wrong, which is why nothing here ever complained.
           cat > "$STAGE/sysutils/sysmanage/distinfo" <<EOF
           TIMESTAMP = ${TS}
@@ -4261,7 +4261,7 @@ jobs:
     name: OpenBSD ports tree (artifact)
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # NO continue-on-error — see winget-manifest for the full rationale.
+    # NO continue-on-error -- see winget-manifest for the full rationale.
     # A publish channel that fails silently is one nobody notices is broken:
     # on 2026-08-07 an entire release shipped GREEN with winget broken, the
     # only clue a red X inside an apparently successful job.  Expected
@@ -4305,7 +4305,7 @@ jobs:
             "$STAGE/sysutils/sysmanage/Makefile"
 
           # OpenBSD checksums (distinfo) are computed by ``make makesum``
-          # inside a real OpenBSD ports tree — we can't reproduce that
+          # inside a real OpenBSD ports tree -- we can't reproduce that
           # SHA256-and-RMD160 dance reliably from Linux.  Leave a
           # placeholder distinfo with the SHA256 of the GitHub tarball;
           # the maintainer regenerates it on the OpenBSD build host.
@@ -4361,7 +4361,7 @@ jobs:
     name: NetBSD pkgsrc tree (artifact)
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # NO continue-on-error — see winget-manifest for the full rationale.
+    # NO continue-on-error -- see winget-manifest for the full rationale.
     # A publish channel that fails silently is one nobody notices is broken:
     # on 2026-08-07 an entire release shipped GREEN with winget broken, the
     # only clue a red X inside an apparently successful job.  Expected
@@ -4404,7 +4404,7 @@ jobs:
           set -euo pipefail
           TARBALL_URL="https://github.com/bceverly/sysmanage/archive/refs/tags/v${VERSION}.tar.gz"
 
-          # HARD FAIL — see the FreeBSD distinfo fix (2026-08-08).  Warning and
+          # HARD FAIL -- see the FreeBSD distinfo fix (2026-08-08).  Warning and
           # substituting zeros ships a pkgsrc distinfo that looks complete and
           # fails checksum verification for every user.  `curl -f -o` also
           # CREATES the file on failure, so `[ -f ]` could hash an empty file:
@@ -4413,7 +4413,7 @@ jobs:
             echo "::error::Could not download source tarball from $TARBALL_URL"
             exit 1
           }
-          [ -s /tmp/sysmanage-src.tar.gz ] || { echo "::error::/tmp/sysmanage-src.tar.gz is empty — refusing to render a bogus checksum"; exit 1; }
+          [ -s /tmp/sysmanage-src.tar.gz ] || { echo "::error::/tmp/sysmanage-src.tar.gz is empty -- refusing to render a bogus checksum"; exit 1; }
           BLAKE2S=$(python3 -c "import hashlib,sys;h=hashlib.blake2s();h.update(open('/tmp/sysmanage-src.tar.gz','rb').read());print(h.hexdigest())")
           SHA512=$(sha512sum /tmp/sysmanage-src.tar.gz | awk '{print $1}')
           SIZE=$(stat -c%s /tmp/sysmanage-src.tar.gz)

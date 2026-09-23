@@ -26,15 +26,15 @@ class EmailService:
 
     Configuration (SMTP server + sender) is resolved **lazily at send time**,
     never snapshotted at construction.  This matters for per-tenant email
-    (Phase 13.1): the active tenant — bound from the request JWT, or passed
+    (Phase 13.1): the active tenant -- bound from the request JWT, or passed
     explicitly via ``send_email(tenant_id=...)`` for background/pre-auth sends
-    — governs which tenant's email config is used.  Snapshotting in
+    -- governs which tenant's email config is used.  Snapshotting in
     ``__init__`` (especially for the module-level singleton, built at import
     time) would freeze the server scope forever.
     """
 
     def __init__(self):
-        # No config snapshot here — see class docstring.
+        # No config snapshot here -- see class docstring.
         pass
 
     def is_enabled(self) -> bool:
@@ -70,14 +70,14 @@ class EmailService:
             tenant_id: Optional tenant whose email config to use (Phase 13.1).
                 Pass this for background/pre-auth sends that run outside a
                 request (where no tenant is bound from the JWT).  ``None`` uses
-                the request-bound active tenant if any, else the server scope —
+                the request-bound active tenant if any, else the server scope --
                 the single-tenant default.
 
         Returns:
             True if email was sent successfully, False otherwise
         """
         # Bind the explicit tenant (no-op when None) so config resolves to the
-        # right scope even outside a request — closing the gap where background
+        # right scope even outside a request -- closing the gap where background
         # sends would silently use the server scope.
         with tenant_scope(tenant_id):
             return self._send_email_in_scope(

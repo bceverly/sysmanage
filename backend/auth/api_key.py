@@ -3,14 +3,14 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-API-key authentication helpers — Phase 13.2 (API Completeness).
+API-key authentication helpers -- Phase 13.2 (API Completeness).
 
 Generation, hashing, and verification for the ``ApiKey`` model.  An API key is
 an alternative bearer credential for automation: presented in the same
 ``Authorization: Bearer <key>`` header as a JWT, but distinguished by the
 ``smk_`` prefix ("sysmanage key").  ``auth_bearer`` falls back to this module
 when a presented bearer credential is not a valid JWT, so every endpoint that
-already accepts a JWT transparently accepts an API key — no per-endpoint change.
+already accepts a JWT transparently accepts an API key -- no per-endpoint change.
 
 Storage is GitHub-PAT style: only ``sha256(key)`` is persisted, so the secret
 is unrecoverable from the database.  Verification hashes the presented key and
@@ -36,9 +36,9 @@ def generate_api_key() -> Tuple[str, str, str]:
     """Mint a new API key.
 
     Returns ``(full_key, key_hash, key_prefix)``:
-      * ``full_key`` — the plaintext, shown to the user exactly once.
-      * ``key_hash`` — SHA-256 hex digest to persist.
-      * ``key_prefix`` — non-secret leading slice for display/audit.
+      * ``full_key`` -- the plaintext, shown to the user exactly once.
+      * ``key_hash`` -- SHA-256 hex digest to persist.
+      * ``key_prefix`` -- non-secret leading slice for display/audit.
     """
     full_key = API_KEY_PREFIX + secrets.token_urlsafe(32)
     return full_key, hash_api_key(full_key), full_key[:_PREFIX_DISPLAY_LEN]
@@ -50,12 +50,12 @@ def hash_api_key(full_key: str) -> str:
     SHA-256 (a fast hash) is the CORRECT choice here, NOT a slow KDF like
     Argon2/bcrypt: an API key is a 256-bit cryptographically-random token
     (``secrets.token_urlsafe(32)``), so it has full machine entropy and is not
-    brute-forceable from its digest — the threat a slow KDF defends against
+    brute-forceable from its digest -- the threat a slow KDF defends against
     (low-entropy human passwords) does not apply.  A fast digest also enables the
     O(1) indexed lookup in ``authenticate_api_key`` (a per-record salted KDF
     cannot be indexed).  This is the same model GitHub uses for personal access
     tokens.  CodeQL's ``py/weak-sensitive-data-hashing`` flags this generically
-    (it can't see the input's entropy) — it is a false positive in this context.
+    (it can't see the input's entropy) -- it is a false positive in this context.
     """
     return hashlib.sha256(full_key.encode("utf-8")).hexdigest()
 
@@ -68,7 +68,7 @@ def looks_like_api_key(credential: Optional[str]) -> bool:
 def authenticate_api_key(credential: str) -> Optional[dict]:
     """Validate an API key and return its principal, or ``None``.
 
-    On success returns ``{"user_id": <userid>, "tenant_id": <str|None>}`` —
+    On success returns ``{"user_id": <userid>, "tenant_id": <str|None>}`` --
     ``user_id`` is the owning user's login id (the same value a JWT carries in
     its ``user_id`` claim), so downstream resolution (``get_current_user`` →
     ``require_authenticated_user``) is identical for both auth types.  Also

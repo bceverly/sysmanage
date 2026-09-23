@@ -82,7 +82,7 @@ describe('Navbar Component (grouped menubar)', () => {
 
     // Categories are the new non-navigating top-level menus. Each label appears
     // in both the desktop menubar trigger and the mobile drawer group title
-    // (jsdom renders both — no CSS media queries), hence getAllByText.
+    // (jsdom renders both -- no CSS media queries), hence getAllByText.
     for (const cat of ['Fleet', 'Patching', 'Security', 'Automation', 'Insights', 'Administration']) {
       expect(screen.getAllByText(cat).length).toBeGreaterThan(0);
     }
@@ -136,7 +136,7 @@ describe('Navbar Component (grouped menubar)', () => {
     await act(async () => {
       render(<NavbarWithRouter />);
     });
-    // Pre-login the whole navbar is hidden — no logo, no categories, no user menu.
+    // Pre-login the whole navbar is hidden -- no logo, no categories, no user menu.
     expect(screen.queryByAltText('SysManage')).toBeNull();
     expect(screen.queryByText('Fleet')).toBeNull();
     expect(screen.queryByLabelText('User menu')).toBeNull();

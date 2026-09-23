@@ -35,7 +35,7 @@ const form = (overrides: Partial<ChildHostFormData> = {}): ChildHostFormData => 
     ...overrides,
 });
 
-describe('validateChildHostForm — Windows', () => {
+describe('validateChildHostForm -- Windows', () => {
     test('accepts a complete workgroup request', () => {
         expect(validateChildHostForm(t, form(), 'win01.example.com')).toBeNull();
     });
@@ -84,7 +84,7 @@ describe('validateChildHostForm — Windows', () => {
     });
 });
 
-describe('buildCreateChildRequest — Windows', () => {
+describe('buildCreateChildRequest -- Windows', () => {
     test('forwards the Windows fields', () => {
         const payload = buildCreateChildRequest(form({ windowsEdition: 'datacenter-core' }), 'win01.example.com');
         expect(payload).toMatchObject({
@@ -103,20 +103,20 @@ describe('buildCreateChildRequest — Windows', () => {
     });
 
     test('does not send a cloud image URL for Windows', () => {
-        // The distribution is a dispatch token, not a URL — the KVM branch sets
+        // The distribution is a dispatch token, not a URL -- the KVM branch sets
         // cloud_image_url from it, and the Windows branch must undo that.
         const payload = buildCreateChildRequest(form(), 'win01.example.com');
         expect(payload).not.toHaveProperty('cloud_image_url');
     });
 
-    test('omits the licence key entirely when blank', () => {
+    test('omits the license key entirely when blank', () => {
         // Evaluation media installs without one; an empty key must not be sent
         // (it would create an empty OpenBAO secret).
         const payload = buildCreateChildRequest(form(), 'win01.example.com');
         expect(payload).not.toHaveProperty('windows_product_key');
     });
 
-    test('sends the licence key when given', () => {
+    test('sends the license key when given', () => {
         const payload = buildCreateChildRequest(
             form({ windowsProductKey: 'XXXXX-XXXXX-XXXXX-XXXXX-XXXXX' }),
             'win01.example.com',

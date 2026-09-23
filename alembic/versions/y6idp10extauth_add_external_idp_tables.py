@@ -10,19 +10,19 @@ Create Date: 2026-05-07 19:30:00.000000
 
 Three new tables backing the Pro+ ``external_idp_engine`` integration:
 
-  external_idp_provider       — one row per LDAP/AD or OIDC IdP
-  idp_role_mapping            — external_group → SecurityRole table
-  external_idp_settings       — singleton cross-provider defaults
+  external_idp_provider       -- one row per LDAP/AD or OIDC IdP
+  idp_role_mapping            -- external_group → SecurityRole table
+  external_idp_settings       -- singleton cross-provider defaults
 
-Idempotent — re-running ``alembic upgrade head`` is a no-op via
+Idempotent -- re-running ``alembic upgrade head`` is a no-op via
 ``inspect().has_table()``.  Singleton settings row seeded with sensible
 defaults (local fallback enabled, 5 max failed attempts).
 
 User table picks up two columns so the login flow can route an account
 to its IdP and remember the external subject identifier:
-  ``external_idp_provider_id``  — FK to external_idp_provider; NULL for
+  ``external_idp_provider_id``  -- FK to external_idp_provider; NULL for
                                   local-only accounts.
-  ``external_subject``          — IdP-side stable identifier (LDAP DN
+  ``external_subject``          -- IdP-side stable identifier (LDAP DN
                                   or OIDC ``sub`` claim).  Used to
                                   re-link if the userid changes.
 
@@ -166,7 +166,7 @@ def upgrade() -> None:
     # Add external_idp linkage columns to user.  Skip if already there.
     # SQLite can't ALTER a table to add a column that carries a constraint,
     # so the FK column has to go through ``batch_alter_table(recreate="auto")``
-    # — same pattern as a8mirror30platform_add_platform_config.py.  The
+    # -- same pattern as a8mirror30platform_add_platform_config.py.  The
     # plain string column doesn't need batch mode but we pipe both through
     # one ``with`` block so the table is only rewritten once.
     user_cols = {c["name"] for c in insp.get_columns("user")}

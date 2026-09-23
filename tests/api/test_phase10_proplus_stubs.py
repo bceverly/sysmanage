@@ -10,7 +10,7 @@ loaded (the default for OSS deployments and the test harness), the
 proplus_routes wrapper mounts stub routes under /api/v1/virt/* and
 /api/v1/observability/* that always return ``{"licensed": False}``.
 
-These tests verify the stubs are mounted and gated behind auth — the
+These tests verify the stubs are mounted and gated behind auth -- the
 licensed (engine-loaded) happy path is exercised directly against the
 Cython module's pytest suite in the sysmanage-professional-plus repo.
 """
@@ -32,7 +32,7 @@ class TestVirtualizationStubRoutes:
             f"/api/v1/virt/kvm/{_HOST_ID}/test-vm/start",
             headers=auth_headers,
         )
-        # Stub or real engine — engine isn't loaded in test harness so
+        # Stub or real engine -- engine isn't loaded in test harness so
         # the stub route serves: returns 200 + {"licensed": False}.
         assert r.status_code in [200, 402, 403, 404]
         if r.status_code == 200:

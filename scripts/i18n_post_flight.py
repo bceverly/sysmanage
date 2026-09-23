@@ -160,7 +160,7 @@ def report_po_repo():
         total_spec_mismatch += spec_mismatch
     print(f"  TOTAL     {total_untranslated=}  {total_spec_mismatch=}")
     if total_spec_mismatch:
-        print("  ❗ format-spec mismatches WILL crash at runtime — investigate before shipping")
+        print("  ❗ format-spec mismatches WILL crash at runtime -- investigate before shipping")
     else:
         print("  ✓ no format-spec mismatches")
 

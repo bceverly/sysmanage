@@ -11,7 +11,7 @@ import { test, expect, Page } from '@playwright/test';
  * ``localStorage.i18nextLng`` (the key the
  * ``i18next-browser-languagedetector`` plugin reads) before
  * navigating, then asserting the page renders translated text
- * — not raw English fallbacks, and not unresolved keys like
+ * -- not raw English fallbacks, and not unresolved keys like
  * ``login.title`` leaking through.
  *
  * The static i18n validators in ``make lint`` already check that
@@ -23,21 +23,21 @@ import { test, expect, Page } from '@playwright/test';
  * in CI.
  *
  * Coverage: a representative sample of the 14 supported locales
- * — not all 14, because running this spec across every locale
+ * -- not all 14, because running this spec across every locale
  * would dominate the CI test budget for marginal incremental
  * confidence.  The sample picks one Latin-script (es), one
  * Germanic (de), one Asian script (ja), and one RTL (ar) so we
  * exercise both LTR and RTL rendering.
  */
 
-// Override the chromium project's authenticated storage state — the
+// Override the chromium project's authenticated storage state -- the
 // login page is the test target, so we explicitly want NO auth here.
 test.use({ storageState: { cookies: [], origins: [] } });
 
 /**
  * Expected translation of ``login.title`` for each locale we sample.
  * Hard-coded here (rather than re-reading the JSON at test time)
- * so a translation change is a deliberate edit to BOTH places — the
+ * so a translation change is a deliberate edit to BOTH places -- the
  * test catches drift if someone retranslates the key on one side
  * but not the other.
  *
@@ -62,7 +62,7 @@ const LOCALE_SAMPLES: ReadonlyArray<{
  * ``i18next-browser-languagedetector`` reads ``i18nextLng`` from
  * localStorage on first init; if we set it after navigation, the
  * detector has already picked a different locale.  The trick is
- * Playwright's ``addInitScript`` — it runs in the page context
+ * Playwright's ``addInitScript`` -- it runs in the page context
  * BEFORE any other script on every navigation.
  */
 async function seedLocale(page: Page, lang: string): Promise<void> {
@@ -74,7 +74,7 @@ async function seedLocale(page: Page, lang: string): Promise<void> {
   );
 }
 
-test.describe('i18n smoke — login page renders in each sampled locale', () => {
+test.describe('i18n smoke -- login page renders in each sampled locale', () => {
   for (const { code, loginHeading, description } of LOCALE_SAMPLES) {
     test(`login heading translates to ${code} (${description})`, async ({ page }) => {
       await seedLocale(page, code);
@@ -91,7 +91,7 @@ test.describe('i18n smoke — login page renders in each sampled locale', () => 
   }
 });
 
-test.describe('i18n smoke — locale persists across reload', () => {
+test.describe('i18n smoke -- locale persists across reload', () => {
   test('refreshing the page keeps the selected language', async ({ page }) => {
     // Pick a non-default locale so the assertion is meaningful.
     await seedLocale(page, 'de');
@@ -102,7 +102,7 @@ test.describe('i18n smoke — locale persists across reload', () => {
       page.getByRole('heading', { name: /^Anmelden$/i }).first(),
     ).toBeVisible({ timeout: 20000 });
 
-    // Reload — localStorage survives, language detector must pick it
+    // Reload -- localStorage survives, language detector must pick it
     // up again on the second init.
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
@@ -113,10 +113,10 @@ test.describe('i18n smoke — locale persists across reload', () => {
   });
 });
 
-test.describe('i18n smoke — no unresolved keys leak through', () => {
+test.describe('i18n smoke -- no unresolved keys leak through', () => {
   /**
    * Catches the common regression where a component does
-   * ``t('foo.bar')`` but ``foo.bar`` isn't in any translation file —
+   * ``t('foo.bar')`` but ``foo.bar`` isn't in any translation file --
    * react-i18next renders the raw key as visible text.  These keys
    * always contain a dot, never appear in real copy, and would be
    * highly visible in any UI: assert none are on the login page in
@@ -130,7 +130,7 @@ test.describe('i18n smoke — no unresolved keys leak through', () => {
       await page.goto('/login');
       await page.waitForLoadState('domcontentloaded');
 
-      // Wait for the form to be ready before scraping body text — i18n
+      // Wait for the form to be ready before scraping body text -- i18n
       // hydration can lag the first render by a frame.
       await page.locator('#userid').waitFor({ state: 'visible', timeout: 20000 });
 

@@ -6,7 +6,7 @@
  * Host Detail's initial data load.
  *
  * The order of the guards is the whole point. No bearer token means redirect
- * to login BEFORE anything is fetched — issuing a dozen requests that will
+ * to login BEFORE anything is fetched -- issuing a dozen requests that will
  * all 401 is both noisy and slow. A missing host id is a bad URL, not a
  * server failure, and must say so rather than spinning forever.
  *
@@ -161,7 +161,7 @@ describe("the happy path", () => {
     expect(setLoading).toHaveBeenCalledWith(false);
   });
 
-  test("licence modules are resolved for the tab set", async () => {
+  test("license modules are resolved for the tab set", async () => {
     m(getLicenseInfo).mockResolvedValue({
       modules: ["config_management_engine"],
       features: ["reports"],
@@ -180,9 +180,9 @@ describe("degradation", () => {
     expect(setLoading).toHaveBeenCalledWith(false);
   });
 
-  test("a failing licence lookup does not stop the host loading", async () => {
-    // The licence decides which TABS appear; losing it must not lose the host.
-    m(getLicenseInfo).mockRejectedValue(new Error("no licence service"));
+  test("a failing license lookup does not stop the host loading", async () => {
+    // The license decides which TABS appear; losing it must not lose the host.
+    m(getLicenseInfo).mockRejectedValue(new Error("no license service"));
     setup();
     await waitFor(() => expect(m(doGetHostByID)).toHaveBeenCalled());
   });

@@ -7,7 +7,7 @@
 WHY THE WHOLE ROUTER IS LICENCE-GATED
 -------------------------------------
 The fact SUBSTRATE is open-source and stays that way: every agent serves the
-osquery-schema tables whatever licence the server holds, because better
+osquery-schema tables whatever license the server holds, because better
 inventory drives adoption. What is Professional is the MANAGEMENT plane --
 authoring packs, assigning them as policy per host/tag/site, pacing collection
 and reading the results. So the gate sits on the router rather than per route:
@@ -18,14 +18,14 @@ WHY THE RULES LIVE IN THE ENGINE
 --------------------------------
 Validation, assignment precedence, due-ness and run grading all come from
 ``query_pack_engine`` via ``query_pack_shim``. This file owns HTTP,
-persistence and authorisation, and deliberately re-implements none of them.
+persistence and authorization, and deliberately re-implements none of them.
 
 ROLES
 -----
 Reuses the SCRIPT roles, as configuration profiles do. A stored pack is the
 same class of object as a saved script -- executable content, authored once
 and run against hosts -- so the same entitlement should govern both, and a
-parallel set would need seeding into ``security_roles`` for no behavioural
+parallel set would need seeding into ``security_roles`` for no behavioral
 gain.
 """
 
@@ -140,7 +140,7 @@ def _refuse(problems: List[str]) -> None:
 async def list_catalog(
     include_deprecated: bool = False,
 ) -> List[Dict[str, Any]]:
-    """The curated catalog — global reference data, one copy for everyone."""
+    """The curated catalog -- global reference data, one copy for everyone."""
     return svc.list_shared_packs(include_deprecated=include_deprecated)
 
 
@@ -368,7 +368,7 @@ async def get_live_query(
 
     Sweeps timeouts on read. A silent host would otherwise hold its slot until
     something else happened to look, and the thing most likely to look is this
-    endpoint — the operator watching the query.
+    endpoint -- the operator watching the query.
     """
     live = _load_live(db, live_id)
     if live_svc.sweep_timeouts(db, live):

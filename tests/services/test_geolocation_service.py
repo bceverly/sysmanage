@@ -12,7 +12,7 @@ Covers:
   * Tarball extraction safety in refresh_geolite_db (path-traversal reject)
   * Background refresh task self-skips when no MaxMind key is configured
 
-GeoLite2 reads + ipapi.co network are mocked — these tests don't touch
+GeoLite2 reads + ipapi.co network are mocked -- these tests don't touch
 either external dependency.
 """
 
@@ -39,7 +39,7 @@ class TestIsInternalIp:
             "10.0.0.1",  # RFC 1918
             "172.16.0.5",  # RFC 1918
             "192.168.1.50",  # RFC 1918
-            "100.64.0.1",  # RFC 6598 (CGNAT) — the one Python's stdlib misses
+            "100.64.0.1",  # RFC 6598 (CGNAT) -- the one Python's stdlib misses
             "127.0.0.1",  # loopback
             "169.254.1.1",  # IPv4 link-local
             "::1",  # IPv6 loopback
@@ -68,7 +68,7 @@ class TestIsInternalIp:
 
 
 # ---------------------------------------------------------------------
-# lookup_ip — short-circuit paths
+# lookup_ip -- short-circuit paths
 # ---------------------------------------------------------------------
 
 
@@ -94,7 +94,7 @@ class TestLookupIpShortCircuit:
 
 
 # ---------------------------------------------------------------------
-# lookup_ip — GeoLite2 path
+# lookup_ip -- GeoLite2 path
 # ---------------------------------------------------------------------
 
 
@@ -165,7 +165,7 @@ class TestLookupIpGeoLite2:
 
 
 # ---------------------------------------------------------------------
-# lookup_ip — ipapi.co fallback path
+# lookup_ip -- ipapi.co fallback path
 # ---------------------------------------------------------------------
 
 
@@ -333,7 +333,7 @@ class TestReaderHolder:
 
 
 # ---------------------------------------------------------------------
-# _lookup_via_geolite2 — AddressNotFound + subdivision-less paths
+# _lookup_via_geolite2 -- AddressNotFound + subdivision-less paths
 # ---------------------------------------------------------------------
 
 
@@ -546,7 +546,7 @@ class TestDownloadTarball:
 
 
 # ---------------------------------------------------------------------
-# refresh_geolite_db — full orchestration
+# refresh_geolite_db -- full orchestration
 # ---------------------------------------------------------------------
 
 
@@ -594,7 +594,7 @@ class TestRefreshGeoliteDbFull:
 
 
 # ---------------------------------------------------------------------
-# geolite_refresh_service — background task
+# geolite_refresh_service -- background task
 # ---------------------------------------------------------------------
 
 
@@ -638,7 +638,7 @@ class TestGeoliteRefreshService:
     @pytest.mark.asyncio
     async def test_swallows_refresh_exception(self):
         # is_geo_lookup_enabled raising inside the try must not crash the
-        # loop — it logs + proceeds to the sleep.
+        # loop -- it logs + proceeds to the sleep.
         with patch.object(
             geo, "is_geo_lookup_enabled", side_effect=RuntimeError("boom")
         ), patch.object(

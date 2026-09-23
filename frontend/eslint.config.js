@@ -13,7 +13,7 @@ import sonarjs from 'eslint-plugin-sonarjs';
 
 export default [
   {
-    // Top-level ignores — applies to every block below.  Without this,
+    // Top-level ignores -- applies to every block below.  Without this,
     // ``js.configs.recommended`` falls back to scanning vendored
     // ``dist/`` bundles where browser globals aren't declared, flooding
     // the report with thousands of false-positive ``no-undef``s.
@@ -60,7 +60,7 @@ export default [
         clearTimeout: 'readonly',
         setInterval: 'readonly',
         clearInterval: 'readonly',
-        // DOM element types — needed by useRef<HTML*Element> generics
+        // DOM element types -- needed by useRef<HTML*Element> generics
         HTMLElement: 'readonly',
         HTMLInputElement: 'readonly',
         HTMLFormElement: 'readonly',
@@ -70,7 +70,7 @@ export default [
         HTMLAnchorElement: 'readonly',
         HTMLSpanElement: 'readonly',
         HTMLLabelElement: 'readonly',
-        // DOM event types — ``Event`` deliberately omitted; HostDetail.tsx
+        // DOM event types -- ``Event`` deliberately omitted; HostDetail.tsx
         // and a few other files declare their own ``Event`` interface for
         // domain-specific payloads, and adding it here would cause
         // ``no-redeclare`` errors.

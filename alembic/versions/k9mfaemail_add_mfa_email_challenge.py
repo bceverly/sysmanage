@@ -8,12 +8,12 @@ Revision ID: k9mfaemail
 Revises: j8install08ppacopr
 Create Date: 2026-05-13 14:30:00.000000
 
-Phase 10.3 closeout — adds the email-OTP fallback path alongside the
+Phase 10.3 closeout -- adds the email-OTP fallback path alongside the
 existing TOTP + backup-code authentication factors.  Stores short-lived,
 one-time codes that the verification endpoint can accept in place of a
 TOTP code when a user can't reach their authenticator app.
 
-The codes themselves are never stored in plaintext — only an Argon2 hash
+The codes themselves are never stored in plaintext -- only an Argon2 hash
 is persisted, mirroring the backup-code pattern in
 ``UserMfaEnrollment.backup_codes_hashed``.  Each row has an explicit
 ``expires_at`` so the verify path can reject stale codes without a
@@ -52,7 +52,7 @@ def upgrade() -> None:
                 nullable=False,
                 index=True,
             ),
-            # Argon2 hash of the 6-digit OTP — never stored in plaintext.
+            # Argon2 hash of the 6-digit OTP -- never stored in plaintext.
             sa.Column("code_hash", sa.Text(), nullable=False),
             sa.Column("created_at", sa.DateTime(), nullable=False),
             # Hard expiration enforced at verify time.  Default lifetime
@@ -68,7 +68,7 @@ def upgrade() -> None:
             # Audit-only; recorded so an admin investigating a
             # suspicious challenge can correlate origin.  Stored as a
             # plain string because the OSS server accepts both v4 and
-            # v6 inbound — no validation here.
+            # v6 inbound -- no validation here.
             sa.Column("ip_address", sa.String(length=45), nullable=True),
         )
         # Composite index supports the common "any live challenge for

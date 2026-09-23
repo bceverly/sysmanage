@@ -23,7 +23,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 # Run as ``python scripts/e2e_test_user.py`` puts ``scripts/`` on sys.path[0],
-# not the repo root — add the repo root so the server's ``backend`` package
+# not the repo root -- add the repo root so the server's ``backend`` package
 # (used for canonical DB-URL resolution in get_database_url) is importable.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -40,7 +40,7 @@ def get_database_url():
     the config through the server's loader, which overlays the DB password from
     OpenBAO when secrets have been moved out of YAML (the config-classification
     direction).  Reading the raw YAML directly (the fallback below) misses that
-    overlay and yields an empty password — which is why this script previously
+    overlay and yields an empty password -- which is why this script previously
     failed with ``fe_sendauth: no password supplied`` even though the server
     connects fine.
     """
@@ -52,7 +52,7 @@ def get_database_url():
             # The app's resolver returns a bare ``postgresql://`` URL and applies
             # the psycopg3-dialect rewrite separately (right before create_engine).
             # Do the same here, or SQLAlchemy defaults a bare ``postgresql://`` to
-            # the psycopg2 dialect — which this project does NOT install (it uses
+            # the psycopg2 dialect -- which this project does NOT install (it uses
             # psycopg3) → ModuleNotFoundError: No module named 'psycopg2'.
             try:
                 from backend.persistence.db import _psycopg_url
@@ -257,7 +257,7 @@ def _delete_user_by_id(session, user_id, email):
     for table in related_tables:
         if not _TABLE_IDENT_RE.match(table):
             # Should never happen given the hardcoded list, but
-            # defensive — keeps the validation visible to semgrep.
+            # defensive -- keeps the validation visible to semgrep.
             continue
         try:
             # Use a savepoint (context manager) so that a failure here

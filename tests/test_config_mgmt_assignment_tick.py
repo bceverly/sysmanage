@@ -7,7 +7,7 @@
 Until this loop existed, an assignment was decoration: you could bind a
 profile to a host with a cron expression and nothing would ever run it.
 
-The behaviours worth pinning are the ones that only show up at 3am:
+The behaviors worth pinning are the ones that only show up at 3am:
 
 * **No catch-up storm.** A schedule missed while the server was down fires
   ONCE, not once per occurrence slept through. Replaying a week of nightly

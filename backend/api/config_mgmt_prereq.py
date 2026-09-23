@@ -84,10 +84,10 @@ async def list_config_mgmt_engine_catalog():
     one host, and a profile written for Puppet is valid whether or not the
     host you happen to be looking at has Puppet installed.
 
-    Not licence-gated. The identities are not the licensed part -- knowing
+    Not license-gated. The identities are not the licensed part -- knowing
     that "puppet" is a word is worthless without the adapter -- and gating it
     would make the authoring dropdown empty on the very page that is already
-    behind the licence, which reads as a bug rather than as a limit.
+    behind the license, which reads as a bug rather than as a limit.
     """
     return ConfigMgmtEngineCatalog(
         engines=[
@@ -264,7 +264,7 @@ async def install_config_mgmt_prerequisite(
             detail=_("Unknown configuration management engine: %s") % target,
         )
 
-    # Installing a licensed adapter needs the licence, for the same reason
+    # Installing a licensed adapter needs the license, for the same reason
     # applying one does: it is part of the paid feature, not a free convenience.
     if engines.requires_license(target):
         require_module(ModuleCode.CONFIG_MANAGEMENT_ENGINE)

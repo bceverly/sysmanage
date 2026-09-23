@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 /**
- * SelectionActionBar — one action bar for every grid in the product.
+ * SelectionActionBar -- one action bar for every grid in the product.
  *
  * WHY THIS EXISTS
  * ---------------
@@ -17,7 +17,7 @@
  * and Salesforce Lightning all converge on, and what MUI X's own DataGrid
  * examples use:
  *
- *   1. CONTEXTUAL — the selection summary and Clear affordance appear only
+ *   1. CONTEXTUAL -- the selection summary and Clear affordance appear only
  *      once something is selected.
  *   2. A SMALL PRIMARY SET plus a single overflow menu, and the overflow
  *      button CARRIES THE HIDDEN COUNT ("More · 4").  A hidden action nobody
@@ -26,9 +26,9 @@
  *      divider.
  *   4. DISABLED, NEVER HIDDEN, and always with a reason.  Hiding actions on
  *      selection change makes them undiscoverable and makes the bar's width
- *      jump.  ``disabledReason`` turns a dead grey control into an
- *      explanation — "Requires exactly one host", "Not supported on this
- *      agent" — which matters here because the gating is genuinely complex.
+ *      jump.  ``disabledReason`` turns a dead gray control into an
+ *      explanation -- "Requires exactly one host", "Not supported on this
+ *      agent" -- which matters here because the gating is genuinely complex.
  *
  * The reason surface differs by control type on purpose.  A disabled MUI
  * Button swallows pointer events, so its tooltip needs a wrapper span; a
@@ -70,7 +70,7 @@ export type SelectionActionColor =
 export interface SelectionAction {
     /** Stable identity.  Used as the React key and as the test hook. */
     id: string;
-    /** Already translated by the caller — screens own their own wording. */
+    /** Already translated by the caller -- screens own their own wording. */
     label: string;
     icon?: React.ReactNode;
     onClick: () => void;
@@ -78,20 +78,20 @@ export interface SelectionAction {
     /**
      * WHY it is disabled, in the operator's language.  Shown as a tooltip on a
      * primary button and as inline secondary text in the menu.  Strongly
-     * recommended: a grey control with no explanation is a support ticket.
+     * recommended: a gray control with no explanation is a support ticket.
      */
     disabledReason?: string;
     /** Tooltip shown when the action is ENABLED. */
     tooltip?: string;
     /** Render in the always-visible row rather than the overflow menu. */
     primary?: boolean;
-    /** Error colouring, sorted last, separated by a divider in the menu. */
+    /** Error coloring, sorted last, separated by a divider in the menu. */
     destructive?: boolean;
     /** Menu subheader to file this under.  Ungrouped items come first. */
     group?: string;
     color?: SelectionActionColor;
     /** Permission-gated away entirely.  Prefer `disabled` where it is merely
-     *  unavailable — hidden actions cannot be discovered or explained. */
+     *  unavailable -- hidden actions cannot be discovered or explained. */
     hidden?: boolean;
 }
 

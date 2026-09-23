@@ -13,7 +13,7 @@ is due.  A mirror that fails every run (e.g. one too large to sync
 without OOMing its host) would otherwise be re-dispatched on every cron
 tick forever.  This column lets the result handler count consecutive
 failures so the tick can apply an escalating skip and ultimately
-auto-disable the mirror — with the count reset to 0 on any success.
+auto-disable the mirror -- with the count reset to 0 on any success.
 
 Idempotent: the column add is guarded by an ``inspect()`` check.
 SQLite- and PostgreSQL-safe.

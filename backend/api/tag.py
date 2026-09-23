@@ -140,7 +140,7 @@ async def get_tags(current_user: str = Depends(get_current_user)):
     Get all tags.
     Runs the database query in a thread pool to avoid blocking the event loop.
     """
-    # Capture the active tenant HERE, in the request's async context — the
+    # Capture the active tenant HERE, in the request's async context -- the
     # ContextVar won't be visible inside the thread-pool worker below.
     from backend.persistence.tenant_context import get_active_tenant
 

@@ -379,10 +379,10 @@ class TestHandleHeartbeat:
 class TestHandleSystemInfoTenantRouting:
     """Phase 13.1 #2: ``handle_system_info`` must route a bound host's inventory
     writes to that host's TENANT database (resolved from the agent-supplied
-    ``host_id``), not the inbound session — otherwise ``update_or_create_host``
+    ``host_id``), not the inbound session -- otherwise ``update_or_create_host``
     (which looks up by FQDN) wouldn't find the tenant-resident row and would
     create a DUPLICATE host in the bootstrap DB.  The single-engine test harness
-    can't give a second physical DB, so we assert the routing behaviour: when
+    can't give a second physical DB, so we assert the routing behavior: when
     bound, the handler opens its OWN session (not the one passed in)."""
 
     @pytest.mark.asyncio
@@ -442,7 +442,7 @@ class TestHandleSystemInfoTenantRouting:
     @pytest.mark.asyncio
     async def test_unbound_host_uses_inbound_session(self, session, mock_connection):
         """Inert path: no tenant binding (tenant_engine_for_host → None) → the
-        handler uses the passed session unchanged (single-tenant behaviour)."""
+        handler uses the passed session unchanged (single-tenant behavior)."""
         host_id = str(uuid.uuid4())
         captured = {}
 

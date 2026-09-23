@@ -10,7 +10,7 @@
  * not-installed row rendered as an error, the card would become a checklist of
  * things the operator is "missing" and would pressure somebody who wants only
  * Salt into installing four engines. So not-installed is neutral, and licensed
- * adapters are labelled rather than hidden -- hiding them would tell a Puppet
+ * adapters are labeled rather than hidden -- hiding them would tell a Puppet
  * shop that Puppet is unsupported when it is actually a paid adapter.
  */
 
@@ -99,7 +99,7 @@ describe("ConfigManagementEnginesCard", () => {
     expect(chip.closest(".MuiChip-colorError")).toBeNull();
   });
 
-  test("licensed adapters are labelled, not hidden", async () => {
+  test("licensed adapters are labeled, not hidden", async () => {
     respond(
       engine({ engine: "puppet", status: "missing", requires_license: true }),
     );
@@ -157,7 +157,7 @@ describe("ConfigManagementEnginesCard", () => {
   });
 
   test("a licensed adapter offers install once the server says it can", async () => {
-    // can_install is the server's answer and already accounts for the licence;
+    // can_install is the server's answer and already accounts for the license;
     // the card must not second-guess it by keying off requires_license.
     respond(
       engine({

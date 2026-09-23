@@ -4,7 +4,7 @@
 
 """Profile CRUD and assignments (Phase 20.1).
 
-The behaviour worth pinning here is SNAPSHOT-ON-WRITE. A profile edit has to
+The behavior worth pinning here is SNAPSHOT-ON-WRITE. A profile edit has to
 leave behind what the profile used to contain, not what it now contains --
 history whose every row is the value that replaced it looks correct until
 somebody tries to restore from it. The tests below assert the direction, not

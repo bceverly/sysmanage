@@ -17,7 +17,7 @@ Why this matters for Phase 11
 -----------------------------
 
 GitHub-direct downloads can't be substituted with a private mirror in
-an air-gapped Phase 11.2 (``role: repository``) deployment — no DNS,
+an air-gapped Phase 11.2 (``role: repository``) deployment -- no DNS,
 no HTTPS to api.github.com.  Copr/OBS URLs CAN be substituted: the
 repository engine's ``build_agent_repoint_plan`` rewrites the same
 file (``/etc/yum.repos.d/sysmanage-airgap.repo`` for DNF,
@@ -28,14 +28,14 @@ internet.
 
 For Ubuntu/Debian, the Phase 10.4 close-out already switched to PPA
 (``ppa:bceverly/sysmanage-agent``) which is substitutable the same way.
-This migration leaves Ubuntu/Debian alone — they're fine.
+This migration leaves Ubuntu/Debian alone -- they're fine.
 
 For FreeBSD/OpenBSD/NetBSD, no upstream Copr/OBS exists; those distros
 fall back to direct GitHub download or pre-staged .pkg files.  Air-gap
 support for BSDs is tracked as a separate follow-up; for now the
 air-gap repository engine emits a per-host repoint plan that points
 ``pkg`` at the local mirror, so the FreeBSD child still gets the
-agent without touching the internet — just via a different path
+agent without touching the internet -- just via a different path
 than its first-boot script expects.
 
 Idempotent: re-running just re-sets the same string.
@@ -107,7 +107,7 @@ def upgrade() -> None:
     # openSUSE family
     _update_commands(bind, "%opensuse%", OBS_OPENSUSE_INSTALL)
     _update_commands(bind, "%tumbleweed%", OBS_OPENSUSE_INSTALL)
-    # SLES — separate repo URL, different SP version
+    # SLES -- separate repo URL, different SP version
     _update_commands(bind, "%sles%", OBS_SLES_INSTALL)
     _update_commands(bind, "%suse linux enterprise%", OBS_SLES_INSTALL)
 

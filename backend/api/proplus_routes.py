@@ -226,12 +226,12 @@ def _provisioning_secret_resolver(credential_ref):
     """Resolve a compute resource's ``credential_ref`` (an OpenBAO KV path) to the
     stored secret FIELDS (Phase 18.1).
 
-    Returns the full field dict — e.g. an SSH ``private_key`` for a ``qemu+ssh``
+    Returns the full field dict -- e.g. an SSH ``private_key`` for a ``qemu+ssh``
     libvirt target, or a Proxmox API token in ``value`` plus an optional
     ``node_ssh_private_key`` for the S5 auto-enroll snippet.  The engine's
     ``_resolve_connection`` picks the fields it needs per provider kind.  Returns
     ``None`` on any failure so provisioning falls back to the server's ambient
-    SSH auth.  NEVER logs the ref or the secret — only the failure type — since
+    SSH auth.  NEVER logs the ref or the secret -- only the failure type -- since
     both are sensitive (matches ``secrets_service``'s clear-text discipline).
     """
     try:
@@ -273,7 +273,7 @@ def _provisioning_secret_writer(resource_id, fields):
     """Store a compute resource's raw secret material in OpenBAO and return the
     ``credential_ref`` (KV path) to persist (Phase 18.1).
 
-    The secret never touches the DB row — only its path does.  Raises on a vault
+    The secret never touches the DB row -- only its path does.  Raises on a vault
     failure so the create surfaces an error rather than silently persisting a
     resource whose credential wasn't saved.  NEVER logs the fields.
     """
@@ -312,7 +312,7 @@ def _provisioning_session_factory_dependency():
     Captures the active tenant IN the request context and returns a sessionmaker
     bound to that tenant's engine.  Provisioning dispatches to a background task
     (a slow first-image download must not block the request), which runs off the
-    request's async context where the tenant ContextVar wouldn't survive — so we
+    request's async context where the tenant ContextVar wouldn't survive -- so we
     capture the tenant here and hand back a factory the worker can call to open a
     fresh, correctly-scoped session (per ``request_sessionmaker`` guidance in
     persistence/partitions.py).  Works with multi-tenancy on or off.
@@ -326,8 +326,8 @@ def _provisioning_boot_session_iterator():
     """Yield a session per host-bearing database for the PXE boot endpoints
     (Phase 18.2 S2).
 
-    Those endpoints are unauthenticated — a machine PXE-booting from bare metal
-    has no credentials — so there is no JWT, and therefore no active tenant, to
+    Those endpoints are unauthenticated -- a machine PXE-booting from bare metal
+    has no credentials -- so there is no JWT, and therefore no active tenant, to
     scope the lookup with.  The MAC (or boot token) must instead be searched for
     across the bootstrap database and every provisioned tenant database, the
     same way agent registration resolves a host it has not seen before.
@@ -353,7 +353,7 @@ def _provisioning_enrollment_token_fn(
     assignment.
 
     Returns the plaintext token (shown exactly once, embedded in the agent
-    config) or ``None`` when multi-tenancy is off — a token-less install still
+    config) or ``None`` when multi-tenancy is off -- a token-less install still
     enrolls as a server-scoped host.
     """
     from backend.config import config  # pylint: disable=import-outside-toplevel
@@ -366,13 +366,13 @@ def _provisioning_enrollment_token_fn(
         #
         # False positive: the rule matches the word "token" in the message text.
         # Only the hostname is logged. The minted plaintext token is returned to
-        # the caller and never reaches a logger — see the two generate_token
+        # the caller and never reaches a logger -- see the two generate_token
         # calls below, whose result goes straight into the return value.
-        # (The suppression must sit on the line IMMEDIATELY above the finding —
+        # (The suppression must sit on the line IMMEDIATELY above the finding --
         # semgrep ignores it if explanatory comments come between.)
         # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
         logger.error(
-            "provisioning: cannot mint an enrollment token for host %s — the "
+            "provisioning: cannot mint an enrollment token for host %s -- the "
             "install assignment is not attributable to a tenant",
             hostname,
         )
@@ -408,7 +408,7 @@ def _provisioning_enrollment_token_fn(
         except TypeError:
             logger.warning(
                 "provisioning: the loaded multitenancy_engine does not accept "
-                "site_id/access_group_id (pre-18.1-S4 build) — minting the "
+                "site_id/access_group_id (pre-18.1-S4 build) -- minting the "
                 "token for tenant %s WITHOUT placement for host %s; rebuild "
                 "and reinstall multitenancy_engine to restore site placement",
                 tenant_id,
@@ -454,7 +454,7 @@ def mount_provisioning_routes(app: FastAPI) -> bool:
     # Split 18.1 args from the 18.2 seams so a version skew degrades instead of
     # taking the whole module down.  An engine .so built before Phase 18.2
     # raises TypeError on the newer keywords, and passing them unconditionally
-    # made mounting fail outright — which also killed the 18.1 routes that .so
+    # made mounting fail outright -- which also killed the 18.1 routes that .so
     # DID support.  Same defensive shape as the ``agent_install_runcmd``
     # hasattr guard in provisioning_bundle.py.
     base_kwargs = {
@@ -710,8 +710,8 @@ def mount_federation_site_routes(app: FastAPI) -> bool:
     """Mount site-side federation routes from federation_site_engine.
 
     The site engine handles the inbound side of the federation
-    protocol — endpoints the coordinator calls to enroll, push
-    policies, and dispatch commands — plus an outbound sync worker
+    protocol -- endpoints the coordinator calls to enroll, push
+    policies, and dispatch commands -- plus an outbound sync worker
     that drains ``federation_sync_queue`` upstream.  When loaded,
     its router replaces the OSS stubs under ``/api/v1/federation/site/*``.
 
@@ -772,7 +772,7 @@ def mount_federation_controller_routes(app: FastAPI) -> bool:
     False otherwise.  The Cython engine (lives in the Pro+ source repo,
     NOT this OSS one) exposes ``get_federation_controller_router(...)``
     with the same dependency-injection signature as every other Pro+
-    engine — keeping the wiring uniform.
+    engine -- keeping the wiring uniform.
     """
     federation_engine = module_loader.get_module("federation_controller_engine")
     if federation_engine is None:

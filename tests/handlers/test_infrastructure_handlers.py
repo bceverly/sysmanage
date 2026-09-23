@@ -51,7 +51,7 @@ def _query_chain_with_in(returned_first):
 
 
 def _validate_host_id_ok():
-    """Patch helper — validate_host_id returns True (host registered)."""
+    """Patch helper -- validate_host_id returns True (host registered)."""
     return patch(
         "backend.utils.host_validation.validate_host_id",
         new=AsyncMock(return_value=True),
@@ -165,8 +165,8 @@ class TestScriptExecutionResult:
         def filter_side_effect(*a, **kw):
             inner = MagicMock()
             # Two patterns:
-            #   .filter().first()        — host lookup or execution lookup
-            #   .filter().filter().first() — script_uuid dedup (skipped here)
+            #   .filter().first()        -- host lookup or execution lookup
+            #   .filter().filter().first() -- script_uuid dedup (skipped here)
             inner.filter.return_value.first.return_value = None  # dedup
             return inner
 

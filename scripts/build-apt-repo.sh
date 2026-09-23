@@ -44,7 +44,7 @@ for ARCH in $ARCHES; do
         > "dists/$SUITE/main/binary-$ARCH/Packages"
     # -n omits gzip's timestamp+name header.  Without it the .gz is
     # byte-different on every regeneration even when the content is identical,
-    # while staying the SAME SIZE — which an `aws s3 sync --size-only` then
+    # while staying the SAME SIZE -- which an `aws s3 sync --size-only` then
     # refuses to upload, leaving R2 serving an old Packages.gz under a Release
     # that describes the new one ("Hash Sum mismatch", forever).
     gzip -9nc "dists/$SUITE/main/binary-$ARCH/Packages" \
@@ -64,7 +64,7 @@ ARCH_LIST="$(echo "$ARCHES" | tr ' ' ' ')"
 if command -v apt-ftparchive >/dev/null 2>&1; then
     # Write OUTSIDE the scanned tree, then move in.  `> Release` would create
     # the (empty) target before apt-ftparchive walks the directory, so the tool
-    # checksums its own output file — which is precisely how the published
+    # checksums its own output file -- which is precisely how the published
     # Release ended up listing a bogus 38-byte "Release" entry.
     TMP_RELEASE="$(mktemp)"
     trap 'rm -f "$TMP_RELEASE"' EXIT
@@ -108,12 +108,12 @@ fi
 # Fail loudly rather than publishing a repo apt will reject.
 for required in Suite Codename Components Architectures; do
     grep -q "^$required:" Release || {
-        echo "ERROR: generated Release is missing '$required:' — apt would refuse this repo" >&2
+        echo "ERROR: generated Release is missing '$required:' -- apt would refuse this repo" >&2
         exit 1
     }
 done
 grep -q "^ .* Release$" Release && {
-    echo "ERROR: Release checksums itself — a stale Release was not removed" >&2
+    echo "ERROR: Release checksums itself -- a stale Release was not removed" >&2
     exit 1
 }
 

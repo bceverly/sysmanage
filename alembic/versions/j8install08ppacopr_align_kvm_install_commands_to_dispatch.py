@@ -15,25 +15,25 @@ alignment with the canonical dispatch table in
 
 Pre-migration state (data audit captured 2026-05-11):
 
-  KVM — Legacy direct-download (curl + dpkg / curl + rpm -i) on:
+  KVM -- Legacy direct-download (curl + dpkg / curl + rpm -i) on:
     Ubuntu 22.04, 24.04, 26.04
     Debian 11, 12
     Oracle Linux 8, 9
     Rocky Linux 9
     AlmaLinux 9
 
-  KVM — pip-from-PyPI (broken — sysmanage-agent is not published
+  KVM -- pip-from-PyPI (broken -- sysmanage-agent is not published
   to PyPI) on:
     Fedora Server 40, 41
 
-  LXD — Legacy direct-download on:
+  LXD -- Legacy direct-download on:
     Ubuntu 22.04, 24.04, 26.04
     Debian 12
 
-  VMM — Legacy direct-download on:
+  VMM -- Legacy direct-download on:
     Debian 12
 
-  VMM — pip-from-PyPI (broken — sysmanage-agent is not published to
+  VMM -- pip-from-PyPI (broken -- sysmanage-agent is not published to
   PyPI, every install fails) on:
     OpenBSD 7.4, 7.5, 7.6, 7.7
 
@@ -43,16 +43,16 @@ Pre-migration state (data audit captured 2026-05-11):
     VMM Ubuntu 22.04, 24.04
     Every WSL row
 
-  Legacy-by-design — direct-download pattern is functional today,
+  Legacy-by-design -- direct-download pattern is functional today,
   switches to upstream package channels when ports submissions land
   (engine flags ``legacy=True`` for these):
     KVM Alpine 3.19, 3.20
     KVM FreeBSD 13.5, 14.3, 15.0  (already use ``fetch`` + ``pkg add``
-        correctly — left as-is)
+        correctly -- left as-is)
     VMM Alpine 3.19, 3.20
     bhyve FreeBSD 15.0
 
-  Not seeded — NetBSD is not currently offered as a child host
+  Not seeded -- NetBSD is not currently offered as a child host
   distribution.  Adding it would be a separate seed migration once a
   NetBSD release artifact exists in the agent build pipeline.
 
@@ -106,7 +106,7 @@ def _as_json_array(cmds):
     for the ``agent_install_commands`` text column.  We don't use
     ``json.dumps`` because the existing column values are hand-formatted
     with 4-space indentation and the prior migrations followed the same
-    style — keeping it visually consistent on inspection."""
+    style -- keeping it visually consistent on inspection."""
     body = ",\n        ".join('"' + c.replace('"', '\\"') + '"' for c in cmds)
     return "[\n        " + body + "\n    ]"
 
@@ -232,11 +232,11 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    # Restoring the exact prior values for every row is not feasible —
+    # Restoring the exact prior values for every row is not feasible --
     # each (distro, version) had slightly different curl URL patterns
     # baked in.  The downgrade path resets the column to NULL so the
     # caller falls back entirely to the engine's dispatch table (or,
-    # if the engine isn't loaded, gets an empty install list — which
+    # if the engine isn't loaded, gets an empty install list -- which
     # is the same failure mode as a missing distribution row, surfacing
     # the misconfiguration loudly rather than silently shipping a stale
     # recipe).

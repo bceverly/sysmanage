@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Phase 13.2.1 — Slice 6 native ``/api/v1`` migration (reports / audit / misc).
+Phase 13.2.1 -- Slice 6 native ``/api/v1`` migration (reports / audit / misc).
 
 Dual-surface contract for: reports, report_branding, report_templates,
 audit_log, broadcast, queue, diagnostics, license_management, plugin_bundle,
@@ -38,8 +38,8 @@ class TestDualSurface:
 class TestParamRoutesVersioned:
     """Param'd diagnostics route has native v1 + alias.
 
-    (OSS ``reports`` was renamed to /api/v1/reporting — see
-    test_api_v1_secrets_reports_rename.py — since the Pro+ reporting_engine owns
+    (OSS ``reports`` was renamed to /api/v1/reporting -- see
+    test_api_v1_secrets_reports_rename.py -- since the Pro+ reporting_engine owns
     /api/v1/reports.)
     """
 

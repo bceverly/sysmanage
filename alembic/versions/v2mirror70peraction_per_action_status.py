@@ -8,8 +8,8 @@ Revision ID: v2mirror70peraction
 Revises: u1mirror60ubresolute
 Create Date: 2026-05-27 19:00:00.000000
 
-The original schema collapsed every plan outcome — sync, snapshot,
-restore, integrity_check, gc — onto one ``last_sync_*`` trio.  That
+The original schema collapsed every plan outcome -- sync, snapshot,
+restore, integrity_check, gc -- onto one ``last_sync_*`` trio.  That
 meant a successful sync followed by a failed snapshot stamped the
 mirror row as ``FAILED`` and erased the operator's view of whether
 the sync had ever worked.  This migration splits the column out:
@@ -52,7 +52,7 @@ _TABLE = "mirror_repository"
 
 # Per-action column groups.  Each tuple: (action_prefix, has_message_id).
 # integrity_check and gc don't dispatch from UI buttons today so they
-# don't need ``_message_id`` yet — but adding the column now avoids a
+# don't need ``_message_id`` yet -- but adding the column now avoids a
 # second migration later when they grow buttons.
 _ACTIONS = ("snapshot", "restore", "integrity", "gc")
 
@@ -76,7 +76,7 @@ def upgrade() -> None:
             ]
         )
     # sync already exists in the original schema except for
-    # ``last_sync_message_id`` — backfill that one so we get the
+    # ``last_sync_message_id`` -- backfill that one so we get the
     # in-flight spinner on sync too.
     new_columns.append(("last_sync_message_id", sa.String(length=80), True))
 

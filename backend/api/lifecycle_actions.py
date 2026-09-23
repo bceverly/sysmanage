@@ -3,15 +3,15 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-OS lifecycle action API (Phase 14.3) — "release-upgrade a host".
+OS lifecycle action API (Phase 14.3) -- "release-upgrade a host".
 
 OSS orchestration: create a release-upgrade job via the Pro+ ``lifecycle_engine``
-(method inference + pre-checks — the moat) and dispatch the upgrade command to the
+(method inference + pre-checks -- the moat) and dispatch the upgrade command to the
 agent through the EXISTING store-and-forward queue.  Because the command is a
 ``command`` message, 14.2 maintenance-window gating applies automatically; a job
 with ``scheduled_at`` is additionally held by the queue until that time.
 
-Gated behind the Professional ``OS_LIFECYCLE`` feature (defence in depth; the UI
+Gated behind the Professional ``OS_LIFECYCLE`` feature (defense in depth; the UI
 hides it when unlicensed).
 """
 
@@ -90,7 +90,7 @@ async def upgrade_host_release(
 
     The job (with method inference + pre-checks) is created by the engine against
     the tenant partition; the command is then enqueued through the same
-    store-and-forward path every other host command uses — so agent delivery,
+    store-and-forward path every other host command uses -- so agent delivery,
     maintenance-window gating (14.2), and ``scheduled_at`` deferral all apply
     unchanged.
     """

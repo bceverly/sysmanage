@@ -7,7 +7,7 @@
 The schedule API in ``backend/api/airgap_collection_schedule.py``
 exposes a manual ``POST /api/v1/airgap/collector/schedules/tick``
 endpoint that fires every due schedule.  Cron-driven scheduling
-needs a background loop that calls the same logic on a heartbeat —
+needs a background loop that calls the same logic on a heartbeat --
 otherwise the only way schedules ever fire is if an operator
 manually hits ``/tick``.
 
@@ -15,18 +15,18 @@ Design notes:
   * Tick cadence is 60 seconds.  Cron's minimum granularity is one
     minute, so a tighter cadence buys nothing and a looser one
     risks missing minute-boundary schedules.
-  * Each tick uses a fresh DB session and closes it at the end —
+  * Each tick uses a fresh DB session and closes it at the end --
     no long-lived sessions parked across the asyncio sleep.
   * The service degrades gracefully when ``airgap_collector_engine``
     or ``automation_engine`` is unloaded: the gate at startup
     short-circuits when collector is absent, and the inner tick
     handles automation_engine absence by leaving ``next_run`` alone
-    (so schedules fire once and then stop advancing — same
-    behaviour as the manual /tick endpoint when automation_engine
+    (so schedules fire once and then stop advancing -- same
+    behavior as the manual /tick endpoint when automation_engine
     is missing).
   * Errors from a single tick (DB hiccup, malformed
     ``target_request_json``) are caught and logged but never
-    propagate up to kill the loop — a single-schedule failure
+    propagate up to kill the loop -- a single-schedule failure
     should not stop the others from firing on the next iteration.
 
 This is the OSS-side close-out for the "cron-driven collection
@@ -50,12 +50,12 @@ from backend.persistence.db import get_db
 
 logger = logging.getLogger(__name__)
 
-# 60s — matches cron's minimum granularity (one minute).  A tighter
+# 60s -- matches cron's minimum granularity (one minute).  A tighter
 # cadence wastes DB churn; a looser one would let schedules whose
 # ``next_run`` lands on the dead minute slip a full cycle.
 TICK_INTERVAL_SECONDS = 60
 
-# Shorter back-off on inner exception — the operator should see fast
+# Shorter back-off on inner exception -- the operator should see fast
 # recovery on a transient DB blip but a persistent error shouldn't
 # spam the logs at full cadence.  Exposed as a constant so tests can
 # patch it.
@@ -65,7 +65,7 @@ ERROR_BACKOFF_SECONDS = 30
 def _run_one_tick() -> dict:
     """Fire every due schedule and advance their ``next_run`` cursors.
 
-    Returns a summary dict for logging — ``fired`` is the count of
+    Returns a summary dict for logging -- ``fired`` is the count of
     schedules that produced a ``QUEUED`` ``AirgapCollectionRun``,
     ``errors`` is the count of schedules whose
     ``target_request_json`` failed to parse.  Both counts are zero
@@ -75,7 +75,7 @@ def _run_one_tick() -> dict:
 
     collector = module_loader.get_module("airgap_collector_engine")
     if collector is None:
-        # Collector not loaded — nothing to schedule against.  Caller
+        # Collector not loaded -- nothing to schedule against.  Caller
         # gate already filters this case at startup, but the inner
         # check is cheap and makes the function safe to invoke
         # standalone (e.g. from a test).
@@ -126,7 +126,7 @@ def _run_one_tick() -> dict:
                     schedule.cron, datetime.now(timezone.utc)
                 )
             else:
-                # automation_engine absent — leave next_run as-is so
+                # automation_engine absent -- leave next_run as-is so
                 # we don't re-fire on the next tick.  Surface via the
                 # summary so the operator can see it in the logs.
                 summary["skipped_automation_absent"] = True
@@ -134,7 +134,7 @@ def _run_one_tick() -> dict:
         if due:
             db.commit()
     except Exception:  # pylint: disable=broad-except
-        # Log + rollback but don't propagate — the next tick can retry.
+        # Log + rollback but don't propagate -- the next tick can retry.
         logger.exception("airgap collection schedule tick failed")
         db.rollback()
     finally:
@@ -166,11 +166,11 @@ async def airgap_schedule_tick_service() -> None:
                 )
             await asyncio.sleep(TICK_INTERVAL_SECONDS)
         except asyncio.CancelledError:
-            logger.info("Air-gap schedule tick service cancelled — exiting loop")
+            logger.info("Air-gap schedule tick service cancelled -- exiting loop")
             raise
         except Exception:  # pylint: disable=broad-except
             logger.exception(
-                "Air-gap schedule tick service error — sleeping then retrying"
+                "Air-gap schedule tick service error -- sleeping then retrying"
             )
             # Shorter back-off than the normal cadence so the operator
             # sees fast recovery on transient DB blips, but not so

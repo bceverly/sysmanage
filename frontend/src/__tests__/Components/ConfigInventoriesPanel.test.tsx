@@ -7,7 +7,7 @@
  *
  * The preview is the reason this panel exists in the form it does. An
  * inventory RESOLVES at launch rather than storing a host list, so "who am I
- * about to change" is a question only the server can answer — and it is the
+ * about to change" is a question only the server can answer -- and it is the
  * one to answer before pressing a button that touches four thousand machines.
  *
  * An inventory that currently resolves to nothing is called out loudly, for

@@ -3,7 +3,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-# install.sh — air-gap bundle dispatcher.  Detects the host OS, maps it
+# install.sh -- air-gap bundle dispatcher.  Detects the host OS, maps it
 # to one of the bundle's per-platform subdirectories, and runs the
 # platform-specific install script there.
 #
@@ -22,7 +22,7 @@
 # Adding a new platform: drop a new <subdir> with its own install.sh and
 # add a case-branch below.  No central registry to keep in sync.
 #
-# POSIX sh — not bash — because Alpine ships only sh + busybox by default.
+# POSIX sh -- not bash -- because Alpine ships only sh + busybox by default.
 
 set -eu
 

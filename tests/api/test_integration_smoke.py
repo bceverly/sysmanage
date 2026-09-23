@@ -47,7 +47,7 @@ def test_db_readiness_reports_database(client):
 
 @pytest.mark.integration
 def test_health_endpoint_supports_head(client):
-    """HEAD on /api/health must work too — used by some monitors / load balancers."""
+    """HEAD on /api/health must work too -- used by some monitors / load balancers."""
     resp = client.head("/api/health")
     assert resp.status_code == 200
 
@@ -71,7 +71,7 @@ def test_unknown_endpoint_returns_404(client):
 
 @pytest.mark.integration
 def test_openapi_schema_is_served(client):
-    """FastAPI's /openapi.json should be available — a basic stack-up smoke check."""
+    """FastAPI's /openapi.json should be available -- a basic stack-up smoke check."""
     resp = client.get("/openapi.json")
     assert resp.status_code == 200
     schema = resp.json()

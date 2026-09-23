@@ -11,7 +11,7 @@ Create Date: 2026-05-01 16:55:00.000000
 The earlier z5a6b7c8d9e0 migration switched FreeBSD KVM agent_install_commands
 from ``pip install sysmanage-agent`` (which doesn't exist on PyPI and never
 worked) to ``fetch + pkg add`` from the GitHub release.  But it only patched
-the older versions (14.2/14.1/14.0/13.4/13.3) — the newer 15.0/14.3/13.5
+the older versions (14.2/14.1/14.0/13.4/13.3) -- the newer 15.0/14.3/13.5
 distributions were seeded later by y4z5a6b7c8d9 with the same broken
 commands and never got caught up.  Spawning a child host on any of those
 versions silently failed: cloud-init "succeeded" because pip install no-ops,

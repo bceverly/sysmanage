@@ -206,7 +206,7 @@ def next_run_from_cron(
     every day matches.
 
     ``max_iterations`` bounds the brute-force search at one year of
-    minutes — pathological expressions like ``0 0 31 2 *`` (Feb 31)
+    minutes -- pathological expressions like ``0 0 31 2 *`` (Feb 31)
     that never fire would otherwise loop forever.  Raises
     ``CronParseError`` if no match is found within the budget."""
     minutes, hours, doms, months, dows = parse_cron(expr)
@@ -258,7 +258,7 @@ def selectors_for_profile(profile, db) -> List:
     If ``profile.tag_id`` is NULL, returns every approved host.  Otherwise,
     returns the hosts carrying that tag.  Returned in a deterministic
     order (by host id) so test assertions are stable."""
-    from backend.persistence import models  # local import — model graph
+    from backend.persistence import models  # local import -- model graph
 
     if profile.tag_id is None:
         rows = (

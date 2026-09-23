@@ -10,14 +10,14 @@ defined policies the coordinator distributes to sites.  Pro+ engine
 wraps these as ``/api/v1/federation/policies*`` endpoints.
 
 Polymorphic by ``policy_type`` (``update_profile``, ``firewall_role``,
-``compliance_baseline``, …) — the type-specific body is JSON in
+``compliance_baseline``, …) -- the type-specific body is JSON in
 ``definition_json``.  Validation of the body shape is the engine's
 job (it knows what an update_profile looks like vs a firewall_role);
 the service layer just stores opaque JSON.
 
 Assignment + push semantics:
 
-  * ``assign_policy_to_sites`` is idempotent — re-assigning the same
+  * ``assign_policy_to_sites`` is idempotent -- re-assigning the same
     (policy, site) doesn't error, it just resets ``push_status='pending'``
     so the next push cycle re-pushes after the operator edited the
     policy body.
@@ -45,7 +45,7 @@ from backend.persistence.models.federation import (
 from backend.services import federation_retry_policy as retry_policy
 
 # ---------------------------------------------------------------------
-# Status constants — mirrored in the engine + UI to avoid string typos.
+# Status constants -- mirrored in the engine + UI to avoid string typos.
 # ---------------------------------------------------------------------
 
 PUSH_STATUS_PENDING = "pending"
@@ -159,7 +159,7 @@ def create_policy(
     """Create a new policy of ``policy_type`` named ``name``.
 
     ``definition`` is serialized to JSON.  The (type, name) pair is
-    unique — re-creating a policy with the same name under the same
+    unique -- re-creating a policy with the same name under the same
     type raises :class:`PolicyNameConflictError`.
     """
     if not policy_type or not policy_type.strip():
@@ -167,7 +167,7 @@ def create_policy(
     if not name or not name.strip():
         raise ValueError("policy name is required")
     if not isinstance(definition, dict):
-        raise ValueError("definition must be a dict (will be JSON-serialised)")
+        raise ValueError("definition must be a dict (will be JSON-serialized)")
 
     policy_type = policy_type.strip()
     name = name.strip()
@@ -233,7 +233,7 @@ def list_policies(
     return list(session.execute(stmt).scalars().all())
 
 
-# Whitelist for ``update_policy`` — same approach as
+# Whitelist for ``update_policy`` -- same approach as
 # ``federation_site_service.update_site``.
 _UPDATABLE_FIELDS = frozenset({"name", "description", "definition"})
 
@@ -295,7 +295,7 @@ def update_policy(
     **fields: Any,
 ) -> FederationPolicy:
     """Patch a policy's editable fields.  Bumps ``version`` if anything
-    actually changes — assigned sites will pick up the new version
+    actually changes -- assigned sites will pick up the new version
     on the next push cycle.
     """
     policy = _ensure_policy(session, policy_id)
@@ -369,7 +369,7 @@ def assign_policy_to_sites(
 ) -> List[FederationPolicyAssignment]:
     """Assign ``policy_id`` to one or more sites.
 
-    Idempotent — re-assigning resets ``push_status='pending'`` so
+    Idempotent -- re-assigning resets ``push_status='pending'`` so
     the operator can force a re-push without removing + re-adding.
     """
     policy = _ensure_policy(session, policy_id)
@@ -398,7 +398,7 @@ def assign_policy_to_sites(
             )
             session.add(assignment)
         else:
-            # Re-assignment is a "re-push intent" — reset status AND
+            # Re-assignment is a "re-push intent" -- reset status AND
             # reset the retry counter so a previously dead-lettered
             # assignment gets a fresh exponential-backoff window.
             existing.push_status = PUSH_STATUS_PENDING
@@ -501,7 +501,7 @@ def requeue_site_policies(
     is a *re-push intent*: it resets each of the site's assignments to
     ``pending`` and clears the error + retry counter (rescuing any
     dead-lettered rows) so the background push worker re-delivers them on
-    its next tick.  It does NOT push synchronously — per the
+    its next tick.  It does NOT push synchronously -- per the
     queue-everything rule, delivery stays with the worker so it survives a
     coordinator→site network blip.
 
@@ -659,7 +659,7 @@ def list_all_pending_pushes(
     """Cross-policy variant for the coordinator's push worker.
 
     Returns every ``(policy, assignment)`` pair where the assignment
-    needs delivery — either never pushed, or its ``pushed_version`` is
+    needs delivery -- either never pushed, or its ``pushed_version`` is
     behind the policy's current version.  ``is_active=False`` policies
     are skipped (deactivation should prevent further pushes).  Joins
     in a single query so the worker doesn't N+1 the policy table.
@@ -667,7 +667,7 @@ def list_all_pending_pushes(
     Phase 12.10 hardening: assignments in their backoff window
     (after a failed push attempt) are skipped, and assignments
     whose ``push_attempts >= MAX_ATTEMPTS`` are excluded entirely
-    via the ``PUSH_STATUS_DEAD`` check — the operator must re-
+    via the ``PUSH_STATUS_DEAD`` check -- the operator must re-
     assign the policy to give them a fresh window.  ``now`` is
     injectable for deterministic tests.
     """

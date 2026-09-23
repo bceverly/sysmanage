@@ -13,7 +13,7 @@ An Air-Gap Repository server lets the operator pick which block device
 on the server_configuration singleton so the Air-Gap Repositories page
 can enable its Import button against the right drive across restarts.
 
-Nullable String — NULL means "no import device chosen yet".  ADD COLUMN
+Nullable String -- NULL means "no import device chosen yet".  ADD COLUMN
 is supported by both PostgreSQL and SQLite, so no dialect guard needed.
 """
 

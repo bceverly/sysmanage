@@ -81,7 +81,7 @@ async def handle_update_apply_result(  # NOSONAR
         ]
         latest_pending_log_by_pkg: dict = {}
         if pkg_keys:
-            from sqlalchemy import tuple_  # local import — keep callers tidy
+            from sqlalchemy import tuple_  # local import -- keep callers tidy
 
             for log in (
                 db.query(UpdateExecutionLog)

@@ -1,4 +1,4 @@
-# Phase 11.8 stub — sysmanage (server).  ``DISTVERSION`` is sed-replaced
+# Phase 11.8 stub -- sysmanage (server).  ``DISTVERSION`` is sed-replaced
 # from ``0.0.0`` to the release tag value by the ``freebsd-ports`` job
 # in .github/workflows/build-and-release.yml.  Do not hand-edit on
 # release.  ``distinfo`` (TIMESTAMP / SHA256 / SIZE) is also regenerated
@@ -9,7 +9,7 @@ DISTVERSION=	0.0.0
 CATEGORIES=	sysutils python
 # No MASTER_SITES / DISTFILES / DIST_SUBDIR ASSIGNMENT here on purpose: USE_GITHUB
 # below derives all three from GH_ACCOUNT/GH_PROJECT/GH_TAGNAME, and a plain "="
-# would redefine what it derived — portlint flags that, and the two can disagree
+# would redefine what it derived -- portlint flags that, and the two can disagree
 # about what is fetched.  Further down, MASTER_SITES is APPENDED (+=) with a
 # :prefetch group for the node-modules distfile USES=npm generates; += adds to
 # what USE_GITHUB derived rather than replacing it.
@@ -71,10 +71,10 @@ RUN_DEPENDS=	${PYTHON_PKGNAMEPREFIX}aiohttp>0:www/py-aiohttp@${PY_FLAVOR} \
 		${PYTHON_PKGNAMEPREFIX}zope.interface>0:devel/py-zope.interface@${PY_FLAVOR} \
 		nginx>0:www/nginx
 
-# python:...,run — the build compiles the web UI with node, not python, so
+# python:...,run -- the build compiles the web UI with node, not python, so
 # python is a RUN dependency only even though this port does build.
 # Deliberately NO ``USE_PYTHON=autoplist``: autoplist generates the packing
-# list for setuptools-installed modules, and this port has no setup.py — it
+# list for setuptools-installed modules, and this port has no setup.py -- it
 # stages source trees by hand below.  Together they produce a wrong plist.
 # pgsql:15+ NOT a hardcoded databases/postgresql15-server RUN_DEPENDS.
 # Pinning major 15 conflicts with the rest of the dependency tree: py-psycopg
@@ -86,8 +86,8 @@ RUN_DEPENDS=	${PYTHON_PKGNAMEPREFIX}aiohttp>0:www/py-aiohttp@${PY_FLAVOR} \
 # python:3.10+, NOT 3.9+.  The Debian control file requires python3 (>= 3.10)
 # and the backend uses syntax that 3.9 cannot parse; declaring 3.9+ would let
 # the port install against a 3.9 default and fail at first import, which no
-# build-time check catches.  (The AGENT is genuinely 3.9-compatible — it has a
-# 3.9 CI leg — so the two ports differ here on purpose.)
+# build-time check catches.  (The AGENT is genuinely 3.9-compatible -- it has a
+# 3.9 CI leg -- so the two ports differ here on purpose.)
 # nodejs:build MUST come with an explicit ``build`` argument.  npm.mk includes
 # nodejs.mk itself, and nodejs.mk's own default registers node as a RUN
 # dependency -- so USES=npm alone put www/node24 in RUN_DEPENDS, making every
@@ -147,7 +147,7 @@ NPM_PKGFILE=	frontend/package.json
 # package directories.
 MASTER_SITES+=	https://repo.sysmanage.org/server/freebsd/${DISTVERSION}/:prefetch
 
-# The rc.d script runs the server as this user, and the port must CREATE it —
+# The rc.d script runs the server as this user, and the port must CREATE it --
 # nothing else will.  Without this the service starts and dies with
 # "su: unknown login: sysmanage", which no build-time check catches: the
 # package is perfectly well-formed, it just cannot run.  Found 2026-08-09
@@ -166,12 +166,12 @@ GROUPS=		sysmanage
 
 USE_RC_SUBR=	sysmanage
 
-# PYTHON_CMD is NOT in the default SUB_LIST — USES=python contributes
+# PYTHON_CMD is NOT in the default SUB_LIST -- USES=python contributes
 # PYTHON_VERSION, PYTHON_VER, PYTHON_SUFFIX and friends, but not the
 # interpreter path.  Without this line USE_RC_SUBR leaves the literal
 # string %%PYTHON_CMD%% in the installed rc.d script, and the service
 # fails at exec with no useful message.  Nothing catches it: the port
-# builds, packages, passes check-plist and stage-qa, and installs — the
+# builds, packages, passes check-plist and stage-qa, and installs -- the
 # placeholder only bites when the service is STARTED.  Found 2026-08-10
 # via `sh -x` on the installed rc script.
 SUB_LIST+=	PYTHON_CMD=${PYTHON_CMD}
@@ -181,7 +181,7 @@ SUB_LIST+=	PYTHON_CMD=${PYTHON_CMD}
 SUB_FILES=	pkg-message sysmanage-nginx.conf
 
 # NO_ARCH stays: the PACKAGE is architecture-independent (Python source plus
-# the static JS/CSS vite emits).  The BUILD is not — it runs node — but that is
+# the static JS/CSS vite emits).  The BUILD is not -- it runs node -- but that is
 # a build-time property and does not make the package arch-specific.
 NO_ARCH=	yes
 
@@ -238,13 +238,13 @@ do-install:
 		${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/backend/benchmarks
 	${INSTALL_DATA} ${WRKSRC}/alembic.ini ${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/
 # The schema tool.  Nothing runs alembic at startup, so without this the
-# database stays empty and the server has no tables — it is the step the Debian
+# database stays empty and the server has no tables -- it is the step the Debian
 # postinst prints as "3. Database Migration".
 #
 # Only THIS script, not all of scripts/.  The Debian package ships the whole
 # directory (debian/install: "scripts/* opt/sysmanage/scripts/"), but that is
-# 1.8 MB and 87 entries of development tooling — i18n checkers, CI gates,
-# CodeQL dumpers, test-network builders — none of which belongs in a runtime
+# 1.8 MB and 87 entries of development tooling -- i18n checkers, CI gates,
+# CodeQL dumpers, test-network builders -- none of which belongs in a runtime
 # package, and most of which carries bash shebangs that would drag
 # shells/bash in as a dependency for no runtime benefit.  It resolves its
 # project root as the PARENT of its own directory, so the scripts/ level must
@@ -266,7 +266,7 @@ do-install:
 # installs and then dies with KeyError: 'api'.  The root example is the
 # one the code actually matches.  (The stale installer examples are an
 # upstream bug affecting centos/opensuse/macos/windows/netbsd/freebsd
-# too — tracked separately; this port sidesteps it.)
+# too -- tracked separately; this port sidesteps it.)
 	${INSTALL_DATA} ${WRKSRC}/sysmanage.yaml.example \
 		${STAGEDIR}${PREFIX}/etc/sysmanage.yaml.sample
 	${MKDIR} ${STAGEDIR}${PREFIX}/etc/nginx
@@ -287,7 +287,7 @@ do-install:
 # the nginx sample for why.
 	${MKDIR} ${STAGEDIR}${PREFIX}/etc/sysmanage/tls
 # The built web UI, from the :frontend distfile.  Fail LOUDLY if it is absent
-# rather than quietly producing a package with no user interface — that is the
+# rather than quietly producing a package with no user interface -- that is the
 # defect this whole distfile exists to prevent, and a silent empty directory
 # looks identical to a working install until someone opens a browser.  The
 # OpenBSD port guards the same way for the same reason.
@@ -297,8 +297,8 @@ do-install:
 # Writable state.  The server runs unprivileged and GENERATES its mTLS CA and
 # server certificate on first start; with nowhere to write it aborts in the
 # FastAPI lifespan and the service never comes up.  The Linux packaging grants
-# exactly this set — ReadWritePaths=/var/lib/sysmanage /var/log/sysmanage
-# /etc/sysmanage in all three systemd units — and this port shipped none of it.
+# exactly this set -- ReadWritePaths=/var/lib/sysmanage /var/log/sysmanage
+# /etc/sysmanage in all three systemd units -- and this port shipped none of it.
 #
 # /var/db is hier(7)'s home for generated state on FreeBSD, so the certificates
 # live there rather than under /etc: they are produced by the program, not
@@ -306,16 +306,16 @@ do-install:
 # SYSMANAGE_LOG_DIR at these, so nothing depends on the code's built-in
 # defaults (/etc/sysmanage/certs, which an unprivileged process cannot create).
 #
-# Ownership and mode come from the @dir() lines in pkg-plist — 0750, not 0700,
+# Ownership and mode come from the @dir() lines in pkg-plist -- 0750, not 0700,
 # because ca.crt must be readable by whatever serves it to agents; the private
 # keys are chmod 0600 by the application itself.  Staging them here only lets
-# check-plist match.  NOTE: pkg-plist has NO comment syntax — every line there
+# check-plist match.  NOTE: pkg-plist has NO comment syntax -- every line there
 # is an entry, so this rationale has to live in the Makefile.
 	${MKDIR} ${STAGEDIR}/var/db/${PORTNAME}/certs \
 		${STAGEDIR}/var/log/${PORTNAME}
 
 # ``backend`` and ``alembic`` are hundreds of files that change every release,
-# so they cannot be enumerated by hand in pkg-plist — an unlisted staged file
+# so they cannot be enumerated by hand in pkg-plist -- an unlisted staged file
 # fails stage-qa, which the 3-line plist would have done on the first real
 # build.  Appending the staged trees to ${TMPPLIST} is the in-tree idiom for a
 # generated file set.  pkg-plist keeps the fixed entries.

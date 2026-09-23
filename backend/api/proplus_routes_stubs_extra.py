@@ -322,7 +322,7 @@ def _mount_stub_group_b(app, results: dict) -> int:
             return {"licensed": False}
 
         # Custom Metrics & Graphs relocated into the licensed
-        # observability_engine (Pro+ moat — Custom Metrics Slice 2).  Without
+        # observability_engine (Pro+ moat -- Custom Metrics Slice 2).  Without
         # the engine, these sub-paths serve the licensed-stub so
         # /api/v1/observability/custom-metrics* returns {"licensed": False}
         # rather than 404.  Mirrors the gpg-keys stub template.
@@ -378,7 +378,7 @@ def _mount_stub_group_b(app, results: dict) -> int:
         logger.debug("Mounted observability_engine stub routes")
 
     if not results.get("federation_controller_engine"):
-        # 12.1.A surface — every endpoint here returns
+        # 12.1.A surface -- every endpoint here returns
         # ``{"licensed": False}`` until the Pro+ controller engine is
         # loaded.  Frontend (12.3) probes any of these to know whether
         # to render the federation UI.  When the engine loads, its own
@@ -406,7 +406,7 @@ def _mount_stub_group_b(app, results: dict) -> int:
             token: str,
         ):
             # Phase 12.10 Slice 2.5: no ``Depends(get_current_user)``
-            # here — the enrollment token IS the auth (chicken-and-egg
+            # here -- the enrollment token IS the auth (chicken-and-egg
             # otherwise: site servers don't have JWT credentials with
             # the coordinator until enrollment completes).
             return {"licensed": False}
@@ -627,7 +627,7 @@ def _mount_stub_group_b(app, results: dict) -> int:
         ):
             return {"licensed": False}
 
-        # Phase 12.5 — federation-aware dynamic-secret leases.
+        # Phase 12.5 -- federation-aware dynamic-secret leases.
         @router.get("/secret-leases")
         async def fed_secret_leases_list_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
@@ -641,11 +641,11 @@ def _mount_stub_group_b(app, results: dict) -> int:
         ):
             return {"licensed": False}
 
-        # Phase 12.6 ingest surface — endpoints sites POST data INTO
+        # Phase 12.6 ingest surface -- endpoints sites POST data INTO
         # the coordinator over the federation wire protocol.  These
         # are authenticated by the site's long-lived sync bearer token
         # (NOT the operator's JWT), so they intentionally do NOT
-        # ``Depends(get_current_user)`` — the stub layer just refuses
+        # ``Depends(get_current_user)`` -- the stub layer just refuses
         # unlicensed access uniformly.
 
         @router.post("/sites/{site_id}/rollups/hosts")
@@ -695,7 +695,7 @@ def _mount_stub_group_b(app, results: dict) -> int:
         logger.debug("Mounted federation_controller_engine stub routes")
 
     if not results.get("federation_site_engine"):
-        # 12.2 surface — endpoints the *coordinator* calls on the
+        # 12.2 surface -- endpoints the *coordinator* calls on the
         # site server.  Distinct prefix from the controller's outbound
         # surface (``/api/v1/federation/*``) so a server running as
         # both roles (test fixture, never production) keeps them

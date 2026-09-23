@@ -13,7 +13,7 @@ Covers:
   * Audit-log entries are written for every mutating operation.
 
 Each test runs against an in-memory SQLite engine bootstrapped from
-the SQLAlchemy ``Base.metadata`` for just the federation tables —
+the SQLAlchemy ``Base.metadata`` for just the federation tables --
 no Alembic, no external state.
 """
 
@@ -59,7 +59,7 @@ def session():
     """Fresh in-memory SQLite + a session.  Each test is hermetic.
 
     ``engine.dispose()`` is in the ``finally`` so we don't leave
-    sqlite3.Connection objects pending GC across the test run —
+    sqlite3.Connection objects pending GC across the test run --
     pytest's ``ResourceWarning: unclosed database`` plumbing
     surfaces every undisposed engine, and on a 5000-test sweep
     those warnings become the bulk of the output.
@@ -203,7 +203,7 @@ class TestCompleteEnrollment:
         assert bearer  # non-empty plaintext
         assert site.sync_bearer_token_hash is not None
         assert site.sync_bearer_token_hash == svc._hash_token(bearer)
-        # Plaintext != hash — confirms we didn't accidentally store
+        # Plaintext != hash -- confirms we didn't accidentally store
         # the plaintext on the row.
         assert bearer != site.sync_bearer_token_hash
 
@@ -344,7 +344,7 @@ class TestUpdateSite:
 
     def test_rejects_token_field(self, session):
         """``enrollment_token_hash`` must not be patchable via update_site
-        — it's managed exclusively by ``complete_enrollment``."""
+        -- it's managed exclusively by ``complete_enrollment``."""
         site, _ = svc.create_site(session, name="Cleveland", url="https://a.x")
         with pytest.raises(ValueError):
             svc.update_site(session, site.id, enrollment_token_hash="x")
@@ -594,7 +594,7 @@ class TestCancelEnrollment:
         assert entries[0].target_site_id == site.id
 
     def test_enrolled_site_cannot_be_cancelled(self, session):
-        """Cancellation is for *pending* enrollment only — flipping an
+        """Cancellation is for *pending* enrollment only -- flipping an
         already-enrolled site needs ``remove_site``, not cancel.  This
         is what the operator path expects."""
         site = quick_enroll(session, name="Cleveland", url="https://a.x")
@@ -723,7 +723,7 @@ class TestSyncBearerToken:
         assert svc.find_site_by_sync_bearer_token(session, "") is None
 
     def test_lookup_rejects_suspended_site(self, session):
-        # Suspended sites can't push data — only ``status='enrolled'``
+        # Suspended sites can't push data -- only ``status='enrolled'``
         # rows are valid bearer-token holders.
         site, bearer, _coord_outbound = enroll_site(
             session, name="Cleveland", url="https://a.x"

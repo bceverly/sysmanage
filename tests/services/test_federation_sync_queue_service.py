@@ -108,7 +108,7 @@ class TestEnqueue:
             dedup_key="host-1:status",
         )
         session.commit()
-        # Only one row in the queue — the second call replaced the first.
+        # Only one row in the queue -- the second call replaced the first.
         rows = qsvc.peek_batch(session)
         assert len(rows) == 1
         assert json.loads(rows[0].payload_json) == {"status": "down"}
@@ -149,7 +149,7 @@ class TestPeekBatch:
         c = qsvc.enqueue(session, payload_type="x", payload={"n": 3})
         # peek_batch orders by (created_at, id).  All three rows are
         # inserted in the same instant here, and on a coarse-resolution
-        # clock (e.g. Windows) they get an identical created_at — which
+        # clock (e.g. Windows) they get an identical created_at -- which
         # makes the id (a random UUID) the tiebreaker and the order
         # non-deterministic.  Stamp strictly-increasing created_at values
         # so the test deterministically exercises the FIFO ordering.

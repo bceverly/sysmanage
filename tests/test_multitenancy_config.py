@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Tests for the multi-tenancy config accessors — Phase 13.1.A.
+Tests for the multi-tenancy config accessors -- Phase 13.1.A.
 
 Covers the default-off ``multitenancy.enabled`` toggle and the
 ``registry:`` / ``database:`` alias-and-deprecate behavior.

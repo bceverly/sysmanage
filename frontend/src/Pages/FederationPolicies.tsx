@@ -75,7 +75,7 @@ import {
 import FederationAlertConfig from "../Components/FederationAlertConfig";
 
 // Operator-visible policy types.  Mirrored from
-// federation_policy_service's docstring — the engine accepts any
+// federation_policy_service's docstring -- the engine accepts any
 // string but the UI offers these common shapes as a select.  Free-
 // form input remains available via the "Other..." sentinel.
 const KNOWN_POLICY_TYPES = [
@@ -336,7 +336,7 @@ const FederationPolicies: React.FC = () => {
     });
     try {
       // Fetch both the available sites AND the policy's current
-      // assignments in parallel — the dialog pre-checks rows the
+      // assignments in parallel -- the dialog pre-checks rows the
       // operator has already assigned, and re-assignment is treated
       // by the backend as a push-status reset (per 12.1.F semantics).
       const [sitesResp, detailResp] = await Promise.all([

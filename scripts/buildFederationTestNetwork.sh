@@ -3,23 +3,23 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-# buildFederationTestNetwork.sh — Provision four KVM VMs for sysmanage
+# buildFederationTestNetwork.sh -- Provision four KVM VMs for sysmanage
 # multi-site federation testing on libvirt/KVM.
 #
-#   sysmanage-coordinator — The federation COORDINATOR.  Dual-homed: a
+#   sysmanage-coordinator -- The federation COORDINATOR.  Dual-homed: a
 #                           NAT NIC for internet (install sysmanage from
 #                           the PPA) plus a static 10.70.0.1 on the
 #                           isolated sysmanage-fed bridge.  Set its
 #                           Server Role -> Federation card to
 #                           "Coordinator" in the UI.
-#   sysmanage-site-a      — A subordinate SITE server.  Dual-homed
+#   sysmanage-site-a      -- A subordinate SITE server.  Dual-homed
 #                           (internet + static 10.70.0.2).  Enrolls
 #                           upstream against the coordinator at
 #                           10.70.0.1.  Server Role -> "Site".
-#   sysmanage-site-b      — A second SITE server (static 10.70.0.3) so you
+#   sysmanage-site-b      -- A second SITE server (static 10.70.0.3) so you
 #                           can exercise cross-site rollups, the federated
 #                           host directory, and per-site command dispatch.
-#   sysmanage-fed-agent   — A sysmanage-agent (static 10.70.0.11) that
+#   sysmanage-fed-agent   -- A sysmanage-agent (static 10.70.0.11) that
 #                           registers with site-a, so you can test the full
 #                           dispatch path: coordinator -> site-a -> agent.
 #
@@ -29,7 +29,7 @@
 #   scripts/buildFederationTestNetwork.sh status   # show VM/network state + IPs
 #
 # Uses the Ubuntu 26.04 server cloud image + cloud-init.  Does NOT install
-# sysmanage or sysmanage-agent — that's your job after the VMs come up.
+# sysmanage or sysmanage-agent -- that's your job after the VMs come up.
 #
 # All four VMs share credentials:
 #   user     = ubuntu
@@ -40,7 +40,7 @@
 #                    qemu-utils qemu-system-x86 cloud-image-utils curl python3-gi
 #
 # Resource sizing.  Disk sizes are the maximum the VM filesystem can
-# grow to — qcow2 is thin-allocated so unused space doesn't actually
+# grow to -- qcow2 is thin-allocated so unused space doesn't actually
 # consume host disk.  Defaults are sized for a real end-to-end test:
 #   coordinator : 2 vCPU / 4 GiB RAM / 40 GiB disk  (full sysmanage stack:
 #                 postgres + OpenBAO + backend + the federation_controller
@@ -378,19 +378,19 @@ ensure_vm() {
     if vm_running "$name"; then
       log "$name: already running"
     else
-      log "$name: defined but stopped — starting"
+      log "$name: defined but stopped -- starting"
       virsh_ start "$name" >/dev/null
       CREATED_COUNT=$((CREATED_COUNT + 1))
     fi
   else
-    log "$name: not defined — creating"
+    log "$name: not defined -- creating"
     "$create_fn"
     CREATED_COUNT=$((CREATED_COUNT + 1))
   fi
 }
 
-# get_nat_ip <vm>  — returns the DHCP-assigned IP (no CIDR) on the NAT NIC,
-# empty string if not yet known.  Does NOT wait — call after the post-start
+# get_nat_ip <vm>  -- returns the DHCP-assigned IP (no CIDR) on the NAT NIC,
+# empty string if not yet known.  Does NOT wait -- call after the post-start
 # settle sleep.  Filters to the default-network lease so the static
 # federation address never shadows the NAT one.
 get_nat_ip() {
@@ -415,7 +415,7 @@ print_vm_summary() {
   if [[ -n "$nat" ]]; then
     echo "  NAT     : $nat"
   else
-    echo "  NAT     : (pending — re-run with the status subcommand once cloud-init finishes)"
+    echo "  NAT     : (pending -- re-run with the status subcommand once cloud-init finishes)"
   fi
   case "$role" in
     coordinator)
@@ -482,10 +482,10 @@ cmd_start() {
   echo "  user     = ${USERNAME}"
   echo "  password = ${PASSWORD}"
   echo
-  echo "sysmanage UI login — when you configure /etc/sysmanage.yaml on the server(s):"
+  echo "sysmanage UI login -- when you configure /etc/sysmanage.yaml on the server(s):"
   echo "  - security.admin_userid MUST be a valid EMAIL (login validates EmailStr;"
   echo "    a bare 'admin' -> HTTP 422, not 401). e.g. admin@example.com / admin"
-  echo "  - email.enabled: true  (just the flag — no SMTP server/password needed)."
+  echo "  - email.enabled: true  (just the flag -- no SMTP server/password needed)."
   echo
   echo "Federation network (${FED_NET_NAME}, static, no internet):"
   echo "  coordinator : ${COORD_IP}"
@@ -524,9 +524,9 @@ cmd_stop() {
       virsh_ undefine "$name" --remove-all-storage --nvram >/dev/null 2>&1 \
         || virsh_ undefine "$name" --remove-all-storage >/dev/null 2>&1 \
         || virsh_ undefine "$name" >/dev/null 2>&1 \
-        || warn "$name: undefine failed — may need manual cleanup with 'virsh undefine $name --remove-all-storage'"
+        || warn "$name: undefine failed -- may need manual cleanup with 'virsh undefine $name --remove-all-storage'"
     else
-      log "$name: not defined — skipping undefine"
+      log "$name: not defined -- skipping undefine"
     fi
   done
 
@@ -595,7 +595,7 @@ usage() {
   cat <<EOF
 Usage: $0 {start|stop|status}
 
-  start   Create and start the four VMs (idempotent — already-running
+  start   Create and start the four VMs (idempotent -- already-running
           VMs are reported, not re-created).
   stop    Destroy all four VMs, delete their disks and seed ISOs, and
           tear down the ${FED_NET_NAME} isolated network.  The Ubuntu

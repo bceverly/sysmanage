@@ -490,8 +490,8 @@ msgid "Invalid TOTP code."
 msgstr "Ongeldige TOTP-code."
 
 #: backend/api/auth_mfa.py:296 backend/api/auth_mfa.py:358
-msgid "MFA challenge expired — please log in again."
-msgstr "MFA-uitdaging verlopen — log in opnieuw."
+msgid "MFA challenge expired -- please log in again."
+msgstr "MFA-uitdaging verlopen -- log in opnieuw."
 
 #: backend/api/auth_mfa.py:301
 msgid "Invalid MFA challenge."
@@ -1396,10 +1396,10 @@ msgstr "Mirror-tick vereist automation_engine voor cron-evaluatie."
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed"
+"Mirror %s has not completed a successful sync yet -- wait for sync to succeed"
 " before assigning it as a default."
 msgstr ""
-"Spiegel %s heeft nog geen succesvolle synchronisatie voltooid — wacht tot de"
+"Spiegel %s heeft nog geen succesvolle synchronisatie voltooid -- wacht tot de"
 " synchronisatie is geslaagd voordat je deze instelt als standaard."
 
 #: backend/api/repository_mirroring.py:613
@@ -1444,11 +1444,11 @@ msgstr ""
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be"
-" loaded — the collector reads each target's bundle from a snapshot of its "
+" loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 "Air-gap-collectie uitvoeringen vereisen dat het repository_mirroring_engine-"
-"module is geladen — de collector leest elke doel-bundle van een snapshot van"
+"module is geladen -- de collector leest elke doel-bundle van een snapshot van"
 " zijn spiegelboom."
 
 #: backend/api/airgap_collector_runs.py:229
@@ -4982,7 +4982,7 @@ msgstr ""
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
-"message(s) for retry (NOT deleting) — may be an in-flight enrollment or a "
+"message(s) for retry (NOT deleting) -- may be an in-flight enrollment or a "
 "deleted host"
 msgstr ""
 "Host %(host_id)s niet gevonden in deze database; %(count)d bericht(en) uit "
@@ -5494,10 +5494,10 @@ msgstr "Ongeldig geheimformaat"
 #, python-format
 #~ msgid ""
 #~ "Host %s not found on this database; deferring %d queued message(s) for retry"
-#~ " (NOT deleting) — may be an in-flight enrollment or a deleted host"
+#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
 #~ "Host %s niet gevonden in deze database; %d wachtrijberichten worden "
-#~ "uitgesteld (worden NIET verwijderd) — kan een aanmelding zijn die nog bezig "
+#~ "uitgesteld (worden NIET verwijderd) -- kan een aanmelding zijn die nog bezig "
 #~ "is of een verwijderde host"
 
 #, python-format

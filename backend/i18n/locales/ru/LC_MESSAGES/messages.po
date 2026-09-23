@@ -492,8 +492,8 @@ msgid "Invalid TOTP code."
 msgstr "Неверный TOTP-код."
 
 #: backend/api/auth_mfa.py:296 backend/api/auth_mfa.py:358
-msgid "MFA challenge expired — please log in again."
-msgstr "Истек срок MFA-проверки — пожалуйста, повторите вход снова."
+msgid "MFA challenge expired -- please log in again."
+msgstr "Истек срок MFA-проверки -- пожалуйста, повторите вход снова."
 
 #: backend/api/auth_mfa.py:301
 msgid "Invalid MFA challenge."
@@ -1402,10 +1402,10 @@ msgstr "Тик зеркала требует автоматизированно�
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed"
+"Mirror %s has not completed a successful sync yet -- wait for sync to succeed"
 " before assigning it as a default."
 msgstr ""
-"Зеркало %s еще не завершило успешную синхронизацию — подождите до тех пор, "
+"Зеркало %s еще не завершило успешную синхронизацию -- подождите до тех пор, "
 "пока синхронизация не будет выполнена успешно перед назначением его "
 "значением по умолчанию."
 
@@ -1452,11 +1452,11 @@ msgstr ""
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be"
-" loaded — the collector reads each target's bundle from a snapshot of its "
+" loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 "Коллекция в изолированном режиме требует загрузки модуля "
-"repository_mirroring_engine — собирающий компонент считывает пакет каждого "
+"repository_mirroring_engine -- собирающий компонент считывает пакет каждого "
 "целевого объекта из снимка его зеркального дерева."
 
 #: backend/api/airgap_collector_runs.py:229
@@ -3519,7 +3519,7 @@ msgstr "Пароль успешно изменен"
 
 #: backend/api/profile.py:226
 msgid "File size too large. Maximum allowed size is 5MB."
-msgstr "Размер файла слишком велик. Максимально допустимый размер — 5МБ."
+msgstr "Размер файла слишком велик. Максимально допустимый размер -- 5МБ."
 
 #: backend/api/profile.py:238
 msgid "Unsupported image format. Allowed formats: PNG, JPEG, JPG, GIF, WEBP"
@@ -4075,12 +4075,12 @@ msgstr "Сообщение должно содержать имя узла ил�
 
 #: backend/api/agent.py:605
 msgid "Host ID no longer valid - please re-register"
-msgstr "ID узла больше недействителен — пожалуйста, перезарегистрируйтесь"
+msgstr "ID узла больше недействителен -- пожалуйста, перезарегистрируйтесь"
 
 #: backend/api/agent.py:617
 msgid "Host ID and hostname mismatch - please re-register"
 msgstr ""
-"Несоответствие ID узла и имени хоста — пожалуйста, перезарегистрируйтесь"
+"Несоответствие ID узла и имени хоста -- пожалуйста, перезарегистрируйтесь"
 
 #: backend/api/agent.py:634
 msgid "Host must register before sending inventory data"
@@ -5006,11 +5006,11 @@ msgstr ""
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
-"message(s) for retry (NOT deleting) — may be an in-flight enrollment or a "
+"message(s) for retry (NOT deleting) -- may be an in-flight enrollment or a "
 "deleted host"
 msgstr ""
 "Хост %(host_id)s не найден в этой базе данных; откладываю %(count)d "
-"сообщение(я) в очереди на повторную отправку (БЕЗ удаления) — возможно, это "
+"сообщение(я) в очереди на повторную отправку (БЕЗ удаления) -- возможно, это "
 "хост в процессе регистрации или уже удаленный хост"
 
 #: backend/websocket/inbound_processor.py:284
@@ -5521,10 +5521,10 @@ msgstr "Неверный формат секрета"
 #, python-format
 #~ msgid ""
 #~ "Host %s not found on this database; deferring %d queued message(s) for retry"
-#~ " (NOT deleting) — may be an in-flight enrollment or a deleted host"
+#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
 #~ "Узел '%s' не найден в этой базе данных; откладываются %d сообщения из "
-#~ "очереди (НЕ УДАЛЯЮТСЯ) — возможно, это процесс регистрации или удаленный "
+#~ "очереди (НЕ УДАЛЯЮТСЯ) -- возможно, это процесс регистрации или удаленный "
 #~ "хост"
 
 #, python-format

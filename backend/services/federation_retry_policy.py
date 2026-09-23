@@ -9,23 +9,23 @@ dispatched_commands).
 
 The wire-protocol workers (Slice 2 sync drain + Slice 3 policy +
 command push) mark entries failed on transport / 4xx / 5xx, but
-before this module they retried every entry on every tick — a down
+before this module they retried every entry on every tick -- a down
 coordinator got hammered, a bad payload chewed CPU in a loop.
 
 This module provides:
 
-  * ``compute_backoff(attempts) -> seconds``  — exponential with
+  * ``compute_backoff(attempts) -> seconds``  -- exponential with
     bounded jitter, capped at ``BACKOFF_CAP_SECONDS``.  Pure
     function; deterministic in tests when ``random.Random`` is
     seeded.
-  * ``MAX_ATTEMPTS``  — universal dead-letter threshold.  After
+  * ``MAX_ATTEMPTS``  -- universal dead-letter threshold.  After
     this many tries, the queue surfaces transition out of the
     worker's view (sync_queue: status='dead' marker on the row;
     assignments: push_status='dead'; commands: never auto-dead-
-    lettered — terminal FSM states for commands are operator-
+    lettered -- terminal FSM states for commands are operator-
     driven).
   * ``is_ready_for_retry(last_attempt_at, attempts, now) -> bool``
-    — convenience wrapper the workers' list queries use to skip
+    -- convenience wrapper the workers' list queries use to skip
     entries still in their backoff window.
 
 Design notes
@@ -33,7 +33,7 @@ Design notes
 Backoff uses the standard ``base * 2^attempts + jitter`` shape that
 AWS / Kubernetes / Tenacity all converge on.  The constants here
 target a "down coordinator for hours, recover gracefully" failure
-mode rather than "rapid retry of a transient blip" — the FIRST
+mode rather than "rapid retry of a transient blip" -- the FIRST
 retry is delayed at all (no immediate re-fire) because in the
 federation wire protocol every failure costs the receiving side a
 DB write + audit-log entry.
@@ -45,7 +45,7 @@ from typing import Optional
 
 # Backoff math.
 #
-# Schedule (no jitter) — attempt N means "N-th failure has been
+# Schedule (no jitter) -- attempt N means "N-th failure has been
 # recorded, what's the wait before attempt N+1?":
 #
 #     attempt=1  → 10s
@@ -76,7 +76,7 @@ def compute_backoff(attempts: int, rng: Optional[random.Random] = None) -> float
     """Return the wait (seconds) before the next retry given that
     ``attempts`` failures have already been recorded.
 
-    ``attempts <= 0`` returns 0 — a row that has never failed should
+    ``attempts <= 0`` returns 0 -- a row that has never failed should
     fire immediately on the next tick.  ``attempts >= MAX_ATTEMPTS``
     still returns the capped backoff; the caller is responsible for
     transitioning to dead-letter rather than retrying.
@@ -104,7 +104,7 @@ def is_ready_for_retry(
     ``attempts <= 0`` → True (no failures, backoff doesn't apply).
     Otherwise compare ``last_attempt_at + compute_backoff(attempts) <= now``.
 
-    Jitter is recomputed every call, which is fine — backoff is
+    Jitter is recomputed every call, which is fine -- backoff is
     advisory; the goal is to space retries, not to commit to a
     specific timestamp.
     """
@@ -115,6 +115,6 @@ def is_ready_for_retry(
 
 
 def is_dead_lettered(attempts: int) -> bool:
-    """``attempts >= MAX_ATTEMPTS`` — caller should transition the
+    """``attempts >= MAX_ATTEMPTS`` -- caller should transition the
     row out of the worker's view rather than retry."""
     return attempts >= MAX_ATTEMPTS

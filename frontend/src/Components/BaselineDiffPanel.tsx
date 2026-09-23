@@ -43,7 +43,7 @@ const messageFrom = (err: unknown, fallback: string): string => {
 };
 
 export interface BaselineDiffPanelProps {
-    /** The host being examined — the one an operator is trying to fix. */
+    /** The host being examined -- the one an operator is trying to fix. */
     hostId: string;
     /**
      * Candidate reference hosts. Optional: the panel loads them itself when
@@ -57,7 +57,7 @@ export interface BaselineDiffPanelProps {
  * Compare this host against a reference ("golden") host.
  *
  * The other kind of drift: the drift dashboard answers "does this host match
- * its assigned profile", this answers "does this host match THAT host" — what
+ * its assigned profile", this answers "does this host match THAT host" -- what
  * an operator reaches for when there is no profile yet and staging works while
  * production does not.
  */
@@ -233,7 +233,7 @@ const BaselineDiffPanel: React.FC<BaselineDiffPanelProps> = ({ hostId, hosts }) 
         // A category the server REFUSED to compare must never render as a
         // match. Before this branch existed, `comparable: false` arrived with
         // all-zero counts and fell straight into the green "Matches" chip
-        // below — so a Windows host compared against a Linux one reported
+        // below -- so a Windows host compared against a Linux one reported
         // that its mounts matched, having never compared them.
         if (result.comparable === false && result.not_comparable) {
             return (
@@ -392,8 +392,8 @@ const BaselineDiffPanel: React.FC<BaselineDiffPanelProps> = ({ hostId, hosts }) 
                                             <TableRow key={`${item.name}-${field}`}>
                                                 <TableCell>{item.name}</TableCell>
                                                 <TableCell>{field}</TableCell>
-                                                <TableCell>{delta.reference ?? '—'}</TableCell>
-                                                <TableCell>{delta.target ?? '—'}</TableCell>
+                                                <TableCell>{delta.reference ?? '--'}</TableCell>
+                                                <TableCell>{delta.target ?? '--'}</TableCell>
                                             </TableRow>
                                         )),
                                     )}

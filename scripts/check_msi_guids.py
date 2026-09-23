@@ -11,7 +11,7 @@ WiX identifies a component by its GUID, so two components sharing one is an
 error (WIX0369) and the MSI does not build.  The failure mode is nasty in a
 specific way: the GUIDs in this file are hand-authored and follow a visual
 pattern (``A7B8C9D0-...``, ``B8C9D0E1-...``), so the obvious way to add a new
-component -- copy a neighbour and advance the pattern -- lands on a value used
+component -- copy a neighbor and advance the pattern -- lands on a value used
 further down the file.  That is exactly what happened on 2026-08-18: two new
 nginx components collided with ``NssmExecutable`` and ``SbomBackend``, and it
 surfaced only in CI, after a full release build on both architectures.
@@ -84,7 +84,7 @@ def main() -> int:
             f"FAIL: {len(problems)} WiX component GUID problem(s).\n"
             "WiX rejects duplicate component GUIDs (WIX0369) and the MSI will "
             "not build.\n"
-            "Generate a fresh one -- do NOT copy a neighbour and advance the "
+            "Generate a fresh one -- do NOT copy a neighbor and advance the "
             "pattern, which is\n"
             "how the last collision happened:\n"
             '    python3 -c "import uuid; print(str(uuid.uuid4()).upper())"\n',

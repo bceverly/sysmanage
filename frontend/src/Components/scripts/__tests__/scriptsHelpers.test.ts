@@ -71,7 +71,7 @@ describe('catalogs', () => {
     });
 });
 
-describe('platform normalisation', () => {
+describe('platform normalization', () => {
     test.each([
         ['Windows', 'windows'],
         ['win32', 'windows'],
@@ -168,7 +168,7 @@ describe('grid locale text', () => {
         // count === -1 means "total unknown".  NOTE the doubled label: the
         // source builds countDisplay as `of <to>` and then prepends `of` again,
         // so a real locale renders "1-10 of of 10".  Pinned as CURRENT
-        // behaviour, not as desired behaviour -- MUI's own convention here is
+        // behavior, not as desired behavior -- MUI's own convention here is
         // "1-10 of more than 10".  See ROADMAP Phase 19 coverage note.
         expect(label({ from: 1, to: 10, count: -1 })).toBe('1-10 common.of common.of 10');
     });

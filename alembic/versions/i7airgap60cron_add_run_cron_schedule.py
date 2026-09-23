@@ -14,7 +14,7 @@ scheduler tick (POST ``/airgap/collector/collection/runs/tick``) without
 requiring a separate ``AirgapCollectionSchedule`` row.
 
 This is the Phase 11.1 follow-up companion to ``cron_schedule`` support
-added to ``airgap_collector_engine.build_collection_run_plan`` — see
+added to ``airgap_collector_engine.build_collection_run_plan`` -- see
 ROADMAP.md §11.1 for the deferred-enhancement context.
 
 SQLite-safe: uses ``op.batch_alter_table(recreate="auto")`` so the

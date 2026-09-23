@@ -573,7 +573,7 @@ const Secrets: React.FC = () => {
                   labelRowsPerPage: t('common.rowsPerPage', 'Rows per page:'),
                   labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) => {
                     const countDisplay = count === -1 ? t('common.of', 'of') + ' ' + to : count;
-                    return from + '–' + to + ' ' + t('common.of', 'of') + ' ' + countDisplay;
+                    return from + '-' + to + ' ' + t('common.of', 'of') + ' ' + countDisplay;
                   },
                 },
                 noRowsLabel: t('secrets.noSecrets', 'No secrets found'),

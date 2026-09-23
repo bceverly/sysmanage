@@ -12,7 +12,7 @@ plan-builders (materialize / serve / repoint).  When that engine isn't loaded
 EVERY endpoint returns a clean HTTP 402 (never a 500) so the frontend can render
 a license-upgrade prompt.
 
-Slice 0 exposes read-only stubs (list environments / content views) — enough to
+Slice 0 exposes read-only stubs (list environments / content views) -- enough to
 prove the gate and drive the plugin shell.  CRUD, publish, and promotion arrive
 in later slices.
 """
@@ -91,7 +91,7 @@ async def list_content_views(db: Session = Depends(get_shared_db)):
 
 
 # =============================================================================
-# Lifecycle Environments — CRUD (Phase 16, Slice 1)
+# Lifecycle Environments -- CRUD (Phase 16, Slice 1)
 #
 # Environments are the ordered promotion path (Library -> Dev -> Test -> Prod).
 # They are platform truth (SHARED partition).  The Library is the path root /
@@ -140,7 +140,7 @@ async def create_environment(
     body: EnvironmentCreate, db: Session = Depends(get_shared_db)
 ):
     """Create an environment (appended to the path; the very first one becomes
-    the Library — the publish target / path root)."""
+    the Library -- the publish target / path root)."""
     _check_clm_module()
     name = _norm_name(body.name)
     existing = db.query(models.SharedLifecycleEnvironment).all()
@@ -245,7 +245,7 @@ async def reorder_environments(
 
 
 # =============================================================================
-# Content Views — CRUD (Phase 16, Slice 2)
+# Content Views -- CRUD (Phase 16, Slice 2)
 #
 # A content view is a named selection of repository mirrors (SHARED partition).
 # ``repos`` are soft refs to tenant ``mirror_repository`` rows (mirror_id) or,
@@ -391,7 +391,7 @@ def _validated_filter(f: ContentViewFilterIn) -> tuple:
                 detail=_("The '%s' filter needs a 'date' (YYYY-MM-DD)") % ftype,
             ) from exc
         rule = {"date": date}
-    else:  # security_only — no rule payload
+    else:  # security_only -- no rule payload
         rule = {}
     return ftype, rule
 
@@ -536,7 +536,7 @@ async def delete_content_view(cv_id: str, db: Session = Depends(get_shared_db)):
 
 
 # =============================================================================
-# Publish (Phase 16, Slice 2) — the immutability core.
+# Publish (Phase 16, Slice 2) -- the immutability core.
 #
 # Publishing snapshots the CV's mirrors into an immutable, physically-
 # materialized version on the mirror host, via an async agent plan (the engine
@@ -572,7 +572,7 @@ def _advisory_after_cutoff_pkgs(
     shared_db: Session, package_managers, cutoff: str
 ) -> list:
     """Distinct package names fixed by advisories PUBLISHED AFTER ``cutoff``
-    (drives the advisory_cutoff deny-list — freeze content at the date)."""
+    (drives the advisory_cutoff deny-list -- freeze content at the date)."""
     cutoff_dt = datetime.strptime(cutoff, "%Y-%m-%d")
     query = (
         shared_db.query(models.SharedAdvisoryPackage.package_name)
@@ -592,7 +592,7 @@ def _advisory_after_cutoff_pkgs(
 def _resolve_cv_filters(shared_db: Session, cv, package_managers) -> List[dict]:
     """Reduce the CV's stored filters to engine primitives (allow/deny/by_date),
     resolving the advisory-coupled ones against ``shared_advisory``.  A
-    security_only that resolves to zero packages is SKIPPED with a loud log —
+    security_only that resolves to zero packages is SKIPPED with a loud log --
     never emit an empty allow-list, which the engine would read as 'keep nothing'
     and wipe the repo."""
     primitives: List[dict] = []

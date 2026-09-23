@@ -13,7 +13,7 @@
  *
  * **Remediation is a real change, and it is confirmed by name.** The dialog
  * names both the host and the profile, because "are you sure?" without a
- * subject is not a check — it is a speed bump.
+ * subject is not a check -- it is a speed bump.
  */
 
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
@@ -308,7 +308,7 @@ describe("remediation", () => {
     ).toBeInTheDocument();
   });
 
-  test("cancelling sends nothing", async () => {
+  test("canceling sends nothing", async () => {
     await openDetail();
     fireEvent.click(await screen.findByText("Remediate to baseline"));
     fireEvent.click(await screen.findByRole("button", { name: "Cancel" }));
@@ -316,7 +316,7 @@ describe("remediation", () => {
   });
 });
 
-describe("ConfigDrift — remediation playbooks", () => {
+describe("ConfigDrift -- remediation playbooks", () => {
   const openDetail = async () => {
     render(<ConfigDrift />);
     await screen.findByText("web01.invalid");
@@ -337,7 +337,7 @@ describe("ConfigDrift — remediation playbooks", () => {
   });
 
   test("a finding with no matching rule offers only the baseline re-apply", async () => {
-    // The behaviour before playbooks existed, and the right fallback: a rule
+    // The behavior before playbooks existed, and the right fallback: a rule
     // library nobody has written yet must not remove the repair that works.
     await openDetail();
     expect(await screen.findByText("Remediate to baseline")).toBeInTheDocument();

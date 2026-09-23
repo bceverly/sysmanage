@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 /**
- * Repository Freshness card (Phase 11 B4) — visible only when this
+ * Repository Freshness card (Phase 11 B4) -- visible only when this
  * server is the private-side half of an air-gap pair (``role:
  * repository``).  Surfaces ``days_since_ingest`` and the
  * freshness label returned by ``GET /api/v1/airgap/repository/
@@ -91,7 +91,7 @@ const RepositoryFreshnessCard: React.FC = () => {
     };
   }, [serverRole]);
 
-  // Hide entirely on non-repository roles — this card is meaningless
+  // Hide entirely on non-repository roles -- this card is meaningless
   // on a standard or collector deployment.
   if (serverRole !== 'repository') {
     return null;

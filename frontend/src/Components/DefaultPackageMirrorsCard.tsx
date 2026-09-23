@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 /**
- * Default Package Mirrors card (Phase 10.4.4) — lives on the Host
+ * Default Package Mirrors card (Phase 10.4.4) -- lives on the Host
  * Defaults settings tab.
  *
  * One row per (platform, version_key, os_family) tuple drawn from

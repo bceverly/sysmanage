@@ -77,7 +77,7 @@ const AirgapCollections: React.FC = () => {
   const [formIncludeCve, setFormIncludeCve] = useState(true);
   const [formIncludeCompliance, setFormIncludeCompliance] = useState(true);
   // Mirror-id picker state.  Multi-select; all picks must share a
-  // host_id (the backend enforces this and 400s otherwise — we mirror
+  // host_id (the backend enforces this and 400s otherwise -- we mirror
   // the validation client-side so the user gets feedback before
   // submit).
   const [formMirrorIds, setFormMirrorIds] = useState<string[]>([]);
@@ -115,7 +115,7 @@ const AirgapCollections: React.FC = () => {
     setSnackbarOpen(true);
   };
 
-  // Fetch server role once on mount — same pattern AirgapRepositories
+  // Fetch server role once on mount -- same pattern AirgapRepositories
   // uses.  The page renders the "not applicable" placeholder when the
   // role isn't ``collector``.
   useEffect(() => {
@@ -148,7 +148,7 @@ const AirgapCollections: React.FC = () => {
     } catch (e: unknown) {
       const status = (e as { response?: { status?: number } })?.response?.status;
       if (status === 402) {
-        // License gate — surface a friendly message instead of a
+        // License gate -- surface a friendly message instead of a
         // generic error.  The page still renders so the operator can
         // see why nothing's loading.
         showError(
@@ -193,7 +193,7 @@ const AirgapCollections: React.FC = () => {
     setFormBurnDevice('');
     setDialogOpen(true);
     // Lazy-load configured mirrors so the picker has fresh data
-    // each time the dialog opens.  Filter to enabled-only here —
+    // each time the dialog opens.  Filter to enabled-only here --
     // the backend would reject disabled picks but no point showing
     // them.
     try {
@@ -320,7 +320,7 @@ const AirgapCollections: React.FC = () => {
         showError(
           t(
             'airgapCollections.noIsoOnDisk',
-            'No ISO file found on disk yet — re-poll in a moment.',
+            'No ISO file found on disk yet -- re-poll in a moment.',
           ),
         );
         return;
@@ -341,7 +341,7 @@ const AirgapCollections: React.FC = () => {
         ),
       );
     } catch (e: unknown) {
-      // /discs is new — fall back to the legacy single-disc path so
+      // /discs is new -- fall back to the legacy single-disc path so
       // older backends still work.
       const status = (e as { response?: { status?: number } })?.response?.status;
       if (status === 404) {
@@ -359,10 +359,10 @@ const AirgapCollections: React.FC = () => {
 
   const handleDownload = async (run: CollectionRun, discIndex?: number) => {
     // Three paths:
-    //   1. Raw ISO from /runs/{id}/iso[?disc=N] — works as soon as the
+    //   1. Raw ISO from /runs/{id}/iso[?disc=N] -- works as soon as the
     //      run reaches ISO_BUILT.  This is the typical "build an ISO
     //      and download it" flow; no optical disc, no signed manifest.
-    //   2. Signed manifest disc from /manifests/{id}/download — used
+    //   2. Signed manifest disc from /manifests/{id}/download -- used
     //      when the run actually burned to disc and produced a
     //      manifest envelope.  Only kicks in when the ISO endpoint
     //      can't satisfy the request (e.g. file purged).
@@ -373,7 +373,7 @@ const AirgapCollections: React.FC = () => {
       // Native streaming download.  Mint a short-lived, single-run token
       // (authenticated POST), then point the browser straight at the
       // token-authed download route so it streams to disk.  We must NOT
-      // pull the response into a Blob — a multi-GB ISO buffered in memory
+      // pull the response into a Blob -- a multi-GB ISO buffered in memory
       // OOMs the browser tab (and can take the backend down behind a
       // buffering proxy).  The mint POST performs the same readiness
       // checks (404/409/410) the old GET did, so the catch below still
@@ -418,7 +418,7 @@ const AirgapCollections: React.FC = () => {
         showError(
           t(
             'airgapCollections.noManifestFound',
-            'Run has no downloadable ISO yet — wait until status reaches ISO_BUILT or COMPLETE.',
+            'Run has no downloadable ISO yet -- wait until status reaches ISO_BUILT or COMPLETE.',
           ),
         );
         return;
@@ -468,21 +468,21 @@ const AirgapCollections: React.FC = () => {
         headerName: t('airgapCollections.column.created', 'Created'),
         width: 180,
         valueGetter: (_v, row: CollectionRun) =>
-          row.created_at ? formatUTCTimestamp(row.created_at, '—') : '—',
+          row.created_at ? formatUTCTimestamp(row.created_at, '--') : '--',
       },
       {
         field: 'started_at',
         headerName: t('airgapCollections.column.started', 'Started'),
         width: 180,
         valueGetter: (_v, row: CollectionRun) =>
-          row.started_at ? formatUTCTimestamp(row.started_at, '—') : '—',
+          row.started_at ? formatUTCTimestamp(row.started_at, '--') : '--',
       },
       {
         field: 'completed_at',
         headerName: t('airgapCollections.column.completed', 'Completed'),
         width: 180,
         valueGetter: (_v, row: CollectionRun) =>
-          row.completed_at ? formatUTCTimestamp(row.completed_at, '—') : '—',
+          row.completed_at ? formatUTCTimestamp(row.completed_at, '--') : '--',
       },
       {
         field: 'iso_size_bytes',
@@ -503,7 +503,7 @@ const AirgapCollections: React.FC = () => {
         renderCell: (p: GridRenderCellParams<CollectionRun>) => (
           <Stack direction="row" spacing={0.5}>
             {/* Show the download icon as soon as the ISO file exists
-                on disk (ISO_BUILT) — operators shouldn't have to wait
+                on disk (ISO_BUILT) -- operators shouldn't have to wait
                 through an optional BURNING stage to get the ISO. */}
             {(p.row.status === 'ISO_BUILT' ||
               p.row.status === 'BURNING' ||

@@ -16,7 +16,7 @@ import { ChildHost } from './hostDetailTypes';
  * Windows install media extracts and re-authors a ~5 GB ISO, and Setup itself
  * runs unattended for 25-45 minutes between reports.  A tighter threshold would
  * cry wolf on every healthy Windows build, and a warning that is usually wrong
- * is worse than none — operators stop reading it.
+ * is worse than none -- operators stop reading it.
  */
 export const STALL_WARNING_MINUTES = 20;
 
@@ -29,7 +29,7 @@ interface ChildHostProgressProps {
  *
  * Renders nothing unless the child is mid-provision.  A Windows Server guest
  * takes 25-45 minutes, during which the only prior signal was a spinner that
- * looked identical at minute 2 and minute 40 — "no news" could mean working or
+ * looked identical at minute 2 and minute 40 -- "no news" could mean working or
  * wedged and the UI could not tell them apart.
  *
  * Two things fix that, and they are separate on purpose:
@@ -87,7 +87,7 @@ const ChildHostProgress: React.FC<ChildHostProgressProps> = ({ child }) => {
                     {stalled
                         ? t(
                               'hostDetail.childHostProgressStalled',
-                              'No update {{when}} — the current step may be long-running, or the provision may have stalled.',
+                              'No update {{when}} -- the current step may be long-running, or the provision may have stalled.',
                               { when: lastUpdate },
                           )
                         : t('hostDetail.childHostProgressUpdated', 'Updated {{when}}', {

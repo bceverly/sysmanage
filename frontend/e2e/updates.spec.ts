@@ -16,7 +16,7 @@ test.describe('Updates Page', () => {
   });
 
   test('should display updates page', async ({ page }) => {
-    // If we landed back on /login, auth setup broke — fail loudly.
+    // If we landed back on /login, auth setup broke -- fail loudly.
     expect(page.url()).not.toContain('/login');
     await expect(page).toHaveURL(/\/updates/);
 
@@ -36,7 +36,7 @@ test.describe('Updates Page', () => {
       // networkidle may timeout, continue anyway
     }
 
-    // If we landed back on /login, auth setup broke — fail loudly.
+    // If we landed back on /login, auth setup broke -- fail loudly.
     expect(page.url()).not.toContain('/login');
 
     // The Updates page shows summary cards with counts
@@ -103,7 +103,7 @@ test.describe('Updates Page', () => {
       // networkidle may timeout, continue anyway
     }
 
-    // If we landed back on /login, auth setup broke — fail loudly.
+    // If we landed back on /login, auth setup broke -- fail loudly.
     expect(page.url()).not.toContain('/login');
 
     // Either we have update rows or an empty state message

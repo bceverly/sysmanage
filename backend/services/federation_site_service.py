@@ -19,7 +19,7 @@ side effects.  Keeping the logic in OSS means:
 
 This module deliberately raises plain exceptions (``ValueError``,
 ``LookupError``) rather than ``HTTPException``.  Routing-layer error
-mapping is the engine's job — keeping HTTP concerns out of the
+mapping is the engine's job -- keeping HTTP concerns out of the
 service layer lets non-FastAPI callers use it too.
 """
 
@@ -61,7 +61,7 @@ STATUS_REMOVED = "removed"
 
 # Operations recorded in ``federation_audit_log.operation``.  The
 # engine reads these constants too, so a typo here would fan out to
-# audit-search consumers — defined here as the single source of truth.
+# audit-search consumers -- defined here as the single source of truth.
 AUDIT_OP_SITE_ENROLLMENT_STARTED = "site_enrollment_started"
 AUDIT_OP_SITE_ENROLLMENT_COMPLETED = "site_enrollment_completed"
 AUDIT_OP_SITE_ENROLLMENT_CANCELLED = "site_enrollment_cancelled"  # 12.1.C
@@ -79,7 +79,7 @@ DEFAULT_ENROLLMENT_TOKEN_TTL_HOURS = 24
 
 
 # ---------------------------------------------------------------------
-# Exceptions — service-layer specific, mapped to HTTP codes at the
+# Exceptions -- service-layer specific, mapped to HTTP codes at the
 # router edge (in the Pro+ engine).
 # ---------------------------------------------------------------------
 
@@ -105,7 +105,7 @@ class EnrollmentTokenExpiredError(FederationSiteError, ValueError):
 
     Distinct from :class:`InvalidEnrollmentTokenError` so the router can
     show "token expired, ask an admin to regenerate" instead of the
-    less-actionable "no such token" — the operator path differs.
+    less-actionable "no such token" -- the operator path differs.
     """
 
 
@@ -117,7 +117,7 @@ class InvalidSiteStateError(FederationSiteError, ValueError):
 
 class IdentityProofError(FederationSiteError, ValueError):
     """Raised when strict out-of-band identity verification fails at
-    ``complete_enrollment`` — the site presented no proof, the row has no
+    ``complete_enrollment`` -- the site presented no proof, the row has no
     pre-registered identity key, or the Ed25519 proof didn't verify against
     that key over the presented TLS cert.  This is the gate that turns
     trust-on-first-use into authenticated pinning; the router maps it to 401."""
@@ -157,7 +157,7 @@ def generate_sync_bearer_token() -> Tuple[str, str]:
     site → coordinator sync bearer.
 
     Distinct from ``generate_enrollment_token`` even though the
-    cryptographic shape is identical — keeping the helpers separate
+    cryptographic shape is identical -- keeping the helpers separate
     makes the lifecycle distinction grep-able (enrollment tokens are
     one-shot, sync bearers are long-lived) and lets us evolve them
     independently (e.g., different entropy budgets, different
@@ -190,7 +190,7 @@ def find_site_by_sync_bearer_token(
     ``status='enrolled'``, or the token is empty.  Callers (the engine's
     FastAPI dependency) translate the ``None`` into HTTP 401.
 
-    The lookup is by hash equality on the indexed token column — no
+    The lookup is by hash equality on the indexed token column -- no
     plaintext comparison ever touches the DB.
     """
     if not plaintext_token:
@@ -216,13 +216,13 @@ def find_site_by_sync_bearer_token(
 
 
 def _utcnow_naive() -> datetime:
-    """UTC ``now()`` with tzinfo stripped — matches the model defaults."""
+    """UTC ``now()`` with tzinfo stripped -- matches the model defaults."""
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 def _coerce_uuid(value: Any) -> UUID:
     """Accept a UUID or its string representation.  Raises ValueError
-    on garbage — the router maps that to 400."""
+    on garbage -- the router maps that to 400."""
     if isinstance(value, UUID):
         return value
     if isinstance(value, str):
@@ -304,7 +304,7 @@ def create_site(
     ``site_identity_public_key_pem`` is the site's Ed25519 IDENTITY public
     key, exchanged OUT OF BAND and pasted in by the operator.  It is stored
     on the row and is the anchor :func:`complete_enrollment` verifies the
-    site's enrollment proof against — without it, the site cannot complete
+    site's enrollment proof against -- without it, the site cannot complete
     strict enrollment.  Optional here (a row can be pre-created and the key
     added later) but required to actually enroll; the UI makes it mandatory.
 
@@ -387,7 +387,7 @@ def complete_enrollment(
 ) -> Tuple[FederationSite, str, str]:
     """Finalise a pending site enrollment.
 
-    Looks up the pending site by hashed token (NOT by id — the site
+    Looks up the pending site by hashed token (NOT by id -- the site
     presents the token over the network, not the site_id), checks
     the token hasn't expired, records the site's TLS certificate for
     future mTLS pinning, mints BOTH directional bearers (Phase 12.10
@@ -450,7 +450,7 @@ def complete_enrollment(
 
     # Strict out-of-band identity verification (Phase 12 strict trust).
     # The valid token only proves the caller holds a bearer secret that
-    # transited the network — an active MITM has it too.  Require the site to
+    # transited the network -- an active MITM has it too.  Require the site to
     # additionally prove that the Ed25519 identity key the operator registered
     # OUT OF BAND signed the exact TLS cert it is presenting.  A swapped cert,
     # a missing/forged proof, or a row with no registered key all refuse here,
@@ -483,7 +483,7 @@ def complete_enrollment(
     plaintext_sync_bearer, sync_bearer_hash = generate_sync_bearer_token()
     site.sync_bearer_token_hash = sync_bearer_hash
 
-    # Phase 12.10 Slice 3 — coordinator → site direction.  The
+    # Phase 12.10 Slice 3 -- coordinator → site direction.  The
     # coordinator IS the sender, so we keep the plaintext on the
     # row.  The caller HASHES this and ships the hash to the site.
     coord_outbound_plaintext = generate_coordinator_outbound_bearer_token()
@@ -517,7 +517,7 @@ def cancel_enrollment(
     if site.status != STATUS_PENDING:
         raise InvalidSiteStateError(
             f"Site {site.id} status is '{site.status}'; cancel_enrollment "
-            f"only applies to pending sites — use remove_site / suspend_site "
+            f"only applies to pending sites -- use remove_site / suspend_site "
             f"for an enrolled site."
         )
     site.enrollment_token_hash = None
@@ -580,7 +580,7 @@ def get_site(session: Session, site_id: Any) -> FederationSite:
 def get_site_by_name(session: Session, name: str) -> Optional[FederationSite]:
     """Fetch a site by name, or ``None`` if no row matches.
 
-    Unlike ``get_site``, returns None instead of raising — name
+    Unlike ``get_site``, returns None instead of raising -- name
     lookups are often used as "does this exist?" predicates by the UI.
     """
     if not name:
@@ -617,7 +617,7 @@ def list_sites(
 
 
 # Subset of FederationSite columns that ``update_site`` will accept.
-# Anything else passed in **fields is rejected — prevents the engine
+# Anything else passed in **fields is rejected -- prevents the engine
 # from accidentally letting a user PATCH the enrollment token hash
 # or status (those have dedicated functions).
 _UPDATABLE_FIELDS = frozenset(
@@ -692,7 +692,7 @@ def _transition_status(
     """Shared state-machine logic for suspend/resume/remove.
 
     Raises :class:`InvalidSiteStateError` if the site's current
-    status isn't in ``expected_current`` — keeps the per-transition
+    status isn't in ``expected_current`` -- keeps the per-transition
     public functions DRY without scattering business logic.
     """
     site = _ensure_site(session, site_id)
@@ -764,11 +764,11 @@ def remove_site(
     The row is preserved so the federation audit log can still
     resolve historical references by ``site_id``.  Cascade-DELETE on
     every child table (host_directory, rollups, audit log entries,
-    policy assignments) is intentionally NOT triggered — operators
+    policy assignments) is intentionally NOT triggered -- operators
     can still inspect past activity for a removed site.
 
     Acceptable from any state except ``removed`` (no-op on already-
-    removed sites — idempotent).
+    removed sites -- idempotent).
     """
     site = _ensure_site(session, site_id)
     if site.status == STATUS_REMOVED:
@@ -816,7 +816,7 @@ def record_sync(
 
     Called every time the coordinator processes a sync push from a
     site (or fails to).  Updates ``last_sync_at`` / ``last_sync_status``
-    plus optionally the cached ``host_count``.  Does NOT log audit —
+    plus optionally the cached ``host_count``.  Does NOT log audit --
     sync events are too high-frequency to write per-row.
 
     Phase 12.2: also appends a ``FederationSiteSyncEvent`` point to the
@@ -857,7 +857,7 @@ def apply_site_metadata(
 
     Called when the coordinator ingests a ``site_metadata`` sync payload.
     Records the site's SysManage version, its own connection-state (the
-    site's view of *its* uplink — distinct from the coordinator's
+    site's view of *its* uplink -- distinct from the coordinator's
     ``last_sync_status``), the JSON capability/module list, and a
     ``last_metadata_at`` stamp.  ``host_count`` is also refreshed when the
     metadata carries it.  Unknown keys are ignored, so the site can add

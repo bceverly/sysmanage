@@ -89,7 +89,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({ checked, label }) => 
 );
 
 // Status indicators shown per hypervisor type. Pure (depends only on type,
-// capabilities and t) — extracted to module scope to keep the component's
+// capabilities and t) -- extracted to module scope to keep the component's
 // cognitive complexity low.
 const getStatusIndicators = (
   type: HypervisorType,
@@ -156,7 +156,7 @@ interface HypervisorInfo {
   disableLabel?: string;
 }
 
-// Per-type display info (name/description/icon/labels). Pure — extracted to
+// Per-type display info (name/description/icon/labels). Pure -- extracted to
 // module scope to keep the component's cognitive complexity low.
 const getHypervisorInfo = (type: HypervisorType, t: TFunction): HypervisorInfo => {
   switch (type) {
@@ -274,7 +274,7 @@ const HYPERVISOR_STATE_RULES: StateRule[] = [
   { when: needsEnabling, state: 'needs_enable', color: 'warning', labelKey: 'notEnabled', defaultLabel: 'Not Enabled' },
 ];
 
-// Determine current state and what action is needed. Pure — extracted to module
+// Determine current state and what action is needed. Pure -- extracted to module
 // scope to keep the component's cognitive complexity low.
 const getHypervisorState = (
   type: HypervisorType,

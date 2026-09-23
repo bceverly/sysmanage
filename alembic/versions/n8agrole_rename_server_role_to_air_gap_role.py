@@ -5,13 +5,13 @@
 """Rename server_configuration.server_role -> air_gap_role.
 
 Phase 12 added a second role axis (``federation_role``).  With both columns
-side by side, ``server_role`` was ambiguous — it has only ever meant the
+side by side, ``server_role`` was ambiguous -- it has only ever meant the
 *air-gap* topology role (standard/collector/repository).  Rename it to
 ``air_gap_role`` so the schema reads clearly alongside ``federation_role``.
 
 Idempotent + cross-backend (SQLite + PostgreSQL): the rename only runs when
-the old column is present and the new one isn't, so re-running — or running
-against a fresh DB that already has ``air_gap_role`` from the model — is a
+the old column is present and the new one isn't, so re-running -- or running
+against a fresh DB that already has ``air_gap_role`` from the model -- is a
 no-op.  Uses batch_alter_table so SQLite (no native multi-op ALTER) and
 PostgreSQL both work.
 
@@ -45,7 +45,7 @@ def _columns(inspector) -> set:
 def _rename(from_col: str, to_col: str) -> None:
     bind = op.get_bind()
     cols = _columns(sa.inspect(bind))
-    # Only act when the source exists and the target doesn't — makes the
+    # Only act when the source exists and the target doesn't -- makes the
     # migration safe to re-run and a no-op on a fresh model-created DB.
     if from_col not in cols or to_col in cols:
         return

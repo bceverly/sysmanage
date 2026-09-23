@@ -137,10 +137,10 @@ class RegistrationKey(Base):
     )
     # Phase 12.4: optional federation-site scope.  When set, a key
     # generated at the coordinator restricts the hosts it can enroll
-    # to a specific subordinate site — agents presenting this key
+    # to a specific subordinate site -- agents presenting this key
     # are accepted ONLY at the named site, blocking key reuse across
     # the federation.  NULL means "any site can accept this key"
-    # (default OSS / single-server behaviour).  FK uses SET NULL
+    # (default OSS / single-server behavior).  FK uses SET NULL
     # on site removal so revoking a site doesn't cascade-delete
     # historical registration keys.
     site_id = Column(
@@ -211,7 +211,7 @@ class RegistrationKey(Base):
             ),
         }
         if include_secret:
-            # Only returned at create time — never on subsequent reads.
+            # Only returned at create time -- never on subsequent reads.
             out["key"] = self.key
         return out
 

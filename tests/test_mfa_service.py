@@ -4,7 +4,7 @@
 
 """Tests for ``backend.services.mfa_service`` and the at-rest crypto helper.
 
-These exercise the pure-logic surface — secret generation, TOTP verify,
+These exercise the pure-logic surface -- secret generation, TOTP verify,
 backup-code generation/hash/consume, encryption round-trip, and the
 combined ``verify_user_code`` path used by the login challenge.
 
@@ -38,7 +38,7 @@ def _mfa_test_config():
 
 
 class _FakeSettings:
-    """Minimal stand-in for an MfaSettings row — avoids hitting the DB."""
+    """Minimal stand-in for an MfaSettings row -- avoids hitting the DB."""
 
     issuer_name = "TestIssuer"
     totp_digits = 6
@@ -265,7 +265,7 @@ class TestEmailOtpFlow:
 
     def test_generate_email_otp_pads_leading_zeros(self):
         """Re-roll a few hundred times and verify NONE come back
-        shorter than 6 chars — the zfill is the only thing keeping
+        shorter than 6 chars -- the zfill is the only thing keeping
         small ``randbelow`` outputs at full width."""
         for _ in range(200):
             code = mfa_service.generate_email_otp_code()
@@ -275,7 +275,7 @@ class TestEmailOtpFlow:
         """Issuing a new code must mark any prior unconsumed challenge
         as consumed.  Without this, two open codes would coexist and
         the second-issued one would be the user-facing "fresh" one
-        while the first stays valid — a confusing-and-exploitable
+        while the first stays valid -- a confusing-and-exploitable
         ambiguity."""
         old_challenge = MagicMock()
         old_challenge.consumed_at = None
@@ -312,7 +312,7 @@ class TestEmailOtpFlow:
         assert re.search(r"\b\d{6}\b", captured["body"]), captured["body"]
 
     def test_request_returns_false_when_email_send_raises(self):
-        """SMTP failures must NOT propagate — the user-facing endpoint
+        """SMTP failures must NOT propagate -- the user-facing endpoint
         always returns "if your account exists we sent a code" to
         avoid user-enumeration.  This locks in the "swallow and
         report False" contract."""
@@ -341,7 +341,7 @@ class TestEmailOtpFlow:
         session.query.return_value.filter.return_value.all.return_value = [challenge]
         ok = mfa_service._consume_email_challenge(session, "user-1", "000000")
         assert ok is False
-        # The miss must NOT consume the challenge — a wrong-then-right
+        # The miss must NOT consume the challenge -- a wrong-then-right
         # retry within the lifetime window has to still work.
         assert challenge.consumed_at is None
 
@@ -364,7 +364,7 @@ class TestEmailOtpFlow:
 
     def test_consume_rejects_empty_or_whitespace_code(self):
         session = MagicMock()
-        # No query should be made — the early-return on falsy code
+        # No query should be made -- the early-return on falsy code
         # short-circuits before db.query is touched.
         assert mfa_service._consume_email_challenge(session, "u", "") is False
         assert mfa_service._consume_email_challenge(session, "u", "   ") is False

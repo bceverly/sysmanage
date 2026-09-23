@@ -240,7 +240,7 @@ const Sites: React.FC = () => {
         </Typography>
         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
           {/* Federation action buttons are hidden entirely when the
-              engine isn't loaded — same rule as the navbar Sites
+              engine isn't loaded -- same rule as the navbar Sites
               link.  The buttons would otherwise navigate to pages
               that all show the Enterprise upsell, which is the
               wrong UX for OSS users. */}
@@ -404,7 +404,7 @@ const Sites: React.FC = () => {
           </Grid>
         )}
 
-      {/* Enrollment dialog — modal form for "Add Site".  Renders the
+      {/* Enrollment dialog -- modal form for "Add Site".  Renders the
           plaintext token EXACTLY ONCE on success; the operator copies
           it out-of-band to the new site server.  Closing the dialog
           clears the token from React state so it doesn't linger. */}
@@ -427,7 +427,7 @@ const Sites: React.FC = () => {
                 {t(
                   "sites.enroll.tokenInstructions",
                   "Copy the enrollment token below and deliver it to the new site server. " +
-                    "This is the only time it will be displayed — there is no recovery if lost.",
+                    "This is the only time it will be displayed -- there is no recovery if lost.",
                 )}
               </DialogContentText>
               <TextField
@@ -499,7 +499,7 @@ const Sites: React.FC = () => {
                 )}
                 helperText={t(
                   "sites.enroll.siteIdentityKeyHelp",
-                  "Required. Paste the site's identity public key, obtained out of band (from the site's Server Role page). The coordinator verifies the site's enrollment proof against this key — it is what defeats an enrollment-time man-in-the-middle.",
+                  "Required. Paste the site's identity public key, obtained out of band (from the site's Server Role page). The coordinator verifies the site's enrollment proof against this key -- it is what defeats an enrollment-time man-in-the-middle.",
                 )}
                 value={enroll.site_identity_public_key_pem}
                 onChange={(e) =>

@@ -29,7 +29,7 @@ PERMIT_PACKAGE =	Yes
 #
 # The pip-packages bundle is 100% pure-Python (no compiled .so), so one distfile
 # serves every OpenBSD/python version.  The heavy C/Rust runtime deps
-# (cryptography, pydantic, Pillow, ...) are NOT bundled — they come from OpenBSD
+# (cryptography, pydantic, Pillow, ...) are NOT bundled -- they come from OpenBSD
 # ports (RUN_DEPENDS below), verified present via openbsd.app.  At runtime,
 # PYTHONPATH = the app + pip-packages, and the system ports satisfy the rest
 # (see files/sysmanage.rc).
@@ -38,7 +38,7 @@ MASTER_SITES =		https://repo.sysmanage.org/server/openbsd/
 MODULES =		lang/python
 MODPY_VERSION =		${MODPY_DEFAULT_VERSION_3}
 
-# Nothing to compile — everything in the distfile is pre-built.
+# Nothing to compile -- everything in the distfile is pre-built.
 NO_BUILD =		Yes
 
 RUN_DEPENDS =		databases/py-alembic${MODPY_FLAVOR} \
@@ -57,7 +57,7 @@ RUN_DEPENDS =		databases/py-alembic${MODPY_FLAVOR} \
 			www/py-aiohttp${MODPY_FLAVOR} \
 			www/py-jinja2${MODPY_FLAVOR}
 
-# libpq for the (pure-Python) psycopg 3 adapter bundled via pip — OpenBSD has
+# libpq for the (pure-Python) psycopg 3 adapter bundled via pip -- OpenBSD has
 # no psycopg 3 port (only databases/py-psycopg2, a different module), so plain
 # `psycopg` is pip-bundled and loads libpq.so at runtime from postgresql-client.
 # postgresql is a multi-package port; its ,-main subpackage IS postgresql-client
@@ -87,9 +87,9 @@ do-install:
 	${INSTALL_DATA} ${WRKSRC}/alembic.ini ${PREFIX}/libexec/sysmanage/
 
 	# Bundled pure-Python dependencies (from the libs distfile; runtime
-	# PYTHONPATH points here — see files/sysmanage.rc).
+	# PYTHONPATH points here -- see files/sysmanage.rc).
 	@test -d ${WRKSRC}/pip-packages || { \
-		echo "ERROR: ${WRKSRC}/pip-packages is missing — the openbsd-libs" ; \
+		echo "ERROR: ${WRKSRC}/pip-packages is missing -- the openbsd-libs" ; \
 		echo "distfile was not fetched/extracted.  Refusing to package." ; \
 		exit 1 ; }
 	cp -R ${WRKSRC}/pip-packages ${PREFIX}/libexec/sysmanage/
@@ -99,7 +99,7 @@ do-install:
 	# port must never reproduce.
 	${INSTALL_DATA_DIR} ${PREFIX}/share/sysmanage/frontend
 	@test -d ${WRKSRC}/frontend/dist || { \
-		echo "ERROR: ${WRKSRC}/frontend/dist is missing — the frontend was" ; \
+		echo "ERROR: ${WRKSRC}/frontend/dist is missing -- the frontend was" ; \
 		echo "not built/injected.  Refusing to package a UI-less server." ; \
 		exit 1 ; }
 	cp -R ${WRKSRC}/frontend/dist/* ${PREFIX}/share/sysmanage/frontend/

@@ -107,7 +107,7 @@ class SoftwarePackage(Base):
     install_date = Column(DateTime, nullable=True)
     is_system_package = Column(Boolean, nullable=False, default=False)
     # Snap channel-aware detection (Phase 17.1): tracking channel, revision, and
-    # best-effort confinement. Nullable — only populated for snap packages.
+    # best-effort confinement. Nullable -- only populated for snap packages.
     channel = Column(String(100), nullable=True)
     revision = Column(String(50), nullable=True)
     confinement = Column(String(20), nullable=True)

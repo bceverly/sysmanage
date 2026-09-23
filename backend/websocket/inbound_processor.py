@@ -39,7 +39,7 @@ def _resolve_host_via_index(host_id):
 
     try:
         engine = tenant_engine_for_host(host_id)
-    except Exception:  # noqa: BLE001 — fall through to the scan in the caller
+    except Exception:  # noqa: BLE001 -- fall through to the scan in the caller
         engine = None
     if engine is None:
         return None, None
@@ -75,13 +75,13 @@ def _find_host_in_tenant_dbs(host_id, hostname):
     """Search every provisioned TENANT database for a host (by id, then fqdn).
 
     Phase 13.1: inbound messages are enqueued to the bootstrap queue with no
-    host_id, but a tenant host's row lives in its tenant DB — so the bootstrap
+    host_id, but a tenant host's row lives in its tenant DB -- so the bootstrap
     pass can't find it.  This resolves the host in the tenant databases.
 
     Returns ``(host, session)`` with the session left OPEN (the caller processes
     the message against it, then MUST close it), or ``(None, None)`` when the
     host isn't in any tenant DB / multi-tenancy is off.  The bootstrap database
-    is skipped here — the caller has already checked it.
+    is skipped here -- the caller has already checked it.
 
     Resolution mirrors ``handle_system_info``: the host→tenant INDEX is the
     authoritative source (keyed by host_id), so try it first; fall back to
@@ -98,7 +98,7 @@ def _find_host_in_tenant_dbs(host_id, hostname):
     # Fallback: scan every tenant database (covers hostname-only messages and a
     # host whose index binding hasn't landed yet).
     for _label, tenant_id, session in iter_host_databases():
-        if tenant_id is None:  # bootstrap — already checked by the caller
+        if tenant_id is None:  # bootstrap -- already checked by the caller
             session.close()
             continue
         host = _match_host_in_session(session, host_id, hostname)
@@ -245,7 +245,7 @@ async def process_pending_messages(  # NOSONAR
             # Phase 13.1 #2 SAFETY: do NOT hard-delete on "host not found".
             # Under per-tenant queues there is an enrollment race window where a
             # freshly-registered host's row may not yet be visible on THIS
-            # (tenant) database even though its messages are already queued here —
+            # (tenant) database even though its messages are already queued here --
             # a bulk delete would destroy the agent's data permanently.  Instead
             # defer each message via mark_failed(retry=True): it reschedules with
             # backoff (so a transient miss is reprocessed once the host row lands)
@@ -265,7 +265,7 @@ async def process_pending_messages(  # NOSONAR
             logger.warning(
                 _(
                     "Host %(host_id)s not found on this database; deferring %(count)d queued "
-                    "message(s) for retry (NOT deleting) — may be an in-flight "
+                    "message(s) for retry (NOT deleting) -- may be an in-flight "
                     "enrollment or a deleted host"
                 ),
                 {"host_id": host_id, "count": len(pending)},
@@ -498,14 +498,14 @@ async def process_validated_message(message, host, db: Session, host_db=None) ->
         log_message_data(message.message_type, message_data)
 
         # Route to appropriate handler based on message type.  The handler's
-        # writes go to the HOST's database (handler_db) — the tenant DB for a
-        # tenant host — even when the queue row lives in the bootstrap queue.
+        # writes go to the HOST's database (handler_db) -- the tenant DB for a
+        # tenant host -- even when the queue row lives in the bootstrap queue.
         success = await route_inbound_message(
             message.message_type, handler_db, mock_connection, message_data
         )
 
         # Persist the handler's writes on the host DB when it's a separate
-        # (tenant) session — the caller only commits the queue DB.
+        # (tenant) session -- the caller only commits the queue DB.
         if success and host_db is not None:
             host_db.commit()
 
@@ -545,7 +545,7 @@ async def process_validated_message(message, host, db: Session, host_db=None) ->
         # the internet) when this server runs as an Air-Gap Repository.
         # Hooked HERE (not in the caller loops) because BOTH the host-id
         # and the null-host-id inbound paths funnel through this function
-        # — agents that put host_id in the message body hit the
+        # -- agents that put host_id in the message body hit the
         # null-host path, which the loop-level hook missed.  Best-effort
         # and self-throttling: a no-op unless the role is 'repository'
         # and the agent's mirror config actually needs to change.
@@ -575,7 +575,7 @@ async def process_system_info_message(message, db: Session) -> None:
     Process a SYSTEM_INFO registration message.
     This is special because the host may not exist yet.
 
-    Phase 13.1: this stays on the bootstrap ``db`` deliberately — ``handle_system_info``
+    Phase 13.1: this stays on the bootstrap ``db`` deliberately -- ``handle_system_info``
     SELF-ROUTES.  It resolves the host's tenant from the agent-supplied host_id
     (``tenant_engine_for_host``) and runs the whole handler on that tenant's
     database, so a bound host's inventory updates land in its tenant DB and no

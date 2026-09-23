@@ -494,8 +494,8 @@ msgid "Invalid TOTP code."
 msgstr "Código TOTP inválido."
 
 #: backend/api/auth_mfa.py:296 backend/api/auth_mfa.py:358
-msgid "MFA challenge expired — please log in again."
-msgstr "La prueba MFA ha expirado — por favor, inicie sesión nuevamente."
+msgid "MFA challenge expired -- please log in again."
+msgstr "La prueba MFA ha expirado -- por favor, inicie sesión nuevamente."
 
 #: backend/api/auth_mfa.py:301
 msgid "Invalid MFA challenge."
@@ -1415,10 +1415,10 @@ msgstr "La tarea tick requiere automation_engine para la evaluación cron."
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed"
+"Mirror %s has not completed a successful sync yet -- wait for sync to succeed"
 " before assigning it as a default."
 msgstr ""
-"El espejo %s aún no ha completado una sincronización exitosa — espere a que "
+"El espejo %s aún no ha completado una sincronización exitosa -- espere a que "
 "la sincronización tenga éxito antes de asignarlo como predeterminado."
 
 #: backend/api/repository_mirroring.py:613
@@ -1464,11 +1464,11 @@ msgstr ""
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be"
-" loaded — the collector reads each target's bundle from a snapshot of its "
+" loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 "Las ejecuciones de recopilación en modo aislamiento requieren que se cargue "
-"el módulo repository_mirroring_engine — el recolector lee cada paquete "
+"el módulo repository_mirroring_engine -- el recolector lee cada paquete "
 "objetivo desde una instantánea de su árbol espejo."
 
 #: backend/api/airgap_collector_runs.py:229
@@ -5065,11 +5065,11 @@ msgstr ""
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
-"message(s) for retry (NOT deleting) — may be an in-flight enrollment or a "
+"message(s) for retry (NOT deleting) -- may be an in-flight enrollment or a "
 "deleted host"
 msgstr ""
 "Host %(host_id)s no encontrado en esta base de datos; posponiendo %(count)d "
-"mensaje(s) en cola para reintentar (NO eliminando) — puede ser una "
+"mensaje(s) en cola para reintentar (NO eliminando) -- puede ser una "
 "inscripción en curso o un host eliminado"
 
 #: backend/websocket/inbound_processor.py:284
@@ -5586,10 +5586,10 @@ msgstr "Formato de secreto no válido"
 #, python-format
 #~ msgid ""
 #~ "Host %s not found on this database; deferring %d queued message(s) for retry"
-#~ " (NOT deleting) — may be an in-flight enrollment or a deleted host"
+#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
 #~ "Host %s no encontrado en esta base de datos; posponiendo %d mensaje(s) en "
-#~ "cola (NO se eliminarán) — puede ser una inscripción en tránsito o un host "
+#~ "cola (NO se eliminarán) -- puede ser una inscripción en tránsito o un host "
 #~ "eliminado"
 
 #, python-format

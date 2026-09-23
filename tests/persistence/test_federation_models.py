@@ -13,7 +13,7 @@ Covers:
     the same engine succeeds without raising and produces the same
     set of tables.
   * ``downgrade()`` is also idempotent.
-  * The singleton row id constant is the expected UUID shape — it's
+  * The singleton row id constant is the expected UUID shape -- it's
     a load-bearing contract for site-side code that upserts by PK.
 """
 
@@ -94,7 +94,7 @@ def test_orm_class_tablename(orm_class, expected_table):
 
 
 def test_singleton_uuid_is_well_formed():
-    """The singleton id must be a UUID — site code upserts by this PK
+    """The singleton id must be a UUID -- site code upserts by this PK
     without a SELECT, so a typo here would create extra rows instead
     of replacing the one we expect."""
     assert isinstance(SINGLETON_FEDERATION_COORDINATOR_ID, uuid.UUID)
@@ -105,7 +105,7 @@ def test_singleton_uuid_is_well_formed():
 
 def test_all_tables_registered_on_base_metadata():
     """``Base.metadata`` must know about every federation table after
-    the package imports — otherwise ``create_all`` will silently
+    the package imports -- otherwise ``create_all`` will silently
     skip them."""
     registered = set(Base.metadata.tables.keys())
     missing = [name for name in EXPECTED_TABLES if name not in registered]
@@ -120,10 +120,10 @@ def test_all_tables_registered_on_base_metadata():
 def _run_alembic_func(engine, func_name):
     """Run the migration's ``upgrade()`` / ``downgrade()`` against an
     explicit engine.  Done by hand (rather than via Alembic CLI) so the
-    test is hermetic — no alembic.ini parsing, no migration history
+    test is hermetic -- no alembic.ini parsing, no migration history
     table, no env.py wiring."""
     # Import locally because Alembic versions are file paths, not
-    # module names — we import via importlib.
+    # module names -- we import via importlib.
     import importlib.util  # noqa: PLC0415
     from pathlib import Path  # noqa: PLC0415
 
@@ -186,7 +186,7 @@ def test_downgrade_drops_all_tables_idempotently():
 
 
 # ---------------------------------------------------------------------
-# Insert smoke test — verify the schema actually accepts a row
+# Insert smoke test -- verify the schema actually accepts a row
 # ---------------------------------------------------------------------
 
 

@@ -8,7 +8,7 @@ import type { SxProps, Theme } from '@mui/material';
 // they look and behave identically ("global" styling, one source of truth).
 //
 // Vertical space is at a premium and horizontal space is not on modern wide
-// displays, so the category groups flow into TWO columns — this roughly halves
+// displays, so the category groups flow into TWO columns -- this roughly halves
 // the rail's height and avoids the vertical scrollbar in the common case.
 // ``break-inside: avoid`` keeps each category + its items together in a column.
 export const navRailContainerSx: SxProps<Theme> = {

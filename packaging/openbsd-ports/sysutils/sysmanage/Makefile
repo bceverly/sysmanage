@@ -1,6 +1,6 @@
 # $OpenBSD$
 #
-# Phase 11.8 ports-tree submission stub — sysmanage (server).
+# Phase 11.8 ports-tree submission stub -- sysmanage (server).
 # ``GH_TAGNAME`` is sed-replaced from ``v0.0.0`` to the release tag
 # value by the ``openbsd-ports`` job in
 # .github/workflows/build-and-release.yml.  Do not hand-edit on release.

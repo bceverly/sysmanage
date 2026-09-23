@@ -23,7 +23,7 @@ import MirrorSetupStatusCard from '../MirrorSetupStatusCard';
 import { HostSummary, hostMatchesPm, PLATFORM_FAMILY_LABEL } from './helpers';
 
 // ---------------------------------------------------------------------
-// Empty state — no platform config yet
+// Empty state -- no platform config yet
 // ---------------------------------------------------------------------
 
 interface ConfigureEmptyStateProps {
@@ -44,7 +44,7 @@ const ConfigureEmptyState: React.FC<ConfigureEmptyStateProps> = ({
   // Track the chosen host's mirror-toolchain readiness so the Create
   // button is gated the same way the per-platform action buttons are.
   // ``undefined`` while the setup probe is still loading on the
-  // newly-selected host — treated as "not ready" so the operator can't
+  // newly-selected host -- treated as "not ready" so the operator can't
   // commit to a host before its toolchain is confirmed green.
   const [setupReady, setSetupReady] = useState<boolean | undefined>(undefined);
 
@@ -95,7 +95,7 @@ const ConfigureEmptyState: React.FC<ConfigureEmptyStateProps> = ({
             value={selectedHost}
             onChange={(_, v) => {
               setHostId(v?.id ?? null);
-              // Reset readiness when the operator swaps hosts — the
+              // Reset readiness when the operator swaps hosts -- the
               // new host's setup card will re-emit its own state.
               setSetupReady(undefined);
             }}
@@ -136,7 +136,7 @@ const ConfigureEmptyState: React.FC<ConfigureEmptyStateProps> = ({
           <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
             {t(
               'mirror.noEligibleHosts',
-              'No registered {{family}} hosts available — register one and refresh.',
+              'No registered {{family}} hosts available -- register one and refresh.',
               {
                 family: PLATFORM_FAMILY_LABEL[platform],
               },

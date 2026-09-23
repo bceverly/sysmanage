@@ -10,7 +10,7 @@ export interface LoggingConfig {
     native_identifier: string | null;
     log_level: string | null;
     verbosity: string | null;
-    // Remote-syslog forwarding (Phase 14.5) — only used when
+    // Remote-syslog forwarding (Phase 14.5) -- only used when
     // native_target === 'syslog_remote'; gated behind LOG_ROUTING (Professional).
     syslog_host?: string | null;
     syslog_port?: number | null;

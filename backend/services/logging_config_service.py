@@ -95,7 +95,7 @@ def resolve_server_logging(db: Session, yaml_logging: Optional[dict] = None) -> 
 def resolve_agent_logging(db: Session, os_family: str) -> Optional[dict]:
     """The stored default config for an agent OS family, or None if unset.
 
-    None means "no server override" — the agent keeps using its own yaml.
+    None means "no server override" -- the agent keeps using its own yaml.
     """
     row = get_setting(db, SCOPE_AGENT, os_family)
     return row.to_dict() if row is not None else None
@@ -139,7 +139,7 @@ def apply_server_native_logging(resolved: dict) -> None:
     """(Re)configure the server's own OS-native log handler from a resolved dict.
 
     Removes any previously-attached native handler, then adds a fresh one when
-    enabled — so a UI change applied at runtime takes effect without a restart.
+    enabled -- so a UI change applied at runtime takes effect without a restart.
     """
     root = logging.getLogger()
     # Snapshot the matching handlers first so we can safely removeHandler()
@@ -200,7 +200,7 @@ def push_logging_to_host(db: Session, host: Host) -> bool:
     server-global settings are read from the main engine.  Returns True if a
     config was enqueued (a server default exists for the host's OS family).
     """
-    # Never push to an unapproved host — its outbound queue is rejected, and a
+    # Never push to an unapproved host -- its outbound queue is rejected, and a
     # stale/pending duplicate (e.g. a leftover bootstrap row) must not swallow
     # the config meant for the real, approved host.
     if getattr(host, "approval_status", None) != "approved":
@@ -214,7 +214,7 @@ def push_logging_to_host(db: Session, host: Host) -> bool:
     if resolved is None:
         return False
     _enqueue_logging_update(db, str(host.id), resolved)
-    # enqueue_message only FLUSHES a caller-provided session — the commit is the
+    # enqueue_message only FLUSHES a caller-provided session -- the commit is the
     # caller's job.  The system_info handler that invokes us does not commit
     # afterward, so own the commit here (as push_logging_to_all_agents does) or
     # the queued config is silently rolled back when the session closes.
@@ -282,7 +282,7 @@ def _enqueue_logging_update(db: Session, host_id: str, resolved) -> None:
     """Persist one OUTBOUND ``logging_config_update`` message for a host.
 
     ``resolved`` is the resolved config dict, or ``None`` to send an empty
-    override (``{}``) — the agent treats that as "revert to yaml".
+    override (``{}``) -- the agent treats that as "revert to yaml".
     """
     # Imported lazily to avoid a heavy import at module load.
     from backend.websocket.messages import Message, MessageType  # noqa: PLC0415

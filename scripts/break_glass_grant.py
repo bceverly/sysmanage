@@ -9,10 +9,10 @@ Mint a deliberately SHORT-LIVED, time-boxed grant that lets a user (a support
 engineer, a vendor, or an operator recovering access) reach ONE tenant for a
 bounded window.  This is the emergency / support path:
 
-  * The grant's ``expires_at`` is the enforcement — the request-time gate
+  * The grant's ``expires_at`` is the enforcement -- the request-time gate
     (``registry_service.has_active_grant``) refuses it the moment it lapses, so
     there is no lingering backdoor and no separate revocation step required.
-  * The TTL is HARD-CAPPED (72h) — you cannot mint an unbounded grant.
+  * The TTL is HARD-CAPPED (72h) -- you cannot mint an unbounded grant.
   * Every issuance is logged with the operator, target tenant, TTL, and reason,
     so break-glass access is always auditable.
 
@@ -22,7 +22,7 @@ Usage::
         --tenant acme --ttl-hours 4 --reason "INC-1234 DB investigation"
 
 ``--tenant`` accepts either the tenant slug or its UUID.  ``--reason`` is
-mandatory — break-glass access without a stated reason is not allowed.
+mandatory -- break-glass access without a stated reason is not allowed.
 """
 
 import argparse
@@ -138,7 +138,7 @@ def main() -> int:
             session, user.id, tenant.id, ttl_seconds, role=role
         )
         # Bind the grant to a live OpenBAO lease (best-effort; no-op when vault
-        # is disabled — expires_at still enforces the window).
+        # is disabled -- expires_at still enforces the window).
         accessor = registry_service.bind_support_lease(
             grant,
             ttl_seconds,
@@ -152,7 +152,7 @@ def main() -> int:
         expires_at = grant.expires_at
         session.commit()
 
-    # Audit — break-glass access must always be logged.
+    # Audit -- break-glass access must always be logged.
     logger.warning(
         "BREAK-GLASS GRANT issued: user=%s tenant=%s(%s) role=%s expires_at=%s "
         "ttl_hours=%.2f operator=%s lease=%s reason=%r",

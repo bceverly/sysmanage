@@ -10,8 +10,8 @@
  * than shipped to a fleet, and an unlicensed server says "Enterprise" rather
  * than showing an empty page that looks broken.
  *
- * Push and deactivate are destructive-adjacent — they change what other
- * servers enforce — so their failure paths are covered as carefully as their
+ * Push and deactivate are destructive-adjacent -- they change what other
+ * servers enforce -- so their failure paths are covered as carefully as their
  * success paths.
  */
 

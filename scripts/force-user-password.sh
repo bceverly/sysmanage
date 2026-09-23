@@ -3,7 +3,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-# force-user-password.sh — Reset a sysmanage user's password directly in
+# force-user-password.sh -- Reset a sysmanage user's password directly in
 # the database AND grant the user every security role, when email-based
 # reset / UI-based role assignment isn't available (test VMs, lab
 # instances, recovering an air-gapped install, etc.).
@@ -15,7 +15,7 @@
 # (the same hasher backend/api/user.py uses) so the new hash is in the
 # format the login path expects.  After the password reset, every row
 # from ``security_roles`` is mapped to the user via
-# ``user_security_roles``, replacing any prior role assignments — so
+# ``user_security_roles``, replacing any prior role assignments -- so
 # this user becomes a full administrator with access to every UI page.
 
 set -euo pipefail
@@ -33,7 +33,7 @@ NEWPW="$2"
 # layout -- so it could not run at all on the BSD ports, Homebrew or Windows,
 # and on a host that had both a packaged install and a leftover dev config at
 # /etc it would edit the wrong database.  SYSMANAGE_CONFIG_PATH is the variable
-# backend/config and the rc.d scripts already honour.
+# backend/config and the rc.d scripts already honor.
 PYTHON_BIN="${PYTHON_BIN:-}"
 if [ -z "$PYTHON_BIN" ]; then
   for candidate in \
@@ -77,7 +77,7 @@ from argon2 import PasswordHasher
 with open(os.environ["FORCE_CONFIG"]) as f:
     cfg = yaml.safe_load(f)
 
-# v3.0 renamed database: -> registry:; honour whichever is present.
+# v3.0 renamed database: -> registry:; honor whichever is present.
 db = cfg.get("database") or cfg["registry"]
 dsn = (
     f"host={db['host']} port={db.get('port', 5432)} "
@@ -90,7 +90,7 @@ with psycopg.connect(dsn) as conn:
     with conn.cursor() as cur:
         # Columns per backend/persistence/models/core.py:277 (User model):
         #   hashed_password, failed_login_attempts, is_locked, locked_at,
-        #   active.  Table is "user" (singular) — quoted because it's a
+        #   active.  Table is "user" (singular) -- quoted because it's a
         #   postgres reserved word.
         cur.execute(
             'UPDATE "user" '

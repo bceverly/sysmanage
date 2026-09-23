@@ -8,7 +8,7 @@ Setup-status card + platform-config CRUD routes for the Repository Mirroring API
 These endpoint groups were extracted from ``backend.api.repository_mirroring`` to
 keep that module under the line-count cap.  They register on the SAME ``router``
 object imported from that module, so every route stays registered exactly as
-before — ``repository_mirroring`` imports this module at the end of its body to
+before -- ``repository_mirroring`` imports this module at the end of its body to
 trigger registration.
 """
 
@@ -61,7 +61,7 @@ async def get_mirror_setup_status(host_id: str, db: Session = Depends(get_tenant
         .first()
     )
     if row is None:
-        # Synthetic "never probed" payload — saves the frontend from
+        # Synthetic "never probed" payload -- saves the frontend from
         # branching on 404 vs row.  ``ready_*`` are all false until a
         # probe lands.
         return {
@@ -293,7 +293,7 @@ async def delete_platform_config(
     )
     if row is None:
         raise HTTPException(status_code=404, detail=_(_PLATFORM_CONFIG_NOT_FOUND))
-    # Refuse to delete a config that still owns mirrors — caller has to
+    # Refuse to delete a config that still owns mirrors -- caller has to
     # delete or reassign the mirrors first.
     in_use = (
         db.query(models.MirrorRepository)

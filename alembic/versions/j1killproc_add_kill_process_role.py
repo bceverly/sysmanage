@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""add 'Kill Host Process' security role (Phase 13.3 — Process Management)
+"""add 'Kill Host Process' security role (Phase 13.3 -- Process Management)
 
 Seeds the new Host-group security role used to gate terminating a process on a
 managed host.  Idempotent: only inserts when a role with that name is absent.
@@ -46,7 +46,7 @@ def upgrade() -> None:
 
     # ``id``/``group_id`` are uuid columns on PostgreSQL, plain TEXT on SQLite.
     # Use ``CAST(:p AS uuid)`` on PG (a bare ``:p::uuid`` would break text()'s
-    # bind-param parser — ``:id`` immediately followed by ``:`` isn't matched).
+    # bind-param parser -- ``:id`` immediately followed by ``:`` isn't matched).
     is_sqlite = bind.dialect.name == "sqlite"
     id_ph = ":id" if is_sqlite else "CAST(:id AS uuid)"
     gid_ph = ":group_id" if is_sqlite else "CAST(:group_id AS uuid)"

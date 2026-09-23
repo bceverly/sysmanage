@@ -122,7 +122,7 @@ if len(origins) > 10:
 # No-op when multi-tenancy is disabled (the default).  Added BEFORE CORS so that
 # CORSMiddleware is the last middleware in the chain (Starlette runs middleware
 # in reverse order of registration, so CORS must be registered last to remain
-# the outermost layer and tag every response — including error responses).
+# the outermost layer and tag every response -- including error responses).
 from backend.startup.tenant_middleware import ActiveTenantMiddleware  # noqa: E402
 
 app.add_middleware(ActiveTenantMiddleware)
@@ -139,7 +139,7 @@ startup_logger.info("Rate-limit middleware added")
 
 # Phase 13.2.1 bridge RETIRED: the ApiVersionMiddleware /api/v1->/api rewrite is
 # gone.  Every feature now serves natively under /api/v1 (all migration slices
-# complete), so the bridge was dead code — /api/v1 requests match native routes
+# complete), so the bridge was dead code -- /api/v1 requests match native routes
 # directly and the deliberately-unversioned surfaces (agent, auth/mfa, IdP
 # SSO/ACS, SCIM) keep their bare /api paths.
 
@@ -256,11 +256,11 @@ if __name__ == "__main__":
     startup_logger.info("=== LAUNCHING UVICORN SERVER ===")
     startup_logger.info("About to call uvicorn.run()")
 
-    # Default to a single worker (production behaviour is unchanged).  The load-
+    # Default to a single worker (production behavior is unchanged).  The load-
     # test workflow sets SYSMANAGE_UVICORN_WORKERS>1 to use the runner's spare
-    # cores — a single worker is GIL-bound to ~1 core and caps throughput.
+    # cores -- a single worker is GIL-bound to ~1 core and caps throughput.
     # NOTE: >1 worker requires an import string (uvicorn re-imports the app per
-    # worker) and runs the lifespan — and thus the background queue processors —
+    # worker) and runs the lifespan -- and thus the background queue processors --
     # once per worker; that's acceptable for the health-poll load scenarios.
     workers = int(os.environ.get("SYSMANAGE_UVICORN_WORKERS", "1") or "1")
     run_kwargs = {

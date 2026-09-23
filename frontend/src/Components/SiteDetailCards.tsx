@@ -104,7 +104,7 @@ export function SiteAlertsCard({
   );
 }
 
-/** Compliance & vulnerability rollup card — the latest AGGREGATE snapshot
+/** Compliance & vulnerability rollup card -- the latest AGGREGATE snapshot
  * this site pushed up (per-host detail stays on the site). */
 export function SiteRollupCard({
   rollup,
@@ -214,7 +214,7 @@ export function SiteRollupCard({
   );
 }
 
-/** Active commands card (Phase 12.10 visibility) — open dispatched commands
+/** Active commands card (Phase 12.10 visibility) -- open dispatched commands
  * targeting this site with FSM state, retry counter, and last push error. */
 export function SiteCommandsCard({
   commands,

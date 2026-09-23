@@ -7,9 +7,9 @@ Air-gap models (Phase 11).
 
 Three tables shared by the OSS routes and both Pro+ engines:
 
-  ``AirgapCollectionRun``        — collector-side: one row per run
-  ``AirgapCollectionTarget``     — collector-side: per-distro target
-  ``AirgapMediaManifest``        — collector-side: produced ISO + sig
+  ``AirgapCollectionRun``        -- collector-side: one row per run
+  ``AirgapCollectionTarget``     -- collector-side: per-distro target
+  ``AirgapMediaManifest``        -- collector-side: produced ISO + sig
 
 The ingestion side adds its own tables in a separate model file
 (``airgap_repository.py``) keyed off the manifest's signer fingerprint
@@ -56,7 +56,7 @@ class AirgapCollectionRun(Base):
     # Lifecycle: QUEUED -> MIRRORING -> STAGING_COMPLETE -> BUILDING_ISO
     #          -> ISO_BUILT -> COMPLETE | FAILED
     # (BURNING is reserved for future operator-driven optical-burn flows
-    # — the auto-orchestrator stops at ISO_BUILT.)
+    # -- the auto-orchestrator stops at ISO_BUILT.)
     status = Column(String(40), nullable=False, default="QUEUED")
     started_at = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
@@ -74,7 +74,7 @@ class AirgapCollectionRun(Base):
     # Optional optical-burn target.  When set, the orchestrator
     # advances ISO_BUILT → BURNING by dispatching ``build_burn_plan``
     # at this device path (e.g. ``/dev/sr0``).  When NULL the run
-    # goes ISO_BUILT → COMPLETE directly — the typical "build a
+    # goes ISO_BUILT → COMPLETE directly -- the typical "build a
     # downloadable ISO file" flow that doesn't touch optical media.
     burn_device = Column(String(200), nullable=True)
 
@@ -91,7 +91,7 @@ class AirgapCollectionRun(Base):
         nullable=True,
     )
 
-    # Phase 11 B3 — delta collection.  When this run is a delta of a
+    # Phase 11 B3 -- delta collection.  When this run is a delta of a
     # prior run, ``parent_run_id`` points at it; the engine reads the
     # parent's manifest files to compute a skip-set.  NULL = full
     # snapshot (the v0.1.0 default).
@@ -105,7 +105,7 @@ class AirgapCollectionRun(Base):
         nullable=True,
     )
 
-    # Phase 11.1 follow-up — cron-driven scheduling.  When set, the
+    # Phase 11.1 follow-up -- cron-driven scheduling.  When set, the
     # server-side scheduler tick (POST
     # ``/airgap/collector/collection/runs/tick``) re-fires this run
     # from ``SCHEDULED`` to ``QUEUED`` on each cron match.  NULL means
@@ -251,7 +251,7 @@ class AirgapMediaManifest(Base):
 
 class AirgapIngestionRun(Base):
     """Repository-side ingestion run.  No FK back to the collection
-    run because the two halves never share a database — instead we
+    run because the two halves never share a database -- instead we
     record the signer fingerprint + collector_id from the verified
     manifest so audit trails can correlate across the air gap by
     inspecting both halves' DBs after the fact."""
@@ -262,7 +262,7 @@ class AirgapIngestionRun(Base):
     iso_path = Column(String(500), nullable=False)
     iso_sha256 = Column(String(64), nullable=True)
 
-    # Pulled from the verified manifest envelope, NOT from a FK — the
+    # Pulled from the verified manifest envelope, NOT from a FK -- the
     # two air-gap halves never share a database.
     signer_fingerprint = Column(String(128), nullable=True)
     manifest_format_version = Column(Integer, nullable=True)
@@ -331,7 +331,7 @@ class AirgapCollectionSchedule(Base):
     On each tick, the OSS route iterates due schedules and posts to
     the same engine.build_collection_run_plan path that on-demand
     runs use.  The cron parser comes from automation_engine (which
-    must also be licensed; both are Enterprise tier) — keeps us out
+    must also be licensed; both are Enterprise tier) -- keeps us out
     of having a third copy of the cron parser.
     """
 
@@ -343,7 +343,7 @@ class AirgapCollectionSchedule(Base):
     enabled = Column(Boolean, nullable=False, default=True)
 
     # Frozen request body used as the input to build_collection_run_plan
-    # on each tick.  Stored as JSON text — engine validates the shape
+    # on each tick.  Stored as JSON text -- engine validates the shape
     # at run time, so cron schedules captured today still work after
     # an engine upgrade that adds new optional request fields.
     target_request_json = Column(Text, nullable=False)
@@ -436,8 +436,8 @@ class AirgapAgentChannelMirror(Base):
     Phase 11.1 mirrors OS packages and repoints hosts that are ALREADY
     managed.  This table closes the bootstrap end: it tells provisioning
     where to install the agent itself from, so a host coming up in an
-    air-gapped site — which cannot reach the Launchpad PPA, COPR, OBS,
-    winget or the Homebrew tap — still gets an agent and enrolls.
+    air-gapped site -- which cannot reach the Launchpad PPA, COPR, OBS,
+    winget or the Homebrew tap -- still gets an agent and enrolls.
 
     Keyed by CHANNEL rather than distro on purpose: one ``copr`` row
     covers Fedora/RHEL/Rocky/Alma at once, and a new RHEL-family distro

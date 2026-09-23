@@ -13,7 +13,7 @@ Architectural invariant:
   ``QueueOperations.enqueue_message``; ``backend/websocket/outbound_processor.py``
   is the single sanctioned consumer that calls these methods to
   actually deliver.  The ``@_drain_only`` decorator below enforces
-  this at runtime — any caller outside the outbound processor (or
+  this at runtime -- any caller outside the outbound processor (or
   the connection manager itself, for internal recursion) raises
   ``RuntimeError`` so the queue-first contract cannot be silently
   bypassed.  Tests are allowlisted so unit tests of the manager
@@ -69,7 +69,7 @@ def _is_drain_allowed_caller(caller_module: str) -> bool:
 # comparable, unique per function definition) once it has been verified
 # as a legitimate drain caller, then skip the module-name lookup on
 # every subsequent call from the same site.  Negative results aren't
-# cached — a forbidden caller raises and never reaches the add().
+# cached -- a forbidden caller raises and never reaches the add().
 _DRAIN_ALLOWED_CODES: set = set()
 
 
@@ -85,7 +85,7 @@ def _drain_only(method):
         if caller_frame is None:
             # Defensive: ``currentframe()`` can return ``None`` on
             # interpreters built without frame support.  Fall through
-            # without enforcement — better than crashing.
+            # without enforcement -- better than crashing.
             return await method(*args, **kwargs)
         code_id = caller_frame.f_code
         if code_id in _DRAIN_ALLOWED_CODES:
@@ -266,7 +266,7 @@ class ConnectionManager:
 
     @_drain_only
     async def send_to_agent(self, agent_id: str, message: dict) -> bool:
-        """Send a message to a specific agent.  Queue-drain-only — see module docstring."""
+        """Send a message to a specific agent.  Queue-drain-only -- see module docstring."""
         if agent_id in self.active_connections:
             connection = self.active_connections[agent_id]
             return await connection.send_message(message)
@@ -310,8 +310,8 @@ class ConnectionManager:
         (which holds zero host rows), so a bootstrap-only lookup would miss it
         and report the agent as disconnected even while it is happily connected.
         ``tenant_engine_for_host`` returns the tenant engine, or ``None`` for a
-        bootstrap/single-tenant host — in which case we fall back to the default
-        engine and behaviour is unchanged.
+        bootstrap/single-tenant host -- in which case we fall back to the default
+        engine and behavior is unchanged.
         """
         # Import here to avoid circular imports
         from sqlalchemy.orm import sessionmaker
@@ -324,7 +324,7 @@ class ConnectionManager:
             engine = tenant_engine_for_host(host_id) or get_engine()
         except Exception:  # pylint: disable=broad-exception-caught
             # Host→tenant routing failed (e.g. registry unreachable). Do not
-            # guess a partition — surface it and leave the message queued so a
+            # guess a partition -- surface it and leave the message queued so a
             # later drain retries once routing recovers.
             logger.exception(
                 "send_to_host: could not resolve the tenant database for host "
@@ -388,7 +388,7 @@ class ConnectionManager:
         Returns the count of agents that successfully received the
         message.  Agents that fail to receive are disconnected so the
         next broadcast doesn't double-fail on them."""
-        from sqlalchemy.orm import sessionmaker  # local import — keeps the
+        from sqlalchemy.orm import sessionmaker  # local import -- keeps the
 
         from backend.persistence import db, models  # module import graph tidy
 

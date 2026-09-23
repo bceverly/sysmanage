@@ -7,7 +7,7 @@ Pro+ licensed-stub route groups (part A) for :func:`mount_proplus_stub_routes`.
 
 Extracted from ``backend.api.proplus_routes`` to keep every module under the
 line-count cap.  ``mount_proplus_stub_routes`` (the public entry re-exported by
-``proplus_routes``) lives here and delegates to the two group functions — this
+``proplus_routes``) lives here and delegates to the two group functions -- this
 one (audit / secrets / container / reporting / av / firewall) and
 ``proplus_routes_stubs_extra._mount_stub_group_b`` (automation onward).
 
@@ -55,13 +55,13 @@ def _mount_provisioning_stubs(app, results: dict) -> int:
     so an OSS-tier PAGE can render a clean "license required" state instead of a
     404; the provisioning UI ships only in the Pro+ plugin, so nothing in the
     open-source frontend ever calls these.  What does call them is a script or an
-    operator with curl — and answering a POST that was meant to assign a machine
+    operator with curl -- and answering a POST that was meant to assign a machine
     an OS with ``200 {"licensed": false}`` would tell them it worked.  402 with a
     reason is the honest answer, and it matches the convention already used by
     the OSS-side gates in child_host_crud.py and airgap_collector_runs.py.
 
     Without these the endpoints simply are not mounted, so an unlicensed server
-    answers 404 — indistinguishable from a typo in the URL.
+    answers 404 -- indistinguishable from a typo in the URL.
 
     Returns the number of stub route groups mounted.
     """
@@ -80,7 +80,7 @@ def _mount_provisioning_stubs(app, results: dict) -> int:
 
     router = APIRouter(prefix="/v1/provisioning", tags=["provisioning-stubs"])
 
-    # 18.1 — compute provisioning
+    # 18.1 -- compute provisioning
     @router.get("/providers")
     @router.get("/compute-resources")
     @router.get("/templates")
@@ -94,7 +94,7 @@ def _mount_provisioning_stubs(app, results: dict) -> int:
     async def provisioning_write_stub(current_user=Depends(get_current_user)):
         _unlicensed()
 
-    # 18.2 — bare metal: catalog, per-MAC assignment, discovery, boot media
+    # 18.2 -- bare metal: catalog, per-MAC assignment, discovery, boot media
     @router.get("/install-sources")
     @router.get("/install-assignments")
     @router.get("/discovered-hosts")

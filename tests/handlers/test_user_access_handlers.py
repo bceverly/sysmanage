@@ -184,7 +184,7 @@ class TestCreateUserGroup:
         kwargs = cls.call_args.kwargs
         assert kwargs["gid"] is None
         assert kwargs["security_id"] is None
-        # is_system_group flag is honoured directly.
+        # is_system_group flag is honored directly.
         assert kwargs["is_system_group"] is True
 
 

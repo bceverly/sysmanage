@@ -33,7 +33,7 @@ shape; adding a new one is backward-compatible and does not.
 
 COMPATIBILITY -- the part that matters operationally
 -----------------------------------------------------
-Engines are prebuilt binaries pulled from the licence server, and the mount
+Engines are prebuilt binaries pulled from the license server, and the mount
 sites call their factories with KEYWORD arguments. Passing ``services=`` to an
 engine compiled before this existed raises ``TypeError: got an unexpected
 keyword argument``, which would break every engine on an install that has not

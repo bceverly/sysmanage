@@ -5,9 +5,9 @@
 """The SYSTEM_INFO handler must actually INGEST the capability advertisement.
 
 Why this file exists separately from the service tests: every piece of Phase 19
-was implemented and unit-tested — the agent built the report and sent it, the
+was implemented and unit-tested -- the agent built the report and sent it, the
 service normalized it, the migration added the columns, and the dispatch gate
-called host_supports() — and the feature was still completely inert, because
+called host_supports() -- and the feature was still completely inert, because
 nothing connected the payload to the service.  The column stayed NULL, so
 host_supports() answered "unknown" for every host and the gate never fired.
 
@@ -67,7 +67,7 @@ def test_a_limited_agent_is_flagged_through_the_handler():
 
 
 def test_the_stored_form_round_trips_back_out():
-    """What the handler writes must be readable by the gate — otherwise the
+    """What the handler writes must be readable by the gate -- otherwise the
     column is populated and host_supports() still answers 'unknown'."""
     values = _values({"agent_capabilities": _report(["install_package", "reboot"])})
 
@@ -124,7 +124,7 @@ def test_limited_flag_is_three_valued():
 
 def test_limited_flag_ignores_a_stale_true_with_no_report():
     """Defence in depth: if the boolean column were somehow set while the JSON
-    is absent, 'unknown' still wins — we cannot describe what was never sent."""
+    is absent, 'unknown' still wins -- we cannot describe what was never sent."""
     from backend.services.agent_capability_service import limited_flag
 
     class _H:

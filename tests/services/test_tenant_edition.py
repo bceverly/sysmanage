@@ -9,7 +9,7 @@ The real per-tenant edition resolution lives in the licensed
 ``multitenancy_engine``; this shim just delegates through
 ``backend.multitenancy.seam`` and degrades to ``None`` when the engine is
 absent or predates the seam.  All three degradation paths are exercised
-here with the seam monkeypatched — no engine is actually loaded.
+here with the seam monkeypatched -- no engine is actually loaded.
 """
 
 # pylint: disable=missing-function-docstring

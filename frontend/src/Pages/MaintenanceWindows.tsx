@@ -180,7 +180,7 @@ const MaintenanceWindows: React.FC = () => {
                     }),
                 );
             }
-            return parts.join(', ') || '—';
+            return parts.join(', ') || '--';
         },
         [t],
     );

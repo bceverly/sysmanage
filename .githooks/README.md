@@ -7,7 +7,7 @@ the default `.git/hooks/` which is not version-controlled).
 ## Installation
 
 Run `make install-hooks` from the repo root once after cloning.  It
-sets `core.hooksPath = .githooks` for this clone — idempotent, safe to
+sets `core.hooksPath = .githooks` for this clone -- idempotent, safe to
 re-run.  `make install-dev` runs `make install-hooks` automatically as
 its last step, so for most contributors there's nothing to do beyond
 the normal setup workflow.
@@ -21,10 +21,10 @@ If black would reformat any of them, the commit is blocked with a
 message telling the dev to run `make format`, `git add` the result,
 and re-commit.  This is the upstream-most defense against the
 "`make lint` silently rewrote my working tree but I forgot to
-`git add`" gap that the lint target's auto-fix behaviour can
+`git add`" gap that the lint target's auto-fix behavior can
 otherwise mask.
 
-The hook does **not** auto-fix and stage the result — explicit
+The hook does **not** auto-fix and stage the result -- explicit
 `make format` keeps the dev in control of what's in each commit.
 Bypass with `git commit --no-verify` in a genuine emergency, but the
 `pre-push` hook + CI both run the same check and will reject the
@@ -46,5 +46,5 @@ workflow can't silently ship un-formatted commits.
 ## Bypassing the install (not recommended)
 
 If for any reason you don't want the hooks active in your clone, run
-`git config --unset core.hooksPath` — but please don't push without
+`git config --unset core.hooksPath` -- but please don't push without
 running `make lint` first, or CI will reject the change anyway.

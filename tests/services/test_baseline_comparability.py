@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Golden-host drift must not fabricate divergence — Phase 21.1 S6.
+"""Golden-host drift must not fabricate divergence -- Phase 21.1 S6.
 
 THE DEFECT THIS FIXES, which was live
 -------------------------------------
@@ -12,7 +12,7 @@ Windows box compared against a Linux one read as "missing every mount" rather
 than "does not have mounts".
 
 That is a fabricated divergence in a feature whose entire job is reporting
-real ones — and it is the "not covered is not empty" confusion arriving in a
+real ones -- and it is the "not covered is not empty" confusion arriving in a
 shipped surface.
 """
 

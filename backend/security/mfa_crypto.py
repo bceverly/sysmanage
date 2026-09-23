@@ -8,11 +8,11 @@ Symmetric encryption for MFA-at-rest secrets.
 TOTP shared secrets are stored encrypted in the database so a leaked
 DB dump alone can't be replayed against the authenticator app.  We use
 Fernet (AES-128-CBC + HMAC-SHA256) with a key derived from the server's
-configured MFA encryption key — separate from the JWT signing key so
+configured MFA encryption key -- separate from the JWT signing key so
 key rotation can happen independently.
 
 Key resolution order:
-1. ``security.mfa_encryption_key`` in ``/etc/sysmanage.yaml`` (preferred —
+1. ``security.mfa_encryption_key`` in ``/etc/sysmanage.yaml`` (preferred --
    operators can rotate this key separately from JWT signing).
 2. Fallback: derive from ``security.jwt_secret`` via HKDF-SHA256.  This
    makes the feature work out of the box without forcing operators to

@@ -2,20 +2,20 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""create maintenance-window tables (Phase 14.2 — maintenance windows)
+"""create maintenance-window tables (Phase 14.2 -- maintenance windows)
 
 Operator-defined change windows: update installs / remote commands only reach
 agents inside allowed windows, with blackout windows and time-boxed emergency
 overrides (audited).  Per-tenant operational policy → **tenant** partition, so
 the table names are UNPREFIXED (no registry_/shared_ prefix).  Scope + override
 rows soft-reference ``host.id`` / ``tags.id`` (same partition) via plain indexed
-GUID columns — no hard FK, keeping this migration order-independent + idempotent.
+GUID columns -- no hard FK, keeping this migration order-independent + idempotent.
 
-* ``maintenance_window`` — a window: name, kind (allow|blackout), recurrence
+* ``maintenance_window`` -- a window: name, kind (allow|blackout), recurrence
   (once|daily|weekly) + IANA timezone; recurring uses local start_time +
   duration_minutes (+ days_of_week for weekly); one-off uses starts_at/ends_at.
-* ``maintenance_window_scope`` — what a window applies to (all|host|tag).
-* ``maintenance_override`` — time-boxed emergency override for one host.
+* ``maintenance_window_scope`` -- what a window applies to (all|host|tag).
+* ``maintenance_override`` -- time-boxed emergency override for one host.
 
 Idempotent; safe on SQLite + PostgreSQL.
 

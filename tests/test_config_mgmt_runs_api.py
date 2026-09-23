@@ -481,7 +481,7 @@ class TestApplyLicensing:
     async def test_a_licensed_puppet_apply_goes_through(self):
         # The module must be present as well as licensed: a licensed engine is
         # dispatched as a spec the Pro+ module builds, so mocking only the
-        # licence gate leaves nothing to send (and correctly 503s).
+        # license gate leaves nothing to send (and correctly 503s).
         session = _Session(Host=[_host()])
         with _Env() as env, patch(
             "backend.api.config_mgmt_runs.require_module", return_value=None

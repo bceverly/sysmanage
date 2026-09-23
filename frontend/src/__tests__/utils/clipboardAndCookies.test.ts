@@ -6,7 +6,7 @@
  * Clipboard and cookie helpers.
  *
  * The clipboard helper exists because `navigator.clipboard` is undefined
- * outside a secure context — a freshly-installed server reached over plain
+ * outside a secure context -- a freshly-installed server reached over plain
  * HTTP by IP. That is not an edge case, it is the first hour of every
  * install, and it is why the Copy buttons once did nothing. So the fallback
  * path is tested as a first-class outcome, not as an afterthought.

@@ -9,7 +9,7 @@
  * ``federation_controller_engine`` is loaded on the coordinator) or
  * a uniform ``{licensed: false, ...}`` stub (OSS / Community / unlicensed
  * Enterprise).  The page-level callers must check ``licensed`` before
- * trusting the rest of the payload — see ``Pages/Sites.tsx`` for the
+ * trusting the rest of the payload -- see ``Pages/Sites.tsx`` for the
  * canonical pattern.
  */
 
@@ -89,7 +89,7 @@ export interface FederationEnrollSiteRequest {
 
 /**
  * Response from POST /sites.  Carries the plaintext enrollment
- * token EXACTLY ONCE — the UI must surface it to the operator on
+ * token EXACTLY ONCE -- the UI must surface it to the operator on
  * the success screen because it cannot be retrieved afterwards.
  */
 export interface FederationEnrollSiteResponse {
@@ -204,7 +204,7 @@ export interface FederationSyncEvent {
 /**
  * Per-site sync-status timeline plus the site's latest self-reported
  * metadata.  ``connection_state`` here is the SITE's own view of its
- * uplink (online / degraded / offline) — when ``offline`` the site is
+ * uplink (online / degraded / offline) -- when ``offline`` the site is
  * operating in local autonomy mode.  ``capabilities`` is the list of
  * Pro+ engine modules the site advertises.
  */
@@ -236,7 +236,7 @@ export async function doGetFederationSiteSyncTimeline(
 /**
  * One row from the federation audit log.  Schema mirrors the
  * ``FederationAuditLog`` SQLAlchemy model.  ``target_site_name`` is
- * an engine-side enrichment — when the engine has the site row,
+ * an engine-side enrichment -- when the engine has the site row,
  * it returns the operator-friendly name alongside the raw UUID so
  * the UI doesn't have to join client-side.
  */
@@ -285,7 +285,7 @@ export async function doListFederationAuditLog(
 }
 
 // ---------------------------------------------------------------------
-// Site-side stub: enrollment status (the site-engine surface — same
+// Site-side stub: enrollment status (the site-engine surface -- same
 // envelope shape).  Used by the Sites map's per-site connectivity
 // badge when running on a coordinator.  Kept here next to the rest
 // of the federation surface so route names live in one place.
@@ -301,7 +301,7 @@ export interface FederationSiteEnrollmentStatusResponse {
 //
 // The OSS rule is "don't show menus for features that aren't available".
 // Every federation page already renders an Enterprise upsell on
-// ``licensed: false`` — but the navbar entry and in-page action
+// ``licensed: false`` -- but the navbar entry and in-page action
 // buttons would otherwise be reachable when the engine isn't loaded.
 // To hide them, we probe ``/api/v1/federation/sites`` once per page
 // load and cache the result in module scope so subsequent calls
@@ -313,7 +313,7 @@ let _federationLicensedPromise: Promise<boolean> | null = null;
 
 /**
  * Resolve the cached licensed flag (or fetch it if we haven't yet).
- * Always resolves — any network / engine error is treated as
+ * Always resolves -- any network / engine error is treated as
  * "not licensed" so the menu hides rather than flashes.
  *
  * Skipped entirely when there's no bearer token: the Navbar lives
@@ -321,7 +321,7 @@ let _federationLicensedPromise: Promise<boolean> | null = null;
  * ``/login`` page too.  If we fire the probe pre-auth, the API call
  * 401s, axios's response interceptor tries ``/refresh``, that also
  * 401s, and ``handle401Refresh`` does ``location.href = '/login'``,
- * triggering a full page reload — which remounts Navbar, fires the
+ * triggering a full page reload -- which remounts Navbar, fires the
  * probe again, and loops indefinitely.  The short-circuit caches a
  * ``false`` result so the loop never starts; ``_resetFederationLicensedCacheForTests``
  * clears it after login so the next mount re-fires the real probe.
@@ -352,7 +352,7 @@ export function probeFederationLicensed(): Promise<boolean> {
  * React hook for gating UI on the federation-engine licensed flag.
  * Returns ``loading=true`` for the first render after mount so
  * components can choose whether to flash the menu or just leave a
- * gap — Navbar uses the latter (renders nothing until resolved).
+ * gap -- Navbar uses the latter (renders nothing until resolved).
  */
 export function useFederationLicensed(): {
   loading: boolean;
@@ -382,7 +382,7 @@ export function useFederationLicensed(): {
 
 /**
  * Test-only: clear the module-scope cache.  Production code never
- * calls this; the cache is the right behaviour at runtime since the
+ * calls this; the cache is the right behavior at runtime since the
  * engine load state is fixed for the life of the page.
  */
 export function _resetFederationLicensedCacheForTests(): void {
@@ -416,7 +416,7 @@ export interface FederationPolicy {
 export interface FederationPolicyAssignment {
   policy_id: string;
   site_id: string;
-  /** Coordinator-side name of the assigned site — engine-enriched
+  /** Coordinator-side name of the assigned site -- engine-enriched
    * so the UI doesn't have to join client-side. */
   site_name?: string | null;
   assigned_at?: string | null;
@@ -424,11 +424,11 @@ export interface FederationPolicyAssignment {
   /**
    * Lifecycle of the per-(policy, site) push:
    *
-   *   pending       — never pushed (or operator re-assigned to reset).
-   *   pushed        — at least one successful delivery.
-   *   acknowledged  — site applied the policy (reserved for future).
-   *   error         — most recent attempt failed; backoff window active.
-   *   dead          — Phase 12.10 hardening: exceeded MAX_ATTEMPTS,
+   *   pending       -- never pushed (or operator re-assigned to reset).
+   *   pushed        -- at least one successful delivery.
+   *   acknowledged  -- site applied the policy (reserved for future).
+   *   error         -- most recent attempt failed; backoff window active.
+   *   dead          -- Phase 12.10 hardening: exceeded MAX_ATTEMPTS,
    *                   no further retries until operator re-assigns.
    */
   push_status: string;
@@ -461,7 +461,7 @@ export interface FederationPolicyCreateRequest {
   policy_type: string;
   name: string;
   description?: string | null;
-  /** Native dict; serialised server-side. */
+  /** Native dict; serialized server-side. */
   definition: Record<string, unknown>;
 }
 
@@ -558,7 +558,7 @@ export async function doRepushSitePolicies(
 }
 
 // ---------------------------------------------------------------------
-// Alert thresholds (Phase 12.1 — operator-configurable)
+// Alert thresholds (Phase 12.1 -- operator-configurable)
 // ---------------------------------------------------------------------
 
 /** The four configurable rollup-alert thresholds.  A null override means
@@ -594,7 +594,7 @@ export async function doUpdateFederationAlertConfig(
 }
 
 // ---------------------------------------------------------------------
-// Cross-site report (Phase 12.3 — federated Reports facet)
+// Cross-site report (Phase 12.3 -- federated Reports facet)
 // ---------------------------------------------------------------------
 
 export interface FederationReportRow {
@@ -699,7 +699,7 @@ export async function doListFederationCommands(params: {
 }
 
 // ---------------------------------------------------------------------
-// Per-site rollups (Phase 12.3 — cross-site compliance/vuln drill-down)
+// Per-site rollups (Phase 12.3 -- cross-site compliance/vuln drill-down)
 // ---------------------------------------------------------------------
 
 export interface FederationComplianceRollup {
@@ -736,7 +736,7 @@ export interface FederationDashboardRollupResponse {
  * Latest synced compliance + vulnerability rollup for one site.  This is
  * the federation-correct "cross-site compliance/vuln drill-down": the
  * coordinator serves the per-site AGGREGATE snapshots the site pushed up
- * (not per-host detail — that lives on the site).  Returns
+ * (not per-host detail -- that lives on the site).  Returns
  * ``{licensed:false}`` on OSS.
  */
 export async function doGetFederationDashboardRollup(
@@ -749,7 +749,7 @@ export async function doGetFederationDashboardRollup(
 }
 
 // ---------------------------------------------------------------------
-// Rollup alerts (Phase 12.1 — cross-site alerting)
+// Rollup alerts (Phase 12.1 -- cross-site alerting)
 // ---------------------------------------------------------------------
 
 export interface FederationAlert {
@@ -825,7 +825,7 @@ export interface FederationDispatchCommandResponse {
 /**
  * Dispatch a command to a subordinate site (and optionally specific hosts
  * at that site).  The coordinator queues it; the site's actuation worker
- * fans it out to local agents and reports results back upstream — nothing
+ * fans it out to local agents and reports results back upstream -- nothing
  * is executed synchronously here.  Returns the created command record so
  * the caller can show it immediately.
  */
@@ -840,12 +840,12 @@ export async function doDispatchFederationCommand(
 }
 
 // ---------------------------------------------------------------------
-// Cross-site host directory (Phase 12.3 — federated Hosts page)
+// Cross-site host directory (Phase 12.3 -- federated Hosts page)
 // ---------------------------------------------------------------------
 
 /**
  * One row of the coordinator's synced cross-site host directory.  This
- * is the SUMMARY tier — the coordinator never holds full per-host
+ * is the SUMMARY tier -- the coordinator never holds full per-host
  * detail; the ``site_detail_url`` on the detail endpoint deep-links to
  * the owning site's own UI for that.  Mirrors the engine's
  * ``_host_directory_to_dict``.
@@ -895,7 +895,7 @@ export interface FederationHostDetailResponse {
   site?: FederationHostSite | null;
   /**
    * Deep-link into the OWNING SITE's own web UI for this host's live
-   * detail.  Drill-down is navigational, not a synchronous proxy — the
+   * detail.  Drill-down is navigational, not a synchronous proxy -- the
    * coordinator never blocks on a subordinate to answer a read.
    */
   site_detail_url?: string | null;

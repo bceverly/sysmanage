@@ -393,7 +393,7 @@ async def delete_saved_script(
 
             # Check if script is being used in any pending/running executions.
             # ScriptExecutionLog is host-scoped (lives in the tenant database),
-            # so query it on the active tenant's engine — querying the bootstrap
+            # so query it on the active tenant's engine -- querying the bootstrap
             # engine here returns a false negative for tenant hosts and would let
             # a script that is actively executing be deleted.
             with request_sessionmaker()() as exec_session:

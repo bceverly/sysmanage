@@ -15,7 +15,7 @@ Routes:
 
   POST /api/auth/mfa/enroll/complete
       Authenticated.  Verify the user's first TOTP code, then issue
-      backup codes.  Returns the plaintext backup codes exactly once —
+      backup codes.  Returns the plaintext backup codes exactly once --
       they are never retrievable again.
 
   POST /api/auth/mfa/verify
@@ -75,7 +75,7 @@ router = APIRouter()
 
 
 class EnrollStartResponse(BaseModel):
-    """Response from ``enroll/start`` — URI for the authenticator app +
+    """Response from ``enroll/start`` -- URI for the authenticator app +
     the raw secret for users who can't scan the QR."""
 
     secret: str
@@ -101,7 +101,7 @@ class VerifyRequest(BaseModel):
 class EmailRequestRequest(BaseModel):
     """Request body for /api/auth/mfa/email/request.
 
-    Re-uses the same MFA-pending token the verify endpoint accepts —
+    Re-uses the same MFA-pending token the verify endpoint accepts --
     the user has already passed the password step but not yet the
     second factor.  No other fields: ``user_id`` and ``email`` are
     decoded from the token + looked up in the DB to avoid an open
@@ -236,7 +236,7 @@ async def enroll_complete(
 ):
     """Verify the first TOTP code, then issue backup codes.
 
-    Returns the plaintext backup codes ONCE — store-and-forget design.
+    Returns the plaintext backup codes ONCE -- store-and-forget design.
     """
     user = _get_user_or_404(db, current_user)
     enrollment = mfa_service.get_enrollment(db, user.id)
@@ -276,7 +276,7 @@ async def enroll_complete(
 
 
 # ---------------------------------------------------------------------
-# Login challenge — anonymous endpoint, validates MFA-pending token
+# Login challenge -- anonymous endpoint, validates MFA-pending token
 # ---------------------------------------------------------------------
 
 
@@ -293,7 +293,7 @@ async def mfa_verify(
     if not pending:
         raise HTTPException(
             status_code=401,
-            detail=_("MFA challenge expired — please log in again."),
+            detail=_("MFA challenge expired -- please log in again."),
         )
     userid = pending.get("user_id")
     user = db.query(models.User).filter(models.User.userid == userid).first()
@@ -341,7 +341,7 @@ async def mfa_email_request(
 
     Phase 10.3 fallback for users who can't reach their authenticator
     app and have no backup codes left.  Requires the same pending
-    token the verify endpoint accepts — the user must have already
+    token the verify endpoint accepts -- the user must have already
     passed the password step (so we know which user to send to and
     that the request isn't a random spammer).
 
@@ -355,21 +355,21 @@ async def mfa_email_request(
     if not pending:
         raise HTTPException(
             status_code=401,
-            detail=_("MFA challenge expired — please log in again."),
+            detail=_("MFA challenge expired -- please log in again."),
         )
     userid = pending.get("user_id")
     user = db.query(models.User).filter(models.User.userid == userid).first()
 
     # Single exit point with the always-identical envelope.  Every
     # branch below produces side effects (audit log + maybe OTP send)
-    # but the wire-level response NEVER differentiates — that's the
+    # but the wire-level response NEVER differentiates -- that's the
     # anti-enumeration property described in the docstring.  Bad
     # pending token resolves to a missing/inactive user → same as the
     # not-enrolled case; probing the endpoint gives an attacker no
     # information about which userids exist or are MFA-enrolled.
     if user and user.active:
         if mfa_service.is_enrolled(db, user.id):
-            # Source IP is best-effort — behind a reverse proxy the
+            # Source IP is best-effort -- behind a reverse proxy the
             # request will carry X-Forwarded-For; we trust whatever
             # ``fastapi_request.client`` surfaces and log only.  Not
             # used for any auth decision.
@@ -547,7 +547,7 @@ async def update_mfa_settings(
 ):
     """Update the singleton MFA settings.  Admin-only.
 
-    The list of fields is a controlled subset — we don't expose
+    The list of fields is a controlled subset -- we don't expose
     ``updated_at`` or ``updated_by`` to the request schema.
     """
     user = _get_user_or_404(db, current_user)

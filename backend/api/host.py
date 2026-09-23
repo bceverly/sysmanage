@@ -124,7 +124,7 @@ class HostRegistrationLegacy(BaseModel):
 
 
 def _limited_flag(host):
-    """Three-valued limited flag — see agent_capability_service.limited_flag."""
+    """Three-valued limited flag -- see agent_capability_service.limited_flag."""
     from backend.services.agent_capability_service import limited_flag  # noqa: PLC0415
 
     return limited_flag(host)
@@ -164,7 +164,7 @@ async def delete_host(host_id: str, current_user: str = Depends(get_current_user
 
     from backend.persistence.partitions import request_sessionmaker  # noqa: PLC0415
 
-    # Authorization on the MAIN engine — users/roles are server-global.
+    # Authorization on the MAIN engine -- users/roles are server-global.
     auth_local = sessionmaker(  # pylint: disable=duplicate-code
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -183,11 +183,11 @@ async def delete_host(host_id: str, current_user: str = Depends(get_current_user
                 status_code=403,
                 detail=_("Permission denied: DELETE_HOST role required"),
             )
-        # Capture before the auth session closes — used for the audit below.
+        # Capture before the auth session closes -- used for the audit below.
         user_id = user.id
 
     # Host data lives in the active tenant's database (Phase 13.1); a bound host
-    # isn't in the bootstrap DB, so route the delete to the request's tenant —
+    # isn't in the bootstrap DB, so route the delete to the request's tenant --
     # the same database get_host reads it from.
     session_local = request_sessionmaker()
     with session_local() as session:
@@ -208,7 +208,7 @@ async def delete_host(host_id: str, current_user: str = Depends(get_current_user
 
     host_tenant_index.unbind_host(host_id)
 
-    # Audit on the MAIN engine — the audit trail is server-global.
+    # Audit on the MAIN engine -- the audit trail is server-global.
     audit_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
     with audit_local() as audit_session:
         AuditService.log_delete(
@@ -230,7 +230,7 @@ async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
     """
     from backend.persistence.partitions import request_sessionmaker  # noqa: PLC0415
 
-    # Authorization on the MAIN engine — users/roles are server-global.
+    # Authorization on the MAIN engine -- users/roles are server-global.
     auth_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
     with auth_local() as auth_session:
         user = (
@@ -442,7 +442,7 @@ def _get_all_hosts_sync(tenant_id=None):
     from backend.persistence.partitions import get_request_engine  # noqa: PLC0415
 
     # Server scope (no active tenant) uses the module-local ``db.get_engine()``
-    # directly — identical to before, and it keeps the existing unit tests that
+    # directly -- identical to before, and it keeps the existing unit tests that
     # mock ``host.db`` working.  Only when a tenant is actually in scope do we
     # route through the seam to that tenant's engine.  Keep the module-local
     # ``sessionmaker`` so only the bound engine changes.
@@ -456,7 +456,7 @@ def _get_all_hosts_sync(tenant_id=None):
 
         # Bulk-fetch the host→tag mapping in one query rather than
         # ``host.tags.all()`` per host (the dynamic relationship issued
-        # 1+N queries — flagged in the Phase 6 N+1 audit).
+        # 1+N queries -- flagged in the Phase 6 N+1 audit).
         host_ids = [h.id for h in hosts]
         tags_by_host: dict = {}
         if host_ids:
@@ -555,7 +555,7 @@ async def get_all_hosts():
     This function retrieves all hosts in the system.
     Runs the database query in a thread pool to avoid blocking the event loop.
     """
-    # Capture the active tenant HERE, in the request's async context — the
+    # Capture the active tenant HERE, in the request's async context -- the
     # ContextVar won't be visible inside the thread-pool worker below.
     from backend.persistence.tenant_context import get_active_tenant
 
@@ -570,7 +570,7 @@ def _get_host_geolocations_sync():
     Phase 12.7: return geo-locatable hosts for the world-map UI.
 
     Filters to rows where ``geo_latitude`` and ``geo_longitude`` are
-    both populated — hosts that haven't been resolved yet (or whose
+    both populated -- hosts that haven't been resolved yet (or whose
     public IP is internal-only / airgapped) are excluded.  The map
     component doesn't try to plot "unknown location" markers; those
     hosts simply don't appear until their next heartbeat resolves.
@@ -713,7 +713,7 @@ async def register_host(registration_data: HostRegistration):
     Register a new host (agent) with the system.
     This endpoint does not require authentication for initial registration.
     """
-    # Phase 13.1: resolve the enrollment token BEFORE opening the host session —
+    # Phase 13.1: resolve the enrollment token BEFORE opening the host session --
     # it both rejects a bad registration (403) and selects which database the
     # host lives in.  None when MT is off / no token → server-scoped (bootstrap).
     # A token is consumed even if the host already exists in the target tenant DB.
@@ -744,7 +744,7 @@ async def register_host(registration_data: HostRegistration):
             return _refresh_existing_host(session, existing_host, registration_data)
 
         # Phantom-duplicate loophole close: no token routed us to the no-tenant DB
-        # and no server-scoped row exists for this fqdn — but if it already lives
+        # and no server-scoped row exists for this fqdn -- but if it already lives
         # in a TENANT DB, creating one here would duplicate it across partitions.
         # (Only reached on the token-less path; a token already picked the tenant.)
         if enrollment_tenant_id is None:
@@ -753,7 +753,7 @@ async def register_host(registration_data: HostRegistration):
         # Race guard: if this fqdn+ipv4 was just cascade-deleted by a
         # child-host delete, the doomed VM's agent is racing virsh
         # destroy with a final /host/register.  Absorb it without
-        # recreating a ghost Host row — the agent is about to die so
+        # recreating a ghost Host row -- the agent is about to die so
         # the response doesn't matter.  See
         # backend.api.recent_host_deletions for the full rationale.
         from backend.api.recent_host_deletions import is_recent_child_host_deletion
@@ -819,7 +819,7 @@ async def register_host(registration_data: HostRegistration):
         session.flush()  # need host.id for join-table inserts below
 
         # Phase 8.1: enroll into the key's access group + bump usage.  Atomic
-        # with the host create — one commit below.
+        # with the host create -- one commit below.
         _apply_registration_key_enrollment(session, host, validated_key)
 
         # Phase 18.1 S4: apply the enrollment token's site / access-group
@@ -880,7 +880,7 @@ async def register_host(registration_data: HostRegistration):
                 },
             )
 
-        # Phase 10.4.4 — auto-apply default mirror assignments for the
+        # Phase 10.4.4 -- auto-apply default mirror assignments for the
         # newly-enrolled host's (platform, version, os_family).  Only
         # for approved hosts; pending hosts get applied when an admin
         # approves them (separate hook in approve_host).  Best-effort:

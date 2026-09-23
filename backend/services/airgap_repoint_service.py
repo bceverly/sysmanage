@@ -10,7 +10,7 @@ to it should have its package manager pointed at this server's mirror
 
 This module is called from the inbound message path (see
 ``inbound_processor``) so the directive propagates on the very next
-communication cycle after the server's role is set to ``repository`` —
+communication cycle after the server's role is set to ``repository`` --
 even for agents that connected while the role was still ``standard``.
 
 Efficiency: a naive "dispatch on every message" would run ``apt-get
@@ -27,7 +27,7 @@ with ``[trusted=yes]`` and never disables online sources) so it matches
 the validated apt-mirror layout: ``deb URL <suite> <components>`` (the
 mirror's Ubuntu-signed InRelease verifies normally), upstream sources
 disabled, then ``apt-get update``.  Dispatched via the same
-``enqueue_apply_plan`` path the ingest mount/copy plans use — the agent
+``enqueue_apply_plan`` path the ingest mount/copy plans use -- the agent
 already knows how to execute these command plans, so no agent change.
 """
 
@@ -73,7 +73,7 @@ def _build_apt_repoint_plan(repo_url: str, suite: str, components: str) -> dict:
     ``sudo sh -c "printf > file"``: the agent sudoers deliberately does
     NOT authorize ``/bin/sh`` (blanket shell would defeat the
     constrained-sudo model), and a shell-wrapped write is denied with
-    "user not allowed to run" — silently leaving the agent unrepointed.
+    "user not allowed to run" -- silently leaving the agent unrepointed.
     ``files`` are deployed before ``commands`` run.
 
     Online sources are then disabled with ``sed`` (an authorized
@@ -97,7 +97,7 @@ def _build_apt_repoint_plan(repo_url: str, suite: str, components: str) -> dict:
         ],
         "commands": [
             # Disable the deb822 OS sources (resolute+) if present.  A
-            # deb822 stanza must be disabled WHOLESALE — commenting only
+            # deb822 stanza must be disabled WHOLESALE -- commenting only
             # some fields (e.g. Types) leaves a stanza missing a required
             # field, which apt rejects with "Malformed stanza … (type)"
             # and then refuses to read ANY source.  So comment every
@@ -184,7 +184,7 @@ def maybe_repoint(db, host, _connection_send=None) -> None:
             plan = _build_apt_repoint_plan(repo.repo_url, suite, components)
             kind = "apt"
         else:
-            # Other package managers (dnf/zypper/apk/pkg) not wired yet —
+            # Other package managers (dnf/zypper/apk/pkg) not wired yet --
             # the device/ingest path supports them, repoint is apt-first.
             return
 

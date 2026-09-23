@@ -9,7 +9,7 @@
  * library is replaced with a recording stub. That is not a cop-out: what
  * matters here is not that Leaflet draws, it is that the page asks for the
  * right data, survives a host with no coordinates, and does not blow up when
- * the fetch fails — all of which the stub lets us observe directly.
+ * the fetch fails -- all of which the stub lets us observe directly.
  *
  * A host without a fix is the normal case, not an edge case: geolocation is
  * best-effort and plenty of hosts never resolve. A page that throws on a null

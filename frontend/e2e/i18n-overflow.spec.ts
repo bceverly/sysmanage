@@ -10,13 +10,13 @@ import { test, expect, Page } from '@playwright/test';
  * Translated UI labels run 30-50% longer than English (German, French, and
  * Russian are the usual worst cases).  When a button, toolbar, or column header
  * can't wrap, the extra width pushes the whole page wider than the viewport and
- * content runs off the right edge — exactly the symptom we hit on the docs site.
+ * content runs off the right edge -- exactly the symptom we hit on the docs site.
  *
  * This spec renders a sample of authenticated pages at several viewport widths in
  * the longest-growth locales and asserts the DOCUMENT never overflows
  * horizontally (``scrollWidth <= clientWidth``).  We check the document, not
  * individual scroll containers, so an intentionally horizontally-scrollable
- * MUI DataGrid (its own scroll area) doesn't false-positive — only something that
+ * MUI DataGrid (its own scroll area) doesn't false-positive -- only something that
  * widens the page itself fails.
  *
  * The MuiButton theme override in ``App.tsx`` (whiteSpace: normal / overflowWrap)
@@ -29,7 +29,7 @@ import { test, expect, Page } from '@playwright/test';
  * the language; it doesn't disturb the auth storage state.
  */
 
-// Longest-growth locales — German (compounds), French (verbose), Russian
+// Longest-growth locales -- German (compounds), French (verbose), Russian
 // (Cyrillic + long words).  Keep the set small: this is widths x locales x pages,
 // so it grows fast against the CI budget.
 const LOCALES = ['de', 'fr', 'ru'] as const;
@@ -60,7 +60,7 @@ async function expectNoHorizontalOverflow(page: Page, label: string): Promise<vo
     const de = document.documentElement;
     const vw = de.clientWidth;
     const offenders: string[] = [];
-    // Only inspect interactive/label-bearing elements — those are what grow with
+    // Only inspect interactive/label-bearing elements -- those are what grow with
     // translation; a scrollable grid body is intentionally wide and excluded by
     // the document-level (not element-level) pass/fail.
     const sel =
@@ -85,7 +85,7 @@ async function expectNoHorizontalOverflow(page: Page, label: string): Promise<vo
 }
 
 for (const locale of LOCALES) {
-  test.describe(`i18n overflow — ${locale}`, () => {
+  test.describe(`i18n overflow -- ${locale}`, () => {
     for (const route of ROUTES) {
       for (const width of WIDTHS) {
         test(`${route} at ${width}px has no horizontal overflow (${locale})`, async ({

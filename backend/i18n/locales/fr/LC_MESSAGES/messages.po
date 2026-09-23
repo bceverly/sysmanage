@@ -496,7 +496,7 @@ msgid "Invalid TOTP code."
 msgstr "Code TOTP non valide."
 
 #: backend/api/auth_mfa.py:296 backend/api/auth_mfa.py:358
-msgid "MFA challenge expired — please log in again."
+msgid "MFA challenge expired -- please log in again."
 msgstr "Le défi MFA a expiré - veuillez vous reconnecter."
 
 #: backend/api/auth_mfa.py:301
@@ -1417,7 +1417,7 @@ msgstr "Le tick du miroir requiert automation_engine pour l'évaluation cron."
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed"
+"Mirror %s has not completed a successful sync yet -- wait for sync to succeed"
 " before assigning it as a default."
 msgstr ""
 "Le miroir %s n'a pas encore effectué une synchronisation réussie - attendez "
@@ -1467,11 +1467,11 @@ msgstr ""
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be"
-" loaded — the collector reads each target's bundle from a snapshot of its "
+" loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 "La collecte en mode air-gap nécessite que le module "
-"repository_mirroring_engine soit chargé — le collecteur lit chaque paquet "
+"repository_mirroring_engine soit chargé -- le collecteur lit chaque paquet "
 "cible à partir d'un instantané de son arbre miroir."
 
 #: backend/api/airgap_collector_runs.py:229
@@ -5097,11 +5097,11 @@ msgstr ""
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
-"message(s) for retry (NOT deleting) — may be an in-flight enrollment or a "
+"message(s) for retry (NOT deleting) -- may be an in-flight enrollment or a "
 "deleted host"
 msgstr ""
-"Hœte %(host_id)s non trouvé dans cette base de données—différer %(count)d "
-"message(s) en attente (NE PAS supprimer)—peut être un abonnement en cours ou"
+"Hœte %(host_id)s non trouvé dans cette base de données--différer %(count)d "
+"message(s) en attente (NE PAS supprimer)--peut être un abonnement en cours ou"
 " un hœte supprimé"
 
 #: backend/websocket/inbound_processor.py:284
@@ -5629,10 +5629,10 @@ msgstr "Format secret non valide"
 #, python-format
 #~ msgid ""
 #~ "Host %s not found on this database; deferring %d queued message(s) for retry"
-#~ " (NOT deleting) — may be an in-flight enrollment or a deleted host"
+#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
 #~ "L'hôte %s n'est pas trouvé dans cette base de données ; différence de %d "
-#~ "message(s) en attente (NE PAS SUPPRIMER) – peut-être une inscription en "
+#~ "message(s) en attente (NE PAS SUPPRIMER) - peut-être une inscription en "
 #~ "cours ou un hôte supprimé"
 
 #, python-format

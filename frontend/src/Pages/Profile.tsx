@@ -650,7 +650,7 @@ const Profile: React.FC = () => {
 
     const renderSecurityInfo = () => (
         <Box sx={{ p: 3 }}>
-            {/* Phase 10.3 — MFA enrollment / status / disable card */}
+            {/* Phase 10.3 -- MFA enrollment / status / disable card */}
             <MfaEnrollmentCard />
 
             {/* Password Change Section */}

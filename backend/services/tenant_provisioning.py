@@ -3,11 +3,11 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Per-tenant database provisioning — OSS shim (Pro+ relocation, Phase 2).
+Per-tenant database provisioning -- OSS shim (Pro+ relocation, Phase 2).
 
 Runs the tenant Alembic chain against a tenant's database (via the OpenBAO-leased
 per-tenant engine) and records the revision in ``registry_tenant_db_version``.
-The provisioning logic moved into the licensed engine — there is no OSS copy —
+The provisioning logic moved into the licensed engine -- there is no OSS copy --
 so this raises a clear error without the engine (provisioning a tenant database
 is impossible without it).
 """

@@ -50,7 +50,7 @@ def host_fact_coverage(host) -> Optional[Dict[str, Any]]:
 def build_payload(pack: Dict[str, Any], queries, host) -> Optional[Dict[str, Any]]:
     """The ``run_query_pack`` parameters for this host, or None.
 
-    ``None`` means the licensed engine is not loaded — see the shim. The
+    ``None`` means the licensed engine is not loaded -- see the shim. The
     caller must not fall back to dispatching everything: an unfiltered pack
     sends hosts questions they cannot answer, and those come back as ERRORS,
     which is a different and worse claim than "does not serve those tables".

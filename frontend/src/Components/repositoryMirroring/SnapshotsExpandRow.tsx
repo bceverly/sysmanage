@@ -119,9 +119,9 @@ const SnapshotsExpandRow: React.FC<SnapshotsExpandRowProps> = ({
                   {snapshots.map((s) => (
                     <TableRow key={s.id}>
                       <TableCell sx={{ fontFamily: 'monospace' }}>{s.snapshot_id}</TableCell>
-                      <TableCell>{s.taken_at ? new Date(s.taken_at).toLocaleString() : '—'}</TableCell>
+                      <TableCell>{s.taken_at ? new Date(s.taken_at).toLocaleString() : '--'}</TableCell>
                       <TableCell align="right">{formatBytes(s.size_bytes)}</TableCell>
-                      <TableCell align="right">{s.file_count?.toLocaleString() ?? '—'}</TableCell>
+                      <TableCell align="right">{s.file_count?.toLocaleString() ?? '--'}</TableCell>
                       <TableCell align="right">
                         <Tooltip
                           title={t(

@@ -4,7 +4,7 @@
 
 """create gpg_key + gpg_key_assignment and seed 'Manage GPG Keys' role
 
-GPG Key Management (Slice 1 — server-side foundation).
+GPG Key Management (Slice 1 -- server-side foundation).
 
 * ``gpg_key`` stores metadata for a named GPG key; the armored material lives
   in the OpenBAO vault, referenced by ``openbao_secret_id`` (NEVER in the DB).

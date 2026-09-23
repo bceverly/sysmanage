@@ -3,14 +3,14 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Phase 13.2.1 — Slice 4 native ``/api/v1`` migration (security / auth-mgmt).
+Phase 13.2.1 -- Slice 4 native ``/api/v1`` migration (security / auth-mgmt).
 
 Dual-surface contract for the migrated routers (auth, security, security_roles,
 password_reset, openbao, external_idp *management*) and the explicit invariants
 that the deferred / stable surfaces are NOT natively versioned:
 
   * external_idp SSO/ACS/metadata callbacks (IdP-configured URLs),
-  * OSS ``secrets`` (deferred — collides with the Pro+ secrets_engine v1 path),
+  * OSS ``secrets`` (deferred -- collides with the Pro+ secrets_engine v1 path),
   * agent-facing ``certificates``.
 """
 

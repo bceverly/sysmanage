@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Startup secrets overlay — Phase 13.1.H (config classification).
+Startup secrets overlay -- Phase 13.1.H (config classification).
 
 Several secrets are read at *import* time and captured in module globals
 (notably ``backend.auth.auth_handler.JWT_SECRET``) or pulled directly from

@@ -12,7 +12,7 @@ for a given host.
 
 Gated on ``airgap_repository_engine`` being loaded (i.e. ``role:
 repository``).  When the engine isn't loaded the endpoint returns
-empty buckets rather than 402 — the frontend card is hidden anyway
+empty buckets rather than 402 -- the frontend card is hidden anyway
 on non-repository deployments, so a friendly empty payload is
 preferable to a noisy error.
 """
@@ -42,11 +42,11 @@ def get_host_compliance_buckets(host_id: str, db: Session = Depends(get_db)):
 
     Resolves:
       1. The host's last package inventory (already collected by the OSS
-         data_collector — read directly off the host record).
+         data_collector -- read directly off the host record).
       2. The latest verified manifest from the local mirror (most-recent
          ``AirgapIngestionRun`` with ``status == "COMPLETE"``).
       3. The most-recent CVE snapshot the collector captured at the same
-         transfer instant — pulled from the manifest envelope's
+         transfer instant -- pulled from the manifest envelope's
          ``include_cve`` payload.
 
     On a ``role: standard`` deployment, both the manifest and the CVE
@@ -54,7 +54,7 @@ def get_host_compliance_buckets(host_id: str, db: Session = Depends(get_db)):
     buckets gracefully.
     """
     if not module_loader.get_module("airgap_repository_engine"):
-        # Don't 402 — the frontend card hides itself based on
+        # Don't 402 -- the frontend card hides itself based on
         # /api/v1/server-info.role.  An empty 200 here means callers
         # that DO hit it (curl, monitoring) get a useful shape.
         return {"not_applied": [], "not_transferred": [], "current": []}
@@ -105,7 +105,7 @@ def _resolve_latest_manifest(db: Session) -> dict:
     if latest is None:
         return {}
     # The ingestion run currently doesn't persist the verified manifest
-    # JSON — that's a follow-up.  For now, return an empty manifest so
+    # JSON -- that's a follow-up.  For now, return an empty manifest so
     # everything-is-current is the conservative classification.
     # When the manifest persistence lands, replace this stub with a
     # JSON-decode of the persisted envelope's inner manifest dict.

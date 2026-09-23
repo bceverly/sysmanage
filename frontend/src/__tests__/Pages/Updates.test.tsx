@@ -339,7 +339,7 @@ describe("query-parameter filters", () => {
     await settle();
   });
 
-  test("filter=security is honoured as the same thing", async () => {
+  test("filter=security is honored as the same thing", async () => {
     searchParams.get.mockImplementation((k: string) =>
       k === "filter" ? "security" : null,
     );

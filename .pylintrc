@@ -155,7 +155,7 @@ single-line-if-stmt=no
 # no-space-check=trailing-comma,dict-separator
 
 # Maximum number of lines in a module.
-# 1000 total lines — the maintainability limit applied uniformly across all
+# 1000 total lines -- the maintainability limit applied uniformly across all
 # SysManage repositories (copyright header included in the count).
 max-module-lines=1000
 

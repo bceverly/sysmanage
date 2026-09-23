@@ -51,7 +51,7 @@ export interface QueryPackAssignment {
 }
 
 /**
- * `partial` is not a lesser success — it means some queries could not be
+ * `partial` is not a lesser success -- it means some queries could not be
  * answered on that host, and the UI must never render it as a clean pass.
  * That distinction is the whole point of the fact substrate.
  */
@@ -195,7 +195,7 @@ export const getRun = async (runId: string): Promise<QueryPackRun> => {
  *
  * `concurrency` and `timeout_seconds` are not cosmetic. An ad-hoc query is
  * one keystroke against every host you own, which is exactly the unbounded
- * fan-out fleet jobs exist to prevent — so the server clamps both and records
+ * fan-out fleet jobs exist to prevent -- so the server clamps both and records
  * what it actually used.
  */
 export type LiveQueryStatus = "pending" | "running" | "completed" | "canceled";

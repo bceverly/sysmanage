@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""windows server child hosts — Phase 12.5 frontend slice
+"""windows server child hosts -- Phase 12.5 frontend slice
 
 Revision ID: w1winchild
 Revises: s1agentmirror
@@ -11,8 +11,8 @@ Create Date: 2026-08-05 00:00:00.000000
 Two things, both needed before the Create Child Host dialog's Windows path
 does anything:
 
-1. ``host_child.windows_key_secret_id`` — the OpenBAO-backed Secret row holding
-   the licence key.  The key itself is NEVER stored in this table (or any
+1. ``host_child.windows_key_secret_id`` -- the OpenBAO-backed Secret row holding
+   the license key.  The key itself is NEVER stored in this table (or any
    other); only the id is, so it cannot be read out of the database.  NULL for
    every non-Windows child and for Windows guests installed from evaluation
    media, which needs no key at all.
@@ -21,7 +21,7 @@ does anything:
    versions appear in the dialog's picker.  ``install_identifier`` is the token
    the engine dispatches on (``virtualization_engine.is_windows_distribution``
    and its edition/os-variant/virtio-release tables all key off it), so these
-   strings are load-bearing — they are not display text.
+   strings are load-bearing -- they are not display text.
 
 Deliberately absent: an ``iso_url``/``cloud_image_url``.  Microsoft does not
 publish a stable unauthenticated URL for Server media, and unlike the Linux
@@ -67,7 +67,7 @@ WINDOWS_KVM_DISTRIBUTIONS = [
         "install_identifier": "windows-server-2025",
         "notes": (
             "As Server 2022, but virtio drivers are taken from the 2k25 "
-            "directories — the 2k22 drivers are not signed for this release "
+            "directories -- the 2k22 drivers are not signed for this release "
             "and Setup refuses them."
         ),
     },
@@ -85,7 +85,7 @@ def _has_column(bind, table: str, column: str) -> bool:
 def upgrade() -> None:
     bind = op.get_bind()
 
-    # --- 1. the licence-key reference column ------------------------------
+    # --- 1. the license-key reference column ------------------------------
     if not _has_column(bind, "host_child", "windows_key_secret_id"):
         # GUID() maps to CHAR(36) on SQLite and UUID on PostgreSQL; the models
         # layer handles that, but a raw add_column needs a concrete type, so

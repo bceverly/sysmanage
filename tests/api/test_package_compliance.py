@@ -172,8 +172,8 @@ class TestEvaluatorMixedRules:
 # ----------------------------------------------------------------------
 #
 # Phase 11.5 gates every route on ``compliance_engine`` being loaded.
-# These tests don't exercise the real Cython .so — they verify route
-# behaviour, so we hand the route a MagicMock whose ``evaluate_host_status``
+# These tests don't exercise the real Cython .so -- they verify route
+# behavior, so we hand the route a MagicMock whose ``evaluate_host_status``
 # delegates to the OSS evaluator (the engine version is itself a port
 # of the OSS logic).  The Pro+ engine's own tests cover the Cython
 # implementation under

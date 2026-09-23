@@ -19,7 +19,7 @@ queries:
     geo_longitude           Float        -- decimal degrees
     INDEX (geo_country_code, geo_subdivision_code)
 
-Idempotent — re-runnable on a database that already has any subset
+Idempotent -- re-runnable on a database that already has any subset
 of these columns / the index.  Type choices avoid PostgreSQL-only
 types (INET, NUMERIC(p,s)) so the same migration runs on SQLite.
 
@@ -67,7 +67,7 @@ def upgrade() -> None:
         if name not in existing_columns:
             op.add_column("host", sa.Column(name, type_, nullable=True))
 
-    # Index creation — also idempotent.  ``get_indexes`` returns dicts
+    # Index creation -- also idempotent.  ``get_indexes`` returns dicts
     # with ``name`` keys; we skip if our index already exists.
     existing_indexes = {idx["name"] for idx in inspector.get_indexes("host")}
     if _GEO_INDEX_NAME not in existing_indexes:

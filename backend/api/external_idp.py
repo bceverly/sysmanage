@@ -14,7 +14,7 @@ Login integration lives in ``backend/api/auth.py``: a user with a
 non-NULL ``external_idp_provider_id`` is authenticated against the
 engine instead of via Argon2.  When ``local_account_fallback`` is
 enabled in settings, a user can still log in with their local password
-even if external auth fails — useful for break-glass admin access.
+even if external auth fails -- useful for break-glass admin access.
 """
 
 import logging
@@ -37,10 +37,10 @@ from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
-# Phase 13.2.1 — two routers so versioning can split the surface:
-#   * ``mgmt_router`` — IdP provider/settings management (UI-facing). Registered
+# Phase 13.2.1 -- two routers so versioning can split the surface:
+#   * ``mgmt_router`` -- IdP provider/settings management (UI-facing). Registered
 #     under native /api/v1 (+ deprecated /api alias) via ``_include_versioned``.
-#   * ``router`` — the SSO/ACS/metadata callback endpoints, whose URLs are
+#   * ``router`` -- the SSO/ACS/metadata callback endpoints, whose URLs are
 #     configured in the external IdP. These STAY unversioned (changing them would
 #     require every customer to reconfigure their IdP), so they keep their full
 #     ``/api/auth/...`` decorator paths and are registered as-is.
@@ -109,8 +109,8 @@ def _resolve_secret(secret_id: Optional[str]) -> Optional[str]:
     """Resolve a Vault secret reference to its plaintext.
 
     Stub: until secrets_engine integration lands here, we treat the
-    ``secret_id`` field as either a literal Vault path or — for local
-    development — a ``literal:VALUE`` prefix that returns the rest as
+    ``secret_id`` field as either a literal Vault path or -- for local
+    development -- a ``literal:VALUE`` prefix that returns the rest as
     plaintext.  Real deployments are expected to set ``vault:path/...``
     and have ``secrets_engine`` loaded.
     """
@@ -128,7 +128,7 @@ def _resolve_secret(secret_id: Optional[str]) -> Optional[str]:
         # value of ``secret_id`` through any local reassignment (slice,
         # truncation, etc.) and keeps the "sensitive" taint label.  To
         # truly break the data flow we log only a constant ``ref_kind``
-        # — either ``"literal"`` or ``"vault"`` — chosen by a boolean
+        # -- either ``"literal"`` or ``"vault"`` -- chosen by a boolean
         # branch on the input.  CodeQL sees the branch's literal-string
         # arms, not the input value, so the taint chain ends here.
         # This also makes the log line strictly more useful in practice:
@@ -152,7 +152,7 @@ class ProviderCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=120)
     type: str = Field(..., pattern="^(ldap|oidc|saml)$")
     enabled: bool = True
-    # Phase 13.1.E — per-tenant scoping + JIT. ``tenant_id`` None = server-global.
+    # Phase 13.1.E -- per-tenant scoping + JIT. ``tenant_id`` None = server-global.
     tenant_id: Optional[str] = None
     jit_provisioning: bool = False
     jit_default_role: str = Field(default="member", max_length=64)
@@ -190,7 +190,7 @@ class ProviderCreateRequest(BaseModel):
 class ProviderUpdateRequest(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=120)
     enabled: Optional[bool] = None
-    # Phase 13.1.E — per-tenant scoping + JIT.
+    # Phase 13.1.E -- per-tenant scoping + JIT.
     tenant_id: Optional[str] = None
     jit_provisioning: Optional[bool] = None
     jit_default_role: Optional[str] = Field(None, max_length=64)
@@ -403,7 +403,7 @@ async def update_idp_settings(
 
 
 # ---------------------------------------------------------------------
-# Public OIDC endpoints (anonymous — used by login redirect dance)
+# Public OIDC endpoints (anonymous -- used by login redirect dance)
 # ---------------------------------------------------------------------
 
 
@@ -418,7 +418,7 @@ _OIDC_STATE_STORE: dict[str, str] = {}
 async def oidc_start(provider_id: str, db: Session = Depends(get_db)):
     """Build the IdP redirect URL and return it to the client.
 
-    Anonymous endpoint — the browser is mid-login when it arrives here.
+    Anonymous endpoint -- the browser is mid-login when it arrives here.
     """
     engine = _check_idp_module()
     provider = _get_provider_or_404(db, provider_id)
@@ -433,7 +433,7 @@ async def oidc_start(provider_id: str, db: Session = Depends(get_db)):
     config = provider.to_dict()
     url = engine.build_oidc_authorization_url(config, state)
     # Open-redirect note: the URL host is the IdP's authorization
-    # endpoint — admin-curated in ``ExternalIdpProvider.oidc_issuer_url``,
+    # endpoint -- admin-curated in ``ExternalIdpProvider.oidc_issuer_url``,
     # NOT user-controlled.  An OIDC auth-start endpoint redirecting to
     # the IdP IS the entire point of the flow.  The state token guards
     # the callback; the provider record itself must be trusted (admin
@@ -450,7 +450,7 @@ async def oidc_callback(
 ):
     """Receive the IdP redirect, exchange the code, and issue a session JWT.
 
-    Anonymous endpoint — the IdP just returned the user here.
+    Anonymous endpoint -- the IdP just returned the user here.
     """
     engine = _check_idp_module()
     provider = _get_provider_or_404(db, provider_id)
@@ -490,7 +490,7 @@ async def oidc_callback(
         .first()
     )
     if not user:
-        # Phase 13.1.E — JIT: auto-provision on first SSO login when the provider
+        # Phase 13.1.E -- JIT: auto-provision on first SSO login when the provider
         # is tenant-scoped with JIT enabled and the email domain is on the
         # tenant's allowlist.  Returns None when JIT doesn't apply / isn't allowed.
         user = _jit_provision_user(db, provider, result.get("email"), result["subject"])
@@ -523,11 +523,11 @@ async def oidc_callback(
 
 
 def _jit_provision_user(db: Session, provider, email: Optional[str], subject: str):
-    """Phase 13.1.E — just-in-time provision an SSO user on first login.
+    """Phase 13.1.E -- just-in-time provision an SSO user on first login.
 
     Applies only when the provider is tenant-scoped (``tenant_id`` set) with
     ``jit_provisioning`` enabled and the email's domain is on the tenant's
-    (non-empty) allowlist — a fail-closed gate (see
+    (non-empty) allowlist -- a fail-closed gate (see
     ``registry_service.jit_domain_permitted``).  Creates the global registry
     identity + a grant into the provider's tenant, then the local account linked
     to this IdP identity (or links an existing local account with the same
@@ -582,7 +582,7 @@ def _jit_provision_user(db: Session, provider, email: Optional[str], subject: st
 
 
 # ---------------------------------------------------------------------
-# Public SAML 2.0 endpoints (anonymous — SP-initiated POST profile)
+# Public SAML 2.0 endpoints (anonymous -- SP-initiated POST profile)
 # ---------------------------------------------------------------------
 
 # RelayState token → (provider_id, AuthnRequest id).  The request id is threaded
@@ -643,7 +643,7 @@ async def saml_start(provider_id: str, db: Session = Depends(get_db)):
         )
     _SAML_STATE_STORE[relay_state] = (str(provider.id), result.get("request_id") or "")
     # Open-redirect note: the URL host is the IdP's admin-curated SSO endpoint
-    # (``saml_idp_sso_url``), NOT user input — redirecting to the IdP is the whole
+    # (``saml_idp_sso_url``), NOT user input -- redirecting to the IdP is the whole
     # point of SP-initiated SSO. The RelayState guards the ACS.
     # nosemgrep: python.fastapi.web.tainted-redirect-fastapi.tainted-redirect-fastapi
     return RedirectResponse(url=result["url"], status_code=302)
@@ -651,11 +651,11 @@ async def saml_start(provider_id: str, db: Session = Depends(get_db)):
 
 @router.post("/api/auth/saml/{provider_id}/acs")
 async def saml_acs(provider_id: str, request: Request, db: Session = Depends(get_db)):
-    """Assertion Consumer Service — the IdP POSTs the signed SAMLResponse here.
+    """Assertion Consumer Service -- the IdP POSTs the signed SAMLResponse here.
 
     The engine verifies the XML signature + conditions in strict mode and pins
     the AuthnRequest id (InResponseTo).  On success we resolve/JIT-provision the
-    linked account, apply group→role mappings, and issue a session JWT — the same
+    linked account, apply group→role mappings, and issue a session JWT -- the same
     shape the OIDC callback returns (the browser-facing landing is wired in the
     frontend, identical to the OIDC flow).
     """
@@ -726,7 +726,7 @@ def _apply_role_mappings(db: Session, user: models.User, role_names: List[str]) 
 
     We delete every UserSecurityRole row for this user that has a
     matching name, then add the requested set back.  Roles granted
-    locally (outside the mapping flow) aren't touched — only the ones
+    locally (outside the mapping flow) aren't touched -- only the ones
     that overlap with the mapping output are reconciled.
     """
     if not role_names:

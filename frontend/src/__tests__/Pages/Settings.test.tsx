@@ -64,7 +64,7 @@ import Settings from "../../Pages/Settings";
 
 const m = (fn: unknown) => fn as unknown as ReturnType<typeof vi.fn>;
 
-// The settings "tabs" are a ListItemButton rail inside a labelled <nav>, not
+// The settings "tabs" are a ListItemButton rail inside a labeled <nav>, not
 // MUI <Tabs>, so there is no role="tab" to query.
 const rail = () => screen.getByRole("navigation", { name: "settings tabs" });
 const railItems = () => within(rail()).getAllByRole("button");

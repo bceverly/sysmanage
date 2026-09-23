@@ -1,9 +1,9 @@
 name: Integration Tests (Linux/Windows/macOS)
 
 # Two triggers:
-#   1. workflow_dispatch — run on demand from the Actions UI; inputs
+#   1. workflow_dispatch -- run on demand from the Actions UI; inputs
 #      let you pick Python version, marker, and OS subset.
-#   2. push of a release tag (v*.*.* or v*.*.*.*) — automatic per-
+#   2. push of a release tag (v*.*.* or v*.*.*.*) -- automatic per-
 #      release integration sweep, mirroring build-and-release.yml.
 #      Tag-push runs use the dispatch defaults below since
 #      `workflow_dispatch.inputs.*` are empty on push events.
@@ -51,7 +51,7 @@ permissions:
 # ---------------------------------------------------------------------------
 # Conventions established by this workflow:
 #
-# 1. Server-side integration tests run on Linux only — they need the real
+# 1. Server-side integration tests run on Linux only -- they need the real
 #    Postgres service container.  Mark them with @pytest.mark.integration
 #    and put them under tests/integration/ (or anywhere with the marker).
 #
@@ -138,7 +138,7 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y --no-install-recommends $MISSING
           fi
-          # Don't start clamd — tests should treat it as installable-but-not-running.
+          # Don't start clamd -- tests should treat it as installable-but-not-running.
 
       - name: Create test config
         run: |
@@ -180,13 +180,13 @@ jobs:
         env:
           # Bound to env vars so the run: script can reference
           # "$PYTEST_MARKER" instead of interpolating ${{ ... }} into
-          # shell — closes the run-shell-injection semgrep finding.
+          # shell -- closes the run-shell-injection semgrep finding.
           PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
           PYTHONPATH: .
           DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
         run: |
           # Collect tests with the requested marker.  If none are tagged yet,
-          # pytest exits 5 ("no tests collected") — we treat that as a soft
+          # pytest exits 5 ("no tests collected") -- we treat that as a soft
           # success and emit a clear scaffolding message.
           set +e
           python -m pytest tests/ \
@@ -211,7 +211,7 @@ jobs:
 
   # -----------------------------------------------------------------------
   # Migration round-trip job.  Catches non-reversible Alembic migrations
-  # before they can ship — the script `scripts/migration_roundtrip.py`
+  # before they can ship -- the script `scripts/migration_roundtrip.py`
   # captures the schema at head, runs `downgrade -1` then `upgrade head`,
   # captures again, and fails on any schema drift.  Phase 8 ships several
   # new tables; this job protects every one of them.
@@ -309,7 +309,7 @@ jobs:
 
   # -----------------------------------------------------------------------
   # Agent-side integration matrix: native OS coverage.  BSDs are handled by
-  # bsd-tests.yml (QEMU) — they don't fit in this workflow because the
+  # bsd-tests.yml (QEMU) -- they don't fit in this workflow because the
   # GitHub-hosted runner pool doesn't include them.
   # -----------------------------------------------------------------------
   integration-agent:
@@ -372,7 +372,7 @@ jobs:
         shell: bash
         env:
           # Bound to env vars so the run: script never interpolates
-          # ${{ ... }} directly into shell — closes run-shell-injection.
+          # ${{ ... }} directly into shell -- closes run-shell-injection.
           PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
           MATRIX_OS: ${{ matrix.os }}
         run: |

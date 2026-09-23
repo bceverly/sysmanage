@@ -267,7 +267,7 @@ async def execute_os_upgrades(  # NOSONAR
                     continue
 
                 # Phase 17.3: image-mode (bootc / rpm-ostree) hosts don't apply
-                # package upgrades — update the atomic OS image instead.
+                # package upgrades -- update the atomic OS image instead.
                 if getattr(host, "is_image_mode", False):
                     results.append(
                         {
@@ -295,7 +295,7 @@ async def execute_os_upgrades(  # NOSONAR
 
                 # Build the apply_updates command message and enqueue it on
                 # the OUTBOUND queue.  The websocket outbound processor is
-                # responsible for actually delivering it to the agent — this
+                # responsible for actually delivering it to the agent -- this
                 # endpoint must never call send_message_to_agent directly.
                 packages_to_update = [
                     {

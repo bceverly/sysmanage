@@ -14,7 +14,7 @@
  *
  * This reproduces the exact sequence with a deliberately slow backend rather
  * than asserting the config value, because the config value is not the
- * behaviour anyone cares about.
+ * behavior anyone cares about.
  */
 
 import React from 'react';

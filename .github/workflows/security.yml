@@ -139,7 +139,7 @@ jobs:
       # Install safety in a DEDICATED venv (isolated from the main env, which
       # keeps semgrep's click~=8.1.8 pin out of safety's way). The typer<0.26
       # pin is the crux: typer 0.26+ vendors its own `_click`, and safety
-      # dispatches its CLI through the REAL click — so typer's callback wrapper
+      # dispatches its CLI through the REAL click -- so typer's callback wrapper
       # reads a vendored click context that was never pushed, crashing with
       # "There is no active click context". Reproduced + fixed on Python 3.12:
       # floating typer resolves 0.27.0 (crashes); typer<0.26 -> 0.25.1 (works).
@@ -157,7 +157,7 @@ jobs:
       # pip-audit pins tomli>=2.2.1 while semgrep (in requirements.txt) pins
       # tomli~=2.0.1; installing pip-audit in the same resolver pass makes
       # the graph unsolvable. Installing it in a separate `pip install`
-      # invocation lets pip resolve it independently — tomli gets bumped
+      # invocation lets pip resolve it independently -- tomli gets bumped
       # with a non-fatal warning, both tools still work.
       run: pip install 'pip-audit>=2.10.0'
 
@@ -175,18 +175,18 @@ jobs:
         /tmp/safety-venv/bin/safety scan --output json --output-file safety-report.json || true
         /tmp/safety-venv/bin/safety scan --output screen
 
-    - name: Run pip-audit (Python — authoritative CVE check against PyPI advisory DB)
+    - name: Run pip-audit (Python -- authoritative CVE check against PyPI advisory DB)
       # ADVISORY (non-gating): pip-audit currently surfaces real un-ignored vulns
       # on tracked deps (mcp CVE-2026-52870/52869/59950 → fix 1.27.2/1.28.1;
       # click PYSEC-2026-2132 → fix 8.3.3). Bump those pins before flipping this
       # to gating (drop the trailing `|| true`).
-      # Ignored CVEs (review periodically — remove an --ignore-vuln line once a
+      # Ignored CVEs (review periodically -- remove an --ignore-vuln line once a
       # fix exists upstream):
-      #   CVE-2026-3219 — pip itself (concatenated tar/ZIP handled as ZIP).
+      #   CVE-2026-3219 -- pip itself (concatenated tar/ZIP handled as ZIP).
       #     Latest pip on PyPI is 26.0.1 (no fix released yet); we are already on
       #     the latest. Suppressing here keeps the report actionable; pip-audit
       #     will re-flag it the moment a patched pip ships.
-      #     # TODO: verify CVE-2026-3219 — pip has no patched release yet; re-check
+      #     # TODO: verify CVE-2026-3219 -- pip has no patched release yet; re-check
       #     #       for a fixed pip and drop this ignore, expires 2026-10-31.
       run: |
         pip-audit -r requirements.txt --strict --ignore-vuln CVE-2026-3219 --format json --output pip-audit-report.json || true
@@ -325,7 +325,7 @@ jobs:
         # --exclude-detectors=lob: the Lob detector reports hundreds of
         # VERIFIED hits across full history in both repos (264 here on 1,550
         # commits, 358 in the agent on 1,135) while neither project has ever
-        # had a Lob account — Lob's API answers positively for keys that are
+        # had a Lob account -- Lob's API answers positively for keys that are
         # not real, so "verified" carries no signal for this one detector.
         # Left in place it fails every scheduled scan, which trains everyone
         # to ignore a security gate: worse than not running it.  Scoped to

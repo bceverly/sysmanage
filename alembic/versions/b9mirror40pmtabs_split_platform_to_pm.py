@@ -10,7 +10,7 @@ Create Date: 2026-05-07 23:15:00.000000
 
 The Phase 10.4.2 ``platform`` column held coarse OS-family values
 (``linux``, ``freebsd``) but the UI design always wanted one tab per
-*package manager* — Linux conflates apt + dnf + zypper into a single
+*package manager* -- Linux conflates apt + dnf + zypper into a single
 tab while operators in practice pick one PM per mirror host.
 
 Phase 10.4.3 retunes the vocabulary to match the UI:
@@ -19,14 +19,14 @@ Phase 10.4.3 retunes the vocabulary to match the UI:
   ------          -----
   linux           apt
   freebsd         pkg
-  (none)          dnf      (new — RHEL/Fedora/Oracle/Rocky/Alma)
-  (none)          zypper   (new — openSUSE/SLES)
+  (none)          dnf      (new -- RHEL/Fedora/Oracle/Rocky/Alma)
+  (none)          zypper   (new -- openSUSE/SLES)
 
-The unique constraint ``(platform, host_id)`` stays in place — a
+The unique constraint ``(platform, host_id)`` stays in place -- a
 single host can carry one mirror config per PM, which is exactly the
 shape the new tab strip needs.
 
-Idempotent + SQLite-safe — both the value rename and the validation
+Idempotent + SQLite-safe -- both the value rename and the validation
 of the new vocabulary check current state before mutating, so
 ``alembic upgrade head`` is a no-op the second time.  Backfill uses
 parameterised ``text()`` SQL so it works on PostgreSQL and SQLite

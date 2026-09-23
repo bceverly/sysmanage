@@ -7,11 +7,11 @@
 A live query is one statement an operator types at a console and fans out
 across a fleet. It is DISPATCHED as a one-query pack, so the agent command and
 the result-correlation path are the ones S4 already proved; what this adds is
-the part a pack does not carry — the BOUNDS.
+the part a pack does not carry -- the BOUNDS.
 
-  * ``query_pack_live_query`` — the request, with its concurrency, per-host
+  * ``query_pack_live_query`` -- the request, with its concurrency, per-host
     timeout and counters.
-  * ``query_pack_run.live_query_id`` — a run belongs to an assignment
+  * ``query_pack_run.live_query_id`` -- a run belongs to an assignment
     (scheduled) or a live query (ad-hoc), never both. Reusing the run table
     means results, grading and the "not covered is not empty" property are
     shared rather than reimplemented.

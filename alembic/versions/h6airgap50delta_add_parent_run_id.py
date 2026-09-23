@@ -12,7 +12,7 @@ Adds ``airgap_collection_run.parent_run_id`` so a delta run can link
 back to the snapshot it builds on.  NULL = full snapshot.
 
 SQLite-safe: uses ``op.batch_alter_table(recreate="auto")`` with an
-explicit FK name (named constraints are required for batch mode —
+explicit FK name (named constraints are required for batch mode --
 see Phase 10.5 footgun in the y6idp10extauth migration).
 """
 

@@ -8,11 +8,11 @@ Deployment-invariant guards.
 Enforces the air-gap **appliance** invariants at startup (design:
 ``docs/planning/openbao-deployment-and-airgap.md`` §5):
 
-  * An air-gapped (``repository``-role) deployment is **single-tenant** —
+  * An air-gapped (``repository``-role) deployment is **single-tenant** --
     multi-tenancy needs customer-owned external SSO, which can't reach an
     IdP offline, so ``multitenancy.enabled`` must be false there.
   * A ``repository``-role server does **not participate in federation**
-    (neither ``coordinator`` nor ``site``) — federation across the gap is
+    (neither ``coordinator`` nor ``site``) -- federation across the gap is
     impossible and within an enclave fights the segmentation that justifies
     the air gap.
 
@@ -44,7 +44,7 @@ def check_deployment_invariants(
 ) -> List[str]:
     """Return a list of invariant-violation messages (empty == valid).
 
-    Pure function — no I/O, no config/DB access — so the policy is unit
+    Pure function -- no I/O, no config/DB access -- so the policy is unit
     testable in isolation.
     """
     violations: List[str] = []
@@ -64,7 +64,7 @@ def check_deployment_invariants(
         violations.append(
             f"federation role '{federation_role}' is set on an air-gapped "
             "(repository-role) deployment. Air-gapped repository servers do not "
-            "participate in federation — deploy independent repository servers "
+            "participate in federation -- deploy independent repository servers "
             "per network segment instead."
         )
 
@@ -80,7 +80,7 @@ def enforce_deployment_invariants() -> None:
     fast rather than silently running an unsupported combination.
 
     Best-effort by design: if the role can't be resolved yet (DB not ready),
-    it logs and returns rather than blocking boot — the install-time config
+    it logs and returns rather than blocking boot -- the install-time config
     builder is the primary gate; this is the runtime backstop.
     """
     try:

@@ -140,7 +140,7 @@ const AddEditScriptDialog: React.FC<AddEditScriptDialogProps> = ({
         <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
           {t('scripts.scriptContent')}
         </Typography>
-        <Box sx={{ border: 1, borderColor: 'grey.300', borderRadius: 1 }}>
+        <Box sx={{ border: 1, borderColor: 'gray.300', borderRadius: 1 }}>
           <Editor
             height="400px"
             language={getLanguageForShell(selectedShell)}

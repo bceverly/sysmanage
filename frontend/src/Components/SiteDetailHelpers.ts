@@ -4,7 +4,7 @@
 
 /**
  * Pure helpers, types, and constants extracted from SiteDetail.tsx to
- * keep the page component small.  No React state or hooks here — just
+ * keep the page component small.  No React state or hooks here -- just
  * formatting utilities and the page's local state shape.
  */
 
@@ -26,9 +26,9 @@ export function statusChipColor(
 }
 
 export function formatAbsolute(iso: string | null | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return "--";
   const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "—";
+  if (Number.isNaN(date.getTime())) return "--";
   return date.toLocaleString();
 }
 
@@ -52,7 +52,7 @@ export function formatRelative(
 export type SyncHealth = "healthy" | "stale" | "overdue" | "unknown";
 
 /** Classify connection health by comparing last-sync age to the expected
- * interval: within 2× = healthy, 2–4× = stale, beyond (or never) = overdue. */
+ * interval: within 2× = healthy, 2-4× = stale, beyond (or never) = overdue. */
 export function syncHealth(
   lastSyncIso: string | null | undefined,
   intervalSeconds: number | undefined,

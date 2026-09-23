@@ -108,7 +108,7 @@ def client(test_session):
     decoding, so:
 
       * Patch ``decode_jwt`` to return a valid payload for any token
-        — that lets ``JWTBearer.verify_jwt`` accept the fake header.
+        -- that lets ``JWTBearer.verify_jwt`` accept the fake header.
       * Override ``get_current_user`` to return a fixed user id.
 
     Both unmount on fixture teardown.
@@ -142,7 +142,7 @@ def client(test_session):
     ), _patch.object(models.User, "has_role", return_value=True), _patch(
         "backend.persistence.db.get_engine", return_value=test_engine_value
     ):
-        # Don't use the TestClient context manager — that would run
+        # Don't use the TestClient context manager -- that would run
         # the FastAPI lifespan, which spins up background workers
         # (federation sync/push, alerting, etc.) that then raise
         # ``CancelledError`` on shutdown and show as teardown errors.
@@ -184,7 +184,7 @@ class TestPackageInstallationAPI:
         assert data["success"] is True
         # Phase 8 API refactor: the response shape changed from a list
         # of per-package ``installation_ids`` to a SINGLE ``request_id``
-        # — multiple packages now group under one UUID (the docstring
+        # -- multiple packages now group under one UUID (the docstring
         # on ``install_packages_operation`` calls this "UUID-based
         # grouping").  The agent reports completion with that one ID.
         assert data["request_id"]
@@ -354,7 +354,7 @@ class TestSoftwareInstallationLogModel:
 
         assert log_entry.status == "completed"
         assert log_entry.success is True
-        # SQLite strips tzinfo on storage — compare naive (see comment
+        # SQLite strips tzinfo on storage -- compare naive (see comment
         # above on ``started_at``).
         assert log_entry.completed_at == completion_time.replace(tzinfo=None)
         assert log_entry.installed_version == "1.0.0"
@@ -552,5 +552,5 @@ class TestPackageInstallationMessageHandling:
 
         assert result["message_type"] == "error"
         # The error envelope is ``{message_type, error_type, message, data}``
-        # — the human-readable text lives under ``message``, not ``error``.
+        # -- the human-readable text lives under ``message``, not ``error``.
         assert "Missing installation_id" in result["message"]

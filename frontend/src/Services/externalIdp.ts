@@ -16,7 +16,7 @@ export interface IdpProvider {
   name: string;
   type: 'ldap' | 'oidc' | 'saml';
   enabled: boolean;
-  // Phase 13.1.E — per-tenant IdP + JIT. tenant_id null = server-global provider.
+  // Phase 13.1.E -- per-tenant IdP + JIT. tenant_id null = server-global provider.
   tenant_id?: string | null;
   jit_provisioning?: boolean;
   jit_default_role?: string;
@@ -36,7 +36,7 @@ export interface IdpProvider {
   oidc_scopes?: string;
   oidc_discovery_url?: string | null;
   oidc_group_claim?: string;
-  // Phase 13.1.E — SAML 2.0.
+  // Phase 13.1.E -- SAML 2.0.
   saml_idp_entity_id?: string | null;
   saml_idp_sso_url?: string | null;
   saml_idp_x509_cert?: string | null;
@@ -47,7 +47,7 @@ export interface IdpProvider {
   saml_email_attribute?: string | null;
   saml_group_attribute?: string;
   saml_want_assertions_signed?: boolean;
-  // Phase 13.1.E — SCIM 2.0 inbound provisioning.
+  // Phase 13.1.E -- SCIM 2.0 inbound provisioning.
   scim_enabled?: boolean;
   scim_bearer_token_secret_id?: string | null;
 }
@@ -56,7 +56,7 @@ export interface IdpProviderCreate {
   name: string;
   type: 'ldap' | 'oidc' | 'saml';
   enabled?: boolean;
-  // Phase 13.1.E — per-tenant IdP + JIT.
+  // Phase 13.1.E -- per-tenant IdP + JIT.
   tenant_id?: string | null;
   jit_provisioning?: boolean;
   jit_default_role?: string;
@@ -76,7 +76,7 @@ export interface IdpProviderCreate {
   oidc_scopes?: string;
   oidc_discovery_url?: string;
   oidc_group_claim?: string;
-  // Phase 13.1.E — SAML 2.0.
+  // Phase 13.1.E -- SAML 2.0.
   saml_idp_entity_id?: string;
   saml_idp_sso_url?: string;
   saml_idp_x509_cert?: string;
@@ -87,7 +87,7 @@ export interface IdpProviderCreate {
   saml_email_attribute?: string;
   saml_group_attribute?: string;
   saml_want_assertions_signed?: boolean;
-  // Phase 13.1.E — SCIM 2.0 inbound provisioning.
+  // Phase 13.1.E -- SCIM 2.0 inbound provisioning.
   scim_enabled?: boolean;
   scim_bearer_token_secret_id?: string;
 }

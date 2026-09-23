@@ -31,7 +31,7 @@ vi.mock("../../Services/federation", () => ({
   doDispatchFederationCommand: vi.fn(),
 }));
 
-// Stub the dispatch dialog — its own behaviour is covered in its dedicated
+// Stub the dispatch dialog -- its own behavior is covered in its dedicated
 // test; rendering its full MUI tree here just bloats the worker heap.
 vi.mock("../../Components/FederationCommandDispatchDialog", () => ({
   default: () => null,

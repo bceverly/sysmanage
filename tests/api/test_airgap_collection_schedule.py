@@ -156,7 +156,7 @@ class TestScheduleTickAutomationMissing:
                 headers=auth_headers,
             )
             assert r.status_code == 200
-        # Tick with collector loaded but automation absent — should warn,
+        # Tick with collector loaded but automation absent -- should warn,
         # not crash.  The schedule's next_run won't advance without
         # automation, but the response is still a clean 200.
         with _engines(collector=True, automation=False):

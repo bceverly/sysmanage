@@ -7,7 +7,7 @@ Maintenance-window evaluation + dispatch gating (Phase 14.2).
 
 The heart of the feature: decide whether a change (an outbound ``command`` /
 ``update_request``) may reach a given host *right now*, given the operator's
-maintenance and blackout windows — and compute the next window a host detail page
+maintenance and blackout windows -- and compute the next window a host detail page
 can surface.
 
 Policy (deliberate, and safe-by-default):
@@ -19,7 +19,7 @@ Policy (deliberate, and safe-by-default):
 * A **blackout** window that currently contains "now" blocks the host even if an
   allow-window is also open (blackout wins).
 
-Recurrence is evaluated in each window's IANA timezone via ``zoneinfo`` (stdlib) —
+Recurrence is evaluated in each window's IANA timezone via ``zoneinfo`` (stdlib) --
 no cron dependency: ``once`` (absolute UTC bounds), ``daily`` and ``weekly``
 (local start time + duration, weekly also gated on weekday).
 """
@@ -215,8 +215,8 @@ def active_override(db: Session, host_id, now_utc: datetime):
 
 def is_dispatch_allowed(db: Session, host_id, now_utc: datetime) -> bool:
     """May a gated change reach ``host_id`` right now?  See module docstring for
-    the policy.  Fails **open** (returns True) on any internal error — a broken
-    evaluator must never freeze fleet management — and logs loudly."""
+    the policy.  Fails **open** (returns True) on any internal error -- a broken
+    evaluator must never freeze fleet management -- and logs loudly."""
     try:
         if active_override(db, host_id, now_utc) is not None:
             return True

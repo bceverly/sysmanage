@@ -5,7 +5,7 @@
 /**
  * Federation role card for Settings → Server Role.
  *
- * The federation counterpart to the air-gap server-role card — an
+ * The federation counterpart to the air-gap server-role card -- an
  * INDEPENDENT axis (a server can be an air-gap collector AND a federation
  * site).  Lets the operator pick none / coordinator / site, then exchange
  * federation identity public keys with the peer exactly like the air-gap
@@ -275,7 +275,7 @@ const FederationRoleCard: React.FC = () => {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {t(
             "federationRole.intro",
-            "Choose how this server participates in a multi-site federation. This is independent of the air-gap role on the left — a server can be both. Takes effect after the next restart.",
+            "Choose how this server participates in a multi-site federation. This is independent of the air-gap role on the left -- a server can be both. Takes effect after the next restart.",
           )}
         </Typography>
 
@@ -347,7 +347,7 @@ const FederationRoleCard: React.FC = () => {
           </Button>
         </Box>
 
-        {/* Identity-key + peer exchange — shown once federated. */}
+        {/* Identity-key + peer exchange -- shown once federated. */}
         {currentRole !== "none" && (
           <>
             <Divider sx={{ my: 2 }} />
@@ -408,7 +408,7 @@ const FederationRoleCard: React.FC = () => {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               {t(
                 "federationRole.peers.help",
-                "Record a peer's public key here to verify its identity fingerprint out of band. The federation connection itself is secured by the TLS certificate pinned during enrollment — these keys are for human verification, not access control.",
+                "Record a peer's public key here to verify its identity fingerprint out of band. The federation connection itself is secured by the TLS certificate pinned during enrollment -- these keys are for human verification, not access control.",
               )}
             </Typography>
             <List dense data-testid="federation-peer-list">
@@ -467,7 +467,7 @@ const FederationRoleCard: React.FC = () => {
               {t("federationRole.peers.import", "Import Peer Key")}
             </Button>
 
-            {/* Site-side enrollment handshake — only on a subordinate site. */}
+            {/* Site-side enrollment handshake -- only on a subordinate site. */}
             {currentRole === "site" && (
               <>
                 <Divider sx={{ my: 2 }} />
@@ -545,7 +545,7 @@ const FederationRoleCard: React.FC = () => {
                   )}
                   helperText={t(
                     "federationRole.enroll.coordIdentityKeyHelp",
-                    "Required. Paste the coordinator's identity public key, obtained out of band (from its Server Role page). This site refuses to enroll unless the coordinator proves this exact key — it is what defeats an enrollment-time man-in-the-middle.",
+                    "Required. Paste the coordinator's identity public key, obtained out of band (from its Server Role page). This site refuses to enroll unless the coordinator proves this exact key -- it is what defeats an enrollment-time man-in-the-middle.",
                   )}
                   value={coordIdentityKey}
                   onChange={(e) => setCoordIdentityKey(e.target.value)}

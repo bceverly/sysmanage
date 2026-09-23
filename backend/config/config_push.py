@@ -113,7 +113,7 @@ class ConfigPushManager:
         """Persist one OUTBOUND queue row of ``envelope`` for ``host_id``.
 
         Returns True on success, False if the enqueue raised.  Caller
-        is responsible for ``db.commit()`` once the batch is built —
+        is responsible for ``db.commit()`` once the batch is built --
         ``QueueOperations.enqueue_message`` only flushes when given a
         session.
         """
@@ -143,7 +143,7 @@ class ConfigPushManager:
         hosts are matched), builds the encrypted envelope, and writes
         one OUTBOUND row to ``message_queue``.  The outbound websocket
         processor picks it up and delivers when the agent is
-        connectable — offline agents receive it on reconnect.
+        connectable -- offline agents receive it on reconnect.
         """
         host = (
             db.query(models.Host)
@@ -152,7 +152,7 @@ class ConfigPushManager:
         )
         if host is None:
             logger.warning(
-                "Cannot push config — no active host with fqdn=%s",
+                "Cannot push config -- no active host with fqdn=%s",
                 sanitize_log(hostname),
             )
             return False

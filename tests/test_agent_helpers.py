@@ -166,7 +166,7 @@ class TestExtractHostIdentifier:
 
 
 # ---------------------------------------------------------------------------
-# Audit-log helpers — verify they call AuditService.log without exploding
+# Audit-log helpers -- verify they call AuditService.log without exploding
 # ---------------------------------------------------------------------------
 
 

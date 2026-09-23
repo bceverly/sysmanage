@@ -107,7 +107,7 @@ def _make_response(status_code, text=""):
 
 
 def _seed_enrolled_site(fed_db, name="alpha", url="https://site-alpha.example.com"):
-    """Create + enrol a single site row.  Returns ``(site_id, outbound_bearer)``."""
+    """Create + enroll a single site row.  Returns ``(site_id, outbound_bearer)``."""
     Session = sessionmaker(bind=fed_db, expire_on_commit=False)
     with Session() as sess:
         site_obj, _sync_bearer, coord_outbound = enroll_site(sess, name=name, url=url)
@@ -243,7 +243,7 @@ async def test_push_once_skips_already_pushed_at_current_version(
     engine, fed_db, db_maker
 ):
     """Once a policy is pushed at its current version, subsequent ticks
-    don't re-deliver — that's the whole point of ``pushed_version``."""
+    don't re-deliver -- that's the whole point of ``pushed_version``."""
     site_id, _ = _seed_enrolled_site(fed_db)
     _assign_policy(fed_db, "stable-policy", {"v": 1}, [site_id])
 
@@ -332,7 +332,7 @@ async def test_push_once_skips_sites_without_outbound_bearer(engine, fed_db, db_
 
 @pytest.mark.asyncio
 async def test_push_once_skips_suspended_sites(engine, fed_db, db_maker):
-    """``status='suspended'`` sites stop receiving pushes immediately —
+    """``status='suspended'`` sites stop receiving pushes immediately --
     operator must explicitly resume them."""
     site_id, _ = _seed_enrolled_site(fed_db)
     Session = sessionmaker(bind=fed_db, expire_on_commit=False)
@@ -382,7 +382,7 @@ async def test_push_once_delivers_command_and_advances_to_in_progress(
 @pytest.mark.asyncio
 async def test_push_once_leaves_command_queued_on_failure(engine, fed_db, db_maker):
     """Push failure → FSM stays at queued_at_site so the next tick
-    retries.  No transition to ``failed`` purely on transport — that
+    retries.  No transition to ``failed`` purely on transport -- that
     would require operator-visible intervention."""
     site_id, _ = _seed_enrolled_site(fed_db)
     _dispatch_command(fed_db, site_id)

@@ -5,7 +5,7 @@
 """
 Tests for backend.api.openbao.
 
-Heavy I/O surface — file checks, subprocess, platform branching. All mocked
+Heavy I/O surface -- file checks, subprocess, platform branching. All mocked
 at the os/subprocess/platform boundary so tests don't touch the real
 OpenBAO binary or filesystem.
 
@@ -91,7 +91,7 @@ class TestFindBaoBinary:
             "backend.api.openbao._is_executable", return_value=False
         ), patch("shutil.which", return_value=None):
             result = ob.find_bao_binary()
-        # Falls through to PATH (returns None) — warning logged.
+        # Falls through to PATH (returns None) -- warning logged.
         assert result is None
 
     def test_returns_bao_when_in_path(self):
@@ -171,7 +171,7 @@ class TestGetOpenbaoStatus:
             "backend.api.openbao.os.remove", side_effect=OSError("readonly")
         ):
             status = ob.get_openbao_status()
-        # Should not raise — just returns stopped.
+        # Should not raise -- just returns stopped.
         assert status["status"] == "stopped"
 
     def test_alive_process_returns_running_with_bao_status(self):
@@ -261,7 +261,7 @@ class TestGetOpenbaoStatus:
 
 
 # ---------------------------------------------------------------------------
-# Router endpoints — minimal shape checks (status sanitisation + dispatch)
+# Router endpoints -- minimal shape checks (status sanitisation + dispatch)
 # ---------------------------------------------------------------------------
 
 
@@ -298,7 +298,7 @@ class TestRouterEndpoints:
         ):
             resp = client.get("/api/v1/openbao/config", headers=auth_headers)
         body = resp.json()
-        # Token must NOT leak — has_token boolean only.
+        # Token must NOT leak -- has_token boolean only.
         assert "token" not in body
         assert body["has_token"] is True
         assert body["url"] == "http://localhost:8200"
@@ -314,7 +314,7 @@ class TestRouterEndpoints:
         ):
             resp = client.post("/api/v1/openbao/start", headers=auth_headers)
         body = resp.json()
-        # The endpoint sanitises — only `success` is exposed on success.
+        # The endpoint sanitises -- only `success` is exposed on success.
         assert body == {"success": True}
 
     def test_start_endpoint_failure_returns_generic_error(self, client, auth_headers):
@@ -435,12 +435,12 @@ class TestStopOpenbao:
         assert result["success"] is False
         # "timed out", not "timeout": the message is real English prose now.
         # This assertion used to pass only because the endpoint returned the
-        # raw msgid "openbao.start_timeout" — the i18n bug it was masking.
+        # raw msgid "openbao.start_timeout" -- the i18n bug it was masking.
         assert "timed out" in result["message"].lower()
 
 
 # ---------------------------------------------------------------------------
-# start_openbao — happy path + Linux script branch
+# start_openbao -- happy path + Linux script branch
 # ---------------------------------------------------------------------------
 
 
@@ -503,7 +503,7 @@ class TestStartOpenbaoHappyPath:
         assert result["success"] is False
         # "timed out", not "timeout": the message is real English prose now.
         # This assertion used to pass only because the endpoint returned the
-        # raw msgid "openbao.start_timeout" — the i18n bug it was masking.
+        # raw msgid "openbao.start_timeout" -- the i18n bug it was masking.
         assert "timed out" in result["message"].lower()
 
     def test_linux_unexpected_exception_returns_generic_failure(self):
@@ -524,7 +524,7 @@ class TestStartOpenbaoHappyPath:
 
 
 # ---------------------------------------------------------------------------
-# stop_openbao — successful Linux path
+# stop_openbao -- successful Linux path
 # ---------------------------------------------------------------------------
 
 

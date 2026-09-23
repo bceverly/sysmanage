@@ -6,7 +6,7 @@
  * Phase 12.7: client for the host-geolocation endpoint.
  *
  * Drives the world-map view (Pages/MapView.tsx).  Returns only hosts
- * with non-null geo coordinates — hosts whose public IP hasn't been
+ * with non-null geo coordinates -- hosts whose public IP hasn't been
  * resolved yet (or whose public IP is internal-only / airgapped) are
  * filtered out server-side and simply don't appear on the map.
  */

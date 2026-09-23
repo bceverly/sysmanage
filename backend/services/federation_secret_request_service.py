@@ -2,18 +2,18 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Federation-aware dynamic-secret leases — site side (Phase 12.5).
+"""Federation-aware dynamic-secret leases -- site side (Phase 12.5).
 
 A subordinate site asks its coordinator for a short-lived credential on
 behalf of one of its hosts.  Per the queue-everything rule this does NOT
-call the coordinator directly — it ENQUEUES a ``secret_lease_request``
+call the coordinator directly -- it ENQUEUES a ``secret_lease_request``
 payload onto ``federation_sync_queue`` and the outbound tick ships it.  The
 coordinator issues the lease from the master Vault and echoes the result
 back down; the site records that echo in ``federation_received_secret_lease``
 (the inbox) so the site engine can deliver the credential to the host
 through the agent's secure channel.
 
-The inbox row stores STATUS + non-sensitive metadata only — the secret value
+The inbox row stores STATUS + non-sensitive metadata only -- the secret value
 is delivered transiently by the engine and never persisted here.
 """
 
@@ -90,7 +90,7 @@ def record_received_lease(
 ) -> FederationReceivedSecretLease:
     """Record the coordinator's lease-result echo into the site inbox.
 
-    Idempotent on ``correlation_key`` — a re-pushed result updates the
+    Idempotent on ``correlation_key`` -- a re-pushed result updates the
     existing inbox row rather than duplicating it.  Caller commits.
     """
     import json  # noqa: PLC0415

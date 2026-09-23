@@ -77,7 +77,7 @@ test('Stage calls stageImage', async () => {
 test('Apply shows a reboot confirmation then calls applyImage', async () => {
     mockApply.mockResolvedValue({ result: true, action: 'apply', message_id: 'm2' });
     render(<HostImageModeTab host={HOST} />);
-    // Clicking Apply should NOT dispatch immediately — a confirm dialog opens.
+    // Clicking Apply should NOT dispatch immediately -- a confirm dialog opens.
     fireEvent.click(screen.getByText('Apply'));
     expect(mockApply).not.toHaveBeenCalled();
     expect(screen.getByText('Apply staged image?')).toBeTruthy();

@@ -5,7 +5,7 @@
 """
 Tests for backend.api.package_host_selector.
 
-Pure helper module — score_host / select_best_host need no DB; find_hosts_for_os
+Pure helper module -- score_host / select_best_host need no DB; find_hosts_for_os
 needs only a mocked db.query chain.
 """
 
@@ -38,7 +38,7 @@ class TestScoreHost:
 
     def test_each_recognised_optional_manager_adds_one(self):
         shells = ["bash", "homebrew", "snap", "pip", "ruby"]
-        # 3 recognised optional managers → base 1 + 3 = 4.
+        # 3 recognized optional managers → base 1 + 3 = 4.
         assert score_host(_host(json.dumps(shells))) == 4
 
     def test_unrecognised_shells_give_only_base(self):
@@ -74,7 +74,7 @@ class TestSelectBestHost:
             assert select_best_host([a, b]) is b
 
     def test_zero_total_score_falls_back_to_random_choice(self):
-        # Both hosts have score 0 — but score_host always returns at least 1.
+        # Both hosts have score 0 -- but score_host always returns at least 1.
         # We patch score_host to force the zero-total branch.
         a = _host()
         b = _host()

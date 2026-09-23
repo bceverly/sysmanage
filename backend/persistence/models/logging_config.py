@@ -6,7 +6,7 @@
 Logging-configuration model (Phase 13.3).
 
 Server-global logging settings stored in the database so they can be edited from
-the Settings UI and pushed to agents — overriding the yaml file (DB wins).  One
+the Settings UI and pushed to agents -- overriding the yaml file (DB wins).  One
 row for the server itself (``scope='server'``) and one row per agent OS family
 (``scope='agent'``, ``os_family`` in linux/windows/macos/bsd) holding the default
 logging config for agents of that OS.
@@ -52,7 +52,7 @@ class LoggingSetting(Base):
     native_identifier = Column(String(255), nullable=True)
     log_level = Column(String(64), nullable=True)  # e.g. "INFO" or pipe-list
     verbosity = Column(String(20), nullable=True)  # agent: low|medium|high
-    # Remote-syslog forwarding (Phase 14.5) — only meaningful when
+    # Remote-syslog forwarding (Phase 14.5) -- only meaningful when
     # native_target == 'syslog_remote'.  Professional-gated (LOG_ROUTING).
     syslog_host = Column(String(255), nullable=True)
     syslog_port = Column(Integer, nullable=True)  # default 514 when unset

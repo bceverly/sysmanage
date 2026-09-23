@@ -244,7 +244,7 @@ def require_module_loaded(module: ModuleCode | str) -> Callable:
 
     Raises HTTP 403 when the calling license doesn't include the
     module, or 503 when the license has it but the Cython engine
-    isn't loaded — same response shape as the decorator path so
+    isn't loaded -- same response shape as the decorator path so
     clients can branch on ``detail.error`` uniformly.
 
     Usage:

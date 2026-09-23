@@ -546,7 +546,7 @@ const HostDetailTabContent: React.FC<HostDetailTabContentProps> = (props) => {
         />
       )}
       {/* Plugin tabs content.  Drop any whose id collides with a
-                hardcoded OSS tab so the OSS panel stays authoritative — see
+                hardcoded OSS tab so the OSS panel stays authoritative -- see
                 the matching filter in tabDefinitions above. */}
       {visiblePluginTabs
         .filter(

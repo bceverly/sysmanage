@@ -50,7 +50,7 @@ chown -R root:wheel /usr/local/lib/sysmanage
 chown -R root:wheel /var/lib/sysmanage
 chown -R root:wheel /var/log/sysmanage
 
-# OpenBAO secrets broker — provision the static prebuilt binary (or Homebrew
+# OpenBAO secrets broker -- provision the static prebuilt binary (or Homebrew
 # package), then load the LaunchDaemon and initialize/unseal.
 echo "Provisioning OpenBAO..."
 if ! command -v bao >/dev/null 2>&1 && [ ! -x /usr/local/bin/bao ]; then

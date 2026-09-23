@@ -358,19 +358,19 @@ const HostUbuntuProTab: React.FC<HostUbuntuProTabProps> = ({
                                                 <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
                                                     {t('hostDetail.livepatchKernel', 'Patched Kernel')}
                                                 </TableCell>
-                                                <TableCell>{ubuntuProInfo.livepatch.kernel || '—'}</TableCell>
+                                                <TableCell>{ubuntuProInfo.livepatch.kernel || '--'}</TableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
                                                     {t('hostDetail.livepatchPatchVersion', 'Patch Version')}
                                                 </TableCell>
-                                                <TableCell>{ubuntuProInfo.livepatch.patch_version || '—'}</TableCell>
+                                                <TableCell>{ubuntuProInfo.livepatch.patch_version || '--'}</TableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
                                                     {t('hostDetail.livepatchClientVersion', 'Client Version')}
                                                 </TableCell>
-                                                <TableCell>{ubuntuProInfo.livepatch.client_version || '—'}</TableCell>
+                                                <TableCell>{ubuntuProInfo.livepatch.client_version || '--'}</TableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
@@ -379,7 +379,7 @@ const HostUbuntuProTab: React.FC<HostUbuntuProTabProps> = ({
                                                 <TableCell>
                                                     {ubuntuProInfo.livepatch.last_check
                                                         ? new Date(ubuntuProInfo.livepatch.last_check).toLocaleString()
-                                                        : '—'}
+                                                        : '--'}
                                                 </TableCell>
                                             </TableRow>
                                         </TableBody>

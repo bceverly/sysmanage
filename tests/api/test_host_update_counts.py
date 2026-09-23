@@ -535,7 +535,7 @@ class TestHostRegisterTenantRouting:
         self, client, session, monkeypatch
     ):
         """Inert path: no enrollment token → no tenant binding is recorded and
-        the host is created server-scoped (unchanged single-tenant behaviour)."""
+        the host is created server-scoped (unchanged single-tenant behavior)."""
         bind_calls = []
         monkeypatch.setattr(
             "backend.services.host_tenant_index.bind_host_to_tenant",

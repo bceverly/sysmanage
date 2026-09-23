@@ -7,7 +7,7 @@
 Sits between HTTP and the Pro+ engine, exactly as
 ``config_mgmt_profile_service`` does for profiles, and for the same stated
 reason: every RULE is asked of the engine and this module only resolves,
-serialises and persists.
+serializes and persists.
 
 WHY RESOLUTION HAPPENS HERE AND THE POLICY HAPPENS THERE
 --------------------------------------------------------
@@ -123,8 +123,8 @@ def next_batch_size(concurrency: int, in_flight: int, pending: int) -> int:
     """How many more targets a job may release right now.
 
     Without the engine the answer is zero, not "all of them": a server that
-    has lost its licence mid-job must stop dispatching rather than fall back
-    to the unbounded behaviour fleet jobs exist to replace.
+    has lost its license mid-job must stop dispatching rather than fall back
+    to the unbounded behavior fleet jobs exist to replace.
     """
     module = _engine()
     if module is None:
@@ -227,7 +227,7 @@ def inventory_host_count(db_session: Session, inventory) -> int:
     return len(resolve_hosts(db_session, inventory))
 
 
-# --- serialisation -----------------------------------------------------------
+# --- serialization -----------------------------------------------------------
 
 
 def inventory_to_dict(row, host_count: Optional[int] = None) -> Dict[str, Any]:

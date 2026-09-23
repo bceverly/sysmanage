@@ -7,7 +7,7 @@ Tests for the Phase 18.2 S3 install-source catalog models (OSS half).
 
 The engine owns the CRUD and boot-resolution logic; what lives here is the
 schema plus the netboot lifecycle rule that keeps a finished machine from
-reinstalling itself, and the serialisation rule that keeps the answer-file
+reinstalling itself, and the serialization rule that keeps the answer-file
 bearer token out of API responses.
 """
 

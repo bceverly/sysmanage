@@ -30,7 +30,7 @@ VAULT_DATA_PATH = "/data/"
 class VaultError(Exception):
     """Exception raised for vault-related errors.
 
-    ``transient`` marks errors worth retrying through a brief outage — a 5xx
+    ``transient`` marks errors worth retrying through a brief outage -- a 5xx
     from OpenBAO (e.g. its database secrets engine could not reach the
     PostgreSQL primary mid-failover) or a connection/timeout to OpenBAO itself.
     Permanent errors (403 permission denied, 4xx client errors, engine not
@@ -55,7 +55,7 @@ def run_with_vault_retry(
     VaultError (permission denied, 4xx, engine not mounted) is re-raised on the
     first occurrence.
 
-    NOTE: minting a credential is not perfectly idempotent — if OpenBAO created
+    NOTE: minting a credential is not perfectly idempotent -- if OpenBAO created
     the role but the response was lost (timeout), a retry mints a second,
     short-lived lease. This is bounded: the orphan lease auto-expires at its
     TTL. Lease lookups/renews are fully idempotent.
@@ -87,7 +87,7 @@ def run_with_vault_retry(
                 raise
             delay = min(base_delay * (2 ** (attempt - 1)), max_delay)
             logger.warning(
-                "Transient OpenBAO error (attempt %d/%d) — retrying in %.1fs: %s",
+                "Transient OpenBAO error (attempt %d/%d) -- retrying in %.1fs: %s",
                 attempt,
                 max_attempts,
                 delay,
@@ -165,12 +165,12 @@ class VaultService:
         ``explicit_max_ttl`` equal to the grant window and is **orphaned**
         (``no_parent``) and **non-renewable**, so it auto-expires exactly when
         the grant does and can never outlive it.  It is not used to authenticate
-        anything — it exists as a vault-visible, individually-revocable lease
+        anything -- it exists as a vault-visible, individually-revocable lease
         bound to the grant.  ``metadata`` (user/tenant/role/reason) is attached
         so an operator can identify the lease via ``token lookup-accessor``.
 
         Returns the token's **accessor** (the revocation handle), or ``None``
-        when vault is disabled/unreachable or token creation is not permitted —
+        when vault is disabled/unreachable or token creation is not permitted --
         the grant's own ``expires_at`` still enforces the window in that case.
         """
         if not self.vault_config.get("enabled", False):
@@ -197,7 +197,7 @@ class VaultService:
         """Revoke a support-grant lease by its token accessor (Phase 13.1.E).
 
         Best-effort: returns ``True`` on success, ``False`` when vault is
-        disabled/unreachable or the accessor is empty/already gone.  Idempotent —
+        disabled/unreachable or the accessor is empty/already gone.  Idempotent --
         revoking an already-expired/absent accessor is treated as success.
         """
         if not accessor or not self.vault_config.get("enabled", False):
@@ -224,7 +224,7 @@ class VaultService:
         # SSRF / path-traversal barrier.  ``path`` is a caller-supplied vault API
         # path that may embed user-influenced data (secret ids, key names), so it
         # must stay a plain relative path under the FIXED vault base URL.
-        # Allowlist the characters real vault paths use and reject traversal —
+        # Allowlist the characters real vault paths use and reject traversal --
         # otherwise a crafted path could reach an unintended endpoint (e.g.
         # ``sys/seal``) or inject a scheme/host/credentials into the request URL.
         if ".." in path or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]*", path):

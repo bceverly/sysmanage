@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Phase 13.1.F — per-tenant quota seam (``backend.services.tenant_limits``).
+"""Phase 13.1.F -- per-tenant quota seam (``backend.services.tenant_limits``).
 
 Resolution of a tenant's numeric limits lives in the licensed
 multitenancy_engine; this OSS seam delegates to it and must degrade to ``None``

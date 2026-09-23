@@ -36,7 +36,7 @@ class TestOsFamily:
 
 
 class TestResolveServer:
-    """resolve_server_logging — DB wins over yaml."""
+    """resolve_server_logging -- DB wins over yaml."""
 
     def test_yaml_fallback(self, db_session):
         resolved = svc.resolve_server_logging(
@@ -212,7 +212,7 @@ class TestApplyServerNative:
             if getattr(handler, "_sysmanage_native", False):
                 handler.close()
                 root.removeHandler(handler)
-        # restore any of ours we removed (none expected) — saved is reference
+        # restore any of ours we removed (none expected) -- saved is reference
         _ = saved
 
     def _native_handlers(self):

@@ -858,7 +858,7 @@ const HostInfoTab: React.FC<HostInfoTabProps> = ({
       {/* Operating System Information */}
       <HostOsInfoCard host={host} handleShowDialog={handleShowDialog} />
 
-      {/* OpenTelemetry Status — Pro+ feature gated on observability_engine */}
+      {/* OpenTelemetry Status -- Pro+ feature gated on observability_engine */}
       {licenseModules.includes("observability_engine") && (
         <HostOpenTelemetryCard
           host={host}
@@ -875,7 +875,7 @@ const HostInfoTab: React.FC<HostInfoTabProps> = ({
         />
       )}
 
-      {/* Graylog Status — Pro+ feature gated on observability_engine */}
+      {/* Graylog Status -- Pro+ feature gated on observability_engine */}
       {licenseModules.includes("observability_engine") && (
         <HostGraylogCard
           graylogLoading={graylogLoading}

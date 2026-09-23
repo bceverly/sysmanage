@@ -91,7 +91,7 @@ describe("Config Management Run History", () => {
     );
   });
 
-  it("honours a caller-supplied limit", async () => {
+  it("honors a caller-supplied limit", async () => {
     vi.mocked(axiosInstance.get).mockResolvedValueOnce({ data: [] } as never);
     await getConfigProfileRuns("h1", 5);
     expect(axiosInstance.get).toHaveBeenCalledWith(

@@ -408,7 +408,7 @@ class TestPluginBundleLoaderEnsurePluginAvailable:
     ):
         """An unsigned cached bundle -- what every pre-signing install has --
         must be deleted and re-fetched, not served.  Serving it was the old
-        behaviour: existence was the entire check."""
+        behavior: existence was the entire check."""
         from backend.licensing.module_signature import ModuleSignatureError
         from backend.licensing.plugin_bundle_loader import PluginBundleLoader
 

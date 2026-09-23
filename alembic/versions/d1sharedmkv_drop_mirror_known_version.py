@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""drop tenant mirror_known_version (relocated to shared) — Phase 13.1.D
+"""drop tenant mirror_known_version (relocated to shared) -- Phase 13.1.D
 
 Sibling of the shared-chain ``s1shared`` migration.  ``mirror_known_version`` is
 canonical reference data (the version dropdown catalog), identical for every
@@ -10,7 +10,7 @@ tenant, so it moves to the ``shared`` partition as ``shared_mirror_known_version
 (created + seeded by ``s1shared``).  This migration removes the per-tenant copy:
 
   1. Drops the cross-partition foreign key on
-     ``mirror_repository.known_version_id`` — the column STAYS as a soft
+     ``mirror_repository.known_version_id`` -- the column STAYS as a soft
      reference into the shared catalog (Phase 13.1 rule: no cross-partition FKs).
   2. Drops the now-relocated ``mirror_known_version`` table.
 
@@ -49,7 +49,7 @@ def upgrade() -> None:
     #    Discover the FK by the column it constrains, NOT by an assumed name:
     #    PostgreSQL auto-names it ``mirror_repository_known_version_id_fkey``
     #    (ignoring the explicit name the original ADD COLUMN requested), while
-    #    SQLite keeps ``fk_mirror_repository_known_version_id`` — so a fixed name
+    #    SQLite keeps ``fk_mirror_repository_known_version_id`` -- so a fixed name
     #    only matches one dialect.  batch_alter_table (recreate='auto') drops it
     #    directly on PostgreSQL and via table-rebuild on SQLite.
     if insp.has_table("mirror_repository"):
@@ -61,7 +61,7 @@ def upgrade() -> None:
                 fk_name = fk.get("name")
                 if fk_name:
                     with op.batch_alter_table("mirror_repository") as batch:
-                        # Contract step of the 13.1.D catalog relocation — the
+                        # Contract step of the 13.1.D catalog relocation -- the
                         # column stays as a soft ref; only the now cross-partition
                         # FK is removed.
                         # expand-contract-ok: relocate mirror_known_version to shared
@@ -78,7 +78,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Best-effort structural reversal: recreate the tenant table + FK (without
-    reseeding — the canonical data lives in the shared chain now)."""
+    reseeding -- the canonical data lives in the shared chain now)."""
     bind = op.get_bind()
     insp = inspect(bind)
 

@@ -386,7 +386,7 @@ def test_unknown_platform_falls_back_to_ufw_for_enable():
     assert plan["flavor"] == "ufw"
 
 
-# Catch ports that are NOT in any preserved set — to make sure removal
+# Catch ports that are NOT in any preserved set -- to make sure removal
 # actually emits delete commands when the port isn't preserved.
 def test_ufw_remove_role_ports_actually_emits_for_non_preserved():
     plan = build_remove_role_ports_plan(

@@ -289,7 +289,7 @@ class TestDeleteColumnPreferences:
 
     @pytest.mark.asyncio
     async def test_deleting_nothing_succeeds_idempotently(self):
-        # Resetting a grid that was never customised is a no-op, not an error.
+        # Resetting a grid that was never customized is a no-op, not an error.
         db = _FakeSession(User=[_user()])
         out = await self._delete(db)
         assert db.deleted == []

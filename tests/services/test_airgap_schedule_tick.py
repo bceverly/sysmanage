@@ -22,7 +22,7 @@ from backend.services import airgap_schedule_tick as tick_module
 @contextmanager
 def _engines(*, collector=True, automation=True):
     """Patch module_loader.get_module so engine availability is
-    deterministic per test — mirrors the helper in
+    deterministic per test -- mirrors the helper in
     tests/api/v1/test_airgap_collection_schedule.py."""
 
     def _resolver(name):
@@ -250,7 +250,7 @@ class TestTickServiceLoop:
         ), patch.object(tick_module, "TICK_INTERVAL_SECONDS", 0.005):
             task = asyncio.create_task(tick_module.airgap_schedule_tick_service())
             # Wait until the loop has actually iterated twice rather than racing
-            # a fixed wall-clock sleep — coarse asyncio timer resolution on
+            # a fixed wall-clock sleep -- coarse asyncio timer resolution on
             # Windows (~15ms) made the fixed-sleep version flaky under CI load.
             try:
                 await asyncio.wait_for(iterated.wait(), timeout=5)
@@ -287,7 +287,7 @@ class TestTickServiceLoop:
             task = asyncio.create_task(tick_module.airgap_schedule_tick_service())
             # Wait for actual recovery (a successful call after the raised one)
             # rather than racing a fixed wall-clock sleep.  Coarse asyncio timer
-            # resolution on Windows (~15ms) made the timed version flaky — the
+            # resolution on Windows (~15ms) made the timed version flaky -- the
             # window could elapse after only the first (raising) call.
             try:
                 await asyncio.wait_for(recovered.wait(), timeout=5)
@@ -295,5 +295,5 @@ class TestTickServiceLoop:
                 task.cancel()
                 with pytest.raises(asyncio.CancelledError):
                     _ = await task  # assignment placates py/ineffectual-statement
-        # First call raised, a subsequent call succeeded — loop kept going.
+        # First call raised, a subsequent call succeeded -- loop kept going.
         assert call_count >= 2

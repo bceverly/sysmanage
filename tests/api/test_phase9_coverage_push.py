@@ -6,7 +6,7 @@
 Phase 9 coverage push.
 
 Auth-gate + happy/error-path tests for endpoint files that were sitting
-in the 20–35 % coverage band before Phase 9.  The asserts intentionally
+in the 20-35 % coverage band before Phase 9.  The asserts intentionally
 allow a wide range of acceptable status codes (200/400/403/404/422)
 because the harness's authoritative test user may not have the role
 the endpoint requires;  the value here is hitting the route's import
@@ -15,7 +15,7 @@ needing to fake every dependency.
 
 DO NOT replace the broad ``in [...]`` asserts with tight checks unless
 you've also seeded the harness with the required permissions and
-fixtures — overspecifying these turns the coverage lift into false
+fixtures -- overspecifying these turns the coverage lift into false
 red on CI for unrelated reasons.
 """
 
@@ -165,7 +165,7 @@ class TestReportsEndpoints:
         assert r.status_code in [400, 402, 403, 422]
 
     def test_view_screenshot_returns_svg(self, client, auth_headers):
-        # Screenshot endpoint has no auth dependency — accept either way.
+        # Screenshot endpoint has no auth dependency -- accept either way.
         r = client.get("/api/v1/reporting/screenshots/registered-hosts")
         assert r.status_code in [200, 401, 403]
         if r.status_code == 200:
@@ -186,7 +186,7 @@ class TestReportsEndpoints:
 
 
 class TestProplusDispatchHelpers:
-    """backend/services/proplus_dispatch.py — pure-function helpers
+    """backend/services/proplus_dispatch.py -- pure-function helpers
     (correlation map) plus the early-return path when the Pro+ engines
     aren't loaded.  Walking these adds 30+ statements of coverage."""
 
@@ -210,7 +210,7 @@ class TestProplusDispatchHelpers:
         log a warning and return without raising."""
         from backend.services import proplus_dispatch as pd
 
-        # Build minimal stand-ins for execution + schedule — the
+        # Build minimal stand-ins for execution + schedule -- the
         # function returns before touching any of these fields when
         # the engine isn't loaded.
         class _Stub:
@@ -275,7 +275,7 @@ class TestGraylogIntegrationRoutes:
 
 
 class TestSavedScriptsRoutes:
-    """backend/api/v1/scripts/routes_saved_scripts.py — bring 20% → 50%+."""
+    """backend/api/v1/scripts/routes_saved_scripts.py -- bring 20% → 50%+."""
 
     def test_list_scripts_requires_auth(self, client):
         r = client.get("/api/v1/scripts/")
@@ -373,7 +373,7 @@ class TestEnabledPackageManagersExtraRoutes:
 
 
 class TestHostMonitoringRoutes:
-    """backend/api/v1/host_monitoring.py — certificates, roles, service-ctrl."""
+    """backend/api/v1/host_monitoring.py -- certificates, roles, service-ctrl."""
 
     def test_certificates_requires_auth(self, client):
         r = client.get(f"/api/v1/host/{_HOST_ID}/certificates")
@@ -400,7 +400,7 @@ class TestHostMonitoringRoutes:
 
 
 class TestAntivirusDefaultsRoutes:
-    """backend/api/v1/antivirus_defaults.py — 27% baseline.
+    """backend/api/v1/antivirus_defaults.py -- 27% baseline.
 
     The ``antivirus_default`` table is not mirrored in the manual
     api-test conftest fixture, so the GET happy-path tests deliberately
@@ -430,7 +430,7 @@ class TestAntivirusDefaultsRoutes:
 
 
 class TestOpenTelemetryRoutes:
-    """backend/api/v1/opentelemetry/* — 22-28% baseline; these endpoints
+    """backend/api/v1/opentelemetry/* -- 22-28% baseline; these endpoints
     are gated by the openTelemetry feature flag, so most paths early-
     return 402 / 403."""
 
@@ -449,7 +449,7 @@ class TestOpenTelemetryRoutes:
 
 
 class TestPackagesOperationsRoutes:
-    """backend/api/v1/packages_operations.py — 20% baseline."""
+    """backend/api/v1/packages_operations.py -- 20% baseline."""
 
     def test_install_packages_requires_auth(self, client):
         r = client.post(
@@ -464,7 +464,7 @@ class TestPackagesOperationsRoutes:
 
 
 class TestAuthEndpoints:
-    """backend/api/v1/auth.py — log-out path is rarely tested."""
+    """backend/api/v1/auth.py -- log-out path is rarely tested."""
 
     def test_logout_requires_auth(self, client):
         r = client.post("/api/v1/logout")
@@ -494,7 +494,7 @@ class TestMessageRouterCoverage:
 
 
 class TestQueueOperationsCoverage:
-    """Lightweight query helpers in queue_operations.py — exercised
+    """Lightweight query helpers in queue_operations.py -- exercised
     via the existing /api/v1/queue endpoints."""
 
     def test_queue_messages_requires_auth(self, client):
@@ -515,7 +515,7 @@ class TestQueueOperationsCoverage:
 
 
 class TestHostHostnameRoutes:
-    """backend/api/v1/host_hostname.py — narrow surface but currently
+    """backend/api/v1/host_hostname.py -- narrow surface but currently
     untouched by tests."""
 
     def test_set_hostname_requires_auth(self, client):

@@ -27,10 +27,10 @@ through a durable queue -- ``enqueue_message`` / ``dequeue_messages_for_host`` -
 and the WebSocket handler is only a transport that drains it.  So this endpoint
 drains the same queue over an ordinary POST.  A message does not know or care
 which transport carried it, which is what keeps the two paths from drifting into
-different behaviour.
+different behavior.
 
 Registration already happens over plain REST, so an agent that cannot open a
-WebSocket can still enrol and then poll: the whole lifecycle stays on ordinary
+WebSocket can still enroll and then poll: the whole lifecycle stays on ordinary
 HTTP that any proxy will pass.
 
 WHY POST AND NOT SSE OR LONG-POLL-BY-DEFAULT
@@ -129,7 +129,7 @@ def _authenticated_host_id(
 
 
 # No response_model=: the `-> PollResponse` return annotation below already
-# tells FastAPI (>= 0.89) what to serialise, and stating it twice means the two
+# tells FastAPI (>= 0.89) what to serialize, and stating it twice means the two
 # can drift.
 @router.post("/agent/poll")
 async def agent_poll(

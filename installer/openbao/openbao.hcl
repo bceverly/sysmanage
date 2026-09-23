@@ -6,8 +6,8 @@
 # and identical across every supported OS so the appliance behaves the same
 # everywhere.
 #
-# It listens on the loopback interface only — the SysManage API talks to
-# OpenBAO locally, never over the network — so TLS is disabled on the
+# It listens on the loopback interface only -- the SysManage API talks to
+# OpenBAO locally, never over the network -- so TLS is disabled on the
 # listener (loopback traffic does not leave the host).  Data is kept in the
 # file storage backend so a fresh install needs no external dependency.
 #

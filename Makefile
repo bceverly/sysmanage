@@ -240,7 +240,7 @@ else
 		echo "Active hooks:"; \
 		ls -1 .githooks/ 2>/dev/null | grep -v '^README' | sed 's/^/  /' || true; \
 	else \
-		echo "[INFO] Not in a git working tree — skipping hook install."; \
+		echo "[INFO] Not in a git working tree -- skipping hook install."; \
 	fi
 endif
 
@@ -993,12 +993,12 @@ endif
 # nothing is running, so this is safe on fresh installs / CI.
 #
 # After migrate completes the user has to start the server back up
-# themselves — we don't auto-start because:
+# themselves -- we don't auto-start because:
 #   * we don't know whether they wanted ``make start`` or
 #     ``make start-privileged``;
 #   * if migrate failed they'd want to investigate before restarting.
 migrate: stop
-	@echo "Running database migrations (via sysmanage-migrate — the same tool"
+	@echo "Running database migrations (via sysmanage-migrate -- the same tool"
 	@echo "operators run in production)..."
 ifeq ($(OS),Windows_NT)
 	@REM Windows dev runs single-tenant/homelab in practice: run the migrator
@@ -1007,11 +1007,11 @@ ifeq ($(OS),Windows_NT)
 	@$(PYTHON) scripts/sysmanage_migrate.py
 else
 	@# Multi-tenancy: 'make stop' took OpenBAO down, but the per-tenant fan-out
-	@# inside sysmanage-migrate needs it up to lease credentials — so start it
+	@# inside sysmanage-migrate needs it up to lease credentials -- so start it
 	@# just for the migration and stop it again, restoring the clean stopped
 	@# state. Single-tenant: no OpenBAO needed, run the tool directly.
 	@if $(PYTHON) -c "from backend.config import config; import sys; sys.exit(0 if config.is_multitenancy_enabled() else 1)" 2>/dev/null; then \
-		echo "multi-tenancy is ON — starting OpenBAO for the per-tenant fan-out..."; \
+		echo "multi-tenancy is ON -- starting OpenBAO for the per-tenant fan-out..."; \
 		./scripts/start-openbao.sh >/dev/null 2>&1 || true; \
 		$(PYTHON) scripts/sysmanage_migrate.py; \
 		rc=$$?; \
@@ -1030,7 +1030,7 @@ endif
 
 # Fan out the tenant chain to every provisioned tenant database (standalone).
 # 'make migrate' already does this; use this target to re-run JUST the fan-out
-# (e.g. after adding a tenant) while the stack is up — OpenBAO must be running.
+# (e.g. after adding a tenant) while the stack is up -- OpenBAO must be running.
 migrate-tenants: $(VENV_ACTIVATE)
 	@echo "=== Migrating per-tenant databases (requires OpenBAO running) ==="
 	@$(PYTHON) scripts/sysmanage_migrate.py --tenants-only
@@ -1042,7 +1042,7 @@ migrate-tenants: $(VENV_ACTIVATE)
 #     export TRANSLATION_SERVICE_URL=http://beast:8765
 #   or:  make translate SERVICE=http://beast:8765
 #
-# SCOPE: ``make translate`` here does THIS repo's own stores only — frontend
+# SCOPE: ``make translate`` here does THIS repo's own stores only -- frontend
 # (JSON) + backend (gettext).  Every other repo's ``make translate`` does its
 # own locales; nothing reaches across repository boundaries.
 # ---------------------------------------------------------------------------
@@ -1063,12 +1063,12 @@ else
 	if [ $$rc -ne 0 ]; then \
 		echo ""; \
 		echo "########################################################################"; \
-		echo "# make translate FAILED — one or more projects have untranslated locales"; \
+		echo "# make translate FAILED -- one or more projects have untranslated locales"; \
 		echo "# (see the per-project banners above).  Locales must be 100%.";  \
 		echo "########################################################################"; \
 		exit $$rc; \
 	fi; \
-	echo ""; echo "[OK] translation backfill complete — frontend + backend at 100%."
+	echo ""; echo "[OK] translation backfill complete -- frontend + backend at 100%."
 endif
 
 translate-dry: $(VENV_ACTIVATE)
@@ -1083,7 +1083,7 @@ else
 	done
 endif
 
-# Offline translation-completeness GATE — no service, no writes, no network.
+# Offline translation-completeness GATE -- no service, no writes, no network.
 # Scans THIS repo's own locale stores (frontend JSON + backend gettext) and
 # fails loudly (non-zero) if any string is still untranslated.  Safe for CI /
 # release hooks; see the i18n-gate job in build-and-release.yml.  Sibling repos
@@ -1108,7 +1108,7 @@ provision-bootstrap: $(VENV_ACTIVATE)
 	@echo "policy so the server can self-provision tenants without holding root."
 	@echo "Requires an OpenBAO admin token. For Postgres it either uses a"
 	@echo "superuser password (--pg-superuser-password) OR, if none is given"
-	@echo "(peer auth — the Ubuntu default), emits a 0600 SQL file to apply via"
+	@echo "(peer auth -- the Ubuntu default), emits a 0600 SQL file to apply via"
 	@echo "'sudo -u postgres psql -f <file>'.  Example:"
 	@echo "  make provision-bootstrap ARGS='--bao-token \$$BAO_TOKEN'"
 	@$(PYTHON) scripts/provision_bootstrap.py $(ARGS)
@@ -1121,10 +1121,10 @@ clean-whitespace: $(VENV_ACTIVATE)
 # Python linting
 #
 # Auto-fix-with-tripwire pattern: ``make lint`` keeps the convenient
-# "format my code while you're at it" behaviour, but if black actually
+# "format my code while you're at it" behavior, but if black actually
 # DID reformat anything we exit non-zero so the dev knows to ``git
 # add`` + re-commit before pushing.  Previously ``lint-python``
-# depended on ``format-python`` and never reported black drift — black
+# depended on ``format-python`` and never reported black drift -- black
 # would silently rewrite the working tree, pylint would run against
 # the already-formatted code, and ``make lint`` reported "passed".
 # The dev then commit + pushed the un-formatted version that was
@@ -1183,7 +1183,7 @@ else
 	if [ "$$black_drift" != "0" ]; then \
 		echo ""; \
 		echo "[FAIL] black reformatted files in your working tree."; \
-		echo "       The fix was applied locally — but CI runs"; \
+		echo "       The fix was applied locally -- but CI runs"; \
 		echo "       'black --check' against committed code, so you"; \
 		echo "       MUST: git add <files> && git commit --amend"; \
 		echo "       (or a fresh commit) before pushing."; \
@@ -1270,8 +1270,8 @@ else
 endif
 
 # Combined linting
-# The FreeBSD port skeleton is never built by CI — it is rendered and
-# tarballed — so defects sat in it unnoticed until a 2026-08-07 review ahead of
+# The FreeBSD port skeleton is never built by CI -- it is rendered and
+# tarballed -- so defects sat in it unnoticed until a 2026-08-07 review ahead of
 # a ports-tree submission: pre-2021 $FreeBSD$/Created-by keywords,
 # USE_PYTHON=autoplist on a NO_BUILD hand-install port, a 3-line pkg-plist
 # against whole staged trees, and MASTER_SITES set alongside USE_GITHUB.  This
@@ -1294,7 +1294,7 @@ check-nginx-configs: $(VENV_ACTIVATE)
 
 # WiX rejects duplicate component GUIDs, but only on Windows at MSI build time --
 # so a collision costs a full release cycle to discover.  The GUIDs are
-# hand-authored and follow a visual pattern, which makes "copy a neighbour and
+# hand-authored and follow a visual pattern, which makes "copy a neighbor and
 # advance it" the natural way to add one, and the natural way to collide.
 check-msi-guids: $(VENV_ACTIVATE)
 	@echo "=== MSI component GUID uniqueness ==="
@@ -1335,14 +1335,14 @@ i18n-extract: $(VENV_ACTIVATE)
 # translated value must carry the SAME interpolation tokens ({{var}},
 # {var}, %s, %(x)s, <tags>) as its English source.  Untranslated
 # ``[TODO]`` values still carry the source tokens, so this passes today
-# and is part of the default ``lint`` target — it catches a machine
+# and is part of the default ``lint`` target -- it catches a machine
 # translator mangling a placeholder, which would be a runtime bug.
 # Strict gate: a translation that is byte-identical to its English source, or
 # that has gone stale because the English was edited after it was translated.
 # Neither is visible to i18n-validate (key present) or i18n-complete (not
-# [TODO]) — a 2026-08 audit found 2,733 English-passthrough values across the
+# [TODO]) -- a 2026-08 audit found 2,733 English-passthrough values across the
 # four repos with every gate green.  Escape hatch: i18n-allow.txt.
-# Guard: the ENGLISH catalogue must translate English to itself.
+# Guard: the ENGLISH catalog must translate English to itself.
 # On 2026-08-13, 347 entries in the agent's en.po had msgstrs belonging to other
 # msgids -- "Error detecting antivirus" rendered as "Error detecting partitions"
 # -- and because `make translate` translates the English msgstr, all 13 locales
@@ -1382,16 +1382,16 @@ i18n-check: $(VENV_ACTIVATE)
 	@$(PYTHON) scripts/i18n_check_translations.py
 	@echo "[OK] i18n translations complete and consistent"
 
-# Offline i18n COMPLETENESS gate — the SAME check CI runs (i18n_backfill --check),
+# Offline i18n COMPLETENESS gate -- the SAME check CI runs (i18n_backfill --check),
 # but with no translation service required (polib only; frontend JSON + backend
 # .po).  Wired into ``lint`` so ``make lint`` and the pre-push hook catch
 # untranslated strings BEFORE a push, instead of failing in GitHub Actions.
 # A new ``_()`` / ``t()`` string with no translation now fails locally.
 i18n-complete: $(VENV_ACTIVATE)
-	@echo "=== i18n completeness (offline — no translation service) ==="
+	@echo "=== i18n completeness (offline -- no translation service) ==="
 	@$(PYTHON) scripts/translation-service/i18n_backfill.py --project frontend --check
 	@$(PYTHON) scripts/translation-service/i18n_backfill.py --project backend --check
-	@echo "[OK] i18n complete — every locale fully translated"
+	@echo "[OK] i18n complete -- every locale fully translated"
 
 # Machine-translate the [TODO]-seeded strings via a LOCAL OpenAI-compatible
 # endpoint (vLLM/Ollama/llama.cpp).  Runs on the operator's GPU rig, not
@@ -1413,7 +1413,7 @@ i18n-backtranslate: $(VENV_ACTIVATE)
 # extracted into per-language .po catalogs, and compiled to runtime .mo.  UNLIKE
 # the frontend (where t('key','English') carries its own inline fallback), a
 # backend string that is NOT in the catalog silently renders English in EVERY
-# locale — so the catalog MUST be kept in sync with the code.  Workflow after
+# locale -- so the catalog MUST be kept in sync with the code.  Workflow after
 # adding or changing any _("..."):
 #     make i18n-extract-backend                                  # code _() -> .po (new msgids = gaps)
 #     make translate TRANSLATE_PROJECTS=backend SERVICE=http://<beast>:8765   # fill the gaps
@@ -1426,7 +1426,7 @@ i18n-extract-backend:
 ifeq ($(OS),Windows_NT)
 	@echo [skip] i18n-extract-backend needs GNU gettext (xgettext/msgmerge/msgen); run on Linux/macOS or CI.
 else
-	@command -v xgettext >/dev/null 2>&1 && command -v msgmerge >/dev/null 2>&1 && command -v msgen >/dev/null 2>&1 || { echo "ERROR: GNU gettext tools (xgettext/msgmerge/msgen) required — apt install gettext"; exit 1; }
+	@command -v xgettext >/dev/null 2>&1 && command -v msgmerge >/dev/null 2>&1 && command -v msgen >/dev/null 2>&1 || { echo "ERROR: GNU gettext tools (xgettext/msgmerge/msgen) required -- apt install gettext"; exit 1; }
 	@echo "=== extracting backend _() strings -> messages.pot ==="
 	@# --package-name / --msgid-bugs-address only set .pot header fields and need
 	@# GNU gettext >= 0.19; NetBSD's base xgettext is older and rejects them.  They
@@ -1443,7 +1443,7 @@ else
 	@# --no-fuzzy-matching: never guess a translation onto a changed string.
 	@# An unmatched/changed string becomes an EMPTY gap (which `make translate`
 	@# fills accurately) rather than a fuzzy guess that msgfmt would drop from the
-	@# .mo (silently rendering English) — the exact bug this whole cycle prevents.
+	@# .mo (silently rendering English) -- the exact bug this whole cycle prevents.
 	@for l in $(BACKEND_I18N_LANGS); do \
 		msgmerge --update --backup=none --quiet --no-fuzzy-matching \
 			$(BACKEND_I18N)/$$l/LC_MESSAGES/messages.po $(BACKEND_I18N)/messages.pot; \
@@ -1475,7 +1475,7 @@ else
 	fi
 endif
 
-# Compile backend .mo from the committed .po BEFORE any package is built — every
+# Compile backend .mo from the committed .po BEFORE any package is built -- every
 # installer payload copies backend/i18n/locales/, and .mo is gitignored (never
 # committed).  Declared as an EXTRA prerequisite on each installer (Make merges
 # prerequisites across rules; the recipes live at their definitions below), so a
@@ -1485,25 +1485,25 @@ installer installer-deb installer-rpm-centos installer-rpm-opensuse installer-al
 
 # CI gate: every _() string in the code must already be in the catalog.  If a
 # contributor adds a string without running i18n-extract-backend, it would ship
-# untranslated — so fail the build.  Network-free.  Pairs with `translate-check`
+# untranslated -- so fail the build.  Network-free.  Pairs with `translate-check`
 # (which fails on any empty msgstr, i.e. extracted-but-not-translated).
 i18n-check-backend:
 ifeq ($(OS),Windows_NT)
 	@echo [skip] i18n-check-backend needs GNU gettext (xgettext/msgcmp); enforced on Linux/CI.
 else
-	@command -v xgettext >/dev/null 2>&1 && command -v msgcmp >/dev/null 2>&1 || { echo "[skip] i18n-check-backend: GNU gettext not installed (apt install gettext) — skipped"; exit 0; }
+	@command -v xgettext >/dev/null 2>&1 && command -v msgcmp >/dev/null 2>&1 || { echo "[skip] i18n-check-backend: GNU gettext not installed (apt install gettext) -- skipped"; exit 0; }
 	@xgettext --language=Python --keyword=_ --keyword=N_ --keyword=ngettext:1,2 --from-code=UTF-8 \
 		-o /tmp/sysmanage-backend-i18n.pot $(BACKEND_I18N_SRC) 2>/dev/null
 	@msgcmp --use-untranslated $(BACKEND_I18N)/en/LC_MESSAGES/messages.po /tmp/sysmanage-backend-i18n.pot >/dev/null 2>&1 \
-		|| { echo "FAIL: backend code has _() strings missing from the catalog — run 'make i18n-extract-backend'"; exit 1; }
+		|| { echo "FAIL: backend code has _() strings missing from the catalog -- run 'make i18n-extract-backend'"; exit 1; }
 	@echo "[OK] backend catalog is in sync with code."
 endif
 
 # Gate the SHAPE of backend gettext msgids.  i18n-check-backend (msgcmp) can
 # only compare msgids that xgettext actually extracted, so it is blind to the
 # two ways a string never gets extracted at all: a lookup key used as the
-# msgid, and a msgid that is not a string literal.  Both render untranslated —
-# or worse, leak the raw key — in every locale, with every other gate green.
+# msgid, and a msgid that is not a string literal.  Both render untranslated --
+# or worse, leak the raw key -- in every locale, with every other gate green.
 # The extractor must SEE every file with translatable text.  Every other i18n
 # gate compares the catalog to the extractor's own output, so none of them can
 # notice a file the extractor never read.
@@ -1534,7 +1534,7 @@ security-full: security-python security-frontend security-secrets
 	@echo "[OK] Comprehensive security analysis completed!"
 
 # Semgrep registry packs run locally.  These mirror the CI Semgrep finding set
-# closely enough to self-verify before pushing — crucially including
+# closely enough to self-verify before pushing -- crucially including
 # ``p/trailofbits`` (e.g. tarfile-extractall-traversal), which the basic packs
 # omit and which the cloud Pro scan flags.  The dynamic-urllib / tainted-* rules
 # live in p/default + p/security-audit.  Exact-rule parity with the cloud Pro
@@ -1544,7 +1544,7 @@ SEMGREP_CONFIGS := --config=p/default --config=p/security-audit --config=p/trail
 	--config=p/django --config=p/flask --config=p/owasp-top-ten
 
 # Run Semgrep LOCALLY from the venv (auto-installs it if missing), so the
-# pre-push self-check matches what the cloud scan reports — no round-trip.
+# pre-push self-check matches what the cloud scan reports -- no round-trip.
 # The LOCAL scan (registry packs above over backend/ + tests/) GATES: it runs
 # with ``--error`` and no ``|| true``, so a NEW finding fails the security
 # chain. It is fast and measurable, unlike ``semgrep ci`` (the Pro cloud
@@ -1740,7 +1740,7 @@ sonarqube-update-install:
 	@echo "--- 1/2: SonarQube server (native install at $(SONARQUBE_HOME)) ---"
 	@set -e; \
 	if ! command -v systemctl >/dev/null 2>&1; then \
-		echo "No systemd (systemctl) found — skipping native server update."; \
+		echo "No systemd (systemctl) found -- skipping native server update."; \
 	elif [ ! -d "$(SONARQUBE_HOME)" ]; then \
 		echo "ERROR: $(SONARQUBE_HOME) not found. Set SONARQUBE_HOME=<your install dir>."; exit 1; \
 	else \
@@ -1838,7 +1838,7 @@ else
 	@# Surgical, no filesystem walk: test DBs are either in-memory (sqlite://)
 	@# or tempfile.mkstemp() files in $$TMPDIR.  The only on-disk repo DB is a
 	@# stray ./<name>.db written to cwd when the app boots with a file-sqlite
-	@# config (db.py: sqlite:///<db_name>) — always top-level, never nested.
+	@# config (db.py: sqlite:///<db_name>) -- always top-level, never nested.
 	@# A recursive ``find .`` here just crawled the tree (brutal on NFS) to
 	@# delete nothing, so target the real locations directly.
 	-@rm -f ./*.db ./tests/*.db 2>/dev/null || true
@@ -1847,7 +1847,7 @@ else
 endif
 # Backend tests run as TWO separate pytest processes accumulating into
 # one coverage dataset via --cov-append: tests/ (canonical) then
-# backend/tests/ (a second tree CI used to skip — proplus/federation/
+# backend/tests/ (a second tree CI used to skip -- proplus/federation/
 # management-API suites).  They CANNOT share one -n auto run (cross-tree
 # xdist worker crashes).  The --cov-fail-under ratchet on the final run
 # gates the COMBINED total so coverage can't silently decline; bump it
@@ -1937,7 +1937,7 @@ else
 			exit 1; \
 		fi; \
 		echo "[INFO] Running Artillery load tests for backend API..."; \
-		echo "[INFO] (Artillery is fetched on demand via npx — first run downloads to ~/.npm/_npx cache, no global install or sudo required)"; \
+		echo "[INFO] (Artillery is fetched on demand via npx -- first run downloads to ~/.npm/_npx cache, no global install or sudo required)"; \
 		echo "[INFO] Regenerating artillery.yml from sysmanage.yaml to pick up the current api.port..."; \
 		$(PYTHON) scripts/generate_artillery_config.py; \
 		TARGET_URL=$$($(PYTHON) -c "import yaml; print(yaml.safe_load(open('artillery.yml'))['config']['target'])"); \
@@ -2085,7 +2085,7 @@ else
 		echo "[INFO] Ensuring OpenBAO is up + primed (supplies jwt_secret to the e2e backend)..."; \
 		./scripts/start-openbao.sh > logs/openbao-e2e.log 2>&1 || true; \
 		. $(VENV_ACTIVATE) && PYTHONPATH=$$(pwd) $(PYTHON) scripts/prime_openbao_secrets.py >> logs/openbao-e2e.log 2>&1 || \
-			echo "[WARN] OpenBAO prime skipped/failed — see logs/openbao-e2e.log. Backend then falls back to jwt_secret in /etc/sysmanage.yaml; if neither is set, e2e login fails with 'HMAC key must not be empty'."; \
+			echo "[WARN] OpenBAO prime skipped/failed -- see logs/openbao-e2e.log. Backend then falls back to jwt_secret in /etc/sysmanage.yaml; if neither is set, e2e login fails with 'HMAC key must not be empty'."; \
 		echo "[INFO] Starting backend API server (email disabled, single-tenant for e2e)..."; \
 		. $(VENV_ACTIVATE) && SYSMANAGE_DISABLE_EMAIL=true SYSMANAGE_MULTITENANCY=false nohup $(PYTHON) -m backend.main > logs/backend-e2e.log 2>&1 & \
 		BACKEND_PID=$$!; \
@@ -2190,7 +2190,7 @@ else
 	# Packaging staging scratch: build-temp holds a STALE copy of
 	# requirements.txt (build-temp/sysmanage-<ver>/) that an authenticated
 	# `safety scan` double-reports against pre-fix pins. Remove the scratch
-	# only — NOT installer/dist itself, which holds built release artifacts.
+	# only -- NOT installer/dist itself, which holds built release artifacts.
 	@rm -rf installer/dist/build-temp/ 2>/dev/null || true
 endif
 	@echo "[OK] Clean completed"
@@ -4943,7 +4943,7 @@ i18n-markup-fix: $(VENV_ACTIVATE)
 	@echo "[OK] i18n markup gate green"
 
 # The four repos each carry a copy of the shared i18n gate; only the SURFACES
-# block and the licence header may differ.  Skips siblings that are not checked
+# block and the license header may differ.  Skips siblings that are not checked
 # out, so it is safe in single-repo CI.
 i18n-sync-check:
 	@$(PYTHON) scripts/sync_i18n_tooling.py --check
@@ -4954,9 +4954,9 @@ i18n-sync:
 # Gate: every Pro+ engine code this repo dispatches to must exist in ModuleCode
 # AND appear in a tier.  An unregistered engine can never be licensed, so the
 # shim answers "requires a Professional+ license" forever with nothing logged.
-# Also cross-checks FEATURE codes against the Pro+ licence generator when that
+# Also cross-checks FEATURE codes against the Pro+ license generator when that
 # repo is checked out beside this one: a feature the generator issues but this
-# repo cannot name makes FeatureCode(value) raise on a valid licence.
+# repo cannot name makes FeatureCode(value) raise on a valid license.
 check-engine-codes:
 	@$(PYTHON) scripts/check_engine_codes.py
 

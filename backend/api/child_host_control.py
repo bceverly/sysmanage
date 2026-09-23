@@ -99,7 +99,7 @@ def _resolve_agent_install_commands(session, distribution_id: str) -> list:
     still carries the legacy curl-and-dpkg recipe would re-install
     via direct download instead of routing through the PPA/Copr/OBS
     channel the rest of the upgrade machinery (apt-get upgrade,
-    dnf upgrade) expects — leaving future upgrades silently broken.
+    dnf upgrade) expects -- leaving future upgrades silently broken.
 
     Returns an empty list when neither source produces a recipe.
     """
@@ -157,7 +157,7 @@ def _try_update_agent_plan_dispatch(
 ) -> bool:
     """Dispatch an update-agent plan via container_engine for LXD/WSL.
 
-    KVM/bhyve/VMM child hosts have their own registered agent — operators
+    KVM/bhyve/VMM child hosts have their own registered agent -- operators
     should use the standard update-agent flow on the linked Host rather
     than this child-host shortcut.  Returns False for those types so the
     caller surfaces a 502 to the user.
@@ -452,7 +452,7 @@ async def update_child_agent(
     # Authz is server-global; child-host data + audit are tenant-scoped.
     user = authorize_on_main(current_user, SecurityRoles.UPDATE_AGENT)
     session_local = request_sessionmaker()
-    # ChildHostDistribution is server-global reference data — its lookups (here
+    # ChildHostDistribution is server-global reference data -- its lookups (here
     # and inside _try_update_agent_plan_dispatch) run on the bootstrap engine,
     # not the tenant database, which carries no copy of the distribution rows.
     ref_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())

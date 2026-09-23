@@ -416,7 +416,7 @@ class TestPushBackoffAndDeadLetter:
 
     def test_dead_letter_excluded_from_pending_pushes(self, session, enrolled_site):
         # Dead-lettered assignments must never appear in the push
-        # worker's view — that's the whole point.
+        # worker's view -- that's the whole point.
         from backend.services import federation_retry_policy as rp
 
         p = psvc.create_policy(session, policy_type="x", name="y", definition={})

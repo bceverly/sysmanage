@@ -4,12 +4,12 @@
 
 """add_coordinator_sync_bearer
 
-Phase 12.10 Slice 2: federation wire protocol — site-side bearer
+Phase 12.10 Slice 2: federation wire protocol -- site-side bearer
 storage for the outbound sync worker.
 
 Adds one nullable column to ``federation_coordinator``:
 
-  ``sync_bearer_token``  — plaintext bearer the site presents on
+  ``sync_bearer_token``  -- plaintext bearer the site presents on
                            every outbound sync POST.  Stored in
                            plaintext (unlike the coordinator-side
                            ``federation_sites.sync_bearer_token_hash``

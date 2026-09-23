@@ -20,7 +20,7 @@ wrong on two counts: the label and the suite.  This migration:
     the original seed (it only covered 22.04, 24.04, and the 26.04
     placeholder).
 
-Reversible — downgrade restores "(next)" + ``noble`` and removes the
+Reversible -- downgrade restores "(next)" + ``noble`` and removes the
 25.10 row.
 """
 
@@ -59,7 +59,7 @@ def upgrade() -> None:
         },
     )
 
-    # Add Ubuntu 25.10 (questing) — missed by the original seed.
+    # Add Ubuntu 25.10 (questing) -- missed by the original seed.
     # Guard with a SELECT so re-applying the migration (or applying
     # against a DB someone hand-patched) is a no-op rather than a
     # duplicate-key blow-up.
@@ -75,7 +75,7 @@ def upgrade() -> None:
         # "no such function: gen_random_uuid").  Do NOT cast in the SQL:
         # ``:id::uuid`` looks like a cast to SQLAlchemy, which then refuses
         # to treat ``:id`` as a bind parameter (it reserves ``::`` for
-        # Postgres casts) and emits it literally — a syntax error.  Instead
+        # Postgres casts) and emits it literally -- a syntax error.  Instead
         # bind a value the driver maps to the column type directly:
         # psycopg2 adapts a ``uuid.UUID`` object to the uuid column natively,
         # and SQLite stores the string form in its CHAR(36) GUID column.

@@ -6,9 +6,9 @@
 
 The point of storing a profile is that applying it links back: the run row
 records which profile produced it, so history can answer "what did this
-profile do across the fleet". That linkage is the behaviour under test.
+profile do across the fleet". That linkage is the behavior under test.
 
-Ad-hoc apply is open source and must keep working with no licence, so the
+Ad-hoc apply is open source and must keep working with no license, so the
 gate lives on the stored path only -- not on the route.
 """
 

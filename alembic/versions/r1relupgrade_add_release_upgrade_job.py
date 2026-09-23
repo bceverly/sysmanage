@@ -2,10 +2,10 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""create release_upgrade_job (tenant partition) — Phase 14.3
+"""create release_upgrade_job (tenant partition) -- Phase 14.3
 
 Operator-driven, schedulable distro release-upgrade jobs live in the TENANT
-partition (unprefixed) — per-host operational state.  ``scheduled_at`` makes a
+partition (unprefixed) -- per-host operational state.  ``scheduled_at`` makes a
 job maintenance-window aware (the same dispatch 14.2 gates).  ``host_id`` is a
 real intra-partition FK to ``host.id`` (host is tenant-partition too).
 

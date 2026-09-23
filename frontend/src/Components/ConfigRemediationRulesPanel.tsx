@@ -153,7 +153,7 @@ const ConfigRemediationRulesPanel: React.FC<Props> = ({ canEdit }) => {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 {t(
                     'configRemediation.intro',
-                    'A rule points a drift finding at the profile that repairs it — a ' +
+                    'A rule points a drift finding at the profile that repairs it -- a ' +
                         'narrower fix than re-applying the whole baseline. Rules are ' +
                         'tried in the order shown; the first match wins.',
                 )}

@@ -8,12 +8,12 @@ Content-lifecycle federated site sync (Phase 16, Slice 7b).
 Two halves of the byte-transport, both best-effort so they never break the
 promotion they hang off:
 
-* COORDINATOR — ``announce_promotion_to_sites``: on promotion into a subscribed
+* COORDINATOR -- ``announce_promotion_to_sites``: on promotion into a subscribed
   environment, enqueue a ``content_view_sync`` federation command to each
   subscribed site carrying the coordinator's serve URL + version metadata.  The
   existing federation push worker delivers it to the site's command inbox.
 
-* SITE — ``handle_content_view_sync``: called from the OSS
+* SITE -- ``handle_content_view_sync``: called from the OSS
   ``federation_actuation_service.fanout_queued_commands`` when a
   ``content_view_sync`` command surfaces; dispatches an HTTP-pull plan to the
   site's mirror host so it fetches the version's bytes and serves them locally.

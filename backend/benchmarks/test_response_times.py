@@ -6,7 +6,7 @@
 Phase 6 response-time micro-benchmark.
 
 Measures p50/p95 in-process latency for hot endpoints using FastAPI's
-TestClient.  This is NOT a load test — it characterises the application
+TestClient.  This is NOT a load test -- it characterises the application
 itself with the network and DB pool factored out.  Use the WebSocket
 scalability harness (still TBD) for end-to-end agent-fleet load.
 
@@ -15,7 +15,7 @@ Usage:
         --benchmark-min-rounds=200
 
 Baseline expectations (committed 2026-04-26, recorded against a fresh
-test DB on a workstation-class machine — your numbers will differ):
+test DB on a workstation-class machine -- your numbers will differ):
 
     GET /api/health                p50 < 5ms    p95 < 20ms
     GET /api/v1/automation/scripts p50 < 25ms   p95 < 80ms   (empty list)
@@ -78,7 +78,7 @@ def test_bench_automation_list(client):
         f"\nGET /api/v1/automation/scripts: "
         f"p50={p50:.2f}ms p95={p95:.2f}ms mean={mean:.2f}ms"
     )
-    # 402 (no license) or 200 (empty list) are both fine — we're measuring
+    # 402 (no license) or 200 (empty list) are both fine -- we're measuring
     # router + auth + license-check overhead, not data.
     assert p95 < 200  # nosec B101
 

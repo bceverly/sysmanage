@@ -382,7 +382,7 @@ const PackageProfilesSettings: React.FC = () => {
 
             {form.constraints.length === 0 ? (
               <Typography variant="body2" color="text.secondary">
-                {t('packageProfiles.noConstraints', 'No constraints — add at least one.')}
+                {t('packageProfiles.noConstraints', 'No constraints -- add at least one.')}
               </Typography>
             ) : (
               <Stack spacing={1}>

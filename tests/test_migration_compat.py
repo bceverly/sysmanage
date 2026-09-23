@@ -174,7 +174,7 @@ class TestCheckModuleCompatibility:
         )
         assert any(e.module_code == "test_mod_2" for e in get_incompatibilities())
 
-        # Now check with a module that doesn't declare a min — should clear.
+        # Now check with a module that doesn't declare a min -- should clear.
         result = check_module_compatibility(
             module_code="test_mod_2",
             module_info={"version": "1"},

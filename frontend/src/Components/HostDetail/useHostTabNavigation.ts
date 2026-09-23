@@ -2,7 +2,7 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-// Tab-name/URL-hash synchronisation and left-rail grouping for the Host Detail
+// Tab-name/URL-hash synchronization and left-rail grouping for the Host Detail
 // page.  The numeric tab index + tabDefinitions stay in the parent; this hook
 // derives navigation helpers from them.
 

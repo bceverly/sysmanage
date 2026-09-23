@@ -2,9 +2,9 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Tests for agent capability ingest + the dispatch gate — ROADMAP Phase 19.
+"""Tests for agent capability ingest + the dispatch gate -- ROADMAP Phase 19.
 
-The behaviour these pin down is mostly about the THREE-VALUED state, because
+The behavior these pin down is mostly about the THREE-VALUED state, because
 collapsing it to two is the failure mode that would hurt real fleets:
 
     advertised-and-supported / advertised-and-NOT-supported / UNKNOWN
@@ -32,7 +32,7 @@ from backend.services.agent_capability_service import (
 
 
 class _Host:
-    """Stand-in for the ORM row — the service only touches these attributes."""
+    """Stand-in for the ORM row -- the service only touches these attributes."""
 
     def __init__(self, fqdn="host.example.com"):
         self.fqdn = fqdn
@@ -75,7 +75,7 @@ def test_unknown_keys_from_a_newer_agent_are_dropped_not_fatal():
 
 
 def test_a_report_with_no_commands_is_rejected():
-    """Not a limited agent — a broken report.  An agent that can run nothing
+    """Not a limited agent -- a broken report.  An agent that can run nothing
     could not have sent it, and storing it would gate every command."""
     assert normalize_report(_report([])) is None
 
@@ -145,7 +145,7 @@ def test_unsupported_command_is_refused_with_the_host_named():
     # The fqdn here is deliberately NOT domain-shaped.  Asserting
     # `"trimmed.example.com" in str(...)` is the exact shape CodeQL flags as
     # incomplete URL substring sanitization (py/incomplete-url-substring-
-    # sanitization) — harmless in a test, but a real finding in the queue is a
+    # sanitization) -- harmless in a test, but a real finding in the queue is a
     # finding nobody reads.  The structured attribute is the better assertion
     # anyway: it pins the contract instead of the phrasing.
     host = _Host("trimmed-host-01")
@@ -155,8 +155,8 @@ def test_unsupported_command_is_refused_with_the_host_named():
         assert_host_supports(host, "initialize_kvm")
     assert excinfo.value.command_type == "initialize_kvm"
     assert excinfo.value.hostname == "trimmed-host-01"
-    # The message must still name the host — that is the whole point of the
-    # error — but check it via the attribute the message is built from.
+    # The message must still name the host -- that is the whole point of the
+    # error -- but check it via the attribute the message is built from.
     assert excinfo.value.hostname in str(excinfo.value)
 
 
@@ -204,7 +204,7 @@ def test_update_values_carry_the_same_decision_as_apply():
 
 def test_update_values_are_empty_for_an_unusable_report():
     """Empty means callers can update() unconditionally without erasing a
-    previous advertisement — the SYSTEM_INFO handler relies on that."""
+    previous advertisement -- the SYSTEM_INFO handler relies on that."""
     assert capability_update_values(None) == {}
     assert capability_update_values({"garbage": True}) == {}
     assert capability_update_values(_report([])) == {}
@@ -212,7 +212,7 @@ def test_update_values_are_empty_for_an_unusable_report():
 
 def test_update_values_name_only_real_host_columns():
     """A typo here would silently do nothing on an UPDATE, or blow up the
-    handler — neither is visible from the service's own tests."""
+    handler -- neither is visible from the service's own tests."""
     from backend.persistence.models.core import Host
 
     for column in capability_update_values(_report(["install_package"])):
@@ -255,7 +255,7 @@ def test_a_report_without_not_applicable_still_normalizes():
 
 
 # ---------------------------------------------------------------------------
-# Phase 21.1 S1 — fact coverage ingestion.
+# Phase 21.1 S1 -- fact coverage ingestion.
 # ---------------------------------------------------------------------------
 
 
@@ -283,7 +283,7 @@ def test_an_agent_that_never_advertised_facts_is_none_not_empty():
     """The distinction this whole slice exists for.
 
     ``None`` means the agent never told us.  ``{}`` would mean it told us it
-    serves nothing — and a consumer rendering that as an empty result is
+    serves nothing -- and a consumer rendering that as an empty result is
     indistinguishable from "measured, found none", which reads as compliant.
     """
     normalized = normalize_report(_report(["install_package"]))
@@ -298,7 +298,7 @@ def test_malformed_fact_coverage_is_rejected_not_half_kept():
 
 
 def test_fact_coverage_never_makes_an_agent_look_limited():
-    """Serving no fact tables is not a degraded agent — the providers simply
+    """Serving no fact tables is not a degraded agent -- the providers simply
     have not shipped yet.  Folding this into ``limited`` would flag every host
     in the fleet the day S1 lands and tell an operator nothing true."""
     report = _report(["install_package"])

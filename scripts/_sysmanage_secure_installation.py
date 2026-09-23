@@ -942,12 +942,12 @@ def get_user_input():
 
     # Phase 13.1.G: deployment mode. Homelab keeps the single-prompt simplicity
     # (one implicit tenant); SaaS turns on the multi-tenancy control plane
-    # (database-per-tenant). Federated / air-gap roles are NOT chosen here — they
+    # (database-per-tenant). Federated / air-gap roles are NOT chosen here -- they
     # are server-role settings configured later in the UI, and are independent of
     # (and mutually exclusive with) multi-tenancy.
     print("\n--- Deployment Mode ---")
-    print("  1. Homelab / on-prem (default) — single tenant, simplest setup")
-    print("  2. SaaS / multi-tenant control plane — host isolated tenants,")
+    print("  1. Homelab / on-prem (default) -- single tenant, simplest setup")
+    print("  2. SaaS / multi-tenant control plane -- host isolated tenants,")
     print("     one database per tenant (opt-in; advanced)")
     mode_choice = input("Deployment mode [1]: ").strip() or "1"
 
@@ -1165,14 +1165,14 @@ def update_config_file(salt, jwt_secret):
                         )
                         priv_cmd = "doas"
                     except (subprocess.CalledProcessError, FileNotFoundError):
-                        # ``doas`` unavailable / unauthorised — fall through to sudo probe.
+                        # ``doas`` unavailable / unauthorised -- fall through to sudo probe.
                         try:
                             subprocess.run(
                                 ["sudo", "-n", "true"], check=True, capture_output=True
                             )
                             priv_cmd = "sudo"
                         except (subprocess.CalledProcessError, FileNotFoundError):
-                            # Neither doas nor sudo available — caller handles
+                            # Neither doas nor sudo available -- caller handles
                             # ``priv_cmd is None`` below by exiting with a clear msg.
                             priv_cmd = None
                 else:
@@ -1184,7 +1184,7 @@ def update_config_file(salt, jwt_secret):
                         )
                         priv_cmd = "sudo"
                     except (subprocess.CalledProcessError, FileNotFoundError):
-                        # sudo unavailable — caller handles ``priv_cmd is None``.
+                        # sudo unavailable -- caller handles ``priv_cmd is None``.
                         priv_cmd = None
 
                 if priv_cmd:
@@ -1389,7 +1389,7 @@ ui = true
     # Start vault server with platform-specific handling.
     # vault_cmd is validated by is_safe_vault_path() in find_vault_binary().
     # Open the log file via ``with`` and let Popen dup the descriptor;
-    # after Popen returns we can safely close the parent-side handle —
+    # after Popen returns we can safely close the parent-side handle --
     # the child already has its own copy.  Without the ``with``, CodeQL
     # flags ``py/file-not-closed`` on the leaked fp.
     with open(log_file, "w") as log_fp:
@@ -1627,7 +1627,7 @@ def update_config_with_deployment_mode(
 ):
     """Write the multi-tenancy block for the chosen deployment mode (Phase 13.1.G).
 
-    Homelab/on-prem → ``multitenancy.enabled: false`` (the pre-13.1 behaviour: one
+    Homelab/on-prem → ``multitenancy.enabled: false`` (the pre-13.1 behavior: one
     implicit tenant). SaaS → ``enabled: true`` plus the self-service flag. The
     control-plane registry uses the existing ``database`` block (config falls back
     ``registry`` → ``database``), so no separate registry credentials are written
@@ -1872,7 +1872,7 @@ def main():
         create_admin_user(user_data, salt)
 
         # Phase 13.1.H (config classification): prime OpenBAO with the
-        # generated secrets so they become the source of truth — the app's
+        # generated secrets so they become the source of truth -- the app's
         # startup overlay then reads them from OpenBAO instead of YAML.
         # Best-effort: if vault isn't reachable the YAML values still work via
         # the fallback.  (At this point the vault root token is in config, set

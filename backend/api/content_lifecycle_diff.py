@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Content Lifecycle Management — version diff API (Phase 16, Slice 8).
+Content Lifecycle Management -- version diff API (Phase 16, Slice 8).
 
 "What changed between v{n} and v{n-1}": publish stores no per-file manifest, so
 the diff is agent-computed -- an agent lists the package basenames of both

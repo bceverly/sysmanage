@@ -38,7 +38,7 @@ def _invalid_credentials_error() -> HTTPException:
     """The single source of truth for the generic-401 used on every
     auth-failure path (unknown user, wrong password, inactive account,
     rate-limit miss, etc.).  Returning the same wording from every
-    branch is a deliberate security choice — leaking which input was
+    branch is a deliberate security choice -- leaking which input was
     wrong helps account enumeration.
 
     Kept as a function rather than a module-level constant so the
@@ -57,10 +57,10 @@ def _set_refresh_cookie(response, refresh_token, jwt_refresh_timeout, is_secure)
     """Set the refresh token cookie on the response.
 
     The cookie's Domain attribute comes from the ``cookie_domain`` server
-    setting (DB-backed, with a ``security.cookie_domain`` YAML fallback — Phase
+    setting (DB-backed, with a ``security.cookie_domain`` YAML fallback -- Phase
     13.1.H). If unset (the default), the Domain attribute is omitted entirely
     and the cookie is scoped to the host that
-    served the response — RFC 6265's default behavior, and what most
+    served the response -- RFC 6265's default behavior, and what most
     deployments want. Setting an explicit domain that doesn't match the
     request host (e.g. hard-coding 'sysmanage.org' on a localhost dev box)
     causes RFC-compliant clients to reject the cookie outright; this used
@@ -130,7 +130,7 @@ async def login(login_data: UserLogin, request: Request, response: Response):  #
         # `reason` is one of the rate-limit messages returned by
         # LoginSecurityValidator.validate_login_attempt(); each is marked N_()
         # at its definition there, so the text IS in the catalog.
-        # i18n: dynamic — resolved from N_()-marked constants in login_security
+        # i18n: dynamic -- resolved from N_()-marked constants in login_security
         raise HTTPException(status_code=429, detail=_(reason))
 
     the_config = config.get_config()
@@ -201,7 +201,7 @@ def _try_admin_login(
     Phase 13.1.H: the recovery *userid* is a bootstrap identifier that stays in
     ``sysmanage.yaml`` (it must resolve even with the DB/vault down), but the
     recovery *password* is a secret read from OpenBAO (``config.get_admin_password``),
-    falling back to the YAML value during the migration window — so the recovery
+    falling back to the YAML value during the migration window -- so the recovery
     credential is no longer required to sit in plaintext YAML.
     """
     admin_userid = the_config.get("security", {}).get("admin_userid")
@@ -285,7 +285,7 @@ def _authenticate_db_user(  # NOSONAR
             detail=_("Account is locked due to too many failed login attempts"),
         )
 
-    # Phase 10.5 — external IdP path.  Users with a non-NULL
+    # Phase 10.5 -- external IdP path.  Users with a non-NULL
     # ``external_idp_provider_id`` authenticate against the directory
     # via the Pro+ ``external_idp_engine``.  Three outcomes:
     #   * engine accepts → skip Argon2, proceed to the post-password
@@ -322,7 +322,7 @@ def _authenticate_db_user(  # NOSONAR
                 user, login_data, session, client_ip, user_agent
             )
 
-    # Password OK from here on — but a second factor may still gate
+    # Password OK from here on -- but a second factor may still gate
     # the actual session token.  Three branches:
     #
     #   a) User has MFA enrolled → issue a short-lived ``mfa_pending``
@@ -330,7 +330,7 @@ def _authenticate_db_user(  # NOSONAR
     #   b) Admin required MFA AND user is past the grace period →
     #      refuse with a structured error so the UI can prompt enroll.
     #   c) Otherwise (no MFA enrolled, no policy gate) → issue a real
-    #      session token, matching pre-Phase-10.3 behaviour.
+    #      session token, matching pre-Phase-10.3 behavior.
     enrollment = mfa_service.get_enrollment(session, user.id)
     if enrollment is not None:
         # Record the password-OK event before issuing the pending token
@@ -372,7 +372,7 @@ def _authenticate_db_user(  # NOSONAR
                 status_code=403,
                 detail=_(
                     "Multi-factor authentication is required for this account. "
-                    "Please enrol from your profile page before signing in."
+                    "Please enroll from your profile page before signing in."
                 ),
             )
 
@@ -404,7 +404,7 @@ def _try_external_idp_auth(user, login_data, session):
     succeeded), ``False`` when it declines, ``None`` when the engine
     isn't loaded (caller falls back to local Argon2).
 
-    Currently only handles LDAP — OIDC users go through the
+    Currently only handles LDAP -- OIDC users go through the
     /api/auth/oidc/{provider}/callback endpoint, not the password
     login form.
     """
@@ -435,7 +435,7 @@ def _try_external_idp_auth(user, login_data, session):
             config, str(login_data.userid), login_data.password
         )
     except Exception:  # pylint: disable=broad-exception-caught
-        # Engine raised — treat as decline so the local fallback can
+        # Engine raised -- treat as decline so the local fallback can
         # kick in if the operator has it enabled.
         return False
     return bool(result.get("success"))
@@ -547,12 +547,12 @@ def _default_tenant_id_for_user(userid: str) -> Optional[str]:
 
     Sticky last-tenant: prefer the user's stored ``last_tenant_id`` when it is
     still a live grant; otherwise the ``is_default`` grant, else the user's
-    first grant — so a user with any tenant access lands *inside* a tenant after
+    first grant -- so a user with any tenant access lands *inside* a tenant after
     login instead of the bare "no tenant" server scope.  The landed tenant is
     written back to ``User.last_tenant_id`` so it is populated on first login
     and self-heals if a previously-stored tenant is later revoked.  Returns
     ``None`` when multi-tenancy is off, the principal isn't a registry identity,
-    or has no grants (e.g. the control-plane operator) — those keep server
+    or has no grants (e.g. the control-plane operator) -- those keep server
     scope.  Best-effort: any failure yields ``None`` so login never breaks.
     """
     if not config.is_multitenancy_enabled():
@@ -593,7 +593,7 @@ def _default_tenant_id_for_user(userid: str) -> Optional[str]:
 async def list_accounts(current_user: str = Depends(get_current_user)):
     """List the tenants the current user can switch to (their live grants).
 
-    Multi-tenancy only — returns 400 when the feature is disabled.
+    Multi-tenancy only -- returns 400 when the feature is disabled.
     """
     if not config.is_multitenancy_enabled():
         raise HTTPException(status_code=400, detail=_("Multi-tenancy is not enabled."))
@@ -665,7 +665,7 @@ async def switch_account(
         finally:
             session.close()
         # Remember this as the user's sticky tenant so their next login lands
-        # here.  Only real tenants are remembered — switching to server scope
+        # here.  Only real tenants are remembered -- switching to server scope
         # (target_tenant is None) leaves the previous sticky untouched.
         _set_user_last_tenant(current_user, target_tenant)
 

@@ -181,7 +181,7 @@ async def deploy_antivirus(  # NOSONAR
         session = db_session
         # Bulk-fetch all hosts and all AntivirusDefaults upfront in two
         # queries instead of 2 per host (flagged in the Phase 6 N+1
-        # audit).  AntivirusDefault is a tiny lookup table — load all
+        # audit).  AntivirusDefault is a tiny lookup table -- load all
         # rows; many hosts share an OS so per-host lookups duplicate
         # work.
         valid_uuids = []
@@ -586,7 +586,7 @@ async def get_antivirus_coverage(db: Session = Depends(get_tenant_db)):
             )
 
         # Bulk-fetch instead of one query per host (the previous loop
-        # issued 2N queries — flagged in the Phase 6 audit).  Two
+        # issued 2N queries -- flagged in the Phase 6 audit).  Two
         # queries total now, regardless of fleet size.
         opensource_host_ids = {
             row[0]

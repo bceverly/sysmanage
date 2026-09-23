@@ -488,8 +488,8 @@ msgid "Invalid TOTP code."
 msgstr "유효하지 않은 TOTP 코드."
 
 #: backend/api/auth_mfa.py:296 backend/api/auth_mfa.py:358
-msgid "MFA challenge expired — please log in again."
-msgstr "MFA 도전 시간 초과 — 다시 로그인해 주세요."
+msgid "MFA challenge expired -- please log in again."
+msgstr "MFA 도전 시간 초과 -- 다시 로그인해 주세요."
 
 #: backend/api/auth_mfa.py:301
 msgid "Invalid MFA challenge."
@@ -1369,9 +1369,9 @@ msgstr "미러 틱은 크론 평가를 위해 automation_engine이 필요합니�
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed"
+"Mirror %s has not completed a successful sync yet -- wait for sync to succeed"
 " before assigning it as a default."
-msgstr "미러 %s는 아직 성공적인 동기화를 완료하지 않았습니다 — 기본 미러로 지정하기 전에 동기화가 성공할 때까지 기다려주세요."
+msgstr "미러 %s는 아직 성공적인 동기화를 완료하지 않았습니다 -- 기본 미러로 지정하기 전에 동기화가 성공할 때까지 기다려주세요."
 
 #: backend/api/repository_mirroring.py:613
 #, python-format
@@ -1415,7 +1415,7 @@ msgstr ""
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be"
-" loaded — the collector reads each target's bundle from a snapshot of its "
+" loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 "에어갭 컬렉션을 실행하려면 repository_mirroring_engine 모듈이 로드되어야 합니다. 컬렉터는 각 타겟의 번들 파일을 "
@@ -4800,11 +4800,11 @@ msgstr "승인된 호스트 %(hostname)s (ID: %(host_id)s)의 NULL host_id 메�
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
-"message(s) for retry (NOT deleting) — may be an in-flight enrollment or a "
+"message(s) for retry (NOT deleting) -- may be an in-flight enrollment or a "
 "deleted host"
 msgstr ""
 "호스트 %(host_id)s이(가) 이 데이터베이스에 존재하지 않음; %(count)d개의 대기 중인 메시지(들)을 재시도로 "
-"미루기(삭제하지 않음) — 등록 중일 수 있거나 삭제된 호스트일 수 있습니다"
+"미루기(삭제하지 않음) -- 등록 중일 수 있거나 삭제된 호스트일 수 있습니다"
 
 #: backend/websocket/inbound_processor.py:284
 #, python-format
@@ -5289,9 +5289,9 @@ msgstr "비밀 형식이 잘못되었습니다"
 #, python-format
 #~ msgid ""
 #~ "Host %s not found on this database; deferring %d queued message(s) for retry"
-#~ " (NOT deleting) — may be an in-flight enrollment or a deleted host"
+#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
-#~ "호스트 '%s'가 이 데이터베이스에 존재하지 않음; %d개의 대기 중인 메시지를 재시도로 미루어 놓습니다(삭제하지 않음) — 등록 중일 "
+#~ "호스트 '%s'가 이 데이터베이스에 존재하지 않음; %d개의 대기 중인 메시지를 재시도로 미루어 놓습니다(삭제하지 않음) -- 등록 중일 "
 #~ "가능성이 있거나 삭제된 호스트일 수 있습니다."
 
 #, python-format

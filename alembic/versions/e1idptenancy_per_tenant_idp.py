@@ -6,14 +6,14 @@
 
 Adds three columns to ``external_idp_provider``:
 
-  * ``tenant_id``     — SOFT reference to ``registry_tenant.id`` (no FK; the
+  * ``tenant_id``     -- SOFT reference to ``registry_tenant.id`` (no FK; the
     registry is a different partition).  NULL = server-global provider (the
-    pre-13.1.E behaviour); a value scopes the provider to one tenant so a SaaS
+    pre-13.1.E behavior); a value scopes the provider to one tenant so a SaaS
     tenant brings its own Entra/Okta/OIDC directory.
-  * ``jit_provisioning`` — when True, a successful SSO login for a subject with
+  * ``jit_provisioning`` -- when True, a successful SSO login for a subject with
     no linked account auto-creates the account + a grant into the provider's
     tenant (gated by that tenant's email-domain allowlist).
-  * ``jit_default_role`` — the grant role for a JIT-created membership.
+  * ``jit_default_role`` -- the grant role for a JIT-created membership.
 
 Idempotent and SQLite + PostgreSQL safe (inspector guard + batch_alter_table).
 

@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Phase 13.2.1 (option A) — OSS secrets/reports renamed under /api/v1.
+Phase 13.2.1 (option A) -- OSS secrets/reports renamed under /api/v1.
 
 The Pro+ secrets_engine/reporting_engine own /api/v1/secrets and /api/v1/reports
 (same endpoint names), so OSS takes DISTINCT v1 names:
@@ -18,7 +18,7 @@ bridge (final Phase 13.2.1 action), so only the canonical /api/v1 names resolve.
 
 import pytest
 
-# (canonical v1 path, retired bare alias) pairs — resolve param-free with the
+# (canonical v1 path, retired bare alias) pairs -- resolve param-free with the
 # test user.
 SECRETS_PAIRS = [
     ("/api/v1/stored-secrets", "/api/secrets"),

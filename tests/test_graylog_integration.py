@@ -4,7 +4,7 @@
 
 """Graylog integration settings + health.
 
-Two behaviours here are load-bearing and neither is obvious from the route
+Two behaviors here are load-bearing and neither is obvious from the route
 signatures.  The settings POST treats a literal ``"***"`` api_token as "the UI
 re-sent the mask, keep what's stored" -- if that guard regressed, every save
 from the settings screen would overwrite the real token with three asterisks

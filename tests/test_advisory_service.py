@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Tests for backend/advisory/advisory_service.py — the OSS wrapper that delegates
+Tests for backend/advisory/advisory_service.py -- the OSS wrapper that delegates
 to the Pro+ advisory_engine (Phase 14.1).  Mirrors test_vulnerability_service.py:
 the engine is mocked, so this exercises the wrapper + license gating in isolation.
 """

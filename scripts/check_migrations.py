@@ -6,14 +6,14 @@
 """
 Guard against non-expand-contract migrations (Phase 13.1).
 
-SysManage migrates a fleet of databases incrementally — control-plane chains
+SysManage migrates a fleet of databases incrementally -- control-plane chains
 first, then each tenant DB one at a time (``sysmanage-migrate``).  During that
 window the SAME running code serves migrated and not-yet-migrated databases, so
 migrations MUST be **backward-compatible / expand-contract**: add things now,
 remove them in a LATER release once every database is past the add.
 
 This scans each migration's ``upgrade()`` for destructive DDL that breaks that
-rule — dropping/renaming tables/columns/constraints — and fails if it finds any.
+rule -- dropping/renaming tables/columns/constraints -- and fails if it finds any.
 ``downgrade()`` is exempt (drops there are expected).
 
 A genuinely-safe drop (e.g. the contract half of an expand-contract pair, run a
@@ -111,7 +111,7 @@ def main() -> int:
     if total:
         print(
             f"\n[FAIL] {total} non-expand-contract operation(s) found. Migrations "
-            "must be backward-compatible across the fleet — see "
+            "must be backward-compatible across the fleet -- see "
             "docs/migration-expand-contract.md. If a drop is the intentional "
             "contract step (a release after the add), add "
             f"'# {_ALLOW}: <reason>' to the line."

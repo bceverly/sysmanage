@@ -3,11 +3,11 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Control-plane API — OSS stub (Pro+ relocation, Phase 3 / moat slice 8).
+Control-plane API -- OSS stub (Pro+ relocation, Phase 3 / moat slice 8).
 
-The entire multi-tenancy control-plane API — tenant / user / grant /
+The entire multi-tenancy control-plane API -- tenant / user / grant /
 email-domain / placement CRUD, provisioning, enrollment tokens, and tenant
-deletion — moved into the licensed ``multitenancy_engine``.  The OSS build
+deletion -- moved into the licensed ``multitenancy_engine``.  The OSS build
 ships only this inert stub.
 
 ``mount_multitenancy_routes`` (see ``backend/api/proplus_routes.py``) mounts the
@@ -31,7 +31,7 @@ from backend.auth.auth_bearer import JWTBearer
 
 logger = logging.getLogger(__name__)
 
-# Highly privileged surface — gate the whole (stub) router on a valid token, so
+# Highly privileged surface -- gate the whole (stub) router on a valid token, so
 # the unlicensed 501 is only revealed to authenticated callers.
 # Self-prefix only "/control-plane"; proplus_routes mounts this at "/api/v1"
 # (canonical) + "/api" (deprecated alias).  See Phase 13.2.1.

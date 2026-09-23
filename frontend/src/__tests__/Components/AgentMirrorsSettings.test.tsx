@@ -145,7 +145,7 @@ test("removing a mirror calls the channel's delete endpoint", async () => {
   render(<AgentMirrorsSettings />);
   await waitFor(() => expect(screen.getByTestId("grid")).toBeTruthy());
   // The grid is stubbed, so drive the delete through the service directly the
-  // same way the row action does — the URL shape is what matters here.
+  // same way the row action does -- the URL shape is what matters here.
   expect(m(axiosInstance.get)).toHaveBeenCalledWith(
     "/api/v1/airgap/agent-mirrors",
   );

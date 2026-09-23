@@ -16,12 +16,12 @@ import {
  * Renders ``children`` only when the license passes the given gate(s); otherwise
  * redirects to the dashboard so the page is unreachable by direct URL on a
  * license that doesn't include it.  Defence-in-depth alongside the nav-level
- * gating and the API's own 402 responses — a Professional user who types
+ * gating and the API's own 402 responses -- a Professional user who types
  * ``/airgap/repositories``, ``/sites``, or ``/fips-compliance`` lands back on
  * the dashboard rather than on a feature they aren't licensed for.
  *
  * Pass ``module`` (a ModuleCode) and/or ``feature`` (a FeatureCode). When both
- * are given, BOTH must pass — this is what blocks reaching an Enterprise-feature
+ * are given, BOTH must pass -- this is what blocks reaching an Enterprise-feature
  * page whose engine module ships at a lower tier.
  */
 const LicensedRoute: React.FC<{

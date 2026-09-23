@@ -47,7 +47,7 @@ class CreateWslChildHostRequest(BaseModel):
     # before it leaves here.  That is forced by the platform, not a shortcut:
     # Autounattend consumes Microsoft's base64 obfuscation of the plaintext (or
     # the plaintext itself), and a product key must be the literal key.  They
-    # are never persisted in the child_host row — the key goes to OpenBAO and
+    # are never persisted in the child_host row -- the key goes to OpenBAO and
     # the passwords are transient (see child_host_virtualization).
     windows_edition: Optional[str] = "standard-core"
     windows_admin_password: Optional[str] = None

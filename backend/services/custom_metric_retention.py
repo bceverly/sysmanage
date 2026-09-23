@@ -4,12 +4,12 @@
 
 """Periodic retention pruning for custom-metric time-series samples.
 
-The Custom Metrics feature (Custom Metrics — Slice 1) stores one row in the
+The Custom Metrics feature (Custom Metrics -- Slice 1) stores one row in the
 tenant ``custom_metric_sample`` table per host, per metric, per cadence tick.
 Left alone that table grows without bound.  This module is the OSS-side
 retention driver: a background loop that, on a daily cadence, DELETEs samples
 older than ``custom_metrics.retention_days`` (default 90) from EVERY provisioned
-tenant database — and, in single-tenant / ``multitenancy.enabled`` false mode,
+tenant database -- and, in single-tenant / ``multitenancy.enabled`` false mode,
 from the one collapsed application database.
 
 This is deliberately OSS: a mechanical ``DELETE`` on an OSS-owned tenant table
@@ -22,14 +22,14 @@ Design notes (mirrors the other OSS background loops, e.g.
 
   * Cadence defaults to 86400s (daily).  Retention is a slow-moving concern;
     a tighter cadence just churns the DB.
-  * Per-tenant iteration reuses ``iter_host_databases()`` — it yields the
+  * Per-tenant iteration reuses ``iter_host_databases()`` -- it yields the
     bootstrap session plus every provisioned tenant DB when multi-tenancy is
     ON, and ONLY the bootstrap session when it is OFF (collapsed mode).  We
     close every session we are handed (the contract for that generator).
   * The retention window is re-read from settings EACH pass, so an operator
     changing ``custom_metrics_retention_days`` takes effect on the next cycle
     without a restart.
-  * Every exception is caught and logged — a bad tenant, a DB hiccup, or a
+  * Every exception is caught and logged -- a bad tenant, a DB hiccup, or a
     settings-read failure must never kill the loop or stall the other tenants.
     Per the "log unresolvable edge cases loudly" rule, each per-tenant prune
     logs its tenant + deleted count.
@@ -46,7 +46,7 @@ from backend.persistence.models import CustomMetricSample
 
 logger = logging.getLogger(__name__)
 
-# Daily — retention is slow-moving; a tighter cadence just churns the DB.
+# Daily -- retention is slow-moving; a tighter cadence just churns the DB.
 DEFAULT_INTERVAL_SECONDS = 86400
 
 # Back-off after a whole-pass failure: shorter than the normal cadence so the
@@ -68,7 +68,7 @@ def prune_custom_metric_samples(session, retention_days) -> int:
     runs identically on SQLite and PostgreSQL (no DB-specific date arithmetic).
 
     A non-positive ``retention_days`` disables pruning (returns 0 without
-    touching the table) — a guard against a misconfigured ``0``/negative value
+    touching the table) -- a guard against a misconfigured ``0``/negative value
     wiping the whole table.
     """
     try:
@@ -105,7 +105,7 @@ def _run_one_pass() -> int:
     Reads the retention window from settings, then walks
     ``iter_host_databases()`` and prunes each yielded session, logging the
     per-tenant deleted count.  Returns the TOTAL rows deleted across all
-    databases.  Never raises — per-tenant failures are logged and skipped so
+    databases.  Never raises -- per-tenant failures are logged and skipped so
     one bad tenant can't stall the rest.
     """
     # Late import: avoid an import cycle (partitions -> models -> ... ) at
@@ -181,10 +181,10 @@ async def run_custom_metric_retention_loop(
             )
             await asyncio.sleep(interval_seconds)
         except asyncio.CancelledError:
-            logger.info("Custom-metric retention loop cancelled — exiting")
+            logger.info("Custom-metric retention loop cancelled -- exiting")
             raise
         except Exception:  # pylint: disable=broad-except
             logger.exception(
-                "Custom-metric retention loop error — backing off then retrying"
+                "Custom-metric retention loop error -- backing off then retrying"
             )
             await asyncio.sleep(ERROR_BACKOFF_SECONDS)

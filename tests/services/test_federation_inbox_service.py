@@ -464,7 +464,7 @@ class TestCommandFsm:
     def test_same_state_is_idempotent(self, session):
         cid = self._new(session)
         ibx.update_command_status(session, cid, new_status=ibx.CMD_STATUS_IN_PROGRESS)
-        # Re-applying in_progress is fine — worker restart safety.
+        # Re-applying in_progress is fine -- worker restart safety.
         ibx.update_command_status(session, cid, new_status=ibx.CMD_STATUS_IN_PROGRESS)
         session.commit()
         assert (

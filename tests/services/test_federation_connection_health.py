@@ -9,7 +9,7 @@ Tests for the Phase 12.2 site-side uplink connection-health logic in
   * ``record_sync_attempt`` maintains consecutive-failure count, the
     derived ``connection_state`` (online/degraded/offline), and the
     ``last_successful_sync_at`` / ``next_reconnect_at`` fields.
-  * ``should_attempt_sync`` honours the reconnect backoff gate.
+  * ``should_attempt_sync`` honors the reconnect backoff gate.
   * ``is_autonomous`` reports local-autonomy mode only when enrolled AND
     offline.
   * ``connection_health`` snapshot shape for enrolled / unenrolled sites.

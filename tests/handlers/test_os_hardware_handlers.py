@@ -28,7 +28,7 @@ def _connection(host_id="conn-host-id", hostname="h.example", ipv4="10.0.0.1"):
     c.hostname = hostname
     c.ipv4 = ipv4
     c.send_message = AsyncMock()
-    # No websocket attribute by default — tests that need it set it explicitly.
+    # No websocket attribute by default -- tests that need it set it explicitly.
     return c
 
 
@@ -221,7 +221,7 @@ class TestHandleOsVersionUpdate:
     @pytest.mark.asyncio
     async def test_queue_failure_does_not_abort_update(self):
         """If the auto-collect queue command throws, the OS update itself must
-        still be reported as successful — that error is best-effort."""
+        still be reported as successful -- that error is best-effort."""
         db = MagicMock()
         host = MagicMock(
             id="h-1",
@@ -324,7 +324,7 @@ class TestHandleHardwareUpdate:
         # The first execute is the Host update.
         first_execute = db.execute.call_args_list[0]
         stmt = first_execute.args[0]
-        # SQLAlchemy update with .values() — extract the bound values.
+        # SQLAlchemy update with .values() -- extract the bound values.
         values = stmt.compile().params
         assert json.loads(values["hardware_details"]) == {"chassis": "VM"}
 

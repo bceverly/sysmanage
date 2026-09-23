@@ -77,7 +77,7 @@ async def deploy_opentelemetry(
             )
 
         # Host data + the engine platform probe (which samples SoftwarePackage)
-        # are tenant-scoped — route them to the active tenant's database.  User
+        # are tenant-scoped -- route them to the active tenant's database.  User
         # RBAC (above), Grafana settings, and the audit trail (below) are
         # server-global and stay on the bootstrap ``db`` session.
         with request_sessionmaker()() as tenant_session:
@@ -112,7 +112,7 @@ async def deploy_opentelemetry(
                     % eligibility.error_message,
                 )
 
-            # Get Grafana configuration (server-global singleton — bootstrap db)
+            # Get Grafana configuration (server-global singleton -- bootstrap db)
             grafana_settings = (
                 db.query(models.GrafanaIntegrationSettings)
                 .filter_by(enabled=True)
@@ -255,7 +255,7 @@ async def remove_opentelemetry(
             # Capture host scalars for audit/logging after the session closes.
             host_fqdn = host.fqdn
 
-            # Engine path only — see deploy_opentelemetry above for rationale.
+            # Engine path only -- see deploy_opentelemetry above for rationale.
             engine_msg_id = try_engine_otel_remove(host, tenant_session)
             if engine_msg_id is None:
                 raise HTTPException(

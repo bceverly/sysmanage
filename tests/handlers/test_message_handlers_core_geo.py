@@ -125,7 +125,7 @@ class TestHeartbeatGeoResolution:
         ) as lookup_mock:
             await handle_heartbeat(session, mock_connection, message_data)
 
-        # No call — cache hit (IP unchanged + geo columns populated)
+        # No call -- cache hit (IP unchanged + geo columns populated)
         lookup_mock.assert_not_called()
 
     @pytest.mark.asyncio
@@ -181,7 +181,7 @@ class TestHeartbeatGeoResolution:
         # Tag opt-out fires before lookup
         lookup_mock.assert_not_called()
 
-        # Public IP is NOT persisted — operator's tag is the contract,
+        # Public IP is NOT persisted -- operator's tag is the contract,
         # we don't record the IP just to "have it on file".
         updated = session.query(Host).filter_by(id=host.id).first()
         assert updated.public_ip is None
@@ -191,7 +191,7 @@ class TestHeartbeatGeoResolution:
     async def test_lookup_failure_leaves_columns_intact(self, session, mock_connection):
         """A None return (rate-limit, network error, internal IP, etc.)
         from lookup_ip must NOT blank out previously-resolved geo
-        columns — last-known-good wins until next successful resolve."""
+        columns -- last-known-good wins until next successful resolve."""
         from backend.persistence.models import Host
 
         host = Host(

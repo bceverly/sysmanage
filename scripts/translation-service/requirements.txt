@@ -1,5 +1,5 @@
 # SysManage translation service (run on the GPU "beast" box).
-# The service itself is light — it offloads all model work to Ollama over HTTP,
+# The service itself is light -- it offloads all model work to Ollama over HTTP,
 # so there is NO torch / transformers / CUDA dependency here.  Install Ollama
 # separately (see README.md) and pull the translation model.
 fastapi>=0.110

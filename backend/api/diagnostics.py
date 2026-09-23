@@ -486,7 +486,7 @@ async def process_diagnostic_result(db, result_data: dict):  # NOSONAR
     if not collection_id:
         raise HTTPException(status_code=400, detail=_("Missing collection_id"))
 
-    # Use the caller's session directly — tenant-routed by the queue processor
+    # Use the caller's session directly -- tenant-routed by the queue processor
     # when multi-tenancy is on, so a bound host's diagnostic report lands in its
     # tenant database.  The caller owns the transaction, so we don't close it.
     session = db

@@ -14,7 +14,7 @@ moving secrets off disk per docs/planning/config-classification.md.
 
 Idempotent and safe to run any time after OpenBAO is initialized + unsealed
 and the app token is in place: it merges into the existing bag.  Best-effort
-— if OpenBAO is disabled/unreachable it reports and exits non-zero, leaving
+-- if OpenBAO is disabled/unreachable it reports and exits non-zero, leaving
 the YAML values (which still work via the fallback) untouched.
 """
 
@@ -43,7 +43,7 @@ def main() -> int:
 
     count = len(bag)
     if secrets_service.store_config_secrets(bag):
-        # Never print secret names/values — just how many were primed.
+        # Never print secret names/values -- just how many were primed.
         print(f"Primed {count} secret(s) into OpenBAO.")
         print(
             "These are now read from OpenBAO at startup; you may remove them from "

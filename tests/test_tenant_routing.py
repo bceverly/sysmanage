@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-Tests for tenant routing & account switching — Phase 13.1.B.
+Tests for tenant routing & account switching -- Phase 13.1.B.
 
 Covers ``get_current_tenant`` (the membership-verifying dependency) and the
 data-plane ``/api/auth/accounts`` + ``/api/auth/switch-account`` endpoints.

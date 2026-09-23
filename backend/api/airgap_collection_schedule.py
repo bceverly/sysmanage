@@ -7,12 +7,12 @@ Air-gap collection schedule API (Phase 11 B2).
 
 CRUD + tick driver hook for cron-scheduled recurring collection runs.
 The cron parsing is delegated to ``automation_engine.next_run_from_cron``
-when that engine is loaded — same pattern Phase 11.4 used for vuln_engine
-CVE-feed scheduling — to avoid a third copy of the cron parser.
+when that engine is loaded -- same pattern Phase 11.4 used for vuln_engine
+CVE-feed scheduling -- to avoid a third copy of the cron parser.
 
 Routes are gated on ``airgap_collector_engine`` being loaded (the role
 we run on must actually be ``collector``).  The tick handler additionally
-warns when ``automation_engine`` isn't loaded — schedules persist but
+warns when ``automation_engine`` isn't loaded -- schedules persist but
 won't auto-fire until the license is fixed.
 """
 
@@ -66,7 +66,7 @@ def _check_collector_module():
 def _get_automation_engine_or_warn():
     """Return the automation_engine module if loaded; else None.
 
-    Schedules stored without automation_engine remain valid — they just
+    Schedules stored without automation_engine remain valid -- they just
     don't auto-fire.  Operators see a clear warning in the tick response.
     """
     return module_loader.get_module("automation_engine")
@@ -161,7 +161,7 @@ async def create_schedule(
     user = _get_user(db, current_user)
     _validate_cron_or_400(request.cron)
     # Validate the target_request shape against the engine before
-    # persisting — fail fast with a clear 400 instead of waiting for
+    # persisting -- fail fast with a clear 400 instead of waiting for
     # the first tick to discover the schedule is malformed.
     try:
         engine.validate_collection_request(request.target_request)

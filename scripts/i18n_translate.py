@@ -8,7 +8,7 @@
 Fills the ``[TODO] <English>`` placeholders that ``i18n_validate.py
 --seed`` leaves in ``frontend/public/locales/<lang>/translation.json``
 by calling a **local, OpenAI-compatible** chat endpoint (vLLM / Ollama /
-llama.cpp / LM Studio — anything that speaks ``/v1/chat/completions``).
+llama.cpp / LM Studio -- anything that speaks ``/v1/chat/completions``).
 The actual translation runs on YOUR hardware; this script just moves
 strings to and from it.
 
@@ -89,7 +89,7 @@ def _set_in(node, path, value):
 
 
 def _endpoint_display() -> tuple[str, str]:
-    """Operator-facing (base, model) — reads NO secret, so it is safe to print."""
+    """Operator-facing (base, model) -- reads NO secret, so it is safe to print."""
     return (
         os.environ.get("I18N_LLM_BASE_URL", "http://localhost:11434/v1").rstrip("/"),
         os.environ.get("I18N_LLM_MODEL", "qwen2.5:32b-instruct"),
@@ -124,7 +124,7 @@ def _chat(base, model, key, system, user, timeout=120):
         method="POST",
     )
     # Dev-only CLI tool; the endpoint is an operator-configured LLM URL
-    # (I18N_LLM_BASE_URL), never request/user-derived — no SSRF surface.
+    # (I18N_LLM_BASE_URL), never request/user-derived -- no SSRF surface.
     # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
     with urllib.request.urlopen(req, timeout=timeout) as resp:  # nosec B310
         body = json.loads(resp.read().decode("utf-8"))
@@ -138,7 +138,7 @@ def _translate_batch(base, model, key, lang_name, sources: list[str]) -> list[st
         "short user-interface strings for a systems-management product. "
         "Keep translations concise and natural for buttons, labels, and "
         "messages. CRITICAL: preserve every placeholder token EXACTLY as "
-        "given and untranslated — these include {{name}}, {count}, %s, "
+        "given and untranslated -- these include {{name}}, {count}, %s, "
         "%d, %(x)s, and HTML-like <tags>. Preserve leading/trailing "
         "punctuation and capitalization style. Respond with ONLY a JSON "
         "array of the translated strings, in the same order, and nothing "
@@ -191,7 +191,7 @@ def translate_lang(lang: str, batch_size: int, limit: int, dry_run: bool) -> dic
             if _placeholders(english) != _placeholders(translated):
                 print(
                     f"  [{lang}] placeholder mismatch at "
-                    f"{'.'.join(path_tuple)} — left as [TODO]",
+                    f"{'.'.join(path_tuple)} -- left as [TODO]",
                     file=sys.stderr,
                 )
                 stats["skipped"] += 1

@@ -20,7 +20,7 @@ from backend.services import airgap_ingest_tick as tick
 
 
 # ---------------------------------------------------------------------------
-# Crypto helpers — faithful to the collector's sign_manifest + the
+# Crypto helpers -- faithful to the collector's sign_manifest + the
 # repository engine's verify_signed_envelope so the keyring logic is
 # exercised against real ed25519 signatures, not a mock.
 # ---------------------------------------------------------------------------
@@ -189,7 +189,7 @@ def test_manifest_extraction_handles_missing_command():
 
 
 # ---------------------------------------------------------------------------
-# verify_envelope_against_keyring — the security gate
+# verify_envelope_against_keyring -- the security gate
 # ---------------------------------------------------------------------------
 def test_verify_accepts_trusted_key(tmp_path):
     pk = Ed25519PrivateKey.generate()
@@ -462,7 +462,7 @@ def test_run_one_tick_skips_inflight(db_session):
     engine = db_session.get_bind()
 
     # _run_one_tick opens its own session via get_db() and closes it in a
-    # finally — hand it a *separate* session so the fixture session stays
+    # finally -- hand it a *separate* session so the fixture session stays
     # usable for the re-read assertion below.
     def _fake_get_db():
         yield Session(bind=engine)

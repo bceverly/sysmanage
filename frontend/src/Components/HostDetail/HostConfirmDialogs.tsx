@@ -127,7 +127,7 @@ const HostConfirmDialogs: React.FC<HostConfirmDialogsProps> = ({
                 maxWidth="md"
                 fullWidth
                 slotProps={{
-                    paper: { sx: { backgroundColor: 'grey.900' } }
+                    paper: { sx: { backgroundColor: 'gray.900' } }
                 }}
             >
                 <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -141,7 +141,7 @@ const HostConfirmDialogs: React.FC<HostConfirmDialogsProps> = ({
                         fontSize: '0.75rem', 
                         whiteSpace: 'pre-wrap', 
                         wordBreak: 'break-word',
-                        backgroundColor: 'grey.800',
+                        backgroundColor: 'gray.800',
                         p: 2,
                         borderRadius: 1,
                         overflow: 'auto'
@@ -308,7 +308,7 @@ const HostConfirmDialogs: React.FC<HostConfirmDialogsProps> = ({
                 maxWidth="sm"
                 fullWidth
                 slotProps={{
-                    paper: { sx: { backgroundColor: 'grey.900' } }
+                    paper: { sx: { backgroundColor: 'gray.900' } }
                 }}
             >
                 <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}>
@@ -336,7 +336,7 @@ const HostConfirmDialogs: React.FC<HostConfirmDialogsProps> = ({
                 maxWidth="sm"
                 fullWidth
                 slotProps={{
-                    paper: { sx: { backgroundColor: 'grey.900' } }
+                    paper: { sx: { backgroundColor: 'gray.900' } }
                 }}
             >
                 <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -419,7 +419,7 @@ const HostConfirmDialogs: React.FC<HostConfirmDialogsProps> = ({
                             return (
                                 <Box>
                                     {/* Diagnostic Report Metadata */}
-                                    <Card sx={{ mb: 3, backgroundColor: 'grey.800' }}>
+                                    <Card sx={{ mb: 3, backgroundColor: 'gray.800' }}>
                                         <CardContent>
                                             <Grid container spacing={2}>
                                                 <Grid size={{ xs: 12, sm: 6 }}>
@@ -469,12 +469,12 @@ const HostConfirmDialogs: React.FC<HostConfirmDialogsProps> = ({
                                                 const sectionTitle = t(`hostDetail.${key}`, key.replaceAll('_', ' ').replaceAll(/\b\w/g, l => l.toUpperCase()));
 
                                                 return (
-                                                    <Card key={key} sx={{ mb: 2, backgroundColor: 'grey.700' }}>
+                                                    <Card key={key} sx={{ mb: 2, backgroundColor: 'gray.700' }}>
                                                         <CardContent>
                                                             <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold', fontSize: '1.1rem' }}>
                                                                 {sectionTitle}
                                                             </Typography>
-                                                            <Paper sx={{ p: 2, backgroundColor: 'grey.900', color: 'white', maxHeight: 300, overflow: 'auto' }}>
+                                                            <Paper sx={{ p: 2, backgroundColor: 'gray.900', color: 'white', maxHeight: 300, overflow: 'auto' }}>
                                                                 <Typography variant="body2" sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
                                                                     {typeof value === 'string'
                                                                         ? value

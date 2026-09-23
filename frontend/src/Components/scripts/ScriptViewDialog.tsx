@@ -83,7 +83,7 @@ const ScriptViewDialog: React.FC<ScriptViewDialogProps> = ({
             <Typography variant="subtitle2" gutterBottom>
               {t('scripts.scriptContent')}
             </Typography>
-            <Box sx={{ border: 1, borderColor: 'grey.300', borderRadius: 1 }}>
+            <Box sx={{ border: 1, borderColor: 'gray.300', borderRadius: 1 }}>
               <Editor
                 height="400px"
                 language={getLanguageForShell(viewingScript.shell_type)}

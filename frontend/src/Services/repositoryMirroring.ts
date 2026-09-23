@@ -178,7 +178,7 @@ export const listSnapshots = async (
   return r.data;
 };
 
-// --- Snap store proxy (Phase 17.1) — gated on the Pro+ snap_proxy_engine ---
+// --- Snap store proxy (Phase 17.1) -- gated on the Pro+ snap_proxy_engine ---
 
 export type SnapCaptureStatus = 'TRACKED' | 'DISPATCHED' | 'CAPTURED' | 'FAILED';
 
@@ -236,7 +236,7 @@ export const captureSnaps = async (
   return r.data;
 };
 
-// --- OCI image content (Phase 17.2) — gated on the Pro+ oci_proxy_engine ---
+// --- OCI image content (Phase 17.2) -- gated on the Pro+ oci_proxy_engine ---
 
 export type ImageCaptureStatus =
   | 'TRACKED'

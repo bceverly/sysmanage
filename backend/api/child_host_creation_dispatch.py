@@ -9,7 +9,7 @@ Extracted from ``child_host_virtualization.py`` to keep that module under the
 1000-line lint cap.  This module contains every per-engine ``_try_*_plan_based_creation``
 helper plus the small request-builder + utility helpers they share.
 
-Public entry point: ``_try_plan_based_creation`` — called from
+Public entry point: ``_try_plan_based_creation`` -- called from
 ``child_host_virtualization.create_child_host_request``.  Returns ``True`` if a
 Pro+ engine plan was queued, ``False`` to fall through to the legacy
 ``create_child_host`` WS dispatch.
@@ -42,7 +42,7 @@ def _load_network_details_payload(host_id: str):
         # Phase 13.1: a tenant-bound host's row lives in its tenant database, not
         # the bootstrap DB.  This helper runs deep in the create-child dispatch
         # chain (possibly off the request thread), so the active-tenant ContextVar
-        # may not be in scope — resolve the engine from the host→tenant binding
+        # may not be in scope -- resolve the engine from the host→tenant binding
         # explicitly.  ``tenant_engine_for_host`` returns None when the host isn't
         # tenant-bound / multi-tenancy is off, so we fall back to bootstrap.
         engine = tenant_engine_for_host(host_id) or db_module.get_engine()
@@ -62,7 +62,7 @@ def _load_network_details_payload(host_id: str):
 def _extract_adapter_candidates(payload) -> List:
     """Extract the list of adapter dicts from a ``network_details`` payload.
 
-    The payload shape varies by hardware collector — sometimes it's a flat
+    The payload shape varies by hardware collector -- sometimes it's a flat
     list of adapter dicts, sometimes a single dict with an ``adapters`` /
     ``interfaces`` / ``network_adapters`` key, sometimes a single adapter
     dict at the top level.
@@ -99,7 +99,7 @@ def _resolve_parent_dns(host_id: str) -> List[str]:
     Audit gap fix #5: the legacy agent's ``get_host_dns_servers()`` read
     /etc/resolv.conf on the parent at create time so VMs got the same
     DNS as their host (often a corporate / split-horizon resolver).
-    The engine path defaults to Cloudflare when nothing's provided —
+    The engine path defaults to Cloudflare when nothing's provided --
     which works for public lookups but breaks corporate DNS records.
 
     This helper reads ``host.network_details`` (JSON the agent uploads
@@ -167,7 +167,7 @@ def _first_param_or(params, keys, default):
 
 
 # ---------------------------------------------------------------------------
-# Agent config YAML — server-side mirror of container_engine helper
+# Agent config YAML -- server-side mirror of container_engine helper
 # ---------------------------------------------------------------------------
 
 
@@ -304,7 +304,7 @@ def _is_freebsd_distribution(distribution: str) -> bool:
 def _generate_freebsd_bootstrap_keypair():
     """Return (openssh_pubkey_str, pem_privkey_str) for one-shot bootstrap.
 
-    Uses the existing ``cryptography`` dep — no new requirements.  Keys
+    Uses the existing ``cryptography`` dep -- no new requirements.  Keys
     are 2048-bit RSA (FreeBSD's stock OpenSSH supports it) and live only
     long enough for the SSH-bootstrap step on the agent.
     """
@@ -371,7 +371,7 @@ def _build_kvm_create_request(
     Audit gap fix #5: when ``command_params`` doesn't carry explicit
     ``dns_server`` / ``dns_servers``, fall back to the parent host's
     reported DNS (read from ``host.network_details``).  Without that, the
-    engine defaults to public Cloudflare resolvers — works for internet
+    engine defaults to public Cloudflare resolvers -- works for internet
     DNS but won't resolve corporate/split-horizon records.
     """
     distribution_label = _param_or(command_params, "distribution_label", "ubuntu")
@@ -457,7 +457,7 @@ def _try_kvm_plan_based_creation(command_params, host_id):
     vm_name = command_params.get("vm_name")
     if not vm_name or not cloud_image_url:
         _vlog.warning(
-            "KVM plan path: missing vm_name=%r or cloud_image_url=%r — "
+            "KVM plan path: missing vm_name=%r or cloud_image_url=%r -- "
             "engine path declined",
             sanitize_log(vm_name),
             sanitize_log(cloud_image_url),
@@ -495,7 +495,7 @@ def _try_kvm_plan_based_creation(command_params, host_id):
     except Exception as exc:  # nosec B110  pylint: disable=broad-exception-caught
         # Engine path declined; the caller raises 502 to surface the failure.
         _vlog.warning(
-            "KVM plan path failed for host %s: %s — engine path declined",
+            "KVM plan path failed for host %s: %s -- engine path declined",
             sanitize_log(host_id),
             exc,
         )
@@ -620,7 +620,7 @@ def _try_bhyve_plan_based_creation(command_params, host_id):
 
     When neither ``raw_image_path`` nor ``iso_path`` is supplied but a
     ``cloud_image_url`` is in the params, the server prepends a download
-    step (using ``build_kvm_image_download_plan`` — the URL semantics
+    step (using ``build_kvm_image_download_plan`` -- the URL semantics
     are identical) and points raw_image_path at the downloaded file.
     """
     virt_engine = module_loader.get_module("virtualization_engine")
@@ -664,7 +664,7 @@ def _try_bhyve_plan_based_creation(command_params, host_id):
 
 # RFC 6598 carrier-grade-NAT addresses used solely as in-engine fallback
 # defaults for the OpenBSD VMM autoinstall network.  These never appear on
-# any wire — vmd's bridged tap lives on the parent host's RFC1918 LAN.
+# any wire -- vmd's bridged tap lives on the parent host's RFC1918 LAN.
 # Extracted as constants because SonarQube flags inline IP literals as a
 # security hotspot; keeping them here makes the intent explicit.
 _VMM_DEFAULT_GATEWAY_IP = "100.64.0.1"  # nosec B104  # NOSONAR
@@ -699,7 +699,7 @@ def _build_vmm_create_request(virt_engine, command_params):
     Forward ``cloud_image_url`` so the engine's legacy
     (non-autoinstall) path can download a Linux cloud image (Ubuntu /
     Debian / Alpine / etc.) and use it as the VM's disk.  Only forwarded
-    when autoinstall is False — autoinstall builds its disk from the
+    when autoinstall is False -- autoinstall builds its disk from the
     OpenBSD installer.
     """
     vm_name = command_params["vm_name"]

@@ -4,7 +4,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 #
-# verify-openbao-openbsd.sh — Phase 13.1.I
+# verify-openbao-openbsd.sh -- Phase 13.1.I
 #
 # Smoke-test the OFFICIAL prebuilt OpenBAO release binary on OpenBSD, end to end:
 #   download -> ./bao --version -> server -> init -> unseal -> KV round-trip.
@@ -53,7 +53,7 @@ cd "$WORK" || fail "cannot cd $WORK"
 say "Downloading ${ASSET} ..."
 rm -f "$ASSET"
 if ! ftp -o "$ASSET" "$URL"; then
-	fail "download failed — likely NO OpenBSD prebuilt for v${VER}. Keep source build."
+	fail "download failed -- likely NO OpenBSD prebuilt for v${VER}. Keep source build."
 fi
 [ -s "$ASSET" ] || fail "downloaded file is empty"
 
@@ -93,7 +93,7 @@ while [ $i -lt 20 ]; do
 		up=1
 		break
 	fi
-	kill -0 "$SRV_PID" 2>/dev/null || break   # server died — stop waiting
+	kill -0 "$SRV_PID" 2>/dev/null || break   # server died -- stop waiting
 	sleep 1
 	i=$((i + 1))
 done

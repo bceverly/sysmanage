@@ -14,7 +14,7 @@ Three new tables:
   package_profile_constraints            REQUIRED/BLOCKED rules with version constraints
   host_package_compliance_status         per-(host, profile) latest scan result
 
-Reversible — downgrade drops the three tables in dependency order.
+Reversible -- downgrade drops the three tables in dependency order.
 """
 
 from typing import Sequence, Union

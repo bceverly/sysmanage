@@ -94,7 +94,7 @@ export function SyncHealthHistogram({
   const tSpan = tMax - tMin || 1;
   const n = Math.max(1, buckets);
   // Each bucket's start timestamp is a stable, unique identity (tSpan >= 1,
-  // so every slice start differs) — used as the React key instead of the
+  // so every slice start differs) -- used as the React key instead of the
   // array index.
   const bucketMs = tSpan / n;
   const agg = Array.from({ length: n }, (_, i) => ({

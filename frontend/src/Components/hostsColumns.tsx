@@ -142,7 +142,7 @@ export function buildHostColumns({
             }
         },
         {
-            // Phase 19: agent capability advertisement.  THREE states, not two —
+            // Phase 19: agent capability advertisement.  THREE states, not two --
             // null means the agent never advertised (an older build), which is
             // NOT the same as "full capability".  Rendering unknown as "Full"
             // would be a claim the server cannot make, and rendering it as

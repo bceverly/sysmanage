@@ -9,7 +9,7 @@ from the WebUI, the server cascade-deletes the linked ``Host`` row at
 the same time it dispatches the destroy plan to the parent.  In the
 seconds between "cascade deletes the Host row" and "agent inside the
 doomed VM is actually killed by virsh destroy", the agent inside the
-VM can call ``POST /host/register`` one last time — recreating the
+VM can call ``POST /host/register`` one last time -- recreating the
 Host row in ``approval_status=pending`` with no parent linkage.  The
 VM then dies, the new row never picks up another connection, and the
 ghost row sits in the Hosts list forever (heartbeat reaper skips
@@ -18,11 +18,11 @@ pending rows by design).
 A short-lived in-memory tombstone keyed by (fqdn, ipv4) closes the
 race: the register endpoint consults this module and returns success
 without creating a row when a recent deletion matches.  The agent
-doesn't care about the response — it's about to be destroyed.
+doesn't care about the response -- it's about to be destroyed.
 
 Why in-memory and not in the DB:
   * The window is short (default 5 minutes) and the volume is tiny
-    (one entry per child-host delete) — a DB table would add a
+    (one entry per child-host delete) -- a DB table would add a
     write+read on every register call for no benefit.
   * The data is intentionally lost on server restart.  A restart
     is itself a long-enough gap that any in-flight register storms
@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 # Five minutes is comfortably longer than the worst-case observed gap
 # between Host row cascade-delete and VM destroy completion (sub-second
 # in the common case, up to ~30s if the agent inside the VM is mid-
-# request when virsh destroy fires).  Picked round and short — long
+# request when virsh destroy fires).  Picked round and short -- long
 # enough to win the race, short enough that a legitimate re-enrollment
 # after a stale-name cleanup isn't blocked for an annoying duration.
 TTL_SECONDS = 300
@@ -101,9 +101,9 @@ def is_recent_child_host_deletion(fqdn: str, ipv4: Optional[str]) -> bool:
     within the last ``TTL_SECONDS`` seconds.
 
     Match precedence:
-      1. exact ``(fqdn, ipv4)`` match — used when the doomed agent
+      1. exact ``(fqdn, ipv4)`` match -- used when the doomed agent
          re-registers with the same IP its VM had.
-      2. ``fqdn``-only match (any ipv4) — fallback for the (rare) case
+      2. ``fqdn``-only match (any ipv4) -- fallback for the (rare) case
          the agent's IP changed between cascade-delete and the final
          register call.
     """
@@ -122,7 +122,7 @@ def is_recent_child_host_deletion(fqdn: str, ipv4: Optional[str]) -> bool:
 
 
 def _reset_for_tests() -> None:
-    """Wipe the in-memory store.  Tests only — not part of the public
+    """Wipe the in-memory store.  Tests only -- not part of the public
     runtime contract."""
     with _LOCK:
         _TOMBSTONES.clear()

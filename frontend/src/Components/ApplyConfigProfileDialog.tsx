@@ -208,7 +208,7 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
               slotProps={{ select: { native: true } }}
             >
               <option value="">
-                {t("configManagement.applyNoStored", "None — paste below")}
+                {t("configManagement.applyNoStored", "None -- paste below")}
               </option>
               {stored.map((p) => (
                 <option key={p.id} value={p.id}>

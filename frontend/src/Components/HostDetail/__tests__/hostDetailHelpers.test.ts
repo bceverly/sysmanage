@@ -45,7 +45,7 @@ const t = ((key: string, fallback?: string) => fallback ?? key) as unknown as TF
 const host = (overrides: Partial<SysManageHost> = {}) =>
     ({ id: '1', fqdn: 'h.example.test', ...overrides }) as SysManageHost;
 
-describe('status + colour mapping', () => {
+describe('status + color mapping', () => {
     test('getStatusColor is binary on "up"', () => {
         expect(getStatusColor('up')).toBe('success');
         expect(getStatusColor('down')).toBe('error');
@@ -85,7 +85,7 @@ describe('status + colour mapping', () => {
         expect(getOpenTelemetryServiceLabel(t, 'garbage')).toBe('Unknown');
     });
 
-    test('role service status maps label and colour together', () => {
+    test('role service status maps label and color together', () => {
         expect(getRoleServiceStatusLabel(t, 'running')).toBe('Running');
         expect(getRoleServiceStatusColor('running')).toBe('success');
         expect(getRoleServiceStatusLabel(t, 'stopped')).toBe('Stopped');
@@ -95,7 +95,7 @@ describe('status + colour mapping', () => {
     });
 
     test('role service status falls back to the RAW value before "Unknown"', () => {
-        // A status we do not recognise is shown as-is rather than hidden behind
+        // A status we do not recognize is shown as-is rather than hidden behind
         // "Unknown" -- an operator can act on "degraded", not on "Unknown".
         expect(getRoleServiceStatusLabel(t, 'degraded')).toBe('degraded');
         expect(getRoleServiceStatusLabel(t, null)).toBe('Unknown');

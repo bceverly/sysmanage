@@ -7,7 +7,7 @@ Per-engine Pro+ route-mounting functions (part B).
 
 Extracted from ``backend.api.proplus_routes`` to keep every module under the
 line-count cap.  Each ``mount_*_routes`` here follows the identical pattern as
-those that remain in ``proplus_routes`` — gate on the loaded Cython engine, wrap
+those that remain in ``proplus_routes`` -- gate on the loaded Cython engine, wrap
 with ``_cython_compat()``, and ``app.include_router(...)``.  The shared gate
 factories and compat shim live in ``proplus_routes_common``.  ``proplus_routes``
 re-imports these so its public surface (and test references) are unchanged.
@@ -39,7 +39,7 @@ _ACCEPTS_SERVICES: Dict[int, bool] = {}
 def _accepts_services(factory) -> bool:
     """Does this engine's router factory take a ``services`` bundle?
 
-    Engines are PREBUILT BINARIES pulled from the licence server, so an
+    Engines are PREBUILT BINARIES pulled from the license server, so an
     install can be running an engine compiled before the bundle existed.
     Passing ``services=`` to one of those raises ``TypeError: got an
     unexpected keyword argument`` and the engine fails to mount -- the "stale
@@ -643,15 +643,15 @@ def mount_multitenancy_routes(app: FastAPI) -> bool:
     """Mount the multi-tenancy control-plane router.
 
     Unlike the other engines, the control plane is gated on the deployment-level
-    ``multitenancy.enabled`` flag — not a per-request license check — because it
+    ``multitenancy.enabled`` flag -- not a per-request license check -- because it
     only exists when the operator has turned multi-tenancy on.  When the licensed
     ``multitenancy_engine`` is loaded, its router (the real logic) is mounted;
     otherwise the built-in OSS router is the fallback, so a config-only
     multi-tenant deployment keeps working without the engine.
 
     Mounted here (at startup, after module load) rather than in
-    ``route_registration`` (import time) so the engine — which loads and is
-    bridged into the seam during startup — has a chance to take over the route.
+    ``route_registration`` (import time) so the engine -- which loads and is
+    bridged into the seam during startup -- has a chance to take over the route.
     """
     from backend.config import config as config_module  # noqa: PLC0415
 

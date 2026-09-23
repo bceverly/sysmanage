@@ -2,10 +2,10 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""add compute_resource.config (non-secret provider settings) — Phase 18.1
+"""add compute_resource.config (non-secret provider settings) -- Phase 18.1
 
 A nullable JSON bag on ``compute_resource`` for NON-secret provider config that
-doesn't warrant a column each — e.g. the Proxmox node SSH login
+doesn't warrant a column each -- e.g. the Proxmox node SSH login
 (``node_ssh_user``), snippet-storage name, or node SSH host for cluster
 targeting.  Secrets still live only in OpenBAO (referenced by
 ``credential_ref``); this column never holds credentials.

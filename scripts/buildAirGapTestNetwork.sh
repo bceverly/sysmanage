@@ -3,19 +3,19 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-# buildAirGapTestNetwork.sh — Provision three KVM VMs for sysmanage air-gap
+# buildAirGapTestNetwork.sh -- Provision three KVM VMs for sysmanage air-gap
 # testing on libvirt/KVM.
 #
-#   sysmanage-online        — NAT'd, internet-accessible.  The "online"
+#   sysmanage-online        -- NAT'd, internet-accessible.  The "online"
 #                             sysmanage server you point at the real
 #                             internet to mirror upstream package repos
 #                             or build ISOs for the air-gap side.
-#   sysmanage-airgap        — Static 10.60.0.1 on an isolated private
+#   sysmanage-airgap        -- Static 10.60.0.1 on an isolated private
 #                             bridge.  No internet.  Carries an extra
 #                             empty virtual DVD device so you can mount
 #                             ISOs you build on the online VM and move
 #                             data across the air gap.
-#   sysmanage-private-agent — Static 10.60.0.2 on the same isolated
+#   sysmanage-private-agent -- Static 10.60.0.2 on the same isolated
 #                             bridge.  No internet.  For sysmanage-agent.
 #
 # Usage:
@@ -24,7 +24,7 @@
 #   scripts/buildAirGapTestNetwork.sh status   # show VM/network state + IPs
 #
 # Uses the Ubuntu 26.04 server cloud image + cloud-init.  Does NOT install
-# sysmanage or sysmanage-agent — that's your job after the VMs come up.
+# sysmanage or sysmanage-agent -- that's your job after the VMs come up.
 #
 # All three VMs share credentials:
 #   user     = ubuntu
@@ -35,10 +35,10 @@
 #                    qemu-utils qemu-system-x86 cloud-image-utils curl
 #
 # Resource sizing.  Disk sizes are the maximum the VM filesystem can
-# grow to — qcow2 is thin-allocated so unused space doesn't actually
+# grow to -- qcow2 is thin-allocated so unused space doesn't actually
 # consume host disk.  Defaults are sized for a real end-to-end test:
 #   online        : 2 vCPU / 8 GiB RAM / 80 GiB disk  (runs the full stack
-#                   AND builds air-gap bundles — ~6 per-distro Docker builds
+#                   AND builds air-gap bundles -- ~6 per-distro Docker builds
 #                   whose pip-wheel compiles peak ~1 GiB each; 2 GiB OOM'd)
 #   airgap        : 2 vCPU / 2 GiB RAM / 80 GiB disk  (must hold the imported
 #                   mirror after the ISO is mounted + ingested)
@@ -246,7 +246,7 @@ local-hostname: ${host}
 EOF
 }
 
-# $1: "dhcp" or a static /24 IPv4 (no CIDR — appended).
+# $1: "dhcp" or a static /24 IPv4 (no CIDR -- appended).
 # $2: MAC to match.  $3: output file.
 write_network_config() {
   local mode="$1" mac="$2" out="$3"
@@ -368,19 +368,19 @@ ensure_vm() {
     if vm_running "$name"; then
       log "$name: already running"
     else
-      log "$name: defined but stopped — starting"
+      log "$name: defined but stopped -- starting"
       virsh_ start "$name" >/dev/null
       CREATED_COUNT=$((CREATED_COUNT + 1))
     fi
   else
-    log "$name: not defined — creating"
+    log "$name: not defined -- creating"
     "$create_fn"
     CREATED_COUNT=$((CREATED_COUNT + 1))
   fi
 }
 
-# get_nat_ip <vm>  — returns the DHCP-assigned IP (no CIDR) on the NAT NIC,
-# empty string if not yet known.  Does NOT wait — call after the post-start
+# get_nat_ip <vm>  -- returns the DHCP-assigned IP (no CIDR) on the NAT NIC,
+# empty string if not yet known.  Does NOT wait -- call after the post-start
 # settle sleep.
 get_nat_ip() {
   local name="$1"
@@ -406,13 +406,13 @@ print_vm_summary() {
       if [[ -n "$nat" ]]; then
         echo "  NAT     : $nat"
       else
-        echo "  NAT     : (pending — re-run with the status subcommand once cloud-init finishes)"
+        echo "  NAT     : (pending -- re-run with the status subcommand once cloud-init finishes)"
       fi
       echo "  install : sudo add-apt-repository -y ppa:bceverly/sysmanage \\"
       echo "              && sudo apt update && sudo apt install -y sysmanage"
       ;;
     server-airgap|agent-airgap)
-      echo "  install : (no internet by design — install via offline ISO"
+      echo "  install : (no internet by design -- install via offline ISO"
       echo "             you build on ${ONLINE_NAME} and mount on this VM)"
       ;;
   esac
@@ -456,10 +456,10 @@ cmd_start() {
   echo "  user     = ${USERNAME}"
   echo "  password = ${PASSWORD}"
   echo
-  echo "sysmanage UI login — when you configure /etc/sysmanage.yaml on the server(s):"
+  echo "sysmanage UI login -- when you configure /etc/sysmanage.yaml on the server(s):"
   echo "  - security.admin_userid MUST be a valid EMAIL (login validates EmailStr;"
   echo "    a bare 'admin' -> HTTP 422, not 401). e.g. admin@example.com / admin"
-  echo "  - email.enabled: true  (just the flag — no SMTP server/password needed)."
+  echo "  - email.enabled: true  (just the flag -- no SMTP server/password needed)."
   echo
   echo "Mount an ISO into the air-gap server's virtual DVD:"
   echo "  virsh -c ${LIBVIRT_URI} domblklist ${AIRGAP_NAME}    # find empty cdrom target"
@@ -486,9 +486,9 @@ cmd_stop() {
       virsh_ undefine "$name" --remove-all-storage --nvram >/dev/null 2>&1 \
         || virsh_ undefine "$name" --remove-all-storage >/dev/null 2>&1 \
         || virsh_ undefine "$name" >/dev/null 2>&1 \
-        || warn "$name: undefine failed — may need manual cleanup with 'virsh undefine $name --remove-all-storage'"
+        || warn "$name: undefine failed -- may need manual cleanup with 'virsh undefine $name --remove-all-storage'"
     else
-      log "$name: not defined — skipping undefine"
+      log "$name: not defined -- skipping undefine"
     fi
   done
 
@@ -558,7 +558,7 @@ usage() {
   cat <<EOF
 Usage: $0 {start|stop|status}
 
-  start   Create and start the three VMs (idempotent — already-running
+  start   Create and start the three VMs (idempotent -- already-running
           VMs are reported, not re-created).
   stop    Destroy all three VMs, delete their disks and seed ISOs, and
           tear down the ${PRIVATE_NET_NAME} isolated network.  The Ubuntu

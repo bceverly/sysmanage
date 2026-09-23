@@ -492,8 +492,8 @@ msgid "Invalid TOTP code."
 msgstr "Código TOTP inválido."
 
 #: backend/api/auth_mfa.py:296 backend/api/auth_mfa.py:358
-msgid "MFA challenge expired — please log in again."
-msgstr "Desafio MFA expirado — por favor, faça login novamente."
+msgid "MFA challenge expired -- please log in again."
+msgstr "Desafio MFA expirado -- por favor, faça login novamente."
 
 #: backend/api/auth_mfa.py:301
 msgid "Invalid MFA challenge."
@@ -1405,10 +1405,10 @@ msgstr "Mirror tick requer automation_engine para avaliação cron."
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed"
+"Mirror %s has not completed a successful sync yet -- wait for sync to succeed"
 " before assigning it as a default."
 msgstr ""
-"O espelho %s ainda não completou um sync bem-sucedido — aguarde o sync ser "
+"O espelho %s ainda não completou um sync bem-sucedido -- aguarde o sync ser "
 "bem-sucedido antes de atribuí-lo como padrão."
 
 #: backend/api/repository_mirroring.py:613
@@ -1455,11 +1455,11 @@ msgstr ""
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be"
-" loaded — the collector reads each target's bundle from a snapshot of its "
+" loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 "Execuções de coleta em modo isolado requerem que o módulo "
-"repository_mirroring_engine seja carregado — o coletor lé cada pacote do "
+"repository_mirroring_engine seja carregado -- o coletor lé cada pacote do "
 "alvo a partir de um snapshot da sua arvore espelhada."
 
 #: backend/api/airgap_collector_runs.py:229
@@ -5023,11 +5023,11 @@ msgstr ""
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
-"message(s) for retry (NOT deleting) — may be an in-flight enrollment or a "
+"message(s) for retry (NOT deleting) -- may be an in-flight enrollment or a "
 "deleted host"
 msgstr ""
 "Host %(host_id)s não encontrado neste banco de dados; adiando %(count)d "
-"mensagem(s) em espera para reenvio (NãO excluindo) — pode ser uma inscrição "
+"mensagem(s) em espera para reenvio (NãO excluindo) -- pode ser uma inscrição "
 "em andamento ou um host excluído"
 
 #: backend/websocket/inbound_processor.py:284
@@ -5535,7 +5535,7 @@ msgstr "Formato de segredo inválido"
 #, python-format
 #~ msgid ""
 #~ "Host %s not found on this database; deferring %d queued message(s) for retry"
-#~ " (NOT deleting) — may be an in-flight enrollment or a deleted host"
+#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
 #~ "O host '%s' não está neste banco de dados; adiando %d mensagem(es) em fila "
 #~ "para reenvio (NãO será excluído) - pode ser uma inscrição em andamento ou um"

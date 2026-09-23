@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for the full terms.
 
 """
-API key model — Phase 13.2 (API Completeness).
+API key model -- Phase 13.2 (API Completeness).
 
 A long-lived, hashed credential that lets automation/CI authenticate to the
 REST API *as a user*, without an interactive login or a refreshable JWT.
@@ -11,17 +11,17 @@ REST API *as a user*, without an interactive login or a refreshable JWT.
 Security model (GitHub-PAT style):
 
   * The plaintext key is shown **exactly once**, at creation.  Only a SHA-256
-    digest (``key_hash``) is persisted — a DB compromise never yields a usable
+    digest (``key_hash``) is persisted -- a DB compromise never yields a usable
     key, and there is no decrypt path.  SHA-256 (not Argon2) is appropriate
     because the key carries full machine entropy, so it isn't brute-forceable.
   * ``key_prefix`` keeps a short, non-secret leading slice for display/audit
     ("which key is this?") without storing the secret.
-  * Lookups are O(1) on the indexed ``key_hash`` — the presented key is hashed
+  * Lookups are O(1) on the indexed ``key_hash`` -- the presented key is hashed
     and matched directly, never scanned.
 
 The key authenticates as ``user_id``'s identity and inherits that user's roles,
 so no separate authorization model is needed.  ``tenant_id`` (soft reference to
-``registry_tenant.id`` — no FK across the partition boundary) optionally pins
+``registry_tenant.id`` -- no FK across the partition boundary) optionally pins
 the key to one tenant in multi-tenant deployments; NULL means server-scoped
 (the single-tenant default).
 """
@@ -41,7 +41,7 @@ class ApiKey(Base):
     __tablename__ = "api_key"
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    # Owning user — the key authenticates AS this identity.  CASCADE so deleting
+    # Owning user -- the key authenticates AS this identity.  CASCADE so deleting
     # a user automatically tears down their keys.
     user_id = Column(
         GUID(),
@@ -77,7 +77,7 @@ class ApiKey(Base):
             return False
         if self.expires_at is not None:
             current = now or datetime.now(timezone.utc)
-            # Compare naive-vs-aware safely: normalise both to naive UTC.
+            # Compare naive-vs-aware safely: normalize both to naive UTC.
             expires = self.expires_at
             if expires.tzinfo is not None:
                 expires = expires.astimezone(timezone.utc).replace(tzinfo=None)
@@ -88,7 +88,7 @@ class ApiKey(Base):
         return True
 
     def to_dict(self) -> dict:
-        """Serialise for API responses — NEVER includes the hash or plaintext."""
+        """Serialise for API responses -- NEVER includes the hash or plaintext."""
         return {
             "id": str(self.id),
             "user_id": str(self.user_id),

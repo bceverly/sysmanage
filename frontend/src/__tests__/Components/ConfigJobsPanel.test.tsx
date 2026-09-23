@@ -7,7 +7,7 @@
  *
  * What this panel has to get right is honesty about scale. A bar at 99.9%
  * looks identical to one at 100%, so the COUNTS carry the message: "3,997 of
- * 4,000 — 3 failed" is the sentence an operator acts on. And a job whose
+ * 4,000 -- 3 failed" is the sentence an operator acts on. And a job whose
  * status went red because three machines of four thousand were mid-reboot
  * would be ignored within a week, so `completed` with a failure count is the
  * right answer and is rendered as such.
@@ -98,7 +98,7 @@ describe("ConfigJobsPanel", () => {
     expect(await screen.findByText("completed")).toBeInTheDocument();
   });
 
-  test("a dry run is labelled so nobody thinks the fleet was changed", async () => {
+  test("a dry run is labeled so nobody thinks the fleet was changed", async () => {
     m(getJobs).mockResolvedValue([job({ check_mode: true })]);
     render(<ConfigJobsPanel canCancel />);
     expect(await screen.findByText("Dry run")).toBeInTheDocument();

@@ -31,13 +31,13 @@ class TestGpgKeysStubRoutes:
     def test_list_reachable(self, client):
         # The test harness globally overrides ``get_current_user`` (see
         # tests/conftest.py), so an unauthenticated call still resolves the stub
-        # rather than 401ing — the real auth/role gate is exercised engine-side.
+        # rather than 401ing -- the real auth/role gate is exercised engine-side.
         r = client.get("/api/v1/secrets/gpg-keys")
         assert r.status_code in [200, 401, 403, 404]
 
     def test_list_returns_unlicensed(self, client, auth_headers):
         r = client.get("/api/v1/secrets/gpg-keys", headers=auth_headers)
-        # Stub or real engine — engine isn't loaded in the test harness so the
+        # Stub or real engine -- engine isn't loaded in the test harness so the
         # stub route serves: returns 200 + {"licensed": False}.
         assert r.status_code in [200, 402, 403, 404]
         if r.status_code == 200:

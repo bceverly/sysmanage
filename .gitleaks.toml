@@ -14,9 +14,9 @@ description = "sysmanage test fixtures and historical false positives"
 
 # --- Path allowlist ---------------------------------------------------------
 # Files containing intentionally-dummy credentials for testing.  These are
-# regexes matched against the (forward-slash-normalised) repo-relative path.
+# regexes matched against the (forward-slash-normalized) repo-relative path.
 paths = [
-  # Test fixtures — JWT secrets, password hashes, RSA keys for unit tests
+  # Test fixtures -- JWT secrets, password hashes, RSA keys for unit tests
   '''(^|/)tests/.*test_security\.py$''',
   '''(^|/)tests/.*test_api_security\.py$''',
   '''(^|/)tests/.*test_communication_security\.py$''',
@@ -47,7 +47,7 @@ paths = [
 regexes = [
   # All TEST_-prefixed values are explicit dev fixtures.
   '''TEST_[A-Za-z0-9+/=_-]{8,}''',
-  # OpenBAO/Vault dev-mode root token literal — Vault docs use this exact
+  # OpenBAO/Vault dev-mode root token literal -- Vault docs use this exact
   # string as the public placeholder for sandbox setups; not a real secret.
   '''hvs\.[A-Za-z0-9_-]{16,}''',
 ]

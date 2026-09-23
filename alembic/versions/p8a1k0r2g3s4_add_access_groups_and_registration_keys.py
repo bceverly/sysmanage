@@ -16,7 +16,7 @@ key flow:
   host_access_groups       many-to-many: hosts ↔ access groups
   user_access_groups       many-to-many: users ↔ access groups
 
-Schema-only — no data seeding.  The migration is reversible:  downgrade
+Schema-only -- no data seeding.  The migration is reversible:  downgrade
 drops all four tables in dependency order.  Round-trip verified by the
 ``migration-roundtrip`` job (see scripts/migration_roundtrip.py).
 """

@@ -2,14 +2,14 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""agent capability advertisement — Phase 19
+"""agent capability advertisement -- Phase 19
 
 Revision ID: x1agentcap
 Revises: w2winprog
 Create Date: 2026-08-07 00:00:00.000000
 
-Not every platform runs the FULL agent — alpine/freebsd/openbsd/netbsd already
-run reduced-capability builds — and until now the server had no idea, so it
+Not every platform runs the FULL agent -- alpine/freebsd/openbsd/netbsd already
+run reduced-capability builds -- and until now the server had no idea, so it
 dispatched commands the agent could not route and the operator found out as a
 runtime failure.
 
@@ -19,8 +19,8 @@ runtime failure.
       types the dispatch gate reads, and unavailable/partial groups with a
       machine-readable reason code.  Kept whole rather than shredded into
       columns precisely so a NEWER agent can advertise capabilities this
-      server has never heard of without needing a migration — the server
-      ignores what it does not recognise.  Same treatment as a federated
+      server has never heard of without needing a migration -- the server
+      ignores what it does not recognize.  Same treatment as a federated
       site's ``capabilities_json``.
 
       NULL means "never told us" (an older agent, or one whose report could
@@ -33,7 +33,7 @@ runtime failure.
       hosts list can filter and sort without parsing JSON on every row.
       NOT NULL DEFAULT false: existing rows are unknown-capability, which is
       not limited, and a nullable tri-state here would put "unknown" and
-      "not limited" in the same column with no way to tell them apart —
+      "not limited" in the same column with no way to tell them apart --
       ``agent_capabilities IS NULL`` is the unknown test.
 
   agent_capabilities_updated_at

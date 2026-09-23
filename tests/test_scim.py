@@ -2,7 +2,7 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Phase 13.1.E — SCIM 2.0 inbound-provisioning endpoints (OSS plumbing).
+"""Phase 13.1.E -- SCIM 2.0 inbound-provisioning endpoints (OSS plumbing).
 
 The SCIM protocol logic lives in the Pro+ ``external_idp_engine``; here we test
 the OSS endpoint layer: the bearer-token gate, the 402/404 gates, and that a

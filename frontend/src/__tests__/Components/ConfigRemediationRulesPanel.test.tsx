@@ -7,11 +7,11 @@
  *
  * The rule that matters most here is about ORDER. Rules are listed in
  * precedence order, not alphabetically, because the list IS the sequence a
- * finding is tested against — and an operator who cannot predict which repair
+ * finding is tested against -- and an operator who cannot predict which repair
  * fires will never switch an automatic one on.
  *
  * Automatic repair is also the largest blast radius in this feature, so it is
- * visibly labelled and off by default.
+ * visibly labeled and off by default.
  */
 
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";

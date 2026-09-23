@@ -5,7 +5,7 @@
 /**
  * Phase 12.3: federation audit log viewer.
  *
- * Lists every cross-site operation the coordinator has recorded —
+ * Lists every cross-site operation the coordinator has recorded --
  * enrollment, suspend / resume / remove, policy assignments and
  * pushes, command dispatches, and ad-hoc engine events.  Filters
  * compose with AND (site, operation type, actor, time window) and
@@ -306,9 +306,9 @@ const FederationAuditLog: React.FC = () => {
                       variant="outlined"
                     />
                   </TableCell>
-                  <TableCell>{entry.actor_userid ?? "—"}</TableCell>
+                  <TableCell>{entry.actor_userid ?? "--"}</TableCell>
                   <TableCell>
-                    {entry.target_site_name || entry.target_site_id || "—"}
+                    {entry.target_site_name || entry.target_site_id || "--"}
                   </TableCell>
                   <TableCell
                     sx={{
@@ -327,7 +327,7 @@ const FederationAuditLog: React.FC = () => {
                   >
                     {entry.details
                       ? JSON.stringify(entry.details)
-                      : "—"}
+                      : "--"}
                   </TableCell>
                   <TableCell>
                     {entry.target_site_id && (

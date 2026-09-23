@@ -1,6 +1,6 @@
 # $NetBSD$
 #
-# Phase 11.8 pkgsrc-wip submission stub — sysmanage (server).
+# Phase 11.8 pkgsrc-wip submission stub -- sysmanage (server).
 # ``DISTNAME`` and ``GITHUB_TAG`` are sed-replaced from ``0.0.0`` /
 # ``v0.0.0`` to the release tag value by the ``netbsd-pkgsrc`` job in
 # .github/workflows/build-and-release.yml.  Do not hand-edit on release.

@@ -84,7 +84,7 @@ async def get_client_certificate(host_id: str):  # pylint: disable=duplicate-cod
                 status_code=422, detail=_("Invalid host ID format")
             ) from exc
 
-    # Host certificate data is tenant-scoped — route to the active tenant's DB.
+    # Host certificate data is tenant-scoped -- route to the active tenant's DB.
     session_local = request_sessionmaker()  # pylint: disable=duplicate-code
 
     with session_local() as session:

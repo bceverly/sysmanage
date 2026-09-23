@@ -197,7 +197,7 @@ class MockUbuntuProInfo:
         self.account_name = "Test Account"
         self.contract_name = "Test Contract"
         self.tech_support_level = "essential"
-        # Livepatch detail (Phase 13.3) — disabled by default
+        # Livepatch detail (Phase 13.3) -- disabled by default
         self.livepatch_enabled = False
         self.livepatch_client_version = None
         self.livepatch_patch_state = None

@@ -52,7 +52,7 @@ class QueueMaintenance:
             if not keep_failed:
                 statuses.append(QueueStatus.FAILED)
 
-            # Bulk DELETE — a single SQL statement.  Do NOT load the rows and
+            # Bulk DELETE -- a single SQL statement.  Do NOT load the rows and
             # delete them one-by-one: a real backlog (observed 157k rows, each
             # carrying a large message_data payload) would pull gigabytes into
             # memory and block the event loop for over a minute.
