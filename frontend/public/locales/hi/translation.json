@@ -800,33 +800,15 @@
     "versionHelp": "उदा., 24.04"
   },
   "emailConfig": {
-    "configureHint": "परीक्षण सक्षम करने के लिए sysmanage.yaml में ईमेल सेटिंग्स कॉन्फ़िगर करें",
     "emailAddressLabel": "ईमेल पता",
     "emailAddressPlaceholder": "परीक्षण संदेश भेजने के लिए ईमेल पता दर्ज करें",
     "enterEmail": "कृपया एक ईमेल पता दर्ज करें",
-    "fromAddress": "प्रेषक का पता",
-    "loadFailed": "ईमेल कॉन्फ़िगरेशन लोड करने में विफल",
     "sendFailed": "परीक्षण ईमेल भेजने में विफल। कृपया अपना कॉन्फ़िगरेशन जांचें।",
     "sendTest": "परीक्षण ईमेल भेजें",
     "sending": "भेज रहा है...",
-    "smtpServer": "SMTP सर्वर",
-    "status": {
-      "configured": "कॉन्फ़िगर किया गया",
-      "disabled": "अक्षम",
-      "enabled": "सक्षम",
-      "notConfigured": "कॉन्फ़िगर नहीं किया गया",
-      "unknown": "अज्ञात"
-    },
-    "statusLabel": "स्थिति",
-    "statusSuffix": {
-      "notConfigured": "(कॉन्फ़िगर नहीं किया गया)"
-    },
-    "subheader": "सूचनाओं और पासवर्ड रीसेट के लिए SMTP सेटिंग्स",
-    "subjectPrefix": "विषय उपसर्ग",
     "testConfiguration": "कॉन्फ़िगरेशन का परीक्षण करें",
     "testDialogBody": "यह सत्यापित करने के लिए कि आपका SMTP कॉन्फ़िगरेशन सही ढंग से काम कर रहा है, एक परीक्षण ईमेल भेजें।",
-    "testDialogTitle": "ईमेल कॉन्फ़िगरेशन का परीक्षण करें",
-    "title": "ईमेल कॉन्फ़िगरेशन"
+    "testDialogTitle": "ईमेल कॉन्फ़िगरेशन का परीक्षण करें"
   },
   "federationAlertConfig": {
     "complianceThreshold": "अनुपालन सीमा (%)",

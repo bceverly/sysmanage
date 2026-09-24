@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-22 10:45-0400\n"
+"POT-Creation-Date: 2026-09-24 06:37-0400\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -385,62 +385,62 @@ msgstr "Matériel mis à jour"
 msgid "Failed to update hardware information"
 msgstr "Échec de la mise à jour des informations matérielles"
 
-#: backend/api/handlers/software_package_handlers.py:108
+#: backend/api/handlers/software_package_handlers.py:109
 msgid "software_inventory_updated"
 msgstr "Inventaire logiciel mis à jour"
 
-#: backend/api/handlers/software_package_handlers.py:117
+#: backend/api/handlers/software_package_handlers.py:118
 msgid "Failed to update software inventory"
 msgstr "Échec de la mise à jour de l'inventaire logiciel"
 
-#: backend/api/handlers/software_package_handlers.py:295
+#: backend/api/handlers/software_package_handlers.py:293
 #: backend/api/updates/report_routes.py:75
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "Échec du stockage des mises à jour: %s"
 
-#: backend/api/handlers/software_package_handlers.py:410
+#: backend/api/handlers/software_package_handlers.py:408
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "Échec du traitement du résultat de collecte des paquets : %s"
 
-#: backend/api/handlers/software_package_handlers.py:504
+#: backend/api/handlers/software_package_handlers.py:502
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "Échec du traitement de la mise à jour de la répository tiercè : %s"
 
-#: backend/api/handlers/software_package_handlers.py:587
+#: backend/api/handlers/software_package_handlers.py:585
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "Échec du traitement de la mise à jour de l’état antivirus : %s"
 
-#: backend/api/handlers/software_package_handlers.py:718
+#: backend/api/handlers/software_package_handlers.py:716
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr ""
 "Échec du traitement de la mise à jour de l’état antivirus commercial : %s"
 
-#: backend/api/handlers/software_package_handlers.py:820
+#: backend/api/handlers/software_package_handlers.py:818
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "Échec du traitement de la mise à jour de l’état pare-feu : %s"
 
-#: backend/api/handlers/software_package_handlers.py:906
+#: backend/api/handlers/software_package_handlers.py:904
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "Échec du traitement de la mise à jour de l’état Graylog : %s"
 
-#: backend/api/handlers/software_package_handlers.py:938
+#: backend/api/handlers/software_package_handlers.py:936
 msgid "Missing request_id in installation_complete"
 msgstr "Identifiant de requête manquant dans installation_complete"
 
-#: backend/api/handlers/software_package_handlers.py:955
+#: backend/api/handlers/software_package_handlers.py:953
 #: backend/api/agent.py:743 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "Demande d'installation non trouvée : %s"
 
-#: backend/api/handlers/software_package_handlers.py:996
+#: backend/api/handlers/software_package_handlers.py:994
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -1417,8 +1417,8 @@ msgstr "Le tick du miroir requiert automation_engine pour l'évaluation cron."
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet -- wait for sync to succeed"
-" before assigning it as a default."
+"Mirror %s has not completed a successful sync yet -- wait for sync to "
+"succeed before assigning it as a default."
 msgstr ""
 "Le miroir %s n'a pas encore effectué une synchronisation réussie - attendez "
 "que la synchronisation soit terminée avec succès avant de l'utiliser comme "
@@ -2971,10 +2971,10 @@ msgid "Failed to get email configuration"
 msgstr "Impossible d'obtenir la configuration de la messagerie"
 
 #: backend/api/email.py:102
-msgid "Email service is disabled. Enable it in the configuration file."
+msgid "Email service is disabled. Enable it in Settings > Configuration."
 msgstr ""
-"Le service de messagerie est désactivé. Activez-le dans le fichier de "
-"configuration."
+"Le service de messagerie est désactivé. Activez-le dans Paramètres > "
+"Configuration."
 
 #: backend/api/email.py:112
 #, python-brace-format
@@ -3539,11 +3539,11 @@ msgstr ""
 
 #: backend/api/auth.py:374
 msgid ""
-"Multi-factor authentication is required for this account. Please enrol from "
-"your profile page before signing in."
+"Multi-factor authentication is required for this account. Please enroll from"
+" your profile page before signing in."
 msgstr ""
-"La connexion multifacteur est nécessaire pour ce compte. Veuillez vous "
-"inscrire depuis la page de votre profil avant de vous connecter."
+"L'authentification multifacteur est requise pour ce compte. Veuillez vous "
+"inscrire depuis votre page de profil avant de vous connecter."
 
 #: backend/api/auth.py:463
 msgid "Account locked due to too many failed login attempts"
@@ -5101,8 +5101,8 @@ msgid ""
 "deleted host"
 msgstr ""
 "Hœte %(host_id)s non trouvé dans cette base de données--différer %(count)d "
-"message(s) en attente (NE PAS supprimer)--peut être un abonnement en cours ou"
-" un hœte supprimé"
+"message(s) en attente (NE PAS supprimer)--peut être un abonnement en cours "
+"ou un hœte supprimé"
 
 #: backend/websocket/inbound_processor.py:284
 #, python-format
@@ -5455,6 +5455,18 @@ msgstr "Réponse vault non valide"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "Format secret non valide"
+
+#~ msgid "Email service is disabled. Enable it in the configuration file."
+#~ msgstr ""
+#~ "Le service de messagerie est désactivé. Activez-le dans le fichier de "
+#~ "configuration."
+
+#~ msgid ""
+#~ "Multi-factor authentication is required for this account. Please enrol from "
+#~ "your profile page before signing in."
+#~ msgstr ""
+#~ "La connexion multifacteur est nécessaire pour ce compte. Veuillez vous "
+#~ "inscrire depuis la page de votre profil avant de vous connecter."
 
 #, python-format
 #~ msgid "Package collection requested from host %s"

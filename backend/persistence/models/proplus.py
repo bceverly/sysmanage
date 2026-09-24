@@ -236,6 +236,14 @@ class PackageVulnerability(Base):
     source = Column(
         String(100), nullable=True
     )  # Data source (nvd, ubuntu, redhat, etc.)
+    # The distro RELEASE this row speaks for ("ubuntu:noble",
+    # "debian:bookworm"), migration s13cverelease. A fixed version is per
+    # release -- Ubuntu ships a different fix in each -- and the fetchers used
+    # to keep ONE row per CVE/package across all of them (whichever came first,
+    # the "upstream" pseudo-release included), so a host was judged against
+    # another release's fix. NULL: a row from before this column, or a source
+    # that is not per-release (Red Hat).
+    release = Column(String(64), nullable=True, index=True)
     created_at = Column(
         DateTime,
         nullable=False,

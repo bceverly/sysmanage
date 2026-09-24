@@ -800,33 +800,15 @@
     "versionHelp": "z.B. 24.04"
   },
   "emailConfig": {
-    "configureHint": "Konfigurieren Sie E-Mail-Einstellungen in sysmanage.yaml, um Tests zu aktivieren",
     "emailAddressLabel": "E-Mail-Adresse",
     "emailAddressPlaceholder": "Geben Sie die E-Mail-Adresse ein, an die die Testnachricht gesendet werden soll",
     "enterEmail": "Bitte geben Sie eine E-Mail-Adresse ein",
-    "fromAddress": "Absenderadresse",
-    "loadFailed": "Fehler beim Laden der E-Mail-Konfiguration",
     "sendFailed": "Test-E-Mail konnte nicht gesendet werden. Bitte überprüfen Sie Ihre Konfiguration.",
     "sendTest": "Test-E-Mail senden",
     "sending": "Wird gesendet...",
-    "smtpServer": "SMTP-Server",
-    "status": {
-      "configured": "Konfiguriert",
-      "disabled": "Deaktiviert",
-      "enabled": "Aktiviert",
-      "notConfigured": "Nicht konfiguriert",
-      "unknown": "Unbekannt"
-    },
-    "statusLabel": "Status",
-    "statusSuffix": {
-      "notConfigured": "(Nicht konfiguriert)"
-    },
-    "subheader": "SMTP-Einstellungen für Benachrichtigungen und Passwort-Zurücksetzung",
-    "subjectPrefix": "Betreff-Präfix",
     "testConfiguration": "Konfiguration testen",
     "testDialogBody": "Senden Sie eine Test-E-Mail, um zu überprüfen, ob Ihre SMTP-Konfiguration korrekt funktioniert.",
-    "testDialogTitle": "E-Mail-Konfiguration testen",
-    "title": "E-Mail-Konfiguration"
+    "testDialogTitle": "E-Mail-Konfiguration testen"
   },
   "federationAlertConfig": {
     "complianceThreshold": "Konformitäts-Schwellenwert (%)",

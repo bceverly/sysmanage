@@ -800,33 +800,15 @@
     "versionHelp": "例: 24.04"
   },
   "emailConfig": {
-    "configureHint": "テストを有効にするには sysmanage.yaml でメール設定を構成してください",
     "emailAddressLabel": "メールアドレス",
     "emailAddressPlaceholder": "テストメッセージを送信するメールアドレスを入力してください",
     "enterEmail": "メールアドレスを入力してください",
-    "fromAddress": "差出人アドレス",
-    "loadFailed": "メール設定の読み込みに失敗しました",
     "sendFailed": "テストメールの送信に失敗しました。設定を確認してください。",
     "sendTest": "テストメールを送信",
     "sending": "送信中...",
-    "smtpServer": "SMTP サーバー",
-    "status": {
-      "configured": "構成済み",
-      "disabled": "無効",
-      "enabled": "有効",
-      "notConfigured": "未構成",
-      "unknown": "不明"
-    },
-    "statusLabel": "ステータス",
-    "statusSuffix": {
-      "notConfigured": "(未構成)"
-    },
-    "subheader": "通知とパスワードリセットの SMTP 設定",
-    "subjectPrefix": "件名プレフィックス",
     "testConfiguration": "構成をテスト",
     "testDialogBody": "SMTP 設定が正しく機能していることを確認するためにテストメールを送信します。",
-    "testDialogTitle": "メール設定のテスト",
-    "title": "メール設定"
+    "testDialogTitle": "メール設定のテスト"
   },
   "federationAlertConfig": {
     "complianceThreshold": "コンプライアンスしきい値(%)",

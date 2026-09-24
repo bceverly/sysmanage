@@ -800,33 +800,15 @@
     "versionHelp": "例如：24.04"
   },
   "emailConfig": {
-    "configureHint": "在 sysmanage.yaml 中配置电子邮件设置以启用测试",
     "emailAddressLabel": "电子邮件地址",
     "emailAddressPlaceholder": "输入要发送测试消息的电子邮件地址",
     "enterEmail": "请输入电子邮件地址",
-    "fromAddress": "发件人地址",
-    "loadFailed": "无法加载电子邮件配置",
     "sendFailed": "无法发送测试电子邮件。请检查您的配置。",
     "sendTest": "发送测试电子邮件",
     "sending": "正在发送...",
-    "smtpServer": "SMTP 服务器",
-    "status": {
-      "configured": "已配置",
-      "disabled": "已禁用",
-      "enabled": "已启用",
-      "notConfigured": "未配置",
-      "unknown": "未知"
-    },
-    "statusLabel": "状态",
-    "statusSuffix": {
-      "notConfigured": "（未配置）"
-    },
-    "subheader": "用于通知和密码重置的 SMTP 设置",
-    "subjectPrefix": "主题前缀",
     "testConfiguration": "测试配置",
     "testDialogBody": "发送测试电子邮件以验证您的 SMTP 配置是否正常工作。",
-    "testDialogTitle": "测试电子邮件配置",
-    "title": "电子邮件配置"
+    "testDialogTitle": "测试电子邮件配置"
   },
   "federationAlertConfig": {
     "complianceThreshold": "合规性阈值(%)",

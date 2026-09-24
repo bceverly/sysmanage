@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-22 10:45-0400\n"
+"POT-Creation-Date: 2026-09-24 06:37-0400\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -379,62 +379,62 @@ msgstr "Hardware bijgewerkt"
 msgid "Failed to update hardware information"
 msgstr "Mislukt om de hardwareinformatie bij te werken"
 
-#: backend/api/handlers/software_package_handlers.py:108
+#: backend/api/handlers/software_package_handlers.py:109
 msgid "software_inventory_updated"
 msgstr "Software-inventaris bijgewerkt"
 
-#: backend/api/handlers/software_package_handlers.py:117
+#: backend/api/handlers/software_package_handlers.py:118
 msgid "Failed to update software inventory"
 msgstr "Mislukt om de softwareinventarisatie bij te werken"
 
-#: backend/api/handlers/software_package_handlers.py:295
+#: backend/api/handlers/software_package_handlers.py:293
 #: backend/api/updates/report_routes.py:75
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "Opslaan van updates mislukt: %s"
 
-#: backend/api/handlers/software_package_handlers.py:410
+#: backend/api/handlers/software_package_handlers.py:408
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "Mislukt om het pakketcollectieresultaat te verwerken: %s"
 
-#: backend/api/handlers/software_package_handlers.py:504
+#: backend/api/handlers/software_package_handlers.py:502
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "Mislukt om derde-partijrepository bij te werken: %s"
 
-#: backend/api/handlers/software_package_handlers.py:587
+#: backend/api/handlers/software_package_handlers.py:585
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "Fout bij verwerken van antivirus-statusupdate: %s"
 
-#: backend/api/handlers/software_package_handlers.py:718
+#: backend/api/handlers/software_package_handlers.py:716
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr ""
 "Fout bij verwerken van statusupdate commercieel antivirusprogramma: %s"
 
-#: backend/api/handlers/software_package_handlers.py:820
+#: backend/api/handlers/software_package_handlers.py:818
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "Fout bij verwerken van firewallstatusupdate: %s"
 
-#: backend/api/handlers/software_package_handlers.py:906
+#: backend/api/handlers/software_package_handlers.py:904
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "Mislukt om de Graylog-status bij te werken: %s"
 
-#: backend/api/handlers/software_package_handlers.py:938
+#: backend/api/handlers/software_package_handlers.py:936
 msgid "Missing request_id in installation_complete"
 msgstr "Ontbrekende request_id in installatievoltooid"
 
-#: backend/api/handlers/software_package_handlers.py:955
+#: backend/api/handlers/software_package_handlers.py:953
 #: backend/api/agent.py:743 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "Installatiedeelverzoek niet gevonden: %s"
 
-#: backend/api/handlers/software_package_handlers.py:996
+#: backend/api/handlers/software_package_handlers.py:994
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -1396,11 +1396,11 @@ msgstr "Mirror-tick vereist automation_engine voor cron-evaluatie."
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet -- wait for sync to succeed"
-" before assigning it as a default."
+"Mirror %s has not completed a successful sync yet -- wait for sync to "
+"succeed before assigning it as a default."
 msgstr ""
-"Spiegel %s heeft nog geen succesvolle synchronisatie voltooid -- wacht tot de"
-" synchronisatie is geslaagd voordat je deze instelt als standaard."
+"Spiegel %s heeft nog geen succesvolle synchronisatie voltooid -- wacht tot "
+"de synchronisatie is geslaagd voordat je deze instelt als standaard."
 
 #: backend/api/repository_mirroring.py:613
 #, python-format
@@ -1448,8 +1448,8 @@ msgid ""
 "mirror tree."
 msgstr ""
 "Air-gap-collectie uitvoeringen vereisen dat het repository_mirroring_engine-"
-"module is geladen -- de collector leest elke doel-bundle van een snapshot van"
-" zijn spiegelboom."
+"module is geladen -- de collector leest elke doel-bundle van een snapshot "
+"van zijn spiegelboom."
 
 #: backend/api/airgap_collector_runs.py:229
 msgid ""
@@ -2912,9 +2912,10 @@ msgid "Failed to get email configuration"
 msgstr "Kan e-mailconfiguratie niet ophalen"
 
 #: backend/api/email.py:102
-msgid "Email service is disabled. Enable it in the configuration file."
+msgid "Email service is disabled. Enable it in Settings > Configuration."
 msgstr ""
-"E-mailservice is uitgeschakeld. Schakel deze in het configuratiebestand in."
+"E-mailservice is uitgeschakeld. Schakel deze in via Instellingen > "
+"Configuratie."
 
 #: backend/api/email.py:112
 #, python-brace-format
@@ -3460,11 +3461,11 @@ msgstr "Account is vergrendeld vanwege te veel mislukte inlogpogingen"
 
 #: backend/api/auth.py:374
 msgid ""
-"Multi-factor authentication is required for this account. Please enrol from "
-"your profile page before signing in."
+"Multi-factor authentication is required for this account. Please enroll from"
+" your profile page before signing in."
 msgstr ""
-"Meervoudige verificatie is vereist voor deze account. Meld je aan vanaf jouw"
-" profielpagina om dit in te stellen."
+"Meervoudige authenticatie is vereist voor dit account. Meld u alstublieft "
+"aan via uw profielpagina voordat u zich aanmeldt."
 
 #: backend/api/auth.py:463
 msgid "Account locked due to too many failed login attempts"
@@ -5330,6 +5331,17 @@ msgstr "Ongeldige respons van vault"
 msgid "Invalid secret format"
 msgstr "Ongeldig geheimformaat"
 
+#~ msgid "Email service is disabled. Enable it in the configuration file."
+#~ msgstr ""
+#~ "E-mailservice is uitgeschakeld. Schakel deze in het configuratiebestand in."
+
+#~ msgid ""
+#~ "Multi-factor authentication is required for this account. Please enrol from "
+#~ "your profile page before signing in."
+#~ msgstr ""
+#~ "Meervoudige verificatie is vereist voor deze account. Meld je aan vanaf jouw"
+#~ " profielpagina om dit in te stellen."
+
 #, python-format
 #~ msgid "Package collection requested from host %s"
 #~ msgstr "Pakketverzameling aanvraag verstuurd vanaf host %s"
@@ -5497,8 +5509,8 @@ msgstr "Ongeldig geheimformaat"
 #~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
 #~ "Host %s niet gevonden in deze database; %d wachtrijberichten worden "
-#~ "uitgesteld (worden NIET verwijderd) -- kan een aanmelding zijn die nog bezig "
-#~ "is of een verwijderde host"
+#~ "uitgesteld (worden NIET verwijderd) -- kan een aanmelding zijn die nog bezig"
+#~ " is of een verwijderde host"
 
 #, python-format
 #~ msgid ""

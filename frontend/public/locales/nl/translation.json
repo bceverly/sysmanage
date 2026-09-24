@@ -800,33 +800,15 @@
     "versionHelp": "bijv. 24.04"
   },
   "emailConfig": {
-    "configureHint": "Configureer e-mailinstellingen in sysmanage.yaml om testen in te schakelen",
     "emailAddressLabel": "E-mailadres",
     "emailAddressPlaceholder": "Voer e-mailadres in om testbericht te verzenden",
     "enterEmail": "Voer een e-mailadres in",
-    "fromAddress": "Afzenderadres",
-    "loadFailed": "Kan e-mailconfiguratie niet laden",
     "sendFailed": "Kan test-e-mail niet verzenden. Controleer uw configuratie.",
     "sendTest": "Test-e-mail verzenden",
     "sending": "Bezig met verzenden...",
-    "smtpServer": "SMTP-server",
-    "status": {
-      "configured": "Geconfigureerd",
-      "disabled": "Uitgeschakeld",
-      "enabled": "Ingeschakeld",
-      "notConfigured": "Niet geconfigureerd",
-      "unknown": "Onbekend"
-    },
-    "statusLabel": "Status",
-    "statusSuffix": {
-      "notConfigured": "(Niet geconfigureerd)"
-    },
-    "subheader": "SMTP-instellingen voor meldingen en wachtwoordherstel",
-    "subjectPrefix": "Onderwerpvoorvoegsel",
     "testConfiguration": "Configuratie testen",
     "testDialogBody": "Verzend een test-e-mail om te controleren of uw SMTP-configuratie correct werkt.",
-    "testDialogTitle": "E-mailconfiguratie testen",
-    "title": "E-mailconfiguratie"
+    "testDialogTitle": "E-mailconfiguratie testen"
   },
   "federationAlertConfig": {
     "complianceThreshold": "Compliance-drempel (%)",

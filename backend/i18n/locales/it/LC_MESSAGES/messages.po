@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-22 10:45-0400\n"
+"POT-Creation-Date: 2026-09-24 06:37-0400\n"
 "Language: it\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -384,63 +384,63 @@ msgstr "Hardware aggiornato"
 msgid "Failed to update hardware information"
 msgstr "Impossibile aggiornare le informazioni sullo hardware"
 
-#: backend/api/handlers/software_package_handlers.py:108
+#: backend/api/handlers/software_package_handlers.py:109
 msgid "software_inventory_updated"
 msgstr "Inventario software aggiornato"
 
-#: backend/api/handlers/software_package_handlers.py:117
+#: backend/api/handlers/software_package_handlers.py:118
 msgid "Failed to update software inventory"
 msgstr "Impossibile aggiornare l'inventario software"
 
-#: backend/api/handlers/software_package_handlers.py:295
+#: backend/api/handlers/software_package_handlers.py:293
 #: backend/api/updates/report_routes.py:75
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "Fallimento nel salvare gli aggiornamenti: %s"
 
-#: backend/api/handlers/software_package_handlers.py:410
+#: backend/api/handlers/software_package_handlers.py:408
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "Impossibile elaborare il risultato della raccolta dei pacchetti: %s"
 
-#: backend/api/handlers/software_package_handlers.py:504
+#: backend/api/handlers/software_package_handlers.py:502
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr ""
 "Impossibile elaborare l'aggiornamento dell'archivio di terze parti: %s"
 
-#: backend/api/handlers/software_package_handlers.py:587
+#: backend/api/handlers/software_package_handlers.py:585
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "Impossibile elaborare l'aggiornamento di stato antivirus: %s"
 
-#: backend/api/handlers/software_package_handlers.py:718
+#: backend/api/handlers/software_package_handlers.py:716
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr ""
 "Impossibile elaborare l'aggiornamento di stato antivirus commerciale: %s"
 
-#: backend/api/handlers/software_package_handlers.py:820
+#: backend/api/handlers/software_package_handlers.py:818
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "Impossibile elaborare l'aggiornamento di stato firewall: %s"
 
-#: backend/api/handlers/software_package_handlers.py:906
+#: backend/api/handlers/software_package_handlers.py:904
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "Impossibile elaborare l'aggiornamento di stato Graylog: %s"
 
-#: backend/api/handlers/software_package_handlers.py:938
+#: backend/api/handlers/software_package_handlers.py:936
 msgid "Missing request_id in installation_complete"
 msgstr "Manca request_id in installation_complete"
 
-#: backend/api/handlers/software_package_handlers.py:955
+#: backend/api/handlers/software_package_handlers.py:953
 #: backend/api/agent.py:743 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "Richiesta di installazione non trovata: %s"
 
-#: backend/api/handlers/software_package_handlers.py:996
+#: backend/api/handlers/software_package_handlers.py:994
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -1425,8 +1425,8 @@ msgstr ""
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet -- wait for sync to succeed"
-" before assigning it as a default."
+"Mirror %s has not completed a successful sync yet -- wait for sync to "
+"succeed before assigning it as a default."
 msgstr ""
 "Lo specchio %s non ha completato ancora una sincronizzazione corretta -- "
 "attendi che la sincronizzazione riesca prima di assegnarlo come predefinito."
@@ -2955,9 +2955,10 @@ msgid "Failed to get email configuration"
 msgstr "Impossibile ottenere la configurazione email"
 
 #: backend/api/email.py:102
-msgid "Email service is disabled. Enable it in the configuration file."
+msgid "Email service is disabled. Enable it in Settings > Configuration."
 msgstr ""
-"Il servizio email è disabilitato. Abilitalo nel file di configurazione."
+"Il servizio email è disabilitato. Abilitalo in Impostazioni > "
+"Configurazione."
 
 #: backend/api/email.py:112
 #, python-brace-format
@@ -3512,11 +3513,11 @@ msgstr "L'account è bloccato a causa di troppi tentativi di accesso falliti"
 
 #: backend/api/auth.py:374
 msgid ""
-"Multi-factor authentication is required for this account. Please enrol from "
-"your profile page before signing in."
+"Multi-factor authentication is required for this account. Please enroll from"
+" your profile page before signing in."
 msgstr ""
-"Per questo account è richiesta l'autenticazione a più fattori. Per favore, "
-"iscriviti dalla tua pagina del profilo prima di accedere."
+"L'autenticazione a più fattori è richiesta per questo account. Per favore, "
+"registrati dalla tua pagina profilo prima di accedere."
 
 #: backend/api/auth.py:463
 msgid "Account locked due to too many failed login attempts"
@@ -5434,6 +5435,17 @@ msgstr "Risposta vault non valida"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "Formato segreto non valido"
+
+#~ msgid "Email service is disabled. Enable it in the configuration file."
+#~ msgstr ""
+#~ "Il servizio email è disabilitato. Abilitalo nel file di configurazione."
+
+#~ msgid ""
+#~ "Multi-factor authentication is required for this account. Please enrol from "
+#~ "your profile page before signing in."
+#~ msgstr ""
+#~ "Per questo account è richiesta l'autenticazione a più fattori. Per favore, "
+#~ "iscriviti dalla tua pagina del profilo prima di accedere."
 
 #, python-format
 #~ msgid "Package collection requested from host %s"

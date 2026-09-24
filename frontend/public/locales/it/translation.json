@@ -800,33 +800,15 @@
     "versionHelp": "es., 24.04"
   },
   "emailConfig": {
-    "configureHint": "Configura le impostazioni email in sysmanage.yaml per abilitare i test",
     "emailAddressLabel": "Indirizzo email",
     "emailAddressPlaceholder": "Inserisci l'indirizzo email per inviare il messaggio di test",
     "enterEmail": "Inserisci un indirizzo email",
-    "fromAddress": "Indirizzo mittente",
-    "loadFailed": "Impossibile caricare la configurazione email",
     "sendFailed": "Impossibile inviare l'email di test. Controlla la tua configurazione.",
     "sendTest": "Invia email di test",
     "sending": "Invio in corso...",
-    "smtpServer": "Server SMTP",
-    "status": {
-      "configured": "Configurato",
-      "disabled": "Disabilitato",
-      "enabled": "Abilitato",
-      "notConfigured": "Non configurato",
-      "unknown": "Sconosciuto"
-    },
-    "statusLabel": "Stato",
-    "statusSuffix": {
-      "notConfigured": "(Non configurato)"
-    },
-    "subheader": "Impostazioni SMTP per notifiche e reimpostazione password",
-    "subjectPrefix": "Prefisso oggetto",
     "testConfiguration": "Testa configurazione",
     "testDialogBody": "Invia un'email di test per verificare che la configurazione SMTP funzioni correttamente.",
-    "testDialogTitle": "Testa configurazione email",
-    "title": "Configurazione email"
+    "testDialogTitle": "Testa configurazione email"
   },
   "federationAlertConfig": {
     "complianceThreshold": "Soglia di conformità (%)",

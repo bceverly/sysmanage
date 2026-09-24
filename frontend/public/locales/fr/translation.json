@@ -800,33 +800,15 @@
     "versionHelp": "par ex., 24.04"
   },
   "emailConfig": {
-    "configureHint": "Configurez les paramètres de messagerie dans sysmanage.yaml pour activer les tests",
     "emailAddressLabel": "Adresse e-mail",
     "emailAddressPlaceholder": "Entrez l'adresse e-mail pour envoyer le message de test",
     "enterEmail": "Veuillez saisir une adresse e-mail",
-    "fromAddress": "Adresse d'expéditeur",
-    "loadFailed": "Échec du chargement de la configuration de la messagerie",
     "sendFailed": "Échec de l'envoi de l'e-mail de test. Veuillez vérifier votre configuration.",
     "sendTest": "Envoyer un e-mail de test",
     "sending": "Envoi en cours...",
-    "smtpServer": "Serveur SMTP",
-    "status": {
-      "configured": "Configuré",
-      "disabled": "Désactivé",
-      "enabled": "Activé",
-      "notConfigured": "Non configuré",
-      "unknown": "Inconnu"
-    },
-    "statusLabel": "Statut",
-    "statusSuffix": {
-      "notConfigured": "(Non configuré)"
-    },
-    "subheader": "Paramètres SMTP pour les notifications et la réinitialisation du mot de passe",
-    "subjectPrefix": "Préfixe de l'objet",
     "testConfiguration": "Tester la configuration",
     "testDialogBody": "Envoyez un e-mail de test pour vérifier que votre configuration SMTP fonctionne correctement.",
-    "testDialogTitle": "Tester la configuration de la messagerie",
-    "title": "Configuration de la messagerie"
+    "testDialogTitle": "Tester la configuration de la messagerie"
   },
   "federationAlertConfig": {
     "complianceThreshold": "Seuil de conformité (%)",

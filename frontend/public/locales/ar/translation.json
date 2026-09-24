@@ -800,33 +800,15 @@
     "versionHelp": "مثال: 24.04"
   },
   "emailConfig": {
-    "configureHint": "قم بتكوين إعدادات البريد الإلكتروني في sysmanage.yaml لتمكين الاختبار",
     "emailAddressLabel": "عنوان البريد الإلكتروني",
     "emailAddressPlaceholder": "أدخل عنوان البريد الإلكتروني لإرسال رسالة اختبار",
     "enterEmail": "يرجى إدخال عنوان بريد إلكتروني",
-    "fromAddress": "عنوان المرسل",
-    "loadFailed": "فشل تحميل تكوين البريد الإلكتروني",
     "sendFailed": "فشل إرسال البريد الإلكتروني التجريبي. يرجى التحقق من التكوين.",
     "sendTest": "إرسال بريد إلكتروني تجريبي",
     "sending": "جارٍ الإرسال...",
-    "smtpServer": "خادم SMTP",
-    "status": {
-      "configured": "مكوّن",
-      "disabled": "معطل",
-      "enabled": "مفعل",
-      "notConfigured": "غير مكوّن",
-      "unknown": "غير معروف"
-    },
-    "statusLabel": "الحالة",
-    "statusSuffix": {
-      "notConfigured": "(غير مكوّن)"
-    },
-    "subheader": "إعدادات SMTP للإشعارات وإعادة تعيين كلمة المرور",
-    "subjectPrefix": "بادئة الموضوع",
     "testConfiguration": "اختبار التكوين",
     "testDialogBody": "أرسل بريدًا إلكترونيًا تجريبيًا للتحقق من أن تكوين SMTP يعمل بشكل صحيح.",
-    "testDialogTitle": "اختبار تكوين البريد الإلكتروني",
-    "title": "تكوين البريد الإلكتروني"
+    "testDialogTitle": "اختبار تكوين البريد الإلكتروني"
   },
   "federationAlertConfig": {
     "complianceThreshold": "عتبة الامتثال (%)",

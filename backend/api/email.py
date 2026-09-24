@@ -99,7 +99,7 @@ async def test_email_config(
             return EmailTestResponse(
                 success=False,
                 message=_(
-                    "Email service is disabled. Enable it in the configuration file."
+                    "Email service is disabled. Enable it in Settings > Configuration."
                 ),
             )
 

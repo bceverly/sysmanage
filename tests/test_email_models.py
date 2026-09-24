@@ -308,7 +308,7 @@ class TestEmailTestResponse:
         """Test EmailTestResponse when email service is disabled."""
         response = EmailTestResponse(
             success=False,
-            message="Email service is disabled. Enable it in the configuration file.",
+            message="Email service is disabled. Enable it in Settings > Configuration.",
         )
 
         assert response.success is False

@@ -24,6 +24,7 @@ import {
   ServerSetting,
   serverSettingsService,
 } from "../Services/serverSettings";
+import SendTestEmailButton from "./SendTestEmailButton";
 
 // Human-friendly labels + group order. Defaults double as the English copy
 // so the panel is usable before locale files are translated.
@@ -261,6 +262,11 @@ const ConfigurationSettings: React.FC = () => {
                   );
                 })}
               </Box>
+              {group === "email" && (
+                <Box sx={{ mt: 2 }}>
+                  <SendTestEmailButton />
+                </Box>
+              )}
             </CardContent>
           </Card>
         );

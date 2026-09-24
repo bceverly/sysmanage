@@ -800,33 +800,15 @@
     "versionHelp": "예: 24.04"
   },
   "emailConfig": {
-    "configureHint": "테스트를 활성화하려면 sysmanage.yaml에서 이메일 설정을 구성하세요",
     "emailAddressLabel": "이메일 주소",
     "emailAddressPlaceholder": "테스트 메시지를 보낼 이메일 주소를 입력하세요",
     "enterEmail": "이메일 주소를 입력하세요",
-    "fromAddress": "보낸 사람 주소",
-    "loadFailed": "이메일 구성을 로드하지 못했습니다",
     "sendFailed": "테스트 이메일을 보내지 못했습니다. 구성을 확인하세요.",
     "sendTest": "테스트 이메일 보내기",
     "sending": "보내는 중...",
-    "smtpServer": "SMTP 서버",
-    "status": {
-      "configured": "구성됨",
-      "disabled": "비활성화됨",
-      "enabled": "활성화됨",
-      "notConfigured": "구성되지 않음",
-      "unknown": "알 수 없음"
-    },
-    "statusLabel": "상태",
-    "statusSuffix": {
-      "notConfigured": "(구성되지 않음)"
-    },
-    "subheader": "알림 및 비밀번호 재설정을 위한 SMTP 설정",
-    "subjectPrefix": "제목 접두사",
     "testConfiguration": "구성 테스트",
     "testDialogBody": "SMTP 구성이 올바르게 작동하는지 확인하기 위해 테스트 이메일을 보내세요.",
-    "testDialogTitle": "이메일 구성 테스트",
-    "title": "이메일 구성"
+    "testDialogTitle": "이메일 구성 테스트"
   },
   "federationAlertConfig": {
     "complianceThreshold": "준수 임계값(%)",

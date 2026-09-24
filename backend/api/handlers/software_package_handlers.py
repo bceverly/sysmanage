@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from backend.api.error_constants import error_host_not_registered
 from backend.i18n import _
+from backend.services.syspatch_classification import classify_syspatch_updates
 from backend.persistence.models import (
     AntivirusStatus,
     AvailablePackage,
@@ -184,6 +185,7 @@ async def handle_package_updates_update(  # NOSONAR
             len(available_updates),
         )
 
+        classify_syspatch_updates(db, connection.host_id, available_updates)
         for package_update in available_updates:
             now = datetime.now(timezone.utc).replace(tzinfo=None)
             # Debug: log all keys in this package update

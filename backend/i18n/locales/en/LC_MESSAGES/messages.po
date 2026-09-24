@@ -5,9 +5,9 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-09-22 10:45-0400\n"
+"POT-Creation-Date: 2026-09-24 06:37-0400\n"
 "Language: en\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 
 #: backend/security/communication_security.py:123
 msgid "Invalid token signature"
@@ -378,61 +378,61 @@ msgstr "hardware_updated"
 msgid "Failed to update hardware information"
 msgstr "Failed to update hardware information"
 
-#: backend/api/handlers/software_package_handlers.py:108
+#: backend/api/handlers/software_package_handlers.py:109
 msgid "software_inventory_updated"
 msgstr "software_inventory_updated"
 
-#: backend/api/handlers/software_package_handlers.py:117
+#: backend/api/handlers/software_package_handlers.py:118
 msgid "Failed to update software inventory"
 msgstr "Failed to update software inventory"
 
-#: backend/api/handlers/software_package_handlers.py:295
+#: backend/api/handlers/software_package_handlers.py:293
 #: backend/api/updates/report_routes.py:75
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "Failed to store updates: %s"
 
-#: backend/api/handlers/software_package_handlers.py:410
+#: backend/api/handlers/software_package_handlers.py:408
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "Failed to process package collection result: %s"
 
-#: backend/api/handlers/software_package_handlers.py:504
+#: backend/api/handlers/software_package_handlers.py:502
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "Failed to process third-party repository update: %s"
 
-#: backend/api/handlers/software_package_handlers.py:587
+#: backend/api/handlers/software_package_handlers.py:585
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "Failed to process antivirus status update: %s"
 
-#: backend/api/handlers/software_package_handlers.py:718
+#: backend/api/handlers/software_package_handlers.py:716
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "Failed to process commercial antivirus status update: %s"
 
-#: backend/api/handlers/software_package_handlers.py:820
+#: backend/api/handlers/software_package_handlers.py:818
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "Failed to process firewall status update: %s"
 
-#: backend/api/handlers/software_package_handlers.py:906
+#: backend/api/handlers/software_package_handlers.py:904
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "Failed to process Graylog status update: %s"
 
-#: backend/api/handlers/software_package_handlers.py:938
+#: backend/api/handlers/software_package_handlers.py:936
 msgid "Missing request_id in installation_complete"
 msgstr "Missing request_id in installation_complete"
 
-#: backend/api/handlers/software_package_handlers.py:955
+#: backend/api/handlers/software_package_handlers.py:953
 #: backend/api/agent.py:743 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "Installation request not found: %s"
 
-#: backend/api/handlers/software_package_handlers.py:996
+#: backend/api/handlers/software_package_handlers.py:994
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -1389,11 +1389,11 @@ msgstr "Mirror tick requires automation_engine for cron evaluation."
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet -- wait for sync to succeed "
-"before assigning it as a default."
+"Mirror %s has not completed a successful sync yet -- wait for sync to "
+"succeed before assigning it as a default."
 msgstr ""
-"Mirror %s has not completed a successful sync yet -- wait for sync to succeed "
-"before assigning it as a default."
+"Mirror %s has not completed a successful sync yet -- wait for sync to "
+"succeed before assigning it as a default."
 
 #: backend/api/repository_mirroring.py:613
 #, python-format
@@ -2883,8 +2883,8 @@ msgid "Failed to get email configuration"
 msgstr "Failed to get email configuration"
 
 #: backend/api/email.py:102
-msgid "Email service is disabled. Enable it in the configuration file."
-msgstr "Email service is disabled. Enable it in the configuration file."
+msgid "Email service is disabled. Enable it in Settings > Configuration."
+msgstr "Email service is disabled. Enable it in Settings > Configuration."
 
 #: backend/api/email.py:112
 #, python-brace-format
@@ -5253,6 +5253,9 @@ msgstr "Invalid response from vault"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "Invalid secret format"
+
+#~ msgid "Email service is disabled. Enable it in the configuration file."
+#~ msgstr "Email service is disabled. Enable it in the configuration file."
 
 #, python-format
 #~ msgid "Invalid %s ID format"

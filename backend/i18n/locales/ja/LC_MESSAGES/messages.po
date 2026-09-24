@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-22 10:45-0400\n"
+"POT-Creation-Date: 2026-09-24 06:37-0400\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -377,61 +377,61 @@ msgstr "ハードウェアが更新されました"
 msgid "Failed to update hardware information"
 msgstr "ハードウェア情報の更新に失敗しました"
 
-#: backend/api/handlers/software_package_handlers.py:108
+#: backend/api/handlers/software_package_handlers.py:109
 msgid "software_inventory_updated"
 msgstr "ソフトウェアインベントリが更新されました"
 
-#: backend/api/handlers/software_package_handlers.py:117
+#: backend/api/handlers/software_package_handlers.py:118
 msgid "Failed to update software inventory"
 msgstr "ソフトウェアインベントリの更新に失敗しました"
 
-#: backend/api/handlers/software_package_handlers.py:295
+#: backend/api/handlers/software_package_handlers.py:293
 #: backend/api/updates/report_routes.py:75
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "更新の保存に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:410
+#: backend/api/handlers/software_package_handlers.py:408
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "パッケージ収集結果の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:504
+#: backend/api/handlers/software_package_handlers.py:502
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "サードパーティーリポジトリ更新の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:587
+#: backend/api/handlers/software_package_handlers.py:585
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "アンチウイルスステータス更新の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:718
+#: backend/api/handlers/software_package_handlers.py:716
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "商用アンチウイルスステータス更新の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:820
+#: backend/api/handlers/software_package_handlers.py:818
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "ファイアウォールステータス更新の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:906
+#: backend/api/handlers/software_package_handlers.py:904
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "Graylog ステータス更新の処理に失敗しました: %s"
 
-#: backend/api/handlers/software_package_handlers.py:938
+#: backend/api/handlers/software_package_handlers.py:936
 msgid "Missing request_id in installation_complete"
 msgstr "インストール完了リクエストに request_id が含まれていません"
 
-#: backend/api/handlers/software_package_handlers.py:955
+#: backend/api/handlers/software_package_handlers.py:953
 #: backend/api/agent.py:743 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "インストール要求が見つかりません: %s"
 
-#: backend/api/handlers/software_package_handlers.py:996
+#: backend/api/handlers/software_package_handlers.py:994
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -1369,8 +1369,8 @@ msgstr "Mirror tick は cron 評価のために automation_engine を必要と�
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet -- wait for sync to succeed"
-" before assigning it as a default."
+"Mirror %s has not completed a successful sync yet -- wait for sync to "
+"succeed before assigning it as a default."
 msgstr "ミラー %s はまだ成功した同期を完了していません -- 同期が成功するまでデフォルトに割り当てないようにしてください。"
 
 #: backend/api/repository_mirroring.py:613
@@ -2827,8 +2827,8 @@ msgid "Failed to get email configuration"
 msgstr "メール設定の取得に失敗しました"
 
 #: backend/api/email.py:102
-msgid "Email service is disabled. Enable it in the configuration file."
-msgstr "メールサービスが無効です。設定ファイルで有効にしてください。"
+msgid "Email service is disabled. Enable it in Settings > Configuration."
+msgstr "メールサービスが無効です。設定 > 設定 で有効にしてください。"
 
 #: backend/api/email.py:112
 #, python-brace-format
@@ -3352,9 +3352,9 @@ msgstr "ログイン試行の失敗が多すぎるためアカウントがロッ
 
 #: backend/api/auth.py:374
 msgid ""
-"Multi-factor authentication is required for this account. Please enrol from "
-"your profile page before signing in."
-msgstr "このアカウントには多要素認証が必要です。ログインする前にプロフィールページから登録してください。"
+"Multi-factor authentication is required for this account. Please enroll from"
+" your profile page before signing in."
+msgstr "このアカウントには多要素認証が必要です。ログインする前に、プロファイルページから登録してください。"
 
 #: backend/api/auth.py:463
 msgid "Account locked due to too many failed login attempts"
@@ -5150,6 +5150,14 @@ msgstr "vaultからの応答が無効です"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "シークレットフォーマットが無効です"
+
+#~ msgid "Email service is disabled. Enable it in the configuration file."
+#~ msgstr "メールサービスが無効です。設定ファイルで有効にしてください。"
+
+#~ msgid ""
+#~ "Multi-factor authentication is required for this account. Please enrol from "
+#~ "your profile page before signing in."
+#~ msgstr "このアカウントには多要素認証が必要です。ログインする前にプロフィールページから登録してください。"
 
 #, python-format
 #~ msgid "Package collection requested from host %s"

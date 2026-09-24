@@ -800,33 +800,15 @@
     "versionHelp": "напр., 24.04"
   },
   "emailConfig": {
-    "configureHint": "Настройте параметры электронной почты в sysmanage.yaml, чтобы включить тестирование",
     "emailAddressLabel": "Адрес электронной почты",
     "emailAddressPlaceholder": "Введите адрес электронной почты для отправки тестового сообщения",
     "enterEmail": "Пожалуйста, введите адрес электронной почты",
-    "fromAddress": "Адрес отправителя",
-    "loadFailed": "Не удалось загрузить настройку электронной почты",
     "sendFailed": "Не удалось отправить тестовое письмо. Проверьте настройку.",
     "sendTest": "Отправить тестовое письмо",
     "sending": "Отправка...",
-    "smtpServer": "Сервер SMTP",
-    "status": {
-      "configured": "Настроено",
-      "disabled": "Отключено",
-      "enabled": "Включено",
-      "notConfigured": "Не настроено",
-      "unknown": "Неизвестно"
-    },
-    "statusLabel": "Статус",
-    "statusSuffix": {
-      "notConfigured": "(Не настроено)"
-    },
-    "subheader": "Настройки SMTP для уведомлений и сброса пароля",
-    "subjectPrefix": "Префикс темы",
     "testConfiguration": "Проверить настройку",
     "testDialogBody": "Отправьте тестовое письмо, чтобы убедиться, что ваша настройка SMTP работает правильно.",
-    "testDialogTitle": "Проверка настройки электронной почты",
-    "title": "Настройка электронной почты"
+    "testDialogTitle": "Проверка настройки электронной почты"
   },
   "federationAlertConfig": {
     "complianceThreshold": "Порог соответствия (%)",

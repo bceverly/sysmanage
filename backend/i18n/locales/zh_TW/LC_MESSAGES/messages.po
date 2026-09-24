@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-22 10:45-0400\n"
+"POT-Creation-Date: 2026-09-24 06:37-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -377,61 +377,61 @@ msgstr "硬體已更新"
 msgid "Failed to update hardware information"
 msgstr "更新硬體資訊失敗"
 
-#: backend/api/handlers/software_package_handlers.py:108
+#: backend/api/handlers/software_package_handlers.py:109
 msgid "software_inventory_updated"
 msgstr "軟體清單已更新"
 
-#: backend/api/handlers/software_package_handlers.py:117
+#: backend/api/handlers/software_package_handlers.py:118
 msgid "Failed to update software inventory"
 msgstr "更新軟體清單失敗"
 
-#: backend/api/handlers/software_package_handlers.py:295
+#: backend/api/handlers/software_package_handlers.py:293
 #: backend/api/updates/report_routes.py:75
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "儲存更新失敗：%s"
 
-#: backend/api/handlers/software_package_handlers.py:410
+#: backend/api/handlers/software_package_handlers.py:408
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "無法處理套件收集結果：%s"
 
-#: backend/api/handlers/software_package_handlers.py:504
+#: backend/api/handlers/software_package_handlers.py:502
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "無法處理第三方倉庫更新：%s"
 
-#: backend/api/handlers/software_package_handlers.py:587
+#: backend/api/handlers/software_package_handlers.py:585
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "無法處理防毒狀態更新：%s"
 
-#: backend/api/handlers/software_package_handlers.py:718
+#: backend/api/handlers/software_package_handlers.py:716
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "無法處理商業防毒狀態更新：%s"
 
-#: backend/api/handlers/software_package_handlers.py:820
+#: backend/api/handlers/software_package_handlers.py:818
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "無法處理防火牆狀態更新：%s"
 
-#: backend/api/handlers/software_package_handlers.py:906
+#: backend/api/handlers/software_package_handlers.py:904
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "無法處理Graylog狀態更新：%s"
 
-#: backend/api/handlers/software_package_handlers.py:938
+#: backend/api/handlers/software_package_handlers.py:936
 msgid "Missing request_id in installation_complete"
 msgstr "缺少request_id在安裝完成中"
 
-#: backend/api/handlers/software_package_handlers.py:955
+#: backend/api/handlers/software_package_handlers.py:953
 #: backend/api/agent.py:743 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "未找到安裝請求：%s"
 
-#: backend/api/handlers/software_package_handlers.py:996
+#: backend/api/handlers/software_package_handlers.py:994
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -1365,8 +1365,8 @@ msgstr "鏡像tick需要automation_engine進行cron評估。"
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet -- wait for sync to succeed"
-" before assigning it as a default."
+"Mirror %s has not completed a successful sync yet -- wait for sync to "
+"succeed before assigning it as a default."
 msgstr "鏡像%s尚未完成成功的同步----等待同步成功後再設置為默認值。"
 
 #: backend/api/repository_mirroring.py:613
@@ -2799,8 +2799,8 @@ msgid "Failed to get email configuration"
 msgstr "無法取得電子郵件設定"
 
 #: backend/api/email.py:102
-msgid "Email service is disabled. Enable it in the configuration file."
-msgstr "電子郵件服務已停用。請在設定檔中啟用。"
+msgid "Email service is disabled. Enable it in Settings > Configuration."
+msgstr "電子郵件服務已停用。請在 設定 > 配置 中啟用。"
 
 #: backend/api/email.py:112
 #, python-brace-format
@@ -3320,9 +3320,9 @@ msgstr "由於登入嘗試失敗次數過多，帳戶已被鎖定"
 
 #: backend/api/auth.py:374
 msgid ""
-"Multi-factor authentication is required for this account. Please enrol from "
-"your profile page before signing in."
-msgstr "需要多因素驗證才能登入此帳戶。請在設定檔頁面註冊後再登入。"
+"Multi-factor authentication is required for this account. Please enroll from"
+" your profile page before signing in."
+msgstr "多因素驗證對這個帳戶需要。請在您的設定檔頁面註冊，然後再登入。"
 
 #: backend/api/auth.py:463
 msgid "Account locked due to too many failed login attempts"
@@ -5092,6 +5092,14 @@ msgstr "從 vault 收到的回應無效"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "密鑰格式無效"
+
+#~ msgid "Email service is disabled. Enable it in the configuration file."
+#~ msgstr "電子郵件服務已停用。請在設定檔中啟用。"
+
+#~ msgid ""
+#~ "Multi-factor authentication is required for this account. Please enrol from "
+#~ "your profile page before signing in."
+#~ msgstr "需要多因素驗證才能登入此帳戶。請在設定檔頁面註冊後再登入。"
 
 #, python-format
 #~ msgid "Package collection requested from host %s"
