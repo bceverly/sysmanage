@@ -164,3 +164,55 @@ class TestServesIsStricterThanAnswerable:
     def test_why_not_served_is_silent_when_the_table_is_served(self):
         host = host_with(served={"sysmanage_file_state": "native"})
         assert host_facts.why_not_served(host, "sysmanage_file_state") is None
+
+
+class TestColumnCoverage:
+    """21.2 S1: coverage per COLUMN. Native ``mounts`` served the table while
+    filling none of its capacity columns, and a disk-usage rule evaluated the
+    NULLs as "fine" on a real host."""
+
+    @staticmethod
+    def _host(columns):
+        facts = {
+            "contract_version": 3,
+            "served": {"mounts": "native"},
+            "unsupported": {},
+            "not_applicable": {},
+        }
+        if columns is not None:
+            facts["columns"] = {"mounts": columns}
+        return FakeHost(facts)
+
+    def test_advertised_columns_are_read_back(self):
+        host = self._host(["path", "type", "blocks"])
+        assert host_facts.advertised_columns(host, "mounts") == (
+            "path",
+            "type",
+            "blocks",
+        )
+
+    def test_all_needed_columns_filled_is_answerable(self):
+        host = self._host(["path", "type", "blocks", "blocks_available"])
+        assert (
+            host_facts.missing_columns(host, "mounts", ["blocks", "blocks_available"])
+            is None
+        )
+
+    def test_an_unfilled_column_is_named(self):
+        host = self._host(["path", "type"])
+        gap = host_facts.missing_columns(
+            host, "mounts", ["path", "blocks", "blocks_available"]
+        )
+        assert gap["reason"] == "columns_not_populated"
+        assert gap["columns"] == ["blocks", "blocks_available"]
+
+    def test_an_agent_that_never_advertised_columns_is_a_gap_not_all_columns(self):
+        """The permissive reading is the defect: NULLs evaluated as data."""
+        gap = host_facts.missing_columns(self._host(None), "mounts", ["blocks"])
+        assert gap["state"] == host_facts.UNKNOWN
+        assert gap["reason"] == "columns_not_advertised"
+
+    def test_an_unserved_table_reports_why(self):
+        host = host_with(not_applicable={"mounts": "wrong_platform"})
+        gap = host_facts.missing_columns(host, "mounts", ["blocks"])
+        assert gap["state"] == host_facts.NOT_APPLICABLE

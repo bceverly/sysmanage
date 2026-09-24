@@ -9760,7 +9760,7 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       Reproduce: `sysmanage-professional-plus/scripts/advisor_spike.py`
       (`--collect` in the agent venv, then evaluate in the server venv).
 
-- [ ] **S1 -- Rule contract + evidence declaration.** The versioned rule
+- [x] **S1 -- Rule contract + evidence declaration.** The versioned rule
       schema, pinned the way `FACT_CONTRACT_VERSION` is, because shipped rule
       packs are content we have to keep readable across agent and server
       versions. Every rule carries an explicit `requires` block naming fact
@@ -9787,9 +9787,41 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       `stale`, distinct from `missing`, so an operator knows whether to fix
       coverage or just rescan.
 
+      **DONE 2026-09-24.** Three pieces, one per repo:
+      * **Column-level coverage (agent + OSS).** Each served table now
+        advertises the columns its provider FILLS (`build_fact_coverage` ->
+        `columns`); osquery fills its whole schema, the native provider
+        declares its own in `fact_native_columns.py`, held EQUAL to what the
+        builders emit by a test that reads the builders' source (a mutation
+        check confirmed it catches drift). Server: `host_facts.
+        advertised_columns()` / `missing_columns()` -- for new consumers, an
+        agent that never advertised columns is a GAP (`columns_not_advertised`),
+        not "all columns", same rule as `serves()`.
+      * **`advisor_engine` (Pro+, Enterprise) -- the contract, pure functions,
+        no DB.** `RULE_CONTRACT_VERSION = 1`; `validate_rule()` returns error
+        CODES (the server owns translation); `requires` must name COLUMNS per
+        fact table and at least one requirement (a rule needing nothing would
+        "pass" on a host that told us nothing); `when` is one read-only SELECT
+        (guard duplicated from query_pack_engine -- engines cannot import each
+        other); fleet rules need a `peer_group` (the S0 curl false positive);
+        a rule from a NEWER contract is refused. `resolve_requirements()`
+        returns evaluate / `not_applicable` / `not_assessable` with EVERY gap
+        (`columns_not_populated`, `not_collected`, `missing`, `stale` with age
+        and limit, `domain_unavailable` for `metric_history` until 21.5);
+        not_applicable wins over other gaps. **Four outcomes**, not three.
+        Freshness per domain from each source's OWN timestamp (updates ->
+        `host.updates_updated_at`); tenant override replaces the default, a
+        rule's `max_age_days` may only TIGHTEN. 29 tests incl. the S0 capacity
+        rule against the exact evidence it met on `gdr-t14`.
+      * **Registrations pulled forward from S2**: a `module-source/` engine
+        must be in Pro+ `MODULES` or `check_module_registry.py` fails, so the
+        four registrations landed with the contract (OSS `ModuleCode.
+        ADVISOR_ENGINE` in the Enterprise `TIER_MODULES`, inherited by SaaS;
+        Pro+ `MODULES` at `enterprise`). No feature code yet -- nothing is gated
+        behind one until the S4 API.
+
 - [ ] **S2 -- `advisor_engine` + the partition split.** New Cython engine, the
-      FOUR registrations `make check-engine-codes` gates (Pro+ MODULES +
-      PROFESSIONAL_FEATURES, OSS `ModuleCode` + `TIER_MODULES`), shared chain
+      registrations already done in S1 (see there), shared chain
       for the rule catalog, tenant chain for recommendations and
       tenant-authored rules. Evaluation only: rules x hosts -> outcomes. No
       scoring, no feed, no UI. Engine reads coverage through the frozen

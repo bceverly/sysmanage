@@ -163,6 +163,47 @@ def explain(host, table: str) -> Optional[Dict[str, str]]:
     return {"table": table, "state": state, "reason": detail or state}
 
 
+def advertised_columns(host, table: str) -> Optional[Tuple[str, ...]]:
+    """The columns this host says it FILLS for ``table``, or None.
+
+    None when the table is not served, or when the agent predates the column
+    advertisement (21.2 S1). Coverage used to be per table only, and native
+    ``mounts`` served the table while filling none of its capacity columns --
+    so a question about disk usage "succeeded" against NULLs.
+    """
+    if not serves(host, table):
+        return None
+    columns = (coverage(host) or {}).get("columns")
+    if not isinstance(columns, dict) or not isinstance(columns.get(table), list):
+        return None
+    return tuple(columns[table])
+
+
+def missing_columns(host, table: str, needed) -> Optional[Dict[str, Any]]:
+    """Why ``host`` cannot answer a question that reads ``needed`` columns of
+    ``table``, or None when it can.
+
+    For NEW consumers only -- same rule as ``serves``: an agent that never
+    advertised its columns is a gap, not "all of them", because reading it the
+    permissive way is exactly how the capacity rule evaluated NULLs as "fine".
+    """
+    reason = why_not_served(host, table)
+    if reason is not None:
+        return reason
+    filled = advertised_columns(host, table)
+    if filled is None:
+        return {"table": table, "state": UNKNOWN, "reason": "columns_not_advertised"}
+    missing = sorted(set(needed or ()) - set(filled))
+    if missing:
+        return {
+            "table": table,
+            "state": SERVED,
+            "reason": "columns_not_populated",
+            "columns": missing,
+        }
+    return None
+
+
 def missing_tables(host, tables) -> Dict[str, Dict[str, str]]:
     """``{table: explanation}`` for each requested table the host cannot answer."""
     out = {}

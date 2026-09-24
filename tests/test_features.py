@@ -422,3 +422,13 @@ class TestTierModules:
 
         for tier in LicenseTier:  # lgtm[py/non-iterable-in-for-loop]
             assert tier in TIER_MODULES
+
+
+def test_advisor_engine_is_enterprise_only():
+    """Phase 21.2: the advisor is an Enterprise module (and so in the SaaS
+    tier, which is an Enterprise superset) -- never a Professional one."""
+    from backend.licensing.features import LicenseTier, ModuleCode, TIER_MODULES
+
+    assert ModuleCode.ADVISOR_ENGINE in TIER_MODULES[LicenseTier.ENTERPRISE]
+    assert ModuleCode.ADVISOR_ENGINE in TIER_MODULES[LicenseTier.MULTITENANT_SAAS]
+    assert ModuleCode.ADVISOR_ENGINE not in TIER_MODULES[LicenseTier.PROFESSIONAL]

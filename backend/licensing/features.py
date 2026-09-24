@@ -304,6 +304,12 @@ class ModuleCode(str, Enum):
     # as a side effect of adding a new one.  Loads at Professional.
     QUERY_PACK_ENGINE = "query_pack_engine"
 
+    # Phase 21.2 -- the advisor. Rules declare the evidence they need; a host
+    # that cannot supply it is not_assessable, never silently clean. Its own
+    # engine: the advisor READS vuln/compliance/drift/facts but must not change
+    # any of those subsystems as a side effect of existing. Enterprise.
+    ADVISOR_ENGINE = "advisor_engine"
+
     @classmethod
     def from_string(cls, value: str) -> "ModuleCode":
         """Convert string to ModuleCode enum."""
@@ -538,6 +544,8 @@ TIER_MODULES = {
         ModuleCode.IMAGE_MODE_ENGINE,
         # Phase 18 -- Provisioning & Discovery
         ModuleCode.PROVISIONING_ENGINE,
+        # Phase 21.2 -- the advisor
+        ModuleCode.ADVISOR_ENGINE,
         # NOTE: MULTITENANCY_ENGINE is intentionally NOT here -- it is exclusive
         # to the MULTITENANT_SAAS tier (defined just below as an Enterprise
         # superset).  That exclusivity is the moat.

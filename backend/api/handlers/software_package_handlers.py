@@ -260,27 +260,14 @@ async def handle_package_updates_update(  # NOSONAR
                     str(e),
                 )
 
-        # When update detection last reported -- unconditionally, as
-        # software_updated_at is: a report replayed from the queue is still a
-        # report. This is what tells "nothing pending" from "never checked".
-        db.execute(
-            update(Host)
-            .where(Host.id == connection.host_id)
-            .values(updates_updated_at=datetime.now(timezone.utc).replace(tzinfo=None))
-        )
-
-        # Only update host's last access timestamp if this is from a live connection
-        # (not from background queue processing of old messages)
-        if (
-            not hasattr(connection, "is_mock_connection")
-            or not connection.is_mock_connection
-        ):
-            stmt = (
-                update(Host)
-                .where(Host.id == connection.host_id)
-                .values(last_access=datetime.now(timezone.utc).replace(tzinfo=None))
-            )
-            db.execute(stmt)
+        # updates_updated_at always (a report replayed from the queue is still
+        # a report -- it is what tells "nothing pending" from "never checked");
+        # last_access only for a live connection, not queued old messages.
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        values = {"updates_updated_at": now}
+        if not getattr(connection, "is_mock_connection", False):
+            values["last_access"] = now
+        db.execute(update(Host).where(Host.id == connection.host_id).values(**values))
 
         db.commit()
 
