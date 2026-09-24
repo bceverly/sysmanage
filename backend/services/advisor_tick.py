@@ -23,9 +23,9 @@ WHAT IT GUARANTEES
 
 WHAT IT DOES NOT DO (S2 is evaluation only)
 -------------------------------------------
-No scoring (S3), no feed or API (S4), no remediation (S5), no fact collection:
-fact rows are read from ``advisor.<table>`` query-pack results, which nothing
-dispatches yet, so fact rules are ``not_collected`` until that lands.
+No scoring (S3), no feed or API (S4), no remediation (S5). Fact rows are
+collected by ``advisor_collection`` (S2b) on the same pass, through the
+ordinary query-pack dispatch path, before evaluation reads them back.
 
 Unlicensed servers never get here: without ``advisor_engine`` the tick is not
 started, and ``run_one_tick`` re-checks.
@@ -44,6 +44,7 @@ from backend.persistence.partitions import (
     iter_host_databases,
     partition_session,
 )
+from backend.services import advisor_collection as collection
 from backend.services import advisor_evidence as ev
 
 logger = logging.getLogger(__name__)
@@ -158,6 +159,9 @@ class _Pass:
         row.rule_id = entry["rule_id"]
         row.rule_version = result.get("rule_version")
         row.lens = result.get("lens")
+        row.impact = result.get("impact")
+        row.likelihood = result.get("likelihood")
+        row.risk = result.get("risk")
         row.outcome = result["outcome"]
         row.gaps = result.get("gaps") or []
         row.match_count = result.get("match_count") or 0
@@ -275,6 +279,15 @@ def _tick_one_database(run: _Pass, shared_entries) -> None:
                 .filter(models.Host.approval_status == "approved")
                 .all()
             )
+            if hasattr(run.engine, "collection_queries"):  # S2-era engines lack it
+                collection.collect(
+                    run.engine,
+                    run.db,
+                    hosts,
+                    [e["rule"] for e in entries],
+                    run.now,
+                    run.summary,
+                )
             evaluated = _evaluate_hosts(run, hosts, entries)
             _evaluate_fleet_rules(run, entries, evaluated)
             run.summary["hosts"] += len(evaluated)
@@ -295,6 +308,11 @@ def run_one_tick() -> Dict[str, Any]:
         "pruned": 0,
         "host_errors": 0,
         "rule_errors": 0,
+        "collections_queued": 0,
+        "collections_refused": 0,
+        "collections_nothing_to_run": 0,
+        "collections_no_engine": 0,
+        "collections_pruned": 0,
     }
     engine = module_loader.get_module("advisor_engine")
     if engine is None or not hasattr(engine, "evaluate_host"):

@@ -96,6 +96,9 @@ class FakeEngine:
                     "rule_version": 1,
                     "lens": rule["lens"],
                     "outcome": "fires" if rows else "does_not_fire",
+                    "impact": 3,
+                    "likelihood": 3,
+                    "risk": 9 if rows else None,
                     "match_count": len(rows),
                     "matches": rows,
                 }
@@ -194,6 +197,7 @@ class TestTick:
         assert len(results) == 1
         row = results[("shared", "AVAIL-001", str(host.id))]
         assert row.outcome == "fires" and row.match_count == 1
+        assert (row.impact, row.likelihood, row.risk) == (3, 3, 9)
 
     def test_a_tenant_rule_sharing_a_curated_key_keeps_its_own_outcome(
         self, make_session

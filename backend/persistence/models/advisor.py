@@ -190,6 +190,8 @@ class AdvisorResult(Base):
         # "what is not assessable, and why" -- both filter on outcome.
         Index("ix_advisor_result_rule_outcome", "rule_source", "rule_key", "outcome"),
         Index("ix_advisor_result_outcome", "outcome"),
+        # The feed's ordering: the worst findings first.
+        Index("ix_advisor_result_risk", "outcome", "risk"),
     )
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
@@ -212,6 +214,13 @@ class AdvisorResult(Base):
     )
     rule_version = Column(Integer, nullable=True)
     lens = Column(String(32), nullable=True)
+    # The rule's scores as of this evaluation (S3). ``risk`` is impact x
+    # likelihood and exists ONLY for ``fires`` -- a host with no finding has
+    # no finding risk, and a host that could not be assessed must never read
+    # as risk 0.
+    impact = Column(Integer, nullable=True)
+    likelihood = Column(Integer, nullable=True)
+    risk = Column(Integer, nullable=True)
     outcome = Column(String(32), nullable=False)
     # For not_assessable / not_applicable: EVERY gap, each
     # ``{evidence, reason[, columns, age_days, max_age_days, detail]}``.

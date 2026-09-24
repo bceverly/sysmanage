@@ -9872,14 +9872,37 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       peer group -- a host has several and none is "its", so those fleet
       rules resolve `not_assessable` until one is defined.
 
-- [ ] **S2b -- Advisor-owned fact collection.** The S0 finding that makes
+- [x] **S2b -- Advisor-owned fact collection.** The S0 finding that makes
       fact rules usable: the advisor keeps a query-pack assignment of its own
       that collects `SELECT *` over exactly the contract tables its enabled
       rules require, named `advisor.<table>` (what `advisor_evidence` reads),
       on hosts that serve them, at an interval inside the facts freshness
       limit. Reuses the query-pack tick and dispatch -- no second path.
 
-- [ ] **S3 -- Risk scoring that WITHHOLDS.** impact x likelihood, and the part
+      **DONE 2026-09-24, two refinements of the plan above.** (1) Not
+      `SELECT *`: `advisor_engine.collection_queries` selects the UNION of
+      the columns the enabled rules declare per table -- `processes` is
+      hundreds of rows a host, daily, and unread columns are cost for
+      nothing. (2) Not an assignment row: an assignment targets a host, tag
+      or site, and "every host the rules need" is none of those.
+      `advisor_collection` dispatches runs itself (pack name
+      `advisor-facts`, visible in Recent Runs) through the SAME
+      `start_run` / `build_payload` / `queue_run` path, on the advisor tick,
+      before evaluation. Due-ness is derived: every 12h (half the 1-day facts
+      limit, so one missed collection is not `stale`), immediately when a
+      rule starts needing a table the last run did not collect, never while
+      a run is pending inside a 6h grace (an offline host would otherwise
+      take a command every tick). Bounded storage -- query-pack runs have no
+      retention: per host only the newest completed advisor run (and an
+      in-grace pending one) is kept. A refused command (an agent too old for
+      `run_query_pack`) is a savepoint rollback, not a lost evaluation pass.
+      Dry run on real hosts: each asked exactly `advisor.listening_ports` +
+      `advisor.mounts` with the declared columns; x13s (Windows) had
+      `mounts` filtered as `wrong_platform` by the query-pack engine.
+      Fact rules still read `columns_not_advertised` until agents report
+      fact contract v3.
+
+- [x] **S3 -- Risk scoring that WITHHOLDS.** impact x likelihood, and the part
       that is easy to get quietly wrong: a host whose evidence was
       unassessable gets NO score and NO grade, not a low one. `vuln_engine`
       already has the shape to copy (`RISK_LEVEL_UNKNOWN`, `unknown_hosts` /
@@ -9887,6 +9910,23 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       rollups must exclude unassessed hosts from every average rather than
       averaging them in as zero -- otherwise adding blind spots improves the
       score, which is precisely backwards.
+
+      **DONE 2026-09-24.** Engine (`scoring.pxi`): a finding's risk is
+      impact x likelihood, set on a result ONLY when it fires; a host scores
+      its WORST finding x4 (0..100 -- twenty trivial findings must not
+      outrank one critical); levels CRITICAL >= 80 / HIGH >= 60 / MEDIUM >= 36
+      / LOW / NONE, and UNKNOWN with score None. NONE only when every
+      applicable rule was ASSESSED; one unassessable rule and no finding is
+      UNKNOWN; findings plus gaps score, flagged `complete: false` (a floor).
+      `score_fleet` averages assessed hosts only and reports unknown and
+      incomplete counts beside it (tested: nine blind spots leave the average
+      unchanged). Server: migration `q8advisorrisk` (impact / likelihood /
+      risk on `advisor_result`, index for the feed's worst-first order);
+      `advisor_scoring` scores every APPROVED host -- one with no rows yet
+      counts as UNKNOWN rather than vanishing from the denominator. Real
+      data (theeverlys, read-only): gdr-t14 36 MEDIUM, incomplete; the other
+      five UNKNOWN (t480 had four clean rules and gaps -- not graded clean);
+      fleet average 36.0 over 1 assessed host of 6.
 
 - [ ] **S4 -- Recommendation feed + API.** Per-host and fleet. `not_assessable`
       is its own column beside the findings and is NEVER folded into "no
