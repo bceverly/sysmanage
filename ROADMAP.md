@@ -9736,7 +9736,15 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       * **Also seen:** the Ubuntu fetcher keeps ONE row per (CVE, package)
         across all releases -- whichever "released" status came first,
         including the `upstream` pseudo-release -- so a host is judged against
-        another release's fix.
+        another release's fix. **FIXED 2026-09-24:** per-release rows
+        (`shared_package_vulnerability.release`, `s13cverelease`) for Ubuntu
+        and Debian, plus a one-time Ubuntu BACKFILL over the whole feed
+        (~80k CVEs, ~4,000 pages) while any cross-release row survives. The
+        first backfill died at page 395: `_http_get_with_retry` retried only
+        5xx, so one timeout (whose httpx message is EMPTY -- the log read
+        "HTTP error fetching Ubuntu data: " and nothing else) ended it, and
+        each run restarts from page 1. Now timeouts, resets and 429
+        (Retry-After) are retried too, and every feed's error names its type.
       Same pass: the USN advisory fetcher asked for `limit=200` in one request
       and Ubuntu's API now answers 422 above 20 -- every scheduled advisory
       refresh failed while the live test (limit 5) stayed green. It pages now.
@@ -9820,13 +9828,56 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
         Pro+ `MODULES` at `enterprise`). No feature code yet -- nothing is gated
         behind one until the S4 API.
 
-- [ ] **S2 -- `advisor_engine` + the partition split.** New Cython engine, the
+- [x] **S2 -- `advisor_engine` + the partition split.** New Cython engine, the
       registrations already done in S1 (see there), shared chain
       for the rule catalog, tenant chain for recommendations and
       tenant-authored rules. Evaluation only: rules x hosts -> outcomes. No
       scoring, no feed, no UI. Engine reads coverage through the frozen
       `ProPlusServices` bundle (mounted by `call_engine_router`'s
       `inspect.signature` gate -- never passed as `services=`).
+
+      **DONE 2026-09-24.** Storage: shared chain `s14advisor`
+      (`shared_advisor_rule_pack` / `shared_advisor_rule`), tenant chain
+      `q7advisor` (`advisor_rule`, `advisor_result` -- one row per
+      host x rule, soft ref to the curated rule, every gap stored).
+      Engine (`evaluator.pxi`): `evaluate_host` materializes one host's
+      evidence into in-memory SQLite (fixed-schema `sm_*` views, fact tables
+      with every declared column) and resolves requirements BEFORE any SQL;
+      a broken or runaway `when` (progress-handler budget) or a rule failing
+      the contract is `not_assessable` / `rule_error`, never does-not-fire;
+      `evaluate_fleet` compares only assessed hosts within their peer group,
+      fewer than two -> `insufficient_peers`. OSS: `advisor_evidence.gather`
+      reads each domain from its own clock; `advisor_tick` (15 min, every
+      database) evaluates every APPROVED host -- down ones too, so a stale
+      outcome ages into `stale` instead of standing as current -- matches
+      results to rules by position (a tenant rule may reuse a curated key),
+      keeps a host's previous rows when its evidence cannot be gathered, and
+      does not prune curated results when the catalog is unreadable.
+      **Deviation, deliberate:** S2 mounts no router, so the services bundle
+      is not in play yet; the tick calls `host_facts` directly and the engine
+      stays DB-free. S4's API mounts through `call_engine_router` as written.
+      **Real data (theeverlys, 6 hosts x 9 S0 rules, read-only):** 2 fires,
+      11 does-not-fire, 1 not_applicable (`mounts` on Windows), 40
+      not_assessable, every one with its reason. It found a defect no unit
+      test had: `timestamptz` evidence is AWARE, the engine's clock naive --
+      the subtraction raised for every scanned host, which the tick would
+      have turned into "keep previous results" for the whole fleet. Both
+      sides now normalize to naive UTC (`_utc_naive`), with a test.
+      **Deferred, each visible rather than guessed:** (1) fact collection --
+      fact rows are read from `advisor.<table>` query-pack results and
+      nothing dispatches them yet, so every fact rule is `not_collected`
+      (and on today's agents `columns_not_advertised`, until they report
+      contract v3); see S2b. (2) Tenant freshness overrides -- the engine
+      takes them, nothing stores them; defaults apply. (3) `package_manager`
+      peer group -- a host has several and none is "its", so those fleet
+      rules resolve `not_assessable` until one is defined.
+
+- [ ] **S2b -- Advisor-owned fact collection.** The S0 finding that makes
+      fact rules usable: the advisor keeps a query-pack assignment of its own
+      that collects `SELECT *` over exactly the contract tables its enabled
+      rules require, named `advisor.<table>` (what `advisor_evidence` reads),
+      on hosts that serve them, at an interval inside the facts freshness
+      limit. Reuses the query-pack tick and dispatch -- no second path.
 
 - [ ] **S3 -- Risk scoring that WITHHOLDS.** impact x likelihood, and the part
       that is easy to get quietly wrong: a host whose evidence was

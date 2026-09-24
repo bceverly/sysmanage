@@ -11,6 +11,7 @@ All models are re-exported here for backward compatibility.
 
 # Re-export all models for backward compatibility
 from .access_groups import *
+from .advisor import *
 from .advisory import *
 from .airgap import *
 from .airgap_bundle import *
