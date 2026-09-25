@@ -9745,6 +9745,28 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
         "HTTP error fetching Ubuntu data: " and nothing else) ended it, and
         each run restarts from page 1. Now timeouts, resets and 429
         (Retry-After) are retried too, and every feed's error names its type.
+        **Backfill COMPLETED 2026-09-25** (80,456 CVEs, 12 retries, 4.2h):
+        386,126 cross-release rows removed, 0 NULL-release Ubuntu rows left.
+        gdr-t14 (26.04 `resolute`) went 216 findings / 8 critical -> 11 -> 3
+        / 0 critical, the last step from two more defects its 11 exposed:
+        * **Version order was an approximation, now dpkg's `verrevcmp`**
+          (`vuln_engine/version_order.pxi`, ported to `advisory_engine`).
+          Splitting on `. - _ +` lost separator order (snapd `2.76.3+ubuntu26.04`
+          read OLDER than `2.76+ubuntu26.04.3`), ranked letters above digits
+          (`1.0a` > `1.0.1`) and compared `ubuntu10` < `ubuntu2`. Differential
+          test vs `dpkg --compare-versions` on 5,000 same-package pairs of real
+          feed versions: old 76 mismatches (1.5%), new 0.
+        * **The epoch drop was right for Red Hat only.** Per-release Ubuntu
+          and Debian rows carry epochs (22,321 / 23,468 rows), so an
+          epoch-less bound there means the package had none; dropping the
+          installed epoch read Ubuntu's transitional firefox `1:1snap1` as
+          older than a 2019 `67.0` fix. Now pure EVR for `ubuntu`/`debian`,
+          drop kept for feeds that never record epochs (Red Hat: 0 of 6,406).
+        Remaining on gdr-t14: mailcap (a 24.04 version left on the 26.04 host
+        -- real) and 2x coreutils `9.5-...+0.0.0~ubuntu25` vs a GNU `9.7` fix:
+        dpkg-correct, but the installed package looks like 26.04's
+        coreutils -> rust-coreutils transitional, which the feed's source may
+        not describe. Open question, not guessed at.
       Same pass: the USN advisory fetcher asked for `limit=200` in one request
       and Ubuntu's API now answers 422 above 20 -- every scheduled advisory
       refresh failed while the live test (limit 5) stayed green. It pages now.
