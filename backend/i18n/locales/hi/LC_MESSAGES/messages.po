@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 06:37-0400\n"
+"POT-Creation-Date: 2026-09-25 17:31-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -142,12 +142,12 @@ msgstr "CA प्रमाणपत्र प्राप्त करने म
 #: backend/api/certificates.py:84 backend/api/certificates.py:139
 #: backend/api/file_watches.py:216 backend/api/file_watches.py:420
 #: backend/api/config_mgmt_drift.py:165 backend/api/config_mgmt_drift.py:198
-#: backend/api/query_packs.py:344 backend/api/query_packs.py:440
-#: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
-#: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
-#: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:473
-#: backend/api/firewall_roles.py:544
+#: backend/api/advisor.py:254 backend/api/query_packs.py:344
+#: backend/api/query_packs.py:440 backend/api/config_mgmt_inventories.py:355
+#: backend/api/host_graylog.py:89 backend/api/config_mgmt_profiles.py:340
+#: backend/api/diagnostics.py:87 backend/api/diagnostics.py:222
+#: backend/api/error_constants.py:48 backend/api/antivirus_status.py:213
+#: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "अमान्य होस्ट ID फॉर्मेट"
@@ -157,7 +157,8 @@ msgstr "अमान्य होस्ट ID फॉर्मेट"
 #: backend/api/graylog_integration.py:187 backend/api/package_handlers.py:62
 #: backend/api/package_handlers.py:547 backend/api/package_compliance.py:316
 #: backend/api/package_compliance.py:442 backend/api/config_mgmt_drift.py:168
-#: backend/api/config_mgmt_drift.py:203 backend/api/grafana_integration.py:329
+#: backend/api/config_mgmt_drift.py:203 backend/api/advisor.py:256
+#: backend/api/grafana_integration.py:329
 #: backend/api/config_mgmt_remediation.py:433
 #: backend/api/image_mode_actions.py:86 backend/api/host_graylog.py:131
 #: backend/api/tag.py:498 backend/api/tag.py:652
@@ -1628,7 +1629,8 @@ msgstr ""
 "जारी कर दी गई है"
 
 #: backend/api/file_watches.py:107 backend/api/config_mgmt_drift.py:191
-#: backend/api/query_packs.py:116 backend/api/config_mgmt_inventories.py:110
+#: backend/api/advisor.py:91 backend/api/query_packs.py:116
+#: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/config_mgmt_jobs.py:167 backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50
@@ -1933,6 +1935,26 @@ msgstr ""
 #: backend/api/config_mgmt_prereq.py:345
 msgid "Installation of the config-management prerequisite was requested"
 msgstr "कॉन्फ़िगरेशन मैनेजमेंट पूर्वापेक्षा की स्थापना का अनुरोध किया गया"
+
+#: backend/api/advisor.py:108
+msgid "The advisor rule was rejected"
+msgstr "सलाहकार नियम को अस्वीकार कर दिया गया"
+
+#: backend/api/advisor.py:124
+msgid "Invalid advisor rule ID format"
+msgstr "अमान्य सलाहकार नियम ID फॉर्मेट"
+
+#: backend/api/advisor.py:127
+msgid "Advisor rule not found"
+msgstr "सलाहकार नियम नहीं मिला"
+
+#: backend/api/advisor.py:140
+msgid "An advisor rule with this ID already exists"
+msgstr "इस ID वाला सलाहकार नियम पहले से मौजूद है"
+
+#: backend/api/advisor.py:268
+msgid "Invalid advisor rule filter"
+msgstr "अमान्य सलाहकार नियम फ़िल्टर"
 
 #: backend/api/grafana_integration.py:319
 msgid "Permission denied: ENABLE_GRAFANA_INTEGRATION role required"

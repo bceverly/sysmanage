@@ -13,6 +13,7 @@ from fastapi import FastAPI
 
 from backend.api import (
     access_groups,
+    advisor,
     advisory_actions,
     agent,
     agent_poll,
@@ -414,6 +415,10 @@ def register_routes(app: FastAPI):
     logger.debug("Adding query-packs router (Phase 21.1 S4)")
     _include_versioned(app, query_packs.router, tags=["query-packs"])
     logger.debug("Query-packs router added")
+
+    logger.debug("Adding advisor router (Phase 21.2 S4)")
+    _include_versioned(app, advisor.router, tags=["advisor"])
+    logger.debug("Advisor router added")
 
     logger.debug("Adding file-watches router (Phase 21.1 S7)")
     _include_versioned(app, file_watches.router, tags=["config-management"])

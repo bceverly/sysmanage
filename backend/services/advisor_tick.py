@@ -297,12 +297,8 @@ def _tick_one_database(run: _Pass, shared_entries) -> None:
         run.db.rollback()
 
 
-def run_one_tick() -> Dict[str, Any]:
-    """Evaluate every database once. Never raises.
-
-    Public so an operator endpoint or a test can drive exactly one tick.
-    """
-    summary: Dict[str, Any] = {
+def _new_summary() -> Dict[str, Any]:
+    return {
         "hosts": 0,
         "results": 0,
         "pruned": 0,
@@ -314,6 +310,27 @@ def run_one_tick() -> Dict[str, Any]:
         "collections_no_engine": 0,
         "collections_pruned": 0,
     }
+
+
+def evaluate_database(db_session, label: str = "request") -> Dict[str, Any]:
+    """Evaluate ONE database now -- the S4 "evaluate now" endpoint, scoped to
+    the caller's tenant rather than every tenant on the server. Never raises;
+    the session is the caller's and is left open."""
+    summary = _new_summary()
+    engine = module_loader.get_module("advisor_engine")
+    if engine is None or not hasattr(engine, "evaluate_host"):
+        return summary
+    run = _Pass(engine=engine, db=db_session, label=label, now=_now(), summary=summary)
+    _tick_one_database(run, load_shared_rules())
+    return summary
+
+
+def run_one_tick() -> Dict[str, Any]:
+    """Evaluate every database once. Never raises.
+
+    Public so an operator endpoint or a test can drive exactly one tick.
+    """
+    summary = _new_summary()
     engine = module_loader.get_module("advisor_engine")
     if engine is None or not hasattr(engine, "evaluate_host"):
         # Not licensed, or an S1-era engine with the contract but no evaluator.

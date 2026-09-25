@@ -9950,12 +9950,35 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       five UNKNOWN (t480 had four clean rules and gaps -- not graded clean);
       fleet average 36.0 over 1 assessed host of 6.
 
-- [ ] **S4 -- Recommendation feed + API.** Per-host and fleet. `not_assessable`
+- [x] **S4 -- Recommendation feed + API.** Per-host and fleet. `not_assessable`
       is its own column beside the findings and is NEVER folded into "no
       recommendations" -- same rule the Recent Runs screen follows for *Not
       covered* beside *Failed*. Results stored per ROW (one row per
       rule/host/outcome), not one document per evaluation: every consumer
       wants "which hosts match this condition", which is a query over rows.
+
+      **DONE 2026-09-25.** `backend/api/advisor.py`, gated on the router by
+      `advisor_engine`: rules (curated + tenant, each with its validation
+      CODES), tenant rule create / update / delete / validate (script roles,
+      as query packs; a rejected rule returns every `{code, field}` -- the UI
+      owns the wording), `GET /advisor/feed` (one entry per rule, worst
+      first, `hosts_not_assessable` and its `gap_reasons` beside
+      `hosts_firing`, totals + the S3 fleet score; a rule that fires nowhere
+      but is blind somewhere ranks ABOVE a clean one), `GET
+      /advisor/hosts/{id}` (score, findings with rendered remediation,
+      not_assessable / not_applicable with their gaps), `GET
+      /advisor/rules/{source}/{key}/hosts?outcome=`, and `POST
+      /advisor/evaluate` (this tenant only, RUN_SCRIPT -- a pass may dispatch
+      fact collections). Disabling or re-keying a rule clears its standing
+      outcomes at once rather than leaving them in the feed until the next
+      tick. Engine: `render_remediation` fills plain `{column}` fields only
+      -- never `str.format`, which would let a tenant-authored template reach
+      attributes. **Deviation, deliberate:** the API follows the query-pack
+      shape (server-side router, engine decides) rather than an
+      engine-provided router via `call_engine_router`: the feed is
+      server-side joins, and the engine has no database. 16 API tests through
+      the real router on a real schema; 5 new backend strings hand-translated
+      in all 13 locales (`msgfmt --check-format` clean, i18n-strict OK).
 
 - [ ] **S5 -- Remediation generation, PROPOSAL ONLY.** Generates a config
       profile or playbook through 20.1's existing adapters and dispatches via
