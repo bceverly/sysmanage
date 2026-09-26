@@ -46,6 +46,7 @@ from backend.persistence.partitions import (
 )
 from backend.services import advisor_collection as collection
 from backend.services import advisor_evidence as ev
+from backend.services import advisor_proposals as proposals
 
 logger = logging.getLogger(__name__)
 
@@ -170,12 +171,17 @@ class _Pass:
         self.summary["results"] += 1
 
     def prune(self, active_keys) -> None:
-        """Drop outcomes of rules that are no longer in this database's rule set."""
+        """Drop outcomes of rules that are no longer in this database's rule
+        set, and withdraw the fixes they had proposed."""
+        gone = set()
         for key, row in list(self.existing.items()):
             if (key[1], key[2]) not in active_keys:
                 self.db.delete(row)
                 del self.existing[key]
+                gone.add((key[1], key[2]))
                 self.summary["pruned"] += 1
+        for source, rule_key in gone:
+            proposals.withdraw_for(self.db, source, rule_key)
 
 
 def _evaluate_hosts(run: _Pass, hosts, entries) -> List[Tuple[Any, Any, List, List]]:
@@ -221,6 +227,7 @@ def _evaluate_hosts(run: _Pass, hosts, entries) -> List[Tuple[Any, Any, List, Li
             continue
         for entry, result in zip(host_entries, results):
             run.store(host.id, entry, result)
+            proposals.sync(run.db, host.id, entry, result, run.summary)
     return evaluated
 
 
@@ -309,6 +316,7 @@ def _new_summary() -> Dict[str, Any]:
         "collections_nothing_to_run": 0,
         "collections_no_engine": 0,
         "collections_pruned": 0,
+        "proposals_opened": 0,
     }
 
 

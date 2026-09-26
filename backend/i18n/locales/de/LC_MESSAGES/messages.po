@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 17:31-0400\n"
+"POT-Creation-Date: 2026-09-26 06:54-0400\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -142,12 +142,13 @@ msgstr "Fehler beim Abrufen des CA-Zertifikats: %s"
 #: backend/api/certificates.py:84 backend/api/certificates.py:139
 #: backend/api/file_watches.py:216 backend/api/file_watches.py:420
 #: backend/api/config_mgmt_drift.py:165 backend/api/config_mgmt_drift.py:198
-#: backend/api/advisor.py:254 backend/api/query_packs.py:344
-#: backend/api/query_packs.py:440 backend/api/config_mgmt_inventories.py:355
-#: backend/api/host_graylog.py:89 backend/api/config_mgmt_profiles.py:340
-#: backend/api/diagnostics.py:87 backend/api/diagnostics.py:222
-#: backend/api/error_constants.py:48 backend/api/antivirus_status.py:213
-#: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
+#: backend/api/advisor.py:255 backend/api/advisor.py:324
+#: backend/api/query_packs.py:344 backend/api/query_packs.py:440
+#: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
+#: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
+#: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
+#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:473
+#: backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "Ungültiges Host-ID-Format"
@@ -157,7 +158,7 @@ msgstr "Ungültiges Host-ID-Format"
 #: backend/api/graylog_integration.py:187 backend/api/package_handlers.py:62
 #: backend/api/package_handlers.py:547 backend/api/package_compliance.py:316
 #: backend/api/package_compliance.py:442 backend/api/config_mgmt_drift.py:168
-#: backend/api/config_mgmt_drift.py:203 backend/api/advisor.py:256
+#: backend/api/config_mgmt_drift.py:203 backend/api/advisor.py:257
 #: backend/api/grafana_integration.py:329
 #: backend/api/config_mgmt_remediation.py:433
 #: backend/api/image_mode_actions.py:86 backend/api/host_graylog.py:131
@@ -1652,7 +1653,7 @@ msgstr ""
 "versendet"
 
 #: backend/api/file_watches.py:107 backend/api/config_mgmt_drift.py:191
-#: backend/api/advisor.py:91 backend/api/query_packs.py:116
+#: backend/api/advisor.py:92 backend/api/query_packs.py:116
 #: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/config_mgmt_jobs.py:167 backend/api/config_mgmt_profiles.py:136
@@ -1963,25 +1964,45 @@ msgstr ""
 "Die Installation der Voraussetzung für die Konfigurationsverwaltung wurde "
 "angefordert"
 
-#: backend/api/advisor.py:108
+#: backend/api/advisor.py:109
 msgid "The advisor rule was rejected"
 msgstr "Die Advisor-Regel wurde abgelehnt"
 
-#: backend/api/advisor.py:124
+#: backend/api/advisor.py:125
 msgid "Invalid advisor rule ID format"
 msgstr "Ungültiges Format der Advisor-Regel-ID"
 
-#: backend/api/advisor.py:127
+#: backend/api/advisor.py:128
 msgid "Advisor rule not found"
 msgstr "Advisor-Regel nicht gefunden"
 
-#: backend/api/advisor.py:140
+#: backend/api/advisor.py:141
 msgid "An advisor rule with this ID already exists"
 msgstr "Eine Advisor-Regel mit dieser ID existiert bereits"
 
-#: backend/api/advisor.py:268
+#: backend/api/advisor.py:269
 msgid "Invalid advisor rule filter"
 msgstr "Ungültiger Filter für Advisor-Regeln"
+
+#: backend/api/advisor.py:295
+msgid "Invalid advisor proposal ID format"
+msgstr "Ungültiges Format der Advisor-Vorschlags-ID"
+
+#: backend/api/advisor.py:298
+msgid "Advisor proposal not found"
+msgstr "Advisor-Vorschlag nicht gefunden"
+
+#: backend/api/advisor.py:318
+msgid "Invalid advisor proposal filter"
+msgstr "Ungültiger Filter für Advisor-Vorschläge"
+
+#: backend/api/advisor.py:351
+msgid "The advisor proposal could not be approved"
+msgstr "Der Advisor-Vorschlag konnte nicht genehmigt werden"
+
+#: backend/api/advisor.py:373
+msgid "The advisor proposal could not be rejected"
+msgstr "Der Advisor-Vorschlag konnte nicht abgelehnt werden"
 
 #: backend/api/grafana_integration.py:319
 msgid "Permission denied: ENABLE_GRAFANA_INTEGRATION role required"
@@ -5364,11 +5385,11 @@ msgstr "Servernachrichtenwarteschlange erfolgreich initialisiert"
 msgid "Rate limit exceeded. Please retry later."
 msgstr "Rate limit erreicht. Bitte später erneut versuchen."
 
-#: backend/services/agent_capability_service.py:244
+#: backend/services/agent_capability_service.py:262
 msgid "this host"
 msgstr "diesem Host"
 
-#: backend/services/agent_capability_service.py:247
+#: backend/services/agent_capability_service.py:265
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "

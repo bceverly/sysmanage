@@ -198,6 +198,22 @@ def host_view(engine, db, host) -> Dict[str, Any]:
         grouped.setdefault(row.outcome, []).append(
             _result_dict(engine, row, rules.get(_key_of(row)))
         )
+    # S5: each finding's latest proposed fix, if its rule has one.
+    latest: Dict[Tuple[str, str], Any] = {}
+    for proposal in (
+        db.query(models.AdvisorProposal)
+        .filter(models.AdvisorProposal.host_id == host.id)
+        .order_by(models.AdvisorProposal.created_at)
+        .all()
+    ):
+        latest[(proposal.rule_source, proposal.rule_key)] = proposal
+    for finding in grouped[FIRES]:
+        proposal = latest.get((finding["source"], finding["key"]))
+        finding["proposal"] = (
+            {"id": str(proposal.id), "status": proposal.status, "kind": proposal.kind}
+            if proposal is not None
+            else None
+        )
     grouped[FIRES].sort(key=lambda r: (-(r["risk"] or 0), r["key"]))
     for outcome in (NOT_ASSESSABLE, NOT_APPLICABLE, DOES_NOT_FIRE):
         grouped[outcome].sort(key=lambda r: r["key"])

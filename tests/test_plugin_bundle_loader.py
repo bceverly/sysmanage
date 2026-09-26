@@ -580,3 +580,63 @@ class TestPluginBundleLoaderSavePluginToCache:
         assert mock_existing.version == "1.0.0"
         mock_session.commit.assert_called_once()
         mock_session.add.assert_not_called()
+
+
+class TestFailedDownloadLogging:
+    """A 404 for an engine with no UI plugin is normal, not an error (2026-09-26).
+
+    Thirteen engines ship no plugin, and every startup logged each as
+    "Plugin download failed ... 404" at ERROR. The license server says which
+    404 is which: no bundle REGISTERED for the code is normal; a registered
+    bundle whose FILE is missing is a fault.
+    """
+
+    URL = "https://license.example/api/v1/modules/download-plugin/advisor_engine/latest"
+
+    @staticmethod
+    def _response(status, body):
+        response = MagicMock()
+        response.status = status
+        response.json = AsyncMock(return_value=body)
+        return response
+
+    def _log(self, status, body):
+        import asyncio  # noqa: PLC0415
+
+        from backend.licensing import plugin_bundle_loader as pbl  # noqa: PLC0415
+
+        with patch.object(pbl, "logger") as logger:
+            asyncio.run(
+                pbl.PluginBundleLoader._log_failed_download(
+                    self.URL, self._response(status, body)
+                )
+            )
+        return logger
+
+    def test_no_bundle_registered_is_info_and_names_the_engine(self):
+        logger = self._log(
+            404, {"detail": "Plugin bundle not found for specified code/version"}
+        )
+        logger.error.assert_not_called()
+        assert logger.info.call_args.args[1] == "advisor_engine"
+
+    def test_a_registered_bundle_with_no_file_is_an_error(self):
+        logger = self._log(404, {"detail": "Plugin bundle file not found on server"})
+        logger.error.assert_called_once()
+        assert "file not found" in logger.error.call_args.args[3]
+
+    @pytest.mark.parametrize("status", [401, 403, 500])
+    def test_other_failures_stay_errors(self, status):
+        self._log(status, {"detail": "nope"}).error.assert_called_once()
+
+    def test_a_body_that_is_not_json_is_an_error(self):
+        response = MagicMock()
+        response.status = 404
+        response.json = AsyncMock(side_effect=ValueError("html"))
+        import asyncio  # noqa: PLC0415
+
+        from backend.licensing import plugin_bundle_loader as pbl  # noqa: PLC0415
+
+        with patch.object(pbl, "logger") as logger:
+            asyncio.run(pbl.PluginBundleLoader._log_failed_download(self.URL, response))
+        logger.error.assert_called_once()

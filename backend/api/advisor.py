@@ -50,6 +50,7 @@ from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import advisor_feed as feed
+from backend.services import advisor_proposals as proposals
 from backend.services import advisor_tick as tick
 
 logger = logging.getLogger(__name__)
@@ -281,3 +282,97 @@ async def evaluate_now(
     """
     _require_role(current_user, SecurityRoles.RUN_SCRIPT)
     return await run_in_threadpool(tick.evaluate_database, db, "api")
+
+
+# ---------------------------------------------------------------------------
+# remediation proposals (S5)
+# ---------------------------------------------------------------------------
+
+
+def _proposal(db: Session, proposal_id: str) -> models.AdvisorProposal:
+    row = db.get(
+        models.AdvisorProposal,
+        _as_uuid(proposal_id, _("Invalid advisor proposal ID format")),
+    )
+    if row is None:
+        raise HTTPException(status_code=404, detail=_("Advisor proposal not found"))
+    return row
+
+
+def _proposal_out(db: Session, row) -> Dict[str, Any]:
+    host = db.get(models.Host, row.host_id)
+    return proposals.proposal_dict(db, row, fqdn=host.fqdn if host else None)
+
+
+@router.get("/advisor/proposals")
+async def list_proposals(
+    status: Optional[str] = None,
+    host_id: Optional[str] = None,
+    db: Session = Depends(get_tenant_db),
+) -> Dict[str, Any]:
+    """Fixes the advisor proposes, newest first. Filter by status or host."""
+    query = db.query(models.AdvisorProposal)
+    if status is not None:
+        if status not in models.ADVISOR_PROPOSAL_STATUSES:
+            raise HTTPException(
+                status_code=400, detail=_("Invalid advisor proposal filter")
+            )
+        query = query.filter(models.AdvisorProposal.status == status)
+    if host_id is not None:
+        query = query.filter(
+            models.AdvisorProposal.host_id
+            == _as_uuid(host_id, _("Invalid host ID format"))
+        )
+    rows = query.order_by(models.AdvisorProposal.created_at.desc()).all()
+    return {"proposals": [_proposal_out(db, row) for row in rows]}
+
+
+@router.post("/advisor/proposals/{proposal_id}/approve")
+async def approve_proposal(
+    proposal_id: str,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """Apply a proposed fix -- through the ordinary config-profile path, so it
+    waits for the host's maintenance window like any other change.
+
+    RUN_SCRIPT, the role that already gates applying a remediation.
+    """
+    _require_role(current_user, SecurityRoles.RUN_SCRIPT)
+    row = _proposal(db, proposal_id)
+    try:
+        proposals.approve(db, row, current_user.userid)
+    except proposals.ProposalError as exc:
+        # The decision and its failure are recorded; the operator sees why.
+        db.commit()
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "message": _("The advisor proposal could not be approved"),
+                "reason": exc.code,
+            },
+        ) from exc
+    db.commit()
+    return _proposal_out(db, row)
+
+
+@router.post("/advisor/proposals/{proposal_id}/reject")
+async def reject_proposal(
+    proposal_id: str,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    _require_role(current_user, SecurityRoles.RUN_SCRIPT)
+    row = _proposal(db, proposal_id)
+    try:
+        proposals.reject(row, current_user.userid)
+    except proposals.ProposalError as exc:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "message": _("The advisor proposal could not be rejected"),
+                "reason": exc.code,
+            },
+        ) from exc
+    db.commit()
+    return _proposal_out(db, row)

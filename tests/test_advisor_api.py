@@ -301,3 +301,87 @@ class TestEvaluate:
     def test_evaluate_needs_run_script(self, client):
         User.allowed = False
         assert client.post("/api/v1/advisor/evaluate").status_code == 403
+
+
+class TestProposals:
+    def _proposal(self, db_factory, host, status="proposed"):
+        with db_factory() as db:
+            row = models.AdvisorProposal(
+                id=uuid.uuid4(),
+                host_id=host.id,
+                rule_source="tenant",
+                rule_key="SEC-001",
+                kind="generate",
+                engine="ansible-core",
+                content="- hosts: all\n",
+                packages=["openssl"],
+                fingerprint="f",
+                status=status,
+                created_at=NOW,
+                updated_at=NOW,
+            )
+            db.add(row)
+            db.commit()
+            return row
+
+    def test_list_and_filter(self, client, db_factory):
+        host = _host(db_factory)
+        self._proposal(db_factory, host)
+        self._proposal(db_factory, host, status="rejected")
+        body = client.get("/api/v1/advisor/proposals?status=proposed").json()
+        assert [p["status"] for p in body["proposals"]] == ["proposed"]
+        assert body["proposals"][0]["fqdn"] == "h1"
+        assert client.get("/api/v1/advisor/proposals?status=bogus").status_code == 400
+
+    def test_approve_goes_through_the_existing_apply_path(self, client, db_factory):
+        host = _host(db_factory)
+        row = self._proposal(db_factory, host)
+        with patch(
+            "backend.services.advisor_proposals.remediation.apply_remediation",
+            return_value="cmd-1",
+        ) as applied:
+            response = client.post(f"/api/v1/advisor/proposals/{row.id}/approve")
+        assert response.status_code == 200, response.text
+        assert response.json()["status"] == "approved"
+        assert response.json()["command_id"] == "cmd-1"
+        applied.assert_called_once()
+
+    def test_a_failed_approval_is_recorded_and_explained(self, client, db_factory):
+        host = _host(db_factory)
+        row = self._proposal(db_factory, host)
+        with patch(
+            "backend.services.advisor_proposals.remediation.apply_remediation",
+            side_effect=RuntimeError("unsupported"),
+        ):
+            response = client.post(f"/api/v1/advisor/proposals/{row.id}/approve")
+        assert response.status_code == 409
+        assert response.json()["detail"]["reason"] == "not_queued"
+        listed = client.get("/api/v1/advisor/proposals?status=failed").json()
+        assert len(listed["proposals"]) == 1
+
+    def test_reject_and_decide_only_once(self, client, db_factory):
+        host = _host(db_factory)
+        row = self._proposal(db_factory, host)
+        assert (
+            client.post(f"/api/v1/advisor/proposals/{row.id}/reject").json()["status"]
+            == "rejected"
+        )
+        assert (
+            client.post(f"/api/v1/advisor/proposals/{row.id}/approve").status_code
+            == 409
+        )
+
+    def test_deciding_needs_run_script(self, client, db_factory):
+        host = _host(db_factory)
+        row = self._proposal(db_factory, host)
+        User.allowed = False
+        assert (
+            client.post(f"/api/v1/advisor/proposals/{row.id}/approve").status_code
+            == 403
+        )
+
+    def test_unknown_proposal_is_404(self, client):
+        assert (
+            client.post(f"/api/v1/advisor/proposals/{uuid.uuid4()}/reject").status_code
+            == 404
+        )

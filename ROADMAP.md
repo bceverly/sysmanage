@@ -10002,13 +10002,40 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       the real router on a real schema; 5 new backend strings hand-translated
       in all 13 locales (`msgfmt --check-format` clean, i18n-strict OK).
 
-- [ ] **S5 -- Remediation generation, PROPOSAL ONLY.** Generates a config
+- [x] **S5 -- Remediation generation, PROPOSAL ONLY.** Generates a config
       profile or playbook through 20.1's existing adapters and dispatches via
       `config_mgmt_dispatch.queue_apply` -- the one dispatch path, one uuid for
       envelope and queue row. It must NOT grow a second one. Gated behind
       operator approval, then maintenance windows at `outbound_processor`
       release time (fail-open, blackout wins) -- the gate already exists and is
       in the right place; advisor supplies the proposal, not a new scheduler.
+
+      **DONE 2026-09-26 (code + tests; live check pending deploy).** A rule
+      may carry an optional `fix` (engine `fix.pxi`, validated with the rest
+      of the contract): `{"profile": name}` binds to a config profile the
+      tenant already has (the 20.1 remediation-library pattern), or
+      `{"generate": "package_upgrade", "column": ...}` generates an
+      ansible-core playbook upgrading the matched packages. Built during
+      evaluation from ALL matched rows, not the stored 20-row sample. A
+      generated fix is root-level configuration built from host evidence, so
+      every package name must match a strict pattern and is DROPPED (and
+      counted) otherwise -- never quoted-and-hoped; only apt/dnf/yum/zypper
+      rows. Tenant table `advisor_proposal` (migration `q9advisorfix`): the
+      tick only creates, refreshes or withdraws `proposed` rows; a
+      `fingerprint` of the fix means an operator is asked once per FIX, not
+      every tick (a rejected upgrade is not re-asked; a changed one is);
+      withdrawn when the rule stops firing, NOT when it merely becomes
+      unassessable. Approval (`POST /advisor/proposals/{id}/approve`,
+      RUN_SCRIPT) stores a generated fix as a real `ConfigProfile` and applies
+      it through `config_mgmt_remediation.apply_remediation` -- the existing
+      builder, `queue_apply`, capability refusal and maintenance-window hold,
+      with no new dispatch path; profile creation and queueing share one
+      savepoint so a refused command leaves no orphan profile, and the
+      decision is recorded either way (`failed` + reason code). The proposal
+      reports the `ConfigProfileRun` its command produced, and is `run: null`
+      -- never "applied" -- while a maintenance window holds it. The host
+      view shows each finding's proposal. 12 engine + 14 service + 6 API
+      tests; 5 new backend strings hand-translated in all 13 locales.
 
 - [ ] **S6 -- Curated rule packs as multi-tenant policy.** Shared catalog +
       per-tenant assignment, offline-updatable for air-gap. Same catalog /

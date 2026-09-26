@@ -128,6 +128,41 @@ class PluginBundleLoader:
                 logger.exception("Error querying cached plugin hash: %s", e)
                 return None
 
+    @staticmethod
+    async def _log_failed_download(url: str, response) -> None:
+        """Log a non-200 plugin download at the level it deserves.
+
+        Most engines ship NO UI plugin (query packs, advisor, virtualization
+        ... their screens live in the OSS frontend or do not exist yet), and
+        the license server answers those with 404 "Plugin bundle not found
+        for specified code/version" -- no bundle is registered for the code.
+        That is the normal answer, not a fault, and logging it as an ERROR put
+        thirteen false errors in every startup log. It is INFO.
+
+        Everything else stays an ERROR: a registered bundle whose FILE is
+        missing on the server ("Plugin bundle file not found on server"), an
+        entitlement refusal, a server error.
+        """
+        detail = ""
+        try:
+            body = await response.json(content_type=None)
+            detail = str((body or {}).get("detail") or "")
+        except Exception:  # pylint: disable=broad-except
+            pass  # a body that is not JSON: fall through to ERROR
+        if response.status == 404 and detail.startswith("Plugin bundle not found"):
+            logger.info(
+                "No UI plugin bundle published for %s (engines without a "
+                "plugin UI are normal)",
+                url.rstrip("/").rsplit("/", 2)[-2],
+            )
+            return
+        logger.error(
+            "Plugin download failed: %s returned %d%s",
+            url,
+            response.status,
+            f" ({detail})" if detail else "",
+        )
+
     async def _fetch_bundle_to_temp(
         self, url: str, license_key: str, temp_path: str
     ) -> Optional[tuple]:
@@ -143,11 +178,7 @@ class PluginBundleLoader:
                 timeout=aiohttp.ClientTimeout(total=DOWNLOAD_TIMEOUT),
             ) as response:
                 if response.status != 200:
-                    logger.error(
-                        "Plugin download failed: %s returned %d",
-                        url,
-                        response.status,
-                    )
+                    await self._log_failed_download(url, response)
                     return None
 
                 expected_hash = response.headers.get("X-Content-SHA512")

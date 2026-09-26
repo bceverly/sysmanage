@@ -235,3 +235,85 @@ class AdvisorResult(Base):
             f"<AdvisorResult(host_id={self.host_id}, rule={self.rule_key}, "
             f"outcome={self.outcome})>"
         )
+
+
+# ---------------------------------------------------------------------------
+# remediation proposals (S5)
+# ---------------------------------------------------------------------------
+
+ADVISOR_PROPOSAL_PROPOSED = "proposed"
+ADVISOR_PROPOSAL_APPROVED = "approved"
+ADVISOR_PROPOSAL_REJECTED = "rejected"
+ADVISOR_PROPOSAL_WITHDRAWN = "withdrawn"
+ADVISOR_PROPOSAL_FAILED = "failed"
+ADVISOR_PROPOSAL_STATUSES = (
+    ADVISOR_PROPOSAL_PROPOSED,
+    ADVISOR_PROPOSAL_APPROVED,
+    ADVISOR_PROPOSAL_REJECTED,
+    ADVISOR_PROPOSAL_WITHDRAWN,
+    ADVISOR_PROPOSAL_FAILED,
+)
+
+
+class AdvisorProposal(Base):
+    """A fix the advisor PROPOSES for one host's finding (S5).
+
+    Nothing here is ever applied without an operator: the evaluation tick
+    creates and refreshes ``proposed`` rows, and only an approval sends one --
+    through ``config_mgmt_remediation.apply_remediation``, the same path and
+    the same maintenance-window gate as any other config-profile change.
+
+    ``fingerprint`` identifies the FIX, not the finding: an operator who
+    rejected "upgrade openssl" is not asked again about the same upgrade
+    every fifteen minutes, but is asked when the fix changes (a new package
+    joins the list).
+    """
+
+    __tablename__ = "advisor_proposal"
+    __table_args__ = (
+        Index("ix_advisor_proposal_host_rule", "host_id", "rule_source", "rule_key"),
+        Index("ix_advisor_proposal_status", "status"),
+    )
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(
+        GUID(),
+        ForeignKey("host.id", ondelete=CASCADE_DELETE),
+        nullable=False,
+        index=True,
+    )
+    rule_source = Column(String(16), nullable=False)
+    rule_key = Column(String(64), nullable=False)
+    # SOFT reference to shared_advisor_rule.id; real FK to a tenant rule.
+    shared_rule_id = Column(GUID(), nullable=True)
+    rule_id = Column(
+        GUID(), ForeignKey("advisor_rule.id", ondelete=CASCADE_DELETE), nullable=True
+    )
+    # ``profile`` (bound to a named config profile) or ``generate``.
+    kind = Column(String(16), nullable=False)
+    profile_name = Column(String(255), nullable=True)
+    engine = Column(String(50), nullable=True)
+    content = Column(Text, nullable=True)
+    packages = Column(JSON, nullable=True)
+    skipped = Column(Integer, nullable=False, default=0)
+    fingerprint = Column(String(64), nullable=False)
+    status = Column(String(16), nullable=False, default=ADVISOR_PROPOSAL_PROPOSED)
+    # Why it was withdrawn or failed -- a code, never a composed sentence.
+    reason = Column(String(64), nullable=True)
+    created_at = Column(DateTime, nullable=False, default=_utcnow)
+    updated_at = Column(DateTime, nullable=False, default=_utcnow, onupdate=_utcnow)
+    decided_by = Column(String(255), nullable=True)
+    decided_at = Column(DateTime, nullable=True)
+    # What an approval produced: the profile applied (a generated fix is
+    # stored as a real ConfigProfile, so versioning and run history are
+    # reused) and the command id that correlates its ConfigProfileRun.
+    profile_id = Column(
+        GUID(), ForeignKey("config_profile.id", ondelete="SET NULL"), nullable=True
+    )
+    command_id = Column(String(36), nullable=True, index=True)
+
+    def __repr__(self):
+        return (
+            f"<AdvisorProposal(host_id={self.host_id}, rule={self.rule_key}, "
+            f"status={self.status})>"
+        )
