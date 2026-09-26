@@ -25,7 +25,8 @@ DUE-NESS IS DERIVED, NOT STORED
 -------------------------------
 A host is due when its newest completed advisor run is older than
 ``COLLECT_INTERVAL``, or when that run did not include every query the rules
-now need (a new rule reading a new table must not wait half a day). A run
+now need, or its rows lack a column they now read (a new rule reading a new
+table or column must not wait half a day). A run
 still pending inside ``PENDING_GRACE`` blocks another -- an offline host would
 otherwise collect a queued command every tick.
 
@@ -42,7 +43,7 @@ their result rows with them.
 
 import logging
 from datetime import timedelta
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from backend.persistence import models
 from backend.services import advisor_evidence as ev
@@ -79,24 +80,41 @@ def _pending(run) -> bool:
     return run.completed_at is None
 
 
-def _query_names(db, run) -> set:
+def _collected(db, run) -> Dict[str, Optional[set]]:
+    """``{query_name: columns the stored rows carry}`` for one run; ``None``
+    for a query that answered with no rows (nothing to judge columns by)."""
     result = models.QueryPackResultRow
-    return {
-        name
-        for (name,) in db.query(result.query_name)
-        .filter(result.run_id == run.id)
-        .distinct()
-    }
+    out: Dict[str, Optional[set]] = {}
+    for name, columns in db.query(result.query_name, result.columns).filter(
+        result.run_id == run.id
+    ):
+        if isinstance(columns, dict):
+            out[name] = (out.get(name) or set()) | set(columns)
+        else:
+            out.setdefault(name, None)
+    return out
 
 
-def is_due(db, runs, names, now) -> bool:
-    """Should this host be asked again? See DUE-NESS above."""
+def is_due(db, runs, queries, now) -> bool:
+    """Should this host be asked again? See DUE-NESS above.
+
+    Also due when a query's stored rows LACK a column the rules now read: a
+    rule that starts filtering on ``type`` must not be evaluated against rows
+    collected without it (every row would read NULL and silently not match).
+    """
     if any(_pending(r) and now - r.started_at < PENDING_GRACE for r in runs):
         return False
     completed = next((r for r in runs if not _pending(r)), None)
     if completed is None or now - completed.started_at >= COLLECT_INTERVAL:
         return True
-    return not set(names) <= _query_names(db, completed)
+    collected = _collected(db, completed)
+    for query in queries:
+        if query["name"] not in collected:
+            return True
+        have = collected[query["name"]]
+        if have is not None and not set(query.get("columns") or ()) <= have:
+            return True
+    return False
 
 
 def prune(db, runs, now) -> List[Any]:
@@ -142,13 +160,12 @@ def collect(engine, db, hosts, rules, now, summary: Dict[str, Any]) -> None:
     """Dispatch due collections and prune old ones, for ``hosts``. Never raises
     past a host: one host's failure must not stop the others'."""
     queries = engine.collection_queries(rules, ev.FACT_QUERY_PREFIX)
-    names = [q["name"] for q in queries]
     for host in hosts:
         try:
             found = _advisor_runs(db, host.id)
             runs = prune(db, found, now)
             summary["collections_pruned"] += len(found) - len(runs)
-            if not queries or not host.active or not is_due(db, runs, names, now):
+            if not queries or not host.active or not is_due(db, runs, queries, now):
                 continue
             outcome = _dispatch(db, host, queries)
             summary["collections_" + outcome] += 1

@@ -9923,6 +9923,28 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       `mounts` filtered as `wrong_platform` by the query-pack engine.
       Fact rules still read `columns_not_advertised` until agents report
       fact contract v3.
+      **Live test 2026-09-26 (S4 API against the running server, theeverlys):**
+      4 tenant rules created via `POST /advisor/rules`, `POST
+      /advisor/evaluate` -> 6 hosts x 4 rules = 24 results, one
+      `advisor-facts` run dispatched to gdr-t14 and back `success` in 2s.
+      It found that gdr-t14 reported contract v3 yet still read
+      `columns_not_advertised`: `agent_capability_service._facts` whitelisted
+      four keys and DROPPED `columns` on the way in, so every v3 agent was
+      blind to every fact rule -- invisible to the S1 tests, which built
+      coverage dicts by hand. Fixed (kept only when sent -- absent stays
+      absent), with tests through the real sanitizer into `host_facts`.
+      **Recheck after restart:** gdr-t14 now advertises columns for every
+      served table and the capacity rule EVALUATED -- firing on 56 `/snap`
+      squashfs mounts (100% full by design; the test rule lacked the S0
+      rule's `type` filter). Correcting the rule exposed a second defect:
+      rows collected before a rule read `type` carried no `type`, the filter
+      compared NULL, and the rule reported `does_not_fire` (live, confirmed)
+      while nothing re-collected until the 12h interval. Fixed both ways:
+      `collection_queries` declares its `columns`; `is_due` re-collects when
+      the stored rows lack one; `advisor_evidence` treats such rows as
+      `not_collected`. Verified live with the new code: `not_collected` +
+      a collection queued, then `does_not_fire` on complete rows (fullest
+      real filesystem `/` at 46.1%).
 
 - [x] **S3 -- Risk scoring that WITHHOLDS.** impact x likelihood, and the part
       that is easy to get quietly wrong: a host whose evidence was

@@ -91,6 +91,15 @@ def normalize_report(report: Any) -> Optional[Dict[str, Any]]:
             return {}
         return {str(k): v for k, v in sorted(value.items())}
 
+    def _columns(value):
+        if not isinstance(value, dict):
+            return None
+        return {
+            str(table): sorted({str(c) for c in cols if isinstance(c, str)})
+            for table, cols in sorted(value.items())
+            if isinstance(cols, list)
+        }
+
     def _facts(value):
         """Phase 21.1 fact coverage, or ``None`` when the agent sent none.
 
@@ -107,12 +116,21 @@ def normalize_report(report: Any) -> Optional[Dict[str, Any]]:
         if not isinstance(version, int) or version < 1:
             logger.warning("agent fact coverage has no usable contract_version")
             return None
-        return {
+        out = {
             "contract_version": version,
             "served": _str_map(value.get("served")),
             "unsupported": _str_map(value.get("unsupported")),
             "not_applicable": _str_map(value.get("not_applicable")),
         }
+        # 21.2 S1: the columns each served table's provider FILLS. Kept only
+        # when sent -- an absent key must stay absent, because
+        # ``host_facts.advertised_columns`` reads "never advertised" as a gap.
+        # It was dropped here until 2026-09-26, so every contract-v3 agent
+        # read as ``columns_not_advertised`` and every fact rule was blind.
+        columns = _columns(value.get("columns"))
+        if columns is not None:
+            out["columns"] = columns
+        return out
 
     commands = _str_list(report.get("commands"))
     if not commands:

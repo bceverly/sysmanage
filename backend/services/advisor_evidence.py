@@ -236,6 +236,11 @@ def gather(
         collected_at, rows = (
             (None, []) if gap is not None else _fact_rows(db, host, table)
         )
+        if rows and not set(columns) <= set().union(*(set(r) for r in rows)):
+            # Collected before a rule started reading these columns: every
+            # row would read NULL for them and silently not match. Not a
+            # collection of what the rules need -- the next one will be.
+            collected_at, rows = None, []
         evidence["facts"][table] = {"gap": gap, "collected_at": collected_at}
         if rows:
             tables[table] = rows

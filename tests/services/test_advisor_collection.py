@@ -60,7 +60,7 @@ def _host(db, active=True):
     return host
 
 
-def _run(db, host, started, completed=True, names=("advisor.mounts",), **kw):
+def _run(db, host, started, completed=True, names=("advisor.mounts",), row=None, **kw):
     run = models.QueryPackRun(
         id=uuid.uuid4(),
         host_id=host.id,
@@ -79,6 +79,7 @@ def _run(db, host, started, completed=True, names=("advisor.mounts",), **kw):
                 run_id=run.id,
                 query_name=name,
                 status="ok",
+                columns=row,
                 collected_at=started,
             )
         )
@@ -129,6 +130,22 @@ class TestDueness:
         host = _host(db)
         _run(db, host, NOW - timedelta(hours=1), names=("advisor.users",))
         assert _collect(db, [host])[0]["collections_queued"] == 1
+
+    def test_rows_lacking_a_newly_read_column_are_recollected(self, db):
+        """A rule that starts reading ``type`` must not be evaluated against
+        rows collected without it."""
+        host = _host(db)
+        _run(db, host, NOW - timedelta(hours=1), row={"path": "/"})
+        wider = [dict(QUERIES[0], columns=["path", "type"])]
+        assert (
+            _collect(db, [host], engine=Engine(queries=wider))[0]["collections_queued"]
+            == 1
+        )
+
+    def test_rows_with_every_column_are_not_recollected(self, db):
+        host = _host(db)
+        _run(db, host, NOW - timedelta(hours=1), row={"path": "/", "type": "ext4"})
+        assert _collect(db, [host])[0]["collections_queued"] == 0
 
     def test_a_pending_run_blocks_another_until_the_grace_ends(self, db):
         """An offline host must not collect a queued command every tick."""

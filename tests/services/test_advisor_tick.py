@@ -387,6 +387,16 @@ class TestEvidence:
             evidence, _ = ev.gather(db, host, {"mounts": {"path"}}, set())
         assert evidence["facts"]["mounts"]["collected_at"] is None
 
+    def test_rows_missing_a_needed_column_are_not_a_collection(self, make_session):
+        """Collected before a rule read ``type``: NULL for every row would
+        silently not match, so it is ``not_collected`` until re-collected."""
+        with make_session() as db, _serves():
+            host = _host(db)
+            _fact_run(db, host, "mounts", rows=[{"path": "/"}])
+            evidence, tables = ev.gather(db, host, {"mounts": {"path", "type"}}, set())
+        assert evidence["facts"]["mounts"]["collected_at"] is None
+        assert "mounts" not in tables
+
     def test_a_coverage_gap_is_passed_through_and_rows_are_not_read(self, make_session):
         gap = {
             "table": "mounts",

@@ -304,3 +304,62 @@ def test_fact_coverage_never_makes_an_agent_look_limited():
     report = _report(["install_package"])
     report["facts"] = _facts(served={}, unsupported={"users": "no_provider"})
     assert capability_update_values(report)["agent_capabilities_limited"] is False
+
+
+class TestFactColumnsSurvive:
+    """21.2 S1 columns must reach storage (2026-09-26).
+
+    The sanitizer whitelisted four keys and dropped ``columns``, so every
+    contract-v3 agent read as ``columns_not_advertised`` and every advisor
+    fact rule was blind on real hosts -- while the S1 tests, which built
+    coverage dicts by hand, stayed green.
+    """
+
+    @staticmethod
+    def _report(facts):
+        return {"schema_version": 1, "commands": ["run_query_pack"], "facts": facts}
+
+    def test_advertised_columns_are_kept(self):
+        from backend.services import agent_capability_service as svc  # noqa: PLC0415
+
+        out = svc.normalize_report(
+            self._report(
+                {
+                    "contract_version": 3,
+                    "served": {"mounts": "native"},
+                    "columns": {"mounts": ["path", "blocks", "path", 7]},
+                }
+            )
+        )
+        assert out["facts"]["columns"] == {"mounts": ["blocks", "path"]}
+
+    def test_an_agent_that_sent_no_columns_still_sends_none(self):
+        """Absent must stay absent: host_facts reads it as a gap, not "all"."""
+        from backend.services import agent_capability_service as svc  # noqa: PLC0415
+
+        out = svc.normalize_report(self._report({"contract_version": 2, "served": {}}))
+        assert "columns" not in out["facts"]
+
+    def test_advertised_columns_reach_host_facts(self):
+        import json  # noqa: PLC0415
+        from types import SimpleNamespace  # noqa: PLC0415
+
+        from backend.services import agent_capability_service as svc  # noqa: PLC0415
+        from backend.services import host_facts  # noqa: PLC0415
+
+        report = svc.normalize_report(
+            self._report(
+                {
+                    "contract_version": 3,
+                    "served": {"mounts": "native"},
+                    "columns": {"mounts": ["path", "blocks", "blocks_available"]},
+                }
+            )
+        )
+        host = SimpleNamespace(agent_capabilities=json.dumps(report))
+        assert (
+            host_facts.missing_columns(
+                host, "mounts", ["path", "blocks", "blocks_available"]
+            )
+            is None
+        )
