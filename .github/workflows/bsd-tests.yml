@@ -219,9 +219,13 @@ jobs:
           python -m pip install --upgrade pip
           # defusedxml is an unconditional runtime import in
           # package_collector_windows.py, so conftest collection needs it even on
-          # non-Windows BSDs.  aiofiles isn't packaged; websockets via pip too as
-          # a fallback for a skipped py3-websockets pkg (no-op if it installed).
-          python -m pip install pytest pytest-asyncio aiofiles defusedxml websockets
+          # non-Windows BSDs.  aiofiles isn't packaged; websockets, SQLAlchemy
+          # (tests/conftest.py imports it) and PyYAML via pip too as a fallback
+          # for a skipped py3-* pkg -- the pkg line above is best-effort, and one
+          # missing name there installs NONE of them (no-op if they installed).
+          # Pure-Python SQLAlchemy: no wheels here, and its optional C extension
+          # must not be the reason the job fails.
+          DISABLE_SQLALCHEMY_CEXT=1 python -m pip install pytest pytest-asyncio aiofiles defusedxml websockets sqlalchemy pyyaml
           set +e
           python -m pytest tests/ -m "$PYTEST_MARKER" \
             -v --tb=short --junit-xml=bsd-openbsd-junit.xml
@@ -284,9 +288,15 @@ jobs:
           # single transient mirror blip doesn't fail the whole job.
           n=0; until [ "$n" -ge 5 ]; do sudo pkgin -y update && sudo pkgin -y install python311 py311-pip git && break; n=$((n+1)); echo "pkgin core install attempt $n failed; retrying in 15s..."; sleep 15; done
           # py311-pytest / py311-pytest-asyncio are not in pkgsrc -- pip them in
-          # below.  These py311-* deps are best-effort; || true so a
-          # renamed/missing pkg doesn't fail the job.
-          sudo pkgin -y install py311-cryptography py311-yaml py311-aiohttp py311-websockets py311-sqlalchemy py311-bcrypt py311-psutil py311-aiofiles || true
+          # below.  These py311-* deps are best-effort, and installed ONE AT A
+          # TIME: as a single batch behind "|| true", sqlalchemy was missing on
+          # 2026-09-26 although it was in the list, and nothing said why.  One
+          # at a time, a package that cannot be installed costs only itself,
+          # and the log names it.
+          for p in py311-cryptography py311-yaml py311-aiohttp py311-websockets \
+                   py311-sqlalchemy py311-bcrypt py311-psutil py311-aiofiles; do
+            sudo pkgin -y install "$p" || echo "pkgin: $p unavailable; pip fallback below"
+          done
           # Fail loudly (not at a downstream 127) if the mirror was unreachable.
           command -v python3.11 >/dev/null 2>&1 || { echo "ERROR: python3.11 not installed -- NetBSD pkg mirror unreachable after retries."; exit 1; }
           cd sysmanage-agent
@@ -295,9 +305,14 @@ jobs:
           python -m pip install --upgrade pip
           # defusedxml is an unconditional runtime import in
           # package_collector_windows.py, so conftest collection needs it even on
-          # non-Windows BSDs.  websockets via pip too as a fallback for a skipped
-          # py311-websockets pkg (no-op if it installed).
-          python -m pip install pytest pytest-asyncio defusedxml websockets
+          # non-Windows BSDs.  websockets, SQLAlchemy (tests/conftest.py imports
+          # it), aiofiles and PyYAML via pip too as a fallback for a skipped
+          # py311-* pkg -- the pkgin line above is best-effort, and one missing
+          # name there installs NONE of them (no-op if they installed).  This
+          # is what failed 2026-09-26: "No module named 'sqlalchemy'".
+          # Pure-Python SQLAlchemy: no wheels here, and its optional C extension
+          # must not be the reason the job fails.
+          DISABLE_SQLALCHEMY_CEXT=1 python -m pip install pytest pytest-asyncio defusedxml websockets sqlalchemy aiofiles pyyaml
           set +e
           python -m pytest tests/ -m "$PYTEST_MARKER" \
             -v --tb=short --junit-xml=bsd-netbsd-junit.xml

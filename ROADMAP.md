@@ -10036,6 +10036,16 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       -- never "applied" -- while a maintenance window holds it. The host
       view shows each finding's proposal. 12 engine + 14 service + 6 API
       tests; 5 new backend strings hand-translated in all 13 locales.
+      **Live 2026-09-26 (theeverlys, deployed):** `TEST-AVAIL-001` given a
+      `package_upgrade` fix; one evaluation opened ONE proposal on gdr-t14 --
+      25 apt security updates in a valid ansible-core playbook, nothing
+      applied. Its 6 skips were exactly the host's `fwupd` firmware updates
+      ("Microsoft UEFI dbx (-> 20260707)" etc.): not apt, not package names,
+      and a package upgrade must never touch firmware. Host view showed the
+      proposal on the finding; reject recorded who and when; approve after
+      reject -> 409 `not_proposed`; re-evaluation opened 0 (same fix, already
+      decided). Approval not exercised live: it would upgrade the packages
+      on a real laptop, so it waits for an explicit go-ahead.
 
 - [ ] **S6 -- Curated rule packs as multi-tenant policy.** Shared catalog +
       per-tenant assignment, offline-updatable for air-gap. Same catalog /
