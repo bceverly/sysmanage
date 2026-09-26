@@ -202,7 +202,16 @@ class TestGetAvailableSources:
     async def test_every_configured_source_is_described(self):
         with _licensed():
             out = await cve.get_available_sources()
-        assert set(out) == {"nvd", "ubuntu", "debian", "redhat", "microsoft", "freebsd"}
+        assert set(out) == {
+            "nvd",
+            "ubuntu",
+            "debian",
+            "redhat",
+            "microsoft",
+            "freebsd",
+            "netbsd",
+            "macos",
+        }
         assert out["nvd"].enabled_by_default is True
         assert out["nvd"].name
 
@@ -452,7 +461,7 @@ class TestTriggerRefresh:
         db = _FakeSession(User=[_user()])
         service = _Service(settings=_settings(enabled_sources=None))
         _, service = await self._refresh(db, service=service)
-        assert len(service.refreshed) == 6
+        assert len(service.refreshed) == len(cve.CVE_SOURCES)
 
     @pytest.mark.asyncio
     async def test_one_failing_source_does_not_stop_the_others(self):

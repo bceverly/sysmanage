@@ -35,7 +35,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
-from backend.i18n import _
+from backend.i18n import N_, _
 from backend.licensing.feature_gate import require_module_loaded
 from backend.licensing.features import ModuleCode
 from backend.persistence import models
@@ -59,6 +59,9 @@ router = APIRouter(
 # A watch list of thousands of paths is a fleet-wide hashing job every
 # interval. Bounded at the edge, where the operator can be told why.
 MAX_PATHS_PER_WATCH = 500
+
+_ERR_INVALID_WATCH_ID = N_("Invalid watch ID format")
+_ERR_WATCH_NOT_FOUND = N_("File watch not found")
 
 
 class PathIn(BaseModel):
@@ -264,11 +267,11 @@ async def get_watch(
 ) -> Dict[str, Any]:
     watch = (
         db.query(models.FileWatch)
-        .filter(models.FileWatch.id == _as_uuid(watch_id, _("Invalid watch ID format")))
+        .filter(models.FileWatch.id == _as_uuid(watch_id, _(_ERR_INVALID_WATCH_ID)))
         .first()
     )
     if watch is None:
-        raise HTTPException(status_code=404, detail=_("File watch not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_WATCH_NOT_FOUND))
     return _watch_dict(watch, with_paths=True)
 
 
@@ -317,18 +320,18 @@ async def update_watch(
     _require_role(current_user, SecurityRoles.EDIT_SCRIPT)
     watch = (
         db.query(models.FileWatch)
-        .filter(models.FileWatch.id == _as_uuid(watch_id, _("Invalid watch ID format")))
+        .filter(models.FileWatch.id == _as_uuid(watch_id, _(_ERR_INVALID_WATCH_ID)))
         .first()
     )
     if watch is None:
-        raise HTTPException(status_code=404, detail=_("File watch not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_WATCH_NOT_FOUND))
 
     changes = request.model_dump(exclude_unset=True)
     if changes.get("paths") is not None:
         problems = _validate_paths(request.paths)
         if problems:
             raise HTTPException(status_code=400, detail="; ".join(problems))
-        for existing in list(watch.paths or []):
+        for existing in watch.paths or []:
             db.delete(existing)
         db.flush()
         for entry in request.paths:
@@ -363,11 +366,11 @@ async def delete_watch(
     _require_role(current_user, SecurityRoles.DELETE_SCRIPT)
     watch = (
         db.query(models.FileWatch)
-        .filter(models.FileWatch.id == _as_uuid(watch_id, _("Invalid watch ID format")))
+        .filter(models.FileWatch.id == _as_uuid(watch_id, _(_ERR_INVALID_WATCH_ID)))
         .first()
     )
     if watch is None:
-        raise HTTPException(status_code=404, detail=_("File watch not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_WATCH_NOT_FOUND))
     db.delete(watch)
     db.commit()
     return {"status": "deleted"}
@@ -407,12 +410,12 @@ async def create_assignment(
     assignment = models.FileWatchAssignment(
         id=uuid.uuid4(),
         watch_id=(
-            _as_uuid(request.watch_id, _("Invalid watch ID format"))
+            _as_uuid(request.watch_id, _(_ERR_INVALID_WATCH_ID))
             if request.watch_id
             else None
         ),
         shared_watch_id=(
-            _as_uuid(request.shared_watch_id, _("Invalid watch ID format"))
+            _as_uuid(request.shared_watch_id, _(_ERR_INVALID_WATCH_ID))
             if request.shared_watch_id
             else None
         ),

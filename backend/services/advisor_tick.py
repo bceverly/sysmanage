@@ -182,12 +182,12 @@ class _Pass:
         """Drop outcomes of rules that are no longer in this database's rule
         set, and withdraw the fixes they had proposed."""
         gone = set()
-        for key, row in list(self.existing.items()):
-            if (key[1], key[2]) not in active_keys:
-                self.db.delete(row)
-                del self.existing[key]
-                gone.add((key[1], key[2]))
-                self.summary["pruned"] += 1
+        # Collected first: ``self.existing`` shrinks inside the loop below.
+        stale = [key for key in self.existing if (key[1], key[2]) not in active_keys]
+        for key in stale:
+            self.db.delete(self.existing.pop(key))
+            gone.add((key[1], key[2]))
+            self.summary["pruned"] += 1
         for source, rule_key in gone:
             proposals.withdraw_for(self.db, source, rule_key)
 

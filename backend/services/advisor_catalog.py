@@ -60,6 +60,47 @@ def _write_rules(shared, pack_row, rules) -> None:
         )
 
 
+def _catalog_is_current(row, pack, summary) -> bool:
+    """True (and counted) when the catalog row needs no write for ``pack``."""
+    if row is None or row.deprecated:
+        return False
+    if (row.version or 0) > pack["version"]:
+        summary["skipped_older"] += 1  # never roll content back
+        return True
+    if (row.version or 0) == pack["version"]:
+        summary["unchanged"] += 1
+        return True
+    return False
+
+
+def _write_pack(shared, row, pack):
+    """Create or refresh the catalog row for ``pack`` and its rules."""
+    if row is None:
+        row = models.SharedAdvisorRulePack(
+            id=uuid.uuid4(), slug=pack["slug"], created_at=_now()
+        )
+        shared.add(row)
+    row.name = pack["name"]
+    row.description = pack.get("description")
+    row.version = pack["version"]
+    row.default_enabled = bool(pack.get("default_enabled"))
+    row.deprecated = False
+    row.source = ENGINE_SOURCE
+    row.updated_at = _now()
+    shared.flush()
+    _write_rules(shared, row, pack.get("rules") or [])
+    return row
+
+
+def _deprecate_unshipped(existing, shipped, summary) -> None:
+    """Mark engine packs the engine no longer ships as deprecated."""
+    for slug, row in existing.items():
+        if row.source == ENGINE_SOURCE and slug not in shipped and not row.deprecated:
+            row.deprecated = True
+            row.updated_at = _now()
+            summary["deprecated"] += 1
+
+
 def sync_shared_catalog(engine) -> Dict[str, Any]:
     """Bring the shared catalog up to the engine's packs. Never raises."""
     summary = {"written": 0, "unchanged": 0, "deprecated": 0, "skipped_older": 0}
@@ -75,37 +116,11 @@ def sync_shared_catalog(engine) -> Dict[str, Any]:
             }
             for pack in packs:
                 row = existing.get(pack["slug"])
-                if row is not None and not row.deprecated:
-                    if (row.version or 0) > pack["version"]:
-                        summary["skipped_older"] += 1  # never roll content back
-                        continue
-                    if (row.version or 0) == pack["version"]:
-                        summary["unchanged"] += 1
-                        continue
-                if row is None:
-                    row = models.SharedAdvisorRulePack(
-                        id=uuid.uuid4(), slug=pack["slug"], created_at=_now()
-                    )
-                    shared.add(row)
-                row.name = pack["name"]
-                row.description = pack.get("description")
-                row.version = pack["version"]
-                row.default_enabled = bool(pack.get("default_enabled"))
-                row.deprecated = False
-                row.source = ENGINE_SOURCE
-                row.updated_at = _now()
-                shared.flush()
-                _write_rules(shared, row, pack.get("rules") or [])
+                if _catalog_is_current(row, pack, summary):
+                    continue
+                _write_pack(shared, row, pack)
                 summary["written"] += 1
-            for slug, row in existing.items():
-                if (
-                    row.source == ENGINE_SOURCE
-                    and slug not in shipped
-                    and not row.deprecated
-                ):
-                    row.deprecated = True
-                    row.updated_at = _now()
-                    summary["deprecated"] += 1
+            _deprecate_unshipped(existing, shipped, summary)
             shared.commit()
         if summary["written"] or summary["deprecated"]:
             logger.info(

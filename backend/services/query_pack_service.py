@@ -167,6 +167,26 @@ def _new_query_row(pack_id, query: Dict[str, Any]) -> models.QueryPackQuery:
     )
 
 
+def _apply_scalar_changes(pack: models.QueryPack, changes: Dict[str, Any]) -> None:
+    """Name, description and enabled; ``None`` clears only the description."""
+    if changes.get("name") is not None:
+        pack.name = changes["name"]
+    if "description" in changes:
+        pack.description = changes["description"]
+    if changes.get("enabled") is not None:
+        pack.enabled = changes["enabled"]
+
+
+def _replace_queries(db: Session, pack: models.QueryPack, queries) -> None:
+    """Swap the pack's queries wholesale and bump its version."""
+    for existing in pack.queries or []:
+        db.delete(existing)
+    db.flush()
+    for query in queries:
+        db.add(_new_query_row(pack.id, query))
+    pack.version = (pack.version or 1) + 1
+
+
 def update_pack(
     db: Session, pack: models.QueryPack, **changes
 ) -> Tuple[Optional[models.QueryPack], List[str]]:
@@ -185,20 +205,10 @@ def update_pack(
         if not verdict.get("valid"):
             return None, list(verdict.get("problems") or [])
 
-    if "name" in changes and changes["name"] is not None:
-        pack.name = changes["name"]
-    if "description" in changes:
-        pack.description = changes["description"]
-    if "enabled" in changes and changes["enabled"] is not None:
-        pack.enabled = changes["enabled"]
+    _apply_scalar_changes(pack, changes)
 
     if queries is not None:
-        for existing in list(pack.queries or []):
-            db.delete(existing)
-        db.flush()
-        for query in queries:
-            db.add(_new_query_row(pack.id, query))
-        pack.version = (pack.version or 1) + 1
+        _replace_queries(db, pack, queries)
 
     pack.updated_at = utcnow()
     db.flush()

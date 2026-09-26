@@ -197,9 +197,8 @@ def test_update_values_carry_the_same_decision_as_apply():
     host = _Host()
     apply_capability_report(host, report)
     assert values["agent_capabilities"] == host.agent_capabilities
-    assert (
-        values["agent_capabilities_limited"] == host.agent_capabilities_limited is True
-    )
+    assert values["agent_capabilities_limited"] == host.agent_capabilities_limited
+    assert host.agent_capabilities_limited is True
 
 
 def test_update_values_are_empty_for_an_unusable_report():
@@ -341,7 +340,6 @@ class TestFactColumnsSurvive:
         assert "columns" not in out["facts"]
 
     def test_advertised_columns_reach_host_facts(self):
-        import json  # noqa: PLC0415
         from types import SimpleNamespace  # noqa: PLC0415
 
         from backend.services import agent_capability_service as svc  # noqa: PLC0415

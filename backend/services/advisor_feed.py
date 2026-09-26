@@ -110,6 +110,42 @@ def _empty_entry(key, rule) -> Dict[str, Any]:
     }
 
 
+def _tally(entry: Dict[str, Any], row) -> None:
+    """Count one host's outcome for one rule into its feed entry."""
+    if row.outcome == FIRES:
+        entry["hosts_firing"] += 1
+        if row.risk is not None:
+            entry["risk"] = max(entry["risk"] or 0, row.risk)
+    elif row.outcome == NOT_ASSESSABLE:
+        entry["hosts_not_assessable"] += 1
+        for gap in row.gaps or []:
+            reason = (gap or {}).get("reason") or "unknown"
+            entry["gap_reasons"][reason] = entry["gap_reasons"].get(reason, 0) + 1
+    elif row.outcome == NOT_APPLICABLE:
+        entry["hosts_not_applicable"] += 1
+    else:
+        entry["hosts_clean"] += 1
+
+
+def _feed_tier(entry: Dict[str, Any]) -> int:
+    """0 = fires somewhere, 1 = a blind spot somewhere, 2 = the rest."""
+    if entry["hosts_firing"]:
+        return 0
+    if entry["hosts_not_assessable"]:
+        return 1
+    return 2
+
+
+def _feed_order(entry: Dict[str, Any]):
+    return (
+        _feed_tier(entry),
+        -(entry["risk"] or 0),
+        -entry["hosts_firing"],
+        -entry["hosts_not_assessable"],
+        entry["key"],
+    )
+
+
 def feed(engine, db, lens: Optional[str] = None) -> Dict[str, Any]:
     """One entry per rule, worst first, plus the fleet score.
 
@@ -124,30 +160,8 @@ def feed(engine, db, lens: Optional[str] = None) -> Dict[str, Any]:
         rule = rules.get(key)
         if lens and (row.lens or (rule or {}).get("lens")) != lens:
             continue
-        entry = entries.setdefault(key, _empty_entry(key, rule))
-        if row.outcome == FIRES:
-            entry["hosts_firing"] += 1
-            if row.risk is not None:
-                entry["risk"] = max(entry["risk"] or 0, row.risk)
-        elif row.outcome == NOT_ASSESSABLE:
-            entry["hosts_not_assessable"] += 1
-            for gap in row.gaps or []:
-                reason = (gap or {}).get("reason") or "unknown"
-                entry["gap_reasons"][reason] = entry["gap_reasons"].get(reason, 0) + 1
-        elif row.outcome == NOT_APPLICABLE:
-            entry["hosts_not_applicable"] += 1
-        else:
-            entry["hosts_clean"] += 1
-    ordered = sorted(
-        entries.values(),
-        key=lambda e: (
-            0 if e["hosts_firing"] else 1 if e["hosts_not_assessable"] else 2,
-            -(e["risk"] or 0),
-            -e["hosts_firing"],
-            -e["hosts_not_assessable"],
-            e["key"],
-        ),
-    )
+        _tally(entries.setdefault(key, _empty_entry(key, rule)), row)
+    ordered = sorted(entries.values(), key=_feed_order)
     return {
         "fleet": scoring.fleet_score(engine, db),
         "totals": {

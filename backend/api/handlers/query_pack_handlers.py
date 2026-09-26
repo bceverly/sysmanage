@@ -34,10 +34,14 @@ from backend.utils.log_sanitize import scrub
 logger = logging.getLogger(__name__)
 
 
-async def handle_query_pack_result(
-    db, connection, message_data: Dict[str, Any]
+async def handle_query_pack_result(  # NOSONAR - uniform awaited handler API
+    db, connection, message_data: Dict[str, Any]  # NOSONAR - same signature
 ) -> Optional[Dict[str, Any]]:
-    """Attach one agent's pack results to its run and grade it."""
+    """Attach one agent's pack results to its run and grade it.
+
+    ``async`` and ``connection`` are the uniform result-handler signature the
+    router awaits (see ``message_handlers``); this handler needs neither.
+    """
     result = message_data.get("result") or {}
     if not message_data.get("success", True):
         # A refused or failed run still has a row to close. Leaving it PENDING

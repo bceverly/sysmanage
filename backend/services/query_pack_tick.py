@@ -107,7 +107,7 @@ def _assignment_dicts(db_session) -> List[Dict[str, Any]]:
     ]
 
 
-def _dispatch_one(db_session, host, resolved, now, summary) -> bool:
+def _dispatch_one(db_session, host, resolved, summary) -> bool:
     """Queue one pack run for one host. Returns False if it could not go.
 
     Per-host isolation is the point: an offline host, or one whose agent
@@ -176,7 +176,7 @@ def _tick_one_database(db_session, now, summary) -> None:
             )
             for item in due:
                 summary["due"] += 1
-                if _dispatch_one(db_session, host, item, now, summary):
+                if _dispatch_one(db_session, host, item, summary):
                     summary["queued"] += 1
                     dispatched_here += 1
                 _touch(db_session, item, now)

@@ -87,7 +87,7 @@ def due_assignments(db_session, host, now: datetime) -> List[Any]:
     return [a for a in fws.assignments_for(db_session, host) if _is_due(a, now)]
 
 
-def _dispatch_one(db_session, host, assignments, now, summary) -> bool:
+def _dispatch_one(db_session, host, assignments, summary) -> bool:
     """Queue one collection for one host. Returns False if it could not go.
 
     Per-host isolation is the point: an offline host, or one whose agent
@@ -129,7 +129,7 @@ def _dispatch_one(db_session, host, assignments, now, summary) -> bool:
         return False
 
 
-def _touch(db_session, assignments, now) -> None:
+def _touch(assignments, now) -> None:
     """Advance each assignment's cursor.
 
     Advanced even when the dispatch did NOT go out. The window did arrive; it
@@ -162,10 +162,10 @@ def _tick_one_database(db_session, now, summary) -> None:
             if not assignments:
                 continue
             summary["due"] += 1
-            if _dispatch_one(db_session, host, assignments, now, summary):
+            if _dispatch_one(db_session, host, assignments, summary):
                 summary["queued"] += 1
                 dispatched_here += 1
-            _touch(db_session, assignments, now)
+            _touch(assignments, now)
 
         if summary["due"]:
             db_session.commit()

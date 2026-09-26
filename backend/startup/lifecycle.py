@@ -490,11 +490,12 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                             file_watch_tick_service,
                         )
 
-                        asyncio.create_task(file_watch_tick_service())
+                        _track_background_task(
+                            asyncio.create_task(file_watch_tick_service())
+                        )
                         logger.info("File watch tick task started")
                     except Exception as tick_e:  # pylint: disable=broad-except
-                        # Never fatal: a scheduler that will not start must
-                        # not take the whole server with it.
+                        # Never fatal: a failed scheduler must not kill the server.
                         logger.warning("File watch tick did not start: %s", tick_e)
 
                 # Advisor evaluation tick (21.2 S2); gated + never fatal there.

@@ -193,7 +193,8 @@ async def get_available_sources(dependencies=Depends(JWTBearer())):
     return {
         source_id: CveSourceInfo(
             name=source_info["name"],
-            description=source_info["description"],
+            # i18n: dynamic -- each description is marked with N_() in cve_sources.py
+            description=_(source_info["description"]),
             enabled_by_default=source_info["enabled_by_default"],
         )
         for source_id, source_info in CVE_SOURCES.items()

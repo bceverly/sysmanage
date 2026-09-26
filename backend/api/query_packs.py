@@ -38,7 +38,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
-from backend.i18n import _
+from backend.i18n import N_, _
 from backend.licensing.feature_gate import require_module_loaded
 from backend.licensing.features import ModuleCode
 from backend.persistence import models
@@ -49,6 +49,9 @@ from backend.services import query_pack_service as svc
 from backend.services import query_pack_shim as shim
 
 logger = logging.getLogger(__name__)
+
+_ERR_INVALID_PACK_ID = N_("Invalid query pack ID format")
+_ERR_PACK_NOT_FOUND = N_("Query pack not found")
 
 router = APIRouter(
     dependencies=[
@@ -157,9 +160,9 @@ async def get_pack(
     pack_id: str,
     db: Session = Depends(get_tenant_db),
 ) -> Dict[str, Any]:
-    pack = svc.get_pack(db, _as_uuid(pack_id, _("Invalid query pack ID format")))
+    pack = svc.get_pack(db, _as_uuid(pack_id, _(_ERR_INVALID_PACK_ID)))
     if pack is None:
-        raise HTTPException(status_code=404, detail=_("Query pack not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_PACK_NOT_FOUND))
     return svc.pack_dict(pack, with_queries=True)
 
 
@@ -192,9 +195,9 @@ async def update_pack(
     current_user=Depends(require_authenticated_user),
 ) -> Dict[str, Any]:
     _require_role(current_user, SecurityRoles.EDIT_SCRIPT)
-    pack = svc.get_pack(db, _as_uuid(pack_id, _("Invalid query pack ID format")))
+    pack = svc.get_pack(db, _as_uuid(pack_id, _(_ERR_INVALID_PACK_ID)))
     if pack is None:
-        raise HTTPException(status_code=404, detail=_("Query pack not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_PACK_NOT_FOUND))
 
     changes = request.model_dump(exclude_unset=True)
     if changes.get("queries") is not None:
@@ -214,9 +217,9 @@ async def delete_pack(
     current_user=Depends(require_authenticated_user),
 ) -> Dict[str, str]:
     _require_role(current_user, SecurityRoles.DELETE_SCRIPT)
-    pack = svc.get_pack(db, _as_uuid(pack_id, _("Invalid query pack ID format")))
+    pack = svc.get_pack(db, _as_uuid(pack_id, _(_ERR_INVALID_PACK_ID)))
     if pack is None:
-        raise HTTPException(status_code=404, detail=_("Query pack not found"))
+        raise HTTPException(status_code=404, detail=_(_ERR_PACK_NOT_FOUND))
     svc.delete_pack(db, pack)
     db.commit()
     return {"status": "deleted"}

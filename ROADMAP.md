@@ -9574,12 +9574,12 @@ because push-green CI never covers the BSDs.
 > tenant data → `tenant` partition, soft-referencing the shared rule id (no
 > cross-partition FK) -- the same catalog/results split as advisories.
 
-- [ ] Rule-based recommendation framework (security / performance / availability / stability lenses) over collected host facts + CVE + compliance + config state
-- [ ] Per-host + fleet recommendation feed with risk scoring (impact × likelihood) -- recommendations in the **tenant** partition
-- [ ] Auto-generated remediation (script or Ansible playbook from 20.1) per recommendation, gated behind operator approval + maintenance windows
-- [ ] Curated, versioned rule packs -- **shipped/curated packs in the `shared` partition (one copy)**, tenant-authored packs in the tenant partition; offline-updatable for air-gap
-- [ ] Recommendations dashboard + per-host advisor tab
-- [ ] i18n/l10n
+- [x] Rule-based recommendation framework (security / performance / availability / stability lenses) over collected host facts + CVE + compliance + config state
+- [x] Per-host + fleet recommendation feed with risk scoring (impact × likelihood) -- recommendations in the **tenant** partition
+- [x] Auto-generated remediation (script or Ansible playbook from 20.1) per recommendation, gated behind operator approval + maintenance windows
+- [x] Curated, versioned rule packs -- **shipped/curated packs in the `shared` partition (one copy)**, tenant-authored packs in the tenant partition; offline-updatable for air-gap
+- [x] Recommendations dashboard + per-host advisor tab
+- [x] i18n/l10n
 
 **Estimated Size:** ~5,000 lines
 
@@ -10126,7 +10126,7 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       always shown). Verified in a real browser against the live tenant: no
       console errors; screenshots matched the API.
 
-- [ ] **S8 -- Docs, screenshots, i18n -- LAST.** Page + `make screenshots`
+- [x] **S8 -- Docs, screenshots, i18n -- LAST.** Page + `make screenshots`
       shotlist entries + glossary nouns in the SAME change, seeded and
       translated. Docs go last by decision: 21.1 proved things change while
       building, and documenting a moving design costs more than documenting a
@@ -10152,8 +10152,9 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       screenshot pipelines. Glossary: rule pack, proposed fix, lens, risk
       score, peer group, evidence -- all 4 repos. Curated pack v2 fixed
       SM-AVAIL-002, which could never fire (it measured age from the
-      domain's own freshness clock). **Remaining:** Pro+ publish, then
-      `make screenshots-enterprise` to produce the four PNGs.
+      domain's own freshness clock). Screenshots captured 2026-09-26 via
+      `make screenshots-enterprise` (advisor, advisor-proposals,
+      advisor-packs, host-detail-advisor) and reviewed. **DONE 2026-09-26.**
 
 - [ ] **Vulnerability feed coverage beyond Ubuntu / Debian / EL** (added
       2026-09-23 with the feed mapping). Since that mapping, a host whose OS no
@@ -10168,6 +10169,71 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
         epoch at the END). Highest value per effort; do first.
       * **NetBSD -- pkgsrc `pkg-vulnerabilities`** (what `pkg_admin audit`
         reads): one signed file of package patterns; `nbN` revisions. Cheap.
+      * **FreeBSD + NetBSD DONE 2026-09-26** (engine-side; live check pending
+        deploy). Each feed is judged by its OWN tool's order, ported line for
+        line from the C (`version_order_bsd.pxi`): pkg's `pkg_version_cmp`,
+        and pkg_install's `dewey_cmp` + `pkg_match` (dewey ranges, globs, csh
+        alternates). Differentially tested against the COMPILED originals:
+        0 mismatches in 60,000 pairs per comparator over the live feeds' own
+        versions, and 0 over 30,228 real pkgsrc patterns; golden cases from
+        those binaries pin it in `test_vuln_bsd_feeds.py`. (The remembered
+        FreeBSD algorithm was wrong in three places -- a `snap` stage, ABASE
+        2, a second-letter guard -- which is why it was ported, not recalled.)
+        Ingest (`feeds_bsd.pxi`) replaces each feed's rows as a snapshot (VuXML
+        57,898 rows, pkgsrc 40,616, each parsed in under a second); an empty
+        parse is refused so a broken download cannot clear the catalog. The
+        1,011 VuXML entries with no CVE get a stable synthetic id rather than
+        being dropped. CVE rows another feed created are linked, never
+        overwritten (they carry the CVSS the BSD feeds lack). The FreeBSD BASE
+        system is assessed too, as `pkg audit` does: `uname -r` and
+        `freebsd-version -u` become the `FreeBSD-kernel` / `FreeBSD`
+        pseudo-packages (`14.3-RELEASE-p2` -> `14.3_2`); CURRENT/STABLE are
+        left out, not judged. Findings de-duplicate on (CVE, package). Both
+        feeds on by default; shared migration `s16bsdfeeds` appends them to
+        existing installs' enabled sources (FreeBSD was a stub that ingested
+        nothing while reporting success; NetBSD did not exist). The VuXML file
+        keeps a DOCTYPE declaring unused external entities, which defusedxml
+        refuses -- stripped before parsing. Agent: FreeBSD/NetBSD inventory now
+        splits `name-version` at the LAST hyphen as both tools do (the old
+        regex read `xorg-fonts-100dpi-7.7_4` as `xorg-fonts` version
+        `100dpi-7.7_4`, which no feed can match); OpenBSD keeps its
+        flavor-aware split. The CVE source descriptions on the settings page
+        are now translated (7 strings, 13 locales).
+      * **Windows + macOS DONE 2026-09-26** (engine-side; live check pending
+        deploy). **Windows** (`feeds_msrc.pxi`) is judged by OS BUILD per
+        PRODUCT: each monthly MSRC CVRF gives the fixed build for every CVE and
+        product, and a host below it on its own servicing branch is vulnerable
+        -- no KB inventory needed, a cumulative update raises the UBR. The
+        product decides it, not the build alone: Windows 11 24H2 and Server
+        2025 are both 26100, fixed at UBR 9445 vs 33438 in the same month. The
+        agent now reports the registry facts (CurrentBuild, UBR,
+        DisplayVersion/ReleaseId, InstallationType, ProductName) and the engine
+        names the product exactly as MSRC spells it; an older agent is "not
+        assessable" (`windows_build_unknown`), never clean. The previous
+        fetcher ingested NOTHING and reported success: wrong XML namespaces
+        (OASIS CSAF; MSRC publishes ICASI CVRF 1.1), a non-existent
+        `ScoreSetV3`, numeric product ids stored as package names, and the "3
+        most recent" documents chosen by REVISION date (a re-issued 2026-Apr
+        outranked August). Now 24 months, incremental per document revision
+        (a month is ~30 MB); a failed month is retried next run. Microsoft
+        was also "on by default" yet never in the default enabled list, so it
+        never ran anywhere. **macOS** (`feeds_macos.pxi`): the OS version
+        against NVD's macOS CPE ranges (`cpe:2.3:o:apple:macos`, `mac_os_x`
+        before 11) -- e.g. CVE-2026-20609 `<14.8.4 | >=15.0,<15.7.4 |
+        >=26.0,<26.3`, Apple's own "fixed in" per supported major. Only a
+        VULNERABLE macOS CPE with a version counts: app CVEs that merely run on
+        macOS (about two thirds of what the query returns) are excluded.
+        Windows applications, Homebrew and App Store apps stay NOT ASSESSED in
+        coverage rather than guessed at. Migration renamed `s16osfeeds`: it
+        appends microsoft, freebsd, netbsd and macos to existing installs.
+        The vulnerability card no longer blames feed coverage when the gap is
+        an unreported OS build (`release_unknown` had the same wrong message);
+        four mistranslated "Not assessable" labels in the vuln plugin (fr/nl/ko
+        read "inaccessible", hi was nonsense) corrected to the glossary forms.
+        Docs: the vulnerability page's source cards (which omitted Debian and
+        Microsoft and claimed Fedora) replaced by a per-OS coverage table.
+        **Remaining: deploy + live check on the real FreeBSD/NetBSD/Windows/
+        macOS hosts, then tick this item.**
       * **Windows -- MSRC CVRF/CSAF** (a fetcher exists; its rows are keyed
         `windows` and never match). Vulnerability is by OS BUILD + installed
         KBs, not package names: the agent must report the full build (UBR) and

@@ -47,7 +47,7 @@ def syspatch_update_types(
     patch_ids.discard(None)
     if not patch_ids:
         return {}
-    types = {patch_id: "system" for patch_id in patch_ids}
+    types = dict.fromkeys(patch_ids, "system")
     release = _release(db, host_id)
     if not release:
         return types

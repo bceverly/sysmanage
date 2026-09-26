@@ -398,7 +398,18 @@ class CveRefreshSettings(Base):
         Integer, nullable=False, default=24
     )  # Default: daily
     enabled_sources = Column(
-        JSON, nullable=False, default=lambda: ["nvd", "ubuntu", "debian", "redhat"]
+        JSON,
+        nullable=False,
+        default=lambda: [
+            "nvd",
+            "ubuntu",
+            "debian",
+            "redhat",
+            "microsoft",
+            "freebsd",
+            "netbsd",
+            "macos",
+        ],
     )  # List of enabled CVE sources
     last_refresh_at = Column(DateTime, nullable=True)
     next_refresh_at = Column(DateTime, nullable=True)

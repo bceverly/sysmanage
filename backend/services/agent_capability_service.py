@@ -49,6 +49,61 @@ def _utcnow_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
+def _str_list(value):
+    if not isinstance(value, list):
+        return []
+    return sorted({str(v) for v in value if isinstance(v, (str, int))})
+
+
+def _str_map(value):
+    if not isinstance(value, dict):
+        return {}
+    return {str(k): v for k, v in sorted(value.items())}
+
+
+def _columns(value):
+    if not isinstance(value, dict):
+        return None
+    return {
+        str(table): sorted({str(c) for c in cols if isinstance(c, str)})
+        for table, cols in sorted(value.items())
+        if isinstance(cols, list)
+    }
+
+
+def _facts(value):
+    """Phase 21.1 fact coverage, or ``None`` when the agent sent none.
+
+    ``None`` rather than ``{}`` on purpose, and it is the same distinction
+    this whole slice is about: an agent that never advertised coverage has
+    not told us it serves nothing, it has told us NOTHING.  Collapsing the
+    two would let a pre-21.1 agent read as "serves no fact tables", which
+    a consumer would then render as an empty result -- and an empty result
+    is indistinguishable from "measured, found none".
+    """
+    if not isinstance(value, dict):
+        return None
+    version = value.get("contract_version")
+    if not isinstance(version, int) or version < 1:
+        logger.warning("agent fact coverage has no usable contract_version")
+        return None
+    out = {
+        "contract_version": version,
+        "served": _str_map(value.get("served")),
+        "unsupported": _str_map(value.get("unsupported")),
+        "not_applicable": _str_map(value.get("not_applicable")),
+    }
+    # 21.2 S1: the columns each served table's provider FILLS. Kept only
+    # when sent -- an absent key must stay absent, because
+    # ``host_facts.advertised_columns`` reads "never advertised" as a gap.
+    # It was dropped here until 2026-09-26, so every contract-v3 agent
+    # read as ``columns_not_advertised`` and every fact rule was blind.
+    columns = _columns(value.get("columns"))
+    if columns is not None:
+        out["columns"] = columns
+    return out
+
+
 def normalize_report(report: Any) -> Optional[Dict[str, Any]]:
     """Validate an advertisement and reduce it to the fields we store.
 
@@ -80,57 +135,6 @@ def normalize_report(report: Any) -> Optional[Dict[str, Any]]:
             MAX_SUPPORTED_SCHEMA_VERSION,
         )
         return None
-
-    def _str_list(value):
-        if not isinstance(value, list):
-            return []
-        return sorted({str(v) for v in value if isinstance(v, (str, int))})
-
-    def _str_map(value):
-        if not isinstance(value, dict):
-            return {}
-        return {str(k): v for k, v in sorted(value.items())}
-
-    def _columns(value):
-        if not isinstance(value, dict):
-            return None
-        return {
-            str(table): sorted({str(c) for c in cols if isinstance(c, str)})
-            for table, cols in sorted(value.items())
-            if isinstance(cols, list)
-        }
-
-    def _facts(value):
-        """Phase 21.1 fact coverage, or ``None`` when the agent sent none.
-
-        ``None`` rather than ``{}`` on purpose, and it is the same distinction
-        this whole slice is about: an agent that never advertised coverage has
-        not told us it serves nothing, it has told us NOTHING.  Collapsing the
-        two would let a pre-21.1 agent read as "serves no fact tables", which
-        a consumer would then render as an empty result -- and an empty result
-        is indistinguishable from "measured, found none".
-        """
-        if not isinstance(value, dict):
-            return None
-        version = value.get("contract_version")
-        if not isinstance(version, int) or version < 1:
-            logger.warning("agent fact coverage has no usable contract_version")
-            return None
-        out = {
-            "contract_version": version,
-            "served": _str_map(value.get("served")),
-            "unsupported": _str_map(value.get("unsupported")),
-            "not_applicable": _str_map(value.get("not_applicable")),
-        }
-        # 21.2 S1: the columns each served table's provider FILLS. Kept only
-        # when sent -- an absent key must stay absent, because
-        # ``host_facts.advertised_columns`` reads "never advertised" as a gap.
-        # It was dropped here until 2026-09-26, so every contract-v3 agent
-        # read as ``columns_not_advertised`` and every fact rule was blind.
-        columns = _columns(value.get("columns"))
-        if columns is not None:
-            out["columns"] = columns
-        return out
 
     commands = _str_list(report.get("commands"))
     if not commands:

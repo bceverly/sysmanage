@@ -15,6 +15,7 @@ import Typography from '@mui/material/Typography';
 
 import {
     LiveQuery,
+    LiveQueryTarget,
     cancelLiveQuery,
     createLiveQuery,
     getLiveQuery,
@@ -67,6 +68,23 @@ const messageFrom = (err: unknown, fallback: string): string => {
     const detail = (err as { response?: { data?: { detail?: unknown } } })?.response
         ?.data?.detail;
     return typeof detail === 'string' && detail ? detail : fallback;
+};
+
+type TargetRow = LiveQueryTarget['rows'][number];
+
+/**
+ * Pair each result row with a key derived from its content. Identical rows
+ * are told apart by how many copies came before them, so the key stays the
+ * same across polls as long as the rows do.
+ */
+const keyedRows = (rows: TargetRow[]): { key: string; row: TargetRow }[] => {
+    const seen = new Map<string, number>();
+    return rows.map((row) => {
+        const content = JSON.stringify(row);
+        const copy = seen.get(content) ?? 0;
+        seen.set(content, copy + 1);
+        return { key: `${content}#${copy}`, row };
+    });
 };
 
 interface Props {
@@ -255,9 +273,9 @@ const LiveQueryPanel: React.FC<Props> = ({ hostIds }) => {
                                 />
                                 <Typography variant="body2">{target.host_id}</Typography>
                             </Stack>
-                            {target.rows.map((row, i) => (
+                            {keyedRows(target.rows).map(({ key, row }) => (
                                 <Typography
-                                    key={i}
+                                    key={key}
                                     variant="caption"
                                     component="div"
                                     sx={{ ml: 2, fontFamily: 'monospace' }}

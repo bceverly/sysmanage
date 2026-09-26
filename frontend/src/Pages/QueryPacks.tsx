@@ -78,6 +78,8 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 interface QueryForm {
+    /** Client-only React key; never sent to the server (see toQueries). */
+    key: string;
     name: string;
     sql: string;
     required_tables: string;
@@ -89,7 +91,19 @@ interface PackForm {
     queries: QueryForm[];
 }
 
-const emptyQuery = (): QueryForm => ({ name: '', sql: '', required_tables: '' });
+let queryKeySeq = 0;
+/** A stable per-row key, so editing a row never remounts its fields. */
+const newQueryKey = (): string => {
+    queryKeySeq += 1;
+    return `query-${queryKeySeq}`;
+};
+
+const emptyQuery = (): QueryForm => ({
+    key: newQueryKey(),
+    name: '',
+    sql: '',
+    required_tables: '',
+});
 
 const emptyForm = (): PackForm => ({
     name: '',
@@ -205,6 +219,7 @@ const QueryPacks: React.FC = () => {
             name: pack.name,
             description: pack.description ?? '',
             queries: (pack.queries ?? []).map((q) => ({
+                key: newQueryKey(),
                 name: q.name,
                 sql: q.sql,
                 required_tables: (q.required_tables ?? []).join(', '),
@@ -546,7 +561,7 @@ const QueryPacks: React.FC = () => {
 
                     {form.queries.map((query, index) => (
                         <Box
-                            key={index}
+                            key={query.key}
                             sx={{ mt: 2, p: 2, border: '1px solid', borderColor: 'divider' }}
                         >
                             <Stack direction="row" justifyContent="space-between">

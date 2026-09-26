@@ -159,13 +159,10 @@ class TestRules:
         assert [r["key"] for r in listed["tenant"]] == ["SEC-001"]
         assert listed["tenant"][0]["errors"] == []
         changed = dict(RULE, title="Renamed")
-        assert (
-            client.put(
-                f"/api/v1/advisor/rules/{rule_id}", json={"rule": changed}
-            ).json()["title"]
-            == "Renamed"
-        )
-        assert client.delete(f"/api/v1/advisor/rules/{rule_id}").status_code == 200
+        renamed = client.put(f"/api/v1/advisor/rules/{rule_id}", json={"rule": changed})
+        assert renamed.json()["title"] == "Renamed"
+        deleted = client.delete(f"/api/v1/advisor/rules/{rule_id}")
+        assert deleted.status_code == 200
         assert client.get("/api/v1/advisor/rules").json()["tenant"] == []
 
     def test_a_rejected_rule_returns_every_problem_as_codes(self, client):
@@ -184,15 +181,19 @@ class TestRules:
 
     def test_a_duplicate_key_is_a_conflict(self, client):
         _create(client)
-        assert _create(client).status_code == 409
+        duplicate = _create(client)
+        assert duplicate.status_code == 409
 
     def test_writes_need_the_script_roles(self, client):
         User.allowed = False
-        assert _create(client).status_code == 403
+        response = _create(client)
+        assert response.status_code == 403
 
     def test_unknown_and_malformed_ids(self, client):
-        assert client.delete(f"/api/v1/advisor/rules/{uuid.uuid4()}").status_code == 404
-        assert client.delete("/api/v1/advisor/rules/not-a-uuid").status_code == 400
+        unknown = client.delete(f"/api/v1/advisor/rules/{uuid.uuid4()}")
+        assert unknown.status_code == 404
+        malformed = client.delete("/api/v1/advisor/rules/not-a-uuid")
+        assert malformed.status_code == 400
 
     def test_disabling_a_rule_clears_its_standing_outcomes(self, client, db_factory):
         rule_id = _create(client).json()["id"]
@@ -295,12 +296,14 @@ class TestEvaluate:
         with patch.object(
             advisor.tick, "evaluate_database", return_value={"results": 3}
         ) as run:
-            assert client.post("/api/v1/advisor/evaluate").json() == {"results": 3}
+            response = client.post("/api/v1/advisor/evaluate")
+        assert response.json() == {"results": 3}
         assert run.call_args.args[1] == "api"
 
     def test_evaluate_needs_run_script(self, client):
         User.allowed = False
-        assert client.post("/api/v1/advisor/evaluate").status_code == 403
+        response = client.post("/api/v1/advisor/evaluate")
+        assert response.status_code == 403
 
 
 class TestProposals:
@@ -362,29 +365,21 @@ class TestProposals:
     def test_reject_and_decide_only_once(self, client, db_factory):
         host = _host(db_factory)
         row = self._proposal(db_factory, host)
-        assert (
-            client.post(f"/api/v1/advisor/proposals/{row.id}/reject").json()["status"]
-            == "rejected"
-        )
-        assert (
-            client.post(f"/api/v1/advisor/proposals/{row.id}/approve").status_code
-            == 409
-        )
+        rejected = client.post(f"/api/v1/advisor/proposals/{row.id}/reject")
+        assert rejected.json()["status"] == "rejected"
+        again = client.post(f"/api/v1/advisor/proposals/{row.id}/approve")
+        assert again.status_code == 409
 
     def test_deciding_needs_run_script(self, client, db_factory):
         host = _host(db_factory)
         row = self._proposal(db_factory, host)
         User.allowed = False
-        assert (
-            client.post(f"/api/v1/advisor/proposals/{row.id}/approve").status_code
-            == 403
-        )
+        response = client.post(f"/api/v1/advisor/proposals/{row.id}/approve")
+        assert response.status_code == 403
 
     def test_unknown_proposal_is_404(self, client):
-        assert (
-            client.post(f"/api/v1/advisor/proposals/{uuid.uuid4()}/reject").status_code
-            == 404
-        )
+        response = client.post(f"/api/v1/advisor/proposals/{uuid.uuid4()}/reject")
+        assert response.status_code == 404
 
 
 class TestPacks:
@@ -410,7 +405,8 @@ class TestPacks:
 
     def test_unknown_pack_and_unknown_rules(self, client):
         with patch.object(advisor.catalog, "pack_rule_keys", return_value=None):
-            assert client.put("/api/v1/advisor/packs/nope", json={}).status_code == 404
+            unknown = client.put("/api/v1/advisor/packs/nope", json={})
+        assert unknown.status_code == 404
         with patch.object(advisor.catalog, "pack_rule_keys", return_value=self.PACK):
             response = client.put(
                 "/api/v1/advisor/packs/base", json={"disabled_rules": ["SM-A", "NOPE"]}
@@ -420,4 +416,5 @@ class TestPacks:
 
     def test_choosing_needs_edit_script(self, client):
         User.allowed = False
-        assert client.put("/api/v1/advisor/packs/base", json={}).status_code == 403
+        response = client.put("/api/v1/advisor/packs/base", json={})
+        assert response.status_code == 403

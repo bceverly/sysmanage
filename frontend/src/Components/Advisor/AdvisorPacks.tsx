@@ -74,7 +74,7 @@ const PackCard: React.FC<{ pack: AdvisorPack; onChoose: (pack: AdvisorPack, choi
                                         checked={rule.enabled}
                                         disabled={!pack.enabled}
                                         onChange={e => toggleRule(rule.key, e.target.checked)}
-                                        inputProps={{ 'aria-label': rule.key }}
+                                        slotProps={{ input: { 'aria-label': rule.key } }}
                                     />
                                 </TableCell>
                                 <TableCell>{rule.title ?? rule.key}</TableCell>

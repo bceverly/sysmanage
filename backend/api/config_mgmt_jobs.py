@@ -45,6 +45,7 @@ from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import config_mgmt_fleet as fleet
 from backend.services import config_mgmt_job_runner as runner
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -529,8 +530,8 @@ async def cancel_job(
 
     logger.info(
         "Config fleet job %s cancelled by %s; %d target(s) were never dispatched",
-        job.id,
-        current_user.userid,
+        sanitize_log(job.id),
+        sanitize_log(current_user.userid),
         skipped,
     )
     return JobResponse(**fleet.job_to_dict(job))

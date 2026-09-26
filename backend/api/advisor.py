@@ -134,7 +134,7 @@ def _key_taken(db: Session, key: str, except_id=None) -> bool:
     query = db.query(models.AdvisorRule).filter(models.AdvisorRule.rule_key == key)
     if except_id is not None:
         query = query.filter(models.AdvisorRule.id != except_id)
-    return db.query(query.exists()).scalar()
+    return query.with_entities(models.AdvisorRule.id).first() is not None
 
 
 def _refuse_duplicate() -> None:

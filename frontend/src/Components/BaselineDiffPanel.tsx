@@ -278,13 +278,14 @@ const BaselineDiffPanel: React.FC<BaselineDiffPanelProps> = ({ hostId, hosts }) 
                                 })}
                             />
                         )}
-                        {total === 0 && blindCount === 0 ? (
+                        {total === 0 && blindCount === 0 && (
                             <Chip
                                 size="small"
                                 color="success"
                                 label={t('baselineDiff.matches', 'Matches')}
                             />
-                        ) : total === 0 ? null : (
+                        )}
+                        {total !== 0 && (
                             <>
                                 {counts.missing > 0 && (
                                     <Chip

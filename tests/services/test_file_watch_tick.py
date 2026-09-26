@@ -132,7 +132,7 @@ class TestDispatchRefusals:
         host = FakeHost()
         assignment = _assignment(db, host, paths=())
         summary = self._summary()
-        assert tick._dispatch_one(db, host, [assignment], NOW, summary) is False
+        assert tick._dispatch_one(db, host, [assignment], summary) is False
         assert summary["nothing_to_watch"] == 1
 
     def test_an_agent_that_cannot_serve_the_table_is_skipped(self, db):
@@ -142,7 +142,7 @@ class TestDispatchRefusals:
         host = FakeHost(serves=False)
         assignment = _assignment(db, host)
         summary = self._summary()
-        assert tick._dispatch_one(db, host, [assignment], NOW, summary) is False
+        assert tick._dispatch_one(db, host, [assignment], summary) is False
         assert summary["not_equipped"] == 1
 
     def test_the_cursor_advances_even_when_dispatch_did_not_go(self, db):
@@ -151,7 +151,7 @@ class TestDispatchRefusals:
         offline host that is a log line a minute until somebody notices."""
         host = FakeHost(serves=False)
         assignment = _assignment(db, host, last=None)
-        tick._touch(db, [assignment], NOW)
+        tick._touch([assignment], NOW)
         assert assignment.last_dispatched_at == NOW
 
 

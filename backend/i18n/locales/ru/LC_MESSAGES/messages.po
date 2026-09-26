@@ -4,8 +4,8 @@
 #
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-26 10:00-0400\n"
+"Report-Msgid-Bugs-To:  \n"
+"POT-Creation-Date: 2026-09-26 14:47-0400\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -140,10 +140,10 @@ msgid "Failed to get CA certificate: %s"
 msgstr "Не удалось получить сертификат CA: %s"
 
 #: backend/api/certificates.py:84 backend/api/certificates.py:139
-#: backend/api/file_watches.py:216 backend/api/file_watches.py:420
+#: backend/api/file_watches.py:219 backend/api/file_watches.py:423
 #: backend/api/config_mgmt_drift.py:165 backend/api/config_mgmt_drift.py:198
 #: backend/api/advisor.py:256 backend/api/advisor.py:325
-#: backend/api/query_packs.py:344 backend/api/query_packs.py:440
+#: backend/api/query_packs.py:347 backend/api/query_packs.py:443
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
@@ -195,8 +195,7 @@ msgstr "Узел не одобрен"
 #: backend/api/opentelemetry/grafana_connection.py:201
 #: backend/api/cve_refresh_settings.py:66 backend/api/scim.py:218
 #: backend/api/scim.py:228 backend/api/packages_operations.py:68
-#: backend/api/packages_operations.py:247
-#: backend/api/license_management.py:116
+#: backend/api/packages_operations.py:247 backend/api/license_management.py:116
 #: backend/api/updates/os_upgrade_routes.py:189
 #: backend/api/updates/execution_routes.py:49
 #: backend/api/secrets/permissions.py:39 backend/api/error_constants.py:22
@@ -608,8 +607,8 @@ msgstr "Не удалось добавить отключение репозит
 
 #: backend/api/reports/endpoints.py:69
 msgid ""
-"Report generation requires a SysManage Professional+ license. Please upgrade"
-" to access this feature."
+"Report generation requires a SysManage Professional+ license. Please upgrade "
+"to access this feature."
 msgstr ""
 "Генерация отчётов требует лицензии SysManage Professional+. Обновите для "
 "доступа к этой функции."
@@ -730,8 +729,8 @@ msgstr "Недействительный или истекший токен ре
 
 #: backend/api/host_registration.py:182
 msgid ""
-"This host already belongs to a tenant. Re-register with its enrollment token"
-" instead of registering server-scoped."
+"This host already belongs to a tenant. Re-register with its enrollment token "
+"instead of registering server-scoped."
 msgstr ""
 "Этот хост уже принадлежит арендатору. Вместо регистрации серверного уровня "
 "используйте токен регистрации для перерегистрации."
@@ -1361,8 +1360,8 @@ msgid ""
 "User account deletion requested. The user list will update automatically "
 "after deletion."
 msgstr ""
-"Запрошенное удаление учетной записи пользователя. Список пользователей будет"
-" автоматически обновлен после удаления."
+"Запрошенное удаление учетной записи пользователя. Список пользователей будет "
+"автоматически обновлен после удаления."
 
 #: backend/api/host_account_management.py:407
 msgid "Permission denied: DELETE_HOST_GROUP role required"
@@ -1417,8 +1416,8 @@ msgid ""
 "Mirror %(mirror_name)s is for %(package_manager)s, can't assign to a "
 "%(platform)s default"
 msgstr ""
-"Зеркало %(mirror_name)s предназначено для %(package_manager)s, не может быть"
-" назначено по умолчанию для платформы %(platform)s"
+"Зеркало %(mirror_name)s предназначено для %(package_manager)s, не может быть "
+"назначено по умолчанию для платформы %(platform)s"
 
 #: backend/api/repository_mirroring.py:696
 msgid "Unknown (platform, version, os_family) tuple"
@@ -1453,8 +1452,8 @@ msgstr ""
 
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
-"Air-gap collection runs require the repository_mirroring_engine module to be"
-" loaded -- the collector reads each target's bundle from a snapshot of its "
+"Air-gap collection runs require the repository_mirroring_engine module to be "
+"loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 "Коллекция в изолированном режиме требует загрузки модуля "
@@ -1467,8 +1466,8 @@ msgid ""
 "Configure mirror settings before creating a collection run."
 msgstr ""
 "Отсутствуют глобальные параметры зеркалирования или не настроен "
-"mirror_root_path. Настройте параметры зеркалирования перед созданием запуска"
-" коллекции."
+"mirror_root_path. Настройте параметры зеркалирования перед созданием запуска "
+"коллекции."
 
 #: backend/api/airgap_collector_runs.py:289
 #, python-format
@@ -1531,8 +1530,8 @@ msgid ""
 "Created one-shot air-gap collection run '%(iso_label)s' with "
 "%(mirror_count)d target mirror(s); snapshots dispatched."
 msgstr ""
-"Создан одноразовый сбор данных в изоляции '%(iso_label)s' с %(mirror_count)d"
-" целевым зеркалом; отправлены снимки."
+"Создан одноразовый сбор данных в изоляции '%(iso_label)s' с %(mirror_count)d "
+"целевым зеркалом; отправлены снимки."
 
 #: backend/api/airgap_collector_runs.py:658
 #, python-format
@@ -1545,8 +1544,8 @@ msgstr ""
 
 #: backend/api/airgap_collector_runs.py:668
 msgid ""
-"ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
-" the collection to rebuild."
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
+"the collection to rebuild."
 msgstr ""
 "Файловая система ISO больше не находится на диске; возможно, стадия сборки "
 "была очищена. Повторите сборку."
@@ -1586,8 +1585,8 @@ msgstr "Профиль пакета не найден"
 
 #: backend/api/package_compliance.py:73
 msgid ""
-"Package compliance profiles require a SysManage Professional license. Please"
-" upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please "
+"upgrade to access this feature."
 msgstr ""
 "Профили соответствия пакетов требуют лицензии SysManage Professional. "
 "Пожалуйста, обновитесь для доступа к этой функции."
@@ -1617,8 +1616,8 @@ msgid ""
 "Scanned host '%(host_fqdn)s' against profile '%(profile_name)s': %(status)s "
 "(%(violation_count)d violation(s))"
 msgstr ""
-"Сканирование хоста '%(host_fqdn)s' по профилю '%(profile_name)s': %(status)s"
-" (%(violation_count)d нарушений)"
+"Сканирование хоста '%(host_fqdn)s' по профилю '%(profile_name)s': %(status)s "
+"(%(violation_count)d нарушений)"
 
 #: backend/api/package_compliance.py:500
 #, python-format
@@ -1629,81 +1628,78 @@ msgstr ""
 "Отправлено проверку соответствия агенту '%(host_fqdn)s' профилю "
 "'%(profile_name)s'"
 
-#: backend/api/file_watches.py:107 backend/api/config_mgmt_drift.py:191
-#: backend/api/advisor.py:93 backend/api/query_packs.py:116
+#: backend/api/file_watches.py:63
+msgid "Invalid watch ID format"
+msgstr "Неверный формат идентификатора наблюдения."
+
+#: backend/api/file_watches.py:64
+msgid "File watch not found"
+msgstr "Не найдено наблюдение файла."
+
+#: backend/api/file_watches.py:110 backend/api/config_mgmt_drift.py:191
+#: backend/api/advisor.py:93 backend/api/query_packs.py:119
 #: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
-#: backend/api/config_mgmt_jobs.py:167 backend/api/config_mgmt_profiles.py:136
+#: backend/api/config_mgmt_jobs.py:168 backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50
 #, python-format
 msgid "Permission denied: %s role required"
 msgstr "Доступ запрещён: требуется роль %s"
 
-#: backend/api/file_watches.py:120
+#: backend/api/file_watches.py:123
 msgid "A watch list must contain at least one path."
 msgstr "Список наблюдения должен содержать хотя бы один путь."
 
-#: backend/api/file_watches.py:123
+#: backend/api/file_watches.py:126
 #, python-format
 msgid "A watch list may contain at most %d paths."
 msgstr "Список наблюдения может содержать не более %d путей."
 
-#: backend/api/file_watches.py:129
+#: backend/api/file_watches.py:132
 msgid "A watched path cannot be empty."
 msgstr "Путь наблюдения не может быть пустым."
 
-#: backend/api/file_watches.py:135
+#: backend/api/file_watches.py:138
 #, python-format
 msgid "Watched path must be absolute: %s"
 msgstr "Путь наблюдения должен быть абсолютным: %s"
 
-#: backend/api/file_watches.py:137
+#: backend/api/file_watches.py:140
 #, python-format
 msgid "Duplicate watched path: %s"
 msgstr "Дублированный путь наблюдения: %s"
 
-#: backend/api/file_watches.py:267 backend/api/file_watches.py:320
-#: backend/api/file_watches.py:366 backend/api/file_watches.py:410
-#: backend/api/file_watches.py:415
-msgid "Invalid watch ID format"
-msgstr "Неверный формат идентификатора наблюдения."
-
-#: backend/api/file_watches.py:271 backend/api/file_watches.py:324
-#: backend/api/file_watches.py:370
-msgid "File watch not found"
-msgstr "Не найдено наблюдение файла."
-
-#: backend/api/file_watches.py:387
+#: backend/api/file_watches.py:390
 msgid "Specify exactly one of watch_id or shared_watch_id."
 msgstr "Укажите ровно один из watch_id или shared_watch_id."
 
-#: backend/api/file_watches.py:393
+#: backend/api/file_watches.py:396
 msgid "Specify exactly one of host_id, tag_id or site_id."
 msgstr "Укажите ровно один из host_id, tag_id или site_id."
 
-#: backend/api/file_watches.py:403
+#: backend/api/file_watches.py:406
 #, python-format
 msgid "Collection interval must be at least %d minutes."
 msgstr "Интервал сбора данных должен составлять как минимум %d минут."
 
-#: backend/api/file_watches.py:425 backend/api/query_packs.py:355
+#: backend/api/file_watches.py:428 backend/api/query_packs.py:358
 #: backend/api/config_mgmt_inventories.py:360
 #: backend/api/config_mgmt_profiles.py:345
 msgid "Invalid tag ID format"
 msgstr "Неверный формат идентификатора тега"
 
-#: backend/api/file_watches.py:430 backend/api/query_packs.py:349
+#: backend/api/file_watches.py:433 backend/api/query_packs.py:352
 #: backend/api/config_mgmt_inventories.py:365
 #: backend/api/config_mgmt_profiles.py:350
 msgid "Invalid site ID format"
 msgstr "Неверный формат идентификатора сайта"
 
-#: backend/api/file_watches.py:455 backend/api/query_packs.py:281
+#: backend/api/file_watches.py:458 backend/api/query_packs.py:284
 #: backend/api/config_mgmt_profiles.py:377
 msgid "Invalid assignment ID format"
 msgstr "Неверный формат идентификатора задания"
 
-#: backend/api/file_watches.py:460 backend/api/query_packs.py:286
+#: backend/api/file_watches.py:463 backend/api/query_packs.py:289
 #: backend/api/config_mgmt_profiles.py:382
 msgid "Assignment not found"
 msgstr "Задание не найдено"
@@ -1719,14 +1715,14 @@ msgstr ""
 
 #: backend/api/config_mgmt_drift.py:211
 #: backend/api/config_mgmt_remediation.py:181
-#: backend/api/config_mgmt_jobs.py:208 backend/api/config_mgmt_profiles.py:159
+#: backend/api/config_mgmt_jobs.py:209 backend/api/config_mgmt_profiles.py:159
 #: backend/api/config_mgmt_runs.py:235
 msgid "Invalid profile ID format"
 msgstr "Неверный формат идентификатора профиля"
 
 #: backend/api/config_mgmt_drift.py:216
 #: backend/api/config_mgmt_remediation.py:186
-#: backend/api/config_mgmt_jobs.py:213 backend/api/config_mgmt_profiles.py:164
+#: backend/api/config_mgmt_jobs.py:214 backend/api/config_mgmt_profiles.py:164
 #: backend/api/config_mgmt_runs.py:244
 msgid "Profile not found"
 msgstr "Профиль не найден"
@@ -1876,8 +1872,8 @@ msgstr "Ошибка входа OIDC: %s"
 
 #: backend/api/external_idp.py:501 backend/api/external_idp.py:701
 msgid ""
-"No sysmanage account is linked to this IdP identity. Ask an administrator to"
-" provision your account first."
+"No sysmanage account is linked to this IdP identity. Ask an administrator to "
+"provision your account first."
 msgstr ""
 "Связанного аккаунта SysManage с этим идентификатором IdP не существует. "
 "Обратитесь к администратору для создания вашего аккаунта."
@@ -2047,8 +2043,8 @@ msgstr ""
 #: backend/api/opentelemetry/eligibility.py:111
 #: backend/api/opentelemetry/grafana_connection.py:88
 #: backend/api/opentelemetry/grafana_connection.py:231
-#: backend/api/packages_operations.py:97
-#: backend/api/packages_operations.py:276 backend/api/error_constants.py:119
+#: backend/api/packages_operations.py:97 backend/api/packages_operations.py:276
+#: backend/api/error_constants.py:119
 msgid "Host not found or not active"
 msgstr "Узел не найден или не активен"
 
@@ -2085,11 +2081,11 @@ msgstr "URL Grafana недоступен"
 
 #: backend/api/opentelemetry/deployment.py:152
 msgid ""
-"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
-" on the server."
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
+"on the server."
 msgstr ""
-"Для развертки OpenTelemetry требуется загрузить Pro+ observability_engine на"
-" сервере."
+"Для развертки OpenTelemetry требуется загрузить Pro+ observability_engine на "
+"сервере."
 
 #: backend/api/opentelemetry/deployment.py:179
 msgid "OpenTelemetry deployment queued successfully"
@@ -2102,8 +2098,8 @@ msgstr "Не удалось развернуть OpenTelemetry: %s"
 
 #: backend/api/opentelemetry/deployment.py:264
 msgid ""
-"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
-" the server."
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
+"the server."
 msgstr ""
 "Для удаления OpenTelemetry требуется загрузить набор инструментов "
 "observability_engine Pro+ на сервере."
@@ -2219,12 +2215,12 @@ msgstr "Не удалось отключить OpenTelemetry от Grafana: %s"
 
 #: backend/api/content_lifecycle.py:64
 msgid ""
-"Content lifecycle management requires a SysManage Professional+ (Enterprise)"
-" license. Please upgrade to access this feature."
+"Content lifecycle management requires a SysManage Professional+ (Enterprise) "
+"license. Please upgrade to access this feature."
 msgstr ""
 "Управление жизненным циклом контента требует лицензии SysManage "
-"Professional+ (Enterprise). Пожалуйста, обновите лицензию для доступа к этой"
-" функции."
+"Professional+ (Enterprise). Пожалуйста, обновите лицензию для доступа к этой "
+"функции."
 
 #: backend/api/content_lifecycle.py:121
 msgid "Environment name is required"
@@ -2320,8 +2316,8 @@ msgstr "Зеркало '%s' не имеет назначенного хоста"
 #: backend/api/content_lifecycle.py:684 backend/api/content_lifecycle.py:726
 msgid "All mirrors in a content view must share one host in this release"
 msgstr ""
-"Все зеркала в представлении содержимого должны использовать одну хост-машину"
-" в этой версии"
+"Все зеркала в представлении содержимого должны использовать одну хост-машину "
+"в этой версии"
 
 #: backend/api/content_lifecycle.py:697
 #, python-format
@@ -2443,8 +2439,7 @@ msgstr "Команда перезапуска сетевого экрана от
 msgid "Firewall deploy command sent successfully"
 msgstr "Команда развертывания сетевого экрана отправлена успешно"
 
-#: backend/api/default_repositories.py:273
-#: backend/api/antivirus_defaults.py:66
+#: backend/api/default_repositories.py:273 backend/api/antivirus_defaults.py:66
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "Требуется имя операционной системы"
@@ -2549,8 +2544,7 @@ msgstr "Запрошено обновление дочернего хоста"
 msgid ""
 "Distribution '%(name)s %(version)s' already exists for type '%(child_type)s'"
 msgstr ""
-"Распределение '%(name)s %(version)s' уже существует для типа "
-"'%(child_type)s'"
+"Распределение '%(name)s %(version)s' уже существует для типа '%(child_type)s'"
 
 #: backend/api/child_host_crud.py:833
 msgid "Distribution deleted"
@@ -2608,8 +2602,7 @@ msgid "Target '%(t)s' is not valid for %(f)s"
 msgstr "Цель '%(t)s' недопустима для %(f)s"
 
 #: backend/api/logging_settings.py:134
-msgid ""
-"Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
+msgid "Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
 msgstr ""
 "Передача удаленного syslog требует профессиональную лицензию (LOG_ROUTING)."
 
@@ -2685,55 +2678,52 @@ msgstr ""
 
 #: backend/api/child_host_virtualization.py:660
 msgid "Child host creation requested. This may take several minutes."
-msgstr ""
-"Запрошенная создание дочернего узла. Это может занять несколько минут."
+msgstr "Запрошенная создание дочернего узла. Это может занять несколько минут."
 
-#: backend/api/query_packs.py:135
+#: backend/api/query_packs.py:53
+msgid "Invalid query pack ID format"
+msgstr "Неверный формат идентификатора пакета запросов"
+
+#: backend/api/query_packs.py:54
+msgid "Query pack not found"
+msgstr "Пакет запросов не найден"
+
+#: backend/api/query_packs.py:138
 #, python-format
 msgid "The query pack was rejected: %s"
 msgstr "Пакет запросов отклонен: %s"
 
-#: backend/api/query_packs.py:160 backend/api/query_packs.py:195
-#: backend/api/query_packs.py:217
-msgid "Invalid query pack ID format"
-msgstr "Неверный формат идентификатора пакета запросов"
-
-#: backend/api/query_packs.py:162 backend/api/query_packs.py:197
-#: backend/api/query_packs.py:219
-msgid "Query pack not found"
-msgstr "Пакет запросов не найден"
-
-#: backend/api/query_packs.py:258
+#: backend/api/query_packs.py:261
 msgid "Invalid ID format in the assignment"
 msgstr "Неверный формат идентификатора в назначении"
 
-#: backend/api/query_packs.py:339
+#: backend/api/query_packs.py:342
 msgid "A live query targets exactly one of hosts, a tag or a site."
 msgstr "Живой запрос направлен ровно на один хост, тег или сайт."
 
-#: backend/api/query_packs.py:420
+#: backend/api/query_packs.py:423
 msgid "Invalid live query ID format"
 msgstr "Неверный формат идентификатора живого запроса"
 
-#: backend/api/query_packs.py:425
+#: backend/api/query_packs.py:428
 msgid "Live query not found"
 msgstr "Живой запрос не найден"
 
-#: backend/api/query_packs.py:457
+#: backend/api/query_packs.py:460
 msgid "Invalid run ID format"
 msgstr "Неверный формат идентификатора запуска"
 
-#: backend/api/query_packs.py:461
+#: backend/api/query_packs.py:464
 msgid "Query pack run not found"
 msgstr "Запуск пакета запросов не найден"
 
 #: backend/api/config_mgmt_inventories.py:133
-#: backend/api/config_mgmt_jobs.py:222
+#: backend/api/config_mgmt_jobs.py:223
 msgid "Invalid inventory ID format"
 msgstr "Неверный формат идентификатора инвентаря"
 
 #: backend/api/config_mgmt_inventories.py:138
-#: backend/api/config_mgmt_jobs.py:227 backend/api/config_mgmt_jobs.py:424
+#: backend/api/config_mgmt_jobs.py:228 backend/api/config_mgmt_jobs.py:425
 msgid "Inventory not found"
 msgstr "Инвентарь не найден"
 
@@ -2829,8 +2819,7 @@ msgstr "Для этого нахождения не найдено соотве�
 #: backend/api/config_mgmt_remediation.py:426
 msgid "The profile this rule repairs with is missing or not active"
 msgstr ""
-"Профиль, по которому восстанавливается это правило, отсутствует или "
-"неактивен"
+"Профиль, по которому восстанавливается это правило, отсутствует или неактивен"
 
 #: backend/api/config_mgmt_remediation.py:460
 msgid "The repair was queued for this host"
@@ -2897,8 +2886,7 @@ msgid ""
 "Your password has been successfully reset. You can now log in with your new "
 "password."
 msgstr ""
-"Ваш пароль успешно сброшен. Теперь вы можете войти в систему с новым "
-"паролем."
+"Ваш пароль успешно сброшен. Теперь вы можете войти в систему с новым паролем."
 
 #: backend/api/password_reset.py:396
 msgid "Token is valid"
@@ -3097,8 +3085,8 @@ msgid ""
 "instructions and will be unable to log in."
 msgstr ""
 "Включите электронную почту в файле конфигурации YAML и настройте параметры "
-"SMTP. Без интеграции электронной почты новые пользователи не смогут получить"
-" инструкции по установке пароля и не смогут войти в систему."
+"SMTP. Без интеграции электронной почты новые пользователи не смогут получить "
+"инструкции по установке пароля и не смогут войти в систему."
 
 #: backend/api/security.py:171
 msgid "Default admin credentials are configured in your YAML file"
@@ -3153,11 +3141,9 @@ msgstr ""
 "Соль пароля использует значение по умолчанию, но JWT-секрет был изменён. "
 "Запуск: {command}"
 
-#: backend/api/ubuntu_pro_settings.py:76
-#: backend/api/ubuntu_pro_settings.py:318
+#: backend/api/ubuntu_pro_settings.py:76 backend/api/ubuntu_pro_settings.py:318
 msgid "Ubuntu Pro key must start with 'C' for contract-based keys"
-msgstr ""
-"Ключ Ubuntu Pro должен начинаться с 'C' для ключей на основе контракта"
+msgstr "Ключ Ubuntu Pro должен начинаться с 'C' для ключей на основе контракта"
 
 #: backend/api/ubuntu_pro_settings.py:80
 msgid "Ubuntu Pro key appears to be too short"
@@ -3212,8 +3198,8 @@ msgstr ""
 #: backend/api/ubuntu_pro_settings.py:350
 msgid "No master key configured. Please configure a master key first."
 msgstr ""
-"Конфигурация главного ключа не настроена. Пожалуйста, настройте главный ключ"
-" в первую очередь."
+"Конфигурация главного ключа не настроена. Пожалуйста, настройте главный ключ "
+"в первую очередь."
 
 #: backend/api/ubuntu_pro_settings.py:381
 #: backend/api/updates/os_upgrade_routes.py:264
@@ -3268,8 +3254,7 @@ msgstr "Регистрация включена: хост недавно был 
 
 #: backend/api/host.py:846
 #, python-format
-msgid ""
-"Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
+msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
 "Узел '%(fqdn)s' подключен к тенанту %(tenant_id)s через токен подключения"
 
@@ -3314,40 +3299,40 @@ msgstr "Необходимо указать target_hostname, target_platform и�
 msgid "Configuration acknowledgment processed"
 msgstr "Подтверждение конфигурации обработано"
 
-#: backend/api/config_mgmt_jobs.py:183
+#: backend/api/config_mgmt_jobs.py:184
 msgid "Invalid job template ID format"
 msgstr "Неверный формат идентификатора шаблона задачи"
 
-#: backend/api/config_mgmt_jobs.py:188
+#: backend/api/config_mgmt_jobs.py:189
 msgid "Job template not found"
 msgstr "Шаблон задачи не найден"
 
-#: backend/api/config_mgmt_jobs.py:195
+#: backend/api/config_mgmt_jobs.py:196
 msgid "Invalid job ID format"
 msgstr "Неверный формат идентификатора задачи"
 
-#: backend/api/config_mgmt_jobs.py:199
+#: backend/api/config_mgmt_jobs.py:200
 msgid "Job not found"
 msgstr "Задача не найдена"
 
-#: backend/api/config_mgmt_jobs.py:272 backend/api/config_mgmt_jobs.py:343
+#: backend/api/config_mgmt_jobs.py:273 backend/api/config_mgmt_jobs.py:344
 #, python-format
 msgid "A job template named '%s' already exists"
 msgstr "Шаблон задачи с именем '%s' уже существует"
 
-#: backend/api/config_mgmt_jobs.py:389
+#: backend/api/config_mgmt_jobs.py:390
 msgid "Job template deleted"
 msgstr "Шаблон задачи удален"
 
-#: backend/api/config_mgmt_jobs.py:415
+#: backend/api/config_mgmt_jobs.py:416
 msgid "The profile this template runs is not active"
 msgstr "Профиль, по которому работает этот шаблон, не активен"
 
-#: backend/api/config_mgmt_jobs.py:524
+#: backend/api/config_mgmt_jobs.py:525
 msgid "This job has already finished"
 msgstr "Эта задача уже завершена"
 
-#: backend/api/config_mgmt_jobs.py:526
+#: backend/api/config_mgmt_jobs.py:527
 msgid "Cancelled by an operator"
 msgstr "Отменено оператором"
 
@@ -3385,8 +3370,7 @@ msgstr "Нет пакетов для установки"
 
 #: backend/api/packages_operations.py:179
 #, python-format
-msgid ""
-"Queued installation of %(package_count)d packages on host %(host_fqdn)s"
+msgid "Queued installation of %(package_count)d packages on host %(host_fqdn)s"
 msgstr ""
 "Добавлены в очередь установка %(package_count)d пакетов на хосте "
 "%(host_fqdn)s"
@@ -3534,8 +3518,8 @@ msgstr ""
 
 #: backend/api/auth.py:374
 msgid ""
-"Multi-factor authentication is required for this account. Please enroll from"
-" your profile page before signing in."
+"Multi-factor authentication is required for this account. Please enroll from "
+"your profile page before signing in."
 msgstr ""
 "Двухфакторная аутентификация требуется для этого аккаунта. Пожалуйста, "
 "зарегистрируйтесь через страницу вашего профиля перед входом в систему."
@@ -3609,8 +3593,7 @@ msgstr "Нет доступных обновлений ОС для этого х
 
 #: backend/api/updates/os_upgrade_routes.py:359
 #, python-format
-msgid ""
-"Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
+msgid "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
 msgstr ""
 "Запущено обновление ОС на узле %(fqdn)s с %(upgrade_count)d обновлением(ями)"
 
@@ -3690,8 +3673,7 @@ msgstr "Неизвестный тип: %(kind)s (допустимые значе
 #: backend/api/dynamic_secrets.py:153
 #, python-format
 msgid ""
-"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
-"ttl=%(ttl)ds)"
+"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, ttl=%(ttl)ds)"
 msgstr ""
 "Выдан динамический секрет '%(name)s' (тип=%(kind)s, роль=%(role)s, "
 "ttl=%(ttl)ds)"
@@ -3723,8 +3705,8 @@ msgid ""
 "WSL enablement requested. A reboot may be required to complete the "
 "installation."
 msgstr ""
-"Запрошенное включение WSL. Возможно, потребуется перезагрузка для завершения"
-" установки."
+"Запрошенное включение WSL. Возможно, потребуется перезагрузка для завершения "
+"установки."
 
 # LXD Container Management strings
 #: backend/api/child_host_virtualization_enable.py:213
@@ -3760,8 +3742,7 @@ msgstr "Запрошена инициализация VMM"
 
 #: backend/api/child_host_virtualization_enable.py:306
 msgid ""
-"VMM initialization requested. The agent will enable and start the vmd "
-"daemon."
+"VMM initialization requested. The agent will enable and start the vmd daemon."
 msgstr "Запрошена инициализация VMM. Агент включит и запустит демон vmd."
 
 #: backend/api/child_host_virtualization_enable.py:348
@@ -3795,8 +3776,8 @@ msgstr "Запрошенная инициализация bhyve"
 
 #: backend/api/child_host_virtualization_enable.py:433
 msgid ""
-"bhyve initialization requested. The agent will load vmm.ko and configure the"
-" system for bhyve virtual machines."
+"bhyve initialization requested. The agent will load vmm.ko and configure the "
+"system for bhyve virtual machines."
 msgstr ""
 "Запрошенная инициализация bhyve. Агент загрузит vmm.ko и настроит систему "
 "для работы с виртуальными машинами bhyve."
@@ -3815,8 +3796,7 @@ msgid ""
 "configuration. This will fail if any VMs are running."
 msgstr ""
 "Запрошенное отключение bhyve. Агент выгрузит vmm.ko и обновит конфигурацию "
-"системы. Это завершится ошибкой, если какие-либо виртуальные машины "
-"работают."
+"системы. Это завершится ошибкой, если какие-либо виртуальные машины работают."
 
 #: backend/api/child_host_virtualization_enable.py:536
 msgid "Agent must be running with root privileges to enable KVM modules"
@@ -3828,8 +3808,8 @@ msgstr "Модули KVM разрешены"
 
 #: backend/api/child_host_virtualization_enable.py:558
 msgid ""
-"KVM modules enable requested. The agent will load the KVM kernel modules via"
-" modprobe."
+"KVM modules enable requested. The agent will load the KVM kernel modules via "
+"modprobe."
 msgstr ""
 "Модули KVM включены по запросу. Агент загрузит модули ядра KVM с помощью "
 "команды modprobe."
@@ -4022,11 +4002,10 @@ msgstr ""
 "Обновите для доступа к этой функции."
 
 #: backend/api/reboot_orchestration.py:135
-msgid ""
-"No running child hosts found. Use the standard reboot endpoint instead."
+msgid "No running child hosts found. Use the standard reboot endpoint instead."
 msgstr ""
-"Запущенные дочерние хосты не найдены. Используйте стандартную конечную точку"
-" перезагрузки."
+"Запущенные дочерние хосты не найдены. Используйте стандартную конечную точку "
+"перезагрузки."
 
 #: backend/api/reboot_orchestration.py:204
 #, python-format
@@ -4045,11 +4024,11 @@ msgstr "Профиль обновления не найден"
 
 #: backend/api/upgrade_profiles.py:74
 msgid ""
-"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
-" upgrade to access this feature."
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
+"upgrade to access this feature."
 msgstr ""
-"Запланированные профили обновлений требуют лицензии SysManage Professional+."
-" Выполните обновление для доступа к этой функции."
+"Запланированные профили обновлений требуют лицензии SysManage Professional+. "
+"Выполните обновление для доступа к этой функции."
 
 #: backend/api/upgrade_profiles.py:196
 #, python-format
@@ -4283,8 +4262,7 @@ msgstr "Инициировано развертывание антивируса
 #: backend/api/antivirus_status.py:338
 #, python-format
 msgid ""
-"Antivirus deployment initiated for %(success_count)d of %(total_count)d "
-"hosts"
+"Antivirus deployment initiated for %(success_count)d of %(total_count)d hosts"
 msgstr ""
 "Запущено развертывание антивируса для %(success_count)d из %(total_count)d "
 "узлов"
@@ -4361,8 +4339,8 @@ msgid ""
 "Air-gap media export requires the air-gap collector engine (Enterprise). "
 "Please upgrade to access this feature."
 msgstr ""
-"Экспорт носителей в условиях изолированной сети требует использования движка"
-" сборщика для изолированных сетей (Enterprise). Обновитесь, чтобы получить "
+"Экспорт носителей в условиях изолированной сети требует использования движка "
+"сборщика для изолированных сетей (Enterprise). Обновитесь, чтобы получить "
 "доступ к этой функции."
 
 #: backend/api/content_lifecycle_export.py:84
@@ -4699,8 +4677,8 @@ msgid ""
 "%s export requires a SysManage Professional+ license. OSS tier supports CSV "
 "export."
 msgstr ""
-"Экспорт %s требует лицензии SysManage Professional+. Термин OSS поддерживает"
-" экспорт в формате CSV."
+"Экспорт %s требует лицензии SysManage Professional+. Термин OSS поддерживает "
+"экспорт в формате CSV."
 
 #: backend/api/audit_log.py:306
 msgid "Use /api/v1/audit/export with Pro+ license"
@@ -4807,8 +4785,7 @@ msgstr "Доступ запрещен: требуется роль ADD_ENABLED_P
 #: backend/api/enabled_package_managers.py:307
 #, python-format
 msgid ""
-"Package manager '%(package_manager)s' is already enabled for OS "
-"'%(os_name)s'"
+"Package manager '%(package_manager)s' is already enabled for OS '%(os_name)s'"
 msgstr ""
 "Пакетный менеджер '%(package_manager)s' уже включен для ОС '%(os_name)s'"
 
@@ -5063,8 +5040,8 @@ msgid ""
 "deleted host"
 msgstr ""
 "Хост %(host_id)s не найден в этой базе данных; откладываю %(count)d "
-"сообщение(я) в очереди на повторную отправку (БЕЗ удаления) -- возможно, это"
-" хост в процессе регистрации или уже удаленный хост"
+"сообщение(я) в очереди на повторную отправку (БЕЗ удаления) -- возможно, это "
+"хост в процессе регистрации или уже удаленный хост"
 
 #: backend/websocket/inbound_processor.py:284
 #, python-format
@@ -5083,8 +5060,7 @@ msgstr "Удалено %(count)d сообщений для неодобренн�
 #: backend/websocket/inbound_processor.py:301
 #, python-format
 msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"
-msgstr ""
-"Обработка сообщений для одобренного хоста %(host_id)s (FQDN: %(fqdn)s)"
+msgstr "Обработка сообщений для одобренного хоста %(host_id)s (FQDN: %(fqdn)s)"
 
 #: backend/websocket/inbound_processor.py:326
 #, python-format
@@ -5211,8 +5187,7 @@ msgstr "Невозможно подтвердить неизвестное со�
 
 #: backend/websocket/queue_operations.py:628
 #, python-format
-msgid ""
-"Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
+msgid "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
 msgstr ""
 "Сообщение %(message_id)s не в статусе SENT (является %(status)s), пропущено "
 "подтверждение"
@@ -5258,8 +5233,8 @@ msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
 "%(error)s"
 msgstr ""
-"Сообщение %(message_id)s окончательно не удалось после %(attempts)d попыток:"
-" %(error)s"
+"Сообщение %(message_id)s окончательно не удалось после %(attempts)d попыток: "
+"%(error)s"
 
 #: backend/websocket/queue_operations.py:841
 #, python-format
@@ -5296,11 +5271,11 @@ msgstr "Инициализация менеджера очереди сообщ�
 msgid "Rate limit exceeded. Please retry later."
 msgstr "Превышен лимит запросов. Пожалуйста, повторите попытку позже."
 
-#: backend/services/agent_capability_service.py:262
+#: backend/services/agent_capability_service.py:266
 msgid "this host"
 msgstr "этой машине"
 
-#: backend/services/agent_capability_service.py:265
+#: backend/services/agent_capability_service.py:269
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "
@@ -5409,12 +5384,46 @@ msgstr "Недействительный ответ от vault"
 msgid "Invalid secret format"
 msgstr "Неверный формат секрета"
 
+#: backend/vulnerability/cve_sources.py:23
+msgid "Primary CVE data source from NIST (includes Apple/macOS CVEs)"
+msgstr "Основной источник данных CVE от NIST (включая CVE для Apple/macOS)"
+
+#: backend/vulnerability/cve_sources.py:30
+msgid "Ubuntu-specific vulnerability data with package fixes"
+msgstr "Данные об уязвимостях Ubuntu с исправлениями пакетов"
+
+#: backend/vulnerability/cve_sources.py:36
+msgid "Debian package vulnerability data"
+msgstr "Данные об уязвимостях пакетов Debian"
+
+#: backend/vulnerability/cve_sources.py:42
+msgid "Red Hat and CentOS vulnerability data"
+msgstr "Данные об уязвимостях Red Hat и CentOS"
+
+#: backend/vulnerability/cve_sources.py:48
+msgid "Windows and Microsoft product vulnerabilities"
+msgstr "Уязвимости Windows и продуктов Microsoft"
+
+#: backend/vulnerability/cve_sources.py:55
+msgid "FreeBSD ports and base system vulnerabilities (what pkg audit reads)"
+msgstr "Уязвимости портов и базовой системы FreeBSD (то, что читает pkg audit)"
+
+#: backend/vulnerability/cve_sources.py:63
+msgid "NetBSD pkgsrc package vulnerabilities (what pkg_admin audit reads)"
+msgstr "Уязвимости пакетов pkgsrc в NetBSD (то, что читает pkg_admin audit)"
+
+#: backend/vulnerability/cve_sources.py:71
+msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
+msgstr ""
+"Уязвимости macOS по версиям ОС на основе данных NVD о затронутых версиях"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
-#~ msgstr "Служба электронной почты отключена. Включите её в файле конфигурации."
+#~ msgstr ""
+#~ "Служба электронной почты отключена. Включите её в файле конфигурации."
 
 #~ msgid ""
-#~ "Multi-factor authentication is required for this account. Please enrol from "
-#~ "your profile page before signing in."
+#~ "Multi-factor authentication is required for this account. Please enrol "
+#~ "from your profile page before signing in."
 #~ msgstr ""
 #~ "Требуется многофакторная аутентификация для этого аккаунта. Пожалуйста, "
 #~ "зарегистрируйтесь на странице профиля перед входом."
@@ -5454,8 +5463,8 @@ msgstr "Неверный формат секрета"
 #, python-format
 #~ msgid "Mirror %s is for %s, can't assign to a %s default"
 #~ msgstr ""
-#~ "Зеркало %s предназначено для %s, нельзя назначить как значение по умолчанию "
-#~ "для %s"
+#~ "Зеркало %s предназначено для %s, нельзя назначить как значение по "
+#~ "умолчанию для %s"
 
 #, python-format
 #~ msgid ""
@@ -5583,8 +5592,8 @@ msgstr "Неверный формат секрета"
 
 #, python-format
 #~ msgid ""
-#~ "Host %s not found on this database; deferring %d queued message(s) for retry"
-#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
+#~ "Host %s not found on this database; deferring %d queued message(s) for "
+#~ "retry (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
 #~ "Узел '%s' не найден в этой базе данных; откладываются %d сообщения из "
 #~ "очереди (НЕ УДАЛЯЮТСЯ) -- возможно, это процесс регистрации или удаленный "
@@ -5655,8 +5664,8 @@ msgstr "Неверный формат секрета"
 #, python-format
 #~ msgid "Message %s failed (attempt %d/%d), scheduled for retry in %d seconds"
 #~ msgstr ""
-#~ "Сообщение %s не удалось (попытка %d/%d), запланировано повторное выполнение "
-#~ "через %d секунд"
+#~ "Сообщение %s не удалось (попытка %d/%d), запланировано повторное "
+#~ "выполнение через %d секунд"
 
 #, python-format
 #~ msgid "Message %s permanently failed after %d attempts: %s"
@@ -5826,11 +5835,11 @@ msgstr "Неверный формат секрета"
 #~ msgstr "Подтвердить Обновление ОС"
 
 #~ msgid ""
-#~ "This action will upgrade the operating system and require a system reboot. "
-#~ "Continue?"
+#~ "This action will upgrade the operating system and require a system "
+#~ "reboot. Continue?"
 #~ msgstr ""
-#~ "Это действие обновит операционную систему и потребует перезагрузки системы. "
-#~ "Продолжить?"
+#~ "Это действие обновит операционную систему и потребует перезагрузки "
+#~ "системы. Продолжить?"
 
 #~ msgid "OS upgrades are always security updates"
 #~ msgstr "Обновления ОС всегда являются обновлениями безопасности"
@@ -5944,8 +5953,8 @@ msgstr "Неверный формат секрета"
 #~ msgstr "KVM/libvirt успешно инициализирован"
 
 #~ msgid ""
-#~ "Audit log export requires a SysManage Professional+ license. Please upgrade "
-#~ "to access CSV, JSON, CEF, and LEEF export formats."
+#~ "Audit log export requires a SysManage Professional+ license. Please "
+#~ "upgrade to access CSV, JSON, CEF, and LEEF export formats."
 #~ msgstr ""
 #~ "Экспорт журнала аудита требует лицензии SysManage Professional+. Обновите "
 #~ "для доступа к форматам экспорта CSV, JSON, CEF и LEEF."
