@@ -20,6 +20,7 @@ good shape. Same rule the Recent Runs screen follows for *Not covered* beside
 from typing import Any, Dict, List, Optional, Tuple
 
 from backend.persistence import models
+from backend.services import advisor_catalog as catalog
 from backend.services import advisor_scoring as scoring
 from backend.services import advisor_tick as tick
 
@@ -58,9 +59,20 @@ def all_rules(engine, db) -> Dict[Tuple[str, str], Dict[str, Any]]:
     the feed marks them ``rule: null`` rather than inventing a title.
     """
     rules = {}
+    settings = catalog.tenant_settings(db)
     for entry in tick.load_shared_rules() or []:
         rules[(entry["source"], entry["key"])] = rule_dict(
-            engine, entry["source"], entry["rule"], id=str(entry["shared_rule_id"])
+            engine,
+            entry["source"],
+            entry["rule"],
+            id=str(entry["shared_rule_id"]),
+            pack=entry.get("pack"),
+            # Per-tenant: a curated rule is on unless this tenant opted out (S6).
+            enabled=catalog.rule_enabled(
+                settings.get(entry.get("pack")),
+                entry.get("pack_default", False),
+                entry["key"],
+            ),
         )
     for row in db.query(models.AdvisorRule).all():
         rule = dict(row.definition or {}, id=row.rule_key)

@@ -191,7 +191,7 @@ export const HOST_CAT_LABEL = new Map<string, { key: string; def: string }>([
   ['virtualization', { key: 'hostDetail.cat.virtualization', def: 'Virtualization' }],
 ]);
 export const HOST_TAB_CATEGORY = new Map<string, string>([
-  ['info', 'overview'], ['hardware', 'overview'],
+  ['info', 'overview'], ['hardware', 'overview'], ['advisor', 'overview'],
   ['software', 'software'], ['software-changes', 'software'], ['third-party-repos', 'software'],
   ['ubuntu-pro', 'software'], ['proplus-advisory', 'software'], ['proplus-lifecycle', 'software'],
   ['security', 'security'], ['compliance', 'security'], ['proplus-compliance', 'security'],

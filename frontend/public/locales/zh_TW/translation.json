@@ -1766,7 +1766,8 @@
     "windowsTimezoneLabel": "時區",
     "wslEnableFailed": "啟用WSL失敗",
     "wslEnabledRebootRequired": "WSL已啟用。需要重新啟動以完成安裝。",
-    "wslEnabledSuccess": "WSL已成功啟用。"
+    "wslEnabledSuccess": "WSL已成功啟用。",
+    "advisorTab": "顧問"
   },
   "hostGroup": {
     "add": "新增",
@@ -2399,7 +2400,8 @@
     "toggleMenu": "切換選單",
     "updates": "更新",
     "users": "使用者",
-    "vulnerabilities": "漏洞"
+    "vulnerabilities": "漏洞",
+    "advisor": "顧問"
   },
   "notifications": {
     "applicationUpdates": "應用程式更新",
@@ -3726,5 +3728,165 @@
     "saveError": "無法儲存清單",
     "status": "狀態",
     "title": "檔案監控清單"
+  },
+  "advisor": {
+    "totals": {
+      "title": "主機與規則結果",
+      "findings": "{{count}} 個發現",
+      "findings_one": "1 個發現",
+      "findings_other": "{{count}} 個發現",
+      "notAssessable": "{{count}} 個無法評估",
+      "notAssessable_one": "1 個無法評估",
+      "notAssessable_other": "{{count}} 個無法評估",
+      "notApplicable": "{{count}} 個不適用",
+      "notApplicable_one": "1 個不適用",
+      "notApplicable_other": "{{count}} 個不適用",
+      "clean": "{{count}} 個正常",
+      "clean_one": "1 個正常",
+      "clean_other": "{{count}} 個正常"
+    },
+    "title": "顧問",
+    "evaluateNow": "立即評估",
+    "loadFailed": "無法載入顧問。",
+    "tabs": {
+      "recommendations": "建議",
+      "proposals": "建議的修正 ({{count}})",
+      "packs": "規則包"
+    },
+    "feed": {
+      "lens": "檢視角度",
+      "allLenses": "全部",
+      "hostsFailed": "無法載入此規則的主機。",
+      "noOpenHosts": "此規則沒有發現，也沒有未評估的主機。",
+      "showHosts": "顯示主機",
+      "notAssessableHelp": "此規則無法評估的主機 -- 並非正常，而是未經量測。",
+      "noRules": "尚未評估任何規則。請先啟用規則包，再進行評估。",
+      "rule": "規則",
+      "risk": "風險",
+      "findings": "發現",
+      "notAssessable": "無法評估",
+      "notApplicable": "不適用",
+      "clean": "正常"
+    },
+    "outcome": {
+      "fires": "發現問題",
+      "doesNotFire": "正常",
+      "notAssessable": "無法評估",
+      "notApplicable": "不適用"
+    },
+    "level": {
+      "critical": "嚴重",
+      "high": "高",
+      "medium": "中",
+      "low": "低",
+      "none": "無發現",
+      "unknown": "未評估"
+    },
+    "lens": {
+      "security": "安全性",
+      "performance": "效能",
+      "availability": "可用性",
+      "stability": "穩定性"
+    },
+    "gap": {
+      "missing": "從未回報",
+      "stale": "資料過舊，不可信",
+      "notCollected": "尚未收集",
+      "columnsNotAdvertised": "代理版本過舊，無法回報所需欄位",
+      "columnsNotPopulated": "代理未填入所需欄位",
+      "domainUnavailable": "此版本不量測此項目",
+      "ruleError": "無法評估該規則",
+      "insufficientPeers": "沒有可比較的主機",
+      "notApplicable": "不適用於此平台",
+      "unsupported": "此代理不支援",
+      "unknown": "代理從未回報涵蓋範圍"
+    },
+    "evidence": {
+      "facts": "事實：{{table}}",
+      "peerGroup": "同類主機群組",
+      "vuln": "弱點掃描",
+      "compliance": "合規掃描",
+      "drift": "配置漂移檢查",
+      "updates": "更新偵測",
+      "reboot": "重新開機狀態",
+      "packages": "軟體清單",
+      "firewall": "防火牆狀態",
+      "metricHistory": "指標歷程",
+      "when": "規則查詢",
+      "rule": "規則定義"
+    },
+    "proposal": {
+      "status": {
+        "proposed": "等待核准",
+        "approved": "已核准",
+        "rejected": "已拒絕",
+        "withdrawn": "已撤回",
+        "failed": "失敗"
+      },
+      "reason": {
+        "noLongerFires": "該發現已消失",
+        "ruleRemoved": "該規則已被移除或關閉",
+        "profileMissing": "其指定的設定檔遺失或未啟用",
+        "notQueued": "該主機無法接收此指令",
+        "notProposed": "已經做出決定"
+      },
+      "queued": "已排入佇列 -- 等待主機（及其維護時段）",
+      "ranOk": "已成功套用",
+      "ranFailed": "已套用，但執行失敗",
+      "appliesProfile": "套用設定檔「{{name}}」。",
+      "upgrades": "升級 {{count}} 個套件：",
+      "upgrades_one": "升級 1 個套件：",
+      "upgrades_other": "升級 {{count}} 個套件：",
+      "skipped": "已排除 {{count}} 個相符項目：它們不是此修正可升級的套件（例如韌體或 snap）。",
+      "skipped_one": "已排除 1 個相符項目：它不是此修正可升級的套件（例如韌體或 snap）。",
+      "skipped_other": "已排除 {{count}} 個相符項目：它們不是此修正可升級的套件（例如韌體或 snap）。",
+      "decideFailed": "無法記錄此決定。",
+      "none": "沒有建議的修正。",
+      "host": "主機",
+      "rule": "規則",
+      "fix": "修正",
+      "detail": "詳細資訊",
+      "packageCount": "{{count}} 個套件",
+      "packageCount_one": "1 個套件",
+      "packageCount_other": "{{count}} 個套件",
+      "review": "審查",
+      "reviewTitle": "審查 {{host}} 上 {{rule}} 的修正",
+      "approveWarning": "核准後，將於該主機的下一個維護時段以系統管理員權限套用此變更（若未設定維護時段則立即套用）。",
+      "reject": "拒絕",
+      "approve": "核准",
+      "statusColumn": "狀態"
+    },
+    "summary": {
+      "fleetAssessed": "已評估 {{assessed}} / {{total}} 台主機",
+      "fleetUnknown": "{{count}} 台主機無法評估，未計入此評分。它們並非正常 -- 而是未經量測。",
+      "fleetUnknown_one": "1 台主機無法評估，未計入此評分。它並非正常 -- 而是未經量測。",
+      "fleetUnknown_other": "{{count}} 台主機無法評估，未計入此評分。它們並非正常 -- 而是未經量測。",
+      "fleetIncomplete": "{{count}} 台主機僅部分完成評估；其評分為最低值。",
+      "fleetIncomplete_one": "1 台主機僅部分完成評估；其評分為最低值。",
+      "fleetIncomplete_other": "{{count}} 台主機僅部分完成評估；其評分為最低值。",
+      "hostUnknown": "此主機無法完成完整評估，因此沒有評級。請查看下方的無法評估清單，了解缺少哪些內容。",
+      "hostIncomplete": "此主機上有部分規則無法評估；此評分為最低值。",
+      "fleetTitle": "主機群風險",
+      "hostTitle": "主機風險"
+    },
+    "packs": {
+      "deprecated": "已撤回",
+      "followsDefault": "已為此租戶啟用（沿用預設值）",
+      "chosen": "已為此租戶啟用",
+      "saveFailed": "無法儲存變更。",
+      "none": "未安裝任何精選規則包。"
+    },
+    "host": {
+      "risk": "風險 {{risk}}",
+      "moreMatches": "共 {{count}} 個相符項目",
+      "moreMatches_one": "共 1 個相符項目",
+      "moreMatches_other": "共 {{count}} 個相符項目",
+      "notEvaluated": "顧問尚未評估此主機。",
+      "findings": "發現",
+      "notAssessable": "無法評估",
+      "proposals": "建議的修正",
+      "notApplicable": "不適用",
+      "clean": "正常"
+    }
   }
 }

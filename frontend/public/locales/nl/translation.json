@@ -1766,7 +1766,8 @@
     "windowsTimezoneLabel": "Tijdzone",
     "wslEnableFailed": "WSL inschakelen mislukt",
     "wslEnabledRebootRequired": "WSL is ingeschakeld. Een herstart is vereist om de installatie te voltooien.",
-    "wslEnabledSuccess": "WSL is succesvol ingeschakeld."
+    "wslEnabledSuccess": "WSL is succesvol ingeschakeld.",
+    "advisorTab": "Adviseur"
   },
   "hostGroup": {
     "add": "Toevoegen",
@@ -2399,7 +2400,8 @@
     "toggleMenu": "Menu wisselen",
     "updates": "Bijwerkingen",
     "users": "Gebruikers",
-    "vulnerabilities": "Kwetsbaarheden"
+    "vulnerabilities": "Kwetsbaarheden",
+    "advisor": "Adviseur"
   },
   "notifications": {
     "applicationUpdates": "Applicatie Updates",
@@ -3726,5 +3728,165 @@
     "saveError": "Kon de lijst niet opslaan",
     "status": "Status",
     "title": "Lijsten voor het bijhouden van bestanden"
+  },
+  "advisor": {
+    "totals": {
+      "title": "Resultaten per host en regel",
+      "findings": "{{count}} bevindingen",
+      "findings_one": "1 bevinding",
+      "findings_other": "{{count}} bevindingen",
+      "notAssessable": "{{count}} niet te beoordelen",
+      "notAssessable_one": "1 niet te beoordelen",
+      "notAssessable_other": "{{count}} niet te beoordelen",
+      "notApplicable": "{{count}} niet van toepassing",
+      "notApplicable_one": "1 niet van toepassing",
+      "notApplicable_other": "{{count}} niet van toepassing",
+      "clean": "{{count}} zonder bevindingen",
+      "clean_one": "1 zonder bevindingen",
+      "clean_other": "{{count}} zonder bevindingen"
+    },
+    "title": "Adviseur",
+    "evaluateNow": "Nu evalueren",
+    "loadFailed": "De adviseur kon niet worden geladen.",
+    "tabs": {
+      "recommendations": "Aanbevelingen",
+      "proposals": "Voorgestelde oplossingen ({{count}})",
+      "packs": "Regelpakketten"
+    },
+    "feed": {
+      "lens": "Invalshoek",
+      "allLenses": "Alle",
+      "hostsFailed": "De hosts voor deze regel konden niet worden geladen.",
+      "noOpenHosts": "Geen bevindingen en niets onbeoordeeld voor deze regel.",
+      "showHosts": "Hosts tonen",
+      "notAssessableHelp": "Hosts waarop deze regel niet kon worden geëvalueerd -- niet probleemloos, maar niet gemeten.",
+      "noRules": "Er zijn nog geen regels geëvalueerd. Schakel een regelpakket in en evalueer daarna.",
+      "rule": "Regel",
+      "risk": "Risico",
+      "findings": "Bevindingen",
+      "notAssessable": "Niet te beoordelen",
+      "notApplicable": "Niet van toepassing",
+      "clean": "Geen bevindingen"
+    },
+    "outcome": {
+      "fires": "Bevinding",
+      "doesNotFire": "Geen bevinding",
+      "notAssessable": "Niet te beoordelen",
+      "notApplicable": "Niet van toepassing"
+    },
+    "level": {
+      "critical": "Kritiek",
+      "high": "Hoog",
+      "medium": "Gemiddeld",
+      "low": "Laag",
+      "none": "Geen bevindingen",
+      "unknown": "Niet beoordeeld"
+    },
+    "lens": {
+      "security": "Beveiliging",
+      "performance": "Prestaties",
+      "availability": "Beschikbaarheid",
+      "stability": "Stabiliteit"
+    },
+    "gap": {
+      "missing": "nooit gerapporteerd",
+      "stale": "te oud om op te vertrouwen",
+      "notCollected": "nog niet verzameld",
+      "columnsNotAdvertised": "agent te oud om de benodigde kolommen te rapporteren",
+      "columnsNotPopulated": "agent vult de benodigde kolommen niet",
+      "domainUnavailable": "niet gemeten door deze versie",
+      "ruleError": "de regel kon niet worden geëvalueerd",
+      "insufficientPeers": "geen vergelijkbare hosts",
+      "notApplicable": "niet van toepassing op dit platform",
+      "unsupported": "niet ondersteund door deze agent",
+      "unknown": "agent heeft nooit dekking gerapporteerd"
+    },
+    "evidence": {
+      "facts": "Feiten: {{table}}",
+      "peerGroup": "Vergelijkingsgroep",
+      "vuln": "Kwetsbaarheidsscan",
+      "compliance": "Compliancescan",
+      "drift": "Controle op configuratieafwijking",
+      "updates": "Detectie van updates",
+      "reboot": "Herstartstatus",
+      "packages": "Software-inventaris",
+      "firewall": "Firewallstatus",
+      "metricHistory": "Metriekgeschiedenis",
+      "when": "Regelquery",
+      "rule": "Regeldefinitie"
+    },
+    "proposal": {
+      "status": {
+        "proposed": "Wacht op goedkeuring",
+        "approved": "Goedgekeurd",
+        "rejected": "Afgewezen",
+        "withdrawn": "Ingetrokken",
+        "failed": "Mislukt"
+      },
+      "reason": {
+        "noLongerFires": "de bevinding is verdwenen",
+        "ruleRemoved": "de regel is verwijderd of uitgeschakeld",
+        "profileMissing": "het genoemde configuratieprofiel ontbreekt of is inactief",
+        "notQueued": "de host kon de opdracht niet aannemen",
+        "notProposed": "er was al over besloten"
+      },
+      "queued": "In wachtrij -- wacht op de host (en het onderhoudsvenster)",
+      "ranOk": "Succesvol toegepast",
+      "ranFailed": "Toegepast, maar de uitvoering is mislukt",
+      "appliesProfile": "Past het configuratieprofiel \"{{name}}\" toe.",
+      "upgrades": "Werkt {{count}} pakketten bij:",
+      "upgrades_one": "Werkt 1 pakket bij:",
+      "upgrades_other": "Werkt {{count}} pakketten bij:",
+      "skipped": "{{count}} overeenkomende items zijn weggelaten: geen pakketten die deze oplossing mag bijwerken (bijvoorbeeld firmware of snaps).",
+      "skipped_one": "1 overeenkomend item is weggelaten: geen pakket dat deze oplossing mag bijwerken (bijvoorbeeld firmware of een snap).",
+      "skipped_other": "{{count}} overeenkomende items zijn weggelaten: geen pakketten die deze oplossing mag bijwerken (bijvoorbeeld firmware of snaps).",
+      "decideFailed": "De beslissing kon niet worden vastgelegd.",
+      "none": "Geen voorgestelde oplossingen.",
+      "host": "Host",
+      "rule": "Regel",
+      "fix": "Oplossing",
+      "detail": "Details",
+      "packageCount": "{{count}} pakketten",
+      "packageCount_one": "1 pakket",
+      "packageCount_other": "{{count}} pakketten",
+      "review": "Beoordelen",
+      "reviewTitle": "Oplossing voor {{rule}} op {{host}} beoordelen",
+      "approveWarning": "Bij goedkeuring wordt deze wijziging met beheerdersrechten op de host toegepast, tijdens het volgende onderhoudsvenster (direct als er geen is).",
+      "reject": "Afwijzen",
+      "approve": "Goedkeuren",
+      "statusColumn": "Status"
+    },
+    "summary": {
+      "fleetAssessed": "{{assessed}} van {{total}} hosts beoordeeld",
+      "fleetUnknown": "{{count}} hosts konden niet worden beoordeeld en tellen niet mee in deze score. Ze zijn niet probleemloos -- ze zijn niet gemeten.",
+      "fleetUnknown_one": "1 host kon niet worden beoordeeld en telt niet mee in deze score. Deze is niet probleemloos -- deze is niet gemeten.",
+      "fleetUnknown_other": "{{count}} hosts konden niet worden beoordeeld en tellen niet mee in deze score. Ze zijn niet probleemloos -- ze zijn niet gemeten.",
+      "fleetIncomplete": "{{count}} hosts zijn slechts gedeeltelijk beoordeeld; hun scores zijn een minimum.",
+      "fleetIncomplete_one": "1 host is slechts gedeeltelijk beoordeeld; de score is een minimum.",
+      "fleetIncomplete_other": "{{count}} hosts zijn slechts gedeeltelijk beoordeeld; hun scores zijn een minimum.",
+      "hostUnknown": "Deze host kon niet volledig worden beoordeeld en heeft daarom geen cijfer. Zie de lijst met niet te beoordelen regels hieronder voor wat ontbreekt.",
+      "hostIncomplete": "Sommige regels konden op deze host niet worden beoordeeld; deze score is een minimum.",
+      "fleetTitle": "Risico machinepark",
+      "hostTitle": "Hostrisico"
+    },
+    "packs": {
+      "deprecated": "Ingetrokken",
+      "followsDefault": "Ingeschakeld voor deze tenant (volgens de standaard)",
+      "chosen": "Ingeschakeld voor deze tenant",
+      "saveFailed": "De wijziging kon niet worden opgeslagen.",
+      "none": "Er zijn geen samengestelde regelpakketten geïnstalleerd."
+    },
+    "host": {
+      "risk": "Risico {{risk}}",
+      "moreMatches": "{{count}} overeenkomsten in totaal",
+      "moreMatches_one": "1 overeenkomst in totaal",
+      "moreMatches_other": "{{count}} overeenkomsten in totaal",
+      "notEvaluated": "De adviseur heeft deze host nog niet geëvalueerd.",
+      "findings": "Bevindingen",
+      "notAssessable": "Niet te beoordelen",
+      "proposals": "Voorgestelde oplossingen",
+      "notApplicable": "Niet van toepassing",
+      "clean": "Geen bevindingen"
+    }
   }
 }

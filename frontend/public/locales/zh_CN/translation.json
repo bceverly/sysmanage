@@ -1766,7 +1766,8 @@
     "windowsTimezoneLabel": "时区",
     "wslEnableFailed": "启用WSL失败",
     "wslEnabledRebootRequired": "WSL已启用。需要重新启动以完成安装。",
-    "wslEnabledSuccess": "WSL已成功启用。"
+    "wslEnabledSuccess": "WSL已成功启用。",
+    "advisorTab": "顾问"
   },
   "hostGroup": {
     "add": "添加",
@@ -2399,7 +2400,8 @@
     "toggleMenu": "切换菜单",
     "updates": "更新",
     "users": "用户",
-    "vulnerabilities": "漏洞"
+    "vulnerabilities": "漏洞",
+    "advisor": "顾问"
   },
   "notifications": {
     "applicationUpdates": "应用程序更新",
@@ -3726,5 +3728,165 @@
     "saveError": "无法保存列表",
     "status": "状态",
     "title": "文件监视列表"
+  },
+  "advisor": {
+    "totals": {
+      "title": "主机与规则结果",
+      "findings": "{{count}} 个发现",
+      "findings_one": "1 个发现",
+      "findings_other": "{{count}} 个发现",
+      "notAssessable": "{{count}} 个无法评估",
+      "notAssessable_one": "1 个无法评估",
+      "notAssessable_other": "{{count}} 个无法评估",
+      "notApplicable": "{{count}} 个不适用",
+      "notApplicable_one": "1 个不适用",
+      "notApplicable_other": "{{count}} 个不适用",
+      "clean": "{{count}} 个正常",
+      "clean_one": "1 个正常",
+      "clean_other": "{{count}} 个正常"
+    },
+    "title": "顾问",
+    "evaluateNow": "立即评估",
+    "loadFailed": "无法加载顾问。",
+    "tabs": {
+      "recommendations": "建议",
+      "proposals": "建议的修复 ({{count}})",
+      "packs": "规则包"
+    },
+    "feed": {
+      "lens": "视角",
+      "allLenses": "全部",
+      "hostsFailed": "无法加载此规则的主机。",
+      "noOpenHosts": "此规则没有发现，也没有未评估的主机。",
+      "showHosts": "显示主机",
+      "notAssessableHelp": "此规则无法评估的主机 -- 并非正常，而是未经测量。",
+      "noRules": "尚未评估任何规则。请先启用规则包，然后进行评估。",
+      "rule": "规则",
+      "risk": "风险",
+      "findings": "发现",
+      "notAssessable": "无法评估",
+      "notApplicable": "不适用",
+      "clean": "正常"
+    },
+    "outcome": {
+      "fires": "发现问题",
+      "doesNotFire": "正常",
+      "notAssessable": "无法评估",
+      "notApplicable": "不适用"
+    },
+    "level": {
+      "critical": "严重",
+      "high": "高",
+      "medium": "中",
+      "low": "低",
+      "none": "无发现",
+      "unknown": "未评估"
+    },
+    "lens": {
+      "security": "安全性",
+      "performance": "性能",
+      "availability": "可用性",
+      "stability": "稳定性"
+    },
+    "gap": {
+      "missing": "从未上报",
+      "stale": "数据过旧，不可信",
+      "notCollected": "尚未采集",
+      "columnsNotAdvertised": "代理版本过旧，无法上报所需列",
+      "columnsNotPopulated": "代理未填充所需列",
+      "domainUnavailable": "此版本不测量该项",
+      "ruleError": "无法评估该规则",
+      "insufficientPeers": "没有可比较的主机",
+      "notApplicable": "不适用于此平台",
+      "unsupported": "此代理不支持",
+      "unknown": "代理从未上报覆盖范围"
+    },
+    "evidence": {
+      "facts": "事实：{{table}}",
+      "peerGroup": "同类主机组",
+      "vuln": "漏洞扫描",
+      "compliance": "合规扫描",
+      "drift": "配置漂移检查",
+      "updates": "更新检测",
+      "reboot": "重启状态",
+      "packages": "软件清单",
+      "firewall": "防火墙状态",
+      "metricHistory": "指标历史",
+      "when": "规则查询",
+      "rule": "规则定义"
+    },
+    "proposal": {
+      "status": {
+        "proposed": "等待审批",
+        "approved": "已批准",
+        "rejected": "已拒绝",
+        "withdrawn": "已撤回",
+        "failed": "失败"
+      },
+      "reason": {
+        "noLongerFires": "该发现已消失",
+        "ruleRemoved": "该规则已被移除或关闭",
+        "profileMissing": "其指定的配置文件缺失或未启用",
+        "notQueued": "该主机无法接收此命令",
+        "notProposed": "已经做出决定"
+      },
+      "queued": "已排队 -- 等待主机（及其维护窗口）",
+      "ranOk": "已成功应用",
+      "ranFailed": "已应用，但运行失败",
+      "appliesProfile": "应用配置文件“{{name}}”。",
+      "upgrades": "升级 {{count}} 个软件包：",
+      "upgrades_one": "升级 1 个软件包：",
+      "upgrades_other": "升级 {{count}} 个软件包：",
+      "skipped": "已排除 {{count}} 个匹配项：它们不是此修复可升级的软件包（例如固件或 snap）。",
+      "skipped_one": "已排除 1 个匹配项：它不是此修复可升级的软件包（例如固件或 snap）。",
+      "skipped_other": "已排除 {{count}} 个匹配项：它们不是此修复可升级的软件包（例如固件或 snap）。",
+      "decideFailed": "无法记录该决定。",
+      "none": "没有建议的修复。",
+      "host": "主机",
+      "rule": "规则",
+      "fix": "修复",
+      "detail": "详情",
+      "packageCount": "{{count}} 个软件包",
+      "packageCount_one": "1 个软件包",
+      "packageCount_other": "{{count}} 个软件包",
+      "review": "审核",
+      "reviewTitle": "审核 {{host}} 上 {{rule}} 的修复",
+      "approveWarning": "批准后，将在该主机的下一个维护窗口以管理员权限应用此更改（如果没有维护窗口则立即应用）。",
+      "reject": "拒绝",
+      "approve": "批准",
+      "statusColumn": "状态"
+    },
+    "summary": {
+      "fleetAssessed": "已评估 {{assessed}} / {{total}} 台主机",
+      "fleetUnknown": "{{count}} 台主机无法评估，未计入此评分。它们并非正常 -- 而是未经测量。",
+      "fleetUnknown_one": "1 台主机无法评估，未计入此评分。它并非正常 -- 而是未经测量。",
+      "fleetUnknown_other": "{{count}} 台主机无法评估，未计入此评分。它们并非正常 -- 而是未经测量。",
+      "fleetIncomplete": "{{count}} 台主机仅部分完成评估；其评分为最低值。",
+      "fleetIncomplete_one": "1 台主机仅部分完成评估；其评分为最低值。",
+      "fleetIncomplete_other": "{{count}} 台主机仅部分完成评估；其评分为最低值。",
+      "hostUnknown": "此主机无法完成全面评估，因此没有评级。请查看下方的无法评估列表，了解缺少哪些内容。",
+      "hostIncomplete": "此主机上有部分规则无法评估；此评分为最低值。",
+      "fleetTitle": "主机群风险",
+      "hostTitle": "主机风险"
+    },
+    "packs": {
+      "deprecated": "已撤回",
+      "followsDefault": "已为此租户启用（遵循默认设置）",
+      "chosen": "已为此租户启用",
+      "saveFailed": "无法保存更改。",
+      "none": "未安装任何精选规则包。"
+    },
+    "host": {
+      "risk": "风险 {{risk}}",
+      "moreMatches": "共 {{count}} 个匹配项",
+      "moreMatches_one": "共 1 个匹配项",
+      "moreMatches_other": "共 {{count}} 个匹配项",
+      "notEvaluated": "顾问尚未评估此主机。",
+      "findings": "发现",
+      "notAssessable": "无法评估",
+      "proposals": "建议的修复",
+      "notApplicable": "不适用",
+      "clean": "正常"
+    }
   }
 }

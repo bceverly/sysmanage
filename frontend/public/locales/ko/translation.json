@@ -1766,7 +1766,8 @@
     "windowsTimezoneLabel": "시간대",
     "wslEnableFailed": "WSL 활성화 실패",
     "wslEnabledRebootRequired": "WSL이 활성화되었습니다. 설치를 완료하려면 재부팅이 필요합니다.",
-    "wslEnabledSuccess": "WSL이 성공적으로 활성화되었습니다."
+    "wslEnabledSuccess": "WSL이 성공적으로 활성화되었습니다.",
+    "advisorTab": "어드바이저"
   },
   "hostGroup": {
     "add": "추가",
@@ -2399,7 +2400,8 @@
     "toggleMenu": "메뉴 전환",
     "updates": "업데이트",
     "users": "사용자",
-    "vulnerabilities": "취약점"
+    "vulnerabilities": "취약점",
+    "advisor": "어드바이저"
   },
   "notifications": {
     "applicationUpdates": "애플리케이션 업데이트",
@@ -3726,5 +3728,165 @@
     "saveError": "목록을 저장할 수 없습니다",
     "status": "상태",
     "title": "파일 감시 목록"
+  },
+  "advisor": {
+    "totals": {
+      "title": "호스트 및 규칙 결과",
+      "findings": "발견 사항 {{count}}건",
+      "findings_one": "발견 사항 1건",
+      "findings_other": "발견 사항 {{count}}건",
+      "notAssessable": "평가 불가 {{count}}건",
+      "notAssessable_one": "평가 불가 1건",
+      "notAssessable_other": "평가 불가 {{count}}건",
+      "notApplicable": "적용 대상 아님 {{count}}건",
+      "notApplicable_one": "적용 대상 아님 1건",
+      "notApplicable_other": "적용 대상 아님 {{count}}건",
+      "clean": "정상 {{count}}건",
+      "clean_one": "정상 1건",
+      "clean_other": "정상 {{count}}건"
+    },
+    "title": "어드바이저",
+    "evaluateNow": "지금 평가",
+    "loadFailed": "어드바이저를 불러올 수 없습니다.",
+    "tabs": {
+      "recommendations": "권장 사항",
+      "proposals": "수정 제안 ({{count}})",
+      "packs": "규칙 팩"
+    },
+    "feed": {
+      "lens": "관점",
+      "allLenses": "전체",
+      "hostsFailed": "이 규칙의 호스트를 불러올 수 없습니다.",
+      "noOpenHosts": "이 규칙에 대한 발견 사항이나 미평가 항목이 없습니다.",
+      "showHosts": "호스트 표시",
+      "notAssessableHelp": "이 규칙을 평가할 수 없었던 호스트 -- 정상이 아니라 측정되지 않은 것입니다.",
+      "noRules": "아직 평가된 규칙이 없습니다. 규칙 팩을 활성화한 후 평가하십시오.",
+      "rule": "규칙",
+      "risk": "위험도",
+      "findings": "발견 사항",
+      "notAssessable": "평가 불가",
+      "notApplicable": "적용 대상 아님",
+      "clean": "정상"
+    },
+    "outcome": {
+      "fires": "발견 사항",
+      "doesNotFire": "정상",
+      "notAssessable": "평가 불가",
+      "notApplicable": "적용 대상 아님"
+    },
+    "level": {
+      "critical": "심각",
+      "high": "높음",
+      "medium": "중간",
+      "low": "낮음",
+      "none": "발견 사항 없음",
+      "unknown": "평가되지 않음"
+    },
+    "lens": {
+      "security": "보안",
+      "performance": "성능",
+      "availability": "가용성",
+      "stability": "안정성"
+    },
+    "gap": {
+      "missing": "보고된 적 없음",
+      "stale": "너무 오래되어 신뢰할 수 없음",
+      "notCollected": "아직 수집되지 않음",
+      "columnsNotAdvertised": "에이전트가 오래되어 필요한 열을 보고할 수 없음",
+      "columnsNotPopulated": "에이전트가 필요한 열을 채우지 않음",
+      "domainUnavailable": "이 버전에서는 측정되지 않음",
+      "ruleError": "규칙을 평가할 수 없음",
+      "insufficientPeers": "비교할 수 있는 호스트 없음",
+      "notApplicable": "이 플랫폼에는 적용되지 않음",
+      "unsupported": "이 에이전트에서 지원되지 않음",
+      "unknown": "에이전트가 수집 범위를 보고한 적 없음"
+    },
+    "evidence": {
+      "facts": "팩트: {{table}}",
+      "peerGroup": "피어 그룹",
+      "vuln": "취약점 스캔",
+      "compliance": "컴플라이언스 스캔",
+      "drift": "구성 이탈 검사",
+      "updates": "업데이트 감지",
+      "reboot": "재부팅 상태",
+      "packages": "소프트웨어 목록",
+      "firewall": "방화벽 상태",
+      "metricHistory": "메트릭 기록",
+      "when": "규칙 쿼리",
+      "rule": "규칙 정의"
+    },
+    "proposal": {
+      "status": {
+        "proposed": "승인 대기 중",
+        "approved": "승인됨",
+        "rejected": "거부됨",
+        "withdrawn": "철회됨",
+        "failed": "실패"
+      },
+      "reason": {
+        "noLongerFires": "발견 사항이 해소됨",
+        "ruleRemoved": "규칙이 제거되었거나 비활성화됨",
+        "profileMissing": "지정된 구성 프로필이 없거나 비활성 상태임",
+        "notQueued": "호스트가 명령을 받을 수 없음",
+        "notProposed": "이미 결정됨"
+      },
+      "queued": "대기열에 추가됨 -- 호스트(및 유지 관리 기간)를 기다리는 중",
+      "ranOk": "성공적으로 적용됨",
+      "ranFailed": "적용되었으나 실행에 실패함",
+      "appliesProfile": "구성 프로필 \"{{name}}\"을(를) 적용합니다.",
+      "upgrades": "패키지 {{count}}개를 업그레이드합니다:",
+      "upgrades_one": "패키지 1개를 업그레이드합니다:",
+      "upgrades_other": "패키지 {{count}}개를 업그레이드합니다:",
+      "skipped": "일치한 항목 {{count}}개가 제외되었습니다: 이 수정으로 업그레이드할 수 있는 패키지가 아닙니다(예: 펌웨어 또는 snap).",
+      "skipped_one": "일치한 항목 1개가 제외되었습니다: 이 수정으로 업그레이드할 수 있는 패키지가 아닙니다(예: 펌웨어 또는 snap).",
+      "skipped_other": "일치한 항목 {{count}}개가 제외되었습니다: 이 수정으로 업그레이드할 수 있는 패키지가 아닙니다(예: 펌웨어 또는 snap).",
+      "decideFailed": "결정을 기록할 수 없습니다.",
+      "none": "수정 제안이 없습니다.",
+      "host": "호스트",
+      "rule": "규칙",
+      "fix": "수정",
+      "detail": "세부 정보",
+      "packageCount": "패키지 {{count}}개",
+      "packageCount_one": "패키지 1개",
+      "packageCount_other": "패키지 {{count}}개",
+      "review": "검토",
+      "reviewTitle": "{{host}}의 {{rule}}에 대한 수정 검토",
+      "approveWarning": "승인하면 이 변경 사항이 다음 유지 관리 기간에 관리자 권한으로 호스트에 적용됩니다(유지 관리 기간이 없으면 즉시 적용).",
+      "reject": "거부",
+      "approve": "승인",
+      "statusColumn": "상태"
+    },
+    "summary": {
+      "fleetAssessed": "호스트 {{total}}대 중 {{assessed}}대 평가됨",
+      "fleetUnknown": "호스트 {{count}}대를 평가할 수 없어 이 점수에 포함되지 않았습니다. 이 호스트들은 정상이 아닙니다 -- 측정되지 않았습니다.",
+      "fleetUnknown_one": "호스트 1대를 평가할 수 없어 이 점수에 포함되지 않았습니다. 이 호스트는 정상이 아닙니다 -- 측정되지 않았습니다.",
+      "fleetUnknown_other": "호스트 {{count}}대를 평가할 수 없어 이 점수에 포함되지 않았습니다. 이 호스트들은 정상이 아닙니다 -- 측정되지 않았습니다.",
+      "fleetIncomplete": "호스트 {{count}}대는 일부만 평가되었습니다. 해당 점수는 최솟값입니다.",
+      "fleetIncomplete_one": "호스트 1대는 일부만 평가되었습니다. 해당 점수는 최솟값입니다.",
+      "fleetIncomplete_other": "호스트 {{count}}대는 일부만 평가되었습니다. 해당 점수는 최솟값입니다.",
+      "hostUnknown": "이 호스트는 완전히 평가할 수 없어 등급이 없습니다. 누락된 항목은 아래 평가 불가 목록을 참조하십시오.",
+      "hostIncomplete": "이 호스트에서 일부 규칙을 평가할 수 없었습니다. 이 점수는 최솟값입니다.",
+      "fleetTitle": "플릿 위험도",
+      "hostTitle": "호스트 위험도"
+    },
+    "packs": {
+      "deprecated": "철회됨",
+      "followsDefault": "이 테넌트에서 활성화됨(기본값 따름)",
+      "chosen": "이 테넌트에서 활성화됨",
+      "saveFailed": "변경 사항을 저장할 수 없습니다.",
+      "none": "설치된 큐레이션 규칙 팩이 없습니다."
+    },
+    "host": {
+      "risk": "위험도 {{risk}}",
+      "moreMatches": "총 {{count}}건 일치",
+      "moreMatches_one": "총 1건 일치",
+      "moreMatches_other": "총 {{count}}건 일치",
+      "notEvaluated": "어드바이저가 아직 이 호스트를 평가하지 않았습니다.",
+      "findings": "발견 사항",
+      "notAssessable": "평가 불가",
+      "proposals": "수정 제안",
+      "notApplicable": "적용 대상 아님",
+      "clean": "정상"
+    }
   }
 }

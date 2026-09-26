@@ -21,6 +21,7 @@ import SourceIcon from '@mui/icons-material/Source';
 import ShieldIcon from '@mui/icons-material/Shield';
 import RuleIcon from '@mui/icons-material/Rule';
 import LayersIcon from '@mui/icons-material/Layers';
+import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
 
 import { useTranslation } from 'react-i18next';
 
@@ -260,7 +261,7 @@ const HostDetail = () => { // NOSONAR
             'info', 'hardware', 'processes', 'software', 'software-changes',
             'third-party-repos', 'access', 'security', 'compliance',
             'certificates', 'server-roles', 'child-hosts', 'ubuntu-pro',
-            'image-mode', 'diagnostics',
+            'image-mode', 'diagnostics', 'advisor',
         ]);
         const safePluginTabs = visiblePluginTabs.filter(
             p => !HARDCODED_IDS.has(p.id),
@@ -268,6 +269,7 @@ const HostDetail = () => { // NOSONAR
         const tabs: Array<{ id: string; icon: React.ReactElement; label: string }> = [
             { id: 'info', icon: <InfoIcon />, label: t('hostDetail.infoTab', 'Info') },
             ...safePluginTabs.filter(p => p.position === 'after-info').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
+            ...(licenseModules.includes('advisor_engine') ? [{ id: 'advisor', icon: <TipsAndUpdatesIcon />, label: t('hostDetail.advisorTab', 'Advisor') }] : []),
             { id: 'hardware', icon: <MemoryIcon />, label: t('hostDetail.hardwareTab', 'Hardware') },
             { id: 'processes', icon: <DvrIcon />, label: t('hostDetail.processesTab', 'Processes') },
             { id: 'software', icon: <AppsIcon />, label: t('hostDetail.softwareTab', 'Software') },

@@ -1785,7 +1785,8 @@
     "windowsTimezoneLabel": "Time zone",
     "wslEnableFailed": "Failed to enable WSL",
     "wslEnabledRebootRequired": "WSL has been enabled. A reboot is required to complete the installation.",
-    "wslEnabledSuccess": "WSL has been enabled successfully."
+    "wslEnabledSuccess": "WSL has been enabled successfully.",
+    "advisorTab": "Advisor"
   },
   "hostGroup": {
     "add": "Add",
@@ -2418,7 +2419,8 @@
     "toggleMenu": "Toggle menu",
     "updates": "Updates",
     "users": "Users",
-    "vulnerabilities": "Vulnerabilities"
+    "vulnerabilities": "Vulnerabilities",
+    "advisor": "Advisor"
   },
   "notifications": {
     "applicationUpdates": "Application Updates",
@@ -3726,5 +3728,165 @@
     "status": "Status",
     "unlockSelected": "Unlock Selected",
     "unlocked": "Unlocked"
+  },
+  "advisor": {
+    "totals": {
+      "title": "Host and rule results",
+      "findings": "{{count}} findings",
+      "findings_one": "1 finding",
+      "findings_other": "{{count}} findings",
+      "notAssessable": "{{count}} not assessable",
+      "notAssessable_one": "1 not assessable",
+      "notAssessable_other": "{{count}} not assessable",
+      "notApplicable": "{{count}} not applicable",
+      "notApplicable_one": "1 not applicable",
+      "notApplicable_other": "{{count}} not applicable",
+      "clean": "{{count}} clean",
+      "clean_one": "1 clean",
+      "clean_other": "{{count}} clean"
+    },
+    "title": "Advisor",
+    "evaluateNow": "Evaluate now",
+    "loadFailed": "The advisor could not be loaded.",
+    "tabs": {
+      "recommendations": "Recommendations",
+      "proposals": "Proposed fixes ({{count}})",
+      "packs": "Rule packs"
+    },
+    "feed": {
+      "lens": "Lens",
+      "allLenses": "All",
+      "hostsFailed": "Could not load the hosts for this rule.",
+      "noOpenHosts": "No findings and nothing unassessed for this rule.",
+      "showHosts": "Show hosts",
+      "notAssessableHelp": "Hosts this rule could not be evaluated on -- not clean, unmeasured.",
+      "noRules": "No rules have been evaluated yet. Enable a rule pack, then evaluate.",
+      "rule": "Rule",
+      "risk": "Risk",
+      "findings": "Findings",
+      "notAssessable": "Not assessable",
+      "notApplicable": "Not applicable",
+      "clean": "Clean"
+    },
+    "outcome": {
+      "fires": "Finding",
+      "doesNotFire": "Clean",
+      "notAssessable": "Not assessable",
+      "notApplicable": "Not applicable"
+    },
+    "level": {
+      "critical": "Critical",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low",
+      "none": "No findings",
+      "unknown": "Not assessed"
+    },
+    "lens": {
+      "security": "Security",
+      "performance": "Performance",
+      "availability": "Availability",
+      "stability": "Stability"
+    },
+    "gap": {
+      "missing": "never reported",
+      "stale": "too old to trust",
+      "notCollected": "not collected yet",
+      "columnsNotAdvertised": "agent too old to report the needed columns",
+      "columnsNotPopulated": "agent does not fill the needed columns",
+      "domainUnavailable": "not measured by this version",
+      "ruleError": "the rule could not be evaluated",
+      "insufficientPeers": "no comparable hosts",
+      "notApplicable": "does not apply to this platform",
+      "unsupported": "not supported by this agent",
+      "unknown": "agent never reported coverage"
+    },
+    "evidence": {
+      "facts": "Facts: {{table}}",
+      "peerGroup": "Peer group",
+      "vuln": "Vulnerability scan",
+      "compliance": "Compliance scan",
+      "drift": "Configuration drift check",
+      "updates": "Update detection",
+      "reboot": "Reboot status",
+      "packages": "Software inventory",
+      "firewall": "Firewall status",
+      "metricHistory": "Metric history",
+      "when": "Rule query",
+      "rule": "Rule definition"
+    },
+    "proposal": {
+      "status": {
+        "proposed": "Awaiting approval",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "withdrawn": "Withdrawn",
+        "failed": "Failed"
+      },
+      "reason": {
+        "noLongerFires": "the finding is gone",
+        "ruleRemoved": "the rule was removed or switched off",
+        "profileMissing": "the configuration profile it names is missing or inactive",
+        "notQueued": "the host could not take the command",
+        "notProposed": "it was already decided"
+      },
+      "queued": "Queued -- waiting for the host (and its maintenance window)",
+      "ranOk": "Applied successfully",
+      "ranFailed": "Applied, but the run failed",
+      "appliesProfile": "Applies the configuration profile \"{{name}}\".",
+      "upgrades": "Upgrades {{count}} packages:",
+      "upgrades_one": "Upgrades 1 package:",
+      "upgrades_other": "Upgrades {{count}} packages:",
+      "skipped": "{{count}} matched items were left out: not packages this fix may upgrade (for example firmware or snaps).",
+      "skipped_one": "1 matched item was left out: not a package this fix may upgrade (for example firmware or a snap).",
+      "skipped_other": "{{count}} matched items were left out: not packages this fix may upgrade (for example firmware or snaps).",
+      "decideFailed": "The decision could not be recorded.",
+      "none": "No proposed fixes.",
+      "host": "Host",
+      "rule": "Rule",
+      "fix": "Fix",
+      "detail": "Detail",
+      "packageCount": "{{count}} packages",
+      "packageCount_one": "1 package",
+      "packageCount_other": "{{count}} packages",
+      "review": "Review",
+      "reviewTitle": "Review fix for {{rule}} on {{host}}",
+      "approveWarning": "Approving applies this change to the host with administrative rights, at its next maintenance window (immediately if it has none).",
+      "reject": "Reject",
+      "approve": "Approve",
+      "statusColumn": "Status"
+    },
+    "summary": {
+      "fleetAssessed": "{{assessed}} of {{total}} hosts assessed",
+      "fleetUnknown": "{{count}} hosts could not be assessed and are not in this score. They are not clean -- they are unmeasured.",
+      "fleetUnknown_one": "1 host could not be assessed and is not in this score. It is not clean -- it is unmeasured.",
+      "fleetUnknown_other": "{{count}} hosts could not be assessed and are not in this score. They are not clean -- they are unmeasured.",
+      "fleetIncomplete": "{{count}} hosts were only partly assessed; their scores are a minimum.",
+      "fleetIncomplete_one": "1 host was only partly assessed; its score is a minimum.",
+      "fleetIncomplete_other": "{{count}} hosts were only partly assessed; their scores are a minimum.",
+      "hostUnknown": "This host could not be fully assessed, so it has no grade. See the not-assessable list below for what is missing.",
+      "hostIncomplete": "Some rules could not be assessed on this host; this score is a minimum.",
+      "fleetTitle": "Fleet risk",
+      "hostTitle": "Host risk"
+    },
+    "packs": {
+      "deprecated": "Withdrawn",
+      "followsDefault": "Enabled for this tenant (following the default)",
+      "chosen": "Enabled for this tenant",
+      "saveFailed": "The change could not be saved.",
+      "none": "No curated rule packs are installed."
+    },
+    "host": {
+      "risk": "Risk {{risk}}",
+      "moreMatches": "{{count}} matches in total",
+      "moreMatches_one": "1 match in total",
+      "moreMatches_other": "{{count}} matches in total",
+      "notEvaluated": "The advisor has not evaluated this host yet.",
+      "findings": "Findings",
+      "notAssessable": "Not assessable",
+      "proposals": "Proposed fixes",
+      "notApplicable": "Not applicable",
+      "clean": "Clean"
+    }
   }
 }

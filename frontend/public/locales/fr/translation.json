@@ -1766,7 +1766,8 @@
     "windowsTimezoneLabel": "Fuseau horaire",
     "wslEnableFailed": "Échec de l'activation de WSL",
     "wslEnabledRebootRequired": "WSL a été activé. Un redémarrage est requis pour terminer l'installation.",
-    "wslEnabledSuccess": "WSL a été activé avec succès."
+    "wslEnabledSuccess": "WSL a été activé avec succès.",
+    "advisorTab": "Conseiller"
   },
   "hostGroup": {
     "add": "Ajouter",
@@ -2399,7 +2400,8 @@
     "toggleMenu": "Basculer le menu",
     "updates": "Mises à jour",
     "users": "Utilisateurs",
-    "vulnerabilities": "Vulnérabilités"
+    "vulnerabilities": "Vulnérabilités",
+    "advisor": "Conseiller"
   },
   "notifications": {
     "applicationUpdates": "Mises à jour d'Applications",
@@ -3726,5 +3728,165 @@
     "saveError": "Impossible d'enregistrer la liste",
     "status": "Statut",
     "title": "Listes de surveillance de fichiers"
+  },
+  "advisor": {
+    "totals": {
+      "title": "Résultats par hôte et par règle",
+      "findings": "{{count}} constats",
+      "findings_one": "1 constat",
+      "findings_other": "{{count}} constats",
+      "notAssessable": "{{count}} non évaluables",
+      "notAssessable_one": "1 non évaluable",
+      "notAssessable_other": "{{count}} non évaluables",
+      "notApplicable": "{{count}} non applicables",
+      "notApplicable_one": "1 non applicable",
+      "notApplicable_other": "{{count}} non applicables",
+      "clean": "{{count}} sans anomalie",
+      "clean_one": "1 sans anomalie",
+      "clean_other": "{{count}} sans anomalie"
+    },
+    "title": "Conseiller",
+    "evaluateNow": "Évaluer maintenant",
+    "loadFailed": "Impossible de charger le conseiller.",
+    "tabs": {
+      "recommendations": "Recommandations",
+      "proposals": "Correctifs proposés ({{count}})",
+      "packs": "Packs de règles"
+    },
+    "feed": {
+      "lens": "Angle",
+      "allLenses": "Tous",
+      "hostsFailed": "Impossible de charger les hôtes de cette règle.",
+      "noOpenHosts": "Aucun constat et aucun hôte non évalué pour cette règle.",
+      "showHosts": "Afficher les hôtes",
+      "notAssessableHelp": "Hôtes sur lesquels cette règle n'a pas pu être évaluée -- pas sains, mais non mesurés.",
+      "noRules": "Aucune règle n'a encore été évaluée. Activez un pack de règles, puis lancez l'évaluation.",
+      "rule": "Règle",
+      "risk": "Risque",
+      "findings": "Constats",
+      "notAssessable": "Non évaluable",
+      "notApplicable": "Non applicable",
+      "clean": "Sans anomalie"
+    },
+    "outcome": {
+      "fires": "Constat",
+      "doesNotFire": "Sans anomalie",
+      "notAssessable": "Non évaluable",
+      "notApplicable": "Non applicable"
+    },
+    "level": {
+      "critical": "Critique",
+      "high": "Élevé",
+      "medium": "Moyen",
+      "low": "Faible",
+      "none": "Aucun constat",
+      "unknown": "Non évalué"
+    },
+    "lens": {
+      "security": "Sécurité",
+      "performance": "Performances",
+      "availability": "Disponibilité",
+      "stability": "Stabilité"
+    },
+    "gap": {
+      "missing": "jamais signalé",
+      "stale": "trop ancien pour être fiable",
+      "notCollected": "pas encore collecté",
+      "columnsNotAdvertised": "agent trop ancien pour signaler les colonnes requises",
+      "columnsNotPopulated": "l'agent ne renseigne pas les colonnes requises",
+      "domainUnavailable": "non mesuré par cette version",
+      "ruleError": "la règle n'a pas pu être évaluée",
+      "insufficientPeers": "aucun hôte comparable",
+      "notApplicable": "ne s'applique pas à cette plateforme",
+      "unsupported": "non pris en charge par cet agent",
+      "unknown": "l'agent n'a jamais signalé sa couverture"
+    },
+    "evidence": {
+      "facts": "Faits : {{table}}",
+      "peerGroup": "Groupe de pairs",
+      "vuln": "Analyse des vulnérabilités",
+      "compliance": "Analyse de conformité",
+      "drift": "Vérification de la dérive de configuration",
+      "updates": "Détection des mises à jour",
+      "reboot": "État du redémarrage",
+      "packages": "Inventaire logiciel",
+      "firewall": "État du pare-feu",
+      "metricHistory": "Historique des métriques",
+      "when": "Requête de la règle",
+      "rule": "Définition de la règle"
+    },
+    "proposal": {
+      "status": {
+        "proposed": "En attente d'approbation",
+        "approved": "Approuvé",
+        "rejected": "Rejeté",
+        "withdrawn": "Retiré",
+        "failed": "Échec"
+      },
+      "reason": {
+        "noLongerFires": "le constat a disparu",
+        "ruleRemoved": "la règle a été supprimée ou désactivée",
+        "profileMissing": "le profil de configuration indiqué est absent ou inactif",
+        "notQueued": "l'hôte n'a pas pu recevoir la commande",
+        "notProposed": "une décision avait déjà été prise"
+      },
+      "queued": "En file d'attente -- en attente de l'hôte (et de sa fenêtre de maintenance)",
+      "ranOk": "Appliqué avec succès",
+      "ranFailed": "Appliqué, mais l'exécution a échoué",
+      "appliesProfile": "Applique le profil de configuration « {{name}} ».",
+      "upgrades": "Met à niveau {{count}} paquets :",
+      "upgrades_one": "Met à niveau 1 paquet :",
+      "upgrades_other": "Met à niveau {{count}} paquets :",
+      "skipped": "{{count}} éléments correspondants ont été exclus : ce ne sont pas des paquets que ce correctif peut mettre à niveau (par exemple un firmware ou des snaps).",
+      "skipped_one": "1 élément correspondant a été exclu : ce n'est pas un paquet que ce correctif peut mettre à niveau (par exemple un firmware ou un snap).",
+      "skipped_other": "{{count}} éléments correspondants ont été exclus : ce ne sont pas des paquets que ce correctif peut mettre à niveau (par exemple un firmware ou des snaps).",
+      "decideFailed": "Impossible d'enregistrer la décision.",
+      "none": "Aucun correctif proposé.",
+      "host": "Hôte",
+      "rule": "Règle",
+      "fix": "Correctif",
+      "detail": "Détail",
+      "packageCount": "{{count}} paquets",
+      "packageCount_one": "1 paquet",
+      "packageCount_other": "{{count}} paquets",
+      "review": "Examiner",
+      "reviewTitle": "Examiner le correctif de {{rule}} sur {{host}}",
+      "approveWarning": "L'approbation applique cette modification à l'hôte avec des droits d'administration, lors de sa prochaine fenêtre de maintenance (immédiatement s'il n'en a pas).",
+      "reject": "Rejeter",
+      "approve": "Approuver",
+      "statusColumn": "État"
+    },
+    "summary": {
+      "fleetAssessed": "{{assessed}} hôtes évalués sur {{total}}",
+      "fleetUnknown": "{{count}} hôtes n'ont pas pu être évalués et ne sont pas inclus dans ce score. Ils ne sont pas sains -- ils ne sont pas mesurés.",
+      "fleetUnknown_one": "1 hôte n'a pas pu être évalué et n'est pas inclus dans ce score. Il n'est pas sain -- il n'est pas mesuré.",
+      "fleetUnknown_other": "{{count}} hôtes n'ont pas pu être évalués et ne sont pas inclus dans ce score. Ils ne sont pas sains -- ils ne sont pas mesurés.",
+      "fleetIncomplete": "{{count}} hôtes n'ont été que partiellement évalués ; leurs scores sont des minimums.",
+      "fleetIncomplete_one": "1 hôte n'a été que partiellement évalué ; son score est un minimum.",
+      "fleetIncomplete_other": "{{count}} hôtes n'ont été que partiellement évalués ; leurs scores sont des minimums.",
+      "hostUnknown": "Cet hôte n'a pas pu être entièrement évalué ; il n'a donc pas de note. Consultez la liste des éléments non évaluables ci-dessous pour voir ce qui manque.",
+      "hostIncomplete": "Certaines règles n'ont pas pu être évaluées sur cet hôte ; ce score est un minimum.",
+      "fleetTitle": "Risque du parc",
+      "hostTitle": "Risque de l'hôte"
+    },
+    "packs": {
+      "deprecated": "Retiré",
+      "followsDefault": "Activé pour ce locataire (réglage standard appliqué)",
+      "chosen": "Activé pour ce locataire",
+      "saveFailed": "Impossible d'enregistrer la modification.",
+      "none": "Aucun pack de règles sélectionné n'est installé."
+    },
+    "host": {
+      "risk": "Risque {{risk}}",
+      "moreMatches": "{{count}} correspondances au total",
+      "moreMatches_one": "1 correspondance au total",
+      "moreMatches_other": "{{count}} correspondances au total",
+      "notEvaluated": "Le conseiller n'a pas encore évalué cet hôte.",
+      "findings": "Constats",
+      "notAssessable": "Non évaluable",
+      "proposals": "Correctifs proposés",
+      "notApplicable": "Non applicable",
+      "clean": "Sans anomalie"
+    }
   }
 }

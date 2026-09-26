@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-26 06:54-0400\n"
+"POT-Creation-Date: 2026-09-26 10:00-0400\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -141,7 +141,7 @@ msgstr "Ophalen van CA-certificaat mislukt: %s"
 #: backend/api/certificates.py:84 backend/api/certificates.py:139
 #: backend/api/file_watches.py:216 backend/api/file_watches.py:420
 #: backend/api/config_mgmt_drift.py:165 backend/api/config_mgmt_drift.py:198
-#: backend/api/advisor.py:255 backend/api/advisor.py:324
+#: backend/api/advisor.py:256 backend/api/advisor.py:325
 #: backend/api/query_packs.py:344 backend/api/query_packs.py:440
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
@@ -157,7 +157,7 @@ msgstr "Ongeldige host-ID formaat"
 #: backend/api/graylog_integration.py:187 backend/api/package_handlers.py:62
 #: backend/api/package_handlers.py:547 backend/api/package_compliance.py:316
 #: backend/api/package_compliance.py:442 backend/api/config_mgmt_drift.py:168
-#: backend/api/config_mgmt_drift.py:203 backend/api/advisor.py:257
+#: backend/api/config_mgmt_drift.py:203 backend/api/advisor.py:258
 #: backend/api/grafana_integration.py:329
 #: backend/api/config_mgmt_remediation.py:433
 #: backend/api/image_mode_actions.py:86 backend/api/host_graylog.py:131
@@ -1621,7 +1621,7 @@ msgstr ""
 "'%(profile_name)s'"
 
 #: backend/api/file_watches.py:107 backend/api/config_mgmt_drift.py:191
-#: backend/api/advisor.py:92 backend/api/query_packs.py:116
+#: backend/api/advisor.py:93 backend/api/query_packs.py:116
 #: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/config_mgmt_jobs.py:167 backend/api/config_mgmt_profiles.py:136
@@ -1927,45 +1927,53 @@ msgstr ""
 msgid "Installation of the config-management prerequisite was requested"
 msgstr "De installatie van de vereiste voor configuratiebeheer is aangevraagd"
 
-#: backend/api/advisor.py:109
+#: backend/api/advisor.py:110
 msgid "The advisor rule was rejected"
 msgstr "De adviseurregel is afgewezen"
 
-#: backend/api/advisor.py:125
+#: backend/api/advisor.py:126
 msgid "Invalid advisor rule ID format"
 msgstr "Ongeldig formaat van adviseurregel-ID"
 
-#: backend/api/advisor.py:128
+#: backend/api/advisor.py:129
 msgid "Advisor rule not found"
 msgstr "Adviseurregel niet gevonden"
 
-#: backend/api/advisor.py:141
+#: backend/api/advisor.py:142
 msgid "An advisor rule with this ID already exists"
 msgstr "Er bestaat al een adviseurregel met deze ID"
 
-#: backend/api/advisor.py:269
+#: backend/api/advisor.py:270
 msgid "Invalid advisor rule filter"
 msgstr "Ongeldig filter voor adviseurregels"
 
-#: backend/api/advisor.py:295
+#: backend/api/advisor.py:296
 msgid "Invalid advisor proposal ID format"
 msgstr "Ongeldig formaat van adviseurvoorstel-ID"
 
-#: backend/api/advisor.py:298
+#: backend/api/advisor.py:299
 msgid "Advisor proposal not found"
 msgstr "Adviseurvoorstel niet gevonden"
 
-#: backend/api/advisor.py:318
+#: backend/api/advisor.py:319
 msgid "Invalid advisor proposal filter"
 msgstr "Ongeldig filter voor adviseurvoorstellen"
 
-#: backend/api/advisor.py:351
+#: backend/api/advisor.py:352
 msgid "The advisor proposal could not be approved"
 msgstr "Het adviseurvoorstel kon niet worden goedgekeurd"
 
-#: backend/api/advisor.py:373
+#: backend/api/advisor.py:374
 msgid "The advisor proposal could not be rejected"
 msgstr "Het adviseurvoorstel kon niet worden afgewezen"
+
+#: backend/api/advisor.py:417
+msgid "Advisor rule pack not found"
+msgstr "Adviseurregelpakket niet gevonden"
+
+#: backend/api/advisor.py:424
+msgid "The advisor rule pack has no such rules"
+msgstr "Het adviseurregelpakket bevat deze regels niet"
 
 #: backend/api/grafana_integration.py:319
 msgid "Permission denied: ENABLE_GRAFANA_INTEGRATION role required"

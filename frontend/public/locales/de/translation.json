@@ -1766,7 +1766,8 @@
     "windowsTimezoneLabel": "Zeitzone",
     "wslEnableFailed": "Fehler beim Aktivieren von WSL",
     "wslEnabledRebootRequired": "WSL wurde aktiviert. Ein Neustart ist erforderlich, um die Installation abzuschließen.",
-    "wslEnabledSuccess": "WSL wurde erfolgreich aktiviert."
+    "wslEnabledSuccess": "WSL wurde erfolgreich aktiviert.",
+    "advisorTab": "Berater"
   },
   "hostGroup": {
     "add": "Hinzufügen",
@@ -2399,7 +2400,8 @@
     "toggleMenu": "Menü umschalten",
     "updates": "Aktualisierungen",
     "users": "Benutzer",
-    "vulnerabilities": "Sicherheitslücken"
+    "vulnerabilities": "Sicherheitslücken",
+    "advisor": "Berater"
   },
   "notifications": {
     "applicationUpdates": "Anwendungs-Updates",
@@ -3726,5 +3728,165 @@
     "saveError": "Könnte die Liste nicht speichern",
     "status": "Status",
     "title": "Dateiüberwachungslisten"
+  },
+  "advisor": {
+    "totals": {
+      "title": "Ergebnisse nach Host und Regel",
+      "findings": "{{count}} Befunde",
+      "findings_one": "1 Befund",
+      "findings_other": "{{count}} Befunde",
+      "notAssessable": "{{count}} nicht bewertbar",
+      "notAssessable_one": "1 nicht bewertbar",
+      "notAssessable_other": "{{count}} nicht bewertbar",
+      "notApplicable": "{{count}} nicht zutreffend",
+      "notApplicable_one": "1 nicht zutreffend",
+      "notApplicable_other": "{{count}} nicht zutreffend",
+      "clean": "{{count}} ohne Befund",
+      "clean_one": "1 ohne Befund",
+      "clean_other": "{{count}} ohne Befund"
+    },
+    "title": "Berater",
+    "evaluateNow": "Jetzt auswerten",
+    "loadFailed": "Der Berater konnte nicht geladen werden.",
+    "tabs": {
+      "recommendations": "Empfehlungen",
+      "proposals": "Vorgeschlagene Korrekturen ({{count}})",
+      "packs": "Regelpakete"
+    },
+    "feed": {
+      "lens": "Perspektive",
+      "allLenses": "Alle",
+      "hostsFailed": "Die Hosts für diese Regel konnten nicht geladen werden.",
+      "noOpenHosts": "Keine Befunde und nichts Unbewertetes für diese Regel.",
+      "showHosts": "Hosts anzeigen",
+      "notAssessableHelp": "Hosts, auf denen diese Regel nicht ausgewertet werden konnte -- nicht unauffällig, sondern ungemessen.",
+      "noRules": "Es wurden noch keine Regeln ausgewertet. Aktivieren Sie ein Regelpaket und werten Sie dann aus.",
+      "rule": "Regel",
+      "risk": "Risiko",
+      "findings": "Befunde",
+      "notAssessable": "Nicht bewertbar",
+      "notApplicable": "Nicht zutreffend",
+      "clean": "Ohne Befund"
+    },
+    "outcome": {
+      "fires": "Befund",
+      "doesNotFire": "Ohne Befund",
+      "notAssessable": "Nicht bewertbar",
+      "notApplicable": "Nicht zutreffend"
+    },
+    "level": {
+      "critical": "Kritisch",
+      "high": "Hoch",
+      "medium": "Mittel",
+      "low": "Niedrig",
+      "none": "Keine Befunde",
+      "unknown": "Nicht bewertet"
+    },
+    "lens": {
+      "security": "Sicherheit",
+      "performance": "Leistung",
+      "availability": "Verfügbarkeit",
+      "stability": "Stabilität"
+    },
+    "gap": {
+      "missing": "nie gemeldet",
+      "stale": "zu alt, um verlässlich zu sein",
+      "notCollected": "noch nicht erfasst",
+      "columnsNotAdvertised": "Agent zu alt, um die benötigten Spalten zu melden",
+      "columnsNotPopulated": "Agent füllt die benötigten Spalten nicht",
+      "domainUnavailable": "von dieser Version nicht gemessen",
+      "ruleError": "die Regel konnte nicht ausgewertet werden",
+      "insufficientPeers": "keine vergleichbaren Hosts",
+      "notApplicable": "gilt nicht für diese Plattform",
+      "unsupported": "von diesem Agent nicht unterstützt",
+      "unknown": "Agent hat nie eine Abdeckung gemeldet"
+    },
+    "evidence": {
+      "facts": "Fakten: {{table}}",
+      "peerGroup": "Vergleichsgruppe",
+      "vuln": "Schwachstellenscan",
+      "compliance": "Compliance-Scan",
+      "drift": "Prüfung auf Konfigurationsabweichung",
+      "updates": "Update-Erkennung",
+      "reboot": "Neustartstatus",
+      "packages": "Software-Inventar",
+      "firewall": "Firewall-Status",
+      "metricHistory": "Metrikverlauf",
+      "when": "Regelabfrage",
+      "rule": "Regeldefinition"
+    },
+    "proposal": {
+      "status": {
+        "proposed": "Wartet auf Genehmigung",
+        "approved": "Genehmigt",
+        "rejected": "Abgelehnt",
+        "withdrawn": "Zurückgezogen",
+        "failed": "Fehlgeschlagen"
+      },
+      "reason": {
+        "noLongerFires": "der Befund besteht nicht mehr",
+        "ruleRemoved": "die Regel wurde entfernt oder deaktiviert",
+        "profileMissing": "das angegebene Konfigurationsprofil fehlt oder ist inaktiv",
+        "notQueued": "der Host konnte den Befehl nicht annehmen",
+        "notProposed": "darüber wurde bereits entschieden"
+      },
+      "queued": "In der Warteschlange -- wartet auf den Host (und sein Wartungsfenster)",
+      "ranOk": "Erfolgreich angewendet",
+      "ranFailed": "Angewendet, aber die Ausführung ist fehlgeschlagen",
+      "appliesProfile": "Wendet das Konfigurationsprofil \"{{name}}\" an.",
+      "upgrades": "Aktualisiert {{count}} Pakete:",
+      "upgrades_one": "Aktualisiert 1 Paket:",
+      "upgrades_other": "Aktualisiert {{count}} Pakete:",
+      "skipped": "{{count}} passende Elemente wurden ausgelassen: keine Pakete, die diese Korrektur aktualisieren darf (zum Beispiel Firmware oder Snaps).",
+      "skipped_one": "1 passendes Element wurde ausgelassen: kein Paket, das diese Korrektur aktualisieren darf (zum Beispiel Firmware oder ein Snap).",
+      "skipped_other": "{{count}} passende Elemente wurden ausgelassen: keine Pakete, die diese Korrektur aktualisieren darf (zum Beispiel Firmware oder Snaps).",
+      "decideFailed": "Die Entscheidung konnte nicht gespeichert werden.",
+      "none": "Keine vorgeschlagenen Korrekturen.",
+      "host": "Host",
+      "rule": "Regel",
+      "fix": "Korrektur",
+      "detail": "Details",
+      "packageCount": "{{count}} Pakete",
+      "packageCount_one": "1 Paket",
+      "packageCount_other": "{{count}} Pakete",
+      "review": "Prüfen",
+      "reviewTitle": "Korrektur für {{rule}} auf {{host}} prüfen",
+      "approveWarning": "Mit der Genehmigung wird diese Änderung mit Administratorrechten auf den Host angewendet, im nächsten Wartungsfenster (sofort, falls keines festgelegt ist).",
+      "reject": "Ablehnen",
+      "approve": "Genehmigen",
+      "statusColumn": "Status"
+    },
+    "summary": {
+      "fleetAssessed": "{{assessed}} von {{total}} Hosts bewertet",
+      "fleetUnknown": "{{count}} Hosts konnten nicht bewertet werden und fließen nicht in diese Bewertung ein. Sie sind nicht unauffällig -- sie sind ungemessen.",
+      "fleetUnknown_one": "1 Host konnte nicht bewertet werden und fließt nicht in diese Bewertung ein. Er ist nicht unauffällig -- er ist ungemessen.",
+      "fleetUnknown_other": "{{count}} Hosts konnten nicht bewertet werden und fließen nicht in diese Bewertung ein. Sie sind nicht unauffällig -- sie sind ungemessen.",
+      "fleetIncomplete": "{{count}} Hosts wurden nur teilweise bewertet; ihre Werte sind Mindestwerte.",
+      "fleetIncomplete_one": "1 Host wurde nur teilweise bewertet; sein Wert ist ein Mindestwert.",
+      "fleetIncomplete_other": "{{count}} Hosts wurden nur teilweise bewertet; ihre Werte sind Mindestwerte.",
+      "hostUnknown": "Dieser Host konnte nicht vollständig bewertet werden und hat daher keine Einstufung. Was fehlt, zeigt die Liste der nicht bewertbaren Regeln unten.",
+      "hostIncomplete": "Einige Regeln konnten auf diesem Host nicht bewertet werden; dieser Wert ist ein Mindestwert.",
+      "fleetTitle": "Risiko aller Hosts",
+      "hostTitle": "Host-Risiko"
+    },
+    "packs": {
+      "deprecated": "Zurückgezogen",
+      "followsDefault": "Für diesen Mandanten aktiviert (gemäß Standard)",
+      "chosen": "Für diesen Mandanten aktiviert",
+      "saveFailed": "Die Änderung konnte nicht gespeichert werden.",
+      "none": "Es sind keine kuratierten Regelpakete installiert."
+    },
+    "host": {
+      "risk": "Risiko {{risk}}",
+      "moreMatches": "{{count}} Treffer insgesamt",
+      "moreMatches_one": "1 Treffer insgesamt",
+      "moreMatches_other": "{{count}} Treffer insgesamt",
+      "notEvaluated": "Der Berater hat diesen Host noch nicht ausgewertet.",
+      "findings": "Befunde",
+      "notAssessable": "Nicht bewertbar",
+      "proposals": "Vorgeschlagene Korrekturen",
+      "notApplicable": "Nicht zutreffend",
+      "clean": "Ohne Befund"
+    }
   }
 }

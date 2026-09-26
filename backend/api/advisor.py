@@ -34,7 +34,7 @@ authenticated user, like reading query-pack results.
 
 import logging
 import uuid
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.concurrency import run_in_threadpool
@@ -49,6 +49,7 @@ from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
+from backend.services import advisor_catalog as catalog
 from backend.services import advisor_feed as feed
 from backend.services import advisor_proposals as proposals
 from backend.services import advisor_tick as tick
@@ -376,3 +377,54 @@ async def reject_proposal(
         ) from exc
     db.commit()
     return _proposal_out(db, row)
+
+
+# ---------------------------------------------------------------------------
+# curated packs (S6)
+# ---------------------------------------------------------------------------
+
+
+class PackChoiceRequest(BaseModel):
+    """A tenant's choice. ``enabled: null`` means "follow the pack's default";
+    omitted fields are left alone."""
+
+    enabled: Optional[bool] = None
+    disabled_rules: Optional[List[str]] = None
+
+
+@router.get("/advisor/packs")
+async def list_packs(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+    """The curated catalog with this tenant's effective state, rule by rule."""
+    return {"packs": catalog.list_packs(db)}
+
+
+@router.put("/advisor/packs/{slug}")
+async def choose_pack(
+    slug: str,
+    request: PackChoiceRequest,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """Turn a curated pack on or off for this tenant, or opt rules out of it.
+
+    EDIT_SCRIPT, as editing a tenant rule: it changes what the advisor runs.
+    What is switched off is cleared at once -- its outcomes and open proposals
+    -- rather than left standing in the feed until the next tick.
+    """
+    _require_role(current_user, SecurityRoles.EDIT_SCRIPT)
+    pack = catalog.pack_rule_keys(slug)
+    if pack is None:
+        raise HTTPException(status_code=404, detail=_("Advisor rule pack not found"))
+    changes = request.model_dump(include=request.model_fields_set)
+    unknown = sorted(set(changes.get("disabled_rules") or []) - set(pack["keys"]))
+    if unknown:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": _("The advisor rule pack has no such rules"),
+                "rules": unknown,
+            },
+        )
+    catalog.set_choice(db, slug, changes, current_user.userid, pack)
+    db.commit()
+    return next(p for p in catalog.list_packs(db) if p["slug"] == slug)

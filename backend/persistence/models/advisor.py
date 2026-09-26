@@ -106,6 +106,10 @@ class SharedAdvisorRulePack(Base):
     # results they left are cleared by the next tick.
     deprecated = Column(Boolean, nullable=False, default=False)
     source = Column(String(64), nullable=True)
+    # Whether a tenant that has not chosen gets this pack (S6). The baseline
+    # is on: an advisor with no active rules shows an empty feed, which reads
+    # as "all clear".
+    default_enabled = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime, nullable=False, default=_utcnow)
     updated_at = Column(DateTime, nullable=False, default=_utcnow, onupdate=_utcnow)
 
@@ -317,3 +321,31 @@ class AdvisorProposal(Base):
             f"<AdvisorProposal(host_id={self.host_id}, rule={self.rule_key}, "
             f"status={self.status})>"
         )
+
+
+class AdvisorPackSetting(Base):
+    """A tenant's choice about one curated pack (S6).
+
+    No row means "the pack's default". ``enabled`` NULL also means the
+    default, so turning a choice back into "follow the catalog" is a value,
+    not a delete. ``disabled_rules`` opts individual curated rules out without
+    copying the pack -- one shared copy, per-tenant policy.
+
+    Keyed by the pack's SLUG, a soft reference: the catalog is another
+    partition, and the slug (unlike its uuid) survives a catalog re-sync.
+    """
+
+    __tablename__ = "advisor_pack_setting"
+    __table_args__ = (
+        UniqueConstraint("pack_slug", name="uq_advisor_pack_setting_slug"),
+    )
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    pack_slug = Column(String(128), nullable=False)
+    enabled = Column(Boolean, nullable=True)
+    disabled_rules = Column(JSON, nullable=True)
+    updated_by = Column(String(255), nullable=True)
+    updated_at = Column(DateTime, nullable=False, default=_utcnow, onupdate=_utcnow)
+
+    def __repr__(self):
+        return f"<AdvisorPackSetting(pack={self.pack_slug}, enabled={self.enabled})>"

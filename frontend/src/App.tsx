@@ -49,6 +49,7 @@ import ConfigDrift from './Pages/ConfigDrift';
 import ConfigJobs from './Pages/ConfigJobs';
 import ConfigProfiles from './Pages/ConfigProfiles';
 import QueryPacks from './Pages/QueryPacks';
+import Advisor from './Pages/Advisor';
 import AirgapCollections from './Pages/AirgapCollections';
 import FederationAuditLog from './Pages/FederationAuditLog';
 import FederationHosts from './Pages/FederationHosts';
@@ -91,6 +92,7 @@ function AppRoutes() {
           this management plane is Professional. Guarded so the page is
           unreachable by direct URL without the module. */}
       <Route path="/query-packs" element={<LicensedRoute module="query_pack_engine"><QueryPacks /></LicensedRoute>} />
+      <Route path="/advisor" element={<LicensedRoute module="advisor_engine"><Advisor /></LicensedRoute>} />
       <Route path="/reports" element={<Reports />} />
       <Route path="/reports/audit-log" element={<AuditLogViewer />} />
       <Route path="/reports/:reportId" element={<ReportViewer />} />

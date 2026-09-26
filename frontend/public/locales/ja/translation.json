@@ -1766,7 +1766,8 @@
     "windowsTimezoneLabel": "タイムゾーン",
     "wslEnableFailed": "WSLの有効化に失敗しました",
     "wslEnabledRebootRequired": "WSLが有効になりました。インストールを完了するには再起動が必要です。",
-    "wslEnabledSuccess": "WSLが正常に有効になりました。"
+    "wslEnabledSuccess": "WSLが正常に有効になりました。",
+    "advisorTab": "アドバイザー"
   },
   "hostGroup": {
     "add": "追加",
@@ -2399,7 +2400,8 @@
     "toggleMenu": "メニューを切り替え",
     "updates": "アップデート",
     "users": "ユーザー",
-    "vulnerabilities": "脆弱性"
+    "vulnerabilities": "脆弱性",
+    "advisor": "アドバイザー"
   },
   "notifications": {
     "applicationUpdates": "アプリケーションアップデート",
@@ -3726,5 +3728,165 @@
     "saveError": "リストの保存に失敗しました",
     "status": "ステータス",
     "title": "ファイル監視リスト"
+  },
+  "advisor": {
+    "totals": {
+      "title": "ホストとルールの結果",
+      "findings": "検出 {{count}} 件",
+      "findings_one": "検出 1 件",
+      "findings_other": "検出 {{count}} 件",
+      "notAssessable": "評価不能 {{count}} 件",
+      "notAssessable_one": "評価不能 1 件",
+      "notAssessable_other": "評価不能 {{count}} 件",
+      "notApplicable": "適用対象外 {{count}} 件",
+      "notApplicable_one": "適用対象外 1 件",
+      "notApplicable_other": "適用対象外 {{count}} 件",
+      "clean": "クリーン {{count}} 件",
+      "clean_one": "クリーン 1 件",
+      "clean_other": "クリーン {{count}} 件"
+    },
+    "title": "アドバイザー",
+    "evaluateNow": "今すぐ評価",
+    "loadFailed": "アドバイザーを読み込めませんでした。",
+    "tabs": {
+      "recommendations": "推奨事項",
+      "proposals": "修正案 ({{count}})",
+      "packs": "ルールパック"
+    },
+    "feed": {
+      "lens": "観点",
+      "allLenses": "すべて",
+      "hostsFailed": "このルールのホストを読み込めませんでした。",
+      "noOpenHosts": "このルールには検出事項も未評価のホストもありません。",
+      "showHosts": "ホストを表示",
+      "notAssessableHelp": "このルールを評価できなかったホスト -- クリーンではなく、未測定です。",
+      "noRules": "まだ評価されたルールはありません。ルールパックを有効にしてから評価してください。",
+      "rule": "ルール",
+      "risk": "リスク",
+      "findings": "検出事項",
+      "notAssessable": "評価不能",
+      "notApplicable": "適用対象外",
+      "clean": "クリーン"
+    },
+    "outcome": {
+      "fires": "検出",
+      "doesNotFire": "クリーン",
+      "notAssessable": "評価不能",
+      "notApplicable": "適用対象外"
+    },
+    "level": {
+      "critical": "重大",
+      "high": "高",
+      "medium": "中",
+      "low": "低",
+      "none": "検出なし",
+      "unknown": "未評価"
+    },
+    "lens": {
+      "security": "セキュリティ",
+      "performance": "パフォーマンス",
+      "availability": "可用性",
+      "stability": "安定性"
+    },
+    "gap": {
+      "missing": "一度も報告されていません",
+      "stale": "古すぎて信頼できません",
+      "notCollected": "まだ収集されていません",
+      "columnsNotAdvertised": "エージェントが古く、必要な列を報告できません",
+      "columnsNotPopulated": "エージェントが必要な列を埋めていません",
+      "domainUnavailable": "このバージョンでは測定されません",
+      "ruleError": "ルールを評価できませんでした",
+      "insufficientPeers": "比較対象のホストがありません",
+      "notApplicable": "このプラットフォームには適用されません",
+      "unsupported": "このエージェントではサポートされていません",
+      "unknown": "エージェントが収集範囲を一度も報告していません"
+    },
+    "evidence": {
+      "facts": "ファクト: {{table}}",
+      "peerGroup": "ピアグループ",
+      "vuln": "脆弱性スキャン",
+      "compliance": "コンプライアンススキャン",
+      "drift": "構成ドリフトチェック",
+      "updates": "アップデート検出",
+      "reboot": "再起動ステータス",
+      "packages": "ソフトウェア一覧",
+      "firewall": "ファイアウォールの状態",
+      "metricHistory": "メトリック履歴",
+      "when": "ルールクエリ",
+      "rule": "ルール定義"
+    },
+    "proposal": {
+      "status": {
+        "proposed": "承認待ち",
+        "approved": "承認済み",
+        "rejected": "却下",
+        "withdrawn": "取り下げ",
+        "failed": "失敗"
+      },
+      "reason": {
+        "noLongerFires": "検出事項が解消されました",
+        "ruleRemoved": "ルールが削除または無効化されました",
+        "profileMissing": "指定された構成プロファイルが存在しないか無効です",
+        "notQueued": "ホストがコマンドを受け付けられませんでした",
+        "notProposed": "すでに判断済みです"
+      },
+      "queued": "キュー登録済み -- ホスト (およびそのメンテナンスウィンドウ) を待機中",
+      "ranOk": "正常に適用されました",
+      "ranFailed": "適用されましたが、実行に失敗しました",
+      "appliesProfile": "構成プロファイル「{{name}}」を適用します。",
+      "upgrades": "{{count}} 個のパッケージをアップグレードします:",
+      "upgrades_one": "1 個のパッケージをアップグレードします:",
+      "upgrades_other": "{{count}} 個のパッケージをアップグレードします:",
+      "skipped": "一致した {{count}} 個の項目は除外されました: この修正でアップグレードできるパッケージではありません (ファームウェアや snap など)。",
+      "skipped_one": "一致した 1 個の項目は除外されました: この修正でアップグレードできるパッケージではありません (ファームウェアや snap など)。",
+      "skipped_other": "一致した {{count}} 個の項目は除外されました: この修正でアップグレードできるパッケージではありません (ファームウェアや snap など)。",
+      "decideFailed": "判断を記録できませんでした。",
+      "none": "修正案はありません。",
+      "host": "ホスト",
+      "rule": "ルール",
+      "fix": "修正",
+      "detail": "詳細",
+      "packageCount": "{{count}} 個のパッケージ",
+      "packageCount_one": "1 個のパッケージ",
+      "packageCount_other": "{{count}} 個のパッケージ",
+      "review": "確認",
+      "reviewTitle": "{{host}} の {{rule}} に対する修正を確認",
+      "approveWarning": "承認すると、この変更は管理者権限でホストに適用されます。適用は次のメンテナンスウィンドウで行われます (ウィンドウがない場合は即時)。",
+      "reject": "却下",
+      "approve": "承認",
+      "statusColumn": "ステータス"
+    },
+    "summary": {
+      "fleetAssessed": "{{total}} 台中 {{assessed}} 台のホストを評価済み",
+      "fleetUnknown": "{{count}} 台のホストは評価できず、このスコアに含まれていません。これらはクリーンではありません -- 未測定です。",
+      "fleetUnknown_one": "1 台のホストは評価できず、このスコアに含まれていません。このホストはクリーンではありません -- 未測定です。",
+      "fleetUnknown_other": "{{count}} 台のホストは評価できず、このスコアに含まれていません。これらはクリーンではありません -- 未測定です。",
+      "fleetIncomplete": "{{count}} 台のホストは一部のみ評価されました。これらのスコアは最小値です。",
+      "fleetIncomplete_one": "1 台のホストは一部のみ評価されました。そのスコアは最小値です。",
+      "fleetIncomplete_other": "{{count}} 台のホストは一部のみ評価されました。これらのスコアは最小値です。",
+      "hostUnknown": "このホストは完全には評価できなかったため、グレードがありません。不足している内容は下の評価不能リストを参照してください。",
+      "hostIncomplete": "このホストでは一部のルールを評価できませんでした。このスコアは最小値です。",
+      "fleetTitle": "フリートのリスク",
+      "hostTitle": "ホストのリスク"
+    },
+    "packs": {
+      "deprecated": "取り下げ",
+      "followsDefault": "このテナントで有効 (デフォルトに従う)",
+      "chosen": "このテナントで有効",
+      "saveFailed": "変更を保存できませんでした。",
+      "none": "キュレーション済みのルールパックはインストールされていません。"
+    },
+    "host": {
+      "risk": "リスク {{risk}}",
+      "moreMatches": "合計 {{count}} 件の一致",
+      "moreMatches_one": "合計 1 件の一致",
+      "moreMatches_other": "合計 {{count}} 件の一致",
+      "notEvaluated": "アドバイザーはまだこのホストを評価していません。",
+      "findings": "検出事項",
+      "notAssessable": "評価不能",
+      "proposals": "修正案",
+      "notApplicable": "適用対象外",
+      "clean": "クリーン"
+    }
   }
 }

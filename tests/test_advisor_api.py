@@ -385,3 +385,39 @@ class TestProposals:
             client.post(f"/api/v1/advisor/proposals/{uuid.uuid4()}/reject").status_code
             == 404
         )
+
+
+class TestPacks:
+    PACK = {"keys": ["SM-A", "SM-B"], "default_enabled": True}
+
+    def test_list(self, client):
+        with patch.object(advisor.catalog, "list_packs", return_value=[{"slug": "x"}]):
+            assert client.get("/api/v1/advisor/packs").json() == {
+                "packs": [{"slug": "x"}]
+            }
+
+    def test_choose_records_only_what_was_sent(self, client):
+        with patch.object(
+            advisor.catalog, "pack_rule_keys", return_value=self.PACK
+        ), patch.object(advisor.catalog, "set_choice") as choose, patch.object(
+            advisor.catalog,
+            "list_packs",
+            return_value=[{"slug": "base", "enabled": False}],
+        ):
+            response = client.put("/api/v1/advisor/packs/base", json={"enabled": None})
+        assert response.status_code == 200, response.text
+        assert choose.call_args.args[2] == {"enabled": None}
+
+    def test_unknown_pack_and_unknown_rules(self, client):
+        with patch.object(advisor.catalog, "pack_rule_keys", return_value=None):
+            assert client.put("/api/v1/advisor/packs/nope", json={}).status_code == 404
+        with patch.object(advisor.catalog, "pack_rule_keys", return_value=self.PACK):
+            response = client.put(
+                "/api/v1/advisor/packs/base", json={"disabled_rules": ["SM-A", "NOPE"]}
+            )
+        assert response.status_code == 400
+        assert response.json()["detail"]["rules"] == ["NOPE"]
+
+    def test_choosing_needs_edit_script(self, client):
+        User.allowed = False
+        assert client.put("/api/v1/advisor/packs/base", json={}).status_code == 403

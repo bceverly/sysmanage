@@ -10047,17 +10047,84 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       decided). Approval not exercised live: it would upgrade the packages
       on a real laptop, so it waits for an explicit go-ahead.
 
-- [ ] **S6 -- Curated rule packs as multi-tenant policy.** Shared catalog +
+- [x] **S6 -- Curated rule packs as multi-tenant policy.** Shared catalog +
       per-tenant assignment, offline-updatable for air-gap. Same catalog /
       assignment split as advisories and query packs: one copy of the curated
       packs, never per-tenant duplicates.
 
-- [ ] **S7 -- Recommendations dashboard + per-host advisor tab.** The
+      **DONE 2026-09-26 (code + tests; live check pending deploy).** The
+      curated content SHIPS IN THE ENGINE (`curated.pxi`,
+      `curated_packs()`): a new engine bundle carries new rules, so packs are
+      versioned with the engine and reach an air-gapped install the way
+      every engine update already does -- no separate download. First pack,
+      `sysmanage-baseline` (11 rules: critical/high fixable CVEs, UID-0
+      accounts, exposed ports with the firewall off, expiring certificates,
+      filesystem capacity, pending security updates with a package-upgrade
+      fix, stale reboot, lingering drift, failed high/critical compliance,
+      and a fleet OpenSSL-drift rule), written against the vocabulary S0-S5
+      found on real hosts: lowercase compliance `fail`/`high`, uppercase vuln
+      severities, pseudo/image filesystems excluded by `type` (snaps are
+      squashfs, 100% full), the updates fix selecting `package_manager` so
+      firmware is skipped. Tests validate every shipped rule AND run its SQL
+      against the evidence schema -- a typo in a curated rule would be a
+      fleet-wide `rule_error`. `advisor_catalog.sync_shared_catalog` (on the
+      tick) writes a pack only when the engine's version is NEWER (an older
+      engine sharing the catalog mid-upgrade never rolls content back) and
+      DEPRECATES, never deletes, a pack the engine stops shipping. Per-tenant
+      choice is `advisor_pack_setting` (tenant chain `q10advisorpack`): pack
+      on/off (NULL = the pack's default) and per-rule opt-outs, keyed by slug;
+      `default_enabled` on the shared pack (shared chain `s15advisordefault`)
+      -- the baseline is ON, because an advisor with no active rules shows an
+      empty feed, which reads as "all clear". A choice clears what it
+      switched off at once (outcomes and open proposals). API: `GET
+      /advisor/packs`, `PUT /advisor/packs/{slug}` (EDIT_SCRIPT). Read-only
+      run of the baseline on theeverlys: gdr-t14 48 MEDIUM, incomplete (a
+      high fixable CVE, 31 pending security updates), its users / ports /
+      certificates rules `not_collected` until S2b collects them.
+      **Live 2026-09-26 (deployed, theeverlys):** the first tick synced the
+      catalog ("1 pack(s) written"); `GET /advisor/packs` showed the baseline
+      on by default (no tenant choice); the same tick opened the
+      `SM-AVAIL-001` proposal (25 apt packages, 6 firmware skipped) and
+      WIDENED the fact collection to users / listening_ports / certificates /
+      mounts -- queued before the agent reconnected after the restart, it was
+      delivered by store-and-forward and came back 4/4 ok. gdr-t14's user,
+      port and certificate rules then evaluated clean. With the four `TEST-`
+      rules deleted: 6 hosts x 11 rules = 66 results, gdr-t14 48 MEDIUM
+      (incomplete), exactly the read-only preview. Opting `SM-STAB-F01` out
+      cleared its 6 results at once, an unknown rule key was a 400 naming
+      it, and restoring "follow the default" brought them back.
+
+- [x] **S7 -- Recommendations dashboard + per-host advisor tab.** The
       unassessable bucket is rendered, with its reason, or the UI reintroduces
       the exact defect S1 designed out. (S6 of 21.1 shipped a live one:
       `comparable: false` was computed correctly and never rendered, so a
       Windows host displayed a green "Matches" for mounts. Computing the
       honest answer is half the work; showing it is the other half.)
+
+      **DONE 2026-09-26.** OSS frontend, same shape as Query Packs:
+      `/advisor` (LicensedRoute `advisor_engine`, nav under Insights) with the
+      fleet score card -- "N of M hosts assessed", the unassessed hosts
+      called out as "not clean -- unmeasured", partly-assessed hosts as a
+      minimum -- totals chips (findings / not assessable / not applicable /
+      clean), and three tabs: Recommendations (one row per rule, worst
+      first, NOT ASSESSABLE a column with its reason chips; expanding lists
+      the hosts with what is missing, linking to each host's tab), Proposed
+      fixes (Review shows exactly what would run -- packages, what was left
+      out, the playbook -- and warns it applies with administrative rights
+      at the next maintenance window; an approved fix reads "queued" until
+      its run returns), and Rule packs (pack and per-rule switches,
+      "following the default" shown). Host detail: an Advisor tab in
+      Overview -- grade (an unassessed host has NO grade and says why, never
+      green), findings with remediation, not-assessable list open with its
+      reasons, proposed fixes. Every server code (outcomes, levels, gap
+      reasons, proposal states) is worded in one `advisorLabels.ts` with
+      literal keys. 122 strings (+ plural `_one`/`_other`) hand-translated
+      into all 13 locales and validated (placeholders, `--`, dashes,
+      glossary); found and fixed a leaf/namespace key collision
+      (`advisor.proposal.status`) the validator caught. 13 UI tests pin the
+      property (unassessed never rendered as clean; the column and reasons
+      always shown). Verified in a real browser against the live tenant: no
+      console errors; screenshots matched the API.
 
 - [ ] **S8 -- Docs, screenshots, i18n -- LAST.** Page + `make screenshots`
       shotlist entries + glossary nouns in the SAME change, seeded and

@@ -1766,7 +1766,8 @@
     "windowsTimezoneLabel": "المنطقة الزمنية",
     "wslEnableFailed": "فشل في تمكين WSL",
     "wslEnabledRebootRequired": "تم تمكين WSL. مطلوب إعادة تشغيل لإكمال التثبيت.",
-    "wslEnabledSuccess": "تم تمكين WSL بنجاح."
+    "wslEnabledSuccess": "تم تمكين WSL بنجاح.",
+    "advisorTab": "المستشار"
   },
   "hostGroup": {
     "add": "إضافة",
@@ -2399,7 +2400,8 @@
     "toggleMenu": "تبديل القائمة",
     "updates": "التحديثات",
     "users": "المستخدمون",
-    "vulnerabilities": "الثغرات الأمنية"
+    "vulnerabilities": "الثغرات الأمنية",
+    "advisor": "المستشار"
   },
   "notifications": {
     "applicationUpdates": "تحديثات التطبيقات",
@@ -3726,5 +3728,165 @@
     "saveError": "لم يتم حفظ القائمة",
     "status": "الحالة",
     "title": "قوائم مراقبة الملفات"
+  },
+  "advisor": {
+    "totals": {
+      "title": "نتائج المضيفات والقواعد",
+      "findings": "{{count}} من المشكلات المكتشفة",
+      "findings_one": "مشكلة مكتشفة واحدة",
+      "findings_other": "{{count}} من المشكلات المكتشفة",
+      "notAssessable": "{{count}} غير قابل للتقييم",
+      "notAssessable_one": "1 غير قابل للتقييم",
+      "notAssessable_other": "{{count}} غير قابل للتقييم",
+      "notApplicable": "{{count}} غير منطبق",
+      "notApplicable_one": "1 غير منطبق",
+      "notApplicable_other": "{{count}} غير منطبق",
+      "clean": "{{count}} سليم",
+      "clean_one": "1 سليم",
+      "clean_other": "{{count}} سليم"
+    },
+    "title": "المستشار",
+    "evaluateNow": "التقييم الآن",
+    "loadFailed": "تعذر تحميل المستشار.",
+    "tabs": {
+      "recommendations": "التوصيات",
+      "proposals": "الإصلاحات المقترحة ({{count}})",
+      "packs": "حزم القواعد"
+    },
+    "feed": {
+      "lens": "المنظور",
+      "allLenses": "الكل",
+      "hostsFailed": "تعذر تحميل المضيفات الخاصة بهذه القاعدة.",
+      "noOpenHosts": "لا توجد مشكلات مكتشفة ولا عناصر غير مقيَّمة لهذه القاعدة.",
+      "showHosts": "عرض المضيفات",
+      "notAssessableHelp": "المضيفات التي تعذر تقييم هذه القاعدة عليها -- ليست سليمة، بل غير مقيسة.",
+      "noRules": "لم تُقيَّم أي قواعد بعد. فعّل حزمة قواعد، ثم ابدأ التقييم.",
+      "rule": "القاعدة",
+      "risk": "المخاطر",
+      "findings": "المشكلات المكتشفة",
+      "notAssessable": "غير قابل للتقييم",
+      "notApplicable": "غير منطبق",
+      "clean": "سليم"
+    },
+    "outcome": {
+      "fires": "مشكلة مكتشفة",
+      "doesNotFire": "سليم",
+      "notAssessable": "غير قابل للتقييم",
+      "notApplicable": "غير منطبق"
+    },
+    "level": {
+      "critical": "حرج",
+      "high": "مرتفع",
+      "medium": "متوسط",
+      "low": "منخفض",
+      "none": "لا توجد مشكلات",
+      "unknown": "لم يُقيَّم"
+    },
+    "lens": {
+      "security": "الأمان",
+      "performance": "الأداء",
+      "availability": "التوفر",
+      "stability": "الاستقرار"
+    },
+    "gap": {
+      "missing": "لم يُبلَّغ عنه قط",
+      "stale": "أقدم من أن يُوثق به",
+      "notCollected": "لم يُجمع بعد",
+      "columnsNotAdvertised": "الوكيل أقدم من أن يُبلغ عن الأعمدة المطلوبة",
+      "columnsNotPopulated": "الوكيل لا يملأ الأعمدة المطلوبة",
+      "domainUnavailable": "لا يقيسه هذا الإصدار",
+      "ruleError": "تعذر تقييم القاعدة",
+      "insufficientPeers": "لا توجد مضيفات مماثلة للمقارنة",
+      "notApplicable": "لا ينطبق على هذه المنصة",
+      "unsupported": "غير مدعوم من هذا الوكيل",
+      "unknown": "لم يُبلغ الوكيل عن التغطية قط"
+    },
+    "evidence": {
+      "facts": "الحقائق: {{table}}",
+      "peerGroup": "مجموعة النظراء",
+      "vuln": "فحص الثغرات الأمنية",
+      "compliance": "فحص الامتثال",
+      "drift": "فحص انحراف التكوين",
+      "updates": "اكتشاف التحديثات",
+      "reboot": "حالة إعادة التشغيل",
+      "packages": "جرد البرامج",
+      "firewall": "حالة جدار الحماية",
+      "metricHistory": "سجل المقاييس",
+      "when": "استعلام القاعدة",
+      "rule": "تعريف القاعدة"
+    },
+    "proposal": {
+      "status": {
+        "proposed": "بانتظار الموافقة",
+        "approved": "تمت الموافقة",
+        "rejected": "مرفوض",
+        "withdrawn": "مسحوب",
+        "failed": "فشل"
+      },
+      "reason": {
+        "noLongerFires": "لم تعد المشكلة موجودة",
+        "ruleRemoved": "أُزيلت القاعدة أو أُوقف تشغيلها",
+        "profileMissing": "ملف تعريف التكوين الذي يشير إليه مفقود أو غير نشط",
+        "notQueued": "تعذر على المضيف استلام الأمر",
+        "notProposed": "سبق اتخاذ قرار بشأنه"
+      },
+      "queued": "في قائمة الانتظار -- بانتظار المضيف (ونافذة الصيانة الخاصة به)",
+      "ranOk": "طُبِّق بنجاح",
+      "ranFailed": "طُبِّق، لكن التشغيل فشل",
+      "appliesProfile": "يطبّق ملف تعريف التكوين \"{{name}}\".",
+      "upgrades": "يرقّي {{count}} من الحزم:",
+      "upgrades_one": "يرقّي حزمة واحدة:",
+      "upgrades_other": "يرقّي {{count}} من الحزم:",
+      "skipped": "تم استبعاد {{count}} من العناصر المطابقة: ليست حزمًا يمكن لهذا الإصلاح ترقيتها (مثل البرامج الثابتة أو حزم snap).",
+      "skipped_one": "تم استبعاد عنصر مطابق واحد: ليس حزمة يمكن لهذا الإصلاح ترقيتها (مثل البرامج الثابتة أو حزمة snap).",
+      "skipped_other": "تم استبعاد {{count}} من العناصر المطابقة: ليست حزمًا يمكن لهذا الإصلاح ترقيتها (مثل البرامج الثابتة أو حزم snap).",
+      "decideFailed": "تعذر تسجيل القرار.",
+      "none": "لا توجد إصلاحات مقترحة.",
+      "host": "المضيف",
+      "rule": "القاعدة",
+      "fix": "الإصلاح",
+      "detail": "التفاصيل",
+      "packageCount": "{{count}} من الحزم",
+      "packageCount_one": "حزمة واحدة",
+      "packageCount_other": "{{count}} من الحزم",
+      "review": "مراجعة",
+      "reviewTitle": "مراجعة إصلاح {{rule}} على {{host}}",
+      "approveWarning": "تؤدي الموافقة إلى تطبيق هذا التغيير على المضيف بصلاحيات إدارية، في نافذة الصيانة التالية الخاصة به (أو فورًا إذا لم تكن له نافذة).",
+      "reject": "رفض",
+      "approve": "موافقة",
+      "statusColumn": "الحالة"
+    },
+    "summary": {
+      "fleetAssessed": "تم تقييم {{assessed}} من أصل {{total}} مضيف",
+      "fleetUnknown": "تعذر تقييم {{count}} من المضيفات وهي غير مشمولة في هذه الدرجة. إنها ليست سليمة -- إنها غير مقيسة.",
+      "fleetUnknown_one": "تعذر تقييم مضيف واحد وهو غير مشمول في هذه الدرجة. إنه ليس سليمًا -- إنه غير مقيس.",
+      "fleetUnknown_other": "تعذر تقييم {{count}} من المضيفات وهي غير مشمولة في هذه الدرجة. إنها ليست سليمة -- إنها غير مقيسة.",
+      "fleetIncomplete": "تم تقييم {{count}} من المضيفات جزئيًا فقط؛ درجاتها تمثل حدًا أدنى.",
+      "fleetIncomplete_one": "تم تقييم مضيف واحد جزئيًا فقط؛ درجته تمثل حدًا أدنى.",
+      "fleetIncomplete_other": "تم تقييم {{count}} من المضيفات جزئيًا فقط؛ درجاتها تمثل حدًا أدنى.",
+      "hostUnknown": "تعذر تقييم هذا المضيف بالكامل، لذا ليس له تصنيف. راجع قائمة العناصر غير القابلة للتقييم أدناه لمعرفة ما هو مفقود.",
+      "hostIncomplete": "تعذر تقييم بعض القواعد على هذا المضيف؛ هذه الدرجة تمثل حدًا أدنى.",
+      "fleetTitle": "مخاطر الأسطول",
+      "hostTitle": "مخاطر المضيف"
+    },
+    "packs": {
+      "deprecated": "مسحوبة",
+      "followsDefault": "مفعّلة لهذا المستأجر (وفقًا للإعداد الافتراضي)",
+      "chosen": "مفعّلة لهذا المستأجر",
+      "saveFailed": "تعذر حفظ التغيير.",
+      "none": "لا توجد حزم قواعد منسقة مثبتة."
+    },
+    "host": {
+      "risk": "المخاطر {{risk}}",
+      "moreMatches": "{{count}} من التطابقات إجمالًا",
+      "moreMatches_one": "تطابق واحد إجمالًا",
+      "moreMatches_other": "{{count}} من التطابقات إجمالًا",
+      "notEvaluated": "لم يقيّم المستشار هذا المضيف بعد.",
+      "findings": "المشكلات المكتشفة",
+      "notAssessable": "غير قابل للتقييم",
+      "proposals": "الإصلاحات المقترحة",
+      "notApplicable": "غير منطبق",
+      "clean": "سليم"
+    }
   }
 }

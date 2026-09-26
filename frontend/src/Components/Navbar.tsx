@@ -74,6 +74,7 @@ const PATH_CATEGORY: Record<string, CategoryId> = {
   '/config-jobs': 'automation',
   '/query-packs': 'automation',
   '/custom-metrics': 'automation',
+  '/advisor': 'insights',
   '/reports': 'insights',
   '/audit-analytics': 'insights',
   '/secrets-analytics': 'insights',
@@ -126,7 +127,7 @@ export function buildNavCategories(
   } = opts;
 
   // Paths hardcoded here -- plugins must not duplicate these.
-  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/maintenance-windows', '/secrets', '/scripts', '/config-profiles', '/config-drift', '/config-jobs', '/query-packs', '/reports', '/airgap/repositories', '/airgap/collections']);
+  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/maintenance-windows', '/secrets', '/scripts', '/config-profiles', '/config-drift', '/config-jobs', '/query-packs', '/advisor', '/reports', '/airgap/repositories', '/airgap/collections']);
   const hardcodedLabels = new Set([
     t('nav.secrets'),
     t('nav.scripts'),
@@ -178,6 +179,11 @@ export function buildNavCategories(
     activeLicenseModules.includes('query_pack_engine'),
     '/query-packs',
     t('nav.queryPacks', 'Query Packs'),
+  );
+  pushIf(
+    activeLicenseModules.includes('advisor_engine'),
+    '/advisor',
+    t('nav.advisor', 'Advisor'),
   );
   pushIf(
     activeLicenseModules.includes('reporting_engine') &&

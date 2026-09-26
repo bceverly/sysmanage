@@ -44,6 +44,7 @@ from backend.persistence.partitions import (
     iter_host_databases,
     partition_session,
 )
+from backend.services import advisor_catalog as catalog
 from backend.services import advisor_collection as collection
 from backend.services import advisor_evidence as ev
 from backend.services import advisor_proposals as proposals
@@ -81,7 +82,11 @@ def load_shared_rules() -> Optional[List[Dict[str, Any]]]:
     try:
         with partition_session(PARTITION_SHARED) as shared:
             rows = (
-                shared.query(models.SharedAdvisorRule)
+                shared.query(
+                    models.SharedAdvisorRule,
+                    models.SharedAdvisorRulePack.slug,
+                    models.SharedAdvisorRulePack.default_enabled,
+                )
                 .join(
                     models.SharedAdvisorRulePack,
                     models.SharedAdvisorRulePack.id
@@ -97,8 +102,11 @@ def load_shared_rules() -> Optional[List[Dict[str, Any]]]:
                     "shared_rule_id": row.id,
                     "rule_id": None,
                     "rule": _definition(row),
+                    # S6: per-tenant choice is applied by the tick, per database.
+                    "pack": slug,
+                    "pack_default": bool(default_enabled),
                 }
-                for row in rows
+                for row, slug, default_enabled in rows
             ]
     except Exception:  # pylint: disable=broad-except
         logger.exception(
@@ -265,7 +273,14 @@ def _tick_one_database(run: _Pass, shared_entries) -> None:
     """Evaluate ONE database. Never raises -- one unreachable tenant must not
     stop every other tenant's evaluation."""
     try:
-        entries = list(shared_entries or []) + _tenant_rules(run.db)
+        settings = catalog.tenant_settings(run.db)
+        entries = [
+            e
+            for e in shared_entries or []
+            if catalog.rule_enabled(
+                settings.get(e.get("pack")), e.get("pack_default", False), e["key"]
+            )
+        ] + _tenant_rules(run.db)
         run.existing = {
             (str(r.host_id), r.rule_source, r.rule_key): r
             for r in run.db.query(models.AdvisorResult).all()
@@ -344,6 +359,9 @@ def run_one_tick() -> Dict[str, Any]:
         # Not licensed, or an S1-era engine with the contract but no evaluator.
         return summary
     now = _now()
+    # S6: bring the shared catalog up to the engine's curated packs first --
+    # a no-op unless the engine ships a newer pack version.
+    catalog.sync_shared_catalog(engine)
     shared_entries = load_shared_rules()
     # EVERY database: a tenant's hosts and rules live in that tenant's
     # database, so reading only the bootstrap one would evaluate nobody under

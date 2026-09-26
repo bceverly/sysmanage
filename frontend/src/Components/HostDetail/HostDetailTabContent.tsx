@@ -18,6 +18,7 @@ import HostServerRolesTab from "./HostServerRolesTab";
 import HostChildHostsTab from "./HostChildHostsTab";
 import HostUbuntuProTab from "./HostUbuntuProTab";
 import HostImageModeTab from "./HostImageModeTab";
+import HostAdvisorTab from "./HostAdvisorTab";
 import HostDiagnosticsTab from "./HostDiagnosticsTab";
 import {
   DiagnosticReport,
@@ -566,6 +567,7 @@ const HostDetailTabContent: React.FC<HostDetailTabContentProps> = (props) => {
               "ubuntu-pro",
               "image-mode",
               "diagnostics",
+              "advisor",
             ]).has(pt.id),
         )
         .map(
@@ -707,6 +709,7 @@ const HostDetailTabContent: React.FC<HostDetailTabContentProps> = (props) => {
         )}
       {/* Image Mode Tab */}
       {currentTabId === "image-mode" && <HostImageModeTab host={host} />}
+      {currentTabId === "advisor" && hostId && <HostAdvisorTab hostId={hostId} />}
       {/* Diagnostics Tab */}
       {currentTabId === "diagnostics" && (
         <HostDiagnosticsTab

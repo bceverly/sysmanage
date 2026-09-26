@@ -132,6 +132,8 @@ def _tick(make_session, shared_rules=()):
                 "shared_rule_id": uuid.uuid4(),
                 "rule_id": None,
                 "rule": r,
+                "pack": "test-pack",
+                "pack_default": True,
             }
             for r in shared_rules
         ]
@@ -218,6 +220,18 @@ class TestTick:
         results = _results(make_session)
         assert results[("shared", "SEC-001", str(host.id))].outcome == "does_not_fire"
         assert results[("tenant", "SEC-001", str(host.id))].outcome == "not_assessable"
+
+    def test_a_tenant_that_switched_the_pack_off_gets_no_curated_results(
+        self, make_session
+    ):
+        """S6: per-tenant choice over one shared copy of the pack."""
+        with make_session() as db:
+            host = _host(db)
+            db.add(models.AdvisorPackSetting(pack_slug="test-pack", enabled=False))
+            db.commit()
+        _tick(make_session, [_rule("A")])
+        assert _results(make_session) == {}
+        assert host
 
     def test_a_withdrawn_rule_takes_its_results_with_it(self, make_session):
         with make_session() as db:
