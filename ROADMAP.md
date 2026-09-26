@@ -10134,6 +10134,27 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       assessed, for the same reason 21.1's did -- a fleet where everything
       answers documents the feature without showing the thing it exists for.
 
+      **2026-09-26: everything but the capture is in.** `sysmanage-docs`
+      `docs/professional-plus/advisor.html` (four outcomes, declared
+      evidence + per-column coverage, per-domain freshness table, withheld
+      scoring, curated baseline pack, proposed fixes, custom rules + API)
+      with its Professional+ index card, and the roadmap page (Enterprise
+      edition + "Proactive operations" card: the advisor ships today). 82
+      docs keys hand-translated into all 13 locales and validated; UI labels
+      the page names (grades, tabs, outcomes, the Insights menu) aligned to
+      the frontend's own translations; strict / markup / code / html-sync /
+      validate / translate-check all green. Screenshots: `seed_advisor.py`
+      gives the demo fleet evidence and runs ONE real advisor tick (no
+      hand-written outcomes) -- ubuntu-web-01 with findings and a proposed
+      fix, rhel-db-01 clean, debian-app-01 too old to trust, the rest never
+      reported; four shotlist entries (`capture.mjs` gained `tabExact`,
+      since "Advisor" is a prefix of "Advisories"), wired into both
+      screenshot pipelines. Glossary: rule pack, proposed fix, lens, risk
+      score, peer group, evidence -- all 4 repos. Curated pack v2 fixed
+      SM-AVAIL-002, which could never fire (it measured age from the
+      domain's own freshness clock). **Remaining:** Pro+ publish, then
+      `make screenshots-enterprise` to produce the four PNGs.
+
 - [ ] **Vulnerability feed coverage beyond Ubuntu / Debian / EL** (added
       2026-09-23 with the feed mapping). Since that mapping, a host whose OS no
       ingested feed covers is `not_assessable` -- which today is every FreeBSD,
