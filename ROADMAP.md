@@ -10668,6 +10668,22 @@ remediation needs its own approved path into the existing entry points.
       translated x13; `i18n-allow.txt` gains the regulation names and the
       `{{host}}: {{reason}}` line. 11 new vitest tests.
 - [ ] **S8 -- Docs, screenshots, i18n -- LAST.**
+      DONE 2026-09-27 except the VM capture: sysmanage-docs
+      `docs/professional-plus/threat-model-posture.html` (questionnaire,
+      checks, the four states + regressions, waivers and lapse, fixing,
+      history / version diff, API, getting started), a Pro+ index card, a
+      pointer from the Advisor page, and the public roadmap now lists the
+      threat-model wizard as shipping. Screenshots are reproducible:
+      `screenshots/seed_advisor.py` saves two threat-model versions through
+      the real service, evaluates after each, and waives one open item
+      through the real waiver path; four new shotlist entries (punch list,
+      wizard, version diff, fix preview). Glossary: posture, posture item,
+      remedy, regressed added; threat model and waiver re-glossed (the old
+      "threat model" meant an attacker analysis); synced to all four repos.
+      67 docs keys x13, every docs i18n gate green. REMAINING: Bryan runs
+      `make screenshots-advisor-seed` + the Enterprise capture (the four
+      PNGs), and pulls + restarts the translation service on beast so it
+      loads the new glossary.
 
 #### 21.5 Built-in Metric Graphs over Collected Facts (Professional+)
 
