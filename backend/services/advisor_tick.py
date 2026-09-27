@@ -48,6 +48,7 @@ from backend.services import advisor_catalog as catalog
 from backend.services import advisor_collection as collection
 from backend.services import advisor_evidence as ev
 from backend.services import advisor_proposals as proposals
+from backend.services import threat_model_catalog
 
 logger = logging.getLogger(__name__)
 
@@ -362,6 +363,8 @@ def run_one_tick() -> Dict[str, Any]:
     # S6: bring the shared catalog up to the engine's curated packs first --
     # a no-op unless the engine ships a newer pack version.
     catalog.sync_shared_catalog(engine)
+    # 21.4: the curated threat-model questionnaire rides the same sync point.
+    threat_model_catalog.sync_questionnaires(engine)
     shared_entries = load_shared_rules()
     # EVERY database: a tenant's hosts and rules live in that tenant's
     # database, so reading only the bootstrap one would evaluate nobody under

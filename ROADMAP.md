@@ -10156,7 +10156,7 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       `make screenshots-enterprise` (advisor, advisor-proposals,
       advisor-packs, host-detail-advisor) and reviewed. **DONE 2026-09-26.**
 
-- [ ] **Vulnerability feed coverage beyond Ubuntu / Debian / EL** (added
+- [x] **Vulnerability feed coverage beyond Ubuntu / Debian / EL** (added
       2026-09-23 with the feed mapping). Since that mapping, a host whose OS no
       ingested feed covers is `not_assessable` -- which today is every FreeBSD,
       OpenBSD, NetBSD, macOS and Windows host, and every Linux distro outside
@@ -10232,8 +10232,37 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
         read "inaccessible", hi was nonsense) corrected to the glossary forms.
         Docs: the vulnerability page's source cards (which omitted Debian and
         Microsoft and claimed Fedora) replaced by a per-OS coverage table.
-        **Remaining: deploy + live check on the real FreeBSD/NetBSD/Windows/
-        macOS hosts, then tick this item.**
+        **LIVE 2026-09-26 (theeverlys, 6 hosts).** Ingest: FreeBSD 57,843
+        rows (11 s), NetBSD 40,337 (17 s), macOS 5,905 CVEs with ranges (56 s),
+        Microsoft 64,241 Windows OS fixes from 24 monthly documents (66 s; the
+        old fetcher's total was 0). The live check found two defects, both
+        fixed: (1) ranges were stored with "," between bounds, but a FreeBSD
+        version carries its port epoch after a comma (`<=1.19_2,1`), so every
+        epoch'd range was silently dropped -- `pkg audit` on the real host
+        flagged nginx and popt, we did not. Separator is now ";". Replaying the
+        host's full inventory (1,166 ports) against the same VuXML now gives
+        EXACTLY `pkg audit`'s 15 vulnerable packages, none extra, none missing
+        (plus the base system, 14.4-p8 -> p9, which plain `pkg audit` does not
+        check). (2) The Windows host runs an Insider build (10.0.26220; MSRC
+        services 25H2 as 26200): every fix is on another servicing branch, so
+        it would have matched nothing and read CLEAN -- now "not assessable"
+        (`windows_build_not_serviced`), with its own card message. Also: a
+        reloaded scan only re-derived "no feed covers this OS", so every other
+        gap (Windows build/macOS version unreported, Insider build, OpenBSD
+        errata) reloaded as "no package inventory"; `unassessable_reason`
+        re-derives them with the scan's own checks, and a verdict-less scan no
+        longer lists anything as "assessed". NetBSD 16 vulnerable packages /
+        81 findings (python*, giflib, libxslt...); macOS 15.6.1: 724 CVEs fixed
+        in later 15.7.x/26.x releases; OpenBSD and Ubuntu unchanged. After the
+        redeploy + re-ingest: FreeBSD = `pkg audit`'s 15 packages exactly (+ the
+        base system); NetBSD = `pkg_admin audit` EXACTLY -- the same 16
+        packages and the same 80 package/CVE pairs, plus its one CVE-less
+        advisory (libxslt) under its synthetic id; x13s on the new agent
+        reports 10.0.26220.9568 / 25H2 / Client / ARM64 and is "not assessable
+        -- build not serviced" (Insider), not clean. Not live-validated: a
+        Windows host on a RELEASED build matching MSRC (neither Windows host
+        is one; the path is tested against the real 2026-Sep CVRF).
+        **DONE 2026-09-26.**
       * **Windows -- MSRC CVRF/CSAF** (a fetcher exists; its rows are keyed
         `windows` and never match). Vulnerability is by OS BUILD + installed
         KBs, not package names: the agent must report the full build (UBR) and
@@ -10373,6 +10402,151 @@ boundaries; (b) does a waiver survive a threat-model re-derivation that changes
 the item's risk score, or is re-affirmation required; (c) is the questionnaire
 itself a shared, versioned artifact operators can extend, like the compliance
 rule packs.
+
+**Decided 2026-09-26 (Bryan):** (a) one threat model **per tenant**, with the
+schema keyed by a scope (`scope_kind`/`scope_ref`, only `tenant` used in v1) so
+per-site/tag models can come later without reshaping data; (b) a waiver goes
+**stale -- needs re-review** when the item's risk RISES, its rule version
+changes, or the threat-model answers that made it apply change -- a lower or
+unchanged risk keeps it; re-affirming is audited; (c) the questionnaire is
+**curated only** in v1: shared, versioned reference data shipped in the engine
+(like the curated rule packs, so it reaches air-gapped installs), operator
+extension deferred.
+
+**Build shape.** Inside `advisor_engine` (same Enterprise tier, reuses its rule
+evaluation, scoring and proposal machinery) -- no new engine. What exists
+(inventory 2026-09-26): per-host posture evidence already lives in the tenant DB
+(FIPS, AV, firewall, pending/security updates, reboot, vulnerability and
+compliance scans, drift, maintenance windows, upgrade profiles, alert rules,
+audit retention); identity/platform settings are SERVER-scoped even under
+multi-tenancy (MFA enforcement, external IdP, session/lockout, password policy,
+server/federation role, OpenBAO, API rate limiting). So: a tenant's punch list
+will contain items only the server operator can change, and must say so rather
+than offer a button the tenant cannot use. The advisor has no installation
+scope today (rules are host/fleet; `advisor_result`/`advisor_proposal` require a
+host), and proposals dispatch only config profiles to hosts -- installation
+remediation needs its own approved path into the existing entry points.
+
+**Slices** (S8 docs LAST, as in 21.1/21.2):
+
+- [x] **S0 -- Spike: can threat-model answers deterministically decide which
+      installation checks apply, over evidence we actually have?** Draft the
+      curated questionnaire (branching, "why we ask") and ~15 conditioned
+      checks; evaluate them read-only against a real installation; prove the
+      same answers + evidence give the same punch list twice; list every check
+      whose evidence does not exist (those become "not assessable", or are cut).
+
+      **DONE 2026-09-26 -- GREEN.** 11 branching questions (e.g. "which
+      obligations apply" only after regulated data; "FIPS validated?" only for
+      public sector / CMMC) derive 14 boolean attributes and a stable model
+      digest; 18 checks gated by any/all predicates over them; evaluated
+      read-only over theeverlys' real evidence (server + tenant DBs). Three
+      profiles give three very different punch lists -- homelab: 1 item
+      (critical vulnerabilities); dentist (PHI, exposed, vendors): 16 items;
+      defense (CUI, FIPS, air-gapped, insider): 17 items -- and each run
+      twice gives an identical list digest. Findings that shape S1:
+      * **A hidden branch's stale answer must be ignored.** The homelab profile
+        carries "FIPS: yes" from a branch it no longer shows; derivation only
+        reads visible questions, so it does not leak into the model.
+      * **A check can contradict the model.** AIRGAP-MATCH: "air-gapped" in the
+        answers, `air_gap_role = standard` on the server -- an open item. The
+        questionnaire is not just a filter; the configuration can disagree.
+      * **Partial coverage is its own state.** Antivirus state exists for 2 of
+        5 active hosts; one reports disabled (open), three report nothing. An
+        item needs "open" AND "unknown on N hosts", never a silent pass.
+      * **A placeholder check reads satisfied.** The spike's API-KEYS check had
+        no real query and came out "satisfied" -- the exact failure the advisor
+        exists to prevent. S1: every check must bind to real evidence columns,
+        validated like advisor rules; no check without evidence ships.
+      * **Some evidence does not exist**: backups on a single-tenant install
+        (registry settings only exist under multi-tenancy) -> permanently "not
+        assessable -- SysManage has no view of your backups", stated as such;
+        MFA enrolment has no aggregate (count it); password policy has no
+        writable setting (read-only check, remediation = none).
+      * **Server-scoped items dominate the dentist/defense lists** (MFA,
+        lockout, session timeout, log forwarding, secrets, air-gap role) -- in
+        multi-tenancy only the server operator can act on them, as planned.
+      * The flat key/value evidence table is clumsy; S1 uses typed views like
+        the advisor's `sm_*` (installation settings, per-domain fleet coverage
+        with total / ok / failing / unknown counts).
+- [x] **S1 -- Contract.** Questionnaire schema (questions, options, `show_if`
+      branching over earlier answers, answer -> attribute mapping), the derived
+      threat model (a deterministic attribute set + a stable digest), and a new
+      `installation` rule scope whose applicability predicate is over
+      attributes and whose evidence is installation domains.
+
+      **DONE 2026-09-26** (Pro+ `advisor_engine`, engine-only). `threat_model.pxi`:
+      the questionnaire contract -- derivation is DATA (each option lists the
+      attributes it sets), `show_if` may only look back and is validated,
+      visibility cascades, answers to hidden questions are IGNORED (reported in
+      `ignored`), unanswered visible questions make the model incomplete; the
+      digest covers questionnaire id+version+attributes; `diff_threat_models`
+      reports attributes on/off and answers changed. `rule_contract.pxi`:
+      scope `installation` needs `applies_when` ({always|any|all|none}, a
+      forgotten predicate is refused, never "always"), reads only
+      INSTALLATION_DOMAINS (host facts/domains refused), optional `coverage`,
+      no host `fix`; `managed_by` (server|tenant) is DERIVED from the domains
+      so a rule cannot claim a tenant can fix a server setting.
+      `installation.pxi`: `sm_install_setting` + `sm_coverage` views; results
+      ordered by id and digested (`punch_list_digest`); not_applicable kept in
+      the output; missing/unavailable domains, a `when` error, or an
+      INCOMPLETE model are not_assessable (half a wizard must not give a short,
+      reassuring list); a coverage item never passes while hosts are unknown,
+      and a failing one still reports them. `curated_posture.pxi`: the curated
+      questionnaire v1 (11 questions, 14 attributes) and 19 posture checks,
+      written "fire unless a row proves the control" so a key the gatherer
+      failed to supply OPENS the item. 29 tests; the S0 findings are
+      regression tests. Note: until S3 an installation rule posted through
+      the advisor API validates but is not yet evaluated.
+- [x] **S2 -- Partition split + schema.** Shared: questionnaire versions (synced
+      from the engine like curated packs). Tenant: threat model versions and
+      answers (scope-keyed), posture items (satisfied / open / waived / not
+      assessable), waivers (who, when, why, the rationale fingerprint it was
+      granted against). Migrations on the shared + tenant chains.
+
+      **DONE 2026-09-27.** `backend/persistence/models/threat_model.py`:
+      shared `SharedThreatQuestionnaire` (one row per VERSION, all kept -- a
+      saved model names the version it answered); tenant `ThreatModel`
+      (versioned per scope, one current; answers derived-from, attributes,
+      digest, complete, missing, ignored), `PostureItem` (latest state per
+      scope+rule; waived is an OVERLAY, never a stored state, so the open risk
+      stays visible under a waiver), `PostureItemEvent` (every state change,
+      with its cause -- evaluation vs threat-model re-derivation -- for S6),
+      `PostureWaiver` (who/when/why + basis: rule version, risk, the
+      attributes that made it apply; stale/reaffirm/revoke fields; revoked
+      rows kept as audit history). Every row scope-keyed (`scope_kind`,
+      `scope_ref` = "" for the tenant -- NULLs never collide in a unique
+      constraint). Migrations `s17threatq` (shared) and `q11posture` (tenant),
+      idempotent, run for real in a test with an ORM round trip.
+      `threat_model_catalog.sync_questionnaires` rides the advisor tick's
+      catalog sync (never raises; a version the engine itself rejects is never
+      written). Engine: the 19 posture checks ship as a second curated pack,
+      `sysmanage-posture` (so a tenant can switch a check off -- a recorded
+      CHOICE, distinct from an audited waiver); the host feed never sees them
+      (it is built from per-host results). **Found:** curated pack names,
+      descriptions and rule titles render as raw English in the UI -- a 21.2
+      gap too (the baseline pack) -- fixed in S7 by keying them for
+      translation.
+- [ ] **S3 -- Installation evidence + evaluation.** Gather the installation
+      domains once per tenant tick (identity, logging, audit retention, backup,
+      secrets, alerting, patch cadence, fleet coverage of FIPS/AV/firewall/
+      compliance), evaluate installation rules, persist the punch list. Server-
+      scoped items are marked as managed by the server operator.
+- [ ] **S4 -- Waivers as audit artifacts.** Waive/unwaive/re-affirm through
+      `audit_service`; staleness per decision (b); a waived item is neutral,
+      never a green tick, and counts as a discrepancy again when unwaived.
+- [ ] **S5 -- Close the loop.** Each open item names its remediation: the
+      existing engine entry point (MFA enforcement, FIPS enable, AV deploy,
+      firewall enable, log forwarding push, config profile) behind operator
+      approval + maintenance windows -- or says plainly that it has no
+      automated path.
+- [ ] **S6 -- Re-evaluation on drift.** Recomputed every tick; an item that
+      regresses reopens itself; history kept so "what changed" is answerable.
+- [ ] **S7 -- UI.** The wizard (branching, why-we-ask, resumable), the
+      threat-model summary with version-to-version diff (what changed in the
+      model AND in the punch list), and the punch list with the four states
+      and the waiver dialog.
+- [ ] **S8 -- Docs, screenshots, i18n -- LAST.**
 
 #### 21.5 Built-in Metric Graphs over Collected Facts (Professional+)
 
