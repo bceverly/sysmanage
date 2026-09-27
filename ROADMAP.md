@@ -10527,11 +10527,34 @@ remediation needs its own approved path into the existing entry points.
       descriptions and rule titles render as raw English in the UI -- a 21.2
       gap too (the baseline pack) -- fixed in S7 by keying them for
       translation.
-- [ ] **S3 -- Installation evidence + evaluation.** Gather the installation
+- [x] **S3 -- Installation evidence + evaluation.** Gather the installation
       domains once per tenant tick (identity, logging, audit retention, backup,
       secrets, alerting, patch cadence, fleet coverage of FIPS/AV/firewall/
       compliance), evaluate installation rules, persist the punch list. Server-
       scoped items are marked as managed by the server operator.
+
+      **DONE 2026-09-27** (server; live check pending a saved threat model).
+      `posture_evidence.gather`: each domain read on its own; one that raises
+      is LEFT OUT (the engine reports it missing) and logged with the domain --
+      never defaulted; backups outside multi-tenancy are UNAVAILABLE, and a
+      backup read that fails is missing, not unavailable (kept apart
+      explicitly). Server settings (identity, session, the EFFECTIVE password
+      policy tenant -> server -> yaml, log forwarding, OpenBAO, platform role)
+      from the bootstrap DB/yaml; the rest from the tenant DB. Coverage over
+      APPROVED hosts with unknown counted separately: no report, a stale report
+      (firewall 2 d, antivirus 7 d) and a vulnerability scan with no verdict are
+      unknown; no compliance scan in 30 d is FAILING (it is what the check
+      measures). Found writing the tests: "latest antivirus row" ordered by the
+      row's random UUID -- fixed to `last_updated`. `posture_service`: saving
+      ADDS a version and returns the engine's diff; no model = no list (not an
+      empty one); every state change is a `posture_item_event` whose cause is
+      `threat_model` on the first pass under a (re-)derived model and
+      `evaluation` after, so S6 never blames the wizard for a regression; a
+      check the model stops applying, or a withdrawn one, leaves with an event.
+      The tick runs it per tenant AFTER the host pass commits, in its own
+      transaction. API (`backend/api/posture.py`, license-gated):
+      questionnaire, current model + versions, save (ADMINISTRATORS only -- a
+      policy statement), punch list. 2 new messages hand-translated x13.
 - [ ] **S4 -- Waivers as audit artifacts.** Waive/unwaive/re-affirm through
       `audit_service`; staleness per decision (b); a waived item is neutral,
       never a green tick, and counts as a discrepancy again when unwaived.

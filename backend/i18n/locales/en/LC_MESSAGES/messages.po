@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-09-26 12:54-0400\n"
+"POT-Creation-Date: 2026-09-27 07:54-0400\n"
 "Language: en\n"
 "Content-Type: text/plain; charset=ASCII\n"
 
@@ -2332,56 +2332,56 @@ msgid "Refresh interval cannot exceed 168 hours (1 week)"
 msgstr "Refresh interval cannot exceed 168 hours (1 week)"
 
 #: backend/api/cve_refresh_settings.py:135
-#: backend/api/cve_refresh_settings.py:380
+#: backend/api/cve_refresh_settings.py:381
 #, python-format
 msgid "Invalid CVE source: %s"
 msgstr "Invalid CVE source: %s"
 
-#: backend/api/cve_refresh_settings.py:226
+#: backend/api/cve_refresh_settings.py:227
 #, python-format
 msgid "Failed to retrieve CVE refresh settings: %s"
 msgstr "Failed to retrieve CVE refresh settings: %s"
 
-#: backend/api/cve_refresh_settings.py:293
+#: backend/api/cve_refresh_settings.py:294
 #, python-format
 msgid "Failed to update CVE refresh settings: %s"
 msgstr "Failed to update CVE refresh settings: %s"
 
-#: backend/api/cve_refresh_settings.py:310
+#: backend/api/cve_refresh_settings.py:311
 #, python-format
 msgid "Failed to retrieve CVE database statistics: %s"
 msgstr "Failed to retrieve CVE database statistics: %s"
 
-#: backend/api/cve_refresh_settings.py:325
+#: backend/api/cve_refresh_settings.py:326
 msgid "Limit must be between 1 and 100"
 msgstr "Limit must be between 1 and 100"
 
-#: backend/api/cve_refresh_settings.py:348
+#: backend/api/cve_refresh_settings.py:349
 #, python-format
 msgid "Failed to retrieve CVE ingestion history: %s"
 msgstr "Failed to retrieve CVE ingestion history: %s"
 
-#: backend/api/cve_refresh_settings.py:422
+#: backend/api/cve_refresh_settings.py:423
 #, python-format
 msgid "Source %(source)s failed: %(error)s"
 msgstr "Source %(source)s failed: %(error)s"
 
-#: backend/api/cve_refresh_settings.py:437
+#: backend/api/cve_refresh_settings.py:438
 #, python-format
 msgid "CVE refresh failed: %s"
 msgstr "CVE refresh failed: %s"
 
-#: backend/api/cve_refresh_settings.py:442
+#: backend/api/cve_refresh_settings.py:443
 #, python-format
 msgid "Failed to trigger CVE refresh: %s"
 msgstr "Failed to trigger CVE refresh: %s"
 
 # Secret deployment messages
-#: backend/api/cve_refresh_settings.py:480
+#: backend/api/cve_refresh_settings.py:481
 msgid "NVD API key cleared successfully"
 msgstr "NVD API key cleared successfully"
 
-#: backend/api/cve_refresh_settings.py:486
+#: backend/api/cve_refresh_settings.py:487
 msgid "Failed to clear NVD API key"
 msgstr "Failed to clear NVD API key"
 
@@ -3313,6 +3313,14 @@ msgstr "Package installation {status} on agent {hostname}"
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "Failed to update package installation status: %s"
+
+#: backend/api/posture.py:66
+msgid "Only an administrator can change the threat model"
+msgstr "Only an administrator can change the threat model"
+
+#: backend/api/posture.py:88 backend/api/posture.py:135
+msgid "The threat-model questionnaire has not been loaded yet"
+msgstr "The threat-model questionnaire has not been loaded yet"
 
 #: backend/api/packages_operations.py:104
 msgid "No packages specified for installation"

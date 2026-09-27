@@ -48,6 +48,7 @@ from backend.services import advisor_catalog as catalog
 from backend.services import advisor_collection as collection
 from backend.services import advisor_evidence as ev
 from backend.services import advisor_proposals as proposals
+from backend.services import posture_service as posture
 from backend.services import threat_model_catalog
 
 logger = logging.getLogger(__name__)
@@ -154,6 +155,7 @@ class _Pass:
     now: datetime
     summary: Dict[str, Any]
     existing: Dict[Tuple[str, str, str], Any] = field(default_factory=dict)
+    tenant_id: Any = None
 
     def store(self, host_id, entry, result) -> None:
         """Upsert one (host, rule) outcome."""
@@ -318,6 +320,21 @@ def _tick_one_database(run: _Pass, shared_entries) -> None:
     except Exception:  # pylint: disable=broad-except
         logger.exception("Advisor tick failed for %s", run.label)
         run.db.rollback()
+        return
+    _evaluate_posture(run, entries)
+
+
+def _evaluate_posture(run: _Pass, entries) -> None:
+    """21.4: the installation punch list, in its OWN transaction -- a posture
+    failure must not roll back the host results just committed."""
+    try:
+        posture.evaluate(
+            run.engine, run.db, run.tenant_id, entries, run.now, run.summary
+        )
+        run.db.commit()
+    except Exception:  # pylint: disable=broad-except
+        logger.exception("Posture evaluation failed for %s", run.label)
+        run.db.rollback()
 
 
 def _new_summary() -> Dict[str, Any]:
@@ -333,6 +350,8 @@ def _new_summary() -> Dict[str, Any]:
         "collections_no_engine": 0,
         "collections_pruned": 0,
         "proposals_opened": 0,
+        "posture_items": 0,
+        "posture_changes": 0,
     }
 
 
@@ -344,7 +363,18 @@ def evaluate_database(db_session, label: str = "request") -> Dict[str, Any]:
     engine = module_loader.get_module("advisor_engine")
     if engine is None or not hasattr(engine, "evaluate_host"):
         return summary
-    run = _Pass(engine=engine, db=db_session, label=label, now=_now(), summary=summary)
+    from backend.persistence.tenant_context import (  # noqa: PLC0415
+        get_active_tenant,
+    )
+
+    run = _Pass(
+        engine=engine,
+        db=db_session,
+        label=label,
+        now=_now(),
+        summary=summary,
+        tenant_id=get_active_tenant(),
+    )
     _tick_one_database(run, load_shared_rules())
     return summary
 
@@ -369,10 +399,15 @@ def run_one_tick() -> Dict[str, Any]:
     # EVERY database: a tenant's hosts and rules live in that tenant's
     # database, so reading only the bootstrap one would evaluate nobody under
     # multi-tenancy and report a clean zero.
-    for label, _tenant, db_session in iter_host_databases():
+    for label, tenant_id, db_session in iter_host_databases():
         try:
             run = _Pass(
-                engine=engine, db=db_session, label=label, now=now, summary=summary
+                engine=engine,
+                db=db_session,
+                label=label,
+                now=now,
+                summary=summary,
+                tenant_id=tenant_id,
             )
             _tick_one_database(run, shared_entries)
         finally:

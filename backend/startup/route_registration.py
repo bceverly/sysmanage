@@ -15,6 +15,7 @@ from backend.api import (
     access_groups,
     advisor,
     advisory_actions,
+    posture,
     agent,
     agent_poll,
     airgap_agent_mirrors,
@@ -418,6 +419,8 @@ def register_routes(app: FastAPI):
 
     logger.debug("Adding advisor router (Phase 21.2 S4)")
     _include_versioned(app, advisor.router, tags=["advisor"])
+    logger.debug("Adding posture router (Phase 21.4 S3)")
+    _include_versioned(app, posture.router, tags=["advisor"])
     logger.debug("Advisor router added")
 
     logger.debug("Adding file-watches router (Phase 21.1 S7)")
