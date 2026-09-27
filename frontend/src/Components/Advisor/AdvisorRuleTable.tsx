@@ -26,6 +26,7 @@ import {
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { useTranslation } from 'react-i18next';
+import { ruleTitle } from '../Posture/postureLabels';
 import { Link as RouterLink } from 'react-router';
 import {
     advisorService,
@@ -92,7 +93,7 @@ const RuleHosts: React.FC<{ entry: AdvisorFeedEntry }> = ({ entry }) => {
 const RuleRow: React.FC<{ entry: AdvisorFeedEntry }> = ({ entry }) => {
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
-    const title = entry.rule?.title ?? entry.key;
+    const title = ruleTitle(t, entry.key, entry.rule?.title);
     return (
         <>
             <TableRow hover>

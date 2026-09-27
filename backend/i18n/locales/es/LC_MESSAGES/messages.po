@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 07:54-0400\n"
+"POT-Creation-Date: 2026-09-27 13:34-0400\n"
 "Language: es\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1654,7 +1654,8 @@ msgstr "No se encontró la vigilancia de archivo."
 #: backend/api/advisor.py:93 backend/api/query_packs.py:119
 #: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
-#: backend/api/config_mgmt_jobs.py:168 backend/api/config_mgmt_profiles.py:136
+#: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
+#: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50
 #, python-format
 msgid "Permission denied: %s role required"
@@ -3396,13 +3397,30 @@ msgstr "Instalación del paquete {status} en el agente {hostname}"
 msgid "Failed to update package installation status: %s"
 msgstr "Falló la actualización del estado de instalación del paquete: %s"
 
-#: backend/api/posture.py:66
+#: backend/api/posture.py:81
 msgid "Only an administrator can change the threat model"
 msgstr "Solo un administrador puede cambiar el modelo de amenazas"
 
-#: backend/api/posture.py:88 backend/api/posture.py:135
+#: backend/api/posture.py:89
+msgid "Only an administrator can waive or re-affirm a posture item"
+msgstr ""
+"Solo un administrador puede eximir o volver a confirmar un punto de postura"
+
+#: backend/api/posture.py:111 backend/api/posture.py:158
 msgid "The threat-model questionnaire has not been loaded yet"
 msgstr "El cuestionario del modelo de amenazas aún no se ha cargado"
+
+#: backend/api/posture.py:261
+msgid "Posture item not found"
+msgstr "Punto de postura no encontrado"
+
+#: backend/api/posture.py:356
+msgid "Only an administrator can apply a posture remedy"
+msgstr "Solo un administrador puede aplicar una corrección de postura"
+
+#: backend/api/posture.py:404
+msgid "Threat model version not found"
+msgstr "Versión del modelo de amenazas no encontrada"
 
 #: backend/api/packages_operations.py:104
 msgid "No packages specified for installation"
@@ -5424,17 +5442,17 @@ msgstr "unidad presente pero sin disco leíble insertado"
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "no hay sistema de archivos ISO en el dispositivo (fstype=%s)"
 
-#: backend/services/audit_service.py:188
+#: backend/services/audit_service.py:189
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "Se creó {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:236
+#: backend/services/audit_service.py:237
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "Actualizado {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:284
+#: backend/services/audit_service.py:285
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "Se eliminó {entity_type} '{entity_name}'"

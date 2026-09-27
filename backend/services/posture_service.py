@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from backend.persistence import models
-from backend.services import posture_evidence, threat_model_catalog
+from backend.services import posture_evidence, posture_waivers, threat_model_catalog
 
 logger = logging.getLogger(__name__)
 
@@ -103,6 +103,36 @@ def save_threat_model(engine, db, answers: Dict[str, Any], user: str):
     return row, diff
 
 
+def rule_definition(db, source: str, key: str) -> Optional[Dict[str, Any]]:
+    """The installation rule behind an item, from wherever it lives."""
+    if source == models.ADVISOR_RULE_SOURCE_TENANT:
+        row = db.query(models.AdvisorRule).filter_by(rule_key=key).first()
+        return dict(row.definition or {}, id=key) if row is not None else None
+    from backend.services import advisor_tick  # noqa: PLC0415 - avoids an import cycle
+
+    for entry in advisor_tick.load_shared_rules() or ():
+        if entry["key"] == key:
+            return entry["rule"]
+    return None
+
+
+def rules_by_key(db) -> Dict[str, Dict[str, Any]]:
+    """Every installation rule this tenant could have an item for, by key --
+    loaded ONCE (the punch list must not query the catalog per item)."""
+    from backend.services import advisor_tick  # noqa: PLC0415 - avoids an import cycle
+
+    out = {
+        e["key"]: e["rule"]
+        for e in advisor_tick.load_shared_rules() or ()
+        if (e.get("rule") or {}).get("scope") == "installation"
+    }
+    for row in db.query(models.AdvisorRule).all():
+        rule = dict(row.definition or {}, id=row.rule_key)
+        if rule.get("scope") == "installation":
+            out[row.rule_key] = rule
+    return out
+
+
 def installation_entries(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return [
         e for e in entries or () if (e.get("rule") or {}).get("scope") == "installation"
@@ -123,9 +153,9 @@ def _event(db, rule_key, before, after, cause, model_version, now) -> None:
     )
 
 
-def _upsert(db, item, entry, result, state, model, now) -> Optional[str]:
-    """Write one item; returns the previous state when it CHANGED, else None
-    (the empty string for a new item)."""
+def _upsert(db, item, entry, result, state, model, now):
+    """Write one item; returns ``(item, previous)`` -- the previous state when
+    it CHANGED, else None (the empty string for a new item)."""
     previous = None
     if item is None:
         item = models.PostureItem(
@@ -149,7 +179,7 @@ def _upsert(db, item, entry, result, state, model, now) -> Optional[str]:
     item.coverage = result.get("coverage")
     item.matches = result.get("matches") or []
     item.evaluated_at = now
-    return previous
+    return item, previous
 
 
 def evaluate(engine, db, tenant_id, entries, now=None, summary=None) -> Dict[str, Any]:
@@ -191,7 +221,12 @@ def evaluate(engine, db, tenant_id, entries, now=None, summary=None) -> Dict[str
                 out["posture_changes"] += 1
             continue
         seen.add(key)
-        previous = _upsert(db, item, entry, result, state, model, now)
+        item, previous = _upsert(db, item, entry, result, state, model, now)
+        # S4: a waiver granted on another basis stops covering the item.
+        if posture_waivers.refresh_staleness(
+            db, SCOPE, item, entry["rule"], model.attributes, now
+        ):
+            out["posture_stale_waivers"] = out.get("posture_stale_waivers", 0) + 1
         out["posture_items"] += 1
         if previous is not None:
             _event(db, key, previous or None, state, cause, model.model_version, now)

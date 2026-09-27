@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 07:54-0400\n"
+"POT-Creation-Date: 2026-09-27 13:34-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1584,7 +1584,8 @@ msgstr "파일 감시가 발견되지 않았습니다."
 #: backend/api/advisor.py:93 backend/api/query_packs.py:119
 #: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
-#: backend/api/config_mgmt_jobs.py:168 backend/api/config_mgmt_profiles.py:136
+#: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
+#: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50
 #, python-format
 msgid "Permission denied: %s role required"
@@ -3245,13 +3246,29 @@ msgstr "Agent {hostname}의 패키지 설치 상태: {status}"
 msgid "Failed to update package installation status: %s"
 msgstr "패키지 설치 상태를 업데이트하는 데 실패했습니다: %s"
 
-#: backend/api/posture.py:66
+#: backend/api/posture.py:81
 msgid "Only an administrator can change the threat model"
 msgstr "관리자만 위협 모델을 변경할 수 있습니다"
 
-#: backend/api/posture.py:88 backend/api/posture.py:135
+#: backend/api/posture.py:89
+msgid "Only an administrator can waive or re-affirm a posture item"
+msgstr "관리자만 보안 태세 항목을 면제하거나 다시 확인할 수 있습니다"
+
+#: backend/api/posture.py:111 backend/api/posture.py:158
 msgid "The threat-model questionnaire has not been loaded yet"
 msgstr "위협 모델 설문지가 아직 로드되지 않았습니다"
+
+#: backend/api/posture.py:261
+msgid "Posture item not found"
+msgstr "보안 태세 항목을 찾을 수 없습니다"
+
+#: backend/api/posture.py:356
+msgid "Only an administrator can apply a posture remedy"
+msgstr "관리자만 보안 태세 조치를 적용할 수 있습니다"
+
+#: backend/api/posture.py:404
+msgid "Threat model version not found"
+msgstr "위협 모델 버전을 찾을 수 없습니다"
 
 #: backend/api/packages_operations.py:104
 msgid "No packages specified for installation"
@@ -5142,17 +5159,17 @@ msgstr "드라이브는 있지만 읽을 수 있는 디스크가 삽입되어 �
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "장치의 ISO 파일 시스템이 없습니다 (fstype=%s)"
 
-#: backend/services/audit_service.py:188
+#: backend/services/audit_service.py:189
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' 생성됨"
 
-#: backend/services/audit_service.py:236
+#: backend/services/audit_service.py:237
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' 업데이트 완료"
 
-#: backend/services/audit_service.py:284
+#: backend/services/audit_service.py:285
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' 삭제됨"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-09-27 07:54-0400\n"
+"POT-Creation-Date: 2026-09-27 13:34-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1565,7 +1565,8 @@ msgstr ""
 #: backend/api/advisor.py:93 backend/api/query_packs.py:119
 #: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
-#: backend/api/config_mgmt_jobs.py:168 backend/api/config_mgmt_profiles.py:136
+#: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
+#: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50
 #, python-format
 msgid "Permission denied: %s role required"
@@ -3203,12 +3204,28 @@ msgstr ""
 msgid "Failed to update package installation status: %s"
 msgstr ""
 
-#: backend/api/posture.py:66
+#: backend/api/posture.py:81
 msgid "Only an administrator can change the threat model"
 msgstr ""
 
-#: backend/api/posture.py:88 backend/api/posture.py:135
+#: backend/api/posture.py:89
+msgid "Only an administrator can waive or re-affirm a posture item"
+msgstr ""
+
+#: backend/api/posture.py:111 backend/api/posture.py:158
 msgid "The threat-model questionnaire has not been loaded yet"
+msgstr ""
+
+#: backend/api/posture.py:261
+msgid "Posture item not found"
+msgstr ""
+
+#: backend/api/posture.py:356
+msgid "Only an administrator can apply a posture remedy"
+msgstr ""
+
+#: backend/api/posture.py:404
+msgid "Threat model version not found"
 msgstr ""
 
 #: backend/api/packages_operations.py:104
@@ -5063,17 +5080,17 @@ msgstr ""
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr ""
 
-#: backend/services/audit_service.py:188
+#: backend/services/audit_service.py:189
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr ""
 
-#: backend/services/audit_service.py:236
+#: backend/services/audit_service.py:237
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr ""
 
-#: backend/services/audit_service.py:284
+#: backend/services/audit_service.py:285
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr ""

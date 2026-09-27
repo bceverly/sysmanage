@@ -3751,7 +3751,8 @@
     "tabs": {
       "recommendations": "Empfehlungen",
       "proposals": "Vorgeschlagene Korrekturen ({{count}})",
-      "packs": "Regelpakete"
+      "packs": "Regelpakete",
+      "posture": "Sicherheitslage"
     },
     "feed": {
       "lens": "Perspektive",
@@ -3887,6 +3888,321 @@
       "proposals": "Vorgeschlagene Korrekturen",
       "notApplicable": "Nicht zutreffend",
       "clean": "Ohne Befund"
+    },
+    "curated": {
+      "pmAirgapRole": "Der Server ist als die von Ihnen beschriebene Air-Gap-Installation eingerichtet",
+      "pmAlerting": "Bei Störungen wird jemand benachrichtigt",
+      "pmAntivirus": "Auf jedem Host läuft ein Virenschutz",
+      "pmApiKeyExpiry": "Kein API-Schlüssel ist ohne Ablaufdatum",
+      "pmAuditRetention": "Der Audit-Verlauf wird mindestens ein Jahr lang aufbewahrt",
+      "pmBackups": "Sicherungen erfüllen Ihr Recovery Point Objective",
+      "pmComplianceScans": "Jeder Host hat einen Compliance-Scan aus den letzten 30 Tagen",
+      "pmCriticalVulns": "Kein Host hat eine ungepatchte kritische Schwachstelle",
+      "pmFips": "Der FIPS-Modus ist überall aktiviert, wo er verfügbar ist",
+      "pmFirewall": "Die Firewall jedes Hosts ist aktiviert",
+      "pmLockout": "Wiederholte fehlgeschlagene Anmeldungen sperren das Konto",
+      "pmLogForward": "Protokolle werden von den Hosts weitergeleitet",
+      "pmMaintWindows": "Änderungen erfolgen in geplanten Wartungsfenstern",
+      "pmMfaEnforced": "MFA ist für Administratoren verpflichtend",
+      "pmMfaEnrolled": "Jeder Administrator hat MFA eingerichtet",
+      "pmPasswordLength": "Passwörter haben mindestens 12 Zeichen",
+      "pmPatchCadence": "Sicherheitsupdates werden nach Zeitplan eingespielt",
+      "pmSecrets": "Geheimnisse werden in OpenBAO aufbewahrt",
+      "pmSessionTimeout": "Sitzungen laufen innerhalb einer Stunde ab",
+      "smAvail001": "Sicherheitsupdates ausstehend",
+      "smAvail002": "Neustart erforderlich",
+      "smComp001": "Fehlgeschlagene Compliance-Prüfungen mit hoher oder kritischer Stufe",
+      "smPerf001": "Dateisystem zu mehr als 90 % belegt",
+      "smSec001": "Kritische Schwachstelle mit verfügbarer Korrektur",
+      "smSec002": "Schwachstelle mit hohem Schweregrad und verfügbarer Korrektur",
+      "smSec003": "Konto außer root mit Benutzer-ID 0",
+      "smSec004": "Dienste lauschen auf allen Schnittstellen, während die Host-Firewall aus ist",
+      "smSec005": "Zertifikat läuft innerhalb von 30 Tagen ab",
+      "smStab001": "Konfigurationsabweichung seit mehr als 7 Tagen ungelöst",
+      "smStabF01": "OpenSSL-Version weicht von der Version vergleichbarer Hosts ab"
+    },
+    "curatedPack": {
+      "baseline": {
+        "description": "Prüfungen zu Sicherheit, Leistung, Verfügbarkeit und Stabilität anhand der Daten, die jeder SysManage-Host meldet.",
+        "name": "SysManage-Grundlinie"
+      },
+      "posture": {
+        "description": "Installationsweite Prüfungen zu Sicherheit und Ausfallsicherheit, angewendet gemäß Ihrem Bedrohungsmodell.",
+        "name": "SysManage-Sicherheitslage"
+      }
+    }
+  },
+  "posture": {
+    "action": {
+      "fix": "Beheben",
+      "waive": "Zurückstellen"
+    },
+    "checkedAt": "Zuletzt geprüft am {{date}}",
+    "col": {
+      "actions": "Aktionen",
+      "check": "Prüfung",
+      "coverage": "Abdeckung",
+      "risk": "Risiko",
+      "state": "Status"
+    },
+    "coverage": {
+      "summary": "{{ok}} von {{total}} Hosts bestehen",
+      "unknown": "(nicht gemeldet: {{n}})"
+    },
+    "empty": "Keine Punkte in dieser Ansicht.",
+    "event": {
+      "added": "Hinzugefügt",
+      "addedByModel": "Durch das Bedrohungsmodell hinzugefügt",
+      "blindSpot": "Konnte nicht mehr bewertet werden",
+      "changed": "Geändert",
+      "changedByModel": "Durch das Bedrohungsmodell geändert",
+      "measuredAgain": "Erneut bewertet",
+      "regression": "Verschlechtert",
+      "remediationRequested": "Korrektur angewendet",
+      "removed": "Entfernt",
+      "removedByModel": "Durch das Bedrohungsmodell entfernt",
+      "resolved": "Behoben",
+      "withdrawn": "Prüfung zurückgezogen"
+    },
+    "expand": "Details",
+    "filter": "Anzeigen",
+    "filterAll": "Alle Punkte",
+    "gap": {
+      "coverageUnknown": "Einige Hosts haben dies nicht gemeldet",
+      "missing": "Die Nachweise konnten nicht gelesen werden",
+      "ruleError": "Die Prüfung konnte nicht ausgewertet werden",
+      "threatModelIncomplete": "Das Bedrohungsmodell ist unvollständig",
+      "unavailable": "SysManage hat auf dieser Installation keinen Einblick in diesen Bereich"
+    },
+    "history": {
+      "none": "Noch keine Änderungen erfasst.",
+      "title": "Verlauf"
+    },
+    "loadFailed": "Die Sicherheitslage konnte nicht geladen werden.",
+    "managedByServer": "Vom Serverbetreiber verwaltet",
+    "noModel": {
+      "body": "Einige Fragen zu Ihren Daten, Verpflichtungen und Ihrer Exposition entscheiden, welche installationsweiten Prüfungen für Sie gelten. Bis dahin können die Prüfungen der Sicherheitslage nicht bewertet werden.",
+      "start": "Fragebogen starten",
+      "title": "Beschreiben Sie zuerst Ihre Installation"
+    },
+    "refusal": {
+      "alreadyWaived": "Dieser Punkt ist bereits zurückgestellt.",
+      "managedByServer": "Nur der Serverbetreiber kann diese Einstellung ändern.",
+      "notAutomated": "Hierfür gibt es keine automatische Korrektur.",
+      "notOpen": "Nur ein offener Punkt kann zurückgestellt oder behoben werden.",
+      "notStale": "Diese Zurückstellung muss nicht erneut bestätigt werden.",
+      "notWaived": "Dieser Punkt ist nicht zurückgestellt.",
+      "nothingToDo": "Es gibt nichts mehr zu ändern.",
+      "reasonRequired": "Eine Begründung ist erforderlich.",
+      "unknownRemedy": "Diese Prüfung nennt keine Korrektur."
+    },
+    "regressed": "Verschlechtert",
+    "remedy": {
+      "applied": "Die Korrektur wurde angewendet. Der Punkt wird bei der nächsten Auswertung erneut geprüft.",
+      "apply": "Korrektur anwenden",
+      "applyFailed": "Die Korrektur konnte nicht angewendet werden.",
+      "change": "{{from}} zu {{to}}",
+      "configure_alerting": "Fügen Sie auf der Seite Warnungen einen Benachrichtigungskanal und eine Warnregel hinzu.",
+      "configure_backups": "Konfigurieren Sie einen Sicherungsbefehl und ein Recovery Point Objective.",
+      "configure_log_forwarding": "Legen Sie in den Protokollierungseinstellungen fest, wohin Protokolle weitergeleitet werden.",
+      "define_maintenance_windows": "Legen Sie fest, wann Änderungen vorgenommen werden dürfen.",
+      "enable_antivirus": "Aktivieren Sie den installierten Virenschutz dort, wo er ausgeschaltet ist. Für Hosts ohne Virenschutz muss auf der Seite Virenschutz ein Produkt ausgewählt werden.",
+      "enable_fips": "Aktivieren Sie den FIPS-Modus auf den Hosts, die ihn unterstützen, in deren Wartungsfenstern.",
+      "enable_firewall": "Aktivieren Sie die Firewall auf den Hosts, auf denen sie ausgeschaltet ist, in deren Wartungsfenstern.",
+      "enable_openbao": "Speichern Sie Geheimnisse in OpenBAO.",
+      "enforce_lockout": "Sperren Sie Konten nach 5 fehlgeschlagenen Anmeldungen.",
+      "enroll_admin_mfa": "Jeder Administrator richtet MFA in seinem eigenen Profil ein.",
+      "expire_api_keys": "Ersetzen Sie API-Schlüssel, die nie ablaufen, durch solche mit Ablaufdatum.",
+      "goThere": "Dorthin wechseln",
+      "hostFailed": "{{host}}: {{reason}}",
+      "hosts": "Hosts, die geändert werden: {{n}}",
+      "patch_critical_vulnerabilities": "Prüfen und genehmigen Sie die vorgeschlagenen Korrekturen.",
+      "previewFailed": "Für die Korrektur konnte keine Vorschau erstellt werden.",
+      "require_admin_mfa": "Machen Sie MFA für Administratoren verpflichtend.",
+      "run_compliance_scans": "Führen Sie auf jedem Host Compliance-Scans durch.",
+      "schedule_security_updates": "Planen Sie Sicherheitsupdates mit einem Update-Profil.",
+      "set_air_gap_role": "Stellen Sie die Serverrolle passend zu Ihrer Air-Gap-Installation ein.",
+      "set_audit_retention": "Erstellen Sie über die Audit-API eine Audit-Aufbewahrungsrichtlinie von mindestens 365 Tagen. Hierfür gibt es noch keine Oberfläche.",
+      "set_password_policy": "Die Passwortrichtlinie wird in sysmanage.yaml festgelegt; SysManage kann sie nicht für Sie ändern.",
+      "shorten_session": "Lassen Sie Sitzungen nach einer Stunde ablaufen."
+    },
+    "saved": "Bedrohungsmodell gespeichert. Die Maßnahmenliste wird beim nächsten Durchlauf des Beraters neu ausgewertet.",
+    "stale": {
+      "modelChanged": "Das Bedrohungsmodell hat sich seit der Zurückstellung geändert",
+      "riskRose": "Das Risiko ist seit der Zurückstellung gestiegen",
+      "ruleChanged": "Die Prüfung hat sich seit der Zurückstellung geändert"
+    },
+    "stalePass": "Einige Punkte wurden zuletzt unter einem früheren Bedrohungsmodell ausgewertet. Sie werden bei der nächsten Auswertung aktualisiert.",
+    "state": {
+      "notAssessable": "Nicht bewertbar",
+      "open": "Offen",
+      "satisfied": "Erfüllt",
+      "waived": "Zurückgestellt"
+    },
+    "waiver": {
+      "explain": "Eine Zurückstellung hält fest, dass Sie dieses Risiko akzeptieren. Der Punkt bleibt im Hintergrund offen, und die Zurückstellung verfällt, wenn das Risiko steigt oder sich ihre Grundlage ändert.",
+      "failed": "Die Zurückstellung konnte nicht gespeichert werden.",
+      "grantedBy": "Zurückgestellt von {{user}} am {{date}}: {{reason}}",
+      "reaffirm": "Erneut bestätigen",
+      "reaffirmTitle": "Zurückstellung erneut bestätigen: {{title}}",
+      "reason": "Begründung",
+      "revoke": "Widerrufen",
+      "revokeFailed": "Die Zurückstellung konnte nicht widerrufen werden.",
+      "submit": "Zurückstellen",
+      "title": "Zurückstellen: {{title}}"
+    },
+    "waiverStale": "Zurückstellung verfallen"
+  },
+  "threatModel": {
+    "attribute": {
+      "air_gapped": "Air-Gap (vom Netz getrennt)",
+      "cui": "Verarbeitet kontrollierte, nicht klassifizierte Informationen",
+      "fips_required": "Erfordert FIPS-validierte Kryptografie",
+      "insider": "Betrachtet Insider als Bedrohung",
+      "internet_exposed": "Aus dem Internet erreichbar",
+      "low_data_loss_tolerance": "Geringe Toleranz für Datenverlust",
+      "low_downtime_tolerance": "Geringe Toleranz für Ausfallzeiten",
+      "low_risk_tolerance": "Geringe Risikotoleranz",
+      "multi_admin": "Mehrere Administratoren",
+      "pci": "Verarbeitet Zahlungskartendaten",
+      "phi": "Verarbeitet Gesundheitsdaten",
+      "regulated": "Verarbeitet regulierte Daten",
+      "targeted": "Rechnet mit gezielten Angreifern",
+      "third_party": "Anbieter oder Auftragnehmer haben Zugriff"
+    },
+    "diff": {
+      "compare": "Vergleichen",
+      "failed": "Die Versionen konnten nicht verglichen werden.",
+      "from": "Vergleichen mit",
+      "noAttributeChange": "Keine Änderung an den Aussagen des Modells über diese Installation.",
+      "noPunchListChange": "Die Maßnahmenliste hat sich nicht geändert."
+    },
+    "option": {
+      "admins": {
+        "few": "Einige",
+        "many": "Viele",
+        "one": "Nur eine Person"
+      },
+      "adversary": {
+        "insider": "Personen innerhalb der Organisation",
+        "nation_state": "Staatliche Angreifer",
+        "opportunistic": "Opportunistische Angreifer, die das Internet scannen",
+        "targeted_criminal": "Kriminelle, die gezielt uns angreifen"
+      },
+      "data": {
+        "controlled_unclassified": "Kontrollierte, nicht klassifizierte Informationen",
+        "health": "Gesundheitsdaten",
+        "none_sensitive": "Nichts Sensibles",
+        "payment_cards": "Zahlungskartendaten",
+        "personal": "Personenbezogene Daten",
+        "trade_secrets": "Geschäftsgeheimnisse oder geistiges Eigentum"
+      },
+      "data_loss": {
+        "a_day": "Etwa einen Tag",
+        "a_week": "Etwa eine Woche",
+        "minutes": "Nur Minuten"
+      },
+      "downtime": {
+        "days": "Tage",
+        "hours": "Stunden",
+        "minutes": "Minuten"
+      },
+      "exposure": {
+        "air_gapped": "Air-Gap: keine Netzwerkverbindung zum Internet",
+        "internal_only": "Nur intern",
+        "some_exposed": "Einige Systeme sind aus dem Internet erreichbar",
+        "widely_exposed": "Viele Systeme sind aus dem Internet erreichbar"
+      },
+      "fips": {
+        "no": "Nein",
+        "unsure": "Ich bin mir nicht sicher",
+        "yes": "Ja"
+      },
+      "org": {
+        "enterprise": "Ein Großunternehmen",
+        "homelab": "Ein Heimlabor oder private Systeme",
+        "public_sector": "Der öffentliche Sektor oder die Verteidigung",
+        "small_business": "Ein kleines Unternehmen"
+      },
+      "regs": {
+        "cmmc_800_171": "CMMC / NIST SP 800-171",
+        "gdpr": "GDPR",
+        "hipaa": "HIPAA",
+        "none_known": "Keine, soweit mir bekannt",
+        "pci_dss": "PCI DSS"
+      },
+      "risk": {
+        "high": "Recht viel",
+        "low": "So wenig wie möglich",
+        "medium": "Etwas, wenn der Aufwand groß ist"
+      },
+      "third_party": {
+        "no": "Nein",
+        "yes": "Ja"
+      }
+    },
+    "question": {
+      "admins": {
+        "title": "Wie viele Personen verwalten diese Systeme?",
+        "why": "Mehr Administratoren bedeuten mehr Konten, die jeweils geschützt werden müssen."
+      },
+      "adversary": {
+        "title": "Wer bereitet Ihnen die größte Sorge?",
+        "why": "Opportunistische Angreifer werden durch gute Grundhygiene gestoppt; gegen gezielte Angreifer braucht es zusätzlich Erkennung und Reaktion."
+      },
+      "data": {
+        "title": "Welche Arten von Daten speichern oder verarbeiten diese Systeme?",
+        "why": "Regulierte Daten bringen Verpflichtungen mit sich, die eine allgemeine Grundlinie nicht abdeckt."
+      },
+      "data_loss": {
+        "title": "Wie viele aktuelle Daten könnten Sie verschmerzen zu verlieren?",
+        "why": "Dies ist Ihr Recovery Point Objective, und es bestimmt, was Sicherungen leisten müssen."
+      },
+      "downtime": {
+        "title": "Wie lange könnten diese Systeme ausfallen, bevor es schadet?",
+        "why": "Eine geringe Toleranz erfordert Warnungen und geplante Wartung."
+      },
+      "exposure": {
+        "title": "Wie gut sind diese Systeme aus dem Internet erreichbar?",
+        "why": "Die Exposition bestimmt, wie wichtig die Härtung des Netzwerks ist."
+      },
+      "fips": {
+        "title": "Muss die Kryptografie nach FIPS 140 validiert sein?",
+        "why": "Bei Aufträgen für Behörden und Verteidigung ist dies oft vorgeschrieben, und es ändert, welche Hosts konform sind."
+      },
+      "org": {
+        "title": "Was beschreibt diese Installation am besten?",
+        "why": "Dies legt die Grundlinie dafür fest, wie viel Absicherung angemessen ist."
+      },
+      "regs": {
+        "title": "Welche dieser Verpflichtungen gelten für Sie?",
+        "why": "Jede Verpflichtung fügt bestimmte Kontrollen hinzu, etwa Audit-Aufbewahrung, MFA oder FIPS."
+      },
+      "risk": {
+        "title": "Wie viel Risiko nehmen Sie in Kauf, um Aufwand zu sparen?",
+        "why": "Dies bestimmt, welche Empfehlungen ihren Aufwand für Sie wert sind."
+      },
+      "third_party": {
+        "title": "Haben Anbieter oder Auftragnehmer Zugriff?",
+        "why": "Zugriff durch Dritte erweitert den Kreis derer, die Zugangsdaten besitzen."
+      }
+    },
+    "summary": {
+      "baseline": "Grundlinie: keine erhöhten Risikofaktoren.",
+      "edit": "Bedrohungsmodell aktualisieren",
+      "incomplete": "Einige Fragen sind unbeantwortet, daher können einige Prüfungen nicht bewertet werden: {{questions}}",
+      "savedBy": "Gespeichert von {{user}} am {{date}}",
+      "title": "Bedrohungsmodell, Version {{version}}"
+    },
+    "version": "Modellversion {{version}}",
+    "wizard": {
+      "back": "Zurück",
+      "chooseAll": "Wählen Sie alle zutreffenden aus.",
+      "next": "Weiter",
+      "save": "Bedrohungsmodell speichern",
+      "saveFailed": "Das Bedrohungsmodell konnte nicht gespeichert werden.",
+      "step": "Frage {{current}} von {{total}}",
+      "title": "Beschreiben Sie Ihre Installation"
     }
   }
 }

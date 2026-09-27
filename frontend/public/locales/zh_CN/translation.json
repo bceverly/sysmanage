@@ -3751,7 +3751,8 @@
     "tabs": {
       "recommendations": "建议",
       "proposals": "建议的修复 ({{count}})",
-      "packs": "规则包"
+      "packs": "规则包",
+      "posture": "安全态势"
     },
     "feed": {
       "lens": "视角",
@@ -3887,6 +3888,321 @@
       "proposals": "建议的修复",
       "notApplicable": "不适用",
       "clean": "正常"
+    },
+    "curated": {
+      "pmAirgapRole": "服务器已按您描述的气隙部署进行设置",
+      "pmAlerting": "出现故障时会有人收到通知",
+      "pmAntivirus": "每台主机都运行防病毒软件",
+      "pmApiKeyExpiry": "没有未设置过期时间的 API 密钥",
+      "pmAuditRetention": "审计历史至少保留一年",
+      "pmBackups": "备份满足您的恢复点目标",
+      "pmComplianceScans": "每台主机在过去 30 天内都进行过合规扫描",
+      "pmCriticalVulns": "没有主机存在未修补的严重漏洞",
+      "pmFips": "在所有可用的地方都已启用 FIPS 模式",
+      "pmFirewall": "每台主机的防火墙都已开启",
+      "pmLockout": "多次登录失败会锁定账户",
+      "pmLogForward": "日志会转发到主机之外",
+      "pmMaintWindows": "变更在计划的维护窗口内进行",
+      "pmMfaEnforced": "管理员必须使用 MFA",
+      "pmMfaEnrolled": "每位管理员都已注册 MFA",
+      "pmPasswordLength": "密码至少 12 个字符",
+      "pmPatchCadence": "按计划应用安全更新",
+      "pmSecrets": "机密信息保存在 OpenBAO 中",
+      "pmSessionTimeout": "会话在一小时内过期",
+      "smAvail001": "有待安装的安全更新",
+      "smAvail002": "需要重新启动",
+      "smComp001": "高危或严重合规检查未通过",
+      "smPerf001": "文件系统使用率超过 90%",
+      "smSec001": "存在已有修复的严重漏洞",
+      "smSec002": "存在已有修复的高危漏洞",
+      "smSec003": "存在用户 ID 为 0 的非 root 账户",
+      "smSec004": "主机防火墙关闭时有服务在所有接口上监听",
+      "smSec005": "证书将在 30 天内过期",
+      "smStab001": "配置漂移超过 7 天未解决",
+      "smStabF01": "OpenSSL 版本与同类主机运行的版本不同"
+    },
+    "curatedPack": {
+      "baseline": {
+        "description": "基于每台 SysManage 主机上报的证据进行的安全、性能、可用性和稳定性检查。",
+        "name": "SysManage 基线"
+      },
+      "posture": {
+        "description": "根据您的威胁模型应用的全局安全性和韧性检查。",
+        "name": "SysManage 安全态势"
+      }
+    }
+  },
+  "posture": {
+    "action": {
+      "fix": "修复",
+      "waive": "豁免"
+    },
+    "checkedAt": "上次检查时间：{{date}}",
+    "col": {
+      "actions": "操作",
+      "check": "检查项",
+      "coverage": "覆盖范围",
+      "risk": "风险",
+      "state": "状态"
+    },
+    "coverage": {
+      "summary": "{{total}} 台主机中有 {{ok}} 台通过",
+      "unknown": "（未上报：{{n}}）"
+    },
+    "empty": "此视图中没有项目。",
+    "event": {
+      "added": "已添加",
+      "addedByModel": "由威胁模型添加",
+      "blindSpot": "已无法再评估",
+      "changed": "已更改",
+      "changedByModel": "由威胁模型更改",
+      "measuredAgain": "已重新评估",
+      "regression": "已回退",
+      "remediationRequested": "已应用补救措施",
+      "removed": "已移除",
+      "removedByModel": "由威胁模型移除",
+      "resolved": "已解决",
+      "withdrawn": "检查项已撤回"
+    },
+    "expand": "详情",
+    "filter": "显示",
+    "filterAll": "所有项目",
+    "gap": {
+      "coverageUnknown": "部分主机尚未上报此项",
+      "missing": "无法读取证据",
+      "ruleError": "无法评估该检查项",
+      "threatModelIncomplete": "威胁模型不完整",
+      "unavailable": "SysManage 在此安装环境中无法查看此项"
+    },
+    "history": {
+      "none": "尚未记录任何变更。",
+      "title": "历史记录"
+    },
+    "loadFailed": "无法加载安全态势。",
+    "managedByServer": "由服务器运维人员管理",
+    "noModel": {
+      "body": "关于您的数据、合规义务和暴露面的几个问题将决定哪些全局检查适用于您。在此之前，无法评估安全态势检查项。",
+      "start": "开始问卷",
+      "title": "请先描述您的安装环境"
+    },
+    "refusal": {
+      "alreadyWaived": "此项目已被豁免。",
+      "managedByServer": "只有服务器运维人员可以更改此设置。",
+      "notAutomated": "此项没有自动修复。",
+      "notOpen": "只有未解决的项目才能被豁免或修复。",
+      "notStale": "此豁免无需重新确认。",
+      "notWaived": "此项目未被豁免。",
+      "nothingToDo": "没有需要更改的内容了。",
+      "reasonRequired": "必须填写原因。",
+      "unknownRemedy": "此检查项未指定修复方法。"
+    },
+    "regressed": "已回退",
+    "remedy": {
+      "applied": "已应用修复。该项目将在下次评估时重新检查。",
+      "apply": "应用修复",
+      "applyFailed": "无法应用修复。",
+      "change": "{{from}} 改为 {{to}}",
+      "configure_alerting": "在告警页面添加通知渠道和告警规则。",
+      "configure_backups": "配置备份命令和恢复点目标。",
+      "configure_log_forwarding": "在日志设置中选择日志转发的目标位置。",
+      "define_maintenance_windows": "定义可以进行变更的时间。",
+      "enable_antivirus": "在防病毒软件已安装但未开启的主机上将其开启。未安装任何防病毒软件的主机需要在防病毒页面选择产品。",
+      "enable_fips": "在支持 FIPS 模式的主机上，于其维护窗口内启用 FIPS 模式。",
+      "enable_firewall": "在防火墙关闭的主机上，于其维护窗口内开启防火墙。",
+      "enable_openbao": "将机密信息存储在 OpenBAO 中。",
+      "enforce_lockout": "登录失败 5 次后锁定账户。",
+      "enroll_admin_mfa": "每位管理员在自己的账户中注册 MFA。",
+      "expire_api_keys": "将永不过期的 API 密钥替换为会过期的密钥。",
+      "goThere": "前往",
+      "hostFailed": "{{host}}：{{reason}}",
+      "hosts": "将发生变更的主机：{{n}}",
+      "patch_critical_vulnerabilities": "审查并批准建议的修复。",
+      "previewFailed": "无法预览修复。",
+      "require_admin_mfa": "要求管理员使用 MFA。",
+      "run_compliance_scans": "在每台主机上运行合规扫描。",
+      "schedule_security_updates": "使用更新配置文件安排安全更新。",
+      "set_air_gap_role": "设置服务器角色以匹配您的气隙部署。",
+      "set_audit_retention": "通过审计 API 创建至少 365 天的审计保留策略。目前尚无对应的界面。",
+      "set_password_policy": "密码策略在 sysmanage.yaml 中设置；SysManage 无法替您更改。",
+      "shorten_session": "将会话设置为一小时后过期。"
+    },
+    "saved": "威胁模型已保存。整改清单将在下一次顾问评估时重新评估。",
+    "stale": {
+      "modelChanged": "自豁免以来威胁模型已发生变化",
+      "riskRose": "自豁免以来风险已升高",
+      "ruleChanged": "自豁免以来检查项已发生变化"
+    },
+    "stalePass": "部分项目上次是在较早的威胁模型下评估的。它们将在下次评估时更新。",
+    "state": {
+      "notAssessable": "无法评估",
+      "open": "未解决",
+      "satisfied": "已满足",
+      "waived": "已豁免"
+    },
+    "waiver": {
+      "explain": "豁免表示您接受此风险。该项目在底层仍保持未解决状态；如果风险升高或其依据发生变化，豁免将失效。",
+      "failed": "无法保存豁免。",
+      "grantedBy": "由 {{user}} 于 {{date}} 豁免：{{reason}}",
+      "reaffirm": "重新确认",
+      "reaffirmTitle": "重新确认豁免：{{title}}",
+      "reason": "原因",
+      "revoke": "撤销",
+      "revokeFailed": "无法撤销豁免。",
+      "submit": "豁免",
+      "title": "豁免：{{title}}"
+    },
+    "waiverStale": "豁免已失效"
+  },
+  "threatModel": {
+    "attribute": {
+      "air_gapped": "气隙隔离",
+      "cui": "处理受控非密信息",
+      "fips_required": "要求使用经 FIPS 验证的加密",
+      "insider": "将内部人员视为威胁",
+      "internet_exposed": "可从互联网访问",
+      "low_data_loss_tolerance": "对数据丢失的容忍度低",
+      "low_downtime_tolerance": "对停机的容忍度低",
+      "low_risk_tolerance": "对风险的容忍度低",
+      "multi_admin": "多名管理员",
+      "pci": "处理支付卡数据",
+      "phi": "处理健康信息",
+      "regulated": "处理受监管数据",
+      "targeted": "预计会遭遇针对性攻击者",
+      "third_party": "供应商或承包商拥有访问权限"
+    },
+    "diff": {
+      "compare": "比较",
+      "failed": "无法比较这些版本。",
+      "from": "比较对象",
+      "noAttributeChange": "模型对此安装环境的描述没有变化。",
+      "noPunchListChange": "整改清单没有变化。"
+    },
+    "option": {
+      "admins": {
+        "few": "几个",
+        "many": "很多",
+        "one": "只有一个"
+      },
+      "adversary": {
+        "insider": "组织内部人员",
+        "nation_state": "国家级攻击者",
+        "opportunistic": "扫描互联网的机会型攻击者",
+        "targeted_criminal": "专门针对我们的犯罪分子"
+      },
+      "data": {
+        "controlled_unclassified": "受控非密信息",
+        "health": "健康信息",
+        "none_sensitive": "没有敏感数据",
+        "payment_cards": "支付卡数据",
+        "personal": "个人信息",
+        "trade_secrets": "商业机密或知识产权"
+      },
+      "data_loss": {
+        "a_day": "大约一天",
+        "a_week": "大约一周",
+        "minutes": "仅几分钟"
+      },
+      "downtime": {
+        "days": "数天",
+        "hours": "数小时",
+        "minutes": "数分钟"
+      },
+      "exposure": {
+        "air_gapped": "气隙隔离：没有通往互联网的网络路径",
+        "internal_only": "仅限内部",
+        "some_exposed": "部分系统可从互联网访问",
+        "widely_exposed": "许多系统可从互联网访问"
+      },
+      "fips": {
+        "no": "否",
+        "unsure": "我不确定",
+        "yes": "是"
+      },
+      "org": {
+        "enterprise": "企业",
+        "homelab": "家庭实验室或个人系统",
+        "public_sector": "公共部门或国防",
+        "small_business": "小型企业"
+      },
+      "regs": {
+        "cmmc_800_171": "CMMC / NIST SP 800-171",
+        "gdpr": "GDPR",
+        "hipaa": "HIPAA",
+        "none_known": "据我所知没有",
+        "pci_dss": "PCI DSS"
+      },
+      "risk": {
+        "high": "相当多",
+        "low": "越少越好",
+        "medium": "一些，在投入较大时可接受"
+      },
+      "third_party": {
+        "no": "否",
+        "yes": "是"
+      }
+    },
+    "question": {
+      "admins": {
+        "title": "有多少人管理这些系统？",
+        "why": "管理员越多，需要分别保护的账户就越多。"
+      },
+      "adversary": {
+        "title": "您最担心的是谁？",
+        "why": "良好的安全习惯可以阻止机会型攻击者；针对性攻击者还需要检测和响应。"
+      },
+      "data": {
+        "title": "这些系统保存或处理哪些类型的数据？",
+        "why": "受监管数据会带来通用基线无法涵盖的合规义务。"
+      },
+      "data_loss": {
+        "title": "您最多能承受丢失多少近期数据？",
+        "why": "这就是您的恢复点目标，它决定了备份必须达到的要求。"
+      },
+      "downtime": {
+        "title": "这些系统停机多久会造成影响？",
+        "why": "容忍度低时需要告警和计划内维护。"
+      },
+      "exposure": {
+        "title": "这些系统从互联网可访问的程度如何？",
+        "why": "暴露程度决定了网络加固的重要性。"
+      },
+      "fips": {
+        "title": "加密是否必须经过 FIPS 140 验证？",
+        "why": "联邦和国防工作通常有此要求，并且它会改变哪些主机符合合规要求。"
+      },
+      "org": {
+        "title": "哪一项最能描述此安装环境？",
+        "why": "它决定了合理保障程度的基线。"
+      },
+      "regs": {
+        "title": "以下哪些合规义务适用于您？",
+        "why": "每项合规义务都会增加特定的控制措施，例如审计保留、MFA 或 FIPS。"
+      },
+      "risk": {
+        "title": "为了节省投入，您愿意接受多少风险？",
+        "why": "它决定了哪些建议对您来说值得付出成本。"
+      },
+      "third_party": {
+        "title": "供应商或承包商是否拥有访问权限？",
+        "why": "第三方访问会扩大持有凭据的人员范围。"
+      }
+    },
+    "summary": {
+      "baseline": "基线：没有较高的风险因素。",
+      "edit": "更新威胁模型",
+      "incomplete": "部分问题尚未回答，因此部分检查项无法评估：{{questions}}",
+      "savedBy": "由 {{user}} 于 {{date}} 保存",
+      "title": "威胁模型，版本 {{version}}"
+    },
+    "version": "版本 {{version}}",
+    "wizard": {
+      "back": "上一步",
+      "chooseAll": "选择所有适用项。",
+      "next": "下一步",
+      "save": "保存威胁模型",
+      "saveFailed": "无法保存威胁模型。",
+      "step": "第 {{current}} 题，共 {{total}} 题",
+      "title": "描述您的安装环境"
     }
   }
 }

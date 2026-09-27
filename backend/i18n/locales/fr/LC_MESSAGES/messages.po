@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 07:54-0400\n"
+"POT-Creation-Date: 2026-09-27 13:34-0400\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1656,7 +1656,8 @@ msgstr "Surveillance de fichier non trouvée"
 #: backend/api/advisor.py:93 backend/api/query_packs.py:119
 #: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
-#: backend/api/config_mgmt_jobs.py:168 backend/api/config_mgmt_profiles.py:136
+#: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
+#: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50
 #, python-format
 msgid "Permission denied: %s role required"
@@ -3423,13 +3424,31 @@ msgstr "Installation du paquet {status} sur l'agent {hostname}"
 msgid "Failed to update package installation status: %s"
 msgstr "Échec de la mise à jour de l'état d'installation du paquet : %s"
 
-#: backend/api/posture.py:66
+#: backend/api/posture.py:81
 msgid "Only an administrator can change the threat model"
 msgstr "Seul un administrateur peut modifier le modèle de menaces"
 
-#: backend/api/posture.py:88 backend/api/posture.py:135
+#: backend/api/posture.py:89
+msgid "Only an administrator can waive or re-affirm a posture item"
+msgstr ""
+"Seul un administrateur peut accorder une dérogation pour un point de posture"
+" ou la reconfirmer"
+
+#: backend/api/posture.py:111 backend/api/posture.py:158
 msgid "The threat-model questionnaire has not been loaded yet"
 msgstr "Le questionnaire du modèle de menaces n'a pas encore été chargé"
+
+#: backend/api/posture.py:261
+msgid "Posture item not found"
+msgstr "Point de posture introuvable"
+
+#: backend/api/posture.py:356
+msgid "Only an administrator can apply a posture remedy"
+msgstr "Seul un administrateur peut appliquer une correction de posture"
+
+#: backend/api/posture.py:404
+msgid "Threat model version not found"
+msgstr "Version du modèle de menaces introuvable"
 
 #: backend/api/packages_operations.py:104
 msgid "No packages specified for installation"
@@ -5467,17 +5486,17 @@ msgstr "Disque présent mais aucune carte insérable lisible n'est insérée"
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "Aucun système de fichiers ISO sur l'appareil (fstype=%s)"
 
-#: backend/services/audit_service.py:188
+#: backend/services/audit_service.py:189
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "Création d'un '{entity_type}' '{entity_name}'"
 
-#: backend/services/audit_service.py:236
+#: backend/services/audit_service.py:237
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "Mise à jour {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:284
+#: backend/services/audit_service.py:285
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "Suppression du '{entity_type}' '{entity_name}' effectuée"

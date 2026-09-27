@@ -226,8 +226,13 @@ def _backup(tenant_id, now) -> Optional[Dict[str, Any]]:
             )
             .scalar()
         )
+    # "Enabled" means backups can actually RUN: per-tenant backups default to
+    # on, so a target with no backup command configured on the server is a
+    # target nothing will ever meet (found live 2026-09-27: enabled, 24 h RPO,
+    # and no backup in the history at all).
+    command = tenant_backup.get_backup_config().backup_command
     return {
-        "enabled": _flag(rpo),
+        "enabled": _flag(rpo and command),
         "rpo_seconds": int(rpo or 0),
         # "Never" is the largest age there is: it can never meet an RPO.
         "last_success_age_seconds": (

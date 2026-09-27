@@ -192,3 +192,21 @@ def test_unapproved_hosts_are_not_counted(factory):
         _host(db, "pending", fips_status="enabled").approval_status = "pending"
         db.commit()
         assert _coverage(pe.gather(db, None, NOW))["fips"]["hosts_total"] == 0
+
+
+def test_backups_with_no_command_are_not_enabled(factory):
+    """Found live: per-tenant backups default to ON, so with no backup command
+    on the server a 24 h RPO was "enabled" and could never be met."""
+    from unittest.mock import MagicMock  # noqa: PLC0415
+
+    backup = MagicMock()
+    backup.tenant_rpo_seconds.return_value = 86400
+    backup.get_backup_config.return_value.backup_command = None
+    with factory() as _db, patch.object(
+        pe.config, "get_multitenancy_config", return_value={"enabled": True}
+    ), patch.dict("sys.modules", {"backend.services.tenant_backup": backup}), patch(
+        "backend.services.tenant_backup", backup, create=True
+    ):
+        values = pe._backup("t1", NOW)  # pylint: disable=protected-access
+    assert values["enabled"] == "0"
+    assert values["last_success_age_seconds"] == 10**12  # never backed up

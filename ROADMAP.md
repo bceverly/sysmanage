@@ -10555,20 +10555,118 @@ remediation needs its own approved path into the existing entry points.
       transaction. API (`backend/api/posture.py`, license-gated):
       questionnaire, current model + versions, save (ADMINISTRATORS only -- a
       policy statement), punch list. 2 new messages hand-translated x13.
-- [ ] **S4 -- Waivers as audit artifacts.** Waive/unwaive/re-affirm through
+      **LIVE 2026-09-27 (theeverlys, homelab profile saved with Bryan's OK):**
+      questionnaire v1 and the posture pack synced at startup; model v1 saved
+      complete with no attributes; one evaluation -> exactly ONE item, open
+      PM-CRITICAL-VULNS (6 hosts: 3 ok, 2 failing = freebsd + macbookair, 1
+      unknown = the x13s Insider build with no verdict), first event cause
+      `threat_model`. Every evidence domain read (backup included -- the
+      install is multi-tenant). The dentist and defense profiles evaluated
+      read-only over the same live evidence: 14 and 16 open, 3 satisfied
+      (lockout, OpenBAO, no key without expiry), server-managed items marked.
+      Found and fixed: per-tenant backups default to ON, so a 24 h RPO read
+      "enabled" with no backup command configured on the server and no
+      backup ever taken -- "enabled" now requires a backup command.
+- [x] **S4 -- Waivers as audit artifacts.** Waive/unwaive/re-affirm through
       `audit_service`; staleness per decision (b); a waived item is neutral,
       never a green tick, and counts as a discrepancy again when unwaived.
-- [ ] **S5 -- Close the loop.** Each open item names its remediation: the
+
+      **DONE 2026-09-27** (server; live waiver pending Bryan's OK -- it writes
+      tamper-evident audit rows). `posture_waivers`: grant / revoke /
+      re-affirm, each written through `audit_service` (new entity type
+      `posture_waiver`, category security, the full basis in the details).
+      Only an OPEN item can be waived, with a non-empty reason -- waiving a
+      not-assessable item would hide a blind spot, and a satisfied one has
+      nothing to accept. The basis is the rule version, the risk, and the
+      values of EXACTLY the attributes the rule's applies_when reads (an
+      unrelated attribute changing does not disturb it). Every evaluation
+      re-checks it: risk ROSE, rule version changed, or those attributes
+      changed -> `stale` (reason + since); a lower or unchanged risk keeps it;
+      once stale it STAYS stale even if the risk falls back -- the acceptance
+      was made about a different situation -- until an administrator
+      re-affirms it against the current basis. Waived is an OVERLAY: the item
+      still evaluates open underneath (`evaluated_state`), a stale waiver shows
+      open, a revoked one is kept as history. API: POST/DELETE
+      `/advisor/posture/{rule}/waiver`, POST `.../reaffirm` -- administrators
+      only, refusals as codes (409 `not_open`, `already_waived`,
+      `reason_required`, `not_stale`, `not_waived`). 21 tests; 2 new messages
+      hand-translated x13.
+      Live read-only check 2026-09-27: the new fields and codes answer
+      correctly; FOUND: re-affirm with no body was a 422 (an optional field
+      in a model still makes FastAPI demand a body) -- the body is optional
+      now, with a regression test. No live waiver was granted: it would write
+      permanent tamper-evident audit rows, so that waits for the S7 UI or
+      Bryan's explicit OK.
+- [x] **S5 -- Close the loop.** Each open item names its remediation: the
       existing engine entry point (MFA enforcement, FIPS enable, AV deploy,
       firewall enable, log forwarding push, config profile) behind operator
       approval + maintenance windows -- or says plainly that it has no
       automated path.
-- [ ] **S6 -- Re-evaluation on drift.** Recomputed every tick; an item that
+
+      **DONE 2026-09-27** (engine + server; live preview pending the Pro+
+      publish). Engine: installation rules may name a `remedy` id (validated;
+      host rules refuse it); all 19 curated checks do; posture pack -> v2.
+      Server `posture_remedies`: the SERVER owns what each id does, in four
+      kinds -- `setting` (require admin MFA, lockout 1..10, session <= 1 h),
+      `fleet` (FIPS enable, firewall enable, enable an INSTALLED-but-disabled
+      antivirus -- one command per FAILING, freshly reported host through the
+      existing plan builders + outbound queue, so maintenance windows gate it
+      like the per-host buttons; a host with no antivirus needs a product
+      chosen, which is the antivirus page's job), `guided` (12 remedies that
+      need an operator's choice -- where logs go, who gets paged -- named as a
+      UI AREA the UI links to), `none` (the password policy lives in
+      sysmanage.yaml; said plainly). Preview = exactly what apply does; apply
+      needs an ADMINISTRATOR AND the per-host role (ENABLE_FIREWALL /
+      ENABLE_ANTIVIRUS), so the page widens nobody's permissions; one host the
+      engine cannot plan for is reported and the rest continue; audited, and a
+      `remediation_requested` event on the item; under multi-tenancy a
+      server-managed item offers nothing to a tenant. A failed settings write
+      (set_setting returns False) is an error, never a claimed success.
+      The real firewall/antivirus dispatchers are tested down to the queue
+      row. 19 tests; 1 new message x13.
+      **LIVE 2026-09-27 (read-only previews, theeverlys):** posture pack v2
+      synced; the one homelab item carries `patch_critical_vulnerabilities`
+      (guided -> advisor proposals, "not automated"). Every kind previewed
+      against real data with UNSAVED items: the three server settings are
+      correctly withheld (`managed_by_server` -- the install is
+      multi-tenant), and viewed as single-tenant would offer exactly
+      `mfa_admin_required false->true` and `jwt_auth_timeout 6000->3600`;
+      FIPS -> x13s + gdr-t14, firewall -> macbookair + netbsd, antivirus ->
+      t480 -- matching the live coverage counts. Nothing was applied.
+- [x] **S6 -- Re-evaluation on drift.** Recomputed every tick; an item that
       regresses reopens itself; history kept so "what changed" is answerable.
+
+      **DONE 2026-09-27** (server). The recompute and the cause-tagged events
+      came with S3; S6 makes them answerable. `posture_history.classify`
+      names every event -- regression, resolved, blind spot, measured again,
+      added / removed (by the model or not), withdrawn, remediation requested
+      -- and a model-caused change is named BEFORE any fleet transition, so a
+      re-run wizard can never read as a regression. `regressed_keys`: an item
+      whose latest real change (a remediation request does not hide it) was
+      a fleet-caused satisfied -> open; the punch list flags it (`regressed`).
+      API: `/advisor/posture/history` (classified, newest first),
+      `/advisor/posture/{rule}/history` (one timeline),
+      `/advisor/threat-model/diff?from_version&to_version` -- what changed in
+      the model AND what that did to the punch list (the events the newer
+      model caused on its first pass). 14 tests; 1 new message x13.
 - [ ] **S7 -- UI.** The wizard (branching, why-we-ask, resumable), the
       threat-model summary with version-to-version diff (what changed in the
       model AND in the punch list), and the punch list with the four states
       and the waiver dialog.
+      CODE DONE 2026-09-27, live browser check pending: a fourth Advisor tab
+      (`Components/Posture/`). Wizard = one question per step with why-we-ask,
+      opens on the current answers, saves only VISIBLE answers (the engine's
+      cascade mirrored in `threatModelLogic.ts`). Punch list: state chips
+      (waived neutral, not-assessable warning -- neither ever green), a
+      regressed badge, a managed-by-server chip, coverage incl. unreported
+      hosts, per-item gaps / waiver / fix / history; stale waivers get
+      re-affirm, any waiver revoke. Fix dialog always previews first; setting
+      and fleet remedies apply from it, guided ones link to their screen
+      (`GUIDED_ROUTES`; alerting is `/alerts`), withheld ones say why.
+      Curated rule titles and pack names are now translated everywhere (the
+      21.2 feed and packs tab showed the engine's English). 224 new keys
+      translated x13; `i18n-allow.txt` gains the regulation names and the
+      `{{host}}: {{reason}}` line. 11 new vitest tests.
 - [ ] **S8 -- Docs, screenshots, i18n -- LAST.**
 
 #### 21.5 Built-in Metric Graphs over Collected Facts (Professional+)

@@ -3751,7 +3751,8 @@
     "tabs": {
       "recommendations": "Recomendaciones",
       "proposals": "Correcciones propuestas ({{count}})",
-      "packs": "Paquetes de reglas"
+      "packs": "Paquetes de reglas",
+      "posture": "Postura"
     },
     "feed": {
       "lens": "Enfoque",
@@ -3887,6 +3888,321 @@
       "proposals": "Correcciones propuestas",
       "notApplicable": "No aplicable",
       "clean": "Correcto"
+    },
+    "curated": {
+      "pmAirgapRole": "El servidor está configurado como la implementación aislada que describió",
+      "pmAlerting": "Alguien recibe una notificación cuando algo falla",
+      "pmAntivirus": "Todos los hosts ejecutan un antivirus",
+      "pmApiKeyExpiry": "Ninguna clave de API carece de fecha de caducidad",
+      "pmAuditRetention": "El historial de auditoría se conserva al menos un año",
+      "pmBackups": "Las copias de seguridad cumplen su objetivo de punto de recuperación",
+      "pmComplianceScans": "Todos los hosts tienen un análisis de cumplimiento de los últimos 30 días",
+      "pmCriticalVulns": "Ningún host tiene una vulnerabilidad crítica sin parchear",
+      "pmFips": "El modo FIPS está activado dondequiera que esté disponible",
+      "pmFirewall": "El firewall de todos los hosts está activado",
+      "pmLockout": "Los inicios de sesión fallidos repetidos bloquean la cuenta",
+      "pmLogForward": "Los registros se reenvían fuera de los hosts",
+      "pmMaintWindows": "Los cambios se aplican en ventanas de mantenimiento planificadas",
+      "pmMfaEnforced": "La MFA es obligatoria para los administradores",
+      "pmMfaEnrolled": "Todos los administradores han registrado la MFA",
+      "pmPasswordLength": "Las contraseñas tienen al menos 12 caracteres",
+      "pmPatchCadence": "Las actualizaciones de seguridad se aplican según una programación",
+      "pmSecrets": "Los secretos se guardan en OpenBAO",
+      "pmSessionTimeout": "Las sesiones caducan en menos de una hora",
+      "smAvail001": "Actualizaciones de seguridad pendientes",
+      "smAvail002": "Reinicio necesario",
+      "smComp001": "Comprobaciones de cumplimiento altas o críticas fallidas",
+      "smPerf001": "Sistema de archivos lleno a más del 90 %",
+      "smSec001": "Vulnerabilidad crítica con una corrección disponible",
+      "smSec002": "Vulnerabilidad de gravedad alta con una corrección disponible",
+      "smSec003": "Cuenta distinta de root con ID de usuario 0",
+      "smSec004": "Servicios escuchando en todas las interfaces con el firewall del host desactivado",
+      "smSec005": "Certificado que caduca en los próximos 30 días",
+      "smStab001": "Desviación de configuración sin resolver durante más de 7 días",
+      "smStabF01": "La versión de OpenSSL difiere de la que ejecutan sus pares"
+    },
+    "curatedPack": {
+      "baseline": {
+        "description": "Comprobaciones de seguridad, rendimiento, disponibilidad y estabilidad sobre los datos que informa cada host de SysManage.",
+        "name": "Línea base de SysManage"
+      },
+      "posture": {
+        "description": "Comprobaciones de seguridad y resiliencia de toda la instalación, aplicadas según su modelo de amenazas.",
+        "name": "Postura de SysManage"
+      }
+    }
+  },
+  "posture": {
+    "action": {
+      "fix": "Corregir",
+      "waive": "Eximir"
+    },
+    "checkedAt": "Última comprobación: {{date}}",
+    "col": {
+      "actions": "Acciones",
+      "check": "Comprobación",
+      "coverage": "Cobertura",
+      "risk": "Riesgo",
+      "state": "Estado"
+    },
+    "coverage": {
+      "summary": "{{ok}} de {{total}} hosts la superan",
+      "unknown": "(sin informar: {{n}})"
+    },
+    "empty": "No hay puntos en esta vista.",
+    "event": {
+      "added": "Añadido",
+      "addedByModel": "Añadido por el modelo de amenazas",
+      "blindSpot": "Ya no se pudo evaluar",
+      "changed": "Modificado",
+      "changedByModel": "Modificado por el modelo de amenazas",
+      "measuredAgain": "Evaluado de nuevo",
+      "regression": "Retroceso",
+      "remediationRequested": "Corrección aplicada",
+      "removed": "Eliminado",
+      "removedByModel": "Eliminado por el modelo de amenazas",
+      "resolved": "Resuelto",
+      "withdrawn": "Comprobación retirada"
+    },
+    "expand": "Detalles",
+    "filter": "Mostrar",
+    "filterAll": "Todos los puntos",
+    "gap": {
+      "coverageUnknown": "Algunos hosts no lo han informado",
+      "missing": "No se pudieron leer los datos",
+      "ruleError": "No se pudo evaluar la comprobación",
+      "threatModelIncomplete": "El modelo de amenazas está incompleto",
+      "unavailable": "SysManage no tiene visibilidad de esto en esta instalación"
+    },
+    "history": {
+      "none": "Aún no se han registrado cambios.",
+      "title": "Historial"
+    },
+    "loadFailed": "No se pudo cargar la postura.",
+    "managedByServer": "Administrado por el operador del servidor",
+    "noModel": {
+      "body": "Unas pocas preguntas sobre sus datos, obligaciones y exposición deciden qué comprobaciones de toda la instalación se aplican a usted. Hasta entonces, las comprobaciones de postura no se pueden evaluar.",
+      "start": "Iniciar el cuestionario",
+      "title": "Primero describa su instalación"
+    },
+    "refusal": {
+      "alreadyWaived": "Este punto ya está eximido.",
+      "managedByServer": "Solo el operador del servidor puede cambiar esta configuración.",
+      "notAutomated": "Esto no tiene corrección automática.",
+      "notOpen": "Solo un punto abierto puede eximirse o corregirse.",
+      "notStale": "Esta exención no necesita reafirmarse.",
+      "notWaived": "Este punto no está eximido.",
+      "nothingToDo": "No queda nada por cambiar.",
+      "reasonRequired": "Se requiere un motivo.",
+      "unknownRemedy": "Esta comprobación no indica ninguna corrección."
+    },
+    "regressed": "Con retroceso",
+    "remedy": {
+      "applied": "Se aplicó la corrección. El punto se volverá a comprobar en la próxima evaluación.",
+      "apply": "Aplicar corrección",
+      "applyFailed": "No se pudo aplicar la corrección.",
+      "change": "{{from}} a {{to}}",
+      "configure_alerting": "Añada un canal de notificación y una regla de alerta en la página de alertas.",
+      "configure_backups": "Configure un comando de copia de seguridad y un objetivo de punto de recuperación.",
+      "configure_log_forwarding": "Elija adónde se reenvían los registros en la configuración de registro.",
+      "define_maintenance_windows": "Defina cuándo se pueden realizar cambios.",
+      "enable_antivirus": "Active el antivirus instalado donde esté desactivado. En los hosts que no tengan ninguno, elija un producto en la página de antivirus.",
+      "enable_fips": "Habilite el modo FIPS en los hosts que lo admitan, durante sus ventanas de mantenimiento.",
+      "enable_firewall": "Active el firewall en los hosts donde esté desactivado, durante sus ventanas de mantenimiento.",
+      "enable_openbao": "Almacene los secretos en OpenBAO.",
+      "enforce_lockout": "Bloquee las cuentas tras 5 inicios de sesión fallidos.",
+      "enroll_admin_mfa": "Cada administrador registra la MFA desde su propio perfil.",
+      "expire_api_keys": "Sustituya las claves de API que nunca caducan por otras que sí caduquen.",
+      "goThere": "Ir allí",
+      "hostFailed": "{{host}}: {{reason}}",
+      "hosts": "Hosts que cambiarán: {{n}}",
+      "patch_critical_vulnerabilities": "Revise y apruebe las correcciones propuestas.",
+      "previewFailed": "No se pudo obtener una vista previa de la corrección.",
+      "require_admin_mfa": "Exija la MFA para los administradores.",
+      "run_compliance_scans": "Ejecute análisis de cumplimiento en todos los hosts.",
+      "schedule_security_updates": "Programe las actualizaciones de seguridad con un perfil de actualización.",
+      "set_air_gap_role": "Establezca el rol del servidor de acuerdo con su implementación aislada.",
+      "set_audit_retention": "Cree una política de retención de auditoría de al menos 365 días mediante la API de auditoría. Todavía no hay una pantalla para esto.",
+      "set_password_policy": "La política de contraseñas se define en sysmanage.yaml; SysManage no puede cambiarla por usted.",
+      "shorten_session": "Haga que las sesiones caduquen después de una hora."
+    },
+    "saved": "Modelo de amenazas guardado. La lista de pendientes se reevaluará en la próxima pasada del asesor.",
+    "stale": {
+      "modelChanged": "El modelo de amenazas ha cambiado desde que se eximió",
+      "riskRose": "El riesgo ha aumentado desde que se eximió",
+      "ruleChanged": "La comprobación ha cambiado desde que se eximió"
+    },
+    "stalePass": "Algunos puntos se evaluaron por última vez con un modelo de amenazas anterior. Se actualizarán en la próxima evaluación.",
+    "state": {
+      "notAssessable": "No evaluable",
+      "open": "Abierto",
+      "satisfied": "Cumplido",
+      "waived": "Eximido"
+    },
+    "waiver": {
+      "explain": "Una exención registra que usted acepta este riesgo. El punto sigue abierto en segundo plano, y la exención caduca si el riesgo aumenta o si cambia su fundamento.",
+      "failed": "No se pudo guardar la exención.",
+      "grantedBy": "Eximido por {{user}} el {{date}}: {{reason}}",
+      "reaffirm": "Reafirmar",
+      "reaffirmTitle": "Reafirmar exención: {{title}}",
+      "reason": "Motivo",
+      "revoke": "Revocar",
+      "revokeFailed": "No se pudo revocar la exención.",
+      "submit": "Eximir",
+      "title": "Eximir: {{title}}"
+    },
+    "waiverStale": "Exención caducada"
+  },
+  "threatModel": {
+    "attribute": {
+      "air_gapped": "Aislado de la red",
+      "cui": "Maneja información no clasificada controlada",
+      "fips_required": "Requiere criptografía validada por FIPS",
+      "insider": "Considera a los usuarios internos como una amenaza",
+      "internet_exposed": "Accesible desde Internet",
+      "low_data_loss_tolerance": "Poca tolerancia a la pérdida de datos",
+      "low_downtime_tolerance": "Poca tolerancia al tiempo de inactividad",
+      "low_risk_tolerance": "Poca tolerancia al riesgo",
+      "multi_admin": "Varios administradores",
+      "pci": "Maneja datos de tarjetas de pago",
+      "phi": "Maneja información de salud",
+      "regulated": "Maneja datos regulados",
+      "targeted": "Espera atacantes dirigidos",
+      "third_party": "Proveedores o contratistas tienen acceso"
+    },
+    "diff": {
+      "compare": "Comparar",
+      "failed": "No se pudieron comparar las versiones.",
+      "from": "Comparar con",
+      "noAttributeChange": "No hay cambios en lo que el modelo indica sobre esta instalación.",
+      "noPunchListChange": "La lista de pendientes no cambió."
+    },
+    "option": {
+      "admins": {
+        "few": "Unas pocas",
+        "many": "Muchas",
+        "one": "Solo una"
+      },
+      "adversary": {
+        "insider": "Personas dentro de la organización",
+        "nation_state": "Atacantes patrocinados por estados",
+        "opportunistic": "Atacantes oportunistas que escanean Internet",
+        "targeted_criminal": "Delincuentes que nos atacan específicamente"
+      },
+      "data": {
+        "controlled_unclassified": "Información no clasificada controlada",
+        "health": "Información de salud",
+        "none_sensitive": "Nada confidencial",
+        "payment_cards": "Datos de tarjetas de pago",
+        "personal": "Información personal sobre personas",
+        "trade_secrets": "Secretos comerciales o propiedad intelectual"
+      },
+      "data_loss": {
+        "a_day": "Aproximadamente un día",
+        "a_week": "Aproximadamente una semana",
+        "minutes": "Solo minutos"
+      },
+      "downtime": {
+        "days": "Días",
+        "hours": "Horas",
+        "minutes": "Minutos"
+      },
+      "exposure": {
+        "air_gapped": "Aislado: sin ruta de red hacia Internet",
+        "internal_only": "Solo interno",
+        "some_exposed": "Algunos sistemas son accesibles desde Internet",
+        "widely_exposed": "Muchos sistemas son accesibles desde Internet"
+      },
+      "fips": {
+        "no": "No",
+        "unsure": "No estoy seguro",
+        "yes": "Sí"
+      },
+      "org": {
+        "enterprise": "Una gran empresa",
+        "homelab": "Un laboratorio doméstico o sistemas personales",
+        "public_sector": "El sector público o la defensa",
+        "small_business": "Una pequeña empresa"
+      },
+      "regs": {
+        "cmmc_800_171": "CMMC / NIST SP 800-171",
+        "gdpr": "GDPR",
+        "hipaa": "HIPAA",
+        "none_known": "Ninguna que yo sepa",
+        "pci_dss": "PCI DSS"
+      },
+      "risk": {
+        "high": "Bastante",
+        "low": "Lo mínimo posible",
+        "medium": "Algo, cuando el esfuerzo es grande"
+      },
+      "third_party": {
+        "no": "No",
+        "yes": "Sí"
+      }
+    },
+    "question": {
+      "admins": {
+        "title": "¿Cuántas personas administran estos sistemas?",
+        "why": "Más administradores significa más cuentas que deben protegerse una por una."
+      },
+      "adversary": {
+        "title": "¿Quién le preocupa más?",
+        "why": "Una buena higiene detiene a los atacantes oportunistas; los dirigidos también requieren detección y respuesta."
+      },
+      "data": {
+        "title": "¿Qué tipos de datos almacenan o procesan estos sistemas?",
+        "why": "Los datos regulados conllevan obligaciones que una línea base genérica no cubre."
+      },
+      "data_loss": {
+        "title": "¿Cuántos datos recientes podría permitirse perder?",
+        "why": "Este es su objetivo de punto de recuperación, y determina lo que deben lograr las copias de seguridad."
+      },
+      "downtime": {
+        "title": "¿Cuánto tiempo podrían estar inactivos estos sistemas antes de que cause daño?",
+        "why": "Una tolerancia baja exige alertas y mantenimiento planificado."
+      },
+      "exposure": {
+        "title": "¿Qué tan accesibles son estos sistemas desde Internet?",
+        "why": "La exposición determina cuánto importa el refuerzo de la red."
+      },
+      "fips": {
+        "title": "¿La criptografía debe estar validada según FIPS 140?",
+        "why": "Los trabajos federales y de defensa a menudo lo exigen, y cambia qué hosts cumplen."
+      },
+      "org": {
+        "title": "¿Qué describe mejor esta instalación?",
+        "why": "Establece el nivel de garantía razonable."
+      },
+      "regs": {
+        "title": "¿Cuáles de estas obligaciones se aplican a usted?",
+        "why": "Cada obligación añade controles específicos, como la retención de auditoría, la MFA o FIPS."
+      },
+      "risk": {
+        "title": "¿Cuánto riesgo aceptará para ahorrar esfuerzo?",
+        "why": "Determina qué recomendaciones compensan su costo para usted."
+      },
+      "third_party": {
+        "title": "¿Tienen acceso proveedores o contratistas?",
+        "why": "El acceso de terceros amplía quién tiene credenciales."
+      }
+    },
+    "summary": {
+      "baseline": "Línea base: sin factores de riesgo elevados.",
+      "edit": "Actualizar modelo de amenazas",
+      "incomplete": "Algunas preguntas no tienen respuesta, por lo que algunas comprobaciones no se pueden evaluar: {{questions}}",
+      "savedBy": "Guardado por {{user}} el {{date}}",
+      "title": "Modelo de amenazas, versión {{version}}"
+    },
+    "version": "Versión {{version}}",
+    "wizard": {
+      "back": "Atrás",
+      "chooseAll": "Elija todas las que correspondan.",
+      "next": "Siguiente",
+      "save": "Guardar modelo de amenazas",
+      "saveFailed": "No se pudo guardar el modelo de amenazas.",
+      "step": "Pregunta {{current}} de {{total}}",
+      "title": "Describa su instalación"
     }
   }
 }

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 07:54-0400\n"
+"POT-Creation-Date: 2026-09-27 13:34-0400\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1586,7 +1586,8 @@ msgstr "ファイル監視が見つかりません"
 #: backend/api/advisor.py:93 backend/api/query_packs.py:119
 #: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
-#: backend/api/config_mgmt_jobs.py:168 backend/api/config_mgmt_profiles.py:136
+#: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
+#: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50
 #, python-format
 msgid "Permission denied: %s role required"
@@ -3252,13 +3253,29 @@ msgstr "エージェント {hostname} 上でのパッケージインストール
 msgid "Failed to update package installation status: %s"
 msgstr "パッケージのインストール状態を更新できませんでした: %s"
 
-#: backend/api/posture.py:66
+#: backend/api/posture.py:81
 msgid "Only an administrator can change the threat model"
 msgstr "脅威モデルを変更できるのは管理者だけです"
 
-#: backend/api/posture.py:88 backend/api/posture.py:135
+#: backend/api/posture.py:89
+msgid "Only an administrator can waive or re-affirm a posture item"
+msgstr "態勢項目の免除または再確認ができるのは管理者だけです"
+
+#: backend/api/posture.py:111 backend/api/posture.py:158
 msgid "The threat-model questionnaire has not been loaded yet"
 msgstr "脅威モデルの質問票はまだ読み込まれていません"
+
+#: backend/api/posture.py:261
+msgid "Posture item not found"
+msgstr "態勢項目が見つかりません"
+
+#: backend/api/posture.py:356
+msgid "Only an administrator can apply a posture remedy"
+msgstr "態勢の是正措置を適用できるのは管理者だけです"
+
+#: backend/api/posture.py:404
+msgid "Threat model version not found"
+msgstr "脅威モデルのバージョンが見つかりません"
 
 #: backend/api/packages_operations.py:104
 msgid "No packages specified for installation"
@@ -5162,17 +5179,17 @@ msgstr "ドライブは存在しますが、読み取り可能なディスクが
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "デバイス上のISOファイルシステムがありません (fstype=%s)"
 
-#: backend/services/audit_service.py:188
+#: backend/services/audit_service.py:189
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' が作成されました"
 
-#: backend/services/audit_service.py:236
+#: backend/services/audit_service.py:237
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' を更新しました"
 
-#: backend/services/audit_service.py:284
+#: backend/services/audit_service.py:285
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' を削除しました"

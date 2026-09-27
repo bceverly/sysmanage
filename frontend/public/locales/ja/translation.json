@@ -3751,7 +3751,8 @@
     "tabs": {
       "recommendations": "推奨事項",
       "proposals": "修正案 ({{count}})",
-      "packs": "ルールパック"
+      "packs": "ルールパック",
+      "posture": "態勢"
     },
     "feed": {
       "lens": "観点",
@@ -3887,6 +3888,321 @@
       "proposals": "修正案",
       "notApplicable": "適用対象外",
       "clean": "クリーン"
+    },
+    "curated": {
+      "pmAirgapRole": "サーバーが、説明どおりのエアギャップ環境として構成されている",
+      "pmAlerting": "障害発生時に誰かに通知される",
+      "pmAntivirus": "すべてのホストでウイルス対策が稼働している",
+      "pmApiKeyExpiry": "有効期限のない API キーが存在しない",
+      "pmAuditRetention": "監査履歴が 1 年以上保持されている",
+      "pmBackups": "バックアップが目標復旧時点を満たしている",
+      "pmComplianceScans": "すべてのホストに過去 30 日以内のコンプライアンススキャンがある",
+      "pmCriticalVulns": "未修正の重大な脆弱性を持つホストがない",
+      "pmFips": "利用可能なすべての場所で FIPS モードが有効になっている",
+      "pmFirewall": "すべてのホストのファイアウォールが有効になっている",
+      "pmLockout": "ログイン失敗が繰り返されるとアカウントがロックされる",
+      "pmLogForward": "ログがホスト外に転送されている",
+      "pmMaintWindows": "変更が計画されたメンテナンスウィンドウ内で行われる",
+      "pmMfaEnforced": "管理者に MFA が必須になっている",
+      "pmMfaEnrolled": "すべての管理者が MFA を登録している",
+      "pmPasswordLength": "パスワードが 12 文字以上である",
+      "pmPatchCadence": "セキュリティ更新がスケジュールに従って適用されている",
+      "pmSecrets": "シークレットが OpenBAO に保管されている",
+      "pmSessionTimeout": "セッションが 1 時間以内に期限切れになる",
+      "smAvail001": "保留中のセキュリティ更新",
+      "smAvail002": "再起動が必要",
+      "smComp001": "高または重大のコンプライアンスチェックの失敗",
+      "smPerf001": "使用率が 90% を超えたファイルシステム",
+      "smSec001": "修正が提供されている重大な脆弱性",
+      "smSec002": "修正が提供されている重要度の高い脆弱性",
+      "smSec003": "ユーザー ID 0 を持つ root 以外のアカウント",
+      "smSec004": "ホストのファイアウォールが無効な状態で全インターフェイスで待ち受けているサービス",
+      "smSec005": "30 日以内に期限切れになる証明書",
+      "smStab001": "7 日を超えて未解決の構成ドリフト",
+      "smStabF01": "OpenSSL のバージョンがピアのバージョンと異なる"
+    },
+    "curatedPack": {
+      "baseline": {
+        "description": "すべての SysManage ホストが報告する証跡に基づく、セキュリティ、パフォーマンス、可用性、安定性のチェック。",
+        "name": "SysManage ベースライン"
+      },
+      "posture": {
+        "description": "脅威モデルに応じて適用される、インストール全体のセキュリティおよびレジリエンスのチェック。",
+        "name": "SysManage 態勢"
+      }
+    }
+  },
+  "posture": {
+    "action": {
+      "fix": "修正",
+      "waive": "免除"
+    },
+    "checkedAt": "最終チェック {{date}}",
+    "col": {
+      "actions": "操作",
+      "check": "チェック",
+      "coverage": "カバレッジ",
+      "risk": "リスク",
+      "state": "状態"
+    },
+    "coverage": {
+      "summary": "{{total}} 台中 {{ok}} 台のホストが合格",
+      "unknown": "(未報告: {{n}})"
+    },
+    "empty": "この表示には項目がありません。",
+    "event": {
+      "added": "追加",
+      "addedByModel": "脅威モデルにより追加",
+      "blindSpot": "評価できなくなりました",
+      "changed": "変更",
+      "changedByModel": "脅威モデルにより変更",
+      "measuredAgain": "再評価されました",
+      "regression": "後退",
+      "remediationRequested": "是正措置を適用",
+      "removed": "削除",
+      "removedByModel": "脅威モデルにより削除",
+      "resolved": "解決",
+      "withdrawn": "チェックの取り下げ"
+    },
+    "expand": "詳細",
+    "filter": "表示",
+    "filterAll": "すべての項目",
+    "gap": {
+      "coverageUnknown": "一部のホストがこれを報告していません",
+      "missing": "証跡を読み取れませんでした",
+      "ruleError": "チェックを評価できませんでした",
+      "threatModelIncomplete": "脅威モデルが未完成です",
+      "unavailable": "このインストールでは SysManage からこれを確認できません"
+    },
+    "history": {
+      "none": "まだ変更は記録されていません。",
+      "title": "履歴"
+    },
+    "loadFailed": "態勢を読み込めませんでした。",
+    "managedByServer": "サーバー運用者が管理",
+    "noModel": {
+      "body": "データ、義務、露出に関するいくつかの質問により、どのインストール全体のチェックが適用されるかが決まります。回答するまでは、態勢チェックを評価できません。",
+      "start": "質問票を開始",
+      "title": "まずインストールについて説明してください"
+    },
+    "refusal": {
+      "alreadyWaived": "この項目はすでに免除されています。",
+      "managedByServer": "この設定を変更できるのはサーバー運用者だけです。",
+      "notAutomated": "これには自動修正がありません。",
+      "notOpen": "免除または修正できるのは未対応の項目だけです。",
+      "notStale": "この免除は再確認の必要がありません。",
+      "notWaived": "この項目は免除されていません。",
+      "nothingToDo": "変更すべき点は残っていません。",
+      "reasonRequired": "理由が必要です。",
+      "unknownRemedy": "このチェックには修正方法が指定されていません。"
+    },
+    "regressed": "後退",
+    "remedy": {
+      "applied": "修正を適用しました。この項目は次回の評価で再チェックされます。",
+      "apply": "修正を適用",
+      "applyFailed": "修正を適用できませんでした。",
+      "change": "{{from}} から {{to}} へ",
+      "configure_alerting": "アラートページで通知チャネルとアラートルールを追加してください。",
+      "configure_backups": "バックアップコマンドと目標復旧時点を設定してください。",
+      "configure_log_forwarding": "ログ設定でログの転送先を選択してください。",
+      "define_maintenance_windows": "変更を行ってよい時間帯を定義してください。",
+      "enable_antivirus": "インストール済みのウイルス対策が無効な場所では有効にしてください。ウイルス対策のないホストでは、ウイルス対策ページで製品を選択する必要があります。",
+      "enable_fips": "対応しているホストで、各ホストのメンテナンスウィンドウ内に FIPS モードを有効にします。",
+      "enable_firewall": "ファイアウォールが無効なホストで、各ホストのメンテナンスウィンドウ内にファイアウォールを有効にします。",
+      "enable_openbao": "シークレットを OpenBAO に保管します。",
+      "enforce_lockout": "ログインに 5 回失敗したらアカウントをロックします。",
+      "enroll_admin_mfa": "各管理者が自分のプロファイルから MFA を登録します。",
+      "expire_api_keys": "有効期限のない API キーを、有効期限のあるキーに置き換えます。",
+      "goThere": "移動",
+      "hostFailed": "{{host}}: {{reason}}",
+      "hosts": "変更されるホスト: {{n}}",
+      "patch_critical_vulnerabilities": "提案された修正を確認して承認してください。",
+      "previewFailed": "修正をプレビューできませんでした。",
+      "require_admin_mfa": "管理者に MFA を必須にします。",
+      "run_compliance_scans": "すべてのホストでコンプライアンススキャンを実行します。",
+      "schedule_security_updates": "更新プロファイルでセキュリティ更新をスケジュールします。",
+      "set_air_gap_role": "エアギャップ環境に合わせてサーバーロールを設定します。",
+      "set_audit_retention": "監査 API を使用して、365 日以上の監査保持ポリシーを作成してください。この操作用の画面はまだありません。",
+      "set_password_policy": "パスワードポリシーは sysmanage.yaml で設定されています。SysManage が代わりに変更することはできません。",
+      "shorten_session": "セッションを 1 時間で期限切れにします。"
+    },
+    "saved": "脅威モデルを保存しました。対応項目リストは次回のアドバイザー実行時に再評価されます。",
+    "stale": {
+      "modelChanged": "免除後に脅威モデルが変更されました",
+      "riskRose": "免除後にリスクが上昇しました",
+      "ruleChanged": "免除後にチェックが変更されました"
+    },
+    "stalePass": "一部の項目は以前の脅威モデルで最後に評価されました。次回の評価で更新されます。",
+    "state": {
+      "notAssessable": "評価不能",
+      "open": "未対応",
+      "satisfied": "充足",
+      "waived": "免除済み"
+    },
+    "waiver": {
+      "explain": "免除は、このリスクを受け入れたことを記録するものです。項目自体は未対応のまま残り、リスクが上昇するか前提が変わると免除は失効します。",
+      "failed": "免除を保存できませんでした。",
+      "grantedBy": "{{user}} が {{date}} に免除: {{reason}}",
+      "reaffirm": "再確認",
+      "reaffirmTitle": "免除の再確認: {{title}}",
+      "reason": "理由",
+      "revoke": "取り消し",
+      "revokeFailed": "免除を取り消せませんでした。",
+      "submit": "免除",
+      "title": "免除: {{title}}"
+    },
+    "waiverStale": "免除が失効"
+  },
+  "threatModel": {
+    "attribute": {
+      "air_gapped": "エアギャップ",
+      "cui": "管理対象非機密情報を扱う",
+      "fips_required": "FIPS 認証済みの暗号が必要",
+      "insider": "内部関係者を脅威とみなす",
+      "internet_exposed": "インターネットから到達可能",
+      "low_data_loss_tolerance": "データ損失の許容度が低い",
+      "low_downtime_tolerance": "ダウンタイムの許容度が低い",
+      "low_risk_tolerance": "リスクの許容度が低い",
+      "multi_admin": "複数の管理者",
+      "pci": "決済カードデータを扱う",
+      "phi": "医療情報を扱う",
+      "regulated": "規制対象データを扱う",
+      "targeted": "標的型攻撃者を想定",
+      "third_party": "ベンダーまたは請負業者がアクセスできる"
+    },
+    "diff": {
+      "compare": "比較",
+      "failed": "バージョンを比較できませんでした。",
+      "from": "比較対象",
+      "noAttributeChange": "このインストールに関するモデルの評価に変更はありません。",
+      "noPunchListChange": "対応項目リストに変更はありませんでした。"
+    },
+    "option": {
+      "admins": {
+        "few": "数名",
+        "many": "多数",
+        "one": "1 名のみ"
+      },
+      "adversary": {
+        "insider": "組織内部の人物",
+        "nation_state": "国家レベルの攻撃者",
+        "opportunistic": "インターネットをスキャンする無差別型の攻撃者",
+        "targeted_criminal": "当組織を狙う犯罪者"
+      },
+      "data": {
+        "controlled_unclassified": "管理対象非機密情報",
+        "health": "医療情報",
+        "none_sensitive": "機密性の高いものはない",
+        "payment_cards": "決済カードデータ",
+        "personal": "個人に関する情報",
+        "trade_secrets": "営業秘密または知的財産"
+      },
+      "data_loss": {
+        "a_day": "約 1 日",
+        "a_week": "約 1 週間",
+        "minutes": "数分のみ"
+      },
+      "downtime": {
+        "days": "数日",
+        "hours": "数時間",
+        "minutes": "数分"
+      },
+      "exposure": {
+        "air_gapped": "エアギャップ: インターネットへのネットワーク経路なし",
+        "internal_only": "内部のみ",
+        "some_exposed": "一部のシステムがインターネットから到達可能",
+        "widely_exposed": "多くのシステムがインターネットから到達可能"
+      },
+      "fips": {
+        "no": "いいえ",
+        "unsure": "わからない",
+        "yes": "はい"
+      },
+      "org": {
+        "enterprise": "大企業",
+        "homelab": "ホームラボまたは個人のシステム",
+        "public_sector": "公共部門または防衛",
+        "small_business": "中小企業"
+      },
+      "regs": {
+        "cmmc_800_171": "CMMC / NIST SP 800-171",
+        "gdpr": "GDPR",
+        "hipaa": "HIPAA",
+        "none_known": "把握しているものはない",
+        "pci_dss": "PCI DSS"
+      },
+      "risk": {
+        "high": "かなり受け入れる",
+        "low": "できるだけ少なく",
+        "medium": "労力が大きい場合はある程度"
+      },
+      "third_party": {
+        "no": "いいえ",
+        "yes": "はい"
+      }
+    },
+    "question": {
+      "admins": {
+        "title": "これらのシステムを管理している人は何人ですか?",
+        "why": "管理者が多いほど、個別に保護すべきアカウントが増えます。"
+      },
+      "adversary": {
+        "title": "最も懸念している相手は誰ですか?",
+        "why": "無差別型の攻撃者は適切な衛生管理で防げますが、標的型の攻撃者には検知と対応も必要です。"
+      },
+      "data": {
+        "title": "これらのシステムはどのような種類のデータを保持または処理していますか?",
+        "why": "規制対象データには、汎用的なベースラインでは対応できない義務が伴います。"
+      },
+      "data_loss": {
+        "title": "直近のデータをどの程度まで失っても許容できますか?",
+        "why": "これが目標復旧時点であり、バックアップが達成すべき水準を決定します。"
+      },
+      "downtime": {
+        "title": "これらのシステムがどのくらい停止すると支障が出ますか?",
+        "why": "許容度が低い場合は、アラートと計画的なメンテナンスが必要です。"
+      },
+      "exposure": {
+        "title": "これらのシステムはインターネットからどの程度到達可能ですか?",
+        "why": "露出の程度によって、ネットワーク強化の重要性が決まります。"
+      },
+      "fips": {
+        "title": "暗号は FIPS 140 認証済みである必要がありますか?",
+        "why": "連邦政府や防衛関連の業務では多くの場合必須であり、どのホストが準拠しているかが変わります。"
+      },
+      "org": {
+        "title": "このインストールに最も当てはまるものはどれですか?",
+        "why": "妥当な保証レベルの基準を定めます。"
+      },
+      "regs": {
+        "title": "次のうち、適用される義務はどれですか?",
+        "why": "各義務により、監査保持、MFA、FIPS などの特定の管理策が追加されます。"
+      },
+      "risk": {
+        "title": "労力を節約するために、どの程度のリスクを受け入れますか?",
+        "why": "どの推奨事項がコストに見合うかを判断する基準になります。"
+      },
+      "third_party": {
+        "title": "ベンダーや請負業者がアクセスできますか?",
+        "why": "第三者のアクセスにより、認証情報を持つ人の範囲が広がります。"
+      }
+    },
+    "summary": {
+      "baseline": "ベースライン: 高いリスク要因はありません。",
+      "edit": "脅威モデルを更新",
+      "incomplete": "未回答の質問があるため、一部のチェックを評価できません: {{questions}}",
+      "savedBy": "{{user}} が {{date}} に保存",
+      "title": "脅威モデル、バージョン {{version}}"
+    },
+    "version": "バージョン {{version}}",
+    "wizard": {
+      "back": "戻る",
+      "chooseAll": "該当するものをすべて選択してください。",
+      "next": "次へ",
+      "save": "脅威モデルを保存",
+      "saveFailed": "脅威モデルを保存できませんでした。",
+      "step": "質問 {{current}} / {{total}}",
+      "title": "インストールについて説明してください"
     }
   }
 }

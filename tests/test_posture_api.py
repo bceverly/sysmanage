@@ -51,6 +51,7 @@ def client():
             session.close()
 
     app.dependency_overrides[get_tenant_db] = _db
+    app.state.factory = factory
     for dep in posture.router.dependencies:
         app.dependency_overrides[dep.dependency] = lambda: None
     User.is_admin = True
@@ -110,3 +111,170 @@ def test_the_questionnaire_is_served_and_a_missing_catalog_is_a_503(client):
         assert (
             client.get("/api/v1/advisor/threat-model/questionnaire").status_code == 503
         )
+
+
+def _open_item(factory_client):
+    """Save a model and an OPEN item directly (the evaluation is service-tested)."""
+    client, factory = factory_client
+    client.post("/api/v1/advisor/threat-model", json={"answers": {"q": "yes"}})
+    from backend.persistence import models  # noqa: PLC0415
+
+    with factory() as db:
+        db.add(
+            models.PostureItem(
+                scope_kind="tenant",
+                scope_ref="",
+                rule_source="tenant",
+                rule_key="PM-X",
+                rule_version=1,
+                state="open",
+                outcome="fires",
+                managed_by="tenant",
+                risk=12,
+            )
+        )
+        db.commit()
+
+
+@pytest.fixture
+def factory_client(client):
+    return client, client.app.state.factory
+
+
+def test_waiving_overlays_the_item_and_counts_it_as_waived(factory_client):
+    client, _ = factory_client
+    _open_item(factory_client)
+    with patch.object(
+        posture.posture,
+        "rule_definition",
+        return_value={"applies_when": {"always": True}},
+    ):
+        response = client.post(
+            "/api/v1/advisor/posture/PM-X/waiver", json={"reason": "accepted"}
+        )
+    assert response.status_code == 200, response.text
+    listing = client.get("/api/v1/advisor/posture").json()
+    assert listing["totals"] == {"waived": 1}
+    item = listing["items"][0]
+    assert (item["state"], item["evaluated_state"]) == ("waived", "open")
+    assert item["waiver"]["reason"] == "accepted"
+    again = client.post("/api/v1/advisor/posture/PM-X/waiver", json={"reason": "x"})
+    assert (again.status_code, again.json()["detail"]) == (
+        409,
+        {"code": "already_waived"},
+    )
+    assert client.delete("/api/v1/advisor/posture/PM-X/waiver").status_code == 200
+    assert client.get("/api/v1/advisor/posture").json()["totals"] == {"open": 1}
+
+
+def test_waivers_need_an_administrator_and_a_known_item(factory_client):
+    client, _ = factory_client
+    _open_item(factory_client)
+    assert (
+        client.post(
+            "/api/v1/advisor/posture/NOPE/waiver", json={"reason": "r"}
+        ).status_code
+        == 404
+    )
+    User.is_admin = False
+    assert (
+        client.post(
+            "/api/v1/advisor/posture/PM-X/waiver", json={"reason": "r"}
+        ).status_code
+        == 403
+    )
+
+
+def test_reaffirm_needs_no_body(factory_client):
+    """Found live: an optional reason still made FastAPI demand a body (422)."""
+    client, _ = factory_client
+    _open_item(factory_client)
+    response = client.post("/api/v1/advisor/posture/PM-X/waiver/reaffirm")
+    assert (response.status_code, response.json()["detail"]) == (
+        409,
+        {"code": "not_waived"},
+    )
+
+
+def test_the_list_says_how_each_item_is_fixed(factory_client):
+    client, _ = factory_client
+    _open_item(factory_client)
+    with patch.object(
+        posture.posture,
+        "rules_by_key",
+        return_value={"PM-X": {"remedy": "configure_alerting"}},
+    ):
+        item = client.get("/api/v1/advisor/posture").json()["items"][0]
+    assert (item["remedy"], item["remedy_kind"], item["remedy_target"]) == (
+        "configure_alerting",
+        "guided",
+        "alerting",
+    )
+
+
+def test_applying_a_fleet_remedy_needs_the_per_host_role(factory_client):
+    client, _ = factory_client
+    _open_item(factory_client)
+    User.has_role = lambda self, role: False
+    with patch.object(
+        posture.posture, "rule_definition", return_value={"remedy": "enable_firewall"}
+    ):
+        response = client.post("/api/v1/advisor/posture/PM-X/remedy")
+    del User.has_role
+    assert response.status_code == 403
+
+
+def test_an_unavailable_remedy_is_a_409_code(factory_client):
+    client, _ = factory_client
+    _open_item(factory_client)
+    with patch.object(
+        posture.posture,
+        "rule_definition",
+        return_value={"remedy": "configure_alerting"},
+    ):
+        response = client.post("/api/v1/advisor/posture/PM-X/remedy")
+        preview = client.get("/api/v1/advisor/posture/PM-X/remedy").json()
+    assert (response.status_code, response.json()["detail"]) == (
+        409,
+        {"code": "not_automated"},
+    )
+    assert preview["kind"] == "guided"
+
+
+def test_history_and_the_regressed_flag_come_through_the_api(factory_client):
+    client, factory = factory_client
+    _open_item(factory_client)
+    from datetime import datetime  # noqa: PLC0415
+
+    from backend.persistence import models  # noqa: PLC0415
+
+    with factory() as db:
+        db.add(
+            models.PostureItemEvent(
+                scope_kind="tenant",
+                scope_ref="",
+                rule_key="PM-X",
+                from_state="satisfied",
+                to_state="open",
+                cause="evaluation",
+                at=datetime(2026, 9, 27),
+            )
+        )
+        db.commit()
+    assert (
+        client.get("/api/v1/advisor/posture/history").json()["events"][0]["kind"]
+        == "regression"
+    )
+    assert (
+        client.get("/api/v1/advisor/posture/PM-X/history").json()["events"][0][
+            "rule_key"
+        ]
+        == "PM-X"
+    )
+    assert client.get("/api/v1/advisor/posture").json()["items"][0]["regressed"] is True
+    assert (
+        client.get(
+            "/api/v1/advisor/threat-model/diff?from_version=1&to_version=7"
+        ).status_code
+        == 404
+    )

@@ -3,7 +3,8 @@
 // See the LICENSE file in the project root for the full terms.
 
 // The advisor dashboard (Phase 21.2 S7): the fleet's risk, the recommendation
-// feed, proposed fixes and curated rule packs.
+// feed, proposed fixes and curated rule packs -- and (21.4) the posture
+// punch list the tenant's threat model produces.
 //
 // The one rule this page must not break: what the advisor could NOT assess is
 // shown -- counted in the fleet summary, a column in every feed row, with the
@@ -42,6 +43,7 @@ import AdvisorScoreSummary from '../Components/Advisor/AdvisorScoreSummary';
 import AdvisorRuleTable from '../Components/Advisor/AdvisorRuleTable';
 import AdvisorProposalList from '../Components/Advisor/AdvisorProposalList';
 import AdvisorPacks from '../Components/Advisor/AdvisorPacks';
+import PostureTab from '../Components/Posture/PostureTab';
 import { lensLabel } from '../Components/Advisor/advisorLabels';
 
 const LENSES = ['security', 'performance', 'availability', 'stability'];
@@ -130,6 +132,7 @@ const Advisor: React.FC = () => {
                 <Tab label={t('advisor.tabs.recommendations', 'Recommendations')} />
                 <Tab label={t('advisor.tabs.proposals', 'Proposed fixes ({{count}})', { count: openProposals })} />
                 <Tab label={t('advisor.tabs.packs', 'Rule packs')} />
+                <Tab label={t('advisor.tabs.posture', 'Posture')} />
             </Tabs>
             {tab === 0 && feed && (
                 <>
@@ -146,6 +149,7 @@ const Advisor: React.FC = () => {
             )}
             {tab === 1 && <AdvisorProposalList proposals={proposals} onChanged={load} />}
             {tab === 2 && <AdvisorPacks packs={packs} onChanged={load} />}
+            {tab === 3 && <PostureTab />}
         </Box>
     );
 };

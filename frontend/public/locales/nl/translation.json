@@ -3751,7 +3751,8 @@
     "tabs": {
       "recommendations": "Aanbevelingen",
       "proposals": "Voorgestelde oplossingen ({{count}})",
-      "packs": "Regelpakketten"
+      "packs": "Regelpakketten",
+      "posture": "Beveiligingsstatus"
     },
     "feed": {
       "lens": "Invalshoek",
@@ -3887,6 +3888,321 @@
       "proposals": "Voorgestelde oplossingen",
       "notApplicable": "Niet van toepassing",
       "clean": "Geen bevindingen"
+    },
+    "curated": {
+      "pmAirgapRole": "De server is ingericht als de air-gapped installatie die u hebt beschreven",
+      "pmAlerting": "Iemand wordt gewaarschuwd als er iets misgaat",
+      "pmAntivirus": "Op elke host draait antivirus",
+      "pmApiKeyExpiry": "Geen enkele API-sleutel is zonder vervaldatum",
+      "pmAuditRetention": "De auditgeschiedenis wordt minstens een jaar bewaard",
+      "pmBackups": "Back-ups voldoen aan uw recovery point objective",
+      "pmComplianceScans": "Elke host heeft een compliancescan van de afgelopen 30 dagen",
+      "pmCriticalVulns": "Geen enkele host heeft een ongepatchte kritieke kwetsbaarheid",
+      "pmFips": "De FIPS-modus staat aan waar die beschikbaar is",
+      "pmFirewall": "De firewall van elke host staat aan",
+      "pmLockout": "Herhaalde mislukte aanmeldingen vergrendelen het account",
+      "pmLogForward": "Logboeken worden van de hosts doorgestuurd",
+      "pmMaintWindows": "Wijzigingen vinden plaats in geplande onderhoudsvensters",
+      "pmMfaEnforced": "MFA is verplicht voor beheerders",
+      "pmMfaEnrolled": "Elke beheerder heeft MFA ingesteld",
+      "pmPasswordLength": "Wachtwoorden hebben minstens 12 tekens",
+      "pmPatchCadence": "Beveiligingsupdates worden volgens schema toegepast",
+      "pmSecrets": "Geheimen worden bewaard in OpenBAO",
+      "pmSessionTimeout": "Sessies verlopen binnen een uur",
+      "smAvail001": "Beveiligingsupdates in behandeling",
+      "smAvail002": "Herstart vereist",
+      "smComp001": "Mislukte compliancecontroles met hoge of kritieke ernst",
+      "smPerf001": "Bestandssysteem voor meer dan 90% vol",
+      "smSec001": "Kritieke kwetsbaarheid waarvoor een oplossing beschikbaar is",
+      "smSec002": "Kwetsbaarheid met hoge ernst waarvoor een oplossing beschikbaar is",
+      "smSec003": "Ander account dan root met gebruikers-ID 0",
+      "smSec004": "Services luisteren op alle interfaces terwijl de hostfirewall uit staat",
+      "smSec005": "Certificaat verloopt binnen 30 dagen",
+      "smStab001": "Configuratieafwijking al meer dan 7 dagen onopgelost",
+      "smStabF01": "OpenSSL-versie wijkt af van de versie op vergelijkbare hosts"
+    },
+    "curatedPack": {
+      "baseline": {
+        "description": "Controles op beveiliging, prestaties, beschikbaarheid en stabiliteit op basis van de gegevens die elke SysManage-host rapporteert.",
+        "name": "SysManage-basislijn"
+      },
+      "posture": {
+        "description": "Installatiebrede controles op beveiliging en veerkracht, toegepast volgens uw dreigingsmodel.",
+        "name": "SysManage-beveiligingsstatus"
+      }
+    }
+  },
+  "posture": {
+    "action": {
+      "fix": "Oplossen",
+      "waive": "Vrijstellen"
+    },
+    "checkedAt": "Laatst gecontroleerd op {{date}}",
+    "col": {
+      "actions": "Acties",
+      "check": "Controle",
+      "coverage": "Dekking",
+      "risk": "Risico",
+      "state": "Status"
+    },
+    "coverage": {
+      "summary": "{{ok}} van {{total}} hosts voldoen",
+      "unknown": "(niet gerapporteerd: {{n}})"
+    },
+    "empty": "Geen punten in deze weergave.",
+    "event": {
+      "added": "Toegevoegd",
+      "addedByModel": "Toegevoegd door het dreigingsmodel",
+      "blindSpot": "Kon niet meer worden beoordeeld",
+      "changed": "Gewijzigd",
+      "changedByModel": "Gewijzigd door het dreigingsmodel",
+      "measuredAgain": "Opnieuw beoordeeld",
+      "regression": "Verslechterd",
+      "remediationRequested": "Oplossing toegepast",
+      "removed": "Verwijderd",
+      "removedByModel": "Verwijderd door het dreigingsmodel",
+      "resolved": "Opgelost",
+      "withdrawn": "Controle ingetrokken"
+    },
+    "expand": "Details",
+    "filter": "Tonen",
+    "filterAll": "Alle punten",
+    "gap": {
+      "coverageUnknown": "Sommige hosts hebben dit niet gerapporteerd",
+      "missing": "De gegevens konden niet worden gelezen",
+      "ruleError": "De controle kon niet worden geëvalueerd",
+      "threatModelIncomplete": "Het dreigingsmodel is onvolledig",
+      "unavailable": "SysManage heeft op deze installatie geen zicht hierop"
+    },
+    "history": {
+      "none": "Nog geen wijzigingen vastgelegd.",
+      "title": "Geschiedenis"
+    },
+    "loadFailed": "De beveiligingsstatus kon niet worden geladen.",
+    "managedByServer": "Beheerd door de serverbeheerder",
+    "noModel": {
+      "body": "Een paar vragen over uw gegevens, verplichtingen en blootstelling bepalen welke installatiebrede controles voor u gelden. Tot die tijd kunnen de controles van de beveiligingsstatus niet worden beoordeeld.",
+      "start": "Vragenlijst starten",
+      "title": "Beschrijf eerst uw installatie"
+    },
+    "refusal": {
+      "alreadyWaived": "Dit punt is al vrijgesteld.",
+      "managedByServer": "Alleen de serverbeheerder kan deze instelling wijzigen.",
+      "notAutomated": "Hiervoor is geen geautomatiseerde oplossing.",
+      "notOpen": "Alleen een open punt kan worden vrijgesteld of opgelost.",
+      "notStale": "Deze vrijstelling hoeft niet opnieuw te worden bevestigd.",
+      "notWaived": "Dit punt is niet vrijgesteld.",
+      "nothingToDo": "Er valt niets meer te wijzigen.",
+      "reasonRequired": "Een reden is verplicht.",
+      "unknownRemedy": "Deze controle noemt geen oplossing."
+    },
+    "regressed": "Verslechterd",
+    "remedy": {
+      "applied": "De oplossing is toegepast. Het punt wordt bij de volgende evaluatie opnieuw gecontroleerd.",
+      "apply": "Oplossing toepassen",
+      "applyFailed": "De oplossing kon niet worden toegepast.",
+      "change": "{{from}} naar {{to}}",
+      "configure_alerting": "Voeg op de pagina Waarschuwingen een meldingskanaal en een waarschuwingsregel toe.",
+      "configure_backups": "Configureer een back-upopdracht en een recovery point objective.",
+      "configure_log_forwarding": "Kies in de logboekinstellingen waarheen logboeken worden doorgestuurd.",
+      "define_maintenance_windows": "Leg vast wanneer wijzigingen mogen worden aangebracht.",
+      "enable_antivirus": "Schakel het geïnstalleerde antivirus in waar het uit staat. Voor hosts zonder antivirus moet op de pagina Antivirus een product worden gekozen.",
+      "enable_fips": "Schakel de FIPS-modus in op de hosts die dit ondersteunen, binnen hun onderhoudsvensters.",
+      "enable_firewall": "Schakel de firewall in op de hosts waar deze uit staat, binnen hun onderhoudsvensters.",
+      "enable_openbao": "Sla geheimen op in OpenBAO.",
+      "enforce_lockout": "Vergrendel accounts na 5 mislukte aanmeldingen.",
+      "enroll_admin_mfa": "Elke beheerder stelt MFA in via het eigen profiel.",
+      "expire_api_keys": "Vervang API-sleutels die nooit verlopen door sleutels met een vervaldatum.",
+      "goThere": "Ga erheen",
+      "hostFailed": "{{host}}: {{reason}}",
+      "hosts": "Hosts die worden gewijzigd: {{n}}",
+      "patch_critical_vulnerabilities": "Beoordeel en keur de voorgestelde oplossingen goed.",
+      "previewFailed": "Er kon geen voorbeeld van de oplossing worden getoond.",
+      "require_admin_mfa": "Maak MFA verplicht voor beheerders.",
+      "run_compliance_scans": "Voer op elke host compliancescans uit.",
+      "schedule_security_updates": "Plan beveiligingsupdates met een updateprofiel.",
+      "set_air_gap_role": "Stel de serverrol in die past bij uw air-gapped installatie.",
+      "set_audit_retention": "Maak via de audit-API een bewaarbeleid voor audits van minstens 365 dagen. Hiervoor is nog geen scherm.",
+      "set_password_policy": "Het wachtwoordbeleid wordt ingesteld in sysmanage.yaml; SysManage kan het niet voor u wijzigen.",
+      "shorten_session": "Laat sessies na een uur verlopen."
+    },
+    "saved": "Dreigingsmodel opgeslagen. De actielijst wordt bij de volgende adviseursronde opnieuw geëvalueerd.",
+    "stale": {
+      "modelChanged": "Het dreigingsmodel is gewijzigd sinds de vrijstelling",
+      "riskRose": "Het risico is gestegen sinds de vrijstelling",
+      "ruleChanged": "De controle is gewijzigd sinds de vrijstelling"
+    },
+    "stalePass": "Sommige punten zijn het laatst geëvalueerd onder een eerder dreigingsmodel. Ze worden bij de volgende evaluatie bijgewerkt.",
+    "state": {
+      "notAssessable": "Niet te beoordelen",
+      "open": "Openstaand",
+      "satisfied": "Voldaan",
+      "waived": "Vrijgesteld"
+    },
+    "waiver": {
+      "explain": "Een vrijstelling legt vast dat u dit risico accepteert. Het punt blijft op de achtergrond open, en de vrijstelling vervalt als het risico stijgt of de grondslag ervan verandert.",
+      "failed": "De vrijstelling kon niet worden opgeslagen.",
+      "grantedBy": "Vrijgesteld door {{user}} op {{date}}: {{reason}}",
+      "reaffirm": "Opnieuw bevestigen",
+      "reaffirmTitle": "Vrijstelling opnieuw bevestigen: {{title}}",
+      "reason": "Reden",
+      "revoke": "Intrekken",
+      "revokeFailed": "De vrijstelling kon niet worden ingetrokken.",
+      "submit": "Vrijstellen",
+      "title": "Vrijstellen: {{title}}"
+    },
+    "waiverStale": "Vrijstelling vervallen"
+  },
+  "threatModel": {
+    "attribute": {
+      "air_gapped": "Fysiek geïsoleerd (air-gapped)",
+      "cui": "Verwerkt gecontroleerde niet-geclassificeerde informatie",
+      "fips_required": "Vereist FIPS-gevalideerde cryptografie",
+      "insider": "Beschouwt insiders als dreiging",
+      "internet_exposed": "Bereikbaar vanaf het internet",
+      "low_data_loss_tolerance": "Weinig tolerantie voor gegevensverlies",
+      "low_downtime_tolerance": "Weinig tolerantie voor uitval",
+      "low_risk_tolerance": "Weinig tolerantie voor risico",
+      "multi_admin": "Meerdere beheerders",
+      "pci": "Verwerkt betaalkaartgegevens",
+      "phi": "Verwerkt gezondheidsgegevens",
+      "regulated": "Verwerkt gereguleerde gegevens",
+      "targeted": "Verwacht gerichte aanvallers",
+      "third_party": "Leveranciers of contractanten hebben toegang"
+    },
+    "diff": {
+      "compare": "Vergelijken",
+      "failed": "De versies konden niet worden vergeleken.",
+      "from": "Vergelijken met",
+      "noAttributeChange": "Geen wijziging in wat het model over deze installatie zegt.",
+      "noPunchListChange": "De actielijst is niet gewijzigd."
+    },
+    "option": {
+      "admins": {
+        "few": "Een paar",
+        "many": "Veel",
+        "one": "Slechts één"
+      },
+      "adversary": {
+        "insider": "Mensen binnen de organisatie",
+        "nation_state": "Statelijke aanvallers",
+        "opportunistic": "Opportunistische aanvallers die het internet scannen",
+        "targeted_criminal": "Criminelen die het specifiek op ons gemunt hebben"
+      },
+      "data": {
+        "controlled_unclassified": "Gecontroleerde niet-geclassificeerde informatie",
+        "health": "Gezondheidsgegevens",
+        "none_sensitive": "Niets gevoeligs",
+        "payment_cards": "Betaalkaartgegevens",
+        "personal": "Persoonsgegevens",
+        "trade_secrets": "Bedrijfsgeheimen of intellectueel eigendom"
+      },
+      "data_loss": {
+        "a_day": "Ongeveer een dag",
+        "a_week": "Ongeveer een week",
+        "minutes": "Slechts minuten"
+      },
+      "downtime": {
+        "days": "Dagen",
+        "hours": "Uren",
+        "minutes": "Minuten"
+      },
+      "exposure": {
+        "air_gapped": "Air-gapped: geen netwerkpad naar het internet",
+        "internal_only": "Alleen intern",
+        "some_exposed": "Sommige systemen zijn bereikbaar vanaf het internet",
+        "widely_exposed": "Veel systemen zijn bereikbaar vanaf het internet"
+      },
+      "fips": {
+        "no": "Nee",
+        "unsure": "Ik weet het niet zeker",
+        "yes": "Ja"
+      },
+      "org": {
+        "enterprise": "Een grote onderneming",
+        "homelab": "Een thuislab of persoonlijke systemen",
+        "public_sector": "De publieke sector of defensie",
+        "small_business": "Een klein bedrijf"
+      },
+      "regs": {
+        "cmmc_800_171": "CMMC / NIST SP 800-171",
+        "gdpr": "GDPR",
+        "hipaa": "HIPAA",
+        "none_known": "Geen, voor zover ik weet",
+        "pci_dss": "PCI DSS"
+      },
+      "risk": {
+        "high": "Vrij veel",
+        "low": "Zo weinig mogelijk",
+        "medium": "Enig, als de inspanning groot is"
+      },
+      "third_party": {
+        "no": "Nee",
+        "yes": "Ja"
+      }
+    },
+    "question": {
+      "admins": {
+        "title": "Hoeveel mensen beheren deze systemen?",
+        "why": "Meer beheerders betekent meer accounts die elk beschermd moeten worden."
+      },
+      "adversary": {
+        "title": "Waarover maakt u zich de meeste zorgen?",
+        "why": "Opportunistische aanvallers worden tegengehouden door goede basishygiëne; gerichte aanvallers vereisen ook detectie en respons."
+      },
+      "data": {
+        "title": "Welke soorten gegevens bevatten of verwerken deze systemen?",
+        "why": "Gereguleerde gegevens brengen verplichtingen mee die een algemene basislijn niet dekt."
+      },
+      "data_loss": {
+        "title": "Hoeveel recente gegevens kunt u zich veroorloven te verliezen?",
+        "why": "Dit is uw recovery point objective, en het bepaalt wat back-ups moeten bereiken."
+      },
+      "downtime": {
+        "title": "Hoe lang kunnen deze systemen uitvallen voordat het schade doet?",
+        "why": "Een lage tolerantie vraagt om waarschuwingen en gepland onderhoud."
+      },
+      "exposure": {
+        "title": "Hoe bereikbaar zijn deze systemen vanaf het internet?",
+        "why": "De blootstelling bepaalt hoe belangrijk netwerkbeveiliging is."
+      },
+      "fips": {
+        "title": "Moet de cryptografie gevalideerd zijn volgens FIPS 140?",
+        "why": "Werk voor de overheid en defensie vereist dit vaak, en het verandert welke hosts compliant zijn."
+      },
+      "org": {
+        "title": "Wat beschrijft deze installatie het best?",
+        "why": "Dit bepaalt de basislijn voor hoeveel zekerheid redelijk is."
+      },
+      "regs": {
+        "title": "Welke van deze verplichtingen gelden voor u?",
+        "why": "Elke verplichting voegt specifieke maatregelen toe, zoals auditbewaring, MFA of FIPS."
+      },
+      "risk": {
+        "title": "Hoeveel risico accepteert u om moeite te besparen?",
+        "why": "Dit bepaalt welke aanbevelingen de kosten voor u waard zijn."
+      },
+      "third_party": {
+        "title": "Hebben leveranciers of contractanten toegang?",
+        "why": "Toegang door derden vergroot de kring van wie inloggegevens heeft."
+      }
+    },
+    "summary": {
+      "baseline": "Basislijn: geen verhoogde risicofactoren.",
+      "edit": "Dreigingsmodel bijwerken",
+      "incomplete": "Sommige vragen zijn onbeantwoord, dus sommige controles kunnen niet worden beoordeeld: {{questions}}",
+      "savedBy": "Opgeslagen door {{user}} op {{date}}",
+      "title": "Dreigingsmodel, versie {{version}}"
+    },
+    "version": "Versie {{version}}",
+    "wizard": {
+      "back": "Terug",
+      "chooseAll": "Kies alles wat van toepassing is.",
+      "next": "Volgende",
+      "save": "Dreigingsmodel opslaan",
+      "saveFailed": "Het dreigingsmodel kon niet worden opgeslagen.",
+      "step": "Vraag {{current}} van {{total}}",
+      "title": "Beschrijf uw installatie"
     }
   }
 }

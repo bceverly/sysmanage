@@ -3751,7 +3751,8 @@
     "tabs": {
       "recommendations": "권장 사항",
       "proposals": "수정 제안 ({{count}})",
-      "packs": "규칙 팩"
+      "packs": "규칙 팩",
+      "posture": "보안 태세"
     },
     "feed": {
       "lens": "관점",
@@ -3887,6 +3888,321 @@
       "proposals": "수정 제안",
       "notApplicable": "적용 대상 아님",
       "clean": "정상"
+    },
+    "curated": {
+      "pmAirgapRole": "서버가 설명하신 에어갭 배포로 설정되어 있음",
+      "pmAlerting": "문제가 발생하면 담당자에게 알림이 전달됨",
+      "pmAntivirus": "모든 호스트에서 바이러스 백신이 실행됨",
+      "pmApiKeyExpiry": "만료 기한이 없는 API 키가 없음",
+      "pmAuditRetention": "감사 기록이 최소 1년 동안 보관됨",
+      "pmBackups": "백업이 복구 시점 목표를 충족함",
+      "pmComplianceScans": "모든 호스트에 최근 30일 이내의 컴플라이언스 스캔이 있음",
+      "pmCriticalVulns": "패치되지 않은 심각한 취약점이 있는 호스트가 없음",
+      "pmFips": "사용 가능한 모든 곳에서 FIPS 모드가 켜져 있음",
+      "pmFirewall": "모든 호스트의 방화벽이 켜져 있음",
+      "pmLockout": "로그인에 반복적으로 실패하면 계정이 잠김",
+      "pmLogForward": "로그가 호스트 외부로 전달됨",
+      "pmMaintWindows": "변경이 계획된 유지 관리 기간에 적용됨",
+      "pmMfaEnforced": "관리자에게 MFA가 필수임",
+      "pmMfaEnrolled": "모든 관리자가 MFA를 등록함",
+      "pmPasswordLength": "비밀번호가 12자 이상임",
+      "pmPatchCadence": "보안 업데이트가 일정에 따라 적용됨",
+      "pmSecrets": "비밀 정보가 OpenBAO에 보관됨",
+      "pmSessionTimeout": "세션이 1시간 이내에 만료됨",
+      "smAvail001": "보류 중인 보안 업데이트",
+      "smAvail002": "재부팅 필요",
+      "smComp001": "실패한 높음 또는 심각 등급의 컴플라이언스 검사",
+      "smPerf001": "사용률이 90%를 초과한 파일 시스템",
+      "smSec001": "수정 사항이 제공되는 심각한 취약점",
+      "smSec002": "수정 사항이 제공되는 심각도 높음 취약점",
+      "smSec003": "사용자 ID가 0인 root 이외의 계정",
+      "smSec004": "호스트 방화벽이 꺼진 상태에서 모든 인터페이스에서 수신 대기 중인 서비스",
+      "smSec005": "30일 이내에 만료되는 인증서",
+      "smStab001": "7일 넘게 해결되지 않은 구성 이탈",
+      "smStabF01": "OpenSSL 버전이 피어의 버전과 다름"
+    },
+    "curatedPack": {
+      "baseline": {
+        "description": "모든 SysManage 호스트가 보고하는 증거를 바탕으로 한 보안, 성능, 가용성 및 안정성 검사입니다.",
+        "name": "SysManage 기준"
+      },
+      "posture": {
+        "description": "위협 모델에 따라 적용되는 설치 전체의 보안 및 복원력 검사입니다.",
+        "name": "SysManage 보안 태세"
+      }
+    }
+  },
+  "posture": {
+    "action": {
+      "fix": "수정",
+      "waive": "면제"
+    },
+    "checkedAt": "마지막 확인 {{date}}",
+    "col": {
+      "actions": "작업",
+      "check": "검사",
+      "coverage": "적용 범위",
+      "risk": "위험도",
+      "state": "상태"
+    },
+    "coverage": {
+      "summary": "호스트 {{total}}대 중 {{ok}}대 통과",
+      "unknown": "(보고되지 않음: {{n}})"
+    },
+    "empty": "이 보기에 항목이 없습니다.",
+    "event": {
+      "added": "추가됨",
+      "addedByModel": "위협 모델에 의해 추가됨",
+      "blindSpot": "더 이상 평가할 수 없음",
+      "changed": "변경됨",
+      "changedByModel": "위협 모델에 의해 변경됨",
+      "measuredAgain": "다시 평가됨",
+      "regression": "퇴보함",
+      "remediationRequested": "조치 적용됨",
+      "removed": "제거됨",
+      "removedByModel": "위협 모델에 의해 제거됨",
+      "resolved": "해결됨",
+      "withdrawn": "검사 철회됨"
+    },
+    "expand": "세부 정보",
+    "filter": "표시",
+    "filterAll": "모든 항목",
+    "gap": {
+      "coverageUnknown": "일부 호스트가 이를 보고하지 않았습니다",
+      "missing": "증거를 읽을 수 없습니다",
+      "ruleError": "검사를 평가할 수 없습니다",
+      "threatModelIncomplete": "위협 모델이 완성되지 않았습니다",
+      "unavailable": "이 설치에서는 SysManage가 이를 확인할 수 없습니다"
+    },
+    "history": {
+      "none": "아직 기록된 변경 사항이 없습니다.",
+      "title": "기록"
+    },
+    "loadFailed": "보안 태세를 불러올 수 없습니다.",
+    "managedByServer": "서버 운영자가 관리함",
+    "noModel": {
+      "body": "데이터, 의무 사항 및 노출에 관한 몇 가지 질문에 따라 설치 전체에 적용되는 검사가 결정됩니다. 답변하기 전까지는 보안 태세 검사를 평가할 수 없습니다.",
+      "start": "설문 시작",
+      "title": "먼저 설치 환경을 설명해 주십시오"
+    },
+    "refusal": {
+      "alreadyWaived": "이 항목은 이미 면제되었습니다.",
+      "managedByServer": "서버 운영자만 이 설정을 변경할 수 있습니다.",
+      "notAutomated": "이 항목에는 자동 수정이 없습니다.",
+      "notOpen": "미해결 항목만 면제하거나 수정할 수 있습니다.",
+      "notStale": "이 면제는 다시 확인할 필요가 없습니다.",
+      "notWaived": "이 항목은 면제되지 않았습니다.",
+      "nothingToDo": "더 이상 변경할 사항이 없습니다.",
+      "reasonRequired": "사유가 필요합니다.",
+      "unknownRemedy": "이 검사에는 지정된 수정 방법이 없습니다."
+    },
+    "regressed": "퇴보함",
+    "remedy": {
+      "applied": "수정이 적용되었습니다. 다음 평가 시 이 항목을 다시 검사합니다.",
+      "apply": "수정 적용",
+      "applyFailed": "수정을 적용할 수 없습니다.",
+      "change": "{{from}}에서 {{to}}(으)로",
+      "configure_alerting": "알림 페이지에서 알림 채널과 알림 규칙을 추가하십시오.",
+      "configure_backups": "백업 명령과 복구 시점 목표를 구성하십시오.",
+      "configure_log_forwarding": "로깅 설정에서 로그를 전달할 위치를 선택하십시오.",
+      "define_maintenance_windows": "변경을 수행할 수 있는 시간을 정의하십시오.",
+      "enable_antivirus": "설치된 바이러스 백신이 꺼져 있는 곳에서는 켜십시오. 바이러스 백신이 없는 호스트는 바이러스 백신 페이지에서 제품을 선택해야 합니다.",
+      "enable_fips": "지원하는 호스트에서 각 호스트의 유지 관리 기간에 FIPS 모드를 활성화합니다.",
+      "enable_firewall": "방화벽이 꺼져 있는 호스트에서 각 호스트의 유지 관리 기간에 방화벽을 켭니다.",
+      "enable_openbao": "비밀 정보를 OpenBAO에 저장합니다.",
+      "enforce_lockout": "로그인에 5회 실패하면 계정을 잠급니다.",
+      "enroll_admin_mfa": "각 관리자가 자신의 프로필에서 MFA를 등록합니다.",
+      "expire_api_keys": "만료되지 않는 API 키를 만료 기한이 있는 키로 교체합니다.",
+      "goThere": "이동",
+      "hostFailed": "{{host}}: {{reason}}",
+      "hosts": "변경될 호스트: {{n}}",
+      "patch_critical_vulnerabilities": "제안된 수정 사항을 검토하고 승인하십시오.",
+      "previewFailed": "수정을 미리 볼 수 없습니다.",
+      "require_admin_mfa": "관리자에게 MFA를 필수로 적용합니다.",
+      "run_compliance_scans": "모든 호스트에서 컴플라이언스 스캔을 실행합니다.",
+      "schedule_security_updates": "업데이트 프로필로 보안 업데이트 일정을 예약합니다.",
+      "set_air_gap_role": "에어갭 배포에 맞게 서버 역할을 설정합니다.",
+      "set_audit_retention": "감사 API를 통해 최소 365일의 감사 보존 정책을 생성하십시오. 아직 이를 위한 화면은 없습니다.",
+      "set_password_policy": "비밀번호 정책은 sysmanage.yaml에서 설정됩니다. SysManage가 대신 변경할 수 없습니다.",
+      "shorten_session": "세션이 1시간 후 만료되도록 합니다."
+    },
+    "saved": "위협 모델이 저장되었습니다. 조치 항목 목록은 다음 어드바이저 실행 시 다시 평가됩니다.",
+    "stale": {
+      "modelChanged": "면제 이후 위협 모델이 변경되었습니다",
+      "riskRose": "면제 이후 위험도가 높아졌습니다",
+      "ruleChanged": "면제 이후 검사가 변경되었습니다"
+    },
+    "stalePass": "일부 항목은 이전 위협 모델로 마지막 평가되었습니다. 다음 평가 시 업데이트됩니다.",
+    "state": {
+      "notAssessable": "평가 불가",
+      "open": "미해결",
+      "satisfied": "충족됨",
+      "waived": "면제됨"
+    },
+    "waiver": {
+      "explain": "면제는 이 위험을 수용한다는 사실을 기록합니다. 항목 자체는 미해결 상태로 유지되며, 위험도가 높아지거나 근거가 변경되면 면제가 만료됩니다.",
+      "failed": "면제를 저장할 수 없습니다.",
+      "grantedBy": "{{user}}님이 {{date}}에 면제함: {{reason}}",
+      "reaffirm": "다시 확인",
+      "reaffirmTitle": "면제 다시 확인: {{title}}",
+      "reason": "사유",
+      "revoke": "취소",
+      "revokeFailed": "면제를 취소할 수 없습니다.",
+      "submit": "면제",
+      "title": "면제: {{title}}"
+    },
+    "waiverStale": "면제 만료됨"
+  },
+  "threatModel": {
+    "attribute": {
+      "air_gapped": "에어갭",
+      "cui": "통제된 비기밀 정보를 처리함",
+      "fips_required": "FIPS 검증 암호화가 필요함",
+      "insider": "내부자를 위협으로 간주함",
+      "internet_exposed": "인터넷에서 접근 가능함",
+      "low_data_loss_tolerance": "데이터 손실 허용도가 낮음",
+      "low_downtime_tolerance": "다운타임 허용도가 낮음",
+      "low_risk_tolerance": "위험 허용도가 낮음",
+      "multi_admin": "여러 명의 관리자",
+      "pci": "결제 카드 데이터를 처리함",
+      "phi": "건강 정보를 처리함",
+      "regulated": "규제 대상 데이터를 처리함",
+      "targeted": "표적 공격자를 예상함",
+      "third_party": "공급업체 또는 협력업체가 접근 권한을 가짐"
+    },
+    "diff": {
+      "compare": "비교",
+      "failed": "버전을 비교할 수 없습니다.",
+      "from": "비교 대상",
+      "noAttributeChange": "이 설치에 대한 모델의 판단에는 변경 사항이 없습니다.",
+      "noPunchListChange": "조치 항목 목록이 변경되지 않았습니다."
+    },
+    "option": {
+      "admins": {
+        "few": "몇 명",
+        "many": "많음",
+        "one": "한 명뿐"
+      },
+      "adversary": {
+        "insider": "조직 내부 사람",
+        "nation_state": "국가 지원 공격자",
+        "opportunistic": "인터넷을 스캔하는 기회주의적 공격자",
+        "targeted_criminal": "우리를 특정하여 노리는 범죄자"
+      },
+      "data": {
+        "controlled_unclassified": "통제된 비기밀 정보",
+        "health": "건강 정보",
+        "none_sensitive": "민감한 정보 없음",
+        "payment_cards": "결제 카드 데이터",
+        "personal": "개인에 관한 개인 정보",
+        "trade_secrets": "영업 비밀 또는 지적 재산"
+      },
+      "data_loss": {
+        "a_day": "약 하루",
+        "a_week": "약 일주일",
+        "minutes": "몇 분만"
+      },
+      "downtime": {
+        "days": "며칠",
+        "hours": "몇 시간",
+        "minutes": "몇 분"
+      },
+      "exposure": {
+        "air_gapped": "에어갭: 인터넷으로 가는 네트워크 경로 없음",
+        "internal_only": "내부 전용",
+        "some_exposed": "일부 시스템이 인터넷에서 접근 가능함",
+        "widely_exposed": "많은 시스템이 인터넷에서 접근 가능함"
+      },
+      "fips": {
+        "no": "아니요",
+        "unsure": "잘 모르겠습니다",
+        "yes": "예"
+      },
+      "org": {
+        "enterprise": "대기업",
+        "homelab": "홈 랩 또는 개인 시스템",
+        "public_sector": "공공 부문 또는 국방",
+        "small_business": "소기업"
+      },
+      "regs": {
+        "cmmc_800_171": "CMMC / NIST SP 800-171",
+        "gdpr": "GDPR",
+        "hipaa": "HIPAA",
+        "none_known": "알고 있는 것 없음",
+        "pci_dss": "PCI DSS"
+      },
+      "risk": {
+        "high": "상당히 많이",
+        "low": "가능한 한 적게",
+        "medium": "노력이 많이 드는 경우 어느 정도"
+      },
+      "third_party": {
+        "no": "아니요",
+        "yes": "예"
+      }
+    },
+    "question": {
+      "admins": {
+        "title": "이 시스템을 관리하는 사람은 몇 명입니까?",
+        "why": "관리자가 많을수록 각각 보호해야 하는 계정이 늘어납니다."
+      },
+      "adversary": {
+        "title": "가장 우려하는 대상은 누구입니까?",
+        "why": "기회주의적 공격자는 올바른 보안 관리로 막을 수 있지만, 표적 공격자에게는 탐지 및 대응도 필요합니다."
+      },
+      "data": {
+        "title": "이 시스템은 어떤 종류의 데이터를 보관하거나 처리합니까?",
+        "why": "규제 대상 데이터에는 일반적인 기준으로는 다루지 못하는 의무 사항이 따릅니다."
+      },
+      "data_loss": {
+        "title": "최근 데이터를 얼마나 잃어도 감당할 수 있습니까?",
+        "why": "이것이 복구 시점 목표이며, 백업이 달성해야 할 수준을 결정합니다."
+      },
+      "downtime": {
+        "title": "이 시스템이 얼마나 오래 중단되면 피해가 발생합니까?",
+        "why": "허용도가 낮으면 알림과 계획된 유지 관리가 필요합니다."
+      },
+      "exposure": {
+        "title": "이 시스템은 인터넷에서 얼마나 접근 가능합니까?",
+        "why": "노출 정도에 따라 네트워크 강화의 중요성이 결정됩니다."
+      },
+      "fips": {
+        "title": "암호화가 FIPS 140 검증을 받아야 합니까?",
+        "why": "연방 정부 및 국방 관련 업무에서는 흔히 필수이며, 어떤 호스트가 준수하는지가 달라집니다."
+      },
+      "org": {
+        "title": "이 설치를 가장 잘 설명하는 것은 무엇입니까?",
+        "why": "적절한 보증 수준의 기준을 정합니다."
+      },
+      "regs": {
+        "title": "다음 중 적용되는 의무 사항은 무엇입니까?",
+        "why": "각 의무 사항은 감사 보존, MFA 또는 FIPS와 같은 특정 통제를 추가합니다."
+      },
+      "risk": {
+        "title": "노력을 줄이기 위해 어느 정도의 위험을 감수하시겠습니까?",
+        "why": "어떤 권장 사항이 비용 대비 가치가 있는지 판단하는 기준이 됩니다."
+      },
+      "third_party": {
+        "title": "공급업체나 협력업체가 접근 권한을 가지고 있습니까?",
+        "why": "제3자 접근은 자격 증명을 보유한 사람의 범위를 넓힙니다."
+      }
+    },
+    "summary": {
+      "baseline": "기준: 높은 위험 요인이 없습니다.",
+      "edit": "위협 모델 업데이트",
+      "incomplete": "답변하지 않은 질문이 있어 일부 검사를 평가할 수 없습니다: {{questions}}",
+      "savedBy": "{{user}}님이 {{date}}에 저장함",
+      "title": "위협 모델, 버전 {{version}}"
+    },
+    "version": "버전 {{version}}",
+    "wizard": {
+      "back": "뒤로",
+      "chooseAll": "해당하는 항목을 모두 선택하십시오.",
+      "next": "다음",
+      "save": "위협 모델 저장",
+      "saveFailed": "위협 모델을 저장할 수 없습니다.",
+      "step": "질문 {{current}}/{{total}}",
+      "title": "설치 환경을 설명해 주십시오"
     }
   }
 }

@@ -214,3 +214,12 @@ nl: queryPacks.query
 # Scoped to nl: the other twelve locales translated both keys normally.
 nl: queryPacks.liveTitle
 nl: queryPacks.tabLive
+
+# --- 21.4 threat-model questionnaire: regulation names are proper nouns ------
+threatModel.option.regs.hipaa
+threatModel.option.regs.pci_dss
+threatModel.option.regs.gdpr
+threatModel.option.regs.cmmc_800_171
+# "{{host}}: {{reason}}" -- a failed-host line in the posture remedy result;
+# pure interpolation around a colon.
+posture.remedy.hostFailed

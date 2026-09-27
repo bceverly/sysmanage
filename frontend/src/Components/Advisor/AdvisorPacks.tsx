@@ -24,6 +24,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { advisorService, type AdvisorPack } from '../../Services/advisorService';
 import { lensLabel } from './advisorLabels';
+import { packDescription, packName, ruleTitle } from '../Posture/postureLabels';
 
 interface Props {
     packs: AdvisorPack[];
@@ -35,6 +36,7 @@ const PackCard: React.FC<{ pack: AdvisorPack; onChoose: (pack: AdvisorPack, choi
     onChoose,
 }) => {
     const { t } = useTranslation();
+    const description = packDescription(t, pack.slug, pack.description);
     const toggleRule = (key: string, on: boolean) => {
         const disabled = new Set(pack.disabled_rules);
         if (on) disabled.delete(key);
@@ -45,13 +47,13 @@ const PackCard: React.FC<{ pack: AdvisorPack; onChoose: (pack: AdvisorPack, choi
         <Card variant="outlined" sx={{ mb: 2 }}>
             <CardContent>
                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                    <Typography variant="h6">{pack.name}</Typography>
+                    <Typography variant="h6">{packName(t, pack.slug, pack.name)}</Typography>
                     <Chip size="small" label={`v${pack.version}`} />
                     {pack.deprecated && (
                         <Chip size="small" color="warning" label={t('advisor.packs.deprecated', 'Withdrawn')} />
                     )}
                 </Stack>
-                {pack.description && <Typography variant="body2" sx={{ mb: 1 }}>{pack.description}</Typography>}
+                {description && <Typography variant="body2" sx={{ mb: 1 }}>{description}</Typography>}
                 <FormControlLabel
                     control={
                         <Switch
@@ -77,7 +79,7 @@ const PackCard: React.FC<{ pack: AdvisorPack; onChoose: (pack: AdvisorPack, choi
                                         slotProps={{ input: { 'aria-label': rule.key } }}
                                     />
                                 </TableCell>
-                                <TableCell>{rule.title ?? rule.key}</TableCell>
+                                <TableCell>{ruleTitle(t, rule.key, rule.title)}</TableCell>
                                 <TableCell>{lensLabel(t, rule.lens)}</TableCell>
                                 <TableCell><Typography variant="caption">{rule.key}</Typography></TableCell>
                             </TableRow>

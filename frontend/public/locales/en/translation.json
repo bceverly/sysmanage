@@ -3751,7 +3751,8 @@
     "tabs": {
       "recommendations": "Recommendations",
       "proposals": "Proposed fixes ({{count}})",
-      "packs": "Rule packs"
+      "packs": "Rule packs",
+      "posture": "Posture"
     },
     "feed": {
       "lens": "Lens",
@@ -3887,6 +3888,321 @@
       "proposals": "Proposed fixes",
       "notApplicable": "Not applicable",
       "clean": "Clean"
+    },
+    "curated": {
+      "pmAirgapRole": "The server is set up as the air-gapped deployment you described",
+      "pmAlerting": "Someone is notified when something breaks",
+      "pmAntivirus": "Every host runs antivirus",
+      "pmApiKeyExpiry": "No API key is left without an expiry",
+      "pmAuditRetention": "Audit history is kept for at least a year",
+      "pmBackups": "Backups meet your recovery point objective",
+      "pmComplianceScans": "Every host has a compliance scan from the last 30 days",
+      "pmCriticalVulns": "No host has an unpatched critical vulnerability",
+      "pmFips": "FIPS mode is on wherever it is available",
+      "pmFirewall": "Every host's firewall is on",
+      "pmLockout": "Repeated failed logins lock the account",
+      "pmLogForward": "Logs are forwarded off the hosts",
+      "pmMaintWindows": "Changes land in planned maintenance windows",
+      "pmMfaEnforced": "MFA is required for administrators",
+      "pmMfaEnrolled": "Every administrator has enrolled MFA",
+      "pmPasswordLength": "Passwords are at least 12 characters",
+      "pmPatchCadence": "Security updates are applied on a schedule",
+      "pmSecrets": "Secrets are kept in OpenBAO",
+      "pmSessionTimeout": "Sessions expire within an hour",
+      "smAvail001": "Security updates pending",
+      "smAvail002": "Reboot required",
+      "smComp001": "Failed high or critical compliance checks",
+      "smPerf001": "Filesystem more than 90% full",
+      "smSec001": "Critical vulnerability with a fix available",
+      "smSec002": "High-severity vulnerability with a fix available",
+      "smSec003": "Account other than root with user ID 0",
+      "smSec004": "Services listening on all interfaces while the host firewall is off",
+      "smSec005": "Certificate expiring within 30 days",
+      "smStab001": "Configuration drift unresolved for more than 7 days",
+      "smStabF01": "OpenSSL version differs from the version its peers run"
+    },
+    "curatedPack": {
+      "baseline": {
+        "description": "Security, performance, availability and stability checks over the evidence every SysManage host reports.",
+        "name": "SysManage baseline"
+      },
+      "posture": {
+        "description": "Installation-wide security and resilience checks, applied according to your threat model.",
+        "name": "SysManage posture"
+      }
+    }
+  },
+  "posture": {
+    "action": {
+      "fix": "Fix",
+      "waive": "Waive"
+    },
+    "checkedAt": "Last checked {{date}}",
+    "col": {
+      "actions": "Actions",
+      "check": "Check",
+      "coverage": "Coverage",
+      "risk": "Risk",
+      "state": "State"
+    },
+    "coverage": {
+      "summary": "{{ok}} of {{total}} hosts pass",
+      "unknown": "(not reported: {{n}})"
+    },
+    "empty": "No items in this view.",
+    "event": {
+      "added": "Added",
+      "addedByModel": "Added by the threat model",
+      "blindSpot": "Could no longer be assessed",
+      "changed": "Changed",
+      "changedByModel": "Changed by the threat model",
+      "measuredAgain": "Assessed again",
+      "regression": "Regressed",
+      "remediationRequested": "Remedy applied",
+      "removed": "Removed",
+      "removedByModel": "Removed by the threat model",
+      "resolved": "Resolved",
+      "withdrawn": "Check withdrawn"
+    },
+    "expand": "Details",
+    "filter": "Show",
+    "filterAll": "All items",
+    "gap": {
+      "coverageUnknown": "Some hosts have not reported this",
+      "missing": "The evidence could not be read",
+      "ruleError": "The check could not be evaluated",
+      "threatModelIncomplete": "The threat model is incomplete",
+      "unavailable": "SysManage has no view of this on this installation"
+    },
+    "history": {
+      "none": "No changes recorded yet.",
+      "title": "History"
+    },
+    "loadFailed": "The posture could not be loaded.",
+    "managedByServer": "Managed by the server operator",
+    "noModel": {
+      "body": "A few questions about your data, obligations and exposure decide which installation-wide checks apply to you. Until then, the posture checks cannot be assessed.",
+      "start": "Start the questionnaire",
+      "title": "Describe your installation first"
+    },
+    "refusal": {
+      "alreadyWaived": "This item is already waived.",
+      "managedByServer": "Only the server operator can change this setting.",
+      "notAutomated": "This has no automated fix.",
+      "notOpen": "Only an open item can be waived or fixed.",
+      "notStale": "This waiver does not need re-affirming.",
+      "notWaived": "This item is not waived.",
+      "nothingToDo": "There is nothing left to change.",
+      "reasonRequired": "A reason is required.",
+      "unknownRemedy": "This check does not name a fix."
+    },
+    "regressed": "Regressed",
+    "remedy": {
+      "applied": "The fix was applied. The item is re-checked on the next evaluation.",
+      "apply": "Apply fix",
+      "applyFailed": "The fix could not be applied.",
+      "change": "{{from}} to {{to}}",
+      "configure_alerting": "Add a notification channel and an alert rule on the alerts page.",
+      "configure_backups": "Configure a backup command and a recovery point objective.",
+      "configure_log_forwarding": "Choose where logs are forwarded in the logging settings.",
+      "define_maintenance_windows": "Define when changes may be made.",
+      "enable_antivirus": "Turn on the installed antivirus where it is off. Hosts with none need a product chosen on the antivirus page.",
+      "enable_fips": "Enable FIPS mode on the hosts that support it, in their maintenance windows.",
+      "enable_firewall": "Turn on the firewall on the hosts where it is off, in their maintenance windows.",
+      "enable_openbao": "Store secrets in OpenBAO.",
+      "enforce_lockout": "Lock accounts after 5 failed logins.",
+      "enroll_admin_mfa": "Each administrator enrolls MFA from their own profile.",
+      "expire_api_keys": "Replace API keys that never expire with ones that do.",
+      "goThere": "Go there",
+      "hostFailed": "{{host}}: {{reason}}",
+      "hosts": "Hosts that will change: {{n}}",
+      "patch_critical_vulnerabilities": "Review and approve the proposed fixes.",
+      "previewFailed": "The fix could not be previewed.",
+      "require_admin_mfa": "Require MFA for administrators.",
+      "run_compliance_scans": "Run compliance scans on every host.",
+      "schedule_security_updates": "Schedule security updates with an update profile.",
+      "set_air_gap_role": "Set the server role to match your air-gapped deployment.",
+      "set_audit_retention": "Create an audit retention policy of at least 365 days through the audit API. There is no screen for this yet.",
+      "set_password_policy": "The password policy is set in sysmanage.yaml; SysManage cannot change it for you.",
+      "shorten_session": "Expire sessions after an hour."
+    },
+    "saved": "Threat model saved. The punch list is re-evaluated on the next advisor pass.",
+    "stale": {
+      "modelChanged": "The threat model has changed since it was waived",
+      "riskRose": "The risk has risen since it was waived",
+      "ruleChanged": "The check has changed since it was waived"
+    },
+    "stalePass": "Some items were last evaluated under an earlier threat model. They update on the next evaluation.",
+    "state": {
+      "notAssessable": "Not assessable",
+      "open": "Open",
+      "satisfied": "Satisfied",
+      "waived": "Waived"
+    },
+    "waiver": {
+      "explain": "A waiver records that you accept this risk. The item stays open underneath, and the waiver lapses if the risk rises or its basis changes.",
+      "failed": "The waiver could not be saved.",
+      "grantedBy": "Waived by {{user}} on {{date}}: {{reason}}",
+      "reaffirm": "Re-affirm",
+      "reaffirmTitle": "Re-affirm waiver: {{title}}",
+      "reason": "Reason",
+      "revoke": "Revoke",
+      "revokeFailed": "The waiver could not be revoked.",
+      "submit": "Waive",
+      "title": "Waive: {{title}}"
+    },
+    "waiverStale": "Waiver lapsed"
+  },
+  "threatModel": {
+    "attribute": {
+      "air_gapped": "Air-gapped",
+      "cui": "Handles controlled unclassified information",
+      "fips_required": "Requires FIPS-validated cryptography",
+      "insider": "Treats insiders as a threat",
+      "internet_exposed": "Reachable from the internet",
+      "low_data_loss_tolerance": "Little tolerance for data loss",
+      "low_downtime_tolerance": "Little tolerance for downtime",
+      "low_risk_tolerance": "Little tolerance for risk",
+      "multi_admin": "Several administrators",
+      "pci": "Handles payment card data",
+      "phi": "Handles health information",
+      "regulated": "Handles regulated data",
+      "targeted": "Expects targeted attackers",
+      "third_party": "Vendors or contractors have access"
+    },
+    "diff": {
+      "compare": "Compare",
+      "failed": "The versions could not be compared.",
+      "from": "Compare with",
+      "noAttributeChange": "No change to what the model says about this installation.",
+      "noPunchListChange": "The punch list did not change."
+    },
+    "option": {
+      "admins": {
+        "few": "A few",
+        "many": "Many",
+        "one": "Just one"
+      },
+      "adversary": {
+        "insider": "People inside the organization",
+        "nation_state": "Nation-state attackers",
+        "opportunistic": "Opportunistic attackers scanning the internet",
+        "targeted_criminal": "Criminals targeting us specifically"
+      },
+      "data": {
+        "controlled_unclassified": "Controlled unclassified information",
+        "health": "Health information",
+        "none_sensitive": "Nothing sensitive",
+        "payment_cards": "Payment card data",
+        "personal": "Personal information about people",
+        "trade_secrets": "Trade secrets or intellectual property"
+      },
+      "data_loss": {
+        "a_day": "About a day",
+        "a_week": "About a week",
+        "minutes": "Only minutes"
+      },
+      "downtime": {
+        "days": "Days",
+        "hours": "Hours",
+        "minutes": "Minutes"
+      },
+      "exposure": {
+        "air_gapped": "Air-gapped: no network path to the internet",
+        "internal_only": "Internal only",
+        "some_exposed": "Some systems are reachable from the internet",
+        "widely_exposed": "Many systems are reachable from the internet"
+      },
+      "fips": {
+        "no": "No",
+        "unsure": "I am not sure",
+        "yes": "Yes"
+      },
+      "org": {
+        "enterprise": "An enterprise",
+        "homelab": "A home lab or personal systems",
+        "public_sector": "The public sector or defense",
+        "small_business": "A small business"
+      },
+      "regs": {
+        "cmmc_800_171": "CMMC / NIST SP 800-171",
+        "gdpr": "GDPR",
+        "hipaa": "HIPAA",
+        "none_known": "None that I know of",
+        "pci_dss": "PCI DSS"
+      },
+      "risk": {
+        "high": "Quite a lot",
+        "low": "As little as possible",
+        "medium": "Some, where the effort is large"
+      },
+      "third_party": {
+        "no": "No",
+        "yes": "Yes"
+      }
+    },
+    "question": {
+      "admins": {
+        "title": "How many people administer these systems?",
+        "why": "More administrators means more accounts that must each be protected."
+      },
+      "adversary": {
+        "title": "Who are you most concerned about?",
+        "why": "Opportunistic attackers are stopped by good hygiene; targeted ones also need detection and response."
+      },
+      "data": {
+        "title": "What kinds of data do these systems hold or process?",
+        "why": "Regulated data brings obligations that a generic baseline does not cover."
+      },
+      "data_loss": {
+        "title": "How much recent data could you afford to lose?",
+        "why": "This is your recovery point objective, and it decides what backups must achieve."
+      },
+      "downtime": {
+        "title": "How long could these systems be down before it hurts?",
+        "why": "A low tolerance calls for alerting and planned maintenance."
+      },
+      "exposure": {
+        "title": "How reachable are these systems from the internet?",
+        "why": "Exposure decides how much network hardening matters."
+      },
+      "fips": {
+        "title": "Must cryptography be FIPS 140 validated?",
+        "why": "Federal and defense work often requires it, and it changes which hosts are compliant."
+      },
+      "org": {
+        "title": "What best describes this installation?",
+        "why": "It sets the baseline for how much assurance is reasonable."
+      },
+      "regs": {
+        "title": "Which of these obligations apply to you?",
+        "why": "Each obligation adds specific controls, such as audit retention, MFA or FIPS."
+      },
+      "risk": {
+        "title": "How much risk will you accept to save effort?",
+        "why": "It shapes which recommendations are worth their cost to you."
+      },
+      "third_party": {
+        "title": "Do vendors or contractors have access?",
+        "why": "Third-party access widens who holds credentials."
+      }
+    },
+    "summary": {
+      "baseline": "Baseline: no elevated risk factors.",
+      "edit": "Update threat model",
+      "incomplete": "Some questions are unanswered, so some checks cannot be assessed: {{questions}}",
+      "savedBy": "Saved by {{user}} on {{date}}",
+      "title": "Threat model, version {{version}}"
+    },
+    "version": "Version {{version}}",
+    "wizard": {
+      "back": "Back",
+      "chooseAll": "Choose all that apply.",
+      "next": "Next",
+      "save": "Save threat model",
+      "saveFailed": "The threat model could not be saved.",
+      "step": "Question {{current}} of {{total}}",
+      "title": "Describe your installation"
     }
   }
 }

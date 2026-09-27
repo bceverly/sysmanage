@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 07:54-0400\n"
+"POT-Creation-Date: 2026-09-27 13:34-0400\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1569,7 +1569,8 @@ msgstr "未找到文件监控。"
 #: backend/api/advisor.py:93 backend/api/query_packs.py:119
 #: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
-#: backend/api/config_mgmt_jobs.py:168 backend/api/config_mgmt_profiles.py:136
+#: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
+#: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50
 #, python-format
 msgid "Permission denied: %s role required"
@@ -3217,13 +3218,29 @@ msgstr "代理 {hostname} 上的软件包安装状态为 {status}"
 msgid "Failed to update package installation status: %s"
 msgstr "更新软件包安装状态失败：%s"
 
-#: backend/api/posture.py:66
+#: backend/api/posture.py:81
 msgid "Only an administrator can change the threat model"
 msgstr "只有管理员可以更改威胁模型"
 
-#: backend/api/posture.py:88 backend/api/posture.py:135
+#: backend/api/posture.py:89
+msgid "Only an administrator can waive or re-affirm a posture item"
+msgstr "只有管理员可以豁免或重新确认安全态势项目"
+
+#: backend/api/posture.py:111 backend/api/posture.py:158
 msgid "The threat-model questionnaire has not been loaded yet"
 msgstr "威胁模型问卷尚未加载"
+
+#: backend/api/posture.py:261
+msgid "Posture item not found"
+msgstr "未找到安全态势项目"
+
+#: backend/api/posture.py:356
+msgid "Only an administrator can apply a posture remedy"
+msgstr "只有管理员可以应用安全态势补救措施"
+
+#: backend/api/posture.py:404
+msgid "Threat model version not found"
+msgstr "未找到威胁模型版本"
 
 #: backend/api/packages_operations.py:104
 msgid "No packages specified for installation"
@@ -5101,17 +5118,17 @@ msgstr "驱动器存在但没有可读取的光盘插入"
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "设备上没有 ISO 文件系统 (fstype=%s)"
 
-#: backend/services/audit_service.py:188
+#: backend/services/audit_service.py:189
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "创建了 {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:236
+#: backend/services/audit_service.py:237
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "已更新 {entity_type} '{entity_name}' 实体"
 
-#: backend/services/audit_service.py:284
+#: backend/services/audit_service.py:285
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "已删除 {entity_type} '{entity_name}'"

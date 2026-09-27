@@ -26,6 +26,7 @@ class Engine:
 
     def __init__(self):
         self.states = {}
+        self.risks = {}
 
     def derive_threat_model(self, questionnaire, answers):
         attrs = {"x": answers.get("q") == "yes"}
@@ -57,6 +58,7 @@ class Engine:
                     "rule_id": rule["id"],
                     "rule_version": 1,
                     "outcome": outcome,
+                    "risk": self.risks.get(rule["id"]),
                     "managed_by": "server" if rule["id"] == "PM-S" else "tenant",
                     "gaps": [],
                     "coverage": None,
@@ -179,3 +181,24 @@ def test_a_rederived_model_is_the_cause_of_the_next_changes(db):
     engine.states = {"PM-A": "fires"}
     ps.evaluate(engine, db, None, [_entry("PM-A")])
     assert _events(db)[-1] == ("PM-A", "satisfied", "open", "threat_model")
+
+
+def test_an_evaluation_marks_a_waiver_stale_when_the_risk_rises(db):
+    from backend.services import posture_waivers as pw  # noqa: PLC0415
+
+    class Admin:
+        id = None
+        userid = "a@b"
+
+    engine = Engine()
+    model, _ = ps.save_threat_model(engine, db, {"q": "yes"}, "a@b")
+    engine.states, engine.risks = {"PM-A": "fires"}, {"PM-A": 12}
+    ps.evaluate(engine, db, None, [_entry("PM-A")])
+    item = db.query(models.PostureItem).filter_by(rule_key="PM-A").one()
+    waiver = pw.grant(
+        db, ps.SCOPE, item, {"applies_when": {"always": True}}, model, Admin(), "ok"
+    )
+    engine.risks = {"PM-A": 20}
+    summary = ps.evaluate(engine, db, None, [_entry("PM-A")])
+    assert waiver.stale_reason == "risk_rose"
+    assert summary["posture_stale_waivers"] == 1

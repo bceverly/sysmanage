@@ -3751,7 +3751,8 @@
     "tabs": {
       "recommendations": "建議",
       "proposals": "建議的修正 ({{count}})",
-      "packs": "規則包"
+      "packs": "規則包",
+      "posture": "安全態勢"
     },
     "feed": {
       "lens": "檢視角度",
@@ -3887,6 +3888,321 @@
       "proposals": "建議的修正",
       "notApplicable": "不適用",
       "clean": "正常"
+    },
+    "curated": {
+      "pmAirgapRole": "伺服器已依您描述的氣隙部署進行設定",
+      "pmAlerting": "發生故障時會有人收到通知",
+      "pmAntivirus": "每部主機都執行防病毒軟體",
+      "pmApiKeyExpiry": "沒有未設定到期時間的 API 金鑰",
+      "pmAuditRetention": "稽核記錄至少保留一年",
+      "pmBackups": "備份符合您的復原點目標",
+      "pmComplianceScans": "每部主機在過去 30 天內都執行過合規掃描",
+      "pmCriticalVulns": "沒有主機存在未修補的重大弱點",
+      "pmFips": "在所有可用之處都已啟用 FIPS 模式",
+      "pmFirewall": "每部主機的防火牆都已開啟",
+      "pmLockout": "多次登入失敗會鎖定帳戶",
+      "pmLogForward": "日誌會轉送到主機以外",
+      "pmMaintWindows": "變更在規劃的維護窗口內進行",
+      "pmMfaEnforced": "管理員必須使用 MFA",
+      "pmMfaEnrolled": "每位管理員都已註冊 MFA",
+      "pmPasswordLength": "密碼至少 12 個字元",
+      "pmPatchCadence": "依排程套用安全性更新",
+      "pmSecrets": "機密資料儲存在 OpenBAO 中",
+      "pmSessionTimeout": "工作階段在一小時內到期",
+      "smAvail001": "有待安裝的安全性更新",
+      "smAvail002": "需要重新開機",
+      "smComp001": "高或重大等級的合規檢查未通過",
+      "smPerf001": "檔案系統使用率超過 90%",
+      "smSec001": "存在已有修正的重大弱點",
+      "smSec002": "存在已有修正的高嚴重性弱點",
+      "smSec003": "存在使用者 ID 為 0 的非 root 帳戶",
+      "smSec004": "主機防火牆關閉時有服務在所有介面上監聽",
+      "smSec005": "憑證將在 30 天內到期",
+      "smStab001": "組態漂移超過 7 天未解決",
+      "smStabF01": "OpenSSL 版本與同類主機執行的版本不同"
+    },
+    "curatedPack": {
+      "baseline": {
+        "description": "根據每部 SysManage 主機回報的證據所進行的安全性、效能、可用性與穩定性檢查。",
+        "name": "SysManage 基準"
+      },
+      "posture": {
+        "description": "依據您的威脅模型套用的全域安全性與韌性檢查。",
+        "name": "SysManage 安全態勢"
+      }
+    }
+  },
+  "posture": {
+    "action": {
+      "fix": "修正",
+      "waive": "豁免"
+    },
+    "checkedAt": "上次檢查時間：{{date}}",
+    "col": {
+      "actions": "動作",
+      "check": "檢查項目",
+      "coverage": "涵蓋範圍",
+      "risk": "風險",
+      "state": "狀態"
+    },
+    "coverage": {
+      "summary": "{{total}} 部主機中有 {{ok}} 部通過",
+      "unknown": "（未回報：{{n}}）"
+    },
+    "empty": "此檢視中沒有項目。",
+    "event": {
+      "added": "已新增",
+      "addedByModel": "由威脅模型新增",
+      "blindSpot": "已無法再評估",
+      "changed": "已變更",
+      "changedByModel": "由威脅模型變更",
+      "measuredAgain": "已重新評估",
+      "regression": "已退步",
+      "remediationRequested": "已套用補救措施",
+      "removed": "已移除",
+      "removedByModel": "由威脅模型移除",
+      "resolved": "已解決",
+      "withdrawn": "檢查項目已撤回"
+    },
+    "expand": "詳細資料",
+    "filter": "顯示",
+    "filterAll": "所有項目",
+    "gap": {
+      "coverageUnknown": "部分主機尚未回報此項目",
+      "missing": "無法讀取證據",
+      "ruleError": "無法評估此檢查項目",
+      "threatModelIncomplete": "威脅模型不完整",
+      "unavailable": "SysManage 在此安裝環境中無法檢視此項目"
+    },
+    "history": {
+      "none": "尚未記錄任何變更。",
+      "title": "歷程記錄"
+    },
+    "loadFailed": "無法載入安全態勢。",
+    "managedByServer": "由伺服器管理者管理",
+    "noModel": {
+      "body": "關於您的資料、法規義務與曝險程度的幾個問題，將決定哪些全域檢查適用於您。在此之前，無法評估安全態勢檢查項目。",
+      "start": "開始填寫問卷",
+      "title": "請先描述您的安裝環境"
+    },
+    "refusal": {
+      "alreadyWaived": "此項目已獲豁免。",
+      "managedByServer": "只有伺服器管理者可以變更此設定。",
+      "notAutomated": "此項目沒有自動修正。",
+      "notOpen": "只有未解決的項目才能豁免或修正。",
+      "notStale": "此豁免不需要重新確認。",
+      "notWaived": "此項目未獲豁免。",
+      "nothingToDo": "已沒有需要變更的內容。",
+      "reasonRequired": "必須填寫原因。",
+      "unknownRemedy": "此檢查項目未指定修正方式。"
+    },
+    "regressed": "已退步",
+    "remedy": {
+      "applied": "已套用修正。此項目將在下次評估時重新檢查。",
+      "apply": "套用修正",
+      "applyFailed": "無法套用修正。",
+      "change": "{{from}} 改為 {{to}}",
+      "configure_alerting": "在警示頁面新增通知管道與警示規則。",
+      "configure_backups": "設定備份指令與復原點目標。",
+      "configure_log_forwarding": "在日誌設定中選擇日誌的轉送目的地。",
+      "define_maintenance_windows": "定義可以進行變更的時間。",
+      "enable_antivirus": "在已安裝但未開啟防病毒軟體的主機上將其開啟。未安裝任何防病毒軟體的主機，需要在防病毒頁面選擇產品。",
+      "enable_fips": "在支援 FIPS 模式的主機上，於其維護窗口內啟用 FIPS 模式。",
+      "enable_firewall": "在防火牆關閉的主機上，於其維護窗口內開啟防火牆。",
+      "enable_openbao": "將機密資料儲存在 OpenBAO 中。",
+      "enforce_lockout": "登入失敗 5 次後鎖定帳戶。",
+      "enroll_admin_mfa": "每位管理員從自己的個人檔案註冊 MFA。",
+      "expire_api_keys": "將永不到期的 API 金鑰替換為會到期的金鑰。",
+      "goThere": "前往",
+      "hostFailed": "{{host}}：{{reason}}",
+      "hosts": "將會變更的主機：{{n}}",
+      "patch_critical_vulnerabilities": "檢閱並核准建議的修正。",
+      "previewFailed": "無法預覽修正。",
+      "require_admin_mfa": "要求管理員使用 MFA。",
+      "run_compliance_scans": "在每部主機上執行合規掃描。",
+      "schedule_security_updates": "使用更新設定檔排程安全性更新。",
+      "set_air_gap_role": "設定伺服器角色以符合您的氣隙部署。",
+      "set_audit_retention": "透過稽核 API 建立至少 365 天的稽核保留原則。目前尚無對應的畫面。",
+      "set_password_policy": "密碼原則是在 sysmanage.yaml 中設定；SysManage 無法代您變更。",
+      "shorten_session": "將工作階段設定為一小時後到期。"
+    },
+    "saved": "威脅模型已儲存。改善清單將在下一次顧問評估時重新評估。",
+    "stale": {
+      "modelChanged": "威脅模型在豁免後已有變更",
+      "riskRose": "風險在豁免後已升高",
+      "ruleChanged": "檢查項目在豁免後已有變更"
+    },
+    "stalePass": "部分項目上次是依據較早的威脅模型評估。這些項目將在下次評估時更新。",
+    "state": {
+      "notAssessable": "無法評估",
+      "open": "未解決",
+      "satisfied": "已符合",
+      "waived": "已豁免"
+    },
+    "waiver": {
+      "explain": "豁免代表您接受此風險。此項目在底層仍維持未解決狀態；若風險升高或其依據有所變更，豁免即失效。",
+      "failed": "無法儲存豁免。",
+      "grantedBy": "由 {{user}} 於 {{date}} 豁免：{{reason}}",
+      "reaffirm": "重新確認",
+      "reaffirmTitle": "重新確認豁免：{{title}}",
+      "reason": "原因",
+      "revoke": "撤銷",
+      "revokeFailed": "無法撤銷豁免。",
+      "submit": "豁免",
+      "title": "豁免：{{title}}"
+    },
+    "waiverStale": "豁免已失效"
+  },
+  "threatModel": {
+    "attribute": {
+      "air_gapped": "氣隙隔離",
+      "cui": "處理受控非機密資訊",
+      "fips_required": "需要經 FIPS 驗證的加密",
+      "insider": "將內部人員視為威脅",
+      "internet_exposed": "可從網際網路存取",
+      "low_data_loss_tolerance": "對資料遺失的容忍度低",
+      "low_downtime_tolerance": "對停機的容忍度低",
+      "low_risk_tolerance": "對風險的容忍度低",
+      "multi_admin": "多位管理員",
+      "pci": "處理支付卡資料",
+      "phi": "處理健康資訊",
+      "regulated": "處理受法規管制的資料",
+      "targeted": "預期會遭遇針對性攻擊者",
+      "third_party": "廠商或承包商擁有存取權"
+    },
+    "diff": {
+      "compare": "比較",
+      "failed": "無法比較這些版本。",
+      "from": "比較對象",
+      "noAttributeChange": "模型對此安裝環境的描述沒有變更。",
+      "noPunchListChange": "改善清單沒有變更。"
+    },
+    "option": {
+      "admins": {
+        "few": "幾位",
+        "many": "很多位",
+        "one": "只有一位"
+      },
+      "adversary": {
+        "insider": "組織內部人員",
+        "nation_state": "國家級攻擊者",
+        "opportunistic": "掃描網際網路的投機型攻擊者",
+        "targeted_criminal": "專門鎖定我們的犯罪者"
+      },
+      "data": {
+        "controlled_unclassified": "受控非機密資訊",
+        "health": "健康資訊",
+        "none_sensitive": "沒有敏感資料",
+        "payment_cards": "支付卡資料",
+        "personal": "個人資料",
+        "trade_secrets": "營業秘密或智慧財產"
+      },
+      "data_loss": {
+        "a_day": "大約一天",
+        "a_week": "大約一週",
+        "minutes": "只有幾分鐘"
+      },
+      "downtime": {
+        "days": "數天",
+        "hours": "數小時",
+        "minutes": "數分鐘"
+      },
+      "exposure": {
+        "air_gapped": "氣隙隔離：沒有通往網際網路的網路路徑",
+        "internal_only": "僅限內部",
+        "some_exposed": "部分系統可從網際網路存取",
+        "widely_exposed": "許多系統可從網際網路存取"
+      },
+      "fips": {
+        "no": "否",
+        "unsure": "我不確定",
+        "yes": "是"
+      },
+      "org": {
+        "enterprise": "企業",
+        "homelab": "家用實驗環境或個人系統",
+        "public_sector": "公部門或國防",
+        "small_business": "小型企業"
+      },
+      "regs": {
+        "cmmc_800_171": "CMMC / NIST SP 800-171",
+        "gdpr": "GDPR",
+        "hipaa": "HIPAA",
+        "none_known": "據我所知沒有",
+        "pci_dss": "PCI DSS"
+      },
+      "risk": {
+        "high": "相當多",
+        "low": "越少越好",
+        "medium": "一些，在工作量較大時可接受"
+      },
+      "third_party": {
+        "no": "否",
+        "yes": "是"
+      }
+    },
+    "question": {
+      "admins": {
+        "title": "有多少人管理這些系統？",
+        "why": "管理員越多，需要個別保護的帳戶就越多。"
+      },
+      "adversary": {
+        "title": "您最擔心的是誰？",
+        "why": "良好的資安習慣就能阻擋投機型攻擊者；針對性攻擊者則還需要偵測與回應。"
+      },
+      "data": {
+        "title": "這些系統儲存或處理哪些類型的資料？",
+        "why": "受法規管制的資料會帶來通用基準未涵蓋的義務。"
+      },
+      "data_loss": {
+        "title": "您最多能承受遺失多少近期資料？",
+        "why": "這就是您的復原點目標，它決定了備份必須達成的要求。"
+      },
+      "downtime": {
+        "title": "這些系統停機多久會造成影響？",
+        "why": "容忍度低時需要警示與規劃的維護。"
+      },
+      "exposure": {
+        "title": "這些系統從網際網路可存取的程度為何？",
+        "why": "曝險程度決定了網路強化的重要性。"
+      },
+      "fips": {
+        "title": "加密是否必須通過 FIPS 140 驗證？",
+        "why": "聯邦與國防相關工作通常有此要求，且會影響哪些主機符合規範。"
+      },
+      "org": {
+        "title": "哪一項最能描述此安裝環境？",
+        "why": "它決定了合理保證程度的基準。"
+      },
+      "regs": {
+        "title": "下列哪些義務適用於您？",
+        "why": "每項義務都會增加特定的控制措施，例如稽核保留、MFA 或 FIPS。"
+      },
+      "risk": {
+        "title": "為了節省工作量，您願意接受多少風險？",
+        "why": "它決定了哪些建議對您而言值得付出成本。"
+      },
+      "third_party": {
+        "title": "廠商或承包商是否擁有存取權？",
+        "why": "第三方存取會擴大持有認證資訊的人員範圍。"
+      }
+    },
+    "summary": {
+      "baseline": "基準：沒有較高的風險因素。",
+      "edit": "更新威脅模型",
+      "incomplete": "部分問題尚未回答，因此部分檢查項目無法評估：{{questions}}",
+      "savedBy": "由 {{user}} 於 {{date}} 儲存",
+      "title": "威脅模型，版本 {{version}}"
+    },
+    "version": "版本 {{version}}",
+    "wizard": {
+      "back": "上一步",
+      "chooseAll": "選擇所有適用項目。",
+      "next": "下一步",
+      "save": "儲存威脅模型",
+      "saveFailed": "無法儲存威脅模型。",
+      "step": "第 {{current}} 題，共 {{total}} 題",
+      "title": "描述您的安裝環境"
     }
   }
 }
