@@ -74,6 +74,11 @@ class CustomMetric(Base):
     # How often the agent runs the metric, in seconds.
     cadence_seconds = Column(Integer, nullable=False, default=300)
     enabled = Column(Boolean, nullable=False, default=True)
+    # Phase 21.5: which BUILT-IN series this row is (``host.cpu_percent`` ...),
+    # or NULL for an operator-defined metric.  Built-ins carry no script and
+    # no tags, so the tag-driven deploy never ships them to an agent; the
+    # server fills their samples from the agent's ``host_metrics`` message.
+    builtin_key = Column(String(64), nullable=True, unique=True, index=True)
     # Soft reference to the creating user.  NO FK: users may live in the
     # registry partition, so a cross-partition FK is not permitted.
     created_by = Column(GUID(), nullable=True)

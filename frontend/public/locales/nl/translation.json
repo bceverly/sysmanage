@@ -2401,7 +2401,8 @@
     "updates": "Bijwerkingen",
     "users": "Gebruikers",
     "vulnerabilities": "Kwetsbaarheden",
-    "advisor": "Adviseur"
+    "advisor": "Adviseur",
+    "hostMetrics": "Hostmetrieken"
   },
   "notifications": {
     "applicationUpdates": "Applicatie Updates",

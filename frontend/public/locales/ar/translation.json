@@ -2401,7 +2401,8 @@
     "updates": "التحديثات",
     "users": "المستخدمون",
     "vulnerabilities": "الثغرات الأمنية",
-    "advisor": "المستشار"
+    "advisor": "المستشار",
+    "hostMetrics": "مقاييس المضيفين"
   },
   "notifications": {
     "applicationUpdates": "تحديثات التطبيقات",

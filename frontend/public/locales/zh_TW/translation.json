@@ -2401,7 +2401,8 @@
     "updates": "更新",
     "users": "使用者",
     "vulnerabilities": "漏洞",
-    "advisor": "顧問"
+    "advisor": "顧問",
+    "hostMetrics": "主機指標"
   },
   "notifications": {
     "applicationUpdates": "應用程式更新",

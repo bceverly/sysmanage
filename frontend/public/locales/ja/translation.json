@@ -2401,7 +2401,8 @@
     "updates": "アップデート",
     "users": "ユーザー",
     "vulnerabilities": "脆弱性",
-    "advisor": "アドバイザー"
+    "advisor": "アドバイザー",
+    "hostMetrics": "ホストメトリクス"
   },
   "notifications": {
     "applicationUpdates": "アプリケーションアップデート",

@@ -2401,7 +2401,8 @@
     "updates": "Aggiornamenti",
     "users": "Utenti",
     "vulnerabilities": "Vulnerebilità",
-    "advisor": "Consulente"
+    "advisor": "Consulente",
+    "hostMetrics": "Metriche degli host"
   },
   "notifications": {
     "applicationUpdates": "Aggiornamenti Applicazioni",

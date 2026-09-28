@@ -2401,7 +2401,8 @@
     "updates": "Aktualisierungen",
     "users": "Benutzer",
     "vulnerabilities": "Sicherheitslücken",
-    "advisor": "Berater"
+    "advisor": "Berater",
+    "hostMetrics": "Host-Metriken"
   },
   "notifications": {
     "applicationUpdates": "Anwendungs-Updates",

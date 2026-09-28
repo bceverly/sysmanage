@@ -2420,7 +2420,8 @@
     "updates": "Updates",
     "users": "Users",
     "vulnerabilities": "Vulnerabilities",
-    "advisor": "Advisor"
+    "advisor": "Advisor",
+    "hostMetrics": "Host Metrics"
   },
   "notifications": {
     "applicationUpdates": "Application Updates",

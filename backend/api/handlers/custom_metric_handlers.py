@@ -204,3 +204,50 @@ async def handle_custom_metric_samples(  # NOSONAR
             "message": "Failed to store custom metric samples",
             "data": {},
         }
+
+
+async def handle_host_metrics(  # NOSONAR
+    db: Session, connection: Any, message_data: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Store the agent's built-in host metrics (Phase 21.5).
+
+    Contract (from the agent, every periodic run):
+        message_type = "host_metrics"
+        data payload = {"collected_at": iso, "metrics": {builtin_key: value}}
+
+    The history logic -- which series exist, one sample per 15 minutes,
+    nothing stored unless ``observability_engine`` is licensed -- lives in
+    ``backend.services.host_metrics``.  Never raises.
+    """
+    # Imported here: the service imports the module loader, which this
+    # handler module is loaded long before.
+    from backend.services import host_metrics  # noqa: PLC0415
+
+    ack = {"message_type": "host_metrics_ack"}
+    host_id = getattr(connection, "host_id", None)
+    if not host_id:
+        logger.warning("host_metrics received but connection has no host_id; ignoring")
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": "Host not registered",
+            "data": {},
+        }
+    if not host_metrics.collecting():
+        logger.debug(
+            "host_metrics for host %s ignored: %s is not licensed",
+            host_id,
+            host_metrics.ENGINE,
+        )
+        return ack
+    payload = (
+        message_data.get("data") if "metrics" not in message_data else message_data
+    )
+    try:
+        stored = host_metrics.store_host_metrics(db, host_id, payload or {})
+        db.commit()
+        logger.debug("host_metrics for host %s: stored=%s", host_id, stored)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        db.rollback()
+        logger.exception("Error storing host_metrics for host %s: %s", host_id, exc)
+    return ack

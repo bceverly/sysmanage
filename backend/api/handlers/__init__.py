@@ -37,7 +37,10 @@ from backend.api.handlers.config_mgmt_handlers import handle_config_profile_resu
 from backend.api.handlers.query_pack_handlers import handle_query_pack_result
 
 # Import from custom_metric_handlers (Custom Metrics & Graphs -- Slice 3b)
-from backend.api.handlers.custom_metric_handlers import handle_custom_metric_samples
+from backend.api.handlers.custom_metric_handlers import (
+    handle_custom_metric_samples,
+    handle_host_metrics,
+)
 
 # Import from hostname_handler
 from backend.api.handlers.hostname_handler import handle_hostname_changed
@@ -123,4 +126,5 @@ __all__ = [
     "handle_hostname_changed",
     # Custom Metrics & Graphs handlers (Slice 3b)
     "handle_custom_metric_samples",
+    "handle_host_metrics",
 ]

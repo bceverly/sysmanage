@@ -10357,42 +10357,42 @@ Building it before 21.2 would mean duplicating all three.
 > two runs on identical inputs is a defect, and an operator cannot be asked to
 > accept a compliance obligation from a black box.
 
-- [ ] **Threat-model Q&A wizard** -- a guided questionnaire run post-install (and
+- [x] **Threat-model Q&A wizard** -- a guided questionnaire run post-install (and
       re-runnable) that establishes what is being protected (data classes,
       regulatory obligations), from whom (opportunistic vs targeted vs insider),
       exposure (internet-facing, air-gapped, third-party access) and risk
       tolerance. Questions are **branching** -- answers suppress irrelevant
       branches -- and every question carries a plain-language "why we ask".
-- [ ] **Derived threat model, versioned and human-readable** -- a persisted,
+- [x] **Derived threat model, versioned and human-readable** -- a persisted,
       diffable artifact with an operator-facing summary page. Versioned because
       re-running the wizard must show *what changed and what that changed about
       the punch list*, not silently replace the previous model.
-- [ ] **Threat-model-conditioned recommendations** -- extend `advisor_engine`
+- [x] **Threat-model-conditioned recommendations** -- extend `advisor_engine`
       rules with applicability predicates keyed to threat-model attributes, then
       evaluate against the state SysManage already holds (host facts, packages,
       CVE, compliance, firewall, logging, MFA, FIPS, air-gap/federation posture).
       Output is per-installation, not per-host: these are *configuration* gaps.
-- [ ] **Punch list with a genuine tri-state** -- every recommendation is
+- [x] **Punch list with a genuine tri-state** -- every recommendation is
       **satisfied** (green), **open** (red), or **waived** (explicitly neutral --
       NOT a green tick, because the risk was accepted rather than eliminated, and
       conflating the two is how an accepted risk quietly becomes an invisible
       one). Waiving is reversible: re-enabling restores it to open and it counts
       as a discrepancy again.
-- [ ] **Waivers are audit artifacts, not UI state** -- a waiver records who, when
+- [x] **Waivers are audit artifacts, not UI state** -- a waiver records who, when
       and why, and is written through `audit_service` like any other privileged
       action. A waiver is scoped to the *rationale* that justified it: if the
       underlying rule's basis materially changes, the waiver is flagged
       **stale -- needs re-review** rather than continuing to suppress the item.
-- [ ] **Close the loop with our own capabilities** -- each open item offers
+- [x] **Close the loop with our own capabilities** -- each open item offers
       remediation through the engines that already implement it (enable
       centralized logging, turn on FIPS mode, deploy antivirus, tighten firewall
       roles, enroll MFA, apply a config profile), reusing 21.2's remediation
       generation gated behind operator approval + maintenance windows. An item
       with no automatable path says so plainly instead of offering a dead button.
-- [ ] **Re-evaluation on drift** -- the punch list is recomputed as the fleet
+- [x] **Re-evaluation on drift** -- the punch list is recomputed as the fleet
       changes, so an item that was satisfied and later regresses reopens itself;
       this is a standing posture view, not a one-shot report.
-- [ ] i18n/l10n
+- [x] i18n/l10n
 
 **Estimated Size:** ~4,500 lines
 
@@ -10649,11 +10649,11 @@ remediation needs its own approved path into the existing entry points.
       `/advisor/threat-model/diff?from_version&to_version` -- what changed in
       the model AND what that did to the punch list (the events the newer
       model caused on its first pass). 14 tests; 1 new message x13.
-- [ ] **S7 -- UI.** The wizard (branching, why-we-ask, resumable), the
+- [x] **S7 -- UI.** The wizard (branching, why-we-ask, resumable), the
       threat-model summary with version-to-version diff (what changed in the
       model AND in the punch list), and the punch list with the four states
       and the waiver dialog.
-      CODE DONE 2026-09-27, live browser check pending: a fourth Advisor tab
+      DONE 2026-09-28 (verified live on the Enterprise screenshot VM): a fourth Advisor tab
       (`Components/Posture/`). Wizard = one question per step with why-we-ask,
       opens on the current answers, saves only VISIBLE answers (the engine's
       cascade mirrored in `threatModelLogic.ts`). Punch list: state chips
@@ -10667,8 +10667,8 @@ remediation needs its own approved path into the existing entry points.
       21.2 feed and packs tab showed the engine's English). 224 new keys
       translated x13; `i18n-allow.txt` gains the regulation names and the
       `{{host}}: {{reason}}` line. 11 new vitest tests.
-- [ ] **S8 -- Docs, screenshots, i18n -- LAST.**
-      DONE 2026-09-27 except the VM capture: sysmanage-docs
+- [x] **S8 -- Docs, screenshots, i18n -- LAST.**
+      DONE 2026-09-28: sysmanage-docs
       `docs/professional-plus/threat-model-posture.html` (questionnaire,
       checks, the four states + regressions, waivers and lapse, fixing,
       history / version diff, API, getting started), a Pro+ index card, a
@@ -10680,10 +10680,14 @@ remediation needs its own approved path into the existing entry points.
       wizard, version diff, fix preview). Glossary: posture, posture item,
       remedy, regressed added; threat model and waiver re-glossed (the old
       "threat model" meant an attacker analysis); synced to all four repos.
-      67 docs keys x13, every docs i18n gate green. REMAINING: Bryan runs
-      `make screenshots-advisor-seed` + the Enterprise capture (the four
-      PNGs), and pulls + restarts the translation service on beast so it
-      loads the new glossary.
+      67 docs keys x13, every docs i18n gate green. Four PNGs captured on
+      the Enterprise VM 2026-09-28 (`make screenshots-advisor-capture`).
+      FOUND in the capture: the preferred waiver candidates all evaluated
+      satisfied on the VM, so the punch list showed no waived item -- the
+      seeder now prefers audit retention and falls back to any open item
+      (never the critical-CVE check). Operational follow-up: pull +
+      restart the translation service on beast so it loads the new
+      glossary.
 
 #### 21.5 Built-in Metric Graphs over Collected Facts (Professional+)
 
@@ -10730,13 +10734,75 @@ be quietly reversed:
     machinery rather than inventing a second retention policy that drifts from
     the first.
 
-- [ ] Decide the retention shape (aggregate / pinned / downsampled) -- a written
+- [x] Decide the retention shape (aggregate / pinned / downsampled) -- a written
       decision with the storage cost per 1,000 hosts, BEFORE any other item
-- [ ] Sample retention for the chosen series, reusing the custom-metric prune
-- [ ] Operator-selected chart cards over those series (host page + fleet view)
-- [ ] Flow-through to the existing Prometheus exposition endpoint so Grafana
+      DECIDED 2026-09-28 (Bryan): **host aggregates only**, stored as
+      **built-in custom metrics**, at **15-minute** resolution.
+      * Series (5 per host): CPU %, memory used %, swap used %, 1-minute
+        load average, and disk used % of the FULLEST local filesystem (one
+        series, not one per mount -- per-mount would multiply cardinality by
+        the mount count for a question "is any disk filling up?" answers).
+      * Why nothing exists to graph today: the agent's 5-minute periodic run
+        sends a process snapshot (up to 1,000 rows) and storage devices, and
+        the server REPLACES both each time; host-level CPU / memory / load
+        are not sent at all. The agent gains one cheap psutil read per
+        periodic run.
+      * Storage: rows in `custom_metric_sample` under system-defined
+        `custom_metric` rows (a `builtin_key`, no script, no tags -- so the
+        tag-driven deploy never ships them to an agent). Reused unchanged:
+        the retention prune and `custom_metrics_retention_days`, the samples
+        API, the Prometheus exporter, and alerting's `custom_metric`
+        condition ("alert when CPU > 90%" costs nothing new).
+      * Cost, MEASURED on PostgreSQL 2026-09-28 (200,000-row temp tables):
+        259 B/row in `custom_metric_sample` incl. its three indexes (a
+        purpose-built narrow table would be 151 B/row; rejected -- it would
+        need its own exporter, alert and API paths). Per 1,000 hosts: 5
+        series x 96/day = 480,000 rows/day = ~124 MB/day ->
+        **3.7 GB at 30 days, 11.2 GB at the default 90**. Storing every
+        5-minute report instead would triple that (33.6 GB at 90 days);
+        the agent still reports every 5 minutes and the server keeps one
+        sample per series per 15 minutes. Prometheus, via the exporter,
+        keeps its own finer history far more cheaply for anyone who wants
+        it.
+      * Pinned per-process series and downsampled per-process history were
+        both rejected: cost grows with pins / with up to 1,000 processes per
+        host, and the standing "no Grafana-class engine" scope decision
+        applies.
+      * Tier: storing the samples is gated on `observability_engine` being
+        licensed (the same engine that owns custom metrics), so an
+        unlicensed install does not quietly accumulate rows nobody can view.
+- [x] Sample retention for the chosen series, reusing the custom-metric prune
+      DONE 2026-09-28: agent `host_metrics_collection.py` (absent != 0; cpu is
+      the mean since the last run; disk = fullest local rw persistent fs) ->
+      `host_metrics` message -> `backend/services/host_metrics.py` stores rows
+      under 5 lazily-created built-in `custom_metric` rows (migration
+      `q12builtinmetric`: `builtin_key`, per tenant DB; never created over an
+      operator metric of the same name -- logged loudly), thinned to one per
+      15 min. The existing prune covers them with no new code.
+- [x] Operator-selected chart cards over those series (host page + fleet view)
+      DONE 2026-09-28: `observability_engine/host_metrics.pxi` (host + fleet
+      read endpoints, VIEW_HOST_DETAILS; fleet ranks top-N by average IN SQL
+      and returns hosts_reporting / hosts_total, where total = active hosts
+      plus any that reported in the range, so it can never read "6 of 0");
+      plugin host tab "Metrics" (chip-picked cards, remembered per browser;
+      "not reported" / "turned off" instead of a vanished card; the line
+      breaks at a >45 min gap) + `/host-metrics` fleet page. Built-ins are
+      enable/disable only; their names are reserved.
+- [x] Flow-through to the existing Prometheus exposition endpoint so Grafana
       gets the same series for free
-- [ ] i18n/l10n
+      DONE 2026-09-28: `builtin` label added; the exporter no longer loads
+      every OK sample into Python -- one query per metric for the latest
+      sample per host within max(2 x cadence, 1 h). Follow-up NOT in 21.5:
+      the advisor's `metric_history` domain still resolves
+      `domain_unavailable`; these samples are what it was waiting for.
+- [x] i18n/l10n
+      DONE 2026-09-28: 28 plugin keys + `nav.hostMetrics` (OSS) in all 13
+      locales; 4 engine gettext strings (observability_engine catalogs); 3
+      agent strings; docs page `professional-plus/host-metrics.html` + index
+      card + custom-metrics cross-link + roadmap page (47 docs keys). Glossary
+      gained series / sample / built-in / load average (synced to all repos).
+      Screenshots: `ent-host-metrics-tab` + `ent-host-metrics-fleet` from
+      `seed_pro.py seed_builtin_host_metrics` (PNGs pending a capture run).
 
 **Estimated Size:** ~800 lines if the retention shape is aggregates-only;
 substantially more for per-process series, which is why that decision comes

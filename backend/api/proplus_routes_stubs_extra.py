@@ -373,6 +373,22 @@ def _mount_stub_group_b(app, results: dict) -> int:
         ):
             return {"licensed": False, "samples": []}
 
+        # Built-in host metric graphs (Phase 21.5) -- the read side lives in
+        # observability_engine; unlicensed, the paths answer "not licensed".
+        @router.get("/host-metrics/hosts/{host_id}")
+        async def obs_host_metrics_host_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "series": []}
+
+        @router.get("/host-metrics/fleet/{key}")
+        async def obs_host_metrics_fleet_stub(  # pylint: disable=unused-argument
+            key: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "series": []}
+
         app.include_router(router, prefix="/api")
         stubs_mounted += 1
         logger.debug("Mounted observability_engine stub routes")

@@ -75,6 +75,7 @@ const PATH_CATEGORY: Record<string, CategoryId> = {
   '/query-packs': 'automation',
   '/custom-metrics': 'automation',
   '/advisor': 'insights',
+  '/host-metrics': 'insights',
   '/reports': 'insights',
   '/audit-analytics': 'insights',
   '/secrets-analytics': 'insights',
@@ -91,6 +92,7 @@ const PATH_CATEGORY: Record<string, CategoryId> = {
 // dynamic lookup clear of the detect-object-injection lint rule.
 const PATH_PERMISSION = new Map<string, string>([
   ['/custom-metrics', 'Manage Custom Metrics'],
+  ['/host-metrics', 'View Host Details'],
 ]);
 
 interface NavLeaf {

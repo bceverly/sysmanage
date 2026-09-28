@@ -2401,7 +2401,8 @@
     "updates": "업데이트",
     "users": "사용자",
     "vulnerabilities": "취약점",
-    "advisor": "어드바이저"
+    "advisor": "어드바이저",
+    "hostMetrics": "호스트 메트릭"
   },
   "notifications": {
     "applicationUpdates": "애플리케이션 업데이트",

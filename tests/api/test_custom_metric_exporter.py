@@ -151,8 +151,8 @@ def test_exposition_happy_path(scratch_session, client):
 
     body = resp.text
     assert (
-        "# HELP sysmanage_custom_metric_value Latest value of a user-defined "
-        "custom metric." in body
+        "# HELP sysmanage_custom_metric_value Latest value of a custom or "
+        "built-in host metric." in body
     )
     assert "# TYPE sysmanage_custom_metric_value gauge" in body
     # Header appears exactly once.
@@ -162,12 +162,12 @@ def test_exposition_happy_path(scratch_session, client):
     # Latest-ok value for host_a is 42.5 (not 10.0, not the errored None).
     assert (
         'sysmanage_custom_metric_value{metric="disk-free",'
-        'host="a.example.com",unit="%"} 42.5' in body
+        'host="a.example.com",unit="%",builtin="false"} 42.5' in body
     )
     # host_b series.
     assert (
         'sysmanage_custom_metric_value{metric="disk-free",'
-        'host="b.example.com",unit="%"} 7.0' in body
+        'host="b.example.com",unit="%",builtin="false"} 7.0' in body
     )
     # No tenant label in collapsed mode.
     assert "tenant=" not in body
@@ -241,7 +241,55 @@ def test_tenant_label_emitted_in_mt_mode(scratch_session, monkeypatch):
     assert resp.status_code == 200
     assert (
         'sysmanage_custom_metric_value{metric="cpu",host="t.example.com",'
-        'unit="%",tenant="tenant-abc-123"} 55.0' in resp.text
+        'unit="%",builtin="false",tenant="tenant-abc-123"} 55.0' in resp.text
+    )
+
+
+def test_a_stale_value_is_not_exported_as_current(scratch_session, client):
+    """Phase 21.5: a sample older than two cadences (floor one hour) is not
+    the host's CURRENT value -- a dead host must drop out of Grafana, not
+    keep its last reading forever."""
+    now = datetime.now(timezone.utc)
+    metric = _add_metric(scratch_session, "queue-depth")  # default 300 s cadence
+    fresh = _add_host(scratch_session, "fresh.example.com")
+    gone = _add_host(scratch_session, "gone.example.com")
+    _add_sample(scratch_session, metric, fresh, 3.0, now - timedelta(minutes=50))
+    _add_sample(scratch_session, metric, gone, 9.0, now - timedelta(hours=2))
+
+    body = client.get("/metrics/custom-metrics").text
+    assert 'host="fresh.example.com"' in body
+    assert 'host="gone.example.com"' not in body
+
+
+def test_a_long_cadence_metric_keeps_its_window(scratch_session, client):
+    now = datetime.now(timezone.utc)
+    metric = _add_metric(scratch_session, "nightly-backup-age")
+    metric.cadence_seconds = 86400
+    scratch_session.commit()
+    host = _add_host(scratch_session, "n.example.com")
+    _add_sample(scratch_session, metric, host, 12.0, now - timedelta(hours=30))
+    assert 'host="n.example.com"' in client.get("/metrics/custom-metrics").text
+
+
+def test_builtin_series_are_labelled(scratch_session, client):
+    now = datetime.now(timezone.utc)
+    metric = CustomMetric(
+        id=uuid.uuid4(),
+        name="host.cpu_percent",
+        script="",
+        interpreter="builtin",
+        unit="%",
+        cadence_seconds=900,
+        builtin_key="host.cpu_percent",
+    )
+    scratch_session.add(metric)
+    scratch_session.commit()
+    host = _add_host(scratch_session, "c.example.com")
+    _add_sample(scratch_session, metric, host, 23.5, now)
+    assert (
+        'sysmanage_custom_metric_value{metric="host.cpu_percent",'
+        'host="c.example.com",unit="%",builtin="true"} 23.5'
+        in client.get("/metrics/custom-metrics").text
     )
 
 

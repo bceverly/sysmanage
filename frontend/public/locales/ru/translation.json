@@ -2401,7 +2401,8 @@
     "updates": "Обновления",
     "users": "Пользователи",
     "vulnerabilities": "Уязвимости",
-    "advisor": "Советник"
+    "advisor": "Советник",
+    "hostMetrics": "Метрики хостов"
   },
   "notifications": {
     "applicationUpdates": "Обновления Приложений",

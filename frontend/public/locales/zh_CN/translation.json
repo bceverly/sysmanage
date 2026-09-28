@@ -2401,7 +2401,8 @@
     "updates": "更新",
     "users": "用户",
     "vulnerabilities": "漏洞",
-    "advisor": "顾问"
+    "advisor": "顾问",
+    "hostMetrics": "主机指标"
   },
   "notifications": {
     "applicationUpdates": "应用程序更新",

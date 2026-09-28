@@ -2401,7 +2401,8 @@
     "updates": "अपडेट",
     "users": "उपयोगकर्ता",
     "vulnerabilities": "कमज़ोरियाँ",
-    "advisor": "सलाहकार"
+    "advisor": "सलाहकार",
+    "hostMetrics": "होस्ट मेट्रिक्स"
   },
   "notifications": {
     "applicationUpdates": "एप्लिकेशन अपडेट",
