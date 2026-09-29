@@ -52,7 +52,7 @@ pycparser==2.23
 pydantic>=2.9.0,<2.13.0
 pydantic-extra-types==2.11.0
 pydantic-settings==2.14.2
-PyJWT==2.13.0  # CVE-2026-32597 + JWK/HS256/JWKS advisories; bumped 2.12.0->2.13.0
+PyJWT==2.15.1  # CVE-2026-102274 (malformed RSA JWK aborts a JWK Set); bumped 2.13.0->2.15.1 once semgrep moved to its own venv. Earlier: CVE-2026-32597 + JWK/HS256/JWKS advisories
 python-dotenv==1.2.2  # CVE-2026-28684 (symlink following in set_key)
 python-multipart>=0.0.31  # 0.0.20 DoS + form-parser bypass; 0.0.31 patches PYSEC-2026-3036..3040 (0.0.27 still affected)
 PyYAML==6.0.2

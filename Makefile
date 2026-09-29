@@ -180,7 +180,8 @@ ifeq ($(OS),Windows_NT)
 else
     PYTHON := $(VENV)/bin/python
     PIP := $(VENV)/bin/pip
-    SEMGREP := $(VENV)/bin/semgrep
+    SEMGREP_VENV := .venv-semgrep
+    SEMGREP := $(SEMGREP_VENV)/bin/semgrep
     VENV_ACTIVATE := $(VENV)/bin/activate
     # Host interpreter for the few recipes that shell out to python3 directly (SBOM,
     # update-requirements): prefer python3, else the newest versioned binary (NetBSD
@@ -1551,9 +1552,22 @@ SEMGREP_CONFIGS := --config=p/default --config=p/security-audit --config=p/trail
 # engine, ~981 files × 20k rules) which times out and so stays ADVISORY
 # (``|| true``): SEMGREP_APP_TOKEN adds it as enrichment on top of the gate.
 # Honors inline ``# nosemgrep`` either way.
-security-semgrep: $(VENV_ACTIVATE)
-	@$(PYTHON) -c "import semgrep" 2>/dev/null || $(PIP) install --quiet semgrep
-	@echo "Running Semgrep static analysis (local venv)..."
+ifeq ($(OS),Windows_NT)
+security-semgrep:
+else
+# Semgrep gets its OWN venv (requirements-semgrep.txt): every semgrep release
+# pins pyjwt~=2.13.0, and co-installed in the application venv that held the
+# server's PyJWT on a CVE-affected version.  Rebuilt when the pin file changes.
+$(SEMGREP): requirements-semgrep.txt
+	@echo "Creating the semgrep tool venv ($(SEMGREP_VENV))..."
+	@$(PYTHON3) -m venv $(SEMGREP_VENV)
+	@$(SEMGREP_VENV)/bin/pip install --quiet --upgrade pip
+	@$(SEMGREP_VENV)/bin/pip install --quiet -r requirements-semgrep.txt
+	@touch $@
+
+security-semgrep: $(SEMGREP)
+endif
+	@echo "Running Semgrep static analysis (its own venv)..."
 	@echo "Tip: export SEMGREP_APP_TOKEN to add the Pro cloud engine as advisory enrichment."
 ifeq ($(OS),Windows_NT)
 	@echo "Running gating local Semgrep scan (backend/ + tests/)..."

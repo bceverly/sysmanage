@@ -52,7 +52,7 @@ pycparser==2.23
 pydantic>=2.9.0,<2.13.0
 pydantic-extra-types==2.11.0
 pydantic-settings==2.14.2
-PyJWT==2.13.0  # CVE-2026-32597 + JWK/HS256/JWKS advisories; bumped 2.12.0->2.13.0
+PyJWT==2.15.1  # CVE-2026-102274 (malformed RSA JWK aborts a JWK Set); bumped 2.13.0->2.15.1 once semgrep moved to its own venv. Earlier: CVE-2026-32597 + JWK/HS256/JWKS advisories
 pylint>=3.0.0
 pytest>=9.0.3  # 9.0.3 patches the tmp-dir advisory affecting <9.0.3
 pytest-asyncio>=0.21.0
@@ -84,11 +84,10 @@ polib>=1.2.0  # PO file parsing for backend i18n validation
 reportlab==4.4.4
 safety==3.7.0
 safety-schemas==0.0.16
-# semgrep ships a compiled OCaml core with Linux/macOS wheels only -- there is no
-# OpenBSD/NetBSD/FreeBSD/Windows build, and pip would otherwise backtrack through
-# every sdist forever trying (and failing) to build it.  Gate it to the platforms
-# it actually supports; the BSDs run the rest of `make security` without it.
-semgrep>=1.162.0 ; sys_platform == "linux" or sys_platform == "darwin"  # 1.162.0 relaxed tomli~=2.0.1 → ~=2.4.0
+# semgrep is NOT installed here: it lives in its own tool venv
+# (requirements-semgrep.txt, `make security-semgrep`).  Every semgrep release
+# pins pyjwt~=2.13.0, which held the server's own PyJWT on a CVE-affected
+# version (CVE-2026-102274) -- a scanner must not dictate a runtime dependency.
 pip-audit>=2.10.0
 
 # Note: On OpenBSD 7.7, coverage.py C tracer requires gcc and py3-cffi

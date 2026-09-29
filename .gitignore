@@ -135,6 +135,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+.venv-semgrep/
 env/
 venv/
 ENV/
@@ -198,6 +199,10 @@ token.json
 # Vault credentials and data (sensitive)
 .vault_credentials
 data/
+# ...but NOT the shipped IEEE MAC-vendor table (Phase 21.6 S5): this rule
+# silently kept backend/data/oui.tsv.gz out of the repo, so CI had no table.
+!backend/data/
+!backend/data/oui.tsv.gz
 
 # HashiCorp Vault tokens and secrets (prevent accidental commits)
 *.vault_token

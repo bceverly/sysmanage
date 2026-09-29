@@ -154,11 +154,10 @@ jobs:
         pip install -r requirements.txt
 
     - name: Install pip-audit (separate resolver pass)
-      # pip-audit pins tomli>=2.2.1 while semgrep (in requirements.txt) pins
-      # tomli~=2.0.1; installing pip-audit in the same resolver pass makes
-      # the graph unsolvable. Installing it in a separate `pip install`
-      # invocation lets pip resolve it independently -- tomli gets bumped
-      # with a non-fatal warning, both tools still work.
+      # Kept as its own resolver pass so pip-audit's pins never constrain the
+      # application's.  (It was first split out because semgrep, then in
+      # requirements.txt, pinned an older tomli; semgrep now has its own venv
+      # -- requirements-semgrep.txt -- since it also pinned PyJWT.)
       run: pip install 'pip-audit>=2.10.0'
 
     - name: Run Safety scan (Python)

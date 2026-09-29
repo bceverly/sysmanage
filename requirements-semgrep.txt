@@ -1,0 +1,13 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+#
+# Semgrep, installed into its OWN venv (.venv-semgrep) by `make security-semgrep`
+# -- never into the application venv.  Every semgrep release pins
+# pyjwt~=2.13.0; co-installed, that held the server's PyJWT on a version with
+# CVE-2026-102274 (found 2026-09-29).  Same reason safety has its own venv.
+#
+# Linux/macOS only: semgrep ships a compiled OCaml core with no
+# OpenBSD/NetBSD/FreeBSD/Windows wheel, and pip would otherwise backtrack
+# through every sdist forever.  The BSDs run the rest of `make security`.
+semgrep>=1.162.0 ; sys_platform == "linux" or sys_platform == "darwin"  # 1.162.0 relaxed tomli~=2.0.1 -> ~=2.4.0
