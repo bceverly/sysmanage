@@ -5538,6 +5538,14 @@ msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "Уязвимости macOS по версиям ОС на основе данных NVD о затронутых версиях"
 
+#: backend/api/agent_poll.py:166
+msgid "Host authentication failed for this poll"
+msgstr "Не удалось выполнить аутентификацию хоста для этого опроса"
+
+#: backend/api/agent_poll.py:179
+msgid "Tenant routing is temporarily unavailable"
+msgstr "Маршрутизация арендаторов временно недоступна"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "Служба электронной почты отключена. Включите её в файле конфигурации."
 

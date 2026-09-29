@@ -48,7 +48,9 @@ class TestAgentAuth:
 
         response = client.post("/api/agent/auth")
 
-        assert response.status_code == 200
+        # 429 with Retry-After: a 200 without a token read as an empty token.
+        assert response.status_code == 429
+        assert response.headers["Retry-After"] == "900"
         data = response.json()
         assert "error" in data
         assert data["error"] == "Rate limit exceeded"

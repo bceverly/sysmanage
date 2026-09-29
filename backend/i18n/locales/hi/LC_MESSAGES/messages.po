@@ -5543,6 +5543,14 @@ msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "OS संस्करण के अनुसार macOS की भेद्यताएँ, NVD के प्रभावित-संस्करण डेटा से"
 
+#: backend/api/agent_poll.py:166
+msgid "Host authentication failed for this poll"
+msgstr "इस पोल के लिए होस्ट प्रमाणीकरण विफल रहा"
+
+#: backend/api/agent_poll.py:179
+msgid "Tenant routing is temporarily unavailable"
+msgstr "टेनेंट रूटिंग अस्थायी रूप से अनुपलब्ध है"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "ईमेल सेवा अक्षम है। कॉन्फ़िगरेशन फ़ाइल में इसे सक्षम करें।"
 

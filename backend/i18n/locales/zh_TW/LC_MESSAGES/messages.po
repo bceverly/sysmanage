@@ -5267,6 +5267,14 @@ msgstr "NetBSD pkgsrc 套件弱點（pkg_admin audit 讀取的資料）"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "依作業系統版本列出的 macOS 弱點（來自 NVD 的受影響版本資料）"
 
+#: backend/api/agent_poll.py:166
+msgid "Host authentication failed for this poll"
+msgstr "此次輪詢的主機驗證失敗"
+
+#: backend/api/agent_poll.py:179
+msgid "Tenant routing is temporarily unavailable"
+msgstr "租戶路由暫時無法使用"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "電子郵件服務已停用。請在設定檔中啟用。"
 

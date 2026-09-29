@@ -5421,6 +5421,14 @@ msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "ثغرات macOS حسب إصدار نظام التشغيل، من بيانات NVD عن الإصدارات المتأثرة"
 
+#: backend/api/agent_poll.py:166
+msgid "Host authentication failed for this poll"
+msgstr "فشلت مصادقة المضيف لعملية الاستقصاء هذه"
+
+#: backend/api/agent_poll.py:179
+msgid "Tenant routing is temporarily unavailable"
+msgstr "توجيه المستأجر غير متاح مؤقتًا"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "خدمة البريد الإلكتروني معطلة. قم بتمكينها في ملف التكوين."
 

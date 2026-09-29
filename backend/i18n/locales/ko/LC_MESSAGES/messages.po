@@ -5305,6 +5305,14 @@ msgstr "NetBSD pkgsrc 패키지 취약점(pkg_admin audit가 읽는 데이터)"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "OS 버전별 macOS 취약점(NVD의 영향받는 버전 데이터 기준)"
 
+#: backend/api/agent_poll.py:166
+msgid "Host authentication failed for this poll"
+msgstr "이 폴링에 대한 호스트 인증에 실패했습니다"
+
+#: backend/api/agent_poll.py:179
+msgid "Tenant routing is temporarily unavailable"
+msgstr "테넌트 라우팅을 일시적으로 사용할 수 없습니다"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "이메일 서비스가 비활성화되어 있습니다. 구성 파일에서 활성화하세요."
 

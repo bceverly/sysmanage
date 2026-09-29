@@ -5428,6 +5428,14 @@ msgstr "NetBSD pkgsrc package vulnerabilities (what pkg_admin audit reads)"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "macOS vulnerabilities by OS version, from NVD's affected-version data"
 
+#: backend/api/agent_poll.py:166
+msgid "Host authentication failed for this poll"
+msgstr "Host authentication failed for this poll"
+
+#: backend/api/agent_poll.py:179
+msgid "Tenant routing is temporarily unavailable"
+msgstr "Tenant routing is temporarily unavailable"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "Email service is disabled. Enable it in the configuration file."
 

@@ -19,6 +19,7 @@ from fastapi import (
     WebSocket,
     WebSocketDisconnect,
 )
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -61,7 +62,14 @@ async def authenticate_agent(request: Request):
 
     # Check rate limiting
     if websocket_security.is_connection_rate_limited(client_host):
-        return {"error": _("Rate limit exceeded"), "retry_after": 900}
+        # 429, not 200: a 200 with no token was read by agents as an EMPTY
+        # token, whose WebSocket rejection they took for "this network blocks
+        # WebSockets" -- demoting them to polling (found 2026-09-29).
+        return JSONResponse(
+            status_code=429,
+            content={"error": _("Rate limit exceeded"), "retry_after": 900},
+            headers={"Retry-After": "900"},
+        )
 
     # Record connection attempt
     websocket_security.record_connection_attempt(client_host)

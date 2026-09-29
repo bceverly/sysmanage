@@ -10851,7 +10851,7 @@ CIDRs, rate-limited, and audited** -- never a fleet-wide default.
       execution -- the same distinction Phase 22.1 draws for `mobile_device`
       DONE 2026-09-29 (21.6 S1, migration `q13assetdisc`). OUI vendor and
       open-port fingerprint evidence arrive with S5 / S4.
-- [ ] Agent-side passive neighbor reporting (ARP/NDP cache, mDNS/SSDP) behind
+- [x] Agent-side passive neighbor reporting (ARP/NDP cache, mDNS/SSDP) behind
       a `network_discovery` capability, per-platform, defaulting to passive
       S1 2026-09-29: Linux (raw capture as root, sockets otherwise),
       Windows and macOS/BSD (cache + mDNS/SSDP) shipped; ARP listening on
@@ -10860,6 +10860,16 @@ CIDRs, rate-limited, and audited** -- never a fleet-wide default.
       (macOS/OpenBSD vs FreeBSD/NetBSD); STILL UNTICKED until it has captured
       on a real macOS and a real BSD host -- synthetic buffers prove the
       parser, not the ioctls.
+      DONE 2026-09-29 on Bryan's real hosts, `arp_listen: ok` on all four,
+      most devices found by ARP listening: macOS (MacBook Air, Wi-Fi) 24 seen /
+      19 via ARP, OpenBSD (t480) 19 / 14, FreeBSD 18 / 14, NetBSD 1 / 1 (a
+      libvirt NAT guest: its gateway IS the whole segment -- correct). Found
+      on the way: `network_bpf` imported `fcntl` at module load, which crashed
+      the agent at startup on Windows (fixed: imported where used, with a test
+      that loads the module without it). The bridge-by-nature skip read Linux
+      sysfs only, so FreeBSD monitored its VM/jail `bridge1`; now the BSDs
+      and macOS read the bridge's members from ifconfig (both dialects) and
+      skip a bridge whose members are all taps/epairs/vmnet.
 - [x] Optional active sweep of operator-specified CIDRs -- off by default,
       rate-limited, audited on every run, with the target ranges recorded
       DONE 21.6 S4 (2026-09-29): second opt-in, on-link IPv4 only, <= 4096

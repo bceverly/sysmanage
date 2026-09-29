@@ -59,8 +59,12 @@ class TestAuthenticateAgent:
 
             result = await authenticate_agent(mock_request)
 
-            assert "error" in result
-            assert result["retry_after"] == 900
+            # 429, not a 200 an agent reads as an empty token.
+            assert result.status_code == 429
+            assert result.headers["Retry-After"] == "900"
+            body = json.loads(result.body)
+            assert "error" in body
+            assert body["retry_after"] == 900
 
     @pytest.mark.asyncio
     async def test_authenticate_agent_no_hostname_header(self):

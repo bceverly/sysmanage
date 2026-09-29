@@ -5557,6 +5557,14 @@ msgstr ""
 "Vulnerabilidades do macOS por versão do sistema operacional, a partir dos "
 "dados de versões afetadas do NVD"
 
+#: backend/api/agent_poll.py:166
+msgid "Host authentication failed for this poll"
+msgstr "Falha na autenticação do host para esta sondagem"
+
+#: backend/api/agent_poll.py:179
+msgid "Tenant routing is temporarily unavailable"
+msgstr "O roteamento de locatários está temporariamente indisponível"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr ""
 #~ "O serviço de e-mail está desabilitado. Habilite-o no arquivo de "

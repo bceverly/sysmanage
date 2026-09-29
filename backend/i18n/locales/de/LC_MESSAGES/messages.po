@@ -5647,6 +5647,14 @@ msgstr ""
 "macOS-Schwachstellen nach Betriebssystemversion, aus den Daten des NVD zu "
 "betroffenen Versionen"
 
+#: backend/api/agent_poll.py:166
+msgid "Host authentication failed for this poll"
+msgstr "Host-Authentifizierung für diese Abfrage fehlgeschlagen"
+
+#: backend/api/agent_poll.py:179
+msgid "Tenant routing is temporarily unavailable"
+msgstr "Mandanten-Routing ist vorübergehend nicht verfügbar"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr ""
 #~ "E-Mail-Dienst ist deaktiviert. Aktivieren Sie ihn in der "

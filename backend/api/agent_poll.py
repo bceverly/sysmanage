@@ -44,17 +44,22 @@ short polls rather than to a broken agent.
 
 from __future__ import annotations
 
+import hmac
+import uuid
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from backend.i18n import _
 from backend.persistence.db import get_db
+from backend.persistence.models import Host
+from backend.persistence.partitions import tenant_engine_for_host
 from backend.security.communication_security import websocket_security
 from backend.utils.log_sanitize import scrub
 from backend.utils.verbosity_logger import get_logger
+from backend.websocket import poll_presence
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_manager import server_queue_manager
 
@@ -97,11 +102,15 @@ def _authenticated_host_id(
     payload: PollRequest,
     authorization: Optional[str],
 ) -> str:
-    """Validate the agent's connection token and return the host it may act as.
+    """Validate the agent's connection token; return the host id it claims.
 
     The same token the WebSocket path issues via ``/agent/auth`` -- deliberately,
-    so switching transport does not mean switching trust model. An agent that
-    can open a WebSocket can poll, and vice versa, with identical authority.
+    so switching transport does not mean switching trust model.  The CLAIM is
+    only trusted once ``_verify_host`` has matched it to the host's own secret.
+
+    ``validate_connection_token`` returns ``(is_valid, connection_id, error)``.
+    This used to test the tuple itself, which is always truthy, so ANY non-empty
+    bearer string was accepted (found 2026-09-29).
     """
     token = None
     if authorization and authorization.lower().startswith("bearer "):
@@ -110,7 +119,13 @@ def _authenticated_host_id(
         raise HTTPException(status_code=401, detail=_("Missing agent connection token"))
 
     client_host = request.client.host if request.client else "unknown"
-    if not websocket_security.validate_connection_token(token, client_host):
+    is_valid = websocket_security.validate_connection_token(token, client_host)[0]
+    try:
+        host_id = str(uuid.UUID(str(payload.host_id)))
+    except ValueError:
+        is_valid = False
+        host_id = None
+    if not is_valid:
         # Deliberately says "authentication failed" rather than naming the
         # credential type: a log line that mentions a token beside a client
         # address is what secret-scanning rules look for, and the wording buys
@@ -124,8 +139,46 @@ def _authenticated_host_id(
         raise HTTPException(
             status_code=401, detail=_("Invalid or expired connection token")
         )
+    return host_id
 
-    return payload.host_id
+
+def _verify_host(db: Session, host_id: str, host_secret: Optional[str]) -> None:
+    """The caller must hold THIS host's own secret, not just any agent's.
+
+    A connection token only proves "some agent authenticated" -- ``/agent/auth``
+    is public and takes the hostname from a header -- so on its own it would let
+    one host poll as another: drain its queue (which can carry deployed keys
+    and certificates) and speak for it.  The host token is the per-host secret
+    issued at approval; the WebSocket path identifies hosts by it too.
+    """
+    host = db.query(Host).filter(Host.id == uuid.UUID(host_id)).first()
+    expected = getattr(host, "host_token", None)
+    if not (
+        expected
+        and host_secret
+        and hmac.compare_digest(str(expected).encode(), str(host_secret).encode())
+    ):
+        logger.warning(
+            "Agent poll rejected: host %s not found or its credential did not match",
+            scrub(host_id),
+        )
+        raise HTTPException(
+            status_code=401, detail=_("Host authentication failed for this poll")
+        )
+
+
+def _host_session(host_id: str, db: Session) -> Session:
+    """The session holding this host's row and queue: its TENANT database when
+    it is bound to one.  The request's ``db`` is the bootstrap database, where a
+    tenant host does not exist -- inbound messages were silently dropped there
+    (the enqueue refuses an unknown host) and its queue could never be read."""
+    try:
+        engine = tenant_engine_for_host(host_id)
+    except Exception as exc:  # noqa: BLE001 - logged loudly by the resolver
+        raise HTTPException(
+            status_code=503, detail=_("Tenant routing is temporarily unavailable")
+        ) from exc
+    return sessionmaker(bind=engine)() if engine is not None else db
 
 
 # No response_model=: the `-> PollResponse` return annotation below already
@@ -136,6 +189,7 @@ async def agent_poll(
     request: Request,
     payload: PollRequest,
     authorization: Optional[str] = Header(default=None),
+    x_host_token: Optional[str] = Header(default=None),
     db: Session = Depends(get_db),
 ) -> PollResponse:
     """Exchange queued messages in both directions over one ordinary POST.
@@ -146,7 +200,20 @@ async def agent_poll(
     the same bookkeeping ``outbound_processor`` performs.
     """
     host_id = _authenticated_host_id(request, payload, authorization)
+    host_db = _host_session(host_id, db)
+    try:
+        _verify_host(host_db, host_id, x_host_token)
+        response = _exchange(host_db, host_id, payload)
+        host_db.commit()
+    finally:
+        if host_db is not db:
+            host_db.close()
+    poll_presence.touch(host_id)
+    return response
 
+
+def _exchange(host_db: Session, host_id: str, payload: PollRequest) -> PollResponse:
+    """Both directions of one poll, on the host's own database."""
     # --- agent -> server -------------------------------------------------
     accepted = 0
     for message in payload.messages:
@@ -156,7 +223,7 @@ async def agent_poll(
                 message_data=message.data,
                 direction=QueueDirection.INBOUND,
                 host_id=host_id,
-                db=db,
+                db=host_db,
             )
             accepted += 1
         except Exception:  # pylint: disable=broad-except
@@ -173,7 +240,7 @@ async def agent_poll(
         host_id=host_id,
         direction=QueueDirection.OUTBOUND,
         limit=MAX_MESSAGES_PER_POLL,
-        db=db,
+        db=host_db,
     )
 
     outbound: List[Dict[str, Any]] = []
@@ -185,7 +252,7 @@ async def agent_poll(
                 "data": queued.message_data,
             }
         )
-        server_queue_manager.mark_sent(queued.message_id, db=db)
+        server_queue_manager.mark_sent(queued.message_id, db=host_db)
 
     if accepted or outbound:
         logger.debug(

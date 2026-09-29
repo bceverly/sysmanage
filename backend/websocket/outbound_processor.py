@@ -179,6 +179,18 @@ def _log_command_sent(message, message_data, host) -> None:
     )
 
 
+def _awaiting_poll(host) -> bool:
+    """True when ``host`` has no WebSocket but is polling over HTTP."""
+    from backend.websocket import poll_presence  # noqa: PLC0415
+    from backend.websocket.connection_manager import (  # noqa: PLC0415
+        connection_manager,
+    )
+
+    if connection_manager.get_agent_by_hostname(host.fqdn):
+        return False
+    return poll_presence.recently_polled(host.id)
+
+
 async def process_outbound_message(message, host, db: Session) -> None:
     """
     Process a single outbound message.
@@ -188,6 +200,10 @@ async def process_outbound_message(message, host, db: Session) -> None:
         host: The host to send the message to
         db: Database session
     """
+    if _awaiting_poll(host):
+        # No socket, but the agent is on the HTTP fallback: leave the message
+        # PENDING so its next poll collects it (see poll_presence).
+        return
     try:
         # Mark message as processing
         if not server_queue_manager.mark_processing(message.message_id, db=db):

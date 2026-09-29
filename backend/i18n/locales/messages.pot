@@ -5225,3 +5225,11 @@ msgstr ""
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
+
+#: backend/api/agent_poll.py:166
+msgid "Host authentication failed for this poll"
+msgstr ""
+
+#: backend/api/agent_poll.py:179
+msgid "Tenant routing is temporarily unavailable"
+msgstr ""

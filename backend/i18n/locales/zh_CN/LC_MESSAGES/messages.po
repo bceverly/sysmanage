@@ -5264,6 +5264,14 @@ msgstr "NetBSD pkgsrc 软件包漏洞（pkg_admin audit 读取的数据）"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "按操作系统版本列出的 macOS 漏洞（来自 NVD 的受影响版本数据）"
 
+#: backend/api/agent_poll.py:166
+msgid "Host authentication failed for this poll"
+msgstr "此次轮询的主机身份验证失败"
+
+#: backend/api/agent_poll.py:179
+msgid "Tenant routing is temporarily unavailable"
+msgstr "租户路由暂时不可用"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "电子邮件服务已禁用。请在配置文件中启用。"
 

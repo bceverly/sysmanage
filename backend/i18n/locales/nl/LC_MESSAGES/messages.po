@@ -5519,6 +5519,14 @@ msgstr ""
 "macOS-kwetsbaarheden per besturingssysteemversie, uit de gegevens van NVD "
 "over getroffen versies"
 
+#: backend/api/agent_poll.py:166
+msgid "Host authentication failed for this poll"
+msgstr "Hostverificatie mislukt voor deze poll"
+
+#: backend/api/agent_poll.py:179
+msgid "Tenant routing is temporarily unavailable"
+msgstr "Tenantroutering is tijdelijk niet beschikbaar"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr ""
 #~ "E-mailservice is uitgeschakeld. Schakel deze in het configuratiebestand in."
