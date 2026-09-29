@@ -2402,7 +2402,8 @@
     "users": "사용자",
     "vulnerabilities": "취약점",
     "advisor": "어드바이저",
-    "hostMetrics": "호스트 메트릭"
+    "hostMetrics": "호스트 메트릭",
+    "assetDiscovery": "네트워크 탐색"
   },
   "notifications": {
     "applicationUpdates": "애플리케이션 업데이트",
@@ -3920,7 +3921,9 @@
       "smSec004": "호스트 방화벽이 꺼진 상태에서 모든 인터페이스에서 수신 대기 중인 서비스",
       "smSec005": "30일 이내에 만료되는 인증서",
       "smStab001": "7일 넘게 해결되지 않은 구성 이탈",
-      "smStabF01": "OpenSSL 버전이 피어의 버전과 다름"
+      "smStabF01": "OpenSSL 버전이 피어의 버전과 다름",
+      "pmNetDiscovery": "네트워크의 장치가 검색되고 있습니다",
+      "pmNetUnmanaged": "네트워크에 관리되지 않는 장치가 없습니다"
     },
     "curatedPack": {
       "baseline": {
@@ -4025,7 +4028,9 @@
       "set_air_gap_role": "에어갭 배포에 맞게 서버 역할을 설정합니다.",
       "set_audit_retention": "감사 API를 통해 최소 365일의 감사 보존 정책을 생성하십시오. 아직 이를 위한 화면은 없습니다.",
       "set_password_policy": "비밀번호 정책은 sysmanage.yaml에서 설정됩니다. SysManage가 대신 변경할 수 없습니다.",
-      "shorten_session": "세션이 1시간 후 만료되도록 합니다."
+      "shorten_session": "세션이 1시간 후 만료되도록 합니다.",
+      "enable_network_discovery": "에이전트가 주변 장치를 보고하도록 네트워크 검색을 켜십시오.",
+      "review_unmanaged_devices": "관리되지 않는 각 장치를 등록하거나 사유와 함께 알려진 장치로 표시하십시오."
     },
     "saved": "위협 모델이 저장되었습니다. 조치 항목 목록은 다음 어드바이저 실행 시 다시 평가됩니다.",
     "stale": {
@@ -4204,6 +4209,170 @@
       "saveFailed": "위협 모델을 저장할 수 없습니다.",
       "step": "질문 {{current}}/{{total}}",
       "title": "설치 환경을 설명해 주십시오"
+    }
+  },
+  "assetDiscovery": {
+    "blindSpots": {
+      "agentsLimited": "일부 에이전트는 네트워크의 모든 것을 볼 수 없습니다:",
+      "notEquipped": "호스트 {{count}}개에서 탐색에 참여할 수 없는 에이전트가 실행 중입니다. 해당 네트워크는 탐색 범위에 포함되지 않습니다.",
+      "notEquipped_other": "호스트 {{count}}개에서 탐색에 참여할 수 없는 에이전트가 실행 중입니다. 해당 네트워크는 탐색 범위에 포함되지 않습니다.",
+      "notEquipped_one": "호스트 {{count}}개에서 탐색에 참여할 수 없는 에이전트가 실행 중입니다. 해당 네트워크는 탐색 범위에 포함되지 않습니다.",
+      "off": "탐색이 꺼져 있습니다. 에이전트가 수신 대기하지 않으므로 새로운 항목이 발견되지 않습니다.",
+      "silent": "에이전트는 수신만 합니다. 아무것도 전송하지 않는 장치는 보이지 않으므로 이 목록은 불완전할 수 있습니다.",
+      "stale": "보고를 중단했습니다",
+      "unswept": "최근 7일 동안 스캔되지 않음: {{networks}}"
+    },
+    "category": {
+      "appliance": "전용 장비",
+      "iot": "IoT 장치 또는 센서",
+      "networkEquipment": "네트워크 장비",
+      "other": "기타",
+      "personalDevice": "개인 장치",
+      "printer": "프린터",
+      "virtualMachine": "가상 머신",
+      "virtualAddress": "가상 또는 공유 주소 (VIP, 로드 밸런서)"
+    },
+    "counts": {
+      "excluded": "알려진 장치(허용됨) {{count}}개",
+      "excluded_other": "알려진 장치(허용됨) {{count}}개",
+      "excluded_one": "알려진 장치(허용됨) {{count}}개",
+      "managed": "관리됨 {{count}}개",
+      "managed_other": "관리됨 {{count}}개",
+      "managed_one": "관리됨 {{count}}개",
+      "onNetwork": "{{network}}에 {{count}}개",
+      "onNetwork_other": "{{network}}에 {{count}}개",
+      "onNetwork_one": "{{network}}에 {{count}}개",
+      "unmanaged": "관리되지 않음 {{count}}개",
+      "unmanaged_other": "관리되지 않음 {{count}}개",
+      "unmanaged_one": "관리되지 않음 {{count}}개"
+    },
+    "exclude": {
+      "action": "{{count}}개를 알려진 장치(허용됨)로 표시",
+      "action_other": "{{count}}개를 알려진 장치(허용됨)로 표시",
+      "action_one": "{{count}}개를 알려진 장치(허용됨)로 표시",
+      "category": "어떤 장치입니까?",
+      "confirm": "알려진 장치로 표시",
+      "done": "장치 {{count}}개를 알려진 장치로 표시했습니다.",
+      "done_other": "장치 {{count}}개를 알려진 장치로 표시했습니다.",
+      "done_one": "장치 {{count}}개를 알려진 장치로 표시했습니다.",
+      "intro": "장치 {{count}}개가 더 이상 관리되지 않음으로 표시되지 않습니다. 이 작업은 사용자 이름 및 사유와 함께 기록되며, IP 주소가 바뀌어도 MAC 주소를 기준으로 각 장치에 계속 적용됩니다.",
+      "intro_other": "장치 {{count}}개가 더 이상 관리되지 않음으로 표시되지 않습니다. 이 작업은 사용자 이름 및 사유와 함께 기록되며, IP 주소가 바뀌어도 MAC 주소를 기준으로 각 장치에 계속 적용됩니다.",
+      "intro_one": "장치 {{count}}개가 더 이상 관리되지 않음으로 표시되지 않습니다. 이 작업은 사용자 이름 및 사유와 함께 기록되며, IP 주소가 바뀌어도 MAC 주소를 기준으로 각 장치에 계속 적용됩니다.",
+      "reason": "사유",
+      "reasonHelp": "필수 항목입니다. 예: 시설관리팀이 관리하는 안내 데스크 프린터.",
+      "title": "알려진 장치(허용됨)로 표시"
+    },
+    "exclusions": {
+      "decidedBy": "결정한 사람",
+      "empty": "알려진 장치로 표시된 장치가 없습니다.",
+      "revokedBy": "{{who}}님이 취소함: {{why}}",
+      "showRevoked": "취소된 결정 표시"
+    },
+    "filters": {
+      "allNetworks": "모든 네트워크",
+      "network": "네트워크",
+      "search": "MAC 또는 IP 주소 검색"
+    },
+    "loadError": "탐색된 장치를 불러올 수 없습니다.",
+    "method": {
+      "arpListen": "ARP 수신 대기",
+      "cache": "이웃 캐시",
+      "mdns": "mDNS",
+      "ndListen": "IPv6 이웃 탐색",
+      "ssdp": "SSDP",
+      "sweep": "능동 스캔"
+    },
+    "policy": {
+      "enabled": "에이전트가 네트워크에서 장치를 수신 대기합니다",
+      "hour": "매시간",
+      "interval": "보고 주기",
+      "lastChanged": "{{when}}에 {{who}}님이 마지막으로 변경함",
+      "minutes": "{{count}}분마다",
+      "minutes_other": "{{count}}분마다",
+      "minutes_one": "1분마다",
+      "sweeps": "능동 스캔 허용",
+      "days": "{{count}}일",
+      "days_other": "{{count}}일",
+      "days_one": "{{count}}일",
+      "retention": "보이지 않은 장치를 잊기까지의 기간"
+    },
+    "revoke": {
+      "confirm": "취소",
+      "title": "이 장치를 다시 관리되지 않음으로 표시"
+    },
+    "status": {
+      "unmanaged": "관리되지 않음"
+    },
+    "subtitle": "에이전트가 네트워크에서 발견했지만 SysManage가 관리하지 않는 장치입니다.",
+    "table": {
+      "address": "주소",
+      "device": "장치",
+      "empty": "일치하는 장치가 없습니다.",
+      "evidence": "자체 식별 정보",
+      "ipOnly": "MAC 확인 안 됨",
+      "lastSeen": "마지막 확인",
+      "localMac": "주소가 변경될 수 있음",
+      "localMacHelp": "로컬 관리 주소입니다. 휴대폰과 태블릿은 이 주소를 변경하므로 이 장치가 새 주소로 다시 나타날 수 있습니다.",
+      "more": "{{total}}개 중 {{shown}}개 표시 중. 위의 필터로 목록을 좁히세요.",
+      "seenBy": "발견한 호스트",
+      "selectAll": "모두 선택",
+      "status": "상태",
+      "maybe": "아마도: {{type}}"
+    },
+    "tabs": {
+      "excluded": "알려진 장치(허용됨)",
+      "managed": "관리됨",
+      "unmanaged": "관리되지 않음",
+      "sweeps": "스캔"
+    },
+    "title": "네트워크 탐색",
+    "unavailable": {
+      "disabled": "활성화되지 않음",
+      "notRoot": "에이전트가 루트로 실행되고 있지 않음",
+      "portInUse": "다른 프로그램이 포트를 사용 중임",
+      "unreadable": "읽을 수 없음",
+      "unsupportedPlatform": "이 플랫폼에서 지원되지 않음"
+    },
+    "sweep": {
+      "agent": "스캔한 에이전트",
+      "disabled": "능동 스캔이 꺼져 있습니다. 자신을 알리지 않는 장치를 찾으려면 위 설정에서 허용하십시오.",
+      "error": "스캔을 시작할 수 없습니다.",
+      "found": "발견됨",
+      "foundOf": "주소 {{probed}}개 중 {{found}}개",
+      "intro": "네트워크의 에이전트가 모든 주소에 작은 패킷을 하나씩 보낸 다음 응답한 모든 장치를 보고합니다. 이를 통해 자신을 알리지 않는 장치를 찾을 수 있으며, 이 작업은 사용자 이름과 함께 기록됩니다.",
+      "none": "아직 스캔한 네트워크가 없습니다.",
+      "perSecond": "초당 주소 {{count}}개",
+      "perSecond_other": "초당 주소 {{count}}개",
+      "perSecond_one": "초당 주소 {{count}}개",
+      "rate": "속도",
+      "requestedBy": "요청한 사람",
+      "start": "스캔 시작",
+      "status": {
+        "completed": "완료됨",
+        "failed": "실패",
+        "queued": "에이전트 대기 중",
+        "refused": "에이전트가 거부함",
+        "timedOut": "에이전트 응답 없음"
+      },
+      "title": "네트워크 스캔"
+    },
+    "address": {
+      "address": "IP 주소",
+      "confirm": "등록",
+      "error": "주소를 등록할 수 없습니다.",
+      "title": "고정 주소 등록",
+      "warning": "가상 IP나 로드 밸런서처럼 절대 바뀌지 않는 주소에만 사용하세요. 이 주소를 가진 모든 장치에 적용되므로, DHCP로 주소를 받는 일반 장치는 다음 임대 후에 다시 나타납니다."
+    },
+    "type": {
+      "computer": "컴퓨터",
+      "iot": "IoT 장치",
+      "media": "TV, 스피커 또는 미디어 플레이어",
+      "networkEquipment": "네트워크 장비",
+      "phoneOrTablet": "휴대폰 또는 태블릿",
+      "printer": "프린터",
+      "unknown": "알 수 없음",
+      "virtualAddress": "가상 라우터 주소",
+      "virtualMachine": "가상 머신"
     }
   }
 }

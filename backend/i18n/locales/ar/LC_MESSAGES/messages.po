@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 13:34-0400\n"
+"POT-Creation-Date: 2026-09-29 12:11-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -357,27 +357,27 @@ msgstr "فشل في معالجة تحديث بيانات الدور: %s"
 msgid "Child host management requires a Professional+ license."
 msgstr "تطلب إدارة المضيف الفرعي ترخيصًا مهني+"
 
-#: backend/api/handlers/os_hardware_handlers.py:131
+#: backend/api/handlers/os_hardware_handlers.py:132
 msgid "No host identification available"
 msgstr "لا تتوفر بيانات تعريف المستضياف"
 
-#: backend/api/handlers/os_hardware_handlers.py:343
+#: backend/api/handlers/os_hardware_handlers.py:344
 msgid "os_version_updated"
 msgstr "تم تحديث إصدار نظام التشغيل"
 
-#: backend/api/handlers/os_hardware_handlers.py:349
+#: backend/api/handlers/os_hardware_handlers.py:350
 msgid "No OS information provided"
 msgstr "لم يتم تقديم معلومات النظام الأساسي (OS)"
 
-#: backend/api/handlers/os_hardware_handlers.py:359
+#: backend/api/handlers/os_hardware_handlers.py:360
 msgid "Failed to update OS version"
 msgstr "فشل في تحديث إصدار نظام التشغيل"
 
-#: backend/api/handlers/os_hardware_handlers.py:543
+#: backend/api/handlers/os_hardware_handlers.py:545
 msgid "hardware_updated"
 msgstr "تم تحديث الأجهزة"
 
-#: backend/api/handlers/os_hardware_handlers.py:552
+#: backend/api/handlers/os_hardware_handlers.py:554
 msgid "Failed to update hardware information"
 msgstr "فشل في تحديث معلومات الأجهزة"
 
@@ -1618,7 +1618,7 @@ msgstr "لم يتم العثور على مراقبة ملف"
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
 #: backend/api/config_mgmt_profiles.py:136
-#: backend/api/secrets/permissions.py:50
+#: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:90
 #, python-format
 msgid "Permission denied: %s role required"
 msgstr "تم رفض الإذن: يتطلب دور %s"
@@ -4283,6 +4283,14 @@ msgstr "يجب تشغيل المضيف في وضع الخصائص لتحكم ا�
 msgid "Service {} requested for {} services"
 msgstr "تم طلب خدمة {} لـ {} خدمات"
 
+#: backend/api/asset_discovery.py:127
+msgid "Unsupported retention period"
+msgstr "فترة احتفاظ غير مدعومة"
+
+#: backend/api/asset_discovery.py:162
+msgid "Invalid device id"
+msgstr "معرّف الجهاز غير صالح"
+
 #: backend/api/content_lifecycle_export.py:60
 msgid ""
 "Air-gap media export requires the air-gap collector engine (Enterprise). "
@@ -4893,12 +4901,12 @@ msgstr "فشل في حذف نموذج السكريبت المحفوظ"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "فشل في استرداد حالة برنامج مكافحة الفيروسات التجاري: %s"
 
-#: backend/websocket/message_router.py:299
+#: backend/websocket/message_router.py:309
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "نوع الرسالة غير المعروفة في الصف: %s"
 
-#: backend/websocket/message_router.py:304
+#: backend/websocket/message_router.py:314
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "خطأ في توجيه نوع الرسالة %(message_type)s: %(error)s"
@@ -5073,7 +5081,7 @@ msgstr "فشل في الحصول على الرسائل الفاشلة: %s"
 msgid "Host ID {host_id} not found"
 msgstr "لم يتم العثور على رقم المضيف {host_id}"
 
-#: backend/websocket/queue_operations.py:316
+#: backend/websocket/queue_operations.py:317
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -5083,44 +5091,44 @@ msgstr ""
 "الاتجاه=%(direction)s, مستضياف=%(host_id)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:498
+#: backend/websocket/queue_operations.py:499
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "أعلنت الرسالة بأنها تحت التجهيز: %s"
 
-#: backend/websocket/queue_operations.py:505
+#: backend/websocket/queue_operations.py:506
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كجارية: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:540
+#: backend/websocket/queue_operations.py:541
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "أعلنت الرسالة بأنها مكتملة: %s"
 
-#: backend/websocket/queue_operations.py:547
+#: backend/websocket/queue_operations.py:548
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كمنجزة: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:585
+#: backend/websocket/queue_operations.py:586
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "تم تعليم الرسالة كمرسلة (في انتظار التأكيد): %s"
 
-#: backend/websocket/queue_operations.py:592
+#: backend/websocket/queue_operations.py:593
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كمرسلة: %(error)s"
 
-#: backend/websocket/queue_operations.py:621
+#: backend/websocket/queue_operations.py:622
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "لا يمكن تأكيد رسالة غير معروفة: %s"
 
-#: backend/websocket/queue_operations.py:628
+#: backend/websocket/queue_operations.py:629
 #, python-format
 msgid ""
 "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
@@ -5128,32 +5136,32 @@ msgstr ""
 "الرسالة %(message_id)s ليست في حالة المرسل، تم تخطي التأكيد (حاليًا "
 "%(status)s)"
 
-#: backend/websocket/queue_operations.py:641
+#: backend/websocket/queue_operations.py:642
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "تم تأكيد الرسالة بواسطة الوكيل: %s"
 
-#: backend/websocket/queue_operations.py:648
+#: backend/websocket/queue_operations.py:649
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كمقبولة: %(error)s"
 
-#: backend/websocket/queue_operations.py:732
+#: backend/websocket/queue_operations.py:733
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "لم يتم استلام أي تأكيد خلال %d ثانية"
 
-#: backend/websocket/queue_operations.py:744
+#: backend/websocket/queue_operations.py:745
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "تمت جدولة %d رسالة غير مؤكدة لإعادة المحاولة"
 
-#: backend/websocket/queue_operations.py:752
+#: backend/websocket/queue_operations.py:753
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "خطأ في إعادة محاولة الرسائل غير المؤكدة: %s"
 
-#: backend/websocket/queue_operations.py:807
+#: backend/websocket/queue_operations.py:808
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -5162,7 +5170,7 @@ msgstr ""
 "رسالة %(message_id)s فشلت في المحاولة (%(attempt)d/%(max_retries)d)، مجدولة "
 "لإعادة المحاولة بعد %(backoff)d ثانية"
 
-#: backend/websocket/queue_operations.py:823
+#: backend/websocket/queue_operations.py:824
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
@@ -5170,12 +5178,12 @@ msgid ""
 msgstr ""
 "رسالة %(message_id)s فشلت بشكل دائم بعد %(attempts)d محاولة: %(error)s"
 
-#: backend/websocket/queue_operations.py:841
+#: backend/websocket/queue_operations.py:842
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كفاشلة: %(error)s"
 
-#: backend/websocket/queue_operations.py:863
+#: backend/websocket/queue_operations.py:864
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "فشل في فك ترميز الرسالة %(message_id)s: %(error)s"
@@ -5205,11 +5213,11 @@ msgstr "تم تمهيد مدير صفوف الرسائل للخادم بنجاح
 msgid "Rate limit exceeded. Please retry later."
 msgstr " تم تجاوز حد التكرار. يرجى المحاولة لاحقاً."
 
-#: backend/services/agent_capability_service.py:266
+#: backend/services/agent_capability_service.py:306
 msgid "this host"
 msgstr "هذا المستضِغف"
 
-#: backend/services/agent_capability_service.py:269
+#: backend/services/agent_capability_service.py:309
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "
@@ -5217,6 +5225,37 @@ msgid ""
 msgstr ""
 "الوكيل في {host} لا يدعم '{command}'. يقوم بالإعلان عن مجموعة قدرات مخفضة، "
 "لذلك لم يتم إرسال الأمر."
+
+#: backend/services/asset_discovery_review.py:125
+#, python-format
+msgid "Unknown device status: %s"
+msgstr "حالة جهاز غير معروفة: %s"
+
+#: backend/services/asset_discovery_review.py:342
+msgid "A reason of at least 3 characters is required"
+msgstr "يلزم سبب لا يقل عن 3 أحرف"
+
+#: backend/services/asset_discovery_review.py:351
+#: backend/services/asset_discovery_review.py:399
+#, python-format
+msgid "Unknown exclusion category: %s"
+msgstr "فئة استثناء غير معروفة: %s"
+
+#: backend/services/asset_discovery_review.py:404
+msgid "That is not a valid IP address"
+msgstr "هذا ليس عنوان IP صالحًا"
+
+#: backend/services/asset_discovery_review.py:412
+msgid "That address is already registered as known"
+msgstr "هذا العنوان مسجل بالفعل كعنوان معروف"
+
+#: backend/services/asset_discovery_review.py:433
+msgid "Exclusion not found"
+msgstr "لم يتم العثور على الاستثناء"
+
+#: backend/services/asset_discovery_review.py:435
+msgid "This exclusion was already revoked"
+msgstr "تم إلغاء هذا الاستثناء بالفعل"
 
 #: backend/services/config_mgmt_dispatch.py:58
 #, python-format
@@ -5252,6 +5291,38 @@ msgstr "المضيف المرجعي غير موجود"
 msgid "Target host not found"
 msgstr "المضيف الهدف غير موجود"
 
+#: backend/services/network_sweep.py:65
+msgid "That is not a valid network"
+msgstr "هذه ليست شبكة صالحة"
+
+#: backend/services/network_sweep.py:67
+msgid "IPv6 networks cannot be swept; only IPv4 networks can be enumerated"
+msgstr "لا يمكن مسح شبكات IPv6؛ يمكن تعداد شبكات IPv4 فقط"
+
+#: backend/services/network_sweep.py:70
+msgid "That network is too large to sweep (at most 4096 addresses)"
+msgstr "هذه الشبكة كبيرة جدًا بحيث لا يمكن مسحها (4096 عنوانًا كحد أقصى)"
+
+#: backend/services/network_sweep.py:73
+msgid "No agent is on that network, so it cannot be swept from here"
+msgstr "لا يوجد وكيل على هذه الشبكة، لذا لا يمكن مسحها من هنا"
+
+#: backend/services/network_sweep.py:75
+msgid "The rate must be between 1 and 200 addresses per second"
+msgstr "يجب أن يكون المعدل بين 1 و200 عنوان في الثانية"
+
+#: backend/services/network_sweep.py:135
+msgid "Network discovery is not available"
+msgstr "اكتشاف الشبكة غير متاح"
+
+#: backend/services/network_sweep.py:140
+msgid "Active sweeps are turned off in the network discovery settings"
+msgstr "عمليات المسح النشطة متوقفة في إعدادات اكتشاف الشبكة"
+
+#: backend/services/network_sweep.py:152
+msgid "Every agent on that network is already sweeping; try again shortly"
+msgstr "كل وكيل على هذه الشبكة يجري مسحًا بالفعل؛ حاول مرة أخرى بعد قليل"
+
 #: backend/services/airgap_device_service.py:149
 msgid "no device selected"
 msgstr "لم يتم تحديد جهاز"
@@ -5273,17 +5344,17 @@ msgstr "وجود القرص لكن لا يوجد قرص قابل للقراءة 
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "لا يوجد نظام ملفات ISO على الجهاز (fstype=%s)"
 
-#: backend/services/audit_service.py:189
+#: backend/services/audit_service.py:191
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "تم إنشاء {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:237
+#: backend/services/audit_service.py:239
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "تم تحديث {entity_type} '\\u0027{entity_name}\\u0027"
 
-#: backend/services/audit_service.py:285
+#: backend/services/audit_service.py:287
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "حُذِفَت الكيان من نوع ‘{entity_type}’ باسم ‘{entity_name}’"

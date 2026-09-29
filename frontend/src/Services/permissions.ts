@@ -89,6 +89,8 @@ export const SecurityRoles = {
     STOP_HOST_SERVICE: 'Stop Host Service',
     // - Host Process Operations (Phase 13.3)
     KILL_HOST_PROCESS: 'Kill Host Process',
+    // - Unenrolled Asset Discovery (Phase 21.6)
+    MANAGE_NETWORK_DISCOVERY: 'Manage Network Discovery',
 
     // Integration Management
     // - Queue Operations (alphabetical)

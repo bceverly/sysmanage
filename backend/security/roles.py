@@ -47,6 +47,8 @@ class SecurityRoles(str, Enum):
     KILL_HOST_PROCESS = "Kill Host Process"
     # - Custom Metrics & Graphs (Pro+ observability_engine -- Slice 1)
     MANAGE_CUSTOM_METRICS = "Manage Custom Metrics"
+    # - Unenrolled Asset Discovery (Enterprise asset_discovery_engine -- 21.6)
+    MANAGE_NETWORK_DISCOVERY = "Manage Network Discovery"
 
     # Integration Management Roles
     # - Queue Operations (alphabetical)

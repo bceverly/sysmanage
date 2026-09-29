@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 13:34-0400\n"
+"POT-Creation-Date: 2026-09-29 12:11-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -356,27 +356,27 @@ msgstr "_ROLE_DATA_UPDATE_ 처리에 실패했습니다: %s"
 msgid "Child host management requires a Professional+ license."
 msgstr "자식 호스트 관리에는 프로페셔널+ 라이선스가 필요합니다."
 
-#: backend/api/handlers/os_hardware_handlers.py:131
+#: backend/api/handlers/os_hardware_handlers.py:132
 msgid "No host identification available"
 msgstr "호스트 식별 정보가 없습니다"
 
-#: backend/api/handlers/os_hardware_handlers.py:343
+#: backend/api/handlers/os_hardware_handlers.py:344
 msgid "os_version_updated"
 msgstr "OS 버전이 업데이트되었습니다"
 
-#: backend/api/handlers/os_hardware_handlers.py:349
+#: backend/api/handlers/os_hardware_handlers.py:350
 msgid "No OS information provided"
 msgstr "OS 정보가 제공되지 않았습니다"
 
-#: backend/api/handlers/os_hardware_handlers.py:359
+#: backend/api/handlers/os_hardware_handlers.py:360
 msgid "Failed to update OS version"
 msgstr "OS 버전을 업데이트할 수 없습니다"
 
-#: backend/api/handlers/os_hardware_handlers.py:543
+#: backend/api/handlers/os_hardware_handlers.py:545
 msgid "hardware_updated"
 msgstr "하드웨어가 업데이트되었습니다"
 
-#: backend/api/handlers/os_hardware_handlers.py:552
+#: backend/api/handlers/os_hardware_handlers.py:554
 msgid "Failed to update hardware information"
 msgstr "하드웨어 정보를 업데이트하는 데 실패했습니다"
 
@@ -1586,7 +1586,7 @@ msgstr "파일 감시가 발견되지 않았습니다."
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
 #: backend/api/config_mgmt_profiles.py:136
-#: backend/api/secrets/permissions.py:50
+#: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:90
 #, python-format
 msgid "Permission denied: %s role required"
 msgstr "%s 역할이 필요합니다. 권한 거부됨:"
@@ -4192,6 +4192,14 @@ msgstr "서비스 제어를 위해 호스트는 특권 모드에서 실행되어
 msgid "Service {} requested for {} services"
 msgstr "서비스 {}가 {} 서비스에 요청되었습니다"
 
+#: backend/api/asset_discovery.py:127
+msgid "Unsupported retention period"
+msgstr "지원되지 않는 보존 기간입니다"
+
+#: backend/api/asset_discovery.py:162
+msgid "Invalid device id"
+msgstr "잘못된 장치 ID입니다"
+
 #: backend/api/content_lifecycle_export.py:60
 msgid ""
 "Air-gap media export requires the air-gap collector engine (Enterprise). "
@@ -4792,12 +4800,12 @@ msgstr "저장된 스크립트 지우기 실패"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "상업용 ANTIVIRUS 상태를 가져오는데 실패했습니다: %s"
 
-#: backend/websocket/message_router.py:299
+#: backend/websocket/message_router.py:309
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "큐에 알 수 없는 메시지 유형: %s"
 
-#: backend/websocket/message_router.py:304
+#: backend/websocket/message_router.py:314
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "메시지 유형 %(message_type)s 라우팅 중 오류 발생: %(error)s"
@@ -4964,7 +4972,7 @@ msgstr "실패한 메시지 목록 가져오기 실패: %s"
 msgid "Host ID {host_id} not found"
 msgstr "호스트 ID {host_id}를 찾을 수 없습니다"
 
-#: backend/websocket/queue_operations.py:316
+#: backend/websocket/queue_operations.py:317
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -4974,75 +4982,75 @@ msgstr ""
 "host_id=%(host_id)s를 대기열에 추가함"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:498
+#: backend/websocket/queue_operations.py:499
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "메시지를 처리 중으로 변경했습니다: %s"
 
-#: backend/websocket/queue_operations.py:505
+#: backend/websocket/queue_operations.py:506
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr "메시지 %(message_id)s를 처리 중으로 표시하는 데 실패함: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:540
+#: backend/websocket/queue_operations.py:541
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "메시지를 완료 상태로 변경했습니다: %s"
 
-#: backend/websocket/queue_operations.py:547
+#: backend/websocket/queue_operations.py:548
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr "메시지 %(message_id)s를 완료됨으로 표시하는 데 실패함: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:585
+#: backend/websocket/queue_operations.py:586
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "메시지를 전송됨으로 표시 (확인 대기 중): %s"
 
-#: backend/websocket/queue_operations.py:592
+#: backend/websocket/queue_operations.py:593
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr "메시지 %(message_id)s를 전송됨으로 표시하는 데 실패함: %(error)s"
 
-#: backend/websocket/queue_operations.py:621
+#: backend/websocket/queue_operations.py:622
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "알 수 없는 메시지를 확인할 수 없습니다: %s"
 
-#: backend/websocket/queue_operations.py:628
+#: backend/websocket/queue_operations.py:629
 #, python-format
 msgid ""
 "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
 msgstr "메시지 %(message_id)s가 SENT 상태가 아님 (현재 상태: %(status)s)으로 확인 무시됨"
 
-#: backend/websocket/queue_operations.py:641
+#: backend/websocket/queue_operations.py:642
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "에이전트가 메시지를 확인함: %s"
 
-#: backend/websocket/queue_operations.py:648
+#: backend/websocket/queue_operations.py:649
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr "메시지 %(message_id)s를 확인됨으로 표시하는 데 실패함: %(error)s"
 
-#: backend/websocket/queue_operations.py:732
+#: backend/websocket/queue_operations.py:733
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "%d초 이내에 확인을 받지 못함"
 
-#: backend/websocket/queue_operations.py:744
+#: backend/websocket/queue_operations.py:745
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "%d개의 확인되지 않은 메시지를 재시도 예약함"
 
-#: backend/websocket/queue_operations.py:752
+#: backend/websocket/queue_operations.py:753
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "확인되지 않은 메시지 재시도 오류: %s"
 
-#: backend/websocket/queue_operations.py:807
+#: backend/websocket/queue_operations.py:808
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -5051,19 +5059,19 @@ msgstr ""
 "메시지 %(message_id)s가 실패 (재시도 횟수: %(attempt)d/%(max_retries)d), %(backoff)d 초 "
 "후 재시도 예정"
 
-#: backend/websocket/queue_operations.py:823
+#: backend/websocket/queue_operations.py:824
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
 "%(error)s"
 msgstr "%(attempts)d 회 시도 끝에 메시지 %(message_id)s 영구 실패: %(error)s"
 
-#: backend/websocket/queue_operations.py:841
+#: backend/websocket/queue_operations.py:842
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "메시지 %(message_id)s를 실패로 표시하는 데 실패함: %(error)s"
 
-#: backend/websocket/queue_operations.py:863
+#: backend/websocket/queue_operations.py:864
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "메시지 %(message_id)s 역직렬화 실패: %(error)s"
@@ -5093,17 +5101,48 @@ msgstr "서버 메시지 큐 관리자가 초기화되었습니다"
 msgid "Rate limit exceeded. Please retry later."
 msgstr "요청 제한이 초과되었습니다. 나중에 다시 시도해주세요."
 
-#: backend/services/agent_capability_service.py:266
+#: backend/services/agent_capability_service.py:306
 msgid "this host"
 msgstr "이 호스트"
 
-#: backend/services/agent_capability_service.py:269
+#: backend/services/agent_capability_service.py:309
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "
 "capability set, so the command was not sent."
 msgstr ""
 "{host}의 에이전트는 '{command}'을 지원하지 않습니다. 축소된 기능 집합을 광고하기 때문에 명령은 전송되지 않았습니다."
+
+#: backend/services/asset_discovery_review.py:125
+#, python-format
+msgid "Unknown device status: %s"
+msgstr "알 수 없는 장치 상태: %s"
+
+#: backend/services/asset_discovery_review.py:342
+msgid "A reason of at least 3 characters is required"
+msgstr "3자 이상의 사유가 필요합니다"
+
+#: backend/services/asset_discovery_review.py:351
+#: backend/services/asset_discovery_review.py:399
+#, python-format
+msgid "Unknown exclusion category: %s"
+msgstr "알 수 없는 제외 범주: %s"
+
+#: backend/services/asset_discovery_review.py:404
+msgid "That is not a valid IP address"
+msgstr "유효한 IP 주소가 아닙니다"
+
+#: backend/services/asset_discovery_review.py:412
+msgid "That address is already registered as known"
+msgstr "이 주소는 이미 알려진 주소로 등록되어 있습니다"
+
+#: backend/services/asset_discovery_review.py:433
+msgid "Exclusion not found"
+msgstr "제외 항목을 찾을 수 없습니다"
+
+#: backend/services/asset_discovery_review.py:435
+msgid "This exclusion was already revoked"
+msgstr "이 제외는 이미 취소되었습니다"
 
 #: backend/services/config_mgmt_dispatch.py:58
 #, python-format
@@ -5138,6 +5177,38 @@ msgstr "참조 호스트가 찾히지 않았습니다"
 msgid "Target host not found"
 msgstr "타겟 호스트가 찾히지 않았습니다"
 
+#: backend/services/network_sweep.py:65
+msgid "That is not a valid network"
+msgstr "유효한 네트워크가 아닙니다"
+
+#: backend/services/network_sweep.py:67
+msgid "IPv6 networks cannot be swept; only IPv4 networks can be enumerated"
+msgstr "IPv6 네트워크는 스캔할 수 없습니다. IPv4 네트워크만 열거할 수 있습니다"
+
+#: backend/services/network_sweep.py:70
+msgid "That network is too large to sweep (at most 4096 addresses)"
+msgstr "이 네트워크는 너무 커서 스캔할 수 없습니다(최대 4096개 주소)"
+
+#: backend/services/network_sweep.py:73
+msgid "No agent is on that network, so it cannot be swept from here"
+msgstr "이 네트워크에 에이전트가 없으므로 여기에서 스캔할 수 없습니다"
+
+#: backend/services/network_sweep.py:75
+msgid "The rate must be between 1 and 200 addresses per second"
+msgstr "속도는 초당 1~200개 주소 사이여야 합니다"
+
+#: backend/services/network_sweep.py:135
+msgid "Network discovery is not available"
+msgstr "네트워크 검색을 사용할 수 없습니다"
+
+#: backend/services/network_sweep.py:140
+msgid "Active sweeps are turned off in the network discovery settings"
+msgstr "네트워크 검색 설정에서 능동 스캔이 꺼져 있습니다"
+
+#: backend/services/network_sweep.py:152
+msgid "Every agent on that network is already sweeping; try again shortly"
+msgstr "이 네트워크의 모든 에이전트가 이미 스캔 중입니다. 잠시 후 다시 시도하세요"
+
 #: backend/services/airgap_device_service.py:149
 msgid "no device selected"
 msgstr "선택된 장치 없음"
@@ -5159,17 +5230,17 @@ msgstr "드라이브는 있지만 읽을 수 있는 디스크가 삽입되어 �
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "장치의 ISO 파일 시스템이 없습니다 (fstype=%s)"
 
-#: backend/services/audit_service.py:189
+#: backend/services/audit_service.py:191
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' 생성됨"
 
-#: backend/services/audit_service.py:237
+#: backend/services/audit_service.py:239
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' 업데이트 완료"
 
-#: backend/services/audit_service.py:285
+#: backend/services/audit_service.py:287
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' 삭제됨"

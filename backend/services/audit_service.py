@@ -60,6 +60,8 @@ class EntityType(str, Enum):
     TENANT = "tenant"
     MAINTENANCE_WINDOW = "maintenance_window"
     POSTURE_WAIVER = "posture_waiver"
+    DISCOVERED_ASSET = "discovered_asset"
+    NETWORK_SWEEP = "network_sweep"
 
 
 class Result(str, Enum):

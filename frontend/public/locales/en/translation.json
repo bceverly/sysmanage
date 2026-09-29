@@ -2421,7 +2421,8 @@
     "users": "Users",
     "vulnerabilities": "Vulnerabilities",
     "advisor": "Advisor",
-    "hostMetrics": "Host Metrics"
+    "hostMetrics": "Host Metrics",
+    "assetDiscovery": "Network Discovery"
   },
   "notifications": {
     "applicationUpdates": "Application Updates",
@@ -3920,7 +3921,9 @@
       "smSec004": "Services listening on all interfaces while the host firewall is off",
       "smSec005": "Certificate expiring within 30 days",
       "smStab001": "Configuration drift unresolved for more than 7 days",
-      "smStabF01": "OpenSSL version differs from the version its peers run"
+      "smStabF01": "OpenSSL version differs from the version its peers run",
+      "pmNetDiscovery": "Devices on your networks are being discovered",
+      "pmNetUnmanaged": "No unmanaged devices are on your networks"
     },
     "curatedPack": {
       "baseline": {
@@ -4025,7 +4028,9 @@
       "set_air_gap_role": "Set the server role to match your air-gapped deployment.",
       "set_audit_retention": "Create an audit retention policy of at least 365 days through the audit API. There is no screen for this yet.",
       "set_password_policy": "The password policy is set in sysmanage.yaml; SysManage cannot change it for you.",
-      "shorten_session": "Expire sessions after an hour."
+      "shorten_session": "Expire sessions after an hour.",
+      "enable_network_discovery": "Turn on network discovery so agents report the devices around them.",
+      "review_unmanaged_devices": "Enroll each unmanaged device, or mark it as known with a reason."
     },
     "saved": "Threat model saved. The punch list is re-evaluated on the next advisor pass.",
     "stale": {
@@ -4204,6 +4209,170 @@
       "saveFailed": "The threat model could not be saved.",
       "step": "Question {{current}} of {{total}}",
       "title": "Describe your installation"
+    }
+  },
+  "assetDiscovery": {
+    "blindSpots": {
+      "agentsLimited": "Some agents cannot see everything on their networks:",
+      "notEquipped": "{{count}} hosts run an agent that cannot take part in discovery; their networks are not covered.",
+      "notEquipped_other": "{{count}} hosts run an agent that cannot take part in discovery; their networks are not covered.",
+      "notEquipped_one": "{{count}} host runs an agent that cannot take part in discovery; its network is not covered.",
+      "off": "Discovery is turned off: agents are not listening, so nothing new will be found.",
+      "silent": "Agents only listen. A device that sends nothing is not seen, so this list may be incomplete.",
+      "stale": "has stopped reporting",
+      "unswept": "Not swept in the last 7 days: {{networks}}"
+    },
+    "category": {
+      "appliance": "Appliance",
+      "iot": "IoT device or sensor",
+      "networkEquipment": "Network equipment",
+      "other": "Other",
+      "personalDevice": "Personal device",
+      "printer": "Printer",
+      "virtualMachine": "Virtual machine",
+      "virtualAddress": "Virtual or shared address (VIP, load balancer)"
+    },
+    "counts": {
+      "excluded": "{{count}} known and fine",
+      "excluded_other": "{{count}} known and fine",
+      "excluded_one": "{{count}} known and fine",
+      "managed": "{{count}} managed",
+      "managed_other": "{{count}} managed",
+      "managed_one": "{{count}} managed",
+      "onNetwork": "{{count}} on {{network}}",
+      "onNetwork_other": "{{count}} on {{network}}",
+      "onNetwork_one": "{{count}} on {{network}}",
+      "unmanaged": "{{count}} unmanaged",
+      "unmanaged_other": "{{count}} unmanaged",
+      "unmanaged_one": "{{count}} unmanaged"
+    },
+    "exclude": {
+      "action": "Mark {{count}} as known and fine",
+      "action_other": "Mark {{count}} as known and fine",
+      "action_one": "Mark {{count}} as known and fine",
+      "category": "What is it?",
+      "confirm": "Mark as known",
+      "done": "{{count}} devices marked as known.",
+      "done_other": "{{count}} devices marked as known.",
+      "done_one": "{{count}} device marked as known.",
+      "intro": "{{count}} devices will no longer be shown as unmanaged. This is recorded with your name and reason, and follows each device by its MAC address even if its IP address changes.",
+      "intro_other": "{{count}} devices will no longer be shown as unmanaged. This is recorded with your name and reason, and follows each device by its MAC address even if its IP address changes.",
+      "intro_one": "{{count}} device will no longer be shown as unmanaged. This is recorded with your name and reason, and follows the device by its MAC address even if its IP address changes.",
+      "reason": "Reason",
+      "reasonHelp": "Required. For example: the front office printer, owned by facilities.",
+      "title": "Mark as known and fine"
+    },
+    "exclusions": {
+      "decidedBy": "Decided by",
+      "empty": "No devices have been marked as known.",
+      "revokedBy": "Revoked by {{who}}: {{why}}",
+      "showRevoked": "Show revoked decisions"
+    },
+    "filters": {
+      "allNetworks": "All networks",
+      "network": "Network",
+      "search": "Search MAC or IP address"
+    },
+    "loadError": "Discovered devices could not be loaded.",
+    "method": {
+      "arpListen": "ARP listening",
+      "cache": "Neighbor cache",
+      "mdns": "mDNS",
+      "ndListen": "IPv6 neighbor discovery",
+      "ssdp": "SSDP",
+      "sweep": "Active sweep"
+    },
+    "policy": {
+      "enabled": "Agents listen for devices on their networks",
+      "hour": "Every hour",
+      "interval": "Report",
+      "lastChanged": "Last changed by {{who}} on {{when}}",
+      "minutes": "Every {{count}} minutes",
+      "minutes_other": "Every {{count}} minutes",
+      "minutes_one": "Every minute",
+      "sweeps": "Allow active sweeps",
+      "days": "{{count}} days",
+      "days_other": "{{count}} days",
+      "days_one": "{{count}} day",
+      "retention": "Forget devices not seen for"
+    },
+    "revoke": {
+      "confirm": "Revoke",
+      "title": "Show this device as unmanaged again"
+    },
+    "status": {
+      "unmanaged": "Unmanaged"
+    },
+    "subtitle": "Devices your agents see on their networks that SysManage does not manage.",
+    "table": {
+      "address": "Address",
+      "device": "Device",
+      "empty": "No devices match.",
+      "evidence": "What it says it is",
+      "ipOnly": "No MAC seen",
+      "lastSeen": "Last seen",
+      "localMac": "Address may change",
+      "localMacHelp": "A locally administered address: phones and tablets change it, so this device may reappear under a new one.",
+      "more": "Showing {{shown}} of {{total}}. Narrow the list with the filters above.",
+      "seenBy": "Seen by",
+      "selectAll": "Select all",
+      "status": "Status",
+      "maybe": "Maybe: {{type}}"
+    },
+    "tabs": {
+      "excluded": "Known and fine",
+      "managed": "Managed",
+      "unmanaged": "Unmanaged",
+      "sweeps": "Sweeps"
+    },
+    "title": "Network Discovery",
+    "unavailable": {
+      "disabled": "not enabled",
+      "notRoot": "the agent is not running as root",
+      "portInUse": "the port is in use by another program",
+      "unreadable": "could not be read",
+      "unsupportedPlatform": "not supported on this platform"
+    },
+    "sweep": {
+      "agent": "Swept by",
+      "disabled": "Active sweeps are turned off. Allow them in the settings above to find devices that never announce themselves.",
+      "error": "The sweep could not be started.",
+      "found": "Found",
+      "foundOf": "{{found}} of {{probed}} addresses",
+      "intro": "An agent on the network sends one small packet to every address, then reports every device that answered. This finds devices that never announce themselves, and it is recorded with your name.",
+      "none": "No network has been swept yet.",
+      "perSecond": "{{count}} addresses per second",
+      "perSecond_other": "{{count}} addresses per second",
+      "perSecond_one": "{{count}} address per second",
+      "rate": "Speed",
+      "requestedBy": "Requested by",
+      "start": "Start sweep",
+      "status": {
+        "completed": "Completed",
+        "failed": "Failed",
+        "queued": "Waiting for the agent",
+        "refused": "Refused by the agent",
+        "timedOut": "No answer from the agent"
+      },
+      "title": "Sweep a network"
+    },
+    "address": {
+      "address": "IP address",
+      "confirm": "Register",
+      "error": "The address could not be registered.",
+      "title": "Register a static address",
+      "warning": "Only for addresses that never change, such as a virtual IP or a load balancer. It covers whatever device holds this address, so an ordinary device given addresses by DHCP will reappear after its next lease."
+    },
+    "type": {
+      "computer": "Computer",
+      "iot": "IoT device",
+      "media": "TV, speaker or media player",
+      "networkEquipment": "Network equipment",
+      "phoneOrTablet": "Phone or tablet",
+      "printer": "Printer",
+      "unknown": "Unknown",
+      "virtualAddress": "Virtual router address",
+      "virtualMachine": "Virtual machine"
     }
   }
 }

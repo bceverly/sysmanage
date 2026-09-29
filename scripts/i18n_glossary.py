@@ -153,6 +153,10 @@ GLOSSARY: Dict[str, str] = {
     "approval": "an operator accepting a newly registered host",
     "discovery": "finding devices on the network that are not yet managed",
     "asset": "a device present on the network",
+    "sweep": "actively probing every address in a network range to find "
+    "devices. NOT cleaning or brushing",
+    "exclusion": "an operator's recorded decision that a discovered device is "
+    "known and needs no management. NOT a ban or an expulsion",
     # -- configuration management -----------------------------------------
     "profile": "a stored configuration definition applied to hosts. NOT a "
     "person's biography or account details",
@@ -762,6 +766,8 @@ ALIASES: Dict[str, Tuple[str, ...]] = {
     "provisioning": ("provision", "provisioned"),
     "enrollment": ("enroll", "enrolled", "enrollment"),
     "discovery": ("discover", "discovered"),
+    "sweep": ("sweeps", "swept"),
+    "exclusion": ("exclusions",),
     "remediation": ("remediate", "remediated"),
     "compliance": ("compliant", "non-compliant"),
     "erratum": ("errata",),

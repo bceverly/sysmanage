@@ -2402,7 +2402,8 @@
     "users": "Utilisateurs",
     "vulnerabilities": "Vulnérabilités",
     "advisor": "Conseiller",
-    "hostMetrics": "Métriques des hôtes"
+    "hostMetrics": "Métriques des hôtes",
+    "assetDiscovery": "Découverte du réseau"
   },
   "notifications": {
     "applicationUpdates": "Mises à jour d'Applications",
@@ -3920,7 +3921,9 @@
       "smSec004": "Services à l'écoute sur toutes les interfaces alors que le pare-feu de l'hôte est désactivé",
       "smSec005": "Certificat expirant dans les 30 jours",
       "smStab001": "Dérive de configuration non résolue depuis plus de 7 jours",
-      "smStabF01": "La version d'OpenSSL diffère de celle de ses pairs"
+      "smStabF01": "La version d'OpenSSL diffère de celle de ses pairs",
+      "pmNetDiscovery": "Les appareils de vos réseaux sont découverts",
+      "pmNetUnmanaged": "Aucun appareil non géré ne se trouve sur vos réseaux"
     },
     "curatedPack": {
       "baseline": {
@@ -4025,7 +4028,9 @@
       "set_air_gap_role": "Définissez le rôle du serveur pour qu'il corresponde à votre déploiement isolé.",
       "set_audit_retention": "Créez une politique de conservation d'audit d'au moins 365 jours via l'API d'audit. Aucun écran n'existe encore pour cela.",
       "set_password_policy": "La politique de mots de passe est définie dans sysmanage.yaml ; SysManage ne peut pas la modifier à votre place.",
-      "shorten_session": "Faites expirer les sessions après une heure."
+      "shorten_session": "Faites expirer les sessions après une heure.",
+      "enable_network_discovery": "Activez la découverte réseau pour que les agents signalent les appareils qui les entourent.",
+      "review_unmanaged_devices": "Enregistrez chaque appareil non géré ou marquez-le comme connu avec un motif."
     },
     "saved": "Modèle de menaces enregistré. La liste des points à traiter sera réévaluée lors du prochain passage du conseiller.",
     "stale": {
@@ -4204,6 +4209,170 @@
       "saveFailed": "Le modèle de menaces n'a pas pu être enregistré.",
       "step": "Question {{current}} sur {{total}}",
       "title": "Décrivez votre installation"
+    }
+  },
+  "assetDiscovery": {
+    "blindSpots": {
+      "agentsLimited": "Certains agents ne peuvent pas tout voir sur leurs réseaux :",
+      "notEquipped": "{{count}} hôtes exécutent un agent qui ne peut pas participer à la découverte ; leurs réseaux ne sont pas couverts.",
+      "notEquipped_other": "{{count}} hôtes exécutent un agent qui ne peut pas participer à la découverte ; leurs réseaux ne sont pas couverts.",
+      "notEquipped_one": "{{count}} hôte exécute un agent qui ne peut pas participer à la découverte ; son réseau n'est pas couvert.",
+      "off": "La découverte est désactivée : les agents n'écoutent pas, donc rien de nouveau ne sera trouvé.",
+      "silent": "Les agents ne font qu'écouter. Un appareil qui n'émet rien n'est pas vu, cette liste peut donc être incomplète.",
+      "stale": "ne transmet plus de rapports",
+      "unswept": "Aucun balayage au cours des 7 derniers jours : {{networks}}"
+    },
+    "category": {
+      "appliance": "Équipement dédié",
+      "iot": "Appareil ou capteur IoT",
+      "networkEquipment": "Équipement réseau",
+      "other": "Autre",
+      "personalDevice": "Appareil personnel",
+      "printer": "Imprimante",
+      "virtualMachine": "Machine virtuelle",
+      "virtualAddress": "Adresse virtuelle ou partagée (VIP, répartiteur de charge)"
+    },
+    "counts": {
+      "excluded": "{{count}} connus et acceptés",
+      "excluded_other": "{{count}} connus et acceptés",
+      "excluded_one": "{{count}} connu et accepté",
+      "managed": "{{count}} gérés",
+      "managed_other": "{{count}} gérés",
+      "managed_one": "{{count}} géré",
+      "onNetwork": "{{count}} sur {{network}}",
+      "onNetwork_other": "{{count}} sur {{network}}",
+      "onNetwork_one": "{{count}} sur {{network}}",
+      "unmanaged": "{{count}} non gérés",
+      "unmanaged_other": "{{count}} non gérés",
+      "unmanaged_one": "{{count}} non géré"
+    },
+    "exclude": {
+      "action": "Marquer {{count}} comme connus et acceptés",
+      "action_other": "Marquer {{count}} comme connus et acceptés",
+      "action_one": "Marquer {{count}} comme connu et accepté",
+      "category": "De quoi s'agit-il ?",
+      "confirm": "Marquer comme connu",
+      "done": "{{count}} appareils marqués comme connus.",
+      "done_other": "{{count}} appareils marqués comme connus.",
+      "done_one": "{{count}} appareil marqué comme connu.",
+      "intro": "{{count}} appareils ne seront plus affichés comme non gérés. Cette décision est enregistrée avec votre nom et votre motif, et suit chaque appareil par son adresse MAC même si son adresse IP change.",
+      "intro_other": "{{count}} appareils ne seront plus affichés comme non gérés. Cette décision est enregistrée avec votre nom et votre motif, et suit chaque appareil par son adresse MAC même si son adresse IP change.",
+      "intro_one": "{{count}} appareil ne sera plus affiché comme non géré. Cette décision est enregistrée avec votre nom et votre motif, et suit l'appareil par son adresse MAC même si son adresse IP change.",
+      "reason": "Motif",
+      "reasonHelp": "Obligatoire. Par exemple : l'imprimante de l'accueil, gérée par les services généraux.",
+      "title": "Marquer comme connu et accepté"
+    },
+    "exclusions": {
+      "decidedBy": "Décidé par",
+      "empty": "Aucun appareil n'a été marqué comme connu.",
+      "revokedBy": "Révoqué par {{who}} : {{why}}",
+      "showRevoked": "Afficher les décisions révoquées"
+    },
+    "filters": {
+      "allNetworks": "Tous les réseaux",
+      "network": "Réseau",
+      "search": "Rechercher une adresse MAC ou IP"
+    },
+    "loadError": "Les appareils découverts n'ont pas pu être chargés.",
+    "method": {
+      "arpListen": "Écoute ARP",
+      "cache": "Cache des voisins",
+      "mdns": "mDNS",
+      "ndListen": "Découverte des voisins IPv6",
+      "ssdp": "SSDP",
+      "sweep": "Balayage actif"
+    },
+    "policy": {
+      "enabled": "Les agents écoutent les appareils présents sur leurs réseaux",
+      "hour": "Toutes les heures",
+      "interval": "Rapport",
+      "lastChanged": "Dernière modification par {{who}} le {{when}}",
+      "minutes": "Toutes les {{count}} minutes",
+      "minutes_other": "Toutes les {{count}} minutes",
+      "minutes_one": "Toutes les minutes",
+      "sweeps": "Autoriser les balayages actifs",
+      "days": "{{count}} jours",
+      "days_other": "{{count}} jours",
+      "days_one": "{{count}} jour",
+      "retention": "Oublier les appareils non vus depuis"
+    },
+    "revoke": {
+      "confirm": "Révoquer",
+      "title": "Afficher de nouveau cet appareil comme non géré"
+    },
+    "status": {
+      "unmanaged": "Non géré"
+    },
+    "subtitle": "Appareils que vos agents voient sur leurs réseaux et que SysManage ne gère pas.",
+    "table": {
+      "address": "Adresse",
+      "device": "Appareil",
+      "empty": "Aucun appareil ne correspond.",
+      "evidence": "Ce qu'il déclare être",
+      "ipOnly": "Aucune MAC vue",
+      "lastSeen": "Vu pour la dernière fois",
+      "localMac": "L'adresse peut changer",
+      "localMacHelp": "Une adresse administrée localement : les téléphones et les tablettes la changent, cet appareil peut donc réapparaître sous une nouvelle adresse.",
+      "more": "Affichage de {{shown}} sur {{total}}. Affinez la liste avec les filtres ci-dessus.",
+      "seenBy": "Vu par",
+      "selectAll": "Tout sélectionner",
+      "status": "Statut",
+      "maybe": "Peut-être : {{type}}"
+    },
+    "tabs": {
+      "excluded": "Connus et acceptés",
+      "managed": "Gérés",
+      "unmanaged": "Non gérés",
+      "sweeps": "Balayages"
+    },
+    "title": "Découverte du réseau",
+    "unavailable": {
+      "disabled": "non activé",
+      "notRoot": "l'agent ne s'exécute pas en tant que root",
+      "portInUse": "le port est utilisé par un autre programme",
+      "unreadable": "n'a pas pu être lu",
+      "unsupportedPlatform": "non pris en charge sur cette plateforme"
+    },
+    "sweep": {
+      "agent": "Balayé par",
+      "disabled": "Les balayages actifs sont désactivés. Autorisez-les dans les paramètres ci-dessus pour trouver les appareils qui ne s'annoncent jamais.",
+      "error": "Le balayage n'a pas pu être lancé.",
+      "found": "Trouvés",
+      "foundOf": "{{found}} sur {{probed}} adresses",
+      "intro": "Un agent du réseau envoie un petit paquet à chaque adresse, puis signale chaque appareil qui a répondu. Cela permet de trouver les appareils qui ne s'annoncent jamais, et l'opération est enregistrée avec votre nom.",
+      "none": "Aucun réseau n'a encore été balayé.",
+      "perSecond": "{{count}} adresses par seconde",
+      "perSecond_other": "{{count}} adresses par seconde",
+      "perSecond_one": "{{count}} adresse par seconde",
+      "rate": "Vitesse",
+      "requestedBy": "Demandé par",
+      "start": "Lancer le balayage",
+      "status": {
+        "completed": "Terminé",
+        "failed": "Échoué",
+        "queued": "En attente de l'agent",
+        "refused": "Refusé par l'agent",
+        "timedOut": "Aucune réponse de l'agent"
+      },
+      "title": "Balayer un réseau"
+    },
+    "address": {
+      "address": "Adresse IP",
+      "confirm": "Enregistrer",
+      "error": "L'adresse n'a pas pu être enregistrée.",
+      "title": "Enregistrer une adresse statique",
+      "warning": "Uniquement pour les adresses qui ne changent jamais, comme une IP virtuelle ou un répartiteur de charge. L'enregistrement s'applique à tout appareil qui détient cette adresse : un appareil ordinaire qui reçoit ses adresses par DHCP réapparaîtra donc après son prochain bail."
+    },
+    "type": {
+      "computer": "Ordinateur",
+      "iot": "Appareil IoT",
+      "media": "Téléviseur, enceinte ou lecteur multimédia",
+      "networkEquipment": "Équipement réseau",
+      "phoneOrTablet": "Téléphone ou tablette",
+      "printer": "Imprimante",
+      "unknown": "Inconnu",
+      "virtualAddress": "Adresse de routeur virtuel",
+      "virtualMachine": "Machine virtuelle"
     }
   }
 }

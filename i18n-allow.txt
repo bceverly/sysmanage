@@ -223,3 +223,8 @@ threatModel.option.regs.cmmc_800_171
 # "{{host}}: {{reason}}" -- a failed-host line in the posture remedy result;
 # pure interpolation around a colon.
 posture.remedy.hostFailed
+# Phase 21.6: discovery protocol names -- identical in every language.
+assetDiscovery.method.mdns
+assetDiscovery.method.ssdp
+# Phase 21.6 S5: "Computer" is the standard word in Italian and Dutch.
+assetDiscovery.type.computer

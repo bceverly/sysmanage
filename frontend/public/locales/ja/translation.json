@@ -2402,7 +2402,8 @@
     "users": "ユーザー",
     "vulnerabilities": "脆弱性",
     "advisor": "アドバイザー",
-    "hostMetrics": "ホストメトリクス"
+    "hostMetrics": "ホストメトリクス",
+    "assetDiscovery": "ネットワーク検出"
   },
   "notifications": {
     "applicationUpdates": "アプリケーションアップデート",
@@ -3920,7 +3921,9 @@
       "smSec004": "ホストのファイアウォールが無効な状態で全インターフェイスで待ち受けているサービス",
       "smSec005": "30 日以内に期限切れになる証明書",
       "smStab001": "7 日を超えて未解決の構成ドリフト",
-      "smStabF01": "OpenSSL のバージョンがピアのバージョンと異なる"
+      "smStabF01": "OpenSSL のバージョンがピアのバージョンと異なる",
+      "pmNetDiscovery": "ネットワーク上のデバイスが検出されています",
+      "pmNetUnmanaged": "ネットワーク上に管理されていないデバイスはありません"
     },
     "curatedPack": {
       "baseline": {
@@ -4025,7 +4028,9 @@
       "set_air_gap_role": "エアギャップ環境に合わせてサーバーロールを設定します。",
       "set_audit_retention": "監査 API を使用して、365 日以上の監査保持ポリシーを作成してください。この操作用の画面はまだありません。",
       "set_password_policy": "パスワードポリシーは sysmanage.yaml で設定されています。SysManage が代わりに変更することはできません。",
-      "shorten_session": "セッションを 1 時間で期限切れにします。"
+      "shorten_session": "セッションを 1 時間で期限切れにします。",
+      "enable_network_discovery": "エージェントが周囲のデバイスを報告できるよう、ネットワーク検出を有効にしてください。",
+      "review_unmanaged_devices": "管理されていない各デバイスを登録するか、理由を付けて既知としてマークしてください。"
     },
     "saved": "脅威モデルを保存しました。対応項目リストは次回のアドバイザー実行時に再評価されます。",
     "stale": {
@@ -4204,6 +4209,170 @@
       "saveFailed": "脅威モデルを保存できませんでした。",
       "step": "質問 {{current}} / {{total}}",
       "title": "インストールについて説明してください"
+    }
+  },
+  "assetDiscovery": {
+    "blindSpots": {
+      "agentsLimited": "一部のエージェントは、ネットワーク上のすべてを確認できません：",
+      "notEquipped": "{{count}} 台のホストで、検出に参加できないエージェントが動作しています。これらのネットワークは検出の対象外です。",
+      "notEquipped_other": "{{count}} 台のホストで、検出に参加できないエージェントが動作しています。これらのネットワークは検出の対象外です。",
+      "notEquipped_one": "{{count}} 台のホストで、検出に参加できないエージェントが動作しています。これらのネットワークは検出の対象外です。",
+      "off": "検出はオフです。エージェントはリッスンしていないため、新しいものは見つかりません。",
+      "silent": "エージェントは受信のみを行います。何も送信しないデバイスは検出されないため、この一覧は不完全な場合があります。",
+      "stale": "報告を停止しました",
+      "unswept": "過去 7 日間にスキャンされていません: {{networks}}"
+    },
+    "category": {
+      "appliance": "専用機器",
+      "iot": "IoT デバイスまたはセンサー",
+      "networkEquipment": "ネットワーク機器",
+      "other": "その他",
+      "personalDevice": "個人用デバイス",
+      "printer": "プリンター",
+      "virtualMachine": "仮想マシン",
+      "virtualAddress": "仮想または共有アドレス (VIP、ロードバランサー)"
+    },
+    "counts": {
+      "excluded": "既知・許容済み {{count}} 件",
+      "excluded_other": "既知・許容済み {{count}} 件",
+      "excluded_one": "既知・許容済み {{count}} 件",
+      "managed": "管理対象 {{count}} 件",
+      "managed_other": "管理対象 {{count}} 件",
+      "managed_one": "管理対象 {{count}} 件",
+      "onNetwork": "{{network}} 上に {{count}} 件",
+      "onNetwork_other": "{{network}} 上に {{count}} 件",
+      "onNetwork_one": "{{network}} 上に {{count}} 件",
+      "unmanaged": "管理対象外 {{count}} 件",
+      "unmanaged_other": "管理対象外 {{count}} 件",
+      "unmanaged_one": "管理対象外 {{count}} 件"
+    },
+    "exclude": {
+      "action": "{{count}} 件を既知・許容済みとしてマーク",
+      "action_other": "{{count}} 件を既知・許容済みとしてマーク",
+      "action_one": "{{count}} 件を既知・許容済みとしてマーク",
+      "category": "これは何ですか？",
+      "confirm": "既知としてマーク",
+      "done": "{{count}} 件のデバイスを既知としてマークしました。",
+      "done_other": "{{count}} 件のデバイスを既知としてマークしました。",
+      "done_one": "{{count}} 件のデバイスを既知としてマークしました。",
+      "intro": "{{count}} 件のデバイスは、今後管理対象外として表示されなくなります。この操作はあなたの名前と理由とともに記録され、IP アドレスが変わっても MAC アドレスによって各デバイスに適用され続けます。",
+      "intro_other": "{{count}} 件のデバイスは、今後管理対象外として表示されなくなります。この操作はあなたの名前と理由とともに記録され、IP アドレスが変わっても MAC アドレスによって各デバイスに適用され続けます。",
+      "intro_one": "{{count}} 件のデバイスは、今後管理対象外として表示されなくなります。この操作はあなたの名前と理由とともに記録され、IP アドレスが変わっても MAC アドレスによって各デバイスに適用され続けます。",
+      "reason": "理由",
+      "reasonHelp": "必須です。例：受付のプリンター（総務部の管理）。",
+      "title": "既知・許容済みとしてマーク"
+    },
+    "exclusions": {
+      "decidedBy": "判断者",
+      "empty": "既知としてマークされたデバイスはありません。",
+      "revokedBy": "{{who}} が取り消し：{{why}}",
+      "showRevoked": "取り消された判断を表示"
+    },
+    "filters": {
+      "allNetworks": "すべてのネットワーク",
+      "network": "ネットワーク",
+      "search": "MAC または IP アドレスを検索"
+    },
+    "loadError": "検出されたデバイスを読み込めませんでした。",
+    "method": {
+      "arpListen": "ARP パッシブ監視",
+      "cache": "近隣キャッシュ",
+      "mdns": "mDNS",
+      "ndListen": "IPv6 近隣探索",
+      "ssdp": "SSDP",
+      "sweep": "アクティブスキャン"
+    },
+    "policy": {
+      "enabled": "エージェントがネットワーク上のデバイスをリッスンする",
+      "hour": "1 時間ごと",
+      "interval": "報告間隔",
+      "lastChanged": "最終変更：{{who}}（{{when}}）",
+      "minutes": "{{count}} 分ごと",
+      "minutes_other": "{{count}} 分ごと",
+      "minutes_one": "1 分ごと",
+      "sweeps": "アクティブスキャンを許可する",
+      "days": "{{count}}日",
+      "days_other": "{{count}}日",
+      "days_one": "{{count}}日",
+      "retention": "未検出のデバイスを忘れるまでの期間"
+    },
+    "revoke": {
+      "confirm": "取り消し",
+      "title": "このデバイスを再び管理対象外として表示"
+    },
+    "status": {
+      "unmanaged": "管理対象外"
+    },
+    "subtitle": "エージェントがネットワーク上で検出した、SysManage が管理していないデバイスです。",
+    "table": {
+      "address": "アドレス",
+      "device": "デバイス",
+      "empty": "一致するデバイスはありません。",
+      "evidence": "自己申告の内容",
+      "ipOnly": "MAC 未検出",
+      "lastSeen": "最終検出",
+      "localMac": "アドレスが変わる可能性あり",
+      "localMacHelp": "ローカル管理アドレスです。スマートフォンやタブレットはこのアドレスを変更するため、このデバイスは新しいアドレスで再び表示される場合があります。",
+      "more": "{{total}} 件中 {{shown}} 件を表示しています。上のフィルターで一覧を絞り込んでください。",
+      "seenBy": "検出元",
+      "selectAll": "すべて選択",
+      "status": "ステータス",
+      "maybe": "おそらく: {{type}}"
+    },
+    "tabs": {
+      "excluded": "既知・許容済み",
+      "managed": "管理対象",
+      "unmanaged": "管理対象外",
+      "sweeps": "スキャン"
+    },
+    "title": "ネットワーク検出",
+    "unavailable": {
+      "disabled": "有効になっていません",
+      "notRoot": "エージェントが root として実行されていません",
+      "portInUse": "ポートが別のプログラムで使用されています",
+      "unreadable": "読み取れませんでした",
+      "unsupportedPlatform": "このプラットフォームではサポートされていません"
+    },
+    "sweep": {
+      "agent": "スキャンしたエージェント",
+      "disabled": "アクティブスキャンはオフになっています。自身の存在を通知しないデバイスを見つけるには、上の設定で許可してください。",
+      "error": "スキャンを開始できませんでした。",
+      "found": "検出数",
+      "foundOf": "{{probed}} 件のアドレス中 {{found}} 件",
+      "intro": "ネットワーク上のエージェントがすべてのアドレスに小さなパケットを 1 つずつ送信し、応答したすべてのデバイスを報告します。これにより、自身の存在を通知しないデバイスも見つかります。この操作はあなたの名前とともに記録されます。",
+      "none": "まだスキャンされたネットワークはありません。",
+      "perSecond": "毎秒 {{count}} アドレス",
+      "perSecond_other": "毎秒 {{count}} アドレス",
+      "perSecond_one": "毎秒 {{count}} アドレス",
+      "rate": "速度",
+      "requestedBy": "要求者",
+      "start": "スキャンを開始",
+      "status": {
+        "completed": "完了",
+        "failed": "失敗",
+        "queued": "エージェントを待機中",
+        "refused": "エージェントが拒否",
+        "timedOut": "エージェントから応答なし"
+      },
+      "title": "ネットワークをスキャン"
+    },
+    "address": {
+      "address": "IPアドレス",
+      "confirm": "登録",
+      "error": "アドレスを登録できませんでした。",
+      "title": "静的アドレスを登録",
+      "warning": "仮想IPやロードバランサーなど、決して変わらないアドレス専用です。このアドレスを持つデバイスすべてが対象になるため、DHCPでアドレスを割り当てられる通常のデバイスは、次のリース後に再び表示されます。"
+    },
+    "type": {
+      "computer": "コンピューター",
+      "iot": "IoTデバイス",
+      "media": "テレビ、スピーカー、またはメディアプレーヤー",
+      "networkEquipment": "ネットワーク機器",
+      "phoneOrTablet": "スマートフォンまたはタブレット",
+      "printer": "プリンター",
+      "unknown": "不明",
+      "virtualAddress": "仮想ルーターアドレス",
+      "virtualMachine": "仮想マシン"
     }
   }
 }

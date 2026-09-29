@@ -55,6 +55,7 @@ class MessageType(str, Enum):
     # from the agent, stored into the OSS ``custom_metric_sample`` tenant table.
     CUSTOM_METRIC_SAMPLES = "custom_metric_samples"
     HOST_METRICS = "host_metrics"
+    NETWORK_DISCOVERY_REPORT = "network_discovery_report"
     HOSTNAME_CHANGED = "hostname_changed"
     # Agent reports completion of a server-initiated package install/uninstall.
     # Replaces the legacy ``POST /agent/installation-complete`` HTTP path so the
@@ -129,6 +130,10 @@ class CommandType(str, Enum):
     # reports per-task idempotency back.  Folding them together would mean the
     # agent guessing which shape it received.
     APPLY_CONFIG_PROFILE = "apply_config_profile"
+    # Phase 21.6 S2: turn passive network discovery on/off on an agent.
+    CONFIGURE_NETWORK_DISCOVERY = "configure_network_discovery"
+    # Phase 21.6 S4: one operator-requested active sweep of an on-link network.
+    RUN_NETWORK_SWEEP = "run_network_sweep"
     # Phase 21.1 S4 -- run a query pack against the host's fact tables.
     RUN_QUERY_PACK = "run_query_pack"
     CHECK_REBOOT_STATUS = "check_reboot_status"

@@ -2402,7 +2402,8 @@
     "users": "Gebruikers",
     "vulnerabilities": "Kwetsbaarheden",
     "advisor": "Adviseur",
-    "hostMetrics": "Hostmetrieken"
+    "hostMetrics": "Hostmetrieken",
+    "assetDiscovery": "Netwerkdetectie"
   },
   "notifications": {
     "applicationUpdates": "Applicatie Updates",
@@ -3920,7 +3921,9 @@
       "smSec004": "Services luisteren op alle interfaces terwijl de hostfirewall uit staat",
       "smSec005": "Certificaat verloopt binnen 30 dagen",
       "smStab001": "Configuratieafwijking al meer dan 7 dagen onopgelost",
-      "smStabF01": "OpenSSL-versie wijkt af van de versie op vergelijkbare hosts"
+      "smStabF01": "OpenSSL-versie wijkt af van de versie op vergelijkbare hosts",
+      "pmNetDiscovery": "Apparaten in uw netwerken worden gedetecteerd",
+      "pmNetUnmanaged": "Er staan geen onbeheerde apparaten in uw netwerken"
     },
     "curatedPack": {
       "baseline": {
@@ -4025,7 +4028,9 @@
       "set_air_gap_role": "Stel de serverrol in die past bij uw air-gapped installatie.",
       "set_audit_retention": "Maak via de audit-API een bewaarbeleid voor audits van minstens 365 dagen. Hiervoor is nog geen scherm.",
       "set_password_policy": "Het wachtwoordbeleid wordt ingesteld in sysmanage.yaml; SysManage kan het niet voor u wijzigen.",
-      "shorten_session": "Laat sessies na een uur verlopen."
+      "shorten_session": "Laat sessies na een uur verlopen.",
+      "enable_network_discovery": "Schakel netwerkdetectie in zodat agents de apparaten om hen heen melden.",
+      "review_unmanaged_devices": "Registreer elk onbeheerd apparaat of markeer het met een reden als bekend."
     },
     "saved": "Dreigingsmodel opgeslagen. De actielijst wordt bij de volgende adviseursronde opnieuw geëvalueerd.",
     "stale": {
@@ -4204,6 +4209,170 @@
       "saveFailed": "Het dreigingsmodel kon niet worden opgeslagen.",
       "step": "Vraag {{current}} van {{total}}",
       "title": "Beschrijf uw installatie"
+    }
+  },
+  "assetDiscovery": {
+    "blindSpots": {
+      "agentsLimited": "Sommige agents kunnen niet alles op hun netwerken zien:",
+      "notEquipped": "Op {{count}} hosts draait een agent die niet aan detectie kan deelnemen; hun netwerken worden niet gedekt.",
+      "notEquipped_other": "Op {{count}} hosts draait een agent die niet aan detectie kan deelnemen; hun netwerken worden niet gedekt.",
+      "notEquipped_one": "Op {{count}} host draait een agent die niet aan detectie kan deelnemen; het netwerk ervan wordt niet gedekt.",
+      "off": "Detectie is uitgeschakeld: agents luisteren niet, dus er wordt niets nieuws gevonden.",
+      "silent": "Agents luisteren alleen. Een apparaat dat niets verzendt, wordt niet gezien, dus deze lijst kan onvolledig zijn.",
+      "stale": "rapporteert niet meer",
+      "unswept": "Niet verkend in de afgelopen 7 dagen: {{networks}}"
+    },
+    "category": {
+      "appliance": "Speciaal apparaat",
+      "iot": "IoT-apparaat of sensor",
+      "networkEquipment": "Netwerkapparatuur",
+      "other": "Overig",
+      "personalDevice": "Persoonlijk apparaat",
+      "printer": "Afdrukapparaat",
+      "virtualMachine": "Virtuele machine",
+      "virtualAddress": "Virtueel of gedeeld adres (VIP, load balancer)"
+    },
+    "counts": {
+      "excluded": "{{count}} bekend en in orde",
+      "excluded_other": "{{count}} bekend en in orde",
+      "excluded_one": "{{count}} bekend en in orde",
+      "managed": "{{count}} beheerd",
+      "managed_other": "{{count}} beheerd",
+      "managed_one": "{{count}} beheerd",
+      "onNetwork": "{{count}} op {{network}}",
+      "onNetwork_other": "{{count}} op {{network}}",
+      "onNetwork_one": "{{count}} op {{network}}",
+      "unmanaged": "{{count}} onbeheerd",
+      "unmanaged_other": "{{count}} onbeheerd",
+      "unmanaged_one": "{{count}} onbeheerd"
+    },
+    "exclude": {
+      "action": "{{count}} markeren als bekend en in orde",
+      "action_other": "{{count}} markeren als bekend en in orde",
+      "action_one": "{{count}} markeren als bekend en in orde",
+      "category": "Wat is het?",
+      "confirm": "Markeren als bekend",
+      "done": "{{count}} apparaten gemarkeerd als bekend.",
+      "done_other": "{{count}} apparaten gemarkeerd als bekend.",
+      "done_one": "{{count}} apparaat gemarkeerd als bekend.",
+      "intro": "{{count}} apparaten worden niet langer als onbeheerd weergegeven. Dit wordt vastgelegd met uw naam en reden, en volgt elk apparaat via het MAC-adres, ook als het IP-adres verandert.",
+      "intro_other": "{{count}} apparaten worden niet langer als onbeheerd weergegeven. Dit wordt vastgelegd met uw naam en reden, en volgt elk apparaat via het MAC-adres, ook als het IP-adres verandert.",
+      "intro_one": "{{count}} apparaat wordt niet langer als onbeheerd weergegeven. Dit wordt vastgelegd met uw naam en reden, en volgt het apparaat via het MAC-adres, ook als het IP-adres verandert.",
+      "reason": "Reden",
+      "reasonHelp": "Verplicht. Bijvoorbeeld: het afdrukapparaat bij de receptie, beheerd door de facilitaire dienst.",
+      "title": "Markeren als bekend en in orde"
+    },
+    "exclusions": {
+      "decidedBy": "Besloten door",
+      "empty": "Er zijn geen apparaten als bekend gemarkeerd.",
+      "revokedBy": "Ingetrokken door {{who}}: {{why}}",
+      "showRevoked": "Ingetrokken beslissingen weergeven"
+    },
+    "filters": {
+      "allNetworks": "Alle netwerken",
+      "network": "Netwerk",
+      "search": "Zoeken op MAC- of IP-adres"
+    },
+    "loadError": "Gedetecteerde apparaten konden niet worden geladen.",
+    "method": {
+      "arpListen": "ARP-luisteren",
+      "cache": "Buurcache",
+      "mdns": "mDNS",
+      "ndListen": "IPv6-buurdetectie",
+      "ssdp": "SSDP",
+      "sweep": "Actieve netwerkverkenning"
+    },
+    "policy": {
+      "enabled": "Agents luisteren naar apparaten op hun netwerken",
+      "hour": "Elk uur",
+      "interval": "Rapporteren",
+      "lastChanged": "Laatst gewijzigd door {{who}} op {{when}}",
+      "minutes": "Elke {{count}} minuten",
+      "minutes_other": "Elke {{count}} minuten",
+      "minutes_one": "Elke minuut",
+      "sweeps": "Actieve netwerkverkenningen toestaan",
+      "days": "{{count}} dagen",
+      "days_other": "{{count}} dagen",
+      "days_one": "{{count}} dag",
+      "retention": "Apparaten vergeten die niet gezien zijn gedurende"
+    },
+    "revoke": {
+      "confirm": "Intrekken",
+      "title": "Dit apparaat weer als onbeheerd weergeven"
+    },
+    "status": {
+      "unmanaged": "Onbeheerd"
+    },
+    "subtitle": "Apparaten die uw agents op hun netwerken zien en die SysManage niet beheert.",
+    "table": {
+      "address": "Adres",
+      "device": "Apparaat",
+      "empty": "Geen overeenkomende apparaten.",
+      "evidence": "Wat het zegt te zijn",
+      "ipOnly": "Geen MAC gezien",
+      "lastSeen": "Laatst gezien",
+      "localMac": "Adres kan veranderen",
+      "localMacHelp": "Een lokaal beheerd adres: telefoons en tablets wijzigen het, dus dit apparaat kan onder een nieuw adres opnieuw verschijnen.",
+      "more": "{{shown}} van {{total}} weergegeven. Verfijn de lijst met de filters hierboven.",
+      "seenBy": "Gezien door",
+      "selectAll": "Alles selecteren",
+      "status": "Toestand",
+      "maybe": "Misschien: {{type}}"
+    },
+    "tabs": {
+      "excluded": "Bekend en in orde",
+      "managed": "Beheerd",
+      "unmanaged": "Onbeheerd",
+      "sweeps": "Netwerkverkenningen"
+    },
+    "title": "Netwerkdetectie",
+    "unavailable": {
+      "disabled": "niet ingeschakeld",
+      "notRoot": "de agent draait niet als root",
+      "portInUse": "de poort wordt gebruikt door een ander programma",
+      "unreadable": "kon niet worden gelezen",
+      "unsupportedPlatform": "niet ondersteund op dit platform"
+    },
+    "sweep": {
+      "agent": "Verkend door",
+      "disabled": "Actieve netwerkverkenningen zijn uitgeschakeld. Sta ze toe in de instellingen hierboven om apparaten te vinden die zichzelf nooit aankondigen.",
+      "error": "De netwerkverkenning kon niet worden gestart.",
+      "found": "Gevonden",
+      "foundOf": "{{found}} van {{probed}} adressen",
+      "intro": "Een agent op het netwerk stuurt één klein pakket naar elk adres en meldt daarna elk apparaat dat heeft geantwoord. Zo worden apparaten gevonden die zichzelf nooit aankondigen, en dit wordt vastgelegd met uw naam.",
+      "none": "Er is nog geen netwerk verkend.",
+      "perSecond": "{{count}} adressen per seconde",
+      "perSecond_other": "{{count}} adressen per seconde",
+      "perSecond_one": "{{count}} adres per seconde",
+      "rate": "Snelheid",
+      "requestedBy": "Aangevraagd door",
+      "start": "Verkenning starten",
+      "status": {
+        "completed": "Voltooid",
+        "failed": "Mislukt",
+        "queued": "Wacht op de agent",
+        "refused": "Geweigerd door de agent",
+        "timedOut": "Geen antwoord van de agent"
+      },
+      "title": "Een netwerk verkennen"
+    },
+    "address": {
+      "address": "IP-adres",
+      "confirm": "Registreren",
+      "error": "Het adres kon niet worden geregistreerd.",
+      "title": "Een statisch adres registreren",
+      "warning": "Alleen voor adressen die nooit veranderen, zoals een virtueel IP-adres of een load balancer. Het geldt voor elk apparaat dat dit adres heeft, dus een gewoon apparaat dat zijn adressen via DHCP krijgt, verschijnt na zijn volgende lease opnieuw."
+    },
+    "type": {
+      "computer": "Computer",
+      "iot": "IoT-apparaat",
+      "media": "Tv, speaker of mediaspeler",
+      "networkEquipment": "Netwerkapparatuur",
+      "phoneOrTablet": "Telefoon of tablet",
+      "printer": "Afdrukapparaat",
+      "unknown": "Onbekend",
+      "virtualAddress": "Virtueel routeradres",
+      "virtualMachine": "Virtuele machine"
     }
   }
 }

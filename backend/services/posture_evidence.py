@@ -358,6 +358,24 @@ def _fleet_coverage(db, now) -> List[Dict[str, Any]]:
 # -- assembly ---------------------------------------------------------------------------------
 
 
+def _network_discovery(db) -> Dict[str, Any]:
+    """21.6 S5: what is on the network that SysManage does not manage.
+
+    Counts come from the same review service the page uses, so the punch
+    list and the Network Discovery page can never disagree.
+    """
+    from backend.services import asset_discovery_review  # noqa: PLC0415
+
+    summary = asset_discovery_review.summary(db)
+    return {
+        "enabled": _flag(summary["policy"]["enabled"]),
+        "unmanaged": summary["counts"]["unmanaged"],
+        "networks_with_unmanaged": len(summary["networks"]),
+        "observers": len(summary["observers"]),
+        "observers_stale": summary["blind_spots"]["stale_observers"],
+    }
+
+
 def _try(label: str, read: Callable[[], Any]):
     try:
         return read()
@@ -398,6 +416,17 @@ def gather(db, tenant_id=None, now: Optional[datetime] = None) -> Dict[str, Any]
             evidence["domains"]["backup"] = {"available": backup["values"] is not None}
             if backup["values"] is not None:
                 evidence["settings"].extend(_rows("backup", backup["values"]))
+        # Without the licensed engine discovery cannot exist here at all:
+        # "unavailable", said plainly -- never a passing zero.
+        from backend.services import asset_discovery_shim  # noqa: PLC0415
+
+        if not asset_discovery_shim.engine_available():
+            evidence["domains"]["network_discovery"] = {"available": False}
+        else:
+            discovery = _try("network_discovery", lambda: _network_discovery(db))
+            if discovery is not None:
+                evidence["domains"]["network_discovery"] = {"available": True}
+                evidence["settings"].extend(_rows("network_discovery", discovery))
         coverage = _try("fleet_coverage", lambda: _fleet_coverage(db, now))
         if coverage is not None:
             evidence["domains"]["fleet_coverage"] = {"available": True}

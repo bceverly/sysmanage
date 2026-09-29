@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 13:34-0400\n"
+"POT-Creation-Date: 2026-09-29 12:11-0400\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -357,27 +357,27 @@ msgstr "Fout bij verwerken van rolgegevensupdate: %s"
 msgid "Child host management requires a Professional+ license."
 msgstr "Sub-host beheer vereist een Professional+ licentie."
 
-#: backend/api/handlers/os_hardware_handlers.py:131
+#: backend/api/handlers/os_hardware_handlers.py:132
 msgid "No host identification available"
 msgstr "Geen hostidentificatie beschikbaar"
 
-#: backend/api/handlers/os_hardware_handlers.py:343
+#: backend/api/handlers/os_hardware_handlers.py:344
 msgid "os_version_updated"
 msgstr "OS versie bijgewerkt"
 
-#: backend/api/handlers/os_hardware_handlers.py:349
+#: backend/api/handlers/os_hardware_handlers.py:350
 msgid "No OS information provided"
 msgstr "Geen OS-informatie opgegeven"
 
-#: backend/api/handlers/os_hardware_handlers.py:359
+#: backend/api/handlers/os_hardware_handlers.py:360
 msgid "Failed to update OS version"
 msgstr "Mislukt om de OS-versie bij te werken"
 
-#: backend/api/handlers/os_hardware_handlers.py:543
+#: backend/api/handlers/os_hardware_handlers.py:545
 msgid "hardware_updated"
 msgstr "Hardware bijgewerkt"
 
-#: backend/api/handlers/os_hardware_handlers.py:552
+#: backend/api/handlers/os_hardware_handlers.py:554
 msgid "Failed to update hardware information"
 msgstr "Mislukt om de hardwareinformatie bij te werken"
 
@@ -1634,7 +1634,7 @@ msgstr "Bestandwaarschuwing niet gevonden"
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
 #: backend/api/config_mgmt_profiles.py:136
-#: backend/api/secrets/permissions.py:50
+#: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:90
 #, python-format
 msgid "Permission denied: %s role required"
 msgstr "Toegang geweigerd: %s rol vereist"
@@ -4356,6 +4356,14 @@ msgstr "Host moet in bevoegde modus draaien om dienscontrole te ondersteunen"
 msgid "Service {} requested for {} services"
 msgstr "Service {} aangevraagd voor {} services"
 
+#: backend/api/asset_discovery.py:127
+msgid "Unsupported retention period"
+msgstr "Niet-ondersteunde bewaartermijn"
+
+#: backend/api/asset_discovery.py:162
+msgid "Invalid device id"
+msgstr "Ongeldige apparaat-ID"
+
 #: backend/api/content_lifecycle_export.py:60
 msgid ""
 "Air-gap media export requires the air-gap collector engine (Enterprise). "
@@ -4970,12 +4978,12 @@ msgstr "Mislukt om opgeslagen script te verwijderen"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "Mislukt om commerciële antivirusstatus op te halen: %s"
 
-#: backend/websocket/message_router.py:299
+#: backend/websocket/message_router.py:309
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "Onbekend berichttype in wachtrij: %s"
 
-#: backend/websocket/message_router.py:304
+#: backend/websocket/message_router.py:314
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "Fout bij het routeren van berichttype %(message_type)s: %(error)s"
@@ -5159,7 +5167,7 @@ msgstr "Mislukt om mislukte berichten op te halen: %s"
 msgid "Host ID {host_id} not found"
 msgstr "Host ID {host_id} niet gevonden"
 
-#: backend/websocket/queue_operations.py:316
+#: backend/websocket/queue_operations.py:317
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -5169,44 +5177,44 @@ msgstr ""
 "richting=%(direction)s, host_id=%(host_id)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:498
+#: backend/websocket/queue_operations.py:499
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "Bericht als verwerkt gemarkeerd: %s"
 
-#: backend/websocket/queue_operations.py:505
+#: backend/websocket/queue_operations.py:506
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr "Kan bericht %(message_id)s niet markeren als verwerkt: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:540
+#: backend/websocket/queue_operations.py:541
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "Bericht als voltooid gemarkeerd: %s"
 
-#: backend/websocket/queue_operations.py:547
+#: backend/websocket/queue_operations.py:548
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr "Kan bericht %(message_id)s niet markeren als voltooid: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:585
+#: backend/websocket/queue_operations.py:586
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "Bericht gemarkeerd als verzonden (wacht op bevestiging): %s"
 
-#: backend/websocket/queue_operations.py:592
+#: backend/websocket/queue_operations.py:593
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr "Kan bericht %(message_id)s niet markeren als verzonden: %(error)s"
 
-#: backend/websocket/queue_operations.py:621
+#: backend/websocket/queue_operations.py:622
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "Kan onbekend bericht niet bevestigen: %s"
 
-#: backend/websocket/queue_operations.py:628
+#: backend/websocket/queue_operations.py:629
 #, python-format
 msgid ""
 "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
@@ -5214,32 +5222,32 @@ msgstr ""
 "Bericht %(message_id)s niet in SENT-status (is %(status)s), bevestiging "
 "wordt genegeerd"
 
-#: backend/websocket/queue_operations.py:641
+#: backend/websocket/queue_operations.py:642
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "Bericht bevestigd door agent: %s"
 
-#: backend/websocket/queue_operations.py:648
+#: backend/websocket/queue_operations.py:649
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr "Kan bericht %(message_id)s niet markeren als bevestigd: %(error)s"
 
-#: backend/websocket/queue_operations.py:732
+#: backend/websocket/queue_operations.py:733
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "Geen bevestiging ontvangen binnen %d seconden"
 
-#: backend/websocket/queue_operations.py:744
+#: backend/websocket/queue_operations.py:745
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "%d niet-bevestigde berichten gepland voor nieuwe poging"
 
-#: backend/websocket/queue_operations.py:752
+#: backend/websocket/queue_operations.py:753
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "Fout bij opnieuw proberen van niet-bevestigde berichten: %s"
 
-#: backend/websocket/queue_operations.py:807
+#: backend/websocket/queue_operations.py:808
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -5248,7 +5256,7 @@ msgstr ""
 "Bericht %(message_id)s mislukt (poging %(attempt)d/%(max_retries)d), opnieuw"
 " proberen over %(backoff)d seconden"
 
-#: backend/websocket/queue_operations.py:823
+#: backend/websocket/queue_operations.py:824
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
@@ -5256,12 +5264,12 @@ msgid ""
 msgstr ""
 "Bericht %(message_id)s permanent mislukt na %(attempts)d pogingen: %(error)s"
 
-#: backend/websocket/queue_operations.py:841
+#: backend/websocket/queue_operations.py:842
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "Kan bericht %(message_id)s niet markeren als mislukt: %(error)s"
 
-#: backend/websocket/queue_operations.py:863
+#: backend/websocket/queue_operations.py:864
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "Kan bericht %(message_id)s niet deserialiseren: %(error)s"
@@ -5291,11 +5299,11 @@ msgstr "Serverberichtwachtrijbeheer geïnitialiseerd"
 msgid "Rate limit exceeded. Please retry later."
 msgstr "Rate limit overschreden. Probeer het later opnieuw."
 
-#: backend/services/agent_capability_service.py:266
+#: backend/services/agent_capability_service.py:306
 msgid "this host"
 msgstr "dit host"
 
-#: backend/services/agent_capability_service.py:269
+#: backend/services/agent_capability_service.py:309
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "
@@ -5303,6 +5311,37 @@ msgid ""
 msgstr ""
 "De agent op {host} ondersteunt niet \"{command}\". Hij adverteert een "
 "beperkte functionaliteitsset, dus de opdracht is niet verzonden."
+
+#: backend/services/asset_discovery_review.py:125
+#, python-format
+msgid "Unknown device status: %s"
+msgstr "Onbekende apparaatstatus: %s"
+
+#: backend/services/asset_discovery_review.py:342
+msgid "A reason of at least 3 characters is required"
+msgstr "Een reden van minstens 3 tekens is vereist"
+
+#: backend/services/asset_discovery_review.py:351
+#: backend/services/asset_discovery_review.py:399
+#, python-format
+msgid "Unknown exclusion category: %s"
+msgstr "Onbekende uitsluitingscategorie: %s"
+
+#: backend/services/asset_discovery_review.py:404
+msgid "That is not a valid IP address"
+msgstr "Dat is geen geldig IP-adres"
+
+#: backend/services/asset_discovery_review.py:412
+msgid "That address is already registered as known"
+msgstr "Dat adres is al als bekend geregistreerd"
+
+#: backend/services/asset_discovery_review.py:433
+msgid "Exclusion not found"
+msgstr "Uitsluiting niet gevonden"
+
+#: backend/services/asset_discovery_review.py:435
+msgid "This exclusion was already revoked"
+msgstr "Deze uitsluiting is al ingetrokken"
 
 #: backend/services/config_mgmt_dispatch.py:58
 #, python-format
@@ -5341,6 +5380,46 @@ msgstr "Verwijzingshost niet gevonden"
 msgid "Target host not found"
 msgstr "Doelhost niet gevonden"
 
+#: backend/services/network_sweep.py:65
+msgid "That is not a valid network"
+msgstr "Dat is geen geldig netwerk"
+
+#: backend/services/network_sweep.py:67
+msgid "IPv6 networks cannot be swept; only IPv4 networks can be enumerated"
+msgstr ""
+"IPv6-netwerken kunnen niet worden verkend; alleen IPv4-netwerken kunnen "
+"worden opgesomd"
+
+#: backend/services/network_sweep.py:70
+msgid "That network is too large to sweep (at most 4096 addresses)"
+msgstr ""
+"Dat netwerk is te groot voor een netwerkverkenning (maximaal 4096 adressen)"
+
+#: backend/services/network_sweep.py:73
+msgid "No agent is on that network, so it cannot be swept from here"
+msgstr ""
+"Er zit geen agent op dat netwerk, dus het kan niet vanaf hier worden verkend"
+
+#: backend/services/network_sweep.py:75
+msgid "The rate must be between 1 and 200 addresses per second"
+msgstr "De snelheid moet tussen 1 en 200 adressen per seconde liggen"
+
+#: backend/services/network_sweep.py:135
+msgid "Network discovery is not available"
+msgstr "Netwerkdetectie is niet beschikbaar"
+
+#: backend/services/network_sweep.py:140
+msgid "Active sweeps are turned off in the network discovery settings"
+msgstr ""
+"Actieve netwerkverkenningen zijn uitgeschakeld in de instellingen voor "
+"netwerkdetectie"
+
+#: backend/services/network_sweep.py:152
+msgid "Every agent on that network is already sweeping; try again shortly"
+msgstr ""
+"Elke agent op dat netwerk is al een netwerkverkenning aan het uitvoeren; "
+"probeer het zo opnieuw"
+
 #: backend/services/airgap_device_service.py:149
 msgid "no device selected"
 msgstr "geen apparaat geselecteerd"
@@ -5362,17 +5441,17 @@ msgstr "schijf aanwezig maar geen leesbare schijf ingeschoven"
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "geen ISO-bestandssysteem op apparaat (fstype=%s)"
 
-#: backend/services/audit_service.py:189
+#: backend/services/audit_service.py:191
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "Gemaakt {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:237
+#: backend/services/audit_service.py:239
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "Bijgewerkte {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:285
+#: backend/services/audit_service.py:287
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "Verwijderd {entity_type} '{entity_name}'"

@@ -210,3 +210,52 @@ def test_backups_with_no_command_are_not_enabled(factory):
         values = pe._backup("t1", NOW)  # pylint: disable=protected-access
     assert values["enabled"] == "0"
     assert values["last_success_age_seconds"] == 10**12  # never backed up
+
+
+# -- 21.6 S5: network discovery on the punch list ---------------------------
+
+
+def test_without_the_discovery_engine_the_domain_is_unavailable(factory):
+    from backend.services import asset_discovery_shim  # noqa: PLC0415
+
+    with factory() as db, patch.object(
+        asset_discovery_shim, "engine_available", return_value=False
+    ):
+        evidence = pe.gather(db, None, NOW)
+    assert evidence["domains"]["network_discovery"] == {"available": False}
+    assert not [k for k in _settings(evidence) if k[0] == "network_discovery"]
+
+
+def test_discovery_counts_match_the_review_page(factory):
+    from backend.services import asset_discovery_shim  # noqa: PLC0415
+    from backend.services import network_discovery_policy  # noqa: PLC0415
+
+    with factory() as db, patch.object(
+        asset_discovery_shim, "engine_available", return_value=True
+    ):
+        agent = _host(db, "agent")
+        for mac, ip in (
+            ("00:1a:2b:00:00:01", "10.0.0.21"),
+            ("00:1a:2b:00:00:02", "10.0.0.22"),
+        ):
+            asset = models.DiscoveredAsset(
+                identity=mac, identity_kind="mac", mac=mac, mac_locally_administered=False, last_ip=ip,
+            )  # fmt: skip
+            db.add(asset)
+            db.flush()
+            db.add(
+                models.DiscoveredAssetSighting(
+                    asset_id=asset.id,
+                    observer_host_id=agent.id,
+                    network="10.0.0.0/24",
+                    sightings=1,
+                )
+            )
+        network_discovery_policy.set_policy(db, True, 300, "op@x")
+        db.flush()
+        evidence = pe.gather(db, None, NOW)
+    settings = _settings(evidence)
+    assert evidence["domains"]["network_discovery"] == {"available": True}
+    assert settings[("network_discovery", "enabled")] == "1"
+    assert settings[("network_discovery", "unmanaged")] == "2"
+    assert settings[("network_discovery", "networks_with_unmanaged")] == "1"

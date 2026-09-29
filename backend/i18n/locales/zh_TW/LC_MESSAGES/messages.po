@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 13:34-0400\n"
+"POT-Creation-Date: 2026-09-29 12:11-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -355,27 +355,27 @@ msgstr "無法處理角色數據更新：%s"
 msgid "Child host management requires a Professional+ license."
 msgstr "子主機管理需要 Professional+ 許可證。"
 
-#: backend/api/handlers/os_hardware_handlers.py:131
+#: backend/api/handlers/os_hardware_handlers.py:132
 msgid "No host identification available"
 msgstr "沒有可用的主機識別信息"
 
-#: backend/api/handlers/os_hardware_handlers.py:343
+#: backend/api/handlers/os_hardware_handlers.py:344
 msgid "os_version_updated"
 msgstr "作業系統版本已更新"
 
-#: backend/api/handlers/os_hardware_handlers.py:349
+#: backend/api/handlers/os_hardware_handlers.py:350
 msgid "No OS information provided"
 msgstr "未提供操作系統信息"
 
-#: backend/api/handlers/os_hardware_handlers.py:359
+#: backend/api/handlers/os_hardware_handlers.py:360
 msgid "Failed to update OS version"
 msgstr "更新作業系統版本失敗"
 
-#: backend/api/handlers/os_hardware_handlers.py:543
+#: backend/api/handlers/os_hardware_handlers.py:545
 msgid "hardware_updated"
 msgstr "硬體已更新"
 
-#: backend/api/handlers/os_hardware_handlers.py:552
+#: backend/api/handlers/os_hardware_handlers.py:554
 msgid "Failed to update hardware information"
 msgstr "更新硬體資訊失敗"
 
@@ -1570,7 +1570,7 @@ msgstr "未找到檔案監控。"
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
 #: backend/api/config_mgmt_profiles.py:136
-#: backend/api/secrets/permissions.py:50
+#: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:90
 #, python-format
 msgid "Permission denied: %s role required"
 msgstr "權限被拒絕：%s 角色所需"
@@ -4160,6 +4160,14 @@ msgstr "主機必須在特權模式下運行以進行服務控制"
 msgid "Service {} requested for {} services"
 msgstr "請求 {} 個服務的 {}"
 
+#: backend/api/asset_discovery.py:127
+msgid "Unsupported retention period"
+msgstr "不支援的保留期限"
+
+#: backend/api/asset_discovery.py:162
+msgid "Invalid device id"
+msgstr "裝置 ID 無效"
+
 #: backend/api/content_lifecycle_export.py:60
 msgid ""
 "Air-gap media export requires the air-gap collector engine (Enterprise). "
@@ -4758,12 +4766,12 @@ msgstr "無法刪除儲存的腳本"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "無法取得商業防毒狀態：%s"
 
-#: backend/websocket/message_router.py:299
+#: backend/websocket/message_router.py:309
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "隊列中未知的消息類型: %s"
 
-#: backend/websocket/message_router.py:304
+#: backend/websocket/message_router.py:314
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "路由消息類型 %(message_type)s 時發生錯誤：%(error)s"
@@ -4928,7 +4936,7 @@ msgstr "獲取失敗消息時失敗：%s"
 msgid "Host ID {host_id} not found"
 msgstr "找不到主機 ID {host_id}"
 
-#: backend/websocket/queue_operations.py:316
+#: backend/websocket/queue_operations.py:317
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -4938,75 +4946,75 @@ msgstr ""
 "主機ID=%(host_id)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:498
+#: backend/websocket/queue_operations.py:499
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "將消息標記為正在處理： %s"
 
-#: backend/websocket/queue_operations.py:505
+#: backend/websocket/queue_operations.py:506
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr "無法將消息 %(message_id)s 記為正在處理：%(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:540
+#: backend/websocket/queue_operations.py:541
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "將消息標記為已完成： %s"
 
-#: backend/websocket/queue_operations.py:547
+#: backend/websocket/queue_operations.py:548
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr "無法將消息 %(message_id)s 記為已完成：%(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:585
+#: backend/websocket/queue_operations.py:586
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "訊息已標記為已傳送（等待確認）：%s"
 
-#: backend/websocket/queue_operations.py:592
+#: backend/websocket/queue_operations.py:593
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr "無法將消息 %(message_id)s 記為已發送：%(error)s"
 
-#: backend/websocket/queue_operations.py:621
+#: backend/websocket/queue_operations.py:622
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "無法確認未知訊息：%s"
 
-#: backend/websocket/queue_operations.py:628
+#: backend/websocket/queue_operations.py:629
 #, python-format
 msgid ""
 "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
 msgstr "消息 %(message_id)s 狀態不是 SENT，跳過確認（當前狀態為：%(status)s）"
 
-#: backend/websocket/queue_operations.py:641
+#: backend/websocket/queue_operations.py:642
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "代理程式已確認訊息：%s"
 
-#: backend/websocket/queue_operations.py:648
+#: backend/websocket/queue_operations.py:649
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr "無法將消息 %(message_id)s 記為已確認：%(error)s"
 
-#: backend/websocket/queue_operations.py:732
+#: backend/websocket/queue_operations.py:733
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "在 %d 秒內未收到確認"
 
-#: backend/websocket/queue_operations.py:744
+#: backend/websocket/queue_operations.py:745
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "已排程 %d 則未確認訊息進行重試"
 
-#: backend/websocket/queue_operations.py:752
+#: backend/websocket/queue_operations.py:753
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "重試未確認訊息時發生錯誤：%s"
 
-#: backend/websocket/queue_operations.py:807
+#: backend/websocket/queue_operations.py:808
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -5014,19 +5022,19 @@ msgid ""
 msgstr ""
 "消息 %(message_id)s 失敗（嘗試次數 %(attempt)d/%(max_retries)d），安排在 %(backoff)d 秒後重試"
 
-#: backend/websocket/queue_operations.py:823
+#: backend/websocket/queue_operations.py:824
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
 "%(error)s"
 msgstr "消息 %(message_id)s 在嘗試了 %(attempts)d 次後永久失敗：%(error)s"
 
-#: backend/websocket/queue_operations.py:841
+#: backend/websocket/queue_operations.py:842
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "無法將消息 %(message_id)s 記為失敗：%(error)s"
 
-#: backend/websocket/queue_operations.py:863
+#: backend/websocket/queue_operations.py:864
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "無法反序列化消息 %(message_id)s：%(error)s"
@@ -5056,16 +5064,47 @@ msgstr "伺服器消息佇列管理器初始化完成"
 msgid "Rate limit exceeded. Please retry later."
 msgstr "超出速率限制。請稍後再試。"
 
-#: backend/services/agent_capability_service.py:266
+#: backend/services/agent_capability_service.py:306
 msgid "this host"
 msgstr "此主機"
 
-#: backend/services/agent_capability_service.py:269
+#: backend/services/agent_capability_service.py:309
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "
 "capability set, so the command was not sent."
 msgstr "在{host}上的代理不支援'{command}'。由於它宣佈了簡化的功能集，因此未發送該命令。"
+
+#: backend/services/asset_discovery_review.py:125
+#, python-format
+msgid "Unknown device status: %s"
+msgstr "未知的裝置狀態：%s"
+
+#: backend/services/asset_discovery_review.py:342
+msgid "A reason of at least 3 characters is required"
+msgstr "需要至少 3 個字元的原因"
+
+#: backend/services/asset_discovery_review.py:351
+#: backend/services/asset_discovery_review.py:399
+#, python-format
+msgid "Unknown exclusion category: %s"
+msgstr "未知的排除類別：%s"
+
+#: backend/services/asset_discovery_review.py:404
+msgid "That is not a valid IP address"
+msgstr "這不是有效的 IP 位址"
+
+#: backend/services/asset_discovery_review.py:412
+msgid "That address is already registered as known"
+msgstr "該位址已登記為已知"
+
+#: backend/services/asset_discovery_review.py:433
+msgid "Exclusion not found"
+msgstr "找不到排除項目"
+
+#: backend/services/asset_discovery_review.py:435
+msgid "This exclusion was already revoked"
+msgstr "此排除項目已被撤銷"
 
 #: backend/services/config_mgmt_dispatch.py:58
 #, python-format
@@ -5100,6 +5139,38 @@ msgstr "參考主機未找到"
 msgid "Target host not found"
 msgstr "目標主機未找到"
 
+#: backend/services/network_sweep.py:65
+msgid "That is not a valid network"
+msgstr "這不是有效的網路"
+
+#: backend/services/network_sweep.py:67
+msgid "IPv6 networks cannot be swept; only IPv4 networks can be enumerated"
+msgstr "無法掃描 IPv6 網路；只能列舉 IPv4 網路"
+
+#: backend/services/network_sweep.py:70
+msgid "That network is too large to sweep (at most 4096 addresses)"
+msgstr "該網路太大，無法掃描（最多 4096 個位址）"
+
+#: backend/services/network_sweep.py:73
+msgid "No agent is on that network, so it cannot be swept from here"
+msgstr "該網路上沒有代理程式，因此無法從這裡掃描"
+
+#: backend/services/network_sweep.py:75
+msgid "The rate must be between 1 and 200 addresses per second"
+msgstr "速率必須介於每秒 1 到 200 個位址之間"
+
+#: backend/services/network_sweep.py:135
+msgid "Network discovery is not available"
+msgstr "網路探索無法使用"
+
+#: backend/services/network_sweep.py:140
+msgid "Active sweeps are turned off in the network discovery settings"
+msgstr "網路探索設定中已關閉主動掃描"
+
+#: backend/services/network_sweep.py:152
+msgid "Every agent on that network is already sweeping; try again shortly"
+msgstr "該網路上的所有代理程式都已在掃描；請稍後再試"
+
 #: backend/services/airgap_device_service.py:149
 msgid "no device selected"
 msgstr "未選擇設備"
@@ -5121,17 +5192,17 @@ msgstr "磁盤已插入但無法讀取"
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "設備上沒有 ISO 文件系統 (fstype=%s)"
 
-#: backend/services/audit_service.py:189
+#: backend/services/audit_service.py:191
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "已創建 {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:237
+#: backend/services/audit_service.py:239
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "已更新 {entity_type} '{entity_name}' 的內容"
 
-#: backend/services/audit_service.py:285
+#: backend/services/audit_service.py:287
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "已刪除 {entity_type} '{entity_name}'"

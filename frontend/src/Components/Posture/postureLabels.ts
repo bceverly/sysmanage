@@ -108,6 +108,8 @@ export const remedyText = (t: TFunction, remedy: string | null): string => {
         run_compliance_scans: t('posture.remedy.run_compliance_scans', 'Run compliance scans on every host.'),
         patch_critical_vulnerabilities: t('posture.remedy.patch_critical_vulnerabilities', 'Review and approve the proposed fixes.'),
         enable_openbao: t('posture.remedy.enable_openbao', 'Store secrets in OpenBAO.'),
+        enable_network_discovery: t('posture.remedy.enable_network_discovery', 'Turn on network discovery so agents report the devices around them.'),
+        review_unmanaged_devices: t('posture.remedy.review_unmanaged_devices', 'Enroll each unmanaged device, or mark it as known with a reason.'),
         set_password_policy: t('posture.remedy.set_password_policy', 'The password policy is set in sysmanage.yaml; SysManage cannot change it for you.'),
     };
     return (remedy && texts[remedy]) || '';
@@ -126,6 +128,7 @@ export const GUIDED_ROUTES: Record<string, string> = {
     compliance: '/compliance',
     advisor_proposals: '/advisor',
     secrets: '/secrets',
+    asset_discovery: '/asset-discovery',
 };
 
 export const ruleTitle = (t: TFunction, key: string, fallback?: string | null): string => {
@@ -150,6 +153,8 @@ export const ruleTitle = (t: TFunction, key: string, fallback?: string | null): 
         'PM-FIREWALL': t('advisor.curated.pmFirewall', "Every host's firewall is on"),
         'PM-COMPLIANCE-SCANS': t('advisor.curated.pmComplianceScans', 'Every host has a compliance scan from the last 30 days'),
         'PM-CRITICAL-VULNS': t('advisor.curated.pmCriticalVulns', 'No host has an unpatched critical vulnerability'),
+        'PM-NET-DISCOVERY': t('advisor.curated.pmNetDiscovery', 'Devices on your networks are being discovered'),
+        'PM-NET-UNMANAGED': t('advisor.curated.pmNetUnmanaged', 'No unmanaged devices are on your networks'),
         // Baseline pack (21.2)
         'SM-SEC-001': t('advisor.curated.smSec001', 'Critical vulnerability with a fix available'),
         'SM-SEC-002': t('advisor.curated.smSec002', 'High-severity vulnerability with a fix available'),

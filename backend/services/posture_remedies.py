@@ -69,6 +69,9 @@ GUIDED = {
     "run_compliance_scans": "compliance",
     "patch_critical_vulnerabilities": "advisor_proposals",
     "enable_openbao": "secrets",
+    # 21.6 S5: both are decisions an operator takes on the discovery page.
+    "enable_network_discovery": "asset_discovery",
+    "review_unmanaged_devices": "asset_discovery",
 }
 NONE = {"set_password_policy"}
 

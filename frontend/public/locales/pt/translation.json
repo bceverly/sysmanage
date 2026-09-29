@@ -2402,7 +2402,8 @@
     "users": "Usuários",
     "vulnerabilities": "Vulnerabilidades",
     "advisor": "Assistente",
-    "hostMetrics": "Métricas de hosts"
+    "hostMetrics": "Métricas de hosts",
+    "assetDiscovery": "Descoberta de rede"
   },
   "notifications": {
     "applicationUpdates": "Atualizações de Aplicações",
@@ -3920,7 +3921,9 @@
       "smSec004": "Serviços escutando em todas as interfaces com o firewall do host desativado",
       "smSec005": "Certificado expirando em até 30 dias",
       "smStab001": "Desvio de configuração não resolvido há mais de 7 dias",
-      "smStabF01": "A versão do OpenSSL difere da executada pelos hosts equivalentes"
+      "smStabF01": "A versão do OpenSSL difere da executada pelos hosts equivalentes",
+      "pmNetDiscovery": "Os dispositivos das suas redes estão sendo descobertos",
+      "pmNetUnmanaged": "Não há dispositivos não gerenciados nas suas redes"
     },
     "curatedPack": {
       "baseline": {
@@ -4025,7 +4028,9 @@
       "set_air_gap_role": "Defina a função do servidor de acordo com sua implantação isolada.",
       "set_audit_retention": "Crie uma política de retenção de auditoria de pelo menos 365 dias pela API de auditoria. Ainda não há uma tela para isso.",
       "set_password_policy": "A política de senhas é definida em sysmanage.yaml; o SysManage não pode alterá-la por você.",
-      "shorten_session": "Faça as sessões expirarem após uma hora."
+      "shorten_session": "Faça as sessões expirarem após uma hora.",
+      "enable_network_discovery": "Ative a descoberta de rede para que os agentes informem os dispositivos ao seu redor.",
+      "review_unmanaged_devices": "Registre cada dispositivo não gerenciado ou marque-o como conhecido com um motivo."
     },
     "saved": "Modelo de ameaças salvo. A lista de pendências será reavaliada na próxima execução do assistente.",
     "stale": {
@@ -4204,6 +4209,170 @@
       "saveFailed": "Não foi possível salvar o modelo de ameaças.",
       "step": "Pergunta {{current}} de {{total}}",
       "title": "Descreva sua instalação"
+    }
+  },
+  "assetDiscovery": {
+    "blindSpots": {
+      "agentsLimited": "Alguns agentes não conseguem ver tudo em suas redes:",
+      "notEquipped": "{{count}} hosts executam um agente que não pode participar da descoberta; suas redes não estão cobertas.",
+      "notEquipped_other": "{{count}} hosts executam um agente que não pode participar da descoberta; suas redes não estão cobertas.",
+      "notEquipped_one": "{{count}} host executa um agente que não pode participar da descoberta; sua rede não está coberta.",
+      "off": "A descoberta está desativada: os agentes não estão escutando, portanto nada novo será encontrado.",
+      "silent": "Os agentes apenas escutam. Um dispositivo que não envia nada não é visto, portanto esta lista pode estar incompleta.",
+      "stale": "parou de enviar relatórios",
+      "unswept": "Sem varredura nos últimos 7 dias: {{networks}}"
+    },
+    "category": {
+      "appliance": "Equipamento dedicado",
+      "iot": "Dispositivo ou sensor IoT",
+      "networkEquipment": "Equipamento de rede",
+      "other": "Outro",
+      "personalDevice": "Dispositivo pessoal",
+      "printer": "Impressora",
+      "virtualMachine": "Máquina virtual",
+      "virtualAddress": "Endereço virtual ou compartilhado (VIP, balanceador de carga)"
+    },
+    "counts": {
+      "excluded": "{{count}} conhecidos e aceitos",
+      "excluded_other": "{{count}} conhecidos e aceitos",
+      "excluded_one": "{{count}} conhecido e aceito",
+      "managed": "{{count}} gerenciados",
+      "managed_other": "{{count}} gerenciados",
+      "managed_one": "{{count}} gerenciado",
+      "onNetwork": "{{count}} em {{network}}",
+      "onNetwork_other": "{{count}} em {{network}}",
+      "onNetwork_one": "{{count}} em {{network}}",
+      "unmanaged": "{{count}} não gerenciados",
+      "unmanaged_other": "{{count}} não gerenciados",
+      "unmanaged_one": "{{count}} não gerenciado"
+    },
+    "exclude": {
+      "action": "Marcar {{count}} como conhecidos e aceitos",
+      "action_other": "Marcar {{count}} como conhecidos e aceitos",
+      "action_one": "Marcar {{count}} como conhecido e aceito",
+      "category": "O que é?",
+      "confirm": "Marcar como conhecido",
+      "done": "{{count}} dispositivos marcados como conhecidos.",
+      "done_other": "{{count}} dispositivos marcados como conhecidos.",
+      "done_one": "{{count}} dispositivo marcado como conhecido.",
+      "intro": "{{count}} dispositivos deixarão de ser exibidos como não gerenciados. Isso é registrado com seu nome e motivo, e acompanha cada dispositivo pelo endereço MAC, mesmo que o endereço IP mude.",
+      "intro_other": "{{count}} dispositivos deixarão de ser exibidos como não gerenciados. Isso é registrado com seu nome e motivo, e acompanha cada dispositivo pelo endereço MAC, mesmo que o endereço IP mude.",
+      "intro_one": "{{count}} dispositivo deixará de ser exibido como não gerenciado. Isso é registrado com seu nome e motivo, e acompanha o dispositivo pelo endereço MAC, mesmo que o endereço IP mude.",
+      "reason": "Motivo",
+      "reasonHelp": "Obrigatório. Por exemplo: a impressora da recepção, sob responsabilidade da equipe de infraestrutura predial.",
+      "title": "Marcar como conhecido e aceito"
+    },
+    "exclusions": {
+      "decidedBy": "Decidido por",
+      "empty": "Nenhum dispositivo foi marcado como conhecido.",
+      "revokedBy": "Revogado por {{who}}: {{why}}",
+      "showRevoked": "Mostrar decisões revogadas"
+    },
+    "filters": {
+      "allNetworks": "Todas as redes",
+      "network": "Rede",
+      "search": "Pesquisar endereço MAC ou IP"
+    },
+    "loadError": "Não foi possível carregar os dispositivos descobertos.",
+    "method": {
+      "arpListen": "Escuta ARP",
+      "cache": "Cache de vizinhos",
+      "mdns": "mDNS",
+      "ndListen": "Descoberta de vizinhos IPv6",
+      "ssdp": "SSDP",
+      "sweep": "Varredura ativa"
+    },
+    "policy": {
+      "enabled": "Os agentes escutam suas redes em busca de dispositivos",
+      "hour": "A cada hora",
+      "interval": "Relatar",
+      "lastChanged": "Última alteração por {{who}} em {{when}}",
+      "minutes": "A cada {{count}} minutos",
+      "minutes_other": "A cada {{count}} minutos",
+      "minutes_one": "A cada minuto",
+      "sweeps": "Permitir varreduras ativas",
+      "days": "{{count}} dias",
+      "days_other": "{{count}} dias",
+      "days_one": "{{count}} dia",
+      "retention": "Esquecer dispositivos não vistos há"
+    },
+    "revoke": {
+      "confirm": "Revogar",
+      "title": "Exibir este dispositivo como não gerenciado novamente"
+    },
+    "status": {
+      "unmanaged": "Não gerenciado"
+    },
+    "subtitle": "Dispositivos que seus agentes veem em suas redes e que o SysManage não gerencia.",
+    "table": {
+      "address": "Endereço",
+      "device": "Dispositivo",
+      "empty": "Nenhum dispositivo corresponde.",
+      "evidence": "O que ele diz ser",
+      "ipOnly": "Nenhum MAC visto",
+      "lastSeen": "Visto pela última vez",
+      "localMac": "O endereço pode mudar",
+      "localMacHelp": "Um endereço administrado localmente: celulares e tablets o alteram, então este dispositivo pode reaparecer com um novo endereço.",
+      "more": "Exibindo {{shown}} de {{total}}. Refine a lista com os filtros acima.",
+      "seenBy": "Visto por",
+      "selectAll": "Selecionar tudo",
+      "status": "Estado",
+      "maybe": "Talvez: {{type}}"
+    },
+    "tabs": {
+      "excluded": "Conhecidos e aceitos",
+      "managed": "Gerenciados",
+      "unmanaged": "Não gerenciados",
+      "sweeps": "Varreduras"
+    },
+    "title": "Descoberta de rede",
+    "unavailable": {
+      "disabled": "não habilitado",
+      "notRoot": "o agente não está sendo executado como root",
+      "portInUse": "a porta está em uso por outro programa",
+      "unreadable": "não foi possível ler",
+      "unsupportedPlatform": "não compatível com esta plataforma"
+    },
+    "sweep": {
+      "agent": "Varrido por",
+      "disabled": "As varreduras ativas estão desativadas. Permita-as nas configurações acima para encontrar dispositivos que nunca se anunciam.",
+      "error": "Não foi possível iniciar a varredura.",
+      "found": "Encontrados",
+      "foundOf": "{{found}} de {{probed}} endereços",
+      "intro": "Um agente na rede envia um pequeno pacote para cada endereço e depois informa cada dispositivo que respondeu. Isso encontra dispositivos que nunca se anunciam, e é registrado com seu nome.",
+      "none": "Nenhuma rede foi varrida ainda.",
+      "perSecond": "{{count}} endereços por segundo",
+      "perSecond_other": "{{count}} endereços por segundo",
+      "perSecond_one": "{{count}} endereço por segundo",
+      "rate": "Velocidade",
+      "requestedBy": "Solicitado por",
+      "start": "Iniciar varredura",
+      "status": {
+        "completed": "Concluída",
+        "failed": "Falhou",
+        "queued": "Aguardando o agente",
+        "refused": "Recusada pelo agente",
+        "timedOut": "Sem resposta do agente"
+      },
+      "title": "Varrer uma rede"
+    },
+    "address": {
+      "address": "Endereço IP",
+      "confirm": "Registrar",
+      "error": "Não foi possível registrar o endereço.",
+      "title": "Registrar um endereço estático",
+      "warning": "Somente para endereços que nunca mudam, como um IP virtual ou um balanceador de carga. Vale para qualquer dispositivo que tenha este endereço, então um dispositivo comum que recebe endereços por DHCP reaparecerá após a próxima concessão."
+    },
+    "type": {
+      "computer": "Computador",
+      "iot": "Dispositivo IoT",
+      "media": "TV, alto-falante ou reprodutor de mídia",
+      "networkEquipment": "Equipamento de rede",
+      "phoneOrTablet": "Telefone ou tablet",
+      "printer": "Impressora",
+      "unknown": "Desconhecido",
+      "virtualAddress": "Endereço de roteador virtual",
+      "virtualMachine": "Máquina virtual"
     }
   }
 }

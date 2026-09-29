@@ -2402,7 +2402,8 @@
     "users": "Benutzer",
     "vulnerabilities": "Sicherheitslücken",
     "advisor": "Berater",
-    "hostMetrics": "Host-Metriken"
+    "hostMetrics": "Host-Metriken",
+    "assetDiscovery": "Netzwerkerkennung"
   },
   "notifications": {
     "applicationUpdates": "Anwendungs-Updates",
@@ -3920,7 +3921,9 @@
       "smSec004": "Dienste lauschen auf allen Schnittstellen, während die Host-Firewall aus ist",
       "smSec005": "Zertifikat läuft innerhalb von 30 Tagen ab",
       "smStab001": "Konfigurationsabweichung seit mehr als 7 Tagen ungelöst",
-      "smStabF01": "OpenSSL-Version weicht von der Version vergleichbarer Hosts ab"
+      "smStabF01": "OpenSSL-Version weicht von der Version vergleichbarer Hosts ab",
+      "pmNetDiscovery": "Geräte in Ihren Netzwerken werden erkannt",
+      "pmNetUnmanaged": "In Ihren Netzwerken befinden sich keine nicht verwalteten Geräte"
     },
     "curatedPack": {
       "baseline": {
@@ -4025,7 +4028,9 @@
       "set_air_gap_role": "Stellen Sie die Serverrolle passend zu Ihrer Air-Gap-Installation ein.",
       "set_audit_retention": "Erstellen Sie über die Audit-API eine Audit-Aufbewahrungsrichtlinie von mindestens 365 Tagen. Hierfür gibt es noch keine Oberfläche.",
       "set_password_policy": "Die Passwortrichtlinie wird in sysmanage.yaml festgelegt; SysManage kann sie nicht für Sie ändern.",
-      "shorten_session": "Lassen Sie Sitzungen nach einer Stunde ablaufen."
+      "shorten_session": "Lassen Sie Sitzungen nach einer Stunde ablaufen.",
+      "enable_network_discovery": "Aktivieren Sie die Netzwerkerkennung, damit Agents die Geräte in ihrer Umgebung melden.",
+      "review_unmanaged_devices": "Registrieren Sie jedes nicht verwaltete Gerät oder markieren Sie es mit einer Begründung als bekannt."
     },
     "saved": "Bedrohungsmodell gespeichert. Die Maßnahmenliste wird beim nächsten Durchlauf des Beraters neu ausgewertet.",
     "stale": {
@@ -4204,6 +4209,170 @@
       "saveFailed": "Das Bedrohungsmodell konnte nicht gespeichert werden.",
       "step": "Frage {{current}} von {{total}}",
       "title": "Beschreiben Sie Ihre Installation"
+    }
+  },
+  "assetDiscovery": {
+    "blindSpots": {
+      "agentsLimited": "Einige Agenten können nicht alles in ihren Netzwerken sehen:",
+      "notEquipped": "Auf {{count}} Hosts läuft ein Agent, der nicht an der Erkennung teilnehmen kann; ihre Netzwerke sind nicht abgedeckt.",
+      "notEquipped_other": "Auf {{count}} Hosts läuft ein Agent, der nicht an der Erkennung teilnehmen kann; ihre Netzwerke sind nicht abgedeckt.",
+      "notEquipped_one": "Auf {{count}} Host läuft ein Agent, der nicht an der Erkennung teilnehmen kann; sein Netzwerk ist nicht abgedeckt.",
+      "off": "Die Erkennung ist ausgeschaltet: Agenten hören nicht mit, daher wird nichts Neues gefunden.",
+      "silent": "Agenten hören nur mit. Ein Gerät, das nichts sendet, wird nicht gesehen, daher kann diese Liste unvollständig sein.",
+      "stale": "meldet keine Daten mehr",
+      "unswept": "In den letzten 7 Tagen nicht abgetastet: {{networks}}"
+    },
+    "category": {
+      "appliance": "Spezialgerät",
+      "iot": "IoT-Gerät oder Sensor",
+      "networkEquipment": "Netzwerkausrüstung",
+      "other": "Sonstiges",
+      "personalDevice": "Persönliches Gerät",
+      "printer": "Drucker",
+      "virtualMachine": "Virtuelle Maschine",
+      "virtualAddress": "Virtuelle oder gemeinsam genutzte Adresse (VIP, Load Balancer)"
+    },
+    "counts": {
+      "excluded": "{{count}} bekannt und unbedenklich",
+      "excluded_other": "{{count}} bekannt und unbedenklich",
+      "excluded_one": "{{count}} bekannt und unbedenklich",
+      "managed": "{{count}} verwaltet",
+      "managed_other": "{{count}} verwaltet",
+      "managed_one": "{{count}} verwaltet",
+      "onNetwork": "{{count}} in {{network}}",
+      "onNetwork_other": "{{count}} in {{network}}",
+      "onNetwork_one": "{{count}} in {{network}}",
+      "unmanaged": "{{count}} nicht verwaltet",
+      "unmanaged_other": "{{count}} nicht verwaltet",
+      "unmanaged_one": "{{count}} nicht verwaltet"
+    },
+    "exclude": {
+      "action": "{{count}} als bekannt und unbedenklich markieren",
+      "action_other": "{{count}} als bekannt und unbedenklich markieren",
+      "action_one": "{{count}} als bekannt und unbedenklich markieren",
+      "category": "Was ist es?",
+      "confirm": "Als bekannt markieren",
+      "done": "{{count}} Geräte als bekannt markiert.",
+      "done_other": "{{count}} Geräte als bekannt markiert.",
+      "done_one": "{{count}} Gerät als bekannt markiert.",
+      "intro": "{{count}} Geräte werden nicht mehr als nicht verwaltet angezeigt. Dies wird mit Ihrem Namen und Ihrer Begründung protokolliert und folgt jedem Gerät über seine MAC-Adresse, auch wenn sich seine IP-Adresse ändert.",
+      "intro_other": "{{count}} Geräte werden nicht mehr als nicht verwaltet angezeigt. Dies wird mit Ihrem Namen und Ihrer Begründung protokolliert und folgt jedem Gerät über seine MAC-Adresse, auch wenn sich seine IP-Adresse ändert.",
+      "intro_one": "{{count}} Gerät wird nicht mehr als nicht verwaltet angezeigt. Dies wird mit Ihrem Namen und Ihrer Begründung protokolliert und folgt dem Gerät über seine MAC-Adresse, auch wenn sich seine IP-Adresse ändert.",
+      "reason": "Begründung",
+      "reasonHelp": "Erforderlich. Zum Beispiel: der Drucker im Empfangsbereich, betreut von der Haustechnik.",
+      "title": "Als bekannt und unbedenklich markieren"
+    },
+    "exclusions": {
+      "decidedBy": "Entschieden von",
+      "empty": "Es wurden keine Geräte als bekannt markiert.",
+      "revokedBy": "Widerrufen von {{who}}: {{why}}",
+      "showRevoked": "Widerrufene Entscheidungen anzeigen"
+    },
+    "filters": {
+      "allNetworks": "Alle Netzwerke",
+      "network": "Netzwerk",
+      "search": "MAC- oder IP-Adresse suchen"
+    },
+    "loadError": "Erkannte Geräte konnten nicht geladen werden.",
+    "method": {
+      "arpListen": "Passives Mithören von ARP",
+      "cache": "Nachbar-Cache",
+      "mdns": "mDNS",
+      "ndListen": "IPv6-Nachbarerkennung",
+      "ssdp": "SSDP",
+      "sweep": "Aktive Netzabtastung"
+    },
+    "policy": {
+      "enabled": "Agenten hören in ihren Netzwerken nach Geräten",
+      "hour": "Stündlich",
+      "interval": "Melden",
+      "lastChanged": "Zuletzt geändert von {{who}} am {{when}}",
+      "minutes": "Alle {{count}} Minuten",
+      "minutes_other": "Alle {{count}} Minuten",
+      "minutes_one": "Jede Minute",
+      "sweeps": "Aktive Netzabtastungen zulassen",
+      "days": "{{count}} Tage",
+      "days_other": "{{count}} Tage",
+      "days_one": "{{count}} Tag",
+      "retention": "Geräte vergessen, die so lange nicht gesehen wurden"
+    },
+    "revoke": {
+      "confirm": "Widerrufen",
+      "title": "Dieses Gerät wieder als nicht verwaltet anzeigen"
+    },
+    "status": {
+      "unmanaged": "Nicht verwaltet"
+    },
+    "subtitle": "Geräte, die Ihre Agenten in ihren Netzwerken sehen und die SysManage nicht verwaltet.",
+    "table": {
+      "address": "Adresse",
+      "device": "Gerät",
+      "empty": "Keine passenden Geräte.",
+      "evidence": "Was es über sich angibt",
+      "ipOnly": "Keine MAC gesehen",
+      "lastSeen": "Zuletzt gesehen",
+      "localMac": "Adresse kann sich ändern",
+      "localMacHelp": "Eine lokal verwaltete Adresse: Telefone und Tablet-PCs ändern sie, daher kann dieses Gerät unter einer neuen wieder auftauchen.",
+      "more": "{{shown}} von {{total}} werden angezeigt. Grenzen Sie die Liste mit den Filtern oben ein.",
+      "seenBy": "Gesehen von",
+      "selectAll": "Alle auswählen",
+      "status": "Zustand",
+      "maybe": "Vielleicht: {{type}}"
+    },
+    "tabs": {
+      "excluded": "Bekannt und unbedenklich",
+      "managed": "Verwaltet",
+      "unmanaged": "Nicht verwaltet",
+      "sweeps": "Netzabtastungen"
+    },
+    "title": "Netzwerkerkennung",
+    "unavailable": {
+      "disabled": "nicht aktiviert",
+      "notRoot": "der Agent läuft nicht als root",
+      "portInUse": "der Port wird von einem anderen Programm verwendet",
+      "unreadable": "konnte nicht gelesen werden",
+      "unsupportedPlatform": "auf dieser Plattform nicht unterstützt"
+    },
+    "sweep": {
+      "agent": "Abgetastet von",
+      "disabled": "Aktive Netzabtastungen sind ausgeschaltet. Lassen Sie sie in den Einstellungen oben zu, um Geräte zu finden, die sich nie selbst bemerkbar machen.",
+      "error": "Die Netzabtastung konnte nicht gestartet werden.",
+      "found": "Gefunden",
+      "foundOf": "{{found}} von {{probed}} Adressen",
+      "intro": "Ein Agent im Netzwerk sendet ein kleines Paket an jede Adresse und meldet dann jedes Gerät, das geantwortet hat. So werden Geräte gefunden, die sich nie selbst bemerkbar machen, und der Vorgang wird mit Ihrem Namen protokolliert.",
+      "none": "Es wurde noch kein Netzwerk abgetastet.",
+      "perSecond": "{{count}} Adressen pro Sekunde",
+      "perSecond_other": "{{count}} Adressen pro Sekunde",
+      "perSecond_one": "{{count}} Adresse pro Sekunde",
+      "rate": "Geschwindigkeit",
+      "requestedBy": "Angefordert von",
+      "start": "Abtastung starten",
+      "status": {
+        "completed": "Abgeschlossen",
+        "failed": "Fehlgeschlagen",
+        "queued": "Wartet auf den Agenten",
+        "refused": "Vom Agenten abgelehnt",
+        "timedOut": "Keine Antwort vom Agenten"
+      },
+      "title": "Netzwerk abtasten"
+    },
+    "address": {
+      "address": "IP-Adresse",
+      "confirm": "Registrieren",
+      "error": "Die Adresse konnte nicht registriert werden.",
+      "title": "Statische Adresse registrieren",
+      "warning": "Nur für Adressen, die sich nie ändern, etwa eine virtuelle IP oder ein Load Balancer. Die Registrierung gilt für jedes Gerät, das diese Adresse gerade hat; ein gewöhnliches Gerät, das seine Adressen per DHCP erhält, erscheint daher nach seiner nächsten Lease wieder."
+    },
+    "type": {
+      "computer": "Rechner",
+      "iot": "IoT-Gerät",
+      "media": "Fernseher, Lautsprecher oder Mediaplayer",
+      "networkEquipment": "Netzwerkausrüstung",
+      "phoneOrTablet": "Telefon oder Tablet",
+      "printer": "Drucker",
+      "unknown": "Unbekannt",
+      "virtualAddress": "Virtuelle Router-Adresse",
+      "virtualMachine": "Virtuelle Maschine"
     }
   }
 }

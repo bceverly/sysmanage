@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 13:34-0400\n"
+"POT-Creation-Date: 2026-09-29 12:11-0400\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -355,27 +355,27 @@ msgstr "ロールデータ更新の処理に失敗しました: %s"
 msgid "Child host management requires a Professional+ license."
 msgstr "子ホスト管理にはProfessional+ライセンスが必要です。"
 
-#: backend/api/handlers/os_hardware_handlers.py:131
+#: backend/api/handlers/os_hardware_handlers.py:132
 msgid "No host identification available"
 msgstr "ホスト識別情報が利用できません"
 
-#: backend/api/handlers/os_hardware_handlers.py:343
+#: backend/api/handlers/os_hardware_handlers.py:344
 msgid "os_version_updated"
 msgstr "OSバージョンが更新されました"
 
-#: backend/api/handlers/os_hardware_handlers.py:349
+#: backend/api/handlers/os_hardware_handlers.py:350
 msgid "No OS information provided"
 msgstr "OS情報が提供されていません"
 
-#: backend/api/handlers/os_hardware_handlers.py:359
+#: backend/api/handlers/os_hardware_handlers.py:360
 msgid "Failed to update OS version"
 msgstr "OSバージョンの更新に失敗しました"
 
-#: backend/api/handlers/os_hardware_handlers.py:543
+#: backend/api/handlers/os_hardware_handlers.py:545
 msgid "hardware_updated"
 msgstr "ハードウェアが更新されました"
 
-#: backend/api/handlers/os_hardware_handlers.py:552
+#: backend/api/handlers/os_hardware_handlers.py:554
 msgid "Failed to update hardware information"
 msgstr "ハードウェア情報の更新に失敗しました"
 
@@ -1588,7 +1588,7 @@ msgstr "ファイル監視が見つかりません"
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
 #: backend/api/config_mgmt_profiles.py:136
-#: backend/api/secrets/permissions.py:50
+#: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:90
 #, python-format
 msgid "Permission denied: %s role required"
 msgstr "許可が拒否されました: %s ロールが必要です"
@@ -4201,6 +4201,14 @@ msgstr "サービスコントロールを行うにはprivilegedモードで実�
 msgid "Service {} requested for {} services"
 msgstr "サービス{}が{}のサービスに対して要求されました"
 
+#: backend/api/asset_discovery.py:127
+msgid "Unsupported retention period"
+msgstr "サポートされていない保持期間です"
+
+#: backend/api/asset_discovery.py:162
+msgid "Invalid device id"
+msgstr "無効なデバイスIDです"
+
 #: backend/api/content_lifecycle_export.py:60
 msgid ""
 "Air-gap media export requires the air-gap collector engine (Enterprise). "
@@ -4807,12 +4815,12 @@ msgstr "保存済みスクリプトの削除に失敗しました"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "商用アンチウイルスステータスの取得に失敗しました: %s"
 
-#: backend/websocket/message_router.py:299
+#: backend/websocket/message_router.py:309
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "キュー内の未知のメッセージタイプ: %s"
 
-#: backend/websocket/message_router.py:304
+#: backend/websocket/message_router.py:314
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "メッセージタイプ %(message_type)s のルーティングに失敗しました: %(error)s"
@@ -4985,7 +4993,7 @@ msgstr "失敗したメッセージの取得に失敗しました: %s"
 msgid "Host ID {host_id} not found"
 msgstr "ホストID {host_id} が見つかりません"
 
-#: backend/websocket/queue_operations.py:316
+#: backend/websocket/queue_operations.py:317
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -4995,75 +5003,75 @@ msgstr ""
 "host_id=%(host_id)s をキューに追加しました"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:498
+#: backend/websocket/queue_operations.py:499
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "メッセージを処理中としてマーク: %s"
 
-#: backend/websocket/queue_operations.py:505
+#: backend/websocket/queue_operations.py:506
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr "メッセージ %(message_id)s を処理中としてマークできませんでした: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:540
+#: backend/websocket/queue_operations.py:541
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "メッセージを完了済みとしてマークしました: %s"
 
-#: backend/websocket/queue_operations.py:547
+#: backend/websocket/queue_operations.py:548
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr "メッセージ %(message_id)s を完了済みとしてマークできませんでした: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:585
+#: backend/websocket/queue_operations.py:586
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "メッセージを送信済みとしてマーク（確認待ち）: %s"
 
-#: backend/websocket/queue_operations.py:592
+#: backend/websocket/queue_operations.py:593
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr "メッセージ %(message_id)s を送信済みとしてマークできませんでした: %(error)s"
 
-#: backend/websocket/queue_operations.py:621
+#: backend/websocket/queue_operations.py:622
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "不明なメッセージを確認できません: %s"
 
-#: backend/websocket/queue_operations.py:628
+#: backend/websocket/queue_operations.py:629
 #, python-format
 msgid ""
 "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
 msgstr "メッセージ %(message_id)s は送信ステータスではありません (現在のステータス：%(status)s)。承認をスキップします"
 
-#: backend/websocket/queue_operations.py:641
+#: backend/websocket/queue_operations.py:642
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "エージェントによりメッセージが確認されました: %s"
 
-#: backend/websocket/queue_operations.py:648
+#: backend/websocket/queue_operations.py:649
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr "メッセージ %(message_id)s を承認済みとしてマークできませんでした: %(error)s"
 
-#: backend/websocket/queue_operations.py:732
+#: backend/websocket/queue_operations.py:733
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "%d 秒以内に確認を受信しませんでした"
 
-#: backend/websocket/queue_operations.py:744
+#: backend/websocket/queue_operations.py:745
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "%d 件の未確認メッセージを再試行にスケジュール"
 
-#: backend/websocket/queue_operations.py:752
+#: backend/websocket/queue_operations.py:753
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "未確認メッセージの再試行エラー: %s"
 
-#: backend/websocket/queue_operations.py:807
+#: backend/websocket/queue_operations.py:808
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -5072,19 +5080,19 @@ msgstr ""
 "メッセージ %(message_id)s が失敗しました（%(attempt)d/%(max_retries)d 回目）: 再試行は "
 "%(backoff)d 秒後にスケジュールされます"
 
-#: backend/websocket/queue_operations.py:823
+#: backend/websocket/queue_operations.py:824
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
 "%(error)s"
 msgstr "メッセージ %(message_id)s が %(attempts)d 回の試行後永久的に失敗しました: %(error)s"
 
-#: backend/websocket/queue_operations.py:841
+#: backend/websocket/queue_operations.py:842
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "メッセージ%(message_id)sを失敗としてマークに失敗しました: %(error)s"
 
-#: backend/websocket/queue_operations.py:863
+#: backend/websocket/queue_operations.py:864
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "メッセージ %(message_id)s をデシリアライズできませんでした: %(error)s"
@@ -5114,16 +5122,47 @@ msgstr "サーバーメッセージキュー管理者が初期化されました
 msgid "Rate limit exceeded. Please retry later."
 msgstr "レート制限を超えました。後で再度お試しください。"
 
-#: backend/services/agent_capability_service.py:266
+#: backend/services/agent_capability_service.py:306
 msgid "this host"
 msgstr "このホスト"
 
-#: backend/services/agent_capability_service.py:269
+#: backend/services/agent_capability_service.py:309
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "
 "capability set, so the command was not sent."
 msgstr "{host}のエージェントは'{command}'をサポートしていません。機能セットが制限されているため、コマンドは送信されませんでした。"
+
+#: backend/services/asset_discovery_review.py:125
+#, python-format
+msgid "Unknown device status: %s"
+msgstr "不明なデバイスの状態: %s"
+
+#: backend/services/asset_discovery_review.py:342
+msgid "A reason of at least 3 characters is required"
+msgstr "3文字以上の理由が必要です"
+
+#: backend/services/asset_discovery_review.py:351
+#: backend/services/asset_discovery_review.py:399
+#, python-format
+msgid "Unknown exclusion category: %s"
+msgstr "不明な除外カテゴリ: %s"
+
+#: backend/services/asset_discovery_review.py:404
+msgid "That is not a valid IP address"
+msgstr "有効な IP アドレスではありません"
+
+#: backend/services/asset_discovery_review.py:412
+msgid "That address is already registered as known"
+msgstr "このアドレスはすでに既知として登録されています"
+
+#: backend/services/asset_discovery_review.py:433
+msgid "Exclusion not found"
+msgstr "除外が見つかりません"
+
+#: backend/services/asset_discovery_review.py:435
+msgid "This exclusion was already revoked"
+msgstr "この除外はすでに取り消されています"
 
 #: backend/services/config_mgmt_dispatch.py:58
 #, python-format
@@ -5158,6 +5197,38 @@ msgstr "参照ホストが見つかりません"
 msgid "Target host not found"
 msgstr "ターゲットホストが見つかりません"
 
+#: backend/services/network_sweep.py:65
+msgid "That is not a valid network"
+msgstr "有効なネットワークではありません"
+
+#: backend/services/network_sweep.py:67
+msgid "IPv6 networks cannot be swept; only IPv4 networks can be enumerated"
+msgstr "IPv6 ネットワークはスキャンできません。列挙できるのは IPv4 ネットワークのみです"
+
+#: backend/services/network_sweep.py:70
+msgid "That network is too large to sweep (at most 4096 addresses)"
+msgstr "このネットワークは大きすぎてスキャンできません（最大 4096 アドレス）"
+
+#: backend/services/network_sweep.py:73
+msgid "No agent is on that network, so it cannot be swept from here"
+msgstr "このネットワーク上にエージェントがないため、ここからスキャンできません"
+
+#: backend/services/network_sweep.py:75
+msgid "The rate must be between 1 and 200 addresses per second"
+msgstr "レートは毎秒 1 から 200 アドレスの範囲で指定してください"
+
+#: backend/services/network_sweep.py:135
+msgid "Network discovery is not available"
+msgstr "ネットワーク検出は利用できません"
+
+#: backend/services/network_sweep.py:140
+msgid "Active sweeps are turned off in the network discovery settings"
+msgstr "アクティブスキャンはネットワーク検出の設定で無効になっています"
+
+#: backend/services/network_sweep.py:152
+msgid "Every agent on that network is already sweeping; try again shortly"
+msgstr "このネットワーク上のすべてのエージェントがすでにスキャン中です。しばらくしてから再試行してください"
+
 #: backend/services/airgap_device_service.py:149
 msgid "no device selected"
 msgstr "デバイスが選択されていません"
@@ -5179,17 +5250,17 @@ msgstr "ドライブは存在しますが、読み取り可能なディスクが
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "デバイス上のISOファイルシステムがありません (fstype=%s)"
 
-#: backend/services/audit_service.py:189
+#: backend/services/audit_service.py:191
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' が作成されました"
 
-#: backend/services/audit_service.py:237
+#: backend/services/audit_service.py:239
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' を更新しました"
 
-#: backend/services/audit_service.py:285
+#: backend/services/audit_service.py:287
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' を削除しました"

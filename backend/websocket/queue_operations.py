@@ -117,9 +117,10 @@ class QueueOperations:
             ):
                 from backend.services.agent_capability_service import (
                     assert_host_supports,
+                    command_type_of,
                 )  # noqa: PLC0415
 
-                assert_host_supports(host, message_data.get("command_type"))
+                assert_host_supports(host, command_type_of(message_data))
 
             # Check for duplicate script execution commands to prevent multiple queuing
             if (

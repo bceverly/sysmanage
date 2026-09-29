@@ -230,6 +230,46 @@ def get_capability_report(host) -> Optional[Dict[str, Any]]:
     return parsed if isinstance(parsed, dict) else None
 
 
+def command_name(command_type: Any) -> Optional[str]:
+    """The wire name of a command, whether given as text or a ``CommandType``.
+
+    ``str()`` of a ``(str, Enum)`` member is ``"CommandType.APPLY_CONFIG_PROFILE"``,
+    not its value -- and ``queue_apply`` and the discovery reconciler put enum
+    MEMBERS in their messages. Comparing ``str(member)`` against the agent's
+    advertised names refused every such command to every upgraded agent the
+    moment the gate started firing (found live 2026-09-29, 21.6 S3 test).
+    """
+    if command_type is None:
+        return None
+    return str(getattr(command_type, "value", command_type))
+
+
+def command_type_of(message_data: Any) -> Optional[str]:
+    """The command a queued message will make the agent RUN.
+
+    Two shapes reach the queue: the flat ``{"command_type": ...}`` and the
+    ``Message.to_dict()`` envelope with it under ``data`` -- which is what
+    ``create_command_message`` and ``queue_apply`` produce, i.e. nearly every
+    real caller. Reading only the flat key made the Phase 19 gate a no-op in
+    production while its tests (which used the flat shape) stayed green; found
+    2026-09-29 in 21.6 S2.
+
+    ``generic_command`` is a wrapper the agent unwraps BEFORE its handler map,
+    so it is never advertised; the command that will actually run is the
+    nested one, and that is what gets checked.
+    """
+    if not isinstance(message_data, dict):
+        return None
+    command_type = message_data.get("command_type")
+    parameters = message_data.get("parameters")
+    if command_type is None and isinstance(message_data.get("data"), dict):
+        command_type = message_data["data"].get("command_type")
+        parameters = message_data["data"].get("parameters")
+    if command_name(command_type) == "generic_command" and isinstance(parameters, dict):
+        return command_name(parameters.get("command_type"))
+    return command_name(command_type)
+
+
 def host_supports(host, command_type: str) -> Optional[bool]:
     """Can this host run ``command_type``?
 
@@ -248,7 +288,7 @@ def host_supports(host, command_type: str) -> Optional[bool]:
     commands = report.get("commands")
     if not isinstance(commands, list) or not commands:
         return None
-    return str(command_type) in commands
+    return command_name(command_type) in commands
 
 
 class UnsupportedCapabilityError(Exception):
@@ -287,4 +327,6 @@ def assert_host_supports(host, command_type: Optional[str]) -> None:
     if not command_type:
         return
     if host_supports(host, command_type) is False:
-        raise UnsupportedCapabilityError(str(command_type), getattr(host, "fqdn", None))
+        raise UnsupportedCapabilityError(
+            command_name(command_type), getattr(host, "fqdn", None)
+        )

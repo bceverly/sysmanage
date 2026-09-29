@@ -2402,7 +2402,8 @@
     "users": "Usuarios",
     "vulnerabilities": "Vulnerabilidades",
     "advisor": "Asesor",
-    "hostMetrics": "Métricas de hosts"
+    "hostMetrics": "Métricas de hosts",
+    "assetDiscovery": "Descubrimiento de red"
   },
   "notifications": {
     "applicationUpdates": "Actualizaciones de Aplicaciones",
@@ -3920,7 +3921,9 @@
       "smSec004": "Servicios escuchando en todas las interfaces con el firewall del host desactivado",
       "smSec005": "Certificado que caduca en los próximos 30 días",
       "smStab001": "Desviación de configuración sin resolver durante más de 7 días",
-      "smStabF01": "La versión de OpenSSL difiere de la que ejecutan sus pares"
+      "smStabF01": "La versión de OpenSSL difiere de la que ejecutan sus pares",
+      "pmNetDiscovery": "Se están detectando los dispositivos de sus redes",
+      "pmNetUnmanaged": "No hay dispositivos no administrados en sus redes"
     },
     "curatedPack": {
       "baseline": {
@@ -4025,7 +4028,9 @@
       "set_air_gap_role": "Establezca el rol del servidor de acuerdo con su implementación aislada.",
       "set_audit_retention": "Cree una política de retención de auditoría de al menos 365 días mediante la API de auditoría. Todavía no hay una pantalla para esto.",
       "set_password_policy": "La política de contraseñas se define en sysmanage.yaml; SysManage no puede cambiarla por usted.",
-      "shorten_session": "Haga que las sesiones caduquen después de una hora."
+      "shorten_session": "Haga que las sesiones caduquen después de una hora.",
+      "enable_network_discovery": "Active la detección de red para que los agentes informen de los dispositivos a su alrededor.",
+      "review_unmanaged_devices": "Registre cada dispositivo no administrado o márquelo como conocido con un motivo."
     },
     "saved": "Modelo de amenazas guardado. La lista de pendientes se reevaluará en la próxima pasada del asesor.",
     "stale": {
@@ -4204,6 +4209,170 @@
       "saveFailed": "No se pudo guardar el modelo de amenazas.",
       "step": "Pregunta {{current}} de {{total}}",
       "title": "Describa su instalación"
+    }
+  },
+  "assetDiscovery": {
+    "blindSpots": {
+      "agentsLimited": "Algunos agentes no pueden ver todo en sus redes:",
+      "notEquipped": "{{count}} hosts ejecutan un agente que no puede participar en el descubrimiento; sus redes no están cubiertas.",
+      "notEquipped_other": "{{count}} hosts ejecutan un agente que no puede participar en el descubrimiento; sus redes no están cubiertas.",
+      "notEquipped_one": "{{count}} host ejecuta un agente que no puede participar en el descubrimiento; su red no está cubierta.",
+      "off": "El descubrimiento está desactivado: los agentes no están escuchando, por lo que no se encontrará nada nuevo.",
+      "silent": "Los agentes solo escuchan. Un dispositivo que no envía nada no se ve, por lo que esta lista puede estar incompleta.",
+      "stale": "ha dejado de enviar informes",
+      "unswept": "Sin barrido en los últimos 7 días: {{networks}}"
+    },
+    "category": {
+      "appliance": "Equipo dedicado",
+      "iot": "Dispositivo o sensor IoT",
+      "networkEquipment": "Equipo de red",
+      "other": "Otro",
+      "personalDevice": "Dispositivo personal",
+      "printer": "Impresora",
+      "virtualMachine": "Máquina virtual",
+      "virtualAddress": "Dirección virtual o compartida (VIP, balanceador de carga)"
+    },
+    "counts": {
+      "excluded": "{{count}} conocidos y aceptados",
+      "excluded_other": "{{count}} conocidos y aceptados",
+      "excluded_one": "{{count}} conocido y aceptado",
+      "managed": "{{count}} gestionados",
+      "managed_other": "{{count}} gestionados",
+      "managed_one": "{{count}} gestionado",
+      "onNetwork": "{{count}} en {{network}}",
+      "onNetwork_other": "{{count}} en {{network}}",
+      "onNetwork_one": "{{count}} en {{network}}",
+      "unmanaged": "{{count}} no gestionados",
+      "unmanaged_other": "{{count}} no gestionados",
+      "unmanaged_one": "{{count}} no gestionado"
+    },
+    "exclude": {
+      "action": "Marcar {{count}} como conocidos y aceptados",
+      "action_other": "Marcar {{count}} como conocidos y aceptados",
+      "action_one": "Marcar {{count}} como conocido y aceptado",
+      "category": "¿Qué es?",
+      "confirm": "Marcar como conocido",
+      "done": "{{count}} dispositivos marcados como conocidos.",
+      "done_other": "{{count}} dispositivos marcados como conocidos.",
+      "done_one": "{{count}} dispositivo marcado como conocido.",
+      "intro": "{{count}} dispositivos dejarán de mostrarse como no gestionados. Esto queda registrado con su nombre y motivo, y sigue a cada dispositivo por su dirección MAC aunque cambie su dirección IP.",
+      "intro_other": "{{count}} dispositivos dejarán de mostrarse como no gestionados. Esto queda registrado con su nombre y motivo, y sigue a cada dispositivo por su dirección MAC aunque cambie su dirección IP.",
+      "intro_one": "{{count}} dispositivo dejará de mostrarse como no gestionado. Esto queda registrado con su nombre y motivo, y sigue al dispositivo por su dirección MAC aunque cambie su dirección IP.",
+      "reason": "Motivo",
+      "reasonHelp": "Obligatorio. Por ejemplo: la impresora de recepción, a cargo de servicios generales.",
+      "title": "Marcar como conocido y aceptado"
+    },
+    "exclusions": {
+      "decidedBy": "Decidido por",
+      "empty": "No se ha marcado ningún dispositivo como conocido.",
+      "revokedBy": "Revocado por {{who}}: {{why}}",
+      "showRevoked": "Mostrar decisiones revocadas"
+    },
+    "filters": {
+      "allNetworks": "Todas las redes",
+      "network": "Red",
+      "search": "Buscar dirección MAC o IP"
+    },
+    "loadError": "No se pudieron cargar los dispositivos descubiertos.",
+    "method": {
+      "arpListen": "Escucha ARP",
+      "cache": "Caché de vecinos",
+      "mdns": "mDNS",
+      "ndListen": "Descubrimiento de vecinos IPv6",
+      "ssdp": "SSDP",
+      "sweep": "Barrido activo"
+    },
+    "policy": {
+      "enabled": "Los agentes escuchan en sus redes para detectar dispositivos",
+      "hour": "Cada hora",
+      "interval": "Informar",
+      "lastChanged": "Último cambio por {{who}} el {{when}}",
+      "minutes": "Cada {{count}} minutos",
+      "minutes_other": "Cada {{count}} minutos",
+      "minutes_one": "Cada minuto",
+      "sweeps": "Permitir barridos activos",
+      "days": "{{count}} días",
+      "days_other": "{{count}} días",
+      "days_one": "{{count}} día",
+      "retention": "Olvidar los dispositivos no vistos durante"
+    },
+    "revoke": {
+      "confirm": "Revocar",
+      "title": "Volver a mostrar este dispositivo como no gestionado"
+    },
+    "status": {
+      "unmanaged": "No gestionado"
+    },
+    "subtitle": "Dispositivos que sus agentes ven en sus redes y que SysManage no gestiona.",
+    "table": {
+      "address": "Dirección",
+      "device": "Dispositivo",
+      "empty": "Ningún dispositivo coincide.",
+      "evidence": "Lo que dice ser",
+      "ipOnly": "No se vio ninguna MAC",
+      "lastSeen": "Visto por última vez",
+      "localMac": "La dirección puede cambiar",
+      "localMacHelp": "Una dirección administrada localmente: los teléfonos y las tabletas la cambian, por lo que este dispositivo puede reaparecer con una nueva.",
+      "more": "Mostrando {{shown}} de {{total}}. Acote la lista con los filtros de arriba.",
+      "seenBy": "Visto por",
+      "selectAll": "Seleccionar todo",
+      "status": "Estado",
+      "maybe": "Quizás: {{type}}"
+    },
+    "tabs": {
+      "excluded": "Conocidos y aceptados",
+      "managed": "Gestionados",
+      "unmanaged": "No gestionados",
+      "sweeps": "Barridos"
+    },
+    "title": "Descubrimiento de red",
+    "unavailable": {
+      "disabled": "no habilitado",
+      "notRoot": "el agente no se ejecuta como root",
+      "portInUse": "el puerto está en uso por otro programa",
+      "unreadable": "no se pudo leer",
+      "unsupportedPlatform": "no compatible con esta plataforma"
+    },
+    "sweep": {
+      "agent": "Barrido por",
+      "disabled": "Los barridos activos están desactivados. Permítalos en la configuración de arriba para encontrar dispositivos que nunca se anuncian.",
+      "error": "No se pudo iniciar el barrido.",
+      "found": "Encontrados",
+      "foundOf": "{{found}} de {{probed}} direcciones",
+      "intro": "Un agente de la red envía un pequeño paquete a cada dirección y luego informa de cada dispositivo que respondió. Así se encuentran dispositivos que nunca se anuncian, y queda registrado con su nombre.",
+      "none": "Todavía no se ha barrido ninguna red.",
+      "perSecond": "{{count}} direcciones por segundo",
+      "perSecond_other": "{{count}} direcciones por segundo",
+      "perSecond_one": "{{count}} dirección por segundo",
+      "rate": "Velocidad",
+      "requestedBy": "Solicitado por",
+      "start": "Iniciar barrido",
+      "status": {
+        "completed": "Completado",
+        "failed": "Fallido",
+        "queued": "Esperando al agente",
+        "refused": "Rechazado por el agente",
+        "timedOut": "Sin respuesta del agente"
+      },
+      "title": "Barrer una red"
+    },
+    "address": {
+      "address": "Dirección IP",
+      "confirm": "Registrar",
+      "error": "No se pudo registrar la dirección.",
+      "title": "Registrar una dirección estática",
+      "warning": "Solo para direcciones que nunca cambian, como una IP virtual o un balanceador de carga. Se aplica a cualquier dispositivo que tenga esta dirección, así que un dispositivo normal que recibe sus direcciones por DHCP volverá a aparecer tras su próxima concesión."
+    },
+    "type": {
+      "computer": "Computadora",
+      "iot": "Dispositivo IoT",
+      "media": "Televisor, altavoz o reproductor multimedia",
+      "networkEquipment": "Equipo de red",
+      "phoneOrTablet": "Teléfono o tableta",
+      "printer": "Impresora",
+      "unknown": "Desconocido",
+      "virtualAddress": "Dirección de router virtual",
+      "virtualMachine": "Máquina virtual"
     }
   }
 }

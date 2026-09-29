@@ -53,8 +53,9 @@ This document provides a detailed roadmap for realizing all features in both ope
 42. [Phase 27: Apple Native MDM (Enterprise)](#phase-27-apple-native-mdm-enterprise)
 43. [Phase 28: Android Native MDM & Zero-Touch Enrollment (Pro+ / Enterprise)](#phase-28-android-native-mdm--zero-touch-enrollment-pro--enterprise)
 44. [Phase 29: High Availability & Disaster Recovery (Enterprise)](#phase-29-high-availability--disaster-recovery-enterprise)
-44. [Release Schedule Summary](#release-schedule-summary)
-45. [Module Migration Plan](#module-migration-plan)
+45. [Phase 30: Browser Remote Terminal (Community / OSS; recording Pro+; approval Enterprise)](#phase-30-browser-remote-terminal-community--oss-recording-pro-approval-enterprise)
+46. [Release Schedule Summary](#release-schedule-summary)
+47. [Module Migration Plan](#module-migration-plan)
 
 ---
 
@@ -772,6 +773,9 @@ Each stabilization phase produces a release. Feature phases may produce one or m
 │  Phase 29: High Availability & Disaster Recovery                     v6.2.0.0   │
 │     └── Server pool behind a LB, leader-elected workers, Postgres failover      │
 │                Agent multi-endpoint failover to a DR site                       │
+│                                                                                 │
+│  Phase 30: Browser Remote Terminal                                   v6.3.0.0   │
+│     └── Agent-tunneled PTY: no sshd, no inbound port, no keys (OSS)             │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -10840,31 +10844,334 @@ on a segment you may not own, and on some networks it is contractually
 forbidden. So active sweeps are **off by default, scoped to operator-specified
 CIDRs, rate-limited, and audited** -- never a fleet-wide default.
 
-- [ ] `discovered_asset` schema/migration -- MAC/IP/hostname, first-seen,
+- [x] `discovered_asset` schema/migration -- MAC/IP/hostname, first-seen,
       last-seen, which agents observed it, and the evidence for the guess
       (OUI vendor, mDNS service names, open-port fingerprint). A device class
       distinct from `host`: no shell, no package manager, no privileged
       execution -- the same distinction Phase 22.1 draws for `mobile_device`
+      DONE 2026-09-29 (21.6 S1, migration `q13assetdisc`). OUI vendor and
+      open-port fingerprint evidence arrive with S5 / S4.
 - [ ] Agent-side passive neighbor reporting (ARP/NDP cache, mDNS/SSDP) behind
       a `network_discovery` capability, per-platform, defaulting to passive
-- [ ] Optional active sweep of operator-specified CIDRs -- off by default,
+      S1 2026-09-29: Linux (raw capture as root, sockets otherwise),
+      Windows and macOS/BSD (cache + mDNS/SSDP) shipped; ARP listening on
+      BSD/macOS (BPF) is S6 -- left unticked until then.
+      S6 2026-09-29: BPF capture written and unit-tested per header layout
+      (macOS/OpenBSD vs FreeBSD/NetBSD); STILL UNTICKED until it has captured
+      on a real macOS and a real BSD host -- synthetic buffers prove the
+      parser, not the ioctls.
+- [x] Optional active sweep of operator-specified CIDRs -- off by default,
       rate-limited, audited on every run, with the target ranges recorded
-- [ ] **Correlation against the managed fleet** -- an asset already covered by a
+      DONE 21.6 S4 (2026-09-29): second opt-in, on-link IPv4 only, <= 4096
+      addresses, 1-200/s, every run a `network_sweep_run` row + audit entry.
+- [x] **Correlation against the managed fleet** -- an asset already covered by a
       `host`, a `mobile_device`, a child host, or a known VIP/load-balancer
       address must not appear as unmanaged. Getting this wrong makes the page
       noise on day one and nobody opens it again
-- [ ] Review page: unenrolled assets with evidence, bulk triage, and a
+      DONE 21.6 S1-S5: managed hosts by MAC (every spelling), enrolled child
+      hosts via their own interfaces, hypervisor tap ports, VIPs / load
+      balancers by static-address registration + VRRP/HSRP/CARP recognition.
+      `mobile_device` does not exist yet -- tracked as a 22.1 item.
+- [x] Review page: unenrolled assets with evidence, bulk triage, and a
       **permanent allow-list exclusion** ("this is an IoT sensor / printer /
       switch / appliance -- never show it again") carrying a reason and an
       actor. Exclusions are audit rows, not UI state, so "who decided this was
       fine" survives
-- [ ] Re-identification is stable across DHCP churn -- key on MAC where
+      DONE 21.6 S3 (2026-09-29): `/asset-discovery`, exclusions as audit
+      rows (`q15assetexcl`), blind spots stated beside the list.
+- [x] Re-identification is stable across DHCP churn -- key on MAC where
       available and fall back deliberately, or an excluded device reappears as
       new every lease and the allow-list silently rots
-- [ ] Feeds 21.4's posture punch list ("11 unmanaged devices on 2 segments")
+      DONE 21.6 S1+S3: identity = normalized MAC, `ip:` fallback only when
+      no MAC was seen (labeled); exclusions keyed by identity (tested through a
+      DHCP renumber); locally administered MACs labeled "address may change".
+- [x] Feeds 21.4's posture punch list ("11 unmanaged devices on 2 segments")
       and is scoreable by 21.2's advisor; air-gap clean (no external lookups --
       the OUI database ships with the server)
-- [ ] i18n/l10n
+      DONE 21.6 S5 (2026-09-29): PM-NET-DISCOVERY + PM-NET-UNMANAGED on the
+      punch list (risk-scored by the advisor), IEEE vendor table shipped as
+      `backend/data/oui.tsv.gz`, no external lookups.
+- [x] i18n/l10n
+      DONE 21.6 S3-S6 (2026-09-29): frontend 24+ keys x 14 (plural bases kept),
+      backend + agent msgids x 13, docs page + card + roadmap card 54 keys x 13
+      (every docs gate green); glossary gained `sweep` + `exclusion`, synced to
+      all four repos -- the beast translation service needs the sync + restart.
+
+**S0 spike -- DONE 2026-09-28, GREEN (15/15 checks).** Pro+
+`scripts/network_discovery_spike.py` (orchestrator) + `network_discovery_probe.py`
+(runs in each agent VM). Two isolated libvirt networks, 7 Debian 13 VMs: segment
+A = 2 agents + a silent device + a chatty one (a stdlib mDNS/SSDP announcer
+standing in for a printer), segment B = 1 agent + silent + chatty. Steady run
+(3 min settle, 2 min window, then a sweep) and a separate 5-minute pass that
+sends NOTHING, because the steady run's own queries could be what made a
+device speak.
+
+What each method actually sees (this is the design input):
+  * **Neighbor cache** -- only hosts this machine exchanged traffic with.
+    Useless alone for a silent device; a cheap read-back after a sweep.
+  * **ARP sniffing** -- in the VM bed, 5 quiet minutes showed only the
+    gateway: idle VMs barely ARP. **The real LAN reversed this (below): it is
+    the best passive method on a live network.** Needs raw capture
+    (AF_PACKET / BPF as root; Windows would need a capture driver).
+  * **IPv6 ND sniffing** -- saw EVERY device, silent ones included, but one
+    frame per ~5 minutes, and only because the libvirt bridge floods
+    solicited-node multicast. A switch with MLD snooping will not; an
+    IPv4-only device never shows. Not dependable.
+  * **mDNS / SSDP listening** -- found every chatty device within 20-40 s with
+    nothing sent, and carries the best "what is it" evidence (service types,
+    UPnP SERVER/USN). Plain UDP multicast sockets: portable, no raw capture.
+    (It also heard this laptop's own avahi and a DIAL search -- real traffic.)
+  * **Sweep** -- one UDP datagram per on-link address at 50/s, then read the
+    neighbor cache: found every device in ~8 s. Portable (the kernel's own ARP
+    does the probing); no raw sockets.
+
+**Real-LAN passive pass -- 2026-09-29, Bryan's home Wi-Fi (192.168.4.0/24),
+300 s, `--no-query` (nothing sent).** 31 distinct MACs:
+  * ARP sniffing found 26 -- **15 of them by no other method** -- at 9 by 10 s,
+    18 by 60 s, 22 by 120 s, 26 by 240 s (median 6 ARP frames per device).
+    Live devices ARP constantly; the VM bed was unrepresentative here.
+  * Neighbor cache 14 (3 found only there), mDNS 5 (first after 67 s; service
+    types airplay/raop/sftp-ssh/companion-link/device-info -- the "what is it"
+    evidence), IPv6 ND 2, SSDP 1 (no SERVER header).
+  * **6 of 31 MACs (19%) are randomized (locally administered bit set)** --
+    phones and tablets. MAC identity can rotate for exactly these.
+  * Wi-Fi did NOT hide clients from each other on this access point
+    (broadcast ARP from peers was visible); client isolation remains untested.
+
+Decisions this forces for S1+:
+  * Default passive = **ARP listening where the agent can capture (Linux,
+    BSD, macOS as root)** + neighbor-cache read + mDNS/SSDP listening (the
+    evidence). Windows: cache + mDNS/SSDP only, and it says so. Listening
+    must be continuous or long-windowed: a 60 s window missed ~30% of the
+    devices a 4-minute one found.
+  * **A silent device is only reliably found by the opt-in sweep**, so a
+    passive-only install must SAY it cannot see silent devices (a stated blind
+    spot, same rule as everywhere else) -- never imply the list is complete.
+  * A randomized (locally administered) MAC is labeled as such: it may rotate,
+    so its "new device" and exclusion semantics must be explicit rather than
+    silently producing a fresh unmanaged row per rotation.
+  * The sweep covers the agent's ON-LINK subnets only. A routed CIDR yields no
+    MACs (everything answers via the router), which would either lose identity
+    or pin every remote address to the router's MAC.
+  * Identity = MAC. Churn check: renumbered via DHCP reservation, the device
+    kept its MAC; a MAC-keyed exclusion held and an IP-keyed one lost it
+    (negative control). IP-only evidence needs a deliberate, labeled fallback.
+  * Correlation: managed peers were seen raw 8 times (so suppression was
+    exercised, not vacuous) and all were suppressed by MAC. NEW noise source:
+    a KVM host's tap ports (`fe:54:00:...`, mirroring each guest's MAC) emit
+    IPv6 ND -- one ghost device per VM on every hypervisor. S1 must check
+    whether the agent's `network_interface` report includes tap/bridge ports
+    and make correlation cover them.
+  * Harness gotcha: `virt-install --graphics none` gives NO video device and
+    the Debian 13 cloud image reboot-loops right after GRUB; add `--video vga`.
+
+**S1 -- DONE 2026-09-29: schema, engine, ingest, agent passive collector.**
+  * OSS: migration `q13assetdisc` (tenant chain) -- `discovered_asset` (one
+    row per DEVICE, identity = MAC or labeled `ip:` fallback,
+    `mac_locally_administered`, bounded ips/hostnames/evidence/methods,
+    `managed_host_id` FK **SET NULL** so a deleted host's device becomes
+    unmanaged again), `discovered_asset_sighting` (per device x observing
+    agent, with its on-link network), `network_discovery_observer` (per-agent
+    networks + method availability = the blind spots). Ingest: message
+    `network_discovery_report` -> `network_discovery_handlers` ->
+    `asset_discovery_service` (persistence) via `asset_discovery_shim`
+    (FAILS CLOSED: no engine, nothing stored -- an uncorrelated table would
+    show every managed host as unmanaged).
+  * NEW Enterprise engine `asset_discovery_engine` (registered: OSS
+    `ModuleCode` + Enterprise `TIER_MODULES`, Pro+ `MODULES`;
+    `check-engine-codes` green). Pure functions: MAC normalization (colon,
+    dash, dot, bare; multicast/zero/broadcast rejected), report sanitation
+    (bounded, method/availability vocabulary, the agent's own MACs AND own
+    IPs dropped), `lookup_keys` (the fleet query is bounded by the REPORT,
+    not the fleet), `correlate` (MAC decisive; tap port -> its guest, reason
+    `hypervisor_port`; IP only when no MAC -- an unknown MAC on a reused IP
+    stays UNMANAGED), `merge_asset` (newest IP first, quiet windows forget
+    nothing).
+  * Found while building: QEMU's own OUI (52:54:00) is locally administered,
+    so the flag is `mac_locally_administered`, NOT "randomized" (a VM's MAC is
+    stable). Windows stores `AA-BB-..` MACs verbatim: the service queries every
+    spelling, or a managed Windows host would read as unmanaged.
+  * Agent: `network_discovery_collection` (Linux root: one AF_PACKET socket
+    for ARP / ND / mDNS / SSDP with sender MACs; elsewhere: UDP multicast
+    sockets for mDNS/SSDP, MAC + interface filled from the neighbor cache),
+    `network_neighbor_cache` (`ip -j neigh`, `arp -an` with macOS octet
+    padding, Windows `arp -a` minus static pseudo-neighbors; absolute paths
+    for NetBSD; unreadable = NOT MEASURED, never empty), container/VM/VPN
+    interfaces skipped. `network_discovery_operations`: OFF until the server
+    sends `configure_network_discovery` (which is what advertises the
+    `network_discovery` capability); on/off persisted across restarts;
+    continuous listening, reports every 60-3600 s (default 300).
+  * Live-verified on the real LAN, non-root: 8 devices in 60 s, all on
+    192.168.4.0/24, all MAC-keyed, blind spots reported exactly
+    (`arp_listen: unavailable:not_root`). The live run found two bugs the
+    unit tests had not: the host's OWN SSDP looping back to its socket, and
+    multicast from a skipped LXD bridge reaching a socket bound to every
+    address -- both now dropped (agent by subnet, engine by own-IP).
+  * Tests: engine 22, OSS service/handler 9 + migration round trip, agent 35;
+    agent i18n 7 strings x 13.
+
+**Remaining slices:**
+  * **S2 -- DONE 2026-09-29.** Migration `q14netdiscpolicy`:
+    `network_discovery_policy` (one row per tenant DB; absent = OFF) and
+    `network_discovery_dispatch` (what each host was last told), plus the
+    seeded **Manage Network Discovery** role. `network_discovery_policy`
+    service RECONCILES rather than broadcasts: a 60 s tick (all tenant DBs,
+    <=200 commands per pass) sends `configure_network_discovery` only to hosts
+    that POSITIVELY advertise it, only when policy != last sent, and again
+    when the agent re-advertised after we told it (SYSTEM_INFO is once per
+    connection, so at most one spare message per reconnect). One id for
+    envelope and queue row. `GET/PUT /api/v1/asset-discovery/policy` (engine
+    gated; read = View Host Details, write = the new role), every change
+    audited with before/after and applied at once. Re-correlation: the
+    hardware handler calls `recorrelate_host` after rewriting a host's
+    interfaces, so a device seen before its host enrolled becomes managed and
+    one whose MAC moved away is released. Started via
+    `background_ticks.start_licensed_ticks()` (lifecycle.py is at its 1000-line
+    budget; the advisor tick moved behind the same call).
+    **Phase 19 bug found and fixed on the way:** the dispatch gate read
+    `command_type` only at the top level, but nearly every real caller
+    (`create_command_message`, `queue_apply`) nests it under `data` -- so the
+    gate never refused anything in production while its flat-shape tests
+    stayed green. `command_type_of()` now reads both shapes and judges
+    `generic_command` by the command it wraps (the agent unwraps it before its
+    handler map, so gating the wrapper would refuse every generic dispatch).
+    Checked before switching it on: every server-sent command the agent
+    handles is advertised; 8 server command types (attach_to_graylog,
+    child_host_status, configure_child_network, evaluate_package_compliance,
+    get_available_updates, get_installed_packages, refresh_user_access,
+    update_software_inventory) have NO agent handler at all -- they already
+    failed at runtime and now fail at enqueue, with a clear message.
+    Tests: 17 S2 + 3 new gate-shape tests; full OSS suite 8170 passed.
+  * **S3 -- DONE 2026-09-29.** Migration `q15assetexcl`:
+    `discovered_asset_exclusion` -- AUDIT ROWS keyed by device identity (MAC),
+    so DHCP cannot undo one; category (closed set) + required reason + actor;
+    revoking keeps the row. Service `asset_discovery_review`: ONE status rule
+    (managed ALWAYS wins -- an exclusion can never hide a managed host; then
+    excluded; else unmanaged), device listing with network/search filters,
+    summary with per-network unmanaged counts ("N unmanaged on M segments")
+    and every blind spot (no sweep yet -> silent devices unseen; agents that
+    stopped reporting; agents without ARP listening, with the reason; hosts
+    whose agent cannot take part). API `/api/v1/asset-discovery/{summary,
+    devices,exclusions,exclusions/{id}/revoke}` (view = View Host Details,
+    exclude/revoke = Manage Network Discovery; each exclusion and revocation
+    audited as `discovered_asset`). OSS page `/asset-discovery` ("Network
+    Discovery", gated on the engine + View Host Details): policy card, blind
+    spots ALWAYS shown above the list, counts, unmanaged / managed / "known
+    and fine" tabs, bulk mark-as-known with category + reason, revoke with
+    reason, "address may change" label on locally administered MACs. i18n:
+    69 frontend keys (+ plural variants) x 14 locales, 6 backend msgids x 13;
+    `mDNS`/`SSDP` allow-listed as protocol names. Tests: backend 14, frontend
+    7 (full suites: frontend 1831 passed).
+    **End-to-end verified 2026-09-29 on real hardware** (Bryan's dev server,
+    tenant The Everlys, agent gdr-t14 as root on home Wi-Fi): policy saved +
+    audited -> reconcile queued `configure_network_discovery` -> first send
+    missed the agent mid-reconnect, store-and-forward retried 60 s later and
+    delivered -> agent started with arp/nd/mdns/ssdp all `ok` -> first report:
+    24 devices on 192.168.4.0/24, 2 matched to managed hosts BY MAC (a
+    MacBook Air whose Wi-Fi MAC is locally administered, and a FreeBSD box --
+    both matched although their agents were offline), 5 locally administered,
+    0 dropped. The run found a bug in the S2 gate fix: `str()` of a
+    `CommandType` member is "CommandType.X", so every enum-built command
+    (queue_apply config profiles included) was refused to upgraded agents
+    once the gate fired; fixed with `command_name()` + enum regression tests
+    (full OSS suite 8186 passed). Reconcile and policy logs now name the
+    tenant database.
+  * **S4 -- DONE 2026-09-29.** Migration `q16netsweep`: `network_sweep_run`
+    (range, rate, addresses, who, which agent, outcome -- refused / failed /
+    timed-out runs kept) + `network_discovery_policy.sweep_enabled` (a SECOND
+    opt-in, off by default: listening is quiet, a sweep puts traffic on the
+    network). Engine `sweep.pxi`: `validate_sweep` (IPv4 only -- an IPv6 /64
+    cannot be enumerated; ON-LINK for a capable agent; <= 4096 addresses;
+    rate 1-200/s), `choose_sweeper` (an idle agent ON that network that
+    reported most recently), report run-block sanitation. OSS
+    `network_sweep` service + `POST/GET /api/v1/asset-discovery/sweeps`
+    (Manage Network Discovery; audited as `network_sweep` with range + rate;
+    409 when every agent there is busy); runs closed ONLY by the agent that
+    was asked; unanswered runs time out after 1 h (reconcile tick). Agent
+    `run_network_sweep` (advertised under `network_discovery`): re-checks
+    on-link/IPv4/size ITSELF, one empty UDP datagram per address to the
+    discard port at the clamped rate, then reads the neighbor cache -- no raw
+    sockets, every platform; refusals reported so the run closes; an
+    unreadable cache is a FAILED sweep, never an empty network. Blind spots:
+    "silent devices unseen" now clears per network, only for networks with a
+    completed sweep in the last 7 days (the rest are named). UI: "Allow active
+    sweeps" switch, Sweeps tab (history + sweep dialog, server refusal shown
+    verbatim). **Validated on the S0 bed with the agent's REAL code:** agent
+    a1's cache held only the gateway; one sweep of 10.121.1.0/24 (253
+    addresses at 50/s) found agent-a2, chatty-a and **silent-a** -- the
+    device passive listening could not reliably see -- and the agent refused
+    segment B's range as `not_on_link` on its own; output through the real
+    engine: 4 kept, 0 dropped, all tagged `sweep`. i18n: 22 frontend keys x 14,
+    8 backend msgids x 13. Tests: engine 28, backend 12 new, agent 43,
+    frontend 11.
+    **Live on Bryan's LAN 2026-09-29:** one sweep of 192.168.4.0/24 at 50/s from
+    gdr-t14 -- command to report in 10 s, 253 probed, 41 answered, **11 devices
+    no passive method had seen in the previous hour**; the run closed as
+    completed, the network dropped out of "not swept". Two findings for S5/S6:
+    (1) interface skipping is by NAME prefix, so a custom-named libvirt bridge
+    (the S0 bed's `smdisc1`) was listened on while it existed -- skip by what
+    an interface IS (bridge hosting local taps/veths), not what it is called;
+    (2) nothing ages out: a device from a network that no longer exists stays
+    "unmanaged" forever -- `discovered_asset` needs a last-seen retention
+    window like `custom_metric_sample`.
+  * **S5 -- DONE 2026-09-29.** Migration `q17assetclassify` (device vendor,
+    device_type, classification; policy retention_days). **Vendor**: the IEEE
+    MA-L/MA-M/MA-S registries (54,079 assignments) ship WITH the server as
+    `backend/data/oui.tsv.gz` (560 KB, regenerated by `scripts/update_oui.py`,
+    deterministic) -- no online lookup, air-gap clean; longest prefix wins;
+    a locally administered MAC has no vendor by definition. **Classification**
+    (engine `classify.pxi`): a LABELED guess with confidence and reasons --
+    what a device SAYS (mDNS service types, SSDP device types; high) beats
+    protocol/hypervisor MACs (VRRP/CARP/HSRP virtual router, QEMU/Xen/VMware/
+    VirtualBox/Hyper-V; high) beats the vendor name (low); the UI says
+    "Maybe: ..." for low confidence and pre-selects the matching exclusion
+    category. **Static addresses**: a VIP / load balancer registered BY IP
+    (category `virtual_address`) covers whatever device holds it -- labeled
+    for addresses that never change (IP keys rot on DHCP, S0) -- and still
+    never hides a managed host. **Retention**: devices unseen for 7/30/90/365
+    days (default 30) are forgotten by the tick; their exclusions survive.
+    **Bridges by what they are**: the agent skips a Linux bridge none of whose
+    ports is a physical NIC (the S4 live run had listened on the S0 bed's
+    custom-named `smdisc1`); `br0` over a real NIC is kept. **Posture feed**
+    (advisor_engine): installation domain `network_discovery` + curated
+    `PM-NET-DISCOVERY` ("devices on your networks are being discovered") and
+    `PM-NET-UNMANAGED` ("no unmanaged devices are on your networks", matches
+    carry the counts -> "11 unmanaged devices on 2 networks"); discovery off
+    or a stale agent can never PROVE the network clean, and without the
+    engine the domain is UNAVAILABLE (not a passing zero); risk-scored like
+    every posture item; guided remedies to `/asset-discovery`. Evidence comes
+    from the same review service as the page, so they cannot disagree.
+    Tests: engine 34 + advisor 173, backend 15 + 2 posture, agent 47,
+    frontend 15. i18n: 24 frontend keys x 14, 3 backend msgids x 13.
+  * **S6 -- DONE 2026-09-29 (pending Bryan's real BSD/macOS host run).**
+    **BPF**: `network_bpf.py` opens `/dev/bpf` (or the first free
+    `/dev/bpfN`), binds each monitored interface, and walks the capture
+    buffer with the ONE thing that differs per platform chosen by
+    `layout()`: the `bpf_hdr` timestamp is 8 bytes with 4-byte alignment on
+    macOS and OpenBSD, two `long`s with `long` alignment on FreeBSD, NetBSD
+    and DragonFly. `records()` is pure and tested against synthetic buffers
+    for each layout (and shown NOT to yield the frames under the wrong one);
+    own frames are dropped by source MAC; the collector's frame parser is
+    shared with Linux AF_PACKET. **Exit-gate harness**:
+    Pro+ `scripts/network_discovery_gate.py` runs the SHIPPED agent collector
+    and sweep modules inside the S0 bed's agent VMs, feeds their reports to
+    the real `record_report` with the real engine on a throwaway database,
+    and reads verdicts back through the review functions the UI calls --
+    GREEN 16/16 (below). **It found two real defects, both fixed**: (1) the
+    shown address was whichever IP came first, and ND listening hears a
+    device's `fe80::` first -- an IPv4 printer was listed by its link-local
+    address; the engine now orders IPs IPv4, global IPv6, link-local
+    (`by_preference`), newest first within each. (2) After a DHCP renumber
+    the OLD address lingers in the neighbor cache for the same MAC, and a
+    sweep walks it through DELAY/PROBE -- still carrying the MAC -- exactly
+    when it reads the cache back, so the device stayed at its old address;
+    the agent now orders unconfirmed entries (anything not
+    REACHABLE/PERMANENT/NOARP) last. **Docs**: `network-discovery.html`,
+    Pro+ index card, roadmap page, `seed_discovery.py` (reports through the
+    real service + engine, a real sweep, two exclusions) +
+    `make screenshots-discovery-seed`, 4 shots. Tests: engine 36, agent 59
+    discovery (5030 full suite).
+
 
 **Estimated Size:** ~3,000 lines (agent-side collectors across five platforms
 are the bulk; the review UI is small).
@@ -10920,9 +11227,26 @@ are the bulk; the review UI is small).
       was wrong and is now canonical -- Arabic أسطول is the ordinary
       fleet-of-vehicles word, not the naval-only sense that makes ja 艦隊 and
       zh 车队 defects.
-- [ ] Unenrolled asset discovery validated on ≥2 network segments: passive
-      reporting finds a known-unmanaged device, correlation suppresses every
-      managed host, and an allow-list exclusion survives a DHCP lease change
+- [x] Unenrolled asset discovery validated on ≥2 network segments: discovery
+      finds a known-unmanaged device on each segment, correlation suppresses
+      every managed host, and an allow-list exclusion survives a DHCP lease
+      change. *Validated on TWO VIRTUAL segments (isolated libvirt networks,
+      the 21.6 S0 bed: `network_discovery_spike.py` in Pro+) plus ONE
+      passive-only pass on a real flat LAN for real-device noise -- decided
+      2026-09-28 (Bryan: single flat physical network). Not covered by that
+      bed, and to be stated as such: real switch behavior (VLANs, port
+      security, MLD snooping, Wi-Fi client isolation) and phones' randomized
+      MACs.*
+      DONE 2026-09-29 (21.6 S6): Pro+ `network_discovery_gate.py all`, GREEN
+      16/16 with the SHIPPED agent collector + sweep in the bed's VMs and the
+      real service + engine: silent AND chatty devices found on BOTH segments
+      (silent ones via ND + sweep), all three agents correlated (each matched
+      to its own host by its neighbor, none ever unmanaged), no cross-segment
+      sightings, and the excluded device renumbered .22 -> .23 through its
+      DHCP reservation was rediscovered at .23 as the SAME excluded device,
+      with no new unmanaged row. The real-LAN passive pass is the 2026-09-29
+      record above. The first two runs were RED 15/16 on the new address --
+      the two defects in the S6 record, now fixed.
 - [ ] **Coverage ladder rung: OSS frontend `lines` floor to 70** -- the last rung before GA verifies it (added 2026-08-07 with the 20/21 rungs).
       *Already raised: Phase 20 took the enforced `lines` floor in
       `frontend/vite.config.ts` from 60 to 70 (measured 71.88%), so this
@@ -10957,6 +11281,10 @@ The OSS floor: mobile is a first-class, *visible* endpoint class -- no automated
 - [ ] Fleet + dashboard surface mobile devices alongside hosts; read-only device-detail view
 - [ ] Manual + authenticated-API device registration + a self-report ingest endpoint (a device/app can POST OS version/build)
 - [ ] Basic "obsolete OS" flag from OSS OS metadata (no curated EOL feed -- that's Pro+)
+- [ ] Correlate `mobile_device` into 21.6 unenrolled asset discovery: a
+      device already known as a mobile device (by MAC / Wi-Fi MAC) must not
+      appear as unmanaged on the Network Discovery page (21.6 S5 covered every
+      source that existed then; this one did not exist yet)
 - [ ] i18n/l10n
 
 **Estimated Size:** ~2,500 lines
@@ -11635,6 +11963,173 @@ client of one.
 
 ---
 
+## Phase 30: Browser Remote Terminal (Community / OSS; recording Pro+; approval Enterprise)
+
+**Target Release:** v6.3.0.0
+**Focus:** Open an interactive shell on a managed host from the web UI, with
+no inbound port, no sshd dependency and no key distribution -- and without
+ever changing the host's security posture to make it work.
+
+**Added 2026-09-29 (Bryan).** Asked for as "SSH into a remote host through
+the web UI", with the hard cases called out: sshd not running, the port not
+open, no keys in place. Bryan's first idea was to record the host's state,
+start sshd / open the port / place a key, and unwind all of it when the
+session closes.
+
+**SEQUENCING NOTE -- worth revisiting.** Placed last so no phase is
+renumbered, but a browser terminal is table stakes in this market (Cockpit,
+Landscape, AWS SSM Session Manager, Teleport all have one) and Phase 24 claims
+market parity at v5.0. Nothing here depends on 22-29, so pulling it ahead of
+the mobile arc costs nothing structurally. Bryan's call, not a silent reorder.
+
+**DECIDED DIRECTION: tunnel through the agent, do not reach for sshd.** The
+agent already holds an authenticated, outbound, always-on connection to the
+server. A terminal is a PTY the agent spawns locally, with its bytes relayed
+browser <-> server <-> agent over that connection. That removes all three hard
+cases instead of working around them: no sshd needed, no port opened (the
+agent dialed out; nothing listens), no keys (the operator is authenticated by
+SysManage, the agent by its existing enrollment). It is the same shape as AWS
+SSM Session Manager, and it keeps Phase 19's "agent to server, 443 only, no
+inbound" decision intact -- which the SSH route would quietly reverse.
+
+**WHY NOT "change the host, then unwind it" (recorded so it is not re-proposed
+without these answers):**
+  * **The unwind is the part that fails.** A browser tab closed, a server
+    restart, a network drop or an agent crash mid-session leaves sshd running,
+    the port open and a key authorized -- a security regression that nobody
+    asked for and nothing records. A server-driven teardown cannot be made
+    reliable; the host would need its own dead-man's switch (below).
+  * **It fights our own features.** Phase 20 drift detection and 21.x posture
+    (PM-* rules, compliance scans) would flag the change, and remediation could
+    revert it mid-session -- or, worse, a baseline could be captured WITH it.
+  * **Concurrency.** Two operators on one host: whose "before" state is the
+    real one, and who unwinds? Ref-counting host mutations is fragile.
+  * **Firewalls are not ours to toggle.** The port may be closed by a network
+    firewall, a cloud security group or policy we cannot see; opening the
+    host firewall then fails anyway, after having weakened it.
+  * **Key placement is credential sprawl** -- the thing 20.1 went pull-style
+    to avoid.
+  If a real-sshd mode is ever wanted (for scp/sftp or tool compatibility), the
+  acceptable form is: sshd bound to 127.0.0.1 only, reached THROUGH the agent
+  tunnel (so no port and no firewall change), authenticated with a short-lived
+  OpenBAO SSH-CA certificate (the `ssh` dynamic-secret lease kind already
+  exists) instead of a placed key -- and if sshd has to be started, the agent
+  owns the revert with an agent-side lease TTL, so the host restores itself
+  even if the server never speaks to it again. Scope this as a follow-on, not
+  the default.
+
+**Security: this is the most privileged feature in the product -- an
+interactive shell from a browser.** Every item below is a requirement, not a
+nicety:
+  * **Off by default, host-side consent.** The agent refuses terminal requests
+    unless its LOCAL config enables it (`remote_terminal.enabled`); a server
+    compromise alone must not be able to turn it on fleet-wide. Advertised
+    through Phase 19 capabilities like everything else.
+  * **Its own role** ("Open Remote Terminal"), separate from View/Manage Host,
+    and **step-up MFA** at session open.
+  * **Who the shell runs as.** Never an implicit root shell: the agent runs the
+    session as a configured local account (or maps the SysManage user to one);
+    privilege goes through the host's own sudo/doas, so the host's audit trail
+    sees it too.
+  * **Audit** every open/close/deny with actor, host, tenant, duration, reason.
+    Idle timeout and maximum duration, with a kill switch in the UI.
+  * **Not the store-and-forward queue.** Interactive bytes cannot go through
+    `message_queue`; this needs a live streaming channel on the agent's
+    WebSocket. Under Phase 29 HA the browser must land on (or be relayed to)
+    the server instance holding that agent's connection.
+
+**Community / OSS -- the terminal and the controls that make it safe to ship
+at all.** None of these is optional or paid: a browser root shell without them
+is a liability, not a feature.
+
+- [ ] Agent: PTY session manager -- POSIX `pty` (Linux, macOS, all four BSDs),
+      Windows ConPTY (PowerShell); resize, flow control, bounded buffers,
+      clean child teardown on disconnect; host-local enable switch
+      (`remote_terminal.enabled`, off by default)
+- [ ] **Live streaming channel**: terminal open/data/resize/close frames
+      multiplexed on the agent's existing WebSocket -- NOT the store-and-forward
+      `message_queue`, which is built for resilience, not keystrokes;
+      per-session ids; backpressure so a flood of output cannot starve the
+      agent's heartbeats or queued command results; under Phase 29 HA the
+      browser is relayed to the server instance holding that agent's connection
+- [ ] **Its own role**: "Open Remote Terminal", separate from View/Manage
+      Host, scoped per host / access group / tenant like every other role,
+      with **step-up MFA** at session open
+- [ ] **Local run-as account**: never an implicit root shell. The agent runs
+      the session as a configured local account, or maps the SysManage user to
+      one; privilege goes through the host's own sudo/doas so the host's own
+      audit trail records it too. Clear "you are <user>" banner in the UI
+- [ ] **Auditing**: every open, close, deny and kill with actor, host,
+      tenant, run-as account, duration and reason; idle timeout and maximum
+      duration; an operator kill switch for live sessions
+- [ ] Server: authenticated browser WebSocket relay, role + MFA check,
+      tenant routing, limit enforcement
+- [ ] Web UI: xterm.js terminal on Host Detail, copy/paste, resize, reconnect
+      notice
+
+**Professional (Pro+)** -- what regulated buyers pay for. Gating the terminal
+itself would push the OSS community to bolt on something less safe, so the
+paid tiers add accountability on top of a terminal that is already safe.
+
+- [ ] **Session recording + playback**: every keystroke and output byte
+      recorded (asciicast) with timing, stored per tenant with retention, and
+      replayed in the browser from the audit entry that references it; the
+      recording is announced in the session banner, and a session cannot
+      start if its recording cannot be stored (fail closed, never an
+      unrecorded session on a host whose policy requires recording)
+
+**Enterprise**
+
+- [ ] **Second-person approval** (just-in-time access): a request names the
+      host, the run-as account, a reason and a duration; a second authorized
+      person approves or denies it; the approval is single-use and expires,
+      and the requester can never approve their own request. Per-host or
+      per-access-group policy decides where approval is required
+- [ ] Session export to SIEM alongside the rest of the audit stream
+
+*Tier split proposed 2026-09-29 (recording at Professional, approval at
+Enterprise); Bryan approved the controls, the exact tier boundary is his to
+adjust.*
+
+- [ ] Follow-on (scope separately): real-sshd mode through the tunnel with
+      OpenBAO SSH-CA certificates, and file transfer
+- [ ] i18n/l10n
+
+**Estimated Size:** ~2,500 lines
+
+### Exit Criteria
+
+- [ ] A terminal opens and works on every supported agent platform (Linux,
+      macOS, FreeBSD, OpenBSD, NetBSD, Windows) against a host with sshd
+      STOPPED and no inbound port open -- proving neither is needed
+- [ ] **Nothing on the host changes:** a before/after posture + drift snapshot
+      of a host that just hosted a session is identical
+- [ ] The agent refuses sessions when its local switch is off, even with a
+      fully privileged server-side request; a user without the role, or who
+      fails step-up MFA, cannot open one
+- [ ] Killing the browser, the server and the network mid-session each leaves
+      no orphaned shell on the host (child process gone within the timeout)
+- [ ] Output flood (`yes`, `cat /dev/urandom | base64`) does not delay the
+      agent's heartbeats or queued command results
+- [ ] Every session open/close/deny/kill is in the audit log with actor, host
+      and run-as account; a session opened as a non-root account shows its
+      sudo use in the HOST's own log as well
+- [ ] **Recording (Pro+):** a recorded session replays byte-for-byte from its
+      audit entry, and when recording storage is unavailable a session that
+      requires it is refused, not opened unrecorded
+- [ ] **Approval (Enterprise):** a host that requires approval refuses a
+      session without one; self-approval, a reused approval and an expired
+      one are each refused
+- [ ] Docs + 14-language i18n complete
+- [ ] **Audit ALL previous phases for stale open items.** Same rule as every
+      phase: walk each earlier phase, check every unticked box against the
+      actual codebase, tick what is genuinely done, and for what is not say
+      plainly whether it is real work, blocked externally, or should move or
+      be dropped.
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
 ## Release Schedule Summary
 
 | Phase | Version | Focus | Key Deliverables |
@@ -11670,6 +12165,7 @@ client of one.
 | 27 | **v6.0.0.0** | Apple Native MDM | **MAJOR -- SysManage becomes the device authority**, not just an observer: Apple MDM protocol, APNs, profiles, remote lock/wipe -- **not air-gappable** |
 | 28 | v6.1.0.0 | Android Native MDM & Zero-Touch | Android Management API policy + bulk/zero-touch enrollment across both vendors -- **not air-gappable** |
 | 29 | v6.2.0.0 | High Availability & Disaster Recovery | Active server pool behind a load balancer, leader-elected singleton workers, Postgres failover integration, agent multi-endpoint failover to a DR site |
+| 30 | v6.3.0.0 | Browser Remote Terminal | Agent-tunneled PTY sessions from the web UI -- no sshd, no inbound port, no keys, host posture untouched (OSS); recording (Pro+), second-person approval (Enterprise) |
 
 ---
 

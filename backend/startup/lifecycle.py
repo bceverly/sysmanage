@@ -24,7 +24,7 @@ from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
 from backend.persistence.db import get_db
 from backend.persistence.partitions import get_shared_db
 from backend.security.certificate_manager import certificate_manager
-from backend.services.advisor_tick import start_if_licensed as start_advisor_tick
+from backend.services.background_ticks import start_licensed_ticks
 from backend.services.email_service import email_service
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.message_processor import message_processor
@@ -498,8 +498,8 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                         # Never fatal: a failed scheduler must not kill the server.
                         logger.warning("File watch tick did not start: %s", tick_e)
 
-                # Advisor evaluation tick (21.2 S2); gated + never fatal there.
-                start_advisor_tick()
+                # Licensed ticks (21.2 advisor, 21.6 discovery); gated + never fatal.
+                start_licensed_ticks()
 
                 # Start the config-profile assignment tick if the config
                 # management engine is loaded.  Same gate as the air-gap tick

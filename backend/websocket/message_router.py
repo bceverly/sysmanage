@@ -20,6 +20,7 @@ from backend.api.handlers import (
     handle_commercial_antivirus_status_update,
     handle_custom_metric_samples,
     handle_host_metrics,
+    handle_network_discovery_report,
     handle_fips_compliance_update,
     handle_firewall_status_update,
     handle_graylog_status_update,
@@ -211,6 +212,10 @@ async def route_inbound_message(  # NOSONAR
 
         elif message_type == MessageType.HOST_METRICS:
             await handle_host_metrics(db, mock_connection, message_data)
+            success = True
+
+        elif message_type == MessageType.NETWORK_DISCOVERY_REPORT:
+            await handle_network_discovery_report(db, mock_connection, message_data)
             success = True
 
         elif message_type == MessageType.HOSTNAME_CHANGED:

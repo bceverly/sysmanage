@@ -2402,7 +2402,8 @@
     "users": "使用者",
     "vulnerabilities": "漏洞",
     "advisor": "顧問",
-    "hostMetrics": "主機指標"
+    "hostMetrics": "主機指標",
+    "assetDiscovery": "網路探索"
   },
   "notifications": {
     "applicationUpdates": "應用程式更新",
@@ -3920,7 +3921,9 @@
       "smSec004": "主機防火牆關閉時有服務在所有介面上監聽",
       "smSec005": "憑證將在 30 天內到期",
       "smStab001": "組態漂移超過 7 天未解決",
-      "smStabF01": "OpenSSL 版本與同類主機執行的版本不同"
+      "smStabF01": "OpenSSL 版本與同類主機執行的版本不同",
+      "pmNetDiscovery": "正在探索您網路中的裝置",
+      "pmNetUnmanaged": "您的網路中沒有未受管理的裝置"
     },
     "curatedPack": {
       "baseline": {
@@ -4025,7 +4028,9 @@
       "set_air_gap_role": "設定伺服器角色以符合您的氣隙部署。",
       "set_audit_retention": "透過稽核 API 建立至少 365 天的稽核保留原則。目前尚無對應的畫面。",
       "set_password_policy": "密碼原則是在 sysmanage.yaml 中設定；SysManage 無法代您變更。",
-      "shorten_session": "將工作階段設定為一小時後到期。"
+      "shorten_session": "將工作階段設定為一小時後到期。",
+      "enable_network_discovery": "開啟網路探索，讓代理程式回報其周圍的裝置。",
+      "review_unmanaged_devices": "註冊每台未受管理的裝置，或註明原因將其標記為已知。"
     },
     "saved": "威脅模型已儲存。改善清單將在下一次顧問評估時重新評估。",
     "stale": {
@@ -4204,6 +4209,170 @@
       "saveFailed": "無法儲存威脅模型。",
       "step": "第 {{current}} 題，共 {{total}} 題",
       "title": "描述您的安裝環境"
+    }
+  },
+  "assetDiscovery": {
+    "blindSpots": {
+      "agentsLimited": "部分代理無法看到其網路上的所有內容：",
+      "notEquipped": "{{count}} 台主機執行的代理無法參與探索，其網路未涵蓋在內。",
+      "notEquipped_other": "{{count}} 台主機執行的代理無法參與探索，其網路未涵蓋在內。",
+      "notEquipped_one": "{{count}} 台主機執行的代理無法參與探索，其網路未涵蓋在內。",
+      "off": "探索已關閉：代理未在監聽，因此不會找到任何新裝置。",
+      "silent": "代理僅會監聽。不傳送任何資料的裝置將無法被看到，因此此清單可能不完整。",
+      "stale": "已停止回報",
+      "unswept": "過去 7 天內未掃描：{{networks}}"
+    },
+    "category": {
+      "appliance": "專用設備",
+      "iot": "IoT 裝置或感測器",
+      "networkEquipment": "網路設備",
+      "other": "其他",
+      "personalDevice": "個人裝置",
+      "printer": "印表機",
+      "virtualMachine": "虛擬機器",
+      "virtualAddress": "虛擬或共用位址（VIP、負載平衡器）"
+    },
+    "counts": {
+      "excluded": "{{count}} 個已知且可接受",
+      "excluded_other": "{{count}} 個已知且可接受",
+      "excluded_one": "{{count}} 個已知且可接受",
+      "managed": "{{count}} 個受管理",
+      "managed_other": "{{count}} 個受管理",
+      "managed_one": "{{count}} 個受管理",
+      "onNetwork": "{{network}} 上有 {{count}} 個",
+      "onNetwork_other": "{{network}} 上有 {{count}} 個",
+      "onNetwork_one": "{{network}} 上有 {{count}} 個",
+      "unmanaged": "{{count}} 個未受管理",
+      "unmanaged_other": "{{count}} 個未受管理",
+      "unmanaged_one": "{{count}} 個未受管理"
+    },
+    "exclude": {
+      "action": "將 {{count}} 個標記為已知且可接受",
+      "action_other": "將 {{count}} 個標記為已知且可接受",
+      "action_one": "將 {{count}} 個標記為已知且可接受",
+      "category": "這是什麼？",
+      "confirm": "標記為已知",
+      "done": "已將 {{count}} 台裝置標記為已知。",
+      "done_other": "已將 {{count}} 台裝置標記為已知。",
+      "done_one": "已將 {{count}} 台裝置標記為已知。",
+      "intro": "{{count}} 台裝置將不再顯示為未受管理。此操作會連同您的姓名與原因一併記錄，並透過 MAC 位址追蹤每台裝置，即使其 IP 位址變更亦然。",
+      "intro_other": "{{count}} 台裝置將不再顯示為未受管理。此操作會連同您的姓名與原因一併記錄，並透過 MAC 位址追蹤每台裝置，即使其 IP 位址變更亦然。",
+      "intro_one": "{{count}} 台裝置將不再顯示為未受管理。此操作會連同您的姓名與原因一併記錄，並透過 MAC 位址追蹤每台裝置，即使其 IP 位址變更亦然。",
+      "reason": "原因",
+      "reasonHelp": "必填。例如：櫃台的印表機，由總務單位負責。",
+      "title": "標記為已知且可接受"
+    },
+    "exclusions": {
+      "decidedBy": "決定者",
+      "empty": "沒有任何裝置被標記為已知。",
+      "revokedBy": "由 {{who}} 撤銷：{{why}}",
+      "showRevoked": "顯示已撤銷的決定"
+    },
+    "filters": {
+      "allNetworks": "所有網路",
+      "network": "網路",
+      "search": "搜尋 MAC 或 IP 位址"
+    },
+    "loadError": "無法載入已探索的裝置。",
+    "method": {
+      "arpListen": "ARP 監聽",
+      "cache": "鄰居快取",
+      "mdns": "mDNS",
+      "ndListen": "IPv6 鄰居探索",
+      "ssdp": "SSDP",
+      "sweep": "主動掃描"
+    },
+    "policy": {
+      "enabled": "代理在其網路上監聽裝置",
+      "hour": "每小時",
+      "interval": "回報頻率",
+      "lastChanged": "最後由 {{who}} 於 {{when}} 變更",
+      "minutes": "每 {{count}} 分鐘",
+      "minutes_other": "每 {{count}} 分鐘",
+      "minutes_one": "每分鐘",
+      "sweeps": "允許主動掃描",
+      "days": "{{count}} 天",
+      "days_other": "{{count}} 天",
+      "days_one": "{{count}} 天",
+      "retention": "未見裝置的遺忘期限"
+    },
+    "revoke": {
+      "confirm": "撤銷",
+      "title": "將此裝置重新顯示為未受管理"
+    },
+    "status": {
+      "unmanaged": "未受管理"
+    },
+    "subtitle": "您的代理在其網路上看到、但 SysManage 未管理的裝置。",
+    "table": {
+      "address": "位址",
+      "device": "裝置",
+      "empty": "沒有符合的裝置。",
+      "evidence": "裝置自述資訊",
+      "ipOnly": "未發現 MAC",
+      "lastSeen": "最後發現時間",
+      "localMac": "位址可能變更",
+      "localMacHelp": "本機管理的位址：手機與平板電腦會變更此位址，因此此裝置可能以新位址再次出現。",
+      "more": "顯示 {{total}} 個中的 {{shown}} 個。請使用上方的篩選條件縮小清單範圍。",
+      "seenBy": "發現者",
+      "selectAll": "全選",
+      "status": "狀態",
+      "maybe": "可能是：{{type}}"
+    },
+    "tabs": {
+      "excluded": "已知且可接受",
+      "managed": "受管理",
+      "unmanaged": "未受管理",
+      "sweeps": "掃描"
+    },
+    "title": "網路探索",
+    "unavailable": {
+      "disabled": "未啟用",
+      "notRoot": "代理未以 root 身分執行",
+      "portInUse": "連接埠已被其他程式使用",
+      "unreadable": "無法讀取",
+      "unsupportedPlatform": "此平台不支援"
+    },
+    "sweep": {
+      "agent": "執行掃描的代理",
+      "disabled": "主動掃描已關閉。請在上方設定中允許，以找出從不主動宣告自身的裝置。",
+      "error": "無法啟動掃描。",
+      "found": "已找到",
+      "foundOf": "{{probed}} 個位址中的 {{found}} 個",
+      "intro": "網路上的代理會向每個位址傳送一個小封包，然後回報所有有回應的裝置。這能找出從不主動宣告自身的裝置，且此操作會連同您的姓名一併記錄。",
+      "none": "尚未掃描任何網路。",
+      "perSecond": "每秒 {{count}} 個位址",
+      "perSecond_other": "每秒 {{count}} 個位址",
+      "perSecond_one": "每秒 {{count}} 個位址",
+      "rate": "速度",
+      "requestedBy": "請求者",
+      "start": "開始掃描",
+      "status": {
+        "completed": "已完成",
+        "failed": "失敗",
+        "queued": "正在等待代理",
+        "refused": "遭代理拒絕",
+        "timedOut": "代理無回應"
+      },
+      "title": "掃描網路"
+    },
+    "address": {
+      "address": "IP 位址",
+      "confirm": "註冊",
+      "error": "無法註冊此位址。",
+      "title": "註冊靜態位址",
+      "warning": "僅適用於永不變更的位址，例如虛擬 IP 或負載平衡器。註冊適用於持有此位址的任何裝置，因此透過 DHCP 取得位址的一般裝置會在下次租約後再次出現。"
+    },
+    "type": {
+      "computer": "電腦",
+      "iot": "IoT 裝置",
+      "media": "電視、喇叭或媒體播放器",
+      "networkEquipment": "網路設備",
+      "phoneOrTablet": "手機或平板",
+      "printer": "印表機",
+      "unknown": "未知",
+      "virtualAddress": "虛擬路由器位址",
+      "virtualMachine": "虛擬機器"
     }
   }
 }

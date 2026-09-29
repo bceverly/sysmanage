@@ -310,6 +310,12 @@ class ModuleCode(str, Enum):
     # any of those subsystems as a side effect of existing. Enterprise.
     ADVISOR_ENGINE = "advisor_engine"
 
+    # Phase 21.6 -- unenrolled asset discovery. Agents report what they see on
+    # their own segments; the engine identifies each device (by MAC) and
+    # matches it against the managed fleet. Its own engine: the 18.2 PXE
+    # discovery (provisioning_engine) is a different lifecycle. Enterprise.
+    ASSET_DISCOVERY_ENGINE = "asset_discovery_engine"
+
     @classmethod
     def from_string(cls, value: str) -> "ModuleCode":
         """Convert string to ModuleCode enum."""
@@ -546,6 +552,8 @@ TIER_MODULES = {
         ModuleCode.PROVISIONING_ENGINE,
         # Phase 21.2 -- the advisor
         ModuleCode.ADVISOR_ENGINE,
+        # Phase 21.6 -- unenrolled asset discovery
+        ModuleCode.ASSET_DISCOVERY_ENGINE,
         # NOTE: MULTITENANCY_ENGINE is intentionally NOT here -- it is exclusive
         # to the MULTITENANT_SAAS tier (defined just below as an Enterprise
         # superset).  That exclusivity is the moat.

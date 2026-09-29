@@ -42,6 +42,11 @@ from backend.api.handlers.custom_metric_handlers import (
     handle_host_metrics,
 )
 
+# Import from network_discovery_handlers (Unenrolled Asset Discovery -- 21.6)
+from backend.api.handlers.network_discovery_handlers import (
+    handle_network_discovery_report,
+)
+
 # Import from hostname_handler
 from backend.api.handlers.hostname_handler import handle_hostname_changed
 
@@ -127,4 +132,5 @@ __all__ = [
     # Custom Metrics & Graphs handlers (Slice 3b)
     "handle_custom_metric_samples",
     "handle_host_metrics",
+    "handle_network_discovery_report",
 ]

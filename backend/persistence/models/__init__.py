@@ -14,6 +14,7 @@ from .access_groups import *
 from .advisor import *
 from .advisory import *
 from .threat_model import *
+from .asset_discovery import *
 from .airgap import *
 from .airgap_bundle import *
 from .api_key import *

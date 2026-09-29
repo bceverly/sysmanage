@@ -29,6 +29,7 @@ from backend.websocket.queue_operations import QueueOperations
 
 # Logger for debugging - use existing root logger configuration
 debug_logger = logging.getLogger("debug_logger")
+logger = logging.getLogger(__name__)
 
 # Initialize queue operations
 queue_ops = QueueOperations()
@@ -500,6 +501,7 @@ async def handle_hardware_update(  # NOSONAR
                     last_updated=now,
                 )
                 db.add(network_interface)
+            _recorrelate_discovered_assets(db, connection.host_id)
 
         # Handle storage devices
         storage_devices = message_data.get("storage_devices", [])
@@ -719,3 +721,16 @@ async def handle_fips_compliance_update(db: Session, connection, message_data: d
         updates.get("fips_status"),
     )
     return {"message_type": "ack", "data": {"success": True}}
+
+
+def _recorrelate_discovered_assets(db, host_id) -> None:
+    """21.6 S2: a changed interface inventory can make a discovered device
+    managed (its host just enrolled) or unmanaged again. Never fails the
+    hardware update it rides on."""
+    try:
+        from backend.services import asset_discovery_service  # noqa: PLC0415
+
+        db.flush()
+        asset_discovery_service.recorrelate_host(db, host_id)
+    except Exception:  # pylint: disable=broad-except
+        logger.exception("discovered-asset re-correlation failed for host %s", host_id)

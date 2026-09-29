@@ -129,3 +129,95 @@ def test_inbound_messages_are_never_gated():
             host_id=host.id,
             db=_db_returning(host),
         )
+
+
+# --------------------------------------------------------------------------
+# The REAL message shapes (found 2026-09-29, 21.6 S2). Every test above uses the
+# flat {"command_type": ...}; nearly every production caller enqueues the
+# Message.to_dict() envelope, with the command under "data" -- and the gate read
+# only the flat key, so in production it never refused anything.
+# --------------------------------------------------------------------------
+
+
+def _enqueue_envelope(host, command_type, parameters=None):
+    from backend.websocket.messages import create_command_message
+
+    return QueueOperations().enqueue_message(
+        message_type="command",
+        message_data=create_command_message(command_type, parameters or {}),
+        direction="outbound",
+        host_id=host.id,
+        db=_db_returning(host),
+    )
+
+
+def test_the_real_envelope_shape_is_gated():
+    host = _Host(commands=["install_package"])
+    with pytest.raises(UnsupportedCapabilityError):
+        _enqueue_envelope(host, "initialize_kvm")
+    with pytest.raises(_Sentinel):
+        _enqueue_envelope(host, "install_package")
+
+
+def test_generic_command_is_judged_by_the_command_it_wraps():
+    """The agent unwraps generic_command before its handler map, so the wrapper
+    is never advertised: gating on it would refuse every generic dispatch."""
+    host = _Host(commands=["install_package"])
+    with pytest.raises(_Sentinel):
+        _enqueue_envelope(
+            host,
+            "generic_command",
+            {"command_type": "install_package", "parameters": {}},
+        )
+    with pytest.raises(UnsupportedCapabilityError) as excinfo:
+        _enqueue_envelope(
+            host,
+            "generic_command",
+            {"command_type": "initialize_kvm", "parameters": {}},
+        )
+    assert excinfo.value.command_type == "initialize_kvm"
+
+
+def test_the_envelope_to_a_host_that_never_advertised_is_not_gated():
+    host = _Host(commands=None)
+    with pytest.raises(_Sentinel):
+        _enqueue_envelope(host, "initialize_kvm")
+
+
+# Found live 2026-09-29 (21.6 S3 end-to-end test): queue_apply and the
+# discovery reconciler put CommandType MEMBERS in the envelope, and str() of a
+# (str, Enum) member is "CommandType.X" -- so once the gate fired, it refused
+# every such command to every upgraded agent. Every test above used strings.
+
+
+def _enqueue_enum_envelope(host, member):
+    from backend.websocket.messages import Message, MessageType
+
+    envelope = Message(
+        message_id="m-1",
+        message_type=MessageType.COMMAND,
+        data={"command_type": member, "parameters": {}},
+    ).to_dict()
+    return QueueOperations().enqueue_message(
+        message_type="command",
+        message_data=envelope,
+        direction="outbound",
+        host_id=host.id,
+        db=_db_returning(host),
+    )
+
+
+@pytest.mark.parametrize(
+    "name", ["apply_config_profile", "configure_network_discovery"]
+)
+def test_an_enum_member_is_judged_by_its_value(name):
+    from backend.websocket.messages import CommandType
+
+    member = CommandType(name)
+    host = _Host(commands=[name])
+    with pytest.raises(_Sentinel):  # advertised: must pass the gate
+        _enqueue_enum_envelope(host, member)
+    other = _Host(commands=["install_package"])
+    with pytest.raises(UnsupportedCapabilityError) as excinfo:
+        _enqueue_enum_envelope(other, member)
+    assert excinfo.value.command_type == name  # the wire name, not "CommandType.X"

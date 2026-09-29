@@ -2402,7 +2402,8 @@
     "users": "用户",
     "vulnerabilities": "漏洞",
     "advisor": "顾问",
-    "hostMetrics": "主机指标"
+    "hostMetrics": "主机指标",
+    "assetDiscovery": "网络发现"
   },
   "notifications": {
     "applicationUpdates": "应用程序更新",
@@ -3920,7 +3921,9 @@
       "smSec004": "主机防火墙关闭时有服务在所有接口上监听",
       "smSec005": "证书将在 30 天内过期",
       "smStab001": "配置漂移超过 7 天未解决",
-      "smStabF01": "OpenSSL 版本与同类主机运行的版本不同"
+      "smStabF01": "OpenSSL 版本与同类主机运行的版本不同",
+      "pmNetDiscovery": "正在发现您网络中的设备",
+      "pmNetUnmanaged": "您的网络中没有未托管的设备"
     },
     "curatedPack": {
       "baseline": {
@@ -4025,7 +4028,9 @@
       "set_air_gap_role": "设置服务器角色以匹配您的气隙部署。",
       "set_audit_retention": "通过审计 API 创建至少 365 天的审计保留策略。目前尚无对应的界面。",
       "set_password_policy": "密码策略在 sysmanage.yaml 中设置；SysManage 无法替您更改。",
-      "shorten_session": "将会话设置为一小时后过期。"
+      "shorten_session": "将会话设置为一小时后过期。",
+      "enable_network_discovery": "开启网络发现，让代理报告其周围的设备。",
+      "review_unmanaged_devices": "注册每台未托管的设备，或注明原因将其标记为已知。"
     },
     "saved": "威胁模型已保存。整改清单将在下一次顾问评估时重新评估。",
     "stale": {
@@ -4204,6 +4209,170 @@
       "saveFailed": "无法保存威胁模型。",
       "step": "第 {{current}} 题，共 {{total}} 题",
       "title": "描述您的安装环境"
+    }
+  },
+  "assetDiscovery": {
+    "blindSpots": {
+      "agentsLimited": "部分代理无法看到其网络上的所有内容：",
+      "notEquipped": "{{count}} 台主机运行的代理无法参与发现，其网络未被覆盖。",
+      "notEquipped_other": "{{count}} 台主机运行的代理无法参与发现，其网络未被覆盖。",
+      "notEquipped_one": "{{count}} 台主机运行的代理无法参与发现，其网络未被覆盖。",
+      "off": "发现已关闭：代理未在监听，因此不会发现任何新设备。",
+      "silent": "代理仅进行监听。不发送任何数据的设备无法被看到，因此此列表可能不完整。",
+      "stale": "已停止报告",
+      "unswept": "过去 7 天内未扫描：{{networks}}"
+    },
+    "category": {
+      "appliance": "专用设备",
+      "iot": "IoT 设备或传感器",
+      "networkEquipment": "网络设备",
+      "other": "其他",
+      "personalDevice": "个人设备",
+      "printer": "打印机",
+      "virtualMachine": "虚拟机",
+      "virtualAddress": "虚拟或共享地址（VIP、负载均衡器）"
+    },
+    "counts": {
+      "excluded": "{{count}} 个已知且可接受",
+      "excluded_other": "{{count}} 个已知且可接受",
+      "excluded_one": "{{count}} 个已知且可接受",
+      "managed": "{{count}} 个受管",
+      "managed_other": "{{count}} 个受管",
+      "managed_one": "{{count}} 个受管",
+      "onNetwork": "{{network}} 上有 {{count}} 个",
+      "onNetwork_other": "{{network}} 上有 {{count}} 个",
+      "onNetwork_one": "{{network}} 上有 {{count}} 个",
+      "unmanaged": "{{count}} 个未受管",
+      "unmanaged_other": "{{count}} 个未受管",
+      "unmanaged_one": "{{count}} 个未受管"
+    },
+    "exclude": {
+      "action": "将 {{count}} 个标记为已知且可接受",
+      "action_other": "将 {{count}} 个标记为已知且可接受",
+      "action_one": "将 {{count}} 个标记为已知且可接受",
+      "category": "这是什么？",
+      "confirm": "标记为已知",
+      "done": "已将 {{count}} 台设备标记为已知。",
+      "done_other": "已将 {{count}} 台设备标记为已知。",
+      "done_one": "已将 {{count}} 台设备标记为已知。",
+      "intro": "{{count}} 台设备将不再显示为未受管。此操作会连同您的姓名和原因一起记录，并通过 MAC 地址跟踪每台设备，即使其 IP 地址发生变化。",
+      "intro_other": "{{count}} 台设备将不再显示为未受管。此操作会连同您的姓名和原因一起记录，并通过 MAC 地址跟踪每台设备，即使其 IP 地址发生变化。",
+      "intro_one": "{{count}} 台设备将不再显示为未受管。此操作会连同您的姓名和原因一起记录，并通过 MAC 地址跟踪每台设备，即使其 IP 地址发生变化。",
+      "reason": "原因",
+      "reasonHelp": "必填。例如：前台的打印机，由行政部门负责。",
+      "title": "标记为已知且可接受"
+    },
+    "exclusions": {
+      "decidedBy": "决定者",
+      "empty": "没有设备被标记为已知。",
+      "revokedBy": "由 {{who}} 撤销：{{why}}",
+      "showRevoked": "显示已撤销的决定"
+    },
+    "filters": {
+      "allNetworks": "所有网络",
+      "network": "网络",
+      "search": "搜索 MAC 或 IP 地址"
+    },
+    "loadError": "无法加载已发现的设备。",
+    "method": {
+      "arpListen": "ARP 监听",
+      "cache": "邻居缓存",
+      "mdns": "mDNS",
+      "ndListen": "IPv6 邻居发现",
+      "ssdp": "SSDP",
+      "sweep": "主动扫描"
+    },
+    "policy": {
+      "enabled": "代理在其网络上监听设备",
+      "hour": "每小时",
+      "interval": "报告频率",
+      "lastChanged": "最后由 {{who}} 于 {{when}} 更改",
+      "minutes": "每 {{count}} 分钟",
+      "minutes_other": "每 {{count}} 分钟",
+      "minutes_one": "每分钟",
+      "sweeps": "允许主动扫描",
+      "days": "{{count}} 天",
+      "days_other": "{{count}} 天",
+      "days_one": "{{count}} 天",
+      "retention": "未见设备的遗忘期限"
+    },
+    "revoke": {
+      "confirm": "撤销",
+      "title": "将此设备重新显示为未受管"
+    },
+    "status": {
+      "unmanaged": "未受管"
+    },
+    "subtitle": "您的代理在其网络上看到的、SysManage 未管理的设备。",
+    "table": {
+      "address": "地址",
+      "device": "设备",
+      "empty": "没有匹配的设备。",
+      "evidence": "设备自述信息",
+      "ipOnly": "未发现 MAC",
+      "lastSeen": "最后发现时间",
+      "localMac": "地址可能变化",
+      "localMacHelp": "本地管理的地址：手机和平板电脑会更改此地址，因此该设备可能以新地址再次出现。",
+      "more": "显示 {{total}} 个中的 {{shown}} 个。请使用上方的筛选器缩小列表范围。",
+      "seenBy": "发现者",
+      "selectAll": "全选",
+      "status": "状态",
+      "maybe": "可能是：{{type}}"
+    },
+    "tabs": {
+      "excluded": "已知且可接受",
+      "managed": "受管",
+      "unmanaged": "未受管",
+      "sweeps": "扫描"
+    },
+    "title": "网络发现",
+    "unavailable": {
+      "disabled": "未启用",
+      "notRoot": "代理未以 root 身份运行",
+      "portInUse": "端口已被其他程序占用",
+      "unreadable": "无法读取",
+      "unsupportedPlatform": "此平台不支持"
+    },
+    "sweep": {
+      "agent": "执行扫描的代理",
+      "disabled": "主动扫描已关闭。请在上方设置中允许，以发现从不主动通告自身的设备。",
+      "error": "无法启动扫描。",
+      "found": "已发现",
+      "foundOf": "{{probed}} 个地址中的 {{found}} 个",
+      "intro": "网络上的代理会向每个地址发送一个小数据包，然后报告所有作出应答的设备。这样可以发现从不主动通告自身的设备，且此操作会连同您的姓名一起记录。",
+      "none": "尚未扫描任何网络。",
+      "perSecond": "每秒 {{count}} 个地址",
+      "perSecond_other": "每秒 {{count}} 个地址",
+      "perSecond_one": "每秒 {{count}} 个地址",
+      "rate": "速度",
+      "requestedBy": "请求者",
+      "start": "开始扫描",
+      "status": {
+        "completed": "已完成",
+        "failed": "失败",
+        "queued": "正在等待代理",
+        "refused": "被代理拒绝",
+        "timedOut": "代理无响应"
+      },
+      "title": "扫描网络"
+    },
+    "address": {
+      "address": "IP 地址",
+      "confirm": "注册",
+      "error": "无法注册该地址。",
+      "title": "注册静态地址",
+      "warning": "仅适用于永不变化的地址，例如虚拟 IP 或负载均衡器。注册适用于持有此地址的任何设备，因此通过 DHCP 获取地址的普通设备会在下次租约后重新出现。"
+    },
+    "type": {
+      "computer": "计算机",
+      "iot": "IoT 设备",
+      "media": "电视、音箱或媒体播放器",
+      "networkEquipment": "网络设备",
+      "phoneOrTablet": "手机或平板电脑",
+      "printer": "打印机",
+      "unknown": "未知",
+      "virtualAddress": "虚拟路由器地址",
+      "virtualMachine": "虚拟机"
     }
   }
 }
