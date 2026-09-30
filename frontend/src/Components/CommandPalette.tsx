@@ -52,6 +52,7 @@ const COMMANDS: Cmd[] = [
   { id: 'custom-metrics', labelKey: 'nav.customMetrics', labelDefault: 'Custom Metrics', group: 'Automation', path: '/custom-metrics', module: 'observability_engine', permission: 'Manage Custom Metrics' },
   { id: 'host-metrics', labelKey: 'nav.hostMetrics', labelDefault: 'Host Metrics', group: 'Insights', path: '/host-metrics', module: 'observability_engine', permission: 'View Host Details' },
   { id: 'asset-discovery', labelKey: 'nav.assetDiscovery', labelDefault: 'Network Discovery', group: 'Insights', path: '/asset-discovery', module: 'asset_discovery_engine', permission: 'View Host Details' },
+  { id: 'malware', labelKey: 'nav.malware', labelDefault: 'Malware', group: 'Security', path: '/malware', module: 'malware_engine', permission: 'View Host Details' },
   { id: 'reports', labelKey: 'nav.reports', labelDefault: 'Reports', group: 'Insights', path: '/reports', module: 'reporting_engine', feature: 'reports' },
   { id: 'users', labelKey: 'nav.users', labelDefault: 'Users', group: 'Administration', path: '/users' },
   { id: 'settings', labelKey: 'nav.settings', labelDefault: 'Settings', group: 'Administration', path: '/settings' },

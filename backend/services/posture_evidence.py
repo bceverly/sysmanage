@@ -376,6 +376,35 @@ def _network_discovery(db) -> Dict[str, Any]:
     }
 
 
+MALWARE_SCAN_FRESH_DAYS = 30
+
+
+def _malware(db, now: datetime) -> Dict[str, Any]:
+    """21.3 S5: are hosts being scanned, and is anything open?
+
+    Counts come from the same review service the Malware page uses, so the
+    punch list and the page can never disagree.  A host counts as UNSCANNED
+    when it can scan and has no completed scan in the last 30 days: a clean
+    scan from last year proves nothing about today.
+    """
+    from backend.services import malware_review  # noqa: PLC0415
+
+    summary = malware_review.summary(db)
+    latest = malware_review._latest_completed(db)  # pylint: disable=protected-access
+    cutoff = now - timedelta(days=MALWARE_SCAN_FRESH_DAYS)
+    stale = sum(
+        1 for run in latest.values() if run.finished_at and run.finished_at < cutoff
+    )
+    gaps = summary["blind_spots"]["legs_not_run"]
+    return {
+        "equipped": summary["coverage"]["equipped"],
+        "hosts_unscanned": summary["coverage"]["never_scanned"] + stale,
+        "open_high": summary["open_by_severity"]["critical"]
+        + summary["open_by_severity"]["high"],
+        "legs_skipped": sum(sum(reasons.values()) for reasons in gaps.values()),
+    }
+
+
 def _try(label: str, read: Callable[[], Any]):
     try:
         return read()
@@ -427,6 +456,15 @@ def gather(db, tenant_id=None, now: Optional[datetime] = None) -> Dict[str, Any]
             if discovery is not None:
                 evidence["domains"]["network_discovery"] = {"available": True}
                 evidence["settings"].extend(_rows("network_discovery", discovery))
+        from backend.services import malware_shim  # noqa: PLC0415
+
+        if not malware_shim.engine_available():
+            evidence["domains"]["malware"] = {"available": False}
+        else:
+            malware = _try("malware", lambda: _malware(db, now))
+            if malware is not None:
+                evidence["domains"]["malware"] = {"available": True}
+                evidence["settings"].extend(_rows("malware", malware))
         coverage = _try("fleet_coverage", lambda: _fleet_coverage(db, now))
         if coverage is not None:
             evidence["domains"]["fleet_coverage"] = {"available": True}

@@ -2403,7 +2403,8 @@
     "vulnerabilities": "漏洞",
     "advisor": "顾问",
     "hostMetrics": "主机指标",
-    "assetDiscovery": "网络发现"
+    "assetDiscovery": "网络发现",
+    "malware": "恶意软件"
   },
   "notifications": {
     "applicationUpdates": "应用程序更新",
@@ -3923,7 +3924,9 @@
       "smStab001": "配置漂移超过 7 天未解决",
       "smStabF01": "OpenSSL 版本与同类主机运行的版本不同",
       "pmNetDiscovery": "正在发现您网络中的设备",
-      "pmNetUnmanaged": "您的网络中没有未托管的设备"
+      "pmNetUnmanaged": "您的网络中没有未托管的设备",
+      "pmMalwareClean": "没有未处理的高严重性恶意软件检测结果",
+      "pmMalwareScanned": "主机已进行恶意软件扫描"
     },
     "curatedPack": {
       "baseline": {
@@ -4030,7 +4033,9 @@
       "set_password_policy": "密码策略在 sysmanage.yaml 中设置；SysManage 无法替您更改。",
       "shorten_session": "将会话设置为一小时后过期。",
       "enable_network_discovery": "开启网络发现，让代理报告其周围的设备。",
-      "review_unmanaged_devices": "注册每台未托管的设备，或注明原因将其标记为已知。"
+      "review_unmanaged_devices": "注册每台未托管的设备，或注明原因将其标记为已知。",
+      "review_malware_findings": "隔离、解决或忽略每个高严重性检测结果。",
+      "scan_for_malware": "每月至少扫描一次所有可扫描的主机。"
     },
     "saved": "威胁模型已保存。整改清单将在下一次顾问评估时重新评估。",
     "stale": {
@@ -4373,6 +4378,197 @@
       "unknown": "未知",
       "virtualAddress": "虚拟路由器地址",
       "virtualMachine": "虚拟机"
+    }
+  },
+  "malware": {
+    "blind": {
+      "legNotRun": "{{leg}} 未在 {{count}} 台主机上运行：{{reason}}",
+      "neverScanned": "{{count}} 台可扫描的主机从未扫描过",
+      "notEquipped": "{{count}} 台主机无法扫描：未安装 ClamAV",
+      "rulesShort": "在 {{count}} 台主机上，ClamAV 加载的规则少于下发的规则",
+      "title": "部分主机未完整扫描：",
+      "notEquipped_one": "{{count}} 台主机无法扫描：未安装 ClamAV",
+      "notEquipped_other": "{{count}} 台主机无法扫描：未安装 ClamAV",
+      "neverScanned_one": "{{count}} 台可扫描的主机从未扫描过",
+      "neverScanned_other": "{{count}} 台可扫描的主机从未扫描过",
+      "legNotRun_one": "{{leg}} 未在 {{count}} 台主机上运行：{{reason}}",
+      "legNotRun_other": "{{leg}} 未在 {{count}} 台主机上运行：{{reason}}",
+      "rulesShort_one": "在 {{count}} 台主机上，ClamAV 加载的规则少于下发的规则",
+      "rulesShort_other": "在 {{count}} 台主机上，ClamAV 加载的规则少于下发的规则"
+    },
+    "counts": {
+      "feed": "规则源：{{title}} v{{version}}，{{count}} 条规则",
+      "hosts": "{{count}} 台主机有未处理的检测结果",
+      "running": "{{count}} 个扫描正在运行",
+      "hosts_one": "{{count}} 台主机有未处理的检测结果",
+      "hosts_other": "{{count}} 台主机有未处理的检测结果",
+      "running_one": "{{count}} 个扫描正在运行",
+      "running_other": "{{count}} 个扫描正在运行",
+      "feed_one": "规则源：{{title}} v{{version}}，{{count}} 条规则",
+      "feed_other": "规则源：{{title}} v{{version}}，{{count}} 条规则"
+    },
+    "decide": {
+      "confirm": "记录处置",
+      "decision": "处置",
+      "reason": "原因",
+      "title": "处置 {{count}} 条检测结果",
+      "title_one": "处置 {{count}} 条检测结果",
+      "title_other": "处置 {{count}} 条检测结果"
+    },
+    "decideSelected": "处置所选的 {{count}} 条",
+    "findings": {
+      "empty": "没有匹配的检测结果。",
+      "file": "文件",
+      "host": "主机",
+      "lastSeen": "最后发现时间",
+      "seenTimes": "发现 {{count}} 次",
+      "severity": "严重性",
+      "signature": "检出项",
+      "status": "状态",
+      "seenTimes_one": "发现 {{count}} 次",
+      "seenTimes_other": "发现 {{count}} 次"
+    },
+    "leg": {
+      "feed": "规则源",
+      "signatures": "ClamAV 特征码"
+    },
+    "loadError": "无法加载恶意软件检测结果。",
+    "reason": {
+      "disabled": "未请求",
+      "error": "扫描程序失败",
+      "memory": "可用内存不足，无法加载特征库",
+      "noDatabase": "没有 ClamAV 特征库",
+      "noRules": "没有可用的规则集",
+      "noScanner": "未安装扫描程序",
+      "timeout": "已超时"
+    },
+    "refusal": {
+      "busy": "已有扫描正在运行",
+      "invalidPath": "某个路径不是有效的绝对路径",
+      "notEquipped": "代理无法扫描（没有 ClamAV）",
+      "notFound": "未找到主机"
+    },
+    "scan": {
+      "completed": "已完成",
+      "failed": "失败",
+      "queued": "已排队",
+      "refused": "已拒绝",
+      "timedOut": "已超时"
+    },
+    "scanDialog": {
+      "error": "无法启动扫描。",
+      "hosts": "主机",
+      "paths": "路径（每行一个）",
+      "pathsHelp": "留空则扫描各操作系统上通常发现恶意软件的位置。",
+      "queued": "已启动 {{count}} 个扫描",
+      "start": "开始扫描",
+      "title": "扫描主机中的恶意软件",
+      "queued_one": "已启动 {{count}} 个扫描",
+      "queued_other": "已启动 {{count}} 个扫描"
+    },
+    "scanHosts": "扫描主机",
+    "scans": {
+      "empty": "尚未运行任何扫描。",
+      "legs": "运行内容",
+      "paths": "路径",
+      "requested": "请求时间",
+      "result": "结果",
+      "rulesLoaded": "已加载 {{loaded}}/{{total}} 条规则",
+      "summary": "{{files}} 个文件，{{findings}} 条检测结果"
+    },
+    "severity": {
+      "critical": "严重",
+      "high": "高",
+      "info": "信息",
+      "low": "低",
+      "medium": "中"
+    },
+    "status": {
+      "falsePositive": "误报",
+      "open": "未处理",
+      "quarantined": "已隔离",
+      "resolved": "已解决",
+      "restored": "已恢复"
+    },
+    "subtitle": "由各主机自身的 ClamAV 运行扫描，使用 ClamAV 特征码和 SysManage 规则源。",
+    "tabs": {
+      "decided": "已处置",
+      "open": "未处理的检测结果",
+      "scans": "扫描",
+      "rulesets": "规则集"
+    },
+    "title": "恶意软件",
+    "decideSelected_one": "处置所选的 {{count}} 条",
+    "decideSelected_other": "处置所选的 {{count}} 条",
+    "qrefusal": {
+      "fileChanged": "文件自扫描以来已更改",
+      "notEquipped": "代理无法执行此操作",
+      "notRegular": "不是常规文件",
+      "other": "已拒绝（{{code}}）",
+      "pathOccupied": "原始路径上现在存在其他内容",
+      "pending": "已有请求正在等待代理处理",
+      "permission": "代理无权移动该文件",
+      "wrongStatus": "当前状态不允许此操作"
+    },
+    "quarantine": {
+      "confirm": "隔离",
+      "confirmSystem": "我已了解，仍然隔离这些文件",
+      "error": "无法发送请求。",
+      "explain": "每个代理会将文件移入专用隔离目录，并记录其原始位置，以便准确恢复。不会删除任何内容。自扫描以来已更改的文件不会被移动。",
+      "requested": "正在等待代理",
+      "sent": "已向代理发送 {{count}} 个请求",
+      "systemPaths": "这些文件位于系统位置。移动它们可能导致主机无法正常工作：",
+      "title": "隔离 {{count}} 个文件",
+      "sent_one": "已向代理发送 {{count}} 个请求",
+      "sent_other": "已向代理发送 {{count}} 个请求",
+      "title_one": "隔离 {{count}} 个文件",
+      "title_other": "隔离 {{count}} 个文件"
+    },
+    "quarantineSelected": "隔离所选的 {{count}} 条",
+    "restore": {
+      "confirm": "恢复",
+      "explain": "除非该路径上现在存在其他内容，否则每个代理会将文件以原始权限放回原位置。",
+      "title": "恢复 {{count}} 个文件",
+      "title_one": "恢复 {{count}} 个文件",
+      "title_other": "恢复 {{count}} 个文件"
+    },
+    "restoreSelected": "恢复所选的 {{count}} 条",
+    "quarantineSelected_one": "隔离所选的 {{count}} 条",
+    "quarantineSelected_other": "隔离所选的 {{count}} 条",
+    "restoreSelected_one": "恢复所选的 {{count}} 条",
+    "restoreSelected_other": "恢复所选的 {{count}} 条",
+    "reject": {
+      "duplicate": "已存在同名规则",
+      "include": "不支持 include 指令",
+      "module": "使用了 ClamAV 无法加载的 YARA 模块",
+      "noStrings": "没有字符串，ClamAV 会跳过该规则",
+      "tooLarge": "规则集过大",
+      "unparseable": "无法解析"
+    },
+    "rulesets": {
+      "chooseFile": "选择 .yar 文件",
+      "curated": "精选",
+      "import": "导入",
+      "importButton": "导入规则集",
+      "importError": "无法导入规则集。",
+      "importExplain": "ClamAV 无法运行的规则（模块导入、没有字符串的规则、include）会被移除并列出。再次导入同名规则集会添加新版本。每个租户都使用这些规则进行扫描。",
+      "importTitle": "导入 YARA 规则集",
+      "imported": "已导入 {{title}} v{{version}}，共 {{count}} 条规则。",
+      "importedBy": "导入者：{{who}}",
+      "readError": "无法读取文件。",
+      "removed": "已移除 {{count}} 条",
+      "retire": "停用",
+      "retireError": "无法停用规则集。",
+      "rules": "规则",
+      "slug": "名称（a-z, 0-9, 连字符）",
+      "source": "来源",
+      "titleField": "标题",
+      "updated": "更新时间",
+      "version": "版本",
+      "removed_one": "已移除 {{count}} 条",
+      "removed_other": "已移除 {{count}} 条",
+      "imported_one": "已导入 {{title}} v{{version}}，共 {{count}} 条规则。",
+      "imported_other": "已导入 {{title}} v{{version}}，共 {{count}} 条规则。"
     }
   }
 }

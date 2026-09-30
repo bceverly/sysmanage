@@ -2403,7 +2403,8 @@
     "vulnerabilities": "漏洞",
     "advisor": "顧問",
     "hostMetrics": "主機指標",
-    "assetDiscovery": "網路探索"
+    "assetDiscovery": "網路探索",
+    "malware": "惡意軟體"
   },
   "notifications": {
     "applicationUpdates": "應用程式更新",
@@ -3923,7 +3924,9 @@
       "smStab001": "組態漂移超過 7 天未解決",
       "smStabF01": "OpenSSL 版本與同類主機執行的版本不同",
       "pmNetDiscovery": "正在探索您網路中的裝置",
-      "pmNetUnmanaged": "您的網路中沒有未受管理的裝置"
+      "pmNetUnmanaged": "您的網路中沒有未受管理的裝置",
+      "pmMalwareClean": "沒有未處理的高嚴重性惡意軟體偵測結果",
+      "pmMalwareScanned": "主機已進行惡意軟體掃描"
     },
     "curatedPack": {
       "baseline": {
@@ -4030,7 +4033,9 @@
       "set_password_policy": "密碼原則是在 sysmanage.yaml 中設定；SysManage 無法代您變更。",
       "shorten_session": "將工作階段設定為一小時後到期。",
       "enable_network_discovery": "開啟網路探索，讓代理程式回報其周圍的裝置。",
-      "review_unmanaged_devices": "註冊每台未受管理的裝置，或註明原因將其標記為已知。"
+      "review_unmanaged_devices": "註冊每台未受管理的裝置，或註明原因將其標記為已知。",
+      "review_malware_findings": "隔離、解決或忽略每個高嚴重性偵測結果。",
+      "scan_for_malware": "每月至少掃描一次所有可掃描的主機。"
     },
     "saved": "威脅模型已儲存。改善清單將在下一次顧問評估時重新評估。",
     "stale": {
@@ -4373,6 +4378,197 @@
       "unknown": "未知",
       "virtualAddress": "虛擬路由器位址",
       "virtualMachine": "虛擬機器"
+    }
+  },
+  "malware": {
+    "blind": {
+      "legNotRun": "{{leg}} 未在 {{count}} 台主機上執行：{{reason}}",
+      "neverScanned": "{{count}} 台可掃描的主機從未掃描過",
+      "notEquipped": "{{count}} 台主機無法掃描：未安裝 ClamAV",
+      "rulesShort": "在 {{count}} 台主機上，ClamAV 載入的規則少於派送的規則",
+      "title": "部分主機未完整掃描：",
+      "notEquipped_one": "{{count}} 台主機無法掃描：未安裝 ClamAV",
+      "notEquipped_other": "{{count}} 台主機無法掃描：未安裝 ClamAV",
+      "neverScanned_one": "{{count}} 台可掃描的主機從未掃描過",
+      "neverScanned_other": "{{count}} 台可掃描的主機從未掃描過",
+      "legNotRun_one": "{{leg}} 未在 {{count}} 台主機上執行：{{reason}}",
+      "legNotRun_other": "{{leg}} 未在 {{count}} 台主機上執行：{{reason}}",
+      "rulesShort_one": "在 {{count}} 台主機上，ClamAV 載入的規則少於派送的規則",
+      "rulesShort_other": "在 {{count}} 台主機上，ClamAV 載入的規則少於派送的規則"
+    },
+    "counts": {
+      "feed": "規則來源：{{title}} v{{version}}，{{count}} 條規則",
+      "hosts": "{{count}} 台主機有未處理的偵測結果",
+      "running": "{{count}} 項掃描執行中",
+      "hosts_one": "{{count}} 台主機有未處理的偵測結果",
+      "hosts_other": "{{count}} 台主機有未處理的偵測結果",
+      "running_one": "{{count}} 項掃描執行中",
+      "running_other": "{{count}} 項掃描執行中",
+      "feed_one": "規則來源：{{title}} v{{version}}，{{count}} 條規則",
+      "feed_other": "規則來源：{{title}} v{{version}}，{{count}} 條規則"
+    },
+    "decide": {
+      "confirm": "記錄處置",
+      "decision": "處置",
+      "reason": "原因",
+      "title": "處置 {{count}} 筆偵測結果",
+      "title_one": "處置 {{count}} 筆偵測結果",
+      "title_other": "處置 {{count}} 筆偵測結果"
+    },
+    "decideSelected": "處置選取的 {{count}} 筆",
+    "findings": {
+      "empty": "沒有符合的偵測結果。",
+      "file": "檔案",
+      "host": "主機",
+      "lastSeen": "最後發現時間",
+      "seenTimes": "發現 {{count}} 次",
+      "severity": "嚴重性",
+      "signature": "偵測項目",
+      "status": "狀態",
+      "seenTimes_one": "發現 {{count}} 次",
+      "seenTimes_other": "發現 {{count}} 次"
+    },
+    "leg": {
+      "feed": "規則來源",
+      "signatures": "ClamAV 病毒碼"
+    },
+    "loadError": "無法載入惡意軟體偵測結果。",
+    "reason": {
+      "disabled": "未要求",
+      "error": "掃描程式失敗",
+      "memory": "可用記憶體不足，無法載入病毒碼資料庫",
+      "noDatabase": "沒有 ClamAV 病毒碼資料庫",
+      "noRules": "沒有可用的規則集",
+      "noScanner": "未安裝掃描程式",
+      "timeout": "已逾時"
+    },
+    "refusal": {
+      "busy": "已有掃描正在執行",
+      "invalidPath": "有路徑不是有效的絕對路徑",
+      "notEquipped": "代理無法掃描（沒有 ClamAV）",
+      "notFound": "找不到主機"
+    },
+    "scan": {
+      "completed": "已完成",
+      "failed": "失敗",
+      "queued": "已排入佇列",
+      "refused": "已拒絕",
+      "timedOut": "已逾時"
+    },
+    "scanDialog": {
+      "error": "無法啟動掃描。",
+      "hosts": "主機",
+      "paths": "路徑（每行一個）",
+      "pathsHelp": "留空則掃描各作業系統上常發現惡意軟體的位置。",
+      "queued": "已啟動 {{count}} 項掃描",
+      "start": "開始掃描",
+      "title": "掃描主機中的惡意軟體",
+      "queued_one": "已啟動 {{count}} 項掃描",
+      "queued_other": "已啟動 {{count}} 項掃描"
+    },
+    "scanHosts": "掃描主機",
+    "scans": {
+      "empty": "尚未執行任何掃描。",
+      "legs": "執行內容",
+      "paths": "路徑",
+      "requested": "要求時間",
+      "result": "結果",
+      "rulesLoaded": "已載入 {{loaded}}/{{total}} 條規則",
+      "summary": "{{files}} 個檔案，{{findings}} 筆偵測結果"
+    },
+    "severity": {
+      "critical": "嚴重",
+      "high": "高",
+      "info": "資訊",
+      "low": "低",
+      "medium": "中"
+    },
+    "status": {
+      "falsePositive": "誤判",
+      "open": "未處理",
+      "quarantined": "已隔離",
+      "resolved": "已解決",
+      "restored": "已還原"
+    },
+    "subtitle": "由各主機本身的 ClamAV 執行掃描，使用 ClamAV 病毒碼與 SysManage 規則來源。",
+    "tabs": {
+      "decided": "已處置",
+      "open": "未處理的偵測結果",
+      "scans": "掃描",
+      "rulesets": "規則集"
+    },
+    "title": "惡意軟體",
+    "decideSelected_one": "處置選取的 {{count}} 筆",
+    "decideSelected_other": "處置選取的 {{count}} 筆",
+    "qrefusal": {
+      "fileChanged": "檔案自掃描後已變更",
+      "notEquipped": "代理無法執行此操作",
+      "notRegular": "不是一般檔案",
+      "other": "已拒絕（{{code}}）",
+      "pathOccupied": "原始路徑上現在有其他內容",
+      "pending": "已有要求正在等待代理處理",
+      "permission": "代理無權移動此檔案",
+      "wrongStatus": "目前狀態不允許此操作"
+    },
+    "quarantine": {
+      "confirm": "隔離",
+      "confirmSystem": "我了解，仍要隔離這些檔案",
+      "error": "無法傳送要求。",
+      "explain": "每個代理會將檔案移至專用的隔離目錄，並記錄其原始位置，以便精確還原。不會刪除任何內容。自掃描後已變更的檔案不會被移動。",
+      "requested": "正在等待代理",
+      "sent": "已向代理傳送 {{count}} 個要求",
+      "systemPaths": "這些檔案位於系統位置。移動它們可能導致主機無法正常運作：",
+      "title": "隔離 {{count}} 個檔案",
+      "sent_one": "已向代理傳送 {{count}} 個要求",
+      "sent_other": "已向代理傳送 {{count}} 個要求",
+      "title_one": "隔離 {{count}} 個檔案",
+      "title_other": "隔離 {{count}} 個檔案"
+    },
+    "quarantineSelected": "隔離選取的 {{count}} 筆",
+    "restore": {
+      "confirm": "還原",
+      "explain": "除非該路徑上現在有其他內容，否則每個代理會以原始權限將檔案放回原位置。",
+      "title": "還原 {{count}} 個檔案",
+      "title_one": "還原 {{count}} 個檔案",
+      "title_other": "還原 {{count}} 個檔案"
+    },
+    "restoreSelected": "還原選取的 {{count}} 筆",
+    "quarantineSelected_one": "隔離選取的 {{count}} 筆",
+    "quarantineSelected_other": "隔離選取的 {{count}} 筆",
+    "restoreSelected_one": "還原選取的 {{count}} 筆",
+    "restoreSelected_other": "還原選取的 {{count}} 筆",
+    "reject": {
+      "duplicate": "已存在同名規則",
+      "include": "不支援 include 指令",
+      "module": "使用了 ClamAV 無法載入的 YARA 模組",
+      "noStrings": "沒有字串，ClamAV 會略過此規則",
+      "tooLarge": "規則集過大",
+      "unparseable": "無法剖析"
+    },
+    "rulesets": {
+      "chooseFile": "選擇 .yar 檔案",
+      "curated": "精選",
+      "import": "匯入",
+      "importButton": "匯入規則集",
+      "importError": "無法匯入規則集。",
+      "importExplain": "ClamAV 無法執行的規則（模組匯入、沒有字串的規則、include）會被移除並列出。再次匯入同名規則集會新增新版本。每個租戶都使用這些規則進行掃描。",
+      "importTitle": "匯入 YARA 規則集",
+      "imported": "已匯入 {{title}} v{{version}}，共 {{count}} 條規則。",
+      "importedBy": "匯入者：{{who}}",
+      "readError": "無法讀取檔案。",
+      "removed": "已移除 {{count}} 條",
+      "retire": "停用",
+      "retireError": "無法停用規則集。",
+      "rules": "規則",
+      "slug": "名稱（a-z, 0-9, 連字號）",
+      "source": "來源",
+      "titleField": "標題",
+      "updated": "更新時間",
+      "version": "版本",
+      "removed_one": "已移除 {{count}} 條",
+      "removed_other": "已移除 {{count}} 條",
+      "imported_one": "已匯入 {{title}} v{{version}}，共 {{count}} 條規則。",
+      "imported_other": "已匯入 {{title}} v{{version}}，共 {{count}} 條規則。"
     }
   }
 }

@@ -316,6 +316,11 @@ class ModuleCode(str, Enum):
     # discovery (provisioning_engine) is a different lifecycle. Enterprise.
     ASSET_DISCOVERY_ENGINE = "asset_discovery_engine"
 
+    # Phase 21.3 -- malware detection. Agents scan with the ClamAV the product
+    # already deploys, running ClamAV's signatures and a YARA rule feed; the
+    # engine validates rule sets, plans scans and judges reports. Enterprise.
+    MALWARE_ENGINE = "malware_engine"
+
     @classmethod
     def from_string(cls, value: str) -> "ModuleCode":
         """Convert string to ModuleCode enum."""
@@ -554,6 +559,8 @@ TIER_MODULES = {
         ModuleCode.ADVISOR_ENGINE,
         # Phase 21.6 -- unenrolled asset discovery
         ModuleCode.ASSET_DISCOVERY_ENGINE,
+        # Phase 21.3 -- malware detection
+        ModuleCode.MALWARE_ENGINE,
         # NOTE: MULTITENANCY_ENGINE is intentionally NOT here -- it is exclusive
         # to the MULTITENANT_SAAS tier (defined just below as an Enterprise
         # superset).  That exclusivity is the moat.

@@ -2403,7 +2403,8 @@
     "vulnerabilities": "Vulnerabilidades",
     "advisor": "Assistente",
     "hostMetrics": "Métricas de hosts",
-    "assetDiscovery": "Descoberta de rede"
+    "assetDiscovery": "Descoberta de rede",
+    "malware": "Detecção de malware"
   },
   "notifications": {
     "applicationUpdates": "Atualizações de Aplicações",
@@ -3923,7 +3924,9 @@
       "smStab001": "Desvio de configuração não resolvido há mais de 7 dias",
       "smStabF01": "A versão do OpenSSL difere da executada pelos hosts equivalentes",
       "pmNetDiscovery": "Os dispositivos das suas redes estão sendo descobertos",
-      "pmNetUnmanaged": "Não há dispositivos não gerenciados nas suas redes"
+      "pmNetUnmanaged": "Não há dispositivos não gerenciados nas suas redes",
+      "pmMalwareClean": "Nenhuma constatação de malware aberta com gravidade alta",
+      "pmMalwareScanned": "Os hosts são verificados em busca de malware"
     },
     "curatedPack": {
       "baseline": {
@@ -4030,7 +4033,9 @@
       "set_password_policy": "A política de senhas é definida em sysmanage.yaml; o SysManage não pode alterá-la por você.",
       "shorten_session": "Faça as sessões expirarem após uma hora.",
       "enable_network_discovery": "Ative a descoberta de rede para que os agentes informem os dispositivos ao seu redor.",
-      "review_unmanaged_devices": "Registre cada dispositivo não gerenciado ou marque-o como conhecido com um motivo."
+      "review_unmanaged_devices": "Registre cada dispositivo não gerenciado ou marque-o como conhecido com um motivo.",
+      "review_malware_findings": "Coloque em quarentena, resolva ou descarte cada constatação de gravidade alta.",
+      "scan_for_malware": "Verifique cada host capaz de realizar verificações pelo menos uma vez por mês."
     },
     "saved": "Modelo de ameaças salvo. A lista de pendências será reavaliada na próxima execução do assistente.",
     "stale": {
@@ -4373,6 +4378,197 @@
       "unknown": "Desconhecido",
       "virtualAddress": "Endereço de roteador virtual",
       "virtualMachine": "Máquina virtual"
+    }
+  },
+  "malware": {
+    "blind": {
+      "legNotRun": "{{leg}} não foi executado em {{count}} hosts: {{reason}}",
+      "neverScanned": "{{count}} hosts capazes de verificar nunca foram verificados",
+      "notEquipped": "{{count}} hosts não podem verificar: o ClamAV não está instalado",
+      "rulesShort": "Em {{count}} hosts, o ClamAV carregou menos regras do que recebeu",
+      "title": "Alguns hosts não foram totalmente verificados:",
+      "notEquipped_one": "{{count}} host não pode verificar: o ClamAV não está instalado",
+      "notEquipped_other": "{{count}} hosts não podem verificar: o ClamAV não está instalado",
+      "neverScanned_one": "{{count}} host capaz de verificar nunca foi verificado",
+      "neverScanned_other": "{{count}} hosts capazes de verificar nunca foram verificados",
+      "legNotRun_one": "{{leg}} não foi executado em {{count}} host: {{reason}}",
+      "legNotRun_other": "{{leg}} não foi executado em {{count}} hosts: {{reason}}",
+      "rulesShort_one": "Em {{count}} host, o ClamAV carregou menos regras do que recebeu",
+      "rulesShort_other": "Em {{count}} hosts, o ClamAV carregou menos regras do que recebeu"
+    },
+    "counts": {
+      "feed": "Feed de regras: {{title}} v{{version}}, {{count}} regras",
+      "hosts": "{{count}} hosts com constatações abertas",
+      "running": "{{count}} verificações em execução",
+      "hosts_one": "{{count}} host com constatações abertas",
+      "hosts_other": "{{count}} hosts com constatações abertas",
+      "running_one": "{{count}} verificação em execução",
+      "running_other": "{{count}} verificações em execução",
+      "feed_one": "Feed de regras: {{title}} v{{version}}, {{count}} regra",
+      "feed_other": "Feed de regras: {{title}} v{{version}}, {{count}} regras"
+    },
+    "decide": {
+      "confirm": "Registrar decisão",
+      "decision": "Decisão",
+      "reason": "Motivo",
+      "title": "Decidir {{count}} constatações",
+      "title_one": "Decidir {{count}} constatação",
+      "title_other": "Decidir {{count}} constatações"
+    },
+    "decideSelected": "Decidir {{count}} selecionadas",
+    "findings": {
+      "empty": "Nenhuma constatação corresponde.",
+      "file": "Arquivo",
+      "host": "Host",
+      "lastSeen": "Visto pela última vez",
+      "seenTimes": "visto {{count}} vezes",
+      "severity": "Gravidade",
+      "signature": "Detecção",
+      "status": "Situação",
+      "seenTimes_one": "visto {{count}} vez",
+      "seenTimes_other": "visto {{count}} vezes"
+    },
+    "leg": {
+      "feed": "Feed de regras",
+      "signatures": "Assinaturas do ClamAV"
+    },
+    "loadError": "Não foi possível carregar as constatações de malware.",
+    "reason": {
+      "disabled": "não solicitado",
+      "error": "o verificador falhou",
+      "memory": "memória livre insuficiente para carregar o banco de dados de assinaturas",
+      "noDatabase": "nenhum banco de dados de assinaturas do ClamAV",
+      "noRules": "nenhum conjunto de regras estava disponível",
+      "noScanner": "nenhum verificador instalado",
+      "timeout": "tempo esgotado"
+    },
+    "refusal": {
+      "busy": "uma verificação já está em execução",
+      "invalidPath": "um caminho não é um caminho absoluto válido",
+      "notEquipped": "o agente não pode verificar (sem ClamAV)",
+      "notFound": "host não encontrado"
+    },
+    "scan": {
+      "completed": "Concluída",
+      "failed": "Falhou",
+      "queued": "Na fila",
+      "refused": "Recusada",
+      "timedOut": "Tempo esgotado"
+    },
+    "scanDialog": {
+      "error": "Não foi possível iniciar as verificações.",
+      "hosts": "Hosts a verificar",
+      "paths": "Caminhos (um por linha)",
+      "pathsHelp": "Deixe em branco para verificar os locais onde malware costuma ser encontrado em cada sistema operacional.",
+      "queued": "{{count}} verificações iniciadas",
+      "start": "Iniciar verificações",
+      "title": "Verificar hosts em busca de malware",
+      "queued_one": "{{count}} verificação iniciada",
+      "queued_other": "{{count}} verificações iniciadas"
+    },
+    "scanHosts": "Verificar hosts",
+    "scans": {
+      "empty": "Nenhuma verificação foi executada ainda.",
+      "legs": "O que foi executado",
+      "paths": "Caminhos",
+      "requested": "Solicitada",
+      "result": "Resultado",
+      "rulesLoaded": "{{loaded}} de {{total}} regras carregadas",
+      "summary": "{{files}} arquivos, {{findings}} constatações"
+    },
+    "severity": {
+      "critical": "Crítica",
+      "high": "Alta",
+      "info": "Informativa",
+      "low": "Baixa",
+      "medium": "Média"
+    },
+    "status": {
+      "falsePositive": "Falso positivo",
+      "open": "Aberta",
+      "quarantined": "Em quarentena",
+      "resolved": "Resolvida",
+      "restored": "Restaurada"
+    },
+    "subtitle": "Verificações executadas pelo próprio ClamAV de cada host, com as assinaturas do ClamAV e o feed de regras do SysManage.",
+    "tabs": {
+      "decided": "Decididas",
+      "open": "Constatações abertas",
+      "scans": "Verificações",
+      "rulesets": "Conjuntos de regras"
+    },
+    "title": "Detecção de malware",
+    "decideSelected_one": "Decidir {{count}} selecionada",
+    "decideSelected_other": "Decidir {{count}} selecionadas",
+    "qrefusal": {
+      "fileChanged": "o arquivo foi alterado desde a verificação",
+      "notEquipped": "o agente não pode fazer isso",
+      "notRegular": "não é um arquivo comum",
+      "other": "recusada ({{code}})",
+      "pathOccupied": "agora há outro item no caminho original",
+      "pending": "já há uma solicitação aguardando o agente",
+      "permission": "o agente não tem permissão para movê-lo",
+      "wrongStatus": "o estado atual não permite isso"
+    },
+    "quarantine": {
+      "confirm": "Colocar em quarentena",
+      "confirmSystem": "Entendo; colocá-los em quarentena mesmo assim",
+      "error": "Não foi possível enviar a solicitação.",
+      "explain": "Cada agente move o arquivo para um diretório de quarentena privado e registra sua origem, para que possa ser restaurado exatamente. Nada é excluído. Um arquivo alterado desde a verificação não é movido.",
+      "requested": "Aguardando o agente",
+      "sent": "{{count}} solicitações enviadas aos agentes",
+      "systemPaths": "Estes arquivos estão em locais do sistema. Movê-los pode impedir o funcionamento do host:",
+      "title": "Colocar {{count}} arquivos em quarentena",
+      "sent_one": "{{count}} solicitação enviada ao agente",
+      "sent_other": "{{count}} solicitações enviadas aos agentes",
+      "title_one": "Colocar {{count}} arquivo em quarentena",
+      "title_other": "Colocar {{count}} arquivos em quarentena"
+    },
+    "quarantineSelected": "Colocar em quarentena {{count}} selecionadas",
+    "restore": {
+      "confirm": "Restaurar",
+      "explain": "Cada agente devolve o arquivo ao local original, com suas permissões originais, a menos que agora haja outro item nesse caminho.",
+      "title": "Restaurar {{count}} arquivos",
+      "title_one": "Restaurar {{count}} arquivo",
+      "title_other": "Restaurar {{count}} arquivos"
+    },
+    "restoreSelected": "Restaurar {{count}} selecionadas",
+    "quarantineSelected_one": "Colocar em quarentena {{count}} selecionada",
+    "quarantineSelected_other": "Colocar em quarentena {{count}} selecionadas",
+    "restoreSelected_one": "Restaurar {{count}} selecionada",
+    "restoreSelected_other": "Restaurar {{count}} selecionadas",
+    "reject": {
+      "duplicate": "já existe uma regra com este nome",
+      "include": "as diretivas include não são suportadas",
+      "module": "usa um módulo YARA que o ClamAV não consegue carregar",
+      "noStrings": "não tem strings, portanto o ClamAV a ignoraria",
+      "tooLarge": "o conjunto de regras é grande demais",
+      "unparseable": "não foi possível analisá-la"
+    },
+    "rulesets": {
+      "chooseFile": "Escolha um arquivo .yar",
+      "curated": "Selecionado",
+      "import": "Importar",
+      "importButton": "Importar conjunto de regras",
+      "importError": "Não foi possível importar o conjunto de regras.",
+      "importExplain": "As regras que o ClamAV não consegue executar (importações de módulos, regras sem strings, diretivas include) são removidas e listadas. Importar novamente o mesmo nome adiciona uma nova versão. Todos os inquilinos fazem verificações com estas regras.",
+      "importTitle": "Importar um conjunto de regras YARA",
+      "imported": "{{title}} v{{version}} importado com {{count}} regras.",
+      "importedBy": "Importado por {{who}}",
+      "readError": "Não foi possível ler o arquivo.",
+      "removed": "{{count}} removidas",
+      "retire": "Desativar",
+      "retireError": "Não foi possível desativar o conjunto de regras.",
+      "rules": "Regras",
+      "slug": "Nome (a-z, 0-9, hifens)",
+      "source": "Origem",
+      "titleField": "Título",
+      "updated": "Atualizado",
+      "version": "Versão",
+      "removed_one": "{{count}} removida",
+      "removed_other": "{{count}} removidas",
+      "imported_one": "{{title}} v{{version}} importado com {{count}} regra.",
+      "imported_other": "{{title}} v{{version}} importado com {{count}} regras."
     }
   }
 }

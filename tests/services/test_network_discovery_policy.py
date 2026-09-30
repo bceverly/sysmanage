@@ -195,7 +195,8 @@ class TestReconcile:
                 "not_equipped": 0,
                 "deferred": 0,
             }
-            assert background_ticks.start_licensed_ticks() == [None, None]
+            # advisor (21.2), network discovery (21.6), malware (21.3): none licensed.
+            assert background_ticks.start_licensed_ticks() == [None, None, None]
 
 
 class TestRecorrelate:

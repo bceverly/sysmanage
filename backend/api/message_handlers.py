@@ -156,6 +156,46 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
 
         return await handle_query_pack_result(db, connection, message_data)
 
+    # Phase 21.3 malware scans, routed on command_type like query packs: a
+    # refused scan and a completed one look nothing alike.
+    if (
+        command_type_of(message_data) == "run_malware_scan"
+        or command_type_from_queue(db, message_data) == "run_malware_scan"
+    ):
+        from backend.api.handlers import handle_malware_scan_result
+
+        return await handle_malware_scan_result(db, connection, message_data)
+
+    if command_type_of(message_data) in (
+        "quarantine_file",
+        "restore_file",
+    ) or command_type_from_queue(db, message_data) in (
+        "quarantine_file",
+        "restore_file",
+    ):
+        from backend.api.handlers import handle_quarantine_result
+
+        return await handle_quarantine_result(db, connection, message_data)
+
+    # Phase 21.3 antivirus auto-deploy: an automatic deploy is done only when
+    # the agent says its plan succeeded.  Recorded, then normal handling
+    # continues (a Deploy-button plan matches no record and is untouched).
+    if (
+        command_type_of(message_data) == "apply_deployment_plan"
+        or command_type_from_queue(db, message_data) == "apply_deployment_plan"
+    ):
+        from backend.services import av_auto_deploy
+
+        try:
+            if av_auto_deploy.record_result(db, message_data):
+                db.commit()
+        except Exception:  # pylint: disable=broad-except
+            db.rollback()
+            logger.exception(
+                "Antivirus auto-deploy result could not be recorded for %s",
+                getattr(connection, "hostname", "unknown"),
+            )
+
     # Check if this is a script execution result
     if "execution_id" in message_data:
         logger.info("Detected script execution result, routing to script handler")

@@ -26,7 +26,7 @@ def test_deploy_ubuntu_installs_apt_clamav_and_ships_clamd_conf():
     paths = [f["path"] for f in plan["files"]]
     assert "/etc/clamav/clamd.conf" in paths
     assert "/etc/clamav/freshclam.conf" in paths
-    services = [a for a in plan["service_actions"]]
+    services = list(plan["service_actions"])
     assert {"service": "clamav-daemon", "action": "start"} in services
 
 
@@ -49,12 +49,24 @@ def test_deploy_freebsd_uses_pkg_manager():
     assert "clamav_clamd" in services
 
 
-def test_deploy_windows_uses_chocolatey_and_writes_clamwin_conf():
+def test_deploy_windows_installs_official_clamav_where_the_agent_looks():
+    # The seeded default "clamwin" (ClamAV 0.103, end of life, and never
+    # detected by the agent) is replaced by the official build.
     plan = build_deploy_plan({"platform": "Windows"}, antivirus_package="clamwin")
-    assert plan["av_product"] == "clamwin"
-    assert plan["packages"][0]["manager"] == "chocolatey"
-    assert plan["files"][0]["path"].endswith(r"\bin\ClamWin.conf")
-    assert "[ClamAV]" in plan["files"][0]["content"]
+    assert plan["av_product"] == "clamav"
+    # The official MSI via winget; Chocolatey's "clamav" is a portable zip
+    # that never lands in Program Files.
+    assert plan["packages"] == [{"manager": "winget", "name": "Cisco.ClamAV"}]
+    assert plan["files"][0]["path"] == r"C:\Program Files\ClamAV\freshclam.conf"
+    assert "DatabaseDirectory" not in plan["files"][0]["content"]
+    argvs = [c["argv"] for c in plan["commands"]]
+    assert [r"C:\Program Files\ClamAV\freshclam.exe"] in argvs
+    # The database directory exists before freshclam runs.
+    assert "database" in argvs[0][-1] and argvs[1][0].endswith("freshclam.exe")
+    seeded = build_deploy_plan({"platform": "Windows"}, antivirus_package="clamav")
+    assert seeded["packages"][0]["name"] == "Cisco.ClamAV"
+    custom = build_deploy_plan({"platform": "Windows"}, antivirus_package="Acme.AV")
+    assert custom["packages"][0]["name"] == "Acme.AV"
 
 
 def test_deploy_caller_supplied_package_is_appended_when_unknown_distro():
@@ -129,8 +141,8 @@ def test_remove_freebsd_uses_pkg_manager():
 def test_remove_windows_uses_chocolatey():
     plan = build_remove_plan({"platform": "Windows"})
     pkgs = plan["packages_to_remove"]
-    assert pkgs[0]["manager"] == "chocolatey"
-    assert pkgs[0]["name"] == "clamwin"
+    assert pkgs[0]["manager"] == "winget"
+    assert pkgs[0]["name"] == "Cisco.ClamAV"
 
 
 # ---------------------------------------------------------------------------
@@ -148,9 +160,9 @@ from backend.services.av_plan_builder import (
 )
 
 
-def test_freshclam_conf_default_cadence_is_24():
+def test_freshclam_conf_default_cadence_is_every_two_hours():
     conf = _basic_freshclam_conf()
-    assert "Checks 24" in conf
+    assert "Checks 12" in conf
 
 
 def test_freshclam_conf_honors_explicit_cadence():
@@ -164,16 +176,16 @@ def test_freshclam_conf_clamps_below_minimum():
     assert "Checks 1" in conf
 
 
-def test_freshclam_conf_clamps_above_maximum():
-    # ClamAV upper bound is 50; planner clamps so we never emit invalid config.
+def test_freshclam_conf_never_checks_more_than_hourly():
+    # ClamAV's mirrors throttle clients that download too often (HTTP 429).
     conf = _basic_freshclam_conf(checks_per_day=999)
-    assert "Checks 50" in conf
+    assert "Checks 24" in conf
 
 
 def test_freshclam_conf_handles_non_int_cadence_gracefully():
     # Defensive: callers passing None/strings should not crash; default is used.
-    assert "Checks 24" in _basic_freshclam_conf(None)
-    assert "Checks 24" in _basic_freshclam_conf("oops")  # type: ignore[arg-type]
+    assert "Checks 12" in _basic_freshclam_conf(None)
+    assert "Checks 12" in _basic_freshclam_conf("oops")  # type: ignore[arg-type]
 
 
 def test_deploy_plan_threads_cadence_into_freshclam_conf():
@@ -313,7 +325,11 @@ def test_deploy_plan_with_schedule_emits_schtasks_on_windows():
             }
         },
     )
-    sched_cmds = [c for c in plan["commands"] if c["argv"][0] == "schtasks"]
+    sched_cmds = [
+        c
+        for c in plan["commands"]
+        if c["argv"][0] == "schtasks" and "SysManage ClamAV Scan" in c["argv"]
+    ]  # the definition-update task is separate
     assert len(sched_cmds) == 1
     argv = sched_cmds[0]["argv"]
     assert "/SC" in argv and "DAILY" in argv
@@ -365,8 +381,8 @@ def test_disable_plan_linux_stops_and_disables_services_no_uninstall():
 def test_disable_plan_windows_removes_scheduled_task():
     plan = build_disable_plan({"platform": "Windows"})
     schtasks = [c for c in plan["commands"] if c["argv"][0] == "schtasks"]
-    assert len(schtasks) == 1
-    assert "/Delete" in schtasks[0]["argv"]
+    assert len(schtasks) == 2  # the update task and the scan task
+    assert all("/Delete" in c["argv"] for c in schtasks)
 
 
 def test_disable_plan_bsd_uses_clamav_clamd_service():
@@ -479,7 +495,9 @@ def test_deploy_windows_weekly_schedule_pins_day_of_week():
             }
         },
     )
-    sched_cmd = next(c for c in plan["commands"] if c["argv"][0] == "schtasks")
+    sched_cmd = next(
+        c for c in plan["commands"] if "SysManage ClamAV Scan" in c["argv"]
+    )
     argv = sched_cmd["argv"]
     assert "WEEKLY" in argv
     # /D WED should be present.
@@ -500,8 +518,102 @@ def test_deploy_windows_monthly_schedule_pins_day_of_month():
             }
         },
     )
-    sched_cmd = next(c for c in plan["commands"] if c["argv"][0] == "schtasks")
+    sched_cmd = next(
+        c for c in plan["commands"] if "SysManage ClamAV Scan" in c["argv"]
+    )
     argv = sched_cmd["argv"]
     assert "MONTHLY" in argv
     assert "/D" in argv
     assert "15" in argv
+
+
+# -- 2026-09-30: the package's own layout, not Linux's, on every platform ------
+
+
+def _file(plan, suffix):
+    return next(f for f in plan["files"] if f["path"].endswith(suffix))
+
+
+def test_freshclam_conf_leaves_database_location_to_the_package():
+    """Hard-coding /var/lib/clamav put the BSDs' signatures where clamscan
+    never looks (/var/db/clamav, /var/clamav), and DatabaseOwner clamav broke
+    OpenBSD (_clamav) and RHEL (clamupdate)."""
+    conf = _basic_freshclam_conf()
+    assert "DatabaseDirectory" not in conf and "DatabaseOwner" not in conf
+    assert "LogSyslog yes" in conf
+
+
+def test_each_bsd_gets_its_own_user_socket_and_services():
+    expected = {
+        "FreeBSD": ("User clamav", "/var/run/clamav/clamd.sock", "clamav_freshclam"),
+        "OpenBSD": ("User _clamav", "/var/db/clamav/clamd.sock", "freshclam"),
+        "NetBSD": ("User clamav", "/var/clamav/clamd.sock", "freshclamd"),
+    }
+    for plat, (user, sock, fresh_svc) in expected.items():
+        plan = build_deploy_plan({"platform": plat}, antivirus_package="clamav")
+        clamd = _file(plan, "clamd.conf")["content"]
+        assert user in clamd and f"LocalSocket {sock}" in clamd, plat
+        assert "DatabaseDirectory" not in clamd and "LogFile" not in clamd, plat
+        assert {"service": fresh_svc, "action": "enable"} in plan[
+            "service_actions"
+        ], plat
+
+
+def test_macos_uses_the_homebrew_prefix_and_a_launchd_updater():
+    for arch, prefix in (("arm64", "/opt/homebrew"), ("x86_64", "/usr/local")):
+        plan = build_deploy_plan(
+            {"platform": "macOS", "machine_architecture": arch},
+            antivirus_package="clamav",
+        )
+        fresh = _file(plan, "freshclam.conf")
+        assert fresh["path"] == f"{prefix}/etc/clamav/freshclam.conf"
+        # Homebrew builds default to a clamav user that macOS does not have.
+        assert "DatabaseOwner root" in fresh["content"]
+        job = _file(plan, "org.sysmanage.freshclam.plist")["content"]
+        assert f"<string>{prefix}/bin/freshclam</string>" in job and "--daemon" in job
+        argvs = [c["argv"] for c in plan["commands"]]
+        assert ["launchctl", "bootstrap", "system",
+                "/Library/LaunchDaemons/org.sysmanage.freshclam.plist"] in argvs  # fmt: skip
+        assert plan["service_actions"] == []
+
+
+def test_windows_schedules_freshclam_at_the_cadence():
+    plan = build_deploy_plan(
+        {"platform": "Windows"},
+        antivirus_package="clamwin",
+        options={"checks_per_day": 6},
+    )
+    task = next(c for c in plan["commands"] if "SysManage ClamAV Update" in c["argv"])
+    argv = task["argv"]
+    assert (
+        argv[argv.index("/SC") + 1] == "HOURLY" and argv[argv.index("/MO") + 1] == "4"
+    )
+    assert argv[argv.index("/RU") + 1] == "SYSTEM"
+
+
+def test_package_managers_are_named_as_the_agent_names_its_installers():
+    # The agent dispatches to _install_with_<manager>; "pkg_add" and
+    # "chocolatey" have no installer there, so those plans failed instantly.
+    expect = {
+        "FreeBSD": "pkg",
+        "OpenBSD": "pkg",
+        "NetBSD": "pkgin",
+        "Windows": "winget",
+    }
+    for plat, manager in expect.items():
+        plan = build_deploy_plan({"platform": plat}, antivirus_package="clamav")
+        assert plan["packages"][0]["manager"] == manager, plat
+
+
+def test_freebsd_clamd_is_visible_to_rc_and_restarted_on_deploy():
+    # Without PidFile the port's rc script reported a running clamd as "not
+    # running" and could not stop it; a clamd started that way must be ended
+    # so the service actions can start it under the new configuration.
+    plan = build_deploy_plan({"platform": "FreeBSD"}, antivirus_package="clamav")
+    clamd_conf = plan["files"][0]["content"]
+    assert "PidFile /var/run/clamav/clamd.pid" in clamd_conf
+    argvs = [c["argv"] for c in plan["commands"]]
+    assert ["pkill", "-x", "clamd"] in argvs
+    other = build_deploy_plan({"platform": "OpenBSD"}, antivirus_package="clamav")
+    assert "PidFile" not in other["files"][0]["content"]
+    assert ["pkill", "-x", "clamd"] not in [c["argv"] for c in other["commands"]]

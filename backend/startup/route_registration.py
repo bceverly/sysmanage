@@ -16,6 +16,7 @@ from backend.api import (
     advisor,
     advisory_actions,
     asset_discovery,
+    malware,
     posture,
     agent,
     agent_poll,
@@ -426,6 +427,8 @@ def register_routes(app: FastAPI):
 
     logger.debug("Adding asset-discovery router (Phase 21.6 S2)")
     _include_versioned(app, asset_discovery.router, tags=["asset-discovery"])
+    logger.debug("Adding malware router (Phase 21.3 S3)")
+    _include_versioned(app, malware.router, tags=["malware"])
 
     logger.debug("Adding file-watches router (Phase 21.1 S7)")
     _include_versioned(app, file_watches.router, tags=["config-management"])

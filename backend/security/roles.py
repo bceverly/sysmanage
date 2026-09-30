@@ -49,6 +49,11 @@ class SecurityRoles(str, Enum):
     MANAGE_CUSTOM_METRICS = "Manage Custom Metrics"
     # - Unenrolled Asset Discovery (Enterprise asset_discovery_engine -- 21.6)
     MANAGE_NETWORK_DISCOVERY = "Manage Network Discovery"
+    # - Malware Detection (Enterprise malware_engine -- 21.3).  Two roles:
+    #   moving a file off a host can break it, so quarantine is granted apart
+    #   from scanning.
+    RUN_MALWARE_SCANS = "Run Malware Scans"
+    QUARANTINE_MALWARE = "Quarantine Malware"
 
     # Integration Management Roles
     # - Queue Operations (alphabetical)

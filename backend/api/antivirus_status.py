@@ -7,7 +7,6 @@ This module houses the API routes for antivirus status management in SysManage.
 """
 
 import logging
-import re
 import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
@@ -27,7 +26,7 @@ from backend.persistence import db as persistence_db
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
-from backend.services import av_plan_builder
+from backend.services import av_auto_deploy, av_plan_builder
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.messages import CommandType, Message, MessageType
@@ -35,11 +34,7 @@ from backend.websocket.messages import CommandType, Message, MessageType
 
 def _host_info_for_av_planner(host: models.Host) -> dict:
     """Pack a Host's OS fields into the dict the AV plan builder expects."""
-    return {
-        "platform": host.platform,
-        "platform_release": host.platform_release,
-        "platform_version": host.platform_version,
-    }
+    return av_auto_deploy.host_info_for_planner(host)
 
 
 from backend.websocket.queue_enums import QueueDirection
@@ -227,19 +222,9 @@ async def deploy_antivirus(  # NOSONAR
                     )
                     continue
 
-                # Get OS name (platform_release or platform)
-                # For macOS, use platform directly since platform_release contains version codenames
-                # For BSD systems, platform_release might be just "7.7", so fall back to platform
-                if host.platform == "macOS":
-                    os_name_raw = "macOS"
-                else:
-                    os_name_raw = host.platform_release or host.platform
-
-                    # If platform_release doesn't start with a letter (e.g., "7.7" for OpenBSD), use platform instead
-                    if os_name_raw and not re.match(r"^[A-Za-z]", os_name_raw):
-                        os_name_raw = host.platform or os_name_raw
-
-                if not os_name_raw:
+                # "Ubuntu 25.04" -> "Ubuntu"; OpenBSD "7.7" / macOS -> platform.
+                os_name = av_auto_deploy.os_name_for_defaults(host)
+                if not os_name:
                     failed_hosts.append(
                         {
                             "host_id": host_id_str,
@@ -248,14 +233,6 @@ async def deploy_antivirus(  # NOSONAR
                         }
                     )
                     continue
-
-                # Extract base OS name without version (e.g., "Ubuntu 25.04" -> "Ubuntu")
-                # For macOS, we already have the base name
-                if host.platform == "macOS":
-                    os_name = "macOS"
-                else:
-                    match = re.match(r"^([A-Za-z]+)", os_name_raw)
-                    os_name = match.group(1) if match else os_name_raw
 
                 # Lookup antivirus default in the prefetched dict (built
                 # at the top of this with-block).
@@ -294,6 +271,8 @@ async def deploy_antivirus(  # NOSONAR
                     host_id=str(host_id),
                     db=session,
                 )
+                # An operator deployed it: automatic management may resume.
+                av_auto_deploy.operator_opt_in(session, host_id)
 
                 # Audit log the antivirus deployment (main engine)
                 AuditService.log(
@@ -390,6 +369,9 @@ async def enable_antivirus(
         db=db,
     )
 
+    # An operator enabled it: automatic management may resume.
+    av_auto_deploy.operator_opt_in(db, host.id)
+
     # Commit the tenant session to persist the queued message.
     db.commit()
 
@@ -453,6 +435,9 @@ async def disable_antivirus(
         host_id=str(host.id),
         db=db,
     )
+
+    # Disabled on purpose: automatic deploy must not turn it back on.
+    av_auto_deploy.operator_opt_out(db, host.id, "disabled", current_user.userid)
 
     # Commit the tenant session to persist the queued message.
     db.commit()
@@ -528,6 +513,9 @@ async def remove_antivirus(
             host_id=str(host.id),
             db=db,
         )
+
+        # Removed on purpose: automatic deploy must not reinstall it.
+        av_auto_deploy.operator_opt_out(db, host.id, "removed", current_user.userid)
 
         # Commit the tenant session to persist the queued message.
         db.commit()

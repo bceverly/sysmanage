@@ -259,3 +259,55 @@ def test_discovery_counts_match_the_review_page(factory):
     assert settings[("network_discovery", "enabled")] == "1"
     assert settings[("network_discovery", "unmanaged")] == "2"
     assert settings[("network_discovery", "networks_with_unmanaged")] == "1"
+
+
+# -- 21.3 S5: malware on the punch list --------------------------------------
+
+
+def test_without_the_malware_engine_the_domain_is_unavailable(factory):
+    from backend.services import malware_shim  # noqa: PLC0415
+
+    with factory() as db, patch.object(
+        malware_shim, "engine_available", return_value=False
+    ):
+        evidence = pe.gather(db, None, NOW)
+    assert evidence["domains"]["malware"] == {"available": False}
+    assert not [k for k in _settings(evidence) if k[0] == "malware"]
+
+
+def test_malware_counts_and_stale_scans(factory):
+    import json  # noqa: PLC0415
+    from datetime import timedelta  # noqa: PLC0415
+
+    from backend.services import malware_shim  # noqa: PLC0415
+
+    with factory() as db, patch.object(
+        malware_shim, "engine_available", return_value=True
+    ):
+        fresh, old, never = (_host(db, n) for n in ("fresh", "old", "never"))
+        for host in (fresh, old, never):
+            host.agent_capabilities = json.dumps({"commands": ["run_malware_scan"]})
+        for host, age in ((fresh, 1), (old, 40)):
+            db.add(
+                models.MalwareScanRun(
+                    host_id=host.id, requested_by="op", paths=["/tmp"], status="completed",
+                    legs={"feed": {"status": "ran"},
+                          "signatures": {"status": "not_run", "reason": "insufficient_memory"}},
+                    finished_at=NOW - timedelta(days=age),
+                )  # fmt: skip
+            )
+        db.add(
+            models.MalwareFinding(
+                host_id=fresh.id, path="/var/www/x", path_hash="h", signature="S",
+                leg="feed", severity="critical", status="open",
+            )  # fmt: skip
+        )
+        db.flush()
+        evidence = pe.gather(db, None, NOW)
+    settings = _settings(evidence)
+    assert evidence["domains"]["malware"] == {"available": True}
+    assert settings[("malware", "equipped")] == "3"
+    # never scanned + scanned 40 days ago: a clean scan from last month proves nothing.
+    assert settings[("malware", "hosts_unscanned")] == "2"
+    assert settings[("malware", "open_high")] == "1"
+    assert settings[("malware", "legs_skipped")] == "2"

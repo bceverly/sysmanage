@@ -51,6 +51,7 @@ import ConfigProfiles from './Pages/ConfigProfiles';
 import QueryPacks from './Pages/QueryPacks';
 import Advisor from './Pages/Advisor';
 import AssetDiscovery from './Pages/AssetDiscovery';
+import Malware from './Pages/Malware';
 import AirgapCollections from './Pages/AirgapCollections';
 import FederationAuditLog from './Pages/FederationAuditLog';
 import FederationHosts from './Pages/FederationHosts';
@@ -95,6 +96,7 @@ function AppRoutes() {
       <Route path="/query-packs" element={<LicensedRoute module="query_pack_engine"><QueryPacks /></LicensedRoute>} />
       <Route path="/advisor" element={<LicensedRoute module="advisor_engine"><Advisor /></LicensedRoute>} />
       <Route path="/asset-discovery" element={<LicensedRoute module="asset_discovery_engine"><AssetDiscovery /></LicensedRoute>} />
+      <Route path="/malware" element={<LicensedRoute module="malware_engine"><Malware /></LicensedRoute>} />
       <Route path="/reports" element={<Reports />} />
       <Route path="/reports/audit-log" element={<AuditLogViewer />} />
       <Route path="/reports/:reportId" element={<ReportViewer />} />

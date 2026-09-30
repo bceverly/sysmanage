@@ -5429,6 +5429,64 @@ msgstr "فشلت مصادقة المضيف لعملية الاستقصاء هذ�
 msgid "Tenant routing is temporarily unavailable"
 msgstr "توجيه المستأجر غير متاح مؤقتًا"
 
+#: backend/api/malware.py:82
+msgid "Invalid id"
+msgstr "معرّف غير صالح"
+
+#: backend/services/malware_quarantine.py:132
+msgid "Unknown action"
+msgstr "إجراء غير معروف"
+
+#: backend/services/malware_review.py:178
+#, python-format
+msgid "That decision cannot be made here: %s"
+msgstr "لا يمكن اتخاذ هذا القرار هنا: %s"
+
+#: backend/services/malware_review.py:65
+#, python-format
+msgid "Unknown finding status: %s"
+msgstr "حالة نتيجة غير معروفة: %s"
+
+#: backend/services/malware_scans.py:142 backend/services/malware_quarantine.py:129
+msgid "Malware detection is not available"
+msgstr "اكتشاف البرمجيات الخبيثة غير متاح"
+
+#: backend/services/malware_scans.py:145
+msgid "Choose at least one host to scan"
+msgstr "اختر مضيفًا واحدًا على الأقل لفحصه"
+
+#: backend/services/malware_scans.py:148
+msgid "At most 500 hosts can be scanned in one request"
+msgstr "يمكن فحص 500 مضيف كحد أقصى في طلب واحد"
+
+#: backend/api/malware.py:344
+msgid "No imported rule set by that name"
+msgstr "لا توجد مجموعة قواعد مستوردة بهذا الاسم"
+
+#: backend/api/malware.py:98
+msgid "Only an administrator can change the malware rule sets"
+msgstr "يمكن للمسؤول فقط تغيير مجموعات قواعد البرمجيات الخبيثة"
+
+#: backend/api/malware.py:104
+msgid ""
+"Malware rule sets are shared by every tenant; change them from the server "
+"scope, not from inside a tenant"
+msgstr ""
+"مجموعات قواعد البرمجيات الخبيثة مشتركة بين جميع المستأجرين؛ غيّرها من نطاق "
+"الخادم، وليس من داخل مستأجر"
+
+#: backend/services/malware_rulesets.py:158
+msgid "A rule set name may use only a-z, 0-9 and hyphens"
+msgstr "لا يمكن أن يستخدم اسم مجموعة القواعد إلا a-z, 0-9 والشرطات"
+
+#: backend/services/malware_rulesets.py:162
+msgid "That name belongs to a curated rule set"
+msgstr "هذا الاسم يخص مجموعة قواعد منسّقة"
+
+#: backend/services/malware_rulesets.py:166
+msgid "None of these rules can run under ClamAV"
+msgstr "لا يمكن تشغيل أي من هذه القواعد في ClamAV"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "خدمة البريد الإلكتروني معطلة. قم بتمكينها في ملف التكوين."
 

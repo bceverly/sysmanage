@@ -2422,7 +2422,8 @@
     "vulnerabilities": "Vulnerabilities",
     "advisor": "Advisor",
     "hostMetrics": "Host Metrics",
-    "assetDiscovery": "Network Discovery"
+    "assetDiscovery": "Network Discovery",
+    "malware": "Malware"
   },
   "notifications": {
     "applicationUpdates": "Application Updates",
@@ -3923,7 +3924,9 @@
       "smStab001": "Configuration drift unresolved for more than 7 days",
       "smStabF01": "OpenSSL version differs from the version its peers run",
       "pmNetDiscovery": "Devices on your networks are being discovered",
-      "pmNetUnmanaged": "No unmanaged devices are on your networks"
+      "pmNetUnmanaged": "No unmanaged devices are on your networks",
+      "pmMalwareClean": "No open high-severity malware findings",
+      "pmMalwareScanned": "Hosts are scanned for malware"
     },
     "curatedPack": {
       "baseline": {
@@ -4030,7 +4033,9 @@
       "set_password_policy": "The password policy is set in sysmanage.yaml; SysManage cannot change it for you.",
       "shorten_session": "Expire sessions after an hour.",
       "enable_network_discovery": "Turn on network discovery so agents report the devices around them.",
-      "review_unmanaged_devices": "Enroll each unmanaged device, or mark it as known with a reason."
+      "review_unmanaged_devices": "Enroll each unmanaged device, or mark it as known with a reason.",
+      "review_malware_findings": "Quarantine, resolve or dismiss each high-severity finding.",
+      "scan_for_malware": "Scan every host that can scan, at least once a month."
     },
     "saved": "Threat model saved. The punch list is re-evaluated on the next advisor pass.",
     "stale": {
@@ -4373,6 +4378,197 @@
       "unknown": "Unknown",
       "virtualAddress": "Virtual router address",
       "virtualMachine": "Virtual machine"
+    }
+  },
+  "malware": {
+    "blind": {
+      "legNotRun": "{{leg}} did not run on {{count}} hosts: {{reason}}",
+      "neverScanned": "{{count}} hosts that can scan have never been scanned",
+      "notEquipped": "{{count}} hosts cannot scan: no ClamAV is installed",
+      "rulesShort": "On {{count}} hosts ClamAV loaded fewer rules than it was given",
+      "title": "Some hosts were not fully scanned:",
+      "notEquipped_one": "{{count}} host cannot scan: no ClamAV is installed",
+      "notEquipped_other": "{{count}} hosts cannot scan: no ClamAV is installed",
+      "neverScanned_one": "{{count}} host that can scan has never been scanned",
+      "neverScanned_other": "{{count}} hosts that can scan have never been scanned",
+      "legNotRun_one": "{{leg}} did not run on {{count}} host: {{reason}}",
+      "legNotRun_other": "{{leg}} did not run on {{count}} hosts: {{reason}}",
+      "rulesShort_one": "On {{count}} host ClamAV loaded fewer rules than it was given",
+      "rulesShort_other": "On {{count}} hosts ClamAV loaded fewer rules than it was given"
+    },
+    "counts": {
+      "feed": "Rule feed: {{title}} v{{version}}, {{count}} rules",
+      "hosts": "{{count}} hosts with open findings",
+      "running": "{{count}} scans running",
+      "hosts_one": "{{count}} host with open findings",
+      "hosts_other": "{{count}} hosts with open findings",
+      "running_one": "{{count}} scan running",
+      "running_other": "{{count}} scans running",
+      "feed_one": "Rule feed: {{title}} v{{version}}, {{count}} rule",
+      "feed_other": "Rule feed: {{title}} v{{version}}, {{count}} rules"
+    },
+    "decide": {
+      "confirm": "Record decision",
+      "decision": "Decision",
+      "reason": "Reason",
+      "title": "Decide {{count}} findings",
+      "title_one": "Decide {{count}} finding",
+      "title_other": "Decide {{count}} findings"
+    },
+    "decideSelected": "Decide {{count}} selected",
+    "findings": {
+      "empty": "No findings match.",
+      "file": "File",
+      "host": "Host",
+      "lastSeen": "Last seen",
+      "seenTimes": "seen {{count}} times",
+      "severity": "Severity",
+      "signature": "Detection",
+      "status": "Status",
+      "seenTimes_one": "seen {{count}} time",
+      "seenTimes_other": "seen {{count}} times"
+    },
+    "leg": {
+      "feed": "Rule feed",
+      "signatures": "ClamAV signatures"
+    },
+    "loadError": "Malware findings could not be loaded.",
+    "reason": {
+      "disabled": "not requested",
+      "error": "the scanner failed",
+      "memory": "not enough free memory to load the signature database",
+      "noDatabase": "no ClamAV signature database",
+      "noRules": "no rule set was available",
+      "noScanner": "no scanner installed",
+      "timeout": "timed out"
+    },
+    "refusal": {
+      "busy": "a scan is already running",
+      "invalidPath": "a path is not a valid absolute path",
+      "notEquipped": "the agent cannot scan (no ClamAV)",
+      "notFound": "host not found"
+    },
+    "scan": {
+      "completed": "Completed",
+      "failed": "Failed",
+      "queued": "Queued",
+      "refused": "Refused",
+      "timedOut": "Timed out"
+    },
+    "scanDialog": {
+      "error": "The scans could not be started.",
+      "hosts": "Hosts",
+      "paths": "Paths (one per line)",
+      "pathsHelp": "Leave empty to scan the usual places malware is found on each operating system.",
+      "queued": "{{count}} scans started",
+      "start": "Start scans",
+      "title": "Scan hosts for malware",
+      "queued_one": "{{count}} scan started",
+      "queued_other": "{{count}} scans started"
+    },
+    "scanHosts": "Scan hosts",
+    "scans": {
+      "empty": "No scans have been run yet.",
+      "legs": "What ran",
+      "paths": "Paths",
+      "requested": "Requested",
+      "result": "Result",
+      "rulesLoaded": "{{loaded}} of {{total}} rules loaded",
+      "summary": "{{files}} files, {{findings}} findings"
+    },
+    "severity": {
+      "critical": "Critical",
+      "high": "High",
+      "info": "Info",
+      "low": "Low",
+      "medium": "Medium"
+    },
+    "status": {
+      "falsePositive": "False positive",
+      "open": "Open",
+      "quarantined": "Quarantined",
+      "resolved": "Resolved",
+      "restored": "Restored"
+    },
+    "subtitle": "Scans run by each host's own ClamAV, with ClamAV's signatures and the SysManage rule feed.",
+    "tabs": {
+      "decided": "Decided",
+      "open": "Open findings",
+      "scans": "Scans",
+      "rulesets": "Rule sets"
+    },
+    "title": "Malware",
+    "decideSelected_one": "Decide {{count}} selected",
+    "decideSelected_other": "Decide {{count}} selected",
+    "qrefusal": {
+      "fileChanged": "the file has changed since the scan",
+      "notEquipped": "the agent cannot do this",
+      "notRegular": "not a regular file",
+      "other": "refused ({{code}})",
+      "pathOccupied": "something else is now at the original path",
+      "pending": "a request is already waiting for the agent",
+      "permission": "the agent is not allowed to move it",
+      "wrongStatus": "not in a state that allows this"
+    },
+    "quarantine": {
+      "confirm": "Quarantine",
+      "confirmSystem": "I understand; quarantine them anyway",
+      "error": "The request could not be sent.",
+      "explain": "Each agent moves the file into a private quarantine directory and records where it came from, so it can be restored exactly. Nothing is deleted. A file that has changed since the scan is not moved.",
+      "requested": "Waiting for the agent",
+      "sent": "{{count}} requests sent to the agents",
+      "systemPaths": "These files are in system locations. Moving them may stop the host from working:",
+      "title": "Quarantine {{count}} files",
+      "sent_one": "{{count}} request sent to the agent",
+      "sent_other": "{{count}} requests sent to the agents",
+      "title_one": "Quarantine {{count}} file",
+      "title_other": "Quarantine {{count}} files"
+    },
+    "quarantineSelected": "Quarantine {{count}} selected",
+    "restore": {
+      "confirm": "Restore",
+      "explain": "Each agent puts the file back where it was, with its original permissions, unless something else is now at that path.",
+      "title": "Restore {{count}} files",
+      "title_one": "Restore {{count}} file",
+      "title_other": "Restore {{count}} files"
+    },
+    "restoreSelected": "Restore {{count}} selected",
+    "quarantineSelected_one": "Quarantine {{count}} selected",
+    "quarantineSelected_other": "Quarantine {{count}} selected",
+    "restoreSelected_one": "Restore {{count}} selected",
+    "restoreSelected_other": "Restore {{count}} selected",
+    "reject": {
+      "duplicate": "a rule with this name already exists",
+      "include": "include directives are not supported",
+      "module": "uses a YARA module ClamAV cannot load",
+      "noStrings": "has no strings, so ClamAV would skip it",
+      "tooLarge": "the rule set is too large",
+      "unparseable": "could not be parsed"
+    },
+    "rulesets": {
+      "chooseFile": "Choose a .yar file",
+      "curated": "Curated",
+      "import": "Import",
+      "importButton": "Import rule set",
+      "importError": "The rule set could not be imported.",
+      "importExplain": "Rules that ClamAV cannot run (module imports, rules with no strings, includes) are removed and listed. Importing the same name again adds a new version. Every tenant scans with these rules.",
+      "importTitle": "Import a YARA rule set",
+      "imported": "{{title}} v{{version}} imported with {{count}} rules.",
+      "importedBy": "Imported by {{who}}",
+      "readError": "The file could not be read.",
+      "removed": "{{count}} removed",
+      "retire": "Retire",
+      "retireError": "The rule set could not be retired.",
+      "rules": "Rules",
+      "slug": "Name (a-z, 0-9, hyphens)",
+      "source": "Source",
+      "titleField": "Title",
+      "updated": "Updated",
+      "version": "Version",
+      "removed_one": "{{count}} removed",
+      "removed_other": "{{count}} removed",
+      "imported_one": "{{title}} v{{version}} imported with {{count}} rule.",
+      "imported_other": "{{title}} v{{version}} imported with {{count}} rules."
     }
   }
 }

@@ -62,6 +62,9 @@ class EntityType(str, Enum):
     POSTURE_WAIVER = "posture_waiver"
     DISCOVERED_ASSET = "discovered_asset"
     NETWORK_SWEEP = "network_sweep"
+    MALWARE_SCAN = "malware_scan"
+    MALWARE_FINDING = "malware_finding"
+    MALWARE_RULESET = "malware_ruleset"
 
 
 class Result(str, Enum):

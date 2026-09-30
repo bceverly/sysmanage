@@ -5275,6 +5275,62 @@ msgstr "此次輪詢的主機驗證失敗"
 msgid "Tenant routing is temporarily unavailable"
 msgstr "租戶路由暫時無法使用"
 
+#: backend/api/malware.py:82
+msgid "Invalid id"
+msgstr "無效的 ID"
+
+#: backend/services/malware_quarantine.py:132
+msgid "Unknown action"
+msgstr "未知的動作"
+
+#: backend/services/malware_review.py:178
+#, python-format
+msgid "That decision cannot be made here: %s"
+msgstr "無法在此作出該處置: %s"
+
+#: backend/services/malware_review.py:65
+#, python-format
+msgid "Unknown finding status: %s"
+msgstr "未知的偵測結果狀態: %s"
+
+#: backend/services/malware_scans.py:142 backend/services/malware_quarantine.py:129
+msgid "Malware detection is not available"
+msgstr "惡意軟體偵測無法使用"
+
+#: backend/services/malware_scans.py:145
+msgid "Choose at least one host to scan"
+msgstr "請至少選擇一台要掃描的主機"
+
+#: backend/services/malware_scans.py:148
+msgid "At most 500 hosts can be scanned in one request"
+msgstr "一次請求最多可掃描 500 台主機"
+
+#: backend/api/malware.py:344
+msgid "No imported rule set by that name"
+msgstr "沒有該名稱的已匯入規則集"
+
+#: backend/api/malware.py:98
+msgid "Only an administrator can change the malware rule sets"
+msgstr "只有管理員才能變更惡意軟體規則集"
+
+#: backend/api/malware.py:104
+msgid ""
+"Malware rule sets are shared by every tenant; change them from the server "
+"scope, not from inside a tenant"
+msgstr "惡意軟體規則集由所有租戶共用；請在伺服器範圍內變更，而非在某個租戶內部變更"
+
+#: backend/services/malware_rulesets.py:158
+msgid "A rule set name may use only a-z, 0-9 and hyphens"
+msgstr "規則集名稱只能使用 a-z, 0-9 和連字號"
+
+#: backend/services/malware_rulesets.py:162
+msgid "That name belongs to a curated rule set"
+msgstr "該名稱屬於精選規則集"
+
+#: backend/services/malware_rulesets.py:166
+msgid "None of these rules can run under ClamAV"
+msgstr "這些規則都無法在 ClamAV 下執行"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "電子郵件服務已停用。請在設定檔中啟用。"
 

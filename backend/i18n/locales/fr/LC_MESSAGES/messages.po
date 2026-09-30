@@ -5654,6 +5654,67 @@ msgstr "Échec de l'authentification de l'hôte pour cette interrogation"
 msgid "Tenant routing is temporarily unavailable"
 msgstr "Le routage des locataires est temporairement indisponible"
 
+#: backend/api/malware.py:82
+msgid "Invalid id"
+msgstr "Identifiant non valide"
+
+#: backend/services/malware_quarantine.py:132
+msgid "Unknown action"
+msgstr "Action inconnue"
+
+#: backend/services/malware_review.py:178
+#, python-format
+msgid "That decision cannot be made here: %s"
+msgstr "Cette décision ne peut pas être prise ici : %s"
+
+#: backend/services/malware_review.py:65
+#, python-format
+msgid "Unknown finding status: %s"
+msgstr "Statut de constat inconnu : %s"
+
+#: backend/services/malware_scans.py:142 backend/services/malware_quarantine.py:129
+msgid "Malware detection is not available"
+msgstr "La détection des logiciels malveillants n'est pas disponible"
+
+#: backend/services/malware_scans.py:145
+msgid "Choose at least one host to scan"
+msgstr "Choisissez au moins un hôte à analyser"
+
+#: backend/services/malware_scans.py:148
+msgid "At most 500 hosts can be scanned in one request"
+msgstr "Au plus 500 hôtes peuvent être analysés en une seule requête"
+
+#: backend/api/malware.py:344
+msgid "No imported rule set by that name"
+msgstr "Aucun jeu de règles importé ne porte ce nom"
+
+#: backend/api/malware.py:98
+msgid "Only an administrator can change the malware rule sets"
+msgstr ""
+"Seul un administrateur peut modifier les jeux de règles de logiciels "
+"malveillants"
+
+#: backend/api/malware.py:104
+msgid ""
+"Malware rule sets are shared by every tenant; change them from the server "
+"scope, not from inside a tenant"
+msgstr ""
+"Les jeux de règles de logiciels malveillants sont partagés par tous les "
+"locataires ; modifiez-les depuis la portée du serveur, et non depuis un "
+"locataire"
+
+#: backend/services/malware_rulesets.py:158
+msgid "A rule set name may use only a-z, 0-9 and hyphens"
+msgstr "Le nom d'un jeu de règles ne peut contenir que a-z, 0-9 et des tirets"
+
+#: backend/services/malware_rulesets.py:162
+msgid "That name belongs to a curated rule set"
+msgstr "Ce nom appartient à un jeu de règles sélectionné"
+
+#: backend/services/malware_rulesets.py:166
+msgid "None of these rules can run under ClamAV"
+msgstr "Aucune de ces règles ne peut s'exécuter sous ClamAV"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr ""
 #~ "Le service de messagerie est désactivé. Activez-le dans le fichier de "

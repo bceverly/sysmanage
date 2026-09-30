@@ -72,6 +72,9 @@ GUIDED = {
     # 21.6 S5: both are decisions an operator takes on the discovery page.
     "enable_network_discovery": "asset_discovery",
     "review_unmanaged_devices": "asset_discovery",
+    # 21.3 S5: scans and findings are both handled on the Malware page.
+    "scan_for_malware": "malware",
+    "review_malware_findings": "malware",
 }
 NONE = {"set_password_policy"}
 

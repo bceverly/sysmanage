@@ -66,6 +66,7 @@ const PATH_CATEGORY: Record<string, CategoryId> = {
   '/compliance': 'security',
   '/fips-compliance': 'security',
   '/alerts': 'security',
+  '/malware': 'security',
   '/secrets': 'security',
   '/gpg-keys': 'security',
   '/scripts': 'automation',
@@ -95,6 +96,7 @@ const PATH_PERMISSION = new Map<string, string>([
   ['/custom-metrics', 'Manage Custom Metrics'],
   ['/host-metrics', 'View Host Details'],
   ['/asset-discovery', 'View Host Details'],
+  ['/malware', 'View Host Details'],
 ]);
 
 interface NavLeaf {
@@ -131,7 +133,7 @@ export function buildNavCategories(
   } = opts;
 
   // Paths hardcoded here -- plugins must not duplicate these.
-  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/maintenance-windows', '/secrets', '/scripts', '/config-profiles', '/config-drift', '/config-jobs', '/query-packs', '/advisor', '/asset-discovery', '/reports', '/airgap/repositories', '/airgap/collections']);
+  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/maintenance-windows', '/secrets', '/scripts', '/config-profiles', '/config-drift', '/config-jobs', '/query-packs', '/advisor', '/asset-discovery', '/malware', '/reports', '/airgap/repositories', '/airgap/collections']);
   const hardcodedLabels = new Set([
     t('nav.secrets'),
     t('nav.scripts'),
@@ -193,6 +195,11 @@ export function buildNavCategories(
     activeLicenseModules.includes('asset_discovery_engine'),
     '/asset-discovery',
     t('nav.assetDiscovery', 'Network Discovery'),
+  );
+  pushIf(
+    activeLicenseModules.includes('malware_engine'),
+    '/malware',
+    t('nav.malware', 'Malware'),
   );
   pushIf(
     activeLicenseModules.includes('reporting_engine') &&

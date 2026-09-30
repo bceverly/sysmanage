@@ -5313,6 +5313,62 @@ msgstr "이 폴링에 대한 호스트 인증에 실패했습니다"
 msgid "Tenant routing is temporarily unavailable"
 msgstr "테넌트 라우팅을 일시적으로 사용할 수 없습니다"
 
+#: backend/api/malware.py:82
+msgid "Invalid id"
+msgstr "잘못된 ID"
+
+#: backend/services/malware_quarantine.py:132
+msgid "Unknown action"
+msgstr "알 수 없는 작업"
+
+#: backend/services/malware_review.py:178
+#, python-format
+msgid "That decision cannot be made here: %s"
+msgstr "여기서는 해당 결정을 내릴 수 없습니다: %s"
+
+#: backend/services/malware_review.py:65
+#, python-format
+msgid "Unknown finding status: %s"
+msgstr "알 수 없는 발견 사항 상태: %s"
+
+#: backend/services/malware_scans.py:142 backend/services/malware_quarantine.py:129
+msgid "Malware detection is not available"
+msgstr "맬웨어 탐지를 사용할 수 없습니다"
+
+#: backend/services/malware_scans.py:145
+msgid "Choose at least one host to scan"
+msgstr "스캔할 호스트를 하나 이상 선택하세요"
+
+#: backend/services/malware_scans.py:148
+msgid "At most 500 hosts can be scanned in one request"
+msgstr "한 번의 요청으로 최대 500개의 호스트를 스캔할 수 있습니다"
+
+#: backend/api/malware.py:344
+msgid "No imported rule set by that name"
+msgstr "해당 이름의 가져온 규칙 세트가 없습니다"
+
+#: backend/api/malware.py:98
+msgid "Only an administrator can change the malware rule sets"
+msgstr "관리자만 맬웨어 규칙 세트를 변경할 수 있습니다"
+
+#: backend/api/malware.py:104
+msgid ""
+"Malware rule sets are shared by every tenant; change them from the server "
+"scope, not from inside a tenant"
+msgstr "맬웨어 규칙 세트는 모든 테넌트가 공유합니다. 테넌트 내부가 아니라 서버 범위에서 변경하십시오"
+
+#: backend/services/malware_rulesets.py:158
+msgid "A rule set name may use only a-z, 0-9 and hyphens"
+msgstr "규칙 세트 이름에는 a-z, 0-9 및 하이픈만 사용할 수 있습니다"
+
+#: backend/services/malware_rulesets.py:162
+msgid "That name belongs to a curated rule set"
+msgstr "해당 이름은 큐레이션된 규칙 세트에 속합니다"
+
+#: backend/services/malware_rulesets.py:166
+msgid "None of these rules can run under ClamAV"
+msgstr "이 규칙 중 어느 것도 ClamAV에서 실행할 수 없습니다"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "이메일 서비스가 비활성화되어 있습니다. 구성 파일에서 활성화하세요."
 

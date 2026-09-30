@@ -10326,6 +10326,204 @@ feed never has a chance to display a score that should have been withheld.
 - [ ] Findings surface + alert + quarantine/remediation hook -- findings in the **tenant** partition
 - [ ] i18n/l10n
 
+**S0 spike -- DONE 2026-09-30.** Existing machinery first: ClamAV DEPLOYMENT
+already exists on all six platforms (Pro+ `av_management_engine`, OSS
+`av_plan_builder`; ClamWin on Windows) with status collection and Defender
+detection -- but no on-demand scan, no findings table, no quarantine, no YARA,
+no feed import. Measured on ClamAV 1.5.4:
+  * **clamscan loads YARA rules as a signature database** (`-d rules.yar`),
+    reporting `YARA.<rule>.UNOFFICIAL` beside its own signatures (EICAR
+    found as `Eicar-Test-Signature`). So ONE scanner the product already
+    deploys on every platform runs both our feed and ClamAV's -- no YARA
+    library in the agent (no BSD wheels exist for yara-python or yara-x;
+    bundling C into six agent packages is exactly what to avoid).
+  * **ClamAV's YARA is a subset**: module imports (`import "pe"`) fail the
+    whole FILE ("successfully loaded 0 rules"); string-less rules are
+    SKIPPED with only a warning. Regex, nocase/wide and `for` loops work.
+    => the engine validates rules on import, and every scan reports how
+    many rules actually loaded -- a skipped rule must never read as clean.
+  * `--allmatch` reports every match per file (duplicates to drop); output
+    parses by splitting on the LAST `": "` (a filename containing
+    `": ... FOUND"` parsed correctly).
+  * **Cost decides the design**: our rules alone = 21 MB RSS, instant; the
+    full ClamAV database = ~1 GB RSS and ~5 s just to load, per run. A
+    fleet-wide scan must not OOM a 1 GB VM. When clamd is running,
+    `clamdscan` uses the daemon's already-loaded database for free.
+
+**Design (from S0):** a scan has two LEGS, each reported as run / not run +
+why. **Feed leg**: our rules (`clamscan -d feed.yar`, or the `yara` CLI when
+present), cheap, anywhere ClamAV is. **Signature leg**: ClamAV's own database
+through clamd when it runs; a one-shot `clamscan` load only when the host has
+the memory for it. A leg that could not run is a stated blind spot, never
+"clean". The feed = rule sets in `shared_malware_ruleset` (curated set shipped
+INSIDE the engine and synced on start, like the advisor catalog -- which is
+also the air-gap path -- plus operator-imported, validated `.yar` files).
+Quarantine is operator-initiated, never automatic: move to a root-only
+quarantine directory with a manifest (hash, original path, mode, owner) so it
+can be RESTORED; system paths need explicit confirmation; nothing is deleted.
+
+**Slices:**
+  * **S1 -- DONE 2026-09-30.** Schema: shared `s18malwarefeed`
+    (`shared_malware_ruleset`, every version kept) and tenant `q20malware`
+    (`malware_scan_run`, `malware_finding`, soft-referencing the rule set).
+    NEW Enterprise `malware_engine` 1.0.0: `validate_ruleset` rebuilds a set
+    from only what ClamAV will run (module imports / string-less / include /
+    duplicate rules removed WITH the reason; regex literals containing `//`
+    or `\{` parse correctly), `plan_scan` (absolute normalized paths only,
+    per-OS defaults -- never `/` by default), `sanitize_scan_report`
+    (`YARA.<rule>.UNOFFICIAL` -> feed leg + rule severity, ClamAV family
+    severity, --allmatch duplicates dropped, a detection from a leg that says
+    it did not run is dropped, `rules_short` when ClamAV loaded fewer rules),
+    `merge_finding` (an operator's false-positive / restored decision is
+    never undone; a quarantined or resolved file seen again reopens),
+    `resolvable` (only the leg that found it, having RUN, over a path that
+    covers it), `quarantine_check` (system paths need confirmation, not
+    refusal), curated `sysmanage-core` v1 (EICAR, coin miner, PHP web shell,
+    reverse shell, Mimikatz, log wiper). Its test loads the curated set into
+    the REAL clamscan and requires every rule to load and match. OSS:
+    `malware_shim` (fails closed), `malware_rulesets.sync_curated` (added,
+    never rolled back, deprecated not deleted), `malware_tick`. Tests: engine
+    18, OSS 6.
+  * **S2 -- DONE 2026-09-30.** Agent `run_malware_scan`
+    (`collection/malware_scan.py` + `operations/malware_scan_operations.py`,
+    capability group `malware`, probe = a scanner exists). Scanners are
+    found by PATH plus PER-PLATFORM off-PATH directories (Program Files
+    ClamAV/ClamWin on Windows; /usr/pkg, /usr/local, Homebrew elsewhere) --
+    per platform so a test pretending ClamAV is absent cannot find the dev
+    box's /usr/bin/clamscan. Feed leg: `clamscan --allmatch -d feed.yar`
+    ("Known viruses" = rules actually loaded), else the `yara` CLI.
+    Signature leg: `clamdscan --multiscan --fdpass` when `clamdscan --ping`
+    answers, else a one-shot clamscan ONLY with >= 2 GB available, else
+    `insufficient_memory`. rc 2 with a summary = ran (unreadable files are
+    not a failed scan); "No supported database files found" =
+    `no_signature_database`. Found while building: the rules file holds
+    every string its rules match and sits in the temp directory, a DEFAULT
+    scan path -- the feed reported itself; hits on it are now dropped.
+    Detections deduplicated (--allmatch), existence-checked, SHA-256'd; one
+    scan at a time (`busy`). Verified against the real ClamAV: feed 6/6
+    rules loaded, web shell + EICAR found; signature leg through clamd found
+    EICAR. Tests: 17 (one runs the real clamscan).
+  * **S3 -- DONE 2026-09-30.** `malware_scans` (engine-planned scans with
+    the current rule set IN the command; hosts that cannot be scanned are
+    REFUSED with the reason -- not_equipped / busy / not_found /
+    invalid_path -- never dropped; older agents that never advertised are
+    dispatched, per Phase 19), result handler routed on command_type (a
+    report may only close its OWN host's queued run), findings upserted via
+    the engine (false positive survives a sighting, a quarantined file seen
+    again reopens), auto-resolve only when the leg that found it ran over its
+    path, 6-hour expiry on the tick in EVERY host database. `malware_review`
+    summary = counts + coverage (equipped / not equipped / never scanned) +
+    blind spots (legs that did not run on each host's LATEST scan, by
+    reason; rule shortfalls). API `/malware/*` (View Host Details to read;
+    NEW roles `Run Malware Scans` and -- separately, for S4 -- `Quarantine
+    Malware`, seeded in q20malware; every request and decision audited).
+    Malware page (Security menu): blind spots beside the findings, open /
+    decided / scans tabs, scan dialog listing refusals, decision dialog
+    requiring a reason. Tests: 11 server + 6 frontend.
+  * **S4 -- DONE 2026-09-30.** Agent `quarantine_file` / `restore_file`
+    (`collection/malware_quarantine.py`): operator-initiated only, nothing
+    ever deleted. Refuses anything that is not a regular file (a symlink
+    would move the link, leave the target) and a file whose SHA-256 no
+    longer matches the scan (`file_changed` -- the operator decided about
+    THAT file). Moves into `~/.sysmanage-agent/quarantine` (0700) with the
+    stored copy chmod 000 and a manifest (path, mode, owner, mtime, hash);
+    across filesystems it copies, VERIFIES, then unlinks. Restore refuses
+    to overwrite (`path_occupied`) or to restore a tampered copy, and puts
+    mode/owner/mtime back. Found while building: for a root agent the
+    quarantine directory is under /root, a DEFAULT scan path -- every
+    quarantined file would have reopened its own finding; the scanner now
+    drops hits inside it. Server `malware_quarantine`: a finding changes
+    status only when the AGENT confirms (`quarantine.state = requested`
+    until then); system paths (engine `quarantine_check`) are sent only with
+    explicit confirmation; a reply from another host is ignored. Role
+    `Quarantine Malware`; every request audited. UI: quarantine / restore
+    actions by role, a system-path confirmation step, "waiting for the
+    agent" / refusal chips. Tests: agent 7, server 4, frontend 2.
+  * **S5 -- DONE 2026-09-30.** Feed: operator-imported YARA sets
+    (`/malware/rulesets`), validated by the engine, rejected rules listed
+    with the reason, a set with nothing runnable refused, versioned, never
+    allowed to take a curated name, retired (not deleted). Rule sets are
+    SHARED by every tenant, so import/retire is gated to an administrator
+    at SERVER scope -- a tenant admin must not change what another tenant
+    scans for. Every scan runs every active set, re-validated TOGETHER (two
+    sets may define the same rule name, which makes ClamAV reject the whole
+    file) and records the set versions it used (`malware_scan_run.rulesets`).
+    Alerting (alerting_engine): condition `malware_detected` -- OPEN findings
+    at or above a severity, default high (an EICAR test file or a PUA must
+    not page anyone), in the Alert Rules page. Posture (advisor_engine):
+    domain `malware` + `PM-MALWARE-SCANNED` (a host that can scan has not
+    been scanned in 30 days) and `PM-MALWARE-CLEAN` (open high/critical --
+    and, like PM-NET-UNMANAGED, an unscanned host or a skipped leg can never
+    PROVE clean); guided remedies to `/malware`. **Found while building: the
+    shared rule catalog syncs a pack only when its VERSION is newer, and
+    21.6 added PM-NET-* without a bump -- Bryan's catalog still held
+    `sysmanage-posture` v2 with 19 rules and no PM-NET, so 21.6's posture
+    checks never ran on a real server.** Posture pack is now v3, and a test
+    pins each pack's (version, content fingerprint) so content cannot change
+    without a bump again. Also fixed on the way: ja "Configuration drift"
+    alert label was 構成の漂白 ("bleaching") -> 構成ドリフト. Tests: advisor
+    180, alerting 60, server posture/feed/gate +9, frontend +1.
+  * **S5b -- DONE 2026-09-30: hosts get ClamAV without a click.** A scan
+    runs on the host's own ClamAV, so an unequipped host is a blind spot.
+    With `malware_engine` licensed, the malware tick
+    (`av_auto_deploy.reconcile`, every host DB) queues the same deploy plan
+    as the Deploy button for every approved, active host whose OS has an
+    antivirus default: when the host reports no antivirus, and whenever
+    `av_plan_builder.PLAN_VERSION` moves (so a corrected config reaches old
+    installs). Bounded: 3 pushes per plan version, 24 h apart, then logged.
+    Audited as `system:antivirus-auto-deploy`. Tenant table
+    `antivirus_auto_deploy` (migration `q21avauto`, idempotent). OSS/Pro
+    servers keep the manual Deploy button. **Found while building: the
+    deploy plans (OSS planner + av_management_engine) were broken off
+    Linux** -- freshclam.conf hard-coded `/var/lib/clamav` + owner
+    `clamav`, so the BSDs' signatures landed where clamscan never looks
+    (and OpenBSD's user is `_clamav`); NetBSD's updater is `freshclamd`;
+    macOS had Intel-only paths and no freshclam service at all; Windows
+    updated once a day at most. Now: no DatabaseDirectory/Owner (package
+    defaults), per-BSD user/socket/service, a macOS launchd job
+    (`org.sysmanage.freshclam`, brew prefix by arch), Windows HOURLY task
+    as SYSTEM; `Checks` default 12, clamp 1-24 (mirror throttling).
+    **Then the real hosts found three more (plan v3, same day):** the plan
+    named managers `pkg_add`/`chocolatey` but the agent's installers are
+    `pkg`/`choco` (OpenBSD and Windows failed instantly, "Unsupported
+    package manager"); the agent's service control had NO BSD support
+    ("BSD support is a follow-up") so every enable/start failed on
+    FreeBSD/OpenBSD/NetBSD -- FreeBSD had the right database and config but
+    no freshclam running (new `core/bsd_service_control.py`: sysrc/service,
+    rcctl, NetBSD rc.conf + pkgsrc rc.d script copy); and Windows installed
+    ClamWin (ClamAV 0.103, end of life) which the agent's detection and the
+    malware scanner never look for -- Windows now gets official ClamAV
+    (choco `clamav`, C:\Program Files\ClamAV) and the seeded default is
+    migrated (`q22avwinclamav`). The agent also aliases the old manager
+    names, so plans from an older server work. Found with a per-database
+    skip-reason log line (hosts / queued / not_approved / inactive /
+    no_default / current / waiting_retry / gave_up).
+    **Plan v4 (same day):** a host that REPORTS ClamAV is not a host whose
+    plan WORKED -- FreeBSD's v3 plan reached the agent 3 minutes before it
+    was updated, failed at the service steps again, and "installed" made it
+    look done. Auto-deploy now records the agent's answer (one id for the
+    envelope and the queue row, matched in `handle_command_result`;
+    migration `q23avautostatus`): only `succeeded` is done, `failed` is
+    retried 1 h, 2 h, 4 h ... at most daily, never given up on; an
+    unanswered plan is re-sent after a day. And Chocolatey's `clamav` turned
+    out to be the portable zip, unpacked under a versioned
+    `chocolatey\lib` folder, never `C:\Program Files\ClamAV` -- Windows
+    now installs the official MSI via winget `Cisco.ClamAV` (native arm64),
+    and the agent's winget installer runs unattended (exact id, agreements
+    accepted, "already installed" = success). Real-host round of v4: 4 of 6
+    succeeded; OpenBSD failed because `pkg_add <installed pkg>` is an
+    UPGRADE (needed newer curl/pcre2 than the system had) -- the agent now
+    treats an installed package as installed; Windows never received the
+    plan at all: the agent's receive loop awaited the initial inventory
+    inside the registration handler, and a `choco outdated` wedged past its
+    timeout (only the Chocolatey shim was killed) held it for 20+ minutes.
+    Fixed: initial inventory runs as a background task; Windows tool calls
+    go through `run_bounded` (kills the process tree on timeout); a plan the
+    server's queue gave up delivering is a failed attempt (retried in an
+    hour), not a day-long wait.
+  * **S6** docs + screenshots + i18n + validation on real hosts (EICAR + a
+    marker rule on each platform with ClamAV).
+
 **Estimated Size:** ~2,500 lines
 
 #### 21.4 Threat Model Wizard & Posture Punch List (Enterprise)

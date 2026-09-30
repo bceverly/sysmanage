@@ -2403,7 +2403,8 @@
     "vulnerabilities": "Kwetsbaarheden",
     "advisor": "Adviseur",
     "hostMetrics": "Hostmetrieken",
-    "assetDiscovery": "Netwerkdetectie"
+    "assetDiscovery": "Netwerkdetectie",
+    "malware": "Malware"
   },
   "notifications": {
     "applicationUpdates": "Applicatie Updates",
@@ -3923,7 +3924,9 @@
       "smStab001": "Configuratieafwijking al meer dan 7 dagen onopgelost",
       "smStabF01": "OpenSSL-versie wijkt af van de versie op vergelijkbare hosts",
       "pmNetDiscovery": "Apparaten in uw netwerken worden gedetecteerd",
-      "pmNetUnmanaged": "Er staan geen onbeheerde apparaten in uw netwerken"
+      "pmNetUnmanaged": "Er staan geen onbeheerde apparaten in uw netwerken",
+      "pmMalwareClean": "Geen openstaande malwarebevindingen met hoge ernst",
+      "pmMalwareScanned": "Hosts worden gescand op malware"
     },
     "curatedPack": {
       "baseline": {
@@ -4030,7 +4033,9 @@
       "set_password_policy": "Het wachtwoordbeleid wordt ingesteld in sysmanage.yaml; SysManage kan het niet voor u wijzigen.",
       "shorten_session": "Laat sessies na een uur verlopen.",
       "enable_network_discovery": "Schakel netwerkdetectie in zodat agents de apparaten om hen heen melden.",
-      "review_unmanaged_devices": "Registreer elk onbeheerd apparaat of markeer het met een reden als bekend."
+      "review_unmanaged_devices": "Registreer elk onbeheerd apparaat of markeer het met een reden als bekend.",
+      "review_malware_findings": "Plaats elke bevinding met hoge ernst in quarantaine, los deze op of negeer deze.",
+      "scan_for_malware": "Scan elke host die kan scannen minstens eens per maand."
     },
     "saved": "Dreigingsmodel opgeslagen. De actielijst wordt bij de volgende adviseursronde opnieuw geëvalueerd.",
     "stale": {
@@ -4373,6 +4378,197 @@
       "unknown": "Onbekend",
       "virtualAddress": "Virtueel routeradres",
       "virtualMachine": "Virtuele machine"
+    }
+  },
+  "malware": {
+    "blind": {
+      "legNotRun": "{{leg}} is niet uitgevoerd op {{count}} hosts: {{reason}}",
+      "neverScanned": "{{count}} hosts die kunnen scannen zijn nog nooit gescand",
+      "notEquipped": "{{count}} hosts kunnen niet scannen: ClamAV is niet geïnstalleerd",
+      "rulesShort": "Op {{count}} hosts heeft ClamAV minder regels geladen dan er zijn aangeboden",
+      "title": "Sommige hosts zijn niet volledig gescand:",
+      "notEquipped_one": "{{count}} host kan niet scannen: ClamAV is niet geïnstalleerd",
+      "notEquipped_other": "{{count}} hosts kunnen niet scannen: ClamAV is niet geïnstalleerd",
+      "neverScanned_one": "{{count}} host die kan scannen is nog nooit gescand",
+      "neverScanned_other": "{{count}} hosts die kunnen scannen zijn nog nooit gescand",
+      "legNotRun_one": "{{leg}} is niet uitgevoerd op {{count}} host: {{reason}}",
+      "legNotRun_other": "{{leg}} is niet uitgevoerd op {{count}} hosts: {{reason}}",
+      "rulesShort_one": "Op {{count}} host heeft ClamAV minder regels geladen dan er zijn aangeboden",
+      "rulesShort_other": "Op {{count}} hosts heeft ClamAV minder regels geladen dan er zijn aangeboden"
+    },
+    "counts": {
+      "feed": "Regelfeed: {{title}} v{{version}}, {{count}} regels",
+      "hosts": "{{count}} hosts met openstaande bevindingen",
+      "running": "{{count}} scans actief",
+      "hosts_one": "{{count}} host met openstaande bevindingen",
+      "hosts_other": "{{count}} hosts met openstaande bevindingen",
+      "running_one": "{{count}} scan actief",
+      "running_other": "{{count}} scans actief",
+      "feed_one": "Regelfeed: {{title}} v{{version}}, {{count}} regel",
+      "feed_other": "Regelfeed: {{title}} v{{version}}, {{count}} regels"
+    },
+    "decide": {
+      "confirm": "Beslissing vastleggen",
+      "decision": "Beslissing",
+      "reason": "Reden",
+      "title": "Beslissen over {{count}} bevindingen",
+      "title_one": "Beslissen over {{count}} bevinding",
+      "title_other": "Beslissen over {{count}} bevindingen"
+    },
+    "decideSelected": "Beslissen over {{count}} geselecteerde",
+    "findings": {
+      "empty": "Geen overeenkomende bevindingen.",
+      "file": "Bestand",
+      "host": "Host",
+      "lastSeen": "Laatst gezien",
+      "seenTimes": "{{count}} keer gezien",
+      "severity": "Ernst",
+      "signature": "Detectie",
+      "status": "Status",
+      "seenTimes_one": "{{count}} keer gezien",
+      "seenTimes_other": "{{count}} keer gezien"
+    },
+    "leg": {
+      "feed": "Regelfeed",
+      "signatures": "ClamAV-signatures"
+    },
+    "loadError": "Malwarebevindingen konden niet worden geladen.",
+    "reason": {
+      "disabled": "niet aangevraagd",
+      "error": "de scanner is mislukt",
+      "memory": "onvoldoende vrij geheugen om de signaturedatabase te laden",
+      "noDatabase": "geen ClamAV-signaturedatabase",
+      "noRules": "er was geen regelset beschikbaar",
+      "noScanner": "geen scanner geïnstalleerd",
+      "timeout": "time-out"
+    },
+    "refusal": {
+      "busy": "er wordt al een scan uitgevoerd",
+      "invalidPath": "een pad is geen geldig absoluut pad",
+      "notEquipped": "de agent kan niet scannen (geen ClamAV)",
+      "notFound": "host niet gevonden"
+    },
+    "scan": {
+      "completed": "Voltooid",
+      "failed": "Mislukt",
+      "queued": "In de wachtrij",
+      "refused": "Geweigerd",
+      "timedOut": "Time-out"
+    },
+    "scanDialog": {
+      "error": "De scans konden niet worden gestart.",
+      "hosts": "Hosts",
+      "paths": "Paden (één per regel)",
+      "pathsHelp": "Laat leeg om de plekken te scannen waar op elk besturingssysteem gewoonlijk malware wordt gevonden.",
+      "queued": "{{count}} scans gestart",
+      "start": "Scans starten",
+      "title": "Hosts scannen op malware",
+      "queued_one": "{{count}} scan gestart",
+      "queued_other": "{{count}} scans gestart"
+    },
+    "scanHosts": "Hosts scannen",
+    "scans": {
+      "empty": "Er zijn nog geen scans uitgevoerd.",
+      "legs": "Wat is uitgevoerd",
+      "paths": "Paden",
+      "requested": "Aangevraagd",
+      "result": "Resultaat",
+      "rulesLoaded": "{{loaded}} van {{total}} regels geladen",
+      "summary": "{{files}} bestanden, {{findings}} bevindingen"
+    },
+    "severity": {
+      "critical": "Kritiek",
+      "high": "Hoog",
+      "info": "Informatie",
+      "low": "Laag",
+      "medium": "Gemiddeld"
+    },
+    "status": {
+      "falsePositive": "Vals-positief",
+      "open": "Openstaand",
+      "quarantined": "In quarantaine",
+      "resolved": "Opgelost",
+      "restored": "Hersteld"
+    },
+    "subtitle": "Scans uitgevoerd door de eigen ClamAV van elke host, met de signatures van ClamAV en de SysManage-regelfeed.",
+    "tabs": {
+      "decided": "Beslist",
+      "open": "Openstaande bevindingen",
+      "scans": "Scans",
+      "rulesets": "Regelsets"
+    },
+    "title": "Malware",
+    "decideSelected_one": "Beslissen over {{count}} geselecteerde",
+    "decideSelected_other": "Beslissen over {{count}} geselecteerde",
+    "qrefusal": {
+      "fileChanged": "het bestand is sinds de scan gewijzigd",
+      "notEquipped": "de agent kan dit niet uitvoeren",
+      "notRegular": "geen gewoon bestand",
+      "other": "geweigerd ({{code}})",
+      "pathOccupied": "op het oorspronkelijke pad staat nu iets anders",
+      "pending": "er wacht al een verzoek op de agent",
+      "permission": "de agent mag het niet verplaatsen",
+      "wrongStatus": "de huidige status staat dit niet toe"
+    },
+    "quarantine": {
+      "confirm": "In quarantaine plaatsen",
+      "confirmSystem": "Ik begrijp het; toch in quarantaine plaatsen",
+      "error": "Het verzoek kon niet worden verzonden.",
+      "explain": "Elke agent verplaatst het bestand naar een privé-quarantainemap en legt vast waar het vandaan kwam, zodat het exact kan worden hersteld. Er wordt niets verwijderd. Een bestand dat sinds de scan is gewijzigd, wordt niet verplaatst.",
+      "requested": "Wacht op de agent",
+      "sent": "{{count}} verzoeken verzonden naar de agents",
+      "systemPaths": "Deze bestanden staan op systeemlocaties. Als u ze verplaatst, werkt de host mogelijk niet meer:",
+      "title": "{{count}} bestanden in quarantaine plaatsen",
+      "sent_one": "{{count}} verzoek verzonden naar de agent",
+      "sent_other": "{{count}} verzoeken verzonden naar de agents",
+      "title_one": "{{count}} bestand in quarantaine plaatsen",
+      "title_other": "{{count}} bestanden in quarantaine plaatsen"
+    },
+    "quarantineSelected": "{{count}} geselecteerde in quarantaine plaatsen",
+    "restore": {
+      "confirm": "Herstellen",
+      "explain": "Elke agent zet het bestand terug op de oorspronkelijke plek, met de oorspronkelijke machtigingen, tenzij daar nu iets anders staat.",
+      "title": "{{count}} bestanden herstellen",
+      "title_one": "{{count}} bestand herstellen",
+      "title_other": "{{count}} bestanden herstellen"
+    },
+    "restoreSelected": "{{count}} geselecteerde herstellen",
+    "quarantineSelected_one": "{{count}} geselecteerde in quarantaine plaatsen",
+    "quarantineSelected_other": "{{count}} geselecteerde in quarantaine plaatsen",
+    "restoreSelected_one": "{{count}} geselecteerde herstellen",
+    "restoreSelected_other": "{{count}} geselecteerde herstellen",
+    "reject": {
+      "duplicate": "er bestaat al een regel met deze naam",
+      "include": "include-directives worden niet ondersteund",
+      "module": "gebruikt een YARA-module die ClamAV niet kan laden",
+      "noStrings": "bevat geen strings, dus ClamAV zou deze overslaan",
+      "tooLarge": "de regelset is te groot",
+      "unparseable": "kon niet worden geparseerd"
+    },
+    "rulesets": {
+      "chooseFile": "Kies een .yar-bestand",
+      "curated": "Samengesteld",
+      "import": "Importeren",
+      "importButton": "Regelset importeren",
+      "importError": "De regelset kon niet worden geïmporteerd.",
+      "importExplain": "Regels die ClamAV niet kan uitvoeren (module-imports, regels zonder strings, include-directives) worden verwijderd en weergegeven. Dezelfde naam opnieuw importeren voegt een nieuwe versie toe. Elke tenant scant met deze regels.",
+      "importTitle": "Een YARA-regelset importeren",
+      "imported": "{{title}} v{{version}} geïmporteerd met {{count}} regels.",
+      "importedBy": "Geïmporteerd door {{who}}",
+      "readError": "Het bestand kon niet worden gelezen.",
+      "removed": "{{count}} verwijderd",
+      "retire": "Buiten gebruik stellen",
+      "retireError": "De regelset kon niet buiten gebruik worden gesteld.",
+      "rules": "Regels",
+      "slug": "Naam (a-z, 0-9, koppeltekens)",
+      "source": "Bron",
+      "titleField": "Titel",
+      "updated": "Bijgewerkt",
+      "version": "Versie",
+      "removed_one": "{{count}} verwijderd",
+      "removed_other": "{{count}} verwijderd",
+      "imported_one": "{{title}} v{{version}} geïmporteerd met {{count}} regel.",
+      "imported_other": "{{title}} v{{version}} geïmporteerd met {{count}} regels."
     }
   }
 }

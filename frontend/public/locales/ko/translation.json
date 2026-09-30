@@ -2403,7 +2403,8 @@
     "vulnerabilities": "취약점",
     "advisor": "어드바이저",
     "hostMetrics": "호스트 메트릭",
-    "assetDiscovery": "네트워크 탐색"
+    "assetDiscovery": "네트워크 탐색",
+    "malware": "맬웨어"
   },
   "notifications": {
     "applicationUpdates": "애플리케이션 업데이트",
@@ -3923,7 +3924,9 @@
       "smStab001": "7일 넘게 해결되지 않은 구성 이탈",
       "smStabF01": "OpenSSL 버전이 피어의 버전과 다름",
       "pmNetDiscovery": "네트워크의 장치가 검색되고 있습니다",
-      "pmNetUnmanaged": "네트워크에 관리되지 않는 장치가 없습니다"
+      "pmNetUnmanaged": "네트워크에 관리되지 않는 장치가 없습니다",
+      "pmMalwareClean": "심각도가 높은 미해결 맬웨어 발견 사항이 없음",
+      "pmMalwareScanned": "호스트에서 맬웨어 스캔이 수행됨"
     },
     "curatedPack": {
       "baseline": {
@@ -4030,7 +4033,9 @@
       "set_password_policy": "비밀번호 정책은 sysmanage.yaml에서 설정됩니다. SysManage가 대신 변경할 수 없습니다.",
       "shorten_session": "세션이 1시간 후 만료되도록 합니다.",
       "enable_network_discovery": "에이전트가 주변 장치를 보고하도록 네트워크 검색을 켜십시오.",
-      "review_unmanaged_devices": "관리되지 않는 각 장치를 등록하거나 사유와 함께 알려진 장치로 표시하십시오."
+      "review_unmanaged_devices": "관리되지 않는 각 장치를 등록하거나 사유와 함께 알려진 장치로 표시하십시오.",
+      "review_malware_findings": "심각도가 높은 각 발견 사항을 격리, 해결 또는 기각하십시오.",
+      "scan_for_malware": "스캔할 수 있는 모든 호스트를 한 달에 한 번 이상 스캔하십시오."
     },
     "saved": "위협 모델이 저장되었습니다. 조치 항목 목록은 다음 어드바이저 실행 시 다시 평가됩니다.",
     "stale": {
@@ -4373,6 +4378,197 @@
       "unknown": "알 수 없음",
       "virtualAddress": "가상 라우터 주소",
       "virtualMachine": "가상 머신"
+    }
+  },
+  "malware": {
+    "blind": {
+      "legNotRun": "호스트 {{count}}대에서 {{leg}}이(가) 실행되지 않았습니다: {{reason}}",
+      "neverScanned": "스캔 가능한 호스트 {{count}}대가 한 번도 스캔되지 않았습니다",
+      "notEquipped": "호스트 {{count}}대는 스캔할 수 없습니다: ClamAV가 설치되어 있지 않습니다",
+      "rulesShort": "호스트 {{count}}대에서 ClamAV가 제공된 것보다 적은 규칙을 로드했습니다",
+      "title": "일부 호스트가 완전히 스캔되지 않았습니다:",
+      "notEquipped_one": "호스트 {{count}}대는 스캔할 수 없습니다: ClamAV가 설치되어 있지 않습니다",
+      "notEquipped_other": "호스트 {{count}}대는 스캔할 수 없습니다: ClamAV가 설치되어 있지 않습니다",
+      "neverScanned_one": "스캔 가능한 호스트 {{count}}대가 한 번도 스캔되지 않았습니다",
+      "neverScanned_other": "스캔 가능한 호스트 {{count}}대가 한 번도 스캔되지 않았습니다",
+      "legNotRun_one": "호스트 {{count}}대에서 {{leg}}이(가) 실행되지 않았습니다: {{reason}}",
+      "legNotRun_other": "호스트 {{count}}대에서 {{leg}}이(가) 실행되지 않았습니다: {{reason}}",
+      "rulesShort_one": "호스트 {{count}}대에서 ClamAV가 제공된 것보다 적은 규칙을 로드했습니다",
+      "rulesShort_other": "호스트 {{count}}대에서 ClamAV가 제공된 것보다 적은 규칙을 로드했습니다"
+    },
+    "counts": {
+      "feed": "규칙 피드: {{title}} v{{version}}, 규칙 {{count}}개",
+      "hosts": "미해결 발견 사항이 있는 호스트 {{count}}대",
+      "running": "실행 중인 스캔 {{count}}건",
+      "hosts_one": "미해결 발견 사항이 있는 호스트 {{count}}대",
+      "hosts_other": "미해결 발견 사항이 있는 호스트 {{count}}대",
+      "running_one": "실행 중인 스캔 {{count}}건",
+      "running_other": "실행 중인 스캔 {{count}}건",
+      "feed_one": "규칙 피드: {{title}} v{{version}}, 규칙 {{count}}개",
+      "feed_other": "규칙 피드: {{title}} v{{version}}, 규칙 {{count}}개"
+    },
+    "decide": {
+      "confirm": "결정 기록",
+      "decision": "결정",
+      "reason": "이유",
+      "title": "발견 사항 {{count}}건 결정",
+      "title_one": "발견 사항 {{count}}건 결정",
+      "title_other": "발견 사항 {{count}}건 결정"
+    },
+    "decideSelected": "선택한 {{count}}건 결정",
+    "findings": {
+      "empty": "일치하는 발견 사항이 없습니다.",
+      "file": "파일",
+      "host": "호스트",
+      "lastSeen": "마지막 확인",
+      "seenTimes": "{{count}}회 확인됨",
+      "severity": "심각도",
+      "signature": "탐지명",
+      "status": "상태",
+      "seenTimes_one": "{{count}}회 확인됨",
+      "seenTimes_other": "{{count}}회 확인됨"
+    },
+    "leg": {
+      "feed": "규칙 피드",
+      "signatures": "ClamAV 시그니처"
+    },
+    "loadError": "맬웨어 발견 사항을 불러올 수 없습니다.",
+    "reason": {
+      "disabled": "요청되지 않음",
+      "error": "스캐너가 실패했습니다",
+      "memory": "시그니처 데이터베이스를 로드할 여유 메모리가 부족합니다",
+      "noDatabase": "ClamAV 시그니처 데이터베이스 없음",
+      "noRules": "사용 가능한 규칙 세트가 없습니다",
+      "noScanner": "설치된 스캐너 없음",
+      "timeout": "시간 초과"
+    },
+    "refusal": {
+      "busy": "이미 스캔이 실행 중입니다",
+      "invalidPath": "유효한 절대 경로가 아닌 경로가 있습니다",
+      "notEquipped": "에이전트가 스캔할 수 없습니다 (ClamAV 없음)",
+      "notFound": "호스트를 찾을 수 없습니다"
+    },
+    "scan": {
+      "completed": "완료됨",
+      "failed": "실패",
+      "queued": "대기 중",
+      "refused": "거부됨",
+      "timedOut": "시간 초과"
+    },
+    "scanDialog": {
+      "error": "스캔을 시작할 수 없습니다.",
+      "hosts": "호스트",
+      "paths": "경로 (한 줄에 하나씩)",
+      "pathsHelp": "비워 두면 각 운영 체제에서 맬웨어가 흔히 발견되는 위치를 스캔합니다.",
+      "queued": "스캔 {{count}}건이 시작되었습니다",
+      "start": "스캔 시작",
+      "title": "호스트 맬웨어 스캔",
+      "queued_one": "스캔 {{count}}건이 시작되었습니다",
+      "queued_other": "스캔 {{count}}건이 시작되었습니다"
+    },
+    "scanHosts": "호스트 스캔",
+    "scans": {
+      "empty": "아직 실행된 스캔이 없습니다.",
+      "legs": "실행 항목",
+      "paths": "경로",
+      "requested": "요청 시각",
+      "result": "결과",
+      "rulesLoaded": "규칙 {{total}}개 중 {{loaded}}개 로드됨",
+      "summary": "파일 {{files}}개, 발견 사항 {{findings}}건"
+    },
+    "severity": {
+      "critical": "심각",
+      "high": "높음",
+      "info": "정보",
+      "low": "낮음",
+      "medium": "중간"
+    },
+    "status": {
+      "falsePositive": "오탐",
+      "open": "미해결",
+      "quarantined": "격리됨",
+      "resolved": "해결됨",
+      "restored": "복원됨"
+    },
+    "subtitle": "각 호스트의 자체 ClamAV가 ClamAV 시그니처와 SysManage 규칙 피드로 실행한 스캔입니다.",
+    "tabs": {
+      "decided": "결정됨",
+      "open": "미해결 발견 사항",
+      "scans": "스캔",
+      "rulesets": "규칙 세트"
+    },
+    "title": "맬웨어",
+    "decideSelected_one": "선택한 {{count}}건 결정",
+    "decideSelected_other": "선택한 {{count}}건 결정",
+    "qrefusal": {
+      "fileChanged": "스캔 이후 파일이 변경되었습니다",
+      "notEquipped": "에이전트가 이 작업을 수행할 수 없습니다",
+      "notRegular": "일반 파일이 아닙니다",
+      "other": "거부됨 ({{code}})",
+      "pathOccupied": "원래 경로에 이제 다른 항목이 있습니다",
+      "pending": "이미 에이전트를 기다리는 요청이 있습니다",
+      "permission": "에이전트에 파일을 이동할 권한이 없습니다",
+      "wrongStatus": "이 작업을 허용하는 상태가 아닙니다"
+    },
+    "quarantine": {
+      "confirm": "격리",
+      "confirmSystem": "이해했습니다. 그래도 격리합니다",
+      "error": "요청을 보낼 수 없습니다.",
+      "explain": "각 에이전트는 파일을 비공개 격리 디렉터리로 이동하고 원래 위치를 기록하므로 정확하게 복원할 수 있습니다. 아무것도 삭제되지 않습니다. 스캔 이후 변경된 파일은 이동되지 않습니다.",
+      "requested": "에이전트 대기 중",
+      "sent": "요청 {{count}}건을 에이전트에 보냈습니다",
+      "systemPaths": "이 파일들은 시스템 위치에 있습니다. 이동하면 호스트가 작동을 멈출 수 있습니다:",
+      "title": "파일 {{count}}개 격리",
+      "sent_one": "요청 {{count}}건을 에이전트에 보냈습니다",
+      "sent_other": "요청 {{count}}건을 에이전트에 보냈습니다",
+      "title_one": "파일 {{count}}개 격리",
+      "title_other": "파일 {{count}}개 격리"
+    },
+    "quarantineSelected": "선택한 {{count}}건 격리",
+    "restore": {
+      "confirm": "복원",
+      "explain": "각 에이전트는 해당 경로에 다른 항목이 없는 한 파일을 원래 권한으로 원래 위치에 되돌립니다.",
+      "title": "파일 {{count}}개 복원",
+      "title_one": "파일 {{count}}개 복원",
+      "title_other": "파일 {{count}}개 복원"
+    },
+    "restoreSelected": "선택한 {{count}}건 복원",
+    "quarantineSelected_one": "선택한 {{count}}건 격리",
+    "quarantineSelected_other": "선택한 {{count}}건 격리",
+    "restoreSelected_one": "선택한 {{count}}건 복원",
+    "restoreSelected_other": "선택한 {{count}}건 복원",
+    "reject": {
+      "duplicate": "이 이름의 규칙이 이미 있습니다",
+      "include": "include 지시문은 지원되지 않습니다",
+      "module": "ClamAV가 로드할 수 없는 YARA 모듈을 사용합니다",
+      "noStrings": "문자열이 없어 ClamAV가 건너뜁니다",
+      "tooLarge": "규칙 세트가 너무 큽니다",
+      "unparseable": "구문 분석할 수 없습니다"
+    },
+    "rulesets": {
+      "chooseFile": ".yar 파일 선택",
+      "curated": "엄선됨",
+      "import": "가져오기",
+      "importButton": "규칙 세트 가져오기",
+      "importError": "규칙 세트를 가져올 수 없습니다.",
+      "importExplain": "ClamAV가 실행할 수 없는 규칙(모듈 가져오기, 문자열이 없는 규칙, include)은 제거되고 목록에 표시됩니다. 같은 이름을 다시 가져오면 새 버전이 추가됩니다. 모든 테넌트가 이 규칙으로 스캔합니다.",
+      "importTitle": "YARA 규칙 세트 가져오기",
+      "imported": "{{title}} v{{version}}을(를) 규칙 {{count}}개와 함께 가져왔습니다.",
+      "importedBy": "가져온 사용자: {{who}}",
+      "readError": "파일을 읽을 수 없습니다.",
+      "removed": "{{count}}개 제거됨",
+      "retire": "사용 중지",
+      "retireError": "규칙 세트를 사용 중지할 수 없습니다.",
+      "rules": "규칙",
+      "slug": "이름(a-z, 0-9, 하이픈)",
+      "source": "소스",
+      "titleField": "제목",
+      "updated": "업데이트",
+      "version": "버전",
+      "removed_one": "{{count}}개 제거됨",
+      "removed_other": "{{count}}개 제거됨",
+      "imported_one": "{{title}} v{{version}}을(를) 규칙 {{count}}개와 함께 가져왔습니다.",
+      "imported_other": "{{title}} v{{version}}을(를) 규칙 {{count}}개와 함께 가져왔습니다."
     }
   }
 }

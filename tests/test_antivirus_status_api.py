@@ -28,6 +28,7 @@ import pytest
 from fastapi import HTTPException
 
 from backend.api import antivirus_status as av
+from backend.persistence import models
 from backend.security.roles import SecurityRoles
 
 MOD = "backend.api.antivirus_status"
@@ -69,6 +70,12 @@ class _FakeSession:
 
     def commit(self):
         self.commits += 1
+
+    def add(self, obj):
+        self._by_key.setdefault(type(obj).__name__, []).append(obj)
+
+    def delete(self, obj):
+        self._by_key.get(type(obj).__name__, []).remove(obj)
 
     def close(self):
         self.closed = True
@@ -144,11 +151,12 @@ class _Env:
 
 
 class TestHostInfoForAvPlanner:
-    def test_only_the_three_os_fields_are_packed(self):
+    def test_only_the_os_fields_and_architecture_are_packed(self):
         assert av._host_info_for_av_planner(_host()) == {
             "platform": "Linux",
             "platform_release": "Ubuntu 24.04",
             "platform_version": "24.04",
+            "machine_architecture": None,
         }
 
 
@@ -357,6 +365,35 @@ class TestSingleHostActions:
         assert env.enqueued[0]["host_id"] == str(HOST_ID)
         assert db.commits == 1
         assert word in env.audits[0]["description"]
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "route,role",
+        [
+            ("disable_antivirus", SecurityRoles.DISABLE_ANTIVIRUS),
+            ("remove_antivirus", SecurityRoles.REMOVE_ANTIVIRUS),
+        ],
+    )
+    async def test_removing_or_disabling_opts_the_host_out_of_auto_deploy(
+        self, route, role
+    ):
+        # Without this, the next plan-version bump would silently reinstall or
+        # re-enable what an operator took off on purpose.
+        db = _FakeSession(Host=[_host()])
+        with _Env():
+            await getattr(av, route)(str(HOST_ID), db=db, current_user=_user(role))
+        (record,) = db._by_key["AntivirusAutoDeploy"]
+        assert record.status == "opted_out" and record.host_id == HOST_ID
+
+    @pytest.mark.asyncio
+    async def test_enabling_hands_the_host_back_to_auto_deploy(self):
+        opted = models.AntivirusAutoDeploy(host_id=HOST_ID, status="opted_out")
+        db = _FakeSession(Host=[_host()], AntivirusAutoDeploy=[opted])
+        with _Env():
+            await av.enable_antivirus(
+                str(HOST_ID), db=db, current_user=_user(SecurityRoles.ENABLE_ANTIVIRUS)
+            )
+        assert db._by_key["AntivirusAutoDeploy"] == []
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("route,role,_word", ACTIONS)

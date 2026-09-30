@@ -5546,6 +5546,66 @@ msgstr "Не удалось выполнить аутентификацию хо
 msgid "Tenant routing is temporarily unavailable"
 msgstr "Маршрутизация арендаторов временно недоступна"
 
+#: backend/api/malware.py:82
+msgid "Invalid id"
+msgstr "Недопустимый идентификатор"
+
+#: backend/services/malware_quarantine.py:132
+msgid "Unknown action"
+msgstr "Неизвестное действие"
+
+#: backend/services/malware_review.py:178
+#, python-format
+msgid "That decision cannot be made here: %s"
+msgstr "Это решение нельзя принять здесь: %s"
+
+#: backend/services/malware_review.py:65
+#, python-format
+msgid "Unknown finding status: %s"
+msgstr "Неизвестный статус срабатывания: %s"
+
+#: backend/services/malware_scans.py:142 backend/services/malware_quarantine.py:129
+msgid "Malware detection is not available"
+msgstr "Обнаружение вредоносного ПО недоступно"
+
+#: backend/services/malware_scans.py:145
+msgid "Choose at least one host to scan"
+msgstr "Выберите хотя бы один хост для сканирования"
+
+#: backend/services/malware_scans.py:148
+msgid "At most 500 hosts can be scanned in one request"
+msgstr "За один запрос можно просканировать не более 500 хостов"
+
+#: backend/api/malware.py:344
+msgid "No imported rule set by that name"
+msgstr "Импортированного набора правил с таким именем нет"
+
+#: backend/api/malware.py:98
+msgid "Only an administrator can change the malware rule sets"
+msgstr ""
+"Изменять наборы правил для обнаружения вредоносного ПО может только "
+"администратор"
+
+#: backend/api/malware.py:104
+msgid ""
+"Malware rule sets are shared by every tenant; change them from the server "
+"scope, not from inside a tenant"
+msgstr ""
+"Наборы правил для обнаружения вредоносного ПО общие для всех арендаторов; "
+"изменяйте их на уровне сервера, а не внутри арендатора"
+
+#: backend/services/malware_rulesets.py:158
+msgid "A rule set name may use only a-z, 0-9 and hyphens"
+msgstr "Имя набора правил может содержать только a-z, 0-9 и дефисы"
+
+#: backend/services/malware_rulesets.py:162
+msgid "That name belongs to a curated rule set"
+msgstr "Это имя принадлежит курируемому набору правил"
+
+#: backend/services/malware_rulesets.py:166
+msgid "None of these rules can run under ClamAV"
+msgstr "Ни одно из этих правил не может выполняться в ClamAV"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "Служба электронной почты отключена. Включите её в файле конфигурации."
 

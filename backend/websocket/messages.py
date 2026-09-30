@@ -136,6 +136,10 @@ class CommandType(str, Enum):
     RUN_NETWORK_SWEEP = "run_network_sweep"
     # Phase 21.1 S4 -- run a query pack against the host's fact tables.
     RUN_QUERY_PACK = "run_query_pack"
+    # Phase 21.3: malware scanning with the host's ClamAV.
+    RUN_MALWARE_SCAN = "run_malware_scan"
+    QUARANTINE_FILE = "quarantine_file"
+    RESTORE_FILE = "restore_file"
     CHECK_REBOOT_STATUS = "check_reboot_status"
     COLLECT_DIAGNOSTICS = "collect_diagnostics"
     COLLECT_CERTIFICATES = "collect_certificates"

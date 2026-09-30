@@ -2403,7 +2403,8 @@
     "vulnerabilities": "Sicherheitslücken",
     "advisor": "Berater",
     "hostMetrics": "Host-Metriken",
-    "assetDiscovery": "Netzwerkerkennung"
+    "assetDiscovery": "Netzwerkerkennung",
+    "malware": "Schadsoftware"
   },
   "notifications": {
     "applicationUpdates": "Anwendungs-Updates",
@@ -3923,7 +3924,9 @@
       "smStab001": "Konfigurationsabweichung seit mehr als 7 Tagen ungelöst",
       "smStabF01": "OpenSSL-Version weicht von der Version vergleichbarer Hosts ab",
       "pmNetDiscovery": "Geräte in Ihren Netzwerken werden erkannt",
-      "pmNetUnmanaged": "In Ihren Netzwerken befinden sich keine nicht verwalteten Geräte"
+      "pmNetUnmanaged": "In Ihren Netzwerken befinden sich keine nicht verwalteten Geräte",
+      "pmMalwareClean": "Keine offenen Schadsoftware-Befunde mit hohem Schweregrad",
+      "pmMalwareScanned": "Hosts werden auf Schadsoftware gescannt"
     },
     "curatedPack": {
       "baseline": {
@@ -4030,7 +4033,9 @@
       "set_password_policy": "Die Passwortrichtlinie wird in sysmanage.yaml festgelegt; SysManage kann sie nicht für Sie ändern.",
       "shorten_session": "Lassen Sie Sitzungen nach einer Stunde ablaufen.",
       "enable_network_discovery": "Aktivieren Sie die Netzwerkerkennung, damit Agents die Geräte in ihrer Umgebung melden.",
-      "review_unmanaged_devices": "Registrieren Sie jedes nicht verwaltete Gerät oder markieren Sie es mit einer Begründung als bekannt."
+      "review_unmanaged_devices": "Registrieren Sie jedes nicht verwaltete Gerät oder markieren Sie es mit einer Begründung als bekannt.",
+      "review_malware_findings": "Stellen Sie jeden Befund mit hohem Schweregrad unter Quarantäne, beheben oder verwerfen Sie ihn.",
+      "scan_for_malware": "Scannen Sie jeden scanfähigen Host mindestens einmal im Monat."
     },
     "saved": "Bedrohungsmodell gespeichert. Die Maßnahmenliste wird beim nächsten Durchlauf des Beraters neu ausgewertet.",
     "stale": {
@@ -4373,6 +4378,197 @@
       "unknown": "Unbekannt",
       "virtualAddress": "Virtuelle Router-Adresse",
       "virtualMachine": "Virtuelle Maschine"
+    }
+  },
+  "malware": {
+    "blind": {
+      "legNotRun": "{{leg}} wurde auf {{count}} Hosts nicht ausgeführt: {{reason}}",
+      "neverScanned": "{{count}} scanfähige Hosts wurden noch nie gescannt",
+      "notEquipped": "{{count}} Hosts können nicht scannen: ClamAV ist nicht installiert",
+      "rulesShort": "Auf {{count}} Hosts hat ClamAV weniger Regeln geladen, als übergeben wurden",
+      "title": "Einige Hosts wurden nicht vollständig gescannt:",
+      "notEquipped_one": "{{count}} Host kann nicht scannen: ClamAV ist nicht installiert",
+      "notEquipped_other": "{{count}} Hosts können nicht scannen: ClamAV ist nicht installiert",
+      "neverScanned_one": "{{count}} scanfähiger Host wurde noch nie gescannt",
+      "neverScanned_other": "{{count}} scanfähige Hosts wurden noch nie gescannt",
+      "legNotRun_one": "{{leg}} wurde auf {{count}} Host nicht ausgeführt: {{reason}}",
+      "legNotRun_other": "{{leg}} wurde auf {{count}} Hosts nicht ausgeführt: {{reason}}",
+      "rulesShort_one": "Auf {{count}} Host hat ClamAV weniger Regeln geladen, als übergeben wurden",
+      "rulesShort_other": "Auf {{count}} Hosts hat ClamAV weniger Regeln geladen, als übergeben wurden"
+    },
+    "counts": {
+      "feed": "Regel-Feed: {{title}} v{{version}}, {{count}} Regeln",
+      "hosts": "{{count}} Hosts mit offenen Befunden",
+      "running": "{{count}} Scans laufen",
+      "hosts_one": "{{count}} Host mit offenen Befunden",
+      "hosts_other": "{{count}} Hosts mit offenen Befunden",
+      "running_one": "{{count}} Scan läuft",
+      "running_other": "{{count}} Scans laufen",
+      "feed_one": "Regel-Feed: {{title}} v{{version}}, {{count}} Regel",
+      "feed_other": "Regel-Feed: {{title}} v{{version}}, {{count}} Regeln"
+    },
+    "decide": {
+      "confirm": "Entscheidung speichern",
+      "decision": "Entscheidung",
+      "reason": "Begründung",
+      "title": "Über {{count}} Befunde entscheiden",
+      "title_one": "Über {{count}} Befund entscheiden",
+      "title_other": "Über {{count}} Befunde entscheiden"
+    },
+    "decideSelected": "Über {{count}} ausgewählte entscheiden",
+    "findings": {
+      "empty": "Keine passenden Befunde.",
+      "file": "Datei",
+      "host": "Host",
+      "lastSeen": "Zuletzt gesehen",
+      "seenTimes": "{{count}}-mal gesehen",
+      "severity": "Schweregrad",
+      "signature": "Erkennung",
+      "status": "Status",
+      "seenTimes_one": "{{count}}-mal gesehen",
+      "seenTimes_other": "{{count}}-mal gesehen"
+    },
+    "leg": {
+      "feed": "Regel-Feed",
+      "signatures": "ClamAV-Signaturen"
+    },
+    "loadError": "Schadsoftware-Befunde konnten nicht geladen werden.",
+    "reason": {
+      "disabled": "nicht angefordert",
+      "error": "der Scanner ist fehlgeschlagen",
+      "memory": "nicht genügend freier Arbeitsspeicher zum Laden der Signaturdatenbank",
+      "noDatabase": "keine ClamAV-Signaturdatenbank",
+      "noRules": "kein Regelsatz verfügbar",
+      "noScanner": "kein Scanner installiert",
+      "timeout": "Zeitüberschreitung"
+    },
+    "refusal": {
+      "busy": "ein Scan läuft bereits",
+      "invalidPath": "ein Pfad ist kein gültiger absoluter Pfad",
+      "notEquipped": "der Agent kann nicht scannen (kein ClamAV)",
+      "notFound": "Host nicht gefunden"
+    },
+    "scan": {
+      "completed": "Abgeschlossen",
+      "failed": "Fehlgeschlagen",
+      "queued": "In Warteschlange",
+      "refused": "Abgelehnt",
+      "timedOut": "Zeitüberschreitung"
+    },
+    "scanDialog": {
+      "error": "Die Scans konnten nicht gestartet werden.",
+      "hosts": "Hosts",
+      "paths": "Pfade (einer pro Zeile)",
+      "pathsHelp": "Leer lassen, um die Orte zu scannen, an denen Schadsoftware auf dem jeweiligen Betriebssystem üblicherweise zu finden ist.",
+      "queued": "{{count}} Scans gestartet",
+      "start": "Scans starten",
+      "title": "Hosts auf Schadsoftware scannen",
+      "queued_one": "{{count}} Scan gestartet",
+      "queued_other": "{{count}} Scans gestartet"
+    },
+    "scanHosts": "Hosts scannen",
+    "scans": {
+      "empty": "Es wurden noch keine Scans ausgeführt.",
+      "legs": "Ausgeführt",
+      "paths": "Pfade",
+      "requested": "Angefordert",
+      "result": "Ergebnis",
+      "rulesLoaded": "{{loaded}} von {{total}} Regeln geladen",
+      "summary": "{{files}} Dateien, {{findings}} Befunde"
+    },
+    "severity": {
+      "critical": "Kritisch",
+      "high": "Hoch",
+      "info": "Hinweis",
+      "low": "Niedrig",
+      "medium": "Mittel"
+    },
+    "status": {
+      "falsePositive": "Fehlalarm",
+      "open": "Offen",
+      "quarantined": "In Quarantäne",
+      "resolved": "Behoben",
+      "restored": "Wiederhergestellt"
+    },
+    "subtitle": "Scans durch das eigene ClamAV jedes Hosts, mit den Signaturen von ClamAV und dem SysManage-Regel-Feed.",
+    "tabs": {
+      "decided": "Entschieden",
+      "open": "Offene Befunde",
+      "scans": "Scanvorgänge",
+      "rulesets": "Regelsätze"
+    },
+    "title": "Schadsoftware",
+    "decideSelected_one": "Über {{count}} ausgewählten entscheiden",
+    "decideSelected_other": "Über {{count}} ausgewählte entscheiden",
+    "qrefusal": {
+      "fileChanged": "die Datei hat sich seit dem Scan geändert",
+      "notEquipped": "der Agent kann dies nicht ausführen",
+      "notRegular": "keine reguläre Datei",
+      "other": "abgelehnt ({{code}})",
+      "pathOccupied": "am ursprünglichen Pfad befindet sich jetzt etwas anderes",
+      "pending": "eine Anforderung wartet bereits auf den Agenten",
+      "permission": "der Agent darf sie nicht verschieben",
+      "wrongStatus": "nicht in einem Zustand, der dies zulässt"
+    },
+    "quarantine": {
+      "confirm": "In Quarantäne verschieben",
+      "confirmSystem": "Ich verstehe; trotzdem in Quarantäne verschieben",
+      "error": "Die Anforderung konnte nicht gesendet werden.",
+      "explain": "Jeder Agent verschiebt die Datei in ein privates Quarantäneverzeichnis und zeichnet ihren Ursprungsort auf, sodass sie exakt wiederhergestellt werden kann. Es wird nichts gelöscht. Eine Datei, die sich seit dem Scan geändert hat, wird nicht verschoben.",
+      "requested": "Wartet auf den Agenten",
+      "sent": "{{count}} Anforderungen an die Agenten gesendet",
+      "systemPaths": "Diese Dateien befinden sich an Systemspeicherorten. Das Verschieben kann dazu führen, dass der Host nicht mehr funktioniert:",
+      "title": "{{count}} Dateien in Quarantäne verschieben",
+      "sent_one": "{{count}} Anforderung an den Agenten gesendet",
+      "sent_other": "{{count}} Anforderungen an die Agenten gesendet",
+      "title_one": "{{count}} Datei in Quarantäne verschieben",
+      "title_other": "{{count}} Dateien in Quarantäne verschieben"
+    },
+    "quarantineSelected": "{{count}} ausgewählte in Quarantäne verschieben",
+    "restore": {
+      "confirm": "Wiederherstellen",
+      "explain": "Jeder Agent legt die Datei mit ihren ursprünglichen Berechtigungen wieder an ihrem ursprünglichen Ort ab, sofern sich dort nicht inzwischen etwas anderes befindet.",
+      "title": "{{count}} Dateien wiederherstellen",
+      "title_one": "{{count}} Datei wiederherstellen",
+      "title_other": "{{count}} Dateien wiederherstellen"
+    },
+    "restoreSelected": "{{count}} ausgewählte wiederherstellen",
+    "quarantineSelected_one": "{{count}} ausgewählte in Quarantäne verschieben",
+    "quarantineSelected_other": "{{count}} ausgewählte in Quarantäne verschieben",
+    "restoreSelected_one": "{{count}} ausgewählte wiederherstellen",
+    "restoreSelected_other": "{{count}} ausgewählte wiederherstellen",
+    "reject": {
+      "duplicate": "eine Regel mit diesem Namen existiert bereits",
+      "include": "include-Direktiven werden nicht unterstützt",
+      "module": "verwendet ein YARA-Modul, das ClamAV nicht laden kann",
+      "noStrings": "enthält keine Strings, daher würde ClamAV sie überspringen",
+      "tooLarge": "der Regelsatz ist zu groß",
+      "unparseable": "konnte nicht geparst werden"
+    },
+    "rulesets": {
+      "chooseFile": "Eine .yar-Datei auswählen",
+      "curated": "Kuratiert",
+      "import": "Importieren",
+      "importButton": "Regelsatz importieren",
+      "importError": "Der Regelsatz konnte nicht importiert werden.",
+      "importExplain": "Regeln, die ClamAV nicht ausführen kann (Modulimporte, Regeln ohne Strings, include-Anweisungen), werden entfernt und aufgelistet. Ein erneuter Import unter demselben Namen fügt eine neue Version hinzu. Jeder Mandant scannt mit diesen Regeln.",
+      "importTitle": "YARA-Regelsatz importieren",
+      "imported": "{{title}} v{{version}} mit {{count}} Regeln importiert.",
+      "importedBy": "Importiert von {{who}}",
+      "readError": "Die Datei konnte nicht gelesen werden.",
+      "removed": "{{count}} entfernt",
+      "retire": "Außer Betrieb nehmen",
+      "retireError": "Der Regelsatz konnte nicht außer Betrieb genommen werden.",
+      "rules": "Regeln",
+      "slug": "Name (a-z, 0-9, Bindestriche)",
+      "source": "Quelle",
+      "titleField": "Titel",
+      "updated": "Aktualisiert",
+      "version": "Version",
+      "removed_one": "{{count}} entfernt",
+      "removed_other": "{{count}} entfernt",
+      "imported_one": "{{title}} v{{version}} mit {{count}} Regel importiert.",
+      "imported_other": "{{title}} v{{version}} mit {{count}} Regeln importiert."
     }
   }
 }

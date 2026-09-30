@@ -2403,7 +2403,8 @@
     "vulnerabilities": "脆弱性",
     "advisor": "アドバイザー",
     "hostMetrics": "ホストメトリクス",
-    "assetDiscovery": "ネットワーク検出"
+    "assetDiscovery": "ネットワーク検出",
+    "malware": "マルウェア"
   },
   "notifications": {
     "applicationUpdates": "アプリケーションアップデート",
@@ -3923,7 +3924,9 @@
       "smStab001": "7 日を超えて未解決の構成ドリフト",
       "smStabF01": "OpenSSL のバージョンがピアのバージョンと異なる",
       "pmNetDiscovery": "ネットワーク上のデバイスが検出されています",
-      "pmNetUnmanaged": "ネットワーク上に管理されていないデバイスはありません"
+      "pmNetUnmanaged": "ネットワーク上に管理されていないデバイスはありません",
+      "pmMalwareClean": "未対応の重大度「高」のマルウェア検出事項がない",
+      "pmMalwareScanned": "ホストでマルウェアのスキャンが行われている"
     },
     "curatedPack": {
       "baseline": {
@@ -4030,7 +4033,9 @@
       "set_password_policy": "パスワードポリシーは sysmanage.yaml で設定されています。SysManage が代わりに変更することはできません。",
       "shorten_session": "セッションを 1 時間で期限切れにします。",
       "enable_network_discovery": "エージェントが周囲のデバイスを報告できるよう、ネットワーク検出を有効にしてください。",
-      "review_unmanaged_devices": "管理されていない各デバイスを登録するか、理由を付けて既知としてマークしてください。"
+      "review_unmanaged_devices": "管理されていない各デバイスを登録するか、理由を付けて既知としてマークしてください。",
+      "review_malware_findings": "重大度「高」の検出事項をそれぞれ隔離、解決、または却下してください。",
+      "scan_for_malware": "スキャン可能なすべてのホストを少なくとも月に 1 回スキャンしてください。"
     },
     "saved": "脅威モデルを保存しました。対応項目リストは次回のアドバイザー実行時に再評価されます。",
     "stale": {
@@ -4373,6 +4378,197 @@
       "unknown": "不明",
       "virtualAddress": "仮想ルーターアドレス",
       "virtualMachine": "仮想マシン"
+    }
+  },
+  "malware": {
+    "blind": {
+      "legNotRun": "{{count}} 台のホストで {{leg}} が実行されませんでした: {{reason}}",
+      "neverScanned": "スキャン可能な {{count}} 台のホストが一度もスキャンされていません",
+      "notEquipped": "{{count}} 台のホストはスキャンできません: ClamAV がインストールされていません",
+      "rulesShort": "{{count}} 台のホストで ClamAV が読み込んだルールが指定数より少なくなっています",
+      "title": "一部のホストは完全にはスキャンされていません:",
+      "notEquipped_one": "{{count}} 台のホストはスキャンできません: ClamAV がインストールされていません",
+      "notEquipped_other": "{{count}} 台のホストはスキャンできません: ClamAV がインストールされていません",
+      "neverScanned_one": "スキャン可能な {{count}} 台のホストが一度もスキャンされていません",
+      "neverScanned_other": "スキャン可能な {{count}} 台のホストが一度もスキャンされていません",
+      "legNotRun_one": "{{count}} 台のホストで {{leg}} が実行されませんでした: {{reason}}",
+      "legNotRun_other": "{{count}} 台のホストで {{leg}} が実行されませんでした: {{reason}}",
+      "rulesShort_one": "{{count}} 台のホストで ClamAV が読み込んだルールが指定数より少なくなっています",
+      "rulesShort_other": "{{count}} 台のホストで ClamAV が読み込んだルールが指定数より少なくなっています"
+    },
+    "counts": {
+      "feed": "ルールフィード: {{title}} v{{version}}、{{count}} 件のルール",
+      "hosts": "未対応の検出事項があるホスト {{count}} 台",
+      "running": "実行中のスキャン {{count}} 件",
+      "hosts_one": "未対応の検出事項があるホスト {{count}} 台",
+      "hosts_other": "未対応の検出事項があるホスト {{count}} 台",
+      "running_one": "実行中のスキャン {{count}} 件",
+      "running_other": "実行中のスキャン {{count}} 件",
+      "feed_one": "ルールフィード: {{title}} v{{version}}、{{count}} 件のルール",
+      "feed_other": "ルールフィード: {{title}} v{{version}}、{{count}} 件のルール"
+    },
+    "decide": {
+      "confirm": "判定を記録",
+      "decision": "判定",
+      "reason": "理由",
+      "title": "{{count}} 件の検出事項を判定",
+      "title_one": "{{count}} 件の検出事項を判定",
+      "title_other": "{{count}} 件の検出事項を判定"
+    },
+    "decideSelected": "選択した {{count}} 件を判定",
+    "findings": {
+      "empty": "一致する検出事項はありません。",
+      "file": "ファイル",
+      "host": "ホスト",
+      "lastSeen": "最終検出",
+      "seenTimes": "{{count}} 回検出",
+      "severity": "重要度",
+      "signature": "検出名",
+      "status": "ステータス",
+      "seenTimes_one": "{{count}} 回検出",
+      "seenTimes_other": "{{count}} 回検出"
+    },
+    "leg": {
+      "feed": "ルールフィード",
+      "signatures": "ClamAV シグネチャ"
+    },
+    "loadError": "マルウェアの検出事項を読み込めませんでした。",
+    "reason": {
+      "disabled": "要求されていません",
+      "error": "スキャナーが失敗しました",
+      "memory": "シグネチャデータベースを読み込むための空きメモリが不足しています",
+      "noDatabase": "ClamAV シグネチャデータベースがありません",
+      "noRules": "利用可能なルールセットがありませんでした",
+      "noScanner": "スキャナーがインストールされていません",
+      "timeout": "タイムアウトしました"
+    },
+    "refusal": {
+      "busy": "スキャンはすでに実行中です",
+      "invalidPath": "有効な絶対パスではないパスがあります",
+      "notEquipped": "エージェントはスキャンできません (ClamAV なし)",
+      "notFound": "ホストが見つかりません"
+    },
+    "scan": {
+      "completed": "完了",
+      "failed": "失敗",
+      "queued": "キュー待ち",
+      "refused": "拒否",
+      "timedOut": "タイムアウト"
+    },
+    "scanDialog": {
+      "error": "スキャンを開始できませんでした。",
+      "hosts": "ホスト",
+      "paths": "パス (1 行に 1 つ)",
+      "pathsHelp": "空欄のままにすると、各オペレーティングシステムでマルウェアがよく見つかる場所をスキャンします。",
+      "queued": "{{count}} 件のスキャンを開始しました",
+      "start": "スキャンを開始",
+      "title": "ホストのマルウェアスキャン",
+      "queued_one": "{{count}} 件のスキャンを開始しました",
+      "queued_other": "{{count}} 件のスキャンを開始しました"
+    },
+    "scanHosts": "ホストをスキャン",
+    "scans": {
+      "empty": "まだスキャンは実行されていません。",
+      "legs": "実行内容",
+      "paths": "パス",
+      "requested": "要求日時",
+      "result": "結果",
+      "rulesLoaded": "{{total}} 件中 {{loaded}} 件のルールを読み込み済み",
+      "summary": "{{files}} ファイル、{{findings}} 件の検出事項"
+    },
+    "severity": {
+      "critical": "重大",
+      "high": "高",
+      "info": "情報",
+      "low": "低",
+      "medium": "中"
+    },
+    "status": {
+      "falsePositive": "誤検知",
+      "open": "未対応",
+      "quarantined": "隔離済み",
+      "resolved": "解決済み",
+      "restored": "復元済み"
+    },
+    "subtitle": "各ホスト自身の ClamAV が、ClamAV のシグネチャと SysManage ルールフィードを使って実行したスキャンです。",
+    "tabs": {
+      "decided": "判定済み",
+      "open": "未対応の検出事項",
+      "scans": "スキャン",
+      "rulesets": "ルールセット"
+    },
+    "title": "マルウェア",
+    "decideSelected_one": "選択した {{count}} 件を判定",
+    "decideSelected_other": "選択した {{count}} 件を判定",
+    "qrefusal": {
+      "fileChanged": "スキャン後にファイルが変更されています",
+      "notEquipped": "エージェントはこの操作を実行できません",
+      "notRegular": "通常のファイルではありません",
+      "other": "拒否されました ({{code}})",
+      "pathOccupied": "元のパスに別のものが存在します",
+      "pending": "すでにエージェントの処理を待っている要求があります",
+      "permission": "エージェントにはファイルを移動する権限がありません",
+      "wrongStatus": "この操作を許可する状態ではありません"
+    },
+    "quarantine": {
+      "confirm": "隔離",
+      "confirmSystem": "理解しました。それでも隔離します",
+      "error": "要求を送信できませんでした。",
+      "explain": "各エージェントはファイルを専用の隔離ディレクトリに移動し、元の場所を記録するため、正確に復元できます。何も削除されません。スキャン後に変更されたファイルは移動されません。",
+      "requested": "エージェントを待機中",
+      "sent": "{{count}} 件の要求をエージェントに送信しました",
+      "systemPaths": "これらのファイルはシステムの場所にあります。移動するとホストが動作しなくなる可能性があります:",
+      "title": "{{count}} 件のファイルを隔離",
+      "sent_one": "{{count}} 件の要求をエージェントに送信しました",
+      "sent_other": "{{count}} 件の要求をエージェントに送信しました",
+      "title_one": "{{count}} 件のファイルを隔離",
+      "title_other": "{{count}} 件のファイルを隔離"
+    },
+    "quarantineSelected": "選択した {{count}} 件を隔離",
+    "restore": {
+      "confirm": "復元",
+      "explain": "各エージェントは、元のパスに別のものが存在しない限り、ファイルを元のアクセス許可で元の場所に戻します。",
+      "title": "{{count}} 件のファイルを復元",
+      "title_one": "{{count}} 件のファイルを復元",
+      "title_other": "{{count}} 件のファイルを復元"
+    },
+    "restoreSelected": "選択した {{count}} 件を復元",
+    "quarantineSelected_one": "選択した {{count}} 件を隔離",
+    "quarantineSelected_other": "選択した {{count}} 件を隔離",
+    "restoreSelected_one": "選択した {{count}} 件を復元",
+    "restoreSelected_other": "選択した {{count}} 件を復元",
+    "reject": {
+      "duplicate": "この名前のルールはすでに存在します",
+      "include": "include ディレクティブはサポートされていません",
+      "module": "ClamAV が読み込めない YARA モジュールを使用しています",
+      "noStrings": "文字列がないため、ClamAV はスキップします",
+      "tooLarge": "ルールセットが大きすぎます",
+      "unparseable": "解析できませんでした"
+    },
+    "rulesets": {
+      "chooseFile": ".yar ファイルを選択",
+      "curated": "厳選",
+      "import": "インポート",
+      "importButton": "ルールセットをインポート",
+      "importError": "ルールセットをインポートできませんでした。",
+      "importExplain": "ClamAV が実行できないルール (モジュールのインポート、文字列のないルール、include) は削除され、一覧表示されます。同じ名前を再度インポートすると新しいバージョンが追加されます。すべてのテナントがこれらのルールでスキャンします。",
+      "importTitle": "YARA ルールセットのインポート",
+      "imported": "{{title}} v{{version}} を {{count}} 件のルールでインポートしました。",
+      "importedBy": "インポート者: {{who}}",
+      "readError": "ファイルを読み込めませんでした。",
+      "removed": "{{count}} 件削除",
+      "retire": "廃止",
+      "retireError": "ルールセットを廃止できませんでした。",
+      "rules": "ルール",
+      "slug": "名前 (a-z, 0-9, ハイフン)",
+      "source": "ソース",
+      "titleField": "タイトル",
+      "updated": "更新日時",
+      "version": "バージョン",
+      "removed_one": "{{count}} 件削除",
+      "removed_other": "{{count}} 件削除",
+      "imported_one": "{{title}} v{{version}} を {{count}} 件のルールでインポートしました。",
+      "imported_other": "{{title}} v{{version}} を {{count}} 件のルールでインポートしました。"
     }
   }
 }

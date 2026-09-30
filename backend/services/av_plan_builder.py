@@ -19,6 +19,17 @@ commercial-AV detection.
 
 from typing import Any, Dict, List, Optional, Tuple
 
+# Bump whenever what a deploy plan writes changes: with malware detection
+# licensed, av_auto_deploy re-pushes the plan to every equipped host whose
+# recorded version is older.  2 = 2026-09-30 (no Linux paths on the BSDs,
+# macOS launchd freshclam, Windows update cadence).  3 = 2026-09-30 (agent's
+# package-manager names "pkg"/"choco"; Windows = official ClamAV, not ClamWin).
+# 4 = 2026-09-30 (Windows via winget Cisco.ClamAV: Chocolatey's "clamav" is
+# the portable zip, unpacked under a versioned lib folder, never Program Files).
+# 5 = 2026-09-30 (FreeBSD clamd.conf PidFile: the rc script decides "running"
+# from it, so clamd ran unseen -- status "not running", and stop impossible).
+PLAN_VERSION = 5
+
 # ---------------------------------------------------------------------------
 # Conf-file paths used by multiple distro layouts (deduped to satisfy
 # Sonar's duplicate-string-literal rule).
@@ -81,7 +92,28 @@ def _linux_clamav_layout(distro: str) -> Tuple[List[str], str, str, str, str]:
     )
 
 
-def _bsd_clamav_layout(plat: str) -> Tuple[str, str, str, str, str]:
+# Package-specific runtime facts, read from each platform's own ClamAV
+# package (FreeBSD port security/clamav, OpenBSD ports, pkgsrc, Homebrew),
+# 2026-09-30: (clamd user, directory for clamd's socket).  The socket lives
+# where the package guarantees a directory exists: FreeBSD's rc script
+# creates /var/run/clamav; OpenBSD clears /var/run at boot, so there -- and
+# on NetBSD -- it goes in the package's own database directory.
+_BSD_RUNTIME = {
+    "freebsd": ("clamav", "/var/run/clamav"),
+    "openbsd": ("_clamav", "/var/db/clamav"),
+    "netbsd": ("clamav", "/var/clamav"),
+}
+
+
+def _brew_prefix(host_info: Optional[Dict[str, Any]]) -> str:
+    """Homebrew lives in /opt/homebrew on Apple silicon, /usr/local on Intel."""
+    arch = ((host_info or {}).get("machine_architecture") or "").lower()
+    return "/opt/homebrew" if arch in ("arm64", "aarch64") else "/usr/local"
+
+
+def _bsd_clamav_layout(
+    plat: str, host_info: Optional[Dict[str, Any]] = None
+) -> Tuple[str, str, str, str, str]:
     """Returns (pkg_manager, clamd_conf, freshclam_conf, clamd_service, freshclam_service)."""
     p = (plat or "").lower()
     if p == "freebsd":
@@ -93,29 +125,102 @@ def _bsd_clamav_layout(plat: str) -> Tuple[str, str, str, str, str]:
             "clamav_freshclam",
         )
     if p == "openbsd":
+        # The agent's installer is named for pkg(8) and runs pkg_add on OpenBSD.
         return (
-            "pkg_add",
+            "pkg",
             "/etc/clamd.conf",
             "/etc/freshclam.conf",
             "clamd",
             "freshclam",
         )
     if p == "netbsd":
+        # pkgsrc installs the updater's rc.d script as "freshclamd".
         return (
             "pkgin",
             "/usr/pkg/etc/clamd.conf",
             "/usr/pkg/etc/freshclam.conf",
             "clamd",
-            "freshclam",
+            "freshclamd",
         )
-    # darwin / macos
+    # darwin / macos: Homebrew ships no freshclam service; the plan installs
+    # a launchd job for it (see _macos_freshclam_job).
+    prefix = _brew_prefix(host_info)
     return (
         "brew",
-        "/usr/local/etc/clamav/clamd.conf",
-        "/usr/local/etc/clamav/freshclam.conf",
+        f"{prefix}/etc/clamav/clamd.conf",
+        f"{prefix}/etc/clamav/freshclam.conf",
         "clamav",
-        "clamav-freshclam",
+        MACOS_FRESHCLAM_LABEL,
     )
+
+
+MACOS_FRESHCLAM_LABEL = "org.sysmanage.freshclam"
+MACOS_FRESHCLAM_PLIST = f"/Library/LaunchDaemons/{MACOS_FRESHCLAM_LABEL}.plist"
+
+
+def _macos_freshclam_job(prefix: str) -> str:
+    """launchd job running freshclam as a daemon: it wakes ``Checks`` times a
+    day on its own, and launchd restarts it if it dies."""
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" '
+        '"http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n'
+        '<plist version="1.0"><dict>\n'
+        f"  <key>Label</key><string>{MACOS_FRESHCLAM_LABEL}</string>\n"
+        "  <key>ProgramArguments</key><array>\n"
+        f"    <string>{prefix}/bin/freshclam</string>\n"
+        "    <string>--daemon</string><string>--foreground</string>\n"
+        "  </array>\n"
+        "  <key>RunAtLoad</key><true/>\n"
+        "  <key>KeepAlive</key><true/>\n"
+        "</dict></plist>\n"
+    )
+
+
+FREEBSD_CLAMD_PIDFILE = "/var/run/clamav/clamd.pid"
+
+
+def _freebsd_stop_unseen_clamd() -> Dict[str, Any]:
+    """A clamd started without PidFile is invisible to rc ("not running"), so
+    rc can neither stop it nor start another (its socket is live).  Ending
+    it here lets the service actions start it under the new config -- which
+    a redeploy needs anyway, since "start" leaves a running clamd on the old
+    one."""
+    return {
+        "argv": ["pkill", "-x", "clamd"],
+        "sudo": True,
+        "timeout": 30,
+        "ignore_errors": True,
+        "description": "restart clamd under the deployed configuration",
+    }
+
+
+def _bsd_clamd_conf(plat: str, host_info: Optional[Dict[str, Any]]) -> str:
+    """clamd.conf for the BSDs and macOS: the package's own user, a socket in
+    a directory the package guarantees, syslog instead of a log file whose
+    directory may not exist.  No DatabaseDirectory: clamd's compiled default
+    is where freshclam puts the database."""
+    user, sock_dir = _BSD_RUNTIME.get(plat, (None, None))
+    if sock_dir is None:  # macOS / Homebrew: runs as root under launchd
+        sock_dir = f"{_brew_prefix(host_info)}/var/lib/clamav"
+    lines = [
+        "# clamd.conf - managed by sysmanage open-source AV planner",
+        "# DO NOT EDIT MANUALLY - overwrites on every deploy",
+        "",
+        "LogSyslog yes",
+        f"LocalSocket {sock_dir}/clamd.sock",
+        "FixStaleSocket yes",
+        "ScanArchive yes",
+        "MaxFileSize 100M",
+        "MaxScanSize 400M",
+    ]
+    if user:
+        lines.insert(3, f"User {user}")
+    if plat == "freebsd":
+        # The port's rc script reads this path to decide whether clamd runs;
+        # clamd writes no pid file unless told to.
+        lines.append(f"PidFile {FREEBSD_CLAMD_PIDFILE}")
+    return "\n".join(lines) + "\n"
 
 
 def _basic_clamd_conf() -> str:
@@ -134,31 +239,48 @@ def _basic_clamd_conf() -> str:
         "MaxThreads 12\n"
         "MaxFileSize 100M\n"
         "MaxScanSize 400M\n"
-        "DatabaseDirectory /var/lib/clamav\n"
     )
 
 
-def _basic_freshclam_conf(checks_per_day: Optional[int] = None) -> str:
+DEFAULT_CHECKS_PER_DAY = 12
+MAX_CHECKS_PER_DAY = 24
+
+
+def clamp_checks(value: Any) -> int:
+    """freshclam's daily update checks: default 12 (every two hours), at most
+    24 (hourly).  ClamAV's mirrors throttle clients that download too often
+    (HTTP 429), so anything above hourly is clamped, never passed through."""
+    cadence = value if isinstance(value, int) else DEFAULT_CHECKS_PER_DAY
+    return min(max(cadence, 1), MAX_CHECKS_PER_DAY)
+
+
+def _basic_freshclam_conf(
+    checks_per_day: Optional[int] = None, database_owner: Optional[str] = None
+) -> str:
     """
     Render freshclam.conf with a configurable definition-update cadence.
 
-    `checks_per_day` defaults to 24 (every hour) if not supplied. ClamAV
-    accepts 1-50; we clamp anything outside that range so we never emit
-    an unparseable config.
+    DatabaseDirectory and DatabaseOwner are deliberately NOT set: every
+    package compiles in its own (Debian /var/lib/clamav + clamav, RHEL
+    clamupdate, FreeBSD/OpenBSD /var/db/clamav, OpenBSD _clamav, NetBSD
+    /var/clamav), and clamscan reads the SAME compiled default -- so the
+    database always lands where the scanner looks.  Hard-coding
+    /var/lib/clamav + clamav (as this did before 2026-09-30) put the BSDs'
+    signatures where clamscan never looked and failed outright on OpenBSD.
+    ``database_owner`` is only for macOS, whose Homebrew build defaults to a
+    ``clamav`` user that does not exist there.
     """
-    cadence = checks_per_day if isinstance(checks_per_day, int) else 24
-    cadence = max(cadence, 1)
-    cadence = min(cadence, 50)
-    return (
-        "# freshclam.conf - managed by sysmanage open-source AV planner\n"
-        "# DO NOT EDIT MANUALLY - overwrites on every deploy\n"
-        "\n"
-        "DatabaseOwner clamav\n"
-        "UpdateLogFile /var/log/clamav/freshclam.log\n"
-        "DatabaseMirror database.clamav.net\n"
-        f"Checks {cadence}\n"
-        "DatabaseDirectory /var/lib/clamav\n"
-    )
+    lines = [
+        "# freshclam.conf - managed by sysmanage open-source AV planner",
+        "# DO NOT EDIT MANUALLY - overwrites on every deploy",
+        "",
+        "LogSyslog yes",
+        "DatabaseMirror database.clamav.net",
+        f"Checks {clamp_checks(checks_per_day)}",
+    ]
+    if database_owner:
+        lines.append(f"DatabaseOwner {database_owner}")
+    return "\n".join(lines) + "\n"
 
 
 # ---------------------------------------------------------------------------
@@ -260,7 +382,7 @@ def _linux_deploy(
     Build a Linux AV deploy plan.
 
     `options` may carry:
-        checks_per_day: int (1-50) -- freshclam definition-update cadence
+        checks_per_day: int (1-24) -- freshclam definition-update cadence
         scan_schedule:  dict -- see _validate_scan_schedule. When set, an
                        /etc/cron.d/sysmanage-clamscan file is added to
                        the plan with a cron entry that invokes clamdscan
@@ -384,13 +506,16 @@ def _bsd_deploy(
     """BSD/macOS deploy plan with optional cadence + scan_schedule."""
     options = options or {}
     plat = (host_info.get("platform") or "").lower()
-    pkg_mgr, clamd_conf, fresh_conf, clamd_svc, fresh_svc = _bsd_clamav_layout(plat)
+    pkg_mgr, clamd_conf, fresh_conf, clamd_svc, fresh_svc = _bsd_clamav_layout(
+        plat, host_info
+    )
     pkg_name = antivirus_package or "clamav"
+    macos = plat in ("darwin", "macos")
 
     files: List[Dict[str, Any]] = [
         {
             "path": clamd_conf,
-            "content": _basic_clamd_conf(),
+            "content": _bsd_clamd_conf(plat, host_info),
             "mode": 0o644,
             "owner": "root",
             "group": "wheel",
@@ -398,13 +523,26 @@ def _bsd_deploy(
         },
         {
             "path": fresh_conf,
-            "content": _basic_freshclam_conf(options.get("checks_per_day")),
+            "content": _basic_freshclam_conf(
+                options.get("checks_per_day"), "root" if macos else None
+            ),
             "mode": 0o644,
             "owner": "root",
             "group": "wheel",
             "backup": True,
         },
     ]
+    if macos:
+        files.append(
+            {
+                "path": MACOS_FRESHCLAM_PLIST,
+                "content": _macos_freshclam_job(_brew_prefix(host_info)),
+                "mode": 0o644,
+                "owner": "root",
+                "group": "wheel",
+                "backup": True,
+            }
+        )
 
     schedule = _validate_scan_schedule(options.get("scan_schedule"))
     if schedule:
@@ -437,7 +575,17 @@ def _bsd_deploy(
         "av_product": "clamav",
         "packages": [{"manager": pkg_mgr, "name": pkg_name}],
         "files": files,
-        "commands": [
+        "commands": _bsd_update_commands(plat, host_info),
+        "service_actions": _bsd_service_actions(plat, clamd_svc, fresh_svc),
+        "scan_schedule": schedule or None,
+    }
+
+
+def _bsd_update_commands(plat: str, host_info: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Refresh the database now, and on macOS load the freshclam launchd job
+    (Homebrew has no freshclam service to enable)."""
+    if plat not in ("darwin", "macos"):
+        commands = [
             {
                 "argv": ["freshclam"],
                 "sudo": True,
@@ -445,42 +593,76 @@ def _bsd_deploy(
                 "ignore_errors": True,
                 "description": "refresh ClamAV signature database",
             },
-        ],
-        "service_actions": [
-            {"service": fresh_svc, "action": "enable"},
-            {"service": fresh_svc, "action": "start"},
-            {"service": clamd_svc, "action": "enable"},
-            {"service": clamd_svc, "action": "start"},
-        ],
-        "scan_schedule": schedule or None,
-    }
+        ]
+        if plat == "freebsd":
+            commands.append(_freebsd_stop_unseen_clamd())
+        return commands
+    prefix = _brew_prefix(host_info)
+    return [
+        {
+            "argv": [f"{prefix}/bin/freshclam"],
+            "sudo": True,
+            "timeout": 300,
+            "ignore_errors": True,
+            "description": "refresh ClamAV signature database",
+        },
+        {
+            "argv": ["launchctl", "bootstrap", "system", MACOS_FRESHCLAM_PLIST],
+            "sudo": True,
+            "timeout": 30,
+            # Already loaded on a re-deploy: launchctl says so and exits 5.
+            "ignore_errors": True,
+            "description": "schedule ClamAV signature updates (launchd)",
+        },
+    ]
+
+
+def _bsd_service_actions(plat: str, clamd_svc: str, fresh_svc: str) -> list:
+    if plat in ("darwin", "macos"):
+        # freshclam runs from its own launchd job; clamd is optional (a
+        # malware scan falls back to a one-shot clamscan when there is memory).
+        return []
+    return [
+        {"service": fresh_svc, "action": "enable"},
+        {"service": fresh_svc, "action": "start"},
+        {"service": clamd_svc, "action": "enable"},
+        {"service": clamd_svc, "action": "start"},
+    ]
 
 
 def _bsd_enable(host_info: Dict[str, Any]) -> Dict[str, Any]:
     plat = (host_info.get("platform") or "").lower()
-    _, _, _, clamd_svc, fresh_svc = _bsd_clamav_layout(plat)
+    _, _, _, clamd_svc, fresh_svc = _bsd_clamav_layout(plat, host_info)
+    macos = plat in ("darwin", "macos")
     return {
         "platform": plat,
         "av_product": "clamav",
         "files": [],
-        "commands": [],
-        "service_actions": [
-            {"service": fresh_svc, "action": "enable"},
-            {"service": fresh_svc, "action": "start"},
-            {"service": clamd_svc, "action": "enable"},
-            {"service": clamd_svc, "action": "start"},
-        ],
+        "commands": _bsd_update_commands(plat, host_info) if macos else [],
+        "service_actions": _bsd_service_actions(plat, clamd_svc, fresh_svc),
     }
+
+
+def _macos_unload_job() -> List[Dict[str, Any]]:
+    return [
+        {
+            "argv": ["launchctl", "bootout", f"system/{MACOS_FRESHCLAM_LABEL}"],
+            "sudo": True,
+            "timeout": 30,
+            "ignore_errors": True,
+            "description": "stop scheduled ClamAV signature updates (launchd)",
+        },
+    ]
 
 
 def _bsd_remove(host_info: Dict[str, Any]) -> Dict[str, Any]:
     plat = (host_info.get("platform") or "").lower()
-    pkg_mgr, _, _, clamd_svc, fresh_svc = _bsd_clamav_layout(plat)
+    pkg_mgr, _, _, clamd_svc, fresh_svc = _bsd_clamav_layout(plat, host_info)
     return {
         "platform": plat,
         "av_product": "clamav",
         "files": [],
-        "commands": [],
+        "commands": _macos_unload_job() if plat in ("darwin", "macos") else [],
         "packages_to_remove": [{"manager": pkg_mgr, "name": "clamav"}],
         "service_actions": [
             {"service": clamd_svc, "action": "stop"},
@@ -491,86 +673,118 @@ def _bsd_remove(host_info: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+# Windows runs the official ClamAV MSI (winget ``Cisco.ClamAV``, native arm64
+# too), not ClamWin and not Chocolatey's ``clamav`` -- that one is the portable
+# zip, unpacked to chocolatey\lib\clamav\tools\clamav-<version>.win.x64, so
+# nothing ever reached the directory below (found on x13s, 2026-09-30):
+# ClamWin's newest release is ClamAV 0.103 (end of life), and both the agent's
+# antivirus detection and its malware scanner look in C:\Program Files\ClamAV
+# -- a ClamWin install was never detected, so it could never be scanned with.
+WINDOWS_INSTALL_DIR = r"C:\Program Files\ClamAV"
+WINDOWS_PACKAGE = "Cisco.ClamAV"
+WINDOWS_UPDATE_TASK = "SysManage ClamAV Update"
+WINDOWS_SCAN_TASK = "SysManage ClamAV Scan"
+
+
+def _windows_package(antivirus_package: str) -> str:
+    """The winget package id: the product names ``clamav``/``clamwin`` (the
+    seeded defaults) mean official ClamAV (see above); anything else is an
+    operator's own winget id."""
+    pkg = (antivirus_package or "").strip()
+    return WINDOWS_PACKAGE if pkg.lower() in ("", "clamwin", "clamav") else pkg
+
+
+def _windows_freshclam_conf(checks: Optional[int]) -> str:
+    # No DatabaseDirectory: freshclam and clamscan share the build's default
+    # (<install dir>\database), as on every other platform.
+    return (
+        "# freshclam.conf - managed by sysmanage open-source AV planner\r\n"
+        "# DO NOT EDIT MANUALLY - overwrites on every deploy\r\n"
+        "DatabaseMirror database.clamav.net\r\n"
+        f"Checks {clamp_checks(checks)}\r\n"
+    )
+
+
+def _windows_database_dir_command() -> Dict[str, Any]:
+    """freshclam refuses to run when its database directory is missing, and
+    the package does not promise to create it."""
+    path = WINDOWS_INSTALL_DIR + r"\database"
+    return {
+        "argv": [
+            "powershell", "-NoProfile", "-NonInteractive", "-Command",
+            f"New-Item -ItemType Directory -Force -Path '{path}' | Out-Null",
+        ],
+        "sudo": False,
+        "elevated": True,
+        "timeout": 60,
+        "ignore_errors": True,
+        "description": "create the ClamAV database directory",
+    }  # fmt: skip
+
+
+def _windows_refresh_command() -> Dict[str, Any]:
+    return {
+        "argv": [WINDOWS_INSTALL_DIR + r"\freshclam.exe"],
+        "sudo": False,
+        "elevated": True,
+        "timeout": 600,
+        "ignore_errors": True,
+        "description": "refresh ClamAV signature database",
+    }
+
+
+def _windows_scan_task(schedule: Dict[str, Any]) -> Dict[str, Any]:
+    scan_paths = " ".join(f'"{p}"' for p in schedule["scan_paths"])
+    scan_cmd = f'"{WINDOWS_INSTALL_DIR}\\clamscan.exe" -r {scan_paths}'
+    if schedule["frequency"] == "daily":
+        sc, modifier = "DAILY", []
+    elif schedule["frequency"] == "weekly":
+        day_map = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+        sc = "WEEKLY"
+        modifier = ["/D", day_map[schedule["day_of_week"]]]
+    else:  # monthly
+        sc = "MONTHLY"
+        modifier = ["/D", str(schedule["day_of_month"])]
+    time_str = f"{schedule['hour']:02d}:{schedule['minute']:02d}"
+    return {
+        "argv": [
+            "schtasks", "/Create", "/TN", WINDOWS_SCAN_TASK, "/SC", sc, *modifier,
+            "/ST", time_str, "/TR", scan_cmd, "/RU", "SYSTEM", "/F",
+        ],
+        "sudo": False,
+        "elevated": True,
+        "timeout": 30,
+        "ignore_errors": True,
+        "description": "register ClamAV scheduled scan",
+    }  # fmt: skip
+
+
 def _windows_deploy(
     _host_info: Dict[str, Any],
     antivirus_package: str,
     options: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-    """Windows ClamWin deploy plan with optional scan_schedule via schtasks."""
+    """Windows ClamAV deploy plan with optional scan_schedule via schtasks."""
     options = options or {}
-    pkg_name = antivirus_package or "clamwin"
-    install_dir = r"C:\Program Files (x86)\ClamWin"
-
-    # Pass checks_per_day through to the WarnOutdated stanza? ClamWin doesn't
-    # have an exact equivalent; we just use the default 30-day warn threshold.
+    checks = options.get("checks_per_day")
     commands: List[Dict[str, Any]] = [
-        {
-            "argv": [install_dir + r"\bin\freshclam.exe"],
-            "sudo": False,
-            "elevated": True,
-            "timeout": 600,
-            "ignore_errors": True,
-            "description": "refresh ClamWin signature database",
-        },
+        _windows_database_dir_command(),
+        _windows_refresh_command(),
+        _windows_update_task(WINDOWS_INSTALL_DIR, checks),
     ]
-
     schedule = _validate_scan_schedule(options.get("scan_schedule"))
     if schedule:
-        # Build a `schtasks /Create` command for the scan.
-        scan_paths = " ".join(f'"{p}"' for p in schedule["scan_paths"])
-        scan_cmd = f'"{install_dir}\\bin\\clamscan.exe" -r {scan_paths}'
-        if schedule["frequency"] == "daily":
-            sc, modifier = "DAILY", []
-        elif schedule["frequency"] == "weekly":
-            day_map = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
-            sc = "WEEKLY"
-            modifier = ["/D", day_map[schedule["day_of_week"]]]
-        else:  # monthly
-            sc = "MONTHLY"
-            modifier = ["/D", str(schedule["day_of_month"])]
-        time_str = f"{schedule['hour']:02d}:{schedule['minute']:02d}"
-        commands.append(
-            {
-                "argv": [
-                    "schtasks",
-                    "/Create",
-                    "/TN",
-                    "SysManage ClamWin Scan",
-                    "/SC",
-                    sc,
-                    *modifier,
-                    "/ST",
-                    time_str,
-                    "/TR",
-                    scan_cmd,
-                    "/F",
-                ],
-                "sudo": False,
-                "elevated": True,
-                "timeout": 30,
-                "ignore_errors": True,
-                "description": "register ClamWin scheduled scan",
-            }
-        )
-
+        commands.append(_windows_scan_task(schedule))
     return {
         "platform": "windows",
-        "av_product": "clamwin",
-        "packages": [{"manager": "chocolatey", "name": pkg_name, "args": ["-y"]}],
+        "av_product": "clamav",
+        "packages": [
+            {"manager": "winget", "name": _windows_package(antivirus_package)}
+        ],
         "files": [
             {
-                "path": install_dir + r"\bin\ClamWin.conf",
-                "content": (
-                    "# ClamWin.conf - managed by sysmanage open-source AV planner\r\n"
-                    "[ClamAV]\r\n"
-                    f"Database = {install_dir}\\db\r\n"
-                    "MaxFileSize = 20\r\n"
-                    "ScanArchives = 1\r\n"
-                    "[Updates]\r\n"
-                    "Enable = 1\r\n"
-                    "DBMirror = database.clamav.net\r\n"
-                    "WarnOutdated = 30\r\n"
-                ),
+                "path": WINDOWS_INSTALL_DIR + r"\freshclam.conf",
+                "content": _windows_freshclam_conf(checks),
                 "mode": 0o644,
                 "encoding": "utf-8",
                 "backup": True,
@@ -582,23 +796,61 @@ def _windows_deploy(
     }
 
 
+def _windows_update_task(install_dir: str, checks: Optional[int]) -> Dict[str, Any]:
+    """A scheduled task running freshclam every 24 / checks hours as SYSTEM.
+    Windows has no freshclam service, and a one-off update at install time
+    leaves the signatures to go stale.  The name matches what the disable
+    plan deletes."""
+    every = max(1, 24 // clamp_checks(checks))
+    return {
+        "argv": [
+            "schtasks", "/Create", "/TN", WINDOWS_UPDATE_TASK,
+            "/SC", "HOURLY", "/MO", str(every),
+            "/TR", f'"{install_dir}\\freshclam.exe"',
+            "/RU", "SYSTEM", "/F",
+        ],
+        "sudo": False,
+        "elevated": True,
+        "timeout": 30,
+        "ignore_errors": False,
+        "description": "schedule ClamAV signature updates",
+    }  # fmt: skip
+
+
+def _windows_delete_tasks() -> List[Dict[str, Any]]:
+    return [
+        {
+            "argv": ["schtasks", "/Delete", "/TN", task, "/F"],
+            "sudo": False,
+            "elevated": True,
+            "timeout": 30,
+            "ignore_errors": True,
+            "description": "remove scheduled ClamAV task",
+        }
+        for task in (WINDOWS_UPDATE_TASK, WINDOWS_SCAN_TASK)
+    ]
+
+
 def _windows_enable(_host_info: Dict[str, Any]) -> Dict[str, Any]:
-    # ClamWin is on-demand, not service-based; "enable" just runs freshclam.
-    install_dir = r"C:\Program Files (x86)\ClamWin"
+    # ClamAV on Windows runs on demand; "enable" refreshes and reschedules.
     return {
         "platform": "windows",
-        "av_product": "clamwin",
+        "av_product": "clamav",
         "files": [],
         "commands": [
-            {
-                "argv": [install_dir + r"\bin\freshclam.exe"],
-                "sudo": False,
-                "elevated": True,
-                "timeout": 600,
-                "ignore_errors": True,
-                "description": "refresh ClamWin signature database",
-            },
+            _windows_refresh_command(),
+            _windows_update_task(WINDOWS_INSTALL_DIR, None),
         ],
+        "service_actions": [],
+    }
+
+
+def _windows_disable() -> Dict[str, Any]:
+    return {
+        "platform": "windows",
+        "av_product": "clamav",
+        "files": [],
+        "commands": _windows_delete_tasks(),
         "service_actions": [],
     }
 
@@ -606,12 +858,10 @@ def _windows_enable(_host_info: Dict[str, Any]) -> Dict[str, Any]:
 def _windows_remove(_host_info: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "platform": "windows",
-        "av_product": "clamwin",
+        "av_product": "clamav",
         "files": [],
-        "commands": [],
-        "packages_to_remove": [
-            {"manager": "chocolatey", "name": "clamwin", "args": ["-y"]}
-        ],
+        "commands": _windows_delete_tasks(),
+        "packages_to_remove": [{"manager": "winget", "name": WINDOWS_PACKAGE}],
         "service_actions": [],
     }
 
@@ -641,8 +891,8 @@ def build_deploy_plan(
     Build a plan that installs and starts the OS-default antivirus.
 
     `options` may carry:
-        checks_per_day (int 1-50): freshclam definition-update cadence
-                                   per day (default 24 = hourly)
+        checks_per_day (int 1-24): freshclam definition-update cadence
+                                   per day (default 12 = every two hours)
         scan_schedule (dict):      see _validate_scan_schedule. When set
                                    the plan adds an /etc/cron.d entry
                                    (Linux/FreeBSD) or a schtasks entry
@@ -695,37 +945,14 @@ def build_disable_plan(host_info: Dict[str, Any]) -> Dict[str, Any]:
             ],
         }
     if kind == "windows":
-        # ClamWin has no daemon -- disable is a no-op aside from removing
-        # the scheduled update task if present.
-        return {
-            "platform": "windows",
-            "av_product": "clamwin",
-            "files": [],
-            "commands": [
-                {
-                    "argv": [
-                        "schtasks",
-                        "/Delete",
-                        "/TN",
-                        "ClamWin Definition Update",
-                        "/F",
-                    ],
-                    "sudo": False,
-                    "elevated": True,
-                    "timeout": 30,
-                    "ignore_errors": True,
-                    "description": "remove daily definition update task",
-                },
-            ],
-            "service_actions": [],
-        }
+        return _windows_disable()
     plat = (host_info.get("platform") or "").lower()
-    _, _, _, clamd_svc, fresh_svc = _bsd_clamav_layout(plat)
+    _, _, _, clamd_svc, fresh_svc = _bsd_clamav_layout(plat, host_info)
     return {
         "platform": plat,
         "av_product": "clamav",
         "files": [],
-        "commands": [],
+        "commands": _macos_unload_job() if plat in ("darwin", "macos") else [],
         "service_actions": [
             {"service": clamd_svc, "action": "stop"},
             {"service": clamd_svc, "action": "disable"},

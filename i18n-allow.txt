@@ -228,3 +228,6 @@ assetDiscovery.method.mdns
 assetDiscovery.method.ssdp
 # Phase 21.6 S5: "Computer" is the standard word in Italian and Dutch.
 assetDiscovery.type.computer
+# Phase 21.3 malware page: correct native words that happen to equal English.
+nl: re:^(Malware|Scans)$
+it: re:^(Malware|File)$

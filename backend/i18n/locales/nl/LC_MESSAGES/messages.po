@@ -5527,6 +5527,64 @@ msgstr "Hostverificatie mislukt voor deze poll"
 msgid "Tenant routing is temporarily unavailable"
 msgstr "Tenantroutering is tijdelijk niet beschikbaar"
 
+#: backend/api/malware.py:82
+msgid "Invalid id"
+msgstr "Ongeldige ID"
+
+#: backend/services/malware_quarantine.py:132
+msgid "Unknown action"
+msgstr "Onbekende actie"
+
+#: backend/services/malware_review.py:178
+#, python-format
+msgid "That decision cannot be made here: %s"
+msgstr "Die beslissing kan hier niet worden genomen: %s"
+
+#: backend/services/malware_review.py:65
+#, python-format
+msgid "Unknown finding status: %s"
+msgstr "Onbekende status van bevinding: %s"
+
+#: backend/services/malware_scans.py:142 backend/services/malware_quarantine.py:129
+msgid "Malware detection is not available"
+msgstr "Malwaredetectie is niet beschikbaar"
+
+#: backend/services/malware_scans.py:145
+msgid "Choose at least one host to scan"
+msgstr "Kies ten minste één host om te scannen"
+
+#: backend/services/malware_scans.py:148
+msgid "At most 500 hosts can be scanned in one request"
+msgstr "Er kunnen maximaal 500 hosts in één verzoek worden gescand"
+
+#: backend/api/malware.py:344
+msgid "No imported rule set by that name"
+msgstr "Geen geïmporteerde regelset met die naam"
+
+#: backend/api/malware.py:98
+msgid "Only an administrator can change the malware rule sets"
+msgstr "Alleen een beheerder kan de malware-regelsets wijzigen"
+
+#: backend/api/malware.py:104
+msgid ""
+"Malware rule sets are shared by every tenant; change them from the server "
+"scope, not from inside a tenant"
+msgstr ""
+"Malware-regelsets worden door alle tenants gedeeld; wijzig ze vanuit het "
+"serverbereik, niet vanuit een tenant"
+
+#: backend/services/malware_rulesets.py:158
+msgid "A rule set name may use only a-z, 0-9 and hyphens"
+msgstr "De naam van een regelset mag alleen a-z, 0-9 en koppeltekens bevatten"
+
+#: backend/services/malware_rulesets.py:162
+msgid "That name belongs to a curated rule set"
+msgstr "Die naam hoort bij een samengestelde regelset"
+
+#: backend/services/malware_rulesets.py:166
+msgid "None of these rules can run under ClamAV"
+msgstr "Geen van deze regels kan onder ClamAV worden uitgevoerd"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr ""
 #~ "E-mailservice is uitgeschakeld. Schakel deze in het configuratiebestand in."

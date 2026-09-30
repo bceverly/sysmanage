@@ -5233,3 +5233,59 @@ msgstr ""
 #: backend/api/agent_poll.py:179
 msgid "Tenant routing is temporarily unavailable"
 msgstr ""
+
+#: backend/api/malware.py:82
+msgid "Invalid id"
+msgstr ""
+
+#: backend/services/malware_quarantine.py:132
+msgid "Unknown action"
+msgstr ""
+
+#: backend/services/malware_review.py:178
+#, python-format
+msgid "That decision cannot be made here: %s"
+msgstr ""
+
+#: backend/services/malware_review.py:65
+#, python-format
+msgid "Unknown finding status: %s"
+msgstr ""
+
+#: backend/services/malware_scans.py:142 backend/services/malware_quarantine.py:129
+msgid "Malware detection is not available"
+msgstr ""
+
+#: backend/services/malware_scans.py:145
+msgid "Choose at least one host to scan"
+msgstr ""
+
+#: backend/services/malware_scans.py:148
+msgid "At most 500 hosts can be scanned in one request"
+msgstr ""
+
+#: backend/api/malware.py:344
+msgid "No imported rule set by that name"
+msgstr ""
+
+#: backend/api/malware.py:98
+msgid "Only an administrator can change the malware rule sets"
+msgstr ""
+
+#: backend/api/malware.py:104
+msgid ""
+"Malware rule sets are shared by every tenant; change them from the server "
+"scope, not from inside a tenant"
+msgstr ""
+
+#: backend/services/malware_rulesets.py:158
+msgid "A rule set name may use only a-z, 0-9 and hyphens"
+msgstr ""
+
+#: backend/services/malware_rulesets.py:162
+msgid "That name belongs to a curated rule set"
+msgstr ""
+
+#: backend/services/malware_rulesets.py:166
+msgid "None of these rules can run under ClamAV"
+msgstr ""
