@@ -114,6 +114,11 @@ class Host(Base):
     ipv4 = Column(String)
     ipv6 = Column(String)
     host_token = Column(String(256), nullable=True, unique=True)
+    # Phase 22.0: once the host's agent proves it keeps its token, the legacy
+    # id-only identity is refused for it (backend/security/agent_identity.py).
+    requires_host_token = Column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
     last_access = Column(DateTime)
     status = Column(String(20), nullable=False, server_default="up")
     approval_status = Column(String(20), nullable=False, server_default="pending")

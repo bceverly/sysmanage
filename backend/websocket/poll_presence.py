@@ -14,7 +14,7 @@ the poll to pick up.
 
 In-process on purpose: it only has to outlive one poll interval (5s, at most
 25s with a long poll), and a server restart makes the agent reconnect anyway.
-Under a multi-instance deployment (Phase 30) this must move to shared state.
+Under a multi-instance deployment (Phase 31, HA/DR) this must move to shared state.
 """
 
 import threading

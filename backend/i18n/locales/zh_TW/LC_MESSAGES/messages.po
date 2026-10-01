@@ -6030,3 +6030,15 @@ msgstr "依作業系統版本列出的 macOS 弱點（來自 NVD 的受影響版
 
 msgid "The single sign-on session has expired. Sign in again."
 msgstr "單一登入工作階段已過期。請重新登入。"
+
+#: backend/api/message_handlers_core.py
+msgid "Agent session refused: it did not prove it is this host"
+msgstr "已拒絕代理程式工作階段：它未證明自己是此主機"
+
+#: backend/api/message_handlers_core.py
+msgid "This agent did not prove it is this host. If the host was reinstalled, remove it from SysManage and approve its new registration."
+msgstr "此代理程式未證明自己是此主機。如果主機已重新安裝，請從 SysManage 中移除它，然後核准其新的註冊。"
+
+#: backend/api/message_handlers.py
+msgid "This session cannot acknowledge another host's message"
+msgstr "此工作階段無法確認其他主機的訊息"

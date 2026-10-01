@@ -26,6 +26,7 @@ import asyncio
 import json
 import uuid
 from datetime import datetime, timezone
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -110,7 +111,9 @@ def _register(fqdn="agent1.example.com", token=TOKEN):
         ipv4="10.0.0.1",
         enrollment_token=token,
     )
-    return asyncio.run(register_host(reg))
+    # The reply is a dict since Phase 22.0 (never the ORM row); .id keeps
+    # these tests reading as before.
+    return SimpleNamespace(**asyncio.run(register_host(reg)))
 
 
 def _count_hosts(eng, fqdn):

@@ -5305,3 +5305,15 @@ msgstr ""
 #: backend/api/sso_session.py
 msgid "The single sign-on session has expired. Sign in again."
 msgstr ""
+
+#: backend/api/message_handlers_core.py
+msgid "Agent session refused: it did not prove it is this host"
+msgstr ""
+
+#: backend/api/message_handlers_core.py
+msgid "This agent did not prove it is this host. If the host was reinstalled, remove it from SysManage and approve its new registration."
+msgstr ""
+
+#: backend/api/message_handlers.py
+msgid "This session cannot acknowledge another host's message"
+msgstr ""

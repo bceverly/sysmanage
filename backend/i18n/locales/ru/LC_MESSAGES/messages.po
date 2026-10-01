@@ -6329,3 +6329,15 @@ msgstr ""
 
 msgid "The single sign-on session has expired. Sign in again."
 msgstr "Сеанс единого входа истек. Войдите снова."
+
+#: backend/api/message_handlers_core.py
+msgid "Agent session refused: it did not prove it is this host"
+msgstr "Сеанс агента отклонен: он не подтвердил, что является этим узлом"
+
+#: backend/api/message_handlers_core.py
+msgid "This agent did not prove it is this host. If the host was reinstalled, remove it from SysManage and approve its new registration."
+msgstr "Этот агент не подтвердил, что является этим узлом. Если узел был переустановлен, удалите его из SysManage и одобрите его новую регистрацию."
+
+#: backend/api/message_handlers.py
+msgid "This session cannot acknowledge another host's message"
+msgstr "Этот сеанс не может подтвердить сообщение другого узла"

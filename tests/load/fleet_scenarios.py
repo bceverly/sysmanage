@@ -1,0 +1,239 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
+"""Fleet scenarios for the Phase 22 scale harness.
+
+  fleet-steady         N agents, started spread over one collection cycle
+                       (the kindest start today's code can get), run for
+                       --duration-seconds.
+  fleet-restart-storm  the same, then the server is restarted after
+                       --warmup-seconds: every agent reconnects at once.
+
+Both enroll the fleet first: every agent registers through the real
+endpoint, then the hosts are approved with one UPDATE in the harness's OWN
+database (approval's certificate is only used for mutual TLS, which this
+plain-ws harness never does).  The server is the disposable one from
+tests/load/stack.py -- a restart needs a server the harness owns.
+
+The verdict is the Phase 22 exit criteria, measured: nothing expires, no
+agent is locked out or demoted to polling, the inbound backlog drains, the
+fleet reconnects, no host is marked down by the outage, and the load is flat.
+On today's code these are EXPECTED to fail -- that is the baseline.  With
+--report-only the run still exits 0 so a baseline can be recorded.
+"""
+
+import asyncio
+import json
+import statistics
+import time
+from typing import List, Optional
+
+from sqlalchemy import create_engine, text
+
+from tests.load import stack
+from tests.load.fleet import COLLECTION_S, Fleet
+from tests.load.observe import Observer
+
+APPROVE_SQL = text(
+    "UPDATE host SET approval_status = 'approved' "
+    "WHERE fqdn LIKE '%.sim.test' AND approval_status = 'pending'"
+)
+
+
+def _approve(db_url: str) -> int:
+    engine = create_engine(db_url.replace("postgresql://", "postgresql+psycopg://", 1))
+    try:
+        with engine.begin() as conn:
+            return conn.execute(APPROVE_SQL).rowcount
+    finally:
+        engine.dispose()
+
+
+def _pct(values: List[float], p: float) -> Optional[float]:
+    if not values:
+        return None
+    ordered = sorted(values)
+    return round(ordered[min(int(len(ordered) * p), len(ordered) - 1)], 1)
+
+
+def _series(samples, key):
+    return [s[key] for s in samples if s.get(key) is not None]
+
+
+def _queue_total(sample, suffix):
+    return sum(v for k, v in sample.get("queue", {}).items() if k.endswith(suffix))
+
+
+def _reconnect_seconds(timeline, restart_t, agents, fraction=0.95):
+    """Seconds after the restart until ``fraction`` of the fleet is connected."""
+    if restart_t is None:
+        return None
+    for row in timeline:
+        if row["t"] > restart_t and row["connected"] >= fraction * agents:
+            return round(row["t"] - restart_t, 1)
+    return None
+
+
+def _spike_ratio(timeline, after_t):
+    """Busiest window's send count over the average: 1.0 is perfectly flat."""
+    sends = [row["sent_since_last"] for row in timeline if row["t"] > after_t]
+    if len(sends) < 3 or not sum(sends):
+        return None
+    return round(max(sends) / statistics.mean(sends), 2)
+
+
+def _summarize(name, fleet, observer, restart_t, warmup):
+    stats = fleet.stats
+    samples = [s for s in observer.samples if "event" not in s]
+    agents = len(fleet.agents)
+    after = [s for s in samples if restart_t is not None and s["t"] > restart_t]
+    final = samples[-1] if samples else {}
+    hosts_down = [s.get("hosts", {}).get("approved.down", 0) for s in after]
+    summary = {
+        "name": name,
+        "agents": agents,
+        "source_ips": fleet.source_ips,
+        "time_scale": fleet.time_scale,
+        "connected_at_end": stats.connected_at_end,
+        "reconnect_95pct_seconds": _reconnect_seconds(stats.timeline, restart_t, agents),
+        "auth_429": stats.counts["auth_429"],
+        "fallback_to_polling": stats.counts["fallback_to_polling"],
+        "register_gave_up": stats.counts["register_gave_up"],
+        "errors_received": dict(stats.errors_received),
+        "messages_sent": sum(stats.sent.values()),
+        "megabytes_sent": round(stats.bytes_sent / 1e6, 1),
+        "heartbeat_rtt_p50_ms": _pct(stats.heartbeat_rtt_ms, 0.50),
+        "heartbeat_rtt_p95_ms": _pct(stats.heartbeat_rtt_ms, 0.95),
+        "heartbeat_rtt_max_ms": _pct(stats.heartbeat_rtt_ms, 1.0),
+        "health_p95_ms": _pct(_series(samples, "health_ms"), 0.95),
+        "health_max_ms": _pct(_series(samples, "health_ms"), 1.0),
+        "health_failures": sum(1 for s in samples if s.get("health_ms") is None),
+        "server_cpu_mean_percent": round(statistics.mean(_series(samples, "server_cpu_percent")), 1)
+        if _series(samples, "server_cpu_percent") else None,
+        "server_rss_max_mb": max(_series(samples, "server_rss_mb"), default=None),
+        "inbound_pending_max": max((_queue_total(s, "inbound.pending") for s in samples), default=0),
+        "inbound_pending_final": _queue_total(final, "inbound.pending"),
+        "oldest_inbound_pending_max_s": max(_series(samples, "oldest_inbound_pending_s"), default=None),
+        "expired_rows_final": _queue_total(final, ".expired"),
+        "hosts_marked_down_max_after_restart": max(hosts_down, default=0),
+        "pg_connections_max": max(_series(samples, "pg_connections"), default=None),
+        "send_spike_ratio": _spike_ratio(stats.timeline, warmup),
+        "agent_counts": dict(stats.counts),
+        "sent_by_type": dict(stats.sent),
+    }  # fmt: skip
+    return summary
+
+
+def verdict(summary) -> List[str]:
+    """The Phase 22 exit criteria, as violations of today's run."""
+    out = []
+    if summary["expired_rows_final"]:
+        out.append(
+            f"{summary['expired_rows_final']} queued messages EXPIRED (silent data loss)"
+        )
+    if summary["auth_429"]:
+        out.append(
+            f"{summary['auth_429']} connection attempts refused with 429 (agents locked out)"
+        )
+    if summary["fallback_to_polling"]:
+        out.append(f"{summary['fallback_to_polling']} agents demoted to HTTP polling")
+    if summary["register_gave_up"]:
+        out.append(f"{summary['register_gave_up']} agents gave up registering")
+    if summary["connected_at_end"] < 0.99 * summary["agents"]:
+        out.append(
+            f"only {summary['connected_at_end']}/{summary['agents']} agents connected at the end"
+        )
+    final, peak = summary["inbound_pending_final"], summary["inbound_pending_max"]
+    if peak and final > max(0.05 * peak, summary["agents"]):
+        out.append(
+            f"inbound backlog did not drain: {final} pending at the end (peak {peak})"
+        )
+    if summary["hosts_marked_down_max_after_restart"]:
+        out.append(
+            f"{summary['hosts_marked_down_max_after_restart']} hosts marked DOWN by the outage"
+        )
+    spike = summary["send_spike_ratio"]
+    if spike is not None and spike > 2.0:
+        out.append(f"agent traffic is bursty: busiest window {spike}x the average")
+    return out
+
+
+async def _timeline(fleet, started, interval):
+    while True:
+        await asyncio.sleep(interval)
+        fleet.stats.snapshot(time.monotonic() - started)
+
+
+async def run_fleet(args) -> dict:
+    """Run one fleet scenario against the stack; returns the report."""
+    if not args.reuse_stack:
+        print("resetting the load stack (empty database) ...")
+        await asyncio.to_thread(stack.reset)
+    state = stack.load_state()
+    base = f"http://127.0.0.1:{state['port']}"
+    fleet = Fleet(base, args.agents, args.source_ips, args.time_scale, args.packages)
+    print(
+        f"enrolling {args.agents} agents from {fleet.source_ips} source address(es) ..."
+    )
+    t0 = time.monotonic()
+    await fleet.register_all()
+    approved = await asyncio.to_thread(_approve, state["db_url"])
+    print(f"  registered {fleet.stats.counts['register_ok']}, approved {approved} "
+          f"in {time.monotonic() - t0:.0f}s")  # fmt: skip
+
+    observer = Observer(base, state["db_url"], lambda: stack.load_state().get("server_pid"),
+                        interval=args.sample_seconds)  # fmt: skip
+    started = time.monotonic()
+    observer.start()
+    ticker = asyncio.create_task(_timeline(fleet, started, args.sample_seconds))
+    # Spread the starts over one (scaled) collection cycle: the kindest
+    # start today's code can get, so the restart's damage stands out.
+    fleet.start(ramp_seconds=COLLECTION_S / args.time_scale)
+    restart_t = None
+    try:
+        if args.scenario == "fleet-restart-storm":
+            await asyncio.sleep(args.warmup_seconds)
+            restart_t = round(time.monotonic() - started, 1)
+            observer.mark("server restart")
+            print(
+                f"  t={restart_t}s: restarting the server (down {args.down_seconds}s) ..."
+            )
+            await asyncio.to_thread(
+                stack.restart_server, stack.load_state(), args.down_seconds
+            )
+            await asyncio.sleep(args.duration_seconds)
+        else:
+            await asyncio.sleep(args.warmup_seconds + args.duration_seconds)
+    finally:
+        ticker.cancel()
+        # Before stop() disconnects everyone.
+        fleet.stats.connected_at_end = fleet.stats.connected
+        await fleet.stop()
+        await observer.stop()
+    summary = _summarize(f"{args.scenario}-{args.agents}", fleet, observer, restart_t,
+                         args.warmup_seconds)  # fmt: skip
+    return {
+        "scenario": args.scenario,
+        # compare.py matches run-over-run by scenario name under "scenarios".
+        "scenarios": [summary],
+        "summary": summary,
+        "violations": verdict(summary),
+        "server_samples": observer.samples,
+        "agent_timeline": fleet.stats.timeline,
+    }
+
+
+def main_fleet(args) -> int:
+    """Entry point from run.py for the fleet-* scenarios."""
+    report = asyncio.run(run_fleet(args))
+    with open(args.output_json, "w", encoding="utf-8") as fh:
+        json.dump(report, fh, indent=2, default=str)
+    print(json.dumps(report["summary"], indent=2, default=str))
+    if report["violations"]:
+        print("\nPhase 22 criteria NOT met:")
+        for line in report["violations"]:
+            print(f"  - {line}")
+        return 0 if args.report_only else 2
+    print("\nPhase 22 criteria met.")
+    return 0

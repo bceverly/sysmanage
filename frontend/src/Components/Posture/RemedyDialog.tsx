@@ -40,8 +40,12 @@ interface Props {
 
 const show = (value: unknown): string => {
     if (value === null || value === undefined || value === '') return '-';
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+        return value.toString();
+    }
     // Structured values (lists, settings maps) read as JSON, not "[object Object]".
-    return typeof value === 'object' ? JSON.stringify(value) : String(value);
+    return JSON.stringify(value) ?? '-';
 };
 
 const PreviewBody: React.FC<{ preview: RemedyPreview }> = ({ preview }) => {

@@ -6194,3 +6194,15 @@ msgstr "macOS vulnerabilities by OS version, from NVD's affected-version data"
 
 msgid "The single sign-on session has expired. Sign in again."
 msgstr "The single sign-on session has expired. Sign in again."
+
+#: backend/api/message_handlers_core.py
+msgid "Agent session refused: it did not prove it is this host"
+msgstr "Agent session refused: it did not prove it is this host"
+
+#: backend/api/message_handlers_core.py
+msgid "This agent did not prove it is this host. If the host was reinstalled, remove it from SysManage and approve its new registration."
+msgstr "This agent did not prove it is this host. If the host was reinstalled, remove it from SysManage and approve its new registration."
+
+#: backend/api/message_handlers.py
+msgid "This session cannot acknowledge another host's message"
+msgstr "This session cannot acknowledge another host's message"

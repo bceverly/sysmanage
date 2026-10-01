@@ -105,6 +105,10 @@ elif [ ! -f /usr/local/etc/sysmanage/config.yaml ]; then
     cp /usr/local/etc/sysmanage/sysmanage.yaml.example \
        /usr/local/etc/sysmanage/config.yaml
 fi
+# Size the database connection pool for THIS machine (Phase 22.2): adds a
+# commented database_pool block only if the config has none -- an
+# administrator's own values are never touched.
+( cd /usr/local/lib/sysmanage && .venv/bin/python -m backend.persistence.pool_sizing --apply /usr/local/etc/sysmanage/config.yaml ) || true
 
 # OpenBAO secrets broker -- install binary, create user, enable + start
 # (the openbao rc.d service runs init/unseal in its start_postcmd).

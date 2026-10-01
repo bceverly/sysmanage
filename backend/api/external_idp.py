@@ -454,7 +454,7 @@ async def oidc_callback(
     Anonymous endpoint -- the IdP just returned the user here.
     """
     try:
-        userid, tenant_id = await _oidc_sign_in(provider_id, request, db)
+        userid, tenant_id = _oidc_sign_in(provider_id, request, db)
     except HTTPException as exc:
         logger.warning(
             "OIDC sign-in via provider %s refused (%s): %s",
@@ -466,7 +466,7 @@ async def oidc_callback(
     return sso_session.landing(userid, tenant_id)
 
 
-async def _oidc_sign_in(provider_id: str, request: Request, db: Session):
+def _oidc_sign_in(provider_id: str, request: Request, db: Session):
     """Exchange the code and resolve the account: (userid, tenant_id), or an
     HTTPException saying why not."""
     engine = _check_idp_module()

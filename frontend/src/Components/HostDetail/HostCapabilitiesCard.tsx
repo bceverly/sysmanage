@@ -87,7 +87,9 @@ const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, lim
     const unavailable = report.unavailable || {};
     const partial = report.partial || {};
     const notApplicable = report.not_applicable || {};
-    const groups = report.capabilities || [];
+    // persistent_host_token is an agent trait the server acts on (Phase 22.0
+    // identity), not a command group -- it is not a "supported" feature.
+    const groups = (report.capabilities || []).filter(group => group !== 'persistent_host_token');
     const unavailableKeys = Object.keys(unavailable);
     const partialKeys = Object.keys(partial);
     const notApplicableKeys = Object.keys(notApplicable);

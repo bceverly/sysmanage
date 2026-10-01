@@ -195,3 +195,17 @@ email:
         </html>
 
         '
+
+# Database connection pool (per server worker).  The installer appends a
+# block sized for this machine; leave it out and the server sizes the pool
+# at startup.  Either way the server checks the pool against PostgreSQL's
+# max_connections when it starts and shrinks it, with a warning, if every
+# worker's pool would not fit.  Show the values for this machine with:
+#   python -m backend.persistence.pool_sizing --print
+# database_pool:
+#   size: 16                # connections kept open
+#   max_overflow: 16        # extra connections for bursts
+#   timeout: 30             # seconds to wait for a free connection
+#   recycle: 1800           # maximum connection age, seconds
+#   tenant_size: 2          # per tenant database (multi-tenancy)
+#   tenant_max_overflow: 6  # per tenant database, bursts

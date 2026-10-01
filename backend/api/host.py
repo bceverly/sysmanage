@@ -38,6 +38,7 @@ from backend.api.host_registration import (  # pylint: disable=unused-import
     _reject_if_fqdn_belongs_to_tenant,
     _resolve_enrollment_tenant,
     _validate_registration_key,
+    registration_reply,
 )
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
@@ -741,7 +742,9 @@ async def register_host(registration_data: HostRegistration):
             .first()
         )
         if existing_host:
-            return _refresh_existing_host(session, existing_host, registration_data)
+            _refresh_existing_host(session, existing_host, registration_data)
+            # Phase 22.0: never hand an existing host's id or token to whoever names it.
+            return registration_reply(existing_host, issue_credential=False)
 
         # Phantom-duplicate loophole close: no token routed us to the no-tenant DB
         # and no server-scoped row exists for this fqdn -- but if it already lives
@@ -804,6 +807,9 @@ async def register_host(registration_data: HostRegistration):
         # NOTE: Script execution capability defaults to False for new hosts
         # This should only be enabled through explicit admin configuration after registration
         host.script_execution_enabled = False
+
+        # Phase 22.0: mint the credential once, for the registration creating the host.
+        host.host_token = models.generate_secure_host_token()
 
         # Phase 19: record the advertised capabilities immediately.  Waiting for
         # the first SYSTEM_INFO would leave the host with an unknown capability
@@ -902,7 +908,7 @@ async def register_host(registration_data: HostRegistration):
                     exc,
                 )
 
-        return host
+        return registration_reply(host, issue_credential=True)
 
 
 @auth_router.put("/host/{host_id}", dependencies=[Depends(JWTBearer())])

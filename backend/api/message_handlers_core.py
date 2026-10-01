@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from backend.api.error_constants import error_host_not_registered
 from backend.i18n import _
 from backend.persistence.models import Host, HostChild
+from backend.security import agent_identity
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
 
@@ -129,6 +130,43 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
         return await _handle_system_info_impl(tenant_db, connection, message_data)
 
 
+def _peer_address(connection):
+    client = getattr(getattr(connection, "websocket", None), "client", None)
+    return getattr(client, "host", None)
+
+
+def _refuse_claim(db, connection, claim, message_data):
+    """A SYSTEM_INFO that did not prove its host: log loudly, audit, and answer
+    with an error -- never a binding, never the host's token."""
+    source = _peer_address(connection)
+    agent_identity.log_refusal(claim, message_data, source)
+    AuditService.log(
+        db=db,
+        action_type=ActionType.AGENT_MESSAGE,
+        entity_type=EntityType.HOST,
+        entity_id=str(claim.host.id) if claim.host else None,
+        entity_name=message_data.get("hostname"),
+        description=_("Agent session refused: it did not prove it is this host"),
+        result=Result.FAILURE,
+        details={
+            "reason": claim.reason,
+            "source_address": source,
+            "host_id_presented": bool(message_data.get("host_id")),
+            "host_token_presented": bool(message_data.get("host_token")),
+        },
+    )
+    db.commit()
+    return {
+        "message_type": "error",
+        "error_type": claim.reason,
+        "message": _(
+            "This agent did not prove it is this host. If the host was "
+            "reinstalled, remove it from SysManage and approve its new registration."
+        ),
+        "data": {},
+    }
+
+
 async def _handle_system_info_impl(db: Session, connection, message_data: dict):
     """Handle system info message from agent."""
     from backend.api.host_utils import update_or_create_host
@@ -148,6 +186,12 @@ async def _handle_system_info_impl(db: Session, connection, message_data: dict):
             "message": error_host_not_registered(),
             "data": {},
         }
+    # Phase 22.0: the host is its credential, not its name.  Nothing below
+    # (binding the session, routing commands, returning the token) happens
+    # for a session that has not proven it is the host it names.
+    claim = agent_identity.check_claim(db, message_data)
+    if not claim.accepted:
+        return _refuse_claim(db, connection, claim, message_data)
     ipv4 = message_data.get("ipv4")
     ipv6 = message_data.get("ipv6")
     platform = message_data.get("platform")
@@ -182,6 +226,8 @@ async def _handle_system_info_impl(db: Session, connection, message_data: dict):
         logger.info(
             "Host %s approval status: %s", sanitize_log(hostname), host.approval_status
         )
+
+        agent_identity.apply_ratchet(claim, message_data)
 
         # Always set hostname on connection so we can send approval messages
         connection.hostname = hostname

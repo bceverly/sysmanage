@@ -179,6 +179,10 @@ if [ ! -f /etc/sysmanage.yaml ]; then
     chown sysmanage:sysmanage /etc/sysmanage.yaml
     chmod 640 /etc/sysmanage.yaml
 fi
+# Size the database connection pool for THIS machine (Phase 22.2): adds a
+# commented database_pool block only if the config has none -- an
+# administrator's own values are never touched.
+( cd /opt/sysmanage && .venv/bin/python -m backend.persistence.pool_sizing --apply /etc/sysmanage.yaml ) || true
 
 # Configure nginx
 # BEGIN GENERATED TLS PREFLIGHT - edit scripts/render_nginx_configs.py

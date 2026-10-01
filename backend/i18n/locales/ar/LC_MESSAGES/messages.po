@@ -6197,3 +6197,15 @@ msgstr ""
 
 msgid "The single sign-on session has expired. Sign in again."
 msgstr "انتهت صلاحية جلسة تسجيل الدخول الموحد. سجّل الدخول مرة أخرى."
+
+#: backend/api/message_handlers_core.py
+msgid "Agent session refused: it did not prove it is this host"
+msgstr "تم رفض جلسة الوكيل: لم تثبت أنها هذا المضيف"
+
+#: backend/api/message_handlers_core.py
+msgid "This agent did not prove it is this host. If the host was reinstalled, remove it from SysManage and approve its new registration."
+msgstr "لم يثبت هذا الوكيل أنه هذا المضيف. إذا تمت إعادة تثبيت المضيف، فأزله من SysManage ووافق على تسجيله الجديد."
+
+#: backend/api/message_handlers.py
+msgid "This session cannot acknowledge another host's message"
+msgstr "لا يمكن لهذه الجلسة الإقرار برسالة مضيف آخر"

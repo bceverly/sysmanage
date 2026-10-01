@@ -36,7 +36,7 @@ from backend.persistence.db import get_db
 from backend.persistence.models import Host, InstallationPackage, InstallationRequest
 from backend.security.communication_security import websocket_security
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
-from backend.utils.verbosity_logger import get_logger
+from backend.utils.verbosity_logger import get_logger, sanitize_log
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import ErrorMessage, MessageType, create_message
 
@@ -47,6 +47,11 @@ logger.info("Agent WebSocket module initialized")
 # Ensure config_push_manager is available for tests
 __all__ = ["config_push_manager", "handle_os_version_update"]
 
+
+# Messages held for a connection that has not completed SYSTEM_INFO yet.  An
+# agent sends a dozen before the handshake lands; far more means a session that
+# will never prove its host.
+MAX_PENDING_INBOUND = 200
 
 router = APIRouter()  # For authenticated endpoints (will get /api prefix)
 public_router = APIRouter()  # For public endpoints (no prefix)
@@ -174,14 +179,23 @@ async def agent_connect(websocket: WebSocket):
         "WebSocket connection established, connection ID: %s", connection.agent_id
     )
     logger.info("Connection object created, waiting for messages...")
-    # db session already opened above for audit logging, continue using it
+    # Phase 22.2: the handshake's session is done.  It used to stay open for
+    # the life of the connection -- hours -- so each connected agent pinned a
+    # pooled connection and ~50 agents exhausted the pool and stalled the
+    # whole server (the scale-harness baseline).  Each message now takes its
+    # own short-lived session and gives it back.
+    db.close()
 
     try:
         while True:
             # Receive message from agent
             data = await websocket.receive_text()
             logger.info("Received WebSocket message: %s...", data[:100])
-            await _process_websocket_message(data, connection, db, connection_id)
+            db = next(get_db())
+            try:
+                await _process_websocket_message(data, connection, db, connection_id)
+            finally:
+                db.close()
 
     except WebSocketDisconnect as e:
         # Agent disconnected - normal cleanup handled in finally
@@ -332,12 +346,33 @@ def _enqueue_inbound_message(message, connection, db):
             connection._pending_inbound_messages = (  # pylint: disable=protected-access
                 existing
             )
+        # Bounded: a session that never proves its host (Phase 22.0 refuses
+        # it) must not be able to grow this without limit.
+        if len(existing) >= MAX_PENDING_INBOUND:
+            logger.warning(
+                "Dropped %s from unregistered connection %s: buffer full",
+                message.message_type,
+                connection.agent_id,
+            )
+            return
         existing.append(message)
         logger.info(
             "Buffered %s message from connection %s -- registration not "
             "yet complete (connection.hostname is None)",
             message.message_type,
             connection.agent_id,
+        )
+        return
+
+    # Phase 22.0: a verified session speaks only for its own host.
+    claimed = (message.data or {}).get("host_id")
+    bound = getattr(connection, "host_id", None)
+    if claimed and bound and str(claimed) != str(bound):
+        logger.warning(
+            "Dropped %s claiming host %s on the session of host %s",
+            message.message_type,
+            sanitize_log(claimed),
+            sanitize_log(bound),
         )
         return
 

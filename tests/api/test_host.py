@@ -383,6 +383,10 @@ class TestHostRegister:
         assert created_host is not None
         assert created_host.fqdn == "agent.example.com"
         assert created_host.ipv4 == "192.168.1.150"
+        # Phase 22.0: the credential is minted here and handed out exactly
+        # once -- to the registration that created the host.
+        assert data["host_token"] == created_host.host_token
+        assert created_host.host_token
 
     def test_register_host_success_existing(self, client, session):
         """Test successful registration of existing host (update)."""
@@ -411,7 +415,10 @@ class TestHostRegister:
         assert response.status_code == 200
         data = response.json()
         assert data["fqdn"] == "existing.example.com"
-        assert data["ipv4"] == "192.168.1.101"
+        # Phase 22.0: an existing host's id and token are never handed to
+        # whoever names it.
+        assert "id" not in data
+        assert "host_token" not in data
 
         # Verify host was updated in database
         session.refresh(existing_host)

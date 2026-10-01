@@ -45,7 +45,8 @@ const Probe = () => {
 
 const makeInstance = (react?: Record<string, unknown>) => {
     const instance = createInstance();
-    instance.use(slowBackend).use(initReactI18next).init({
+    // Not awaited on purpose: the catalog must arrive AFTER the first render.
+    void instance.use(slowBackend).use(initReactI18next).init({
         lng: 'en',
         fallbackLng: 'en',
         interpolation: { escapeValue: false },

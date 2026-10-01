@@ -144,9 +144,17 @@ export default [
     }
   },
   {
-    files: ['src/**/*.test.{js,jsx,ts,tsx}', 'src/__tests__/**/*'],
+    // An explicit extension pattern for __tests__: ESLint does not treat a
+    // catch-all like `src/__tests__/**/*` as making a file lintable, so the
+    // helpers there (setup.ts...) were silently never linted.
+    files: ['src/**/*.test.{js,jsx,ts,tsx}', 'src/__tests__/**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
       parser: typescriptParser,
+      // Type information for no-floating-promises (SonarQube scans tests too).
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname
+      },
       globals: {
         vi: 'readonly',
         describe: 'readonly',
@@ -182,6 +190,7 @@ export default [
       // TYPE annotation, so `(cb: (v: string) => void)` reads as an unused
       // `v`. Same `^_` convention as the main block above.
       'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-floating-promises': 'error',
       'react/prop-types': 'off'
     }
   }

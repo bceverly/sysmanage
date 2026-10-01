@@ -6436,3 +6436,15 @@ msgstr ""
 
 msgid "The single sign-on session has expired. Sign in again."
 msgstr "Die Single-Sign-On-Sitzung ist abgelaufen. Melden Sie sich erneut an."
+
+#: backend/api/message_handlers_core.py
+msgid "Agent session refused: it did not prove it is this host"
+msgstr "Agentensitzung abgelehnt: Sie hat nicht nachgewiesen, dass sie dieser Host ist"
+
+#: backend/api/message_handlers_core.py
+msgid "This agent did not prove it is this host. If the host was reinstalled, remove it from SysManage and approve its new registration."
+msgstr "Dieser Agent hat nicht nachgewiesen, dass er dieser Host ist. Wenn der Host neu installiert wurde, entfernen Sie ihn aus SysManage und genehmigen Sie seine neue Registrierung."
+
+#: backend/api/message_handlers.py
+msgid "This session cannot acknowledge another host's message"
+msgstr "Diese Sitzung kann die Nachricht eines anderen Hosts nicht bestätigen"

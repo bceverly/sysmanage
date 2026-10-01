@@ -5,8 +5,9 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-// Initialize i18n for tests
-i18n
+// Initialize i18n for tests.  The resources are inline (no backend to
+// fetch), so init has nothing to wait for and its promise can be dropped.
+void i18n
   .use(initReactI18next)
   .init({
     lng: 'en',

@@ -45,6 +45,14 @@ if [ ! -f "/etc/sysmanage.yaml" ]; then
 	cp /usr/local/etc/sysmanage/sysmanage.yaml.example /etc/sysmanage.yaml.example
 	echo "IMPORTANT: Configure /etc/sysmanage.yaml before starting the service"
 fi
+# Size the database connection pool for THIS machine (Phase 22.2): adds a
+# commented database_pool block only if the config has none -- an
+# administrator's own values are never touched.
+# (Into the example when no config exists yet, so the copy the admin makes
+# already carries it.)
+SIZED_CONFIG=/etc/sysmanage.yaml
+[ -f "$SIZED_CONFIG" ] || SIZED_CONFIG=/etc/sysmanage.yaml.example
+( cd /usr/local/lib/sysmanage && ./.venv/bin/python -m backend.persistence.pool_sizing --apply "$SIZED_CONFIG" ) || true
 
 chown -R root:wheel /usr/local/lib/sysmanage
 chown -R root:wheel /var/lib/sysmanage

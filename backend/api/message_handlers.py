@@ -513,6 +513,27 @@ async def handle_command_acknowledgment(  # NOSONAR
             sanitize_log(hostname),
         )
 
+    # Phase 22.0: a session may acknowledge only its OWN host's commands --
+    # never another host's (which would silently drop that host's work).
+    session_host = getattr(connection, "host_id", None)
+    if (
+        original_msg is not None
+        and original_msg.host_id is not None
+        and (session_host is None or str(original_msg.host_id) != str(session_host))
+    ):
+        logger.warning(
+            "Refused acknowledgment of message %s for host %s from session of host %s",
+            sanitize_log(message_id),
+            sanitize_log(original_msg.host_id),
+            sanitize_log(session_host),
+        )
+        return {
+            "message_type": "error",
+            "error_type": "not_your_message",
+            "message": _("This session cannot acknowledge another host's message"),
+            "data": {},
+        }
+
     # Mark the message as acknowledged (completed)
     success = server_queue_manager.mark_acknowledged(message_id, db=db)
 

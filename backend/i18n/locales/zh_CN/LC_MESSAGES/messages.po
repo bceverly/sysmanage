@@ -6027,3 +6027,15 @@ msgstr "按操作系统版本列出的 macOS 漏洞（来自 NVD 的受影响版
 
 msgid "The single sign-on session has expired. Sign in again."
 msgstr "单点登录会话已过期。请重新登录。"
+
+#: backend/api/message_handlers_core.py
+msgid "Agent session refused: it did not prove it is this host"
+msgstr "已拒绝代理会话：它未证明自己是此主机"
+
+#: backend/api/message_handlers_core.py
+msgid "This agent did not prove it is this host. If the host was reinstalled, remove it from SysManage and approve its new registration."
+msgstr "此代理未证明自己是此主机。如果主机已重新安装，请从 SysManage 中删除它，然后批准其新的注册。"
+
+#: backend/api/message_handlers.py
+msgid "This session cannot acknowledge another host's message"
+msgstr "此会话无法确认其他主机的消息"

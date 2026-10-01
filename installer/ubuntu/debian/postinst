@@ -54,6 +54,10 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 		chown sysmanage:sysmanage /etc/sysmanage.yaml
 		chmod 640 /etc/sysmanage.yaml
 	fi
+	# Size the database connection pool for THIS machine (Phase 22.2): adds a
+	# commented database_pool block only if the config has none -- an
+	# administrator's own values are never touched.
+	( cd /opt/sysmanage && .venv/bin/python -m backend.persistence.pool_sizing --apply /etc/sysmanage.yaml ) || true
 
 	# ---------------------------------------------------------------
 	# OpenBAO (secrets broker) -- install + start + initialize/unseal.

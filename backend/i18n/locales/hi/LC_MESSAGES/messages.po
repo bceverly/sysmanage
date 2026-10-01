@@ -6354,3 +6354,15 @@ msgstr ""
 
 msgid "The single sign-on session has expired. Sign in again."
 msgstr "सिंगल साइन-ऑन सत्र समाप्त हो गया है। फिर से साइन इन करें।"
+
+#: backend/api/message_handlers_core.py
+msgid "Agent session refused: it did not prove it is this host"
+msgstr "एजेंट सत्र अस्वीकार किया गया: इसने साबित नहीं किया कि यह यही होस्ट है"
+
+#: backend/api/message_handlers_core.py
+msgid "This agent did not prove it is this host. If the host was reinstalled, remove it from SysManage and approve its new registration."
+msgstr "इस एजेंट ने साबित नहीं किया कि यह यही होस्ट है। यदि होस्ट को फिर से इंस्टॉल किया गया था, तो उसे SysManage से हटाएँ और उसके नए पंजीकरण को स्वीकृत करें।"
+
+#: backend/api/message_handlers.py
+msgid "This session cannot acknowledge another host's message"
+msgstr "यह सत्र किसी अन्य होस्ट के संदेश की पावती नहीं दे सकता"

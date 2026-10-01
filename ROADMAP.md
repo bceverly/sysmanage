@@ -46,16 +46,17 @@ This document provides a detailed roadmap for realizing all features in both ope
 35. [Phase 20: Configuration Management & Drift (Enterprise)](#phase-20-configuration-management--drift-enterprise)
 36. [Phase 21: Endpoint Facts & Proactive Advisor (Enterprise)](#phase-21-endpoint-facts--proactive-advisor-enterprise)
 37. [Phase 22: Scale Hardening -- Thundering-Herd Remediation (Community / OSS; Pro+ / Enterprise)](#phase-22-scale-hardening----thundering-herd-remediation-community--oss-pro--enterprise)
-38. [Phase 23: Mobile Fleet Visibility & UEM Ingestion (Community / Pro+ / Enterprise)](#phase-23-mobile-fleet-visibility--uem-ingestion-community--pro--enterprise)
-39. [Phase 24: Mobile Companion App & Compliance (Pro+ / Enterprise)](#phase-24-mobile-companion-app--compliance-pro--enterprise)
-40. [Phase 25: Stabilization & v5.0 GA](#phase-25-stabilization--v50-ga)
-41. [Phase 26: Expanded Agent Architecture & Packaging (Community / OSS)](#phase-26-expanded-agent-architecture--packaging-community--oss)
-42. [Phase 27: Security Tooling Coexistence (Enterprise)](#phase-27-security-tooling-coexistence-enterprise)
-43. [Phase 28: Apple Native MDM (Enterprise)](#phase-28-apple-native-mdm-enterprise)
-44. [Phase 29: Android Native MDM & Zero-Touch Enrollment (Pro+ / Enterprise)](#phase-29-android-native-mdm--zero-touch-enrollment-pro--enterprise)
-45. [Phase 30: High Availability & Disaster Recovery (Enterprise)](#phase-30-high-availability--disaster-recovery-enterprise)
-46. [Phase 31: Browser Remote Terminal (Community / OSS; recording Pro+; approval Enterprise)](#phase-31-browser-remote-terminal-community--oss-recording-pro-approval-enterprise)
-47. [Phase 32: Fleet Targeting by Site & Network Segment (Enterprise)](#phase-32-fleet-targeting-by-site--network-segment-enterprise)
+38. [Phase 23: Hardware & Asset Visibility (Community / OSS; Pro+)](#phase-23-hardware--asset-visibility-community--oss-pro)
+39. [Phase 24: Mobile Fleet Visibility & UEM Ingestion (Community / Pro+ / Enterprise)](#phase-24-mobile-fleet-visibility--uem-ingestion-community--pro--enterprise)
+40. [Phase 25: Mobile Companion App & Compliance (Pro+ / Enterprise)](#phase-25-mobile-companion-app--compliance-pro--enterprise)
+41. [Phase 26: Stabilization & v5.0 GA](#phase-26-stabilization--v50-ga)
+42. [Phase 27: Expanded Agent Architecture & Packaging (Community / OSS)](#phase-27-expanded-agent-architecture--packaging-community--oss)
+43. [Phase 28: Security Tooling Coexistence (Enterprise)](#phase-28-security-tooling-coexistence-enterprise)
+44. [Phase 29: Apple Native MDM (Enterprise)](#phase-29-apple-native-mdm-enterprise)
+45. [Phase 30: Android Native MDM & Zero-Touch Enrollment (Pro+ / Enterprise)](#phase-30-android-native-mdm--zero-touch-enrollment-pro--enterprise)
+46. [Phase 31: High Availability & Disaster Recovery (Enterprise)](#phase-31-high-availability--disaster-recovery-enterprise)
+47. [Phase 32: Browser Remote Terminal (Community / OSS; recording Pro+; approval Enterprise)](#phase-32-browser-remote-terminal-community--oss-recording-pro-approval-enterprise)
+48. [Phase 33: Fleet Targeting by Site & Network Segment (Enterprise)](#phase-33-fleet-targeting-by-site--network-segment-enterprise)
 48. [Release Schedule Summary](#release-schedule-summary)
 49. [Module Migration Plan](#module-migration-plan)
 
@@ -496,7 +497,7 @@ the ladder front-loads gains then tapers:
 | **Phase 13 (Enterprise GA)** -- install the ratchet | ≥12% floor ✅ | ≥25% target → **~50% achieved, floor ≥48** ✅ | ≥25% target → **~54% achieved, floor ≥53** ✅ |
 | **Phase 15 (Stabilization)** | 30% ✅ (measured ~34%) | 40% ✅ (already met) | 30% ✅ (already met) |
 | **Phase 19 (Stabilization)** | 50% | 55% | 50% ✅ (already met) |
-| **Phase 25 (Stabilization & v5.0 GA)** | **70%** | **70%** | **70%** |
+| **Phase 26 (Stabilization & v5.0 GA)** | **70%** | **70%** | **70%** |
 
 **OSS frontend line-coverage ramp to Python parity (revised):** rather than
 the coarse table rungs above, the OSS frontend now climbs its enforced **line**
@@ -754,35 +755,38 @@ Each stabilization phase produces a release. Feature phases may produce one or m
 │  Phase 22: Scale Hardening -- Thundering-Herd Remediation            v3.10.0.0  │
 │     └── Jittered schedules, bounded queues, waves, CDN delivery                 │
 │                                                                                 │
-│  Phase 23: Mobile Fleet Visibility & UEM Ingestion                   v4.0.0.0   │
+│  Phase 23: Hardware & Asset Visibility                               v3.11.0.0  │
+│     └── Drive/array/ZFS/sensor health + real-time alerts; asset tags            │
+│                                                                                 │
+│  Phase 24: Mobile Fleet Visibility & UEM Ingestion                   v4.0.0.0   │
 │     └── MAJOR - a new device class. Model, registration, ingest-from-UEM        │
 │                                                                                 │
-│  Phase 24: Mobile Companion App & Compliance                         v4.1.0.0   │
+│  Phase 25: Mobile Companion App & Compliance                         v4.1.0.0   │
 │     └── BYOD self-report app; mobile EOL/patch compliance + enforcement         │
 │                                                                                 │
-│  Phase 25: Market-Parity GA                                          v5.0.0.0   │
+│  Phase 26: Market-Parity GA                                          v5.0.0.0   │
 │     └── MAJOR - market parity reached. All gap features hardened; v5.0 GA       │
 │                                                                                 │
-│  Phase 26: Expanded Agent Architecture                               v5.1.0.0   │
+│  Phase 27: Expanded Agent Architecture                               v5.1.0.0   │
 │     └── ppc64le + s390x + riscv64 agent packaging/CI (Community/OSS)            │
 │                                                                                 │
-│  Phase 27: Security Tooling Coexistence                              v5.2.0.0   │
+│  Phase 28: Security Tooling Coexistence                              v5.2.0.0   │
 │     └── Velociraptor IR/hunting + Wazuh ingestion                               │
 │                                                                                 │
-│  Phase 28: Apple Native MDM                                          v6.0.0.0   │
+│  Phase 29: Apple Native MDM                                          v6.0.0.0   │
 │     └── MAJOR - device authority: Apple MDM protocol, APNs, remote wipe         │
 │                                                                                 │
-│  Phase 29: Android Native MDM & Zero-Touch                           v6.1.0.0   │
+│  Phase 30: Android Native MDM & Zero-Touch                           v6.1.0.0   │
 │     └── Android Management API policy + bulk/zero-touch enrollment              │
 │                                                                                 │
-│  Phase 30: High Availability & Disaster Recovery                     v6.2.0.0   │
+│  Phase 31: High Availability & Disaster Recovery                     v6.2.0.0   │
 │     └── Server pool behind a LB, leader-elected workers, Postgres failover      │
 │                Agent multi-endpoint failover to a DR site                       │
 │                                                                                 │
-│  Phase 31: Browser Remote Terminal                                   v6.3.0.0   │
+│  Phase 32: Browser Remote Terminal                                   v6.3.0.0   │
 │     └── Agent-tunneled PTY: no sshd, no inbound port, no keys (OSS)             │
 │                                                                                 │
-│  Phase 32: Fleet Targeting by Site & Network Segment                 v6.4.0.0   │
+│  Phase 33: Fleet Targeting by Site & Network Segment                 v6.4.0.0   │
 │     └── Target work by site, and by CIDR segment within a site                  │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
@@ -1227,11 +1231,11 @@ shipped, the generic handlers should be implemented early as a Phase 3 prerequis
 
 2. **Container Engine Testing**
    - [x] LXD container lifecycle testing on Ubuntu -- `sysmanage-agent/tests/integration/test_lxd_lifecycle.py` (7 tests) drives `LxdOperations` through stop → start → restart → delete against a real Alpine container created via `lxc launch` as test setup; observable state verified via `lxc list` between transitions; auto-skips when LXD daemon isn't available
-   - *(WSL instance lifecycle testing on Windows -- **moved to Phase 26 on 2026-08-04.**
+   - *(WSL instance lifecycle testing on Windows -- **moved to Phase 27 on 2026-08-04.**
      Blocked on GitHub rather than on us: `actions/runner-images` [#10563](https://github.com/actions/runner-images/issues/10563)
      asking for WSL2 on hosted Windows runners was closed as *not planned*, and a
      job cannot switch WSL versions in-build because that needs a reboot. Re-check
-     at Phase 26.)*
+     at Phase 27.)*
    - [x] Verify read-only mode for unlicensed users
 
 3. **Security Engine Testing**
@@ -3606,8 +3610,8 @@ deliberately stopped at the docs body paragraphs.
 | OpenBSD ports (workflow builds; not yet upstream-submitted) | OpenBSD | ⚠️ tarball-published only |
 | **winget** | Windows | ✅ merged 2026-06-08 -- `sysmanage.sysmanage` (#376004) + `sysmanage.sysmanage-agent` (#376005) are in `microsoft:master`; `komac update` runs on tag.  (Earlier sandbox-validation stall on PR #375773 is resolved.) |
 | **Homebrew tap (``bceverly/tap/sysmanage-agent``)** | macOS, Linux via Linuxbrew | ✅ auto-published on every release tag |
-| **Microsoft Store (MSIX)** | Windows | 🔜 in scope -- needs `runFullTrust`/privileged-helper identity (deferred to Phase 25 -- see “Consumer app-store distribution”) |
-| **Mac App Store** | macOS (sandboxed) | 🔜 in scope -- needs sandboxed-UI + privileged-helper split (deferred to Phase 25 -- see “Consumer app-store distribution”) |
+| **Microsoft Store (MSIX)** | Windows | 🔜 in scope -- needs `runFullTrust`/privileged-helper identity (deferred to Phase 26 -- see “Consumer app-store distribution”) |
+| **Mac App Store** | macOS (sandboxed) | 🔜 in scope -- needs sandboxed-UI + privileged-helper split (deferred to Phase 26 -- see “Consumer app-store distribution”) |
 | FreeBSD ports | FreeBSD | ❌ not published, not consumed (direct .pkg today) |
 | NetBSD pkgsrc | NetBSD | ❌ not published, not consumed |
 | AUR (``sysmanage-agent``) | Arch | ✅ auto-published on every release tag |
@@ -3659,7 +3663,7 @@ direct GitHub-release URLs cannot easily be mirrored).
        2026-05-12 (manual TTY step); future releases auto-update
        via ``komac update`` in the build-and-release workflow.
        Microsoft Store submission for the "official" channel
-       is deferred to Phase 25 (see "Consumer app-store
+       is deferred to Phase 26 (see "Consumer app-store
        distribution") -- it is gated on a Partner Center account,
        not on code.
      * **Homebrew tap** -- ``bceverly/homebrew-tap`` repo exists and
@@ -4630,7 +4634,7 @@ plan-builder + UI integration.
       up/idempotent/down on sqlite; black + `backend/` pylint + `tsc` + eslint +
       offline i18n gate all green. *Follow-ups (non-blocking; Phase 21 audit 2026-10-01: the strings and the
       `.so` rebuild are done, but this browser landing was NEVER wired -- for
-      OIDC either -- and is carried to Phase 25):* the ACS browser
+      OIDC either -- and is carried to Phase 26):* the ACS browser
       landing (cookie+redirect) is wired in the frontend like OIDC; SAML UI/API
       strings are inline-English defaults pending a `make translate` GPU backfill;
       and the engine `.so` needs a release rebuild for the other Python versions
@@ -6459,7 +6463,7 @@ close the gap between our output and the parsers that consume it.
       Whatever lands should also make "the MSI succeeded but the service is
       absent" a loud, detectable state rather than a silent one.
 - [x] **FreeBSD port made submission-ready, and statically gated.** *(Pulled
-      forward from Phase 26 on 2026-08-07, at Bryan's request, while assessing
+      forward from Phase 27 on 2026-08-07, at Bryan's request, while assessing
       whether the BSD ports could be submitted upstream.)*
 
       Reviewing the skeleton found three defects a ports committer would have
@@ -6509,7 +6513,7 @@ close the gap between our output and the parsers that consume it.
       Do FreeBSD alone first and treat it as the pilot -- three simultaneous
       submissions to three communities with three conventions, none ever built,
       invites three reviewers finding the same class of problem. OpenBSD
-      (`ports@`, strictest) and NetBSD (`pkgsrc-wip` first) stay in Phase 26.
+      (`ports@`, strictest) and NetBSD (`pkgsrc-wip` first) stay in Phase 27.
 
 - [x] **Child hosts enroll with NO TENANT -- they need an enrollment token.**
       *(DONE 2026-08-12 -- `_build_agent_config_yaml` now emits `security.enrollment_token`, minted against the PARENT's tenant via `tenant_for_host` + the existing provisioning mint, threaded through all three creation paths (KVM/WSL/LXD) with a test that counts the call sites so a new path cannot silently regress. Declines rather than guessing when the parent's tenant cannot be resolved -- a token naming the wrong tenant would put the child in someone else's data plane.)*
@@ -6550,7 +6554,7 @@ close the gap between our output and the parsers that consume it.
 Not architecture work: it is about agent HETEROGENEITY, and it is needed
 now.  alpine/freebsd/openbsd/netbsd already run reduced-capability agents,
 and the server will happily dispatch a command they cannot run.  It also
-underpins the mobile companion app (Phase 23), where a device reports
+underpins the mobile companion app (Phase 25), where a device reports
 inventory but executes nothing -- the limiting case of a limited agent.
 
 Some platforms this phase reaches can't run the *full* agent: a native library may have no build for a given arch, or a very old target OS may lack a prerequisite. Rather than silently degrade, the agent should **declare what it can do**, and the server should make any shortfall visible so operators aren't surprised when a feature is unavailable on a host. Baseline agents report everything; the value shows up later when a trimmed agent has to be shipped for a constrained target.
@@ -8357,7 +8361,7 @@ nearly free and makes the dashboard actionable rather than merely informative.
       · **Version** -- v3.8.0.0; engine bumped to 1.0.4. The phase was
         originally targeted at v3.7.0.0 and shipped one minor higher, so
         Phase 21 moved from v3.8.0.0 to v3.9.0.0 rather than collide with
-        it. The v4.0.0.0 anchor at Phase 23 is unchanged.
+        it. The v4.0.0.0 anchor at Phase 24 is unchanged.
 
       · **Screenshots** -- `make screenshots` captures all 50 Enterprise
         shots and `make test-links` passes (1608 OK, 0 errors), so the four
@@ -11099,7 +11103,7 @@ CIDRs, rate-limited, and audited** -- never a fleet-wide default.
       last-seen, which agents observed it, and the evidence for the guess
       (OUI vendor, mDNS service names, open-port fingerprint). A device class
       distinct from `host`: no shell, no package manager, no privileged
-      execution -- the same distinction Phase 23.1 draws for `mobile_device`
+      execution -- the same distinction Phase 24.1 draws for `mobile_device`
       DONE 2026-09-29 (21.6 S1, migration `q13assetdisc`). OUI vendor and
       open-port fingerprint evidence arrive with S5 / S4.
 - [x] Agent-side passive neighbor reporting (ARP/NDP cache, mDNS/SSDP) behind
@@ -11132,7 +11136,7 @@ CIDRs, rate-limited, and audited** -- never a fleet-wide default.
       DONE 21.6 S1-S5: managed hosts by MAC (every spelling), enrolled child
       hosts via their own interfaces, hypervisor tap ports, VIPs / load
       balancers by static-address registration + VRRP/HSRP/CARP recognition.
-      `mobile_device` does not exist yet -- tracked as a 23.1 item.
+      `mobile_device` does not exist yet -- tracked as a 24.1 item.
 - [x] Review page: unenrolled assets with evidence, bulk triage, and a
       **permanent allow-list exclusion** ("this is an IoT sensor / printer /
       switch / appliance -- never show it again") carrying a reason and an
@@ -11522,9 +11526,9 @@ are the bulk; the review UI is small).
       federation 1M-host run + strings, federation Slice 3, the pool/** CDN
       cache, the vuln-engine shared-CVE fix, the GPG remove-on-confirm, the
       external_idp abi3 rebuild, agent dead-code cleanup, the bundle
-      builders), 2 were already tracked (WSL lifecycle -> Phase 26, app-store
-      distribution -> Phase 25). Seven were neither, and are now open items
-      in Phase 25 "Carried forward by the Phase 21 audit" -- most important:
+      builders), 2 were already tracked (WSL lifecycle -> Phase 27, app-store
+      distribution -> Phase 26). Seven were neither, and are now open items
+      in Phase 26 "Carried forward by the Phase 21 audit" -- most important:
       **browser SSO (OIDC + SAML) has no landing page** (fixed 2026-10-01), behind a ticked
       Phase 13 box; also EC2/Azure/GCE/vSphere compute providers, physical
       bare-metal PXE validation, air-gap bundle smoke tests, the federation
@@ -11551,16 +11555,69 @@ were re-verified by hand. Findings are cited as `repo:file:line` at audit time.
 
 **SEQUENCING (2026-10-01, Bryan).** Pulled forward to come right after
 Phase 21 -- every later phase moved out by one. It is a prerequisite for real
-enterprise scale and for Phase 30 (HA/DR, which runs multiple server workers
+enterprise scale and for Phase 31 (HA/DR, which runs multiple server workers
 and therefore NEEDS 22.2's leader election and atomic queue claiming). A
 minor release (v3.10) rather than a major: it changes how the product
 behaves under load, not what it does.
+
+**Scope kept to hardening (2026-10-01, Bryan):** hardware health and asset
+tags, both requested for this phase, became Phase 23 (v3.11.0.0) the same
+day; 22 keeps security, fixes and scale.
 
 **The two root causes.** (1) Timers are anchored to process start or to a
 reconnect, with no randomization, so any correlated restart (a server bounce,
 a site power restore, a mass upgrade) puts the whole fleet in phase forever.
 (2) Work is done as one unbounded pass or one fleet-wide burst -- "every host
 now" -- instead of a bounded, resumable, rate-limited stream.
+
+#### 22.0 Agent identity: a host is its credential, not its name (security -- FIRST)
+
+**Added 2026-10-01 (Bryan), ahead of everything else in this phase.** Found by
+the new `agent-impersonation` scenario in the scale harness (`tests/load/`):
+the server let a client that knew only an approved host's NAME obtain that
+host's credential and act as the host -- its data written to the host's
+record, the host's commands delivered to it. A positive control (the real
+agent's own update) proved the run measured real processing. Hostnames are
+public; the host_token is the credential, and the server must act like it.
+Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
+
+- [x] **Registration never hands back an existing host's credential**, and
+      returns an explicit, minimal response (never the serialized host row).
+      A NEW host gets its token exactly once, from the registration that
+      created it.
+- [x] **The WebSocket handshake verifies, never trusts a name.** A
+      SYSTEM_INFO that claims an existing, credentialed host without proof is
+      refused -- no binding, no token, a loud log line and an audit entry with
+      the claimed host and source address. A host_id/host_token pair is
+      checked; a wrong token is refused. `registration_success` stops
+      carrying the token (compatibility: only to a session already proven, and
+      only until the ratchet below covers that host).
+- [x] **Everything after the handshake follows the verified session:** a
+      message may only touch the session's own host (a different host_id, or
+      a wrong host_token, is refused); time-sensitive handlers (heartbeat,
+      acknowledgment) included; commands are routed by host id to verified
+      sessions only, never by hostname.
+- [x] **Agent keeps its credential.** Today it overwrites its stored token
+      with whatever a response carries, including nothing, and relies on the
+      server re-sending it. Keep the stored token when a response omits it,
+      and advertise that capability.
+- [x] **Per-host ratchet (no global switch):** once an agent with that
+      capability presents a valid token, the host is marked token-required and
+      the legacy host_id-only identity is refused for it from then on. Only an
+      admin action clears it.
+- [ ] **Re-enroll action** for a reinstalled host (lost its token): an admin
+      clears the credential from the host page and the next registration
+      re-issues it; auto-approving enrollment keys may re-enroll on their own.
+- [ ] **Proof:** `agent-impersonation` passes (every check, with its positive
+      control) and gates CI; controls show a fresh host still enrolls in one
+      step and a pre-fix agent still connects. Then the simulated fleet runs
+      clean against the hardened server. Docs: how agent identity works.
+      *2026-10-01: fix landed in server + agent. The scenario's 11 checks all
+      pass against it (all 7 attack checks FAILED before), including the
+      positive control, the pre-22.0-agent control and the ratchet; unit
+      tests `tests/test_agent_identity.py` (server) and
+      `tests/test_host_identity.py` (agent). Open: wire the scenario into CI,
+      the fleet run against the hardened server, docs.*
 
 #### 22.1 Agent: schedules that never align (Community / OSS)
 
@@ -11637,6 +11694,16 @@ now" -- instead of a bounded, resumable, rate-limited stream.
       Token-bucket admission, push config only when its checksum changed,
       ingestion via the queue, explicit pool sizing, short-lived sessions
       (`message_handlers_core.py:132-484`, `agent.py:113`, `db.py:114-119`).
+      *Pool sizing + short-lived sessions PULLED FORWARD and done 2026-10-01
+      (Bryan, after the baseline stalled at every size): the WebSocket now
+      takes a session per message (`agent.py`); `backend/persistence/
+      pool_sizing.py` sizes the pool per worker from CPUs and RAM
+      (`database_pool` in sysmanage.yaml, written by every installer's
+      post-install step or computed at startup) and fits it under
+      PostgreSQL's `max_connections` at startup with a loud warning; tenant
+      engines use `database_pool.tenant_*`. Still open in this item:
+      token-bucket admission, checksum-gated config push, ingestion via the
+      queue.*
 - [ ] **Agent connection rate limit keyed on identity, not IP** -- 20
       attempts per IP per 15 min, ignoring `X-Forwarded-For`: behind a proxy
       or NAT, agent 21 onward is locked out and all retry at the same second
@@ -11757,6 +11824,99 @@ now" -- instead of a bounded, resumable, rate-limited stream.
       endpoints, eager-loaded counts, pagination, `visibilitychange` pause,
       jittered intervals, ETag/304, push for live state.
 
+#### 22.8 Sign-in hardening: require MFA in the IdP's token (Pro+)
+
+**Added 2026-10-01 (Bryan),** while planning a public console that signs in
+through Microsoft 365. SSO leaves MFA to the identity provider -- Entra ID's
+Authenticator number matching, Conditional Access -- and sysmanage accepts
+whatever token comes back. Today `external_idp_engine` reads only the
+subject, email and groups (`exchange_oidc_code`, `external_idp_engine.pyx:264`;
+`process_saml_response` likewise); nothing checks HOW the user signed in, so a
+misconfigured or bypassed IdP policy that skips MFA is invisible to us.
+
+- [ ] **Per-provider "require multi-factor sign-in" setting**, default OFF
+      (existing providers keep working) and recommended ON for any
+      internet-facing console:
+      - OIDC: the ID token's `amr` claim must contain `mfa` (RFC 8176; Entra
+        ID also emits `mfa` when Authenticator push/number matching or a
+        passkey satisfied the policy). Optionally `acr` against a configured
+        value for IdPs that express assurance that way.
+      - SAML: the assertion's `AuthnContextClassRef` must be one of a
+        configured list (e.g. Entra's
+        `http://schemas.microsoft.com/claims/multipleauthn`), and the
+        AuthnRequest asks for it (`RequestedAuthnContext`).
+      - A token without proof of MFA is refused with its own reason
+        (`mfa_required`), shown on the `/login/sso` landing page ("Your
+        identity provider did not confirm multi-factor sign-in") and logged
+        with the provider and what the token did say.
+- [ ] Engine logic in `external_idp_engine` (moat); OSS carries the provider
+      column (idempotent migration), the settings UI field, the landing-page
+      reason and its i18n (14 locales). Tests: token with/without `mfa`,
+      SAML context match/mismatch, setting off = today's behavior.
+- [ ] Docs: the external-IdP page gains the setting, and the Microsoft 365
+      walkthrough (app registration, redirect URI = `webui.public_url`,
+      group object IDs in role mappings, security defaults vs Conditional
+      Access) -- verified against a real Entra tenant, which also closes the
+      "SSO never exercised against a real IdP" note on the Phase 26 item.
+
+#### 22.9 Production canary: an outside watcher for the whole server (OSS)
+
+**Added 2026-10-01 (Bryan).** "A canary process that runs separately from
+sysmanage that checks on the viability of the frontend, the backend and the
+ability to communicate to the network and also if there haven't been any
+inbound requests in a certain period of time ... added only in production to
+the installs ... its own yaml file that takes email credentials ... all of its
+checks and timings configurable ... also check database health ... write up a
+section in the docs ... under best practices deployment models." Everything
+that alerts today runs INSIDE the server -- when the server, its database or
+its network is what failed, nothing says so.
+
+- [ ] **A separate program, `sysmanage-canary`,** with its own service (systemd
+      unit, BSD rc.d, Windows service, macOS launchd), its own unprivileged
+      user and its own process: it must keep running when the server, its
+      virtualenv or its database is broken, so it shares no runtime state
+      with the server and keeps its dependencies minimal (standard library +
+      the PostgreSQL driver). Installed by the PRODUCTION packages only (deb,
+      rpm, ports/packages, MSI, macOS) -- never by `make start`.
+- [ ] **Its own config, `/etc/sysmanage-canary.yaml`** (mode 0600, owned by the
+      canary user; Windows/macOS equivalents), shipped as a commented example
+      the admin hand-edits. Every check can be switched on or off and has its
+      own interval, timeout, threshold and the number of consecutive failures
+      before it fires. Validated with `sysmanage-canary --check-config`; a
+      bad file is refused loudly at start, never half-applied.
+- [ ] **Checks:**
+      - web UI: the console URL answers (status, TLS handshake, time);
+      - backend: `/api/health` answers within its threshold;
+      - database: connect, `SELECT 1`, latency, connections in use against
+        the server's maximum (the pool exhaustion the harness found), with
+        its own read-only credentials in the canary's yaml;
+      - network: DNS resolution and outbound reachability to configurable
+        targets (e.g. the license server, the package mirrors, a public
+        resolver);
+      - inbound silence: no agent traffic for a configurable period -- read
+        from the database (newest host contact / inbound queue row), so a
+        dead listener, a broken firewall rule or a lapsed DNS record is
+        noticed even when every local check passes.
+- [ ] **Email alerts through its own SMTP settings** in that yaml (host, port,
+      STARTTLS/TLS, user, password -- a Gmail app password works -- from,
+      recipients). One email when a check starts failing, a reminder at a
+      configurable interval while it stays down, one when it recovers; never
+      one per probe. `sysmanage-canary --test-email` sends a test message.
+- [ ] **Who watches the canary:** an optional dead-man's-switch ping URL
+      (healthchecks.io-style) per cycle, and an optional daily "still
+      watching" email -- a canary that died silently is worse than none.
+- [ ] Tests (each check against a stopped/slow/refusing target; alert,
+      reminder and recovery sequencing; config validation); packaging per
+      platform; 14-language i18n for its messages.
+- [ ] **Docs: a new "Best-practice deployment models" page** under Deployment,
+      with a "Production canary" section (what it watches, the yaml with
+      every key explained, a Gmail app-password walkthrough, testing it), and
+      the internet-facing guidance worked out on 2026-10-01: a public agent
+      hostname with enrollment tokens and nginx limits beside a protected
+      console (IP allowlist, client certificates, or SSO with the IdP's MFA),
+      Ubuntu 24.04 LTS, a cloud firewall in front of UFW, fail2ban on the
+      login paths only.
+
 #### Found during the audit (not herd issues)
 
 - [ ] **License server orders versions as strings** -- "2.0.9" sorts above
@@ -11775,6 +11935,42 @@ now" -- instead of a bounded, resumable, rate-limited stream.
       agent locked out; steady-state server load is flat (no 5-minute spikes);
       a fleet-wide plan or rule bump completes at the configured wave rate; a
       license-server publish leaves no customer without engines.
+      *Harness built 2026-10-01 (`tests/load/`: `stack.py` disposable pinned
+      server, `fleet.py` agents that behave like today's agent, `observe.py`,
+      scenarios `fleet-steady`, `fleet-restart-storm`, `agent-impersonation`;
+      run through the existing `run.py` / `load-tests.yml` contract). BASELINE
+      on the pre-22 code (+ 22.0), real-time agent timers, one laptop,
+      10-minute runs:*
+
+      | Run | Connected at end | DB conns (pool 15) | Health failures | Backlog at end | Oldest queued | Burst vs mean |
+      |---|---|---|---|---|---|---|
+      | steady 50 | 0 / 50 | 16 | 13 | 485 | 4.7 min | 14.5x |
+      | steady 100 | 0 / 100 | 16 | 13 | 542 | 7.6 min | 12.9x |
+      | steady 200 | 0 / 200 | 16 | 15 | 1,869 | 8.6 min | 9.1x |
+      | steady 500 | 0 / 500 | 16 | 18 | 1,266 | 9.3 min | -- |
+      | steady 1,000 | 0 / 1,000 | 16 | 16 | 5,370 | 9.1 min | 13.9x |
+      | restart storm 100 | 0 / 100, never re-reached 95% | 16 | 22 | 836 | 8.7 min | 12.0x |
+      | storm 100, one NAT address | 0 / 100; 196 refused with 429 | 16 | 17 | 133 | 4.2 min | 13.7x |
+      | restart storm 1,000 | 0 / 1,000; 974 marked down | 16 | 25 | 7,817 | 9.9 min | 11.7x |
+
+      *Reading: every run, even 50 agents, ends with the database pool
+      exhausted, health checks timing out, the inbound queue FROZEN (not
+      merely slow) and every agent disconnected, while the CPU idles at
+      12-24% -- starvation, not load. Nothing expired yet only because the
+      runs are shorter than the 60-minute expiry. Fix order follows: 22.2's
+      pool sizing and short-lived sessions first; until then every other
+      measurement is a measurement of the stall.*
+
+      *AFTER the pool fix (2026-10-01, same harness and laptop):*
+
+      | Run | Connected at end | Back to 95% | Hosts marked down | DB conns | Health failures | Backlog at end |
+      |---|---|---|---|---|---|---|
+      | steady 200 | 200 / 200 | -- | 0 | 4 | 0 | 4,131 |
+      | restart storm 1,000 | 1,000 / 1,000 | 190 s | 0 | 4 | 7 (during the 30 s outage) | 51,997 |
+
+      *The stall is gone. The next bottleneck is now plain: the inbound queue
+      drains at a fixed ~10 messages/s while the database sits at 4
+      connections -- the "Agent intake throughput" item above.*
 - [ ] Docs: a scaling guide (worker count, pool sizing, private mirrors,
       federation intervals) + 14-language i18n.
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
@@ -11786,7 +11982,142 @@ now" -- instead of a bounded, resumable, rate-limited stream.
 
 ---
 
-## Phase 23: Mobile Fleet Visibility & UEM Ingestion (Community / Pro+ / Enterprise)
+## Phase 23: Hardware & Asset Visibility (Community / OSS; Pro+)
+
+**Target Release:** v3.11.0.0
+**Focus:** Know what the hardware under every host is doing and which physical
+machine it is -- failing drives, degraded arrays and pools, overheating and
+other hardware faults reported the moment they happen, and an asset tag that
+belongs to the machine rather than to any one OS installed on it.
+
+**SEQUENCING (2026-10-01, Bryan).** Both features were requested for Phase 22
+and moved here the same day so Phase 22 stays hardening, security and fixes;
+every later phase moved out by one. A minor release (v3.11): new visibility,
+built on 22's agent identity (an asset tag needs to know which host is which)
+and send-on-change collection, and its real-time alerts follow 22.3's rule
+that a site-wide event must not become ten thousand emails.
+
+#### 23.1 Hardware health: failing drives, degraded arrays, overheating (OSS + Pro+)
+
+**Added 2026-10-01 (Bryan).** "Capture SMART status for failing storage,
+alerts about failed drives in arrays, failed drives in ZFS pools and the
+like, other alerts captured by various services in the operating system
+(overtemp, other hardware failures) ... have the agents pass that along and
+have a robust UI in the server ... and send email alerts to an admin when
+they happen in real-time." Nothing collects this today; `alerting_engine`
+(Pro+) already sends email/webhook/Slack/Teams but on a 60 s rule tick, and
+`health_engine` scores diagnostics -- reuse both, do not build a second
+notifier.
+
+- [ ] **Agent collectors, per OS, our own schema** (as 21.1: native first,
+      "not measured" is never "healthy" -- every source reports
+      ran / absent / failed, shown beside the results):
+      - drives: `smartctl -j` (SATA/SAS/NVMe: overall verdict, reallocated /
+        pending / uncorrectable sectors, media errors, wear, temperature);
+        `nvme smart-log`; macOS `diskutil`; Windows `Get-PhysicalDisk`
+        health + `MSStorageDriver_FailurePredictStatus`;
+      - arrays and pools: ZFS `zpool status` (DEGRADED/FAULTED/UNAVAIL,
+        checksum errors, scrub results); Linux md (`/proc/mdstat`, `mdadm
+        --detail`); btrfs `device stats`; LVM raid; FreeBSD gmirror/graid;
+        OpenBSD/NetBSD `bioctl` and `raidctl`; Windows Storage Spaces; vendor
+        RAID CLIs when present (storcli/perccli, ssacli, arcconf);
+      - sensors and platform: lm-sensors / `hw.sensors` / `envstat`,
+        `ipmitool sel` + `sdr` (BMC), EDAC memory errors, machine-check
+        events, Windows WHEA-Logger.
+- [ ] **Real time, event-first:** subscribe where the OS already raises the
+      event -- ZFS `zed`, `smartd`, `mdadm --monitor`, journald (I/O errors,
+      MCE, thermal), FreeBSD `devd`, Windows event log subscriptions -- and
+      send a `hardware_health_event` as URGENT immediately; a periodic sweep
+      (send-on-change, 22.1) catches anything without an event source.
+- [ ] **Server (OSS schema + UI):** components (drive, array, pool, sensor)
+      with current state, and an event history (time, severity, source, raw
+      evidence); dedupe and flap damping; acknowledge / resolve with a
+      reason. A fleet **Hardware Health** page (failing drives, degraded
+      arrays and pools, temperatures, filterable by site / tag / OS), a host
+      tab, and a dashboard tile.
+- [ ] **Real-time alerts (Pro+, through `alerting_engine`):** an event
+      evaluates its rules on arrival, not on the next tick, and dispatches to
+      the existing channels (email first); severity routing, re-notify until
+      acknowledged, maintenance-window suppression (14.2), per-host rate
+      limits and a digest when a whole site trips at once (a power or
+      cooling event must not send ten thousand emails -- the 22.3 herd rule).
+- [ ] Recommend (Enterprise auto-deploy, as ClamAV in 21.3): install
+      smartmontools where absent, with the operator's consent.
+- [ ] **Proof on real failures, not just fixtures:** file-backed ZFS pool
+      with a device offlined/corrupted, mdadm array on loop devices with a
+      member failed, recorded `smartctl` JSON from failing drives; an email
+      arrives within seconds of each. Docs + screenshots + 14-language i18n.
+
+#### 23.2 Asset tags on the machine, not the OS (OSS)
+
+**Added 2026-10-01 (Bryan).** "Assign an asset tag to a host that is tied to
+something that doesn't change ... a settings page where the admin could
+define the scheme by which asset tags are named ... search by asset tags,
+run reports ... checked for conformity to the naming scheme at entry time ...
+importing a CSV file that maps our identifying token to the asset tag ...
+survives OS reinstall ... my T480 ... Windows, Ubuntu and OpenBSD all on one
+machine ... all three OS's to register as separate hosts but still have the
+same asset tag." The tag belongs to the PHYSICAL MACHINE; a host is one OS
+on it. Nothing collects a hardware identity today (only 18.2's bare-metal
+discovery records manufacturer / model / serial, keyed by MAC).
+
+- [ ] **Hardware identity, collected by every agent, the same from every OS
+      on the machine:** the SMBIOS system UUID (Linux
+      `/sys/class/dmi/id/product_uuid`, Windows
+      `Win32_ComputerSystemProduct.UUID`, FreeBSD `kenv smbios.system.uuid`,
+      OpenBSD `sysctl hw.uuid`, NetBSD `machdep.dmi.system-uuid`, macOS
+      `IOPlatformUUID`), plus system and baseboard serial numbers as
+      corroboration. Normalized so the three OSes agree (Windows and older
+      SMBIOS disagree on the byte order of the first three UUID fields).
+      A CPU serial is not an option -- x86 removed it after the Pentium III.
+      Every source says ran / absent / failed; a host with no readable
+      identity is shown as such, never silently unmatched.
+- [ ] **Machine record (OSS schema):** hosts that report the same identity
+      are one machine; the asset tag lives on the machine, so the T480's three
+      OS hosts share one tag, and a reinstalled OS lands on the same machine
+      (and its tag) automatically. Conflicts are surfaced, never merged
+      silently: a cloned VM or a vendor that ships a placeholder UUID
+      (all-zero / `03000200-...` / "To Be Filled By O.E.M.") makes the admin
+      confirm. The hardware identity is NEVER an agent credential (22.0) --
+      it is readable by any local user and spoofable.
+- [ ] **Naming-scheme settings with a builder, not a regex box:** prefix,
+      separator, digit count with zero padding, optional suffix, allowed
+      characters -- with a live preview ("GDR-000042"), examples that pass and
+      fail, and the next free number suggested. An advanced regex option for
+      schemes the builder cannot express. Changing the scheme reports which
+      existing tags no longer conform; it never rewrites them.
+- [ ] **Assigning and finding:** set / change / clear the tag on the
+      machine (from any of its hosts' pages) with the scheme checked at entry
+      and uniqueness enforced; every change audited. Hosts grid column +
+      filter, the command palette and global search find a host by tag;
+      reports gain the tag (and an "untagged machines" report).
+- [ ] **CSV import and export:** map an identifier (system UUID or serial
+      number) to a tag; a dry-run preview shows every row as will-assign /
+      unchanged / not-found / fails-the-scheme / duplicate before anything is
+      written. Export the same columns. A tag imported for a machine that has
+      not enrolled yet is held and applied when it does -- and 18.2's
+      bare-metal discovery can assign it before the OS is even installed.
+- [ ] Docs + screenshots + 14-language i18n; tests for the scheme engine,
+      the identity normalization (recorded outputs from all six OS families),
+      the T480 multi-boot case and the import dry run.
+
+#### Exit criteria
+
+- [ ] Real failures, not just fixtures: a degraded ZFS pool, a failed md
+      member and failing-drive SMART data each raise an alert email within
+      seconds; a multi-boot machine's OS hosts share one asset tag.
+- [ ] Docs: hardware health and asset tags pages + screenshots + 14-language
+      i18n (the docs-are-part-of-done rule).
+- [ ] **Audit ALL previous phases for stale open items.** Same rule as every
+      phase: walk each earlier phase, check every unticked box against the
+      actual codebase, tick what is genuinely done, and for what is not say
+      plainly whether it is real work, blocked externally, or should move or
+      be dropped.
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 24: Mobile Fleet Visibility & UEM Ingestion (Community / Pro+ / Enterprise)
 
 **Target Release:** **v4.0.0.0**
 **Focus:** Extend the managed fleet beyond servers and desktops to enterprise phones & tablets -- inventory + OS/patch compliance across tiers, up to full native MDM control at Enterprise -- so the v4.0 "manage everything" promise covers every endpoint class.
@@ -11797,11 +12128,11 @@ now" -- instead of a bounded, resumable, rate-limited stream.
 
 **Design note -- this is NOT a ported agent.** iOS and Android forbid a persistent privileged daemon (sandboxing + background-execution limits), so there is no `sysmanage-agent` port. Management runs over vendor MDM/UEM channels and is mostly *server-side*; the only device-side pieces are an optional small companion app and/or an OS-native enrollment profile -- separate codebases (Swift/Apple MDM, Android Enterprise) from the agent.
 
-> **⚠️ Self-hosted / air-gap caveat.** Native mobile management needs outbound cloud reachability the rest of SysManage does not: **Apple MDM requires Apple's APNs** and the **Android Management API is Google-cloud-hosted**, so the native-MDM tiers are **not air-gappable**. The air-gap-friendly options are ingest-from-an-existing-UEM (23.3) and the self-hosted companion app (23.2), both of which reach only the customer's own infra. Called out per sub-phase.
+> **⚠️ Self-hosted / air-gap caveat.** Native mobile management needs outbound cloud reachability the rest of SysManage does not: **Apple MDM requires Apple's APNs** and the **Android Management API is Google-cloud-hosted**, so the native-MDM tiers are **not air-gappable**. The air-gap-friendly options are ingest-from-an-existing-UEM (24.3) and the self-hosted companion app (24.2), both of which reach only the customer's own infra. Called out per sub-phase.
 
 > **⚠️ Multi-tenancy storage (same rule as 14.1/14.3/21.1).** Mobile **device inventory + compliance findings are per-host/tenant data** → `tenant` partition, soft-referencing shared ids (no cross-partition FK). The **mobile OS release / EOL reference feed is global** → reuse the `shared` partition from 14.3 (one copy, offline-updatable), never per tenant.
 
-#### 23.1 Mobile device model + fleet visibility (Community / OSS)
+#### 24.1 Mobile device model + fleet visibility (Community / OSS)
 
 The OSS floor: mobile is a first-class, *visible* endpoint class -- no automated management, but you can see what you know about.
 
@@ -11817,7 +12148,7 @@ The OSS floor: mobile is a first-class, *visible* endpoint class -- no automated
 
 **Estimated Size:** ~2,500 lines
 
-#### 23.2 UEM/MDM ingestion -- single pane of glass (Pro+) ⭐
+#### 24.2 UEM/MDM ingestion -- single pane of glass (Pro+) ⭐
 
 Highest value, lowest effort: don't *be* the MDM -- **ingest from the one they already run.** Makes SysManage the single pane of glass across servers + desktops + mobile.
 
@@ -11831,14 +12162,14 @@ Highest value, lowest effort: don't *be* the MDM -- **ingest from the one they a
 
 ### Licensing summary
 
-- **Community / OSS:** device model + fleet visibility + manual/self-report registration (23.1). You can *see* devices you or a companion app report; no automated management, no curated EOL/compliance.
-- **Pro+ (Professional):** aggregate **visibility & compliance** -- companion app (23.2), ingest-from-existing-UEM (23.3 ⭐), Android inventory (23.4 read), and mobile EOL/patch compliance + alerting (23.4). The "single pane of glass over the mobile you already manage" tier -- no device control.
-- **Enterprise:** compliance *enforcement* + alerting on ingested devices (23.4).  **Being** the MDM -- native iOS/Android and zero-touch enrollment orchestration / zero-touch (23.7), and compliance *enforcement* + remote actions (lock/wipe/force-update).
+- **Community / OSS:** device model + fleet visibility + manual/self-report registration (24.1). You can *see* devices you or a companion app report; no automated management, no curated EOL/compliance.
+- **Pro+ (Professional):** aggregate **visibility & compliance** -- companion app (24.2), ingest-from-existing-UEM (24.3 ⭐), Android inventory (24.4 read), and mobile EOL/patch compliance + alerting (24.4). The "single pane of glass over the mobile you already manage" tier -- no device control.
+- **Enterprise:** compliance *enforcement* + alerting on ingested devices (24.4).  **Being** the MDM -- native iOS/Android and zero-touch enrollment orchestration / zero-touch (24.7), and compliance *enforcement* + remote actions (lock/wipe/force-update).
 
 ### Exit Criteria
 
 - [ ] Mobile device inventory validated end-to-end via ≥1 ingestion connector
-      (23.3) -- the native Android/Apple paths moved to Phase 28 (Apple) and Phase 29 (Android) with the split,
+      (24.3) -- the native Android/Apple paths moved to Phase 29 (Apple) and Phase 30 (Android) with the split,
       so this phase is validated on ingestion alone
 - [ ] Mobile OS EOL + security-patch compliance surfaces + alerts, reusing the 14.3 / advisory / alerting substrate
 - [ ] Every tier 402-clean when unlicensed; Community shows devices but gates ingestion / native-MDM / enforcement
@@ -11849,21 +12180,21 @@ Highest value, lowest effort: don't *be* the MDM -- **ingest from the one they a
 
 ---
 
-## Phase 24: Mobile Companion App & Compliance (Pro+ / Enterprise)
+## Phase 25: Mobile Companion App & Compliance (Pro+ / Enterprise)
 
 **Target Release:** v4.1.0.0
 **Focus:** Our own inventory path for devices no UEM covers, and the assessment
 layer that turns mobile inventory into findings -- EOL/patch compliance, alerts
 and enforcement.
 
-**Why split from Phase 23 (2026-08-07):** the mobile work totalled ~14,000
+**Why split from Phase 24 (2026-08-07):** the mobile work totalled ~14,000
 estimated lines, second-largest in the roadmap. The seam is *where the data comes
-from and what you do with it*: Phase 23 populates the fleet from systems the
+from and what you do with it*: Phase 24 populates the fleet from systems the
 customer already runs (ingestion), while this phase adds a first-party reporting
-path and the compliance/alerting layer on top. Phase 23 must land first -- this
+path and the compliance/alerting layer on top. Phase 24 must land first -- this
 phase assesses devices it cannot itself enroll.
 
-#### 24.1 Companion inventory app -- BYOD self-report (Pro+)
+#### 25.1 Companion inventory app -- BYOD self-report (Pro+)
 
 A thin, customer-deployable iOS/Android app for visibility where full MDM is overkill (BYOD). Honest about its limits: uninstallable, sandbox-limited, best-effort background check-in -- **visibility only, never enforcement.**
 
@@ -11871,11 +12202,11 @@ A thin, customer-deployable iOS/Android app for visibility where full MDM is ove
 - [ ] Token/QR enrollment against a tenant; check-ins land in `mobile_device` (tenant partition)
 - [ ] Air-gap-friendly (talks only to the customer's SysManage server)
 - [ ] i18n/l10n
-- **Tier note:** the app + richer reporting/compliance is Pro+; the raw self-report endpoint it uses is the OSS 23.1 one.
+- **Tier note:** the app + richer reporting/compliance is Pro+; the raw self-report endpoint it uses is the OSS 24.1 one.
 
 **Estimated Size:** ~3,500 lines (app + server)
 
-#### 24.2 Mobile compliance, lifecycle & alerting (Pro+ / Enterprise)
+#### 25.2 Mobile compliance, lifecycle & alerting (Pro+ / Enterprise)
 
 Make the inventory *actionable* -- reuse existing engines rather than rebuild.
 
@@ -11907,7 +12238,7 @@ Make the inventory *actionable* -- reuse existing engines rather than rebuild.
 
 ---
 
-## Phase 25: Stabilization & v5.0 GA
+## Phase 26: Stabilization & v5.0 GA
 
 **Target Release:** **v5.0.0.0**
 **Focus:** Full market-parity GA -- content lifecycle + provisioning + config management + advisor hardened together; performance, security, docs, i18n.
@@ -12006,7 +12337,7 @@ omits the package to keep its pip bundle pure-Python.
 Phases 0-20 had no unticked boxes, so the Phase 21 audit checked every place
 an earlier phase closed by DEFERRING or noting a follow-up, against the code.
 Most were done (and the stale notes are now marked so); these were neither
-done nor tracked anywhere. Re-home any of them if Phase 25 is the wrong fit.
+done nor tracked anywhere. Re-home any of them if Phase 26 is the wrong fit.
 
 - [x] **SSO browser landing (OIDC + SAML) -- a user-facing gap behind a ticked
       Phase 13 box.** *Fixed 2026-10-01 (pulled forward into Phase 21):* the
@@ -12077,20 +12408,20 @@ done nor tracked anywhere. Re-home any of them if Phase 25 is the wrong fit.
 
 ---
 
-## Phase 26: Expanded Agent Architecture & Packaging (Community / OSS)
+## Phase 27: Expanded Agent Architecture & Packaging (Community / OSS)
 
 **Target Release:** v5.1.0.0
 **Focus:** Run the `sysmanage-agent` on CPU architectures beyond x86-64 and arm64 -- **IBM Power (ppc64le)**, **IBM Z (s390x)**, and **RISC-V (riscv64)** -- so SysManage manages the enterprise iron and emerging silicon our competitors reach but we currently don't. The agent is AGPL, so this lands entirely in Community/OSS; no new Pro+ engine -- it's portability, packaging, and build-matrix work.
 
 **Market gap addressed:** Red Hat Satellite / Canonical Landscape / IBM BigFix manage ppc64le + s390x fleets (RHEL, SLES, Ubuntu on Power/Z) -- mainframe & Power shops are exactly the regulated enterprises we target. RISC-V is the forward bet on emerging server/edge silicon.
 
-**Why post-GA (Phase 26):** the parity arc (14-24) is about *features*; this is a *reach* expansion of an existing capability -- the same agent on more silicon, not a new capability class, so it is a minor (**v5.1.0.0**) rather than a major. It follows the v5.0 GA and builds directly on the arm64/QEMU cross-arch work already in place.
+**Why post-GA (Phase 27):** the parity arc (14-24) is about *features*; this is a *reach* expansion of an existing capability -- the same agent on more silicon, not a new capability class, so it is a minor (**v5.1.0.0**) rather than a major. It follows the v5.0 GA and builds directly on the arm64/QEMU cross-arch work already in place.
 
 > **⚠️ Endianness -- s390x is big-endian.** x86-64, arm64, ppc64le, and riscv64 are all little-endian; **s390x is big-endian** -- the one place latent byte-order bugs surface. Every `struct.pack`/`ctypes`/binary-protocol/hash-of-packed-bytes assumption in the agent (and the store-and-forward queue serialization) must be endian-audited, not assumed. JSON/text paths are safe; raw-binary paths are the risk. It gets its own slice so it isn't hand-waved.
 
 > **⚠️ Native-dependency wheels.** The agent's compiled deps (notably `cryptography`'s Rust core, `psutil`) don't always ship manylinux wheels for ppc64le/s390x/riscv64 -- so these arches may need a source-build toolchain (Rust + dev headers) in the package build, or vendored/pinned floors. That's the real effort, not the Python. Must preserve the Py3.9-floor and no-eager-asyncio agent constraints.
 
-#### 26.1 Portability foundation -- endian audit + CI matrix (OSS)
+#### 27.1 Portability foundation -- endian audit + CI matrix (OSS)
 
 - [ ] Endianness/portability audit of the agent + store-and-forward serialization; make any binary byte order explicit (no implicit native order); add a big-endian regression test leg
 - [ ] Extend `make build-all-architectures` QEMU cross-arch matrix to ppc64le / s390x / riscv64 (binfmt/QEMU already used for arm64)
@@ -12099,7 +12430,7 @@ done nor tracked anywhere. Re-home any of them if Phase 25 is the wrong fit.
 
 **Estimated Size:** ~2,500 lines (build/CI + audit fixes)
 
-#### 26.2 IBM Power -- ppc64le packaging (OSS)
+#### 27.2 IBM Power -- ppc64le packaging (OSS)
 
 - [ ] deb (Debian/Ubuntu ppc64el) + rpm (RHEL/Fedora el9 ppc64le, SLES) + Alpine (ppc64le) agent packages; `control`/spec arch toggles like the arm64 work
 - [ ] Launchpad PPA + COPR ppc64le arch enablement
@@ -12107,15 +12438,15 @@ done nor tracked anywhere. Re-home any of them if Phase 25 is the wrong fit.
 
 **Estimated Size:** ~1,500 lines
 
-#### 26.3 IBM Z -- s390x packaging + big-endian correctness (OSS)
+#### 27.3 IBM Z -- s390x packaging + big-endian correctness (OSS)
 
 - [ ] deb (Debian/Ubuntu s390x) + rpm (RHEL/SLES s390x) agent packages
-- [ ] Big-endian correctness (26.1 audit) validated green on an emulated s390x guest: enroll → inventory → command dispatch, plus a store-and-forward round-trip across a simulated outage
+- [ ] Big-endian correctness (27.1 audit) validated green on an emulated s390x guest: enroll → inventory → command dispatch, plus a store-and-forward round-trip across a simulated outage
 - [ ] Confirm TLS + message signing produce identical results big- vs little-endian
 
 **Estimated Size:** ~1,500 lines
 
-#### 26.4 RISC-V -- riscv64 packaging (OSS)
+#### 27.4 RISC-V -- riscv64 packaging (OSS)
 
 - [ ] deb (Debian/Ubuntu riscv64) + Alpine (riscv64) + Fedora riscv64 (as available) agent packages
 - [ ] Handle the still-maturing wheel/toolchain story (source-build `cryptography` where no wheel exists)
@@ -12123,7 +12454,7 @@ done nor tracked anywhere. Re-home any of them if Phase 25 is the wrong fit.
 
 **Estimated Size:** ~1,500 lines
 
-#### 26.5 Server-side arch awareness + docs (OSS)
+#### 27.5 Server-side arch awareness + docs (OSS)
 
 - [ ] Server recognizes / normalizes / displays the new `machine_architecture` values (fleet, host detail, reports); package/repo + OS-lifecycle/EOL selection keyed by arch where relevant
 - [ ] Install docs + a supported-architecture matrix updated; agent download / repo pages list the new arches
@@ -12131,7 +12462,7 @@ done nor tracked anywhere. Re-home any of them if Phase 25 is the wrong fit.
 
 **Estimated Size:** ~1,000 lines
 
-#### 26.6 Native agent channels for the remaining platforms (OSS)
+#### 27.6 Native agent channels for the remaining platforms (OSS)
 
 *Scope note (2026-08-07): the FreeBSD port cleanup + its static gate were
 pulled forward into Phase 19; the upstream SUBMISSION of the FreeBSD port is
@@ -12225,7 +12556,7 @@ first-submission gates.*
 
 ---
 
-## Phase 27: Security Tooling Coexistence (Enterprise)
+## Phase 28: Security Tooling Coexistence (Enterprise)
 
 **Target Release:** v5.2.0.0
 **Focus:** Integrate with the security tooling customers already run, rather than
@@ -12240,7 +12571,7 @@ different failure surface. Splitting lets the advisor ship on its own schedule
 and keeps integration risk (someone else's API, someone else's release cadence)
 out of a phase that gates GA.
 
-#### 27.1 Incident Response & Threat Hunting -- Velociraptor integration (Enterprise)
+#### 28.1 Incident Response & Threat Hunting -- Velociraptor integration (Enterprise)
 
 The **response/triage arm** for advisor (21.1), malware (21.2), `vuln_engine`, and
 `alerting_engine` findings. SysManage stays the management/orchestration plane;
@@ -12257,7 +12588,7 @@ being ours).
 
 **Estimated Size:** ~2,500 lines
 
-#### 27.2 Security Tooling Coexistence -- Wazuh ingestion (Enterprise)
+#### 28.2 Security Tooling Coexistence -- Wazuh ingestion (Enterprise)
 
 Meet customers who already run Wazuh where they are: **ingest, don't rebuild.** Wazuh
 alerts / FIM / SCA become additional inputs to `advisor_engine` (21.1) and the alert
@@ -12293,7 +12624,7 @@ one-way ingestion connector only.
 
 ---
 
-## Phase 28: Apple Native MDM (Enterprise)
+## Phase 29: Apple Native MDM (Enterprise)
 
 **Target Release:** v6.0.0.0
 **Focus:** Be the MDM authority for iOS/iPadOS -- the Apple MDM protocol itself:
@@ -12301,15 +12632,15 @@ APNs push, signed enrollment profiles, device queries, restriction/configuration
 profiles, and remote lock/wipe.
 
 **Why its own phase (split 2026-08-07):** at ~10,000 estimated lines this single
-slice was larger than all of Phase 27, and it dominated a combined native-MDM
+slice was larger than all of Phase 28, and it dominated a combined native-MDM
 phase of ~18,500 lines -- the largest in the roadmap. It is also the most
 self-contained: a protocol implementation against Apple's spec, gated on an Apple
 push certificate and APNs reachability, sharing little with the Android path.
 
-**Not air-gappable.** APNs reachability is mandatory; Phase 23 remains the
+**Not air-gappable.** APNs reachability is mandatory; Phase 24 remains the
 air-gap-compatible mobile story.
 
-#### 28.1 iOS/iPadOS native MDM -- Apple MDM protocol (Enterprise)
+#### 29.1 iOS/iPadOS native MDM -- Apple MDM protocol (Enterprise)
 
 Be the MDM for Apple devices. Heaviest sub-phase (protocol + APNs + enrollment), Enterprise-only.
 
@@ -12339,7 +12670,7 @@ Be the MDM for Apple devices. Heaviest sub-phase (protocol + APNs + enrollment),
 
 ---
 
-## Phase 29: Android Native MDM & Zero-Touch Enrollment (Pro+ / Enterprise)
+## Phase 30: Android Native MDM & Zero-Touch Enrollment (Pro+ / Enterprise)
 
 **Target Release:** v6.1.0.0
 **Focus:** Android Management API enrollment and policy, plus bulk/zero-touch
@@ -12347,11 +12678,11 @@ enrollment orchestration across BOTH platforms.
 
 **Why enrollment orchestration sits here:** Apple ADE/ABM and Android zero-touch
 are one feature with two back ends, and it needs both MDM implementations to
-exist -- so it follows Phase 28 rather than shipping half-built alongside it.
+exist -- so it follows Phase 29 rather than shipping half-built alongside it.
 
 **Not air-gappable.** Google cloud reachability is mandatory.
 
-#### 29.1 Android native MDM -- Android Management API (Pro+ inventory → Enterprise policy)
+#### 30.1 Android native MDM -- Android Management API (Pro+ inventory → Enterprise policy)
 
 Google hosts the heavy lifting; we integrate the API. Split by tier: **read = Pro+, control = Enterprise.**
 
@@ -12362,7 +12693,7 @@ Google hosts the heavy lifting; we integrate the API. Split by tier: **read = Pr
 
 **Estimated Size:** ~4,500 lines
 
-#### 29.2 Enrollment orchestration & zero-touch (Enterprise)
+#### 30.2 Enrollment orchestration & zero-touch (Enterprise)
 
 The operational product: getting devices enrolled at scale.
 
@@ -12391,7 +12722,7 @@ The operational product: getting devices enrolled at scale.
 
 ---
 
-## Phase 30: High Availability & Disaster Recovery (Enterprise)
+## Phase 31: High Availability & Disaster Recovery (Enterprise)
 
 **Target Release:** v6.2.0.0
 **Focus:** Survive losing a server, and survive losing a site. Multiple
@@ -12404,7 +12735,7 @@ deliberately built on top of it rather than beside it.
 
 **SEQUENCING NOTE -- worth revisiting.** This is placed last because it does not
 block anything else, but it is the phase most likely to be pulled forward:
-enterprise procurement asks about HA at evaluation time, and Phase 25 claims
+enterprise procurement asks about HA at evaluation time, and Phase 26 claims
 "market parity" at v5.0 while a single server outage still takes the whole
 control plane down. If a deal needs it, moving this ahead of the mobile arc
 (22/23/27/28) costs nothing structurally -- nothing in those phases depends on
@@ -12430,7 +12761,7 @@ quietly assumes it is the only one:
   * **Migrations race on startup.** N servers starting together will all try
     to run Alembic.
 
-#### 30.1 Make the server horizontally runnable (Enterprise)
+#### 31.1 Make the server horizontally runnable (Enterprise)
 
 - [ ] **Connection registry + inter-server dispatch** -- a shared record of
       which instance holds which agent's socket, and a path to hand a command
@@ -12462,7 +12793,7 @@ quietly assumes it is the only one:
 
 **Estimated Size:** ~5,000 lines
 
-#### 30.2 Database high availability (Enterprise -- integrate, don't build)
+#### 31.2 Database high availability (Enterprise -- integrate, don't build)
 
 **We do not write a Postgres failover system.** Patroni, repmgr and
 pg_auto_failover exist and customers already run them; building a fifth would
@@ -12487,14 +12818,14 @@ client of one.
 
 **Estimated Size:** ~2,000 lines
 
-#### 30.3 Cross-site failover / DR (Enterprise)
+#### 31.3 Cross-site failover / DR (Enterprise)
 
 - [ ] **Agent-side multi-endpoint failover** -- the agent takes an ORDERED list
       of server endpoints rather than one, health-checks, fails over with
       backoff and fails back deliberately. Without this the whole feature is
       theatre: a VIP that is unreachable because the *network* is gone cannot
       be fixed by anything on the server side. This is the single most
-      important item in 30.3 and it lands in the OSS agent
+      important item in 31.3 and it lands in the OSS agent
 - [ ] Warm secondary: streaming replication to the DR site plus artifact
       replication, with a measured and documented RPO
 - [ ] **Promotion is explicit and fenced, and the secondary is READ-ONLY until
@@ -12511,7 +12842,7 @@ client of one.
 
 **Estimated Size:** ~4,500 lines
 
-#### 30.4 Operating it (Enterprise)
+#### 31.4 Operating it (Enterprise)
 
 - [ ] Server Cluster page -- instances and their health, which holds the leader
       lock, how agents are distributed across instances, replication lag, and
@@ -12553,7 +12884,7 @@ client of one.
 
 ---
 
-## Phase 31: Browser Remote Terminal (Community / OSS; recording Pro+; approval Enterprise)
+## Phase 32: Browser Remote Terminal (Community / OSS; recording Pro+; approval Enterprise)
 
 **Target Release:** v6.3.0.0
 **Focus:** Open an interactive shell on a managed host from the web UI, with
@@ -12568,7 +12899,7 @@ session closes.
 
 **SEQUENCING NOTE -- worth revisiting.** Placed last so no phase is
 renumbered, but a browser terminal is table stakes in this market (Cockpit,
-Landscape, AWS SSM Session Manager, Teleport all have one) and Phase 25 claims
+Landscape, AWS SSM Session Manager, Teleport all have one) and Phase 26 claims
 market parity at v5.0. Nothing here depends on 22-29, so pulling it ahead of
 the mobile arc costs nothing structurally. Bryan's call, not a silent reorder.
 
@@ -12625,7 +12956,7 @@ nicety:
     Idle timeout and maximum duration, with a kill switch in the UI.
   * **Not the store-and-forward queue.** Interactive bytes cannot go through
     `message_queue`; this needs a live streaming channel on the agent's
-    WebSocket. Under Phase 30 HA the browser must land on (or be relayed to)
+    WebSocket. Under Phase 31 HA the browser must land on (or be relayed to)
     the server instance holding that agent's connection.
 
 **Community / OSS -- the terminal and the controls that make it safe to ship
@@ -12640,7 +12971,7 @@ is a liability, not a feature.
       multiplexed on the agent's existing WebSocket -- NOT the store-and-forward
       `message_queue`, which is built for resilience, not keystrokes;
       per-session ids; backpressure so a flood of output cannot starve the
-      agent's heartbeats or queued command results; under Phase 30 HA the
+      agent's heartbeats or queued command results; under Phase 31 HA the
       browser is relayed to the server instance holding that agent's connection
 - [ ] **Its own role**: "Open Remote Terminal", separate from View/Manage
       Host, scoped per host / access group / tenant like every other role,
@@ -12720,7 +13051,7 @@ adjust.*
 
 ---
 
-## Phase 32: Fleet Targeting by Site & Network Segment (Enterprise)
+## Phase 33: Fleet Targeting by Site & Network Segment (Enterprise)
 
 **Target Release:** v6.4.0.0
 **Focus:** Choose WHERE work runs the way large estates are actually laid out:
@@ -12786,16 +13117,17 @@ federation (`Host.site_id`) and are not offered to scans yet.
 | 20 | v3.8.0.0 | Configuration Management & Drift | Ansible desired-state config, config profiles, drift detection + remediate-to-baseline |
 | 21 | v3.9.0.0 | Endpoint Facts & Proactive Advisor | osquery fact substrate, Insights-style recommendations, malware detection, threat-model wizard + posture punch list, unenrolled asset discovery |
 | 22 | v3.10.0.0 | Scale Hardening -- Thundering-Herd Remediation | Jittered agent schedules + send-on-change, high-throughput intake and fair queues, leader election, bounded/spread ticks, fleet pushes in waves, stage-then-swap module updates + CDN delivery, federation deltas, scale harness |
-| 23 | **v4.0.0.0** | Mobile Fleet Visibility & UEM Ingestion | **MAJOR -- a new device class enters the product.** Device model, manual/API registration, ingest-from-UEM -- **air-gap compatible** |
-| 24 | v4.1.0.0 | Mobile Companion App & Compliance | First-party BYOD self-report app; mobile EOL/patch compliance, alerting + enforcement |
-| 25 | **v5.0.0.0** | Market-Parity GA | **MAJOR -- market parity reached.** All gap features hardened; v5.0 GA |
-| 26 | v5.1.0.0 | Expanded Agent Architecture & Packaging | ppc64le + s390x (big-endian) + riscv64 agent packaging/CI; native channels for alpine/BSD (Community/OSS) |
-| 27 | v5.2.0.0 | Security Tooling Coexistence | Velociraptor IR/hunting + Wazuh ingestion (Enterprise) |
-| 28 | **v6.0.0.0** | Apple Native MDM | **MAJOR -- SysManage becomes the device authority**, not just an observer: Apple MDM protocol, APNs, profiles, remote lock/wipe -- **not air-gappable** |
-| 29 | v6.1.0.0 | Android Native MDM & Zero-Touch | Android Management API policy + bulk/zero-touch enrollment across both vendors -- **not air-gappable** |
-| 30 | v6.2.0.0 | High Availability & Disaster Recovery | Active server pool behind a load balancer, leader-elected singleton workers, Postgres failover integration, agent multi-endpoint failover to a DR site |
-| 31 | v6.3.0.0 | Browser Remote Terminal | Agent-tunneled PTY sessions from the web UI -- no sshd, no inbound port, no keys, host posture untouched (OSS); recording (Pro+), second-person approval (Enterprise) |
-| 32 | v6.4.0.0 | Fleet Targeting by Site & Network Segment | Target scans and other fleet work by site, and by CIDR network segment within a site; per-site/segment rollout limits (Enterprise) |
+| 23 | v3.11.0.0 | Hardware & Asset Visibility | Drive health (SMART, NVMe), degraded arrays and ZFS pools, temperatures and hardware errors from every OS, with real-time email alerts; asset tags bound to the physical machine (shared by every OS on it), a naming-scheme builder, search, reports and CSV import |
+| 24 | **v4.0.0.0** | Mobile Fleet Visibility & UEM Ingestion | **MAJOR -- a new device class enters the product.** Device model, manual/API registration, ingest-from-UEM -- **air-gap compatible** |
+| 25 | v4.1.0.0 | Mobile Companion App & Compliance | First-party BYOD self-report app; mobile EOL/patch compliance, alerting + enforcement |
+| 26 | **v5.0.0.0** | Market-Parity GA | **MAJOR -- market parity reached.** All gap features hardened; v5.0 GA |
+| 27 | v5.1.0.0 | Expanded Agent Architecture & Packaging | ppc64le + s390x (big-endian) + riscv64 agent packaging/CI; native channels for alpine/BSD (Community/OSS) |
+| 28 | v5.2.0.0 | Security Tooling Coexistence | Velociraptor IR/hunting + Wazuh ingestion (Enterprise) |
+| 29 | **v6.0.0.0** | Apple Native MDM | **MAJOR -- SysManage becomes the device authority**, not just an observer: Apple MDM protocol, APNs, profiles, remote lock/wipe -- **not air-gappable** |
+| 30 | v6.1.0.0 | Android Native MDM & Zero-Touch | Android Management API policy + bulk/zero-touch enrollment across both vendors -- **not air-gappable** |
+| 31 | v6.2.0.0 | High Availability & Disaster Recovery | Active server pool behind a load balancer, leader-elected singleton workers, Postgres failover integration, agent multi-endpoint failover to a DR site |
+| 32 | v6.3.0.0 | Browser Remote Terminal | Agent-tunneled PTY sessions from the web UI -- no sshd, no inbound port, no keys, host posture untouched (OSS); recording (Pro+), second-person approval (Enterprise) |
+| 33 | v6.4.0.0 | Fleet Targeting by Site & Network Segment | Target scans and other fleet work by site, and by CIDR network segment within a site; per-site/segment rollout limits (Enterprise) |
 
 ---
 

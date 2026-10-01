@@ -412,6 +412,20 @@ try {
         Write-Log "Configuration file already exists: $ConfigFile"
     }
 
+    # Size the database connection pool for THIS machine (Phase 22.2): adds a
+    # commented database_pool block only if the config has none.
+    $VenvPython = Join-Path $InstallDir ".venv\Scripts\python.exe"
+    if ((Test-Path $ConfigFile) -and (Test-Path $VenvPython)) {
+        Push-Location $InstallDir
+        try {
+            & $VenvPython -m backend.persistence.pool_sizing --apply $ConfigFile 2>&1 | Out-File -FilePath $LogFile -Append
+        } catch {
+            Write-Log "WARNING: could not size the database pool: $_"
+        } finally {
+            Pop-Location
+        }
+    }
+
     # Create database directory
     $DbDir = "C:\ProgramData\SysManage\db"
     if (-not (Test-Path $DbDir)) {

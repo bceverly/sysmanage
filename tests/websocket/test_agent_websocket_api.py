@@ -164,7 +164,37 @@ class TestAgentConnect:
             await agent_connect(mock_websocket)
 
             mock_cm.disconnect.assert_called_once_with("agent-123")
-            mock_db.close.assert_called_once()
+            # Closed before the receive loop (Phase 22.2) and again on cleanup.
+            mock_db.close.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_each_message_gets_its_own_short_lived_session(self, mock_websocket):
+        """Phase 22.2: a connection must not pin one pooled connection for its
+        whole life -- that is how ~50 agents exhausted the pool."""
+        mock_websocket.receive_text.side_effect = ["m1", "m2", WebSocketDisconnect()]
+        sessions = []
+
+        def new_session():
+            db = Mock()
+            sessions.append(db)
+            return iter([db])
+
+        with patch("backend.api.agent.get_db", side_effect=new_session), patch(
+            "backend.api.agent.websocket_security"
+        ) as mock_security, patch(
+            "backend.api.agent.connection_manager"
+        ) as mock_cm, patch(
+            "backend.api.agent._process_websocket_message", new=AsyncMock()
+        ) as process:
+            mock_security.validate_connection_token.return_value = (True, "c", "Valid")
+            mock_cm.connect = AsyncMock(return_value=Mock(agent_id="agent-1"))
+            await agent_connect(mock_websocket)
+
+        # One for the handshake, one per message -- each closed.
+        assert len(sessions) == 3
+        assert [call.args[2] for call in process.call_args_list] == sessions[1:]
+        for db in sessions:
+            db.close.assert_called()
 
 
 class TestProcessWebSocketMessage:

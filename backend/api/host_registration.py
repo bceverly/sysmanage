@@ -59,6 +59,22 @@ def _refresh_existing_host(session, existing_host, registration_data) -> "models
         raise
 
 
+def registration_reply(host, issue_credential: bool) -> dict:
+    """What a registration answers -- explicit, never the serialized row
+    (which carried the token, the client certificate and every column).
+    The id and token go only to the registration that created the host."""
+    reply = {
+        "result": True,
+        "fqdn": host.fqdn,
+        "approval_status": host.approval_status,
+        "active": host.active,
+    }
+    if issue_credential:
+        reply["id"] = str(host.id)
+        reply["host_token"] = host.host_token
+    return reply
+
+
 def _validate_registration_key(session, raw_key):
     """Resolve a registration key string to a usable ``RegistrationKey``
     row.  Returns the row when valid, ``None`` when no key was supplied,

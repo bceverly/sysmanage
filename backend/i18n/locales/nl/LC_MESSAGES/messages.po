@@ -6304,3 +6304,15 @@ msgstr ""
 
 msgid "The single sign-on session has expired. Sign in again."
 msgstr "De single sign-on-sessie is verlopen. Meld u opnieuw aan."
+
+#: backend/api/message_handlers_core.py
+msgid "Agent session refused: it did not prove it is this host"
+msgstr "Agentsessie geweigerd: deze heeft niet bewezen dat het deze host is"
+
+#: backend/api/message_handlers_core.py
+msgid "This agent did not prove it is this host. If the host was reinstalled, remove it from SysManage and approve its new registration."
+msgstr "Deze agent heeft niet bewezen dat het deze host is. Als de host opnieuw is geïnstalleerd, verwijder hem dan uit SysManage en keur de nieuwe registratie goed."
+
+#: backend/api/message_handlers.py
+msgid "This session cannot acknowledge another host's message"
+msgstr "Deze sessie kan het bericht van een andere host niet bevestigen"

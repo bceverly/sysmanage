@@ -67,6 +67,8 @@ cover/
 # Django stuff:
 *.log
 logs/
+# Load-test harness output (tests/load/stack.py writes a config with secrets here)
+.runtime-logs/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal

@@ -7,10 +7,14 @@ This module manages the "db" object which is the gateway into the SQLAlchemy
 ORM used by SysManage.
 """
 
+import logging
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from backend.config import config
+
+logger = logging.getLogger(__name__)
 
 
 def _psycopg_url(url: str) -> str:
@@ -111,15 +115,45 @@ def _init_production_database():
         PROD_DATABASE_URL = _apply_db_options(PROD_DATABASE_URL, db_options)
 
     # create the database connection
-    PROD_ENGINE = create_engine(
-        _psycopg_url(PROD_DATABASE_URL),
-        connect_args={},
-        echo=False,
-        **HA_ENGINE_KWARGS,
-    )
+    PROD_ENGINE = _sized_engine(_psycopg_url(PROD_DATABASE_URL), the_config)
     PROD_SESSION_LOCAL = sessionmaker(
         autocommit=False, autoflush=False, bind=PROD_ENGINE
     )
+
+
+def _sized_engine(url, the_config):
+    """The bootstrap engine with its pool sized for this machine, and checked
+    against what PostgreSQL will accept (Phase 22.2 -- see pool_sizing)."""
+    from backend.persistence import (
+        pool_sizing,
+    )  # pylint: disable=import-outside-toplevel
+
+    if not url.startswith("postgresql"):
+        # SQLite (development): SQLAlchemy picks the right pool class itself.
+        return create_engine(url, connect_args={}, echo=False, **HA_ENGINE_KWARGS)
+    pool = pool_sizing.settings(the_config)
+
+    def build(sized):
+        kwargs = {**HA_ENGINE_KWARGS, **pool_sizing.engine_kwargs(sized)}
+        return create_engine(url, connect_args={}, echo=False, **kwargs)
+
+    engine = build(pool)
+    workers = pool_sizing.server_workers()
+    limit = pool_sizing.server_max_connections(engine)
+    if limit is not None:
+        fitted, reason = pool_sizing.fit(pool, limit, workers)
+        if reason:
+            logger.warning("Database pool reduced to fit the server: %s", reason)
+            engine.dispose()
+            engine, pool = build(fitted), fitted
+    logger.info(
+        "Database pool: %s + %s overflow per worker (%s worker(s), timeout %ss)",
+        pool["size"],
+        pool["max_overflow"],
+        workers,
+        pool["timeout"],
+    )
+    return engine
 
 
 # Get the base model class - we can use this to extend any models

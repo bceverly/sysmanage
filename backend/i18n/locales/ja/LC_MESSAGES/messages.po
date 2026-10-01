@@ -6093,3 +6093,15 @@ msgstr "OS バージョン別の macOS の脆弱性 (NVD の影響を受ける�
 
 msgid "The single sign-on session has expired. Sign in again."
 msgstr "シングルサインオンのセッションの有効期限が切れました。もう一度サインインしてください。"
+
+#: backend/api/message_handlers_core.py
+msgid "Agent session refused: it did not prove it is this host"
+msgstr "エージェント セッションを拒否しました: このホストであることを証明しませんでした"
+
+#: backend/api/message_handlers_core.py
+msgid "This agent did not prove it is this host. If the host was reinstalled, remove it from SysManage and approve its new registration."
+msgstr "このエージェントは、このホストであることを証明しませんでした。ホストを再インストールした場合は、SysManage から削除し、新しい登録を承認してください。"
+
+#: backend/api/message_handlers.py
+msgid "This session cannot acknowledge another host's message"
+msgstr "このセッションは別のホストのメッセージを確認応答できません"

@@ -22,6 +22,7 @@ the bootstrap / server-scope database.
 
 import asyncio
 import uuid
+from types import SimpleNamespace
 
 import pytest
 from sqlalchemy import create_engine
@@ -134,14 +135,17 @@ def _fqdns_via_seam(tenant_id):
 def _register(fqdn, token):
     from backend.api.host import HostRegistration, register_host
 
-    return asyncio.run(
-        register_host(
-            HostRegistration(
-                active=True,
-                fqdn=fqdn,
-                hostname=fqdn.split(".")[0],
-                ipv4="10.0.0.1",
-                enrollment_token=token,
+    # The reply is a dict since Phase 22.0 (never the ORM row).
+    return SimpleNamespace(
+        **asyncio.run(
+            register_host(
+                HostRegistration(
+                    active=True,
+                    fqdn=fqdn,
+                    hostname=fqdn.split(".")[0],
+                    ipv4="10.0.0.1",
+                    enrollment_token=token,
+                )
             )
         )
     )

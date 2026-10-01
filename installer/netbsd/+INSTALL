@@ -45,6 +45,10 @@ POST-INSTALL)
 	/usr/pkg/bin/python3.12 -m venv .venv
 	.venv/bin/pip install --quiet --upgrade pip
 	.venv/bin/pip install --quiet -r "$([ -f requirements-prod.txt ] && echo requirements-prod.txt || echo requirements.txt)"
+	# Size the database connection pool for THIS machine (Phase 22.2): adds a
+	# commented database_pool block only if the config has none -- an
+	# administrator's own values are never touched.
+	.venv/bin/python -m backend.persistence.pool_sizing --apply /usr/pkg/etc/sysmanage/config.yaml || true
 
 	# OpenBAO secrets broker -- provision the static prebuilt binary (NetBSD
 	# has no OpenBAO package), install the rc.d service, create the user.

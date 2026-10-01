@@ -177,6 +177,8 @@ parts:
         echo "Configuration file not found at $SYSMANAGE_CONFIG_PATH"
         echo "Creating from example template..."
         cp "$SNAP/app/config/sysmanage.yaml.example" "$SYSMANAGE_CONFIG_PATH"
+        # Size the database pool for this machine (Phase 22.2).
+        ( cd "$SNAP/app" && $SNAP/usr/bin/python3.10 -m backend.persistence.pool_sizing --apply "$SYSMANAGE_CONFIG_PATH" ) || true
         echo ""
         echo "WARNING: Using default configuration. Edit the config file:"
         echo "  $SYSMANAGE_CONFIG_PATH"

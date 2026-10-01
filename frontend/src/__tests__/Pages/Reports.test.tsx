@@ -8,7 +8,7 @@ import { BrowserRouter } from 'react-router';
 import { vi, type Mock } from 'vitest';
 import Reports from '../../Pages/Reports';
 
-/* eslint-disable no-undef, no-unused-vars */
+/* eslint-disable no-unused-vars */
 declare const global: {
   fetch: any;
 };
@@ -21,7 +21,7 @@ declare const Blob: {
 declare const Headers: {
   new (init?: HeadersInit): Headers;
 };
-/* eslint-enable no-undef, no-unused-vars */
+/* eslint-enable no-unused-vars */
 
 // Mock axios API
 vi.mock('../../Services/api', () => ({

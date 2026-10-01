@@ -91,7 +91,7 @@ describe('CommandPalette', () => {
   it('filters commands by query', () => {
     renderPalette();
     dispatchOpen();
-    act(() => fireEvent.change(input(), { target: { value: 'host' } }));
+    act(() => { fireEvent.change(input(), { target: { value: 'host' } }); });
     expect(screen.getByText('Hosts')).toBeInTheDocument();
     expect(screen.queryByText('Settings')).toBeNull();
   });
@@ -99,7 +99,7 @@ describe('CommandPalette', () => {
   it('shows a no-matches message for a non-matching query', () => {
     renderPalette();
     dispatchOpen();
-    act(() => fireEvent.change(input(), { target: { value: 'zzznotathing' } }));
+    act(() => { fireEvent.change(input(), { target: { value: 'zzznotathing' } }); });
     expect(screen.getByText(/No matches/i)).toBeInTheDocument();
   });
 
@@ -143,8 +143,8 @@ describe('CommandPalette', () => {
   it('navigates and closes on Enter', async () => {
     renderPalette();
     dispatchOpen();
-    act(() => fireEvent.change(input(), { target: { value: 'hosts' } }));
-    act(() => fireEvent.keyDown(input(), { key: 'Enter' }));
+    act(() => { fireEvent.change(input(), { target: { value: 'hosts' } }); });
+    act(() => { fireEvent.keyDown(input(), { key: 'Enter' }); });
     expect(h.navigate).toHaveBeenCalledWith('/hosts');
     await waitFor(() =>
       expect(screen.queryByPlaceholderText(/Search pages/i)).toBeNull(),
@@ -154,16 +154,16 @@ describe('CommandPalette', () => {
   it('navigates on click', () => {
     renderPalette();
     dispatchOpen();
-    act(() => fireEvent.click(screen.getByText('Dashboard')));
+    act(() => { fireEvent.click(screen.getByText('Dashboard')); });
     expect(h.navigate).toHaveBeenCalledWith('/');
   });
 
   it('ArrowUp/ArrowDown adjust the active row without crashing', () => {
     renderPalette();
     dispatchOpen();
-    act(() => fireEvent.keyDown(input(), { key: 'ArrowDown' }));
-    act(() => fireEvent.keyDown(input(), { key: 'ArrowUp' }));
-    act(() => fireEvent.keyDown(input(), { key: 'Enter' }));
+    act(() => { fireEvent.keyDown(input(), { key: 'ArrowDown' }); });
+    act(() => { fireEvent.keyDown(input(), { key: 'ArrowUp' }); });
+    act(() => { fireEvent.keyDown(input(), { key: 'Enter' }); });
     expect(h.navigate).toHaveBeenCalled();
   });
 });

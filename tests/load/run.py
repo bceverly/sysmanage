@@ -73,6 +73,7 @@ Numbers are good for catching regressions, not capacity planning.
 import argparse
 import asyncio
 import json
+import os
 import sys
 import time
 import urllib.error
@@ -802,13 +803,81 @@ def main() -> int:
             "ws-ordering",
             "ws-backpressure",
             "all",
+            # Phase 22 fleet scenarios: realistic agents against the
+            # disposable server from tests/load/stack.py (fleet_scenarios.py).
+            "fleet-steady",
+            "fleet-restart-storm",
+            # Security: can an agent act as another host knowing only its
+            # name? (security_scenarios.py)
+            "agent-impersonation",
         ],
     )
     parser.add_argument("--agents", type=int, default=100)
     parser.add_argument("--duration-seconds", type=int, default=60)
     parser.add_argument("--server-url", default="http://localhost:8000")
     parser.add_argument("--output-json", required=True)
+    fleet = parser.add_argument_group("fleet scenarios")
+    fleet.add_argument(
+        "--source-ips",
+        type=int,
+        default=0,
+        help="distinct loopback source addresses (0 = one per agent; 1 = all behind one NAT)",
+    )
+    fleet.add_argument(
+        "--time-scale",
+        type=float,
+        default=1.0,
+        help="divide the agents' timers by this (10 = 5-minute collection every 30 s)",
+    )
+    fleet.add_argument(
+        "--packages", type=int, default=600, help="packages per software inventory"
+    )
+    fleet.add_argument("--warmup-seconds", type=int, default=120)
+    fleet.add_argument(
+        "--down-seconds",
+        type=int,
+        default=30,
+        help="server outage for the restart storm",
+    )
+    fleet.add_argument("--sample-seconds", type=float, default=5.0)
+    fleet.add_argument(
+        "--reuse-stack",
+        action="store_true",
+        help="skip the database reset (by default each fleet run starts empty)",
+    )
+    fleet.add_argument(
+        "--report-only",
+        action="store_true",
+        help="exit 0 even when the Phase 22 criteria fail (recording a baseline)",
+    )
     args = parser.parse_args()
+
+    if args.scenario == "agent-impersonation":
+        sys.path.insert(
+            0,
+            os.path.dirname(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            ),
+        )
+        # pylint: disable-next=import-outside-toplevel
+        from tests.load.security_scenarios import main_security
+
+        return main_security(args)
+
+    if args.scenario.startswith("fleet-"):
+        # Run as a script, the repo root is not on sys.path (CI sets PYTHONPATH=.).
+        sys.path.insert(
+            0,
+            os.path.dirname(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            ),
+        )
+        # pylint: disable-next=import-outside-toplevel
+        from tests.load.fleet_scenarios import main_fleet
+
+        if args.source_ips <= 0:
+            args.source_ips = args.agents
+        return main_fleet(args)
 
     if args.duration_seconds <= 0:
         print("ERROR: --duration-seconds must be > 0", file=sys.stderr)
