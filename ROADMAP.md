@@ -11530,7 +11530,7 @@ are the bulk; the review UI is small).
       bare-metal PXE validation, air-gap bundle smoke tests, the federation
       map follow-ups (build or drop), placeholder API paths in the docs, and
       the optional pen-test revisit.
-- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+- [x] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free -- *met 2026-10-01: lint clean in sysmanage, sysmanage-agent and sysmanage-docs; SonarCloud clean (310 sysmanage issues fixed, 3 deliberate NOSONAR), agent rescanned, CodeQL zero; backend, frontend, E2E, agent and engine suites green; no perf regression; shipped as v3.9.0.0.*
 
 ---
 
@@ -12783,8 +12783,8 @@ federation (`Host.site_id`) and are not offered to scans yet.
 | 18.1 | v3.5.0.0 | Compute Provisioning & Auto-Enroll | Pluggable compute-provider model (remote libvirt, Proxmox), templates, first-boot auto-enroll |
 | 18.2 | v3.5.x | Bare-Metal PXE & Discovery | Readiness preflight + config advisor, PXE/kickstart, host discovery, ISO provisioning |
 | 19 | v3.6.0.0 | Stabilization | Content lifecycle + provisioning hardening; agent capability advertisement |
-| 20 | v3.7.0.0 | Configuration Management & Drift | Ansible desired-state config, config profiles, drift detection + remediate-to-baseline |
-| 21 | v3.8.0.0 | Endpoint Facts & Proactive Advisor | osquery fact substrate, Insights-style recommendations, malware detection, threat-model wizard + posture punch list, unenrolled asset discovery |
+| 20 | v3.8.0.0 | Configuration Management & Drift | Ansible desired-state config, config profiles, drift detection + remediate-to-baseline |
+| 21 | v3.9.0.0 | Endpoint Facts & Proactive Advisor | osquery fact substrate, Insights-style recommendations, malware detection, threat-model wizard + posture punch list, unenrolled asset discovery |
 | 22 | v3.10.0.0 | Scale Hardening -- Thundering-Herd Remediation | Jittered agent schedules + send-on-change, high-throughput intake and fair queues, leader election, bounded/spread ticks, fleet pushes in waves, stage-then-swap module updates + CDN delivery, federation deltas, scale harness |
 | 23 | **v4.0.0.0** | Mobile Fleet Visibility & UEM Ingestion | **MAJOR -- a new device class enters the product.** Device model, manual/API registration, ingest-from-UEM -- **air-gap compatible** |
 | 24 | v4.1.0.0 | Mobile Companion App & Compliance | First-party BYOD self-report app; mobile EOL/patch compliance, alerting + enforcement |
