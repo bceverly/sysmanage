@@ -173,14 +173,14 @@ const GrafanaIntegrationCard: React.FC = () => {
 
   // Load data on mount
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [loadData]);
 
   // Check health when settings change and enabled, but only after initial load
   useEffect(() => {
     if (settings.enabled && !loading && (settings.host_id || settings.manual_url)) {
       const timer = setTimeout(() => {
-        checkHealth();
+        void checkHealth();
       }, 2000); // Delay to avoid rapid calls
       return () => clearTimeout(timer);
     }

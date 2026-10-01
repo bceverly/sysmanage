@@ -385,7 +385,7 @@ const MirrorListCard: React.FC<MirrorListCardProps> = ({
                       title={t('mirror.action.delete', 'Delete')}
                       onClick={() => {
                         if (globalThis.confirm(t('mirror.deleteConfirm', 'Delete this mirror?'))) {
-                          handleAction(deleteMirror, m.id, 'mirror.deleteError');
+                          void handleAction(deleteMirror, m.id, 'mirror.deleteError');
                         }
                       }}
                     >

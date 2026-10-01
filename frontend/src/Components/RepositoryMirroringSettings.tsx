@@ -75,7 +75,7 @@ const RepositoryMirroringSettings: React.FC = () => {
   };
 
   useEffect(() => {
-    refresh();
+    void refresh();
     // refresh is stable for the component lifetime; mount-only fetch
     // is intentional.
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -6342,3 +6342,6 @@ msgstr ""
 
 #~ msgid "Executing command sequence"
 #~ msgstr "Executando sequência de comandos"
+
+msgid "The single sign-on session has expired. Sign in again."
+msgstr "A sessão de logon único expirou. Entre novamente."

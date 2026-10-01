@@ -98,6 +98,7 @@ from backend.api import (
     security_roles,
     server_info,
     server_settings,
+    sso_session,
     tag,
     telemetry,
     third_party_repos,
@@ -311,6 +312,9 @@ def register_routes(app: FastAPI):
     # SSO/ACS/metadata callbacks -- IdP-configured URLs, kept unversioned.
     logger.debug("Adding external IdP SSO callback router (unversioned /api/auth/*)")
     app.include_router(external_idp.router)
+    # Browser landing for those callbacks (login-page provider list + the
+    # one-shot session hand-off) -- same unversioned /api/auth/* surface.
+    app.include_router(sso_session.router)
     # Provider/settings management -- native /api/v1 + deprecated /api alias.
     logger.debug("Adding external IdP management router (native /api/v1 + alias)")
     _include_versioned(app, external_idp.mgmt_router, tags=["external-idp"])

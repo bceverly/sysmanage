@@ -5301,3 +5301,7 @@ msgstr ""
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
+
+#: backend/api/sso_session.py
+msgid "The single sign-on session has expired. Sign in again."
+msgstr ""

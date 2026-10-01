@@ -114,7 +114,7 @@ const PackageProfilesSettings: React.FC = () => {
   }, [t]);
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, [refresh]);
 
   const openCreate = () => {

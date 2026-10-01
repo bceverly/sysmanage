@@ -138,7 +138,7 @@ const MaintenanceWindows: React.FC = () => {
     }, [t]);
 
     useEffect(() => {
-        load();
+        void load();
     }, [load]);
 
     const scheduleText = useCallback(

@@ -171,7 +171,7 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
     };
 
     if (hostId) {
-      fetchAntivirusStatus();
+      void fetchAntivirusStatus();
     }
   }, [hostId, t, refreshTrigger]);
 

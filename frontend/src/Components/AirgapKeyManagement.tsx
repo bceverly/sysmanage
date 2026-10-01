@@ -104,7 +104,7 @@ export const CollectorPublicKeyCard: React.FC = () => {
 
   useEffect(() => {
     let alive = true;
-    (async () => {
+    void (async () => {
       setLoading(true);
       try {
         const r = await axiosInstance.get<CollectorKey>(COLLECTOR_KEY_URL);
@@ -225,7 +225,7 @@ export const TrustedCollectorsCard: React.FC = () => {
   }, [t]);
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, [refresh]);
 
   const doImport = async () => {
@@ -393,7 +393,7 @@ export const ImportDeviceCard: React.FC = () => {
   }, [t]);
 
   useEffect(() => {
-    load();
+    void load();
   }, [load]);
 
   const persist = async (device: string) => {

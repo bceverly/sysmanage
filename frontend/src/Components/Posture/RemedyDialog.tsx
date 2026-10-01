@@ -38,8 +38,11 @@ interface Props {
     onApplied: () => void;
 }
 
-const show = (value: unknown): string =>
-    value === null || value === undefined || value === '' ? '-' : String(value);
+const show = (value: unknown): string => {
+    if (value === null || value === undefined || value === '') return '-';
+    // Structured values (lists, settings maps) read as JSON, not "[object Object]".
+    return typeof value === 'object' ? JSON.stringify(value) : String(value);
+};
 
 const PreviewBody: React.FC<{ preview: RemedyPreview }> = ({ preview }) => {
     const { t } = useTranslation();

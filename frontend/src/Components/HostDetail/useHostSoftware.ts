@@ -279,7 +279,7 @@ export const useHostSoftware = ({
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
             // Refresh the installation history
-            fetchInstallationHistory();
+            void fetchInstallationHistory();
         } catch (error) {
             console.error('Error deleting installation record:', error);
             setSnackbarMessage(t('hostDetail.installationDeleteError', 'Failed to delete installation record'));
@@ -317,13 +317,13 @@ export const useHostSoftware = ({
                 }
             }
         };
-        loadSoftwarePackages();
+        void loadSoftwarePackages();
     }, [currentTabId, hostId, softwarePagination.page, softwarePagination.page_size, softwareSearchTerm]);
 
     // Load installation history when Software Changes tab is selected
     useEffect(() => {
         if (currentTabId === 'software-changes') {
-            fetchInstallationHistory();
+            void fetchInstallationHistory();
         }
     }, [currentTabId, hostId, fetchInstallationHistory]);
 

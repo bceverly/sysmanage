@@ -76,7 +76,7 @@ const ConfigInventoriesPanel: React.FC<Props> = ({ canEdit, onChanged }) => {
     }, [t]);
 
     useEffect(() => {
-        load();
+        void load();
     }, [load]);
 
     const resetForm = () => {

@@ -263,12 +263,14 @@ export const useHostUbuntuPro = ({
                 }
             });
 
-            // Apply changes
+            // Apply changes one at a time, in order: Ubuntu Pro services
+            // depend on each other (enabling FIPS turns Livepatch off), so
+            // the agent must receive them in the order they were chosen.
             for (const change of servicesToChange) {
                 if (change.enable) {
-                    await doEnableUbuntuProService(hostId, change.service);
+                    await doEnableUbuntuProService(hostId, change.service); // NOSONAR - order matters (see above)
                 } else {
-                    await doDisableUbuntuProService(hostId, change.service);
+                    await doDisableUbuntuProService(hostId, change.service); // NOSONAR - order matters (see above)
                 }
             }
 

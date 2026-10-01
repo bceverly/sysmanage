@@ -120,7 +120,7 @@ const DeviceTable: React.FC<Props> = ({ devices, selectable, selected, onToggle,
                     {selectable && (
                         <TableCell padding="checkbox">
                             <Checkbox checked={allSelected} onChange={() => onToggleAll(ids)}
-                                inputProps={{ 'aria-label': t('assetDiscovery.table.selectAll', 'Select all') }} />
+                                slotProps={{ input: { 'aria-label': t('assetDiscovery.table.selectAll', 'Select all') } }} />
                         </TableCell>
                     )}
                     <TableCell>{t('assetDiscovery.table.device', 'Device')}</TableCell>
@@ -137,7 +137,7 @@ const DeviceTable: React.FC<Props> = ({ devices, selectable, selected, onToggle,
                         {selectable && (
                             <TableCell padding="checkbox">
                                 <Checkbox checked={selected.has(device.id)} onChange={() => onToggle(device.id)}
-                                    inputProps={{ 'aria-label': device.identity }} />
+                                    slotProps={{ input: { 'aria-label': device.identity } }} />
                             </TableCell>
                         )}
                         <TableCell><Identity device={device} /></TableCell>

@@ -79,7 +79,7 @@ const OpenBAOStatusCard: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    loadData();
+    void loadData();
 
     // Auto-refresh status only (not config) every 30 seconds to reduce flicker
     const interval = setInterval(refreshStatus, 30000);
@@ -141,7 +141,7 @@ const OpenBAOStatusCard: React.FC = () => {
   }, [status, t]);
 
   const handleRefresh = useCallback(() => {
-    loadData();
+    void loadData();
   }, [loadData]);
 
   const handleSeal = useCallback(async () => {

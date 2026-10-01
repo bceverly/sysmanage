@@ -74,7 +74,7 @@ const SecurityWarningBanner: React.FC = () => {
       }
     };
 
-    checkSecurityStatus();
+    void checkSecurityStatus();
     // Check every 30 seconds in case status changes
     const interval = globalThis.setInterval(checkSecurityStatus, 30000);
 

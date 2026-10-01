@@ -68,7 +68,7 @@ const ApiKeys: React.FC = () => {
     }, [t]);
 
     useEffect(() => {
-        loadKeys();
+        void loadKeys();
     }, [loadKeys]);
 
     const handleCreate = async () => {

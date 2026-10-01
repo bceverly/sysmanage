@@ -49,6 +49,7 @@ from backend.persistence.models.core import GUID
 
 IDENTITY_MAC = "mac"
 IDENTITY_IP = "ip"
+HOST_ID = "host.id"  # the column every observation points at
 
 
 def _utcnow():
@@ -82,7 +83,7 @@ class DiscoveredAsset(Base):
     # FK nulls itself when that host is deleted, which is exactly right: a
     # decommissioned host still on the network is an unmanaged device again.
     managed_host_id = Column(
-        GUID(), ForeignKey("host.id", ondelete="SET NULL"), nullable=True, index=True
+        GUID(), ForeignKey(HOST_ID, ondelete="SET NULL"), nullable=True, index=True
     )
     managed_reason = Column(String(32), nullable=True)
     correlated_at = Column(DateTime, nullable=True)
@@ -131,7 +132,7 @@ class DiscoveredAssetSighting(Base):
         index=True,
     )
     observer_host_id = Column(
-        GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False, index=True
+        GUID(), ForeignKey(HOST_ID, ondelete="CASCADE"), nullable=False, index=True
     )
     interface = Column(String(64), nullable=True)
     network = Column(String(64), nullable=True)  # the observer's on-link CIDR
@@ -155,7 +156,7 @@ class NetworkDiscoveryObserver(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     host_id = Column(
         GUID(),
-        ForeignKey("host.id", ondelete="CASCADE"),
+        ForeignKey(HOST_ID, ondelete="CASCADE"),
         nullable=False,
         unique=True,
         index=True,
@@ -224,7 +225,7 @@ class NetworkDiscoveryDispatch(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     host_id = Column(
         GUID(),
-        ForeignKey("host.id", ondelete="CASCADE"),
+        ForeignKey(HOST_ID, ondelete="CASCADE"),
         nullable=False,
         unique=True,
         index=True,
@@ -311,7 +312,7 @@ class NetworkSweepRun(Base):
     requested_by = Column(String(255), nullable=False)
     requested_at = Column(DateTime, nullable=False, default=_utcnow)
     agent_host_id = Column(
-        GUID(), ForeignKey("host.id", ondelete="SET NULL"), nullable=True, index=True
+        GUID(), ForeignKey(HOST_ID, ondelete="SET NULL"), nullable=True, index=True
     )
     command_id = Column(String(36), nullable=True)
     finished_at = Column(DateTime, nullable=True)

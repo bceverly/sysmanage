@@ -307,7 +307,7 @@ const Users = () => {
                 setEditUserImageUrl(null);
                 setEditDialogOpen(true);
                 // Fetch the user's profile image
-                fetchEditUserImage(selectedUser.id);
+                void fetchEditUserImage(selectedUser.id);
             }
         }
     };
@@ -369,7 +369,7 @@ const Users = () => {
 
     useEffect(() => {
         if (!localStorage.getItem('bearer_token')) {
-            navigate("/login");
+            void navigate("/login");
         }
         const loadUsers = async () => {
             try {
@@ -382,7 +382,7 @@ const Users = () => {
                 setLoading(false);
             }
         };
-        loadUsers();
+        void loadUsers();
     }, [navigate]);
 
     // Memoize column visibility model

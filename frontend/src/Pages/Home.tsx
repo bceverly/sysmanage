@@ -260,19 +260,19 @@ const Dashboard = () => {
 
     useEffect(() => {
         if (!localStorage.getItem('bearer_token')) {
-            navigate("/login");
+            void navigate("/login");
             return;
         }
 
         // Load card preferences
-        loadCardPreferences();
+        void loadCardPreferences();
 
         // Initial data fetch
-        fetchData(true);
+        void fetchData(true);
 
         // Set up auto-refresh every 30 seconds
         const refreshInterval = setInterval(() => {
-            fetchData(false);
+            void fetchData(false);
         }, 30000);
 
         // Cleanup interval on component unmount
@@ -282,31 +282,31 @@ const Dashboard = () => {
     }, [navigate, fetchData]);
 
     const handleHostsClick = () => {
-        navigate('/hosts');
+        void navigate('/hosts');
     };
 
     const handleUpdatesClick = () => {
-        navigate('/updates');
+        void navigate('/updates');
     };
 
     const handleSecurityClick = () => {
         // Navigate to updates page with security filter pre-selected
-        navigate('/updates?securityOnly=true');
+        void navigate('/updates?securityOnly=true');
     };
 
     const handleRebootClick = () => {
         // Navigate to hosts page to show hosts requiring reboot
-        navigate('/hosts');
+        void navigate('/hosts');
     };
 
     const handleAntivirusClick = () => {
         // Navigate to hosts page
-        navigate('/hosts');
+        void navigate('/hosts');
     };
 
     const handleOtelClick = () => {
         // Navigate to hosts page
-        navigate('/hosts');
+        void navigate('/hosts');
     };
 
     const handleSaveSettings = (cards: { identifier: string; visible: boolean }[]) => {

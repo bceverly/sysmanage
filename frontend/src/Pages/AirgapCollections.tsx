@@ -171,7 +171,7 @@ const AirgapCollections: React.FC = () => {
       setLoading(false);
       return;
     }
-    refresh();
+    void refresh();
   }, [roleLoaded, serverRole, refresh]);
 
   // Auto-poll while any run is mid-lifecycle so chips advance from

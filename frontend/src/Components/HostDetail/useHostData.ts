@@ -94,12 +94,12 @@ export const useHostData = ({
                 setLicenseFeatures([]);
             }
         };
-        checkLicenseModules();
+        void checkLicenseModules();
     }, [setLicenseModules, setLicenseFeatures]);
     // Main initialization effect that loads host data, storage, network, users, certificates, and optional subsystems with proper error handling
     useEffect(() => { // NOSONAR
         if (!localStorage.getItem('bearer_token')) {
-            navigate("/login");
+            void navigate("/login");
             return;
         }
 
@@ -194,7 +194,7 @@ export const useHostData = ({
             }
         };
 
-        fetchHost();
+        void fetchHost();
     }, [hostId, navigate, t, fetchCertificates, fetchRoles, fetchChildHosts, fetchVirtualizationStatus, setDiagnosticsData, setHost, setStorageDevices, setNetworkInterfaces, setUserAccounts, setUserGroups, setCurrentUser, setUbuntuProInfo, setHasAntivirusOsDefault, setLoading, setError]);
     // Auto-refresh user accounts and groups every 60 seconds
     useEffect(() => {

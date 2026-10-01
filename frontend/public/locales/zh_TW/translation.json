@@ -2074,7 +2074,17 @@
     "submit": "登入",
     "title": "登入",
     "username": "使用者名稱或電子郵件",
-    "verifying": "正在驗證..."
+    "verifying": "正在驗證...",
+    "sso": {
+      "or": "或",
+      "signInWith": "使用 {{name}} 登入",
+      "signingIn": "正在登入...",
+      "denied": "您的身分識別提供者已完成登入，但該身分沒有對應的有效 SysManage 帳戶。請聯絡管理員為您授予存取權限。",
+      "unavailable": "此伺服器不提供單一登入。",
+      "expired": "單一登入工作階段已過期。請重新登入。",
+      "failed": "單一登入未完成。請重試，或使用密碼登入。",
+      "backToLogin": "返回登入"
+    }
   },
   "logout": {
     "loading": "正在登出..."

@@ -101,7 +101,7 @@ const ConfigJobTemplatesPanel: React.FC<Props> = ({
     }, [t]);
 
     useEffect(() => {
-        load();
+        void load();
     }, [load]);
 
     const save = async () => {

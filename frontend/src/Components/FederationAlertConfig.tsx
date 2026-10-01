@@ -133,7 +133,7 @@ const FederationAlertConfig: React.FC = () => {
   }, [applyOverrides]);
 
   useEffect(() => {
-    load();
+    void load();
   }, [load]);
 
   const handleSave = async () => {

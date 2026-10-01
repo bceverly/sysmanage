@@ -102,7 +102,7 @@ const AuditLogViewer: React.FC = () => {
   }, [search, userId, actionType, entityType, category, entryType, startDate, endDate, page, rowsPerPage]);
 
   useEffect(() => {
-    fetchAuditLogs();
+    void fetchAuditLogs();
   }, [fetchAuditLogs]);
 
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -167,7 +167,7 @@ const AuditLogViewer: React.FC = () => {
   const handleExportPDF = () => handleExport('pdf');
 
   const handleGoBack = () => {
-    navigate('/reports#security');
+    void navigate('/reports#security');
   };
 
   const getResultColor = (result: string) => {

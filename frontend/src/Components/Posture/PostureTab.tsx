@@ -122,7 +122,7 @@ const PostureTab: React.FC = () => {
         }
     }, [t]);
 
-    useEffect(() => { load(); }, [load]);
+    useEffect(() => { void load(); }, [load]);
 
     const revoke = async (item: PostureItem) => {
         try {
@@ -131,7 +131,7 @@ const PostureTab: React.FC = () => {
             const code = refusalCode(err);
             setError(code ? refusalLabel(t, code) : t('posture.waiver.revokeFailed', 'The waiver could not be revoked.'));
         }
-        load();
+        void load();
     };
 
     if (loading) return <CircularProgress />;
@@ -186,14 +186,14 @@ const PostureTab: React.FC = () => {
             {wizard && questionnaire && (
                 <ThreatModelWizard open questionnaire={questionnaire} initial={model?.answers ?? {}}
                     onClose={() => setWizard(false)}
-                    onSaved={(_m, c) => { setWizard(false); setChanges(c); load(); }} />
+                    onSaved={(_m, c) => { setWizard(false); setChanges(c); void load(); }} />
             )}
             {dialog?.action === 'fix' && (
                 <RemedyDialog item={dialog.item} onClose={() => setDialog(null)} onApplied={load} />
             )}
             {(dialog?.action === 'waive' || dialog?.action === 'reaffirm') && (
                 <WaiverDialog item={dialog.item} mode={dialog.action} onClose={() => setDialog(null)}
-                    onDone={() => { setDialog(null); load(); }} />
+                    onDone={() => { setDialog(null); void load(); }} />
             )}
         </>
     );

@@ -123,7 +123,7 @@ const UpgradeProfilesSettings: React.FC = () => {
   }, [t]);
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, [refresh]);
 
   const openCreate = () => {

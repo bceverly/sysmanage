@@ -2074,7 +2074,17 @@
     "submit": "登录",
     "title": "登录",
     "username": "用户名或邮箱",
-    "verifying": "正在验证..."
+    "verifying": "正在验证...",
+    "sso": {
+      "or": "或",
+      "signInWith": "使用 {{name}} 登录",
+      "signingIn": "正在登录...",
+      "denied": "您的身份提供程序已完成登录，但该身份没有对应的有效 SysManage 帐户。请联系管理员为您授予访问权限。",
+      "unavailable": "此服务器上不提供单点登录。",
+      "expired": "单点登录会话已过期。请重新登录。",
+      "failed": "单点登录未完成。请重试，或使用密码登录。",
+      "backToLogin": "返回登录"
+    }
   },
   "logout": {
     "loading": "退出中..."

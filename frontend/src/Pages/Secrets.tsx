@@ -64,7 +64,7 @@ const Secrets: React.FC = () => {
   // Confirmation dialog state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteMessage, setDeleteMessage] = useState('');
-  const [pendingDeleteAction, setPendingDeleteAction] = useState<(() => void) | null>(null);
+  const [pendingDeleteAction, setPendingDeleteAction] = useState<(() => Promise<void>) | null>(null);
 
   // Selection state
   const [selectedSecrets, setSelectedSecrets] = useState<GridRowSelectionModel>([]);
@@ -217,8 +217,8 @@ const Secrets: React.FC = () => {
   }, [t]);
 
   useEffect(() => {
-    loadSecrets();
-    loadSecretTypes();
+    void loadSecrets();
+    void loadSecretTypes();
   }, [loadSecrets, loadSecretTypes]);
 
   const formatTimestamp = (timestamp: string) => {
@@ -340,7 +340,7 @@ const Secrets: React.FC = () => {
       );
 
       handleCloseAddSecretDialog();
-      loadSecrets();
+      void loadSecrets();
     } catch (error) {
       console.error('Failed to save secret:', error);
       showNotification(
@@ -354,7 +354,7 @@ const Secrets: React.FC = () => {
     }
   };
 
-  const handleDeleteSelected = async () => {
+  const handleDeleteSelected = () => {
     if (selectedSecrets.length === 0) return;
 
     const confirmMessage = selectedSecrets.length === 1
@@ -388,7 +388,7 @@ const Secrets: React.FC = () => {
       );
 
       setSelectedSecrets([]);
-      loadSecrets();
+      void loadSecrets();
     } catch (error) {
       console.error('Failed to delete secrets:', error);
       showNotification(t('secrets.deleteError', 'Failed to delete secrets'), 'error');
@@ -397,9 +397,10 @@ const Secrets: React.FC = () => {
     }
   };
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = () => {
     if (pendingDeleteAction) {
-      pendingDeleteAction();
+      // The delete reports its own failure (executeDeleteSelected catches).
+      void pendingDeleteAction();
     }
     setShowDeleteConfirm(false);
     setPendingDeleteAction(null);

@@ -72,7 +72,7 @@ export const useHostRolesAndCerts = ({
 
                 // Refetch certificates after a short delay to allow collection to complete
                 setTimeout(() => {
-                    fetchCertificates();
+                    void fetchCertificates();
                 }, 3000);
             }
         } catch (error) {
@@ -118,7 +118,7 @@ export const useHostRolesAndCerts = ({
                 setSnackbarOpen(true);
                 // Refetch roles after a short delay to allow collection to complete
                 setTimeout(() => {
-                    fetchRoles();
+                    void fetchRoles();
                 }, 3000);
             }
         } catch (error) {
@@ -177,7 +177,7 @@ export const useHostRolesAndCerts = ({
 
                 // Refresh roles after a delay to get updated status
                 setTimeout(() => {
-                    fetchRoles();
+                    void fetchRoles();
                 }, 3000);
             }
         } catch (error) {
@@ -196,7 +196,7 @@ export const useHostRolesAndCerts = ({
         if (currentTabId === 'server-roles' && host?.active) {
             // Start auto-refresh every 30 seconds (without loading indicator)
             const interval = setInterval(() => {
-                fetchRoles(false);
+                void fetchRoles(false);
             }, 30000);
             rolesRefreshInterval.current = interval;
 

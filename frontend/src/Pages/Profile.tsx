@@ -246,7 +246,7 @@ const Profile: React.FC = () => {
             }
         };
 
-        loadProfile();
+        void loadProfile();
     }, [t, fetchProfileImage]);
 
     // Separate cleanup effect for blob URLs
@@ -460,7 +460,7 @@ const Profile: React.FC = () => {
 
     const handleCancel = () => {
         // Navigate back to previous page
-        navigate(-1);
+        void navigate(-1);
     };
 
     if (loading) {

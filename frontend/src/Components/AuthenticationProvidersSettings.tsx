@@ -117,7 +117,7 @@ const AuthenticationProvidersSettings: React.FC = () => {
   };
 
   useEffect(() => {
-    refresh();
+    void refresh();
     // refresh is stable; mount-only fetch is intentional.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

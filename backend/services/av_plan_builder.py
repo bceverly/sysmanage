@@ -41,6 +41,7 @@ PLAN_VERSION = 6
 CLAMD_CONF_DEBIAN = "/etc/clamav/clamd.conf"
 FRESHCLAM_CONF_DEBIAN = "/etc/clamav/freshclam.conf"
 FRESHCLAM_CONF_RPM = "/etc/freshclam.conf"
+REFRESH_SIGNATURES = "refresh ClamAV signature database"
 
 # ---------------------------------------------------------------------------
 # Distro / platform → packages, paths, services
@@ -465,7 +466,7 @@ def _linux_deploy(
                 "sudo": True,
                 "timeout": 300,
                 "ignore_errors": True,
-                "description": "refresh ClamAV signature database",
+                "description": REFRESH_SIGNATURES,
             },
         ],
         "service_actions": [
@@ -609,7 +610,7 @@ def _bsd_update_commands(plat: str, host_info: Dict[str, Any]) -> List[Dict[str,
                 "sudo": True,
                 "timeout": 300,
                 "ignore_errors": True,
-                "description": "refresh ClamAV signature database",
+                "description": REFRESH_SIGNATURES,
             },
         ]
         if plat == "freebsd":
@@ -622,7 +623,7 @@ def _bsd_update_commands(plat: str, host_info: Dict[str, Any]) -> List[Dict[str,
             "sudo": True,
             "timeout": 300,
             "ignore_errors": True,
-            "description": "refresh ClamAV signature database",
+            "description": REFRESH_SIGNATURES,
         },
         {
             "argv": ["launchctl", "bootstrap", "system", MACOS_FRESHCLAM_PLIST],
@@ -747,7 +748,7 @@ def _windows_refresh_command() -> Dict[str, Any]:
         "elevated": True,
         "timeout": 600,
         "ignore_errors": True,
-        "description": "refresh ClamAV signature database",
+        "description": REFRESH_SIGNATURES,
     }
 
 

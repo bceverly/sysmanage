@@ -77,8 +77,8 @@ const InvitationsManager: React.FC = () => {
 
     useEffect(() => {
         if (open) {
-            loadInvitations();
-            loadRoles();
+            void loadInvitations();
+            void loadRoles();
         }
     }, [open, loadInvitations, loadRoles]);
 

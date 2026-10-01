@@ -50,7 +50,7 @@ const ReportViewer: React.FC = () => {
 
   useEffect(() => {
     if (reportId) {
-      fetchReportHtml();
+      void fetchReportHtml();
     }
   }, [reportId, fetchReportHtml]);
 
@@ -98,11 +98,11 @@ const ReportViewer: React.FC = () => {
 
     // Navigate to the appropriate tab
     if (isUserReport) {
-      navigate('/reports#users');
+      void navigate('/reports#users');
     } else if (isSecurityReport) {
-      navigate('/reports#security');
+      void navigate('/reports#security');
     } else {
-      navigate('/reports#hosts');
+      void navigate('/reports#hosts');
     }
   };
 

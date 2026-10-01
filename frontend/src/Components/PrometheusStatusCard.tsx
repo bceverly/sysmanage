@@ -67,7 +67,7 @@ const PrometheusStatusCard: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchStatus();
+    void fetchStatus();
   }, [fetchStatus]);
 
   if (loading) {

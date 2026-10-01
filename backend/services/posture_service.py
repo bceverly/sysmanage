@@ -182,6 +182,31 @@ def _upsert(db, item, entry, result, state, model, now):
     return item, previous
 
 
+def _apply_result(engine, db, result, entry, item, run, out) -> bool:
+    """Fold one engine verdict into the punch list; True when the rule still
+    applies (so its item is kept)."""
+    model, cause, now = run
+    key = result.get("rule_id")
+    state = engine.posture_state(result)
+    if state is None:  # the threat model no longer applies this check
+        if item is not None:
+            _event(db, key, item.state, None, cause, model.model_version, now)
+            db.delete(item)
+            out["posture_changes"] += 1
+        return False
+    item, previous = _upsert(db, item, entry, result, state, model, now)
+    # S4: a waiver granted on another basis stops covering the item.
+    if posture_waivers.refresh_staleness(
+        db, SCOPE, item, entry["rule"], model.attributes, now
+    ):
+        out["posture_stale_waivers"] = out.get("posture_stale_waivers", 0) + 1
+    out["posture_items"] += 1
+    if previous is not None:
+        _event(db, key, previous or None, state, cause, model.model_version, now)
+        out["posture_changes"] += 1
+    return True
+
+
 def evaluate(engine, db, tenant_id, entries, now=None, summary=None) -> Dict[str, Any]:
     """Recompute this tenant's punch list. The caller commits."""
     now = now or _now()
@@ -208,29 +233,14 @@ def evaluate(engine, db, tenant_id, entries, now=None, summary=None) -> Dict[str
         else CAUSE_THREAT_MODEL
     )
     seen = set()
+    run = (model, cause, now)
     for result in results:
         key = result.get("rule_id")
-        entry, item = by_key.get(key), items.get(key)
-        state = engine.posture_state(result)
+        entry = by_key.get(key)
         if entry is None:
             continue
-        if state is None:  # the threat model no longer applies this check
-            if item is not None:
-                _event(db, key, item.state, None, cause, model.model_version, now)
-                db.delete(item)
-                out["posture_changes"] += 1
-            continue
-        seen.add(key)
-        item, previous = _upsert(db, item, entry, result, state, model, now)
-        # S4: a waiver granted on another basis stops covering the item.
-        if posture_waivers.refresh_staleness(
-            db, SCOPE, item, entry["rule"], model.attributes, now
-        ):
-            out["posture_stale_waivers"] = out.get("posture_stale_waivers", 0) + 1
-        out["posture_items"] += 1
-        if previous is not None:
-            _event(db, key, previous or None, state, cause, model.model_version, now)
-            out["posture_changes"] += 1
+        if _apply_result(engine, db, result, entry, items.get(key), run, out):
+            seen.add(key)
     evaluated = {r.get("rule_id") for r in results}
     for key, item in items.items():
         if key not in seen and key not in evaluated:

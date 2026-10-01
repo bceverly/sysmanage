@@ -44,7 +44,7 @@ const ConfigJobs: React.FC = () => {
                 console.error('Failed to resolve fleet job permissions:', err);
             }
         };
-        check();
+        void check();
     }, []);
 
     return (

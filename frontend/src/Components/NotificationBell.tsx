@@ -62,7 +62,7 @@ const NotificationBell: React.FC = () => {
       };
     }
 
-    fetchUpdateStats();
+    void fetchUpdateStats();
 
     // Register the refresh function for external triggers
     registerRefresh(fetchUpdateStats);
@@ -110,12 +110,12 @@ const NotificationBell: React.FC = () => {
 
   const handleViewAllUpdates = () => {
     setShowDropdown(false);
-    navigate('/updates');
+    void navigate('/updates');
   };
 
   const handleViewSecurityUpdates = () => {
     setShowDropdown(false);
-    navigate('/updates?filter=security');
+    void navigate('/updates?filter=security');
   };
 
   const hasUpdates = updateStats && updateStats.total_updates > 0;

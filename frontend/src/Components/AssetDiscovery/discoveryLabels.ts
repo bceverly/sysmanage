@@ -8,7 +8,7 @@
 import type { TFunction } from 'i18next';
 import type { DeviceType, ExclusionCategory } from '../../Services/assetDiscoveryService';
 
-export const categoryLabel = (t: TFunction, category: ExclusionCategory | string): string => {
+export const categoryLabel = (t: TFunction, category: string): string => {
     const labels: Record<ExclusionCategory, string> = {
         printer: t('assetDiscovery.category.printer', 'Printer'),
         iot: t('assetDiscovery.category.iot', 'IoT device or sensor'),
@@ -51,7 +51,7 @@ export const formatSeen = (iso: string | null): string => {
     return Number.isNaN(date.getTime()) ? iso : date.toLocaleString();
 };
 
-export const deviceTypeLabel = (t: TFunction, kind: DeviceType | string | null | undefined): string => {
+export const deviceTypeLabel = (t: TFunction, kind: string | null | undefined): string => {
     const labels: Record<DeviceType, string> = {
         printer: t('assetDiscovery.type.printer', 'Printer'),
         media: t('assetDiscovery.type.media', 'TV, speaker or media player'),
@@ -67,7 +67,7 @@ export const deviceTypeLabel = (t: TFunction, kind: DeviceType | string | null |
 };
 
 // The exclusion category a device's guessed type suggests, if any.
-export const categoryForType = (kind: DeviceType | string | null | undefined): ExclusionCategory | null => {
+export const categoryForType = (kind: string | null | undefined): ExclusionCategory | null => {
     const map: Partial<Record<DeviceType, ExclusionCategory>> = {
         printer: 'printer',
         media: 'appliance',

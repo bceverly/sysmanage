@@ -168,7 +168,7 @@ const FederationHosts: React.FC = () => {
   }, [searchParams, page, pageSize, t]);
 
   useEffect(() => {
-    fetchData();
+    void fetchData();
   }, [fetchData]);
 
   // Reflect external URL filter changes (e.g. SiteDetail deep-link).

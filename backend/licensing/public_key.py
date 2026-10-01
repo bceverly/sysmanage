@@ -83,26 +83,24 @@ async def fetch_public_key() -> Optional[str]:
     key_url = f"{server_url.rstrip('/')}/v1/public-key"
 
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
+        async with (
+            aiohttp.ClientSession() as session,
+            session.get(
                 key_url,
                 timeout=aiohttp.ClientTimeout(total=30),
-            ) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    public_key = data.get("public_key")
-                    if public_key:
-                        _save_cached_key(public_key)
-                        logger.info(
-                            "Successfully fetched public key from license server"
-                        )
-                        return public_key
-                    else:
-                        logger.error("License server returned empty public key")
+            ) as response,
+        ):
+            if response.status == 200:
+                data = await response.json()
+                public_key = data.get("public_key")
+                if public_key:
+                    _save_cached_key(public_key)
+                    logger.info("Successfully fetched public key from license server")
+                    return public_key
                 else:
-                    logger.warning(
-                        "Failed to fetch public key: HTTP %d", response.status
-                    )
+                    logger.error("License server returned empty public key")
+            else:
+                logger.warning("Failed to fetch public key: HTTP %d", response.status)
     except aiohttp.ClientError as e:
         logger.warning("Network error fetching public key: %s", e)
     except Exception as e:

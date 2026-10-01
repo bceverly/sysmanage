@@ -82,7 +82,7 @@ const ConfigJobsPanel: React.FC<Props> = ({ canCancel, refreshToken }) => {
     }, [t]);
 
     useEffect(() => {
-        load();
+        void load();
     }, [load, refreshToken]);
 
     const anyActive = jobs.some(

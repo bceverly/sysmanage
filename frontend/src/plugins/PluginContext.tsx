@@ -96,22 +96,27 @@ export const PluginProvider: React.FC<PluginProviderProps> = ({ children }) => {
             const data = await response.json();
             const bundles: string[] = data.bundles || [];
 
-            for (const bundleUrl of bundles) {
+            // Download every bundle at once, then run them in the server's
+            // order: plugins register as they execute, so order matters, but
+            // the downloads do not depend on each other.
+            const scripts = await Promise.all(bundles.map(async bundleUrl => {
                 try {
                     const scriptResponse = await fetch(`${baseURL}${bundleUrl}`, {
                         headers: { 'Authorization': `Bearer ${token}` },
                     });
-                    if (scriptResponse.ok) {
-                        const scriptText = await scriptResponse.text();
-                        // Execute the IIFE script which will call registerPlugin
-                        const scriptEl = document.createElement('script');
-                        scriptEl.textContent = scriptText;
-                        document.head.appendChild(scriptEl);
-                        scriptEl.remove();
-                    }
+                    return scriptResponse.ok ? await scriptResponse.text() : null;
                 } catch (err) {
                     console.warn('Failed to load plugin bundle:', bundleUrl, err);
+                    return null;
                 }
+            }));
+            for (const scriptText of scripts) {
+                if (scriptText === null) continue;
+                // Execute the IIFE script which will call registerPlugin
+                const scriptEl = document.createElement('script');
+                scriptEl.textContent = scriptText;
+                document.head.appendChild(scriptEl);
+                scriptEl.remove();
             }
         } catch (err) {
             console.warn('Failed to discover plugins:', err);
@@ -121,7 +126,7 @@ export const PluginProvider: React.FC<PluginProviderProps> = ({ children }) => {
     }, []);
 
     useEffect(() => {
-        loadPlugins();
+        void loadPlugins();
     }, [loadPlugins]);
 
     // Rebuild context value when plugins change (revision triggers re-computation)

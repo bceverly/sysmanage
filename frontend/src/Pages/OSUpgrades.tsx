@@ -89,11 +89,11 @@ const OSUpgrades: React.FC = () => {
     setIsRefreshing(false);
     setSelectedUpgrades(new Set());
 
-    triggerRefresh();
+    void triggerRefresh();
   }, [fetchOSUpgrades, fetchOSUpgradesSummary, triggerRefresh]);
 
   useEffect(() => {
-    Promise.all([
+    void Promise.all([
       fetchOSUpgrades(),
       fetchOSUpgradesSummary()
     ]);
@@ -162,8 +162,10 @@ const OSUpgrades: React.FC = () => {
 
     try {
       const hosts = Array.from(upgradesByHost.entries());
+      // One host at a time on purpose: a selection can span the fleet, and
+      // the first refusal should stop the rest rather than race them.
       for (const [hostId, packageManagers] of hosts) {
-        await updatesService.executeOSUpgrades([hostId], packageManagers);
+        await updatesService.executeOSUpgrades([hostId], packageManagers); // NOSONAR - deliberate pacing (see above)
       }
     } catch (error) {
       console.error('Failed to execute OS upgrades:', error);

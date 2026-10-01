@@ -2074,7 +2074,17 @@
     "submit": "Iniciar sesión",
     "title": "Acceso",
     "username": "Usuario o correo",
-    "verifying": "Verificando..."
+    "verifying": "Verificando...",
+    "sso": {
+      "or": "o",
+      "signInWith": "Iniciar sesión con {{name}}",
+      "signingIn": "Iniciando sesión...",
+      "denied": "Su proveedor de identidad le autenticó, pero no hay ninguna cuenta activa de SysManage para esa identidad. Pida a un administrador que le dé acceso.",
+      "unavailable": "El inicio de sesión único no está disponible en este servidor.",
+      "expired": "La sesión de inicio de sesión único ha caducado. Vuelva a iniciar sesión.",
+      "failed": "El inicio de sesión único no se completó. Inténtelo de nuevo o inicie sesión con su contraseña.",
+      "backToLogin": "Volver al inicio de sesión"
+    }
   },
   "logout": {
     "loading": "Cerrando sesión..."

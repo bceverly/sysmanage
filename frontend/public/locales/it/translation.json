@@ -2074,7 +2074,17 @@
     "submit": "Accedi",
     "title": "Accesso",
     "username": "Nome utente o email",
-    "verifying": "Verifica in corso..."
+    "verifying": "Verifica in corso...",
+    "sso": {
+      "or": "oppure",
+      "signInWith": "Accedi con {{name}}",
+      "signingIn": "Accesso in corso...",
+      "denied": "Il provider di identità ti ha autenticato, ma non esiste un account SysManage attivo per questa identità. Chiedi a un amministratore di concederti l'accesso.",
+      "unavailable": "Il single sign-on non è disponibile su questo server.",
+      "expired": "La sessione di single sign-on è scaduta. Accedi di nuovo.",
+      "failed": "Il single sign-on non è stato completato. Riprova oppure accedi con la tua password.",
+      "backToLogin": "Torna all'accesso"
+    }
   },
   "logout": {
     "loading": "Disconnessione in corso..."

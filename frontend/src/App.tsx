@@ -27,6 +27,7 @@ import SecurityWarningBanner from './Components/SecurityWarningBanner';
 import MigrationCompatBanner from './Components/MigrationCompatBanner';
 import Login from './Pages/Login';
 import ResetPassword from './Pages/ResetPassword';
+import SsoCallback from './Pages/SsoCallback';
 import AcceptInvitation from './Pages/AcceptInvitation';
 import Home from './Pages/Home';
 import Hosts from './Pages/Hosts';
@@ -72,6 +73,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/login/sso" element={<SsoCallback />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/accept-invitation" element={<AcceptInvitation />} />
       <Route path="/" element={<Home />} />

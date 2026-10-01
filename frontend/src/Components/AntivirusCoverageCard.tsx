@@ -54,7 +54,7 @@ const AntivirusCoverageCard: React.FC = () => {
   }, [t]);
 
   useEffect(() => {
-    fetchCoverage();
+    void fetchCoverage();
 
     // Refresh every 60 seconds
     const interval = setInterval(fetchCoverage, 60000);

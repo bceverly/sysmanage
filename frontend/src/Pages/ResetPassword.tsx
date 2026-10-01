@@ -80,7 +80,7 @@ const ResetPassword: React.FC = () => {
             }
         };
 
-        validateToken();
+        void validateToken();
     }, [token, t]);
 
     const handleSubmit = async (e: React.BaseSyntheticEvent) => {
@@ -121,7 +121,7 @@ const ResetPassword: React.FC = () => {
 
             // Redirect to login after a brief delay
             setTimeout(() => {
-                navigate('/login');
+                void navigate('/login');
             }, 3000);
 
         } catch (err: unknown) {

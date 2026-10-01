@@ -6027,3 +6027,6 @@ msgstr "依作業系統版本列出的 macOS 弱點（來自 NVD 的受影響版
 
 #~ msgid "Executing command sequence"
 #~ msgstr "正在執行命令序列"
+
+msgid "The single sign-on session has expired. Sign in again."
+msgstr "單一登入工作階段已過期。請重新登入。"

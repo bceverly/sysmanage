@@ -90,7 +90,7 @@ const ConfigRemediationRulesPanel: React.FC<Props> = ({ canEdit }) => {
     }, [t]);
 
     useEffect(() => {
-        load();
+        void load();
     }, [load]);
 
     const save = async () => {

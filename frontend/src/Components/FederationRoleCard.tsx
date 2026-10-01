@@ -125,7 +125,7 @@ const FederationRoleCard: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchRole();
+    void fetchRole();
   }, [fetchRole]);
 
   const fetchEnrollmentStatus = useCallback(async () => {
@@ -142,8 +142,8 @@ const FederationRoleCard: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (currentRole !== "none") fetchKeyAndPeers();
-    if (currentRole === "site") fetchEnrollmentStatus();
+    if (currentRole !== "none") void fetchKeyAndPeers();
+    if (currentRole === "site") void fetchEnrollmentStatus();
   }, [currentRole, fetchKeyAndPeers, fetchEnrollmentStatus]);
 
   const handleSave = async () => {

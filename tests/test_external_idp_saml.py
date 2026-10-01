@@ -26,6 +26,11 @@ from backend.persistence import models
 from backend.persistence.db import Base
 
 PROVIDER_ID = uuid.uuid4()
+CONSOLE = "https://console.example.com"
+
+
+def _console():
+    return patch("backend.api.sso_session._console_url", return_value=CONSOLE)
 
 
 @pytest.fixture
@@ -149,10 +154,16 @@ async def test_saml_acs_issues_jwt_for_linked_user(db):
         return_value={"SAMLResponse": "b64assertion", "RelayState": relay}
     )
     try:
-        result = await external_idp.saml_acs(str(PROVIDER_ID), request, db)
+        with _console():
+            result = await external_idp.saml_acs(str(PROVIDER_ID), request, db)
     finally:
         p.stop()
-    assert "Authorization" in result
+    # The browser lands on the console, the session in a one-shot cookie --
+    # never in the URL.
+    assert isinstance(result, RedirectResponse)
+    assert result.headers["location"] == f"{CONSOLE}/login/sso"
+    assert "sysmanage_sso_handoff=" in result.headers["set-cookie"]
+    assert "HttpOnly" in result.headers["set-cookie"]
     # the verified assertion + request_id were handed to the engine
     _, _, req_id = engine.process_saml_response.call_args.args
     assert req_id == "_req123"
@@ -169,11 +180,12 @@ async def test_saml_acs_rejects_unknown_relaystate(db):
         return_value={"SAMLResponse": "x", "RelayState": "never-issued"}
     )
     try:
-        with pytest.raises(HTTPException) as exc:
-            await external_idp.saml_acs(str(PROVIDER_ID), request, db)
+        with _console():
+            result = await external_idp.saml_acs(str(PROVIDER_ID), request, db)
     finally:
         p.stop()
-    assert exc.value.status_code == 400
+    assert result.headers["location"] == f"{CONSOLE}/login/sso?error=failed"
+    assert "set-cookie" not in result.headers
 
 
 @pytest.mark.asyncio
@@ -194,11 +206,29 @@ async def test_saml_acs_401_when_assertion_invalid(db):
         return_value={"SAMLResponse": "tampered", "RelayState": relay}
     )
     try:
-        with pytest.raises(HTTPException) as exc:
-            await external_idp.saml_acs(str(PROVIDER_ID), request, db)
+        with _console():
+            result = await external_idp.saml_acs(str(PROVIDER_ID), request, db)
     finally:
         p.stop()
-    assert exc.value.status_code == 401
+    assert result.headers["location"] == f"{CONSOLE}/login/sso?error=failed"
+
+
+@pytest.mark.asyncio
+async def test_saml_acs_unlinked_identity_lands_with_denied(db):
+    engine = _mock_engine()
+    p = _patch_engine(engine)
+    relay = "relay-token-3"
+    external_idp._SAML_STATE_STORE[relay] = (str(PROVIDER_ID), "_req")
+    request = MagicMock()
+    request.form = AsyncMock(
+        return_value={"SAMLResponse": "b64assertion", "RelayState": relay}
+    )
+    try:
+        with _console():
+            result = await external_idp.saml_acs(str(PROVIDER_ID), request, db)
+    finally:
+        p.stop()
+    assert result.headers["location"] == f"{CONSOLE}/login/sso?error=denied"
 
 
 @pytest.mark.asyncio

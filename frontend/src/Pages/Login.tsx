@@ -22,6 +22,7 @@ import Alert from "@mui/material/Alert";
 import api from "../Services/api"
 import LanguageSelector from "../Components/LanguageSelector"
 import ForgotPasswordDialog from "../Components/ForgotPasswordDialog"
+import SsoButtons from "../Components/Login/SsoButtons"
 import { saveRememberedEmail, getRememberedEmail, clearRememberedEmail } from "../utils/cookieUtils"
 import { clearPermissionsCache } from "../Services/permissions"
 
@@ -70,7 +71,7 @@ const Login = () => {
       } else {
         clearRememberedEmail();
       }
-      navigate("/");
+      void navigate("/");
       globalThis.location.reload();
     };
 
@@ -321,6 +322,7 @@ const Login = () => {
             </Link>
           </Box>
         </Box>
+        <SsoButtons />
       </Box>
     </Container>
 

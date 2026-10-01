@@ -69,7 +69,7 @@ const MigrationCompatBanner: React.FC = () => {
       }
     };
 
-    check();
+    void check();
     const interval = globalThis.setInterval(check, 60000);
     return () => {
       cancelled = true;

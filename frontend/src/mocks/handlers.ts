@@ -235,7 +235,7 @@ export const handlers = [
   }),
 
   // Handle POST requests for package uninstallation
-  http.post("*/api/v1/packages/uninstall/*", async () => {
+  http.post("*/api/v1/packages/uninstall/*", () => {
     return HttpResponse.json({
       success: true,
       message: "Package uninstallation has been queued",

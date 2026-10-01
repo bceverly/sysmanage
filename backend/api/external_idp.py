@@ -27,8 +27,8 @@ from fastapi.responses import RedirectResponse, Response
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from backend.api import sso_session
 from backend.auth.auth_bearer import JWTBearer
-from backend.auth.auth_handler import sign_jwt
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
@@ -448,10 +448,27 @@ async def oidc_callback(
     request: Request,
     db: Session = Depends(get_db),
 ):
-    """Receive the IdP redirect, exchange the code, and issue a session JWT.
+    """Receive the IdP redirect and land the browser on the console, signed in
+    (or on the console's SSO page with the reason it was not).
 
     Anonymous endpoint -- the IdP just returned the user here.
     """
+    try:
+        userid, tenant_id = await _oidc_sign_in(provider_id, request, db)
+    except HTTPException as exc:
+        logger.warning(
+            "OIDC sign-in via provider %s refused (%s): %s",
+            sanitize_log(provider_id),
+            exc.status_code,
+            sanitize_log(str(exc.detail)),
+        )
+        return sso_session.failure(exc.status_code)
+    return sso_session.landing(userid, tenant_id)
+
+
+async def _oidc_sign_in(provider_id: str, request: Request, db: Session):
+    """Exchange the code and resolve the account: (userid, tenant_id), or an
+    HTTPException saying why not."""
     engine = _check_idp_module()
     provider = _get_provider_or_404(db, provider_id)
     code = request.query_params.get("code")
@@ -518,8 +535,7 @@ async def oidc_callback(
 
     from backend.api.auth import _default_tenant_id_for_user  # noqa: PLC0415
 
-    tenant_id = _default_tenant_id_for_user(user.userid)
-    return {"Authorization": sign_jwt(user.userid, tenant_id=tenant_id)}
+    return user.userid, _default_tenant_id_for_user(user.userid)
 
 
 def _jit_provision_user(db: Session, provider, email: Optional[str], subject: str):
@@ -655,10 +671,25 @@ async def saml_acs(provider_id: str, request: Request, db: Session = Depends(get
 
     The engine verifies the XML signature + conditions in strict mode and pins
     the AuthnRequest id (InResponseTo).  On success we resolve/JIT-provision the
-    linked account, apply group→role mappings, and issue a session JWT -- the same
-    shape the OIDC callback returns (the browser-facing landing is wired in the
-    frontend, identical to the OIDC flow).
+    linked account, apply group→role mappings, and land the browser on the
+    console signed in -- the same hand-off as the OIDC callback.
     """
+    try:
+        userid, tenant_id = await _saml_sign_in(provider_id, request, db)
+    except HTTPException as exc:
+        logger.warning(
+            "SAML sign-in via provider %s refused (%s): %s",
+            sanitize_log(provider_id),
+            exc.status_code,
+            sanitize_log(str(exc.detail)),
+        )
+        return sso_session.failure(exc.status_code)
+    return sso_session.landing(userid, tenant_id)
+
+
+async def _saml_sign_in(provider_id: str, request: Request, db: Session):
+    """Verify the assertion and resolve the account: (userid, tenant_id), or
+    an HTTPException saying why not."""
     engine = _check_idp_module()
     provider = _get_provider_or_404(db, provider_id)
     form = await request.form()
@@ -717,8 +748,7 @@ async def saml_acs(provider_id: str, request: Request, db: Session = Depends(get
 
     from backend.api.auth import _default_tenant_id_for_user  # noqa: PLC0415
 
-    tenant_id = _default_tenant_id_for_user(user.userid)
-    return {"Authorization": sign_jwt(user.userid, tenant_id=tenant_id)}
+    return user.userid, _default_tenant_id_for_user(user.userid)
 
 
 def _apply_role_mappings(db: Session, user: models.User, role_names: List[str]) -> None:

@@ -66,7 +66,7 @@ const SnapshotsExpandRow: React.FC<SnapshotsExpandRowProps> = ({
   // snapshot's result handler runs server-side.
   useEffect(() => {
     if (!expanded) return;
-    fetchSnapshots();
+    void fetchSnapshots();
     const handle = setInterval(fetchSnapshots, 10_000);
     return () => clearInterval(handle);
   }, [expanded, fetchSnapshots]);

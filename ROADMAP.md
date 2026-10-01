@@ -2145,7 +2145,7 @@ Already-correctly-gated: **Orchestrated Reboot** falls back to plain reboot when
 - [x] virtualization_engine module (~24,000 lines, largest single module) -- `virtualization_engine.pyx` 7,560 lines + 128 tests
 - [x] observability_engine module (~6,300 lines) -- `observability_engine.pyx` 1,305 lines + 31 tests
 - [x] ~24,489 lines of agent code migrated to server-side Cython -- virtualization migration complete (legacy `child_host_operations` → stub).  Observability migration completed 2026-05-15 with the deletion of all 8 OTEL+Graylog deployment files from sysmanage-agent per 10.2 step 7; every observability operation now flows server-side through the Pro+ `observability_engine` plan-builders + the agent's `apply_deployment_plan` generic executor.
-- [x] MFA implementation -- TOTP + backup codes + per-user/admin enforcement; email-OTP fallback still open
+- [x] MFA implementation -- TOTP + backup codes + per-user/admin enforcement; email-OTP fallback *(landed later -- `mfa_service.request_email_otp`, `POST /api/auth/mfa/email/request`; confirmed by the Phase 21 audit, 2026-10-01)*
 - [x] Repository mirroring -- `repository_mirroring_engine.pyx`
 - [x] External IdP support -- `external_idp_engine.pyx` (LDAP + OIDC + role mapping + local fallback)
 - [x] Upgrade profiles migrated from OSS to `automation_engine` -- 10.6 close-out complete
@@ -3371,7 +3371,7 @@ rather than blocking.
 - All federation operations are audited on both sides
 - RBAC correctly restricts per-site access for federated users
 - [x] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free -- 2026-08-04
-  - *Audit status (June 2026):* ✅ all 527 federation tests pass · ✅ lint issue-free · ✅ SonarQube clean. **Remaining before this box can be checked:** a real-scale performance-regression run (the `test_federation_scale.py` harness exists but has only been run at tiny default scale, not the 100-site / 1M-host target) and the i18n/l10n translation pass (12.1 / 12.2 / 12.8 -- ~283 federation strings still `[TODO]` passthroughs per non-English locale).
+  - *Audit status (June 2026):* ✅ all 527 federation tests pass · ✅ lint issue-free · ✅ SonarQube clean. **Remaining before this box can be checked:** a real-scale performance-regression run (the `test_federation_scale.py` harness exists but has only been run at tiny default scale, not the 100-site / 1M-host target) and the i18n/l10n translation pass (12.1 / 12.2 / 12.8 -- ~283 federation strings still `[TODO]` passthroughs per non-English locale). *Both resolved (Phase 21 audit, 2026-10-01): the 1M-host scale run is recorded in this phase's exit gate (2026-08-04) and the federation strings are translated (0 gaps).*
 
 #### 12.8 i18n/l10n debt repayment
 
@@ -4111,7 +4111,7 @@ green.
   * Operator UI for resetting dead-lettered rows (today: re-assign
     via API or direct DB).
 
-**Slice 3 (TODO) -- coordinator outbound worker.** Reverse direction
+**Slice 3 (DONE May 2026 -- `federation_push_worker.pxi`; this planning text is kept for the design record) -- coordinator outbound worker.** Reverse direction
 in `federation_controller_engine.pyx`:
   1. Tick worker enumerates pending policy pushes via
      `policy_svc.list_pending_push_targets()` and pending command
@@ -4628,7 +4628,9 @@ plan-builder + UI integration.
       never had) are now real columns (migration `e3idpuserlink`) -- this unblocks
       OIDC sign-in too. 7 engine SAML tests + 7 OSS endpoint tests; full chain
       up/idempotent/down on sqlite; black + `backend/` pylint + `tsc` + eslint +
-      offline i18n gate all green. *Follow-ups (non-blocking):* the ACS browser
+      offline i18n gate all green. *Follow-ups (non-blocking; Phase 21 audit 2026-10-01: the strings and the
+      `.so` rebuild are done, but this browser landing was NEVER wired -- for
+      OIDC either -- and is carried to Phase 25):* the ACS browser
       landing (cookie+redirect) is wired in the frontend like OIDC; SAML UI/API
       strings are inline-English defaults pending a `make translate` GPU backfill;
       and the engine `.so` needs a release rebuild for the other Python versions
@@ -5794,7 +5796,8 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
       Eligible-for-cache rule with a 1-month TTL left a `pool/**` `.deb` at
       DYNAMIC), so two bypass/cache rules exist on the zone but are inert; they
       are kept as a guard should the hostname ever move behind the zone cache.
-      `pool/**` is likewise uncached -- tracked in Phase 19, and NOT a cost
+      `pool/**` is likewise uncached -- tracked in Phase 19 (resolved there
+      2026-08-25: it was cached all along; HEAD probes misread it), and NOT a cost
       problem (R2 egress is free; a download is one Class-B op).
 - [x] Frontend: Install Sources, Bare Metal (per-MAC assignments, netboot arm/disarm, boot media) and Discovered tabs on the Provisioning page, Enterprise-gated (2026-08-03)
 - [x] Docs page + wired screenshots + i18n/l10n for bare-metal provisioning (2026-08-04: six new sections on `provisioning-engine.html` covering PXE flow, readiness/config advisor incl. own-DHCP vs proxyDHCP, install-source catalog, per-MAC assignment + netboot arming, discovery and boot media; three captured screenshots wired via `shotlist.json` + `seed_ent.py`; 37 i18n keys seeded and translated; roadmap page updated)
@@ -11511,7 +11514,22 @@ are the bulk; the review UI is small).
       box is a VERIFICATION, not a climb -- 21 adds pages of its own and
       has to show the floor still holds after them. Left unticked for
       exactly that reason.*
-- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before -- including whole i18n workstreams -- which made the backlog look far larger than it was and hid which gaps were real.
+- [x] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before -- including whole i18n workstreams -- which made the backlog look far larger than it was and hid which gaps were real.
+      *DONE 2026-10-01.* Phases 0-20 had NO unticked boxes, so the audit
+      went after the other way work goes stale: 17 places an earlier phase
+      closed by deferring or noting a follow-up, each checked against the
+      code. 10 were done (stale notes now marked resolved: MFA email OTP,
+      federation 1M-host run + strings, federation Slice 3, the pool/** CDN
+      cache, the vuln-engine shared-CVE fix, the GPG remove-on-confirm, the
+      external_idp abi3 rebuild, agent dead-code cleanup, the bundle
+      builders), 2 were already tracked (WSL lifecycle -> Phase 26, app-store
+      distribution -> Phase 25). Seven were neither, and are now open items
+      in Phase 25 "Carried forward by the Phase 21 audit" -- most important:
+      **browser SSO (OIDC + SAML) has no landing page** (fixed 2026-10-01), behind a ticked
+      Phase 13 box; also EC2/Azure/GCE/vSphere compute providers, physical
+      bare-metal PXE validation, air-gap bundle smoke tests, the federation
+      map follow-ups (build or drop), placeholder API paths in the docs, and
+      the optional pen-test revisit.
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -11982,6 +12000,68 @@ omits the package to keep its pip bundle pure-Python.
       whether Prometheus-only is the documented answer for that platform
 - [ ] If it stays excluded, document it on the Windows install page rather than
       leaving it to be discovered from a log line
+
+### Carried forward by the Phase 21 audit (2026-10-01)
+
+Phases 0-20 had no unticked boxes, so the Phase 21 audit checked every place
+an earlier phase closed by DEFERRING or noting a follow-up, against the code.
+Most were done (and the stale notes are now marked so); these were neither
+done nor tracked anywhere. Re-home any of them if Phase 25 is the wrong fit.
+
+- [x] **SSO browser landing (OIDC + SAML) -- a user-facing gap behind a ticked
+      Phase 13 box.** *Fixed 2026-10-01 (pulled forward into Phase 21):* the
+      callback and ACS now 303 the browser to the console's `/login/sso` with
+      the session in a two-minute HttpOnly cookie scoped to `/api/auth/sso`
+      (never in a URL); `POST /api/auth/sso/session` hands it over once and
+      sets the refresh cookie like a password login; failures land on the same
+      page with a reason code (`denied` / `unavailable` / `failed`), detail in
+      the server log only. The login page lists enabled server-wide OIDC/SAML
+      providers from anonymous `GET /api/auth/sso/providers` (tenant-scoped
+      ones only when a tenant is named, so a shared console does not list its
+      customers' IdPs). Code: `backend/api/sso_session.py`,
+      `frontend/src/Pages/SsoCallback.tsx`,
+      `frontend/src/Components/Login/SsoButtons.tsx`; tests
+      `tests/test_sso_session.py` + the two vitest files; docs page
+      `external-idp.html` gained the SAML and login-page sections. A real IdP
+      round trip (Keycloak or similar) is still unexercised.
+      *Original finding:* The OIDC callback (`backend/api/external_idp.py:522`)
+      and the SAML ACS (`:721`) return raw JSON `{"Authorization": ...}` to
+      the browser the IdP sent there, and the login page has no SSO button or
+      callback route -- so a real browser SSO sign-in ends on a page of JSON.
+      The SAML note said the landing "is wired in the frontend like OIDC";
+      neither is. Needs: an SSO entry on the login page per configured
+      provider, a server redirect that hands the session to the SPA without
+      putting the JWT in a URL that lands in logs/history, and a callback
+      route. Recommend fixing BEFORE GA (arguably before the next release).
+- [ ] **Compute providers for EC2, Azure, GCE and VMware/vSphere** --
+      deferred "to Phase 19 exit" by 18.1 and never written (only a docstring
+      in `provisioning_engine.pyx:13`); Phase 19 closed on libvirt + Proxmox.
+      The public roadmap page still lists them as "still ahead". Each needs a
+      `ComputeProvider` driver, registry entry, credential-by-reference, mock
+      tests and a live validation. Real feature work -- may deserve its own
+      phase rather than GA scope.
+- [ ] **Bare-metal PXE install -> enroll on a physical machine** (BIOS/CSM and
+      UEFI). 18.2's "real hardware" validation ran on Hyper-V (a non-iPXE
+      vendor ROM, which covered the protocol risk), but no physical machine
+      has been through the flow.
+- [ ] **Air-gap install bundles: per-platform smoke tests on real air-gapped
+      VMs.** The May 2026 bundle builder's "follow-ups (tracked)" were never
+      tracked: its stub builders and release-asset wiring have since been
+      written (Debian/Fedora/RHEL/openSUSE/Alpine/Windows/macOS/BSDs in
+      `scripts/buildAirGapBundle.sh`), but no per-distro install from a
+      built ISO on an air-gapped VM has been recorded.
+- [ ] **Federation maps: build or drop** -- the 12.3 "host-cluster overlay"
+      on the Sites map (`SitesMap.tsx` is sites-only) and the "cluster
+      drill-down depth / per-region host lists" polish on the host map were
+      noted as follow-ups and never tracked. Decide; if dropped, say so here.
+- [ ] **Docs: replace placeholder API paths** (`/api/agents`, `/api/metrics`,
+      `/api/tasks`, marked "illustrative only" in Phase 13) in
+      `docs/getting-started/tutorials.html` and
+      `docs/architecture/performance-{metrics,optimization}.html` with real
+      endpoints.
+- [ ] *(Optional, business)* **External penetration test** -- removed from
+      Phase 1 on 2026-08-04 as a spend decision ("revisit when there are paying
+      customers"); listed here only so the revisit has a place to land.
 
 ### Exit Criteria
 

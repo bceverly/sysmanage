@@ -2093,7 +2093,17 @@
     "submit": "Sign In",
     "title": "Login",
     "username": "Username or Email",
-    "verifying": "Verifying..."
+    "verifying": "Verifying...",
+    "sso": {
+      "or": "or",
+      "signInWith": "Sign in with {{name}}",
+      "signingIn": "Signing you in...",
+      "denied": "Your identity provider signed you in, but there is no active SysManage account for that identity. Ask an administrator to give you access.",
+      "unavailable": "Single sign-on is not available on this server.",
+      "expired": "The single sign-on session has expired. Sign in again.",
+      "failed": "Single sign-on did not complete. Try again, or sign in with your password.",
+      "backToLogin": "Back to sign in"
+    }
   },
   "logout": {
     "loading": "Logging out..."

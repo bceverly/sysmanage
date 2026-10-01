@@ -91,7 +91,7 @@ const DashboardSettingsDialog: React.FC<DashboardSettingsDialogProps> = ({
 
   useEffect(() => {
     if (open) {
-      loadPreferences();
+      void loadPreferences();
     }
   }, [open, loadPreferences]);
 

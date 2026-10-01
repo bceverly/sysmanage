@@ -91,7 +91,7 @@ const TrackedImagesExpandRow: React.FC<TrackedImagesExpandRowProps> = ({
 
   useEffect(() => {
     if (!expanded) return undefined;
-    fetchImages();
+    void fetchImages();
     const handle = setInterval(fetchImages, 10_000);
     return () => clearInterval(handle);
   }, [expanded, fetchImages]);

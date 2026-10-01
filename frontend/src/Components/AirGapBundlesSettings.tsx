@@ -187,9 +187,9 @@ const AirGapBundlesSettings: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    refresh();
-    refreshDocker();
-    refreshResources();
+    void refresh();
+    void refreshDocker();
+    void refreshResources();
   }, [refresh, refreshDocker, refreshResources]);
 
   // Auto-poll while any bundle is in-flight, so the status chip ticks
@@ -200,8 +200,8 @@ const AirGapBundlesSettings: React.FC = () => {
     );
     if (!inFlight) return;
     const id = globalThis.setInterval(() => {
-      refresh();
-      refreshResources();
+      void refresh();
+      void refreshResources();
     }, 5000);
     return () => globalThis.clearInterval(id);
   }, [bundles, refresh, refreshResources]);

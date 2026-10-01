@@ -102,7 +102,7 @@ export const useHostLifecycle = ({
             }
         };
 
-        pollStatus();
+        void pollStatus();
         const interval = setInterval(pollStatus, 5000);
         return () => clearInterval(interval);
     }, [rebootOrchestrationId, host?.id, t, setSnackbarMessage, setSnackbarSeverity, setSnackbarOpen]);
@@ -143,7 +143,7 @@ export const useHostLifecycle = ({
             
             // Start polling for completion if request is pending
             if (updatedHost?.diagnostics_request_status === 'pending') {
-                const pollForCompletion = async (attempts = 0, maxAttempts = 20) => {
+                const pollForCompletion = (attempts = 0, maxAttempts = 20) => {
                     if (attempts >= maxAttempts) {
                         console.log('Diagnostics polling completed after max attempts');
                         return;

@@ -111,7 +111,7 @@ const HostAdvisorTab: React.FC<{ hostId: string }> = ({ hostId }) => {
         }
     }, [hostId]);
 
-    useEffect(() => { load(); }, [load]);
+    useEffect(() => { void load(); }, [load]);
 
     if (error) {
         return <Alert severity="error">{t('advisor.loadFailed', 'The advisor could not be loaded.')}</Alert>;

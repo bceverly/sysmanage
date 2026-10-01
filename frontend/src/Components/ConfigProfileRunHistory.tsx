@@ -69,7 +69,7 @@ const ConfigProfileRunHistory: React.FC<ConfigProfileRunHistoryProps> = ({
 
   useEffect(() => {
     if (hostId) {
-      load();
+      void load();
     }
   }, [hostId, refreshTrigger, load]);
 

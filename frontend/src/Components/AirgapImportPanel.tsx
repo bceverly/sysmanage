@@ -110,9 +110,9 @@ const AirgapImportPanel: React.FC<Props> = ({ onComplete }) => {
   }, []);
 
   useEffect(() => {
-    rescan();
+    void rescan();
     // On mount, surface any already-in-flight run (e.g. after a reload).
-    fetchLatestRun().then((latest) => {
+    void fetchLatestRun().then((latest) => {
       if (latest) {
         setRun(latest);
         if (!TERMINAL.has(latest.status)) trackedId.current = latest.id;

@@ -69,12 +69,12 @@ export const useHostTags = ({
     // Load tags when component mounts and when hostTags change
     useEffect(() => {
         if (hostId) {
-            loadHostTags();
+            void loadHostTags();
         }
     }, [hostId, loadHostTags]);
 
     useEffect(() => {
-        loadAvailableTags();
+        void loadAvailableTags();
     }, [hostTags, loadAvailableTags]);
 
     const handleAddTag = async () => {

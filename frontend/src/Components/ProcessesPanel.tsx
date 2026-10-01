@@ -80,11 +80,11 @@ const ProcessesPanel: React.FC<ProcessesPanelProps> = ({
     }, [hostId, t]);
 
     useEffect(() => {
-        loadProcesses();
+        void loadProcesses();
     }, [loadProcesses]);
 
     useEffect(() => {
-        hasPermission(SecurityRoles.KILL_HOST_PROCESS).then(setCanKill);
+        hasPermission(SecurityRoles.KILL_HOST_PROCESS).then(setCanKill).catch(() => setCanKill(false));
     }, []);
 
     const handleRefresh = async () => {

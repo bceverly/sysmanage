@@ -2074,7 +2074,17 @@
     "submit": "Anmelden",
     "title": "Anmelden",
     "username": "Benutzername oder E-Mail",
-    "verifying": "Wird verifiziert..."
+    "verifying": "Wird verifiziert...",
+    "sso": {
+      "or": "oder",
+      "signInWith": "Anmelden mit {{name}}",
+      "signingIn": "Sie werden angemeldet...",
+      "denied": "Ihr Identitätsanbieter hat Sie angemeldet, aber für diese Identität gibt es kein aktives SysManage-Konto. Bitten Sie einen Administrator, Ihnen Zugriff zu gewähren.",
+      "unavailable": "Single Sign-On ist auf diesem Server nicht verfügbar.",
+      "expired": "Die Single-Sign-On-Sitzung ist abgelaufen. Melden Sie sich erneut an.",
+      "failed": "Single Sign-On wurde nicht abgeschlossen. Versuchen Sie es erneut oder melden Sie sich mit Ihrem Passwort an.",
+      "backToLogin": "Zurück zur Anmeldung"
+    }
   },
   "logout": {
     "loading": "Abmeldung läuft..."

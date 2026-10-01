@@ -264,7 +264,7 @@ const DistributionsSettings: React.FC = () => {
     }, [t, virtEnabled]);
 
     useEffect(() => {
-        loadData();
+        void loadData();
     }, [loadData]);
 
     // Filter data based on search
@@ -317,7 +317,7 @@ const DistributionsSettings: React.FC = () => {
                 severity: 'success',
             });
             handleAddClose();
-            loadData();
+            void loadData();
         } catch (error) {
             const axiosErr = error as AxiosError;
             setSnackbar({
@@ -367,7 +367,7 @@ const DistributionsSettings: React.FC = () => {
                 severity: 'success',
             });
             handleEditClose();
-            loadData();
+            void loadData();
         } catch (error) {
             const axiosErr = error as AxiosError;
             setSnackbar({
@@ -399,7 +399,7 @@ const DistributionsSettings: React.FC = () => {
             });
             handleDeleteClose();
             setSelection([]);
-            loadData();
+            void loadData();
         } catch (error) {
             const axiosErr = error as AxiosError;
             setSnackbar({
@@ -567,7 +567,7 @@ const DistributionsSettings: React.FC = () => {
                         const hidden = Object.entries(newModel)
                             .filter(([, visible]) => !visible)
                             .map(([field]) => field);
-                        setHiddenColumns(hidden);
+                        void setHiddenColumns(hidden);
                     }}
                     sx={{ bgcolor: 'background.paper' }}
                 />

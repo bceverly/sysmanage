@@ -342,28 +342,28 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
         temp_path = os.path.join(modules_path, f"{module_code}.tmp")
 
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
+            async with (
+                aiohttp.ClientSession() as session,
+                session.get(
                     url,
                     headers={"X-License-Key": license_key},
                     timeout=aiohttp.ClientTimeout(total=DOWNLOAD_TIMEOUT),
-                ) as response:
-                    if response.status != 200:
-                        self._log_failed_download_response(
-                            module_code, url, response.status, platform_info
-                        )
-                        return False
-
-                    # Get expected hash from header
-                    expected_hash = response.headers.get("X-Content-SHA512")
-                    actual_version = response.headers.get(
-                        "X-Module-Version", version_str
+                ) as response,
+            ):
+                if response.status != 200:
+                    self._log_failed_download_response(
+                        module_code, url, response.status, platform_info
                     )
+                    return False
 
-                    # Download to temp file
-                    async with aiofiles.open(temp_path, "wb") as f:
-                        async for chunk in response.content.iter_chunked(8192):
-                            await f.write(chunk)
+                # Get expected hash from header
+                expected_hash = response.headers.get("X-Content-SHA512")
+                actual_version = response.headers.get("X-Module-Version", version_str)
+
+                # Download to temp file
+                async with aiofiles.open(temp_path, "wb") as f:
+                    async for chunk in response.content.iter_chunked(8192):
+                        await f.write(chunk)
 
             # Verify hash if provided
             actual_hash = self._verify_downloaded_hash(temp_path, expected_hash)

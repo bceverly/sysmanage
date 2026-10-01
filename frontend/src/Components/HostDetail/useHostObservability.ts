@@ -221,7 +221,7 @@ export const useHostObservability = ({
     const handleGraylogAttachModalClose = () => {
         setGraylogAttachModalOpen(false);
         // Refresh Graylog attachment status after modal closes
-        fetchGraylogAttachment();
+        void fetchGraylogAttachment();
     };
 
     const handleDeployOpenTelemetry = async () => {
@@ -264,7 +264,7 @@ export const useHostObservability = ({
     // Fetch OpenTelemetry status when Info tab is active
     useEffect(() => {
         if (currentTabId === 'info' && host?.active) {
-            fetchOpenTelemetryStatus();
+            void fetchOpenTelemetryStatus();
         }
     }, [currentTabId, host?.active, host, fetchOpenTelemetryStatus]);
 
@@ -273,7 +273,7 @@ export const useHostObservability = ({
         if (currentTabId === 'info' && host?.active) {
             // Start auto-refresh every 30 seconds
             const interval = setInterval(() => {
-                fetchOpenTelemetryStatus();
+                void fetchOpenTelemetryStatus();
             }, 30000);
             openTelemetryRefreshInterval.current = interval;
 
@@ -292,7 +292,7 @@ export const useHostObservability = ({
     // Fetch Graylog attachment status when Info tab is active
     useEffect(() => {
         if (currentTabId === 'info' && host?.active) {
-            fetchGraylogAttachment();
+            void fetchGraylogAttachment();
         }
     }, [currentTabId, host?.active, host, fetchGraylogAttachment]);
 
@@ -301,7 +301,7 @@ export const useHostObservability = ({
         if (currentTabId === 'info' && host?.active) {
             // Start auto-refresh every 30 seconds
             const interval = setInterval(() => {
-                fetchGraylogAttachment();
+                void fetchGraylogAttachment();
             }, 30000);
             graylogRefreshInterval.current = interval;
 
@@ -352,7 +352,7 @@ export const useHostObservability = ({
             }
         };
 
-        checkOpenTelemetryEligibility();
+        void checkOpenTelemetryEligibility();
     }, [hostId, host]);
 
     // Check Graylog eligibility when host is loaded
@@ -381,7 +381,7 @@ export const useHostObservability = ({
             }
         };
 
-        checkGraylogEligibility();
+        void checkGraylogEligibility();
     }, [hostId, host]);
 
     return {

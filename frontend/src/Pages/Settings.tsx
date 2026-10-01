@@ -102,7 +102,7 @@ const Settings: React.FC = () => {
   const [licenseFeatures, setLicenseFeatures] = useState<string[]>([]);
   const [licenseActive, setLicenseActive] = useState<boolean>(false);
   useEffect(() => {
-    (async () => {
+    void (async () => {
       try {
         const info = await refreshLicenseCache();
         setLicenseModules(info?.modules ?? []);
@@ -217,13 +217,13 @@ const Settings: React.FC = () => {
 
     // Load package data when switching to Available Packages tab
     if (newTabId === 'available-packages') {
-      loadPackageSummary();
+      void loadPackageSummary();
       // Start 30-second auto-refresh timer for package cards
       if (packageRefreshInterval) {
         globalThis.clearInterval(packageRefreshInterval);
       }
       const interval = globalThis.setInterval(() => {
-        loadPackageSummary();
+        void loadPackageSummary();
       }, 30000);
       setPackageRefreshInterval(interval);
     } else if (packageRefreshInterval) {
@@ -372,7 +372,7 @@ const Settings: React.FC = () => {
   }, [tags, searchTerm, searchColumn, performSearch]);
 
   useEffect(() => {
-    loadTags();
+    void loadTags();
   }, [loadTags]);
 
   // Cleanup package refresh interval on unmount
@@ -553,7 +553,7 @@ const Settings: React.FC = () => {
         console.log('Package refresh requested successfully:', response.data.message);
         // Reload package summary after a short delay to allow processing
         setTimeout(() => {
-          loadPackageSummary();
+          void loadPackageSummary();
             }, 2000);
       }
     } catch (error) {
@@ -566,13 +566,13 @@ const Settings: React.FC = () => {
       // If we have existing package summaries, use those
       if (packageSummary.length > 0) {
         // Refresh packages for all known OS/version combinations from package summaries
-        for (const summary of packageSummary) {
+        await Promise.all(packageSummary.map(async summary => {
           try {
             await axiosInstance.post(`/api/v1/packages/refresh/${encodeURIComponent(summary.os_name)}/${encodeURIComponent(summary.os_version)}`);
           } catch (error) {
             console.error('Error refreshing packages for', summary.os_name, summary.os_version, ':', error);
           }
-        }
+        }));
       } else {
         // No package summaries exist yet, discover active hosts and trigger collection
         try {
@@ -588,14 +588,14 @@ const Settings: React.FC = () => {
           });
 
           // Trigger package collection for each unique OS/version combination
-          for (const combination of Array.from(osVersionCombinations)) {
+          await Promise.all(Array.from(osVersionCombinations).map(async combination => {
             const [osName, osVersion] = combination.split('|');
             try {
               await axiosInstance.post(`/api/v1/packages/refresh/${encodeURIComponent(osName)}/${encodeURIComponent(osVersion)}`);
             } catch (error) {
               console.error('Error refreshing packages for', osName, osVersion, ':', error);
             }
-          }
+          }));
         } catch (error) {
           console.error('Error fetching hosts for package refresh:', error);
         }
@@ -604,7 +604,7 @@ const Settings: React.FC = () => {
 
       // Reload package summary after a short delay
       setTimeout(() => {
-        loadPackageSummary();
+        void loadPackageSummary();
         }, 3000);
     } catch (error: unknown) {
       console.error('Error refreshing all packages:', error);
@@ -616,7 +616,7 @@ const Settings: React.FC = () => {
   // shifts with license filtering and added tabs.
   useEffect(() => {
     if (tabNames[activeTab] === 'available-packages') {
-      loadPackageSummary();
+      void loadPackageSummary();
     }
   }, [activeTab, tabNames, loadPackageSummary]);
 

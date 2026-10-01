@@ -44,7 +44,11 @@ export default [
       parserOptions: {
         ecmaFeatures: {
           jsx: true
-        }
+        },
+        // Type information, for the promise rules below (tsconfig includes
+        // src with allowJs, so .js files are covered too).
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname
       },
       globals: {
         window: 'readonly',
@@ -118,6 +122,12 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/ban-ts-comment': 'warn',
       '@typescript-eslint/no-wrapper-object-types': 'off',
+      // A promise nobody awaits or catches fails silently: the rejection
+      // becomes an "unhandled rejection" in the console and the UI shows
+      // nothing.  Await it, .catch() it, or mark a deliberate fire-and-forget
+      // with `void`.  (SonarQube S9383; 263 findings when this landed,
+      // 2026-10-01.)
+      '@typescript-eslint/no-floating-promises': 'error',
       // Security plugin rule - disabled by default, but plugin needed for eslint-disable comments
       'security/detect-possible-timing-attacks': 'off',
       // i18n guard: flag hardcoded user-facing text in JSX so it can't ship

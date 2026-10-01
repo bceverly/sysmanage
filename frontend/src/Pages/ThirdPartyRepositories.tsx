@@ -289,12 +289,12 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
     }, [ppaOwner, ppaName, coprOwner, coprProject, obsUrl, obsProjectPath, obsDistroVersion, obsRepoName, tapUser, tapRepo, pkgRepoName, pkgRepoUrl, pkgsrcName, pkgsrcUrl, windowsRepoName, windowsRepoUrl, osName]);
 
     useEffect(() => {
-        loadRepositories();
-        loadDefaultRepositories();
+        void loadRepositories();
+        void loadDefaultRepositories();
         // Auto-refresh every 30 seconds
         const refreshInterval = setInterval(() => {
-            loadRepositories();
-            loadDefaultRepositories();
+            void loadRepositories();
+            void loadDefaultRepositories();
         }, 30000);
         return () => clearInterval(refreshInterval);
     }, [hostId, privilegedMode, loadRepositories, loadDefaultRepositories]);

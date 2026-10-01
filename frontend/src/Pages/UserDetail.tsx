@@ -116,7 +116,7 @@ const UserDetail = () => { // NOSONAR
 
     useEffect(() => {
         if (!localStorage.getItem('bearer_token')) {
-            navigate("/login");
+            void navigate("/login");
             return;
         }
 
@@ -147,7 +147,7 @@ const UserDetail = () => { // NOSONAR
             }
         };
 
-        fetchUser();
+        void fetchUser();
     }, [userId, navigate, t]);
 
     // Fetch security roles and user's current roles - only if user has view permission
@@ -178,7 +178,7 @@ const UserDetail = () => { // NOSONAR
             }
         };
 
-        fetchSecurityRoles();
+        void fetchSecurityRoles();
     }, [userId, canViewUserSecurityRoles, t]);
 
     const formatDate = (dateString: string | null | undefined) => {

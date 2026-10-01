@@ -132,7 +132,7 @@ const AntivirusDefaultsSettings: React.FC = () => {
 
   // Load defaults on component mount
   useEffect(() => {
-    loadDefaults();
+    void loadDefaults();
   }, [loadDefaults]);
 
   const handleEdit = () => {

@@ -80,7 +80,7 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
         setStored((prev) => (prev.length ? [] : prev));
       }
     };
-    loadStored();
+    void loadStored();
   }, [open]);
 
   const reset = () => {

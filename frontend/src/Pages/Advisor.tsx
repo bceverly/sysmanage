@@ -96,7 +96,7 @@ const Advisor: React.FC = () => {
         }
     }, [lens]);
 
-    useEffect(() => { load(); }, [load]);
+    useEffect(() => { void load(); }, [load]);
 
     const evaluate = async () => {
         setEvaluating(true);
@@ -106,7 +106,7 @@ const Advisor: React.FC = () => {
             setError(true);
         }
         setEvaluating(false);
-        load();
+        void load();
     };
 
     const openProposals = proposals.filter(p => p.status === 'proposed').length;

@@ -368,7 +368,7 @@ export function useFederationLicensed(): {
   );
   useEffect(() => {
     let cancelled = false;
-    probeFederationLicensed().then((licensed) => {
+    void probeFederationLicensed().then((licensed) => {
       if (!cancelled) {
         setState({ loading: false, licensed });
       }

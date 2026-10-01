@@ -100,7 +100,7 @@ const ServerRoleSettings: React.FC = () => {
   }, [t]);
 
   useEffect(() => {
-    fetchRole();
+    void fetchRole();
   }, [fetchRole]);
 
   const handleSave = async () => {

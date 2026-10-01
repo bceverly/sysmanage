@@ -83,7 +83,7 @@ const AcceptInvitation: React.FC = () => {
             }
         };
 
-        validateToken();
+        void validateToken();
     }, [token, t]);
 
     const handleSubmit = async (e: React.BaseSyntheticEvent) => {
@@ -125,7 +125,7 @@ const AcceptInvitation: React.FC = () => {
             setError(null);
 
             setTimeout(() => {
-                navigate('/login');
+                void navigate('/login');
             }, 3000);
         } catch (err: unknown) {
             console.error('Accept invitation error:', err);

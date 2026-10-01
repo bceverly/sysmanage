@@ -76,7 +76,7 @@ const DefaultPackageMirrorsCard: React.FC = () => {
 
   useEffect(() => {
     if (mirrorsLicensed) {
-      load();
+      void load();
     }
   }, [mirrorsLicensed]);
 

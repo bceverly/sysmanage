@@ -77,7 +77,7 @@ const FileWatchPanel: React.FC<Props> = ({ canEdit }) => {
     }, [t]);
 
     useEffect(() => {
-        load();
+        void load();
     }, [load]);
 
     const submit = async () => {

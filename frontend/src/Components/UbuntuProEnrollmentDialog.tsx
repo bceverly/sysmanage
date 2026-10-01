@@ -80,7 +80,7 @@ const UbuntuProEnrollmentDialog: React.FC<UbuntuProEnrollmentDialogProps> = ({
   // Load master key status when dialog opens
   useEffect(() => {
     if (open) {
-      loadMasterKeyStatus();
+      void loadMasterKeyStatus();
       setEnrollmentResults([]);
       setShowResults(false);
       setCustomKey('');

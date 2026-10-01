@@ -220,13 +220,13 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
 
   // Initial load
   useEffect(() => {
-    loadOSOptions();
-    loadPMOSOptions();
+    void loadOSOptions();
+    void loadPMOSOptions();
   }, [loadOSOptions, loadPMOSOptions]);
 
   useEffect(() => {
     if (canView) {
-      loadRepositories();
+      void loadRepositories();
     } else {
       setLoading(false);
     }
@@ -234,7 +234,7 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
 
   useEffect(() => {
     if (canViewPM) {
-      loadEnabledPMs();
+      void loadEnabledPMs();
     } else {
       setPmLoading(false);
     }

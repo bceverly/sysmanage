@@ -237,8 +237,8 @@ const Scripts: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    loadScripts();
-    loadExecutions();
+    void loadScripts();
+    void loadExecutions();
   }, [loadScripts, loadExecutions]);
 
   // Check permissions
@@ -266,20 +266,20 @@ const Scripts: React.FC = () => {
         console.error('Failed to resolve script permissions:', error);
       }
     };
-    checkPermissions();
+    void checkPermissions();
   }, []);
 
   // Load hosts only when Execute Script tab is accessed
   useEffect(() => {
     if (tabValue === 1 && hosts.length === 0) {
-      loadHosts();
+      void loadHosts();
     }
   }, [tabValue, hosts.length, loadHosts]);
 
   // Load executions when Script Executions tab is accessed
   useEffect(() => {
     if (tabValue === 2) {
-      loadExecutions();
+      void loadExecutions();
     }
   }, [tabValue, loadExecutions]);
 
@@ -288,7 +288,7 @@ const Scripts: React.FC = () => {
     if (tabValue !== 2) return;
 
     const interval = globalThis.setInterval(() => {
-      loadExecutions();
+      void loadExecutions();
     }, 30000);
 
     return () => globalThis.clearInterval(interval);
@@ -315,7 +315,7 @@ const Scripts: React.FC = () => {
             result.status === 'completed' ? 'success' : 'error'
           );
           // Refresh executions list to show updated status
-          loadExecutions();
+          void loadExecutions();
         }
       } catch (error) {
         console.error('Failed to fetch execution result:', error);
@@ -330,7 +330,7 @@ const Scripts: React.FC = () => {
     };
 
     // Fetch immediately
-    fetchExecutionResult();
+    void fetchExecutionResult();
 
     // Adaptive polling strategy:
     // - First 2 minutes: poll every 3 seconds
@@ -341,7 +341,7 @@ const Scripts: React.FC = () => {
 
       const timeoutId = globalThis.setTimeout(() => {
         if (isExecuting && currentExecutionId) {
-          fetchExecutionResult();
+          void fetchExecutionResult();
           scheduleNextPoll();
         }
       }, interval);
@@ -423,7 +423,7 @@ const Scripts: React.FC = () => {
       }
 
       handleCloseAddScriptDialog();
-      loadScripts();
+      void loadScripts();
     } catch {
       showNotification(isEditMode ? t('scripts.updateError') : t('scripts.saveError'), 'error');
     } finally {
@@ -443,7 +443,7 @@ const Scripts: React.FC = () => {
     try {
       await scriptsService.deleteScript(scriptToDelete);
       showNotification(t('scripts.deleteSuccess'), 'success');
-      loadScripts();
+      void loadScripts();
     } catch {
       showNotification(t('scripts.deleteError'), 'error');
     } finally {
@@ -502,7 +502,7 @@ const Scripts: React.FC = () => {
       const response = await scriptsService.executeScript(executeRequest);
       setCurrentExecutionId(response.execution_id);
       showNotification(t('scripts.executeSuccess'), 'success');
-      loadExecutions();
+      void loadExecutions();
     } catch (error) {
       setIsExecuting(false);
       const axiosError = error as { response?: { status?: number } };
@@ -669,9 +669,7 @@ const Scripts: React.FC = () => {
 
     setLoading(true);
     try {
-      for (const scriptId of selectedScripts) {
-        await scriptsService.deleteScript(scriptId as string);
-      }
+      await Promise.all(selectedScripts.map(scriptId => scriptsService.deleteScript(scriptId as string)));
       showNotification(
         selectedScripts.length === 1
           ? t('scripts.deleteSuccess')
@@ -679,7 +677,7 @@ const Scripts: React.FC = () => {
         'success'
       );
       setSelectedScripts([]);
-      loadScripts();
+      void loadScripts();
     } catch {
       showNotification(t('scripts.deleteError'), 'error');
     } finally {
@@ -693,12 +691,11 @@ const Scripts: React.FC = () => {
     setExecutionsLoading(true);
     try {
       // Map DataGrid selection IDs (database IDs) to execution IDs
-      for (const databaseId of selectedExecutions) {
-        const execution = executions.find(exec => exec.id === databaseId);
-        if (execution) {
-          await scriptsService.deleteScriptExecution(execution.id);
-        }
-      }
+      await Promise.all(
+        executions
+          .filter(exec => selectedExecutions.includes(exec.id))
+          .map(exec => scriptsService.deleteScriptExecution(exec.id)),
+      );
       showNotification(
         selectedExecutions.length === 1
           ? t('scripts.deleteExecutionSuccess')
@@ -706,7 +703,7 @@ const Scripts: React.FC = () => {
         'success'
       );
       setSelectedExecutions([]);
-      loadExecutions();
+      void loadExecutions();
     } catch {
       showNotification(t('scripts.deleteExecutionError'), 'error');
     } finally {
@@ -757,7 +754,7 @@ const Scripts: React.FC = () => {
       await scriptsService.createScript(scriptData);
       showNotification(t('scripts.saveSuccess'), 'success');
       handleCloseAddScriptDialog();
-      loadScripts();
+      void loadScripts();
     } catch {
       showNotification(t('scripts.saveError'), 'error');
     } finally {

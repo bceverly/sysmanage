@@ -113,7 +113,7 @@ const ConfigurationSettings: React.FC = () => {
   }, [t]);
 
   useEffect(() => {
-    load();
+    void load();
   }, [load]);
 
   const grouped = useMemo(() => {

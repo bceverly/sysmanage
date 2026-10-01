@@ -98,7 +98,7 @@ const QueuesTab: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    loadQueueMessages();
+    void loadQueueMessages();
   }, [loadQueueMessages]);
 
   const handleDeleteMessages = async () => {

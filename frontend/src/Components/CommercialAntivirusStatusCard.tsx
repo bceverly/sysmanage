@@ -88,7 +88,7 @@ const CommercialAntivirusStatusCard: React.FC<CommercialAntivirusStatusCardProps
     };
 
     if (hostId) {
-      fetchStatus();
+      void fetchStatus();
     }
   }, [hostId, t, refreshTrigger]);
 

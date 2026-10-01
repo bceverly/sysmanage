@@ -340,40 +340,42 @@ class LicenseService:
 
         try:
             check_url = f"{phone_home_url.rstrip('/')}/v1/check"
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
+            async with (
+                aiohttp.ClientSession() as session,
+                session.post(
                     check_url,
                     json={
                         "license_key": self._license_key,
                     },
                     timeout=aiohttp.ClientTimeout(total=30),
-                ) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        if data.get("valid"):
-                            self._update_phone_home_timestamp()
-                            self._log_validation("phone_home", "success")
-                            logger.info("Phone-home validation successful")
-                            return True
-                        else:
-                            # License revoked
-                            revocation_reason = data.get("reason", "Unknown")
-                            logger.warning("License revoked: %s", revocation_reason)
-                            self._log_validation(
-                                "phone_home",
-                                "failure",
-                                f"License revoked: {revocation_reason}",
-                            )
-                            self._deactivate_license()
-                            return False
+                ) as response,
+            ):
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get("valid"):
+                        self._update_phone_home_timestamp()
+                        self._log_validation("phone_home", "success")
+                        logger.info("Phone-home validation successful")
+                        return True
                     else:
-                        logger.warning("Phone-home returned status %d", response.status)
+                        # License revoked
+                        revocation_reason = data.get("reason", "Unknown")
+                        logger.warning("License revoked: %s", revocation_reason)
                         self._log_validation(
                             "phone_home",
-                            "error",
-                            f"HTTP status {response.status}",
+                            "failure",
+                            f"License revoked: {revocation_reason}",
                         )
-                        return self._check_offline_grace()
+                        self._deactivate_license()
+                        return False
+                else:
+                    logger.warning("Phone-home returned status %d", response.status)
+                    self._log_validation(
+                        "phone_home",
+                        "error",
+                        f"HTTP status {response.status}",
+                    )
+                    return self._check_offline_grace()
 
         except aiohttp.ClientError as e:
             logger.warning("Phone-home network error: %s", e)

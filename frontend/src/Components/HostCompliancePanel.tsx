@@ -133,7 +133,7 @@ const HostCompliancePanel: React.FC<HostCompliancePanelProps> = ({ hostId }) => 
   }, [hostId, t]);
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, [refresh]);
 
   const rows: RowShape[] = useMemo(() => {

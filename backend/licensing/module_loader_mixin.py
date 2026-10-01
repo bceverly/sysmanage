@@ -83,42 +83,44 @@ class ModuleLoaderUpdatesMixin:
         )
 
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
+            async with (
+                aiohttp.ClientSession() as session,
+                session.get(
                     url,
                     headers={"X-License-Key": license_key},
                     timeout=aiohttp.ClientTimeout(total=VERSION_CHECK_TIMEOUT),
-                ) as response:
-                    if response.status != 200:
-                        logger.warning(
-                            "Version check failed: %s returned %d",
-                            url,
-                            response.status,
-                        )
-                        return {}
+                ) as response,
+            ):
+                if response.status != 200:
+                    logger.warning(
+                        "Version check failed: %s returned %d",
+                        url,
+                        response.status,
+                    )
+                    return {}
 
-                    data = await response.json()
+                data = await response.json()
 
-                    # Parse modules
-                    modules_result: Dict[str, Dict[str, str]] = {}
-                    for mod in data.get("modules", []):
-                        modules_result[mod["code"]] = {
-                            "version": mod["latest_version"],
-                            "file_hash": mod["file_hash"],
-                        }
-
-                    # Parse plugins
-                    plugins_result: Dict[str, Dict[str, str]] = {}
-                    for plugin in data.get("plugins", []):
-                        plugins_result[plugin["code"]] = {
-                            "version": plugin["latest_version"],
-                            "file_hash": plugin["file_hash"],
-                        }
-
-                    return {
-                        "modules": modules_result,
-                        "plugins": plugins_result,
+                # Parse modules
+                modules_result: Dict[str, Dict[str, str]] = {}
+                for mod in data.get("modules", []):
+                    modules_result[mod["code"]] = {
+                        "version": mod["latest_version"],
+                        "file_hash": mod["file_hash"],
                     }
+
+                # Parse plugins
+                plugins_result: Dict[str, Dict[str, str]] = {}
+                for plugin in data.get("plugins", []):
+                    plugins_result[plugin["code"]] = {
+                        "version": plugin["latest_version"],
+                        "file_hash": plugin["file_hash"],
+                    }
+
+                return {
+                    "modules": modules_result,
+                    "plugins": plugins_result,
+                }
 
         except aiohttp.ClientError as e:
             logger.warning("Version check network error: %s", e)

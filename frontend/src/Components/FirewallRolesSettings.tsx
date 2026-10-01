@@ -162,12 +162,12 @@ const FirewallRolesSettings: React.FC = () => {
   }, [canView, t]);
 
   useEffect(() => {
-    loadCommonPorts();
+    void loadCommonPorts();
   }, [loadCommonPorts]);
 
   useEffect(() => {
     if (canView) {
-      loadRoles();
+      void loadRoles();
     } else {
       setLoading(false);
     }
@@ -387,7 +387,7 @@ const FirewallRolesSettings: React.FC = () => {
       }
 
       closeDialog();
-      loadRoles();
+      void loadRoles();
     } catch (err: unknown) {
       console.error('Error saving firewall role:', err);
       const defaultMessage = editingRole ? t('firewallRoles.errorUpdating') : t('firewallRoles.errorCreating');
@@ -409,7 +409,7 @@ const FirewallRolesSettings: React.FC = () => {
     try {
       await axiosInstance.delete(`/api/v1/firewall-roles/${roleToDelete.id}`);
       showSnackbar(t('firewallRoles.deleteSuccess'), 'success');
-      loadRoles();
+      void loadRoles();
     } catch (err: unknown) {
       console.error('Error deleting firewall role:', err);
       const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
@@ -545,12 +545,10 @@ const FirewallRolesSettings: React.FC = () => {
     if (selectedRows.length === 0) return;
 
     try {
-      for (const roleId of selectedRows) {
-        await axiosInstance.delete(`/api/v1/firewall-roles/${roleId}`);
-      }
+      await Promise.all(selectedRows.map(roleId => axiosInstance.delete(`/api/v1/firewall-roles/${roleId}`)));
       showSnackbar(t('firewallRoles.deleteSuccess'), 'success');
       setSelectedRows([]);
-      loadRoles();
+      void loadRoles();
     } catch (err: unknown) {
       console.error('Error deleting firewall roles:', err);
       showSnackbar(extractApiErrorMessage(err, t('firewallRoles.errorDeleting')), 'error');

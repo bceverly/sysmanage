@@ -2074,7 +2074,17 @@
     "submit": "Entrar",
     "title": "Entrar",
     "username": "Usuário ou e-mail",
-    "verifying": "Verificando..."
+    "verifying": "Verificando...",
+    "sso": {
+      "or": "ou",
+      "signInWith": "Entrar com {{name}}",
+      "signingIn": "Entrando...",
+      "denied": "Seu provedor de identidade autenticou você, mas não há uma conta ativa do SysManage para essa identidade. Peça a um administrador para conceder acesso.",
+      "unavailable": "O logon único não está disponível neste servidor.",
+      "expired": "A sessão de logon único expirou. Entre novamente.",
+      "failed": "O logon único não foi concluído. Tente novamente ou entre com sua senha.",
+      "backToLogin": "Voltar para a entrada"
+    }
   },
   "logout": {
     "loading": "Fazendo logout..."

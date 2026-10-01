@@ -112,7 +112,7 @@ const ConfigProfiles: React.FC = () => {
     }, [t]);
 
     useEffect(() => {
-        load();
+        void load();
     }, [load]);
 
     useEffect(() => {
@@ -129,7 +129,7 @@ const ConfigProfiles: React.FC = () => {
                 console.error('Failed to load the engine catalog:', err);
             }
         };
-        loadEngines();
+        void loadEngines();
     }, []);
 
     useEffect(() => {
@@ -149,7 +149,7 @@ const ConfigProfiles: React.FC = () => {
                 console.error('Failed to resolve config profile permissions:', err);
             }
         };
-        check();
+        void check();
     }, []);
 
     const openCreate = () => {

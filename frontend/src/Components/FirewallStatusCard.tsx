@@ -174,16 +174,16 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
     };
 
     if (hostId) {
-      fetchFirewallStatus();
+      void fetchFirewallStatus();
     }
   }, [hostId, t, refreshTrigger]);
 
   // Load firewall roles when permission is available
   useEffect(() => {
     if (hostId && canViewFirewallRoles) {
-      loadHostFirewallRoles();
-      loadAllFirewallRoles();
-      loadExpectedPorts();
+      void loadHostFirewallRoles();
+      void loadAllFirewallRoles();
+      void loadExpectedPorts();
     }
   }, [hostId, canViewFirewallRoles, loadHostFirewallRoles, loadAllFirewallRoles, loadExpectedPorts, refreshTrigger]);
 
@@ -270,22 +270,17 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
   const handleSaveRoles = async () => {
     setSavingRoles(true);
     try {
-      // Remove roles marked for removal
-      for (const roleId of rolesToRemove) {
-        const assignment = hostFirewallRoles.find(r => r.firewall_role_id === roleId);
-        if (assignment) {
-          await axiosInstance.delete(`/api/v1/firewall-roles/host/${hostId}/roles/${assignment.id}`);
-        }
-      }
+      // Remove roles marked for removal, then add the new ones (each step's
+      // requests are independent of one another).
+      const removals = hostFirewallRoles.filter(r => rolesToRemove.includes(r.firewall_role_id));
+      await Promise.all(removals.map(assignment =>
+        axiosInstance.delete(`/api/v1/firewall-roles/host/${hostId}/roles/${assignment.id}`)));
 
-      // Add new roles
-      for (const role of pendingRoles) {
-        if (role.id.startsWith('new-')) {
-          await axiosInstance.post(`/api/v1/firewall-roles/host/${hostId}/roles`, {
-            firewall_role_id: role.firewall_role_id,
-          });
-        }
-      }
+      const additions = pendingRoles.filter(role => role.id.startsWith('new-'));
+      await Promise.all(additions.map(role =>
+        axiosInstance.post(`/api/v1/firewall-roles/host/${hostId}/roles`, {
+          firewall_role_id: role.firewall_role_id,
+        })));
 
       // Reload host firewall roles and expected ports
       await loadHostFirewallRoles();
@@ -388,7 +383,7 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
     }
   };
 
-  const handleRemoveFirewall = async () => {
+  const handleRemoveFirewall = () => {
     setError(t('security.firewallRemoveNotImplemented', 'Firewall removal is not yet supported'));
   };
 

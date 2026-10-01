@@ -45,7 +45,7 @@ const when = (iso: string | null): string => (iso ? new Date(iso).toLocaleString
 const Coverage: React.FC<{ item: PostureItem }> = ({ item }) => {
     const { t } = useTranslation();
     const c = item.coverage;
-    if (!c || !c.hosts_total) return <>-</>;
+    if (!c?.hosts_total) return <>-</>;
     return (
         <Typography variant="body2">
             {t('posture.coverage.summary', '{{ok}} of {{total}} hosts pass', { ok: c.hosts_ok, total: c.hosts_total })}
@@ -100,7 +100,7 @@ const History: React.FC<{ ruleKey: string }> = ({ ruleKey }) => {
     );
 };
 
-const Actions: React.FC<Props> = ({ item, onAction }) => {
+const Actions: React.FC<Omit<Props, 'onRevoke'>> = ({ item, onAction }) => {
     const { t } = useTranslation();
     const open = item.evaluated_state === 'open';
     return (
@@ -141,7 +141,7 @@ const PostureItemRow: React.FC<Props> = ({ item, onAction, onRevoke }) => {
                 </TableCell>
                 <TableCell>{item.risk ?? '-'}</TableCell>
                 <TableCell><Coverage item={item} /></TableCell>
-                <TableCell><Actions item={item} onAction={onAction} onRevoke={onRevoke} /></TableCell>
+                <TableCell><Actions item={item} onAction={onAction} /></TableCell>
             </TableRow>
             <TableRow>
                 <TableCell colSpan={6} sx={{ py: 0, borderBottom: expanded ? undefined : 'none' }}>

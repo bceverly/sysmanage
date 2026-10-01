@@ -32,6 +32,7 @@ from backend.services import asset_discovery_review as review
 from backend.services import network_discovery_policy as policy_svc
 from backend.services import network_sweep
 from backend.services.audit_service import AuditService, EntityType
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -138,10 +139,10 @@ async def put_policy(
     db.commit()
     logger.info(
         "network discovery policy set to %s by %s in %s; %s",
-        change["after"],
-        current_user.userid,
-        db.get_bind().url.database,
-        summary,
+        sanitize_log(change["after"]),
+        sanitize_log(current_user.userid),
+        sanitize_log(db.get_bind().url.database),
+        sanitize_log(summary),
     )
     return {**change["after"], "dispatch": summary}
 

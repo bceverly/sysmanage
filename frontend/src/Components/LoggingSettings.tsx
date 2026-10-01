@@ -127,7 +127,7 @@ const LoggingSettings: React.FC = () => {
     }, [t]);
 
     useEffect(() => {
-        load();
+        void load();
     }, [load]);
 
     const handleSave = async () => {

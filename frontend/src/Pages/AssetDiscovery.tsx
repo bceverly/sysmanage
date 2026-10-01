@@ -50,7 +50,8 @@ type View = Exclude<DeviceStatus, 'all'> | 'sweeps';
 const TABS: View[] = ['unmanaged', 'managed', 'excluded', 'sweeps'];
 
 const observedNetworks = (summary: DiscoverySummary): string[] =>
-    Array.from(new Set(summary.observers.flatMap(o => o.networks.map(n => n.network)))).sort();
+    Array.from(new Set(summary.observers.flatMap(o => o.networks.map(n => n.network))))
+        .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
 const Counts: React.FC<{ summary: DiscoverySummary }> = ({ summary }) => {
     const { t } = useTranslation();
@@ -155,7 +156,7 @@ const AssetDiscovery: React.FC = () => {
         }
     }, [status, network, search, showRevoked]);
 
-    useEffect(() => { load(); }, [load]);
+    useEffect(() => { void load(); }, [load]);
     useEffect(() => { setSelected(new Set()); }, [status, network, search]);
 
     const toggle = (id: string) => setSelected(prev => {

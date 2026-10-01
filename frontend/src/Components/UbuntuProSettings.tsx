@@ -107,8 +107,8 @@ const UbuntuProSettings: React.FC = () => {
 
   // Load settings on component mount
   useEffect(() => {
-    loadSettings();
-    loadKeyStatus();
+    void loadSettings();
+    void loadKeyStatus();
   }, [loadSettings, loadKeyStatus]);
 
   const saveSettings = async () => {
@@ -121,7 +121,7 @@ const UbuntuProSettings: React.FC = () => {
       };
 
       await axiosInstance.put('/api/v1/ubuntu-pro/', payload);
-      loadKeyStatus(); // Refresh status
+      void loadKeyStatus(); // Refresh status
       showSnackbar(t('ubuntuPro.messages.saveSuccess', 'Ubuntu Pro settings saved successfully'), 'success');
     } catch (error: unknown) {
       console.error('Error saving Ubuntu Pro settings:', error);
@@ -137,7 +137,7 @@ const UbuntuProSettings: React.FC = () => {
     try {
       await axiosInstance.delete('/api/v1/ubuntu-pro/master-key');
       setMasterKey('');
-      loadKeyStatus();
+      void loadKeyStatus();
       showSnackbar(t('ubuntuPro.messages.keyCleared', 'Master key cleared successfully'), 'success');
     } catch (error: unknown) {
       console.error('Error clearing master key:', error);

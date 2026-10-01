@@ -34,12 +34,12 @@ interface Props {
 const DiscoveryPolicyCard: React.FC<Props> = ({ policy, canManage, onSave }) => {
     const { t } = useTranslation();
     const [enabled, setEnabled] = useState(policy.enabled);
-    const [interval, setIntervalValue] = useState(policy.report_interval_seconds);
+    const [intervalSeconds, setIntervalSeconds] = useState(policy.report_interval_seconds);
     const [sweeps, setSweeps] = useState(policy.sweep_enabled);
     const [retention, setRetention] = useState(policy.retention_days ?? 30);
     const [busy, setBusy] = useState(false);
     const dirty = enabled !== policy.enabled
-        || interval !== policy.report_interval_seconds
+        || intervalSeconds !== policy.report_interval_seconds
         || sweeps !== policy.sweep_enabled
         || retention !== (policy.retention_days ?? 30);
     const intervalLabel = (seconds: number) =>
@@ -56,9 +56,9 @@ const DiscoveryPolicyCard: React.FC<Props> = ({ policy, canManage, onSave }) => 
                         label={t('assetDiscovery.policy.enabled', 'Agents listen for devices on their networks')} />
                     <FormControl size="small" sx={{ minWidth: 200 }} disabled={!canManage}>
                         <InputLabel id="discovery-interval">{t('assetDiscovery.policy.interval', 'Report')}</InputLabel>
-                        <Select labelId="discovery-interval" value={interval}
+                        <Select labelId="discovery-interval" value={intervalSeconds}
                             label={t('assetDiscovery.policy.interval', 'Report')}
-                            onChange={e => setIntervalValue(Number(e.target.value))}>
+                            onChange={e => setIntervalSeconds(Number(e.target.value))}>
                             {INTERVALS.map(s => <MenuItem key={s} value={s}>{intervalLabel(s)}</MenuItem>)}
                         </Select>
                     </FormControl>
@@ -77,7 +77,7 @@ const DiscoveryPolicyCard: React.FC<Props> = ({ policy, canManage, onSave }) => 
                         label={t('assetDiscovery.policy.sweeps', 'Allow active sweeps')} />
                     {canManage && (
                         <Button variant="contained" disabled={!dirty || busy}
-                            onClick={async () => { setBusy(true); try { await onSave(enabled, interval, sweeps, retention); } finally { setBusy(false); } }}>
+                            onClick={async () => { setBusy(true); try { await onSave(enabled, intervalSeconds, sweeps, retention); } finally { setBusy(false); } }}>
                             {t('common.save', 'Save')}
                         </Button>
                     )}

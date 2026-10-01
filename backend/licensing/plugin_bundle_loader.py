@@ -171,22 +171,24 @@ class PluginBundleLoader:
         Returns ``(expected_hash, version)`` from the response headers, or
         ``None`` if the server did not return the bundle.
         """
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
+        async with (
+            aiohttp.ClientSession() as session,
+            session.get(
                 url,
                 headers={"X-License-Key": license_key},
                 timeout=aiohttp.ClientTimeout(total=DOWNLOAD_TIMEOUT),
-            ) as response:
-                if response.status != 200:
-                    await self._log_failed_download(url, response)
-                    return None
+            ) as response,
+        ):
+            if response.status != 200:
+                await self._log_failed_download(url, response)
+                return None
 
-                expected_hash = response.headers.get("X-Content-SHA512")
-                actual_version = response.headers.get("X-Module-Version")
+            expected_hash = response.headers.get("X-Content-SHA512")
+            actual_version = response.headers.get("X-Module-Version")
 
-                async with aiofiles.open(temp_path, "wb") as f:
-                    async for chunk in response.content.iter_chunked(8192):
-                        await f.write(chunk)
+            async with aiofiles.open(temp_path, "wb") as f:
+                async for chunk in response.content.iter_chunked(8192):
+                    await f.write(chunk)
 
         return expected_hash, actual_version
 

@@ -6301,3 +6301,6 @@ msgstr ""
 
 #~ msgid "Executing command sequence"
 #~ msgstr "Opdrachtenreeks wordt uitgevoerd"
+
+msgid "The single sign-on session has expired. Sign in again."
+msgstr "De single sign-on-sessie is verlopen. Meld u opnieuw aan."

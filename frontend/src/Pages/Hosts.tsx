@@ -53,7 +53,7 @@ const Hosts = () => {
     // refuses child-host operations entirely; the UI follows suit.
     const [licenseModules, setLicenseModules] = useState<string[]>([]);
     useEffect(() => {
-        (async () => {
+        void (async () => {
             try {
                 const licenseInfo = await getLicenseInfo();
                 setLicenseModules(licenseInfo.modules || []);
@@ -455,16 +455,16 @@ const Hosts = () => {
 
     useEffect(() => {
         if (!localStorage.getItem('bearer_token')) {
-            navigate("/login");
+            void navigate("/login");
         }
 
         // Initial load
-        refreshHosts();
+        void refreshHosts();
 
         // Set up periodic refresh every 60 seconds (increased from 30 to reduce load)
         const intervalId = globalThis.setInterval(() => {
             // Refresh hosts periodically
-            refreshHosts();
+            void refreshHosts();
         }, 60000);
 
         // Cleanup interval on unmount
@@ -589,7 +589,7 @@ const Hosts = () => {
 
     // Load tags on component mount
     React.useEffect(() => {
-        loadAllTags();
+        void loadAllTags();
     }, [loadAllTags]);
 
     // Memoize column visibility model

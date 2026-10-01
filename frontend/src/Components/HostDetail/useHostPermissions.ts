@@ -122,7 +122,7 @@ export const useHostPermissions = (): HostPermissions => {
                 console.error('Failed to resolve host permissions:', error);
             }
         };
-        checkPermissions();
+        void checkPermissions();
     }, []);
 
     return {

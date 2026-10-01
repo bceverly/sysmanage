@@ -154,7 +154,7 @@ const GraylogAttachmentModal: React.FC<GraylogAttachmentModalProps> = ({
 
     useEffect(() => {
         if (open) {
-            loadGraylogSettings();
+            void loadGraylogSettings();
         }
     }, [open, loadGraylogSettings]);
 

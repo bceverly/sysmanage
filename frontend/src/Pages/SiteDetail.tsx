@@ -247,17 +247,17 @@ const SiteDetail: React.FC = () => {
             t("sites.detail.errorLoad", "Failed to load site."),
         });
       });
-    refreshCommands();
-    refreshSyncStatus();
-    refreshSyncTimeline();
-    refreshRollup();
-    refreshAlerts();
+    void refreshCommands();
+    void refreshSyncStatus();
+    void refreshSyncTimeline();
+    void refreshRollup();
+    void refreshAlerts();
     // Poll connection health + alerts so an operator watching the page
     // sees the site go stale/overdue (and new alerts) without a reload.
     const poll = setInterval(() => {
-      refreshSyncStatus();
-      refreshSyncTimeline();
-      refreshAlerts();
+      void refreshSyncStatus();
+      void refreshSyncTimeline();
+      void refreshAlerts();
     }, 15000);
     return () => {
       cancelled = true;
@@ -330,7 +330,7 @@ const SiteDetail: React.FC = () => {
       // After removal, fall back to the Sites grid -- the row is
       // soft-removed at the backend but the operator's mental model
       // is "this site is gone now", so we navigate away.
-      navigate("/sites");
+      void navigate("/sites");
     } finally {
       setActionInFlight(false);
     }

@@ -85,7 +85,7 @@ const ReportBrandingSettings: React.FC = () => {
   }, [t, fetchLogo]);
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, [refresh]);
 
   // Revoke the object URL when the component unmounts so the blob is

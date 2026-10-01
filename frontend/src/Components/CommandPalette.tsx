@@ -115,7 +115,7 @@ const CommandPalette: React.FC = () => {
   };
 
   const run = (cmd: { path: string }) => {
-    navigate(cmd.path);
+    void navigate(cmd.path);
     close();
   };
 

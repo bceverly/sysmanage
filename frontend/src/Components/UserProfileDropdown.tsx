@@ -82,7 +82,7 @@ const UserProfileDropdown: React.FC = () => {
 
     // Load profile image on component mount
     useEffect(() => {
-        fetchProfileImage();
+        void fetchProfileImage();
     }, [fetchProfileImage]);
 
     // Cleanup blob URLs when component unmounts
@@ -96,7 +96,7 @@ const UserProfileDropdown: React.FC = () => {
 
     // Add refresh function for external use
     const refreshProfileImage = useCallback(() => {
-        fetchProfileImage();
+        void fetchProfileImage();
     }, [fetchProfileImage]);
 
     // Expose refresh function globally for other components to use
@@ -117,17 +117,17 @@ const UserProfileDropdown: React.FC = () => {
 
     const handleProfile = () => {
         handleClose();
-        navigate('/profile');
+        void navigate('/profile');
     };
 
     const handleApiKeys = () => {
         handleClose();
-        navigate('/api-keys');
+        void navigate('/api-keys');
     };
 
     const handleLogout = () => {
         handleClose();
-        navigate('/logout');
+        void navigate('/logout');
     };
 
     return (

@@ -166,7 +166,7 @@ export const useChildHosts = ({
                 childType,
                 distribution: '',
             }));
-            fetchDistributions(childType);
+            void fetchDistributions(childType);
         }
     }, [createChildHostOpen, host, fetchDistributions, virtualizationStatus]);
 
@@ -242,8 +242,8 @@ export const useChildHosts = ({
                 }
                 // Refetch child hosts and virtualization status after a short delay to allow collection to complete
                 setTimeout(() => {
-                    fetchChildHosts(false);
-                    fetchVirtualizationStatus();
+                    void fetchChildHosts(false);
+                    void fetchVirtualizationStatus();
                     setChildHostsRefreshRequested(false);
                 }, 3000);
             }
@@ -269,7 +269,7 @@ export const useChildHosts = ({
             setSnackbarOpen(true);
             // Refresh after a short delay
             setTimeout(() => {
-                fetchChildHosts(false);
+                void fetchChildHosts(false);
             }, 3000);
         } catch (error) {
             console.error('Error starting child host:', error);
@@ -291,7 +291,7 @@ export const useChildHosts = ({
             setSnackbarOpen(true);
             // Refresh after a short delay
             setTimeout(() => {
-                fetchChildHosts(false);
+                void fetchChildHosts(false);
             }, 3000);
         } catch (error) {
             console.error('Error stopping child host:', error);
@@ -313,7 +313,7 @@ export const useChildHosts = ({
             setSnackbarOpen(true);
             // Refresh after a short delay
             setTimeout(() => {
-                fetchChildHosts(false);
+                void fetchChildHosts(false);
             }, 5000);
         } catch (error) {
             console.error('Error restarting child host:', error);
@@ -335,7 +335,7 @@ export const useChildHosts = ({
             setSnackbarOpen(true);
             // Refresh after a short delay
             setTimeout(() => {
-                fetchChildHosts(false);
+                void fetchChildHosts(false);
             }, 5000);
         } catch (error) {
             console.error('Error requesting child host agent update:', error);
@@ -368,7 +368,7 @@ export const useChildHosts = ({
             setSnackbarOpen(true);
             // Refresh after a short delay
             setTimeout(() => {
-                fetchChildHosts(false);
+                void fetchChildHosts(false);
             }, 3000);
         } catch (error) {
             // Check if this is a 404 (child host already removed)
@@ -378,7 +378,7 @@ export const useChildHosts = ({
                 setSnackbarOpen(true);
                 // Refresh the list to remove the stale entry
                 setTimeout(() => {
-                    fetchChildHosts(false);
+                    void fetchChildHosts(false);
                 }, 1000);
             } else {
                 console.error('Error deleting child host:', error);
@@ -413,7 +413,7 @@ export const useChildHosts = ({
                 setSnackbarOpen(true);
                 // Refresh virtualization status
                 setTimeout(() => {
-                    fetchVirtualizationStatus();
+                    void fetchVirtualizationStatus();
                 }, 3000);
             }
         } catch (error) {
@@ -438,7 +438,7 @@ export const useChildHosts = ({
                 setSnackbarOpen(true);
                 // Refresh virtualization status after a delay
                 setTimeout(() => {
-                    fetchVirtualizationStatus();
+                    void fetchVirtualizationStatus();
                 }, 5000);
             }
         } catch (error) {
@@ -463,7 +463,7 @@ export const useChildHosts = ({
                 setSnackbarOpen(true);
                 // Refresh virtualization status after a delay
                 setTimeout(() => {
-                    fetchVirtualizationStatus();
+                    void fetchVirtualizationStatus();
                 }, 5000);
             }
         } catch (error) {
@@ -488,7 +488,7 @@ export const useChildHosts = ({
                 setSnackbarOpen(true);
                 // Refresh virtualization status after a delay
                 setTimeout(() => {
-                    fetchVirtualizationStatus();
+                    void fetchVirtualizationStatus();
                 }, 5000);
             }
         } catch (error) {
@@ -513,7 +513,7 @@ export const useChildHosts = ({
                 setSnackbarOpen(true);
                 // Refresh virtualization status after a delay
                 setTimeout(() => {
-                    fetchVirtualizationStatus();
+                    void fetchVirtualizationStatus();
                 }, 5000);
             }
         } catch (error) {
@@ -538,7 +538,7 @@ export const useChildHosts = ({
                 setSnackbarOpen(true);
                 // Refresh virtualization status after a delay
                 setTimeout(() => {
-                    fetchVirtualizationStatus();
+                    void fetchVirtualizationStatus();
                 }, 5000);
             }
         } catch (error) {
@@ -563,7 +563,7 @@ export const useChildHosts = ({
                 setSnackbarOpen(true);
                 // Refresh virtualization status after a delay (needs time for queue round-trip)
                 setTimeout(() => {
-                    fetchVirtualizationStatus();
+                    void fetchVirtualizationStatus();
                 }, 6000);
             }
         } catch (error) {
@@ -588,7 +588,7 @@ export const useChildHosts = ({
                 setSnackbarOpen(true);
                 // Refresh virtualization status after a delay (needs time for queue round-trip)
                 setTimeout(() => {
-                    fetchVirtualizationStatus();
+                    void fetchVirtualizationStatus();
                 }, 6000);
             }
         } catch (error) {
@@ -618,7 +618,7 @@ export const useChildHosts = ({
             confirmRootPassword: '',
             autoApprove: false,
         }));
-        fetchDistributions(childType);
+        void fetchDistributions(childType);
         setCreateChildHostOpen(true);
     }, [fetchDistributions]);
 
@@ -688,7 +688,7 @@ export const useChildHosts = ({
                     });
                     // Refresh child hosts list
                     setTimeout(() => {
-                        fetchChildHosts();
+                        void fetchChildHosts();
                     }, 3000);
                 } else if (result.reboot_required) {
                     setSnackbarMessage(t('hostDetail.childHostNeedsReboot', 'WSL needs to be enabled. A reboot is required first.'));
@@ -727,13 +727,13 @@ export const useChildHosts = ({
             if (now - childHostsLastAgentRefresh.current > 30000) {
                 childHostsLastAgentRefresh.current = now;
                 // Request fresh child host status from agent (silently, no snackbar)
-                requestChildHostsRefresh(false);
+                void requestChildHostsRefresh(false);
             }
 
             // Start auto-refresh every 15 seconds (without loading indicator)
             const interval = setInterval(() => {
-                fetchChildHosts(false);
-                fetchVirtualizationStatus();
+                void fetchChildHosts(false);
+                void fetchVirtualizationStatus();
             }, 15000);
             childHostsRefreshInterval.current = interval;
 

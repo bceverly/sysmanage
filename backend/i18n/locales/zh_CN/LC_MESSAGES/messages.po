@@ -6024,3 +6024,6 @@ msgstr "按操作系统版本列出的 macOS 漏洞（来自 NVD 的受影响版
 
 #~ msgid "Executing command sequence"
 #~ msgstr "正在执行命令序列"
+
+msgid "The single sign-on session has expired. Sign in again."
+msgstr "单点登录会话已过期。请重新登录。"

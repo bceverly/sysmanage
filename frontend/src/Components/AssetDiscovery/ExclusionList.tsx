@@ -124,7 +124,12 @@ const ExclusionList: React.FC<Props> = ({ exclusions, showRevoked, canManage, on
             )}
             {adding && <StaticAddressDialog open={adding} onClose={() => setAdding(false)} onConfirm={onAddAddress} />}
             <RevokeDialog target={target} onClose={() => setTarget(null)}
-                onConfirm={async reason => { if (target) await onRevoke(target.id, reason); setTarget(null); }} />
+                onConfirm={async reason => {
+                    if (target) {
+                        await onRevoke(target.id, reason);
+                    }
+                    setTarget(null);
+                }} />
         </>
     );
 };

@@ -98,7 +98,7 @@ const ReportTemplatesSettings: React.FC = () => {
   }, [t]);
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, [refresh]);
 
   const loadFieldsFor = useCallback(async (baseType: string) => {
@@ -124,7 +124,7 @@ const ReportTemplatesSettings: React.FC = () => {
       selected_fields: [],
       enabled: true,
     });
-    if (baseTypes[0]) loadFieldsFor(baseTypes[0]);
+    if (baseTypes[0]) void loadFieldsFor(baseTypes[0]);
     setDialogOpen(true);
   };
 

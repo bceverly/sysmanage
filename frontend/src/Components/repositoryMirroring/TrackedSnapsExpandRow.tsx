@@ -81,7 +81,7 @@ const TrackedSnapsExpandRow: React.FC<TrackedSnapsExpandRowProps> = ({
 
   useEffect(() => {
     if (!expanded) return undefined;
-    fetchSnaps();
+    void fetchSnaps();
     const handle = setInterval(fetchSnaps, 10_000);
     return () => clearInterval(handle);
   }, [expanded, fetchSnaps]);

@@ -35,7 +35,7 @@ existed for 2 of 5 hosts).
 """
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Optional
 
 from sqlalchemy import func
@@ -276,83 +276,96 @@ def _fips_state(host):
     return "unknown"
 
 
+COVERAGE_KEYS = (
+    "fips",
+    "antivirus",
+    "firewall",
+    "compliance_scan",
+    "critical_vulnerabilities",
+)
+
+
+def _av_state(row, now) -> str:
+    if (
+        row is None
+        or row.enabled is None
+        or row.last_updated is None
+        or now - row.last_updated > ANTIVIRUS_MAX_AGE
+    ):
+        return "unknown"
+    return "ok" if row.enabled else "failing"
+
+
+def _fw_state(row, now) -> str:
+    if (
+        row is None
+        or row.last_updated is None
+        or now - row.last_updated > FIREWALL_MAX_AGE
+    ):
+        return "unknown"
+    return "ok" if row.enabled else "failing"
+
+
+def _comp_state(row, now) -> str:
+    # No recent scan is a FAILING coverage, not unknown: "is every host
+    # scanned" is exactly what this measures.
+    if row is not None and now - row.scanned_at <= COMPLIANCE_MAX_AGE:
+        return "ok"
+    return "failing"
+
+
+def _vuln_state(row, now) -> str:
+    if (
+        row is None
+        or now - row.scanned_at > VULN_MAX_AGE
+        or (row.risk_level or "").upper() == "UNKNOWN"
+    ):
+        return "unknown"  # no verdict is not a clean verdict
+    return "failing" if (row.critical_count or 0) > 0 else "ok"
+
+
 def _fleet_coverage(db, now) -> List[Dict[str, Any]]:
     hosts = (
         db.query(models.Host).filter(models.Host.approval_status == "approved").all()
     )
     ids = [h.id for h in hosts]
     if not ids:
-        return [
-            _coverage(key, [])
-            for key in (
-                "fips",
-                "antivirus",
-                "firewall",
-                "compliance_scan",
-                "critical_vulnerabilities",
-            )
-        ]
-    av = _latest_by_host(
-        db, models.AntivirusStatus, models.AntivirusStatus.last_updated, ids
-    )
-    fw = _latest_by_host(
-        db, models.FirewallStatus, models.FirewallStatus.last_updated, ids
-    )
-    comp = _latest_by_host(
-        db, models.HostComplianceScan, models.HostComplianceScan.scanned_at, ids
-    )
-    vuln = _latest_by_host(
-        db, models.HostVulnerabilityScan, models.HostVulnerabilityScan.scanned_at, ids
-    )
-
-    def av_state(h):
-        row = av.get(str(h.id))
-        if (
-            row is None
-            or row.enabled is None
-            or row.last_updated is None
-            or now - row.last_updated > ANTIVIRUS_MAX_AGE
-        ):
-            return "unknown"
-        return "ok" if row.enabled else "failing"
-
-    def fw_state(h):
-        row = fw.get(str(h.id))
-        if (
-            row is None
-            or row.last_updated is None
-            or now - row.last_updated > FIREWALL_MAX_AGE
-        ):
-            return "unknown"
-        return "ok" if row.enabled else "failing"
-
-    def comp_state(h):
-        row = comp.get(str(h.id))
-        # No recent scan is a FAILING coverage, not unknown: "is every host
-        # scanned" is exactly what this measures.
-        return (
-            "ok"
-            if row is not None and now - row.scanned_at <= COMPLIANCE_MAX_AGE
-            else "failing"
+        return [_coverage(key, []) for key in COVERAGE_KEYS]
+    latest = {
+        "antivirus": (
+            _latest_by_host(
+                db, models.AntivirusStatus, models.AntivirusStatus.last_updated, ids
+            ),
+            _av_state,
+        ),
+        "firewall": (
+            _latest_by_host(
+                db, models.FirewallStatus, models.FirewallStatus.last_updated, ids
+            ),
+            _fw_state,
+        ),
+        "compliance_scan": (
+            _latest_by_host(
+                db, models.HostComplianceScan, models.HostComplianceScan.scanned_at, ids
+            ),
+            _comp_state,
+        ),
+        "critical_vulnerabilities": (
+            _latest_by_host(
+                db,
+                models.HostVulnerabilityScan,
+                models.HostVulnerabilityScan.scanned_at,
+                ids,
+            ),
+            _vuln_state,
+        ),
+    }
+    coverage = [_coverage("fips", [_fips_state(h) for h in hosts])]
+    for key, (rows, state) in latest.items():
+        coverage.append(
+            _coverage(key, [state(rows.get(str(h.id)), now) for h in hosts])
         )
-
-    def vuln_state(h):
-        row = vuln.get(str(h.id))
-        if (
-            row is None
-            or now - row.scanned_at > VULN_MAX_AGE
-            or (row.risk_level or "").upper() == "UNKNOWN"
-        ):
-            return "unknown"  # no verdict is not a clean verdict
-        return "failing" if (row.critical_count or 0) > 0 else "ok"
-
-    return [
-        _coverage("fips", [_fips_state(h) for h in hosts]),
-        _coverage("antivirus", [av_state(h) for h in hosts]),
-        _coverage("firewall", [fw_state(h) for h in hosts]),
-        _coverage("compliance_scan", [comp_state(h) for h in hosts]),
-        _coverage("critical_vulnerabilities", [vuln_state(h) for h in hosts]),
-    ]
+    return coverage
 
 
 # -- assembly ---------------------------------------------------------------------------------
@@ -415,9 +428,28 @@ def _try(label: str, read: Callable[[], Any]):
         return None
 
 
+def _add(evidence: Dict[str, Any], domain: str, values) -> None:
+    evidence["domains"][domain] = {"available": True}
+    evidence["settings"].extend(_rows(domain, values))
+
+
+def _licensed(
+    evidence: Dict[str, Any], domain: str, engine_available: bool, read
+) -> None:
+    """A domain that needs its licensed engine.  Without the engine it cannot
+    exist here at all: "unavailable", said plainly -- never a passing zero."""
+    if not engine_available:
+        evidence["domains"][domain] = {"available": False}
+        return
+    values = _try(domain, read)
+    if values is not None:
+        _add(evidence, domain, values)
+
+
 def gather(db, tenant_id=None, now: Optional[datetime] = None) -> Dict[str, Any]:
     """The installation evidence for the tenant whose database is ``db``."""
-    now = now or datetime.utcnow()
+    # Naive UTC, like the timestamps it is compared against.
+    now = now or datetime.now(timezone.utc).replace(tzinfo=None)
     evidence: Dict[str, Any] = {"domains": {}, "settings": [], "coverage": []}
     main = sessionmaker(bind=dbm.get_engine())()
     try:
@@ -436,8 +468,7 @@ def gather(db, tenant_id=None, now: Optional[datetime] = None) -> Dict[str, Any]
         for domain, read in readers.items():
             values = _try(domain, read)
             if values is not None:
-                evidence["domains"][domain] = {"available": True}
-                evidence["settings"].extend(_rows(domain, values))
+                _add(evidence, domain, values)
         # _backup returns None for "cannot exist here" (unavailable); a read
         # that FAILS must be "missing" instead, so the two are kept apart.
         backup = _try("backup", lambda: {"values": _backup(tenant_id, now)})
@@ -445,26 +476,23 @@ def gather(db, tenant_id=None, now: Optional[datetime] = None) -> Dict[str, Any]
             evidence["domains"]["backup"] = {"available": backup["values"] is not None}
             if backup["values"] is not None:
                 evidence["settings"].extend(_rows("backup", backup["values"]))
-        # Without the licensed engine discovery cannot exist here at all:
-        # "unavailable", said plainly -- never a passing zero.
-        from backend.services import asset_discovery_shim  # noqa: PLC0415
+        from backend.services import (  # noqa: PLC0415
+            asset_discovery_shim,
+            malware_shim,
+        )
 
-        if not asset_discovery_shim.engine_available():
-            evidence["domains"]["network_discovery"] = {"available": False}
-        else:
-            discovery = _try("network_discovery", lambda: _network_discovery(db))
-            if discovery is not None:
-                evidence["domains"]["network_discovery"] = {"available": True}
-                evidence["settings"].extend(_rows("network_discovery", discovery))
-        from backend.services import malware_shim  # noqa: PLC0415
-
-        if not malware_shim.engine_available():
-            evidence["domains"]["malware"] = {"available": False}
-        else:
-            malware = _try("malware", lambda: _malware(db, now))
-            if malware is not None:
-                evidence["domains"]["malware"] = {"available": True}
-                evidence["settings"].extend(_rows("malware", malware))
+        _licensed(
+            evidence,
+            "network_discovery",
+            asset_discovery_shim.engine_available(),
+            lambda: _network_discovery(db),
+        )
+        _licensed(
+            evidence,
+            "malware",
+            malware_shim.engine_available(),
+            lambda: _malware(db, now),
+        )
         coverage = _try("fleet_coverage", lambda: _fleet_coverage(db, now))
         if coverage is not None:
             evidence["domains"]["fleet_coverage"] = {"available": True}

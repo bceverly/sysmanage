@@ -20,7 +20,7 @@ const Logout = () => {
             localStorage.removeItem("userid");
             localStorage.removeItem("bearer_token");
             clearPermissionsCache();
-            navigate("/login");
+            void navigate("/login");
 
             // Call logout endpoint for audit logging in background (fire and forget)
             // This doesn't block the user experience

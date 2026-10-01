@@ -55,7 +55,7 @@ const MaintenanceWindowCard: React.FC<Props> = ({ hostId }) => {
     }, [hostId]);
 
     useEffect(() => {
-        load();
+        void load();
     }, [load]);
 
     const submitOverride = async () => {

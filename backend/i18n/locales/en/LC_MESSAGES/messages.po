@@ -6191,3 +6191,6 @@ msgstr "macOS vulnerabilities by OS version, from NVD's affected-version data"
 
 #~ msgid "Deploying files to host"
 #~ msgstr "Deploying files to host"
+
+msgid "The single sign-on session has expired. Sign in again."
+msgstr "The single sign-on session has expired. Sign in again."

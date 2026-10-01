@@ -6351,3 +6351,6 @@ msgstr ""
 
 #~ msgid "Executing command sequence"
 #~ msgstr "कमांड अनुक्रम निष्पादित किया जा रहा है"
+
+msgid "The single sign-on session has expired. Sign in again."
+msgstr "सिंगल साइन-ऑन सत्र समाप्त हो गया है। फिर से साइन इन करें।"

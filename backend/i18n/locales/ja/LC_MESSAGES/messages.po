@@ -6090,3 +6090,6 @@ msgstr "OS バージョン別の macOS の脆弱性 (NVD の影響を受ける�
 
 #~ msgid "Executing command sequence"
 #~ msgstr "コマンドシーケンスを実行中"
+
+msgid "The single sign-on session has expired. Sign in again."
+msgstr "シングルサインオンのセッションの有効期限が切れました。もう一度サインインしてください。"

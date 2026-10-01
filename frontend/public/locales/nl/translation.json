@@ -2074,7 +2074,17 @@
     "submit": "Aanmelden",
     "title": "Inloggen",
     "username": "Gebruikersnaam of e-mail",
-    "verifying": "Verifiëren..."
+    "verifying": "Verifiëren...",
+    "sso": {
+      "or": "of",
+      "signInWith": "Aanmelden met {{name}}",
+      "signingIn": "U wordt aangemeld...",
+      "denied": "Uw identiteitsprovider heeft u aangemeld, maar er is geen actief SysManage-account voor die identiteit. Vraag een beheerder om u toegang te geven.",
+      "unavailable": "Single sign-on is niet beschikbaar op deze server.",
+      "expired": "De single sign-on-sessie is verlopen. Meld u opnieuw aan.",
+      "failed": "Single sign-on is niet voltooid. Probeer het opnieuw of meld u aan met uw wachtwoord.",
+      "backToLogin": "Terug naar aanmelden"
+    }
   },
   "logout": {
     "loading": "Uitloggen..."

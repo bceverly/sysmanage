@@ -365,9 +365,9 @@ const Reports: React.FC = () => {
   const handleViewReport = (reportId: string) => {
     // Audit log has its own dedicated viewer component
     if (reportId === 'audit-log') {
-      navigate('/reports/audit-log');
+      void navigate('/reports/audit-log');
     } else {
-      navigate(`/reports/${reportId}`);
+      void navigate(`/reports/${reportId}`);
     }
   };
 

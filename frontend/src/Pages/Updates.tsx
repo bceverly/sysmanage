@@ -102,7 +102,7 @@ const Updates: React.FC = () => {
         console.error('Failed to resolve software-update permission:', error);
       }
     };
-    checkPermission();
+    void checkPermission();
   }, []);
 
   const fetchUpdatesSummary = useCallback(async () => {
@@ -227,7 +227,7 @@ const Updates: React.FC = () => {
     setSelectedUpdates(new Set());
     
     // Trigger notification bell refresh after data refresh
-    triggerRefresh();
+    void triggerRefresh();
   }, [fetchUpdatesSummary, fetchHostsWithUpdates, fetchUpdates, triggerRefresh]);
 
   const handleManualRefresh = async () => {
@@ -235,7 +235,7 @@ const Updates: React.FC = () => {
   };
 
   useEffect(() => {
-    Promise.all([
+    void Promise.all([
       fetchUpdatesSummary(),
       fetchHostsWithUpdates(),
       fetchUpdates(0)
@@ -344,7 +344,7 @@ const Updates: React.FC = () => {
           setUpdateStatuses(newStatuses);
 
           // Trigger notification bell refresh when packages are updated
-          triggerRefresh();
+          void triggerRefresh();
 
           // Clear selections for completed updates after a delay
           setTimeout(() => clearCompletedSelections(newStatuses), 3000);
@@ -438,7 +438,9 @@ const Updates: React.FC = () => {
         const packageNames = hostUpdates.map((u: SelectedUpdate) => u.packageName);
         const packageManagers = Array.from(new Set<string>(hostUpdates.map((u: SelectedUpdate) => u.packageManager)));
         
-        await updatesService.executeUpdates([hostId], packageNames, packageManagers);
+        // One host at a time on purpose: a selection can span the fleet, and
+        // the first refusal should stop the rest rather than race them.
+        await updatesService.executeUpdates([hostId], packageNames, packageManagers); // NOSONAR - deliberate pacing (see above)
       }
       
       // Checkboxes are already cleared above

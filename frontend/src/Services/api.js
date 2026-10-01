@@ -111,7 +111,9 @@ async function handleResponseError(err) {
   // The login request itself failing (bad credentials) must short-circuit --
   // don't try the refresh-token path on it.  Match by suffix because the
   // login endpoint is now versioned (``/api/v1/login``), not ``/login``.
-  if (originalConfig.url?.endsWith("/login")) {
+  // The single sign-on hand-off is the same kind of request: a 401 there
+  // means the hand-off expired, and a refresh must not paper over it.
+  if (originalConfig.url?.endsWith("/login") || originalConfig.url?.endsWith("/sso/session")) {
     throw err;
   }
   console.debug('Token expired? err.response = ' + err.response);

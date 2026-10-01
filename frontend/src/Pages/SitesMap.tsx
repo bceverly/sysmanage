@@ -207,7 +207,7 @@ const SitesMap: React.FC = () => {
         event.preventDefault();
         const siteId = link.dataset.siteId;
         if (siteId) {
-          navigate(`/sites/${encodeURIComponent(siteId)}`);
+          void navigate(`/sites/${encodeURIComponent(siteId)}`);
         }
       }
     };

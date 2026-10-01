@@ -2074,7 +2074,17 @@
     "submit": "Se connecter",
     "title": "Connexion",
     "username": "Nom d'utilisateur ou e-mail",
-    "verifying": "Vérification..."
+    "verifying": "Vérification...",
+    "sso": {
+      "or": "ou",
+      "signInWith": "Se connecter avec {{name}}",
+      "signingIn": "Connexion en cours...",
+      "denied": "Votre fournisseur d'identité vous a authentifié, mais aucun compte SysManage actif n'existe pour cette identité. Demandez à un administrateur de vous donner accès.",
+      "unavailable": "L'authentification unique n'est pas disponible sur ce serveur.",
+      "expired": "La session d'authentification unique a expiré. Reconnectez-vous.",
+      "failed": "L'authentification unique n'a pas abouti. Réessayez ou connectez-vous avec votre mot de passe.",
+      "backToLogin": "Retour à la connexion"
+    }
   },
   "logout": {
     "loading": "Déconnexion en cours..."

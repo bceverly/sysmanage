@@ -125,7 +125,7 @@ const MirrorSetupStatusCard: React.FC<Props> = ({
   }, [hostId]);
 
   useEffect(() => {
-    fetchStatus();
+    void fetchStatus();
   }, [fetchStatus]);
 
   // Poll while a probe or install is in flight.
@@ -135,7 +135,7 @@ const MirrorSetupStatusCard: React.FC<Props> = ({
       status.last_check_message_id || status.last_install_message_id;
     if (!inFlight) return;
     const handle = setInterval(() => {
-      fetchStatus();
+      void fetchStatus();
       setNow(Date.now());
     }, POLL_MS);
     return () => clearInterval(handle);

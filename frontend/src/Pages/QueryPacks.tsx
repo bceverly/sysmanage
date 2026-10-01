@@ -176,7 +176,7 @@ const QueryPacks: React.FC = () => {
     }, [t]);
 
     useEffect(() => {
-        load();
+        void load();
     }, [load]);
 
     useEffect(() => {
@@ -202,7 +202,12 @@ const QueryPacks: React.FC = () => {
             setCanEdit(edit);
             setCanDelete(remove);
         };
-        check();
+        // Permissions unknown (the request failed) = no edit buttons.
+        check().catch(() => {
+            setCanAdd(false);
+            setCanEdit(false);
+            setCanDelete(false);
+        });
     }, []);
 
     const openCreate = () => {

@@ -234,7 +234,7 @@ const MapView: React.FC = () => {
         event.preventDefault();
         const hostId = link.dataset.hostId;
         if (hostId) {
-          navigate(`/hosts/${hostId}`);
+          void navigate(`/hosts/${hostId}`);
         }
       }
     };

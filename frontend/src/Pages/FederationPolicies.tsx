@@ -195,7 +195,7 @@ const FederationPolicies: React.FC = () => {
 
   useEffect(() => {
     setState((prev) => ({ ...prev, loading: true }));
-    fetchPolicies();
+    void fetchPolicies();
   }, [fetchPolicies]);
 
   // -------- Create flow --------------------------------------------------

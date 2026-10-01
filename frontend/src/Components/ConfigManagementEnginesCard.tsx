@@ -103,7 +103,7 @@ const ConfigManagementEnginesCard: React.FC<
   }, [hostId, t]);
 
   useEffect(() => {
-    if (hostId) load();
+    if (hostId) void load();
   }, [hostId, refreshTrigger, load]);
 
   const handleInstall = async (engine: string) => {

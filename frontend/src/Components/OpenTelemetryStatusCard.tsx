@@ -65,7 +65,7 @@ const OpenTelemetryStatusCard: React.FC = () => {
   }, [t]);
 
   useEffect(() => {
-    fetchStatus();
+    void fetchStatus();
   }, [fetchStatus]);
 
   if (loading) {

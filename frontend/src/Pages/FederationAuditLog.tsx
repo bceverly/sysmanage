@@ -135,7 +135,7 @@ const FederationAuditLog: React.FC = () => {
   }, [searchParams, page, pageSize, t]);
 
   useEffect(() => {
-    fetchData();
+    void fetchData();
   }, [fetchData]);
 
   // Whenever the URL filter params change externally (e.g. SiteDetail's

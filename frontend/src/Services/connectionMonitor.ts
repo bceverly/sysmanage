@@ -118,7 +118,7 @@ class ConnectionMonitor {
    */
   retryNow(): void {
     if (!this.status.isConnected && !this.isRetrying) {
-      this.performRetry();
+      void this.performRetry();
     }
   }
 
@@ -142,7 +142,7 @@ class ConnectionMonitor {
   private startHealthCheck(): void {
     this.stopHealthCheck();
     this.healthCheckTimeoutId = globalThis.setTimeout(() => {
-      this.performHealthCheck();
+      void this.performHealthCheck();
     }, this.options.healthCheckInterval * 1000);
   }
 
@@ -207,7 +207,7 @@ class ConnectionMonitor {
         this.notifyStatusChange();
         this.retryTimeoutId = globalThis.setTimeout(updateCountdown, 1000);
       } else {
-        this.performRetry();
+        void this.performRetry();
       }
     };
 

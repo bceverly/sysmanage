@@ -99,7 +99,7 @@ const ConfigDrift: React.FC = () => {
     }, [t]);
 
     useEffect(() => {
-        load();
+        void load();
     }, [load]);
 
     useEffect(() => {
@@ -112,7 +112,7 @@ const ConfigDrift: React.FC = () => {
                 console.error('Failed to resolve drift permissions:', err);
             }
         };
-        check();
+        void check();
     }, []);
 
     const openDetail = useCallback(async (row: ConfigDriftHostSummary) => {

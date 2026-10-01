@@ -144,7 +144,7 @@ const LiveQueryPanel: React.FC<Props> = ({ hostIds }) => {
                     .filter(Boolean),
             });
             setLive(created);
-            poll(created.id);
+            void poll(created.id);
         } catch (err) {
             setError(messageFrom(err, t('queryPacks.liveFailed', 'Could not run the query')));
             setRunning(false);

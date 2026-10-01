@@ -94,7 +94,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({ theme = 'dark' }) =
       
       // Only change language if it's different from current
       if (i18n.language !== finalLang) {
-        i18n.changeLanguage(finalLang);
+        void i18n.changeLanguage(finalLang);
       }
     };
 

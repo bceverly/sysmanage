@@ -29,7 +29,7 @@ export const useColumnVisibility = (gridIdentifier: string) => {
       }
     };
 
-    loadPreferences();
+    void loadPreferences();
   }, [gridIdentifier]);
 
   // Save preferences when they change

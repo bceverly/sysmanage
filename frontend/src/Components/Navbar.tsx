@@ -295,7 +295,7 @@ const Navbar = () => {
     };
 
     if (localStorage.getItem('bearer_token')) {
-      checkLicenseFeatures();
+      void checkLicenseFeatures();
     }
   }, []);
 
@@ -394,7 +394,7 @@ const Navbar = () => {
   // authoritative one: a stale bearer_token can linger in localStorage on
   // /login, so gating on the token alone would still leak the bar. All hooks
   // above run unconditionally, so this early return is safe.
-  const preAuthPaths = ['/login', '/reset-password', '/accept-invitation'];
+  const preAuthPaths = ['/login', '/login/sso', '/reset-password', '/accept-invitation'];
   if (preAuthPaths.includes(location.pathname) || menuVisible !== 'visible') {
     return null;
   }
