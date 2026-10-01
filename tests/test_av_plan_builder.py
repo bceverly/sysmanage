@@ -612,8 +612,19 @@ def test_freebsd_clamd_is_visible_to_rc_and_restarted_on_deploy():
     plan = build_deploy_plan({"platform": "FreeBSD"}, antivirus_package="clamav")
     clamd_conf = plan["files"][0]["content"]
     assert "PidFile /var/run/clamav/clamd.pid" in clamd_conf
-    argvs = [c["argv"] for c in plan["commands"]]
-    assert ["pkill", "-x", "clamd"] in argvs
+    stop = [
+        c["argv"] for c in plan["commands"] if "pkill -x clamd" in " ".join(c["argv"])
+    ]
+    # It must WAIT for the old clamd to exit: the start raced its shutdown,
+    # rc said "already running", and nothing was left (2026-09-30).
+    assert len(stop) == 1 and "while pgrep -x clamd" in stop[0][-1]
     other = build_deploy_plan({"platform": "OpenBSD"}, antivirus_package="clamav")
     assert "PidFile" not in other["files"][0]["content"]
-    assert ["pkill", "-x", "clamd"] not in [c["argv"] for c in other["commands"]]
+    assert not any("pkill" in " ".join(c["argv"]) for c in other["commands"])
+
+
+def test_clamav_logs_to_a_facility_syslog_keeps():
+    for plat in ("FreeBSD", "NetBSD", "Darwin"):
+        plan = build_deploy_plan({"platform": plat}, antivirus_package="clamav")
+        for f in plan["files"][:2]:
+            assert "LogFacility LOG_DAEMON" in f["content"], (plat, f["path"])

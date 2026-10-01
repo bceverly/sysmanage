@@ -10523,6 +10523,19 @@ can be RESTORED; system paths need explicit confirmation; nothing is deleted.
     hour), not a day-long wait.
   * **S6** docs + screenshots + i18n + validation on real hosts (EICAR + a
     marker rule on each platform with ClamAV).
+    **Real-host scan, 2026-10-01 (test set: EICAR, PHP web shell, coin-miner
+    config, clean file):** Linux, FreeBSD, OpenBSD, NetBSD, macOS -- BOTH
+    legs ran, all 6 rules loaded, all three samples caught by our rules and
+    EICAR also by ClamAV's own signatures (FreeBSD/macOS add a second,
+    `Eicar-Signature`), `clean.txt` never flagged. Windows (x13s, arm64):
+    Defender quarantined `eicar.com` and `shell.php` before the scan; ours
+    caught `miner.json`, which Defender missed. Found: FreeBSD's signature
+    leg fell back to one-shot because clamd was DEAD -- plan v5's
+    pkill-then-start raced the old clamd's shutdown (rc saw its pid file,
+    "already running") -- and ClamAV logged to LOCAL6, which stock syslog
+    drops. Plan v6 waits for the exit and logs to LOG_DAEMON. Still to do:
+    quarantine/restore round trip; Windows EICAR/web shell need a Defender
+    folder exclusion to reach our scanner.
 
 **Estimated Size:** ~2,500 lines
 

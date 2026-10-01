@@ -28,7 +28,10 @@ from typing import Any, Dict, List, Optional, Tuple
 # the portable zip, unpacked under a versioned lib folder, never Program Files).
 # 5 = 2026-09-30 (FreeBSD clamd.conf PidFile: the rc script decides "running"
 # from it, so clamd ran unseen -- status "not running", and stop impossible).
-PLAN_VERSION = 5
+# 6 = 2026-10-01 (wait for that clamd to EXIT before starting it: the start
+# raced its shutdown, rc said "already running", and none was left; syslog
+# facility LOG_DAEMON so ClamAV's messages land somewhere).
+PLAN_VERSION = 6
 
 # ---------------------------------------------------------------------------
 # Conf-file paths used by multiple distro layouts (deduped to satisfy
@@ -187,9 +190,18 @@ def _freebsd_stop_unseen_clamd() -> Dict[str, Any]:
     a redeploy needs anyway, since "start" leaves a running clamd on the old
     one."""
     return {
-        "argv": ["pkill", "-x", "clamd"],
+        # pkill only signals: wait (at most 30 s) for the old clamd to EXIT,
+        # or the start that follows sees its pid file, says "already running",
+        # and nothing is left once it finishes dying (FreeBSD, 2026-09-30).
+        "argv": [
+            "/bin/sh",
+            "-c",
+            "pkill -x clamd; i=0; "
+            "while pgrep -x clamd >/dev/null && [ $i -lt 30 ]; "
+            "do sleep 1; i=$((i+1)); done; true",
+        ],
         "sudo": True,
-        "timeout": 30,
+        "timeout": 60,
         "ignore_errors": True,
         "description": "restart clamd under the deployed configuration",
     }
@@ -208,6 +220,9 @@ def _bsd_clamd_conf(plat: str, host_info: Optional[Dict[str, Any]]) -> str:
         "# DO NOT EDIT MANUALLY - overwrites on every deploy",
         "",
         "LogSyslog yes",
+        # ClamAV's default facility is LOCAL6, which stock syslog configs
+        # (FreeBSD's included) route nowhere: its messages were simply lost.
+        "LogFacility LOG_DAEMON",
         f"LocalSocket {sock_dir}/clamd.sock",
         "FixStaleSocket yes",
         "ScanArchive yes",
@@ -275,6 +290,9 @@ def _basic_freshclam_conf(
         "# DO NOT EDIT MANUALLY - overwrites on every deploy",
         "",
         "LogSyslog yes",
+        # ClamAV's default facility is LOCAL6, which stock syslog configs
+        # (FreeBSD's included) route nowhere: its messages were simply lost.
+        "LogFacility LOG_DAEMON",
         "DatabaseMirror database.clamav.net",
         f"Checks {clamp_checks(checks_per_day)}",
     ]
