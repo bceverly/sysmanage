@@ -4446,25 +4446,26 @@
       "busy": "er wordt al een scan uitgevoerd",
       "invalidPath": "een pad is geen geldig absoluut pad",
       "notEquipped": "de agent kan niet scannen (geen ClamAV)",
-      "notFound": "host niet gevonden"
+      "notFound": "host niet gevonden",
+      "inactive": "de host is niet actief (of bestaat niet meer)"
     },
     "scan": {
       "completed": "Voltooid",
       "failed": "Mislukt",
       "queued": "In de wachtrij",
       "refused": "Geweigerd",
-      "timedOut": "Time-out"
+      "timedOut": "Time-out",
+      "waiting": "Wachtend"
     },
     "scanDialog": {
       "error": "De scans konden niet worden gestart.",
-      "hosts": "Hosts",
-      "paths": "Paden (één per regel)",
       "pathsHelp": "Laat leeg om de plekken te scannen waar op elk besturingssysteem gewoonlijk malware wordt gevonden.",
-      "queued": "{{count}} scans gestart",
       "start": "Scans starten",
       "title": "Hosts scannen op malware",
-      "queued_one": "{{count}} scan gestart",
-      "queued_other": "{{count}} scans gestart"
+      "concurrency": "Hosts die tegelijk scannen",
+      "jobStarted": "{{hosts}} hosts: {{sent}} worden nu gescand, {{waiting}} wachten op hun beurt",
+      "pathsUnix": "Paden voor Linux, BSD en macOS (één per regel)",
+      "pathsWindows": "Paden voor Windows (één per regel)"
     },
     "scanHosts": "Hosts scannen",
     "scans": {
@@ -4569,6 +4570,26 @@
       "removed_other": "{{count}} verwijderd",
       "imported_one": "{{title}} v{{version}} geïmporteerd met {{count}} regel.",
       "imported_other": "{{title}} v{{version}} geïmporteerd met {{count}} regels."
+    },
+    "jobs": {
+      "atOnce": "maximaal {{count}} tegelijk",
+      "by": "Door",
+      "done": "{{done}} van {{total}} voltooid",
+      "hostCount": "{{count}} hosts",
+      "inventoryCount": "{{count}} hostinventarissen",
+      "notScanned": "Niet gescand: {{count}}",
+      "progress": "Voortgang",
+      "started": "Gestart",
+      "tagCount": "{{count}} labels",
+      "targets": "Doelen",
+      "title": "Scantaken"
+    },
+    "targets": {
+      "all": "Alle hosts",
+      "chosen": "Kiezen op label, inventaris of host",
+      "hosts": "Afzonderlijke hosts",
+      "inventories": "Hostinventarissen",
+      "tags": "Labels"
     }
   }
 }

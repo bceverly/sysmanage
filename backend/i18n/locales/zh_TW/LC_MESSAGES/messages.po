@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 12:11-0400\n"
+"POT-Creation-Date: 2026-10-01 11:10-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -146,7 +146,7 @@ msgstr "取得 CA 憑證失敗：%s"
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:473
+#: backend/api/antivirus_status.py:208 backend/api/firewall_roles.py:473
 #: backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
@@ -168,7 +168,7 @@ msgstr "主機ID格式無效"
 #: backend/api/updates/query_routes.py:123
 #: backend/api/updates/execution_routes.py:268 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
-#: backend/api/antivirus_status.py:225 backend/api/child_host_utils.py:82
+#: backend/api/antivirus_status.py:220 backend/api/child_host_utils.py:82
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
 #: backend/api/repository_mirroring_setup.py:202
 #: backend/api/repository_mirroring_setup.py:263
@@ -202,6 +202,35 @@ msgstr "主機尚未被批准"
 #: backend/api/child_host_utils.py:33
 msgid "User not found"
 msgstr "找不到用戶"
+
+#: backend/api/malware.py:117 backend/api/file_watches.py:110
+#: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:93
+#: backend/api/query_packs.py:119 backend/api/config_mgmt_inventories.py:110
+#: backend/api/config_mgmt_remediation.py:137
+#: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
+#: backend/api/config_mgmt_profiles.py:136
+#: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:90
+#, python-format
+msgid "Permission denied: %s role required"
+msgstr "權限被拒絕：%s 角色所需"
+
+#: backend/api/malware.py:133
+msgid "Only an administrator can change the malware rule sets"
+msgstr "只有管理員才能變更惡意軟體規則集"
+
+#: backend/api/malware.py:139
+msgid ""
+"Malware rule sets are shared by every tenant; change them from the server "
+"scope, not from inside a tenant"
+msgstr "惡意軟體規則集由所有租戶共用；請在伺服器範圍內變更，而非在某個租戶內部變更"
+
+#: backend/api/malware.py:149
+msgid "Invalid id"
+msgstr "無效的 ID"
+
+#: backend/api/malware.py:403
+msgid "No imported rule set by that name"
+msgstr "沒有該名稱的已匯入規則集"
 
 #: backend/api/advisory_actions.py:68
 msgid "syspatch apply queued"
@@ -287,7 +316,7 @@ msgstr "處理程序狀態更新失敗：%s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:511 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:551 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "主機未註冊"
@@ -428,7 +457,7 @@ msgid "Missing request_id in installation_complete"
 msgstr "缺少request_id在安裝完成中"
 
 #: backend/api/handlers/software_package_handlers.py:953
-#: backend/api/agent.py:743 backend/api/packages.py:486
+#: backend/api/agent.py:751 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "未找到安裝請求：%s"
@@ -1564,17 +1593,6 @@ msgstr "無效的監控 ID 格式。"
 msgid "File watch not found"
 msgstr "未找到檔案監控。"
 
-#: backend/api/file_watches.py:110 backend/api/config_mgmt_drift.py:191
-#: backend/api/advisor.py:93 backend/api/query_packs.py:119
-#: backend/api/config_mgmt_inventories.py:110
-#: backend/api/config_mgmt_remediation.py:137
-#: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
-#: backend/api/config_mgmt_profiles.py:136
-#: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:90
-#, python-format
-msgid "Permission denied: %s role required"
-msgstr "權限被拒絕：%s 角色所需"
-
 #: backend/api/file_watches.py:123
 msgid "A watch list must contain at least one path."
 msgstr "監控清單必須包含至少一個路徑。"
@@ -2463,7 +2481,7 @@ msgstr "Agent 認證失敗：無效的主機 ID"
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "ID 為 %s 的主機尚未註冊。請重新註冊。"
 
-#: backend/api/message_handlers_core.py:245 backend/api/agent.py:645
+#: backend/api/message_handlers_core.py:245 backend/api/agent.py:653
 msgid "Host registration pending approval"
 msgstr "主機註冊待批准"
 
@@ -3124,13 +3142,21 @@ msgid ""
 "(auto_approve=%(auto_approve)s)"
 msgstr "主機 '%(fqdn)s' 通過註冊密鑰 '%(key_name)s' 加入（自動批准=%(auto_approve)s）"
 
-#: backend/api/agent_poll.py:110
+#: backend/api/agent_poll.py:119
 msgid "Missing agent connection token"
 msgstr "缺少代理連接令牌"
 
-#: backend/api/agent_poll.py:125
+#: backend/api/agent_poll.py:140
 msgid "Invalid or expired connection token"
 msgstr "無效或已過期的連接令牌"
+
+#: backend/api/agent_poll.py:166
+msgid "Host authentication failed for this poll"
+msgstr "此次輪詢的主機驗證失敗"
+
+#: backend/api/agent_poll.py:179
+msgid "Tenant routing is temporarily unavailable"
+msgstr "租戶路由暫時無法使用"
 
 #: backend/api/config_management.py:122
 msgid "Configuration pushed to all agents"
@@ -3193,30 +3219,30 @@ msgstr "此工作已經完成"
 msgid "Cancelled by an operator"
 msgstr "由操作員取消"
 
-#: backend/api/message_handlers.py:392
+#: backend/api/message_handlers.py:432
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "無法處理診斷結果：%s"
 
-#: backend/api/message_handlers.py:426
+#: backend/api/message_handlers.py:466
 msgid "Missing message_id in command acknowledgment"
 msgstr "缺少消息ID在命令確認中"
 
-#: backend/api/message_handlers.py:535
+#: backend/api/message_handlers.py:575
 msgid "Missing installation_id in package installation status"
 msgstr "缺少安裝ID在包安裝狀態中"
 
-#: backend/api/message_handlers.py:555
+#: backend/api/message_handlers.py:595
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "未找到 ID 為 %s 的安裝日誌條目"
 
-#: backend/api/message_handlers.py:601
+#: backend/api/message_handlers.py:641
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "代理程式 {hostname} 上的包安裝 {status}"
 
-#: backend/api/message_handlers.py:630
+#: backend/api/message_handlers.py:670
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "更新套件安裝狀態失敗：%s"
@@ -3888,80 +3914,80 @@ msgid ""
 "Triggered upgrade profile '%(profile_name)s' against %(host_count)d host(s)"
 msgstr "觸發升級配置文件 '%(profile_name)s' 對於 %(host_count)d 個主機"
 
-#: backend/api/agent.py:64
+#: backend/api/agent.py:70
 msgid "Rate limit exceeded"
 msgstr "超出速率限制"
 
-#: backend/api/agent.py:124
+#: backend/api/agent.py:132
 #, python-format
 msgid "Agent WebSocket authentication failed from %s"
 msgstr "來自 %s 的 Agent WebSocket 身份驗證失敗"
 
-#: backend/api/agent.py:134
+#: backend/api/agent.py:142
 #, python-format
 msgid "Authentication failed: %s"
 msgstr "認證失敗：%s"
 
-#: backend/api/agent.py:150
+#: backend/api/agent.py:158
 #, python-format
 msgid "Agent WebSocket connection attempted without token from %s"
 msgstr "來自 %s 的 Agent WebSocket 連接嘗試未帶令牌"
 
-#: backend/api/agent.py:159
+#: backend/api/agent.py:167
 msgid "Authentication token required"
 msgstr "需要認證權杖"
 
-#: backend/api/agent.py:254
+#: backend/api/agent.py:262
 msgid "Message failed security validation"
 msgstr "訊息安全驗證失敗"
 
-#: backend/api/agent.py:283
+#: backend/api/agent.py:291
 msgid "Message must be valid JSON"
 msgstr "訊息必須是有效的JSON"
 
-#: backend/api/agent.py:519
+#: backend/api/agent.py:527
 msgid "Agent message validation failed: missing hostname and host_id"
 msgstr "Agent 消息驗證失敗：缺少 hostname 和 host_id"
 
-#: backend/api/agent.py:538
+#: backend/api/agent.py:546
 #, python-brace-format
 msgid "Agent message from unregistered host: {hostname}"
 msgstr "來自未註冊主機的 Agent 消息：{hostname}"
 
-#: backend/api/agent.py:555
+#: backend/api/agent.py:563
 #, python-brace-format
 msgid "Agent message from unapproved host: {hostname}"
 msgstr "來自未批准主機的 Agent 消息：{hostname}"
 
-#: backend/api/agent.py:587
+#: backend/api/agent.py:595
 msgid "Message must include hostname or host_id for host validation"
 msgstr "消息必須包含主機名或host_id以進行主機驗證"
 
-#: backend/api/agent.py:605
+#: backend/api/agent.py:613
 msgid "Host ID no longer valid - please re-register"
 msgstr "主機 ID 已不再有效 - 請重新註冊"
 
-#: backend/api/agent.py:617
+#: backend/api/agent.py:625
 msgid "Host ID and hostname mismatch - please re-register"
 msgstr "主機 ID 和主機名不匹配 - 請重新註冊"
 
-#: backend/api/agent.py:634
+#: backend/api/agent.py:642
 msgid "Host must register before sending inventory data"
 msgstr "主機必須先註冊才能發送存貨數據"
 
-#: backend/api/agent.py:705
+#: backend/api/agent.py:713
 msgid "Missing or invalid authorization header"
 msgstr "缺少或無效的授權頭信息"
 
-#: backend/api/agent.py:730
+#: backend/api/agent.py:738
 msgid "Invalid host authentication"
 msgstr "主機驗證無效"
 
-#: backend/api/agent.py:771 backend/api/packages.py:498
+#: backend/api/agent.py:779 backend/api/packages.py:498
 msgid "Installation completion recorded"
 msgstr "安裝完成記錄"
 
-#: backend/api/agent.py:777 backend/api/error_constants.py:193
+#: backend/api/agent.py:785 backend/api/error_constants.py:193
 msgid "Internal server error"
 msgstr "內部伺服器錯誤"
 
@@ -4065,53 +4091,53 @@ msgstr "無效的秘密ID"
 msgid "OpenBAO is not running"
 msgstr "OpenBAO未運行"
 
-#: backend/api/antivirus_status.py:136
+#: backend/api/antivirus_status.py:131
 #, python-format
 msgid "Failed to retrieve antivirus status: %s"
 msgstr "無法取得防毒狀態：%s"
 
-#: backend/api/antivirus_status.py:167
+#: backend/api/antivirus_status.py:162
 msgid "Permission denied: DEPLOY_ANTIVIRUS role required"
 msgstr "權限 denied: DEPLOY_ANTIVIRUS 角色所需"
 
-#: backend/api/antivirus_status.py:247
+#: backend/api/antivirus_status.py:232
 msgid "Unable to determine host operating system"
 msgstr "無法確定主機的操作系統"
 
-#: backend/api/antivirus_status.py:269
+#: backend/api/antivirus_status.py:246
 #, python-format
 msgid "No antivirus default configured for OS: %s"
 msgstr "沒有為此操作系統配置防病毒默認值：%s"
 
-#: backend/api/antivirus_status.py:335
+#: backend/api/antivirus_status.py:314
 #, python-format
 msgid "Antivirus deployment initiated for all %d hosts"
 msgstr "已啟動對所有 %d 個主機的防病毒部署"
 
-#: backend/api/antivirus_status.py:338
+#: backend/api/antivirus_status.py:317
 #, python-format
 msgid ""
 "Antivirus deployment initiated for %(success_count)d of %(total_count)d "
 "hosts"
 msgstr "已為 %(success_count)d of %(total_count)d 主機部署防毒軟件"
 
-#: backend/api/antivirus_status.py:344
+#: backend/api/antivirus_status.py:323
 msgid "Antivirus deployment failed for all hosts"
 msgstr "所有主機上的防病毒部署失敗"
 
-#: backend/api/antivirus_status.py:412
+#: backend/api/antivirus_status.py:394
 msgid "Antivirus enable command sent successfully"
 msgstr "成功發送啟用防病毒命令"
 
-#: backend/api/antivirus_status.py:476
+#: backend/api/antivirus_status.py:461
 msgid "Antivirus disable command sent successfully"
 msgstr "成功發送禁用防病毒命令"
 
-#: backend/api/antivirus_status.py:551
+#: backend/api/antivirus_status.py:539
 msgid "Antivirus remove command sent successfully"
 msgstr "成功發送刪除防病毒命令"
 
-#: backend/api/antivirus_status.py:620
+#: backend/api/antivirus_status.py:608
 #, python-format
 msgid "Failed to retrieve antivirus coverage: %s"
 msgstr "無法檢索防毒覆蓋範圍：%s"
@@ -5081,6 +5107,8 @@ msgid "Unknown device status: %s"
 msgstr "未知的裝置狀態：%s"
 
 #: backend/services/asset_discovery_review.py:342
+#: backend/services/malware_quarantine.py:136
+#: backend/services/malware_review.py:186
 msgid "A reason of at least 3 characters is required"
 msgstr "需要至少 3 個字元的原因"
 
@@ -5106,6 +5134,18 @@ msgstr "找不到排除項目"
 msgid "This exclusion was already revoked"
 msgstr "此排除項目已被撤銷"
 
+#: backend/services/malware_rulesets.py:158
+msgid "A rule set name may use only a-z, 0-9 and hyphens"
+msgstr "規則集名稱只能使用 a-z, 0-9 和連字號"
+
+#: backend/services/malware_rulesets.py:162
+msgid "That name belongs to a curated rule set"
+msgstr "該名稱屬於精選規則集"
+
+#: backend/services/malware_rulesets.py:166
+msgid "None of these rules can run under ClamAV"
+msgstr "這些規則都無法在 ClamAV 下執行"
+
 #: backend/services/config_mgmt_dispatch.py:58
 #, python-format
 msgid "Profile '%s' does not contain valid JSON"
@@ -5116,10 +5156,36 @@ msgstr "配置文件 '%s' 不包含有效的 JSON"
 msgid "Profile '%s' must contain a JSON array of DSC resources"
 msgstr "配置文件 '%s' 必須包含一組 DSC 資源的 JSON 陣列"
 
+#: backend/services/malware_scan_jobs.py:144
+#: backend/services/malware_scans.py:162
+#: backend/services/malware_quarantine.py:129
+msgid "Malware detection is not available"
+msgstr "惡意軟體偵測無法使用"
+
+#: backend/services/malware_scan_jobs.py:149
+msgid "The targets do not name any active host"
+msgstr "目標中沒有任何使用中的主機"
+
+#: backend/services/malware_scan_jobs.py:153
+msgid "At most 10000 hosts can be scanned in one job"
+msgstr "一個工作最多可掃描 10000 台主機"
+
 #: backend/services/reboot_orchestration_service.py:253
 #, python-format
 msgid "%(failed_count)d of %(total_count)d child host(s) failed to restart"
 msgstr "%(failed_count)d of %(total_count)d 子主機重新啟動失敗"
+
+#: backend/services/malware_scans.py:165
+msgid "Choose at least one host to scan"
+msgstr "請至少選擇一台要掃描的主機"
+
+#: backend/services/malware_scans.py:168
+msgid "At most 500 hosts can be scanned in one request"
+msgstr "一次請求最多可掃描 500 台主機"
+
+#: backend/services/malware_quarantine.py:132
+msgid "Unknown action"
+msgstr "未知的動作"
 
 #: backend/services/config_mgmt_files.py:156
 msgid ""
@@ -5192,20 +5258,30 @@ msgstr "磁盤已插入但無法讀取"
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "設備上沒有 ISO 文件系統 (fstype=%s)"
 
-#: backend/services/audit_service.py:191
+#: backend/services/audit_service.py:194
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "已創建 {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:239
+#: backend/services/audit_service.py:242
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "已更新 {entity_type} '{entity_name}' 的內容"
 
-#: backend/services/audit_service.py:287
+#: backend/services/audit_service.py:290
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "已刪除 {entity_type} '{entity_name}'"
+
+#: backend/services/malware_review.py:66
+#, python-format
+msgid "Unknown finding status: %s"
+msgstr "未知的偵測結果狀態: %s"
+
+#: backend/services/malware_review.py:183
+#, python-format
+msgid "That decision cannot be made here: %s"
+msgstr "無法在此作出該處置: %s"
 
 #: backend/services/vault_service.py:219
 msgid "Vault is not enabled"
@@ -5266,70 +5342,6 @@ msgstr "NetBSD pkgsrc 套件弱點（pkg_admin audit 讀取的資料）"
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "依作業系統版本列出的 macOS 弱點（來自 NVD 的受影響版本資料）"
-
-#: backend/api/agent_poll.py:166
-msgid "Host authentication failed for this poll"
-msgstr "此次輪詢的主機驗證失敗"
-
-#: backend/api/agent_poll.py:179
-msgid "Tenant routing is temporarily unavailable"
-msgstr "租戶路由暫時無法使用"
-
-#: backend/api/malware.py:82
-msgid "Invalid id"
-msgstr "無效的 ID"
-
-#: backend/services/malware_quarantine.py:132
-msgid "Unknown action"
-msgstr "未知的動作"
-
-#: backend/services/malware_review.py:178
-#, python-format
-msgid "That decision cannot be made here: %s"
-msgstr "無法在此作出該處置: %s"
-
-#: backend/services/malware_review.py:65
-#, python-format
-msgid "Unknown finding status: %s"
-msgstr "未知的偵測結果狀態: %s"
-
-#: backend/services/malware_scans.py:142 backend/services/malware_quarantine.py:129
-msgid "Malware detection is not available"
-msgstr "惡意軟體偵測無法使用"
-
-#: backend/services/malware_scans.py:145
-msgid "Choose at least one host to scan"
-msgstr "請至少選擇一台要掃描的主機"
-
-#: backend/services/malware_scans.py:148
-msgid "At most 500 hosts can be scanned in one request"
-msgstr "一次請求最多可掃描 500 台主機"
-
-#: backend/api/malware.py:344
-msgid "No imported rule set by that name"
-msgstr "沒有該名稱的已匯入規則集"
-
-#: backend/api/malware.py:98
-msgid "Only an administrator can change the malware rule sets"
-msgstr "只有管理員才能變更惡意軟體規則集"
-
-#: backend/api/malware.py:104
-msgid ""
-"Malware rule sets are shared by every tenant; change them from the server "
-"scope, not from inside a tenant"
-msgstr "惡意軟體規則集由所有租戶共用；請在伺服器範圍內變更，而非在某個租戶內部變更"
-
-#: backend/services/malware_rulesets.py:158
-msgid "A rule set name may use only a-z, 0-9 and hyphens"
-msgstr "規則集名稱只能使用 a-z, 0-9 和連字號"
-
-#: backend/services/malware_rulesets.py:162
-msgid "That name belongs to a curated rule set"
-msgstr "該名稱屬於精選規則集"
-
-#: backend/services/malware_rulesets.py:166
-msgid "None of these rules can run under ClamAV"
-msgstr "這些規則都無法在 ClamAV 下執行"
 
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "電子郵件服務已停用。請在設定檔中啟用。"

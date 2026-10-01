@@ -4446,25 +4446,26 @@
       "busy": "已有掃描正在執行",
       "invalidPath": "有路徑不是有效的絕對路徑",
       "notEquipped": "代理無法掃描（沒有 ClamAV）",
-      "notFound": "找不到主機"
+      "notFound": "找不到主機",
+      "inactive": "主機未處於作用中狀態（或已不存在）"
     },
     "scan": {
       "completed": "已完成",
       "failed": "失敗",
       "queued": "已排入佇列",
       "refused": "已拒絕",
-      "timedOut": "已逾時"
+      "timedOut": "已逾時",
+      "waiting": "等待中"
     },
     "scanDialog": {
       "error": "無法啟動掃描。",
-      "hosts": "主機",
-      "paths": "路徑（每行一個）",
       "pathsHelp": "留空則掃描各作業系統上常發現惡意軟體的位置。",
-      "queued": "已啟動 {{count}} 項掃描",
       "start": "開始掃描",
       "title": "掃描主機中的惡意軟體",
-      "queued_one": "已啟動 {{count}} 項掃描",
-      "queued_other": "已啟動 {{count}} 項掃描"
+      "concurrency": "同時掃描的主機數",
+      "jobStarted": "{{hosts}} 台主機：{{sent}} 台正在掃描，{{waiting}} 台等待輪到",
+      "pathsUnix": "Linux、BSD 和 macOS 路徑（每行一個）",
+      "pathsWindows": "Windows 路徑（每行一個）"
     },
     "scanHosts": "掃描主機",
     "scans": {
@@ -4569,6 +4570,26 @@
       "removed_other": "已移除 {{count}} 條",
       "imported_one": "已匯入 {{title}} v{{version}}，共 {{count}} 條規則。",
       "imported_other": "已匯入 {{title}} v{{version}}，共 {{count}} 條規則。"
+    },
+    "jobs": {
+      "atOnce": "最多同時 {{count}} 台",
+      "by": "發起人",
+      "done": "已完成 {{done}}/{{total}}",
+      "hostCount": "{{count}} 台主機",
+      "inventoryCount": "{{count}} 個主機清單",
+      "notScanned": "未掃描：{{count}}",
+      "progress": "進度",
+      "started": "開始時間",
+      "tagCount": "{{count}} 個標籤",
+      "targets": "目標",
+      "title": "掃描作業"
+    },
+    "targets": {
+      "all": "所有主機",
+      "chosen": "依標籤、主機清單或主機選擇",
+      "hosts": "個別主機",
+      "inventories": "主機清單",
+      "tags": "標籤"
     }
   }
 }

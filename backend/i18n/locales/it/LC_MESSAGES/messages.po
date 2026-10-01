@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 12:11-0400\n"
+"POT-Creation-Date: 2026-10-01 11:10-0400\n"
 "Language: it\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -146,7 +146,7 @@ msgstr "Fallimento nell'ottenere il certificato CA: %s"
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:473
+#: backend/api/antivirus_status.py:208 backend/api/firewall_roles.py:473
 #: backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
@@ -168,7 +168,7 @@ msgstr "Formato di ID host non valido"
 #: backend/api/updates/query_routes.py:123
 #: backend/api/updates/execution_routes.py:268 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
-#: backend/api/antivirus_status.py:225 backend/api/child_host_utils.py:82
+#: backend/api/antivirus_status.py:220 backend/api/child_host_utils.py:82
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
 #: backend/api/repository_mirroring_setup.py:202
 #: backend/api/repository_mirroring_setup.py:263
@@ -202,6 +202,37 @@ msgstr "Il sistema host non è approvato"
 #: backend/api/child_host_utils.py:33
 msgid "User not found"
 msgstr "Utente non trovato"
+
+#: backend/api/malware.py:117 backend/api/file_watches.py:110
+#: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:93
+#: backend/api/query_packs.py:119 backend/api/config_mgmt_inventories.py:110
+#: backend/api/config_mgmt_remediation.py:137
+#: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
+#: backend/api/config_mgmt_profiles.py:136
+#: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:90
+#, python-format
+msgid "Permission denied: %s role required"
+msgstr "Permesso negato: ruolo %s richiesto"
+
+#: backend/api/malware.py:133
+msgid "Only an administrator can change the malware rule sets"
+msgstr "Solo un amministratore può modificare i set di regole per il malware"
+
+#: backend/api/malware.py:139
+msgid ""
+"Malware rule sets are shared by every tenant; change them from the server "
+"scope, not from inside a tenant"
+msgstr ""
+"I set di regole per il malware sono condivisi da tutti i tenant; modificali "
+"dall'ambito del server, non dall'interno di un tenant"
+
+#: backend/api/malware.py:149
+msgid "Invalid id"
+msgstr "ID non valido"
+
+#: backend/api/malware.py:403
+msgid "No imported rule set by that name"
+msgstr "Nessun set di regole importato con questo nome"
 
 #: backend/api/advisory_actions.py:68
 msgid "syspatch apply queued"
@@ -293,7 +324,7 @@ msgstr ""
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:511 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:551 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "Host non registrato"
@@ -437,7 +468,7 @@ msgid "Missing request_id in installation_complete"
 msgstr "Manca request_id in installation_complete"
 
 #: backend/api/handlers/software_package_handlers.py:953
-#: backend/api/agent.py:743 backend/api/packages.py:486
+#: backend/api/agent.py:751 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "Richiesta di installazione non trovata: %s"
@@ -1659,17 +1690,6 @@ msgstr "Formato ID di monitoraggio non valido"
 msgid "File watch not found"
 msgstr "Non è stato trovato un monitoraggio di file"
 
-#: backend/api/file_watches.py:110 backend/api/config_mgmt_drift.py:191
-#: backend/api/advisor.py:93 backend/api/query_packs.py:119
-#: backend/api/config_mgmt_inventories.py:110
-#: backend/api/config_mgmt_remediation.py:137
-#: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
-#: backend/api/config_mgmt_profiles.py:136
-#: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:90
-#, python-format
-msgid "Permission denied: %s role required"
-msgstr "Permesso negato: ruolo %s richiesto"
-
 #: backend/api/file_watches.py:123
 msgid "A watch list must contain at least one path."
 msgstr "Una lista di monitoraggio deve contenere almeno un percorso."
@@ -2594,7 +2614,7 @@ msgstr "L'autenticazione dell'agente ha fallito: ID host non valido"
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "Il sistema host con ID %s non è iscritto. Si prega di riiscrivere."
 
-#: backend/api/message_handlers_core.py:245 backend/api/agent.py:645
+#: backend/api/message_handlers_core.py:245 backend/api/agent.py:653
 msgid "Host registration pending approval"
 msgstr "Iscrizione del sistema host in sospeso per approvazione"
 
@@ -3304,13 +3324,21 @@ msgstr ""
 "L'host '%(fqdn)s' è stato iscritto tramite chiave di registrazione "
 "'%(key_name)s' (auto_approve=%(auto_approve)s)"
 
-#: backend/api/agent_poll.py:110
+#: backend/api/agent_poll.py:119
 msgid "Missing agent connection token"
 msgstr "Manca il token di connessione dell'agente"
 
-#: backend/api/agent_poll.py:125
+#: backend/api/agent_poll.py:140
 msgid "Invalid or expired connection token"
 msgstr "Token di connessione non valido o scaduto"
+
+#: backend/api/agent_poll.py:166
+msgid "Host authentication failed for this poll"
+msgstr "Autenticazione dell'host non riuscita per questo polling"
+
+#: backend/api/agent_poll.py:179
+msgid "Tenant routing is temporarily unavailable"
+msgstr "Il routing dei tenant è temporaneamente non disponibile"
 
 #: backend/api/config_management.py:122
 msgid "Configuration pushed to all agents"
@@ -3373,30 +3401,30 @@ msgstr "Questo lavoro si è già concluso"
 msgid "Cancelled by an operator"
 msgstr "Annullato da un operatore"
 
-#: backend/api/message_handlers.py:392
+#: backend/api/message_handlers.py:432
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "Impossibile elaborare il risultato diagnostico: %s"
 
-#: backend/api/message_handlers.py:426
+#: backend/api/message_handlers.py:466
 msgid "Missing message_id in command acknowledgment"
 msgstr "Mancante message_id nell'accettazione del comando"
 
-#: backend/api/message_handlers.py:535
+#: backend/api/message_handlers.py:575
 msgid "Missing installation_id in package installation status"
 msgstr "Mancante installation_id nello stato di installazione del pacchetto"
 
-#: backend/api/message_handlers.py:555
+#: backend/api/message_handlers.py:595
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "Voce non trovata nel registro delle installazioni per ID: %s"
 
-#: backend/api/message_handlers.py:601
+#: backend/api/message_handlers.py:641
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "Installazione del pacchetto {status} sull'agente {hostname}"
 
-#: backend/api/message_handlers.py:630
+#: backend/api/message_handlers.py:670
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "Impossibile aggiornare lo stato dell'installazione dei pacchetti: %s"
@@ -4148,85 +4176,85 @@ msgstr ""
 "Profilo di aggiornamento '%(profile_name)s' attivato contro %(host_count)d "
 "host(s)"
 
-#: backend/api/agent.py:64
+#: backend/api/agent.py:70
 msgid "Rate limit exceeded"
 msgstr "Limite di velocità superato"
 
-#: backend/api/agent.py:124
+#: backend/api/agent.py:132
 #, python-format
 msgid "Agent WebSocket authentication failed from %s"
 msgstr "Autenticazione WebSocket dell'agente fallita da %s"
 
-#: backend/api/agent.py:134
+#: backend/api/agent.py:142
 #, python-format
 msgid "Authentication failed: %s"
 msgstr "Autenticazione fallita: %s"
 
-#: backend/api/agent.py:150
+#: backend/api/agent.py:158
 #, python-format
 msgid "Agent WebSocket connection attempted without token from %s"
 msgstr "Connessione WebSocket dell'agente tentata senza token da %s"
 
-#: backend/api/agent.py:159
+#: backend/api/agent.py:167
 msgid "Authentication token required"
 msgstr "Token di autenticazione richiesto"
 
-#: backend/api/agent.py:254
+#: backend/api/agent.py:262
 msgid "Message failed security validation"
 msgstr "Il messaggio ha fallito la validazione di sicurezza"
 
-#: backend/api/agent.py:283
+#: backend/api/agent.py:291
 msgid "Message must be valid JSON"
 msgstr "Il messaggio deve essere un JSON valido"
 
-#: backend/api/agent.py:519
+#: backend/api/agent.py:527
 msgid "Agent message validation failed: missing hostname and host_id"
 msgstr ""
 "Validazione del messaggio dell'agente fallita: manca hostname e host_id"
 
-#: backend/api/agent.py:538
+#: backend/api/agent.py:546
 #, python-brace-format
 msgid "Agent message from unregistered host: {hostname}"
 msgstr "Messaggio di agente dall'host non registrato: {hostname}"
 
-#: backend/api/agent.py:555
+#: backend/api/agent.py:563
 #, python-brace-format
 msgid "Agent message from unapproved host: {hostname}"
 msgstr "Messaggio di agente dall'host non approvato: {hostname}"
 
-#: backend/api/agent.py:587
+#: backend/api/agent.py:595
 msgid "Message must include hostname or host_id for host validation"
 msgstr ""
 "Il messaggio deve includere il nome del host o l'host_id per la validazione "
 "del host"
 
-#: backend/api/agent.py:605
+#: backend/api/agent.py:613
 msgid "Host ID no longer valid - please re-register"
 msgstr "L'ID del sistema host non è valido - si prega di riiscrivere"
 
-#: backend/api/agent.py:617
+#: backend/api/agent.py:625
 msgid "Host ID and hostname mismatch - please re-register"
 msgstr ""
 "ID del sistema host non corrisponde al nome host - si prega di riiscrivere"
 
-#: backend/api/agent.py:634
+#: backend/api/agent.py:642
 msgid "Host must register before sending inventory data"
 msgstr ""
 "Il sistema host deve iscriversi prima di inviare i dati dell'inventario"
 
-#: backend/api/agent.py:705
+#: backend/api/agent.py:713
 msgid "Missing or invalid authorization header"
 msgstr "Mancante o invalido header di autorizzazione"
 
-#: backend/api/agent.py:730
+#: backend/api/agent.py:738
 msgid "Invalid host authentication"
 msgstr "Autenticazione host non valida"
 
-#: backend/api/agent.py:771 backend/api/packages.py:498
+#: backend/api/agent.py:779 backend/api/packages.py:498
 msgid "Installation completion recorded"
 msgstr "Registrazione della conclusione dell'installazione"
 
-#: backend/api/agent.py:777 backend/api/error_constants.py:193
+#: backend/api/agent.py:785 backend/api/error_constants.py:193
 msgid "Internal server error"
 msgstr "Errore interno del server"
 
@@ -4332,30 +4360,30 @@ msgstr "ID segreto non valido"
 msgid "OpenBAO is not running"
 msgstr "OpenBAO non è in esecuzione"
 
-#: backend/api/antivirus_status.py:136
+#: backend/api/antivirus_status.py:131
 #, python-format
 msgid "Failed to retrieve antivirus status: %s"
 msgstr "Impossibile recuperare lo stato dell'antivirus: %s"
 
-#: backend/api/antivirus_status.py:167
+#: backend/api/antivirus_status.py:162
 msgid "Permission denied: DEPLOY_ANTIVIRUS role required"
 msgstr "Permesso negato: richiesta del ruolo DEPLOY_ANTIVIRUS"
 
-#: backend/api/antivirus_status.py:247
+#: backend/api/antivirus_status.py:232
 msgid "Unable to determine host operating system"
 msgstr "Impossibile determinare il sistema operativo dell'host"
 
-#: backend/api/antivirus_status.py:269
+#: backend/api/antivirus_status.py:246
 #, python-format
 msgid "No antivirus default configured for OS: %s"
 msgstr "Nessuna predefinita antivirus configurata per OS: %s"
 
-#: backend/api/antivirus_status.py:335
+#: backend/api/antivirus_status.py:314
 #, python-format
 msgid "Antivirus deployment initiated for all %d hosts"
 msgstr "Iniziativa dell'installazione antivirus per tutti i %d host"
 
-#: backend/api/antivirus_status.py:338
+#: backend/api/antivirus_status.py:317
 #, python-format
 msgid ""
 "Antivirus deployment initiated for %(success_count)d of %(total_count)d "
@@ -4364,23 +4392,23 @@ msgstr ""
 "Iniziativa della distribuzione antivirus per %(success_count)d di "
 "%(total_count)d host"
 
-#: backend/api/antivirus_status.py:344
+#: backend/api/antivirus_status.py:323
 msgid "Antivirus deployment failed for all hosts"
 msgstr "Installazione antivirus fallita su tutti gli host"
 
-#: backend/api/antivirus_status.py:412
+#: backend/api/antivirus_status.py:394
 msgid "Antivirus enable command sent successfully"
 msgstr "Comando di abilitazione antivirus inviato con successo"
 
-#: backend/api/antivirus_status.py:476
+#: backend/api/antivirus_status.py:461
 msgid "Antivirus disable command sent successfully"
 msgstr "Comando di disabilitazione antivirus inviato con successo"
 
-#: backend/api/antivirus_status.py:551
+#: backend/api/antivirus_status.py:539
 msgid "Antivirus remove command sent successfully"
 msgstr "Comando di rimozione antivirus inviato con successo"
 
-#: backend/api/antivirus_status.py:620
+#: backend/api/antivirus_status.py:608
 #, python-format
 msgid "Failed to retrieve antivirus coverage: %s"
 msgstr "Impossibile recuperare la copertura antivirus: %s"
@@ -5422,6 +5450,8 @@ msgid "Unknown device status: %s"
 msgstr "Stato del dispositivo sconosciuto: %s"
 
 #: backend/services/asset_discovery_review.py:342
+#: backend/services/malware_quarantine.py:136
+#: backend/services/malware_review.py:186
 msgid "A reason of at least 3 characters is required"
 msgstr "È richiesto un motivo di almeno 3 caratteri"
 
@@ -5447,6 +5477,18 @@ msgstr "Esclusione non trovata"
 msgid "This exclusion was already revoked"
 msgstr "Questa esclusione è già stata revocata"
 
+#: backend/services/malware_rulesets.py:158
+msgid "A rule set name may use only a-z, 0-9 and hyphens"
+msgstr "Il nome di un set di regole può contenere solo a-z, 0-9 e trattini"
+
+#: backend/services/malware_rulesets.py:162
+msgid "That name belongs to a curated rule set"
+msgstr "Questo nome appartiene a un set di regole curato"
+
+#: backend/services/malware_rulesets.py:166
+msgid "None of these rules can run under ClamAV"
+msgstr "Nessuna di queste regole può essere eseguita con ClamAV"
+
 #: backend/services/config_mgmt_dispatch.py:58
 #, python-format
 msgid "Profile '%s' does not contain valid JSON"
@@ -5457,12 +5499,38 @@ msgstr "Profilo '%s' non contiene un JSON valido"
 msgid "Profile '%s' must contain a JSON array of DSC resources"
 msgstr "Il profilo '%s' deve contenere un array JSON di risorse DSC"
 
+#: backend/services/malware_scan_jobs.py:144
+#: backend/services/malware_scans.py:162
+#: backend/services/malware_quarantine.py:129
+msgid "Malware detection is not available"
+msgstr "Il rilevamento del malware non è disponibile"
+
+#: backend/services/malware_scan_jobs.py:149
+msgid "The targets do not name any active host"
+msgstr "Le destinazioni non indicano alcun host attivo"
+
+#: backend/services/malware_scan_jobs.py:153
+msgid "At most 10000 hosts can be scanned in one job"
+msgstr "Al massimo 10000 host possono essere analizzati in un processo"
+
 #: backend/services/reboot_orchestration_service.py:253
 #, python-format
 msgid "%(failed_count)d of %(total_count)d child host(s) failed to restart"
 msgstr ""
 "%(failed_count)d di %(total_count)d figlio host non sono riusciti a "
 "riavviarsi"
+
+#: backend/services/malware_scans.py:165
+msgid "Choose at least one host to scan"
+msgstr "Scegli almeno un host da scansionare"
+
+#: backend/services/malware_scans.py:168
+msgid "At most 500 hosts can be scanned in one request"
+msgstr "È possibile scansionare al massimo 500 host in una richiesta"
+
+#: backend/services/malware_quarantine.py:132
+msgid "Unknown action"
+msgstr "Azione sconosciuta"
 
 #: backend/services/config_mgmt_files.py:156
 msgid ""
@@ -5545,20 +5613,30 @@ msgstr "disco presente ma nessun disco leggibile inserito"
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "nessun filesystem ISO sul dispositivo (fstype=%s)"
 
-#: backend/services/audit_service.py:191
+#: backend/services/audit_service.py:194
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "Creato {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:239
+#: backend/services/audit_service.py:242
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "Aggiornamento di {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:287
+#: backend/services/audit_service.py:290
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "Eliminato {entity_type} '{entity_name}'"
+
+#: backend/services/malware_review.py:66
+#, python-format
+msgid "Unknown finding status: %s"
+msgstr "Stato del rilevamento sconosciuto: %s"
+
+#: backend/services/malware_review.py:183
+#, python-format
+msgid "That decision cannot be made here: %s"
+msgstr "Questa decisione non può essere presa qui: %s"
 
 #: backend/services/vault_service.py:219
 msgid "Vault is not enabled"
@@ -5626,72 +5704,6 @@ msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "Vulnerabilità di macOS per versione del sistema operativo, dai dati del NVD "
 "sulle versioni interessate"
-
-#: backend/api/agent_poll.py:166
-msgid "Host authentication failed for this poll"
-msgstr "Autenticazione dell'host non riuscita per questo polling"
-
-#: backend/api/agent_poll.py:179
-msgid "Tenant routing is temporarily unavailable"
-msgstr "Il routing dei tenant è temporaneamente non disponibile"
-
-#: backend/api/malware.py:82
-msgid "Invalid id"
-msgstr "ID non valido"
-
-#: backend/services/malware_quarantine.py:132
-msgid "Unknown action"
-msgstr "Azione sconosciuta"
-
-#: backend/services/malware_review.py:178
-#, python-format
-msgid "That decision cannot be made here: %s"
-msgstr "Questa decisione non può essere presa qui: %s"
-
-#: backend/services/malware_review.py:65
-#, python-format
-msgid "Unknown finding status: %s"
-msgstr "Stato del rilevamento sconosciuto: %s"
-
-#: backend/services/malware_scans.py:142 backend/services/malware_quarantine.py:129
-msgid "Malware detection is not available"
-msgstr "Il rilevamento del malware non è disponibile"
-
-#: backend/services/malware_scans.py:145
-msgid "Choose at least one host to scan"
-msgstr "Scegli almeno un host da scansionare"
-
-#: backend/services/malware_scans.py:148
-msgid "At most 500 hosts can be scanned in one request"
-msgstr "È possibile scansionare al massimo 500 host in una richiesta"
-
-#: backend/api/malware.py:344
-msgid "No imported rule set by that name"
-msgstr "Nessun set di regole importato con questo nome"
-
-#: backend/api/malware.py:98
-msgid "Only an administrator can change the malware rule sets"
-msgstr "Solo un amministratore può modificare i set di regole per il malware"
-
-#: backend/api/malware.py:104
-msgid ""
-"Malware rule sets are shared by every tenant; change them from the server "
-"scope, not from inside a tenant"
-msgstr ""
-"I set di regole per il malware sono condivisi da tutti i tenant; modificali "
-"dall'ambito del server, non dall'interno di un tenant"
-
-#: backend/services/malware_rulesets.py:158
-msgid "A rule set name may use only a-z, 0-9 and hyphens"
-msgstr "Il nome di un set di regole può contenere solo a-z, 0-9 e trattini"
-
-#: backend/services/malware_rulesets.py:162
-msgid "That name belongs to a curated rule set"
-msgstr "Questo nome appartiene a un set di regole curato"
-
-#: backend/services/malware_rulesets.py:166
-msgid "None of these rules can run under ClamAV"
-msgstr "Nessuna di queste regole può essere eseguita con ClamAV"
 
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr ""

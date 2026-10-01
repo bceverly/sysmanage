@@ -4446,25 +4446,26 @@
       "busy": "已有扫描正在运行",
       "invalidPath": "某个路径不是有效的绝对路径",
       "notEquipped": "代理无法扫描（没有 ClamAV）",
-      "notFound": "未找到主机"
+      "notFound": "未找到主机",
+      "inactive": "主机未处于活动状态（或已不存在）"
     },
     "scan": {
       "completed": "已完成",
       "failed": "失败",
       "queued": "已排队",
       "refused": "已拒绝",
-      "timedOut": "已超时"
+      "timedOut": "已超时",
+      "waiting": "等待中"
     },
     "scanDialog": {
       "error": "无法启动扫描。",
-      "hosts": "主机",
-      "paths": "路径（每行一个）",
       "pathsHelp": "留空则扫描各操作系统上通常发现恶意软件的位置。",
-      "queued": "已启动 {{count}} 个扫描",
       "start": "开始扫描",
       "title": "扫描主机中的恶意软件",
-      "queued_one": "已启动 {{count}} 个扫描",
-      "queued_other": "已启动 {{count}} 个扫描"
+      "concurrency": "同时扫描的主机数",
+      "jobStarted": "{{hosts}} 台主机：{{sent}} 台正在扫描，{{waiting}} 台等待轮到",
+      "pathsUnix": "Linux、BSD 和 macOS 路径（每行一个）",
+      "pathsWindows": "Windows 路径（每行一个）"
     },
     "scanHosts": "扫描主机",
     "scans": {
@@ -4569,6 +4570,26 @@
       "removed_other": "已移除 {{count}} 条",
       "imported_one": "已导入 {{title}} v{{version}}，共 {{count}} 条规则。",
       "imported_other": "已导入 {{title}} v{{version}}，共 {{count}} 条规则。"
+    },
+    "jobs": {
+      "atOnce": "最多同时 {{count}} 台",
+      "by": "发起人",
+      "done": "已完成 {{done}}/{{total}}",
+      "hostCount": "{{count}} 台主机",
+      "inventoryCount": "{{count}} 个主机清单",
+      "notScanned": "未扫描：{{count}}",
+      "progress": "进度",
+      "started": "开始时间",
+      "tagCount": "{{count}} 个标签",
+      "targets": "目标",
+      "title": "扫描作业"
+    },
+    "targets": {
+      "all": "所有主机",
+      "chosen": "按标签、主机清单或主机选择",
+      "hosts": "单个主机",
+      "inventories": "主机清单",
+      "tags": "标签"
     }
   }
 }

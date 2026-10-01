@@ -4446,25 +4446,26 @@
       "busy": "ya hay un escaneo en curso",
       "invalidPath": "una ruta no es una ruta absoluta válida",
       "notEquipped": "el agente no puede escanear (sin ClamAV)",
-      "notFound": "host no encontrado"
+      "notFound": "host no encontrado",
+      "inactive": "el host no está activo (o ya no existe)"
     },
     "scan": {
       "completed": "Completado",
       "failed": "Fallido",
       "queued": "En cola",
       "refused": "Rechazado",
-      "timedOut": "Tiempo agotado"
+      "timedOut": "Tiempo agotado",
+      "waiting": "En espera"
     },
     "scanDialog": {
       "error": "No se pudieron iniciar los escaneos.",
-      "hosts": "Hosts",
-      "paths": "Rutas (una por línea)",
       "pathsHelp": "Déjelo vacío para escanear las ubicaciones habituales donde se encuentra software malicioso en cada sistema operativo.",
-      "queued": "{{count}} escaneos iniciados",
       "start": "Iniciar escaneos",
       "title": "Escanear hosts en busca de software malicioso",
-      "queued_one": "{{count}} escaneo iniciado",
-      "queued_other": "{{count}} escaneos iniciados"
+      "concurrency": "Hosts escaneando a la vez",
+      "jobStarted": "{{hosts}} hosts: {{sent}} escaneando ahora, {{waiting}} esperando su turno",
+      "pathsUnix": "Rutas de Linux, BSD y macOS (una por línea)",
+      "pathsWindows": "Rutas de Windows (una por línea)"
     },
     "scanHosts": "Escanear hosts",
     "scans": {
@@ -4569,6 +4570,26 @@
       "removed_other": "{{count}} eliminadas",
       "imported_one": "{{title}} v{{version}} importado con {{count}} regla.",
       "imported_other": "{{title}} v{{version}} importado con {{count}} reglas."
+    },
+    "jobs": {
+      "atOnce": "hasta {{count}} a la vez",
+      "by": "Por",
+      "done": "{{done}} de {{total}} finalizados",
+      "hostCount": "{{count}} hosts",
+      "inventoryCount": "{{count}} inventarios de hosts",
+      "notScanned": "Sin escanear: {{count}}",
+      "progress": "Progreso",
+      "started": "Iniciado",
+      "tagCount": "{{count}} etiquetas",
+      "targets": "Destinos",
+      "title": "Trabajos de escaneo"
+    },
+    "targets": {
+      "all": "Todos los hosts",
+      "chosen": "Elegir por etiqueta, inventario o host",
+      "hosts": "Hosts individuales",
+      "inventories": "Inventarios de hosts",
+      "tags": "Etiquetas"
     }
   }
 }

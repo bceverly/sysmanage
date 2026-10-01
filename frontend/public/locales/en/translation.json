@@ -4446,25 +4446,26 @@
       "busy": "a scan is already running",
       "invalidPath": "a path is not a valid absolute path",
       "notEquipped": "the agent cannot scan (no ClamAV)",
-      "notFound": "host not found"
+      "notFound": "host not found",
+      "inactive": "the host is not active (or no longer exists)"
     },
     "scan": {
       "completed": "Completed",
       "failed": "Failed",
       "queued": "Queued",
       "refused": "Refused",
-      "timedOut": "Timed out"
+      "timedOut": "Timed out",
+      "waiting": "Waiting"
     },
     "scanDialog": {
       "error": "The scans could not be started.",
-      "hosts": "Hosts",
-      "paths": "Paths (one per line)",
       "pathsHelp": "Leave empty to scan the usual places malware is found on each operating system.",
-      "queued": "{{count}} scans started",
       "start": "Start scans",
       "title": "Scan hosts for malware",
-      "queued_one": "{{count}} scan started",
-      "queued_other": "{{count}} scans started"
+      "concurrency": "Hosts scanning at once",
+      "jobStarted": "{{hosts}} hosts: {{sent}} scanning now, {{waiting}} waiting their turn",
+      "pathsUnix": "Linux, BSD and macOS paths (one per line)",
+      "pathsWindows": "Windows paths (one per line)"
     },
     "scanHosts": "Scan hosts",
     "scans": {
@@ -4569,6 +4570,26 @@
       "removed_other": "{{count}} removed",
       "imported_one": "{{title}} v{{version}} imported with {{count}} rule.",
       "imported_other": "{{title}} v{{version}} imported with {{count}} rules."
+    },
+    "jobs": {
+      "atOnce": "up to {{count}} at once",
+      "by": "By",
+      "done": "{{done}} of {{total}} finished",
+      "hostCount": "{{count}} hosts",
+      "inventoryCount": "{{count}} inventories",
+      "notScanned": "Not scanned: {{count}}",
+      "progress": "Progress",
+      "started": "Started",
+      "tagCount": "{{count}} tags",
+      "targets": "Targets",
+      "title": "Scan jobs"
+    },
+    "targets": {
+      "all": "All hosts",
+      "chosen": "Choose by tag, inventory or host",
+      "hosts": "Individual hosts",
+      "inventories": "Inventories",
+      "tags": "Tags"
     }
   }
 }

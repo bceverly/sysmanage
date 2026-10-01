@@ -4446,25 +4446,26 @@
       "busy": "이미 스캔이 실행 중입니다",
       "invalidPath": "유효한 절대 경로가 아닌 경로가 있습니다",
       "notEquipped": "에이전트가 스캔할 수 없습니다 (ClamAV 없음)",
-      "notFound": "호스트를 찾을 수 없습니다"
+      "notFound": "호스트를 찾을 수 없습니다",
+      "inactive": "호스트가 활성 상태가 아닙니다 (또는 더 이상 존재하지 않음)"
     },
     "scan": {
       "completed": "완료됨",
       "failed": "실패",
       "queued": "대기 중",
       "refused": "거부됨",
-      "timedOut": "시간 초과"
+      "timedOut": "시간 초과",
+      "waiting": "대기 중"
     },
     "scanDialog": {
       "error": "스캔을 시작할 수 없습니다.",
-      "hosts": "호스트",
-      "paths": "경로 (한 줄에 하나씩)",
       "pathsHelp": "비워 두면 각 운영 체제에서 맬웨어가 흔히 발견되는 위치를 스캔합니다.",
-      "queued": "스캔 {{count}}건이 시작되었습니다",
       "start": "스캔 시작",
       "title": "호스트 맬웨어 스캔",
-      "queued_one": "스캔 {{count}}건이 시작되었습니다",
-      "queued_other": "스캔 {{count}}건이 시작되었습니다"
+      "concurrency": "동시에 스캔하는 호스트 수",
+      "jobStarted": "호스트 {{hosts}}대: {{sent}}대 스캔 중, {{waiting}}대 순서 대기 중",
+      "pathsUnix": "Linux, BSD 및 macOS 경로 (한 줄에 하나씩)",
+      "pathsWindows": "Windows 경로 (한 줄에 하나씩)"
     },
     "scanHosts": "호스트 스캔",
     "scans": {
@@ -4569,6 +4570,26 @@
       "removed_other": "{{count}}개 제거됨",
       "imported_one": "{{title}} v{{version}}을(를) 규칙 {{count}}개와 함께 가져왔습니다.",
       "imported_other": "{{title}} v{{version}}을(를) 규칙 {{count}}개와 함께 가져왔습니다."
+    },
+    "jobs": {
+      "atOnce": "동시에 최대 {{count}}대",
+      "by": "실행자",
+      "done": "{{total}}개 중 {{done}}개 완료",
+      "hostCount": "호스트 {{count}}대",
+      "inventoryCount": "호스트 인벤토리 {{count}}개",
+      "notScanned": "스캔되지 않음: {{count}}",
+      "progress": "진행률",
+      "started": "시작 시간",
+      "tagCount": "태그 {{count}}개",
+      "targets": "대상",
+      "title": "스캔 작업"
+    },
+    "targets": {
+      "all": "모든 호스트",
+      "chosen": "태그, 인벤토리 또는 호스트로 선택",
+      "hosts": "개별 호스트",
+      "inventories": "호스트 인벤토리",
+      "tags": "태그"
     }
   }
 }

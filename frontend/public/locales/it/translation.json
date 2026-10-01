@@ -4446,25 +4446,26 @@
       "busy": "una scansione è già in corso",
       "invalidPath": "un percorso non è un percorso assoluto valido",
       "notEquipped": "l'agente non può eseguire scansioni (ClamAV assente)",
-      "notFound": "host non trovato"
+      "notFound": "host non trovato",
+      "inactive": "l'host non è attivo (o non esiste più)"
     },
     "scan": {
       "completed": "Completata",
       "failed": "Non riuscita",
       "queued": "In coda",
       "refused": "Rifiutata",
-      "timedOut": "Tempo scaduto"
+      "timedOut": "Tempo scaduto",
+      "waiting": "In attesa"
     },
     "scanDialog": {
       "error": "Impossibile avviare le scansioni.",
-      "hosts": "Host",
-      "paths": "Percorsi (uno per riga)",
       "pathsHelp": "Lasciare vuoto per scansionare le posizioni in cui il malware si trova abitualmente su ciascun sistema operativo.",
-      "queued": "{{count}} scansioni avviate",
       "start": "Avvia scansioni",
       "title": "Scansiona gli host alla ricerca di malware",
-      "queued_one": "{{count}} scansione avviata",
-      "queued_other": "{{count}} scansioni avviate"
+      "concurrency": "Host in scansione contemporaneamente",
+      "jobStarted": "{{hosts}} host: {{sent}} in scansione ora, {{waiting}} in attesa del proprio turno",
+      "pathsUnix": "Percorsi Linux, BSD e macOS (uno per riga)",
+      "pathsWindows": "Percorsi Windows (uno per riga)"
     },
     "scanHosts": "Scansiona host",
     "scans": {
@@ -4569,6 +4570,26 @@
       "removed_other": "{{count}} rimosse",
       "imported_one": "{{title}} v{{version}} importato con {{count}} regola.",
       "imported_other": "{{title}} v{{version}} importato con {{count}} regole."
+    },
+    "jobs": {
+      "atOnce": "fino a {{count}} contemporaneamente",
+      "by": "Avviato da",
+      "done": "{{done}} di {{total}} completate",
+      "hostCount": "{{count}} host",
+      "inventoryCount": "{{count}} inventari di host",
+      "notScanned": "Non scansionati: {{count}}",
+      "progress": "Avanzamento",
+      "started": "Avviato",
+      "tagCount": "{{count}} etichette",
+      "targets": "Destinazioni",
+      "title": "Processi di scansione"
+    },
+    "targets": {
+      "all": "Tutti gli host",
+      "chosen": "Scegli per etichetta, inventario o host",
+      "hosts": "Singoli host",
+      "inventories": "Inventari di host",
+      "tags": "Etichette"
     }
   }
 }

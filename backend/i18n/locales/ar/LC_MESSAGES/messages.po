@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 12:11-0400\n"
+"POT-Creation-Date: 2026-10-01 11:10-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -146,7 +146,7 @@ msgstr "فشل في الحصول على شهادة المرجع المعتمد: 
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:473
+#: backend/api/antivirus_status.py:208 backend/api/firewall_roles.py:473
 #: backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
@@ -168,7 +168,7 @@ msgstr "تنسيق ID المضيف غير صحيح"
 #: backend/api/updates/query_routes.py:123
 #: backend/api/updates/execution_routes.py:268 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
-#: backend/api/antivirus_status.py:225 backend/api/child_host_utils.py:82
+#: backend/api/antivirus_status.py:220 backend/api/child_host_utils.py:82
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
 #: backend/api/repository_mirroring_setup.py:202
 #: backend/api/repository_mirroring_setup.py:263
@@ -202,6 +202,37 @@ msgstr "المضيف غير معتمد"
 #: backend/api/child_host_utils.py:33
 msgid "User not found"
 msgstr "لم يتم العثور على المستخدم"
+
+#: backend/api/malware.py:117 backend/api/file_watches.py:110
+#: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:93
+#: backend/api/query_packs.py:119 backend/api/config_mgmt_inventories.py:110
+#: backend/api/config_mgmt_remediation.py:137
+#: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
+#: backend/api/config_mgmt_profiles.py:136
+#: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:90
+#, python-format
+msgid "Permission denied: %s role required"
+msgstr "تم رفض الإذن: يتطلب دور %s"
+
+#: backend/api/malware.py:133
+msgid "Only an administrator can change the malware rule sets"
+msgstr "يمكن للمسؤول فقط تغيير مجموعات قواعد البرمجيات الخبيثة"
+
+#: backend/api/malware.py:139
+msgid ""
+"Malware rule sets are shared by every tenant; change them from the server "
+"scope, not from inside a tenant"
+msgstr ""
+"مجموعات قواعد البرمجيات الخبيثة مشتركة بين جميع المستأجرين؛ غيّرها من نطاق "
+"الخادم، وليس من داخل مستأجر"
+
+#: backend/api/malware.py:149
+msgid "Invalid id"
+msgstr "معرّف غير صالح"
+
+#: backend/api/malware.py:403
+msgid "No imported rule set by that name"
+msgstr "لا توجد مجموعة قواعد مستوردة بهذا الاسم"
 
 #: backend/api/advisory_actions.py:68
 msgid "syspatch apply queued"
@@ -289,7 +320,7 @@ msgstr "فشل في معالجة تحديث حالة العملية: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:511 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:551 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "المضيف غير مسجل"
@@ -430,7 +461,7 @@ msgid "Missing request_id in installation_complete"
 msgstr "لا يوجد معرف الطلب في استجابة الإكمال"
 
 #: backend/api/handlers/software_package_handlers.py:953
-#: backend/api/agent.py:743 backend/api/packages.py:486
+#: backend/api/agent.py:751 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "لم يتم العثور على طلب التثبيت: %s"
@@ -1612,17 +1643,6 @@ msgstr "تنسيق معرف المراقبة غير صالح"
 msgid "File watch not found"
 msgstr "لم يتم العثور على مراقبة ملف"
 
-#: backend/api/file_watches.py:110 backend/api/config_mgmt_drift.py:191
-#: backend/api/advisor.py:93 backend/api/query_packs.py:119
-#: backend/api/config_mgmt_inventories.py:110
-#: backend/api/config_mgmt_remediation.py:137
-#: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
-#: backend/api/config_mgmt_profiles.py:136
-#: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:90
-#, python-format
-msgid "Permission denied: %s role required"
-msgstr "تم رفض الإذن: يتطلب دور %s"
-
 #: backend/api/file_watches.py:123
 msgid "A watch list must contain at least one path."
 msgstr "يجب أن تحتوي قائمة المراقبة على مسار واحد على الأقل"
@@ -2529,7 +2549,7 @@ msgstr "فشل التحقق من هوية وكيل: معرف المستضِغف 
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "المضيف الذي يحمل رقم %s لم يتم التسجيل. الرجاء إعادة التسجيل."
 
-#: backend/api/message_handlers_core.py:245 backend/api/agent.py:645
+#: backend/api/message_handlers_core.py:245 backend/api/agent.py:653
 msgid "Host registration pending approval"
 msgstr "تمت الموافقة على تسجيل المضيف وانتظار التحقق منها"
 
@@ -3212,13 +3232,21 @@ msgstr ""
 "تم تسجيل مستضياف '%(fqdn)s' عبر مفتاح التسجيل '%(key_name)s' "
 "(auto_approve=%(auto_approve)s)"
 
-#: backend/api/agent_poll.py:110
+#: backend/api/agent_poll.py:119
 msgid "Missing agent connection token"
 msgstr " thiếu رمز اتصال الوكيل"
 
-#: backend/api/agent_poll.py:125
+#: backend/api/agent_poll.py:140
 msgid "Invalid or expired connection token"
 msgstr "رمز الاتصال غير صالح أو منتهي الصلاحية"
+
+#: backend/api/agent_poll.py:166
+msgid "Host authentication failed for this poll"
+msgstr "فشلت مصادقة المضيف لعملية الاستقصاء هذه"
+
+#: backend/api/agent_poll.py:179
+msgid "Tenant routing is temporarily unavailable"
+msgstr "توجيه المستأجر غير متاح مؤقتًا"
 
 #: backend/api/config_management.py:122
 msgid "Configuration pushed to all agents"
@@ -3281,30 +3309,30 @@ msgstr "انتهت هذه الوظيفة بالفعل"
 msgid "Cancelled by an operator"
 msgstr "ألغاه مشغل"
 
-#: backend/api/message_handlers.py:392
+#: backend/api/message_handlers.py:432
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "فشل في معالجة نتيجة التشخيص: %s"
 
-#: backend/api/message_handlers.py:426
+#: backend/api/message_handlers.py:466
 msgid "Missing message_id in command acknowledgment"
 msgstr "لم يتم تحديد معرف الرسالة في تأكيد الطلب"
 
-#: backend/api/message_handlers.py:535
+#: backend/api/message_handlers.py:575
 msgid "Missing installation_id in package installation status"
 msgstr "لم يتم تحديد معرف التثبيت في حالة التثبيت"
 
-#: backend/api/message_handlers.py:555
+#: backend/api/message_handlers.py:595
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "لم يتم العثور على سجل تثبيت للاستعلام: %s"
 
-#: backend/api/message_handlers.py:601
+#: backend/api/message_handlers.py:641
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr " حالة تثبيت الحزمة {status} على الوكيل {hostname}"
 
-#: backend/api/message_handlers.py:630
+#: backend/api/message_handlers.py:670
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "فشل في تحديث حالة تثبيت الحزم: %s"
@@ -4009,80 +4037,80 @@ msgid ""
 msgstr ""
 " kích hoạt ملف الشخصية الترقية '%(profile_name)s' ضد %(host_count)d مستضيءًا"
 
-#: backend/api/agent.py:64
+#: backend/api/agent.py:70
 msgid "Rate limit exceeded"
 msgstr "تم تجاوز حد المعدل"
 
-#: backend/api/agent.py:124
+#: backend/api/agent.py:132
 #, python-format
 msgid "Agent WebSocket authentication failed from %s"
 msgstr "فشل التحقق من هوية WebSocket للوكيل من %s"
 
-#: backend/api/agent.py:134
+#: backend/api/agent.py:142
 #, python-format
 msgid "Authentication failed: %s"
 msgstr "فشل في المصادقة: %s"
 
-#: backend/api/agent.py:150
+#: backend/api/agent.py:158
 #, python-format
 msgid "Agent WebSocket connection attempted without token from %s"
 msgstr "تم محاولة إنشاء اتصال WebSocket للوكيل بدون رمز من %s"
 
-#: backend/api/agent.py:159
+#: backend/api/agent.py:167
 msgid "Authentication token required"
 msgstr "مطلوب رمز المصادقة"
 
-#: backend/api/agent.py:254
+#: backend/api/agent.py:262
 msgid "Message failed security validation"
 msgstr "فشلت الرسالة في التحقق الأمني"
 
-#: backend/api/agent.py:283
+#: backend/api/agent.py:291
 msgid "Message must be valid JSON"
 msgstr "يجب أن تكون الرسالة بتنسيق JSON صحيح"
 
-#: backend/api/agent.py:519
+#: backend/api/agent.py:527
 msgid "Agent message validation failed: missing hostname and host_id"
 msgstr "فشل التحقق من رسائل الوكيل: مفقود اسم المضيف و host_id"
 
-#: backend/api/agent.py:538
+#: backend/api/agent.py:546
 #, python-brace-format
 msgid "Agent message from unregistered host: {hostname}"
 msgstr "رسالة من الوكيل من مضيف غير مسجل: {hostname}"
 
-#: backend/api/agent.py:555
+#: backend/api/agent.py:563
 #, python-brace-format
 msgid "Agent message from unapproved host: {hostname}"
 msgstr "رسالة من الوكيل من مضيف غير معتمد: {hostname}"
 
-#: backend/api/agent.py:587
+#: backend/api/agent.py:595
 msgid "Message must include hostname or host_id for host validation"
 msgstr "يجب أن تتضمن الرسالة اسم المضيف أو ID المضيف لتأكيد المضيف"
 
-#: backend/api/agent.py:605
+#: backend/api/agent.py:613
 msgid "Host ID no longer valid - please re-register"
 msgstr "رقم المضيف غير صالح الآن - الرجاء إعادة التسجيل"
 
-#: backend/api/agent.py:617
+#: backend/api/agent.py:625
 msgid "Host ID and hostname mismatch - please re-register"
 msgstr "لا يتطابق رقم المضيف مع اسمه؛ الرجاء إعادة التسجيل"
 
-#: backend/api/agent.py:634
+#: backend/api/agent.py:642
 msgid "Host must register before sending inventory data"
 msgstr "يجب على المضيف التسجيل قبل إرسال بيانات المخزون"
 
-#: backend/api/agent.py:705
+#: backend/api/agent.py:713
 msgid "Missing or invalid authorization header"
 msgstr "لا يوجد رأس التحقق أو رأسه غير صالح"
 
-#: backend/api/agent.py:730
+#: backend/api/agent.py:738
 msgid "Invalid host authentication"
 msgstr "التحقق من المضيف غير صحيح"
 
-#: backend/api/agent.py:771 backend/api/packages.py:498
+#: backend/api/agent.py:779 backend/api/packages.py:498
 msgid "Installation completion recorded"
 msgstr "تم تسجيل انتهاء التثبيت"
 
-#: backend/api/agent.py:777 backend/api/error_constants.py:193
+#: backend/api/agent.py:785 backend/api/error_constants.py:193
 msgid "Internal server error"
 msgstr "خطأ خادم داخلي"
 
@@ -4186,30 +4214,30 @@ msgstr "مفتاح السر غير صالح"
 msgid "OpenBAO is not running"
 msgstr "OpenBAO غير مستخدم"
 
-#: backend/api/antivirus_status.py:136
+#: backend/api/antivirus_status.py:131
 #, python-format
 msgid "Failed to retrieve antivirus status: %s"
 msgstr "فشل في استرداد حالة مضاد الفيروسات: %s"
 
-#: backend/api/antivirus_status.py:167
+#: backend/api/antivirus_status.py:162
 msgid "Permission denied: DEPLOY_ANTIVIRUS role required"
 msgstr " رفض الوصول: يتطلب دور DEPLOY_ANTIVIRUS"
 
-#: backend/api/antivirus_status.py:247
+#: backend/api/antivirus_status.py:232
 msgid "Unable to determine host operating system"
 msgstr "لا يمكن تحديد نظام التشغيل للخادم"
 
-#: backend/api/antivirus_status.py:269
+#: backend/api/antivirus_status.py:246
 #, python-format
 msgid "No antivirus default configured for OS: %s"
 msgstr "لم يتم تحديد قيمة افتراضية لمكافحة الفيروسات لنظام التشغيل: %s"
 
-#: backend/api/antivirus_status.py:335
+#: backend/api/antivirus_status.py:314
 #, python-format
 msgid "Antivirus deployment initiated for all %d hosts"
 msgstr "تم بدء نشر برنامج مكافحة الفيروسات لجميع المضيفين %d"
 
-#: backend/api/antivirus_status.py:338
+#: backend/api/antivirus_status.py:317
 #, python-format
 msgid ""
 "Antivirus deployment initiated for %(success_count)d of %(total_count)d "
@@ -4218,23 +4246,23 @@ msgstr ""
 "تم بدء نشر برنامج مكافحة الفيروسات لـ %(success_count)d من %(total_count)d "
 "المستضياف"
 
-#: backend/api/antivirus_status.py:344
+#: backend/api/antivirus_status.py:323
 msgid "Antivirus deployment failed for all hosts"
 msgstr "فشل نشر برنامج مكافحة الفيروسات على جميع المضيفين"
 
-#: backend/api/antivirus_status.py:412
+#: backend/api/antivirus_status.py:394
 msgid "Antivirus enable command sent successfully"
 msgstr " lệnh تم إرسالها بنجاح لتمكين مضاد الفيروسات"
 
-#: backend/api/antivirus_status.py:476
+#: backend/api/antivirus_status.py:461
 msgid "Antivirus disable command sent successfully"
 msgstr " lệnh تعطيل مضاد الفيروسات تم إرسالها بنجاح"
 
-#: backend/api/antivirus_status.py:551
+#: backend/api/antivirus_status.py:539
 msgid "Antivirus remove command sent successfully"
 msgstr " lệnh إزالة برنامج مكافحة الفيروسات تم إرسالها بنجاح"
 
-#: backend/api/antivirus_status.py:620
+#: backend/api/antivirus_status.py:608
 #, python-format
 msgid "Failed to retrieve antivirus coverage: %s"
 msgstr "فشل في استرداد نطاق مضاد الفيروسات: %s"
@@ -5232,6 +5260,8 @@ msgid "Unknown device status: %s"
 msgstr "حالة جهاز غير معروفة: %s"
 
 #: backend/services/asset_discovery_review.py:342
+#: backend/services/malware_quarantine.py:136
+#: backend/services/malware_review.py:186
 msgid "A reason of at least 3 characters is required"
 msgstr "يلزم سبب لا يقل عن 3 أحرف"
 
@@ -5257,6 +5287,18 @@ msgstr "لم يتم العثور على الاستثناء"
 msgid "This exclusion was already revoked"
 msgstr "تم إلغاء هذا الاستثناء بالفعل"
 
+#: backend/services/malware_rulesets.py:158
+msgid "A rule set name may use only a-z, 0-9 and hyphens"
+msgstr "لا يمكن أن يستخدم اسم مجموعة القواعد إلا a-z, 0-9 والشرطات"
+
+#: backend/services/malware_rulesets.py:162
+msgid "That name belongs to a curated rule set"
+msgstr "هذا الاسم يخص مجموعة قواعد منسّقة"
+
+#: backend/services/malware_rulesets.py:166
+msgid "None of these rules can run under ClamAV"
+msgstr "لا يمكن تشغيل أي من هذه القواعد في ClamAV"
+
 #: backend/services/config_mgmt_dispatch.py:58
 #, python-format
 msgid "Profile '%s' does not contain valid JSON"
@@ -5267,10 +5309,36 @@ msgstr "ملف التعريف '%s' لا يحتوي على JSON صالح"
 msgid "Profile '%s' must contain a JSON array of DSC resources"
 msgstr "يجب أن يحتوي ملف التعريف '%s' على مصفوفة JSON من موارد DSC"
 
+#: backend/services/malware_scan_jobs.py:144
+#: backend/services/malware_scans.py:162
+#: backend/services/malware_quarantine.py:129
+msgid "Malware detection is not available"
+msgstr "اكتشاف البرمجيات الخبيثة غير متاح"
+
+#: backend/services/malware_scan_jobs.py:149
+msgid "The targets do not name any active host"
+msgstr "لا تحدد الأهداف أي مضيف نشط"
+
+#: backend/services/malware_scan_jobs.py:153
+msgid "At most 10000 hosts can be scanned in one job"
+msgstr "يمكن فحص 10000 مضيف على الأكثر في مهمة واحدة"
+
 #: backend/services/reboot_orchestration_service.py:253
 #, python-format
 msgid "%(failed_count)d of %(total_count)d child host(s) failed to restart"
 msgstr "%(failed_count)d من %(total_count)d مستضياف فرعي فشل في إعادة التشغيل"
+
+#: backend/services/malware_scans.py:165
+msgid "Choose at least one host to scan"
+msgstr "اختر مضيفًا واحدًا على الأقل لفحصه"
+
+#: backend/services/malware_scans.py:168
+msgid "At most 500 hosts can be scanned in one request"
+msgstr "يمكن فحص 500 مضيف كحد أقصى في طلب واحد"
+
+#: backend/services/malware_quarantine.py:132
+msgid "Unknown action"
+msgstr "إجراء غير معروف"
 
 #: backend/services/config_mgmt_files.py:156
 msgid ""
@@ -5344,20 +5412,30 @@ msgstr "وجود القرص لكن لا يوجد قرص قابل للقراءة 
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "لا يوجد نظام ملفات ISO على الجهاز (fstype=%s)"
 
-#: backend/services/audit_service.py:191
+#: backend/services/audit_service.py:194
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "تم إنشاء {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:239
+#: backend/services/audit_service.py:242
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "تم تحديث {entity_type} '\\u0027{entity_name}\\u0027"
 
-#: backend/services/audit_service.py:287
+#: backend/services/audit_service.py:290
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "حُذِفَت الكيان من نوع ‘{entity_type}’ باسم ‘{entity_name}’"
+
+#: backend/services/malware_review.py:66
+#, python-format
+msgid "Unknown finding status: %s"
+msgstr "حالة نتيجة غير معروفة: %s"
+
+#: backend/services/malware_review.py:183
+#, python-format
+msgid "That decision cannot be made here: %s"
+msgstr "لا يمكن اتخاذ هذا القرار هنا: %s"
 
 #: backend/services/vault_service.py:219
 msgid "Vault is not enabled"
@@ -5420,72 +5498,6 @@ msgstr "ثغرات حزم pkgsrc في NetBSD (ما يقرؤه pkg_admin audit)"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "ثغرات macOS حسب إصدار نظام التشغيل، من بيانات NVD عن الإصدارات المتأثرة"
-
-#: backend/api/agent_poll.py:166
-msgid "Host authentication failed for this poll"
-msgstr "فشلت مصادقة المضيف لعملية الاستقصاء هذه"
-
-#: backend/api/agent_poll.py:179
-msgid "Tenant routing is temporarily unavailable"
-msgstr "توجيه المستأجر غير متاح مؤقتًا"
-
-#: backend/api/malware.py:82
-msgid "Invalid id"
-msgstr "معرّف غير صالح"
-
-#: backend/services/malware_quarantine.py:132
-msgid "Unknown action"
-msgstr "إجراء غير معروف"
-
-#: backend/services/malware_review.py:178
-#, python-format
-msgid "That decision cannot be made here: %s"
-msgstr "لا يمكن اتخاذ هذا القرار هنا: %s"
-
-#: backend/services/malware_review.py:65
-#, python-format
-msgid "Unknown finding status: %s"
-msgstr "حالة نتيجة غير معروفة: %s"
-
-#: backend/services/malware_scans.py:142 backend/services/malware_quarantine.py:129
-msgid "Malware detection is not available"
-msgstr "اكتشاف البرمجيات الخبيثة غير متاح"
-
-#: backend/services/malware_scans.py:145
-msgid "Choose at least one host to scan"
-msgstr "اختر مضيفًا واحدًا على الأقل لفحصه"
-
-#: backend/services/malware_scans.py:148
-msgid "At most 500 hosts can be scanned in one request"
-msgstr "يمكن فحص 500 مضيف كحد أقصى في طلب واحد"
-
-#: backend/api/malware.py:344
-msgid "No imported rule set by that name"
-msgstr "لا توجد مجموعة قواعد مستوردة بهذا الاسم"
-
-#: backend/api/malware.py:98
-msgid "Only an administrator can change the malware rule sets"
-msgstr "يمكن للمسؤول فقط تغيير مجموعات قواعد البرمجيات الخبيثة"
-
-#: backend/api/malware.py:104
-msgid ""
-"Malware rule sets are shared by every tenant; change them from the server "
-"scope, not from inside a tenant"
-msgstr ""
-"مجموعات قواعد البرمجيات الخبيثة مشتركة بين جميع المستأجرين؛ غيّرها من نطاق "
-"الخادم، وليس من داخل مستأجر"
-
-#: backend/services/malware_rulesets.py:158
-msgid "A rule set name may use only a-z, 0-9 and hyphens"
-msgstr "لا يمكن أن يستخدم اسم مجموعة القواعد إلا a-z, 0-9 والشرطات"
-
-#: backend/services/malware_rulesets.py:162
-msgid "That name belongs to a curated rule set"
-msgstr "هذا الاسم يخص مجموعة قواعد منسّقة"
-
-#: backend/services/malware_rulesets.py:166
-msgid "None of these rules can run under ClamAV"
-msgstr "لا يمكن تشغيل أي من هذه القواعد في ClamAV"
 
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "خدمة البريد الإلكتروني معطلة. قم بتمكينها في ملف التكوين."

@@ -22,7 +22,6 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from backend.persistence import models
@@ -33,6 +32,7 @@ from backend.persistence.models.config_fleet import (
     TARGET_PENDING,
 )
 from backend.services import config_mgmt_spec_shim as shim
+from backend.services.host_selectors import hosts_for_selectors
 
 logger = logging.getLogger(__name__)
 
@@ -187,34 +187,13 @@ def resolve_hosts(db_session: Session, inventory) -> List[Any]:
         .all()
     )
     selectors = module.inventory_selectors(inventory, members)
-
-    query = db_session.query(models.Host).filter(models.Host.active.is_(True))
-    if selectors.get("all_hosts"):
-        return query.all()
-
-    host_ids = selectors.get("host_ids") or []
-    tag_ids = selectors.get("tag_ids") or []
-    site_ids = selectors.get("site_ids") or []
-    if not (host_ids or tag_ids or site_ids):
-        return []
-
-    clauses = []
-    if host_ids:
-        clauses.append(models.Host.id.in_(host_ids))
-    if site_ids:
-        clauses.append(models.Host.site_id.in_(site_ids))
-    if tag_ids:
-        # A subquery rather than a join: joining HostTag multiplies a host by
-        # its matching tags, so a host carrying two of the selected tags would
-        # become two targets and be dispatched to twice.
-        tagged = (
-            db_session.query(models.HostTag.host_id)
-            .filter(models.HostTag.tag_id.in_(tag_ids))
-            .subquery()
-        )
-        clauses.append(models.Host.id.in_(db_session.query(tagged.c.host_id)))
-
-    return query.filter(or_(*clauses)).all()
+    return hosts_for_selectors(
+        db_session,
+        all_hosts=bool(selectors.get("all_hosts")),
+        host_ids=selectors.get("host_ids") or [],
+        tag_ids=selectors.get("tag_ids") or [],
+        site_ids=selectors.get("site_ids") or [],
+    )
 
 
 def inventory_host_count(db_session: Session, inventory) -> int:

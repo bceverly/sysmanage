@@ -4446,25 +4446,26 @@
       "busy": "スキャンはすでに実行中です",
       "invalidPath": "有効な絶対パスではないパスがあります",
       "notEquipped": "エージェントはスキャンできません (ClamAV なし)",
-      "notFound": "ホストが見つかりません"
+      "notFound": "ホストが見つかりません",
+      "inactive": "ホストがアクティブではありません (または存在しません)"
     },
     "scan": {
       "completed": "完了",
       "failed": "失敗",
       "queued": "キュー待ち",
       "refused": "拒否",
-      "timedOut": "タイムアウト"
+      "timedOut": "タイムアウト",
+      "waiting": "待機中"
     },
     "scanDialog": {
       "error": "スキャンを開始できませんでした。",
-      "hosts": "ホスト",
-      "paths": "パス (1 行に 1 つ)",
       "pathsHelp": "空欄のままにすると、各オペレーティングシステムでマルウェアがよく見つかる場所をスキャンします。",
-      "queued": "{{count}} 件のスキャンを開始しました",
       "start": "スキャンを開始",
       "title": "ホストのマルウェアスキャン",
-      "queued_one": "{{count}} 件のスキャンを開始しました",
-      "queued_other": "{{count}} 件のスキャンを開始しました"
+      "concurrency": "同時にスキャンするホスト数",
+      "jobStarted": "{{hosts}} 台のホスト: {{sent}} 台をスキャン中、{{waiting}} 台が順番待ち",
+      "pathsUnix": "Linux、BSD、macOS のパス (1 行に 1 つ)",
+      "pathsWindows": "Windows のパス (1 行に 1 つ)"
     },
     "scanHosts": "ホストをスキャン",
     "scans": {
@@ -4569,6 +4570,26 @@
       "removed_other": "{{count}} 件削除",
       "imported_one": "{{title}} v{{version}} を {{count}} 件のルールでインポートしました。",
       "imported_other": "{{title}} v{{version}} を {{count}} 件のルールでインポートしました。"
+    },
+    "jobs": {
+      "atOnce": "同時に最大 {{count}} 台",
+      "by": "実行者",
+      "done": "{{total}} 件中 {{done}} 件完了",
+      "hostCount": "{{count}} 台のホスト",
+      "inventoryCount": "{{count}} 件のホストインベントリ",
+      "notScanned": "未スキャン: {{count}}",
+      "progress": "進捗",
+      "started": "開始日時",
+      "tagCount": "{{count}} 個のタグ",
+      "targets": "対象",
+      "title": "スキャンジョブ"
+    },
+    "targets": {
+      "all": "すべてのホスト",
+      "chosen": "タグ、インベントリ、ホストで選択",
+      "hosts": "個別のホスト",
+      "inventories": "ホストインベントリ",
+      "tags": "タグ"
     }
   }
 }

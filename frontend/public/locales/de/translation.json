@@ -4446,25 +4446,26 @@
       "busy": "ein Scan läuft bereits",
       "invalidPath": "ein Pfad ist kein gültiger absoluter Pfad",
       "notEquipped": "der Agent kann nicht scannen (kein ClamAV)",
-      "notFound": "Host nicht gefunden"
+      "notFound": "Host nicht gefunden",
+      "inactive": "der Host ist nicht aktiv (oder existiert nicht mehr)"
     },
     "scan": {
       "completed": "Abgeschlossen",
       "failed": "Fehlgeschlagen",
       "queued": "In Warteschlange",
       "refused": "Abgelehnt",
-      "timedOut": "Zeitüberschreitung"
+      "timedOut": "Zeitüberschreitung",
+      "waiting": "Wartend"
     },
     "scanDialog": {
       "error": "Die Scans konnten nicht gestartet werden.",
-      "hosts": "Hosts",
-      "paths": "Pfade (einer pro Zeile)",
       "pathsHelp": "Leer lassen, um die Orte zu scannen, an denen Schadsoftware auf dem jeweiligen Betriebssystem üblicherweise zu finden ist.",
-      "queued": "{{count}} Scans gestartet",
       "start": "Scans starten",
       "title": "Hosts auf Schadsoftware scannen",
-      "queued_one": "{{count}} Scan gestartet",
-      "queued_other": "{{count}} Scans gestartet"
+      "concurrency": "Gleichzeitig scannende Hosts",
+      "jobStarted": "{{hosts}} Hosts: {{sent}} werden jetzt gescannt, {{waiting}} warten, bis sie an der Reihe sind",
+      "pathsUnix": "Pfade für Linux, BSD und macOS (einer pro Zeile)",
+      "pathsWindows": "Pfade für Windows (einer pro Zeile)"
     },
     "scanHosts": "Hosts scannen",
     "scans": {
@@ -4569,6 +4570,26 @@
       "removed_other": "{{count}} entfernt",
       "imported_one": "{{title}} v{{version}} mit {{count}} Regel importiert.",
       "imported_other": "{{title}} v{{version}} mit {{count}} Regeln importiert."
+    },
+    "jobs": {
+      "atOnce": "bis zu {{count}} gleichzeitig",
+      "by": "Von",
+      "done": "{{done}} von {{total}} abgeschlossen",
+      "hostCount": "{{count}} Hosts",
+      "inventoryCount": "{{count}} Hostgruppen",
+      "notScanned": "Nicht gescannt: {{count}}",
+      "progress": "Fortschritt",
+      "started": "Gestartet",
+      "tagCount": "{{count}} Tags",
+      "targets": "Ziele",
+      "title": "Scan-Aufträge"
+    },
+    "targets": {
+      "all": "Alle Hosts",
+      "chosen": "Nach Tag, Hostgruppe oder Host auswählen",
+      "hosts": "Einzelne Hosts",
+      "inventories": "Hostgruppen",
+      "tags": "Tags"
     }
   }
 }

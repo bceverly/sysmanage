@@ -4446,25 +4446,26 @@
       "busy": "uma verificação já está em execução",
       "invalidPath": "um caminho não é um caminho absoluto válido",
       "notEquipped": "o agente não pode verificar (sem ClamAV)",
-      "notFound": "host não encontrado"
+      "notFound": "host não encontrado",
+      "inactive": "o host não está ativo (ou não existe mais)"
     },
     "scan": {
       "completed": "Concluída",
       "failed": "Falhou",
       "queued": "Na fila",
       "refused": "Recusada",
-      "timedOut": "Tempo esgotado"
+      "timedOut": "Tempo esgotado",
+      "waiting": "Aguardando"
     },
     "scanDialog": {
       "error": "Não foi possível iniciar as verificações.",
-      "hosts": "Hosts a verificar",
-      "paths": "Caminhos (um por linha)",
       "pathsHelp": "Deixe em branco para verificar os locais onde malware costuma ser encontrado em cada sistema operacional.",
-      "queued": "{{count}} verificações iniciadas",
       "start": "Iniciar verificações",
       "title": "Verificar hosts em busca de malware",
-      "queued_one": "{{count}} verificação iniciada",
-      "queued_other": "{{count}} verificações iniciadas"
+      "concurrency": "Hosts verificados simultaneamente",
+      "jobStarted": "{{hosts}} hosts: {{sent}} em verificação agora, {{waiting}} aguardando a vez",
+      "pathsUnix": "Caminhos do Linux, BSD e macOS (um por linha)",
+      "pathsWindows": "Caminhos do Windows (um por linha)"
     },
     "scanHosts": "Verificar hosts",
     "scans": {
@@ -4569,6 +4570,26 @@
       "removed_other": "{{count}} removidas",
       "imported_one": "{{title}} v{{version}} importado com {{count}} regra.",
       "imported_other": "{{title}} v{{version}} importado com {{count}} regras."
+    },
+    "jobs": {
+      "atOnce": "até {{count}} simultaneamente",
+      "by": "Por",
+      "done": "{{done}} de {{total}} concluídas",
+      "hostCount": "{{count}} hosts",
+      "inventoryCount": "{{count}} inventários de hosts",
+      "notScanned": "Não verificados: {{count}}",
+      "progress": "Progresso",
+      "started": "Iniciado",
+      "tagCount": "{{count}} marcadores",
+      "targets": "Alvos",
+      "title": "Trabalhos de verificação"
+    },
+    "targets": {
+      "all": "Todos os hosts",
+      "chosen": "Escolher por marcador, inventário ou host",
+      "hosts": "Hosts individuais",
+      "inventories": "Inventários de hosts",
+      "tags": "Marcadores"
     }
   }
 }
