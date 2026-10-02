@@ -163,7 +163,8 @@ def test_waiving_overlays_the_item_and_counts_it_as_waived(factory_client):
         409,
         {"code": "already_waived"},
     )
-    assert client.delete("/api/v1/advisor/posture/PM-X/waiver").status_code == 200
+    removed = client.delete("/api/v1/advisor/posture/PM-X/waiver")
+    assert removed.status_code == 200
     assert client.get("/api/v1/advisor/posture").json()["totals"] == {"open": 1}
 
 

@@ -95,7 +95,8 @@ async def _connect(base, ws_base, ip, hostname, outcome):
             async for raw in ws:
                 inbox.append(json.loads(raw))
         except websockets.ConnectionClosed:
-            pass
+            # The server closed the socket: the scenario reads what arrived.
+            return
 
     return ws, inbox, asyncio.create_task(reader())
 

@@ -110,7 +110,7 @@ class MessageProcessor:
                 # Inbound (agents→server) on the worker thread, then outbound
                 # (server→agents) here -- it writes to the real WebSockets.
                 more = await self._drain_inbound(db.get_bind()) or more
-                await process_outbound_messages(db)
+                more = bool(await process_outbound_messages(db)) or more
 
                 # Retry messages that were sent but not acknowledged within the
                 # timeout (websocket send succeeded but the agent disconnected

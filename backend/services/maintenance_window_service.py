@@ -312,3 +312,32 @@ def next_window_for_host(db: Session, host_id, now_utc: datetime) -> dict:
         "active_blackout": active_blackout.name if active_blackout else None,
         "next_window": next_window_summary,
     }
+
+
+# Phase 22.2: the outbound drain stores a not-before time on a message held by
+# a closed window (so it stops occupying the drain) and tags it with this
+# marker.  Any change an operator makes -- a window created, edited or
+# deleted, an emergency override -- releases every tagged message at once, so
+# the change takes effect on the next tick instead of after the re-check delay.
+DEFERRED_MARKER = "deferred: maintenance window"
+
+
+def release_deferred(db: Session) -> int:
+    """Make every message held by a maintenance window due again."""
+    from backend.persistence.models import MessageQueue  # noqa: PLC0415
+    from backend.websocket.queue_enums import (  # noqa: PLC0415
+        QueueDirection,
+        QueueStatus,
+    )
+
+    return (
+        db.query(MessageQueue)
+        .filter(
+            MessageQueue.direction == QueueDirection.OUTBOUND,
+            MessageQueue.status == QueueStatus.PENDING,
+            MessageQueue.error_message == DEFERRED_MARKER,
+        )
+        .update(
+            {"scheduled_at": None, "error_message": None}, synchronize_session=False
+        )
+    )

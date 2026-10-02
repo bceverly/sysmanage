@@ -46,6 +46,18 @@ def recently_polled(host_id, now: float = None) -> bool:
     )
 
 
+def polling_host_ids(now: float = None) -> list:
+    """Every host that polled within ``POLL_PRESENCE_SECONDS``: the outbound
+    drain leaves their messages to the polls (Phase 22.2)."""
+    now = now if now is not None else time.monotonic()
+    with _lock:
+        return [
+            host_id
+            for host_id, seen in _last_poll.items()
+            if now - seen < POLL_PRESENCE_SECONDS
+        ]
+
+
 def forget(host_id) -> None:
     """Drop a host (tests, or a host that was deleted)."""
     with _lock:

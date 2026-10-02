@@ -197,9 +197,11 @@ def _freebsd_stop_unseen_clamd() -> Dict[str, Any]:
         "argv": [
             "/bin/sh",
             "-c",
-            "pkill -x clamd; i=0; "
-            "while pgrep -x clamd >/dev/null && [ $i -lt 30 ]; "
-            "do sleep 1; i=$((i+1)); done; true",
+            (
+                "pkill -x clamd; i=0; "
+                "while pgrep -x clamd >/dev/null && [ $i -lt 30 ]; "
+                "do sleep 1; i=$((i+1)); done; true"
+            ),
         ],
         "sudo": True,
         "timeout": 60,

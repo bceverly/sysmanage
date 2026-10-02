@@ -280,6 +280,7 @@ async def create_maintenance_window(
         session.add(window)
         session.flush()  # assign window.id
         _write_scopes(session, window.id, payload)
+        mw.release_deferred(session)  # takes effect on the next tick
         session.commit()
         return _serialize(session, [window])[0]
 
@@ -305,6 +306,7 @@ async def update_maintenance_window(
             )
         _apply_payload(window, payload)
         _write_scopes(session, window.id, payload)
+        mw.release_deferred(session)  # takes effect on the next tick
         session.commit()
         return _serialize(session, [window])[0]
 
@@ -330,6 +332,7 @@ async def delete_maintenance_window(
             MaintenanceWindowScope.window_id == window.id
         ).delete()
         session.delete(window)
+        mw.release_deferred(session)  # takes effect on the next tick
         session.commit()
         return {"status": "deleted", "id": window_id}
 
@@ -380,6 +383,7 @@ async def create_override(
                 "duration_minutes": payload.duration_minutes,
             },
         )
+        mw.release_deferred(session)  # takes effect on the next tick
         session.commit()
         return override.to_dict()
 

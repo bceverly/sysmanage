@@ -615,7 +615,12 @@ class TestQueueOperationsRetryUnacknowledged:
         mock_message.status = QueueStatus.SENT
 
         # First query for stale messages, second for mark_failed
-        mock_db.query.return_value.filter.return_value.all.return_value = [mock_message]
+        mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = [
+            (mock_message.message_id, mock_message.message_data)
+        ]
+        mock_db.query.return_value.filter.return_value.update.return_value = (
+            1  # claimed
+        )
         mock_db.query.return_value.filter_by.return_value.first.return_value = (
             mock_message
         )
@@ -630,7 +635,9 @@ class TestQueueOperationsRetryUnacknowledged:
 
         ops = QueueOperations()
         mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.all.return_value = []
+        mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = (
+            []
+        )
 
         result = ops.retry_unacknowledged_messages(timeout_seconds=60, db=mock_db)
 
@@ -659,7 +666,12 @@ class TestQueueOperationsRetryUnacknowledged:
         mock_message.max_retries = 3
         mock_message.status = QueueStatus.SENT
 
-        mock_db.query.return_value.filter.return_value.all.return_value = [mock_message]
+        mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = [
+            (mock_message.message_id, mock_message.message_data)
+        ]
+        mock_db.query.return_value.filter.return_value.update.return_value = (
+            1  # claimed
+        )
         mock_db.query.return_value.filter_by.return_value.first.return_value = (
             mock_message
         )
@@ -674,7 +686,7 @@ class TestQueueOperationsRetryUnacknowledged:
 
         ops = QueueOperations()
         mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.all.side_effect = Exception(
+        mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.side_effect = Exception(
             "Database error"
         )
 

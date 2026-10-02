@@ -183,7 +183,9 @@ def _wait_healthy(port, timeout=120):
                 if resp.status == 200:
                     return
         except (urllib.error.URLError, OSError):
-            pass
+            # Not up yet: retry until the deadline.
+            time.sleep(1)
+            continue
         time.sleep(1)
     raise SystemExit(
         f"server on port {port} did not become healthy; see {STATE_DIR}/server.log"
@@ -244,7 +246,8 @@ def stop_server(state, grace=20):
         try:
             os.killpg(pid, signal.SIGKILL)
         except ProcessLookupError:
-            pass
+            # It finished exiting on its own between the check and the kill.
+            pid = None
     state["server_pid"] = None
     _save(state)
 

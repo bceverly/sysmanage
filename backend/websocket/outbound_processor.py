@@ -7,9 +7,10 @@ Outbound message processor for SysManage.
 Handles processing and sending of messages from server to agents.
 """
 
-from datetime import datetime, timezone
+import time
+from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import func, or_
+from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
 
 from backend.startup.leadership import multi_process
@@ -23,114 +24,145 @@ from backend.websocket.queue_manager import (
 logger = get_logger(__name__)
 
 
-async def process_outbound_messages(  # NOSONAR
-    db: Session,
-) -> None:
-    """
-    Process outbound messages from the server to agents.
+# Phase 22.2 outbound starvation.  The pass used to take the global top 20
+# pending messages per database: messages held by a closed maintenance window
+# or waiting for a polling agent stayed pending at the head of that list and
+# could block every other host, and even unblocked a 10,000-host push took 8+
+# minutes at 20 a second.  Now it mirrors the inbound drain: oldest-waiting
+# host first, a bounded number per host per round, rounds until the time
+# budget is spent; a deferred message carries a not-before time
+# (``scheduled_at``) so it stops being "due"; hosts on the HTTP poll fallback
+# are left to their polls.
+OUTBOUND_BUDGET_SECONDS = 0.5
+OUTBOUND_HOST_BATCH = 50
+OUTBOUND_PER_HOST = 20
+MAINTENANCE_RECHECK_SECONDS = 60  # an override or a window opening is seen within this
 
-    Args:
-        db: Database session
-    """
-    logger.info("Processing outbound messages")
 
-    from backend.persistence.models import Host, MessageQueue
-
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
-
-    # Get outbound messages for all hosts
-    # Only pick up messages that are ready to be processed:
-    # - scheduled_at is NULL (immediate), OR
-    # - scheduled_at <= now (scheduled time has passed, including retries)
-    query = db.query(MessageQueue).filter(
+def _due_outbound(MessageQueue, now):  # pylint: disable=invalid-name
+    return and_(
         MessageQueue.direction == QueueDirection.OUTBOUND,
         MessageQueue.status == QueueStatus.PENDING,
         MessageQueue.host_id.is_not(None),
-        or_(
-            MessageQueue.scheduled_at.is_(None),
-            MessageQueue.scheduled_at <= now,
-        ),
+        MessageQueue.expired_at.is_(None),
+        or_(MessageQueue.scheduled_at.is_(None), MessageQueue.scheduled_at <= now),
     )
+
+
+def _waiting_hosts(db, now, limit, visited=()):
+    """Hosts with due outbound messages, oldest-waiting first -- only those
+    this process can deliver to, and not already visited in this drain (a
+    host whose message stays pending must not hold the next round's slots)."""
+    from backend.persistence.models import Host, MessageQueue  # noqa: PLC0415
+    from backend.websocket import poll_presence  # noqa: PLC0415
+
+    query = db.query(MessageQueue.host_id).filter(_due_outbound(MessageQueue, now))
+    polling = poll_presence.polling_host_ids()
+    skip = list(polling) + list(visited)
+    if skip:
+        query = query.filter(MessageQueue.host_id.notin_(skip))
     if multi_process():
-        # Phase 22.2: only the worker holding a host's WebSocket can deliver
-        # to it.  Another worker would find no socket and fail the message, so
-        # each worker takes only its own agents' messages; the rest wait for
-        # theirs (or for an HTTP poll, which reads the queue itself).
+        # Only the worker holding a host's WebSocket can deliver to it; another
+        # worker would find no socket and fail the message.
         local = local_hostnames()
         if not local:
-            return
+            return []
         query = query.join(Host, Host.id == MessageQueue.host_id).filter(
             func.lower(Host.fqdn).in_(local)
         )
-    outbound_messages = (
-        query.order_by(MessageQueue.priority.desc(), MessageQueue.created_at.asc())
-        .limit(20)
+    return [
+        host_id
+        for (host_id,) in query.group_by(MessageQueue.host_id)
+        .order_by(func.min(MessageQueue.created_at))
+        .limit(limit)
         .all()
+    ]
+
+
+def _defer(messages, now, reason) -> None:
+    from backend.services.maintenance_window_service import (  # noqa: PLC0415
+        DEFERRED_MARKER,
     )
 
-    # Group messages by host for efficient processing
-    messages_by_host = {}
-    for message in outbound_messages:
-        if message.host_id:
-            if message.host_id not in messages_by_host:
-                messages_by_host[message.host_id] = []
-            messages_by_host[message.host_id].append(message)
+    not_before = now + timedelta(seconds=MAINTENANCE_RECHECK_SECONDS)
+    for message in messages:
+        message.scheduled_at = not_before
+        message.error_message = DEFERRED_MARKER  # released by any window change
+    logger.info(
+        "%s; deferring %d message(s) until %s", reason, len(messages), not_before
+    )
 
-    # Process messages for each host
-    for host_id, host_messages in messages_by_host.items():
-        # Check if host exists and is approved
-        host = db.query(Host).filter(Host.id == host_id).first()
-        if not host:
-            logger.warning(
-                "Host %d not found, marking outbound messages as failed", host_id
-            )
-            for message in host_messages:
-                server_queue_manager.mark_failed(
-                    message.message_id, "Host not found", db=db
-                )
-            continue
 
-        if host.approval_status != "approved":
-            logger.warning(
-                "Host %d not approved, marking outbound messages as failed", host_id
-            )
-            for message in host_messages:
-                server_queue_manager.mark_failed(
-                    message.message_id,
-                    f"Host not approved (status: {host.approval_status})",
-                    db=db,
-                )
-            continue
+async def _send_to_host(db, host_id, now, deadline, seen) -> int:
+    """Deliver this host's due messages; returns how many were handled."""
+    from backend.persistence.models import Host  # noqa: PLC0415
+    from backend.services.maintenance_window_service import (  # noqa: PLC0415
+        GATED_MESSAGE_TYPES,
+        is_dispatch_allowed,
+    )
 
-        # Maintenance-window gating (Phase 14.2): defer gated change actions
-        # (command / update_request) when the host is outside its allowed
-        # windows or inside a blackout.  Evaluated once per host per tick; the
-        # message stays PENDING and is retried next tick when the window opens.
-        # Control-plane pushes (e.g. logging_config_update) are never gated.
-        from backend.services.maintenance_window_service import (  # noqa: PLC0415
-            GATED_MESSAGE_TYPES,
-            is_dispatch_allowed,
+    messages = [
+        message
+        for message in server_queue_manager.dequeue_messages_for_host(
+            host_id=host_id,
+            direction=QueueDirection.OUTBOUND,
+            limit=OUTBOUND_PER_HOST,
+            db=db,
         )
+        if message.message_id not in seen
+    ]
+    seen.update(message.message_id for message in messages)
+    if not messages:
+        return 0
 
-        gated_pending = [
-            m for m in host_messages if m.message_type in GATED_MESSAGE_TYPES
-        ]
-        dispatch_allowed = True
-        if gated_pending:
-            dispatch_allowed = is_dispatch_allowed(db, host_id, now)
-            if not dispatch_allowed:
-                logger.info(
-                    "Maintenance window closed for host %s; deferring %d gated "
-                    "message(s) until the next window opens",
-                    host.fqdn,
-                    len(gated_pending),
-                )
+    host = db.query(Host).filter(Host.id == host_id).first()
+    if host is None or host.approval_status != "approved":
+        reason = (
+            "Host not found"
+            if host is None
+            else f"Host not approved (status: {host.approval_status})"
+        )
+        logger.warning("%s for host %s; failing its outbound messages", reason, host_id)
+        for message in messages:
+            server_queue_manager.mark_failed(message.message_id, reason, db=db)
+        return len(messages)
 
-        # Process each message for this host (skip gated ones while deferred).
-        for message in host_messages:
-            if not dispatch_allowed and message.message_type in GATED_MESSAGE_TYPES:
-                continue
-            await process_outbound_message(message, host, db)
+    # Maintenance-window gating (Phase 14.2): change actions wait while the
+    # host is outside its windows or in a blackout; control-plane pushes
+    # (e.g. logging_config_update) are never gated.  Deferred with a
+    # not-before time, so they stop occupying the drain until it is re-checked.
+    gated = [m for m in messages if m.message_type in GATED_MESSAGE_TYPES]
+    if gated and not is_dispatch_allowed(db, host_id, now):
+        _defer(gated, now, f"Maintenance window closed for host {host.fqdn}")
+        messages = [m for m in messages if m.message_type not in GATED_MESSAGE_TYPES]
+
+    sent = 0
+    for message in messages:
+        await process_outbound_message(message, host, db)
+        sent += 1
+        if time.monotonic() >= deadline:
+            break
+    return sent
+
+
+async def process_outbound_messages(db: Session) -> bool:  # NOSONAR
+    """Deliver due outbound messages within this call's time budget.
+
+    Returns True when it stopped with work still waiting, so the caller can
+    come straight back instead of sleeping."""
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    deadline = time.monotonic() + OUTBOUND_BUDGET_SECONDS
+    seen, visited = set(), set()
+    while time.monotonic() < deadline:
+        host_ids = _waiting_hosts(db, now, OUTBOUND_HOST_BATCH, visited)
+        if not host_ids:
+            return False
+        for host_id in host_ids:
+            if time.monotonic() >= deadline:
+                return True
+            visited.add(host_id)
+            await _send_to_host(db, host_id, now, deadline, seen)
+    return True
 
 
 def local_hostnames() -> list:

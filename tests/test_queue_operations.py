@@ -565,7 +565,12 @@ class TestQueueOperationsRetryUnacknowledged:
 
         mock_db = MagicMock()
         # First call for stale messages query
-        mock_db.query.return_value.filter.return_value.all.return_value = [mock_msg]
+        mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = [
+            (mock_msg.message_id, mock_msg.message_data)
+        ]
+        mock_db.query.return_value.filter.return_value.update.return_value = (
+            1  # claimed
+        )
         # Second call for mark_failed lookup
         mock_db.query.return_value.filter_by.return_value.first.return_value = mock_msg
         mock_get_db.return_value = iter([mock_db])

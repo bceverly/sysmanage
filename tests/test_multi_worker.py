@@ -300,7 +300,8 @@ def test_local_hostnames_are_lower_cased():
     from backend.websocket.connection_manager import connection_manager
 
     with patch.dict(connection_manager.hostname_to_agent, {"Web-01.Example.com": "a"}):
-        assert "web-01.example.com" in outbound_processor.local_hostnames()
+        names = outbound_processor.local_hostnames()
+    assert names.count("web-01.example.com") == 1
 
 
 # -- counting the processes ------------------------------------------------------

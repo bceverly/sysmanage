@@ -21,7 +21,7 @@ through the queue-manager status transitions runs for real.  "Now" is pinned to
 a fixed instant so recurrence math is deterministic (no wall-clock flakiness).
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
@@ -33,6 +33,7 @@ from backend.persistence.models import (
     MaintenanceWindowScope,
     MessageQueue,
 )
+from backend.services import maintenance_window_service as mw_service
 from backend.websocket import outbound_processor
 from backend.websocket.outbound_processor import process_outbound_messages
 from backend.websocket.queue_manager import QueueDirection, QueueStatus
@@ -123,6 +124,7 @@ async def _run(session):
         send_mock,
     ):
         await process_outbound_messages(session)
+    session.commit()  # as the message processor does after every drain
     return send_mock
 
 
@@ -179,6 +181,9 @@ async def test_blackout_holds_then_release_executes(session):
     # Clear the blackout (operator disables it); same still-PENDING message now
     # releases and executes on the next tick.
     blackout.enabled = False
+    # What the window API does on every change (Phase 22.2): held messages
+    # carry a not-before time, and an operator's change releases them now.
+    mw_service.release_deferred(session)
     session.commit()
 
     send_mock = await _run(session)
@@ -208,8 +213,29 @@ async def test_closed_allow_window_holds_then_open_executes(session):
     # is now released and executes.
     window.start_time = "10:00"
     window.duration_minutes = 240
+    mw_service.release_deferred(session)  # as the window API does on a change
     session.commit()
 
     send_mock = await _run(session)
     assert send_mock.called
     assert _status(session, message_id) == QueueStatus.SENT
+
+
+@pytest.mark.asyncio
+async def test_a_held_message_is_not_rechecked_every_tick(session):
+    """Phase 22.2: a held message carries a not-before time, so it stops
+    occupying the outbound drain until the re-check (or an operator change)."""
+    host = _approved_host(session)
+    message_id = _enqueue_command(session, host.id)
+    _mk_window(session, host.id, kind="blackout", start_time="11:30",
+               duration_minutes=60)  # fmt: skip
+    await _run(session)
+    session.flush()
+    held = session.query(MessageQueue).filter_by(message_id=message_id).first()
+    assert held.scheduled_at is not None
+    assert held.error_message == mw_service.DEFERRED_MARKER
+    assert mw_service.release_deferred(session) == 1
+    session.flush()
+    assert (
+        held.scheduled_at is None or session.refresh(held) or held.scheduled_at is None
+    )

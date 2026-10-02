@@ -199,3 +199,30 @@ async def test_override_requires_reason(patched_sm):
             current_user=_admin(),
         )
     assert exc.value.status_code == 400
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("change", ["create", "update", "delete", "override"])
+async def test_every_change_releases_held_messages(patched_sm, monkeypatch, change):
+    """Phase 22.2: held messages carry a not-before time; any operator change
+    to the windows must release them so it takes effect on the next tick."""
+    admin = _admin()
+    window_id = None
+    if change in ("update", "delete"):
+        window_id = (await create_maintenance_window(_daily(), current_user=admin))[
+            "id"
+        ]
+    released = MagicMock(return_value=0)
+    monkeypatch.setattr(mod.mw, "release_deferred", released)
+    if change == "create":
+        await create_maintenance_window(_daily(), current_user=admin)
+    elif change == "update":
+        await update_maintenance_window(window_id, _daily(name="B"), current_user=admin)
+    elif change == "delete":
+        await delete_maintenance_window(window_id, current_user=admin)
+    else:
+        await create_override(
+            OverrideIn(host_id=str(uuid.uuid4()), reason="hotfix", duration_minutes=5),
+            current_user=admin,
+        )
+    released.assert_called_once()

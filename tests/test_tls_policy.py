@@ -76,7 +76,9 @@ def server_port(cert_files):
                 with config.ssl.wrap_socket(conn, server_side=True) as tls:
                     tls.recv(1)
             except (ssl.SSLError, OSError):
-                pass
+                # A refused handshake is what the CBC tests expect; the
+                # client side asserts it.  Keep serving.
+                continue
 
     thread = threading.Thread(target=serve, daemon=True)
     thread.start()
@@ -90,6 +92,7 @@ def _handshake(port, ciphers=None, maximum=None):
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
     context.check_hostname = False
     context.verify_mode = ssl.CERT_NONE
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
     if ciphers:
         context.set_ciphers(ciphers)
     if maximum:

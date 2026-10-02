@@ -44,6 +44,17 @@ from backend.services import threat_model_catalog
 
 logger = logging.getLogger(__name__)
 
+_REMEDY_CONFLICT_CODES = {
+    code: code
+    for code in (
+        remedies.UNAVAILABLE_UNKNOWN,
+        remedies.UNAVAILABLE_NOT_AUTOMATED,
+        remedies.UNAVAILABLE_NOT_OPEN,
+        remedies.UNAVAILABLE_SERVER_MANAGED,
+        remedies.UNAVAILABLE_NOTHING_TO_DO,
+    )
+}
+
 router = APIRouter(
     dependencies=[
         Depends(JWTBearer()),
@@ -373,7 +384,10 @@ async def apply_remedy(
             model.model_version if model else None,
         )
     except ValueError as exc:
-        raise HTTPException(status_code=409, detail={"code": str(exc)}) from exc
+        # Only the remedy's own reason codes reach the client, never an
+        # arbitrary exception message (CodeQL py/stack-trace-exposure).
+        code = _REMEDY_CONFLICT_CODES.get(str(exc), "remedy_unavailable")
+        raise HTTPException(status_code=409, detail={"code": code}) from exc
     db.commit()
     return result
 

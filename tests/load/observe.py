@@ -51,7 +51,9 @@ def _proc_tree(pid: int) -> list:
             ) as fh:
                 todo.extend(int(child) for child in fh.read().split())
         except (OSError, ValueError):
-            pass
+            # The process exited between listing and reading: it has no
+            # children left to count.
+            continue
     return tree
 
 

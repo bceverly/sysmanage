@@ -684,18 +684,21 @@ class QueueOperations:
             if not session_provided:
                 db.close()
 
+    # Phase 22.2: the no-ack sweep is bounded and claims each row atomically.
+    # It used to load EVERY stale SENT row at once (a 10k-host push nobody
+    # acknowledged = 10k rows, 10k warnings) and, with several workers, two
+    # workers could both retry one message and double its retry count.
+    NO_ACK_SWEEP_LIMIT = 500
+
     def retry_unacknowledged_messages(  # NOSONAR
         self, timeout_seconds: int = 60, db: Session = None
     ) -> int:
         """
-        Find messages in SENT status that haven't been acknowledged and retry them.
+        Schedule a retry for SENT messages not acknowledged within the timeout
+        (the send succeeded but the agent disconnected or crashed first).
 
-        This should be called periodically to handle messages that were sent but
-        the agent crashed/disconnected before acknowledging.
-
-        Args:
-            timeout_seconds: How long to wait for ack before considering it lost
-            db: Optional database session
+        At most ``NO_ACK_SWEEP_LIMIT`` per call, oldest first; each row is
+        claimed with one conditional UPDATE so only one worker retries it.
 
         Returns:
             int: Number of messages marked for retry
@@ -708,58 +711,35 @@ class QueueOperations:
             cutoff_time = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
                 seconds=timeout_seconds
             )
-
-            # Find SENT messages older than timeout
-            stale_messages = (
-                db.query(MessageQueue)
+            stale = (
+                db.query(MessageQueue.message_id, MessageQueue.message_data)
                 .filter(
                     MessageQueue.status == QueueStatus.SENT,
                     MessageQueue.started_at < cutoff_time,
                 )
+                .order_by(asc(MessageQueue.started_at))
+                .limit(self.NO_ACK_SWEEP_LIMIT)
                 .all()
             )
 
             retry_count = 0
-            for message in stale_messages:
-                # Log details about what we're retrying
-                try:
-                    msg_data = (
-                        json.loads(message.message_data)
-                        if isinstance(message.message_data, str)
-                        else message.message_data
+            for message_id, message_data in stale:
+                claimed = (
+                    db.query(MessageQueue)
+                    .filter(
+                        MessageQueue.message_id == message_id,
+                        MessageQueue.status == QueueStatus.SENT,
                     )
-                    command_type = msg_data.get("data", {}).get(
-                        "command_type", "unknown"
+                    .update(
+                        {"status": QueueStatus.IN_PROGRESS},
+                        synchronize_session="fetch",
                     )
-                    if command_type == "create_child_host":
-                        distribution = (
-                            msg_data.get("data", {})
-                            .get("parameters", {})
-                            .get("distribution", "unknown")
-                        )
-                        logger.warning(
-                            "NO ACK RECEIVED for create_child_host: message_id=%s, distribution=%s, sent_at=%s - scheduling retry",
-                            message.message_id,
-                            distribution,
-                            message.started_at,
-                        )
-                    else:
-                        logger.warning(
-                            "NO ACK RECEIVED: message_id=%s, command_type=%s, sent_at=%s - scheduling retry",
-                            message.message_id,
-                            command_type,
-                            message.started_at,
-                        )
-                except Exception:
-                    logger.warning(
-                        "NO ACK RECEIVED: message_id=%s, sent_at=%s - scheduling retry",
-                        message.message_id,
-                        message.started_at,
-                    )
-
-                # Use mark_failed to handle retry logic
+                )
+                if not claimed:
+                    continue  # acknowledged meanwhile, or another worker has it
+                _log_no_ack(message_id, message_data)
                 if self.mark_failed(
-                    message.message_id,
+                    message_id,
                     error_message=_("No acknowledgment received within %d seconds")
                     % timeout_seconds,
                     retry=True,
@@ -771,7 +751,7 @@ class QueueOperations:
                 db.commit()
 
             if retry_count > 0:
-                logger.info(
+                logger.warning(
                     _("Scheduled %d unacknowledged messages for retry"), retry_count
                 )
 
@@ -900,3 +880,28 @@ class QueueOperations:
                 {"message_id": message.message_id, "error": str(e)},
             )
             return {}
+
+
+def _log_no_ack(message_id, message_data) -> None:
+    """One line per unacknowledged message at debug level; create_child_host
+    keeps its warning (a VM half-created on an agent is worth a look)."""
+    try:
+        data = (
+            json.loads(message_data) if isinstance(message_data, str) else message_data
+        ) or {}
+        command = data.get("data", {})
+        if command.get("command_type") == "create_child_host":
+            logger.warning(
+                "NO ACK RECEIVED for create_child_host: message_id=%s, "
+                "distribution=%s - scheduling retry",
+                message_id,
+                command.get("parameters", {}).get("distribution", "unknown"),
+            )
+            return
+        logger.debug(
+            "No ack for %s (%s); scheduling retry",
+            message_id,
+            command.get("command_type", "unknown"),
+        )
+    except (ValueError, AttributeError, TypeError):
+        logger.debug("No ack for %s; scheduling retry", message_id)

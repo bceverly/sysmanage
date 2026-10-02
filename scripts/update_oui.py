@@ -36,9 +36,7 @@ SOURCES = {
     "mam.csv": "https://standards-oui.ieee.org/oui28/mam.csv",
     "oui36.csv": "https://standards-oui.ieee.org/oui36/oui36.csv",
 }
-OUT = os.path.join(
-    os.path.dirname(__file__), "..", "backend", "data", "oui.tsv.gz"
-)
+OUT = os.path.join(os.path.dirname(__file__), "..", "backend", "data", "oui.tsv.gz")
 MAX_VENDOR = 64
 
 
@@ -49,6 +47,8 @@ def _fetch(name: str, from_dir) -> str:
     request = urllib.request.Request(
         SOURCES[name], headers={"User-Agent": "Mozilla/5.0 sysmanage-oui-update"}
     )
+    # SOURCES is a fixed table of https:// URLs (no user input reaches it).
+    # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
     with urllib.request.urlopen(request, timeout=120) as response:  # nosec B310
         return response.read().decode("utf-8", "replace")
 
@@ -85,7 +85,9 @@ def main() -> int:
     args = parser.parse_args()
     table = build(args.from_dir)
     if len(table) < 30000:
-        print(f"refusing to write: only {len(table)} assignments parsed", file=sys.stderr)
+        print(
+            f"refusing to write: only {len(table)} assignments parsed", file=sys.stderr
+        )
         return 1
     write(table)
     print(f"wrote {len(table)} assignments to {os.path.normpath(OUT)}")
