@@ -11725,17 +11725,40 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       Still one core: ~90 msg/s arrive from 1,000 agents -- the rest is
       22.1 send-on-change (less to process) and multi-worker safety below
       (more cores).*
-- [ ] **Retry scheduling** -- inbound processing ignores `scheduled_at` and has
+- [x] **Retry scheduling** -- inbound processing ignores `scheduled_at` and has
       no ordering (a failing message is retried every second; failing rows can
       monopolize the batch); jitter the retry delay; bound the "no
       acknowledgment" sweep (`inbound_processor.py:313-322`,
       `queue_operations.py:683-803`).
-- [ ] **Outbound starvation** -- the outbound pass takes the global top 20 per
+      *DONE 2026-10-02. The intake work (2026-10-01) already gave inbound the
+      due filter, oldest-first order, a per-host cap and jittered backoff;
+      now the no-ack sweep takes at most 500 rows a pass, oldest first,
+      claims each with one conditional UPDATE (two workers can no longer both
+      retry one message and double its count), and logs one summary line
+      instead of one warning per message (create_child_host keeps its own).*
+- [x] **Outbound starvation** -- the outbound pass takes the global top 20 per
       database; messages held by a closed maintenance window or waiting for a
       polling agent stay pending and can block every other host; even
       unblocked, a 10k-host push takes 8+ minutes. Exclude deferred rows (a
       stored not-before time), round-robin per host, larger batches with a
       time budget (`outbound_processor.py:41-187`).
+      *DONE 2026-10-02. The outbound drain mirrors the inbound one:
+      oldest-waiting host first, 20 per host per round, rounds within a 0.5 s
+      budget and straight back while work remains; a host visited this drain
+      is not picked again (a host whose messages stay pending can no longer
+      hold every slot -- found by the new tests). A message held by a closed
+      window gets a 60 s not-before time and a marker; any window create /
+      edit / delete or emergency override releases every marked message at
+      once (`maintenance_window_service.release_deferred`), so an operator's
+      change still takes effect on the next tick. Hosts on the HTTP poll
+      fallback are left to their polls. `tests/test_queue_fairness.py`
+      reproduces each old failure. Harness, 1,000-agent restart storm, 4
+      workers: every Phase 22 criterion met, unchanged from before (reconnect
+      90 s, backlog peak 84, 0 expired, 0 marked down, burst 1.28) -- this
+      storm is inbound-heavy; the outbound proof is the tests. Found on the
+      way: the harness timed the reconnect from samples that still counted
+      the old connections (read 0.1 s and failed a passing run); it now
+      waits for the drop (`tests/test_load_harness_measures.py`).*
 - [x] **Multi-worker safety** -- with `SYSMANAGE_UVICORN_WORKERS` > 1 every
       tick, queue processor, phone-home and module update runs once per worker
       and queue claiming is check-then-update (double processing; concurrent

@@ -66,11 +66,23 @@ def _queue_total(sample, suffix):
 
 
 def _reconnect_seconds(timeline, restart_t, agents, fraction=0.95):
-    """Seconds after the restart until ``fraction`` of the fleet is connected."""
+    """Seconds after the restart until ``fraction`` of the fleet is connected
+    AGAIN -- after the drop.  The first samples after the restart command
+    still count the old connections (the agents have not noticed the server
+    going yet), which read as a 0.1 s "reconnect" and shrank the restart
+    window the spike ratio leaves out (seen 2026-10-02 once shutdown ran to
+    completion and the sockets closed a little later)."""
     if restart_t is None:
         return None
+    threshold = fraction * agents
+    dropped = False
     for row in timeline:
-        if row["t"] > restart_t and row["connected"] >= fraction * agents:
+        if row["t"] <= restart_t:
+            continue
+        if not dropped:
+            dropped = row["connected"] < threshold
+            continue
+        if row["connected"] >= threshold:
             return round(row["t"] - restart_t, 1)
     return None
 
