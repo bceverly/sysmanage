@@ -110,6 +110,7 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
         self.ipv4 = self.local_ip
         self.host_id: Optional[str] = None
         self.host_token: Optional[str] = None
+        self.not_before = 0.0  # a 429's Retry-After, with --identity-auth
         self.approved = False
         self.failures = 0
         self.structural = 0
@@ -185,11 +186,26 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
     async def _auth(self) -> Optional[str]:
         stats = self.fleet.stats
         try:
+            headers = {"x-agent-hostname": self.hostname}
+            if self.fleet.identity_auth and self.host_id and self.host_token:
+                # Agent 22.2: say who we are, so the limit is per host, not
+                # per (NAT) address.
+                headers.update(
+                    {"x-host-id": self.host_id, "x-host-token": self.host_token}
+                )
             async with self._http().post(f"{self.fleet.base}/api/agent/auth",
-                                         headers={"x-agent-hostname": self.hostname},
+                                         headers=headers,
                                          timeout=aiohttp.ClientTimeout(total=30)) as resp:  # fmt: skip
                 if resp.status == 429:
                     stats.counts["auth_429"] += 1
+                    if self.fleet.identity_auth:  # agent 22.2 honors Retry-After
+                        try:
+                            wait = float(resp.headers.get("Retry-After", 60))
+                        except ValueError:
+                            wait = 60.0
+                        self.not_before = time.monotonic() + wait * self._rng.uniform(
+                            1.0, 1.2
+                        )
                     return None
                 if resp.status != 200:
                     stats.counts[f"auth_http_{resp.status}"] += 1
@@ -223,6 +239,7 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
             delay = min(5 * 2 ** min(self.failures, 6), 300) * self._rng.uniform(
                 0.5, 1.5
             )
+            delay = max(delay, self.not_before - time.monotonic())
             await self.fleet.sleep(delay, scaled=False)
 
     async def _connect_once(self) -> bool:
@@ -237,7 +254,7 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
         try:
             async with websockets.connect(
                 f"{self.fleet.ws_base}/api/agent/connect?token={token}",
-                local_addr=(self.local_ip, 0), open_timeout=30, close_timeout=10,
+                local_addr=self.fleet.local_addr(self.local_ip), open_timeout=30, close_timeout=10,
                 ping_interval=HEARTBEAT_S, ping_timeout=HEARTBEAT_S / 2, max_size=2**24,
             ) as ws:  # fmt: skip
                 self.structural = 0
@@ -430,6 +447,8 @@ class Fleet:
         packages: int = 600,
         send_on_change: bool = False,
         jitter: bool = False,
+        identity_auth: bool = False,
+        bind_source: bool = True,
     ):
         self.base = base_url.rstrip("/")
         self.ws_base = self.base.replace("http" + "://", "ws" + "://", 1).replace(
@@ -439,6 +458,11 @@ class Fleet:
         self.time_scale = time_scale
         self.send_on_change = send_on_change
         self.jitter = jitter
+        self.identity_auth = identity_auth
+        # False on a REMOTE load machine: the 127.20.x.y loopback addresses
+        # only reach a server on the same machine; there every agent shares
+        # the machine's address -- the large-NAT case.
+        self.bind_source = bind_source
         self.payloads = payloads.Payloads(packages=packages)
         self.stats = FleetStats()
         self.stopping = False
@@ -446,13 +470,17 @@ class Fleet:
         self._sessions: Dict[str, aiohttp.ClientSession] = {}
         self._tasks: List[asyncio.Task] = []
 
+    def local_addr(self, local_ip: str):
+        """The source address to bind, or None to let the OS choose."""
+        return (local_ip, 0) if self.bind_source else None
+
     def http_session(self, local_ip: str) -> aiohttp.ClientSession:
         """One session per source address; force_close like the agent's
         per-call sessions (no idle keep-alive sockets)."""
         session = self._sessions.get(local_ip)
         if session is None:
             connector = aiohttp.TCPConnector(
-                local_addr=(local_ip, 0), force_close=True, limit=0
+                local_addr=self.local_addr(local_ip), force_close=True, limit=0
             )
             session = aiohttp.ClientSession(connector=connector)
             self._sessions[local_ip] = session

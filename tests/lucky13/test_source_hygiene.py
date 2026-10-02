@@ -63,7 +63,7 @@ def _hits(check, roots, suffixes, pattern, line_ok=None):
     regex = re.compile(pattern)
     found = []
     for path in _files(roots, suffixes):
-        rel = str(path.relative_to(REPO))
+        rel = path.relative_to(REPO).as_posix()  # allow-list keys use "/" on every OS
         if (check, rel) in ALLOWED:
             continue
         try:

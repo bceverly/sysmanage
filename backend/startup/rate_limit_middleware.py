@@ -21,8 +21,9 @@ Design choices, made deliberately to avoid regressions:
     comms path are never limited -- store-and-forward agent traffic must not be
     throttled.  Starlette's ``TestClient`` (client host ``testclient``) is
     exempt so the suite is unaffected.
-  * **Proxy-aware keying.** Honours the first ``X-Forwarded-For`` hop when
-    present so a reverse-proxy deployment keys on the real client, not the proxy.
+  * **Proxy-aware keying.** Behind a trusted reverse proxy
+    (``security.trusted_proxies``) it keys on the real client from
+    ``X-Forwarded-For``; anyone else's header is ignored (see client_address).
   * **Config read off the hot path's DB.** Limits come from the in-memory YAML
     config / env (not a per-request DB lookup), so enabling it adds no query.
 
@@ -37,6 +38,7 @@ from starlette.responses import JSONResponse
 
 from backend.config import config
 from backend.i18n import _
+from backend.security.client_address import client_address
 
 # Paths never subject to volume limiting (matched after version rewrite, so the
 # unversioned form covers ``/api/v1/...`` too).
@@ -135,11 +137,13 @@ def _is_exempt(path: str) -> bool:
 
 
 def _client_key(scope) -> str:
-    """Best client identifier: first X-Forwarded-For hop, else the socket IP."""
+    """The client's address: ``X-Forwarded-For`` is believed only from a
+    trusted proxy, and read from the right (Phase 22.2).  The left-most hop
+    used to be taken from anyone, so a client could pick its own key."""
+    forwarded = None
     for name, value in scope.get("headers", []):
         if name == b"x-forwarded-for":
-            forwarded = value.decode("latin-1").split(",")[0].strip()
-            if forwarded:
-                return forwarded
+            forwarded = value.decode("latin-1")
+            break
     client = scope.get("client")
-    return client[0] if client else "unknown"
+    return client_address(client[0] if client else None, forwarded)

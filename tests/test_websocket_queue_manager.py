@@ -73,16 +73,13 @@ class TestServerMessageQueueManager(unittest.TestCase):
         mock_db = Mock()
         mock_get_db.return_value = iter([mock_db])
 
-        mock_message = Mock()
-        mock_message.message_id = "msg-123"
-        mock_db.query.return_value.filter_by.return_value.first.return_value = (
-            mock_message
-        )
+        mock_db.query.return_value.filter.return_value.update.return_value = 1
 
         result = self.queue_manager.mark_completed("msg-123")
 
         assert result is True
-        assert mock_message.status == QueueStatus.COMPLETED
+        values = mock_db.query.return_value.filter.return_value.update.call_args[0][0]
+        assert values["status"] == QueueStatus.COMPLETED
         mock_db.commit.assert_called_once()
 
     @patch("backend.websocket.queue_operations.get_db")

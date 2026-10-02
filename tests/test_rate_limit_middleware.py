@@ -5,8 +5,9 @@
 """
 Tests for the rate-limit middleware (Phase 13.2).
 
-Uses an ``X-Forwarded-For`` header so the client key is a real IP rather than
-the exempt ``testclient`` host, letting the HTTP-level 429 path be exercised.
+The client sits behind a trusted proxy (loopback, the default) and sends an
+``X-Forwarded-For`` header, so the client key is a real IP rather than the
+exempt ``testclient`` host, letting the HTTP-level 429 path be exercised.
 """
 
 from fastapi import FastAPI
@@ -19,7 +20,7 @@ from backend.startup.rate_limit_middleware import (
 )
 
 
-def _app(**kwargs):
+def _app(via_proxy=True, **kwargs):
     app = FastAPI()
     app.add_middleware(RateLimitMiddleware, **kwargs)
 
@@ -35,7 +36,10 @@ def _app(**kwargs):
     def agent_status():
         return {"ok": True}
 
-    return TestClient(app)
+    # Loopback is a trusted proxy by default, so its X-Forwarded-For counts.
+    return (
+        TestClient(app, client=("127.0.0.1", 50000)) if via_proxy else TestClient(app)
+    )
 
 
 def _hdr(ip="9.9.9.9"):
@@ -49,12 +53,22 @@ class TestHelpers:
         assert _is_exempt("/api/agent/connect") is True
         assert _is_exempt("/api/v1/ping") is False
 
-    def test_client_key_prefers_xff(self):
+    def test_client_key_ignores_xff_from_an_untrusted_peer(self):
+        """Anyone can write the header: from a non-proxy it is ignored."""
         scope = {
             "headers": [(b"x-forwarded-for", b"1.2.3.4, 5.6.7.8")],
             "client": ("10.0.0.1", 1234),
         }
-        assert _client_key(scope) == "1.2.3.4"
+        assert _client_key(scope) == "10.0.0.1"
+
+    def test_client_key_reads_xff_from_the_right_behind_a_trusted_proxy(self):
+        """The proxy APPENDS the client; whatever the client sent comes first
+        and must not be believed."""
+        scope = {
+            "headers": [(b"x-forwarded-for", b"1.2.3.4, 5.6.7.8")],
+            "client": ("127.0.0.1", 1234),
+        }
+        assert _client_key(scope) == "5.6.7.8"
 
     def test_client_key_falls_back_to_socket(self):
         scope = {"headers": [], "client": ("10.0.0.1", 1234)}
@@ -90,7 +104,7 @@ class TestRateLimiting:
             assert client.get("/api/agent/status", headers=_hdr()).status_code == 200
 
     def test_testclient_host_exempt(self):
-        # No X-Forwarded-For -> client key is the TestClient host, which is exempt.
-        client = _app(enabled=True, requests=1, window_seconds=60)
+        # No proxy, no X-Forwarded-For -> the TestClient host, which is exempt.
+        client = _app(via_proxy=False, enabled=True, requests=1, window_seconds=60)
         for _ in range(5):
             assert client.get("/api/v1/ping").status_code == 200

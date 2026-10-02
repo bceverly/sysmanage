@@ -20,7 +20,9 @@ from typing import List, Optional
 import aiohttp
 from sqlalchemy import create_engine, text
 
-_CLK_TCK = os.sysconf("SC_CLK_TCK")
+# /proc is Linux-only (the harness runs there); importing must still work on
+# Windows, where the harness's pure helpers are unit-tested.
+_CLK_TCK = os.sysconf("SC_CLK_TCK") if hasattr(os, "sysconf") else 100
 
 QUEUE_SQL = text(
     "SELECT direction, status, count(*) FROM message_queue GROUP BY direction, status"

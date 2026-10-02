@@ -45,6 +45,7 @@ class TestAgentAuth:
         """Test agent authentication when rate limited."""
         # Mock rate limiting
         mock_security.is_connection_rate_limited.return_value = True
+        mock_security.retry_after.return_value = 900
 
         response = client.post("/api/agent/auth")
 

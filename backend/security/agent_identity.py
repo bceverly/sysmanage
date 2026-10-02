@@ -156,3 +156,38 @@ def log_refusal(claim: Claim, message_data: dict, source: Optional[str]) -> None
         bool(message_data.get("host_id")),
         bool(message_data.get("host_token")),
     )
+
+
+def verified_host_id(host_id, token) -> Optional[str]:
+    """The host id, if ``token`` is that host's credential; else None.
+
+    For callers without a session -- the connection limit on ``/agent/auth``
+    keys a verified agent on its host instead of its address (Phase 22.2).
+    The host's row is read from the database that owns it (its tenant's,
+    under multi-tenancy).  Never raises: any failure is "not verified"."""
+    if not host_id or not token:
+        return None
+    try:
+        host_uuid = uuid.UUID(str(host_id))
+        from sqlalchemy.orm import (
+            sessionmaker,
+        )  # pylint: disable=import-outside-toplevel
+
+        from backend.persistence.db import (
+            get_engine,
+        )  # pylint: disable=import-outside-toplevel
+        from backend.persistence.partitions import (  # pylint: disable=import-outside-toplevel
+            tenant_engine_for_host,
+        )
+
+        engine = tenant_engine_for_host(str(host_uuid)) or get_engine()
+        with sessionmaker(bind=engine)() as session:
+            stored = (
+                session.query(Host.host_token).filter(Host.id == host_uuid).scalar()
+            )
+    except Exception:  # pylint: disable=broad-exception-caught
+        logger.debug(
+            "Could not verify the identity presented for %s", sanitize_log(host_id)
+        )
+        return None
+    return str(host_uuid) if _token_matches(token, stored) else None

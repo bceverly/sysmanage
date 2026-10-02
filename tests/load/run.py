@@ -851,6 +851,21 @@ def main() -> int:
         help="agents vary their timers and splay their first collection (agent Phase 22.1)",
     )
     fleet.add_argument(
+        "--identity-auth",
+        action="store_true",
+        help="agents send host id + token to /agent/auth and honor Retry-After (agent 22.2)",
+    )
+    fleet.add_argument(
+        "--remote-fleet",
+        metavar="HOST",
+        help="run the simulated agents on HOST over ssh (venv at ~/sysmanage-loadsim/venv)",
+    )
+    fleet.add_argument(
+        "--server-address",
+        default="127.0.0.1",
+        help="the server's address as the remote fleet reaches it (with --remote-fleet)",
+    )
+    fleet.add_argument(
         "--reuse-stack",
         action="store_true",
         help="skip the database reset (by default each fleet run starts empty)",

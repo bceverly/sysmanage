@@ -281,18 +281,17 @@ class TestQueueOperationsMarkCompleted:
         """Test mark_completed succeeds."""
         from backend.websocket.queue_operations import QueueOperations
 
-        mock_msg = MagicMock()
-        mock_msg.status = QueueStatus.IN_PROGRESS
-
         mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mock_msg
+        mock_db.query.return_value.filter.return_value.update.return_value = 1
         mock_get_db.return_value = iter([mock_db])
 
         ops = QueueOperations()
         result = ops.mark_completed("msg-123")
 
         assert result is True
-        assert mock_msg.status == QueueStatus.COMPLETED
+        values = mock_db.query.return_value.filter.return_value.update.call_args[0][0]
+        assert values["status"] == QueueStatus.COMPLETED
+        mock_db.commit.assert_called_once()
 
     @patch("backend.websocket.queue_operations.get_db")
     def test_mark_completed_not_found(self, mock_get_db):
@@ -300,7 +299,7 @@ class TestQueueOperationsMarkCompleted:
         from backend.websocket.queue_operations import QueueOperations
 
         mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = None
+        mock_db.query.return_value.filter.return_value.update.return_value = 0
         mock_get_db.return_value = iter([mock_db])
 
         ops = QueueOperations()

@@ -11791,7 +11791,7 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       Still open: tenants spread across workers (one leader runs every
       tenant's ticks), and shared presence for HA (`poll_presence` and the
       fleet status endpoints read this worker's connections only).*
-- [ ] **Reconnect admission control** -- each SYSTEM_INFO does host upsert,
+- [x] **Reconnect admission control** -- each SYSTEM_INFO does host upsert,
       full package ingestion, an audit commit and a logging-config push inline;
       each WebSocket holds a DB session for its life on a default 5+10 pool.
       Token-bucket admission, push config only when its checksum changed,
@@ -11806,12 +11806,31 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       PostgreSQL's `max_connections` at startup with a loud warning; tenant
       engines use `database_pool.tenant_*`. Still open in this item:
       token-bucket admission, checksum-gated config push, ingestion via the
-      queue.*
-- [ ] **Agent connection rate limit keyed on identity, not IP** -- 20
+      queue.* *DONE 2026-10-02: registrations pass a token bucket
+      (`backend/websocket/admission.py`, 100/s burst 200 per worker,
+      `security.agent_connection_limits.admissions_per_second` /
+      `admission_burst`) -- an agent over the rate is not refused, its reply
+      comes later and it holds no DB connection while waiting; the agent
+      reports a digest of its applied logging config in SYSTEM_INFO and the
+      server pushes only when its own differs (both repos pin the same digest
+      in tests); SYSTEM_INFO-embedded packages are queued, not ingested
+      inline. 10k storm: 0 refusals, 0 demoted to polling -- see the exit
+      criteria for what did NOT hold.*
+- [x] **Agent connection rate limit keyed on identity, not IP** -- 20
       attempts per IP per 15 min, ignoring `X-Forwarded-For`: behind a proxy
       or NAT, agent 21 onward is locked out and all retry at the same second
       (fixed `Retry-After: 900`); the tracking dict never shrinks
       (`communication_security.py:235-255`, `agent.py:61`).
+      *DONE 2026-10-02. Agents (new build) send host id + token to
+      /agent/auth; a verified host is limited per host (30 / 15 min), only
+      unregistered agents per address (600 / 15 min); `Retry-After` is
+      computed from the key's oldest attempt plus jitter and the agent waits
+      it; the table prunes empty keys. `X-Forwarded-For` is believed only
+      from `security.trusted_proxies` (loopback default) and read from the
+      RIGHT -- the API rate limiter took the left-most hop from anyone, so a
+      client could choose its own key (fixed with it,
+      `backend/security/client_address.py`). Auth and connect resolve the
+      address the same way (the connection token is bound to it).*
 - [x] **Outage grace for the heartbeat monitor** -- after server downtime longer
       than the timeout, the first pass marks every host down before agents can
       reconnect, flipping `active` filters and alerting
@@ -12165,6 +12184,63 @@ unforgivable.
       *The stall is gone. The next bottleneck is now plain: the inbound queue
       drains at a fixed ~10 messages/s while the database sits at 4
       connections -- the "Agent intake throughput" item above.*
+
+      *10,000 agents, 2026-10-02 (4 workers; send-on-change, jitter,
+      identity auth; the server, PostgreSQL and all 10,000 simulated agents
+      on one 8-core laptop): FAILED. 6,898 / 10,000 connected at the end,
+      inbound backlog 127,452 and never draining, heartbeat p95 11.9 s,
+      health p95 12 s; held: 0 auth refusals, 0 demoted to polling, 0 hosts
+      marked down, 0 expired. The fleet never finished connecting even
+      before the restart: the first-connect collection (~23 reports per
+      agent) arrived at ~350 messages/s while processing managed ~16/s, and
+      worker pools ran dry ("QueuePool limit of size 24 overflow 24
+      reached"). Next bottlenecks, in order: (1) every heartbeat loads and
+      rewrites the host row inline -- ~333 write transactions/s at 10k --
+      coalesce `last_access` updates into one batched write per few
+      seconds; (2) one inbound drain thread per worker, and a 600-package
+      inventory replacement per message -- profile at 10k (py-spy), then
+      parallel drains and bulk ingestion; (3) re-run on hardware where the
+      simulator does not share the server's cores.*
+
+      *Heartbeat batching (2026-10-02, same 10k storm): a connection's first
+      heartbeat takes the full path; identical ones after it only record
+      "seen now", written by one bulk UPDATE per database every 5 s
+      (`backend/websocket/heartbeat_batch.py`). Connected at the end 6,898 ->
+      9,835 / 10,000, reconnect to 95% never -> 256 s, heartbeat p95 11.9 ->
+      6.0 s, health p95 12.1 -> 6.7 s; still 0 refusals, 0 polling, 0 marked
+      down, 0 expired. Still FAILED: inbound backlog peaked at 149,921 and
+      kept growing (processing ~25-75 messages/s against ~350 offered in the
+      first-connect burst). PostgreSQL is not the cap (500 allowed, ~110
+      used); each worker is CPU-bound (~75% of a core, one interpreter lock)
+      on a laptop also running PostgreSQL and the simulator. A py-spy profile
+      at 2,000 agents (which drained at ~130/s): in the drain 87% of time is
+      database/ORM work -- inventory ingestion 24%, per-message
+      mark_processing + mark_completed 12%, re-validating already-verified
+      hosts 5%; on the event loop 41% of time is queueing inbound messages
+      (a duplicate-check query, an insert and a commit each). Next: per-message
+      CPU -- cheaper enqueue off the loop, one transaction per processed
+      message, no re-validation of verified hosts, bulk (Core) inventory
+      ingestion; then a 10k run with the simulator on another machine.*
+
+      *Per-message CPU cuts + the simulator on another machine (2026-10-02):
+      inbound queueing off the event loop (a worker thread, still in order
+      per agent), one UPDATE for "completed" and no re-read after a claim,
+      handlers skip re-validating the host the drain just loaded, inventory
+      replaced with one bulk INSERT in one transaction; the harness gained
+      `--remote-fleet HOST` (the agents on the FreeBSD box over ssh; the
+      laptop keeps the server, PostgreSQL, the observer and the restart --
+      and all 10,000 agents share ONE address, the large-NAT case). 10k
+      storm: connected 9,975 / 10,000, reconnect 245 s, heartbeat p95 3.9 s,
+      health p95 3.6 s; 0 refusals, 0 polling, 0 marked down, 0 expired.
+      Processing rose 15 -> 32 -> 43 messages/s (best minute 50 -> 76 ->
+      102). Still FAILED on the backlog (140,226 at the end): what is left is
+      the first-connect burst -- every agent's first report of every type,
+      ~300,000 messages in ten minutes, over an hour to drain. Steady state
+      (send-on-change, 15-minute samples) is an estimated 25-40/s at 10k, which
+      the server now keeps up with. Next: (1) more workers / drain threads
+      per worker (each of 4 workers ~84% of a core); (2) a fresh profile
+      with these cuts in; (3) an agent-side cap on the first-connect burst
+      (send the initial reports over minutes, not seconds).*
 - [ ] Docs: a scaling guide (worker count, pool sizing, private mirrors,
       federation intervals) + 14-language i18n.
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every

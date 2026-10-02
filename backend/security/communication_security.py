@@ -232,36 +232,66 @@ class WebSocketSecurityManager:
 
         return True, ""
 
-    def is_connection_rate_limited(self, client_ip: str) -> bool:
-        """Check if connection attempts from IP are rate limited."""
+    # -- connection limit (Phase 22.2) -----------------------------------------
+    #
+    # Keyed on WHO is connecting: a verified host ("host:<id>") gets its own
+    # allowance; only an agent with no identity yet (first registration, an
+    # agent older than 22.2) is counted by address ("ip:<address>"), with an
+    # allowance big enough for an office behind one NAT address.  It used to
+    # be 20 per IP per 15 minutes for everyone: agent 21 behind a NAT was
+    # locked out, and every refused agent was told to come back in exactly
+    # 900 s, so they all did at once.
+
+    def connection_limits(self) -> Dict[str, int]:
+        """``per_host``, ``per_address`` and ``window_seconds``, from
+        ``security.agent_connection_limits`` (every key optional)."""
+        defaults = {"per_host": 30, "per_address": 600, "window_seconds": 900}
+        raw = (self.config.get("security") or {}).get("agent_connection_limits")
+        limits = dict(defaults)
+        if isinstance(raw, dict):
+            for key, default in defaults.items():
+                try:
+                    limits[key] = max(1, int(raw.get(key, default)))
+                except (TypeError, ValueError):
+                    limits[key] = default
+        return limits
+
+    def _recent(self, key: str, window: int) -> list:
         current_time = time.time()
+        attempts = [
+            attempt
+            for attempt in self.connection_attempts.get(key, [])
+            if current_time - attempt < window
+        ]
+        if attempts:
+            self.connection_attempts[key] = attempts
+        else:
+            self.connection_attempts.pop(key, None)  # never grows without bound
+        return attempts
 
-        # Clean old attempts (keep last 15 minutes)
-        if client_ip in self.connection_attempts:
-            self.connection_attempts[client_ip] = [
-                attempt_time
-                for attempt_time in self.connection_attempts[client_ip]
-                if current_time - attempt_time < 900  # 15 minutes
-            ]
-
-        # Check rate limit (max 20 connections per 15 minutes)
-        attempts = len(self.connection_attempts.get(client_ip, []))
-        if attempts >= 20:
+    def is_connection_rate_limited(self, key: str, limit: Optional[int] = None) -> bool:
+        """Has ``key`` used up its connection attempts for the window?"""
+        limits = self.connection_limits()
+        limit = limit if limit is not None else limits["per_address"]
+        attempts = self._recent(key, limits["window_seconds"])
+        if len(attempts) >= limit:
             logger.warning(
-                "Rate limiting connection attempts from IP: %s", client_ip
+                "Rate limiting agent connection attempts: %s", sanitize_log(key)
             )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
             return True
-
         return False
 
-    def record_connection_attempt(self, client_ip: str) -> None:
+    def retry_after(self, key: str) -> int:
+        """Seconds until ``key`` may try again: until its oldest attempt in
+        the window expires, plus jitter so a refused crowd spreads out."""
+        window = self.connection_limits()["window_seconds"]
+        attempts = self._recent(key, window)
+        wait = window - (time.time() - min(attempts)) if attempts else 30
+        return int(max(30, wait) + secrets.randbelow(60))
+
+    def record_connection_attempt(self, key: str) -> None:
         """Record a connection attempt for rate limiting."""
-        current_time = time.time()
-
-        if client_ip not in self.connection_attempts:
-            self.connection_attempts[client_ip] = []
-
-        self.connection_attempts[client_ip].append(current_time)
+        self.connection_attempts.setdefault(key, []).append(time.time())
 
     def cleanup_stale_connections(self) -> None:
         """Clean up stale connection records."""

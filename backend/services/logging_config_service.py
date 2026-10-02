@@ -16,6 +16,8 @@ DB-over-yaml: a stored ``logging_setting`` row always wins; when absent the
 yaml value (or a sane default) is used.
 """
 
+import hashlib
+import json
 import logging
 from typing import Dict, List, Optional
 
@@ -193,8 +195,27 @@ def _main_session():
     return sessionmaker(bind=db_module.get_engine())()
 
 
-def push_logging_to_host(db: Session, host: Host) -> bool:
+def config_digest(payload) -> Optional[str]:
+    """Fingerprint of a logging payload as the agent receives it.
+
+    Byte-for-byte the agent's ``core/logging_digest.config_digest``: SHA-256
+    of the canonical JSON (sorted keys, no spaces).  Phase 22.2: an agent
+    reports the fingerprint of what it runs with, and an unchanged config is
+    not pushed again on every reconnect."""
+    if not isinstance(payload, dict) or not payload:
+        return None
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def push_logging_to_host(
+    db: Session, host: Host, agent_digest: Optional[str] = None
+) -> bool:
     """Enqueue the resolved logging config for one host (used on connect).
+
+    ``agent_digest`` is the fingerprint the agent reported for the config it
+    already runs with; when it matches, nothing is pushed (Phase 22.2: a
+    server restart used to push to every reconnecting agent).
 
     ``db`` is the host's (partition-routed) session for the queue write; the
     server-global settings are read from the main engine.  Returns True if a
@@ -213,6 +234,8 @@ def push_logging_to_host(db: Session, host: Host) -> bool:
         main.close()
     if resolved is None:
         return False
+    if agent_digest and agent_digest == config_digest(_agent_payload(resolved)):
+        return False  # the agent already runs with exactly this
     _enqueue_logging_update(db, str(host.id), resolved)
     # enqueue_message only FLUSHES a caller-provided session -- the commit is the
     # caller's job.  The system_info handler that invokes us does not commit

@@ -75,6 +75,11 @@ async def validate_host_id(
     if not host_id:
         return True  # No host_id to validate
 
+    # The inbound drain has just loaded this very host (Phase 22.2: the
+    # re-check in every handler was 5% of the drain's time).
+    if str(getattr(connection, "verified_host_id", "")) == str(host_id):
+        return True
+
     # First try to find by exact host_id
     host = db.query(Host).filter(Host.id == host_id).first()
 

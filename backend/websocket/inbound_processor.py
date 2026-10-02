@@ -599,6 +599,7 @@ async def process_validated_message(message, host, db: Session, host_db=None) ->
         # Create connection object with host info
         mock_connection = MockConnection(host.id)
         mock_connection.hostname = host.fqdn
+        mock_connection.verified_host_id = str(host.id)  # handlers skip the re-check
 
         logger.info(
             _(

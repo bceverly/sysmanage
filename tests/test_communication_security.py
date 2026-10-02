@@ -366,12 +366,14 @@ class TestWebSocketSecurityManager:
         client_ip = "192.168.1.100"
         current_time = time.time()
 
-        # Add 25 connection attempts (over the 20 limit)
+        # Add 25 connection attempts (over a limit of 20)
         self.security_manager.connection_attempts[client_ip] = [
             current_time - i for i in range(25)
         ]
 
-        is_limited = self.security_manager.is_connection_rate_limited(client_ip)
+        is_limited = self.security_manager.is_connection_rate_limited(
+            client_ip, limit=20
+        )
         assert is_limited is True
 
     def test_is_connection_rate_limited_old_attempts_cleaned(self):

@@ -111,7 +111,8 @@ describe('AssetDiscovery page', () => {
         render(<AssetDiscovery />);
         await screen.findByText('00:1a:2b:00:00:01');
         expect(screen.getByText(/Agents only listen/)).toBeTruthy();
-        expect(screen.getByText((text) => text.includes('win-01.example.com'))).toBeTruthy();
+        // Anchored, dots escaped: the observer's line starts with its hostname.
+        expect(screen.getByText(/^win-01\.example\.com: /)).toBeTruthy();
         expect(screen.getByText(/has stopped reporting/)).toBeTruthy();
         expect(screen.getByText(/not supported on this platform/)).toBeTruthy();
         expect(screen.getByText(/2 hosts run an agent that cannot take part/)).toBeTruthy();

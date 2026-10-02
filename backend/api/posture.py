@@ -384,9 +384,11 @@ async def apply_remedy(
             model.model_version if model else None,
         )
     except ValueError as exc:
-        # Only the remedy's own reason codes reach the client, never an
-        # arbitrary exception message (CodeQL py/stack-trace-exposure).
-        code = _REMEDY_CONFLICT_CODES.get(str(exc), "remedy_unavailable")
+        # The reason comes from the remedy's own plan, never from the
+        # exception (CodeQL py/stack-trace-exposure): apply() refuses exactly
+        # when preview() says the remedy is unavailable.
+        reason = remedies.preview(db, item, rule).get("unavailable_reason")
+        code = reason if reason in _REMEDY_CONFLICT_CODES else "remedy_unavailable"
         raise HTTPException(status_code=409, detail={"code": code}) from exc
     db.commit()
     return result

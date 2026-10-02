@@ -10,7 +10,7 @@ Handles software inventory, package updates, available packages, third-party rep
 import logging
 from datetime import datetime, timezone
 
-from sqlalchemy import delete, update
+from sqlalchemy import delete, insert, update
 from sqlalchemy.orm import Session
 
 from backend.api.error_constants import error_host_not_registered
@@ -60,33 +60,37 @@ async def handle_software_update(db: Session, connection, message_data: dict):
         # Handle software packages
         software_packages = message_data.get("software_packages", [])
         if software_packages:
-            # Delete existing software packages for this host and commit
-            # to ensure deletion is fully persisted before inserting new data
+            # Replace the host's inventory in ONE transaction with ONE bulk
+            # INSERT (Phase 22.2: one ORM object per package, ~600 per report,
+            # was the inbound drain's largest cost).  Core statements run in
+            # order, so the delete is never overtaken by the inserts -- the
+            # reason the ORM version committed in between.
             db.execute(
                 delete(SoftwarePackage).where(
                     SoftwarePackage.host_id == connection.host_id
                 )
             )
-            db.commit()
-
-            # Add new software packages
-            for package in software_packages:
-                now = datetime.now(timezone.utc).replace(tzinfo=None)
-                software_package = SoftwarePackage(
-                    host_id=connection.host_id,
-                    package_name=package.get("package_name"),
-                    package_version=package.get("version") or "unknown",
-                    package_manager=package.get("package_manager", "unknown"),
-                    package_description=package.get("description"),
-                    architecture=package.get("architecture"),
-                    install_path=package.get("installation_path"),
-                    channel=package.get("channel"),
-                    revision=package.get("revision"),
-                    confinement=package.get("confinement"),
-                    created_at=now,
-                    updated_at=now,
-                )
-                db.add(software_package)
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
+            db.execute(
+                insert(SoftwarePackage),
+                [
+                    {
+                        "host_id": connection.host_id,
+                        "package_name": package.get("package_name"),
+                        "package_version": package.get("version") or "unknown",
+                        "package_manager": package.get("package_manager", "unknown"),
+                        "package_description": package.get("description"),
+                        "architecture": package.get("architecture"),
+                        "install_path": package.get("installation_path"),
+                        "channel": package.get("channel"),
+                        "revision": package.get("revision"),
+                        "confinement": package.get("confinement"),
+                        "created_at": now,
+                        "updated_at": now,
+                    }
+                    for package in software_packages
+                ],
+            )
 
         # Update the software updated timestamp on the host
         stmt = (

@@ -72,7 +72,8 @@ def test_apply_writes_once_and_never_prints_the_password(tmp_path, capsys):
         "admin_password"
     ]
     assert password not in out and "generated" in out
-    assert stat.S_IMODE(config.stat().st_mode) == 0o640  # permissions kept
+    if os.name != "nt":  # POSIX permission bits; Windows has none to keep
+        assert stat.S_IMODE(config.stat().st_mode) == 0o640  # permissions kept
     text = config.read_text(encoding="utf-8")
     assert "left unchanged" in inst.apply_to_file(str(config))
     assert config.read_text(encoding="utf-8") == text

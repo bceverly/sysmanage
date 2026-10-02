@@ -28,6 +28,7 @@ from backend.services.background_ticks import start_licensed_ticks
 from backend.services.email_service import email_service
 from backend.startup.leadership import check_worker_support, leadership, singleton_task
 from backend.utils.verbosity_logger import get_logger
+from backend.websocket import heartbeat_batch
 from backend.websocket.message_processor import message_processor
 
 logger = get_logger("backend.startup.lifecycle")
@@ -962,5 +963,6 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     except Exception as e:
         logger.exception("Error stopping heartbeat monitor: %s", e)
 
+    heartbeat_batch.flush()  # heartbeats recorded since the last flush (22.2)
     await leadership.stop()  # releases the leader lock for the next worker
     logger.info("=== FASTAPI LIFESPAN SHUTDOWN COMPLETE ===")

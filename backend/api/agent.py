@@ -8,6 +8,7 @@ WebSockets with real-time bidirectional communication capabilities.
 Enhanced with security validation and secure communication protocols.
 """
 
+import asyncio
 import json
 from datetime import datetime, timezone
 
@@ -19,6 +20,7 @@ from fastapi import (
     WebSocket,
     WebSocketDisconnect,
 )
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session, sessionmaker
@@ -34,9 +36,12 @@ from backend.config.config_push import config_push_manager
 from backend.i18n import _
 from backend.persistence.db import get_db
 from backend.persistence.models import Host, InstallationPackage, InstallationRequest
+from backend.security.agent_identity import verified_host_id
+from backend.security.client_address import request_client_address
 from backend.security.communication_security import websocket_security
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import get_logger, sanitize_log
+from backend.websocket import admission
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import ErrorMessage, MessageType, create_message
 
@@ -63,21 +68,38 @@ async def authenticate_agent(request: Request):
     Generate authentication token for agent WebSocket connection.
     This endpoint should be called before establishing WebSocket connection.
     """
-    client_host = request.client.host if request.client else "unknown"
+    # The real client behind a trusted reverse proxy, never a header anyone
+    # can write (Phase 22.2; see client_address).
+    client_host = request_client_address(request)
 
-    # Check rate limiting
-    if websocket_security.is_connection_rate_limited(client_host):
+    # Phase 22.2: a VERIFIED agent is limited by host, so the agents behind
+    # one NAT address no longer share one allowance; only an agent without an
+    # identity yet (first registration, older agents) is counted by address.
+    host_id = await run_in_threadpool(
+        verified_host_id,
+        request.headers.get("x-host-id"),
+        request.headers.get("x-host-token"),
+    )
+    limits = websocket_security.connection_limits()
+    if host_id:
+        key, limit = f"host:{host_id}", limits["per_host"]
+    else:
+        key, limit = f"ip:{client_host}", limits["per_address"]
+
+    if websocket_security.is_connection_rate_limited(key, limit):
         # 429, not 200: a 200 with no token was read by agents as an EMPTY
         # token, whose WebSocket rejection they took for "this network blocks
-        # WebSockets" -- demoting them to polling (found 2026-09-29).
+        # WebSockets" -- demoting them to polling (found 2026-09-29).  The
+        # wait is computed and jittered: a fixed 900 s sent every refused
+        # agent back in the same second.
+        retry_after = websocket_security.retry_after(key)
         return JSONResponse(
             status_code=429,
-            content={"error": _("Rate limit exceeded"), "retry_after": 900},
-            headers={"Retry-After": "900"},
+            content={"error": _("Rate limit exceeded"), "retry_after": retry_after},
+            headers={"Retry-After": str(retry_after)},
         )
 
-    # Record connection attempt
-    websocket_security.record_connection_attempt(client_host)
+    websocket_security.record_connection_attempt(key)
 
     # For now, we'll extract hostname from headers or use IP
     # In a full implementation, this might come from client certificates
@@ -100,7 +122,9 @@ async def agent_connect(websocket: WebSocket):
     Enhanced with authentication and message validation.
     """
     logger.info("WebSocket connection attempt started")
-    client_host = websocket.client.host if websocket.client else "unknown"
+    # Resolved exactly as /agent/auth resolves it: the connection token is
+    # bound to this address.
+    client_host = request_client_address(websocket)
     logger.info(
         "Client host: %s", client_host
     )  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
@@ -297,8 +321,11 @@ async def _process_websocket_message(data, connection, db, connection_id):
         ]:
             await _handle_time_sensitive_message(message, connection, db)
         else:
-            # Queue all other messages for background processing
-            _enqueue_inbound_message(message, connection, db)
+            # Queue all other messages for background processing -- in a
+            # worker thread (Phase 22.2: the insert + commit on the event loop
+            # was 41% of its time at 2,000 agents).  Awaited, so one agent's
+            # messages still queue in order.
+            await asyncio.to_thread(_enqueue_inbound_message, message, connection, db)
 
     except json.JSONDecodeError:
         # Invalid JSON - send error
@@ -736,6 +763,12 @@ async def _handle_system_info_message(message, connection, db):
     logger.info(
         "Calling handle_system_info - IMMEDIATE PROCESSING for connection registration"
     )
+    # Phase 22.2 admission control: in a reconnect storm, registrations are
+    # spread at a steady rate; this agent's reply just comes later.  Before
+    # the handler touches the database, so a waiting agent holds no connection.
+    waited = await admission.gate().wait_turn()
+    if waited:
+        logger.debug("Registration admitted after %.1f s (reconnect storm)", waited)
     try:
         # Process system_info immediately for connection registration
         # This is critical to ensure the connection manager is updated

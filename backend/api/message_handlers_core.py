@@ -20,6 +20,7 @@ from backend.persistence.models import Host, HostChild
 from backend.security import agent_identity
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
+from backend.websocket import heartbeat_batch
 
 # Use standard logger that respects /etc/sysmanage.yaml configuration
 logger = logging.getLogger(__name__)
@@ -247,9 +248,9 @@ async def _handle_system_info_impl(db: Session, connection, message_data: dict):
         # ``connection.hostname`` was still None at receive time.  Now that
         # registration is complete, replay them through the normal enqueue
         # path so they're persisted with proper ``_connection_info``.
-        from backend.api.agent import (
+        from backend.api.agent import (  # pylint: disable=import-outside-toplevel
             flush_pending_inbound_messages,
-        )  # pylint: disable=import-outside-toplevel
+        )
 
         flush_pending_inbound_messages(connection, db)
 
@@ -334,9 +335,9 @@ def _auto_approve_via_child_token(db, host, hostname, auto_approve_token):
     # Generate client certificate for the auto-approved host
     from cryptography import x509  # noqa: PLC0415
 
-    from backend.security.certificate_manager import (
+    from backend.security.certificate_manager import (  # noqa: PLC0415
         certificate_manager,
-    )  # noqa: PLC0415
+    )
 
     cert_pem, _unused = certificate_manager.generate_client_certificate(
         host.fqdn, host.id
@@ -381,9 +382,9 @@ def _auto_approve_via_child_token(db, host, hostname, auto_approve_token):
     # child hosts created through the manage-children flow weren't picking up
     # their default mirror.  Best-effort: any failure is logged and swallowed.
     try:
-        from backend.api.repository_mirroring import (
+        from backend.api.repository_mirroring import (  # pylint: disable=import-outside-toplevel
             apply_default_mirrors_for_new_host,
-        )  # pylint: disable=import-outside-toplevel
+        )
 
         apply_default_mirrors_for_new_host(str(host.id))
     except (
@@ -446,9 +447,9 @@ def _build_system_info_update_values(message_data, connection, host, platform):
     # stays NULL, host_supports() answers "unknown" for every host, and the
     # dispatch gate in queue_operations can never fire.  An unusable report
     # yields {} and leaves any previous advertisement in place.
-    from backend.services.agent_capability_service import (
+    from backend.services.agent_capability_service import (  # noqa: PLC0415
         capability_update_values,
-    )  # noqa: PLC0415
+    )
 
     update_values.update(
         capability_update_values(message_data.get("agent_capabilities"))
@@ -469,27 +470,50 @@ def _build_system_info_update_values(message_data, connection, host, platform):
     return update_values, is_privileged
 
 
+def _queue_software_packages(db, host, software_packages) -> None:
+    from backend.websocket.messages import MessageType  # noqa: PLC0415
+    from backend.websocket.queue_enums import QueueDirection  # noqa: PLC0415
+    from backend.websocket.queue_operations import QueueOperations  # noqa: PLC0415
+
+    try:
+        QueueOperations().enqueue_message(
+            message_type=MessageType.SOFTWARE_INVENTORY_UPDATE.value,
+            message_data={
+                "host_id": str(host.id),
+                "software_packages": software_packages,
+            },
+            direction=QueueDirection.INBOUND,
+            host_id=str(host.id),
+            db=db,
+            host_verified=True,
+        )
+        db.commit()
+        logger.info(
+            "Queued %d software packages from SYSTEM_INFO for %s",
+            len(software_packages),
+            sanitize_log(host.fqdn),
+        )
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        db.rollback()
+        logger.warning(
+            "Could not queue SYSTEM_INFO software packages for %s: %s",
+            sanitize_log(host.fqdn),
+            exc,
+        )
+
+
 async def _process_approved_system_info(
     db, connection, host, hostname, message_data, platform, ipv4, ipv6, is_privileged
 ):
     """Post-approval SYSTEM_INFO work: ingest software packages, audit the
     connection, and build the ``registration_success`` response."""
-    # Process software packages if included in SYSTEM_INFO message
+    # Software packages inside SYSTEM_INFO (older agents) go through the queue
+    # like any inventory report (Phase 22.2): ingesting thousands of rows
+    # inline held up the registration reply, and in a reconnect storm every
+    # agent's reply.
     software_packages = message_data.get("software_packages", [])
     if software_packages:
-        logger.info(
-            "Processing %d software packages from SYSTEM_INFO message",
-            len(software_packages),
-        )
-        from backend.api.handlers import handle_software_update  # noqa: PLC0415
-
-        # Create software update message data
-        software_message = {
-            "host_id": str(host.id),
-            "software_packages": software_packages,
-        }
-        # Call software update handler
-        await handle_software_update(db, connection, software_message)
+        _queue_software_packages(db, host, software_packages)
 
     # Log successful agent registration/connection
     AuditService.log(
@@ -515,7 +539,9 @@ async def _process_approved_system_info(
     try:
         from backend.services import logging_config_service as _logsvc  # noqa: PLC0415
 
-        _logsvc.push_logging_to_host(db, host)
+        _logsvc.push_logging_to_host(
+            db, host, agent_digest=message_data.get("logging_config_digest")
+        )
     except Exception as exc:  # pylint: disable=broad-exception-caught
         logger.warning(
             "Could not push logging config to %s: %s", sanitize_log(hostname), exc
@@ -567,6 +593,22 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
             "error_type": "host_not_registered",
             "message": error_host_not_registered(),
             "data": {},
+        }
+
+    # Phase 22.2: a heartbeat that changes nothing but "seen now" is batched
+    # (heartbeat_batch) -- no row load, no commit on the WebSocket path.
+    if already_verified and heartbeat_batch.can_batch(connection, message_data):
+        heartbeat_batch.note(connection.host_id, db.get_bind())
+        await connection.send_message(
+            {
+                "message_type": "ack",
+                "message_id": message_data.get("message_id", "unknown"),
+                "data": {"status": "received"},
+            }
+        )
+        return {
+            "message_type": "heartbeat_ack",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
     if hasattr(connection, "host_id") and connection.host_id:
@@ -697,6 +739,8 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
 
                 # Commit changes
                 db.commit()
+                if already_verified:
+                    heartbeat_batch.remember(connection, message_data)
                 logger.info(
                     "Heartbeat: Updated last_access for %s to %s",
                     host.fqdn,
@@ -717,9 +761,9 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                 # config push, etc.  Never create the orphan for a host_id we
                 # know is tenant-bound -- the heartbeat is also processed on the
                 # tenant DB via the inbound queue.
-                from backend.persistence.partitions import (
+                from backend.persistence.partitions import (  # noqa: PLC0415
                     tenant_engine_for_host,
-                )  # noqa: PLC0415
+                )
 
                 agent_host_id = message_data.get("host_id") or connection.host_id
                 if (
@@ -771,9 +815,9 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                     # capability advertisement until its NEXT SYSTEM_INFO, so a
                     # freshly enrolled limited agent would look full-capability
                     # for one cycle.  Same rule, applied at birth.
-                    from backend.services.agent_capability_service import (
+                    from backend.services.agent_capability_service import (  # noqa: PLC0415
                         apply_capability_report,
-                    )  # noqa: PLC0415
+                    )
 
                     apply_capability_report(
                         host, message_data.get("agent_capabilities")

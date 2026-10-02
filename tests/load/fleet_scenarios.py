@@ -26,7 +26,10 @@ On today's code these are EXPECTED to fail -- that is the baseline.  With
 import asyncio
 import json
 import statistics
+import subprocess  # nosec B404 - fixed argv lists to ssh/scp
 import time
+from collections import Counter
+from types import SimpleNamespace
 from typing import List, Optional
 
 from sqlalchemy import create_engine, text
@@ -214,6 +217,7 @@ async def run_fleet(args) -> dict:
         args.packages,
         send_on_change=args.send_on_change,
         jitter=args.jitter,
+        identity_auth=getattr(args, "identity_auth", False),
     )
     print(
         f"enrolling {args.agents} agents from {fleet.source_ips} source address(es) ..."
@@ -266,9 +270,117 @@ async def run_fleet(args) -> dict:
     }
 
 
+# -- the fleet on another machine ------------------------------------------------
+
+_REMOTE_DIR = "sysmanage-loadsim"
+_SHIPPED = ("tests/__init__.py", "tests/load/__init__.py", "tests/load/fleet.py",
+            "tests/load/payloads.py", "tests/load/fleet_remote.py")  # fmt: skip
+
+
+def _ship_code(host: str) -> None:
+    """Copy the simulator to ``host:~/sysmanage-loadsim/code`` (a venv with
+    aiohttp + websockets is expected at ``~/sysmanage-loadsim/venv``)."""
+    root = stack.REPO
+    subprocess.run(["ssh", "-o", "BatchMode=yes", host,
+                    f"mkdir -p {_REMOTE_DIR}/code/tests/load"], check=True)  # fmt: skip
+    for rel in _SHIPPED:
+        subprocess.run(["scp", "-q", "-o", "BatchMode=yes", str(root / rel),
+                        f"{host}:{_REMOTE_DIR}/code/{rel}"], check=True)  # fmt: skip
+
+
+def _remote_fleet(stats: dict) -> SimpleNamespace:
+    """The remote fleet's report, shaped like a local Fleet for _summarize."""
+    fleet_stats = SimpleNamespace(
+        counts=Counter(stats["counts"]), sent=Counter(stats["sent"]),
+        errors_received=Counter(stats["errors_received"]),
+        heartbeat_rtt_ms=stats["heartbeat_rtt_ms"],
+        connected_at_end=stats["connected_at_end"], bytes_sent=stats["bytes_sent"],
+        timeline=stats["timeline"],
+    )  # fmt: skip
+    return SimpleNamespace(stats=fleet_stats, agents=range(stats["agents"]),
+                           source_ips=stats["source_ips"], time_scale=stats["time_scale"])  # fmt: skip
+
+
+async def _expect(stream, prefix: str) -> str:
+    while True:
+        line = (await stream.readline()).decode("utf-8", "replace")
+        if not line:
+            raise SystemExit(f"the remote fleet ended before {prefix!r}")
+        if line.startswith(prefix):
+            return line[len(prefix) :].strip()
+
+
+async def run_remote_fleet(args) -> dict:
+    """Like run_fleet, with the agents on ``args.remote_fleet`` (ssh)."""
+    if not args.reuse_stack:
+        print("resetting the load stack (empty database) ...")
+        await asyncio.to_thread(stack.reset)
+    state = stack.load_state()
+    await asyncio.to_thread(_ship_code, args.remote_fleet)
+    storm = args.scenario == "fleet-restart-storm"
+    run_seconds = args.warmup_seconds + (
+        args.down_seconds + args.duration_seconds if storm else args.duration_seconds
+    )
+    flags = [f for f, on in (("--send-on-change", args.send_on_change),
+                             ("--jitter", args.jitter),
+                             ("--identity-auth", getattr(args, "identity_auth", False))) if on]  # fmt: skip
+    remote_cmd = " ".join(
+        [f"cd {_REMOTE_DIR}/code &&", "../venv/bin/python -m tests.load.fleet_remote",
+         f"--base http://{args.server_address}:{state['port']}",
+         f"--agents {args.agents}", f"--run-seconds {run_seconds}",
+         f"--time-scale {args.time_scale}", f"--packages {args.packages}",
+         f"--sample-seconds {args.sample_seconds}", *flags]
+    )  # fmt: skip
+    # Closed in the finally below; the subprocess writes to it throughout.
+    log = open(  # pylint: disable=consider-using-with
+        stack.STATE_DIR / "remote-fleet.log", "wb"
+    )
+    proc = await asyncio.create_subprocess_exec(
+        "ssh", "-o", "BatchMode=yes", args.remote_fleet, remote_cmd,
+        stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=log,
+        limit=256 * 1024 * 1024,  # the STATS line is large (default: 64 KB)
+    )  # fmt: skip
+    print(f"enrolling {args.agents} agents on {args.remote_fleet} ...", flush=True)
+    registered = await _expect(proc.stdout, "REGISTERED ")
+    approved = await asyncio.to_thread(_approve, state["db_url"])
+    print(f"  registered {registered}, approved {approved}", flush=True)
+    observer = Observer(f"http://127.0.0.1:{state['port']}", state["db_url"],
+                        lambda: stack.load_state().get("server_pid"),
+                        interval=args.sample_seconds)  # fmt: skip
+    proc.stdin.write(b"GO\n")
+    await proc.stdin.drain()
+    started = time.monotonic()
+    observer.start()
+    restart_t = None
+    try:
+        if storm:
+            await asyncio.sleep(args.warmup_seconds)
+            restart_t = round(time.monotonic() - started, 1)
+            observer.mark("server restart")
+            print(
+                f"  t={restart_t}s: restarting the server (down {args.down_seconds}s) ..."
+            )
+            await asyncio.to_thread(
+                stack.restart_server, stack.load_state(), args.down_seconds
+            )
+        stats = json.loads(await _expect(proc.stdout, "STATS "))
+    finally:
+        await observer.stop()
+        await proc.wait()
+        log.close()
+    fleet = _remote_fleet(stats)
+    summary = _summarize(f"{args.scenario}-{args.agents}", fleet, observer, restart_t,
+                         args.warmup_seconds)  # fmt: skip
+    summary["remote_fleet"] = args.remote_fleet
+    return {"scenario": args.scenario, "scenarios": [summary], "summary": summary,
+            "violations": verdict(summary), "server_samples": observer.samples,
+            "agent_timeline": fleet.stats.timeline}  # fmt: skip
+
+
 def main_fleet(args) -> int:
     """Entry point from run.py for the fleet-* scenarios."""
-    report = asyncio.run(run_fleet(args))
+    runner = run_remote_fleet if getattr(args, "remote_fleet", None) else run_fleet
+    report = asyncio.run(runner(args))
     with open(args.output_json, "w", encoding="utf-8") as fh:
         json.dump(report, fh, indent=2, default=str)
     print(json.dumps(report["summary"], indent=2, default=str))

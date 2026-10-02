@@ -497,7 +497,8 @@ class QueueOperations:
                 )
                 .update(
                     {"status": QueueStatus.IN_PROGRESS, "started_at": now},
-                    synchronize_session="fetch",
+                    # "evaluate": no extra SELECT per claim (Phase 22.2).
+                    synchronize_session="evaluate",
                 )
             )
             if not claimed:
@@ -557,13 +558,21 @@ class QueueOperations:
             db = next(get_db())
 
         try:
-            message = db.query(MessageQueue).filter_by(message_id=message_id).first()
-
-            if not message:
+            # One UPDATE, no load-then-write (Phase 22.2: per-message status
+            # bookkeeping was 12% of the inbound drain's time).
+            updated = (
+                db.query(MessageQueue)
+                .filter(MessageQueue.message_id == message_id)
+                .update(
+                    {
+                        "status": QueueStatus.COMPLETED,
+                        "completed_at": datetime.now(timezone.utc).replace(tzinfo=None),
+                    },
+                    synchronize_session="evaluate",
+                )
+            )
+            if not updated:
                 return False
-
-            message.status = QueueStatus.COMPLETED
-            message.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
             if not session_provided:
                 db.commit()

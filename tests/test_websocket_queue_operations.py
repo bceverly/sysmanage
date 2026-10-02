@@ -326,16 +326,14 @@ class TestQueueOperationsMarkCompleted:
         ops = QueueOperations()
         mock_db = MagicMock()
 
-        mock_message = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = (
-            mock_message
-        )
+        mock_db.query.return_value.filter.return_value.update.return_value = 1
 
         result = ops.mark_completed("msg-123", db=mock_db)
 
         assert result is True
-        assert mock_message.status == QueueStatus.COMPLETED
-        assert mock_message.completed_at is not None
+        values = mock_db.query.return_value.filter.return_value.update.call_args[0][0]
+        assert values["status"] == QueueStatus.COMPLETED
+        assert values["completed_at"] is not None
 
     def test_mark_completed_message_not_found(self):
         """Test marking nonexistent message as completed."""
@@ -343,7 +341,7 @@ class TestQueueOperationsMarkCompleted:
 
         ops = QueueOperations()
         mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = None
+        mock_db.query.return_value.filter.return_value.update.return_value = 0
 
         result = ops.mark_completed("nonexistent-msg", db=mock_db)
 
@@ -355,7 +353,7 @@ class TestQueueOperationsMarkCompleted:
 
         ops = QueueOperations()
         mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.side_effect = Exception(
+        mock_db.query.return_value.filter.return_value.update.side_effect = Exception(
             "Database error"
         )
 

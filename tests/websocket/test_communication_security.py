@@ -357,7 +357,9 @@ class TestWebSocketSecurityManager:
         for _ in range(20):
             security_manager.record_connection_attempt("192.168.1.100")
 
-        is_limited = security_manager.is_connection_rate_limited("192.168.1.100")
+        is_limited = security_manager.is_connection_rate_limited(
+            "192.168.1.100", limit=20
+        )
 
         assert is_limited is True
 

@@ -111,10 +111,10 @@ def _container_exists():
     return bool(out.stdout.strip())
 
 
-def _config(port, db):
+def _config(port, db, bind_host="127.0.0.1"):
     """A complete standalone config -- nothing inherited from this box."""
     return {
-        "api": {"host": "127.0.0.1", "port": port, "certFile": "", "keyFile": "", "chainFile": ""},
+        "api": {"host": bind_host, "port": port, "certFile": "", "keyFile": "", "chainFile": ""},
         "database": db,
         "security": {
             "password_salt": secrets.token_hex(32),
@@ -124,6 +124,11 @@ def _config(port, db):
             "jwt_algorithm": "HS256",
             "jwt_auth_timeout": 6000,
             "jwt_refresh_timeout": 60000,
+            # A remote load machine puts every agent behind ONE address (the
+            # large-NAT case); unregistered agents are counted per address,
+            # so a whole fleet enrolling at once needs the allowance a real
+            # site that size would configure.
+            "agent_connection_limits": {"per_address": 1000000},
         },
         "webui": {"host": "127.0.0.1", "port": 3999},
         # WARNING keeps a 10k-agent run from writing gigabytes of INFO lines;
@@ -259,7 +264,7 @@ def restart_server(state, down_seconds=0):
     return start_server(state)
 
 
-def up(port, db_url, pin=True):
+def up(port, db_url, pin=True, bind_host="127.0.0.1"):
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     if db_url:
         from urllib.parse import urlparse  # pylint: disable=import-outside-toplevel
@@ -281,7 +286,9 @@ def up(port, db_url, pin=True):
     config_path = STATE_DIR / "sysmanage-load.yaml"
     import yaml  # pylint: disable=import-outside-toplevel
 
-    config_path.write_text(yaml.safe_dump(_config(port, db)), encoding="utf-8")
+    config_path.write_text(
+        yaml.safe_dump(_config(port, db, bind_host)), encoding="utf-8"
+    )
     config_path.chmod(0o600)
     code = pin_code() if pin else REPO
     print(f"migrating the load database (code under test: {code}) ...")
@@ -347,9 +354,11 @@ def main():
     parser.add_argument("--port", type=int, default=18080 + INSTANCE)
     parser.add_argument("--db-url", default=None,
                         help="use this PostgreSQL instead of a throwaway container")  # fmt: skip
+    parser.add_argument("--bind-host", default="127.0.0.1",
+                        help="0.0.0.0 when the fleet runs on another machine (--remote-fleet)")  # fmt: skip
     args = parser.parse_args()
     if args.action == "up":
-        up(args.port, args.db_url, pin=not args.no_pin)
+        up(args.port, args.db_url, pin=not args.no_pin, bind_host=args.bind_host)
     elif args.action == "repin":
         state = load_state()
         state["code"] = str(pin_code())

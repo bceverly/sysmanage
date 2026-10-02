@@ -54,8 +54,11 @@ class TestAuthenticateAgent:
         mock_request.client = Mock()
         mock_request.client.host = "192.168.1.100"
 
+        mock_request.headers = {}
+
         with patch("backend.api.agent.websocket_security") as mock_security:
             mock_security.is_connection_rate_limited.return_value = True
+            mock_security.retry_after.return_value = 900
 
             result = await authenticate_agent(mock_request)
 
