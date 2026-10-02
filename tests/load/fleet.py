@@ -49,6 +49,20 @@ POLL_S = 5
 REGISTRATION_RETRY_S = 30
 REGISTRATION_TRIES = 10
 SEND_BATCH = 10
+# Send-on-change (agent Phase 22.1): see SimAgent._wanted.
+SAMPLE_S = 15 * 60
+RESEND_S = 24 * 3600
+CONNECT_SPLAY_S = 60
+SNAPSHOT_TYPES = frozenset(
+    {
+        "software_inventory_update", "user_access_update", "hardware_update",
+        "host_certificates_update", "role_data", "os_version_update",
+        "reboot_status_update", "third_party_repository_update",
+        "antivirus_status_update", "firewall_status_update", "graylog_status_update",
+        "child_host_list_update", "fips_compliance_update", "package_updates_update",
+        "process_status_update", "host_metrics",
+    }
+)  # fmt: skip
 
 _STRUCTURAL = ("invalidstatus", "invalidupgrade", "invalidhandshake", "invalidmessage")
 
@@ -107,6 +121,7 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
         }
         self.ws = None
         self.hb_sent_at: Optional[float] = None
+        self.sent_at: Dict[str, float] = {}  # send-on-change memory, per report type
         self._rng = random.Random(index)
 
     # -- identity -----------------------------------------------------------
@@ -252,10 +267,10 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
         for queue in self.out.values():
             queue.clear()
         self.out["urgent"].append(payloads.system_info(self))
-        self.out["normal"].extend(payloads.periodic_set(self, self.fleet.payloads))
         tasks = [
+            asyncio.create_task(self._first_collection()),
             asyncio.create_task(self._sender()),
-            asyncio.create_task(self._every(HEARTBEAT_S, self._heartbeat)),
+            asyncio.create_task(self._every(HEARTBEAT_S, self._heartbeat, 0.1)),
             asyncio.create_task(self._every(COLLECTION_S, self._collection)),
             asyncio.create_task(self._every(CHILD_HOSTS_S, self._child_hosts)),
             asyncio.create_task(self._every(UPDATE_CHECK_S, self._update_check)),
@@ -269,11 +284,22 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
             await asyncio.gather(*tasks, return_exceptions=True)
             self.ws = None
 
-    async def _every(self, interval: float, action):
+    async def _first_collection(self):
+        """Today's agent collects the moment it connects; with ``--jitter``
+        it waits up to a minute first (agent core/schedule_jitter.py)."""
+        if self.fleet.jitter:
+            await self.fleet.sleep(self._rng.uniform(0, CONNECT_SPLAY_S))
+        self._queue_reports(payloads.periodic_set(self, self.fleet.payloads))
+
+    async def _every(self, interval: float, action, spread: float = 0.2):
         """A periodic sender: first run one interval after connect, then every
-        interval -- anchored to the connect, never jittered (today's agent)."""
+        interval -- anchored to the connect and never varied (today's agent),
+        or varied by +/-``spread`` each time (``--jitter``)."""
         while True:
-            await self.fleet.sleep(interval)
+            pause = interval
+            if self.fleet.jitter:
+                pause *= self._rng.uniform(1 - spread, 1 + spread)
+            await self.fleet.sleep(pause)
             action()
 
     def _heartbeat(self):
@@ -281,13 +307,40 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
         self.out["high"].append(payloads.heartbeat(self))
 
     def _collection(self):
-        self.out["normal"].extend(payloads.periodic_set(self, self.fleet.payloads))
+        self._queue_reports(payloads.periodic_set(self, self.fleet.payloads))
 
     def _child_hosts(self):
-        self.out["normal"].append(payloads.child_hosts(self))
+        self._queue_reports([payloads.child_hosts(self)])
 
     def _update_check(self):
-        self.out["normal"].append(payloads.package_updates(self, self.fleet.payloads))
+        self._queue_reports([payloads.package_updates(self, self.fleet.payloads)])
+
+    def _queue_reports(self, messages):
+        """Queue snapshot reports -- all of them (today's agent), or only the
+        ones a send-on-change agent would send (``--send-on-change``)."""
+        for message in messages:
+            if self._wanted(message):
+                self.out["normal"].append(message)
+
+    def _wanted(self, message) -> bool:
+        """The agent's send-on-change rule (sysmanage-agent
+        communication/send_on_change.py) for content that never changes, as
+        here: each report once, processes and metrics every 15 minutes,
+        everything again after 24 hours -- scaled with the run's timers."""
+        if not self.fleet.send_on_change:
+            return True
+        kind = message[18 : message.index('"', 18)]
+        if kind not in SNAPSHOT_TYPES:
+            return True
+        now = time.monotonic()
+        every = (
+            SAMPLE_S if kind in ("process_status_update", "host_metrics") else RESEND_S
+        )
+        last = self.sent_at.get(kind)
+        if last is not None and now - last < every / self.fleet.time_scale:
+            return False
+        self.sent_at[kind] = now
+        return True
 
     async def _sender(self):
         """Up to 10 messages a pass, urgent first, then 1 s (the agent's queue)."""
@@ -307,7 +360,7 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
 
     async def _burst(self):
         for message, pause in payloads.initial_burst(self, self.fleet.payloads):
-            self.out["normal"].append(message)
+            self._queue_reports([message])
             if pause:
                 await asyncio.sleep(pause)
 
@@ -368,13 +421,24 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
 class Fleet:
     """N agents, their shared payloads, HTTP sessions and stats."""
 
-    def __init__(self, base_url: str, agents: int, source_ips: int,time_scale: float = 1.0, packages: int = 600):  # fmt: skip
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+        self,
+        base_url: str,
+        agents: int,
+        source_ips: int,
+        time_scale: float = 1.0,
+        packages: int = 600,
+        send_on_change: bool = False,
+        jitter: bool = False,
+    ):
         self.base = base_url.rstrip("/")
         self.ws_base = self.base.replace("http" + "://", "ws" + "://", 1).replace(
             "https" + "://", "wss" + "://", 1
         )
         self.source_ips = max(1, min(source_ips, agents))
         self.time_scale = time_scale
+        self.send_on_change = send_on_change
+        self.jitter = jitter
         self.payloads = payloads.Payloads(packages=packages)
         self.stats = FleetStats()
         self.stopping = False

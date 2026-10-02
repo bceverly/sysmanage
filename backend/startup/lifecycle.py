@@ -21,11 +21,12 @@ from backend.licensing.license_service import license_service
 from backend.licensing.module_loader import module_loader
 from backend.monitoring.graylog_health_monitor import graylog_health_monitor_service
 from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
-from backend.persistence.db import get_db
+from backend.persistence.db import get_db, get_engine
 from backend.persistence.partitions import get_shared_db
 from backend.security.certificate_manager import certificate_manager
 from backend.services.background_ticks import start_licensed_ticks
 from backend.services.email_service import email_service
+from backend.startup.leadership import check_worker_support, leadership, singleton_task
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.message_processor import message_processor
 
@@ -89,12 +90,17 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         # repository-role / air-gapped deployment).  See
         # docs/planning/openbao-deployment-and-airgap.md §5.
         logger.info("=== DEPLOYMENT INVARIANT CHECK ===")
-        from backend.startup.deployment_guards import (
+        from backend.startup.deployment_guards import (  # noqa: PLC0415
             enforce_deployment_invariants,
-        )  # noqa: PLC0415
+        )
 
         enforce_deployment_invariants()
         logger.info("Deployment invariants satisfied")
+
+        # Phase 22.2: with several workers, one leader runs the server-wide
+        # background work (every singleton_task below); see leadership.py.
+        check_worker_support(get_engine())
+        await leadership.start(get_engine())
 
         # Startup: overlay secrets from OpenBAO onto the in-memory config +
         # auth globals (jwt_secret / password_salt / admin_password / DB
@@ -102,9 +108,9 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         # loaded at import remain in force.  See
         # docs/planning/config-classification.md (Phase 13.1.H).
         logger.info("=== SECRETS OVERLAY (OpenBAO) ===")
-        from backend.config.secrets_bootstrap import (
+        from backend.config.secrets_bootstrap import (  # noqa: PLC0415
             refresh_secrets_from_openbao,
-        )  # noqa: PLC0415
+        )
 
         refresh_secrets_from_openbao()
 
@@ -117,9 +123,9 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
 
             from backend.config import config as _cfg  # noqa: PLC0415
             from backend.persistence import db as _db  # noqa: PLC0415
-            from backend.services import (
+            from backend.services import (  # noqa: PLC0415
                 logging_config_service as _logsvc,
-            )  # noqa: PLC0415
+            )
 
             with sessionmaker(bind=_db.get_engine())() as _log_session:
                 _logsvc.apply_server_native_logging(
@@ -191,16 +197,16 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                     try:
                         mt_info = multitenancy_engine.get_module_info()
                         if mt_info.get("provides_background_task", False):
-                            from backend.services.tenant_backup import (
+                            from backend.services.tenant_backup import (  # noqa: PLC0415
                                 get_backup_config,
-                            )  # noqa: PLC0415
+                            )
 
                             if get_backup_config().enabled:
                                 logger.info(
                                     "=== MULTITENANCY BACKUP ORCHESTRATOR STARTUP ==="
                                 )
                                 _track_background_task(
-                                    asyncio.create_task(
+                                    singleton_task(
                                         multitenancy_engine.start_backup_orchestrator(
                                             db_maker=get_db,
                                             logger=logger,
@@ -235,7 +241,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                     if alerting_info.get("provides_background_task", False):
                         logger.info("=== ALERTING ENGINE BACKGROUND TASK STARTUP ===")
                         try:
-                            alerting_task = asyncio.create_task(
+                            alerting_task = singleton_task(
                                 alerting_engine.start_alert_evaluator(
                                     db_maker=get_db,
                                     email_service=email_service,
@@ -258,7 +264,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                         try:
                             from backend.persistence import models
 
-                            reporting_task = asyncio.create_task(
+                            reporting_task = singleton_task(
                                 reporting_engine.start_report_scheduler(
                                     db_maker=get_db,
                                     models=models,
@@ -282,7 +288,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                         try:
                             from backend.persistence import models
 
-                            audit_retention_task = asyncio.create_task(
+                            audit_retention_task = singleton_task(
                                 audit_engine.start_retention_scheduler(
                                     db_maker=get_db,
                                     models=models,
@@ -308,7 +314,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                         try:
                             from backend.persistence import models
 
-                            secrets_rotation_task = asyncio.create_task(
+                            secrets_rotation_task = singleton_task(
                                 secrets_engine.start_rotation_scheduler(
                                     db_maker=get_db,
                                     models=models,
@@ -338,7 +344,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                                 queue_automation_execution,
                             )
 
-                            automation_sched_task = asyncio.create_task(
+                            automation_sched_task = singleton_task(
                                 automation_engine.start_schedule_dispatcher(
                                     dispatch_fn=queue_automation_execution,
                                     logger=logger,
@@ -363,7 +369,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                                 queue_fleet_bulk_op,
                             )
 
-                            fleet_sched_task = asyncio.create_task(
+                            fleet_sched_task = singleton_task(
                                 fleet_engine.start_schedule_dispatcher(
                                     dispatch_fn=queue_fleet_bulk_op,
                                     host_provider=build_host_provider(get_db),
@@ -383,8 +389,8 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 # neither even when an engine is licensed/loaded.  Read once.
                 try:
                     from backend.config import (
-                        config as _fed_config,
-                    )  # pylint: disable=import-outside-toplevel
+                        config as _fed_config,  # pylint: disable=import-outside-toplevel
+                    )
 
                     _federation_role = _fed_config.get_federation_role()
                 except Exception:  # pylint: disable=broad-exception-caught
@@ -409,7 +415,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                         )
                         try:
                             _track_background_task(
-                                asyncio.create_task(
+                                singleton_task(
                                     federation_controller_engine.start_federation_push_worker(
                                         db_maker=get_db,
                                         logger=logger,
@@ -445,7 +451,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                         )
                         try:
                             _track_background_task(
-                                asyncio.create_task(
+                                singleton_task(
                                     federation_site_engine.start_federation_sync_worker(
                                         db_maker=get_db,
                                         logger=logger,
@@ -473,7 +479,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                             query_pack_tick_service,
                         )
 
-                        query_pack_task = asyncio.create_task(query_pack_tick_service())
+                        query_pack_task = singleton_task(query_pack_tick_service())
                         logger.info("Query pack tick task started: %s", query_pack_task)
                     except Exception as tick_e:  # pylint: disable=broad-except
                         # Never fatal: a scheduler that will not start must not
@@ -491,7 +497,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                         )
 
                         _track_background_task(
-                            asyncio.create_task(file_watch_tick_service())
+                            singleton_task(file_watch_tick_service())
                         )
                         logger.info("File watch tick task started")
                     except Exception as tick_e:  # pylint: disable=broad-except
@@ -516,7 +522,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                             config_mgmt_assignment_tick_service,
                         )
 
-                        config_tick_task = asyncio.create_task(
+                        config_tick_task = singleton_task(
                             config_mgmt_assignment_tick_service()
                         )
                         logger.info(
@@ -541,9 +547,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                             config_mgmt_job_tick_service,
                         )
 
-                        job_tick_task = asyncio.create_task(
-                            config_mgmt_job_tick_service()
-                        )
+                        job_tick_task = singleton_task(config_mgmt_job_tick_service())
                         logger.info(
                             "Config fleet job tick task started: %s",
                             job_tick_task,
@@ -571,7 +575,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                             airgap_schedule_tick_service,
                         )
 
-                        airgap_tick_task = asyncio.create_task(
+                        airgap_tick_task = singleton_task(
                             airgap_schedule_tick_service()
                         )
                         logger.info(
@@ -597,7 +601,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                             airgap_run_tick_service,
                         )
 
-                        airgap_run_task = asyncio.create_task(airgap_run_tick_service())
+                        airgap_run_task = singleton_task(airgap_run_tick_service())
                         logger.info(
                             "Air-gap run orchestrator started: %s",
                             airgap_run_task,
@@ -625,7 +629,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                             airgap_ingest_tick_service,
                         )
 
-                        airgap_ingest_task = asyncio.create_task(
+                        airgap_ingest_task = singleton_task(
                             airgap_ingest_tick_service()
                         )
                         logger.info(
@@ -652,7 +656,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                             cve_refresh_service.start_scheduler()
                             logger.info("CVE refresh scheduler started")
 
-                            cve_refresh_task = asyncio.create_task(
+                            cve_refresh_task = singleton_task(
                                 cve_refresh_service.check_and_refresh_if_overdue(
                                     db_maker=get_shared_db,
                                 )
@@ -681,16 +685,16 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         # Phase 13.2.1: now that OSS + Pro+ (engine or stub) routes are all
         # mounted, fail fast if any two share the same method+path -- this is the
         # only point where the OSS↔Pro+ route seam is fully assembled.
-        from backend.startup.route_registration import (
+        from backend.startup.route_registration import (  # noqa: PLC0415
             check_route_collisions,
-        )  # noqa: PLC0415
+        )
 
         check_route_collisions(_fastapi_app)
 
         # Startup: Start the heartbeat monitor service
         logger.info("=== HEARTBEAT MONITOR STARTUP ===")
         logger.info("About to start heartbeat monitor service")
-        heartbeat_task = asyncio.create_task(heartbeat_monitor_service())
+        heartbeat_task = singleton_task(heartbeat_monitor_service())
         logger.info("Heartbeat monitor task created: %s", heartbeat_task)
         logger.info("Heartbeat monitor service started successfully")
 
@@ -702,11 +706,11 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         # the refresh + ipapi.co fallback logic.
         try:
             logger.info("=== GEOLITE2 REFRESH STARTUP ===")
-            from backend.services.geolocation_service import (
+            from backend.services.geolocation_service import (  # noqa: PLC0415
                 geolite_refresh_service,
-            )  # noqa: PLC0415
+            )
 
-            geolite_refresh_task = asyncio.create_task(geolite_refresh_service())
+            geolite_refresh_task = singleton_task(geolite_refresh_service())
             logger.info("GeoLite2 refresh task created: %s", geolite_refresh_task)
         except Exception as geo_exc:  # pylint: disable=broad-exception-caught
             logger.warning("Failed to start GeoLite2 refresh task: %s", geo_exc)
@@ -721,12 +725,12 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         if not _custom_metric_retention_started:
             logger.info("=== CUSTOM METRIC RETENTION STARTUP ===")
             try:
-                from backend.services.custom_metric_retention import (
+                from backend.services.custom_metric_retention import (  # noqa: PLC0415
                     run_custom_metric_retention_loop,
-                )  # noqa: PLC0415
+                )
 
                 _track_background_task(
-                    asyncio.create_task(run_custom_metric_retention_loop())
+                    singleton_task(run_custom_metric_retention_loop())
                 )
                 _custom_metric_retention_started = True
                 logger.info("Custom-metric retention loop started")
@@ -745,12 +749,12 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         if not _package_catalog_refresh_started:
             logger.info("=== PACKAGE CATALOG REFRESH STARTUP ===")
             try:
-                from backend.services.package_catalog_refresh import (
+                from backend.services.package_catalog_refresh import (  # noqa: PLC0415
                     run_package_catalog_refresh_loop,
-                )  # noqa: PLC0415
+                )
 
                 _track_background_task(
-                    asyncio.create_task(run_package_catalog_refresh_loop())
+                    singleton_task(run_package_catalog_refresh_loop())
                 )
                 _package_catalog_refresh_started = True
                 logger.info("Package-catalog refresh loop started")
@@ -770,52 +774,20 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         logger.info("=== MESSAGE PROCESSOR STARTUP ===")
         logger.info("About to start message processor")
 
-        # Get current event loop and schedule the message processor to start
-        loop = asyncio.get_event_loop()
-        logger.info("Got event loop: %s", loop)
-
-        # Create the task and schedule it with the event loop
-        message_processor_task = loop.create_task(message_processor.start())
+        # Every worker drains the queues (claims are atomic; see 22.2 notes in
+        # inbound_processor / outbound_processor).
+        message_processor_task = asyncio.create_task(message_processor.start())
         logger.info("Created message processor task: %s", message_processor_task)
-        logger.info("Message processor task ID: %s", id(message_processor_task))
-
-        # Allow the event loop to process the task creation
-        logger.info("Yielding control to event loop for 0.1 seconds")
-        await asyncio.sleep(0.1)  # Short yield to let task start
-
-        # Force the event loop to process any pending tasks
-        logger.info("Additional yield for 0.5 seconds to let task start")
-        await asyncio.sleep(0.5)  # Give it time to actually start
-
-        # Check task status
-        logger.info("Checking message processor task status")
-        logger.info("Task done: %s", message_processor_task.done())
-        logger.info("Task cancelled: %s", message_processor_task.cancelled())
-
-        if message_processor_task.done():
-            print(
-                "WARNING - Message processor task completed during startup",
-                flush=True,
-            )
-            logger.warning("Message processor task completed during startup")
-            try:
-                result = await message_processor_task
-                logger.info("Task result: %s", result)
-                print(f"Task result: {result}")
-            except Exception as task_e:
-                logger.exception(
-                    "Message processor startup failed: %s", task_e, exc_info=True
-                )
-                print(f"Task exception: {task_e}")
-                raise
-        else:
-            logger.info("Message processor task scheduled and running successfully")
 
         # Startup: Start the discovery beacon service
         logger.info("=== DISCOVERY BEACON STARTUP ===")
         logger.info("About to start discovery beacon service")
-        await discovery_beacon.start_beacon_service()
-        logger.info("Discovery beacon service started successfully")
+        if leadership.is_leader:  # one UDP listener per server, not per worker
+            await discovery_beacon.start_beacon_service()
+        else:
+            _track_background_task(
+                singleton_task(discovery_beacon.start_beacon_service())
+            )
 
         logger.info("=== ALL STARTUP TASKS COMPLETED SUCCESSFULLY ===")
         logger.info("Server is ready to accept requests")
@@ -856,8 +828,10 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
             try:
                 await message_processor_task
             except asyncio.CancelledError:
+                # Expected: we cancelled it.  Re-raising here aborted the rest of
+                # shutdown ("Application shutdown failed"), skipping every later
+                # step -- the other engines' tasks and the leader lock.
                 logger.info("Message processor task cancelled successfully")
-                raise
         logger.info("Message processor service stopped")
     except Exception as e:
         logger.exception("Error stopping message processor: %s", e)
@@ -871,7 +845,6 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 await graylog_health_task
             except asyncio.CancelledError:
                 logger.info("Graylog health monitor task cancelled successfully")
-                raise
         logger.info("Graylog health monitor service stopped")
     except Exception as e:
         logger.exception("Error stopping Graylog health monitor: %s", e)
@@ -885,7 +858,6 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 await alerting_task
             except asyncio.CancelledError:
                 logger.info("Alerting engine task cancelled successfully")
-                raise
             logger.info("Alerting engine background task stopped")
         except Exception as e:
             logger.exception("Error stopping alerting engine task: %s", e)
@@ -899,7 +871,6 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 await reporting_task
             except asyncio.CancelledError:
                 logger.info("Reporting engine task cancelled successfully")
-                raise
             logger.info("Reporting engine background task stopped")
         except Exception as e:
             logger.exception("Error stopping reporting engine task: %s", e)
@@ -913,7 +884,6 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 await audit_retention_task
             except asyncio.CancelledError:
                 logger.info("Audit engine retention task cancelled successfully")
-                raise
             logger.info("Audit engine retention background task stopped")
         except Exception as e:
             logger.exception("Error stopping audit engine retention task: %s", e)
@@ -927,7 +897,6 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 await secrets_rotation_task
             except asyncio.CancelledError:
                 logger.info("Secrets engine rotation task cancelled successfully")
-                raise
             logger.info("Secrets engine rotation background task stopped")
         except Exception as e:
             logger.exception(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
@@ -943,7 +912,6 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 await cve_refresh_task
             except asyncio.CancelledError:
                 logger.info("CVE refresh task cancelled successfully")
-                raise
             logger.info("CVE refresh background task stopped")
         except Exception as e:
             logger.exception("Error stopping CVE refresh task: %s", e)
@@ -957,7 +925,6 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 await automation_sched_task
             except asyncio.CancelledError:
                 logger.info("Automation schedule dispatcher cancelled successfully")
-                raise
         except Exception as e:
             logger.exception("Error stopping automation schedule dispatcher: %s", e)
 
@@ -970,7 +937,6 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 await fleet_sched_task
             except asyncio.CancelledError:
                 logger.info("Fleet schedule dispatcher cancelled successfully")
-                raise
         except Exception as e:
             logger.exception("Error stopping fleet schedule dispatcher: %s", e)
 
@@ -992,9 +958,9 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 await heartbeat_task
             except asyncio.CancelledError:
                 logger.info("Heartbeat monitor task cancelled successfully")
-                raise
         logger.info("Heartbeat monitor service stopped")
     except Exception as e:
         logger.exception("Error stopping heartbeat monitor: %s", e)
 
+    await leadership.stop()  # releases the leader lock for the next worker
     logger.info("=== FASTAPI LIFESPAN SHUTDOWN COMPLETE ===")

@@ -49,8 +49,12 @@ doas su - _postgresql -c "createuser -P sysmanage"
 doas su - _postgresql -c "createdb -O sysmanage sysmanage"
 ```
 
-3. Configure SysManage:
+3. Configure SysManage. Create the config from the example and generate its
+   secrets (JWT secret, password salt and the recovery admin password -- the
+   example ships only placeholders, and a placeholder never signs in):
 ```sh
+doas install -m 600 /usr/local/share/examples/sysmanage/sysmanage.yaml /etc/sysmanage.yaml
+cd /usr/local/libexec/sysmanage && doas python3 -m backend.config.install_secrets --apply /etc/sysmanage.yaml
 doas vi /etc/sysmanage.yaml
 ```
 

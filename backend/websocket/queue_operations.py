@@ -485,25 +485,39 @@ class QueueOperations:
             db = next(get_db())
 
         try:
-            message = db.query(MessageQueue).filter_by(message_id=message_id).first()
-
-            if not message:
-                logger.warning(
-                    "mark_processing: Message %s not found in database",
-                    message_id,
+            # Phase 22.2: claim with ONE conditional UPDATE.  The old read-
+            # then-write let two workers both see PENDING and both process the
+            # message; now exactly one UPDATE matches the row.
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
+            claimed = (
+                db.query(MessageQueue)
+                .filter(
+                    MessageQueue.message_id == message_id,
+                    MessageQueue.status == QueueStatus.PENDING,
                 )
-                return False
-
-            if message.status != QueueStatus.PENDING:
-                logger.warning(
-                    "mark_processing: Message %s has status %s (expected PENDING)",
-                    message_id,
-                    message.status,
+                .update(
+                    {"status": QueueStatus.IN_PROGRESS, "started_at": now},
+                    synchronize_session="fetch",
                 )
+            )
+            if not claimed:
+                status = (
+                    db.query(MessageQueue.status)
+                    .filter(MessageQueue.message_id == message_id)
+                    .scalar()
+                )
+                if status is None:
+                    logger.warning(
+                        "mark_processing: Message %s not found in database",
+                        message_id,
+                    )
+                else:
+                    logger.warning(
+                        "mark_processing: Message %s has status %s (expected PENDING)",
+                        message_id,
+                        status,
+                    )
                 return False
-
-            message.status = QueueStatus.IN_PROGRESS
-            message.started_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
             # Always flush to ensure the status change is visible to other queries
             # within the same session/transaction

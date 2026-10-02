@@ -259,24 +259,16 @@ class TestQueueOperationsMarkProcessing:
     """Tests for QueueOperations.mark_processing method."""
 
     def test_mark_processing_success(self):
-        """Test successfully marking message as processing."""
-        from backend.websocket.queue_enums import QueueStatus
+        """One conditional UPDATE claims the message (Phase 22.2)."""
         from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
-
-        mock_message = MagicMock()
-        mock_message.status = QueueStatus.PENDING
-        mock_db.query.return_value.filter_by.return_value.first.return_value = (
-            mock_message
-        )
+        mock_db.query.return_value.filter.return_value.update.return_value = 1
 
         result = ops.mark_processing("msg-123", db=mock_db)
 
         assert result is True
-        assert mock_message.status == QueueStatus.IN_PROGRESS
-        assert mock_message.started_at is not None
         mock_db.flush.assert_called_once()
 
     def test_mark_processing_message_not_found(self):
@@ -285,24 +277,23 @@ class TestQueueOperationsMarkProcessing:
 
         ops = QueueOperations()
         mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = None
+        mock_db.query.return_value.filter.return_value.update.return_value = 0
+        mock_db.query.return_value.filter.return_value.scalar.return_value = None
 
         result = ops.mark_processing("nonexistent-msg", db=mock_db)
 
         assert result is False
 
     def test_mark_processing_wrong_status(self):
-        """Test marking message with wrong status."""
+        """A message that is no longer PENDING is not claimed."""
         from backend.websocket.queue_enums import QueueStatus
         from backend.websocket.queue_operations import QueueOperations
 
         ops = QueueOperations()
         mock_db = MagicMock()
-
-        mock_message = MagicMock()
-        mock_message.status = QueueStatus.COMPLETED
-        mock_db.query.return_value.filter_by.return_value.first.return_value = (
-            mock_message
+        mock_db.query.return_value.filter.return_value.update.return_value = 0
+        mock_db.query.return_value.filter.return_value.scalar.return_value = (
+            QueueStatus.COMPLETED
         )
 
         result = ops.mark_processing("msg-123", db=mock_db)
@@ -315,7 +306,7 @@ class TestQueueOperationsMarkProcessing:
 
         ops = QueueOperations()
         mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.side_effect = Exception(
+        mock_db.query.return_value.filter.return_value.update.side_effect = Exception(
             "Database error"
         )
 

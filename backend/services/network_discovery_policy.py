@@ -41,17 +41,18 @@ from backend.persistence.models import (
     NetworkDiscoveryPolicy,
 )
 from backend.persistence.models.asset_discovery import (
-    DEFAULT_RETENTION_DAYS,
-    RETENTION_CHOICES,
     DEFAULT_REPORT_INTERVAL_SECONDS,
+    DEFAULT_RETENTION_DAYS,
     MAX_REPORT_INTERVAL_SECONDS,
     MIN_REPORT_INTERVAL_SECONDS,
+    RETENTION_CHOICES,
 )
 from backend.persistence.partitions import iter_host_databases
 from backend.services.agent_capability_service import (
     UnsupportedCapabilityError,
     host_supports,
 )
+from backend.startup.leadership import singleton_task
 
 logger = logging.getLogger(__name__)
 
@@ -338,7 +339,7 @@ def start_if_licensed():
     if _TASK is not None and not _TASK.done():
         return _TASK
     try:
-        _TASK = asyncio.create_task(network_discovery_tick_service())
+        _TASK = singleton_task(network_discovery_tick_service())
         logger.info("Network discovery reconcile tick started")
         return _TASK
     except Exception as exc:  # pylint: disable=broad-except

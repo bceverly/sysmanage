@@ -115,7 +115,9 @@ class TestVerificationHappensBeforeTheSwap:
         assert os.path.exists(marker), "the working install was destroyed"
         with open(marker, encoding="utf-8") as handle:
             assert handle.read() == "the version that already loads"
-        assert not os.path.exists(live + ".incoming"), "staging dir leaked"
+        assert not os.path.exists(
+            f"{live}.incoming.{os.getpid()}"
+        ), "staging dir leaked"
 
     def test_a_verified_bundle_is_installed(self, tmp_path):
         # The guard must not block legitimate updates.
@@ -168,7 +170,7 @@ class TestVerificationHappensBeforeTheSwap:
                 bundle, modules_path, "thing", "3.14"
             )
 
-        assert seen["dir"].endswith(".incoming")
+        assert seen["dir"].endswith(f".incoming.{os.getpid()}")
         assert seen["so"].startswith(seen["dir"])
 
     def test_a_bundle_with_no_compiled_module_is_still_rejected(self, tmp_path):

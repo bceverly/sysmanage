@@ -339,7 +339,8 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
 
         modules_path = self._get_modules_path()
         Path(modules_path).mkdir(parents=True, exist_ok=True)
-        temp_path = os.path.join(modules_path, f"{module_code}.tmp")
+        # Per process (22.2): several server workers may fetch one module at once.
+        temp_path = os.path.join(modules_path, f"{module_code}.{os.getpid()}.tmp")
 
         try:
             async with (
@@ -539,7 +540,7 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
         leaves a previously-working install intact instead of wiping it.
         Path-traversal-safe.  Returns None on any failure."""
         module_dir = os.path.join(modules_path, f"{module_code}_{pyver}")
-        staging_dir = module_dir + ".incoming"
+        staging_dir = f"{module_dir}.incoming.{os.getpid()}"  # per worker (22.2)
         try:
             # Stage into a sibling dir; the live module_dir is untouched until swap.
             shutil.rmtree(staging_dir, ignore_errors=True)
@@ -600,14 +601,23 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
                 return None
             # Bundle is good -- atomically swap in: move the live dir aside (rename
             # onto a non-empty POSIX dir fails), then restore on failure.
-            backup_dir = module_dir + ".old"
+            backup_dir = f"{module_dir}.old.{os.getpid()}"
             shutil.rmtree(backup_dir, ignore_errors=True)
             had_existing = os.path.exists(module_dir)
             if had_existing:
-                os.rename(module_dir, backup_dir)
+                try:
+                    os.rename(module_dir, backup_dir)
+                except FileNotFoundError:  # another worker moved it first
+                    had_existing = False
             try:
                 os.rename(staging_dir, module_dir)
             except OSError:
+                # Another worker swapped in the same bundle a moment earlier
+                # (22.2: workers start together): use theirs.
+                theirs = os.path.join(module_dir, compiled[0])
+                if os.path.exists(theirs):
+                    shutil.rmtree(backup_dir, ignore_errors=True)
+                    return theirs
                 if had_existing:
                     os.rename(backup_dir, module_dir)
                 raise

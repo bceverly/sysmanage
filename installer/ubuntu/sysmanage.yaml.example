@@ -61,14 +61,14 @@ registry:
 
 # Authentication and JWT signing.
 security:
-  password_salt: "CHANGE_ME_IN_PRODUCTION_USE_RANDOM_STRING"   # ⚠ change this
+  password_salt: "CHANGE_ME_IN_PRODUCTION_USE_RANDOM_STRING"   # the installer writes a random one
   # MUST be an email address: the login endpoint declares userid as
   # pydantic EmailStr, so a bare "admin" is rejected with HTTP 422
   # before the password is ever checked.  The old default could never
   # log in on any platform.
   admin_userid: "admin@example.com"
-  admin_password: "admin"   # ⚠ change this on first login
-  jwt_secret: "CHANGE_ME_IN_PRODUCTION_USE_RANDOM_SECRET"   # ⚠ change this
+  admin_password: "CHANGE_ME_GENERATED_AT_INSTALL"   # the installer writes a random one; a placeholder never signs in
+  jwt_secret: "CHANGE_ME_IN_PRODUCTION_USE_RANDOM_SECRET"   # the installer writes a random one
   jwt_algorithm: "HS256"
   jwt_auth_timeout: 600
   jwt_refresh_timeout: 60000

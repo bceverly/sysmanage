@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: check-black check-msi-guids provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript lint-css lint-css-fix security security-full security-python security-frontend security-secrets security-semgrep security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
+.PHONY: test-lucky13 check-black check-msi-guids provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript lint-css lint-css-fix security security-full security-python security-frontend security-secrets security-semgrep security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
 
 # Default target
 help:
@@ -14,6 +14,7 @@ help:
 	@echo "  make test-ui       - Run Selenium UI tests (BSD fallback only)"
 	@echo "  make test-e2e      - Run frontend E2E tests (Playwright TypeScript)"
 	@echo "  make test-performance - Run Artillery load tests"
+	@echo "  make test-lucky13     - MITRE 'Lucky 13' unforgivable-vulnerability checks (also in make security)"
 	@echo "  make lint          - Run all linters (Python + TypeScript)"
 	@echo "  make lint-python   - Run Python linting only"
 	@echo "  make lint-typescript - Run TypeScript linting only"
@@ -1531,7 +1532,7 @@ security-upgrades: $(VENV_ACTIVATE)
 	@echo "  https://platform.safetycli.com/codebases/sysmanage/findings?branch=main"
 
 # Comprehensive security analysis - all tools
-security-full: security-python security-frontend security-secrets
+security-full: test-lucky13 security-python security-frontend security-secrets
 	@echo "[OK] Comprehensive security analysis completed!"
 
 # Semgrep registry packs run locally.  These mirror the CI Semgrep finding set
@@ -1839,6 +1840,17 @@ format-python: $(VENV_ACTIVATE) clean-whitespace
 # black-formatting target.  The hook prints "Fix locally with: make format".
 .PHONY: format
 format: format-python
+
+# MITRE "Lucky 13" (Christey 2007, "Unforgivable Vulnerabilities"): the
+# thirteen classes found in five minutes.  Also run by test-python (they live
+# in tests/) and by CI as a named step.  See tests/lucky13/conftest.py.
+test-lucky13: $(VENV_ACTIVATE)
+	@echo "=== MITRE 'Lucky 13' unforgivable vulnerabilities ==="
+ifeq ($(OS),Windows_NT)
+	@set OTEL_ENABLED=false && $(PYTHON) -m pytest tests/lucky13 -m lucky13 -q --tb=short -p no:cacheprovider
+else
+	@OTEL_ENABLED=false $(PYTHON) -m pytest tests/lucky13 -m lucky13 -q --tb=short -p no:cacheprovider
+endif
 
 # Python tests
 test-python: $(VENV_ACTIVATE) clean-whitespace

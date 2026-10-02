@@ -104,6 +104,10 @@ if [ -f /etc/sysmanage.yaml ]; then
 elif [ ! -f /usr/local/etc/sysmanage/config.yaml ]; then
     cp /usr/local/etc/sysmanage/sysmanage.yaml.example \
        /usr/local/etc/sysmanage/config.yaml
+    chmod 640 /usr/local/etc/sysmanage/config.yaml
+    # Generate this install's secrets (Lucky 13 #12): jwt_secret, password_salt and
+    # the recovery admin password -- only in a config just created from the example.
+    ( cd /usr/local/lib/sysmanage && .venv/bin/python -m backend.config.install_secrets --apply /usr/local/etc/sysmanage/config.yaml ) || true
 fi
 # Size the database connection pool for THIS machine (Phase 22.2): adds a
 # commented database_pool block only if the config has none -- an

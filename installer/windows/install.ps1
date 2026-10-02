@@ -391,11 +391,13 @@ try {
     $ConfigDir = "C:\ProgramData\SysManage"
     $ConfigFile = Join-Path $ConfigDir "sysmanage.yaml"
     $ExampleConfig = Join-Path $ConfigDir "sysmanage.yaml.example"
+    $ConfigCreated = $false
 
     if (-not (Test-Path $ConfigFile)) {
         if (Test-Path $ExampleConfig) {
             Write-Log "Creating default configuration from example..."
             Copy-Item $ExampleConfig $ConfigFile
+            $ConfigCreated = $true
             Write-Log ""
             Write-Log "IMPORTANT: Please edit the configuration file:"
             Write-Log "  $ConfigFile"
@@ -419,6 +421,11 @@ try {
         Push-Location $InstallDir
         try {
             & $VenvPython -m backend.persistence.pool_sizing --apply $ConfigFile 2>&1 | Out-File -FilePath $LogFile -Append
+            # Generate this install's secrets (Lucky 13 #12) -- only in a
+            # config just created from the example.
+            if ($ConfigCreated) {
+                & $VenvPython -m backend.config.install_secrets --apply $ConfigFile 2>&1 | Out-File -FilePath $LogFile -Append
+            }
         } catch {
             Write-Log "WARNING: could not size the database pool: $_"
         } finally {

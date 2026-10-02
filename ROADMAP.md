@@ -46,7 +46,7 @@ This document provides a detailed roadmap for realizing all features in both ope
 35. [Phase 20: Configuration Management & Drift (Enterprise)](#phase-20-configuration-management--drift-enterprise)
 36. [Phase 21: Endpoint Facts & Proactive Advisor (Enterprise)](#phase-21-endpoint-facts--proactive-advisor-enterprise)
 37. [Phase 22: Scale Hardening -- Thundering-Herd Remediation (Community / OSS; Pro+ / Enterprise)](#phase-22-scale-hardening----thundering-herd-remediation-community--oss-pro--enterprise)
-38. [Phase 23: Hardware & Asset Visibility (Community / OSS; Pro+)](#phase-23-hardware--asset-visibility-community--oss-pro)
+38. [Phase 23: Hardware, Time & Asset Visibility (Community / OSS; Pro+)](#phase-23-hardware-time--asset-visibility-community--oss-pro)
 39. [Phase 24: Mobile Fleet Visibility & UEM Ingestion (Community / Pro+ / Enterprise)](#phase-24-mobile-fleet-visibility--uem-ingestion-community--pro--enterprise)
 40. [Phase 25: Mobile Companion App & Compliance (Pro+ / Enterprise)](#phase-25-mobile-companion-app--compliance-pro--enterprise)
 41. [Phase 26: Stabilization & v5.0 GA](#phase-26-stabilization--v50-ga)
@@ -755,8 +755,8 @@ Each stabilization phase produces a release. Feature phases may produce one or m
 │  Phase 22: Scale Hardening -- Thundering-Herd Remediation            v3.10.0.0  │
 │     └── Jittered schedules, bounded queues, waves, CDN delivery                 │
 │                                                                                 │
-│  Phase 23: Hardware & Asset Visibility                               v3.11.0.0  │
-│     └── Drive/array/ZFS/sensor health + real-time alerts; asset tags            │
+│  Phase 23: Hardware, Time & Asset Visibility                         v3.11.0.0  │
+│     └── Drive/array/ZFS/sensor health + alerts; clock drift; asset tags         │
 │                                                                                 │
 │  Phase 24: Mobile Fleet Visibility & UEM Ingestion                   v4.0.0.0   │
 │     └── MAJOR - a new device class. Model, registration, ingest-from-UEM        │
@@ -11621,7 +11621,7 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
 
 #### 22.1 Agent: schedules that never align (Community / OSS)
 
-- [ ] **Persisted last-run + random first offset for every collector**
+- [x] **Persisted last-run + random first offset for every collector**
       (inventory, update check, package mirror refresh, package catalog,
       certificates, roles, metrics, custom metrics, public IP): store last-run
       in the agent DB; a (re)connect runs only what is overdue, after a random
@@ -11630,13 +11630,51 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       inventory and the Windows catalog fetch within ~10 s, and the 5-minute
       cycle stays in phase thereafter (agent `main.py:711-719`,
       `data_collector.py:440-461`, `agent_utils.py:158-161`, `config.py:242`).
-- [ ] **Initial inventory sent once, not twice per reconnect** --
+      *Partly done 2026-10-02 (agent `core/schedule_jitter.py`): the
+      collection interval and update check vary +/-20%, the heartbeat
+      +/-10%, and the first collection after a connect waits a random
+      0-60 s. Send-on-change keeps the RESULTS of a reconnect's collection
+      from being sent again -- but the agent still RUNS it (the registration
+      burst's update check is a package-manager refresh). Still open: the
+      persisted last-run, so a reconnect only runs what is overdue -- DONE
+      the same day: agent `src/database/run_ledger.py` + table
+      `collection_run` (migration f6a7b8c9d0e1) records when the update
+      check and the package-catalog collection last ran; both run only when
+      due by that persisted time (the tasks restart with every connection,
+      so "at startup" had meant "after every reconnect", and on Windows that
+      re-paged the public Chocolatey/winget catalogs); the connect burst
+      skips a recent update check unless the server asked (`forced()`); an
+      approval or identity change makes the update check due at once; the
+      ledger fails open. Cheap collections still run on connect --
+      send-on-change keeps their unchanged results home. Harness
+      note: steady-state traffic is flat with or without jitter (the
+      simulated fleet already starts spread out); the verdict now judges
+      steady state, excluding the reconnect transient, which is still
+      reported. With send-on-change + jitter + the outage grace the
+      1,000-agent restart storm met every criterion the harness checks.*
+- [x] **Initial inventory sent once, not twice per reconnect** --
       `registration_manager` and `_collect_and_send_periodic_data` both send it
       on every connect; the documented 5-minute initial wait does not exist.
-- [ ] **Send-on-change** for every snapshot (software inventory, users,
+      *Done 2026-10-02 by send-on-change: the registration burst finds the
+      reports the connect-time collection just queued unchanged and skips
+      them (an approval or identity change resets the gate, so a newly
+      approved host still gets everything once).*
+- [x] **Send-on-change** for every snapshot (software inventory, users,
       hardware, certificates, roles, processes, firewall...): content hash,
       forced resend every ~24 h; metrics every 15 min (the server keeps one
       sample per 15 min). Today the full software inventory goes ~288x/day.
+      *Done 2026-10-02: agent `communication/send_on_change.py` -- one gate in
+      `queue_outbound_message`; fingerprint ignores timestamps/ids; processes
+      by identity (sent on start/stop, else every 15 min); metrics every 15
+      min; resend after 24 h (server's tightest posture window is 2 days);
+      anything the server ASKS for runs inside `forced()` (commands, refresh
+      broadcast); reset on approval / identity change; remembered only after
+      queuing. Harness (`--send-on-change`), 1,000-agent restart storm, same
+      server: backlog at end 38,716 -> 0 (peak 40,649 -> 3,971), reconnect
+      180 -> 90 s, heartbeat p95 1.4 -> 0.26 s, health p95 3.5 -> 0.29 s,
+      agent bytes 857 -> 226 MB (best case: simulated content never
+      changes). Docs: the agent configuration page's fictional `collection:`
+      intervals block replaced by the real schedule.*
 - [ ] **5xx and 429 on the WebSocket upgrade are TRANSIENT**, honoring
       `Retry-After` -- today they count as "WebSockets blocked" and push the
       agent onto 5-second HTTP polling for 15 minutes, turning a short overload
@@ -11698,13 +11736,38 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       unblocked, a 10k-host push takes 8+ minutes. Exclude deferred rows (a
       stored not-before time), round-robin per host, larger batches with a
       time budget (`outbound_processor.py:41-187`).
-- [ ] **Multi-worker safety** -- with `SYSMANAGE_UVICORN_WORKERS` > 1 every
+- [x] **Multi-worker safety** -- with `SYSMANAGE_UVICORN_WORKERS` > 1 every
       tick, queue processor, phone-home and module update runs once per worker
       and queue claiming is check-then-update (double processing; concurrent
       module downloads share one temp file). Leader election per tick
       (`pg_try_advisory_lock`, per tenant) and atomic claiming
       (`UPDATE ... RETURNING` / `SKIP LOCKED`) (`main.py:259-278`,
       `queue_operations.py:472-489`, `module_loader.py:343`).
+      *DONE 2026-10-02 (Bryan: "please do this work as well").
+      `backend/startup/leadership.py`: one PostgreSQL advisory lock elects a
+      leader among the workers; every server-wide task (heartbeat monitor,
+      engine schedulers, retention, feed refreshes, the discovery beacon's
+      UDP listener) starts through `singleton_task()` and waits in the
+      followers, which retry every 15 s and take over when the leader dies
+      (uvicorn restarts it as a follower); a leader that loses its lock to
+      another worker shuts itself down rather than run twice. More than one
+      worker on SQLite is refused at startup. Queue claims are one
+      conditional UPDATE (`mark_processing`); the inbound drain takes a
+      per-host advisory lock so two workers never process one host at once
+      (order and per-host rows), commits before handing a host on, leaves
+      another worker's in-progress rows alone for 5 min, and host-less
+      messages are the leader's; outbound goes only to agents connected to
+      THIS worker (another worker failed them before). Module downloads and
+      staging are per process and a concurrent swap uses the winner's copy.
+      Found on the way: every lifespan shutdown re-raised the CancelledError
+      it had just caused, aborting the rest of shutdown ("Application
+      shutdown failed") -- fixed. Harness, 1,000-agent restart storm, same
+      laptop, 1 worker -> 4: inbound backlog peak 3,841 -> 93, oldest waiting
+      160 s -> 36 s, health p95 128 -> 12 ms, burst ratio 2.25 -> 1.28,
+      reconnect 90 s, 0 expired, 0 hosts marked down, 24 DB connections.
+      Still open: tenants spread across workers (one leader runs every
+      tenant's ticks), and shared presence for HA (`poll_presence` and the
+      fleet status endpoints read this worker's connections only).*
 - [ ] **Reconnect admission control** -- each SYSTEM_INFO does host upsert,
       full package ingestion, an audit commit and a logging-config push inline;
       each WebSocket holds a DB session for its life on a default 5+10 pool.
@@ -11726,10 +11789,14 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       or NAT, agent 21 onward is locked out and all retry at the same second
       (fixed `Retry-After: 900`); the tracking dict never shrinks
       (`communication_security.py:235-255`, `agent.py:61`).
-- [ ] **Outage grace for the heartbeat monitor** -- after server downtime longer
+- [x] **Outage grace for the heartbeat monitor** -- after server downtime longer
       than the timeout, the first pass marks every host down before agents can
       reconnect, flipping `active` filters and alerting
       (`heartbeat_monitor.py:21-73`).
+      *Done 2026-10-02: for one heartbeat window plus 8 minutes of agent
+      reconnect time after the monitor starts, nobody is marked down; a host
+      still silent after that is. Harness, 1,000-agent restart storm: hosts
+      marked down 4 -> 0.*
 - [ ] Cache host-to-tenant with TTL + invalidation (a host-less message scans
       every tenant DB); async DB retry instead of a blocking `time.sleep`
       backoff on the event loop (`inbound_processor.py:74-108`,
@@ -11934,7 +12001,94 @@ its network is what failed, nothing says so.
       Ubuntu 24.04 LTS, a cloud firewall in front of UFW, fail2ban on the
       login paths only.
 
+#### 22.10 MITRE "Lucky 13" unforgivable vulnerabilities, checked on every push (OSS)
+
+**Added 2026-10-02 (Bryan).** "An explicit check in the CI for the 'mitre
+lucky 13' common vulnerabilities" -- Steve Christey (MITRE), "Unforgivable
+Vulnerabilities", Black Hat USA 2007: thirteen classes so documented, obvious
+and cheap to find ("found in five minutes") that shipping one is
+unforgivable.
+
+- [x] **`tests/lucky13/`, its own step in `ci.yml`** (`pytest -m lucky13`),
+      every test named by its number and CWE: #1 buffer overflow / #3
+      traversal / #5 SQL injection / #13 integer overflow -- every GET path
+      parameter (logged in and public) and every integer query parameter fed
+      `AAA...`, `../..`, `' OR 1=1`, `0xffffffff`, 2**63, plus 100 KB fields
+      on every sign-in and enrollment form: never a 5xx, never a login; #7
+      direct request -- every route needs a login or sits on a reviewed list
+      with its reason (`public_routes.py`), and no protected route answers an
+      anonymous call; #8 `authenticated=1` -- the same sweep with forged
+      cookies, headers, query and form fields; #2 XSS, #4 file inclusion, #6
+      world-writable files, #9 home-grown crypto, #10 launching Help/UI from
+      privileged code, #11 predictable /tmp paths, #12 default passwords --
+      source scans with an allow-list that records why each exception is
+      safe. *2026-10-02.*
+- [x] **Fixed what it found on its first run:** an internal function published
+      as an unauthenticated route (`POST /api/v1/diagnostics/process-result`,
+      #7); two routes that 500'd on any non-UUID host id and three that
+      passed unbounded `limit`/`offset`/`page` to SQL (#13, #1, #5); a
+      `chmod 777` in the Alpine package build (#6).
+- [x] **#12 default password -- Bryan's decision.** Every installer's
+      `sysmanage.yaml.example` ships `admin_password: "admin"` (with
+      `admin@example.com`), the deb postinst copies it to
+      `/etc/sysmanage.yaml` when none exists, and the recovery login accepts
+      it; `jwt_secret` / `password_salt` ship as `CHANGE_ME...` placeholders
+      (a known JWT secret forges any token). Today the console only WARNS.
+      Options: refuse well-known passwords at the recovery login; ship them
+      blank; or generate random values at install time (as the pool sizing
+      already does) -- and refuse to start on a placeholder JWT secret. The
+      check is a strict xfail until then: it turns red the moment it is
+      fixed, so the marker comes off with the fix.
+      *DONE 2026-10-02 (Bryan: "generate the password at install time"):
+      `backend/config/install_secrets.py --apply` replaces ONLY placeholder
+      values (a live install's `jwt_secret` also keys stored MFA secrets, so
+      it is never touched) and installers call it only in their "config just
+      created" branch -- deb, rpm (centos/opensuse), FreeBSD, NetBSD, macOS
+      (into the example copy), Windows, snap; Alpine and OpenBSD print/
+      document the command. The examples now ship `CHANGE_ME...` for all
+      three, and the recovery login refuses any placeholder or well-known
+      password (constant-time compare). The xfail is gone; the check passes.*
+- [x] Extend to the other repositories: sysmanage-agent (runs as root /
+      SYSTEM: #6, #10, #11 matter most there), Pro+ engines (Cython compiles
+      to C: #1 and #13 are real there), sysmanage-docs (#2).
+      *Done 2026-10-02: `make test-lucky13` in all four repos (part of
+      `make security`), a named CI step in each (server, agent and docs on
+      every push; Pro+ on every release build, its CI is not push-triggered),
+      README sections, and a section with the paper link on the docs
+      security page in all 14 languages. First runs found and fixed: agent
+      -- deployed files ignored the plan's `mode` (server scripts landed
+      0644 in a shared temp dir), package names could pass as options or
+      local files, malformed and endlessly nested commands crashed the
+      dispatcher; Pro+ -- a root `dpkg -i` of a fixed /tmp path, two more
+      fixed /tmp paths in root scripts, file-wide bounds checking switched
+      off in two engines, a 500 on a long password, admin JWTs signed with
+      the public example secret; docs -- translations injected as raw HTML
+      (one Arabic string held leaked model output; now sanitized),
+      `admin/admin`-style logins in the screenshot tooling, a fixed /tmp log
+      written as root. A route-walk guard test in each server suite fails if
+      a FastAPI change ever makes the sweeps check nothing. Worker counting
+      now uses a shared PostgreSQL lock, so `uvicorn --workers N` and a
+      second machine are seen without the env var.*
+
 #### Found during the audit (not herd issues)
+
+- [x] **TLS offered CBC cipher suites** (Lucky Thirteen, CVE-2013-0169, and
+      its successors). uvicorn's default cipher string `"TLSv1"` gave the
+      server ECDHE-RSA-AES128-SHA and the other CBC suites (NULL and
+      anonymous ones in its list too); the installers' nginx configs set
+      `ssl_protocols` but no `ssl_ciphers`, so nginx used `HIGH:!aNULL:!MD5`
+      -- CBC again under TLS 1.2. *2026-10-02: the server now passes an
+      AEAD-only list (`backend/security/tls_policy.py`, Mozilla
+      intermediate's TLS 1.2 half; closes TLS 1.0/1.1 as a side effect).
+      Pending Bryan's OK: the same `ssl_ciphers` line in all 11 nginx
+      configs, and a CI check that handshakes against both.* *DONE
+      2026-10-02 (Bryan: "add this"): the nginx template takes the list from
+      `tls_policy.py` through `scripts/render_nginx_configs.py` (one source,
+      drift-checked); validated with `nginx -t` and real handshakes against
+      nginx: TLS 1.0/1.1 and every CBC suite refused, TLS 1.2 AEAD and 1.3
+      accepted. `tests/test_tls_policy.py` handshakes against the context
+      uvicorn builds and holds all 11 configs to the list (negative control:
+      with uvicorn's default ciphers it fails).*
 
 - [ ] **License server orders versions as strings** -- "2.0.9" sorts above
       "2.0.30", so a fresh install asking for "latest" can get an older build
@@ -11999,13 +12153,15 @@ its network is what failed, nothing says so.
 
 ---
 
-## Phase 23: Hardware & Asset Visibility (Community / OSS; Pro+)
+## Phase 23: Hardware, Time & Asset Visibility (Community / OSS; Pro+)
 
 **Target Release:** v3.11.0.0
-**Focus:** Know what the hardware under every host is doing and which physical
-machine it is -- failing drives, degraded arrays and pools, overheating and
-other hardware faults reported the moment they happen, and an asset tag that
-belongs to the machine rather than to any one OS installed on it.
+**Focus:** Know what the hardware under every host is doing, whether its
+clock can be trusted, and which physical machine it is -- failing drives,
+degraded arrays and pools, overheating and other hardware faults reported the
+moment they happen; every clock measured against the server and kept in sync;
+and an asset tag that belongs to the machine rather than to any one OS
+installed on it.
 
 **SEQUENCING (2026-10-01, Bryan).** Both features were requested for Phase 22
 and moved here the same day so Phase 22 stays hardening, security and fixes;
@@ -12118,8 +12274,66 @@ discovery records manufacturer / model / serial, keyed by MAC).
       the identity normalization (recorded outputs from all six OS families),
       the T480 multi-boot case and the import dry run.
 
+#### 23.3 Time synchronization: measure every clock, keep it in bounds (OSS + Pro+)
+
+**Added 2026-10-02 (Bryan):** "measures the time drift of each remote host and
+provides an ability to use ntp to get them all in sync and to do a
+spot-resynchronization to any machine that is outside of a predefined bound
+that is customer-configurable ... an alert raised when a remote host exceeds
+that limit ... very important from a security perspective." A clock that is
+off breaks what security rests on: certificate validity (TLS, mutual TLS,
+code signing), Kerberos (5-minute tolerance), TOTP codes, token expiry, and
+the order of events in audit logs and incident timelines. Nothing measures
+it today.
+
+- [ ] **Measure the offset, independently of the host's own time service:**
+      the agent and server timestamp the heartbeat exchange NTP-style
+      (offset = server time - midpoint of the agent's send and receive), so a
+      host whose NTP is broken -- or lying -- is still measured, every
+      heartbeat, at no extra traffic.  Smoothed (median of recent samples) so
+      one slow round trip is not a false alarm.
+- [ ] **Report the host's own time service:** chrony (`chronyc tracking`),
+      ntpd (`ntpq -c rv`), systemd-timesyncd (`timedatectl
+      show-timesync`), OpenNTPD (`ntpctl -s status`, OpenBSD default),
+      Windows Time (`w32tm /query /status`), macOS (`sntp` /
+      `systemsetup -getusingnetworktime`): which service, synchronized or not,
+      its source and stratum, its own estimate of the offset.  "Not
+      measured" is never "in sync" -- a host with no time service says so.
+- [ ] **The server's own clock first:** the server checks its sync against
+      its configured reference and refuses to judge the fleet against a clock
+      it cannot vouch for (the 22.9 canary watches it too).
+- [ ] **Customer-configurable bounds:** a warning and a critical offset
+      (defaults 1 s and 5 s), set for the whole fleet and overridable per
+      tenant, site and tag -- tighter for domain controllers and signing
+      hosts, looser for lab machines.
+- [ ] **Fleet NTP policy (Pro+):** the NTP sources each host should use (an
+      internal pair for an air-gapped site), applied to whichever service the
+      host runs (chrony, ntpd, timesyncd, OpenNTPD, w32time), the service
+      enabled at boot, and drift from the policy reported -- through the
+      Phase 20 desired-state engine where a profile fits.
+- [ ] **Spot resynchronization:** on any host outside its bound, an
+      audited one-click step -- `chronyc makestep`, `ntpdate` / `sntp -sS`,
+      `rdate -n` on OpenBSD, `w32tm /resync /force` -- from the host page or
+      for every out-of-bounds host at once (fleet job, in waves); optionally
+      automatic on breach, per policy, with its own audit entry.
+- [ ] **Alerts (Pro+, through `alerting_engine`, real time):** raised when a
+      host crosses its warning or critical bound or loses time sync, routed
+      to the existing channels (email first), cleared when it recovers, rate
+      limited, and digested when a whole site drifts together (a dead NTP
+      server -- one alert, not a thousand).
+- [ ] **UI:** a fleet Time Sync view (offset per host, worst first, by
+      site/tag, time service and source), the offset on the host page with
+      its history, a dashboard tile; posture (21.4) gains a "clocks in
+      bounds" check.
+- [ ] Docs + screenshots + 14-language i18n; tests per OS for the service
+      parsers (recorded command output), the offset estimate, bound
+      resolution (fleet / tenant / site / tag) and the resync dispatch.
+
 #### Exit criteria
 
+- [ ] A clock deliberately skewed beyond its bound (a VM with `date -s`) is
+      measured within one heartbeat, raises the alert, and is brought back
+      by a spot resync -- on Linux, a BSD and Windows.
 - [ ] Real failures, not just fixtures: a degraded ZFS pool, a failed md
       member and failing-drive SMART data each raise an alert email within
       seconds; a multi-boot machine's OS hosts share one asset tag.
@@ -13134,7 +13348,7 @@ federation (`Host.site_id`) and are not offered to scans yet.
 | 20 | v3.8.0.0 | Configuration Management & Drift | Ansible desired-state config, config profiles, drift detection + remediate-to-baseline |
 | 21 | v3.9.0.0 | Endpoint Facts & Proactive Advisor | osquery fact substrate, Insights-style recommendations, malware detection, threat-model wizard + posture punch list, unenrolled asset discovery |
 | 22 | v3.10.0.0 | Scale Hardening -- Thundering-Herd Remediation | Jittered agent schedules + send-on-change, high-throughput intake and fair queues, leader election, bounded/spread ticks, fleet pushes in waves, stage-then-swap module updates + CDN delivery, federation deltas, scale harness |
-| 23 | v3.11.0.0 | Hardware & Asset Visibility | Drive health (SMART, NVMe), degraded arrays and ZFS pools, temperatures and hardware errors from every OS, with real-time email alerts; asset tags bound to the physical machine (shared by every OS on it), a naming-scheme builder, search, reports and CSV import |
+| 23 | v3.11.0.0 | Hardware, Time & Asset Visibility | Drive health (SMART, NVMe), degraded arrays and ZFS pools, temperatures and hardware errors from every OS, with real-time email alerts; every host's clock drift measured, NTP managed fleet-wide, out-of-bounds hosts resynchronized and alerted on; asset tags bound to the physical machine (shared by every OS on it), a naming-scheme builder, search, reports and CSV import |
 | 24 | **v4.0.0.0** | Mobile Fleet Visibility & UEM Ingestion | **MAJOR -- a new device class enters the product.** Device model, manual/API registration, ingest-from-UEM -- **air-gap compatible** |
 | 25 | v4.1.0.0 | Mobile Companion App & Compliance | First-party BYOD self-report app; mobile EOL/patch compliance, alerting + enforcement |
 | 26 | **v5.0.0.0** | Market-Parity GA | **MAJOR -- market parity reached.** All gap features hardened; v5.0 GA |

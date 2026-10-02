@@ -244,8 +244,11 @@ async def get_script_executions(
     current_user=Depends(get_current_user),
     host_id: Optional[str] = Query(None, description="Filter by host ID"),
     status: Optional[str] = Query(None, description="Filter by status"),
-    page: int = Query(1, description="Page number (1-based)"),
-    limit: int = Query(50, description="Maximum number of results per page"),
+    # Bounded: huge values overflowed the database driver (Lucky 13 #13).
+    page: int = Query(1, ge=1, le=2**31 - 1, description="Page number (1-based)"),
+    limit: int = Query(
+        50, ge=1, le=1000, description="Maximum number of results per page"
+    ),
 ):
     """Get script execution logs with pagination."""
     session_factory = request_sessionmaker()

@@ -8,13 +8,16 @@ Handles processing of messages received from agents.
 """
 
 import asyncio
+import random
 import time
+import zlib
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import and_, func, or_
+from sqlalchemy import and_, func, or_, text
 from sqlalchemy.orm import Session, sessionmaker
 
 from backend.i18n import _
+from backend.startup.leadership import leadership, multi_process
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.message_router import log_message_data, route_inbound_message
 from backend.websocket.mock_connection import MockConnection
@@ -169,14 +172,72 @@ INBOUND_BUDGET_SECONDS = 0.75
 HOST_BATCH = 50  # hosts claimed per round, oldest waiting first
 PER_HOST_LIMIT = 20  # messages per host per round, so no host starves the rest
 NULL_HOST_BATCH = 50
+STUCK_SECONDS = 30
+STUCK_SECONDS_MULTI = 300
+# Namespace (first key) of the per-host drain locks; the leader lock uses the
+# one-key form, which PostgreSQL keeps apart from the two-key form.
+HOST_LOCK_CLASS = 0x534D
+
+
+class _HostLocks:
+    """Per-host drain locks across server processes (Phase 22.2).
+
+    With several workers, each drains the queue; two of them must never
+    process one host's messages at once (out of order, and racing on that
+    host's rows).  A worker drains a host only while it holds that host's
+    PostgreSQL advisory lock, on one connection kept for the drain.  One
+    process, or a database without advisory locks: every acquire succeeds."""
+
+    def __init__(self, db):
+        self._conn = None
+        bind = db.get_bind()
+        if multi_process() and bind.dialect.name == "postgresql":
+            self._conn = bind.connect().execution_options(isolation_level="AUTOCOMMIT")
+
+    @property
+    def active(self) -> bool:
+        return self._conn is not None
+
+    @staticmethod
+    def _key(host_id) -> int:
+        return zlib.crc32(str(host_id).encode("utf-8")) - 2**31  # a signed int4
+
+    def acquire(self, host_id) -> bool:
+        if self._conn is None:
+            return True
+        return bool(
+            self._conn.execute(
+                text("SELECT pg_try_advisory_lock(:c, :k)"),
+                {"c": HOST_LOCK_CLASS, "k": self._key(host_id)},
+            ).scalar()
+        )
+
+    def release(self, host_id) -> None:
+        if self._conn is not None:
+            self._conn.execute(
+                text("SELECT pg_advisory_unlock(:c, :k)"),
+                {"c": HOST_LOCK_CLASS, "k": self._key(host_id)},
+            )
+
+    def close(self) -> None:
+        if self._conn is None:
+            return
+        conn, self._conn = self._conn, None
+        try:
+            conn.execute(text("SELECT pg_advisory_unlock_all()"))
+            conn.close()
+        except Exception:  # pylint: disable=broad-exception-caught
+            conn.invalidate()  # never return a connection that may hold locks
 
 
 def _reset_stuck_messages(db):
-    """Put IN_PROGRESS messages abandoned for 30 s back to PENDING."""
+    """Put abandoned IN_PROGRESS messages back to PENDING.  One process: any
+    IN_PROGRESS row older than 30 s is abandoned (the drain is sequential).
+    Several: another worker may still be working on it, so wait longer."""
     from backend.persistence.models import MessageQueue  # noqa: PLC0415
 
     stuck_threshold = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
-        seconds=30
+        seconds=STUCK_SECONDS_MULTI if multi_process() else STUCK_SECONDS
     )
     stuck_messages = (
         db.query(MessageQueue)
@@ -212,6 +273,18 @@ def _due_filter(MessageQueue):  # pylint: disable=invalid-name
 def _oldest_waiting_hosts(db, limit):
     from backend.persistence.models import MessageQueue  # noqa: PLC0415
 
+    if multi_process():
+        # Every worker sees the same oldest hosts; a wider, shuffled window
+        # spreads them so workers do not queue up on one another's locks.
+        hosts = _oldest_waiting_hosts_window(db, MessageQueue, limit * 4)
+        random.shuffle(hosts)
+        return hosts[:limit]
+    return _oldest_waiting_hosts_window(db, MessageQueue, limit)
+
+
+def _oldest_waiting_hosts_window(
+    db, MessageQueue, limit
+):  # pylint: disable=invalid-name
     return [
         host_id
         for (host_id,) in db.query(MessageQueue.host_id)
@@ -300,18 +373,29 @@ async def _drain_host_queues(db, deadline) -> bool:
     spent.  True when it stopped with work still waiting; a round that
     attempts nothing new ends the drain (the next one starts fresh)."""
     seen = set()
-    while time.monotonic() < deadline:
-        host_ids = _oldest_waiting_hosts(db, HOST_BATCH)
-        if not host_ids:
-            return False
-        attempted = 0
-        for host_id in host_ids:
-            if time.monotonic() >= deadline:
-                return True
-            attempted += await _drain_one_host(db, host_id, deadline, seen)
-        if not attempted:
-            return False
-    return True
+    locks = _HostLocks(db)
+    try:
+        while time.monotonic() < deadline:
+            host_ids = _oldest_waiting_hosts(db, HOST_BATCH)
+            if not host_ids:
+                return False
+            attempted = 0
+            for host_id in host_ids:
+                if time.monotonic() >= deadline:
+                    return True
+                if not locks.acquire(host_id):
+                    continue  # another worker is draining this host
+                try:
+                    attempted += await _drain_one_host(db, host_id, deadline, seen)
+                    if locks.active:
+                        db.commit()  # visible before another worker takes the host
+                finally:
+                    locks.release(host_id)
+            if not attempted:
+                return False
+        return True
+    finally:
+        locks.close()
 
 
 async def process_pending_messages(db: Session) -> bool:
@@ -331,6 +415,8 @@ async def process_pending_messages(db: Session) -> bool:
     _reset_stuck_messages(db)
     deadline = time.monotonic() + INBOUND_BUDGET_SECONDS
     more = await _drain_host_queues(db, deadline)
+    if multi_process() and not leadership.is_leader:
+        return more  # host-less messages: the leader's (no host to lock on)
     return await _drain_null_host_messages(db, deadline) or more
 
 

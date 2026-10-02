@@ -7,6 +7,7 @@
 import logging
 from datetime import datetime, timezone
 from typing import Optional
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_, desc
@@ -253,9 +254,9 @@ async def execute_updates(  # NOSONAR
 
 @router.get("/execution-log/{host_id}")
 async def get_execution_log(
-    host_id: str,
-    limit: Optional[int] = Query(50),
-    offset: Optional[int] = Query(0),
+    host_id: UUID,  # typed: a malformed id is a 422, not a 500 (Lucky 13)
+    limit: Optional[int] = Query(50, ge=1, le=1000),
+    offset: Optional[int] = Query(0, ge=0, le=2**31 - 1),
     dependencies=Depends(JWTBearer()),
 ):
     """Get update execution log for a host."""

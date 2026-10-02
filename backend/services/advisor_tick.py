@@ -50,6 +50,7 @@ from backend.services import advisor_evidence as ev
 from backend.services import advisor_proposals as proposals
 from backend.services import posture_service as posture
 from backend.services import threat_model_catalog
+from backend.startup.leadership import singleton_task
 
 logger = logging.getLogger(__name__)
 
@@ -460,7 +461,7 @@ def start_if_licensed():
     if _TASK is not None and not _TASK.done():
         return _TASK  # lifespan ran twice (reload / test harness)
     try:
-        _TASK = asyncio.create_task(advisor_tick_service())
+        _TASK = singleton_task(advisor_tick_service())
         logger.info("Advisor evaluation tick started: %s", _TASK)
         return _TASK
     except Exception as exc:  # pylint: disable=broad-except

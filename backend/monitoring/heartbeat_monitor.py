@@ -9,6 +9,7 @@ Periodically checks for hosts that haven't sent heartbeats and marks them as dow
 
 import asyncio
 import logging
+import time
 from datetime import datetime, timedelta, timezone
 
 from backend.config.config import get_heartbeat_timeout_minutes
@@ -16,6 +17,24 @@ from backend.persistence.models import Host
 from backend.persistence.partitions import iter_host_databases
 
 logger = logging.getLogger(__name__)
+
+# Phase 22.2 outage grace.  No agent can send a heartbeat while the SERVER is
+# down, so right after a start every host looks silent: the first pass used to
+# mark the whole fleet down (flipping "active" filters, firing alerts) before
+# the agents had a chance to reconnect.  For one heartbeat window, plus the
+# time agents take to come back (their reconnect backoff reaches ~7.5 min),
+# nothing is marked down; after that, a host that is still silent is.
+RECONNECT_ALLOWANCE_MINUTES = 8
+_service_started_at = None
+
+
+def _in_outage_grace(timeout_minutes, now=None):
+    """True while the server is too freshly started to judge silence."""
+    if _service_started_at is None:
+        return False
+    now = time.monotonic() if now is None else now
+    grace_seconds = 60 * (timeout_minutes + RECONNECT_ALLOWANCE_MINUTES)
+    return now - _service_started_at < grace_seconds
 
 
 def _mark_stale_hosts_down(db, timeout_threshold, label):
@@ -48,6 +67,11 @@ async def check_host_heartbeats():  # NOSONAR
     for label, _, db in iter_host_databases():
         try:
             timeout_minutes = get_heartbeat_timeout_minutes()
+            if _in_outage_grace(timeout_minutes):
+                logger.debug(
+                    "Heartbeat monitor: in post-start grace; not marking hosts down"
+                )
+                continue
             # Naive UTC to match how last_access is stored.
             timeout_threshold = datetime.now(timezone.utc).replace(
                 tzinfo=None
@@ -64,6 +88,8 @@ async def heartbeat_monitor_service():
     """
     Background service that runs heartbeat checks every minute.
     """
+    global _service_started_at  # pylint: disable=global-statement
+    _service_started_at = time.monotonic()
     logger.info("Starting heartbeat monitor service")
 
     while True:

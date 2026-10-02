@@ -9,9 +9,10 @@ Handles processing and sending of messages from server to agents.
 
 from datetime import datetime, timezone
 
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
+from backend.startup.leadership import multi_process
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.queue_manager import (
     QueueDirection,
@@ -32,9 +33,6 @@ async def process_outbound_messages(  # NOSONAR
         db: Database session
     """
     logger.info("Processing outbound messages")
-    print(
-        "=== OUTBOUND PROCESSOR: Starting to process outbound messages ===", flush=True
-    )
 
     from backend.persistence.models import Host, MessageQueue
 
@@ -44,48 +42,31 @@ async def process_outbound_messages(  # NOSONAR
     # Only pick up messages that are ready to be processed:
     # - scheduled_at is NULL (immediate), OR
     # - scheduled_at <= now (scheduled time has passed, including retries)
-    outbound_messages = (
-        db.query(MessageQueue)
-        .filter(
-            MessageQueue.direction == QueueDirection.OUTBOUND,
-            MessageQueue.status == QueueStatus.PENDING,
-            MessageQueue.host_id.is_not(None),
-            or_(
-                MessageQueue.scheduled_at.is_(None),
-                MessageQueue.scheduled_at <= now,
-            ),
+    query = db.query(MessageQueue).filter(
+        MessageQueue.direction == QueueDirection.OUTBOUND,
+        MessageQueue.status == QueueStatus.PENDING,
+        MessageQueue.host_id.is_not(None),
+        or_(
+            MessageQueue.scheduled_at.is_(None),
+            MessageQueue.scheduled_at <= now,
+        ),
+    )
+    if multi_process():
+        # Phase 22.2: only the worker holding a host's WebSocket can deliver
+        # to it.  Another worker would find no socket and fail the message, so
+        # each worker takes only its own agents' messages; the rest wait for
+        # theirs (or for an HTTP poll, which reads the queue itself).
+        local = local_hostnames()
+        if not local:
+            return
+        query = query.join(Host, Host.id == MessageQueue.host_id).filter(
+            func.lower(Host.fqdn).in_(local)
         )
-        .order_by(MessageQueue.priority.desc(), MessageQueue.created_at.asc())
+    outbound_messages = (
+        query.order_by(MessageQueue.priority.desc(), MessageQueue.created_at.asc())
         .limit(20)
         .all()
     )
-
-    print(
-        f"=== OUTBOUND PROCESSOR: Found {len(outbound_messages)} pending outbound messages ===",
-        flush=True,
-    )
-    for msg in outbound_messages:
-        print(
-            f"=== OUTBOUND PROCESSOR: Message ID: {msg.message_id}, Type: {msg.message_type}, Host: {msg.host_id}, Status: {msg.status} ===",
-            flush=True,
-        )
-        # Try to deserialize and show command_type if it's a command
-        try:
-            msg_data = server_queue_manager.deserialize_message_data(msg)
-            if (
-                msg.message_type == "command"
-                and "data" in msg_data
-                and "command_type" in msg_data["data"]
-            ):
-                print(
-                    f"=== OUTBOUND PROCESSOR: Command type: {msg_data['data']['command_type']} ===",
-                    flush=True,
-                )
-        except Exception as e:
-            print(
-                f"=== OUTBOUND PROCESSOR: Could not deserialize message: {e} ===",
-                flush=True,
-            )
 
     # Group messages by host for efficient processing
     messages_by_host = {}
@@ -150,6 +131,15 @@ async def process_outbound_messages(  # NOSONAR
             if not dispatch_allowed and message.message_type in GATED_MESSAGE_TYPES:
                 continue
             await process_outbound_message(message, host, db)
+
+
+def local_hostnames() -> list:
+    """Lower-cased hostnames of the agents connected to THIS process."""
+    from backend.websocket.connection_manager import (  # noqa: PLC0415
+        connection_manager,
+    )
+
+    return sorted({name.lower() for name in connection_manager.hostname_to_agent})
 
 
 def _log_command_sent(message, message_data, host) -> None:

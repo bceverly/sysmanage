@@ -63,7 +63,7 @@ security:
   # before the password is ever checked.  The old default could never
   # log in on any platform.
   admin_userid: "admin@example.com"
-  admin_password: "admin"
+  admin_password: "CHANGE_ME_GENERATED_AT_INSTALL"   # the installer writes a random one; a placeholder never signs in
   jwt_secret: "CHANGE_ME_IN_PRODUCTION_USE_RANDOM_SECRET"
   jwt_algorithm: "HS256"
   jwt_auth_timeout: 600

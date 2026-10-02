@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import importlib.util
 import re
 import sys
 from pathlib import Path
@@ -184,6 +185,17 @@ PORT_COPY = (
 )
 
 
+def _server_ciphers() -> str:
+    """The server's AEAD-only cipher list -- ONE source for uvicorn and nginx.
+    Loaded by path: tls_policy has no imports, and the backend package's own
+    imports are not needed (or wanted) to render a config."""
+    path = REPO / "backend" / "security" / "tls_policy.py"
+    spec = importlib.util.spec_from_file_location("_tls_policy", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.SERVER_CIPHERS
+
+
 def render(platform: str) -> str:
     """Substitute one platform's paths into the template."""
     text = TEMPLATE.read_text(encoding="utf-8")
@@ -191,6 +203,7 @@ def render(platform: str) -> str:
         if key in METADATA_KEYS:
             continue  # describes the install, not a placeholder in the config
         text = text.replace(f"@{key}@", value)
+    text = text.replace("@SSL_CIPHERS@", _server_ciphers())
     leftovers = [line for line in text.splitlines() if "@" in line and "@@" not in line]
     unresolved = [line for line in leftovers if _has_placeholder(line)]
     if unresolved:

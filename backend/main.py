@@ -17,6 +17,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.config import config
+from backend.security.tls_policy import uvicorn_tls_kwargs
 from backend.startup.cors_config import get_cors_origins
 from backend.startup.exception_handlers import register_exception_handlers
 from backend.startup.lifecycle import lifespan
@@ -184,13 +185,8 @@ if __name__ == "__main__":
 
     if key_file and cert_file:
         startup_logger.info("SSL certificates found, configuring HTTPS")
-        ssl_config = {
-            "ssl_keyfile": key_file,
-            "ssl_certfile": cert_file,
-        }
-        if chain_file:
-            ssl_config["ssl_ca_certs"] = chain_file
-            startup_logger.info("SSL chain file added to config")
+        # AEAD-only ciphers: no CBC suites (Lucky Thirteen); see tls_policy.
+        ssl_config = uvicorn_tls_kwargs(key_file, cert_file, chain_file)
         startup_logger.info("SSL config: %s", ssl_config)
     else:
         startup_logger.info("No SSL certificates configured, using HTTP")
@@ -256,12 +252,11 @@ if __name__ == "__main__":
     startup_logger.info("=== LAUNCHING UVICORN SERVER ===")
     startup_logger.info("About to call uvicorn.run()")
 
-    # Default to a single worker (production behavior is unchanged).  The load-
-    # test workflow sets SYSMANAGE_UVICORN_WORKERS>1 to use the runner's spare
-    # cores -- a single worker is GIL-bound to ~1 core and caps throughput.
-    # NOTE: >1 worker requires an import string (uvicorn re-imports the app per
-    # worker) and runs the lifespan -- and thus the background queue processors --
-    # once per worker; that's acceptable for the health-poll load scenarios.
+    # Default to a single worker.  SYSMANAGE_UVICORN_WORKERS>1 uses more cores
+    # (one worker is GIL-bound to ~1 core).  >1 worker needs an import string
+    # (uvicorn re-imports the app per worker) and PostgreSQL: each worker runs
+    # the lifespan, so one elected leader runs the server-wide background work
+    # and queue claims are per host and atomic (Phase 22.2; leadership.py).
     workers = int(os.environ.get("SYSMANAGE_UVICORN_WORKERS", "1") or "1")
     run_kwargs = {
         "host": host,

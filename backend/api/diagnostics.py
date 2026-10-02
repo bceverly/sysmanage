@@ -476,11 +476,13 @@ async def delete_diagnostic_report(  # NOSONAR
         return {"result": True, "message": _("Diagnostic report deleted")}
 
 
-@router.post("/diagnostics/process-result")
 async def process_diagnostic_result(db, result_data: dict):  # NOSONAR
     """
     Process diagnostic collection result from agent.
-    This endpoint is called internally when we receive diagnostic results via WebSocket.
+
+    Called by the agent message handler with the queue's session.  NOT a route:
+    it used to be published as an unauthenticated POST (CWE-425, a MITRE
+    "Lucky 13" direct request, found 2026-10-02) -- see tests/lucky13.
     """
     collection_id = result_data.get("collection_id")
     if not collection_id:

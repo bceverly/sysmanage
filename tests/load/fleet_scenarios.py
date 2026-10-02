@@ -75,12 +75,32 @@ def _reconnect_seconds(timeline, restart_t, agents, fraction=0.95):
     return None
 
 
-def _spike_ratio(timeline, after_t):
-    """Busiest window's send count over the average: 1.0 is perfectly flat."""
-    sends = [row["sent_since_last"] for row in timeline if row["t"] > after_t]
+def _spike_ratio(timeline, after_t, restart_window=None):
+    """Busiest window's send count over the average: 1.0 is perfectly flat.
+
+    STEADY state only: windows inside ``restart_window`` (the restart until
+    the fleet is back, plus a minute) are left out.  The reconnect after an
+    outage is a one-off, bounded event -- and with send-on-change the steady
+    average is small, so counting it would read the transient as a 5-minute
+    spike, which is what this measures.  The transient is still reported:
+    see ``reconnect_95pct_seconds`` and the timeline."""
+    lo, hi = restart_window or (None, None)
+    sends = [
+        row["sent_since_last"]
+        for row in timeline
+        if row["t"] > after_t and not (lo is not None and lo <= row["t"] <= hi)
+    ]
     if len(sends) < 3 or not sum(sends):
         return None
     return round(max(sends) / statistics.mean(sends), 2)
+
+
+def _restart_window(timeline, restart_t, agents):
+    """``(start, end)`` of the reconnect transient, or None without a restart."""
+    if restart_t is None:
+        return None
+    back = _reconnect_seconds(timeline, restart_t, agents)
+    return restart_t, restart_t + (back if back is not None else 300) + 60
 
 
 def _summarize(name, fleet, observer, restart_t, warmup):
@@ -118,7 +138,9 @@ def _summarize(name, fleet, observer, restart_t, warmup):
         "expired_rows_final": _queue_total(final, ".expired"),
         "hosts_marked_down_max_after_restart": max(hosts_down, default=0),
         "pg_connections_max": max(_series(samples, "pg_connections"), default=None),
-        "send_spike_ratio": _spike_ratio(stats.timeline, warmup),
+        "send_spike_ratio": _spike_ratio(
+            stats.timeline, warmup, _restart_window(stats.timeline, restart_t, agents)
+        ),
         "agent_counts": dict(stats.counts),
         "sent_by_type": dict(stats.sent),
     }  # fmt: skip
@@ -172,7 +194,15 @@ async def run_fleet(args) -> dict:
         await asyncio.to_thread(stack.reset)
     state = stack.load_state()
     base = f"http://127.0.0.1:{state['port']}"
-    fleet = Fleet(base, args.agents, args.source_ips, args.time_scale, args.packages)
+    fleet = Fleet(
+        base,
+        args.agents,
+        args.source_ips,
+        args.time_scale,
+        args.packages,
+        send_on_change=args.send_on_change,
+        jitter=args.jitter,
+    )
     print(
         f"enrolling {args.agents} agents from {fleet.source_ips} source address(es) ..."
     )

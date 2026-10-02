@@ -215,6 +215,35 @@ SysManage implements enterprise-grade security features:
 - **Scanning**: Automated security vulnerability scanning
 - **Policies**: Configurable password policies and account security
 
+### MITRE "Lucky 13" (Unforgivable Vulnerabilities)
+
+We test explicitly for the thirteen weakness classes in Steve Christey's
+[*Unforgivable Vulnerabilities*](https://cwe.mitre.org/documents/unforgivable_vulns/unforgivable.pdf)
+(MITRE, Black Hat USA 2007) -- flaws so well known and so cheap to find that
+shipping one is unforgivable. The checks live in `tests/lucky13/`, every test
+names its number and CWE, and CI runs them as their own named step on every
+push. The agent, Professional+ and documentation repositories run their own
+`tests/lucky13` (or equivalent) the same way.
+
+| # | Class (CWE) | How the server is checked |
+|---|---|---|
+| 1 | Buffer overflow (120) | 100 KB fields on every sign-in and enrollment form; 8 KB path values on every route: refused cleanly, never a 5xx |
+| 2 | Cross-site scripting (79) | No raw HTML sinks in the frontend; every server-built HTML response reviewed |
+| 3 | Directory traversal (23) | `../..` and absolute paths in every path parameter |
+| 4 | Remote file inclusion (98) | No `eval`/`exec`/dynamic import of request data; engines load only after signature verification |
+| 5 | SQL injection (89) | `' OR 1=1` in the login and every id parameter: no login, no crash |
+| 6 | World-writable files (276) | Code, scripts and installers never create world-writable files |
+| 7 | Direct request (425) | Every route needs a login or is on a reviewed public list with its reason; every protected route refuses an anonymous call |
+| 8 | Auth bypass via `authenticated=1` (472) | Forged cookies, headers, query and form fields on every protected route |
+| 9 | Home-grown crypto (327) | No weak or hand-rolled cryptography; security code uses `secrets`, not `random` |
+| 10 | Privilege escalation via Help (271) | The privileged server never launches a browser, help viewer or shell UI |
+| 11 | Symlink following (61) | No predictable temporary paths |
+| 12 | Hard-coded / default password (259) | Example configurations may hold only placeholders; installers generate each install's JWT secret, salt and recovery password; a placeholder or well-known password never signs in |
+| 13 | Integer overflow (190) | `0xffffffff`, 2^63 and negative values in every integer path and query parameter |
+
+Run them locally with `make test-lucky13` (also part of `make security` and
+`make test`).
+
 **📖 For complete security documentation, visit [sysmanage.org/docs/security/](https://sysmanage.org/docs/security/)**
 
 ## Deployment
@@ -230,7 +259,8 @@ cd frontend && npm run dev
 
 ### Production
 ```bash
-# Backend
+# Backend (more than one worker requires PostgreSQL: the workers elect one
+# leader for background work and claim queued messages per host)
 uvicorn backend.main:app --host 0.0.0.0 --port 6443 --workers 4
 
 # Frontend

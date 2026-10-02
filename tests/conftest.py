@@ -724,3 +724,14 @@ def real_engine():
     seam.register_engine(MagicMock(), module=mod)
     yield mod
     seam.unregister_engine()
+
+
+@pytest.fixture(autouse=True)
+def _no_heartbeat_outage_grace():
+    """The heartbeat monitor's post-start grace (Phase 22.2) is process-wide:
+    a test that starts the service must not put every later test inside it."""
+    from backend.monitoring import heartbeat_monitor
+
+    heartbeat_monitor._service_started_at = None  # pylint: disable=protected-access
+    yield
+    heartbeat_monitor._service_started_at = None  # pylint: disable=protected-access

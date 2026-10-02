@@ -230,18 +230,15 @@ class TestQueueOperationsMarkProcessing:
         """Test mark_processing succeeds for pending message."""
         from backend.websocket.queue_operations import QueueOperations
 
-        mock_msg = MagicMock()
-        mock_msg.status = QueueStatus.PENDING
-
         mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mock_msg
+        mock_db.query.return_value.filter.return_value.update.return_value = 1
         mock_get_db.return_value = iter([mock_db])
 
         ops = QueueOperations()
         result = ops.mark_processing("msg-123")
 
         assert result is True
-        assert mock_msg.status == QueueStatus.IN_PROGRESS
+        mock_db.commit.assert_called_once()
 
     @patch("backend.websocket.queue_operations.get_db")
     def test_mark_processing_not_found(self, mock_get_db):
@@ -249,7 +246,8 @@ class TestQueueOperationsMarkProcessing:
         from backend.websocket.queue_operations import QueueOperations
 
         mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = None
+        mock_db.query.return_value.filter.return_value.update.return_value = 0
+        mock_db.query.return_value.filter.return_value.scalar.return_value = None
         mock_get_db.return_value = iter([mock_db])
 
         ops = QueueOperations()
@@ -262,11 +260,11 @@ class TestQueueOperationsMarkProcessing:
         """Test mark_processing fails for non-pending message."""
         from backend.websocket.queue_operations import QueueOperations
 
-        mock_msg = MagicMock()
-        mock_msg.status = QueueStatus.COMPLETED
-
         mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mock_msg
+        mock_db.query.return_value.filter.return_value.update.return_value = 0
+        mock_db.query.return_value.filter.return_value.scalar.return_value = (
+            QueueStatus.COMPLETED
+        )
         mock_get_db.return_value = iter([mock_db])
 
         ops = QueueOperations()

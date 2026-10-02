@@ -7,6 +7,7 @@ This module provides the necessary function to support login to the SysManage
 server.
 """
 
+import hmac
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -23,13 +24,17 @@ from backend.auth.auth_handler import (
     sign_refresh_token,
 )
 from backend.config import config
+from backend.config.install_secrets import is_placeholder
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.login_security import login_security
 from backend.services import mfa_service, registry_service
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.utils.verbosity_logger import get_logger
 
 argon2_hasher = PasswordHasher()
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -210,7 +215,19 @@ def _try_admin_login(
     if not (admin_userid and admin_password and login_data.userid == admin_userid):
         return None
 
-    if login_data.password != admin_password:
+    # Lucky 13 #12 (CWE-259): a shipped placeholder or well-known password is
+    # never a credential, even when it is still in the file (installers now
+    # generate one; see backend/config/install_secrets.py).
+    if is_placeholder(admin_password):
+        logger.error(
+            "Recovery admin login refused: security.admin_password is a default "
+            "or placeholder value. Set a real password in the configuration."
+        )
+        return None
+
+    if not hmac.compare_digest(
+        str(login_data.password).encode("utf-8"), str(admin_password).encode("utf-8")
+    ):
         login_security.record_failed_login(
             str(login_data.userid), client_ip, user_agent
         )
@@ -423,9 +440,9 @@ def _try_external_idp_auth(user, login_data, session):
         return None
     config = provider.to_dict()
     # Resolve bind password from Vault before passing to the engine.
-    from backend.api.external_idp import (
+    from backend.api.external_idp import (  # pylint: disable=import-outside-toplevel
         _resolve_secret,
-    )  # pylint: disable=import-outside-toplevel
+    )
 
     config["ldap_bind_password"] = _resolve_secret(
         provider.ldap_bind_password_secret_id

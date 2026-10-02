@@ -38,8 +38,24 @@ PG_CONN_SQL = text(
 )
 
 
-def _proc_cpu_seconds(pid: int) -> Optional[float]:
-    """utime + stime of the process and its reaped children, in seconds."""
+def _proc_tree(pid: int) -> list:
+    """``pid`` and its live descendants -- with SYSMANAGE_UVICORN_WORKERS > 1
+    the work happens in the workers, children of the process we started."""
+    tree, todo = [], [pid]
+    while todo:
+        current = todo.pop()
+        tree.append(current)
+        try:
+            with open(
+                f"/proc/{current}/task/{current}/children", encoding="ascii"
+            ) as fh:
+                todo.extend(int(child) for child in fh.read().split())
+        except (OSError, ValueError):
+            pass
+    return tree
+
+
+def _one_cpu_seconds(pid: int) -> Optional[float]:
     try:
         with open(f"/proc/{pid}/stat", encoding="ascii") as fh:
             fields = fh.read().rsplit(")", 1)[1].split()
@@ -48,7 +64,15 @@ def _proc_cpu_seconds(pid: int) -> Optional[float]:
         return None
 
 
-def _proc_rss_mb(pid: int) -> Optional[float]:
+def _proc_cpu_seconds(pid: int) -> Optional[float]:
+    """utime + stime of the process tree (and reaped children), in seconds."""
+    readings = [_one_cpu_seconds(member) for member in _proc_tree(pid)]
+    if readings[0] is None:
+        return None
+    return sum(r for r in readings if r is not None)
+
+
+def _one_rss_mb(pid: int) -> Optional[float]:
     try:
         with open(f"/proc/{pid}/status", encoding="ascii") as fh:
             for line in fh:
@@ -57,6 +81,13 @@ def _proc_rss_mb(pid: int) -> Optional[float]:
     except (OSError, ValueError):
         return None
     return None
+
+
+def _proc_rss_mb(pid: int) -> Optional[float]:
+    readings = [_one_rss_mb(member) for member in _proc_tree(pid)]
+    if readings[0] is None:
+        return None
+    return sum(r for r in readings if r is not None)
 
 
 class Observer:
@@ -117,7 +148,8 @@ class Observer:
         result = None
         if cpu is not None and self._last_cpu and self._last_cpu[0] == pid:
             elapsed = now - self._last_cpu[2]
-            if elapsed > 0:
+            # A worker that died and was replaced takes its CPU time with it.
+            if elapsed > 0 and cpu >= self._last_cpu[1]:
                 result = round(100 * (cpu - self._last_cpu[1]) / elapsed, 1)
         self._last_cpu = (pid, cpu, now) if cpu is not None else None
         return result

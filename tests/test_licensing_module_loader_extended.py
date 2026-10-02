@@ -405,7 +405,7 @@ class TestDownloadAndCacheModule:
             result = await loader._download_and_cache_module("m")
         assert result is False
         # Temp file should have been removed on hash mismatch.
-        assert not (modules_path / "m.tmp").exists()
+        assert not (modules_path / f"m.{os.getpid()}.tmp").exists()
 
     @pytest.mark.asyncio
     async def test_happy_path_downloads_loads_and_caches(self, tmp_path):
@@ -461,7 +461,7 @@ class TestDownloadAndCacheModule:
         )
         assert kwargs["version"] == "1.2.3"
         # The downloaded tarball is removed after extraction (sole artifact = .so dir).
-        assert not (modules_path / "m.tmp").exists()
+        assert not (modules_path / f"m.{os.getpid()}.tmp").exists()
 
     @pytest.mark.asyncio
     async def test_network_error_returns_false_and_cleans_temp(self, tmp_path):
@@ -473,7 +473,7 @@ class TestDownloadAndCacheModule:
         modules_path = tmp_path / "mods"
         modules_path.mkdir()
         # Pre-create a temp file so we can verify the cleanup path runs.
-        temp_file = modules_path / "m.tmp"
+        temp_file = modules_path / f"m.{os.getpid()}.tmp"
         temp_file.write_bytes(b"partial")
 
         class _BoomSession:

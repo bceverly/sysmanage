@@ -43,6 +43,10 @@ fi
 if [ ! -f "/etc/sysmanage.yaml" ]; then
 	echo "Creating example configuration..."
 	cp /usr/local/etc/sysmanage/sysmanage.yaml.example /etc/sysmanage.yaml.example
+	chmod 600 /etc/sysmanage.yaml.example
+	# Generate this install's secrets (Lucky 13 #12) into the copy the admin
+	# turns into /etc/sysmanage.yaml.
+	( cd /usr/local/lib/sysmanage && ./.venv/bin/python -m backend.config.install_secrets --apply /etc/sysmanage.yaml.example ) || true
 	echo "IMPORTANT: Configure /etc/sysmanage.yaml before starting the service"
 fi
 # Size the database connection pool for THIS machine (Phase 22.2): adds a

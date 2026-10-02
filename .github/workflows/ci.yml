@@ -129,6 +129,19 @@ jobs:
         PYTHONPATH: .
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
 
+    - name: MITRE "Lucky 13" unforgivable vulnerabilities (Christey 2007)
+      run: |
+        # Steve Christey (MITRE), "Unforgivable Vulnerabilities", Black Hat
+        # 2007: buffer overflow, XSS, directory traversal, remote file
+        # inclusion, SQL injection, world-writable files, direct request,
+        # authenticated=1, home-grown crypto, privilege escalation via Help,
+        # symlink following, default passwords, integer overflow.  Its own
+        # step so a regression is named here, not buried in the full suite
+        # (which runs these too).  See tests/lucky13/conftest.py.
+        python -m pytest tests/lucky13 -m lucky13 -v --tb=short -p no:cacheprovider
+      env:
+        PYTHONPATH: .
+
     - name: Run backend tests
       run: |
         # Clean old test databases

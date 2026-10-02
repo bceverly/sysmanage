@@ -38,6 +38,8 @@ POST-INSTALL)
 	elif [ ! -f /usr/pkg/etc/sysmanage/config.yaml ]; then
 		cp /usr/pkg/etc/sysmanage/sysmanage.yaml.example \
 			/usr/pkg/etc/sysmanage/config.yaml
+		chmod 640 /usr/pkg/etc/sysmanage/config.yaml
+		NEW_CONFIG=1
 	fi
 
 	# Create Python virtual environment and install dependencies
@@ -49,6 +51,11 @@ POST-INSTALL)
 	# commented database_pool block only if the config has none -- an
 	# administrator's own values are never touched.
 	.venv/bin/python -m backend.persistence.pool_sizing --apply /usr/pkg/etc/sysmanage/config.yaml || true
+	# Generate this install's secrets (Lucky 13 #12): jwt_secret, password_salt and
+	# the recovery admin password -- only in a config just created from the example.
+	if [ "${NEW_CONFIG:-0}" = 1 ]; then
+		.venv/bin/python -m backend.config.install_secrets --apply /usr/pkg/etc/sysmanage/config.yaml || true
+	fi
 
 	# OpenBAO secrets broker -- provision the static prebuilt binary (NetBSD
 	# has no OpenBAO package), install the rc.d service, create the user.

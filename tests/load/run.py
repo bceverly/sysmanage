@@ -841,6 +841,16 @@ def main() -> int:
     )
     fleet.add_argument("--sample-seconds", type=float, default=5.0)
     fleet.add_argument(
+        "--send-on-change",
+        action="store_true",
+        help="agents send unchanged reports only on the agent's send-on-change cadence",
+    )
+    fleet.add_argument(
+        "--jitter",
+        action="store_true",
+        help="agents vary their timers and splay their first collection (agent Phase 22.1)",
+    )
+    fleet.add_argument(
         "--reuse-stack",
         action="store_true",
         help="skip the database reset (by default each fleet run starts empty)",

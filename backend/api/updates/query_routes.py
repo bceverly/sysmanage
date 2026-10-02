@@ -6,6 +6,7 @@
 
 import logging
 from typing import Optional
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -105,7 +106,7 @@ async def get_update_summary(dependencies=Depends(JWTBearer())):
 
 @router.get("/{host_id}")
 async def get_host_updates(
-    host_id: str,
+    host_id: UUID,  # typed: a malformed id is a 422, not a 500 (Lucky 13)
     *,
     package_manager: Optional[str] = Query(None),
     security_only: Optional[bool] = Query(None),
@@ -205,8 +206,9 @@ async def get_all_updates(  # pylint: disable=too-many-positional-arguments
     system_only: Optional[bool] = Query(None),
     application_only: Optional[bool] = Query(None),
     package_manager: Optional[str] = Query(None),
-    limit: Optional[int] = Query(100),
-    offset: Optional[int] = Query(0),
+    # Bounded: 2**63 overflowed the database driver (Lucky 13 #13).
+    limit: Optional[int] = Query(100, ge=1, le=100_000),
+    offset: Optional[int] = Query(0, ge=0, le=2**31 - 1),
     dependencies=Depends(JWTBearer()),
 ):
     """Get package updates across all hosts."""
