@@ -44,7 +44,6 @@ class TestMessageProcessor:
                 start_task.cancel()
 
         # Verify logger calls
-        mock_logger.info.assert_any_call("DEBUG: MessageProcessor.start() called")
         mock_logger.info.assert_any_call("Message processor started")
 
     @patch("backend.websocket.message_processor.logger")
@@ -56,9 +55,7 @@ class TestMessageProcessor:
 
         await processor.start()
 
-        mock_logger.info.assert_any_call(
-            "DEBUG: MessageProcessor already running, returning early"
-        )
+        mock_logger.info.assert_any_call("Message processor already running")
 
     async def test_stop(self):
         """Test stop() method."""
@@ -99,7 +96,12 @@ class TestMessageProcessor:
 
         mock_db.commit.assert_called_once()
         mock_db.close.assert_called_once()
-        mock_inbound.assert_called_once_with(mock_db)
+        # Inbound runs on the worker thread with its OWN session, bound to
+        # the same database (Phase 22.2); outbound stays on this session.
+        mock_inbound.assert_called_once()
+        worker_session = mock_inbound.call_args.args[0]
+        assert worker_session is not mock_db
+        assert worker_session.get_bind() is mock_db.get_bind.return_value
         mock_outbound.assert_called_once_with(mock_db)
 
     @patch("backend.websocket.message_processor.config")
@@ -173,3 +175,28 @@ class TestMessageProcessorIntegration:
     # Integration tests have been removed as the detailed processing logic
     # has been moved to separate modules (inbound_processor, outbound_processor)
     # These modules should have their own dedicated test files
+
+
+@pytest.mark.asyncio
+async def test_a_backlog_brings_the_loop_straight_back():
+    """Phase 22.2: a drain that stopped on its time budget with work waiting
+    is followed by the short pause, not the full interval."""
+    processor = MessageProcessor()
+    pauses = []
+    results = iter([True, False])
+
+    async def drain():
+        try:
+            return next(results)
+        except StopIteration:
+            processor.stop()
+            return False
+
+    async def fake_sleep(seconds):
+        pauses.append(seconds)
+
+    with patch.object(processor, "_process_pending_messages", side_effect=drain), patch(
+        "backend.websocket.message_processor.asyncio.sleep", side_effect=fake_sleep
+    ):
+        await processor.start()
+    assert pauses[:2] == [processor.busy_interval, processor.process_interval]

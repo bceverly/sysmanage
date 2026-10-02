@@ -22,10 +22,10 @@ class TestProcessPendingMessages:
 
         mock_db = MagicMock()
         mock_db.query.return_value.filter.return_value.all.return_value = []
-        mock_db.query.return_value.filter.return_value.distinct.return_value.limit.return_value.all.return_value = (
+        mock_db.query.return_value.filter.return_value.group_by.return_value.order_by.return_value.limit.return_value.all.return_value = (
             []
         )
-        mock_db.query.return_value.filter.return_value.limit.return_value.all.return_value = (
+        mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = (
             []
         )
 
@@ -53,7 +53,7 @@ class TestProcessPendingMessages:
             mock_stuck_message
         ]
         # Second call returns no host IDs
-        mock_db.query.return_value.filter.return_value.distinct.return_value.limit.return_value.all.return_value = (
+        mock_db.query.return_value.filter.return_value.group_by.return_value.order_by.return_value.limit.return_value.all.return_value = (
             []
         )
 
@@ -80,13 +80,13 @@ class TestProcessPendingMessages:
         # No stuck messages
         mock_db.query.return_value.filter.return_value.all.return_value = []
         # One host with pending messages
-        mock_db.query.return_value.filter.return_value.distinct.return_value.limit.return_value.all.return_value = [
+        mock_db.query.return_value.filter.return_value.group_by.return_value.order_by.return_value.limit.return_value.all.return_value = [
             ("host-123",)
         ]
         # Host lookup returns None (not found)
         mock_db.query.return_value.filter.return_value.first.return_value = None
         # No null host messages
-        mock_db.query.return_value.filter.return_value.limit.return_value.all.return_value = (
+        mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = (
             []
         )
 
@@ -112,7 +112,7 @@ class TestProcessPendingMessages:
 
         mock_db = MagicMock()
         mock_db.query.return_value.filter.return_value.all.return_value = []
-        mock_db.query.return_value.filter.return_value.distinct.return_value.limit.return_value.all.return_value = [
+        mock_db.query.return_value.filter.return_value.group_by.return_value.order_by.return_value.limit.return_value.all.return_value = [
             ("host-123",)
         ]
         mock_db.query.return_value.filter.return_value.first.return_value = mock_host
@@ -143,7 +143,7 @@ class TestProcessPendingMessages:
 
         mock_db = MagicMock()
         mock_db.query.return_value.filter.return_value.all.return_value = []
-        mock_db.query.return_value.filter.return_value.distinct.return_value.limit.return_value.all.return_value = [
+        mock_db.query.return_value.filter.return_value.group_by.return_value.order_by.return_value.limit.return_value.all.return_value = [
             ("host-123",)
         ]
         mock_db.query.return_value.filter.return_value.first.return_value = mock_host
@@ -543,11 +543,11 @@ class TestNullHostIdMessages:
         # No stuck messages
         mock_db.query.return_value.filter.return_value.all.return_value = []
         # No host IDs with pending
-        mock_db.query.return_value.filter.return_value.distinct.return_value.limit.return_value.all.return_value = (
+        mock_db.query.return_value.filter.return_value.group_by.return_value.order_by.return_value.limit.return_value.all.return_value = (
             []
         )
         # One null-host message
-        mock_db.query.return_value.filter.return_value.limit.return_value.all.return_value = [
+        mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = [
             mock_message
         ]
 
@@ -579,10 +579,10 @@ class TestNullHostIdMessages:
 
         mock_db = MagicMock()
         mock_db.query.return_value.filter.return_value.all.return_value = []
-        mock_db.query.return_value.filter.return_value.distinct.return_value.limit.return_value.all.return_value = (
+        mock_db.query.return_value.filter.return_value.group_by.return_value.order_by.return_value.limit.return_value.all.return_value = (
             []
         )
-        mock_db.query.return_value.filter.return_value.limit.return_value.all.return_value = [
+        mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = [
             mock_message
         ]
 
@@ -618,10 +618,10 @@ class TestNullHostIdMessages:
 
         mock_db = MagicMock()
         mock_db.query.return_value.filter.return_value.all.return_value = []
-        mock_db.query.return_value.filter.return_value.distinct.return_value.limit.return_value.all.return_value = (
+        mock_db.query.return_value.filter.return_value.group_by.return_value.order_by.return_value.limit.return_value.all.return_value = (
             []
         )
-        mock_db.query.return_value.filter.return_value.limit.return_value.all.return_value = [
+        mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = [
             mock_message
         ]
         mock_db.query.return_value.filter.return_value.first.return_value = mock_host
@@ -662,10 +662,10 @@ class TestNullHostIdMessages:
 
         mock_db = MagicMock()
         mock_db.query.return_value.filter.return_value.all.return_value = []
-        mock_db.query.return_value.filter.return_value.distinct.return_value.limit.return_value.all.return_value = (
+        mock_db.query.return_value.filter.return_value.group_by.return_value.order_by.return_value.limit.return_value.all.return_value = (
             []
         )
-        mock_db.query.return_value.filter.return_value.limit.return_value.all.return_value = [
+        mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = [
             mock_message
         ]
         mock_db.query.return_value.filter.return_value.first.return_value = mock_host
@@ -697,10 +697,10 @@ class TestNullHostIdMessages:
 
         mock_db = MagicMock()
         mock_db.query.return_value.filter.return_value.all.return_value = []
-        mock_db.query.return_value.filter.return_value.distinct.return_value.limit.return_value.all.return_value = (
+        mock_db.query.return_value.filter.return_value.group_by.return_value.order_by.return_value.limit.return_value.all.return_value = (
             []
         )
-        mock_db.query.return_value.filter.return_value.limit.return_value.all.return_value = [
+        mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = [
             mock_message
         ]
 
@@ -734,10 +734,10 @@ class TestNullHostIdMessages:
 
         mock_db = MagicMock()
         mock_db.query.return_value.filter.return_value.all.return_value = []
-        mock_db.query.return_value.filter.return_value.distinct.return_value.limit.return_value.all.return_value = (
+        mock_db.query.return_value.filter.return_value.group_by.return_value.order_by.return_value.limit.return_value.all.return_value = (
             []
         )
-        mock_db.query.return_value.filter.return_value.limit.return_value.all.return_value = [
+        mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = [
             mock_message
         ]
         mock_db.query.return_value.filter.return_value.first.return_value = mock_host
@@ -778,10 +778,10 @@ class TestNullHostIdMessages:
 
         mock_db = MagicMock()
         mock_db.query.return_value.filter.return_value.all.return_value = []
-        mock_db.query.return_value.filter.return_value.distinct.return_value.limit.return_value.all.return_value = (
+        mock_db.query.return_value.filter.return_value.group_by.return_value.order_by.return_value.limit.return_value.all.return_value = (
             []
         )
-        mock_db.query.return_value.filter.return_value.limit.return_value.all.return_value = [
+        mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = [
             mock_message
         ]
         mock_db.query.return_value.filter.return_value.first.return_value = mock_host

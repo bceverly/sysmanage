@@ -10,14 +10,14 @@ Handles cleanup, expiration, and deletion of queue messages.
 from datetime import datetime, timedelta, timezone
 from typing import List
 
-from sqlalchemy import and_
+from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
 
 from backend.i18n import _
 from backend.persistence.db import get_db
 from backend.persistence.models import MessageQueue
 from backend.utils.verbosity_logger import get_logger
-from backend.websocket.queue_enums import QueueStatus
+from backend.websocket.queue_enums import QueueDirection, QueueStatus
 
 logger = get_logger(__name__)
 
@@ -158,18 +158,55 @@ class QueueMaintenance:
                 minutes=timeout_minutes
             )
 
-            # Find messages that should be expired
-            # Only expire messages that are still pending or in_progress
-            # Don't touch completed, failed, or already expired messages
+            # Phase 22.2: an INBOUND message expires on time since its last
+            # ATTEMPT, never just for waiting its turn.  Expiring by age turned
+            # any backlog into silent data loss -- an agent's report thrown
+            # away because the server was busy.  A hard ceiling (default 24 h)
+            # still bounds a backlog that can never be worked off.  OUTBOUND
+            # keeps age-based expiry on purpose: a command delivered an hour
+            # late (a reboot, a patch run) is worse than one never delivered.
+            ceiling_hours = config.get("message_queue", {}).get(
+                "inbound_max_age_hours", 24
+            )
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
+            # pylint: disable-next=assignment-from-no-return  # pylint cannot infer SQLAlchemy func.*
+            last_attempt = func.coalesce(
+                MessageQueue.last_error_at, MessageQueue.started_at
+            )
+            inbound_stale = and_(
+                MessageQueue.direction == QueueDirection.INBOUND,
+                or_(
+                    and_(last_attempt.is_not(None), last_attempt < cutoff_time),
+                    MessageQueue.created_at < now - timedelta(hours=ceiling_hours),
+                ),
+            )
+            outbound_stale = and_(
+                MessageQueue.direction != QueueDirection.INBOUND,
+                MessageQueue.created_at < cutoff_time,
+            )
+            # Only messages still pending or in progress; completed, failed and
+            # already-expired rows are left alone.
             messages_to_expire = db.query(MessageQueue).filter(
                 and_(
-                    MessageQueue.created_at < cutoff_time,
+                    or_(inbound_stale, outbound_stale),
                     MessageQueue.status.in_(
                         [QueueStatus.PENDING, QueueStatus.IN_PROGRESS]
                     ),
                     MessageQueue.expired_at.is_(None),  # Not already expired
                 )
             )
+            inbound_count = messages_to_expire.filter(
+                MessageQueue.direction == QueueDirection.INBOUND
+            ).count()
+            if inbound_count:
+                # Loud: these are agent reports the server never used.
+                logger.warning(
+                    "Expiring %d inbound agent message(s): retried for %d minutes "
+                    "without success, or waiting longer than %d hours",
+                    inbound_count,
+                    timeout_minutes,
+                    ceiling_hours,
+                )
 
             count = messages_to_expire.count()
             if count > 0:

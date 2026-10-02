@@ -157,7 +157,13 @@ class TestMessageProcessorProcessPendingMessages:
         processor = MessageProcessor()
         await processor._process_pending_messages()
 
-        mock_process_inbound.assert_called_once_with(mock_db)
+        # Inbound runs on the worker thread with its own session on the same
+        # database (Phase 22.2); outbound uses this one.
+        mock_process_inbound.assert_called_once()
+        assert (
+            mock_process_inbound.call_args.args[0].get_bind()
+            is mock_db.get_bind.return_value
+        )
         mock_process_outbound.assert_called_once_with(mock_db)
         mock_db.commit.assert_called_once()
         mock_db.close.assert_called_once()
@@ -263,14 +269,16 @@ class TestMessageProcessorProcessPendingMessages:
         ]
 
         processor = MessageProcessor()
+        drain = AsyncMock(return_value=False)
         with patch.object(
             processor, "_provisioned_tenant_ids", return_value=["t-a", "t-b"]
-        ):
+        ), patch.object(MessageProcessor, "_drain_inbound", drain):
             await processor._process_pending_messages()
 
-        # Processed bootstrap + both tenant DBs (3 sessions), each committed/closed.
-        processed = {c.args[0] for c in mock_process_inbound.call_args_list}
-        assert processed == {bootstrap_db, tenant_a, tenant_b}
+        # Every database's inbound queue drained (on the worker, by engine) and
+        # each session committed/closed.
+        drained = {c.args[0] for c in drain.call_args_list}
+        assert drained == {db.get_bind() for db in (bootstrap_db, tenant_a, tenant_b)}
         for db in (bootstrap_db, tenant_a, tenant_b):
             db.commit.assert_called_once()
             db.close.assert_called_once()

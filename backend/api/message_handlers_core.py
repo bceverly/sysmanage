@@ -550,9 +550,18 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
         await connection.send_message(ack_message)
         return {"message_type": "success"}
 
-    # Check for host_id in message data (agent-provided)
+    # Check for host_id in message data (agent-provided).  A session already
+    # bound to that host proved it at the handshake (Phase 22.0) -- no need to
+    # look it up again on every heartbeat (Phase 22.2: one query per agent per
+    # 30 s on the thread serving every agent).
     agent_host_id = message_data.get("host_id")
-    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+    bound_host = getattr(connection, "host_id", None)
+    already_verified = bound_host is not None and str(bound_host) == str(agent_host_id)
+    if (
+        agent_host_id
+        and not already_verified
+        and not await validate_host_id(db, connection, agent_host_id)
+    ):
         return {
             "message_type": "error",
             "error_type": "host_not_registered",

@@ -40,7 +40,12 @@ logging:
   level: INFO|WARNING|ERROR|CRITICAL
   format: '[%(asctime)s UTC] %(name)s - %(levelname)s - %(message)s'
 message_queue:
+  # Outbound commands expire this long after they are queued.  Inbound agent
+  # reports expire this long after their last FAILED attempt -- a report that
+  # is only waiting its turn is never dropped for waiting...
   expiration_timeout_minutes: 60
+  # ...unless it has waited longer than this (bounds an unworkable backlog).
+  inbound_max_age_hours: 24
   cleanup_interval_minutes: 30
 # Multi-tenancy (Phase 13.1) -- opt-in; disabled for the standard dev/single-tenant
 # setup. Set enabled: true to exercise the SaaS control plane locally. See

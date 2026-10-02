@@ -385,6 +385,9 @@ def _enqueue_inbound_message(message, connection, db):
     message_data = message.data.copy() if message.data else {}
     message_data["_connection_info"] = {
         "agent_id": connection.agent_id,
+        "host_id": (
+            str(connection.host_id) if getattr(connection, "host_id", None) else None
+        ),
         "hostname": connection.hostname,
         "ipv4": connection.ipv4,
         "ipv6": connection.ipv6,
@@ -392,34 +395,71 @@ def _enqueue_inbound_message(message, connection, db):
     }
 
     # Enqueue for background processing
-    queue_ops.enqueue_message(
-        message_type=message.message_type,
-        message_data=message_data,
-        direction=QueueDirection.INBOUND,
-        host_id=None,  # Will be determined during processing
-        priority=(
-            Priority.HIGH
-            if message.message_type == MessageType.SYSTEM_INFO
-            else Priority.NORMAL
-        ),
-        message_id=message.message_id,
-        db=db,
-    )
-    # Commit the enqueue NOW.  ``enqueue_message`` only FLUSHES when handed a
-    # session -- the commit is the caller's job.  We must not rely on a later
-    # handler committing this same ``db``: for a tenant-bound host the
-    # time-sensitive handlers (heartbeat/ack) route to and commit the host's
-    # TENANT session instead (see ``_handle_time_sensitive_message``), so this
-    # bootstrap session would otherwise never be committed and the queued
-    # message would be silently rolled back -- losing the agent's inventory/OS
-    # updates entirely.
-    db.commit()
+    # Phase 22.2: a verified session knows its host, so the message is queued
+    # WITH it -- into the host's own queue (its tenant database when bound).
+    # Host-less rows went through a separate path drained 10 per second for
+    # the whole server: the intake ceiling the scale harness measured.
+    host_id = getattr(connection, "host_id", None)
+    target_db, own_session = _host_queue_session(host_id, db)
+    try:
+        queue_ops.enqueue_message(
+            message_type=message.message_type,
+            message_data=message_data,
+            direction=QueueDirection.INBOUND,
+            host_id=host_id if target_db is not None else None,
+            priority=(
+                Priority.HIGH
+                if message.message_type == MessageType.SYSTEM_INFO
+                else Priority.NORMAL
+            ),
+            message_id=message.message_id,
+            db=target_db if target_db is not None else db,
+            # The handshake just proved this host exists -- skip re-checking.
+            host_verified=target_db is not None,
+        )
+        # Commit the enqueue NOW.  ``enqueue_message`` only FLUSHES when handed
+        # a session -- the commit is the caller's job.  We must not rely on a
+        # later handler committing this same session: for a tenant-bound host
+        # the time-sensitive handlers (heartbeat/ack) commit a different one,
+        # so this would otherwise be silently rolled back -- losing the
+        # agent's inventory/OS updates entirely.
+        (target_db if target_db is not None else db).commit()
+    finally:
+        if own_session:
+            target_db.close()
 
     logger.info(
         "Enqueued %s message from connection %s for background processing",
         message.message_type,
         connection.agent_id,
     )
+
+
+def _host_queue_session(host_id, db):
+    """``(session, owned)`` for the queue a bound host's messages belong in:
+    its tenant database when it is bound to one, else ``db``.  ``(None,
+    False)`` when there is no host or its tenant cannot be resolved right now --
+    the message is then queued host-less on ``db`` (the slower path that
+    resolves the host later), never dropped."""
+    if host_id is None:
+        return None, False
+    from backend.persistence.partitions import (  # noqa: PLC0415
+        tenant_engine_for_host,
+    )
+
+    try:
+        engine = tenant_engine_for_host(host_id)
+    except Exception:  # pylint: disable=broad-exception-caught
+        logger.error(
+            "Could not resolve the tenant of host %s; queuing its message "
+            "host-less on the bootstrap queue instead",
+            sanitize_log(host_id),
+            exc_info=True,
+        )
+        return None, False
+    if engine is None:
+        return db, False
+    return sessionmaker(bind=engine)(), True
 
 
 def flush_pending_inbound_messages(connection, db):

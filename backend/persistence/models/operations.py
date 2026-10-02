@@ -174,6 +174,17 @@ Index(
     MessageQueue.scheduled_at,
 )
 
+# Phase 22.2: one host's queue, oldest first.  Without it every per-host
+# dequeue walked the whole backlog (9 ms each at 45k pending rows -- the
+# drain's time budget went on scanning); with it, 0.05 ms.
+Index(
+    "ix_message_queue_host_queue",
+    MessageQueue.host_id,
+    MessageQueue.direction,
+    MessageQueue.status,
+    MessageQueue.created_at,
+)
+
 
 class QueueMetrics(Base):
     """

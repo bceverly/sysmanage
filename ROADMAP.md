@@ -11670,6 +11670,23 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       `queue_maintenance.py:153-183`). Attach host/tenant at enqueue, claim in
       large batches with a time budget, process tenants in parallel, expire on
       time-since-last-attempt.
+      *2026-10-01 (Bryan: "keep pressing"): DONE except tenants in parallel.
+      A verified session queues WITH its host into the host's own (tenant)
+      queue; the drain is time-budgeted (0.75 s), oldest-waiting host first,
+      20 per host per round, one attempt per message per drain, and comes
+      straight back while a backlog remains; inbound expiry is by time since
+      the last attempt (24 h ceiling, `message_queue.inbound_max_age_hours`),
+      outbound stays age-based; composite index `ix_message_queue_host_queue`
+      (migration q26mqhostidx: 9 ms -> 0.05 ms per host dequeue); the drain
+      runs on a worker thread (`inbound_worker.py`) so the main loop serves
+      the agents; enqueue skips the host re-check for verified sessions and
+      the duplicate check loads one column; the server role is cached 30 s;
+      heartbeats on a verified session skip re-validation. Harness, 1,000-agent
+      restart storm: inbound processed 19 -> 30 msg/s, heartbeat p95 2.1 ->
+      1.4 s, reconnect 180 s, 1 host marked down (pre-fix: stalled, 974).
+      Still one core: ~90 msg/s arrive from 1,000 agents -- the rest is
+      22.1 send-on-change (less to process) and multi-worker safety below
+      (more cores).*
 - [ ] **Retry scheduling** -- inbound processing ignores `scheduled_at` and has
       no ordering (a failing message is retried every second; failing rows can
       monopolize the batch); jitter the retry delay; bound the "no

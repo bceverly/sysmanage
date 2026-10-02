@@ -24,6 +24,7 @@ from backend.persistence.partitions import (
 )
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.inbound_processor import process_pending_messages
+from backend.websocket.inbound_worker import inbound_worker
 from backend.websocket.outbound_processor import process_outbound_messages
 from backend.websocket.queue_manager import server_queue_manager
 
@@ -48,61 +49,34 @@ class MessageProcessor:
         """Initialize the message processor."""
         self.running = False
         self.process_interval = 1.0  # Process messages every second
+        self.busy_interval = 0.05  # ...or almost at once while a backlog remains
         self._last_cleanup = None  # last time old messages were purged
 
     async def start(self):
         """Start the background message processing loop."""
-        # Use both logger and print to ensure we see the message
-        logger.info("DEBUG: MessageProcessor.start() called")
-        print("DEBUG: MessageProcessor.start() called", flush=True)
-
         if self.running:
-            logger.info("DEBUG: MessageProcessor already running, returning early")
-            print(
-                "DEBUG: MessageProcessor already running, returning early", flush=True
-            )
+            logger.info("Message processor already running")
             return
 
         self.running = True
         logger.info(_("Message processor started"))
-        print("DEBUG: Message processor started - running flag set to True", flush=True)
 
-        cycle_count = 0
         try:
             while self.running:
-                cycle_count += 1
+                more = False
                 try:
-                    print(
-                        f"Processing cycle #{cycle_count} - About to call _process_pending_messages()",
-                        flush=True,
-                    )
-                    logger.info("Processing cycle #%s starting", cycle_count)
-                    await self._process_pending_messages()
-                    print(
-                        f"Processing cycle #{cycle_count} - Finished calling _process_pending_messages()",
-                        flush=True,
-                    )
-                    logger.info("Processing cycle #%s completed", cycle_count)
+                    more = await self._process_pending_messages()
                 except Exception as e:
                     logger.exception(
                         _("Error in message processing loop: %s"), str(e), exc_info=True
                     )
-                    print(
-                        f"Error in processing cycle #{cycle_count}: {e}",
-                        flush=True,
-                    )
-
-                # Wait before next processing cycle
-                print(
-                    f"Cycle #{cycle_count} complete - Sleeping for {self.process_interval} seconds before next cycle",
-                    flush=True,
+                # Phase 22.2: when a drain stopped on its time budget with work
+                # still waiting, come straight back (a brief yield) instead of
+                # sleeping a full interval.  The per-cycle stdout prints that
+                # used to be here are gone -- at this rate they were a flood.
+                await asyncio.sleep(
+                    self.busy_interval if more else self.process_interval
                 )
-                logger.info(
-                    "Cycle #%s complete, sleeping %ss",
-                    cycle_count,
-                    self.process_interval,
-                )
-                await asyncio.sleep(self.process_interval)
         except asyncio.CancelledError:
             logger.info(_("Message processor cancelled"))
             raise
@@ -113,6 +87,7 @@ class MessageProcessor:
     def stop(self):
         """Stop the background message processing."""
         self.running = False
+        inbound_worker.stop()
 
     async def _process_pending_messages(self):
         """Drain the message queue in the bootstrap DB and every provisioned
@@ -129,10 +104,12 @@ class MessageProcessor:
             or (now - self._last_cleanup) >= self._CLEANUP_INTERVAL
         )
 
+        more = False
         for label, db in self._queue_sessions():
             try:
-                # Inbound (agents→server), then outbound (server→agents).
-                await process_pending_messages(db)
+                # Inbound (agents→server) on the worker thread, then outbound
+                # (server→agents) here -- it writes to the real WebSockets.
+                more = await self._drain_inbound(db.get_bind()) or more
                 await process_outbound_messages(db)
 
                 # Retry messages that were sent but not acknowledged within the
@@ -173,6 +150,28 @@ class MessageProcessor:
 
         if do_cleanup:
             self._last_cleanup = now
+        return more
+
+    @staticmethod
+    async def _drain_inbound(engine):
+        """Drain this database's inbound queue on the worker thread, with a
+        session of its own (sessions are not shared between threads).  The
+        main loop is free for the agents while the worker waits on the
+        database -- see ``inbound_worker``."""
+
+        async def drain():
+            session = sessionmaker(bind=engine)()
+            try:
+                more = await process_pending_messages(session)
+                session.commit()
+                return more
+            except Exception:
+                session.rollback()
+                raise
+            finally:
+                session.close()
+
+        return await inbound_worker.run(drain())
 
     @staticmethod
     def _bootstrap_session():

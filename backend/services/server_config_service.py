@@ -13,6 +13,7 @@ row degrades gracefully to the default instead of raising.
 from __future__ import annotations
 
 import logging
+import time
 
 from backend.persistence import db, models
 from backend.persistence.models.server_configuration import (
@@ -25,6 +26,19 @@ from backend.persistence.models.server_configuration import (
 
 logger = logging.getLogger(__name__)
 
+# Phase 22.2: the role is read for every inbound agent message (air-gap repoint
+# check) -- a database round trip and an ORM load each time, about 7% of the
+# inbound worker's CPU under a 1,000-agent fleet.  It changes perhaps once in
+# an installation's life, so it is cached briefly; set_server_role clears it.
+_ROLE_TTL_SECONDS = 30.0
+_role_cache = {"value": None, "at": 0.0}
+
+
+def clear_server_role_cache() -> None:
+    """Forget the cached role (set_server_role does this; tests may too)."""
+    _role_cache["value"] = None
+    _role_cache["at"] = 0.0
+
 
 def get_server_role() -> str:
     """Return the configured server role, or the default on any failure.
@@ -34,16 +48,23 @@ def get_server_role() -> str:
     DB isn't reachable -- the role is non-critical metadata, so a lookup
     failure should degrade to "no air gap" rather than crash the caller.
     """
+    now = time.monotonic()
+    if _role_cache["value"] is not None and now - _role_cache["at"] < _ROLE_TTL_SECONDS:
+        return _role_cache["value"]
     try:
         session_local = db.get_session_local()
         with session_local() as session:
             row = session.query(models.ServerConfiguration).first()
-            if row is None or not row.air_gap_role:
-                return DEFAULT_SERVER_ROLE
-            return row.air_gap_role
+            role = (
+                row.air_gap_role
+                if row is not None and row.air_gap_role
+                else DEFAULT_SERVER_ROLE
+            )
     except Exception as exc:  # pylint: disable=broad-exception-caught
         logger.warning("Could not read air_gap_role from DB; defaulting: %s", exc)
-        return DEFAULT_SERVER_ROLE
+        return DEFAULT_SERVER_ROLE  # not cached: try the database again next time
+    _role_cache["value"], _role_cache["at"] = role, now
+    return role
 
 
 def set_server_role(role: str) -> str:
@@ -69,6 +90,7 @@ def set_server_role(role: str) -> str:
         else:
             row.air_gap_role = role
         session.commit()
+    clear_server_role_cache()
     return role
 
 

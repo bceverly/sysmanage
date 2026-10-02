@@ -7,8 +7,11 @@ Inbound message processor for SysManage.
 Handles processing of messages received from agents.
 """
 
+import asyncio
+import time
 from datetime import datetime, timedelta, timezone
 
+from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session, sessionmaker
 
 from backend.i18n import _
@@ -157,38 +160,24 @@ async def _dispatch_null_host_message(message, host, db, hostname, tenant_sessio
             tenant_session.close()
 
 
-async def process_pending_messages(  # NOSONAR
-    db: Session,
-) -> None:
-    """
-    Process all pending messages in the queue.
+# Phase 22.2 intake throughput.  The drain used to take 10 host-less messages a
+# second for the whole server (plus 10 hosts x 10 messages): the scale harness
+# watched a 1,000-agent fleet queue 52,000 messages it could not catch up on.
+# Now each call drains until its time budget is spent, oldest-waiting host
+# first, yielding between messages so the WebSockets keep breathing.
+INBOUND_BUDGET_SECONDS = 0.75
+HOST_BATCH = 50  # hosts claimed per round, oldest waiting first
+PER_HOST_LIMIT = 20  # messages per host per round, so no host starves the rest
+NULL_HOST_BATCH = 50
 
-    Args:
-        db: Database session
-    """
-    print("_process_pending_messages() called", flush=True)
-    logger.info("_process_pending_messages() called")
 
-    # Expire all cached objects to ensure we get fresh data from the database
-    # This prevents stale objects from being returned by queries
-    db.expire_all()
+def _reset_stuck_messages(db):
+    """Put IN_PROGRESS messages abandoned for 30 s back to PENDING."""
+    from backend.persistence.models import MessageQueue  # noqa: PLC0415
 
-    print(f"Got database session: {db}", flush=True)
-    logger.info("Got database session")
-
-    # First, expire old messages to prevent infinite processing loops
-    expired_count = server_queue_manager.expire_old_messages(db)
-    if expired_count > 0:
-        logger.info("Expired %d old messages", expired_count)
-
-    from backend.persistence.models import Host, MessageQueue
-
-    # Define stuck message threshold (messages older than 30 seconds)
     stuck_threshold = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
         seconds=30
     )
-
-    # First, reset stuck IN_PROGRESS messages back to PENDING
     stuck_messages = (
         db.query(MessageQueue)
         .filter(
@@ -198,189 +187,231 @@ async def process_pending_messages(  # NOSONAR
         )
         .all()
     )
-
     if stuck_messages:
         logger.warning(
             "Found %s stuck IN_PROGRESS messages, resetting to PENDING",
             len(stuck_messages),
         )
-        print(
-            f"Found {len(stuck_messages)} stuck IN_PROGRESS messages, resetting to PENDING",
-            flush=True,
-        )
         for msg in stuck_messages:
             msg.status = QueueStatus.PENDING
             msg.started_at = None
-            print(
-                f"Reset message {msg.message_id} from IN_PROGRESS back to PENDING",
-                flush=True,
-            )
         db.commit()
 
-    # Now get all hosts with pending messages (including newly reset ones)
-    # Exclude expired messages from processing
-    host_ids = (
-        db.query(MessageQueue.host_id)
-        .filter(
-            MessageQueue.direction == QueueDirection.INBOUND,
-            MessageQueue.status == QueueStatus.PENDING,
-            MessageQueue.host_id.is_not(None),
-            MessageQueue.expired_at.is_(None),
-        )
-        .distinct()
-        .limit(10)
+
+def _due_filter(MessageQueue):  # pylint: disable=invalid-name
+    """Pending, unexpired inbound rows whose retry time (if any) has come."""
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    return and_(
+        MessageQueue.direction == QueueDirection.INBOUND,
+        MessageQueue.status == QueueStatus.PENDING,
+        MessageQueue.expired_at.is_(None),
+        or_(MessageQueue.scheduled_at.is_(None), MessageQueue.scheduled_at <= now),
+    )
+
+
+def _oldest_waiting_hosts(db, limit):
+    from backend.persistence.models import MessageQueue  # noqa: PLC0415
+
+    return [
+        host_id
+        for (host_id,) in db.query(MessageQueue.host_id)
+        .filter(_due_filter(MessageQueue), MessageQueue.host_id.is_not(None))
+        .group_by(MessageQueue.host_id)
+        .order_by(func.min(MessageQueue.created_at))
+        .limit(limit)
         .all()
-    )
+    ]
 
-    print(
-        f"Found {len(host_ids)} hosts with pending messages",
-        flush=True,
-    )
-    logger.info("Found %s hosts with pending messages", len(host_ids))
 
-    for (host_id,) in host_ids:
-        # Check if host exists and is still approved before processing its messages
-        host = db.query(Host).filter(Host.id == host_id).first()
-        if not host:
-            # Phase 13.1 #2 SAFETY: do NOT hard-delete on "host not found".
-            # Under per-tenant queues there is an enrollment race window where a
-            # freshly-registered host's row may not yet be visible on THIS
-            # (tenant) database even though its messages are already queued here --
-            # a bulk delete would destroy the agent's data permanently.  Instead
-            # defer each message via mark_failed(retry=True): it reschedules with
-            # backoff (so a transient miss is reprocessed once the host row lands)
-            # and only gives up after max_retries, leaving the row as FAILED and
-            # still inspectable rather than gone.  A genuinely-deleted host's
-            # messages therefore stop after a bounded number of attempts instead
-            # of vanishing silently.
-            pending = (
-                db.query(MessageQueue)
-                .filter(
-                    MessageQueue.host_id == host_id,
-                    MessageQueue.direction == QueueDirection.INBOUND,
-                    MessageQueue.status == QueueStatus.PENDING,
-                )
-                .all()
-            )
-            logger.warning(
-                _(
-                    "Host %(host_id)s not found on this database; deferring %(count)d queued "
-                    "message(s) for retry (NOT deleting) -- may be an in-flight "
-                    "enrollment or a deleted host"
-                ),
-                {"host_id": host_id, "count": len(pending)},
-            )
-            for message in pending:
-                server_queue_manager.mark_failed(
-                    message.message_id,
-                    f"Host {host_id} not found on this database (deferred for retry)",
-                    db=db,
-                )
-            continue
+def _defer_messages_of_missing_host(db, host_id):
+    """Phase 13.1 #2 SAFETY: never hard-delete on "host not found" -- under
+    per-tenant queues a freshly enrolled host's row may not be visible yet.
+    Each message is deferred via mark_failed(retry) and only gives up after
+    max_retries, left as FAILED and inspectable rather than gone."""
+    from backend.persistence.models import MessageQueue  # noqa: PLC0415
 
-        if host.approval_status != "approved":
-            logger.warning(
-                _(
-                    "Host %(host_id)s (FQDN: %(fqdn)s) no longer approved (status: %(status)s), deleting all its messages from queue"
-                ),
-                {
-                    "host_id": host_id,
-                    "fqdn": host.fqdn,
-                    "status": host.approval_status,
-                },
-            )
-            deleted = server_queue_manager.delete_messages_for_host(host_id, db=db)
-            logger.info(
-                _("Deleted %(count)d messages for unapproved host %(host_id)s"),
-                {"count": deleted, "host_id": host_id},
-            )
-            continue
-
-        # Host exists and is approved - process its messages
-        logger.info(
-            _("Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"),
-            {"host_id": host_id, "fqdn": host.fqdn},
-        )
-        host_messages = server_queue_manager.dequeue_messages_for_host(
-            host_id=host_id, direction=QueueDirection.INBOUND, limit=10, db=db
-        )
-
-        for message in host_messages:
-            await process_validated_message(message, host, db)
-
-    # Second, handle messages with NULL host_id by extracting hostname from message data
-    # Exclude expired messages from processing
-    null_host_messages = (
+    pending = (
         db.query(MessageQueue)
         .filter(
+            MessageQueue.host_id == host_id,
             MessageQueue.direction == QueueDirection.INBOUND,
             MessageQueue.status == QueueStatus.PENDING,
-            MessageQueue.host_id.is_(None),
-            MessageQueue.expired_at.is_(None),
         )
-        .limit(10)
         .all()
     )
+    logger.warning(
+        _(
+            "Host %(host_id)s not found on this database; deferring %(count)d queued "
+            "message(s) for retry (NOT deleting) -- may be an in-flight "
+            "enrollment or a deleted host"
+        ),
+        {"host_id": host_id, "count": len(pending)},
+    )
+    for message in pending:
+        server_queue_manager.mark_failed(
+            message.message_id,
+            f"Host {host_id} not found on this database (deferred for retry)",
+            db=db,
+        )
 
+
+async def _drain_one_host(db, host_id, deadline, seen) -> int:
+    """Process this host's due messages; returns how many were attempted."""
+    from backend.persistence.models import Host  # noqa: PLC0415
+
+    host = db.query(Host).filter(Host.id == host_id).first()
+    if not host:
+        _defer_messages_of_missing_host(db, host_id)
+        return 0
+    if host.approval_status != "approved":
+        logger.warning(
+            _(
+                "Host %(host_id)s (FQDN: %(fqdn)s) no longer approved (status: %(status)s), deleting all its messages from queue"
+            ),
+            {"host_id": host_id, "fqdn": host.fqdn, "status": host.approval_status},
+        )
+        deleted = server_queue_manager.delete_messages_for_host(host_id, db=db)
+        logger.info(
+            _("Deleted %(count)d messages for unapproved host %(host_id)s"),
+            {"count": deleted, "host_id": host_id},
+        )
+        return 0
+    attempted = 0
+    for message in server_queue_manager.dequeue_messages_for_host(
+        host_id=host_id, direction=QueueDirection.INBOUND, limit=PER_HOST_LIMIT, db=db
+    ):
+        # At most one attempt per message per drain: its outcome (completed,
+        # failed, retry scheduled) is written through other sessions, so this
+        # session can still see it as pending -- re-taking it would retry it
+        # at once instead of after its backoff.
+        if message.message_id in seen:
+            continue
+        seen.add(message.message_id)
+        attempted += 1
+        await process_validated_message(message, host, db)
+        await asyncio.sleep(0)  # let the WebSockets and heartbeats run
+        if time.monotonic() >= deadline:
+            break
+    return attempted
+
+
+async def _drain_host_queues(db, deadline) -> bool:
+    """Round after round of the oldest-waiting hosts until the budget is
+    spent.  True when it stopped with work still waiting; a round that
+    attempts nothing new ends the drain (the next one starts fresh)."""
+    seen = set()
+    while time.monotonic() < deadline:
+        host_ids = _oldest_waiting_hosts(db, HOST_BATCH)
+        if not host_ids:
+            return False
+        attempted = 0
+        for host_id in host_ids:
+            if time.monotonic() >= deadline:
+                return True
+            attempted += await _drain_one_host(db, host_id, deadline, seen)
+        if not attempted:
+            return False
+    return True
+
+
+async def process_pending_messages(db: Session) -> bool:
+    """Process pending inbound messages within this call's time budget.
+
+    Returns True when it stopped with work still waiting, so the caller can
+    come straight back instead of sleeping.
+    """
+    # Expire cached objects so queries see fresh data.
+    db.expire_all()
+
+    # First, expire old messages to prevent infinite processing loops
+    expired_count = server_queue_manager.expire_old_messages(db)
+    if expired_count > 0:
+        logger.info("Expired %d old messages", expired_count)
+
+    _reset_stuck_messages(db)
+    deadline = time.monotonic() + INBOUND_BUDGET_SECONDS
+    more = await _drain_host_queues(db, deadline)
+    return await _drain_null_host_messages(db, deadline) or more
+
+
+async def _drain_null_host_messages(db, deadline) -> bool:
+    """Messages queued without a host (sessions from before 22.2, buffered
+    pre-handshake traffic): the host is resolved from the message.  True when
+    the budget ran out with more waiting."""
+    from backend.persistence.models import MessageQueue  # noqa: PLC0415
+
+    null_host_messages = (
+        db.query(MessageQueue)
+        .filter(_due_filter(MessageQueue), MessageQueue.host_id.is_(None))
+        .order_by(MessageQueue.created_at)
+        .limit(NULL_HOST_BATCH)
+        .all()
+    )
     for message in null_host_messages:
-        logger.info(_("Processing message with NULL host_id: %s"), message.message_id)
+        if time.monotonic() >= deadline:
+            return True
+        await _process_null_host_message(db, message)
+        await asyncio.sleep(0)
+    return len(null_host_messages) == NULL_HOST_BATCH
 
-        # Deserialize message data to extract hostname
-        try:
-            message_data = server_queue_manager.deserialize_message_data(message)
 
-            # Check if this is a SYSTEM_INFO message (registration) - these don't require host lookup
-            from backend.websocket.messages import MessageType
+async def _process_null_host_message(db, message) -> None:
+    logger.info(_("Processing message with NULL host_id: %s"), message.message_id)
 
-            if message.message_type == MessageType.SYSTEM_INFO:
-                logger.info(
-                    _("Processing SYSTEM_INFO registration message %s"),
-                    message.message_id,
-                )
-                # SYSTEM_INFO messages are processed without host validation
-                # The handler will create/update the host record
-                await process_system_info_message(message, db)
-                continue
+    # Deserialize message data to extract hostname
+    try:
+        message_data = server_queue_manager.deserialize_message_data(message)
 
-            hostname = message_data.get("hostname")
+        # Check if this is a SYSTEM_INFO message (registration) - these don't require host lookup
+        from backend.websocket.messages import MessageType
 
-            # Try connection info if no hostname in message data
-            if not hostname:
-                connection_info = message_data.get("_connection_info", {})
-                hostname = connection_info.get("hostname")
-
-            # Get host_id from message data (agents send this)
-            host_id = message_data.get("host_id")
-            if not host_id:
-                connection_info = message_data.get("_connection_info", {})
-                host_id = connection_info.get("host_id")
-
-            if not hostname and not host_id:
-                logger.warning(
-                    _("Message %s missing hostname and host_id, deleting"),
-                    message.message_id,
-                )
-                server_queue_manager.mark_failed(
-                    message.message_id,
-                    "Missing hostname and host_id in message data",
-                    db=db,
-                )
-                continue
-
-            host, tenant_session = resolve_message_host(db, host_id, hostname)
-
-            await _dispatch_null_host_message(
-                message, host, db, hostname, tenant_session
+        if message.message_type == MessageType.SYSTEM_INFO:
+            logger.info(
+                _("Processing SYSTEM_INFO registration message %s"),
+                message.message_id,
             )
+            # SYSTEM_INFO messages are processed without host validation
+            # The handler will create/update the host record
+            await process_system_info_message(message, db)
+            return
 
-        except Exception as e:
-            logger.exception(
-                _("Error processing NULL host_id message %(message_id)s: %(error)s"),
-                {"message_id": message.message_id, "error": str(e)},
+        hostname = message_data.get("hostname")
+
+        # Try connection info if no hostname in message data
+        if not hostname:
+            connection_info = message_data.get("_connection_info", {})
+            hostname = connection_info.get("hostname")
+
+        # Get host_id from message data (agents send this)
+        host_id = message_data.get("host_id")
+        if not host_id:
+            connection_info = message_data.get("_connection_info", {})
+            host_id = connection_info.get("host_id")
+
+        if not hostname and not host_id:
+            logger.warning(
+                _("Message %s missing hostname and host_id, deleting"),
+                message.message_id,
             )
             server_queue_manager.mark_failed(
-                message.message_id, f"Processing error: {str(e)}", db=db
+                message.message_id,
+                "Missing hostname and host_id in message data",
+                db=db,
             )
+            return
+
+        host, tenant_session = resolve_message_host(db, host_id, hostname)
+
+        await _dispatch_null_host_message(message, host, db, hostname, tenant_session)
+
+    except Exception as e:
+        logger.exception(
+            _("Error processing NULL host_id message %(message_id)s: %(error)s"),
+            {"message_id": message.message_id, "error": str(e)},
+        )
+        server_queue_manager.mark_failed(
+            message.message_id, f"Processing error: {str(e)}", db=db
+        )
 
 
 def resolve_message_host(db, host_id, hostname):

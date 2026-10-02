@@ -8,6 +8,7 @@ Handles message enqueuing, dequeuing, and status updates.
 """
 
 import json
+import random
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 
@@ -39,9 +40,14 @@ class QueueOperations:
         correlation_id: str | None = None,
         reply_to: str | None = None,
         db: Session | None = None,
+        host_verified: bool = False,
     ) -> str:
         """
         Add a message to the server queue.
+
+        ``host_verified`` skips the "does this host exist" query for an INBOUND
+        message from a session that has just proven its host (Phase 22.0/22.2:
+        one round trip per agent message, on the thread serving every agent).
 
         Args:
             message_type: Type of message (e.g., 'command', 'broadcast')
@@ -98,7 +104,9 @@ class QueueOperations:
 
         try:
             # Validate host_id exists if provided
-            if host_id is not None:
+            host = None
+            skip_check = host_verified and direction == QueueDirection.INBOUND
+            if host_id is not None and not skip_check:
                 host = db.query(Host).filter(Host.id == host_id).first()
                 if not host:
                     raise ValueError(
@@ -196,16 +204,21 @@ class QueueOperations:
 
             # Check for duplicate message_id to prevent re-enqueuing the same message
             # This can happen when agents retry/reconnect and resend messages
-            existing_message = (
-                db.query(MessageQueue)
+            # One column, not the whole row as an object: this runs for every
+            # agent message on the thread serving every agent, and loading
+            # the whole row (payload and all) as an object was most of the
+            # enqueue's cost in the Phase 22 profile.
+            existing = (
+                db.query(MessageQueue.status)
                 .filter(MessageQueue.message_id == message_id)
                 .first()
             )
-            if existing_message:
+            existing_status = existing[0] if existing else None
+            if existing:
                 logger.debug(
                     "Message %s already exists in queue (status=%s), skipping duplicate enqueue",
                     message_id,
-                    existing_message.status,
+                    existing_status,
                 )
                 return message_id
 
@@ -392,9 +405,12 @@ class QueueOperations:
                     Priority.NORMAL: 2,
                     Priority.LOW: 1,
                 }
+                # Higher priority first, then OLDER first.  (One key with
+                # reverse=True also reversed the time order: within a priority
+                # the newest message was taken first -- the same bug the agent's
+                # queue had.)
                 messages.sort(
-                    key=lambda m: (priority_map.get(m.priority, 0), m.created_at),
-                    reverse=True,  # Higher priority first, older messages first within priority
+                    key=lambda m: (-priority_map.get(m.priority, 0), m.created_at)
                 )
 
             return messages
@@ -795,9 +811,14 @@ class QueueOperations:
             if retry and message.retry_count < message.max_retries:
                 # Reset to pending for retry with exponential backoff
                 message.status = QueueStatus.PENDING
+                # Max 1 hour, jittered +/-20% (Phase 22.2): messages that
+                # failed together (a database blip) must not all come back in
+                # the same second and fail together again.
                 backoff_seconds = min(
                     60 * (2 ** (message.retry_count - 1)), 3600
-                )  # Max 1 hour
+                ) * random.uniform(
+                    0.8, 1.2
+                )  # nosec B311  # NOSONAR - jitter, not security
                 message.scheduled_at = datetime.now(timezone.utc).replace(
                     tzinfo=None
                 ) + timedelta(seconds=backoff_seconds)

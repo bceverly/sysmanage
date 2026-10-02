@@ -36,7 +36,9 @@ class TestProcessPendingMessages:
 
     @pytest.mark.asyncio
     async def test_process_pending_messages_expires_old_messages(self, session):
-        """Test that old messages are expired."""
+        """An inbound message that was ATTEMPTED and has been failing for over
+        the timeout is expired.  (Phase 22.2: one that only WAITED is not --
+        see test_queue_expiry.py.)"""
         host = Host(
             id=str(uuid4()),
             fqdn="test-host.example.com",
@@ -62,6 +64,8 @@ class TestProcessPendingMessages:
             message_type="test_message",
             message_data="{}",
             created_at=old_time,
+            started_at=old_time,
+            last_error_at=old_time,
         )
         session.add(old_message)
         session.commit()

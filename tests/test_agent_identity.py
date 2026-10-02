@@ -204,3 +204,24 @@ def test_an_unproven_session_cannot_grow_its_buffer_without_limit():
     for _ in range(agent_api.MAX_PENDING_INBOUND + 50):
         agent_api._enqueue_inbound_message(message, connection, MagicMock())
     assert len(connection._pending_inbound_messages) == agent_api.MAX_PENDING_INBOUND
+
+
+def test_a_verified_sessions_messages_are_queued_with_their_host():
+    """Phase 22.2: host-less rows went through a path drained 10 per second
+    for the whole server; a bound session now queues WITH its host."""
+    host_id = uuid.uuid4()
+    connection = SimpleNamespace(
+        hostname="web.example.com", host_id=host_id, agent_id="c",
+        ipv4=None, ipv6=None, platform=None,
+    )  # fmt: skip
+    message = SimpleNamespace(message_type="os_version_update", message_id="x", data={})
+    db = MagicMock()
+    with patch(
+        "backend.websocket.queue_operations.QueueOperations.enqueue_message"
+    ) as enqueue, patch(
+        "backend.persistence.partitions.tenant_engine_for_host", return_value=None
+    ):
+        agent_api._enqueue_inbound_message(message, connection, db)
+    assert enqueue.call_args.kwargs["host_id"] == host_id
+    assert enqueue.call_args.kwargs["db"] is db
+    db.commit.assert_called_once()
