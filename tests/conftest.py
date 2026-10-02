@@ -735,3 +735,19 @@ def _no_heartbeat_outage_grace():
     heartbeat_monitor._service_started_at = None  # pylint: disable=protected-access
     yield
     heartbeat_monitor._service_started_at = None  # pylint: disable=protected-access
+
+
+@pytest.fixture(autouse=True)
+def _generous_drain_budgets(monkeypatch):
+    """The queue drains stop when their time budget (0.5-0.75 s) runs out.
+    Tests check WHICH work a drain does, not how fast: on a loaded parallel
+    run the real budget ran out mid-test and failed them at random."""
+    from backend.websocket import (  # pylint: disable=import-outside-toplevel
+        inbound_processor,
+        outbound_processor,
+    )
+
+    monkeypatch.setattr(inbound_processor, "INBOUND_BUDGET_SECONDS", 30.0)
+    # Expiry is throttled per process; every test starts with it due.
+    monkeypatch.setattr(inbound_processor, "_last_expiry", float("-inf"))
+    monkeypatch.setattr(outbound_processor, "OUTBOUND_BUDGET_SECONDS", 30.0)

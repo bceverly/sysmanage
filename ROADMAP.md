@@ -11846,7 +11846,8 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
 - [ ] Single-flight OpenBAO secret refresh with TTL jitter
       (`secrets_service.py:43-91`); chunked startup deletes
       (`custom_metric_retention.py`, `queue_maintenance`); remove per-message
-      stdout debug prints in the processors.
+      stdout debug prints in the processors. *Prints: removed from the inbound
+      drain 2026-10-02 (6 per message, 6% of drain time at 10k).*
 
 #### 22.3 Server: background work that is bounded and spread (OSS + Enterprise)
 
@@ -12241,6 +12242,25 @@ unforgivable.
       per worker (each of 4 workers ~84% of a core); (2) a fresh profile
       with these cuts in; (3) an agent-side cap on the first-connect burst
       (send the initial reports over minutes, not seconds).*
+
+      *Workers sized automatically (2026-10-02, Bryan): `backend/startup/
+      workers.py` -- one per CPU less a quarter (kept for PostgreSQL and the
+      OS), at most one per GB beyond 2 GB, at most 16, SQLite 1; override with
+      `api.workers` in sysmanage.yaml (SYSMANAGE_UVICORN_WORKERS still wins);
+      main.py exports the count so pool sizing and leader election agree.
+      Service files across the installers now start `backend.main` instead of
+      uvicorn (see Phase 26 "Production serving topology"). 10k storm, auto =
+      6 workers on the 8-core laptop: connected 10,000 / 10,000, reconnect
+      211 s, heartbeat p95 3.3 s, processing 50/s (best minute 124), backlog
+      136,607 at the end. Profile at that load: the laptop is SATURATED --
+      the workers ~3.75 cores, PostgreSQL 300-360% at peak -- and in the drain
+      59% of the time is the database executing statements. More workers on
+      this machine buy nothing more; fewer statements per message do. Taken
+      at once: expiry runs every 30 s instead of on every drain pass (was
+      4.4%), and the per-message stdout prints and INFO logs in the drain are
+      gone (logging was 6%). Next: one transaction per processed message
+      (claim + handler + complete; mark_processing/mark_completed are still
+      15%), then the agent-side first-connect spreading (Bryan wants it).*
 - [ ] Docs: a scaling guide (worker count, pool sizing, private mirrors,
       federation intervals) + 14-language i18n.
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
@@ -12572,6 +12592,51 @@ Make the inventory *actionable* -- reuse existing engines rather than rebuild.
 
 **Target Release:** **v5.0.0.0**
 **Focus:** Full market-parity GA -- content lifecycle + provisioning + config management + advisor hardened together; performance, security, docs, i18n.
+
+### Production serving topology: nginx is the only thing facing the network (tech debt)
+
+**Added 2026-10-02 (Bryan).** A production install must never have the
+Python application server reachable on its own -- nginx in front on every
+platform, always. Phase 19 put nginx everywhere (443 + TLS, 80 redirecting,
+one generated config, installed by every package including the MSI), but the
+SERVICE definitions were not held to it: on 2026-10-02 six of them were found
+starting `uvicorn backend.main:app --host 0.0.0.0 --port 8080` -- the app
+reachable on every interface beside nginx, ignoring `sysmanage.yaml`'s bind
+address (and the automatic worker count). nginx cannot run Python itself; an
+ASGI server (uvicorn) always sits behind it -- the point is that it listens on
+loopback only and nothing reaches it except nginx.
+
+- [x] Installer service files start the app through `backend.main`, which
+      binds `api.host`/`api.port` from sysmanage.yaml (loopback in every
+      shipped example) and sizes the workers: openSUSE/CentOS systemd units,
+      Alpine OpenRC, FreeBSD and NetBSD rc.d, OpenBSD rc, macOS launchd,
+      Windows NSSM service + service script. *2026-10-02.*
+- [ ] The two ports-tree rc scripts started uvicorn directly:
+      `packaging/freebsd-ports/sysutils/sysmanage/files/sysmanage.in` (runs
+      under `daemon -c`, i.e. from `/`, with `--app-dir`) and
+      `packaging/openbsd-ports/sysutils/sysmanage/pkg/sysmanage.rc`.
+      *Converted 2026-10-02 (Bryan): FreeBSD exports PYTHONPATH (rc.subr's
+      `su -m` keeps it; `sysmanage_listen`/`sysmanage_port` retired, warned
+      about if still set); OpenBSD uses `daemon_execdir` (its `su -l` clears
+      the environment) with the default pexp. Still to do: install and start
+      both from a real ports tree (FreeBSD 14.x, OpenBSD 7.7-7.9) -- service
+      start / status / stop, the app on 127.0.0.1:8080 only, workers running
+      -- since only a real tree finds these.* Also 2026-10-02: the installer
+      OpenBSD rc now runs `install_secrets` when it creates the config, and
+      creates it 0600.
+- [ ] A `make lint` guard, like the nginx-config drift check: no installer,
+      packaging or service file may start uvicorn directly or bind a wildcard
+      address; `api.host` in every shipped example must be loopback.
+- [ ] Evaluate a Unix socket between nginx and the app (no TCP port at all)
+      on the POSIX platforms.
+- [ ] Verify on a real host per platform (RHEL/CentOS, openSUSE, Ubuntu,
+      Alpine, FreeBSD, NetBSD, OpenBSD, macOS, Windows): only nginx listens
+      on a non-loopback address (`ss`/`sockstat`/`netstat`), 443 serves, 80
+      redirects, the app answers on loopback only, the host firewall opens 443
+      alone.
+- [ ] Docs: the deployment page states the topology in one picture -- nginx
+      (443) -> app on 127.0.0.1:8080 -> PostgreSQL -- and why nothing else
+      may listen.
 
 ### Consumer app-store distribution (moved from Phase 12, 2026-08-04)
 

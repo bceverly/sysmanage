@@ -94,3 +94,19 @@ def test_outbound_keeps_age_based_expiry(session):
     )
     server_queue_manager.expire_old_messages(session)
     assert _expired(session, late)
+
+
+async def test_expiry_runs_at_most_once_per_interval(session):
+    """Phase 22.2: expiry is maintenance, not part of every drain pass."""
+    from unittest.mock import patch  # pylint: disable=import-outside-toplevel
+
+    from backend.websocket import (
+        inbound_processor,
+    )  # pylint: disable=import-outside-toplevel
+
+    with patch.object(
+        server_queue_manager, "expire_old_messages", return_value=0
+    ) as expire:
+        await inbound_processor.process_pending_messages(session)
+        await inbound_processor.process_pending_messages(session)
+    assert expire.call_count == 1

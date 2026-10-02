@@ -173,6 +173,8 @@ HOST_BATCH = 50  # hosts claimed per round, oldest waiting first
 PER_HOST_LIMIT = 20  # messages per host per round, so no host starves the rest
 NULL_HOST_BATCH = 50
 STUCK_SECONDS = 30
+EXPIRY_INTERVAL_SECONDS = 30.0
+_last_expiry = float("-inf")
 STUCK_SECONDS_MULTI = 300
 # Namespace (first key) of the per-host drain locks; the leader lock uses the
 # one-key form, which PostgreSQL keeps apart from the two-key form.
@@ -407,10 +409,14 @@ async def process_pending_messages(db: Session) -> bool:
     # Expire cached objects so queries see fresh data.
     db.expire_all()
 
-    # First, expire old messages to prevent infinite processing loops
-    expired_count = server_queue_manager.expire_old_messages(db)
-    if expired_count > 0:
-        logger.info("Expired %d old messages", expired_count)
+    # Expiry is maintenance: at most every EXPIRY_INTERVAL_SECONDS per worker
+    # (Phase 22.2: on every drain it was 4.4% of the drain's time at 10k).
+    global _last_expiry  # pylint: disable=global-statement
+    if time.monotonic() - _last_expiry >= EXPIRY_INTERVAL_SECONDS:
+        _last_expiry = time.monotonic()
+        expired_count = server_queue_manager.expire_old_messages(db)
+        if expired_count > 0:
+            logger.info("Expired %d old messages", expired_count)
 
     _reset_stuck_messages(db)
     deadline = time.monotonic() + INBOUND_BUDGET_SECONDS
@@ -561,11 +567,7 @@ async def process_validated_message(message, host, db: Session, host_db=None) ->
     """
     handler_db = host_db if host_db is not None else db
     try:
-        print(
-            f"Starting to process message {message.message_id} of type {message.message_type}",
-            flush=True,
-        )
-        logger.info(
+        logger.debug(
             "Starting to process message %s of type %s",
             message.message_id,
             message.message_type,
@@ -579,18 +581,10 @@ async def process_validated_message(message, host, db: Session, host_db=None) ->
             return
 
         # Deserialize message data
-        print(
-            f"About to deserialize message data for {message.message_id}",
-            flush=True,
-        )
         message_data = server_queue_manager.deserialize_message_data(message)
         data_size = len(str(message_data)) if message_data else 0
         data_keys = list(message_data.keys()) if message_data else []
-        print(
-            f"Deserialized message data - keys: {data_keys}, size: {data_size} bytes",
-            flush=True,
-        )
-        logger.info(
+        logger.debug(
             "Deserialized message data - keys: %s, size: %s bytes",
             data_keys,
             data_size,
@@ -601,7 +595,7 @@ async def process_validated_message(message, host, db: Session, host_db=None) ->
         mock_connection.hostname = host.fqdn
         mock_connection.verified_host_id = str(host.id)  # handlers skip the re-check
 
-        logger.info(
+        logger.debug(
             _(
                 "Processing queued message: %(message_id)s (type: %(message_type)s, host: %(host)s)"
             ),
@@ -629,26 +623,14 @@ async def process_validated_message(message, host, db: Session, host_db=None) ->
 
         if success:
             # Mark message as completed and remove from queue
-            print(
-                f"Marking message {message.message_id} as completed",
-                flush=True,
-            )
             server_queue_manager.mark_completed(message.message_id, db=db)
-            logger.info(
+            logger.debug(
                 _(
                     "Successfully processed and completed message: %(message_id)s for host %(host)s"
                 ),
                 {"message_id": message.message_id, "host": host.fqdn},
             )
-            print(
-                f"Message {message.message_id} marked as completed successfully",
-                flush=True,
-            )
         else:
-            print(
-                f"Message {message.message_id} processing failed",
-                flush=True,
-            )
             # Mark message as failed and remove from queue
             server_queue_manager.mark_failed(
                 message.message_id, error_message="Unknown message type", db=db

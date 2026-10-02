@@ -54,21 +54,34 @@ def test_loopback_bind_is_silent(caplog):
     assert not [r for r in caplog.records if r.levelno >= logging.WARNING]
 
 
-def test_wildcard_bind_warns_with_the_reason_and_the_fix(caplog):
-    with caplog.at_level(logging.WARNING):
-        exposed = check_api_bind({"api": {"host": "0.0.0.0", "port": 8080}})
+def test_production_binds_loopback_instead_of_an_unacknowledged_wildcard(caplog):
+    """Bryan, 2026-10-02: nginx is the only thing facing the network.  An old
+    ``api.host: 0.0.0.0`` must not publish the API now that every launcher
+    reads api.host -- the server binds loopback (nginx still reaches it) and
+    says so loudly."""
+    from backend.config.bind_policy import resolve_api_bind_host  # noqa: PLC0415
 
-    assert exposed is True
+    config = {"api": {"host": "0.0.0.0", "port": 8080}}
+    assert resolve_api_bind_host(config) == "127.0.0.1"
+    with caplog.at_level(logging.WARNING):
+        exposed = check_api_bind(config)
+
+    assert exposed is False
     warnings = [r for r in caplog.records if r.levelno >= logging.WARNING]
     assert len(warnings) == 1
-
     message = warnings[0].getMessage()
-    # It has to say WHAT is wrong, WHY it matters, and WHAT to do -- a warning
-    # that only says "bound to 0.0.0.0" gets scrolled past.
-    assert "ALL interfaces" in message
+    # WHAT happened, WHY, and WHAT to do.
+    assert "127.0.0.1" in message and "0.0.0.0" in message
     assert "unauthenticated" in message
     assert "api.host" in message and "localhost" in message
     assert "allow_public_bind" in message
+
+
+def test_an_acknowledged_wildcard_is_honored():
+    from backend.config.bind_policy import resolve_api_bind_host  # noqa: PLC0415
+
+    config = {"api": {"host": "0.0.0.0", "allow_public_bind": True}}
+    assert resolve_api_bind_host(config) == "0.0.0.0"
 
 
 def test_acknowledgement_silences_the_warning_without_disabling_the_check(caplog):

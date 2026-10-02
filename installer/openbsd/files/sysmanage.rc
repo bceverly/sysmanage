@@ -2,7 +2,8 @@
 #
 # $OpenBSD$
 
-daemon="/usr/local/bin/python3 -m uvicorn backend.main:app --host 0.0.0.0 --port 8080"
+# backend.main (not uvicorn directly): it binds api.host/api.port from sysmanage.yaml and sizes the workers for this machine (Phase 22.2)
+daemon="/usr/local/bin/python3 -m backend.main"
 daemon_flags=""
 daemon_timeout=60
 
@@ -35,7 +36,11 @@ rc_pre() {
 	# Copy example config if no config exists
 	if [ ! -f ${SYSMANAGE_CONFIG} ] && [ -f /usr/local/share/examples/sysmanage/sysmanage.yaml ]; then
 		cp /usr/local/share/examples/sysmanage/sysmanage.yaml ${SYSMANAGE_CONFIG}
-		chmod 0644 ${SYSMANAGE_CONFIG}
+		chmod 0600 ${SYSMANAGE_CONFIG}
+		# This install's JWT secret, salt and recovery password -- the
+		# example ships placeholders only (Lucky 13 #12).
+		/usr/local/bin/python3 -m backend.config.install_secrets \
+		    --apply ${SYSMANAGE_CONFIG} || true
 		echo "Created default configuration at ${SYSMANAGE_CONFIG}"
 		echo "Please edit this file to configure:"
 		echo "  1. PostgreSQL database connection"

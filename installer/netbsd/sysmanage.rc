@@ -28,7 +28,8 @@ load_rc_config $name
 
 # Command to execute
 command="/usr/pkg/lib/sysmanage/.venv/bin/python"
-command_args="-m uvicorn backend.main:app --host 0.0.0.0 --port 8080"
+# backend.main (not uvicorn directly): it binds api.host/api.port from sysmanage.yaml and sizes the workers for this machine (Phase 22.2)
+command_args="-m backend.main"
 command_interpreter="/usr/pkg/lib/sysmanage/.venv/bin/python"
 
 pidfile="${sysmanage_pidfile}"

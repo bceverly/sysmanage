@@ -118,14 +118,18 @@ class WebSocketSecurityManager:
 
             if not hmac.compare_digest(signature, expected_signature):
                 logger.warning(
-                    "Invalid token signature from IP", extra={"client_ip": client_ip}
+                    "Invalid token signature from IP",
+                    extra={"client_ip": sanitize_log(client_ip)},
                 )
                 return False, None, _("Invalid token signature")
 
             # Check expiration
             current_time = int(time.time())
             if current_time > payload.get("expires", 0):
-                logger.info("Expired token from IP", extra={"client_ip": client_ip})
+                logger.info(
+                    "Expired token from IP",
+                    extra={"client_ip": sanitize_log(client_ip)},
+                )
                 return False, None, _("Token expired")
 
             # Check IP consistency (allow some flexibility for NAT/proxy scenarios)
@@ -146,7 +150,7 @@ class WebSocketSecurityManager:
 
         except (KeyError, ValueError):  # ValueError catches JSONDecodeError (subclass)
             logger.warning(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
-                "Malformed token from IP ", extra={"client_ip": client_ip}
+                "Malformed token from IP ", extra={"client_ip": sanitize_log(client_ip)}
             )
             return False, None, _("Malformed token")
 

@@ -252,12 +252,19 @@ if __name__ == "__main__":
     startup_logger.info("=== LAUNCHING UVICORN SERVER ===")
     startup_logger.info("About to call uvicorn.run()")
 
-    # Default to a single worker.  SYSMANAGE_UVICORN_WORKERS>1 uses more cores
-    # (one worker is GIL-bound to ~1 core).  >1 worker needs an import string
-    # (uvicorn re-imports the app per worker) and PostgreSQL: each worker runs
-    # the lifespan, so one elected leader runs the server-wide background work
-    # and queue claims are per host and atomic (Phase 22.2; leadership.py).
-    workers = int(os.environ.get("SYSMANAGE_UVICORN_WORKERS", "1") or "1")
+    # Workers: sized for this machine unless sysmanage.yaml (api.workers) or
+    # SYSMANAGE_UVICORN_WORKERS says otherwise (Phase 22.2; startup/workers.py).
+    # Exported so every worker -- and its pool sizing and leader election --
+    # sees the same count.  >1 worker needs an import string (uvicorn
+    # re-imports the app per worker) and PostgreSQL.
+    from backend.persistence.db import get_database_url  # noqa: E402
+    from backend.startup import workers as worker_count  # noqa: E402
+
+    workers, why = worker_count.resolve(
+        app_config, get_database_url().startswith("sqlite")
+    )
+    os.environ[worker_count.ENV_VAR] = str(workers)
+    startup_logger.info("Server workers: %d (%s)", workers, why)
     run_kwargs = {
         "host": host,
         "port": port,

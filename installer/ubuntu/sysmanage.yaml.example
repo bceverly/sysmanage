@@ -46,6 +46,11 @@ api:
   #   allow_public_bind: true
   host: "localhost"
   port: 8080
+  # Server worker processes. "auto" (the default) sizes them for this
+  # machine: CPUs minus a quarter (kept for PostgreSQL and the OS), at
+  # most one per GB of memory beyond 2 GB, at most 16; SQLite always 1.
+  # A number overrides it; SYSMANAGE_UVICORN_WORKERS overrides both.
+  # workers: auto
 
 # Database connection (PostgreSQL required).
 registry:

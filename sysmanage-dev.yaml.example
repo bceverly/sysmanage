@@ -1,6 +1,11 @@
 api:
   host: localhost
   port: 8080
+  # Server worker processes. "auto" (the default) sizes them for this
+  # machine: CPUs minus a quarter (kept for PostgreSQL and the OS), at
+  # most one per GB of memory beyond 2 GB, at most 16; SQLite always 1.
+  # A number overrides it; SYSMANAGE_UVICORN_WORKERS overrides both.
+  # workers: auto
 registry:
   # The registry/bootstrap database.  Renamed from 'database:' -- the
   # loader still honors the old key but warns, so shipping it here made

@@ -8,12 +8,7 @@
 	<array>
 		<string>/usr/local/lib/sysmanage/.venv/bin/python</string>
 		<string>-m</string>
-		<string>uvicorn</string>
-		<string>backend.main:app</string>
-		<string>--host</string>
-		<string>0.0.0.0</string>
-		<string>--port</string>
-		<string>8080</string>
+		<string>backend.main</string>
 	</array>
 	<key>WorkingDirectory</key>
 	<string>/usr/local/lib/sysmanage</string>

@@ -2,9 +2,15 @@
 #
 # $OpenBSD$
 
-daemon="${TRUEPREFIX}/bin/python3 -m uvicorn backend.main:app"
+# backend.main, not uvicorn directly (Phase 22.2): it binds api.host /
+# api.port from sysmanage.yaml -- loopback behind nginx, never 0.0.0.0 -- and
+# sizes the workers for this machine.  rc.subr starts it through ``su -l``,
+# which clears the environment, so the app directory is the working directory
+# (daemon_execdir) instead of a PYTHONPATH export: ``python3 -m`` imports from
+# there, and uvicorn's spawned workers inherit the same sys.path.
+daemon="${TRUEPREFIX}/bin/python3 -m backend.main"
 daemon_user="_sysmanage"
-daemon_flags="--host 0.0.0.0 --port 8080 --app-dir ${TRUEPREFIX}/libexec/sysmanage"
+daemon_execdir="${TRUEPREFIX}/libexec/sysmanage"
 
 . /etc/rc.d/rc.subr
 

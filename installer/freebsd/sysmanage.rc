@@ -23,7 +23,9 @@ load_rc_config $name
 # Command to execute
 command="/usr/sbin/daemon"
 command_args="-P ${sysmanage_pidfile} -r -t ${name} -o ${sysmanage_logfile} \
-    /usr/local/lib/sysmanage/.venv/bin/python -m uvicorn backend.main:app --host 0.0.0.0 --port 8080"
+    /usr/local/lib/sysmanage/.venv/bin/python -m backend.main"
+# backend.main (not uvicorn directly): binds api.host/api.port from the config
+# and sizes the workers for this machine (Phase 22.2).
 
 pidfile="${sysmanage_pidfile}"
 required_files="${sysmanage_config}"

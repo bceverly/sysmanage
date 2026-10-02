@@ -25,15 +25,18 @@ happily, and the only symptom was that pointing an agent at port 8080 "worked"
 -- which is exactly how agent configuration templates came to be written
 against the back door instead of the front one.
 
-WHY A WARNING AND NOT A REFUSAL
--------------------------------
-A wildcard bind is legitimate in real cases: development without a reverse
-proxy, a container that publishes its own port, or a deployment that terminates
-TLS somewhere else entirely.  Refusing to start would break those, and a
-security control that stops people working gets disabled rather than
-understood.  So this is loud, actionable, and silenceable BY ACKNOWLEDGEMENT
-rather than by turning the check off -- setting ``api.allow_public_bind: true``
-records that somebody decided this on purpose.
+WHY LOOPBACK AND NOT A REFUSAL
+------------------------------
+In production an unacknowledged wildcard binds loopback instead (2026-10-02,
+Bryan: nginx is the only thing facing the network).  The server still starts
+and nginx still reaches it, and a loud warning says what was asked for and
+what was done.  Until then this only warned -- safe while most service files
+forced the address on the uvicorn command line, not once every launcher reads
+api.host.  A wildcard bind IS legitimate in real cases -- development without
+a reverse proxy, a container publishing its own port, TLS terminated somewhere
+else -- so it stays possible BY ACKNOWLEDGEMENT: ``api.allow_public_bind:
+true`` records that somebody decided this on purpose.  Dev mode binds every
+interface as before.
 """
 
 from __future__ import annotations
@@ -90,7 +93,17 @@ def resolve_api_bind_host(app_config: Dict[str, Any]) -> str:
     configured = api.get("host")
 
     if not is_dev_mode(app_config):
-        return configured if configured else "localhost"
+        if not configured:
+            return "localhost"
+        # Production: nginx is the only thing that faces the network (Bryan,
+        # 2026-10-02).  A wildcard nobody acknowledged binds loopback instead
+        # -- the server still starts and nginx still reaches it.  This used to
+        # only warn, which was safe while most service files forced the
+        # address on the uvicorn command line; now that every launcher reads
+        # api.host, an old "0.0.0.0" in a config would have published the API.
+        if is_wildcard_bind(configured) and not api.get("allow_public_bind"):
+            return "127.0.0.1"
+        return configured
 
     if (
         configured
@@ -117,6 +130,28 @@ def check_api_bind(app_config: Dict[str, Any], log: logging.Logger = None) -> bo
     # claiming "localhost" while the socket answers on 0.0.0.0 would be worse
     # than no line at all.
     host = resolve_api_bind_host(app_config)
+    configured = api.get("host")
+    if (
+        configured
+        and is_wildcard_bind(configured)
+        and is_loopback_bind(host)
+        and not is_dev_mode(app_config)
+    ):
+        # Loud on purpose: the config asked for every interface and did not get it.
+        log.warning(
+            "SECURITY: api.host is %r, but the API is bound to %s:%s instead. "
+            "nginx terminates TLS on 443 and reaches the API on loopback; a "
+            "wildcard bind would publish the API directly -- bypassing TLS, "
+            "the security headers and the upgrade validation in the nginx "
+            "configuration, with agent registration (unauthenticated by "
+            "design) open in cleartext. Set api.host to 'localhost' to silence "
+            "this; to really serve the API directly, set "
+            "api.allow_public_bind: true.",
+            configured,
+            host,
+            port,
+        )
+        return False
 
     if not is_wildcard_bind(host):
         if not is_loopback_bind(host):
@@ -145,19 +180,12 @@ def check_api_bind(app_config: Dict[str, Any], log: logging.Logger = None) -> bo
         )
         return True
 
-    # Loud on purpose.  This is the one line that turns an internal port into a
-    # publicly reachable, unauthenticated enrollment endpoint.
+    # Unreachable in production (resolve_api_bind_host binds loopback instead
+    # of an unacknowledged wildcard); kept for callers that pass a resolved
+    # wildcard some other way.
     log.warning(
-        "SECURITY: api.host is %r, so the API is listening on ALL interfaces "
-        "(port %s). SysManage expects nginx to terminate TLS on 443 and reach "
-        "the API on loopback, so a wildcard bind publishes the API directly -- "
-        "bypassing TLS, the security headers and the upgrade validation that "
-        "live in the nginx configuration. Agent registration is unauthenticated "
-        "by design, so this exposes an open enrollment endpoint in cleartext. "
-        "Set api.host to 'localhost' unless you know you need otherwise; if you "
-        "do, set api.allow_public_bind: true to record that it is intentional "
-        "and silence this warning.",
-        host,
+        "SECURITY: the API is listening on ALL interfaces (port %s) without "
+        "api.allow_public_bind -- it should be behind nginx on loopback.",
         port,
     )
     return True

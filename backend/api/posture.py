@@ -387,9 +387,10 @@ async def apply_remedy(
         # The reason comes from the remedy's own plan, never from the
         # exception (CodeQL py/stack-trace-exposure): apply() refuses exactly
         # when preview() says the remedy is unavailable.
+        logger.debug("Remedy refused for %s: %s", rule_key, exc)
         reason = remedies.preview(db, item, rule).get("unavailable_reason")
         code = reason if reason in _REMEDY_CONFLICT_CODES else "remedy_unavailable"
-        raise HTTPException(status_code=409, detail={"code": code}) from exc
+        raise HTTPException(status_code=409, detail={"code": code}) from None
     db.commit()
     return result
 

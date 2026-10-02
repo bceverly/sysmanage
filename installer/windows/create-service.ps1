@@ -160,8 +160,10 @@ try {
 
     $ConfigPath = "C:\ProgramData\SysManage\sysmanage.yaml"
 
-    # Install service - Run uvicorn with backend.main:app
-    & $nssmPath install $ServiceName $VenvPythonShort -m uvicorn backend.main:app --host 0.0.0.0 --port 8080 2>&1 | Out-File -FilePath $LogFile -Append
+    # Install service - run backend.main (not uvicorn directly): it binds
+    # api.host/api.port from sysmanage.yaml and sizes the workers for this
+    # machine (Phase 22.2).
+    & $nssmPath install $ServiceName $VenvPythonShort -m backend.main 2>&1 | Out-File -FilePath $LogFile -Append
 
     if ($LASTEXITCODE -ne 0) {
         throw "NSSM install command failed with exit code $LASTEXITCODE"

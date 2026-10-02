@@ -28,5 +28,7 @@ if (-not (Test-Path $VenvPython)) {
 # Set config path environment variable
 $env:SYSMANAGE_CONFIG = $ConfigFile
 
-# Run uvicorn server
-& $VenvPython -m uvicorn backend.main:app --host 0.0.0.0 --port 8080
+# Run the server through backend.main (not uvicorn directly): it binds
+# api.host/api.port from sysmanage.yaml and sizes the workers for this
+# machine (Phase 22.2).
+& $VenvPython -m backend.main
