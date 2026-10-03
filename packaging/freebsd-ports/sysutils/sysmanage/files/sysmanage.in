@@ -101,6 +101,14 @@ export PYTHONPATH="%%PREFIX%%/libexec/sysmanage"
 # backend.main, not uvicorn directly (Phase 22.2): it binds api.host /
 # api.port from sysmanage.yaml -- loopback behind nginx -- and sizes the
 # workers for this machine.
-command_args="-c -p ${pidfile} %%PYTHON_CMD%% -m backend.main"
+#
+# ``-f``: stdin/stdout/stderr to /dev/null.  Without it the server stays
+# attached to whoever ran ``service sysmanage start``: over ssh the session
+# never returned and the whole log streamed into it (found 2026-10-02
+# validating this script).  The server writes its own rotated log to
+# sysmanage_logdir (backend.log), so nothing is lost but a crash before
+# logging starts -- for that, run the command above by hand as the service
+# user, as the notes above describe.
+command_args="-f -c -p ${pidfile} %%PYTHON_CMD%% -m backend.main"
 
 run_rc_command "$1"

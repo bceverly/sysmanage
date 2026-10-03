@@ -10,10 +10,11 @@ Handles software inventory, package updates, available packages, third-party rep
 import logging
 from datetime import datetime, timezone
 
-from sqlalchemy import delete, insert, update
+from sqlalchemy import delete, update
 from sqlalchemy.orm import Session
 
 from backend.api.error_constants import error_host_not_registered
+from backend.api.handlers.inventory_diff import replace_host_rows
 from backend.i18n import _
 from backend.services.syspatch_classification import classify_syspatch_updates
 from backend.persistence.models import (
@@ -32,6 +33,25 @@ from backend.persistence.models import (
 
 # Logger for debugging - use existing root logger configuration
 debug_logger = logging.getLogger("debug_logger")
+
+
+SOFTWARE_COLUMNS = ("package_name", "package_version", "package_manager",
+                    "package_description", "architecture", "install_path",
+                    "channel", "revision", "confinement")  # fmt: skip
+
+
+def _software_row(package: dict) -> dict:
+    return {
+        "package_name": package.get("package_name"),
+        "package_version": package.get("version") or "unknown",
+        "package_manager": package.get("package_manager", "unknown"),
+        "package_description": package.get("description"),
+        "architecture": package.get("architecture"),
+        "install_path": package.get("installation_path"),
+        "channel": package.get("channel"),
+        "revision": package.get("revision"),
+        "confinement": package.get("confinement"),
+    }
 
 
 async def handle_software_update(db: Session, connection, message_data: dict):
@@ -60,36 +80,15 @@ async def handle_software_update(db: Session, connection, message_data: dict):
         # Handle software packages
         software_packages = message_data.get("software_packages", [])
         if software_packages:
-            # Replace the host's inventory in ONE transaction with ONE bulk
-            # INSERT (Phase 22.2: one ORM object per package, ~600 per report,
-            # was the inbound drain's largest cost).  Core statements run in
-            # order, so the delete is never overtaken by the inserts -- the
-            # reason the ORM version committed in between.
-            db.execute(
-                delete(SoftwarePackage).where(
-                    SoftwarePackage.host_id == connection.host_id
-                )
-            )
+            # Phase 22.2: write only the rows that changed (inventory_diff).
             now = datetime.now(timezone.utc).replace(tzinfo=None)
-            db.execute(
-                insert(SoftwarePackage),
-                [
-                    {
-                        "host_id": connection.host_id,
-                        "package_name": package.get("package_name"),
-                        "package_version": package.get("version") or "unknown",
-                        "package_manager": package.get("package_manager", "unknown"),
-                        "package_description": package.get("description"),
-                        "architecture": package.get("architecture"),
-                        "install_path": package.get("installation_path"),
-                        "channel": package.get("channel"),
-                        "revision": package.get("revision"),
-                        "confinement": package.get("confinement"),
-                        "created_at": now,
-                        "updated_at": now,
-                    }
-                    for package in software_packages
-                ],
+            replace_host_rows(
+                db,
+                SoftwarePackage,
+                connection.host_id,
+                (_software_row(package) for package in software_packages),
+                SOFTWARE_COLUMNS,
+                {"created_at": now, "updated_at": now},
             )
 
         # Update the software updated timestamp on the host

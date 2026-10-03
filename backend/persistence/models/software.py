@@ -93,7 +93,9 @@ class SoftwarePackage(Base):
 
     __tablename__ = "software_package"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    host_id = Column(GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False)
+    host_id = Column(
+        GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False, index=True
+    )
     package_name = Column(String(255), nullable=False, index=True)
     package_version = Column(String(100), nullable=False)
     package_description = Column(Text, nullable=True)

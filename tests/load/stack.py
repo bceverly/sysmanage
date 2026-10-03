@@ -30,6 +30,7 @@ import os
 import secrets
 import shutil
 import signal
+import socket
 import subprocess  # nosec B404 - fixed argv lists, no shell
 import sys
 import time
@@ -86,6 +87,8 @@ def _start_postgres(password):
             "-p", f"127.0.0.1:{PG_PORT}:5432",
             "--tmpfs", "/var/lib/postgresql/data",
             PG_IMAGE, "-c", "max_connections=500",
+            # Per-statement cost for the observer's report (observe.py).
+            "-c", "shared_preload_libraries=pg_stat_statements",
         ],
         stdout=subprocess.DEVNULL,
     )  # fmt: skip
@@ -114,7 +117,10 @@ def _container_exists():
 def _config(port, db, bind_host="127.0.0.1"):
     """A complete standalone config -- nothing inherited from this box."""
     return {
-        "api": {"host": bind_host, "port": port, "certFile": "", "keyFile": "", "chainFile": ""},
+        "api": {"host": bind_host, "port": port, "certFile": "", "keyFile": "", "chainFile": "",
+                # --bind-host 0.0.0.0 is deliberate (a fleet on another
+                # machine); unacknowledged, the server binds loopback.
+                "allow_public_bind": bind_host in ("0.0.0.0", "::")},
         "database": db,
         "security": {
             "password_salt": secrets.token_hex(32),
@@ -197,9 +203,26 @@ def _wait_healthy(port, timeout=120):
     )
 
 
+def _port_taken(port) -> bool:
+    try:
+        with socket.create_connection(("127.0.0.1", port), timeout=1):
+            return True
+    except OSError:
+        return False
+
+
 def start_server(state):
     """Start the server; returns its pid.  The log is appended to, so a
     restart's output follows the previous run's."""
+    # Something already answering on the port would pass the health check
+    # and take the fleet's traffic while ours fails to bind -- orphaned
+    # workers of an earlier server did exactly that, twice (2026-10-02), and
+    # the runs measured a server on a database that no longer existed.
+    if _port_taken(state["port"]):
+        raise SystemExit(
+            f"port {state['port']} is already in use (an earlier server's orphaned "
+            f"workers?); find them with: ss -ltnp | grep :{state['port']}"
+        )
     # The child keeps its own copy of the log descriptor, so ours can close.
     # The server outlives this call on purpose: no `with` for the Popen.
     with open(STATE_DIR / "server.log", "ab") as log:

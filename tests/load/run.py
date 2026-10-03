@@ -807,6 +807,7 @@ def main() -> int:
             # disposable server from tests/load/stack.py (fleet_scenarios.py).
             "fleet-steady",
             "fleet-restart-storm",
+            "fleet-agent-restart",
             # Security: can an agent act as another host knowing only its
             # name? (security_scenarios.py)
             "agent-impersonation",
@@ -854,6 +855,16 @@ def main() -> int:
         "--identity-auth",
         action="store_true",
         help="agents send host id + token to /agent/auth and honor Retry-After (agent 22.2)",
+    )
+    fleet.add_argument(
+        "--report-window",
+        action="store_true",
+        help="agents spread their first reports over the server's suggested window (agent 22.2)",
+    )
+    fleet.add_argument(
+        "--forget-on-restart",
+        action="store_true",
+        help="fleet-agent-restart: agents lose their send-on-change memory (before agent 22.2)",
     )
     fleet.add_argument(
         "--remote-fleet",

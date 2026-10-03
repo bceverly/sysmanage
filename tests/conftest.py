@@ -750,4 +750,6 @@ def _generous_drain_budgets(monkeypatch):
     monkeypatch.setattr(inbound_processor, "INBOUND_BUDGET_SECONDS", 30.0)
     # Expiry is throttled per process; every test starts with it due.
     monkeypatch.setattr(inbound_processor, "_last_expiry", float("-inf"))
+    # The oldest-waiting-hosts window is cached per process; start empty.
+    inbound_processor.forget_host_window()
     monkeypatch.setattr(outbound_processor, "OUTBOUND_BUDGET_SECONDS", 30.0)

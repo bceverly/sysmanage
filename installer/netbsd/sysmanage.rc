@@ -30,7 +30,23 @@ load_rc_config $name
 command="/usr/pkg/lib/sysmanage/.venv/bin/python"
 # backend.main (not uvicorn directly): it binds api.host/api.port from sysmanage.yaml and sizes the workers for this machine (Phase 22.2)
 command_args="-m backend.main"
-command_interpreter="/usr/pkg/lib/sysmanage/.venv/bin/python"
+# rc.subr finds the running server by this name (status / stop).
+procname="${command}"
+start_cmd="sysmanage_start"
+# NetBSD's rc.subr runs ``command`` in the FOREGROUND and expects it to
+# daemonize itself; ``python -m backend.main`` does not, so ``service sysmanage start`` never
+# returned and no pidfile was written (status and stop could not find the
+# process).  Same class of defect as FreeBSD's ``daemon`` without ``-f``
+# (2026-10-03).  Start it in the background here, stdin from /dev/null and
+# output to the log, and record its pid: ``exec`` keeps that pid the
+# Python process's own.  NOT yet validated on a NetBSD host.
+sysmanage_start()
+{
+	echo "Starting ${name}."
+	cd /usr/pkg/lib/sysmanage || return 1
+	su -m ${sysmanage_user} -c "exec ${command} ${command_args} \
+	    </dev/null >>${sysmanage_logfile} 2>&1 & echo \$! > ${pidfile}"
+}
 
 pidfile="${sysmanage_pidfile}"
 required_files="${sysmanage_config}"

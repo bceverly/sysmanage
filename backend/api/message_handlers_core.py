@@ -20,7 +20,7 @@ from backend.persistence.models import Host, HostChild
 from backend.security import agent_identity
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
-from backend.websocket import heartbeat_batch
+from backend.websocket import heartbeat_batch, report_window
 
 # Use standard logger that respects /etc/sysmanage.yaml configuration
 logger = logging.getLogger(__name__)
@@ -553,6 +553,8 @@ async def _process_approved_system_info(
         "hostname": hostname,
         "host_token": host.host_token,  # Send secure token instead of integer ID
         "host_id": str(host.id),  # Send as UUID string
+        # Phase 22.2: spread the first reports when the server is busy.
+        "initial_report_window_seconds": report_window.suggest(db),
     }
 
 

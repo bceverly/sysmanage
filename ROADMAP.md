@@ -12261,6 +12261,97 @@ unforgivable.
       gone (logging was 6%). Next: one transaction per processed message
       (claim + handler + complete; mark_processing/mark_completed are still
       15%), then the agent-side first-connect spreading (Bryan wants it).*
+
+      *Four more cuts (2026-10-02, Bryan: "do all 4"). (1) The agent's
+      send-on-change memory survives restarts: table `sent_report` (agent
+      migration a7b8c9d0e1f2, `src/database/sent_reports.py`, fails open), so
+      a fleet-wide agent upgrade no longer resends every unchanged report.
+      (2) `registration_success` carries `initial_report_window_seconds`
+      (`backend/websocket/report_window.py`): pending inbound plus agents
+      registered in the last minute (x workers x 10 messages), divided by
+      50 msg/s, at most 1,800 s, 0 on a quiet server; the agent starts its
+      first inventory at a random moment in it (capped at an hour). Tunable in
+      `security.agent_connection_limits`. (3) One queue write per message: a
+      drain that holds its host exclusively (advisory lock, or SQLite) skips
+      the claim UPDATE; one PostgreSQL worker without locks keeps it. (4)
+      Harness: `fleet-agent-restart` (every agent process restarts at once),
+      `--report-window`, `--forget-on-restart`; `stack.py` refuses a port
+      already in use (orphaned workers of an earlier server answered two runs
+      on a dead database). 200 agents, every agent restarted: messages after
+      the restart 11,918 -> 8,134 (the rest are heartbeats), backlog peak
+      548 -> 58, 0 errors / 429s / polling. Then, from the 10k profile: the
+      drain thread was busy 99.8% of the time, 59% of it waiting on a
+      PostgreSQL at ~3.4 cores; the largest handler cost was the software
+      inventory's delete-all + re-insert (~600 rows a report, 11.5%). Now
+      written as a diff (`backend/api/handlers/inventory_diff.py`): one
+      SELECT, then only the rows that changed -- on PostgreSQL an unchanged
+      600-package report is 0 writes and 7 ms (was 1,200 row writes, 28 ms).
+      The process snapshot is one bulk INSERT instead of an ORM object per
+      process (5.9%). Next: rerun 10k on the remote fleet with
+      pg_stat_statements, including fleet-agent-restart.*
+
+      *10k rerun (2026-10-02, remote fleet on the FreeBSD box, all of the
+      above in; harness PostgreSQL now loads pg_stat_statements and every run
+      reports its 25 costliest statements). Two missing indexes were 58% of
+      the database's time: no index on host_id on the per-report inventory
+      tables (PostgreSQL does not index a foreign key) -- one host's software
+      rows took 61 ms, 250 ms on a quiet database -- and the drain's "oldest
+      waiting hosts" was a GROUP BY over the whole backlog (61 ms a round).
+      Fixed: migration q27invhostidx (host_id on software_package,
+      user_accounts, user_groups, user_group_memberships, host_certificates,
+      host_roles, network_interface, storage_device; also speeds host
+      deletion's cascades) and q28mqdrainorder + the drain walking due rows
+      oldest first (same hosts, same order, verified on the loaded database).
+      The run also showed the server's report window covered only half the
+      first inventory: the agent's post-connect collection ignored it. Now
+      both wait for the same held moment (agent `schedule_jitter.
+      hold_initial_reports`). Results, server-restart storm (before today ->
+      now): backlog peak 145,083 -> 50,136, at the end 136,607 -> 45,586,
+      oldest waiting 612 -> 369 s, processing up to 212/s (was 102),
+      10,000 -> 9,989 connected, reconnect 211 -> 223 s, heartbeat p95 3.3 ->
+      3.4 s, 0 marked down / expired / 429s / polling. Agent-restart storm:
+      backlog peak 103,362 -> 39,639, processed 54,409 -> ~85,000 messages.
+      Still not met: "the backlog drains" -- partly by design now (the first
+      inventory is spread over the server's window, capped at 30 min, longer
+      than the 5-minute run), partly the laptop (server + PostgreSQL + drain
+      on 8 cores). Next: the window's drain-rate default (50/s) is below the
+      ~150-200/s now measured -- size it from the measured completion rate;
+      the "oldest waiting hosts" read is still the costliest statement
+      (24-28 ms: up to 4,000 rows a round); run long enough to see the
+      window end.*
+
+      *10k, 40-minute run (2026-10-02, server-restart storm, remote fleet):
+      EVERY PHASE 22 CRITERION MET -- the first 10k run to pass. Two more
+      cuts first: the report window divides by the drain rate the server
+      measured over the last minute (each worker counts its drain, times the
+      workers; the configured 50/s is now only the floor) -- median window
+      748 s instead of the 1,800 s cap for every agent; and one read of the
+      oldest waiting hosts serves several rounds for up to 5 s (a dry or
+      stale window forces one fresh read before a drain gives up) -- that
+      statement went from 24-28 ms a round, the database's costliest, to
+      1.97 ms average and 5th place. Results: backlog peak 68,520, drained to
+      0 by ~16 minutes and stayed there; oldest waiting 544 s at peak;
+      processing up to 293/s; 10,000 / 10,000 connected; reconnect 225 s;
+      heartbeat p95 1.3 s, health p95 0.9 s; server CPU mean 217%;
+      0 expired / marked down / 429s / polling / errors; send spike ratio
+      1.56. Costliest statements now are the first-report inserts themselves
+      (host_process, software_package -- 0.03-0.04 ms per row). Also: the
+      converted FreeBSD rc script validated on the FreeBSD box (start /
+      status / restart / stop, loopback bind, nginx 200, warning for the
+      retired rcvars) and given `daemon -f` -- without it `service start`
+      over ssh never returned and streamed the server's log into the
+      session. Generalized 2026-10-03 (Bryan): agent FreeBSD port rc `-f`
+      (validated on the FreeBSD box: start returns, status / restart / stop);
+      server FreeBSD installer rc and OpenBao rc had `-o` without `-f` --
+      reproduced on FreeBSD that `-o` alone hangs the caller and `-f -o`
+      returns and still logs -- now `-f -o`. NetBSD server and agent rc were
+      worse: rc.subr runs `command` in the foreground and neither process
+      daemonizes, so `service start` never returned and no pidfile was
+      written; both now start in the background via `start_cmd` (stdin
+      /dev/null, output to the log, pid recorded via `exec`) with `procname`
+      set so status / stop find the process -- the construct verified under
+      FreeBSD's sh, NOT yet on a NetBSD host. NetBSD OpenBao rc: stdin from
+      /dev/null. OpenBSD (`rc_bg`), systemd and launchd need nothing.*
 - [ ] Docs: a scaling guide (worker count, pool sizing, private mirrors,
       federation intervals) + 14-language i18n.
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every

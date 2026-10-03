@@ -36,7 +36,9 @@ class UserAccount(Base):
 
     __tablename__ = "user_accounts"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    host_id = Column(GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False)
+    host_id = Column(
+        GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False, index=True
+    )
     username = Column(String(255), nullable=False)
     uid = Column(Integer, nullable=True)  # Linux/macOS user ID
     security_id = Column(String(255), nullable=True)  # Windows SID
@@ -58,7 +60,9 @@ class UserGroup(Base):
 
     __tablename__ = "user_groups"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    host_id = Column(GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False)
+    host_id = Column(
+        GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False, index=True
+    )
     group_name = Column(String(255), nullable=False)
     gid = Column(Integer, nullable=True)  # Linux/macOS group ID
     security_id = Column(String(255), nullable=True)  # Windows SID
@@ -79,7 +83,9 @@ class UserGroupMembership(Base):
 
     __tablename__ = "user_group_memberships"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    host_id = Column(GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False)
+    host_id = Column(
+        GUID(), ForeignKey(HOST_ID_FK, ondelete="CASCADE"), nullable=False, index=True
+    )
     user_account_id = Column(
         GUID(), ForeignKey("user_accounts.id", ondelete="CASCADE"), nullable=False
     )
@@ -180,6 +186,15 @@ Index(
 Index(
     "ix_message_queue_host_queue",
     MessageQueue.host_id,
+    MessageQueue.direction,
+    MessageQueue.status,
+    MessageQueue.created_at,
+)
+
+# Phase 22.2: the drain's "oldest waiting hosts" walks due rows oldest first
+# (was a GROUP BY over the whole backlog: 61 ms a round at 100k pending).
+Index(
+    "ix_message_queue_drain_order",
     MessageQueue.direction,
     MessageQueue.status,
     MessageQueue.created_at,

@@ -22,7 +22,11 @@ load_rc_config $name
 
 # Command to execute
 command="/usr/sbin/daemon"
-command_args="-P ${sysmanage_pidfile} -r -t ${name} -o ${sysmanage_logfile} \
+# ``-f`` with ``-o``: stdio to /dev/null first, then output to the log file.
+# ``-o`` alone left the supervisor holding the caller's terminal, so
+# ``service ... start`` over ssh never returned (reproduced on FreeBSD
+# 2026-10-03; with ``-f`` it returns and the log still fills).
+command_args="-f -P ${sysmanage_pidfile} -r -t ${name} -o ${sysmanage_logfile} \
     /usr/local/lib/sysmanage/.venv/bin/python -m backend.main"
 # backend.main (not uvicorn directly): binds api.host/api.port from the config
 # and sizes the workers for this machine (Phase 22.2).

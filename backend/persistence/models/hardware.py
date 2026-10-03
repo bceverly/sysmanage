@@ -31,7 +31,9 @@ class StorageDevice(Base):
 
     __tablename__ = "storage_device"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    host_id = Column(
+        GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     device_name = Column(String(255), nullable=False)
     device_type = Column(String(50), nullable=True)  # e.g., "SSD", "HDD", "NVMe"
     mount_point = Column(String(255), nullable=True)
@@ -56,7 +58,9 @@ class NetworkInterface(Base):
 
     __tablename__ = "network_interface"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    host_id = Column(
+        GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     interface_name = Column(String(255), nullable=False)
     interface_type = Column(
         String(50), nullable=True

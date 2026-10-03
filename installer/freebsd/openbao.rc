@@ -25,7 +25,11 @@ load_rc_config $name
 : ${openbao_keyfile:="/var/lib/openbao/init.json"}
 
 command="/usr/sbin/daemon"
-command_args="-P ${openbao_pidfile} -r -t ${name} -o ${openbao_logfile} \
+# ``-f`` with ``-o``: stdio to /dev/null first, then output to the log file.
+# ``-o`` alone left the supervisor holding the caller's terminal, so
+# ``service ... start`` over ssh never returned (reproduced on FreeBSD
+# 2026-10-03; with ``-f`` it returns and the log still fills).
+command_args="-f -P ${openbao_pidfile} -r -t ${name} -o ${openbao_logfile} \
     /usr/local/bin/bao server -config=${openbao_config}"
 pidfile="${openbao_pidfile}"
 required_files="${openbao_config}"

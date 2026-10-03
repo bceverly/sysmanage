@@ -22,7 +22,7 @@ openbao_start()
 	[ -x "$command" ] || command="/usr/local/bin/bao"
 	install -d -o openbao -g openbao /var/lib/openbao /var/lib/openbao/data
 	echo "Starting openbao."
-	su -m openbao -c "$command server -config=/usr/pkg/etc/openbao/openbao.hcl >> /var/log/openbao.log 2>&1 &"
+	su -m openbao -c "$command server -config=/usr/pkg/etc/openbao/openbao.hcl </dev/null >> /var/log/openbao.log 2>&1 &"
 	sleep 1
 	pgrep -f 'bao server' > "$pidfile" 2>/dev/null || true
 	# Idempotent init/unseal (the helper waits for the listener).

@@ -35,6 +35,10 @@ HOSTS_SQL = text(
     "SELECT approval_status, active, count(*) FROM host "
     "WHERE fqdn LIKE '%.sim.test' GROUP BY approval_status, active"
 )
+TOP_STATEMENTS_SQL = text(
+    "SELECT query, calls, rows, total_exec_time AS total_ms, mean_exec_time AS mean_ms "
+    "FROM pg_stat_statements ORDER BY total_exec_time DESC LIMIT 25"
+)
 PG_CONN_SQL = text(
     "SELECT count(*) FROM pg_stat_activity WHERE datname = current_database()"
 )
@@ -106,6 +110,7 @@ class Observer:
         self.pid_getter = pid_getter
         self.interval = interval
         self.samples: List[dict] = []
+        self.top_statements: List[dict] = []
         self._task: Optional[asyncio.Task] = None
         self._last_cpu = None
         self._started = time.monotonic()
@@ -175,13 +180,37 @@ class Observer:
 
     def start(self):
         self._started = time.monotonic()
+        self._statements("reset")
         self._task = asyncio.create_task(self._loop())
 
     async def stop(self):
         if self._task:
             self._task.cancel()
             await asyncio.gather(self._task, return_exceptions=True)
+        self.top_statements = self._statements("top")
         self.engine.dispose()
+
+    def _statements(self, action: str) -> list:
+        """pg_stat_statements: zero it at the start, report the costliest
+        statements at the end.  Empty where the extension is unavailable (a
+        --db-url database without it); never fails the run."""
+        try:
+            with self.engine.begin() as conn:
+                if action == "reset":
+                    conn.execute(
+                        text("CREATE EXTENSION IF NOT EXISTS pg_stat_statements")
+                    )
+                    conn.execute(text("SELECT pg_stat_statements_reset()"))
+                    return []
+                rows = conn.execute(TOP_STATEMENTS_SQL).mappings().all()
+        except Exception:  # pylint: disable=broad-exception-caught
+            return []
+        return [
+            {"total_ms": round(r["total_ms"]), "calls": r["calls"],
+             "mean_ms": round(r["mean_ms"], 3), "rows": r["rows"],
+             "query": r["query"][:300]}  # fmt: skip
+            for r in rows
+        ]
 
     def mark(self, label: str):
         """Note an event (a restart) on the timeline."""

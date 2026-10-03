@@ -14,6 +14,8 @@ database, the observer and the restart, and drives this over ssh:
     fleet_remote: enrolls the fleet, prints "REGISTERED <n>"
     controller:   approves the hosts in its database, writes "GO\\n"
     fleet_remote: runs for --run-seconds, then prints "STATS <json>"
+    controller:   (fleet-agent-restart) writes "RESTART\n" or "RESTART forget\n"
+                  mid-run: every agent process restarts
 
 Every agent shares the remote machine's address (``bind_source=False``):
 the large-NAT case.  Needs only aiohttp and websockets.
@@ -24,6 +26,7 @@ import asyncio
 import json
 import random
 import sys
+import threading
 import time
 
 from tests.load.fleet import COLLECTION_S, Fleet
@@ -49,6 +52,7 @@ def _stats(fleet: Fleet) -> dict:
         # At most RTT_SAMPLES: 10,000 agents' every round trip made a line
         # of many MB (the controller reads it as one line).
         "heartbeat_rtt_ms": _sample(stats.heartbeat_rtt_ms),
+        "report_windows": _sample(stats.report_windows),
         "connected_at_end": stats.connected_at_end,
         "bytes_sent": stats.bytes_sent,
         "timeline": stats.timeline,
@@ -61,10 +65,31 @@ async def _ticker(fleet, started, interval):
         fleet.stats.snapshot(time.monotonic() - started)
 
 
+async def _restarts(fleet):
+    """Agent-process restarts on the controller's word.  Read on a DAEMON
+    thread: asyncio.run() waits for its executor's threads at exit, and one
+    blocked on stdin would never finish."""
+    loop = asyncio.get_running_loop()
+    lines: asyncio.Queue = asyncio.Queue()
+
+    def reader():
+        for raw in sys.stdin:
+            loop.call_soon_threadsafe(lines.put_nowait, raw)
+
+    threading.Thread(target=reader, daemon=True).start()
+    while True:
+        line = await lines.get()
+        words = line.split()
+        if words and words[0] == "RESTART":
+            await fleet.restart_agents(forget="forget" in words[1:])
+            print("RESTARTED", flush=True)
+
+
 async def run(args) -> dict:
     fleet = Fleet(args.base, args.agents, 1, args.time_scale, args.packages,
                   send_on_change=args.send_on_change, jitter=args.jitter,
-                  identity_auth=args.identity_auth, bind_source=False)  # fmt: skip
+                  identity_auth=args.identity_auth, bind_source=False,
+                  report_window=args.report_window)  # fmt: skip
     await fleet.register_all()
     print(f"REGISTERED {fleet.stats.counts['register_ok']}", flush=True)
     go = await asyncio.to_thread(sys.stdin.readline)
@@ -72,11 +97,13 @@ async def run(args) -> dict:
         raise SystemExit(f"expected GO from the controller, got {go!r}")
     started = time.monotonic()
     ticker = asyncio.create_task(_ticker(fleet, started, args.sample_seconds))
+    restarts = asyncio.create_task(_restarts(fleet))
     fleet.start(ramp_seconds=COLLECTION_S / args.time_scale)
     try:
         await asyncio.sleep(args.run_seconds)
     finally:
         ticker.cancel()
+        restarts.cancel()
         fleet.stats.connected_at_end = fleet.stats.connected
         await fleet.stop()
     return _stats(fleet)
@@ -93,6 +120,7 @@ def main(argv=None) -> int:
     parser.add_argument("--send-on-change", action="store_true")
     parser.add_argument("--jitter", action="store_true")
     parser.add_argument("--identity-auth", action="store_true")
+    parser.add_argument("--report-window", action="store_true")
     args = parser.parse_args(argv)
     stats = asyncio.run(run(args))
     print("STATS " + json.dumps(stats, default=str), flush=True)

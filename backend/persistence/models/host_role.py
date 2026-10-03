@@ -23,7 +23,9 @@ class HostRole(Base):
     __tablename__ = "host_roles"
 
     id = Column(Integer, primary_key=True)
-    host_id = Column(GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False)
+    host_id = Column(
+        GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     role = Column(String(100), nullable=False)  # e.g., "Web Server", "Database Server"
     package_name = Column(
         String(255), nullable=False

@@ -9,16 +9,18 @@ Handles processing of messages received from agents.
 
 import asyncio
 import random
+import threading
 import time
 import zlib
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import and_, func, or_, text
+from sqlalchemy import and_, or_, text
 from sqlalchemy.orm import Session, sessionmaker
 
 from backend.i18n import _
 from backend.startup.leadership import leadership, multi_process
 from backend.utils.verbosity_logger import get_logger
+from backend.websocket import report_window
 from backend.websocket.message_router import log_message_data, route_inbound_message
 from backend.websocket.mock_connection import MockConnection
 from backend.websocket.queue_manager import (
@@ -193,12 +195,21 @@ class _HostLocks:
     def __init__(self, db):
         self._conn = None
         bind = db.get_bind()
+        self._dialect = bind.dialect.name
         if multi_process() and bind.dialect.name == "postgresql":
             self._conn = bind.connect().execution_options(isolation_level="AUTOCOMMIT")
 
     @property
     def active(self) -> bool:
         return self._conn is not None
+
+    @property
+    def exclusive(self) -> bool:
+        """True when a host this drain acquired can be processed by nobody
+        else: every worker takes the same lock, or SQLite (one process).
+        One PostgreSQL worker takes no locks, and a worker joining mid-drain
+        would not wait for it -- there the per-message claim still guards."""
+        return self.active or self._dialect == "sqlite"
 
     @staticmethod
     def _key(host_id) -> int:
@@ -272,30 +283,81 @@ def _due_filter(MessageQueue):  # pylint: disable=invalid-name
     )
 
 
+# Phase 22.2: one read of the oldest waiting hosts serves several rounds.
+# Read every round, it was the database's costliest statement at 10,000
+# agents (24-28 ms: up to 4,000 rows to find 200 hosts).  A host listed here
+# whose messages are already done costs one indexed lookup; a host that
+# started waiting since the read waits at most HOST_WINDOW_SECONDS.
+HOST_WINDOW_SECONDS = 5.0
+_host_windows = {}  # database -> (read_at, [host_id, ...] still to serve)
+_host_windows_lock = threading.Lock()
+
+
+def _window_key(db) -> str:
+    return str(db.get_bind().url)
+
+
+def _host_window_cached(db) -> bool:
+    with _host_windows_lock:
+        read_at, hosts = _host_windows.get(_window_key(db), (0.0, []))
+    return bool(hosts) and time.monotonic() - read_at < HOST_WINDOW_SECONDS
+
+
+def forget_host_window(db=None) -> None:
+    """Drop the cached window (one database's, or all) so the next round reads."""
+    with _host_windows_lock:
+        if db is None:
+            _host_windows.clear()
+        else:
+            _host_windows.pop(_window_key(db), None)
+
+
 def _oldest_waiting_hosts(db, limit):
+    """The next ``limit`` hosts to drain, oldest waiting first."""
     from backend.persistence.models import MessageQueue  # noqa: PLC0415
 
+    key = _window_key(db)
+    now = time.monotonic()
+    with _host_windows_lock:
+        read_at, hosts = _host_windows.get(key, (0.0, []))
+        if hosts and now - read_at < HOST_WINDOW_SECONDS:
+            _host_windows[key] = (read_at, hosts[limit:])
+            return hosts[:limit]
     if multi_process():
         # Every worker sees the same oldest hosts; a wider, shuffled window
         # spreads them so workers do not queue up on one another's locks.
         hosts = _oldest_waiting_hosts_window(db, MessageQueue, limit * 4)
         random.shuffle(hosts)
-        return hosts[:limit]
-    return _oldest_waiting_hosts_window(db, MessageQueue, limit)
+    else:
+        hosts = _oldest_waiting_hosts_window(db, MessageQueue, limit * 4)
+    with _host_windows_lock:
+        _host_windows[key] = (now, hosts[limit:])
+    return hosts[:limit]
 
 
 def _oldest_waiting_hosts_window(
     db, MessageQueue, limit
 ):  # pylint: disable=invalid-name
-    return [
-        host_id
-        for (host_id,) in db.query(MessageQueue.host_id)
+    """The ``limit`` hosts whose oldest due message is oldest.
+
+    Read due rows oldest first and keep each host's first appearance -- that
+    is its oldest row, so the order is exactly min(created_at) per host --
+    stopping after ``limit * PER_HOST_LIMIT`` rows.  It was a GROUP BY over
+    every pending row: 61 ms a round with 100k waiting at 10,000 agents
+    (2026-10-02), 27% of the database's time.  This walks the index
+    ``ix_message_queue_drain_order`` instead.  Rows that cover fewer than
+    ``limit`` hosts give fewer hosts: still the oldest ones."""
+    hosts = {}
+    for (host_id,) in (
+        db.query(MessageQueue.host_id)
         .filter(_due_filter(MessageQueue), MessageQueue.host_id.is_not(None))
-        .group_by(MessageQueue.host_id)
-        .order_by(func.min(MessageQueue.created_at))
-        .limit(limit)
-        .all()
-    ]
+        .order_by(MessageQueue.created_at)
+        .limit(limit * PER_HOST_LIMIT)
+    ):
+        hosts.setdefault(host_id, None)
+        if len(hosts) >= limit:
+            break
+    return list(hosts)
 
 
 def _defer_messages_of_missing_host(db, host_id):
@@ -330,7 +392,7 @@ def _defer_messages_of_missing_host(db, host_id):
         )
 
 
-async def _drain_one_host(db, host_id, deadline, seen) -> int:
+async def _drain_one_host(db, host_id, deadline, seen, exclusive=False) -> int:
     """Process this host's due messages; returns how many were attempted."""
     from backend.persistence.models import Host  # noqa: PLC0415
 
@@ -363,7 +425,8 @@ async def _drain_one_host(db, host_id, deadline, seen) -> int:
             continue
         seen.add(message.message_id)
         attempted += 1
-        await process_validated_message(message, host, db)
+        await process_validated_message(message, host, db, claimed=exclusive)
+        report_window.record_processed(1)
         await asyncio.sleep(0)  # let the WebSockets and heartbeats run
         if time.monotonic() >= deadline:
             break
@@ -377,10 +440,15 @@ async def _drain_host_queues(db, deadline) -> bool:
     seen = set()
     locks = _HostLocks(db)
     try:
+        fresh_read = False  # did this round's hosts come from a new read?
         while time.monotonic() < deadline:
+            fresh_read = not _host_window_cached(db)
             host_ids = _oldest_waiting_hosts(db, HOST_BATCH)
             if not host_ids:
-                return False
+                if fresh_read:
+                    return False
+                forget_host_window(db)  # the cached window ran dry: read again
+                continue
             attempted = 0
             for host_id in host_ids:
                 if time.monotonic() >= deadline:
@@ -388,13 +456,19 @@ async def _drain_host_queues(db, deadline) -> bool:
                 if not locks.acquire(host_id):
                     continue  # another worker is draining this host
                 try:
-                    attempted += await _drain_one_host(db, host_id, deadline, seen)
+                    attempted += await _drain_one_host(
+                        db, host_id, deadline, seen, exclusive=locks.exclusive
+                    )
                     if locks.active:
                         db.commit()  # visible before another worker takes the host
                 finally:
                     locks.release(host_id)
             if not attempted:
-                return False
+                if fresh_read:
+                    return False
+                # Hosts from an older read may be done already: read again
+                # before deciding there is no work.
+                forget_host_window(db)
         return True
     finally:
         locks.close()
@@ -551,7 +625,9 @@ def resolve_message_host(db, host_id, hostname):
     return host, tenant_session
 
 
-async def process_validated_message(message, host, db: Session, host_db=None) -> None:
+async def process_validated_message(
+    message, host, db: Session, host_db=None, claimed=False
+) -> None:
     """
     Process a message with pre-validated host information.
 
@@ -564,6 +640,11 @@ async def process_validated_message(message, host, db: Session, host_db=None) ->
             while its inbound message can sit in the bootstrap queue, so the two
             differ.  Defaults to ``db`` (collapsed/single-tenant mode), where
             they're the same database.
+        claimed: the caller holds this host exclusively (its drain lock), so
+            no other worker can take the message: skip the claim UPDATE.
+            Phase 22.2 -- one write per message instead of two; a crash
+            mid-message leaves it pending, to be processed again, as the
+            stuck-message reset already did.
     """
     handler_db = host_db if host_db is not None else db
     try:
@@ -574,7 +655,9 @@ async def process_validated_message(message, host, db: Session, host_db=None) ->
         )
 
         # Mark message as being processed
-        if not server_queue_manager.mark_processing(message.message_id, db=db):
+        if not claimed and not server_queue_manager.mark_processing(
+            message.message_id, db=db
+        ):
             logger.warning(
                 _("Could not mark message %s as processing"), message.message_id
             )

@@ -13,7 +13,7 @@ reflects the latest report rather than a time series.
 import logging
 from datetime import datetime, timezone
 
-from sqlalchemy import delete
+from sqlalchemy import delete, insert
 from sqlalchemy.orm import Session
 
 from backend.api.error_constants import error_host_not_registered
@@ -70,29 +70,31 @@ async def handle_process_status_update(db: Session, connection, message_data: di
             message_data.get("truncated", False),
         )
 
-        # Replace the whole snapshot for this host.
+        # Replace the whole snapshot for this host: CPU and memory figures
+        # change every sample, so there is nothing to diff.  One bulk INSERT
+        # (Phase 22.2: one ORM object per process was 5.9% of the inbound
+        # drain at 10,000 agents).
         db.execute(delete(HostProcess).where(HostProcess.host_id == connection.host_id))
-
-        for proc in processes:
-            pid = proc.get("pid")
-            if pid is None:
-                continue  # a process row without a pid is unusable
-            db.add(
-                HostProcess(
-                    host_id=connection.host_id,
-                    pid=pid,
-                    parent_pid=proc.get("parent_pid"),
-                    process_name=(proc.get("name") or "")[:255],
-                    username=(proc.get("username") or None),
-                    status=(proc.get("status") or None),
-                    cpu_percent=proc.get("cpu_percent"),
-                    memory_percent=proc.get("memory_percent"),
-                    memory_rss_bytes=proc.get("memory_rss_bytes"),
-                    command_line=proc.get("command_line"),
-                    started_at=_parse_dt(proc.get("started_at")),
-                    collected_at=collected_at,
-                )
-            )
+        rows = [
+            {
+                "host_id": connection.host_id,
+                "pid": proc.get("pid"),
+                "parent_pid": proc.get("parent_pid"),
+                "process_name": (proc.get("name") or "")[:255],
+                "username": (proc.get("username") or None),
+                "status": (proc.get("status") or None),
+                "cpu_percent": proc.get("cpu_percent"),
+                "memory_percent": proc.get("memory_percent"),
+                "memory_rss_bytes": proc.get("memory_rss_bytes"),
+                "command_line": proc.get("command_line"),
+                "started_at": _parse_dt(proc.get("started_at")),
+                "collected_at": collected_at,
+            }
+            for proc in processes
+            if proc.get("pid") is not None  # a process row without a pid is unusable
+        ]
+        if rows:
+            db.execute(insert(HostProcess), rows)
 
         db.commit()
 

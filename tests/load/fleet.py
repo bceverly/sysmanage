@@ -81,6 +81,8 @@ class FleetStats:
     sent: Counter = field(default_factory=Counter)
     errors_received: Counter = field(default_factory=Counter)
     heartbeat_rtt_ms: List[float] = field(default_factory=list)
+    # initial_report_window_seconds from each registration_success (22.2)
+    report_windows: List[float] = field(default_factory=list)
     connected: int = 0
     connected_at_end: int = 0
     polling: int = 0
@@ -123,6 +125,7 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
         self.ws = None
         self.hb_sent_at: Optional[float] = None
         self.sent_at: Dict[str, float] = {}  # send-on-change memory, per report type
+        self.reports_at = 0.0  # a busy server's held first-report moment (22.2)
         self._rng = random.Random(index)
 
     # -- identity -----------------------------------------------------------
@@ -306,6 +309,9 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
         it waits up to a minute first (agent core/schedule_jitter.py)."""
         if self.fleet.jitter:
             await self.fleet.sleep(self._rng.uniform(0, CONNECT_SPLAY_S))
+        held = self.reports_at - time.monotonic()
+        if held > 0:  # the agent waits for the server's window here too
+            await asyncio.sleep(held)
         self._queue_reports(payloads.periodic_set(self, self.fleet.payloads))
 
     async def _every(self, interval: float, action, spread: float = 0.2):
@@ -375,7 +381,15 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
                 stats.sent[message[18 : message.index('"', 18)]] += 1
             await asyncio.sleep(1)
 
-    async def _burst(self):
+    async def _burst(self, window: float = 0.0):
+        """The initial inventory after registration_success.  With
+        ``--report-window`` it starts at a random moment in the server's
+        ``initial_report_window_seconds`` (agent 22.2; real seconds), and the
+        first post-connect collection waits for the same moment."""
+        if self.fleet.report_window and window > 0:
+            delay = self._rng.uniform(0, min(window, 3600.0))
+            self.reports_at = time.monotonic() + delay
+            await asyncio.sleep(delay)
         for message, pause in payloads.initial_burst(self, self.fleet.payloads):
             self._queue_reports([message])
             if pause:
@@ -398,7 +412,9 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
             self.host_id = message.get("host_id") or self.host_id
             self.host_token = message.get("host_token") or self.host_token
             if self.approved:
-                asyncio.ensure_future(self._burst())
+                window = message.get("initial_report_window_seconds") or 0
+                stats.report_windows.append(window)
+                asyncio.ensure_future(self._burst(float(window)))
         elif kind == "command":
             ack_id = message.get("queue_message_id") or message.get("message_id")
             self.out["high"].append(payloads.command_ack(ack_id))
@@ -449,6 +465,7 @@ class Fleet:
         jitter: bool = False,
         identity_auth: bool = False,
         bind_source: bool = True,
+        report_window: bool = False,
     ):
         self.base = base_url.rstrip("/")
         self.ws_base = self.base.replace("http" + "://", "ws" + "://", 1).replace(
@@ -463,6 +480,7 @@ class Fleet:
         # only reach a server on the same machine; there every agent shares
         # the machine's address -- the large-NAT case.
         self.bind_source = bind_source
+        self.report_window = report_window
         self.payloads = payloads.Payloads(packages=packages)
         self.stats = FleetStats()
         self.stopping = False
@@ -514,6 +532,20 @@ class Fleet:
         if delay:
             await asyncio.sleep(delay)
         await agent.run(register=register)
+
+    async def restart_agents(self, forget: bool = False):
+        """Every agent PROCESS restarts at once (a fleet-wide upgrade): its
+        connection drops, it registers again and reconnects.  ``forget``: the
+        agent before 22.2, whose send-on-change memory died with the process;
+        otherwise it is kept, as the agent's on-disk record now does."""
+        for task in self._tasks:
+            task.cancel()
+        await asyncio.gather(*self._tasks, return_exceptions=True)
+        self._tasks.clear()
+        if forget:
+            for agent in self.agents:
+                agent.sent_at.clear()
+        self.start(register=True)
 
     async def stop(self):
         self.stopping = True

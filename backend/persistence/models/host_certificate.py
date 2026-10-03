@@ -25,7 +25,10 @@ class HostCertificate(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False
     )
     host_id = Column(
-        UUID(as_uuid=True), ForeignKey("host.id", ondelete="CASCADE"), nullable=False
+        UUID(as_uuid=True),
+        ForeignKey("host.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     file_path = Column(
         String(1000), nullable=False, index=True

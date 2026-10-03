@@ -9,6 +9,11 @@
                        --duration-seconds.
   fleet-restart-storm  the same, then the server is restarted after
                        --warmup-seconds: every agent reconnects at once.
+  fleet-agent-restart  the same, but every AGENT restarts after
+                       --warmup-seconds (a fleet-wide upgrade): each
+                       registers again and reconnects.  The agent keeps its
+                       send-on-change memory on disk (22.2) unless
+                       --forget-on-restart, the agent before it.
 
 Both enroll the fleet first: every agent registers through the real
 endpoint, then the hosts are approved with one UPDATE in the harness's OWN
@@ -141,6 +146,10 @@ def _summarize(name, fleet, observer, restart_t, warmup):
         "heartbeat_rtt_p50_ms": _pct(stats.heartbeat_rtt_ms, 0.50),
         "heartbeat_rtt_p95_ms": _pct(stats.heartbeat_rtt_ms, 0.95),
         "heartbeat_rtt_max_ms": _pct(stats.heartbeat_rtt_ms, 1.0),
+        "messages_sent_after_restart": sum(row["sent_since_last"] for row in stats.timeline
+                                           if restart_t is not None and row["t"] > restart_t),
+        "report_window_p50_s": _pct(getattr(stats, "report_windows", []), 0.50),
+        "report_window_max_s": _pct(getattr(stats, "report_windows", []), 1.0),
         "health_p95_ms": _pct(_series(samples, "health_ms"), 0.95),
         "health_max_ms": _pct(_series(samples, "health_ms"), 1.0),
         "health_failures": sum(1 for s in samples if s.get("health_ms") is None),
@@ -218,6 +227,7 @@ async def run_fleet(args) -> dict:
         send_on_change=args.send_on_change,
         jitter=args.jitter,
         identity_auth=getattr(args, "identity_auth", False),
+        report_window=getattr(args, "report_window", False),
     )
     print(
         f"enrolling {args.agents} agents from {fleet.source_ips} source address(es) ..."
@@ -249,6 +259,13 @@ async def run_fleet(args) -> dict:
                 stack.restart_server, stack.load_state(), args.down_seconds
             )
             await asyncio.sleep(args.duration_seconds)
+        elif args.scenario == "fleet-agent-restart":
+            await asyncio.sleep(args.warmup_seconds)
+            restart_t = round(time.monotonic() - started, 1)
+            observer.mark("agent restart")
+            print(f"  t={restart_t}s: restarting every agent ...")
+            await fleet.restart_agents(forget=getattr(args, "forget_on_restart", False))
+            await asyncio.sleep(args.duration_seconds)
         else:
             await asyncio.sleep(args.warmup_seconds + args.duration_seconds)
     finally:
@@ -266,6 +283,7 @@ async def run_fleet(args) -> dict:
         "summary": summary,
         "violations": verdict(summary),
         "server_samples": observer.samples,
+        "pg_top_statements": observer.top_statements,
         "agent_timeline": fleet.stats.timeline,
     }
 
@@ -294,6 +312,7 @@ def _remote_fleet(stats: dict) -> SimpleNamespace:
         counts=Counter(stats["counts"]), sent=Counter(stats["sent"]),
         errors_received=Counter(stats["errors_received"]),
         heartbeat_rtt_ms=stats["heartbeat_rtt_ms"],
+        report_windows=stats.get("report_windows", []),
         connected_at_end=stats["connected_at_end"], bytes_sent=stats["bytes_sent"],
         timeline=stats["timeline"],
     )  # fmt: skip
@@ -323,7 +342,8 @@ async def run_remote_fleet(args) -> dict:
     )
     flags = [f for f, on in (("--send-on-change", args.send_on_change),
                              ("--jitter", args.jitter),
-                             ("--identity-auth", getattr(args, "identity_auth", False))) if on]  # fmt: skip
+                             ("--identity-auth", getattr(args, "identity_auth", False)),
+                             ("--report-window", getattr(args, "report_window", False))) if on]  # fmt: skip
     remote_cmd = " ".join(
         [f"cd {_REMOTE_DIR}/code &&", "../venv/bin/python -m tests.load.fleet_remote",
          f"--base http://{args.server_address}:{state['port']}",
@@ -363,6 +383,15 @@ async def run_remote_fleet(args) -> dict:
             await asyncio.to_thread(
                 stack.restart_server, stack.load_state(), args.down_seconds
             )
+        elif args.scenario == "fleet-agent-restart":
+            await asyncio.sleep(args.warmup_seconds)
+            restart_t = round(time.monotonic() - started, 1)
+            observer.mark("agent restart")
+            print(f"  t={restart_t}s: restarting every agent ...", flush=True)
+            forget = getattr(args, "forget_on_restart", False)
+            proc.stdin.write(b"RESTART forget\n" if forget else b"RESTART\n")
+            await proc.stdin.drain()
+            await _expect(proc.stdout, "RESTARTED")
         stats = json.loads(await _expect(proc.stdout, "STATS "))
     finally:
         await observer.stop()
@@ -374,6 +403,7 @@ async def run_remote_fleet(args) -> dict:
     summary["remote_fleet"] = args.remote_fleet
     return {"scenario": args.scenario, "scenarios": [summary], "summary": summary,
             "violations": verdict(summary), "server_samples": observer.samples,
+        "pg_top_statements": observer.top_statements,
             "agent_timeline": fleet.stats.timeline}  # fmt: skip
 
 
