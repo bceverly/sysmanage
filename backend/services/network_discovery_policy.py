@@ -53,6 +53,7 @@ from backend.services.agent_capability_service import (
     host_supports,
 )
 from backend.startup.leadership import singleton_task
+from backend.startup.tick_runner import run_periodic
 
 logger = logging.getLogger(__name__)
 
@@ -317,18 +318,19 @@ def run_one_tick() -> Dict[str, int]:
 
 async def network_discovery_tick_service() -> None:
     """Background service: one reconcile pass every ``TICK_INTERVAL_SECONDS``."""
-    while True:
-        try:
-            summary = run_one_tick()
-            if summary["queued"] or summary["deferred"]:
-                logger.info("Network discovery reconcile: %s", summary)
-            await asyncio.sleep(TICK_INTERVAL_SECONDS)
-        except asyncio.CancelledError:
-            logger.info("Network discovery tick cancelled -- exiting loop")
-            raise
-        except Exception:  # pylint: disable=broad-except
-            logger.exception("Network discovery tick error -- retrying")
-            await asyncio.sleep(ERROR_BACKOFF_SECONDS)
+
+    def _report(summary):
+        if summary["queued"] or summary["deferred"]:
+            logger.info("Network discovery reconcile: %s", summary)
+
+    await run_periodic(
+        "Network discovery tick",
+        run_one_tick,
+        TICK_INTERVAL_SECONDS,
+        ERROR_BACKOFF_SECONDS,
+        on_result=_report,
+        logger=logger,
+    )
 
 
 def start_if_licensed():

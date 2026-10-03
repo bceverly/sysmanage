@@ -937,7 +937,7 @@ class TestTickService:
             pass
 
         with patch(f"{TICK}._run_one_tick", side_effect=_tick):
-            with patch(f"{TICK}.asyncio.sleep", side_effect=_sleep):
+            with patch("backend.startup.tick_runner.asyncio.sleep", side_effect=_sleep):
                 with pytest.raises(_Stop):
                     await tick.airgap_run_tick_service()
         # Second iteration proves the first exception didn't poison the loop.

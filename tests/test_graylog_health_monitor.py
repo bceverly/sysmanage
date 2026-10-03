@@ -236,7 +236,7 @@ class TestGraylogHealthMonitorService:
         async def side_effect(_):
             nonlocal call_count
             call_count += 1
-            if call_count >= 1:
+            if call_count >= 2:  # the first is the start splay (22.3)
                 raise asyncio.CancelledError()
 
         mock_sleep.side_effect = side_effect

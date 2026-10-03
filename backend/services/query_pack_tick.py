@@ -42,7 +42,6 @@ Unlicensed servers never reach any of this: assignments cannot be created
 without ``query_pack_engine``, so the loop finds nothing.
 """
 
-import asyncio
 import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List
@@ -53,6 +52,7 @@ from backend.persistence.partitions import iter_host_databases
 from backend.services import query_pack_dispatch as dispatch
 from backend.services import query_pack_service as svc
 from backend.services import query_pack_shim as shim
+from backend.startup.tick_runner import run_periodic
 
 logger = logging.getLogger(__name__)
 
@@ -239,27 +239,24 @@ def run_one_tick() -> Dict[str, Any]:
 
 async def query_pack_tick_service() -> None:
     """Background service: one tick every ``TICK_INTERVAL_SECONDS``."""
-    logger.info(
-        "Starting query-pack assignment tick service (interval=%ds)",
+
+    def _report(summary):
+        if summary["due"]:
+            logger.info(
+                "Query pack tick: due=%d queued=%d unresolvable=%d "
+                "nothing_to_run=%d deferred=%d",
+                summary["due"],
+                summary["queued"],
+                summary["unresolvable"],
+                summary["nothing_to_run"],
+                summary["deferred"],
+            )
+
+    await run_periodic(
+        "Query pack tick",
+        run_one_tick,
         TICK_INTERVAL_SECONDS,
+        ERROR_BACKOFF_SECONDS,
+        on_result=_report,
+        logger=logger,
     )
-    while True:
-        try:
-            summary = run_one_tick()
-            if summary["due"]:
-                logger.info(
-                    "Query pack tick: due=%d queued=%d unresolvable=%d "
-                    "nothing_to_run=%d deferred=%d",
-                    summary["due"],
-                    summary["queued"],
-                    summary["unresolvable"],
-                    summary["nothing_to_run"],
-                    summary["deferred"],
-                )
-            await asyncio.sleep(TICK_INTERVAL_SECONDS)
-        except asyncio.CancelledError:
-            logger.info("Query pack tick service cancelled -- exiting loop")
-            raise
-        except Exception:  # pylint: disable=broad-except
-            logger.exception("Query pack tick service error -- sleeping then retrying")
-            await asyncio.sleep(ERROR_BACKOFF_SECONDS)

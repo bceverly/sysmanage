@@ -97,10 +97,14 @@ class AuditService:
         details: Optional[Dict[str, Any]] = None,
         ip_address: Optional[str] = None,
         error_message: Optional[str] = None,
+        commit: bool = True,
         **kwargs,
     ) -> AuditLog:
         """
         Create an audit log entry.
+
+        ``commit=False`` only adds it to ``db``: a caller logging many entries
+        (a fleet-wide push, Phase 22.3) commits once for all of them.
 
         Args:
             db: Database session
@@ -157,8 +161,9 @@ class AuditService:
         )
 
         db.add(audit_entry)
-        db.commit()
-        db.refresh(audit_entry)
+        if commit:
+            db.commit()
+            db.refresh(audit_entry)
 
         return audit_entry
 

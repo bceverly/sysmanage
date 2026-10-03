@@ -15,11 +15,18 @@ from urllib.parse import urlparse
 
 from backend.persistence.db import get_db
 from backend.persistence.models import GraylogIntegrationSettings
+from backend.startup.tick_runner import run_periodic
 
 logger = logging.getLogger(__name__)
 
 
-async def check_graylog_health():  # NOSONAR
+async def check_graylog_health():
+    """One check, on a worker thread: synchronous database and HTTP work that
+    on the event loop held up every connected agent (Phase 22.3)."""
+    await asyncio.to_thread(check_graylog_health_now)
+
+
+def check_graylog_health_now():  # NOSONAR
     """
     Check Graylog server health and detect available input ports.
     Updates the database with the results.
@@ -155,14 +162,7 @@ async def graylog_health_monitor_service():
     """
     Background service that runs Graylog health checks every 5 minutes.
     """
-    logger.info("Starting Graylog health monitor service")
-
-    while True:
-        try:
-            await check_graylog_health()
-            # Check every 5 minutes (300 seconds)
-            await asyncio.sleep(300)
-        except Exception as e:
-            logger.exception("Error in Graylog health monitor service: %s", e)
-            # Wait a bit before retrying
-            await asyncio.sleep(60)
+    # Every 5 minutes, jittered, first check at a random moment (Phase 22.3).
+    await run_periodic(
+        "Graylog health monitor", check_graylog_health, 300, 60, logger=logger
+    )

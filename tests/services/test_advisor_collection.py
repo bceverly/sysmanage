@@ -96,6 +96,7 @@ def _collect(db, hosts, engine=None, payload=("q",)):
             "collections_nothing_to_run",
             "collections_no_engine",
             "collections_pruned",
+            "collections_next_pass",
         )
     }
     built = None if payload is None else {"queries": list(payload)}
@@ -245,3 +246,27 @@ class TestPruning:
         _collect(db, [host])
         db.commit()
         assert db.get(models.QueryPackRun, other.id) is not None
+
+
+class TestSpread:
+    """Phase 22.3: the fleet's collections do not fall due together."""
+
+    def test_a_pass_queues_at_most_its_cap(self, db, monkeypatch):
+        monkeypatch.setattr(col, "MAX_COLLECTIONS_PER_PASS", 3)
+        hosts = [_host(db) for _ in range(5)]  # never collected: all due
+        summary, _ = _collect(db, hosts)
+        assert summary["collections_queued"] == 3
+        assert summary["collections_next_pass"] == 2
+
+    def test_each_host_has_its_own_interval_never_past_the_limit(self):
+        intervals = {col.host_interval(uuid.uuid4()) for _ in range(200)}
+        assert len(intervals) > 190
+        low = col.COLLECT_INTERVAL * (1 - col.INTERVAL_SPREAD)
+        assert all(low <= i <= col.COLLECT_INTERVAL for i in intervals)
+        host_id = uuid.uuid4()
+        assert col.host_interval(host_id) == col.host_interval(host_id)  # fixed
+
+    def test_a_host_is_due_at_its_own_interval(self, db):
+        host = _host(db)
+        _run(db, host, NOW - col.host_interval(host.id) - timedelta(minutes=1))
+        assert _collect(db, [host])[0]["collections_queued"] == 1

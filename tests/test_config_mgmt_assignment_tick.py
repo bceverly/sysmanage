@@ -407,3 +407,43 @@ class TestEveryTenantIsVisited:
         _run([idle, busy])
         assert idle.committed == 0
         assert busy.committed == 1
+
+
+class TestWaves:
+    """Phase 22.3: an assignment over a large target goes out in waves (a
+    fleet job) instead of queuing every host at the cron minute."""
+
+    @staticmethod
+    def _hosts(count):
+        return [host(host_id=uuid.uuid4()) for _ in range(count)]
+
+    def test_a_large_target_is_released_by_a_job_not_all_at_once(self):
+        hosts = self._hosts(tick.WAVE_THRESHOLD + 10)
+        session = _Session(hosts, [assignment()], profile())
+        made = {}
+
+        def create(_db, job_hosts, _profile, **kw):
+            made.update(hosts=list(job_hosts), **kw)
+            return SimpleNamespace(id="job")
+
+        with patch.object(
+            tick.job_runner, "create_job_for_hosts", create
+        ), patch.object(tick.job_runner, "advance_job", return_value={
+            "released": 20,
+            "skipped": 0,
+            "expired": 0,
+        },):  # fmt: skip
+            summary, dispatched = _run(session)
+        assert dispatched == []  # nothing queued host by host
+        assert len(made["hosts"]) == tick.WAVE_THRESHOLD + 10
+        assert made["inventory_name"].startswith("assignment:")
+        assert (summary["jobs"], summary["queued"]) == (1, 20)  # the first wave only
+
+    def test_a_small_target_still_goes_out_directly(self):
+        hosts = self._hosts(tick.WAVE_THRESHOLD)
+        session = _Session(hosts, [assignment()], profile())
+        with patch.object(tick.job_runner, "create_job_for_hosts") as create:
+            summary, dispatched = _run(session)
+        create.assert_not_called()
+        assert len(dispatched) == tick.WAVE_THRESHOLD
+        assert summary["jobs"] == 0

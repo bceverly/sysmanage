@@ -11675,11 +11675,16 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       agent bytes 857 -> 226 MB (best case: simulated content never
       changes). Docs: the agent configuration page's fictional `collection:`
       intervals block replaced by the real schedule.*
-- [ ] **5xx and 429 on the WebSocket upgrade are TRANSIENT**, honoring
+- [x] **5xx and 429 on the WebSocket upgrade are TRANSIENT**, honoring
       `Retry-After` -- today they count as "WebSockets blocked" and push the
       agent onto 5-second HTTP polling for 15 minutes, turning a short overload
       into a sustained one (`transport_fallback.py:50`).
-- [ ] **Backoff with full jitter everywhere**: reconnect (wider first window
+      *Done 2026-10-03: `server_busy_status()` reads the status of a refused
+      upgrade (websockets 15+ `error.response`, older `error.status_code`, or
+      "HTTP nnn" in the message); 429 / 5xx are transient and never count
+      toward the fallback; `retry_after_seconds()` feeds the reconnect wait. A
+      proxy's 403 still falls back. Tests use real `websockets` exceptions.*
+- [x] **Backoff with full jitter everywhere**: reconnect (wider first window
       after a clean server close; honor a server "reconnect after" hint),
       registration (retry forever with backoff instead of exiting into a
       fixed 10 s systemd restart), HTTP polling errors, the 900 s fallback
@@ -11687,6 +11692,18 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       `client_registration.py:358-384`, `http_polling.py:56-214`,
       `queue_manager.py:296-305`); don't record success after a failed health
       check.
+      *Done 2026-10-03: agent `core/backoff.py` -- full jitter, uniform in
+      [1 s, min(cap, base x 2^n)], used by reconnect (cap 300 s; after a clean
+      close -- 1001 / 1012 / 1013 -- the first wait is up to 60 s; a server
+      Retry-After or the /agent/auth 429 hint is a floor, +0-20%),
+      registration (startup retries forever instead of exiting into systemd's
+      flat 10 s restart; re-registration stays bounded), polling errors
+      (grows from 15 s), the 900 s fallback re-test (+/-20%, re-drawn each
+      time) and outbound message retries (cap 1 h). A failed health check or
+      re-registration now raises `ServerUnavailable` into the reconnect
+      backoff -- it had slept a flat 5 s, skipped the backoff and been
+      recorded as a WebSocket success. Docs: the three agent settings
+      describe the new waits (14 languages).*
 - [ ] **Windows package catalogs fetched once, not per agent** -- every
       Windows agent pages through the public Chocolatey and winget APIs
       (hundreds of requests, no throttle, no 429 handling) on startup, on every
@@ -11700,7 +11717,7 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
 
 #### 22.2 Server: intake, queues and multi-worker safety (Community / OSS)
 
-- [ ] **Agent intake throughput** -- non-urgent agent messages are queued
+- [x] **Agent intake throughput** -- non-urgent agent messages are queued
       without a host and drained 10 per second for the whole server, then
       expired after 60 minutes: at 10k agents the server never catches up and
       the backlog becomes silent data loss (`agent.py:304-371`,
@@ -11725,6 +11742,16 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       Still one core: ~90 msg/s arrive from 1,000 agents -- the rest is
       22.1 send-on-change (less to process) and multi-worker safety below
       (more cores).*
+      *Ticked 2026-10-03 (Bryan): the 10,000-agent, 40-minute server-restart
+      storm (2026-10-02) met every criterion the harness checks -- backlog
+      peak 68,520 drained to 0 by ~16 min, processing up to 293/s, 0 expired
+      / marked down / 429s / polling. "Process tenants in parallel" moved to
+      its own item below; this run was single-tenant.*
+- [ ] **Process tenants in parallel** -- split out of "Agent intake
+      throughput" (2026-10-03). Each worker drains one database at a time;
+      with many tenant databases one busy tenant's backlog delays the rest.
+      Not yet measured: the harness runs single-tenant -- extend it to many
+      tenants first, then decide.
 - [x] **Retry scheduling** -- inbound processing ignores `scheduled_at` and has
       no ordering (a failing message is retried every second; failing rows can
       monopolize the batch); jitter the retry delay; bound the "no
@@ -11851,7 +11878,7 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
 
 #### 22.3 Server: background work that is bounded and spread (OSS + Enterprise)
 
-- [ ] **Every tick off the event loop, with start splay and jitter** --
+- [x] **Every tick off the event loop, with start splay and jitter** --
       advisor, malware, package catalog, query packs, file watch, config
       assignment, network discovery and the heartbeat monitor run synchronous
       all-tenant passes directly in the async loop, all starting at the same
@@ -11859,12 +11886,39 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       `background_ticks.py`). `asyncio.to_thread` or a worker, random start
       delay, per-run jitter, tenants spread across the interval, time budgets
       with saved cursors.
+      *Done 2026-10-03 (the off-loop / splay / jitter part):
+      `backend/startup/tick_runner.run_periodic` -- the pass runs on a worker
+      thread (context variables copied), the first pass waits a random moment
+      (at most one interval, at most 2 min), every interval and error backoff
+      varies +/-10%. All 14 OSS loops use it: advisor, malware, query packs,
+      file watch, config assignment, config fleet jobs, network discovery,
+      air-gap schedule / run / ingest, custom-metric retention, package
+      catalog, and the heartbeat and Graylog monitors (their checks were
+      `async` but all synchronous DB work; now on a thread). The Pro+ engine
+      loops (alerting, reporting, audit retention, secrets rotation,
+      automation, fleet schedules, tenant backup) are engine code: alerting
+      and backup have their own items below. "Tenants spread across the
+      interval, time budgets with saved cursors" is split out below.*
+- [ ] **Tenants spread across a tick's interval; time budgets with saved
+      cursors** -- split out 2026-10-03. Each tick still walks every tenant
+      in one pass; off the loop that no longer stalls agents, but a large
+      estate's pass is one burst of database work. Measure with the
+      many-tenant harness (see "Process tenants in parallel") first.
 - [ ] **Advisor at fleet scale** -- loads every host and every (host x rule)
       result into memory every 15 min with per-host queries; collections
       uncapped and due in lockstep every 12 h. Cursor pagination, bulk tag and
       evidence loading, per-tick caps, per-host offsets (`advisor_tick.py:139-306`,
       `advisor_collection.py:157-180`).
-- [ ] **Fleet pushes in waves** -- antivirus auto-deploy redeploys every host in
+      *Partly done 2026-10-03: collections no longer fall due in lockstep --
+      each host's interval is 9-12 h by its fixed offset (never past half the
+      facts' freshness limit), at most 500 queued per database per pass (a new
+      rule needing a new table makes the whole fleet due at once); tags for
+      every host load in one query per pass, not one per host. The tick runs
+      off the event loop (above). STILL OPEN: evidence gathered per host, every
+      host evaluated every pass, all results loaded -- cursor pagination, bulk
+      evidence, per-tick caps. Server-internal load rather than a fleet herd;
+      measure at 50k first.*
+- [x] **Fleet pushes in waves** -- antivirus auto-deploy redeploys every host in
       one tick on a `PLAN_VERSION` bump with un-jittered retries and one audit
       commit per host (`av_auto_deploy.py:150-367`); scheduled config
       assignments fire every matching host at the cron minute
@@ -11872,19 +11926,53 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       refresh keeps the fleet in step (`package_catalog_refresh.py:93-188`).
       Reuse `config_mgmt_job_runner`'s concurrency waves (the model 21.3 S7 scan
       jobs already follow), per-host offsets (hash of host id), bulk audit.
+      *Done 2026-10-03. Antivirus auto-deploy: at most 250 plans per database
+      per pass (`MAX_PUSHES_PER_PASS`; the 5-minute malware tick makes that
+      3,000 an hour), the rest stay due ("next_wave"); retries wait their
+      backoff plus a fixed per-host share of 25% (`backend/utils/host_spread.
+      host_offset`, a hash of the host id, so a due time never moves between
+      ticks); the wave's audit entries commit once (`AuditService.log(...,
+      commit=False)`, default unchanged). Scheduled config assignments over
+      50 hosts become a fleet job (`config_mgmt_job_runner.
+      create_job_for_hosts`, split out of `create_job`), first wave now, the
+      rest at the job's concurrency as results arrive; smaller ones go out
+      directly as before. Package catalog: the pass runs hourly instead of
+      daily, each host's threshold is 20 h + its share of 4 h, at most 500
+      asks per database per pass -- still about once a day per host.*
 - [ ] **Alerting set-based** -- every rule x every host every 60 s with
       separate queries per pair, serially per tenant: ~1M pairs and millions of
       queries a minute at 50k hosts. Bulk prefetch, set-based evaluation,
       batches, staggered tenants (`alerting_router.pxi:802-806`,
       `alerting_service.pxi:35-280`).
-- [ ] **Tenant backup backoff** -- a failing tenant backup retries every tick
+      *Partly done 2026-10-03 (Pro+ `alerting_engine`): host tags load once per
+      pass and each rule's cooldowns in one query (the set of hosts still
+      cooling down) -- they were three queries per (rule x host) pair every
+      minute; the evaluation interval is jittered +/-10%. Built and tested
+      locally against a scratch build (37 tests); not yet published. STILL
+      OPEN: the nine condition evaluators still query per host -- each needs a
+      set-based form (one query per rule).*
+- [x] **Tenant backup backoff** -- a failing tenant backup retries every tick
       (as often as 30 s); first-run due times all coincide. Per-tenant
       jittered backoff; spread first runs across the RPO
       (`datamover_backup.pxi:401-444`).
+      *Done 2026-10-03 (Pro+ `multitenancy_engine`): a failed backup waits
+      1 min doubling to one RPO, plus a fixed per-tenant share of 25%
+      (`backup_retry_seconds`); a tenant never backed up runs first at its own
+      point within one RPO of the orchestrator starting (`first_backup_due`);
+      the tick summary counts tenants backing off. Built and tested locally
+      against a scratch build; not yet published (engine version bump via
+      `make lint-modules-version-fix`).*
 - [ ] Optional random splay on air-gap schedules and malware/ClamAV scan
       schedules; GeoLite download only when stale; back off ipapi lookups
       per host and stop after a 429 (`airgap_schedule_tick.py:56-130`,
       `geolocation_service.py:276-528`, `message_handlers_core.py:586-605`).
+      *Partly done 2026-10-03: GeoLite2 downloads only when the file is older
+      than the refresh interval (every server start downloaded ~75 MB); an
+      ipapi.co 429 pauses every fallback lookup for Retry-After (else an hour);
+      an address that resolved to nothing is not looked up again for 6 h (each
+      connect of a host behind an unknown NAT asked again). STILL OPEN, Bryan's
+      call: the splay on air-gap collection and malware scan schedules shifts
+      an operator's visible run time.*
 
 #### 22.4 Distribution and licensing (Pro+ / Enterprise)
 
@@ -12149,6 +12237,20 @@ unforgivable.
       agent locked out; steady-state server load is flat (no 5-minute spikes);
       a fleet-wide plan or rule bump completes at the configured wave rate; a
       license-server publish leaves no customer without engines.
+      *Progress 2026-10-03: the reconnect half is proven at 10k (single
+      tenant, one site, one 8-core laptop for server + PostgreSQL + drain):
+      40-minute server-restart storm, every criterion the harness checks met
+      (22.2 notes). Still to prove: 50k, many tenants and sites, wave-rate
+      pushes (22.3), a license-server publish (22.4).*
+      *Exit-proof runs 2026-10-03, 40 minutes each, 10,000 agents on the
+      FreeBSD box, with 22.1's full-jitter backoff and 22.3's off-loop ticks,
+      waves and spreading in: server-restart storm -- backlog peak 51,732,
+      drained by ~16 min and stayed near 0, reconnect 195 s, heartbeat p95
+      1.2 s, health p95 0.48 s, server CPU 199%; agent-restart storm (every
+      agent process restarted at once) -- backlog peak 60,337, drained by
+      ~16 min, reconnect 159 s, heartbeat p95 1.3 s. Both: 10,000 / 10,000
+      connected, 0 expired / marked down / 429s / polling / errors, every
+      criterion the harness checks met.*
       *Harness built 2026-10-01 (`tests/load/`: `stack.py` disposable pinned
       server, `fleet.py` agents that behave like today's agent, `observe.py`,
       scenarios `fleet-steady`, `fleet-restart-storm`, `agent-impersonation`;
@@ -12350,7 +12452,11 @@ unforgivable.
       written; both now start in the background via `start_cmd` (stdin
       /dev/null, output to the log, pid recorded via `exec`) with `procname`
       set so status / stop find the process -- the construct verified under
-      FreeBSD's sh, NOT yet on a NetBSD host. NetBSD OpenBao rc: stdin from
+      FreeBSD's sh and validated on NetBSD 10.1 (beast:2222) with stand-in
+      processes at the real paths: the OLD scripts hung `service onestart`
+      (and left the server running while status said "not running"); the
+      new ones return, and status / restart / stop work for server and agent,
+      also with both on one host. NetBSD OpenBao rc: stdin from
       /dev/null. OpenBSD (`rc_bg`), systemd and launchd need nothing.*
 - [ ] Docs: a scaling guide (worker count, pool sizing, private mirrors,
       federation intervals) + 14-language i18n.

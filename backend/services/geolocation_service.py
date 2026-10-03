@@ -49,6 +49,7 @@ import shutil
 import tarfile
 import tempfile
 import threading
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -272,6 +273,60 @@ def _lookup_via_geolite2(ip_str: str) -> Optional[GeoResult]:
 _IPAPI_URL_TEMPLATE = "https://ipapi.co/{ip}/json/"
 _IPAPI_TIMEOUT_SECONDS = 5.0
 
+# Phase 22.3.  ipapi.co's free tier is 1,000 lookups a day for the SERVER's
+# address: a 429 was treated as one miss and the next host asked straight
+# away, and a host whose address resolves to nothing asked again on every
+# connect -- a reconnecting fleet behind one NAT is thousands of calls.
+# After a 429 nobody asks until Retry-After (an hour without one); an
+# address that resolved to nothing is not asked again for MISS_RETRY_SECONDS.
+_IPAPI_PAUSE_SECONDS = 3600.0
+MISS_RETRY_SECONDS = 6 * 3600.0
+_MISS_CACHE_LIMIT = 50_000
+_state_lock = threading.Lock()
+_ipapi_paused_until = 0.0  # monotonic
+_missed_at: dict = {}  # ip -> monotonic time of the last miss
+
+
+def _pause_ipapi(response) -> None:
+    global _ipapi_paused_until  # pylint: disable=global-statement
+    try:
+        pause = float(response.headers.get("Retry-After", _IPAPI_PAUSE_SECONDS))
+    except (TypeError, ValueError):
+        pause = _IPAPI_PAUSE_SECONDS
+    with _state_lock:
+        _ipapi_paused_until = time.monotonic() + max(60.0, pause)
+    logger.warning(
+        "ipapi.co rate-limited this server (HTTP 429); pausing fallback lookups "
+        "for %.0f seconds",
+        max(60.0, pause),
+    )
+
+
+def _ipapi_paused() -> bool:
+    with _state_lock:
+        return time.monotonic() < _ipapi_paused_until
+
+
+def _recently_missed(ip_str: str) -> bool:
+    with _state_lock:
+        missed = _missed_at.get(ip_str)
+    return missed is not None and time.monotonic() - missed < MISS_RETRY_SECONDS
+
+
+def _note_miss(ip_str: str) -> None:
+    with _state_lock:
+        if len(_missed_at) >= _MISS_CACHE_LIMIT:
+            _missed_at.clear()  # bounded: forgetting only costs a re-ask
+        _missed_at[ip_str] = time.monotonic()
+
+
+def reset_lookup_backoff() -> None:
+    """Forget the pause and the misses (tests, or after a config change)."""
+    global _ipapi_paused_until  # pylint: disable=global-statement
+    with _state_lock:
+        _ipapi_paused_until = 0.0
+        _missed_at.clear()
+
 
 def _lookup_via_ipapi(ip_str: str) -> Optional[GeoResult]:
     """Resolve ``ip_str`` via ipapi.co's free tier.
@@ -281,7 +336,7 @@ def _lookup_via_ipapi(ip_str: str) -> Optional[GeoResult]:
     raising -- callers treat None as "unknown location" and leave the
     host's geo columns at their previous value (or NULL).
     """
-    if not is_geo_lookup_ipapi_fallback_enabled():
+    if not is_geo_lookup_ipapi_fallback_enabled() or _ipapi_paused():
         return None
     url = _IPAPI_URL_TEMPLATE.format(ip=ip_str)
     try:
@@ -289,8 +344,11 @@ def _lookup_via_ipapi(ip_str: str) -> Optional[GeoResult]:
     except (httpx.RequestError, httpx.TimeoutException) as exc:
         logger.debug("ipapi.co fallback network error for %s: %s", ip_str, exc)
         return None
+    if response.status_code == 429:
+        _pause_ipapi(response)
+        return None
     if response.status_code != 200:
-        # 429 = rate-limited; other non-200s shouldn't normally happen.
+        # Other non-200s shouldn't normally happen.
         logger.debug(
             "ipapi.co fallback returned HTTP %d for %s", response.status_code, ip_str
         )
@@ -351,10 +409,12 @@ def lookup_ip(ip_str: str) -> Optional[GeoResult]:
     if is_internal_ip(ip_str):
         return None
 
-    result = _lookup_via_geolite2(ip_str)
-    if result is not None:
-        return result
-    return _lookup_via_ipapi(ip_str)
+    if _recently_missed(ip_str):
+        return None
+    result = _lookup_via_geolite2(ip_str) or _lookup_via_ipapi(ip_str)
+    if result is None:
+        _note_miss(ip_str)
+    return result
 
 
 # ---------------------------------------------------------------------
@@ -510,6 +570,18 @@ def refresh_geolite_db() -> bool:  # NOSONAR S3516 - True on success, False on f
             pass
 
 
+def geolite_is_stale() -> bool:
+    """True when the GeoLite2 file is missing or older than the refresh
+    interval (Phase 22.3: every server start downloaded ~75 MB from MaxMind
+    whether the file on disk was a day old or a minute old)."""
+    path = get_geo_lookup_database_path()
+    try:
+        age = time.time() - os.path.getmtime(path)
+    except OSError:
+        return True
+    return age >= max(1, get_geo_lookup_refresh_interval_hours() * 3600) * 0.9
+
+
 async def geolite_refresh_service() -> None:
     """Background task: refresh the GeoLite2 DB at the configured interval.
 
@@ -524,7 +596,11 @@ async def geolite_refresh_service() -> None:
     """
     while True:
         try:
-            if is_geo_lookup_enabled() and get_geo_lookup_maxmind_license_key():
+            if (
+                is_geo_lookup_enabled()
+                and get_geo_lookup_maxmind_license_key()
+                and geolite_is_stale()
+            ):
                 # Run the (synchronous) refresh in a thread so we don't
                 # block the asyncio event loop for the duration of a
                 # 75MB download.

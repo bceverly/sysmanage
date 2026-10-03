@@ -39,7 +39,9 @@ start_cmd="sysmanage_start"
 # process).  Same class of defect as FreeBSD's ``daemon`` without ``-f``
 # (2026-10-03).  Start it in the background here, stdin from /dev/null and
 # output to the log, and record its pid: ``exec`` keeps that pid the
-# Python process's own.  NOT yet validated on a NetBSD host.
+# Python process's own.  Validated on NetBSD 10.1: the old
+# script hung ``service start``; this one returns, and status / restart /
+# stop work.
 sysmanage_start()
 {
 	echo "Starting ${name}."

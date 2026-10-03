@@ -482,7 +482,7 @@ class TestGraylogHealthMonitorService:
             async def controlled_sleep(seconds):
                 nonlocal call_count
                 call_count += 1
-                if call_count >= 1:
+                if call_count >= 2:  # the first is the start splay (22.3)
                     raise asyncio.CancelledError()
 
             mock_sleep.side_effect = controlled_sleep
@@ -515,7 +515,7 @@ class TestGraylogHealthMonitorService:
             async def controlled_sleep(seconds):
                 nonlocal call_count
                 call_count += 1
-                if call_count >= 1:
+                if call_count >= 2:  # the first is the start splay (22.3)
                     raise asyncio.CancelledError()
 
             mock_sleep.side_effect = controlled_sleep
@@ -544,7 +544,7 @@ class TestGraylogHealthMonitorService:
 
             async def capture_sleep(seconds):
                 sleep_durations.append(seconds)
-                if len(sleep_durations) >= 1:
+                if len(sleep_durations) >= 2:  # start splay, then the interval
                     raise asyncio.CancelledError()
 
             mock_sleep.side_effect = capture_sleep
@@ -552,8 +552,10 @@ class TestGraylogHealthMonitorService:
             with contextlib.suppress(asyncio.CancelledError):
                 await graylog_health_monitor_service()
 
-            # Verify sleep was called with 5 minute interval (300 seconds)
-            assert 300 in sleep_durations
+            # A random start (at most 2 minutes), then 5 minutes +/-10%
+            # (Phase 22.3: ticks must not fire in step).
+            assert 0 <= sleep_durations[0] <= 120
+            assert 270 <= sleep_durations[1] <= 330
 
 
 # =============================================================================

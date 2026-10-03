@@ -31,7 +31,6 @@ Unlicensed servers never get here: without ``advisor_engine`` the tick is not
 started, and ``run_one_tick`` re-checks.
 """
 
-import asyncio
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -51,6 +50,7 @@ from backend.services import advisor_proposals as proposals
 from backend.services import posture_service as posture
 from backend.services import threat_model_catalog
 from backend.startup.leadership import singleton_task
+from backend.startup.tick_runner import run_periodic
 
 logger = logging.getLogger(__name__)
 
@@ -137,13 +137,17 @@ def _tenant_rules(db_session) -> List[Dict[str, Any]]:
     ]
 
 
-def _tag_ids(db_session, host) -> List[str]:
-    return [
-        str(row.tag_id)
-        for row in db_session.query(models.HostTag)
-        .filter(models.HostTag.host_id == host.id)
-        .all()
-    ]
+def _tag_ids_by_host(db_session, hosts) -> Dict[str, List[str]]:
+    """Every host's tag ids in ONE query (Phase 22.3: it was one query per
+    host per pass)."""
+    by_host: Dict[str, List[str]] = {str(h.id): [] for h in hosts}
+    ids = [h.id for h in hosts]
+    for start in range(0, len(ids), 1000):
+        for row in db_session.query(
+            models.HostTag.host_id, models.HostTag.tag_id
+        ).filter(models.HostTag.host_id.in_(ids[start : start + 1000])):
+            by_host.setdefault(str(row.host_id), []).append(str(row.tag_id))
+    return by_host
 
 
 @dataclass
@@ -208,6 +212,7 @@ def _evaluate_hosts(run: _Pass, hosts, entries) -> List[Tuple[Any, Any, List, Li
     # and keyed matching would file one rule's outcome under the other.
     host_entries = [e for e in entries if e["rule"].get("scope", "host") == "host"]
     evaluated = []
+    tags = _tag_ids_by_host(run.db, hosts)
     for host in hosts:
         try:
             evidence, tables = ev.gather(run.db, host, fact_needs, domains)
@@ -224,7 +229,7 @@ def _evaluate_hosts(run: _Pass, hosts, entries) -> List[Tuple[Any, Any, List, Li
             run.summary["host_errors"] += 1
             continue
         evaluated.append(
-            (host, evidence, tables.get("sm_package") or [], _tag_ids(run.db, host))
+            (host, evidence, tables.get("sm_package") or [], tags.get(str(host.id), []))
         )
         if len(results) != len(host_entries):
             logger.error(
@@ -350,6 +355,7 @@ def _new_summary() -> Dict[str, Any]:
         "collections_nothing_to_run": 0,
         "collections_no_engine": 0,
         "collections_pruned": 0,
+        "collections_next_pass": 0,  # due, left for a later pass (22.3 cap)
         "proposals_opened": 0,
         "posture_items": 0,
         "posture_changes": 0,
@@ -418,29 +424,27 @@ def run_one_tick() -> Dict[str, Any]:
 
 async def advisor_tick_service() -> None:
     """Background service: one evaluation every ``TICK_INTERVAL_SECONDS``."""
-    logger.info(
-        "Starting advisor evaluation tick (interval=%ds)", TICK_INTERVAL_SECONDS
+
+    def _report(summary):
+        if summary["results"] or summary["host_errors"]:
+            logger.info(
+                "Advisor tick: hosts=%d results=%d pruned=%d host_errors=%d "
+                "rule_errors=%d",
+                summary["hosts"],
+                summary["results"],
+                summary["pruned"],
+                summary["host_errors"],
+                summary["rule_errors"],
+            )
+
+    await run_periodic(
+        "Advisor tick",
+        run_one_tick,
+        TICK_INTERVAL_SECONDS,
+        ERROR_BACKOFF_SECONDS,
+        on_result=_report,
+        logger=logger,
     )
-    while True:
-        try:
-            summary = run_one_tick()
-            if summary["results"] or summary["host_errors"]:
-                logger.info(
-                    "Advisor tick: hosts=%d results=%d pruned=%d host_errors=%d "
-                    "rule_errors=%d",
-                    summary["hosts"],
-                    summary["results"],
-                    summary["pruned"],
-                    summary["host_errors"],
-                    summary["rule_errors"],
-                )
-            await asyncio.sleep(TICK_INTERVAL_SECONDS)
-        except asyncio.CancelledError:
-            logger.info("Advisor tick service canceled -- exiting loop")
-            raise
-        except Exception:  # pylint: disable=broad-except
-            logger.exception("Advisor tick service error -- sleeping then retrying")
-            await asyncio.sleep(ERROR_BACKOFF_SECONDS)
 
 
 # asyncio keeps only a WEAK reference to a task: without this one the loop

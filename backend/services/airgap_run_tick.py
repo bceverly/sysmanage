@@ -51,7 +51,6 @@ the error via the same tooltip pattern used for mirror failures.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import socket
 from datetime import datetime, timezone
@@ -59,6 +58,7 @@ from datetime import datetime, timezone
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.startup.tick_runner import run_periodic
 
 logger = logging.getLogger(__name__)
 
@@ -761,24 +761,21 @@ async def airgap_run_tick_service() -> None:
     ``airgap_collector_engine`` Pro+ module is loaded -- same gate as
     the schedule-tick.
     """
-    logger.info(
-        "Starting air-gap collection run tick service (interval=%ds)",
+
+    def _report(summary):
+        if summary["advanced"] or summary["failed"]:
+            logger.info(
+                "Air-gap run tick: advanced=%d failed=%d skipped_inflight=%d",
+                summary["advanced"],
+                summary["failed"],
+                summary["skipped_inflight"],
+            )
+
+    await run_periodic(
+        "Air-gap run tick",
+        _run_one_tick,
         TICK_INTERVAL_SECONDS,
+        ERROR_BACKOFF_SECONDS,
+        on_result=_report,
+        logger=logger,
     )
-    while True:
-        try:
-            summary = _run_one_tick()
-            if summary["advanced"] or summary["failed"]:
-                logger.info(
-                    "Air-gap run tick: advanced=%d failed=%d skipped_inflight=%d",
-                    summary["advanced"],
-                    summary["failed"],
-                    summary["skipped_inflight"],
-                )
-            await asyncio.sleep(TICK_INTERVAL_SECONDS)
-        except asyncio.CancelledError:
-            logger.info("Air-gap run tick service cancelled")
-            raise
-        except Exception:  # pylint: disable=broad-except
-            logger.exception("airgap run tick service outer loop error")
-            await asyncio.sleep(ERROR_BACKOFF_SECONDS)

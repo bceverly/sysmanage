@@ -49,12 +49,21 @@ from backend.persistence import models
 from backend.services import advisor_evidence as ev
 from backend.services import query_pack_dispatch as dispatch
 from backend.services import query_pack_service as svc
+from backend.utils.host_spread import host_offset
 
 logger = logging.getLogger(__name__)
 
 ADVISOR_PACK_NAME = "advisor-facts"
 COLLECT_INTERVAL = timedelta(hours=12)
 PENDING_GRACE = timedelta(hours=6)
+# Phase 22.3: every host fell due at the same 12-hour mark and one pass asked
+# them all.  Each host's interval is now between 75% and 100% of
+# COLLECT_INTERVAL by its fixed offset (never longer: half the facts'
+# freshness limit is what keeps one missed collection from going stale), and
+# at most MAX_COLLECTIONS_PER_PASS are queued per database per pass -- a new
+# rule that needs a new table makes the whole fleet due at once.
+INTERVAL_SPREAD = 0.25
+MAX_COLLECTIONS_PER_PASS = 500
 _PACK = {"id": None, "name": ADVISOR_PACK_NAME, "curated": False}
 
 
@@ -95,7 +104,13 @@ def _collected(db, run) -> Dict[str, Optional[set]]:
     return out
 
 
-def is_due(db, runs, queries, now) -> bool:
+def host_interval(host_id) -> timedelta:
+    """This host's collection interval: COLLECT_INTERVAL less its fixed share
+    of INTERVAL_SPREAD, so the fleet's collections do not fall due together."""
+    return COLLECT_INTERVAL * (1 - INTERVAL_SPREAD * host_offset(host_id))
+
+
+def is_due(db, runs, queries, now, host_id=None) -> bool:
     """Should this host be asked again? See DUE-NESS above.
 
     Also due when a query's stored rows LACK a column the rules now read: a
@@ -105,7 +120,7 @@ def is_due(db, runs, queries, now) -> bool:
     if any(_pending(r) and now - r.started_at < PENDING_GRACE for r in runs):
         return False
     completed = next((r for r in runs if not _pending(r)), None)
-    if completed is None or now - completed.started_at >= COLLECT_INTERVAL:
+    if completed is None or now - completed.started_at >= host_interval(host_id):
         return True
     collected = _collected(db, completed)
     for query in queries:
@@ -160,14 +175,21 @@ def collect(engine, db, hosts, rules, now, summary: Dict[str, Any]) -> None:
     """Dispatch due collections and prune old ones, for ``hosts``. Never raises
     past a host: one host's failure must not stop the others'."""
     queries = engine.collection_queries(rules, ev.FACT_QUERY_PREFIX)
+    queued = 0
     for host in hosts:
         try:
             found = _advisor_runs(db, host.id)
             runs = prune(db, found, now)
             summary["collections_pruned"] += len(found) - len(runs)
-            if not queries or not host.active or not is_due(db, runs, queries, now):
+            if not queries or not host.active:
+                continue
+            if not is_due(db, runs, queries, now, host.id):
+                continue
+            if queued >= MAX_COLLECTIONS_PER_PASS:
+                summary["collections_next_pass"] += 1  # still due: a later pass
                 continue
             outcome = _dispatch(db, host, queries)
+            queued += outcome == "queued"
             summary["collections_" + outcome] += 1
             if outcome == "no_engine":
                 return  # the same for every host; stop asking

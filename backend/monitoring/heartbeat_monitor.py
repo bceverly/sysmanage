@@ -15,6 +15,7 @@ from datetime import datetime, timedelta, timezone
 from backend.config.config import get_heartbeat_timeout_minutes
 from backend.persistence.models import Host
 from backend.persistence.partitions import iter_host_databases
+from backend.startup.tick_runner import run_periodic
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,13 @@ def _mark_stale_hosts_down(db, timeout_threshold, label):
         logger.info("Marked %s hosts as down (%s)", len(stale_hosts), label)
 
 
-async def check_host_heartbeats():  # NOSONAR
+async def check_host_heartbeats():
+    """One check, on a worker thread: it is all synchronous database work, and
+    on the event loop it held up every connected agent (Phase 22.3)."""
+    await asyncio.to_thread(check_host_heartbeats_now)
+
+
+def check_host_heartbeats_now():  # NOSONAR
     """Mark approved hosts that missed the heartbeat window as down, across the
     bootstrap DB and every provisioned tenant DB.  Each database is handled
     independently so one failure can't stall the rest."""
@@ -90,14 +97,7 @@ async def heartbeat_monitor_service():
     """
     global _service_started_at  # pylint: disable=global-statement
     _service_started_at = time.monotonic()
-    logger.info("Starting heartbeat monitor service")
-
-    while True:
-        try:
-            await check_host_heartbeats()
-            # Check every minute
-            await asyncio.sleep(60)
-        except Exception as e:
-            logger.exception("Error in heartbeat monitor service: %s", e)
-            # Wait a bit before retrying
-            await asyncio.sleep(30)
+    # Every minute, jittered, first check at a random moment (Phase 22.3).
+    await run_periodic(
+        "Heartbeat monitor", check_host_heartbeats, 60, 30, logger=logger
+    )

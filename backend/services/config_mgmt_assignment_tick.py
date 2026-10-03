@@ -40,7 +40,6 @@ without ``config_management_engine``, so the loop finds nothing and the gate
 at startup keeps it from running at all.
 """
 
-import asyncio
 import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List
@@ -49,8 +48,17 @@ from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.partitions import iter_host_databases
 from backend.services import config_mgmt_dispatch as dispatch
+from backend.services import config_mgmt_job_runner as job_runner
+from backend.startup.tick_runner import run_periodic
 
 logger = logging.getLogger(__name__)
+
+# Phase 22.3: an assignment that targets more hosts than this is released in
+# waves by a fleet job (its concurrency, as wide as the engine allows by
+# default) instead of queued for every host at the cron minute.  Smaller ones
+# go out directly, as before -- a job per single-host schedule would only
+# crowd the jobs list.
+WAVE_THRESHOLD = 50
 
 # 60s -- cron's finest granularity is one minute, so a tighter cadence is
 # pure churn and a looser one lets a minute-boundary schedule slip a cycle.
@@ -138,6 +146,24 @@ def _dispatch_one(db_session, host, parameters: Dict[str, Any]) -> bool:
         return False
 
 
+def _dispatch_in_waves(db_session, assignment, profile, hosts, summary) -> None:
+    """More hosts than one wave: a fleet job releases them at its concurrency
+    as results come back (Phase 22.3), instead of queuing the whole target at
+    the cron minute -- every host then running the profile in the same
+    minute.  The first wave goes out now; the job tick releases the rest."""
+    job = job_runner.create_job_for_hosts(
+        db_session,
+        hosts,
+        profile,
+        inventory_name=f"assignment:{assignment.id}",
+        check_mode=bool(assignment.check_mode),
+    )
+    released = job_runner.advance_job(db_session, job)
+    summary["queued"] += released["released"]
+    summary["skipped_hosts"] += released["skipped"]
+    summary["jobs"] += 1
+
+
 def _tick_one_database(db_session, automation, now, summary) -> None:
     """Run the tick against ONE database. Never raises.
 
@@ -190,11 +216,15 @@ def _tick_one_database(db_session, automation, now, summary) -> None:
                 assignment.last_applied_at = now
                 continue
 
-            for host in _hosts_for(db_session, assignment):
-                if _dispatch_one(db_session, host, parameters):
-                    summary["queued"] += 1
-                else:
-                    summary["skipped_hosts"] += 1
+            hosts = _hosts_for(db_session, assignment)
+            if len(hosts) > WAVE_THRESHOLD:
+                _dispatch_in_waves(db_session, assignment, profile, hosts, summary)
+            else:
+                for host in hosts:
+                    if _dispatch_one(db_session, host, parameters):
+                        summary["queued"] += 1
+                    else:
+                        summary["skipped_hosts"] += 1
 
             assignment.last_applied_at = now
 
@@ -218,6 +248,7 @@ def run_one_tick() -> Dict[str, Any]:
         "due": 0,
         "queued": 0,
         "skipped_hosts": 0,
+        "jobs": 0,  # assignments released in waves (22.3)
         "no_cron_engine": False,
     }
 
@@ -250,28 +281,23 @@ def run_one_tick() -> Dict[str, Any]:
 
 async def config_mgmt_assignment_tick_service() -> None:
     """Background service: one tick every ``TICK_INTERVAL_SECONDS``."""
-    logger.info(
-        "Starting config-profile assignment tick service (interval=%ds)",
-        TICK_INTERVAL_SECONDS,
-    )
-    while True:
-        try:
-            summary = run_one_tick()
-            if summary["due"] or summary["no_cron_engine"]:
-                logger.info(
-                    "Config assignment tick: due=%d queued=%d skipped_hosts=%d "
-                    "automation_engine_absent=%s",
-                    summary["due"],
-                    summary["queued"],
-                    summary["skipped_hosts"],
-                    summary["no_cron_engine"],
-                )
-            await asyncio.sleep(TICK_INTERVAL_SECONDS)
-        except asyncio.CancelledError:
-            logger.info("Config assignment tick service cancelled -- exiting loop")
-            raise
-        except Exception:  # pylint: disable=broad-except
-            logger.exception(
-                "Config assignment tick service error -- sleeping then retrying"
+
+    def _report(summary):
+        if summary["due"] or summary["no_cron_engine"]:
+            logger.info(
+                "Config assignment tick: due=%d queued=%d skipped_hosts=%d "
+                "automation_engine_absent=%s",
+                summary["due"],
+                summary["queued"],
+                summary["skipped_hosts"],
+                summary["no_cron_engine"],
             )
-            await asyncio.sleep(ERROR_BACKOFF_SECONDS)
+
+    await run_periodic(
+        "Config assignment tick",
+        run_one_tick,
+        TICK_INTERVAL_SECONDS,
+        ERROR_BACKOFF_SECONDS,
+        on_result=_report,
+        logger=logger,
+    )

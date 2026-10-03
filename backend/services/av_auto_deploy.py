@@ -37,6 +37,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from backend.persistence import db as persistence_db
 from backend.persistence import models
 from backend.services import av_plan_builder
+from backend.utils.host_spread import host_offset
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import CommandType, Message, MessageType
 from backend.websocket.queue_enums import QueueDirection, QueueStatus
@@ -47,6 +48,16 @@ logger = logging.getLogger(__name__)
 RETRY_BASE_HOURS = 1
 RETRY_MAX_HOURS = 24
 LOUD_AFTER_ATTEMPTS = 3
+# Phase 22.3: a fleet-wide push goes out in WAVES.  A PLAN_VERSION bump made
+# every host due at once and one tick queued them all -- every agent then
+# downloading and installing antivirus in the same minute.  At most this many
+# plans per database per pass (the malware tick runs every 5 minutes, so
+# 3,000 an hour); the rest stay due for the next passes.
+MAX_PUSHES_PER_PASS = 250
+# Each host's retry waits up to this much longer than the base delay, by a
+# fixed offset from its id, so hosts that failed together do not retry
+# together (fixed per host, so a host's due time does not move tick to tick).
+RETRY_SPREAD = 0.25
 
 STATUS_QUEUED = "queued"
 STATUS_SUCCEEDED = "succeeded"
@@ -149,10 +160,11 @@ def operator_opt_in(session: Session, host_id: Any) -> None:
         session.delete(record)
 
 
-def retry_delay(attempts: int) -> timedelta:
-    """1 h, 2 h, 4 h ... at most a day, after ``attempts`` failed pushes."""
-    hours = RETRY_BASE_HOURS * (2 ** max(0, attempts - 1))
-    return timedelta(hours=min(hours, RETRY_MAX_HOURS))
+def retry_delay(attempts: int, host_id: Any = None) -> timedelta:
+    """1 h, 2 h, 4 h ... at most a day, after ``attempts`` failed pushes --
+    plus a fixed per-host share of ``RETRY_SPREAD`` (Phase 22.3)."""
+    hours = min(RETRY_BASE_HOURS * (2 ** max(0, attempts - 1)), RETRY_MAX_HOURS)
+    return timedelta(hours=hours * (1 + RETRY_SPREAD * host_offset(host_id)))
 
 
 def _due(record, now: datetime) -> bool:
@@ -165,7 +177,7 @@ def _due(record, now: datetime) -> bool:
         return False
     if record.status == STATUS_FAILED:
         return (record.finished_at or record.requested_at) <= now - retry_delay(
-            record.attempts
+            record.attempts, record.host_id
         )
     # Queued with no answer yet (offline host, or an agent too old to say).
     return record.requested_at <= now - timedelta(hours=RETRY_MAX_HOURS)
@@ -217,7 +229,7 @@ def _mark_undelivered(session: Session, records, label: str) -> None:
             record.host_id,
             label or "bootstrap",
             record.last_error,
-            retry_delay(record.attempts),
+            retry_delay(record.attempts, record.host_id),
         )
 
 
@@ -269,7 +281,7 @@ def record_result(session: Session, message_data: Dict[str, Any]) -> bool:
         record.plan_version,
         record.host_id,
         record.attempts,
-        retry_delay(record.attempts),
+        retry_delay(record.attempts, record.host_id),
         record.last_error,
     )
     return True
@@ -329,6 +341,8 @@ def reconcile(session: Session, label: str = "") -> Dict[str, Any]:
     for host in session.query(models.Host).all():
         summary["hosts"] += 1
         reason, package = _classify(host, defaults, records, now)
+        if reason == "due" and len(pushed) >= MAX_PUSHES_PER_PASS:
+            reason = "next_wave"  # still due: a later pass takes it
         if reason == "no_default":
             no_default.add(os_name_for_defaults(host) or "?")
         if reason != "due":
@@ -367,6 +381,7 @@ def _audit(pushed) -> None:
         with session_local() as audit_session:
             for host, package, attempts in pushed:
                 AuditService.log(
+                    commit=False,  # one commit for the whole wave (22.3)
                     db=audit_session,
                     action_type=ActionType.EXECUTE,
                     entity_type=EntityType.HOST,
@@ -381,5 +396,6 @@ def _audit(pushed) -> None:
                         "attempt": attempts,
                     },
                 )
+            audit_session.commit()
     except Exception:  # pylint: disable=broad-except
         logger.exception("Antivirus auto-deploy audit failed")

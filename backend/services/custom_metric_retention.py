@@ -37,12 +37,12 @@ Design notes (mirrors the other OSS background loops, e.g.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import datetime, timedelta, timezone
 
 from backend.config import config as _config
 from backend.persistence.models import CustomMetricSample
+from backend.startup.tick_runner import run_periodic
 
 logger = logging.getLogger(__name__)
 
@@ -168,23 +168,18 @@ async def run_custom_metric_retention_loop(
     ``task.cancel()``; every other exception is caught so the loop is
     self-healing and never dies.
     """
-    logger.info(
-        "Starting custom-metric retention loop (interval=%ds)",
+
+    def _report(total):
+        logger.info(
+            "custom-metric retention pass complete: %d sample(s) pruned total",
+            total,
+        )
+
+    await run_periodic(
+        "Custom-metric retention loop",
+        _run_one_pass,
         interval_seconds,
+        ERROR_BACKOFF_SECONDS,
+        on_result=_report,
+        logger=logger,
     )
-    while True:
-        try:
-            total = _run_one_pass()
-            logger.info(
-                "custom-metric retention pass complete: %d sample(s) pruned total",
-                total,
-            )
-            await asyncio.sleep(interval_seconds)
-        except asyncio.CancelledError:
-            logger.info("Custom-metric retention loop cancelled -- exiting")
-            raise
-        except Exception:  # pylint: disable=broad-except
-            logger.exception(
-                "Custom-metric retention loop error -- backing off then retrying"
-            )
-            await asyncio.sleep(ERROR_BACKOFF_SECONDS)

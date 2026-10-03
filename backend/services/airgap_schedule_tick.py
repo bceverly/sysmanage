@@ -39,7 +39,6 @@ periodic-tick driver that ties them together.
 
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 from datetime import datetime, timezone
@@ -47,6 +46,7 @@ from datetime import datetime, timezone
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.startup.tick_runner import run_periodic
 
 logger = logging.getLogger(__name__)
 
@@ -149,30 +149,22 @@ async def airgap_schedule_tick_service() -> None:
     at server startup only when ``airgap_collector_engine`` is loaded
     (see ``backend/startup/lifecycle.py``).
     """
-    logger.info(
-        "Starting air-gap collection schedule tick service (interval=%ds)",
-        TICK_INTERVAL_SECONDS,
-    )
-    while True:
-        try:
-            summary = _run_one_tick()
-            if summary["fired"] or summary["errors"]:
-                logger.info(
-                    "Air-gap schedule tick: fired=%d errors=%d "
-                    "automation_engine_absent=%s",
-                    summary["fired"],
-                    summary["errors"],
-                    summary["skipped_automation_absent"],
-                )
-            await asyncio.sleep(TICK_INTERVAL_SECONDS)
-        except asyncio.CancelledError:
-            logger.info("Air-gap schedule tick service cancelled -- exiting loop")
-            raise
-        except Exception:  # pylint: disable=broad-except
-            logger.exception(
-                "Air-gap schedule tick service error -- sleeping then retrying"
+
+    def _report(summary):
+        if summary["fired"] or summary["errors"]:
+            logger.info(
+                "Air-gap schedule tick: fired=%d errors=%d "
+                "automation_engine_absent=%s",
+                summary["fired"],
+                summary["errors"],
+                summary["skipped_automation_absent"],
             )
-            # Shorter back-off than the normal cadence so the operator
-            # sees fast recovery on transient DB blips, but not so
-            # short that a persistent error spams the logs.
-            await asyncio.sleep(ERROR_BACKOFF_SECONDS)
+
+    await run_periodic(
+        "Air-gap schedule tick",
+        _run_one_tick,
+        TICK_INTERVAL_SECONDS,
+        ERROR_BACKOFF_SECONDS,
+        on_result=_report,
+        logger=logger,
+    )

@@ -37,20 +37,29 @@ sweep is roughly one small message per host, not ~11 MB per host.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import datetime, timedelta, timezone
 
+from backend.startup.tick_runner import run_periodic
+from backend.utils.host_spread import host_offset
+
 logger = logging.getLogger(__name__)
 
-# Daily.  The agent re-scans its own package managers on the same cadence, so
-# asking more often would mostly re-ask for data the host has not re-collected.
-DEFAULT_INTERVAL_SECONDS = 86400
+# Each host is still asked about once a day -- the agent re-scans its own
+# package managers on that cadence -- but the PASS runs hourly (Phase 22.3):
+# one daily pass asked every stale host at the same moment, and the whole
+# fleet then scanned and answered together.
+DEFAULT_INTERVAL_SECONDS = 3600
 
-# How stale a host's catalog must be before it is re-requested.  Slightly under
-# the interval so a host is not skipped for a whole extra day because a pass ran
-# a few minutes early.
+# How stale a host's catalog must be before it is re-requested: 20 hours plus
+# this host's fixed share of SPREAD_HOURS, so the fleet's requests spread over
+# the hourly passes instead of all falling due in one.
 STALE_AFTER_HOURS = 20
+SPREAD_HOURS = 4
+
+# At most this many requests per database per pass: a fleet that enrolled
+# together (no catalog yet, all due at once) is asked over several passes.
+MAX_ASKS_PER_PASS = 500
 
 # Back-off after a whole-pass failure: shorter than the cadence so an operator
 # sees recovery, but not so short it spams the log on a persistent fault.
@@ -71,7 +80,8 @@ def _needs_refresh(host, now: datetime) -> bool:
         return True
     if reported.tzinfo is None:
         reported = reported.replace(tzinfo=timezone.utc)
-    return now - reported >= timedelta(hours=STALE_AFTER_HOURS)
+    stale_after = STALE_AFTER_HOURS + SPREAD_HOURS * host_offset(host.id)
+    return now - reported >= timedelta(hours=stale_after)
 
 
 def request_refresh_for_stale_hosts(session, models, now: datetime) -> int:
@@ -97,6 +107,8 @@ def request_refresh_for_stale_hosts(session, models, now: datetime) -> int:
 
     asked = 0
     for host in hosts:
+        if asked >= MAX_ASKS_PER_PASS:
+            break  # the rest are still stale: a later pass asks them
         if not _needs_refresh(host, now):
             continue
         try:
@@ -166,23 +178,15 @@ async def run_package_catalog_refresh_loop(
     Cancellable via ``task.cancel()``; every other exception is caught so the
     loop is self-healing and never dies.
     """
-    logger.info(
-        "Starting package-catalog refresh loop (interval=%ds, stale_after=%dh)",
+
+    def _report(total):
+        logger.info("package-catalog refresh pass complete: %d host(s) asked", total)
+
+    await run_periodic(
+        "Package-catalog refresh loop",
+        _run_one_pass,
         interval_seconds,
-        STALE_AFTER_HOURS,
+        ERROR_BACKOFF_SECONDS,
+        on_result=_report,
+        logger=logger,
     )
-    while True:
-        try:
-            total = _run_one_pass()
-            logger.info(
-                "package-catalog refresh pass complete: %d host(s) asked", total
-            )
-            await asyncio.sleep(interval_seconds)
-        except asyncio.CancelledError:
-            logger.info("Package-catalog refresh loop cancelled -- exiting")
-            raise
-        except Exception:  # pylint: disable=broad-except
-            logger.exception(
-                "Package-catalog refresh loop error -- backing off then retrying"
-            )
-            await asyncio.sleep(ERROR_BACKOFF_SECONDS)

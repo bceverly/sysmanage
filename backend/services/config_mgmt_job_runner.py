@@ -42,7 +42,6 @@ WHAT IT DELIBERATELY DOES NOT DECIDE
   rules, in ``config_jobs.pxi``.
 """
 
-import asyncio
 import logging
 from datetime import timedelta
 from typing import Any, Dict, List, Optional
@@ -65,6 +64,7 @@ from backend.persistence.partitions import iter_host_databases
 from backend.services import config_mgmt_dispatch as dispatch
 from backend.services import config_mgmt_fleet as fleet
 from backend.services import config_mgmt_spec_shim as shim
+from backend.startup.tick_runner import run_periodic
 
 logger = logging.getLogger(__name__)
 
@@ -114,17 +114,40 @@ def create_job(
     ``host_fqdn`` is copied onto every target because the host may be
     decommissioned before anybody reads the job.
     """
-    now = fleet.now_naive()
-    hosts = fleet.resolve_hosts(db_session, inventory)
+    return create_job_for_hosts(
+        db_session,
+        fleet.resolve_hosts(db_session, inventory),
+        profile,
+        inventory_name=inventory.name,
+        template=template,
+        requested_by=requested_by,
+    )
 
+
+def create_job_for_hosts(  # pylint: disable=too-many-arguments
+    db_session: Session,
+    hosts,
+    profile,
+    *,
+    inventory_name: str,
+    template=None,
+    check_mode: Optional[bool] = None,
+    requested_by: Optional[str] = None,
+) -> models.ConfigJob:
+    """A job over an explicit host list -- ``create_job`` resolves them from an
+    inventory; a scheduled assignment (Phase 22.3) from its host, site or tag,
+    so it is released in waves instead of all at once."""
+    now = fleet.now_naive()
+    if check_mode is None:
+        check_mode = bool(getattr(template, "check_mode", False))
     job = models.ConfigJob(
         template_id=getattr(template, "id", None),
         template_name=getattr(template, "name", None),
         profile_id=profile.id,
         profile_name=profile.name,
-        inventory_name=inventory.name,
+        inventory_name=inventory_name,
         status=JOB_PENDING,
-        check_mode=bool(getattr(template, "check_mode", False)),
+        check_mode=check_mode,
         concurrency=fleet.clamp_concurrency(getattr(template, "concurrency", None)),
         timeout_seconds=getattr(template, "timeout_seconds", None),
         total_targets=len(hosts),
@@ -162,7 +185,7 @@ def create_job(
             "Config fleet job %s launched against inventory '%s' which resolved "
             "to zero active hosts; nothing was dispatched",
             job.id,
-            inventory.name,
+            inventory_name,
         )
     return job
 
@@ -616,28 +639,25 @@ def module_loader_automation():
 
 async def config_mgmt_job_tick_service() -> None:
     """Background service: one tick every ``TICK_INTERVAL_SECONDS``."""
-    logger.info(
-        "Starting config fleet job tick service (interval=%ds)",
+
+    def _report(summary):
+        if summary["launched"] or summary["active"] or summary["no_cron_engine"]:
+            logger.info(
+                "Config fleet job tick: launched=%d active=%d released=%d "
+                "skipped=%d expired=%d automation_engine_absent=%s",
+                summary["launched"],
+                summary["active"],
+                summary["released"],
+                summary["skipped"],
+                summary["expired"],
+                summary["no_cron_engine"],
+            )
+
+    await run_periodic(
+        "Config fleet job tick",
+        run_one_tick,
         TICK_INTERVAL_SECONDS,
+        ERROR_BACKOFF_SECONDS,
+        on_result=_report,
+        logger=logger,
     )
-    while True:
-        try:
-            summary = run_one_tick()
-            if summary["launched"] or summary["active"] or summary["no_cron_engine"]:
-                logger.info(
-                    "Config fleet job tick: launched=%d active=%d released=%d "
-                    "skipped=%d expired=%d automation_engine_absent=%s",
-                    summary["launched"],
-                    summary["active"],
-                    summary["released"],
-                    summary["skipped"],
-                    summary["expired"],
-                    summary["no_cron_engine"],
-                )
-            await asyncio.sleep(TICK_INTERVAL_SECONDS)
-        except asyncio.CancelledError:
-            logger.info("Config fleet job tick service cancelled -- exiting loop")
-            raise
-        except Exception:  # pylint: disable=broad-except
-            logger.exception("Config fleet job tick service error -- sleeping")
-            await asyncio.sleep(ERROR_BACKOFF_SECONDS)

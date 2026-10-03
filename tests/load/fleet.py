@@ -239,9 +239,19 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
             else:
                 self.failures += 1
             # Every pass -- a clean close too -- goes through the backoff.
-            delay = min(5 * 2 ** min(self.failures, 6), 300) * self._rng.uniform(
-                0.5, 1.5
-            )
+            if self.fleet.jitter:
+                # Agent 22.1 (core/backoff.py): full jitter in [1, min(300,
+                # 5 x 2^n)]; after a clean close (the agent counts it as its
+                # first failure) the first wait is up to 60 s.
+                if connected:
+                    delay = self._rng.uniform(1.0, 60.0)
+                else:
+                    top = min(300.0, 5.0 * 2 ** min(self.failures + 1, 16))
+                    delay = self._rng.uniform(1.0, top)
+            else:
+                delay = min(5 * 2 ** min(self.failures, 6), 300) * self._rng.uniform(
+                    0.5, 1.5
+                )
             delay = max(delay, self.not_before - time.monotonic())
             await self.fleet.sleep(delay, scaled=False)
 
@@ -272,7 +282,11 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
         except Exception as exc:  # pylint: disable=broad-exception-caught
             name = f"{type(exc).__name__} {exc}".lower()
             stats.counts[f"ws_{type(exc).__name__}"] += 1
-            if any(p in name for p in _STRUCTURAL):
+            # Agent 22.1: a 429 / 5xx on the upgrade is the server saying "not
+            # now", never "this network blocks WebSockets".
+            busy = self.fleet.jitter and any(f"http {c}" in name for c in
+                                             ("429", "500", "502", "503", "504"))  # fmt: skip
+            if any(p in name for p in _STRUCTURAL) and not busy:
                 self.structural += 1
                 if self.structural >= 2:
                     stats.counts["fallback_to_polling"] += 1

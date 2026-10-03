@@ -139,7 +139,7 @@ def test_a_failed_plan_is_retried_with_backoff_and_never_given_up(db, queued):
     assert record.status == "failed" and "privileged" in record.last_error
     assert av_auto_deploy.reconcile(db)["waiting_retry"] == 1  # too soon
     for attempt in range(1, 8):
-        _age(db, host, av_auto_deploy.retry_delay(attempt).total_seconds() / 3600 + 0.1,
+        _age(db, host, av_auto_deploy.retry_delay(attempt, host.id).total_seconds() / 3600 + 0.1,
              "finished_at")  # fmt: skip
         assert av_auto_deploy.reconcile(db)["queued"] == 1, attempt
         db.commit()
@@ -233,7 +233,9 @@ def test_a_plan_the_queue_gave_up_delivering_is_retried_soon(db):
     record = db.get(models.AntivirusAutoDeploy, host.id)
     assert record.status == "failed" and "not delivered" in record.last_error
     assert summary["waiting_retry"] == 1
-    _age(db, host, 1.1, "finished_at")
+    # An hour, plus this host's fixed share of the retry spread (22.3).
+    hours = av_auto_deploy.retry_delay(1, host.id).total_seconds() / 3600
+    _age(db, host, hours + 0.1, "finished_at")
     with patch.object(av_auto_deploy, "_audit"):
         assert av_auto_deploy.reconcile(db)["queued"] == 1
 
@@ -250,3 +252,61 @@ def test_an_operator_opt_out_survives_a_new_plan_version(db, queued):
     av_auto_deploy.operator_opt_in(db, host.id)
     db.commit()
     assert av_auto_deploy.reconcile(db)["queued"] == 1
+
+
+# -- Phase 22.3: a fleet-wide push goes out in waves -----------------------------
+
+
+def test_a_plan_version_bump_goes_out_in_waves(db, queued, monkeypatch):
+    """Every host became due at once and one tick queued them all."""
+    monkeypatch.setattr(av_auto_deploy, "MAX_PUSHES_PER_PASS", 3)
+    for _ in range(7):
+        _host(db)
+    with patch.object(av_auto_deploy, "_audit"):
+        first = av_auto_deploy.reconcile(db)
+        db.commit()
+        second = av_auto_deploy.reconcile(db)
+        db.commit()
+        third = av_auto_deploy.reconcile(db)
+        db.commit()
+    assert (first["queued"], first["next_wave"]) == (3, 4)
+    assert (second["queued"], second["next_wave"]) == (3, 1)
+    assert third["queued"] == 1 and "next_wave" not in third
+
+
+def test_hosts_that_failed_together_do_not_retry_together():
+    delays = {
+        av_auto_deploy.retry_delay(2, uuid.uuid4()).total_seconds() for _ in range(50)
+    }
+    assert len(delays) > 45  # spread
+    assert all(2 * 3600 <= d <= 2 * 3600 * 1.25 for d in delays)
+    host_id = uuid.uuid4()  # fixed per host: due time does not move tick to tick
+    assert av_auto_deploy.retry_delay(2, host_id) == av_auto_deploy.retry_delay(
+        2, host_id
+    )
+
+
+def test_a_wave_is_audited_in_one_commit(db):
+    for _ in range(4):
+        _host(db)
+    commits = []
+    real = av_auto_deploy.sessionmaker
+
+    def counting_sessionmaker(*args, **kwargs):
+        factory = real(*args, **kwargs)
+
+        def make():
+            session = factory()
+            original = session.commit
+            session.commit = lambda: (commits.append(1), original())[1]
+            return session
+
+        return make
+
+    with patch.object(
+        av_auto_deploy, "sessionmaker", counting_sessionmaker
+    ), patch.object(
+        av_auto_deploy.persistence_db, "get_engine", return_value=db.get_bind()
+    ):
+        assert av_auto_deploy.reconcile(db)["queued"] == 4
+    assert len(commits) == 1

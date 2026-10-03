@@ -753,3 +753,16 @@ def _generous_drain_budgets(monkeypatch):
     # The oldest-waiting-hosts window is cached per process; start empty.
     inbound_processor.forget_host_window()
     monkeypatch.setattr(outbound_processor, "OUTBOUND_BUDGET_SECONDS", 30.0)
+
+
+@pytest.fixture(autouse=True)
+def _fresh_geo_backoff():
+    """The ipapi pause and the per-address miss cache are per process
+    (Phase 22.3); one test's misses must not answer another's lookups."""
+    from backend.services import (  # pylint: disable=import-outside-toplevel
+        geolocation_service,
+    )
+
+    geolocation_service.reset_lookup_backoff()
+    yield
+    geolocation_service.reset_lookup_backoff()

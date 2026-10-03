@@ -25,8 +25,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from backend.services import package_catalog_refresh as pcr
 from backend.services.package_catalog_refresh import (
     DEFAULT_INTERVAL_SECONDS,
+    SPREAD_HOURS,
     STALE_AFTER_HOURS,
     _needs_refresh,
     request_refresh_for_stale_hosts,
@@ -64,7 +66,9 @@ def test_fresh_host_is_left_alone():
 
 
 def test_stale_host_is_asked():
-    host = _Host("stale.x", "abc", NOW - timedelta(hours=STALE_AFTER_HOURS + 1))
+    host = _Host(
+        "stale.x", "abc", NOW - timedelta(hours=STALE_AFTER_HOURS + SPREAD_HOURS + 1)
+    )
     assert _needs_refresh(host, NOW) is True
 
 
@@ -74,9 +78,32 @@ def test_naive_timestamps_are_treated_as_utc():
     assert _needs_refresh(host, NOW) is False
 
 
-def test_staleness_window_is_under_the_interval():
-    """Otherwise a pass running minutes early skips a host for a whole day."""
-    assert STALE_AFTER_HOURS * 3600 < DEFAULT_INTERVAL_SECONDS
+def test_every_host_is_still_asked_about_once_a_day():
+    """Passes are hourly (Phase 22.3); a host is asked within one pass of its
+    own threshold, which is never more than a day."""
+    assert DEFAULT_INTERVAL_SECONDS <= 3600
+    assert (
+        STALE_AFTER_HOURS + SPREAD_HOURS
+    ) * 3600 + DEFAULT_INTERVAL_SECONDS <= 25 * 3600
+
+
+def test_hosts_fall_due_spread_over_the_window_not_together():
+    """One daily pass asked every host at the same moment; each host now has
+    its own threshold, fixed by its id, between 20 and 24 hours."""
+    reported = NOW - timedelta(hours=STALE_AFTER_HOURS + SPREAD_HOURS / 2)
+    hosts = [_Host(f"h{i}.x", "abc", reported) for i in range(400)]
+    due = sum(_needs_refresh(h, NOW) for h in hosts)
+    assert 120 < due < 280  # about half are past their own threshold
+    assert all(_needs_refresh(h, NOW) == _needs_refresh(h, NOW) for h in hosts[:20])
+
+
+def test_a_fleet_that_enrolled_together_is_asked_over_several_passes(
+    queued, monkeypatch
+):
+    monkeypatch.setattr(pcr, "MAX_ASKS_PER_PASS", 10)
+    hosts = [_Host(f"new{i}.x") for i in range(25)]  # no catalog yet: all due
+    asked = request_refresh_for_stale_hosts(_session_with(hosts), MagicMock(), NOW)
+    assert asked == 10
 
 
 # --------------------------------------------------------------------------
