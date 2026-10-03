@@ -98,15 +98,35 @@ def _proc_rss_mb(pid: int) -> Optional[float]:
     return sum(r for r in readings if r is not None)
 
 
+def _engine_for(db_url: str):
+    url = db_url.replace("postgresql://", "postgresql+psycopg://", 1)
+    return create_engine(url, pool_size=1, max_overflow=0, pool_pre_ping=True)
+
+
+def _add_db_counts(conn, out: dict) -> None:
+    """One database's queue and host counts, summed into ``out``."""
+    for direction, status, count in conn.execute(QUEUE_SQL):
+        key = f"{direction}.{status}"
+        out["queue"][key] = out["queue"].get(key, 0) + count
+    oldest = conn.execute(OLDEST_SQL).scalar()
+    if oldest is not None:
+        out["oldest_inbound_pending_s"] = max(
+            round(float(oldest), 1), out["oldest_inbound_pending_s"] or 0.0
+        )
+    for approval, active, count in conn.execute(HOSTS_SQL):
+        key = f"{approval}.{'up' if active else 'down'}"
+        out["hosts"][key] = out["hosts"].get(key, 0) + count
+
+
 class Observer:
     """Samples the server every ``interval`` seconds into ``samples``."""
 
-    def __init__(self, base_url: str, db_url: str, pid_getter, interval: float = 5.0):
+    def __init__(self, base_url: str, db_url: str, pid_getter, interval: float = 5.0, tenant_db_urls=(),):  # fmt: skip  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self.base = base_url.rstrip("/")
-        url = db_url.replace("postgresql://", "postgresql+psycopg://", 1)
-        self.engine = create_engine(
-            url, pool_size=1, max_overflow=0, pool_pre_ping=True
-        )
+        self.engine = _engine_for(db_url)
+        # Multi-tenant stacks: a tenant's hosts and queue live in its own
+        # database; queue and host counts are summed across all of them.
+        self.tenant_engines = [_engine_for(u) for u in tenant_db_urls]
         self.pid_getter = pid_getter
         self.interval = interval
         self.samples: List[dict] = []
@@ -123,16 +143,10 @@ class Observer:
             "pg_connections": None,
         }
         try:
+            for engine in [self.engine, *self.tenant_engines]:
+                with engine.connect() as conn:
+                    _add_db_counts(conn, out)
             with self.engine.connect() as conn:
-                for direction, status, count in conn.execute(QUEUE_SQL):
-                    out["queue"][f"{direction}.{status}"] = count
-                oldest = conn.execute(OLDEST_SQL).scalar()
-                out["oldest_inbound_pending_s"] = (
-                    round(float(oldest), 1) if oldest is not None else None
-                )
-                for approval, active, count in conn.execute(HOSTS_SQL):
-                    key = f"{approval}.{'up' if active else 'down'}"
-                    out["hosts"][key] = count
                 out["pg_connections"] = conn.execute(PG_CONN_SQL).scalar()
         except Exception as exc:  # pylint: disable=broad-exception-caught
             out["db_error"] = type(exc).__name__
@@ -189,6 +203,8 @@ class Observer:
             await asyncio.gather(self._task, return_exceptions=True)
         self.top_statements = self._statements("top")
         self.engine.dispose()
+        for engine in self.tenant_engines:
+            engine.dispose()
 
     def _statements(self, action: str) -> list:
         """pg_stat_statements: zero it at the start, report the costliest

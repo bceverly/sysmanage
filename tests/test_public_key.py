@@ -123,12 +123,15 @@ class TestSaveCachedKey:
         """Test saves key to file and memory."""
         from backend.licensing.public_key import _cache, _save_cached_key
 
-        mock_cache_dir.mkdir = MagicMock()
+        mock_cache_file.parent.mkdir = MagicMock()
         mock_cache_file.write_text = MagicMock()
 
         _save_cached_key("new-key-pem")
 
-        mock_cache_dir.mkdir.assert_called_once_with(parents=True, exist_ok=True)
+        # The cache file's own directory (license.public_key_path, 22.4).
+        mock_cache_file.parent.mkdir.assert_called_once_with(
+            parents=True, exist_ok=True
+        )
         mock_cache_file.write_text.assert_called_once_with("new-key-pem")
         assert _cache["public_key"] == "new-key-pem"
 
@@ -139,7 +142,7 @@ class TestSaveCachedKey:
         """Test keeps in memory even when file write fails."""
         from backend.licensing.public_key import _cache, _save_cached_key
 
-        mock_cache_dir.mkdir.side_effect = Exception("Permission denied")
+        mock_cache_file.parent.mkdir.side_effect = Exception("Permission denied")
 
         _save_cached_key("error-key-pem")
 
@@ -251,7 +254,8 @@ class TestGetPublicKeyPem:
 
         mock_fetch.return_value = "server-key-pem"
 
-        result = await get_public_key_pem()
+        with patch("backend.licensing.public_key._load_cached_key", return_value=None):
+            result = await get_public_key_pem()
 
         assert result == "server-key-pem"
 

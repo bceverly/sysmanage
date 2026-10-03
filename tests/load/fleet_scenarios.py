@@ -49,6 +49,19 @@ APPROVE_SQL = text(
 )
 
 
+def _tenant_db_urls(state) -> list:
+    return [t["db_url"] for t in state.get("tenants") or []]
+
+
+def _tokens(state) -> list:
+    return [t["token"] for t in state.get("tenants") or []]
+
+
+def _approve_all(state) -> int:
+    """Approve the fleet in the main database and every tenant database."""
+    return sum(_approve(url) for url in [state["db_url"], *_tenant_db_urls(state)])
+
+
 def _approve(db_url: str) -> int:
     engine = create_engine(db_url.replace("postgresql://", "postgresql+psycopg://", 1))
     try:
@@ -228,18 +241,20 @@ async def run_fleet(args) -> dict:
         jitter=args.jitter,
         identity_auth=getattr(args, "identity_auth", False),
         report_window=getattr(args, "report_window", False),
+        enrollment_tokens=_tokens(state),
     )
     print(
         f"enrolling {args.agents} agents from {fleet.source_ips} source address(es) ..."
     )
     t0 = time.monotonic()
     await fleet.register_all()
-    approved = await asyncio.to_thread(_approve, state["db_url"])
+    approved = await asyncio.to_thread(_approve_all, state)
     print(f"  registered {fleet.stats.counts['register_ok']}, approved {approved} "
           f"in {time.monotonic() - t0:.0f}s")  # fmt: skip
 
     observer = Observer(base, state["db_url"], lambda: stack.load_state().get("server_pid"),
-                        interval=args.sample_seconds)  # fmt: skip
+                        interval=args.sample_seconds,
+                        tenant_db_urls=_tenant_db_urls(state))  # fmt: skip
     started = time.monotonic()
     observer.start()
     ticker = asyncio.create_task(_timeline(fleet, started, args.sample_seconds))
@@ -349,7 +364,8 @@ async def run_remote_fleet(args) -> dict:
          f"--base http://{args.server_address}:{state['port']}",
          f"--agents {args.agents}", f"--run-seconds {run_seconds}",
          f"--time-scale {args.time_scale}", f"--packages {args.packages}",
-         f"--sample-seconds {args.sample_seconds}", *flags]
+         f"--sample-seconds {args.sample_seconds}", *flags,
+         *([f"--enrollment-tokens {','.join(_tokens(state))}"] if _tokens(state) else [])]
     )  # fmt: skip
     # Closed in the finally below; the subprocess writes to it throughout.
     log = open(  # pylint: disable=consider-using-with
@@ -362,11 +378,12 @@ async def run_remote_fleet(args) -> dict:
     )  # fmt: skip
     print(f"enrolling {args.agents} agents on {args.remote_fleet} ...", flush=True)
     registered = await _expect(proc.stdout, "REGISTERED ")
-    approved = await asyncio.to_thread(_approve, state["db_url"])
+    approved = await asyncio.to_thread(_approve_all, state)
     print(f"  registered {registered}, approved {approved}", flush=True)
     observer = Observer(f"http://127.0.0.1:{state['port']}", state["db_url"],
                         lambda: stack.load_state().get("server_pid"),
-                        interval=args.sample_seconds)  # fmt: skip
+                        interval=args.sample_seconds,
+                        tenant_db_urls=_tenant_db_urls(state))  # fmt: skip
     proc.stdin.write(b"GO\n")
     await proc.stdin.drain()
     started = time.monotonic()

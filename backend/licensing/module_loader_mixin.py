@@ -15,7 +15,6 @@ runtime via ``self`` exactly as before.
 """
 
 import asyncio
-import os
 from typing import Any, Dict, List
 
 import aiohttp
@@ -24,6 +23,9 @@ from backend.config.config import get_config
 from backend.utils.verbosity_logger import get_logger
 
 logger = get_logger("backend.licensing.module_loader")
+
+# At most this many engine downloads at once (Phase 22.4).
+MAX_PARALLEL_DOWNLOADS = 3
 
 # Version check timeout in seconds
 VERSION_CHECK_TIMEOUT = 30
@@ -141,6 +143,9 @@ class ModuleLoaderUpdatesMixin:
             List of module codes that have updates available
         """
         server_data = await self.query_server_versions()
+        # Kept for update_modules' plugin pass: one versions call per cycle
+        # (Phase 22.4; it was two, from every customer server).
+        self._cycle_server_versions = server_data
         if not server_data:
             return []
 
@@ -218,22 +223,28 @@ class ModuleLoaderUpdatesMixin:
         if not updates_needed:
             logger.info("All modules are up to date")
 
-        # Phase 1: Unload and remove cached modules (fast, synchronous)
-        was_loaded_map = {}
-        for module_code in updates_needed:
-            was_loaded_map[module_code] = self.unload_module(module_code)
-            self._remove_cached_module(module_code)
+        # Stage, verify, then swap -- never delete first (Phase 22.4).  This
+        # used to unload each engine and delete its cached file BEFORE the
+        # download, and its "restore" then looked up the path it had just
+        # deleted: an overloaded license server after a publish left
+        # customers without engines until the next cycle (up to 6 h).  Now
+        # the working engine stays loaded and cached throughout:
+        # ``_download_and_cache_module`` extracts into a staging dir, verifies
+        # the signature, swaps it in, records it, and only then replaces the
+        # loaded module.  A failed download costs nothing.
+        # Bounded: every customer server fetching every engine at once is the
+        # license server's herd.
+        gate = asyncio.Semaphore(MAX_PARALLEL_DOWNLOADS)
 
-        # Phase 2: Download all modules in parallel
         async def _download_one(mc: str):
-            return mc, await self._download_and_cache_module(mc)
+            async with gate:
+                return mc, await self._download_and_cache_module(mc)
 
         download_results = await asyncio.gather(
             *[_download_one(mc) for mc in updates_needed],
             return_exceptions=True,
         )
 
-        # Phase 3: Process results
         results = {}
         for item in download_results:
             if isinstance(item, Exception):
@@ -241,21 +252,19 @@ class ModuleLoaderUpdatesMixin:
                 continue
             module_code, success = item
             results[module_code] = success
-
             if success:
                 logger.info("Module %s updated successfully", module_code)
             else:
-                logger.error("Failed to update module %s", module_code)
-                cached_path = self._get_cached_module_path(module_code)
-                if (
-                    was_loaded_map.get(module_code)
-                    and cached_path
-                    and os.path.exists(cached_path)
-                ):
-                    self._load_module_from_path(module_code, cached_path)
+                logger.error(
+                    "Failed to update module %s; the installed version stays in use",
+                    module_code,
+                )
 
-        # Also update plugin bundles
-        server_versions = await self.query_server_versions()
+        # Also update plugin bundles -- from the versions this cycle already got
+        server_versions = getattr(self, "_cycle_server_versions", None)
+        if server_versions is None:
+            server_versions = await self.query_server_versions()
+        self._cycle_server_versions = None
         plugin_results = await self._plugin_loader.update_plugins(server_versions)
         results.update({f"{k}_plugin": v for k, v in plugin_results.items()})
 

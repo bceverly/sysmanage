@@ -15,6 +15,7 @@ Handles:
 """
 
 import asyncio
+import random
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -30,7 +31,7 @@ from backend.licensing.features import (
     ModuleCode,
 )
 from backend.licensing.module_loader import module_loader
-from backend.licensing.public_key import get_public_key_pem
+from backend.licensing.public_key import fetch_public_key, get_public_key_pem
 from backend.licensing.validator import (
     LicensePayload,
     ValidationResult,
@@ -64,6 +65,8 @@ class LicenseService:
         self._license_key_hash: Optional[str] = None
         self._phone_home_task: Optional[asyncio.Task] = None
         self._module_update_task: Optional[asyncio.Task] = None
+        # The license server's last ``next_check_after`` (22.4), if any.
+        self._next_check_after: Optional[float] = None
         self._initialized = False
 
     @property
@@ -112,7 +115,26 @@ class LicenseService:
             "module_update_interval_hours", DEFAULT_MODULE_UPDATE_INTERVAL
         )
 
-    async def initialize(self) -> None:
+    @staticmethod
+    async def _validate_with_key(license_key: str):
+        """Validate against the cached public key; if that fails, fetch a
+        fresh key (it may have been rotated) and try once more.  None when no
+        key is available at all."""
+        public_key_pem = await get_public_key_pem()
+        if not public_key_pem:
+            return None
+        result = validate_license(license_key, public_key_pem)
+        if result.valid:
+            return result
+        fresh = await fetch_public_key()
+        if fresh and fresh != public_key_pem:
+            logger.info(
+                "License did not verify with the cached key; retrying with a fresh one"
+            )
+            return validate_license(license_key, fresh)
+        return result
+
+    async def initialize(self, update_now: bool = True) -> None:
         """
         Initialize the license service.
 
@@ -134,17 +156,13 @@ class LicenseService:
             self._initialized = True
             return
 
-        # Fetch public key from license server
-        logger.info("Fetching public key from license server")
-        public_key_pem = await get_public_key_pem()
-        if not public_key_pem:
+        # Validate the license locally (cached key first, Phase 22.4)
+        result = await self._validate_with_key(license_key)
+        if result is None:
             logger.warning("Failed to fetch public key - cannot validate license")
             self._log_validation("local", "failure", "No public key available")
             self._initialized = True
             return
-
-        # Validate the license locally
-        result = validate_license(license_key, public_key_pem)
         if not result.valid:
             logger.warning("License validation failed: %s", result.error)
             self._log_validation("local", "failure", result.error)
@@ -173,8 +191,12 @@ class LicenseService:
             result.payload.expires_at.isoformat(),
         )
 
-        # Check for module updates on startup
-        await module_loader.check_and_update_on_startup()
+        # Module updates.  Operator tooling (``sysmanage_migrate``) checks now
+        # and reads the failures; the server does it in the background
+        # (Phase 22.4): a fleet of customer servers restarted together each
+        # blocked its startup on the license server, all at the same moment.
+        if update_now:
+            await module_loader.check_and_update_on_startup()
 
         # Start phone-home background task
         if self._get_phone_home_url():
@@ -182,7 +204,9 @@ class LicenseService:
 
         # Start module update check background task
         if self._get_phone_home_url():
-            self._module_update_task = asyncio.create_task(self._module_update_loop())
+            self._module_update_task = asyncio.create_task(
+                self._module_update_loop(check_soon=not update_now)
+            )
 
         self._initialized = True
 
@@ -291,28 +315,37 @@ class LicenseService:
                 session.rollback()
 
     async def _phone_home_loop(self) -> None:
-        """Background task for periodic phone-home validation."""
-        interval_hours = self._get_phone_home_interval()
-        interval_seconds = interval_hours * 3600
+        """Background task for periodic phone-home validation.
 
-        # Initial delay before first phone-home (5 minutes)
-        await asyncio.sleep(300)
+        Phase 22.4: a fixed 5-minute first check then a fixed interval kept
+        customers that restarted together (a release, a cloud region's
+        maintenance) calling the license server in the same minute forever.
+        The first check waits a random 5-30 minutes, every interval varies
+        +/-25%, and a ``next_check_after`` (seconds) in the server's answer
+        is honored -- the license server can spread its own load."""
+        interval_seconds = self._get_phone_home_interval() * 3600
+        await asyncio.sleep(_jittered_between(300, 1800))
 
         while True:
+            self._next_check_after = None
             try:
                 await self._phone_home()
             except Exception as e:
                 logger.exception("Phone-home error: %s", e)
 
-            await asyncio.sleep(interval_seconds)
+            await asyncio.sleep(self._next_check_after or _jittered(interval_seconds))
 
-    async def _module_update_loop(self) -> None:
-        """Background task for periodic module update checks."""
-        interval_hours = self._get_module_update_interval()
-        interval_seconds = interval_hours * 3600
+    async def _module_update_loop(self, check_soon: bool = False) -> None:
+        """Background task for periodic module update checks.
 
-        # Initial delay before first check (30 minutes, since startup already checked)
-        await asyncio.sleep(1800)
+        ``check_soon``: the server skipped the startup check (it runs in the
+        background, Phase 22.4); do it within the first 1-5 minutes -- after
+        startup has loaded the cached engines -- instead of 30."""
+        interval_seconds = self._get_module_update_interval() * 3600
+        if check_soon:
+            await asyncio.sleep(_jittered_between(60, 300))
+        else:
+            await asyncio.sleep(_jittered_between(1800, 3600))
 
         while True:
             try:
@@ -321,7 +354,7 @@ class LicenseService:
             except Exception as e:
                 logger.exception("Module update check error: %s", e)
 
-            await asyncio.sleep(interval_seconds)
+            await asyncio.sleep(_jittered(interval_seconds))
 
     async def _phone_home(self) -> bool:
         """
@@ -352,6 +385,7 @@ class LicenseService:
             ):
                 if response.status == 200:
                     data = await response.json()
+                    self._next_check_after = _server_hint(data.get("next_check_after"))
                     if data.get("valid"):
                         self._update_phone_home_timestamp()
                         self._log_validation("phone_home", "success")
@@ -589,14 +623,11 @@ class LicenseService:
         Returns:
             ValidationResult with success/failure details
         """
-        # Fetch public key from license server
-        public_key_pem = await get_public_key_pem()
-        if not public_key_pem:
+        result = await self._validate_with_key(license_key)
+        if result is None:
             return ValidationResult(
                 valid=False, error="Failed to fetch public key from license server"
             )
-
-        result = validate_license(license_key, public_key_pem)
         if not result.valid:
             self._log_validation("install", "failure", result.error)
             return result
@@ -629,3 +660,27 @@ class LicenseService:
 
 # Global license service instance
 license_service = LicenseService()
+
+
+# Phase 22.4: license-server calls spread across customers.
+_SPREAD = 0.25
+_MIN_HINT_SECONDS = 300
+_MAX_HINT_SECONDS = 7 * 86400
+
+
+def _jittered(seconds: float) -> float:
+    """``seconds`` varied by +/-25%."""
+    return seconds * random.uniform(1 - _SPREAD, 1 + _SPREAD)  # nosec B311
+
+
+def _jittered_between(low: float, high: float) -> float:
+    return random.uniform(low, high)  # nosec B311
+
+
+def _server_hint(value) -> Optional[float]:
+    """The license server's ``next_check_after`` (seconds), bounded, or None."""
+    try:
+        seconds = float(value)
+    except (TypeError, ValueError):
+        return None
+    return min(max(seconds, _MIN_HINT_SECONDS), _MAX_HINT_SECONDS)

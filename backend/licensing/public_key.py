@@ -32,6 +32,15 @@ CACHE_FILE = CACHE_DIR / "public_key.pem"
 _cache: dict = {"public_key": None}
 
 
+def _cache_file() -> Path:
+    """``license.public_key_path`` when set, else ``CACHE_FILE``.  With the
+    cache read first (Phase 22.4), where it lives matters: a second server on
+    one machine (the load-test stack, a self-signed test license) must not
+    share -- or overwrite -- the installed server's key."""
+    configured = (get_config().get("license") or {}).get("public_key_path")
+    return Path(configured) if configured else CACHE_FILE
+
+
 def _get_license_server_url() -> str:
     """Get the license server URL from config.
 
@@ -48,10 +57,11 @@ def _load_cached_key() -> Optional[str]:
     if _cache["public_key"]:
         return _cache["public_key"]
 
-    if CACHE_FILE.exists():
+    cache_file = _cache_file()
+    if cache_file.exists():
         try:
-            _cache["public_key"] = CACHE_FILE.read_text()
-            logger.debug("Loaded public key from cache: %s", CACHE_FILE)
+            _cache["public_key"] = cache_file.read_text()
+            logger.debug("Loaded public key from cache: %s", cache_file)
             return _cache["public_key"]
         except Exception as e:
             logger.warning("Failed to read cached public key: %s", e)
@@ -61,11 +71,12 @@ def _load_cached_key() -> Optional[str]:
 
 def _save_cached_key(key_pem: str) -> None:
     """Save public key to file cache."""
+    cache_file = _cache_file()
     try:
-        CACHE_DIR.mkdir(parents=True, exist_ok=True)
-        CACHE_FILE.write_text(key_pem)
+        cache_file.parent.mkdir(parents=True, exist_ok=True)
+        cache_file.write_text(key_pem)
         _cache["public_key"] = key_pem
-        logger.info("Public key cached to: %s", CACHE_FILE)
+        logger.info("Public key cached to: %s", cache_file)
     except Exception as e:
         logger.warning("Failed to cache public key: %s", e)
         # Still keep in memory
@@ -113,21 +124,23 @@ async def get_public_key_pem() -> Optional[str]:
     """
     Get the PEM-encoded public key for license verification.
 
-    First tries to fetch from the license server, then falls back to cache.
+    The cached key first, the license server only when there is none
+    (Phase 22.4): every customer server fetched it on every start, so a
+    fleet restarting together all called the license server at boot.  A key
+    rotation is still picked up -- a license that does not verify against
+    the cached key makes the caller fetch a fresh one
+    (``license_service._validate_with_key``).
 
     Returns:
         The public key in PEM format, or None if unavailable
     """
-    # Try to fetch fresh key from server
+    cached = _load_cached_key()
+    if cached:
+        return cached
+
     key = await fetch_public_key()
     if key:
         return key
-
-    # Fall back to cached key
-    cached = _load_cached_key()
-    if cached:
-        logger.info("Using cached public key (server unavailable)")
-        return cached
 
     logger.error("No public key available - cannot validate licenses")
     return None

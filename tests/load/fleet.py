@@ -147,6 +147,9 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
     async def register(self) -> bool:
         """POST /api/host/register, retried like the agent: fixed 30 s, 10 tries."""
         body = payloads.registration_body(self)
+        tokens = self.fleet.enrollment_tokens
+        if tokens:  # multi-tenant stack: agents spread round-robin over tenants
+            body["enrollment_token"] = tokens[self.index % len(tokens)]
         stats = self.fleet.stats
         for attempt in range(REGISTRATION_TRIES):
             if self.fleet.stopping:
@@ -480,6 +483,7 @@ class Fleet:
         identity_auth: bool = False,
         bind_source: bool = True,
         report_window: bool = False,
+        enrollment_tokens=(),
     ):
         self.base = base_url.rstrip("/")
         self.ws_base = self.base.replace("http" + "://", "ws" + "://", 1).replace(
@@ -495,6 +499,7 @@ class Fleet:
         # the machine's address -- the large-NAT case.
         self.bind_source = bind_source
         self.report_window = report_window
+        self.enrollment_tokens = list(enrollment_tokens)
         self.payloads = payloads.Payloads(packages=packages)
         self.stats = FleetStats()
         self.stopping = False

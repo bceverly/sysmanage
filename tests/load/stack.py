@@ -150,11 +150,11 @@ def _config(port, db, bind_host="127.0.0.1"):
     }  # fmt: skip
 
 
-def _server_env(config_path, code=REPO):
+def _server_env(config_path, code=REPO, multitenancy=False):
     env = dict(os.environ)
     env.update(
         SYSMANAGE_CONFIG_PATH=str(config_path),
-        SYSMANAGE_MULTITENANCY="false",
+        SYSMANAGE_MULTITENANCY="true" if multitenancy else "false",
         SYSMANAGE_DISABLE_EMAIL="true",
         OTEL_ENABLED="false",
         PYTHONPATH=str(code),
@@ -228,7 +228,8 @@ def start_server(state):
     with open(STATE_DIR / "server.log", "ab") as log:
         proc = subprocess.Popen(  # nosec B603 # pylint: disable=consider-using-with
             [sys.executable, "-m", "backend.main"],
-            cwd=_code(state), env=_server_env(state["config"], _code(state)),
+            cwd=_code(state),
+            env=_server_env(state["config"], _code(state), state.get("multitenancy", False)),
             stdin=subprocess.DEVNULL,
             stdout=log, stderr=subprocess.STDOUT, start_new_session=True,
         )  # fmt: skip
@@ -333,8 +334,17 @@ def up(port, db_url, pin=True, bind_host="127.0.0.1"):
 def reset():
     """Stop the server, empty the database, migrate, start again: every
     scenario starts from the same clean state.  Works on the throwaway
-    container and on an external database (CI) alike."""
+    container and on an external database (CI) alike.  A multi-tenant stack
+    is rebuilt from scratch (its tenants have databases and OpenBAO roles
+    of their own)."""
     state = load_state()
+    if state.get("multitenancy"):
+        from tests.load import stack_mt  # pylint: disable=import-outside-toplevel
+
+        stop_server(state)
+        state = stack_mt.up_mt(state["port"], len(state.get("tenants") or []),
+                               state.get("bind_host", "127.0.0.1"))  # fmt: skip
+        return state["server_pid"]
     stop_server(state)
     from sqlalchemy import (
         create_engine,
@@ -360,6 +370,10 @@ def down():
         return
     state = load_state()
     stop_server(state)
+    if state.get("bao_container"):
+        from tests.load import stack_mt  # pylint: disable=import-outside-toplevel
+
+        stack_mt.down_mt()
     if state.get("container"):
         subprocess.run(  # nosec B603 B607 - fixed argv
             ["docker", "rm", "-f", CONTAINER],
@@ -379,8 +393,14 @@ def main():
                         help="use this PostgreSQL instead of a throwaway container")  # fmt: skip
     parser.add_argument("--bind-host", default="127.0.0.1",
                         help="0.0.0.0 when the fleet runs on another machine (--remote-fleet)")  # fmt: skip
+    parser.add_argument("--tenants", type=int, default=0,
+                        help="multi-tenant mode with this many tenants (stack_mt.py)")  # fmt: skip
     args = parser.parse_args()
-    if args.action == "up":
+    if args.action == "up" and args.tenants:
+        from tests.load import stack_mt  # pylint: disable=import-outside-toplevel
+
+        stack_mt.up_mt(args.port, args.tenants, args.bind_host)
+    elif args.action == "up":
         up(args.port, args.db_url, pin=not args.no_pin, bind_host=args.bind_host)
     elif args.action == "repin":
         state = load_state()

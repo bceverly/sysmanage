@@ -141,7 +141,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         logger.info("=== LICENSE SERVICE INITIALIZATION ===")
         logger.info("About to initialize license service")
         try:
-            await license_service.initialize()
+            await license_service.initialize(update_now=False)  # update: background
             if license_service.is_pro_plus_active:
                 logger.info(
                     "Pro+ license active: tier=%s", license_service.license_tier

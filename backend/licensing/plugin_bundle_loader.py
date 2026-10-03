@@ -12,6 +12,7 @@ bundles (IIFE JavaScript files served to the frontend).
 import asyncio
 import hashlib
 import os
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -49,6 +50,9 @@ class PluginBundleLoader:
 
     def __init__(self):
         self._initialized = False
+        self.last_fetch_status: Optional[int] = (
+            None  # the last refused fetch's HTTP status
+        )
 
     def _get_modules_path(self) -> str:
         """Get the path for storing downloaded modules."""
@@ -180,6 +184,7 @@ class PluginBundleLoader:
             ) as response,
         ):
             if response.status != 200:
+                self.last_fetch_status = response.status
                 await self._log_failed_download(url, response)
                 return None
 
@@ -240,6 +245,8 @@ class PluginBundleLoader:
 
         version_str = version or "latest"
         url = f"{download_url}/{module_code}/{version_str}"
+        if _no_bundle_recently(module_code):
+            return False  # the server said it has none, not long ago (22.4)
 
         modules_path = self._get_modules_path()
         Path(modules_path).mkdir(parents=True, exist_ok=True)
@@ -247,8 +254,11 @@ class PluginBundleLoader:
         final_path = os.path.join(modules_path, f"{module_code}-plugin.iife.js")
 
         try:
+            self.last_fetch_status = None
             fetched = await self._fetch_bundle_to_temp(url, license_key, temp_path)
             if fetched is None:
+                if self.last_fetch_status == 404:
+                    _note_no_bundle(module_code)
                 return False
             expected_hash, actual_version = fetched
             # The helper cannot see version_str, so apply the same fallback the
@@ -505,3 +515,19 @@ class PluginBundleLoader:
                 logger.error("Failed to update plugin %s", module_code)
 
         return results
+
+
+# Phase 22.4: an engine with no plugin bundle (the server answers 404) was
+# asked for one again on every load and every update cycle, by every customer
+# server.  Remembered for NO_BUNDLE_RETRY_SECONDS per process.
+NO_BUNDLE_RETRY_SECONDS = 24 * 3600
+_no_bundle_at: Dict[str, float] = {}
+
+
+def _note_no_bundle(module_code: str) -> None:
+    _no_bundle_at[module_code] = time.monotonic()
+
+
+def _no_bundle_recently(module_code: str) -> bool:
+    noted = _no_bundle_at.get(module_code)
+    return noted is not None and time.monotonic() - noted < NO_BUNDLE_RETRY_SECONDS

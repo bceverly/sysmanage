@@ -11752,6 +11752,24 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       with many tenant databases one busy tenant's backlog delays the rest.
       Not yet measured: the harness runs single-tenant -- extend it to many
       tenants first, then decide.
+      *Harness extended 2026-10-03: `stack.py up --tenants N`
+      (`tests/load/stack_mt.py`) -- OpenBAO dev container, a self-signed
+      multitenant_saas license and the multitenancy_engine bundle (offline;
+      key cached in the stack's own dir via the new `license.public_key_path`),
+      provisioner bootstrap, N tenants auto-provisioned (own database +
+      OpenBAO role + tenant migrations) with an enrollment token each; agents
+      enroll round-robin, the observer and approval cover every tenant
+      database. Smoke: 150 agents / 3 tenants, server restart -- 50 hosts per
+      tenant database, every criterion met.*
+      *Measured 2026-10-03 -- it matters: the same 10k server-restart storm
+      across 20 tenants (remote fleet, 20-min run) processed 36-43 msg/s
+      during the reconnect wave (single tenant: ~100-150), oldest waiting
+      1,195 s (512), reconnect 418 s (195), heartbeat p95 5.6 s (1.2), health
+      p95 6.1 s (0.5); backlog 16,876 at the end, draining at 220/s; still 0
+      expired / marked down / 429s / polling. The costliest statement is the
+      host -> tenant lookup: 520,749 calls in one run, uncached (see "Cache
+      host-to-tenant with TTL + invalidation"). Next: that cache, then tenants
+      drained in parallel, then rerun.*
 - [x] **Retry scheduling** -- inbound processing ignores `scheduled_at` and has
       no ordering (a failing message is retried every second; failing rows can
       monopolize the batch); jitter the retry delay; bound the "no
@@ -11904,7 +11922,7 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       in one pass; off the loop that no longer stalls agents, but a large
       estate's pass is one burst of database work. Measure with the
       many-tenant harness (see "Process tenants in parallel") first.
-- [ ] **Advisor at fleet scale** -- loads every host and every (host x rule)
+- [x] **Advisor at fleet scale** -- loads every host and every (host x rule)
       result into memory every 15 min with per-host queries; collections
       uncapped and due in lockstep every 12 h. Cursor pagination, bulk tag and
       evidence loading, per-tick caps, per-host offsets (`advisor_tick.py:139-306`,
@@ -11918,6 +11936,18 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       host evaluated every pass, all results loaded -- cursor pagination, bulk
       evidence, per-tick caps. Server-internal load rather than a fleet herd;
       measure at 50k first.*
+      *Measured and done 2026-10-03: one real advisor pass (real
+      `advisor_engine`, curated rules) over 2,000 seeded hosts on PostgreSQL --
+      15.5 s and 34,012 statements; 59% were one proposal lookup per
+      (host x rule). Now: every proposal loaded once per pass
+      (`advisor_proposals.latest_by_key`), and evidence read per DOMAIN for
+      chunks of 250 hosts (`advisor_evidence_bulk.Chunk`; byte-for-byte the
+      per-host readers' evidence, proven on a seeded database) -- 3.0 s and
+      77 statements for the same 2,000 hosts (~80 s / ~2,000 statements at
+      50k, was ~6.5 min / ~850,000). Packages are kept per host for the pass
+      only when a fleet rule compares them (a whole fleet's inventories held
+      in memory otherwise). Fact tables (query-pack results) are still read
+      per host -- they cost only when fact rules are enabled.*
 - [x] **Fleet pushes in waves** -- antivirus auto-deploy redeploys every host in
       one tick on a `PLAN_VERSION` bump with un-jittered retries and one audit
       commit per host (`av_auto_deploy.py:150-367`); scheduled config
@@ -11939,7 +11969,7 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       directly as before. Package catalog: the pass runs hourly instead of
       daily, each host's threshold is 20 h + its share of 4 h, at most 500
       asks per database per pass -- still about once a day per host.*
-- [ ] **Alerting set-based** -- every rule x every host every 60 s with
+- [x] **Alerting set-based** -- every rule x every host every 60 s with
       separate queries per pair, serially per tenant: ~1M pairs and millions of
       queries a minute at 50k hosts. Bulk prefetch, set-based evaluation,
       batches, staggered tenants (`alerting_router.pxi:802-806`,
@@ -11951,6 +11981,13 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       locally against a scratch build (37 tests); not yet published. STILL
       OPEN: the nine condition evaluators still query per host -- each needs a
       set-based form (one query per rule).*
+      *Evaluators set-based 2026-10-03: a per-pass `PassRows` cache reads each
+      evaluator's table ONCE for every host (updates, disks, latest CVE scan,
+      latest custom-metric sample, processes, drift, malware; the newest row
+      per host via a portable max-per-host subquery); the metric lookup is
+      once per rule. Proven equivalent to the per-host path, host by host, on
+      a real database (`test_alerting_pass_rows.py`); scratch build, 70 engine
+      + 74 backend tests. Needs a rebuild + publish of `alerting_engine`.*
 - [x] **Tenant backup backoff** -- a failing tenant backup retries every tick
       (as often as 30 s); first-run due times all coincide. Per-tenant
       jittered backoff; spread first runs across the RPO
@@ -11962,7 +11999,7 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       the tick summary counts tenants backing off. Built and tested locally
       against a scratch build; not yet published (engine version bump via
       `make lint-modules-version-fix`).*
-- [ ] Optional random splay on air-gap schedules and malware/ClamAV scan
+- [x] Optional random splay on air-gap schedules and malware/ClamAV scan
       schedules; GeoLite download only when stale; back off ipapi lookups
       per host and stop after a 429 (`airgap_schedule_tick.py:56-130`,
       `geolocation_service.py:276-528`, `message_handlers_core.py:586-605`).
@@ -11970,26 +12007,51 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       than the refresh interval (every server start downloaded ~75 MB); an
       ipapi.co 429 pauses every fallback lookup for Retry-After (else an hour);
       an address that resolved to nothing is not looked up again for 6 h (each
-      connect of a host behind an unknown NAT asked again). STILL OPEN, Bryan's
-      call: the splay on air-gap collection and malware scan schedules shifts
-      an operator's visible run time.*
+      connect of a host behind an unknown NAT asked again). Splay approved by
+      Bryan and done the same day: each host's scheduled antivirus scan starts
+      up to 60 min after the configured time by its fixed offset, never past
+      23:59 so a weekly or monthly scan keeps its day, and the plan reports
+      the real time and `splay_minutes` (helpers moved to
+      `av_scan_schedule.py`); each air-gap collection schedule runs up to
+      30 min after its cron time, keyed on its own id (random per install).
+      Docs updated (14 languages).*
 
 #### 22.4 Distribution and licensing (Pro+ / Enterprise)
 
-- [ ] **Module updates stage, verify, then swap** -- `update_modules()` unloads
+- [x] **Module updates stage, verify, then swap** -- `update_modules()` unloads
       and deletes the working engine BEFORE downloading the new one, and its
       "restore" looks up the path it just deleted: an overloaded license server
       after a publish leaves customers without engines for up to 6 h
       (`module_loader_mixin.py:214-251`). Download into staging, swap on
       success, never delete first; bounded concurrency; jittered retry.
-- [ ] **License server is not a CDN** -- every download (signature check, DB
+      *Done 2026-10-03: `update_modules` no longer unloads or deletes
+      anything up front -- the download stages, verifies and swaps (as the
+      extractor already did) and only then replaces the loaded module; a
+      failed download leaves the installed engine loaded and cached. At most
+      3 downloads at once (`MAX_PARALLEL_DOWNLOADS`). The retry is the next
+      update cycle, now jittered (below).*
+- [x] **License server is not a CDN** -- every download (signature check, DB
       write, streamed by one uvicorn worker) and every versions call (~70
       queries, no caching, called twice per cycle) hits one Python process;
       a same-version rebuild re-downloads fleet-wide. Signed short-lived
       redirects to R2/CDN, cached + ETag'd versions, nginx `limit_req` per
       license, more workers, one versions call per cycle
       (`modules.py:389-595`, `systemd/...service:13`, `nginx/...conf:68-77`).
-- [ ] **Phone-home and update checks jittered and server-directed** -- fixed
+      *Done 2026-10-03 (Pro+ license server + OSS client): with
+      `modules.redirect` configured (endpoint, bucket, prefix, access key id,
+      `secret_access_key_env`, ttl) a download is a 307 to a short-lived
+      SigV4-signed R2 URL -- license check and download log still on the
+      license server; stdlib signing, verified against the AWS reference
+      vector (`backend/api/module_delivery.py`). Off until configured. The OSS
+      client follows the redirect by hand (the license key never goes to the
+      storage host; non-HTTPS refused) and reads version + hash off the
+      license server's response. Versions: two queries (was ~70), cached
+      60 s per (platform, arch, python, entitlement), cleared on register /
+      delete / activate / deactivate / scan, ETag + 304. Client: one
+      versions call per cycle (was two). nginx: `limit_req` 30 r/min burst 60
+      per X-License-Key on /api/v1/modules/ (validated with `nginx -t`);
+      systemd: `--workers 4`.*
+- [x] **Phone-home and update checks jittered and server-directed** -- fixed
       300 s/1800 s first delays then fixed 24 h/6 h, so correlated restarts
       align customers forever; startup blocks on license-server calls and
       fetches the public key before trying its cache. Random splay, +/-20-30%
@@ -11997,11 +12059,29 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       background startup update check (`license_service.py:176-324`,
       `public_key.py:115-133`); cache "no plugin bundle" negatively
       (`plugin_bundle_loader.py:381-384`).
+      *Done 2026-10-03: phone-home first check at a random 5-30 min, then
+      the interval +/-25%, and a `next_check_after` (seconds, bounded 5 min
+      to 7 days) in the license server's answer is honored; module update
+      checks the same. The server's startup no longer blocks on the license
+      server -- its update check runs 1-5 min later in the background
+      (`initialize(update_now=False)`); `sysmanage_migrate` still checks up
+      front and reads the failures. The public key: cache first, fetched only
+      when absent or when the license fails to verify against the cached one
+      (rotation). An engine with no plugin bundle (404) is not asked again
+      for 24 h per process.*
 - [ ] **One upstream fetch for vulnerability feeds** -- every customer server
       pulls NVD, Ubuntu, Debian, Red Hat and MSRC itself, with no ETag and no
       jitter (NVD without a key is IP-limited). Publish a digested daily feed
       via CDN with deltas; at minimum ETag/If-Modified-Since and jitter
       (`cve_refresh.pxi:266-337`, `cve_fetchers.pxi:20-249`).
+      *Minimum done 2026-10-03 (Pro+ `vuln_engine`): the Debian tracker (one
+      large file) is fetched conditionally -- unchanged since the last fetch
+      is a 304, nothing downloaded or reprocessed; retry waits are jittered;
+      each refresh's next time is +/-10%; a never-refreshed install's first
+      refresh comes at a random moment within 30 min. NVD was already a
+      7-day incremental window. STILL OPEN: one digested upstream feed
+      published via CDN, so customer servers stop hitting NVD / the distros
+      at all.*
 
 #### 22.5 Federation (Enterprise)
 

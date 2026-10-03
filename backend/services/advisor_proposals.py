@@ -89,6 +89,19 @@ def _latest(db, host_id, source: str, key: str):
     )
 
 
+def latest_by_key(db) -> Dict[tuple, Any]:
+    """Every (host, rule)'s newest proposal in ONE query, for a whole pass.
+
+    Phase 22.3: ``sync`` looked it up once per (host x rule) result -- 59% of
+    an advisor pass's statements (2,000 hosts: 20,000 of 34,000)."""
+    newest: Dict[tuple, Any] = {}
+    for row in db.query(models.AdvisorProposal).order_by(
+        models.AdvisorProposal.created_at.desc()
+    ):
+        newest.setdefault((str(row.host_id), row.rule_source, row.rule_key), row)
+    return newest
+
+
 def _fill(row, fix: Dict[str, Any], fp: str) -> None:
     row.kind = fix.get("kind")
     row.profile_name = fix.get("profile")
@@ -99,9 +112,16 @@ def _fill(row, fix: Dict[str, Any], fp: str) -> None:
     row.fingerprint = fp
 
 
-def sync(db, host_id, entry: Dict[str, Any], result: Dict[str, Any], summary) -> None:
-    """Keep this (host, rule)'s proposal in step with its latest outcome."""
-    latest = _latest(db, host_id, entry["source"], entry["key"])
+def sync(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    db, host_id, entry: Dict[str, Any], result: Dict[str, Any], summary, latest_map=None
+) -> None:
+    """Keep this (host, rule)'s proposal in step with its latest outcome.
+    ``latest_map`` (from ``latest_by_key``) spares the per-result lookup."""
+    key = (str(host_id), entry["source"], entry["key"])
+    if latest_map is not None:
+        latest = latest_map.get(key)
+    else:
+        latest = _latest(db, host_id, entry["source"], entry["key"])
     fix = result.get("fix")
     if result.get("outcome") == models.ADVISOR_OUTCOME_FIRES and fix:
         fp = fingerprint(fix)
@@ -125,6 +145,8 @@ def sync(db, host_id, entry: Dict[str, Any], result: Dict[str, Any], summary) ->
         )
         _fill(row, fix, fp)
         db.add(row)
+        if latest_map is not None:
+            latest_map[key] = row
         summary["proposals_opened"] = summary.get("proposals_opened", 0) + 1
     elif result.get("outcome") in _CLEARED and latest is not None:
         if latest.status == PROPOSED:

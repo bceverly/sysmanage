@@ -151,8 +151,10 @@ class _Env:
 
 
 class TestHostInfoForAvPlanner:
-    def test_only_the_os_fields_and_architecture_are_packed(self):
+    def test_only_the_os_fields_architecture_and_id_are_packed(self):
+        # host_id spreads a scheduled scan's time per host (Phase 22.3).
         assert av._host_info_for_av_planner(_host()) == {
+            "host_id": str(HOST_ID),
             "platform": "Linux",
             "platform_release": "Ubuntu 24.04",
             "platform_version": "24.04",

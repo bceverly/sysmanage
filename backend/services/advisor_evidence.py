@@ -213,8 +213,11 @@ def gather(
     host,
     fact_needs: Dict[str, Set[str]],
     domains: Set[str],
+    bulk=None,
 ) -> Tuple[Dict[str, Any], Dict[str, List[Dict[str, Any]]]]:
-    """``(evidence, tables)`` for one host -- see the module docstring."""
+    """``(evidence, tables)`` for one host -- see the module docstring.
+    ``bulk``: an ``advisor_evidence_bulk.Chunk`` holding this host's domain
+    rows, loaded with its neighbors' (Phase 22.3)."""
     evidence: Dict[str, Any] = {"facts": {}, "domains": {}}
     tables: Dict[str, List[Dict[str, Any]]] = {"sm_host": [_sm_host(host)]}
 
@@ -223,7 +226,10 @@ def gather(
             evidence["domains"][domain] = {"at": host.reboot_required_updated_at}
         elif domain in _DOMAINS:
             reader, view = _DOMAINS[domain]
-            at, rows = reader(db, host)
+            if bulk is not None and domain in bulk.domains:
+                at, rows = bulk.read(domain, host)
+            else:
+                at, rows = reader(db, host)
             evidence["domains"][domain] = {"at": at}
             tables[view] = rows
         # Anything else (metric_history, or a domain this server does not

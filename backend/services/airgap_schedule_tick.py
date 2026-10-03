@@ -41,12 +41,13 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.startup.tick_runner import run_periodic
+from backend.utils.host_spread import host_offset
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +61,21 @@ TICK_INTERVAL_SECONDS = 60
 # spam the logs at full cadence.  Exposed as a constant so tests can
 # patch it.
 ERROR_BACKOFF_SECONDS = 30
+
+
+# Phase 22.3: every air-gapped repository on the default cron ("0 3 * * *")
+# collected at 03:00 sharp, all pulling from the same upstream mirrors at
+# once.  Each schedule runs up to SPLAY_MINUTES later, by a fixed share from
+# its own id (random per install, stable per schedule).
+SPLAY_MINUTES = 30
+
+
+def splayed_next_run(automation, cron: str, key, now):
+    """The schedule's next cron occurrence after ``now``, plus its splay."""
+    base = automation.next_run_from_cron(cron, now)
+    if base is None:
+        return None
+    return base + timedelta(minutes=SPLAY_MINUTES * host_offset(key))
 
 
 def _run_one_tick() -> dict:
@@ -122,8 +138,8 @@ def _run_one_tick() -> dict:
             schedule.last_status = "QUEUED"
             schedule.last_run_id = run.id
             if automation is not None:
-                schedule.next_run = automation.next_run_from_cron(
-                    schedule.cron, datetime.now(timezone.utc)
+                schedule.next_run = splayed_next_run(
+                    automation, schedule.cron, schedule.id, datetime.now(timezone.utc)
                 )
             else:
                 # automation_engine absent -- leave next_run as-is so

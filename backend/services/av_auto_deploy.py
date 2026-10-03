@@ -79,6 +79,8 @@ def _utcnow() -> datetime:
 def host_info_for_planner(host: Any) -> Dict[str, Any]:
     """Pack a Host's OS fields into the dict the AV plan builder expects."""
     return {
+        # Spreads a scheduled scan's time per host (Phase 22.3).
+        "host_id": str(host.id),
         "platform": host.platform,
         "platform_release": host.platform_release,
         "platform_version": host.platform_version,

@@ -33,6 +33,7 @@ from backend.i18n import N_, _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.services import airgap_schedule_tick
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 logger = logging.getLogger(__name__)
@@ -94,11 +95,14 @@ def _validate_cron_or_400(cron: str) -> None:
         ) from exc
 
 
-def _compute_next_run(cron: str) -> Optional[datetime]:
+def _compute_next_run(cron: str, schedule_id) -> Optional[datetime]:
     automation = _get_automation_engine_or_warn()
     if automation is None:
         return None
-    return automation.next_run_from_cron(cron, datetime.now(timezone.utc))
+    # Spread per schedule (Phase 22.3): see airgap_schedule_tick.SPLAY_MINUTES.
+    return airgap_schedule_tick.splayed_next_run(
+        automation, cron, schedule_id, datetime.now(timezone.utc)
+    )
 
 
 class ScheduleCreateRequest(BaseModel):
@@ -170,12 +174,14 @@ async def create_schedule(
             status_code=400,
             detail=_("Invalid target_request: %s") % str(exc),
         ) from exc
+    schedule_id = uuid.uuid4()  # known before the insert: it keys the splay
     schedule = models.AirgapCollectionSchedule(
+        id=schedule_id,
         name=request.name,
         cron=request.cron,
         enabled=request.enabled,
         target_request_json=json.dumps(request.target_request),
-        next_run=_compute_next_run(request.cron),
+        next_run=_compute_next_run(request.cron, schedule_id),
     )
     db.add(schedule)
     db.commit()
@@ -242,7 +248,7 @@ async def update_schedule(
     if request.cron is not None and request.cron != schedule.cron:
         _validate_cron_or_400(request.cron)
         schedule.cron = request.cron
-        schedule.next_run = _compute_next_run(request.cron)
+        schedule.next_run = _compute_next_run(request.cron, schedule.id)
     if request.enabled is not None:
         schedule.enabled = request.enabled
     if request.target_request is not None:
@@ -356,8 +362,8 @@ async def tick(db: Session = Depends(get_db)):
         schedule.last_status = "QUEUED"
         schedule.last_run_id = run.id
         if automation is not None:
-            schedule.next_run = automation.next_run_from_cron(
-                schedule.cron, datetime.now(timezone.utc)
+            schedule.next_run = airgap_schedule_tick.splayed_next_run(
+                automation, schedule.cron, schedule.id, datetime.now(timezone.utc)
             )
         fired.append(
             {

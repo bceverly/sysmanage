@@ -628,3 +628,59 @@ def test_clamav_logs_to_a_facility_syslog_keeps():
         plan = build_deploy_plan({"platform": plat}, antivirus_package="clamav")
         for f in plan["files"][:2]:
             assert "LogFacility LOG_DAEMON" in f["content"], (plat, f["path"])
+
+
+# -- Phase 22.3: scheduled scans spread per host ---------------------------------
+
+
+def _ubuntu(host_id=None):
+    info = {"platform": "Linux", "platform_release": "Ubuntu 24.04",
+            "platform_version": "24.04", "machine_architecture": None}  # fmt: skip
+    if host_id:
+        info["host_id"] = host_id
+    return info
+
+
+def test_hosts_on_one_policy_do_not_all_scan_at_the_same_minute():
+    import uuid  # pylint: disable=import-outside-toplevel
+
+    times = set()
+    for _ in range(40):
+        plan = build_deploy_plan(
+            _ubuntu(str(uuid.uuid4())), "clamav",
+            {"scan_schedule": {"frequency": "daily", "hour": 3, "minute": 0}},
+        )  # fmt: skip
+        sched = plan["scan_schedule"]
+        assert 3 * 60 <= sched["hour"] * 60 + sched["minute"] < 3 * 60 + 60
+        times.add((sched["hour"], sched["minute"]))
+    assert len(times) > 25
+
+
+def test_a_hosts_scan_time_is_stable():
+    opts = {"scan_schedule": {"frequency": "daily", "hour": 3, "minute": 0}}
+    first = build_deploy_plan(_ubuntu("host-a"), "clamav", opts)
+    again = build_deploy_plan(_ubuntu("host-a"), "clamav", opts)
+    assert first["scan_schedule"] == again["scan_schedule"]
+
+
+def test_a_late_scan_never_moves_to_the_next_day():
+    import uuid  # pylint: disable=import-outside-toplevel
+
+    for _ in range(40):
+        plan = build_deploy_plan(
+            _ubuntu(str(uuid.uuid4())), "clamav",
+            {"scan_schedule": {"frequency": "weekly", "hour": 23, "minute": 30,
+                               "day_of_week": 2}},
+        )  # fmt: skip
+        sched = plan["scan_schedule"]
+        assert sched["hour"] == 23 and 30 <= sched["minute"] <= 59
+        assert sched["day_of_week"] == 2
+
+
+def test_without_a_host_id_the_schedule_is_unchanged():
+    plan = build_deploy_plan(
+        _ubuntu(),
+        "clamav",
+        {"scan_schedule": {"frequency": "daily", "hour": 3, "minute": 0}},
+    )
+    assert (plan["scan_schedule"]["hour"], plan["scan_schedule"]["minute"]) == (3, 0)

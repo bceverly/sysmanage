@@ -766,3 +766,16 @@ def _fresh_geo_backoff():
     geolocation_service.reset_lookup_backoff()
     yield
     geolocation_service.reset_lookup_backoff()
+
+
+@pytest.fixture(autouse=True)
+def _fresh_plugin_negative_cache():
+    """A 404 for a plugin bundle is remembered per process (Phase 22.4);
+    one test's 404 must not answer another's download."""
+    from backend.licensing import (  # pylint: disable=import-outside-toplevel
+        plugin_bundle_loader,
+    )
+
+    plugin_bundle_loader._no_bundle_at.clear()  # pylint: disable=protected-access
+    yield
+    plugin_bundle_loader._no_bundle_at.clear()  # pylint: disable=protected-access

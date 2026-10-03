@@ -310,6 +310,49 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
             return None
         return actual_hash
 
+    async def _fetch_module_bytes(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+        self, url, license_key, temp_path, module_code, platform_info
+    ):
+        """Stream the bundle to ``temp_path``; ``(expected hash, version)`` or
+        None.  The license server may answer with a redirect to signed object
+        storage (Phase 22.4): followed by hand, so the license key is never
+        sent on to the storage host, and the hash and version are read off the
+        license server's own response."""
+        timeout = aiohttp.ClientTimeout(total=DOWNLOAD_TIMEOUT)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers={"X-License-Key": license_key},
+                                   timeout=timeout, allow_redirects=False) as response:  # fmt: skip
+                expected_hash = response.headers.get("X-Content-SHA512")
+                version = response.headers.get("X-Module-Version")
+                location = response.headers.get("Location")
+                if response.status in (301, 302, 303, 307, 308) and location:
+                    target = location
+                elif response.status == 200:
+                    target = None
+                    await _stream_to(response, temp_path)
+                else:
+                    self._log_failed_download_response(
+                        module_code, url, response.status, platform_info
+                    )
+                    return None
+            if target is not None:
+                if not target.startswith("https://"):
+                    logger.error(
+                        "Refusing a non-HTTPS module redirect for %s", module_code
+                    )
+                    return None
+                async with session.get(target, timeout=timeout) as stored:
+                    if stored.status != 200:
+                        self._log_failed_download_response(
+                            module_code,
+                            target.split("?")[0],
+                            stored.status,
+                            platform_info,
+                        )
+                        return None
+                    await _stream_to(stored, temp_path)
+        return expected_hash, version
+
     async def _download_and_cache_module(
         self, module_code: str, version: Optional[str] = None
     ) -> bool:
@@ -343,28 +386,13 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
         temp_path = os.path.join(modules_path, f"{module_code}.{os.getpid()}.tmp")
 
         try:
-            async with (
-                aiohttp.ClientSession() as session,
-                session.get(
-                    url,
-                    headers={"X-License-Key": license_key},
-                    timeout=aiohttp.ClientTimeout(total=DOWNLOAD_TIMEOUT),
-                ) as response,
-            ):
-                if response.status != 200:
-                    self._log_failed_download_response(
-                        module_code, url, response.status, platform_info
-                    )
-                    return False
-
-                # Get expected hash from header
-                expected_hash = response.headers.get("X-Content-SHA512")
-                actual_version = response.headers.get("X-Module-Version", version_str)
-
-                # Download to temp file
-                async with aiofiles.open(temp_path, "wb") as f:
-                    async for chunk in response.content.iter_chunked(8192):
-                        await f.write(chunk)
+            fetched = await self._fetch_module_bytes(
+                url, license_key, temp_path, module_code, platform_info
+            )
+            if fetched is None:
+                return False
+            expected_hash, actual_version = fetched
+            actual_version = actual_version or version_str
 
             # Verify hash if provided
             actual_hash = self._verify_downloaded_hash(temp_path, expected_hash)
@@ -859,3 +887,9 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
 
 # Global module loader instance
 module_loader = ModuleLoader()
+
+
+async def _stream_to(response, path: str) -> None:
+    async with aiofiles.open(path, "wb") as f:
+        async for chunk in response.content.iter_chunked(8192):
+            await f.write(chunk)

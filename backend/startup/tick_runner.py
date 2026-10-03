@@ -34,9 +34,7 @@ SPREAD = 0.1
 
 
 def _jittered(seconds: float) -> float:
-    return seconds * random.uniform(
-        1 - SPREAD, 1 + SPREAD
-    )  # nosec B311 - spreading load
+    return seconds * random.uniform(1 - SPREAD, 1 + SPREAD)  # nosec B311
 
 
 def start_splay(interval: float) -> float:

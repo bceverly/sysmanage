@@ -18,6 +18,12 @@ commercial-AV detection.
 """
 
 from typing import Any, Dict, List, Optional, Tuple
+from backend.services.av_scan_schedule import (
+    _cron_line_for_schedule,
+    _scan_command_for_paths,
+    _splay_schedule,
+    _validate_scan_schedule,
+)
 
 # Bump whenever what a deploy plan writes changes: with malware detection
 # licensed, av_auto_deploy re-pushes the plan to every equipped host whose
@@ -304,90 +310,7 @@ def _basic_freshclam_conf(
     return "\n".join(lines) + "\n"
 
 
-# ---------------------------------------------------------------------------
-# Scan schedule helpers
-# ---------------------------------------------------------------------------
-
-
-def _validate_scan_schedule(schedule: Optional[Dict[str, Any]]) -> Dict[str, Any]:
-    """
-    Normalize a scan-schedule dict.
-
-    Accepted shape:
-        {
-          "frequency": "daily" | "weekly" | "monthly",
-          "hour":   int 0-23   (default 3)
-          "minute": int 0-59   (default 0)
-          "day_of_week": int 0-6  (only used when frequency=weekly; 0=Sunday)
-          "day_of_month": int 1-28  (only used when frequency=monthly; capped
-                                     at 28 so February doesn't drop scans)
-          "scan_paths": [str, ...]  (default ["/"])
-        }
-
-    Returns the normalized dict, or {} if schedule is falsy. Raises ValueError
-    on invalid inputs so the caller fails loudly instead of silently building
-    a broken cron line.
-    """
-    if not schedule:
-        return {}
-
-    frequency = (schedule.get("frequency") or "daily").lower()
-    if frequency not in ("daily", "weekly", "monthly"):
-        raise ValueError(
-            f"scan schedule frequency must be daily|weekly|monthly, got {frequency!r}"
-        )
-
-    hour = int(schedule.get("hour", 3))
-    minute = int(schedule.get("minute", 0))
-    if not 0 <= hour <= 23:
-        raise ValueError(f"scan schedule hour must be 0-23, got {hour}")
-    if not 0 <= minute <= 59:
-        raise ValueError(f"scan schedule minute must be 0-59, got {minute}")
-
-    out: Dict[str, Any] = {
-        "frequency": frequency,
-        "hour": hour,
-        "minute": minute,
-        "scan_paths": list(schedule.get("scan_paths") or ["/"]),
-    }
-
-    if frequency == "weekly":
-        dow = int(schedule.get("day_of_week", 0))
-        if not 0 <= dow <= 6:
-            raise ValueError(f"day_of_week must be 0-6, got {dow}")
-        out["day_of_week"] = dow
-    elif frequency == "monthly":
-        dom = int(schedule.get("day_of_month", 1))
-        if not 1 <= dom <= 28:
-            raise ValueError(
-                f"day_of_month must be 1-28 (we clamp at 28 to keep months consistent), got {dom}"
-            )
-        out["day_of_month"] = dom
-
-    return out
-
-
-def _cron_line_for_schedule(schedule: Dict[str, Any], scan_command: str) -> str:
-    """Render one /etc/cron.d-style line from a normalized schedule dict."""
-    minute = schedule["minute"]
-    hour = schedule["hour"]
-    if schedule["frequency"] == "daily":
-        return f"{minute} {hour} * * * root {scan_command}"
-    if schedule["frequency"] == "weekly":
-        return f"{minute} {hour} * * {schedule['day_of_week']} root {scan_command}"
-    # monthly
-    return f"{minute} {hour} {schedule['day_of_month']} * * root {scan_command}"
-
-
-def _scan_command_for_paths(scan_paths: List[str]) -> str:
-    """
-    Render the on-host scan command. `clamdscan -m` uses the running clamd
-    daemon, falling back to `clamscan` (slower) is the operator's call --
-    we keep it simple here.
-    """
-    quoted = " ".join(f'"{p}"' for p in scan_paths)
-    return f"/usr/bin/clamdscan -m --fdpass {quoted}"
-
+# Scan schedule helpers: see av_scan_schedule (imported at the top).
 
 # ---------------------------------------------------------------------------
 # Per-platform deploy / enable / remove
@@ -436,7 +359,9 @@ def _linux_deploy(
         },
     ]
 
-    schedule = _validate_scan_schedule(options.get("scan_schedule"))
+    schedule = _splay_schedule(
+        _validate_scan_schedule(options.get("scan_schedule")), host_info
+    )
     if schedule:
         scan_cmd = _scan_command_for_paths(schedule["scan_paths"])
         cron_line = _cron_line_for_schedule(schedule, scan_cmd)
@@ -565,7 +490,9 @@ def _bsd_deploy(
             }
         )
 
-    schedule = _validate_scan_schedule(options.get("scan_schedule"))
+    schedule = _splay_schedule(
+        _validate_scan_schedule(options.get("scan_schedule")), host_info
+    )
     if schedule:
         # BSD/macOS: drop a per-host crontab fragment under /etc/cron.d
         # on FreeBSD/Linux-style; OpenBSD/NetBSD use /etc/daily.local etc.
@@ -781,7 +708,7 @@ def _windows_scan_task(schedule: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _windows_deploy(
-    _host_info: Dict[str, Any],
+    host_info: Dict[str, Any],
     antivirus_package: str,
     options: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
@@ -793,7 +720,9 @@ def _windows_deploy(
         _windows_refresh_command(),
         _windows_update_task(WINDOWS_INSTALL_DIR, checks),
     ]
-    schedule = _validate_scan_schedule(options.get("scan_schedule"))
+    schedule = _splay_schedule(
+        _validate_scan_schedule(options.get("scan_schedule")), host_info
+    )
     if schedule:
         commands.append(_windows_scan_task(schedule))
     return {

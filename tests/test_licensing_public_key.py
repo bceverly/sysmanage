@@ -278,10 +278,22 @@ class TestGetPublicKeyPem:
 
         with patch.object(
             public_key, "fetch_public_key", new=AsyncMock(return_value="fresh-key")
-        ):
+        ), patch.object(public_key, "_load_cached_key", return_value=None):
             result = await public_key.get_public_key_pem()
 
         assert result == "fresh-key"
+
+    @pytest.mark.asyncio
+    async def test_a_cached_key_is_used_without_asking_the_server(self):
+        """Phase 22.4: every customer server fetched the key on every start."""
+        from backend.licensing import public_key
+
+        fetch = AsyncMock(return_value="fresh-key")
+        with patch.object(public_key, "fetch_public_key", new=fetch), patch.object(
+            public_key, "_load_cached_key", return_value="cached-key"
+        ):
+            assert await public_key.get_public_key_pem() == "cached-key"
+        fetch.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_falls_back_to_cache(self):

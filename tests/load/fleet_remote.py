@@ -89,7 +89,8 @@ async def run(args) -> dict:
     fleet = Fleet(args.base, args.agents, 1, args.time_scale, args.packages,
                   send_on_change=args.send_on_change, jitter=args.jitter,
                   identity_auth=args.identity_auth, bind_source=False,
-                  report_window=args.report_window)  # fmt: skip
+                  report_window=args.report_window,
+                  enrollment_tokens=[t for t in args.enrollment_tokens.split(",") if t])  # fmt: skip
     await fleet.register_all()
     print(f"REGISTERED {fleet.stats.counts['register_ok']}", flush=True)
     go = await asyncio.to_thread(sys.stdin.readline)
@@ -121,6 +122,8 @@ def main(argv=None) -> int:
     parser.add_argument("--jitter", action="store_true")
     parser.add_argument("--identity-auth", action="store_true")
     parser.add_argument("--report-window", action="store_true")
+    parser.add_argument("--enrollment-tokens", default="",
+                        help="comma-separated; agents enroll round-robin (multi-tenant stack)")  # fmt: skip
     args = parser.parse_args(argv)
     stats = asyncio.run(run(args))
     print("STATS " + json.dumps(stats, default=str), flush=True)

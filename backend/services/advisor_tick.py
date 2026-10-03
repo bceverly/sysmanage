@@ -46,6 +46,7 @@ from backend.persistence.partitions import (
 from backend.services import advisor_catalog as catalog
 from backend.services import advisor_collection as collection
 from backend.services import advisor_evidence as ev
+from backend.services import advisor_evidence_bulk as bulk_ev
 from backend.services import advisor_proposals as proposals
 from backend.services import posture_service as posture
 from backend.services import threat_model_catalog
@@ -161,6 +162,8 @@ class _Pass:
     summary: Dict[str, Any]
     existing: Dict[Tuple[str, str, str], Any] = field(default_factory=dict)
     tenant_id: Any = None
+    # Every (host, rule)'s newest proposal, loaded once per pass (22.3).
+    proposals: Optional[Dict[Tuple[str, str, str], Any]] = None
 
     def store(self, host_id, entry, result) -> None:
         """Upsert one (host, rule) outcome."""
@@ -213,9 +216,17 @@ def _evaluate_hosts(run: _Pass, hosts, entries) -> List[Tuple[Any, Any, List, Li
     host_entries = [e for e in entries if e["rule"].get("scope", "host") == "host"]
     evaluated = []
     tags = _tag_ids_by_host(run.db, hosts)
-    for host in hosts:
+    # Packages are kept per host only when a fleet rule compares them: a whole
+    # fleet's inventories held for the pass is tens of millions of rows.
+    keep_packages = any(r.get("scope") == "fleet" for r in rules)
+    bulk = None
+    for index, host in enumerate(hosts):
+        if index % bulk_ev.CHUNK_HOSTS == 0:  # evidence in chunks (22.3)
+            bulk = bulk_ev.Chunk(
+                run.db, hosts[index : index + bulk_ev.CHUNK_HOSTS], domains
+            )
         try:
-            evidence, tables = ev.gather(run.db, host, fact_needs, domains)
+            evidence, tables = ev.gather(run.db, host, fact_needs, domains, bulk=bulk)
             results = run.engine.evaluate_host(rules, evidence, tables, now=run.now)
         except Exception:  # pylint: disable=broad-except
             # Previous outcomes stay; see "WHAT IT GUARANTEES".
@@ -228,9 +239,8 @@ def _evaluate_hosts(run: _Pass, hosts, entries) -> List[Tuple[Any, Any, List, Li
             )
             run.summary["host_errors"] += 1
             continue
-        evaluated.append(
-            (host, evidence, tables.get("sm_package") or [], tags.get(str(host.id), []))
-        )
+        packages = (tables.get("sm_package") or []) if keep_packages else []
+        evaluated.append((host, evidence, packages, tags.get(str(host.id), [])))
         if len(results) != len(host_entries):
             logger.error(
                 "Advisor tick (%s): engine returned %d results for %d rules on "
@@ -244,7 +254,7 @@ def _evaluate_hosts(run: _Pass, hosts, entries) -> List[Tuple[Any, Any, List, Li
             continue
         for entry, result in zip(host_entries, results):
             run.store(host.id, entry, result)
-            proposals.sync(run.db, host.id, entry, result, run.summary)
+            proposals.sync(run.db, host.id, entry, result, run.summary, run.proposals)
     return evaluated
 
 
@@ -294,6 +304,7 @@ def _tick_one_database(run: _Pass, shared_entries) -> None:
             (str(r.host_id), r.rule_source, r.rule_key): r
             for r in run.db.query(models.AdvisorResult).all()
         }
+        run.proposals = proposals.latest_by_key(run.db)
         active = {(e["source"], e["key"]) for e in entries}
         if shared_entries is None:
             # The catalog could not be READ: its rules still exist, so their

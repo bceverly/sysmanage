@@ -391,7 +391,9 @@ async def enable_antivirus(
         audit_session.commit()
 
     logger.info("Antivirus enable command sent to host %s", host.fqdn)
-    return {"message": _("Antivirus enable command sent successfully")}
+    return {
+        "message": _("Antivirus enable command sent successfully"),
+    }
 
 
 @router.post(
