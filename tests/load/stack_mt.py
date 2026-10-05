@@ -30,8 +30,10 @@ checkout) with a built ``multitenancy_engine`` bundle, and the docs repo's
 
 import json
 import os
+import platform
 import secrets
 import shutil
+import signal
 import subprocess  # nosec B404 - fixed argv lists, no shell
 import sys
 import tarfile
@@ -54,14 +56,36 @@ ENGINE = "multitenancy_engine"
 ADMIN = "load-tenant-admin@sysmanage.org"
 
 
+BAO_PID_FILE = stack.STATE_DIR / "bao.pid"
+
+
+def _bao_stop_native() -> None:
+    try:
+        pid = int(BAO_PID_FILE.read_text(encoding="utf-8"))
+        os.kill(pid, signal.SIGTERM)
+    except (OSError, ValueError):
+        pass
+    BAO_PID_FILE.unlink(missing_ok=True)
+
+
 def _bao_up(token: str) -> str:
-    subprocess.run(["docker", "rm", "-f", BAO_CONTAINER], check=False,  # nosec B603 B607
-                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)  # fmt: skip
-    stack._run([  # pylint: disable=protected-access
-        "docker", "run", "-d", "--name", BAO_CONTAINER, "--network", "host",
-        "-e", "SKIP_SETCAP=1", BAO_IMAGE, "server", "-dev",
-        f"-dev-root-token-id={token}", f"-dev-listen-address=127.0.0.1:{BAO_PORT}",
-    ], stdout=subprocess.DEVNULL)  # fmt: skip
+    args = ["server", "-dev", f"-dev-root-token-id={token}",
+            f"-dev-listen-address=127.0.0.1:{BAO_PORT}"]  # fmt: skip
+    if stack.native():  # the `bao` binary itself (OpenBSD has no docker)
+        _bao_stop_native()
+        with open(stack.STATE_DIR / "bao.log", "ab") as log:
+            proc = subprocess.Popen(  # nosec B603 B607 # pylint: disable=consider-using-with
+                ["bao", *args], stdin=subprocess.DEVNULL, stdout=log,
+                stderr=subprocess.STDOUT, start_new_session=True,
+            )  # fmt: skip
+        BAO_PID_FILE.write_text(str(proc.pid), encoding="utf-8")
+    else:
+        subprocess.run(["docker", "rm", "-f", BAO_CONTAINER], check=False,  # nosec B603 B607
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)  # fmt: skip
+        stack._run([  # pylint: disable=protected-access
+            "docker", "run", "-d", "--name", BAO_CONTAINER, "--network", "host",
+            "-e", "SKIP_SETCAP=1", BAO_IMAGE, *args,
+        ], stdout=subprocess.DEVNULL)  # fmt: skip
     url = f"http://127.0.0.1:{BAO_PORT}"
     for _ in range(60):
         try:
@@ -91,7 +115,11 @@ def _license(out: Path) -> str:
 
 def _engine_bundle() -> Path:
     root = PROPLUS_DIR / "storage" / "modules" / ENGINE
-    bundles = sorted(root.glob("*/linux/x86_64/abi3/*.tar.gz"),
+    plat = platform.system().lower()
+    arch = {"amd64": "x86_64", "arm64": "aarch64"}.get(
+        platform.machine().lower(), platform.machine().lower()
+    )
+    bundles = sorted(root.glob(f"*/{plat}/{arch}/abi3/*.tar.gz"),
                      key=lambda p: [int(x) for x in p.parts[-5].split(".")])  # fmt: skip
     if not bundles:
         raise SystemExit(
@@ -195,8 +223,12 @@ def up_mt(port: int, tenants: int, bind_host: str = "127.0.0.1") -> dict:
 
     state_dir = stack.STATE_DIR
     state_dir.mkdir(parents=True, exist_ok=True)
+    stack.fresh_server_log()
     password = secrets.token_urlsafe(16)
-    stack._start_postgres(password)
+    if stack.native():
+        stack._start_postgres_native(password)  # pylint: disable=protected-access
+    else:
+        stack._start_postgres(password)  # pylint: disable=protected-access
     db = {"user": stack.PG_USER, "password": password, "host": "127.0.0.1",
           "port": stack.PG_PORT, "name": stack.PG_DB}  # fmt: skip
     bao_token = secrets.token_urlsafe(24)
@@ -244,5 +276,8 @@ def up_mt(port: int, tenants: int, bind_host: str = "127.0.0.1") -> dict:
 
 
 def down_mt() -> None:
+    if stack.native():
+        _bao_stop_native()
+        return
     subprocess.run(["docker", "rm", "-f", BAO_CONTAINER], check=False,  # nosec B603 B607
                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)  # fmt: skip

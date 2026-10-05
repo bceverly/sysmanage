@@ -11770,6 +11770,29 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       host -> tenant lookup: 520,749 calls in one run, uncached (see "Cache
       host-to-tenant with TTL + invalidation"). Next: that cache, then tenants
       drained in parallel, then rerun.*
+      *Tried and taken back out 2026-10-04: a pool of 4 inbound worker
+      threads draining 4 tenant databases at once. No gain anywhere it was
+      measured -- workstation 20-tenant 10k storm: backlog left 28,720 vs
+      16,876 without it, heartbeat p95 7.5 s vs 5.6 s; t480 (OpenBSD, 4 cores,
+      5k agents / 10 tenants, compiled driver): ~9,300 processed vs ~11,000
+      with one drain, hosts marked down 274 vs 4. Profiles show why: the
+      drain threads are mostly idle; the event loop is what is busy -- it
+      runs synchronous database work for heartbeats (the first two on every
+      connection miss the batched fast path), SYSTEM_INFO and identity
+      checks, and when it falls behind agents miss keepalives, reconnect,
+      and start the slow path again. Next for multi-tenant scale: get that
+      work off the event loop, then measure again on a quiet Linux box.*
+      *Measured on a quiet 12-thread Linux box (t14) 2026-10-05, 10,000
+      agents across 20 tenants, server-restart storm: the backlog DRAINS --
+      peak 82,864, 0 left by ~17 min, 10,000 / 10,000 reconnected (95% in
+      223 s), heartbeat p95 2.2 s, health p95 2.3 s, 0 expired / 429s /
+      polling. The workstation's 20-tenant runs had been measuring a shared
+      machine. Still failing: 239 hosts marked DOWN by the outage (0 in the
+      single-tenant exit runs) -- next item. Tried and reverted: running the
+      full heartbeat row update in a worker thread -- backlog drained ~2 min
+      sooner but hosts marked down rose to 1,239 (the first heartbeat's
+      `last_access` write waited behind the shared thread pool), so
+      SYSTEM_INFO stays on the loop too.*
 - [x] **Retry scheduling** -- inbound processing ignores `scheduled_at` and has
       no ordering (a failing message is retried every second; failing rows can
       monopolize the batch); jitter the retry delay; bound the "no
@@ -11888,6 +11911,16 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       every tenant DB); async DB retry instead of a blocking `time.sleep`
       backoff on the event loop (`inbound_processor.py:74-108`,
       `partitions.py:395`).
+      *Cache done 2026-10-04 (`backend/services/host_tenant_index.py`):
+      found bindings are kept 30 min (+/-10%) per worker; a miss is never
+      cached (an enrolling host must not be pinned to bootstrap); each worker
+      asks the engine at most every 5 s which bindings changed
+      (`multitenancy_engine.rebound_hosts`, indexed
+      `registry_host_tenant.updated_at`, migration `r10registry`) and drops
+      those; a failed check drops the whole cache. A first 60 s TTL did
+      nothing -- agents heartbeat every 60 s on one worker, so every entry
+      had just expired. Still open: hostname-only messages still scan every
+      tenant database, and the blocking retry sleep.*
 - [ ] Single-flight OpenBAO secret refresh with TTL jitter
       (`secrets_service.py:43-91`); chunked startup deletes
       (`custom_metric_retention.py`, `queue_maintenance`); remove per-message
@@ -12308,6 +12341,38 @@ unforgivable.
       granted unlimited grace, and an error inside the grace check fails open
       (`license_service.py:437-459`). Confirm this is intended for air-gapped
       appliances; otherwise bound it.
+- [ ] **BSD servers run the pure-Python PostgreSQL driver** -- psycopg's
+      compiled form ships as `psycopg[binary]` wheels only for Linux, macOS
+      and Windows x64, so `requirements*.txt` installs plain `psycopg`
+      everywhere else and the OpenBSD package bundles it the same way
+      (`installer/openbsd/build-libs.sh` strips `[binary]`). That `psycopg`
+      falls back to its `ctypes` implementation (`psycopg.pq.__impl__ ==
+      "python"`): every libpq call goes through ctypes. *Found 2026-10-04 on
+      the OpenBSD load host (t480): with it, a 5,000-agent / 10-tenant storm
+      drained ~2 messages/s with PostgreSQL idle -- the event loop was busy
+      inside `pq_ctypes` (stack sampling via faulthandler; py-spy has no
+      OpenBSD build). `psycopg-c` (the C implementation, same version as
+      psycopg) built cleanly there against the packaged libpq with the base
+      `cc` (`pg_config` + `libpq-fe.h` from `postgresql-client`).*
+      Proposal: build `psycopg-c` at package-build time for OpenBSD, FreeBSD
+      and NetBSD (each package build host compiles it once against that
+      release's libpq and bundles the wheel, like the other compiled deps in
+      `build-libs.sh`); from-source installs try `psycopg[c]` and fall back to
+      plain `psycopg` if no compiler / headers are present, logging which
+      implementation loaded. Startup logs `psycopg.pq.__impl__` on every
+      platform so a slow driver is visible. Measure before/after on t480
+      (same storm, `python` vs `c`) and record it here.
+      *Dev side done 2026-10-04: `make install-dev` builds `psycopg-c` (the
+      installed psycopg's exact version) on every platform but Linux and
+      macOS, warns and keeps the pure driver when `pg_config` or a compiler
+      is missing, and prints `psycopg.pq.__impl__`; checked on t480
+      (`c`). `make install-psycopg-c` does just that step. Still open: the
+      BSD packages and the startup log line.*
+      *Measured 2026-10-04 on t480, same 5k-agent / 10-tenant server-restart
+      storm, one drain: pure-Python driver ~1,900 messages processed in 20
+      min, 310 hosts marked down, heartbeat p95 10.0 s; compiled ~11,000
+      processed, 4 marked down, heartbeat p95 8.4 s. Neither keeps up there
+      (a 4-core laptop CPU) -- the event-loop work above is the next limit.*
 
 #### Exit criteria
 
@@ -12322,6 +12387,12 @@ unforgivable.
       40-minute server-restart storm, every criterion the harness checks met
       (22.2 notes). Still to prove: 50k, many tenants and sites, wave-rate
       pushes (22.3), a license-server publish (22.4).*
+      *Many tenants 2026-10-05: 10k agents across 20 tenants drains a
+      server-restart storm completely on a dedicated 12-thread Linux box
+      (t14; 22.2 "Process tenants in parallel" notes); 239 hosts marked down
+      remain to fix. Runs are only read from a machine the harness calls
+      quiet: it now measures CPU used by processes outside the run and calls
+      a run "NOT TRUSTWORTHY" above 25% (the workstation sits at ~37%).*
       *Exit-proof runs 2026-10-03, 40 minutes each, 10,000 agents on the
       FreeBSD box, with 22.1's full-jitter backoff and 22.3's off-loop ticks,
       waves and spreading in: server-restart storm -- backlog peak 51,732,

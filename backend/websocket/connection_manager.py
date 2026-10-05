@@ -223,10 +223,12 @@ class ConnectionManager:
 
             del self.active_connections[agent_id]
 
+            # A count, not the list: every connected hostname on every
+            # disconnect was ~125 KB a line at 5,000 agents (Phase 22).
             logger.info(
-                "Agent %s disconnected. Remaining hostnames: %s",
+                "Agent %s disconnected. %d hostnames remain",
                 agent_id,
-                list(self.hostname_to_agent.keys()),
+                len(self.hostname_to_agent),
             )
 
     def register_agent(  # pylint: disable=too-many-positional-arguments
@@ -253,9 +255,9 @@ class ConnectionManager:
                 )
                 self.hostname_to_agent[hostname] = agent_id
                 logger.info(
-                    "Agent %s registered. All hostnames: %s",
+                    "Agent %s registered. %d hostnames registered",
                     agent_id,
-                    list(self.hostname_to_agent.keys()),
+                    len(self.hostname_to_agent),
                 )
             return connection
 
@@ -275,8 +277,7 @@ class ConnectionManager:
     @_drain_only
     async def send_to_hostname(self, hostname: str, message: dict) -> bool:
         """Send a message to an agent by hostname (case-insensitive).  Queue-drain-only."""
-        logger.info("send_to_hostname called for hostname: %s", hostname)
-        logger.info("Available hostnames: %s", list(self.hostname_to_agent.keys()))
+        logger.debug("send_to_hostname called for hostname: %s", hostname)
 
         # Try exact match first
         if hostname in self.hostname_to_agent:

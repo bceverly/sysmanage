@@ -175,6 +175,9 @@ def _summarize(name, fleet, observer, restart_t, warmup):
         "expired_rows_final": _queue_total(final, ".expired"),
         "hosts_marked_down_max_after_restart": max(hosts_down, default=0),
         "pg_connections_max": max(_series(samples, "pg_connections"), default=None),
+        "host_load_per_cpu_p90": _pct(_series(samples, "host_load_per_cpu"), 0.90),
+        # CPU used by processes outside the run, per CPU: see verdict().
+        "other_cpu_per_cpu_p90": _pct(_series(samples, "other_cpu_per_cpu"), 0.90),
         "send_spike_ratio": _spike_ratio(
             stats.timeline, warmup, _restart_window(stats.timeline, restart_t, agents)
         ),
@@ -184,9 +187,25 @@ def _summarize(name, fleet, observer, restart_t, warmup):
     return summary
 
 
+# Share of the machine's CPU used by processes OUTSIDE the run (server,
+# PostgreSQL, container plumbing, OpenBAO and the harness are the run) above
+# which the run measured a shared machine: 2026-10-04 a run on a workstation
+# shared with a browser, chat clients and another project's tests looked three
+# times worse than the code was.  Measured from per-process CPU time, not load
+# average, which cannot tell a busy server on a small box from a shared one.
+OTHER_CPU_LIMIT = 0.25
+
+
 def verdict(summary) -> List[str]:
     """The Phase 22 exit criteria, as violations of today's run."""
     out = []
+    other = summary.get("other_cpu_per_cpu_p90")
+    if other is not None and other > OTHER_CPU_LIMIT:
+        out.append(
+            f"RUN NOT TRUSTWORTHY: processes outside the run used {other:.0%} of "
+            f"the server machine's CPU (p90, limit {OTHER_CPU_LIMIT:.0%}); rerun "
+            "on a quiet machine before reading the numbers"
+        )
     if summary["expired_rows_final"]:
         out.append(
             f"{summary['expired_rows_final']} queued messages EXPIRED (silent data loss)"

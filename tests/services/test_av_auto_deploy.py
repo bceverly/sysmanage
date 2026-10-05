@@ -276,7 +276,10 @@ def test_a_plan_version_bump_goes_out_in_waves(db, queued, monkeypatch):
 
 def test_hosts_that_failed_together_do_not_retry_together():
     delays = {
-        av_auto_deploy.retry_delay(2, uuid.uuid4()).total_seconds() for _ in range(50)
+        av_auto_deploy.retry_delay(
+            2, uuid.uuid5(uuid.NAMESPACE_DNS, f"host-{i}")
+        ).total_seconds()
+        for i in range(50)
     }
     assert len(delays) > 45  # spread
     assert all(2 * 3600 <= d <= 2 * 3600 * 1.25 for d in delays)

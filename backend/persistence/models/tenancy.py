@@ -419,8 +419,12 @@ class RegistryHostTenant(Base):
         GUID(), ForeignKey(_TENANT_FK, ondelete="CASCADE"), nullable=False
     )
     created_at = Column(DateTime, nullable=False, default=_utcnow)
+    # Phase 22: set on every bind / re-bind; server workers poll it to drop
+    # cached bindings that changed (``host_tenant_index``).
+    updated_at = Column(DateTime, nullable=True, default=_utcnow, onupdate=_utcnow)
 
     __table_args__ = (
         Index("ix_registry_host_tenant_host", "host_id"),
         Index("ix_registry_host_tenant_tenant", "tenant_id"),
+        Index("ix_registry_host_tenant_updated", "updated_at"),
     )

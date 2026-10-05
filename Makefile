@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test-lucky13 check-black check-msi-guids provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript lint-css lint-css-fix security security-full security-python security-frontend security-secrets security-semgrep security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
+.PHONY: install-psycopg-c lint-license-headers lint-license-headers-fix test-lucky13 check-black check-msi-guids provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript lint-css lint-css-fix security security-full security-python security-frontend security-secrets security-semgrep security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
 
 # Default target
 help:
@@ -16,6 +16,8 @@ help:
 	@echo "  make test-performance - Run Artillery load tests"
 	@echo "  make test-lucky13     - MITRE 'Lucky 13' unforgivable-vulnerability checks (also in make security)"
 	@echo "  make lint          - Run all linters (Python + TypeScript)"
+	@echo "  make lint-license-headers - Copyright + license header on every source file"
+	@echo "  make lint-license-headers-fix - Add missing headers / bump a stale year"
 	@echo "  make lint-python   - Run Python linting only"
 	@echo "  make lint-typescript - Run TypeScript linting only"
 	@echo "  make security      - Run comprehensive security analysis (all tools)"
@@ -31,6 +33,7 @@ help:
 	@echo "  make clean         - Clean test artifacts and cache"
 	@echo "  make build         - Build frontend for production"
 	@echo "  make install-dev   - Install all development tools (includes Playwright + WebDriver + MSW for testing)"
+	@echo "  make install-psycopg-c - (BSDs) build just the compiled PostgreSQL driver, not the whole install-dev"
 	@echo "  make migrate       - Run database migrations (alembic upgrade head)"
 	@echo "  make check-test-models - Check test model synchronization between conftest files"
 	@echo ""
@@ -246,6 +249,32 @@ else
 	fi
 endif
 
+# The compiled PostgreSQL driver.  psycopg[binary] wheels exist only for
+# Linux, macOS and Windows x64; elsewhere plain psycopg falls back to its
+# ctypes implementation, which drained ~2 messages/s in the Phase 22 OpenBSD
+# storm.  Builds psycopg-c (the installed psycopg's exact version) against the
+# system libpq; without a compiler or pg_config the pure-Python driver stays,
+# with a warning.  Run on its own after a psycopg upgrade -- no need for the
+# whole install-dev rebuild.  A no-op on Linux and macOS.
+install-psycopg-c:
+ifeq ($(OS),Windows_NT)
+	@echo "[INFO] Windows: psycopg[binary] provides the compiled driver (x64)"
+else
+	@case "$$(uname -s)" in Linux|Darwin) ;; *) \
+		PSYV=$$($(PYTHON) -c "import psycopg; print(psycopg.__version__)"); \
+		export PATH="/usr/local/bin:/usr/pkg/bin:$$PATH"; \
+		[ "$$(uname -s)" = "OpenBSD" ] && export TMPDIR=$$HOME/tmp; \
+		[ "$$(uname -s)" = "NetBSD" ] && export TMPDIR=/var/tmp; \
+		if command -v pg_config >/dev/null 2>&1; then \
+			echo "[INFO] Building psycopg-c $$PSYV (compiled PostgreSQL driver; no wheel for this OS)..."; \
+			$(PYTHON) -m pip install "psycopg-c==$$PSYV" || echo "[WARN] psycopg-c did not build; keeping the slower pure-Python driver"; \
+		else \
+			echo "[WARN] pg_config not found (install the PostgreSQL client package); keeping the slower pure-Python psycopg driver"; \
+		fi ;; \
+	esac
+	@$(PYTHON) -c "import psycopg; print('[INFO] psycopg implementation:', psycopg.pq.__impl__)"
+endif
+
 # Install development dependencies
 install-dev: setup-venv install-hooks
 	@echo "Installing Python development dependencies..."
@@ -398,6 +427,9 @@ else
 	else \
 		$(PYTHON) -m pip install -r requirements.txt; \
 	fi
+endif
+ifneq ($(OS),Windows_NT)
+	@$(MAKE) --no-print-directory install-psycopg-c
 endif
 	@echo "Checking for BSD system C tracer requirements..."
 	@$(PYTHON) scripts/check-bsd-deps.py
@@ -1251,6 +1283,16 @@ release:
 # File-length gate: no source file may exceed 1000 lines (scripts/ exempt).
 # Uniform across all SysManage repos; complements pylint max-module-lines and the
 # eslint max-lines rule, and also covers Cython (.pyx), which pylint cannot lint.
+# License-header gate: every source file carries our copyright notice and
+# THIS repository's license (AGPL here; proprietary in Pro+, never crossed).
+# The fix target adds missing headers and bumps a stale end year; a header
+# naming the wrong license is reported for a person to correct.
+lint-license-headers:
+	@$(PYTHON) scripts/check_license_headers.py
+
+lint-license-headers-fix:
+	@$(PYTHON) scripts/check_license_headers.py --fix
+
 lint-file-length:
 	@echo "Checking file lengths (max 1000 lines; scripts/ + generated i18n exempt)..."
 ifeq ($(OS),Windows_NT)
@@ -1283,7 +1325,7 @@ lint-freebsd-port:
 	@$(PYTHON) scripts/check_freebsd_port.py
 
 
-lint: lint-file-length lint-python lint-typescript lint-css check-engine-codes check-nginx-configs check-msi-guids i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-markup i18n-complete i18n-sync-check lint-version check-migrations lint-freebsd-port
+lint: lint-file-length lint-license-headers lint-python lint-typescript lint-css check-engine-codes check-nginx-configs check-msi-guids i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-markup i18n-complete i18n-sync-check lint-version check-migrations lint-freebsd-port
 	@echo "[OK] All linting completed successfully!"
 
 # Guard: the per-platform nginx configs are GENERATED from one template.

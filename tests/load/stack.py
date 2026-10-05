@@ -28,6 +28,7 @@ import argparse
 import json
 import os
 import secrets
+import shlex
 import shutil
 import signal
 import socket
@@ -106,6 +107,63 @@ def _start_postgres(password):
     raise SystemExit("PostgreSQL container did not become ready")
 
 
+# Native mode (no docker, e.g. OpenBSD): a throwaway PostgreSQL cluster in the
+# state directory instead of the container.  fsync is off -- the container
+# ran on tmpfs, and runs must stay comparable; it lives only for the run.
+PGDATA = STATE_DIR / "pgdata"
+
+
+def native() -> bool:
+    """True when the stack runs its services as processes, not containers."""
+    return os.environ.get("LOAD_NATIVE") == "1" or not shutil.which("docker")
+
+
+def _pg_stat_statements_available() -> bool:
+    try:
+        libdir = subprocess.run(  # nosec B603 B607 - fixed argv
+            ["pg_config", "--pkglibdir"], capture_output=True, text=True, check=True
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return False
+    return any(Path(libdir).glob("pg_stat_statements.*"))
+
+
+def _stop_postgres_native():
+    if (PGDATA / "postmaster.pid").exists():
+        subprocess.run(  # nosec B603 B607 - fixed argv
+            ["pg_ctl", "-D", str(PGDATA), "-m", "fast", "-w", "stop"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False,
+        )  # fmt: skip
+    shutil.rmtree(PGDATA, ignore_errors=True)
+
+
+def _start_postgres_native(password):
+    _stop_postgres_native()
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    pwfile = STATE_DIR / "pg-password"
+    pwfile.write_text(password, encoding="utf-8")
+    pwfile.chmod(0o600)
+    try:
+        _run(["initdb", "-D", str(PGDATA), "-U", PG_USER, f"--pwfile={pwfile}",
+              "--auth-local=trust", "--auth-host=scram-sha-256", "-E", "UTF8"],
+             stdout=subprocess.DEVNULL)  # fmt: skip
+    finally:
+        pwfile.unlink()
+    options = [
+        f"-p {PG_PORT}", "-c listen_addresses=127.0.0.1",
+        f"-c unix_socket_directories={STATE_DIR}", "-c max_connections=500",
+        "-c fsync=off", "-c synchronous_commit=off", "-c full_page_writes=off",
+    ]  # fmt: skip
+    if _pg_stat_statements_available():
+        options.append("-c shared_preload_libraries=pg_stat_statements")
+    else:
+        print("  (pg_stat_statements not installed: no per-statement report)")
+    _run(["pg_ctl", "-D", str(PGDATA), "-l", str(STATE_DIR / "postgres.log"),
+          "-w", "-t", "60", "-o", " ".join(options), "start"],
+         stdout=subprocess.DEVNULL)  # fmt: skip
+    _run(["createdb", "-h", str(STATE_DIR), "-p", str(PG_PORT), "-U", PG_USER, PG_DB])
+
+
 def _container_exists():
     out = subprocess.run(  # nosec B603 B607 - fixed argv
         ["docker", "ps", "-aq", "-f", f"name=^{CONTAINER}$"],
@@ -162,6 +220,14 @@ def _server_env(config_path, code=REPO, multitenancy=False):
     return env
 
 
+def fresh_server_log():
+    """A new stack starts a new server.log (restarts within it append).  It
+    grew to 25 GB appending across every run; the previous one is kept."""
+    log = STATE_DIR / "server.log"
+    if log.exists():
+        log.replace(STATE_DIR / "server.log.prev")
+
+
 def pin_code():
     """Copy the code under test into the stack's state directory."""
     dest = STATE_DIR / "code"
@@ -211,6 +277,13 @@ def _port_taken(port) -> bool:
         return False
 
 
+def _server_prefix():
+    """``LOAD_SERVER_PREFIX``: a command the server runs under, e.g. a
+    profiler (``py-spy record ... --``).  It must start the server as its
+    child: ptrace_scope=1 lets a profiler trace only its own children."""
+    return shlex.split(os.environ.get("LOAD_SERVER_PREFIX", ""))
+
+
 def start_server(state):
     """Start the server; returns its pid.  The log is appended to, so a
     restart's output follows the previous run's."""
@@ -227,7 +300,7 @@ def start_server(state):
     # The server outlives this call on purpose: no `with` for the Popen.
     with open(STATE_DIR / "server.log", "ab") as log:
         proc = subprocess.Popen(  # nosec B603 # pylint: disable=consider-using-with
-            [sys.executable, "-m", "backend.main"],
+            _server_prefix() + [sys.executable, "-m", "backend.main"],
             cwd=_code(state),
             env=_server_env(state["config"], _code(state), state.get("multitenancy", False)),
             stdin=subprocess.DEVNULL,
@@ -290,6 +363,7 @@ def restart_server(state, down_seconds=0):
 
 def up(port, db_url, pin=True, bind_host="127.0.0.1"):
     STATE_DIR.mkdir(parents=True, exist_ok=True)
+    fresh_server_log()
     if db_url:
         from urllib.parse import urlparse  # pylint: disable=import-outside-toplevel
 
@@ -298,12 +372,11 @@ def up(port, db_url, pin=True, bind_host="127.0.0.1"):
               "port": parsed.port or 5432, "name": parsed.path.lstrip("/")}  # fmt: skip
         container = False
     else:
-        if not shutil.which("docker"):
-            raise SystemExit(
-                "docker is required (or pass --db-url for an existing database)"
-            )
         password = secrets.token_urlsafe(16)
-        _start_postgres(password)
+        if native():
+            _start_postgres_native(password)
+        else:
+            _start_postgres(password)
         db = {"user": PG_USER, "password": password, "host": "127.0.0.1",
               "port": PG_PORT, "name": PG_DB}  # fmt: skip
         container = True
@@ -374,7 +447,9 @@ def down():
         from tests.load import stack_mt  # pylint: disable=import-outside-toplevel
 
         stack_mt.down_mt()
-    if state.get("container"):
+    if state.get("container") and native():
+        _stop_postgres_native()
+    elif state.get("container"):
         subprocess.run(  # nosec B603 B607 - fixed argv
             ["docker", "rm", "-f", CONTAINER],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False,

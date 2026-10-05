@@ -779,3 +779,16 @@ def _fresh_plugin_negative_cache():
     plugin_bundle_loader._no_bundle_at.clear()  # pylint: disable=protected-access
     yield
     plugin_bundle_loader._no_bundle_at.clear()  # pylint: disable=protected-access
+
+
+@pytest.fixture(autouse=True)
+def _fresh_host_tenant_cache():
+    """Host->tenant bindings are cached per process (Phase 22); one test's
+    binding must not route another test's host."""
+    from backend.services import (  # pylint: disable=import-outside-toplevel
+        host_tenant_index,
+    )
+
+    host_tenant_index.clear_cache()
+    yield
+    host_tenant_index.clear_cache()

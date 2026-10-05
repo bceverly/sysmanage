@@ -13,6 +13,11 @@ from backend.services import airgap_schedule_tick as tick
 BASE = datetime(2026, 10, 4, 3, 0, tzinfo=timezone.utc)
 
 
+def _id(i):
+    """Fixed ids: random ones could collide and fail at random."""
+    return uuid.uuid5(uuid.NAMESPACE_DNS, f"schedule-{i}")
+
+
 class _Cron:
     def next_run_from_cron(self, _cron, _now):
         return BASE
@@ -20,8 +25,7 @@ class _Cron:
 
 def test_schedules_spread_over_the_window():
     runs = {
-        tick.splayed_next_run(_Cron(), "0 3 * * *", uuid.uuid4(), BASE)
-        for _ in range(50)
+        tick.splayed_next_run(_Cron(), "0 3 * * *", _id(i), BASE) for i in range(50)
     }
     assert len(runs) > 40
     assert all(BASE <= r < BASE + timedelta(minutes=tick.SPLAY_MINUTES) for r in runs)

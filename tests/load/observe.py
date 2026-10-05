@@ -14,6 +14,7 @@ database it watches.
 
 import asyncio
 import os
+import subprocess  # nosec B404 - fixed argv (ps, pgrep)
 import time
 from typing import List, Optional
 
@@ -42,6 +43,131 @@ TOP_STATEMENTS_SQL = text(
 PG_CONN_SQL = text(
     "SELECT count(*) FROM pg_stat_activity WHERE datname = current_database()"
 )
+
+
+_HAVE_PROC = os.path.isdir("/proc/self")
+
+
+def _ps_tree(pid: int) -> list:
+    """No /proc (OpenBSD, the macOS-like BSDs): children through pgrep."""
+    tree, todo = [], [pid]
+    while todo:
+        current = todo.pop()
+        tree.append(current)
+        out = subprocess.run(  # nosec B603 B607 - fixed argv
+            ["pgrep", "-P", str(current)], capture_output=True, text=True, check=False
+        ).stdout
+        todo.extend(int(child) for child in out.split())
+    return tree
+
+
+def _cputime_seconds(value: str) -> float:
+    """BSD ps ``time``: [[dd-]hh:]mm:ss[.cc]."""
+    days, _, clock = value.rpartition("-")
+    seconds = 0.0
+    for part in clock.split(":"):
+        seconds = seconds * 60 + float(part)
+    return seconds + (int(days) * 86400 if days else 0)
+
+
+def _ps_readings(pid: int):
+    """(cpu seconds, rss MB) of the process tree through ``ps``, or Nones."""
+    tree = {str(p) for p in _ps_tree(pid)}
+    # Every process, filtered here: OpenBSD's ps reads only the first pid of
+    # "-p a,b" (and only the last of repeated -p), which measured just the
+    # supervisor and showed a busy server at 0.3% CPU.
+    out = subprocess.run(  # nosec B603 B607 - fixed argv
+        ["ps", "-A", "-o", "pid=,rss=,time="],
+        capture_output=True, text=True, check=False,
+    ).stdout  # fmt: skip
+    rows = [line.split() for line in out.splitlines() if line.strip()]
+    rows = [row for row in rows if row and row[0] in tree]
+    if not rows:
+        return None, None
+    try:
+        cpu = sum(_cputime_seconds(row[2]) for row in rows)
+        rss = sum(int(row[1]) for row in rows) / 1024
+    except (IndexError, ValueError):
+        return None, None
+    return cpu, rss
+
+
+# Processes that are part of a load run besides the server tree and this
+# observer: the database, the container plumbing, OpenBAO.
+RUN_COMMANDS = ("postgres", "docker-proxy", "containerd", "dockerd", "bao", "ssh")
+
+
+def _all_cpu_seconds() -> dict:
+    """pid -> (ppid, command, cpu seconds) for every process, via ``ps``."""
+    out = subprocess.run(  # nosec B603 B607 - fixed argv
+        ["ps", "-A", "-o", "pid=,ppid=,comm=,time="],
+        capture_output=True, text=True, check=False,
+    ).stdout  # fmt: skip
+    table = {}
+    for line in out.splitlines():
+        parts = line.split()
+        if len(parts) < 4:
+            continue
+        try:
+            table[int(parts[0])] = (
+                int(parts[1]),
+                parts[2],
+                _cputime_seconds(parts[-1]),
+            )
+        except ValueError:
+            continue
+    return table
+
+
+def _descendants(table: dict, roots) -> set:
+    children = {}
+    for pid, (ppid, _comm, _cpu) in table.items():
+        children.setdefault(ppid, []).append(pid)
+    found, todo = set(), [r for r in roots if r]
+    while todo:
+        pid = todo.pop()
+        if pid not in found:
+            found.add(pid)
+            todo.extend(children.get(pid, []))
+    return found
+
+
+class OtherCpu:
+    """CPU used by processes that are NOT part of the run, per CPU of this
+    machine, between two calls.  2026-10-04: a run on a workstation shared
+    with a browser, chat clients and another project's test suite looked
+    three times worse than the code was; load average could not tell that
+    apart from a busy server on a small box, CPU time per process can."""
+
+    def __init__(self):
+        self._last = None  # (monotonic time, {pid: cpu seconds})
+
+    def sample(self, server_pid) -> Optional[float]:
+        now = time.monotonic()
+        table = _all_cpu_seconds()
+        if not table:
+            return None
+        ours = _descendants(table, [server_pid, os.getpid()])
+        other = {pid: cpu for pid, (_ppid, comm, cpu) in table.items()
+                 if pid not in ours and not comm.startswith(RUN_COMMANDS)}  # fmt: skip
+        result = None
+        if self._last is not None and now > self._last[0]:
+            used = sum(max(0.0, cpu - self._last[1].get(pid, 0.0))
+                       for pid, cpu in other.items() if pid in self._last[1])  # fmt: skip
+            result = round(used / (now - self._last[0]) / (os.cpu_count() or 1), 2)
+        self._last = (now, other)
+        return result
+
+
+def host_load_per_cpu() -> Optional[float]:
+    """1-minute load average per CPU of THIS machine.  Over ~1.5 the server
+    shares the box with other work and the run is not a clean measurement
+    (2026-10-04: another project's test suite plus 26 GB of swap made one run
+    look 3x worse than the code was)."""
+    try:
+        return round(os.getloadavg()[0] / (os.cpu_count() or 1), 2)
+    except (AttributeError, OSError):
+        return None
 
 
 def _proc_tree(pid: int) -> list:
@@ -74,6 +200,8 @@ def _one_cpu_seconds(pid: int) -> Optional[float]:
 
 def _proc_cpu_seconds(pid: int) -> Optional[float]:
     """utime + stime of the process tree (and reaped children), in seconds."""
+    if not _HAVE_PROC:
+        return _ps_readings(pid)[0]
     readings = [_one_cpu_seconds(member) for member in _proc_tree(pid)]
     if readings[0] is None:
         return None
@@ -92,6 +220,8 @@ def _one_rss_mb(pid: int) -> Optional[float]:
 
 
 def _proc_rss_mb(pid: int) -> Optional[float]:
+    if not _HAVE_PROC:
+        return _ps_readings(pid)[1]
     readings = [_one_rss_mb(member) for member in _proc_tree(pid)]
     if readings[0] is None:
         return None
@@ -133,6 +263,7 @@ class Observer:
         self.top_statements: List[dict] = []
         self._task: Optional[asyncio.Task] = None
         self._last_cpu = None
+        self._other_cpu = OtherCpu()
         self._started = time.monotonic()
 
     def _db_sample(self) -> dict:
@@ -188,6 +319,8 @@ class Observer:
                     health_ms=await self._health_ms(session),
                     server_cpu_percent=self._cpu_percent(pid, now),
                     server_rss_mb=_proc_rss_mb(pid) if pid else None,
+                    host_load_per_cpu=host_load_per_cpu(),
+                    other_cpu_per_cpu=self._other_cpu.sample(pid),
                 )
                 self.samples.append(sample)
                 await asyncio.sleep(max(0.0, self.interval - (time.monotonic() - now)))

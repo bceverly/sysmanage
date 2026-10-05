@@ -259,7 +259,11 @@ class TestSpread:
         assert summary["collections_next_pass"] == 2
 
     def test_each_host_has_its_own_interval_never_past_the_limit(self):
-        intervals = {col.host_interval(uuid.uuid4()) for _ in range(200)}
+        # Fixed ids: random ones could collide and fail at random.
+        intervals = {
+            col.host_interval(uuid.uuid5(uuid.NAMESPACE_DNS, f"host-{i}"))
+            for i in range(200)
+        }
         assert len(intervals) > 190
         low = col.COLLECT_INTERVAL * (1 - col.INTERVAL_SPREAD)
         assert all(low <= i <= col.COLLECT_INTERVAL for i in intervals)

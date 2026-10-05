@@ -247,83 +247,23 @@ class QueueOperations:
                 session_provided,
             )
 
-            if not session_provided:
-                try:
-                    db.commit()
-                    logger.debug(
-                        "Successfully committed message %s to database (self-managed session)",
-                        message_id,
-                    )
-
-                    # Verify the message was actually inserted
-                    verification = (
-                        db.query(MessageQueue)
-                        .filter(MessageQueue.message_id == message_id)
-                        .first()
-                    )
-                    if verification:
-                        logger.debug(
-                            "Verified message %s exists in database after commit",
-                            message_id,
-                        )
-                    else:
-                        logger.error(
-                            "Message %s NOT found in database after commit!",
-                            message_id,
-                        )
-                        raise RuntimeError(
-                            f"Message {message_id} was not persisted to database despite successful commit"
-                        )
-                except Exception as commit_error:
-                    logger.exception(
-                        "Commit failed for message %s: %s",
-                        message_id,
-                        commit_error,
-                    )
-                    raise
-            else:
-                logger.debug(
-                    "Using provided session for message %s, db.dirty=%s, db.new=%s",
-                    message_id,
-                    len(db.dirty),
-                    len(db.new),
-                )
-
-                # For provided sessions, we need to flush to make sure the data is written to the session
-                # but the commit will happen later by the caller
-                try:
+            # Self-managed session: commit.  A provided session: flush, and
+            # the caller commits.  (Phase 22: a read-back of the row after
+            # each write was 21% of the enqueue's time in the 20-tenant
+            # profile -- it re-read what this session had just written, and
+            # a failed write raises here anyway.)
+            try:
+                if session_provided:
                     db.flush()
-                    logger.debug(
-                        "Successfully flushed message %s to provided session",
-                        message_id,
-                    )
-
-                    # Verify the message was actually added to the session
-                    verification = (
-                        db.query(MessageQueue)
-                        .filter(MessageQueue.message_id == message_id)
-                        .first()
-                    )
-                    if verification:
-                        logger.debug(
-                            "Verified message %s exists in session after flush",
-                            message_id,
-                        )
-                    else:
-                        logger.error(
-                            "Message %s NOT found in session after flush!",
-                            message_id,
-                        )
-                        raise RuntimeError(
-                            f"Message {message_id} was not added to session despite successful flush"
-                        )
-                except Exception as flush_error:
-                    logger.exception(
-                        "Flush failed for message %s: %s",
-                        message_id,
-                        flush_error,
-                    )
-                    raise
+                else:
+                    db.commit()
+            except Exception as write_error:
+                logger.exception(
+                    "Writing message %s to the queue failed: %s",
+                    message_id,
+                    write_error,
+                )
+                raise
 
             logger.debug(
                 _(
