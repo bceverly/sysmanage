@@ -7,6 +7,8 @@ Tests for backend/startup/route_registration.py module.
 Tests route registration functionality.
 """
 
+from unittest.mock import patch
+
 import pytest
 from fastapi import FastAPI
 
@@ -165,11 +167,26 @@ class TestRegisterAppRoutes:
 
         from backend.startup.route_registration import register_app_routes
 
+        from sqlalchemy import create_engine
+        from sqlalchemy.pool import StaticPool
+
         app = FastAPI()
         register_app_routes(app)
 
-        client = TestClient(app)
-        response = client.get("/api/health/db")
+        # A database of its own: run alone, get_engine() returned the
+        # developer's real database and the test failed whenever that was
+        # down (2026-10-05).
+        engine = create_engine(
+            "sqlite://",
+            connect_args={"check_same_thread": False},
+            poolclass=StaticPool,
+        )
+        try:
+            with patch("backend.persistence.db.get_engine", return_value=engine):
+                client = TestClient(app)
+                response = client.get("/api/health/db")
+        finally:
+            engine.dispose()
 
         assert response.status_code == 200
         body = response.json()

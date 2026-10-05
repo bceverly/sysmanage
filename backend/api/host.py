@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import sessionmaker
 
 # Import the new router modules
@@ -33,16 +33,19 @@ from backend.api.error_constants import error_host_not_found, error_user_not_fou
 from backend.api.host_registration import (  # pylint: disable=unused-import
     _apply_enrollment_token_placement,
     _apply_registration_key_enrollment,
+    _audit_registration_key_enrollment,
     _host_write_engine,
     _refresh_existing_host,
     _reject_if_fqdn_belongs_to_tenant,
     _resolve_enrollment_tenant,
     _validate_registration_key,
+    existing_host_reply,
     registration_reply,
 )
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.security import agent_identity
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
@@ -101,6 +104,10 @@ class HostRegistration(BaseModel):
     # binds the host to the token's tenant (host→tenant index) so the data
     # plane routes this host's data to that tenant's database.
     enrollment_token: Optional[str] = None
+    # Phase 22: a random value the agent keeps and sends with every attempt,
+    # so a retry whose first reply was lost gets its credential (see
+    # backend/security/agent_identity.py, "idempotent registration").
+    registration_nonce: Optional[str] = Field(default=None, max_length=256)
 
 
 class HostRegistrationLegacy(BaseModel):
@@ -743,8 +750,9 @@ async def register_host(registration_data: HostRegistration):
         )
         if existing_host:
             _refresh_existing_host(session, existing_host, registration_data)
-            # Phase 22.0: never hand an existing host's id or token to whoever names it.
-            return registration_reply(existing_host, issue_credential=False)
+            return existing_host_reply(
+                existing_host, registration_data.registration_nonce
+            )
 
         # Phantom-duplicate loophole close: no token routed us to the no-tenant DB
         # and no server-scoped row exists for this fqdn -- but if it already lives
@@ -810,6 +818,9 @@ async def register_host(registration_data: HostRegistration):
 
         # Phase 22.0: mint the credential once, for the registration creating the host.
         host.host_token = models.generate_secure_host_token()
+        host.registration_nonce_hash = agent_identity.registration_nonce_hash(
+            registration_data.registration_nonce
+        )
 
         # Phase 19: record the advertised capabilities immediately.  Waiting for
         # the first SYSTEM_INFO would leave the host with an unknown capability
@@ -856,35 +867,7 @@ async def register_host(registration_data: HostRegistration):
                 details={"tenant_id": enrollment_tenant_id},
             )
 
-        # Audit log: enrollment via registration key carries enough
-        # context that the operator can correlate to the matched key.
-        if validated_key is not None:
-            AuditService.log(
-                db=session,
-                action_type=ActionType.CREATE,
-                entity_type=EntityType.HOST,
-                entity_id=str(host.id),
-                entity_name=host.fqdn,
-                description=_(
-                    "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' (auto_approve=%(auto_approve)s)"
-                )
-                % {
-                    "fqdn": host.fqdn,
-                    "key_name": validated_key.name,
-                    "auto_approve": validated_key.auto_approve,
-                },
-                result=Result.SUCCESS,
-                details={
-                    "registration_key_id": str(validated_key.id),
-                    "registration_key_name": validated_key.name,
-                    "access_group_id": (
-                        str(validated_key.access_group_id)
-                        if validated_key.access_group_id
-                        else None
-                    ),
-                    "auto_approved": validated_key.auto_approve,
-                },
-            )
+        _audit_registration_key_enrollment(session, host, validated_key)
 
         # Phase 10.4.4 -- auto-apply default mirror assignments for the
         # newly-enrolled host's (platform, version, os_family).  Only

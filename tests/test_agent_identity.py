@@ -142,7 +142,7 @@ async def test_a_refused_handshake_binds_nothing_and_returns_no_token(db):
 
 @pytest.mark.asyncio
 async def test_a_verified_handshake_binds_the_session(db):
-    host = _host(db)
+    host = _host(db, registration_nonce_hash=ident.registration_nonce_hash("n" * 40))
     connection = _connection()
     with patch("backend.api.agent.flush_pending_inbound_messages"), patch(
         "backend.websocket.connection_manager.connection_manager.register_agent"
@@ -155,6 +155,8 @@ async def test_a_verified_handshake_binds_the_session(db):
     assert reply["message_type"] == "registration_success"
     assert connection.host_id == host.id
     register.assert_called_once()
+    db.refresh(host)
+    assert host.registration_nonce_hash is None  # the proven token spent it
 
 
 # -- after the handshake ------------------------------------------------------
@@ -225,3 +227,35 @@ def test_a_verified_sessions_messages_are_queued_with_their_host():
     assert enqueue.call_args.kwargs["host_id"] == host_id
     assert enqueue.call_args.kwargs["db"] is db
     db.commit.assert_called_once()
+
+
+# -- idempotent registration (Phase 22) ------------------------------------------
+
+
+def test_a_verified_handshake_spends_the_registration_nonce(db):
+    host = _host(db, registration_nonce_hash=ident.registration_nonce_hash("n" * 40))
+    claim = _claim(db, hostname=host.fqdn, host_id=str(host.id), host_token=TOKEN)
+    assert claim.verdict == ident.VERIFIED
+    assert ident.forget_registration_nonce(claim) is True
+    assert host.registration_nonce_hash is None
+    assert ident.forget_registration_nonce(claim) is False  # nothing left
+
+
+def test_only_a_verified_claim_spends_the_nonce(db):
+    stored = ident.registration_nonce_hash("n" * 40)
+    host = _host(db, registration_nonce_hash=stored)
+    claim = _claim(db, hostname=host.fqdn)  # no credential: refused
+    assert ident.forget_registration_nonce(claim) is False
+    assert host.registration_nonce_hash == stored
+
+
+def test_nonce_matching_is_exact():
+    host = SimpleNamespace(
+        registration_nonce_hash=ident.registration_nonce_hash("n" * 40)
+    )
+    assert ident.registration_nonce_matches(host, "n" * 40)
+    assert not ident.registration_nonce_matches(host, "n" * 41)
+    assert not ident.registration_nonce_matches(host, None)
+    assert not ident.registration_nonce_matches(
+        SimpleNamespace(registration_nonce_hash=None), "n" * 40
+    )

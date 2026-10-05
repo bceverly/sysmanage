@@ -31,6 +31,7 @@ import asyncio
 import json
 import random
 import time
+import uuid
 from collections import Counter, deque
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
@@ -112,6 +113,10 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
         self.ipv4 = self.local_ip
         self.host_id: Optional[str] = None
         self.host_token: Optional[str] = None
+        # Like the agent (server Phase 22): one random value, sent with every
+        # registration attempt, so a retry whose reply was lost gets the
+        # credential back.
+        self.registration_nonce = uuid.uuid4().hex + uuid.uuid4().hex
         self.not_before = 0.0  # a 429's Retry-After, with --identity-auth
         self.approved = False
         self.failures = 0
@@ -147,6 +152,7 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
     async def register(self) -> bool:
         """POST /api/host/register, retried like the agent: fixed 30 s, 10 tries."""
         body = payloads.registration_body(self)
+        body["registration_nonce"] = self.registration_nonce
         tokens = self.fleet.enrollment_tokens
         if tokens:  # multi-tenant stack: agents spread round-robin over tenants
             body["enrollment_token"] = tokens[self.index % len(tokens)]
@@ -484,6 +490,7 @@ class Fleet:
         bind_source: bool = True,
         report_window: bool = False,
         enrollment_tokens=(),
+        first_index: int = 0,
     ):
         self.base = base_url.rstrip("/")
         self.ws_base = self.base.replace("http" + "://", "ws" + "://", 1).replace(
@@ -503,7 +510,9 @@ class Fleet:
         self.payloads = payloads.Payloads(packages=packages)
         self.stats = FleetStats()
         self.stopping = False
-        self.agents = [SimAgent(self, i) for i in range(agents)]
+        # first_index: this fleet is one shard of a larger one (several
+        # processes and machines); names and ids must not collide.
+        self.agents = [SimAgent(self, first_index + i) for i in range(agents)]
         self._sessions: Dict[str, aiohttp.ClientSession] = {}
         self._tasks: List[asyncio.Task] = []
 

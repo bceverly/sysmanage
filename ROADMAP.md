@@ -11605,6 +11605,30 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       capability presents a valid token, the host is marked token-required and
       the legacy host_id-only identity is refused for it from then on. Only an
       admin action clears it.
+- [x] **Idempotent registration** -- a lost registration reply must not lock
+      an agent out. The id and token go only to the registration that created
+      the host (correctly: naming a host must not hand out its credential),
+      so when that reply was lost -- a timeout on a slow link, a server
+      restart at the wrong moment -- the agent's retry got "an existing host"
+      and every session after was refused `host_credential_required`. Found
+      2026-10-05: 6 of 10,000 simulated agents on the slowest Wi-Fi fleet box,
+      each marked down.
+      *Done in code 2026-10-05: the agent sends a random nonce with every
+      registration attempt (stored in its own database, migration
+      `b8c9d0e1f2a3`, so it survives a restart); the server keeps its SHA-256
+      on the host it creates (`host.registration_nonce_hash`, migration
+      `q29regnonce`) and a retry with the same nonce gets the same id and
+      token (`host_registration.existing_host_reply`); the hash is cleared
+      the first time the agent proves its token, so a nonce can recover a
+      credential never received, never one in use. An agent facing an older
+      server that rejects the field (422) retries once without it. Also
+      fixed: the agent logged every registration field verbatim -- the
+      registration key and enrollment token included; secrets now log as
+      `<redacted>`. To tick: a beast run with 0 credential refusals.*
+      *Proven 2026-10-05: the same 20k / 20-tenant storm on beast with the
+      fix -- credential refusals 15 -> 0, one agent recovered its lost
+      credential through its nonce ("Registration retry ... re-sending its
+      credential"), hosts marked down 22 -> 2.*
 - [ ] **Re-enroll action** for a reinstalled host (lost its token): an admin
       clears the credential from the host page and the next registration
       re-issues it; auto-approving enrollment keys may re-enroll on their own.
@@ -11747,7 +11771,7 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       peak 68,520 drained to 0 by ~16 min, processing up to 293/s, 0 expired
       / marked down / 429s / polling. "Process tenants in parallel" moved to
       its own item below; this run was single-tenant.*
-- [ ] **Process tenants in parallel** -- split out of "Agent intake
+- [x] **Process tenants in parallel** -- split out of "Agent intake
       throughput" (2026-10-03). Each worker drains one database at a time;
       with many tenant databases one busy tenant's backlog delays the rest.
       Not yet measured: the harness runs single-tenant -- extend it to many
@@ -11812,6 +11836,8 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       drained to 0, 0 hosts marked down, 0 errors sent to agents, 0 refused
       connections, heartbeat p95 2.7 s, health p95 3.3 s, other processes'
       CPU 0.0 (a clean run).*
+      *Ticked 2026-10-05 (Bryan): measured on two machines -- parallel
+      drains did not help, and 20 tenants drain completely with one.*
 - [x] **Retry scheduling** -- inbound processing ignores `scheduled_at` and has
       no ordering (a failing message is retried every second; failing rows can
       monopolize the batch); jitter the retry delay; bound the "no
@@ -11926,7 +11952,7 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       reconnect time after the monitor starts, nobody is marked down; a host
       still silent after that is. Harness, 1,000-agent restart storm: hosts
       marked down 4 -> 0.*
-- [ ] Cache host-to-tenant with TTL + invalidation (a host-less message scans
+- [x] Cache host-to-tenant with TTL + invalidation (a host-less message scans
       every tenant DB); async DB retry instead of a blocking `time.sleep`
       backoff on the event loop (`inbound_processor.py:74-108`,
       `partitions.py:395`).
@@ -11938,8 +11964,14 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       `registry_host_tenant.updated_at`, migration `r10registry`) and drops
       those; a failed check drops the whole cache. A first 60 s TTL did
       nothing -- agents heartbeat every 60 s on one worker, so every entry
-      had just expired. Still open: hostname-only messages still scan every
-      tenant database, and the blocking retry sleep.*
+      had just expired. Ticked 2026-10-05 (Bryan); the two parts not done
+      moved to the next item.*
+- [ ] **Hostname-only messages and the blocking retry** -- split out of the
+      host-to-tenant cache item (2026-10-05): a message that carries only a
+      hostname still scans every tenant database to find its host
+      (`inbound_processor._find_host_in_tenant_dbs`), and `run_with_db_retry`
+      sleeps with `time.sleep` when called on the event loop
+      (`partitions.py:395`).
 - [ ] Single-flight OpenBAO secret refresh with TTL jitter
       (`secrets_service.py:43-91`); chunked startup deletes
       (`custom_metric_retention.py`, `queue_maintenance`); remove per-message
@@ -12412,6 +12444,28 @@ unforgivable.
       the harness checks met once the pool fit counted tenant databases. Runs are only read from a machine the harness calls
       quiet: it now measures CPU used by processes outside the run and calls
       a run "NOT TRUSTWORTHY" above 25% (the workstation sits at ~37%).*
+      *Capacity curve 2026-10-05 -- server + PostgreSQL on beast (Ryzen 5
+      7600, 12 threads, 29 GB, wired), fleet sharded over three Wi-Fi
+      machines (`--remote-fleet t14:4,freebsd:3,t480:2`), 20 tenants,
+      server-restart storm, every run clean (0.0 outside CPU), nothing
+      expired, no 429s, no polling, backlog drained to 0 in all:*
+
+      | Agents | Workers | Reconnect 95% | Heartbeat p95 | Health p95 | Backlog peak | Marked down | Server CPU | Server RSS |
+      |---|---|---|---|---|---|---|---|---|
+      | 10,000 | 9 | 115 s | 1.1 s | 0.05 s | 21k | 6 (pre-nonce) | 273% | 7.2 GB |
+      | 20,000 | 9 | 230 s | 1.6 s | 0.85 s | 141k | 2 | 454% | 9.8 GB |
+      | 30,000 | 6 | not reached (93%) | 4.1 s | 3.7 s | 208k | 550 | 508% of 600% | 10.1 GB |
+
+      *Reading: ~2.2-2.7 server cores and ~3.5 GB of server memory per 10k
+      agents, plus PostgreSQL (~10 GB at 20k with 20 tenants). 30k drained
+      everything but with 6 workers the event loops were saturated (each
+      worker ~85% of a core), so reconnects and heartbeats ran late; more
+      workers needed memory beast did not have. One quiet 12-thread box
+      carries 20-25k agents across 20 tenants with every criterion met.
+      50k is NOT proven: by this curve it needs ~12-14 dedicated server
+      cores, a separate database machine and 48 GB+ -- extrapolation (for
+      the scaling guide) or a one-day cloud box. Bryan, 2026-10-05: stop
+      here for now.*
       *Exit-proof runs 2026-10-03, 40 minutes each, 10,000 agents on the
       FreeBSD box, with 22.1's full-jitter backoff and 22.3's off-loop ticks,
       waves and spreading in: server-restart storm -- backlog peak 51,732,

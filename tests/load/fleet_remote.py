@@ -90,7 +90,8 @@ async def run(args) -> dict:
                   send_on_change=args.send_on_change, jitter=args.jitter,
                   identity_auth=args.identity_auth, bind_source=False,
                   report_window=args.report_window,
-                  enrollment_tokens=[t for t in args.enrollment_tokens.split(",") if t])  # fmt: skip
+                  enrollment_tokens=[t for t in args.enrollment_tokens.split(",") if t],
+                  first_index=args.first_index)  # fmt: skip
     await fleet.register_all()
     print(f"REGISTERED {fleet.stats.counts['register_ok']}", flush=True)
     go = await asyncio.to_thread(sys.stdin.readline)
@@ -122,6 +123,8 @@ def main(argv=None) -> int:
     parser.add_argument("--jitter", action="store_true")
     parser.add_argument("--identity-auth", action="store_true")
     parser.add_argument("--report-window", action="store_true")
+    parser.add_argument("--first-index", type=int, default=0,
+                        help="number of this shard's first agent (several shards)")  # fmt: skip
     parser.add_argument("--enrollment-tokens", default="",
                         help="comma-separated; agents enroll round-robin (multi-tenant stack)")  # fmt: skip
     args = parser.parse_args(argv)

@@ -18,6 +18,8 @@ from fastapi import HTTPException
 
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.security import agent_identity
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
@@ -57,6 +59,52 @@ def _refresh_existing_host(session, existing_host, registration_data) -> "models
         print(f"Error updating existing host: {e}")
         session.rollback()
         raise
+
+
+def existing_host_reply(existing_host, registration_nonce) -> dict:
+    """The answer to a registration naming a host that already exists: no id
+    or token (Phase 22.0) -- unless it is the registrant retrying with the
+    nonce it created the host with (Phase 22; agent_identity)."""
+    retry = agent_identity.registration_nonce_matches(existing_host, registration_nonce)
+    if retry:
+        logger.info(
+            "Registration retry for %s with its nonce: re-sending its credential",
+            sanitize_log(existing_host.fqdn),
+        )
+    return registration_reply(existing_host, issue_credential=retry)
+
+
+def _audit_registration_key_enrollment(session, host, validated_key) -> None:
+    """Audit a host enrolled through a registration key (Phase 8.1)."""
+    # Audit log: enrollment via registration key carries enough
+    # context that the operator can correlate to the matched key.
+    if validated_key is not None:
+        AuditService.log(
+            db=session,
+            action_type=ActionType.CREATE,
+            entity_type=EntityType.HOST,
+            entity_id=str(host.id),
+            entity_name=host.fqdn,
+            description=_(
+                "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' (auto_approve=%(auto_approve)s)"
+            )
+            % {
+                "fqdn": host.fqdn,
+                "key_name": validated_key.name,
+                "auto_approve": validated_key.auto_approve,
+            },
+            result=Result.SUCCESS,
+            details={
+                "registration_key_id": str(validated_key.id),
+                "registration_key_name": validated_key.name,
+                "access_group_id": (
+                    str(validated_key.access_group_id)
+                    if validated_key.access_group_id
+                    else None
+                ),
+                "auto_approved": validated_key.auto_approve,
+            },
+        )
 
 
 def registration_reply(host, issue_credential: bool) -> dict:

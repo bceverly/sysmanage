@@ -268,10 +268,12 @@ def up_mt(port: int, tenants: int, bind_host: str = "127.0.0.1") -> dict:
     stack._run([sys.executable, "-c", _ADMIN, ADMIN, admin_password], cwd=code,  # pylint: disable=protected-access
                env=env, stdout=subprocess.DEVNULL)  # fmt: skip
     print("provisioner bootstrap ...", flush=True)
-    stack._run([sys.executable, "scripts/provision_bootstrap.py", "--bao-addr", bao_url,  # pylint: disable=protected-access
-                "--bao-token", bao_token, "--pg-host", "127.0.0.1",
-                "--pg-port", str(stack.PG_PORT), "--pg-db", stack.PG_DB,
-                "--pg-superuser", stack.PG_USER, "--pg-superuser-password", password],
+    # --flag=value: a generated password or token can start with "-", which
+    # argparse would take for an option (a 20k run failed to start that way).
+    stack._run([sys.executable, "scripts/provision_bootstrap.py", f"--bao-addr={bao_url}",
+                f"--bao-token={bao_token}", "--pg-host=127.0.0.1",
+                f"--pg-port={stack.PG_PORT}", f"--pg-db={stack.PG_DB}",
+                f"--pg-superuser={stack.PG_USER}", f"--pg-superuser-password={password}"],
                cwd=code, env=env, stdout=subprocess.DEVNULL)  # fmt: skip
     base_url = f"postgresql://{db['user']}:{db['password']}@{db['host']}:{db['port']}"
     state = {"port": port, "config": str(config_path), "code": str(code),

@@ -119,6 +119,10 @@ class Host(Base):
     requires_host_token = Column(
         Boolean, nullable=False, default=False, server_default=false()
     )
+    # Phase 22: SHA-256 of the nonce the agent registered with.  A retry with
+    # the same nonce gets the id and token again (its first reply may have
+    # been lost); cleared once the agent proves its token.
+    registration_nonce_hash = Column(String(64), nullable=True)
     last_access = Column(DateTime)
     status = Column(String(20), nullable=False, server_default="up")
     approval_status = Column(String(20), nullable=False, server_default="pending")

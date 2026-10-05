@@ -33,6 +33,7 @@ their agents update, with no switch to flip; only an administrator's
 re-enroll clears it.
 """
 
+import hashlib
 import hmac
 import logging
 import uuid
@@ -139,6 +140,46 @@ def apply_ratchet(claim: Claim, message_data: dict) -> bool:
             "Host %s now requires its token (agent keeps its credential)",
             sanitize_log(host.fqdn),
         )
+        return True
+    return False
+
+
+# -- idempotent registration (Phase 22) -----------------------------------------
+# The id and token go only to the registration that created the host -- or so
+# it was: when that reply was lost (a timeout on a slow link, a server restart
+# at the wrong moment) the agent's retry found "an existing host", got no
+# credential, and every session after was refused host_credential_required
+# with no way back but an admin re-enroll (6 of 10,000 simulated agents on a
+# slow Wi-Fi fleet, 2026-10-05).  An agent now sends a random nonce with every
+# registration attempt; the server keeps its hash on the host it creates, and
+# a retry presenting the same nonce gets the same id and token.  Only the
+# registrant knows the nonce, so naming a host still yields nothing; and the
+# hash is cleared the first time the agent proves its token, so a nonce can
+# recover a credential that was never received, never one in use.
+REGISTRATION_NONCE_MIN_LENGTH = 32
+
+
+def registration_nonce_hash(nonce) -> Optional[str]:
+    """SHA-256 (hex) of a usable nonce, or None (absent or too short)."""
+    if not isinstance(nonce, str) or len(nonce) < REGISTRATION_NONCE_MIN_LENGTH:
+        return None
+    return hashlib.sha256(nonce.encode("utf-8")).hexdigest()
+
+
+def registration_nonce_matches(host: Host, nonce) -> bool:
+    """True when ``nonce`` is the one ``host`` was created with, and the host's
+    agent has not yet proven its token."""
+    presented = registration_nonce_hash(nonce)
+    stored = getattr(host, "registration_nonce_hash", None)
+    return bool(presented and stored) and hmac.compare_digest(presented, stored)
+
+
+def forget_registration_nonce(claim: Claim) -> bool:
+    """Clear the nonce once the agent proves its token.  True when it changed
+    (the caller commits)."""
+    host = claim.host
+    if claim.verdict == VERIFIED and host is not None and host.registration_nonce_hash:
+        host.registration_nonce_hash = None
         return True
     return False
 

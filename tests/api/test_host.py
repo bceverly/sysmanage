@@ -388,6 +388,74 @@ class TestHostRegister:
         assert data["host_token"] == created_host.host_token
         assert created_host.host_token
 
+    def test_a_registration_retry_with_its_nonce_gets_its_credential(
+        self, client, session
+    ):
+        """Phase 22: the reply to the registration that created the host was
+        lost; the agent's retry presents the same nonce and gets the same id
+        and token -- anyone else naming the host still gets neither."""
+        nonce = "n" * 48
+        registration_data = {
+            "active": True,
+            "fqdn": "retry.example.com",
+            "hostname": "retry",
+            "ipv4": "192.168.1.160",
+            "registration_nonce": nonce,
+        }
+        first = client.post("/api/host/register", json=registration_data).json()
+        assert first["host_token"]
+
+        retry = client.post("/api/host/register", json=registration_data).json()
+        assert (retry["id"], retry["host_token"]) == (first["id"], first["host_token"])
+
+        stranger = client.post(
+            "/api/host/register",
+            json={**registration_data, "registration_nonce": "x" * 48},
+        ).json()
+        assert "id" not in stranger and "host_token" not in stranger
+        bare = client.post(
+            "/api/host/register",
+            json={
+                k: v for k, v in registration_data.items() if k != "registration_nonce"
+            },
+        ).json()
+        assert "id" not in bare and "host_token" not in bare
+
+    def test_a_spent_nonce_recovers_nothing(self, client, session):
+        """Once the agent proves its token the nonce is cleared: it can recover
+        a credential that was never received, never one in use."""
+        registration_data = {
+            "active": True,
+            "fqdn": "spent.example.com",
+            "hostname": "spent",
+            "ipv4": "192.168.1.161",
+            "registration_nonce": "s" * 48,
+        }
+        client.post("/api/host/register", json=registration_data)
+        host = (
+            session.query(models.Host)
+            .filter(models.Host.fqdn == "spent.example.com")
+            .first()
+        )
+        assert host.registration_nonce_hash
+        host.registration_nonce_hash = None  # what a verified handshake does
+        session.commit()
+        retry = client.post("/api/host/register", json=registration_data).json()
+        assert "id" not in retry and "host_token" not in retry
+
+    def test_a_short_nonce_is_not_stored(self, client, session):
+        client.post(
+            "/api/host/register",
+            json={"active": True, "fqdn": "short.example.com", "hostname": "short",
+                  "registration_nonce": "abc"},  # fmt: skip
+        )
+        host = (
+            session.query(models.Host)
+            .filter(models.Host.fqdn == "short.example.com")
+            .first()
+        )
+        assert host.registration_nonce_hash is None
+
     def test_register_host_success_existing(self, client, session):
         """Test successful registration of existing host (update)."""
         # Create existing host

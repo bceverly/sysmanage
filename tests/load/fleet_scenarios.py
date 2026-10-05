@@ -30,6 +30,7 @@ On today's code these are EXPECTED to fail -- that is the baseline.  With
 
 import asyncio
 import json
+import shlex
 import statistics
 import subprocess  # nosec B404 - fixed argv lists to ssh/scp
 import time
@@ -39,6 +40,7 @@ from typing import List, Optional
 
 from sqlalchemy import create_engine, text
 
+from tests.load import fleet_shards
 from tests.load import stack
 from tests.load.fleet import COLLECTION_S, Fleet
 from tests.load.observe import Observer
@@ -363,48 +365,74 @@ async def _expect(stream, prefix: str) -> str:
             return line[len(prefix) :].strip()
 
 
-async def run_remote_fleet(args) -> dict:
-    """Like run_fleet, with the agents on ``args.remote_fleet`` (ssh)."""
-    if not args.reuse_stack:
-        print("resetting the load stack (empty database) ...")
-        await asyncio.to_thread(stack.reset)
-    state = stack.load_state()
-    await asyncio.to_thread(_ship_code, args.remote_fleet)
-    storm = args.scenario == "fleet-restart-storm"
-    run_seconds = args.warmup_seconds + (
-        args.down_seconds + args.duration_seconds if storm else args.duration_seconds
-    )
+async def _start_shard(args, state, shard, run_seconds):
+    """One simulator process on ``shard.host`` over ssh."""
     flags = [f for f, on in (("--send-on-change", args.send_on_change),
                              ("--jitter", args.jitter),
                              ("--identity-auth", getattr(args, "identity_auth", False)),
                              ("--report-window", getattr(args, "report_window", False))) if on]  # fmt: skip
-    remote_cmd = " ".join(
-        [f"cd {_REMOTE_DIR}/code &&", "../venv/bin/python -m tests.load.fleet_remote",
+    inner = " ".join(
+        # Every agent holds a socket: raise the soft file limit to the hard
+        # one (1024 by default on Ubuntu).  sh -c: the login shell may be csh.
+        ["ulimit -n $(ulimit -Hn) 2>/dev/null;",
+         f"cd {_REMOTE_DIR}/code &&", "exec ../venv/bin/python -m tests.load.fleet_remote",
          f"--base http://{args.server_address}:{state['port']}",
-         f"--agents {args.agents}", f"--run-seconds {run_seconds}",
+         f"--agents {shard.count}", f"--first-index {shard.first}",
+         f"--run-seconds {run_seconds}",
          f"--time-scale {args.time_scale}", f"--packages {args.packages}",
          f"--sample-seconds {args.sample_seconds}", *flags,
          *([f"--enrollment-tokens {','.join(_tokens(state))}"] if _tokens(state) else [])]
     )  # fmt: skip
-    # Closed in the finally below; the subprocess writes to it throughout.
+    remote_cmd = "sh -c " + shlex.quote(inner)
+    # Closed by the caller; the subprocess writes to it throughout.
     log = open(  # pylint: disable=consider-using-with
-        stack.STATE_DIR / "remote-fleet.log", "wb"
+        stack.STATE_DIR / f"remote-fleet-{shard.host}-{shard.first}.log", "wb"
     )
     proc = await asyncio.create_subprocess_exec(
-        "ssh", "-o", "BatchMode=yes", args.remote_fleet, remote_cmd,
+        "ssh", "-o", "BatchMode=yes", shard.host, remote_cmd,
         stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=log,
         limit=256 * 1024 * 1024,  # the STATS line is large (default: 64 KB)
     )  # fmt: skip
-    print(f"enrolling {args.agents} agents on {args.remote_fleet} ...", flush=True)
-    registered = await _expect(proc.stdout, "REGISTERED ")
+    return proc, log
+
+
+async def _tell_all(procs, line: bytes):
+    for proc in procs:
+        proc.stdin.write(line)
+        await proc.stdin.drain()
+
+
+async def run_remote_fleet(args) -> dict:  # pylint: disable=too-many-locals
+    """Like run_fleet, with the agents on other machines over ssh:
+    ``--remote-fleet HOST`` or shards ``HOST:PROCS,HOST:PROCS`` (fleet_shards)."""
+    if not args.reuse_stack:
+        print("resetting the load stack (empty database) ...")
+        await asyncio.to_thread(stack.reset)
+    state = stack.load_state()
+    shards = fleet_shards.split(args.remote_fleet, args.agents)
+    for host in sorted({s.host for s in shards}):
+        await asyncio.to_thread(_ship_code, host)
+    storm = args.scenario == "fleet-restart-storm"
+    run_seconds = args.warmup_seconds + (
+        args.down_seconds + args.duration_seconds if storm else args.duration_seconds
+    )
+    started_shards = [await _start_shard(args, state, s, run_seconds) for s in shards]
+    procs = [proc for proc, _log in started_shards]
+    print(f"enrolling {args.agents} agents on {args.remote_fleet} "
+          f"({len(shards)} process(es)) ...", flush=True)  # fmt: skip
+    registered = sum(
+        int(n)
+        for n in await asyncio.gather(
+            *(_expect(p.stdout, "REGISTERED ") for p in procs)
+        )
+    )
     approved = await asyncio.to_thread(_approve_all, state)
     print(f"  registered {registered}, approved {approved}", flush=True)
     observer = Observer(f"http://127.0.0.1:{state['port']}", state["db_url"],
                         lambda: stack.load_state().get("server_pid"),
                         interval=args.sample_seconds,
                         tenant_db_urls=_tenant_db_urls(state))  # fmt: skip
-    proc.stdin.write(b"GO\n")
-    await proc.stdin.drain()
+    await _tell_all(procs, b"GO\n")
     started = time.monotonic()
     observer.start()
     restart_t = None
@@ -425,21 +453,24 @@ async def run_remote_fleet(args) -> dict:
             observer.mark("agent restart")
             print(f"  t={restart_t}s: restarting every agent ...", flush=True)
             forget = getattr(args, "forget_on_restart", False)
-            proc.stdin.write(b"RESTART forget\n" if forget else b"RESTART\n")
-            await proc.stdin.drain()
-            await _expect(proc.stdout, "RESTARTED")
-        stats = json.loads(await _expect(proc.stdout, "STATS "))
+            await _tell_all(procs, b"RESTART forget\n" if forget else b"RESTART\n")
+            await asyncio.gather(*(_expect(p.stdout, "RESTARTED") for p in procs))
+        parts = await asyncio.gather(*(_expect(p.stdout, "STATS ") for p in procs))
+        stats = fleet_shards.merge([json.loads(part) for part in parts])
     finally:
         await observer.stop()
-        await proc.wait()
-        log.close()
+        for proc, log in started_shards:
+            await proc.wait()
+            log.close()
+    # Each machine is one source address (bind_source=False on remote fleets).
+    stats["source_ips"] = len({s.host for s in shards})
     fleet = _remote_fleet(stats)
     summary = _summarize(f"{args.scenario}-{args.agents}", fleet, observer, restart_t,
                          args.warmup_seconds)  # fmt: skip
     summary["remote_fleet"] = args.remote_fleet
     return {"scenario": args.scenario, "scenarios": [summary], "summary": summary,
             "violations": verdict(summary), "server_samples": observer.samples,
-        "pg_top_statements": observer.top_statements,
+            "pg_top_statements": observer.top_statements,
             "agent_timeline": fleet.stats.timeline}  # fmt: skip
 
 

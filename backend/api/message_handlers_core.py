@@ -229,6 +229,8 @@ async def _handle_system_info_impl(db: Session, connection, message_data: dict):
         )
 
         agent_identity.apply_ratchet(claim, message_data)
+        # The agent holds its token now: its registration nonce is spent.
+        agent_identity.forget_registration_nonce(claim)
 
         # Always set hostname on connection so we can send approval messages
         connection.hostname = hostname
