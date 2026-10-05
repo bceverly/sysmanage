@@ -28,6 +28,9 @@ checkout) with a built ``multitenancy_engine`` bundle, and the docs repo's
 ``screenshots/pro_keygen.py`` (``SYSMANAGE_DOCS_DIR``).
 """
 
+# stack_mt extends stack.py and uses its internals by design.
+# pylint: disable=protected-access
+
 import json
 import os
 import platform
@@ -53,6 +56,7 @@ DOCS_DIR = Path(
     os.environ.get("SYSMANAGE_DOCS_DIR", stack.REPO.parent / "sysmanage-docs")
 )
 ENGINE = "multitenancy_engine"
+MT_MAX_CONNECTIONS = 3000
 ADMIN = "load-tenant-admin@sysmanage.org"
 
 
@@ -225,10 +229,18 @@ def up_mt(port: int, tenants: int, bind_host: str = "127.0.0.1") -> dict:
     state_dir.mkdir(parents=True, exist_ok=True)
     stack.fresh_server_log()
     password = secrets.token_urlsafe(16)
+    # Sized for the pools a 20-tenant server plans (workers x (bootstrap +
+    # tenants x 8)): at 500 the startup fit had to give each tenant database
+    # one connection per worker, and the run measured that, not the server
+    # (2026-10-05).  The server's own fit keeps it honest at any size.
     if stack.native():
-        stack._start_postgres_native(password)  # pylint: disable=protected-access
+        stack._start_postgres_native(
+            password, MT_MAX_CONNECTIONS
+        )  # pylint: disable=protected-access
     else:
-        stack._start_postgres(password)  # pylint: disable=protected-access
+        stack._start_postgres(
+            password, MT_MAX_CONNECTIONS
+        )  # pylint: disable=protected-access
     db = {"user": stack.PG_USER, "password": password, "host": "127.0.0.1",
           "port": stack.PG_PORT, "name": stack.PG_DB}  # fmt: skip
     bao_token = secrets.token_urlsafe(24)

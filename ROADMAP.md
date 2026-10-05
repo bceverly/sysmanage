@@ -11788,11 +11788,30 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       223 s), heartbeat p95 2.2 s, health p95 2.3 s, 0 expired / 429s /
       polling. The workstation's 20-tenant runs had been measuring a shared
       machine. Still failing: 239 hosts marked DOWN by the outage (0 in the
-      single-tenant exit runs) -- next item. Tried and reverted: running the
+      single-tenant exit runs) -- FIXED the same day, see below. Tried and
+      reverted: running the
       full heartbeat row update in a worker thread -- backlog drained ~2 min
       sooner but hosts marked down rose to 1,239 (the first heartbeat's
       `last_access` write waited behind the shared thread pool), so
       SYSTEM_INFO stays on the loop too.*
+      *The 239 hosts marked down, fixed 2026-10-05: PostgreSQL refused
+      clients ("too many clients", hundreds of times) and the batched
+      heartbeat writes failed 801 times, so those hosts' `last_access` was
+      never written. The 22.2 startup pool check fitted each worker's
+      bootstrap pool under `max_connections` and ignored the tenant
+      databases' pools on the same server (8 workers x 20 tenants planned
+      ~1,500 connections against 500). `pool_sizing.fit` now counts them:
+      with multi-tenancy on, the bootstrap pool keeps at most half of each
+      worker's share and the tenant pools split the rest, re-divided as
+      tenants are added (`tenant_engine_kwargs`), at least one each, with the
+      same loud warning; the docs' pool section says so in all 14 languages.
+      The harness's multi-tenant PostgreSQL is now sized for what 20 tenants
+      plan (`max_connections` 3000; single-tenant stacks keep 500). Rerun on
+      t14, 10k agents / 20 tenants: EVERY criterion the harness checks met --
+      10,000 / 10,000 reconnected (95% in 255 s), backlog peak 95,884
+      drained to 0, 0 hosts marked down, 0 errors sent to agents, 0 refused
+      connections, heartbeat p95 2.7 s, health p95 3.3 s, other processes'
+      CPU 0.0 (a clean run).*
 - [x] **Retry scheduling** -- inbound processing ignores `scheduled_at` and has
       no ordering (a failing message is retried every second; failing rows can
       monopolize the batch); jitter the retry delay; bound the "no
@@ -12389,8 +12408,8 @@ unforgivable.
       pushes (22.3), a license-server publish (22.4).*
       *Many tenants 2026-10-05: 10k agents across 20 tenants drains a
       server-restart storm completely on a dedicated 12-thread Linux box
-      (t14; 22.2 "Process tenants in parallel" notes); 239 hosts marked down
-      remain to fix. Runs are only read from a machine the harness calls
+      (t14; 22.2 "Process tenants in parallel" notes) with every criterion
+      the harness checks met once the pool fit counted tenant databases. Runs are only read from a machine the harness calls
       quiet: it now measures CPU used by processes outside the run and calls
       a run "NOT TRUSTWORTHY" above 25% (the workstation sits at ~37%).*
       *Exit-proof runs 2026-10-03, 40 minutes each, 10,000 agents on the

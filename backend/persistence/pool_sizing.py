@@ -249,16 +249,18 @@ def fit(
     set_tenant_budget(None)
     if allowed <= 0:
         return pool, None
-    if planned + tenant_planned <= allowed:
-        if tenants:  # tenants added later must still fit beside this pool
+    if not tenants:
+        bootstrap_allowed = allowed
+    else:
+        # The bootstrap pool never takes more than its share: tenants are
+        # added while the server runs (a server started before its tenants
+        # once kept 46 of 54 connections and left 1 per tenant database).
+        bootstrap_allowed = max(1, int(allowed * BOOTSTRAP_SHARE_WITH_TENANTS))
+        if planned <= bootstrap_allowed and planned + tenant_planned <= allowed:
             set_tenant_budget(allowed - planned)
+            return pool, None
+    if planned <= bootstrap_allowed and not tenants:
         return pool, None
-    bootstrap_allowed = allowed
-    if tenants:
-        keep_for_tenants = min(
-            tenant_planned, int(allowed * (1 - BOOTSTRAP_SHARE_WITH_TENANTS))
-        )
-        bootstrap_allowed = max(1, allowed - max(tenants, keep_for_tenants))
     fitted = dict(pool)
     if planned > bootstrap_allowed:
         fitted["max_overflow"] = max(0, bootstrap_allowed - pool["size"])

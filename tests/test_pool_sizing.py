@@ -170,3 +170,22 @@ def test_tenant_count_is_zero_without_a_registry():
         assert ps.tenant_count(engine) == 0
     finally:
         engine.dispose()
+
+
+def test_a_server_started_before_its_tenants_leaves_them_room():
+    """2026-10-05 on t14: the server started with 1 tenant, kept 46 of each
+    worker's 54 connections, and the 20 tenants added next got 1 each."""
+    ps.fit(_pool(), 500, 9, tenants=1)
+    allowed = (500 - ps.RESERVED_CONNECTIONS) // 9
+    budget = ps._tenant_budget["per_worker"]  # pylint: disable=protected-access
+    assert budget >= allowed // 2
+    # With a database sized for 20 tenants the configured pools fit as is.
+    ps.fit(_pool(), 3000, 9, tenants=1)
+    with patch.object(ps, "tenant_count", return_value=20), patch.object(
+        ps, "machine_capacity", return_value=(12, 29.0)
+    ):
+        assert ps.tenant_engine_kwargs({}) == {
+            "pool_size": 2,
+            "max_overflow": 6,
+            "pool_timeout": 30,
+        }

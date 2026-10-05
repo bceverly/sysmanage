@@ -75,7 +75,7 @@ def load_state():
     return json.loads(STATE_FILE.read_text(encoding="utf-8"))
 
 
-def _start_postgres(password):
+def _start_postgres(password, max_connections=500):
     if _container_exists():
         _run(["docker", "rm", "-f", CONTAINER], stdout=subprocess.DEVNULL,
              stderr=subprocess.DEVNULL)  # fmt: skip
@@ -86,8 +86,8 @@ def _start_postgres(password):
             "-e", f"POSTGRES_PASSWORD={password}",
             "-e", f"POSTGRES_DB={PG_DB}",
             "-p", f"127.0.0.1:{PG_PORT}:5432",
-            "--tmpfs", "/var/lib/postgresql/data",
-            PG_IMAGE, "-c", "max_connections=500",
+            "--tmpfs", "/var/lib/postgresql/data", "--shm-size", "1g",
+            PG_IMAGE, "-c", f"max_connections={max_connections}",
             # Per-statement cost for the observer's report (observe.py).
             "-c", "shared_preload_libraries=pg_stat_statements",
         ],
@@ -137,7 +137,7 @@ def _stop_postgres_native():
     shutil.rmtree(PGDATA, ignore_errors=True)
 
 
-def _start_postgres_native(password):
+def _start_postgres_native(password, max_connections=500):
     _stop_postgres_native()
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     pwfile = STATE_DIR / "pg-password"
@@ -151,7 +151,7 @@ def _start_postgres_native(password):
         pwfile.unlink()
     options = [
         f"-p {PG_PORT}", "-c listen_addresses=127.0.0.1",
-        f"-c unix_socket_directories={STATE_DIR}", "-c max_connections=500",
+        f"-c unix_socket_directories={STATE_DIR}", f"-c max_connections={max_connections}",
         "-c fsync=off", "-c synchronous_commit=off", "-c full_page_writes=off",
     ]  # fmt: skip
     if _pg_stat_statements_available():
