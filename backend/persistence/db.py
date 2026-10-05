@@ -141,9 +141,19 @@ def _sized_engine(url, the_config):
     workers = pool_sizing.server_workers()
     limit = pool_sizing.server_max_connections(engine)
     if limit is not None:
-        fitted, reason = pool_sizing.fit(pool, limit, workers)
+        # Multi-tenancy: the tenant databases' pools share the same server
+        # (at least one tenant is planned for, so tenants added later fit).
+        from backend.config.config import (  # pylint: disable=import-outside-toplevel
+            is_multitenancy_enabled,
+        )
+
+        tenants = 0
+        if is_multitenancy_enabled():
+            tenants = max(1, pool_sizing.tenant_count(engine))
+        fitted, reason = pool_sizing.fit(pool, limit, workers, tenants)
         if reason:
             logger.warning("Database pool reduced to fit the server: %s", reason)
+        if fitted != pool:
             engine.dispose()
             engine, pool = build(fitted), fitted
     logger.info(

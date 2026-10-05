@@ -12,6 +12,7 @@ install-time write that must never touch an administrator's own settings.
 
 from unittest.mock import patch
 
+import pytest
 import yaml
 
 from backend.persistence import pool_sizing as ps
@@ -96,3 +97,76 @@ def test_tenant_engine_kwargs_use_the_tenant_keys():
 def test_the_cli_prints_valid_yaml(capsys):
     assert ps.main(["--print"]) == 0
     assert "size" in yaml.safe_load(capsys.readouterr().out)["database_pool"]
+
+
+# -- tenant databases share the server (2026-10-05) ------------------------------
+
+
+@pytest.fixture(autouse=True)
+def _no_tenant_budget():
+    ps.set_tenant_budget(None)
+    yield
+    ps.set_tenant_budget(None)
+
+
+def _pool(size=32, overflow=32):
+    return {"size": size, "max_overflow": overflow, "timeout": 30, "recycle": 1800,
+            "tenant_size": 2, "tenant_max_overflow": 6}  # fmt: skip
+
+
+def test_tenant_pools_count_against_the_server():
+    """The t14 storm: 8 workers, 20 tenants, max_connections 500 -- the old
+    check fitted the bootstrap pool alone and planned ~1,500 connections."""
+    fitted, reason = ps.fit(_pool(), 500, 8, tenants=20)
+    allowed = (500 - ps.RESERVED_CONNECTIONS) // 8
+    bootstrap = fitted["size"] + fitted["max_overflow"]
+    assert bootstrap <= allowed * ps.BOOTSTRAP_SHARE_WITH_TENANTS + 1
+    assert (
+        bootstrap + ps._tenant_budget["per_worker"] <= allowed
+    )  # pylint: disable=protected-access
+    assert "20 tenant database(s)" in reason
+    with patch.object(ps, "tenant_count", return_value=20), patch.object(
+        ps, "machine_capacity", return_value=(12, 29.0)
+    ):
+        kwargs = ps.tenant_engine_kwargs({})
+    total = 8 * (bootstrap + 20 * (kwargs["pool_size"] + kwargs["max_overflow"]))
+    assert total <= 500 - ps.RESERVED_CONNECTIONS
+    assert kwargs["pool_size"] >= 1
+
+
+def test_tenants_added_after_startup_still_fit():
+    ps.fit(_pool(10, 10), 1000, 2, tenants=1)  # fits: room is recorded
+    budget = ps._tenant_budget["per_worker"]  # pylint: disable=protected-access
+    assert budget == (1000 - ps.RESERVED_CONNECTIONS) // 2 - 20
+    with patch.object(ps, "machine_capacity", return_value=(4, 8.0)):
+        with patch.object(ps, "tenant_count", return_value=1):
+            assert ps.tenant_engine_kwargs({})["pool_size"] == 2  # configured
+        with patch.object(ps, "tenant_count", return_value=200):
+            kwargs = ps.tenant_engine_kwargs({})
+    assert 200 * (kwargs["pool_size"] + kwargs["max_overflow"]) <= budget
+    assert (kwargs["pool_size"], kwargs["max_overflow"]) == (2, 0)  # 475 // 200
+
+
+def test_every_tenant_keeps_at_least_one_connection():
+    ps.fit(_pool(), 60, 4, tenants=50)
+    with patch.object(ps, "tenant_count", return_value=50), patch.object(
+        ps, "machine_capacity", return_value=(4, 8.0)
+    ):
+        kwargs = ps.tenant_engine_kwargs({})
+    assert kwargs["pool_size"] == 1 and kwargs["max_overflow"] == 0
+
+
+def test_single_tenant_servers_are_unchanged():
+    pool = _pool(10, 10)
+    assert ps.fit(pool, 200, 1) == (pool, None)
+    assert ps._tenant_budget["per_worker"] is None  # pylint: disable=protected-access
+
+
+def test_tenant_count_is_zero_without_a_registry():
+    from sqlalchemy import create_engine  # pylint: disable=import-outside-toplevel
+
+    engine = create_engine("sqlite://")
+    try:
+        assert ps.tenant_count(engine) == 0
+    finally:
+        engine.dispose()

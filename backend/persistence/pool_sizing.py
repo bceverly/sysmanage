@@ -51,6 +51,20 @@ canary, an operator's psql), must fit.  If it does not, the overflow and then
 the size are reduced to fit, with a loud warning saying so -- the server never
 refuses to start over this, and never silently plans for more connections
 than the database will accept.
+
+TENANT DATABASES (multi-tenancy)
+--------------------------------
+Every worker also keeps a pool per tenant database (``tenant_size`` +
+``tenant_max_overflow``).  Tenant databases normally live on the same
+PostgreSQL server, so they count against the same ``max_connections``: the
+check above once fitted the bootstrap pool alone, and a 20-tenant, 8-worker
+server planned for ~1,500 connections on a 500-connection server.  Under a
+10,000-agent reconnect storm PostgreSQL refused clients, heartbeats could not
+be recorded and 239 connected hosts were marked down (2026-10-05).  Now, when
+everything does not fit, the bootstrap pool keeps at most half of each
+worker's share and the tenant pools split the rest -- re-divided as tenants
+are added, at least one connection each -- with the same loud warning.  (A
+tenant database on another server is counted anyway: safe, if cautious.)
 """
 
 import argparse
@@ -68,6 +82,13 @@ DEFAULT_TIMEOUT = 30
 DEFAULT_RECYCLE = 1800
 DEFAULT_TENANT_SIZE = 2
 DEFAULT_TENANT_OVERFLOW = 6
+# Of each worker's connections, at most this share goes to the bootstrap pool
+# when the tenant pools would not otherwise fit.
+BOOTSTRAP_SHARE_WITH_TENANTS = 0.5
+
+# Set at startup when tenant pools had to be fitted: the connections each
+# worker may hold across ALL its tenant pools.  None: use the configured sizes.
+_tenant_budget: Dict[str, Optional[int]] = {"per_worker": None}
 MIN_SIZE, MAX_SIZE = 10, 40
 
 
@@ -172,24 +193,91 @@ def tenant_engine_kwargs(app_config: Optional[Dict[str, Any]] = None) -> Dict[st
 
         app_config = config.get_config()
     pool = settings(app_config)
-    return {"pool_size": pool["tenant_size"], "max_overflow": pool["tenant_max_overflow"],
-            "pool_timeout": pool["timeout"]}  # fmt: skip
+    size, overflow = pool["tenant_size"], pool["tenant_max_overflow"]
+    budget = _tenant_budget["per_worker"]
+    if budget is not None:
+        each = max(1, budget // max(1, tenant_count()))
+        if size + overflow > each:
+            size = min(size, each)
+            overflow = each - size
+    return {
+        "pool_size": size,
+        "max_overflow": overflow,
+        "pool_timeout": pool["timeout"],
+    }
+
+
+def tenant_count(engine=None) -> int:
+    """Provisioned tenant databases (placements in the registry); 0 when the
+    registry cannot be read (no multi-tenancy tables, SQLite)."""
+    from sqlalchemy import text  # pylint: disable=import-outside-toplevel
+
+    if engine is None:
+        from backend.persistence import db  # pylint: disable=import-outside-toplevel
+
+        engine = db.get_engine()
+    try:
+        with engine.connect() as conn:
+            return int(
+                conn.execute(
+                    text(
+                        "SELECT count(DISTINCT tenant_id) FROM registry_tenant_placement"
+                    )
+                ).scalar()
+                or 0
+            )
+    except Exception:  # pylint: disable=broad-exception-caught
+        return 0
+
+
+def set_tenant_budget(per_worker: Optional[int]) -> None:
+    """Record (or clear) each worker's connection budget for tenant pools."""
+    _tenant_budget["per_worker"] = per_worker
 
 
 def fit(
-    pool: Dict[str, int], max_connections: int, workers: int
+    pool: Dict[str, int], max_connections: int, workers: int, tenants: int = 0
 ) -> Tuple[Dict[str, int], Optional[str]]:
-    """Shrink ``pool`` so every worker's pool fits under the server's limit.
+    """Shrink ``pool`` so every worker's pools fit under the server's limit.
 
-    Returns the pool to use and, when it had to change, why."""
+    ``tenants``: tenant databases whose pools share the server (multi-
+    tenancy).  Returns the pool to use and, when it had to change, why;
+    records the tenant pools' share for ``tenant_engine_kwargs``."""
     allowed = (max_connections - RESERVED_CONNECTIONS) // max(1, workers)
     planned = pool["size"] + pool["max_overflow"]
-    if allowed <= 0 or planned <= allowed:
+    tenant_planned = tenants * (pool["tenant_size"] + pool["tenant_max_overflow"])
+    set_tenant_budget(None)
+    if allowed <= 0:
         return pool, None
+    if planned + tenant_planned <= allowed:
+        if tenants:  # tenants added later must still fit beside this pool
+            set_tenant_budget(allowed - planned)
+        return pool, None
+    bootstrap_allowed = allowed
+    if tenants:
+        keep_for_tenants = min(
+            tenant_planned, int(allowed * (1 - BOOTSTRAP_SHARE_WITH_TENANTS))
+        )
+        bootstrap_allowed = max(1, allowed - max(tenants, keep_for_tenants))
     fitted = dict(pool)
-    fitted["max_overflow"] = max(0, allowed - pool["size"])
-    if pool["size"] > allowed:
-        fitted["size"], fitted["max_overflow"] = max(1, allowed), 0
+    if planned > bootstrap_allowed:
+        fitted["max_overflow"] = max(0, bootstrap_allowed - pool["size"])
+        if pool["size"] > bootstrap_allowed:
+            fitted["size"], fitted["max_overflow"] = max(1, bootstrap_allowed), 0
+    if tenants:
+        set_tenant_budget(
+            max(tenants, allowed - fitted["size"] - fitted["max_overflow"])
+        )
+        each = max(1, _tenant_budget["per_worker"] // tenants)
+        return fitted, (
+            f"PostgreSQL max_connections is {max_connections}; with {workers} "
+            f"worker(s), {tenants} tenant database(s) and {RESERVED_CONNECTIONS} "
+            f"reserved, each worker may use {allowed}, but {CONFIG_KEY} asks for "
+            f"{planned} + {tenants} x {pool['tenant_size'] + pool['tenant_max_overflow']}. "
+            f"Using {fitted['size']} + {fitted['max_overflow']} for the bootstrap "
+            f"pool and {each} per tenant database. Raise max_connections in "
+            f"postgresql.conf (or put PgBouncer in front) for more."
+        )
     reason = (
         f"PostgreSQL max_connections is {max_connections}; with {workers} worker(s) "
         f"and {RESERVED_CONNECTIONS} reserved, each worker may use {allowed}, but "
