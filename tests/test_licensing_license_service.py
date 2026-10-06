@@ -440,6 +440,7 @@ class TestLicenseServiceOfflineGrace:
         service = LicenseService()
         mock_license = MagicMock()
         mock_license.license_id = "test-123"
+        mock_license.offline_days = 7
         service._cached_license = mock_license
 
         mock_record = MagicMock()

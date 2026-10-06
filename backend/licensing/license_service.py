@@ -10,13 +10,13 @@ Handles:
 - Phone-home to license server for validation
 - Caching validated license in database
 - Background task for periodic re-validation
-- Offline grace period management
+- Offline operation (no time limit; the license's own expiry bounds it)
 - Module update checking
 """
 
 import asyncio
 import random
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Optional
 
 import aiohttp
@@ -35,6 +35,7 @@ from backend.licensing.public_key import fetch_public_key, get_public_key_pem
 from backend.licensing.validator import (
     LicensePayload,
     ValidationResult,
+    check_expiration,
     hash_license_key,
     validate_license,
 )
@@ -49,6 +50,9 @@ DEFAULT_PHONE_HOME_INTERVAL = 24
 
 # Default module update check interval in hours
 DEFAULT_MODULE_UPDATE_INTERVAL = 6
+
+# _last_phone_home_at(): the database could not say.
+_UNKNOWN = object()
 
 # Default modules path
 DEFAULT_MODULES_PATH = "/var/lib/sysmanage/modules"
@@ -198,9 +202,10 @@ class LicenseService:
         if update_now:
             await module_loader.check_and_update_on_startup()
 
-        # Start phone-home background task
-        if self._get_phone_home_url():
-            self._phone_home_task = asyncio.create_task(self._phone_home_loop())
+        # Start the license-check background task -- with or without a
+        # phone-home URL: an offline (air-gapped) server still has its
+        # license's expiry checked while it runs, not only at startup.
+        self._phone_home_task = asyncio.create_task(self._phone_home_loop())
 
         # Start module update check background task
         if self._get_phone_home_url():
@@ -322,14 +327,19 @@ class LicenseService:
         maintenance) calling the license server in the same minute forever.
         The first check waits a random 5-30 minutes, every interval varies
         +/-25%, and a ``next_check_after`` (seconds) in the server's answer
-        is honored -- the license server can spread its own load."""
+        is honored -- the license server can spread its own load.
+
+        Every cycle first checks the license's own term: offline operation has
+        no time limit, so this is what retires an expired license on a server
+        that runs for months without a restart or a reachable license server."""
         interval_seconds = self._get_phone_home_interval() * 3600
         await asyncio.sleep(_jittered_between(300, 1800))
 
-        while True:
+        while self._cached_license:
             self._next_check_after = None
             try:
-                await self._phone_home()
+                if self._check_license_term():
+                    await self._phone_home()
             except Exception as e:
                 logger.exception("Phone-home error: %s", e)
 
@@ -420,6 +430,26 @@ class LicenseService:
             self._log_validation("phone_home", "error", str(e))
             return self._check_offline_grace()
 
+    def _check_license_term(self) -> bool:
+        """Retire the license once it is past its expiry and grace period
+        (the same rule ``validate_license`` applies at load).  True while it
+        is still in force."""
+        if not self._cached_license:
+            return False
+        valid, warning = check_expiration(self._cached_license.expires_at)
+        if valid:
+            if warning:
+                logger.warning("License warning: %s", warning)
+            return True
+        logger.warning(
+            "License %s expired (%s) and is past its grace period",
+            self._cached_license.license_id,
+            self._cached_license.expires_at,
+        )
+        self._log_validation("local", "failure", "License has expired")
+        self._deactivate_license()
+        return False
+
     def _update_phone_home_timestamp(self) -> None:
         """Update the last phone-home timestamp in database."""
         if not self._cached_license:
@@ -448,21 +478,72 @@ class LicenseService:
                 session.rollback()
 
     def _check_offline_grace(self) -> bool:
-        """
-        Check if we're within the offline grace period.
+        """The license server could not be reached: keep the license.
+
+        Offline operation is supported by design, without a time limit, so an
+        air-gapped server (or one whose network to the license server is down
+        for good) keeps its license.  What bounds a license is its signed
+        expiry, which ``validate_license`` enforces at every load whether or
+        not the license server answers; revocation needs a successful
+        phone-home, so a server that never reaches it never learns of one.
+
+        The license's ``offline_days`` is when this starts to WARN, not a
+        cutoff: past it the log says how long the server has been out of
+        contact.  Reading the last contact is only for that message -- if the
+        database cannot answer, the license is kept all the same (by this
+        policy, not because of the error).
 
         Returns:
-            True if still within grace period, False otherwise
+            True when a license is loaded (it stays active), False without one.
         """
         if not self._cached_license:
             return False
 
+        expires = self._cached_license.expires_at
+        last_contact = self._last_phone_home_at()
+        if last_contact is _UNKNOWN:
+            logger.warning(
+                "License server unreachable; time since the last contact unknown. "
+                "The license stays active until it expires (%s).",
+                expires,
+            )
+            return True
+        if last_contact is None:
+            logger.info(
+                "License server not reached yet; operating offline. The license "
+                "stays active until it expires (%s).",
+                expires,
+            )
+            return True
+
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        offline_days = (now - last_contact).days
+        if offline_days > self._cached_license.offline_days:
+            logger.warning(
+                "License server not reached for %d days (expected at least every "
+                "%d). The license stays active until it expires (%s); "
+                "revocations and engine updates cannot reach this server until "
+                "it reconnects.",
+                offline_days,
+                self._cached_license.offline_days,
+                expires,
+            )
+        else:
+            logger.info(
+                "License server unreachable; operating offline (last contact %d "
+                "days ago).",
+                offline_days,
+            )
+        return True
+
+    def _last_phone_home_at(self):
+        """The last successful phone-home: a datetime, None if there never was
+        one, or ``_UNKNOWN`` if the database could not say."""
         session_local = sessionmaker(
             autocommit=False, autoflush=False, bind=db_module.get_engine()
         )
-
-        with session_local() as session:
-            try:
+        try:
+            with session_local() as session:
                 license_record = (
                     session.query(ProPlusLicense)
                     .filter(
@@ -470,29 +551,10 @@ class LicenseService:
                     )
                     .first()
                 )
-                if not license_record or not license_record.last_phone_home_at:
-                    # Never successfully phoned home - allow initial grace period
-                    return True
-
-                offline_days = license_record.offline_days
-                grace_deadline = license_record.last_phone_home_at + timedelta(
-                    days=offline_days
-                )
-                now = datetime.now(timezone.utc).replace(tzinfo=None)
-
-                if now <= grace_deadline:
-                    days_remaining = (grace_deadline - now).days
-                    logger.info(
-                        "Operating in offline mode (%d days remaining)", days_remaining
-                    )
-                    return True
-                else:
-                    logger.warning("Offline grace period expired")
-                    return False
-
-            except Exception as e:
-                logger.exception("Error checking offline grace: %s", e)
-                return True  # Fail open during errors
+                return license_record.last_phone_home_at if license_record else None
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.warning("Could not read the last license-server contact: %s", e)
+            return _UNKNOWN
 
     def _deactivate_license(self) -> None:
         """Deactivate the current license."""

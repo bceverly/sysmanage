@@ -7,6 +7,8 @@ import { BrowserRouter } from 'react-router';
 import { vi, beforeEach } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import Home from '../../Pages/Home';
+import { Gauge } from '@mui/x-charts/Gauge';
+import { doGetHosts, doGetHostsSummary } from '../../Services/hosts';
 import { server } from '../../mocks/node';
 
 // Mock localStorage
@@ -19,12 +21,17 @@ Object.defineProperty(window, 'localStorage', {
   },
 });
 
-// Mock the hosts service
+// Mock the hosts service: the dashboard reads counts, not the host list
+// (Phase 22.7).
 vi.mock('../../Services/hosts', () => ({
-  doGetHosts: vi.fn(() => Promise.resolve([
-    { id: '550e8400-e29b-41d4-a716-446655440001', active: true, status: 'up', fqdn: 'test1.example.com', ipv4: '192.168.1.1', ipv6: '::1' },
-    { id: '550e8400-e29b-41d4-a716-446655440002', active: true, status: 'up', fqdn: 'test2.example.com', ipv4: '192.168.1.2', ipv6: '::2' }
-  ]))
+  doGetHosts: vi.fn(() => Promise.reject(new Error('the dashboard must not fetch every host'))),
+  doGetHostsSummary: vi.fn(() => Promise.resolve({
+    total: 7,
+    approved: 6,
+    approved_up: 5,
+    approved_down: 1,
+    reboot_required: 3,
+  })),
 }));
 
 // Mock the updates service
@@ -112,5 +119,16 @@ describe('Home Page', () => {
     await act(async () => {
       expect(() => render(<HomeWithRouter />)).not.toThrow();
     });
+  });
+
+  test('shows the host counts from the summary, without the host list', async () => {
+    await act(async () => {
+      render(<HomeWithRouter />);
+    });
+    expect(doGetHostsSummary).toHaveBeenCalled();
+    expect(doGetHosts).not.toHaveBeenCalled();
+    const values = vi.mocked(Gauge).mock.calls.map(([props]) => (props as { value?: number }).value);
+    expect(values).toContain(7); // hosts
+    expect(values).toContain(3); // reboot required
   });
 });

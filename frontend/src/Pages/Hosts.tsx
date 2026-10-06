@@ -9,6 +9,7 @@ import Box from '@mui/material/Box';
 import { Autocomplete, TextField, ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
+import { useVisiblePolling } from '../hooks/useVisiblePolling';
 import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData, doRebootHost, doShutdownHost, doUpdateAgent, doRequestHostDiagnostics } from '../Services/hosts'
 import { doDeployOpenTelemetry } from '../Services/opentelemetry'
 import { useTablePageSize } from '../hooks/useTablePageSize';
@@ -459,18 +460,12 @@ const Hosts = () => {
             void navigate("/login");
         }
 
-        // Initial load
+        // Initial load; the refresh below repeats it every 60 seconds while
+        // the tab is visible.
         void refreshHosts();
-
-        // Set up periodic refresh every 60 seconds (increased from 30 to reduce load)
-        const intervalId = globalThis.setInterval(() => {
-            // Refresh hosts periodically
-            void refreshHosts();
-        }, 60000);
-
-        // Cleanup interval on unmount
-        return () => globalThis.clearInterval(intervalId);
     }, [navigate]);
+
+    useVisiblePolling(refreshHosts, 60000);
 
     // Check permissions
     useEffect(() => {

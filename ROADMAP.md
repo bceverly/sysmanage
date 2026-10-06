@@ -11642,7 +11642,7 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       languages); docs: agent-approval page section + RBAC role description
       (14 languages). Auto-approving enrollment keys re-enrolling on their own
       was NOT built -- it would skip that approval; decide separately.*
-- [ ] **Proof:** `agent-impersonation` passes (every check, with its positive
+- [x] **Proof:** `agent-impersonation` passes (every check, with its positive
       control) and gates CI; controls show a fresh host still enrolls in one
       step and a pre-fix agent still connects. Then the simulated fleet runs
       clean against the hardened server. Docs: how agent identity works.
@@ -11651,7 +11651,14 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       positive control, the pre-22.0-agent control and the ratchet; unit
       tests `tests/test_agent_identity.py` (server) and
       `tests/test_host_identity.py` (agent). Open: wire the scenario into CI,
-      the fleet run against the hardened server, docs.*
+      the fleet run against the hardened server, docs.
+      Done 2026-10-06: a CI job of its own (`ci.yml` `agent-impersonation`):
+      `tests/load/stack.py up --db-url` on the job's PostgreSQL, then the
+      scenario -- exit 2 on any impersonation path, 1 if inconclusive; run
+      the same way locally against a postgres:15 container, 11/11. The fleet
+      has run against the hardened server since 2026-10-02 (10k, 20k, 30k
+      storms). Docs: `sysmanage-docs/docs/security/agent-identity.html`
+      (security index card + docs index link), 14 languages.*
 
 #### 22.1 Agent: schedules that never align (Community / OSS)
 
@@ -11738,13 +11745,26 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       backoff -- it had slept a flat 5 s, skipped the backoff and been
       recorded as a WebSocket success. Docs: the three agent settings
       describe the new waits (14 languages).*
-- [ ] **Windows package catalogs fetched once, not per agent** -- every
+- [x] **Windows package catalogs fetched once, not per agent** -- every
       Windows agent pages through the public Chocolatey and winget APIs
       (hundreds of requests, no throttle, no 429 handling) on startup, on every
       reconnect and daily; behind one NAT a site gets rate-limited or banned,
       and a partial result is stored as the catalog. Fetch on the server or a
       site proxy and serve it; at minimum throttle, honor 429, and treat a
       partial fetch as a failure (`package_collector_windows.py:98-232`).
+      *Minimum done 2026-10-06 (agent): measured first -- winget.run answers
+      12 packages a page whatever the limit asks, so one fetch is ~360
+      winget + ~100 Chocolatey requests per Windows agent. Pages are now
+      paced (0.5 s +/-40%, `schedule_jitter.jittered`); HTTP 429/503 waits
+      for Retry-After (capped at 300 s, else jittered backoff), 4 attempts a
+      page; any page that fails or does not parse fails the catalog and the
+      previous one is KEPT (it was replaced by the part fetched); a runaway
+      pager stops at 2,000 pages; a catalog fetched within 24 h is reused --
+      the server's `collect_available_packages` request no longer re-fetches
+      the public APIs each time (22.1's run ledger already stopped the
+      per-reconnect fetch). Tests `tests/test_windows_public_catalog.py`.
+      NOT built: one fetch on the server or a site proxy served to agents --
+      revisit with a measured Windows fleet behind one NAT.*
 - [ ] Coalesce superseded snapshots in the outbound queue; per-agent timer
       offsets derived from host id for heartbeat, child-host list (send only
       on change), network discovery reports.
@@ -11976,7 +11996,7 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       nothing -- agents heartbeat every 60 s on one worker, so every entry
       had just expired. Ticked 2026-10-05 (Bryan); the two parts not done
       moved to the next item.*
-- [ ] **Hostname-only messages and the blocking retry** -- split out of the
+- [x] **Hostname-only messages and the blocking retry** -- split out of the
       host-to-tenant cache item (2026-10-05): a message that carries only a
       hostname still scans every tenant database to find its host
       (`inbound_processor._find_host_in_tenant_dbs`), and `run_with_db_retry`
@@ -11989,7 +12009,8 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       (and the host->tenant cache now answers most lookups without the
       database). Not worth building blind; revisit if either shows up in a
       failover drill or in production logs. Bryan to decide: keep open, or
-      close as measured-not-needed.*
+      close as measured-not-needed.
+      Closed 2026-10-06 (Bryan): measured, not needed.*
 - [ ] Single-flight OpenBAO secret refresh with TTL jitter
       (`secrets_service.py:43-91`); chunked startup deletes
       (`custom_metric_retention.py`, `queue_maintenance`); remove per-message
@@ -12213,13 +12234,31 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
 
 #### 22.7 Web UI (Community / OSS)
 
-- [ ] **Polling that scales with users** -- the dashboard (30 s) and Hosts page
+- [x] **Polling that scales with users** -- the dashboard (30 s) and Hosts page
       (60 s) fetch ALL hosts with an N+1 load of every host's update rows
       (`api/host.py:455-483`, `models/core.py:281`); notification bell,
       security banner, site detail, malware (5 s while pending) and air-gap
       pages poll too; nothing pauses in a background tab. Aggregate/count
       endpoints, eager-loaded counts, pagination, `visibilitychange` pause,
       jittered intervals, ETag/304, push for live state.
+      *Measured, then done 2026-10-06, on a disposable stack seeded with
+      20,000 hosts and 500,000 pending updates: `GET /hosts` took 36 s and
+      returned 15 MB -- every host's update rows loaded one host at a time to
+      count them -- and the dashboard asked for it every 30 s to show three
+      numbers. Now: update counts are one grouped query
+      (`host_counts.update_counts_by_host`; 36 s -> 1.7 s), and the dashboard
+      reads a new `GET /api/v1/hosts/summary` (14 ms, a few bytes): one
+      dashboard refresh costs the server ~0.35 s instead of ~37 s. Found on
+      the way: the security/system counts in the host list and host detail
+      read `is_security_update`/`is_system_update`, attributes the model does
+      not have, so they were ALWAYS 0 (the tests passed because the
+      `tests/api` ORM mirror invented those columns -- removed). A new
+      `useVisiblePolling` hook makes no poll while the tab is hidden and one
+      on return if due: dashboard, Hosts page, notification bell, security
+      banner (the pollers on every page or always open). Not built (measure
+      at 50k first, 23.0): server-side paging of the Hosts grid (1.7 s and
+      15 MB per visible Hosts tab per minute at 20k), ETag/304, push; the
+      short pending-only pollers stop on their own.*
 
 #### 22.8 Sign-in hardening: require MFA in the IdP's token (Pro+)
 
@@ -12412,10 +12451,24 @@ unforgivable.
       among builds of one version the preferred Python version still wins.
       The OSS client already compared numerically (`_is_newer`). Tests: the
       download endpoint with 2.0.9 vs 2.0.10, and the helpers.*
-- [ ] **Offline-grace decision** -- a server that has never phoned home is
+- [x] **Offline-grace decision** -- a server that has never phoned home is
       granted unlimited grace, and an error inside the grace check fails open
       (`license_service.py:437-459`). Confirm this is intended for air-gapped
       appliances; otherwise bound it.
+      *Decided and fixed 2026-10-06 (Bryan): offline operation has NO time
+      limit, formally -- air-gapped servers are a supported use. What bounds
+      a license is its signed expiry (+7 days' grace), and that is now
+      checked while the server runs, not only at load: the license-check
+      loop starts with or without a phone-home URL and retires an expired
+      license each cycle (`_check_license_term`). `offline_days` is a
+      warning threshold (the log says how long since the last contact), not
+      a cutoff; a database error while reading the last contact is logged
+      and changes nothing -- the license is kept by policy, not by
+      fail-open. (Before: grace expiry had no effect at all, since
+      `_phone_home()`'s result was ignored, and an expired license lived
+      until the next restart.) Docs: the air-gap page's offline paragraph
+      rewritten (it called `offline_days` the enforcement mechanism), 14
+      languages.*
 - [ ] **BSD servers run the pure-Python PostgreSQL driver** -- psycopg's
       compiled form ships as `psycopg[binary]` wheels only for Linux, macOS
       and Windows x64, so `requirements*.txt` installs plain `psycopg`
@@ -12761,6 +12814,17 @@ machine; this proof waits for it rather than for a cloud box.
       30k up, and the worker count and pool sizing it took.
 - [ ] Fold the result into the scaling guide (Phase 22) -- replace its 50k
       extrapolation with the measured numbers.
+- [ ] **Hosts grid at 50k: measure, then page on the server if needed**
+      (carried from 22.7, Bryan 2026-10-06). The Hosts page still fetches
+      every host (`GET /api/v1/hosts`) each minute while its tab is visible:
+      1.7 s and 15 MB per open Hosts tab at 20k hosts, after 22.7 moved the
+      update counts into one grouped query (it was 36 s). Seed 50k hosts on
+      the new machine and time it again (the probe: a disposable stack +
+      20k hosts / 500k updates seeded by SQL, see the 22.7 note). If it grows
+      past what one open tab should cost, page and sort/filter the grid on
+      the server (DataGrid server mode) instead of shipping the whole list;
+      the other `/hosts` callers (Settings, Scripts, Maintenance Windows,
+      Query Packs) want a lighter id/name list too.
 
 #### 23.1 Hardware health: failing drives, degraded arrays, overheating (OSS + Pro+)
 

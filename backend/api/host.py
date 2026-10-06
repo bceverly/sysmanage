@@ -30,6 +30,9 @@ from backend.api import (
     host_utils,
 )
 from backend.api.error_constants import error_host_not_found, error_user_not_found
+from backend.api import host_counts
+from backend.api.host_counts import NO_UPDATES as _NO_UPDATES
+from backend.api.host_counts import update_counts_by_host
 from backend.api.host_registration import (  # pylint: disable=unused-import
     _apply_enrollment_token_placement,
     _apply_registration_key_enrollment,
@@ -267,19 +270,9 @@ async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
         # Get tags using the dynamic relationship
         host_tags = host.tags.all()
 
-        # Calculate update counts from package_updates relationship
-        package_updates = host.package_updates
-        security_updates_count = sum(
-            1
-            for update in package_updates
-            if getattr(update, "is_security_update", False)
+        security_updates_count, system_updates_count, total_updates_count = (
+            update_counts_by_host(session, [host.id]).get(host.id, _NO_UPDATES)
         )
-        system_updates_count = sum(
-            1
-            for update in package_updates
-            if getattr(update, "is_system_update", False)
-        )
-        total_updates_count = len(package_updates)
 
         # Return as dictionary with all fields
         return {
@@ -370,19 +363,9 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
         # Get tags using the dynamic relationship
         host_tags = host.tags.all()
 
-        # Calculate update counts from package_updates relationship
-        package_updates = host.package_updates
-        security_updates_count = sum(
-            1
-            for update in package_updates
-            if getattr(update, "is_security_update", False)
+        security_updates_count, system_updates_count, total_updates_count = (
+            update_counts_by_host(session, [host.id]).get(host.id, _NO_UPDATES)
         )
-        system_updates_count = sum(
-            1
-            for update in package_updates
-            if getattr(update, "is_system_update", False)
-        )
-        total_updates_count = len(package_updates)
 
         # Return as dictionary with all fields
         return {
@@ -476,25 +459,18 @@ def _get_all_hosts_sync(tenant_id=None):
             )
             for hid, tag in tag_rows:
                 tags_by_host.setdefault(hid, []).append(tag)
+        # Update counts in one grouped query (Phase 22.7) -- not every host's
+        # update rows loaded one host at a time.
+        update_counts = update_counts_by_host(session)
 
         # Convert to dictionaries with tags included
         result = []
         for host in hosts:
             host_tags = tags_by_host.get(host.id, [])
 
-            # Calculate update counts from package_updates relationship
-            package_updates = host.package_updates
-            security_updates_count = sum(
-                1
-                for update in package_updates
-                if getattr(update, "is_security_update", False)
+            security_updates_count, system_updates_count, total_updates_count = (
+                update_counts.get(host.id, _NO_UPDATES)
             )
-            system_updates_count = sum(
-                1
-                for update in package_updates
-                if getattr(update, "is_system_update", False)
-            )
-            total_updates_count = len(package_updates)
 
             host_dict = {
                 "id": str(host.id),
@@ -555,6 +531,10 @@ def _get_all_hosts_sync(tenant_id=None):
             result.append(host_dict)
 
         return result
+
+
+# Before ``/hosts`` routes with a path parameter can claim "summary".
+auth_router.include_router(host_counts.router, tags=["hosts"])
 
 
 @auth_router.get("/hosts", dependencies=[Depends(JWTBearer())])

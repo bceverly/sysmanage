@@ -514,8 +514,6 @@ class PackageUpdate(TestBase):
     package_manager = Column(String(50), nullable=False)
     update_type = Column(String(20), nullable=False)  # security, bugfix, enhancement
     source = Column(String(255), nullable=True)
-    is_security_update = Column(Boolean, nullable=False, default=False)
-    is_system_update = Column(Boolean, nullable=False, default=False)
     requires_reboot = Column(Boolean, nullable=False, default=False)
     update_size_bytes = Column(Integer, nullable=True)
     bundle_id = Column(String(255), nullable=True)

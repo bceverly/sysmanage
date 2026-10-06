@@ -26,7 +26,7 @@ httpx>=0.27.2
 idna==3.18  # CVE bypass of CVE-2024-3651 fix in idna.encode() (was 3.11)
 itsdangerous==2.2.0
 Jinja2>=3.1.6
-Mako==1.3.12  # CVE-2026-44307 path-traversal fix (was 1.3.11)
+Mako==1.4.3  # CVE-2026-102991 Windows drive-letter path traversal (fixed 1.4.2; was 1.3.12)
 MarkupSafe==3.0.2
 orjson==3.11.6  # CVE-2025-67221 (no recursion limit on deeply nested JSON)
 packaging>=24.0

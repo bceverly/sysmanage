@@ -61,8 +61,6 @@ class TestHostUpdateCounts:
                 available_version="1.0.1",
                 package_manager="apt",
                 update_type="security",
-                is_security_update=True,
-                is_system_update=False,
                 status="available",
             ),
             # System update only
@@ -73,8 +71,6 @@ class TestHostUpdateCounts:
                 available_version="5.4.1",
                 package_manager="apt",
                 update_type="system",
-                is_security_update=False,
-                is_system_update=True,
                 status="available",
             ),
             # Both security and system update
@@ -85,8 +81,6 @@ class TestHostUpdateCounts:
                 available_version="001_nfs",
                 package_manager="syspatch",
                 update_type="security",
-                is_security_update=True,
-                is_system_update=True,
                 status="available",
             ),
             # Regular application update (neither security nor system)
@@ -97,8 +91,6 @@ class TestHostUpdateCounts:
                 available_version="92.0",
                 package_manager="apt",
                 update_type="enhancement",
-                is_security_update=False,
-                is_system_update=False,
                 status="available",
             ),
         ]
@@ -115,7 +107,9 @@ class TestHostUpdateCounts:
         assert (
             data["security_updates_count"] == 2
         )  # security-patch-1 and syspatch-001_nfs
-        assert data["system_updates_count"] == 2  # kernel-update and syspatch-001_nfs
+        # One type per update (update_type): the syspatch is stored as a
+        # security update, as the updates report stores it.
+        assert data["system_updates_count"] == 1  # kernel-update
         assert data["total_updates_count"] == 4  # All 4 updates
 
     def test_get_hosts_list_with_update_counts(self, client, session, auth_headers):
@@ -149,8 +143,6 @@ class TestHostUpdateCounts:
                 available_version="1.0.1",
                 package_manager="apt",
                 update_type="security",
-                is_security_update=True,
-                is_system_update=False,
                 status="available",
             ),
             models.PackageUpdate(
@@ -160,8 +152,6 @@ class TestHostUpdateCounts:
                 available_version="2.0.1",
                 package_manager="apt",
                 update_type="system",
-                is_security_update=False,
-                is_system_update=True,
                 status="available",
             ),
         ]
@@ -216,8 +206,6 @@ class TestHostUpdateCounts:
                 available_version="001_nfs",
                 package_manager="syspatch",
                 update_type="security",
-                is_security_update=True,
-                is_system_update=True,
                 requires_reboot=True,
                 source="OpenBSD base system",
                 repository="syspatch",
@@ -230,8 +218,6 @@ class TestHostUpdateCounts:
                 available_version="002_zic",
                 package_manager="syspatch",
                 update_type="security",
-                is_security_update=True,
-                is_system_update=True,
                 requires_reboot=True,
                 source="OpenBSD base system",
                 repository="syspatch",
@@ -251,7 +237,7 @@ class TestHostUpdateCounts:
         assert (
             data["security_updates_count"] == 2
         )  # Both syspatches are security updates
-        assert data["system_updates_count"] == 2  # Both syspatches are system updates
+        assert data["system_updates_count"] == 0  # stored as security updates
         assert data["total_updates_count"] == 2  # 2 total updates
 
     def test_update_count_calculation_edge_cases(self, client, session, auth_headers):
@@ -277,8 +263,6 @@ class TestHostUpdateCounts:
                 available_version="1.1.0",
                 package_manager="snap",
                 update_type="enhancement",
-                is_security_update=False,
-                is_system_update=False,
                 status="available",
             ),
             # Update with null/None current version (common for new installs)
@@ -289,8 +273,6 @@ class TestHostUpdateCounts:
                 available_version="1.0.0",
                 package_manager="apt",
                 update_type="security",
-                is_security_update=True,
-                is_system_update=False,
                 status="available",
             ),
             # Update in different status (should still be counted)
@@ -301,8 +283,6 @@ class TestHostUpdateCounts:
                 available_version="1.0.1",
                 package_manager="apt",
                 update_type="system",
-                is_security_update=False,
-                is_system_update=True,
                 status="pending",  # Different status
             ),
         ]
@@ -345,8 +325,6 @@ class TestHostUpdateCounts:
                 available_version="1.1",
                 package_manager="apt",
                 update_type="security",
-                is_security_update=True,
-                is_system_update=False,
                 status="available",
             ),
             models.PackageUpdate(
@@ -356,8 +334,6 @@ class TestHostUpdateCounts:
                 available_version="2.1",
                 package_manager="apt",
                 update_type="security",
-                is_security_update=True,
-                is_system_update=False,
                 status="available",
             ),
             models.PackageUpdate(
@@ -367,8 +343,6 @@ class TestHostUpdateCounts:
                 available_version="1.1",
                 package_manager="apt",
                 update_type="system",
-                is_security_update=False,
-                is_system_update=True,
                 status="available",
             ),
             models.PackageUpdate(
@@ -378,8 +352,6 @@ class TestHostUpdateCounts:
                 available_version="1.1",
                 package_manager="apt",
                 update_type="enhancement",
-                is_security_update=False,
-                is_system_update=False,
                 status="available",
             ),
         ]
@@ -393,8 +365,6 @@ class TestHostUpdateCounts:
                 available_version="1.1",
                 package_manager="apt",
                 update_type="security",
-                is_security_update=True,
-                is_system_update=True,
                 status="available",
             ),
             models.PackageUpdate(
@@ -404,8 +374,6 @@ class TestHostUpdateCounts:
                 available_version="1.1",
                 package_manager="apt",
                 update_type="system",
-                is_security_update=False,
-                is_system_update=True,
                 status="available",
             ),
             models.PackageUpdate(
@@ -415,8 +383,6 @@ class TestHostUpdateCounts:
                 available_version="1.1",
                 package_manager="apt",
                 update_type="enhancement",
-                is_security_update=False,
-                is_system_update=False,
                 status="available",
             ),
         ]
@@ -431,7 +397,7 @@ class TestHostUpdateCounts:
         # Test individual host endpoints
         expected_counts_list = [
             (2, 1, 4),  # Host 1: 2 security, 1 system, 4 total
-            (1, 2, 3),  # Host 2: 1 security, 2 system, 3 total
+            (1, 1, 3),  # Host 2: 1 security, 1 system, 3 total
             (0, 0, 0),  # Host 3: 0 security, 0 system, 0 total
         ]
 
@@ -457,7 +423,7 @@ class TestHostUpdateCounts:
                 assert host_data["total_updates_count"] == 4
             elif host_data["fqdn"] == "isolated2.example.com":
                 assert host_data["security_updates_count"] == 1
-                assert host_data["system_updates_count"] == 2
+                assert host_data["system_updates_count"] == 1
                 assert host_data["total_updates_count"] == 3
             elif host_data["fqdn"] == "isolated3.example.com":
                 assert host_data["security_updates_count"] == 0

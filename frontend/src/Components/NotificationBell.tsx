@@ -8,12 +8,14 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { updatesService, UpdateStatsSummary } from '../Services/updates';
 import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
+import { useVisiblePolling } from '../hooks/useVisiblePolling';
 import './css/NotificationBell.css';
 
 const NotificationBell: React.FC = () => {
   const [updateStats, setUpdateStats] = useState<UpdateStatsSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [pollMs, setPollMs] = useState(10 * 1000);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const isMountedRef = useRef(true);
@@ -67,24 +69,22 @@ const NotificationBell: React.FC = () => {
     // Register the refresh function for external triggers
     registerRefresh(fetchUpdateStats);
 
-    // Start with frequent polling (every 10 seconds) for the first 2 minutes to catch initial data
-    let interval = globalThis.setInterval(fetchUpdateStats, 10 * 1000);
-
-    // After 2 minutes, switch to less frequent polling (every 30 seconds)
+    // Frequent polling (every 10 seconds) for the first 2 minutes to catch
+    // initial data, then every 30 seconds -- only while the tab is visible.
     const slowDownTimeout = globalThis.setTimeout(() => {
       if (isMountedRef.current) {
-        globalThis.clearInterval(interval);
-        interval = globalThis.setInterval(fetchUpdateStats, 30 * 1000);
+        setPollMs(30 * 1000);
       }
     }, 2 * 60 * 1000);
 
     return () => {
       isMountedRef.current = false;
       unregisterRefresh();
-      globalThis.clearInterval(interval);
       globalThis.clearTimeout(slowDownTimeout);
     };
   }, [fetchUpdateStats, registerRefresh, unregisterRefresh]);
+
+  useVisiblePolling(fetchUpdateStats, pollMs, Boolean(localStorage.getItem('bearer_token')));
 
   // Handle clicking outside to close dropdown
   useEffect(() => {

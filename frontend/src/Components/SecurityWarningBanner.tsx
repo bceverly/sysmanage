@@ -2,11 +2,12 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { Alert, AlertTitle, Box } from '@mui/material';
 import { Warning } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import api from '../Services/api';
+import { useVisiblePolling } from '../hooks/useVisiblePolling';
 
 interface SecurityWarning {
   type: string;
@@ -36,50 +37,48 @@ const SecurityWarningBanner: React.FC = () => {
   const [securityStatus, setSecurityStatus] = useState<SecurityStatus | null>(null);
   const bannerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  const checkSecurityStatus = useCallback(async () => {
     // Set CSS custom property for banner height to push navbar down
     const setBannerHeight = (height: string) => {
       document.documentElement.style.setProperty('--security-banner-height', height);
     };
+    // Only check security status if user is authenticated
+    const token = localStorage.getItem('bearer_token');
+    if (!token) {
+      setSecurityStatus(null);
+      setBannerHeight('0px'); // No banner when not authenticated
+      return;
+    }
 
-    const checkSecurityStatus = async () => {
-      // Only check security status if user is authenticated
-      const token = localStorage.getItem('bearer_token');
-      if (!token) {
-        setSecurityStatus(null);
-        setBannerHeight('0px'); // No banner when not authenticated
-        return;
-      }
+    try {
+      const response = await api.get('/api/v1/security/default-credentials-status');
+      const status = response.data;
+      setSecurityStatus(status);
 
-      try {
-        const response = await api.get('/api/v1/security/default-credentials-status');
-        const status = response.data;
-        setSecurityStatus(status);
-        
-        // Height is MEASURED after render (see the layout effect below), not
-        // computed here.  This used to add up hardcoded pixel guesses --
-        // 80 base, +280 for the step-by-step block, +85 per warning -- and the
-        // navbar sits at top: var(--security-banner-height).  Any content that
-        // rendered taller than the guess left the navbar underneath the banner,
-        // where the alert silently swallowed clicks on the nav.  That is what
-        // happened on 2026-08-11 when the remediation commands became longer:
-        // the E2E menubar test failed with "subtree intercepts pointer events".
-        // A guess about rendered height cannot survive a text change, a
-        // translation, or a narrower viewport.
-      } catch (error) {
-        console.error('Failed to check security status:', error);
-        // Don't show banner if we can't determine status
-        setSecurityStatus(null);
-        setBannerHeight('0px');
-      }
-    };
-
-    void checkSecurityStatus();
-    // Check every 30 seconds in case status changes
-    const interval = globalThis.setInterval(checkSecurityStatus, 30000);
-
-    return () => globalThis.clearInterval(interval);
+      // Height is MEASURED after render (see the layout effect below), not
+      // computed here.  This used to add up hardcoded pixel guesses --
+      // 80 base, +280 for the step-by-step block, +85 per warning -- and the
+      // navbar sits at top: var(--security-banner-height).  Any content that
+      // rendered taller than the guess left the navbar underneath the banner,
+      // where the alert silently swallowed clicks on the nav.  That is what
+      // happened on 2026-08-11 when the remediation commands became longer:
+      // the E2E menubar test failed with "subtree intercepts pointer events".
+      // A guess about rendered height cannot survive a text change, a
+      // translation, or a narrower viewport.
+    } catch (error) {
+      console.error('Failed to check security status:', error);
+      // Don't show banner if we can't determine status
+      setSecurityStatus(null);
+      setBannerHeight('0px');
+    }
   }, []);
+
+  useEffect(() => {
+    void checkSecurityStatus();
+  }, [checkSecurityStatus]);
+
+  // Check every 30 seconds in case status changes, while the tab is visible.
+  useVisiblePolling(checkSecurityStatus, 30000);
 
   // Measure the rendered banner and publish its real height, so the navbar
   // (top: var(--security-banner-height)) and .main-content padding always

@@ -37,10 +37,13 @@ async def _sleeps(coro_factory, count=4):
 
 async def test_phone_home_starts_at_a_random_moment_and_jitters():
     service = ls.LicenseService()
+    service._cached_license = MagicMock()  # the loop runs while one is loaded
     firsts, intervals = set(), []
     with patch.object(
         service, "_get_phone_home_interval", return_value=24
-    ), patch.object(service, "_phone_home", AsyncMock(return_value=True)):
+    ), patch.object(service, "_check_license_term", return_value=True), patch.object(
+        service, "_phone_home", AsyncMock(return_value=True)
+    ):
         for _ in range(10):
             sleeps = await _sleeps(service._phone_home_loop)
             firsts.add(round(sleeps[0]))
@@ -52,6 +55,7 @@ async def test_phone_home_starts_at_a_random_moment_and_jitters():
 
 async def test_the_license_server_can_direct_the_next_check():
     service = ls.LicenseService()
+    service._cached_license = MagicMock()
 
     async def phone_home():
         service._next_check_after = ls._server_hint(7200)
@@ -59,7 +63,9 @@ async def test_the_license_server_can_direct_the_next_check():
 
     with patch.object(
         service, "_get_phone_home_interval", return_value=24
-    ), patch.object(service, "_phone_home", phone_home):
+    ), patch.object(service, "_check_license_term", return_value=True), patch.object(
+        service, "_phone_home", phone_home
+    ):
         sleeps = await _sleeps(service._phone_home_loop, count=3)
     assert sleeps[1:] == [7200.0, 7200.0]
 

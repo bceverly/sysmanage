@@ -230,13 +230,19 @@ class TestInitializeWithLicense:
             service, "_log_validation"
         ), patch(
             "backend.licensing.license_service.module_loader"
-        ) as ml:
+        ) as ml, patch.object(
+            service, "_phone_home_loop", new=MagicMock(return_value=None)
+        ), patch(
+            "backend.licensing.license_service.asyncio.create_task"
+        ) as create_task:
             ml.check_and_update_on_startup = AsyncMock()
             await service.initialize()
 
         assert service._cached_license is payload
-        # No phone_home_url → background tasks are NOT started.
-        assert service._phone_home_task is None
+        # No phone_home_url: the license-term check still runs (an offline
+        # server's license expires while it runs); module updates do not.
+        assert service._phone_home_task is create_task.return_value
+        create_task.assert_called_once()
         assert service._module_update_task is None
 
 
@@ -503,26 +509,103 @@ class TestUpdatePhoneHomeTimestamp:
 
 
 class TestCheckOfflineGraceExtra:
-    def test_expired_grace_returns_false(self):
+    def test_long_offline_keeps_the_license_and_warns(self, caplog):
+        """Offline operation has no time limit (air-gapped servers): past
+        ``offline_days`` it warns, it does not cut the license off."""
+        from backend.licensing.license_service import LicenseService
+
+        service = LicenseService()
+        service._cached_license = _payload()  # offline_days=7
+        record = MagicMock()
+        record.last_phone_home_at = datetime.now() - timedelta(days=365)
+        with _patch_session(rows=record), caplog.at_level("WARNING"):
+            assert service._check_offline_grace() is True
+        assert "not reached for 365 days" in caplog.text
+        assert service._cached_license is not None
+
+    def test_never_reached_keeps_the_license(self):
         from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
         service._cached_license = _payload()
         record = MagicMock()
-        # last phone-home was a year ago, offline_days=7 → expired.
-        record.last_phone_home_at = datetime.now() - timedelta(days=365)
-        record.offline_days = 7
+        record.last_phone_home_at = None
         with _patch_session(rows=record):
-            assert service._check_offline_grace() is False
+            assert service._check_offline_grace() is True
 
-    def test_db_error_fails_open(self):
+    def test_db_error_keeps_the_license_by_policy(self, caplog):
         from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
         service._cached_license = _payload()
-        with _patch_session(raise_on_query=RuntimeError("db down")):
-            # Documented behavior: fail open on DB errors.
+        with _patch_session(raise_on_query=RuntimeError("db down")), caplog.at_level(
+            "WARNING"
+        ):
             assert service._check_offline_grace() is True
+        assert "time since the last contact unknown" in caplog.text
+
+
+class TestCheckLicenseTerm:
+    """The license's own expiry is enforced while the server runs, not only
+    at startup -- it is what bounds offline operation."""
+
+    def test_in_force(self):
+        from backend.licensing.license_service import LicenseService
+
+        service = LicenseService()
+        service._cached_license = _payload()  # expires 2099
+        assert service._check_license_term() is True
+
+    def test_expired_past_grace_is_retired(self):
+        from backend.licensing.license_service import LicenseService
+
+        service = LicenseService()
+        service._cached_license = _payload()
+        service._cached_license.expires_at = datetime(2020, 1, 1)
+        with patch.object(service, "_log_validation") as log, patch.object(
+            service, "_deactivate_license"
+        ) as deactivate:
+            assert service._check_license_term() is False
+        deactivate.assert_called_once()
+        log.assert_called_once_with("local", "failure", "License has expired")
+
+    def test_expiring_soon_warns_and_keeps(self, caplog):
+        from backend.licensing.license_service import LicenseService
+
+        service = LicenseService()
+        service._cached_license = _payload()
+        service._cached_license.expires_at = datetime.now() + timedelta(days=5)
+        with caplog.at_level("WARNING"):
+            assert service._check_license_term() is True
+        assert "License expires in" in caplog.text
+
+    def test_no_license(self):
+        from backend.licensing.license_service import LicenseService
+
+        assert LicenseService()._check_license_term() is False
+
+    @pytest.mark.asyncio
+    async def test_loop_skips_phone_home_and_stops_once_expired(self):
+        from backend.licensing.license_service import LicenseService
+
+        service = LicenseService()
+        service._cached_license = _payload()
+        service._cached_license.expires_at = datetime(2020, 1, 1)
+
+        def retire():
+            service._cached_license = None
+
+        with patch(
+            "backend.licensing.license_service.asyncio.sleep", new=AsyncMock()
+        ), patch.object(service, "_log_validation"), patch.object(
+            service, "_deactivate_license", side_effect=retire
+        ), patch.object(
+            service, "_phone_home", new=AsyncMock()
+        ) as ph, patch.object(
+            service, "_get_phone_home_interval", return_value=1
+        ):
+            await service._phone_home_loop()  # returns: no license left
+        ph.assert_not_awaited()
 
 
 # ---------------------------------------------------------------------------
@@ -634,6 +717,7 @@ class TestBackgroundLoops:
         from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
+        service._cached_license = _payload()
         sleeps = {"count": 0}
 
         async def _sleep(seconds):
@@ -657,6 +741,7 @@ class TestBackgroundLoops:
         from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
+        service._cached_license = _payload()
         sleeps = {"count": 0}
 
         async def _sleep(seconds):
@@ -683,6 +768,7 @@ class TestBackgroundLoops:
         from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
+        service._cached_license = _payload()
         sleeps = {"count": 0}
 
         async def _sleep(seconds):
@@ -705,6 +791,7 @@ class TestBackgroundLoops:
         from backend.licensing.license_service import LicenseService
 
         service = LicenseService()
+        service._cached_license = _payload()
         sleeps = {"count": 0}
 
         async def _sleep(seconds):

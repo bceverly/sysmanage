@@ -12,7 +12,8 @@ import { Typography, Grid, Skeleton, CircularProgress, IconButton } from "@mui/m
 import { Settings as SettingsIcon } from '@mui/icons-material';
 import { AxiosResponse } from 'axios';
 
-import { doGetHosts, SysManageHost } from '../Services/hosts'
+import { doGetHostsSummary, HostsSummary } from '../Services/hosts'
+import { useVisiblePolling } from '../hooks/useVisiblePolling';
 import { updatesService, UpdateStatsSummary } from '../Services/updates';
 import axiosInstance from '../Services/api';
 import DashboardSettingsDialog from '../Components/DashboardSettingsDialog';
@@ -32,25 +33,19 @@ const COLOR_YELLOW = '#ff9800';
 const COLOR_RED = '#ff1744';
 
 // Helper function to determine host status color based on approved hosts
-const getHostStatusColor = (hosts: SysManageHost[]): string => {
-    const approvedHosts = hosts.filter(host => host.approval_status === 'approved');
-    if (approvedHosts.length === 0) {
+const getHostStatusColor = (summary: HostsSummary): string => {
+    if (summary.approved === 0) {
         return COLOR_GREEN;
     }
-
-    const approvedHostsUp = approvedHosts.filter(host => host.status === 'up').length;
-    const approvedHostsDown = approvedHosts.filter(host => host.status === 'down').length;
-
-    if (approvedHostsDown === approvedHosts.length) {
+    if (summary.approved_down === summary.approved) {
         return COLOR_RED; // All approved hosts are down
     }
-    if (approvedHostsUp > 0 && approvedHostsDown > 0) {
+    if (summary.approved_up > 0 && summary.approved_down > 0) {
         return COLOR_YELLOW; // Mixed up/down
     }
     return COLOR_GREEN; // All approved hosts are up
 };
 
-// Helper function to determine color based on coverage percentage thresholds
 const getCoverageColor = (coveragePercentage: number): string => {
     if (coveragePercentage >= 80) {
         return COLOR_GREEN;
@@ -141,21 +136,18 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
 
-    const processHostsResponse = (hostsResponse: PromiseSettledResult<SysManageHost[]>) => {
+    // Counts from /hosts/summary (Phase 22.7): the dashboard fetched the
+    // whole host list every 30 seconds to show these three numbers.
+    const processHostsResponse = (hostsResponse: PromiseSettledResult<HostsSummary>) => {
         if (hostsResponse.status !== 'fulfilled') {
             return;
         }
 
-        const hosts = hostsResponse.value;
-        setHostsTotal(hosts.length);
-        setHostStatusColor(getHostStatusColor(hosts));
-
-        // Calculate reboot required statistics
-        const hostsRequiringReboot = hosts.filter(
-            (host: SysManageHost) => host.approval_status === 'approved' && host.reboot_required
-        ).length;
-        setRebootRequired(hostsRequiringReboot);
-        setRebootColor(hostsRequiringReboot > 0 ? COLOR_RED : COLOR_GREEN);
+        const summary = hostsResponse.value;
+        setHostsTotal(summary.total);
+        setHostStatusColor(getHostStatusColor(summary));
+        setRebootRequired(summary.reboot_required);
+        setRebootColor(summary.reboot_required > 0 ? COLOR_RED : COLOR_GREEN);
     };
 
     const processUpdatesResponse = (updatesResponse: PromiseSettledResult<UpdateStatsSummary>) => {
@@ -195,7 +187,7 @@ const Dashboard = () => {
 
         try {
             const [hostsResponse, updatesResponse, antivirusResponse, otelResponse] = await Promise.allSettled([
-                doGetHosts(),
+                doGetHostsSummary(),
                 updatesService.getUpdatesSummary(),
                 axiosInstance.get('/api/v1/antivirus-coverage'),
                 axiosInstance.get('/api/v1/opentelemetry/opentelemetry-coverage')
@@ -267,19 +259,12 @@ const Dashboard = () => {
         // Load card preferences
         void loadCardPreferences();
 
-        // Initial data fetch
+        // Initial data fetch; the refresh below repeats it every 30 seconds
+        // while the tab is visible.
         void fetchData(true);
-
-        // Set up auto-refresh every 30 seconds
-        const refreshInterval = setInterval(() => {
-            void fetchData(false);
-        }, 30000);
-
-        // Cleanup interval on component unmount
-        return () => {
-            clearInterval(refreshInterval);
-        };
     }, [navigate, fetchData]);
+
+    useVisiblePolling(() => fetchData(false), 30000, Boolean(localStorage.getItem('bearer_token')));
 
     const handleHostsClick = () => {
         void navigate('/hosts');
