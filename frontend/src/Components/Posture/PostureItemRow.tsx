@@ -31,6 +31,7 @@ import {
     stateLabel,
     staleLabel,
 } from './postureLabels';
+import { appLocale } from '../../utils/locale';
 
 export type RowAction = 'fix' | 'waive' | 'reaffirm';
 
@@ -40,7 +41,7 @@ interface Props {
     onRevoke: (item: PostureItem) => void;
 }
 
-const when = (iso: string | null): string => (iso ? new Date(iso).toLocaleString() : '-');
+const when = (iso: string | null): string => (iso ? new Date(iso).toLocaleString(appLocale()) : '-');
 
 const Coverage: React.FC<{ item: PostureItem }> = ({ item }) => {
     const { t } = useTranslation();

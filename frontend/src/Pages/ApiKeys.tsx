@@ -28,11 +28,12 @@ import {
     listApiKeys,
     revokeApiKey,
 } from '../Services/apiKeys';
+import { appLocale } from '../utils/locale';
 
 const formatDate = (value?: string | null): string => {
     if (!value) return '--';
     const d = new Date(value);
-    return Number.isNaN(d.getTime()) ? '--' : d.toLocaleString();
+    return Number.isNaN(d.getTime()) ? '--' : d.toLocaleString(appLocale());
 };
 
 const ApiKeys: React.FC = () => {

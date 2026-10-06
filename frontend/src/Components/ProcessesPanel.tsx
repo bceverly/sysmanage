@@ -27,6 +27,7 @@ import {
     doKillHostProcess,
 } from '../Services/processes';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
+import { appLocale } from '../utils/locale';
 
 interface ProcessesPanelProps {
     hostId: string;
@@ -250,7 +251,7 @@ const ProcessesPanel: React.FC<ProcessesPanelProps> = ({
                     {t('processes.collectedAt', 'Snapshot taken')}:{' '}
                     {new Date(
                         collectedAt.endsWith('Z') ? collectedAt : `${collectedAt}Z`,
-                    ).toLocaleString()}
+                    ).toLocaleString(appLocale())}
                 </Typography>
             )}
 

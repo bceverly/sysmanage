@@ -12,6 +12,7 @@ import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import { TFunction } from 'i18next';
 import { parseUTCTimestamp } from '../utils/dateUtils';
 import { SysManageHost } from '../Services/hosts';
+import { appLocale } from '../utils/locale';
 
 interface BuildHostColumnsArgs {
     t: TFunction;
@@ -265,12 +266,12 @@ export function buildHostColumns({
                 }
 
                 return (
-                    <div title={date.toLocaleString()}>
+                    <div title={date.toLocaleString(appLocale())}>
                         <div style={{ fontSize: '0.85em', color: statusColor }}>
                             {timeText}
                         </div>
                         <div style={{ fontSize: '0.7em', color: '#666' }}>
-                            {date.toLocaleTimeString()}
+                            {date.toLocaleTimeString(appLocale())}
                         </div>
                     </div>
                 );

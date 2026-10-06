@@ -34,6 +34,7 @@ import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import InvitationsManager from '../Components/InvitationsManager';
 import SelectionActionBar from '../Components/SelectionActionBar';
+import { appLocale } from '../utils/locale';
 
 const Users = () => {
     const [tableData, setTableData] = useState<SysManageUser[]>([]);
@@ -458,8 +459,8 @@ const Users = () => {
                         noResultsOverlayLabel: t('users.noResults'),
                         footerRowSelected: (count: number) =>
                             count === 1
-                                ? `${count.toLocaleString()} ${t('common.rowSelected')}`
-                                : `${count.toLocaleString()} ${t('common.rowsSelected')}`,
+                                ? `${count.toLocaleString(appLocale())} ${t('common.rowSelected')}`
+                                : `${count.toLocaleString(appLocale())} ${t('common.rowsSelected')}`,
                     }}
                 />
             </Box>

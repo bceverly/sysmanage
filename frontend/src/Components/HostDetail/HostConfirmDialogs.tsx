@@ -49,6 +49,9 @@ interface HostConfirmDialogsProps {
     shutdownConfirmOpen: boolean;
     setShutdownConfirmOpen: (value: boolean) => void;
     handleShutdownConfirm: () => void;
+    reenrollConfirmOpen: boolean;
+    setReenrollConfirmOpen: (value: boolean) => void;
+    handleReenrollConfirm: () => void;
     hostnameEditOpen: boolean;
     setHostnameEditOpen: (value: boolean) => void;
     newHostname: string;
@@ -91,6 +94,9 @@ const HostConfirmDialogs: React.FC<HostConfirmDialogsProps> = ({
     shutdownConfirmOpen,
     setShutdownConfirmOpen,
     handleShutdownConfirm,
+    reenrollConfirmOpen,
+    setReenrollConfirmOpen,
+    handleReenrollConfirm,
     hostnameEditOpen,
     setHostnameEditOpen,
     newHostname,
@@ -256,6 +262,31 @@ const HostConfirmDialogs: React.FC<HostConfirmDialogsProps> = ({
                     </Button>
                     <Button onClick={handleShutdownConfirm} color="error" variant="contained">
                         {t('hosts.shutdown', 'Shutdown')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Re-enroll Confirmation Dialog (Phase 22.0) */}
+            <Dialog
+                open={reenrollConfirmOpen}
+                onClose={() => setReenrollConfirmOpen(false)}
+                aria-labelledby="reenroll-dialog-title"
+                aria-describedby="reenroll-dialog-description"
+            >
+                <DialogTitle id="reenroll-dialog-title">
+                    {t('hosts.confirmReenroll', 'Re-enroll the Agent of This Host?')}
+                </DialogTitle>
+                <DialogContent>
+                    <Typography id="reenroll-dialog-description">
+                        {t('hosts.confirmReenrollMessage', 'This clears the agent credential of {{hostname}} and returns the host to pending approval. Use it when the agent was reinstalled and lost its credential: the next agent to connect as this host gets a new one, and nothing it sends is accepted until you approve the host again.', { hostname: host?.fqdn })}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setReenrollConfirmOpen(false)}>
+                        {t('common.cancel', 'Cancel')}
+                    </Button>
+                    <Button onClick={handleReenrollConfirm} color="warning" variant="contained">
+                        {t('hosts.reenroll', 'Re-enroll Agent')}
                     </Button>
                 </DialogActions>
             </Dialog>

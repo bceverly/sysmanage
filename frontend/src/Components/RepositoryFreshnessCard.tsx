@@ -25,6 +25,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { appLocale } from '../utils/locale';
 
 interface FreshnessResponse {
   last_ingest_at: string | null;
@@ -144,7 +145,7 @@ const RepositoryFreshnessCard: React.FC = () => {
                 sx={{ display: 'block', mt: 0.5, color: 'text.secondary' }}
               >
                 {t('airgap.freshness.last_ingest_at', 'Last ingest:')}{' '}
-                {new Date(data.last_ingest_at).toLocaleString()}
+                {new Date(data.last_ingest_at).toLocaleString(appLocale())}
               </Typography>
             )}
           </Box>

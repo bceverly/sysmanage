@@ -56,6 +56,7 @@ import {
   FederationHostDirectoryEntry,
 } from "../Services/federation";
 import FederationCommandDispatchDialog from "../Components/FederationCommandDispatchDialog";
+import { appLocale } from '../utils/locale';
 
 interface HostsState {
   loading: boolean;
@@ -81,7 +82,7 @@ function formatTimestamp(iso?: string | null): string {
   if (!iso) return "--";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString();
+  return date.toLocaleString(appLocale());
 }
 
 const FederationHosts: React.FC = () => {

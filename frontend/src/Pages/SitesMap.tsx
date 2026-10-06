@@ -38,6 +38,7 @@ import {
   doListFederationSites,
   FederationSiteSummary,
 } from "../Services/federation";
+import { appLocale } from '../utils/locale';
 
 const TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 const TILE_ATTRIBUTION =
@@ -109,7 +110,7 @@ function popupHtml(site: FederationSiteSummary, labels: PopupLabels): string {
   if (site.last_sync_at) {
     lines.push(
       `<div><b>${escapeHtml(labels.lastSync)}</b> ${escapeHtml(
-        new Date(site.last_sync_at).toLocaleString(),
+        new Date(site.last_sync_at).toLocaleString(appLocale()),
       )}</div>`,
     );
   }

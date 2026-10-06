@@ -1905,7 +1905,13 @@
     "updateAgentSelected": "Mettre à jour l'agent sur les sélectionnés",
     "updated": "Mis à jour",
     "updates": "Mises à jour",
-    "viewParent": "Voir l'hôte parent"
+    "viewParent": "Voir l'hôte parent",
+    "reenroll": "Réinscrire l'agent",
+    "reenrollHint": "Pour un agent réinstallé qui a perdu ses identifiants : les efface et remet l'hôte en attente d'approbation",
+    "confirmReenroll": "Réinscrire l'agent de cet hôte ?",
+    "confirmReenrollMessage": "Cette action efface les identifiants de l'agent de {{hostname}} et remet l'hôte en attente d'approbation. Utilisez-la lorsque l'agent a été réinstallé et a perdu ses identifiants : le prochain agent qui se connecte en tant que cet hôte en reçoit de nouveaux, et rien de ce qu'il envoie n'est accepté tant que vous n'avez pas de nouveau approuvé l'hôte.",
+    "reenrollDone": "Identifiants effacés. Approuvez de nouveau l'hôte dès que son agent se reconnecte.",
+    "reenrollFailed": "Échec de la réinscription de l'hôte"
   },
   "idp": {
     "action": {

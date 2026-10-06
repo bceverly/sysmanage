@@ -19,6 +19,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
 import { useTranslation } from 'react-i18next';
 import { CommercialAntivirusStatus, getCommercialAntivirusStatus } from '../Services/commercialAntivirusService';
+import { appLocale } from '../utils/locale';
 
 interface BooleanStatusProps {
   value: boolean | null;
@@ -114,7 +115,7 @@ const CommercialAntivirusStatusCard: React.FC<CommercialAntivirusStatusCardProps
       // Database stores naive UTC datetime, so append 'Z' to indicate UTC
       const utcString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
       const date = new Date(utcString);
-      return date.toLocaleString();
+      return date.toLocaleString(appLocale());
     } catch {
       return t('common.notAvailable', 'N/A');
     }

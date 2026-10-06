@@ -44,6 +44,7 @@ import {
   FederationAuditEntry,
   FederationAuditListParams,
 } from "../Services/federation";
+import { appLocale } from '../utils/locale';
 
 interface AuditLogState {
   loading: boolean;
@@ -77,7 +78,7 @@ function buildParams(
 function formatTimestamp(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString();
+  return date.toLocaleString(appLocale());
 }
 
 const FederationAuditLog: React.FC = () => {

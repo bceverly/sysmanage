@@ -40,6 +40,7 @@ import { secretsService, SecretResponse, SecretWithContent, SecretType } from '.
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import { formatUTCTimestamp } from '../utils/dateUtils';
 import './css/Secrets.css';
+import { appLocale } from '../utils/locale';
 
 const Secrets: React.FC = () => {
   const { t } = useTranslation();
@@ -581,8 +582,8 @@ const Secrets: React.FC = () => {
                 noResultsOverlayLabel: t('secrets.noSecrets', 'No secrets found'),
                 footerRowSelected: (count: number) =>
                   count === 1
-                    ? `${count.toLocaleString()} ${t('common.rowSelected', 'row selected')}`
-                    : `${count.toLocaleString()} ${t('common.rowsSelected', 'rows selected')}`,
+                    ? `${count.toLocaleString(appLocale())} ${t('common.rowSelected', 'row selected')}`
+                    : `${count.toLocaleString(appLocale())} ${t('common.rowsSelected', 'rows selected')}`,
               }}
             />
           </Box>

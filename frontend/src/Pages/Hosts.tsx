@@ -23,6 +23,7 @@ import { broadcastService } from '../Services/broadcast';
 import HostsActionBar from '../Components/HostsActionBar';
 import { buildHostColumns } from '../Components/hostsColumns';
 import { isParentHost, sortHostsGrouped } from '../Components/hostGrouping';
+import { appLocale } from '../utils/locale';
 
 const Hosts = () => {
     const [tableData, setTableData] = useState<SysManageHost[]>([]);
@@ -723,8 +724,8 @@ const Hosts = () => {
                         noResultsOverlayLabel: t('hosts.noResults'),
                         footerRowSelected: (count: number) =>
                             count === 1
-                                ? `${count.toLocaleString()} ${t('common.rowSelected')}`
-                                : `${count.toLocaleString()} ${t('common.rowsSelected')}`,
+                                ? `${count.toLocaleString(appLocale())} ${t('common.rowSelected')}`
+                                : `${count.toLocaleString(appLocale())} ${t('common.rowsSelected')}`,
                     }}
                 />
             </Box>

@@ -27,6 +27,7 @@ import {
 } from '@mui/icons-material';
 import { DataGrid } from '@mui/x-data-grid';
 import { OSPackageSummary, PackageInfo } from './settingsTypes';
+import { appLocale } from '../../utils/locale';
 
 interface AvailablePackagesTabProps {
   packageSummary: OSPackageSummary[];
@@ -106,13 +107,13 @@ const AvailablePackagesTab: React.FC<AvailablePackagesTabProps> = ({
                       </Typography>
                     </Box>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                      {t('availablePackages.totalPackages', 'Total Packages')}: {summary.total_packages.toLocaleString()}
+                      {t('availablePackages.totalPackages', 'Total Packages')}: {summary.total_packages.toLocaleString(appLocale())}
                     </Typography>
                     <Box>
                       {summary.package_managers.map((manager) => (
                         <Chip
                           key={manager.package_manager}
-                          label={`${manager.package_manager}: ${manager.package_count.toLocaleString()}`}
+                          label={`${manager.package_manager}: ${manager.package_count.toLocaleString(appLocale())}`}
                           size="small"
                           variant="outlined"
                           sx={{ mr: 0.5, mb: 0.5 }}
@@ -249,7 +250,7 @@ const AvailablePackagesTab: React.FC<AvailablePackagesTabProps> = ({
           <Typography variant="h6" sx={{ mb: 2 }}>
             {t('availablePackages.results', 'Search Results')}{' '}
             {/* eslint-disable-next-line i18next/no-literal-string -- result count summary uses interpolated values */}
-            ({packageTotalCount.toLocaleString()} total, showing {packages.length})
+            ({packageTotalCount.toLocaleString(appLocale())} total, showing {packages.length})
           </Typography>
           {/* Say plainly when the list is a union.  Without a host, results
               come from every machine of the OS, and a package present on one

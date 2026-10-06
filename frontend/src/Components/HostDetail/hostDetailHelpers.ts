@@ -9,6 +9,7 @@
 import type { TFunction } from 'i18next';
 import { SysManageHost, UserAccount, UserGroup } from '../../Services/hosts';
 import { parseUTCTimestamp, formatUTCTimestamp } from '../../utils/dateUtils';
+import { appLocale } from '../../utils/locale';
 
 export const formatDate = (t: TFunction, dateString: string | null | undefined): string => {
     return formatUTCTimestamp(dateString, t('common.notAvailable', 'N/A'));
@@ -108,7 +109,7 @@ export const formatBytesWithCommas = (t: TFunction, bytes?: number): string => {
         unitIndex++;
     }
 
-    const formattedSize = size.toLocaleString(undefined, {
+    const formattedSize = size.toLocaleString(appLocale(), {
         maximumFractionDigits: unitIndex === 0 ? 0 : 1
     });
 

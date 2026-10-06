@@ -200,3 +200,41 @@ class TestRequestUpdatesCheckExtended:
             )
         assert response.status_code == 200
         enqueue.assert_called_once()
+
+
+class TestReenrollHost:
+    """Phase 22.0: re-enroll a host whose agent lost its credential."""
+
+    def test_requires_authentication(self, client):
+        response = client.post(f"/api/v1/host/{uuid.uuid4()}/reenroll")
+        assert response.status_code in [401, 403]
+
+    def test_unknown_host(self, client, auth_headers):
+        response = client.post(
+            f"/api/v1/host/{uuid.uuid4()}/reenroll", headers=auth_headers
+        )
+        assert response.status_code in [403, 404]
+
+    def test_clears_the_credential_and_requires_approval_again(
+        self, client, auth_headers, session
+    ):
+        host = _create_host(
+            session,
+            fqdn="reinstalled.x",
+            approval_status="approved",
+            host_token="t" * 40,
+            requires_host_token=True,
+            registration_nonce_hash="h" * 64,
+        )
+        with patch("backend.api.host_approval.AuditService.log_update") as audit:
+            response = client.post(
+                f"/api/v1/host/{host.id}/reenroll", headers=auth_headers
+            )
+        assert response.status_code == 200
+        assert response.json() == {"result": True, "approval_status": "pending"}
+        session.refresh(host)
+        assert host.host_token is None
+        assert host.requires_host_token is False
+        assert host.registration_nonce_hash is None
+        assert host.approval_status == "pending"
+        audit.assert_called_once()

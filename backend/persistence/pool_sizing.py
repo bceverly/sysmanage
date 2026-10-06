@@ -278,7 +278,9 @@ def fit(
             f"{planned} + {tenants} x {pool['tenant_size'] + pool['tenant_max_overflow']}. "
             f"Using {fitted['size']} + {fitted['max_overflow']} for the bootstrap "
             f"pool and {each} per tenant database. Raise max_connections in "
-            f"postgresql.conf (or put PgBouncer in front) for more."
+            f"postgresql.conf, or place tenant databases on another PostgreSQL "
+            f"server (a transaction-mode pooler such as PgBouncer is not "
+            f"supported: the server holds session-level advisory locks)."
         )
     reason = (
         f"PostgreSQL max_connections is {max_connections}; with {workers} worker(s) "

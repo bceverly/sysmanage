@@ -392,6 +392,48 @@ async def reject_host(
         return ret_host
 
 
+@router.post("/host/{host_id}/reenroll", dependencies=[Depends(JWTBearer())])
+async def reenroll_host(host_id: str, current_user=Depends(require_authenticated_user)):
+    """Re-enroll a host whose agent lost its credential (Phase 22.0).
+
+    A reinstalled agent has no token, and a host that has one refuses every
+    session that cannot present it -- there was no way back.  This clears
+    the host's credential and puts it back to pending: the next agent to
+    claim the host gets a new token on first use (agent_identity), and an
+    administrator approves it again before anything it sends is accepted --
+    clearing the credential alone would let whoever claimed the host first
+    take over an approved one.
+    """
+    if not current_user.has_role(SecurityRoles.APPROVE_HOST_REGISTRATION):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: APPROVE_HOST_REGISTRATION role required"),
+        )
+    tenant_id = get_active_tenant()
+    bind = db.get_engine() if tenant_id is None else get_request_engine(tenant_id)
+    session_local = sessionmaker(  # pylint: disable=duplicate-code
+        autocommit=False, autoflush=False, bind=bind
+    )
+    with session_local() as session:
+        host = session.query(models.Host).filter(models.Host.id == host_id).first()
+        if not host:
+            raise HTTPException(status_code=404, detail=error_host_not_found())
+        host.host_token = None
+        host.requires_host_token = False
+        host.registration_nonce_hash = None
+        host.approval_status = "pending"
+        session.commit()
+        AuditService.log_update(
+            db=session,
+            user_id=current_user.id,
+            username=current_user.userid,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+        )
+        return {"result": True, "approval_status": host.approval_status}
+
+
 @router.post("/host/{host_id}/request-os-update", dependencies=[Depends(JWTBearer())])
 async def request_os_version_update(host_id: str):
     """

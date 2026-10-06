@@ -500,6 +500,8 @@ const HostDetail = () => { // NOSONAR
         setRebootConfirmOpen,
         shutdownConfirmOpen,
         setShutdownConfirmOpen,
+        reenrollConfirmOpen,
+        setReenrollConfirmOpen,
         rebootPreCheckData,
         setRebootPreCheckData,
         rebootPreCheckLoading,
@@ -518,11 +520,13 @@ const HostDetail = () => { // NOSONAR
         handleViewDiagnosticDetail,
         handleRebootClick,
         handleShutdownClick,
+        handleReenrollClick,
         handleUpdateAgent,
         handleRebootConfirm,
         handleHostnameEditClick,
         handleHostnameChange,
         handleShutdownConfirm,
+        handleReenrollConfirm,
         handleConfirmDelete,
         handleCancelDelete,
         handleRequestDiagnostics,
@@ -602,6 +606,7 @@ const HostDetail = () => { // NOSONAR
                 handleRequestPackages={handleRequestPackages}
                 handleRebootClick={handleRebootClick}
                 handleShutdownClick={handleShutdownClick}
+                handleReenrollClick={handleReenrollClick}
                 handleUpdateAgent={handleUpdateAgent}
             />
 
@@ -812,6 +817,9 @@ const HostDetail = () => { // NOSONAR
                 shutdownConfirmOpen={shutdownConfirmOpen}
                 setShutdownConfirmOpen={setShutdownConfirmOpen}
                 handleShutdownConfirm={handleShutdownConfirm}
+                reenrollConfirmOpen={reenrollConfirmOpen}
+                setReenrollConfirmOpen={setReenrollConfirmOpen}
+                handleReenrollConfirm={handleReenrollConfirm}
                 hostnameEditOpen={hostnameEditOpen}
                 setHostnameEditOpen={setHostnameEditOpen}
                 newHostname={newHostname}

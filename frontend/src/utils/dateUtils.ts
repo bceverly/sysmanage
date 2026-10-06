@@ -2,6 +2,8 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
+import { appLocale } from './locale';
+
 /**
  * Utility functions for handling backend timestamps.
  *
@@ -38,7 +40,7 @@ export const parseUTCTimestamp = (timestamp: string | null | undefined): Date | 
  */
 export const formatUTCTimestamp = (timestamp: string | null | undefined, fallback = '-'): string => {
   const date = parseUTCTimestamp(timestamp);
-  return date ? date.toLocaleString() : fallback;
+  return date ? date.toLocaleString(appLocale()) : fallback;
 };
 
 /**
@@ -47,7 +49,7 @@ export const formatUTCTimestamp = (timestamp: string | null | undefined, fallbac
  */
 export const formatUTCDate = (timestamp: string | null | undefined, fallback = '-'): string => {
   const date = parseUTCTimestamp(timestamp);
-  return date ? date.toLocaleDateString() : fallback;
+  return date ? date.toLocaleDateString(appLocale()) : fallback;
 };
 
 /**
@@ -56,5 +58,5 @@ export const formatUTCDate = (timestamp: string | null | undefined, fallback = '
  */
 export const formatUTCTime = (timestamp: string | null | undefined, fallback = '-'): string => {
   const date = parseUTCTimestamp(timestamp);
-  return date ? date.toLocaleTimeString() : fallback;
+  return date ? date.toLocaleTimeString(appLocale()) : fallback;
 };

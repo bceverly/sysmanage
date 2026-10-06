@@ -8,6 +8,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { useTranslation } from 'react-i18next';
+import { appLocale } from '../../utils/locale';
 
 /**
  * What the agent on this host advertises it can do -- ROADMAP Phase 19.
@@ -115,7 +116,7 @@ const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, lim
 
                 {updatedAt && (
                     <Typography variant="caption" color="text.secondary">
-                        {t('hostCapabilities.updated', 'Reported')}: {new Date(updatedAt).toLocaleString()}
+                        {t('hostCapabilities.updated', 'Reported')}: {new Date(updatedAt).toLocaleString(appLocale())}
                     </Typography>
                 )}
 

@@ -33,6 +33,7 @@ import {
     getServiceStatusLabel,
     getServiceStatusColor,
 } from './hostDetailHelpers';
+import { appLocale } from '../../utils/locale';
 
 interface HostUbuntuProTabProps {
     host: SysManageHost;
@@ -378,7 +379,7 @@ const HostUbuntuProTab: React.FC<HostUbuntuProTabProps> = ({
                                                 </TableCell>
                                                 <TableCell>
                                                     {ubuntuProInfo.livepatch.last_check
-                                                        ? new Date(ubuntuProInfo.livepatch.last_check).toLocaleString()
+                                                        ? new Date(ubuntuProInfo.livepatch.last_check).toLocaleString(appLocale())
                                                         : '--'}
                                                 </TableCell>
                                             </TableRow>

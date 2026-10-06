@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { Chip, CircularProgress, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { formatElapsed } from './helpers';
+import { appLocale } from '../../utils/locale';
 
 // ---------------------------------------------------------------------
 // Per-action status chip
@@ -63,7 +64,7 @@ const ActionStatusChip: React.FC<ActionStatusChipProps> = ({
       <Tooltip
         title={t('mirror.chip.inFlight', '{{label}} in progress since {{at}}', {
           label,
-          at: atDate ? atDate.toLocaleString() : 'unknown time',
+          at: atDate ? atDate.toLocaleString(appLocale()) : 'unknown time',
         })}
         arrow
       >
@@ -119,7 +120,7 @@ const ActionStatusChip: React.FC<ActionStatusChipProps> = ({
   if (status === 'SUCCESS') {
     return (
       <Tooltip
-        title={atDate ? atDate.toLocaleString() : ''}
+        title={atDate ? atDate.toLocaleString(appLocale()) : ''}
         arrow
         placement="top"
       >

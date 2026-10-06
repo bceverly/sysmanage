@@ -239,6 +239,13 @@ has none, KEEP THE ENGLISH TERM rather than invent a literal translation that \
 means something else. A fluent translation of the wrong sense is the most \
 common failure here and is worse than leaving the English. A further system \
 message may define specific terms for this batch; those definitions win.
+7. NATIVE NUMBERS AND DATES. Write quantities and measurements the way \
+{language} writes them: its digit grouping and decimal separator (e.g. \
+German "10.000" and "2,7", French "10 000" and "2,7", Hindi "1,41,424"), and \
+its percent style. A date written out in words follows {language}'s \
+convention. NEVER change version numbers (Ubuntu 24.04, OAuth 2.0, v1.4.22), \
+IP addresses, port numbers, ISO dates (2026-10-05), or any number inside \
+code, a path, a command or a placeholder -- those stay exactly as written.
 
 OUTPUT: Return ONLY a JSON object of the exact form \
 {"translations": ["...", "..."]} where "translations" is an array with EXACTLY \

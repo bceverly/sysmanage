@@ -1905,7 +1905,13 @@
     "updateAgentSelected": "更新所选主机上的代理",
     "updated": "已更新",
     "updates": "更新",
-    "viewParent": "查看父主机"
+    "viewParent": "查看父主机",
+    "reenroll": "重新注册代理",
+    "reenrollHint": "用于丢失凭据的重新安装代理：清除凭据并将主机恢复为待批准状态",
+    "confirmReenroll": "重新注册此主机的代理？",
+    "confirmReenrollMessage": "这会清除 {{hostname}} 的代理凭据，并将主机恢复为待批准状态。在代理被重新安装并丢失凭据时使用：下一个以此主机身份连接的代理会获得新凭据，在您再次批准该主机之前，不接受它发送的任何内容。",
+    "reenrollDone": "凭据已清除。代理重新连接后，请再次批准该主机。",
+    "reenrollFailed": "重新注册主机失败"
   },
   "idp": {
     "action": {

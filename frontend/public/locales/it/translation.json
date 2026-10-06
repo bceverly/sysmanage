@@ -1905,7 +1905,13 @@
     "updateAgentSelected": "Aggiorna agente sui selezionati",
     "updated": "Aggiornato",
     "updates": "Aggiornamenti",
-    "viewParent": "Visualizza host genitore"
+    "viewParent": "Visualizza host genitore",
+    "reenroll": "Registra di nuovo l'agente",
+    "reenrollHint": "Per un agente reinstallato che ha perso le credenziali: le cancella e riporta l'host in attesa di approvazione",
+    "confirmReenroll": "Registrare di nuovo l'agente di questo host?",
+    "confirmReenrollMessage": "Questa azione cancella le credenziali dell'agente di {{hostname}} e riporta l'host in attesa di approvazione. Usarla quando l'agente è stato reinstallato e ha perso le credenziali: il prossimo agente che si connette come questo host ne riceve di nuove, e nulla di ciò che invia viene accettato finché non si approva di nuovo l'host.",
+    "reenrollDone": "Credenziali cancellate. Approvare di nuovo l'host quando il suo agente si riconnette.",
+    "reenrollFailed": "Impossibile registrare di nuovo l'host"
   },
   "idp": {
     "action": {

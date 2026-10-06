@@ -51,6 +51,7 @@ import {
   MfaStatus,
   regenerateBackupCodes,
 } from '../Services/mfa';
+import { appLocale } from '../utils/locale';
 
 const MfaEnrollmentCard: React.FC = () => {
   const { t } = useTranslation();
@@ -317,7 +318,7 @@ const MfaEnrollmentCard: React.FC = () => {
             {status.last_used_at && (
               <Chip
                 label={t('mfa.lastUsedAt', 'Last used: {{when}}', {
-                  when: new Date(status.last_used_at).toLocaleString(),
+                  when: new Date(status.last_used_at).toLocaleString(appLocale()),
                 })}
                 size="small"
                 variant="outlined"

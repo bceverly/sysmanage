@@ -18,6 +18,7 @@ vi.mock('../../../Services/hosts', () => ({
     doDeleteDiagnostic: vi.fn(),
     doRebootHost: vi.fn(),
     doShutdownHost: vi.fn(),
+    doReenrollHost: vi.fn(),
     doUpdateAgent: vi.fn(),
     doRequestSystemInfo: vi.fn(),
     doRefreshUserAccessData: vi.fn(),
@@ -83,6 +84,7 @@ describe('useHostLifecycle', () => {
         m(hosts.doDeleteDiagnostic).mockResolvedValue({});
         m(hosts.doRebootHost).mockResolvedValue({});
         m(hosts.doShutdownHost).mockResolvedValue({});
+        m(hosts.doReenrollHost).mockResolvedValue({ result: true, approval_status: 'pending' });
         m(hosts.doUpdateAgent).mockResolvedValue({});
         m(hosts.doChangeHostname).mockResolvedValue({});
         m(hosts.doRebootPreCheck).mockResolvedValue({ has_running_children: false, has_container_engine: false });
@@ -353,6 +355,47 @@ describe('useHostLifecycle', () => {
                 await result.current.handleShutdownConfirm();
             });
             expect(hosts.doShutdownHost).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('re-enroll (Phase 22.0)', () => {
+        test('handleReenrollClick opens confirm', () => {
+            const { result } = setup();
+            act(() => result.current.handleReenrollClick());
+            expect(result.current.reenrollConfirmOpen).toBe(true);
+        });
+
+        test('handleReenrollConfirm clears the credential and marks the host pending', async () => {
+            const { result, setHost, setSnackbarSeverity } = setup();
+            act(() => result.current.handleReenrollClick());
+            await act(async () => {
+                await result.current.handleReenrollConfirm();
+            });
+            expect(hosts.doReenrollHost).toHaveBeenCalledWith('h1');
+            expect(setSnackbarSeverity).toHaveBeenCalledWith('success');
+            expect(result.current.reenrollConfirmOpen).toBe(false);
+            const update = setHost.mock.calls[0][0] as (_h: SysManageHost | null) => SysManageHost | null;
+            expect(update(makeHost({ approval_status: 'approved' }))?.approval_status).toBe('pending');
+            expect(update(null)).toBeNull();
+        });
+
+        test('handleReenrollConfirm error keeps the dialog open', async () => {
+            m(hosts.doReenrollHost).mockRejectedValueOnce(new Error('boom'));
+            const { result, setSnackbarSeverity } = setup();
+            act(() => result.current.handleReenrollClick());
+            await act(async () => {
+                await result.current.handleReenrollConfirm();
+            });
+            expect(setSnackbarSeverity).toHaveBeenCalledWith('error');
+            expect(result.current.reenrollConfirmOpen).toBe(true);
+        });
+
+        test('no host -> noop', async () => {
+            const { result } = setup({ host: null });
+            await act(async () => {
+                await result.current.handleReenrollConfirm();
+            });
+            expect(hosts.doReenrollHost).not.toHaveBeenCalled();
         });
     });
 

@@ -1905,7 +1905,13 @@
     "updateAgentSelected": "Agent op geselecteerden bijwerken",
     "updated": "Bijgewerkt",
     "updates": "Bijwerkingen",
-    "viewParent": "Bovenliggende host weergeven"
+    "viewParent": "Bovenliggende host weergeven",
+    "reenroll": "Agent opnieuw registreren",
+    "reenrollHint": "Voor een opnieuw geïnstalleerde agent die zijn referenties kwijt is: wist ze en zet de host terug naar wachten op goedkeuring",
+    "confirmReenroll": "De agent van deze host opnieuw registreren?",
+    "confirmReenrollMessage": "Dit wist de agentreferenties van {{hostname}} en zet de host terug naar wachten op goedkeuring. Gebruik dit wanneer de agent opnieuw is geïnstalleerd en zijn referenties kwijt is: de volgende agent die als deze host verbinding maakt krijgt nieuwe, en niets wat hij verstuurt wordt geaccepteerd totdat u de host opnieuw goedkeurt.",
+    "reenrollDone": "Referenties gewist. Keur de host opnieuw goed zodra de agent weer verbinding maakt.",
+    "reenrollFailed": "Opnieuw registreren van de host mislukt"
   },
   "idp": {
     "action": {

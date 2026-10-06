@@ -29,6 +29,7 @@ import {
 } from '../../Services/postureService';
 import { attributeText, questionText } from './threatModelText';
 import { eventKindLabel, ruleTitle } from './postureLabels';
+import { appLocale } from '../../utils/locale';
 
 interface Props {
     model: ThreatModel;
@@ -109,7 +110,7 @@ const ThreatModelSummary: React.FC<Props> = ({ model, versions, onEdit }) => {
                 {model.created_at && (
                     <Typography variant="caption" color="text.secondary">
                         {t('threatModel.summary.savedBy', 'Saved by {{user}} on {{date}}',
-                            { user: model.created_by ?? '-', date: new Date(model.created_at).toLocaleString() })}
+                            { user: model.created_by ?? '-', date: new Date(model.created_at).toLocaleString(appLocale()) })}
                     </Typography>
                 )}
                 {!model.complete && (

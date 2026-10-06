@@ -580,6 +580,13 @@ const doRebootHost = async (hostId: string) => {
     return result;
 };
 
+// Phase 22.0: clear a host's agent credential and return it to pending, so a
+// reinstalled agent (which lost its credential) can enroll again.
+const doReenrollHost = async (hostId: string) => {
+    const response = await api.post("/api/v1/host/" + hostId + "/reenroll");
+    return response.data as { result: boolean; approval_status: string };
+};
+
 const doShutdownHost = async (hostId: string) => {
     let result = {} as SuccessResponse;
 
@@ -833,4 +840,4 @@ type UbuntuProInfo = {
 }
 
 export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup, SoftwarePackage, PaginatedSoftwareResponse, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, UbuntuProService, UbuntuProLivepatch, RebootPreCheckResponse, OrchestratedRebootResponse, RebootOrchestrationStatus };
-export { doDeleteHost, doGetHostByID, doGetHosts, doApproveHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doRequestSystemInfo, doGetHostSoftware, doRefreshSoftwareData, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doUpdateAgent, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doChangeHostname, doRebootPreCheck, doOrchestratedReboot, getRebootOrchestrationStatus };
+export { doDeleteHost, doGetHostByID, doGetHosts, doApproveHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doRequestSystemInfo, doGetHostSoftware, doRefreshSoftwareData, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doReenrollHost, doUpdateAgent, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doChangeHostname, doRebootPreCheck, doOrchestratedReboot, getRebootOrchestrationStatus };

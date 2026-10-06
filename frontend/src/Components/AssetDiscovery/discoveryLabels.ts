@@ -7,6 +7,7 @@
 
 import type { TFunction } from 'i18next';
 import type { DeviceType, ExclusionCategory } from '../../Services/assetDiscoveryService';
+import { appLocale } from '../../utils/locale';
 
 export const categoryLabel = (t: TFunction, category: string): string => {
     const labels: Record<ExclusionCategory, string> = {
@@ -48,7 +49,7 @@ export const unavailableLabel = (t: TFunction, reason: string): string => {
 export const formatSeen = (iso: string | null): string => {
     if (!iso) return '-';
     const date = new Date(iso.endsWith('Z') || iso.includes('+') ? iso : `${iso}Z`);
-    return Number.isNaN(date.getTime()) ? iso : date.toLocaleString();
+    return Number.isNaN(date.getTime()) ? iso : date.toLocaleString(appLocale());
 };
 
 export const deviceTypeLabel = (t: TFunction, kind: string | null | undefined): string => {

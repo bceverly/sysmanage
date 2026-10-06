@@ -58,6 +58,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import AirgapImportPanel from '../Components/AirgapImportPanel';
+import { appLocale } from '../utils/locale';
 
 // Default freshness threshold used by the dashboard when the backend
 // doesn't surface its own.  Matches the conservative default used in
@@ -376,7 +377,7 @@ const AirgapRepositories: React.FC = () => {
                   <TableCell align="right">{repo.package_count ?? 0}</TableCell>
                   <TableCell>
                     {repo.last_ingest_at
-                      ? new Date(repo.last_ingest_at).toLocaleString()
+                      ? new Date(repo.last_ingest_at).toLocaleString(appLocale())
                       : t('airgap.repositories.table.neverIngested', 'Never')}
                   </TableCell>
                   <TableCell sx={{ color: isStale ? '#b8860b' : '#2d5a3d' }}>

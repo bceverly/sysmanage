@@ -1905,7 +1905,13 @@
     "updateAgentSelected": "Atualizar agente nos selecionados",
     "updated": "Atualizado",
     "updates": "Atualizações",
-    "viewParent": "Ver host pai"
+    "viewParent": "Ver host pai",
+    "reenroll": "Registrar agente novamente",
+    "reenrollHint": "Para um agente reinstalado que perdeu sua credencial: apaga-a e retorna o host para aprovação pendente",
+    "confirmReenroll": "Registrar novamente o agente deste host?",
+    "confirmReenrollMessage": "Isto apaga a credencial do agente de {{hostname}} e retorna o host para aprovação pendente. Use quando o agente foi reinstalado e perdeu sua credencial: o próximo agente que se conectar como este host receberá uma nova, e nada do que ele enviar será aceito até que você aprove o host novamente.",
+    "reenrollDone": "Credencial apagada. Aprove o host novamente quando o agente se reconectar.",
+    "reenrollFailed": "Falha ao registrar o host novamente"
   },
   "idp": {
     "action": {

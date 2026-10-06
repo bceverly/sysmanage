@@ -1905,7 +1905,13 @@
     "updateAgentSelected": "更新所選主機上的代理",
     "updated": "已更新",
     "updates": "更新",
-    "viewParent": "查看父主機"
+    "viewParent": "查看父主機",
+    "reenroll": "重新註冊代理",
+    "reenrollHint": "用於遺失憑證的重新安裝代理：清除憑證並將主機恢復為待核准狀態",
+    "confirmReenroll": "重新註冊此主機的代理？",
+    "confirmReenrollMessage": "這會清除 {{hostname}} 的代理憑證，並將主機恢復為待核准狀態。在代理被重新安裝並遺失憑證時使用：下一個以此主機身分連線的代理會取得新憑證，在您再次核准該主機之前，不接受它傳送的任何內容。",
+    "reenrollDone": "憑證已清除。代理重新連線後，請再次核准該主機。",
+    "reenrollFailed": "重新註冊主機失敗"
   },
   "idp": {
     "action": {

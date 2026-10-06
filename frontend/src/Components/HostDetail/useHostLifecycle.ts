@@ -22,6 +22,7 @@ import {
     doDeleteDiagnostic,
     doRebootHost,
     doShutdownHost,
+    doReenrollHost,
     doUpdateAgent,
     doRequestSystemInfo,
     doRefreshUserAccessData,
@@ -63,6 +64,7 @@ export const useHostLifecycle = ({
     const [diagnosticToDelete, setDiagnosticToDelete] = useState<string | null>(null);
     const [rebootConfirmOpen, setRebootConfirmOpen] = useState<boolean>(false);
     const [shutdownConfirmOpen, setShutdownConfirmOpen] = useState<boolean>(false);
+    const [reenrollConfirmOpen, setReenrollConfirmOpen] = useState<boolean>(false);
     const [rebootPreCheckData, setRebootPreCheckData] = useState<RebootPreCheckResponse | null>(null);
     const [rebootPreCheckLoading, setRebootPreCheckLoading] = useState<boolean>(false);
     const [rebootOrchestrationId, setRebootOrchestrationId] = useState<string | null>(null);
@@ -222,6 +224,10 @@ export const useHostLifecycle = ({
         setRebootConfirmOpen(true);
     };
 
+    const handleReenrollClick = () => {
+        setReenrollConfirmOpen(true);
+    };
+
     const handleShutdownClick = () => {
         setShutdownConfirmOpen(true);
     };
@@ -311,6 +317,24 @@ export const useHostLifecycle = ({
         }
     };
 
+    const handleReenrollConfirm = async () => {
+        if (!host?.id) return;
+
+        try {
+            const result = await doReenrollHost(host.id);
+            setHost((prev) => (prev ? { ...prev, approval_status: result.approval_status } : prev));
+            setSnackbarMessage(t('hosts.reenrollDone', 'Credential cleared. Approve the host again once its agent reconnects.'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            setReenrollConfirmOpen(false);
+        } catch (error) {
+            console.error('Failed to re-enroll host:', error);
+            setSnackbarMessage(t('hosts.reenrollFailed', 'Failed to re-enroll the host'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        }
+    };
+
     const handleConfirmDelete = async () => {
         if (!diagnosticToDelete) return;
         
@@ -365,6 +389,8 @@ export const useHostLifecycle = ({
         setRebootConfirmOpen,
         shutdownConfirmOpen,
         setShutdownConfirmOpen,
+        reenrollConfirmOpen,
+        setReenrollConfirmOpen,
         rebootPreCheckData,
         setRebootPreCheckData,
         rebootPreCheckLoading,
@@ -383,11 +409,13 @@ export const useHostLifecycle = ({
         handleViewDiagnosticDetail,
         handleRebootClick,
         handleShutdownClick,
+        handleReenrollClick,
         handleUpdateAgent,
         handleRebootConfirm,
         handleHostnameEditClick,
         handleHostnameChange,
         handleShutdownConfirm,
+        handleReenrollConfirm,
         handleConfirmDelete,
         handleCancelDelete,
         handleRequestDiagnostics,

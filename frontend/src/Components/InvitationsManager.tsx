@@ -35,6 +35,7 @@ import {
     doResendInvitation
 } from '../Services/invitations';
 import { SecurityRole, doGetAllRoleGroups } from '../Services/securityRoles';
+import { appLocale } from '../utils/locale';
 
 const InvitationsManager: React.FC = () => {
     const { t } = useTranslation();
@@ -185,7 +186,7 @@ const InvitationsManager: React.FC = () => {
     const formatDate = (value: string | null): string => {
         if (!value) return '';
         const d = new Date(value.endsWith('Z') ? value : `${value}Z`);
-        return Number.isNaN(d.getTime()) ? '' : d.toLocaleString();
+        return Number.isNaN(d.getTime()) ? '' : d.toLocaleString(appLocale());
     };
 
     return (

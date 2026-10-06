@@ -1905,7 +1905,13 @@
     "updateAgentSelected": "Agent auf Ausgewählten aktualisieren",
     "updated": "Aktualisiert",
     "updates": "Aktualisierungen",
-    "viewParent": "Übergeordneten Host anzeigen"
+    "viewParent": "Übergeordneten Host anzeigen",
+    "reenroll": "Agent neu registrieren",
+    "reenrollHint": "Für einen neu installierten Agenten, der seine Anmeldedaten verloren hat: löscht sie und setzt den Host auf ausstehende Genehmigung zurück",
+    "confirmReenroll": "Agent dieses Hosts neu registrieren?",
+    "confirmReenrollMessage": "Dies löscht die Agent-Anmeldedaten von {{hostname}} und setzt den Host auf ausstehende Genehmigung zurück. Verwenden Sie es, wenn der Agent neu installiert wurde und seine Anmeldedaten verloren hat: Der nächste Agent, der sich als dieser Host verbindet, erhält neue, und nichts, was er sendet, wird angenommen, bis Sie den Host erneut genehmigen.",
+    "reenrollDone": "Anmeldedaten gelöscht. Genehmigen Sie den Host erneut, sobald sich sein Agent wieder verbindet.",
+    "reenrollFailed": "Fehler beim Neuregistrieren des Hosts"
   },
   "idp": {
     "action": {

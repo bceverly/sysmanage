@@ -1924,7 +1924,13 @@
     "updateAgentSelected": "Update Agent on Selected",
     "updated": "Updated",
     "updates": "Updates",
-    "viewParent": "View Parent Host"
+    "viewParent": "View Parent Host",
+    "reenroll": "Re-enroll Agent",
+    "reenrollHint": "For a reinstalled agent that lost its credential: clears it and returns the host to pending approval",
+    "confirmReenroll": "Re-enroll the Agent of This Host?",
+    "confirmReenrollMessage": "This clears the agent credential of {{hostname}} and returns the host to pending approval. Use it when the agent was reinstalled and lost its credential: the next agent to connect as this host gets a new one, and nothing it sends is accepted until you approve the host again.",
+    "reenrollDone": "Credential cleared. Approve the host again once its agent reconnects.",
+    "reenrollFailed": "Failed to re-enroll the host"
   },
   "idp": {
     "action": {

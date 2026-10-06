@@ -27,6 +27,7 @@ import ColumnVisibilityButton from '../ColumnVisibilityButton';
 import { SysManageHost } from '../../Services/hosts';
 import { Certificate } from './hostDetailTypes';
 import { parseUTCTimestamp } from '../../utils/dateUtils';
+import { appLocale } from '../../utils/locale';
 
 interface HostCertificatesTabProps {
     host: SysManageHost;
@@ -170,7 +171,7 @@ const HostCertificatesTab: React.FC<HostCertificatesTabProps> = ({
                                 color: expiryColor
                             }}
                         >
-                            {expiryDate ? expiryDate.toLocaleDateString() : t('common.unknown', 'Unknown')}
+                            {expiryDate ? expiryDate.toLocaleDateString(appLocale()) : t('common.unknown', 'Unknown')}
                         </Typography>
                         {daysUntilExpiry !== null && (
                             <Typography variant="caption" sx={{ display: 'block', lineHeight: 1 }}>

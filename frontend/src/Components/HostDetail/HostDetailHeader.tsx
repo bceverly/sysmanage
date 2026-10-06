@@ -10,6 +10,7 @@ import LayersIcon from '@mui/icons-material/Layers';
 import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import AppsIcon from '@mui/icons-material/Apps';
 import EditIcon from '@mui/icons-material/Edit';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
@@ -26,6 +27,7 @@ interface HostDetailHeaderProps {
     handleRequestPackages: () => void;
     handleRebootClick: () => void;
     handleShutdownClick: () => void;
+    handleReenrollClick: () => void;
     handleUpdateAgent: () => void;
 }
 
@@ -37,6 +39,7 @@ const HostDetailHeader: React.FC<HostDetailHeaderProps> = ({
     handleRequestPackages,
     handleRebootClick,
     handleShutdownClick,
+    handleReenrollClick,
     handleUpdateAgent,
 }) => {
     const navigate = useNavigate();
@@ -140,6 +143,17 @@ const HostDetailHeader: React.FC<HostDetailHeaderProps> = ({
                         disabled={!host.active}
                     >
                         {t('hosts.updateAgent', 'Update Agent')}
+                    </Button>
+                    )}
+                    {hasPermissionSync(SecurityRoles.APPROVE_HOST_REGISTRATION) && (
+                    <Button
+                        variant="outlined"
+                        color="warning"
+                        startIcon={<VpnKeyIcon />}
+                        onClick={handleReenrollClick}
+                        title={t('hosts.reenrollHint', 'For a reinstalled agent that lost its credential: clears it and returns the host to pending approval')}
+                    >
+                        {t('hosts.reenroll', 'Re-enroll Agent')}
                     </Button>
                     )}
                 </Box>

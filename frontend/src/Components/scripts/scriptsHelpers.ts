@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 import { Host, Script } from '../../Services/scripts';
+import { appLocale } from '../../utils/locale';
 
 export type ChipColor = 'success' | 'error' | 'warning' | 'info' | 'default';
 
@@ -136,7 +137,7 @@ export const buildDataGridLocaleText = (
   noRowsLabel,
   noResultsOverlayLabel: noRowsLabel,
   footerRowSelected: (count: number) => {
-    const countStr = count.toLocaleString();
+    const countStr = count.toLocaleString(appLocale());
     return count === 1
       ? countStr + ' ' + t('common.rowSelected')
       : countStr + ' ' + t('common.rowsSelected');

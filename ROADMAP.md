@@ -11629,9 +11629,19 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       fix -- credential refusals 15 -> 0, one agent recovered its lost
       credential through its nonce ("Registration retry ... re-sending its
       credential"), hosts marked down 22 -> 2.*
-- [ ] **Re-enroll action** for a reinstalled host (lost its token): an admin
+- [x] **Re-enroll action** for a reinstalled host (lost its token): an admin
       clears the credential from the host page and the next registration
       re-issues it; auto-approving enrollment keys may re-enroll on their own.
+      *Done 2026-10-05: `POST /api/v1/host/{id}/reenroll` (role Approve Host
+      Registration, audited) clears the host's token, `requires_host_token`
+      and registration nonce and puts the host back to PENDING; the next agent
+      to claim the host gets a new token on first use, and approving the host
+      sends it (`host_approved`). Back to pending on purpose: clearing a
+      credential must never hand an approved host to whoever connects first.
+      A "Re-enroll Agent" button with a confirm dialog on the host page (14
+      languages); docs: agent-approval page section + RBAC role description
+      (14 languages). Auto-approving enrollment keys re-enrolling on their own
+      was NOT built -- it would skip that approval; decide separately.*
 - [ ] **Proof:** `agent-impersonation` passes (every check, with its positive
       control) and gates CI; controls show a fresh host still enrolls in one
       step and a pre-fix agent still connects. Then the simulated fleet runs
@@ -11972,6 +11982,14 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       (`inbound_processor._find_host_in_tenant_dbs`), and `run_with_db_retry`
       sleeps with `time.sleep` when called on the event loop
       (`partitions.py:395`).
+      *Measured 2026-10-05 before building: neither path ran at all in the
+      20k and 30k beast storms (server logs of 0.55 and 0.85 GB) -- 0
+      "Processing message with NULL host_id" (since 22.0 every message from a
+      bound session carries its host_id) and 0 "Transient DB error" retries
+      (and the host->tenant cache now answers most lookups without the
+      database). Not worth building blind; revisit if either shows up in a
+      failover drill or in production logs. Bryan to decide: keep open, or
+      close as measured-not-needed.*
 - [ ] Single-flight OpenBAO secret refresh with TTL jitter
       (`secrets_service.py:43-91`); chunked startup deletes
       (`custom_metric_retention.py`, `queue_maintenance`); remove per-message
@@ -12385,9 +12403,15 @@ unforgivable.
       uvicorn builds and holds all 11 configs to the list (negative control:
       with uvicorn's default ciphers it fails).*
 
-- [ ] **License server orders versions as strings** -- "2.0.9" sorts above
+- [x] **License server orders versions as strings** -- "2.0.9" sorts above
       "2.0.30", so a fresh install asking for "latest" can get an older build
       (Pro+ `modules.py:362-365, 556`).
+      *Fixed 2026-10-05: the three "latest" lookups (module download,
+      plugin download, the versions endpoint) take the newest by version
+      NUMBER (`module_delivery.version_key` / `newest` / `newest_per_code`);
+      among builds of one version the preferred Python version still wins.
+      The OSS client already compared numerically (`_is_newer`). Tests: the
+      download endpoint with 2.0.9 vs 2.0.10, and the helpers.*
 - [ ] **Offline-grace decision** -- a server that has never phoned home is
       granted unlimited grace, and an error inside the grace check fails open
       (`license_service.py:437-459`). Confirm this is intended for air-gapped
@@ -12428,7 +12452,9 @@ unforgivable.
 #### Exit criteria
 
 - [ ] **A scale harness proves it** -- simulated agents (extend the
-      screenshot fixture agent) at 10k and 50k across many tenants and sites:
+      screenshot fixture agent) at 10k and 20k across many tenants and sites
+      (50k moved to Phase 23.0, Bryan 2026-10-05 -- it needs the 32-core
+      machine being built):
       a server restart drains the reconnect storm with no message expiry and no
       agent locked out; steady-state server load is flat (no 5-minute spikes);
       a fleet-wide plan or rule bump completes at the configured wave rate; a
@@ -12684,6 +12710,16 @@ unforgivable.
       /dev/null. OpenBSD (`rc_bg`), systemd and launchd need nothing.*
 - [ ] Docs: a scaling guide (worker count, pool sizing, private mirrors,
       federation intervals) + 14-language i18n.
+      *Partly done 2026-10-05: `sysmanage-docs/docs/server/scaling.html`
+      (linked from the server index and the docs index), 14 languages, every
+      docs i18n gate green -- the measured capacity table (10k single-tenant
+      to 30k / 20 tenants), sizing per 10,000 agents, agents per worker, the
+      `max_connections` formula with tenant pools, what happens after a
+      restart, and a checklist. Says plainly that transaction-mode poolers
+      (PgBouncer) are not supported (session advisory locks) -- the startup
+      warning and the configuration page had suggested one; both corrected.
+      Still to add: private mirrors and federation intervals, once 22.5 /
+      22.6 land (their herd items are open), and the 50k numbers (23.0).*
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -12709,6 +12745,22 @@ every later phase moved out by one. A minor release (v3.11): new visibility,
 built on 22's agent identity (an asset tag needs to know which host is which)
 and send-on-change collection, and its real-time alerts follow 22.3's rule
 that a site-wide event must not become ten thousand emails.
+
+#### 23.0 Scale proof at 50k agents (carried over from Phase 22)
+
+**Moved here 2026-10-05 (Bryan).** Phase 22 proved 10k agents (single
+tenant) and 20k across 20 tenants on a 12-thread box, with a capacity curve
+saying 50k needs ~12-14 dedicated server cores, a separate database and 48
+GB+ (Phase 22 exit criteria notes). Bryan is building a 32-core / 128 GB
+machine; this proof waits for it rather than for a cloud box.
+
+- [ ] **50k agents across many tenants** on the new machine (server +
+      PostgreSQL there, the fleet sharded over the laptops with
+      `--remote-fleet`): a server-restart storm reconnects every agent with
+      no expiry, no lockout and no host marked down; record the curve from
+      30k up, and the worker count and pool sizing it took.
+- [ ] Fold the result into the scaling guide (Phase 22) -- replace its 50k
+      extrapolation with the measured numbers.
 
 #### 23.1 Hardware health: failing drives, degraded arrays, overheating (OSS + Pro+)
 

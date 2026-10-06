@@ -24,6 +24,7 @@ import {
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { connectionMonitor, ConnectionStatus } from '../Services/connectionMonitor';
+import { appLocale } from '../utils/locale';
 
 interface ServerDownModalProps {
   open: boolean;
@@ -159,7 +160,7 @@ const ServerDownModal: React.FC<ServerDownModalProps> = ({ open }) => {
               <Chip
                 size="small"
                 label={t('serverDown.lastConnected', 
-                  { time: status.lastConnected.toLocaleTimeString() })}
+                  { time: status.lastConnected.toLocaleTimeString(appLocale()) })}
                 color="default"
               />
             )}

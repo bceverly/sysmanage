@@ -9,6 +9,7 @@
  */
 
 import { FederationSiteDetail } from "../Services/federation";
+import { appLocale } from '../utils/locale';
 
 export function statusChipColor(
   status: FederationSiteDetail["status"],
@@ -29,7 +30,7 @@ export function formatAbsolute(iso: string | null | undefined): string {
   if (!iso) return "--";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "--";
-  return date.toLocaleString();
+  return date.toLocaleString(appLocale());
 }
 
 /** Locale-aware "N minutes ago" via the browser's Intl, no hardcoded units. */
