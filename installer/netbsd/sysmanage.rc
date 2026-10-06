@@ -83,6 +83,17 @@ sysmanage_prestart()
 		/usr/pkg/bin/python3.12 -m venv .venv
 		.venv/bin/pip install --quiet --upgrade pip
 		.venv/bin/pip install --quiet -r "$([ -f requirements-prod.txt ] && echo requirements-prod.txt || echo requirements.txt)"
+		# The compiled PostgreSQL driver (Phase 22): pkgsrc has no psycopg-c and
+		# PyPI no NetBSD wheel, so build it here against the installed libpq.  The
+		# pure-Python psycopg calls libpq through ctypes and is several times
+		# slower under load; without a compiler or pg_config it stays in use.
+		PSYV=$(.venv/bin/python -c "import psycopg; print(psycopg.__version__)" 2>/dev/null)
+		if [ -n "$PSYV" ] && { [ -x /usr/pkg/bin/pg_config ] || command -v pg_config >/dev/null 2>&1; }; then
+			PATH="/usr/pkg/bin:$PATH" TMPDIR=/var/tmp .venv/bin/pip install --quiet "psycopg-c==$PSYV" \
+				|| echo "WARNING: psycopg-c did not build; using the slower pure-Python PostgreSQL driver"
+		else
+			echo "WARNING: pg_config not found; using the slower pure-Python PostgreSQL driver"
+		fi
 	fi
 
 	# Run database migrations

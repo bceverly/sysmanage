@@ -428,6 +428,16 @@ async def run_remote_fleet(args) -> dict:  # pylint: disable=too-many-locals
     )
     approved = await asyncio.to_thread(_approve_all, state)
     print(f"  registered {registered}, approved {approved}", flush=True)
+    if not registered:
+        # 2026-10-06: a firewall on the server machine dropped every agent's
+        # connection, and the run went on for its full length measuring an
+        # idle server.  No agent registered = nothing to measure: stop now.
+        for proc in procs:
+            proc.kill()
+        raise SystemExit(
+            f"no agent registered: can {args.remote_fleet} reach "
+            f"{args.server_address}:{state['port']}?  (firewall, bind address)"
+        )
     observer = Observer(f"http://127.0.0.1:{state['port']}", state["db_url"],
                         lambda: stack.load_state().get("server_pid"),
                         interval=args.sample_seconds,

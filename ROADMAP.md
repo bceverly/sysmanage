@@ -12057,11 +12057,24 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       automation, fleet schedules, tenant backup) are engine code: alerting
       and backup have their own items below. "Tenants spread across the
       interval, time budgets with saved cursors" is split out below.*
-- [ ] **Tenants spread across a tick's interval; time budgets with saved
+- [x] **Tenants spread across a tick's interval; time budgets with saved
       cursors** -- split out 2026-10-03. Each tick still walks every tenant
       in one pass; off the loop that no longer stalls agents, but a large
       estate's pass is one burst of database work. Measure with the
       many-tenant harness (see "Process tenants in parallel") first.
+      *Measured 2026-10-06, not needed at this size: t14 server, 50 tenants,
+      10,000 agents (FreeBSD fleet), 30 min steady state, every criterion met
+      (heartbeat p95 987 ms, 0 expired, 0% other CPU). Server and PostgreSQL
+      CPU repeat every 30-60 s, but so does the agents' own send rate
+      (autocorrelation +0.63 at 30 s) -- it is agent traffic; averaged by
+      phase of the tick periods, server CPU is flat to ~3% and nothing shows
+      at 5 or 15 min; /api/health spikes (p95 45 ms, max 281 ms) are not
+      periodic. Caveat: only the multitenancy engine was loaded, so the
+      licensed engines' ticks (advisor 15 min, alerting 1 min, malware
+      5 min) were not in the run -- carried to 23.0. New in the harness:
+      PostgreSQL CPU per sample (`observe.PgCpu`), and a remote fleet that
+      registers no agent stops at once (a firewall on t14 cost one 45-min
+      run measuring an idle server).*
 - [x] **Advisor at fleet scale** -- loads every host and every (host x rule)
       result into memory every 15 min with per-host queries; collections
       uncapped and due in lockstep every 12 h. Cursor pagination, bulk tag and
@@ -12528,7 +12541,7 @@ unforgivable.
       until the next restart.) Docs: the air-gap page's offline paragraph
       rewritten (it called `offline_days` the enforcement mechanism), 14
       languages.*
-- [ ] **BSD servers run the pure-Python PostgreSQL driver** -- psycopg's
+- [x] **BSD servers run the pure-Python PostgreSQL driver** -- psycopg's
       compiled form ships as `psycopg[binary]` wheels only for Linux, macOS
       and Windows x64, so `requirements*.txt` installs plain `psycopg`
       everywhere else and the OpenBSD package bundles it the same way
@@ -12560,6 +12573,25 @@ unforgivable.
       min, 310 hosts marked down, heartbeat p95 10.0 s; compiled ~11,000
       processed, 4 marked down, heartbeat p95 8.4 s. Neither keeps up there
       (a 4-core laptop CPU) -- the event-loop work above is the next limit.*
+      *Packages done 2026-10-06. OpenBSD: `build-libs.sh` bundles the
+      psycopg-c SOURCE (the sdist ships generated C -- no Cython) and the port
+      compiles it offline in `do-build` (`python -m build --no-isolation`,
+      BUILD_DEPENDS py-build/py-setuptools/py-wheel + postgresql,-main) into
+      pip-packages; the distfile stays pure-Python and one-size-fits-all. The
+      exact steps ran on t480 (7.9): `impl: c`. Both OpenBSD workflows now
+      fail a package without `psycopg_c/pq`. FreeBSD: `databases/py-psycopg-c`
+      added to the port's RUN_DEPENDS and the +MANIFEST package (same version
+      as py-psycopg in ports; `impl: c` on the FreeBSD 14.4 box). NetBSD: the
+      .tgz builds psycopg-c at install time after its pip install (pkgsrc has
+      neither psycopg 3 nor psycopg-c), keeping the pure driver with a
+      warning without pg_config or a compiler. Every platform's startup log
+      names the implementation, a WARNING for the pure one
+      (`backend/persistence/driver_info.py`). To verify: a run of
+      `build-openbsd-packages.yml`, and the FreeBSD port in a real ports
+      tree. FOUND on the way: the pkgsrc port
+      (`packaging/netbsd-pkgsrc`) DEPENDS on `databases/py-psycopg`, which
+      pkgsrc does not have (only py-psycopg2) -- it cannot build in a real
+      pkgsrc tree; the shipped NetBSD .tgz is unaffected.*
 
 #### Exit criteria
 
@@ -12897,6 +12929,14 @@ machine; this proof waits for it rather than for a cloud box.
       30k up, and the worker count and pool sizing it took.
 - [ ] Fold the result into the scaling guide (Phase 22) -- replace its 50k
       extrapolation with the measured numbers.
+- [ ] **Tenant-pass bursts with the licensed engines loaded** (carried from
+      22.3, 2026-10-06). The 22.3 measurement (50 tenants, 10k agents) found
+      no tick-aligned burst, but its stack loaded only the multitenancy
+      engine: the advisor (15 min), alerting (1 min) and malware (5 min)
+      ticks, which walk every tenant, did not run. Repeat it on the new
+      machine with those engines licensed (the screenshot pipeline's
+      self-signed license) and analyze it the same way (phase-averaged CPU
+      by tick period); spread tenants across the interval only if it bursts.
 - [ ] **Hosts grid at 50k: measure, then page on the server if needed**
       (carried from 22.7, Bryan 2026-10-06). The Hosts page still fetches
       every host (`GET /api/v1/hosts`) each minute while its tab is visible:

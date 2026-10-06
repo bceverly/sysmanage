@@ -117,6 +117,24 @@ if find "$STAGE/pip-packages" -name '*.so' | grep -q .; then
 	exit 1
 fi
 
+# The compiled PostgreSQL driver (Phase 22): psycopg-c's SOURCE, for the
+# port to compile at build time against that release's libpq (see do-build in
+# the Makefile).  The pure-Python psycopg above loads libpq through ctypes --
+# measured on t480, a 5k-agent storm drained ~1,900 messages in 20 minutes
+# with it and ~11,000 with psycopg-c.  Source, not a wheel: the distfile
+# stays one-size-fits-all, and the sdist carries the generated C (no Cython
+# needed to build it).
+PSYV=$("${OUT}/bldvenv/bin/python" -c 'import importlib.metadata as m; print(m.version("psycopg"))')
+echo "=== Bundling psycopg-c ${PSYV} source ==="
+rm -rf "${OUT}/psycopg-c-src"
+"${OUT}/bldvenv/bin/python" -m pip download --no-binary :all: --no-deps \
+	"psycopg-c==${PSYV}" -d "${OUT}/psycopg-c-src"
+mkdir -p "$STAGE/psycopg-c"
+# (OpenBSD tar has no --strip-components: extract, then copy the top dir.)
+( cd "${OUT}/psycopg-c-src" && tar xzf psycopg_c-*.tar.gz )
+cp -R "${OUT}"/psycopg-c-src/psycopg_c-*/. "$STAGE/psycopg-c/"
+test -f "$STAGE/psycopg-c/pyproject.toml" || { echo "ERROR: psycopg-c source not staged" >&2; exit 1; }
+
 echo "=== Staging backend source + built frontend ==="
 for d in backend alembic scripts installer sbom; do
 	[ -d "$SRC/$d" ] && cp -R "$SRC/$d" "$STAGE/"

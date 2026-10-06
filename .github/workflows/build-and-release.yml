@@ -663,6 +663,7 @@ jobs:
             tar ztf "$PKG_FILE" > /tmp/pc.txt
             grep -q 'share/sysmanage/frontend/index.html' /tmp/pc.txt || { echo "ERROR: no frontend"; exit 1; }
             grep -q 'libexec/sysmanage/pip-packages/fastapi' /tmp/pc.txt || { echo "ERROR: no pip bundle"; exit 1; }
+            grep -q 'libexec/sysmanage/pip-packages/psycopg_c/pq' /tmp/pc.txt || { echo "ERROR: no compiled psycopg-c (the slow pure-Python driver would be used)"; exit 1; }
             grep -q 'libexec/sysmanage/backend/main.py' /tmp/pc.txt || { echo "ERROR: no backend"; exit 1; }
             cp "$PKG_FILE" "$GITHUB_WORKSPACE/sysmanage-${VERSION}-openbsd${OPENBSD_VERSION_NODOT}.tgz"
             ls -la "$GITHUB_WORKSPACE"/*.tgz

@@ -18,8 +18,9 @@ PERMIT_PACKAGE =	Yes
 
 # --- Offline build model ---------------------------------------------------
 #
-# This port builds FULLY OFFLINE (no pip / npm / compiler at build time): all
-# network access happens in the fetch phase, as OpenBSD ports policy expects.
+# This port builds FULLY OFFLINE (no pip / npm at build time; the one thing
+# compiled, psycopg-c, comes from source in the distfile): all network access
+# happens in the fetch phase, as OpenBSD ports policy expects.
 # It fetches a SINGLE pre-built distfile from the SysManage R2 repository,
 # produced by the release pipeline, containing everything needed:
 #
@@ -38,8 +39,16 @@ MASTER_SITES =		https://repo.sysmanage.org/server/openbsd/
 MODULES =		lang/python
 MODPY_VERSION =		${MODPY_DEFAULT_VERSION_3}
 
-# Nothing to compile -- everything in the distfile is pre-built.
-NO_BUILD =		Yes
+# One thing is compiled: psycopg-c, the C PostgreSQL driver, from the source
+# bundled in the distfile (do-build below), against this release's libpq.
+# Without it psycopg falls back to its pure-Python implementation, which calls
+# libpq through ctypes -- measured on OpenBSD (t480), a 5k-agent storm drained
+# ~1,900 messages in 20 minutes with it and ~11,000 with psycopg-c.  The sdist
+# carries generated C, so no Cython; still fully offline.
+BUILD_DEPENDS =		devel/py-build${MODPY_FLAVOR} \
+			devel/py-setuptools${MODPY_FLAVOR} \
+			devel/py-wheel${MODPY_FLAVOR} \
+			databases/postgresql,-main
 
 RUN_DEPENDS =		databases/py-alembic${MODPY_FLAVOR} \
 			databases/py-sqlalchemy${MODPY_FLAVOR} \
@@ -57,9 +66,10 @@ RUN_DEPENDS =		databases/py-alembic${MODPY_FLAVOR} \
 			www/py-aiohttp${MODPY_FLAVOR} \
 			www/py-jinja2${MODPY_FLAVOR}
 
-# libpq for the (pure-Python) psycopg 3 adapter bundled via pip -- OpenBSD has
-# no psycopg 3 port (only databases/py-psycopg2, a different module), so plain
-# `psycopg` is pip-bundled and loads libpq.so at runtime from postgresql-client.
+# libpq for the psycopg 3 adapter bundled via pip -- OpenBSD has no psycopg 3
+# port (only databases/py-psycopg2, a different module), so `psycopg` is
+# pip-bundled, with psycopg-c compiled in do-build, and loads libpq.so at
+# runtime from postgresql-client.
 # postgresql is a multi-package port; its ,-main subpackage IS postgresql-client
 # (ships libpq.so), so that is the correct dependency spec.
 RUN_DEPENDS +=		databases/postgresql,-main
@@ -79,6 +89,14 @@ SYSMANAGE_GROUP =	_sysmanage
 post-extract:
 	printf '__version__ = "%s"\n' "${V}" > ${WRKSRC}/backend/__init__.py
 
+do-build:
+	@test -f ${WRKSRC}/psycopg-c/pyproject.toml || { \
+		echo "ERROR: ${WRKSRC}/psycopg-c is missing -- the distfile predates" ; \
+		echo "the bundled psycopg-c source.  Refusing to package." ; \
+		exit 1 ; }
+	cd ${WRKSRC}/psycopg-c && ${MODPY_BIN} -m build --wheel --no-isolation \
+		--skip-dependency-check --outdir ${WRKDIR}/psycopg-c-dist .
+
 do-install:
 	# Backend Python application
 	${INSTALL_DATA_DIR} ${PREFIX}/libexec/sysmanage
@@ -93,6 +111,13 @@ do-install:
 		echo "distfile was not fetched/extracted.  Refusing to package." ; \
 		exit 1 ; }
 	cp -R ${WRKSRC}/pip-packages ${PREFIX}/libexec/sysmanage/
+	# The compiled driver built in do-build, beside the pure-Python psycopg
+	# it accelerates (psycopg imports psycopg_c when it is there).
+	${MODPY_BIN} -m zipfile -e ${WRKDIR}/psycopg-c-dist/psycopg_c-*.whl \
+		${PREFIX}/libexec/sysmanage/pip-packages/
+	# (zipfile drops modes: give the shared objects the usual 0555.)
+	find ${PREFIX}/libexec/sysmanage/pip-packages/psycopg_c -name '*.so' \
+		-exec chmod 555 {} +
 
 	# Frontend static files (from the libs distfile).  A missing frontend is a
 	# hard error: shipping a server without its UI is exactly the defect this

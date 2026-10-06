@@ -159,6 +159,31 @@ class OtherCpu:
         return result
 
 
+class PgCpu:
+    """CPU used by PostgreSQL's processes between two calls, in percent of
+    one CPU -- where a burst of database work (a tick walking every tenant,
+    Phase 22.3) shows, when the server's own CPU does not."""
+
+    def __init__(self):
+        self._last = None  # (monotonic time, {pid: cpu seconds})
+
+    def sample(self) -> Optional[float]:
+        now = time.monotonic()
+        table = _all_cpu_seconds()
+        if not table:
+            return None
+        pg = {pid: cpu for pid, (_ppid, comm, cpu) in table.items()
+              if comm.startswith(("postgres", "postmaster"))}  # fmt: skip
+        result = None
+        if self._last is not None and now > self._last[0]:
+            used = sum(
+                max(0.0, cpu - self._last[1].get(pid, 0.0)) for pid, cpu in pg.items()
+            )
+            result = round(100 * used / (now - self._last[0]), 1)
+        self._last = (now, pg)
+        return result
+
+
 def host_load_per_cpu() -> Optional[float]:
     """1-minute load average per CPU of THIS machine.  Over ~1.5 the server
     shares the box with other work and the run is not a clean measurement
@@ -264,6 +289,7 @@ class Observer:
         self._task: Optional[asyncio.Task] = None
         self._last_cpu = None
         self._other_cpu = OtherCpu()
+        self._pg_cpu = PgCpu()
         self._started = time.monotonic()
 
     def _db_sample(self) -> dict:
@@ -321,6 +347,7 @@ class Observer:
                     server_rss_mb=_proc_rss_mb(pid) if pid else None,
                     host_load_per_cpu=host_load_per_cpu(),
                     other_cpu_per_cpu=self._other_cpu.sample(pid),
+                    pg_cpu_percent=self._pg_cpu.sample(),
                 )
                 self.samples.append(sample)
                 await asyncio.sleep(max(0.0, self.interval - (time.monotonic() - now)))

@@ -97,6 +97,13 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
 
         enforce_deployment_invariants()
         logger.info("Deployment invariants satisfied")
+        # Which PostgreSQL driver (Phase 22): the pure-Python fallback is
+        # several times slower and used to be chosen silently.
+        from backend.persistence.driver_info import (  # noqa: PLC0415
+            log_postgres_driver,
+        )
+
+        log_postgres_driver(get_engine())
 
         # Phase 22.2: with several workers, one leader runs the server-wide
         # background work (every singleton_task below); see leadership.py.
