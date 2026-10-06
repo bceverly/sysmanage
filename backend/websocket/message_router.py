@@ -80,56 +80,40 @@ async def route_inbound_message(  # NOSONAR
 
     try:
         if message_type == MessageType.OS_VERSION_UPDATE:
-            print("About to call handle_os_version_update", flush=True)
             await handle_os_version_update(db, mock_connection, message_data)
             success = True
-            print("Successfully processed OS version update", flush=True)
 
         elif message_type == MessageType.HARDWARE_UPDATE:
-            print("About to call handle_hardware_update", flush=True)
             await handle_hardware_update(db, mock_connection, message_data)
             success = True
-            print("Successfully processed hardware update", flush=True)
 
         elif message_type == MessageType.FIPS_COMPLIANCE_UPDATE:
             await handle_fips_compliance_update(db, mock_connection, message_data)
             success = True
 
         elif message_type == MessageType.USER_ACCESS_UPDATE:
-            print("About to call handle_user_access_update", flush=True)
             await handle_user_access_update(db, mock_connection, message_data)
             success = True
-            print("Successfully processed user access update", flush=True)
 
         elif message_type == MessageType.SOFTWARE_INVENTORY_UPDATE:
-            print("About to call handle_software_update", flush=True)
             await handle_software_update(db, mock_connection, message_data)
             success = True
-            print("Successfully processed software inventory update", flush=True)
 
         elif message_type == MessageType.PACKAGE_UPDATES_UPDATE:
-            print("About to call handle_package_updates_update", flush=True)
             await handle_package_updates_update(db, mock_connection, message_data)
             success = True
-            print("Successfully processed package updates", flush=True)
 
         elif message_type == MessageType.AVAILABLE_PACKAGES_BATCH_START:
-            print("About to call handle_packages_batch_start", flush=True)
             await handle_packages_batch_start(db, mock_connection, message_data)
             success = True
-            print("Successfully processed packages batch start", flush=True)
 
         elif message_type == MessageType.AVAILABLE_PACKAGES_BATCH:
-            print("About to call handle_packages_batch", flush=True)
             await handle_packages_batch(db, mock_connection, message_data)
             success = True
-            print("Successfully processed packages batch", flush=True)
 
         elif message_type == MessageType.AVAILABLE_PACKAGES_BATCH_END:
-            print("About to call handle_packages_batch_end", flush=True)
             await handle_packages_batch_end(db, mock_connection, message_data)
             success = True
-            print("Successfully processed packages batch end", flush=True)
 
         elif message_type == MessageType.AVAILABLE_PACKAGES_DELTA:
             # Incremental catalog update.  Rejected server-side if its base
@@ -139,76 +123,52 @@ async def route_inbound_message(  # NOSONAR
             success = True
 
         elif message_type == MessageType.SCRIPT_EXECUTION_RESULT:
-            print("About to call handle_script_execution_result", flush=True)
             await handle_script_execution_result(db, mock_connection, message_data)
             success = True
-            print("Successfully processed script execution result", flush=True)
 
         elif message_type == MessageType.REBOOT_STATUS_UPDATE:
-            print("About to call handle_reboot_status_update", flush=True)
             await handle_reboot_status_update(db, mock_connection, message_data)
             success = True
-            print("Successfully processed reboot status update", flush=True)
 
         elif message_type == MessageType.HOST_CERTIFICATES_UPDATE:
-            print("About to call handle_host_certificates_update", flush=True)
             await handle_host_certificates_update(db, mock_connection, message_data)
             success = True
-            print("Successfully processed host certificates update", flush=True)
 
         elif message_type == MessageType.ROLE_DATA:
-            print("About to call handle_host_role_data_update", flush=True)
             await handle_host_role_data_update(db, mock_connection, message_data)
             success = True
-            print("Successfully processed host role data update", flush=True)
 
         elif message_type == MessageType.THIRD_PARTY_REPOSITORY_UPDATE:
-            print("About to call handle_third_party_repository_update", flush=True)
             await handle_third_party_repository_update(
                 db, mock_connection, message_data
             )
             success = True
-            print("Successfully processed third-party repository update", flush=True)
 
         elif message_type == MessageType.ANTIVIRUS_STATUS_UPDATE:
-            print("About to call handle_antivirus_status_update", flush=True)
             await handle_antivirus_status_update(db, mock_connection, message_data)
             success = True
-            print("Successfully processed antivirus status update", flush=True)
 
         elif message_type == MessageType.COMMERCIAL_ANTIVIRUS_STATUS_UPDATE:
-            print("About to call handle_commercial_antivirus_status_update", flush=True)
             await handle_commercial_antivirus_status_update(
                 db, mock_connection, message_data
             )
             success = True
-            print(
-                "Successfully processed commercial antivirus status update", flush=True
-            )
 
         elif message_type == MessageType.FIREWALL_STATUS_UPDATE:
-            print("About to call handle_firewall_status_update", flush=True)
             await handle_firewall_status_update(db, mock_connection, message_data)
             success = True
-            print("Successfully processed firewall status update", flush=True)
 
         elif message_type == MessageType.GRAYLOG_STATUS_UPDATE:
-            print("About to call handle_graylog_status_update", flush=True)
             await handle_graylog_status_update(db, mock_connection, message_data)
             success = True
-            print("Successfully processed Graylog status update", flush=True)
 
         elif message_type == MessageType.PROCESS_STATUS_UPDATE:
-            print("About to call handle_process_status_update", flush=True)
             await handle_process_status_update(db, mock_connection, message_data)
             success = True
-            print("Successfully processed process status update", flush=True)
 
         elif message_type == MessageType.CUSTOM_METRIC_SAMPLES:
-            print("About to call handle_custom_metric_samples", flush=True)
             await handle_custom_metric_samples(db, mock_connection, message_data)
             success = True
-            print("Successfully processed custom metric samples", flush=True)
 
         elif message_type == MessageType.HOST_METRICS:
             await handle_host_metrics(db, mock_connection, message_data)
@@ -219,93 +179,64 @@ async def route_inbound_message(  # NOSONAR
             success = True
 
         elif message_type == MessageType.HOSTNAME_CHANGED:
-            print("About to call handle_hostname_changed", flush=True)
             await handle_hostname_changed(db, mock_connection, message_data)
             success = True
-            print("Successfully processed hostname changed", flush=True)
 
         elif message_type == MessageType.VIRTUALIZATION_SUPPORT_UPDATE:
-            print("About to call handle_virtualization_support_update", flush=True)
             await handle_virtualization_support_update(
                 db, mock_connection, message_data
             )
             success = True
-            print("Successfully processed virtualization support update", flush=True)
 
         elif message_type == MessageType.CHILD_HOST_LIST_UPDATE:
-            print("About to call handle_child_hosts_list_update", flush=True)
             await handle_child_hosts_list_update(db, mock_connection, message_data)
             success = True
-            print("Successfully processed child host list update", flush=True)
 
         elif message_type == MessageType.CHILD_HOST_CREATION_PROGRESS:
-            print("About to call handle_child_host_creation_progress", flush=True)
             await handle_child_host_creation_progress(db, mock_connection, message_data)
             success = True
-            print("Successfully processed child host creation progress", flush=True)
 
         elif message_type == MessageType.CHILD_HOST_CREATED:
-            print("About to call handle_child_host_created", flush=True)
             await handle_child_host_created(db, mock_connection, message_data)
             success = True
-            print("Successfully processed child host created", flush=True)
 
         elif message_type == MessageType.COMMAND_RESULT:
-            print("About to call handle_command_result", flush=True)
             await handle_command_result(db, mock_connection, message_data)
             success = True
-            print("Successfully processed command result", flush=True)
 
         elif message_type == MessageType.COMMAND_ACKNOWLEDGMENT:
-            print("About to call handle_command_acknowledgment", flush=True)
             await handle_command_acknowledgment(db, mock_connection, message_data)
             success = True
-            print("Successfully processed command acknowledgment", flush=True)
 
         elif message_type == MessageType.UPDATE_APPLY_RESULT:
-            print("About to call handle_update_apply_result", flush=True)
             await handle_update_apply_result(db, mock_connection, message_data)
             success = True
-            print("Successfully processed update apply result", flush=True)
 
         elif message_type == MessageType.INSTALLATION_COMPLETE:
-            print("About to call handle_installation_complete", flush=True)
             await handle_installation_complete(db, mock_connection, message_data)
             success = True
-            print("Successfully processed installation_complete", flush=True)
 
         elif message_type == MessageType.VMM_INITIALIZED:
-            print("About to call handle_vmm_initialize_result", flush=True)
             await handle_vmm_initialize_result(db, mock_connection, message_data)
             success = True
-            print("Successfully processed VMM initialized", flush=True)
 
         elif message_type == MessageType.KVM_INITIALIZED:
-            print("About to call handle_kvm_initialize_result", flush=True)
             await handle_kvm_initialize_result(db, mock_connection, message_data)
             success = True
-            print("Successfully processed KVM initialized", flush=True)
 
         elif message_type == MessageType.BHYVE_INITIALIZED:
-            print("About to call handle_bhyve_initialize_result", flush=True)
             await handle_bhyve_initialize_result(db, mock_connection, message_data)
             success = True
-            print("Successfully processed bhyve initialized", flush=True)
 
         elif message_type == MessageType.KVM_MODULES_ENABLED:
-            print("About to call handle_kvm_modules_enable_result", flush=True)
             await handle_kvm_modules_enable_result(db, mock_connection, message_data)
             success = True
-            print("Successfully processed KVM modules enabled", flush=True)
 
         elif message_type == MessageType.KVM_MODULES_DISABLED:
-            print("About to call handle_kvm_modules_disable_result", flush=True)
             await handle_kvm_modules_disable_result(db, mock_connection, message_data)
             success = True
-            print("Successfully processed KVM modules disabled", flush=True)
 
         else:
-            print(f"Unknown message type: {message_type}", flush=True)
             logger.warning(_("Unknown message type in queue: %s"), message_type)
             success = False
 
@@ -315,7 +246,6 @@ async def route_inbound_message(  # NOSONAR
             {"message_type": message_type, "error": str(e)},
             exc_info=True,
         )
-        print(f"ERROR in routing message type {message_type}: {e}", flush=True)
         success = False
 
     return success
@@ -334,10 +264,6 @@ def log_message_data(message_type: str, message_data: Dict[str, Any]) -> None:
         cpu_model = message_data.get("cpu_model", "N/A")
         memory_mb = message_data.get("memory_total_mb", "N/A")
         storage_count = len(message_data.get("storage_devices", []))
-        print(
-            f"Hardware data - CPU: {cpu_vendor} {cpu_model}, Memory: {memory_mb} MB, Storage: {storage_count} devices",
-            flush=True,
-        )
         logger.info(
             "Hardware data - CPU: %s %s, Memory: %s MB, Storage: %s devices",
             cpu_vendor,
@@ -348,10 +274,6 @@ def log_message_data(message_type: str, message_data: Dict[str, Any]) -> None:
     elif message_type == MessageType.SOFTWARE_INVENTORY_UPDATE:
         total_packages = message_data.get("total_packages", 0)
         software_packages = message_data.get("software_packages", [])
-        print(
-            f"Software data - Total packages: {total_packages}, Sample: {software_packages[0] if software_packages else 'None'}",
-            flush=True,
-        )
         logger.info(
             "Software data - Total packages: %s, Sample: %s",
             total_packages,
@@ -360,10 +282,6 @@ def log_message_data(message_type: str, message_data: Dict[str, Any]) -> None:
     elif message_type == MessageType.USER_ACCESS_UPDATE:
         total_users = message_data.get("total_users", 0)
         total_groups = message_data.get("total_groups", 0)
-        print(
-            f"User access data - Users: {total_users}, Groups: {total_groups}",
-            flush=True,
-        )
         logger.info(
             "User access data - Users: %s, Groups: %s",
             total_users,

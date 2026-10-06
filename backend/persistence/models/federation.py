@@ -722,9 +722,13 @@ class FederationSyncQueue(Base):
     last_error = Column(Text, nullable=True)
     # Optional dedup key -- host-delta entries set this, rollups don't.
     dedup_key = Column(String(255), nullable=True)
+    # When a failed entry may be retried, computed once at the failure
+    # (Phase 22.5); NULL = ready.  The worker selects on it in SQL.
+    next_attempt_at = Column(DateTime, nullable=True)
 
     __table_args__ = (
         Index("ix_federation_sync_queue_created_at", "created_at"),
+        Index("ix_federation_sync_queue_next_attempt_at", "next_attempt_at"),
         Index("ix_federation_sync_queue_payload_type", "payload_type"),
         Index("ix_federation_sync_queue_dedup_key", "dedup_key"),
     )

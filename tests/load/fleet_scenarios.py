@@ -477,6 +477,12 @@ async def run_remote_fleet(args) -> dict:  # pylint: disable=too-many-locals
 def main_fleet(args) -> int:
     """Entry point from run.py for the fleet-* scenarios."""
     runner = run_remote_fleet if getattr(args, "remote_fleet", None) else run_fleet
+    if args.scenario == "fleet-wave-push":
+        from tests.load.wave_scenarios import (  # pylint: disable=import-outside-toplevel
+            run_wave,
+        )
+
+        runner = run_wave
     report = asyncio.run(runner(args))
     with open(args.output_json, "w", encoding="utf-8") as fh:
         json.dump(report, fh, indent=2, default=str)

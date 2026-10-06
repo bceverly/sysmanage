@@ -25,6 +25,7 @@ State machine for ``enrollment_status``:
 
 from __future__ import annotations
 
+import random
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
@@ -126,6 +127,18 @@ def _backoff_seconds(consecutive_failures: int) -> int:
         RECONNECT_BACKOFF_BASE_SECONDS * (2**exponent),
         RECONNECT_BACKOFF_CAP_SECONDS,
     )
+
+
+def _jittered_backoff_seconds(consecutive_failures: int) -> float:
+    """The backoff actually waited: between half and all of
+    :func:`_backoff_seconds` (Phase 22.5).
+
+    The backoff was exact, so every site that lost the coordinator at the
+    same moment (its outage) retried at the same moments and came back in
+    one burst when it returned.  Half fixed, half random keeps each site's
+    wait growing and under the cap while spreading the fleet out."""
+    backoff = _backoff_seconds(consecutive_failures)
+    return backoff / 2 + random.uniform(0, backoff / 2)  # nosec B311
 
 
 def _get_or_create(session: Session) -> FederationCoordinator:
@@ -424,7 +437,7 @@ def record_sync_attempt(
         row.consecutive_sync_failures = (row.consecutive_sync_failures or 0) + 1
         row.connection_state = _classify_connection(row.consecutive_sync_failures)
         row.next_reconnect_at = now + timedelta(
-            seconds=_backoff_seconds(row.consecutive_sync_failures)
+            seconds=_jittered_backoff_seconds(row.consecutive_sync_failures)
         )
     return row
 

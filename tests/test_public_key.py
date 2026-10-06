@@ -77,15 +77,16 @@ class TestLoadCachedKey:
     @patch("backend.licensing.public_key._cache", {"public_key": None})
     @patch("backend.licensing.public_key.CACHE_FILE")
     def test_load_cached_key_from_file(self, mock_cache_file):
-        """Test loads key from file when not in memory."""
+        """Test loads a valid key from file when not in memory."""
         from backend.licensing.public_key import _load_cached_key
 
+        pem = _real_pem()
         mock_cache_file.exists.return_value = True
-        mock_cache_file.read_text.return_value = "file-key-pem"
+        mock_cache_file.read_text.return_value = pem
 
         result = _load_cached_key()
 
-        assert result == "file-key-pem"
+        assert result == pem
 
     @patch("backend.licensing.public_key._cache", {"public_key": None})
     @patch("backend.licensing.public_key.CACHE_FILE")
@@ -120,20 +121,19 @@ class TestSaveCachedKey:
     @patch("backend.licensing.public_key.CACHE_FILE")
     @patch("backend.licensing.public_key.CACHE_DIR")
     def test_save_cached_key_success(self, mock_cache_dir, mock_cache_file):
-        """Test saves key to file and memory."""
-        from backend.licensing.public_key import _cache, _save_cached_key
+        """Test saves key to file (atomically) and memory."""
+        import tempfile
+        from pathlib import Path
 
-        mock_cache_file.parent.mkdir = MagicMock()
-        mock_cache_file.write_text = MagicMock()
+        from backend.licensing import public_key
 
-        _save_cached_key("new-key-pem")
-
-        # The cache file's own directory (license.public_key_path, 22.4).
-        mock_cache_file.parent.mkdir.assert_called_once_with(
-            parents=True, exist_ok=True
-        )
-        mock_cache_file.write_text.assert_called_once_with("new-key-pem")
-        assert _cache["public_key"] == "new-key-pem"
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "license" / "public_key.pem"
+            with patch.object(public_key, "CACHE_FILE", target):
+                public_key._save_cached_key("new-key-pem")
+            assert target.read_text() == "new-key-pem"
+            assert list(target.parent.iterdir()) == [target]  # no temp left
+        assert public_key._cache["public_key"] == "new-key-pem"
 
     @patch("backend.licensing.public_key._cache", {"public_key": None})
     @patch("backend.licensing.public_key.CACHE_FILE")
@@ -375,3 +375,13 @@ class AsyncContextManager:
 
     async def __aexit__(self, *args):
         pass
+
+
+def _real_pem() -> str:
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric import ec
+
+    key = ec.generate_private_key(ec.SECP256R1()).public_key()
+    return key.public_bytes(
+        serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo
+    ).decode()

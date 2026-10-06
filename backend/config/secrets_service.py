@@ -23,6 +23,7 @@ applies, so a deployment that hasn't migrated its secrets keeps working.
 """
 
 import logging
+import random
 import threading
 import time
 from typing import Any, Callable, Optional
@@ -51,6 +52,13 @@ _cache_expiry: float = 0.0
 # yet" so a missing/unreachable OpenBAO isn't hit on every secret lookup
 # (each miss costs a connection-retry timeout).
 _cache_fetched: bool = False
+# Phase 22.2: single flight.  When the cache expired, every thread that asked
+# in that moment read OpenBAO itself -- a burst of identical reads (and, with
+# OpenBAO down, a burst of connection timeouts).  One thread refreshes; the
+# others wait for it and use its result.  The TTL varies +/-_CACHE_TTL_SPREAD
+# so the server's worker processes do not refresh in step either.
+_refresh_lock = threading.Lock()
+_CACHE_TTL_SPREAD = 0.2
 
 
 def _config_secret_path() -> str:
@@ -77,18 +85,33 @@ def get_config_secret_bag() -> Optional[dict]:
     global _cache_bag, _cache_expiry, _cache_fetched  # pylint: disable=global-statement
     if not config.is_vault_enabled():
         return None
-    now = time.time()
-    with _cache_lock:
-        # Serve from cache while fresh -- including a cached miss (None), so an
-        # absent/down OpenBAO isn't re-probed on every lookup.
-        if _cache_fetched and now < _cache_expiry:
-            return _cache_bag
-    bag = _read_bag_from_openbao()
-    with _cache_lock:
-        _cache_bag = bag
-        _cache_expiry = now + _CACHE_TTL_SECONDS
-        _cache_fetched = True
+    hit, bag = _cached()
+    if hit:
+        return bag
+    with _refresh_lock:
+        # Another thread may have refreshed while this one waited.
+        hit, bag = _cached()
+        if hit:
+            return bag
+        bag = _read_bag_from_openbao()
+        ttl = _CACHE_TTL_SECONDS * random.uniform(  # nosec B311 - spreading load
+            1 - _CACHE_TTL_SPREAD, 1 + _CACHE_TTL_SPREAD
+        )
+        with _cache_lock:
+            _cache_bag = bag
+            _cache_expiry = time.time() + ttl
+            _cache_fetched = True
     return bag
+
+
+def _cached():
+    """``(True, bag)`` while the cache is fresh -- a cached miss (None)
+    included, so an absent/down OpenBAO isn't re-probed on every lookup --
+    else ``(False, None)``."""
+    with _cache_lock:
+        if _cache_fetched and time.time() < _cache_expiry:
+            return True, _cache_bag
+    return False, None
 
 
 def _read_bag_from_openbao() -> Optional[dict]:

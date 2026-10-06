@@ -205,6 +205,33 @@ async def test_a_redirect_to_storage_is_followed_without_the_license_key(tmp_pat
     assert "X-License-Key" not in session.requests[1][1]
 
 
+async def test_a_refused_storage_link_falls_back_to_the_license_server(tmp_path):
+    """2026-10-06: the license server's storage credential had no access and
+    R2 answered 403 for every engine -- no customer could update.  The
+    client now asks the license server to send the bytes itself."""
+    session = _Session([
+        _Resp(307, {"Location": "https://acct.r2.example/b/k?sig=1",
+                    "X-Content-SHA512": "abc", "X-Module-Version": "2.1.0"}),
+        _Resp(403),
+        _Resp(200, {"X-Content-SHA512": "abc", "X-Module-Version": "2.1.0"}, b"direct"),
+    ])  # fmt: skip
+    assert await _fetch(session, tmp_path) == ("abc", "2.1.0")
+    assert (tmp_path / "x.tmp").read_bytes() == b"direct"
+    url, headers = session.requests[2]
+    assert url == "https://lic/download/x"
+    assert headers == {"X-License-Key": "LICENSE-KEY", "X-Module-Direct": "1"}
+
+
+async def test_an_older_license_server_that_redirects_again_fails_cleanly(tmp_path):
+    session = _Session([
+        _Resp(307, {"Location": "https://acct.r2.example/b/k?sig=1"}),
+        _Resp(403),
+        _Resp(307, {"Location": "https://acct.r2.example/b/k?sig=2"}),
+    ])  # fmt: skip
+    assert await _fetch(session, tmp_path) is None
+    assert len(session.requests) == 3
+
+
 async def test_a_non_https_redirect_is_refused(tmp_path):
     session = _Session([_Resp(302, {"Location": "http://evil.example/x"})])
     assert await _fetch(session, tmp_path) is None

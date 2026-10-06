@@ -172,6 +172,29 @@ class TestPeekBatch:
         with pytest.raises(ValueError):
             qsvc.peek_batch(session, limit=0)
 
+    def test_ready_rows_behind_many_waiting_ones_are_reached(self, session):
+        """Phase 22.5: it read the oldest ``limit * 4`` rows and filtered the
+        waiting ones in Python, so ready rows behind them starved."""
+        base = datetime(2026, 1, 1, 0, 0, 0)
+        for n in range(20):  # older, failed, waiting an hour
+            row = qsvc.enqueue(session, payload_type="x", payload={"w": n})
+            row.created_at = base + timedelta(seconds=n)
+            row.attempts = 3
+            row.next_attempt_at = datetime(2099, 1, 1)
+        ready = qsvc.enqueue(session, payload_type="x", payload={"r": 1})
+        ready.created_at = base + timedelta(hours=1)
+        session.commit()
+        rows = qsvc.peek_batch(session, limit=2, now=datetime(2026, 1, 2))
+        assert [r.id for r in rows] == [ready.id]
+
+    def test_waiting_row_becomes_ready_at_its_moment(self, session):
+        row = qsvc.enqueue(session, payload_type="x", payload={"a": 1})
+        row.attempts = 1
+        row.next_attempt_at = datetime(2026, 1, 1, 12, 0, 0)
+        session.commit()
+        assert qsvc.peek_batch(session, now=datetime(2026, 1, 1, 11, 59, 59)) == []
+        assert qsvc.peek_batch(session, now=datetime(2026, 1, 1, 12, 0, 0)) == [row]
+
 
 class TestQueueDepth:
     def test_returns_zero_when_empty(self, session):
@@ -232,6 +255,25 @@ class TestMarkFailed:
         qsvc.mark_failed(session, row.id, error="boom again")
         session.commit()
         assert session.get(FederationSyncQueue, row.id).attempts == 2
+
+    def test_schedules_the_retry_once(self, session):
+        """Phase 22.5: the retry moment is fixed at the failure (jittered
+        once), so the entry's readiness does not flicker between ticks."""
+        row = qsvc.enqueue(session, payload_type="x", payload={"a": 1})
+        session.commit()
+        qsvc.mark_failed(session, row.id, error="boom")
+        wait = (row.next_attempt_at - row.last_attempt_at).total_seconds()
+        assert 8 <= wait <= 12  # 10 s base +/-20% after the first failure
+        qsvc.mark_failed(session, row.id, error="boom")
+        wait = (row.next_attempt_at - row.last_attempt_at).total_seconds()
+        assert 16 <= wait <= 24
+
+    def test_dedup_replace_clears_the_retry_moment(self, session):
+        row = qsvc.enqueue(session, payload_type="x", payload={"a": 1}, dedup_key="k")
+        session.commit()
+        qsvc.mark_failed(session, row.id, error="boom")
+        again = qsvc.enqueue(session, payload_type="x", payload={"a": 2}, dedup_key="k")
+        assert again.next_attempt_at is None
 
     def test_blank_error_raises(self, session):
         row = qsvc.enqueue(session, payload_type="x", payload={})

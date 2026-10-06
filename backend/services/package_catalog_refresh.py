@@ -61,6 +61,15 @@ SPREAD_HOURS = 4
 # together (no catalog yet, all due at once) is asked over several passes.
 MAX_ASKS_PER_PASS = 500
 
+# A host asked and not yet answered is not asked again for this long (Phase
+# 22.3 wave proof, 2026-10-06).  Hosts were taken in database order, so the
+# first MAX_ASKS_PER_PASS stale hosts that never deliver a catalog (an agent
+# that cannot collect one, a host that answers nothing) were asked every pass
+# and every host behind them never.  Per process: the pass runs as one
+# server-wide task, and a restart only means each host is asked once more.
+ASK_AGAIN_AFTER = timedelta(hours=6)
+_ASKED_AT: dict = {}
+
 # Back-off after a whole-pass failure: shorter than the cadence so an operator
 # sees recovery, but not so short it spams the log on a persistent fault.
 ERROR_BACKOFF_SECONDS = 300
@@ -105,12 +114,18 @@ def request_refresh_for_stale_hosts(session, models, now: datetime) -> int:
         .all()
     )
 
+    for host_id, at in list(_ASKED_AT.items()):
+        if now - at >= ASK_AGAIN_AFTER:
+            del _ASKED_AT[host_id]
+
     asked = 0
     for host in hosts:
         if asked >= MAX_ASKS_PER_PASS:
             break  # the rest are still stale: a later pass asks them
         if not _needs_refresh(host, now):
             continue
+        if str(host.id) in _ASKED_AT:
+            continue  # asked recently and has not answered yet
         try:
             command = create_command_message(
                 command_type="collect_available_packages",
@@ -127,6 +142,7 @@ def request_refresh_for_stale_hosts(session, models, now: datetime) -> int:
                 db=session,
             )
             asked += 1
+            _ASKED_AT[str(host.id)] = now
         except Exception:  # pylint: disable=broad-except
             # Loud, with the host, per the "log unresolvable edge cases" rule:
             # a host silently never refreshing is the failure this service

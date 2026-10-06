@@ -11765,9 +11765,18 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       per-reconnect fetch). Tests `tests/test_windows_public_catalog.py`.
       NOT built: one fetch on the server or a site proxy served to agents --
       revisit with a measured Windows fleet behind one NAT.*
-- [ ] Coalesce superseded snapshots in the outbound queue; per-agent timer
+- [x] Coalesce superseded snapshots in the outbound queue; per-agent timer
       offsets derived from host id for heartbeat, child-host list (send only
       on change), network discovery reports.
+      *Done 2026-10-06 (agent): a newer full-snapshot report or heartbeat
+      drops still-pending ones of its type in the same transaction
+      (`enqueue_message(supersede=True)`, `send_on_change.SUPERSEDING_TYPES`)
+      -- never host_metrics (every sample is a chart point), command results
+      or paginated batches, never a message already being sent. The
+      child-host list was already send-on-change; heartbeats were already
+      jittered; the network discovery report loop slept a fixed interval
+      restarted with every connection -- now jittered. Random jitter rather
+      than host-id offsets: it drifts agents apart every interval.*
 
 #### 22.2 Server: intake, queues and multi-worker safety (Community / OSS)
 
@@ -12011,11 +12020,19 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       failover drill or in production logs. Bryan to decide: keep open, or
       close as measured-not-needed.
       Closed 2026-10-06 (Bryan): measured, not needed.*
-- [ ] Single-flight OpenBAO secret refresh with TTL jitter
+- [x] Single-flight OpenBAO secret refresh with TTL jitter
       (`secrets_service.py:43-91`); chunked startup deletes
       (`custom_metric_retention.py`, `queue_maintenance`); remove per-message
       stdout debug prints in the processors. *Prints: removed from the inbound
       drain 2026-10-02 (6 per message, 6% of drain time at 10k).*
+      *Done 2026-10-06: one thread refreshes an expired secret bag while
+      the others wait for its result (`_refresh_lock`), the 30 s TTL varies
+      +/-20%; the queue purge and the custom-metric prune delete in 5,000-row
+      chunks, each committed (`backend/persistence/chunked_delete.py`); 71
+      more per-message prints removed (`message_router.py`, the outbound
+      processor -- which printed every command's data -- registration and
+      approval; the approval ones were the only report of two swallowed
+      errors, now logged with the host).*
 
 #### 22.3 Server: background work that is bounded and spread (OSS + Enterprise)
 
@@ -12174,6 +12191,15 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       versions call per cycle (was two). nginx: `limit_req` 30 r/min burst 60
       per X-License-Key on /api/v1/modules/ (validated with `nginx -t`);
       systemd: `--workers 4`.*
+      *2026-10-06, first live use: every engine download 403'd -- the
+      license server's `modules.redirect` credential could not read the
+      bucket (the signer itself is right: the same URL signed with the
+      publish credential gets 200). Installed engines stayed in use (the
+      stage-then-swap above), but nothing could update. Now a failed signed
+      fetch retries once from the license server with `X-Module-Direct: 1`,
+      which streams the file instead of redirecting; and a damaged cached
+      public key is refetched with one warning instead of an ERROR and a
+      traceback (cache writes are atomic now).*
 - [x] **Phone-home and update checks jittered and server-directed** -- fixed
       300 s/1800 s first delays then fixed 24 h/6 h, so correlated restarts
       align customers forever; startup blocks on license-server calls and
@@ -12208,22 +12234,42 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
 
 #### 22.5 Federation (Enterprise)
 
-- [ ] **The jitter the comment promises** -- the site sync loop says it is
+- [x] **The jitter the comment promises** -- the site sync loop says it is
       jittered and sleeps a fixed interval; reconnect backoff after a
       coordinator outage is deterministic (30 s doubling to 900 s), so all
       sites return in lockstep (`federation_site_router.pxi:577`,
       `federation_site_engine.pyx:392`, `federation_coordinator_service.py:114-128`).
-- [ ] **Deltas, not snapshots** -- the host directory is a full unpaginated
+      *Done 2026-10-06: the Pro+ `federation_site_engine` sync loop waits
+      `sync_interval_seconds` +/-20% and a random 0-60 s before its first
+      tick (`_tick_sleep_seconds`, `_start_splay_seconds`; scratch-built and
+      tested); the OSS reconnect backoff is between half and all of the
+      exponential value (`_jittered_backoff_seconds`), still capped at 900 s.*
+- [x] **Deltas, not snapshots** -- the host directory is a full unpaginated
       snapshot every tick; catch-up drains 100 entries per tick (~1,200/hour);
       the coordinator push worker posts serially across tenants. Deltas or
       pages, adaptive drain to a time budget, `next_attempt_at` in SQL instead
       of filtering the oldest rows in Python (which starves newer ready rows)
       (`federation_site_host_directory_service.py:14-58`,
       `federation_push_worker.pxi:102-545`, `federation_sync_queue_service.py:181-197`).
+      *Done 2026-10-06, measured first: at 20,000 hosts a full directory is
+      0.25 s to collect but 6.4 MB per site per tick, every row upserted by
+      the coordinator each time. The site now queues only entries that
+      changed since the last tick (`federation_site_host_directory_service`,
+      digest per host), merged into a still-pending payload rather than
+      replacing it, with the whole directory daily and after a restart or
+      leader change; the coordinator's ingest is an upsert and never deletes,
+      so it needed no change. The sync queue's readiness is now a column,
+      `next_attempt_at` (migration `q30fedsyncnext`), set once at the failure
+      and selected in SQL -- the Python filter re-rolled its jitter on every
+      check (readiness flickered) and starved ready rows behind waiting ones.
+      NOT built (needs a many-sites harness to measure; none exists): drain
+      to a time budget instead of 100 entries a tick, and the coordinator
+      push worker posting across tenants in parallel -- see the exit
+      criterion's "many sites".*
 
 #### 22.6 ClamAV and other external mirrors (OSS + Enterprise)
 
-- [ ] **Per-host splay for signature updates** -- the Windows update task has
+- [x] **Per-host splay for signature updates** -- the Windows update task has
       no start time (anchored to deployment, so a fleet deploy aligns every
       host to the same minute), the deploy plan runs freshclam immediately on
       every host at once, and launchd/`Checks` start in phase. Random `/ST`
@@ -12231,6 +12277,19 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       private mirror (cvdupdate on the SysManage or mirror host) as the
       recommended default for large fleets (`av_plan_builder.py:164-832`,
       `clamav_layout.pxi:133-146`).
+      *Done 2026-10-06 (OSS `av_plan_builder` + `av_scan_schedule`): each
+      host waits its own share (host-id hash) of 5 min before the first
+      signature download -- a `sleep` / PowerShell `Start-Sleep` command ahead
+      of freshclam, and since plan commands run before service actions it also
+      holds back the updater service's first download; the Windows update
+      task gets `/ST` at the host's own minute of its period. PLAN_VERSION 7,
+      so auto-deploy re-pushes it in waves. The Pro+ `av_management_engine`
+      builders are only used to validate the platform (its deploy route is a
+      scaffold), so they were left alone. Tests
+      `tests/test_av_signature_splay.py`. NOT built: a private signature
+      mirror (cvdupdate) -- the plans write `DatabaseMirror
+      database.clamav.net` and have no option for another; a product feature
+      (setting, plan option, docs), not a herd fix.*
 
 #### 22.7 Web UI (Community / OSS)
 
@@ -12528,6 +12587,25 @@ unforgivable.
       machines (`--remote-fleet t14:4,freebsd:3,t480:2`), 20 tenants,
       server-restart storm, every run clean (0.0 outside CPU), nothing
       expired, no 429s, no polling, backlog drained to 0 in all:*
+      *Wave-rate and license-publish proven 2026-10-06. `fleet-wave-push`
+      (`tests/load/wave_scenarios.py`; t14, 2,000 agents, the real
+      `av_auto_deploy.reconcile` and package-catalog passes driven every
+      60 s against the server's database, the real outbound path
+      delivering): antivirus 8 passes x 250, every agent exactly once, 2,000
+      deploys recorded succeeded; catalog requests 4 x 500, every agent once;
+      heartbeat p95 957 ms, 0 expired, 0 lockouts, run trustworthy (0% other
+      CPU). The first run found a starvation bug -- the catalog pass took
+      hosts in database order, so 500 stale hosts that never answer were
+      asked every pass and the rest never; a host is now not asked again for
+      6 h (`package_catalog_refresh.ASK_AGAIN_AFTER`). `publish_scenario.py`:
+      40 customer servers (separate processes, the real `ModuleLoader`
+      update path, own DB and modules dir) through 60 s of a publish under
+      chaos -- 121 downloads 503, 26 corrupted, 124 served the old bundle,
+      40 stalled, 147 failed updates -- and none was ever without its
+      engine; all ended on the new version. Negative control `--legacy`
+      (delete-before-download, the pre-22.4 code): 9 of 10 customers lost
+      their engine. Still to prove: many SITES -- no federation harness
+      exists; and 50k (23.0).*
 
       | Agents | Workers | Reconnect 95% | Heartbeat p95 | Health p95 | Backlog peak | Marked down | Server CPU | Server RSS |
       |---|---|---|---|---|---|---|---|---|
@@ -12773,6 +12851,11 @@ unforgivable.
       warning and the configuration page had suggested one; both corrected.
       Still to add: private mirrors and federation intervals, once 22.5 /
       22.6 land (their herd items are open), and the 50k numbers (23.0).*
+      *2026-10-06: added fleet-wide pushes (wave rates, measured), engine
+      updates (measured publish) and federation sync intervals and
+      backoff, 14 languages. Still to add: the 50k numbers (23.0); private
+      mirrors -- there is no private ClamAV mirror option to document (see
+      22.6).*
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -12825,8 +12908,36 @@ machine; this proof waits for it rather than for a cloud box.
       the server (DataGrid server mode) instead of shipping the whole list;
       the other `/hosts` callers (Settings, Scripts, Maintenance Windows,
       Query Packs) want a lighter id/name list too.
-
-#### 23.1 Hardware health: failing drives, degraded arrays, overheating (OSS + Pro+)
+- [ ] **Federation at scale: a many-sites harness, then what it finds**
+      (carried from 22.5 and the Phase 22 exit criterion, Bryan 2026-10-06).
+      Phase 22 jittered the site sync loop and the reconnect backoff, made
+      the host directory send deltas, and moved sync-queue readiness into
+      SQL (`next_attempt_at`) -- but "many tenants and sites" was never
+      proven, because no harness runs a coordinator with many sites. Build
+      it first (a coordinator stack plus N simulated sites, each with its
+      own database and a seeded fleet, speaking the real ingest endpoints),
+      measure, then decide on what it shows:
+      - **Coordinator ingest runs on the event loop.** `ingest_host_directory`
+        (Pro+ `federation_routes_ingest.pxi`) is an `async def` that upserts
+        every entry one at a time with synchronous DB calls -- a full
+        directory is 20,000 upserts per site (6.4 MB at 20k hosts), blocking
+        the coordinator's loop while it runs. Deltas make that rare (a full
+        directory daily and after a site restart), but many sites restarting
+        together still land on it at once. Measure; if it stalls, run it off
+        the loop and upsert in bulk.
+      - **Site drain is 100 entries a tick** (`_DEFAULT_BATCH_SIZE`), about
+        1,200 an hour at the default interval: a site far behind (a long
+        coordinator outage) takes hours to catch up. Drain to a time budget
+        instead, if the harness shows the backlog.
+      - **The coordinator push worker posts serially across tenants**
+        (`federation_push_worker.pxi`): one slow site holds up every other.
+        Parallelize with a bound, if measured.
+      - **Hosts removed at a site never leave the coordinator's directory.**
+        The ingest only upserts and the site only sends hosts it has, so a
+        decommissioned or deleted host stays in Cross-Site Hosts forever.
+        Found 2026-10-06 while building the deltas (true before them too):
+        the daily full directory could carry a "this is everything" flag so
+        the coordinator removes the site's entries not in it.: failing drives, degraded arrays, overheating (OSS + Pro+)
 
 **Added 2026-10-01 (Bryan).** "Capture SMART status for failing storage,
 alerts about failed drives in arrays, failed drives in ZFS pools and the

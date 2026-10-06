@@ -101,7 +101,18 @@ class TestRecordSyncAttemptHealth:
             gap = (row.next_reconnect_at - row.last_sync_at).total_seconds()
             assert gap <= csvc.RECONNECT_BACKOFF_CAP_SECONDS
             last_gap = gap
-        assert last_gap == csvc.RECONNECT_BACKOFF_CAP_SECONDS
+        # Jittered (22.5): between half the cap and the cap once saturated.
+        assert csvc.RECONNECT_BACKOFF_CAP_SECONDS / 2 <= last_gap
+        assert last_gap <= csvc.RECONNECT_BACKOFF_CAP_SECONDS
+
+    def test_backoff_is_jittered_between_half_and_all(self):
+        """Phase 22.5: sites that lost the coordinator together must not
+        retry in step."""
+        for failures in (1, 3, 12):
+            full = csvc._backoff_seconds(failures)
+            waits = [csvc._jittered_backoff_seconds(failures) for _ in range(200)]
+            assert all(full / 2 <= w <= full for w in waits)
+            assert len({round(w, 3) for w in waits}) > 50
 
 
 class TestShouldAttemptSync:

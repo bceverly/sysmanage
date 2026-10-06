@@ -9,7 +9,7 @@ Verifies OpenBAO-first resolution, YAML fallback with deprecation, and the
 best-effort/never-raise behavior when vault is disabled or unreachable.
 """
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from backend.config import secrets_service
 
@@ -168,3 +168,56 @@ def test_store_tenant_secrets_merges_and_writes():
 def test_store_tenant_secrets_disabled_returns_false():
     with patch.object(secrets_service.config, "is_vault_enabled", return_value=False):
         assert secrets_service.store_tenant_secrets("t-1", {"x": "y"}) is False
+
+
+def test_single_flight_refresh():
+    """Phase 22.2: when the cache expires, threads asking at once share ONE
+    OpenBAO read instead of each making their own."""
+    import threading
+    import time
+
+    _reset_warned()
+    calls = []
+    started = threading.Event()
+
+    def slow_read():
+        calls.append(1)
+        started.set()
+        time.sleep(0.2)  # OpenBAO answering slowly
+        return {"jwt_secret": "from-bao"}
+
+    results = []
+    with patch.object(
+        secrets_service.config, "is_vault_enabled", return_value=True
+    ), patch.object(secrets_service, "_read_bag_from_openbao", side_effect=slow_read):
+        threads = [
+            threading.Thread(
+                target=lambda: results.append(secrets_service.get_config_secret_bag())
+            )
+            for _ in range(8)
+        ]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+    assert len(calls) == 1
+    assert results == [{"jwt_secret": "from-bao"}] * 8
+
+
+def test_cache_ttl_is_jittered():
+    """Worker processes must not all refresh at the same moment."""
+    expiries = set()
+    with patch.object(
+        secrets_service.config, "is_vault_enabled", return_value=True
+    ), patch.object(secrets_service, "_read_bag_from_openbao", return_value={}):
+        for _ in range(30):
+            secrets_service.invalidate_cache()
+            before = secrets_service.time.time()
+            secrets_service.get_config_secret_bag()
+            expiries.add(round(secrets_service._cache_expiry - before, 3))
+    ttl = secrets_service._CACHE_TTL_SECONDS
+    spread = secrets_service._CACHE_TTL_SPREAD
+    assert all(
+        ttl * (1 - spread) - 0.1 <= e <= ttl * (1 + spread) + 0.1 for e in expiries
+    )
+    assert len(expiries) > 10

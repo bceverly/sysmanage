@@ -342,15 +342,38 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
                     )
                     return None
                 async with session.get(target, timeout=timeout) as stored:
-                    if stored.status != 200:
+                    if stored.status == 200:
+                        await _stream_to(stored, temp_path)
+                        return expected_hash, version
+                    self._log_failed_download_response(
+                        module_code,
+                        target.split("?")[0],
+                        stored.status,
+                        platform_info,
+                    )
+                # The signed storage link failed (a storage credential without
+                # access answered 403 for every engine, 2026-10-06): ask the
+                # license server for the bytes itself.  One that predates the
+                # header redirects again, and this download fails as before.
+                logger.warning(
+                    "Retrying %s from the license server directly", module_code
+                )
+                async with session.get(
+                    url,
+                    headers={"X-License-Key": license_key, "X-Module-Direct": "1"},
+                    timeout=timeout,
+                    allow_redirects=False,
+                ) as direct:
+                    if direct.status != 200:
                         self._log_failed_download_response(
-                            module_code,
-                            target.split("?")[0],
-                            stored.status,
-                            platform_info,
+                            module_code, url, direct.status, platform_info
                         )
                         return None
-                    await _stream_to(stored, temp_path)
+                    await _stream_to(direct, temp_path)
+                    return (
+                        direct.headers.get("X-Content-SHA512") or expected_hash,
+                        direct.headers.get("X-Module-Version") or version,
+                    )
         return expected_hash, version
 
     async def _download_and_cache_module(

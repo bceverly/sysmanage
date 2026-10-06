@@ -22,6 +22,8 @@ from backend.services.av_scan_schedule import (
     _cron_line_for_schedule,
     _scan_command_for_paths,
     _splay_schedule,
+    pre_download_delay_command,
+    update_task_start,
     _validate_scan_schedule,
 )
 
@@ -36,8 +38,11 @@ from backend.services.av_scan_schedule import (
 # from it, so clamd ran unseen -- status "not running", and stop impossible).
 # 6 = 2026-10-01 (wait for that clamd to EXIT before starting it: the start
 # raced its shutdown, rc said "already running", and none was left; syslog
-# facility LOG_DAEMON so ClamAV's messages land somewhere).
-PLAN_VERSION = 6
+# facility LOG_DAEMON so ClamAV's messages land somewhere).  7 = 2026-10-06
+# (Phase 22.6: each host waits its share of 5 minutes before the first
+# signature download, and the Windows update task starts at the host's own
+# minute -- a fleet deployed together no longer updates in the same minute).
+PLAN_VERSION = 7
 
 # ---------------------------------------------------------------------------
 # Conf-file paths used by multiple distro layouts (deduped to satisfy
@@ -387,15 +392,18 @@ def _linux_deploy(
         "distro": distro,
         "packages": pkgs,
         "files": files,
-        "commands": [
-            {
-                "argv": ["freshclam"],
-                "sudo": True,
-                "timeout": 300,
-                "ignore_errors": True,
-                "description": REFRESH_SIGNATURES,
-            },
-        ],
+        "commands": _delayed(
+            host_info,
+            [
+                {
+                    "argv": ["freshclam"],
+                    "sudo": True,
+                    "timeout": 300,
+                    "ignore_errors": True,
+                    "description": REFRESH_SIGNATURES,
+                },
+            ],
+        ),
         "service_actions": [
             {"service": fresh_svc, "action": "enable"},
             {"service": fresh_svc, "action": "start"},
@@ -523,7 +531,7 @@ def _bsd_deploy(
         "av_product": "clamav",
         "packages": [{"manager": pkg_mgr, "name": pkg_name}],
         "files": files,
-        "commands": _bsd_update_commands(plat, host_info),
+        "commands": _delayed(host_info, _bsd_update_commands(plat, host_info)),
         "service_actions": _bsd_service_actions(plat, clamd_svc, fresh_svc),
         "scan_schedule": schedule or None,
     }
@@ -670,6 +678,16 @@ def _windows_database_dir_command() -> Dict[str, Any]:
     }  # fmt: skip
 
 
+def _delayed(
+    host_info: Dict[str, Any], commands: List[Dict[str, Any]], windows: bool = False
+) -> List[Dict[str, Any]]:
+    """``commands`` behind this host's pre-download wait (22.6), if any.
+    Commands run before service actions, so the wait also holds back the
+    updater service's first download."""
+    delay = pre_download_delay_command(host_info, windows=windows)
+    return ([delay] if delay else []) + commands
+
+
 def _windows_refresh_command() -> Dict[str, Any]:
     return {
         "argv": [WINDOWS_INSTALL_DIR + r"\freshclam.exe"],
@@ -715,11 +733,15 @@ def _windows_deploy(
     """Windows ClamAV deploy plan with optional scan_schedule via schtasks."""
     options = options or {}
     checks = options.get("checks_per_day")
-    commands: List[Dict[str, Any]] = [
-        _windows_database_dir_command(),
-        _windows_refresh_command(),
-        _windows_update_task(WINDOWS_INSTALL_DIR, checks),
-    ]
+    commands: List[Dict[str, Any]] = _delayed(
+        host_info,
+        [
+            _windows_database_dir_command(),
+            _windows_refresh_command(),
+            _windows_update_task(WINDOWS_INSTALL_DIR, checks, host_info),
+        ],
+        windows=True,
+    )
     schedule = _splay_schedule(
         _validate_scan_schedule(options.get("scan_schedule")), host_info
     )
@@ -746,16 +768,19 @@ def _windows_deploy(
     }
 
 
-def _windows_update_task(install_dir: str, checks: Optional[int]) -> Dict[str, Any]:
-    """A scheduled task running freshclam every 24 / checks hours as SYSTEM.
-    Windows has no freshclam service, and a one-off update at install time
-    leaves the signatures to go stale.  The name matches what the disable
-    plan deletes."""
+def _windows_update_task(
+    install_dir: str, checks: Optional[int], host_info: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
+    """A scheduled task running freshclam every 24 / checks hours as SYSTEM,
+    starting at this host's own minute of the period (22.6).  Windows has no
+    freshclam service, and a one-off update at install time leaves the
+    signatures to go stale.  The name matches what the disable plan deletes."""
     every = max(1, 24 // clamp_checks(checks))
     return {
         "argv": [
             "schtasks", "/Create", "/TN", WINDOWS_UPDATE_TASK,
             "/SC", "HOURLY", "/MO", str(every),
+            "/ST", update_task_start(host_info or {}, every),
             "/TR", f'"{install_dir}\\freshclam.exe"',
             "/RU", "SYSTEM", "/F",
         ],
@@ -781,7 +806,7 @@ def _windows_delete_tasks() -> List[Dict[str, Any]]:
     ]
 
 
-def _windows_enable(_host_info: Dict[str, Any]) -> Dict[str, Any]:
+def _windows_enable(host_info: Dict[str, Any]) -> Dict[str, Any]:
     # ClamAV on Windows runs on demand; "enable" refreshes and reschedules.
     return {
         "platform": "windows",
@@ -789,7 +814,7 @@ def _windows_enable(_host_info: Dict[str, Any]) -> Dict[str, Any]:
         "files": [],
         "commands": [
             _windows_refresh_command(),
-            _windows_update_task(WINDOWS_INSTALL_DIR, None),
+            _windows_update_task(WINDOWS_INSTALL_DIR, None, host_info),
         ],
         "service_actions": [],
     }

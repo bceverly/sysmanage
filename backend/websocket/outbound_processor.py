@@ -319,13 +319,7 @@ async def send_command_to_agent(
             host.id,
             host.fqdn,
         )
-        print(
-            f"=== OUTBOUND PROCESSOR: About to send command message {queue_message_id} to host {host.fqdn} ===",
-            flush=True,
-        )
-        print(f"=== OUTBOUND PROCESSOR: Command data: {command_data} ===", flush=True)
         success = await connection_manager.send_to_host(host.id, message)
-        print(f"=== OUTBOUND PROCESSOR: Send result: {success} ===", flush=True)
 
         if not success:
             logger.warning(

@@ -14,6 +14,7 @@ from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
 
 from backend.i18n import _
+from backend.persistence.chunked_delete import delete_in_chunks
 from backend.persistence.db import get_db
 from backend.persistence.models import MessageQueue
 from backend.utils.verbosity_logger import get_logger
@@ -52,21 +53,18 @@ class QueueMaintenance:
             if not keep_failed:
                 statuses.append(QueueStatus.FAILED)
 
-            # Bulk DELETE -- a single SQL statement.  Do NOT load the rows and
-            # delete them one-by-one: a real backlog (observed 157k rows, each
-            # carrying a large message_data payload) would pull gigabytes into
-            # memory and block the event loop for over a minute.
-            deleted_count = (
-                db.query(MessageQueue)
-                .filter(
-                    MessageQueue.completed_at < cutoff_date,
-                    MessageQueue.status.in_(statuses),
-                )
-                .delete(synchronize_session=False)
+            # Bulk DELETEs by id, never loading the rows (a real backlog --
+            # 157k rows, each with a large message_data payload -- pulled
+            # gigabytes into memory).  In chunks, each committed (Phase 22.2):
+            # one DELETE of a day's completed messages at fleet scale held a
+            # single transaction for millions of rows.  This commits the
+            # caller's session too, chunk by chunk.
+            deleted_count = delete_in_chunks(
+                db,
+                MessageQueue,
+                MessageQueue.completed_at < cutoff_date,
+                MessageQueue.status.in_(statuses),
             )
-
-            if not session_provided:
-                db.commit()
 
             logger.info(
                 _("Cleaned up %d old messages"),

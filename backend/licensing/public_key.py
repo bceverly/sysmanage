@@ -9,10 +9,13 @@ Downloads and caches the ECDSA P-521 public key from the license server.
 Falls back to a cached copy if the server is unavailable.
 """
 
+import os
 from pathlib import Path
 from typing import Optional
 
 import aiohttp
+from cryptography.exceptions import UnsupportedAlgorithm
+from cryptography.hazmat.primitives.serialization import load_pem_public_key
 
 from backend.config.config import get_config
 from backend.utils.verbosity_logger import get_logger
@@ -60,13 +63,33 @@ def _load_cached_key() -> Optional[str]:
     cache_file = _cache_file()
     if cache_file.exists():
         try:
-            _cache["public_key"] = cache_file.read_text()
-            logger.debug("Loaded public key from cache: %s", cache_file)
-            return _cache["public_key"]
+            key_pem = cache_file.read_text()
         except Exception as e:
             logger.warning("Failed to read cached public key: %s", e)
+            return None
+        # A cached file that is not a key (damaged, truncated, another
+        # server's leftovers) is treated as absent and refetched with one
+        # warning -- it used to reach signature verification, which failed
+        # with an ERROR and a traceback before the retry (2026-10-06).
+        if not _is_public_key(key_pem):
+            logger.warning(
+                "Cached public key %s is not a valid PEM key; fetching a fresh one",
+                cache_file,
+            )
+            return None
+        _cache["public_key"] = key_pem
+        logger.debug("Loaded public key from cache: %s", cache_file)
+        return key_pem
 
     return None
+
+
+def _is_public_key(key_pem: str) -> bool:
+    try:
+        load_pem_public_key(key_pem.encode("utf-8"))
+        return True
+    except (ValueError, TypeError, UnsupportedAlgorithm):
+        return False
 
 
 def _save_cached_key(key_pem: str) -> None:
@@ -74,7 +97,10 @@ def _save_cached_key(key_pem: str) -> None:
     cache_file = _cache_file()
     try:
         cache_file.parent.mkdir(parents=True, exist_ok=True)
-        cache_file.write_text(key_pem)
+        # Atomic: a reader never sees a half-written key.
+        partial = cache_file.with_name(f"{cache_file.name}.{os.getpid()}.tmp")
+        partial.write_text(key_pem)
+        os.replace(partial, cache_file)
         _cache["public_key"] = key_pem
         logger.info("Public key cached to: %s", cache_file)
     except Exception as e:

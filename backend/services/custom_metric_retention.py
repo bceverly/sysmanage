@@ -41,6 +41,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 
 from backend.config import config as _config
+from backend.persistence.chunked_delete import delete_in_chunks
 from backend.persistence.models import CustomMetricSample
 from backend.startup.tick_runner import run_periodic
 
@@ -90,13 +91,11 @@ def prune_custom_metric_samples(session, retention_days) -> int:
 
     cutoff = datetime.now(timezone.utc) - timedelta(days=retention_days)
 
-    deleted = (
-        session.query(CustomMetricSample)
-        .filter(CustomMetricSample.collected_at < cutoff)
-        .delete(synchronize_session=False)
+    # In chunks, each committed (22.2): one DELETE of a whole backlog held a
+    # transaction (and its locks) for the entire table's worth of rows.
+    return delete_in_chunks(
+        session, CustomMetricSample, CustomMetricSample.collected_at < cutoff
     )
-    session.commit()
-    return int(deleted or 0)
 
 
 def _run_one_pass() -> int:

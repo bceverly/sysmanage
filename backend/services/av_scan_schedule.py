@@ -120,3 +120,49 @@ def _scan_command_for_paths(scan_paths: List[str]) -> str:
     """
     quoted = " ".join(f'"{p}"' for p in scan_paths)
     return f"/usr/bin/clamdscan -m --fdpass {quoted}"
+
+
+# Phase 22.6: signature downloads spread per host.  A deploy plan ran
+# freshclam (and started the updater) at once on every host it reached, and
+# Windows' update task had no start time -- anchored to the deploy, so a
+# fleet deployed together updated in the same minute forever after.  Each host
+# now waits its own share of PRE_DOWNLOAD_SPLAY_SECONDS before the first
+# download, and its update task starts at its own minute of the period.
+PRE_DOWNLOAD_SPLAY_SECONDS = 300
+PRE_DOWNLOAD_DELAY = "wait this host's turn before downloading signatures"
+
+
+def pre_download_delay_command(
+    host_info: Dict[str, Any], windows: bool = False
+) -> Optional[Dict[str, Any]]:
+    """A plan command waiting this host's share of the splay, or None (no
+    host id -- an operator's preview -- or a share under a second)."""
+    host_id = (host_info or {}).get("host_id")
+    seconds = int(host_offset(host_id) * PRE_DOWNLOAD_SPLAY_SECONDS) if host_id else 0
+    if seconds < 1:
+        return None
+    if windows:
+        argv = [
+            "powershell",
+            "-NoProfile",
+            "-Command",
+            f"Start-Sleep -Seconds {seconds}",
+        ]
+    else:
+        argv = ["sleep", str(seconds)]
+    return {
+        "argv": argv,
+        "sudo": False,
+        "timeout": seconds + 60,
+        "ignore_errors": True,
+        "description": PRE_DOWNLOAD_DELAY,
+    }
+
+
+def update_task_start(host_info: Dict[str, Any], every_hours: int) -> str:
+    """``HH:MM`` for a task repeating every ``every_hours``: this host's
+    share of one period, so the fleet's updates do not run in step."""
+    host_id = (host_info or {}).get("host_id")
+    minutes = int(host_offset(host_id) * max(1, every_hours) * 60) if host_id else 0
+    minutes %= 24 * 60
+    return f"{minutes // 60:02d}:{minutes % 60:02d}"

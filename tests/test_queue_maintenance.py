@@ -13,49 +13,51 @@ from unittest.mock import MagicMock, patch
 class TestQueueMaintenanceCleanupOldMessages:
     """Tests for QueueMaintenance.cleanup_old_messages method."""
 
-    def test_cleanup_old_messages_with_provided_db(self):
-        """Test cleanup with provided db session."""
+    @patch("backend.websocket.queue_maintenance.delete_in_chunks", return_value=2)
+    def test_cleanup_old_messages_with_provided_db(self, chunks):
+        """Deletes through delete_in_chunks on the caller's session (22.2:
+        chunked, each chunk committed)."""
         from backend.websocket.queue_maintenance import QueueMaintenance
 
         mock_db = MagicMock()
-        # Bulk delete returns the number of rows removed directly.
-        mock_db.query.return_value.filter.return_value.delete.return_value = 2
-
         maintenance = QueueMaintenance()
         result = maintenance.cleanup_old_messages(older_than_days=7, db=mock_db)
 
         assert result == 2
-        mock_db.commit.assert_not_called()  # Caller manages commit
-        mock_db.query.return_value.filter.return_value.delete.assert_called_once()
+        assert chunks.call_args[0][0] is mock_db
+        assert len(chunks.call_args[0]) == 4  # session, model, cutoff, statuses
+        mock_db.close.assert_not_called()  # the caller's session
 
-    def test_cleanup_old_messages_with_keep_failed_false(self):
-        """Test cleanup including failed messages (bulk delete)."""
+    @patch("backend.websocket.queue_maintenance.delete_in_chunks", return_value=1)
+    def test_cleanup_old_messages_with_keep_failed_false(self, chunks):
+        """keep_failed=False widens the status filter to failed rows."""
         from backend.websocket.queue_maintenance import QueueMaintenance
-
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.delete.return_value = 1
 
         maintenance = QueueMaintenance()
         result = maintenance.cleanup_old_messages(
-            older_than_days=7, keep_failed=False, db=mock_db
+            older_than_days=7, keep_failed=False, db=MagicMock()
         )
 
         assert result == 1
+        status_clause = chunks.call_args[0][3]
+        assert "failed" in str(
+            status_clause.compile(compile_kwargs={"literal_binds": True})
+        )
 
+    @patch("backend.websocket.queue_maintenance.delete_in_chunks", return_value=0)
     @patch("backend.websocket.queue_maintenance.get_db")
-    def test_cleanup_old_messages_without_db(self, mock_get_db):
-        """Test cleanup creates and commits its own db session."""
+    def test_cleanup_old_messages_without_db(self, mock_get_db, chunks):
+        """Without a session it opens one, and closes it."""
         from backend.websocket.queue_maintenance import QueueMaintenance
 
         mock_db = MagicMock()
         mock_get_db.return_value = iter([mock_db])
-        mock_db.query.return_value.filter.return_value.delete.return_value = 0
 
         maintenance = QueueMaintenance()
         result = maintenance.cleanup_old_messages(older_than_days=7)
 
         assert result == 0
-        mock_db.commit.assert_called_once()
+        assert chunks.call_args[0][0] is mock_db
         mock_db.close.assert_called_once()
 
     @patch("backend.websocket.queue_maintenance.get_db")

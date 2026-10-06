@@ -82,6 +82,9 @@ class FleetStats:
     sent: Counter = field(default_factory=Counter)
     errors_received: Counter = field(default_factory=Counter)
     heartbeat_rtt_ms: List[float] = field(default_factory=list)
+    # (monotonic time, command_type, agent index) of every command received:
+    # the wave scenarios read the delivery rate from it.
+    command_arrivals: List[tuple] = field(default_factory=list)
     # initial_report_window_seconds from each registration_success (22.2)
     report_windows: List[float] = field(default_factory=list)
     connected: int = 0
@@ -442,6 +445,7 @@ class SimAgent:  # pylint: disable=too-many-instance-attributes
             ack_id = message.get("queue_message_id") or message.get("message_id")
             self.out["high"].append(payloads.command_ack(ack_id))
             command_type = (message.get("data") or {}).get("command_type", "unknown")
+            stats.command_arrivals.append((time.monotonic(), command_type, self.index))
             self.out["high"].append(
                 payloads.command_result(self, message.get("message_id"), command_type)
             )

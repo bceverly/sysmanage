@@ -37,6 +37,13 @@ from backend.services.package_catalog_refresh import (
 NOW = datetime(2026, 8, 13, 12, 0, tzinfo=timezone.utc)
 
 
+@pytest.fixture(autouse=True)
+def _forget_who_was_asked():
+    pcr._ASKED_AT.clear()
+    yield
+    pcr._ASKED_AT.clear()
+
+
 class _Host:
     def __init__(self, fqdn, fingerprint=None, reported=None):
         self.id = f"id-{fqdn}"
@@ -191,3 +198,31 @@ def test_nothing_is_asked_when_the_fleet_is_current(queued):
     hosts = [_Host(f"h{i}.x", f"f{i}", NOW - timedelta(minutes=5)) for i in range(4)]
     assert request_refresh_for_stale_hosts(_session_with(hosts), MagicMock(), NOW) == 0
     queued.enqueue_message.assert_not_called()
+
+
+def test_hosts_that_never_answer_do_not_starve_the_rest(queued, monkeypatch):
+    """Phase 22.3 wave proof: hosts were taken in database order, so the
+    first MAX_ASKS_PER_PASS stale hosts that never deliver a catalog were
+    asked every pass and the hosts behind them never."""
+    monkeypatch.setattr(pcr, "MAX_ASKS_PER_PASS", 10)
+    hosts = [_Host(f"h{i}.x") for i in range(25)]  # none ever answers
+    session = _session_with(hosts)
+    asked_ids = []
+    for minutes in (0, 60, 120):
+        before = len(queued.enqueue_message.call_args_list)
+        request_refresh_for_stale_hosts(
+            session, MagicMock(), NOW + timedelta(minutes=minutes)
+        )
+        calls = queued.enqueue_message.call_args_list[before:]
+        asked_ids += [c.kwargs["host_id"] for c in calls]
+    assert len(asked_ids) == 25 and len(set(asked_ids)) == 25
+
+
+def test_an_unanswered_host_is_asked_again_later(queued):
+    hosts = [_Host("quiet.x")]
+    session = _session_with(hosts)
+    assert request_refresh_for_stale_hosts(session, MagicMock(), NOW) == 1
+    soon = NOW + pcr.ASK_AGAIN_AFTER - timedelta(minutes=1)
+    assert request_refresh_for_stale_hosts(session, MagicMock(), soon) == 0
+    later = NOW + pcr.ASK_AGAIN_AFTER
+    assert request_refresh_for_stale_hosts(session, MagicMock(), later) == 1

@@ -29,7 +29,6 @@ def _refresh_existing_host(session, existing_host, registration_data) -> "models
     """Update an already-registered host's network/active fields from a
     re-registration payload.  Script-execution capability is intentionally
     NOT touched -- that's an admin-configured server-side setting."""
-    print("Updating existing host with minimal registration data...")
     try:
         existing_host.active = registration_data.active
         existing_host.ipv4 = registration_data.ipv4
@@ -47,16 +46,10 @@ def _refresh_existing_host(session, existing_host, registration_data) -> "models
         apply_capability_report(
             existing_host, getattr(registration_data, "agent_capabilities", None)
         )
-        print(
-            f"Before commit - FQDN: {existing_host.fqdn}, Active: {existing_host.active}"
-        )
         session.commit()
-        print("Database commit successful")
         session.refresh(existing_host)
-        print("After refresh - Host updated with minimal data")
         return existing_host
-    except Exception as e:
-        print(f"Error updating existing host: {e}")
+    except Exception:
         session.rollback()
         raise
 

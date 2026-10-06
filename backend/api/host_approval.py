@@ -225,11 +225,13 @@ async def approve_host(  # NOSONAR
             )
 
             await apply_default_repositories_to_host(session, host)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             # Don't fail the approval process if we can't apply default repos
-            print(
-                f"DEBUG: Error applying default repositories to {host.id} ({host.fqdn}): {e}",
-                flush=True,
+            logger.warning(
+                "Could not apply default repositories to host %s (%s): %s",
+                host.id,
+                host.fqdn,
+                e,
             )
 
         # Apply enabled package managers for this host's operating system
@@ -309,15 +311,13 @@ async def approve_host(  # NOSONAR
             )
             # Commit the session to persist the queued message
             session.commit()
-            print(
-                f"DEBUG: Enqueued host approval notification for host {host.id} ({host.fqdn})",
-                flush=True,
-            )
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             # Don't fail the approval process if we can't enqueue the notification
-            print(
-                f"DEBUG: Error enqueuing host approval notification to {host.id} ({host.fqdn}): {e}",
-                flush=True,
+            logger.warning(
+                "Could not queue the approval notice for host %s (%s): %s",
+                host.id,
+                host.fqdn,
+                e,
             )
 
         ret_host = models.Host(

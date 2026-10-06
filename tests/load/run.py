@@ -808,6 +808,8 @@ def main() -> int:
             "fleet-steady",
             "fleet-restart-storm",
             "fleet-agent-restart",
+            # A fleet-wide push goes out in capped waves (22.3).
+            "fleet-wave-push",
             # Security: can an agent act as another host knowing only its
             # name? (security_scenarios.py)
             "agent-impersonation",
@@ -841,6 +843,12 @@ def main() -> int:
         help="server outage for the restart storm",
     )
     fleet.add_argument("--sample-seconds", type=float, default=5.0)
+    fleet.add_argument(
+        "--pass-seconds",
+        type=float,
+        default=60.0,
+        help="fleet-wave-push: seconds between the driven push passes",
+    )
     fleet.add_argument(
         "--send-on-change",
         action="store_true",

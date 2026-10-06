@@ -89,23 +89,32 @@ class TestLoadCachedKey:
 
         assert result is None
 
-    def test_loads_from_file_when_memory_empty(self):
-        """Test loads from file when memory cache is empty."""
+    def test_loads_from_file_when_memory_empty(self, tmp_path):
+        """Test loads a valid key from file when memory cache is empty."""
         from backend.licensing import public_key
 
-        # Clear memory cache
         public_key._cache["public_key"] = None
+        cache_file = tmp_path / "public_key.pem"
+        cache_file.write_text(_real_pem())
 
-        mock_file = MagicMock()
-        mock_file.exists.return_value = True
-        mock_file.read_text.return_value = "file-key-data"
-
-        with patch.object(public_key, "CACHE_FILE", mock_file):
+        with patch.object(public_key, "CACHE_FILE", cache_file):
             result = public_key._load_cached_key()
 
-        assert result == "file-key-data"
-        # Clean up memory cache
+        assert result == _real_pem()
         public_key._cache["public_key"] = None
+
+    def test_a_damaged_cached_key_is_treated_as_absent(self, tmp_path):
+        """2026-10-06: a damaged cache file reached signature verification
+        and failed with an ERROR and a traceback; it is now refetched."""
+        from backend.licensing import public_key
+
+        public_key._cache["public_key"] = None
+        cache_file = tmp_path / "public_key.pem"
+        cache_file.write_text("-----BEGIN PUBLIC KEY-----\ntruncat")
+
+        with patch.object(public_key, "CACHE_FILE", cache_file):
+            assert public_key._load_cached_key() is None
+        assert public_key._cache["public_key"] is None
 
     def test_handles_file_read_error(self):
         """Test handles file read errors gracefully."""
@@ -464,3 +473,16 @@ class TestModuleConstants:
         from backend.licensing.public_key import CACHE_FILE
 
         assert isinstance(CACHE_FILE, Path)
+
+
+def _real_pem() -> str:
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric import ec
+
+    if not hasattr(_real_pem, "pem"):
+        key = ec.generate_private_key(ec.SECP256R1()).public_key()
+        _real_pem.pem = key.public_bytes(
+            serialization.Encoding.PEM,
+            serialization.PublicFormat.SubjectPublicKeyInfo,
+        ).decode()
+    return _real_pem.pem

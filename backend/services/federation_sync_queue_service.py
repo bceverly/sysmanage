@@ -35,11 +35,11 @@ payload types can pick their own dedup shape.
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from backend.persistence.models.federation import FederationSyncQueue
@@ -127,6 +127,7 @@ def enqueue(
             existing.payload_json = json.dumps(payload, sort_keys=True)
             existing.attempts = 0
             existing.last_attempt_at = None
+            existing.next_attempt_at = None
             existing.last_error = None
             existing.created_at = _utcnow_naive()
             return existing
@@ -173,27 +174,27 @@ def peek_batch(
         raise ValueError("limit must be > 0")
     if now is None:
         now = _utcnow_naive()
-    # Cheap pre-filter at the DB level: never-attempted rows are
-    # always ready; dead-lettered rows are never ready.  The fine-
-    # grained backoff check happens in Python because the
-    # ``compute_backoff`` formula uses runtime jitter.
-    candidates = list(
+    # Phase 22.5: readiness is a column, set once when an attempt fails,
+    # and selected in SQL.  It used to be checked in Python over the
+    # oldest ``limit * 4`` rows with fresh jitter per check -- a row's
+    # readiness flickered between ticks, and ready rows behind a window
+    # of waiting ones were never reached.
+    return list(
         session.execute(
             select(FederationSyncQueue)
             .where(FederationSyncQueue.attempts < retry_policy.MAX_ATTEMPTS)
+            .where(
+                or_(
+                    FederationSyncQueue.next_attempt_at.is_(None),
+                    FederationSyncQueue.next_attempt_at <= now,
+                )
+            )
             .order_by(FederationSyncQueue.created_at, FederationSyncQueue.id)
-            .limit(limit * 4)
+            .limit(limit)
         )
         .scalars()
         .all()
     )
-    ready: List[FederationSyncQueue] = []
-    for entry in candidates:
-        if retry_policy.is_ready_for_retry(entry.last_attempt_at, entry.attempts, now):
-            ready.append(entry)
-            if len(ready) >= limit:
-                break
-    return ready
 
 
 def queue_depth(session: Session) -> int:
@@ -258,6 +259,10 @@ def mark_failed(
     entry.attempts += 1
     entry.last_attempt_at = _utcnow_naive()
     entry.last_error = error
+    # The retry moment, jittered once (22.5): peek_batch selects on it.
+    entry.next_attempt_at = entry.last_attempt_at + timedelta(
+        seconds=retry_policy.compute_backoff(entry.attempts)
+    )
     return entry
 
 
