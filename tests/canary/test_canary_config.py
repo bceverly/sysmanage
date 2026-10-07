@@ -7,6 +7,7 @@ problem listed, a bad file never half-applied."""
 
 import copy
 import os
+import sys
 
 import pytest
 import yaml
@@ -110,6 +111,10 @@ def test_unreadable_and_invalid_files(tmp_path):
     assert "not valid YAML" in invalid.value.problems[0]
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="POSIX mode bits; on Windows the MSI sets the ACL and the check is off",
+)
 def test_a_world_readable_file_is_warned_about(tmp_path):
     path = tmp_path / "c.yaml"
     path.write_text("x: 1", encoding="utf-8")
