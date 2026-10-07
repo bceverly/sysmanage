@@ -1,0 +1,4 @@
+canary/sysmanage_canary usr/lib/sysmanage-canary/
+canary/bin/sysmanage-canary usr/bin/
+canary/service/sysmanage-canary.service lib/systemd/system/
+canary/sysmanage-canary.yaml.example usr/share/sysmanage-canary/

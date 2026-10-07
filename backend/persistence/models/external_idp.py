@@ -99,6 +99,15 @@ class ExternalIdpProvider(Base):
     # id is here).  Provisioned users land in this provider's tenant.
     scim_enabled = Column(Boolean, nullable=False, default=False)
     scim_bearer_token_secret_id = Column(String(255), nullable=True)
+    # Phase 22.8 -- require multi-factor sign-in at the IdP.  SSO leaves MFA to
+    # the identity provider; with this on, a token that does not SAY the user
+    # signed in with more than one factor is refused (OIDC: ``amr`` contains
+    # ``mfa``, or ``acr`` is one of ``oidc_acr_values``; SAML: the
+    # AuthnContextClassRef is one of ``saml_mfa_authn_contexts``, Entra ID's
+    # multipleauthn when empty).  Off by default.
+    require_mfa = Column(Boolean, nullable=False, default=False)
+    oidc_acr_values = Column(String(500), nullable=True)
+    saml_mfa_authn_contexts = Column(Text, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
@@ -143,6 +152,9 @@ class ExternalIdpProvider(Base):
             "saml_want_assertions_signed": self.saml_want_assertions_signed,
             "scim_enabled": self.scim_enabled,
             "scim_bearer_token_secret_id": self.scim_bearer_token_secret_id,
+            "require_mfa": bool(self.require_mfa),
+            "oidc_acr_values": self.oidc_acr_values,
+            "saml_mfa_authn_contexts": self.saml_mfa_authn_contexts,
         }
 
 

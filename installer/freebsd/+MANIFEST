@@ -187,6 +187,22 @@ echo "     service nginx start"
 echo ""
 echo "Log files: /var/log/sysmanage/"
 echo ""
+# sysmanage-canary (Phase 22.9): its own unprivileged user and a 0600
+# config from the example (never overwritten); not enabled until configured.
+if ! pw groupshow sysmanage-canary >/dev/null 2>&1; then pw groupadd sysmanage-canary -g 9996; fi
+if ! pw usershow sysmanage-canary >/dev/null 2>&1; then
+    pw useradd sysmanage-canary -u 9996 -g sysmanage-canary -h - -s /usr/sbin/nologin \
+        -d /nonexistent -c "SysManage canary"
+fi
+if [ ! -e /usr/local/etc/sysmanage-canary.yaml ]; then
+    install -m 0600 -o sysmanage-canary -g sysmanage-canary \
+        /usr/local/share/sysmanage-canary/sysmanage-canary.yaml.example \
+        /usr/local/etc/sysmanage-canary.yaml
+fi
+echo "Outside watcher: edit /usr/local/etc/sysmanage-canary.yaml, then"
+echo "     sysmanage-canary --config /usr/local/etc/sysmanage-canary.yaml --check-config"
+echo "     sysrc sysmanage_canary_enable=YES && service sysmanage_canary start"
+echo ""
 EOD
   pre-deinstall: <<EOD
 #!/bin/sh

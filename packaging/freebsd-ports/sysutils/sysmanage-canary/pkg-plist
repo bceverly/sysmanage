@@ -1,0 +1,8 @@
+bin/sysmanage-canary
+@owner sysmanage-canary
+@group sysmanage-canary
+@mode 0600
+@sample etc/sysmanage-canary.yaml.sample
+@mode
+@group
+@owner

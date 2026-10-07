@@ -1,0 +1,46 @@
+SysManage Server - getting started
+==================================
+
+The installer put SysManage Server in C:\Program Files\SysManage Server and
+registered its services (SysManageServer, SysManageNginx, SysManageOpenBAO).
+On a fresh install SysManageServer is left STOPPED, on manual start: it cannot
+serve anything until the steps below are done.  What the installer did on this
+machine is logged in C:\ProgramData\SysManage\logs\install.log.
+
+Upgrades need none of this: they keep the configuration, apply the database
+migrations themselves and restart the server.
+
+Run the commands below in an administrator PowerShell.
+
+1. PostgreSQL 12 or newer, with a database and a user for SysManage
+   (for example database "sysmanage" owned by user "sysmanage").
+
+2. Configuration: C:\ProgramData\SysManage\sysmanage.yaml
+   Under "database:" set host, port, name, user and password.  Under
+   "security:" set admin_userid to an email address (it must be one; the
+   login rejects anything else).  The installer already generated this
+   install's secrets and the initial admin password.  The file is readable
+   only by SYSTEM and Administrators, because it holds them.
+
+3. Database schema:
+     & "C:\Program Files\SysManage Server\.venv\Scripts\python.exe" `
+       "C:\Program Files\SysManage Server\scripts\sysmanage_migrate.py"
+
+4. TLS certificate - nginx will not start without one.  Put them in the
+   tls folder the installer created (SYSTEM and Administrators only):
+     C:\ProgramData\SysManage\tls\server.crt
+     C:\ProgramData\SysManage\tls\server.key
+   To keep them elsewhere, change ssl_certificate and ssl_certificate_key in
+     C:\Program Files\SysManage Server\nginx\conf\sysmanage-nginx.conf
+
+5. Start the server, have it start at every boot, and restart nginx:
+     Set-Service SysManageServer -StartupType Automatic
+     Start-Service SysManageServer
+     Restart-Service SysManageNginx
+
+The console is then at https://<this host>/.  Agents need outbound port 443
+to this host and nothing else.
+
+To be told when the server stops working, install the separate SysManage
+Canary MSI (sysmanage-canary-<version>-windows-<arch>.msi), ideally on
+another machine.

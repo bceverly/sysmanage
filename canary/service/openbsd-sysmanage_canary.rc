@@ -1,0 +1,38 @@
+#!/bin/ksh
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+#
+# sysmanage-canary: an outside watcher for a SysManage server (Phase 22.9).
+# Enable with:   rcctl enable sysmanage_canary
+
+daemon="/usr/local/bin/sysmanage-canary"
+daemon_flags="--config /etc/sysmanage-canary.yaml"
+daemon_user="_sysmanage_canary"
+
+. /etc/rc.d/rc.subr
+
+# The launcher execs Python, so the running process is
+# "/usr/local/bin/python3.N -B -m sysmanage_canary <flags>", not the launcher's
+# own path; the default pexp would never match and rcctl check/stop would
+# report a running canary as stopped.
+pexp=".*python3[0-9.]* -B -m sysmanage_canary${daemon_flags:+ ${daemon_flags}}"
+
+rc_bg=YES
+rc_reload=NO
+
+rc_pre() {
+	# The canary's own unprivileged user, created on first start (the port
+	# has no registered uid for it), and its config readable by it alone.
+	if ! id _sysmanage_canary >/dev/null 2>&1; then
+		useradd -s /sbin/nologin -d /var/empty -L daemon \
+			-c "SysManage canary" _sysmanage_canary
+	fi
+	if [ -f /etc/sysmanage-canary.yaml ]; then
+		chown _sysmanage_canary /etc/sysmanage-canary.yaml
+		chmod 0600 /etc/sysmanage-canary.yaml
+	fi
+	su -s /bin/sh _sysmanage_canary -c "${daemon} ${daemon_flags} --check-config"
+}
+
+rc_cmd $1

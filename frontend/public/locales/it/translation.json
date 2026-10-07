@@ -1119,7 +1119,6 @@
       "label": "Usa server gestito"
     }
   },
-  "greeting": "Saluta",
   "hostAccount": {
     "accountDisabled": "L'account è disabilitato",
     "add": "Aggiungi",
@@ -1976,7 +1975,12 @@
       "type": "Tipo",
       "userBase": "Base ricerca utenti",
       "userFilter": "Filtro ricerca utenti",
-      "userFilterHelp": "Deve contenere %s per il nome utente, es. (sAMAccountName=%s)"
+      "userFilterHelp": "Deve contenere %s per il nome utente, es. (sAMAccountName=%s)",
+      "requireMfa": "Richiedi accesso multifattore",
+      "oidcAcrValues": "Livelli di garanzia accettati (acr)",
+      "oidcAcrValuesHelp": "Facoltativo: valori acr che contano anche come multifattore, separati da spazi; vengono richiesti all'accesso. In caso contrario, il token deve indicare che amr include mfa.",
+      "samlMfaContexts": "Contesti di autenticazione multifattore",
+      "samlMfaContextsHelp": "Valori AuthnContextClassRef che contano come multifattore, uno per riga. Vuoto significa http://schemas.microsoft.com/claims/multipleauthn di Microsoft Entra ID."
     },
     "loadError": "Impossibile caricare i provider di identità.",
     "mapAddError": "Impossibile aggiungere la mappatura.",
@@ -2089,7 +2093,8 @@
       "unavailable": "Il single sign-on non è disponibile su questo server.",
       "expired": "La sessione di single sign-on è scaduta. Accedi di nuovo.",
       "failed": "Il single sign-on non è stato completato. Riprova oppure accedi con la tua password.",
-      "backToLogin": "Torna all'accesso"
+      "backToLogin": "Torna all'accesso",
+      "mfaRequired": "Il provider di identità non ha confermato l'accesso multifattore. Accedi di nuovo usando il secondo fattore, oppure chiedi a un amministratore di verificare la policy multifattore del provider di identità."
     }
   },
   "logout": {
@@ -2390,7 +2395,6 @@
       "engineMissing": "Il motore di federazione Pro+ richiesto non è caricato; verifica la licenza."
     },
     "fips": "FIPS",
-    "gated": "Navigazione Gated",
     "hosts": "Host",
     "logoAlt": "SysManage",
     "logout": "Esci",
@@ -2398,7 +2402,6 @@
     "map": "Mappa",
     "osLifecycle": "Ciclo di vita del sistema operativo",
     "osUpgrades": "Upgrade SO",
-    "plain": "Navigazione Plain",
     "queryPacks": "Pacchetti di Query",
     "reports": "Report",
     "role": {
@@ -2546,7 +2549,6 @@
     "versionOp": "Op",
     "versionOpAny": "(qualsiasi)"
   },
-  "pluginOnlyKey": "",
   "policies": {
     "actions": {
       "assign": "Assegna",

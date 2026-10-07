@@ -169,4 +169,16 @@ do-install:
 		${INSTALL_SCRIPT} ${WRKSRC}/scripts/openbao_init_unseal.py \
 			${PREFIX}/libexec/sysmanage/scripts/openbao_init_unseal.py || true
 
+	# sysmanage-canary (Phase 22.9): an outside watcher for the server -- its
+	# own library, launcher, rc.d service and example configuration.  Enable
+	# with: rcctl enable sysmanage_canary (after editing the config).
+	${INSTALL_DATA_DIR} ${PREFIX}/lib/sysmanage-canary
+	cp -R ${WRKSRC}/canary/sysmanage_canary ${PREFIX}/lib/sysmanage-canary/
+	${INSTALL_SCRIPT} ${WRKSRC}/canary/bin/sysmanage-canary ${PREFIX}/bin/sysmanage-canary
+	${INSTALL_SCRIPT} ${WRKSRC}/canary/service/openbsd-sysmanage_canary.rc \
+		${DESTDIR}/etc/rc.d/sysmanage_canary
+	${INSTALL_DATA_DIR} ${PREFIX}/share/examples/sysmanage-canary
+	${INSTALL_DATA} ${WRKSRC}/canary/sysmanage-canary.yaml.example \
+		${PREFIX}/share/examples/sysmanage-canary/sysmanage-canary.yaml
+
 .include <bsd.port.mk>

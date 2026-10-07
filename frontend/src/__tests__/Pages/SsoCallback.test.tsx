@@ -33,6 +33,12 @@ describe('SsoCallback', () => {
         expect(localStorage.getItem('userid')).toBe('user@acme.com');
     });
 
+    test('a sign-in without multi-factor proof says so (22.8)', async () => {
+        at('/login/sso?error=mfa_required');
+        expect(await screen.findByText(/did not confirm multi-factor sign-in/)).toBeInTheDocument();
+        expect(takeSsoSession).not.toHaveBeenCalled();
+    });
+
     test('an expired hand-off says so', async () => {
         vi.mocked(takeSsoSession).mockRejectedValue(new Error('401'));
         at('/login/sso');

@@ -200,11 +200,21 @@ def _decode_fallback(expr: str) -> str:
 def extract_keys() -> dict[str, str]:
     """Walk ``frontend/src/`` and return {key: english_fallback}."""
     keys: dict[str, str] = {}
-    for path in SRC_DIR.rglob("*.tsx"):
-        keys.update(_extract_from_file(path))
-    for path in SRC_DIR.rglob("*.ts"):
-        keys.update(_extract_from_file(path))
+    for pattern in ("*.tsx", "*.ts"):
+        for path in SRC_DIR.rglob(pattern):
+            if not _is_test_file(path):
+                keys.update(_extract_from_file(path))
     return keys
+
+
+def _is_test_file(path: Path) -> bool:
+    """Tests call ``t()`` with made-up keys (``greeting``, ``pluginOnlyKey``).
+
+    Walking them seeded those keys into the shipped catalogs as
+    ``[MISSING:greeting]`` -- four of them sat in en/translation.json until a
+    2026-10-07 audit.  Only application code defines the catalog.
+    """
+    return "__tests__" in path.parts or ".test." in path.name or ".spec." in path.name
 
 
 def _extract_from_file(path: Path) -> dict[str, str]:

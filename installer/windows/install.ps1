@@ -398,14 +398,17 @@ try {
             Write-Log "Creating default configuration from example..."
             Copy-Item $ExampleConfig $ConfigFile
             $ConfigCreated = $true
+            # Tells create-service.ps1 (the next custom action) that this is a
+            # fresh install: the configuration is still the example, so the
+            # server is registered but not started, and no migration is tried.
+            Set-Content -Path (Join-Path $LogPath ".config-created") -Value (Get-Date -Format o)
             Write-Log ""
             Write-Log "IMPORTANT: Please edit the configuration file:"
             Write-Log "  $ConfigFile"
             Write-Log ""
             Write-Log "You must configure:"
-            Write-Log "  - database.url: PostgreSQL connection string"
-            Write-Log "  - server.port: Port for web interface (default: 8080)"
-            Write-Log "  - security settings"
+            Write-Log "  - database: host, port, name, user, password"
+            Write-Log "  - security.admin_userid: an email address"
             Write-Log ""
         } else {
             Write-Log "WARNING: No example configuration file found"
@@ -430,6 +433,23 @@ try {
             Write-Log "WARNING: could not size the database pool: $_"
         } finally {
             Pop-Location
+        }
+    }
+
+    # Secrets stay with SYSTEM and Administrators.  ProgramData lets every
+    # local user READ what is created under it, and sysmanage.yaml holds the
+    # database password, the JWT secret and the initial admin password; the
+    # tls directory will hold nginx's private key.  Every SysManage service
+    # (server, nginx, OpenBAO) runs as LocalSystem, so nothing else needs
+    # access.  Well-known SIDs, not names, because the names are translated on
+    # non-English Windows.
+    $TlsDir = Join-Path $ConfigDir "tls"
+    New-Item -ItemType Directory -Force -Path $TlsDir | Out-Null
+    foreach ($secret in @($ConfigFile, $TlsDir)) {
+        if (Test-Path $secret) {
+            $grant = if ((Get-Item $secret).PSIsContainer) { "(OI)(CI)F" } else { "F" }
+            icacls $secret /inheritance:r /grant:r "*S-1-5-18:$grant" "*S-1-5-32-544:$grant" | Out-Null
+            if ($LASTEXITCODE -ne 0) { Write-Log "WARNING: could not restrict access to $secret" }
         }
     }
 
@@ -485,10 +505,13 @@ try {
     Write-Log "=== Installation Complete ==="
     Write-Log ""
     Write-Log "Next steps:"
+    Write-Log "See $(Join-Path $InstallDir 'GETTING-STARTED.txt') - in short:"
     Write-Log "1. Install and configure PostgreSQL"
     Write-Log "2. Edit configuration: $ConfigFile"
-    Write-Log "3. Install a TLS certificate (see below) - nginx will not start without it"
-    Write-Log "4. Service will be created and started next"
+    Write-Log "3. Apply the database schema (scripts\sysmanage_migrate.py)"
+    Write-Log "4. Install a TLS certificate - nginx will not start without it"
+    Write-Log "5. Start SysManageServer (a fresh install leaves it stopped; an upgrade"
+    Write-Log "   migrates and restarts it by itself)"
     Write-Log ""
     Write-Log "The web console is served by nginx on port 443:"
     Write-Log "  https://localhost/"

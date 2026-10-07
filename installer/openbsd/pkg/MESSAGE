@@ -1,0 +1,9 @@
+sysmanage-canary, the outside watcher for this server, is installed but
+not enabled.  It is best run on another machine; to run it here:
+
+  1. Edit ${SYSCONFDIR}/sysmanage-canary.yaml (server URLs, a read-only
+     database role, the mail server and who to alert).
+  2. sysmanage-canary --config ${SYSCONFDIR}/sysmanage-canary.yaml --check-config
+     sysmanage-canary --config ${SYSCONFDIR}/sysmanage-canary.yaml --test-email
+  3. rcctl enable sysmanage_canary && rcctl start sysmanage_canary
+     (the first start creates its _sysmanage_canary user)

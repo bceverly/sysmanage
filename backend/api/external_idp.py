@@ -185,6 +185,10 @@ class ProviderCreateRequest(BaseModel):
     saml_email_attribute: Optional[str] = None
     saml_group_attribute: str = Field(default="groups")
     saml_want_assertions_signed: bool = True
+    # Phase 22.8 -- require multi-factor sign-in at the IdP.
+    require_mfa: bool = False
+    oidc_acr_values: Optional[str] = Field(default=None, max_length=500)
+    saml_mfa_authn_contexts: Optional[str] = None
 
 
 class ProviderUpdateRequest(BaseModel):
@@ -220,6 +224,9 @@ class ProviderUpdateRequest(BaseModel):
     saml_email_attribute: Optional[str] = None
     saml_group_attribute: Optional[str] = None
     saml_want_assertions_signed: Optional[bool] = None
+    require_mfa: Optional[bool] = None
+    oidc_acr_values: Optional[str] = Field(default=None, max_length=500)
+    saml_mfa_authn_contexts: Optional[str] = None
 
 
 class RoleMappingCreateRequest(BaseModel):
@@ -442,6 +449,33 @@ async def oidc_start(provider_id: str, db: Session = Depends(get_db)):
     return RedirectResponse(url=url, status_code=302)
 
 
+class _MfaNotConfirmed(HTTPException):
+    """The IdP signed the user in without proof of multi-factor sign-in and
+    the provider requires it (Phase 22.8): its own reason on the SSO page."""
+
+
+def _refuse(provider, protocol: str, result: dict):
+    """The HTTPException for a failed engine result -- ``_MfaNotConfirmed``
+    when the engine says MFA was missing, logged with the provider and what
+    the token said."""
+    error = result.get("error", "unknown")
+    if protocol == "SAML":
+        detail = _("SAML sign-in failed: %s") % error
+    else:
+        detail = _("OIDC sign-in failed: %s") % error
+    if result.get("reason") == "mfa_required":
+        logger.warning(
+            "SSO sign-in refused by provider %s (%s): multi-factor sign-in required "
+            "but not confirmed for subject %s: %s",
+            sanitize_log(provider.name),
+            provider.id,
+            sanitize_log(str(result.get("subject"))),
+            sanitize_log(str(result.get("error"))),
+        )
+        return _MfaNotConfirmed(status_code=401, detail=detail)
+    return HTTPException(status_code=401, detail=detail)
+
+
 @router.get("/api/auth/oidc/{provider_id}/callback")
 async def oidc_callback(
     provider_id: str,
@@ -462,8 +496,14 @@ async def oidc_callback(
             exc.status_code,
             sanitize_log(str(exc.detail)),
         )
-        return sso_session.failure(exc.status_code)
+        return sso_session.failure(exc.status_code, _reason(exc))
     return sso_session.landing(userid, tenant_id)
+
+
+def _reason(exc: HTTPException):
+    return (
+        sso_session.REASON_MFA_REQUIRED if isinstance(exc, _MfaNotConfirmed) else None
+    )
 
 
 def _oidc_sign_in(provider_id: str, request: Request, db: Session):
@@ -493,10 +533,7 @@ def _oidc_sign_in(provider_id: str, request: Request, db: Session):
 
     result = engine.exchange_oidc_code(config, code, state)
     if not result["success"]:
-        raise HTTPException(
-            status_code=401,
-            detail=_("OIDC sign-in failed: %s") % result.get("error", "unknown"),
-        )
+        raise _refuse(provider, "OIDC", result)
 
     user = (
         db.query(models.User)
@@ -683,7 +720,7 @@ async def saml_acs(provider_id: str, request: Request, db: Session = Depends(get
             exc.status_code,
             sanitize_log(str(exc.detail)),
         )
-        return sso_session.failure(exc.status_code)
+        return sso_session.failure(exc.status_code, _reason(exc))
     return sso_session.landing(userid, tenant_id)
 
 
@@ -710,10 +747,7 @@ async def _saml_sign_in(provider_id: str, request: Request, db: Session):
         _saml_config(provider), str(saml_response), request_id
     )
     if not result["success"]:
-        raise HTTPException(
-            status_code=401,
-            detail=_("SAML sign-in failed: %s") % result.get("error", "unknown"),
-        )
+        raise _refuse(provider, "SAML", result)
 
     user = (
         db.query(models.User)

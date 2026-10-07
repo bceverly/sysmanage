@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <!--
+    Copyright (c) 2024-2026 Bryan Everly
+    Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+    See the LICENSE file in the project root for the full terms.
+
+    The installer UI shared by sysmanage.wxs and sysmanage-canary.wxs:
+    WixUI_Minimal without its license page (Welcome, Ready, progress,
+    Finish), so that an interactive install ends on a page that says what
+    is left to do.  Both MSIs used to install with no UI at all, and their
+    custom actions run hidden, so the next steps were only ever written to
+    a log nobody was told about.
+
+    Each package sets, before referencing this UI:
+      WIXUI_EXITDIALOGOPTIONALTEXT     a short "what now" note
+      WixShellExecTarget               [#its getting-started text file]
+    The Finish page offers (checked) to open that file.  Silent installs
+    (msiexec /qn, winget) show no UI and are unaffected.
+
+    Needs: wix build -ext WixToolset.UI.wixext -ext WixToolset.Util.wixext
+  -->
+  <Fragment>
+    <UI Id="SysManageUI">
+      <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+      <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+      <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
+
+      <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+
+      <DialogRef Id="ErrorDlg" />
+      <DialogRef Id="FatalError" />
+      <DialogRef Id="FilesInUse" />
+      <DialogRef Id="MsiRMFilesInUse" />
+      <DialogRef Id="PrepareDlg" />
+      <DialogRef Id="ProgressDlg" />
+      <DialogRef Id="ResumeDlg" />
+      <DialogRef Id="UserExit" />
+      <DialogRef Id="WelcomeDlg" />
+
+      <!-- Install: Welcome -> Ready -> progress -> Finish. -->
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Condition="NOT Installed" />
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="1" Condition="NOT Installed" />
+
+      <!-- Repair / remove when the MSI is opened again. -->
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2" Condition="Installed" />
+      <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg" />
+      <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg" />
+      <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg" />
+      <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg" />
+
+      <!-- Finish: open the getting-started steps when the box is ticked. -->
+      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="OpenGettingStarted"
+               Condition="WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 AND NOT Installed" />
+      <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999" />
+
+      <Property Id="ARPNOMODIFY" Value="1" />
+    </UI>
+
+    <UIRef Id="WixUI_Common" />
+
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Open the getting-started steps" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+
+    <!-- Runs as the user who clicked Finish (an immediate action from the
+         UI), so the text opens in that user's editor. -->
+    <CustomAction Id="OpenGettingStarted"
+                  BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)"
+                  DllEntry="WixShellExec"
+                  Impersonate="yes"
+                  Return="ignore" />
+  </Fragment>
+</Wix>

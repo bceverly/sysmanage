@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<!-- Copyright (c) 2024-2026 Bryan Everly
+     Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+     See the LICENSE file in the project root for the full terms.
+
+     The last page of the sysmanage-canary installer (Phase 22.9): the
+     daemon is installed but not loaded until the configuration is filled
+     in. -->
+<html><head><meta charset="utf-8">
+<style>
+body { font: 13px -apple-system, "Helvetica Neue", sans-serif; }
+code { font: 12px Menlo, monospace; }
+pre { font: 12px Menlo, monospace; background: #f2f2f2; padding: 6px 8px; }
+li { margin-bottom: 8px; }
+</style></head><body>
+<h3>sysmanage-canary is installed, but not yet running</h3>
+<p>It needs its configuration first. What the installer did on this Mac is
+in <code>/tmp/sysmanage-canary-install.log</code>.</p>
+<ol>
+<li><b>Edit</b> <code>/usr/local/etc/sysmanage-canary.yaml</code>: the server
+URLs, a read-only database role, the mail server and who to alert.</li>
+<li><b>Check it and send a test message</b>:
+<pre>sudo -u _sysmanage_canary sysmanage-canary \
+    --config /usr/local/etc/sysmanage-canary.yaml --check-config
+sudo -u _sysmanage_canary sysmanage-canary \
+    --config /usr/local/etc/sysmanage-canary.yaml --test-email</pre></li>
+<li><b>Start it</b> (it then starts at every boot):
+<pre>sudo launchctl bootstrap system /Library/LaunchDaemons/org.sysmanage.canary.plist</pre></li>
+</ol>
+<p>It logs to <code>/usr/local/var/log/sysmanage-canary.log</code>.</p>
+</body></html>

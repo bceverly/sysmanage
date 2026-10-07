@@ -53,6 +53,9 @@ SSO_TYPES = ("oidc", "saml")
 # sign-in refused with.  Only the code travels in the URL; the detail (which
 # can carry IdP error text) stays in the server log.
 REASON_FAILED = "failed"
+# Phase 22.8: the IdP signed the user in without proof of multi-factor
+# sign-in, and the provider requires it.
+REASON_MFA_REQUIRED = "mfa_required"
 _REASONS = {402: "unavailable", 403: "denied"}
 
 
@@ -81,9 +84,10 @@ def landing(userid: str, tenant_id: Optional[str]) -> RedirectResponse:
     return response
 
 
-def failure(status_code: int) -> RedirectResponse:
-    """Send the browser to the console's SSO page with a reason to explain."""
-    reason = _REASONS.get(status_code, REASON_FAILED)
+def failure(status_code: int, reason: Optional[str] = None) -> RedirectResponse:
+    """Send the browser to the console's SSO page with a reason to explain:
+    ``reason`` when given, else the one for ``status_code``."""
+    reason = reason or _REASONS.get(status_code, REASON_FAILED)
     return RedirectResponse(
         url=f"{_console_url()}{LANDING_PATH}?error={reason}", status_code=303
     )

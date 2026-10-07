@@ -1,0 +1,16 @@
+#!/bin/sh
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+set -e
+
+if [ "$1" = "purge" ]; then
+	rm -f /etc/sysmanage-canary.yaml
+	if getent passwd sysmanage-canary >/dev/null; then
+		deluser --system sysmanage-canary >/dev/null 2>&1 || true
+	fi
+fi
+
+#DEBHELPER#
+
+exit 0

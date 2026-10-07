@@ -26,7 +26,7 @@ export interface SsoSession {
 }
 
 /** Why the server sent the browser back without a session. */
-export type SsoFailure = "denied" | "unavailable" | "failed" | "expired";
+export type SsoFailure = "denied" | "unavailable" | "failed" | "expired" | "mfa_required";
 
 export const getSsoProviders = async (): Promise<SsoProvider[]> => {
     const response = await axiosInstance.get<SsoProvider[]>("/api/auth/sso/providers");

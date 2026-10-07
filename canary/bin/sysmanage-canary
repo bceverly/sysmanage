@@ -1,0 +1,49 @@
+#!/bin/sh
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+#
+# sysmanage-canary command line (Phase 22.9).  Packages install the library
+# under one of the directories below; a SYSTEM Python runs it -- never the
+# server's virtualenv, which the canary must survive.  The newest Python 3.8+
+# that has PyYAML is used (openSUSE Leap's python3 is 3.6; its packages pull
+# in python311).  SYSMANAGE_CANARY_PYTHON overrides the choice.
+# Package prefixes too: NetBSD's boot-time PATH (and sudo's secure_path) has
+# no /usr/pkg/bin, where pkgsrc installs Python, so the service never found
+# an interpreter (found on a real NetBSD 10.1 host, 2026-10-07).
+PATH="$PATH:/usr/local/bin:/usr/pkg/bin"
+export PATH
+for lib in /usr/lib/sysmanage-canary /usr/local/lib/sysmanage-canary \
+	/usr/pkg/lib/sysmanage-canary; do
+	[ -d "$lib/sysmanage_canary" ] && break
+	lib=""
+done
+if [ -z "$lib" ]; then
+	echo "sysmanage-canary: library not found" >&2
+	exit 1
+fi
+# The macOS package builds a private venv beside the library (macOS has no
+# system PyYAML or psycopg); it is the canary's own, never the server's.
+if [ -z "$SYSMANAGE_CANARY_PYTHON" ] && [ -x "$lib/venv/bin/python3" ]; then
+	SYSMANAGE_CANARY_PYTHON="$lib/venv/bin/python3"
+fi
+if [ -z "$SYSMANAGE_CANARY_PYTHON" ]; then
+	for candidate in python3.14 python3.13 python3.12 python3.11 python3.10 python3.9 python3.8 python3; do
+		if command -v "$candidate" >/dev/null 2>&1 && "$candidate" -c \
+			'import sys, yaml; sys.exit(sys.version_info < (3, 8))' >/dev/null 2>&1; then
+			# The full path, so a service manager matching the process sees it.
+			SYSMANAGE_CANARY_PYTHON="$(command -v "$candidate")"
+			break
+		fi
+	done
+fi
+if [ -z "$SYSMANAGE_CANARY_PYTHON" ]; then
+	echo "sysmanage-canary: no Python 3.8+ with PyYAML found" >&2
+	exit 1
+fi
+# On OpenBSD psycopg exists only in the server's pip bundle; when the canary
+# runs on the server machine it may use that copy (after its own library).
+path="$lib"
+bundle=/usr/local/libexec/sysmanage/pip-packages
+[ -d "$bundle/psycopg" ] && path="$path:$bundle"
+PYTHONPATH="$path" exec "$SYSMANAGE_CANARY_PYTHON" -B -m sysmanage_canary "$@"

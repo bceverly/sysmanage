@@ -265,6 +265,11 @@ jobs:
           # Generate SHA256 checksum
           cd installer/dist
           sha256sum "sysmanage_${VERSION}-1_all.deb" > "sysmanage_${VERSION}-1_all.deb.sha256"
+          # sysmanage-canary (Phase 22.9) is a second binary package from the
+          # same source; fail here if the build did not produce it.
+          CANARY_DEB="sysmanage-canary_${VERSION}-1_all.deb"
+          test -s "$CANARY_DEB" || { echo "::error::$CANARY_DEB was not built"; exit 1; }
+          sha256sum "$CANARY_DEB" > "$CANARY_DEB.sha256"
 
           echo "Package built: $DEB_FILE"
           echo "Size: $(du -h $DEB_FILE | cut -f1)"
@@ -276,6 +281,8 @@ jobs:
           path: |
             installer/dist/sysmanage_*.deb
             installer/dist/sysmanage_*.deb.sha256
+            installer/dist/sysmanage-canary_*.deb
+            installer/dist/sysmanage-canary_*.deb.sha256
 
       - name: Upload SBOM files as artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -1324,6 +1331,41 @@ jobs:
           echo "Building Windows MSI (x64) for version: $Env:VERSION"
           powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture x64
 
+      - name: Build sysmanage-canary MSI (x64)
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          powershell -ExecutionPolicy Bypass -File installer\windows\build-canary-msi.ps1 -Architecture x64
+
+      # Install the canary MSI on this runner and prove the result works:
+      # the service is registered (manual start, LOCAL SERVICE), the shipped
+      # example validates, and psycopg loads libpq the way the service would
+      # (PATH as the service sets it -- the ARM64 build depends on that).
+      # Then uninstall and check the service is gone.
+      - name: Install-test sysmanage-canary MSI (x64)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $msi = Get-ChildItem installer\dist\sysmanage-canary-*-windows-x64.msi | Select-Object -First 1
+          $p = Start-Process msiexec.exe -ArgumentList "/i `"$($msi.FullName)`" /qn /l*v canary-install.log" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { Get-Content canary-install.log -Tail 60; throw "msiexec /i exited $($p.ExitCode)" }
+          Get-Content "$env:ProgramData\SysManage\canary\install.log"
+          $svc = Get-CimInstance Win32_Service -Filter "Name='SysManageCanary'"
+          if (-not $svc) { throw "SysManageCanary service not registered" }
+          if ($svc.StartName -notlike "*LocalService*") { throw "service runs as $($svc.StartName)" }
+          if ($svc.StartMode -ne "Manual") { throw "fresh install should be Manual, is $($svc.StartMode)" }
+          $dir = "$env:ProgramFiles\SysManage Canary"
+          if (-not (Test-Path "$dir\GETTING-STARTED.txt")) { throw "GETTING-STARTED.txt not installed" }
+          & "$dir\sysmanage-canary.cmd" --config "$env:ProgramData\SysManage\sysmanage-canary.yaml" --check-config
+          if ($LASTEXITCODE -ne 0) { throw "--check-config failed" }
+          $env:PATH = "$dir\python;$dir\libpq;$env:SystemRoot\System32;$env:SystemRoot"
+          & "$dir\python\python.exe" -c "import yaml, psycopg; print('psycopg', psycopg.__version__, psycopg.pq.__impl__)"
+          if ($LASTEXITCODE -ne 0) { throw "psycopg/libpq did not load" }
+          $p = Start-Process msiexec.exe -ArgumentList "/x `"$($msi.FullName)`" /qn" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "msiexec /x exited $($p.ExitCode)" }
+          if (Get-Service SysManageCanary -ErrorAction SilentlyContinue) { throw "service left behind after uninstall" }
+          Write-Host "[OK] canary MSI installs, validates, loads libpq and uninstalls"
+
       - name: Upload Windows MSI (x64) as artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
@@ -1494,6 +1536,41 @@ jobs:
         run: |
           echo "Building Windows MSI (ARM64) for version: $Env:VERSION"
           powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture arm64
+
+      - name: Build sysmanage-canary MSI (ARM64)
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          powershell -ExecutionPolicy Bypass -File installer\windows\build-canary-msi.ps1 -Architecture arm64
+
+      # Install the canary MSI on this runner and prove the result works:
+      # the service is registered (manual start, LOCAL SERVICE), the shipped
+      # example validates, and psycopg loads libpq the way the service would
+      # (PATH as the service sets it -- the ARM64 build depends on that).
+      # Then uninstall and check the service is gone.
+      - name: Install-test sysmanage-canary MSI (ARM64)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $msi = Get-ChildItem installer\dist\sysmanage-canary-*-windows-arm64.msi | Select-Object -First 1
+          $p = Start-Process msiexec.exe -ArgumentList "/i `"$($msi.FullName)`" /qn /l*v canary-install.log" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { Get-Content canary-install.log -Tail 60; throw "msiexec /i exited $($p.ExitCode)" }
+          Get-Content "$env:ProgramData\SysManage\canary\install.log"
+          $svc = Get-CimInstance Win32_Service -Filter "Name='SysManageCanary'"
+          if (-not $svc) { throw "SysManageCanary service not registered" }
+          if ($svc.StartName -notlike "*LocalService*") { throw "service runs as $($svc.StartName)" }
+          if ($svc.StartMode -ne "Manual") { throw "fresh install should be Manual, is $($svc.StartMode)" }
+          $dir = "$env:ProgramFiles\SysManage Canary"
+          if (-not (Test-Path "$dir\GETTING-STARTED.txt")) { throw "GETTING-STARTED.txt not installed" }
+          & "$dir\sysmanage-canary.cmd" --config "$env:ProgramData\SysManage\sysmanage-canary.yaml" --check-config
+          if ($LASTEXITCODE -ne 0) { throw "--check-config failed" }
+          $env:PATH = "$dir\python;$dir\libpq;$env:SystemRoot\System32;$env:SystemRoot"
+          & "$dir\python\python.exe" -c "import yaml, psycopg; print('psycopg', psycopg.__version__, psycopg.pq.__impl__)"
+          if ($LASTEXITCODE -ne 0) { throw "psycopg/libpq did not load" }
+          $p = Start-Process msiexec.exe -ArgumentList "/x `"$($msi.FullName)`" /qn" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "msiexec /x exited $($p.ExitCode)" }
+          if (Get-Service SysManageCanary -ErrorAction SilentlyContinue) { throw "service left behind after uninstall" }
+          Write-Host "[OK] canary MSI installs, validates, loads libpq and uninstalls"
 
       - name: Upload Windows MSI (ARM64) as artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -1800,6 +1877,8 @@ jobs:
           # Copy this build's artifacts into the staging tree.
           cp $RF/sysmanage_*.deb "repo/server/deb/pool/main/$VERSION-1/" 2>/dev/null || true
           cp $RF/sysmanage_*.deb.sha256 "repo/server/deb/pool/main/$VERSION-1/" 2>/dev/null || true
+          cp $RF/sysmanage-canary_*.deb "repo/server/deb/pool/main/$VERSION-1/" 2>/dev/null || true
+          cp $RF/sysmanage-canary_*.deb.sha256 "repo/server/deb/pool/main/$VERSION-1/" 2>/dev/null || true
           cp $RF/sysmanage-openbsd-port-*.tar.gz "repo/server/openbsd/$VERSION/" 2>/dev/null || true
           cp $RF/sysmanage-openbsd-port-*.tar.gz.sha256 "repo/server/openbsd/$VERSION/" 2>/dev/null || true
           # Pre-built binary packages (.tgz) per supported OpenBSD release.
@@ -1942,16 +2021,18 @@ jobs:
           # Checking the BUCKET, not the local tree: the local file provably
           # existed (the index was built from it), so only the remote answers
           # the question that matters.
-          DEB_KEY="server/deb/pool/main/$VERSION-1/sysmanage_${VERSION}-1_all.deb"
-          if ! s3 ls "s3://${R2_BUCKET}/$DEB_KEY" >/dev/null 2>&1; then
-            echo "::error::published .deb missing from R2: $DEB_KEY"
-            echo "Local pool contents:"
-            ls -la "repo/server/deb/pool/main/$VERSION-1/" || true
-            echo "Bucket pool contents for this version:"
-            s3 ls "s3://${R2_BUCKET}/server/deb/pool/main/$VERSION-1/" || true
-            exit 1
-          fi
-          echo "verified in R2: $DEB_KEY"
+          for DEB_NAME in sysmanage sysmanage-canary; do
+            DEB_KEY="server/deb/pool/main/$VERSION-1/${DEB_NAME}_${VERSION}-1_all.deb"
+            if ! s3 ls "s3://${R2_BUCKET}/$DEB_KEY" >/dev/null 2>&1; then
+              echo "::error::published .deb missing from R2: $DEB_KEY"
+              echo "Local pool contents:"
+              ls -la "repo/server/deb/pool/main/$VERSION-1/" || true
+              echo "Bucket pool contents for this version:"
+              s3 ls "s3://${R2_BUCKET}/server/deb/pool/main/$VERSION-1/" || true
+              exit 1
+            fi
+            echo "verified in R2: $DEB_KEY"
+          done
           echo "Published SysManage Server v$VERSION to https://repo.sysmanage.org/server/"
 
       # Cloudflare fronts R2 and caches NEGATIVE responses: a GET for a path
@@ -2953,6 +3034,10 @@ jobs:
           cp $WORKSPACE/installer/openbao/openbao.hcl /tmp/$TAR_NAME/installer/openbao/
           cp $WORKSPACE/installer/openbao/sysmanage-openbao-init.service /tmp/$TAR_NAME/installer/openbao/
 
+          # sysmanage-canary (Phase 22.9) -- the spec's canary subpackage
+          # installs it; hard copy, so a missing tree fails here.
+          cp -r $WORKSPACE/canary /tmp/$TAR_NAME/
+
           # Create tarball
           cd /tmp
           tar czf sysmanage-$VERSION.tar.gz $TAR_NAME/
@@ -3229,6 +3314,10 @@ jobs:
           if [ -d "$WORKSPACE/sbom" ]; then
             cp -r $WORKSPACE/sbom /tmp/$TAR_NAME/
           fi
+
+          # sysmanage-canary (Phase 22.9) -- the spec's canary subpackage
+          # installs it; hard copy, so a missing tree fails here.
+          cp -r $WORKSPACE/canary /tmp/$TAR_NAME/
 
           # Create tarball
           cd /tmp
@@ -4222,6 +4311,14 @@ jobs:
           SHA256 (bceverly-sysmanage-${VERSION}-v${VERSION}_GH0.tar.gz) = ${SHA}
           SIZE (bceverly-sysmanage-${VERSION}-v${VERSION}_GH0.tar.gz) = ${SIZE}
           EOF
+
+          # sysutils/sysmanage-canary (Phase 22.9) is built from the SAME
+          # tarball, so its distinfo is the server port's.
+          mkdir -p "$STAGE/sysutils/sysmanage-canary"
+          cp -r packaging/freebsd-ports/sysutils/sysmanage-canary/* "$STAGE/sysutils/sysmanage-canary/"
+          sed -i "s/^DISTVERSION=.*/DISTVERSION=\t${VERSION}/" \
+            "$STAGE/sysutils/sysmanage-canary/Makefile"
+          cp "$STAGE/sysutils/sysmanage/distinfo" "$STAGE/sysutils/sysmanage-canary/distinfo"
 
           tar -czf "/tmp/sysmanage-v${VERSION}-freebsd-port.tar.gz" -C "$STAGE" sysutils
 

@@ -348,10 +348,38 @@ Step "SysManageNginx service registered" {
 Step "SysManageServer service registered" {
     $s = Get-Service -Name "SysManageServer" -EA SilentlyContinue
     if (-not $s) { throw "backend service not registered" }
+    # A fresh install leaves it stopped on manual start until it is configured
+    # (create-service.ps1); an upgrade migrates and starts it.
     if ($s.Status -ne "Running") {
-        Note "not Running - expected without PostgreSQL and a configured sysmanage.yaml"
+        if ($s.StartType -ne "Manual") {
+            throw "stopped but StartType=$($s.StartType) - a fresh install should be Manual, an upgrade Running"
+        }
+        Note "stopped on manual start - a fresh install, by design (see GETTING-STARTED.txt)"
     }
     "$($s.Status), StartType=$($s.StartType)"
+}
+
+Step "Operator scripts and GETTING-STARTED.txt installed" {
+    foreach ($f in @("scripts\sysmanage_migrate.py", "scripts\openbao_init_unseal.py", "GETTING-STARTED.txt")) {
+        if (-not (Test-Path (Join-Path $InstallRoot $f))) { throw "$f missing from $InstallRoot" }
+    }
+    "present"
+}
+
+Step "Secrets are not readable by ordinary users" {
+    # BUILTIN\Users (S-1-5-32-545) and Authenticated Users (S-1-5-11) must have
+    # no access to the config, the TLS folder or the OpenBAO keys.
+    $open = @()
+    foreach ($path in @("C:\ProgramData\SysManage\sysmanage.yaml", "C:\ProgramData\SysManage\tls",
+                        "C:\ProgramData\SysManage\openbao")) {
+        if (-not (Test-Path $path)) { continue }
+        foreach ($rule in (Get-Acl $path).Access) {
+            $sid = try { $rule.IdentityReference.Translate([System.Security.Principal.SecurityIdentifier]).Value } catch { "" }
+            if ($sid -in @("S-1-5-32-545", "S-1-5-11", "S-1-1-0")) { $open += "$path ($($rule.IdentityReference))" }
+        }
+    }
+    if ($open) { throw "readable by ordinary users: $($open -join '; ')" }
+    "restricted"
 }
 
 # --------------------------------------------------------------- nginx config --

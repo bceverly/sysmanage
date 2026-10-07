@@ -1119,7 +1119,6 @@
       "label": "Usar servidor administrado"
     }
   },
-  "greeting": "Saludar al usuario",
   "hostAccount": {
     "accountDisabled": "La cuenta está deshabilitada",
     "add": "Agregar",
@@ -1976,7 +1975,12 @@
       "type": "Tipo",
       "userBase": "Base de búsqueda de usuarios",
       "userFilter": "Filtro de búsqueda de usuarios",
-      "userFilterHelp": "Debe contener %s para el nombre de usuario, p. ej. (sAMAccountName=%s)"
+      "userFilterHelp": "Debe contener %s para el nombre de usuario, p. ej. (sAMAccountName=%s)",
+      "requireMfa": "Requerir inicio de sesión multifactor",
+      "oidcAcrValues": "Niveles de garantía aceptados (acr)",
+      "oidcAcrValuesHelp": "Opcional: valores acr que también cuentan como multifactor, separados por espacios; se solicitan al iniciar sesión. De lo contrario, el token debe indicar que amr incluye mfa.",
+      "samlMfaContexts": "Contextos de autenticación multifactor",
+      "samlMfaContextsHelp": "Valores de AuthnContextClassRef que cuentan como multifactor, uno por línea. Vacío significa http://schemas.microsoft.com/claims/multipleauthn de Microsoft Entra ID."
     },
     "loadError": "No se pudieron cargar los proveedores de identidad.",
     "mapAddError": "No se pudo agregar la asignación.",
@@ -2089,7 +2093,8 @@
       "unavailable": "El inicio de sesión único no está disponible en este servidor.",
       "expired": "La sesión de inicio de sesión único ha caducado. Vuelva a iniciar sesión.",
       "failed": "El inicio de sesión único no se completó. Inténtelo de nuevo o inicie sesión con su contraseña.",
-      "backToLogin": "Volver al inicio de sesión"
+      "backToLogin": "Volver al inicio de sesión",
+      "mfaRequired": "Su proveedor de identidad no confirmó el inicio de sesión multifactor. Vuelva a iniciar sesión con su segundo factor o pida a un administrador que revise la directiva multifactor del proveedor de identidad."
     }
   },
   "logout": {
@@ -2390,7 +2395,6 @@
       "engineMissing": "El motor de federación Pro+ requerido no se ha cargado; compruebe la licencia."
     },
     "fips": "FIPS",
-    "gated": "Navegación con puerta de enlace",
     "hosts": "Hospederos",
     "logoAlt": "SysManage",
     "logout": "Cerrar Sesión",
@@ -2398,7 +2402,6 @@
     "map": "Mapa",
     "osLifecycle": "Ciclo de vida del sistema operativo",
     "osUpgrades": "Actualizaciones de SO",
-    "plain": "Navegación simple",
     "queryPacks": "Paquetes de consultas",
     "reports": "Informes",
     "role": {
@@ -2546,7 +2549,6 @@
     "versionOp": "Op",
     "versionOpAny": "(cualquiera)"
   },
-  "pluginOnlyKey": "[FALTANTE:pluginOnlyKey]",
   "policies": {
     "actions": {
       "assign": "Asignar",

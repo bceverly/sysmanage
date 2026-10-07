@@ -1119,7 +1119,6 @@
       "label": "관리 서버 사용"
     }
   },
-  "greeting": "[부재: 인사말]",
   "hostAccount": {
     "accountDisabled": "계정이 비활성화되었습니다",
     "add": "추가",
@@ -1976,7 +1975,12 @@
       "type": "유형",
       "userBase": "사용자 검색 기준",
       "userFilter": "사용자 검색 필터",
-      "userFilterHelp": "사용자 이름을 위해 %s를 포함해야 합니다, 예: (sAMAccountName=%s)"
+      "userFilterHelp": "사용자 이름을 위해 %s를 포함해야 합니다, 예: (sAMAccountName=%s)",
+      "requireMfa": "다단계 로그인 필요",
+      "oidcAcrValues": "허용되는 보증 수준 (acr)",
+      "oidcAcrValuesHelp": "선택 사항: 다단계로도 인정되는 acr 값을 공백으로 구분하여 입력합니다. 이 값은 로그인 시 요청됩니다. 그렇지 않으면 토큰에 amr이 mfa를 포함한다고 명시되어 있어야 합니다.",
+      "samlMfaContexts": "다단계 인증 컨텍스트",
+      "samlMfaContextsHelp": "다단계로 인정되는 AuthnContextClassRef 값을 한 줄에 하나씩 입력합니다. 비워 두면 Microsoft Entra ID의 http://schemas.microsoft.com/claims/multipleauthn을(를) 사용합니다."
     },
     "loadError": "ID 공급자를 불러올 수 없습니다.",
     "mapAddError": "매핑을 추가할 수 없습니다.",
@@ -2089,7 +2093,8 @@
       "unavailable": "이 서버에서는 Single Sign-On을 사용할 수 없습니다.",
       "expired": "Single Sign-On 세션이 만료되었습니다. 다시 로그인하세요.",
       "failed": "Single Sign-On이 완료되지 않았습니다. 다시 시도하거나 암호로 로그인하세요.",
-      "backToLogin": "로그인으로 돌아가기"
+      "backToLogin": "로그인으로 돌아가기",
+      "mfaRequired": "ID 공급자가 다단계 로그인을 확인하지 않았습니다. 두 번째 인증 요소를 사용하여 다시 로그인하거나, 관리자에게 ID 공급자의 다단계 정책을 확인하도록 요청하세요."
     }
   },
   "logout": {
@@ -2390,7 +2395,6 @@
       "engineMissing": "필수 Pro+ 연방 엔진이 로드되지 않았습니다; 라이선스를 확인하세요."
     },
     "fips": "FIPS",
-    "gated": "[부재: 메뉴. 게이트드]",
     "hosts": "호스트",
     "logoAlt": "SysManage",
     "logout": "로그아웃",
@@ -2398,7 +2402,6 @@
     "map": "지도",
     "osLifecycle": "OS 라이프사이클",
     "osUpgrades": "OS 업그레이드",
-    "plain": "[부재: 메뉴. 플레인]",
     "queryPacks": "쿼리 팩",
     "reports": "보고서",
     "role": {
@@ -2546,7 +2549,6 @@
     "versionOp": "연산자",
     "versionOpAny": "(임의)"
   },
-  "pluginOnlyKey": "플러그인 전용 키가 누락되었습니다.",
   "policies": {
     "actions": {
       "assign": "할당",

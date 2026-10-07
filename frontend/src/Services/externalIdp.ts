@@ -47,6 +47,10 @@ export interface IdpProvider {
   saml_email_attribute?: string | null;
   saml_group_attribute?: string;
   saml_want_assertions_signed?: boolean;
+  // Phase 22.8 -- require multi-factor sign-in at the IdP.
+  require_mfa?: boolean;
+  oidc_acr_values?: string | null;
+  saml_mfa_authn_contexts?: string | null;
   // Phase 13.1.E -- SCIM 2.0 inbound provisioning.
   scim_enabled?: boolean;
   scim_bearer_token_secret_id?: string | null;
@@ -87,6 +91,10 @@ export interface IdpProviderCreate {
   saml_email_attribute?: string;
   saml_group_attribute?: string;
   saml_want_assertions_signed?: boolean;
+  // Phase 22.8 -- require multi-factor sign-in at the IdP.
+  require_mfa?: boolean;
+  oidc_acr_values?: string | null;
+  saml_mfa_authn_contexts?: string | null;
   // Phase 13.1.E -- SCIM 2.0 inbound provisioning.
   scim_enabled?: boolean;
   scim_bearer_token_secret_id?: string;

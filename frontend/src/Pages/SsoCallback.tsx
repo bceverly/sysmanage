@@ -23,12 +23,14 @@ const failureMessage = (t: TFunction, reason: SsoFailure): string => {
             return t('login.sso.unavailable', 'Single sign-on is not available on this server.');
         case 'expired':
             return t('login.sso.expired', 'The single sign-on session has expired. Sign in again.');
+        case 'mfa_required':
+            return t('login.sso.mfaRequired', 'Your identity provider did not confirm multi-factor sign-in. Sign in again using your second factor, or ask an administrator to check the identity provider\'s multi-factor policy.');
         default:
             return t('login.sso.failed', 'Single sign-on did not complete. Try again, or sign in with your password.');
     }
 };
 
-const KNOWN: SsoFailure[] = ['denied', 'unavailable', 'failed', 'expired'];
+const KNOWN: SsoFailure[] = ['denied', 'unavailable', 'failed', 'expired', 'mfa_required'];
 
 const SsoCallback: React.FC = () => {
     const { t } = useTranslation();

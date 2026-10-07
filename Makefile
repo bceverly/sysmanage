@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: install-psycopg-c lint-license-headers lint-license-headers-fix test-lucky13 check-black check-msi-guids provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript lint-css lint-css-fix security security-full security-python security-frontend security-secrets security-semgrep security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
+.PHONY: install-psycopg-c lint-license-headers lint-license-headers-fix test-lucky13 check-black check-msi-guids provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript lint-css lint-css-fix security security-full security-python security-frontend security-secrets security-semgrep security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-macos-canary installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
 
 # Default target
 help:
@@ -136,6 +136,7 @@ help:
 	@echo "More packaging:"
 	@echo "  make installer-freebsd - Build the FreeBSD port tarball"
 	@echo "  make installer-macos   - Build the macOS package"
+	@echo "  make installer-macos-canary - Build the macOS sysmanage-canary package"
 	@echo "  make installer-netbsd  - Build the NetBSD package"
 	@echo "  make installer-msi     - Build a Windows .msi (needs Windows + WiX)"
 	@echo "  make installer-msi-x64 / installer-msi-arm64 / installer-msi-all - Windows MSI per arch"
@@ -1323,6 +1324,7 @@ endif
 # poudriere testport on a real FreeBSD host before submitting upstream.
 lint-freebsd-port:
 	@$(PYTHON) scripts/check_freebsd_port.py
+	@$(PYTHON) scripts/check_freebsd_port.py --port-dir packaging/freebsd-ports/sysutils/sysmanage-canary
 
 
 lint: lint-file-length lint-license-headers lint-python lint-typescript lint-css check-engine-codes check-nginx-configs check-msi-guids i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-markup i18n-complete i18n-sync-check lint-version check-migrations lint-freebsd-port
@@ -2605,6 +2607,7 @@ installer-deb:
 	rsync -a --exclude='__pycache__' --exclude='*.pyc' alembic/ "$$BUILD_DIR/alembic/"; \
 	cp -r config "$$BUILD_DIR/" 2>/dev/null || true; \
 	cp -r scripts "$$BUILD_DIR/" 2>/dev/null || true; \
+	rsync -a --exclude='__pycache__' --exclude='*.pyc' canary/ "$$BUILD_DIR/canary/"; \
 	cp README.md "$$BUILD_DIR/" 2>/dev/null || touch "$$BUILD_DIR/README.md"; \
 	mkdir -p "$$BUILD_DIR/sbom"; \
 	cp sbom/*.json "$$BUILD_DIR/sbom/" 2>/dev/null || echo "Note: SBOM files not found, skipping"; \
@@ -2628,6 +2631,8 @@ installer-deb:
 	echo ""; \
 	echo "Moving package to output directory..."; \
 	mv "$$BUILD_TEMP"/sysmanage_*.deb "$$OUTPUT_DIR/"; \
+	# The second binary package from the same source (Phase 22.9).
+	mv "$$BUILD_TEMP"/sysmanage-canary_*.deb "$$OUTPUT_DIR/"; \
 	mv "$$BUILD_TEMP"/sysmanage_*.buildinfo "$$OUTPUT_DIR/" 2>/dev/null || true; \
 	mv "$$BUILD_TEMP"/sysmanage_*.changes "$$OUTPUT_DIR/" 2>/dev/null || true; \
 	echo ""; \
@@ -2771,6 +2776,7 @@ installer-rpm-centos:
 	cp -r alembic "$$TAR_DIR/"; \
 	cp -r config "$$TAR_DIR/"; \
 	cp -r scripts "$$TAR_DIR/"; \
+	rsync -a --exclude='__pycache__' --exclude='*.pyc' canary/ "$$TAR_DIR/canary/"; \
 	cp -r sbom "$$TAR_DIR/"; \
 	cp README.md "$$TAR_DIR/" 2>/dev/null || touch "$$TAR_DIR/README.md"; \
 	cp LICENSE "$$TAR_DIR/" 2>/dev/null || touch "$$TAR_DIR/LICENSE"; \
@@ -2926,6 +2932,7 @@ installer-rpm-opensuse:
 	cp -r alembic "$$TAR_DIR/"; \
 	cp -r config "$$TAR_DIR/"; \
 	cp -r scripts "$$TAR_DIR/"; \
+	rsync -a --exclude='__pycache__' --exclude='*.pyc' canary/ "$$TAR_DIR/canary/"; \
 	cp -r sbom "$$TAR_DIR/"; \
 	cp README.md "$$TAR_DIR/" 2>/dev/null || touch "$$TAR_DIR/README.md"; \
 	cp LICENSE "$$TAR_DIR/" 2>/dev/null || touch "$$TAR_DIR/LICENSE"; \
@@ -3076,6 +3083,13 @@ installer-freebsd: build
 	cp installer/freebsd/openbao.rc "$$PACKAGE_ROOT/usr/local/etc/rc.d/openbao"; \
 	chmod +x "$$PACKAGE_ROOT/usr/local/etc/rc.d/openbao"; \
 	cp installer/openbao/openbao.hcl "$$PACKAGE_ROOT/usr/local/etc/openbao/openbao.hcl"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/local/lib/sysmanage-canary" "$$PACKAGE_ROOT/usr/local/bin" \
+		"$$PACKAGE_ROOT/usr/local/share/sysmanage-canary"; \
+	cp -R canary/sysmanage_canary "$$PACKAGE_ROOT/usr/local/lib/sysmanage-canary/"; \
+	find "$$PACKAGE_ROOT/usr/local/lib/sysmanage-canary" -name __pycache__ -prune -exec rm -rf {} +; \
+	install -m 755 canary/bin/sysmanage-canary "$$PACKAGE_ROOT/usr/local/bin/sysmanage-canary"; \
+	install -m 755 canary/service/freebsd-sysmanage_canary.rc "$$PACKAGE_ROOT/usr/local/etc/rc.d/sysmanage_canary"; \
+	install -m 644 canary/sysmanage-canary.yaml.example "$$PACKAGE_ROOT/usr/local/share/sysmanage-canary/"; \
 	echo "✓ Configuration files copied"; \
 	echo ""; \
 	echo "Copying SBOM..."; \
@@ -3239,10 +3253,13 @@ installer-macos: build
 	echo ""; \
 	echo "Copying distribution XML..."; \
 	cp installer/macos/distribution.xml "$$BUILD_TEMP/distribution.xml"; \
+	mkdir -p "$$BUILD_TEMP/resources"; \
+	cp installer/macos/conclusion.html "$$BUILD_TEMP/resources/"; \
 	echo "✓ Distribution XML copied"; \
 	echo ""; \
 	echo "Building final installer package..."; \
 	productbuild --distribution "$$BUILD_TEMP/distribution.xml" \
+		--resources "$$BUILD_TEMP/resources" \
 		--package-path "$$BUILD_TEMP" \
 		"$$OUTPUT_DIR/sysmanage-$$VERSION-macos.pkg"; \
 	echo ""; \
@@ -3251,7 +3268,43 @@ installer-macos: build
 	echo "Installation commands:"; \
 	echo "  sudo installer -pkg $$OUTPUT_DIR/sysmanage-$$VERSION-macos.pkg -target /"; \
 	echo ""; \
-	ls -lh "$$OUTPUT_DIR/sysmanage-$$VERSION-macos.pkg"
+	ls -lh "$$OUTPUT_DIR/sysmanage-$$VERSION-macos.pkg"; \
+	$(MAKE) installer-macos-canary VERSION="$$VERSION"
+
+# sysmanage-canary for macOS (Phase 22.9): its OWN package, because the canary
+# belongs on a different machine from the server it watches.  Nothing to
+# build -- the library, the launcher, the example config and the launchd
+# plist; the postinstall makes the account and a private venv.
+installer-macos-canary:
+	@set -e; \
+	command -v pkgbuild >/dev/null 2>&1 || { echo "ERROR: pkgbuild not found (xcode-select --install)"; exit 1; }; \
+	if [ -z "$$VERSION" ]; then \
+		VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+		[ -n "$$VERSION" ] || VERSION="0.9.0"; \
+	fi; \
+	OUTPUT_DIR="$$(pwd)/installer/dist"; \
+	BUILD_TEMP="$$OUTPUT_DIR/build-temp-macos-canary"; \
+	PAYLOAD="$$BUILD_TEMP/payload"; \
+	rm -rf "$$BUILD_TEMP"; \
+	mkdir -p "$$PAYLOAD/usr/local/lib/sysmanage-canary" "$$PAYLOAD/usr/local/bin" \
+		"$$PAYLOAD/usr/local/share/sysmanage-canary" "$$PAYLOAD/Library/LaunchDaemons" \
+		"$$BUILD_TEMP/scripts"; \
+	rsync -a --exclude='__pycache__' --exclude='*.pyc' canary/sysmanage_canary \
+		"$$PAYLOAD/usr/local/lib/sysmanage-canary/"; \
+	install -m 755 canary/bin/sysmanage-canary "$$PAYLOAD/usr/local/bin/"; \
+	install -m 644 canary/sysmanage-canary.yaml.example "$$PAYLOAD/usr/local/share/sysmanage-canary/"; \
+	install -m 644 canary/service/org.sysmanage.canary.plist "$$PAYLOAD/Library/LaunchDaemons/"; \
+	install -m 755 installer/macos/canary-postinstall.sh "$$BUILD_TEMP/scripts/postinstall"; \
+	pkgbuild --root "$$PAYLOAD" --scripts "$$BUILD_TEMP/scripts" \
+		--identifier org.sysmanage.canary --version "$$VERSION" --install-location / \
+		"$$BUILD_TEMP/sysmanage-canary-component.pkg"; \
+	mkdir -p "$$BUILD_TEMP/resources"; \
+	cp installer/macos/canary-conclusion.html "$$BUILD_TEMP/resources/"; \
+	productbuild --distribution installer/macos/distribution-canary.xml \
+		--resources "$$BUILD_TEMP/resources" --package-path "$$BUILD_TEMP" \
+		"$$OUTPUT_DIR/sysmanage-canary-$$VERSION-macos.pkg"; \
+	rm -rf "$$BUILD_TEMP"; \
+	echo "[OK] macOS canary package: $$OUTPUT_DIR/sysmanage-canary-$$VERSION-macos.pkg"
 
 # NetBSD .tgz package
 installer-netbsd: build
@@ -3325,6 +3378,12 @@ installer-netbsd: build
 	cp installer/netbsd/openbao.rc "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d/openbao"; \
 	chmod +x "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d/openbao"; \
 	cp installer/openbao/openbao.hcl "$$PACKAGE_ROOT/usr/pkg/etc/openbao/openbao.hcl"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage-canary" "$$PACKAGE_ROOT/usr/pkg/bin" \
+		"$$PACKAGE_ROOT/usr/pkg/share/examples/sysmanage-canary"; \
+	rsync -a --exclude='__pycache__' --exclude='*.pyc' canary/sysmanage_canary "$$PACKAGE_ROOT/usr/pkg/lib/sysmanage-canary/"; \
+	install -m 755 canary/bin/sysmanage-canary "$$PACKAGE_ROOT/usr/pkg/bin/sysmanage-canary"; \
+	install -m 755 canary/service/netbsd-sysmanage_canary.rc "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d/sysmanage_canary"; \
+	install -m 644 canary/sysmanage-canary.yaml.example "$$PACKAGE_ROOT/usr/pkg/share/examples/sysmanage-canary/"; \
 	echo "✓ Configuration files copied"; \
 	echo ""; \
 	echo "Copying SBOM..."; \
@@ -3467,10 +3526,12 @@ installer-msi: installer-msi-all
 # Build Windows .msi installer for x64
 installer-msi-x64: build
 	@powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture x64
+	@powershell -ExecutionPolicy Bypass -File installer\windows\build-canary-msi.ps1 -Architecture x64
 
 # Build Windows .msi installer for ARM64
 installer-msi-arm64: build
 	@powershell -ExecutionPolicy Bypass -File installer\windows\build-msi.ps1 -Architecture arm64
+	@powershell -ExecutionPolicy Bypass -File installer\windows\build-canary-msi.ps1 -Architecture arm64
 
 # Build Windows .msi installers for both x64 and ARM64
 installer-msi-all: build
@@ -4273,6 +4334,7 @@ deploy-obs:
 	cp "$$WORKSPACE/alembic.ini" "/tmp/$$TAR_NAME/"; \
 	cp -r "$$WORKSPACE/config" "/tmp/$$TAR_NAME/"; \
 	cp -r "$$WORKSPACE/scripts" "/tmp/$$TAR_NAME/"; \
+	cp -r "$$WORKSPACE/canary" "/tmp/$$TAR_NAME/"; \
 	cp "$$WORKSPACE/requirements.txt" "/tmp/$$TAR_NAME/"; \
 	cp "$$WORKSPACE/requirements-prod.txt" "/tmp/$$TAR_NAME/"; \
 	cp "$$WORKSPACE/README.md" "/tmp/$$TAR_NAME/" || touch "/tmp/$$TAR_NAME/README.md"; \
@@ -4411,6 +4473,7 @@ deploy-copr:
 	cp "$$WORKSPACE/requirements-prod.txt" "/tmp/$$TAR_NAME/"; \
 	cp -r "$$WORKSPACE/config" "/tmp/$$TAR_NAME/"; \
 	cp -r "$$WORKSPACE/scripts" "/tmp/$$TAR_NAME/"; \
+	cp -r "$$WORKSPACE/canary" "/tmp/$$TAR_NAME/"; \
 	mkdir -p "/tmp/$$TAR_NAME/frontend"; \
 	cp -r "$$WORKSPACE/frontend/dist" "/tmp/$$TAR_NAME/frontend/"; \
 	cp -r "$$WORKSPACE/frontend/public" "/tmp/$$TAR_NAME/frontend/"; \

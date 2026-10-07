@@ -25,7 +25,8 @@ Depends: ${misc:Depends},
 Recommends: postgresql (>= 12),
  xorriso,
  docker.io
-Suggests: postgresql-client
+Suggests: postgresql-client,
+ sysmanage-canary
 Description: Centralized system management server
  SysManage is a comprehensive system management platform that provides:
   * Centralized agent management
@@ -43,3 +44,20 @@ Description: Centralized system management server
  After installation, configure /etc/sysmanage.yaml to point to your
  PostgreSQL database. Use the online config builder at:
  https://sysmanage.org/config-builder.html
+
+Package: sysmanage-canary
+Architecture: all
+Depends: ${misc:Depends},
+ python3 (>= 3.10),
+ python3-yaml,
+ python3-psycopg,
+ adduser,
+ systemd
+Description: Outside watcher for a SysManage server
+ sysmanage-canary checks a SysManage server from the outside -- the web
+ console, the backend API, the database, the network, and whether agents are
+ still reporting -- and sends email when something stops working.  It runs
+ as its own service and user with its own configuration
+ (/etc/sysmanage-canary.yaml), on the system Python, so it keeps working when
+ the server, its virtualenv or its database has failed.  It can run on the
+ server itself or, better, on another machine.

@@ -1,0 +1,103 @@
+# sysmanage-canary configuration (Phase 22.9).
+#
+# The canary is a separate program that watches a SysManage server from the
+# outside and emails when something stops working: the web console, the
+# backend API, the database, the network, or agents going silent.  It keeps
+# running when the server, its virtualenv or its database is broken.
+#
+# Install as /etc/sysmanage-canary.yaml (Windows: %ProgramData%\SysManage\,
+# macOS: /usr/local/etc/), owned by the canary user, mode 0600 -- it holds
+# passwords.  Check it with:   sysmanage-canary --check-config
+# Send a test email with:      sysmanage-canary --test-email
+# Run every check once with:   sysmanage-canary --once
+#
+# Every check has: enabled, interval_seconds (>= 10), timeout_seconds (1-300)
+# and failures_before_alert (failures in a row before the first email).
+
+# Language of the emails: en, de, es, fr, it, nl, pt, ru, ja, ko, zh_CN,
+# zh_TW, hi or ar.
+language: en
+
+# Shown in every email subject, e.g. "[SysManage production] Database is DOWN".
+server_name: "SysManage production"
+
+email:
+  # Gmail: smtp.gmail.com, port 587, starttls, your address as username and
+  # an App Password (Google account > Security > App passwords; needs
+  # 2-Step Verification) -- not your normal password.
+  host: smtp.example.com
+  port: 587
+  security: starttls          # starttls | tls (port 465) | none
+  username: alerts@example.com
+  password: "change-me"
+  from: alerts@example.com
+  to:
+    - ops@example.com
+  reminder_minutes: 60        # repeat while a check stays down
+  timeout_seconds: 30
+
+# Who watches the canary.  A canary that died silently is worse than none.
+heartbeat:
+  # A dead-man's-switch URL (healthchecks.io and similar) fetched every
+  # interval_seconds; that service alerts you when the pings stop.
+  url: ""
+  interval_seconds: 300
+  # Hour of the day (0-23, local time) for a daily "still watching" email
+  # with the state of every check.  Remove or leave empty for none.
+  daily_email_hour: 8
+
+checks:
+  web_ui:
+    enabled: true
+    url: https://sysmanage.example.com/
+    interval_seconds: 60
+    timeout_seconds: 10
+    max_response_ms: 5000
+    failures_before_alert: 3
+    verify_tls: true          # false only for a self-signed test server
+
+  backend:
+    enabled: true
+    url: https://sysmanage.example.com/api/health
+    interval_seconds: 60
+    timeout_seconds: 10
+    max_response_ms: 2000
+    failures_before_alert: 3
+    verify_tls: true
+
+  database:
+    enabled: true
+    # Give the canary its own read-only role, e.g.:
+    #   CREATE ROLE sysmanage_canary LOGIN PASSWORD '...';
+    #   GRANT CONNECT ON DATABASE sysmanage TO sysmanage_canary;
+    #   GRANT pg_monitor TO sysmanage_canary;
+    #   GRANT SELECT ON host, message_queue TO sysmanage_canary;
+    dsn: "postgresql://sysmanage_canary:change-me@127.0.0.1:5432/sysmanage"
+    interval_seconds: 60
+    timeout_seconds: 10
+    max_response_ms: 1000
+    max_connections_percent: 85   # alert above this share of max_connections
+    failures_before_alert: 3
+
+  network:
+    enabled: true
+    resolve:                  # names that must resolve
+      - license.sysmanage.org
+    connect:                  # host:port that must accept a TCP connection
+      - license.sysmanage.org:443
+      - 1.1.1.1:53
+    interval_seconds: 300
+    timeout_seconds: 10
+    failures_before_alert: 2
+
+  inbound_silence:
+    enabled: true
+    # Alert when no agent has reported for this long: a dead listener, a
+    # broken firewall rule or a lapsed DNS record, even when every local
+    # check passes.  Uses checks.database.dsn unless dsn is set here.
+    max_silence_minutes: 30
+    # With multi-tenancy, list each tenant database too.
+    extra_dsns: []
+    interval_seconds: 300
+    timeout_seconds: 10
+    failures_before_alert: 1

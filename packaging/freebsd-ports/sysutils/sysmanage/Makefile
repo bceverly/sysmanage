@@ -155,10 +155,13 @@ MASTER_SITES+=	https://repo.sysmanage.org/server/freebsd/${DISTVERSION}/:prefetc
 # by installing the package and starting the service.
 #
 # The matching entries go in ports/UIDs and ports/GIDs and travel WITH this
-# port in the submission diff.  253 was free in both as of 2026-08-09;
-# portmgr may reassign it, which is routine.
+# port in the submission diff.  Use 402: the 253 chosen on 2026-08-09 is
+# upstream's _adsuck (checked against cgit ports/UIDs on 2026-10-07, which
+# also has _i2pd on the agent's old 255).  402 (server), 403 (agent) and 404
+# (canary) were free in both files that day; portmgr may still reassign them,
+# which is routine.  Re-check before submitting.
 #
-# The AGENT creates a SEPARATE account (sysmanage-agent, uid 255) and must
+# The AGENT creates a SEPARATE account (sysmanage-agent, uid 403) and must
 # keep it separate: its sudoers policy is root-equivalent, and sharing one
 # account would let a compromise of this web application inherit those
 # grants.  The two ports must never converge on one user.

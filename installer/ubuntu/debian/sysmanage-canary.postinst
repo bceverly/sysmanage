@@ -1,0 +1,29 @@
+#!/bin/sh
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+set -e
+
+if [ "$1" = "configure" ]; then
+	if ! getent passwd sysmanage-canary >/dev/null; then
+		adduser --system --group --home /nonexistent --no-create-home \
+			--disabled-password --disabled-login \
+			--gecos "SysManage canary" sysmanage-canary
+	fi
+	# The configuration holds passwords: the canary user only, mode 0600.
+	# Never overwritten -- the administrator edits it.  (The example is not
+	# under /usr/share/doc: minimal images do not install that.)
+	if [ ! -e /etc/sysmanage-canary.yaml ]; then
+		install -m 0600 -o sysmanage-canary -g sysmanage-canary \
+			/usr/share/sysmanage-canary/sysmanage-canary.yaml.example \
+			/etc/sysmanage-canary.yaml
+		echo "sysmanage-canary: edit /etc/sysmanage-canary.yaml, check it with"
+		echo "  sudo -u sysmanage-canary sysmanage-canary --check-config"
+		echo "  sudo -u sysmanage-canary sysmanage-canary --test-email"
+		echo "then start it: sudo systemctl enable --now sysmanage-canary"
+	fi
+fi
+
+#DEBHELPER#
+
+exit 0

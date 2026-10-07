@@ -1138,7 +1138,6 @@
       "label": "Use Managed Server"
     }
   },
-  "greeting": "[MISSING:greeting]",
   "hostAccount": {
     "accountDisabled": "Account is disabled",
     "add": "Add",
@@ -1995,7 +1994,12 @@
       "type": "Type",
       "userBase": "User search base",
       "userFilter": "User search filter",
-      "userFilterHelp": "Must contain %s for the username, e.g. (sAMAccountName=%s)"
+      "userFilterHelp": "Must contain %s for the username, e.g. (sAMAccountName=%s)",
+      "requireMfa": "Require multi-factor sign-in",
+      "oidcAcrValues": "Accepted assurance levels (acr)",
+      "oidcAcrValuesHelp": "Optional: acr values that also count as multi-factor, separated by spaces; they are requested at sign-in. Otherwise the token must say amr includes mfa.",
+      "samlMfaContexts": "Multi-factor authentication contexts",
+      "samlMfaContextsHelp": "AuthnContextClassRef values that count as multi-factor, one per line. Empty means Microsoft Entra ID's http://schemas.microsoft.com/claims/multipleauthn."
     },
     "loadError": "Could not load Identity Providers.",
     "mapAddError": "Could not add mapping.",
@@ -2108,7 +2112,8 @@
       "unavailable": "Single sign-on is not available on this server.",
       "expired": "The single sign-on session has expired. Sign in again.",
       "failed": "Single sign-on did not complete. Try again, or sign in with your password.",
-      "backToLogin": "Back to sign in"
+      "backToLogin": "Back to sign in",
+      "mfaRequired": "Your identity provider did not confirm multi-factor sign-in. Sign in again using your second factor, or ask an administrator to check the identity provider's multi-factor policy."
     }
   },
   "logout": {
@@ -2409,7 +2414,6 @@
       "engineMissing": "Required Pro+ federation engine not loaded; check license."
     },
     "fips": "FIPS",
-    "gated": "[MISSING:nav.gated]",
     "hosts": "Hosts",
     "logoAlt": "SysManage",
     "logout": "Logout",
@@ -2417,7 +2421,6 @@
     "map": "Map",
     "osLifecycle": "OS Lifecycle",
     "osUpgrades": "OS Upgrades",
-    "plain": "[MISSING:nav.plain]",
     "queryPacks": "Query Packs",
     "reports": "Reports",
     "role": {
@@ -2565,7 +2568,6 @@
     "versionOp": "Op",
     "versionOpAny": "(any)"
   },
-  "pluginOnlyKey": "[MISSING:pluginOnlyKey]",
   "policies": {
     "actions": {
       "assign": "Assign",

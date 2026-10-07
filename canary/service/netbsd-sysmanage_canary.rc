@@ -1,0 +1,94 @@
+#!/bin/sh
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+#
+# PROVIDE: sysmanage_canary
+# REQUIRE: DAEMON NETWORKING
+# KEYWORD: shutdown
+#
+# sysmanage-canary: an outside watcher for a SysManage server (Phase 22.9).
+# Add to /etc/rc.conf:   sysmanage_canary=YES
+
+$_rc_subr_loaded . /etc/rc.subr
+
+name="sysmanage_canary"
+rcvar=$name
+
+load_rc_config $name
+
+: ${sysmanage_canary:="NO"}
+: ${sysmanage_canary_config:="/usr/pkg/etc/sysmanage-canary.yaml"}
+: ${sysmanage_canary_account:="sysmanage-canary"}
+: ${sysmanage_canary_logfile:="/var/log/sysmanage-canary.log"}
+
+command="/usr/pkg/bin/sysmanage-canary"
+pidfile="/var/run/sysmanage_canary/sysmanage_canary.pid"
+required_files="${sysmanage_canary_config}"
+
+# The launcher execs Python, so the running process is "python3.N -B -m
+# sysmanage_canary ...", never the launcher's own name: rc.subr's process
+# matching (procname) cannot find it.  Start, stop and status therefore go by
+# the pidfile alone -- the pid recorded at start IS the Python process, because
+# exec keeps it.  (The account variable is not ${name}_user on purpose: that
+# would make rc.subr wrap these commands in su a second time.)
+start_precmd="sysmanage_canary_prestart"
+start_cmd="sysmanage_canary_start"
+stop_cmd="sysmanage_canary_stop"
+status_cmd="sysmanage_canary_status"
+
+sysmanage_canary_pid()
+{
+	[ -f "${pidfile}" ] || return 1
+	_pid=$(cat "${pidfile}")
+	[ -n "${_pid}" ] && kill -0 "${_pid}" 2>/dev/null && echo "${_pid}"
+}
+
+sysmanage_canary_prestart()
+{
+	if _pid=$(sysmanage_canary_pid); then
+		echo "${name} is already running as pid ${_pid}."
+		return 1
+	fi
+	install -d -o "${sysmanage_canary_account}" -m 0755 /var/run/sysmanage_canary
+	touch "${sysmanage_canary_logfile}"
+	chown "${sysmanage_canary_account}" "${sysmanage_canary_logfile}"
+	su -m "${sysmanage_canary_account}" -c \
+	    "${command} --config ${sysmanage_canary_config} --check-config"
+}
+
+sysmanage_canary_start()
+{
+	echo "Starting ${name}."
+	su -m "${sysmanage_canary_account}" -c "exec ${command} \
+	    --config ${sysmanage_canary_config} </dev/null \
+	    >>${sysmanage_canary_logfile} 2>&1 & echo \$! > ${pidfile}"
+}
+
+sysmanage_canary_stop()
+{
+	if ! _pid=$(sysmanage_canary_pid); then
+		echo "${name} is not running."
+		return 0
+	fi
+	echo "Stopping ${name}."
+	kill "${_pid}"
+	_wait=0
+	while kill -0 "${_pid}" 2>/dev/null && [ ${_wait} -lt 15 ]; do
+		sleep 1
+		_wait=$((_wait + 1))
+	done
+	rm -f "${pidfile}"
+}
+
+sysmanage_canary_status()
+{
+	if _pid=$(sysmanage_canary_pid); then
+		echo "${name} is running as pid ${_pid}."
+	else
+		echo "${name} is not running."
+		return 1
+	fi
+}
+
+run_rc_command "$1"

@@ -12,6 +12,15 @@
 @comment OpenBAO secrets broker (Phase 13.1.H): rc.d service (provisions the
 @comment verified prebuilt 'bao' on first start), shared config, init helper.
 @rcscript ${RCDIR}/openbao
+@comment sysmanage-canary (Phase 22.9): rc.d service, launcher, library, example
+@rcscript ${RCDIR}/sysmanage_canary
+bin/sysmanage-canary
+lib/sysmanage-canary/
+share/examples/sysmanage-canary/
+share/examples/sysmanage-canary/sysmanage-canary.yaml
+@mode 0600
+@sample ${SYSCONFDIR}/sysmanage-canary.yaml
+@mode
 @comment Backend application directory
 libexec/sysmanage/
 libexec/sysmanage/alembic.ini

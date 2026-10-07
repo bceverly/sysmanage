@@ -136,7 +136,7 @@ cp -R "${OUT}"/psycopg-c-src/psycopg_c-*/. "$STAGE/psycopg-c/"
 test -f "$STAGE/psycopg-c/pyproject.toml" || { echo "ERROR: psycopg-c source not staged" >&2; exit 1; }
 
 echo "=== Staging backend source + built frontend ==="
-for d in backend alembic scripts installer sbom; do
+for d in backend alembic scripts installer sbom canary; do
 	[ -d "$SRC/$d" ] && cp -R "$SRC/$d" "$STAGE/"
 done
 for f in alembic.ini requirements-prod.txt README.md LICENSE sysmanage.yaml.example; do

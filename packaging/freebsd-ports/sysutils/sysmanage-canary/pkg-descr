@@ -1,0 +1,9 @@
+sysmanage-canary watches a SysManage server from the outside and sends
+email when something stops working: the web console, the backend health
+endpoint, the database (connection, query latency, connections in use),
+outbound networking, and silence from agents that should be checking in.
+
+It is a separate program on purpose.  It never imports server code and
+runs on the system Python, so a broken server, virtualenv or database
+cannot take the watcher down with it.  It can run on the server itself
+or, better, on a second machine.

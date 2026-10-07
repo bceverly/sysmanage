@@ -44,6 +44,10 @@ Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
 
+# The outside watcher (Phase 22.9) -- best on another machine, so only
+# suggested here.
+Suggests:       %{name}-canary = %{version}-%{release}
+
 %description
 SysManage is a comprehensive centralized system management server with a
 modern web-based interface. It provides:
@@ -59,6 +63,26 @@ modern web-based interface. It provides:
 
 The server runs as a systemd service and communicates with SysManage agents
 deployed across your infrastructure to provide centralized management.
+
+%package canary
+Summary:        Outside watcher for a SysManage server
+BuildArch:      noarch
+Requires:       python311
+Requires:       python311-PyYAML
+Recommends:     python311-psycopg
+Requires(pre):  shadow
+Requires(post): systemd
+Requires(preun): systemd
+Requires(postun): systemd
+
+%description canary
+sysmanage-canary checks a SysManage server from the outside -- the web
+console, the backend API, the database, the network, and whether agents are
+still reporting -- and sends email when something stops working (Phase 22.9).
+It runs as its own service and user with its own configuration
+(/etc/sysmanage-canary.yaml), on a system Python, so it keeps working when the
+server, its virtualenv or its database has failed.  It can run on the server
+itself or, better, on another machine.
 
 %prep
 %autosetup -n %{name}-%{version}
@@ -147,6 +171,14 @@ if [ -d %{buildroot}/usr/share/doc/sysmanage/sbom ]; then
     find %{buildroot}/usr/share/doc/sysmanage/sbom -type f | \
         sed "s|%{buildroot}||g" >> %{_builddir}/sbom-files.list
 fi
+
+# sysmanage-canary (Phase 22.9): its own library, launcher, unit and example.
+install -d %{buildroot}/usr/lib/sysmanage-canary %{buildroot}/usr/share/sysmanage-canary %{buildroot}/usr/bin
+cp -r canary/sysmanage_canary %{buildroot}/usr/lib/sysmanage-canary/
+install -m 755 canary/bin/sysmanage-canary %{buildroot}/usr/bin/sysmanage-canary
+install -d %{buildroot}/usr/lib/systemd/system
+install -m 644 canary/service/sysmanage-canary.service %{buildroot}/usr/lib/systemd/system/
+install -m 644 canary/sysmanage-canary.yaml.example %{buildroot}/usr/share/sysmanage-canary/
 
 %pre
 # Create sysmanage user if it doesn't exist
@@ -376,6 +408,37 @@ fi
 %dir /etc/nginx
 %dir /etc/nginx/conf.d
 %config(noreplace) /etc/nginx/conf.d/sysmanage-nginx.conf
+
+%pre canary
+getent group sysmanage-canary >/dev/null || groupadd -r sysmanage-canary
+getent passwd sysmanage-canary >/dev/null || \
+    useradd -r -g sysmanage-canary -d /nonexistent -s /sbin/nologin \
+        -c "SysManage canary" sysmanage-canary
+exit 0
+
+%post canary
+# The configuration holds passwords: the canary user only, mode 0600; never
+# overwritten -- the administrator edits it.  Not enabled until configured.
+if [ ! -e /etc/sysmanage-canary.yaml ]; then
+    install -m 0600 -o sysmanage-canary -g sysmanage-canary \
+        /usr/share/sysmanage-canary/sysmanage-canary.yaml.example /etc/sysmanage-canary.yaml
+    echo "sysmanage-canary: edit /etc/sysmanage-canary.yaml, check it with"
+    echo "  sudo -u sysmanage-canary sysmanage-canary --check-config"
+    echo "then start it: sudo systemctl enable --now sysmanage-canary"
+fi
+%systemd_post sysmanage-canary.service
+
+%preun canary
+%systemd_preun sysmanage-canary.service
+
+%postun canary
+%systemd_postun_with_restart sysmanage-canary.service
+
+%files canary
+/usr/lib/sysmanage-canary/
+/usr/bin/sysmanage-canary
+/usr/lib/systemd/system/sysmanage-canary.service
+/usr/share/sysmanage-canary/
 
 %changelog
 * Tue Oct 29 2024 Bryan Everly <bryan@theeverlys.com> - 0.9.0-1

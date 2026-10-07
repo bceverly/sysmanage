@@ -217,6 +217,28 @@ POST-INSTALL)
 	echo ""
 	echo "Log files: /var/log/sysmanage/"
 	echo ""
+	# sysmanage-canary (Phase 22.9): an outside watcher for the server -- its
+	# own unprivileged user and a 0600 config from the example (never
+	# overwritten); not enabled until configured.
+	if ! /usr/sbin/groupinfo sysmanage-canary >/dev/null 2>&1; then
+		/usr/sbin/groupadd -g 9996 sysmanage-canary
+	fi
+	if ! /usr/sbin/userinfo sysmanage-canary >/dev/null 2>&1; then
+		/usr/sbin/useradd -u 9996 -g sysmanage-canary -s /sbin/nologin \
+			-d /nonexistent -c "SysManage canary" sysmanage-canary
+	fi
+	if [ ! -e /usr/pkg/etc/sysmanage-canary.yaml ]; then
+		install -m 0600 -o sysmanage-canary -g sysmanage-canary \
+			/usr/pkg/share/examples/sysmanage-canary/sysmanage-canary.yaml.example \
+			/usr/pkg/etc/sysmanage-canary.yaml
+	fi
+	if [ -f /usr/pkg/share/examples/rc.d/sysmanage_canary ]; then
+		cp /usr/pkg/share/examples/rc.d/sysmanage_canary /etc/rc.d/sysmanage_canary
+		chmod +x /etc/rc.d/sysmanage_canary
+	fi
+	echo "Outside watcher: edit /usr/pkg/etc/sysmanage-canary.yaml, check it with"
+	echo "  sysmanage-canary --config /usr/pkg/etc/sysmanage-canary.yaml --check-config"
+	echo "then: echo 'sysmanage_canary=YES' >> /etc/rc.conf && /etc/rc.d/sysmanage_canary start"
 	;;
 
 PRE-DEINSTALL)

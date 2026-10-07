@@ -1119,7 +1119,6 @@
       "label": "使用托管服务器"
     }
   },
-  "greeting": "[缺失：问候语]",
   "hostAccount": {
     "accountDisabled": "账户已禁用",
     "add": "添加",
@@ -1976,7 +1975,12 @@
       "type": "类型",
       "userBase": "用户搜索基础",
       "userFilter": "用户搜索过滤器",
-      "userFilterHelp": "必须包含 %s 表示用户名，如 (sAMAccountName=%s)"
+      "userFilterHelp": "必须包含 %s 表示用户名，如 (sAMAccountName=%s)",
+      "requireMfa": "要求多因素身份验证登录",
+      "oidcAcrValues": "接受的保证级别 (acr)",
+      "oidcAcrValuesHelp": "可选：同样视为多因素身份验证的 acr 值，以空格分隔；登录时会请求这些值。否则，令牌必须声明 amr 包含 mfa。",
+      "samlMfaContexts": "多因素身份验证上下文",
+      "samlMfaContextsHelp": "视为多因素身份验证的 AuthnContextClassRef 值，每行一个。留空表示 Microsoft Entra ID 的 http://schemas.microsoft.com/claims/multipleauthn。"
     },
     "loadError": "无法加载身份提供程序。",
     "mapAddError": "无法添加映射。",
@@ -2089,7 +2093,8 @@
       "unavailable": "此服务器上不提供单点登录。",
       "expired": "单点登录会话已过期。请重新登录。",
       "failed": "单点登录未完成。请重试，或使用密码登录。",
-      "backToLogin": "返回登录"
+      "backToLogin": "返回登录",
+      "mfaRequired": "您的身份提供程序未确认多因素身份验证登录。请使用第二重验证因素重新登录，或请管理员检查身份提供程序的多因素身份验证策略。"
     }
   },
   "logout": {
@@ -2390,7 +2395,6 @@
       "engineMissing": "需要 Pro+ 联邦引擎未加载；检查许可证。"
     },
     "fips": "联邦信息处理标准",
-    "gated": "[缺失：导航。网关]",
     "hosts": "主机",
     "logoAlt": "SysManage",
     "logout": "退出登录",
@@ -2398,7 +2402,6 @@
     "map": "地图",
     "osLifecycle": "操作系统生命周期",
     "osUpgrades": "操作系统升级",
-    "plain": "[缺失：导航。纯文本]",
     "queryPacks": "查询包",
     "reports": "报表",
     "role": {
@@ -2546,7 +2549,6 @@
     "versionOp": "运算符",
     "versionOpAny": "(任意)"
   },
-  "pluginOnlyKey": "插件仅键缺失",
   "policies": {
     "actions": {
       "assign": "分配",

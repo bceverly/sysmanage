@@ -4,6 +4,7 @@
 	<organization>com.sysmanage</organization>
 	<domains enable_localSystem="true"/>
 	<options customize="never" require-scripts="true" rootVolumeOnly="true" />
+	<conclusion file="conclusion.html" mime-type="text/html"/>
 	<choices-outline>
 		<line choice="default">
 			<line choice="com.sysmanage.server"/>

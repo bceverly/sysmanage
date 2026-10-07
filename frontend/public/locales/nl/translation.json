@@ -1119,7 +1119,6 @@
       "label": "Beheerde server gebruiken"
     }
   },
-  "greeting": "[GEEN VERWERVING: begroeting]",
   "hostAccount": {
     "accountDisabled": "Account is uitgeschakeld",
     "add": "Toevoegen",
@@ -1976,7 +1975,12 @@
       "type": "Soort",
       "userBase": "Zoekbasis voor gebruikers",
       "userFilter": "Zoekfilter voor gebruikers",
-      "userFilterHelp": "Moet %s bevatten voor de gebruikersnaam, bijv. (sAMAccountName=%s)"
+      "userFilterHelp": "Moet %s bevatten voor de gebruikersnaam, bijv. (sAMAccountName=%s)",
+      "requireMfa": "Multi-factoraanmelding vereisen",
+      "oidcAcrValues": "Geaccepteerde betrouwbaarheidsniveaus (acr)",
+      "oidcAcrValuesHelp": "Optioneel: acr-waarden die ook als multi-factor gelden, gescheiden door spaties; ze worden bij het aanmelden aangevraagd. Anders moet het token aangeven dat amr mfa bevat.",
+      "samlMfaContexts": "Contexten voor multi-factorauthenticatie",
+      "samlMfaContextsHelp": "AuthnContextClassRef-waarden die als multi-factor gelden, één per regel. Leeg betekent http://schemas.microsoft.com/claims/multipleauthn van Microsoft Entra ID."
     },
     "loadError": "Identiteitsproviders konden niet worden geladen.",
     "mapAddError": "Toewijzing kon niet worden toegevoegd.",
@@ -2089,7 +2093,8 @@
       "unavailable": "Single sign-on is niet beschikbaar op deze server.",
       "expired": "De single sign-on-sessie is verlopen. Meld u opnieuw aan.",
       "failed": "Single sign-on is niet voltooid. Probeer het opnieuw of meld u aan met uw wachtwoord.",
-      "backToLogin": "Terug naar aanmelden"
+      "backToLogin": "Terug naar aanmelden",
+      "mfaRequired": "Uw identiteitsprovider heeft de multi-factoraanmelding niet bevestigd. Meld u opnieuw aan met uw tweede factor, of vraag een beheerder het multi-factorbeleid van de identiteitsprovider te controleren."
     }
   },
   "logout": {
@@ -2390,7 +2395,6 @@
       "engineMissing": "Nodige Pro+ federatie-engine niet geladen; controleer licentie."
     },
     "fips": "FIPS",
-    "gated": "[GEEN VERWERVING: navigatie met poort]",
     "hosts": "Hosten",
     "logoAlt": "SysManage",
     "logout": "Uitloggen",
@@ -2398,7 +2402,6 @@
     "map": "Kaart",
     "osLifecycle": "Besturingssysteem levenscyclus",
     "osUpgrades": "OS-upgrades",
-    "plain": "[GEEN VERWERVING: navigatie zonder poort]",
     "queryPacks": "Querypakketten",
     "reports": "Rapporten",
     "role": {
@@ -2546,7 +2549,6 @@
     "versionOp": "Op",
     "versionOpAny": "(alle)"
   },
-  "pluginOnlyKey": "[ONTHEEF:pluginOnlyKey]",
   "policies": {
     "actions": {
       "assign": "Toewijzen",

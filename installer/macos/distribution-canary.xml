@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2024-2026 Bryan Everly
+     Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+     See the LICENSE file in the project root for the full terms. -->
+<installer-gui-script minSpecVersion="1">
+	<title>SysManage Canary</title>
+	<organization>org.sysmanage</organization>
+	<domains enable_localSystem="true"/>
+	<options customize="never" require-scripts="true" rootVolumeOnly="true" />
+	<conclusion file="canary-conclusion.html" mime-type="text/html"/>
+	<choices-outline>
+		<line choice="default">
+			<line choice="org.sysmanage.canary"/>
+		</line>
+	</choices-outline>
+	<choice id="default"/>
+	<choice id="org.sysmanage.canary" visible="false">
+		<pkg-ref id="org.sysmanage.canary"/>
+	</choice>
+	<pkg-ref id="org.sysmanage.canary" onConclusion="none">sysmanage-canary-component.pkg</pkg-ref>
+</installer-gui-script>

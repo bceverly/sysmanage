@@ -1,0 +1,24 @@
+[
+{ type: install
+  message: <<EOM
+sysmanage-canary is installed but NOT configured.
+
+1. Edit %%PREFIX%%/etc/sysmanage-canary.yaml: the server URLs, the
+   database role (read-only is enough), the mail server and who to alert.
+   The file holds passwords, so it is mode 0600, owned by sysmanage-canary;
+   keep it that way.
+
+2. Check it and send a test message:
+
+     sysmanage-canary --config %%PREFIX%%/etc/sysmanage-canary.yaml --check-config
+     sysmanage-canary --config %%PREFIX%%/etc/sysmanage-canary.yaml --test-email
+
+3. Enable and start it:
+
+     sysrc sysmanage_canary_enable=YES
+     service sysmanage_canary start
+
+It logs to syslog with the tag sysmanage-canary.
+EOM
+}
+]

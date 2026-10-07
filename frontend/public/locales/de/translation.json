@@ -1119,7 +1119,6 @@
       "label": "Verwalteten Server verwenden"
     }
   },
-  "greeting": "Willkommen",
   "hostAccount": {
     "accountDisabled": "Konto ist deaktiviert",
     "add": "Hinzufügen",
@@ -1976,7 +1975,12 @@
       "type": "Typ",
       "userBase": "Benutzer-Suchbasis",
       "userFilter": "Benutzer-Suchfilter",
-      "userFilterHelp": "Muss %s für den Benutzernamen enthalten, z. B. (sAMAccountName=%s)"
+      "userFilterHelp": "Muss %s für den Benutzernamen enthalten, z. B. (sAMAccountName=%s)",
+      "requireMfa": "Multi-Faktor-Anmeldung erforderlich",
+      "oidcAcrValues": "Akzeptierte Vertrauensstufen (acr)",
+      "oidcAcrValuesHelp": "Optional: acr-Werte, die ebenfalls als Multi-Faktor gelten, durch Leerzeichen getrennt; sie werden bei der Anmeldung angefordert. Andernfalls muss das Token angeben, dass amr den Wert mfa enthält.",
+      "samlMfaContexts": "Multi-Faktor-Authentifizierungskontexte",
+      "samlMfaContextsHelp": "AuthnContextClassRef-Werte, die als Multi-Faktor gelten, einer pro Zeile. Leer bedeutet http://schemas.microsoft.com/claims/multipleauthn von Microsoft Entra ID."
     },
     "loadError": "Identitätsanbieter konnten nicht geladen werden.",
     "mapAddError": "Zuordnung konnte nicht hinzugefügt werden.",
@@ -2089,7 +2093,8 @@
       "unavailable": "Single Sign-On ist auf diesem Server nicht verfügbar.",
       "expired": "Die Single-Sign-On-Sitzung ist abgelaufen. Melden Sie sich erneut an.",
       "failed": "Single Sign-On wurde nicht abgeschlossen. Versuchen Sie es erneut oder melden Sie sich mit Ihrem Passwort an.",
-      "backToLogin": "Zurück zur Anmeldung"
+      "backToLogin": "Zurück zur Anmeldung",
+      "mfaRequired": "Ihr Identitätsanbieter hat die Multi-Faktor-Anmeldung nicht bestätigt. Melden Sie sich erneut mit Ihrem zweiten Faktor an, oder bitten Sie einen Administrator, die Multi-Faktor-Richtlinie des Identitätsanbieters zu prüfen."
     }
   },
   "logout": {
@@ -2390,7 +2395,6 @@
       "engineMissing": "Erforderliche Pro+ Federation-Engine nicht geladen; überprüfen Sie die Lizenz."
     },
     "fips": "FIPS",
-    "gated": "Navigation ausblenden",
     "hosts": "Hosts",
     "logoAlt": "SysManage",
     "logout": "Abmelden",
@@ -2398,7 +2402,6 @@
     "map": "Karte",
     "osLifecycle": "Betriebssystemlebenszyklus",
     "osUpgrades": "OS-Upgrades",
-    "plain": "Einfache Navigation",
     "queryPacks": "Abfragepakete",
     "reports": "Berichte",
     "role": {
@@ -2546,7 +2549,6 @@
     "versionOp": "Op",
     "versionOpAny": "(beliebig)"
   },
-  "pluginOnlyKey": "",
   "policies": {
     "actions": {
       "assign": "Zuweisen",

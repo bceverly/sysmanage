@@ -30,7 +30,10 @@ override_dh_auto_install:
 	dh_auto_install
 
 override_dh_installinit:
-	dh_installinit --name=sysmanage --no-start
+	dh_installinit -psysmanage --name=sysmanage --no-start
 
 override_dh_installsystemd:
-	dh_installsystemd --name=sysmanage --no-start --no-enable
+	dh_installsystemd -psysmanage --name=sysmanage --no-start --no-enable
+	# Phase 22.9: the canary is not enabled or started on install -- it needs
+	# its configuration first (the postinst says how).
+	dh_installsystemd -psysmanage-canary --name=sysmanage-canary --no-start --no-enable

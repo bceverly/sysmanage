@@ -207,28 +207,8 @@ try {
     $ServiceCreated = $true
     Write-Log "Service configured successfully"
 
-    # Start the service
-    Write-Log "Starting service..."
-    try {
-        Start-Service -Name $ServiceName -ErrorAction Stop
-        Start-Sleep -Seconds 2
-        $svcStatus = Get-Service -Name $ServiceName
-        Write-Log "Service status: $($svcStatus.Status)"
-
-        if ($svcStatus.Status -eq 'Running') {
-            Write-Log "Service started successfully"
-            Write-Log ""
-            Write-Log "Web interface should be available at: http://localhost:8080"
-        } else {
-            Write-Log "WARNING: Service is not running. Status: $($svcStatus.Status)"
-            Write-Log "Check logs:"
-            Write-Log "  $StdoutLog"
-            Write-Log "  $StderrLog"
-        }
-    } catch {
-        Write-Log "WARNING: Failed to start service: $_"
-        Write-Log "You can start it manually with: Start-Service $ServiceName"
-    }
+    # NOT started here: whether to start, and whether to migrate first, is
+    # decided after OpenBAO is up (see the end of this script).
 
 } catch {
     Write-Log "ERROR: Exception during service creation: $_"
@@ -275,6 +255,10 @@ try {
         $OpenBaoData = "C:\ProgramData\SysManage\openbao"
         $OpenBaoConfig = Join-Path $OpenBaoData "openbao.hcl"
         New-Item -ItemType Directory -Force -Path (Join-Path $OpenBaoData "data") | Out-Null
+        # init.json (written below) holds the unseal keys and the root token,
+        # and ProgramData is readable by every local user: SYSTEM (the
+        # OpenBAO service) and Administrators only.
+        icacls $OpenBaoData /inheritance:r /grant:r "*S-1-5-18:(OI)(CI)F" "*S-1-5-32-544:(OI)(CI)F" | Out-Null
 
         # Windows-path config (the shared *.hcl uses Unix paths).
         $dataPath = (Join-Path $OpenBaoData "data").Replace('\','\\')
@@ -321,7 +305,66 @@ ui            = false
     Write-Log "WARNING: OpenBAO provisioning failed (non-fatal): $_"
 }
 
+# ---------------------------------------------------------------
+# Start the server -- or, on a fresh install, deliberately don't.
+#
+# A fresh install has only the example configuration (install.ps1 leaves a
+# .config-created marker when it copies it): no database settings, no schema,
+# no certificate.  Starting the service then only produced a restart loop of
+# failures that looked like a broken install.  So it is registered on MANUAL
+# start and left stopped; GETTING-STARTED.txt (opened from the installer's
+# Finish page) walks through configuring it, migrating and starting it.
+#
+# An upgrade keeps its configuration, so the schema is brought up to the new
+# code first -- sysmanage_migrate.py, the same tool every other platform uses
+# (registry, shared and tenant chains, then each tenant database, which is why
+# this runs after OpenBAO is up) -- and the service is started.  A migration
+# failure does not stop the start: the console then shows its pending-
+# migration banner, and the failure goes to the log and the Event Log with
+# the command to re-run.
+# ---------------------------------------------------------------
 if ($ServiceCreated) {
+    $FreshMarker = Join-Path $LogPath ".config-created"
+    $nssmPath = Join-Path $InstallDir "nssm.exe"
+    if (Test-Path $FreshMarker) {
+        Remove-Item $FreshMarker -Force -ErrorAction SilentlyContinue
+        & $nssmPath set $ServiceName Start SERVICE_DEMAND_START | Out-File -FilePath $LogFile -Append
+        Write-Log "Fresh install: $ServiceName is registered but NOT started (manual start)."
+        Write-Log "Configure it first - see $(Join-Path $InstallDir 'GETTING-STARTED.txt')."
+    } else {
+        $VenvPython = Join-Path $InstallDir ".venv\Scripts\python.exe"
+        $MigrateScript = Join-Path $InstallDir "scripts\sysmanage_migrate.py"
+        $env:SYSMANAGE_CONFIG_PATH = "C:\ProgramData\SysManage\sysmanage.yaml"
+        Write-Log "Upgrade: applying database migrations..."
+        # "$_" per line: Windows PowerShell 5.1 turns each stderr line of a
+        # native program (Alembic logs to stderr) into an ErrorRecord, and
+        # Out-File then wrote every one as a "NativeCommandError" block.  An
+        # ErrorRecord's string form is just the line.
+        & $VenvPython $MigrateScript 2>&1 | ForEach-Object { "$_" } | Out-File -FilePath $LogFile -Append
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "Database migrations applied."
+        } else {
+            $retry = "& `"$VenvPython`" `"$MigrateScript`""
+            Write-Log "WARNING: database migration failed (exit $LASTEXITCODE). Fix the cause, then run:"
+            Write-Log "  $retry"
+            try {
+                if (-not [System.Diagnostics.EventLog]::SourceExists("SysManage")) {
+                    [System.Diagnostics.EventLog]::CreateEventSource("SysManage", "Application")
+                }
+                Write-EventLog -LogName Application -Source "SysManage" -EntryType Warning -EventId 1001 `
+                    -Message "SysManage Server upgrade: database migration failed. See $LogFile, then run: $retry"
+            } catch { }
+        }
+        try {
+            Start-Service -Name $ServiceName -ErrorAction Stop
+            Start-Sleep -Seconds 2
+            Write-Log "Service status: $((Get-Service -Name $ServiceName).Status)"
+            Write-Log "The console is served by nginx on https://localhost/ (port 8080 is the loopback-only API)."
+        } catch {
+            Write-Log "WARNING: Failed to start service: $_"
+            Write-Log "Check $(Join-Path $LogPath 'server-stderr.log'), then: Start-Service $ServiceName"
+        }
+    }
     Write-Host "Windows Service creation complete"
 } else {
     # NEVER exit non-zero -- the WiX CustomAction uses ``Return="check"``,

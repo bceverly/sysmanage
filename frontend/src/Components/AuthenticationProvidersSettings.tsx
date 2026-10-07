@@ -63,6 +63,7 @@ import {
   updateIdpSettings,
   updateProvider,
 } from '../Services/externalIdp';
+import IdpMfaFields from './IdpMfaFields';
 
 const DEFAULT_DRAFT: IdpProviderCreate = {
   name: '',
@@ -659,6 +660,7 @@ const AuthenticationProvidersSettings: React.FC = () => {
                 />
               </>
             )}
+            <IdpMfaFields draft={draft} setDraft={setDraft} />
             {/* SCIM 2.0 inbound provisioning -- orthogonal to the auth protocol. */}
             <FormControlLabel
               control={

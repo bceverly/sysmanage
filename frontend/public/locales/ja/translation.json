@@ -1119,7 +1119,6 @@
       "label": "管理サーバーを使用"
     }
   },
-  "greeting": "[欠落: 挨拶]",
   "hostAccount": {
     "accountDisabled": "アカウントは無効です",
     "add": "追加",
@@ -1976,7 +1975,12 @@
       "type": "タイプ",
       "userBase": "ユーザー検索ベース",
       "userFilter": "ユーザー検索フィルター",
-      "userFilterHelp": "ユーザー名のために %s を含む必要があります、例: (sAMAccountName=%s)"
+      "userFilterHelp": "ユーザー名のために %s を含む必要があります、例: (sAMAccountName=%s)",
+      "requireMfa": "多要素サインインを必須にする",
+      "oidcAcrValues": "許容する保証レベル (acr)",
+      "oidcAcrValuesHelp": "省略可: 多要素としても扱う acr 値をスペース区切りで指定します。これらはサインイン時に要求されます。指定しない場合、トークンで amr に mfa が含まれている必要があります。",
+      "samlMfaContexts": "多要素認証コンテキスト",
+      "samlMfaContextsHelp": "多要素として扱う AuthnContextClassRef 値 (1 行に 1 つ)。空の場合は Microsoft Entra ID の http://schemas.microsoft.com/claims/multipleauthn を使用します。"
     },
     "loadError": "ID プロバイダーを読み込めませんでした。",
     "mapAddError": "マッピングを追加できませんでした。",
@@ -2089,7 +2093,8 @@
       "unavailable": "このサーバーではシングルサインオンを利用できません。",
       "expired": "シングルサインオンのセッションの有効期限が切れました。もう一度サインインしてください。",
       "failed": "シングルサインオンが完了しませんでした。もう一度試すか、パスワードでサインインしてください。",
-      "backToLogin": "サインインに戻る"
+      "backToLogin": "サインインに戻る",
+      "mfaRequired": "ID プロバイダーで多要素サインインが確認されませんでした。2 番目の要素を使用してもう一度サインインするか、ID プロバイダーの多要素ポリシーを確認するよう管理者に依頼してください。"
     }
   },
   "logout": {
@@ -2390,7 +2395,6 @@
       "engineMissing": "必要な Pro+ 連携エンジンがロードされていません；ライセンスを確認してください。"
     },
     "fips": "FIPS",
-    "gated": "[欠落: ナビゲーション (ゲート済み)]",
     "hosts": "ホスト",
     "logoAlt": "SysManage",
     "logout": "ログアウト",
@@ -2398,7 +2402,6 @@
     "map": "マップ",
     "osLifecycle": "OSライフサイクル",
     "osUpgrades": "OSアップグレード",
-    "plain": "[欠落: ナビゲーション (シンプル)]",
     "queryPacks": "クエリパック",
     "reports": "レポート",
     "role": {
@@ -2546,7 +2549,6 @@
     "versionOp": "演算子",
     "versionOpAny": "(任意)"
   },
-  "pluginOnlyKey": "[欠落: pluginOnlyKey]",
   "policies": {
     "actions": {
       "assign": "割り当てる",

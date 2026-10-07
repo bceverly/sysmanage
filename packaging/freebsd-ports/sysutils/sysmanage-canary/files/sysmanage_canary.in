@@ -1,0 +1,55 @@
+#!/bin/sh
+#
+# PROVIDE: sysmanage_canary
+# REQUIRE: LOGIN NETWORKING
+# KEYWORD: shutdown
+#
+# Add the following lines to /etc/rc.conf.local or /etc/rc.conf
+# to enable this service:
+#
+# sysmanage_canary_enable (bool):  Set to NO by default.
+#               Set it to YES to enable sysmanage_canary.
+# sysmanage_canary_user (str):     Set to "sysmanage-canary" by default.
+# sysmanage_canary_config (str):   Set to
+#               "%%PREFIX%%/etc/sysmanage-canary.yaml" by default.
+
+. /etc/rc.subr
+
+name=sysmanage_canary
+rcvar=sysmanage_canary_enable
+
+load_rc_config $name
+
+: ${sysmanage_canary_enable:="NO"}
+: ${sysmanage_canary_user:="sysmanage-canary"}
+: ${sysmanage_canary_config:="%%PREFIX%%/etc/sysmanage-canary.yaml"}
+
+# A per-service directory: rc.subr runs daemon(8) as sysmanage_canary_user
+# (see below), and an unprivileged daemon cannot create a pidfile directly
+# in the root-owned /var/run.
+pidfile="/var/run/${name}/${name}.pid"
+start_precmd="sysmanage_canary_precmd"
+
+# The interpreter the port depends on; the launcher would otherwise pick the
+# newest python3.x it finds with PyYAML.
+export SYSMANAGE_CANARY_PYTHON="%%PYTHON_CMD%%"
+
+sysmanage_canary_precmd()
+{
+	/usr/bin/install -d -o "${sysmanage_canary_user}" \
+	    -g "${sysmanage_canary_user}" -m 0755 "/var/run/${name}"
+	# Refuse to start on a configuration the canary would reject anyway,
+	# and say why on the terminal instead of only in syslog.
+	%%PREFIX%%/bin/sysmanage-canary --config "${sysmanage_canary_config}" \
+	    --check-config
+}
+
+command="/usr/sbin/daemon"
+# NO ``-u`` here: sysmanage_canary_user is ${name}_user, so run_rc_command
+# already wraps this in ``su -m``, and a second drop in daemon(8) fails in
+# initgroups().  -P records the supervisor's pid, which is what rc.subr
+# matches against $command.  -r restarts the canary if it ever exits; -f with
+# -S sends its output to syslog and detaches it from the starting terminal.
+command_args="-f -r -R 30 -P ${pidfile} -S -T sysmanage-canary %%PREFIX%%/bin/sysmanage-canary --config ${sysmanage_canary_config}"
+
+run_rc_command "$1"

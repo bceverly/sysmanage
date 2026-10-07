@@ -1119,7 +1119,6 @@
       "label": "Usar servidor gerenciado"
     }
   },
-  "greeting": "Insira uma saudação personalizada aqui",
   "hostAccount": {
     "accountDisabled": "A conta está desativada",
     "add": "Adicionar",
@@ -1948,7 +1947,7 @@
       "groupFilter": "Filtro de busca de grupos (opcional)",
       "groupFilterHelp": "ex. (member=%s) -- %s é o DN do usuário",
       "issuer": "URL do emissor OIDC",
-      "jit": "Aprovisionamento just-in-time (criar utilizadores automaticamente no primeiro início de sessão SSO)",
+      "jit": "Provisionamento just-in-time (criar usuários automaticamente no primeiro login SSO)",
       "jitRole": "Função predefinida do JIT",
       "jitRoleHelp": "Função atribuída aos membros criados automaticamente. Requer um ID de inquilino e uma lista de domínios de e-mail permitidos correspondente nesse inquilino.",
       "ldapServer": "URL do servidor LDAP (ldaps://...)",
@@ -1976,7 +1975,12 @@
       "type": "Tipo",
       "userBase": "Base de busca de usuários",
       "userFilter": "Filtro de busca de usuários",
-      "userFilterHelp": "Deve conter %s para o nome de usuário, ex. (sAMAccountName=%s)"
+      "userFilterHelp": "Deve conter %s para o nome de usuário, ex. (sAMAccountName=%s)",
+      "requireMfa": "Exigir login multifator",
+      "oidcAcrValues": "Níveis de garantia aceitos (acr)",
+      "oidcAcrValuesHelp": "Opcional: valores acr que também contam como multifator, separados por espaços; eles são solicitados no login. Caso contrário, o token deve informar que amr inclui mfa.",
+      "samlMfaContexts": "Contextos de autenticação multifator",
+      "samlMfaContextsHelp": "Valores de AuthnContextClassRef que contam como multifator, um por linha. Vazio significa http://schemas.microsoft.com/claims/multipleauthn do Microsoft Entra ID."
     },
     "loadError": "Não foi possível carregar provedores de identidade.",
     "mapAddError": "Não foi possível adicionar o mapeamento.",
@@ -2089,7 +2093,8 @@
       "unavailable": "O logon único não está disponível neste servidor.",
       "expired": "A sessão de logon único expirou. Entre novamente.",
       "failed": "O logon único não foi concluído. Tente novamente ou entre com sua senha.",
-      "backToLogin": "Voltar para a entrada"
+      "backToLogin": "Voltar para a entrada",
+      "mfaRequired": "Seu provedor de identidade não confirmou o login multifator. Entre novamente usando seu segundo fator ou peça a um administrador para verificar a política multifator do provedor de identidade."
     }
   },
   "logout": {
@@ -2390,7 +2395,6 @@
       "engineMissing": "Motor Pro+ federado necessário não carregado; verifique a licença."
     },
     "fips": "FIPS",
-    "gated": "Navegação Gated",
     "hosts": "Servidores",
     "logoAlt": "SysManage",
     "logout": "Sair",
@@ -2398,7 +2402,6 @@
     "map": "Mapa",
     "osLifecycle": "Ciclo de Vida do SO",
     "osUpgrades": "Upgrades de SO",
-    "plain": "Navegação Simples",
     "queryPacks": "Pacotes de Consultas",
     "reports": "Relatórios",
     "role": {
@@ -2546,7 +2549,6 @@
     "versionOp": "Op",
     "versionOpAny": "(qualquer)"
   },
-  "pluginOnlyKey": "[FALTANDO:pluginOnlyKey]",
   "policies": {
     "actions": {
       "assign": "Atribuir",

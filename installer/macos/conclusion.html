@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<!-- Copyright (c) 2024-2026 Bryan Everly
+     Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+     See the LICENSE file in the project root for the full terms.
+
+     The last page of the SysManage Server installer: what still has to be
+     done.  Installer.app never shows script output, so this page is where an
+     administrator learns it; what the postinstall found on THIS Mac is in
+     its log. -->
+<html><head><meta charset="utf-8">
+<style>
+body { font: 13px -apple-system, "Helvetica Neue", sans-serif; }
+code { font: 12px Menlo, monospace; }
+pre { font: 12px Menlo, monospace; background: #f2f2f2; padding: 6px 8px; }
+li { margin-bottom: 8px; }
+</style></head><body>
+<h3>SysManage Server is installed, but not yet running</h3>
+<p>What the installer found on this Mac (nginx, TLS, OpenBAO) is in
+<code>/tmp/sysmanage-server-install.log</code>. Then:</p>
+<ol>
+<li><b>PostgreSQL</b>, if it is not installed:
+<pre>brew install postgresql@16
+brew services start postgresql@16
+createdb sysmanage</pre></li>
+<li><b>Configuration</b>: copy the example and set the database and
+<code>admin_userid</code> (an email address):
+<pre>sudo cp /etc/sysmanage.yaml.example /etc/sysmanage.yaml</pre></li>
+<li><b>Database schema</b>:
+<pre>cd /usr/local/lib/sysmanage
+sudo .venv/bin/python scripts/sysmanage_migrate.py</pre></li>
+<li><b>TLS certificate</b>, required before nginx will start:
+<code>/usr/local/etc/sysmanage/tls/server.crt</code> and
+<code>server.key</code>; then check with <code>nginx -t</code>.</li>
+<li><b>Start the server and nginx</b>:
+<pre>sudo launchctl load /Library/LaunchDaemons/com.sysmanage.server.plist
+brew services restart nginx</pre></li>
+</ol>
+<p>To be told when the server stops working, install the separate
+<b>sysmanage-canary</b> package, ideally on another machine.</p>
+</body></html>

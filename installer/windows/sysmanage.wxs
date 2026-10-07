@@ -18,8 +18,15 @@
                         Manufacturer="SysManage" />
 
     <!-- Ensure only one version is installed at a time -->
+    <!-- AllowSameVersionUpgrades: Windows Installer compares only the first
+         THREE version fields, and every SysManage release can differ only in
+         the fourth (3.9.0.26 -> 3.9.0.27).  Without this, MajorUpgrade treats
+         such a release as "the same version", does not remove the old one,
+         and the two install side by side: found 2026-10-07 by upgrading
+         the canary 3.9.99.1 -> 3.9.99.2 on a real Windows ARM64 machine. -->
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed."
-                  Schedule="afterInstallValidate" />
+                  Schedule="afterInstallValidate"
+                  AllowSameVersionUpgrades="yes" />
 
     <!--
       Force ARP DisplayVersion to the full 4-segment string.
@@ -42,6 +49,12 @@
     <!-- Embed CAB file in MSI -->
     <MediaTemplate EmbedCab="yes" />
 
+    <!-- Installer UI (sysmanage-ui.wxs): an interactive install ends on a
+         Finish page that says what is left and opens GETTING-STARTED.txt. -->
+    <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" Value="SysManage Server is installed, but it needs PostgreSQL, its configuration, the database schema and a TLS certificate before it can serve anything." />
+    <Property Id="WixShellExecTarget" Value="[#GettingStartedTxt]" />
+    <UIRef Id="SysManageUI" />
+
     <!-- Directory structure -->
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="INSTALLFOLDER" Name="SysManage Server">
@@ -50,6 +63,7 @@
              psycopg[binary], which bundles libpq, so this subdir is arm64-only. -->
         <Directory Id="LIBPQFOLDER" Name="libpq" />
         <?endif?>
+        <Directory Id="SCRIPTSFOLDER" Name="scripts" />
       </Directory>
     </StandardDirectory>
 
@@ -119,6 +133,11 @@
         <File Id="NssmExe" Source="nssm\nssm.exe" />
       </Component>
 
+      <!-- What is left to do after the install; the Finish page opens it. -->
+      <Component Id="GettingStarted" Guid="26F532A2-19A0-453D-B008-95DAC6EC181E">
+        <File Id="GettingStartedTxt" Source="getting-started.txt" Name="GETTING-STARTED.txt" KeyPath="yes" />
+      </Component>
+
       <!-- SBOM (Software Bill of Materials) - Backend -->
       <Component Id="SbomBackend" Guid="C9D0E1F2-A3B4-4C5D-8E9F-0A1B2C3D4E5F">
         <File Id="SbomBackendJson" Source="..\..\sbom\backend-sbom.json" />
@@ -127,6 +146,19 @@
       <!-- SBOM - Frontend -->
       <Component Id="SbomFrontend" Guid="D0E1F2A3-B4C5-4D5E-8F9A-0B1C2D3E4F5A">
         <File Id="SbomFrontendJson" Source="..\..\sbom\frontend-sbom.json" />
+      </Component>
+    </ComponentGroup>
+
+    <!-- The two operator scripts the install runs: the schema migration
+         (registry, shared and tenant chains, as sysmanage_migrate.py does on
+         every platform) and the OpenBAO init/unseal helper.  Both resolve the
+         install root as the parent of scripts\, so the folder level matters.
+         create-service.ps1 always called the OpenBAO helper, but nothing
+         shipped it, so on Windows OpenBAO was never initialized. -->
+    <ComponentGroup Id="OperatorScripts" Directory="SCRIPTSFOLDER">
+      <Component Id="OperatorScriptFiles" Guid="308F3508-510B-43AA-AC25-77D9E0C081B5">
+        <File Id="SysmanageMigratePy" Source="..\..\scripts\sysmanage_migrate.py" KeyPath="yes" />
+        <File Id="OpenbaoInitUnsealPy" Source="..\..\scripts\openbao_init_unseal.py" />
       </Component>
     </ComponentGroup>
 
@@ -204,6 +236,7 @@
       <ComponentGroupRef Id="SourceFilesComponent" />
       <ComponentGroupRef Id="ConfigFiles" />
       <ComponentGroupRef Id="WindowsService" />
+      <ComponentGroupRef Id="OperatorScripts" />
       <?if $(sys.BUILDARCH) = "arm64" ?>
       <ComponentGroupRef Id="LibpqArm64" />
       <?endif?>

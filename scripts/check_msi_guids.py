@@ -51,6 +51,11 @@ def check_file(path: Path) -> list:
         by_guid[guid].append(match.group("id"))
 
     if not by_guid:
+        # A fragment with no components at all (the shared installer UI) is
+        # fine; "<Component" present but unmatched means this regex no longer
+        # reads the file, which must not pass silently.
+        if "<Component" not in text:
+            return []
         return [f"{path.relative_to(REPO)}: no <Component> elements found"]
 
     for guid, ids in sorted(by_guid.items()):

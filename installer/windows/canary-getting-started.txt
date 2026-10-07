@@ -1,0 +1,23 @@
+SysManage Canary - getting started
+==================================
+
+The installer put the canary in C:\Program Files\SysManage Canary and
+registered the SysManageCanary service, set to MANUAL start: it needs its
+configuration first.  What the installer did is logged in
+C:\ProgramData\SysManage\canary\install.log.
+
+Run the commands below in an administrator PowerShell.
+
+1. Edit C:\ProgramData\SysManage\sysmanage-canary.yaml: the server URLs, a
+   read-only database role, the mail server and who to alert.  Only SYSTEM,
+   Administrators and the service can read it, because it holds passwords.
+
+2. Check it and send a test message:
+     & "C:\Program Files\SysManage Canary\sysmanage-canary.cmd" --config "C:\ProgramData\SysManage\sysmanage-canary.yaml" --check-config
+     & "C:\Program Files\SysManage Canary\sysmanage-canary.cmd" --config "C:\ProgramData\SysManage\sysmanage-canary.yaml" --test-email
+
+3. Start it, and have it start at every boot:
+     Set-Service SysManageCanary -StartupType Automatic
+     Start-Service SysManageCanary
+
+It logs to C:\ProgramData\SysManage\canary\canary.log.

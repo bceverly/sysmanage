@@ -1119,7 +1119,6 @@
       "label": "使用託管伺服器"
     }
   },
-  "greeting": "[缺失：問候語]",
   "hostAccount": {
     "accountDisabled": "帳戶已停用",
     "add": "新增",
@@ -1976,7 +1975,12 @@
       "type": "類型",
       "userBase": "使用者搜尋基礎",
       "userFilter": "使用者搜尋篩選",
-      "userFilterHelp": "必須包含 %s 代表使用者名稱，如 (sAMAccountName=%s)"
+      "userFilterHelp": "必須包含 %s 代表使用者名稱，如 (sAMAccountName=%s)",
+      "requireMfa": "要求多重要素登入",
+      "oidcAcrValues": "接受的保證等級 (acr)",
+      "oidcAcrValuesHelp": "選用：同樣視為多重要素的 acr 值，以空格分隔；登入時會要求這些值。否則，權杖必須聲明 amr 包含 mfa。",
+      "samlMfaContexts": "多重要素驗證內容",
+      "samlMfaContextsHelp": "視為多重要素的 AuthnContextClassRef 值，每行一個。留空表示 Microsoft Entra ID 的 http://schemas.microsoft.com/claims/multipleauthn。"
     },
     "loadError": "無法載入身分提供者。",
     "mapAddError": "無法新增對應。",
@@ -2089,7 +2093,8 @@
       "unavailable": "此伺服器不提供單一登入。",
       "expired": "單一登入工作階段已過期。請重新登入。",
       "failed": "單一登入未完成。請重試，或使用密碼登入。",
-      "backToLogin": "返回登入"
+      "backToLogin": "返回登入",
+      "mfaRequired": "您的身分識別提供者未確認多重要素登入。請使用第二個驗證要素重新登入，或請管理員檢查身分識別提供者的多重要素原則。"
     }
   },
   "logout": {
@@ -2390,7 +2395,6 @@
       "engineMissing": "需要 Pro+ 聯邦引擎但未加載；請檢查許可證。"
     },
     "fips": "FIPS",
-    "gated": "[缺失：導航欄位 (進入)",
     "hosts": "主機",
     "logoAlt": "SysManage",
     "logout": "登出",
@@ -2398,7 +2402,6 @@
     "map": "地圖",
     "osLifecycle": "作業系統生命週期",
     "osUpgrades": "作業系統升級",
-    "plain": "[缺失：導航欄位 (普通)",
     "queryPacks": "查詢套件",
     "reports": "報表",
     "role": {
@@ -2546,7 +2549,6 @@
     "versionOp": "運算子",
     "versionOpAny": "(任意)"
   },
-  "pluginOnlyKey": "插件僅限鍵缺失",
   "policies": {
     "actions": {
       "assign": "分配",

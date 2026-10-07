@@ -146,6 +146,48 @@ async def test_oidc_callback_without_engine_is_unavailable(db, console):
     assert result.headers["location"] == f"{CONSOLE}/login/sso?error=unavailable"
 
 
+@pytest.mark.asyncio
+async def test_oidc_callback_without_mfa_says_so(db, console, caplog):
+    """Phase 22.8: a provider requiring multi-factor sign-in refuses a token
+    without it, with its own reason on the SSO page and a log line naming the
+    provider and what the token said."""
+    _link_user(db)
+    engine = _engine()
+    engine.exchange_oidc_code.return_value = {
+        "success": False,
+        "subject": "okta-sub-1",
+        "groups": [],
+        "email": "user@acme.com",
+        "error": "the identity provider did not confirm multi-factor sign-in (amr=['pwd'])",
+        "reason": "mfa_required",
+    }
+    with caplog.at_level("WARNING", logger=external_idp.logger.name):
+        result = await _callback(db, engine)
+    assert result.headers["location"] == f"{CONSOLE}/login/sso?error=mfa_required"
+    assert "set-cookie" not in result.headers
+    assert "Okta" in caplog.text and "amr=['pwd']" in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_other_engine_failures_keep_the_generic_reason(db, console):
+    engine = _engine()
+    engine.exchange_oidc_code.return_value = {
+        "success": False, "subject": None, "groups": [], "email": None,
+        "error": "token exchange failed", "reason": None,
+    }  # fmt: skip
+    result = await _callback(db, engine)
+    assert result.headers["location"] == f"{CONSOLE}/login/sso?error=failed"
+
+
+def test_the_provider_carries_the_mfa_settings_to_the_engine(db):
+    provider = db.query(models.ExternalIdpProvider).filter_by(id=OIDC_ID).one()
+    assert provider.to_dict()["require_mfa"] is False  # off by default
+    provider.require_mfa = True
+    provider.oidc_acr_values = "gold"
+    config = provider.to_dict()
+    assert config["require_mfa"] is True and config["oidc_acr_values"] == "gold"
+
+
 def test_http_console_gets_no_secure_flag():
     with patch.object(sso_session, "_console_url", return_value="http://dev:3000"):
         result = sso_session.landing("user@acme.com", None)

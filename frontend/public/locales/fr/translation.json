@@ -1119,7 +1119,6 @@
       "label": "Utiliser le serveur géré"
     }
   },
-  "greeting": "Bonjour [NOM_UTILISATEUR]",
   "hostAccount": {
     "accountDisabled": "Le compte est désactivé",
     "add": "Ajouter",
@@ -1976,7 +1975,12 @@
       "type": "Type",
       "userBase": "Base de recherche des utilisateurs",
       "userFilter": "Filtre de recherche des utilisateurs",
-      "userFilterHelp": "Doit contenir %s pour le nom d'utilisateur, ex. (sAMAccountName=%s)"
+      "userFilterHelp": "Doit contenir %s pour le nom d'utilisateur, ex. (sAMAccountName=%s)",
+      "requireMfa": "Exiger une connexion multifacteur",
+      "oidcAcrValues": "Niveaux d'assurance acceptés (acr)",
+      "oidcAcrValuesHelp": "Facultatif : valeurs acr qui comptent également comme multifacteur, séparées par des espaces ; elles sont demandées lors de la connexion. Sinon, le jeton doit indiquer que amr inclut mfa.",
+      "samlMfaContexts": "Contextes d'authentification multifacteur",
+      "samlMfaContextsHelp": "Valeurs AuthnContextClassRef qui comptent comme multifacteur, une par ligne. Vide signifie http://schemas.microsoft.com/claims/multipleauthn de Microsoft Entra ID."
     },
     "loadError": "Impossible de charger les fournisseurs d'identité.",
     "mapAddError": "Impossible d'ajouter la correspondance.",
@@ -2089,7 +2093,8 @@
       "unavailable": "L'authentification unique n'est pas disponible sur ce serveur.",
       "expired": "La session d'authentification unique a expiré. Reconnectez-vous.",
       "failed": "L'authentification unique n'a pas abouti. Réessayez ou connectez-vous avec votre mot de passe.",
-      "backToLogin": "Retour à la connexion"
+      "backToLogin": "Retour à la connexion",
+      "mfaRequired": "Votre fournisseur d'identité n'a pas confirmé la connexion multifacteur. Connectez-vous à nouveau avec votre second facteur, ou demandez à un administrateur de vérifier la stratégie multifacteur du fournisseur d'identité."
     }
   },
   "logout": {
@@ -2390,7 +2395,6 @@
       "engineMissing": "Le moteur Pro+ fédérationnel requis n'est pas chargé ; vérifiez la licence."
     },
     "fips": "FIPS",
-    "gated": "Navigation filtrée",
     "hosts": "Hôtes",
     "logoAlt": "SysManage",
     "logout": "Déconnexion",
@@ -2398,7 +2402,6 @@
     "map": "Carte",
     "osLifecycle": "Cycle de vie du système d'exploitation",
     "osUpgrades": "Mises à niveau SE",
-    "plain": "Navigation simple",
     "queryPacks": "Paquets de requêtes",
     "reports": "Rapports",
     "role": {
@@ -2546,7 +2549,6 @@
     "versionOp": "Op",
     "versionOpAny": "(tout)"
   },
-  "pluginOnlyKey": "",
   "policies": {
     "actions": {
       "assign": "Attribuer",

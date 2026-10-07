@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <!--
+    Copyright (c) 2024-2026 Bryan Everly
+    Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+    See the LICENSE file in the project root for the full terms.
+
+    sysmanage-canary for Windows (Phase 22.9): the outside watcher for a
+    SysManage server, as its OWN package: it belongs on a different
+    machine from the server it watches.
+
+    Self-contained like the server MSI: a bundled CPython plus the two wheels
+    the canary needs (PyYAML, psycopg), so the install needs no network and no
+    system Python.  install-canary.ps1 unpacks them and registers the
+    SysManageCanary service through NSSM, running as LOCAL SERVICE.  A fresh
+    install leaves the service on MANUAL start: the configuration has to be
+    filled in first.  Built by build-canary-msi.ps1.
+  -->
+
+  <Package Name="SysManage Canary"
+           Manufacturer="SysManage"
+           Version="$(var.VERSION)"
+           UpgradeCode="A8927217-9BA0-424B-8DA0-8A31B18C7844"
+           Language="1033"
+           Codepage="1252"
+           Scope="perMachine">
+
+    <SummaryInformation Keywords="Installer"
+                        Description="SysManage Canary - outside watcher for a SysManage server"
+                        Manufacturer="SysManage" />
+
+    <!-- AllowSameVersionUpgrades: Windows Installer compares only the first
+         THREE version fields, and every SysManage release can differ only in
+         the fourth (3.9.0.26 -> 3.9.0.27).  Without this, MajorUpgrade treats
+         such a release as "the same version", does not remove the old one,
+         and the two install side by side: found 2026-10-07 by upgrading
+         the canary 3.9.99.1 -> 3.9.99.2 on a real Windows ARM64 machine. -->
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed."
+                  Schedule="afterInstallValidate"
+                  AllowSameVersionUpgrades="yes" />
+
+    <!-- The full 4-segment version in Add/Remove Programs (see sysmanage.wxs). -->
+    <Property Id="ARPDISPLAYVERSION" Value="$(var.VERSION)" />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Installer UI (sysmanage-ui.wxs): the Finish page says the service
+         waits for its configuration and opens GETTING-STARTED.txt. -->
+    <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" Value="SysManage Canary is installed but not started: fill in C:\ProgramData\SysManage\sysmanage-canary.yaml first. The steps open when you click Finish." />
+    <Property Id="WixShellExecTarget" Value="[#CanaryGettingStartedTxt]" />
+    <UIRef Id="SysManageUI" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="SysManage Canary">
+        <?if $(sys.BUILDARCH) = "arm64" ?>
+        <!-- ARM64 uses pure-Python psycopg (no psycopg-binary wheel for
+             win_arm64), which loads this libpq at runtime. -->
+        <Directory Id="LIBPQFOLDER" Name="libpq" />
+        <?endif?>
+      </Directory>
+    </StandardDirectory>
+
+    <ComponentGroup Id="CanaryComponents" Directory="INSTALLFOLDER">
+      <Component Id="CanaryInstallScript" Guid="90F3B535-3862-4FEC-A58B-9CD8BA031D8B">
+        <File Id="InstallCanaryPs1" Source="install-canary.ps1" KeyPath="yes" />
+      </Component>
+      <Component Id="CanaryRemoveScript" Guid="63A1A35F-1620-44EA-9CB3-130AF104BBFE">
+        <File Id="RemoveCanaryPs1" Source="remove-canary.ps1" KeyPath="yes" />
+      </Component>
+      <Component Id="CanaryNssm" Guid="4DA517AB-3262-478A-89F5-C68D130922BE">
+        <File Id="CanaryNssmExe" Source="nssm\nssm.exe" KeyPath="yes" />
+      </Component>
+      <Component Id="CanaryConfigExample" Guid="BE449E44-CC6C-40D6-AC02-13014C3EC47A">
+        <File Id="CanaryYamlExample" Source="..\..\canary\sysmanage-canary.yaml.example" KeyPath="yes" />
+      </Component>
+      <Component Id="CanaryLibraryZip" Guid="A8BA0656-7473-4485-8724-44A869A2FDC7">
+        <File Id="CanaryZipFile" Source="canary.zip" KeyPath="yes" />
+      </Component>
+      <Component Id="CanaryPythonZip" Guid="D592CD65-6748-48A3-A72A-2DF5B1B68C78">
+        <File Id="CanaryPythonZipFile" Source="canary-python.zip" KeyPath="yes" />
+      </Component>
+      <Component Id="CanaryWheelsZip" Guid="677B33F9-ED3D-46CA-9CEF-88CA73733A00">
+        <File Id="CanaryWheelsZipFile" Source="canary-wheels.zip" KeyPath="yes" />
+      </Component>
+      <Component Id="CanaryGettingStarted" Guid="E9283079-B0C4-45BE-96F5-68812F77A6B5">
+        <File Id="CanaryGettingStartedTxt" Source="canary-getting-started.txt" Name="GETTING-STARTED.txt" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <?if $(sys.BUILDARCH) = "arm64" ?>
+    <!-- The same libpq set the server MSI ships; build-msi.ps1 stages it. -->
+    <ComponentGroup Id="CanaryLibpqArm64" Directory="LIBPQFOLDER">
+      <Component Id="CanaryLibpqDlls" Guid="F37E311F-817C-4F93-A09D-036ECDA7EF3B">
+        <File Id="CanaryLibpqDll" Source="libpq-arm64\libpq.dll" KeyPath="yes" />
+        <File Id="CanaryLibcrypto" Source="libpq-arm64\libcrypto-3-arm64.dll" />
+        <File Id="CanaryLibssl" Source="libpq-arm64\libssl-3-arm64.dll" />
+        <File Id="CanaryZlib" Source="libpq-arm64\z.dll" />
+        <File Id="CanaryLz4" Source="libpq-arm64\lz4.dll" />
+        <File Id="CanaryLegacy" Source="libpq-arm64\legacy.dll" />
+      </Component>
+    </ComponentGroup>
+    <?endif?>
+
+    <Feature Id="CanaryFeature" Title="SysManage Canary" Level="1">
+      <ComponentGroupRef Id="CanaryComponents" />
+      <?if $(sys.BUILDARCH) = "arm64" ?>
+      <ComponentGroupRef Id="CanaryLibpqArm64" />
+      <?endif?>
+    </Feature>
+
+    <CustomAction Id="InstallCanary"
+                  Directory="INSTALLFOLDER"
+                  Execute="deferred"
+                  Impersonate="no"
+                  ExeCommand='powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File "[INSTALLFOLDER]install-canary.ps1"'
+                  Return="check" />
+
+    <!-- [UPGRADINGPRODUCTCODE] is set only when a newer version is replacing
+         this one: the script then remembers whether the service was set to
+         start automatically and was running, and the new install restores
+         that instead of leaving it on manual. -->
+    <CustomAction Id="RemoveCanary"
+                  Directory="INSTALLFOLDER"
+                  Execute="deferred"
+                  Impersonate="no"
+                  ExeCommand='powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File "[INSTALLFOLDER]remove-canary.ps1" -Upgrading "[UPGRADINGPRODUCTCODE]"'
+                  Return="ignore" />
+
+    <InstallExecuteSequence>
+      <Custom Action="InstallCanary" After="InstallFiles" Condition="NOT Installed" />
+      <Custom Action="RemoveCanary" Before="RemoveFiles" Condition="REMOVE=&quot;ALL&quot;" />
+    </InstallExecuteSequence>
+
+  </Package>
+</Wix>

@@ -468,8 +468,24 @@ if ($Architecture -eq "x64") {
     Write-Host ""
 }
 
+# The installer UI (sysmanage-ui.wxs) needs two WiX extensions, pinned to the
+# same 6.0.1 as the wix tool CI installs: WixToolset.UI.wixext (the dialogs)
+# and WixToolset.Util.wixext (WixShellExec, which opens GETTING-STARTED.txt).
+function Install-WixExtensions {
+    # No 2> redirect: under "Stop", Windows PowerShell 5.1 turns redirected
+    # native stderr into a terminating error.
+    $have = (& wix extension list -g | Out-String)
+    foreach ($ext in @("WixToolset.UI.wixext", "WixToolset.Util.wixext")) {
+        if ($have -notmatch [regex]::Escape($ext)) {
+            & wix extension add -g "$ext/6.0.1"
+            if ($LASTEXITCODE -ne 0) { throw "could not add the WiX extension $ext" }
+        }
+    }
+}
+
 # Build MSI package
 Write-Host "Building MSI package..." -ForegroundColor Cyan
+Install-WixExtensions
 Push-Location (Join-Path $CurrentDir "installer\windows")
 try {
     $wixArgs = @(
@@ -477,6 +493,11 @@ try {
         "-o"
         $OutputMsi
         "sysmanage.wxs"
+        "sysmanage-ui.wxs"
+        "-ext"
+        "WixToolset.UI.wixext"
+        "-ext"
+        "WixToolset.Util.wixext"
         "-arch"
         $Architecture
         "-d"

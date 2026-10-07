@@ -12231,7 +12231,7 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       when absent or when the license fails to verify against the cached one
       (rotation). An engine with no plugin bundle (404) is not asked again
       for 24 h per process.*
-- [ ] **One upstream fetch for vulnerability feeds** -- every customer server
+- [x] **One upstream fetch for vulnerability feeds** -- every customer server
       pulls NVD, Ubuntu, Debian, Red Hat and MSRC itself, with no ETag and no
       jitter (NVD without a key is IP-limited). Publish a digested daily feed
       via CDN with deltas; at minimum ETag/If-Modified-Since and jitter
@@ -12244,6 +12244,8 @@ Disclosure: no exploit detail here; the harness scenario ships WITH the fix.
       7-day incremental window. STILL OPEN: one digested upstream feed
       published via CDN, so customer servers stop hitting NVD / the distros
       at all.*
+      *Moved to Phase 23.0 2026-10-06 (Bryan): the minimum is done; the
+      shared CDN feed is a publishing pipeline, not a herd fix.*
 
 #### 22.5 Federation (Enterprise)
 
@@ -12342,7 +12344,7 @@ subject, email and groups (`exchange_oidc_code`, `external_idp_engine.pyx:264`;
 `process_saml_response` likewise); nothing checks HOW the user signed in, so a
 misconfigured or bypassed IdP policy that skips MFA is invisible to us.
 
-- [ ] **Per-provider "require multi-factor sign-in" setting**, default OFF
+- [x] **Per-provider "require multi-factor sign-in" setting**, default OFF
       (existing providers keep working) and recommended ON for any
       internet-facing console:
       - OIDC: the ID token's `amr` claim must contain `mfa` (RFC 8176; Entra
@@ -12357,15 +12359,34 @@ misconfigured or bypassed IdP policy that skips MFA is invisible to us.
         (`mfa_required`), shown on the `/login/sso` landing page ("Your
         identity provider did not confirm multi-factor sign-in") and logged
         with the provider and what the token did say.
-- [ ] Engine logic in `external_idp_engine` (moat); OSS carries the provider
+      *Done 2026-10-06: `require_mfa` on the provider (off by default), with
+      `oidc_acr_values` and `saml_mfa_authn_contexts` (Entra's
+      multipleauthn when empty); the OIDC authorization request carries
+      `acr_values`, the SAML AuthnRequest a RequestedAuthnContext. A token
+      without proof lands on /login/sso with `error=mfa_required` ("Your
+      identity provider did not confirm multi-factor sign-in"), logged with
+      the provider, the subject and what the token said.*
+- [x] Engine logic in `external_idp_engine` (moat); OSS carries the provider
       column (idempotent migration), the settings UI field, the landing-page
       reason and its i18n (14 locales). Tests: token with/without `mfa`,
       SAML context match/mismatch, setting off = today's behavior.
+      *Done 2026-10-06: `oidc_mfa_problem` / `saml_mfa_problem` and the
+      `reason` field in the Pro+ engine (scratch-built; 47 engine tests incl.
+      a full OIDC exchange with and without `mfa`); OSS migration
+      `q31idpmfa`, `_MfaNotConfirmed` + `sso_session.REASON_MFA_REQUIRED`,
+      the `IdpMfaFields` settings component and the landing message in 14
+      locales (reusing the existing translated sign-in-failed details, no new
+      backend msgid). Also fixed on the way: the Portuguese `idp.field.jit`
+      (European, not Brazilian) and the Hindi `samlWantSigned` (said
+      something else).*
 - [ ] Docs: the external-IdP page gains the setting, and the Microsoft 365
       walkthrough (app registration, redirect URI = `webui.public_url`,
       group object IDs in role mappings, security defaults vs Conditional
       Access) -- verified against a real Entra tenant, which also closes the
       "SSO never exercised against a real IdP" note on the Phase 26 item.
+      *Setting documented 2026-10-06 (`external-idp.html`, "Requiring
+      Multi-Factor Sign-In", 14 languages). STILL OPEN: the Microsoft 365
+      walkthrough -- it must be verified against a real Entra tenant.*
 
 #### 22.9 Production canary: an outside watcher for the whole server (OSS)
 
@@ -12379,20 +12400,34 @@ section in the docs ... under best practices deployment models." Everything
 that alerts today runs INSIDE the server -- when the server, its database or
 its network is what failed, nothing says so.
 
-- [ ] **A separate program, `sysmanage-canary`,** with its own service (systemd
+- [x] **A separate program, `sysmanage-canary`,** with its own service (systemd
       unit, BSD rc.d, Windows service, macOS launchd), its own unprivileged
       user and its own process: it must keep running when the server, its
       virtualenv or its database is broken, so it shares no runtime state
       with the server and keeps its dependencies minimal (standard library +
       the PostgreSQL driver). Installed by the PRODUCTION packages only (deb,
       rpm, ports/packages, MSI, macOS) -- never by `make start`.
-- [ ] **Its own config, `/etc/sysmanage-canary.yaml`** (mode 0600, owned by the
+      *Done 2026-10-06: `canary/sysmanage_canary` -- standard library +
+      PyYAML + psycopg, no import from the server, run by the newest system
+      Python 3.8+ with PyYAML (`canary/bin/sysmanage-canary`). Packaged: a
+      separate `sysmanage-canary` .deb (built and installed in an Ubuntu
+      24.04 container: user, 0600 config, German output) and RPM subpackage
+      in both specs (canary-only build installed on Rocky 9); in the FreeBSD
+      pkg, the OpenBSD port (package built on t480 with it inside) and the
+      NetBSD pkg (untested: VM paused). Services: systemd unit, FreeBSD /
+      OpenBSD / NetBSD rc.d, launchd plist, a Windows scheduled-task
+      installer. NOT packaged yet: the macOS pkg, the Windows MSI and the
+      FreeBSD ports skeleton (its USERS need a registered uid) -- see below.*
+- [x] **Its own config, `/etc/sysmanage-canary.yaml`** (mode 0600, owned by the
       canary user; Windows/macOS equivalents), shipped as a commented example
       the admin hand-edits. Every check can be switched on or off and has its
       own interval, timeout, threshold and the number of consecutive failures
       before it fires. Validated with `sysmanage-canary --check-config`; a
       bad file is refused loudly at start, never half-applied.
-- [ ] **Checks:**
+      *Done: strict schema (unknown keys, wrong types, ranges -- every
+      problem listed, never half-applied), `--check-config`, a commented
+      example, a warning when the file is readable by others.*
+- [x] **Checks:**
       - web UI: the console URL answers (status, TLS handshake, time);
       - backend: `/api/health` answers within its threshold;
       - database: connect, `SELECT 1`, latency, connections in use against
@@ -12405,18 +12440,30 @@ its network is what failed, nothing says so.
         from the database (newest host contact / inbound queue row), so a
         dead listener, a broken firewall rule or a lapsed DNS record is
         noticed even when every local check passes.
-- [ ] **Email alerts through its own SMTP settings** in that yaml (host, port,
+      *Done: web_ui, backend (status, TLS, time), database (SELECT 1
+      latency, connections vs max_connections), network (DNS + TCP),
+      inbound_silence (newest host contact / inbound row, tenant databases
+      via `extra_dsns`); each with its own interval, timeout and
+      failures_before_alert, run in parallel.*
+- [x] **Email alerts through its own SMTP settings** in that yaml (host, port,
       STARTTLS/TLS, user, password -- a Gmail app password works -- from,
       recipients). One email when a check starts failing, a reminder at a
       configurable interval while it stays down, one when it recovers; never
       one per probe. `sysmanage-canary --test-email` sends a test message.
-- [ ] **Who watches the canary:** an optional dead-man's-switch ping URL
+      *Done: starttls / tls / none; one email at the threshold, reminders
+      every reminder_minutes, one on recovery; `--test-email`.*
+- [x] **Who watches the canary:** an optional dead-man's-switch ping URL
       (healthchecks.io-style) per cycle, and an optional daily "still
       watching" email -- a canary that died silently is worse than none.
-- [ ] Tests (each check against a stopped/slow/refusing target; alert,
+      *Done: `heartbeat.url` pinged every interval, `daily_email_hour`.*
+- [x] Tests (each check against a stopped/slow/refusing target; alert,
       reminder and recovery sequencing; config validation); packaging per
       platform; 14-language i18n for its messages.
-- [ ] **Docs: a new "Best-practice deployment models" page** under Deployment,
+      *Done: `tests/canary` (53 tests: real HTTP listeners, refused and
+      closed ports, fake DB connections, alert/reminder/recovery
+      sequencing, config validation, CLI, every catalog's placeholders);
+      messages in 14 languages (`locales/*.json`).*
+- [x] **Docs: a new "Best-practice deployment models" page** under Deployment,
       with a "Production canary" section (what it watches, the yaml with
       every key explained, a Gmail app-password walkthrough, testing it), and
       the internet-facing guidance worked out on 2026-10-01: a public agent
@@ -12424,6 +12471,98 @@ its network is what failed, nothing says so.
       console (IP allowlist, client certificates, or SSO with the IdP's MFA),
       Ubuntu 24.04 LTS, a cloud firewall in front of UFW, fail2ban on the
       login paths only.
+      *Done 2026-10-06: `docs/deployment/best-practices.html` (linked from
+      the deployment index), 14 languages, every docs gate green.*
+- [x] **Canary packaging still to do:** the macOS pkg (launchd plist ready),
+      the Windows MSI (`canary/service/install-windows.ps1` works by hand),
+      and the FreeBSD ports skeleton (needs a registered uid for its user);
+      verify the NetBSD package once the VM is back.
+      *Done 2026-10-07:*
+      - *macOS: `make installer-macos-canary` (also run by
+        `installer-macos`), its own `sysmanage-canary-<v>-macos.pkg`;
+        postinstall makes `_sysmanage_canary`, a private venv (Command Line
+        Tools Python first, so `brew upgrade` cannot break it) and the 0600
+        config, and leaves the daemon unloaded. Built, installed, run under
+        launchd and removed on the MacBook Air.*
+      - *Windows: `installer/windows/sysmanage-canary.wxs` +
+        `build-canary-msi.ps1` (Python pin read from `build-msi.ps1`),
+        bundled CPython and wheels (offline), NSSM service `SysManageCanary`
+        as LOCAL SERVICE, manual start on a fresh install, start type and
+        running state kept across upgrades, ACLs by SID. Both MSI CI jobs
+        build it and install-test it (service, `--check-config`, psycopg
+        loads libpq, uninstall). Replaces `install-windows.ps1` (deleted).
+        Not yet run: the first CI build is the first WiX build.*
+      - *FreeBSD: `packaging/freebsd-ports/sysutils/sysmanage-canary` (own
+        port, same distfile as the server); portlint, check-plist, stage-qa
+        and `service onestart/onestatus/onestop` pass on FreeBSD 14.4;
+        rendered by the freebsd-ports job, gated by `lint-freebsd-port`.
+        Proposes uid/gid 404 -- and the server's 253 and agent's 255 are
+        taken upstream (`_adsuck`, `_i2pd`), so their notes now say 402/403.*
+      - *Fixed on the way: the FreeBSD rc script declared
+        `sysmanage_canary_user` AND passed `daemon -u` (initgroups failure);
+        on OpenBSD and NetBSD the launcher's exec into Python made rcctl /
+        rc.subr report a running canary as stopped (OpenBSD: `pexp`, proven
+        on t480 with start/check/restart/stop; NetBSD: pidfile-based control,
+        proven under FreeBSD's rc.subr). The launcher now execs Python by
+        full path.*
+      - *Still open: a real NetBSD run (VM unreachable) -- moved to 23.0.*
+      - *Install-time guidance (2026-10-07, Bryan: every installer should say
+        what is left to do): the server's .deb and both RPM specs now
+        `Suggests: sysmanage-canary`; the OpenBSD package prints the canary
+        steps (`pkg/MESSAGE`, seen as `+DISPLAY` in a t480 build); the macOS
+        server and canary packages end on a conclusion page
+        (`conclusion.html`, `canary-conclusion.html`, built with
+        `productbuild --resources`; checked on the MacBook Air); BOTH MSIs
+        gained an installer UI (`sysmanage-ui.wxs`: WixUI_Minimal without the
+        license page) whose Finish page states what is left and opens
+        GETTING-STARTED.txt (needs WixToolset.UI + Util extensions, added by
+        the build scripts). First WiX build of the UI is the next CI run.*
+      - *Windows server install fixed while writing its GETTING-STARTED
+        (2026-10-07): the MSI never created the schema nor said to, and it
+        STARTED the service on a fresh install with only the example config
+        (a restart loop that looked like a broken install). Now a fresh
+        install (install.ps1 leaves a `.config-created` marker) registers the
+        server on manual start and leaves it stopped; an upgrade runs
+        `scripts\sysmanage_migrate.py` after OpenBAO is up, then starts it (a
+        failed migration is logged + Event Log with the re-run command, and
+        the console's pending-migration banner shows it). The MSI now ships
+        `scripts\sysmanage_migrate.py` and `scripts\openbao_init_unseal.py`
+        -- create-service.ps1 always called the latter, but nothing shipped
+        it, so OpenBAO on Windows was never initialized. `sysmanage.yaml`, a
+        new `tls` folder and the OpenBAO data (unseal keys, root token) are
+        now SYSTEM + Administrators only (ProgramData is readable by every
+        local user). `test-msi-install.ps1` checks all of it.*
+      - *Real-hardware run, 2026-10-07 (Bryan opened netbsd, freebsd, t480,
+        x13s and the MacBook Air): NetBSD 10.1 canary start / refused second
+        start / status / restart / stop, also from the bare boot PATH;
+        OpenBSD re-run on t480; canary + server MSIs BUILT with WiX 6 on
+        x13s (Windows 11 ARM64) and their UI tables read back (Welcome ->
+        Ready -> Finish, no license page, WixShellExec on Wix4UtilCA_A64);
+        canary MSI install / run as LOCAL SERVICE / upgrade-while-running /
+        uninstall; server MSI upgraded x13s from 3.5.1 (database migrated
+        through q31idpmfa, healthy), `test-msi-install.ps1` 20/20, fresh
+        install (stopped, manual, 0600-equivalent config, new OpenBAO) and
+        restore. Bugs only real machines found, all fixed:*
+        - *NetBSD: the launcher found no Python -- the boot PATH and sudo's
+          secure_path lack /usr/pkg/bin. It now appends /usr/local/bin and
+          /usr/pkg/bin.*
+        - *Windows ARM64: the SERVER never reached its database -- pure-Python
+          psycopg finds libpq only along PATH and nothing put the bundled
+          DLLs there ("no pq wrapper available", also in the old 3.5.1 log).
+          `backend/__init__.py` now prepends the folders that hold
+          `libpq.dll` (test added); every entry point imports it first.*
+        - *All three MSIs (server, canary, AGENT): a release that differs only
+          in the 4th version field installed SIDE BY SIDE with the old one --
+          Windows Installer compares three fields. `AllowSameVersionUpgrades`
+          on every `MajorUpgrade`; proven 3.9.99.1 -> .2 -> .3.*
+        - *Migration output in install.log was buried in PowerShell 5.1
+          "NativeCommandError" blocks; now plain lines.*
+      - *Publishing fix: `make installer-deb` moved only `sysmanage_*.deb` out
+        of its build tree, so the canary .deb was built and then deleted, and
+        no release step named it. It is now moved, checksummed, uploaded,
+        copied into the apt pool and verified in R2 like the server's.
+        Launchpad, COPR and OBS need nothing new: the canary is a second
+        binary package from the same source and spec.*
 
 #### 22.10 MITRE "Lucky 13" unforgivable vulnerabilities, checked on every push (OSS)
 
@@ -12595,7 +12734,7 @@ unforgivable.
 
 #### Exit criteria
 
-- [ ] **A scale harness proves it** -- simulated agents (extend the
+- [x] **A scale harness proves it** -- simulated agents (extend the
       screenshot fixture agent) at 10k and 20k across many tenants and sites
       (50k moved to Phase 23.0, Bryan 2026-10-05 -- it needs the 32-core
       machine being built):
@@ -12638,6 +12777,9 @@ unforgivable.
       (delete-before-download, the pre-22.4 code): 9 of 10 customers lost
       their engine. Still to prove: many SITES -- no federation harness
       exists; and 50k (23.0).*
+      *2026-10-06 (Bryan): "many sites" moved to Phase 23.0 with the
+      federation harness it needs ("Federation at scale"); 50k is 23.0's
+      already. With those moved, this criterion is met for Phase 22.*
 
       | Agents | Workers | Reconnect 95% | Heartbeat p95 | Health p95 | Backlog peak | Marked down | Server CPU | Server RSS |
       |---|---|---|---|---|---|---|---|---|
@@ -12871,7 +13013,7 @@ unforgivable.
       new ones return, and status / restart / stop work for server and agent,
       also with both on one host. NetBSD OpenBao rc: stdin from
       /dev/null. OpenBSD (`rc_bg`), systemd and launchd need nothing.*
-- [ ] Docs: a scaling guide (worker count, pool sizing, private mirrors,
+- [x] Docs: a scaling guide (worker count, pool sizing, private mirrors,
       federation intervals) + 14-language i18n.
       *Partly done 2026-10-05: `sysmanage-docs/docs/server/scaling.html`
       (linked from the server index and the docs index), 14 languages, every
@@ -12888,11 +13030,26 @@ unforgivable.
       backoff, 14 languages. Still to add: the 50k numbers (23.0); private
       mirrors -- there is no private ClamAV mirror option to document (see
       22.6).*
-- [ ] **Audit ALL previous phases for stale open items.** Same rule as every
+      *Closed 2026-10-07: the 50k numbers are the one remainder, and
+      23.0 carries them ("Fold the result into the scaling guide").*
+- [x] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
       plainly whether it is real work, blocked externally, or should move or
       be dropped.
+      *Done 2026-10-07: no unticked boxes in Phases 0-21; 29 "still pending"
+      notes checked against the code -- 20 stale, 3 correctly carried, the
+      rest untracked: six are now in Phase 26 ("Carried forward by the Phase
+      22 audit") and two were live defects, fixed here: (1) the multitenancy plugin shipped
+      91 strings as "[TODO] ..." in all 13 locales (users saw "[TODO]
+      Tenants") -- `plugin_i18n_lib.looks_untranslated` treated a placeholder
+      as a translation, which blinded BOTH `i18n-check-plugins` and
+      `translate_plugins.py`; it now counts `[TODO]`/`[MISSING:` as missing
+      (test added) and the 1,183 values are translated. (2) four test-only
+      keys (`greeting`, `nav.gated`, `nav.plain`, `pluginOnlyKey`) sat in all
+      14 OSS catalogs as `[MISSING:...]` because `i18n_validate.py` extracted
+      keys from test files; it now skips `__tests__`/`.test.`/`.spec.`
+      (test added) and the 56 values are stripped.*
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -12929,6 +13086,20 @@ machine; this proof waits for it rather than for a cloud box.
       30k up, and the worker count and pool sizing it took.
 - [ ] Fold the result into the scaling guide (Phase 22) -- replace its 50k
       extrapolation with the measured numbers.
+- [ ] **sysmanage-canary on a real NetBSD host** (moved from 22.9,
+      2026-10-07). The NetBSD package carries the canary and an rc script
+      that controls it by pidfile (the launcher execs Python, so rc.subr's
+      process matching cannot find it); that logic was proven under
+      FreeBSD's rc.subr only, because the NetBSD VM was unreachable. Install
+      the package, start / status / stop it, and confirm the account (9996)
+      and the 0600 config.
+- [ ] **One upstream fetch for vulnerability feeds** (moved from 22.4,
+      Bryan 2026-10-06). Every customer server pulls NVD, Ubuntu, Debian, Red
+      Hat and MSRC itself. The minimum shipped in 22.4 (conditional Debian
+      fetch, jittered retries and refresh times, first refresh spread over
+      30 min); still to build: one digested daily feed, with deltas,
+      published via the CDN, so customer servers stop hitting NVD and the
+      distros at all (`cve_refresh.pxi`, `cve_fetchers.pxi`).
 - [ ] **Tenant-pass bursts with the licensed engines loaded** (carried from
       22.3, 2026-10-06). The 22.3 measurement (50 tenants, 10k agents) found
       no tick-aligned burst, but its stack loaded only the multitenancy
@@ -13476,6 +13647,56 @@ done nor tracked anywhere. Re-home any of them if Phase 26 is the wrong fit.
 - [ ] *(Optional, business)* **External penetration test** -- removed from
       Phase 1 on 2026-08-04 as a spend decision ("revisit when there are paying
       customers"); listed here only so the revisit has a place to land.
+
+### Carried forward by the Phase 22 audit (2026-10-07)
+
+Phases 0-21 again had no unticked boxes; the audit read every ticked item
+whose own note still said "pending", "still open", "deferred" or "remains",
+against the code. 20 of 29 were stale notes for finished work, three were
+correctly carried (12.3 cluster overlay and cloud/vSphere providers to Phase
+26 above, Alpine/BSD package repos to Phase 27). Two were defects and were
+fixed in Phase 22 (multitenancy `[TODO]` strings, leaked test keys -- see the
+Phase 22 audit item). These were neither done nor tracked:
+
+- [ ] **Advisor `metric_history` domain** (Phase 21.4/21.5 follow-up).
+      `advisor_engine/rule_contract.pxi` still declares it
+      `"available": False`, so a rule over metric history answers
+      `domain_unavailable` although 21.5 now stores the samples. Wire it, or
+      say why not.
+- [ ] **Windows child hosts: OVMF wedge on warm reset** (Phase 12.5 finding
+      (a)). `windows_create.pxi` adds `tpm-crb` only for TPM-required editions
+      and never stops virt-install adding its own TPM for Server 2022; pass
+      `--tpm none` there (or turn SMM off) and re-run the smoke test.
+- [ ] **Server MSI install verification** (Phase 19 "STILL NOT VERIFIED: x64
+      MSI, CI-built MSI"). The canary MSI is now install-tested in both CI jobs
+      (22.9); give the server MSI the same `msiexec /i` -> service -> health
+      -> `msiexec /x` step on x64 and ARM64. `installer/windows/
+      test-msi-install.ps1` already checks the service, the shipped scripts,
+      GETTING-STARTED.txt and the secret ACLs (2026-10-07); wire it into
+      both MSI jobs.
+- [ ] **Phase 8 carryovers: Pro+ Playwright flows and a functional
+      multi-host fleet E2E.** `frontend/e2e/proplus.spec.ts` and
+      `license-matrix.spec.ts` cover licensing; nothing drives an automation
+      or fleet job across several hosts end to end (`tests/load/fleet.py` is
+      scale, not function). Build, or drop with a reason.
+- [ ] **Confirm the BSD process resolvers ran** (Phase 21, "unexercised until
+      the next `bsd-tests.yml` dispatch"). Needs the workflow history, which
+      only Bryan can read here; tick when a green dispatch is seen.
+- [ ] **Restart the beast translation service** to load the newer glossary
+      (Phase 21 note; still outstanding, Bryan).
+- [ ] **A failed server MSI upgrade destroys the old install** (found
+      2026-10-07 on x13s). The old product's `RemoveService` action deletes
+      its Windows services and has no rollback action, and the rollback of
+      its removal failed ("Error in rollback skipped. Return: 5"): after a
+      1603 the machine had the old files but no service and no
+      Add/Remove Programs entry. Give the service removal a rollback action
+      (re-register), or defer it until the new install has committed, and
+      prove it with a deliberately failing upgrade.
+- [ ] **Stale local ARM64 wheel set** (2026-10-07). `build-msi.ps1` uses
+      `installer/windows/wheels-arm64` as-is when it holds any wheels, so a
+      set built for older pins (Mako 1.3.12 vs 1.4.3) produces an MSI whose
+      offline install fails -- caught only at install time. Check the set
+      against `requirements-prod.txt` at BUILD time and refresh or fail.
 
 ### Exit Criteria
 

@@ -1,0 +1,42 @@
+#!/bin/sh
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+#
+# PROVIDE: sysmanage_canary
+# REQUIRE: LOGIN NETWORKING
+# KEYWORD: shutdown
+#
+# sysmanage-canary: an outside watcher for a SysManage server (Phase 22.9).
+# Add to /etc/rc.conf:   sysmanage_canary_enable="YES"
+
+. /etc/rc.subr
+
+name="sysmanage_canary"
+rcvar="sysmanage_canary_enable"
+load_rc_config $name
+: ${sysmanage_canary_enable:="NO"}
+: ${sysmanage_canary_user:="sysmanage-canary"}
+: ${sysmanage_canary_config:="/usr/local/etc/sysmanage-canary.yaml"}
+
+# A per-service directory: rc.subr runs daemon(8) as sysmanage_canary_user
+# (see below), and an unprivileged daemon cannot create a pidfile directly in
+# the root-owned /var/run.
+pidfile="/var/run/${name}/${name}.pid"
+start_precmd="${name}_prestart"
+
+sysmanage_canary_prestart()
+{
+	/usr/bin/install -d -o "${sysmanage_canary_user}" \
+	    -g "${sysmanage_canary_user}" -m 0755 "/var/run/${name}"
+	/usr/local/bin/sysmanage-canary --config "${sysmanage_canary_config}" --check-config
+}
+
+command="/usr/sbin/daemon"
+# NO ``-u`` here: sysmanage_canary_user is ${name}_user, so run_rc_command
+# already wraps this in ``su -m``, and a second drop in daemon(8) fails in
+# initgroups() ("Operation not permitted").  -f with -S sends the output to
+# syslog and detaches it from the starting terminal.
+command_args="-f -r -R 30 -P ${pidfile} -S -T sysmanage-canary /usr/local/bin/sysmanage-canary --config ${sysmanage_canary_config}"
+
+run_rc_command "$1"
