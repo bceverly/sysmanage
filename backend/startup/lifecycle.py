@@ -53,6 +53,21 @@ _custom_metric_retention_started = False
 _package_catalog_refresh_started = False
 
 
+async def _stop_task(task: "asyncio.Task", name: str) -> None:
+    """Cancel a background task and wait until it has finished.
+
+    ``gather(..., return_exceptions=True)`` absorbs the CancelledError the
+    TASK raises because we cancelled it -- re-raising that one aborted the
+    rest of shutdown ("Application shutdown failed") and skipped every later
+    step, the leader lock included -- while a cancellation of THIS coroutine
+    (shutdown itself being cancelled) still propagates, which an
+    ``except asyncio.CancelledError`` here could not tell apart.
+    """
+    task.cancel()
+    await asyncio.gather(task, return_exceptions=True)
+    logger.info("%s cancelled successfully", name)
+
+
 @asynccontextmanager
 async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     """
@@ -832,14 +847,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     try:
         message_processor.stop()
         if message_processor_task:
-            message_processor_task.cancel()
-            try:
-                await message_processor_task
-            except asyncio.CancelledError:
-                # Expected: we cancelled it.  Re-raising here aborted the rest of
-                # shutdown ("Application shutdown failed"), skipping every later
-                # step -- the other engines' tasks and the leader lock.
-                logger.info("Message processor task cancelled successfully")
+            await _stop_task(message_processor_task, "Message processor task")
         logger.info("Message processor service stopped")
     except Exception as e:
         logger.exception("Error stopping message processor: %s", e)
@@ -848,11 +856,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     logger.info("Stopping Graylog health monitor service")
     try:
         if graylog_health_task:
-            graylog_health_task.cancel()
-            try:
-                await graylog_health_task
-            except asyncio.CancelledError:
-                logger.info("Graylog health monitor task cancelled successfully")
+            await _stop_task(graylog_health_task, "Graylog health monitor task")
         logger.info("Graylog health monitor service stopped")
     except Exception as e:
         logger.exception("Error stopping Graylog health monitor: %s", e)
@@ -861,11 +865,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     if alerting_task:
         logger.info("Stopping alerting engine background task")
         try:
-            alerting_task.cancel()
-            try:
-                await alerting_task
-            except asyncio.CancelledError:
-                logger.info("Alerting engine task cancelled successfully")
+            await _stop_task(alerting_task, "Alerting engine task")
             logger.info("Alerting engine background task stopped")
         except Exception as e:
             logger.exception("Error stopping alerting engine task: %s", e)
@@ -874,11 +874,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     if reporting_task:
         logger.info("Stopping reporting engine background task")
         try:
-            reporting_task.cancel()
-            try:
-                await reporting_task
-            except asyncio.CancelledError:
-                logger.info("Reporting engine task cancelled successfully")
+            await _stop_task(reporting_task, "Reporting engine task")
             logger.info("Reporting engine background task stopped")
         except Exception as e:
             logger.exception("Error stopping reporting engine task: %s", e)
@@ -887,11 +883,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     if audit_retention_task:
         logger.info("Stopping audit engine retention background task")
         try:
-            audit_retention_task.cancel()
-            try:
-                await audit_retention_task
-            except asyncio.CancelledError:
-                logger.info("Audit engine retention task cancelled successfully")
+            await _stop_task(audit_retention_task, "Audit engine retention task")
             logger.info("Audit engine retention background task stopped")
         except Exception as e:
             logger.exception("Error stopping audit engine retention task: %s", e)
@@ -900,11 +892,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     if secrets_rotation_task:
         logger.info("Stopping secrets engine rotation background task")
         try:
-            secrets_rotation_task.cancel()
-            try:
-                await secrets_rotation_task
-            except asyncio.CancelledError:
-                logger.info("Secrets engine rotation task cancelled successfully")
+            await _stop_task(secrets_rotation_task, "Secrets engine rotation task")
             logger.info("Secrets engine rotation background task stopped")
         except Exception as e:
             logger.exception(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
@@ -915,11 +903,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     if cve_refresh_task:
         logger.info("Stopping CVE refresh background task")
         try:
-            cve_refresh_task.cancel()
-            try:
-                await cve_refresh_task
-            except asyncio.CancelledError:
-                logger.info("CVE refresh task cancelled successfully")
+            await _stop_task(cve_refresh_task, "CVE refresh task")
             logger.info("CVE refresh background task stopped")
         except Exception as e:
             logger.exception("Error stopping CVE refresh task: %s", e)
@@ -928,11 +912,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     if automation_sched_task:
         logger.info("Stopping automation engine schedule dispatcher")
         try:
-            automation_sched_task.cancel()
-            try:
-                await automation_sched_task
-            except asyncio.CancelledError:
-                logger.info("Automation schedule dispatcher cancelled successfully")
+            await _stop_task(automation_sched_task, "Automation schedule dispatcher")
         except Exception as e:
             logger.exception("Error stopping automation schedule dispatcher: %s", e)
 
@@ -940,11 +920,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     if fleet_sched_task:
         logger.info("Stopping fleet engine schedule dispatcher")
         try:
-            fleet_sched_task.cancel()
-            try:
-                await fleet_sched_task
-            except asyncio.CancelledError:
-                logger.info("Fleet schedule dispatcher cancelled successfully")
+            await _stop_task(fleet_sched_task, "Fleet schedule dispatcher")
         except Exception as e:
             logger.exception("Error stopping fleet schedule dispatcher: %s", e)
 
@@ -961,11 +937,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     logger.info("Stopping heartbeat monitor service")
     try:
         if heartbeat_task:
-            heartbeat_task.cancel()
-            try:
-                await heartbeat_task
-            except asyncio.CancelledError:
-                logger.info("Heartbeat monitor task cancelled successfully")
+            await _stop_task(heartbeat_task, "Heartbeat monitor task")
         logger.info("Heartbeat monitor service stopped")
     except Exception as e:
         logger.exception("Error stopping heartbeat monitor: %s", e)

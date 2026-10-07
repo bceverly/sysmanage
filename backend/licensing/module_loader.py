@@ -44,6 +44,25 @@ DOWNLOAD_TIMEOUT = 300
 VERSION_CHECK_TIMEOUT = 30
 
 
+def _extract_bundle_safely(bundle_path: str, dest_root: str, module_code: str) -> bool:
+    """Extract a module bundle into ``dest_root``, member by member (NOT
+    extractall): each resolved path must stay inside dest_root, and the
+    ``data`` filter rejects ../, absolute paths and links.  False (and
+    nothing more extracted) at the first member that would escape."""
+    with tarfile.open(bundle_path, "r:gz") as tar:
+        for member in tar.getmembers():
+            target = os.path.realpath(os.path.join(dest_root, member.name))
+            if target != dest_root and not target.startswith(dest_root + os.sep):
+                logger.error(
+                    "Refusing unsafe path %s in bundle for %s",
+                    member.name,
+                    module_code,
+                )
+                return False
+            tar.extract(member, dest_root, filter="data")
+    return True
+
+
 class ModuleLoader(ModuleLoaderUpdatesMixin):
     """
     Loader for Pro+ Cython modules.
@@ -597,21 +616,8 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
             shutil.rmtree(staging_dir, ignore_errors=True)
             os.makedirs(staging_dir, exist_ok=True)
             dest_root = os.path.realpath(staging_dir)
-            with tarfile.open(bundle_path, "r:gz") as tar:
-                # Validate each member (NOT extractall): resolved path must stay
-                # inside dest_root; ``data`` filter rejects ../absolute/symlink.
-                for member in tar.getmembers():
-                    target = os.path.realpath(os.path.join(dest_root, member.name))
-                    if target != dest_root and not target.startswith(
-                        dest_root + os.sep
-                    ):
-                        logger.error(
-                            "Refusing unsafe path %s in bundle for %s",
-                            member.name,
-                            module_code,
-                        )
-                        return None
-                    tar.extract(member, dest_root, filter="data")
+            if not _extract_bundle_safely(bundle_path, dest_root, module_code):
+                return None
             compiled = [
                 n
                 for n in sorted(os.listdir(staging_dir))

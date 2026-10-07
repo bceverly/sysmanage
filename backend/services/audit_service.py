@@ -95,8 +95,6 @@ class AuditService:
         entity_id: Optional[str] = None,
         entity_name: Optional[str] = None,
         details: Optional[Dict[str, Any]] = None,
-        ip_address: Optional[str] = None,
-        error_message: Optional[str] = None,
         commit: bool = True,
         **kwargs,
     ) -> AuditLog:
@@ -119,7 +117,8 @@ class AuditService:
             details: Additional structured data about the action (optional)
             ip_address: IP address of the client (optional)
             error_message: Error details if action failed (optional)
-            **kwargs: Additional fields (user_agent, category, entry_type)
+            **kwargs: Additional fields (ip_address, error_message,
+                user_agent, category, entry_type)
 
         Returns:
             The created AuditLog entry
@@ -151,10 +150,10 @@ class AuditService:
             entity_name=entity_name,
             description=description,
             details=details,
-            ip_address=ip_address,
+            ip_address=kwargs.get("ip_address"),
             user_agent=kwargs.get("user_agent"),
             result=result.value,
-            error_message=error_message,
+            error_message=kwargs.get("error_message"),
             category=kwargs.get("category"),
             entry_type=kwargs.get("entry_type"),
             integrity_hash=integrity_hash,

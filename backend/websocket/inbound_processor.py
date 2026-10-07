@@ -272,14 +272,14 @@ def _reset_stuck_messages(db):
         db.commit()
 
 
-def _due_filter(MessageQueue):  # pylint: disable=invalid-name
+def _due_filter(queue_model):
     """Pending, unexpired inbound rows whose retry time (if any) has come."""
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     return and_(
-        MessageQueue.direction == QueueDirection.INBOUND,
-        MessageQueue.status == QueueStatus.PENDING,
-        MessageQueue.expired_at.is_(None),
-        or_(MessageQueue.scheduled_at.is_(None), MessageQueue.scheduled_at <= now),
+        queue_model.direction == QueueDirection.INBOUND,
+        queue_model.status == QueueStatus.PENDING,
+        queue_model.expired_at.is_(None),
+        or_(queue_model.scheduled_at.is_(None), queue_model.scheduled_at <= now),
     )
 
 
@@ -289,6 +289,9 @@ def _due_filter(MessageQueue):  # pylint: disable=invalid-name
 # whose messages are already done costs one indexed lookup; a host that
 # started waiting since the read waits at most HOST_WINDOW_SECONDS.
 HOST_WINDOW_SECONDS = 5.0
+# The shuffle only spreads hosts between workers; SystemRandom so no reader
+# has to wonder whether a predictable generator matters here.
+_SHUFFLE = random.SystemRandom()
 _host_windows = {}  # database -> (read_at, [host_id, ...] still to serve)
 _host_windows_lock = threading.Lock()
 
@@ -327,7 +330,7 @@ def _oldest_waiting_hosts(db, limit):
         # Every worker sees the same oldest hosts; a wider, shuffled window
         # spreads them so workers do not queue up on one another's locks.
         hosts = _oldest_waiting_hosts_window(db, MessageQueue, limit * 4)
-        random.shuffle(hosts)
+        _SHUFFLE.shuffle(hosts)
     else:
         hosts = _oldest_waiting_hosts_window(db, MessageQueue, limit * 4)
     with _host_windows_lock:
@@ -335,9 +338,7 @@ def _oldest_waiting_hosts(db, limit):
     return hosts[:limit]
 
 
-def _oldest_waiting_hosts_window(
-    db, MessageQueue, limit
-):  # pylint: disable=invalid-name
+def _oldest_waiting_hosts_window(db, queue_model, limit):
     """The ``limit`` hosts whose oldest due message is oldest.
 
     Read due rows oldest first and keep each host's first appearance -- that
@@ -349,9 +350,9 @@ def _oldest_waiting_hosts_window(
     ``limit`` hosts give fewer hosts: still the oldest ones."""
     hosts = {}
     for (host_id,) in (
-        db.query(MessageQueue.host_id)
-        .filter(_due_filter(MessageQueue), MessageQueue.host_id.is_not(None))
-        .order_by(MessageQueue.created_at)
+        db.query(queue_model.host_id)
+        .filter(_due_filter(queue_model), queue_model.host_id.is_not(None))
+        .order_by(queue_model.created_at)
         .limit(limit * PER_HOST_LIMIT)
     ):
         hosts.setdefault(host_id, None)
@@ -440,38 +441,43 @@ async def _drain_host_queues(db, deadline) -> bool:
     seen = set()
     locks = _HostLocks(db)
     try:
-        fresh_read = False  # did this round's hosts come from a new read?
         while time.monotonic() < deadline:
-            fresh_read = not _host_window_cached(db)
+            fresh_read = not _host_window_cached(db)  # hosts from a new read?
             host_ids = _oldest_waiting_hosts(db, HOST_BATCH)
-            if not host_ids:
-                if fresh_read:
-                    return False
-                forget_host_window(db)  # the cached window ran dry: read again
-                continue
-            attempted = 0
-            for host_id in host_ids:
-                if time.monotonic() >= deadline:
-                    return True
-                if not locks.acquire(host_id):
-                    continue  # another worker is draining this host
-                try:
-                    attempted += await _drain_one_host(
-                        db, host_id, deadline, seen, exclusive=locks.exclusive
-                    )
-                    if locks.active:
-                        db.commit()  # visible before another worker takes the host
-                finally:
-                    locks.release(host_id)
+            attempted, out_of_time = await _drain_round(
+                db, host_ids, deadline, seen, locks
+            )
+            if out_of_time:
+                return True
             if not attempted:
                 if fresh_read:
                     return False
-                # Hosts from an older read may be done already: read again
-                # before deciding there is no work.
+                # Hosts from an older read may be done already (or the
+                # cached window ran dry): read again before deciding there
+                # is no work.
                 forget_host_window(db)
         return True
     finally:
         locks.close()
+
+
+async def _drain_round(db, host_ids, deadline, seen, locks):
+    """Drain each host in turn; (messages attempted, ran out of time)."""
+    attempted = 0
+    for host_id in host_ids:
+        if time.monotonic() >= deadline:
+            return attempted, True
+        if not locks.acquire(host_id):
+            continue  # another worker is draining this host
+        try:
+            attempted += await _drain_one_host(
+                db, host_id, deadline, seen, exclusive=locks.exclusive
+            )
+            if locks.active:
+                db.commit()  # visible before another worker takes the host
+        finally:
+            locks.release(host_id)
+    return attempted, False
 
 
 async def process_pending_messages(db: Session) -> bool:

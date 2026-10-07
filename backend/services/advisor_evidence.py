@@ -220,7 +220,12 @@ def gather(
     rows, loaded with its neighbors' (Phase 22.3)."""
     evidence: Dict[str, Any] = {"facts": {}, "domains": {}}
     tables: Dict[str, List[Dict[str, Any]]] = {"sm_host": [_sm_host(host)]}
+    _gather_domains(db, host, domains, bulk, evidence, tables)
+    _gather_facts(db, host, fact_needs, evidence, tables)
+    return evidence, tables
 
+
+def _gather_domains(db, host, domains, bulk, evidence, tables) -> None:
     for domain in sorted(domains):
         if domain == "reboot":
             evidence["domains"][domain] = {"at": host.reboot_required_updated_at}
@@ -235,6 +240,8 @@ def gather(
         # Anything else (metric_history, or a domain this server does not
         # know) is left out: the engine reports it domain_unavailable.
 
+
+def _gather_facts(db, host, fact_needs, evidence, tables) -> None:
     for table, columns in sorted(fact_needs.items()):
         gap: Optional[Dict[str, Any]] = host_facts.missing_columns(
             host, table, sorted(columns)
@@ -250,7 +257,6 @@ def gather(
         evidence["facts"][table] = {"gap": gap, "collected_at": collected_at}
         if rows:
             tables[table] = rows
-    return evidence, tables
 
 
 def peer_value(host, peer_group: Optional[str], tag_ids=None) -> Optional[str]:

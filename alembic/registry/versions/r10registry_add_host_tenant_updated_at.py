@@ -43,8 +43,11 @@ def upgrade() -> None:
     columns = {col["name"] for col in inspector.get_columns(_TABLE)}
     if _COLUMN not in columns:
         op.add_column(_TABLE, sa.Column(_COLUMN, sa.DateTime(), nullable=True))
+    table = sa.table(_TABLE, sa.column(_COLUMN), sa.column("created_at"))
     op.execute(
-        sa.text(f"UPDATE {_TABLE} SET {_COLUMN} = created_at WHERE {_COLUMN} IS NULL")
+        table.update()
+        .where(table.c[_COLUMN].is_(None))
+        .values({_COLUMN: table.c.created_at})
     )
     existing = {idx["name"] for idx in sa.inspect(bind).get_indexes(_TABLE)}
     if _INDEX not in existing:

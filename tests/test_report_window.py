@@ -133,7 +133,7 @@ def test_bad_limits_fall_back_to_defaults():
         )
 
 
-async def test_registration_success_carries_the_window(db_session):
+def test_registration_success_carries_the_window(db_session):
     from backend.api.message_handlers_core import (  # pylint: disable=import-outside-toplevel
         _process_approved_system_info,
     )
@@ -149,8 +149,8 @@ async def test_registration_success_carries_the_window(db_session):
     with patch(LIMITS, return_value=(10.0, 0.0, 1800.0)), patch(
         "backend.services.logging_config_service.push_logging_to_host"
     ):
-        reply = await _process_approved_system_info(
-            db_session, None, host, host.fqdn, {}, "Linux", None, None, True
+        reply = _process_approved_system_info(
+            db_session, host, host.fqdn, {}, "Linux", None, None, True
         )
     assert reply["message_type"] == "registration_success"
     assert reply["initial_report_window_seconds"] == 50

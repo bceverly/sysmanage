@@ -39,6 +39,8 @@ import secrets
 import sys
 from typing import Callable, Dict, Optional
 
+from backend.config.config_target import resolve_config_target
+
 # Values the examples have shipped, or ever could: never a real secret.
 WELL_KNOWN_PASSWORDS = frozenset(
     {"admin", "password", "changeme", "change_me", "administrator", "sysmanage",
@@ -90,6 +92,7 @@ def generate(text: str) -> tuple:
 
 def apply_to_file(path: str) -> str:
     """Replace the placeholders in ``path``; returns what was done."""
+    path = resolve_config_target(path)
     with open(path, encoding="utf-8") as handle:
         original = handle.read()
     updated, replaced = generate(original)
@@ -116,7 +119,7 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
     try:
         print(apply_to_file(args.apply))
-    except OSError as exc:
+    except (OSError, ValueError) as exc:
         print(f"could not update {args.apply}: {exc}", file=sys.stderr)
         return 1
     return 0

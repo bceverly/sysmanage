@@ -124,35 +124,43 @@ def sync(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         latest = _latest(db, host_id, entry["source"], entry["key"])
     fix = result.get("fix")
     if result.get("outcome") == models.ADVISOR_OUTCOME_FIRES and fix:
-        fp = fingerprint(fix)
-        if latest is not None and latest.status == PROPOSED:
-            if latest.fingerprint != fp:
-                _fill(latest, fix, fp)
-                latest.updated_at = _now()
-            return
-        if latest is not None and latest.fingerprint == fp:
-            return  # the operator already decided on this exact fix
-        row = models.AdvisorProposal(
-            id=uuid.uuid4(),
-            host_id=host_id,
-            rule_source=entry["source"],
-            rule_key=entry["key"],
-            shared_rule_id=entry.get("shared_rule_id"),
-            rule_id=entry.get("rule_id"),
-            status=PROPOSED,
-            created_at=_now(),
-            updated_at=_now(),
-        )
-        _fill(row, fix, fp)
-        db.add(row)
-        if latest_map is not None:
-            latest_map[key] = row
-        summary["proposals_opened"] = summary.get("proposals_opened", 0) + 1
+        row = _sync_firing(db, host_id, entry, fix, latest)
+        if row is not None:
+            if latest_map is not None:
+                latest_map[key] = row
+            summary["proposals_opened"] = summary.get("proposals_opened", 0) + 1
     elif result.get("outcome") in _CLEARED and latest is not None:
         if latest.status == PROPOSED:
             latest.status = WITHDRAWN
             latest.reason = REASON_NO_LONGER_FIRES
             latest.updated_at = _now()
+
+
+def _sync_firing(db, host_id, entry, fix, latest):
+    """The rule fires with a fix: refresh the open proposal, or open a new
+    one.  Returns the row it OPENED, or None when it opened nothing."""
+    fp = fingerprint(fix)
+    if latest is not None and latest.status == PROPOSED:
+        if latest.fingerprint != fp:
+            _fill(latest, fix, fp)
+            latest.updated_at = _now()
+        return None
+    if latest is not None and latest.fingerprint == fp:
+        return None  # the operator already decided on this exact fix
+    row = models.AdvisorProposal(
+        id=uuid.uuid4(),
+        host_id=host_id,
+        rule_source=entry["source"],
+        rule_key=entry["key"],
+        shared_rule_id=entry.get("shared_rule_id"),
+        rule_id=entry.get("rule_id"),
+        status=PROPOSED,
+        created_at=_now(),
+        updated_at=_now(),
+    )
+    _fill(row, fix, fp)
+    db.add(row)
+    return row
 
 
 def withdraw_for(db, source: str, key: str) -> None:

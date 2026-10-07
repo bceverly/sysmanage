@@ -342,6 +342,49 @@ async def _process_websocket_message(data, connection, db, connection_id):
             logger.exception("Failed to send error message: %s", send_exc)
 
 
+def _buffer_until_registered(message, connection) -> None:
+    """Hold a message that arrived before SYSTEM_INFO registration finished
+    (see ``_enqueue_inbound_message``); ``flush_pending_inbound_messages``
+    sends it on once the connection knows its host."""
+    existing = getattr(connection, "_pending_inbound_messages", None)
+    if not isinstance(existing, list):
+        existing = []
+        connection._pending_inbound_messages = (  # pylint: disable=protected-access
+            existing
+        )
+    # Bounded: a session that never proves its host (Phase 22.0 refuses it)
+    # must not be able to grow this without limit.
+    if len(existing) >= MAX_PENDING_INBOUND:
+        logger.warning(
+            "Dropped %s from unregistered connection %s: buffer full",
+            message.message_type,
+            connection.agent_id,
+        )
+        return
+    existing.append(message)
+    logger.info(
+        "Buffered %s message from connection %s -- registration not "
+        "yet complete (connection.hostname is None)",
+        message.message_type,
+        connection.agent_id,
+    )
+
+
+def _claims_another_host(message, connection) -> bool:
+    """Phase 22.0: a verified session speaks only for its own host."""
+    claimed = (message.data or {}).get("host_id")
+    bound = getattr(connection, "host_id", None)
+    if claimed and bound and str(claimed) != str(bound):
+        logger.warning(
+            "Dropped %s claiming host %s on the session of host %s",
+            message.message_type,
+            sanitize_log(claimed),
+            sanitize_log(bound),
+        )
+        return True
+    return False
+
+
 def _enqueue_inbound_message(message, connection, db):
     """
     Enqueue an inbound message for background processing.
@@ -367,40 +410,9 @@ def _enqueue_inbound_message(message, connection, db):
     keeps the behavior correct in both call paths.
     """
     if not connection.hostname and message.message_type != MessageType.SYSTEM_INFO:
-        existing = getattr(connection, "_pending_inbound_messages", None)
-        if not isinstance(existing, list):
-            existing = []
-            connection._pending_inbound_messages = (  # pylint: disable=protected-access
-                existing
-            )
-        # Bounded: a session that never proves its host (Phase 22.0 refuses
-        # it) must not be able to grow this without limit.
-        if len(existing) >= MAX_PENDING_INBOUND:
-            logger.warning(
-                "Dropped %s from unregistered connection %s: buffer full",
-                message.message_type,
-                connection.agent_id,
-            )
-            return
-        existing.append(message)
-        logger.info(
-            "Buffered %s message from connection %s -- registration not "
-            "yet complete (connection.hostname is None)",
-            message.message_type,
-            connection.agent_id,
-        )
+        _buffer_until_registered(message, connection)
         return
-
-    # Phase 22.0: a verified session speaks only for its own host.
-    claimed = (message.data or {}).get("host_id")
-    bound = getattr(connection, "host_id", None)
-    if claimed and bound and str(claimed) != str(bound):
-        logger.warning(
-            "Dropped %s claiming host %s on the session of host %s",
-            message.message_type,
-            sanitize_log(claimed),
-            sanitize_log(bound),
-        )
+    if _claims_another_host(message, connection):
         return
 
     from backend.websocket.queue_enums import Priority, QueueDirection

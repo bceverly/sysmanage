@@ -39,13 +39,13 @@ OUTBOUND_PER_HOST = 20
 MAINTENANCE_RECHECK_SECONDS = 60  # an override or a window opening is seen within this
 
 
-def _due_outbound(MessageQueue, now):  # pylint: disable=invalid-name
+def _due_outbound(queue_model, now):
     return and_(
-        MessageQueue.direction == QueueDirection.OUTBOUND,
-        MessageQueue.status == QueueStatus.PENDING,
-        MessageQueue.host_id.is_not(None),
-        MessageQueue.expired_at.is_(None),
-        or_(MessageQueue.scheduled_at.is_(None), MessageQueue.scheduled_at <= now),
+        queue_model.direction == QueueDirection.OUTBOUND,
+        queue_model.status == QueueStatus.PENDING,
+        queue_model.host_id.is_not(None),
+        queue_model.expired_at.is_(None),
+        or_(queue_model.scheduled_at.is_(None), queue_model.scheduled_at <= now),
     )
 
 

@@ -275,9 +275,8 @@ async def _handle_system_info_impl(db: Session, connection, message_data: dict):
 
         # Only process additional data for approved hosts
         if host.approval_status == "approved":
-            return await _process_approved_system_info(
+            return _process_approved_system_info(
                 db,
-                connection,
                 host,
                 hostname,
                 message_data,
@@ -504,8 +503,8 @@ def _queue_software_packages(db, host, software_packages) -> None:
         )
 
 
-async def _process_approved_system_info(
-    db, connection, host, hostname, message_data, platform, ipv4, ipv6, is_privileged
+def _process_approved_system_info(
+    db, host, hostname, message_data, platform, ipv4, ipv6, is_privileged
 ):
     """Post-approval SYSTEM_INFO work: ingest software packages, audit the
     connection, and build the ``registration_success`` response."""

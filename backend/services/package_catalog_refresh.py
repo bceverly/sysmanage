@@ -114,9 +114,12 @@ def request_refresh_for_stale_hosts(session, models, now: datetime) -> int:
         .all()
     )
 
-    for host_id, at in list(_ASKED_AT.items()):
-        if now - at >= ASK_AGAIN_AFTER:
-            del _ASKED_AT[host_id]
+    # Collect first, then delete: a dict cannot change size while iterated.
+    stale = [
+        host_id for host_id, at in _ASKED_AT.items() if now - at >= ASK_AGAIN_AFTER
+    ]
+    for host_id in stale:
+        del _ASKED_AT[host_id]
 
     asked = 0
     for host in hosts:

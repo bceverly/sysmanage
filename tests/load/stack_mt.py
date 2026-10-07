@@ -68,6 +68,8 @@ def _bao_stop_native() -> None:
         pid = int(BAO_PID_FILE.read_text(encoding="utf-8"))
         os.kill(pid, signal.SIGTERM)
     except (OSError, ValueError):
+        # No pidfile, a garbled one, or the process is already gone: there is
+        # nothing left to stop, and the pidfile is removed below either way.
         pass
     BAO_PID_FILE.unlink(missing_ok=True)
 

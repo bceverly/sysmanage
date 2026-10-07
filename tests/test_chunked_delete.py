@@ -6,6 +6,7 @@
 
 import uuid
 
+import pytest
 import sqlalchemy as sa
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -20,17 +21,31 @@ class Row(Base):  # pylint: disable=too-few-public-methods
     age = sa.Column(sa.Integer, nullable=False)
 
 
-def _session(rows):
-    engine = sa.create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(engine)
-    session = sessionmaker(bind=engine)()
-    session.add_all(Row(age=a) for a in rows)
-    session.commit()
-    return session
+@pytest.fixture
+def make_session():
+    """A seeded in-memory session per call; every session is closed and every
+    engine disposed when the test ends.  Without dispose() the pool kept the
+    sqlite3 connection alive until garbage collection, and pytest (warnings
+    are errors) failed whichever unrelated test happened to be running then."""
+    opened = []
+
+    def _make(rows):
+        engine = sa.create_engine("sqlite:///:memory:")
+        Base.metadata.create_all(engine)
+        session = sessionmaker(bind=engine)()
+        opened.append((session, engine))
+        session.add_all(Row(age=a) for a in rows)
+        session.commit()
+        return session
+
+    yield _make
+    for session, engine in opened:
+        session.close()
+        engine.dispose()
 
 
-def test_deletes_every_match_in_chunks_committing_each():
-    session = _session([10] * 23 + [1] * 5)
+def test_deletes_every_match_in_chunks_committing_each(make_session):
+    session = make_session([10] * 23 + [1] * 5)
     commits = []
     original = session.commit
 
@@ -44,18 +59,18 @@ def test_deletes_every_match_in_chunks_committing_each():
     assert session.query(Row).count() == 5  # the young rows stay
 
 
-def test_exact_multiple_of_the_chunk_ends_on_an_empty_select():
-    session = _session([10] * 20)
+def test_exact_multiple_of_the_chunk_ends_on_an_empty_select(make_session):
+    session = make_session([10] * 20)
     assert delete_in_chunks(session, Row, Row.age > 5, chunk_size=10) == 20
     assert session.query(Row).count() == 0
 
 
-def test_nothing_to_delete():
-    session = _session([1, 2, 3])
+def test_nothing_to_delete(make_session):
+    session = make_session([1, 2, 3])
     assert delete_in_chunks(session, Row, Row.age > 5) == 0
     assert session.query(Row).count() == 3
 
 
-def test_several_criteria_are_all_applied():
-    session = _session([10, 10, 1])
+def test_several_criteria_are_all_applied(make_session):
+    session = make_session([10, 10, 1])
     assert delete_in_chunks(session, Row, Row.age > 5, Row.age < 20) == 2

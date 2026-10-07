@@ -73,6 +73,8 @@ import os
 import sys
 from typing import Any, Dict, Optional, Tuple
 
+from backend.config.config_target import resolve_config_target
+
 logger = logging.getLogger(__name__)
 
 CONFIG_KEY = "database_pool"
@@ -340,6 +342,7 @@ def apply_to_file(path: str) -> str:
 
     Appends text instead of rewriting the YAML so the admin's comments and
     layout survive; never touches an existing block."""
+    path = resolve_config_target(path)
     with open(path, encoding="utf-8") as handle:
         existing = handle.read()
     if any(line.startswith(f"{CONFIG_KEY}:") for line in existing.splitlines()):
@@ -368,7 +371,7 @@ def main(argv=None) -> int:
     if args.apply:
         try:
             print(apply_to_file(args.apply))
-        except OSError as exc:
+        except (OSError, ValueError) as exc:
             print(f"could not update {args.apply}: {exc}", file=sys.stderr)
             return 1
         return 0

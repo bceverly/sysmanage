@@ -41,6 +41,7 @@ from backend.services import posture_remedies as remedies
 from backend.services import posture_service as posture
 from backend.services import posture_waivers as waivers
 from backend.services import threat_model_catalog
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -387,9 +388,13 @@ async def apply_remedy(
         # The reason comes from the remedy's own plan, never from the
         # exception (CodeQL py/stack-trace-exposure): apply() refuses exactly
         # when preview() says the remedy is unavailable.
-        logger.debug("Remedy refused for %s: %s", rule_key, exc)
+        logger.debug(
+            "Remedy refused for %s: %s", sanitize_log(rule_key), sanitize_log(exc)
+        )
         reason = remedies.preview(db, item, rule).get("unavailable_reason")
-        code = reason if reason in _REMEDY_CONFLICT_CODES else "remedy_unavailable"
+        # The dict's own value, never ``reason`` itself: the response carries
+        # only a code this module defines.
+        code = _REMEDY_CONFLICT_CODES.get(reason, "remedy_unavailable")
         raise HTTPException(status_code=409, detail={"code": code}) from None
     db.commit()
     return result

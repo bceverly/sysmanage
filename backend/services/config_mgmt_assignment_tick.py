@@ -164,6 +164,41 @@ def _dispatch_in_waves(db_session, assignment, profile, hosts, summary) -> None:
     summary["jobs"] += 1
 
 
+def _apply_assignment(db_session, assignment, summary) -> None:
+    """Dispatch one due assignment's profile to its hosts (in waves when the
+    target is large).  The caller advances ``last_applied_at`` either way."""
+    profile = (
+        db_session.query(models.ConfigProfile)
+        .filter(models.ConfigProfile.id == assignment.profile_id)
+        .first()
+    )
+    try:
+        parameters = dispatch.parameters_for(
+            profile, check_mode=bool(assignment.check_mode)
+        )
+    except dispatch.DispatchError as exc:
+        # A stored body that cannot be turned into a command. The cursor is
+        # advanced anyway: re-deciding this every minute produces an
+        # identical failure and a flooded log.
+        logger.exception(
+            "Assignment %s cannot dispatch profile %s: %s",
+            assignment.id,
+            assignment.profile_id,
+            exc.message,
+        )
+        return
+
+    hosts = _hosts_for(db_session, assignment)
+    if len(hosts) > WAVE_THRESHOLD:
+        _dispatch_in_waves(db_session, assignment, profile, hosts, summary)
+        return
+    for host in hosts:
+        if _dispatch_one(db_session, host, parameters):
+            summary["queued"] += 1
+        else:
+            summary["skipped_hosts"] += 1
+
+
 def _tick_one_database(db_session, automation, now, summary) -> None:
     """Run the tick against ONE database. Never raises.
 
@@ -194,38 +229,7 @@ def _tick_one_database(db_session, automation, now, summary) -> None:
             summary["due"] += 1
             due_here += 1
 
-            profile = (
-                db_session.query(models.ConfigProfile)
-                .filter(models.ConfigProfile.id == assignment.profile_id)
-                .first()
-            )
-            try:
-                parameters = dispatch.parameters_for(
-                    profile, check_mode=bool(assignment.check_mode)
-                )
-            except dispatch.DispatchError as exc:
-                # A stored body that cannot be turned into a command. Advance
-                # the cursor anyway: re-deciding this every minute produces an
-                # identical failure and a flooded log.
-                logger.exception(
-                    "Assignment %s cannot dispatch profile %s: %s",
-                    assignment.id,
-                    assignment.profile_id,
-                    exc.message,
-                )
-                assignment.last_applied_at = now
-                continue
-
-            hosts = _hosts_for(db_session, assignment)
-            if len(hosts) > WAVE_THRESHOLD:
-                _dispatch_in_waves(db_session, assignment, profile, hosts, summary)
-            else:
-                for host in hosts:
-                    if _dispatch_one(db_session, host, parameters):
-                        summary["queued"] += 1
-                    else:
-                        summary["skipped_hosts"] += 1
-
+            _apply_assignment(db_session, assignment, summary)
             assignment.last_applied_at = now
 
         # Per-DATABASE, not per-tick: ``summary`` accumulates across every
