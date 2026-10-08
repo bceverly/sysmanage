@@ -127,8 +127,29 @@ fi
 PSYV=$("${OUT}/bldvenv/bin/python" -c 'import importlib.metadata as m; print(m.version("psycopg"))')
 echo "=== Bundling psycopg-c ${PSYV} source ==="
 rm -rf "${OUT}/psycopg-c-src"
-"${OUT}/bldvenv/bin/python" -m pip download --no-binary :all: --no-deps \
-	"psycopg-c==${PSYV}" -d "${OUT}/psycopg-c-src"
+# Fetched straight from PyPI (sha256-checked), NOT `pip download`: pip
+# prepares the sdist's metadata, which for psycopg-c runs pg_config -- absent
+# on the CI VM, so the v3.10.0.0 release build failed here.  Only the port's
+# compile step (do-build) needs pg_config.
+"${OUT}/bldvenv/bin/python" - "$PSYV" "${OUT}/psycopg-c-src" <<'PY'
+import hashlib, json, sys, urllib.request
+from pathlib import Path
+
+version, dest = sys.argv[1], Path(sys.argv[2])
+dest.mkdir(parents=True, exist_ok=True)
+with urllib.request.urlopen(f"https://pypi.org/pypi/psycopg-c/{version}/json", timeout=60) as r:
+    release = json.load(r)
+sdists = [u for u in release["urls"] if u["packagetype"] == "sdist"]
+if not sdists:
+    sys.exit(f"no source distribution of psycopg-c {version} on PyPI")
+sdist = sdists[0]
+with urllib.request.urlopen(sdist["url"], timeout=120) as r:
+    data = r.read()
+if hashlib.sha256(data).hexdigest() != sdist["digests"]["sha256"]:
+    sys.exit(f"sha256 mismatch for {sdist['filename']}")
+(dest / sdist["filename"]).write_bytes(data)
+print("downloaded", sdist["filename"])
+PY
 mkdir -p "$STAGE/psycopg-c"
 # (OpenBSD tar has no --strip-components: extract, then copy the top dir.)
 ( cd "${OUT}/psycopg-c-src" && tar xzf psycopg_c-*.tar.gz )

@@ -66,7 +66,7 @@ const StaticAddressDialog: React.FC<Props> = ({ open, onClose, onConfirm }) => {
                     <InputLabel id="address-category">{t('assetDiscovery.exclude.category', 'What is it?')}</InputLabel>
                     <Select labelId="address-category" value={category}
                         label={t('assetDiscovery.exclude.category', 'What is it?')}
-                        onChange={e => setCategory(e.target.value as ExclusionCategory)}>
+                        onChange={e => setCategory(e.target.value)}>
                         {EXCLUSION_CATEGORIES.map(c => <MenuItem key={c} value={c}>{categoryLabel(t, c)}</MenuItem>)}
                     </Select>
                 </FormControl>

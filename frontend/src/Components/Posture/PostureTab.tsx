@@ -155,7 +155,7 @@ const PostureTab: React.FC = () => {
                     <FormControl size="small" sx={{ minWidth: 180, mb: 1 }}>
                         <InputLabel id="posture-filter" shrink>{t('posture.filter', 'Show')}</InputLabel>
                         <Select labelId="posture-filter" value={filter} label={t('posture.filter', 'Show')} displayEmpty notched
-                            onChange={e => setFilter(e.target.value as PostureState | '')}>
+                            onChange={e => setFilter(e.target.value)}>
                             <MenuItem value="">{t('posture.filterAll', 'All items')}</MenuItem>
                             {STATES.map(s => <MenuItem key={s} value={s}>{stateLabel(t, s)}</MenuItem>)}
                         </Select>

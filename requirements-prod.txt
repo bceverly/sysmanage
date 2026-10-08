@@ -101,7 +101,8 @@ reportlab==4.4.4
 
 # fallback below (pure-Python, installs everywhere).  Gate to Linux/macOS/Windows.
 requests>=2.33.1  # 2.32.0-2.32.5 has urllib3 redirect-leak CVE chain; 2.33.x is latest patched
-urllib3>=2.7.0  # 2.5.0-2.6.3 has 3 CVEs (Set-Cookie isolation + redirect-Authorization leak); 2.7.0 is latest patched
+urllib3>=2.8.0  # 2.7.0 has PYSEC-2026-4175..4177; 2.5.0-2.6.3 had 3 CVEs (Set-Cookie isolation + redirect-Authorization leak); 2.8.0 is latest patched
+pyasn1>=0.6.4  # transitive (ldap3); 0.6.3 has PYSEC-2026-3455..3457, fixed in 0.6.4
 
 # OpenTelemetry for observability
 

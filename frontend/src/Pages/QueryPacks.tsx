@@ -154,6 +154,9 @@ const QueryPacks: React.FC = () => {
     // the operator opens that tab, and it is the one tab that needs it.
     const [hosts, setHosts] = useState<SysManageHost[]>([]);
     const [selectedHosts, setSelectedHosts] = useState<string[]>([]);
+    // Out of the JSX: inline it nested five functions deep (Sonar S2004).
+    const toggleHost = (id: string, checked: boolean) =>
+        setSelectedHosts((prev) => (checked ? [...prev, id] : prev.filter((x) => x !== id)));
 
     const load = useCallback(async () => {
         try {
@@ -501,13 +504,7 @@ const QueryPacks: React.FC = () => {
                                     <Checkbox
                                         size="small"
                                         checked={selectedHosts.includes(h.id)}
-                                        onChange={(e) =>
-                                            setSelectedHosts((prev) =>
-                                                e.target.checked
-                                                    ? [...prev, h.id]
-                                                    : prev.filter((x) => x !== h.id),
-                                            )
-                                        }
+                                        onChange={(e) => toggleHost(h.id, e.target.checked)}
                                     />
                                 }
                                 label={`${h.fqdn} (${h.platform ?? '?'})`}

@@ -99,7 +99,8 @@ playwright==1.58.0 ; sys_platform == "linux" or sys_platform == "darwin" or sys_
 selenium>=4.43.0  # Web automation framework (fallback for OpenBSD/FreeBSD where Playwright unavailable); CVE in 4.0-4.42 around insecure WebSocket frame handling
 webdriver-manager>=4.0.0
 requests>=2.33.1  # 2.32.0-2.32.5 has urllib3 redirect-leak CVE chain; 2.33.x is latest patched
-urllib3>=2.7.0  # 2.5.0-2.6.3 has 3 CVEs (Set-Cookie isolation + redirect-Authorization leak); 2.7.0 is latest patched
+urllib3>=2.8.0  # 2.7.0 has PYSEC-2026-4175..4177; 2.5.0-2.6.3 had 3 CVEs (Set-Cookie isolation + redirect-Authorization leak); 2.8.0 is latest patched
+pyasn1>=0.6.4  # transitive (ldap3); 0.6.3 has PYSEC-2026-3455..3457, fixed in 0.6.4
 
 # OpenTelemetry for observability
 # Note: Using minimum versions to allow pip to resolve compatible version sets

@@ -60,7 +60,7 @@ const ExcludeDialog: React.FC<Props> = ({ open, count, suggested, onClose, onCon
                     <InputLabel id="exclude-category">{t('assetDiscovery.exclude.category', 'What is it?')}</InputLabel>
                     <Select labelId="exclude-category" value={category}
                         label={t('assetDiscovery.exclude.category', 'What is it?')}
-                        onChange={e => setCategory(e.target.value as ExclusionCategory)}>
+                        onChange={e => setCategory(e.target.value)}>
                         {EXCLUSION_CATEGORIES.map(c => <MenuItem key={c} value={c}>{categoryLabel(t, c)}</MenuItem>)}
                     </Select>
                 </FormControl>

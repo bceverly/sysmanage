@@ -13,3 +13,6 @@ isort
 bandit
 safety
 # semgrep: see requirements-semgrep.txt (its own tool venv).
+
+# The venv's own pip is audited too (make security); 26.1.x has PYSEC-2026-3721.
+pip>=26.2.0

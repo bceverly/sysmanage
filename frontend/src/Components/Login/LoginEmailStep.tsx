@@ -25,7 +25,7 @@ export const LoginEmailStep: React.FC<EmailStepProps> = ({ email, onEmailChange,
     const { t } = useTranslation();
     const [checking, setChecking] = useState(false);
 
-    const submit = (e: React.FormEvent) => {
+    const submit = (e: React.SyntheticEvent) => {
         e.preventDefault();
         if (email.trim() === '') return;
         setChecking(true);

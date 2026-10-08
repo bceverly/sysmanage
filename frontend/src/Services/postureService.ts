@@ -209,6 +209,6 @@ export const postureService = {
 export const refusalCode = (err: unknown): string | null => {
   const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
   return detail && typeof detail === "object" && "code" in detail
-    ? String((detail as { code: unknown }).code)
+    ? String(detail.code)
     : null;
 };

@@ -1,0 +1,18 @@
+# Reviewed pip-audit exceptions for `make security` (scripts/check_python_deps.py).
+#
+# Every entry needs an id and a reason; an optional expires date makes the
+# ignore FAIL the gate once it has passed, so an exception gets re-checked
+# instead of outliving the reason for it.  Same format in every SysManage
+# repository.
+#
+# vulnerabilities:
+#   - id: CVE-2026-12345
+#     reason: "why it does not apply here, or why it cannot be fixed yet"
+#     expires: 2026-12-31
+
+vulnerabilities:
+  # pip itself: a concatenated tar/ZIP is handled as a ZIP.  Carried from the
+  # CI pip-audit step, where it had no published fix.
+  - id: CVE-2026-3219
+    reason: "pip handles a concatenated tar/ZIP as ZIP; no fixed pip release when recorded"
+    expires: 2026-12-31

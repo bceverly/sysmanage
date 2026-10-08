@@ -277,6 +277,11 @@ else
 endif
 
 # Install development dependencies
+# --upgrade --upgrade-strategy eager: plain `pip install -r` leaves an installed
+# package alone while it still meets its (usually unpinned) requirement, so a local
+# venv kept vulnerable versions CI never sees (CI always installs fresh).  With it,
+# install-dev brings every package -- transitive ones too -- to the newest allowed
+# version, and `make security` (scripts/check_python_deps.py) checks the result.
 install-dev: setup-venv install-hooks
 	@echo "Installing Python development dependencies..."
 ifeq ($(OS),Windows_NT)
@@ -288,7 +293,7 @@ ifeq ($(OS),Windows_NT)
 	@REM BSD branches) BEFORE the pip install, so opentelemetry-exporter-otlp resolves
 	@REM against it. No-ops on x64 (prebuilt wheel) and if grpcio is already built.
 	-@powershell -ExecutionPolicy Bypass -File scripts/build-grpcio-win-arm64.ps1
-	@$(WIN_ARM64_ENV) $(PYTHON) -m pip install -r requirements-dev.txt
+	@$(WIN_ARM64_ENV) $(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r requirements-dev.txt
 else
 	@if [ "$$(uname -s)" = "Darwin" ]; then \
 		echo "[INFO] macOS detected - checking for packaging tools..."; \
@@ -301,7 +306,7 @@ else
 		if command -v pkgbuild >/dev/null 2>&1 && command -v productbuild >/dev/null 2>&1; then \
 			echo "✓ All macOS packaging tools available"; \
 		fi; \
-		$(PYTHON) -m pip install -r requirements-dev.txt; \
+		$(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r requirements-dev.txt; \
 	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
 		echo "[INFO] OpenBSD detected - using ~/tmp for builds..."; \
 		if ! command -v xmlsec1 >/dev/null 2>&1; then \
@@ -309,7 +314,7 @@ else
 			doas pkg_add xmlsec || echo "[WARN] Could not auto-install xmlsec; if the xmlsec wheel later fails to build, run:  doas pkg_add xmlsec"; \
 		fi; \
 		export TMPDIR=$$HOME/tmp && \
-		$(PYTHON) -m pip install -r requirements-dev.txt; \
+		$(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r requirements-dev.txt; \
 	elif [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "[INFO] NetBSD detected - configuring source builds (grpcio, cryptography, lxml)..."; \
 		export PATH="$$HOME/.cargo/bin:/usr/pkg/bin:$$PATH"; \
@@ -364,7 +369,7 @@ else
 		export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 && \
 		export GRPC_PYTHON_BUILD_SYSTEM_CARES=1 && \
 		export GRPC_PYTHON_BUILD_EXT_COMPILER_JOBS=1 && \
-		$(PYTHON) -m pip install -r requirements-dev.txt; \
+		$(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r requirements-dev.txt; \
 	elif [ "$$(uname -s)" = "FreeBSD" ]; then \
 		echo "[INFO] FreeBSD detected - checking for system dependencies..."; \
 		PYVER=$$($(PYTHON) -c "import sys; v=sys.version_info; print(f'py{v.major}{v.minor}')"); \
@@ -389,14 +394,14 @@ else
 				exit 1; \
 			}; \
 		fi; \
-		$(PYTHON) -m pip install -r requirements-dev.txt; \
+		$(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r requirements-dev.txt; \
 	else \
-		$(PYTHON) -m pip install -r requirements-dev.txt; \
+		$(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r requirements-dev.txt; \
 	fi
 endif
 	@echo "Installing requirements.txt (includes Selenium WebDriver)..."
 ifeq ($(OS),Windows_NT)
-	@$(WIN_ARM64_ENV) $(PYTHON) -m pip install -r requirements.txt
+	@$(WIN_ARM64_ENV) $(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r requirements.txt
 else
 	@if [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "[INFO] NetBSD - using /var/tmp and excluding Playwright and gevent..."; \
@@ -426,7 +431,7 @@ else
 		grep -v "playwright" requirements.txt | $(PYTHON) -m pip install -r /dev/stdin || { echo "[ERROR] Failed to install requirements"; exit 1; }; \
 		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
 	else \
-		$(PYTHON) -m pip install -r requirements.txt; \
+		$(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r requirements.txt; \
 	fi
 endif
 ifneq ($(OS),Windows_NT)
@@ -1652,6 +1657,9 @@ else
 	@$(PYTHON) -m pip list | grep -E "(cryptography|aiohttp|black|bandit|websockets|PyYAML|SQLAlchemy|alembic|safety|fastapi|starlette|jinja2|python-multipart|setuptools)" || echo "Package list completed"
 endif
 	@echo ""
+	@echo "Running the dependency gate (requirements met + pip-audit of this environment)..."
+	@$(PYTHON) scripts/check_python_deps.py
+	@echo ""
 	@echo "Note: Check Safety web UI at https://platform.safetycli.com/codebases/sysmanage/findings?branch=main"
 	@echo "      for specific version upgrade recommendations when vulnerabilities are found."
 	@echo "[OK] Python security analysis completed"
@@ -2631,7 +2639,6 @@ installer-deb:
 	echo ""; \
 	echo "Moving package to output directory..."; \
 	mv "$$BUILD_TEMP"/sysmanage_*.deb "$$OUTPUT_DIR/"; \
-	# The second binary package from the same source (Phase 22.9).
 	mv "$$BUILD_TEMP"/sysmanage-canary_*.deb "$$OUTPUT_DIR/"; \
 	mv "$$BUILD_TEMP"/sysmanage_*.buildinfo "$$OUTPUT_DIR/" 2>/dev/null || true; \
 	mv "$$BUILD_TEMP"/sysmanage_*.changes "$$OUTPUT_DIR/" 2>/dev/null || true; \
