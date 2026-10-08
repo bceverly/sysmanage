@@ -94,6 +94,8 @@ help:
 	@echo "  make i18n-strip-orphans - DESTRUCTIVE: delete locale keys no longer referenced in code"
 	@echo "  make i18n-complete     - Offline gate: every locale 100% translated (what CI runs)"
 	@echo "  make i18n-strict       - Catch English-identical, stale and wrong-language values"
+	@echo "  make i18n-verify       - Every translation proven (ledger + deterministic checks)"
+	@echo "  make i18n-verify-run   - Verify unledgered translations (needs SERVICE=)"
 	@echo "  make i18n-markup       - Markup/structure gate (tags and entities must survive translation)"
 	@echo "  make i18n-markup-fix   - Requeue and refill values that fail the markup gate"
 	@echo "  make i18n-placeholders - Placeholder integrity: {{count}} et al must be preserved"
@@ -1110,6 +1112,7 @@ else
 	fi; \
 	echo ""; echo "[OK] translation backfill complete -- frontend + backend at 100%."
 endif
+	@$(MAKE) --no-print-directory i18n-verify-run SERVICE="$(SERVICE)"
 
 translate-dry: $(VENV_ACTIVATE)
 ifeq ($(OS),Windows_NT)
@@ -1412,6 +1415,21 @@ i18n-markup: $(VENV_ACTIVATE)
 	@echo "=== i18n markup (tags preserved from English) ==="
 	@$(PYTHON) scripts/i18n_check_markup.py
 	@echo "[OK] i18n markup gate passed"
+
+# Translation verifier (scripts/i18n_verify.py).  i18n-strict and its siblings
+# each catch one KIND of bad translation found in the past; this one asks the
+# opposite question -- has every translated value been PROVEN good?  It fails
+# on any value that is not in the ledger (.i18n-verified) for its exact
+# English + translation, or that fails the deterministic checks
+# (scripts/i18n_quality.py: English left in, list literals, pipeline markers,
+# broken placeholders).  i18n-verify-run fills the ledger and needs the GPU
+# translation service; `make translate` runs it on what it writes.
+i18n-verify: $(VENV_ACTIVATE)
+	@echo "=== i18n verify (every translation proven, not merely defect-free) ==="
+	@$(PYTHON) scripts/i18n_verify.py
+
+i18n-verify-run: $(VENV_ACTIVATE)
+	@$(PYTHON) scripts/i18n_verify.py --service "$(SERVICE)"
 
 i18n-strict: $(VENV_ACTIVATE)
 	@echo "=== i18n strict (English-identical + stale) ==="

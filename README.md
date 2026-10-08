@@ -250,22 +250,34 @@ Run them locally with `make test-lucky13` (also part of `make security` and
 
 ### Development
 ```bash
-# Backend
-uvicorn backend.main:app --reload --host 0.0.0.0 --port 6443
-
-# Frontend
-cd frontend && npm run dev
+make start    # backend + frontend dev server + OpenBAO
+make stop
 ```
 
 ### Production
-```bash
-# Backend (more than one worker requires PostgreSQL: the workers elect one
-# leader for background work and claim queued messages per host)
-uvicorn backend.main:app --host 0.0.0.0 --port 6443 --workers 4
+Install a package (`.deb`, `.rpm`, BSD package or port, macOS `.pkg`,
+Windows `.msi`) rather than running the server by hand; every installer
+sets it up the same way:
 
-# Frontend
-cd frontend && npm run build
-# Serve built files from frontend/dist/
+- **nginx is the only listener on the network.**  It terminates TLS on
+  443 (80 only redirects), serves the built web UI from
+  `frontend/dist/`, and proxies `/api/` and the agent WebSocket to the
+  backend.  That is the whole firewall requirement: inbound 443 on the
+  server, outbound 443 from each agent.
+- **The backend listens on loopback only** (`api.host: localhost`,
+  `api.port: 8080` in `/etc/sysmanage.yaml`).  It starts as a service
+  (systemd, rc.d, launchd or a Windows service) running
+  `python -m backend.main` from the install's virtual environment, never
+  a bare `uvicorn` on a public address.
+- **Worker processes size themselves** (`api.workers: auto`): CPUs minus
+  a quarter, at most one per GB of memory beyond 2 GB, at most 16.  More
+  than one worker requires PostgreSQL (the workers elect one leader for
+  background work and claim queued messages per host); SQLite always
+  runs one.
+
+```bash
+# What the service runs (Linux path shown):
+/opt/sysmanage/.venv/bin/python -m backend.main
 ```
 
 **📖 For detailed deployment instructions, visit [sysmanage.org/docs/server/deployment.html](https://sysmanage.org/docs/server/deployment.html)**

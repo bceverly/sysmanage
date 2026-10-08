@@ -100,6 +100,10 @@ curl -s http://localhost:8765/health | python3 -m json.tool
 | `OLLAMA_TIMEOUT`    | `600`                    | Seconds per LLM call                      |
 | `NUM_CTX`           | `8192`                   | Ollama context window                     |
 | `OLLAMA_KEEP_ALIVE` | `30m`                    | Keep model resident in VRAM (`-1` = pin)  |
+| `VERIFY_EMBED_MODEL`| `bge-m3`                 | Embedding model for `/verify/batch`       |
+| `VERIFY_JUDGE_MODEL`| *the translation model*  | Judge for the middle similarity band      |
+| `VERIFY_PASS_AT`    | `0.75`                   | Cosine at or above which a pair passes    |
+| `VERIFY_FAIL_BELOW` | `0.40`                   | Cosine below which a pair fails           |
 
 ## VRAM & model residency (does it reload per language?)
 
@@ -158,6 +162,28 @@ curl -s http://BEAST:8765/translate/batch -H 'content-type: application/json' -d
 ```
 
 Always batch from the clients -- one round-trip per chunk instead of per string.
+
+### `POST /verify/batch` -- is each translation right?
+The model half of `scripts/i18n_verify.py` (`make i18n-verify-run`). One
+locale per request; each item comes back `ok` or with a `reason`. Needs the
+embedding model once: `ollama pull bge-m3`.
+```bash
+curl -s http://BEAST:8765/verify/batch -H 'content-type: application/json' -d '{
+  "lang": "fr",
+  "items": [{"source": "Save", "value": "Enregistrer"},
+            {"source": "Example Config", "value": "Fallback factor when the authenticator app is unreachable"}]
+}'
+```
+```json
+{ "verifier": "1:bge-m3:0.75:0.4",
+  "results": [ {"ok": true, "cos": 0.81},
+               {"ok": false, "reason": "untranslated English: when the is"} ] }
+```
+A pair passes the deterministic checks (`scripts/i18n_quality.py`, the same
+code CI runs), then bge-m3 cosine >= 0.75 passes and < 0.40 fails; the band
+between goes to the translation model as a one-item judge. Why that shape --
+and why the model is never asked about *language* -- is measured in
+`translate_verify.py`'s docstring.
 
 ## Robustness contract (so a translation pass never half-dies)
 

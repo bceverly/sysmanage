@@ -476,7 +476,7 @@ drifted down as feature pages shipped without tests.
 
 | Frontend | Path | Baseline (2026-06) | After Phase 13 | Enforced floor |
 |---|---|---|---|---|
-| OSS SysManage | `sysmanage/frontend/src` | ~9% | ~12% | **≥70% lines** (raised to 60 on 2026-08-26, then to 70 during Phase 20; measured 71.88%) |
+| OSS SysManage | `sysmanage/frontend/src` | ~9% | ~12% | **≥80% lines** (raised to 60 on 2026-08-26, to 70 during Phase 20, then to 80 at the Phase 22 exit gate on 2026-10-08; measured 82.49%) |
 | License server (admin portal) | `sysmanage-professional-plus/frontend/src` | ~23% | **~50%** | **≥48% lines** |
 | Pro+ components (plugin bundles) | `sysmanage-professional-plus/frontend/plugin-src` | ~7% | **~54%** | **≥53% lines** |
 
@@ -651,7 +651,7 @@ the explicit bullet is added to the in-progress and future phases.)
 
 ### Release Versioning
 
-**Current Version:** v3.9.0.0
+**Current Version:** v3.10.0.0
 
 *(This one line is HAND-maintained -- it is NOT git-tag-derived like the
 on-disk markers are, which is exactly how it sat silently at v3.3.0.0
@@ -13094,7 +13094,17 @@ unforgivable.
       14 OSS catalogs as `[MISSING:...]` because `i18n_validate.py` extracted
       keys from test files; it now skips `__tests__`/`.test.`/`.spec.`
       (test added) and the 56 values are stripped.*
-- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+- [x] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+      *Closed 2026-10-08 at v3.10.0.0 (Bryan ran lint, security, SonarCloud,
+      CodeQL, the load-harness regression check and the release workflow, and
+      tagged). OSS frontend coverage rung: 2,283 tests, lines 72.51% -> 82.49%;
+      floors raised to lines 80 / statements 79 / functions 69 / branches 63.
+      Writing those tests found a crash on the Updates page (a null
+      `host_id` in the host dropdown) -- fixed -- and two
+      ThirdPartyRepositories tests that passed without asserting anything --
+      replaced. Docs roadmap page: scale hardening moved to shipped, claiming
+      only what was proven (10,000 agents / 20 tenants); the 50,000-agent
+      claim moved to the Phase 23 card.*
 
 ---
 
@@ -13350,6 +13360,59 @@ it today.
 - [ ] Docs + screenshots + 14-language i18n; tests per OS for the service
       parsers (recorded command output), the offset estimate, bound
       resolution (fleet / tenant / site / tag) and the resync dispatch.
+
+#### 23.4 Translation verification: every value proven, not merely defect-free (all four repos)
+
+**Added 2026-10-08 (Bryan: "so tired of 'discovering' bad translations... i
+feel like there is something we should be doing differently").** Every
+existing i18n gate recognizes one failure found in the past, so a translation
+wrong in a new way passes all of them. A scan that day found, in sysmanage-docs
+alone, English text filed under unrelated keys, values that were Python list
+literals, `[MISSING:` markers that had been translated, and "Franglais" from
+the old word-substitution scripts. Measured design (calibrated on beast against
+780 random real values and every defect the scan found):
+
+- [x] **`scripts/i18n_quality.py`** (shared, synced): deterministic checks --
+      English function words outside code/quotes (flagged 4 of 780 good values,
+      all genuinely broken; caught 112 of 126 half-English ones), list
+      literals and non-string values, pipeline markers, placeholder parity.
+      The translation service now runs the English check on its own output
+      (guard `english`, with a correction note), so it stops writing them.
+- [x] **`scripts/i18n_verify.py`** (shared, synced): a value passes only when
+      it is in the repo's ledger `.i18n-verified` for its exact
+      locale + English + translation (editing either re-verifies it) and passes
+      the deterministic checks. Reads every surface `i18n_strict` reads plus
+      the Pro+ plugin bundles. `--service` verifies what is missing,
+      `--requeue` marks rejects `[TODO]`, `--accept ... --reason` records a
+      human override. `make i18n-verify` / `make i18n-verify-run`; every
+      `make translate` ends with a verify run.
+- [x] **Service `POST /verify/batch`** (`translate_verify.py`): bge-m3 cosine
+      >= 0.75 passes, < 0.40 fails (390 swapped wrong-key pairs never exceeded
+      0.62), the band between goes to a ONE-item judge (rejected 24 of 25
+      wrong-key values, passed 25 of 25 good ones). Not asked of the model:
+      language -- it passed whole English paragraphs as "Korean".
+- [x] **The legacy writers are gone**: 14 word-substitution scripts and an
+      analysis dump deleted from `sysmanage-docs/assets/locales/` (they were
+      also being shipped to the website by the docs package).
+- [ ] **Bootstrap the ledgers** on beast (`ollama pull bge-m3` once), repo by
+      repo: `make i18n-verify-run SERVICE=http://beast:8765`. ~350k values
+      (docs 266k); resumable -- an interrupted run keeps what it verified.
+      *sysmanage-agent DONE 2026-10-08 (scratch service on beast): 9,077
+      values, 8,944 verified, 133 rejected -- spot-checked by hand, all but
+      a few genuinely wrong: a dozen locales showed "Failed to collect
+      software inventory" for "Failed to get BSD/Linux network info",
+      "Could not mark ... as processing" read "Message marked as
+      processing", and Hindi was gibberish in places. Requeued and
+      retranslated (123 then verified), 7 hand-written (Hindi beyond the 8b
+      model), 3 judge false alarms on one-word strings accepted with
+      reasons. `make i18n-verify` passes in the agent. Throughput ~400
+      values/min, so the docs pass is ~8-9 hours.*
+- [ ] **Redo every reject**: `python3 scripts/i18n_verify.py --requeue`, then
+      `make translate` (which re-verifies); `--accept` only for a genuine false
+      alarm, with its reason.
+- [ ] **Wire `i18n-verify` into `make lint`** in all four repos once each
+      ledger is complete, so an unverified translation fails the build.
+
 
 #### Exit criteria
 

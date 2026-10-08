@@ -365,11 +365,16 @@ export default defineConfig({
       // refactor does not turn red before anyone has written a line of new
       // code. Measured at the time of the bump: lines 71.59, statements
       // 70.28, functions 58.61, branches 50.26.
+      //
+      // Phase 22 rung (2026-10-08): the gate's +10 step reaches the Python 75%
+      // gate, and coverage overshot it.  Measured at the bump: lines 82.49,
+      // statements 81.27, functions 71.71, branches 65.50.  Floors again sit
+      // ~2-3 points under measured.  NEVER lower these.
       thresholds: {
-        lines: 70,
-        statements: 68,
-        functions: 56,
-        branches: 48,
+        lines: 80,
+        statements: 79,
+        functions: 69,
+        branches: 63,
       },
       exclude: [
         'node_modules/',

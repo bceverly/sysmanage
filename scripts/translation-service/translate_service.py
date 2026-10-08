@@ -74,6 +74,13 @@ from pydantic import BaseModel, Field
 # will not start.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 try:
+    # The deterministic checks the verifier and CI run (i18n_quality.py).  The
+    # service runs them on its OWN output, so it stops writing half-English
+    # values instead of leaving them for a gate to find.
+    import i18n_quality
+except ImportError:  # pragma: no cover - deployment accident
+    i18n_quality = None
+try:
     import i18n_glossary as glossary
 except ImportError as _exc:  # pragma: no cover - deployment accident
     glossary = None
@@ -396,7 +403,7 @@ _SCRIPT_TAGS = (
 # new output guard lands, so `curl .../health` distinguishes builds.
 # "untranslated" is opt-in per request (require_change) -- advertised so a
 # deploy is verifiable, same as the other two.
-SERVICE_GUARDS = ("placeholders", "language", "untranslated")
+SERVICE_GUARDS = ("placeholders", "language", "untranslated", "english")
 
 
 def _scripts_used(text: str) -> set:
@@ -498,6 +505,12 @@ def _correction_note(reason: str, src: str, lang_code: str) -> str:
         return (
             f"Your previous answer was NOT in {language}. Answer in {language}, "
             f"written in the {scripts} script. Do not answer in any other language."
+        )
+    if reason == "english":
+        return (
+            "Your previous answer left ordinary English words in it. Translate "
+            f"the WHOLE sentence into {language}; keep only product names, code, "
+            "commands, paths and placeholders in English."
         )
     if reason == "untranslated":
         return (
@@ -637,7 +650,12 @@ async def _raw_chunk(
         "format": "json",
         "stream": False,
         "keep_alive": OLLAMA_KEEP_ALIVE,
-        "options": {"temperature": 0, "num_ctx": NUM_CTX},
+        # num_predict: Ollama shifts the context and keeps generating when a
+        # reply never terminates, so without a cap one bad answer runs until
+        # the process is restarted (seen 2026-10-08: 14,000+ tokens, GPU held,
+        # every later request queued behind it).  No real reply needs more
+        # tokens than the context window holds.
+        "options": {"temperature": 0, "num_ctx": NUM_CTX, "num_predict": NUM_CTX},
         "messages": [
             {
                 "role": "system",
@@ -745,6 +763,15 @@ async def _ollama_translate_chunk(
             return "placeholders"
         if not _language_ok(lang_code, txt):
             return "language"
+        if (
+            i18n_quality is not None
+            and len(i18n_quality.english_words(lang_code, txt))
+            >= i18n_quality.ENGLISH_HIT_LIMIT
+        ):
+            # English left in the answer, whole or word by word ("Cliquer
+            # 'Ajouter Dépôt' to appliquer to tous compatible hôtes").  The
+            # script guard above cannot see it: it is the right alphabet.
+            return "english"
         if require_change and txt.strip() == src.strip():
             # The caller filters its intentionally-English strings out before
             # sending, so anything that arrives here MUST change.  Without this
@@ -1009,6 +1036,22 @@ app = FastAPI(
 )
 
 
+# Verification (POST /verify/batch) lives in translate_verify.py; it shares
+# this service's Ollama, model and markup masking.
+from translate_verify import VERIFIER_VERSION, make_router  # noqa: E402
+
+app.include_router(
+    make_router(
+        OLLAMA_URL,
+        os.getenv("VERIFY_JUDGE_MODEL", TRANSLATION_MODEL),
+        LANGUAGES,
+        _mask_markup,
+        OLLAMA_TIMEOUT,
+        OLLAMA_KEEP_ALIVE,
+    )
+)
+
+
 @app.get("/languages")
 async def languages() -> dict:
     return {"languages": LANGUAGES, "count": len(LANGUAGES)}
@@ -1046,6 +1089,7 @@ async def health() -> dict:
         # service from one still running the previous file -- and the guards are
         # invisible when working (they only ever suppress bad output).
         "guards": sorted(SERVICE_GUARDS),
+        "verifier": VERIFIER_VERSION,
     }
 
 

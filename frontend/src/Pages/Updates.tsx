@@ -130,6 +130,9 @@ const Updates: React.FC = () => {
       // Extract unique hosts from updates
       const hostMap = new Map<string, { hostname: string; count: number }>();
       (response.updates || []).forEach(update => {
+        // An update with no host can't be filtered to; running updates skips
+        // these rows too.  Left in, host.hostId.toString() crashed the page.
+        if (update.host_id === null || update.host_id === undefined) return;
         const existing = hostMap.get(update.host_id);
         if (existing) {
           existing.count++;
@@ -146,7 +149,7 @@ const Updates: React.FC = () => {
         hostId,
         hostname: data.hostname,
         updateCount: data.count
-      })).sort((a, b) => a.hostname.localeCompare(b.hostname));
+      })).sort((a, b) => (a.hostname ?? '').localeCompare(b.hostname ?? ''));
 
       setHostsWithUpdates(hosts);
     } catch (error) {

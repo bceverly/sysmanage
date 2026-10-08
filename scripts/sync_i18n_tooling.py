@@ -65,6 +65,12 @@ SHARED = [
     # defect it was added for walks straight through.  Same path everywhere,
     # which is also the path the translation service imports.
     ("scripts/i18n_glossary.py", "scripts/i18n_glossary.py"),
+    # The translation verifier and its deterministic checks.  Neither carries a
+    # per-repo block: the verifier reads SURFACES from i18n_strict (plus the
+    # Pro+ plugin bundles when plugin_i18n_lib is importable), and
+    # i18n_quality.py is also what the translation service imports.
+    ("scripts/i18n_quality.py", "scripts/i18n_quality.py"),
+    ("scripts/i18n_verify.py", "scripts/i18n_verify.py"),
 ]
 
 # sysmanage keeps the translation backfill under scripts/translation-service/,

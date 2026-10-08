@@ -283,3 +283,7 @@ agent.db-journal
 marketing/.build/
 marketing/executive-opportunity-brief.docx
 marketing/executive-opportunity-brief.pdf
+
+# Working file of scripts/i18n_verify.py (the last run's rejects); the ledger
+# itself, .i18n-verified, IS tracked.
+.i18n-verify-failures.json

@@ -2,7 +2,7 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { vi, describe, beforeEach, afterEach, test, expect } from "vitest";
 
 vi.mock("react-i18next", () => {
@@ -193,11 +193,11 @@ describe("the add dialog", () => {
     m(axiosInstance.get).mockResolvedValue({ data: { repositories: [] } });
     renderPage();
     await click("fire-add");
-    await screen.findByRole("dialog");
-    const submit = screen
-      .getAllByRole("button")
-      .find((b) => /^add$/i.test((b.textContent || "").trim()));
-    if (!submit) return;
+    const dialog = await screen.findByRole("dialog");
+    // The i18n mock renders keys, so the button's name is the key itself.
+    // This used to look for "add", never found it, and returned early --
+    // passing without ever clicking.
+    const submit = within(dialog).getByRole("button", { name: "common.add" });
     await act(async () => {
       fireEvent.click(submit);
     });
@@ -249,41 +249,10 @@ const withRepos = () => {
   m(axiosInstance.get).mockResolvedValue({ data: { repositories: REPOS } });
 };
 
-describe("the add payload by platform", () => {
-  const addWith = async (osName: string, value: string) => {
-    withRepos();
-    renderPage({ osName });
-    await click("fire-add");
-    await screen.findByRole("dialog");
-    const fields = screen.queryAllByRole("textbox");
-    if (fields.length === 0) return false;
-    await act(async () => {
-      fireEvent.change(fields[0], { target: { value } });
-    });
-    const submit = screen
-      .getAllByRole("button")
-      .find((b) => /^add$/i.test((b.textContent || "").trim()));
-    if (!submit) return false;
-    await act(async () => {
-      fireEvent.click(submit);
-    });
-    return true;
-  };
-
-  test("an apt host sends only the repository identifier", async () => {
-    if (!(await addWith("Ubuntu", "ppa:example/ppa"))) return;
-    await waitFor(() => expect(m(axiosInstance.post)).toHaveBeenCalled());
-    const payload = m(axiosInstance.post).mock.calls[0][1];
-    expect(payload).toHaveProperty("repository");
-    expect(payload).not.toHaveProperty("type");
-  });
-
-  test("a SUSE host sends the identifier as the url too", async () => {
-    if (!(await addWith("openSUSE Tumbleweed", "http://repo.invalid/x"))) return;
-    await waitFor(() => expect(m(axiosInstance.post)).toHaveBeenCalled());
-    expect(m(axiosInstance.post).mock.calls[0][1]).toHaveProperty("url");
-  });
-});
+// The add payload for every platform is asserted in
+// ThirdPartyRepositories.extra.test.tsx.  Two tests here used to cover it, but
+// they looked for a button label that never rendered under this file's i18n
+// mock and returned early -- passing without ever clicking anything.
 
 describe("bulk actions with a selection", () => {
   test("the enable endpoint is distinct from the disable one", async () => {
