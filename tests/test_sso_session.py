@@ -11,6 +11,7 @@ HttpOnly cookie (never the URL), failures land there with a reason code, and
 the console takes the session exactly once.
 """
 
+import asyncio
 import uuid
 from unittest.mock import MagicMock, patch
 
@@ -21,7 +22,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from backend.api import external_idp, sso_session
+from backend.api import external_idp, sso_session, sso_state
 from backend.auth.auth_handler import decode_jwt, sign_jwt
 from backend.persistence import models
 from backend.persistence.db import Base
@@ -101,7 +102,7 @@ def _link_user(db):
 
 async def _callback(db, engine, state="state-1", issued=True):
     if issued:
-        external_idp._OIDC_STATE_STORE[state] = str(OIDC_ID)
+        sso_state.save(db, state, OIDC_ID)
     with patch("backend.api.external_idp.module_loader") as loader, patch.object(
         external_idp, "_resolve_secret", return_value="client-secret"
     ):
@@ -197,7 +198,7 @@ def test_http_console_gets_no_secure_flag():
 @pytest.mark.asyncio
 async def test_providers_lists_enabled_server_wide_sso_only(db):
     with patch.object(sso_session, "_module_loaded", return_value=True):
-        listed = await sso_session.list_sso_providers(None, db)
+        listed = await sso_session.list_sso_providers(db)
     assert [(p["name"], p["type"]) for p in listed] == [
         ("Azure", "saml"),
         ("Okta", "oidc"),
@@ -207,18 +208,17 @@ async def test_providers_lists_enabled_server_wide_sso_only(db):
 
 
 @pytest.mark.asyncio
-async def test_providers_for_a_named_tenant(db):
+async def test_a_tenants_providers_are_never_listed_here(db):
+    """Only through login discovery, for an email in the tenant's domains."""
     with patch.object(sso_session, "_module_loaded", return_value=True):
-        listed = await sso_session.list_sso_providers(str(TENANT_ID), db)
-        garbage = await sso_session.list_sso_providers("not-a-uuid", db)
-    assert [p["name"] for p in listed] == ["Tenant IdP"]
-    assert garbage == []
+        listed = await sso_session.list_sso_providers(db)
+    assert "Tenant IdP" not in [p["name"] for p in listed]
 
 
 @pytest.mark.asyncio
 async def test_providers_empty_without_license(db):
     with patch.object(sso_session, "_module_loaded", return_value=False):
-        assert await sso_session.list_sso_providers(None, db) == []
+        assert await sso_session.list_sso_providers(db) == []
 
 
 def _request_with(cookie):
@@ -247,3 +247,67 @@ async def test_take_session_without_valid_cookie_is_401(cookie):
     with pytest.raises(HTTPException) as exc:
         await sso_session.take_sso_session(_request_with(cookie), Response())
     assert exc.value.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_the_state_is_shared_not_per_worker(db, console):
+    """Phase 22.8 (2026-10-07): /start and the IdP's return can reach
+    DIFFERENT workers.  The state lives in the database, so any worker that
+    sees the callback finds it -- nothing in this process holds it."""
+    _link_user(db)
+    sso_state.save(db, "from-another-worker", OIDC_ID)
+    result = await _callback(db, _engine(), state="from-another-worker", issued=False)
+    assert result.headers["location"] == f"{CONSOLE}/login/sso"
+
+
+@pytest.mark.asyncio
+async def test_a_state_is_good_for_one_sign_in(db, console):
+    _link_user(db)
+    first = await _callback(db, _engine(), state="once")
+    assert first.headers["location"] == f"{CONSOLE}/login/sso"
+    replay = await _callback(db, _engine(), state="once", issued=False)
+    assert "error=" in replay.headers["location"]
+
+
+def test_an_expired_state_is_refused(db):
+    sso_state.save(db, "old", OIDC_ID)
+    row = db.get(models.SsoPendingState, "old")
+    row.created_at = row.created_at - __import__("datetime").timedelta(
+        seconds=sso_state.MAX_AGE_SECONDS + 1
+    )
+    db.commit()
+    assert sso_state.claim(db, "old") is None
+
+
+def _discover(db, email, tenants=()):
+    with patch.object(sso_session, "_module_loaded", return_value=True), patch.object(
+        sso_session, "_tenants_for_domain", return_value=list(tenants)
+    ):
+        return asyncio.run(
+            sso_session.discover_login_methods(
+                sso_session.LoginDiscoveryRequest(email=email), db
+            )
+        )
+
+
+def test_discovery_offers_server_wide_providers_and_always_a_password(db):
+    result = _discover(db, "someone@nowhere.example")
+    assert result["password"] is True
+    assert [p["name"] for p in result["providers"]] == ["Azure", "Okta"]
+
+
+def test_discovery_adds_the_providers_of_tenants_owning_the_domain(db):
+    result = _discover(db, "bryan@acme.com", tenants=[TENANT_ID])
+    assert "Tenant IdP" in [p["name"] for p in result["providers"]]
+    entry = next(p for p in result["providers"] if p["name"] == "Tenant IdP")
+    assert entry["start_url"] == f"/api/auth/oidc/{entry['id']}/start"
+
+
+def test_discovery_does_not_depend_on_whether_the_account_exists(db):
+    """Same domain, one address with an account and one without: the same
+    answer, so the login page cannot be used to probe for accounts."""
+    db.add(models.User(userid="known@acme.com", active=True, is_admin=False))
+    db.commit()
+    known = _discover(db, "known@acme.com", tenants=[TENANT_ID])
+    unknown = _discover(db, "nobody@acme.com", tenants=[TENANT_ID])
+    assert known == unknown

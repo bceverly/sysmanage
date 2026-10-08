@@ -1939,7 +1939,7 @@
       "caBundle": "مسار حزمة TLS CA (اختياري)",
       "clientId": "معرّف العميل",
       "clientSecret": "سر العميل (معرّف سر Vault)",
-      "clientSecretHelp": "مرجع مثل vault:secret/path أو literal:plaintext",
+      "clientSecretHelp": "ليس السر نفسه بل مكان العثور عليه: vault:path/to/secret، أو literal: متبوعًا بالسر (للاختبار فقط).",
       "discovery": "تجاوز URL للاكتشاف (اختياري)",
       "enabled": "مفعّل",
       "groupBase": "قاعدة بحث المجموعات (اختياري)",
@@ -1960,7 +1960,7 @@
       "samlIdpEntityId": "رمز الكيان IdP",
       "samlIdpSso": "URL SSO للكيان IdP",
       "samlSpAcs": "URL ACS للـ SP",
-      "samlSpAcsHelp": "مكان إرسال IdP للتأكيد بالبريد الإلكتروني، على سبيل المثال https://host/api/auth/saml/<id>/acs",
+      "samlSpAcsHelp": "المكان الذي يرسل إليه موفر الهوية التأكيد. اتركه فارغًا وسيملؤه SysManage عند الحفظ.",
       "samlSpEntityId": "رمز الكيان للـ SP",
       "samlSpKey": "مفتاح خاص للـ SP (Vault secret id، اختياري)",
       "samlSpKeyHelp": "إشارة مثل: vault:سر/مسار أو نص حرفي: نص مسطور",
@@ -1980,7 +1980,11 @@
       "oidcAcrValues": "مستويات الضمان المقبولة (acr)",
       "oidcAcrValuesHelp": "اختياري: قيم acr التي تُحتسب أيضًا متعددة العوامل، مفصولة بمسافات؛ ويتم طلبها عند تسجيل الدخول. وإلا فيجب أن يذكر الرمز المميز أن amr يتضمن mfa.",
       "samlMfaContexts": "سياقات المصادقة متعددة العوامل",
-      "samlMfaContextsHelp": "قيم AuthnContextClassRef التي تُحتسب متعددة العوامل، قيمة واحدة في كل سطر. القيمة الفارغة تعني http://schemas.microsoft.com/claims/multipleauthn الخاصة بـ Microsoft Entra ID."
+      "samlMfaContextsHelp": "قيم AuthnContextClassRef التي تُحتسب متعددة العوامل، قيمة واحدة في كل سطر. القيمة الفارغة تعني http://schemas.microsoft.com/claims/multipleauthn الخاصة بـ Microsoft Entra ID.",
+      "redirectHelp": "اتركه فارغًا وسيملؤه SysManage عند الحفظ. سجّل هذا العنوان بالضبط لدى موفر الهوية لديك.",
+      "samlSpEntityIdHelp": "اتركه فارغًا لاستخدام URL البيانات الوصفية لهذا الموفر.",
+      "samlMetadata": "URL البيانات الوصفية للـ SP",
+      "samlMetadataHelp": "قدّمه إلى موفر الهوية لديك: فهو يصف SysManage كموفر خدمة."
     },
     "loadError": "تعذر تحميل موفري الهوية.",
     "mapAddError": "تعذرت إضافة التعيين.",
@@ -2095,7 +2099,10 @@
       "failed": "لم يكتمل تسجيل الدخول الموحد. حاول مرة أخرى، أو سجّل الدخول باستخدام كلمة المرور.",
       "backToLogin": "العودة إلى تسجيل الدخول",
       "mfaRequired": "لم يؤكد موفر الهوية تسجيل الدخول متعدد العوامل. سجّل الدخول مرة أخرى باستخدام العامل الثاني، أو اطلب من المسؤول التحقق من نهج المصادقة متعددة العوامل لدى موفر الهوية."
-    }
+    },
+    "next": "التالي",
+    "signingInAs": "تسجيل الدخول باسم {{email}}",
+    "useAnotherEmail": "استخدام بريد إلكتروني آخر"
   },
   "logout": {
     "loading": "جاري تسجيل الخروج..."

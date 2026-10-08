@@ -109,6 +109,13 @@ def test_login_selenium(selenium_page, test_user, ui_config, start_server):
 
         assert username_input is not None, "Could not find username input field"
 
+        # Two-step login (2026-10-07): the email first; Next shows the password.
+        username_input.clear()
+        username_input.send_keys(test_user["username"])
+        selenium_page.wait_for_element_clickable(
+            By.CSS_SELECTOR, 'button[type="submit"]'
+        ).click()
+
         # Find password field (try multiple selectors)
         password_selectors = [
             (By.CSS_SELECTOR, 'input[id="password"]'),  # MUI TextField id
@@ -130,8 +137,6 @@ def test_login_selenium(selenium_page, test_user, ui_config, start_server):
         assert password_input is not None, "Could not find password input field"
 
         # Fill in credentials
-        username_input.clear()
-        username_input.send_keys(test_user["username"])
         password_input.clear()
         password_input.send_keys(test_user["password"])
 
@@ -293,6 +298,13 @@ def test_invalid_login_selenium(selenium_page, ui_config, start_server):
     if username_input is None:
         raise Exception("Could not find username input field in login form")
 
+    # Two-step login (2026-10-07): the email first; Next shows the password.
+    username_input.clear()
+    username_input.send_keys("invalid_user")
+    selenium_page.wait_for_element_clickable(
+        By.CSS_SELECTOR, 'button[type="submit"]'
+    ).click()
+
     password_selectors = [
         (By.CSS_SELECTOR, 'input[id="password"]'),
         (By.CSS_SELECTOR, 'input[name="password"]'),
@@ -313,8 +325,6 @@ def test_invalid_login_selenium(selenium_page, ui_config, start_server):
         raise Exception("Could not find password input field in login form")
 
     # Try invalid credentials
-    username_input.clear()
-    username_input.send_keys("invalid_user")
     password_input.clear()
     password_input.send_keys("invalid_password")
 

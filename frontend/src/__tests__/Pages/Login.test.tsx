@@ -2,84 +2,79 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router';
 import { vi } from 'vitest';
 import Login from '../../Pages/Login';
+import api from '../../Services/api';
+import { discoverLoginMethods } from '../../Services/sso';
 
-// Mock the API service
-vi.mock('../../Services/api.js', () => ({
-  default: {
-    post: vi.fn()
-  }
-}));
+vi.mock('../../Services/api', () => ({ default: { post: vi.fn() } }));
+vi.mock('../../Services/sso', () => ({ discoverLoginMethods: vi.fn() }));
 
-const LoginWithRouter = () => (
-  <BrowserRouter>
-    <Login />
-  </BrowserRouter>
-);
+const renderLogin = async () => {
+  await act(async () => {
+    render(<BrowserRouter><Login /></BrowserRouter>);
+  });
+};
 
-describe('Login Page', () => {
+const enterEmail = async (email: string) => {
+  fireEvent.change(screen.getByLabelText(/email/i), { target: { value: email } });
+  await act(async () => {
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+  });
+};
+
+const okta = { id: 'p1', name: 'Okta', type: 'oidc' as const, start_url: '/api/auth/oidc/p1/start' };
+
+describe('Login page (email first, then password or single sign-on)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  test('renders login form', async () => {
-    await act(async () => {
-      render(<LoginWithRouter />);
-    });
-    
+  test('step one asks only for the email', async () => {
+    await renderLogin();
     expect(screen.getByText('Login to SysManage')).toBeInTheDocument();
-    expect(screen.getByLabelText(/email/i) || screen.getByPlaceholderText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/password/i) || screen.getByPlaceholderText(/password/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/password/i)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
   });
 
-  test('has proper form structure', async () => {
-    await act(async () => {
-      render(<LoginWithRouter />);
-    });
-    
-    // Look for form elements or login text
-    expect(screen.getByText('Login to SysManage')).toBeInTheDocument();
+  test('step two offers the password and the domain\'s providers', async () => {
+    vi.mocked(discoverLoginMethods).mockResolvedValue({ password: true, providers: [okta] });
+    await renderLogin();
+    await enterEmail('bryan@acme.com');
+    expect(discoverLoginMethods).toHaveBeenCalledWith('bryan@acme.com');
+    expect(screen.getByTestId('login-identity')).toHaveTextContent('bryan@acme.com');
+    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sign in with Okta' })).toBeInTheDocument();
   });
 
-  test('contains email and password inputs', async () => {
-    await act(async () => {
-      render(<LoginWithRouter />);
-    });
-    
-    const emailInput = screen.getByLabelText(/email/i) || 
-                      screen.getByPlaceholderText(/email/i) ||
-                      screen.getByDisplayValue('') as HTMLInputElement;
-    const passwordInput = screen.getByLabelText(/password/i) || 
-                         screen.getByPlaceholderText(/password/i);
-    
-    expect(emailInput || passwordInput).toBeInTheDocument();
+  test('"use a different email" returns to step one', async () => {
+    vi.mocked(discoverLoginMethods).mockResolvedValue({ password: true, providers: [] });
+    await renderLogin();
+    await enterEmail('bryan@acme.com');
+    fireEvent.click(screen.getByRole('button', { name: 'Use a different email' }));
+    expect(screen.queryByLabelText(/password/i)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/email/i)).toHaveValue('bryan@acme.com');
   });
 
-  test('form submission', async () => {
-    await act(async () => {
-      render(<LoginWithRouter />);
-    });
-    
-    const submitButton = screen.getByRole('button', { name: /login/i });
-    
-    await act(async () => {
-      fireEvent.click(submitButton);
-    });
-    
-    // Test that the component handles form submission without crashing
-    await waitFor(() => {
-      expect(submitButton).toBeInTheDocument();
-    });
+  test('a failed lookup still offers the password', async () => {
+    vi.mocked(discoverLoginMethods).mockRejectedValue(new Error('500'));
+    await renderLogin();
+    await enterEmail('bryan@acme.com');
+    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
   });
 
-  test('renders without errors', async () => {
+  test('the password step logs in as before', async () => {
+    vi.mocked(discoverLoginMethods).mockResolvedValue({ password: true, providers: [] });
+    vi.mocked(api.post).mockResolvedValue({ data: {} });
+    await renderLogin();
+    await enterEmail('bryan@acme.com');
+    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'secret' } });
     await act(async () => {
-      render(<LoginWithRouter />);
+      fireEvent.click(screen.getByRole('button', { name: /login/i }));
     });
-    expect(screen.getByText('Login to SysManage')).toBeInTheDocument();
+    expect(api.post).toHaveBeenCalledWith('/api/v1/login', { userid: 'bryan@acme.com', password: 'secret' });
   });
 });

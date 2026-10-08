@@ -1939,7 +1939,7 @@
       "caBundle": "TLS CA 번들 경로(선택사항)",
       "clientId": "클라이언트 ID",
       "clientSecret": "클라이언트 시크릿(Vault 시크릿 ID)",
-      "clientSecretHelp": "vault:secret/path 또는 literal:plaintext와 같은 참조",
+      "clientSecretHelp": "시크릿 자체가 아니라 시크릿 위치입니다: vault:path/to/secret 또는 literal: 뒤에 시크릿 입력(테스트 전용).",
       "discovery": "Discovery URL 재정의(선택사항)",
       "enabled": "활성화됨",
       "groupBase": "그룹 검색 기준(선택사항)",
@@ -1960,7 +1960,7 @@
       "samlIdpEntityId": "IdP 엔티티 ID",
       "samlIdpSso": "IdP SSO URL",
       "samlSpAcs": "SP ACS URL",
-      "samlSpAcsHelp": "IdP가 어설션을 POST로 전송하는 위치, 예를 들어 https://host/api/auth/saml/<id>/acs",
+      "samlSpAcsHelp": "ID 공급자가 어설션을 전송하는 위치입니다. 비워 두면 저장 시 SysManage가 채웁니다.",
       "samlSpEntityId": "SP 엔티티 ID",
       "samlSpKey": "SP 개인키 (Vault secret id, 선택사항)",
       "samlSpKeyHelp": "vault:secret/path 또는 literal:plaintext과 같은 참조 형식",
@@ -1980,7 +1980,11 @@
       "oidcAcrValues": "허용되는 보증 수준 (acr)",
       "oidcAcrValuesHelp": "선택 사항: 다단계로도 인정되는 acr 값을 공백으로 구분하여 입력합니다. 이 값은 로그인 시 요청됩니다. 그렇지 않으면 토큰에 amr이 mfa를 포함한다고 명시되어 있어야 합니다.",
       "samlMfaContexts": "다단계 인증 컨텍스트",
-      "samlMfaContextsHelp": "다단계로 인정되는 AuthnContextClassRef 값을 한 줄에 하나씩 입력합니다. 비워 두면 Microsoft Entra ID의 http://schemas.microsoft.com/claims/multipleauthn을(를) 사용합니다."
+      "samlMfaContextsHelp": "다단계로 인정되는 AuthnContextClassRef 값을 한 줄에 하나씩 입력합니다. 비워 두면 Microsoft Entra ID의 http://schemas.microsoft.com/claims/multipleauthn을(를) 사용합니다.",
+      "redirectHelp": "비워 두면 저장 시 SysManage가 채웁니다. 이 주소를 그대로 ID 공급자에 등록하세요.",
+      "samlSpEntityIdHelp": "비워 두면 이 공급자의 메타데이터 URL을 사용합니다.",
+      "samlMetadata": "SP 메타데이터 URL",
+      "samlMetadataHelp": "ID 공급자에 제공하세요. SysManage를 서비스 공급자로 설명합니다."
     },
     "loadError": "ID 공급자를 불러올 수 없습니다.",
     "mapAddError": "매핑을 추가할 수 없습니다.",
@@ -2095,7 +2099,10 @@
       "failed": "Single Sign-On이 완료되지 않았습니다. 다시 시도하거나 암호로 로그인하세요.",
       "backToLogin": "로그인으로 돌아가기",
       "mfaRequired": "ID 공급자가 다단계 로그인을 확인하지 않았습니다. 두 번째 인증 요소를 사용하여 다시 로그인하거나, 관리자에게 ID 공급자의 다단계 정책을 확인하도록 요청하세요."
-    }
+    },
+    "next": "다음",
+    "signingInAs": "{{email}}(으)로 로그인",
+    "useAnotherEmail": "다른 이메일 사용"
   },
   "logout": {
     "loading": "로그아웃 중..."

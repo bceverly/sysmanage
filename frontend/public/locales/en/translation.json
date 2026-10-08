@@ -1958,7 +1958,7 @@
       "caBundle": "TLS CA bundle path (optional)",
       "clientId": "Client ID",
       "clientSecret": "Client secret (Vault secret id)",
-      "clientSecretHelp": "Reference like vault:secret/path or literal:plaintext",
+      "clientSecretHelp": "Not the secret itself but where to find it: vault:path/to/secret, or literal: followed by the secret (testing only).",
       "discovery": "Discovery URL override (optional)",
       "enabled": "Enabled",
       "groupBase": "Group search base (optional)",
@@ -1979,7 +1979,7 @@
       "samlIdpEntityId": "IdP Entity ID",
       "samlIdpSso": "IdP SSO URL",
       "samlSpAcs": "SP ACS URL",
-      "samlSpAcsHelp": "Where the IdP POSTs the assertion, e.g. https://host/api/auth/saml/<id>/acs",
+      "samlSpAcsHelp": "Where the identity provider posts the assertion. Leave blank and SysManage fills it in when you save.",
       "samlSpEntityId": "SP Entity ID",
       "samlSpKey": "SP private key (Vault secret id, optional)",
       "samlSpKeyHelp": "Reference like vault:secret/path or literal:plaintext",
@@ -1999,7 +1999,11 @@
       "oidcAcrValues": "Accepted assurance levels (acr)",
       "oidcAcrValuesHelp": "Optional: acr values that also count as multi-factor, separated by spaces; they are requested at sign-in. Otherwise the token must say amr includes mfa.",
       "samlMfaContexts": "Multi-factor authentication contexts",
-      "samlMfaContextsHelp": "AuthnContextClassRef values that count as multi-factor, one per line. Empty means Microsoft Entra ID's http://schemas.microsoft.com/claims/multipleauthn."
+      "samlMfaContextsHelp": "AuthnContextClassRef values that count as multi-factor, one per line. Empty means Microsoft Entra ID's http://schemas.microsoft.com/claims/multipleauthn.",
+      "redirectHelp": "Leave blank and SysManage fills it in when you save. Register this exact address with your identity provider.",
+      "samlSpEntityIdHelp": "Leave blank to use this provider's metadata URL.",
+      "samlMetadata": "SP metadata URL",
+      "samlMetadataHelp": "Give this to your identity provider: it describes SysManage as a service provider."
     },
     "loadError": "Could not load Identity Providers.",
     "mapAddError": "Could not add mapping.",
@@ -2114,7 +2118,10 @@
       "failed": "Single sign-on did not complete. Try again, or sign in with your password.",
       "backToLogin": "Back to sign in",
       "mfaRequired": "Your identity provider did not confirm multi-factor sign-in. Sign in again using your second factor, or ask an administrator to check the identity provider's multi-factor policy."
-    }
+    },
+    "next": "Next",
+    "signingInAs": "Signing in as {{email}}",
+    "useAnotherEmail": "Use a different email"
   },
   "logout": {
     "loading": "Logging out..."

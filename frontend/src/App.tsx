@@ -64,6 +64,7 @@ import SitesMap from './Pages/SitesMap';
 import SitesTiles from './Pages/SitesTiles';
 import Logout from './Pages/Logout';
 import LicensedRoute from './Components/LicensedRoute';
+import AuthGate from './Components/AuthGate';
 import { getLicenseInfo } from './Services/license';
 import { PluginProvider, usePlugins } from './plugins';
 
@@ -71,6 +72,7 @@ function AppRoutes() {
   const { routes, pluginsLoaded } = usePlugins();
 
   return (
+    <AuthGate>
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/login/sso" element={<SsoCallback />} />
@@ -138,6 +140,7 @@ function AppRoutes() {
       })}
       {!pluginsLoaded && <Route path="*" element={null} />}
     </Routes>
+    </AuthGate>
   );
 }
 

@@ -1939,7 +1939,7 @@
       "caBundle": "TLS-CA-bundlepad (optioneel)",
       "clientId": "Client-ID",
       "clientSecret": "Client-secret (Vault-secret-id)",
-      "clientSecretHelp": "Verwijzing zoals vault:secret/path of literal:plaintext",
+      "clientSecretHelp": "Niet het secret zelf, maar waar het te vinden is: vault:path/to/secret, of literal: gevolgd door het secret (alleen voor testen).",
       "discovery": "Discovery-URL-override (optioneel)",
       "enabled": "Ingeschakeld",
       "groupBase": "Zoekbasis voor groepen (optioneel)",
@@ -1960,7 +1960,7 @@
       "samlIdpEntityId": "IdP Entiteit ID",
       "samlIdpSso": "IdP SSO-URL",
       "samlSpAcs": "SP ACS-URL",
-      "samlSpAcsHelp": "De locatie waar de IdP de assertie POST-t, bijvoorbeeld https://host/api/auth/saml/<id>/acs",
+      "samlSpAcsHelp": "Waar de identiteitsprovider de assertie naartoe stuurt. Leeg laten, dan vult SysManage het in bij opslaan.",
       "samlSpEntityId": "SP Entiteit ID",
       "samlSpKey": "SP privésleutel (Vault secret id, optioneel)",
       "samlSpKeyHelp": "Referentie zoals vault:secret/path of literal:plaintext",
@@ -1980,7 +1980,11 @@
       "oidcAcrValues": "Geaccepteerde betrouwbaarheidsniveaus (acr)",
       "oidcAcrValuesHelp": "Optioneel: acr-waarden die ook als multi-factor gelden, gescheiden door spaties; ze worden bij het aanmelden aangevraagd. Anders moet het token aangeven dat amr mfa bevat.",
       "samlMfaContexts": "Contexten voor multi-factorauthenticatie",
-      "samlMfaContextsHelp": "AuthnContextClassRef-waarden die als multi-factor gelden, één per regel. Leeg betekent http://schemas.microsoft.com/claims/multipleauthn van Microsoft Entra ID."
+      "samlMfaContextsHelp": "AuthnContextClassRef-waarden die als multi-factor gelden, één per regel. Leeg betekent http://schemas.microsoft.com/claims/multipleauthn van Microsoft Entra ID.",
+      "redirectHelp": "Leeg laten, dan vult SysManage het in bij opslaan. Registreer exact dit adres bij uw identiteitsprovider.",
+      "samlSpEntityIdHelp": "Leeg laten om de metadata-URL van deze provider te gebruiken.",
+      "samlMetadata": "SP-metadata-URL",
+      "samlMetadataHelp": "Geef dit aan uw identiteitsprovider: het beschrijft SysManage als serviceprovider."
     },
     "loadError": "Identiteitsproviders konden niet worden geladen.",
     "mapAddError": "Toewijzing kon niet worden toegevoegd.",
@@ -2095,7 +2099,10 @@
       "failed": "Single sign-on is niet voltooid. Probeer het opnieuw of meld u aan met uw wachtwoord.",
       "backToLogin": "Terug naar aanmelden",
       "mfaRequired": "Uw identiteitsprovider heeft de multi-factoraanmelding niet bevestigd. Meld u opnieuw aan met uw tweede factor, of vraag een beheerder het multi-factorbeleid van de identiteitsprovider te controleren."
-    }
+    },
+    "next": "Volgende",
+    "signingInAs": "Aanmelden als {{email}}",
+    "useAnotherEmail": "Een ander e-mailadres gebruiken"
   },
   "logout": {
     "loading": "Uitloggen..."

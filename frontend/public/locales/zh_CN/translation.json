@@ -1939,7 +1939,7 @@
       "caBundle": "TLS CA 证书包路径（可选）",
       "clientId": "客户端 ID",
       "clientSecret": "客户端密钥（Vault 密钥 ID）",
-      "clientSecretHelp": "形如 vault:secret/path 或 literal:plaintext 的引用",
+      "clientSecretHelp": "不是密钥本身，而是其位置：vault:path/to/secret，或 literal: 后跟密钥（仅用于测试）。",
       "discovery": "Discovery URL 覆盖（可选）",
       "enabled": "已启用",
       "groupBase": "组搜索基础（可选）",
@@ -1960,7 +1960,7 @@
       "samlIdpEntityId": "IdP 实体 ID",
       "samlIdpSso": "身份提供者单点登录URL",
       "samlSpAcs": "SP ACS URL",
-      "samlSpAcsHelp": "IdP POST 断言的位置，例如 https://host/api/auth/saml/<id>/acs",
+      "samlSpAcsHelp": "身份提供商发送断言的地址。留空，SysManage 会在保存时自动填写。",
       "samlSpEntityId": "SP 实体 ID",
       "samlSpKey": "SP 私钥（Vault 秘钥 id，可选）",
       "samlSpKeyHelp": "引用如 vault:secret/path 或 literal:plaintext",
@@ -1980,7 +1980,11 @@
       "oidcAcrValues": "接受的保证级别 (acr)",
       "oidcAcrValuesHelp": "可选：同样视为多因素身份验证的 acr 值，以空格分隔；登录时会请求这些值。否则，令牌必须声明 amr 包含 mfa。",
       "samlMfaContexts": "多因素身份验证上下文",
-      "samlMfaContextsHelp": "视为多因素身份验证的 AuthnContextClassRef 值，每行一个。留空表示 Microsoft Entra ID 的 http://schemas.microsoft.com/claims/multipleauthn。"
+      "samlMfaContextsHelp": "视为多因素身份验证的 AuthnContextClassRef 值，每行一个。留空表示 Microsoft Entra ID 的 http://schemas.microsoft.com/claims/multipleauthn。",
+      "redirectHelp": "留空，SysManage 会在保存时自动填写。请将此地址原样注册到您的身份提供商。",
+      "samlSpEntityIdHelp": "留空则使用此提供商的元数据 URL。",
+      "samlMetadata": "SP 元数据 URL",
+      "samlMetadataHelp": "将其提供给您的身份提供商：它将 SysManage 描述为服务提供商。"
     },
     "loadError": "无法加载身份提供程序。",
     "mapAddError": "无法添加映射。",
@@ -2095,7 +2099,10 @@
       "failed": "单点登录未完成。请重试，或使用密码登录。",
       "backToLogin": "返回登录",
       "mfaRequired": "您的身份提供程序未确认多因素身份验证登录。请使用第二重验证因素重新登录，或请管理员检查身份提供程序的多因素身份验证策略。"
-    }
+    },
+    "next": "下一步",
+    "signingInAs": "以 {{email}} 登录",
+    "useAnotherEmail": "使用其他邮箱"
   },
   "logout": {
     "loading": "退出中..."

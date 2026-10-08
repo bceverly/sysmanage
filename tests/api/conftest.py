@@ -108,6 +108,7 @@ def test_db():
         MirrorSetupStatus,
         MirrorSnapshot,
         PackageProfile,
+        SsoPendingState,
         PackageProfileConstraint,
         ProvisioningJob,
         ProvisioningTemplate,

@@ -28,9 +28,23 @@ export interface SsoSession {
 /** Why the server sent the browser back without a session. */
 export type SsoFailure = "denied" | "unavailable" | "failed" | "expired" | "mfa_required";
 
-export const getSsoProviders = async (): Promise<SsoProvider[]> => {
-    const response = await axiosInstance.get<SsoProvider[]>("/api/auth/sso/providers");
-    return Array.isArray(response.data) ? response.data : [];
+/** How an email address can sign in: step one of the login page. */
+export interface LoginMethods {
+    password: boolean;
+    providers: SsoProvider[];
+}
+
+/**
+ * The sign-in methods for this email address.  The server answers by the
+ * address's domain only (server-wide providers plus those of the tenants that
+ * own the domain), never by whether an account exists.
+ */
+export const discoverLoginMethods = async (email: string): Promise<LoginMethods> => {
+    const response = await axiosInstance.post<LoginMethods>("/api/auth/login/discover", { email });
+    return {
+        password: response.data?.password !== false,
+        providers: Array.isArray(response.data?.providers) ? response.data.providers : [],
+    };
 };
 
 export const takeSsoSession = async (): Promise<SsoSession> => {

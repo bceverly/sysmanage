@@ -1939,7 +1939,7 @@
       "caBundle": "TLS CA बंडल पथ (वैकल्पिक)",
       "clientId": "क्लाइंट ID",
       "clientSecret": "क्लाइंट सीक्रेट (Vault सीक्रेट ID)",
-      "clientSecretHelp": "vault:secret/path या literal:plaintext जैसा संदर्भ",
+      "clientSecretHelp": "स्वयं सीक्रेट नहीं, बल्कि उसे कहाँ पाएँ: vault:path/to/secret, या literal: के बाद सीक्रेट (केवल परीक्षण के लिए)।",
       "discovery": "Discovery URL ओवरराइड (वैकल्पिक)",
       "enabled": "सक्षम",
       "groupBase": "समूह खोज आधार (वैकल्पिक)",
@@ -1960,7 +1960,7 @@
       "samlIdpEntityId": "IdP इन्टिटी ID",
       "samlIdpSso": "IdP SSO URL",
       "samlSpAcs": "SP ACS URL",
-      "samlSpAcsHelp": "IdP POSTs प्रतिबंध करने के लिए, उदाहरण के लिए https://host/api/auth/saml/<id>/acs",
+      "samlSpAcsHelp": "जहाँ पहचान प्रदाता असर्शन भेजता है। खाली छोड़ें, सहेजने पर SysManage इसे भर देगा।",
       "samlSpEntityId": "SP इंटीडी",
       "samlSpKey": "SP गुप्त कुंजी (वॉल्ट सेक्रेट आईडी, वैकल्पिक)",
       "samlSpKeyHelp": "वॉल्ट:सेक्रेट/पाथ या लिटरल:प्लेटफ़ाइन में संदर्भ जैसे",
@@ -1980,7 +1980,11 @@
       "oidcAcrValues": "स्वीकृत आश्वासन स्तर (acr)",
       "oidcAcrValuesHelp": "वैकल्पिक: acr मान जो मल्टी-फ़ैक्टर के रूप में भी गिने जाते हैं, स्पेस से अलग किए गए; साइन इन के समय इनका अनुरोध किया जाता है। अन्यथा टोकन में यह बताया होना चाहिए कि amr में mfa शामिल है।",
       "samlMfaContexts": "मल्टी-फ़ैक्टर प्रमाणीकरण संदर्भ",
-      "samlMfaContextsHelp": "AuthnContextClassRef मान जो मल्टी-फ़ैक्टर के रूप में गिने जाते हैं, प्रति पंक्ति एक। खाली होने का अर्थ है Microsoft Entra ID का http://schemas.microsoft.com/claims/multipleauthn।"
+      "samlMfaContextsHelp": "AuthnContextClassRef मान जो मल्टी-फ़ैक्टर के रूप में गिने जाते हैं, प्रति पंक्ति एक। खाली होने का अर्थ है Microsoft Entra ID का http://schemas.microsoft.com/claims/multipleauthn।",
+      "redirectHelp": "खाली छोड़ें, सहेजने पर SysManage इसे भर देगा। यही पता अपने पहचान प्रदाता के साथ पंजीकृत करें।",
+      "samlSpEntityIdHelp": "इस प्रदाता का मेटाडेटा URL उपयोग करने के लिए खाली छोड़ें।",
+      "samlMetadata": "SP मेटाडेटा URL",
+      "samlMetadataHelp": "इसे अपने पहचान प्रदाता को दें: यह SysManage को सेवा प्रदाता के रूप में वर्णित करता है।"
     },
     "loadError": "पहचान प्रदाताओं को लोड नहीं किया जा सका।",
     "mapAddError": "मैपिंग नहीं जोड़ी जा सकी।",
@@ -2095,7 +2099,10 @@
       "failed": "सिंगल साइन-ऑन पूरा नहीं हुआ। फिर से प्रयास करें, या अपने पासवर्ड से साइन इन करें।",
       "backToLogin": "साइन इन पर वापस जाएँ",
       "mfaRequired": "आपके पहचान प्रदाता ने मल्टी-फ़ैक्टर साइन इन की पुष्टि नहीं की। अपने दूसरे फ़ैक्टर का उपयोग करके फिर से साइन इन करें, या किसी व्यवस्थापक से पहचान प्रदाता की मल्टी-फ़ैक्टर नीति जाँचने के लिए कहें।"
-    }
+    },
+    "next": "आगे",
+    "signingInAs": "{{email}} के रूप में साइन इन",
+    "useAnotherEmail": "दूसरा ईमेल उपयोग करें"
   },
   "logout": {
     "loading": "लॉगआउट हो रहा है..."

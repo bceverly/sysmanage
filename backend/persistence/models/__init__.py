@@ -240,6 +240,7 @@ __all__ = [
     "ExternalIdpProvider",
     "IdpRoleMapping",
     "ExternalIdpSettings",
+    "SsoPendingState",
     "SINGLETON_IDP_SETTINGS_ID",
     # Multi-site federation (Phase 12.6)
     "FederationSite",

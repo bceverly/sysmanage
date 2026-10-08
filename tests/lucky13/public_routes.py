@@ -61,6 +61,8 @@ PUBLIC_ROUTES = {
     ("POST", "/api/auth/saml/{provider_id}/acs"): _SIGN_IN
     + " (signed SAML assertion verified in the handler)",
     ("GET", "/api/auth/sso/providers"): "login page lists the sign-in buttons",
+    ("POST", "/api/auth/login/discover"): "login page step one: an email's sign-in "
+    "methods, by domain only",
     ("POST", "/api/auth/sso/session"): _SIGN_IN
     + " (one-time HttpOnly SSO hand-off cookie)",
     ("POST", "/api/scim/v2/{provider_id}/Users"): _SCIM,

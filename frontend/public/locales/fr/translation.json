@@ -1939,7 +1939,7 @@
       "caBundle": "Chemin du bundle CA TLS (optionnel)",
       "clientId": "ID client",
       "clientSecret": "Secret client (id de secret Vault)",
-      "clientSecretHelp": "Référence du type vault:secret/path ou literal:plaintext",
+      "clientSecretHelp": "Non pas le secret lui-même, mais où le trouver : vault:path/to/secret, ou literal: suivi du secret (tests uniquement).",
       "discovery": "URL de découverte (optionnel)",
       "enabled": "Activé",
       "groupBase": "Base de recherche des groupes (optionnel)",
@@ -1960,7 +1960,7 @@
       "samlIdpEntityId": "IDP Entity ID",
       "samlIdpSso": "URL d'authentification unique de l'IdP (IdP SSO URL)",
       "samlSpAcs": "URL ACS du SP",
-      "samlSpAcsHelp": "Où l'IdP POSTe l'affirmation, par exemple https://host/api/auth/saml/<id>/acs",
+      "samlSpAcsHelp": "Où le fournisseur d'identité envoie l'assertion. Laissez vide et SysManage le remplit à l'enregistrement.",
       "samlSpEntityId": "Entity ID du SP",
       "samlSpKey": "Clé privée du SP (Vault secret id, facultatif)",
       "samlSpKeyHelp": "Référence comme vault:secret/path ou littéral:plaintext",
@@ -1980,7 +1980,11 @@
       "oidcAcrValues": "Niveaux d'assurance acceptés (acr)",
       "oidcAcrValuesHelp": "Facultatif : valeurs acr qui comptent également comme multifacteur, séparées par des espaces ; elles sont demandées lors de la connexion. Sinon, le jeton doit indiquer que amr inclut mfa.",
       "samlMfaContexts": "Contextes d'authentification multifacteur",
-      "samlMfaContextsHelp": "Valeurs AuthnContextClassRef qui comptent comme multifacteur, une par ligne. Vide signifie http://schemas.microsoft.com/claims/multipleauthn de Microsoft Entra ID."
+      "samlMfaContextsHelp": "Valeurs AuthnContextClassRef qui comptent comme multifacteur, une par ligne. Vide signifie http://schemas.microsoft.com/claims/multipleauthn de Microsoft Entra ID.",
+      "redirectHelp": "Laissez vide et SysManage le remplit à l'enregistrement. Enregistrez exactement cette adresse auprès de votre fournisseur d'identité.",
+      "samlSpEntityIdHelp": "Laissez vide pour utiliser l'URL de métadonnées de ce fournisseur.",
+      "samlMetadata": "URL de métadonnées du SP",
+      "samlMetadataHelp": "Transmettez-la à votre fournisseur d'identité : elle décrit SysManage en tant que fournisseur de services."
     },
     "loadError": "Impossible de charger les fournisseurs d'identité.",
     "mapAddError": "Impossible d'ajouter la correspondance.",
@@ -2095,7 +2099,10 @@
       "failed": "L'authentification unique n'a pas abouti. Réessayez ou connectez-vous avec votre mot de passe.",
       "backToLogin": "Retour à la connexion",
       "mfaRequired": "Votre fournisseur d'identité n'a pas confirmé la connexion multifacteur. Connectez-vous à nouveau avec votre second facteur, ou demandez à un administrateur de vérifier la stratégie multifacteur du fournisseur d'identité."
-    }
+    },
+    "next": "Suivant",
+    "signingInAs": "Connexion en tant que {{email}}",
+    "useAnotherEmail": "Utiliser une autre adresse e-mail"
   },
   "logout": {
     "loading": "Déconnexion en cours..."

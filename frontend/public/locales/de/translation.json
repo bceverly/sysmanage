@@ -1939,7 +1939,7 @@
       "caBundle": "TLS-CA-Bundle-Pfad (optional)",
       "clientId": "Client-ID",
       "clientSecret": "Client-Secret (Vault-Secret-ID)",
-      "clientSecretHelp": "Referenz wie vault:secret/path oder literal:plaintext",
+      "clientSecretHelp": "Nicht das Secret selbst, sondern sein Fundort: vault:path/to/secret oder literal: gefolgt vom Secret (nur zum Testen).",
       "discovery": "Discovery-URL-Override (optional)",
       "enabled": "Aktiviert",
       "groupBase": "Gruppen-Suchbasis (optional)",
@@ -1960,7 +1960,7 @@
       "samlIdpEntityId": "IdP-Entity-ID",
       "samlIdpSso": "IdP SSO-URL",
       "samlSpAcs": "SP ACS-URL",
-      "samlSpAcsHelp": "Wo der IdP die Assertion POSTs, z.B. https://host/api/auth/saml/<id>/acs",
+      "samlSpAcsHelp": "Wohin der Identitätsanbieter die Assertion sendet. Leer lassen, SysManage füllt es beim Speichern aus.",
       "samlSpEntityId": "SP Entitäts-ID",
       "samlSpKey": "SP-Privat-Schlüssel (Vault secret id, optional)",
       "samlSpKeyHelp": "Referenz wie vault:secret/path oder literal:plaintext",
@@ -1980,7 +1980,11 @@
       "oidcAcrValues": "Akzeptierte Vertrauensstufen (acr)",
       "oidcAcrValuesHelp": "Optional: acr-Werte, die ebenfalls als Multi-Faktor gelten, durch Leerzeichen getrennt; sie werden bei der Anmeldung angefordert. Andernfalls muss das Token angeben, dass amr den Wert mfa enthält.",
       "samlMfaContexts": "Multi-Faktor-Authentifizierungskontexte",
-      "samlMfaContextsHelp": "AuthnContextClassRef-Werte, die als Multi-Faktor gelten, einer pro Zeile. Leer bedeutet http://schemas.microsoft.com/claims/multipleauthn von Microsoft Entra ID."
+      "samlMfaContextsHelp": "AuthnContextClassRef-Werte, die als Multi-Faktor gelten, einer pro Zeile. Leer bedeutet http://schemas.microsoft.com/claims/multipleauthn von Microsoft Entra ID.",
+      "redirectHelp": "Leer lassen, SysManage füllt es beim Speichern aus. Registrieren Sie genau diese Adresse bei Ihrem Identitätsanbieter.",
+      "samlSpEntityIdHelp": "Leer lassen, um die Metadaten-URL dieses Anbieters zu verwenden.",
+      "samlMetadata": "SP-Metadaten-URL",
+      "samlMetadataHelp": "Geben Sie dies Ihrem Identitätsanbieter: Es beschreibt SysManage als Service Provider."
     },
     "loadError": "Identitätsanbieter konnten nicht geladen werden.",
     "mapAddError": "Zuordnung konnte nicht hinzugefügt werden.",
@@ -2095,7 +2099,10 @@
       "failed": "Single Sign-On wurde nicht abgeschlossen. Versuchen Sie es erneut oder melden Sie sich mit Ihrem Passwort an.",
       "backToLogin": "Zurück zur Anmeldung",
       "mfaRequired": "Ihr Identitätsanbieter hat die Multi-Faktor-Anmeldung nicht bestätigt. Melden Sie sich erneut mit Ihrem zweiten Faktor an, oder bitten Sie einen Administrator, die Multi-Faktor-Richtlinie des Identitätsanbieters zu prüfen."
-    }
+    },
+    "next": "Weiter",
+    "signingInAs": "Anmeldung als {{email}}",
+    "useAnotherEmail": "Andere E-Mail-Adresse verwenden"
   },
   "logout": {
     "loading": "Abmeldung läuft..."

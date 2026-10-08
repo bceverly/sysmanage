@@ -1939,7 +1939,7 @@
       "caBundle": "Percorso bundle CA TLS (opzionale)",
       "clientId": "ID client",
       "clientSecret": "Segreto client (id segreto Vault)",
-      "clientSecretHelp": "Riferimento tipo vault:secret/path o literal:plaintext",
+      "clientSecretHelp": "Non il segreto stesso ma dove trovarlo: vault:path/to/secret, oppure literal: seguito dal segreto (solo per test).",
       "discovery": "Override URL discovery (opzionale)",
       "enabled": "Abilitato",
       "groupBase": "Base ricerca gruppi (opzionale)",
@@ -1960,7 +1960,7 @@
       "samlIdpEntityId": "IDP Entity ID",
       "samlIdpSso": "URL SSO IdP",
       "samlSpAcs": "URL ACS SP",
-      "samlSpAcsHelp": "Dove l'IdP invia il POST dell'asserzione, ad esempio https://host/api/auth/saml/<id>/acs",
+      "samlSpAcsHelp": "Dove il provider di identità invia l'asserzione. Lascia vuoto e SysManage lo compilerà al salvataggio.",
       "samlSpEntityId": "ID entità SP",
       "samlSpKey": "Chiave privata SP (Vault secret id, opzionale)",
       "samlSpKeyHelp": "Riferimento come vault:secret/path o testo letterale:plaintext",
@@ -1980,7 +1980,11 @@
       "oidcAcrValues": "Livelli di garanzia accettati (acr)",
       "oidcAcrValuesHelp": "Facoltativo: valori acr che contano anche come multifattore, separati da spazi; vengono richiesti all'accesso. In caso contrario, il token deve indicare che amr include mfa.",
       "samlMfaContexts": "Contesti di autenticazione multifattore",
-      "samlMfaContextsHelp": "Valori AuthnContextClassRef che contano come multifattore, uno per riga. Vuoto significa http://schemas.microsoft.com/claims/multipleauthn di Microsoft Entra ID."
+      "samlMfaContextsHelp": "Valori AuthnContextClassRef che contano come multifattore, uno per riga. Vuoto significa http://schemas.microsoft.com/claims/multipleauthn di Microsoft Entra ID.",
+      "redirectHelp": "Lascia vuoto e SysManage lo compilerà al salvataggio. Registra esattamente questo indirizzo presso il tuo provider di identità.",
+      "samlSpEntityIdHelp": "Lascia vuoto per usare l'URL dei metadati di questo provider.",
+      "samlMetadata": "URL metadati SP",
+      "samlMetadataHelp": "Forniscilo al tuo provider di identità: descrive SysManage come service provider."
     },
     "loadError": "Impossibile caricare i provider di identità.",
     "mapAddError": "Impossibile aggiungere la mappatura.",
@@ -2095,7 +2099,10 @@
       "failed": "Il single sign-on non è stato completato. Riprova oppure accedi con la tua password.",
       "backToLogin": "Torna all'accesso",
       "mfaRequired": "Il provider di identità non ha confermato l'accesso multifattore. Accedi di nuovo usando il secondo fattore, oppure chiedi a un amministratore di verificare la policy multifattore del provider di identità."
-    }
+    },
+    "next": "Avanti",
+    "signingInAs": "Accesso come {{email}}",
+    "useAnotherEmail": "Usa un altro indirizzo email"
   },
   "logout": {
     "loading": "Disconnessione in corso..."

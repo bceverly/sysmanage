@@ -59,6 +59,13 @@ def login_helper(selenium_page, test_user):
     if username_input is None:
         raise Exception("Could not find username input field in login form")
 
+    # Two-step login (2026-10-07): the email first; Next shows the password.
+    username_input.clear()
+    username_input.send_keys(test_user["username"])
+    selenium_page.wait_for_element_clickable(
+        By.CSS_SELECTOR, 'button[type="submit"]'
+    ).click()
+
     # Try multiple selectors for password field
     password_selectors = [
         (By.CSS_SELECTOR, 'input[id="password"]'),
@@ -79,8 +86,6 @@ def login_helper(selenium_page, test_user):
     if password_input is None:
         raise Exception("Could not find password input field in login form")
 
-    username_input.clear()
-    username_input.send_keys(test_user["username"])
     password_input.clear()
     password_input.send_keys(test_user["password"])
 

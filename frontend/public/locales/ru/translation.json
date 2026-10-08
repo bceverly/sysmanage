@@ -1939,7 +1939,7 @@
       "caBundle": "Путь к TLS CA bundle (необязательно)",
       "clientId": "ID клиента",
       "clientSecret": "Client secret (id секрета Vault)",
-      "clientSecretHelp": "Ссылка вида vault:secret/path или literal:plaintext",
+      "clientSecretHelp": "Не сам секрет, а где его найти: vault:path/to/secret или literal: и затем секрет (только для тестирования).",
       "discovery": "Переопределение URL discovery (необязательно)",
       "enabled": "Включено",
       "groupBase": "База поиска групп (необязательно)",
@@ -1960,7 +1960,7 @@
       "samlIdpEntityId": "Идентификатор сущности IdP",
       "samlIdpSso": "URL одноразовой аутентификации IdP",
       "samlSpAcs": "URL ACS SP",
-      "samlSpAcsHelp": "Место для отправки утверждений IdP, например https://host/api/auth/saml/<id>/acs",
+      "samlSpAcsHelp": "Куда поставщик удостоверений отправляет утверждение. Оставьте пустым, и SysManage заполнит поле при сохранении.",
       "samlSpEntityId": "ID сущности SP",
       "samlSpKey": "Приватный ключ SP (Vault secret id, необязательно)",
       "samlSpKeyHelp": "Ссылка вида vault:secret/path или текстовое значение literal:plaintext",
@@ -1980,7 +1980,11 @@
       "oidcAcrValues": "Допустимые уровни доверия (acr)",
       "oidcAcrValuesHelp": "Необязательно: значения acr, которые также считаются многофакторными, через пробел; они запрашиваются при входе. В противном случае токен должен указывать, что amr включает mfa.",
       "samlMfaContexts": "Контексты многофакторной проверки подлинности",
-      "samlMfaContextsHelp": "Значения AuthnContextClassRef, которые считаются многофакторными, по одному в строке. Пустое значение означает http://schemas.microsoft.com/claims/multipleauthn из Microsoft Entra ID."
+      "samlMfaContextsHelp": "Значения AuthnContextClassRef, которые считаются многофакторными, по одному в строке. Пустое значение означает http://schemas.microsoft.com/claims/multipleauthn из Microsoft Entra ID.",
+      "redirectHelp": "Оставьте пустым, и SysManage заполнит поле при сохранении. Зарегистрируйте именно этот адрес у вашего поставщика удостоверений.",
+      "samlSpEntityIdHelp": "Оставьте пустым, чтобы использовать URL метаданных этого поставщика.",
+      "samlMetadata": "URL метаданных SP",
+      "samlMetadataHelp": "Передайте его вашему поставщику удостоверений: он описывает SysManage как поставщика услуг."
     },
     "loadError": "Не удалось загрузить провайдеров идентификации.",
     "mapAddError": "Не удалось добавить сопоставление.",
@@ -2095,7 +2099,10 @@
       "failed": "Единый вход не был завершен. Повторите попытку или войдите с паролем.",
       "backToLogin": "Вернуться ко входу",
       "mfaRequired": "Ваш поставщик удостоверений не подтвердил многофакторный вход. Войдите снова, используя второй фактор, или попросите администратора проверить политику многофакторной проверки поставщика удостоверений."
-    }
+    },
+    "next": "Далее",
+    "signingInAs": "Вход как {{email}}",
+    "useAnotherEmail": "Использовать другой email"
   },
   "logout": {
     "loading": "Выход..."

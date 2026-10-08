@@ -27,7 +27,7 @@ from fastapi.responses import RedirectResponse, Response
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from backend.api import sso_session
+from backend.api import sso_session, sso_state
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
@@ -256,12 +256,35 @@ async def list_providers(db: Session = Depends(get_db)):
     return [r.to_dict() for r in rows]
 
 
+def _fill_endpoint_defaults(row) -> None:
+    """Give a provider the SysManage addresses it is registered under.
+
+    They contain the provider's own id, which an admin creating one cannot
+    know yet -- the form demanded them anyway, so every new provider had to be
+    saved with a guess and edited afterwards (2026-10-07).  Left blank, they
+    are filled in from the console's public URL: the OIDC redirect URI, and the
+    SAML ACS URL and SP entity ID (the metadata URL, the usual convention).
+    A value the admin typed is never replaced.
+    """
+    if row.id is None:
+        row.id = uuid.uuid4()
+    base = sso_session.console_base_url()
+    if row.type == "oidc" and not (row.oidc_redirect_uri or "").strip():
+        row.oidc_redirect_uri = f"{base}/api/auth/oidc/{row.id}/callback"
+    if row.type == "saml":
+        if not (row.saml_sp_acs_url or "").strip():
+            row.saml_sp_acs_url = f"{base}/api/auth/saml/{row.id}/acs"
+        if not (row.saml_sp_entity_id or "").strip():
+            row.saml_sp_entity_id = f"{base}/api/auth/saml/{row.id}/metadata"
+
+
 @mgmt_router.post("/idp-providers", dependencies=[Depends(JWTBearer())])
 async def create_provider(
     request: ProviderCreateRequest, db: Session = Depends(get_db)
 ):
     _check_idp_module()
     row = models.ExternalIdpProvider(**request.model_dump())
+    _fill_endpoint_defaults(row)
     db.add(row)
     db.commit()
     db.refresh(row)
@@ -284,6 +307,7 @@ async def update_provider(
     row = _get_provider_or_404(db, provider_id)
     for field, value in request.model_dump(exclude_unset=True).items():
         setattr(row, field, value)
+    _fill_endpoint_defaults(row)
     db.commit()
     db.refresh(row)
     return row.to_dict()
@@ -414,11 +438,9 @@ async def update_idp_settings(
 # ---------------------------------------------------------------------
 
 
-# Tiny in-memory store of OIDC ``state`` tokens.  Maps state → provider_id.
-# Cleared at process restart; entries are removed at callback time.  A
-# state token is single-use, so the only window for replay is the time
-# between /start and /callback (~1 minute typical).
-_OIDC_STATE_STORE: dict[str, str] = {}
+# The OIDC ``state`` and SAML ``RelayState`` of a sign-in in progress live in
+# the database (``sso_state``), not in this worker's memory: with several
+# workers the IdP's return often reaches another one (Phase 22.8).
 
 
 @router.get("/api/auth/oidc/{provider_id}/start")
@@ -436,7 +458,7 @@ async def oidc_start(provider_id: str, db: Session = Depends(get_db)):
     if not provider.enabled:
         raise HTTPException(status_code=403, detail=_("OIDC provider is disabled."))
     state = _secrets.token_urlsafe(32)
-    _OIDC_STATE_STORE[state] = str(provider.id)
+    sso_state.save(db, state, provider.id)
     config = provider.to_dict()
     url = engine.build_oidc_authorization_url(config, state)
     # Open-redirect note: the URL host is the IdP's authorization
@@ -497,7 +519,7 @@ async def oidc_callback(
             sanitize_log(str(exc.detail)),
         )
         return sso_session.failure(exc.status_code, _reason(exc))
-    return sso_session.landing(userid, tenant_id)
+    return sso_session.landing(userid, tenant_id, request.url.hostname)
 
 
 def _reason(exc: HTTPException):
@@ -517,8 +539,8 @@ def _oidc_sign_in(provider_id: str, request: Request, db: Session):
         raise HTTPException(
             status_code=400, detail=_("Missing code or state in callback.")
         )
-    expected = _OIDC_STATE_STORE.pop(state, None)
-    if expected != str(provider.id):
+    pending = sso_state.claim(db, state)
+    if pending is None or pending[0] != str(provider.id):
         raise HTTPException(status_code=400, detail=_("Invalid OIDC state."))
 
     config = provider.to_dict()
@@ -587,7 +609,16 @@ def _jit_provision_user(db: Session, provider, email: Optional[str], subject: st
     email).  Returns the ``User`` on success, or ``None`` when JIT does not apply
     / is not permitted (the caller then 403s as before).
     """
-    if not getattr(provider, "jit_provisioning", False) or not provider.tenant_id:
+    if not getattr(provider, "jit_provisioning", False):
+        return None
+    if not provider.tenant_id:
+        # JIT is switched on but cannot apply: say so, or the admin sees only
+        # "no account" and a setting that seems to do nothing (2026-10-07).
+        logger.warning(
+            "JIT declined: provider %s has just-in-time provisioning on but no "
+            "tenant; set its Tenant ID and that tenant's email-domain allowlist",
+            provider.id,
+        )
         return None
     if not email:
         logger.warning("JIT declined: provider %s returned no email claim", provider.id)
@@ -638,10 +669,9 @@ def _jit_provision_user(db: Session, provider, email: Optional[str], subject: st
 # Public SAML 2.0 endpoints (anonymous -- SP-initiated POST profile)
 # ---------------------------------------------------------------------
 
-# RelayState token → (provider_id, AuthnRequest id).  The request id is threaded
-# into the ACS so the engine can pin the IdP's ``InResponseTo`` (replay /
-# unsolicited-response protection).  Single-use: popped at the ACS.
-_SAML_STATE_STORE: dict = {}
+# The RelayState's row carries the AuthnRequest id, threaded into the ACS so
+# the engine can pin the IdP's ``InResponseTo`` (replay / unsolicited-response
+# protection).  Single-use: claimed (deleted) at the ACS.
 
 
 def _saml_config(provider) -> dict:
@@ -694,7 +724,7 @@ async def saml_start(provider_id: str, db: Session = Depends(get_db)):
             detail=_("Could not start SAML sign-in: %s")
             % result.get("error", "unknown"),
         )
-    _SAML_STATE_STORE[relay_state] = (str(provider.id), result.get("request_id") or "")
+    sso_state.save(db, relay_state, provider.id, result.get("request_id") or None)
     # Open-redirect note: the URL host is the IdP's admin-curated SSO endpoint
     # (``saml_idp_sso_url``), NOT user input -- redirecting to the IdP is the whole
     # point of SP-initiated SSO. The RelayState guards the ACS.
@@ -721,7 +751,7 @@ async def saml_acs(provider_id: str, request: Request, db: Session = Depends(get
             sanitize_log(str(exc.detail)),
         )
         return sso_session.failure(exc.status_code, _reason(exc))
-    return sso_session.landing(userid, tenant_id)
+    return sso_session.landing(userid, tenant_id, request.url.hostname)
 
 
 async def _saml_sign_in(provider_id: str, request: Request, db: Session):
@@ -736,8 +766,8 @@ async def _saml_sign_in(provider_id: str, request: Request, db: Session):
         raise HTTPException(
             status_code=400, detail=_("Missing SAMLResponse or RelayState.")
         )
-    stashed = _SAML_STATE_STORE.pop(str(relay_state), None)
-    if not stashed or stashed[0] != str(provider.id):
+    stashed = sso_state.claim(db, str(relay_state))
+    if stashed is None or stashed[0] != str(provider.id):
         raise HTTPException(
             status_code=400, detail=_("Invalid or expired SAML RelayState.")
         )

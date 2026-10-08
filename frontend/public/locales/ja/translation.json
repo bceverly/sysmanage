@@ -1939,7 +1939,7 @@
       "caBundle": "TLS CA バンドルのパス（任意）",
       "clientId": "クライアント ID",
       "clientSecret": "クライアントシークレット（Vault シークレット ID）",
-      "clientSecretHelp": "vault:secret/path または literal:plaintext のような参照",
+      "clientSecretHelp": "シークレットそのものではなく、その場所を指定します: vault:path/to/secret、または literal: の後にシークレット (テスト専用)。",
       "discovery": "Discovery URL のオーバーライド（任意）",
       "enabled": "有効",
       "groupBase": "グループ検索ベース（任意）",
@@ -1960,7 +1960,7 @@
       "samlIdpEntityId": "IdPエンティティID",
       "samlIdpSso": "IdP SSO URL",
       "samlSpAcs": "SP ACS URL",
-      "samlSpAcsHelp": "IdP がアサーションを POST する場所、例：https://host/api/auth/saml/<id>/acs",
+      "samlSpAcsHelp": "ID プロバイダーがアサーションを送信する先です。空欄のままにすると、保存時に SysManage が入力します。",
       "samlSpEntityId": "SPエンティティID",
       "samlSpKey": "SP 秘密キー（オプション；Vault secret id）",
       "samlSpKeyHelp": "vault:secret/path のような参照または文字列:平文の文字列",
@@ -1980,7 +1980,11 @@
       "oidcAcrValues": "許容する保証レベル (acr)",
       "oidcAcrValuesHelp": "省略可: 多要素としても扱う acr 値をスペース区切りで指定します。これらはサインイン時に要求されます。指定しない場合、トークンで amr に mfa が含まれている必要があります。",
       "samlMfaContexts": "多要素認証コンテキスト",
-      "samlMfaContextsHelp": "多要素として扱う AuthnContextClassRef 値 (1 行に 1 つ)。空の場合は Microsoft Entra ID の http://schemas.microsoft.com/claims/multipleauthn を使用します。"
+      "samlMfaContextsHelp": "多要素として扱う AuthnContextClassRef 値 (1 行に 1 つ)。空の場合は Microsoft Entra ID の http://schemas.microsoft.com/claims/multipleauthn を使用します。",
+      "redirectHelp": "空欄のままにすると、保存時に SysManage が入力します。この正確なアドレスを ID プロバイダーに登録してください。",
+      "samlSpEntityIdHelp": "空欄のままにすると、このプロバイダーのメタデータ URL を使用します。",
+      "samlMetadata": "SP メタデータ URL",
+      "samlMetadataHelp": "これを ID プロバイダーに渡してください。SysManage をサービスプロバイダーとして記述しています。"
     },
     "loadError": "ID プロバイダーを読み込めませんでした。",
     "mapAddError": "マッピングを追加できませんでした。",
@@ -2095,7 +2099,10 @@
       "failed": "シングルサインオンが完了しませんでした。もう一度試すか、パスワードでサインインしてください。",
       "backToLogin": "サインインに戻る",
       "mfaRequired": "ID プロバイダーで多要素サインインが確認されませんでした。2 番目の要素を使用してもう一度サインインするか、ID プロバイダーの多要素ポリシーを確認するよう管理者に依頼してください。"
-    }
+    },
+    "next": "次へ",
+    "signingInAs": "{{email}} としてサインイン",
+    "useAnotherEmail": "別のメールアドレスを使用"
   },
   "logout": {
     "loading": "ログアウト中..."

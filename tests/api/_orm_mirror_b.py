@@ -628,6 +628,18 @@ class ExternalIdpSettings(TestBase):
     )
 
 
+class SsoPendingState(TestBase):
+    __tablename__ = "sso_pending_state"
+    state = Column(String(64), primary_key=True)
+    provider_id = Column(
+        GUID(),
+        ForeignKey("external_idp_provider.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    request_id = Column(String(255), nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+
 class ComputeResource(TestBase):
     __tablename__ = "compute_resource"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)

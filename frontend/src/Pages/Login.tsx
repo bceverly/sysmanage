@@ -8,8 +8,6 @@ import { useTranslation } from 'react-i18next';
 
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import InputAdornment from '@mui/material/InputAdornment';
-import AccountCircle from '@mui/icons-material/AccountCircle';
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import Link from "@mui/material/Link";
@@ -23,6 +21,8 @@ import api from "../Services/api"
 import LanguageSelector from "../Components/LanguageSelector"
 import ForgotPasswordDialog from "../Components/ForgotPasswordDialog"
 import SsoButtons from "../Components/Login/SsoButtons"
+import { LoginEmailStep, LoginIdentity } from "../Components/Login/LoginEmailStep"
+import type { LoginMethods } from "../Services/sso"
 import { saveRememberedEmail, getRememberedEmail, clearRememberedEmail } from "../utils/cookieUtils"
 import { clearPermissionsCache } from "../Services/permissions"
 
@@ -38,6 +38,8 @@ const Login = () => {
       password: "",
     });
     const [rememberMe, setRememberMe] = useState(false);
+    // Step one (email) until the server says how this address signs in.
+    const [methods, setMethods] = useState<LoginMethods | null>(null);
     const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
     const [isLoggingIn, setIsLoggingIn] = useState(false);
     // Phase 10.3 -- MFA challenge state.  When the password login succeeds
@@ -255,28 +257,23 @@ const Login = () => {
           <Typography component="h1" variant="h5" sx={{ mb: 2 }}>
             {t('login.title')}
           </Typography>
-        <Box component="form" onSubmit={handleSubmitEvent} noValidate sx={{ mt: 1 }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="userid"
-            label={t('login.username')}
-            name="userid"
-            value={input.userid}
-            autoComplete="email"
-            autoFocus
-            onChange={handleInput}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <AccountCircle />
-                  </InputAdornment>
-                ),
-              },
+        {methods === null ? (
+          <LoginEmailStep
+            email={input.userid}
+            onEmailChange={(userid) => setInput((prev) => ({ ...prev, userid }))}
+            onMethods={setMethods}
+          />
+        ) : (
+          <>
+          <LoginIdentity
+            email={input.userid}
+            onChange={() => {
+              setMethods(null);
+              setInput((prev) => ({ ...prev, password: '' }));
             }}
           />
+        {methods.password && (
+        <Box component="form" onSubmit={handleSubmitEvent} noValidate sx={{ mt: 1, width: '100%' }}>
           <TextField
             margin="normal"
             required
@@ -287,6 +284,7 @@ const Login = () => {
             id="password"
             value={input.password}
             autoComplete="current-password"
+            autoFocus
             onChange={handleInput}
           />
           <FormControlLabel
@@ -322,7 +320,10 @@ const Login = () => {
             </Link>
           </Box>
         </Box>
-        <SsoButtons />
+        )}
+          <SsoButtons providers={methods.providers} divider={methods.password} />
+          </>
+        )}
       </Box>
     </Container>
 

@@ -21,7 +21,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from backend.api import external_idp
+from backend.api import external_idp, sso_state
 from backend.persistence import models
 from backend.persistence.db import Base
 
@@ -107,7 +107,6 @@ async def test_saml_start_redirects_and_stores_relaystate(db):
     engine = _mock_engine()
     p = _patch_engine(engine)
     try:
-        external_idp._SAML_STATE_STORE.clear()
         resp = await external_idp.saml_start(str(PROVIDER_ID), db)
     finally:
         p.stop()
@@ -115,8 +114,11 @@ async def test_saml_start_redirects_and_stores_relaystate(db):
     assert resp.status_code == 302
     assert resp.headers["location"].startswith("https://idp.acme.com/sso")
     # exactly one RelayState recorded, bound to (provider, request_id)
-    (stashed,) = external_idp._SAML_STATE_STORE.values()
-    assert stashed == (str(PROVIDER_ID), "_req123")
+    (stashed,) = db.query(models.SsoPendingState).all()
+    assert (str(stashed.provider_id), stashed.request_id) == (
+        str(PROVIDER_ID),
+        "_req123",
+    )
 
 
 @pytest.mark.asyncio
@@ -148,7 +150,7 @@ async def test_saml_acs_issues_jwt_for_linked_user(db):
     engine = _mock_engine()
     p = _patch_engine(engine)
     relay = "relay-token-1"
-    external_idp._SAML_STATE_STORE[relay] = (str(PROVIDER_ID), "_req123")
+    sso_state.save(db, relay, PROVIDER_ID, "_req123")
     request = MagicMock()
     request.form = AsyncMock(
         return_value={"SAMLResponse": "b64assertion", "RelayState": relay}
@@ -168,7 +170,7 @@ async def test_saml_acs_issues_jwt_for_linked_user(db):
     _, _, req_id = engine.process_saml_response.call_args.args
     assert req_id == "_req123"
     # RelayState is single-use
-    assert relay not in external_idp._SAML_STATE_STORE
+    assert db.get(models.SsoPendingState, relay) is None
 
 
 @pytest.mark.asyncio
@@ -200,7 +202,7 @@ async def test_saml_acs_401_when_assertion_invalid(db):
     }
     p = _patch_engine(engine)
     relay = "relay-token-2"
-    external_idp._SAML_STATE_STORE[relay] = (str(PROVIDER_ID), "_req")
+    sso_state.save(db, relay, PROVIDER_ID, "_req")
     request = MagicMock()
     request.form = AsyncMock(
         return_value={"SAMLResponse": "tampered", "RelayState": relay}
@@ -218,7 +220,7 @@ async def test_saml_acs_unlinked_identity_lands_with_denied(db):
     engine = _mock_engine()
     p = _patch_engine(engine)
     relay = "relay-token-3"
-    external_idp._SAML_STATE_STORE[relay] = (str(PROVIDER_ID), "_req")
+    sso_state.save(db, relay, PROVIDER_ID, "_req")
     request = MagicMock()
     request.form = AsyncMock(
         return_value={"SAMLResponse": "b64assertion", "RelayState": relay}

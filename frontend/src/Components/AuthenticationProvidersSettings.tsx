@@ -64,6 +64,7 @@ import {
   updateProvider,
 } from '../Services/externalIdp';
 import IdpMfaFields from './IdpMfaFields';
+import IdpEndpointField from './IdpEndpointField';
 
 const DEFAULT_DRAFT: IdpProviderCreate = {
   name: '',
@@ -542,19 +543,24 @@ const AuthenticationProvidersSettings: React.FC = () => {
                 />
                 <TextField
                   label={t('idp.field.clientSecret', 'Client secret (Vault secret id)')}
-                  helperText={t('idp.field.clientSecretHelp', 'Reference like vault:secret/path or literal:plaintext')}
+                  helperText={t(
+                    'idp.field.clientSecretHelp',
+                    'Not the secret itself but where to find it: vault:path/to/secret, or literal: followed by the secret (testing only).',
+                  )}
                   value={draft.oidc_client_secret_secret_id ?? ''}
                   onChange={(e) =>
                     setDraft({ ...draft, oidc_client_secret_secret_id: e.target.value })
                   }
                   fullWidth
                 />
-                <TextField
+                <IdpEndpointField
                   label={t('idp.field.redirect', 'Redirect URI')}
+                  helperText={t(
+                    'idp.field.redirectHelp',
+                    'Leave blank and SysManage fills it in when you save. Register this exact address with your identity provider.',
+                  )}
                   value={draft.oidc_redirect_uri ?? ''}
-                  onChange={(e) => setDraft({ ...draft, oidc_redirect_uri: e.target.value })}
-                  fullWidth
-                  required
+                  onChange={(value) => setDraft({ ...draft, oidc_redirect_uri: value })}
                 />
                 <TextField
                   label={t('idp.field.scopes', 'Scopes')}
@@ -605,24 +611,34 @@ const AuthenticationProvidersSettings: React.FC = () => {
                   minRows={3}
                   required
                 />
-                <TextField
+                <IdpEndpointField
                   label={t('idp.field.samlSpEntityId', 'SP Entity ID')}
+                  helperText={t(
+                    'idp.field.samlSpEntityIdHelp',
+                    "Leave blank to use this provider's metadata URL.",
+                  )}
                   value={draft.saml_sp_entity_id ?? ''}
-                  onChange={(e) => setDraft({ ...draft, saml_sp_entity_id: e.target.value })}
-                  fullWidth
-                  required
+                  onChange={(value) => setDraft({ ...draft, saml_sp_entity_id: value })}
                 />
-                <TextField
+                <IdpEndpointField
                   label={t('idp.field.samlSpAcs', 'SP ACS URL')}
                   helperText={t(
                     'idp.field.samlSpAcsHelp',
-                    'Where the IdP POSTs the assertion, e.g. https://host/api/auth/saml/<id>/acs',
+                    'Where the identity provider posts the assertion. Leave blank and SysManage fills it in when you save.',
                   )}
                   value={draft.saml_sp_acs_url ?? ''}
-                  onChange={(e) => setDraft({ ...draft, saml_sp_acs_url: e.target.value })}
-                  fullWidth
-                  required
+                  onChange={(value) => setDraft({ ...draft, saml_sp_acs_url: value })}
                 />
+                {editingId && (
+                  <IdpEndpointField
+                    label={t('idp.field.samlMetadata', 'SP metadata URL')}
+                    helperText={t(
+                      'idp.field.samlMetadataHelp',
+                      'Give this to your identity provider: it describes SysManage as a service provider.',
+                    )}
+                    value={`${globalThis.location.origin}/api/auth/saml/${editingId}/metadata`}
+                  />
+                )}
                 <TextField
                   label={t('idp.field.samlSpKey', 'SP private key (Vault secret id, optional)')}
                   helperText={t(

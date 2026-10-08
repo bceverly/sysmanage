@@ -43,7 +43,10 @@ async function doLogin(page: Page): Promise<boolean> {
     const userField = page.locator('#userid');
     await userField.waitFor({ state: 'visible', timeout: 10000 });
 
+    // Two steps: the email (Next), then the password.
     await page.fill('#userid', username);
+    await page.click('button[type="submit"]');
+    await page.locator('#password').waitFor({ state: 'visible', timeout: 20000 });
     await page.fill('#password', password);
     await page.click('button[type="submit"]');
 

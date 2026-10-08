@@ -218,3 +218,29 @@ class ExternalIdpSettings(Base):
             "max_failed_attempts": self.max_failed_attempts,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
+
+
+class SsoPendingState(Base):
+    """One SSO sign-in between ``/start`` and the IdP's return (Phase 22.8).
+
+    The OIDC ``state`` / SAML ``RelayState`` used to live in one worker's
+    memory, so with several workers the IdP's redirect often reached a worker
+    that had never seen it: "Invalid OIDC state" on a sign-in that had just
+    passed MFA (found 2026-10-07, the first real Entra ID sign-in).  A row is
+    readable by every worker, deleted when used (single-use), and refused
+    after ``backend.api.sso_state.MAX_AGE_SECONDS``.
+    """
+
+    __tablename__ = "sso_pending_state"
+
+    state = Column(String(64), primary_key=True)
+    provider_id = Column(
+        GUID(),
+        ForeignKey("external_idp_provider.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    # SAML: the AuthnRequest id, pinned as InResponseTo by the engine.
+    request_id = Column(String(255), nullable=True)
+    created_at = Column(
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+    )

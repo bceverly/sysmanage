@@ -12379,7 +12379,7 @@ misconfigured or bypassed IdP policy that skips MFA is invisible to us.
       backend msgid). Also fixed on the way: the Portuguese `idp.field.jit`
       (European, not Brazilian) and the Hindi `samlWantSigned` (said
       something else).*
-- [ ] Docs: the external-IdP page gains the setting, and the Microsoft 365
+- [x] Docs: the external-IdP page gains the setting, and the Microsoft 365
       walkthrough (app registration, redirect URI = `webui.public_url`,
       group object IDs in role mappings, security defaults vs Conditional
       Access) -- verified against a real Entra tenant, which also closes the
@@ -12387,6 +12387,50 @@ misconfigured or bypassed IdP policy that skips MFA is invisible to us.
       *Setting documented 2026-10-06 (`external-idp.html`, "Requiring
       Multi-Factor Sign-In", 14 languages). STILL OPEN: the Microsoft 365
       walkthrough -- it must be verified against a real Entra tenant.*
+      *Done 2026-10-07: verified end to end against Bryan's real Entra ID
+      tenant -- sign-in, group-to-role mapping, just-in-time accounts and
+      Require multi-factor sign-in (refused without MFA, admitted with it).
+      Walkthrough on `external-idp.html` ("Walkthrough: Microsoft 365 / Entra
+      ID"), 14 languages. Key finding written into it: Entra's v2.0 ID tokens
+      carry no `amr`, so MFA requires the v1.0 issuer
+      (`https://sts.windows.net/<tenant>/`) and v1.0 discovery URL. This also
+      closes the "SSO never exercised against a real IdP" note on Phase 26.*
+
+- [x] **Found in the first real Entra ID sign-in (2026-10-07)** -- the walkthrough
+      run turned up a chain of defects no test had reached; all fixed:
+      - *Engine: the sign-in URL was guessed as `<issuer>/authorize` (404 at
+        Microsoft); it now comes from the discovery document (cached an hour).
+        Pasted values are trimmed. The ID token's `iss` / `aud` / `exp` were
+        never checked, though OIDC Core 3.1.3.7 requires it (a comment claimed
+        a signature check nothing performed) -- now checked.*
+      - *The OIDC `state` and SAML `RelayState` lived in one worker's memory:
+        with several workers the IdP's return often found no state. Now
+        `sso_pending_state` (migration `q32ssostate`), single-use, 10 minutes.*
+      - *JIT silently did nothing for a provider without a tenant -- now logged.
+        A callback reached on a host other than the console's lost the hand-off
+        cookie ("session expired") -- now logged with both hosts.*
+      - *Identifier-first login (Bryan's design): the email first, then the
+        password and the providers that address may use -- server-wide ones
+        plus those of tenants listing its domain (`POST /api/auth/login/discover`,
+        by domain only, never account existence). Replaced a login page that
+        could never show a tenant's provider. `/api/auth/sso/providers` lists
+        server-wide providers only. Playwright, Selenium and both screenshot
+        scripts log in in two steps; docs updated in 14 languages.*
+      - *Console: an `AuthGate` decides before a page renders (no dashboard
+        flash when signed out; an expired token waits for the refresh).*
+- [x] **Provider settings say what to register at the IdP**: show each OIDC
+      provider's redirect URI and each SAML provider's metadata / ACS URLs
+      (the provider ID was nowhere in the UI), and what the client-secret
+      field expects (`literal:...` or a vault path -- a raw secret silently
+      failed as "could not be resolved").
+      *Done 2026-10-07: those addresses contain the provider's own id, yet the
+      form REQUIRED them before the first save. Now optional: left blank, the
+      server fills them in from the console's public URL
+      (`_fill_endpoint_defaults`: OIDC redirect URI, SAML ACS URL and SP entity
+      ID = metadata URL; a typed value is never replaced). `IdpEndpointField`
+      shows each with a copy button, plus the SAML metadata URL for a saved
+      provider; the client-secret help now says it takes a reference, not the
+      secret. Tests on both sides; 14 languages; walkthrough step updated.*
 
 #### 22.9 Production canary: an outside watcher for the whole server (OSS)
 
@@ -13609,6 +13653,11 @@ done nor tracked anywhere. Re-home any of them if Phase 26 is the wrong fit.
       `tests/test_sso_session.py` + the two vitest files; docs page
       `external-idp.html` gained the SAML and login-page sections. A real IdP
       round trip (Keycloak or similar) is still unexercised.
+      *Exercised 2026-10-07 against a real Microsoft Entra ID tenant (OIDC):
+      the round trip found and fixed seven defects -- see 22.8, "Found in the
+      first real Entra ID sign-in". The login page is now identifier-first;
+      tenant providers come from `/api/auth/login/discover`. SAML against a
+      real IdP is still to be run.*
       *Original finding:* The OIDC callback (`backend/api/external_idp.py:522`)
       and the SAML ACS (`:721`) return raw JSON `{"Authorization": ...}` to
       the browser the IdP sent there, and the login page has no SSO button or

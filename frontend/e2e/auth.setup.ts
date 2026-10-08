@@ -38,7 +38,10 @@ setup('authenticate', async ({ page }) => {
 
   // Use the same selectors as the working Python Playwright tests
   // The userid field has id="userid" and password field has id="password"
+  // Two steps since 2026-10-07: the email (Next), then the password.
   await page.fill('#userid', username);
+  await page.click('button[type="submit"]');
+  await page.locator('#password').waitFor({ state: 'visible', timeout: 20000 });
   await page.fill('#password', password);
   await page.click('button[type="submit"]');
 
