@@ -13387,7 +13387,7 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       human override. `make i18n-verify` / `make i18n-verify-run`; every
       `make translate` ends with a verify run.
 - [x] **Service `POST /verify/batch`** (`translate_verify.py`): bge-m3 cosine
-      >= 0.75 passes, < 0.40 fails (390 swapped wrong-key pairs never exceeded
+      >= 0.65 passes, < 0.40 fails (390 swapped wrong-key pairs never exceeded
       0.62), the band between goes to a ONE-item judge (rejected 24 of 25
       wrong-key values, passed 25 of 25 good ones). Not asked of the model:
       language -- it passed whole English paragraphs as "Korean".

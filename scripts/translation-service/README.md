@@ -102,7 +102,7 @@ curl -s http://localhost:8765/health | python3 -m json.tool
 | `OLLAMA_KEEP_ALIVE` | `30m`                    | Keep model resident in VRAM (`-1` = pin)  |
 | `VERIFY_EMBED_MODEL`| `bge-m3`                 | Embedding model for `/verify/batch`       |
 | `VERIFY_JUDGE_MODEL`| *the translation model*  | Judge for the middle similarity band      |
-| `VERIFY_PASS_AT`    | `0.75`                   | Cosine at or above which a pair passes    |
+| `VERIFY_PASS_AT`    | `0.65`                   | Cosine at or above which a pair passes    |
 | `VERIFY_FAIL_BELOW` | `0.40`                   | Cosine below which a pair fails           |
 
 ## VRAM & model residency (does it reload per language?)
@@ -175,12 +175,12 @@ curl -s http://BEAST:8765/verify/batch -H 'content-type: application/json' -d '{
 }'
 ```
 ```json
-{ "verifier": "1:bge-m3:0.75:0.4",
+{ "verifier": "2:bge-m3:0.65:0.4",
   "results": [ {"ok": true, "cos": 0.81},
                {"ok": false, "reason": "untranslated English: when the is"} ] }
 ```
 A pair passes the deterministic checks (`scripts/i18n_quality.py`, the same
-code CI runs), then bge-m3 cosine >= 0.75 passes and < 0.40 fails; the band
+code CI runs), then bge-m3 cosine >= 0.65 passes and < 0.40 fails; the band
 between goes to the translation model as a one-item judge. Why that shape --
 and why the model is never asked about *language* -- is measured in
 `translate_verify.py`'s docstring.

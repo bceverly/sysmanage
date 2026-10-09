@@ -27,6 +27,16 @@ Why this shape, measured on beast (RTX 4060 Ti, 16 GiB) on 2026-10-08:
     pairs never exceeded 0.62, and 95% of real pairs scored above 0.66.  It is
     unreliable on one- and two-word strings ("Overview"/"Panoramica" scored
     0.41), which is why the middle band goes to the judge rather than failing.
+  * PASS_AT is 0.65, not the 0.75 first shipped.  At 0.75 a quarter of all
+    values (every short heading: "Log Locations", "Exporter Configuration")
+    went to the judge one at a time, and the 266k-value docs pass estimated
+    weeks.  0.65 is still above every swapped pair measured, and 95% of real
+    pairs clear it, so the judge sees ~5%.
+  * The judge prompt is EXACTLY the calibrated one.  A clause added after
+    calibration ("each term is used in its systems-administration sense")
+    made it reject 831 of the first 832 docs values, including correct
+    Arabic headings it described as accurate in its own reason.  Re-run the
+    calibration before changing a word of it.
   * On that middle band the judge rejected 24 of 25 swapped values and nine
     real ones -- every one genuinely broken (Hindi "Quick Navigation" rendered
     as gibberish, "fleet compliance report" as "network firewall compliance
@@ -50,18 +60,17 @@ except ImportError:  # pragma: no cover - deployment accident
     i18n_quality = None
 
 EMBED_MODEL = os.getenv("VERIFY_EMBED_MODEL", "bge-m3")
-PASS_AT = float(os.getenv("VERIFY_PASS_AT", "0.75"))
+PASS_AT = float(os.getenv("VERIFY_PASS_AT", "0.65"))
 FAIL_BELOW = float(os.getenv("VERIFY_FAIL_BELOW", "0.40"))
 JUDGE_MAX_TOKENS = 96
 # Bump when a threshold, model or prompt changes, so a ledger can be traced to
 # the verifier that wrote it (GET /health reports it).
-VERIFIER_VERSION = f"1:{EMBED_MODEL}:{PASS_AT}:{FAIL_BELOW}"
+VERIFIER_VERSION = f"2:{EMBED_MODEL}:{PASS_AT}:{FAIL_BELOW}"
 
 JUDGE_PROMPT = """You check translations for a systems-administration product. You are given an English SOURCE and a {language} TRANSLATION.
 
 Answer "yes" only if ALL of these hold:
 - the TRANSLATION says what the SOURCE says (same meaning, nothing important missing or added; small wording differences are fine);
-- each term is used in its systems-administration sense (a "host" is a managed machine, a "script" is a program, a "fleet" is a set of managed machines);
 - it is not a translation of some other sentence.
 
 Otherwise answer "no". Reply with JSON only: {{"answer": "yes" or "no", "reason": "<at most 12 words, in English>"}}"""
