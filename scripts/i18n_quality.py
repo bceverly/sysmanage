@@ -71,12 +71,17 @@ ENGLISH_HIT_LIMIT = 2
 # Stripped before counting: code, markup, placeholders, URLs, quoted text (a
 # quoted log line or UI label is SUPPOSED to stay English) and path-, flag- or
 # identifier-shaped tokens.
+# Every alternative is linear: a delimited form stops at its own opening
+# delimiter ([^<>], [^{}], ...) and the path-shaped token may start only at
+# the beginning of a token (?<!\S), so a long unbroken run or a string of
+# unclosed brackets is scanned once, not once per position (CodeQL
+# py/polynomial-redos, 2026-10-11).
 _NOT_PROSE = re.compile(
-    r"<code>.*?</code>|<pre>.*?</pre>|<[^>]+>"
-    r"|\{\{[^}]+\}\}|\{[A-Za-z_]\w*\}|%\(\w+\)[sd]|%[sd]|\$\{\w+\}|&\w+;"
+    r"<code>.*?</code>|<pre>.*?</pre>|<[^<>]+>"
+    r"|\{\{[^{}]+\}\}|\{[A-Za-z_]\w*\}|%\(\w+\)[sd]|%[sd]|\$\{\w+\}|&\w+;"
     r"|https?://\S+|`[^`]*`"
-    r"|\"[^\"]*\"|“[^”]*”|„[^“”]*[“”]|«[^»]*»|「[^」]*」|『[^』]*』"
-    r"|\S*[/_.=]\S*",
+    r"|\"[^\"]*\"|“[^“”]*”|„[^„“”]*[“”]|«[^«»]*»|「[^「」]*」|『[^『』]*』"
+    r"|(?<!\S)[^\s/_.=]*[/_.=]\S*",
     re.S,
 )
 # A WORD is a run of letters in any script, so accented words stay whole:

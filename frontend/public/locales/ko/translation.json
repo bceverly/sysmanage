@@ -4060,7 +4060,11 @@
       "enable_network_discovery": "에이전트가 주변 장치를 보고하도록 네트워크 검색을 켜십시오.",
       "review_unmanaged_devices": "관리되지 않는 각 장치를 등록하거나 사유와 함께 알려진 장치로 표시하십시오.",
       "review_malware_findings": "심각도가 높은 각 발견 사항을 격리, 해결 또는 기각하십시오.",
-      "scan_for_malware": "스캔할 수 있는 모든 호스트를 한 달에 한 번 이상 스캔하십시오."
+      "scan_for_malware": "스캔할 수 있는 모든 호스트를 한 달에 한 번 이상 스캔하십시오.",
+      "failure": {
+        "unsupported_platform": "이 수정은 호스트의 플랫폼을 지원하지 않습니다",
+        "dispatch_failed": "변경 사항을 호스트로 보낼 수 없습니다. 서버 로그를 확인하세요"
+      }
     },
     "saved": "위협 모델이 저장되었습니다. 조치 항목 목록은 다음 어드바이저 실행 시 다시 평가됩니다.",
     "stale": {

@@ -4060,7 +4060,11 @@
       "enable_network_discovery": "Activez la découverte réseau pour que les agents signalent les appareils qui les entourent.",
       "review_unmanaged_devices": "Enregistrez chaque appareil non géré ou marquez-le comme connu avec un motif.",
       "review_malware_findings": "Mettez en quarantaine, résolvez ou ignorez chaque constat de gravité élevée.",
-      "scan_for_malware": "Analysez chaque hôte capable d'effectuer une analyse, au moins une fois par mois."
+      "scan_for_malware": "Analysez chaque hôte capable d'effectuer une analyse, au moins une fois par mois.",
+      "failure": {
+        "unsupported_platform": "cette correction ne prend pas en charge la plateforme de l'hôte",
+        "dispatch_failed": "la modification n'a pas pu être envoyée à l'hôte ; consultez le journal du serveur"
+      }
     },
     "saved": "Modèle de menaces enregistré. La liste des points à traiter sera réévaluée lors du prochain passage du conseiller.",
     "stale": {

@@ -25,6 +25,7 @@ import { LoginEmailStep, LoginIdentity } from "../Components/Login/LoginEmailSte
 import type { LoginMethods } from "../Services/sso"
 import { saveRememberedEmail, getRememberedEmail, clearRememberedEmail } from "../utils/cookieUtils"
 import { clearPermissionsCache } from "../Services/permissions"
+import { storeBearerToken } from "../Services/bearerToken";
 
 interface LoginResponse {
   Authorization?: string;
@@ -67,7 +68,7 @@ const Login = () => {
       // Clear permissions cache before setting new credentials
       clearPermissionsCache();
       localStorage.setItem("userid", input.userid);
-      localStorage.setItem("bearer_token", token);
+      storeBearerToken(token);
       if (rememberMe) {
         saveRememberedEmail(input.userid);
       } else {

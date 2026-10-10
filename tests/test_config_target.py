@@ -14,6 +14,16 @@ from backend.config.config_target import resolve_config_target
 from backend.persistence import pool_sizing
 
 
+@pytest.fixture(autouse=True)
+def _tmp_is_a_config_dir(tmp_path, monkeypatch):
+    """Tests write their config under tmp_path; let the path guard accept it."""
+    from backend.config import config_target
+
+    monkeypatch.setattr(
+        config_target, "CONFIG_DIRS", config_target.CONFIG_DIRS + (str(tmp_path),)
+    )
+
+
 @pytest.mark.parametrize(
     "name", ["sysmanage.yaml", "sysmanage.yaml.example", "config.yaml"]
 )
@@ -59,3 +69,14 @@ def test_the_tools_refuse_a_wrong_name_without_touching_it(tmp_path):
     assert install_secrets.main(["--apply", str(other)]) == 1
     assert pool_sizing.main(["--apply", str(other)]) == 1
     assert other.read_text(encoding="utf-8") == "password_salt: CHANGE_ME\n"
+
+
+def test_a_config_name_outside_the_config_directories_is_refused(tmp_path, monkeypatch):
+    # The right file NAME in the wrong place is still refused: the tools run as
+    # root, and "/tmp/x/sysmanage.yaml" is not the server's configuration.
+    from backend.config import config_target
+
+    monkeypatch.setattr(config_target, "CONFIG_DIRS", ("/etc",))
+    (tmp_path / "sysmanage.yaml").write_text("api: {}\n")
+    with pytest.raises(ValueError, match="configuration directory"):
+        resolve_config_target(str(tmp_path / "sysmanage.yaml"))

@@ -4060,7 +4060,11 @@
       "enable_network_discovery": "开启网络发现，让代理报告其周围的设备。",
       "review_unmanaged_devices": "注册每台未托管的设备，或注明原因将其标记为已知。",
       "review_malware_findings": "隔离、解决或忽略每个高严重性检测结果。",
-      "scan_for_malware": "每月至少扫描一次所有可扫描的主机。"
+      "scan_for_malware": "每月至少扫描一次所有可扫描的主机。",
+      "failure": {
+        "unsupported_platform": "此修复不支持该主机的平台",
+        "dispatch_failed": "无法将更改发送到主机；请查看服务器日志"
+      }
     },
     "saved": "威胁模型已保存。整改清单将在下一次顾问评估时重新评估。",
     "stale": {

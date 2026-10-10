@@ -4060,7 +4060,11 @@
       "enable_network_discovery": "Schakel netwerkdetectie in zodat agents de apparaten om hen heen melden.",
       "review_unmanaged_devices": "Registreer elk onbeheerd apparaat of markeer het met een reden als bekend.",
       "review_malware_findings": "Plaats elke bevinding met hoge ernst in quarantaine, los deze op of negeer deze.",
-      "scan_for_malware": "Scan elke host die kan scannen minstens eens per maand."
+      "scan_for_malware": "Scan elke host die kan scannen minstens eens per maand.",
+      "failure": {
+        "unsupported_platform": "deze herstelactie ondersteunt het platform van de host niet",
+        "dispatch_failed": "de wijziging kon niet naar de host worden verzonden; zie het serverlogboek"
+      }
     },
     "saved": "Dreigingsmodel opgeslagen. De actielijst wordt bij de volgende adviseursronde opnieuw geëvalueerd.",
     "stale": {

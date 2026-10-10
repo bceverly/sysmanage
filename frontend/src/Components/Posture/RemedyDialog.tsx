@@ -22,6 +22,7 @@ import {
     Typography,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { useNavigate } from 'react-router';
 import {
     postureService,
@@ -79,6 +80,12 @@ const PreviewBody: React.FC<{ preview: RemedyPreview }> = ({ preview }) => {
     );
 };
 
+// The server reports WHY a host failed as a code, never as exception text.
+const failureReason = (t: TFunction, code: string): string =>
+    code === 'unsupported_platform'
+        ? t('posture.remedy.failure.unsupported_platform', "this remedy does not support the host's platform")
+        : t('posture.remedy.failure.dispatch_failed', 'the change could not be sent to the host; see the server log');
+
 const ResultBody: React.FC<{ result: RemedyResult }> = ({ result }) => {
     const { t } = useTranslation();
     return (
@@ -88,7 +95,7 @@ const ResultBody: React.FC<{ result: RemedyResult }> = ({ result }) => {
             </Alert>
             {result.failed.map(f => (
                 <Typography key={f.fqdn} variant="body2" color="error">
-                    {t('posture.remedy.hostFailed', '{{host}}: {{reason}}', { host: f.fqdn, reason: f.reason })}
+                    {t('posture.remedy.hostFailed', '{{host}}: {{reason}}', { host: f.fqdn, reason: failureReason(t, f.reason) })}
                 </Typography>
             ))}
         </>

@@ -128,8 +128,12 @@ const addPort = (dialog: HTMLElement) =>
   fireEvent.click(within(dialog).getByRole("button", { name: "firewallRoles.addPort" }));
 
 // The chip area that follows the "Open IPvN Ports (count)" heading.
+const PORT_HEADING = {
+  IPv4: /^firewallRoles\.openIPv4Ports \(\d+\)$/,
+  IPv6: /^firewallRoles\.openIPv6Ports \(\d+\)$/,
+};
 const portList = (dialog: HTMLElement, version: "IPv4" | "IPv6") => {
-  const heading = within(dialog).getByText(new RegExp(`^firewallRoles\\.open${version}Ports \\(\\d+\\)$`));
+  const heading = within(dialog).getByText(PORT_HEADING[version]);
   return { heading, list: heading.nextElementSibling as HTMLElement };
 };
 

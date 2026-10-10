@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 import axios from "axios";
+import { storeBearerToken } from "./bearerToken";
 
 // Same-origin baseURL -- every backend route is now under /api, and both
 // nginx (production) and vite (dev) reverse-proxy /api/* to the backend.
@@ -91,7 +92,7 @@ async function handle401Refresh(originalConfig) {
   try {
     const response = await axiosInstance.post("/api/v1/refresh", {});
     console.log('Received response:', response);
-    localStorage.setItem("bearer_token", response.data.Authorization);
+    storeBearerToken(response.data.Authorization);
     return axiosInstance(originalConfig);
   } catch (error) {
     console.log(error);

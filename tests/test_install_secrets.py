@@ -13,9 +13,21 @@ placeholders are ever replaced, so a live config is never touched.
 import os
 import stat
 
+import pytest
 import yaml
 
 from backend.config import install_secrets as inst
+
+
+@pytest.fixture(autouse=True)
+def _tmp_is_a_config_dir(tmp_path, monkeypatch):
+    """Tests write their config under tmp_path; let the path guard accept it."""
+    from backend.config import config_target
+
+    monkeypatch.setattr(
+        config_target, "CONFIG_DIRS", config_target.CONFIG_DIRS + (str(tmp_path),)
+    )
+
 
 EXAMPLE = """\
 # my notes

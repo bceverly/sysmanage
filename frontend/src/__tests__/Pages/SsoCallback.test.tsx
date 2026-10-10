@@ -23,13 +23,13 @@ describe('SsoCallback', () => {
     afterEach(() => vi.unstubAllGlobals());
 
     test('takes the session once, stores it like a password login, enters the app', async () => {
-        vi.mocked(takeSsoSession).mockResolvedValue({ Authorization: 'jwt', userid: 'user@acme.com' });
+        vi.mocked(takeSsoSession).mockResolvedValue({ Authorization: 'h.jwt.s', userid: 'user@acme.com' });
         const replace = vi.fn();
         vi.stubGlobal('location', { ...globalThis.location, replace });
         at('/login/sso');
         await waitFor(() => expect(replace).toHaveBeenCalledWith('/'));
         expect(takeSsoSession).toHaveBeenCalledTimes(1);
-        expect(localStorage.getItem('bearer_token')).toBe('jwt');
+        expect(localStorage.getItem('bearer_token')).toBe('h.jwt.s');
         expect(localStorage.getItem('userid')).toBe('user@acme.com');
     });
 

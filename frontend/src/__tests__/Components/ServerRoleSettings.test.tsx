@@ -107,7 +107,9 @@ describe("ServerRoleSettings", () => {
 
   test("selecting and saving a new role PUTs it and shows the success toast", async () => {
     render(<ServerRoleSettings />);
-    const collector = await screen.findByRole("radio", { name: new RegExp(COLLECTOR_TITLE.replace(/[()]/g, "\\$&")) });
+    const collector = await screen.findByRole("radio", {
+      name: (accessibleName) => accessibleName.includes(COLLECTOR_TITLE),
+    });
     fireEvent.click(collector);
     expect(
       screen.getByText(/Restart the SysManage server after saving/),

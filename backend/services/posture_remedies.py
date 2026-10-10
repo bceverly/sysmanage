@@ -249,6 +249,20 @@ def _dispatch_antivirus(db, host, _user):
     )  # pylint: disable=protected-access
 
 
+# Per-host failure codes in an apply() result; the UI translates each.
+FAILURE_UNSUPPORTED_PLATFORM = "unsupported_platform"
+FAILURE_DISPATCH = "dispatch_failed"
+
+
+def _failure_code(exc: Exception) -> str:
+    """The code for one host's failure: a planner that has no plan for the
+    host's platform refuses with ValueError or a failed lookup; anything else
+    is a dispatch failure."""
+    if isinstance(exc, (ValueError, LookupError)):
+        return FAILURE_UNSUPPORTED_PLATFORM
+    return FAILURE_DISPATCH
+
+
 # (hosts to act on, per-host dispatch, the role the per-host button needs)
 FLEET = {
     "enable_fips": (_fips_hosts, _dispatch_fips, None),
@@ -353,11 +367,14 @@ def apply(db, scope, item, rule, user, threat_model_version=None) -> Dict[str, A
                 dispatch(db, by_id[host["id"]], user)
             except Exception as exc:  # pylint: disable=broad-except
                 # One host the engine cannot plan for (unsupported OS) must not
-                # stop the rest; it is reported, with the reason.
+                # stop the rest; it is reported with a reason CODE.  The
+                # exception text goes to the log only -- it can carry internal
+                # detail and must not reach the browser (CodeQL
+                # py/stack-trace-exposure, 2026-10-11).
                 logger.warning(
                     "Posture remedy %s failed for %s: %s", remedy, host["fqdn"], exc
                 )
-                failed.append({"fqdn": host["fqdn"], "reason": str(exc)[:200]})
+                failed.append({"fqdn": host["fqdn"], "reason": _failure_code(exc)})
         entity = EntityType.HOST
     db.add(
         models.PostureItemEvent(

@@ -11,6 +11,7 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router';
 import axiosInstance from '../Services/api';
+import { storeBearerToken } from '../Services/bearerToken';
 
 /** Pages reachable without a session. */
 export const PUBLIC_PATHS = ['/login', '/login/sso', '/reset-password', '/accept-invitation'];
@@ -41,7 +42,7 @@ const AuthGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         axiosInstance
             .post('/api/v1/refresh', {})
             .then((response) => {
-                localStorage.setItem('bearer_token', response.data.Authorization);
+                storeBearerToken(response.data.Authorization);
             })
             .catch(() => {
                 localStorage.removeItem('bearer_token');

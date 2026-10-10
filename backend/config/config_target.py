@@ -10,7 +10,11 @@ typo, a symlink planted where the config should be, a path built from bad
 input -- would have them overwrite it.  So the target must be an existing
 regular file (not a symlink) with one of the names the installers actually
 use: ``sysmanage.yaml``, ``sysmanage.yaml.example`` (macOS writes the
-example first) and ``config.yaml`` (the FreeBSD and NetBSD packages).
+example first) and ``config.yaml`` (the FreeBSD and NetBSD packages) -- in one
+of the directories the installers actually write to.
+
+The returned path is rebuilt from those two allow-lists, never from the
+argument itself, so nothing the caller passed reaches ``open()``.
 """
 
 import os
@@ -20,17 +24,44 @@ CONFIG_FILE_NAMES = frozenset(
     {"sysmanage.yaml", "sysmanage.yaml.example", "config.yaml"}
 )
 
+# Where every installer keeps the server configuration: deb/rpm/macOS/OpenBSD
+# (/etc), Alpine (/etc/sysmanage), FreeBSD (/usr/local/etc/sysmanage), NetBSD
+# (/usr/pkg/etc/sysmanage) and Windows (C:\ProgramData\SysManage).
+CONFIG_DIRS = (
+    "/etc",
+    "/etc/sysmanage",
+    "/usr/local/etc/sysmanage",
+    "/usr/pkg/etc/sysmanage",
+    "C:\\ProgramData\\SysManage",
+)
+
+
+def _same_dir(first: str, second: str) -> bool:
+    return os.path.normcase(os.path.realpath(first)) == os.path.normcase(
+        os.path.realpath(second)
+    )
+
 
 def resolve_config_target(path: str) -> str:
     """The absolute path to rewrite; ValueError (or OSError) when refused."""
     absolute = os.path.abspath(path)
     name = os.path.basename(absolute)
-    if name not in CONFIG_FILE_NAMES:
+    filename = next((n for n in sorted(CONFIG_FILE_NAMES) if n == name), None)
+    if filename is None:
         raise ValueError(
             f"refusing {path}: not a SysManage configuration file "
             f"(expected one of {', '.join(sorted(CONFIG_FILE_NAMES))})"
         )
-    mode = os.lstat(absolute).st_mode
+    directory = next(
+        (d for d in CONFIG_DIRS if _same_dir(d, os.path.dirname(absolute))), None
+    )
+    if directory is None:
+        raise ValueError(
+            f"refusing {path}: not in a SysManage configuration directory "
+            f"({', '.join(CONFIG_DIRS)})"
+        )
+    target = os.path.join(os.path.realpath(directory), filename)
+    mode = os.lstat(target).st_mode
     if stat.S_ISLNK(mode) or not stat.S_ISREG(mode):
         raise ValueError(f"refusing {path}: not a regular file")
-    return os.path.join(os.path.realpath(os.path.dirname(absolute)), name)
+    return target

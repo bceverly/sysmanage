@@ -136,12 +136,12 @@ describe('Login page (password and two-factor flow)', () => {
   });
 
   test('a successful login stores the token, forgets the email and reloads', async () => {
-    vi.mocked(api.post).mockResolvedValue({ data: { Authorization: 'tok-1' } });
+    vi.mocked(api.post).mockResolvedValue({ data: { Authorization: 'h.tok-1.s' } });
     await toPasswordStep();
     await submitPassword();
     expect(clearPermissionsCache).toHaveBeenCalled();
     expect(localStorage.getItem('userid')).toBe('bryan@acme.com');
-    expect(localStorage.getItem('bearer_token')).toBe('tok-1');
+    expect(localStorage.getItem('bearer_token')).toBe('h.tok-1.s');
     expect(clearRememberedEmail).toHaveBeenCalled();
     expect(saveRememberedEmail).not.toHaveBeenCalled();
     expect(reload).toHaveBeenCalled();
@@ -149,7 +149,7 @@ describe('Login page (password and two-factor flow)', () => {
 
   test('a remembered email is prefilled and saved again after login', async () => {
     vi.mocked(getRememberedEmail).mockReturnValue('kept@acme.com' as never);
-    vi.mocked(api.post).mockResolvedValue({ data: { Authorization: 'tok-2' } });
+    vi.mocked(api.post).mockResolvedValue({ data: { Authorization: 'h.tok-2.s' } });
     await renderMemory();
     expect(screen.getByLabelText(/email/i)).toHaveValue('kept@acme.com');
     await act(async () => {
@@ -161,7 +161,7 @@ describe('Login page (password and two-factor flow)', () => {
   });
 
   test('ticking remember me saves the email', async () => {
-    vi.mocked(api.post).mockResolvedValue({ data: { Authorization: 'tok-3' } });
+    vi.mocked(api.post).mockResolvedValue({ data: { Authorization: 'h.tok-3.s' } });
     await toPasswordStep();
     fireEvent.click(screen.getByRole('checkbox'));
     await submitPassword();
@@ -214,13 +214,13 @@ describe('Login page (password and two-factor flow)', () => {
       await toChallenge();
       expect(screen.getByText('Two-Factor Authentication')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Verify' })).toBeDisabled();
-      vi.mocked(api.post).mockResolvedValueOnce({ data: { Authorization: 'tok-mfa' } });
+      vi.mocked(api.post).mockResolvedValueOnce({ data: { Authorization: 'h.tok-mfa.s' } });
       await submitCode(' 123456 ');
       expect(api.post).toHaveBeenLastCalledWith('/api/v1/auth/mfa/verify', {
         pending_token: 'pend-1',
         code: '123456',
       });
-      expect(localStorage.getItem('bearer_token')).toBe('tok-mfa');
+      expect(localStorage.getItem('bearer_token')).toBe('h.tok-mfa.s');
       expect(reload).toHaveBeenCalled();
     });
 

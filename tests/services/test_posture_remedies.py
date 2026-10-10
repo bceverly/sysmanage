@@ -203,8 +203,18 @@ def test_one_failing_host_does_not_stop_the_rest(factory):
             result = pr.apply(
                 db, ps.SCOPE, _item(db), {"remedy": "enable_firewall"}, Admin()
             )
-    assert result["failed"] == [{"fqdn": "a", "reason": "unsupported OS"}]
+    # A code, never the exception's own text (it can carry internal detail).
+    assert result["failed"] == [{"fqdn": "a", "reason": "unsupported_platform"}]
     assert {h["fqdn"] for h in result["hosts"]} == {"a", "b"}
+
+
+def test_a_failure_reason_is_a_code_not_the_exception_text():
+    assert pr._failure_code(ValueError("x")) == pr.FAILURE_UNSUPPORTED_PLATFORM
+    assert pr._failure_code(KeyError("centos")) == pr.FAILURE_UNSUPPORTED_PLATFORM
+    assert (
+        pr._failure_code(RuntimeError("password=hunter2 at /etc/secret"))
+        == pr.FAILURE_DISPATCH
+    )
 
 
 def test_a_fleet_remedy_needs_the_per_host_role():

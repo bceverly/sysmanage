@@ -4060,7 +4060,11 @@
       "enable_network_discovery": "Active la detección de red para que los agentes informen de los dispositivos a su alrededor.",
       "review_unmanaged_devices": "Registre cada dispositivo no administrado o márquelo como conocido con un motivo.",
       "review_malware_findings": "Ponga en cuarentena, resuelva o descarte cada hallazgo de gravedad alta.",
-      "scan_for_malware": "Escanee cada host que pueda escanear al menos una vez al mes."
+      "scan_for_malware": "Escanee cada host que pueda escanear al menos una vez al mes.",
+      "failure": {
+        "unsupported_platform": "esta corrección no admite la plataforma del host",
+        "dispatch_failed": "no se pudo enviar el cambio al host; consulte el registro del servidor"
+      }
     },
     "saved": "Modelo de amenazas guardado. La lista de pendientes se reevaluará en la próxima pasada del asesor.",
     "stale": {

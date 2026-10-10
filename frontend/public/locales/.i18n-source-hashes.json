@@ -2702,6 +2702,8 @@
   "posture.remedy.enforce_lockout": "d6ede12d788bd5ea",
   "posture.remedy.enroll_admin_mfa": "8198a9d092cc5661",
   "posture.remedy.expire_api_keys": "3de41f450c142c2b",
+  "posture.remedy.failure.dispatch_failed": "9f789c16dcbbe7bc",
+  "posture.remedy.failure.unsupported_platform": "acebbd0654922708",
   "posture.remedy.goThere": "e20bd7d7e901d3e5",
   "posture.remedy.hostFailed": "b5e9bcb67c90af05",
   "posture.remedy.hosts": "8a9fbcb82db81415",

@@ -4060,7 +4060,11 @@
       "enable_network_discovery": "Turn on network discovery so agents report the devices around them.",
       "review_unmanaged_devices": "Enroll each unmanaged device, or mark it as known with a reason.",
       "review_malware_findings": "Quarantine, resolve or dismiss each high-severity finding.",
-      "scan_for_malware": "Scan every host that can scan, at least once a month."
+      "scan_for_malware": "Scan every host that can scan, at least once a month.",
+      "failure": {
+        "unsupported_platform": "this remedy does not support the host's platform",
+        "dispatch_failed": "the change could not be sent to the host; see the server log"
+      }
     },
     "saved": "Threat model saved. The punch list is re-evaluated on the next advisor pass.",
     "stale": {

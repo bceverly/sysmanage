@@ -4060,7 +4060,11 @@
       "enable_network_discovery": "開啟網路探索，讓代理程式回報其周圍的裝置。",
       "review_unmanaged_devices": "註冊每台未受管理的裝置，或註明原因將其標記為已知。",
       "review_malware_findings": "隔離、解決或忽略每個高嚴重性偵測結果。",
-      "scan_for_malware": "每月至少掃描一次所有可掃描的主機。"
+      "scan_for_malware": "每月至少掃描一次所有可掃描的主機。",
+      "failure": {
+        "unsupported_platform": "此修復不支援該主機的平台",
+        "dispatch_failed": "無法將變更傳送到主機；請查看伺服器記錄"
+      }
     },
     "saved": "威脅模型已儲存。改善清單將在下一次顧問評估時重新評估。",
     "stale": {

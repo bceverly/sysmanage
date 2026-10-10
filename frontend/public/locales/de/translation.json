@@ -4060,7 +4060,11 @@
       "enable_network_discovery": "Aktivieren Sie die Netzwerkerkennung, damit Agents die Geräte in ihrer Umgebung melden.",
       "review_unmanaged_devices": "Registrieren Sie jedes nicht verwaltete Gerät oder markieren Sie es mit einer Begründung als bekannt.",
       "review_malware_findings": "Stellen Sie jeden Befund mit hohem Schweregrad unter Quarantäne, beheben oder verwerfen Sie ihn.",
-      "scan_for_malware": "Scannen Sie jeden scanfähigen Host mindestens einmal im Monat."
+      "scan_for_malware": "Scannen Sie jeden scanfähigen Host mindestens einmal im Monat.",
+      "failure": {
+        "unsupported_platform": "diese Korrektur unterstützt die Plattform des Hosts nicht",
+        "dispatch_failed": "die Änderung konnte nicht an den Host gesendet werden; siehe Serverprotokoll"
+      }
     },
     "saved": "Bedrohungsmodell gespeichert. Die Maßnahmenliste wird beim nächsten Durchlauf des Beraters neu ausgewertet.",
     "stale": {

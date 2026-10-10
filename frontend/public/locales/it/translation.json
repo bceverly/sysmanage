@@ -4060,7 +4060,11 @@
       "enable_network_discovery": "Attiva il rilevamento di rete perché gli agenti segnalino i dispositivi intorno a loro.",
       "review_unmanaged_devices": "Registra ogni dispositivo non gestito o contrassegnalo come noto indicando un motivo.",
       "review_malware_findings": "Metti in quarantena, risolvi o ignora ogni rilevamento con gravità alta.",
-      "scan_for_malware": "Esegui la scansione di ogni host in grado di eseguirla, almeno una volta al mese."
+      "scan_for_malware": "Esegui la scansione di ogni host in grado di eseguirla, almeno una volta al mese.",
+      "failure": {
+        "unsupported_platform": "questa correzione non supporta la piattaforma dell'host",
+        "dispatch_failed": "impossibile inviare la modifica all'host; consulta il log del server"
+      }
     },
     "saved": "Modello delle minacce salvato. L'elenco dei punti aperti verrà rivalutato al prossimo passaggio del consulente.",
     "stale": {

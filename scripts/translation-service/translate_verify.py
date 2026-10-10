@@ -104,12 +104,12 @@ def make_router(
     router = APIRouter()
 
     async def embed(client: httpx.AsyncClient, texts: List[str]) -> List[List[float]]:
-        # ollama_url is operator config, not request input.
-        resp = await client.post(  # nosemgrep: tainted-fastapi-http-request-httpx
-            f"{ollama_url}/api/embed",
-            json={"model": EMBED_MODEL, "input": texts, "keep_alive": keep_alive},
-            timeout=timeout,
-        )
+        # ollama_url is operator config, not request input; the request's text
+        # travels in the JSON body to that fixed URL, so there is no forgery.
+        url = f"{ollama_url}/api/embed"
+        body = {"model": EMBED_MODEL, "input": texts, "keep_alive": keep_alive}
+        # nosemgrep: python.fastapi.net.tainted-fastapi-http-request-httpx.tainted-fastapi-http-request-httpx
+        resp = await client.post(url, json=body, timeout=timeout)
         resp.raise_for_status()
         return resp.json()["embeddings"]
 
@@ -140,9 +140,9 @@ def make_router(
                 },
             ],
         }
-        resp = await client.post(  # nosemgrep: tainted-fastapi-http-request-httpx
-            f"{ollama_url}/api/chat", json=payload, timeout=timeout
-        )
+        url = f"{ollama_url}/api/chat"  # operator config, as in embed()
+        # nosemgrep: python.fastapi.net.tainted-fastapi-http-request-httpx.tainted-fastapi-http-request-httpx
+        resp = await client.post(url, json=payload, timeout=timeout)
         resp.raise_for_status()
         try:
             verdict = json.loads(resp.json()["message"]["content"])

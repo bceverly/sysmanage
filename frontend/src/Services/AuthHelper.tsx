@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 import api from "./api";
+import { storeBearerToken } from "./bearerToken";
 
 type DoLoginRequest = {
   'userid': string;
@@ -18,7 +19,7 @@ const doLogin = async (requestData: DoLoginRequest) => {
   .then((response) => {
     // No error - process response
     localStorage.setItem("userid", requestData.userid);
-    localStorage.setItem("bearer_token", response.data.Authorization);
+    storeBearerToken(response.data.Authorization);
     return response;
   })
   .catch((error) => {

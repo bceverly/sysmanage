@@ -13,6 +13,7 @@ import { Alert, Box, Button, CircularProgress, Container, Typography } from '@mu
 import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { clearPermissionsCache } from '../Services/permissions';
+import { storeBearerToken } from '../Services/bearerToken';
 import { takeSsoSession, type SsoFailure } from '../Services/sso';
 
 const failureMessage = (t: TFunction, reason: SsoFailure): string => {
@@ -51,7 +52,7 @@ const SsoCallback: React.FC = () => {
             .then(session => {
                 clearPermissionsCache();
                 localStorage.setItem('userid', session.userid);
-                localStorage.setItem('bearer_token', session.Authorization);
+                storeBearerToken(session.Authorization);
                 globalThis.location.replace('/');
             })
             .catch(() => setFailure('expired'));

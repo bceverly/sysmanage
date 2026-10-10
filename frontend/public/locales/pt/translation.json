@@ -4060,7 +4060,11 @@
       "enable_network_discovery": "Ative a descoberta de rede para que os agentes informem os dispositivos ao seu redor.",
       "review_unmanaged_devices": "Registre cada dispositivo não gerenciado ou marque-o como conhecido com um motivo.",
       "review_malware_findings": "Coloque em quarentena, resolva ou descarte cada constatação de gravidade alta.",
-      "scan_for_malware": "Verifique cada host capaz de realizar verificações pelo menos uma vez por mês."
+      "scan_for_malware": "Verifique cada host capaz de realizar verificações pelo menos uma vez por mês.",
+      "failure": {
+        "unsupported_platform": "esta correção não oferece suporte à plataforma do host",
+        "dispatch_failed": "não foi possível enviar a alteração ao host; consulte o log do servidor"
+      }
     },
     "saved": "Modelo de ameaças salvo. A lista de pendências será reavaliada na próxima execução do assistente.",
     "stale": {

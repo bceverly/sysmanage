@@ -18,6 +18,16 @@ import yaml
 from backend.persistence import pool_sizing as ps
 
 
+@pytest.fixture(autouse=True)
+def _tmp_is_a_config_dir(tmp_path, monkeypatch):
+    """Tests write their config under tmp_path; let the path guard accept it."""
+    from backend.config import config_target
+
+    monkeypatch.setattr(
+        config_target, "CONFIG_DIRS", config_target.CONFIG_DIRS + (str(tmp_path),)
+    )
+
+
 def test_scales_with_cpus_within_bounds():
     assert ps.recommend(1, 64)["size"] == ps.MIN_SIZE
     assert ps.recommend(8, 64)["size"] == 24
