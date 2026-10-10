@@ -829,7 +829,7 @@
   "federationDispatch": {
     "cancel": "Abbrechen",
     "commandType": "Befehl",
-    "dispatch": "Abfertigen",
+    "dispatch": "Senden",
     "dispatching": "Wird verteilt...",
     "errors": {
       "failed": "Senden des Befehls fehlgeschlagen.",
@@ -862,7 +862,7 @@
       "openSite": "Standort"
     },
     "bulk": {
-      "clear": "Löschen",
+      "clear": "Auswahl aufheben",
       "dispatch": "Befehl verteilen",
       "selectAll": "Alle auf dieser Seite auswählen",
       "selected": "{{n}} Hosts ausgewählt"
@@ -1007,7 +1007,7 @@
     "startPort": "Start-Port",
     "subtitle": "Untertitel",
     "tcp": "TCP",
-    "title": "Feuerwandrollen",
+    "title": "Firewall-Rollen",
     "udp": "Udp",
     "updateSuccess": "Erfolgreich aktualisiert"
   },
@@ -1820,7 +1820,7 @@
     "deployOpenTelemetry": "OpenTelemetry bereitstellen",
     "diagnosticsRequestFailed": "Fehler beim Anfordern der Diagnosekennung. Bitte versuchen Sie es erneut.",
     "diagnosticsRequested": "Diagnosekennung angefordert für Host {{hostId}}. Bitte überprüfen Sie die Hostdetails-Seite, um die Ergebnisse anzuzeigen, sobald diese verfügbar sind.",
-    "down": "Abgebrochen",
+    "down": "Ausgefallen",
     "filterByTags": "Nach Tags filtern",
     "fqdn": "FQDN",
     "getDiagnostics": "Diagnose abrufen",
@@ -1897,7 +1897,7 @@
     "systemUpdatesOnly": "{{count}} Systemupdates",
     "tags": "Tags",
     "unknown": "Unbekannt",
-    "up": "Auf",
+    "up": "Aktiv",
     "updateAgent": "Agent aktualisieren",
     "updateAgentFailed": "Agent-Aktualisierung konnte nicht angefordert werden",
     "updateAgentRequested": "Agent-Aktualisierung erfolgreich angefordert",
@@ -2367,7 +2367,7 @@
         "files": "Dateien",
         "id": "Schnappschuss",
         "size": "Größe",
-        "taken": "Am"
+        "taken": "Erstellt am"
       },
       "empty": "Noch keine Vorschauverwaltungen vorhanden. Klicken Sie auf das Kamera-Icon, um eine zu erstellen.",
       "loadError": "Konnte keine Snapshots laden.",
@@ -2379,7 +2379,7 @@
     "tabLabel": "Repository-Spiegelung"
   },
   "nav": {
-    "advisories": "Warnungen",
+    "advisories": "Sicherheitshinweise",
     "airgapCollections": "Luftschicht-Sammlungen",
     "airgapRepositories": "Air-Gap-Repositorys",
     "alerts": "Warnungen",
@@ -3032,7 +3032,7 @@
     "filenamePlaceholder": "z.B. id_rsa.pub, server.crt, database.conf",
     "keyType": "Schlüsseltyp",
     "key_type": {
-      "ca": "Zertifikatstelle (CS)",
+      "ca": "Zertifizierungsstelle (CA)",
       "private": "Privat",
       "public": "Öffentlich"
     },
@@ -3180,7 +3180,7 @@
       "title": "Air-Gap-Sammler (Online-Seite)"
     },
     "currentTag": "(aktuell)",
-    "heading": "Luftscharfrolle",
+    "heading": "Air-Gap-Rolle",
     "intro": "Wählen Sie aus, wie dieser SysManage-Server in einer air-gapped-Bereitstellung mitwirkt. Die meisten Server sollten auf Standard bleiben. Die Rolle tritt nach dem nächsten Neustart des Servers in Kraft.",
     "loadError": "Konnte die aktuelle Serverrolle nicht laden.",
     "menuTitle": "Serverrolle",
@@ -3780,7 +3780,7 @@
       "recommendations": "Empfehlungen",
       "proposals": "Vorgeschlagene Korrekturen ({{count}})",
       "packs": "Regelpakete",
-      "posture": "Sicherheits- und Widerstandsfähigkeitsposition"
+      "posture": "Sicherheitslage"
     },
     "feed": {
       "lens": "Lens (in diesem Kontext: Kategorien von Empfehlungen wie Sicherheit, Leistung, Verfügbarkeit oder Stabilität)",
@@ -4364,7 +4364,7 @@
       "unsupportedPlatform": "auf dieser Plattform nicht unterstützt"
     },
     "sweep": {
-      "agent": "Abgefragt von",
+      "agent": "Gescannt von",
       "disabled": "Aktive Netzabtastungen sind ausgeschaltet. Lassen Sie sie in den Einstellungen oben zu, um Geräte zu finden, die sich nie selbst bemerkbar machen.",
       "error": "Die Netzabtastung konnte nicht gestartet werden.",
       "found": "Gefunden",
@@ -4601,7 +4601,7 @@
       "by": "Von",
       "done": "{{done}} von {{total}} abgeschlossen",
       "hostCount": "{{count}} Hosts",
-      "inventoryCount": "[TODO] {{count}} inventories",
+      "inventoryCount": "{{count}} Inventare",
       "notScanned": "Nicht gescannt: {{count}}",
       "progress": "Fortschritt",
       "started": "Gestartet",

@@ -107,7 +107,7 @@
     "buildError": "Impossibile inserire nella coda la compilazione.",
     "buildProplus": "Compila l'aggeggio Build Pro+",
     "buildServer": "Compila l'aggeggio Build Server",
-    "bundle": "[TODO] Bundle",
+    "bundle": "Pacchetto",
     "completedAt": "Compilato",
     "confirmDelete": "Vuoi eliminare questo pacchetto e il file ISO associato?",
     "copied": "Comando copiato negli appunti",
@@ -508,7 +508,7 @@
     "dispatchError": "Impossibile inviare la scansione live",
     "dispatchSent": "Scansione live inviata all'agente -- il risultato arriverà a breve",
     "dispatchTooltip": "Chiedi all'agente una scansione live sullo stato attuale dei pacchetti",
-    "expandViolations": "Attiva/Disattiva violazioni",
+    "expandViolations": "Mostra/nascondi violazioni",
     "lastScan": "Ultima scansione",
     "loadError": "Impossibile caricare i dati di conformità",
     "noProfiles": "Nessun profilo di conformità definito. Creane uno in Impostazioni → Profili di conformità.",
@@ -829,7 +829,7 @@
   "federationDispatch": {
     "cancel": "Annulla",
     "commandType": "Comando",
-    "dispatch": "Inoltrare",
+    "dispatch": "Invia",
     "dispatching": "Invio in corso...",
     "errors": {
       "failed": "Impossibile inviare il comando.",
@@ -862,7 +862,7 @@
       "openSite": "Sito"
     },
     "bulk": {
-      "clear": "Cancella",
+      "clear": "Deseleziona",
       "dispatch": "Invia comando",
       "selectAll": "Seleziona tutto su questa pagina",
       "selected": "{{n}} host selezionati"
@@ -903,7 +903,7 @@
     "col": {
       "active": "Attivo",
       "compliance": "Peggior conformità",
-      "critical": "CVES critici",
+      "critical": "CVE critiche",
       "high": "Alte CVE",
       "hosts": "Host",
       "site": "Sito"
@@ -1820,7 +1820,7 @@
     "deployOpenTelemetry": "Distribuisci OpenTelemetry",
     "diagnosticsRequestFailed": "Impossibile richiedere la raccolta diagnostica. Riprova.",
     "diagnosticsRequested": "Raccolta diagnostica richiesta per l'host {{hostId}}. Controlla la pagina dei dettagli dell'host per visualizzare i risultati quando disponibili.",
-    "down": "In basso",
+    "down": "Non attivo",
     "filterByTags": "Filtra per tag",
     "fqdn": "FQDN",
     "getDiagnostics": "Ottieni diagnostica",
@@ -1888,7 +1888,7 @@
     "selectTags": "Seleziona tag",
     "shellsAllowed": "Shell consentite",
     "showAllHosts": "Mostra tutti gli host",
-    "shutdown": "[TODO] Shutdown",
+    "shutdown": "Arresto",
     "shutdownFailed": "Richiesta di spegnimento fallita",
     "shutdownRequested": "Spegnimento richiesto con successo",
     "shutdownSelected": "Spegni Selezionati",
@@ -1897,7 +1897,7 @@
     "systemUpdatesOnly": "{{count}} aggiornamenti sistema",
     "tags": "Tag",
     "unknown": "Sconosciuto",
-    "up": "Su",
+    "up": "Attivo",
     "updateAgent": "Aggiorna agente",
     "updateAgentFailed": "Impossibile richiedere l'aggiornamento dell'agente",
     "updateAgentRequested": "Aggiornamento agente richiesto con successo",
@@ -2114,7 +2114,7 @@
     "created": "Finestra di manutenzione creata",
     "currentWindow": "Finestra corrente",
     "day": {
-      "fri": "Venere",
+      "fri": "Ven",
       "mon": "Lun",
       "sat": "Sabato",
       "sun": "Sole",
@@ -2379,7 +2379,7 @@
     "tabLabel": "Specchiamento del repository"
   },
   "nav": {
-    "advisories": "Avvisi",
+    "advisories": "Avvisi di sicurezza",
     "airgapCollections": "Collezioni a Isolamento",
     "airgapRepositories": "Depositi Air-Gap",
     "alerts": "Avvisi",
@@ -2388,7 +2388,7 @@
       "automation": "Automazione",
       "fleet": "Flotta",
       "insights": "Intuizioni",
-      "patching": "Aggiornamento",
+      "patching": "Gestione patch",
       "security": "Sicurezza"
     },
     "closeMenu": "Chiudi menu",
@@ -3032,7 +3032,7 @@
     "filenamePlaceholder": "ad esempio, id_rsa.pub, server.crt, database.conf",
     "keyType": "Tipo Chiave",
     "key_type": {
-      "ca": "Certificato di Autorità",
+      "ca": "Autorità di certificazione (CA)",
       "private": "Privata",
       "public": "Pubblica"
     },
@@ -3203,7 +3203,7 @@
       "airgap": "Air-Gap e specchiamento",
       "general": "Generale",
       "integrations": "Integrazioni e registrazione",
-      "patching": "Aggiornamento",
+      "patching": "Gestione patch",
       "reporting": "Rapportistica",
       "secrets": "Segreti",
       "security": "Sicurezza e accesso",
@@ -4073,7 +4073,7 @@
       "notAssessable": "Non valutabile",
       "open": "Aperto",
       "satisfied": "Soddisfatto",
-      "waived": "Accettato (con verifica)"
+      "waived": "Esentato"
     },
     "waiver": {
       "explain": "Una deroga registra che accetti questo rischio. Il punto resta aperto in secondo piano e la deroga decade se il rischio aumenta o se cambiano i suoi presupposti.",

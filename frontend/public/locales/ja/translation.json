@@ -1416,7 +1416,7 @@
     "editHostname": "ホスト名を編集",
     "editServices": "サービスを編集",
     "enabled": "有効",
-    "entitled": "権限のある",
+    "entitled": "利用資格あり",
     "errorMessage": "エラーメッセージ",
     "errorUpdatingServices": "サービス更新エラー",
     "expired": "期限切れ",
@@ -1820,7 +1820,7 @@
     "deployOpenTelemetry": "OpenTelemetryをデプロイ",
     "diagnosticsRequestFailed": "診断収集要求に失敗しました。再度お試しください。",
     "diagnosticsRequested": "ホスト {{hostId}} の診断収集が要求されました。結果を確認するには、ホスト詳細ページをご覧ください。",
-    "down": "ダウン",
+    "down": "停止中",
     "filterByTags": "タグでフィルター",
     "fqdn": "FQDN",
     "getDiagnostics": "診断情報を取得",
@@ -1897,7 +1897,7 @@
     "systemUpdatesOnly": "{{count}} システムアップデート",
     "tags": "タグ",
     "unknown": "不明",
-    "up": "上へ",
+    "up": "稼働中",
     "updateAgent": "エージェントを更新",
     "updateAgentFailed": "エージェントの更新リクエストに失敗しました",
     "updateAgentRequested": "エージェントの更新が正常にリクエストされました",
@@ -2367,7 +2367,7 @@
         "files": "ファイル",
         "id": "スナップショット",
         "size": "サイズ",
-        "taken": "取得された"
+        "taken": "取得日時"
       },
       "empty": "スナップショットはまだありません。スナップショットを取るにはカメラアイコンをクリックしてください。",
       "loadError": "スナップショットの読み込みに失敗しました。",
@@ -2379,7 +2379,7 @@
     "tabLabel": "リポジトリミラーリング"
   },
   "nav": {
-    "advisories": "注意事項",
+    "advisories": "セキュリティ勧告",
     "airgapCollections": "オフライン収集",
     "airgapRepositories": "エアギャップ リポジトリ",
     "alerts": "アラート",

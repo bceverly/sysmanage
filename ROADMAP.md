@@ -13394,7 +13394,7 @@ the old word-substitution scripts. Measured design (calibrated on beast against
 - [x] **The legacy writers are gone**: 14 word-substitution scripts and an
       analysis dump deleted from `sysmanage-docs/assets/locales/` (they were
       also being shipped to the website by the docs package).
-- [ ] **Bootstrap the ledgers** on beast (`ollama pull bge-m3` once), repo by
+- [x] **Bootstrap the ledgers** on beast (`ollama pull bge-m3` once), repo by
       repo: `make i18n-verify-run SERVICE=http://beast:8765`. ~350k values
       (docs 266k); resumable -- an interrupted run keeps what it verified.
       *sysmanage-agent DONE 2026-10-08 (scratch service on beast): 9,077
@@ -13430,11 +13430,24 @@ the old word-substitution scripts. Measured design (calibrated on beast against
 - [ ] **A stronger model for Hindi**: aya-expanse:8b wrote a large share of
       the rejected Hindi (1,188 of 2,316 docs rejects); retry with
       aya-expanse:32b on the 32-core box before hand-translating more.
-- [ ] **Redo every reject**: `python3 scripts/i18n_verify.py --requeue`, then
+- [x] **Redo every reject**: `python3 scripts/i18n_verify.py --requeue`, then
       `make translate` (which re-verifies); `--accept` only for a genuine false
       alarm, with its reason.
-- [ ] **Wire `i18n-verify` into `make lint`** in all four repos once each
+- [x] **Wire `i18n-verify` into `make lint`** in all four repos once each
       ledger is complete, so an unverified translation fails the build.
+      *Done 2026-10-10: all four ledgers complete (sysmanage and Pro+ went
+      through the same requeue -> retranslate -> per-language human review
+      as the docs), every i18n gate green in all four repos, and
+      `i18n-verify` added to each repo's `lint` target. Found on the way:
+      the service saved 95 "[English, translation]" PAIRS as values (now a
+      "shape" guard on its own output); Pro+ `write_bundle` drops inline
+      `const en` tables, so review edits to plugin bundles are applied in
+      place, never by rewriting the file; Ollama can wedge with a model
+      "loaded" but no runner (every judge call then times out; restart
+      ollama); the glossary grew 21 terms, split into
+      `i18n_glossary_terms.py` at the 1000-line limit, gained mark-aware
+      boundaries and per-key exceptions (`except_keys`), and its new
+      forbidden forms found 80+ more wrong values across the repos.*
 
 
 #### Exit criteria

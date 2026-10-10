@@ -231,3 +231,7 @@ assetDiscovery.type.computer
 # Phase 21.3 malware page: correct native words that happen to equal English.
 nl: re:^(Malware|Scans)$
 it: re:^(Malware|File)$
+
+# Certificate authority as a key type: Spanish keeps the abbreviation CA
+# (French uses AC, translated). Reviewed 2026-10-10.
+es: secrets.key_type.ca

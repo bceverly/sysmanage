@@ -829,7 +829,7 @@
   "federationDispatch": {
     "cancel": "Cancelar",
     "commandType": "Comando",
-    "dispatch": "Enviar comando para um agente",
+    "dispatch": "Enviar",
     "dispatching": "Enviando...",
     "errors": {
       "failed": "Falha ao enviar comando.",
@@ -1374,7 +1374,7 @@
     "confirmUninstallMessage": "Tem certeza de que deseja desinstalar este pacote? Esta ação removerá o pacote do sistema.",
     "confirmUninstallPackage": "Desinstalar Pacote",
     "contractName": "Nome do Contrato",
-    "cpuCores": "[TODO] Cores",
+    "cpuCores": "Núcleos",
     "cpuFrequency": "Frequência",
     "cpuInfo": "CPU",
     "cpuModel": "Modelo da CPU",
@@ -2388,7 +2388,7 @@
       "automation": "Automação",
       "fleet": "Frota",
       "insights": "Análises",
-      "patching": "Atualização",
+      "patching": "Gerenciamento de patches",
       "security": "Segurança"
     },
     "closeMenu": "Fechar menu",
@@ -3203,7 +3203,7 @@
       "airgap": "Air-Gap & Espelhamento",
       "general": "Geral",
       "integrations": "Integrações & Log",
-      "patching": "Atualização",
+      "patching": "Gerenciamento de patches",
       "reporting": "Relatórios",
       "secrets": "Segredos",
       "security": "Segurança & Acesso",

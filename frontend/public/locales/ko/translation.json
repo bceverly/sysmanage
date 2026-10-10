@@ -198,7 +198,7 @@
     "notApplicable": "이 페이지는 수집자 역할 배포에서만 의미가 있습니다.",
     "refresh": "새로고침",
     "subtitle": "구성된 저장소를 미러링하고, 서명된 ISO를 생성하며, 공기 격리 측에서 사용할 수 있도록 매니페스트를 작성하여 단발성 수집 작업을 트리거합니다.",
-    "title": "공백 수집 실행"
+    "title": "에어갭 수집 실행"
   },
   "airgapDevices": {
     "empty": "적격 드라이브 없음. 미디어 삽입 후 재스캔을 눌러주세요.",
@@ -534,7 +534,7 @@
     "days_other": "{{count}} 일",
     "detailTitle": "차이점 {{host}}",
     "differences": "차이점",
-    "driftingFor": "구성 이탈",
+    "driftingFor": "드리프트 지속 기간",
     "findingsFailed": "이 호스트에 대한 결과를 로드할 수 없습니다.",
     "host": "호스트",
     "intro": "더 이상 할당된 프로필과 일치하지 않는 호스트. 편향은 드라이 런을 통해 감지되므로 여기에 변경 사항이 없습니다 -- 치유는 실제 프로필을 다시 적용하여 수행됩니다.",
@@ -829,7 +829,7 @@
   "federationDispatch": {
     "cancel": "취소",
     "commandType": "명령어",
-    "dispatch": "배포",
+    "dispatch": "전송",
     "dispatching": "분배 중...",
     "errors": {
       "failed": "명령을 전달하는 데 실패했습니다.",
@@ -1416,7 +1416,7 @@
     "editHostname": "호스트 이름 편집",
     "editServices": "서비스 편집",
     "enabled": "활성화",
-    "entitled": "권한 부여",
+    "entitled": "사용 자격 있음",
     "errorMessage": "오류 메시지",
     "errorUpdatingServices": "서비스 업데이트 실패",
     "expired": "만료됨",
@@ -1820,7 +1820,7 @@
     "deployOpenTelemetry": "OpenTelemetry 배포",
     "diagnosticsRequestFailed": "진단 수집 요청 실패. 다시 시도해 주세요.",
     "diagnosticsRequested": "호스트 {{hostId}}의 진단 수집이 요청되었습니다. 결과가 사용 가능해질 때 호스트 세부 정보 페이지를 확인하세요.",
-    "down": "다운",
+    "down": "중단됨",
     "filterByTags": "태그로 필터링",
     "fqdn": "FQDN",
     "getDiagnostics": "진단 정보 가져오기",
@@ -1897,7 +1897,7 @@
     "systemUpdatesOnly": "{{count}} 시스템 업데이트",
     "tags": "태그",
     "unknown": "알 수 없음",
-    "up": "상단",
+    "up": "가동 중",
     "updateAgent": "에이전트 업데이트",
     "updateAgentFailed": "에이전트 업데이트 요청 실패",
     "updateAgentRequested": "에이전트 업데이트가 성공적으로 요청되었습니다",
@@ -2367,7 +2367,7 @@
         "files": "파일",
         "id": "스냅샷",
         "size": "크기",
-        "taken": "취득된"
+        "taken": "생성 시각"
       },
       "empty": "아직 스냅샷이 없습니다. 하나를 찍으려면 카메라 아이콘을 클릭하세요.",
       "loadError": "스냅샷을 불러오는데 실패했습니다.",
@@ -2379,7 +2379,7 @@
     "tabLabel": "리포지토리 미러링"
   },
   "nav": {
-    "advisories": "경고",
+    "advisories": "권고 사항",
     "airgapCollections": "공기 격리 수집",
     "airgapRepositories": "공기 격리 저장소",
     "alerts": "경고",
@@ -2553,7 +2553,7 @@
     "title": "규정 준수 프로필",
     "updated": "규정 준수 프로필이 저장되었습니다",
     "version": "버전",
-    "versionOp": "작업",
+    "versionOp": "연산자",
     "versionOpAny": "(임의)"
   },
   "policies": {
@@ -3214,7 +3214,7 @@
   "sites": {
     "actions": {
       "remove": "제거",
-      "resume": "재시작",
+      "resume": "재개",
       "suspend": "일시 중지"
     },
     "addSite": "사이트 등록",
@@ -4364,7 +4364,7 @@
       "unsupportedPlatform": "이 플랫폼에서 지원되지 않음"
     },
     "sweep": {
-      "agent": "스캔됨",
+      "agent": "스캔 수행 에이전트",
       "disabled": "능동 스캔이 꺼져 있습니다. 자신을 알리지 않는 장치를 찾으려면 위 설정에서 허용하십시오.",
       "error": "스캔을 시작할 수 없습니다.",
       "found": "발견됨",
@@ -4495,7 +4495,7 @@
     "scanHosts": "호스트 스캔",
     "scans": {
       "empty": "아직 실행된 스캔이 없습니다.",
-      "legs": "어떤 것이 실행되었나요?",
+      "legs": "실행된 항목",
       "paths": "경로",
       "requested": "요청 시각",
       "result": "결과",

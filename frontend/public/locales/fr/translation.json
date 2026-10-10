@@ -829,7 +829,7 @@
   "federationDispatch": {
     "cancel": "Annuler",
     "commandType": "Commande",
-    "dispatch": "Expédier",
+    "dispatch": "Envoyer",
     "dispatching": "En cours de lancement...",
     "errors": {
       "failed": "Impossible de distribuer la commande.",
@@ -1551,7 +1551,7 @@
     "ipv4Address": "Adresse IPv4",
     "ipv6Address": "Adresse IPv6",
     "issuer": "Émetteur",
-    "kernel": "Nuage de noyau",
+    "kernel": "Noyau",
     "kvmInitializeFailed": "Échec de l'initialisation KVM",
     "kvmInitializedSuccess": "Initialisation KVM demandée. L'agent installera et configurera libvirt.",
     "kvmModulesDisableFailed": "Échec de la désactivation des modules KVM. Assurez-vous qu'aucune VM n'est en cours d'exécution.",
@@ -1897,7 +1897,7 @@
     "systemUpdatesOnly": "{{count}} mises à jour système",
     "tags": "Étiquettes",
     "unknown": "Inconnu",
-    "up": "Haut",
+    "up": "Actif",
     "updateAgent": "Mettre à jour l'agent",
     "updateAgentFailed": "Échec de la demande de mise à jour de l'agent",
     "updateAgentRequested": "Mise à jour de l'agent demandée avec succès",
@@ -2166,7 +2166,7 @@
     "state": {
       "blocked": "Bloqué",
       "in_window": "Dans une fenêtre",
-      "override": "Actif surchargé",
+      "override": "Dérogation active",
       "unrestricted": "Non limité"
     },
     "timezone": "Fuseau horaire",
@@ -3032,7 +3032,7 @@
     "filenamePlaceholder": "p. ex., id_rsa.pub, server.crt, database.conf",
     "keyType": "Type de Clé",
     "key_type": {
-      "ca": "[TODO] CA",
+      "ca": "AC",
       "private": "Privée",
       "public": "Publique"
     },

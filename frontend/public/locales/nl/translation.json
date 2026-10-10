@@ -582,7 +582,7 @@
     "hostsIn": "Resultaten per host voor {{name}}",
     "intro": "Voer één configuratieprofiel tegelijk uit op veel hosts. Een taak werkt zijn inventaris in golven af in plaats van alles tegelijk, en legt vast wat er op elke host is gebeurd.",
     "inventoriesFailed": "Kon de hostinventarissen niet laden",
-    "inventory": "Voorraad (beheerde hosts)",
+    "inventory": "Inventaris",
     "inventoryDeleteFailed": "Kon de hostinventaris niet verwijderen",
     "inventorySaveFailed": "Kon de hostinventaris niet opslaan",
     "jobsFailed": "Kon de taken niet laden",
@@ -862,7 +862,7 @@
       "openSite": "Locatie"
     },
     "bulk": {
-      "clear": "Leegmaken",
+      "clear": "Selectie wissen",
       "dispatch": "Commando uitzenden",
       "selectAll": "Selecteer alles op deze pagina",
       "selected": "{{n}} hosts geselecteerd"
@@ -1820,7 +1820,7 @@
     "deployOpenTelemetry": "OpenTelemetry implementeren",
     "diagnosticsRequestFailed": "Kan verzameling diagnostics niet aanvragen. Probeer het later opnieuw.",
     "diagnosticsRequested": "Diagnostics verzameling gevraagd voor host {{hostId}}. Controleer de hostdetailspagina om resultaten te bekijken wanneer beschikbaar.",
-    "down": "Uit",
+    "down": "Uitgevallen",
     "filterByTags": "Filteren op tags",
     "fqdn": "FQDN",
     "getDiagnostics": "Diagnostiek ophalen",
@@ -1897,7 +1897,7 @@
     "systemUpdatesOnly": "{{count}} systeemupdates",
     "tags": "Labels",
     "unknown": "Onbekend",
-    "up": "Op",
+    "up": "Actief",
     "updateAgent": "Agent bijwerken",
     "updateAgentFailed": "Kan agent-update niet aanvragen",
     "updateAgentRequested": "Agent-update succesvol aangevraagd",
@@ -2118,8 +2118,8 @@
       "mon": "Ma",
       "sat": "Zat",
       "sun": "Zon",
-      "thu": "Dinsdag",
-      "tue": "Maandag",
+      "thu": "Do",
+      "tue": "Di",
       "wed": "Woensdag"
     },
     "daysOfWeek": "Werkdagen van de week",
@@ -2379,7 +2379,7 @@
     "tabLabel": "Repository spiegeling"
   },
   "nav": {
-    "advisories": "Waarschuwingen",
+    "advisories": "Beveiligingsadviezen",
     "airgapCollections": "Luchtdichte collecties",
     "airgapRepositories": "Luchtgapsieve repos",
     "alerts": "Waarschuwingen",
@@ -2394,7 +2394,7 @@
     "closeMenu": "Menu sluiten",
     "compliance": "Compliance",
     "configDrift": "Configuratieverschuiving",
-    "configJobs": "Machinepark taken",
+    "configJobs": "Machineparktaken",
     "configProfiles": "Configuratieprofielen",
     "customMetrics": "Aangepaste metrieken",
     "dashboard": "Dashboard",
@@ -3214,7 +3214,7 @@
   "sites": {
     "actions": {
       "remove": "Verwijderen",
-      "resume": "Herstarten",
+      "resume": "Hervatten",
       "suspend": "Pauzeren"
     },
     "addSite": "Site inschrijven",
@@ -3780,10 +3780,10 @@
       "recommendations": "Aanbevelingen",
       "proposals": "Voorgestelde oplossingen ({{count}})",
       "packs": "Regelpakketten",
-      "posture": "Beveiligingsstatus (installatie)"
+      "posture": "Beveiligingsstatus"
     },
     "feed": {
-      "lens": "Lens (categorie aanbevelingen: beveiliging, prestaties, beschikbaarheid of stabiliteit)",
+      "lens": "Invalshoek",
       "allLenses": "Alle",
       "hostsFailed": "De hosts voor deze regel konden niet worden geladen.",
       "noOpenHosts": "Geen bevindingen en niets onbeoordeeld voor deze regel.",
@@ -4583,7 +4583,7 @@
       "importedBy": "Geïmporteerd door {{who}}",
       "readError": "Het bestand kon niet worden gelezen.",
       "removed": "{{count}} verwijderd",
-      "retire": "Uiteren",
+      "retire": "Buiten gebruik stellen",
       "retireError": "De regelset kon niet buiten gebruik worden gesteld.",
       "rules": "Regels",
       "slug": "Naam (a-z, 0-9, koppeltekens)",

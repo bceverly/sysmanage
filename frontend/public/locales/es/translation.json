@@ -1416,7 +1416,7 @@
     "editHostname": "Editar Nombre de Host",
     "editServices": "Editar servicios",
     "enabled": "Habilitado",
-    "entitled": "Con derecho a",
+    "entitled": "Con derecho",
     "errorMessage": "Mensaje de error",
     "errorUpdatingServices": "Error actualizando servicios",
     "expired": "Vencido",
@@ -1820,7 +1820,7 @@
     "deployOpenTelemetry": "Desplegar OpenTelemetry",
     "diagnosticsRequestFailed": "No se pudo solicitar la recopilación de diagnósticos. Por favor, inténtelo nuevamente.",
     "diagnosticsRequested": "Se ha solicitado la recopilación de diagnósticos para el host {{hostId}}. Consulte la página de detalles del host para ver los resultados cuando estén disponibles.",
-    "down": "Abajo",
+    "down": "Caído",
     "filterByTags": "Filtrar por etiquetas",
     "fqdn": "FQDN",
     "getDiagnostics": "Obtener diagnósticos",
@@ -1897,7 +1897,7 @@
     "systemUpdatesOnly": "{{count}} actualizaciones del sistema",
     "tags": "Etiquetas",
     "unknown": "Desconocido",
-    "up": "Arriba",
+    "up": "Activo",
     "updateAgent": "Actualizar agente",
     "updateAgentFailed": "Error al solicitar la actualización del agente",
     "updateAgentRequested": "Actualización del agente solicitada correctamente",
@@ -2379,7 +2379,7 @@
     "tabLabel": "Replicación de repositorio"
   },
   "nav": {
-    "advisories": "Advertencias",
+    "advisories": "Avisos de seguridad",
     "airgapCollections": "Colecciones Air-Gap",
     "airgapRepositories": "Repositorios aislados",
     "alerts": "Alertas",
@@ -3032,7 +3032,7 @@
     "filenamePlaceholder": "p.ej., id_rsa.pub, server.crt, database.conf",
     "keyType": "Tipo de Clave",
     "key_type": {
-      "ca": "[TODO] CA",
+      "ca": "CA",
       "private": "Privada",
       "public": "Pública"
     },
@@ -3267,7 +3267,7 @@
       "syncNever": "Nunca sincronizado",
       "syncOverdue": "Vencido",
       "syncPoints": "{{n}} eventos de sincronización",
-      "syncStale": "Caducado",
+      "syncStale": "Desactualizado",
       "syncTimeline": "Lnea de tiempo de sincronización",
       "syncTimelineEmpty": "No se han registrado eventos de sincronización todavía.",
       "url": "URL",
