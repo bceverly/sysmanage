@@ -13405,8 +13405,31 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       processing", and Hindi was gibberish in places. Requeued and
       retranslated (123 then verified), 7 hand-written (Hindi beyond the 8b
       model), 3 judge false alarms on one-word strings accepted with
-      reasons. `make i18n-verify` passes in the agent. Throughput ~400
-      values/min, so the docs pass is ~8-9 hours.*
+      reasons. `make i18n-verify` passes in the agent.*
+      *sysmanage-docs DONE 2026-10-09: 212k unique values; 2,316 model + 578
+      deterministic rejects, requeued and retranslated, then the 211 the
+      model still rejected plus 58 strings the service could not produce
+      went to per-language human review: 155 fixed (Arabic "default
+      republic" for Default Repositories, Italian "irritable quality
+      insurance", Traditional Chinese "key bird" for Production Canary),
+      6 kept English with scoped allow rules, the rest confirmed correct
+      and accepted with reasons. Every docs i18n gate passes.
+      Found on the way and fixed: (1) a judge-prompt clause added AFTER
+      calibration rejected 831 of the first 832 values -- never edit the
+      prompt without re-running the calibration; (2) PASS_AT lowered
+      0.75 -> 0.65 (still above every swapped pair) so the judge sees ~5%,
+      not a quarter; (3) the English-word check split accented words
+      ("Análisis" -> "An"), which also made the SERVICE refuse correct
+      translations -- most of the 58 unfillable strings; (4) en/em dashes
+      added to the deterministic checks.*
+- [ ] **Give the judge the domain glossary** (as the translator already
+      gets it), then re-run the calibration: it rejected the glossary's own
+      term 主機群 for "fleet" as "a collection of vehicles", and is
+      over-strict on one- and two-word headings (roughly 40% of its rejects
+      on short strings were correct translations).
+- [ ] **A stronger model for Hindi**: aya-expanse:8b wrote a large share of
+      the rejected Hindi (1,188 of 2,316 docs rejects); retry with
+      aya-expanse:32b on the 32-core box before hand-translating more.
 - [ ] **Redo every reject**: `python3 scripts/i18n_verify.py --requeue`, then
       `make translate` (which re-verifies); `--accept` only for a genuine false
       alarm, with its reason.

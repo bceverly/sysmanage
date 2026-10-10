@@ -2196,8 +2196,6 @@ msgstr "未知的過濾類型：%s"
 #, python-format
 msgid "The '%s' filter requires the Advisory engine, which is not loaded"
 msgstr ""
-"\\u2018%s\\u2019 \\u63d0\\u5240 \\u9700\\u8981 Advisory \\u人民服务, \\u4e14 "
-"\\u5b83 \\u6ca1\\u6709 \\u88c5\\u4e0a"
 
 #: backend/api/content_lifecycle.py:381
 #, python-format

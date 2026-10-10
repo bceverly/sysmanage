@@ -76,7 +76,7 @@
       "aggregate": {
         "daysAgo": "{{days}} día(s) atrás",
         "noIngest": "N/A",
-        "oldestFreshness": "Mayor antigüedad",
+        "oldestFreshness": "[TODO] Oldest freshness",
         "staleRepos": "Repositorios obsoletos (> {{days}}d)",
         "title": "Agrupar",
         "totalPackages": "Paquetes totales",
@@ -198,7 +198,7 @@
     "notApplicable": "Esta página solo tiene sentido en implementaciones con rol recolector.",
     "refresh": "Actualizar",
     "subtitle": "Desencadena ejecuciones en un solo momento que reflejan los repositorios configurados, construye un ISO firmado y escribe una manifestación para la ingestión en el lado aislado de red.",
-    "title": "Ejecuciones de Recolección en Aire"
+    "title": "[TODO] Air-Gap Collection Runs"
   },
   "airgapDevices": {
     "empty": "No se encontraron unidades elegibles. Inserte el medio y presione Rescan.",
@@ -534,7 +534,7 @@
     "days_other": "{{count}} días",
     "detailTitle": "Diferencias en {{host}}",
     "differences": "Diferencias",
-    "driftingFor": "Desviado por",
+    "driftingFor": "[TODO] Drifting for",
     "findingsFailed": "No se pudieron cargar los resultados para este host",
     "host": "Host",
     "intro": "Hosts que ya no coinciden con el perfil asignado. La desviación se detecta mediante ejecuciones secas, por lo que nada aquí ha cambiado - la remediación vuelve a aplicar el perfil en realidad.",
@@ -549,7 +549,7 @@
     "repairUnavailable": "Su perfil de reparación no está activo",
     "repairWith": "Reparar con {{profile}}",
     "seenSince": "Primero visto",
-    "tabDrift": "Anclas flotantes",
+    "tabDrift": "[TODO] Drifting hosts",
     "tabPlaybooks": "Playbooks de remediación",
     "title": "Desviación de configuración",
     "view": "Ver",
@@ -829,7 +829,7 @@
   "federationDispatch": {
     "cancel": "Cancelar",
     "commandType": "Comando",
-    "dispatch": "Enviar",
+    "dispatch": "[TODO] Dispatch",
     "dispatching": "Enviando…",
     "errors": {
       "failed": "No se pudo enviar el comando.",
@@ -1001,13 +1001,13 @@
     "portRange": "Rango de puertos",
     "protocol": "Protocolo",
     "roleName": "Nombre del rol",
-    "roleNamePlaceholder": "Ingrese el nombre del rol",
+    "roleNamePlaceholder": "[TODO] Role Name Placeholder",
     "roleNameRequired": "Nombre del rol requerido",
     "selectPort": "Seleccionar puerto",
     "startPort": "Puerto inicial",
     "subtitle": "Subtítulo",
     "tcp": "TCP",
-    "title": "Título",
+    "title": "[TODO] Firewall Roles",
     "udp": "Udp",
     "updateSuccess": "Actualizado correctamente"
   },
@@ -1416,7 +1416,7 @@
     "editHostname": "Editar Nombre de Host",
     "editServices": "Editar servicios",
     "enabled": "Habilitado",
-    "entitled": "Con derecho",
+    "entitled": "[TODO] Entitled",
     "errorMessage": "Mensaje de error",
     "errorUpdatingServices": "Error actualizando servicios",
     "expired": "Vencido",
@@ -1523,11 +1523,11 @@
       "imageRef": "Referencia de Imagen",
       "noStagedImage": "No hay ninguna imagen en staging",
       "pendingReboot": "Pendiente -- reiniciar para aplicar",
-      "rollback": "Deshacer",
+      "rollback": "[TODO] Rollback",
       "rollbackAvailable": "Deshecho disponible",
       "rollbackError": "No se pudo deshacer la imagen",
       "rollbackSuccess": "Se ha solicitado deshacer la imagen (el host se reiniciará)",
-      "stage": "Preparar",
+      "stage": "[TODO] Stage",
       "stageError": "No se pudo preparar la imagen",
       "stageSuccess": "Se ha solicitado preparar la imagen",
       "stagedImage": "Imagen en staging",
@@ -1809,7 +1809,7 @@
     "childHostFilter": "Filtro de host hijo",
     "childHostOf": "Host hijo de {{parent}}",
     "childHostsOnly": "Solo hosts hijos",
-    "childrenOnly": "Solo hijos",
+    "childrenOnly": "[TODO] Children",
     "confirmReboot": "Confirmar Reinicio del Sistema",
     "confirmRebootMessage": "¿Está seguro de que desea reiniciar {{hostname}}? El sistema no estará disponible durante unos minutos.",
     "confirmShutdown": "Confirmar Apagado del Sistema",
@@ -1820,7 +1820,7 @@
     "deployOpenTelemetry": "Desplegar OpenTelemetry",
     "diagnosticsRequestFailed": "No se pudo solicitar la recopilación de diagnósticos. Por favor, inténtelo nuevamente.",
     "diagnosticsRequested": "Se ha solicitado la recopilación de diagnósticos para el host {{hostId}}. Consulte la página de detalles del host para ver los resultados cuando estén disponibles.",
-    "down": "Inactivo",
+    "down": "[TODO] Down",
     "filterByTags": "Filtrar por etiquetas",
     "fqdn": "FQDN",
     "getDiagnostics": "Obtener diagnósticos",
@@ -1897,7 +1897,7 @@
     "systemUpdatesOnly": "{{count}} actualizaciones del sistema",
     "tags": "Etiquetas",
     "unknown": "Desconocido",
-    "up": "Activo",
+    "up": "[TODO] Up",
     "updateAgent": "Actualizar agente",
     "updateAgentFailed": "Error al solicitar la actualización del agente",
     "updateAgentRequested": "Actualización del agente solicitada correctamente",
@@ -2070,7 +2070,7 @@
     "syslogProtocol": "Protocolo",
     "targetRemoteLocked": "{{target}} (Profesional)",
     "title": "Registro",
-    "verbosity": "Detalle"
+    "verbosity": "[TODO] Verbosity"
   },
   "login": {
     "forgotPassword": "¿Olvidaste tu contraseña?",
@@ -2090,7 +2090,7 @@
     "username": "Usuario o correo",
     "verifying": "Verificando...",
     "sso": {
-      "or": "o",
+      "or": "[TODO] or",
       "signInWith": "Iniciar sesión con {{name}}",
       "signingIn": "Iniciando sesión...",
       "denied": "Su proveedor de identidad le autenticó, pero no hay ninguna cuenta activa de SysManage para esa identidad. Pida a un administrador que le dé acceso.",
@@ -2114,12 +2114,12 @@
     "created": "Ventana de mantenimiento creada",
     "currentWindow": "Ventana actual",
     "day": {
-      "fri": "Vie",
+      "fri": "[TODO] Fri",
       "mon": "Lun",
       "sat": "Sáb",
-      "sun": "Dom",
+      "sun": "[TODO] Sun",
       "thu": "Jue",
-      "tue": "Mar",
+      "tue": "[TODO] Tue",
       "wed": "Mié"
     },
     "daysOfWeek": "Días de la semana",
@@ -2380,7 +2380,7 @@
   },
   "nav": {
     "advisories": "Advertencias",
-    "airgapCollections": "Recopilaciones en Isla",
+    "airgapCollections": "[TODO] Air-Gap Collections",
     "airgapRepositories": "Repositorios aislados",
     "alerts": "Alertas",
     "cat": {
@@ -2412,7 +2412,7 @@
     "queryPacks": "Paquetes de consultas",
     "reports": "Informes",
     "role": {
-      "collector": "Recopilador en Isla",
+      "collector": "[TODO] Air-Gap Collector",
       "engineMissing": "Motor Pro+ requerido no cargado; verifique la licencia.",
       "repository": "Repositorio aislado"
     },
@@ -2481,7 +2481,7 @@
     "unknown": "Desconocido",
     "unseal": "Desellar",
     "unsealError": "Error al desellar OpenBAO",
-    "unsealed": "No Sellado",
+    "unsealed": "[TODO] Unsealed",
     "unsealing": "Desellando..."
   },
   "osUpgrades": {
@@ -3032,7 +3032,7 @@
     "filenamePlaceholder": "p.ej., id_rsa.pub, server.crt, database.conf",
     "keyType": "Tipo de Clave",
     "key_type": {
-      "ca": "Autoridad Certificadora",
+      "ca": "[TODO] CA",
       "private": "Privada",
       "public": "Pública"
     },
@@ -3105,7 +3105,7 @@
     "enableAntivirus": "Habilitar Antivirus",
     "enableFirewall": "Habilitar firewall",
     "enabled": "Habilitado",
-    "firewall": "Cortafuegos",
+    "firewall": "[TODO] Firewall",
     "firewallDeployError": "Error al implementar el firewall",
     "firewallDisableError": "Error al deshabilitar el firewall",
     "firewallEnableError": "Error al habilitar el firewall",
@@ -3180,7 +3180,7 @@
       "title": "Recopilador aislado (lado en línea)"
     },
     "currentTag": "(actual)",
-    "heading": "Server Role",
+    "heading": "[TODO] Air-Gap Role",
     "intro": "Elija cómo este servidor SysManage participa en una implementación aislada. La mayoría de los servidores deben permanecer en Estándar. El rol entra en vigor después del próximo reinicio del servidor.",
     "loadError": "No se pudo cargar el rol actual del servidor.",
     "menuTitle": "Rol del servidor",
@@ -3214,7 +3214,7 @@
   "sites": {
     "actions": {
       "remove": "Eliminar",
-      "resume": "Continuar",
+      "resume": "[TODO] Resume",
       "suspend": "Suspender"
     },
     "addSite": "Inscribir sitio",
@@ -3267,7 +3267,7 @@
       "syncNever": "Nunca sincronizado",
       "syncOverdue": "Vencido",
       "syncPoints": "{{n}} eventos de sincronización",
-      "syncStale": "Caduco",
+      "syncStale": "[TODO] Stale",
       "syncTimeline": "Lnea de tiempo de sincronización",
       "syncTimelineEmpty": "No se han registrado eventos de sincronización todavía.",
       "url": "URL",
@@ -3402,7 +3402,7 @@
     "deleteSelected": "Eliminar seleccionados ({{count}})",
     "deleteSuccess": "Eliminado correctamente",
     "detectedOs": "Sistema Operativo Detectado",
-    "disableError": "Error al deshabilitar",
+    "disableError": "[TODO] Disable Error",
     "disableSelected": "Deshabilitar seleccionados ({{count}})",
     "disableSuccess": "Deshabilitado correctamente",
     "enableError": "Error al habilitar",
@@ -3878,7 +3878,7 @@
       "packageCount": "{{count}} paquetes",
       "packageCount_one": "1 paquete",
       "packageCount_other": "{{count}} paquetes",
-      "review": "Revisar",
+      "review": "[TODO] Review",
       "reviewTitle": "Revisar corrección de {{rule}} en {{host}}",
       "approveWarning": "Al aprobar, este cambio se aplica al host con privilegios de administrador en su próxima ventana de mantenimiento (de inmediato si no tiene ninguna).",
       "reject": "Rechazar",
@@ -3967,7 +3967,7 @@
   "posture": {
     "action": {
       "fix": "Corregir",
-      "waive": "Eximir"
+      "waive": "[TODO] Waive"
     },
     "checkedAt": "Última comprobación: {{date}}",
     "col": {
@@ -4084,7 +4084,7 @@
       "reason": "Motivo",
       "revoke": "Revocar",
       "revokeFailed": "No se pudo revocar la exención.",
-      "submit": "Eximir",
+      "submit": "[TODO] Waive",
       "title": "Eximir: {{title}}"
     },
     "waiverStale": "Exención caducada"

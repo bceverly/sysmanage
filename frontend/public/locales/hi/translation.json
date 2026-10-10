@@ -31,7 +31,7 @@
     "deleteFailed": "माईरों को हटाने में विफलता हुई।",
     "loadFailed": "सेट की गई एजेंट माईरों को लोड करने में विफलता हुई।",
     "noEngine": "यह सर्वर पर प्रोवाइज़निंग इंजीन लाइसेंस नहीं है, तो सेट करने के लिए कोई चैनल नहीं है।",
-    "refresh": "फ़्रीश",
+    "refresh": "[TODO] Refresh",
     "remove": "माईरों को हटाओ",
     "removed": "माईरों हटा दिए गए; उस चैनल से पब्लिक स्रोत से इनस्तॉल किया जाएगा।",
     "saveFailed": "माईरों को सहेजने में विफलता हुई।",
@@ -136,11 +136,11 @@
     "resourcesInsufficient": "यह सर्वर पर्याप्त मुक्त मेमोरी या डिस्क नहीं है जिससे सर्वर या एजेंट बंडल बनाया जा सके -- वे बटन तब तक अक्षम रहेंगे जब तक संसाधनों को मुक्त नहीं किया जाता (स्वैप जोड़ें या VM का आकार बढ़ाएँ)।",
     "resourcesLow": "कम संसाधन - बिल्ड चला सकता है लेकिन स्वैप पर भरोसा करेगा और धीमी गति से चल सकता है।",
     "size": "आकार",
-    "status": "विस्तार",
+    "status": "[TODO] Status",
     "subtitle": "एक मल्टी-ओएस ISO जनरेट करें जो sysmanage सर्वर या एजेंट + सभी प्रतिप्ल्यूम परिष्करणों को शामिल करता है, तैयार होकर एक एयर-गेप्स्ड होस्ट पर माउंट करने के लिए।",
     "tabLabel": "एयर-गैप बंडल्स",
-    "title": "विशेष अनुकरण (Air-Gap) संस्थापन कंपोजिट",
-    "version": "\\u092a\\u0941\\u0935\\u0947"
+    "title": "[TODO] Air-Gap Install Bundles",
+    "version": "[TODO] Version"
   },
   "airgapCollections": {
     "actions": {
@@ -154,12 +154,12 @@
       "isoLabel": "ISO लेबल",
       "size": "आकार",
       "started": "शुरू हो गया",
-      "status": "विस्तार"
+      "status": "[TODO] Status"
     },
     "confirmDelete": "यह संग्रहण चलने और इसके मैनिफेस्ट्स को हटाएं?",
     "createError": "चलाने को बनाने में विफलता",
     "created": "संग्रहण चलानी क्वीयूड",
-    "deleteError": "चलानी को इनकार करने में विफलता",
+    "deleteError": "[TODO] Failed to delete run",
     "deleted": "संग्रहण चलानी मिटा दी गई है",
     "dialog": {
       "burnDevice": "प्रकाशीय बर्न डिवाइस (वैकल्पिक)",
@@ -179,7 +179,7 @@
       "mirrorsRequired": "कम से कम एक माइरोर लक्षण की आवश्यकता है।",
       "mirrorsTitle": "दर्पण",
       "noMirrors": "किसी भी सक्रिय माइरोर की कन्फगरेशन नहीं है। सेटिंग्स → रिपोज़िटरी माइरोरिंग पर जाकर एक जोड़े, फिर फिर से कोशिश करें।",
-      "submit": "कार्यक्रम चलाओ",
+      "submit": "[TODO] Queue Run",
       "title": "नई संकलन चलानी"
     },
     "discPicker": {
@@ -202,12 +202,12 @@
   },
   "airgapDevices": {
     "empty": "कोई लाभार्थी द्रव्यमय नहीं पाया गया। मीडिया इन्सर्ट करें और रिस्कैन दबाएँ।",
-    "help": "देव्याल \\u0938जार/पाद गो भुविन साबे पादोज्देके सोजे पादोज्देके सेयास पोलान. \\u0926ुव्बे देव्याल \\u0938जार/पाद गो भुविन \\u0938ाबे पादोज्देके \\u0938ेयास पोलान ।. \\u0915्र\\u092cे देव्याल \\u0938जार/पाद गो भुविन \\u0938ाबे पादोज्देके \\u0938ेयास पोलान ।.",
+    "help": "[TODO] Pick the optical/USB drive that holds the collector media. The Import button on the Air-Gap Repositories page becomes available when this drive has a readable ISO inserted. The media signature is verified during import.",
     "label": "ब्लॉक डिवाइस",
     "loadError": "ड्राइव को गिनने में विफलता",
     "none": "(कोई नहीं)",
-    "optical": "किरणीय",
-    "removable": "किनारे वाला",
+    "optical": "[TODO] optical",
+    "removable": "[TODO] removable",
     "rescan": "ड्राइव फिर से स्कैन करें",
     "saveError": "डिवाइस सेभ करने में असफलता हुई।",
     "title": "इम्पोर्ट ड्राइव"
@@ -225,7 +225,7 @@
       "copying": "पैकेज को कॉपी करना",
       "failed": "असफल",
       "queued": "क्वेड",
-      "verified": "\\u092a\\u0941\\u0935\\u0947",
+      "verified": "[TODO] Verified",
       "verifying": "\\u0926\\u094b\\u0938\\u094d\\u092f\\u0947 signature \\u092e\\u0947\\u091c\\u094b"
     },
     "runDone": "प्रविष्ट करना पूरा -- नीचे की संस्थान सूची को ताज़ा किया गया है।",
@@ -239,7 +239,7 @@
       "copyKey": "पब्लिक कुंजी कॉपी करें",
       "help": "इस पब्लिक कुंजी को कॉपी करें और Air-Gap रिपोज़िट्री सर्वर में इम्पोर्ट करें ताकि यह इस कलेक्टर द्वारा उत्पन्न किए गए हस्ताक्षरित मीडिया को संबोधित करे। केवल पब्लिक कुंजी ही दिखाई देती है -- गोपनीय हस्ताक्षरण कुंजी कभी भी इस सर्वर से बाहर नहीं आती।",
       "loadError": "कलेक्टर पब्लिक कुंजी को लोड नहीं कर सका।",
-      "title": "कोलेक्टर पब्लिक की"
+      "title": "[TODO] Collector Public Key"
     },
     "copied": "कॉपी किया!",
     "copyError": "क्लिपबोर्ड पर कॉपी करने में विफलता",
@@ -247,9 +247,9 @@
     "fingerprint": "फिंगरप्रिन्ट",
     "trusted": {
       "badKey": "(अपठनीय कुंजी)",
-      "count": "{{n}} संबोधन",
+      "count": "[TODO] {{n}} trusted",
       "empty": "कोई ट्रस्टेड कलेक्टर कुंजी नहीं है।",
-      "help": "प्रत्येक एयर-गैप कलेक्टर (Air-Gap Collector) से जिनमें इस गिट हब (repository) को मीडिया (media) पहुंचाना चाहिए, उनके लिए बाहरी सक्रियता के साथ पब्लिक की (public key) को इम्पोर्ट करें। असंबद्ध कुंजी द्वारा हस्ताक्षरित मीडिया (media signed by an untrusted key) को आयनग (ingest) के समय नकारात्मक जब्त किए जाते हैं।",
+      "help": "[TODO] Import the public key from each Air-Gap Collector whose media this repository should accept. Media signed by an untrusted key is rejected during ingest.",
       "import": "कुंजी इम्पोर्ट",
       "importError": "कुंजी को इम्पोर्ट नहीं कर सका।",
       "imported": "प्रविष्ट की गई सकारात्मक {{fp}}",
@@ -285,34 +285,34 @@
     "created": "बनाया गया",
     "createdTitle": "API कुंजी बनाई गई",
     "description": "API कुंजियां ऑटोमेशन को आपके रूप में API के लिए प्रमाणित होने देने की अनुमति देती हैं। उन्हें पासवर्ड की तरह सुरक्षा मानें।",
-    "expires": "विफल होने की समयतापूर्वक तिथि",
+    "expires": "[TODO] Expires",
     "expiresOptional": "विफल होने की समयतापूर्वक तिथि (वैकल्पिक)",
     "lastUsed": "हाल ही में इस्तेमाल किया गया",
     "loadError": "API कुंजियों को लोड करने में विफल हुए।",
     "name": "नाम",
-    "prefix": "कुंजी प्रतिफल",
-    "revoke": "अनुमति लीना",
+    "prefix": "[TODO] Key prefix",
+    "revoke": "[TODO] Revoke",
     "revokeError": "API कुंजी तोड़ने में विफल हुए।",
-    "revoked": "कानून कर दिया",
-    "status": "विस्तार",
+    "revoked": "[TODO] Revoked",
+    "status": "[TODO] Status",
     "title": "API कुंजियाँ"
   },
   "audit": {
     "columns": {
-      "actor": "कैसियन",
+      "actor": "[TODO] Actor",
       "details": "विवरण",
       "openSite": "खोलें",
       "operation": "क्रिया",
       "site": "साइट",
-      "timestamp": "\\u0926\\u0948\\u0930\\u094d\\u092f\\u093e\\u0928"
+      "timestamp": "[TODO] Timestamp"
     },
     "empty": "अभी तक कोई फ़ेडरेशन ऑडिट प्रविष्टियाँ नहीं हैं।",
     "emptyFiltered": "फ़िल्टर में मैच नहीं हुए कोई ऑडिट प्रविष्टियाँ।",
     "errorLoad": "फेडरेशन ऑडिट लॉग को लोड करने में विफल हुए।",
     "filters": {
-      "actor": "कैसियन",
+      "actor": "[TODO] Actor",
       "apply": "लागू करें",
-      "clear": "सफेद करें",
+      "clear": "[TODO] Clear",
       "operation": "क्रिया",
       "siteId": "साइट आईडी"
     },
@@ -413,7 +413,7 @@
     "missingTitle": "संदर्भ में नहीं, इस होस्ट पर है",
     "name": "नाम",
     "noOtherHosts": "अभी तक कोई और होस्ट तुलना करने के लिए उपलब्ध नहीं है।",
-    "reference": "संदर्भ",
+    "reference": "[TODO] Reference",
     "referenceHost": "संदर्भ होस्ट",
     "summary": "{{count}} के साथ {{reference}} में ⟨Δ⟩ अंतर(ים)",
     "thisHost": "यह होस्ट",
@@ -479,7 +479,7 @@
     "noDescription": "कोई विवरण नहीं",
     "none": "कोई नहीं",
     "notAvailable": "उपलब्ध नहीं",
-    "of": "का",
+    "of": "[TODO] of",
     "refresh": "रीफ़्रेश करें",
     "requiresSelection": "कम से कम एक पंक्ति चुनें",
     "requiresSingleSelection": "ठीक एक पंक्ति चुनें",
@@ -582,7 +582,7 @@
     "hostsIn": "{{name}} के लिए प्रति होस्ट परिणाम",
     "intro": "एक ही समय में कई होस्टों पर एक कॉन्फ़िगरेशन प्रोफ़ाइल चलाएँ। एक जॉब अपने इनवेंटरी को तरंगों में संसाधित करता है, न कि एक बार में, और हर होस्ट पर हुई घटनाओं का रिकॉर्ड रखता है।",
     "inventoriesFailed": "होस्ट इन्वेंटरी लोड नहीं की जा सकीं",
-    "inventory": "होस्ट इन्वेंटरी",
+    "inventory": "[TODO] Inventory",
     "inventoryDeleteFailed": "होस्ट इन्वेंटरी मिटाई नहीं जा सकी",
     "inventorySaveFailed": "होस्ट इन्वेंटरी सहेजी नहीं जा सकी",
     "jobsFailed": "जॉब्स को लोड नहीं किया जा सकता",
@@ -607,7 +607,7 @@
     "progress": "{{done}} का {{total}} -- {{ok}} सफल हुआ, {{failed}} असफल रहा, {{skipped}} छोड़ दिया गया",
     "schedule": "निर्धारण (क्रॉन)",
     "scheduleHelp": "खाली छोड़ें ताकि केवल हाथ से लॉन्च करें.",
-    "tabInventories": "होस्ट इन्वेंटरी",
+    "tabInventories": "[TODO] Inventories",
     "tabJobs": "जॉब",
     "tabTemplates": "टेम्पलेट्स",
     "targetsFailed": "होस्ट्स को लोड नहीं किया जा सकता",
@@ -688,7 +688,7 @@
     "saveFailed": "प्रोफ़ाइल को सहेज नहीं सकते",
     "title": "कॉन्फ़िगरेशन प्रोफाइल्स",
     "updated": "अपडेट किया गया",
-    "version": "वर्जन",
+    "version": "[TODO] Version",
     "versionLabel": "वर्जन {{n}}",
     "versionsFailed": "वर्जन इतिहास लोड नहीं हो सका"
   },
@@ -795,7 +795,7 @@
     "loadError": "वितरण लोड करने में त्रुटि",
     "minAgentVersion": "न्यूनतम एजेंट संस्करण",
     "notes": "नोट्स",
-    "title": "चाइल्ड होस्ट वितरण",
+    "title": "[TODO] Child Host Distributions",
     "version": "संस्करण",
     "versionHelp": "उदा., 24.04"
   },
@@ -820,11 +820,11 @@
     "minOfflineSecondsHelp": "ताकि तेज़ सिंक इंटरवल्स फ्लैप न हों",
     "offlineMultiplier": "ऑफलाइन मल्टीप्लायर",
     "offlineMultiplierHelp": "साइट के सिंक इंटरवल को × करने से पहले जब यह ऑफ़लाइन झंडा दिखाता है",
-    "save": "सीमाओं को बचवा",
+    "save": "[TODO] Save thresholds",
     "saveFailed": "सीमाओं को बचाने में विफल हुए।",
     "saved": "प्रतीक्षा सीमाएँ बचीं हैं।",
     "subtitle": "एक फील्ड खाली छोड़ें बिल्ट-इन प्रतिस्थापन का उपयोग करने के लिए।",
-    "title": "प्रत्यावर्तन सीमाएँ"
+    "title": "[TODO] Alert thresholds"
   },
   "federationDispatch": {
     "cancel": "रद्द करें",
@@ -840,8 +840,8 @@
     },
     "hostIds": "होस्ट आयडी",
     "hostIdsHint": "होस्ट ID (होस्ट्स पेज से)",
-    "packages": "काशोजे च्रैनित",
-    "packagesOptional": "काशोजे च्रैनित (\\u092a्शाब \\u092bुव में = नेपार स्योज)",
+    "packages": "[TODO] Package names",
+    "packagesOptional": "[TODO] Package names (optional -- blank = all updates)",
     "script": "स्क्रिप्ट",
     "subtitle": "{{site}} के लिए एक कमांड कोई क्वीयू में पंजीकरण करें। साइट अपने होस्ट्स पर इसे चलाती और परिणाम बताती है -- कुछ भी तुरंत नहीं लचीकरण होता।",
     "subtitleMulti": "चयनित {{hosts}} होस्ट(s) पर और {{sites}} साइट(s) पर एक कमांड के लिए काउंटर क्रम में अग्रणी बुलेट का विनिर्देश। हर साइट इसे चलाती है और परिणामों को लौकिक रूप से बताती है -- कुछ भी अमन नहीं चला जाता है।",
@@ -852,7 +852,7 @@
     "types": {
       "applyUpdates": "अपडेट लागू करें",
       "deployPackages": "पैकेज इनस्टल करें",
-      "reboot": "पुनर्राम चलाओ",
+      "reboot": "[TODO] Reboot",
       "runScript": "स्क्रिप्ट चलाएं"
     }
   },
@@ -862,7 +862,7 @@
       "openSite": "साइट"
     },
     "bulk": {
-      "clear": "सफेद करें",
+      "clear": "[TODO] Clear",
       "dispatch": "कमांड डिसपाच",
       "selectAll": "इस पेज पर सभी को चुनें",
       "selected": "{{n}} होस्ट्स सेलेक्टेड"
@@ -872,15 +872,15 @@
       "ipv4": "IPv4",
       "lastSeen": "अंतिम देखी गई",
       "os": "ओएस",
-      "platform": "क्रारे",
-      "status": "विस्तार"
+      "platform": "[TODO] Platform",
+      "status": "[TODO] Status"
     },
     "detail": {
       "close": "बंद करें",
       "ipv6": "IPv6",
       "noLiveLink": "\\u092c\\u0947 \\u0938\\u094d\\u0915\\u094b \\u091a\\u093e\\u0930 \\u0926\\u0940 \\u092a\\u092c\\u0938\\u0947 (\\u0926\\u0940 \\u0915\\u094b \\u092e\\u094d\\u0936\\u0947 \\u091a\\u093e\\u0930 URL \\u0928\\u0947\\u0902 \\u0915\\u094b).",
       "notFound": "यह होस्ट अब डिरेक्टरी में नहीं है।",
-      "site": "प्सात विते",
+      "site": "[TODO] Owning site",
       "theSite": "साइट",
       "title": "होस्ट विवरण",
       "viewLive": "\\u092e\\u0947\\u091c\\u094b live detail \\u0946 {{site}} \\u2192"
@@ -890,10 +890,10 @@
     "errorLoad": "क्रॉस-साइट होस्ट्स लोड करने में विफल हुए।",
     "filters": {
       "apply": "लागू करें",
-      "clear": "सफेद करें",
+      "clear": "[TODO] Clear",
       "osFamily": "ओएस परिवार",
       "search": "योगा१ (অকেিন /\nIP)",
-      "status": "विस्तार"
+      "status": "[TODO] Status"
     },
     "scopedToSite": "एक साइट के लिए स्कोप",
     "subtitle": "सार्वभौम नोड के सभी पंजीकृत साइटों से समन्वित डायरेक्टरी, कoodinator के द्वारा।",
@@ -902,7 +902,7 @@
   "federationReport": {
     "col": {
       "active": "कार्यात्मक",
-      "compliance": "\\u0938\\u094d\\u092e\\u0947\\u091c\\u094b compliance",
+      "compliance": "[TODO] Worst compliance",
       "critical": "क्रिटिकल CVEs",
       "high": "उच्च CVE",
       "hosts": "होस्ट",
@@ -929,7 +929,7 @@
       "coordUrl": "समन्वयक URL",
       "enrolled": "कoodinator के साथ पंजीकृत",
       "error": "समन्वयक के साथ पंजीकरण नहीं हो सका।",
-      "help": "पाबोज्दे वै येतार्रजो देव्याल सोजे पादोज्देके \\u0938ेयास पोलान. \\u0926ुव्बे येतार्रजो देव्याल \\u0938ोजे.",
+      "help": "[TODO] Point this site at its coordinator and paste the one-time enrollment token the coordinator issued (from its Sites page). This site calls back to complete the handshake and begin syncing.",
       "notEnrolled": "कोई कुशलजनक से प्रोटिक्यूटर एनरोल नहीं हुआ।",
       "submit": "सहकर्मी के साथ पंजीकरण करें",
       "submitting": "पंजीकरण चल रहा है...",
@@ -941,7 +941,7 @@
       "copyKey": "पब्लिक कुंजी कॉपी करें",
       "help": "इस पब्लिक कुंजी को कॉपी करें और पीयर के फ़ेडरेशन कार्ड में पेस्ट करें ताकि हर ओर दूसरे का अभिव्यक्ति फ़िंगरप्रिंट और इसकी बाहर से पुष्टि कर सके। गोपनीय कुंजी कभी भी इस सर्वर से बाहर नहीं आती।",
       "pending": "आयडेंटिटी कुंजी जनरेट करने में…",
-      "title": "\\u092c\\u0947 \\u0938\\u094d\\u0915\\u094b \\u092e\\u0947\\u0902\\u091a\\u093e\\u0930"
+      "title": "[TODO] This server's identity key"
     },
     "importError": "कुंजी को इम्पोर्ट नहीं कर सका।",
     "intro": "यह सर्वर का भूमिका चयन करें जो बहुसाइट फ़ेडरेशन में भाग लेता है। यह एक प्रकार की विधि है -- एक सर्वर दोनों ही हो सकता है। अगले रिस्टार्ट के बाद प्रभावी हो जाता है।",
@@ -954,9 +954,9 @@
       "empty": "अभी तक कोई पीयर आइडेंटिटी कुंजी नहीं रिकार्ड हुई हैं।",
       "help": "यहाँ पीयर के इंपबल्क की पब्लिक की सारणी को निर्धारित करें ताकि उसका आइडेंटिटी फ़िनगरप्रिंट ऑउट ऑफ़ बैंड सत्यापित किया जा सके। फ़ेडरेशन कनेक्शन खुद ही TLS सर्टिफ़िकेट पिन्निंग के माध्यम से सुरक्षित होता है - इन की सारणी लोगों के सत्यापन, न कि एक्सेस कंट्रोल के लिए हैं।",
       "import": "पीयर कुंजी इम्पोर्ट करें",
-      "name": "देव्याल चोलान",
-      "pem": "देव्याल सोजे (PEM)",
-      "title": "देव्याल सोजे च्रैनित"
+      "name": "[TODO] Peer name",
+      "pem": "[TODO] Peer public key (PEM)",
+      "title": "[TODO] Peer identity keys"
     },
     "removeError": "कुंजी हटा नहीं पाई।",
     "save": "फेडरेशन रोल सहेजें",
@@ -1001,13 +1001,13 @@
     "portRange": "पोर्ट श्रेणी",
     "protocol": "प्रोटोकॉल",
     "roleName": "भूमिका का नाम",
-    "roleNamePlaceholder": "भूमिका का नाम दर्ज करें",
+    "roleNamePlaceholder": "[TODO] Role Name Placeholder",
     "roleNameRequired": "भूमिका का नाम आवश्यक",
     "selectPort": "पोर्ट चुनें",
     "startPort": "प्रारंभ पोर्ट",
     "subtitle": "उपशीर्षक",
     "tcp": "TCP",
-    "title": "शीर्षक",
+    "title": "[TODO] Firewall Roles",
     "udp": "Udp",
     "updateSuccess": "अपडेट सफल"
   },
@@ -1147,9 +1147,9 @@
     "primaryGroup": "प्राथमिक समूह",
     "primaryGroupHelp": "उपयोगकर्ता के समान नाम वाला समूह बनाने के लिए खाली छोड़ें",
     "shell": "शेल",
-    "shellBash": "बश",
+    "shellBash": "[TODO] Bash",
     "shellBourne": "बोर्न शेल",
-    "shellCsh": "क्सह",
+    "shellCsh": "[TODO] Csh",
     "shellFalse": "गलत",
     "shellFish": "फिश",
     "shellKsh": "Ksh",
@@ -1170,7 +1170,7 @@
     "limited": "सीमित",
     "notApplicable": "इस ऑपरेटिंग सिस्टम के लिए लागू नहीं है",
     "partial": "थोड़ा-सा समर्थित",
-    "reasonBuildExcluded": "यह एजेंट बिल्ड में छोड़ा गया है",
+    "reasonBuildExcluded": "[TODO] Omitted from this agent build",
     "reasonMissingTool": "इस होस्ट पर एक आवश्यक टूल इंस्टॉल नहीं है",
     "reasonNoHandler": "यह एजेंट में इन्हें बनाया नहीं गया है",
     "reasonUnsupportedArch": "यह आर्किटेक्चर के लिए बनाया नहीं गया है",
@@ -1416,7 +1416,7 @@
     "editHostname": "होस्ट नाम संपादित करें",
     "editServices": "सेवाएँ संपादित करें",
     "enabled": "सक्षम",
-    "entitled": "अधिकारी",
+    "entitled": "[TODO] Entitled",
     "errorMessage": "त्रुटि संदेश",
     "errorUpdatingServices": "सेवा अद्ययन करने में त्रुटि",
     "expired": "समाप्त हो गया",
@@ -1507,9 +1507,9 @@
       }
     },
     "imageMode": {
-      "apply": "अनुपात",
+      "apply": "[TODO] Apply",
       "applyError": "इमेज को लागू करने में विफलता",
-      "applySuccess": "स्टेग किए गए इमेज को लागू करने की संकेतन",
+      "applySuccess": "[TODO] Image apply requested (host will reboot)",
       "backend": "बैकएंड",
       "badge": "इमेज मोड",
       "bootedImage": "बूट किया गया इमेज",
@@ -1517,7 +1517,7 @@
       "confirmApplyTitle": "स्टेज किए गए इमेज को लागू करें?",
       "confirmRollbackMessage": "यह होस्ट को इसके पिछले इमेज में रोलबैक करता है और इसे पुनः बूट करता है। अग्रसर हों?",
       "confirmRollbackTitle": "इमेज को रोलबैक करें?",
-      "digest": "दाग",
+      "digest": "[TODO] Digest",
       "enterpriseNotice": "इमेज को स्टेग, लागू करना और रोलबैक करना एंटरप्राइज विशेषता है। वर्तमान इमेज के विवरण नीचे दिखाए गए हैं",
       "enterpriseOnly": "इमेज मोड ऑपरेशन करने के लिए एंटरप्राइज लाइसेंस होता है",
       "imageRef": "इमेज प्रतीक",
@@ -1527,7 +1527,7 @@
       "rollbackAvailable": "रोलबैक उपलब्ध है",
       "rollbackError": "इमेज को रोलबैक करने में विफलता",
       "rollbackSuccess": "इमेज को रोलबैक करने की संकेतन (होस्ट बूट करेगा)",
-      "stage": "स्टेग",
+      "stage": "[TODO] Stage",
       "stageError": "इमेज को स्टेज करने में विफलता",
       "stageSuccess": "इमेज को स्टेग करने की संकेतन",
       "stagedImage": "स्टेग किए गए इमेज",
@@ -1757,7 +1757,7 @@
     "windowsIsoPathRequired": "कृपया विंडोज़ इनस्टलेशन ISO के पथ दर्ज करें",
     "windowsJoinDomainToggle": "एक Active Directory टोमेन में जुड़ें",
     "windowsLocaleHelp": "UI और input भाषा, जैसे \"en-US\"",
-    "windowsLocaleLabel": "भाषा",
+    "windowsLocaleLabel": "[TODO] Locale",
     "windowsProductKeyHelp": "AVMA, MAK या KMS कुंजी। मूल्यांकन स्रोत के लिए रखें, जो इसके बिना इनSTALL करता है। OpenBAO में सहेजा जाता है, कभी डेटाबेस में नहीं।",
     "windowsProductKeyLabel": "लाइसेंस कुंजी",
     "windowsSectionTitle": "Windows Server सेटअप",
@@ -1800,7 +1800,7 @@
     "antivirusDeployPartialSuccess": "ऐन्टीवायरस डिप्लोइमेंट सुरक्षा के लिए {{count}} होस्ट(s) पर शुरू की गई।\\n\\nअसफल होस्ट(s):\\n{{hosts}}",
     "antivirusDeploySuccess": "एन्टीवायरस डिप्लोइमेंट सुरक्षा के लिए {{count}} होस्ट(स) पर शुरू हो गई",
     "approvalNeeded": "अनुमोदन आवश्यक",
-    "approveSelected": "निवड़ित को पारदर्शी बनाएं",
+    "approveSelected": "[TODO] Approve Selected",
     "capabilities": "कैपABILITY",
     "capabilitiesFull": "पूरा",
     "capabilitiesFullTooltip": "इस एजेंट ने पूरी कैपABILITY सेट को घोषित की है",
@@ -1809,7 +1809,7 @@
     "childHostFilter": "चाइल्ड होस्ट फ़िल्टर",
     "childHostOf": "{{parent}} का चाइल्ड होस्ट",
     "childHostsOnly": "केवल चाइल्ड होस्ट",
-    "childrenOnly": "केवल चिल्ड्रन",
+    "childrenOnly": "[TODO] Children",
     "confirmReboot": "सिस्टम पुनः प्रारंभ की पुष्टि करें",
     "confirmRebootMessage": "क्या आप वाकई {{hostname}} को पुनः प्रारंभ करना चाहते हैं? सिस्टम कुछ मिनटों के लिए अनुपलब्ध रहेगा।",
     "confirmShutdown": "सिस्टम बंद करने की पुष्टि करें",
@@ -1818,9 +1818,9 @@
     "delete": "हटाएं",
     "deployAntivirus": "एंटीवायरस तैनात करें",
     "deployOpenTelemetry": "OpenTelemetry तैनात करें",
-    "diagnosticsRequestFailed": "सेटिंग्स सेवा अद्ययन करने में विफल हुए",
+    "diagnosticsRequestFailed": "[TODO] Failed to request diagnostics collection. Please try again.",
     "diagnosticsRequested": "डायएगनोसिक कलेक्शन के लिए होस्ट {{hostId}} प्राप्त करना। जब उपलब्ध हों, होस्ट विवरण पृष्ठ पर परिणाम देखें।",
-    "down": "बंद",
+    "down": "[TODO] Down",
     "filterByTags": "टैग द्वारा फ़िल्टर करें",
     "fqdn": "एफक्यूडीएन",
     "getDiagnostics": "डायग्नोस्टिक्स प्राप्त करें",
@@ -2022,27 +2022,27 @@
     "created": "आमंत्रण {{email}} को भेजा गया",
     "email": "ई-मेल",
     "existingHeading": "आमंत्रण",
-    "expires": "धीरे होने की समयतिक्का",
+    "expires": "[TODO] Expires",
     "firstName": "पहला नाम",
     "inviteHeading": "एक नए उपयोगकर्ता को आमंत्रित करें",
-    "isAdmin": "संशोधक अभिलाषा दें",
+    "isAdmin": "[TODO] Grant administrator access",
     "lastName": "अंतिम नाम",
     "loadError": "आमंत्रण लोड करने में विफल रहा",
     "manageButton": "आमंत्रण",
     "none": "वर्तमान आमंत्रण नहीं है",
-    "resend": "फरसे करें",
+    "resend": "[TODO] Resend",
     "resendError": "आमंत्रण पुन: भेजने में विफल रहा",
     "resent": "आमंत्रण पुन: भेजा गया",
-    "revoke": "अनुदान लें",
+    "revoke": "[TODO] Revoke",
     "revokeError": "आमंत्रण संक्रमित करने में विफल रहा",
     "roles": "सुरक्षा भूमिकाएं",
     "rolesPlaceholder": "भूमिकाओं का चयन करें",
     "sendInvite": "इन्वाइटेशन भेजें",
     "status": "स्थिति",
     "statusAccepted": "स्वीकार किया गया",
-    "statusExpired": "धीरे हो गया",
+    "statusExpired": "[TODO] Expired",
     "statusPending": "पेंडिंग",
-    "statusRevoked": "अनुदान दिया गया",
+    "statusRevoked": "[TODO] Revoked",
     "title": "उपयोगकर्ता के इन्वाइटेशन"
   },
   "logging": {
@@ -2108,9 +2108,9 @@
     "loading": "लॉगआउट हो रहा है..."
   },
   "maintenanceWindows": {
-    "addWindow": "मॉडियन की तारीख निर्धारित करें",
+    "addWindow": "[TODO] Schedule Maintenance",
     "confirmDelete": "क्या आप इस मेनटेनेंस विंडो को हटाना चाहते हैं?",
-    "confirmOverride": "अतिरिक्त",
+    "confirmOverride": "[TODO] Override",
     "created": "मेनटेनेंस विंडो का बनाया गया है",
     "currentWindow": "वर्तमान विंडो",
     "day": {
@@ -2118,8 +2118,8 @@
       "mon": "सोमवार",
       "sat": "शनि",
       "sun": "सोम",
-      "thu": "गुरू",
-      "tue": "सुन्दर",
+      "thu": "[TODO] Thu",
+      "tue": "[TODO] Tue",
       "wed": "सोमवार"
     },
     "daysOfWeek": "सप्ताह के दिन",
@@ -2129,7 +2129,7 @@
     "description": "वर्णन",
     "durationMinutes": "(मिनट में) दरजा",
     "editWindow": "मेनटेनेंस विंडो संपादित करें",
-    "emergencyOverride": "आपदा प्रबंधन अतिरिक्त",
+    "emergencyOverride": "[TODO] Emergency override",
     "enabled": "सक्रिय",
     "endsAt": "(UTC में) समाप्त होता है",
     "everyDay": "हर दिन",
@@ -2166,7 +2166,7 @@
     "state": {
       "blocked": "रोका",
       "in_window": "विंडो में",
-      "override": "अतिरिक्त लगी हुई",
+      "override": "[TODO] Override active",
       "unrestricted": "असीमित"
     },
     "timezone": "समय क्षेत्र",
@@ -2239,7 +2239,7 @@
       "label": {
         "restore": "पुनर्जीवित करें",
         "snapshot": "snap",
-        "sync": "संग्रहण करें"
+        "sync": "[TODO] sync"
       },
       "ok": "ठीक"
     },
@@ -2250,7 +2250,7 @@
       "osVersion": "OS / संस्करण",
       "statusRestore": "पुनरावृत्ति",
       "statusSnapshot": "स्नैपशट",
-      "statusSync": "सिंक",
+      "statusSync": "[TODO] Sync",
       "upstream": "अपस्ट्रीम"
     },
     "configureSubtitle": "उस होस्ट को चुनें जो इस प्लेटफ़ॉर्म की मिरर योजनाएँ चलाएगा। केवल वे होस्ट सूचीबद्ध हैं जिनका प्लेटफ़ॉर्म टैब से मेल खाता है।",
@@ -2293,7 +2293,7 @@
         "actions": "क्रियाएं",
         "digest": "डाइजेस्ट",
         "image": "छवि",
-        "status": "चपकर",
+        "status": "[TODO] Capture",
         "tag": "टैग"
       },
       "empty": "अभी तक कोई छवि ट्रैक नहीं की गई है। ऊपर से एक जोड़ें, फिर 'चपकर छवि' प्रयोग करें।",
@@ -2307,7 +2307,7 @@
       "untrack": "इस छवि का ट्रैकिंग बंद करें",
       "untrackError": "उस छवि को अट्रैक करने से बचाने में विफलता हुई।"
     },
-    "listTitle": "रिपॉजिटरी मिरर",
+    "listTitle": "[TODO] Mirror Repositories",
     "loadError": "रिपॉजिटरी मिरर लोड नहीं किए जा सके।",
     "noEligibleHosts": "कोई पंजीकृत {{family}} होस्ट उपलब्ध नहीं -- एक पंजीकृत करें और ताज़ा करें।",
     "platform": {
@@ -2342,21 +2342,21 @@
     },
     "snap": {
       "action": {
-        "capture": "चपटे हस्ताक्षर चपटा करो",
-        "tracked": "प्रत्यक्ष हस्ताक्षर"
+        "capture": "[TODO] Capture tracked snaps",
+        "tracked": "[TODO] Tracked snaps"
       },
       "channel": "चैनल",
       "col": {
         "actions": "क्रियाएं",
         "channel": "चैनल",
-        "name": "हस्ताक्षर",
-        "status": "चपटा करो"
+        "name": "[TODO] Snap",
+        "status": "[TODO] Capture"
       },
-      "empty": "अभी तक कोई हस्ताक्षर प्रत्यक्ष नहीं किए गए हैं। ऊपर एक जोड़ें, फिर \\\"चपटे हस्ताक्षर\\\" का उपयोग करें।",
+      "empty": "[TODO] No snaps tracked yet. Add one above, then use \"Capture snaps\".",
       "loadError": "चपटे हस्ताक्षर लोड नहीं किए जा सके।",
-      "name": "हस्ताक्षर का नाम",
+      "name": "[TODO] Snap name",
       "title": "{{name}} के लिए प्रत्यक्ष हस्ताक्षर",
-      "track": "प्रत्यक्ष करें",
+      "track": "[TODO] Track",
       "trackError": "उस हस्ताक्षर को प्रत्यक्ष नहीं किया जा सका। नाम छूट, अंक, और टिहरी में होने चाहिए।",
       "untrack": "इस हस्ताक्षर को प्रत्यक्ष नहीं करने के लिए रुको",
       "untrackError": "उस हस्ताक्षर को प्रत्यक्ष नहीं किया जा सका।"
@@ -2412,13 +2412,13 @@
     "queryPacks": "क्वेरी पैक",
     "reports": "रिपोर्ट",
     "role": {
-      "collector": "वायु-गेप कल्लौंड",
+      "collector": "[TODO] Air-Gap Collector",
       "engineMissing": "आवश्यक Pro+ इंजन लोड नहीं है; लाइसेंस जांचें।",
       "repository": "वायु-अलग संस्थान"
     },
     "scripts": "स्क्रिप्ट",
-    "scrollLeft": "बाएं लॉन्ग",
-    "scrollRight": "दाईं ओर लॉन्ग",
+    "scrollLeft": "[TODO] Scroll left",
+    "scrollRight": "[TODO] Scroll right",
     "search": "खोज (Ctrl+K)",
     "secrets": "सीक्रेट",
     "settings": "सेटिंग्स",
@@ -2570,16 +2570,16 @@
       "noSites": "अभी तक कोई फ़ेडरेशन साइट एनरोल नहीं हुआ।  पहले एक सबऑर्डिनेट SysManage सर्वर एनरोल करें।",
       "statusLine": "प्रस्तुति अवस्था: {{status}}",
       "statusLineWithAttempts": "प्रस्तुति अवस्था: {{status}} ({{attempts}} प्रयास)",
-      "submit": "अंतिम असाइनमेंट सहेजें",
-      "success": "पाबोज्दे वै येतार्रजो.",
+      "submit": "[TODO] Save assignments",
+      "success": "[TODO] Policy assignments updated.",
       "title": "साइट्स को अनुवादित करें"
     },
     "columns": {
       "actions": "क्रियाएं",
       "active": "कार्यात्मक",
       "name": "नाम",
-      "type": "\\u092a\\u093e\\u0930\\u094d\\u0926\\u0947",
-      "version": "\\u092a\\u0941\\u0935\\u0947"
+      "type": "[TODO] Type",
+      "version": "[TODO] Version"
     },
     "create": {
       "button": "नया नीति",
@@ -2592,11 +2592,11 @@
       "invalidJson": "परिभाषा JSON ऑब्जेक्ट होनी चाहिए।",
       "name": "नाम",
       "submit": "बनाएँ",
-      "success": "पादोज्देके सेयास.",
+      "success": "[TODO] Policy created.",
       "title": "पॉलिसी बनाएँ",
-      "type": "पाबोज्दे वै येतार्रजो.",
+      "type": "[TODO] Policy type",
       "typeOther": "अन्य...",
-      "typeRequired": "पादोज्दे वै येतार्रजो."
+      "typeRequired": "[TODO] Policy type is required."
     },
     "deactivate": {
       "error": "कैसे नीति को डिएक्टिव करने में विफल हुए।",
@@ -2606,7 +2606,7 @@
     "edit": {
       "error": "कानून का अपडेट फ़ैल हो गया।",
       "submit": "सहेजें",
-      "success": "पादोज्दे वै येतार्रजो.",
+      "success": "[TODO] Policy updated.",
       "title": "पॉलिसी संपादित करें",
       "versionNote": "सेविंग करने से नीति का संस्करण बढ़ेगा; साइट्स अगले पश्चाग्रहण साइकल में नए संस्करण को ले लेंगी।"
     },
@@ -2615,7 +2615,7 @@
     "filters": {
       "activeOnly": "केवल गैर-निष्क्रिय",
       "allTypes": "सभी प्रकार",
-      "type": "पाबोज्दे वै येतार्रजो."
+      "type": "[TODO] Policy type"
     },
     "inactive": "निष्क्रिय",
     "push": {
@@ -2630,7 +2630,7 @@
     "command": "कमांड",
     "cpu": "CPU प्रतिशत",
     "forceKill": "(SIGKILL के बजाय SIGTERM)",
-    "kill": "बहना",
+    "kill": "[TODO] Kill",
     "killConfirm": "प्रोसेस \"{{name}}\" (PID {{pid}}) को समाप्त करने की पुष्टि करें? इसे वापस नहीं किया जा सकता है।",
     "killError": "समापन की अनुरोध करने में विफल रहा",
     "killRequested": "समाप्त करने की पुष्टि की गई है। सूची जल्द ही अपडेट होगी।",
@@ -2640,7 +2640,7 @@
     "name": "नाम",
     "noRows": "प्रक्रिया सूची वर्तमान में उपलब्ध नहीं है",
     "pid": "पीआईडी",
-    "refresh": "फ्रिश",
+    "refresh": "[TODO] Refresh",
     "refreshError": "फ़िज़िल अद्यतन प्राप्त करने में विफल रहा",
     "refreshRequested": "फ्रिश की अनुमति दी गई है। सूची जल्द ही अपडेट होगी।",
     "rss": "RSS",
@@ -2670,7 +2670,7 @@
     "description": "विवरण",
     "edit": "संपादित करें",
     "editTitle": "क्वेरी पैक संपादित करें",
-    "failed": "फलाना",
+    "failed": "[TODO] Failed",
     "failedCount": "{{count}} फेल हुआ",
     "intro": "क्वेरी पैक्स हर एजेंट द्वारा सेवा किए गए फैक्ट टेबल्स पर SQL का उपयोग करके चलते हैं, इसलिए एक क्वेरी सभी प्लेटफॉर्म्स पर काम करती है।",
     "liveFailed": "क्वेरी चला नहीं सकता",
@@ -2695,7 +2695,7 @@
     "rowNotCovered": "कवर नहीं हुआ: {{reason}}",
     "runNow": "अब चलाएँ",
     "runStatus": {
-      "failed": "फेल्ड",
+      "failed": "[TODO] Failed",
       "partial": "आंशिक रूप से उत्तर दिया गया",
       "pending": "लंबित",
       "success": "सफलता"
@@ -2791,20 +2791,20 @@
   "reports": {
     "antivirusCommercial": {
       "description": "कार्यक्रमिक एन्टीवायरस सुरक्षा संतुलन जोड़े में उत्पाद का नाम, संस्करण, पहचान संस्करण, वास्तविक-समय संरक्षण संतुलन और सेवा संतुलन के माध्यम से सभी प्रबंधित होस्टों के लिए।",
-      "name": "कार्यक्रमिक एन्टीवायरस संतुलन"
+      "name": "[TODO] Commercial Antivirus Status"
     },
     "antivirusOpensource": {
       "description": "ओपन-सोर्स एंटीवायरस सॉफ़्टवेअर के स्थिति प्रदर्शन, सभी होस्ट्स में सॉफ़्टवेअर नाम, संस्करण, इनस्टैलेशन पथ और एनबलड/डिसएबलड स्थिति को दिखाता है।",
       "name": "ओपन-सोर्स एंटीवायरस स्टेटस"
     },
-    "auditLog": "वरिचा लॉग",
+    "auditLog": "[TODO] Audit Log",
     "auditLogReport": {
       "description": "पूर्ण अडिट ट्रेल जो उपयोगकर्ता के कार्यों और प्रणाली में परिवर्तनों का पहचान, एजेंट संदेश और प्रबंधन संक्रमणों के लिए।",
-      "name": "वरिचा लॉग"
+      "name": "[TODO] Audit Log"
     },
     "firewallStatus": {
       "description": "प्रबंधित होस्टों के लिए सभी पैरामीटरों में फायरवॉल संतुलन जो फाइरवॉल सॉफ़्टवेअर, वापस दिखाए गए/बंद होने की स्थिति, खुले IPv4 और IPv6 पोर्ट्स और प्रणाली जानकारी में।",
-      "name": "होस्ट फाइरवॉल संतुलन"
+      "name": "[TODO] Host Firewall Status"
     },
     "generateError": "पहचान करने में त्रुटि: {{message}}",
     "generatePdf": "PDF जेनरेट करें",
@@ -2837,14 +2837,14 @@
       "basic": "बेसिक",
       "commercial": "कॉमर्शियल",
       "compliance": "कॉम्पलाइअंस",
-      "firewall": "बारिएर",
+      "firewall": "[TODO] firewall",
       "hosts": "होस्ट्स",
       "network": "संचार",
       "opensource": ".opensource",
-      "organization": "प्रस्तुति",
+      "organization": "[TODO] organization",
       "permissions": "परमिशन्स",
       "rbac": "RBAC",
-      "roles": "प्रवेश कwalities",
+      "roles": "[TODO] roles",
       "security": "सुरक्षा",
       "systemInfo": "सिस्टम जानकारी",
       "tags": "टैग",
@@ -2886,7 +2886,7 @@
     "validatingToken": "रीसेट टोकन सत्यापित कर रहे हैं..."
   },
   "scripts": {
-    "adHocScript": "अधकारी श्रेणी का स्क्रिप्ट",
+    "adHocScript": "[TODO] Ad-hoc Script",
     "addScript": "स्क्रिप्ट जोड़ें",
     "cancel": "रद्द करें",
     "completedAt": "पूर्ण हुआ",
@@ -2958,7 +2958,7 @@
     "shellType": "शेल प्रकार",
     "shells": {
       "bash": "Bash",
-      "cmd": "प्रति",
+      "cmd": "[TODO] Cmd",
       "ksh": "Ksh",
       "powershell": "PowerShell",
       "sh": "Sh",
@@ -3032,7 +3032,7 @@
     "filenamePlaceholder": "उदाहरण के लिए, id_rsa.pub, server.crt, database.conf",
     "keyType": "कुंजी प्रकार",
     "key_type": {
-      "ca": "प्रमाण प्राधिकरण",
+      "ca": "[TODO] CA",
       "private": "निजी",
       "public": "सार्वजनिक"
     },
@@ -3180,7 +3180,7 @@
       "title": "एयर-गैप कल्ले (ऑनलाइन ओर)"
     },
     "currentTag": "(वर्तमान)",
-    "heading": "Server Role",
+    "heading": "[TODO] Air-Gap Role",
     "intro": "यह SysManage सर्वर के लिए एयर-गैप इम्पलेमेंटेशन में कैसे भाग लेना चाहिए का चुनाव करें। सबसे अधिक सर्वरों को Standard पर रहना चाहिए। यह दृश्य आगे बढ़ता है जब नेक्स्ट सर्वर रीस्टार्ट के बाद होता है।",
     "loadError": "वर्तमान सर्वर भूमिका को लोड नहीं किया जा सका।",
     "menuTitle": "सर्वर भूमिका",
@@ -3230,11 +3230,11 @@
       "activeCommandsLoading": "लोडिंग...",
       "agentVersionMin": "न्यूनतम एजेंट संस्करण",
       "alertAck": "स्वीकार करें",
-      "alertAcked": "प्रतीक्षा कर रहा",
+      "alertAcked": "[TODO] Acknowledged",
       "alertsTitle": "खुले अलर्ट",
       "autonomous": "अपने आप में संचालित",
       "backToList": "साइट्स पर वापस जाएँ",
-      "backlogDepth": "\\प्शाब केयास",
+      "backlogDepth": "[TODO] Pending upstream queue",
       "backlogUnknown": "--",
       "commandAttempts": "{{n}} प्रबिष्ट कोशिशें",
       "commandDispatchedAt": "डिसपाच {{when}}",
@@ -3247,14 +3247,14 @@
       "lastSyncStatus": "अंतिम सिंक रिकार्डस्थिति",
       "metadata": "मेटाडाटा",
       "notFound": "साइट नहीं मिला।",
-      "pushPolicies": "कानून प्रस्तुत करें",
+      "pushPolicies": "[TODO] Push policies",
       "pushPoliciesHint": "इस साइट के प्रत्येक नीति को फिर से आयावना करें -- जल्दबाज़ या मृत-पत्र डिलीवरी भी शामिल हैं -- ताहत अमुक समय पर फिर से प्रोस करें।",
       "refresh": "अद्यतन करें",
       "repushFailed": "कानून का पुनर्प्रसारण टीका करने में विफल हो गया।",
       "repushQueued": "{{n}} नीति पुश को पुनर्भेजन के लिए संपीड़ित किया गया है।",
-      "rollupCompliance": "संतुलन",
+      "rollupCompliance": "[TODO] Compliance",
       "rollupEmpty": "इस साइट से अभी तक कोई पारिता या गतिवर्धक डेटा सिंक नहीं हुआ।",
-      "rollupTitle": "संतुलन और संवेदनाएँ",
+      "rollupTitle": "[TODO] Compliance & vulnerabilities",
       "rollupVulnerabilities": "संवेदनशीलताएँ ({{hosts}} होस्ट(s) प्रभावित)",
       "seeHosts": "इस साइट पर होस्ट्स देखें",
       "siteCapabilities": "कैपेबिलिटीज़",
@@ -3265,7 +3265,7 @@
       "syncIntervalValue": "{{seconds}}स",
       "syncLatency": "\\u092c\\u094b\\u0932\\u094d\\u092f\\u0947 sync latency (recent)",
       "syncNever": "कभी सिंक नहीं हुआ",
-      "syncOverdue": "वहम",
+      "syncOverdue": "[TODO] Overdue",
       "syncPoints": "{{n}} संकेतन घटनाएँ",
       "syncStale": "पुराना",
       "syncTimeline": "सिंक टाइमलाइन",
@@ -3303,7 +3303,7 @@
     "hostsLink": "होस्ट",
     "lastSync": "{{when}} को सिंक कर दिया",
     "mapView": "आरेख दृश्य",
-    "policiesLink": "पादोज्देके सेयास.",
+    "policiesLink": "[TODO] Policies",
     "subtitle": "इस समन्वयक के द्वारा पंजीकृत उप-सिस्टमेनेज सर्वर।",
     "tilesView": "डैशबोर्ड",
     "title": "फेडरेशन साइटस"
@@ -3322,13 +3322,13 @@
     "coordinator": "कोऑर्डिनेटर",
     "coordinatorThisServer": "यह सर्वर",
     "countEnrolled": "{{n}} पंजीकृत",
-    "countHosts": "{{n}} कैसिन्ग",
+    "countHosts": "[TODO] {{n}} hosts",
     "countPending": "{{n}} पेंडिंग",
     "countSuspended": "{{n}} रोकड़",
     "empty": "अभी तक कोई साइट एनरोल नहीं हुई है।",
     "errorLoad": "साइट्स लोड करने में विफल हुए।",
     "gridView": "ग्रिड दृश्य",
-    "hostsLabel": "{{n}} कैसिन्ग",
+    "hostsLabel": "[TODO] {{n}} hosts",
     "lastSync": "{{when}} को सिंक कर दिया",
     "mapView": "आरेख दृश्य",
     "title": "फेडरेशन डैशबोर्ड"
@@ -3468,7 +3468,7 @@
   },
   "ubuntuPro": {
     "actions": {
-      "clearKey": "की साफ़ करें"
+      "clearKey": "[TODO] Clear Key"
     },
     "description": "Ubuntu Pro सब्सक्रिप्शन प्रबंधन और बल्क नामांकन के लिए मास्टर कीज़ कॉन्फ़िगर करें।",
     "enrollment": {
@@ -3478,7 +3478,7 @@
       "enroll": "होस्ट्स नामांकित करें",
       "enrolling": "नामांकन हो रहा है...",
       "errorLabel": "त्रुटि",
-      "hostFallback": "सर्किट {{id}}",
+      "hostFallback": "[TODO] Host {{id}}",
       "keySource": "नामांकन की स्रोत",
       "noMasterKey": "कोई मास्टर की कॉन्फ़िगर नहीं है। कृपया नीचे एक कस्टम Ubuntu Pro की दर्ज करें।",
       "organization": "संगठन: {{name}}",
@@ -3694,14 +3694,14 @@
     "passwordForEmailHelp": "आपकी पहचान सत्यापित करने के लिए आवश्यक",
     "passwordForEmailPlaceholder": "पुष्टि के लिए अपना वर्तमान पासवर्ड दर्ज करें",
     "passwordMismatch": "नया पासवर्ड और पुष्टि मेल नहीं खाते",
-    "passwordNeedsCharTypes": "\\u0926ेव्याल \\u091cो {{count}} है च्रेके",
+    "passwordNeedsCharTypes": "[TODO] Password must contain at least {{count}} different character types",
     "passwordNeedsLowercase": "पासवर्ड में कम से कम एक छोटा अक्षर होना चाहिए",
     "passwordNeedsNumber": "पासवर्ड में कम से कम एक संख्या होनी चाहिए",
     "passwordNeedsSpecial": "पासवर्ड में कम से कम एक विशेष अक्षर होना चाहिए",
     "passwordNeedsUppercase": "पासवर्ड में कम से कम एक बड़ा अक्षर होना चाहिए",
     "passwordRequirements": "पासवर्ड कम से कम 8 अक्षर लंबा होना चाहिए",
-    "passwordTooLong": "\\u0926ेव्याल \\u092a्सा जो {{count}} है ।",
-    "passwordTooShort": "\\u0926ेव्याल \\u092a्सा जो {{count}} है",
+    "passwordTooLong": "[TODO] Password must be no more than {{count}} characters long",
+    "passwordTooShort": "[TODO] Password must be at least {{count}} characters long",
     "personalInfo": "व्यक्तिगत जानकारी",
     "profile": "प्रोफ़ाइल",
     "profileImage": "प्रोफ़ाइल छवि",
@@ -3749,7 +3749,7 @@
     "enabled": "सक्रिय",
     "loadError": "फ़ाइल वॉच सूचियों को लोड करने में असमर्थ",
     "name": "नाम",
-    "pathCount": "मार्ग",
+    "pathCount": "[TODO] Paths",
     "paths": "एक-एक करके लाइनों पर मार्ग",
     "pathsHelp": "केवल अपेक्षित मार्ग हैं। एक संबंधित मार्ग प्रत्येक होस्ट पर अलग-अलग हल करता है, इसलिए उसी सूची के लिए फ़ाइलें अलग-अलग दिखाई देंगी",
     "save": "सहेजें",
@@ -3780,10 +3780,10 @@
       "recommendations": "सिफ़ारिशें",
       "proposals": "प्रस्तावित सुधार ({{count}})",
       "packs": "नियम पैक",
-      "posture": "सुरक्षा स्थिति"
+      "posture": "[TODO] Posture"
     },
     "feed": {
-      "lens": "दृष्टिकोण",
+      "lens": "[TODO] Lens",
       "allLenses": "सभी",
       "hostsFailed": "इस नियम के लिए होस्ट लोड नहीं हो सके।",
       "noOpenHosts": "इस नियम के लिए कोई निष्कर्ष नहीं और कुछ भी बिना आकलन के नहीं।",
@@ -3798,7 +3798,7 @@
       "clean": "साफ़"
     },
     "outcome": {
-      "fires": "निष्कर्ष",
+      "fires": "[TODO] Finding",
       "doesNotFire": "साफ़",
       "notAssessable": "आकलन संभव नहीं",
       "notApplicable": "लागू नहीं"
@@ -4315,7 +4315,7 @@
     "policy": {
       "enabled": "एजेंट अपने नेटवर्क पर डिवाइस के लिए सुनते हैं",
       "hour": "हर घंटे",
-      "interval": "रिपोर्ट अंतराल",
+      "interval": "[TODO] Report",
       "lastChanged": "अंतिम बार {{who}} द्वारा {{when}} को बदला गया",
       "minutes": "हर {{count}} मिनट",
       "minutes_other": "हर {{count}} मिनट",
@@ -4353,7 +4353,7 @@
       "excluded": "ज्ञात और स्वीकार्य",
       "managed": "प्रबंधित",
       "unmanaged": "अप्रबंधित",
-      "sweeps": "स्कैन"
+      "sweeps": "[TODO] Sweeps"
     },
     "title": "नेटवर्क खोज",
     "unavailable": {
@@ -4364,10 +4364,10 @@
       "unsupportedPlatform": "इस प्लेटफ़ॉर्म पर समर्थित नहीं"
     },
     "sweep": {
-      "agent": "स्कैन करने वाला एजेंट",
+      "agent": "[TODO] Swept by",
       "disabled": "सक्रिय स्कैन बंद हैं। ऐसे डिवाइस खोजने के लिए जो कभी अपनी मौजूदगी की घोषणा नहीं करते, ऊपर की सेटिंग्स में इनकी अनुमति दें।",
       "error": "स्कैन शुरू नहीं किया जा सका।",
-      "found": "मिले",
+      "found": "[TODO] Found",
       "foundOf": "{{probed}} में से {{found}} पते",
       "intro": "नेटवर्क पर एक एजेंट हर पते पर एक छोटा पैकेट भेजता है, फिर जवाब देने वाले हर डिवाइस की रिपोर्ट करता है। इससे वे डिवाइस मिलते हैं जो कभी अपनी मौजूदगी की घोषणा नहीं करते, और यह आपके नाम के साथ दर्ज किया जाता है।",
       "none": "अभी तक किसी नेटवर्क को स्कैन नहीं किया गया है।",
@@ -4496,7 +4496,7 @@
     "scans": {
       "empty": "अभी तक कोई स्कैन नहीं चलाया गया है।",
       "legs": "क्या चला",
-      "paths": "पाथ",
+      "paths": "[TODO] Paths",
       "requested": "अनुरोधित",
       "result": "परिणाम",
       "rulesLoaded": "{{total}} में से {{loaded}} नियम लोड हुए",
@@ -4613,7 +4613,7 @@
       "all": "सभी होस्ट",
       "chosen": "टैग, इन्वेंटरी या होस्ट के अनुसार चुनें",
       "hosts": "अलग-अलग होस्ट",
-      "inventories": "होस्ट इन्वेंटरी",
+      "inventories": "[TODO] Inventories",
       "tags": "टैग्स"
     }
   }

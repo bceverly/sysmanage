@@ -236,7 +236,7 @@ msgstr "لا توجد مجموعة قواعد مستوردة بهذا الاسم
 
 #: backend/api/advisory_actions.py:68
 msgid "syspatch apply queued"
-msgstr "تطبيق التصحيحات النظامية المؤجلة"
+msgstr ""
 
 #: backend/api/advisory_actions.py:83
 msgid "Advisory management requires a SysManage Professional license."
@@ -578,7 +578,7 @@ msgstr " رفض الوصول: يتطلب دور ADD_THIRD_PARTY_REPOSITORY"
 
 #: backend/api/third_party_repos.py:278
 msgid "Repository identifier is required"
-msgstr "IsRequired"
+msgstr ""
 
 #: backend/api/third_party_repos.py:328
 msgid "Repository add request queued successfully"
@@ -1119,7 +1119,7 @@ msgstr "المضيف غير نشط"
 
 #: backend/api/host_hostname.py:82
 msgid "Host agent is not running in privileged mode"
-msgstr "لم يعمل وكيل المضيف في وضع الخصائص"
+msgstr ""
 
 #: backend/api/host_hostname.py:90
 msgid "Hostname cannot be empty"
@@ -2450,7 +2450,7 @@ msgstr ""
 
 #: backend/api/default_repositories.py:308
 msgid "Repository URL is required"
-msgstr "IsRequired"
+msgstr ""
 
 #: backend/api/default_repositories.py:310
 msgid "Repository URL must be 1000 characters or less"
@@ -2836,7 +2836,6 @@ msgid ""
 "Graylog attach requires the Pro+ observability_engine to be loaded on the "
 "server."
 msgstr ""
-"Graylog requires the Pro+ observability_engine to be loaded on the server."
 
 #: backend/api/host_graylog.py:188
 msgid "Graylog attachment command queued successfully"
@@ -4730,7 +4729,7 @@ msgstr "المضيف المقدم ليس لديه عنوان قابل للحل"
 
 #: backend/api/content_lifecycle_promotion.py:543
 msgid "Repository mirroring is required to repoint a host"
-msgstr "يجب تمكين معادلة المستودع لإعادة توجيه العقدة"
+msgstr ""
 
 #: backend/api/content_lifecycle_promotion.py:571
 msgid "Snap store proxy is required to repoint a host's snaps"
@@ -4893,7 +4892,7 @@ msgstr "يوجد بالفعل برنامج نصي بهذا الاسم"
 
 #: backend/api/scripts/routes_saved_scripts.py:197
 msgid "Failed to create saved script"
-msgstr "فشل في حذف نموذج السكريبت المحفوظ"
+msgstr ""
 
 # Tag management messages
 #: backend/api/scripts/routes_saved_scripts.py:240

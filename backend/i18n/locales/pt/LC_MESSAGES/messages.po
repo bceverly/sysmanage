@@ -2440,7 +2440,7 @@ msgstr "Chave da API do NVD limpa com sucesso"
 
 #: backend/api/cve_refresh_settings.py:487
 msgid "Failed to clear NVD API key"
-msgstr "Falha ao limpar a chave mestra"
+msgstr ""
 
 #: backend/api/firewall_status.py:157
 #, python-format

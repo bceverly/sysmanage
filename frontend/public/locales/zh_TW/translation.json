@@ -65,7 +65,7 @@
       "label": {
         "current": "最新",
         "never": "從未匯入",
-        "stale": "陳舊",
+        "stale": "[TODO] Stale",
         "very_stale": "非常陳舊"
       },
       "last_ingest_at": "上次匯入：",
@@ -343,7 +343,7 @@
       "certificate": "憑證",
       "host": "主機",
       "package": "套件",
-      "script": "指令稿",
+      "script": "[TODO] Script",
       "secret": "密鑰",
       "tag": "標籤",
       "user": "使用者",
@@ -474,12 +474,12 @@
     "less": "更少",
     "loading": "載入中...",
     "moreActions": "更多",
-    "na": "不適用",
+    "na": "[TODO] N/A",
     "no": "否",
     "noDescription": "無描述",
     "none": "無",
-    "notAvailable": "不適用",
-    "of": "共",
+    "notAvailable": "[TODO] N/A",
+    "of": "[TODO] of",
     "refresh": "重新整理",
     "requiresSelection": "請至少選取一列",
     "requiresSingleSelection": "請只選取一列",
@@ -515,7 +515,7 @@
     "nonCompliant": "不合規",
     "notScanned": "未掃描",
     "pending": "待定",
-    "profile": "設定檔",
+    "profile": "[TODO] Profile",
     "scanError": "掃描失敗",
     "scanNow": "掃描",
     "scanResult": "掃描完成：{{status}}（{{count}} 項違規）",
@@ -542,7 +542,7 @@
     "noDetail": "無需再報告詳細資訊。",
     "noDrift": "每個主機都符合其分配的配置文件。",
     "noFindings": "此主機無開放差異。",
-    "profiles": "配置文件",
+    "profiles": "[TODO] Profiles",
     "remediate": "將配置恢復至基準",
     "remediateFailed": "無法排隊修復",
     "repairFailed": "無法排隊修復",
@@ -558,15 +558,15 @@
   "configFleet": {
     "allHosts": "每個主機",
     "allHostsLabel": "這個租用下所有活躍的主機",
-    "atATime": "每批 {{count}} 台主機",
-    "atATime_one": "每批 {{count}} 台主機",
-    "atATime_other": "每批 {{count}} 台主機",
+    "atATime": "[TODO] {{count}} hosts at once",
+    "atATime_one": "[TODO] {{count}} host at once",
+    "atATime_other": "[TODO] {{count}} hosts at once",
     "cancel": "取消",
     "cancelFailed": "無法取消這個工作",
     "cancelledByOperator": "由操作員取消",
     "checkMode": "試執行",
     "checkModeLabel": "試執行 -- 回報將會變更的內容，但不做任何變更",
-    "concurrency": "每批主機數",
+    "concurrency": "[TODO] Hosts at a time",
     "concurrencyClamped": "並發量被調整到 {{value}}，這個伺服器允許的最高值。",
     "concurrencyHelp": "一次可以運行的主機數量。伺服器會限制這個數量。",
     "confirmLaunchDry": "這會對 {{inventory}} 進行乾跑 {{profile}}。 不會有任何改變。",
@@ -582,7 +582,7 @@
     "hostsIn": "{{name}} 的各主機結果",
     "intro": "一次性在多個主機上執行一個配置資料夾。工作會以波浪方式處理其清單，而不是全部一次，並記錄每個主機上的發生情況。",
     "inventoriesFailed": "無法載入主機清單",
-    "inventory": "主機清單",
+    "inventory": "[TODO] Inventory",
     "inventoryDeleteFailed": "無法刪除主機清單",
     "inventorySaveFailed": "無法儲存主機清單",
     "jobsFailed": "無法載入工作",
@@ -603,18 +603,18 @@
     "previewEmpty": "這個清單目前沒有選擇任何活躍的主機。對它啟動的任務不會做任何事。",
     "previewFailed": "無法解析這個主機清單",
     "previewTitle": "{{name}} 選取的主機",
-    "profile": "設定檔",
+    "profile": "[TODO] Profile",
     "progress": "{{total}} 台中已完成 {{done}} 台 -- 成功 {{ok}} 台、失敗 {{failed}} 台、略過 {{skipped}} 台",
     "schedule": "計劃（cron）",
     "scheduleHelp": "留空以手動啟動",
-    "tabInventories": "主機清單",
+    "tabInventories": "[TODO] Inventories",
     "tabJobs": "工作",
     "tabTemplates": "範本",
     "targetsFailed": "無法載入主機",
     "templateDeleteFailed": "無法刪除模板",
     "templateSaveFailed": "無法儲存工作範本",
     "templatesFailed": "無法載入工作模板",
-    "title": "主機群組態工作"
+    "title": "[TODO] Fleet Configuration Jobs"
   },
   "configManagement": {
     "applyAction": "應用",
@@ -628,7 +628,7 @@
     "applyLiveWarning": "這將實際更改這台主機。",
     "applyNoStored": "無 -- 請下方貼上",
     "applyPlaybook": "Playbook 內容 (YAML)",
-    "applyProfile": "套用資料表",
+    "applyProfile": "[TODO] Apply profile",
     "applyProfileName": "資料表名稱 (可選)",
     "applyResources": "DSC 資源 (JSON)",
     "applyStoredChosen": "此將執行如實儲存的配置。執行記錄會與它相關聯。",
@@ -654,10 +654,10 @@
     "runNoChanges": "無變更",
     "runNoProfile": "沒有配置檔",
     "runOutcome": "結果",
-    "runProfile": "資料庫",
+    "runProfile": "[TODO] Profile",
     "runTaskCounts": "{{ok}} 正常, {{changed}} 已更改, {{failed}} 失敗",
     "runTasks": "任務",
-    "runWhen": "當",
+    "runWhen": "[TODO] When",
     "runsEmpty": "此主機尚未應用任何配置資料庫。",
     "runsError": "無法載入配置執行歷史記錄",
     "runsTitle": "配置執行歷史記錄"
@@ -795,7 +795,7 @@
     "loadError": "載入發行版時發生錯誤",
     "minAgentVersion": "最低代理版本",
     "notes": "備註",
-    "title": "子主機發行版",
+    "title": "[TODO] Child Host Distributions",
     "version": "版本",
     "versionHelp": "例如：24.04"
   },
@@ -829,7 +829,7 @@
   "federationDispatch": {
     "cancel": "取消",
     "commandType": "命令",
-    "dispatch": "發送",
+    "dispatch": "[TODO] Dispatch",
     "dispatching": "正在發送……",
     "errors": {
       "failed": "無法發送命令。",
@@ -1001,13 +1001,13 @@
     "portRange": "連接埠範圍",
     "protocol": "通訊協定",
     "roleName": "角色名稱",
-    "roleNamePlaceholder": "輸入角色名稱",
+    "roleNamePlaceholder": "[TODO] Role Name Placeholder",
     "roleNameRequired": "需要角色名稱",
     "selectPort": "選擇連接埠",
     "startPort": "起始連接埠",
     "subtitle": "副標題",
     "tcp": "TCP",
-    "title": "標題",
+    "title": "[TODO] Firewall Roles",
     "udp": "UDP",
     "updateSuccess": "更新成功"
   },
@@ -1308,7 +1308,7 @@
     "childHostHostnameHelp": "請輸入主機名（例如，\"myhost\"）或完全限定域名（例如，\"myhost.example.com\"）",
     "childHostHostnameLabel": "主機名稱",
     "childHostHostnameRequired": "請輸入主機名稱",
-    "childHostImageLabel": "映像檔",
+    "childHostImageLabel": "[TODO] Image",
     "childHostImageRequired": "請選擇一個映像",
     "childHostName": "名稱",
     "childHostNeedsReboot": "需要啟用WSL。首先需要重新啟動。",
@@ -1361,7 +1361,7 @@
     "client": "用戶端",
     "collectCertificates": "收集",
     "collectRoles": "收集",
-    "collectedAt": "收集時間",
+    "collectedAt": "[TODO] Collected",
     "collectionId": "收集 ID",
     "collectionStatus": "狀態",
     "completedAt": "完成時間",
@@ -1374,11 +1374,11 @@
     "confirmUninstallMessage": "您確定要解除安裝此套件嗎？此操作將從系統中移除該套件。",
     "confirmUninstallPackage": "解除安裝套件",
     "contractName": "合約名稱",
-    "cpuCores": "核心數",
+    "cpuCores": "[TODO] Cores",
     "cpuFrequency": "頻率",
     "cpuInfo": "處理器",
     "cpuModel": "處理器型號",
-    "cpuThreads": "執行緒數",
+    "cpuThreads": "[TODO] Threads",
     "cpuVendor": "處理器製造商",
     "createBhyveVmTitle": "建立 bhyve 虛擬機器",
     "createChildHostButton": "建立",
@@ -1416,7 +1416,7 @@
     "editHostname": "編輯主機名稱",
     "editServices": "編輯服務",
     "enabled": "已啟用",
-    "entitled": "已授權",
+    "entitled": "[TODO] Entitled",
     "errorMessage": "錯誤訊息",
     "errorUpdatingServices": "更新服務失敗",
     "expired": "已過期",
@@ -1527,7 +1527,7 @@
       "rollbackAvailable": "還原可用",
       "rollbackError": "還原影像失敗",
       "rollbackSuccess": "影像還原請求（主機將重新啟動）",
-      "stage": "排程",
+      "stage": "[TODO] Stage",
       "stageError": "排程影像失敗",
       "stageSuccess": "排程影像請求",
       "stagedImage": "已排程的影像",
@@ -1717,8 +1717,8 @@
     "ubuntuProAttachSuccess": "Ubuntu Pro 已成功連結",
     "ubuntuProAttachTitle": "連結 Ubuntu Pro",
     "ubuntuProAttaching": "正在連結...",
-    "ubuntuProDetach": "中斷連結",
-    "ubuntuProDetachConfirm": "中斷連結",
+    "ubuntuProDetach": "[TODO] Detach",
+    "ubuntuProDetachConfirm": "[TODO] Detach",
     "ubuntuProDetachConfirmMessage": "您確定要從此系統中斷連結 Ubuntu Pro 嗎？這將移除此主機的所有 Ubuntu Pro 權益和服務。",
     "ubuntuProDetachConfirmTitle": "確認中斷連結 Ubuntu Pro",
     "ubuntuProDetachError": "中斷連結 Ubuntu Pro 失敗",
@@ -1809,7 +1809,7 @@
     "childHostFilter": "子主機篩選器",
     "childHostOf": "{{parent}}的子主機",
     "childHostsOnly": "僅子主機",
-    "childrenOnly": "僅子級",
+    "childrenOnly": "[TODO] Children",
     "confirmReboot": "確認系統重新啟動",
     "confirmRebootMessage": "您確定要重新啟動 {{hostname}} 嗎？系統將有幾分鐘不可用。",
     "confirmShutdown": "確認系統關機",
@@ -1820,9 +1820,9 @@
     "deployOpenTelemetry": "部署 OpenTelemetry",
     "diagnosticsRequestFailed": "無法請求診斷收集。請稍後再試。",
     "diagnosticsRequested": "已為主機 {{hostId}} 請求診斷收集。請在主機詳細頁面查看結果。",
-    "down": "停機",
+    "down": "[TODO] Down",
     "filterByTags": "依標籤篩選",
-    "fqdn": "完全限定域名",
+    "fqdn": "[TODO] FQDN",
     "getDiagnostics": "取得診斷資訊",
     "healthGrade": "健康",
     "healthScore": "健康評分: {{score}}",
@@ -1845,7 +1845,7 @@
     "osUpgradeAvailable": "此主機可進行作業系統升級",
     "packagesRequestFailed": "請求套件收集失敗",
     "packagesRequested": "已成功請求套件收集",
-    "parentsOnly": "僅父級",
+    "parentsOnly": "[TODO] Parents",
     "platform": "平台",
     "privileged": "特權",
     "reboot": "重新啟動",
@@ -1897,7 +1897,7 @@
     "systemUpdatesOnly": "{{count}} 系統更新",
     "tags": "標籤",
     "unknown": "未知",
-    "up": "上線",
+    "up": "[TODO] Up",
     "updateAgent": "更新代理",
     "updateAgentFailed": "請求代理更新失敗",
     "updateAgentRequested": "代理更新請求成功",
@@ -2166,7 +2166,7 @@
     "state": {
       "blocked": "被阻塞",
       "in_window": "在窗口內",
-      "override": "覆蓋激活",
+      "override": "[TODO] Override active",
       "unrestricted": "無限制"
     },
     "timezone": "時區",
@@ -2241,7 +2241,7 @@
         "snapshot": "snap",
         "sync": "同步"
       },
-      "ok": "成功"
+      "ok": "[TODO] ok"
     },
     "col": {
       "actions": "操作",
@@ -2279,7 +2279,7 @@
       "name_helper": "小寫字母、數字、連字符和下劃線。空格和點變為連字符。",
       "retention": "保留（天）",
       "signingKey": "簽署金鑰 URL（選用）",
-      "snapshotKeep": "保留的快照數",
+      "snapshotKeep": "[TODO] Snapshots to keep",
       "upstream": "上游 URL",
       "upstreamHelp": "從上面的版本自動填寫;僅當您有區域特定的鏡像可指向時才覆寫。",
       "version": "版本"
@@ -2307,7 +2307,7 @@
       "untrack": "停止追蹤此影像",
       "untrackError": "無法取消追蹤該影像。"
     },
-    "listTitle": "倉庫鏡像",
+    "listTitle": "[TODO] Mirror Repositories",
     "loadError": "無法載入倉庫鏡像。",
     "noEligibleHosts": "沒有已註冊的 {{family}} 主機可用 -- 請註冊一個並重新整理。",
     "platform": {
@@ -2367,7 +2367,7 @@
         "files": "檔案",
         "id": "快照",
         "size": "大小",
-        "taken": "建立於"
+        "taken": "[TODO] Taken at"
       },
       "empty": "目前還沒有快照。點擊相機圖標以拍攝一個。",
       "loadError": "無法加載快照。",
@@ -2386,7 +2386,7 @@
     "cat": {
       "admin": "管理",
       "automation": "自動化",
-      "fleet": "主機群",
+      "fleet": "[TODO] Fleet",
       "insights": "洞察",
       "patching": "補丁更新",
       "security": "安全性"
@@ -2394,7 +2394,7 @@
     "closeMenu": "關閉選單",
     "compliance": "合規性",
     "configDrift": "配置漂移",
-    "configJobs": "主機群作業",
+    "configJobs": "[TODO] Fleet Jobs",
     "configProfiles": "配置配置文件",
     "customMetrics": "自定義指標",
     "dashboard": "儀表板",
@@ -2416,7 +2416,7 @@
       "engineMissing": "未載入所需的Pro+引擎；請檢查授權。",
       "repository": "隔離存儲庫"
     },
-    "scripts": "指令稿",
+    "scripts": "[TODO] Scripts",
     "scrollLeft": "向左捲動",
     "scrollRight": "向右捲動",
     "search": "搜尋 (Ctrl+K)",
@@ -2550,10 +2550,10 @@
     "saveError": "儲存合規設定檔失敗",
     "subtitle": "針對主機清單評估的必需和阻擋套件定義",
     "tabLabel": "合規配置文件",
-    "title": "合規設定檔",
+    "title": "[TODO] Compliance Profiles",
     "updated": "合規設定檔已儲存",
     "version": "版本",
-    "versionOp": "運算子",
+    "versionOp": "[TODO] Op",
     "versionOpAny": "(任意)"
   },
   "policies": {
@@ -2636,7 +2636,7 @@
     "killRequested": "終止請求。列表將很快更新。",
     "killTitle": "終止進程",
     "loadError": "無法加載進程",
-    "memory": "內存 %%",
+    "memory": "[TODO] Mem %",
     "name": "名稱",
     "noRows": "尚無進程數據",
     "pid": "進程ID",
@@ -2740,7 +2740,7 @@
     "confirmRemoveLogo": "移除目前標誌？",
     "constraintsHelp": "允許的格式: PNG, JPEG, SVG, WEBP。最大大小: 1 MB。",
     "deleteError": "移除標誌失敗",
-    "headerText": "頁首文字",
+    "headerText": "[TODO] Header Text",
     "headerTextHelp": "報告標題中與徽標並排顯示（例如 \"Confidential -- Internal Use\"）。",
     "loadError": "載入報告品牌失敗",
     "logoAlt": "報告標誌",
@@ -2945,7 +2945,7 @@
     "save": "儲存",
     "saveError": "儲存錯誤",
     "saveSuccess": "儲存成功",
-    "scriptContent": "指令稿內容",
+    "scriptContent": "[TODO] Script Content",
     "scriptContentRequired": "需要指令稿內容",
     "scriptExecutions": "指令稿執行",
     "scriptLibrary": "指令稿庫",
@@ -2977,7 +2977,7 @@
     },
     "stderrOutput": "Stderr 輸出",
     "stdoutOutput": "Stdout 輸出",
-    "title": "指令稿",
+    "title": "[TODO] Scripts",
     "update": "更新",
     "updateError": "更新錯誤",
     "updateSuccess": "更新成功",
@@ -3032,7 +3032,7 @@
     "filenamePlaceholder": "例如：id_rsa.pub, server.crt, database.conf",
     "keyType": "金鑰類型",
     "key_type": {
-      "ca": "憑證頒發機構",
+      "ca": "[TODO] CA",
       "private": "私有",
       "public": "公開"
     },
@@ -3180,7 +3180,7 @@
       "title": "隔離收集器（線上側）"
     },
     "currentTag": "(目前)",
-    "heading": "Server Role",
+    "heading": "[TODO] Air-Gap Role",
     "intro": "選擇此 SysManage 伺服器在隔離部署中扮演的角色。大多數伺服器應保持在標準模式。角色在下次伺服器重啟後生效。",
     "loadError": "無法加載當前伺服器角色。",
     "menuTitle": "伺服器角色",
@@ -3214,7 +3214,7 @@
   "sites": {
     "actions": {
       "remove": "移除",
-      "resume": "恢復",
+      "resume": "[TODO] Resume",
       "suspend": "暫停"
     },
     "addSite": "註冊網站",
@@ -3267,7 +3267,7 @@
       "syncNever": "從未同步",
       "syncOverdue": "逾期",
       "syncPoints": "{{n}} 同步事件",
-      "syncStale": "過期",
+      "syncStale": "[TODO] Stale",
       "syncTimeline": "同步時間線",
       "syncTimelineEmpty": "尚無同步事件記錄。",
       "url": "URL",
@@ -3358,7 +3358,7 @@
       "disabledMessage": "OpenTelemetry 偵測功能目前已停用。移除 OTEL_ENABLED=false 或設定 OTEL_ENABLED=true 以啟用分散式追蹤和指標收集。",
       "enableHint": "OpenTelemetry 預設為啟用。若要停用，請設定 OTEL_ENABLED=false 環境變數並重新啟動伺服器。",
       "fetchError": "無法獲取OpenTelemetry狀態",
-      "instrumentation": "偵測功能",
+      "instrumentation": "[TODO] Instrumentation",
       "metricsCount": "指標",
       "prometheusPort": "Prometheus 連接埠",
       "statistics": "統計資料",
@@ -3431,7 +3431,7 @@
     "pkgsrcNameHelp": "例如:wip 或 custom-packages",
     "pkgsrcUrl": "儲存庫 URL",
     "pkgsrcUrlHelp": "例如:https://github.com/NetBSD/pkgsrc-wip",
-    "ppaHelp": "PPA 說明",
+    "ppaHelp": "[TODO] Ppa Help",
     "ppaIdentifier": "PPA 識別碼",
     "ppaName": "PPA名稱",
     "ppaNameHelp": "例如，ppa",
@@ -3624,7 +3624,7 @@
     "lastName": "姓氏",
     "loadError": "載入使用者詳情失敗",
     "lockUser": "鎖定使用者",
-    "lockedAt": "鎖定時間",
+    "lockedAt": "[TODO] Locked At",
     "notFound": "找不到使用者",
     "passwordResetError": "發送密碼重設電子郵件失敗。請重試。",
     "passwordResetSuccess": "密碼重設電子郵件已發送至{{email}}",
@@ -3704,8 +3704,8 @@
     "passwordTooShort": "密碼必須至少為 {{count}} 個字符長",
     "personalInfo": "個人資訊",
     "profile": "個人檔案",
-    "profileImage": "設定檔影像",
-    "profileTabs": "配置選項卡",
+    "profileImage": "[TODO] Profile Image",
+    "profileTabs": "[TODO] profile tabs",
     "save": "儲存變更",
     "saveError": "儲存個人檔案變更失敗",
     "saveSuccess": "個人檔案更新成功",
@@ -3780,10 +3780,10 @@
       "recommendations": "建議",
       "proposals": "建議的修正 ({{count}})",
       "packs": "規則包",
-      "posture": "安全態勢"
+      "posture": "[TODO] Posture"
     },
     "feed": {
-      "lens": "檢視角度",
+      "lens": "[TODO] Lens",
       "allLenses": "全部",
       "hostsFailed": "無法載入此規則的主機。",
       "noOpenHosts": "此規則沒有發現，也沒有未評估的主機。",
@@ -3795,18 +3795,18 @@
       "findings": "發現",
       "notAssessable": "無法評估",
       "notApplicable": "不適用",
-      "clean": "正常"
+      "clean": "[TODO] Clean"
     },
     "outcome": {
       "fires": "發現問題",
-      "doesNotFire": "正常",
+      "doesNotFire": "[TODO] Clean",
       "notAssessable": "無法評估",
       "notApplicable": "不適用"
     },
     "level": {
       "critical": "嚴重",
       "high": "高",
-      "medium": "中",
+      "medium": "[TODO] Medium",
       "low": "低",
       "none": "無發現",
       "unknown": "未評估"
@@ -3895,7 +3895,7 @@
       "fleetIncomplete_other": "{{count}} 台主機僅部分完成評估；其評分為最低值。",
       "hostUnknown": "此主機無法完成完整評估，因此沒有評級。請查看下方的無法評估清單，了解缺少哪些內容。",
       "hostIncomplete": "此主機上有部分規則無法評估；此評分為最低值。",
-      "fleetTitle": "主機群風險",
+      "fleetTitle": "[TODO] Fleet risk",
       "hostTitle": "主機風險"
     },
     "packs": {
@@ -3915,7 +3915,7 @@
       "notAssessable": "無法評估",
       "proposals": "建議的修正",
       "notApplicable": "不適用",
-      "clean": "正常"
+      "clean": "[TODO] Clean"
     },
     "curated": {
       "pmAirgapRole": "伺服器已依您描述的氣隙部署進行設定",
@@ -4071,7 +4071,7 @@
     "stalePass": "部分項目上次是依據較早的威脅模型評估。這些項目將在下次評估時更新。",
     "state": {
       "notAssessable": "無法評估",
-      "open": "未解決",
+      "open": "[TODO] Open",
       "satisfied": "已符合",
       "waived": "已豁免"
     },
@@ -4232,7 +4232,7 @@
     },
     "version": "版本 {{version}}",
     "wizard": {
-      "back": "上一步",
+      "back": "[TODO] Back",
       "chooseAll": "選擇所有適用項目。",
       "next": "下一步",
       "save": "儲存威脅模型",
@@ -4315,7 +4315,7 @@
     "policy": {
       "enabled": "代理在其網路上監聽裝置",
       "hour": "每小時",
-      "interval": "回報頻率",
+      "interval": "[TODO] Report",
       "lastChanged": "最後由 {{who}} 於 {{when}} 變更",
       "minutes": "每 {{count}} 分鐘",
       "minutes_other": "每 {{count}} 分鐘",
@@ -4338,13 +4338,13 @@
       "address": "位址",
       "device": "裝置",
       "empty": "沒有符合的裝置。",
-      "evidence": "裝置自述資訊",
+      "evidence": "[TODO] What it says it is",
       "ipOnly": "未發現 MAC",
       "lastSeen": "最後發現時間",
       "localMac": "位址可能變更",
       "localMacHelp": "本機管理的位址：手機與平板電腦會變更此位址，因此此裝置可能以新位址再次出現。",
       "more": "顯示 {{total}} 個中的 {{shown}} 個。請使用上方的篩選條件縮小清單範圍。",
-      "seenBy": "發現者",
+      "seenBy": "[TODO] Seen by",
       "selectAll": "全選",
       "status": "狀態",
       "maybe": "可能是：{{type}}"
@@ -4364,7 +4364,7 @@
       "unsupportedPlatform": "此平台不支援"
     },
     "sweep": {
-      "agent": "執行掃描的代理",
+      "agent": "[TODO] Swept by",
       "disabled": "主動掃描已關閉。請在上方設定中允許，以找出從不主動宣告自身的裝置。",
       "error": "無法啟動掃描。",
       "found": "已找到",
@@ -4433,7 +4433,7 @@
       "feed_other": "規則來源：{{title}} v{{version}}，{{count}} 條規則"
     },
     "decide": {
-      "confirm": "記錄處置",
+      "confirm": "[TODO] Record decision",
       "decision": "處置",
       "reason": "原因",
       "title": "處置 {{count}} 筆偵測結果",
@@ -4495,7 +4495,7 @@
     "scanHosts": "掃描主機",
     "scans": {
       "empty": "尚未執行任何掃描。",
-      "legs": "執行內容",
+      "legs": "[TODO] What ran",
       "paths": "路徑",
       "requested": "要求時間",
       "result": "結果",
@@ -4507,11 +4507,11 @@
       "high": "高",
       "info": "資訊",
       "low": "低",
-      "medium": "中"
+      "medium": "[TODO] Medium"
     },
     "status": {
       "falsePositive": "誤判",
-      "open": "未處理",
+      "open": "[TODO] Open",
       "quarantined": "已隔離",
       "resolved": "已解決",
       "restored": "已還原"
@@ -4519,7 +4519,7 @@
     "subtitle": "由各主機本身的 ClamAV 執行掃描，使用 ClamAV 病毒碼與 SysManage 規則來源。",
     "tabs": {
       "decided": "已處置",
-      "open": "未處理的偵測結果",
+      "open": "[TODO] Open findings",
       "scans": "掃描",
       "rulesets": "規則集"
     },
@@ -4598,7 +4598,7 @@
     },
     "jobs": {
       "atOnce": "最多同時 {{count}} 台",
-      "by": "發起人",
+      "by": "[TODO] By",
       "done": "已完成 {{done}}/{{total}}",
       "hostCount": "{{count}} 台主機",
       "inventoryCount": "{{count}} 個主機清單",
@@ -4613,7 +4613,7 @@
       "all": "所有主機",
       "chosen": "依標籤、主機清單或主機選擇",
       "hosts": "個別主機",
-      "inventories": "主機清單",
+      "inventories": "[TODO] Inventories",
       "tags": "標籤"
     }
   }

@@ -25,7 +25,7 @@
   },
   "agentMirrors": {
     "add": "Adicionar",
-    "colActions": "Aóes",
+    "colActions": "[TODO] Actions",
     "colChannel": "Canal",
     "colUrl": "URL do Espelho",
     "deleteFailed": "Não foi possível remover o espelho.",
@@ -89,7 +89,7 @@
       "table": {
         "distro": "Distribuição",
         "empty": "Nenhum repositório ingerido ainda.",
-        "freshness": "Atualização",
+        "freshness": "[TODO] Freshness",
         "freshnessDays": "{{days}} dia(s)",
         "freshnessNever": "Nunca ingerido",
         "lastIngest": "Última ingestão bem-sucedida",
@@ -99,7 +99,7 @@
         "signerFingerprint": "Impressão digital do assinante",
         "version": "Versão"
       },
-      "title": "Repositórios de Ar-Azul"
+      "title": "[TODO] Air-Gap Repositories"
     }
   },
   "airgapBundles": {
@@ -139,7 +139,7 @@
     "status": "Estado",
     "subtitle": "Gere um ISO multi-OS contendo o servidor ou agente SysManage + todas as dependências por plataforma, pronto para montar em um host isolado da rede.",
     "tabLabel": "Pacotes Air-Gap",
-    "title": "Pacotes de Instalação para Isolamento",
+    "title": "[TODO] Air-Gap Install Bundles",
     "version": "Versão"
   },
   "airgapCollections": {
@@ -179,7 +179,7 @@
       "mirrorsRequired": "Pelo menos um alvo de espelho é obrigatório.",
       "mirrorsTitle": "Espelhos",
       "noMirrors": "Não há espelhos habilitados configurados. Vá para Configurações → Espelhamento de Repositório para adicionar um e, em seguida, tente novamente.",
-      "submit": "Colocar na fila",
+      "submit": "[TODO] Queue Run",
       "title": "Nova Execução de Coleção"
     },
     "discPicker": {
@@ -213,7 +213,7 @@
     "title": "Importar Disco"
   },
   "airgapImport": {
-    "device": "Unidade",
+    "device": "[TODO] Drive",
     "import": "Importar ISO",
     "importError": "Não foi possível iniciar a importação.",
     "noDevice": "Nenhuma unidade de importação selecionada. Escolha uma em Configurações → Papel do Servidor.",
@@ -223,7 +223,7 @@
     "run": {
       "complete": "Completo",
       "copying": "Copiando pacotes",
-      "failed": "Falhou",
+      "failed": "[TODO] Failed",
       "queued": "Na fila",
       "verified": "Verificado",
       "verifying": "Verificando assinatura"
@@ -413,7 +413,7 @@
     "missingTitle": "No host de referência, não neste host",
     "name": "Nome",
     "noOtherHosts": "Não há outro host para comparar ainda.",
-    "reference": "Host de referência",
+    "reference": "[TODO] Reference",
     "referenceHost": "Host de referência",
     "summary": "{{count}} diferença(s) de {{reference}}.",
     "thisHost": "Este host",
@@ -527,7 +527,7 @@
   "configDrift": {
     "actions": "Ações",
     "confirmAction": "Corrigir",
-    "confirmBody": "Este executa {{profile}} em {{host}} de verdade e altera o host para corresponder. É mantido até o próximo intervalo de manutenção se um for aplicado.",
+    "confirmBody": "[TODO] This runs {{profile}} on {{host}} for real and changes the host to match it. It is held until the next maintenance window if one applies.",
     "confirmTitle": "Reaplicar este perfil?",
     "days": "{{count}} dias",
     "days_one": "{{count}} dia",
@@ -582,7 +582,7 @@
     "hostsIn": "Resultados por host de {{name}}",
     "intro": "Executa um perfil de configuração em muitos hosts ao mesmo tempo. Um trabalho percorre seu inventário em ondas, em vez de tudo de uma vez, e registra o que aconteceu em cada host.",
     "inventoriesFailed": "Não foi possível carregar os inventários de hosts",
-    "inventory": "Inventário de hosts",
+    "inventory": "[TODO] Inventory",
     "inventoryDeleteFailed": "Não foi possível excluir o inventário de hosts",
     "inventorySaveFailed": "Não foi possível salvar o inventário de hosts",
     "jobsFailed": "Não foi possível carregar os trabalhos",
@@ -607,7 +607,7 @@
     "progress": "{{done}} de {{total}} -- {{ok}} bem-sucedido, {{failed}} falhou, {{skipped}} pulado",
     "schedule": "Programação (cron)",
     "scheduleHelp": "Deixe em branco para lançar manualmente apenas.",
-    "tabInventories": "Inventários de hosts",
+    "tabInventories": "[TODO] Inventories",
     "tabJobs": "Tarefas",
     "tabTemplates": "Modelos",
     "targetsFailed": "Não foi possível carregar os hosts",
@@ -649,7 +649,7 @@
     "prereqInstallError": "Falha ao solicitar a instalação do requisito de gestão de configuração",
     "prereqInstallRequested": "Solicitação de instalação. Este cartão é atualizado uma vez que o host informa de volta.",
     "runChanged": "Alterado",
-    "runCheckMode": "Execução em Modo Teste",
+    "runCheckMode": "[TODO] Dry run",
     "runFailed": "Falha",
     "runNoChanges": "Sem Alterações",
     "runNoProfile": "Sem perfil",
@@ -750,7 +750,7 @@
     "security": "Segurança",
     "settings": {
       "checkAll": "Selecionar Todos",
-      "checkNone": "Desselecionar Todos",
+      "checkNone": "[TODO] Check None",
       "description": "Selecione quais cartões exibir no painel",
       "loadError": "Falha ao carregar preferências",
       "saveError": "Falha ao salvar preferências",
@@ -829,7 +829,7 @@
   "federationDispatch": {
     "cancel": "Cancelar",
     "commandType": "Comando",
-    "dispatch": "Enviar",
+    "dispatch": "[TODO] Dispatch",
     "dispatching": "Enviando...",
     "errors": {
       "failed": "Falha ao enviar comando.",
@@ -871,7 +871,7 @@
       "fqdn": "Hospedeiro",
       "ipv4": "IPv4",
       "lastSeen": "Última visualização",
-      "os": "SO",
+      "os": "[TODO] OS",
       "platform": "Plataforma",
       "status": "Estado"
     },
@@ -891,7 +891,7 @@
     "filters": {
       "apply": "Aplicar",
       "clear": "Limpar",
-      "osFamily": "Família do SO",
+      "osFamily": "[TODO] OS family",
       "search": "Pesquisar (nome / IP)",
       "status": "Estado"
     },
@@ -1001,13 +1001,13 @@
     "portRange": "Intervalo de portas",
     "protocol": "Protocolo",
     "roleName": "Nome da função",
-    "roleNamePlaceholder": "Insira o nome da função",
+    "roleNamePlaceholder": "[TODO] Role Name Placeholder",
     "roleNameRequired": "Nome da função obrigatório",
     "selectPort": "Selecionar porta",
     "startPort": "Porta inicial",
     "subtitle": "Subtítulo",
     "tcp": "TCP",
-    "title": "Título",
+    "title": "[TODO] Firewall Roles",
     "udp": "Udp",
     "updateSuccess": "Atualizado com sucesso"
   },
@@ -1200,7 +1200,7 @@
       "cloud": "Nuvem (padrão upstream)",
       "col": {
         "mirror": "Espelho padrão",
-        "osFamily": "Família do SO",
+        "osFamily": "[TODO] OS Family",
         "platform": "Plataforma",
         "version": "Versão"
       },
@@ -1374,7 +1374,7 @@
     "confirmUninstallMessage": "Tem certeza de que deseja desinstalar este pacote? Esta ação removerá o pacote do sistema.",
     "confirmUninstallPackage": "Desinstalar Pacote",
     "contractName": "Nome do Contrato",
-    "cpuCores": "Núcleos",
+    "cpuCores": "[TODO] Cores",
     "cpuFrequency": "Frequência",
     "cpuInfo": "CPU",
     "cpuModel": "Modelo da CPU",
@@ -1416,7 +1416,7 @@
     "editHostname": "Editar Nome do Host",
     "editServices": "Editar serviços",
     "enabled": "Habilitado",
-    "entitled": "Autorizado",
+    "entitled": "[TODO] Entitled",
     "errorMessage": "Mensagem de erro",
     "errorUpdatingServices": "Erro atualizando serviços",
     "expired": "Expirado",
@@ -1523,11 +1523,11 @@
       "imageRef": "Referência da Imagem",
       "noStagedImage": "Nenhuma imagem em estágio",
       "pendingReboot": "Pendente -- reinicie para aplicar",
-      "rollback": "Rolar de volta",
+      "rollback": "[TODO] Rollback",
       "rollbackAvailable": "Rollback Disponível",
       "rollbackError": "Falha ao desfazer a imagem",
       "rollbackSuccess": "Rollback da imagem solicitado (o host será reiniciado)",
-      "stage": "Estagiar",
+      "stage": "[TODO] Stage",
       "stageError": "Falha ao preparar a imagem",
       "stageSuccess": "Preparar a imagem solicitado",
       "stagedImage": "Imagem Estagiada",
@@ -1809,7 +1809,7 @@
     "childHostFilter": "Filtro de host filho",
     "childHostOf": "Host filho de {{parent}}",
     "childHostsOnly": "Apenas hosts filhos",
-    "childrenOnly": "Apenas filhos",
+    "childrenOnly": "[TODO] Children",
     "confirmReboot": "Confirmar Reinicialização do Sistema",
     "confirmRebootMessage": "Tem certeza de que deseja reiniciar {{hostname}}? O sistema ficará indisponível por alguns minutos.",
     "confirmShutdown": "Confirmar Desligamento do Sistema",
@@ -1820,11 +1820,11 @@
     "deployOpenTelemetry": "Implantar OpenTelemetry",
     "diagnosticsRequestFailed": "Falha ao solicitar coleta de diagnósticos. Por favor, tente novamente.",
     "diagnosticsRequested": "Coleta de diagnósticos solicitada para host \\{{hostId}}\\. Verifique a página de detalhes do host para visualizar os resultados quando estiverem disponíveis.",
-    "down": "Inativo",
+    "down": "[TODO] Down",
     "filterByTags": "Filtrar por tags",
     "fqdn": "FQDN",
     "getDiagnostics": "Obter Diagnósticos",
-    "healthGrade": "Saude",
+    "healthGrade": "[TODO] Health",
     "healthScore": "Pontuacao de Saude: {{score}}",
     "hideChildHosts": "Ocultar hosts filhos",
     "hoursAgo": "{{hours}}h atrás",
@@ -1897,7 +1897,7 @@
     "systemUpdatesOnly": "{{count}} atualizações do sistema",
     "tags": "Marcadores",
     "unknown": "Desconhecido",
-    "up": "Ativo",
+    "up": "[TODO] Up",
     "updateAgent": "Atualizar agente",
     "updateAgentFailed": "Falha ao solicitar atualização do agente",
     "updateAgentRequested": "Atualização do agente solicitada com sucesso",
@@ -2022,7 +2022,7 @@
     "created": "Invitção enviada para {{email}}",
     "email": "E-mail",
     "existingHeading": "Invitações",
-    "expires": "Vence em",
+    "expires": "[TODO] Expires",
     "firstName": "Primeiro Nome",
     "inviteHeading": "Convidar um novo usuário",
     "isAdmin": "Conceder acesso de administrador",
@@ -2110,17 +2110,17 @@
   "maintenanceWindows": {
     "addWindow": "Agendar Manutenção",
     "confirmDelete": "Tem certeza de que deseja excluir esta janela de manutenÇão?",
-    "confirmOverride": "Contorno",
+    "confirmOverride": "[TODO] Override",
     "created": "Janela de manutenÇão criada",
     "currentWindow": "Janela atual",
     "day": {
-      "fri": "Sex",
-      "mon": "Seg",
-      "sat": "Sébado",
+      "fri": "[TODO] Fri",
+      "mon": "[TODO] Mon",
+      "sat": "[TODO] Sat",
       "sun": "Domingo",
       "thu": "Quinta-feira",
       "tue": "Terça-feira",
-      "wed": "Sexta-feira"
+      "wed": "[TODO] Wed"
     },
     "daysOfWeek": "Dias da semana",
     "deleteError": "Falha ao excluir janela de manutenÇão",
@@ -2166,7 +2166,7 @@
     "state": {
       "blocked": "Bloqueado",
       "in_window": "Na janela",
-      "override": "Contorno ativo",
+      "override": "[TODO] Override active",
       "unrestricted": "Ilimitado"
     },
     "timezone": "Fuso Horário",
@@ -2290,7 +2290,7 @@
         "tracked": "Imagens rastreadas"
       },
       "col": {
-        "actions": "Aóes",
+        "actions": "[TODO] Actions",
         "digest": "Digesto",
         "image": "Imagem",
         "status": "Capturar",
@@ -2347,7 +2347,7 @@
       },
       "channel": "Canal",
       "col": {
-        "actions": "Aóes",
+        "actions": "[TODO] Actions",
         "channel": "Canal",
         "name": "Instantânea",
         "status": "Capturar"
@@ -2363,7 +2363,7 @@
     },
     "snapshots": {
       "col": {
-        "actions": "Años",
+        "actions": "[TODO] Actions",
         "files": "Arquivos",
         "id": "Instantâneo",
         "size": "Tamanho",
@@ -2381,14 +2381,14 @@
   "nav": {
     "advisories": "Avisos",
     "airgapCollections": "Coletas em Isolamento",
-    "airgapRepositories": "Repositórios de Ar-Azul",
+    "airgapRepositories": "[TODO] Air-Gap Repos",
     "alerts": "Alertas",
     "cat": {
       "admin": "Administração",
       "automation": "Automação",
       "fleet": "Frota",
       "insights": "Análises",
-      "patching": "Atualização",
+      "patching": "[TODO] Patching",
       "security": "Segurança"
     },
     "closeMenu": "Fechar menu",
@@ -2479,9 +2479,9 @@
     "subtitle": "Gerenciamento de segredos e armazenamento de chaves SSH",
     "title": "Vault OpenBAO",
     "unknown": "Desconhecido",
-    "unseal": "Desselar",
+    "unseal": "[TODO] Unseal",
     "unsealError": "Falha ao desselar o OpenBAO",
-    "unsealed": "Deselado",
+    "unsealed": "[TODO] Unsealed",
     "unsealing": "Desselando..."
   },
   "osUpgrades": {
@@ -2655,7 +2655,7 @@
   "queryPacks": {
     "actions": "Ações",
     "addQuery": "Adicionar Consulta",
-    "answered": "Resposta",
+    "answered": "[TODO] Answered",
     "answeredOf": "Hospedeiros responderam: {{answered}} / {{total}}",
     "cancel": "Cancelar",
     "cancelFailed": "Não é possível cancelar a consulta",
@@ -2854,7 +2854,7 @@
     "title": "Relatórios",
     "unknownError": "Erro desconhecido",
     "userRbac": {
-      "description": "Visão completa de todos os usuários com seus papéis de segurança organizados por grupos de papel. Mostra a estrutura granular de permissões para controle de acesso baseado em papéis através do sistema.",
+      "description": "[TODO] Complete view of all users with their assigned security roles organized by role groups. Shows the granular permission structure for role-based access control across the system.",
       "name": "Papéis de Segurança do Usuário (RBAC)"
     },
     "usersList": {
@@ -2967,7 +2967,7 @@
     "startedAt": "Iniciado em",
     "status": {
       "completed": "Concluído",
-      "failed": "Falhou",
+      "failed": "[TODO] Failed",
       "in_progress": "Em Andamento",
       "installing": "Instalando",
       "pending": "Pendente",
@@ -3032,7 +3032,7 @@
     "filenamePlaceholder": "ex: id_rsa.pub, server.crt, database.conf",
     "keyType": "Tipo de Chave",
     "key_type": {
-      "ca": "Autoridade Certificadora",
+      "ca": "[TODO] CA",
       "private": "Privada",
       "public": "Pública"
     },
@@ -3180,7 +3180,7 @@
       "title": "Coletor de Ar-Azul (lado online)"
     },
     "currentTag": "(atual)",
-    "heading": "Server Role",
+    "heading": "[TODO] Air-Gap Role",
     "intro": "Escolha como este servidor SysManage participa em uma implantação sem acesso à internet. A maioria dos servidores deve permanecer na Configuração Padrão. O papel entra em vigor após o próximo reinicio do servidor.",
     "loadError": "Não foi possível carregar o papel atual do servidor.",
     "menuTitle": "Função do Servidor",
@@ -3203,7 +3203,7 @@
       "airgap": "Air-Gap & Espelhamento",
       "general": "Geral",
       "integrations": "Integrações & Log",
-      "patching": "Atualização",
+      "patching": "[TODO] Patching",
       "reporting": "Relatórios",
       "secrets": "Segredos",
       "security": "Segurança & Acesso",
@@ -3214,7 +3214,7 @@
   "sites": {
     "actions": {
       "remove": "Remover",
-      "resume": "Retomar",
+      "resume": "[TODO] Resume",
       "suspend": "Suspender"
     },
     "addSite": "Incluir Site",
@@ -3267,7 +3267,7 @@
       "syncNever": "Nunca sincronizado",
       "syncOverdue": "Vencido",
       "syncPoints": "{{n}} eventos de sincronização",
-      "syncStale": "Vencido",
+      "syncStale": "[TODO] Stale",
       "syncTimeline": "Linha do tempo de sincronização",
       "syncTimelineEmpty": "Nenhuma entrada de sincronização registrada ainda.",
       "url": "URL",
@@ -3402,7 +3402,7 @@
     "deleteSelected": "Excluir selecionados ({{count}})",
     "deleteSuccess": "Excluído com sucesso",
     "detectedOs": "Sistema Operacional Detectado",
-    "disableError": "Erro ao desabilitar",
+    "disableError": "[TODO] Disable Error",
     "disableSelected": "Desativar selecionados ({{count}})",
     "disableSuccess": "Desabilitado com sucesso",
     "enableError": "Erro ao habilitar",
@@ -3442,7 +3442,7 @@
     "privilegedModeRequired": "Modo privilegiado requerido",
     "repoIdentifierRequired": "Identificador do repositório obrigatório",
     "requiresPrivileged": "O host deve estar rodando em modo privilegiado",
-    "source": "Origem",
+    "source": "[TODO] Source",
     "tapIdentifier": "Identificador de tap",
     "tapRepo": "Repositório tap",
     "tapRepoHelp": "ex., cask-versions",
@@ -3850,7 +3850,7 @@
         "approved": "Aprovada",
         "rejected": "Rejeitada",
         "withdrawn": "Retirada",
-        "failed": "Falhou"
+        "failed": "[TODO] Failed"
       },
       "reason": {
         "noLongerFires": "a constatação não existe mais",
@@ -3878,7 +3878,7 @@
       "packageCount": "{{count}} pacotes",
       "packageCount_one": "1 pacote",
       "packageCount_other": "{{count}} pacotes",
-      "review": "Revisar",
+      "review": "[TODO] Review",
       "reviewTitle": "Revisar correção de {{rule}} em {{host}}",
       "approveWarning": "Ao aprovar, esta alteração é aplicada ao host com privilégios de administrador na próxima janela de manutenção (imediatamente, se não houver nenhuma).",
       "reject": "Rejeitar",
@@ -3967,7 +3967,7 @@
   "posture": {
     "action": {
       "fix": "Corrigir",
-      "waive": "Isentar"
+      "waive": "[TODO] Waive"
     },
     "checkedAt": "Última verificação: {{date}}",
     "col": {
@@ -4084,7 +4084,7 @@
       "reason": "Motivo",
       "revoke": "Revogar",
       "revokeFailed": "Não foi possível revogar a isenção.",
-      "submit": "Isentar",
+      "submit": "[TODO] Waive",
       "title": "Isentar: {{title}}"
     },
     "waiverStale": "Isenção caducada"
@@ -4379,7 +4379,7 @@
       "start": "Iniciar varredura",
       "status": {
         "completed": "Concluída",
-        "failed": "Falhou",
+        "failed": "[TODO] Failed",
         "queued": "Aguardando o agente",
         "refused": "Recusada pelo agente",
         "timedOut": "Sem resposta do agente"
@@ -4476,7 +4476,7 @@
     },
     "scan": {
       "completed": "Concluída",
-      "failed": "Falhou",
+      "failed": "[TODO] Failed",
       "queued": "Na fila",
       "refused": "Recusada",
       "timedOut": "Tempo esgotado",
@@ -4587,7 +4587,7 @@
       "retireError": "Não foi possível desativar o conjunto de regras.",
       "rules": "Regras",
       "slug": "Nome (a-z, 0-9, hifens)",
-      "source": "Origem",
+      "source": "[TODO] Source",
       "titleField": "Título",
       "updated": "Atualizado",
       "version": "Versão",
@@ -4613,7 +4613,7 @@
       "all": "Todos os hosts",
       "chosen": "Escolher por marcador, inventário ou host",
       "hosts": "Hosts individuais",
-      "inventories": "Inventários de hosts",
+      "inventories": "[TODO] Inventories",
       "tags": "Marcadores"
     }
   }

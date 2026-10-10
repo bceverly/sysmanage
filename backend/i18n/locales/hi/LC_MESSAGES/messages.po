@@ -299,16 +299,11 @@ msgstr "कॉन्फिगरेशन बदलाव %(host_id)s होस�
 #, python-format
 msgid "Hostname changed message for host %s missing new_hostname"
 msgstr ""
-"HostException: \\u092f\\u0947 \\u0938\\u094d\\u0915\\u0947 %s \\u0915\\u093e"
-" \\u092a\\u094d\\u0924\\u093f\\u092c\\u0964 \\u0938\\u0947 "
-"\\u0905\\u0915\\u094b\\u0902 \\u0939\\u094d\\u092f\\u093e\\u0924\\u0964"
 
 #: backend/api/handlers/hostname_handler.py:63
 #, python-format
 msgid "Host %s not found for hostname update"
 msgstr ""
-"HostException: \\u092f\\u0947\\u0915\\u093e \\u0938\\u094d\\u0924 "
-"\\u091c\\u094b %s \\u0915\\u094b \\u0939\\u0948"
 
 #: backend/api/handlers/hostname_handler.py:72
 #, python-format
@@ -591,7 +586,7 @@ msgstr "रिपोज़िट्री पहचान आवश्यक ह
 
 #: backend/api/third_party_repos.py:328
 msgid "Repository add request queued successfully"
-msgstr "रिपोज़िट्री जोड़ने की पुष्टि की गई"
+msgstr ""
 
 #: backend/api/third_party_repos.py:336
 #, python-format
@@ -608,7 +603,7 @@ msgstr "कोई हटाने के लिए रिपोज़िटर�
 
 #: backend/api/third_party_repos.py:474
 msgid "Repository deletion request queued successfully"
-msgstr "रिपोज़िट्री को हटाने की पुष्टि की गई"
+msgstr ""
 
 #: backend/api/third_party_repos.py:482
 #, python-format
@@ -625,12 +620,12 @@ msgstr "कोई रिपोज़िटरी सूची नहीं द�
 
 #: backend/api/third_party_repos.py:592
 msgid "Repository enable request queued successfully"
-msgstr "रिपोज़िट्री को सक्रिय करने की पुष्टि की गई"
+msgstr ""
 
 #: backend/api/third_party_repos.py:600
 #, python-format
 msgid "Failed to queue repository enable: %s"
-msgstr "प्रतिष्ठान को यूनिक करने में विफल हुए: %s"
+msgstr ""
 
 #: backend/api/third_party_repos.py:628
 msgid "Permission denied: DISABLE_THIRD_PARTY_REPOSITORY role required"
@@ -638,7 +633,7 @@ msgstr "प्रवेश नहीं: DISABLE_THIRD_PARTY_REPOSITORY भू�
 
 #: backend/api/third_party_repos.py:710
 msgid "Repository disable request queued successfully"
-msgstr "रिपोज़िट्री को विभंजित करने की पुष्टि की गई"
+msgstr ""
 
 #: backend/api/third_party_repos.py:718
 #, python-format
@@ -761,11 +756,11 @@ msgstr ""
 
 #: backend/api/host_registration.py:77
 msgid "Invalid or expired registration key"
-msgstr "अमान्य या सक्रिय की संरेखित रजिस्ट्रेशन कुंजी"
+msgstr ""
 
 #: backend/api/host_registration.py:116
 msgid "Invalid or expired enrollment token"
-msgstr "अमान्य या सक्रिय की संपत्ति टोकन"
+msgstr ""
 
 #: backend/api/host_registration.py:182
 msgid ""
@@ -1325,7 +1320,7 @@ msgstr "पैकेज बात्च को समाप्त करने �
 
 #: backend/api/package_handlers.py:567
 msgid "Delta base does not match the stored catalog"
-msgstr "डेल्टा बेस मॉचिन कैटलोग संग्रहित है"
+msgstr ""
 
 #: backend/api/package_handlers.py:612
 #, python-format
@@ -2296,7 +2291,7 @@ msgstr ""
 #: backend/api/content_lifecycle.py:365
 #, python-format
 msgid "Unknown filter type: %s"
-msgstr "दोंपस्ट व्मार बेश: %s"
+msgstr ""
 
 #: backend/api/content_lifecycle.py:371
 #, python-format
@@ -2306,7 +2301,7 @@ msgstr "'%s' व्मार Advisory पेजेय ाॆनान, हो �
 #: backend/api/content_lifecycle.py:381
 #, python-format
 msgid "The '%s' filter needs a non-empty 'packages' list"
-msgstr "'%s' व्मार जेव्मार 'packages' सोते है"
+msgstr ""
 
 #: backend/api/content_lifecycle.py:391
 #, python-format
@@ -2523,7 +2518,7 @@ msgstr "प्रवेश नहीं: REMOVE_DEFAULT_REPOSITORY भूमि�
 
 #: backend/api/default_repositories.py:514
 msgid "Invalid repository ID format"
-msgstr "अमान्य अर्थशाला ID संरूप"
+msgstr ""
 
 #: backend/api/default_repositories.py:527
 msgid "Default repository not found"
@@ -2568,8 +2563,6 @@ msgstr "चाइल्ड होस्ट रिफ्रेश का अन�
 msgid ""
 "Distribution '%(name)s %(version)s' already exists for type '%(child_type)s'"
 msgstr ""
-"'बेस्य को 'पमीमारी ॥॰ नाज्य' %(name)s %(version)s 'चरत्देक को मेस्य 'पमीमारी"
-" ॥॰ नाज्य' %(child_type)s ॥॰ पकरनान"
 
 #: backend/api/child_host_crud.py:833
 msgid "Distribution deleted"
@@ -2594,7 +2587,7 @@ msgstr "ID %s वाले होस्ट पंजीकृत नहीं �
 
 #: backend/api/message_handlers_core.py:245 backend/api/agent.py:653
 msgid "Host registration pending approval"
-msgstr "होस्ट रजिस्ट्रेशन पार्टी के लिए"
+msgstr ""
 
 #: backend/api/message_handlers_core.py:359
 msgid "Host auto-approved via child host creation"
@@ -2946,7 +2939,7 @@ msgstr "अंटीवायरस पैकेज नाम 255 अक्ष�
 #: backend/api/antivirus_defaults.py:106
 #, python-format
 msgid "Failed to retrieve antivirus defaults: %s"
-msgstr "वायरस रोकने की प्रतिस्थापना खोजने में विफल: %s"
+msgstr ""
 
 #: backend/api/antivirus_defaults.py:127
 #, python-format
@@ -3038,7 +3031,7 @@ msgstr "बंडल फ़ाइल डिस्क पर और नहीं 
 
 #: backend/api/airgap_bundles.py:629
 msgid "Invalid or expired download token"
-msgstr "अमान्य या सक्रिय की समय परिकल्पना"
+msgstr ""
 
 # Tag management messages
 #: backend/api/tag.py:133
@@ -3279,12 +3272,6 @@ msgstr "रजिस्ट्रेशन अवशोषित: होस्ट
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
-"\\u092f\\u0947\\u0938 \\u0915\\u094b '%(fqdn)s' "
-"\\u0915\\u093e\\u0930\\u094d\\u0924\\u0940 "
-"\\u0926\\u0947\\u0938\\u094d\\u092f\\u094b %(tenant_id)s \\u0915\\u093e "
-"\\u0905\\u092a\\u0926\\u0940 "
-"\\u092c\\u0947\\u0938\\u094d\\u0930\\u094b\\u091f\\u093e\\u0935\\u0946\\u0902"
-" \\u092a\\u0947\\u0938\\u094d\\u092c\\u094b"
 
 #: backend/api/host.py:863
 #, python-format
@@ -3292,10 +3279,6 @@ msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
 "(auto_approve=%(auto_approve)s)"
 msgstr ""
-"\\u092f\\u0947\\u0938 \\u0915\\u094b '%(fqdn)s' "
-"\\u0915\\u093e\\u0930\\u094d\\u0917\\u093f\\u0924 \\u0915\\u0936\\u0948 "
-"\\u0939\\u094b\\u0917\\u094d\\u0930\\u0940 \\u092a\\u094d\\u092f\\u0964 "
-"'%(key_name)s' (auto_approve=%(auto_approve)s)"
 
 #: backend/api/agent_poll.py:119
 msgid "Missing agent connection token"
@@ -3356,7 +3339,7 @@ msgstr "जॉब नहीं मिला"
 #: backend/api/config_mgmt_jobs.py:273 backend/api/config_mgmt_jobs.py:344
 #, python-format
 msgid "A job template named '%s' already exists"
-msgstr "एक नौकरी टेम्पलेट जिसका नाम '%s' पहले से मौजूद है"
+msgstr "'%s' नाम का जॉब टेम्पलेट पहले से मौजूद है"
 
 #: backend/api/config_mgmt_jobs.py:390
 msgid "Job template deleted"
@@ -3368,7 +3351,7 @@ msgstr "यह टेम्पलेट जो इस नौकरी को च
 
 #: backend/api/config_mgmt_jobs.py:525
 msgid "This job has already finished"
-msgstr "इस नौकरी ने पहले से ही समाप्ति की है"
+msgstr "यह जॉब पहले ही पूरा हो चुका है"
 
 #: backend/api/config_mgmt_jobs.py:527
 msgid "Cancelled by an operator"
@@ -3588,7 +3571,7 @@ msgstr "बहुत सारे असफल लॉगिन प्रया�
 
 #: backend/api/auth.py:489
 msgid "Invalid or missing refresh token"
-msgstr "अमान्य या उपलब्ध परीक्षण टोकन"
+msgstr ""
 
 #: backend/api/auth.py:599 backend/api/auth.py:647
 msgid "Multi-tenancy is not enabled."
@@ -3995,7 +3978,7 @@ msgstr "अद्यतनों की जांच की आवश्यक�
 #: backend/api/secrets/crud.py:35 backend/api/error_constants.py:166
 #: backend/services/vault_service.py:423
 msgid "Secret not found"
-msgstr "गप्पा मिल नहीं रहा"
+msgstr ""
 
 #: backend/api/secrets/crud.py:46
 msgid ""
@@ -4198,7 +4181,7 @@ msgstr "अधिकारिता मेम्बर नहीं पाया
 
 #: backend/api/agent.py:738
 msgid "Invalid host authentication"
-msgstr "अवैध मेट्रिक्स प्रमाणीकरण"
+msgstr ""
 
 #: backend/api/agent.py:779 backend/api/packages.py:498
 msgid "Installation completion recorded"
@@ -4285,7 +4268,7 @@ msgstr "WSL विशेषता सक्षमता अपेक्षित
 
 #: backend/api/error_constants.py:124
 msgid "Repository management requires privileged agent mode"
-msgstr "रिपोज़िट्री प्रबंधन एक प्राकृतिक एजेंट मोड की आवश्यकता है"
+msgstr ""
 
 #: backend/api/error_constants.py:130
 msgid "Current user not found"
@@ -4542,7 +4525,7 @@ msgstr "एक ओवर्राइड कारण आवश्यक है�
 
 #: backend/api/maintenance_windows.py:350
 msgid "Override duration must be positive."
-msgstr "ओवर्राइड डरेशन मुख्य रूप से होना चाहिए।"
+msgstr ""
 
 #: backend/api/report_branding.py:116
 msgid "Updated report branding"
@@ -4639,7 +4622,7 @@ msgstr "गलत ID प्रारूप"
 
 #: backend/api/firewall_roles.py:674
 msgid "Firewall role already assigned to this host"
-msgstr "फाइरवॉल भूमिका इस होस्ट के लिए प्रतिस्थापन नहीं मिला"
+msgstr ""
 
 #: backend/api/firewall_roles.py:732
 #, python-format
@@ -4833,7 +4816,7 @@ msgstr "सर्विंग होस्ट का कोई प्रति�
 
 #: backend/api/content_lifecycle_promotion.py:543
 msgid "Repository mirroring is required to repoint a host"
-msgstr "यूनिट मरीन को पुन: स्थापित करने के लिए रिपोज़िट्री मरीनिंग आवश्यक है"
+msgstr ""
 
 #: backend/api/content_lifecycle_promotion.py:571
 msgid "Snap store proxy is required to repoint a host's snaps"
@@ -5586,7 +5569,7 @@ msgstr "वॉल्ट से अवैध प्रतिक्रिया"
 
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
-msgstr "गप्पा रूपांतरण असंबद्ध है"
+msgstr ""
 
 #: backend/vulnerability/cve_sources.py:23
 msgid "Primary CVE data source from NIST (includes Apple/macOS CVEs)"

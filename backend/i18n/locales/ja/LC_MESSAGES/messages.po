@@ -2915,7 +2915,7 @@ msgstr "バンドルが見つかりません"
 
 #: backend/api/airgap_bundles.py:469
 msgid "product must be one of: "
-msgstr "プロジェクドは一切で:…"
+msgstr ""
 
 #: backend/api/airgap_bundles.py:483
 msgid "Insufficient host resources to build a bundle: "

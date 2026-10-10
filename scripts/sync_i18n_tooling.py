@@ -65,6 +65,9 @@ SHARED = [
     # defect it was added for walks straight through.  Same path everywhere,
     # which is also the path the translation service imports.
     ("scripts/i18n_glossary.py", "scripts/i18n_glossary.py"),
+    # Its data tables (TERMS, ALIASES), split out 2026-10-10; i18n_glossary
+    # imports them, so the two files MUST travel together.
+    ("scripts/i18n_glossary_terms.py", "scripts/i18n_glossary_terms.py"),
     # The translation verifier and its deterministic checks.  Neither carries a
     # per-repo block: the verifier reads SURFACES from i18n_strict (plus the
     # Pro+ plugin bundles when plugin_i18n_lib is importable), and

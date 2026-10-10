@@ -264,3 +264,66 @@ def test_only_an_http_service_url_is_accepted(verify):
     # urllib would happily open file:///etc/passwd; the verifier must not.
     module, _locales, _allow = verify
     assert module.main(["--service", "file:///etc/passwd"]) == 2
+
+
+@pytest.mark.parametrize(
+    "lang,source,value",
+    [
+        # Accented words are words: "Análisis" is not "An" + "lisis".
+        (
+            "es",
+            "Historical Analysis: long-term trend analysis",
+            "Análisis histórico: análisis de tendencias a largo plazo",
+        ),
+        (
+            "pt",
+            "up to this value",
+            "um tempo aleatório de até este valor, até um minuto",
+        ),
+        (
+            "pt",
+            "OS Lifecycle",
+            "O Gerenciamento do Ciclo de Vida do SO adiciona um registro",
+        ),
+        # Hyphen-joined English terms are kept whole.
+        (
+            "de",
+            "a man-in-the-middle with trust-on-first-use",
+            "Ein Man-in-the-Middle bei Trust-on-First-Use",
+        ),
+        # Dutch "we" is Dutch.
+        ("nl", "we are", "zijn we nu klaar en als we"),
+    ],
+)
+def test_accented_and_hyphenated_words_are_not_split(lang, source, value):
+    assert quality.problem(lang, source, value) is None
+
+
+def test_an_en_or_em_dash_is_rejected():
+    assert quality.problem("de", "A -- B", "A — B").startswith("an en or em dash")
+    assert quality.problem("de", "1-2", "1–2").startswith("an en or em dash")
+
+
+def test_a_locale_the_product_does_not_ship_is_skipped(verify):
+    module, locales, allow = verify
+    (locales / "tr.json").write_text(
+        json.dumps({"a": {"save": "Yapılandırmayı kaydet", "name": "SysManage"}})
+    )
+    _failed, pending = module.classify(allow, {})
+    assert {i.lang for i in pending} == {"fr"}
+    assert module.UNSUPPORTED[("t", "tr")] >= 1
+
+
+def test_a_sibling_repositorys_verdict_is_reused_for_the_same_triple(
+    verify, tmp_path, monkeypatch
+):
+    module, _locales, _allow = verify
+    repo = tmp_path / "sysmanage-x"
+    sibling = tmp_path / "sysmanage-y"
+    repo.mkdir()
+    sibling.mkdir()
+    monkeypatch.setattr(module, "REPO", repo)
+    (sibling / ".i18n-verified").write_text("fr\tabc123\tmodel\n")
+    (tmp_path / "unrelated").mkdir()
+    (tmp_path / "unrelated" / ".i18n-verified").write_text("fr\tzzz\tmodel\n")
+    assert module._sibling_ledgers() == {"sysmanage-y": {"fr:abc123": "model"}}

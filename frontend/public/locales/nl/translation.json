@@ -65,18 +65,18 @@
       "label": {
         "current": "Actueel",
         "never": "Nooit ingenomen",
-        "stale": "Verouderd",
+        "stale": "[TODO] Stale",
         "very_stale": "Zeer verouderd"
       },
       "last_ingest_at": "Laatste innemen:",
       "no_ingest": "Nog geen media ingenomen.",
-      "title": "Repository-versheid"
+      "title": "[TODO] Repository Freshness"
     },
     "repositories": {
       "aggregate": {
         "daysAgo": "{{days}} dag(en) geleden",
         "noIngest": "N/A",
-        "oldestFreshness": "Oudste versiebekendheid",
+        "oldestFreshness": "[TODO] Oldest freshness",
         "staleRepos": "Verouderde repositories (> {{days}}d)",
         "title": "Aggregaat",
         "totalPackages": "Totaal aantal pakketten",
@@ -89,7 +89,7 @@
       "table": {
         "distro": "Distributie",
         "empty": "Nog geen repositories geïmporteerd.",
-        "freshness": "Verschillendheid",
+        "freshness": "[TODO] Freshness",
         "freshnessDays": "{{days}} dag(en)",
         "freshnessNever": "Nooit geïmporteerd",
         "lastIngest": "Laatste succesvolle import",
@@ -198,7 +198,7 @@
     "notApplicable": "Deze pagina heeft alleen betekenis op collector-rol implementaties.",
     "refresh": "Vernieuwen",
     "subtitle": "Activeer éénmalige collectie uitvoeringen die gespiegelde geconfigureerde repositories weerspiegelen, een ondertekend ISO bouwen en een manifest genereren voor verwerking aan de luchtdichte kant.",
-    "title": "Luchtdichte collectie uitvoeringen"
+    "title": "[TODO] Air-Gap Collection Runs"
   },
   "airgapDevices": {
     "empty": "Geen geschikte schijven gevonden. Voeg media toe en klik op Rescan.",
@@ -213,7 +213,7 @@
     "title": "Schijf importeren"
   },
   "airgapImport": {
-    "device": "Schijf",
+    "device": "[TODO] Drive",
     "import": "ISO importeren",
     "importError": "Kan importeren niet starten.",
     "noDevice": "Geen importschijf geselecteerd. Kies er een in Instellingen → Serverrol.",
@@ -293,7 +293,7 @@
     "prefix": "Sleutelprefix",
     "revoke": "Intrekken",
     "revokeError": "Kon API-sleutel niet intrekken.",
-    "revoked": "Gehaald",
+    "revoked": "[TODO] Revoked",
     "status": "Status",
     "title": "API-sleutels"
   },
@@ -312,7 +312,7 @@
     "filters": {
       "actor": "Acteur",
       "apply": "Toepassen",
-      "clear": "Wissen",
+      "clear": "[TODO] Clear",
       "operation": "Handeling",
       "siteId": "Site-ID"
     },
@@ -454,7 +454,7 @@
     "apply": "Toepassen",
     "back": "Terug",
     "cancel": "Annuleren",
-    "clearSelection": "Selectie wissen",
+    "clearSelection": "[TODO] Clear selection",
     "close": "Sluiten",
     "confirm": "Bevestigen",
     "confirmAction": "Actie bevestigen",
@@ -474,12 +474,12 @@
     "less": "minder",
     "loading": "Laden...",
     "moreActions": "Meer",
-    "na": "N.v.t.",
+    "na": "[TODO] N/A",
     "no": "Nee",
     "noDescription": "Geen beschrijving",
     "none": "Geen",
-    "notAvailable": "N.v.t.",
-    "of": "van",
+    "notAvailable": "[TODO] N/A",
+    "of": "[TODO] of",
     "refresh": "Vernieuwen",
     "requiresSelection": "Selecteer minstens één rij",
     "requiresSingleSelection": "Selecteer precies één rij",
@@ -582,7 +582,7 @@
     "hostsIn": "Resultaten per host voor {{name}}",
     "intro": "Voer één configuratieprofiel tegelijk uit op veel hosts. Een taak werkt zijn inventaris in golven af in plaats van alles tegelijk, en legt vast wat er op elke host is gebeurd.",
     "inventoriesFailed": "Kon de hostinventarissen niet laden",
-    "inventory": "Hostinventaris",
+    "inventory": "[TODO] Inventory",
     "inventoryDeleteFailed": "Kon de hostinventaris niet verwijderen",
     "inventorySaveFailed": "Kon de hostinventaris niet opslaan",
     "jobsFailed": "Kon de taken niet laden",
@@ -599,7 +599,7 @@
     "noJobs": "Er zijn nog geen fleet-taken uitgevoerd. Start er een vanaf het tabblad Sjablonen.",
     "noTargets": "Geen hosts om te tonen.",
     "noTemplates": "Nog geen taaksjablonen. Een sjabloon draait één profiel op één inventaris, op verzoek of volgens een planning.",
-    "preview": "Voorbeeld",
+    "preview": "[TODO] Preview",
     "previewEmpty": "Deze inventaris selecteert op dit moment geen actieve hosts. Een taak die erop wordt gestart zou niets doen.",
     "previewFailed": "Kon deze hostinventaris niet omzetten naar hosts",
     "previewTitle": "Hosts geselecteerd door {{name}}",
@@ -607,8 +607,8 @@
     "progress": "{{done}} van {{total}} -- {{ok}} geslaagd, {{failed}} mislukt, {{skipped}} overgeslagen",
     "schedule": "Schema (cron)",
     "scheduleHelp": "Laat leeg om alleen handmatig te lanceren.",
-    "tabInventories": "Hostinventarissen",
-    "tabJobs": "Taken",
+    "tabInventories": "[TODO] Inventories",
+    "tabJobs": "[TODO] Jobs",
     "tabTemplates": "Sjablonen",
     "targetsFailed": "Kon de hosts niet laden",
     "templateDeleteFailed": "Kon het sjabloon niet verwijderen",
@@ -756,7 +756,7 @@
       "saveError": "Kan voorkeuren niet opslaan",
       "title": "Dashboard Instellingen"
     },
-    "updates": "Bijwerkingen"
+    "updates": "[TODO] Updates"
   },
   "dataGrid": {
     "columnVisibility": "Kolomzichtbaarheid",
@@ -829,7 +829,7 @@
   "federationDispatch": {
     "cancel": "Annuleren",
     "commandType": "Commando",
-    "dispatch": "Uitzenden",
+    "dispatch": "[TODO] Dispatch",
     "dispatching": "Bezig met verzenden...",
     "errors": {
       "failed": "Kan opdracht niet afleveren.",
@@ -862,7 +862,7 @@
       "openSite": "Locatie"
     },
     "bulk": {
-      "clear": "Wissen",
+      "clear": "[TODO] Clear",
       "dispatch": "Commando uitzenden",
       "selectAll": "Selecteer alles op deze pagina",
       "selected": "{{n}} hosts geselecteerd"
@@ -872,7 +872,7 @@
       "ipv4": "IPv4",
       "lastSeen": "Laatst gezien",
       "os": "OS",
-      "platform": "Plaatsvervangend",
+      "platform": "[TODO] Platform",
       "status": "Status"
     },
     "detail": {
@@ -890,7 +890,7 @@
     "errorLoad": "Kan cross-site hosts niet laden.",
     "filters": {
       "apply": "Toepassen",
-      "clear": "Wissen",
+      "clear": "[TODO] Clear",
       "osFamily": "OS-familie",
       "search": "Zoeken (naam / IP)",
       "status": "Status"
@@ -1007,7 +1007,7 @@
     "startPort": "Startpoort",
     "subtitle": "Ondertitel",
     "tcp": "TCP",
-    "title": "Titel",
+    "title": "[TODO] Firewall Roles",
     "udp": "UDP",
     "updateSuccess": "Succesvol bijgewerkt"
   },
@@ -1201,7 +1201,7 @@
       "col": {
         "mirror": "Standaard mirror",
         "osFamily": "OS-familie",
-        "platform": "Plaatsvervangend",
+        "platform": "[TODO] Platform",
         "version": "Versie"
       },
       "noEligible": "Geen gesynchroniseerde mirrors beschikbaar",
@@ -1365,7 +1365,7 @@
     "collectionId": "Verzamel-ID",
     "collectionStatus": "Status",
     "completedAt": "Voltooid op",
-    "complianceTab": "Naleving",
+    "complianceTab": "[TODO] Compliance",
     "configurationFiles": "Configuratiebestanden",
     "confirmDeleteInstallation": "Weet u zeker dat u dit installatierecord wilt verwijderen?",
     "confirmDeleteInstallationMessage": "Weet u zeker dat u deze installatiegegevens wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
@@ -1416,7 +1416,7 @@
     "editHostname": "Hostnaam bewerken",
     "editServices": "Services bewerken",
     "enabled": "Ingeschakeld",
-    "entitled": "Gerechtigd",
+    "entitled": "[TODO] Entitled",
     "errorMessage": "Foutmelding",
     "errorUpdatingServices": "Fout bij het bijwerken van services",
     "expired": "Verlopen",
@@ -1432,11 +1432,11 @@
     "graylogPort": "(poort {{port}})",
     "graylogRequiresPrivileged": "Vereist agent in geprivilegieerde modus",
     "graylogStatus": "Graylog-status",
-    "graylogTarget": "Doel",
+    "graylogTarget": "[TODO] Target",
     "groupMembers": "Leden",
     "hardwareInfo": "Hardware-informatie",
     "hardwareTab": "Hardwaré",
-    "homeDir": "Start",
+    "homeDir": "[TODO] Home",
     "hostInactive": "Host is niet actief",
     "hostname": "Hostnaam",
     "hostnameChangeFailed": "Hostnaam wijzigen mislukt",
@@ -1520,14 +1520,14 @@
       "digest": "Digest",
       "enterpriseNotice": "Het voorbereiden, toepassen en terugdraaien van afbeeldingen is een Enterprise-functie. De huidige afbeeldingdetails worden hieronder weergegeven.",
       "enterpriseOnly": "Afbeeldingsmodus acties vereisen een Enterprise-licentie",
-      "imageRef": "Afbeeldingshandleiding",
+      "imageRef": "[TODO] Image Reference",
       "noStagedImage": "Geen afbeelding voorbereid",
       "pendingReboot": "Wachtend - herstart om toe te passen",
       "rollback": "Terugdraaien",
       "rollbackAvailable": "Terugdraaien beschikbaar",
       "rollbackError": "Kan de afbeelding niet ongedaan maken",
       "rollbackSuccess": "Terugdraaien naar vorige afbeelding (host zal herstarten). Doorgaan?",
-      "stage": "Voorbereiden",
+      "stage": "[TODO] Stage",
       "stageError": "Kan de afbeelding niet voorbereiden",
       "stageSuccess": "Staging van afbeelding aanvraag",
       "stagedImage": "Gevoorbereide Afbeelding",
@@ -1635,7 +1635,7 @@
     "packagesToInstall": "Te installeren pakketten",
     "pendingApproval": "Goedkeuring in Behandeling",
     "physicalVolumes": "Fysiek",
-    "platform": "Plaatsvervangend",
+    "platform": "[TODO] Platform",
     "platformRelease": "Platformversie",
     "privilegedModeRequired": "Geprivilegieerde modus vereist voor servicebeheer",
     "processList": "Proceslijst",
@@ -1757,7 +1757,7 @@
     "windowsIsoPathRequired": "Gelieve de pad naar de Windows-installatie-ISO op te geven",
     "windowsJoinDomainToggle": "Voeg een Active Directory-domein toe",
     "windowsLocaleHelp": "UI-en invoergebiedsinstellingen, bijv. \"en-US\"",
-    "windowsLocaleLabel": "Taalsamenstelling",
+    "windowsLocaleLabel": "[TODO] Locale",
     "windowsProductKeyHelp": "AVMA, MAK of KMS-sleutel. Laat leeg voor evaluatiemedia, wat zonder een sleutel wordt geïnstalleerd. Opgeslagen in OpenBAO, nooit in de database.",
     "windowsProductKeyLabel": "Licentiesleutel",
     "windowsSectionTitle": "Windows Server-installatie",
@@ -1820,7 +1820,7 @@
     "deployOpenTelemetry": "OpenTelemetry implementeren",
     "diagnosticsRequestFailed": "Kan verzameling diagnostics niet aanvragen. Probeer het later opnieuw.",
     "diagnosticsRequested": "Diagnostics verzameling gevraagd voor host {{hostId}}. Controleer de hostdetailspagina om resultaten te bekijken wanneer beschikbaar.",
-    "down": "Inactief",
+    "down": "[TODO] Down",
     "filterByTags": "Filteren op tags",
     "fqdn": "FQDN",
     "getDiagnostics": "Diagnostiek ophalen",
@@ -1846,7 +1846,7 @@
     "packagesRequestFailed": "Aanvragen van pakketverzameling mislukt",
     "packagesRequested": "Pakketverzameling succesvol aangevraagd",
     "parentsOnly": "Alleen ouders",
-    "platform": "Plaatsvervangend",
+    "platform": "[TODO] Platform",
     "privileged": "Geprivilegieerd",
     "reboot": "Herstarten",
     "rebootFailed": "Herstart aanvraag mislukt",
@@ -1903,7 +1903,7 @@
     "updateAgentRequested": "Agent-update succesvol aangevraagd",
     "updateAgentSelected": "Agent op geselecteerden bijwerken",
     "updated": "Bijgewerkt",
-    "updates": "Bijwerkingen",
+    "updates": "[TODO] Updates",
     "viewParent": "Bovenliggende host weergeven",
     "reenroll": "Agent opnieuw registreren",
     "reenrollHint": "Voor een opnieuw geïnstalleerde agent die zijn referenties kwijt is: wist ze en zet de host terug naar wachten op goedkeuring",
@@ -2042,7 +2042,7 @@
     "statusAccepted": "Geaccepteerd",
     "statusExpired": "Verlopen",
     "statusPending": "In afwachting",
-    "statusRevoked": "Gehistoreerd",
+    "statusRevoked": "[TODO] Revoked",
     "title": "Gebruikersuitnodigingen"
   },
   "logging": {
@@ -2090,7 +2090,7 @@
     "username": "Gebruikersnaam of e-mail",
     "verifying": "Verifiëren...",
     "sso": {
-      "or": "of",
+      "or": "[TODO] or",
       "signInWith": "Aanmelden met {{name}}",
       "signingIn": "U wordt aangemeld...",
       "denied": "Uw identiteitsprovider heeft u aangemeld, maar er is geen actief SysManage-account voor die identiteit. Vraag een beheerder om u toegang te geven.",
@@ -2114,13 +2114,13 @@
     "created": "Onderhoudsvenster gemaakt",
     "currentWindow": "Huidig venster",
     "day": {
-      "fri": "Vri",
+      "fri": "[TODO] Fri",
       "mon": "Ma",
       "sat": "Zat",
       "sun": "Zon",
-      "thu": "Don",
-      "tue": "Dins",
-      "wed": "Woe"
+      "thu": "[TODO] Thu",
+      "tue": "[TODO] Tue",
+      "wed": "[TODO] Wed"
     },
     "daysOfWeek": "Werkdagen van de week",
     "deleteError": "Kon het onderhoudsvenster niet verwijderen",
@@ -2153,8 +2153,8 @@
     "recurrenceOnce": "Eén keer",
     "recurrenceWeekly": "Wekelijks",
     "saveError": "Kon het onderhoudsvenster niet opslaan",
-    "schedule": "Planning",
-    "scope": "Geschiedenis",
+    "schedule": "[TODO] Schedule",
+    "scope": "[TODO] Scope",
     "scopeAll": "Alle hosts",
     "scopeHosts": "Specifieke hosts",
     "scopeTags": "Hosts per tag",
@@ -2226,7 +2226,7 @@
     "action": {
       "delete": "Verwijderen",
       "edit": "Bewerken",
-      "snapshot": "Schets",
+      "snapshot": "[TODO] Snapshot",
       "sync": "Nu synchroniseren"
     },
     "add": "Mirror toevoegen",
@@ -2249,7 +2249,7 @@
       "name": "Naam",
       "osVersion": "OS / Versie",
       "statusRestore": "Herstel",
-      "statusSnapshot": "Schets",
+      "statusSnapshot": "[TODO] Snapshot",
       "statusSync": "Synchroniseren",
       "upstream": "Opstroom"
     },
@@ -2293,7 +2293,7 @@
         "actions": "Acties",
         "digest": "Digest",
         "image": "Afbeelding",
-        "status": "Catureer",
+        "status": "[TODO] Capture",
         "tag": "Label"
       },
       "empty": "Geen gefollowde afbeeldingen. Voeg erboven eentje toe, dan gebruik \"Gefollowde afbeeldingen catureeren\".",
@@ -2349,14 +2349,14 @@
       "col": {
         "actions": "Acties",
         "channel": "Kanaal",
-        "name": "Gesnapte moment",
+        "name": "[TODO] Snap",
         "status": "Opnemen"
       },
       "empty": "Er zijn nog geen gevolgde gesnapte momenten. Voeg erboven een toe, dan gebruik je \"Gesnapte momenten opnemen\".",
       "loadError": "Gevolgd gesnapte momenten konden niet worden geladen.",
       "name": "Naam van het gesnapte moment",
       "title": "Gevolgd gesnapte momenten voor {{name}}",
-      "track": "Volgen",
+      "track": "[TODO] Track",
       "trackError": "Kon dat gesnapte moment niet volgen. Namen bestaan uit kleine letters, cijfers en streepjes.",
       "untrack": "Volgen stoppen voor dit gesnapte moment",
       "untrackError": "Kon dat gesnapte moment niet onvolgen."
@@ -2365,7 +2365,7 @@
       "col": {
         "actions": "Acties",
         "files": "Bestanden",
-        "id": "Schets",
+        "id": "[TODO] Snapshot",
         "size": "Grootte",
         "taken": "Genomen op"
       },
@@ -2394,7 +2394,7 @@
     "closeMenu": "Menu sluiten",
     "compliance": "Compliance",
     "configDrift": "Configuratieverschuiving",
-    "configJobs": "Vloottaken",
+    "configJobs": "[TODO] Fleet Jobs",
     "configProfiles": "Configuratieprofielen",
     "customMetrics": "Aangepaste metrieken",
     "dashboard": "Dashboard",
@@ -2424,7 +2424,7 @@
     "settings": "Instellingen",
     "sites": "Sites",
     "toggleMenu": "Menu wisselen",
-    "updates": "Bijwerkingen",
+    "updates": "[TODO] Updates",
     "users": "Gebruikers",
     "vulnerabilities": "Kwetsbaarheden",
     "advisor": "Adviseur",
@@ -2454,7 +2454,7 @@
     "disabledNote": "Schakel OpenBAO in in sysmanage.yaml om vault-functies te gebruiken",
     "hideLogs": "Logs verbergen",
     "loadError": "Laden van OpenBAO-status mislukt",
-    "mountPath": "Aankoppelpad",
+    "mountPath": "[TODO] Mount Path",
     "noLogs": "Geen recente logs beschikbaar",
     "operationalMode": "Bedrijfsmodus",
     "processId": "Proces-ID",
@@ -2740,7 +2740,7 @@
     "confirmRemoveLogo": "Huidig logo verwijderen?",
     "constraintsHelp": "Toegestane formaten: PNG, JPEG, SVG, WEBP. Maximale grootte: 1 MB.",
     "deleteError": "Logo verwijderen mislukt",
-    "headerText": "Koptekst",
+    "headerText": "[TODO] Header Text",
     "headerTextHelp": "Verschijnt naast het logo in de rapportenkop (bijv. \"Vertrouwelijk - Interne Gebruik\").",
     "loadError": "Rapportbranding laden mislukt",
     "logoAlt": "Rapportlogo",
@@ -2931,7 +2931,7 @@
     "noOutput": "Geen uitvoer",
     "noScripts": "Geen scripts",
     "offline": "offline",
-    "platform": "Plaatsvervangend",
+    "platform": "[TODO] Platform",
     "platforms": {
       "darwin": "Darwin",
       "freebsd": "FreeBSD",
@@ -2972,7 +2972,7 @@
       "installing": "Installeren",
       "pending": "In Wachtrij",
       "queued": "In de wachtrij",
-      "running": "Draait",
+      "running": "[TODO] Running",
       "timeout": "Time-out"
     },
     "stderrOutput": "Stderr-uitvoer",
@@ -3032,7 +3032,7 @@
     "filenamePlaceholder": "bijv., id_rsa.pub, server.crt, database.conf",
     "keyType": "Sleuteltype",
     "key_type": {
-      "ca": "Certificaatautoriteit",
+      "ca": "[TODO] CA",
       "private": "Privé",
       "public": "Openbaar"
     },
@@ -3180,7 +3180,7 @@
       "title": "Air-Gap Collector (online kant)"
     },
     "currentTag": "(huidig)",
-    "heading": "Server Role",
+    "heading": "[TODO] Air-Gap Role",
     "intro": "Kies hoe deze SysManage-server deelt in een air-gapped implementatie. De meeste servers moeten op Standaard blijven. De rol treedt na de volgende serveropstart in werking.",
     "loadError": "Kon de huidige serverrol niet laden.",
     "menuTitle": "Serverrol",
@@ -3214,7 +3214,7 @@
   "sites": {
     "actions": {
       "remove": "Verwijderen",
-      "resume": "Hervatten",
+      "resume": "[TODO] Resume",
       "suspend": "Pauzeren"
     },
     "addSite": "Site inschrijven",
@@ -3267,7 +3267,7 @@
       "syncNever": "Nooit gesynchroniseerd",
       "syncOverdue": "Verlopen",
       "syncPoints": "{{n}} synchronisatie gebeurtenissen",
-      "syncStale": "Verouderd",
+      "syncStale": "[TODO] Stale",
       "syncTimeline": "Tijdslijn synchronisatie",
       "syncTimelineEmpty": "Geen synchronisatiegebeurtenissen opgeslagen nog.",
       "url": "URL",
@@ -3377,7 +3377,7 @@
       "statistics": "Statistieken",
       "status": "Status",
       "storageSize": "Opslaggrootte",
-      "targets": "Doelen",
+      "targets": "[TODO] Targets",
       "title": "Prometheus-status",
       "url": "URL",
       "version": "Versie"
@@ -3402,7 +3402,7 @@
     "deleteSelected": "Geselecteerde verwijderen ({{count}})",
     "deleteSuccess": "Succesvol verwijderd",
     "detectedOs": "Gedetecteerde OS",
-    "disableError": "Fout bij uitschakelen",
+    "disableError": "[TODO] Disable Error",
     "disableSelected": "Geselecteerde uitschakelen ({{count}})",
     "disableSuccess": "Succesvol uitgeschakeld",
     "enableError": "Fout bij inschakelen",
@@ -3442,7 +3442,7 @@
     "privilegedModeRequired": "Geprivilegieerde modus vereist",
     "repoIdentifierRequired": "Repository-ID vereist",
     "requiresPrivileged": "De host moet draaien in privileged modus",
-    "source": "Bron",
+    "source": "[TODO] Source",
     "tapIdentifier": "Tap-ID",
     "tapRepo": "Tap-repository",
     "tapRepoHelp": "bijv. cask-versions",
@@ -3528,7 +3528,7 @@
       "applicationOnly": "Alleen applicatie-updates",
       "securityOnly": "Alleen Beveiligingsupdates",
       "systemOnly": "Alleen Systeemupdates",
-      "updates": "bijwerkingen"
+      "updates": "[TODO] updates"
     },
     "managers": {
       "apt": "APT (Debian/Ubuntu)",
@@ -3780,10 +3780,10 @@
       "recommendations": "Aanbevelingen",
       "proposals": "Voorgestelde oplossingen ({{count}})",
       "packs": "Regelpakketten",
-      "posture": "Beveiligingsstatus"
+      "posture": "[TODO] Posture"
     },
     "feed": {
-      "lens": "Invalshoek",
+      "lens": "[TODO] Lens",
       "allLenses": "Alle",
       "hostsFailed": "De hosts voor deze regel konden niet worden geladen.",
       "noOpenHosts": "Geen bevindingen en niets onbeoordeeld voor deze regel.",
@@ -3795,11 +3795,11 @@
       "findings": "Bevindingen",
       "notAssessable": "Niet te beoordelen",
       "notApplicable": "Niet van toepassing",
-      "clean": "Geen bevindingen"
+      "clean": "[TODO] Clean"
     },
     "outcome": {
       "fires": "Bevinding",
-      "doesNotFire": "Geen bevinding",
+      "doesNotFire": "[TODO] Clean",
       "notAssessable": "Niet te beoordelen",
       "notApplicable": "Niet van toepassing"
     },
@@ -3915,7 +3915,7 @@
       "notAssessable": "Niet te beoordelen",
       "proposals": "Voorgestelde oplossingen",
       "notApplicable": "Niet van toepassing",
-      "clean": "Geen bevindingen"
+      "clean": "[TODO] Clean"
     },
     "curated": {
       "pmAirgapRole": "De server is ingericht als de air-gapped installatie die u hebt beschreven",
@@ -4310,7 +4310,7 @@
       "mdns": "mDNS",
       "ndListen": "IPv6-buurdetectie",
       "ssdp": "SSDP",
-      "sweep": "Actieve netwerkverkenning"
+      "sweep": "[TODO] Active sweep"
     },
     "policy": {
       "enabled": "Agents luisteren naar apparaten op hun netwerken",
@@ -4353,7 +4353,7 @@
       "excluded": "Bekend en in orde",
       "managed": "Beheerd",
       "unmanaged": "Onbeheerd",
-      "sweeps": "Netwerkverkenningen"
+      "sweeps": "[TODO] Sweeps"
     },
     "title": "Netwerkdetectie",
     "unavailable": {
@@ -4364,7 +4364,7 @@
       "unsupportedPlatform": "niet ondersteund op dit platform"
     },
     "sweep": {
-      "agent": "Verkend door",
+      "agent": "[TODO] Swept by",
       "disabled": "Actieve netwerkverkenningen zijn uitgeschakeld. Sta ze toe in de instellingen hierboven om apparaten te vinden die zichzelf nooit aankondigen.",
       "error": "De netwerkverkenning kon niet worden gestart.",
       "found": "Gevonden",
@@ -4495,7 +4495,7 @@
     "scanHosts": "Hosts scannen",
     "scans": {
       "empty": "Er zijn nog geen scans uitgevoerd.",
-      "legs": "Wat is uitgevoerd",
+      "legs": "[TODO] What ran",
       "paths": "Paden",
       "requested": "Aangevraagd",
       "result": "Resultaat",
@@ -4583,11 +4583,11 @@
       "importedBy": "Geïmporteerd door {{who}}",
       "readError": "Het bestand kon niet worden gelezen.",
       "removed": "{{count}} verwijderd",
-      "retire": "Buiten gebruik stellen",
+      "retire": "[TODO] Retire",
       "retireError": "De regelset kon niet buiten gebruik worden gesteld.",
       "rules": "Regels",
       "slug": "Naam (a-z, 0-9, koppeltekens)",
-      "source": "Bron",
+      "source": "[TODO] Source",
       "titleField": "Titel",
       "updated": "Bijgewerkt",
       "version": "Versie",
@@ -4606,14 +4606,14 @@
       "progress": "Voortgang",
       "started": "Gestart",
       "tagCount": "{{count}} labels",
-      "targets": "Doelen",
-      "title": "Scantaken"
+      "targets": "[TODO] Targets",
+      "title": "[TODO] Scan jobs"
     },
     "targets": {
       "all": "Alle hosts",
       "chosen": "Kiezen op label, inventaris of host",
       "hosts": "Afzonderlijke hosts",
-      "inventories": "Hostinventarissen",
+      "inventories": "[TODO] Inventories",
       "tags": "Labels"
     }
   }

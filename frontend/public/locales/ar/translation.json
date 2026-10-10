@@ -37,8 +37,8 @@
     "saveFailed": "لم يتم حفظ المرآة.",
     "saved": "تم حفظ المرآة.",
     "subtitle": "استبدال مرآة خاصة بالقنوات التي يتم تثبيتها منها الآغنت. بدون ذلك، لا يمكن للمضيف المعد في موقع مغلق الوصول إلى PPA العام أو COPR أو OBS أو winget أو Homebrew tap، وبالتالي لن يتم تثبيت آغنت ولا ينضم.",
-    "tabLabel": "مرايا تثبيت الوكيل",
-    "title": "آغنت إنستال مرايا"
+    "tabLabel": "[TODO] Agent Install Mirrors",
+    "title": "[TODO] Agent Install Mirrors"
   },
   "airgap": {
     "compliance": {
@@ -51,7 +51,7 @@
       },
       "error": "فشل تحميل مجموعات الامتثال:",
       "not_applied_detail": "مثبت {{installed}} → متوفر {{available}}",
-      "title": "الامتثال المعزول",
+      "title": "[TODO] Air-Gap Compliance",
       "tooltip": {
         "current": "تطابق حزم الخادم مع حالة المرآة الأخيرة ولا يوجد أي تهديدات أمنية عامة قد ظهرت منذ آخر نقل.",
         "not_applied": "هناك تصحيحات لهذه المشكلات بالفعل على المرآة المحلية. لا يحتاج الأمر إلى نقل وسائط جديد - فقط لم يتم تشغيل مدير الحزم بعد على الخادم.",
@@ -76,7 +76,7 @@
       "aggregate": {
         "daysAgo": "{{days}} يومًا مضى",
         "noIngest": "ن/أ",
-        "oldestFreshness": "الحد الأدنى من الطازجة",
+        "oldestFreshness": "[TODO] Oldest freshness",
         "staleRepos": "المستودعات القديمة (> {{days}}d)",
         "title": "تجميع",
         "totalPackages": "المجموع الكلي للحزم",
@@ -90,7 +90,7 @@
         "distro": "التوزيع",
         "empty": "لم يتم تحميل أي مستودعات حتى الآن.",
         "freshness": "ความสดใหม่",
-        "freshnessDays": "{{days}} الدرة",
+        "freshnessDays": "[TODO] {{days}} day(s)",
         "freshnessNever": "لم يتم تحميله من قبل",
         "lastIngest": "آخر استيعاب ناجح",
         "neverIngested": "لم يسبق",
@@ -139,7 +139,7 @@
     "status": "الحالة",
     "subtitle": "إنشاء ملف ISO متعدد أنظمة التشغيل يحتوي على خادم sysmanage أو وكيل + جميع الاعتمادات حسب النظام، جاهز لتركيبه على نظام مغلق.",
     "tabLabel": "حزم الفصل الجوي",
-    "title": "حزمة التثبيت في وضع الفراغ",
+    "title": "[TODO] Air-Gap Install Bundles",
     "version": "الإصدار"
   },
   "airgapCollections": {
@@ -179,8 +179,8 @@
       "mirrorsRequired": "يُتطلب على الأقل هدف مرآة واحد.",
       "mirrorsTitle": "المرآة",
       "noMirrors": "لا يوجد مرآات مفعلة. انتقل إلى الإعدادات → معادلة المستودعات لإضافة واحدة، ثم حاول مرة أخرى.",
-      "submit": "تشغيل في الانتظار",
-      "title": "تشغيل جمع جديد"
+      "submit": "[TODO] Queue Run",
+      "title": "[TODO] New Collection Run"
     },
     "discPicker": {
       "cancel": "إلغاء",
@@ -192,25 +192,25 @@
     "licenseRequired": "محرك جامع البيانات المنفصل عن الهواء غير محمل؛ يتطلب ترخيصًا من فئة Pro+.",
     "loadError": "فشل في تحميل التشغيلات.",
     "multiDiscInfo": "أنتجت هذه العملية {{count}} أقراص. حدد أيها تريد تحميلها.",
-    "newRun": "تشغيل جمع جديد",
+    "newRun": "[TODO] New Collection Run",
     "noIsoOnDisk": "لم يتم العثور على ملف ISO على القرص بعد -- حاول مرة أخرى لاحقاً.",
     "noManifestFound": "لا يوجد مانيفست بعد لتشغيل هذا -- حاول مرة أخرى عندما يكون الحالة COMPLETE.",
     "notApplicable": "هذه الصفحة ذات معنى فقط في توزيعات الدور المجمع.",
     "refresh": "تحديث",
     "subtitle": " kích hoạt các دورة جمع فورية تشبه المستودعات المحددة، وبناء ISO ký hiệu và viết một biểu đồ cho việc tiếp nhận trên phía không kết nối.",
-    "title": "تشغيل جمع الفجوة الهوائية"
+    "title": "[TODO] Air-Gap Collection Runs"
   },
   "airgapDevices": {
     "empty": "لم يتم العثور على أي أقراص مؤهلة. أدخل الوسائط واضغط على إعادة المسح.",
     "help": "اختر القرص الضوئي/USB الذي يحتوي على وسائط المجموعة. يتم تفعيل زر استيراد على صفحة مخازن الهواء الفاصلة عندما يكون في هذا القرص قرص ISO قابل للقراءة. يتم التحقق من توقيع الوسائط أثناء الاستيراد.",
-    "label": "جهاز موصول بالشبكة",
+    "label": "[TODO] Block device",
     "loadError": "لم يتم تعداد الأقراص.",
     "none": "(لا شيء)",
     "optical": "ضوئي",
     "removable": "قابل للإزالة",
     "rescan": "إعادة فحص الأقراص",
     "saveError": "لا يمكن حفظ الجهاز.",
-    "title": "استيرادDrv"
+    "title": "[TODO] Import Drive"
   },
   "airgapImport": {
     "device": "المحرك",
@@ -221,7 +221,7 @@
     "ready": "جاهز{{label}}",
     "rescan": "إعادة الفحص",
     "run": {
-      "complete": "تامٌّ",
+      "complete": "[TODO] Complete",
       "copying": "نسخ الحزم",
       "failed": "فشل",
       "queued": "تم وضعه في الانتظار",
@@ -304,7 +304,7 @@
       "openSite": "مفتوح",
       "operation": "عملية",
       "site": "الموقع",
-      "timestamp": "توقيت"
+      "timestamp": "[TODO] Timestamp"
     },
     "empty": "لا يوجد سجلات مراجعة تعدد المواقع حتى الآن.",
     "emptyFiltered": "لا تطابق أي سجلات مراجعة.",
@@ -312,7 +312,7 @@
     "filters": {
       "actor": "ممثل",
       "apply": "تطبيق",
-      "clear": "مسح",
+      "clear": "[TODO] Clear",
       "operation": "عملية",
       "siteId": "معرف الموقع"
     },
@@ -362,7 +362,7 @@
     "resultLabel": "النتيجة",
     "search": "البحث (الوصف أو اسم الكيان)",
     "startDate": "تاريخ البدء",
-    "timestamp": "الطابع الزمني",
+    "timestamp": "[TODO] Timestamp",
     "username": "اسم المستخدم"
   },
   "availablePackages": {
@@ -413,7 +413,7 @@
     "missingTitle": "على المرجع، ليس على هذا المضيف",
     "name": "الاسم",
     "noOtherHosts": "لا يوجد مضيف آخر لمقارنته بعد.",
-    "reference": "مرجع",
+    "reference": "[TODO] Reference",
     "referenceHost": "مضيف مرجعي",
     "summary": "فرق ({{count}}) عن {{reference}}.",
     "thisHost": "هذا المضيف",
@@ -474,12 +474,12 @@
     "less": "أقل",
     "loading": "جارٍ التحميل...",
     "moreActions": "المزيد",
-    "na": "غير متاح",
+    "na": "N/A",
     "no": "لا",
     "noDescription": "لا يوجد وصف",
     "none": "لا شيء",
-    "notAvailable": "غير متاح",
-    "of": "من",
+    "notAvailable": "N/A",
+    "of": "[TODO] of",
     "refresh": "تحديث",
     "requiresSelection": "حدد صفًا واحدًا على الأقل",
     "requiresSingleSelection": "حدد صفًا واحدًا فقط",
@@ -492,7 +492,7 @@
     "save": "حفظ",
     "saving": "جاري الحفظ...",
     "search": "بحث",
-    "selected": "محدد",
+    "selected": "[TODO] Selected",
     "status": "الحالة",
     "stopped": "متوقف",
     "togglePasswordVisibility": "تبديل ظهور كلمة المرور",
@@ -534,7 +534,7 @@
     "days_other": "أيام {{count}}",
     "detailTitle": "اختلافات على {{host}}",
     "differences": "الاختلافات",
-    "driftingFor": "انحراف لمدة",
+    "driftingFor": "[TODO] Drifting for",
     "findingsFailed": "تعذر تحميل النتائج لهذا المضيف",
     "host": "المضيف",
     "intro": "المضيفون الذين لم يعودوا يطابقون الملف الشخصي المخصص لهم. يتم اكتشاف الانحراف من خلال عمليات الجرد التجريبية، لذلك لم يتم إجراء أي تغيير هنا - سيؤدي الإصلاح إلى تطبيق الملف الشخصي حقيقيًا.",
@@ -573,7 +573,7 @@
     "confirmLaunchLive": "سيؤدي ذلك إلى تنفيذ {{profile}} فعليًا على كل مضيف في {{inventory}} وتغييره ليطابقه. ويُحتجَز التسليم لأي مضيف داخل نافذة صيانة.",
     "confirmLaunchTitle": "هل تريد تشغيل هذه الوظيفة؟",
     "deleteInventoryBody": "يجب أولاً حذف قوالب المهام التي تستخدم {{name}}.",
-    "deleteInventoryTitle": "هل تريد حذف مجموعة المضيفين هذه؟",
+    "deleteInventoryTitle": "[TODO] Delete this inventory?",
     "description": "الوصف",
     "hostCount": "{{count}} hosts",
     "hostCount_one": "{{count}} host",
@@ -582,9 +582,9 @@
     "hostsIn": "النتائج لكل مضيف في {{name}}",
     "intro": "تشغيل ملف تعريف تكوين واحد عبر العديد من المضيفين في وقت واحد. يقوم العمل بمعالجة مخططه بالتناوب بدلاً من تشغيله كله مرة واحدة، ويسجل ما حدث على كل مضيف.",
     "inventoriesFailed": "تعذّر تحميل مجموعات المضيفين",
-    "inventory": "مجموعة مضيفين",
-    "inventoryDeleteFailed": "تعذّر حذف مجموعة المضيفين",
-    "inventorySaveFailed": "تعذّر حفظ مجموعة المضيفين",
+    "inventory": "[TODO] Inventory",
+    "inventoryDeleteFailed": "[TODO] Could not delete the inventory",
+    "inventorySaveFailed": "[TODO] Could not save the inventory",
     "jobsFailed": "لا يمكن تحميل المهام",
     "launch": "ابدأ",
     "launchFailed": "لا يمكن إطلاق هذه المهمة",
@@ -593,21 +593,21 @@
     "launched_other": "تم إطلاقه ضد المضيفين {{count}}. التقدم على علامة تبويب المهام",
     "membersHint": "أضِف مضيفين أو وسومًا أو مواقع إلى هذه المجموعة بعد إنشائها. يُعاد تحليلها في كل مرة تُطلَق فيها مهمة، لذا يُضمَّن تلقائيًا أي مضيف يُضاف إلى وسم.",
     "name": "اسم",
-    "newInventory": "مجموعة مضيفين جديدة",
+    "newInventory": "[TODO] New inventory",
     "newTemplate": "قالب مهمة جديد",
     "noInventories": "لا توجد مجموعات مضيفين بعد. تحدّد المجموعة المضيفين الذين تُنفَّذ عليهم مهمة الأسطول.",
     "noJobs": "لم يتم تشغيل أي مهام أسطول حتى الآن. قم بتشغيل واحد من علامة التبويب القوالب.",
     "noTargets": "لا يوجد مضيفون لعرضهم.",
     "noTemplates": "لا توجد قوالب مهام بعد. تقوم القالب بتشغيل ملف تعريف واحد عبر جرد واحد، حسب الطلب أو وفقًا لجدول زمني.",
-    "preview": "معاينة",
+    "preview": "[TODO] Preview",
     "previewEmpty": "لا تحدّد مجموعة المضيفين هذه أي مضيف نشط حاليًا، ولن تُنفّذ أي مهمة تُطلَق عليها أي إجراء.",
-    "previewFailed": "تعذّر تحليل مجموعة المضيفين هذه",
+    "previewFailed": "[TODO] Could not resolve this inventory",
     "previewTitle": "المضيفون الذين تحدّدهم {{name}}",
     "profile": "ملف تعريف",
     "progress": "{{done}} من أصل {{total}} -- نجح {{ok}}، وفشل {{failed}}، وتم تخطّي {{skipped}}",
     "schedule": "جدول زمني (cron)",
     "scheduleHelp": "اتركه فارغًا لتشغيله يدويًا فقط.",
-    "tabInventories": "مجموعات المضيفين",
+    "tabInventories": "[TODO] Inventories",
     "tabJobs": "المهام",
     "tabTemplates": "القوالب",
     "targetsFailed": "لم يتم تحميل المضيفين",
@@ -686,7 +686,7 @@
     "name": "الاسم",
     "noVersions": "لم يتم إنشاء أي إصدارات سابقة بعد. يتم الاحتفاظ بإصدار كل مرة يتم فيها تغيير المحرك أو الجسم.",
     "saveFailed": "تعذر حفظ الملف الشخصي",
-    "title": "ملفات تكوين الملفات",
+    "title": "[TODO] Configuration Profiles",
     "updated": "تم التحديث",
     "version": "الإصدار",
     "versionLabel": "الإصدار {{n}}",
@@ -726,7 +726,7 @@
     "secretSetHelp": "كلمة المرور مخزنة في OpenBAO. أدخل كلمة مرور جديدة لاستبدالها.",
     "secretUnset": "غير محدد",
     "secretUnsetHelp": "…محمية بشكل آمن في OpenBAO وليس في قاعدة البيانات.",
-    "title": "التكوين"
+    "title": "[TODO] Configuration"
   },
   "connection": {
     "networkError": "خطأ الشبكة: لا يمكن الوصول إلى الخادم",
@@ -750,7 +750,7 @@
     "security": "الأمان",
     "settings": {
       "checkAll": "تحديد الكل",
-      "checkNone": "إلغاء تحديد الكل",
+      "checkNone": "[TODO] Check None",
       "description": "اختر البطاقات التي تريد عرضها على لوحة المعلومات",
       "loadError": "فشل في تحميل التفضيلات",
       "saveError": "فشل في حفظ التفضيلات",
@@ -806,19 +806,19 @@
     "sendFailed": "فشل إرسال البريد الإلكتروني التجريبي. يرجى التحقق من التكوين.",
     "sendTest": "إرسال بريد إلكتروني تجريبي",
     "sending": "جارٍ الإرسال...",
-    "testConfiguration": "اختبار التكوين",
+    "testConfiguration": "[TODO] Test Configuration",
     "testDialogBody": "أرسل بريدًا إلكترونيًا تجريبيًا للتحقق من أن تكوين SMTP يعمل بشكل صحيح.",
     "testDialogTitle": "اختبار تكوين البريد الإلكتروني"
   },
   "federationAlertConfig": {
     "complianceThreshold": "عتبة الامتثال (%)",
     "complianceThresholdHelp": "تنبيه عند انخفاض درجة خط الأساس تحت هذا النسبة المئوية",
-    "criticalCveThreshold": "عتبة الثغرات الحرجة",
+    "criticalCveThreshold": "[TODO] Critical CVE threshold",
     "criticalCveThresholdHelp": "تنبيه عند تجاوز عدد الثغرات الحرجة بشكل صارم هذا الرقم",
     "effective": "فعال",
     "minOfflineSeconds": "ثواني الحد الأدنى للعمل دون اتصال",
     "minOfflineSecondsHelp": "السقف لتجنب تقلبات فترات التزامن السريعة جداً",
-    "offlineMultiplier": "ضربات العمل دون اتصال",
+    "offlineMultiplier": "[TODO] Offline multiplier",
     "offlineMultiplierHelp": "ضاعف فترة تزامن الموقع قبل أن يتم الإبلاغ عنه خارج الخدمة",
     "save": "حفظ العتبات",
     "saveFailed": "فشل في تحديث العتبات.",
@@ -829,7 +829,7 @@
   "federationDispatch": {
     "cancel": "إلغاء",
     "commandType": " lệnh",
-    "dispatch": "إرسال",
+    "dispatch": "[TODO] Dispatch",
     "dispatching": "في طور الإرسال...",
     "errors": {
       "failed": "فشل في توزيع الأمر.",
@@ -853,7 +853,7 @@
       "applyUpdates": "تطبيق التحديثات",
       "deployPackages": "قم بتثبيت الحزم",
       "reboot": "اعادة التشغيل",
-      "runScript": "تنفيذ النموذج"
+      "runScript": "[TODO] Run script"
     }
   },
   "federationHosts": {
@@ -862,7 +862,7 @@
       "openSite": "الموقع"
     },
     "bulk": {
-      "clear": "مسح",
+      "clear": "[TODO] Clear",
       "dispatch": "إرسال الأمر",
       "selectAll": "اختر الكل على هذه الصفحة",
       "selected": "{{n}} مضيفات محددة"
@@ -890,7 +890,7 @@
     "errorLoad": "فشل في تحميل العُقد عبر المواقع.",
     "filters": {
       "apply": "تطبيق",
-      "clear": "مسح",
+      "clear": "[TODO] Clear",
       "osFamily": "عائلة نظام التشغيل",
       "search": "بحث (اسم / IP)",
       "status": "الحالة"
@@ -1001,13 +1001,13 @@
     "portRange": "نطاق المنافذ",
     "protocol": "البروتوكول",
     "roleName": "اسم الدور",
-    "roleNamePlaceholder": "أدخل اسم الدور",
+    "roleNamePlaceholder": "[TODO] Role Name Placeholder",
     "roleNameRequired": "اسم الدور مطلوب",
     "selectPort": "اختر المنفذ",
     "startPort": "منفذ البدء",
-    "subtitle": "العنوان الفرعي",
+    "subtitle": "[TODO] Subtitle",
     "tcp": "TCP",
-    "title": "العنوان",
+    "title": "[TODO] Firewall Roles",
     "udp": "UDP",
     "updateSuccess": "تم التحديث بنجاح"
   },
@@ -1048,7 +1048,7 @@
       "label": "اختر خادم Grafana"
     },
     "serverUrl": {
-      "label": "الرابط"
+      "label": "URL"
     },
     "status": {
       "checking": "فحص جاري...",
@@ -1104,7 +1104,7 @@
     },
     "server": "خادم Graylog",
     "serverUrl": {
-      "label": "الرابط"
+      "label": "URL"
     },
     "status": {
       "checking": "فحص جاري...",
@@ -1146,7 +1146,7 @@
     "passwordTooShort": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل",
     "primaryGroup": "المجموعة الأساسية",
     "primaryGroupHelp": "اتركه فارغًا لإنشاء مجموعة بنفس اسم المستخدم",
-    "shell": "الصدفة",
+    "shell": "[TODO] Shell",
     "shellBash": "Bash",
     "shellBourne": "Shell Bourne",
     "shellCsh": "Csh",
@@ -1185,8 +1185,8 @@
   "hostDefaults": {
     "addNewPackageManager": "إضافة مدير حزم جديد مُفعّل",
     "addNewRepository": "إضافة مستودع افتراضي جديد",
-    "configuredPackageManagers": "مديرو الحزم الإضافيون المكونون",
-    "configuredRepositories": "المستودعات الافتراضية المكونة",
+    "configuredPackageManagers": "[TODO] Configured Additional Package Managers",
+    "configuredRepositories": "[TODO] Configured Default Repositories",
     "defaultLabel": "الافتراضي",
     "defaultPackageManagerInfo": "مدير الحزم الافتراضي لـ {{os}}: {{pm}}",
     "errorAddingPackageManager": "فشل في إضافة مدير الحزم المُفعّل",
@@ -1207,7 +1207,7 @@
       "noEligible": "لا توجد مرايا متزامنة متاحة",
       "saveSuccess": "تم الحفظ. سيتم إعادة تكوين {{count}} مضيف(ين).",
       "subtitle": "لكل زوج (منصة، إصدار) مدعوم، اختر المرآة التي يستخدمها المضيفون الجدد والقائمون من تلك العائلة بشكل افتراضي. السحابة تعني أن المضيفين يصلون إلى upstream العام مباشرة. المرايا التي أكملت مزامنة ناجحة فقط مؤهلة.",
-      "title": "مرايا الحزم الافتراضية"
+      "title": "[TODO] Default Package Mirrors"
     },
     "noOptionalPackageManagers": "لا تتوفر مديرو حزم إضافيون لنظام التشغيل هذا.",
     "noPackageManagers": "لم يتم تكوين أي مديري حزم إضافيين. أضف مديري الحزم أعلاه لتفعيلهم على المضيفين.",
@@ -1355,8 +1355,8 @@
     "childHostsEmptyWslNotEnabled": "قم بتمكين WSL لإنشاء أجهزة افتراضية على هذا المضيف.",
     "childHostsRefreshError": "خطأ في طلب تحديث المضيفات الفرعية",
     "childHostsRefreshRequested": "تم طلب تحديث المضيفات الفرعية",
-    "childHostsTab": "المضيفات الفرعية",
-    "childHostsTitle": "المضيفات الفرعية",
+    "childHostsTab": "[TODO] Child Hosts",
+    "childHostsTitle": "[TODO] Child Hosts",
     "clickRequestData": "انقر فوق \"طلب بيانات المضيف\" لجمع معلومات التحقيق من الوكيل.",
     "client": "العميل",
     "collectCertificates": "جمع",
@@ -1416,7 +1416,7 @@
     "editHostname": "تعديل اسم المضيف",
     "editServices": "تعديل الخدمات",
     "enabled": "مفعّل",
-    "entitled": "مستحق",
+    "entitled": "[TODO] Entitled",
     "errorMessage": "رسالة الخطأ",
     "errorUpdatingServices": "خطأ في تحديث الخدمات",
     "expired": "منتهية الصلاحية",
@@ -1461,7 +1461,7 @@
         "installed": "مثبت",
         "kernelSupport": "دعم النواة",
         "modulesLoaded": "الوحدات محملة",
-        "running": "يعمل",
+        "running": "[TODO] Running",
         "uefiAvailable": "برنامج UEFI الثابت"
       },
       "kvm": {
@@ -1517,20 +1517,20 @@
       "confirmApplyTitle": "هل تريد تطبيق الصورة المدّخرة؟",
       "confirmRollbackMessage": "هذا يقوم بالرجوع بالصوره إلى وضعها السابق وإعادة تشغيل الجهاز. هل تريد الاستمرار؟",
       "confirmRollbackTitle": "هل تريد رجوع الصورة؟",
-      "digest": "ملخص",
+      "digest": "[TODO] Digest",
       "enterpriseNotice": "تخزين، تطبيق، ورجوع الصور هو ميزة Enterprise. يتم عرض التفاصيل الحالية للصورة أدناه.",
       "enterpriseOnly": "تحتاج إجراءات وضع الصورة إلى رخصة Enterprise",
       "imageRef": "مرجع الصورة",
       "noStagedImage": "لا توجد صورة مخزنة",
       "pendingReboot": "قيد الانتظار - إعادة تشغيل لتطبيق الصورة",
-      "rollback": "الرجوع بالصوره إلى وضعها السابق",
+      "rollback": "[TODO] Rollback",
       "rollbackAvailable": "متوفر الرجوع بالصوره إلى وضعها السابق",
       "rollbackError": "فشل في الرجوع بالصوره إلى وضعها السابق",
       "rollbackSuccess": "تم طلب الرجوع بالصوره إلى وضعها السابق (سيقوم الجهاز بإعادة التشغيل)",
-      "stage": "تخزين",
+      "stage": "[TODO] Stage",
       "stageError": "فشل في تخزين الصورة",
       "stageSuccess": "تم طلب تخزين الصورة",
-      "stagedImage": "صورة المدّخرة",
+      "stagedImage": "[TODO] Staged Image",
       "title": "وضع الصورة"
     },
     "imageModeTab": "وضع الصورة",
@@ -1560,10 +1560,10 @@
     "kvmModulesEnableSuccess": "تم طلب تفعيل وحدات KVM. سيقوم الوكيل بتحميل وحدات النواة.",
     "lastRequested": "آخر طلب",
     "livepatchClientVersion": "إصدار العميل",
-    "livepatchFixes": "الإصلاحات المطبَّقة",
+    "livepatchFixes": "[TODO] Applied Fixes",
     "livepatchKernel": "النواة المصححة",
     "livepatchLastCheck": "آخر اتصال",
-    "livepatchPatchVersion": "إصدار التصحيح",
+    "livepatchPatchVersion": "[TODO] Patch Version",
     "livepatchState": "حالة التصحيح",
     "livepatchTitle": "تصحيح النواة المباشر",
     "loadError": "فشل في تحميل تفاصيل المضيف",
@@ -1602,7 +1602,7 @@
     "opentelemetryConnectSuccess": "تم توصيل OpenTelemetry بـ Grafana بنجاح",
     "opentelemetryDeployFailed": "فشل نشر OpenTelemetry",
     "opentelemetryDeploySuccess": "تمت إضافة نشر OpenTelemetry إلى قائمة الانتظار بنجاح",
-    "opentelemetryDeployed": "منشور",
+    "opentelemetryDeployed": "[TODO] Deployed",
     "opentelemetryDisconnect": "قطع الاتصال من Grafana",
     "opentelemetryDisconnectSuccess": "تم قطع اتصال OpenTelemetry من Grafana بنجاح",
     "opentelemetryGrafanaServer": "خادم Grafana",
@@ -1612,7 +1612,7 @@
     "opentelemetryRemoveSuccess": "تم وضع إزالة OpenTelemetry في قائمة الانتظار بنجاح",
     "opentelemetryRestart": "إعادة تشغيل",
     "opentelemetryRestartSuccess": "تمت إعادة تشغيل خدمة OpenTelemetry بنجاح",
-    "opentelemetryServiceRunning": "يعمل",
+    "opentelemetryServiceRunning": "[TODO] Running",
     "opentelemetryServiceStatus": "حالة الخدمة",
     "opentelemetryServiceStopped": "متوقف",
     "opentelemetryServiceUnknown": "غير معروف",
@@ -1676,7 +1676,7 @@
     "servicesUpdateError": "خطأ في تحديث خدمات Ubuntu Pro",
     "servicesUpdateRequested": "تم طلب تحديث خدمات Ubuntu Pro",
     "servicesUpdatedCount": "{{count}} خدمة تم تحديثها",
-    "shell": "الصدفة",
+    "shell": "[TODO] Shell",
     "showingPackages": "عرض {{start}}-{{end}} من {{total}} حزمة",
     "size": "الحجم",
     "softwareChangesTab": "تغييرات البرامج",
@@ -1809,7 +1809,7 @@
     "childHostFilter": "مرشح المضيف الفرعي",
     "childHostOf": "مضيف فرعي لـ {{parent}}",
     "childHostsOnly": "المضيفات الفرعية فقط",
-    "childrenOnly": "الفرعية فقط",
+    "childrenOnly": "[TODO] Children",
     "confirmReboot": "تأكيد إعادة تشغيل النظام",
     "confirmRebootMessage": "هل أنت متأكد من أنك تريد إعادة تشغيل {{hostname}}؟ سيكون النظام غير متاح لبضع دقائق.",
     "confirmShutdown": "تأكيد إيقاف تشغيل النظام",
@@ -1820,9 +1820,9 @@
     "deployOpenTelemetry": "نشر OpenTelemetry",
     "diagnosticsRequestFailed": "فشل طلب جمع التشخيصات. يرجى المحاولة مرة أخرى.",
     "diagnosticsRequested": "تم طلب جمع التشخيصات لخادم {{hostId}}. تحقق من صفحة تفاصيل الخادم لمراجعة النتائج عند توافرها.",
-    "down": "متوقف",
+    "down": "[TODO] Down",
     "filterByTags": "تصفية بالعلامات",
-    "fqdn": "اسم النطاق الكامل",
+    "fqdn": "FQDN",
     "getDiagnostics": "الحصول على التشخيصات",
     "healthGrade": "الصحة",
     "healthScore": "درجة الصحة: {{score}}",
@@ -1845,7 +1845,7 @@
     "osUpgradeAvailable": "ترقية نظام التشغيل متاحة لهذا المضيف",
     "packagesRequestFailed": "فشل طلب جمع الحزم",
     "packagesRequested": "تم طلب جمع الحزم بنجاح",
-    "parentsOnly": "الرئيسية فقط",
+    "parentsOnly": "[TODO] Parents",
     "platform": "المنصة",
     "privileged": "مميز",
     "reboot": "إعادة التشغيل",
@@ -1897,7 +1897,7 @@
     "systemUpdatesOnly": "{{count}} تحديثات نظام",
     "tags": "العلامات",
     "unknown": "غير معروف",
-    "up": "متاح",
+    "up": "[TODO] Up",
     "updateAgent": "تحديث الوكيل",
     "updateAgentFailed": "فشل في طلب تحديث الوكيل",
     "updateAgentRequested": "تم طلب تحديث الوكيل بنجاح",
@@ -2070,7 +2070,7 @@
     "syslogProtocol": "البروتوكول",
     "targetRemoteLocked": "{{target}} (مهني)",
     "title": "التسجيل",
-    "verbosity": "مستوى التفصيل"
+    "verbosity": "[TODO] Verbosity"
   },
   "login": {
     "forgotPassword": "هل نسيت كلمة المرور؟",
@@ -2117,8 +2117,8 @@
       "fri": "الجمعة",
       "mon": "الأحد",
       "sat": "سبت",
-      "sun": "أحد",
-      "thu": "พฤหัสบดี",
+      "sun": "[TODO] Sun",
+      "thu": "[TODO] Thu",
       "tue": "อังคาร",
       "wed": "พุธ"
     },
@@ -2235,13 +2235,13 @@
     "chip": {
       "failed": "فشل",
       "failedNoText": "فشل؛ بدون نص خطأ عائد.",
-      "inFlight": "{{label}} حزجيف الدوم {{at}}",
+      "inFlight": "[TODO] {{label}} in progress since {{at}}",
       "label": {
-        "restore": "رنان",
+        "restore": "[TODO] restore",
         "snapshot": "snap",
-        "sync": "سون"
+        "sync": "[TODO] sync"
       },
-      "ok": "ممتاز"
+      "ok": "[TODO] ok"
     },
     "col": {
       "actions": "الإجراءات",
@@ -2291,14 +2291,14 @@
       },
       "col": {
         "actions": "إجراءات",
-        "digest": "الهضم",
+        "digest": "[TODO] Digest",
         "image": "صورة",
         "status": "التقاط",
         "tag": "علامة"
       },
       "empty": "لم يتم متابعة أي صور حتى الآن. أضف واحدة فوق، ثم استخدم \"التقاط الصور\".",
       "loadError": "لا يمكن تحميل الصور المتابعة.",
-      "registry": "المستودع",
+      "registry": "[TODO] Registry",
       "repository": "مستودع",
       "tag": "علامة",
       "title": "الصور المتابعة لـ {{name}}",
@@ -2349,12 +2349,12 @@
       "col": {
         "actions": "إجراءات",
         "channel": "القناة",
-        "name": "الصورة",
+        "name": "Snap",
         "status": "التقاط"
       },
       "empty": "لا توجد أي صور متابعة بعد. أضف واحدة فوق، ثم استخدم \"التقاط الصور\".",
       "loadError": "ไม่ يمكن تحميل الـ snaps المتابعة",
-      "name": "اسم الصورة",
+      "name": "[TODO] Snap name",
       "title": "الصور المتابعة لـ {{name}}",
       "track": "تتبع",
       "trackError": "لا يمكن تتبع هذا النسخة. الأسماء يجب أن تكون حروفًا صغيرة، أرقامًا، ومسات تحت",
@@ -2376,7 +2376,7 @@
       "restoreError": "فشل إعادة توزيع الاستعادة.",
       "title": "صور {{name}}"
     },
-    "tabLabel": "مرايا مستودع"
+    "tabLabel": "[TODO] Repository Mirroring"
   },
   "nav": {
     "advisories": "التحذيرات",
@@ -2395,13 +2395,13 @@
     "compliance": "الامتثال",
     "configDrift": "انحراف التكوين",
     "configJobs": "وظائف الأسطول",
-    "configProfiles": "ملفات التكوين الملفات",
+    "configProfiles": "[TODO] Config Profiles",
     "customMetrics": "المقاييس المخصصة",
     "dashboard": "لوحة التحكم",
     "federationRole": {
       "engineMissing": "محرك التحالف Pro+ المطلوب لم يتم تحميله؛ تحقق من الرخصة."
     },
-    "fips": "معايير الأمن الفيدرالي",
+    "fips": "FIPS",
     "hosts": "المضيفون",
     "logoAlt": "SysManage",
     "logout": "تسجيل الخروج",
@@ -2414,7 +2414,7 @@
     "role": {
       "collector": "مجمِّع الفجوة الهوائية",
       "engineMissing": "محرك Pro+ المطلوب غير محمل؛ تحقق من الترخيص.",
-      "repository": "المخزن المغلق"
+      "repository": "[TODO] Air-Gapped Repository"
     },
     "scripts": "البرامج النصية",
     "scrollLeft": "انقل يميناً",
@@ -2459,7 +2459,7 @@
     "operationalMode": "وضع التشغيل",
     "processId": "معرّف العملية",
     "production": "إنتاج",
-    "recentLogs": "السجلات الحديثة",
+    "recentLogs": "[TODO] Recent Logs",
     "running": "قيد التشغيل",
     "seal": "ختم",
     "sealError": "فشل في ختم OpenBAO",
@@ -2549,11 +2549,11 @@
     "required": "مطلوب",
     "saveError": "فشل حفظ ملف الامتثال",
     "subtitle": "تم تقييم تعريفات الحزم المطلوبة والمحظورة ضد جرد المضيفين",
-    "tabLabel": "ملفات ملفات الامتثال",
+    "tabLabel": "[TODO] Compliance Profiles",
     "title": "ملفات الامتثال",
     "updated": "تم حفظ ملف الامتثال",
     "version": "الإصدار",
-    "versionOp": "عملية",
+    "versionOp": "[TODO] Op",
     "versionOpAny": "(أي)"
   },
   "policies": {
@@ -2602,7 +2602,7 @@
       "error": "فشل في تعطيل السياسة.",
       "success": "'{{name}}' تمت إلغاء تنشيطه."
     },
-    "deadLetter": "رسائل الرفض",
+    "deadLetter": "dead-letter",
     "edit": {
       "error": "فشل في تحديث السياسة.",
       "submit": "حفظ",
@@ -2630,7 +2630,7 @@
     "command": " الأمر",
     "cpu": "نسبة استخدام المعالج %",
     "forceKill": "إنهاء القسري (استخدام SIGKILL بدلاً من SIGTERM)",
-    "kill": "إنهاء العملية",
+    "kill": "[TODO] Kill",
     "killConfirm": "هل تريد إنهاء العملية \"{{name}}\" (PID {{pid}})؟ لا يمكن التراجع عن هذا.",
     "killError": "فشل في طلب إنهاء",
     "killRequested": "تم طلب الإنهاء. القائمة سيتم تحديثها قريباً.",
@@ -2709,7 +2709,7 @@
     "tabCatalog": "فهرس الكتالوج المختار",
     "tabLive": "استعلام مباشر",
     "tabMine": "حزمي الخاصة",
-    "tabRuns": "التشغيل الأخير",
+    "tabRuns": "[TODO] Recent Runs",
     "targetStatus": {
       "failed": "فشل",
       "partial": "رد جزئي",
@@ -2740,7 +2740,7 @@
     "confirmRemoveLogo": "هل تريد إزالة الشعار الحالي؟",
     "constraintsHelp": "التنسيقات المسموح بها: PNG و JPEG و SVG و WEBP. الحد الأقصى للحجم: 1 ميجابايت.",
     "deleteError": "فشل إزالة الشعار",
-    "headerText": "نص الرأس",
+    "headerText": "[TODO] Header Text",
     "headerTextHelp": "يظهر بجانب الشعار في عنوان التقرير (مثل \"مُعَلَّق - للاستخدام الداخلي فقط\")",
     "loadError": "فشل تحميل علامة التقارير",
     "logoAlt": "شعار التقرير",
@@ -2752,7 +2752,7 @@
     "saveError": "فشل حفظ العلامة",
     "saved": "تم حفظ العلامة",
     "subtitle": "شعار المؤسسة ونص الرأس المضمنان في كل تقرير PDF/HTML تم إنشاؤه",
-    "tabLabel": "تخصيص التقارير",
+    "tabLabel": "[TODO] Report Branding",
     "title": "علامة التقارير",
     "uploadError": "فشل تحميل الشعار",
     "uploadLogo": "تحميل الشعار"
@@ -2838,7 +2838,7 @@
       "commercial": "تجاري",
       "compliance": "التوافق",
       "firewall": "حاجز ناري",
-      "hosts": "المرتبطين",
+      "hosts": "[TODO] hosts",
       "network": " الشبكة",
       "opensource": "مصدر مفتوح المصدر",
       "organization": "المنظمة",
@@ -2847,7 +2847,7 @@
       "roles": "الأدوار",
       "security": "الأمان",
       "systemInfo": "معلومات النظام",
-      "tags": "الرموز",
+      "tags": "[TODO] tags",
       "tracking": "تتبع",
       "users": "المستخدمين"
     },
@@ -2886,7 +2886,7 @@
     "validatingToken": "جاري التحقق من رمز إعادة التعيين..."
   },
   "scripts": {
-    "adHocScript": "دُرج سكربت عشوائي",
+    "adHocScript": "[TODO] Ad-hoc Script",
     "addScript": "إضافة سكريبت",
     "cancel": "إلغاء",
     "completedAt": "اكتمل في",
@@ -3028,11 +3028,11 @@
     "deleteMultipleSuccess": "تم حذف الأسرار بنجاح",
     "deleteSelected": "حذف المحدد",
     "deleteSuccess": "تم حذف السر بنجاح",
-    "editSecret": "تحرير السر",
+    "editSecret": "[TODO] Edit Secret",
     "filenamePlaceholder": "مثل: id_rsa.pub, server.crt, database.conf",
     "keyType": "نوع المفتاح",
     "key_type": {
-      "ca": "مرجع الشهادات",
+      "ca": "[TODO] CA",
       "private": "خاص",
       "public": "عام"
     },
@@ -3074,7 +3074,7 @@
       "protected": "محمي",
       "successMessage": "جميع الأجهزة لديها حماية من الفيروسات مفعلة.",
       "title": "تغطية مكافحة الفيروسات",
-      "totalHosts": "إجمالي الأجهزة",
+      "totalHosts": "[TODO] Total Hosts",
       "unprotected": "غير محمي",
       "warningMessage": "{{count}} جهاز (أجهزة) ليس لديها حماية من الفيروسات مفعلة."
     },
@@ -3180,7 +3180,7 @@
       "title": "محصورة جواً (الجانب المتصل بالإنترنت)"
     },
     "currentTag": "(حالي)",
-    "heading": "Server Role",
+    "heading": "[TODO] Air-Gap Role",
     "intro": "اختر كيف يشارك هذا خادم SysManage في نشر مغلق. يجب أن يستمر معظم الخوادم في البقاء على المعيار. يتم تفعيل الدور بعد إعادة تشغيل الخادم التالي.",
     "loadError": "ไม่ يمكن تحميل دور الخادم الحالي.",
     "menuTitle": "دور الخادم",
@@ -3234,7 +3234,7 @@
       "alertsTitle": "إشعارات مفتوحة",
       "autonomous": "يعمل بشكل مستقل",
       "backToList": "العودة إلى المواقع",
-      "backlogDepth": "الصف الأصلي المنتظر",
+      "backlogDepth": "[TODO] Pending upstream queue",
       "backlogUnknown": "--",
       "commandAttempts": "{{n}} محاولات إرسال",
       "commandDispatchedAt": "تم الإرسال {{when}}",
@@ -3283,7 +3283,7 @@
       "done": "انتهى",
       "engineUnavailable": "…محرك التحكم في الاتحاد غير مُحمّل؛ لا يمكن تسجيل موقع.",
       "error": "فشل في تسجيل الموقع.",
-      "location": ".etiqat al-makaan (mustaqdama)",
+      "location": "[TODO] Location label (optional)",
       "name": "اسم الموقع",
       "siteIdentityKey": "مفتاح الهوية العام للموقع (PEM)",
       "siteIdentityKeyHelp": "مطلوب. قم بلصق مفتاح الهوية العام للموقع، الذي تم الحصول عليه خارج الشبكة (من صفحة دور الخادم الخاصة بالموقع). يقوم المنسق بتأكيد دليل تسجيل الموقع ضد هذا المفتاح -- وهو ما يDefeat التسلل في وقت التسجيل.",
@@ -3402,10 +3402,10 @@
     "deleteSelected": "حذف المحدد ({{count}})",
     "deleteSuccess": "تم الحذف بنجاح",
     "detectedOs": "-detected-است",
-    "disableError": "خطأ في التعطيل",
+    "disableError": "[TODO] Disable Error",
     "disableSelected": "تعطيل المحدد ({{count}})",
     "disableSuccess": "تم التعطيل بنجاح",
-    "enableError": "خطأ في التمكين",
+    "enableError": "[TODO] Enable Error",
     "enableSelected": "تفعيل المحدد ({{count}})",
     "enableSuccess": "تم التمكين بنجاح",
     "enabled": "مفعّل",
@@ -3780,7 +3780,7 @@
       "recommendations": "التوصيات",
       "proposals": "الإصلاحات المقترحة ({{count}})",
       "packs": "حزم القواعد",
-      "posture": "الوضع الأمني"
+      "posture": "[TODO] Posture"
     },
     "feed": {
       "lens": "المنظور",
@@ -3792,13 +3792,13 @@
       "noRules": "لم تُقيَّم أي قواعد بعد. فعّل حزمة قواعد، ثم ابدأ التقييم.",
       "rule": "القاعدة",
       "risk": "المخاطر",
-      "findings": "المشكلات المكتشفة",
+      "findings": "[TODO] Findings",
       "notAssessable": "غير قابل للتقييم",
       "notApplicable": "غير منطبق",
       "clean": "سليم"
     },
     "outcome": {
-      "fires": "مشكلة مكتشفة",
+      "fires": "[TODO] Finding",
       "doesNotFire": "سليم",
       "notAssessable": "غير قابل للتقييم",
       "notApplicable": "غير منطبق"
@@ -3840,7 +3840,7 @@
       "reboot": "حالة إعادة التشغيل",
       "packages": "جرد البرامج",
       "firewall": "حالة جدار الحماية",
-      "metricHistory": "سجل المقاييس",
+      "metricHistory": "[TODO] Metric history",
       "when": "استعلام القاعدة",
       "rule": "تعريف القاعدة"
     },
@@ -3911,7 +3911,7 @@
       "moreMatches_one": "تطابق واحد إجمالًا",
       "moreMatches_other": "{{count}} من التطابقات إجمالًا",
       "notEvaluated": "لم يقيّم المستشار هذا المضيف بعد.",
-      "findings": "المشكلات المكتشفة",
+      "findings": "[TODO] Findings",
       "notAssessable": "غير قابل للتقييم",
       "proposals": "الإصلاحات المقترحة",
       "notApplicable": "غير منطبق",
@@ -4008,7 +4008,7 @@
     },
     "history": {
       "none": "لم تُسجَّل أي تغييرات بعد.",
-      "title": "السجل"
+      "title": "[TODO] History"
     },
     "loadFailed": "تعذّر تحميل الوضع الأمني.",
     "managedByServer": "يديره مشغّل الخادم",
@@ -4072,7 +4072,7 @@
     "state": {
       "notAssessable": "غير قابل للتقييم",
       "open": "مفتوح",
-      "satisfied": "مستوفى",
+      "satisfied": "[TODO] Satisfied",
       "waived": "معفى"
     },
     "waiver": {
@@ -4232,7 +4232,7 @@
     },
     "version": "الإصدار {{version}}",
     "wizard": {
-      "back": "السابق",
+      "back": "[TODO] Back",
       "chooseAll": "اختر كل ما ينطبق.",
       "next": "التالي",
       "save": "حفظ نموذج التهديدات",
@@ -4277,7 +4277,7 @@
       "unmanaged_one": "غير مُدارة: {{count}}"
     },
     "exclude": {
-      "action": "تمييز {{count}} أجهزة كمعروفة ومقبولة",
+      "action": "[TODO] Mark {{count}} as known and fine",
       "action_other": "تمييز {{count}} جهازًا كمعروف ومقبول",
       "action_one": "تمييز {{count}} جهاز كمعروف ومقبول",
       "category": "ما هذا الجهاز؟",
@@ -4364,7 +4364,7 @@
       "unsupportedPlatform": "غير مدعوم على هذا النظام الأساسي"
     },
     "sweep": {
-      "agent": "الوكيل الذي أجرى المسح",
+      "agent": "[TODO] Swept by",
       "disabled": "المسح النشط متوقف. اسمح به في الإعدادات أعلاه للعثور على الأجهزة التي لا تعلن عن نفسها أبدًا.",
       "error": "تعذّر بدء المسح.",
       "found": "تم العثور عليها",
@@ -4454,7 +4454,7 @@
       "seenTimes_other": "عدد مرات الرصد: {{count}}"
     },
     "leg": {
-      "feed": "مصدر القواعد",
+      "feed": "[TODO] Rule feed",
       "signatures": "تواقيع ClamAV"
     },
     "loadError": "تعذر تحميل نتائج البرمجيات الخبيثة.",
@@ -4520,7 +4520,7 @@
     "tabs": {
       "decided": "تم البت فيها",
       "open": "النتائج المفتوحة",
-      "scans": "عمليات الفحص",
+      "scans": "[TODO] Scans",
       "rulesets": "مجموعات القواعد"
     },
     "title": "البرمجيات الخبيثة",
@@ -4601,7 +4601,7 @@
       "by": "بواسطة",
       "done": "اكتمل {{done}} من {{total}}",
       "hostCount": "المضيفات: {{count}}",
-      "inventoryCount": "مجموعات المضيفين: {{count}}",
+      "inventoryCount": "[TODO] {{count}} inventories",
       "notScanned": "لم يتم فحصها: {{count}}",
       "progress": "التقدم",
       "started": "بدأ في",
@@ -4613,7 +4613,7 @@
       "all": "جميع المضيفات",
       "chosen": "الاختيار حسب العلامة أو مجموعة المضيفين أو المضيف",
       "hosts": "مضيفات محددة",
-      "inventories": "مجموعات المضيفين",
+      "inventories": "[TODO] Inventories",
       "tags": "العلامات"
     }
   }

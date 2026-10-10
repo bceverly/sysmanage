@@ -70,7 +70,7 @@
       },
       "last_ingest_at": "Ultima acquisizione:",
       "no_ingest": "Nessun supporto mai acquisito.",
-      "title": "Aggiornamento del repository"
+      "title": "[TODO] Repository Freshness"
     },
     "repositories": {
       "aggregate": {
@@ -99,7 +99,7 @@
         "signerFingerprint": "Impronta digitale del firmatario",
         "version": "Versione"
       },
-      "title": "Ripostigli aerei"
+      "title": "[TODO] Air-Gap Repositories"
     }
   },
   "airgapBundles": {
@@ -107,7 +107,7 @@
     "buildError": "Impossibile inserire nella coda la compilazione.",
     "buildProplus": "Compila l'aggeggio Build Pro+",
     "buildServer": "Compila l'aggeggio Build Server",
-    "bundle": "Aggeggio",
+    "bundle": "[TODO] Bundle",
     "completedAt": "Compilato",
     "confirmDelete": "Vuoi eliminare questo pacchetto e il file ISO associato?",
     "copied": "Comando copiato negli appunti",
@@ -299,7 +299,7 @@
   },
   "audit": {
     "columns": {
-      "actor": "Azione",
+      "actor": "[TODO] Actor",
       "details": "Dettagli",
       "openSite": "Aperto",
       "operation": "Operazione",
@@ -310,9 +310,9 @@
     "emptyFiltered": "Nessuna voce di audit corrispondente ai filtri.",
     "errorLoad": "Impossibile caricare il registro federato.",
     "filters": {
-      "actor": "Azione",
+      "actor": "[TODO] Actor",
       "apply": "Applica",
-      "clear": "Cancella",
+      "clear": "[TODO] Clear",
       "operation": "Operazione",
       "siteId": "ID sito"
     },
@@ -413,7 +413,7 @@
     "missingTitle": "Sull'host di riferimento, non su questo host",
     "name": "Nome",
     "noOtherHosts": "Non esiste un altro host da confrontare.",
-    "reference": "Host di riferimento",
+    "reference": "[TODO] Reference",
     "referenceHost": "Host di riferimento",
     "summary": "{{count}} differenza(i) da {{reference}}.",
     "thisHost": "Questo host",
@@ -508,7 +508,7 @@
     "dispatchError": "Impossibile inviare la scansione live",
     "dispatchSent": "Scansione live inviata all'agente -- il risultato arriverà a breve",
     "dispatchTooltip": "Chiedi all'agente una scansione live sullo stato attuale dei pacchetti",
-    "expandViolations": "Mostra/nascondi violazioni",
+    "expandViolations": "[TODO] Toggle violations",
     "lastScan": "Ultima scansione",
     "loadError": "Impossibile caricare i dati di conformità",
     "noProfiles": "Nessun profilo di conformità definito. Creane uno in Impostazioni → Profili di conformità.",
@@ -746,7 +746,7 @@
     "antivirusCoverage": "Antivirus",
     "hosts": "Host",
     "openTelemetryCoverage": "OpenTelemetry",
-    "rebootRequired": "Riavvii Richiesti",
+    "rebootRequired": "[TODO] Reboot Needed",
     "security": "Sicurezza",
     "settings": {
       "checkAll": "Seleziona Tutto",
@@ -829,7 +829,7 @@
   "federationDispatch": {
     "cancel": "Annulla",
     "commandType": "Comando",
-    "dispatch": "Invia",
+    "dispatch": "[TODO] Dispatch",
     "dispatching": "Invio in corso...",
     "errors": {
       "failed": "Impossibile inviare il comando.",
@@ -852,7 +852,7 @@
     "types": {
       "applyUpdates": "Aggiorna aggiornamenti",
       "deployPackages": "Installa pacchetti",
-      "reboot": "Riavvia",
+      "reboot": "[TODO] Reboot",
       "runScript": "Esegui script"
     }
   },
@@ -862,7 +862,7 @@
       "openSite": "Sito"
     },
     "bulk": {
-      "clear": "Cancella",
+      "clear": "[TODO] Clear",
       "dispatch": "Invia comando",
       "selectAll": "Seleziona tutto su questa pagina",
       "selected": "{{n}} host selezionati"
@@ -890,7 +890,7 @@
     "errorLoad": "Impossibile caricare gli host trans-sito.",
     "filters": {
       "apply": "Applica",
-      "clear": "Cancella",
+      "clear": "[TODO] Clear",
       "osFamily": "Famiglia del sistema operativo",
       "search": "Cerca (nome / IP)",
       "status": "Stato"
@@ -903,7 +903,7 @@
     "col": {
       "active": "Attivo",
       "compliance": "Peggior conformità",
-      "critical": "CVE critici",
+      "critical": "[TODO] Critical CVEs",
       "high": "Alte CVE",
       "hosts": "Host",
       "site": "Sito"
@@ -1001,13 +1001,13 @@
     "portRange": "Intervallo di porte",
     "protocol": "Protocollo",
     "roleName": "Nome ruolo",
-    "roleNamePlaceholder": "Inserisci il nome del ruolo",
+    "roleNamePlaceholder": "[TODO] Role Name Placeholder",
     "roleNameRequired": "Nome ruolo richiesto",
     "selectPort": "Seleziona porta",
     "startPort": "Porta iniziale",
     "subtitle": "Sottotitolo",
     "tcp": "TCP",
-    "title": "Titolo",
+    "title": "[TODO] Firewall Roles",
     "udp": "Udp",
     "updateSuccess": "Aggiornato correttamente"
   },
@@ -1416,7 +1416,7 @@
     "editHostname": "Modifica Nome Host",
     "editServices": "Modifica servizi",
     "enabled": "Abilitato",
-    "entitled": "Autorizzato",
+    "entitled": "[TODO] Entitled",
     "errorMessage": "Messaggio di errore",
     "errorUpdatingServices": "Errore nell'aggiornamento dei servizi",
     "expired": "Scaduto",
@@ -1432,7 +1432,7 @@
     "graylogPort": "(porta {{port}})",
     "graylogRequiresPrivileged": "Richiede agente in modalità privilegiata",
     "graylogStatus": "Stato Graylog",
-    "graylogTarget": "Destinazione",
+    "graylogTarget": "[TODO] Target",
     "groupMembers": "Membri",
     "hardwareInfo": "Informazioni Hardware",
     "hardwareTab": "Hardware",
@@ -1523,11 +1523,11 @@
       "imageRef": "Riferimento immagine",
       "noStagedImage": "Nessuna immagine in stato di staging",
       "pendingReboot": "In attesa -- il sistema deve essere riavviato per applicare l'immagine",
-      "rollback": "Ripristina",
+      "rollback": "[TODO] Rollback",
       "rollbackAvailable": "Ripristino disponibile",
       "rollbackError": "Impossibile ripristinare l'immagine",
       "rollbackSuccess": "Richiesta di ripristino dell'immagine (il sistema verrá riavviato)",
-      "stage": "Prepara",
+      "stage": "[TODO] Stage",
       "stageError": "Impossibile preparare l'immagine",
       "stageSuccess": "Richiesta di preparazione dell'immagine",
       "stagedImage": "Immagine in stato di staging",
@@ -1792,7 +1792,7 @@
   },
   "hosts": {
     "actionGroupDeploy": "Distribuisci",
-    "actionGroupPower": "Alimentazione",
+    "actionGroupPower": "[TODO] Power",
     "agentVersion": "Versione Agente",
     "allHosts": "Tutti",
     "antivirusDeployAllFailed": "La distribuzione dell'applicazione antivirus ha fallito su tutti i host:\\n\\n{{hosts}}",
@@ -1809,7 +1809,7 @@
     "childHostFilter": "Filtro host figlio",
     "childHostOf": "Host figlio di {{parent}}",
     "childHostsOnly": "Solo host figlio",
-    "childrenOnly": "Solo figli",
+    "childrenOnly": "[TODO] Children",
     "confirmReboot": "Conferma Riavvio del Sistema",
     "confirmRebootMessage": "Sei sicuro di voler riavviare {{hostname}}? Il sistema non sarà disponibile per alcuni minuti.",
     "confirmShutdown": "Conferma Spegnimento del Sistema",
@@ -1820,7 +1820,7 @@
     "deployOpenTelemetry": "Distribuisci OpenTelemetry",
     "diagnosticsRequestFailed": "Impossibile richiedere la raccolta diagnostica. Riprova.",
     "diagnosticsRequested": "Raccolta diagnostica richiesta per l'host {{hostId}}. Controlla la pagina dei dettagli dell'host per visualizzare i risultati quando disponibili.",
-    "down": "Inattivo",
+    "down": "[TODO] Down",
     "filterByTags": "Filtra per tag",
     "fqdn": "FQDN",
     "getDiagnostics": "Ottieni diagnostica",
@@ -1848,7 +1848,7 @@
     "parentsOnly": "Solo genitori",
     "platform": "Piattaforma",
     "privileged": "Privilegiato",
-    "reboot": "Riavvia",
+    "reboot": "[TODO] Reboot",
     "rebootFailed": "Richiesta di riavvio fallita",
     "rebootOrchestration": {
       "childName": "Nome",
@@ -1888,7 +1888,7 @@
     "selectTags": "Seleziona tag",
     "shellsAllowed": "Shell consentite",
     "showAllHosts": "Mostra tutti gli host",
-    "shutdown": "Spegni",
+    "shutdown": "[TODO] Shutdown",
     "shutdownFailed": "Richiesta di spegnimento fallita",
     "shutdownRequested": "Spegnimento richiesto con successo",
     "shutdownSelected": "Spegni Selezionati",
@@ -1897,7 +1897,7 @@
     "systemUpdatesOnly": "{{count}} aggiornamenti sistema",
     "tags": "Tag",
     "unknown": "Sconosciuto",
-    "up": "Attivo",
+    "up": "[TODO] Up",
     "updateAgent": "Aggiorna agente",
     "updateAgentFailed": "Impossibile richiedere l'aggiornamento dell'agente",
     "updateAgentRequested": "Aggiornamento agente richiesto con successo",
@@ -2114,12 +2114,12 @@
     "created": "Finestra di manutenzione creata",
     "currentWindow": "Finestra corrente",
     "day": {
-      "fri": "Ven",
+      "fri": "[TODO] Fri",
       "mon": "Lun",
-      "sat": "Sab",
-      "sun": "Dom",
-      "thu": "Gio",
-      "tue": "Mar",
+      "sat": "[TODO] Sat",
+      "sun": "[TODO] Sun",
+      "thu": "[TODO] Thu",
+      "tue": "[TODO] Tue",
       "wed": "Mer"
     },
     "daysOfWeek": "Giochi della settimana",
@@ -2226,7 +2226,7 @@
     "action": {
       "delete": "Elimina",
       "edit": "Modifica",
-      "snapshot": "Pianificazione",
+      "snapshot": "[TODO] Snapshot",
       "sync": "Sincronizza ora"
     },
     "add": "Aggiungi mirror",
@@ -2249,7 +2249,7 @@
       "name": "Nome",
       "osVersion": "SO / Versione",
       "statusRestore": "Ripristina",
-      "statusSnapshot": "Pianificazione",
+      "statusSnapshot": "[TODO] Snapshot",
       "statusSync": "Sincronizzazione",
       "upstream": "Origine"
     },
@@ -2349,12 +2349,12 @@
       "col": {
         "actions": "Azioni",
         "channel": "Canale",
-        "name": "Immagine di controllo",
+        "name": "[TODO] Snap",
         "status": "Cattura"
       },
       "empty": "Non ci sono ancora immagini di controllo monitorate. Aggiungi una sopra, quindi usa \"Cattura le immagini di controllo\".",
       "loadError": "Impossibile caricare le immagini di controllo monitorate.",
-      "name": "Nome dell'immagine di controllo",
+      "name": "[TODO] Snap name",
       "title": "Immagini di controllo monitorate per {{name}}",
       "track": "Monitora",
       "trackError": "Impossibile monitorare quell'immagine di controllo. I nomi possono contenere solo lettere minuscole, cifre e trattini.",
@@ -2365,9 +2365,9 @@
       "col": {
         "actions": "Azioni",
         "files": "File",
-        "id": "Pianificazione",
+        "id": "[TODO] Snapshot",
         "size": "Dimensione",
-        "taken": "Creato il"
+        "taken": "[TODO] Taken at"
       },
       "empty": "Ancora nessuna snapshot. Fare clic sull'icona della fotocamera per crearne una.",
       "loadError": "Impossibile caricare i snapshot.",
@@ -2381,14 +2381,14 @@
   "nav": {
     "advisories": "Avvisi",
     "airgapCollections": "Collezioni a Isolamento",
-    "airgapRepositories": "Ripostigli aerei",
+    "airgapRepositories": "[TODO] Air-Gap Repos",
     "alerts": "Avvisi",
     "cat": {
       "admin": "Amministrazione",
       "automation": "Automazione",
       "fleet": "Flotta",
       "insights": "Intuizioni",
-      "patching": "Aggiornamento",
+      "patching": "[TODO] Patching",
       "security": "Sicurezza"
     },
     "closeMenu": "Chiudi menu",
@@ -2404,7 +2404,7 @@
     "fips": "FIPS",
     "hosts": "Host",
     "logoAlt": "SysManage",
-    "logout": "Esci",
+    "logout": "[TODO] Logout",
     "maintenanceWindows": "Finestre di Manutenzione",
     "map": "Mappa",
     "osLifecycle": "Ciclo di vita del sistema operativo",
@@ -3032,7 +3032,7 @@
     "filenamePlaceholder": "ad esempio, id_rsa.pub, server.crt, database.conf",
     "keyType": "Tipo Chiave",
     "key_type": {
-      "ca": "Autorità Certificazione",
+      "ca": "[TODO] CA",
       "private": "Privata",
       "public": "Pubblica"
     },
@@ -3180,7 +3180,7 @@
       "title": "Collector aerea (lato online)"
     },
     "currentTag": "(attuale)",
-    "heading": "Server Role",
+    "heading": "[TODO] Air-Gap Role",
     "intro": "Scegli come questo server SysManage partecipi a una distribuzione aerea. La maggior parte dei server dovrebbe rimanere su Standard. Il ruolo entra in vigore dopo il prossimo riavvio del server.",
     "loadError": "Impossibile caricare il ruolo corrente del server.",
     "menuTitle": "Ruolo del server",
@@ -3203,7 +3203,7 @@
       "airgap": "Air-Gap e specchiamento",
       "general": "Generale",
       "integrations": "Integrazioni e registrazione",
-      "patching": "Aggiornamento",
+      "patching": "[TODO] Patching",
       "reporting": "Rapportistica",
       "secrets": "Segreti",
       "security": "Sicurezza e accesso",
@@ -3349,7 +3349,7 @@
     "instrumentation": {
       "fastapi": "FastAPI",
       "logging": "Registrazione",
-      "requests": "Richieste",
+      "requests": "[TODO] Requests",
       "sqlalchemy": "SQLAlchemy"
     },
     "opentelemetry": {
@@ -3442,7 +3442,7 @@
     "privilegedModeRequired": "Modalità privilegiata richiesta",
     "repoIdentifierRequired": "Identificatore del repository richiesto",
     "requiresPrivileged": "L'host deve essere in modalità privilegiata",
-    "source": "Origine",
+    "source": "[TODO] Source",
     "tapIdentifier": "Identificatore di tap",
     "tapRepo": "Repository tap",
     "tapRepoHelp": "es. cask-versions",
@@ -3783,7 +3783,7 @@
       "posture": "Postura"
     },
     "feed": {
-      "lens": "Prospettiva",
+      "lens": "[TODO] Lens",
       "allLenses": "Tutte",
       "hostsFailed": "Impossibile caricare gli host per questa regola.",
       "noOpenHosts": "Nessun rilevamento e niente di non valutato per questa regola.",
@@ -4073,7 +4073,7 @@
       "notAssessable": "Non valutabile",
       "open": "Aperto",
       "satisfied": "Soddisfatto",
-      "waived": "In deroga"
+      "waived": "[TODO] Waived"
     },
     "waiver": {
       "explain": "Una deroga registra che accetti questo rischio. Il punto resta aperto in secondo piano e la deroga decade se il rischio aumenta o se cambiano i suoi presupposti.",
@@ -4168,7 +4168,7 @@
         "pci_dss": "PCI DSS"
       },
       "risk": {
-        "high": "Parecchio",
+        "high": "[TODO] Quite a lot",
         "low": "Il meno possibile",
         "medium": "Un po', quando lo sforzo è elevato"
       },
@@ -4495,7 +4495,7 @@
     "scanHosts": "Scansiona host",
     "scans": {
       "empty": "Non è stata ancora eseguita alcuna scansione.",
-      "legs": "Componenti eseguiti",
+      "legs": "[TODO] What ran",
       "paths": "Percorsi",
       "requested": "Richiesta",
       "result": "Risultato",
@@ -4537,7 +4537,7 @@
       "wrongStatus": "lo stato attuale non lo consente"
     },
     "quarantine": {
-      "confirm": "Metti in quarantena",
+      "confirm": "[TODO] Quarantine",
       "confirmSystem": "Ho capito; mettili comunque in quarantena",
       "error": "Impossibile inviare la richiesta.",
       "explain": "Ogni agente sposta il file in una directory di quarantena privata e ne registra la posizione di origine, in modo da poterlo ripristinare esattamente. Non viene eliminato nulla. Un file modificato dopo la scansione non viene spostato.",
@@ -4587,7 +4587,7 @@
       "retireError": "Impossibile ritirare il set di regole.",
       "rules": "Regole",
       "slug": "Nome (a-z, 0-9, trattini)",
-      "source": "Origine",
+      "source": "[TODO] Source",
       "titleField": "Titolo",
       "updated": "Aggiornato",
       "version": "Versione",
@@ -4598,7 +4598,7 @@
     },
     "jobs": {
       "atOnce": "fino a {{count}} contemporaneamente",
-      "by": "Avviato da",
+      "by": "[TODO] By",
       "done": "{{done}} di {{total}} completate",
       "hostCount": "{{count}} host",
       "inventoryCount": "{{count}} inventari di host",

@@ -179,7 +179,7 @@
       "mirrorsRequired": "Au moins un cible de miroir est requise.",
       "mirrorsTitle": "Miroirs",
       "noMirrors": "Aucun miroir activé configuré. Allez aux Paramètres → Miroitement des répertoires pour en ajouter un, puis essayez de nouveau.",
-      "submit": "Ajouter une commande dans la file d'attente",
+      "submit": "[TODO] Queue Run",
       "title": "Nouvelle exécution de collection"
     },
     "discPicker": {
@@ -219,7 +219,7 @@
     "noDevice": "Aucune clé de disque d'importation n'a encore été sélectionnée. Choisissez-en une dans Paramétrage → Rôle du serveur.",
     "notReady": "Pas prêt",
     "ready": "Prêt{{label}}",
-    "rescan": "Rechercher",
+    "rescan": "[TODO] Rescan",
     "run": {
       "complete": "Terminé",
       "copying": "Copie des paquets",
@@ -299,7 +299,7 @@
   },
   "audit": {
     "columns": {
-      "actor": "Actionnaire",
+      "actor": "[TODO] Actor",
       "details": "Détails",
       "openSite": "Ouvert",
       "operation": "Opération",
@@ -310,7 +310,7 @@
     "emptyFiltered": "Aucun élément d'audit ne correspond aux filtres.",
     "errorLoad": "Impossible de charger le journal d'audit de la fédération.",
     "filters": {
-      "actor": "Actionnaire",
+      "actor": "[TODO] Actor",
       "apply": "Appliquer",
       "clear": "Effacer",
       "operation": "Opération",
@@ -413,7 +413,7 @@
     "missingTitle": "Sur la référence, pas sur cet hôte",
     "name": "Nom",
     "noOtherHosts": "Aucun autre hôte à comparer pour le moment",
-    "reference": "Hôte de référence",
+    "reference": "[TODO] Reference",
     "referenceHost": "Hôte de référence",
     "summary": "Différence(s) de {{count}} par rapport à {{reference}}.",
     "thisHost": "Cet hôte",
@@ -455,7 +455,7 @@
     "back": "Retour",
     "cancel": "Annuler",
     "clearSelection": "Effacer la sélection",
-    "close": "Fermer",
+    "close": "[TODO] Close",
     "confirm": "Confirmer",
     "confirmAction": "Confirmer l'action",
     "copied": "Copié",
@@ -464,7 +464,7 @@
     "delete": "Supprimer",
     "disabled": "Désactivé",
     "done": "Terminé",
-    "edit": "Modifier",
+    "edit": "[TODO] Edit",
     "enabled": "Activé",
     "exportCSV": "Exporter CSV",
     "exportPDF": "Exporter PDF",
@@ -508,7 +508,7 @@
     "dispatchError": "Échec de l'envoi de l'analyse en direct",
     "dispatchSent": "Analyse en direct envoyée à l'agent -- le résultat arrivera sous peu",
     "dispatchTooltip": "Demander à l'agent une analyse en direct par rapport à l'état actuel des paquets",
-    "expandViolations": "Afficher/masquer les violations",
+    "expandViolations": "[TODO] Toggle violations",
     "lastScan": "Dernière analyse",
     "loadError": "Échec du chargement des données de conformité",
     "noProfiles": "Aucun profil de conformité défini. Créez-en un dans Paramètres → Profils de conformité.",
@@ -676,7 +676,7 @@
     "deleteFailed": "Impossible de supprimer le profil",
     "deleteTitle": "Supprimer le profil",
     "description": "Description",
-    "edit": "Modifier",
+    "edit": "[TODO] Edit",
     "editTitle": "Modifier le profil de configuration",
     "engine": "Moteur",
     "history": "Historique des versions",
@@ -750,7 +750,7 @@
     "security": "Sécurité",
     "settings": {
       "checkAll": "Tout Sélectionner",
-      "checkNone": "Tout Désélectionner",
+      "checkNone": "[TODO] Check None",
       "description": "Sélectionnez les cartes à afficher sur votre tableau de bord",
       "loadError": "Impossible de charger les préférences",
       "saveError": "Impossible d'enregistrer les préférences",
@@ -781,7 +781,7 @@
     "displayNameHelp": "par ex., Ubuntu 24.04 LTS (Noble)",
     "distributionName": "Nom de la Distribution",
     "distributionNameHelp": "par ex., Ubuntu",
-    "edit": "Modifier",
+    "edit": "[TODO] Edit",
     "editError": "Erreur lors de la mise à jour de la distribution",
     "editSuccess": "Distribution mise à jour avec succès",
     "editTitle": "Modifier la Distribution",
@@ -829,7 +829,7 @@
   "federationDispatch": {
     "cancel": "Annuler",
     "commandType": "Commande",
-    "dispatch": "Lancer",
+    "dispatch": "[TODO] Dispatch",
     "dispatching": "En cours de lancement...",
     "errors": {
       "failed": "Impossible de distribuer la commande.",
@@ -876,7 +876,7 @@
       "status": "Statut"
     },
     "detail": {
-      "close": "Fermer",
+      "close": "[TODO] Close",
       "ipv6": "IPv6",
       "noLiveLink": "Le lien de détail en direct n'est pas disponible (le site propriétaire n'a aucune URL).",
       "notFound": "Ce hôte n'est plus dans le répertoire.",
@@ -1001,13 +1001,13 @@
     "portRange": "Plage de ports",
     "protocol": "Protocole",
     "roleName": "Nom du rôle",
-    "roleNamePlaceholder": "Saisissez le nom du rôle",
+    "roleNamePlaceholder": "[TODO] Role Name Placeholder",
     "roleNameRequired": "Nom du rôle requis",
     "selectPort": "Sélectionner un port",
     "startPort": "Port de début",
     "subtitle": "Sous-titre",
     "tcp": "TCP",
-    "title": "Titre",
+    "title": "[TODO] Firewall Roles",
     "udp": "UDP",
     "updateSuccess": "Mise à jour réussie"
   },
@@ -1200,7 +1200,7 @@
       "cloud": "Cloud (par défaut amont)",
       "col": {
         "mirror": "Miroir par défaut",
-        "osFamily": "Famille de SE",
+        "osFamily": "[TODO] OS Family",
         "platform": "Plateforme",
         "version": "Version"
       },
@@ -1374,7 +1374,7 @@
     "confirmUninstallMessage": "Êtes-vous sûr de vouloir désinstaller ce paquet ? Cette action supprimera le paquet du système.",
     "confirmUninstallPackage": "Désinstaller le paquet",
     "contractName": "Nom du contrat",
-    "cpuCores": "Cœurs",
+    "cpuCores": "[TODO] Cores",
     "cpuFrequency": "Fréquence",
     "cpuInfo": "Processeur",
     "cpuModel": "Modèle du Processeur",
@@ -1416,7 +1416,7 @@
     "editHostname": "Modifier le nom d'hôte",
     "editServices": "Modifier les services",
     "enabled": "Activé",
-    "entitled": "Autorisé",
+    "entitled": "[TODO] Entitled",
     "errorMessage": "Message d'erreur",
     "errorUpdatingServices": "Erreur mise à jour des services",
     "expired": "Expiré",
@@ -1551,7 +1551,7 @@
     "ipv4Address": "Adresse IPv4",
     "ipv6Address": "Adresse IPv6",
     "issuer": "Émetteur",
-    "kernel": "Noyau",
+    "kernel": "[TODO] Kernel",
     "kvmInitializeFailed": "Échec de l'initialisation KVM",
     "kvmInitializedSuccess": "Initialisation KVM demandée. L'agent installera et configurera libvirt.",
     "kvmModulesDisableFailed": "Échec de la désactivation des modules KVM. Assurez-vous qu'aucune VM n'est en cours d'exécution.",
@@ -1820,7 +1820,7 @@
     "deployOpenTelemetry": "Déployer OpenTelemetry",
     "diagnosticsRequestFailed": "Impossible de demander la collecte des diagnostics. Veuillez réessayer.",
     "diagnosticsRequested": "Collecte de diagnostics demandée pour l'hôte {{hostId}}. Veuillez consulter la page des dêtails de l'hôte pour visualiser les résultats lorsque ceux-ci seront disponibles.",
-    "down": "Hors service",
+    "down": "[TODO] Down",
     "filterByTags": "Filtrer par tags",
     "fqdn": "FQDN",
     "getDiagnostics": "Obtenir les diagnostics",
@@ -1897,7 +1897,7 @@
     "systemUpdatesOnly": "{{count}} mises à jour système",
     "tags": "Étiquettes",
     "unknown": "Inconnu",
-    "up": "En ligne",
+    "up": "[TODO] Up",
     "updateAgent": "Mettre à jour l'agent",
     "updateAgentFailed": "Échec de la demande de mise à jour de l'agent",
     "updateAgentRequested": "Mise à jour de l'agent demandée avec succès",
@@ -1915,7 +1915,7 @@
   "idp": {
     "action": {
       "delete": "Supprimer",
-      "edit": "Modifier",
+      "edit": "[TODO] Edit",
       "mappings": "Correspondances de rôles"
     },
     "add": "Ajouter un fournisseur",
@@ -2064,7 +2064,7 @@
     "sinkLinux": "le journal systemd (ou syslog)",
     "sinkMacos": "syslog",
     "sinkWindows": "le journal des événements Windows",
-    "syslogFacility": "Fédération",
+    "syslogFacility": "[TODO] Facility",
     "syslogHost": "Hôte syslog",
     "syslogPort": "Port syslog",
     "syslogProtocol": "Protocole",
@@ -2110,17 +2110,17 @@
   "maintenanceWindows": {
     "addWindow": "Planifier la maintenance",
     "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette fenêtre de maintenance ?",
-    "confirmOverride": "Surcoupure",
+    "confirmOverride": "[TODO] Override",
     "created": "Fenêtre de maintenance créée",
     "currentWindow": "Fenêtre actuelle",
     "day": {
-      "fri": "Ven",
-      "mon": "Lun",
-      "sat": "Sam",
-      "sun": "Dim",
-      "thu": "Jeu",
-      "tue": "Mar",
-      "wed": "Mer"
+      "fri": "[TODO] Fri",
+      "mon": "[TODO] Mon",
+      "sat": "[TODO] Sat",
+      "sun": "[TODO] Sun",
+      "thu": "[TODO] Thu",
+      "tue": "[TODO] Tue",
+      "wed": "[TODO] Wed"
     },
     "daysOfWeek": "Jours de la semaine",
     "deleteError": "Échec de la suppression de la fenêtre de maintenance",
@@ -2166,7 +2166,7 @@
     "state": {
       "blocked": "Bloqué",
       "in_window": "Dans une fenêtre",
-      "override": "Surcoupure active",
+      "override": "[TODO] Override active",
       "unrestricted": "Non limité"
     },
     "timezone": "Fuseau horaire",
@@ -2225,7 +2225,7 @@
   "mirror": {
     "action": {
       "delete": "Supprimer",
-      "edit": "Modifier",
+      "edit": "[TODO] Edit",
       "snapshot": "Instantané",
       "sync": "Synchroniser"
     },
@@ -2251,7 +2251,7 @@
       "statusRestore": "Restaurer",
       "statusSnapshot": "Instantané",
       "statusSync": "Synchronisation",
-      "upstream": "Amont"
+      "upstream": "[TODO] Upstream"
     },
     "configureSubtitle": "Choisissez l'hôte qui exécutera les plans de miroir de cette plateforme. Seuls les hôtes dont la plateforme correspond à l'onglet sont listés.",
     "configureTitle": "Configurer le mirroring {{platform}}",
@@ -2367,7 +2367,7 @@
         "files": "Fichiers",
         "id": "Instantané",
         "size": "Taille",
-        "taken": "Pris le"
+        "taken": "[TODO] Taken at"
       },
       "empty": "Aucun instantané encore. Cliquez sur l’icône appareil photo pour en prendre un.",
       "loadError": "Impossible de charger les instantanés.",
@@ -2380,7 +2380,7 @@
   },
   "nav": {
     "advisories": "Avis de sécurité",
-    "airgapCollections": "Exécutions de collecte en isolement",
+    "airgapCollections": "[TODO] Air-Gap Collections",
     "airgapRepositories": "Repositoires hors connexion",
     "alerts": "Alertes",
     "cat": {
@@ -2408,7 +2408,7 @@
     "maintenanceWindows": "Fenêtres de maintenance",
     "map": "Carte",
     "osLifecycle": "Cycle de vie du système d'exploitation",
-    "osUpgrades": "Mises à niveau SE",
+    "osUpgrades": "[TODO] OS Upgrades",
     "queryPacks": "Paquets de requêtes",
     "reports": "Rapports",
     "role": {
@@ -2479,7 +2479,7 @@
     "subtitle": "Gestion des secrets et stockage de clés SSH",
     "title": "Coffre-fort OpenBAO",
     "unknown": "Inconnu",
-    "unseal": "Desceller",
+    "unseal": "[TODO] Unseal",
     "unsealError": "Échec du descellement d'OpenBAO",
     "unsealed": "Descellé",
     "unsealing": "Descellement en cours..."
@@ -2546,7 +2546,7 @@
     "noConstraints": "Aucune contrainte -- ajoutez-en au moins une.",
     "packageManager": "Gestionnaire (tout)",
     "packageName": "Paquet",
-    "required": "Requis",
+    "required": "[TODO] Required",
     "saveError": "Échec de l'enregistrement du profil de conformité",
     "subtitle": "Définitions de paquets requis et bloqués évaluées par rapport à l'inventaire d'hôte",
     "tabLabel": "Profils de conformité",
@@ -2560,7 +2560,7 @@
     "actions": {
       "assign": "Attribuer",
       "deactivate": "Déactiver",
-      "edit": "Modifier",
+      "edit": "[TODO] Edit",
       "push": "Pousser maintenant"
     },
     "active": "actif",
@@ -2668,7 +2668,7 @@
     "deleteFailed": "Impossible de supprimer le paquet de requêtes",
     "deleteTitle": "Supprimer le paquet de requêtes",
     "description": "Description",
-    "edit": "Modifier",
+    "edit": "[TODO] Edit",
     "editTitle": "Modifier le paquet de requêtes",
     "failed": "Échec",
     "failedCount": "{{count}} a échoué",
@@ -2904,7 +2904,7 @@
     "deleteSelectedExecutions": "Supprimer les exécutions sélectionnées",
     "deleteSuccess": "Suppression réussie",
     "description": "Description",
-    "edit": "Modifier",
+    "edit": "[TODO] Edit",
     "errorMessage": "Message d'erreur",
     "errors": {
       "hostNotConnected": "Hôte non connecté"
@@ -3032,7 +3032,7 @@
     "filenamePlaceholder": "p. ex., id_rsa.pub, server.crt, database.conf",
     "keyType": "Type de Clé",
     "key_type": {
-      "ca": "Autorité de Certification",
+      "ca": "[TODO] CA",
       "private": "Privée",
       "public": "Publique"
     },
@@ -3091,7 +3091,7 @@
     "commercialAntivirus": "Antivirus - commercial",
     "commercialAntivirusError": "Échec du chargement du statut antivirus commercial",
     "configWarning": "Avertissement de sécurité de configuration",
-    "coreService": "Service Principal",
+    "coreService": "[TODO] Core Service",
     "criticalWarning": "AVERTISSEMENT DE SÉCURITÉ CRITIQUE",
     "daysAgo": "il y a {{days}} jours",
     "defaultCredentialsExist": "Les identifiants admin par défaut sont configurés dans votre fichier YAML",
@@ -3138,7 +3138,7 @@
     "removeCredentialsHint": "Supprimez admin_userid et admin_password de votre fichier de configuration et redémarrez le serveur",
     "removeFirewall": "Supprimer le pare-feu",
     "restartFirewall": "Redémarrer le pare-feu",
-    "scanInformation": "Informations d'Analyse",
+    "scanInformation": "[TODO] Scan Information",
     "securityStepsTitle": "Étapes de sécurité requises (dans l'ordre) :",
     "securityWarning": "Avertissement de sécurité",
     "selectRole": "Sélectionner un Rôle",
@@ -3180,7 +3180,7 @@
       "title": "Collecteur en mode hors connexion (côte connectée)"
     },
     "currentTag": "(actuel)",
-    "heading": "Server Role",
+    "heading": "[TODO] Air-Gap Role",
     "intro": "Choisissez comment ce serveur SysManage participe à une déploiement hors connexion. La plupart des serveurs doivent rester en mode Standard. Le rôle entre en vigueur après le prochain redémarrage du serveur.",
     "loadError": "Impossible de charger le rôle actuel du serveur.",
     "menuTitle": "Rôle du serveur",
@@ -3798,7 +3798,7 @@
       "clean": "Sans anomalie"
     },
     "outcome": {
-      "fires": "Constat",
+      "fires": "[TODO] Finding",
       "doesNotFire": "Sans anomalie",
       "notAssessable": "Non évaluable",
       "notApplicable": "Non applicable"
@@ -3878,7 +3878,7 @@
       "packageCount": "{{count}} paquets",
       "packageCount_one": "1 paquet",
       "packageCount_other": "{{count}} paquets",
-      "review": "Examiner",
+      "review": "[TODO] Review",
       "reviewTitle": "Examiner le correctif de {{rule}} sur {{host}}",
       "approveWarning": "L'approbation applique cette modification à l'hôte avec des droits d'administration, lors de sa prochaine fenêtre de maintenance (immédiatement s'il n'en a pas).",
       "reject": "Rejeter",
@@ -4073,7 +4073,7 @@
       "notAssessable": "Non évaluable",
       "open": "Ouvert",
       "satisfied": "Satisfait",
-      "waived": "Sous dérogation"
+      "waived": "[TODO] Waived"
     },
     "waiver": {
       "explain": "Une dérogation enregistre que vous acceptez ce risque. Le point reste ouvert en arrière-plan, et la dérogation devient caduque si le risque augmente ou si son fondement change.",
@@ -4495,7 +4495,7 @@
     "scanHosts": "Analyser les hôtes",
     "scans": {
       "empty": "Aucune analyse n'a encore été exécutée.",
-      "legs": "Éléments exécutés",
+      "legs": "[TODO] What ran",
       "paths": "Chemins",
       "requested": "Demandée",
       "result": "Résultat",
@@ -4518,9 +4518,9 @@
     },
     "subtitle": "Analyses exécutées par le ClamAV de chaque hôte, avec les signatures ClamAV et le flux de règles SysManage.",
     "tabs": {
-      "decided": "Traités",
+      "decided": "[TODO] Decided",
       "open": "Constats ouverts",
-      "scans": "Analyses",
+      "scans": "[TODO] Scans",
       "rulesets": "Jeux de règles"
     },
     "title": "Logiciels malveillants",

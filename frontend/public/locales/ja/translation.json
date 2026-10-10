@@ -179,7 +179,7 @@
       "mirrorsRequired": "少なくとも1つのミラーターゲットが必要です。",
       "mirrorsTitle": "ミラーリング",
       "noMirrors": "アクティブなミラーリングが設定されていません。設定 → レポジトリミラーリングにミラーを追加してから、再度試行してください。",
-      "submit": "キューに追加して実行",
+      "submit": "[TODO] Queue Run",
       "title": "新しいコレクション実行"
     },
     "discPicker": {
@@ -224,7 +224,7 @@
       "complete": "完了",
       "copying": "パッケージをコピー中",
       "failed": "失敗",
-      "queued": "キューに追加しました",
+      "queued": "[TODO] Queued",
       "verified": "確認済み",
       "verifying": "署名を検証しています"
     },
@@ -473,7 +473,7 @@
     "invalidDate": "無効な日付",
     "less": "少なく",
     "loading": "読み込み中...",
-    "moreActions": "その他",
+    "moreActions": "[TODO] More",
     "na": "N/A",
     "no": "いいえ",
     "noDescription": "説明なし",
@@ -534,7 +534,7 @@
     "days_other": "{{count}}日間",
     "detailTitle": "相違点 {{host}}",
     "differences": "相違点",
-    "driftingFor": "漂白しているもの",
+    "driftingFor": "[TODO] Drifting for",
     "findingsFailed": "このホストの結果を読み込むことができません",
     "host": "ホスト",
     "intro": "プロファイルに割り当てられたものと一致しなくなったホスト。ドライランによって構成のドリフトが検出されるため、ここには変更はありません。修正は実際のプロファイルの再適用を行います。",
@@ -582,7 +582,7 @@
     "hostsIn": "{{name}} のホストごとの結果",
     "intro": "1 つの構成プロファイルを多数のホストに対してまとめて実行します。ジョブはインベントリを一度にではなく波状に処理し、各ホストで何が起きたかを記録します。",
     "inventoriesFailed": "ホストインベントリを読み込めませんでした",
-    "inventory": "ホストインベントリ",
+    "inventory": "[TODO] Inventory",
     "inventoryDeleteFailed": "ホストインベントリを削除できませんでした",
     "inventorySaveFailed": "ホストインベントリを保存できませんでした",
     "jobsFailed": "ジョブを読み込めませんでした",
@@ -607,7 +607,7 @@
     "progress": "{{done}}の{{total}} -- {{ok}}が成功しました、{{failed}}が失敗しました、{{skipped}}がスキップされました",
     "schedule": "スケジュール (cron)",
     "scheduleHelp": "空白のままにして手動で起動する場合はこのフィールドを空にします。",
-    "tabInventories": "ホストインベントリ",
+    "tabInventories": "[TODO] Inventories",
     "tabJobs": "ジョブ",
     "tabTemplates": "テンプレート",
     "targetsFailed": "ホストを読み込むことができませんでした",
@@ -750,7 +750,7 @@
     "security": "セキュリティ",
     "settings": {
       "checkAll": "すべて選択",
-      "checkNone": "すべて解除",
+      "checkNone": "[TODO] Check None",
       "description": "ダッシュボードに表示するカードを選択",
       "loadError": "設定の読み込みに失敗しました",
       "saveError": "設定の保存に失敗しました",
@@ -795,7 +795,7 @@
     "loadError": "ディストリビューションの読み込みエラー",
     "minAgentVersion": "最小エージェントバージョン",
     "notes": "備考",
-    "title": "チャイルドホストディストリビューション",
+    "title": "[TODO] Child Host Distributions",
     "version": "バージョン",
     "versionHelp": "例: 24.04"
   },
@@ -1001,13 +1001,13 @@
     "portRange": "ポート範囲",
     "protocol": "プロトコル",
     "roleName": "ロール名",
-    "roleNamePlaceholder": "ロール名を入力",
+    "roleNamePlaceholder": "[TODO] Role Name Placeholder",
     "roleNameRequired": "ロール名が必要",
     "selectPort": "ポートを選択",
     "startPort": "開始ポート",
     "subtitle": "サブタイトル",
     "tcp": "TCP",
-    "title": "タイトル",
+    "title": "[TODO] Firewall Roles",
     "udp": "UDP",
     "updateSuccess": "更新に成功"
   },
@@ -1361,7 +1361,7 @@
     "client": "クライアント",
     "collectCertificates": "収集",
     "collectRoles": "収集",
-    "collectedAt": "収集日時",
+    "collectedAt": "[TODO] Collected",
     "collectionId": "収集ID",
     "collectionStatus": "ステータス",
     "completedAt": "完了日時",
@@ -1416,7 +1416,7 @@
     "editHostname": "ホスト名を編集",
     "editServices": "サービスを編集",
     "enabled": "有効",
-    "entitled": "有効",
+    "entitled": "[TODO] Entitled",
     "errorMessage": "エラーメッセージ",
     "errorUpdatingServices": "サービス更新エラー",
     "expired": "期限切れ",
@@ -1809,7 +1809,7 @@
     "childHostFilter": "子ホストフィルター",
     "childHostOf": "{{parent}}の子ホスト",
     "childHostsOnly": "子ホストのみ",
-    "childrenOnly": "子のみ",
+    "childrenOnly": "[TODO] Children",
     "confirmReboot": "システム再起動の確認",
     "confirmRebootMessage": "{{hostname}}を再起動してもよろしいですか？システムは数分間利用できなくなります。",
     "confirmShutdown": "システムシャットダウンの確認",
@@ -1835,7 +1835,7 @@
     "lastCheckin": "最終チェックイン",
     "lastSeen": "{{minutes}}分前に最終確認",
     "minutesAgo": "{{minutes}}分前",
-    "never": "未確認",
+    "never": "[TODO] never",
     "noEligibleHostsForAntivirus": "適格なホストが選択されていません。ウイルス対策のデプロイにはホストがアクティブかつ特権モードである必要があります。",
     "noResults": "結果なし",
     "noRows": "行なし",
@@ -2215,11 +2215,11 @@
     "verifyAndEnroll": "確認して登録"
   },
   "migrationCompat": {
-    "currently": "現在のバージョン:",
+    "currently": "[TODO] currently at",
     "intro": "1つ以上のPro+モジュールが読み込めません。データベーススキーマが必要なバージョンより古いためです。サーバーで",
     "noVersion": "alembic_version 行が見つかりません",
     "outro": "を実行してから、sysmanageを再起動してください。",
-    "requires": "必要なバージョン:",
+    "requires": "[TODO] requires",
     "title": "データベースの移行が必要です"
   },
   "mirror": {
@@ -2307,7 +2307,7 @@
       "untrack": "このイメージの追跡を停止する",
       "untrackError": "その画像の追跡解除に失敗しました。"
     },
-    "listTitle": "リポジトリミラー",
+    "listTitle": "[TODO] Mirror Repositories",
     "loadError": "リポジトリミラーを読み込めませんでした。",
     "noEligibleHosts": "登録された{{family}}ホストがありません -- 登録して更新してください。",
     "platform": {
@@ -2367,7 +2367,7 @@
         "files": "ファイル",
         "id": "スナップショット",
         "size": "サイズ",
-        "taken": "作成日時"
+        "taken": "[TODO] Taken at"
       },
       "empty": "スナップショットはまだありません。スナップショットを取るにはカメラアイコンをクリックしてください。",
       "loadError": "スナップショットの読み込みに失敗しました。",
@@ -2376,7 +2376,7 @@
       "restoreError": "復元ディスPATCHが失敗しました。",
       "title": "{{name}}のスナップショット"
     },
-    "tabLabel": "リポジトリミラー"
+    "tabLabel": "[TODO] Repository Mirroring"
   },
   "nav": {
     "advisories": "注意事項",
@@ -2454,7 +2454,7 @@
     "disabledNote": "Vault機能を使用するにはsysmanage.yamlでOpenBAOを有効にしてください",
     "hideLogs": "ログを隠す",
     "loadError": "OpenBAOステータスの読み込みに失敗しました",
-    "mountPath": "マウントパス",
+    "mountPath": "[TODO] Mount Path",
     "noLogs": "最近のログはありません",
     "operationalMode": "動作モード",
     "processId": "プロセスID",
@@ -2553,7 +2553,7 @@
     "title": "コンプライアンスプロファイル",
     "updated": "コンプライアンスプロファイルを保存しました",
     "version": "バージョン",
-    "versionOp": "演算子",
+    "versionOp": "[TODO] Op",
     "versionOpAny": "(任意)"
   },
   "policies": {
@@ -3032,7 +3032,7 @@
     "filenamePlaceholder": "例: id_rsa.pub, server.crt, database.conf",
     "keyType": "キータイプ",
     "key_type": {
-      "ca": "認証局",
+      "ca": "[TODO] CA",
       "private": "プライベート",
       "public": "パブリック"
     },
@@ -3112,7 +3112,7 @@
     "firewallError": "ファイアウォールの状態の読み込みに失敗しました",
     "firewallRemoveNotImplemented": "ファイアウォールの削除はまだサポートされていません",
     "firewallRestartError": "ファイアウォールの再起動に失敗しました",
-    "firewallRoles": "ファイアウォールロール",
+    "firewallRoles": "[TODO] Firewall Roles",
     "firewallRolesSaveError": "ファイアウォールロールの保存に失敗しました",
     "firewallSoftware": "ファイアウォールソフトウェア",
     "installPath": "インストールパス",
@@ -3180,7 +3180,7 @@
       "title": "オフライン側のエアギャップ コレクター"
     },
     "currentTag": "(現在)",
-    "heading": "Server Role",
+    "heading": "[TODO] Air-Gap Role",
     "intro": "この SysManage サーバーがエアギャップ展開にどのように参加するかを選択します。ほとんどのサーバーは標準のままにしておいてください。役割は次のサーバー再起動後に効果を発揮します。",
     "loadError": "現在のサーバーロールの読み込みに失敗しました。",
     "menuTitle": "サーバーロール",
@@ -3214,7 +3214,7 @@
   "sites": {
     "actions": {
       "remove": "削除する",
-      "resume": "再開する",
+      "resume": "[TODO] Resume",
       "suspend": "一時停止"
     },
     "addSite": "サイトの登録",
@@ -3624,7 +3624,7 @@
     "lastName": "姓",
     "loadError": "ユーザー詳細の読み込みに失敗しました",
     "lockUser": "ユーザーをロック",
-    "lockedAt": "ロック日時",
+    "lockedAt": "[TODO] Locked At",
     "notFound": "ユーザーが見つかりません",
     "passwordResetError": "パスワードリセットメールの送信に失敗しました。再度お試しください。",
     "passwordResetSuccess": "パスワードリセットメールが{{email}}に送信されました",
@@ -3806,7 +3806,7 @@
     "level": {
       "critical": "重大",
       "high": "高",
-      "medium": "中",
+      "medium": "[TODO] Medium",
       "low": "低",
       "none": "検出なし",
       "unknown": "未評価"
@@ -3878,7 +3878,7 @@
       "packageCount": "{{count}} 個のパッケージ",
       "packageCount_one": "1 個のパッケージ",
       "packageCount_other": "{{count}} 個のパッケージ",
-      "review": "確認",
+      "review": "[TODO] Review",
       "reviewTitle": "{{host}} の {{rule}} に対する修正を確認",
       "approveWarning": "承認すると、この変更は管理者権限でホストに適用されます。適用は次のメンテナンスウィンドウで行われます (ウィンドウがない場合は即時)。",
       "reject": "却下",
@@ -4071,7 +4071,7 @@
     "stalePass": "一部の項目は以前の脅威モデルで最後に評価されました。次回の評価で更新されます。",
     "state": {
       "notAssessable": "評価不能",
-      "open": "未対応",
+      "open": "[TODO] Open",
       "satisfied": "充足",
       "waived": "免除済み"
     },
@@ -4141,7 +4141,7 @@
       "downtime": {
         "days": "数日",
         "hours": "数時間",
-        "minutes": "数分"
+        "minutes": "[TODO] Minutes"
       },
       "exposure": {
         "air_gapped": "エアギャップ: インターネットへのネットワーク経路なし",
@@ -4315,7 +4315,7 @@
     "policy": {
       "enabled": "エージェントがネットワーク上のデバイスをリッスンする",
       "hour": "1 時間ごと",
-      "interval": "報告間隔",
+      "interval": "[TODO] Report",
       "lastChanged": "最終変更：{{who}}（{{when}}）",
       "minutes": "{{count}} 分ごと",
       "minutes_other": "{{count}} 分ごと",
@@ -4338,7 +4338,7 @@
       "address": "アドレス",
       "device": "デバイス",
       "empty": "一致するデバイスはありません。",
-      "evidence": "自己申告の内容",
+      "evidence": "[TODO] What it says it is",
       "ipOnly": "MAC 未検出",
       "lastSeen": "最終検出",
       "localMac": "アドレスが変わる可能性あり",
@@ -4364,10 +4364,10 @@
       "unsupportedPlatform": "このプラットフォームではサポートされていません"
     },
     "sweep": {
-      "agent": "スキャンしたエージェント",
+      "agent": "[TODO] Swept by",
       "disabled": "アクティブスキャンはオフになっています。自身の存在を通知しないデバイスを見つけるには、上の設定で許可してください。",
       "error": "スキャンを開始できませんでした。",
-      "found": "検出数",
+      "found": "[TODO] Found",
       "foundOf": "{{probed}} 件のアドレス中 {{found}} 件",
       "intro": "ネットワーク上のエージェントがすべてのアドレスに小さなパケットを 1 つずつ送信し、応答したすべてのデバイスを報告します。これにより、自身の存在を通知しないデバイスも見つかります。この操作はあなたの名前とともに記録されます。",
       "none": "まだスキャンされたネットワークはありません。",
@@ -4448,7 +4448,7 @@
       "lastSeen": "最終検出",
       "seenTimes": "{{count}} 回検出",
       "severity": "重要度",
-      "signature": "検出名",
+      "signature": "[TODO] Detection",
       "status": "ステータス",
       "seenTimes_one": "{{count}} 回検出",
       "seenTimes_other": "{{count}} 回検出"
@@ -4495,7 +4495,7 @@
     "scanHosts": "ホストをスキャン",
     "scans": {
       "empty": "まだスキャンは実行されていません。",
-      "legs": "実行内容",
+      "legs": "[TODO] What ran",
       "paths": "パス",
       "requested": "要求日時",
       "result": "結果",
@@ -4507,11 +4507,11 @@
       "high": "高",
       "info": "情報",
       "low": "低",
-      "medium": "中"
+      "medium": "[TODO] Medium"
     },
     "status": {
       "falsePositive": "誤検知",
-      "open": "未対応",
+      "open": "[TODO] Open",
       "quarantined": "隔離済み",
       "resolved": "解決済み",
       "restored": "復元済み"
@@ -4519,7 +4519,7 @@
     "subtitle": "各ホスト自身の ClamAV が、ClamAV のシグネチャと SysManage ルールフィードを使って実行したスキャンです。",
     "tabs": {
       "decided": "判定済み",
-      "open": "未対応の検出事項",
+      "open": "[TODO] Open findings",
       "scans": "スキャン",
       "rulesets": "ルールセット"
     },
@@ -4598,7 +4598,7 @@
     },
     "jobs": {
       "atOnce": "同時に最大 {{count}} 台",
-      "by": "実行者",
+      "by": "[TODO] By",
       "done": "{{total}} 件中 {{done}} 件完了",
       "hostCount": "{{count}} 台のホスト",
       "inventoryCount": "{{count}} 件のホストインベントリ",
@@ -4613,7 +4613,7 @@
       "all": "すべてのホスト",
       "chosen": "タグ、インベントリ、ホストで選択",
       "hosts": "個別のホスト",
-      "inventories": "ホストインベントリ",
+      "inventories": "[TODO] Inventories",
       "tags": "タグ"
     }
   }
