@@ -2195,7 +2195,7 @@ msgstr "未知的過濾類型：%s"
 #: backend/api/content_lifecycle.py:371
 #, python-format
 msgid "The '%s' filter requires the Advisory engine, which is not loaded"
-msgstr ""
+msgstr "該 '%s' 過濾器需要諮詢引擎，但此引擎未載入"
 
 #: backend/api/content_lifecycle.py:381
 #, python-format
@@ -5341,6 +5341,23 @@ msgstr "NetBSD pkgsrc 套件弱點（pkg_admin audit 讀取的資料）"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "依作業系統版本列出的 macOS 弱點（來自 NVD 的受影響版本資料）"
 
+msgid "The single sign-on session has expired. Sign in again."
+msgstr "單一登入工作階段已過期。請重新登入。"
+
+#: backend/api/message_handlers_core.py
+msgid "Agent session refused: it did not prove it is this host"
+msgstr "已拒絕代理程式工作階段：它未證明自己是此主機"
+
+#: backend/api/message_handlers_core.py
+msgid ""
+"This agent did not prove it is this host. If the host was reinstalled, "
+"remove it from SysManage and approve its new registration."
+msgstr "此代理程式未證明自己是此主機。如果主機已重新安裝，請從 SysManage 中移除它，然後核准其新的註冊。"
+
+#: backend/api/message_handlers.py
+msgid "This session cannot acknowledge another host's message"
+msgstr "此工作階段無法確認其他主機的訊息"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "電子郵件服務已停用。請在設定檔中啟用。"
 
@@ -6025,18 +6042,3 @@ msgstr "依作業系統版本列出的 macOS 弱點（來自 NVD 的受影響版
 
 #~ msgid "Executing command sequence"
 #~ msgstr "正在執行命令序列"
-
-msgid "The single sign-on session has expired. Sign in again."
-msgstr "單一登入工作階段已過期。請重新登入。"
-
-#: backend/api/message_handlers_core.py
-msgid "Agent session refused: it did not prove it is this host"
-msgstr "已拒絕代理程式工作階段：它未證明自己是此主機"
-
-#: backend/api/message_handlers_core.py
-msgid "This agent did not prove it is this host. If the host was reinstalled, remove it from SysManage and approve its new registration."
-msgstr "此代理程式未證明自己是此主機。如果主機已重新安裝，請從 SysManage 中移除它，然後核准其新的註冊。"
-
-#: backend/api/message_handlers.py
-msgid "This session cannot acknowledge another host's message"
-msgstr "此工作階段無法確認其他主機的訊息"

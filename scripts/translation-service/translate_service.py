@@ -403,7 +403,7 @@ _SCRIPT_TAGS = (
 # new output guard lands, so `curl .../health` distinguishes builds.
 # "untranslated" is opt-in per request (require_change) -- advertised so a
 # deploy is verifiable, same as the other two.
-SERVICE_GUARDS = ("placeholders", "language", "untranslated", "english")
+SERVICE_GUARDS = ("placeholders", "language", "untranslated", "english", "shape")
 
 
 def _scripts_used(text: str) -> set:
@@ -505,6 +505,13 @@ def _correction_note(reason: str, src: str, lang_code: str) -> str:
         return (
             f"Your previous answer was NOT in {language}. Answer in {language}, "
             f"written in the {scripts} script. Do not answer in any other language."
+        )
+    if reason == "shape":
+        return (
+            "Your previous answer was not a plain translation. Return each "
+            f"translation as ONE {language} string -- never a list or a pair "
+            "with the English, never a bracketed note -- and use ASCII hyphens, "
+            "not en or em dashes."
         )
     if reason == "english":
         return (
@@ -763,15 +770,18 @@ async def _ollama_translate_chunk(
             return "placeholders"
         if not _language_ok(lang_code, txt):
             return "language"
-        if (
-            i18n_quality is not None
-            and len(i18n_quality.english_words(lang_code, txt))
-            >= i18n_quality.ENGLISH_HIT_LIMIT
-        ):
+        why = i18n_quality.problem(lang_code, src, txt) if i18n_quality else None
+        if why and why.startswith("untranslated English"):
             # English left in the answer, whole or word by word ("Cliquer
             # 'Ajouter Dépôt' to appliquer to tous compatible hôtes").  The
             # script guard above cannot see it: it is the right alphabet.
             return "english"
+        if why and not why.startswith("placeholders"):
+            # Not a translation at all: an "[English, translation]" PAIR (the
+            # model did this for 95 nl/ru values on 2026-10-10 and they were
+            # saved as Python list text), a pipeline marker, or an en/em
+            # dash.  Placeholders are judged by _placeholders_ok above.
+            return "shape"
         if require_change and txt.strip() == src.strip():
             # The caller filters its intentionally-English strings out before
             # sending, so anything that arrives here MUST change.  Without this

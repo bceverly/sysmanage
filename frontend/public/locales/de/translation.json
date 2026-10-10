@@ -74,7 +74,7 @@
     },
     "repositories": {
       "aggregate": {
-        "daysAgo": "[TODO] {{days}} day(s) ago",
+        "daysAgo": "vor {{days}} Tagen",
         "noIngest": "n/v",
         "oldestFreshness": "Älteste Fräschkeit",
         "staleRepos": "Veraltete Repositories (> {{days}}d)",
@@ -312,7 +312,7 @@
     "filters": {
       "actor": "Akteur",
       "apply": "Anwenden",
-      "clear": "[TODO] Clear",
+      "clear": "Löschen",
       "operation": "Operation",
       "siteId": "Standort-ID"
     },
@@ -413,7 +413,7 @@
     "missingTitle": "Auf der Referenz, aber nicht auf diesem Host",
     "name": "Name",
     "noOtherHosts": "Es gibt keinen anderen Host zum Vergleichen.",
-    "reference": "[TODO] Reference",
+    "reference": "Referenz",
     "referenceHost": "Referenz-Host",
     "summary": "{{count}} Unterschied(e) von {{reference}}.",
     "thisHost": "Dieser Host",
@@ -499,7 +499,7 @@
     "unassigned": "Nicht zugewiesen",
     "unknown": "Unbekannt",
     "update": "Aktualisieren",
-    "view": "[TODO] View",
+    "view": "Ansicht",
     "yes": "Ja"
   },
   "compliance": {
@@ -552,7 +552,7 @@
     "tabDrift": "Schwankende Hosts",
     "tabPlaybooks": "Sanierungs-Playbooks",
     "title": "Konfiguration driften",
-    "view": "[TODO] View",
+    "view": "Ansicht",
     "tabFileWatches": "Überwachte Dateien"
   },
   "configFleet": {
@@ -573,7 +573,7 @@
     "confirmLaunchLive": "Damit wird {{profile}} tatsächlich auf jedem Host in {{inventory}} ausgeführt und die Hosts werden entsprechend geändert. Für Hosts innerhalb eines Wartungsfensters wird die Zustellung zurückgehalten.",
     "confirmLaunchTitle": "Soll dieser Job gestartet werden?",
     "deleteInventoryBody": "Job-Vorlagen, die {{name}} verwenden, müssen zuerst gelöscht werden.",
-    "deleteInventoryTitle": "[TODO] Delete this inventory?",
+    "deleteInventoryTitle": "Dieses Inventar löschen?",
     "description": "Beschreibung",
     "hostCount": "{{count}} hosts",
     "hostCount_one": "{{count}} host",
@@ -581,10 +581,10 @@
     "hosts": "Ergebnisse pro Host",
     "hostsIn": "Ergebnisse pro Host für {{name}}",
     "intro": "Führen Sie ein Konfigurationsprofil auf vielen Hosts gleichzeitig aus. Ein Job arbeitet seine Hostgruppe in Wellen ab statt alles auf einmal, und hält fest, was auf jedem Host geschehen ist.",
-    "inventoriesFailed": "[TODO] Could not load inventories",
-    "inventory": "[TODO] Inventory",
-    "inventoryDeleteFailed": "[TODO] Could not delete the inventory",
-    "inventorySaveFailed": "[TODO] Could not save the inventory",
+    "inventoriesFailed": "Könnte Inventare nicht laden",
+    "inventory": "Inventar",
+    "inventoryDeleteFailed": "Könnte das Inventar nicht löschen",
+    "inventorySaveFailed": "Könnte das Inventar nicht speichern",
     "jobsFailed": "Jobs konnten nicht geladen werden",
     "launch": "Starten",
     "launchFailed": "Dieser Job konnte nicht gestartet werden",
@@ -593,7 +593,7 @@
     "launched_other": "Auf {{count}} Hosts gestartet. Den Fortschritt finden Sie auf der Registerkarte „Jobs“.",
     "membersHint": "Fügen Sie dieser Hostgruppe nach dem Anlegen Hosts, Tags oder Standorte hinzu. Sie werden bei jedem Start eines Jobs neu aufgelöst, sodass ein zu einem Tag hinzugefügter Host automatisch berücksichtigt wird.",
     "name": "Name",
-    "newInventory": "[TODO] New inventory",
+    "newInventory": "Neues Inventar",
     "newTemplate": "Neue Jobvorlage",
     "noInventories": "Noch keine Hostgruppen. Eine Hostgruppe benennt die Hosts, auf denen ein Flotten-Job läuft.",
     "noJobs": "Es wurden noch keine Flotten-Jobs ausgeführt. Starten Sie einen über die Registerkarte „Vorlagen“.",
@@ -607,7 +607,7 @@
     "progress": "{{done}} von {{total}} -- {{ok}} erfolgreich, {{failed}} fehlgeschlagen, {{skipped}} übersprungen",
     "schedule": "Planung (Cron)",
     "scheduleHelp": "Lassen Sie leer, um manuell zu starten.",
-    "tabInventories": "[TODO] Inventories",
+    "tabInventories": "Inventare",
     "tabJobs": "Jobs",
     "tabTemplates": "Vorlagen",
     "targetsFailed": "Könnte Hosts nicht laden",
@@ -829,7 +829,7 @@
   "federationDispatch": {
     "cancel": "Abbrechen",
     "commandType": "Befehl",
-    "dispatch": "[TODO] Dispatch",
+    "dispatch": "Abfertigen",
     "dispatching": "Wird verteilt...",
     "errors": {
       "failed": "Senden des Befehls fehlgeschlagen.",
@@ -862,7 +862,7 @@
       "openSite": "Standort"
     },
     "bulk": {
-      "clear": "[TODO] Clear",
+      "clear": "Löschen",
       "dispatch": "Befehl verteilen",
       "selectAll": "Alle auf dieser Seite auswählen",
       "selected": "{{n}} Hosts ausgewählt"
@@ -890,7 +890,7 @@
     "errorLoad": "Cross-Site-Hosts laden fehlgeschlagen.",
     "filters": {
       "apply": "Anwenden",
-      "clear": "[TODO] Clear",
+      "clear": "Löschen",
       "osFamily": "Betriebssystem-Familie",
       "search": "Suchen (Name / IP)",
       "status": "Status"
@@ -1007,7 +1007,7 @@
     "startPort": "Start-Port",
     "subtitle": "Untertitel",
     "tcp": "TCP",
-    "title": "[TODO] Firewall Roles",
+    "title": "Feuerwandrollen",
     "udp": "Udp",
     "updateSuccess": "Erfolgreich aktualisiert"
   },
@@ -1187,7 +1187,7 @@
     "addNewRepository": "Neues Standard-Repository hinzufügen",
     "configuredPackageManagers": "Konfigurierte zusätzliche Paketmanager",
     "configuredRepositories": "Konfigurierte Standard-Repositories",
-    "defaultLabel": "[TODO] Default",
+    "defaultLabel": "Standard",
     "defaultPackageManagerInfo": "Standard-Paketmanager für {{os}}: {{pm}}",
     "errorAddingPackageManager": "Fehler beim Hinzufügen des aktivierten Paketmanagers",
     "errorAddingRepository": "Fehler beim Hinzufügen des Standard-Repositories",
@@ -1374,7 +1374,7 @@
     "confirmUninstallMessage": "Sind Sie sicher, dass Sie dieses Paket deinstallieren möchten? Diese Aktion entfernt das Paket vom System.",
     "confirmUninstallPackage": "Paket deinstallieren",
     "contractName": "Vertragsname",
-    "cpuCores": "[TODO] Cores",
+    "cpuCores": "Kerne",
     "cpuFrequency": "Frequenz",
     "cpuInfo": "Prozessor",
     "cpuModel": "Prozessor-Modell",
@@ -1510,7 +1510,7 @@
       "apply": "Anwenden",
       "applyError": "Bildanwendung fehlgeschlagen",
       "applySuccess": "Bildanwendung angefordert (der Host wird neu gestartet)",
-      "backend": "[TODO] Backend",
+      "backend": "Backend",
       "badge": "Bildmodus",
       "bootedImage": "Geladenes Bild",
       "confirmApplyMessage": "Dies wendet das vorbereitete Bild an und startet den Host neu. Fortfahren?",
@@ -1523,11 +1523,11 @@
       "imageRef": "Bildreferenz",
       "noStagedImage": "Kein Bild vorbereitet",
       "pendingReboot": "Ausstehend -- Neustart zum Anwenden erforderlich",
-      "rollback": "[TODO] Rollback",
+      "rollback": "Rückgängig machen",
       "rollbackAvailable": "Rübckstapelschaltfläche verfügbar",
       "rollbackError": "Rürckstapeln des Bilds fehlgeschlagen",
       "rollbackSuccess": "Rürckstapeln des Bilds angefordert (der Host wird neu gestartet)",
-      "stage": "[TODO] Stage",
+      "stage": "Phase",
       "stageError": "Vorbereiten des Bilds fehlgeschlagen",
       "stageSuccess": "Vorbereiten des Bilds angefordert",
       "stagedImage": "Geladenes Bild",
@@ -1757,7 +1757,7 @@
     "windowsIsoPathRequired": "Bitte geben Sie den Pfad zum Windows-Installations-ISO auf dem Elternteil an",
     "windowsJoinDomainToggle": "Zum Active Directory-Domänenverbund hinzufügen",
     "windowsLocaleHelp": "Schnittstellen- und Eingabesprache, z.B. \"en-US\"",
-    "windowsLocaleLabel": "[TODO] Locale",
+    "windowsLocaleLabel": "Lokale",
     "windowsProductKeyHelp": "AVMA, MAK oder KMS-Schlüssel. Lassen Sie leer für Evaluierungsmedien, die ohne einen Schlüssel installiert werden. Speichert in OpenBAO, nicht in der Datenbank.",
     "windowsProductKeyLabel": "Lizenzschlüssel",
     "windowsSectionTitle": "Windows Server-Einrichtung",
@@ -1820,7 +1820,7 @@
     "deployOpenTelemetry": "OpenTelemetry bereitstellen",
     "diagnosticsRequestFailed": "Fehler beim Anfordern der Diagnosekennung. Bitte versuchen Sie es erneut.",
     "diagnosticsRequested": "Diagnosekennung angefordert für Host {{hostId}}. Bitte überprüfen Sie die Hostdetails-Seite, um die Ergebnisse anzuzeigen, sobald diese verfügbar sind.",
-    "down": "[TODO] Down",
+    "down": "Abgebrochen",
     "filterByTags": "Nach Tags filtern",
     "fqdn": "FQDN",
     "getDiagnostics": "Diagnose abrufen",
@@ -1995,7 +1995,7 @@
         "group": "Externe Gruppe",
         "role": "Rolle"
       },
-      "default": "[TODO] Default",
+      "default": "Standard",
       "empty": "Noch keine Zuordnungen.",
       "group": "Externe Gruppe",
       "role": "sysmanage-Rollenname"
@@ -2084,7 +2084,7 @@
     "mfaTitle": "Zwei-Faktor-Authentifizierung",
     "mfaVerify": "Verifizieren",
     "password": "Passwort",
-    "remember": "[TODO] Remember me",
+    "remember": "Mich erinnern",
     "submit": "Anmelden",
     "title": "Anmelden",
     "username": "Benutzername oder E-Mail",
@@ -2116,11 +2116,11 @@
     "day": {
       "fri": "Freitag",
       "mon": "Montag",
-      "sat": "[TODO] Sat",
-      "sun": "[TODO] Sun",
-      "thu": "[TODO] Thu",
-      "tue": "[TODO] Tue",
-      "wed": "[TODO] Wed"
+      "sat": "Samstag",
+      "sun": "Sonne",
+      "thu": "Donnerstag",
+      "tue": "Dienstag",
+      "wed": "Mittwoch"
     },
     "daysOfWeek": "Wochentage",
     "deleteError": "Fehler beim Löschen des Wartungsfensters",
@@ -2136,7 +2136,7 @@
     "hostCardTitle": "Wartungsfenster",
     "inBlackout": "Im Blackout: {{name}}",
     "intro": "Definieren Sie, wann Aktualisierungen und Fernbefehle ausgeführt werden können. Hosts innerhalb eines Erlaubnisfensters (und außerhalb jeglicher Blackouts) erhalten die Änderungen; andere Änderungen werden aufgehoben und freigegeben, wenn das nächste Fenster geöffnet wird. Hosts ohne ein Fenster sind nicht eingeschränkt.",
-    "kind": "[TODO] Kind",
+    "kind": "Art",
     "kindAllow": "Erlauben",
     "kindBlackout": "Ausfall",
     "loadError": "Fehler beim Laden der Wartungsfenster",
@@ -2251,7 +2251,7 @@
       "statusRestore": "Wiederherstellen",
       "statusSnapshot": "Schnappschuss",
       "statusSync": "Synchronisieren",
-      "upstream": "[TODO] Upstream"
+      "upstream": "Upstream"
     },
     "configureSubtitle": "Wählen Sie den Host, der die Mirror-Pläne dieser Plattform ausführt. Es werden nur Hosts aufgeführt, deren Plattform mit dem Tab übereinstimmt.",
     "configureTitle": "{{platform}}-Mirroring konfigurieren",
@@ -2350,7 +2350,7 @@
         "actions": "Aktionen",
         "channel": "Kanal",
         "name": "Snap",
-        "status": "[TODO] Capture"
+        "status": "Aufnahme"
       },
       "empty": "Noch keine Snaps verfolgt. Füg einen oben hinzu, dann benutze \"Festlegen von Snaps\".",
       "loadError": "Gefüttelte Snaps konnten nicht geladen werden.",
@@ -2367,7 +2367,7 @@
         "files": "Dateien",
         "id": "Schnappschuss",
         "size": "Größe",
-        "taken": "[TODO] Taken at"
+        "taken": "Am"
       },
       "empty": "Noch keine Vorschauverwaltungen vorhanden. Klicken Sie auf das Kamera-Icon, um eine zu erstellen.",
       "loadError": "Konnte keine Snapshots laden.",
@@ -2454,14 +2454,14 @@
     "disabledNote": "Aktivieren Sie OpenBAO in sysmanage.yaml, um Vault-Funktionen zu nutzen",
     "hideLogs": "Protokolle ausblenden",
     "loadError": "OpenBAO-Status konnte nicht geladen werden",
-    "mountPath": "[TODO] Mount Path",
+    "mountPath": "Montierpfad",
     "noLogs": "Keine aktuellen Protokolle verfügbar",
     "operationalMode": "Betriebsmodus",
     "processId": "Prozess-ID",
     "production": "Produktion",
     "recentLogs": "Aktuelle Protokolle",
     "running": "Läuft",
-    "seal": "[TODO] Seal",
+    "seal": "Verschluss",
     "sealError": "Fehler beim Versiegeln von OpenBAO",
     "sealStatus": "Versiegelungsstatus",
     "sealed": "Versiegelt",
@@ -2584,7 +2584,7 @@
     "create": {
       "button": "Neues Policy",
       "cancel": "Abbrechen",
-      "customType": "[TODO] Custom policy type",
+      "customType": "Benutzerdefinierter Richtlinientyp",
       "definition": "Definition (JSON)",
       "description": "Beschreibung",
       "engineUnavailable": "Der Federation Controller Engine wurde nicht geladen; keine Policies können erstellt werden.",
@@ -2696,7 +2696,7 @@
     "runNow": "Jetzt ausführen",
     "runStatus": {
       "failed": "Fehlgeschlagen",
-      "partial": "[TODO] Partially answered",
+      "partial": "Teilweise beantwortet",
       "pending": "Ausstehend",
       "success": "Erfolgreich"
     },
@@ -3032,7 +3032,7 @@
     "filenamePlaceholder": "z.B. id_rsa.pub, server.crt, database.conf",
     "keyType": "Schlüsseltyp",
     "key_type": {
-      "ca": "[TODO] CA",
+      "ca": "Zertifikatstelle (CS)",
       "private": "Privat",
       "public": "Öffentlich"
     },
@@ -3180,7 +3180,7 @@
       "title": "Air-Gap-Sammler (Online-Seite)"
     },
     "currentTag": "(aktuell)",
-    "heading": "[TODO] Air-Gap Role",
+    "heading": "Luftscharfrolle",
     "intro": "Wählen Sie aus, wie dieser SysManage-Server in einer air-gapped-Bereitstellung mitwirkt. Die meisten Server sollten auf Standard bleiben. Die Rolle tritt nach dem nächsten Neustart des Servers in Kraft.",
     "loadError": "Konnte die aktuelle Serverrolle nicht laden.",
     "menuTitle": "Serverrolle",
@@ -3214,7 +3214,7 @@
   "sites": {
     "actions": {
       "remove": "Entfernen",
-      "resume": "[TODO] Resume",
+      "resume": "Fortsetzen",
       "suspend": "Anhalten"
     },
     "addSite": "Site registrieren",
@@ -3397,7 +3397,7 @@
     "coprProject": "COPR-Projekt",
     "coprProjectHelp": "z.B. python3.11",
     "coprProjectPlaceholder": "z. B. dotnet-6.0",
-    "default": "[TODO] Default",
+    "default": "Standard",
     "deleteError": "Fehler beim Löschen",
     "deleteSelected": "Ausgewählte löschen ({{count}})",
     "deleteSuccess": "Erfolgreich gelöscht",
@@ -3442,7 +3442,7 @@
     "privilegedModeRequired": "Privilegierter Modus erforderlich",
     "repoIdentifierRequired": "Repository-Bezeichner erforderlich",
     "requiresPrivileged": "Der Host muss im Privilegiertmodus laufen",
-    "source": "[TODO] Source",
+    "source": "Quelle",
     "tapIdentifier": "Tap-Bezeichner",
     "tapRepo": "Tap-Repository",
     "tapRepoHelp": "z. B. cask-versions",
@@ -3780,10 +3780,10 @@
       "recommendations": "Empfehlungen",
       "proposals": "Vorgeschlagene Korrekturen ({{count}})",
       "packs": "Regelpakete",
-      "posture": "[TODO] Posture"
+      "posture": "Sicherheits- und Widerstandsfähigkeitsposition"
     },
     "feed": {
-      "lens": "[TODO] Lens",
+      "lens": "Lens (in diesem Kontext: Kategorien von Empfehlungen wie Sicherheit, Leistung, Verfügbarkeit oder Stabilität)",
       "allLenses": "Alle",
       "hostsFailed": "Die Hosts für diese Regel konnten nicht geladen werden.",
       "noOpenHosts": "Keine Befunde und nichts Unbewertetes für diese Regel.",
@@ -3795,11 +3795,11 @@
       "findings": "Befunde",
       "notAssessable": "Nicht bewertbar",
       "notApplicable": "Nicht zutreffend",
-      "clean": "[TODO] Clean"
+      "clean": "Säubern"
     },
     "outcome": {
       "fires": "Befund",
-      "doesNotFire": "[TODO] Clean",
+      "doesNotFire": "Säubern",
       "notAssessable": "Nicht bewertbar",
       "notApplicable": "Nicht zutreffend"
     },
@@ -3895,7 +3895,7 @@
       "fleetIncomplete_other": "{{count}} Hosts wurden nur teilweise bewertet; ihre Werte sind Mindestwerte.",
       "hostUnknown": "Dieser Host konnte nicht vollständig bewertet werden und hat daher keine Einstufung. Was fehlt, zeigt die Liste der nicht bewertbaren Regeln unten.",
       "hostIncomplete": "Einige Regeln konnten auf diesem Host nicht bewertet werden; dieser Wert ist ein Mindestwert.",
-      "fleetTitle": "[TODO] Fleet risk",
+      "fleetTitle": "Flottenrisiko",
       "hostTitle": "Host-Risiko"
     },
     "packs": {
@@ -3915,7 +3915,7 @@
       "notAssessable": "Nicht bewertbar",
       "proposals": "Vorgeschlagene Korrekturen",
       "notApplicable": "Nicht zutreffend",
-      "clean": "[TODO] Clean"
+      "clean": "Säubern"
     },
     "curated": {
       "pmAirgapRole": "Der Server ist als die von Ihnen beschriebene Air-Gap-Installation eingerichtet",
@@ -3967,7 +3967,7 @@
   "posture": {
     "action": {
       "fix": "Beheben",
-      "waive": "[TODO] Waive"
+      "waive": "Verzichten"
     },
     "checkedAt": "Zuletzt geprüft am {{date}}",
     "col": {
@@ -4084,7 +4084,7 @@
       "reason": "Begründung",
       "revoke": "Widerrufen",
       "revokeFailed": "Die Zurückstellung konnte nicht widerrufen werden.",
-      "submit": "[TODO] Waive",
+      "submit": "Verzichten",
       "title": "Zurückstellen: {{title}}"
     },
     "waiverStale": "Zurückstellung verfallen"
@@ -4353,7 +4353,7 @@
       "excluded": "Bekannt und unbedenklich",
       "managed": "Verwaltet",
       "unmanaged": "Nicht verwaltet",
-      "sweeps": "[TODO] Sweeps"
+      "sweeps": "Scans"
     },
     "title": "Netzwerkerkennung",
     "unavailable": {
@@ -4364,7 +4364,7 @@
       "unsupportedPlatform": "auf dieser Plattform nicht unterstützt"
     },
     "sweep": {
-      "agent": "[TODO] Swept by",
+      "agent": "Abgefragt von",
       "disabled": "Aktive Netzabtastungen sind ausgeschaltet. Lassen Sie sie in den Einstellungen oben zu, um Geräte zu finden, die sich nie selbst bemerkbar machen.",
       "error": "Die Netzabtastung konnte nicht gestartet werden.",
       "found": "Gefunden",
@@ -4495,7 +4495,7 @@
     "scanHosts": "Hosts scannen",
     "scans": {
       "empty": "Es wurden noch keine Scans ausgeführt.",
-      "legs": "[TODO] What ran",
+      "legs": "Was lief",
       "paths": "Pfade",
       "requested": "Angefordert",
       "result": "Ergebnis",
@@ -4587,7 +4587,7 @@
       "retireError": "Der Regelsatz konnte nicht außer Betrieb genommen werden.",
       "rules": "Regeln",
       "slug": "Name (a-z, 0-9, Bindestriche)",
-      "source": "[TODO] Source",
+      "source": "Quelle",
       "titleField": "Titel",
       "updated": "Aktualisiert",
       "version": "Version",
@@ -4613,7 +4613,7 @@
       "all": "Alle Hosts",
       "chosen": "Nach Tag, Hostgruppe oder Host auswählen",
       "hosts": "Einzelne Hosts",
-      "inventories": "[TODO] Inventories",
+      "inventories": "Inventare",
       "tags": "Tags"
     }
   }

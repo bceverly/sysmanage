@@ -2440,7 +2440,7 @@ msgstr "Chave da API do NVD limpa com sucesso"
 
 #: backend/api/cve_refresh_settings.py:487
 msgid "Failed to clear NVD API key"
-msgstr ""
+msgstr "Falha ao limpar a chave de API NVD"
 
 #: backend/api/firewall_status.py:157
 #, python-format
@@ -5636,6 +5636,25 @@ msgstr ""
 "Vulnerabilidades do macOS por versão do sistema operacional, a partir dos "
 "dados de versões afetadas do NVD"
 
+msgid "The single sign-on session has expired. Sign in again."
+msgstr "A sessão de logon único expirou. Entre novamente."
+
+#: backend/api/message_handlers_core.py
+msgid "Agent session refused: it did not prove it is this host"
+msgstr "Sessão do agente recusada: não provou que é este host"
+
+#: backend/api/message_handlers_core.py
+msgid ""
+"This agent did not prove it is this host. If the host was reinstalled, "
+"remove it from SysManage and approve its new registration."
+msgstr ""
+"Este agente não provou que é este host. Se o host foi reinstalado, remova-o "
+"do SysManage e aprove o novo registro."
+
+#: backend/api/message_handlers.py
+msgid "This session cannot acknowledge another host's message"
+msgstr "Esta sessão não pode confirmar a mensagem de outro host"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr ""
 #~ "O serviço de e-mail está desabilitado. Habilite-o no arquivo de "
@@ -6342,18 +6361,3 @@ msgstr ""
 
 #~ msgid "Executing command sequence"
 #~ msgstr "Executando sequência de comandos"
-
-msgid "The single sign-on session has expired. Sign in again."
-msgstr "A sessão de logon único expirou. Entre novamente."
-
-#: backend/api/message_handlers_core.py
-msgid "Agent session refused: it did not prove it is this host"
-msgstr "Sessão do agente recusada: não provou que é este host"
-
-#: backend/api/message_handlers_core.py
-msgid "This agent did not prove it is this host. If the host was reinstalled, remove it from SysManage and approve its new registration."
-msgstr "Este agente não provou que é este host. Se o host foi reinstalado, remova-o do SysManage e aprove o novo registro."
-
-#: backend/api/message_handlers.py
-msgid "This session cannot acknowledge another host's message"
-msgstr "Esta sessão não pode confirmar a mensagem de outro host"

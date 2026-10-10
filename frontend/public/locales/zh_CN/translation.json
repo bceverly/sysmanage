@@ -174,12 +174,12 @@
       "isoLabelRequired": "ISO标签是必需的",
       "mediaSizeHelper": "每个磁盘的最大大小（MB）。默认为4700（DVD-5）。",
       "mediaSizeMb": "介质大小（MB）",
-      "mirrorPicker": "[TODO] Pick mirrors",
+      "mirrorPicker": "选择镜像",
       "mirrorsHelper": "选择一个或多个已配置的镜像站点。捆绑包将从在创建时拍摄的新鲜快照中构建。所有选择必须共享同一主机。",
       "mirrorsRequired": "至少需要一个镜像目标。",
-      "mirrorsTitle": "[TODO] Mirrors",
+      "mirrorsTitle": "镜像",
       "noMirrors": "没有启用的镜像配置。前往设置 → 仓库镜像以添加一个，然后重试。",
-      "submit": "[TODO] Queue Run",
+      "submit": "队列运行",
       "title": "新建集合运行"
     },
     "discPicker": {
@@ -278,16 +278,16 @@
   },
   "apiKeys": {
     "active": "活动",
-    "confirmRevoke": "[TODO] Are you sure you want to revoke this API key? Any automation using it will stop working immediately.",
+    "confirmRevoke": "你确定要撤销这个API密钥吗？使用它的任何自动化操作都会立即停止。",
     "copyWarning": "现在复制此链目？它不会再正在显示。",
     "create": "创建 API 密钥",
     "createError": "无法创建 API 密钥。",
     "created": "已创建",
     "createdTitle": "API密钥已创建",
     "description": "API密钥允许自动化程序以您的身份进行身份验证。请妥善保管，如同对待密码一样处理它们。",
-    "expires": "[TODO] Expires",
+    "expires": "过期",
     "expiresOptional": "将选期（可选）",
-    "lastUsed": "[TODO] Last used",
+    "lastUsed": "最后使用时间",
     "loadError": "无法加载 API 密钥。",
     "name": "名称",
     "prefix": "密钥前缀",
@@ -299,7 +299,7 @@
   },
   "audit": {
     "columns": {
-      "actor": "[TODO] Actor",
+      "actor": "演员",
       "details": "详情",
       "openSite": "打开",
       "operation": "操作",
@@ -310,7 +310,7 @@
     "emptyFiltered": "没有符合筛选条件的审核条目。",
     "errorLoad": "加载联邦审计日志失败。",
     "filters": {
-      "actor": "[TODO] Actor",
+      "actor": "演员",
       "apply": "应用",
       "clear": "清除",
       "operation": "操作",
@@ -474,12 +474,12 @@
     "less": "更少",
     "loading": "加载中...",
     "moreActions": "更多",
-    "na": "[TODO] N/A",
+    "na": "N/A",
     "no": "否",
     "noDescription": "无描述",
     "none": "无",
-    "notAvailable": "[TODO] N/A",
-    "of": "[TODO] of",
+    "notAvailable": "N/A",
+    "of": "的",
     "refresh": "刷新",
     "requiresSelection": "请至少选择一行",
     "requiresSingleSelection": "请只选择一行",
@@ -515,7 +515,7 @@
     "nonCompliant": "不合规",
     "notScanned": "未扫描",
     "pending": "待定",
-    "profile": "[TODO] Profile",
+    "profile": "配置文件",
     "scanError": "扫描失败",
     "scanNow": "扫描",
     "scanResult": "扫描完成：{{status}}（{{count}} 项违规）",
@@ -534,7 +534,7 @@
     "days_other": "{{count}} 天差",
     "detailTitle": "差异于 {{host}}",
     "differences": "差异",
-    "driftingFor": "[TODO] Drifting for",
+    "driftingFor": "漂移中",
     "findingsFailed": "无法加载此主机的结果",
     "host": "主机",
     "intro": "不再匹配其分配的配置文件的主机。漂移由干运行检测，因此这里没有报告任何更改 - 修复措施将重新应用配置文件。",
@@ -542,7 +542,7 @@
     "noDetail": "无更多详细信息报告",
     "noDrift": "每个主机都匹配其分配的配置文件。",
     "noFindings": "此主机无开放差异",
-    "profiles": "[TODO] Profiles",
+    "profiles": "配置文件列表",
     "remediate": "修复到基线",
     "remediateFailed": "无法入队修复措施",
     "repairFailed": "无法队列修复",
@@ -558,15 +558,15 @@
   "configFleet": {
     "allHosts": "每个主机",
     "allHostsLabel": "这个租户中的每个活跃主机",
-    "atATime": "[TODO] {{count}} hosts at once",
-    "atATime_one": "[TODO] {{count}} host at once",
-    "atATime_other": "[TODO] {{count}} hosts at once",
+    "atATime": "{{count}} 一批主机",
+    "atATime_one": "{{count}} 一次性主机",
+    "atATime_other": "{{count}} 一批主机",
     "cancel": "取消",
     "cancelFailed": "无法取消此任务",
     "cancelledByOperator": "由操作员取消",
     "checkMode": "试运行",
     "checkModeLabel": "试运行 -- 报告将会发生的变更，但不做任何更改",
-    "concurrency": "[TODO] Hosts at a time",
+    "concurrency": "同时的主机数量",
     "concurrencyClamped": "并发量调整为{{value}}，该服务器允许的最高值。",
     "concurrencyHelp": "一次可以运行的主机数量。服务器限制了这个数量。",
     "confirmLaunchDry": "这作为干运行 {{profile}} 对抗 {{inventory}}。不会有任何更改。",
@@ -582,7 +582,7 @@
     "hostsIn": "{{name}} 的各主机结果",
     "intro": "一次性在多个主机上运行一个配置文件。任务以波次方式处理其清单，而不是全部一次，并记录每个主机的处理结果。",
     "inventoriesFailed": "无法加载主机清单",
-    "inventory": "[TODO] Inventory",
+    "inventory": "清单",
     "inventoryDeleteFailed": "无法删除主机清单",
     "inventorySaveFailed": "无法保存主机清单",
     "jobsFailed": "无法加载作业",
@@ -603,18 +603,18 @@
     "previewEmpty": "当前库中没有选择任何活动主机。对它启动的任务将不会做任何事情。",
     "previewFailed": "无法解析此主机清单",
     "previewTitle": "{{name}} 选中的主机",
-    "profile": "[TODO] Profile",
+    "profile": "配置文件",
     "progress": "{{total}} 台中已完成 {{done}} 台 -- 成功 {{ok}} 台，失败 {{failed}} 台，跳过 {{skipped}} 台",
     "schedule": "计划（cron）",
     "scheduleHelp": "留空以手动启动。",
-    "tabInventories": "[TODO] Inventories",
+    "tabInventories": "清单",
     "tabJobs": "工作",
     "tabTemplates": "模板",
     "targetsFailed": "无法加载主机",
     "templateDeleteFailed": "无法删除模板",
     "templateSaveFailed": "无法保存作业模板",
     "templatesFailed": "无法加载工作模板",
-    "title": "[TODO] Fleet Configuration Jobs"
+    "title": "主机群配置作业"
   },
   "configManagement": {
     "applyAction": "应用",
@@ -654,7 +654,7 @@
     "runNoChanges": "无变化",
     "runNoProfile": "没有配置文件",
     "runOutcome": "结果",
-    "runProfile": "[TODO] Profile",
+    "runProfile": "配置文件",
     "runTaskCounts": "{{ok}} 正常, {{changed}} 已更改, {{failed}} 失败",
     "runTasks": "任务",
     "runWhen": "何时",
@@ -750,7 +750,7 @@
     "security": "安全",
     "settings": {
       "checkAll": "全选",
-      "checkNone": "[TODO] Check None",
+      "checkNone": "检查无",
       "description": "选择要在仪表板上显示的卡片",
       "loadError": "无法加载偏好设置",
       "saveError": "保存偏好设置失败",
@@ -1001,13 +1001,13 @@
     "portRange": "端口范围",
     "protocol": "协议",
     "roleName": "角色名称",
-    "roleNamePlaceholder": "[TODO] Role Name Placeholder",
+    "roleNamePlaceholder": "角色名称占位符",
     "roleNameRequired": "需要角色名称",
     "selectPort": "选择端口",
     "startPort": "起始端口",
     "subtitle": "副标题",
     "tcp": "TCP",
-    "title": "[TODO] Firewall Roles",
+    "title": "防火墙角色",
     "udp": "UDP",
     "updateSuccess": "更新成功"
   },
@@ -1361,7 +1361,7 @@
     "client": "客户端",
     "collectCertificates": "收集",
     "collectRoles": "收集",
-    "collectedAt": "[TODO] Collected",
+    "collectedAt": "收集的",
     "collectionId": "收集 ID",
     "collectionStatus": "状态",
     "completedAt": "完成时间",
@@ -1374,11 +1374,11 @@
     "confirmUninstallMessage": "您确定要卸载此软件包吗？此操作将从系统中移除该软件包。",
     "confirmUninstallPackage": "卸载软件包",
     "contractName": "合同名称",
-    "cpuCores": "[TODO] Cores",
+    "cpuCores": "核心",
     "cpuFrequency": "频率",
     "cpuInfo": "处理器",
     "cpuModel": "处理器型号",
-    "cpuThreads": "[TODO] Threads",
+    "cpuThreads": "线程",
     "cpuVendor": "处理器厂商",
     "createBhyveVmTitle": "创建 bhyve 虚拟机",
     "createChildHostButton": "创建",
@@ -1416,7 +1416,7 @@
     "editHostname": "编辑主机名",
     "editServices": "编辑服务",
     "enabled": "已启用",
-    "entitled": "[TODO] Entitled",
+    "entitled": "授权的",
     "errorMessage": "错误消息",
     "errorUpdatingServices": "更新服务失败",
     "expired": "已过期",
@@ -1520,7 +1520,7 @@
       "digest": "摘要信息",
       "enterpriseNotice": "阶段化、应用和回滚镜像是企业版功能。当前的镜像详情如下。",
       "enterpriseOnly": "镜像操作需要企业版许可证",
-      "imageRef": "[TODO] Image Reference",
+      "imageRef": "镜像引用",
       "noStagedImage": "没有已阶段化的镜像",
       "pendingReboot": "待处理 -- 重启以应用",
       "rollback": "回滚",
@@ -1757,7 +1757,7 @@
     "windowsIsoPathRequired": "请指定 Windows 安装 ISO 的路径",
     "windowsJoinDomainToggle": "加入 Active Directory 域",
     "windowsLocaleHelp": "UI 和输入语言环境，例如：\"en-US\"",
-    "windowsLocaleLabel": "[TODO] Locale",
+    "windowsLocaleLabel": "本地化",
     "windowsProductKeyHelp": "AVMA、MAK 或 KMS 密钥。留空以使用评估媒体，该媒体无需密钥即可安装。存储在 OpenBAO 中，不会存入数据库中。",
     "windowsProductKeyLabel": "许可密钥",
     "windowsSectionTitle": "Windows 服务器安装程序",
@@ -1809,7 +1809,7 @@
     "childHostFilter": "子主机筛选器",
     "childHostOf": "{{parent}}的子主机",
     "childHostsOnly": "仅子主机",
-    "childrenOnly": "[TODO] Children",
+    "childrenOnly": "孩子们",
     "confirmReboot": "确认系统重启",
     "confirmRebootMessage": "您确定要重启 {{hostname}} 吗？系统将有几分钟不可用。",
     "confirmShutdown": "确认系统关机",
@@ -1820,9 +1820,9 @@
     "deployOpenTelemetry": "部署 OpenTelemetry",
     "diagnosticsRequestFailed": "请求诊断数据收集失败。请重试。",
     "diagnosticsRequested": "请求收集诊断数据以供主机 {{hostId}} 查看。请在主机详情页面查看结果。",
-    "down": "[TODO] Down",
+    "down": "下线",
     "filterByTags": "按标签筛选",
-    "fqdn": "[TODO] FQDN",
+    "fqdn": "FQDN",
     "getDiagnostics": "获取诊断信息",
     "healthGrade": "健康",
     "healthScore": "健康评分: {{score}}",
@@ -1845,7 +1845,7 @@
     "osUpgradeAvailable": "此主机可进行操作系统升级",
     "packagesRequestFailed": "请求软件包收集失败",
     "packagesRequested": "已成功请求软件包收集",
-    "parentsOnly": "[TODO] Parents",
+    "parentsOnly": "家长",
     "platform": "平台",
     "privileged": "特权",
     "reboot": "重启",
@@ -1897,7 +1897,7 @@
     "systemUpdatesOnly": "{{count}} 系统更新",
     "tags": "标签",
     "unknown": "未知",
-    "up": "[TODO] Up",
+    "up": "上",
     "updateAgent": "更新代理",
     "updateAgentFailed": "请求代理更新失败",
     "updateAgentRequested": "代理更新请求成功",
@@ -2138,7 +2138,7 @@
     "intro": "定义更新和远程命令可以运行的时间。在允许窗口内的主机（且不在任何停用期内）接收更改；其他更改将在下一个窗口打开时释放。没有窗口的主机不受限制。",
     "kind": "类型",
     "kindAllow": "允许",
-    "kindBlackout": "[TODO] Blackout",
+    "kindBlackout": "停机时间",
     "loadError": "无法加载维护窗口",
     "nHosts": "{{count}} 主机",
     "nTags": "{{count}} 标签",
@@ -2237,7 +2237,7 @@
       "failedNoText": "失败；没有返回错误文本。",
       "inFlight": "{{label}} 于 {{at}} 开始程序推进",
       "label": {
-        "restore": "[TODO] restore",
+        "restore": "恢复",
         "snapshot": "snap",
         "sync": "将数据功能同步"
       },
@@ -2291,7 +2291,7 @@
       },
       "col": {
         "actions": "操作",
-        "digest": "[TODO] Digest",
+        "digest": "摘要",
         "image": "镜像",
         "status": "捕获",
         "tag": "标签"
@@ -2367,7 +2367,7 @@
         "files": "文件",
         "id": "快照",
         "size": "大小",
-        "taken": "[TODO] Taken at"
+        "taken": "捕获于"
       },
       "empty": "尚无快照。点击相机图标进行拍摄。",
       "loadError": "无法加载快照。",
@@ -2386,7 +2386,7 @@
     "cat": {
       "admin": "管理",
       "automation": "自动化",
-      "fleet": "[TODO] Fleet",
+      "fleet": "主机群",
       "insights": "洞察",
       "patching": "补丁",
       "security": "安全性"
@@ -2394,7 +2394,7 @@
     "closeMenu": "关闭菜单",
     "compliance": "合规性",
     "configDrift": "配置漂移",
-    "configJobs": "[TODO] Fleet Jobs",
+    "configJobs": "主机群作业",
     "configProfiles": "配置配置文件",
     "customMetrics": "自定义指标",
     "dashboard": "仪表盘",
@@ -2420,7 +2420,7 @@
     "scrollLeft": "向左滚动",
     "scrollRight": "向右滚动",
     "search": "搜索 (Ctrl+K)",
-    "secrets": "[TODO] Secrets",
+    "secrets": "秘密",
     "settings": "设置",
     "sites": "站点",
     "toggleMenu": "切换菜单",
@@ -2553,7 +2553,7 @@
     "title": "合规配置文件",
     "updated": "合规配置文件已保存",
     "version": "版本",
-    "versionOp": "[TODO] Op",
+    "versionOp": "操作",
     "versionOpAny": "(任意)"
   },
   "policies": {
@@ -2740,7 +2740,7 @@
     "confirmRemoveLogo": "移除当前徽标？",
     "constraintsHelp": "允许的格式: PNG, JPEG, SVG, WEBP。最大尺寸: 1 MB。",
     "deleteError": "移除徽标失败",
-    "headerText": "[TODO] Header Text",
+    "headerText": "标题文本",
     "headerTextHelp": "与徽标一起出现在报告标题中（例如“机密----仅供内部使用”）。",
     "loadError": "加载报告品牌失败",
     "logoAlt": "报告徽标",
@@ -3032,7 +3032,7 @@
     "filenamePlaceholder": "例如：id_rsa.pub, server.crt, database.conf",
     "keyType": "密钥类型",
     "key_type": {
-      "ca": "[TODO] CA",
+      "ca": "加拿大",
       "private": "私有",
       "public": "公开"
     },
@@ -3180,7 +3180,7 @@
       "title": "空气隙收集器（在线侧）"
     },
     "currentTag": "(当前)",
-    "heading": "[TODO] Air-Gap Role",
+    "heading": "空气隔断角色",
     "intro": "选择此SysManage服务器如何参与离网部署。大多数服务器应保持在标准模式。角色将在下次服务器重启后生效。",
     "loadError": "无法加载当前服务器角色。",
     "menuTitle": "服务器角色",
@@ -3214,7 +3214,7 @@
   "sites": {
     "actions": {
       "remove": "移除",
-      "resume": "[TODO] Resume",
+      "resume": "恢复",
       "suspend": "暂停"
     },
     "addSite": "注册站点",
@@ -3267,7 +3267,7 @@
       "syncNever": "从未同步过",
       "syncOverdue": "逾期",
       "syncPoints": "{{n}} 同步事件",
-      "syncStale": "[TODO] Stale",
+      "syncStale": "过期",
       "syncTimeline": "同步时间线",
       "syncTimelineEmpty": "没有同步事件记录。",
       "url": "URL",
@@ -3358,7 +3358,7 @@
       "disabledMessage": "OpenTelemetry 检测当前已禁用。移除 OTEL_ENABLED=false 或设置 OTEL_ENABLED=true 以启用分布式追踪和指标收集。",
       "enableHint": "OpenTelemetry 默认启用。要禁用请设置 OTEL_ENABLED=false 环境变量并重启服务器。",
       "fetchError": "无法获取OpenTelemetry状态",
-      "instrumentation": "[TODO] Instrumentation",
+      "instrumentation": "仪表板",
       "metricsCount": "指标",
       "prometheusPort": "Prometheus 端口",
       "statistics": "统计信息",
@@ -3442,7 +3442,7 @@
     "privilegedModeRequired": "需要特权模式",
     "repoIdentifierRequired": "需要仓库标识符",
     "requiresPrivileged": "主机必须以特权模式运行",
-    "source": "[TODO] Source",
+    "source": "来源",
     "tapIdentifier": "Tap 标识符",
     "tapRepo": "Tap 仓库",
     "tapRepoHelp": "例如:cask-versions",
@@ -3703,9 +3703,9 @@
     "passwordTooLong": "密码不得超过 {{count}} 个字符",
     "passwordTooShort": "密码必须至少包含 {{count}} 个字符",
     "personalInfo": "个人信息",
-    "profile": "[TODO] Profile",
-    "profileImage": "[TODO] Profile Image",
-    "profileTabs": "[TODO] profile tabs",
+    "profile": "配置文件",
+    "profileImage": "配置文件图像",
+    "profileTabs": "配置文件选项卡",
     "save": "保存更改",
     "saveError": "配置文件更改保存失败",
     "saveSuccess": "配置文件更新成功",
@@ -3780,7 +3780,7 @@
       "recommendations": "建议",
       "proposals": "建议的修复 ({{count}})",
       "packs": "规则包",
-      "posture": "[TODO] Posture"
+      "posture": "姿态"
     },
     "feed": {
       "lens": "视角",
@@ -3795,18 +3795,18 @@
       "findings": "发现",
       "notAssessable": "无法评估",
       "notApplicable": "不适用",
-      "clean": "[TODO] Clean"
+      "clean": "清理"
     },
     "outcome": {
-      "fires": "[TODO] Finding",
-      "doesNotFire": "[TODO] Clean",
+      "fires": "发现",
+      "doesNotFire": "清理",
       "notAssessable": "无法评估",
       "notApplicable": "不适用"
     },
     "level": {
       "critical": "严重",
       "high": "高",
-      "medium": "[TODO] Medium",
+      "medium": "中等",
       "low": "低",
       "none": "无发现",
       "unknown": "未评估"
@@ -3895,7 +3895,7 @@
       "fleetIncomplete_other": "{{count}} 台主机仅部分完成评估；其评分为最低值。",
       "hostUnknown": "此主机无法完成全面评估，因此没有评级。请查看下方的无法评估列表，了解缺少哪些内容。",
       "hostIncomplete": "此主机上有部分规则无法评估；此评分为最低值。",
-      "fleetTitle": "[TODO] Fleet risk",
+      "fleetTitle": "主机群风险",
       "hostTitle": "主机风险"
     },
     "packs": {
@@ -3915,7 +3915,7 @@
       "notAssessable": "无法评估",
       "proposals": "建议的修复",
       "notApplicable": "不适用",
-      "clean": "[TODO] Clean"
+      "clean": "清理"
     },
     "curated": {
       "pmAirgapRole": "服务器已按您描述的气隙部署进行设置",
@@ -4071,7 +4071,7 @@
     "stalePass": "部分项目上次是在较早的威胁模型下评估的。它们将在下次评估时更新。",
     "state": {
       "notAssessable": "无法评估",
-      "open": "[TODO] Open",
+      "open": "开放",
       "satisfied": "已满足",
       "waived": "已豁免"
     },
@@ -4232,7 +4232,7 @@
     },
     "version": "版本 {{version}}",
     "wizard": {
-      "back": "[TODO] Back",
+      "back": "返回",
       "chooseAll": "选择所有适用项。",
       "next": "下一步",
       "save": "保存威胁模型",
@@ -4315,7 +4315,7 @@
     "policy": {
       "enabled": "代理在其网络上监听设备",
       "hour": "每小时",
-      "interval": "[TODO] Report",
+      "interval": "报告",
       "lastChanged": "最后由 {{who}} 于 {{when}} 更改",
       "minutes": "每 {{count}} 分钟",
       "minutes_other": "每 {{count}} 分钟",
@@ -4338,7 +4338,7 @@
       "address": "地址",
       "device": "设备",
       "empty": "没有匹配的设备。",
-      "evidence": "[TODO] What it says it is",
+      "evidence": "它所声称的是什么",
       "ipOnly": "未发现 MAC",
       "lastSeen": "最后发现时间",
       "localMac": "地址可能变化",
@@ -4351,7 +4351,7 @@
     },
     "tabs": {
       "excluded": "已知且可接受",
-      "managed": "[TODO] Managed",
+      "managed": "管理",
       "unmanaged": "未受管",
       "sweeps": "扫描"
     },
@@ -4364,7 +4364,7 @@
       "unsupportedPlatform": "此平台不支持"
     },
     "sweep": {
-      "agent": "[TODO] Swept by",
+      "agent": "被扫过",
       "disabled": "主动扫描已关闭。请在上方设置中允许，以发现从不主动通告自身的设备。",
       "error": "无法启动扫描。",
       "found": "已发现",
@@ -4448,7 +4448,7 @@
       "lastSeen": "最后发现时间",
       "seenTimes": "发现 {{count}} 次",
       "severity": "严重性",
-      "signature": "[TODO] Detection",
+      "signature": "检测",
       "status": "状态",
       "seenTimes_one": "发现 {{count}} 次",
       "seenTimes_other": "发现 {{count}} 次"
@@ -4495,9 +4495,9 @@
     "scanHosts": "扫描主机",
     "scans": {
       "empty": "尚未运行任何扫描。",
-      "legs": "[TODO] What ran",
+      "legs": "运行的内容",
       "paths": "路径",
-      "requested": "[TODO] Requested",
+      "requested": "请求的",
       "result": "结果",
       "rulesLoaded": "已加载 {{loaded}}/{{total}} 条规则",
       "summary": "{{files}} 个文件，{{findings}} 条检测结果"
@@ -4507,11 +4507,11 @@
       "high": "高",
       "info": "信息",
       "low": "低",
-      "medium": "[TODO] Medium"
+      "medium": "中等"
     },
     "status": {
       "falsePositive": "误报",
-      "open": "[TODO] Open",
+      "open": "开放",
       "quarantined": "已隔离",
       "resolved": "已解决",
       "restored": "已恢复"
@@ -4519,7 +4519,7 @@
     "subtitle": "由各主机自身的 ClamAV 运行扫描，使用 ClamAV 特征码和 SysManage 规则源。",
     "tabs": {
       "decided": "已处置",
-      "open": "[TODO] Open findings",
+      "open": "打开检测结果",
       "scans": "扫描",
       "rulesets": "规则集"
     },
@@ -4598,7 +4598,7 @@
     },
     "jobs": {
       "atOnce": "最多同时 {{count}} 台",
-      "by": "[TODO] By",
+      "by": "根据",
       "done": "已完成 {{done}}/{{total}}",
       "hostCount": "{{count}} 台主机",
       "inventoryCount": "{{count}} 个主机清单",
@@ -4613,7 +4613,7 @@
       "all": "所有主机",
       "chosen": "按标签、主机清单或主机选择",
       "hosts": "单个主机",
-      "inventories": "[TODO] Inventories",
+      "inventories": "清单",
       "tags": "标签"
     }
   }

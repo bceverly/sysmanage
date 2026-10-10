@@ -190,9 +190,26 @@ def make_router(
                             "reason": f"meaning: similarity {cos} to the source",
                         }
                     else:
-                        ok, reason = await judge(
-                            client, req.lang, req.items[i].source, req.items[i].value
-                        )
+                        try:
+                            ok, reason = await judge(
+                                client,
+                                req.lang,
+                                req.items[i].source,
+                                req.items[i].value,
+                            )
+                        except httpx.HTTPError as exc:
+                            # One slow or failed judge call must not fail the
+                            # other 63 pairs in the batch (2026-10-10: a
+                            # ReadTimeout while a translation run shared the
+                            # GPU turned a whole batch into a 500).  "retry"
+                            # leaves the pair unverified for the next run.
+                            results[i] = {
+                                "ok": False,
+                                "retry": True,
+                                "cos": cos,
+                                "reason": f"judge unavailable: {type(exc).__name__}",
+                            }
+                            continue
                         results[i] = {
                             "ok": ok,
                             "cos": cos,

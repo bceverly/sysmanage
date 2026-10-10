@@ -298,12 +298,12 @@ msgstr "कॉन्फिगरेशन बदलाव %(host_id)s होस�
 #: backend/api/handlers/hostname_handler.py:55
 #, python-format
 msgid "Hostname changed message for host %s missing new_hostname"
-msgstr ""
+msgstr "होस्ट %s के लिए नए होस्टनेम का संदेश गायब है"
 
 #: backend/api/handlers/hostname_handler.py:63
 #, python-format
 msgid "Host %s not found for hostname update"
-msgstr ""
+msgstr "होस्ट %s होस्टनेम अपडेट के लिए नहीं मिला"
 
 #: backend/api/handlers/hostname_handler.py:72
 #, python-format
@@ -586,7 +586,7 @@ msgstr "रिपोज़िट्री पहचान आवश्यक ह
 
 #: backend/api/third_party_repos.py:328
 msgid "Repository add request queued successfully"
-msgstr ""
+msgstr "रिपॉजिटरी जोड़ने का अनुरोध सफलतापूर्वक कतार में रखा गया"
 
 #: backend/api/third_party_repos.py:336
 #, python-format
@@ -603,7 +603,7 @@ msgstr "कोई हटाने के लिए रिपोज़िटर�
 
 #: backend/api/third_party_repos.py:474
 msgid "Repository deletion request queued successfully"
-msgstr ""
+msgstr "रिपॉजिटरी हटाने का अनुरोध सफलतापूर्वक कतार में रखा गया"
 
 #: backend/api/third_party_repos.py:482
 #, python-format
@@ -620,12 +620,12 @@ msgstr "कोई रिपोज़िटरी सूची नहीं द�
 
 #: backend/api/third_party_repos.py:592
 msgid "Repository enable request queued successfully"
-msgstr ""
+msgstr "रिपॉजिटरी सक्षम करने का अनुरोध सफलतापूर्वक कतार में रखा गया"
 
 #: backend/api/third_party_repos.py:600
 #, python-format
 msgid "Failed to queue repository enable: %s"
-msgstr ""
+msgstr "रिपॉजिटरी एनेबल करने में विफलता: %s"
 
 #: backend/api/third_party_repos.py:628
 msgid "Permission denied: DISABLE_THIRD_PARTY_REPOSITORY role required"
@@ -633,7 +633,7 @@ msgstr "प्रवेश नहीं: DISABLE_THIRD_PARTY_REPOSITORY भू�
 
 #: backend/api/third_party_repos.py:710
 msgid "Repository disable request queued successfully"
-msgstr ""
+msgstr "रिपॉजिटरी अक्षम करने का अनुरोध सफलतापूर्वक कतार में रखा गया"
 
 #: backend/api/third_party_repos.py:718
 #, python-format
@@ -756,11 +756,11 @@ msgstr ""
 
 #: backend/api/host_registration.py:77
 msgid "Invalid or expired registration key"
-msgstr ""
+msgstr "अवैध या समाप्त रजिस्ट्रेशन की कुंजी"
 
 #: backend/api/host_registration.py:116
 msgid "Invalid or expired enrollment token"
-msgstr ""
+msgstr "अवैध या समाप्त एनकॉलेंट टोकन"
 
 #: backend/api/host_registration.py:182
 msgid ""
@@ -1320,7 +1320,7 @@ msgstr "पैकेज बात्च को समाप्त करने �
 
 #: backend/api/package_handlers.py:567
 msgid "Delta base does not match the stored catalog"
-msgstr ""
+msgstr "डेल्टा बेस संग्रहित कैटलॉग से मेल नहीं खाता"
 
 #: backend/api/package_handlers.py:612
 #, python-format
@@ -2291,7 +2291,7 @@ msgstr ""
 #: backend/api/content_lifecycle.py:365
 #, python-format
 msgid "Unknown filter type: %s"
-msgstr ""
+msgstr "अज्ञात फ़िल्टर प्रकार: %s"
 
 #: backend/api/content_lifecycle.py:371
 #, python-format
@@ -2301,7 +2301,7 @@ msgstr "'%s' व्मार Advisory पेजेय ाॆनान, हो �
 #: backend/api/content_lifecycle.py:381
 #, python-format
 msgid "The '%s' filter needs a non-empty 'packages' list"
-msgstr ""
+msgstr "फ़िल्टर '%s' को पैकेजों की एक खाली सूची की आवश्यकता है"
 
 #: backend/api/content_lifecycle.py:391
 #, python-format
@@ -2518,7 +2518,7 @@ msgstr "प्रवेश नहीं: REMOVE_DEFAULT_REPOSITORY भूमि�
 
 #: backend/api/default_repositories.py:514
 msgid "Invalid repository ID format"
-msgstr ""
+msgstr "अवैध रिपॉजिटरी आईडी प्रारूप"
 
 #: backend/api/default_repositories.py:527
 msgid "Default repository not found"
@@ -2563,6 +2563,8 @@ msgstr "चाइल्ड होस्ट रिफ्रेश का अन�
 msgid ""
 "Distribution '%(name)s %(version)s' already exists for type '%(child_type)s'"
 msgstr ""
+"वितरण '%(name)s %(version)s' पहले से ही प्रकार '%(child_type)s' के लिए मौजूद"
+" है"
 
 #: backend/api/child_host_crud.py:833
 msgid "Distribution deleted"
@@ -2587,7 +2589,7 @@ msgstr "ID %s वाले होस्ट पंजीकृत नहीं �
 
 #: backend/api/message_handlers_core.py:245 backend/api/agent.py:653
 msgid "Host registration pending approval"
-msgstr ""
+msgstr "होस्ट रजिस्ट्रेशन प्रतीक्षा में है"
 
 #: backend/api/message_handlers_core.py:359
 msgid "Host auto-approved via child host creation"
@@ -2939,7 +2941,7 @@ msgstr "अंटीवायरस पैकेज नाम 255 अक्ष�
 #: backend/api/antivirus_defaults.py:106
 #, python-format
 msgid "Failed to retrieve antivirus defaults: %s"
-msgstr ""
+msgstr "एंटीवायरस डिफ़ॉल्ट प्राप्त करने में विफलता: %s"
 
 #: backend/api/antivirus_defaults.py:127
 #, python-format
@@ -3031,7 +3033,7 @@ msgstr "बंडल फ़ाइल डिस्क पर और नहीं 
 
 #: backend/api/airgap_bundles.py:629
 msgid "Invalid or expired download token"
-msgstr ""
+msgstr "अवैध या समाप्त डाउनलोड टोकन"
 
 # Tag management messages
 #: backend/api/tag.py:133
@@ -3272,6 +3274,8 @@ msgstr "रजिस्ट्रेशन अवशोषित: होस्ट
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
+"होस्ट '%(fqdn)s' टेनेंट %(tenant_id)s में एंटरल किया गया (एनकॉलेंट टोकन के "
+"साथ)"
 
 #: backend/api/host.py:863
 #, python-format
@@ -3279,6 +3283,8 @@ msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
 "(auto_approve=%(auto_approve)s)"
 msgstr ""
+"होस्ट '%(fqdn)s' रजिस्ट्रेशन की कुंजी '%(key_name)s' "
+"(auto_approve=%(auto_approve)s) के माध्यम से एंटरल किया गया"
 
 #: backend/api/agent_poll.py:119
 msgid "Missing agent connection token"
@@ -3571,7 +3577,7 @@ msgstr "बहुत सारे असफल लॉगिन प्रया�
 
 #: backend/api/auth.py:489
 msgid "Invalid or missing refresh token"
-msgstr ""
+msgstr "अवैध या गायब रिफ़्रेश टोकन"
 
 #: backend/api/auth.py:599 backend/api/auth.py:647
 msgid "Multi-tenancy is not enabled."
@@ -3978,7 +3984,7 @@ msgstr "अद्यतनों की जांच की आवश्यक�
 #: backend/api/secrets/crud.py:35 backend/api/error_constants.py:166
 #: backend/services/vault_service.py:423
 msgid "Secret not found"
-msgstr ""
+msgstr "गुप्त नहीं मिला"
 
 #: backend/api/secrets/crud.py:46
 msgid ""
@@ -4181,7 +4187,7 @@ msgstr "अधिकारिता मेम्बर नहीं पाया
 
 #: backend/api/agent.py:738
 msgid "Invalid host authentication"
-msgstr ""
+msgstr "अवैध होस्ट प्रमाणीकरण"
 
 #: backend/api/agent.py:779 backend/api/packages.py:498
 msgid "Installation completion recorded"
@@ -4269,6 +4275,8 @@ msgstr "WSL विशेषता सक्षमता अपेक्षित
 #: backend/api/error_constants.py:124
 msgid "Repository management requires privileged agent mode"
 msgstr ""
+"रिपॉजिटरी प्रबंधन के लिए प्रावेश करने के लिए एजेंट को विशेषाधिकार मोड में "
+"होना चाहिए"
 
 #: backend/api/error_constants.py:130
 msgid "Current user not found"
@@ -4525,7 +4533,7 @@ msgstr "एक ओवर्राइड कारण आवश्यक है�
 
 #: backend/api/maintenance_windows.py:350
 msgid "Override duration must be positive."
-msgstr ""
+msgstr "ओवरराइड अवधि सकारात्मक होनी चाहिए।"
 
 #: backend/api/report_branding.py:116
 msgid "Updated report branding"
@@ -4622,7 +4630,7 @@ msgstr "गलत ID प्रारूप"
 
 #: backend/api/firewall_roles.py:674
 msgid "Firewall role already assigned to this host"
-msgstr ""
+msgstr "फ़ायरवॉल भूमिका इस होस्ट को पहले से ही असाइन की गई है"
 
 #: backend/api/firewall_roles.py:732
 #, python-format
@@ -4816,7 +4824,7 @@ msgstr "सर्विंग होस्ट का कोई प्रति�
 
 #: backend/api/content_lifecycle_promotion.py:543
 msgid "Repository mirroring is required to repoint a host"
-msgstr ""
+msgstr "रिपॉजिटरी को रीपॉइंट करने के लिए रिपॉजिटरी मिररिंग आवश्यक है"
 
 #: backend/api/content_lifecycle_promotion.py:571
 msgid "Snap store proxy is required to repoint a host's snaps"
@@ -5569,7 +5577,7 @@ msgstr "वॉल्ट से अवैध प्रतिक्रिया"
 
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
-msgstr ""
+msgstr "गुप्त प्रारूप गलत है"
 
 #: backend/vulnerability/cve_sources.py:23
 msgid "Primary CVE data source from NIST (includes Apple/macOS CVEs)"
@@ -5603,6 +5611,25 @@ msgstr "NetBSD pkgsrc पैकेज की भेद्यताएँ (जि
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "OS संस्करण के अनुसार macOS की भेद्यताएँ, NVD के प्रभावित-संस्करण डेटा से"
+
+msgid "The single sign-on session has expired. Sign in again."
+msgstr "सिंगल साइन-ऑन सत्र समाप्त हो गया है। फिर से साइन इन करें।"
+
+#: backend/api/message_handlers_core.py
+msgid "Agent session refused: it did not prove it is this host"
+msgstr "एजेंट सत्र अस्वीकार किया गया: इसने साबित नहीं किया कि यह यही होस्ट है"
+
+#: backend/api/message_handlers_core.py
+msgid ""
+"This agent did not prove it is this host. If the host was reinstalled, "
+"remove it from SysManage and approve its new registration."
+msgstr ""
+"इस एजेंट ने साबित नहीं किया कि यह यही होस्ट है। यदि होस्ट को फिर से इंस्टॉल "
+"किया गया था, तो उसे SysManage से हटाएँ और उसके नए पंजीकरण को स्वीकृत करें।"
+
+#: backend/api/message_handlers.py
+msgid "This session cannot acknowledge another host's message"
+msgstr "यह सत्र किसी अन्य होस्ट के संदेश की पावती नहीं दे सकता"
 
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "ईमेल सेवा अक्षम है। कॉन्फ़िगरेशन फ़ाइल में इसे सक्षम करें।"
@@ -6334,18 +6361,3 @@ msgstr ""
 
 #~ msgid "Executing command sequence"
 #~ msgstr "कमांड अनुक्रम निष्पादित किया जा रहा है"
-
-msgid "The single sign-on session has expired. Sign in again."
-msgstr "सिंगल साइन-ऑन सत्र समाप्त हो गया है। फिर से साइन इन करें।"
-
-#: backend/api/message_handlers_core.py
-msgid "Agent session refused: it did not prove it is this host"
-msgstr "एजेंट सत्र अस्वीकार किया गया: इसने साबित नहीं किया कि यह यही होस्ट है"
-
-#: backend/api/message_handlers_core.py
-msgid "This agent did not prove it is this host. If the host was reinstalled, remove it from SysManage and approve its new registration."
-msgstr "इस एजेंट ने साबित नहीं किया कि यह यही होस्ट है। यदि होस्ट को फिर से इंस्टॉल किया गया था, तो उसे SysManage से हटाएँ और उसके नए पंजीकरण को स्वीकृत करें।"
-
-#: backend/api/message_handlers.py
-msgid "This session cannot acknowledge another host's message"
-msgstr "यह सत्र किसी अन्य होस्ट के संदेश की पावती नहीं दे सकता"

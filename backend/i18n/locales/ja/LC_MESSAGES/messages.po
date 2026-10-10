@@ -2915,7 +2915,7 @@ msgstr "バンドルが見つかりません"
 
 #: backend/api/airgap_bundles.py:469
 msgid "product must be one of: "
-msgstr ""
+msgstr "製品は次のいずれかでなければなりません: "
 
 #: backend/api/airgap_bundles.py:483
 msgid "Insufficient host resources to build a bundle: "
@@ -5401,6 +5401,25 @@ msgstr "NetBSD の pkgsrc パッケージの脆弱性 (pkg_admin audit が読む
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "OS バージョン別の macOS の脆弱性 (NVD の影響を受けるバージョンのデータより)"
 
+msgid "The single sign-on session has expired. Sign in again."
+msgstr "シングルサインオンのセッションの有効期限が切れました。もう一度サインインしてください。"
+
+#: backend/api/message_handlers_core.py
+msgid "Agent session refused: it did not prove it is this host"
+msgstr "エージェント セッションを拒否しました: このホストであることを証明しませんでした"
+
+#: backend/api/message_handlers_core.py
+msgid ""
+"This agent did not prove it is this host. If the host was reinstalled, "
+"remove it from SysManage and approve its new registration."
+msgstr ""
+"このエージェントは、このホストであることを証明しませんでした。ホストを再インストールした場合は、SysManage "
+"から削除し、新しい登録を承認してください。"
+
+#: backend/api/message_handlers.py
+msgid "This session cannot acknowledge another host's message"
+msgstr "このセッションは別のホストのメッセージを確認応答できません"
+
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "メールサービスが無効です。設定ファイルで有効にしてください。"
 
@@ -6090,18 +6109,3 @@ msgstr "OS バージョン別の macOS の脆弱性 (NVD の影響を受ける�
 
 #~ msgid "Executing command sequence"
 #~ msgstr "コマンドシーケンスを実行中"
-
-msgid "The single sign-on session has expired. Sign in again."
-msgstr "シングルサインオンのセッションの有効期限が切れました。もう一度サインインしてください。"
-
-#: backend/api/message_handlers_core.py
-msgid "Agent session refused: it did not prove it is this host"
-msgstr "エージェント セッションを拒否しました: このホストであることを証明しませんでした"
-
-#: backend/api/message_handlers_core.py
-msgid "This agent did not prove it is this host. If the host was reinstalled, remove it from SysManage and approve its new registration."
-msgstr "このエージェントは、このホストであることを証明しませんでした。ホストを再インストールした場合は、SysManage から削除し、新しい登録を承認してください。"
-
-#: backend/api/message_handlers.py
-msgid "This session cannot acknowledge another host's message"
-msgstr "このセッションは別のホストのメッセージを確認応答できません"

@@ -5,12 +5,12 @@
     "confirmPassword": "비밀번호 확인",
     "description": "계정 생성을 완료하려면 비밀번호를 설정하세요.",
     "fillAllFields": "모든 필드를 입력해 주세요",
-    "firstName": "[TODO] First Name",
+    "firstName": "이름",
     "goToLogin": "로그인으로 이동하기",
     "invalidDescription": "이 초대 링크는 유효하지 않거나 만료되었습니다. 관리자에게 새 초대를 보내달라고 요청하세요.",
     "invalidTitle": "유효하지 않은 초대 링크",
     "invalidToken": "이 초대 링크는 유효하지 않거나 만료되었습니다",
-    "lastName": "[TODO] Last Name",
+    "lastName": "마지막 이름",
     "noToken": "토큰 정보 제공되지 않음",
     "password": "비밀번호",
     "passwordMismatch": "비밀번호가 일치하지 않습니다",
@@ -87,13 +87,13 @@
       "notApplicable": "이 대시보드는 리포지토리 역할 배포에서만 의미가 있습니다.",
       "subtitle": "이 프라이빗 사이드 미러의 각 저장소 통계 및 집계 신선도.",
       "table": {
-        "distro": "[TODO] Distro",
+        "distro": "분배판",
         "empty": "아직 인식된 레포지토리가 없습니다.",
         "freshness": "신선도",
         "freshnessDays": "{{days}} 일",
         "freshnessNever": "从来未摄取",
         "lastIngest": "최근 성공적인 인GEST",
-        "neverIngested": "[TODO] Never",
+        "neverIngested": "절대",
         "noFingerprint": "--",
         "packageCount": "패키지",
         "signerFingerprint": "서명자 지문",
@@ -198,7 +198,7 @@
     "notApplicable": "이 페이지는 수집자 역할 배포에서만 의미가 있습니다.",
     "refresh": "새로고침",
     "subtitle": "구성된 저장소를 미러링하고, 서명된 ISO를 생성하며, 공기 격리 측에서 사용할 수 있도록 매니페스트를 작성하여 단발성 수집 작업을 트리거합니다.",
-    "title": "[TODO] Air-Gap Collection Runs"
+    "title": "공백 수집 실행"
   },
   "airgapDevices": {
     "empty": "적격 드라이브 없음. 미디어 삽입 후 재스캔을 눌러주세요.",
@@ -312,7 +312,7 @@
     "filters": {
       "actor": "행위자",
       "apply": "적용",
-      "clear": "[TODO] Clear",
+      "clear": "지우기",
       "operation": "작업",
       "siteId": "사이트 ID"
     },
@@ -478,8 +478,8 @@
     "no": "아니오",
     "noDescription": "설명 없음",
     "none": "없음",
-    "notAvailable": "[TODO] N/A",
-    "of": "[TODO] of",
+    "notAvailable": "N/A",
+    "of": "의",
     "refresh": "새로고침",
     "requiresSelection": "행을 하나 이상 선택하세요",
     "requiresSingleSelection": "행을 정확히 하나만 선택하세요",
@@ -534,7 +534,7 @@
     "days_other": "{{count}} 일",
     "detailTitle": "차이점 {{host}}",
     "differences": "차이점",
-    "driftingFor": "[TODO] Drifting for",
+    "driftingFor": "구성 이탈",
     "findingsFailed": "이 호스트에 대한 결과를 로드할 수 없습니다.",
     "host": "호스트",
     "intro": "더 이상 할당된 프로필과 일치하지 않는 호스트. 편향은 드라이 런을 통해 감지되므로 여기에 변경 사항이 없습니다 -- 치유는 실제 프로필을 다시 적용하여 수행됩니다.",
@@ -607,7 +607,7 @@
     "progress": "{{done}}의 {{total}} -- {{ok}} 성공, {{failed}} 실패, {{skipped}} 건너뛰기",
     "schedule": "스케줄 (cron)",
     "scheduleHelp": "비어있으면 수동으로만 실행합니다.",
-    "tabInventories": "[TODO] Inventories",
+    "tabInventories": "인벤토리",
     "tabJobs": "작업",
     "tabTemplates": "템플릿",
     "targetsFailed": "호스트를 로드할 수 없습니다.",
@@ -713,7 +713,7 @@
     "repairWith": "수리하기",
     "saveFailed": "규칙을 저장할 수 없습니다.",
     "scopeHelp": "이 작업이 편차를 보이는 모든 곳에서 복구하려면 비워 두세요.",
-    "scopeTo": "[TODO] Only drift from",
+    "scopeTo": "오직 구성 이탈에서",
     "scoped": "{{profile}}의 편차만"
   },
   "configuration": {
@@ -750,7 +750,7 @@
     "security": "보안",
     "settings": {
       "checkAll": "모두 선택",
-      "checkNone": "[TODO] Check None",
+      "checkNone": "없음 확인",
       "description": "대시보드에 표시할 카드 선택",
       "loadError": "선호 설정 로드 실패",
       "saveError": "선호 설정 저장 실패",
@@ -759,7 +759,7 @@
     "updates": "업데이트"
   },
   "dataGrid": {
-    "columnVisibility": "[TODO] Column Visibility",
+    "columnVisibility": "열 표시",
     "hideAll": "모두 숨기기",
     "reset": "재설정",
     "showAll": "모두 표시"
@@ -792,9 +792,9 @@
     "installIdentifier": "설치 식별자",
     "installIdentifierHelp": "WSL: Ubuntu-24.04, LXD: ubuntu:24.04",
     "installMethod": "에이전트 설치 방법",
-    "loadError": "[TODO] Error loading distributions",
+    "loadError": "오류 로드 분배판",
     "minAgentVersion": "최소 에이전트 버전",
-    "notes": "[TODO] Notes",
+    "notes": "참고사항",
     "title": "차일드 호스트 배포판",
     "version": "버전",
     "versionHelp": "예: 24.04"
@@ -829,7 +829,7 @@
   "federationDispatch": {
     "cancel": "취소",
     "commandType": "명령어",
-    "dispatch": "[TODO] Dispatch",
+    "dispatch": "배포",
     "dispatching": "분배 중...",
     "errors": {
       "failed": "명령을 전달하는 데 실패했습니다.",
@@ -847,7 +847,7 @@
     "subtitleMulti": "{{sites}}개의 사이트에서 선택한 호스트({{hosts}})에 명령을 큐에 추가합니다. 각 사이트가 호스트에서 명령을 실행하고 결과를 보고합니다 -- 즉시 실행되는 것은 없습니다.",
     "targetAll": "이 사이트의 모든 호스트",
     "targetSpecific": "특정 호스트 (ID로 지정)",
-    "thisSite": "[TODO] this site",
+    "thisSite": "이 사이트",
     "title": "명령 분배",
     "types": {
       "applyUpdates": "업데이트 적용",
@@ -862,7 +862,7 @@
       "openSite": "사이트"
     },
     "bulk": {
-      "clear": "[TODO] Clear",
+      "clear": "지우기",
       "dispatch": "명령 분배",
       "selectAll": "이 페이지의 모든 항목 선택",
       "selected": "{{n}} 선택된 호스트"
@@ -881,7 +881,7 @@
       "noLiveLink": "실시간 상세 링크가 이용할 수 없습니다 (소유 사이트에 URL이 없음).",
       "notFound": "이 호스트는 더 이상 디렉토리에 포함되어 있지 않습니다.",
       "site": "소유 사이트",
-      "theSite": "[TODO] the site",
+      "theSite": "사이트",
       "title": "호스트 상세 정보",
       "viewLive": "{{site}} → 실시간 상세 정보 보기"
     },
@@ -890,7 +890,7 @@
     "errorLoad": "사이트 간 호스트 로드 실패.",
     "filters": {
       "apply": "적용",
-      "clear": "[TODO] Clear",
+      "clear": "지우기",
       "osFamily": "OS 계열",
       "search": "검색 (이름 / IP)",
       "status": "상태"
@@ -953,7 +953,7 @@
     "peers": {
       "empty": "등록된 피어 식별 키 없음.",
       "help": "피어의 공개 키를 여기에 기록하여 그들의 식별 지문을 외부에서 확인하세요. 연방 연결 자체는 등록 시 고정된 TLS 인증서로 보호됩니다 -- 이러한 키는 인간 검증용이며 접근 제어에는 사용되지 않습니다.",
-      "import": "[TODO] Import Peer Key",
+      "import": "피어 키 가져오기",
       "name": "피어 이름",
       "pem": "피어 공개 키 (PEM)",
       "title": "피어 식별 키"
@@ -1007,7 +1007,7 @@
     "startPort": "시작 포트",
     "subtitle": "부제목",
     "tcp": "TCP",
-    "title": "[TODO] Firewall Roles",
+    "title": "방화벽 역할",
     "udp": "UDP",
     "updateSuccess": "업데이트 성공"
   },
@@ -1378,7 +1378,7 @@
     "cpuFrequency": "주파수",
     "cpuInfo": "프로세서",
     "cpuModel": "프로세서 모델",
-    "cpuThreads": "[TODO] Threads",
+    "cpuThreads": "스레드",
     "cpuVendor": "프로세서 제조사",
     "createBhyveVmTitle": "bhyve 가상 머신 생성",
     "createChildHostButton": "생성",
@@ -1416,7 +1416,7 @@
     "editHostname": "호스트 이름 편집",
     "editServices": "서비스 편집",
     "enabled": "활성화",
-    "entitled": "[TODO] Entitled",
+    "entitled": "권한 부여",
     "errorMessage": "오류 메시지",
     "errorUpdatingServices": "서비스 업데이트 실패",
     "expired": "만료됨",
@@ -1710,8 +1710,8 @@
     "thirdPartyReposTab": "서드파티 저장소",
     "timezone": "시간대",
     "totalMemory": "총 메모리",
-    "ubuntuProAttach": "[TODO] Attach",
-    "ubuntuProAttachConfirm": "[TODO] Attach",
+    "ubuntuProAttach": "부착",
+    "ubuntuProAttachConfirm": "부착",
     "ubuntuProAttachDescription": "이 시스템을 구독에 연결하려면 Ubuntu Pro 토큰을 입력하십시오.",
     "ubuntuProAttachError": "Ubuntu Pro 연결에 실패했습니다",
     "ubuntuProAttachSuccess": "Ubuntu Pro가 성공적으로 연결되었습니다",
@@ -1757,7 +1757,7 @@
     "windowsIsoPathRequired": "Windows 설치 ISO의 경로를 입력해 주세요",
     "windowsJoinDomainToggle": "Active Directory 도메인에 참가하기",
     "windowsLocaleHelp": "UI 및 입력 로케일, 예: \"en-US\"",
-    "windowsLocaleLabel": "[TODO] Locale",
+    "windowsLocaleLabel": "지역",
     "windowsProductKeyHelp": "AVMA, MAK 또는 KMS 키입니다. 평가용 미디어는 라이선스 없이 설치하려면 이 항목을 비워둡니다. OpenBAO에 저장되며 데이터베이스에는 저장되지 않습니다.",
     "windowsProductKeyLabel": "라이선스 키",
     "windowsSectionTitle": "Windows 설정 프로그램",
@@ -1809,7 +1809,7 @@
     "childHostFilter": "자식 호스트 필터",
     "childHostOf": "{{parent}}의 자식 호스트",
     "childHostsOnly": "자식 호스트만",
-    "childrenOnly": "[TODO] Children",
+    "childrenOnly": "자식",
     "confirmReboot": "시스템 재부팅 확인",
     "confirmRebootMessage": "{{hostname}}를 재부팅하시겠습니까? 시스템을 몇 분 동안 사용할 수 없습니다.",
     "confirmShutdown": "시스템 종료 확인",
@@ -1820,7 +1820,7 @@
     "deployOpenTelemetry": "OpenTelemetry 배포",
     "diagnosticsRequestFailed": "진단 수집 요청 실패. 다시 시도해 주세요.",
     "diagnosticsRequested": "호스트 {{hostId}}의 진단 수집이 요청되었습니다. 결과가 사용 가능해질 때 호스트 세부 정보 페이지를 확인하세요.",
-    "down": "[TODO] Down",
+    "down": "다운",
     "filterByTags": "태그로 필터링",
     "fqdn": "FQDN",
     "getDiagnostics": "진단 정보 가져오기",
@@ -1897,7 +1897,7 @@
     "systemUpdatesOnly": "{{count}} 시스템 업데이트",
     "tags": "태그",
     "unknown": "알 수 없음",
-    "up": "[TODO] Up",
+    "up": "상단",
     "updateAgent": "에이전트 업데이트",
     "updateAgentFailed": "에이전트 업데이트 요청 실패",
     "updateAgentRequested": "에이전트 업데이트가 성공적으로 요청되었습니다",
@@ -2023,10 +2023,10 @@
     "email": "이메일",
     "existingHeading": "초대 목록",
     "expires": "만료 기간",
-    "firstName": "[TODO] First Name",
+    "firstName": "이름",
     "inviteHeading": "새 사용자 초대",
     "isAdmin": "관리자 권한 부여",
-    "lastName": "[TODO] Last Name",
+    "lastName": "마지막 이름",
     "loadError": "초대 목록 로딩 실패",
     "manageButton": "초대 목록",
     "none": "아직 초대 정보 없음",
@@ -2055,7 +2055,7 @@
     "nativeIdentifier": "네이티브 식별자 / 태그",
     "nativeTarget": "네이티브 대상",
     "remoteSyslogLocked": "Remote syslog forwarding 처과 김지 SysManage Professional 고스래 운소만 컴어적으카짜.",
-    "remoteSyslogTitle": "[TODO] Remote syslog forwarding",
+    "remoteSyslogTitle": "원격 시스로그 전달",
     "saveError": "로깅 설정을 저장하지 못했습니다",
     "saved": "로깅 설정이 저장되어 에이전트에 전송되었습니다.",
     "serverCardTitle": "서버 로깅",
@@ -2065,12 +2065,12 @@
     "sinkMacos": "syslog",
     "sinkWindows": "Windows 이벤트 로그",
     "syslogFacility": "시설",
-    "syslogHost": "[TODO] Syslog host",
-    "syslogPort": "[TODO] Syslog port",
-    "syslogProtocol": "[TODO] Protocol",
+    "syslogHost": "시그널 호스트",
+    "syslogPort": "시그널 포트",
+    "syslogProtocol": "프로토콜",
     "targetRemoteLocked": "{{target}} (프로페셔널)",
     "title": "로깅",
-    "verbosity": "[TODO] Verbosity"
+    "verbosity": "상세도"
   },
   "login": {
     "forgotPassword": "비밀번호를 잊으셨나요?",
@@ -2136,7 +2136,7 @@
     "hostCardTitle": "유지보수 윈도우",
     "inBlackout": "블랙아웃 중: {{name}}",
     "intro": "업데이트와 원격 명령이 실행될 수 있는 시간을 정의합니다. 허용 윈도우 내부에 있는 호스트(블랙아웃 외부)는 변경 사항을 받습니다; 다른 변경 사항은 다음 윈도우가 열릴 때까지 보류됩니다. 윈도우가 없는 호스트는 제한이 없습니다.",
-    "kind": "[TODO] Kind",
+    "kind": "종류",
     "kindAllow": "허용",
     "kindBlackout": "블랙아웃",
     "loadError": "유지보수 윈도우 로드 실패",
@@ -2241,7 +2241,7 @@
         "snapshot": "snap",
         "sync": "동기화"
       },
-      "ok": "[TODO] ok"
+      "ok": "좋음"
     },
     "col": {
       "actions": "작업",
@@ -2367,7 +2367,7 @@
         "files": "파일",
         "id": "스냅샷",
         "size": "크기",
-        "taken": "[TODO] Taken at"
+        "taken": "취득된"
       },
       "empty": "아직 스냅샷이 없습니다. 하나를 찍으려면 카메라 아이콘을 클릭하세요.",
       "loadError": "스냅샷을 불러오는데 실패했습니다.",
@@ -2379,7 +2379,7 @@
     "tabLabel": "리포지토리 미러링"
   },
   "nav": {
-    "advisories": "[TODO] Advisories",
+    "advisories": "경고",
     "airgapCollections": "공기 격리 수집",
     "airgapRepositories": "공기 격리 저장소",
     "alerts": "경고",
@@ -2394,7 +2394,7 @@
     "closeMenu": "메뉴 닫기",
     "compliance": "준수",
     "configDrift": "구성 편향",
-    "configJobs": "[TODO] Fleet Jobs",
+    "configJobs": "플릿 작업",
     "configProfiles": "구성 프로필",
     "customMetrics": "사용자 정의 메트릭",
     "dashboard": "대시보드",
@@ -2463,7 +2463,7 @@
     "running": "실행 중",
     "seal": "봉인",
     "sealError": "OpenBAO 봉인에 실패했습니다",
-    "sealStatus": "[TODO] Seal Status",
+    "sealStatus": "보안 상태",
     "sealed": "봉인됨",
     "sealing": "봉인 중...",
     "serverHealth": "서버 상태",
@@ -2553,7 +2553,7 @@
     "title": "규정 준수 프로필",
     "updated": "규정 준수 프로필이 저장되었습니다",
     "version": "버전",
-    "versionOp": "[TODO] Op",
+    "versionOp": "작업",
     "versionOpAny": "(임의)"
   },
   "policies": {
@@ -2688,7 +2688,7 @@
     "notCoveredCount": "{{count}} 미포함",
     "pack": "패키지",
     "queries": "쿼리",
-    "query": "[TODO] Query",
+    "query": "조회",
     "queryName": "쿼리 이름",
     "requiredTables": "사실 테이블 사용",
     "requiredTablesHelp": "쉼표로 구분된 목록. 보고서를 생성하지 않는 호스트는 쿼리가 커버되지 않는다는 메시지를 반환한다, 아무것도 반환하지 않는다는 대신",
@@ -2961,7 +2961,7 @@
       "cmd": "명령어",
       "ksh": "Ksh",
       "powershell": "PowerShell",
-      "sh": "[TODO] Sh",
+      "sh": "Sh",
       "zsh": "Zsh"
     },
     "startedAt": "시작 시각",
@@ -3180,7 +3180,7 @@
       "title": "공기 격리 수집기 (온라인 측)"
     },
     "currentTag": "(현재)",
-    "heading": "[TODO] Air-Gap Role",
+    "heading": "공백 역할",
     "intro": "이 SysManage 서버가 공기 격리 배포에 어떻게 참여할지 선택합니다. 대부분의 서버는 표준 상태로 유지해야 합니다. 역할은 다음 서버 재시작 후 적용됩니다.",
     "loadError": "현재 서버 역할을 불러오는데 실패했습니다.",
     "menuTitle": "서버 역할",
@@ -3214,7 +3214,7 @@
   "sites": {
     "actions": {
       "remove": "제거",
-      "resume": "[TODO] Resume",
+      "resume": "재시작",
       "suspend": "일시 중지"
     },
     "addSite": "사이트 등록",
@@ -3402,7 +3402,7 @@
     "deleteSelected": "선택 항목 삭제 ({{count}})",
     "deleteSuccess": "삭제 성공",
     "detectedOs": "감지된 OS",
-    "disableError": "[TODO] Disable Error",
+    "disableError": "오류 비활성화",
     "disableSelected": "선택 항목 비활성화 ({{count}})",
     "disableSuccess": "비활성화 성공",
     "enableError": "활성화 오류",
@@ -3780,7 +3780,7 @@
       "recommendations": "권장 사항",
       "proposals": "수정 제안 ({{count}})",
       "packs": "규칙 팩",
-      "posture": "[TODO] Posture"
+      "posture": "자세"
     },
     "feed": {
       "lens": "관점",
@@ -3795,11 +3795,11 @@
       "findings": "발견 사항",
       "notAssessable": "평가 불가",
       "notApplicable": "적용 대상 아님",
-      "clean": "[TODO] Clean"
+      "clean": "청소"
     },
     "outcome": {
       "fires": "발견 사항",
-      "doesNotFire": "[TODO] Clean",
+      "doesNotFire": "청소",
       "notAssessable": "평가 불가",
       "notApplicable": "적용 대상 아님"
     },
@@ -3840,7 +3840,7 @@
       "reboot": "재부팅 상태",
       "packages": "소프트웨어 목록",
       "firewall": "방화벽 상태",
-      "metricHistory": "[TODO] Metric history",
+      "metricHistory": "메트릭 히스토리",
       "when": "규칙 쿼리",
       "rule": "규칙 정의"
     },
@@ -3915,7 +3915,7 @@
       "notAssessable": "평가 불가",
       "proposals": "수정 제안",
       "notApplicable": "적용 대상 아님",
-      "clean": "[TODO] Clean"
+      "clean": "청소"
     },
     "curated": {
       "pmAirgapRole": "서버가 설명하신 에어갭 배포로 설정되어 있음",
@@ -4045,7 +4045,7 @@
       "enforce_lockout": "로그인에 5회 실패하면 계정을 잠급니다.",
       "enroll_admin_mfa": "각 관리자가 자신의 프로필에서 MFA를 등록합니다.",
       "expire_api_keys": "만료되지 않는 API 키를 만료 기한이 있는 키로 교체합니다.",
-      "goThere": "[TODO] Go there",
+      "goThere": "가기",
       "hostFailed": "{{host}}: {{reason}}",
       "hosts": "변경될 호스트: {{n}}",
       "patch_critical_vulnerabilities": "제안된 수정 사항을 검토하고 승인하십시오.",
@@ -4071,7 +4071,7 @@
     "stalePass": "일부 항목은 이전 위협 모델로 마지막 평가되었습니다. 다음 평가 시 업데이트됩니다.",
     "state": {
       "notAssessable": "평가 불가",
-      "open": "[TODO] Open",
+      "open": "열림",
       "satisfied": "충족됨",
       "waived": "면제됨"
     },
@@ -4155,7 +4155,7 @@
         "yes": "예"
       },
       "org": {
-        "enterprise": "[TODO] An enterprise",
+        "enterprise": "기업",
         "homelab": "홈 랩 또는 개인 시스템",
         "public_sector": "공공 부문 또는 국방",
         "small_business": "소기업"
@@ -4277,9 +4277,9 @@
       "unmanaged_one": "관리되지 않음 {{count}}개"
     },
     "exclude": {
-      "action": "[TODO] Mark {{count}} as known and fine",
-      "action_other": "[TODO] Mark {{count}} as known and fine",
-      "action_one": "[TODO] Mark {{count}} as known and fine",
+      "action": "{{count}}를 알고 있고 양호로 표시",
+      "action_other": "{{count}}를 알고 있고 양호로 표시",
+      "action_one": "{{count}}를 알고 있고 양호로 표시",
       "category": "어떤 장치입니까?",
       "confirm": "알려진 장치로 표시",
       "done": "장치 {{count}}개를 알려진 장치로 표시했습니다.",
@@ -4315,7 +4315,7 @@
     "policy": {
       "enabled": "에이전트가 네트워크에서 장치를 수신 대기합니다",
       "hour": "매시간",
-      "interval": "[TODO] Report",
+      "interval": "보고서",
       "lastChanged": "{{when}}에 {{who}}님이 마지막으로 변경함",
       "minutes": "{{count}}분마다",
       "minutes_other": "{{count}}분마다",
@@ -4338,22 +4338,22 @@
       "address": "주소",
       "device": "장치",
       "empty": "일치하는 장치가 없습니다.",
-      "evidence": "[TODO] What it says it is",
+      "evidence": "그것이 주장하는 바와 같다",
       "ipOnly": "MAC 확인 안 됨",
       "lastSeen": "마지막 확인",
       "localMac": "주소가 변경될 수 있음",
       "localMacHelp": "로컬 관리 주소입니다. 휴대폰과 태블릿은 이 주소를 변경하므로 이 장치가 새 주소로 다시 나타날 수 있습니다.",
       "more": "{{total}}개 중 {{shown}}개 표시 중. 위의 필터로 목록을 좁히세요.",
-      "seenBy": "[TODO] Seen by",
+      "seenBy": "조회됨",
       "selectAll": "모두 선택",
       "status": "상태",
       "maybe": "아마도: {{type}}"
     },
     "tabs": {
-      "excluded": "[TODO] Known and fine",
+      "excluded": "알고 있고 양호함",
       "managed": "관리됨",
       "unmanaged": "관리되지 않음",
-      "sweeps": "[TODO] Sweeps"
+      "sweeps": "스캔"
     },
     "title": "네트워크 탐색",
     "unavailable": {
@@ -4364,7 +4364,7 @@
       "unsupportedPlatform": "이 플랫폼에서 지원되지 않음"
     },
     "sweep": {
-      "agent": "[TODO] Swept by",
+      "agent": "스캔됨",
       "disabled": "능동 스캔이 꺼져 있습니다. 자신을 알리지 않는 장치를 찾으려면 위 설정에서 허용하십시오.",
       "error": "스캔을 시작할 수 없습니다.",
       "found": "발견됨",
@@ -4448,7 +4448,7 @@
       "lastSeen": "마지막 확인",
       "seenTimes": "{{count}}회 확인됨",
       "severity": "심각도",
-      "signature": "[TODO] Detection",
+      "signature": "탐지",
       "status": "상태",
       "seenTimes_one": "{{count}}회 확인됨",
       "seenTimes_other": "{{count}}회 확인됨"
@@ -4495,7 +4495,7 @@
     "scanHosts": "호스트 스캔",
     "scans": {
       "empty": "아직 실행된 스캔이 없습니다.",
-      "legs": "[TODO] What ran",
+      "legs": "어떤 것이 실행되었나요?",
       "paths": "경로",
       "requested": "요청 시각",
       "result": "결과",
@@ -4510,8 +4510,8 @@
       "medium": "중간"
     },
     "status": {
-      "falsePositive": "[TODO] False positive",
-      "open": "[TODO] Open",
+      "falsePositive": "거짓 양성",
+      "open": "열림",
       "quarantined": "격리됨",
       "resolved": "해결됨",
       "restored": "복원됨"
@@ -4519,7 +4519,7 @@
     "subtitle": "각 호스트의 자체 ClamAV가 ClamAV 시그니처와 SysManage 규칙 피드로 실행한 스캔입니다.",
     "tabs": {
       "decided": "결정됨",
-      "open": "[TODO] Open findings",
+      "open": "개방된 발견",
       "scans": "스캔",
       "rulesets": "규칙 세트"
     },
@@ -4598,7 +4598,7 @@
     },
     "jobs": {
       "atOnce": "동시에 최대 {{count}}대",
-      "by": "[TODO] By",
+      "by": "by",
       "done": "{{total}}개 중 {{done}}개 완료",
       "hostCount": "호스트 {{count}}대",
       "inventoryCount": "호스트 인벤토리 {{count}}개",
@@ -4613,7 +4613,7 @@
       "all": "모든 호스트",
       "chosen": "태그, 인벤토리 또는 호스트로 선택",
       "hosts": "개별 호스트",
-      "inventories": "[TODO] Inventories",
+      "inventories": "인벤토리",
       "tags": "태그"
     }
   }

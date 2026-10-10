@@ -64,7 +64,7 @@
       "error": "Не удалось загрузить актуальность:",
       "label": {
         "current": "Актуально",
-        "never": "[TODO] Never ingested",
+        "never": "Никогда не импортировано",
         "stale": "Устарело",
         "very_stale": "Очень устарело"
       },
@@ -87,7 +87,7 @@
       "notApplicable": "Эта панель управления имеет смысл только для развертываний с ролью репозитория.",
       "subtitle": "Статистика по каждому репозиторию для этого частного зеркала, а также сводная свежесть.",
       "table": {
-        "distro": "[TODO] Distro",
+        "distro": "Распределение",
         "empty": "Репозитории еще не были загружены.",
         "freshness": "Свежесть",
         "freshnessDays": "{{days}} день(ев)",
@@ -179,7 +179,7 @@
       "mirrorsRequired": "Необходимо хотя бы одно целевое зеркало.",
       "mirrorsTitle": "Зеркала",
       "noMirrors": "Нет активных зеркал. Перейдите в Настройки → Зеркальное отображение репозиториев, чтобы добавить одно, затем повторите попытку.",
-      "submit": "[TODO] Queue Run",
+      "submit": "Запуск очереди",
       "title": "Новый запуск сбора данных"
     },
     "discPicker": {
@@ -198,7 +198,7 @@
     "notApplicable": "Эта страница имеет смысл только при развертывании роли collector.",
     "refresh": "Обновить",
     "subtitle": "Вызвать одноразовые сборки, которые зеркалируют конфигурированные репозитории, создают подписанную ISO и записывают манифест для загрузки в изолированной среде.",
-    "title": "[TODO] Air-Gap Collection Runs"
+    "title": "Сборки в режиме air-gap"
   },
   "airgapDevices": {
     "empty": "Не найдено подходящих накопителей. Вставьте носитель и нажмите Пересканирование.",
@@ -362,7 +362,7 @@
     "resultLabel": "Результат",
     "search": "Поиск (описание или имя сущности)",
     "startDate": "Дата начала",
-    "timestamp": "[TODO] Timestamp",
+    "timestamp": "Маркировка времени",
     "username": "Имя пользователя"
   },
   "availablePackages": {
@@ -413,8 +413,8 @@
     "missingTitle": "На эталоне, но не на этом хосте",
     "name": "Имя",
     "noOtherHosts": "На данный момент нет других хостов для сравнения.",
-    "reference": "[TODO] Reference",
-    "referenceHost": "[TODO] Reference host",
+    "reference": "Ссылка",
+    "referenceHost": "Хост-ссылка",
     "summary": "{{count}} разница(и) от {{reference}}.",
     "thisHost": "Этот хост",
     "title": "Сравнить с эталонным хостом",
@@ -478,7 +478,7 @@
     "no": "Нет",
     "noDescription": "Без описания",
     "none": "Нет",
-    "notAvailable": "[TODO] N/A",
+    "notAvailable": "N/A",
     "of": "из",
     "refresh": "Обновить",
     "requiresSelection": "Выберите хотя бы одну строку",
@@ -488,7 +488,7 @@
     "rowSelected": "строка выбрана",
     "rowsPerPage": "Строк на страницу",
     "rowsSelected": "строк выбрано",
-    "running": "[TODO] Running",
+    "running": "Запущено",
     "save": "Сохранить",
     "saving": "Сохранение...",
     "search": "Поиск",
@@ -534,7 +534,7 @@
     "days_other": "{{count}} дни",
     "detailTitle": "Различия на {{host}}",
     "differences": "Различия",
-    "driftingFor": "[TODO] Drifting for",
+    "driftingFor": "Отклоняется для",
     "findingsFailed": "Не удалось загрузить результаты для этого хоста",
     "host": "Хост",
     "intro": "Хосты, которые больше не соответствуют профилю, назначенному им. Отклонение обнаруживается в ходе сухих запусков, поэтому здесь ничего не изменилось -- исправление применяет профиль реально.",
@@ -551,7 +551,7 @@
     "seenSince": "Впервые замечено",
     "tabDrift": "Плавающие хосты",
     "tabPlaybooks": "Скрипты исправления",
-    "title": "[TODO] Configuration Drift",
+    "title": "Отклонение конфигурации",
     "view": "Просмотреть",
     "tabFileWatches": "Отслеживаемые файлы"
   },
@@ -582,8 +582,8 @@
     "hostsIn": "Результаты по хостам для {{name}}",
     "intro": "Запускает один профиль конфигурации на многих хостах одновременно. Задача работает через инвентарь по волнам, а не сразу, и фиксирует результаты для каждого хоста.",
     "inventoriesFailed": "Не удалось загрузить списки хостов",
-    "inventory": "[TODO] Inventory",
-    "inventoryDeleteFailed": "[TODO] Could not delete the inventory",
+    "inventory": "Инвентарь",
+    "inventoryDeleteFailed": "Не удалось удалить инвентарь",
     "inventorySaveFailed": "Не удалось сохранить список хостов",
     "jobsFailed": "Не удалось загрузить задачи",
     "launch": "Запустить",
@@ -593,7 +593,7 @@
     "launched_other": "Запущено против {{count}} хостов. Прогресс можно отслеживать на вкладке «Задачи».",
     "membersHint": "После создания добавьте в этот список хосты, теги или площадки. Они определяются заново при каждом запуске задания, поэтому хост, добавленный к тегу, учитывается автоматически.",
     "name": "Имя",
-    "newInventory": "[TODO] New inventory",
+    "newInventory": "Новый инвентарь",
     "newTemplate": "Новая шаблонная задача",
     "noInventories": "Списков хостов пока нет. Список задаёт хосты, на которых выполняется задание для парка устройств.",
     "noJobs": "На данный момент не запущены задачи флота. Запустите одну из шаблонов на вкладке «Шаблоны».",
@@ -607,14 +607,14 @@
     "progress": "{{done}} из {{total}} -- {{ok}} успешно, {{failed}} не удалось, {{skipped}} пропущено",
     "schedule": "Расписание (cron)",
     "scheduleHelp": "Оставьте это поле пустым, чтобы запустить вручную только.",
-    "tabInventories": "[TODO] Inventories",
-    "tabJobs": "[TODO] Jobs",
+    "tabInventories": "Инвентари",
+    "tabJobs": "Задачи",
     "tabTemplates": "Шаблоны",
     "targetsFailed": "Не удалось загрузить хосты",
     "templateDeleteFailed": "Не удалось удалить шаблон",
     "templateSaveFailed": "Не удалось сохранить шаблон задачи",
     "templatesFailed": "Не удалось загрузить шаблоны задач",
-    "title": "[TODO] Fleet Configuration Jobs"
+    "title": "Задачи конфигурации парка"
   },
   "configManagement": {
     "applyAction": "Применить",
@@ -750,7 +750,7 @@
     "security": "Безопасность",
     "settings": {
       "checkAll": "Выбрать Все",
-      "checkNone": "[TODO] Check None",
+      "checkNone": "Проверить ни одно",
       "description": "Выберите карточки для отображения на панели",
       "loadError": "Не удалось загрузить настройки",
       "saveError": "Не удалось сохранить настройки",
@@ -775,7 +775,7 @@
     "deleteConfirm": "Вы уверены, что хотите удалить этот дистрибутив? Это действие нельзя отменить.",
     "deleteError": "Ошибка удаления дистрибутива",
     "deleteSuccess": "Дистрибутив успешно удален",
-    "deleteTitle": "[TODO] Delete Distribution",
+    "deleteTitle": "Удалить распределение",
     "description": "Управление доступными дистрибутивами для создания дочерних хостов (экземпляров WSL, контейнеров, ВМ).",
     "displayName": "Отображаемое Имя",
     "displayNameHelp": "напр., Ubuntu 24.04 LTS (Noble)",
@@ -784,7 +784,7 @@
     "edit": "Редактировать",
     "editError": "Ошибка обновления дистрибутива",
     "editSuccess": "Дистрибутив успешно обновлен",
-    "editTitle": "[TODO] Edit Distribution",
+    "editTitle": "Редактировать распределение",
     "executableName": "Имя Исполняемого Файла",
     "executableNameHelp": "Только WSL: напр., ubuntu2404.exe",
     "installCommands": "Команды Установки Агента",
@@ -806,7 +806,7 @@
     "sendFailed": "Не удалось отправить тестовое письмо. Проверьте настройку.",
     "sendTest": "Отправить тестовое письмо",
     "sending": "Отправка...",
-    "testConfiguration": "[TODO] Test Configuration",
+    "testConfiguration": "Конфигурация тестирования",
     "testDialogBody": "Отправьте тестовое письмо, чтобы убедиться, что ваша настройка SMTP работает правильно.",
     "testDialogTitle": "Проверка настройки электронной почты"
   },
@@ -829,7 +829,7 @@
   "federationDispatch": {
     "cancel": "Отменить",
     "commandType": "Команда",
-    "dispatch": "[TODO] Dispatch",
+    "dispatch": "Отправить команду",
     "dispatching": "Отправка…",
     "errors": {
       "failed": "Не удалось отправить команду.",
@@ -838,7 +838,7 @@
       "scriptRequired": "Введите скрипт для выполнения.",
       "unlicensed": "Федерация требует лицензии Enterprise."
     },
-    "hostIds": "[TODO] Host IDs",
+    "hostIds": "ID хоста",
     "hostIdsHint": "Через запятую перечисленные идентификаторы хостов (с страницы Хосты)",
     "packages": "Имена пакетов",
     "packagesOptional": "Имена пакетов (необязательно -- пустое значение = все обновления)",
@@ -868,7 +868,7 @@
       "selected": "{{n}} выбранных хостов"
     },
     "columns": {
-      "fqdn": "[TODO] Host",
+      "fqdn": "Хост",
       "ipv4": "IPv4",
       "lastSeen": "Последнее обнаружение",
       "os": "Операционная система",
@@ -882,7 +882,7 @@
       "notFound": "Этот хост больше не находится в каталоге.",
       "site": "Сайт-владелец",
       "theSite": "сайт",
-      "title": "[TODO] Host detail",
+      "title": "Подробности хоста",
       "viewLive": "Просмотр текущих данных для {{site}} →"
     },
     "empty": "Хостов, синхронизированных с любым сайтом, еще нет.",
@@ -905,7 +905,7 @@
       "compliance": "Наихудшее соответствие",
       "critical": "Критические CVE",
       "high": "Высокий уровень CVE",
-      "hosts": "[TODO] Hosts",
+      "hosts": "Хосты",
       "site": "Сайт"
     },
     "generate": "Сгенерировать отчет",
@@ -954,9 +954,9 @@
       "empty": "Идентификационные ключи пира еще не записаны.",
       "help": "Запишите публичный ключ партнера здесь, чтобы проверить его идентификационную метку вне контекста. Соединение федерации само по себе защищено TLS-сертификатом, закрепленным при регистрации -- эти ключи используются для верификации людьми, а не для контроля доступа.",
       "import": "Импорт ключа соседнего узла",
-      "name": "[TODO] Peer name",
+      "name": "Имя сверстника",
       "pem": "Открытый ключ узла (PEM)",
-      "title": "[TODO] Peer identity keys"
+      "title": "Ключи идентичности сверстников"
     },
     "removeError": "Не удалось удалить ключ.",
     "save": "Сохранить роль федерации",
@@ -1001,13 +1001,13 @@
     "portRange": "Диапазон портов",
     "protocol": "Протокол",
     "roleName": "Имя роли",
-    "roleNamePlaceholder": "[TODO] Role Name Placeholder",
+    "roleNamePlaceholder": "Имя роли (плацдарм)",
     "roleNameRequired": "Требуется имя роли",
     "selectPort": "Выбрать порт",
     "startPort": "Начальный порт",
     "subtitle": "Подзаголовок",
     "tcp": "TCP",
-    "title": "[TODO] Firewall Roles",
+    "title": "Роли брандмауэра",
     "udp": "UDP",
     "updateSuccess": "Успешно обновлено"
   },
@@ -1053,9 +1053,9 @@
     "status": {
       "checking": "Проверка...",
       "disabled": "Отключено",
-      "healthy": "[TODO] Healthy",
+      "healthy": "Здоровый",
       "label": "Статус",
-      "unhealthy": "[TODO] Unhealthy",
+      "unhealthy": "Неудовлетворительный",
       "unknown": "Неизвестно"
     },
     "title": "Интеграция Grafana",
@@ -1109,9 +1109,9 @@
     "status": {
       "checking": "Проверка...",
       "disabled": "Отключено",
-      "healthy": "[TODO] Healthy",
+      "healthy": "Здоровый",
       "label": "Статус",
-      "unhealthy": "[TODO] Unhealthy",
+      "unhealthy": "Неудовлетворительный",
       "unknown": "Неизвестно"
     },
     "title": "Интеграция Graylog",
@@ -1148,7 +1148,7 @@
     "primaryGroupHelp": "Оставьте пустым для создания группы с тем же именем, что и пользователь",
     "shell": "Оболочка",
     "shellBash": "Bash",
-    "shellBourne": "[TODO] Bourne Shell",
+    "shellBourne": "Bourne Shell",
     "shellCsh": "Csh",
     "shellFalse": "Ложь",
     "shellFish": "Рыба",
@@ -1326,7 +1326,7 @@
     "childHostRootPasswordHelp": "Пароль для пользователя root на ВМ OpenBSD",
     "childHostRootPasswordMismatch": "Пароли root не совпадают",
     "childHostRootPasswordRequired": "Пожалуйста, введите пароль root",
-    "childHostRunning": "[TODO] Running",
+    "childHostRunning": "Запущено",
     "childHostStartError": "Ошибка при запуске дочернего хоста",
     "childHostStartRequested": "Запрошен запуск для {{name}}",
     "childHostStatus": "Статус",
@@ -1378,7 +1378,7 @@
     "cpuFrequency": "Частота",
     "cpuInfo": "Процессор",
     "cpuModel": "Модель Процессора",
-    "cpuThreads": "[TODO] Threads",
+    "cpuThreads": "Нитки",
     "cpuVendor": "Производитель Процессора",
     "createBhyveVmTitle": "Создать виртуальную машину bhyve",
     "createChildHostButton": "Создать",
@@ -1414,7 +1414,7 @@
     "diagnosticsTab": "Диагностика",
     "disabled": "Отключено",
     "editHostname": "Изменить имя хоста",
-    "editServices": "[TODO] Edit services",
+    "editServices": "Редактировать службы",
     "enabled": "Включено",
     "entitled": "Авторизован",
     "errorMessage": "Сообщение об ошибке",
@@ -1461,7 +1461,7 @@
         "installed": "Установлен",
         "kernelSupport": "Поддержка ядра",
         "modulesLoaded": "Модули загружены",
-        "running": "[TODO] Running",
+        "running": "Запущено",
         "uefiAvailable": "Прошивка UEFI"
       },
       "kvm": {
@@ -1517,7 +1517,7 @@
       "confirmApplyTitle": "Применить стадийное изображение?",
       "confirmRollbackMessage": "Это возвращает хост к предыдущему изображению и перезагружает его. Продолжить?",
       "confirmRollbackTitle": "Откатить изображение?",
-      "digest": "[TODO] Digest",
+      "digest": "Хэш",
       "enterpriseNotice": "Подготовка, применение и откат изображений являются функциями Enterprise. Ниже показаны текущие сведения об изображении.",
       "enterpriseOnly": "Действия с режимом изображения требуют лицензии Enterprise",
       "imageRef": "Ссылка на изображение",
@@ -1527,7 +1527,7 @@
       "rollbackAvailable": "Доступен откат",
       "rollbackError": "Не удалось откатить изображение",
       "rollbackSuccess": "Запрошен откат к предыдущему изображению (хост перезагрузится)",
-      "stage": "[TODO] Stage",
+      "stage": "Этап",
       "stageError": "Не удалось подготовить изображение",
       "stageSuccess": "Запрошена подготовка изображения",
       "stagedImage": "Подготавливаемое изображение",
@@ -1612,7 +1612,7 @@
     "opentelemetryRemoveSuccess": "Удаление OpenTelemetry успешно добавлено в очередь",
     "opentelemetryRestart": "Перезапустить",
     "opentelemetryRestartSuccess": "Служба OpenTelemetry успешно перезапущена",
-    "opentelemetryServiceRunning": "[TODO] Running",
+    "opentelemetryServiceRunning": "Запущено",
     "opentelemetryServiceStatus": "Состояние службы",
     "opentelemetryServiceStopped": "Остановлено",
     "opentelemetryServiceUnknown": "Неизвестно",
@@ -1792,7 +1792,7 @@
   },
   "hosts": {
     "actionGroupDeploy": "Развёртывание",
-    "actionGroupPower": "[TODO] Power",
+    "actionGroupPower": "Сила",
     "agentVersion": "Версия агента",
     "allHosts": "Все",
     "antivirusDeployAllFailed": "Не удалось развернуть антивирусное ПО на всех хостах:\\n\\n{{hosts}}",
@@ -1809,7 +1809,7 @@
     "childHostFilter": "Фильтр дочернего хоста",
     "childHostOf": "Дочерний хост {{parent}}",
     "childHostsOnly": "Только дочерние хосты",
-    "childrenOnly": "[TODO] Children",
+    "childrenOnly": "Дети",
     "confirmReboot": "Подтвердить перезагрузку системы",
     "confirmRebootMessage": "Вы уверены, что хотите перезагрузить {{hostname}}? Система будет недоступна несколько минут.",
     "confirmShutdown": "Подтвердить выключение системы",
@@ -1820,7 +1820,7 @@
     "deployOpenTelemetry": "Развернуть OpenTelemetry",
     "diagnosticsRequestFailed": "Не удалось запросить сборку диагностики. Попробуйте еще раз.",
     "diagnosticsRequested": "Запрошена диагностика для хоста {{hostId}}. Проверьте страницу с деталями хоста, чтобы просмотреть результаты при их доступности.",
-    "down": "[TODO] Down",
+    "down": "Вниз",
     "filterByTags": "Фильтр по тегам",
     "fqdn": "FQDN",
     "getDiagnostics": "Получить диагностику",
@@ -1897,7 +1897,7 @@
     "systemUpdatesOnly": "{{count}} системных обновлений",
     "tags": "Теги",
     "unknown": "Неизвестно",
-    "up": "[TODO] Up",
+    "up": "Вверх",
     "updateAgent": "Обновить агент",
     "updateAgentFailed": "Не удалось запросить обновление агента",
     "updateAgentRequested": "Обновление агента успешно запрошено",
@@ -2060,7 +2060,7 @@
     "saved": "Настройки журналирования сохранены и отправлены агентам.",
     "serverCardTitle": "Журналирование сервера",
     "sinkBsd": "syslog",
-    "sinkGeneric": "[TODO] the OS-native sink",
+    "sinkGeneric": "Корзина (ос-нативная)",
     "sinkLinux": "журнал systemd (или syslog)",
     "sinkMacos": "syslog",
     "sinkWindows": "журнал событий Windows",
@@ -2070,7 +2070,7 @@
     "syslogProtocol": "Протокол",
     "targetRemoteLocked": "{{target}} (Профессиональная)",
     "title": "Журналирование",
-    "verbosity": "[TODO] Verbosity"
+    "verbosity": "Детализация"
   },
   "login": {
     "forgotPassword": "Забыли пароль?",
@@ -2114,12 +2114,12 @@
     "created": "Создано окно обслуживания",
     "currentWindow": "Текущее окно",
     "day": {
-      "fri": "[TODO] Fri",
+      "fri": "Пятница",
       "mon": "Пн",
       "sat": "Сб",
-      "sun": "[TODO] Sun",
+      "sun": "Солнце",
       "thu": "Чт",
-      "tue": "[TODO] Tue",
+      "tue": "Вторник",
       "wed": "Ср"
     },
     "daysOfWeek": "Дни недели",
@@ -2138,7 +2138,7 @@
     "intro": "Определите время, когда обновления и удаленные команды могут выполняться. Хосты внутри разрешенного окна (и вне черного дня) получают изменения; другие изменения блокируются до открытия следующего окна. Хосты без окна не ограничены.",
     "kind": "Тип",
     "kindAllow": "Разрешить",
-    "kindBlackout": "[TODO] Blackout",
+    "kindBlackout": "Перерыв",
     "loadError": "Не удалось загрузить окна обслуживания",
     "nHosts": "{{count}} хост(ов)",
     "nTags": "{{count}} тег(а)",
@@ -2233,13 +2233,13 @@
     "addTitle": "Добавить зеркало",
     "cancel": "Отмена",
     "chip": {
-      "failed": "[TODO] failed",
+      "failed": "Неудачно",
       "failedNoText": "Ошибка; текст ошибки не возвращен.",
       "inFlight": "{{label}} в состете с {{at}}",
       "label": {
-        "restore": "[TODO] restore",
+        "restore": "Восстановить",
         "snapshot": "snap",
-        "sync": "[TODO] sync"
+        "sync": "Синхронизировать"
       },
       "ok": "ок"
     },
@@ -2251,7 +2251,7 @@
       "statusRestore": "Восстановление",
       "statusSnapshot": "Снимок",
       "statusSync": "Синхронизация",
-      "upstream": "[TODO] Upstream"
+      "upstream": "Верхний поток"
     },
     "configureSubtitle": "Выберите хост, который будет выполнять планы зеркалирования этой платформы. Перечислены только хосты, чья платформа соответствует вкладке.",
     "configureTitle": "Настройка зеркалирования {{platform}}",
@@ -2291,7 +2291,7 @@
       },
       "col": {
         "actions": "Действия",
-        "digest": "[TODO] Digest",
+        "digest": "Хэш",
         "image": "Изображение",
         "status": "Захват",
         "tag": "Метка"
@@ -2349,7 +2349,7 @@
       "col": {
         "actions": "Действия",
         "channel": "Канал",
-        "name": "[TODO] Snap",
+        "name": "Snap",
         "status": "Захват"
       },
       "empty": "Пока нет отслеживаемых снимков. Добавьте один выше, затем используйте \"Захват снимков\".",
@@ -2367,7 +2367,7 @@
         "files": "Файлы",
         "id": "Снимок",
         "size": "Размер",
-        "taken": "[TODO] Taken at"
+        "taken": "Вознято в"
       },
       "empty": "Снимков пока нет. Нажмите значок камеры, чтобы сделать один.",
       "loadError": "Не удалось загрузить снимки.",
@@ -2380,13 +2380,13 @@
   },
   "nav": {
     "advisories": "Рекомендации",
-    "airgapCollections": "[TODO] Air-Gap Collections",
+    "airgapCollections": "Сборки в режиме air-gap",
     "airgapRepositories": "Изолированные репозитории",
     "alerts": "Оповещения",
     "cat": {
       "admin": "Администрирование",
       "automation": "Автоматизация",
-      "fleet": "[TODO] Fleet",
+      "fleet": "Парк",
       "insights": "Аналитика",
       "patching": "Пакетное обновление",
       "security": "Безопасность"
@@ -2394,7 +2394,7 @@
     "closeMenu": "Закрыть меню",
     "compliance": "Соответствие",
     "configDrift": "Отклонение от конфигурации",
-    "configJobs": "[TODO] Fleet Jobs",
+    "configJobs": "Задачи парка",
     "configProfiles": "Профили конфигурации",
     "customMetrics": "Пользовательские метрики",
     "dashboard": "Панель",
@@ -2412,7 +2412,7 @@
     "queryPacks": "Пакеты запросов",
     "reports": "Отчёты",
     "role": {
-      "collector": "[TODO] Air-Gap Collector",
+      "collector": "Сборщик air-gap",
       "engineMissing": "Требуемый движок Pro+ не загружен; проверьте лицензию.",
       "repository": "Репозиторий в изолированном режиме"
     },
@@ -2454,16 +2454,16 @@
     "disabledNote": "Включите OpenBAO в sysmanage.yaml для использования функций хранилища",
     "hideLogs": "Скрыть журналы",
     "loadError": "Не удалось загрузить статус OpenBAO",
-    "mountPath": "[TODO] Mount Path",
+    "mountPath": "Путь монтирования",
     "noLogs": "Недавние журналы недоступны",
     "operationalMode": "Операционный Режим",
     "processId": "ID процесса",
     "production": "Производство",
     "recentLogs": "Недавние журналы",
-    "running": "[TODO] Running",
-    "seal": "[TODO] Seal",
+    "running": "Запущено",
+    "seal": "Закрыть замком",
     "sealError": "Не удалось запечатать OpenBAO",
-    "sealStatus": "[TODO] Seal Status",
+    "sealStatus": "Статус запечатывания",
     "sealed": "Запечатано",
     "sealing": "Запечатывание...",
     "serverHealth": "Состояние сервера",
@@ -2479,10 +2479,10 @@
     "subtitle": "Управление секретами и хранение SSH-ключей",
     "title": "Хранилище OpenBAO",
     "unknown": "Неизвестно",
-    "unseal": "[TODO] Unseal",
+    "unseal": "Открыть замком",
     "unsealError": "Не удалось распечатать OpenBAO",
-    "unsealed": "[TODO] Unsealed",
-    "unsealing": "[TODO] Unsealing..."
+    "unsealed": "Открыто",
+    "unsealing": "Открывается..."
   },
   "osUpgrades": {
     "executeSelected": "Выполнить выбранные обновления ОС",
@@ -2602,7 +2602,7 @@
       "error": "Не удалось деактивировать политику.",
       "success": "'{{name}}' деактивирован."
     },
-    "deadLetter": "[TODO] dead-letter",
+    "deadLetter": "dead-letter",
     "edit": {
       "error": "Не удалось обновить политику.",
       "submit": "Сохранить",
@@ -2630,7 +2630,7 @@
     "command": "Команда",
     "cpu": "Процент использования CPU",
     "forceKill": "Принудительное завершение (SIGKILL вместо SIGTERM)",
-    "kill": "[TODO] Kill",
+    "kill": "Уничтожить",
     "killConfirm": "Вы действительно хотите завершить процесс \"{{name}}\" (PID {{pid}})? Это действие нельзя отменить.",
     "killError": "Не удалось запросить завершение",
     "killRequested": "Запрошено завершение. Список будет обновлен через несколько секунд.",
@@ -2733,7 +2733,7 @@
     "messageType": "Тип сообщения",
     "priority": "Приоритет",
     "title": "Управление очередями",
-    "viewDetails": "[TODO] View Details"
+    "viewDetails": "Посмотреть детали"
   },
   "reportBranding": {
     "companyName": "Название компании",
@@ -2899,7 +2899,7 @@
     "deleteExecutionError": "Ошибка удаления выполнения",
     "deleteExecutionSuccess": "Выполнение успешно удалено",
     "deleteExecutionsSuccess": "Выполнения успешно удалены",
-    "deleteMultipleSuccess": "[TODO] Delete Multiple Success",
+    "deleteMultipleSuccess": "Успешно удалено несколько",
     "deleteSelected": "Удалить выбранное",
     "deleteSelectedExecutions": "Удалить выбранные выполнения",
     "deleteSuccess": "Успешно удалено",
@@ -2967,7 +2967,7 @@
     "startedAt": "Запущено",
     "status": {
       "completed": "Завершено",
-      "failed": "[TODO] Failed",
+      "failed": "Неудачно",
       "in_progress": "Выполняется",
       "installing": "Установка",
       "pending": "Ожидание",
@@ -3032,7 +3032,7 @@
     "filenamePlaceholder": "например, id_rsa.pub, server.crt, database.conf",
     "keyType": "Тип Ключа",
     "key_type": {
-      "ca": "[TODO] CA",
+      "ca": "Канада",
       "private": "Приватный",
       "public": "Публичный"
     },
@@ -3180,7 +3180,7 @@
       "title": "Коллектор в изолированной среде (онлайн сторона)"
     },
     "currentTag": "(текущий)",
-    "heading": "[TODO] Air-Gap Role",
+    "heading": "Роль air-gap",
     "intro": "Выберите, как этот сервер SysManage участвует в изолированной развертке. Большинству серверов следует оставаться на стандартном уровне. Роль вступает в силу после перезапуска сервера.",
     "loadError": "Не удалось загрузить текущую роль сервера.",
     "menuTitle": "Роль сервера",
@@ -3214,7 +3214,7 @@
   "sites": {
     "actions": {
       "remove": "Удалить",
-      "resume": "[TODO] Resume",
+      "resume": "Продолжить",
       "suspend": "Приостановить"
     },
     "addSite": "Зарегистрировать сайт",
@@ -3242,7 +3242,7 @@
       "dispatchCommand": "Отправить команду",
       "enrolledAt": "Зарегистрировано на",
       "errorLoad": "Не удалось загрузить сайт.",
-      "hostCount": "[TODO] Host count",
+      "hostCount": "Количество хостов",
       "lastSyncAt": "Последняя синхронизация",
       "lastSyncStatus": "Статус последней синхронизации",
       "metadata": "Метаданные",
@@ -3300,7 +3300,7 @@
     },
     "errorLoad": "Не удалось загрузить сайты федерации.",
     "hostCount": "{{count}} хостов",
-    "hostsLink": "[TODO] Hosts",
+    "hostsLink": "Хосты",
     "lastSync": "Синхронизировано {{when}}",
     "mapView": "Карта",
     "policiesLink": "Политики",
@@ -3402,10 +3402,10 @@
     "deleteSelected": "Удалить выбранные ({{count}})",
     "deleteSuccess": "Успешно удалено",
     "detectedOs": "Обнаруженная ОС",
-    "disableError": "[TODO] Disable Error",
+    "disableError": "Отключить ошибку",
     "disableSelected": "Отключить выбранные ({{count}})",
     "disableSuccess": "Успешно отключено",
-    "enableError": "[TODO] Enable Error",
+    "enableError": "Включить ошибку",
     "enableSelected": "Включить выбранные ({{count}})",
     "enableSuccess": "Успешно включено",
     "enabled": "Включено",
@@ -3780,10 +3780,10 @@
       "recommendations": "Рекомендации",
       "proposals": "Предлагаемые исправления ({{count}})",
       "packs": "Пакеты правил",
-      "posture": "[TODO] Posture"
+      "posture": "Поза"
     },
     "feed": {
-      "lens": "[TODO] Lens",
+      "lens": "Лупа",
       "allLenses": "Все",
       "hostsFailed": "Не удалось загрузить хосты для этого правила.",
       "noOpenHosts": "Для этого правила нет замечаний и нет неоценённых хостов.",
@@ -3792,13 +3792,13 @@
       "noRules": "Ни одно правило ещё не вычислялось. Включите пакет правил и запустите оценку.",
       "rule": "Правило",
       "risk": "Риск",
-      "findings": "[TODO] Findings",
+      "findings": "Найдите",
       "notAssessable": "Невозможно оценить",
       "notApplicable": "Неприменимо",
       "clean": "Без замечаний"
     },
     "outcome": {
-      "fires": "[TODO] Finding",
+      "fires": "Найдено",
       "doesNotFire": "Без замечаний",
       "notAssessable": "Невозможно оценить",
       "notApplicable": "Неприменимо"
@@ -3832,7 +3832,7 @@
     },
     "evidence": {
       "facts": "Факты: {{table}}",
-      "peerGroup": "[TODO] Peer group",
+      "peerGroup": "Группа сверстников",
       "vuln": "Сканирование уязвимостей",
       "compliance": "Проверка на соответствие стандартам",
       "drift": "Проверка отклонения конфигурации",
@@ -3878,7 +3878,7 @@
       "packageCount": "Пакетов: {{count}}",
       "packageCount_one": "1 пакет",
       "packageCount_other": "Пакетов: {{count}}",
-      "review": "[TODO] Review",
+      "review": "Проверить",
       "reviewTitle": "Проверка исправления для {{rule}} на {{host}}",
       "approveWarning": "При утверждении это изменение будет применено к хосту с правами администратора в ближайшее окно обслуживания (или немедленно, если окна нет).",
       "reject": "Отклонить",
@@ -3895,7 +3895,7 @@
       "fleetIncomplete_other": "Хостов, оценённых лишь частично: {{count}}; их оценки являются минимальными.",
       "hostUnknown": "Этот хост невозможно полностью оценить, поэтому у него нет итоговой оценки. Чего не хватает, см. в списке «Невозможно оценить» ниже.",
       "hostIncomplete": "Некоторые правила невозможно оценить на этом хосте; эта оценка является минимальной.",
-      "fleetTitle": "[TODO] Fleet risk",
+      "fleetTitle": "Риск парка",
       "hostTitle": "Риск хоста"
     },
     "packs": {
@@ -3911,7 +3911,7 @@
       "moreMatches_one": "Всего 1 совпадение",
       "moreMatches_other": "Всего совпадений: {{count}}",
       "notEvaluated": "Советник ещё не оценивал этот хост.",
-      "findings": "[TODO] Findings",
+      "findings": "Найдите",
       "notAssessable": "Невозможно оценить",
       "proposals": "Предлагаемые исправления",
       "notApplicable": "Неприменимо",
@@ -3967,7 +3967,7 @@
   "posture": {
     "action": {
       "fix": "Исправить",
-      "waive": "[TODO] Waive"
+      "waive": "Принять на веру"
     },
     "checkedAt": "Последняя проверка: {{date}}",
     "col": {
@@ -4073,7 +4073,7 @@
       "notAssessable": "Невозможно оценить",
       "open": "Открыт",
       "satisfied": "Выполнен",
-      "waived": "[TODO] Waived"
+      "waived": "Принято (вавер)"
     },
     "waiver": {
       "explain": "Принятие риска фиксирует, что вы осознанно принимаете этот риск. Сам пункт остаётся открытым, а принятие риска теряет силу, если риск возрастёт или изменятся его основания.",
@@ -4084,7 +4084,7 @@
       "reason": "Причина",
       "revoke": "Отозвать",
       "revokeFailed": "Не удалось отозвать принятие риска.",
-      "submit": "[TODO] Waive",
+      "submit": "Принять на веру",
       "title": "Принятие риска: {{title}}"
     },
     "waiverStale": "Принятие риска утратило силу"
@@ -4315,7 +4315,7 @@
     "policy": {
       "enabled": "Агенты прослушивают свои сети в поиске устройств",
       "hour": "Каждый час",
-      "interval": "[TODO] Report",
+      "interval": "Отчет",
       "lastChanged": "Последнее изменение: {{who}}, {{when}}",
       "minutes": "Каждые {{count}} минуты",
       "minutes_other": "Каждые {{count}} минут",
@@ -4344,7 +4344,7 @@
       "localMac": "Адрес может меняться",
       "localMacHelp": "Локально администрируемый адрес: телефоны и планшеты меняют его, поэтому это устройство может снова появиться под новым адресом.",
       "more": "Показано {{shown}} из {{total}}. Сузьте список с помощью фильтров выше.",
-      "seenBy": "[TODO] Seen by",
+      "seenBy": "Видимо для",
       "selectAll": "Выбрать все",
       "status": "Статус",
       "maybe": "Возможно: {{type}}"
@@ -4353,7 +4353,7 @@
       "excluded": "Известные и допустимые",
       "managed": "Управляемые",
       "unmanaged": "Неуправляемые",
-      "sweeps": "[TODO] Sweeps"
+      "sweeps": "Проверки"
     },
     "title": "Обнаружение устройств в сети",
     "unavailable": {
@@ -4364,7 +4364,7 @@
       "unsupportedPlatform": "не поддерживается на этой платформе"
     },
     "sweep": {
-      "agent": "[TODO] Swept by",
+      "agent": "Проверено",
       "disabled": "Активное сканирование выключено. Разрешите его в настройках выше, чтобы находить устройства, которые никогда не сообщают о себе.",
       "error": "Не удалось запустить сканирование.",
       "found": "Найдено",
@@ -4379,7 +4379,7 @@
       "start": "Начать сканирование",
       "status": {
         "completed": "Завершено",
-        "failed": "[TODO] Failed",
+        "failed": "Неудачно",
         "queued": "Ожидание агента",
         "refused": "Отклонено агентом",
         "timedOut": "Нет ответа от агента"
@@ -4495,7 +4495,7 @@
     "scanHosts": "Сканировать хосты",
     "scans": {
       "empty": "Сканирования еще не выполнялись.",
-      "legs": "[TODO] What ran",
+      "legs": "Что было запущено",
       "paths": "Пути",
       "requested": "Запрошено",
       "result": "Результат",
@@ -4537,7 +4537,7 @@
       "wrongStatus": "текущее состояние не позволяет это сделать"
     },
     "quarantine": {
-      "confirm": "[TODO] Quarantine",
+      "confirm": "Карантин",
       "confirmSystem": "Я понимаю; всё равно поместить их в карантин",
       "error": "Не удалось отправить запрос.",
       "explain": "Каждый агент перемещает файл в закрытый каталог карантина и записывает, откуда он был взят, чтобы его можно было точно восстановить. Ничего не удаляется. Файл, изменившийся после сканирования, не перемещается.",
@@ -4598,7 +4598,7 @@
     },
     "jobs": {
       "atOnce": "до {{count}} одновременно",
-      "by": "[TODO] By",
+      "by": "По",
       "done": "Завершено {{done}} из {{total}}",
       "hostCount": "Хостов: {{count}}",
       "inventoryCount": "Списков хостов: {{count}}",
@@ -4613,7 +4613,7 @@
       "all": "Все хосты",
       "chosen": "Выбрать по тегу, списку хостов или хосту",
       "hosts": "Отдельные хосты",
-      "inventories": "[TODO] Inventories",
+      "inventories": "Инвентари",
       "tags": "Теги"
     }
   }

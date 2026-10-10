@@ -236,7 +236,7 @@ msgstr "لا توجد مجموعة قواعد مستوردة بهذا الاسم
 
 #: backend/api/advisory_actions.py:68
 msgid "syspatch apply queued"
-msgstr ""
+msgstr "تم وضع syspatch apply في الطابور"
 
 #: backend/api/advisory_actions.py:83
 msgid "Advisory management requires a SysManage Professional license."
@@ -578,7 +578,7 @@ msgstr " رفض الوصول: يتطلب دور ADD_THIRD_PARTY_REPOSITORY"
 
 #: backend/api/third_party_repos.py:278
 msgid "Repository identifier is required"
-msgstr ""
+msgstr "مطلوب معرف مستودع"
 
 #: backend/api/third_party_repos.py:328
 msgid "Repository add request queued successfully"
@@ -1119,7 +1119,7 @@ msgstr "المضيف غير نشط"
 
 #: backend/api/host_hostname.py:82
 msgid "Host agent is not running in privileged mode"
-msgstr ""
+msgstr "وكيل المضيف غير تشغيل في وضع الامتيازات"
 
 #: backend/api/host_hostname.py:90
 msgid "Hostname cannot be empty"
@@ -2450,7 +2450,7 @@ msgstr ""
 
 #: backend/api/default_repositories.py:308
 msgid "Repository URL is required"
-msgstr ""
+msgstr "مطلوب عنوان URL لمستودع"
 
 #: backend/api/default_repositories.py:310
 msgid "Repository URL must be 1000 characters or less"
@@ -2835,7 +2835,7 @@ msgstr "يحتاج Graylog إلى آليه، graylog_server و المنفذ في
 msgid ""
 "Graylog attach requires the Pro+ observability_engine to be loaded on the "
 "server."
-msgstr ""
+msgstr "يتطلب Graylog إرفاق محرك المراقبة Pro+ على الخادم."
 
 #: backend/api/host_graylog.py:188
 msgid "Graylog attachment command queued successfully"
@@ -4729,7 +4729,7 @@ msgstr "المضيف المقدم ليس لديه عنوان قابل للحل"
 
 #: backend/api/content_lifecycle_promotion.py:543
 msgid "Repository mirroring is required to repoint a host"
-msgstr ""
+msgstr "يتطلب تكرار المستودع لإعادة توجيه المضيف"
 
 #: backend/api/content_lifecycle_promotion.py:571
 msgid "Snap store proxy is required to repoint a host's snaps"
@@ -4892,7 +4892,7 @@ msgstr "يوجد بالفعل برنامج نصي بهذا الاسم"
 
 #: backend/api/scripts/routes_saved_scripts.py:197
 msgid "Failed to create saved script"
-msgstr ""
+msgstr "فشل في إنشاء النص البرمجي المحفوظ"
 
 # Tag management messages
 #: backend/api/scripts/routes_saved_scripts.py:240
@@ -5497,6 +5497,25 @@ msgstr "ثغرات حزم pkgsrc في NetBSD (ما يقرؤه pkg_admin audit)"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "ثغرات macOS حسب إصدار نظام التشغيل، من بيانات NVD عن الإصدارات المتأثرة"
+
+msgid "The single sign-on session has expired. Sign in again."
+msgstr "انتهت صلاحية جلسة تسجيل الدخول الموحد. سجّل الدخول مرة أخرى."
+
+#: backend/api/message_handlers_core.py
+msgid "Agent session refused: it did not prove it is this host"
+msgstr "تم رفض جلسة الوكيل: لم تثبت أنها هذا المضيف"
+
+#: backend/api/message_handlers_core.py
+msgid ""
+"This agent did not prove it is this host. If the host was reinstalled, "
+"remove it from SysManage and approve its new registration."
+msgstr ""
+"لم يثبت هذا الوكيل أنه هذا المضيف. إذا تمت إعادة تثبيت المضيف، فأزله من "
+"SysManage ووافق على تسجيله الجديد."
+
+#: backend/api/message_handlers.py
+msgid "This session cannot acknowledge another host's message"
+msgstr "لا يمكن لهذه الجلسة الإقرار برسالة مضيف آخر"
 
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "خدمة البريد الإلكتروني معطلة. قم بتمكينها في ملف التكوين."
@@ -6193,18 +6212,3 @@ msgstr ""
 
 #~ msgid "Executing command sequence"
 #~ msgstr "تنفيذ تسلسل الأوامر"
-
-msgid "The single sign-on session has expired. Sign in again."
-msgstr "انتهت صلاحية جلسة تسجيل الدخول الموحد. سجّل الدخول مرة أخرى."
-
-#: backend/api/message_handlers_core.py
-msgid "Agent session refused: it did not prove it is this host"
-msgstr "تم رفض جلسة الوكيل: لم تثبت أنها هذا المضيف"
-
-#: backend/api/message_handlers_core.py
-msgid "This agent did not prove it is this host. If the host was reinstalled, remove it from SysManage and approve its new registration."
-msgstr "لم يثبت هذا الوكيل أنه هذا المضيف. إذا تمت إعادة تثبيت المضيف، فأزله من SysManage ووافق على تسجيله الجديد."
-
-#: backend/api/message_handlers.py
-msgid "This session cannot acknowledge another host's message"
-msgstr "لا يمكن لهذه الجلسة الإقرار برسالة مضيف آخر"
