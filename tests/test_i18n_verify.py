@@ -327,3 +327,14 @@ def test_a_sibling_repositorys_verdict_is_reused_for_the_same_triple(
     (tmp_path / "unrelated").mkdir()
     (tmp_path / "unrelated" / ".i18n-verified").write_text("fr\tzzz\tmodel\n")
     assert module._sibling_ledgers() == {"sysmanage-y": {"fr:abc123": "model"}}
+
+
+def test_code_spans_are_stripped_and_unclosed_ones_are_harmless():
+    # English inside <code> is a command and may stay; outside it, it may not.
+    assert (
+        quality.english_words("fr", "Lancez <code>set the value to the host</code> ici")
+        == []
+    )
+    assert quality.english_words("fr", "the value is set") != []
+    # A string of unclosed tags is processed in linear time, not quadratic.
+    assert quality.english_words("fr", "<code>" * 20000) == []
