@@ -92,6 +92,60 @@ def _cosine(a: List[float], b: List[float]) -> float:
     return dot / norm if norm else 0.0
 
 
+# How much better an answer must match ANOTHER item's source than its own before
+# the batch counts as shifted.  Cross-lingual bge-m3 scores for a correct
+# translation sit far above unrelated pairs, so a small margin only trips on a
+# real shift, not on two similar short labels.
+ALIGN_MARGIN = float(os.getenv("ALIGN_MARGIN", "0.05"))
+
+
+async def aligned(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    client: httpx.AsyncClient,
+    ollama_url: str,
+    keep_alive: str,
+    timeout: float,
+    sources: List[str],
+    answers: List[str],
+) -> bool:
+    """False when a batch's answers are evidently attached to the wrong items.
+
+    The length check below cannot see this: the model sometimes returns the
+    right NUMBER of answers in the wrong ORDER (or merges one item and splits
+    another), and every value is then written under a neighbor's key.  Measured
+    2026-10-11 on the docs: French page titles holding the "Export CSV" sentence.
+    Each answer must match its own source at least as well as any other source.
+    The embedding model is the verifier's (already resident); if it cannot be
+    reached the batch is accepted -- this is a guard, never a reason to stop
+    translating.
+    """
+    if len(sources) < 2:
+        return True
+    try:
+        # nosemgrep: python.fastapi.net.tainted-fastapi-http-request-httpx.tainted-fastapi-http-request-httpx
+        resp = await client.post(
+            f"{ollama_url}/api/embed",
+            json={
+                "model": EMBED_MODEL,
+                "input": list(sources) + list(answers),
+                "keep_alive": keep_alive,
+            },
+            timeout=timeout,
+        )
+        resp.raise_for_status()
+        vectors = resp.json()["embeddings"]
+    except (httpx.HTTPError, KeyError, ValueError, TypeError):
+        return True
+    count = len(sources)
+    src, out = vectors[:count], vectors[count:]
+    for i in range(count):
+        own = _cosine(out[i], src[i])
+        if any(
+            _cosine(out[i], src[j]) > own + ALIGN_MARGIN for j in range(count) if j != i
+        ):
+            return False
+    return True
+
+
 def make_router(
     ollama_url: str,
     judge_model: str,

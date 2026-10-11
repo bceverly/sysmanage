@@ -341,7 +341,13 @@ def _chunks(items: List[str], size: int) -> List[List[str]]:
 MAX_CORRECTIONS = 2
 
 _PLACEHOLDER_RE = re.compile(
-    r"\{\{[^{}]{0,200}\}\}"  # {{ name }}  (i18next / handlebars)
+    # A WHOLE <code> span, content included: a command, path or UI label the
+    # reader must type or find verbatim.  Masking only the tags left the inside
+    # exposed and the model translated it (/sys/class/dmi/id, "To Be Filled By
+    # O.E.M.", measured 2026-10-11).  As one token it is masked as one marker,
+    # and the placeholder guard then demands it back byte-for-byte.
+    r"<code\b[^<>]{0,200}>[^<]{0,500}</code>"
+    r"|\{\{[^{}]{0,200}\}\}"  # {{ name }}  (i18next / handlebars)
     r"|\$\{[^}]{1,200}\}"  # ${VAR}
     r"|\{[^{}]{0,200}\}"  # { name } { 0 }  (ICU / .NET / python)
     r"|%\d{1,9}\$[sdfgex]"  # %1$s
@@ -722,10 +728,15 @@ async def _raw_chunk(
             # Restore the masked markup, then strip lone surrogates the model may
             # emit -- they'd be valid here but crash JSON serialization of the
             # HTTP response.
-            return [
+            restored = [
                 _strip_surrogates(_unmask_markup(str(x), originals))
                 for x, originals in zip(out, masks)
             ]
+            if await aligned(
+                client, OLLAMA_URL, OLLAMA_KEEP_ALIVE, OLLAMA_TIMEOUT, sources, restored
+            ):
+                return restored
+            # Right count, wrong order: fall through to one-at-a-time.
     except (httpx.HTTPError, KeyError, ValueError, TypeError):
         # Transport/parse error or shape mismatch: fall through to the
         # one-at-a-time retry below rather than failing the whole chunk.
@@ -1048,7 +1059,7 @@ app = FastAPI(
 
 # Verification (POST /verify/batch) lives in translate_verify.py; it shares
 # this service's Ollama, model and markup masking.
-from translate_verify import VERIFIER_VERSION, make_router  # noqa: E402
+from translate_verify import VERIFIER_VERSION, aligned, make_router  # noqa: E402
 
 app.include_router(
     make_router(

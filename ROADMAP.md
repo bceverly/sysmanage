@@ -13409,6 +13409,22 @@ of its three OSes once).
 - [ ] Docs + screenshots + 14-language i18n; tests for the scheme engine,
       the identity normalization (recorded outputs from all six OS families),
       the T480 multi-boot case and the import dry run.
+      *S6 2026-10-11 -- done in code: `sysmanage-docs`
+      `docs/administration/asset-tags.html` (+ admin index card, roadmap
+      Community card), 55 keys in 14 languages; screenshots wired into
+      `make screenshots` through a new in-VM seeder `seed_assettags.py`
+      (identities through `record_identity`, tags through the real CSV
+      import: the demo win11-ws-01 + ubuntu-ws-07 are one Dell, debian-app-01
+      a QEMU VM, a LEGACY tag the scheme flags, a pending tag) and five shots
+      (scheme, import dry run via a new `uploadFile` capture step, pending
+      tags, Machine card, Untagged Machines report). Found while wiring the
+      shots: q34 created "Manage Asset Tags" but granted it to nobody, so an
+      UPGRADED server had no one able to edit tags -- migration
+      `q36assettagrole` grants it to every Edit Tags holder (o12's pattern).
+      OUTSTANDING (Bryan): `make screenshots`; the T480 proof -- boot it into
+      Windows, Ubuntu and OpenBSD once each, approve the three hosts, then
+      `scripts/machine_identity_proof.py --hosts ...` (masks the real
+      serials).*
 
 #### 23.3 Time synchronization: measure every clock, keep it in bounds (OSS + Pro+)
 
