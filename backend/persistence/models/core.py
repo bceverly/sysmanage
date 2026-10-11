@@ -261,6 +261,24 @@ class Host(Base):
     # carries a site; NULL for hosts not assigned to a site.
     site_id = Column(GUID(), nullable=True, index=True)
 
+    # Phase 23.2 -- the machine this OS runs on (a SOFT reference to
+    # ``machine.id``; see models/machine.py) and the hardware identity this
+    # host reported, kept per host so a disagreement between the OSes on one
+    # machine stays visible.  ``hw_identity_status`` is the agent's per-source
+    # JSON (ran / absent / unprivileged / failed / placeholder): a host with no
+    # identity says WHY.
+    machine_id = Column(GUID(), nullable=True, index=True)
+    hw_match_key = Column(String(36), nullable=True, index=True)
+    hw_system_uuid = Column(String(36), nullable=True)
+    hw_system_serial = Column(String(255), nullable=True)
+    hw_board_serial = Column(String(255), nullable=True)
+    hw_identity_status = Column(Text, nullable=True)
+    hw_identity_updated_at = Column(DateTime, nullable=True)
+    # A link that needs an admin's decision instead of being made silently: the
+    # machine it collided with, and why ("virtual_clone", "serial_mismatch").
+    machine_conflict_id = Column(GUID(), nullable=True)
+    machine_conflict_reason = Column(String(32), nullable=True)
+
     # Phase 12.7: Public IP + GeoLite2 geo-location.
     #
     # The agent fetches its public-facing IP at startup + on a 24h

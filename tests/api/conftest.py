@@ -87,6 +87,7 @@ def test_db():
         AccessGroup,
         AirgapAgentChannelMirror,
         AirGapBundle,
+        AssetTagScheme,
         AirgapCollectionRun,
         AirgapCollectionSchedule,
         AirgapCollectionTarget,
@@ -98,6 +99,7 @@ def test_db():
         FederationSite,
         HostAccessGroup,
         HostDefaultMirror,
+        Machine,
         HostPackageComplianceStatus,
         IdpRoleMapping,
         MfaSettings,
@@ -218,6 +220,12 @@ def test_db():
                 "10000000-0000-0000-0000-000000000006",
                 "Edit Tags",
                 "Edit host tags",
+                "00000000-0000-0000-0000-000000000001",
+            ),
+            (
+                "10000000-0000-0000-0000-0000000000a7",
+                "Manage Asset Tags",
+                "Set machine asset tags and the naming scheme",
                 "00000000-0000-0000-0000-000000000001",
             ),
             (
@@ -523,6 +531,8 @@ def test_db():
     original_enabled_package_manager = models.EnabledPackageManager
     original_firewall_role = models.FirewallRole
     original_firewall_role_open_port = models.FirewallRoleOpenPort
+    original_machine = models.Machine
+    original_asset_tag_scheme = models.AssetTagScheme
     models.Host = Host
     models.User = User
     models.SecurityRoleGroup = SecurityRoleGroup
@@ -542,6 +552,8 @@ def test_db():
     models.EnabledPackageManager = EnabledPackageManager
     models.FirewallRole = FirewallRole
     models.FirewallRoleOpenPort = FirewallRoleOpenPort
+    models.Machine = Machine
+    models.AssetTagScheme = AssetTagScheme
     models.HostFirewallRole = HostFirewallRole
 
     # Override the get_engine dependency
@@ -592,6 +604,8 @@ def test_db():
     models.EnabledPackageManager = original_enabled_package_manager
     models.FirewallRole = original_firewall_role
     models.FirewallRoleOpenPort = original_firewall_role_open_port
+    models.Machine = original_machine
+    models.AssetTagScheme = original_asset_tag_scheme
 
     # Clean up database connections.  In-memory DB: disposing the engine drops
     # the StaticPool's single connection and the schema with it -- no temp file

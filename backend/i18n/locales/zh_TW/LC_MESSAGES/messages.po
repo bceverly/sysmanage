@@ -5,31 +5,31 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-01 11:10-0400\n"
+"POT-Creation-Date: 2026-10-11 08:17-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: backend/security/communication_security.py:123
+#: backend/security/communication_security.py:124
 msgid "Invalid token signature"
 msgstr "無效的權杖簽名"
 
-#: backend/security/communication_security.py:129
+#: backend/security/communication_security.py:133
 msgid "Token expired"
 msgstr "權杖過期"
 
-#: backend/security/communication_security.py:151
+#: backend/security/communication_security.py:155
 msgid "Malformed token"
 msgstr "令牌格式無效"
 
-#: backend/security/communication_security.py:391
+#: backend/security/communication_security.py:425
 msgid "Encrypted data expired"
 msgstr "加密資料過期"
 
-#: backend/security/communication_security.py:402
+#: backend/security/communication_security.py:436
 msgid "Invalid signature"
 msgstr "無效簽名"
 
-#: backend/security/communication_security.py:409
+#: backend/security/communication_security.py:443
 msgid "Decryption failed"
 msgstr "解密失敗"
 
@@ -69,9 +69,35 @@ msgstr "無法驗證憑證"
 msgid "User not found."
 msgstr "找不到用戶。"
 
-#: backend/auth/auth_bearer.py:192 backend/api/auth.py:663
+#: backend/auth/auth_bearer.py:192 backend/api/auth.py:680
 msgid "You do not have access to the selected account."
 msgstr "您沒有權限訪問所選的帳戶"
+
+#: backend/api/asset_tags.py:59 backend/api/malware.py:118
+#: backend/api/file_watches.py:110 backend/api/config_mgmt_drift.py:191
+#: backend/api/advisor.py:93 backend/api/query_packs.py:119
+#: backend/api/config_mgmt_inventories.py:110
+#: backend/api/config_mgmt_remediation.py:137
+#: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:375
+#: backend/api/config_mgmt_profiles.py:136
+#: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
+#: backend/api/machines.py:151
+#, python-format
+msgid "Permission denied: %s role required"
+msgstr "權限被拒絕：%s 角色所需"
+
+#: backend/api/asset_tags.py:144
+msgid "Asset tag naming scheme changed"
+msgstr "資產標籤命名方案已更改"
+
+#: backend/api/asset_tags.py:204
+#, python-format
+msgid "Asset tag set to %s"
+msgstr "資產標籤設定為 %s"
+
+#: backend/api/asset_tags.py:204
+msgid "Asset tag cleared"
+msgstr "資產標籤已清除"
 
 #: backend/api/fleet.py:93
 #, python-format
@@ -165,15 +191,15 @@ msgstr "主機ID格式無效"
 #: backend/api/airgap_repository_buckets.py:64
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:54
-#: backend/api/updates/query_routes.py:123
-#: backend/api/updates/execution_routes.py:268 backend/api/diagnostics.py:102
+#: backend/api/updates/query_routes.py:124
+#: backend/api/updates/execution_routes.py:269 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:220 backend/api/child_host_utils.py:82
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
 #: backend/api/repository_mirroring_setup.py:202
 #: backend/api/repository_mirroring_setup.py:263
 #: backend/api/scripts/routes_executions.py:78
-#: backend/api/commercial_antivirus_status.py:88
+#: backend/api/commercial_antivirus_status.py:88 backend/api/machines.py:68
 msgid "Host not found"
 msgstr "未找到主機"
 
@@ -183,7 +209,7 @@ msgstr "主機尚未被批准"
 
 #: backend/api/certificates.py:156 backend/api/security_roles.py:161
 #: backend/api/security_roles.py:204 backend/api/auth_mfa.py:149
-#: backend/api/airgap_collection_schedule.py:139
+#: backend/api/airgap_collection_schedule.py:143
 #: backend/api/graylog_integration.py:171 backend/api/broadcast.py:128
 #: backend/api/queue.py:122 backend/api/airgap_collector_runs.py:88
 #: backend/api/access_groups.py:140 backend/api/grafana_integration.py:313
@@ -197,38 +223,27 @@ msgstr "主機尚未被批准"
 #: backend/api/packages_operations.py:247
 #: backend/api/license_management.py:116
 #: backend/api/updates/os_upgrade_routes.py:189
-#: backend/api/updates/execution_routes.py:49
+#: backend/api/updates/execution_routes.py:50
 #: backend/api/secrets/permissions.py:39 backend/api/error_constants.py:22
 #: backend/api/child_host_utils.py:33
 msgid "User not found"
 msgstr "找不到用戶"
 
-#: backend/api/malware.py:117 backend/api/file_watches.py:110
-#: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:93
-#: backend/api/query_packs.py:119 backend/api/config_mgmt_inventories.py:110
-#: backend/api/config_mgmt_remediation.py:137
-#: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
-#: backend/api/config_mgmt_profiles.py:136
-#: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:90
-#, python-format
-msgid "Permission denied: %s role required"
-msgstr "權限被拒絕：%s 角色所需"
-
-#: backend/api/malware.py:133
+#: backend/api/malware.py:134
 msgid "Only an administrator can change the malware rule sets"
 msgstr "只有管理員才能變更惡意軟體規則集"
 
-#: backend/api/malware.py:139
+#: backend/api/malware.py:140
 msgid ""
 "Malware rule sets are shared by every tenant; change them from the server "
 "scope, not from inside a tenant"
 msgstr "惡意軟體規則集由所有租戶共用；請在伺服器範圍內變更，而非在某個租戶內部變更"
 
-#: backend/api/malware.py:149
+#: backend/api/malware.py:150
 msgid "Invalid id"
 msgstr "無效的 ID"
 
-#: backend/api/malware.py:403
+#: backend/api/malware.py:404
 msgid "No imported rule set by that name"
 msgstr "沒有該名稱的已匯入規則集"
 
@@ -309,14 +324,14 @@ msgstr "更新主機 %(host_id)s 的主機名稱，從 %(old_hostname)s 更改�
 msgid "Error handling hostname changed message: %s"
 msgstr "處理主機名稱變更消息時發生錯誤：%s"
 
-#: backend/api/handlers/process_handlers.py:121
+#: backend/api/handlers/process_handlers.py:123
 #, python-format
 msgid "Failed to process process status update: %s"
 msgstr "處理程序狀態更新失敗：%s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:551 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:572 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "主機未註冊"
@@ -400,69 +415,69 @@ msgstr "未提供操作系統信息"
 msgid "Failed to update OS version"
 msgstr "更新作業系統版本失敗"
 
-#: backend/api/handlers/os_hardware_handlers.py:545
+#: backend/api/handlers/os_hardware_handlers.py:568
 msgid "hardware_updated"
 msgstr "硬體已更新"
 
-#: backend/api/handlers/os_hardware_handlers.py:554
+#: backend/api/handlers/os_hardware_handlers.py:577
 msgid "Failed to update hardware information"
 msgstr "更新硬體資訊失敗"
 
-#: backend/api/handlers/software_package_handlers.py:109
+#: backend/api/handlers/software_package_handlers.py:112
 msgid "software_inventory_updated"
 msgstr "軟體清單已更新"
 
-#: backend/api/handlers/software_package_handlers.py:118
+#: backend/api/handlers/software_package_handlers.py:121
 msgid "Failed to update software inventory"
 msgstr "更新軟體清單失敗"
 
-#: backend/api/handlers/software_package_handlers.py:293
+#: backend/api/handlers/software_package_handlers.py:296
 #: backend/api/updates/report_routes.py:75
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "儲存更新失敗：%s"
 
-#: backend/api/handlers/software_package_handlers.py:408
+#: backend/api/handlers/software_package_handlers.py:411
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "無法處理套件收集結果：%s"
 
-#: backend/api/handlers/software_package_handlers.py:502
+#: backend/api/handlers/software_package_handlers.py:505
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "無法處理第三方倉庫更新：%s"
 
-#: backend/api/handlers/software_package_handlers.py:585
+#: backend/api/handlers/software_package_handlers.py:588
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "無法處理防毒狀態更新：%s"
 
-#: backend/api/handlers/software_package_handlers.py:716
+#: backend/api/handlers/software_package_handlers.py:719
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "無法處理商業防毒狀態更新：%s"
 
-#: backend/api/handlers/software_package_handlers.py:818
+#: backend/api/handlers/software_package_handlers.py:821
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "無法處理防火牆狀態更新：%s"
 
-#: backend/api/handlers/software_package_handlers.py:904
+#: backend/api/handlers/software_package_handlers.py:907
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "無法處理Graylog狀態更新：%s"
 
-#: backend/api/handlers/software_package_handlers.py:936
+#: backend/api/handlers/software_package_handlers.py:939
 msgid "Missing request_id in installation_complete"
 msgstr "缺少request_id在安裝完成中"
 
-#: backend/api/handlers/software_package_handlers.py:953
-#: backend/api/agent.py:751 backend/api/packages.py:486
+#: backend/api/handlers/software_package_handlers.py:956
+#: backend/api/agent.py:871 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "未找到安裝請求：%s"
 
-#: backend/api/handlers/software_package_handlers.py:994
+#: backend/api/handlers/software_package_handlers.py:997
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -678,57 +693,57 @@ msgstr "PDF產生不可用。請安裝reportlab套件。"
 msgid "Report"
 msgstr "報告"
 
-#: backend/api/airgap_collection_schedule.py:48
+#: backend/api/airgap_collection_schedule.py:49
 msgid "Air-gap collection schedule not found"
 msgstr "找不到氣隙採集排程"
 
-#: backend/api/airgap_collection_schedule.py:49
+#: backend/api/airgap_collection_schedule.py:50
 #, python-format
 msgid "Invalid UUID for schedule_id: %s"
 msgstr "schedule_id 的 UUID 無效: %s"
 
-#: backend/api/airgap_collection_schedule.py:58
+#: backend/api/airgap_collection_schedule.py:59
 msgid ""
 "Air-gap collection schedules require a SysManage Professional+ license with "
 "the air-gap collector engine. Please upgrade to access this feature."
 msgstr "氣隙採集排程需要包含氣隙採集器引擎的 SysManage Professional+ 授權。請升級以存取此功能。"
 
-#: backend/api/airgap_collection_schedule.py:84
+#: backend/api/airgap_collection_schedule.py:85
 msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
 msgstr "無效的 cron 運算式：需要 5 個欄位 (m h dom mon dow)"
 
-#: backend/api/airgap_collection_schedule.py:93
+#: backend/api/airgap_collection_schedule.py:94
 #: backend/api/upgrade_profiles.py:148
 #, python-format
 msgid "Invalid cron expression: %s"
 msgstr "無效的 cron 運算式: %s"
 
-#: backend/api/airgap_collection_schedule.py:171
-#: backend/api/airgap_collection_schedule.py:254
+#: backend/api/airgap_collection_schedule.py:175
+#: backend/api/airgap_collection_schedule.py:260
 #, python-format
 msgid "Invalid target_request: %s"
 msgstr "無效的 target_request: %s"
 
-#: backend/api/airgap_collection_schedule.py:189
+#: backend/api/airgap_collection_schedule.py:195
 #, python-format
 msgid "Created air-gap collection schedule '%s'"
 msgstr "已建立氣隙採集排程 '%s'"
 
-#: backend/api/airgap_collection_schedule.py:265
+#: backend/api/airgap_collection_schedule.py:271
 #, python-format
 msgid "Updated air-gap collection schedule '%s'"
 msgstr "已更新氣隙採集排程 '%s'"
 
-#: backend/api/airgap_collection_schedule.py:304
+#: backend/api/airgap_collection_schedule.py:310
 #, python-format
 msgid "Deleted air-gap collection schedule '%s'"
 msgstr "已刪除氣隙採集排程 '%s'"
 
-#: backend/api/airgap_collection_schedule.py:309
+#: backend/api/airgap_collection_schedule.py:315
 msgid "Air-gap collection schedule deleted"
 msgstr "氣隙採集排程已刪除"
 
-#: backend/api/airgap_collection_schedule.py:373
+#: backend/api/airgap_collection_schedule.py:379
 msgid ""
 "automation_engine not loaded; next_run timestamps not advanced. Schedules "
 "will fire only on the current tick window until the Pro+ license includes "
@@ -737,15 +752,22 @@ msgstr ""
 "automation_engine 未載入；next_run 時間戳記未推進。在 Pro+ 授權包含 automation_engine "
 "之前，排程僅在目前 tick 視窗中觸發。"
 
-#: backend/api/host_registration.py:77
+#: backend/api/host_registration.py:82
+#, python-format
+msgid ""
+"Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
+"(auto_approve=%(auto_approve)s)"
+msgstr "主機 '%(fqdn)s' 通過註冊密鑰 '%(key_name)s' 加入（自動批准=%(auto_approve)s）"
+
+#: backend/api/host_registration.py:134
 msgid "Invalid or expired registration key"
 msgstr "無效或已過期的註冊密鑰"
 
-#: backend/api/host_registration.py:116
+#: backend/api/host_registration.py:173
 msgid "Invalid or expired enrollment token"
 msgstr "無效或已過期的入站令牌"
 
-#: backend/api/host_registration.py:182
+#: backend/api/host_registration.py:239
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -1113,6 +1135,10 @@ msgstr "主機名稱格式無效"
 #: backend/api/host_hostname.py:147
 msgid "Hostname change requested"
 msgstr "請求主機名變更"
+
+#: backend/api/sso_session.py:232
+msgid "The single sign-on session has expired. Sign in again."
+msgstr "單一登入工作階段已過期。請重新登入。"
 
 #: backend/api/invitations.py:124
 msgid "Permission denied: Add User role required"
@@ -1771,87 +1797,87 @@ msgstr "外部身份提供者整合需要 SysManage Professional+ 許可證。�
 msgid "IdP provider not found"
 msgstr "找不到身份提供者"
 
-#: backend/api/external_idp.py:291
+#: backend/api/external_idp.py:322
 msgid "IdP provider deleted"
 msgstr "身份提供者已刪除"
 
-#: backend/api/external_idp.py:339
+#: backend/api/external_idp.py:370
 msgid "A default-for-unmapped mapping already exists for this provider."
 msgstr "此供應商已經存在預設的未映射對應關係。"
 
-#: backend/api/external_idp.py:373
+#: backend/api/external_idp.py:404
 msgid "Role mapping not found"
 msgstr "角色映射未找到"
 
-#: backend/api/external_idp.py:376
+#: backend/api/external_idp.py:407
 msgid "Role mapping deleted"
 msgstr "角色映射已刪除"
 
-#: backend/api/external_idp.py:427
+#: backend/api/external_idp.py:456
 msgid "Provider is not an OIDC provider."
 msgstr "提供者不是OIDC提供者。"
 
-#: backend/api/external_idp.py:430
+#: backend/api/external_idp.py:459
 msgid "OIDC provider is disabled."
 msgstr "OIDC提供商已停用。"
 
-#: backend/api/external_idp.py:461
-msgid "Missing code or state in callback."
-msgstr "缺少代碼或狀態在回調中。"
+#: backend/api/external_idp.py:485
+#, python-format
+msgid "SAML sign-in failed: %s"
+msgstr "SAML 登入失敗：%s"
 
-#: backend/api/external_idp.py:465
-msgid "Invalid OIDC state."
-msgstr "無效的 OIDC 狀態。"
-
-#: backend/api/external_idp.py:474
-msgid "OIDC client secret could not be resolved."
-msgstr "OIDC客戶端密鑰無法解析。"
-
-#: backend/api/external_idp.py:481
+#: backend/api/external_idp.py:487
 #, python-format
 msgid "OIDC sign-in failed: %s"
 msgstr "OIDC登入失敗：%s"
 
-#: backend/api/external_idp.py:501 backend/api/external_idp.py:701
+#: backend/api/external_idp.py:540
+msgid "Missing code or state in callback."
+msgstr "缺少代碼或狀態在回調中。"
+
+#: backend/api/external_idp.py:544
+msgid "Invalid OIDC state."
+msgstr "無效的 OIDC 狀態。"
+
+#: backend/api/external_idp.py:553
+msgid "OIDC client secret could not be resolved."
+msgstr "OIDC客戶端密鑰無法解析。"
+
+#: backend/api/external_idp.py:577 backend/api/external_idp.py:796
 msgid ""
 "No sysmanage account is linked to this IdP identity. Ask an administrator to"
 " provision your account first."
 msgstr "沒有與此身份提供者身份相關聯的SysManage帳戶。請先要求管理員為您建立帳戶。"
 
-#: backend/api/external_idp.py:506 backend/api/external_idp.py:706
+#: backend/api/external_idp.py:582 backend/api/external_idp.py:801
 msgid "Account is inactive."
 msgstr "帳戶處於非活動狀態。"
 
-#: backend/api/external_idp.py:611 backend/api/external_idp.py:632
+#: backend/api/external_idp.py:694 backend/api/external_idp.py:715
 msgid "Provider is not a SAML provider."
 msgstr "提供者不是 SAML 提供者。"
 
-#: backend/api/external_idp.py:617
+#: backend/api/external_idp.py:700
 #, python-format
 msgid "Could not build SP metadata: %s"
 msgstr "無法建立 SP 元數據：%s"
 
-#: backend/api/external_idp.py:635
+#: backend/api/external_idp.py:718
 msgid "SAML provider is disabled."
 msgstr "SAML 提供者已停用。"
 
-#: backend/api/external_idp.py:641
+#: backend/api/external_idp.py:724
 #, python-format
 msgid "Could not start SAML sign-in: %s"
 msgstr "無法啟動 SAML 登入：%s"
 
-#: backend/api/external_idp.py:669
+#: backend/api/external_idp.py:767
 msgid "Missing SAMLResponse or RelayState."
 msgstr "缺少 SAMLResponse 或 RelayState。"
 
-#: backend/api/external_idp.py:674
+#: backend/api/external_idp.py:772
 msgid "Invalid or expired SAML RelayState."
 msgstr "無效或已過期的 SAML RelayState。"
-
-#: backend/api/external_idp.py:684
-#, python-format
-msgid "SAML sign-in failed: %s"
-msgstr "SAML 登入失敗：%s"
 
 #: backend/api/config_mgmt_prereq.py:252 backend/api/packages_operations.py:76
 msgid "Permission denied: ADD_PACKAGE role required"
@@ -2462,36 +2488,47 @@ msgstr "類型 '%(child_type)s' 已存在分布 '%(name)s %(version)s'"
 msgid "Distribution deleted"
 msgstr "發行版已刪除"
 
-#: backend/api/message_handlers_core.py:56
+#: backend/api/message_handlers_core.py:58
 msgid "Agent authentication failed: invalid host token"
 msgstr "Agent 認證失敗：無效的主機令牌"
 
-#: backend/api/message_handlers_core.py:65
+#: backend/api/message_handlers_core.py:67
 msgid "Host with token is not registered. Please re-register."
 msgstr "憑證主機尚未註冊。請重新註冊。"
 
-#: backend/api/message_handlers_core.py:86
+#: backend/api/message_handlers_core.py:88
 msgid "Agent authentication failed: invalid host ID"
 msgstr "Agent 認證失敗：無效的主機 ID"
 
-#: backend/api/message_handlers_core.py:95 backend/utils/host_validation.py:99
+#: backend/api/message_handlers_core.py:97
+#: backend/utils/host_validation.py:104
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "ID 為 %s 的主機尚未註冊。請重新註冊。"
 
-#: backend/api/message_handlers_core.py:245 backend/api/agent.py:653
+#: backend/api/message_handlers_core.py:150
+msgid "Agent session refused: it did not prove it is this host"
+msgstr "已拒絕代理程式工作階段：它未證明自己是此主機"
+
+#: backend/api/message_handlers_core.py:164
+msgid ""
+"This agent did not prove it is this host. If the host was reinstalled, "
+"remove it from SysManage and approve its new registration."
+msgstr "此代理程式未證明自己是此主機。如果主機已重新安裝，請從 SysManage 中移除它，然後核准其新的註冊。"
+
+#: backend/api/message_handlers_core.py:293 backend/api/agent.py:767
 msgid "Host registration pending approval"
 msgstr "主機註冊待批准"
 
-#: backend/api/message_handlers_core.py:359
+#: backend/api/message_handlers_core.py:407
 msgid "Host auto-approved via child host creation"
 msgstr "主機自動批准通過子主機建立"
 
-#: backend/api/message_handlers_core.py:455
+#: backend/api/message_handlers_core.py:526
 msgid "Agent registered and connected successfully"
 msgstr "Agent 註冊並成功連接"
 
-#: backend/api/message_handlers_core.py:769
+#: backend/api/message_handlers_core.py:871
 msgid "Failed to process heartbeat"
 msgstr "無法處理心跳"
 
@@ -3078,7 +3115,7 @@ msgstr "未配置主密鑰。請先配置主密鑰。"
 
 #: backend/api/ubuntu_pro_settings.py:381
 #: backend/api/updates/os_upgrade_routes.py:264
-#: backend/api/updates/execution_routes.py:103
+#: backend/api/updates/execution_routes.py:104
 msgid "Host not found or inactive"
 msgstr "找不到主機或主機不活動"
 
@@ -3111,34 +3148,27 @@ msgstr "計算套件數量時失敗：%s"
 msgid "Failed to search packages: %s"
 msgstr "無法搜尋套件：%s"
 
-#: backend/api/host.py:184
+#: backend/api/host.py:195
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "權限被拒絕：需要 DELETE_HOST 角色"
 
-#: backend/api/host.py:248
+#: backend/api/host.py:259
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "權限 denied: VIEW_HOST_DETAILS 角色所需"
 
-#: backend/api/host.py:663
+#: backend/api/host.py:651
 msgid "Host already exists"
 msgstr "主機已存在"
 
-#: backend/api/host.py:772
+#: backend/api/host.py:763
 msgid "Registration absorbed: host was recently deleted"
 msgstr "註冊被吸收：主機最近已被刪除"
 
-#: backend/api/host.py:846
+#: backend/api/host.py:843
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "主機 '%(fqdn)s' 通過入網令牌加入租戶 %(tenant_id)s"
-
-#: backend/api/host.py:863
-#, python-format
-msgid ""
-"Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
-"(auto_approve=%(auto_approve)s)"
-msgstr "主機 '%(fqdn)s' 通過註冊密鑰 '%(key_name)s' 加入（自動批准=%(auto_approve)s）"
 
 #: backend/api/agent_poll.py:119
 msgid "Missing agent connection token"
@@ -3226,46 +3256,50 @@ msgstr "無法處理診斷結果：%s"
 msgid "Missing message_id in command acknowledgment"
 msgstr "缺少消息ID在命令確認中"
 
-#: backend/api/message_handlers.py:575
+#: backend/api/message_handlers.py:533
+msgid "This session cannot acknowledge another host's message"
+msgstr "此工作階段無法確認其他主機的訊息"
+
+#: backend/api/message_handlers.py:596
 msgid "Missing installation_id in package installation status"
 msgstr "缺少安裝ID在包安裝狀態中"
 
-#: backend/api/message_handlers.py:595
+#: backend/api/message_handlers.py:616
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "未找到 ID 為 %s 的安裝日誌條目"
 
-#: backend/api/message_handlers.py:641
+#: backend/api/message_handlers.py:662
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "代理程式 {hostname} 上的包安裝 {status}"
 
-#: backend/api/message_handlers.py:670
+#: backend/api/message_handlers.py:691
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "更新套件安裝狀態失敗：%s"
 
-#: backend/api/posture.py:81
+#: backend/api/posture.py:93
 msgid "Only an administrator can change the threat model"
 msgstr "只有管理員可以變更威脅模型"
 
-#: backend/api/posture.py:89
+#: backend/api/posture.py:101
 msgid "Only an administrator can waive or re-affirm a posture item"
 msgstr "只有管理員可以豁免或重新確認安全態勢項目"
 
-#: backend/api/posture.py:111 backend/api/posture.py:158
+#: backend/api/posture.py:123 backend/api/posture.py:170
 msgid "The threat-model questionnaire has not been loaded yet"
 msgstr "威脅模型問卷尚未載入"
 
-#: backend/api/posture.py:261
+#: backend/api/posture.py:273
 msgid "Posture item not found"
 msgstr "找不到安全態勢項目"
 
-#: backend/api/posture.py:356
+#: backend/api/posture.py:368
 msgid "Only an administrator can apply a posture remedy"
 msgstr "只有管理員可以套用安全態勢補救措施"
 
-#: backend/api/posture.py:404
+#: backend/api/posture.py:426
 msgid "Threat model version not found"
 msgstr "找不到威脅模型版本"
 
@@ -3405,33 +3439,33 @@ msgstr "入學令牌需要啟用多租戶功能。"
 msgid "Could not mint an enrollment token for that tenant."
 msgstr "無法為該租戶生成入學令牌。"
 
-#: backend/api/auth.py:47
+#: backend/api/auth.py:52
 msgid "Invalid username or password"
 msgstr "無效的使用者名稱或密碼"
 
-#: backend/api/auth.py:285
+#: backend/api/auth.py:302
 msgid "Account is locked due to too many failed login attempts"
 msgstr "由於登入嘗試失敗次數過多，帳戶已被鎖定"
 
-#: backend/api/auth.py:374
+#: backend/api/auth.py:391
 msgid ""
 "Multi-factor authentication is required for this account. Please enroll from"
 " your profile page before signing in."
 msgstr "多因素驗證對這個帳戶需要。請在您的設定檔頁面註冊，然後再登入。"
 
-#: backend/api/auth.py:463
+#: backend/api/auth.py:480
 msgid "Account locked due to too many failed login attempts"
 msgstr "由於登入嘗試失敗次數過多，帳戶被鎖定"
 
-#: backend/api/auth.py:489
+#: backend/api/auth.py:506
 msgid "Invalid or missing refresh token"
 msgstr "無效或缺少刷新令牌"
 
-#: backend/api/auth.py:599 backend/api/auth.py:647
+#: backend/api/auth.py:616 backend/api/auth.py:664
 msgid "Multi-tenancy is not enabled."
 msgstr "不支持多租戶。"
 
-#: backend/api/auth.py:720
+#: backend/api/auth.py:737
 msgid "Logout successful"
 msgstr "登出成功"
 
@@ -3492,60 +3526,60 @@ msgstr "主機的OS升級命令已排隊"
 msgid "Failed to queue OS upgrade command"
 msgstr "無法將作業系統升級命令加入佇列"
 
-#: backend/api/updates/query_routes.py:102
+#: backend/api/updates/query_routes.py:103
 #, python-format
 msgid "Failed to get update summary: %s"
 msgstr "取得更新摘要失敗：%s"
 
-#: backend/api/updates/query_routes.py:198
+#: backend/api/updates/query_routes.py:199
 #, python-format
 msgid "Failed to get host updates: %s"
 msgstr "取得主機更新失敗：%s"
 
-#: backend/api/updates/query_routes.py:299
+#: backend/api/updates/query_routes.py:301
 #, python-format
 msgid "Failed to get updates: %s"
 msgstr "取得更新失敗：%s"
 
-#: backend/api/updates/query_routes.py:319
+#: backend/api/updates/query_routes.py:321
 #, python-format
 msgid "Failed to get update results: %s"
 msgstr "獲取更新結果時失敗：%s"
 
-#: backend/api/updates/execution_routes.py:57
+#: backend/api/updates/execution_routes.py:58
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "權限被拒絕：需要 APPLY_SOFTWARE_UPDATE 角色"
 
-#: backend/api/updates/execution_routes.py:118
+#: backend/api/updates/execution_routes.py:119
 msgid ""
 "This is an image-mode host; update the OS image instead of applying package "
 "updates."
 msgstr "這是圖像模式主機；更新作業系統映像而不是套用套件更新。"
 
-#: backend/api/updates/execution_routes.py:134
+#: backend/api/updates/execution_routes.py:135
 msgid "No matching updates found for specified packages"
 msgstr "找不到指定套件的相符更新"
 
-#: backend/api/updates/execution_routes.py:220
+#: backend/api/updates/execution_routes.py:221
 msgid "Update execution started"
 msgstr "更新執行已開始"
 
-#: backend/api/updates/execution_routes.py:229
+#: backend/api/updates/execution_routes.py:230
 #, python-format
 msgid "Failed to send command: %s"
 msgstr "傳送指令失敗：%s"
 
-#: backend/api/updates/execution_routes.py:237
+#: backend/api/updates/execution_routes.py:238
 #, python-format
 msgid "Failed to send update command: %s"
 msgstr "傳送更新指令失敗：%s"
 
-#: backend/api/updates/execution_routes.py:250
+#: backend/api/updates/execution_routes.py:251
 #, python-format
 msgid "Failed to execute updates: %s"
 msgstr "執行更新失敗：%s"
 
-#: backend/api/updates/execution_routes.py:305
+#: backend/api/updates/execution_routes.py:306
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "取得執行記錄失敗：%s"
@@ -3774,7 +3808,7 @@ msgstr "配置檔已刪除"
 msgid "Assignment removed"
 msgstr "分配已移除"
 
-#: backend/api/host_approval.py:54
+#: backend/api/host_approval.py:54 backend/api/host_approval.py:410
 msgid "Permission denied: APPROVE_HOST_REGISTRATION role required"
 msgstr "權限被拒絕：需要 APPROVE_HOST_REGISTRATION 角色"
 
@@ -3782,11 +3816,11 @@ msgstr "權限被拒絕：需要 APPROVE_HOST_REGISTRATION 角色"
 msgid "Host is not in pending status"
 msgstr "主機不處於待定狀態"
 
-#: backend/api/host_approval.py:433
+#: backend/api/host_approval.py:475
 msgid "OS version update requested"
 msgstr "已請求作業系統版本更新"
 
-#: backend/api/host_approval.py:478
+#: backend/api/host_approval.py:520
 msgid "Updates check requested"
 msgstr "檢查更新請求"
 
@@ -3912,80 +3946,80 @@ msgid ""
 "Triggered upgrade profile '%(profile_name)s' against %(host_count)d host(s)"
 msgstr "觸發升級配置文件 '%(profile_name)s' 對於 %(host_count)d 個主機"
 
-#: backend/api/agent.py:70
+#: backend/api/agent.py:98
 msgid "Rate limit exceeded"
 msgstr "超出速率限制"
 
-#: backend/api/agent.py:132
+#: backend/api/agent.py:161
 #, python-format
 msgid "Agent WebSocket authentication failed from %s"
 msgstr "來自 %s 的 Agent WebSocket 身份驗證失敗"
 
-#: backend/api/agent.py:142
+#: backend/api/agent.py:171
 #, python-format
 msgid "Authentication failed: %s"
 msgstr "認證失敗：%s"
 
-#: backend/api/agent.py:158
+#: backend/api/agent.py:187
 #, python-format
 msgid "Agent WebSocket connection attempted without token from %s"
 msgstr "來自 %s 的 Agent WebSocket 連接嘗試未帶令牌"
 
-#: backend/api/agent.py:167
+#: backend/api/agent.py:196
 msgid "Authentication token required"
 msgstr "需要認證權杖"
 
-#: backend/api/agent.py:262
+#: backend/api/agent.py:300
 msgid "Message failed security validation"
 msgstr "訊息安全驗證失敗"
 
-#: backend/api/agent.py:291
+#: backend/api/agent.py:332
 msgid "Message must be valid JSON"
 msgstr "訊息必須是有效的JSON"
 
-#: backend/api/agent.py:527
+#: backend/api/agent.py:641
 msgid "Agent message validation failed: missing hostname and host_id"
 msgstr "Agent 消息驗證失敗：缺少 hostname 和 host_id"
 
-#: backend/api/agent.py:546
+#: backend/api/agent.py:660
 #, python-brace-format
 msgid "Agent message from unregistered host: {hostname}"
 msgstr "來自未註冊主機的 Agent 消息：{hostname}"
 
-#: backend/api/agent.py:563
+#: backend/api/agent.py:677
 #, python-brace-format
 msgid "Agent message from unapproved host: {hostname}"
 msgstr "來自未批准主機的 Agent 消息：{hostname}"
 
-#: backend/api/agent.py:595
+#: backend/api/agent.py:709
 msgid "Message must include hostname or host_id for host validation"
 msgstr "消息必須包含主機名或host_id以進行主機驗證"
 
-#: backend/api/agent.py:613
+#: backend/api/agent.py:727
 msgid "Host ID no longer valid - please re-register"
 msgstr "主機 ID 已不再有效 - 請重新註冊"
 
-#: backend/api/agent.py:625
+#: backend/api/agent.py:739
 msgid "Host ID and hostname mismatch - please re-register"
 msgstr "主機 ID 和主機名不匹配 - 請重新註冊"
 
-#: backend/api/agent.py:642
+#: backend/api/agent.py:756
 msgid "Host must register before sending inventory data"
 msgstr "主機必須先註冊才能發送存貨數據"
 
-#: backend/api/agent.py:713
+#: backend/api/agent.py:833
 msgid "Missing or invalid authorization header"
 msgstr "缺少或無效的授權頭信息"
 
-#: backend/api/agent.py:738
+#: backend/api/agent.py:858
 msgid "Invalid host authentication"
 msgstr "主機驗證無效"
 
-#: backend/api/agent.py:779 backend/api/packages.py:498
+#: backend/api/agent.py:899 backend/api/packages.py:498
 msgid "Installation completion recorded"
 msgstr "安裝完成記錄"
 
-#: backend/api/agent.py:785 backend/api/error_constants.py:193
+#: backend/api/agent.py:905 backend/api/error_constants.py:193
 msgid "Internal server error"
 msgstr "內部伺服器錯誤"
 
@@ -4021,7 +4055,7 @@ msgstr "請求診斷收集"
 msgid "Diagnostic report deleted"
 msgstr "已刪除診斷報告"
 
-#: backend/api/diagnostics.py:487
+#: backend/api/diagnostics.py:489
 msgid "Missing collection_id"
 msgstr "缺少collection_id"
 
@@ -4123,19 +4157,19 @@ msgstr "已為 %(success_count)d of %(total_count)d 主機部署防毒軟件"
 msgid "Antivirus deployment failed for all hosts"
 msgstr "所有主機上的防病毒部署失敗"
 
-#: backend/api/antivirus_status.py:394
+#: backend/api/antivirus_status.py:395
 msgid "Antivirus enable command sent successfully"
 msgstr "成功發送啟用防病毒命令"
 
-#: backend/api/antivirus_status.py:461
+#: backend/api/antivirus_status.py:463
 msgid "Antivirus disable command sent successfully"
 msgstr "成功發送禁用防病毒命令"
 
-#: backend/api/antivirus_status.py:539
+#: backend/api/antivirus_status.py:541
 msgid "Antivirus remove command sent successfully"
 msgstr "成功發送刪除防病毒命令"
 
-#: backend/api/antivirus_status.py:608
+#: backend/api/antivirus_status.py:610
 #, python-format
 msgid "Failed to retrieve antivirus coverage: %s"
 msgstr "無法檢索防毒覆蓋範圍：%s"
@@ -4184,11 +4218,11 @@ msgstr "主機必須在特權模式下運行以進行服務控制"
 msgid "Service {} requested for {} services"
 msgstr "請求 {} 個服務的 {}"
 
-#: backend/api/asset_discovery.py:127
+#: backend/api/asset_discovery.py:128
 msgid "Unsupported retention period"
 msgstr "不支援的保留期限"
 
-#: backend/api/asset_discovery.py:162
+#: backend/api/asset_discovery.py:163
 msgid "Invalid device id"
 msgstr "裝置 ID 無效"
 
@@ -4304,16 +4338,16 @@ msgstr "標籤範圍需要一個 tag_id。"
 msgid "A window needs at least one scope (all, host, or tag)."
 msgstr "窗口至少需要一個範圍（all、host 或 tag）。"
 
-#: backend/api/maintenance_windows.py:304
-#: backend/api/maintenance_windows.py:327
+#: backend/api/maintenance_windows.py:305
+#: backend/api/maintenance_windows.py:329
 msgid "Maintenance window not found."
 msgstr "維護窗口未找到。"
 
-#: backend/api/maintenance_windows.py:346
+#: backend/api/maintenance_windows.py:349
 msgid "An override reason is required."
 msgstr "需要提供覆蓋理由。"
 
-#: backend/api/maintenance_windows.py:350
+#: backend/api/maintenance_windows.py:353
 msgid "Override duration must be positive."
 msgstr "覆蓋持續時間必須為正數。"
 
@@ -4704,37 +4738,37 @@ msgstr "腳本執行已排隊等待交付"
 msgid "Failed to execute script"
 msgstr "執行腳本時失敗"
 
-#: backend/api/scripts/routes_executions.py:319
+#: backend/api/scripts/routes_executions.py:322
 msgid "Failed to fetch script executions"
 msgstr "無法取得多個腳本執行"
 
-#: backend/api/scripts/routes_executions.py:348
-#: backend/api/scripts/routes_executions.py:426
+#: backend/api/scripts/routes_executions.py:351
+#: backend/api/scripts/routes_executions.py:429
 msgid "Permission denied: DELETE_SCRIPT_EXECUTION role required"
 msgstr "權限被拒絕：需要 DELETE_SCRIPT_EXECUTION 角色"
 
-#: backend/api/scripts/routes_executions.py:360
-#: backend/api/scripts/routes_executions.py:495
+#: backend/api/scripts/routes_executions.py:363
+#: backend/api/scripts/routes_executions.py:498
 msgid "Script execution not found"
 msgstr "找不到腳本執行"
 
-#: backend/api/scripts/routes_executions.py:388
+#: backend/api/scripts/routes_executions.py:391
 msgid "Script execution deleted successfully"
 msgstr "腳本執行已成功刪除"
 
-#: backend/api/scripts/routes_executions.py:397
+#: backend/api/scripts/routes_executions.py:400
 msgid "Failed to delete script execution"
 msgstr "無法刪除腳本執行"
 
-#: backend/api/scripts/routes_executions.py:466
+#: backend/api/scripts/routes_executions.py:469
 msgid "Script executions deleted successfully"
 msgstr "腳本執行已成功刪除"
 
-#: backend/api/scripts/routes_executions.py:473
+#: backend/api/scripts/routes_executions.py:476
 msgid "Failed to delete script executions"
 msgstr "無法刪除多個腳本執行"
 
-#: backend/api/scripts/routes_executions.py:530
+#: backend/api/scripts/routes_executions.py:533
 msgid "Failed to fetch script execution"
 msgstr "無法取得腳本執行"
 
@@ -4790,53 +4824,58 @@ msgstr "無法刪除儲存的腳本"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "無法取得商業防毒狀態：%s"
 
-#: backend/websocket/message_router.py:309
+#: backend/api/machines.py:170
+#, python-format
+msgid "Machine link decided for host %s"
+msgstr "主機連結已決定為 %s"
+
+#: backend/websocket/message_router.py:240
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "隊列中未知的消息類型: %s"
 
-#: backend/websocket/message_router.py:314
+#: backend/websocket/message_router.py:245
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "路由消息類型 %(message_type)s 時發生錯誤：%(error)s"
 
-#: backend/websocket/queue_maintenance.py:72
+#: backend/websocket/queue_maintenance.py:70
 #, python-format
 msgid "Cleaned up %d old messages"
 msgstr "已清理 %d 個舊消息"
 
-#: backend/websocket/queue_maintenance.py:80
+#: backend/websocket/queue_maintenance.py:78
 #, python-format
 msgid "Failed to cleanup old messages: %s"
 msgstr "清除舊消息時失敗：%s"
 
-#: backend/websocket/queue_maintenance.py:116
+#: backend/websocket/queue_maintenance.py:114
 #, python-format
 msgid "Deleted %(count)d messages for host %(host_id)s"
 msgstr "刪除主機 %(host_id)s 的 %(count)d 條消息"
 
-#: backend/websocket/queue_maintenance.py:125
+#: backend/websocket/queue_maintenance.py:123
 #, python-format
 msgid "Failed to delete messages for host %(host_id)s: %(error)s"
 msgstr "無法刪除主機 %(host_id)s 的消息：%(error)s"
 
-#: backend/websocket/queue_maintenance.py:191
+#: backend/websocket/queue_maintenance.py:226
 #, python-format
 msgid ""
 "Marked %(count)d old messages as expired (older than %(timeout)d minutes)"
 msgstr "標記 %(count)d 條舊消息為過期（超過 %(timeout)d 分鐘）"
 
-#: backend/websocket/queue_maintenance.py:201
+#: backend/websocket/queue_maintenance.py:236
 #, python-format
 msgid "Failed to expire old messages: %s"
 msgstr "過期舊消息時失敗：%s"
 
-#: backend/websocket/queue_maintenance.py:249
+#: backend/websocket/queue_maintenance.py:284
 #, python-format
 msgid "Deleted %d failed/expired messages"
 msgstr "已刪除 %d 個失效/過期的消息"
 
-#: backend/websocket/queue_maintenance.py:256
+#: backend/websocket/queue_maintenance.py:291
 #, python-format
 msgid "Failed to delete failed messages: %s"
 msgstr "刪除失敗消息時失敗：%s"
@@ -4846,26 +4885,26 @@ msgstr "刪除失敗消息時失敗：%s"
 msgid "Mock connection: would send message %s"
 msgstr "模擬連接：將發送消息%s"
 
-#: backend/websocket/inbound_processor.py:122
+#: backend/websocket/inbound_processor.py:130
 #, python-format
 msgid "Host %(hostname)s not found for message %(message_id)s, deleting"
 msgstr "找不到消息 %(message_id)s 的主機 %(hostname)s，刪除"
 
-#: backend/websocket/inbound_processor.py:133
+#: backend/websocket/inbound_processor.py:141
 #, python-format
 msgid ""
 "Host %(hostname)s not approved (status: %(status)s) for message "
 "%(message_id)s, deleting"
 msgstr "主機 %(hostname)s 未批准（狀態：%(status)s）的消息 %(message_id)s，正在刪除"
 
-#: backend/websocket/inbound_processor.py:150
+#: backend/websocket/inbound_processor.py:158
 #, python-format
 msgid ""
 "Processing NULL host_id message for approved host %(hostname)s (ID: "
 "%(host_id)s)"
 msgstr "處理 NULL 主機 ID 消息，已批准主機為 %(hostname)s (ID: %(host_id)s)"
 
-#: backend/websocket/inbound_processor.py:267
+#: backend/websocket/inbound_processor.py:382
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
@@ -4874,78 +4913,73 @@ msgid ""
 msgstr ""
 "主機 %(host_id)s 在此資料庫中未找到；延期 %(count)d 個佇列中的訊息（不會刪除）----可能是正在進行的入網程序或已刪除的主機"
 
-#: backend/websocket/inbound_processor.py:284
+#: backend/websocket/inbound_processor.py:407
 #, python-format
 msgid ""
 "Host %(host_id)s (FQDN: %(fqdn)s) no longer approved (status: %(status)s), "
 "deleting all its messages from queue"
 msgstr "主機 %(host_id)s (FQDN: %(fqdn)s) 已不再批准（狀態：%(status)s），刪除其所有消息"
 
-#: backend/websocket/inbound_processor.py:294
+#: backend/websocket/inbound_processor.py:413
 #, python-format
 msgid "Deleted %(count)d messages for unapproved host %(host_id)s"
 msgstr "刪除未批准主機 %(host_id)s 的 %(count)d 條消息"
 
-#: backend/websocket/inbound_processor.py:301
-#, python-format
-msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"
-msgstr "處理已批准主機的消訊：%(host_id)s (FQDN: %(fqdn)s)"
-
-#: backend/websocket/inbound_processor.py:326
+#: backend/websocket/inbound_processor.py:531
 #, python-format
 msgid "Processing message with NULL host_id: %s"
 msgstr "處理具有 NULL host_id 的消息：%s"
 
-#: backend/websocket/inbound_processor.py:337
+#: backend/websocket/inbound_processor.py:542
 #, python-format
 msgid "Processing SYSTEM_INFO registration message %s"
 msgstr "處理 SYSTEM_INFO 註冊消息 %s"
 
-#: backend/websocket/inbound_processor.py:360
+#: backend/websocket/inbound_processor.py:565
 #, python-format
 msgid "Message %s missing hostname and host_id, deleting"
 msgstr "消息%s缺少主機名稱和主機ID，刪除中"
 
-#: backend/websocket/inbound_processor.py:378
+#: backend/websocket/inbound_processor.py:581
 #, python-format
 msgid "Error processing NULL host_id message %(message_id)s: %(error)s"
 msgstr "處理主機 ID 為 NULL 的消息 %(message_id)s 時發生錯誤：%(error)s"
 
-#: backend/websocket/inbound_processor.py:460
+#: backend/websocket/inbound_processor.py:668
 #, python-format
 msgid "Could not mark message %s as processing"
 msgstr "無法將消息 %s 設為處理中"
 
-#: backend/websocket/inbound_processor.py:488
+#: backend/websocket/inbound_processor.py:689
 #, python-format
 msgid ""
 "Processing queued message: %(message_id)s (type: %(message_type)s, host: "
 "%(host)s)"
 msgstr "處理排隊消息：%(message_id)s (類型：%(message_type)s, 主機：%(host)s)"
 
-#: backend/websocket/inbound_processor.py:521
+#: backend/websocket/inbound_processor.py:718
 #, python-format
 msgid ""
 "Successfully processed and completed message: %(message_id)s for host "
 "%(host)s"
 msgstr "成功處理並完成消息：%(message_id)s，對應主機為 %(host)s"
 
-#: backend/websocket/inbound_processor.py:539
+#: backend/websocket/inbound_processor.py:728
 #, python-format
 msgid "Failed to process message %s: unknown message type"
 msgstr "無法處理消息%s：未知的消息類型"
 
-#: backend/websocket/inbound_processor.py:560
+#: backend/websocket/inbound_processor.py:749
 #, python-format
 msgid "Error processing message %(message_id)s for host %(host)s: %(error)s"
 msgstr "為主機 %(host)s 處理消息 %(message_id)s 時發生錯誤：%(error)s"
 
-#: backend/websocket/inbound_processor.py:590
+#: backend/websocket/inbound_processor.py:779
 #, python-format
 msgid "Could not mark SYSTEM_INFO message %s as processing"
 msgstr "無法將 SYSTEM_INFO 消息 %s 設為處理中"
 
-#: backend/websocket/inbound_processor.py:622
+#: backend/websocket/inbound_processor.py:811
 #, python-format
 msgid "Error processing SYSTEM_INFO message %(message_id)s: %(error)s"
 msgstr "處理 SYSTEM_INFO 消息 %(message_id)s 時發生錯誤：%(error)s"
@@ -4955,12 +4989,12 @@ msgstr "處理 SYSTEM_INFO 消息 %(message_id)s 時發生錯誤：%(error)s"
 msgid "Failed to get failed messages: %s"
 msgstr "獲取失敗消息時失敗：%s"
 
-#: backend/websocket/queue_operations.py:105
+#: backend/websocket/queue_operations.py:113
 #, python-brace-format
 msgid "Host ID {host_id} not found"
 msgstr "找不到主機 ID {host_id}"
 
-#: backend/websocket/queue_operations.py:317
+#: backend/websocket/queue_operations.py:270
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -4970,75 +5004,75 @@ msgstr ""
 "主機ID=%(host_id)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:499
+#: backend/websocket/queue_operations.py:470
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "將消息標記為正在處理： %s"
 
-#: backend/websocket/queue_operations.py:506
+#: backend/websocket/queue_operations.py:477
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr "無法將消息 %(message_id)s 記為正在處理：%(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:541
+#: backend/websocket/queue_operations.py:520
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "將消息標記為已完成： %s"
 
-#: backend/websocket/queue_operations.py:548
+#: backend/websocket/queue_operations.py:527
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr "無法將消息 %(message_id)s 記為已完成：%(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:586
+#: backend/websocket/queue_operations.py:565
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "訊息已標記為已傳送（等待確認）：%s"
 
-#: backend/websocket/queue_operations.py:593
+#: backend/websocket/queue_operations.py:572
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr "無法將消息 %(message_id)s 記為已發送：%(error)s"
 
-#: backend/websocket/queue_operations.py:622
+#: backend/websocket/queue_operations.py:601
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "無法確認未知訊息：%s"
 
-#: backend/websocket/queue_operations.py:629
+#: backend/websocket/queue_operations.py:608
 #, python-format
 msgid ""
 "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
 msgstr "消息 %(message_id)s 狀態不是 SENT，跳過確認（當前狀態為：%(status)s）"
 
-#: backend/websocket/queue_operations.py:642
+#: backend/websocket/queue_operations.py:621
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "代理程式已確認訊息：%s"
 
-#: backend/websocket/queue_operations.py:649
+#: backend/websocket/queue_operations.py:628
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr "無法將消息 %(message_id)s 記為已確認：%(error)s"
 
-#: backend/websocket/queue_operations.py:733
+#: backend/websocket/queue_operations.py:692
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "在 %d 秒內未收到確認"
 
-#: backend/websocket/queue_operations.py:745
+#: backend/websocket/queue_operations.py:704
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "已排程 %d 則未確認訊息進行重試"
 
-#: backend/websocket/queue_operations.py:753
+#: backend/websocket/queue_operations.py:712
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "重試未確認訊息時發生錯誤：%s"
 
-#: backend/websocket/queue_operations.py:808
+#: backend/websocket/queue_operations.py:772
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -5046,37 +5080,37 @@ msgid ""
 msgstr ""
 "消息 %(message_id)s 失敗（嘗試次數 %(attempt)d/%(max_retries)d），安排在 %(backoff)d 秒後重試"
 
-#: backend/websocket/queue_operations.py:824
+#: backend/websocket/queue_operations.py:788
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
 "%(error)s"
 msgstr "消息 %(message_id)s 在嘗試了 %(attempts)d 次後永久失敗：%(error)s"
 
-#: backend/websocket/queue_operations.py:842
+#: backend/websocket/queue_operations.py:806
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "無法將消息 %(message_id)s 記為失敗：%(error)s"
 
-#: backend/websocket/queue_operations.py:864
+#: backend/websocket/queue_operations.py:828
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "無法反序列化消息 %(message_id)s：%(error)s"
 
-#: backend/websocket/message_processor.py:67
+#: backend/websocket/message_processor.py:62
 msgid "Message processor started"
 msgstr "消息處理程序已啟動"
 
-#: backend/websocket/message_processor.py:88
+#: backend/websocket/message_processor.py:71
 #, python-format
 msgid "Error in message processing loop: %s"
 msgstr "消息處理循環中發生錯誤：%s"
 
-#: backend/websocket/message_processor.py:107
+#: backend/websocket/message_processor.py:81
 msgid "Message processor cancelled"
 msgstr "消息處理程序已取消"
 
-#: backend/websocket/message_processor.py:111
+#: backend/websocket/message_processor.py:85
 msgid "Message processor stopped"
 msgstr "消息處理程序已停止"
 
@@ -5084,7 +5118,7 @@ msgstr "消息處理程序已停止"
 msgid "Server message queue manager initialized"
 msgstr "伺服器消息佇列管理器初始化完成"
 
-#: backend/startup/rate_limit_middleware.py:98
+#: backend/startup/rate_limit_middleware.py:100
 msgid "Rate limit exceeded. Please retry later."
 msgstr "超出速率限制。請稍後再試。"
 
@@ -5132,15 +5166,15 @@ msgstr "找不到排除項目"
 msgid "This exclusion was already revoked"
 msgstr "此排除項目已被撤銷"
 
-#: backend/services/malware_rulesets.py:158
+#: backend/services/malware_rulesets.py:169
 msgid "A rule set name may use only a-z, 0-9 and hyphens"
 msgstr "規則集名稱只能使用 a-z, 0-9 和連字號"
 
-#: backend/services/malware_rulesets.py:162
+#: backend/services/malware_rulesets.py:173
 msgid "That name belongs to a curated rule set"
 msgstr "該名稱屬於精選規則集"
 
-#: backend/services/malware_rulesets.py:166
+#: backend/services/malware_rulesets.py:177
 msgid "None of these rules can run under ClamAV"
 msgstr "這些規則都無法在 ClamAV 下執行"
 
@@ -5256,17 +5290,17 @@ msgstr "磁盤已插入但無法讀取"
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "設備上沒有 ISO 文件系統 (fstype=%s)"
 
-#: backend/services/audit_service.py:194
+#: backend/services/audit_service.py:198
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "已創建 {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:242
+#: backend/services/audit_service.py:246
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "已更新 {entity_type} '{entity_name}' 的內容"
 
-#: backend/services/audit_service.py:290
+#: backend/services/audit_service.py:294
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "已刪除 {entity_type} '{entity_name}'"
@@ -5341,22 +5375,9 @@ msgstr "NetBSD pkgsrc 套件弱點（pkg_admin audit 讀取的資料）"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "依作業系統版本列出的 macOS 弱點（來自 NVD 的受影響版本資料）"
 
-msgid "The single sign-on session has expired. Sign in again."
-msgstr "單一登入工作階段已過期。請重新登入。"
-
-#: backend/api/message_handlers_core.py
-msgid "Agent session refused: it did not prove it is this host"
-msgstr "已拒絕代理程式工作階段：它未證明自己是此主機"
-
-#: backend/api/message_handlers_core.py
-msgid ""
-"This agent did not prove it is this host. If the host was reinstalled, "
-"remove it from SysManage and approve its new registration."
-msgstr "此代理程式未證明自己是此主機。如果主機已重新安裝，請從 SysManage 中移除它，然後核准其新的註冊。"
-
-#: backend/api/message_handlers.py
-msgid "This session cannot acknowledge another host's message"
-msgstr "此工作階段無法確認其他主機的訊息"
+#, python-format
+#~ msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"
+#~ msgstr "處理已批准主機的消訊：%(host_id)s (FQDN: %(fqdn)s)"
 
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "電子郵件服務已停用。請在設定檔中啟用。"

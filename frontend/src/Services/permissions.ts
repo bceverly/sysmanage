@@ -91,6 +91,7 @@ export const SecurityRoles = {
     KILL_HOST_PROCESS: 'Kill Host Process',
     // - Unenrolled Asset Discovery (Phase 21.6)
     MANAGE_NETWORK_DISCOVERY: 'Manage Network Discovery',
+    MANAGE_ASSET_TAGS: 'Manage Asset Tags',
     RUN_MALWARE_SCANS: 'Run Malware Scans',
     QUARANTINE_MALWARE: 'Quarantine Malware',
 

@@ -5,31 +5,31 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-01 11:10-0400\n"
+"POT-Creation-Date: 2026-10-11 08:17-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: backend/security/communication_security.py:123
+#: backend/security/communication_security.py:124
 msgid "Invalid token signature"
 msgstr "توقيع الرمز المميز غير صحيح"
 
-#: backend/security/communication_security.py:129
+#: backend/security/communication_security.py:133
 msgid "Token expired"
 msgstr "انتهت صلاحية الرمز المميز"
 
-#: backend/security/communication_security.py:151
+#: backend/security/communication_security.py:155
 msgid "Malformed token"
 msgstr "الرمز المميز مُشوَّه"
 
-#: backend/security/communication_security.py:391
+#: backend/security/communication_security.py:425
 msgid "Encrypted data expired"
 msgstr "انتهت صلاحية البيانات المشفرة"
 
-#: backend/security/communication_security.py:402
+#: backend/security/communication_security.py:436
 msgid "Invalid signature"
 msgstr "توقيع غير صحيح"
 
-#: backend/security/communication_security.py:409
+#: backend/security/communication_security.py:443
 msgid "Decryption failed"
 msgstr "فشل التشفير"
 
@@ -69,9 +69,35 @@ msgstr "لا يمكن التحقق من بيانات الاعتماد"
 msgid "User not found."
 msgstr "المستخدم غير موجود."
 
-#: backend/auth/auth_bearer.py:192 backend/api/auth.py:663
+#: backend/auth/auth_bearer.py:192 backend/api/auth.py:680
 msgid "You do not have access to the selected account."
 msgstr "ليس لديك إذن لوصول الحساب المحدد."
+
+#: backend/api/asset_tags.py:59 backend/api/malware.py:118
+#: backend/api/file_watches.py:110 backend/api/config_mgmt_drift.py:191
+#: backend/api/advisor.py:93 backend/api/query_packs.py:119
+#: backend/api/config_mgmt_inventories.py:110
+#: backend/api/config_mgmt_remediation.py:137
+#: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:375
+#: backend/api/config_mgmt_profiles.py:136
+#: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
+#: backend/api/machines.py:151
+#, python-format
+msgid "Permission denied: %s role required"
+msgstr "تم رفض الإذن: يتطلب دور %s"
+
+#: backend/api/asset_tags.py:144
+msgid "Asset tag naming scheme changed"
+msgstr "تغيير نظام تسمية علامات الأصول"
+
+#: backend/api/asset_tags.py:204
+#, python-format
+msgid "Asset tag set to %s"
+msgstr "تم تعيين علامة الأصول إلى %s"
+
+#: backend/api/asset_tags.py:204
+msgid "Asset tag cleared"
+msgstr "تم مسح علامة الأصول"
 
 #: backend/api/fleet.py:93
 #, python-format
@@ -165,15 +191,15 @@ msgstr "تنسيق ID المضيف غير صحيح"
 #: backend/api/airgap_repository_buckets.py:64
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:54
-#: backend/api/updates/query_routes.py:123
-#: backend/api/updates/execution_routes.py:268 backend/api/diagnostics.py:102
+#: backend/api/updates/query_routes.py:124
+#: backend/api/updates/execution_routes.py:269 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:220 backend/api/child_host_utils.py:82
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
 #: backend/api/repository_mirroring_setup.py:202
 #: backend/api/repository_mirroring_setup.py:263
 #: backend/api/scripts/routes_executions.py:78
-#: backend/api/commercial_antivirus_status.py:88
+#: backend/api/commercial_antivirus_status.py:88 backend/api/machines.py:68
 msgid "Host not found"
 msgstr "لم يتم العثور على المضيف"
 
@@ -183,7 +209,7 @@ msgstr "المضيف غير معتمد"
 
 #: backend/api/certificates.py:156 backend/api/security_roles.py:161
 #: backend/api/security_roles.py:204 backend/api/auth_mfa.py:149
-#: backend/api/airgap_collection_schedule.py:139
+#: backend/api/airgap_collection_schedule.py:143
 #: backend/api/graylog_integration.py:171 backend/api/broadcast.py:128
 #: backend/api/queue.py:122 backend/api/airgap_collector_runs.py:88
 #: backend/api/access_groups.py:140 backend/api/grafana_integration.py:313
@@ -197,28 +223,17 @@ msgstr "المضيف غير معتمد"
 #: backend/api/packages_operations.py:247
 #: backend/api/license_management.py:116
 #: backend/api/updates/os_upgrade_routes.py:189
-#: backend/api/updates/execution_routes.py:49
+#: backend/api/updates/execution_routes.py:50
 #: backend/api/secrets/permissions.py:39 backend/api/error_constants.py:22
 #: backend/api/child_host_utils.py:33
 msgid "User not found"
 msgstr "لم يتم العثور على المستخدم"
 
-#: backend/api/malware.py:117 backend/api/file_watches.py:110
-#: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:93
-#: backend/api/query_packs.py:119 backend/api/config_mgmt_inventories.py:110
-#: backend/api/config_mgmt_remediation.py:137
-#: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:363
-#: backend/api/config_mgmt_profiles.py:136
-#: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:90
-#, python-format
-msgid "Permission denied: %s role required"
-msgstr "تم رفض الإذن: يتطلب دور %s"
-
-#: backend/api/malware.py:133
+#: backend/api/malware.py:134
 msgid "Only an administrator can change the malware rule sets"
 msgstr "يمكن للمسؤول فقط تغيير مجموعات قواعد البرمجيات الخبيثة"
 
-#: backend/api/malware.py:139
+#: backend/api/malware.py:140
 msgid ""
 "Malware rule sets are shared by every tenant; change them from the server "
 "scope, not from inside a tenant"
@@ -226,11 +241,11 @@ msgstr ""
 "مجموعات قواعد البرمجيات الخبيثة مشتركة بين جميع المستأجرين؛ غيّرها من نطاق "
 "الخادم، وليس من داخل مستأجر"
 
-#: backend/api/malware.py:149
+#: backend/api/malware.py:150
 msgid "Invalid id"
 msgstr "معرّف غير صالح"
 
-#: backend/api/malware.py:403
+#: backend/api/malware.py:404
 msgid "No imported rule set by that name"
 msgstr "لا توجد مجموعة قواعد مستوردة بهذا الاسم"
 
@@ -313,14 +328,14 @@ msgstr ""
 msgid "Error handling hostname changed message: %s"
 msgstr "خطأ في معالجة رسالة تغيير اسم المستضافة (hostname): %s"
 
-#: backend/api/handlers/process_handlers.py:121
+#: backend/api/handlers/process_handlers.py:123
 #, python-format
 msgid "Failed to process process status update: %s"
 msgstr "فشل في معالجة تحديث حالة العملية: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:551 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:572 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "المضيف غير مسجل"
@@ -404,69 +419,69 @@ msgstr "لم يتم تقديم معلومات النظام الأساسي (OS)"
 msgid "Failed to update OS version"
 msgstr "فشل في تحديث إصدار نظام التشغيل"
 
-#: backend/api/handlers/os_hardware_handlers.py:545
+#: backend/api/handlers/os_hardware_handlers.py:568
 msgid "hardware_updated"
 msgstr "تم تحديث الأجهزة"
 
-#: backend/api/handlers/os_hardware_handlers.py:554
+#: backend/api/handlers/os_hardware_handlers.py:577
 msgid "Failed to update hardware information"
 msgstr "فشل في تحديث معلومات الأجهزة"
 
-#: backend/api/handlers/software_package_handlers.py:109
+#: backend/api/handlers/software_package_handlers.py:112
 msgid "software_inventory_updated"
 msgstr "تم تحديث مخزون البرمجيات"
 
-#: backend/api/handlers/software_package_handlers.py:118
+#: backend/api/handlers/software_package_handlers.py:121
 msgid "Failed to update software inventory"
 msgstr "فشل في تحديث سجل البرمجيات"
 
-#: backend/api/handlers/software_package_handlers.py:293
+#: backend/api/handlers/software_package_handlers.py:296
 #: backend/api/updates/report_routes.py:75
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "فشل في حفظ التحديثات: %s"
 
-#: backend/api/handlers/software_package_handlers.py:408
+#: backend/api/handlers/software_package_handlers.py:411
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "فشل في معالجة نتائج جمع الحزم: %s"
 
-#: backend/api/handlers/software_package_handlers.py:502
+#: backend/api/handlers/software_package_handlers.py:505
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "فشل في معالجة تحديث مستودع المستخدم الخارجي: %s"
 
-#: backend/api/handlers/software_package_handlers.py:585
+#: backend/api/handlers/software_package_handlers.py:588
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "فشل في معالجة تحديث حالة مضاد الفيروسات: %s"
 
-#: backend/api/handlers/software_package_handlers.py:716
+#: backend/api/handlers/software_package_handlers.py:719
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "فشل في معالجة تحديث حالة مضاد الفيروسات التجاري: %s"
 
-#: backend/api/handlers/software_package_handlers.py:818
+#: backend/api/handlers/software_package_handlers.py:821
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "فشل في معالجة تحديث حالة جدار الحماية: %s"
 
-#: backend/api/handlers/software_package_handlers.py:904
+#: backend/api/handlers/software_package_handlers.py:907
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "فشل في معالجة تحديث حالة Graylog: %s"
 
-#: backend/api/handlers/software_package_handlers.py:936
+#: backend/api/handlers/software_package_handlers.py:939
 msgid "Missing request_id in installation_complete"
 msgstr "لا يوجد معرف الطلب في استجابة الإكمال"
 
-#: backend/api/handlers/software_package_handlers.py:953
-#: backend/api/agent.py:751 backend/api/packages.py:486
+#: backend/api/handlers/software_package_handlers.py:956
+#: backend/api/agent.py:871 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "لم يتم العثور على طلب التثبيت: %s"
 
-#: backend/api/handlers/software_package_handlers.py:994
+#: backend/api/handlers/software_package_handlers.py:997
 #: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -688,16 +703,16 @@ msgstr "إنشاء PDF غير متوفر. يرجى تثبيت حزمة reportlab
 msgid "Report"
 msgstr "تقرير"
 
-#: backend/api/airgap_collection_schedule.py:48
+#: backend/api/airgap_collection_schedule.py:49
 msgid "Air-gap collection schedule not found"
 msgstr "جدول جمع المعزولة غير موجود"
 
-#: backend/api/airgap_collection_schedule.py:49
+#: backend/api/airgap_collection_schedule.py:50
 #, python-format
 msgid "Invalid UUID for schedule_id: %s"
 msgstr "UUID غير صالح لـ schedule_id: %s"
 
-#: backend/api/airgap_collection_schedule.py:58
+#: backend/api/airgap_collection_schedule.py:59
 msgid ""
 "Air-gap collection schedules require a SysManage Professional+ license with "
 "the air-gap collector engine. Please upgrade to access this feature."
@@ -705,42 +720,42 @@ msgstr ""
 "تتطلب جداول جمع المعزولة ترخيص SysManage Professional+ مع محرك المُجَمِّع "
 "المعزول. يرجى الترقية للوصول إلى هذه الميزة."
 
-#: backend/api/airgap_collection_schedule.py:84
+#: backend/api/airgap_collection_schedule.py:85
 msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
 msgstr "تعبير cron غير صالح: متوقع 5 حقول (m h dom mon dow)"
 
-#: backend/api/airgap_collection_schedule.py:93
+#: backend/api/airgap_collection_schedule.py:94
 #: backend/api/upgrade_profiles.py:148
 #, python-format
 msgid "Invalid cron expression: %s"
 msgstr "تعبير cron غير صالح: %s"
 
-#: backend/api/airgap_collection_schedule.py:171
-#: backend/api/airgap_collection_schedule.py:254
+#: backend/api/airgap_collection_schedule.py:175
+#: backend/api/airgap_collection_schedule.py:260
 #, python-format
 msgid "Invalid target_request: %s"
 msgstr "target_request غير صالحة: %s"
 
-#: backend/api/airgap_collection_schedule.py:189
+#: backend/api/airgap_collection_schedule.py:195
 #, python-format
 msgid "Created air-gap collection schedule '%s'"
 msgstr "تم إنشاء جدول جمع المعزولة '%s'"
 
-#: backend/api/airgap_collection_schedule.py:265
+#: backend/api/airgap_collection_schedule.py:271
 #, python-format
 msgid "Updated air-gap collection schedule '%s'"
 msgstr "تم تحديث جدول جمع المعزولة '%s'"
 
-#: backend/api/airgap_collection_schedule.py:304
+#: backend/api/airgap_collection_schedule.py:310
 #, python-format
 msgid "Deleted air-gap collection schedule '%s'"
 msgstr "تم حذف جدول جمع المعزولة '%s'"
 
-#: backend/api/airgap_collection_schedule.py:309
+#: backend/api/airgap_collection_schedule.py:315
 msgid "Air-gap collection schedule deleted"
 msgstr "تم حذف جدول جمع المعزولة"
 
-#: backend/api/airgap_collection_schedule.py:373
+#: backend/api/airgap_collection_schedule.py:379
 msgid ""
 "automation_engine not loaded; next_run timestamps not advanced. Schedules "
 "will fire only on the current tick window until the Pro+ license includes "
@@ -750,15 +765,24 @@ msgstr ""
 "الجداول فقط في نافذة العلامة الحالية حتى يتضمن ترخيص Pro+ المحرك "
 "automation_engine."
 
-#: backend/api/host_registration.py:77
+#: backend/api/host_registration.py:82
+#, python-format
+msgid ""
+"Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
+"(auto_approve=%(auto_approve)s)"
+msgstr ""
+"تم تسجيل مستضياف '%(fqdn)s' عبر مفتاح التسجيل '%(key_name)s' "
+"(auto_approve=%(auto_approve)s)"
+
+#: backend/api/host_registration.py:134
 msgid "Invalid or expired registration key"
 msgstr "مفتاح التسجيل غير صالح أو منتهٍ الصلاحية"
 
-#: backend/api/host_registration.py:116
+#: backend/api/host_registration.py:173
 msgid "Invalid or expired enrollment token"
 msgstr "رمز التسجيل غير صالح أو منتهٍ الصلاحية"
 
-#: backend/api/host_registration.py:182
+#: backend/api/host_registration.py:239
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -1132,6 +1156,10 @@ msgstr "صيغة اسم المضيف غير صالحة"
 #: backend/api/host_hostname.py:147
 msgid "Hostname change requested"
 msgstr "تم طلب تغيير اسم المضيف"
+
+#: backend/api/sso_session.py:232
+msgid "The single sign-on session has expired. Sign in again."
+msgstr "انتهت صلاحية جلسة تسجيل الدخول الموحد. سجّل الدخول مرة أخرى."
 
 #: backend/api/invitations.py:124
 msgid "Permission denied: Add User role required"
@@ -1823,48 +1851,53 @@ msgstr ""
 msgid "IdP provider not found"
 msgstr "مزود IdP غير موجود"
 
-#: backend/api/external_idp.py:291
+#: backend/api/external_idp.py:322
 msgid "IdP provider deleted"
 msgstr "تم حذف مزود IdP"
 
-#: backend/api/external_idp.py:339
+#: backend/api/external_idp.py:370
 msgid "A default-for-unmapped mapping already exists for this provider."
 msgstr "يوجد بالفعل تعيين افتراضي للعناصر غير المعيَّنة لهذا المزوّد."
 
-#: backend/api/external_idp.py:373
+#: backend/api/external_idp.py:404
 msgid "Role mapping not found"
 msgstr "لم يتم العثور على خريطة الأدوار"
 
-#: backend/api/external_idp.py:376
+#: backend/api/external_idp.py:407
 msgid "Role mapping deleted"
 msgstr "تم حذف خريطة الأدوار"
 
-#: backend/api/external_idp.py:427
+#: backend/api/external_idp.py:456
 msgid "Provider is not an OIDC provider."
 msgstr "الProveedor ليس مزود OIDC."
 
-#: backend/api/external_idp.py:430
+#: backend/api/external_idp.py:459
 msgid "OIDC provider is disabled."
 msgstr "مزوّد OIDC معطل."
 
-#: backend/api/external_idp.py:461
-msgid "Missing code or state in callback."
-msgstr "ناقص رمز أو حالة في استدعاء الدالة."
+#: backend/api/external_idp.py:485
+#, python-format
+msgid "SAML sign-in failed: %s"
+msgstr "فشل تسجيل الدخول باستخدام SAML: %s"
 
-#: backend/api/external_idp.py:465
-msgid "Invalid OIDC state."
-msgstr "حالة OIDC غير صالحة."
-
-#: backend/api/external_idp.py:474
-msgid "OIDC client secret could not be resolved."
-msgstr "تعذر حل سر مفتاح عميل OIDC."
-
-#: backend/api/external_idp.py:481
+#: backend/api/external_idp.py:487
 #, python-format
 msgid "OIDC sign-in failed: %s"
 msgstr "فشل تسجيل الدخول OIDC: %s"
 
-#: backend/api/external_idp.py:501 backend/api/external_idp.py:701
+#: backend/api/external_idp.py:540
+msgid "Missing code or state in callback."
+msgstr "ناقص رمز أو حالة في استدعاء الدالة."
+
+#: backend/api/external_idp.py:544
+msgid "Invalid OIDC state."
+msgstr "حالة OIDC غير صالحة."
+
+#: backend/api/external_idp.py:553
+msgid "OIDC client secret could not be resolved."
+msgstr "تعذر حل سر مفتاح عميل OIDC."
+
+#: backend/api/external_idp.py:577 backend/api/external_idp.py:796
 msgid ""
 "No sysmanage account is linked to this IdP identity. Ask an administrator to"
 " provision your account first."
@@ -1872,40 +1905,35 @@ msgstr ""
 "لا يوجد حساب SysManage مرتبط بهذا الهوية IdP. اطلب من المسؤول توفير الحساب "
 "أولاً."
 
-#: backend/api/external_idp.py:506 backend/api/external_idp.py:706
+#: backend/api/external_idp.py:582 backend/api/external_idp.py:801
 msgid "Account is inactive."
 msgstr "الحساب غير نشط."
 
-#: backend/api/external_idp.py:611 backend/api/external_idp.py:632
+#: backend/api/external_idp.py:694 backend/api/external_idp.py:715
 msgid "Provider is not a SAML provider."
 msgstr "الموفر ليس موفرًا لـ SAML."
 
-#: backend/api/external_idp.py:617
+#: backend/api/external_idp.py:700
 #, python-format
 msgid "Could not build SP metadata: %s"
 msgstr "لم يتم بناء بيانات SP الوصفية: %s"
 
-#: backend/api/external_idp.py:635
+#: backend/api/external_idp.py:718
 msgid "SAML provider is disabled."
 msgstr "تم تعطيل موفر SAML."
 
-#: backend/api/external_idp.py:641
+#: backend/api/external_idp.py:724
 #, python-format
 msgid "Could not start SAML sign-in: %s"
 msgstr "لا يمكن بدء تسجيل الدخول باستخدام SAML: %s"
 
-#: backend/api/external_idp.py:669
+#: backend/api/external_idp.py:767
 msgid "Missing SAMLResponse or RelayState."
 msgstr "SAMLResponse أو RelayState مفقود."
 
-#: backend/api/external_idp.py:674
+#: backend/api/external_idp.py:772
 msgid "Invalid or expired SAML RelayState."
 msgstr "SAML RelayState غير صالح أو منتهي الصلاحية."
-
-#: backend/api/external_idp.py:684
-#, python-format
-msgid "SAML sign-in failed: %s"
-msgstr "فشل تسجيل الدخول باستخدام SAML: %s"
 
 #: backend/api/config_mgmt_prereq.py:252 backend/api/packages_operations.py:76
 msgid "Permission denied: ADD_PACKAGE role required"
@@ -2532,36 +2560,49 @@ msgstr "'%(name)s %(version)s' من نوع '%(child_type)s' موجود بالف�
 msgid "Distribution deleted"
 msgstr "تم حذف التوزيعة"
 
-#: backend/api/message_handlers_core.py:56
+#: backend/api/message_handlers_core.py:58
 msgid "Agent authentication failed: invalid host token"
 msgstr "فشل التحقق من هوية وكيل: توكن المستضيف غير صحيح"
 
-#: backend/api/message_handlers_core.py:65
+#: backend/api/message_handlers_core.py:67
 msgid "Host with token is not registered. Please re-register."
 msgstr "المضيف الذي يحمل رمزًا غير مسجل. الرجاء إعادة التسجيل."
 
-#: backend/api/message_handlers_core.py:86
+#: backend/api/message_handlers_core.py:88
 msgid "Agent authentication failed: invalid host ID"
 msgstr "فشل التحقق من هوية وكيل: معرف المستضِغف غير صحيح"
 
-#: backend/api/message_handlers_core.py:95 backend/utils/host_validation.py:99
+#: backend/api/message_handlers_core.py:97
+#: backend/utils/host_validation.py:104
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "المضيف الذي يحمل رقم %s لم يتم التسجيل. الرجاء إعادة التسجيل."
 
-#: backend/api/message_handlers_core.py:245 backend/api/agent.py:653
+#: backend/api/message_handlers_core.py:150
+msgid "Agent session refused: it did not prove it is this host"
+msgstr "تم رفض جلسة الوكيل: لم تثبت أنها هذا المضيف"
+
+#: backend/api/message_handlers_core.py:164
+msgid ""
+"This agent did not prove it is this host. If the host was reinstalled, "
+"remove it from SysManage and approve its new registration."
+msgstr ""
+"لم يثبت هذا الوكيل أنه هذا المضيف. إذا تمت إعادة تثبيت المضيف، فأزله من "
+"SysManage ووافق على تسجيله الجديد."
+
+#: backend/api/message_handlers_core.py:293 backend/api/agent.py:767
 msgid "Host registration pending approval"
 msgstr "تمت الموافقة على تسجيل المضيف وانتظار التحقق منها"
 
-#: backend/api/message_handlers_core.py:359
+#: backend/api/message_handlers_core.py:407
 msgid "Host auto-approved via child host creation"
 msgstr "تم الموافقة تلقائيًا عند إنشاء مضيف فرعي"
 
-#: backend/api/message_handlers_core.py:455
+#: backend/api/message_handlers_core.py:526
 msgid "Agent registered and connected successfully"
 msgstr "تم تسجيل وكيل وإحالته بنجاح"
 
-#: backend/api/message_handlers_core.py:769
+#: backend/api/message_handlers_core.py:871
 msgid "Failed to process heartbeat"
 msgstr "فشل في معالجة النبضة القلبية"
 
@@ -3167,7 +3208,7 @@ msgstr "لم يتم تكوين مفتاح رئيسي. يرجى تكوين مفت
 
 #: backend/api/ubuntu_pro_settings.py:381
 #: backend/api/updates/os_upgrade_routes.py:264
-#: backend/api/updates/execution_routes.py:103
+#: backend/api/updates/execution_routes.py:104
 msgid "Host not found or inactive"
 msgstr "لم يتم العثور على المضيف أو أنه غير نشط"
 
@@ -3200,36 +3241,27 @@ msgstr "فشل في إحصاء الحزم: %s"
 msgid "Failed to search packages: %s"
 msgstr "فشل في البحث عن الحزم: %s"
 
-#: backend/api/host.py:184
+#: backend/api/host.py:195
 msgid "Permission denied: DELETE_HOST role required"
 msgstr " رفض الوصول: يتطلب دور DELETE_HOST"
 
-#: backend/api/host.py:248
+#: backend/api/host.py:259
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "تم رفض الإذن: يتطلب دور `VIEW_HOST_DETAILS`"
 
-#: backend/api/host.py:663
+#: backend/api/host.py:651
 msgid "Host already exists"
 msgstr "المضيف موجود بالفعل"
 
-#: backend/api/host.py:772
+#: backend/api/host.py:763
 msgid "Registration absorbed: host was recently deleted"
 msgstr "التسجيل تم امتصاصه: كان المضيف قد حُذف مؤخرا"
 
-#: backend/api/host.py:846
+#: backend/api/host.py:843
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "تم تسجيل مستضياف '%(fqdn)s' في المستأجر %(tenant_id)s عبر رمز التسجيل"
-
-#: backend/api/host.py:863
-#, python-format
-msgid ""
-"Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
-"(auto_approve=%(auto_approve)s)"
-msgstr ""
-"تم تسجيل مستضياف '%(fqdn)s' عبر مفتاح التسجيل '%(key_name)s' "
-"(auto_approve=%(auto_approve)s)"
 
 #: backend/api/agent_poll.py:119
 msgid "Missing agent connection token"
@@ -3317,46 +3349,50 @@ msgstr "فشل في معالجة نتيجة التشخيص: %s"
 msgid "Missing message_id in command acknowledgment"
 msgstr "لم يتم تحديد معرف الرسالة في تأكيد الطلب"
 
-#: backend/api/message_handlers.py:575
+#: backend/api/message_handlers.py:533
+msgid "This session cannot acknowledge another host's message"
+msgstr "لا يمكن لهذه الجلسة الإقرار برسالة مضيف آخر"
+
+#: backend/api/message_handlers.py:596
 msgid "Missing installation_id in package installation status"
 msgstr "لم يتم تحديد معرف التثبيت في حالة التثبيت"
 
-#: backend/api/message_handlers.py:595
+#: backend/api/message_handlers.py:616
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "لم يتم العثور على سجل تثبيت للاستعلام: %s"
 
-#: backend/api/message_handlers.py:641
+#: backend/api/message_handlers.py:662
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr " حالة تثبيت الحزمة {status} على الوكيل {hostname}"
 
-#: backend/api/message_handlers.py:670
+#: backend/api/message_handlers.py:691
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "فشل في تحديث حالة تثبيت الحزم: %s"
 
-#: backend/api/posture.py:81
+#: backend/api/posture.py:93
 msgid "Only an administrator can change the threat model"
 msgstr "يمكن للمسؤول فقط تغيير نموذج التهديدات"
 
-#: backend/api/posture.py:89
+#: backend/api/posture.py:101
 msgid "Only an administrator can waive or re-affirm a posture item"
 msgstr "يمكن للمسؤول فقط إعفاء بند الوضع الأمني أو إعادة تأكيده"
 
-#: backend/api/posture.py:111 backend/api/posture.py:158
+#: backend/api/posture.py:123 backend/api/posture.py:170
 msgid "The threat-model questionnaire has not been loaded yet"
 msgstr "لم يتم تحميل استبيان نموذج التهديدات بعد"
 
-#: backend/api/posture.py:261
+#: backend/api/posture.py:273
 msgid "Posture item not found"
 msgstr "لم يتم العثور على بند الوضع الأمني"
 
-#: backend/api/posture.py:356
+#: backend/api/posture.py:368
 msgid "Only an administrator can apply a posture remedy"
 msgstr "يمكن للمسؤول فقط تطبيق إجراء معالجة للوضع الأمني"
 
-#: backend/api/posture.py:404
+#: backend/api/posture.py:426
 msgid "Threat model version not found"
 msgstr "لم يتم العثور على إصدار نموذج التهديدات"
 
@@ -3496,15 +3532,15 @@ msgstr "تتطلب ورقة التسجيل تمكين متعددة المستأ�
 msgid "Could not mint an enrollment token for that tenant."
 msgstr "تعذر إصدار رمز تسجيل للعميل هذا."
 
-#: backend/api/auth.py:47
+#: backend/api/auth.py:52
 msgid "Invalid username or password"
 msgstr "اسم المستخدم أو كلمة المرور غير صحيحة"
 
-#: backend/api/auth.py:285
+#: backend/api/auth.py:302
 msgid "Account is locked due to too many failed login attempts"
 msgstr "الحساب مقفل بسبب محاولات تسجيل دخول فاشلة كثيرة"
 
-#: backend/api/auth.py:374
+#: backend/api/auth.py:391
 msgid ""
 "Multi-factor authentication is required for this account. Please enroll from"
 " your profile page before signing in."
@@ -3512,19 +3548,19 @@ msgstr ""
 "تتطلب عملية تسجيل الدخول إلى هذا الحساب المصادقة متعددة العوامل. يرجى "
 "التسجيل من صفحة ملفك الشخصي قبل تسجيل الدخول."
 
-#: backend/api/auth.py:463
+#: backend/api/auth.py:480
 msgid "Account locked due to too many failed login attempts"
 msgstr "الحساب مقفل بسبب محاولات تسجيل دخول فاشلة كثيرة"
 
-#: backend/api/auth.py:489
+#: backend/api/auth.py:506
 msgid "Invalid or missing refresh token"
 msgstr "رمز التجديد غير صالح أو مفقود"
 
-#: backend/api/auth.py:599 backend/api/auth.py:647
+#: backend/api/auth.py:616 backend/api/auth.py:664
 msgid "Multi-tenancy is not enabled."
 msgstr "لم يتم تمكين متعددة المستخدمين."
 
-#: backend/api/auth.py:720
+#: backend/api/auth.py:737
 msgid "Logout successful"
 msgstr "تسجيل الخروج ناجح"
 
@@ -3589,31 +3625,31 @@ msgstr "تم ترتيب الأمر لتحديث نظام التشغیع للخا
 msgid "Failed to queue OS upgrade command"
 msgstr "فشل في ترتيب أمر تحديث نظام التشغيل في قائمة الانتظار"
 
-#: backend/api/updates/query_routes.py:102
+#: backend/api/updates/query_routes.py:103
 #, python-format
 msgid "Failed to get update summary: %s"
 msgstr "فشل في الحصول على ملخص التحديث: %s"
 
-#: backend/api/updates/query_routes.py:198
+#: backend/api/updates/query_routes.py:199
 #, python-format
 msgid "Failed to get host updates: %s"
 msgstr "فشل في الحصول على تحديثات المضيف: %s"
 
-#: backend/api/updates/query_routes.py:299
+#: backend/api/updates/query_routes.py:301
 #, python-format
 msgid "Failed to get updates: %s"
 msgstr "فشل في الحصول على التحديثات: %s"
 
-#: backend/api/updates/query_routes.py:319
+#: backend/api/updates/query_routes.py:321
 #, python-format
 msgid "Failed to get update results: %s"
 msgstr "فشل في الحصول على نتائج التحديث: %s"
 
-#: backend/api/updates/execution_routes.py:57
+#: backend/api/updates/execution_routes.py:58
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr " رفض الوصول: يتطلب دور APPLY_SOFTWARE_UPDATE"
 
-#: backend/api/updates/execution_routes.py:118
+#: backend/api/updates/execution_routes.py:119
 msgid ""
 "This is an image-mode host; update the OS image instead of applying package "
 "updates."
@@ -3621,30 +3657,30 @@ msgstr ""
 "هذا هو مضيف يعمل في وضع الصورة؛ قم بتحديث صورة نظام التشغيل بدلاً من تطبيق "
 "تحديثات الحزم."
 
-#: backend/api/updates/execution_routes.py:134
+#: backend/api/updates/execution_routes.py:135
 msgid "No matching updates found for specified packages"
 msgstr "لم يتم العثور على تحديثات مطابقة للحزم المحددة"
 
-#: backend/api/updates/execution_routes.py:220
+#: backend/api/updates/execution_routes.py:221
 msgid "Update execution started"
 msgstr "بدأ تنفيذ التحديث"
 
-#: backend/api/updates/execution_routes.py:229
+#: backend/api/updates/execution_routes.py:230
 #, python-format
 msgid "Failed to send command: %s"
 msgstr "فشل في إرسال الأمر: %s"
 
-#: backend/api/updates/execution_routes.py:237
+#: backend/api/updates/execution_routes.py:238
 #, python-format
 msgid "Failed to send update command: %s"
 msgstr "فشل في إرسال أمر التحديث: %s"
 
-#: backend/api/updates/execution_routes.py:250
+#: backend/api/updates/execution_routes.py:251
 #, python-format
 msgid "Failed to execute updates: %s"
 msgstr "فشل في تنفيذ التحديثات: %s"
 
-#: backend/api/updates/execution_routes.py:305
+#: backend/api/updates/execution_routes.py:306
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "فشل في الحصول على سجل التنفيذ: %s"
@@ -3885,7 +3921,7 @@ msgstr "تم حذف الملف التعريفي"
 msgid "Assignment removed"
 msgstr "تم إزالة التعيين"
 
-#: backend/api/host_approval.py:54
+#: backend/api/host_approval.py:54 backend/api/host_approval.py:410
 msgid "Permission denied: APPROVE_HOST_REGISTRATION role required"
 msgstr " رفض الوصول: يتطلب دور APPROVE_HOST_REGISTRATION"
 
@@ -3893,11 +3929,11 @@ msgstr " رفض الوصول: يتطلب دور APPROVE_HOST_REGISTRATION"
 msgid "Host is not in pending status"
 msgstr "المضيف ليس في حالة انتظار"
 
-#: backend/api/host_approval.py:433
+#: backend/api/host_approval.py:475
 msgid "OS version update requested"
 msgstr "تم طلب تحديث إصدار نظام التشغيل"
 
-#: backend/api/host_approval.py:478
+#: backend/api/host_approval.py:520
 msgid "Updates check requested"
 msgstr "تم طلب فحص التحديثات"
 
@@ -4036,80 +4072,80 @@ msgid ""
 msgstr ""
 " kích hoạt ملف الشخصية الترقية '%(profile_name)s' ضد %(host_count)d مستضيءًا"
 
-#: backend/api/agent.py:70
+#: backend/api/agent.py:98
 msgid "Rate limit exceeded"
 msgstr "تم تجاوز حد المعدل"
 
-#: backend/api/agent.py:132
+#: backend/api/agent.py:161
 #, python-format
 msgid "Agent WebSocket authentication failed from %s"
 msgstr "فشل التحقق من هوية WebSocket للوكيل من %s"
 
-#: backend/api/agent.py:142
+#: backend/api/agent.py:171
 #, python-format
 msgid "Authentication failed: %s"
 msgstr "فشل في المصادقة: %s"
 
-#: backend/api/agent.py:158
+#: backend/api/agent.py:187
 #, python-format
 msgid "Agent WebSocket connection attempted without token from %s"
 msgstr "تم محاولة إنشاء اتصال WebSocket للوكيل بدون رمز من %s"
 
-#: backend/api/agent.py:167
+#: backend/api/agent.py:196
 msgid "Authentication token required"
 msgstr "مطلوب رمز المصادقة"
 
-#: backend/api/agent.py:262
+#: backend/api/agent.py:300
 msgid "Message failed security validation"
 msgstr "فشلت الرسالة في التحقق الأمني"
 
-#: backend/api/agent.py:291
+#: backend/api/agent.py:332
 msgid "Message must be valid JSON"
 msgstr "يجب أن تكون الرسالة بتنسيق JSON صحيح"
 
-#: backend/api/agent.py:527
+#: backend/api/agent.py:641
 msgid "Agent message validation failed: missing hostname and host_id"
 msgstr "فشل التحقق من رسائل الوكيل: مفقود اسم المضيف و host_id"
 
-#: backend/api/agent.py:546
+#: backend/api/agent.py:660
 #, python-brace-format
 msgid "Agent message from unregistered host: {hostname}"
 msgstr "رسالة من الوكيل من مضيف غير مسجل: {hostname}"
 
-#: backend/api/agent.py:563
+#: backend/api/agent.py:677
 #, python-brace-format
 msgid "Agent message from unapproved host: {hostname}"
 msgstr "رسالة من الوكيل من مضيف غير معتمد: {hostname}"
 
-#: backend/api/agent.py:595
+#: backend/api/agent.py:709
 msgid "Message must include hostname or host_id for host validation"
 msgstr "يجب أن تتضمن الرسالة اسم المضيف أو ID المضيف لتأكيد المضيف"
 
-#: backend/api/agent.py:613
+#: backend/api/agent.py:727
 msgid "Host ID no longer valid - please re-register"
 msgstr "رقم المضيف غير صالح الآن - الرجاء إعادة التسجيل"
 
-#: backend/api/agent.py:625
+#: backend/api/agent.py:739
 msgid "Host ID and hostname mismatch - please re-register"
 msgstr "لا يتطابق رقم المضيف مع اسمه؛ الرجاء إعادة التسجيل"
 
-#: backend/api/agent.py:642
+#: backend/api/agent.py:756
 msgid "Host must register before sending inventory data"
 msgstr "يجب على المضيف التسجيل قبل إرسال بيانات المخزون"
 
-#: backend/api/agent.py:713
+#: backend/api/agent.py:833
 msgid "Missing or invalid authorization header"
 msgstr "لا يوجد رأس التحقق أو رأسه غير صالح"
 
-#: backend/api/agent.py:738
+#: backend/api/agent.py:858
 msgid "Invalid host authentication"
 msgstr "التحقق من المضيف غير صحيح"
 
-#: backend/api/agent.py:779 backend/api/packages.py:498
+#: backend/api/agent.py:899 backend/api/packages.py:498
 msgid "Installation completion recorded"
 msgstr "تم تسجيل انتهاء التثبيت"
 
-#: backend/api/agent.py:785 backend/api/error_constants.py:193
+#: backend/api/agent.py:905 backend/api/error_constants.py:193
 msgid "Internal server error"
 msgstr "خطأ خادم داخلي"
 
@@ -4145,7 +4181,7 @@ msgstr "تم طلب جمع التشخيص"
 msgid "Diagnostic report deleted"
 msgstr "تم حذف التقرير التشخيصي"
 
-#: backend/api/diagnostics.py:487
+#: backend/api/diagnostics.py:489
 msgid "Missing collection_id"
 msgstr "لم يتم تحديد معرف مجموعة البيانات (collection_id)"
 
@@ -4249,19 +4285,19 @@ msgstr ""
 msgid "Antivirus deployment failed for all hosts"
 msgstr "فشل نشر برنامج مكافحة الفيروسات على جميع المضيفين"
 
-#: backend/api/antivirus_status.py:394
+#: backend/api/antivirus_status.py:395
 msgid "Antivirus enable command sent successfully"
 msgstr " lệnh تم إرسالها بنجاح لتمكين مضاد الفيروسات"
 
-#: backend/api/antivirus_status.py:461
+#: backend/api/antivirus_status.py:463
 msgid "Antivirus disable command sent successfully"
 msgstr " lệnh تعطيل مضاد الفيروسات تم إرسالها بنجاح"
 
-#: backend/api/antivirus_status.py:539
+#: backend/api/antivirus_status.py:541
 msgid "Antivirus remove command sent successfully"
 msgstr " lệnh إزالة برنامج مكافحة الفيروسات تم إرسالها بنجاح"
 
-#: backend/api/antivirus_status.py:608
+#: backend/api/antivirus_status.py:610
 #, python-format
 msgid "Failed to retrieve antivirus coverage: %s"
 msgstr "فشل في استرداد نطاق مضاد الفيروسات: %s"
@@ -4310,11 +4346,11 @@ msgstr "يجب تشغيل المضيف في وضع الخصائص لتحكم ا�
 msgid "Service {} requested for {} services"
 msgstr "تم طلب خدمة {} لـ {} خدمات"
 
-#: backend/api/asset_discovery.py:127
+#: backend/api/asset_discovery.py:128
 msgid "Unsupported retention period"
 msgstr "فترة احتفاظ غير مدعومة"
 
-#: backend/api/asset_discovery.py:162
+#: backend/api/asset_discovery.py:163
 msgid "Invalid device id"
 msgstr "معرّف الجهاز غير صالح"
 
@@ -4432,16 +4468,16 @@ msgstr "يحتاج نطاق الوسم إلى معرف وسم (tag_id)."
 msgid "A window needs at least one scope (all, host, or tag)."
 msgstr "يجب أن يكون للنافذة على الأقل نطاق واحد (all، host، أو tag)."
 
-#: backend/api/maintenance_windows.py:304
-#: backend/api/maintenance_windows.py:327
+#: backend/api/maintenance_windows.py:305
+#: backend/api/maintenance_windows.py:329
 msgid "Maintenance window not found."
 msgstr "لم يتم العثور على نافذة الصيانة المحددة."
 
-#: backend/api/maintenance_windows.py:346
+#: backend/api/maintenance_windows.py:349
 msgid "An override reason is required."
 msgstr "سبب التعديل مطلوب."
 
-#: backend/api/maintenance_windows.py:350
+#: backend/api/maintenance_windows.py:353
 msgid "Override duration must be positive."
 msgstr "يجب أن تكون فترة التعديل إيجابية."
 
@@ -4842,37 +4878,37 @@ msgstr "تم ترحيل تنفيذ السكربت للتسليم"
 msgid "Failed to execute script"
 msgstr "فشل في تنفيذ السكريبت"
 
-#: backend/api/scripts/routes_executions.py:319
+#: backend/api/scripts/routes_executions.py:322
 msgid "Failed to fetch script executions"
 msgstr "فشل في استلام تنفيذات السكريبت"
 
-#: backend/api/scripts/routes_executions.py:348
-#: backend/api/scripts/routes_executions.py:426
+#: backend/api/scripts/routes_executions.py:351
+#: backend/api/scripts/routes_executions.py:429
 msgid "Permission denied: DELETE_SCRIPT_EXECUTION role required"
 msgstr " رفض الوصول: يتطلب دور DELETE_SCRIPT_EXECUTION"
 
-#: backend/api/scripts/routes_executions.py:360
-#: backend/api/scripts/routes_executions.py:495
+#: backend/api/scripts/routes_executions.py:363
+#: backend/api/scripts/routes_executions.py:498
 msgid "Script execution not found"
 msgstr "لم يتم العثور على تنفيذ السكربت"
 
-#: backend/api/scripts/routes_executions.py:388
+#: backend/api/scripts/routes_executions.py:391
 msgid "Script execution deleted successfully"
 msgstr "تم حذف تنفيذ سكربت بنجاح"
 
-#: backend/api/scripts/routes_executions.py:397
+#: backend/api/scripts/routes_executions.py:400
 msgid "Failed to delete script execution"
 msgstr "فشل في حذف تنفيذ السكريبت"
 
-#: backend/api/scripts/routes_executions.py:466
+#: backend/api/scripts/routes_executions.py:469
 msgid "Script executions deleted successfully"
 msgstr "تم حذف تنفيذات السكربت بنجاح"
 
-#: backend/api/scripts/routes_executions.py:473
+#: backend/api/scripts/routes_executions.py:476
 msgid "Failed to delete script executions"
 msgstr "فشل في حذف تنفيذات السكريبت"
 
-#: backend/api/scripts/routes_executions.py:530
+#: backend/api/scripts/routes_executions.py:533
 msgid "Failed to fetch script execution"
 msgstr "فشل في استلام تنفيذ السكريبت"
 
@@ -4928,37 +4964,42 @@ msgstr "فشل في حذف نموذج السكريبت المحفوظ"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "فشل في استرداد حالة برنامج مكافحة الفيروسات التجاري: %s"
 
-#: backend/websocket/message_router.py:309
+#: backend/api/machines.py:170
+#, python-format
+msgid "Machine link decided for host %s"
+msgstr "تم تحديد رابط الآلة للمضيف %s"
+
+#: backend/websocket/message_router.py:240
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "نوع الرسالة غير المعروفة في الصف: %s"
 
-#: backend/websocket/message_router.py:314
+#: backend/websocket/message_router.py:245
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "خطأ في توجيه نوع الرسالة %(message_type)s: %(error)s"
 
-#: backend/websocket/queue_maintenance.py:72
+#: backend/websocket/queue_maintenance.py:70
 #, python-format
 msgid "Cleaned up %d old messages"
 msgstr "قمت بتنظيف %d رسالة قديمة"
 
-#: backend/websocket/queue_maintenance.py:80
+#: backend/websocket/queue_maintenance.py:78
 #, python-format
 msgid "Failed to cleanup old messages: %s"
 msgstr "فشل في تنظيف الرسائل القديمة: %s"
 
-#: backend/websocket/queue_maintenance.py:116
+#: backend/websocket/queue_maintenance.py:114
 #, python-format
 msgid "Deleted %(count)d messages for host %(host_id)s"
 msgstr "حذف %(count)d رسالة لمستضياف %(host_id)s"
 
-#: backend/websocket/queue_maintenance.py:125
+#: backend/websocket/queue_maintenance.py:123
 #, python-format
 msgid "Failed to delete messages for host %(host_id)s: %(error)s"
 msgstr "فشل حذف الرسائل لمستضياف %(host_id)s: %(error)s"
 
-#: backend/websocket/queue_maintenance.py:191
+#: backend/websocket/queue_maintenance.py:226
 #, python-format
 msgid ""
 "Marked %(count)d old messages as expired (older than %(timeout)d minutes)"
@@ -4966,17 +5007,17 @@ msgstr ""
 "وضع علامة على %(count)d رسالة قديمة كمنتهية الصلاحية (أقدم من %(timeout)d "
 "دقيقة)"
 
-#: backend/websocket/queue_maintenance.py:201
+#: backend/websocket/queue_maintenance.py:236
 #, python-format
 msgid "Failed to expire old messages: %s"
 msgstr "فشل في إلغاء صلاحية الرسائل القديمة: %s"
 
-#: backend/websocket/queue_maintenance.py:249
+#: backend/websocket/queue_maintenance.py:284
 #, python-format
 msgid "Deleted %d failed/expired messages"
 msgstr "حُذِفَت %d رسائل فاشلة/منتهية الصلاحية"
 
-#: backend/websocket/queue_maintenance.py:256
+#: backend/websocket/queue_maintenance.py:291
 #, python-format
 msgid "Failed to delete failed messages: %s"
 msgstr "فشل في حذف الرسائل الفاشلة: %s"
@@ -4986,12 +5027,12 @@ msgstr "فشل في حذف الرسائل الفاشلة: %s"
 msgid "Mock connection: would send message %s"
 msgstr "اتصال محاكي: سيتم إرسال الرسالة %s"
 
-#: backend/websocket/inbound_processor.py:122
+#: backend/websocket/inbound_processor.py:130
 #, python-format
 msgid "Host %(hostname)s not found for message %(message_id)s, deleting"
 msgstr "مستضياف '%(hostname)s' غير موجود للرسالة %(message_id)s، سيتم حذفها"
 
-#: backend/websocket/inbound_processor.py:133
+#: backend/websocket/inbound_processor.py:141
 #, python-format
 msgid ""
 "Host %(hostname)s not approved (status: %(status)s) for message "
@@ -5000,7 +5041,7 @@ msgstr ""
 "الخادم %(hostname)s غير مقبول (الحالة: %(status)s) للرسالة %(message_id)s، "
 "سيتم حذفها"
 
-#: backend/websocket/inbound_processor.py:150
+#: backend/websocket/inbound_processor.py:158
 #, python-format
 msgid ""
 "Processing NULL host_id message for approved host %(hostname)s (ID: "
@@ -5008,7 +5049,7 @@ msgid ""
 msgstr ""
 "معالجة رسالة host_id NULL للمستضيء المعتمد %(hostname)s (ID: %(host_id)s)"
 
-#: backend/websocket/inbound_processor.py:267
+#: backend/websocket/inbound_processor.py:382
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
@@ -5018,7 +5059,7 @@ msgstr ""
 "المضيف %(host_id)s غير موجود في هذه قاعدة البيانات؛ تأجيل %(count)d رسالة "
 "معلقة للإعادة المحاولة (بدون حذف) -- قد يكون هناك تسجيل جارٍ أو مضيف محذوف"
 
-#: backend/websocket/inbound_processor.py:284
+#: backend/websocket/inbound_processor.py:407
 #, python-format
 msgid ""
 "Host %(host_id)s (FQDN: %(fqdn)s) no longer approved (status: %(status)s), "
@@ -5027,42 +5068,37 @@ msgstr ""
 "مستضياف %(host_id)s (FQDN: %(fqdn)s) لم يعد مقبولاً (الحالة: %(status)s)، "
 "سيتم حذف جميع رسائله من الطابور"
 
-#: backend/websocket/inbound_processor.py:294
+#: backend/websocket/inbound_processor.py:413
 #, python-format
 msgid "Deleted %(count)d messages for unapproved host %(host_id)s"
 msgstr "حذف %(count)d رسالة لمستضياف غير مقبول %(host_id)s"
 
-#: backend/websocket/inbound_processor.py:301
-#, python-format
-msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"
-msgstr "معالجة الرسائل للمستضيء المعتمد %(host_id)s (FQDN: %(fqdn)s)"
-
-#: backend/websocket/inbound_processor.py:326
+#: backend/websocket/inbound_processor.py:531
 #, python-format
 msgid "Processing message with NULL host_id: %s"
 msgstr "معالجة الرسائل مع host_id NULL: %s"
 
-#: backend/websocket/inbound_processor.py:337
+#: backend/websocket/inbound_processor.py:542
 #, python-format
 msgid "Processing SYSTEM_INFO registration message %s"
 msgstr "معالجة رسالة التسجيل SYSTEM_INFO %s"
 
-#: backend/websocket/inbound_processor.py:360
+#: backend/websocket/inbound_processor.py:565
 #, python-format
 msgid "Message %s missing hostname and host_id, deleting"
 msgstr "رسالة %s مفقودة أو بدون اسم المضيف و ID المضيف، سيتم حذفها"
 
-#: backend/websocket/inbound_processor.py:378
+#: backend/websocket/inbound_processor.py:581
 #, python-format
 msgid "Error processing NULL host_id message %(message_id)s: %(error)s"
 msgstr "خطأ في معالجة رسالة host_id NULL %(message_id)s: %(error)s"
 
-#: backend/websocket/inbound_processor.py:460
+#: backend/websocket/inbound_processor.py:668
 #, python-format
 msgid "Could not mark message %s as processing"
 msgstr "ไม่ يمكن وضع علامة على الرسالة %s كجاري المعالجة"
 
-#: backend/websocket/inbound_processor.py:488
+#: backend/websocket/inbound_processor.py:689
 #, python-format
 msgid ""
 "Processing queued message: %(message_id)s (type: %(message_type)s, host: "
@@ -5071,29 +5107,29 @@ msgstr ""
 "معالجة الرسالة الموقوفة للتنفيذ: %(message_id)s (نوع: %(message_type)s، "
 "المستضيء: %(host)s)"
 
-#: backend/websocket/inbound_processor.py:521
+#: backend/websocket/inbound_processor.py:718
 #, python-format
 msgid ""
 "Successfully processed and completed message: %(message_id)s for host "
 "%(host)s"
 msgstr "تم معالجة الرسالة بنجاح وإكمالها: %(message_id)s للخادم: %(host)s"
 
-#: backend/websocket/inbound_processor.py:539
+#: backend/websocket/inbound_processor.py:728
 #, python-format
 msgid "Failed to process message %s: unknown message type"
 msgstr "فشل في معالجة الرسالة %s: نوع الرسالة غير معرف"
 
-#: backend/websocket/inbound_processor.py:560
+#: backend/websocket/inbound_processor.py:749
 #, python-format
 msgid "Error processing message %(message_id)s for host %(host)s: %(error)s"
 msgstr "خطأ في معالجة الرسالة %(message_id)s لمستضياف %(host)s: %(error)s"
 
-#: backend/websocket/inbound_processor.py:590
+#: backend/websocket/inbound_processor.py:779
 #, python-format
 msgid "Could not mark SYSTEM_INFO message %s as processing"
 msgstr "ไม่ يمكن وضع علامة على رسالة SYSTEM_INFO %s كجاري المعالجة"
 
-#: backend/websocket/inbound_processor.py:622
+#: backend/websocket/inbound_processor.py:811
 #, python-format
 msgid "Error processing SYSTEM_INFO message %(message_id)s: %(error)s"
 msgstr "خطأ في معالجة رسالة SYSTEM_INFO %(message_id)s: %(error)s"
@@ -5103,12 +5139,12 @@ msgstr "خطأ في معالجة رسالة SYSTEM_INFO %(message_id)s: %(error)
 msgid "Failed to get failed messages: %s"
 msgstr "فشل في الحصول على الرسائل الفاشلة: %s"
 
-#: backend/websocket/queue_operations.py:105
+#: backend/websocket/queue_operations.py:113
 #, python-brace-format
 msgid "Host ID {host_id} not found"
 msgstr "لم يتم العثور على رقم المضيف {host_id}"
 
-#: backend/websocket/queue_operations.py:317
+#: backend/websocket/queue_operations.py:270
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -5118,44 +5154,44 @@ msgstr ""
 "الاتجاه=%(direction)s, مستضياف=%(host_id)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:499
+#: backend/websocket/queue_operations.py:470
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "أعلنت الرسالة بأنها تحت التجهيز: %s"
 
-#: backend/websocket/queue_operations.py:506
+#: backend/websocket/queue_operations.py:477
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كجارية: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:541
+#: backend/websocket/queue_operations.py:520
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "أعلنت الرسالة بأنها مكتملة: %s"
 
-#: backend/websocket/queue_operations.py:548
+#: backend/websocket/queue_operations.py:527
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كمنجزة: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:586
+#: backend/websocket/queue_operations.py:565
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "تم تعليم الرسالة كمرسلة (في انتظار التأكيد): %s"
 
-#: backend/websocket/queue_operations.py:593
+#: backend/websocket/queue_operations.py:572
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كمرسلة: %(error)s"
 
-#: backend/websocket/queue_operations.py:622
+#: backend/websocket/queue_operations.py:601
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "لا يمكن تأكيد رسالة غير معروفة: %s"
 
-#: backend/websocket/queue_operations.py:629
+#: backend/websocket/queue_operations.py:608
 #, python-format
 msgid ""
 "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
@@ -5163,32 +5199,32 @@ msgstr ""
 "الرسالة %(message_id)s ليست في حالة المرسل، تم تخطي التأكيد (حاليًا "
 "%(status)s)"
 
-#: backend/websocket/queue_operations.py:642
+#: backend/websocket/queue_operations.py:621
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "تم تأكيد الرسالة بواسطة الوكيل: %s"
 
-#: backend/websocket/queue_operations.py:649
+#: backend/websocket/queue_operations.py:628
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كمقبولة: %(error)s"
 
-#: backend/websocket/queue_operations.py:733
+#: backend/websocket/queue_operations.py:692
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "لم يتم استلام أي تأكيد خلال %d ثانية"
 
-#: backend/websocket/queue_operations.py:745
+#: backend/websocket/queue_operations.py:704
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "تمت جدولة %d رسالة غير مؤكدة لإعادة المحاولة"
 
-#: backend/websocket/queue_operations.py:753
+#: backend/websocket/queue_operations.py:712
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "خطأ في إعادة محاولة الرسائل غير المؤكدة: %s"
 
-#: backend/websocket/queue_operations.py:808
+#: backend/websocket/queue_operations.py:772
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -5197,7 +5233,7 @@ msgstr ""
 "رسالة %(message_id)s فشلت في المحاولة (%(attempt)d/%(max_retries)d)، مجدولة "
 "لإعادة المحاولة بعد %(backoff)d ثانية"
 
-#: backend/websocket/queue_operations.py:824
+#: backend/websocket/queue_operations.py:788
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
@@ -5205,30 +5241,30 @@ msgid ""
 msgstr ""
 "رسالة %(message_id)s فشلت بشكل دائم بعد %(attempts)d محاولة: %(error)s"
 
-#: backend/websocket/queue_operations.py:842
+#: backend/websocket/queue_operations.py:806
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كفاشلة: %(error)s"
 
-#: backend/websocket/queue_operations.py:864
+#: backend/websocket/queue_operations.py:828
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "فشل في فك ترميز الرسالة %(message_id)s: %(error)s"
 
-#: backend/websocket/message_processor.py:67
+#: backend/websocket/message_processor.py:62
 msgid "Message processor started"
 msgstr "بدأ معالج الرسائل"
 
-#: backend/websocket/message_processor.py:88
+#: backend/websocket/message_processor.py:71
 #, python-format
 msgid "Error in message processing loop: %s"
 msgstr "خطأ في دورة معالجة الرسائل: %s"
 
-#: backend/websocket/message_processor.py:107
+#: backend/websocket/message_processor.py:81
 msgid "Message processor cancelled"
 msgstr "تم إلغاء معالج الرسائل"
 
-#: backend/websocket/message_processor.py:111
+#: backend/websocket/message_processor.py:85
 msgid "Message processor stopped"
 msgstr "تم إيقاف معالج الرسائل"
 
@@ -5236,7 +5272,7 @@ msgstr "تم إيقاف معالج الرسائل"
 msgid "Server message queue manager initialized"
 msgstr "تم تمهيد مدير صفوف الرسائل للخادم بنجاح"
 
-#: backend/startup/rate_limit_middleware.py:98
+#: backend/startup/rate_limit_middleware.py:100
 msgid "Rate limit exceeded. Please retry later."
 msgstr " تم تجاوز حد التكرار. يرجى المحاولة لاحقاً."
 
@@ -5286,15 +5322,15 @@ msgstr "لم يتم العثور على الاستثناء"
 msgid "This exclusion was already revoked"
 msgstr "تم إلغاء هذا الاستثناء بالفعل"
 
-#: backend/services/malware_rulesets.py:158
+#: backend/services/malware_rulesets.py:169
 msgid "A rule set name may use only a-z, 0-9 and hyphens"
 msgstr "لا يمكن أن يستخدم اسم مجموعة القواعد إلا a-z, 0-9 والشرطات"
 
-#: backend/services/malware_rulesets.py:162
+#: backend/services/malware_rulesets.py:173
 msgid "That name belongs to a curated rule set"
 msgstr "هذا الاسم يخص مجموعة قواعد منسّقة"
 
-#: backend/services/malware_rulesets.py:166
+#: backend/services/malware_rulesets.py:177
 msgid "None of these rules can run under ClamAV"
 msgstr "لا يمكن تشغيل أي من هذه القواعد في ClamAV"
 
@@ -5411,17 +5447,17 @@ msgstr "وجود القرص لكن لا يوجد قرص قابل للقراءة 
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "لا يوجد نظام ملفات ISO على الجهاز (fstype=%s)"
 
-#: backend/services/audit_service.py:194
+#: backend/services/audit_service.py:198
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "تم إنشاء {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:242
+#: backend/services/audit_service.py:246
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "تم تحديث {entity_type} '\\u0027{entity_name}\\u0027"
 
-#: backend/services/audit_service.py:290
+#: backend/services/audit_service.py:294
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "حُذِفَت الكيان من نوع ‘{entity_type}’ باسم ‘{entity_name}’"
@@ -5498,24 +5534,9 @@ msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "ثغرات macOS حسب إصدار نظام التشغيل، من بيانات NVD عن الإصدارات المتأثرة"
 
-msgid "The single sign-on session has expired. Sign in again."
-msgstr "انتهت صلاحية جلسة تسجيل الدخول الموحد. سجّل الدخول مرة أخرى."
-
-#: backend/api/message_handlers_core.py
-msgid "Agent session refused: it did not prove it is this host"
-msgstr "تم رفض جلسة الوكيل: لم تثبت أنها هذا المضيف"
-
-#: backend/api/message_handlers_core.py
-msgid ""
-"This agent did not prove it is this host. If the host was reinstalled, "
-"remove it from SysManage and approve its new registration."
-msgstr ""
-"لم يثبت هذا الوكيل أنه هذا المضيف. إذا تمت إعادة تثبيت المضيف، فأزله من "
-"SysManage ووافق على تسجيله الجديد."
-
-#: backend/api/message_handlers.py
-msgid "This session cannot acknowledge another host's message"
-msgstr "لا يمكن لهذه الجلسة الإقرار برسالة مضيف آخر"
+#, python-format
+#~ msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"
+#~ msgstr "معالجة الرسائل للمستضيء المعتمد %(host_id)s (FQDN: %(fqdn)s)"
 
 #~ msgid "Email service is disabled. Enable it in the configuration file."
 #~ msgstr "خدمة البريد الإلكتروني معطلة. قم بتمكينها في ملف التكوين."

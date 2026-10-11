@@ -15,9 +15,6 @@ from backend.api import (
     access_groups,
     advisor,
     advisory_actions,
-    asset_discovery,
-    malware,
-    posture,
     agent,
     agent_poll,
     airgap_agent_mirrors,
@@ -31,6 +28,8 @@ from backend.api import (
     antivirus_defaults,
     antivirus_status,
     api_keys,
+    asset_discovery,
+    asset_tags,
     audit_log,
     auth,
     auth_mfa,
@@ -74,13 +73,16 @@ from backend.api import (
     license_management,
     lifecycle_actions,
     logging_settings,
+    machines,
     maintenance_windows,
+    malware,
     openbao,
     opentelemetry,
     package_compliance,
     packages,
     password_reset,
     plugin_bundle,
+    posture,
     processes,
     profile,
     provisioning_bundle,
@@ -428,6 +430,10 @@ def register_routes(app: FastAPI):
     logger.debug("Adding posture router (Phase 21.4 S3)")
     _include_versioned(app, posture.router, tags=["advisor"])
     logger.debug("Advisor router added")
+
+    logger.debug("Adding machines router (Phase 23.2 S2)")
+    _include_versioned(app, machines.router, tags=["machines"])
+    _include_versioned(app, asset_tags.router, tags=["machines"])
 
     logger.debug("Adding asset-discovery router (Phase 21.6 S2)")
     _include_versioned(app, asset_discovery.router, tags=["asset-discovery"])

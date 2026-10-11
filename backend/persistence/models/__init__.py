@@ -33,6 +33,7 @@ from .grafana_integration import *
 from .graylog_attachment import *
 from .graylog_integration import *
 from .hardware import *
+from .machine import *
 from .host_certificate import *
 from .host_role import *
 from .logging_config import *

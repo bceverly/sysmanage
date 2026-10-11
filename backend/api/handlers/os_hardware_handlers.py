@@ -362,6 +362,22 @@ async def handle_os_version_update(  # NOSONAR
         }
 
 
+def _record_machine_identity(db: Session, host_id, raw) -> None:
+    """Record the reported hardware identity and link the host's machine."""
+    from backend.services import machine_identity  # noqa: PLC0415
+
+    try:
+        host = db.get(Host, host_id)
+        if host is not None:
+            machine_identity.record_identity(db, host, raw)
+            db.commit()
+    except Exception as exc:  # pylint: disable=broad-except
+        db.rollback()
+        logger.error(
+            "Could not record the hardware identity for host %s: %s", host_id, exc
+        )
+
+
 async def handle_hardware_update(  # NOSONAR
     db: Session, connection, message_data: dict
 ):
@@ -459,6 +475,13 @@ async def handle_hardware_update(  # NOSONAR
                 "Hardware fields updated for host %s: %s",
                 connection.host_id,
                 list(hardware_updates.keys()),
+            )
+
+        # Phase 23.2: which machine this host runs on.  Its own guard -- a bad
+        # identity must not cost the rest of the hardware update.
+        if "hardware_identity" in message_data:
+            _record_machine_identity(
+                db, connection.host_id, message_data.get("hardware_identity")
             )
 
         # Handle network interfaces

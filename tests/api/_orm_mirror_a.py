@@ -176,6 +176,16 @@ class Host(TestBase):
     )
     # Phase 18.1 S4 -- federation site placement (soft ref; no FK)
     site_id = Column(GUID(), nullable=True)
+    # Phase 23.2 -- machine link (soft ref) + the reported hardware identity
+    machine_id = Column(GUID(), nullable=True)
+    hw_match_key = Column(String(36), nullable=True)
+    hw_system_uuid = Column(String(36), nullable=True)
+    hw_system_serial = Column(String(255), nullable=True)
+    hw_board_serial = Column(String(255), nullable=True)
+    hw_identity_status = Column(Text, nullable=True)
+    hw_identity_updated_at = Column(DateTime, nullable=True)
+    machine_conflict_id = Column(GUID(), nullable=True)
+    machine_conflict_reason = Column(String(32), nullable=True)
 
     # Phase 12.7: agent-reported public IP + GeoLite2 resolution
     public_ip = Column(String(45), nullable=True)

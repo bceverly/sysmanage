@@ -794,3 +794,36 @@ class AirgapAgentChannelMirror(TestBase):
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=True)
+
+
+class Machine(TestBase):
+    """Phase 23.2 -- the hardware a host runs on; the asset tag lives here."""
+
+    __tablename__ = "machine"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    match_key = Column(String(36), nullable=False)
+    system_uuid = Column(String(36), nullable=True)
+    system_serial = Column(String(255), nullable=True)
+    board_serial = Column(String(255), nullable=True)
+    vendor = Column(String(255), nullable=True)
+    model = Column(String(255), nullable=True)
+    is_virtual = Column(Boolean, nullable=False, default=False)
+    asset_tag = Column(String(128), nullable=True, unique=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+
+class AssetTagScheme(TestBase):
+    """Phase 23.2 S3 -- the tenant's asset-tag naming scheme (one row)."""
+
+    __tablename__ = "asset_tag_scheme"
+    id = Column(GUID(), primary_key=True)
+    mode = Column(String(16), nullable=False, default="builder")
+    prefix = Column(String(32), nullable=False, default="")
+    separator = Column(String(1), nullable=False, default="-")
+    digits = Column(Integer, nullable=False, default=6)
+    suffix = Column(String(32), nullable=False, default="")
+    pattern = Column(String(256), nullable=False, default="")
+    enforce = Column(Boolean, nullable=False, default=False)
+    updated_at = Column(DateTime, nullable=True)
+    updated_by = Column(String(255), nullable=True)

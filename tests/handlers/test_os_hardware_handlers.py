@@ -403,3 +403,32 @@ class TestHandleHardwareUpdate:
         )
         assert result["error_type"] == "hardware_update_failed"
         db.rollback.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_hardware_identity_is_recorded_for_the_host(self):
+        # Phase 23.2: the report's identity goes to the machine-link service.
+        db = MagicMock()
+        host = MagicMock()
+        db.get.return_value = host
+        identity = {"match_key": "k", "status": {}}
+        with patch("backend.services.machine_identity.record_identity") as record:
+            result = await handle_hardware_update(
+                db,
+                _connection(),
+                {"cpu_vendor": "Intel", "hardware_identity": identity},
+            )
+        assert result["message_type"] == "success"
+        record.assert_called_once_with(db, host, identity)
+
+    @pytest.mark.asyncio
+    async def test_a_broken_identity_does_not_cost_the_hardware_update(self):
+        db = MagicMock()
+        with patch(
+            "backend.services.machine_identity.record_identity",
+            side_effect=RuntimeError("bad identity"),
+        ):
+            result = await handle_hardware_update(
+                db, _connection(), {"cpu_vendor": "Intel", "hardware_identity": {}}
+            )
+        assert result["message_type"] == "success"
+        db.rollback.assert_called_once()

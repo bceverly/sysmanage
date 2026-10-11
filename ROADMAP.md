@@ -13266,6 +13266,35 @@ same asset tag." The tag belongs to the PHYSICAL MACHINE; a host is one OS
 on it. Nothing collects a hardware identity today (only 18.2's bare-metal
 discovery records manufacturer / model / serial, keyed by MAC).
 
+**S0 spike DONE 2026-10-11 -- real readings, one per OS family** (t14 Linux,
+freebsd, t480 OpenBSD, NetBSD VM, x13s Windows, MacBook Air):
+Linux `/sys/class/dmi/id/product_uuid` + `product_serial` + `board_serial`
+are mode 0400 root (and `hostnamectl` gives an unprivileged user vendor and
+model only), NetBSD's `machdep.dmi.system-uuid` is root-only too -- so on
+those two the identity needs privileged mode, and an unprivileged agent must
+report "unreadable", never guess. Windows (`Win32_ComputerSystemProduct`),
+FreeBSD (`kenv`, ONE variable per call), OpenBSD (`sysctl hw.uuid`,
+`hw.serialno`) and macOS (`ioreg` `IOPlatformUUID`, Apple's own hardware UUID
+-- no SMBIOS on Apple Silicon) read unprivileged. Byte order: Windows and
+FreeBSD print the SMBIOS-2.6 order (Lenovo's `...-11b2-...`), OpenBSD prints
+the first three fields UNswapped (`4ce15669-7a34-b211-...` is
+`6956e14c-347a-11b2-...`). So: the agent normalizes per OS to the SMBIOS
+order, AND the server matches on an order-insensitive key (a UUID and its
+swapped form are one machine) so an OS we have not measured cannot split a
+machine. NetBSD keys are `machdep.dmi.system-uuid` etc.; serial keys exist
+only when the firmware has them. Recorded fixtures are SCRAMBLED (same
+structure, fake digits) -- real serials of Bryan's machines stay out of the
+public repos.
+
+Slices: S1 agent collector + normalization + per-source status (and the
+`system_info` fact columns) · S2 server machine record (order-insensitive
+key, placeholder and clone conflicts surfaced, host -> machine link) · S3
+naming-scheme engine + settings API · S4 UI (scheme builder, tag on the host
+page, grid column/filter, search, untagged report) · S5 CSV import/export
+with dry run + held tags for machines not yet enrolled (and 18.2 discovery) ·
+S6 docs, screenshots, i18n, and the T480 multi-boot proof (boot it into each
+of its three OSes once).
+
 - [ ] **Hardware identity, collected by every agent, the same from every OS
       on the machine:** the SMBIOS system UUID (Linux
       `/sys/class/dmi/id/product_uuid`, Windows
@@ -13277,6 +13306,19 @@ discovery records manufacturer / model / serial, keyed by MAC).
       A CPU serial is not an option -- x86 removed it after the Pentium III.
       Every source says ran / absent / failed; a host with no readable
       identity is shown as such, never silently unmatched.
+      *S1 (agent) DONE 2026-10-11: `collection/hardware_identity.py` reads
+      all six families (Linux sysfs, Windows CIM via PowerShell -- not the
+      removed wmic --, FreeBSD kenv, OpenBSD/NetBSD sysctl by absolute path,
+      macOS ioreg), normalizes (OpenBSD byte order, case, braces, placeholder
+      UUIDs and "To Be Filled By O.E.M." serials), and reports per source
+      ran / absent / unprivileged / failed / placeholder plus an
+      order-insensitive `match_key`. Run unmodified on all six real machines
+      (user and root). Sent as `hardware_identity` in the hardware report
+      (send-on-change) and fills osquery `system_info` uuid / serials /
+      vendor / model. Scrambled fixtures, 22 tests. Also fixed: agent tests
+      that did not mock the database read AND wrote the real agent DB's run
+      ledger on the machine running them -- an autouse fixture now gives
+      every test an in-memory ledger. Server side (record, display) is S2.*
 - [ ] **Machine record (OSS schema):** hosts that report the same identity
       are one machine; the asset tag lives on the machine, so the T480's three
       OS hosts share one tag, and a reinstalled OS lands on the same machine
@@ -13285,12 +13327,38 @@ discovery records manufacturer / model / serial, keyed by MAC).
       (all-zero / `03000200-...` / "To Be Filled By O.E.M.") makes the admin
       confirm. The hardware identity is NEVER an agent credential (22.0) --
       it is readable by any local user and spoofable.
+      *S2 (server) DONE 2026-10-11: `machine` table + host identity columns
+      (migration `q33machine`, idempotent, downgradable; `host.machine_id` a
+      soft reference), `services/machine_identity.py` and
+      `api/machines.py` (`GET /host/{id}/machine`, `GET
+      /machines/conflicts`, `POST /host/{id}/machine/resolve`, audited,
+      Approve Host Registration role). Rules: physical hardware links
+      automatically (multi-boot, reinstall); a VIRTUAL machine colliding with
+      another host's machine, or the same UUID with a different system serial,
+      is HELD for an admin (`virtual_clone` / `serial_mismatch`) -- "same"
+      links it, "different" gives it its own machine for good; a container
+      reading its parent's hardware is not linked; an unusable identity
+      creates nothing and keeps an existing link. 29 tests + a real-Alembic
+      migration test. The UI for all of this is S4.*
 - [ ] **Naming-scheme settings with a builder, not a regex box:** prefix,
       separator, digit count with zero padding, optional suffix, allowed
       characters -- with a live preview ("GDR-000042"), examples that pass and
       fail, and the next free number suggested. An advanced regex option for
       schemes the builder cannot express. Changing the scheme reports which
       existing tags no longer conform; it never rewrites them.
+      *S3 (engine + API) DONE 2026-10-11: `services/asset_tag_scheme.py`
+      (builder: prefix / separator / 1-12 zero-padded digits / suffix;
+      advanced regex matched with the `regex` module and a 50 ms timeout --
+      `(a|aa)+c` on a long input is refused, not a stalled worker; reason
+      codes, preview, pass/fail examples, next free tag, non-conforming
+      report that never rewrites). One scheme row per TENANT database
+      (`asset_tag_scheme`, migration `q34assettag`, which also seeds the new
+      "Manage Asset Tags" role). `api/asset_tags.py`: GET/PUT scheme, POST
+      draft preview, GET entry-time check, PUT machine tag (set / change /
+      clear; scheme-checked when enforced, unique ignoring case, audited).
+      Found while testing: `digits: 0` was silently defaulted to 6 by an
+      `or` -- fixed, regression-tested. Role names are shown untranslated in
+      the user-roles screen (true of every role, pre-existing).*
 - [ ] **Assigning and finding:** set / change / clear the tag on the
       machine (from any of its hosts' pages) with the scheme checked at entry
       and uniqueness enforced; every change audited. Hosts grid column +
