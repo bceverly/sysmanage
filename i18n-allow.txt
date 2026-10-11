@@ -134,7 +134,7 @@ de,es,fr,it,nl: re:[Aa]ntivirus
 es,fr,it,nl,pt: re:Scripts?
 de,fr,it,nl: re:(Client|Digest|Info)
 de,it,nl,pt: re:(Firewall|Offline)
-de,es,it,nl: re:Hosts
+de,es,it,nl,pt: re:Hosts
 de,fr,nl,pt: re:Threads
 de,es,nl,pt: re:Upstream
 es,it,nl,pt: re:firewall

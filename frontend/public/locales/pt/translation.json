@@ -744,7 +744,7 @@
   },
   "dashboard": {
     "antivirusCoverage": "Antivírus",
-    "hosts": "Servidores",
+    "hosts": "Hosts",
     "openTelemetryCoverage": "OpenTelemetry",
     "rebootRequired": "Reinicialização Necessária",
     "security": "Segurança",
@@ -905,7 +905,7 @@
       "compliance": "Pior conformidade",
       "critical": "CVEs Críticas",
       "high": "Muitos CVEs",
-      "hosts": "Servidores",
+      "hosts": "Hosts",
       "site": "Site"
     },
     "generate": "Gerar relatório",
@@ -2159,7 +2159,7 @@
     "scopeHosts": "Hosts Específicos",
     "scopeTags": "Hosts por tag",
     "scopeType": "Aplica-se a",
-    "selectHosts": "Servidores",
+    "selectHosts": "Hosts",
     "selectTags": "Etiquetas",
     "startTime": "Hora de Inicialização",
     "startsAt": "Inicia em (UTC)",
@@ -2402,7 +2402,7 @@
       "engineMissing": "Motor Pro+ federado necessário não carregado; verifique a licença."
     },
     "fips": "FIPS",
-    "hosts": "Servidores",
+    "hosts": "Hosts",
     "logoAlt": "SysManage",
     "logout": "Sair",
     "maintenanceWindows": "Janelas de Manutenção",
@@ -2826,7 +2826,7 @@
     "subtitle": "Gere relatórios abrangentes para hosts, usuários e análises de sistema",
     "tabs": {
       "federation": "Federação",
-      "hosts": "Servidores",
+      "hosts": "Hosts",
       "security": "Segurança",
       "users": "Usuários"
     },
@@ -3306,7 +3306,7 @@
     },
     "errorLoad": "Falha ao carregar sites federados.",
     "hostCount": "{{count}} hosts",
-    "hostsLink": "Servidores",
+    "hostsLink": "Hosts",
     "lastSync": "Sincronizado {{when}}",
     "mapView": "Visualização em mapa",
     "policiesLink": "Políticas",
@@ -4672,6 +4672,68 @@
       "suffix": "Sufixo (opcional)",
       "tabLabel": "Etiquetas de Ativos",
       "title": "Esquema de nomenclatura de tags de ativos"
+    },
+    "held": {
+      "bySerial": "Número de série {{id}}",
+      "byUuid": "UUID do sistema {{id}}",
+      "explain": "Tags para máquinas que ainda não relataram. Cada uma é aplicada pela primeira vez que uma máquina com esse UUID ou número de série relatar sem uma tag.",
+      "heldBy": "Adicionado por",
+      "loadFailed": "Não foi possível carregar as tags pendentes.",
+      "none": "Nenhuma tag está pendente.",
+      "release": "Remover",
+      "title": "Tags pendentes",
+      "waitingFor": "Esperando por"
+    },
+    "import": {
+      "applied": "Importação aplicada: {{assigned}} atribuído, {{held}} pendente.",
+      "apply": "Aplicar importação ({{rows}})",
+      "choose": "Importar CSV...",
+      "col": {
+        "detail": "Detalhe",
+        "hosts": "Hosts",
+        "identifier": "UUID do sistema / número de série",
+        "line": "Linha",
+        "outcome": "Resultado",
+        "tag": "Tag de ativo"
+      },
+      "discovered": "Visto pela descoberta em metal nu ({{mac}})",
+      "export": "Exportar CSV",
+      "failed": "A solicitação falhou. Tente novamente.",
+      "fileError": {
+        "missingColumns": "O arquivo precisa ter uma coluna 'tag_ativo' e uma coluna 'uuid_sistema' ou 'numero_serie_sistema'.",
+        "notCsv": "O arquivo não é um CSV legível.",
+        "tooLarge": "O arquivo é maior que 1 MB.",
+        "tooManyRows": "O arquivo tem mais de 10.000 linhas.",
+        "unreadable": "O arquivo não pôde ser lido."
+      },
+      "previewTitle": "Visualização: {{file}}",
+      "readOnly": "A importação requer a função 'Gerenciar Tags de Ativos'.",
+      "reason": {
+        "ambiguous": "Mais de uma máquina relata este UUID. Adicione o número de série para escolher uma.",
+        "badUuid": "O UUID do sistema não é um UUID válido.",
+        "duplicateInFile": "Uma linha anterior no arquivo utiliza este tag.",
+        "identifierRepeated": "Uma linha anterior no arquivo nomeia esta máquina.",
+        "noIdentifier": "A linha não possui UUID ou número de série do sistema.",
+        "noTag": "Sem tag nesta linha; uma importação nunca limpa uma tag.",
+        "placeholder": "Um marcador de fornecedor não identifica nenhuma máquina.",
+        "tagHeld": "Esta tag já está aguardando outra máquina.",
+        "tagInUse": "Outra máquina já possui este tag."
+      },
+      "replaces": "Substitui {{previous}}",
+      "status": {
+        "ambiguous": "Ambíguo",
+        "assign": "Será atribuído",
+        "duplicate": "Duplicado",
+        "failsScheme": "Falha no esquema",
+        "hold": "Esperará pela máquina",
+        "invalid": "Inválido",
+        "skipped": "Ignorada",
+        "unchanged": "Inalterado"
+      },
+      "subtitle": "Mapeie UUIDs ou números de série do sistema para tags de ativos com um arquivo CSV. Você verá o que cada linha fará antes de qualquer coisa ser escrita.",
+      "title": "Importar e exportar",
+      "truncated": "Exibindo as primeiras {{shown}} de {{total}} linhas.",
+      "working": "Em execução"
     }
   },
   "machine": {

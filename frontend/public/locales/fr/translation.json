@@ -4672,6 +4672,68 @@
       "suffix": "Suffixe (facultatif)",
       "tabLabel": "Tags d'actifs",
       "title": "Schéma de nommage des tags d'actifs"
+    },
+    "held": {
+      "bySerial": "Numéro de série {{id}}",
+      "byUuid": "UUID du système {{id}}",
+      "explain": "Marqueurs pour les machines qui n'ont pas encore signalé leur présence. Chacun est appliqué la première fois qu'une machine avec cet UUID ou numéro de série signale sa présence sans marqueur.",
+      "heldBy": "Ajouté par",
+      "loadFailed": "Impossible de charger les balises en attente.",
+      "none": "Aucune étiquette n'est en attente.",
+      "release": "Supprimer",
+      "title": "Étiquettes en attente",
+      "waitingFor": "En attente"
+    },
+    "import": {
+      "applied": "Import appliqué : {{assigned}} attribué, {{held}} en attente.",
+      "apply": "Appliquer l'importation ({{rows}})",
+      "choose": "Importer CSV...",
+      "col": {
+        "detail": "Détails",
+        "hosts": "Hôtes",
+        "identifier": "UUID du système / numéro de série",
+        "line": "Ligne",
+        "outcome": "Résultat",
+        "tag": "Marqueur d'actif"
+      },
+      "discovered": "Visible par la découverte sur métal nu ({{mac}})",
+      "export": "Exporter CSV",
+      "failed": "La requête a échoué. Réessayez.",
+      "fileError": {
+        "missingColumns": "Le fichier nécessite une colonne asset_tag et une colonne system_uuid ou system_serial.",
+        "notCsv": "Le fichier n'est pas un fichier CSV lisible.",
+        "tooLarge": "Le fichier dépasse 1 Mo.",
+        "tooManyRows": "Le fichier comporte plus de 10 000 lignes.",
+        "unreadable": "Le fichier ne peut pas être lu."
+      },
+      "previewTitle": "Aperçu : {{file}}",
+      "readOnly": "L'importation nécessite le rôle 'Gérer les étiquettes d'actifs'.",
+      "reason": {
+        "ambiguous": "Plus d'une machine signale ce UUID. Ajoutez le numéro de série pour en choisir une.",
+        "badUuid": "L'UUID du système n'est pas un UUID valide.",
+        "duplicateInFile": "Une ligne précédente dans le fichier utilise ce marqueur.",
+        "identifierRepeated": "Une ligne précédente dans le fichier nomme cette machine.",
+        "noIdentifier": "La ligne n'a pas d'UUID système ou de numéro de série.",
+        "noTag": "Aucun marqueur dans cette ligne ; l'importation ne supprime jamais un marqueur.",
+        "placeholder": "Un marqueur de fournisseur n'identifie aucune machine.",
+        "tagHeld": "Cette étiquette attend déjà une autre machine.",
+        "tagInUse": "Une autre machine possède déjà ce marqueur."
+      },
+      "replaces": "Remplace {{previous}}",
+      "status": {
+        "ambiguous": "Ambigü",
+        "assign": "Sera attribué",
+        "duplicate": "Duplicata",
+        "failsScheme": "Échec du schéma",
+        "hold": "En attente de la machine",
+        "invalid": "Invalide",
+        "skipped": "Ignorée",
+        "unchanged": "Inchangé"
+      },
+      "subtitle": "Associer les UUIDs ou numéros de série du système aux marqueurs d'actifs avec un fichier CSV. Vous voyez ce que fera chaque ligne avant qu'aucune ne soit écrite.",
+      "title": "Importation et exportation",
+      "truncated": "Affichage des {{shown}} premières lignes sur {{total}}.",
+      "working": "En cours"
     }
   },
   "machine": {

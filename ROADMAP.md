@@ -13388,6 +13388,24 @@ of its three OSes once).
       written. Export the same columns. A tag imported for a machine that has
       not enrolled yet is held and applied when it does -- and 18.2's
       bare-metal discovery can assign it before the OS is even installed.
+      *S5 DONE 2026-10-11: `services/asset_tag_csv.py` + `api/asset_tag_csv.py`
+      (preview / apply / export / held list / release). Columns
+      `asset_tag` + `system_uuid` and/or `system_serial` (forgiving headers,
+      BOM, 1 MB / 10,000 rows); a UUID matches either byte order through the
+      agent's key, a serial ignores case. Row outcomes: assign / unchanged /
+      hold / fails_scheme / duplicate (another machine's or hold's tag, or
+      repeated in the file) / ambiguous (a cloned UUID without a serial to
+      decide) / invalid / skipped (a blank tag never clears one). Apply
+      re-plans on the server -- the browser's preview is never trusted --
+      and audits each write. Held tags (`held_asset_tag`, migration
+      `q35heldtag`) are claimed inside `record_identity` the first time an
+      untagged machine with that UUID or serial reports, never over an
+      existing tag and never onto a tag another machine took meanwhile. A
+      serial 18.2 discovery saw shows its MAC in the preview, so a tag can be
+      held for a blank box before it has an OS. Export round-trips (and
+      escapes spreadsheet formulas). UI: Settings > Asset Tags gains Import
+      and export (dry-run table) and Pending tags. Swapping two machines'
+      tags in one file reports a duplicate -- clear one first.*
 - [ ] Docs + screenshots + 14-language i18n; tests for the scheme engine,
       the identity normalization (recorded outputs from all six OS families),
       the T480 multi-boot case and the import dry run.

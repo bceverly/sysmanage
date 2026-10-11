@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 10:39-0400\n"
+"POT-Creation-Date: 2026-10-11 14:41-0400\n"
 "Language: it\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -90,7 +90,7 @@ msgstr "Permesso negato: ruolo %s richiesto"
 msgid "Asset tag naming scheme changed"
 msgstr "Schema di denominazione delle etichette dell'asset modificato"
 
-#: backend/api/asset_tags.py:204
+#: backend/api/asset_tags.py:204 backend/services/asset_tag_csv.py:362
 #, python-format
 msgid "Asset tag set to %s"
 msgstr "Etichetta dell'asset impostata su %s"
@@ -4753,6 +4753,11 @@ msgstr "Ruolo di firewall rimosso dal host con successo"
 msgid "Failed to remove firewall role: %s"
 msgstr "Impossibile rimuovere il ruolo firewall: %s"
 
+#: backend/api/asset_tag_csv.py:140
+#, python-format
+msgid "Held asset tag %s released"
+msgstr "Etichetta dell'asset trattenuta %s rilasciata"
+
 #: backend/api/lifecycle_actions.py:58 backend/api/lifecycle_actions.py:69
 msgid "OS lifecycle management requires a SysManage Professional license."
 msgstr ""
@@ -5554,6 +5559,11 @@ msgstr "Le destinazioni non indicano alcun host attivo"
 msgid "At most 10000 hosts can be scanned in one job"
 msgstr "Al massimo 10000 host possono essere analizzati in un processo"
 
+#: backend/services/held_asset_tags.py:159
+#, python-format
+msgid "Held asset tag %s applied"
+msgstr "Etichetta dell'asset trattenuta %s applicata"
+
 #: backend/services/reboot_orchestration_service.py:253
 #, python-format
 msgid "%(failed_count)d of %(total_count)d child host(s) failed to restart"
@@ -5678,6 +5688,11 @@ msgstr "Stato del rilevamento sconosciuto: %s"
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "Questa decisione non può essere presa qui: %s"
+
+#: backend/services/asset_tag_csv.py:366
+#, python-format
+msgid "Asset tag %s held until the machine reports in"
+msgstr "Etichetta dell'asset %s trattenuta finché la macchina non si segnala"
 
 #: backend/services/vault_service.py:219
 msgid "Vault is not enabled"

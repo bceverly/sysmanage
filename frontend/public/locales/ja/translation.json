@@ -4672,6 +4672,68 @@
       "suffix": "接尾辞（オプション）",
       "tabLabel": "アセットタグ",
       "title": "資産タグ命名規則"
+    },
+    "held": {
+      "bySerial": "シリアル番号 {{id}}",
+      "byUuid": "システムUUID {{id}}",
+      "explain": "まだレポートしていないマシンのタグ。各タグは、そのUUIDまたはシリアル番号で最初にレポートしたマシンに適用されます。",
+      "heldBy": "追加者",
+      "loadFailed": "タグの読み込みに失敗しました。",
+      "none": "保留中のタグはありません。",
+      "release": "削除",
+      "title": "保留中のタグ",
+      "waitingFor": "待機中"
+    },
+    "import": {
+      "applied": "インポートが適用されました: {{assigned}} が割り当てられ、{{held}} が保留中です。",
+      "apply": "インポートを適用 ({{rows}})",
+      "choose": "CSVをインポート...",
+      "col": {
+        "detail": "詳細",
+        "hosts": "ホスト",
+        "identifier": "システムUUID/シリアル番号",
+        "line": "行",
+        "outcome": "結果",
+        "tag": "資産タグ"
+      },
+      "discovered": "裸の金属発見 ({{mac}}) によって表示されます。",
+      "export": "CSVをエクスポート",
+      "failed": "リクエストに失敗しました。もう一度お試しください。",
+      "fileError": {
+        "missingColumns": "このファイルには asset_tag 列と system_uuid または system_serial 列が必要です。",
+        "notCsv": "読み取り可能なCSVファイルではありません",
+        "tooLarge": "ファイルサイズが1MBを超える",
+        "tooManyRows": "ファイル行数が1万件を超えています。",
+        "unreadable": "ファイルを読み込むことができません。"
+      },
+      "previewTitle": "プレビュー: {{file}}",
+      "readOnly": "インポートには「管理資産タグ」の権限が必要です。",
+      "reason": {
+        "ambiguous": "複数のマシンが同じUUIDを報告しています。シリアル番号を追加して1台を選択してください。",
+        "badUuid": "system UUID は無効な UUID です。",
+        "duplicateInFile": "ファイル内でこのタグが使用されています。",
+        "identifierRepeated": "ファイル内でこのマシンより前に行があります。",
+        "noIdentifier": "行に system UUID またはシリアル番号がありません。",
+        "noTag": "この行にはタグがありません。インポートはタグをクリアしません。",
+        "placeholder": "ベンダープレースホルダーはマシンを特定しません。",
+        "tagHeld": "このタグはすでに別のマシンを待っています。",
+        "tagInUse": "別のマシンに同じタグがすでに割り当てられています。"
+      },
+      "replaces": "{{previous}}を置き換えます",
+      "status": {
+        "ambiguous": "曖昧です。",
+        "assign": "割り当て予定",
+        "duplicate": "重複しています。",
+        "failsScheme": "スキーマに失敗しました",
+        "hold": "マシンの報告を待ちます",
+        "invalid": "無効です。",
+        "skipped": "スキップ",
+        "unchanged": "変更なし"
+      },
+      "subtitle": "CSVファイルでシステムUUIDまたはシリアル番号を資産タグにマッピングします。各行の処理内容を確認できます。",
+      "title": "インポートとエクスポート",
+      "truncated": "{{total}} 行のうち最初の {{shown}} 行を表示しています。",
+      "working": "処理中"
     }
   },
   "machine": {

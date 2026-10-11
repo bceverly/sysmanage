@@ -95,6 +95,7 @@ vi.mock("../../Components/AuthenticationProvidersSettings", () => stub("Authenti
 vi.mock("../../Components/ServerRoleSettings", () => stub("ServerRoleSettings"));
 vi.mock("../../Components/LoggingSettings", () => stub("LoggingSettings"));
 vi.mock("../../Components/AssetTagSchemeSettings", () => stub("AssetTagSchemeSettings"));
+vi.mock("../../Components/AssetTagImportExport", () => stub("AssetTagImportExport"));
 vi.mock("../../Components/settings/IntegrationsTab", () => stub("IntegrationsTab"));
 vi.mock("../../Components/settings/QueuesTab", () => stub("QueuesTab"));
 vi.mock("../../Components/settings/UbuntuProTab", () => stub("UbuntuProTab"));

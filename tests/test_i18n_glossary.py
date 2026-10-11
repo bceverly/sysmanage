@@ -76,3 +76,42 @@ def test_a_forbidden_form_never_matches_inside_a_word():
     assert guest.search("ضيف جديد")
     assert not guest.search("مضيف جديد")  # host contains guest
     assert glossary.forbidden_matcher("Bestand").search("der Bestand ist")
+
+
+def _strict():
+    spec = importlib.util.spec_from_file_location(
+        "i18n_strict_glossary", SCRIPTS / "i18n_strict.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_a_canonical_inside_the_forbidden_word_does_not_excuse_it():
+    """nl "Hosten" contains "host"; fr "Simulation sèche" contains
+    "simulation".  Both shipped past the gate until 2026-10-11."""
+    strict = _strict()
+    assert strict.glossary_hits("Hosts", "Hosten", "nl")
+    assert strict.glossary_hits("Dry run: x", "Simulation sèche : x", "fr")
+
+
+def test_a_canonical_elsewhere_in_the_value_still_excuses_it():
+    """A sentence may use the agreed word AND an unrelated look-alike."""
+    strict = _strict()
+    assert not strict.glossary_hits("Hosts", "Hosts", "nl")
+    assert not strict.glossary_hits("Dry run", "Simulation", "fr")
+
+
+def test_a_forbidden_form_inside_the_agreed_word_is_no_match():
+    """ja canonical エラータ (errata) contains the forbidden エラー (error)."""
+    strict = _strict()
+    assert not strict.glossary_hits("OpenBSD errata", "OpenBSD エラータ", "ja")
+    assert strict.glossary_hits("OpenBSD errata", "OpenBSD エラー", "ja")
+
+
+def test_korean_forbidden_forms_match_whole_words_with_particles():
+    """수입 (trade imports) must not match 필수입니다 ("is required")."""
+    matcher = glossary.forbidden_matcher("수입")
+    assert matcher.search("CSV 수입")
+    assert matcher.search("수입은 실패했습니다")
+    assert not matcher.search("이 단계는 필수입니다")

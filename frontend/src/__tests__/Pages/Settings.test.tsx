@@ -37,6 +37,7 @@ vi.mock("../../Components/AuthenticationProvidersSettings", () => ({ default: ()
 vi.mock("../../Components/ServerRoleSettings", () => ({ default: () => <div data-testid="stub-ServerRoleSettings" /> }));
 vi.mock("../../Components/LoggingSettings", () => ({ default: () => <div data-testid="stub-LoggingSettings" /> }));
 vi.mock("../../Components/AssetTagSchemeSettings", () => ({ default: () => <div data-testid="stub-AssetTagSchemeSettings" /> }));
+vi.mock("../../Components/AssetTagImportExport", () => ({ default: () => <div data-testid="stub-AssetTagImportExport" /> }));
 vi.mock("../../Components/settings/AvailablePackagesTab", () => ({ default: () => <div data-testid="stub-AvailablePackagesTab" /> }));
 vi.mock("../../Components/settings/IntegrationsTab", () => ({ default: () => <div data-testid="stub-IntegrationsTab" /> }));
 vi.mock("../../Components/settings/QueuesTab", () => ({ default: () => <div data-testid="stub-QueuesTab" /> }));

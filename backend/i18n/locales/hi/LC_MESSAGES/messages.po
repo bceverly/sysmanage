@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 10:39-0400\n"
+"POT-Creation-Date: 2026-10-11 14:41-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -91,7 +91,7 @@ msgstr "अनुमति नहीं: %s भूमिका आवश्य�
 msgid "Asset tag naming scheme changed"
 msgstr "एसेट टैग नामकरण योजना बदल दी गई"
 
-#: backend/api/asset_tags.py:204
+#: backend/api/asset_tags.py:204 backend/services/asset_tag_csv.py:362
 #, python-format
 msgid "Asset tag set to %s"
 msgstr "एसेट टैग %s पर सेट किया गया"
@@ -4690,6 +4690,11 @@ msgstr "फाइरवॉल भूमिका को होस्ट से �
 msgid "Failed to remove firewall role: %s"
 msgstr "%s के फायरवॉल रोल हटाने में विफल हुए"
 
+#: backend/api/asset_tag_csv.py:140
+#, python-format
+msgid "Held asset tag %s released"
+msgstr "होल्ड किया गया एसेट टैग %s रिलीज़ किया गया"
+
 #: backend/api/lifecycle_actions.py:58 backend/api/lifecycle_actions.py:69
 msgid "OS lifecycle management requires a SysManage Professional license."
 msgstr ""
@@ -5470,6 +5475,11 @@ msgstr "लक्ष्यों में कोई सक्रिय हो�
 msgid "At most 10000 hosts can be scanned in one job"
 msgstr "एक जॉब में अधिकतम 10000 होस्ट स्कैन किए जा सकते हैं"
 
+#: backend/services/held_asset_tags.py:159
+#, python-format
+msgid "Held asset tag %s applied"
+msgstr "होल्ड किया गया एसेट टैग %s लागू किया गया"
+
 #: backend/services/reboot_orchestration_service.py:253
 #, python-format
 msgid "%(failed_count)d of %(total_count)d child host(s) failed to restart"
@@ -5589,6 +5599,11 @@ msgstr "अज्ञात निष्कर्ष स्थिति: %s"
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "यह निर्णय यहाँ नहीं लिया जा सकता: %s"
+
+#: backend/services/asset_tag_csv.py:366
+#, python-format
+msgid "Asset tag %s held until the machine reports in"
+msgstr "एसेट टैग %s तब तक रखा जाता है जब तक मशीन रिपोर्ट नहीं करती"
 
 #: backend/services/vault_service.py:219
 msgid "Vault is not enabled"

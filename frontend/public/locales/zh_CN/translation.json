@@ -4672,6 +4672,68 @@
       "suffix": "后缀（可选）",
       "tabLabel": "资产标签",
       "title": "资产标签命名规则"
+    },
+    "held": {
+      "bySerial": "序列号{{id}}",
+      "byUuid": "系统 UUID {{id}}",
+      "explain": "对于尚未报告的机器的标签。每次有该 UUID 或序列号的机器在没有标签的情况下首次报告时，都会应用这些标签。",
+      "heldBy": "添加者",
+      "loadFailed": "无法加载待处理的标签。",
+      "none": "没有待处理的标签。",
+      "release": "删除",
+      "title": "待处理标签",
+      "waitingFor": "等待中"
+    },
+    "import": {
+      "applied": "导入已应用：已分配 {{assigned}} 个，待处理 {{held}} 个。",
+      "apply": "应用导入 ({{rows}})",
+      "choose": "导入 CSV...",
+      "col": {
+        "detail": "详细信息",
+        "hosts": "主机",
+        "identifier": "系统 UUID / 序列号",
+        "line": "行",
+        "outcome": "结果",
+        "tag": "资产标签"
+      },
+      "discovered": "裸金属发现 ({{mac}}) 看到",
+      "export": "导出 CSV",
+      "failed": "请求失败。请重试。",
+      "fileError": {
+        "missingColumns": "该文件需要添加 asset_tag 列和系统 UUID 或 system_serial 列。",
+        "notCsv": "文件不是可读的 CSV 文件。",
+        "tooLarge": "文件大于 1 MB。",
+        "tooManyRows": "文件超过 10,000 行。",
+        "unreadable": "无法读取文件。"
+      },
+      "previewTitle": "预览：{{file}}",
+      "readOnly": "导入需要管理资产标签角色。",
+      "reason": {
+        "ambiguous": "多个机器报告了相同的 UUID。添加序列号以选择一台。",
+        "badUuid": "系统 UUID 不是有效的 UUID。",
+        "duplicateInFile": "文件中这一行使用了这个标签。",
+        "identifierRepeated": "文件中这一行标记了这台机器。",
+        "noIdentifier": "该行没有系统 UUID 或序列号。",
+        "noTag": "该行没有标签；导入永远不会清除标签。",
+        "placeholder": "供应商占位符未识别任何机器。",
+        "tagHeld": "此标签已等待另一台机器。",
+        "tagInUse": "另一台机器已经有这个标签。"
+      },
+      "replaces": "替换 {{previous}}",
+      "status": {
+        "ambiguous": "模糊的",
+        "assign": "将分配",
+        "duplicate": "重复的",
+        "failsScheme": "验证失败",
+        "hold": "将等待该机器报到",
+        "invalid": "无效的",
+        "skipped": "跳过",
+        "unchanged": "未更改"
+      },
+      "subtitle": "使用 CSV 文件将系统 UUID 或序列号映射到资产标签。你可以在执行任何写操作之前看到每行的作用。",
+      "title": "导入和导出",
+      "truncated": "显示前 {{shown}} 行，共 {{total}} 行。",
+      "working": "正在处理"
     }
   },
   "machine": {

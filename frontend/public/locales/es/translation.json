@@ -549,7 +549,7 @@
     "repairUnavailable": "Su perfil de reparación no está activo",
     "repairWith": "Reparar con {{profile}}",
     "seenSince": "Primero visto",
-    "tabDrift": "Anfitriones drifantes",
+    "tabDrift": "Hosts con deriva",
     "tabPlaybooks": "Playbooks de remediación",
     "title": "Desviación de configuración",
     "view": "Ver",
@@ -568,7 +568,7 @@
     "checkModeLabel": "Simulación: informa de lo que cambiaría, sin cambiar nada",
     "concurrency": "Hosts a la vez",
     "concurrencyClamped": "La concurrencia se ajustó a {{value}}, la más alta que permite este servidor.",
-    "concurrencyHelp": "¿Cuántos anfitriones pueden ejecutarse a la vez. El servidor limita esto.",
+    "concurrencyHelp": "Cuántos hosts pueden ejecutarse a la vez. El servidor impone un límite.",
     "confirmLaunchDry": "Esto ejecuta {{profile}} contra {{inventory}} como una prueba seca. No se cambiará nada.",
     "confirmLaunchLive": "Esto ejecuta {{profile}} de verdad en cada host en {{inventory}} y los cambia para que coincidan con él. La entrega se retiene para cualquier host dentro de un período de mantenimiento.",
     "confirmLaunchTitle": "¿Lanzar este trabajo?",
@@ -744,7 +744,7 @@
   },
   "dashboard": {
     "antivirusCoverage": "Antivirus",
-    "hosts": "Hospederos",
+    "hosts": "Hosts",
     "openTelemetryCoverage": "OpenTelemetry",
     "rebootRequired": "Reinicio Requerido",
     "security": "Seguridad",
@@ -905,7 +905,7 @@
       "compliance": "Peor cumplimiento",
       "critical": "CVEs críticas",
       "high": "Alto número de CVEs",
-      "hosts": "Hospederos",
+      "hosts": "Hosts",
       "site": "Sitio"
     },
     "generate": "Generar informe",
@@ -2159,7 +2159,7 @@
     "scopeHosts": "Hostes específicos",
     "scopeTags": "Hosts por etiqueta",
     "scopeType": "Se aplica a",
-    "selectHosts": "Hospederos",
+    "selectHosts": "Hosts",
     "selectTags": "Etiquetas",
     "startTime": "Hora de inicio",
     "startsAt": "Comienza a las (UTC)",
@@ -2402,7 +2402,7 @@
       "engineMissing": "El motor de federación Pro+ requerido no se ha cargado; compruebe la licencia."
     },
     "fips": "FIPS",
-    "hosts": "Hospederos",
+    "hosts": "Hosts",
     "logoAlt": "SysManage",
     "logout": "Cerrar Sesión",
     "maintenanceWindows": "Ventanas de Mantenimiento",
@@ -2674,7 +2674,7 @@
     "failedCount": "{{count}} fallido",
     "intro": "Los paquetes de consultas ejecutan SQL contra las tablas de hechos que sirve cada agente, por lo que una consulta funciona en todas las plataformas.",
     "liveFailed": "No se pudo ejecutar la consulta",
-    "liveIntro": "Ejecutar una consulta ahora a través de los anfitriones seleccionados. El envío está limitado, por lo que los anfitriones se piden en oleadas en lugar de todos a la vez.",
+    "liveIntro": "Ejecutar una consulta ahora a través de los hosts seleccionados. El envío está limitado, por lo que los hosts se consultan en oleadas en lugar de todos a la vez.",
     "liveStatus": {
       "canceled": "Cancelado",
       "completed": "Completado",
@@ -2702,7 +2702,7 @@
     },
     "save": "Guardar",
     "saveFailed": "No se pudo guardar el paquete de consultas",
-    "selectHosts": "Anfitriones a consultar",
+    "selectHosts": "Hosts a consultar",
     "sql": "SQL",
     "started": "Iniciado",
     "status": "Estado",
@@ -2826,7 +2826,7 @@
     "subtitle": "Genere informes integrales para hosts, usuarios y análisis del sistema",
     "tabs": {
       "federation": "Federación",
-      "hosts": "Hospederos",
+      "hosts": "Hosts",
       "security": "Seguridad",
       "users": "Usuarios"
     },
@@ -2838,7 +2838,7 @@
       "commercial": "comercial",
       "compliance": "cumplimiento",
       "firewall": "firewall",
-      "hosts": "hospederos",
+      "hosts": "hosts",
       "network": "red",
       "opensource": "open source",
       "organization": "organización",
@@ -3306,7 +3306,7 @@
     },
     "errorLoad": "No se pudieron cargar los sitios de la federación.",
     "hostCount": "{{count}} hosts",
-    "hostsLink": "Hospederos",
+    "hostsLink": "Hosts",
     "lastSync": "Sincronizado {{when}}",
     "mapView": "Vista de mapa",
     "policiesLink": "Políticas",
@@ -4672,6 +4672,68 @@
       "suffix": "Sufijo (opcional)",
       "tabLabel": "Etiquetas de Activos",
       "title": "Esquema de nomenclatura de etiquetas de activos"
+    },
+    "held": {
+      "bySerial": "Número de serie {{id}}",
+      "byUuid": "UUID del sistema {{id}}",
+      "explain": "Etiquetas para máquinas que aún no han reportado. Cada una se aplica la primera vez que una máquina con ese UUID o número de serie informa sin una etiqueta.",
+      "heldBy": "Agregado por",
+      "loadFailed": "No se pudieron cargar las etiquetas pendientes.",
+      "none": "No hay etiquetas pendientes.",
+      "release": "Eliminar",
+      "title": "Etiquetas pendientes",
+      "waitingFor": "Esperando"
+    },
+    "import": {
+      "applied": "Importación aplicada: {{assigned}} asignado, {{held}} pendiente.",
+      "apply": "Aplicar importación ({{rows}})",
+      "choose": "Importar CSV...",
+      "col": {
+        "detail": "Detalle",
+        "hosts": "Hosts",
+        "identifier": "UUID del sistema / número de serie",
+        "line": "Fila",
+        "outcome": "Resultado",
+        "tag": "Etiqueta de activo"
+      },
+      "discovered": "Visible por descubrimiento de metal desnudo ({{mac}})",
+      "export": "Exportar CSV",
+      "failed": "La solicitud falló. Inténtalo de nuevo.",
+      "fileError": {
+        "missingColumns": "El archivo necesita una columna 'asset_tag' y una columna 'system_uuid' o 'system_serial'.",
+        "notCsv": "El archivo no es un CSV legible.",
+        "tooLarge": "El archivo es mayor a 1 MB.",
+        "tooManyRows": "El archivo tiene más de 10,000 filas.",
+        "unreadable": "El archivo no se pudo leer."
+      },
+      "previewTitle": "Vista previa: {{file}}",
+      "readOnly": "La importación requiere el rol 'Administrar etiquetas de activos'.",
+      "reason": {
+        "ambiguous": "Más de una máquina informa este UUID. Agrega el número de serie para elegir una.",
+        "badUuid": "El UUID del sistema no es un UUID válido.",
+        "duplicateInFile": "Una fila anterior en el archivo utiliza este marcador",
+        "identifierRepeated": "Una fila anterior en los nombres de archivo nombra esta máquina",
+        "noIdentifier": "La fila no tiene UUID del sistema o número de serie.",
+        "noTag": "No hay etiqueta en esta fila; la importación nunca elimina una etiqueta.",
+        "placeholder": "Un marcador de proveedor identifica una máquina sin asignación",
+        "tagHeld": "Esta etiqueta ya está esperando a otra máquina.",
+        "tagInUse": "Otra máquina ya tiene este marcador"
+      },
+      "replaces": "Reemplaza {{previous}}",
+      "status": {
+        "ambiguous": "Ambiguo",
+        "assign": "Asignaré",
+        "duplicate": "Duplicado",
+        "failsScheme": "Falla el esquema",
+        "hold": "Esperará a la máquina",
+        "invalid": "Inválido",
+        "skipped": "Omitido",
+        "unchanged": "Sin cambios"
+      },
+      "subtitle": "Asigna UUIDs o números de serie del sistema a etiquetas de activos con un archivo CSV. Verás lo que hará cada fila antes de escribirse nada.",
+      "title": "Importar y exportar",
+      "truncated": "Se muestran las primeras {{shown}} de {{total}} filas.",
+      "working": "Procesando"
     }
   },
   "machine": {

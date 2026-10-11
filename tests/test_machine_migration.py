@@ -2,9 +2,10 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Migrations q33machine and q34assettag (Phase 23.2 S2/S3): the machine table,
-the host identity columns, the asset-tag scheme and its role -- idempotent,
-downgradable, and the ORM agrees with what they built."""
+"""Migrations q33machine, q34assettag and q35heldtag (Phase 23.2 S2/S3/S5): the
+machine table, the host identity columns, the asset-tag scheme and its role,
+and held tags -- idempotent, downgradable, and the ORM agrees with what they
+built."""
 
 import os
 import sqlite3
@@ -83,6 +84,9 @@ def test_the_migration_builds_the_schema_reruns_cleanly_and_the_orm_agrees():
             db, "asset_tag_scheme"
         )
         assert _role_count(db) == 1
+        assert {"kind", "identifier", "asset_tag", "created_at"} <= _columns(
+            db, "held_asset_tag"
+        )
 
         # Idempotent: run q33machine again over the schema it already built.
         _alembic(["stamp", "q32ssostate"], db)
@@ -118,6 +122,7 @@ def test_the_migration_builds_the_schema_reruns_cleanly_and_the_orm_agrees():
         _alembic(["downgrade", "q32ssostate"], db)
         assert not _HOST_COLUMNS & _columns(db, "host")
         assert _role_count(db) == 0
+        assert not _columns(db, "held_asset_tag")
     finally:
         if os.path.exists(db):
             os.unlink(db)

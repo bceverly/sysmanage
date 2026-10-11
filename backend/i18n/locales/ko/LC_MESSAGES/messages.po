@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 10:39-0400\n"
+"POT-Creation-Date: 2026-10-11 14:41-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -90,7 +90,7 @@ msgstr "%s 역할이 필요합니다. 권한 거부됨:"
 msgid "Asset tag naming scheme changed"
 msgstr "자산 태그 명명 규칙이 변경되었습니다"
 
-#: backend/api/asset_tags.py:204
+#: backend/api/asset_tags.py:204 backend/services/asset_tag_csv.py:362
 #, python-format
 msgid "Asset tag set to %s"
 msgstr "자산 태그가 %s로 설정되었습니다"
@@ -4505,6 +4505,11 @@ msgstr "호스트에서 방화벽 역할을 성공적으로 제거했습니다"
 msgid "Failed to remove firewall role: %s"
 msgstr "방화벽 역할 제거에 실패했습니다: %s"
 
+#: backend/api/asset_tag_csv.py:140
+#, python-format
+msgid "Held asset tag %s released"
+msgstr "보류된 자산 태그 %s 해제됨"
+
 #: backend/api/lifecycle_actions.py:58 backend/api/lifecycle_actions.py:69
 msgid "OS lifecycle management requires a SysManage Professional license."
 msgstr "OS 라이프사이클 관리를 위한 SysManage Professional 라이선스가 필요합니다."
@@ -5247,6 +5252,11 @@ msgstr "대상에 활성 호스트가 없습니다"
 msgid "At most 10000 hosts can be scanned in one job"
 msgstr "하나의 작업에서 최대 10000개 호스트를 검사할 수 있습니다"
 
+#: backend/services/held_asset_tags.py:159
+#, python-format
+msgid "Held asset tag %s applied"
+msgstr "보류된 자산 태그 %s 적용됨"
+
 #: backend/services/reboot_orchestration_service.py:253
 #, python-format
 msgid "%(failed_count)d of %(total_count)d child host(s) failed to restart"
@@ -5359,6 +5369,11 @@ msgstr "알 수 없는 발견 사항 상태: %s"
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "여기서는 해당 결정을 내릴 수 없습니다: %s"
+
+#: backend/services/asset_tag_csv.py:366
+#, python-format
+msgid "Asset tag %s held until the machine reports in"
+msgstr "머신이 보고할 때까지 자산 태그 %s 보류됨"
 
 #: backend/services/vault_service.py:219
 msgid "Vault is not enabled"

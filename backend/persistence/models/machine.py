@@ -81,3 +81,30 @@ class AssetTagScheme(Base):
     enforce = Column(Boolean, nullable=False, default=False, server_default=false())
     updated_at = Column(DateTime, nullable=True)
     updated_by = Column(String(255), nullable=True)
+
+
+# How a held tag finds its machine.
+HELD_BY_UUID = "system_uuid"
+HELD_BY_SERIAL = "system_serial"
+
+
+class HeldAssetTag(Base):
+    """A tag waiting for a machine that has not reported in yet (Phase 23.2
+    S5): a CSV row whose UUID or serial matched no machine, or a tag given to
+    a box 18.2's bare-metal discovery saw before it had an OS.  Applied -- and
+    deleted -- when a machine with that identity first appears untagged."""
+
+    __tablename__ = "held_asset_tag"
+    __table_args__ = (
+        UniqueConstraint("kind", "identifier", name="uq_held_asset_tag_identity"),
+        UniqueConstraint("asset_tag", name="uq_held_asset_tag_tag"),
+    )
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    # HELD_BY_UUID (identifier = the byte-order-insensitive match key) or
+    # HELD_BY_SERIAL (identifier = the system serial as printed).
+    kind = Column(String(16), nullable=False)
+    identifier = Column(String(255), nullable=False, index=True)
+    asset_tag = Column(String(128), nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    created_by = Column(String(255), nullable=True)

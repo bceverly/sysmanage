@@ -35,6 +35,7 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session
 
 from backend.persistence import models
+from backend.services import held_asset_tags
 
 logger = logging.getLogger(__name__)
 
@@ -136,9 +137,16 @@ def _normalize(raw: Any) -> Optional[Dict[str, Any]]:
 
 
 def record_identity(db: Session, host: models.Host, raw: Any) -> None:
-    """Store ``host``'s reported identity and link it to its machine.
+    """Store ``host``'s reported identity and link it to its machine, then
+    apply any asset tag held for that machine (S5).
 
     The caller commits.  Logged loudly when a link is held for an admin."""
+    _record_identity(db, host, raw)
+    if host.machine_id:
+        held_asset_tags.claim(db, db.get(models.Machine, host.machine_id))
+
+
+def _record_identity(db: Session, host: models.Host, raw: Any) -> None:
     identity = _normalize(raw)
     if identity is None:
         return
@@ -237,5 +245,6 @@ def resolve_conflict(db: Session, host: models.Host, decision: str) -> models.Ma
         db.add(machine)
         db.flush()
         _link(host, machine)
+        held_asset_tags.claim(db, machine)
         return machine
     raise ValueError(f"unknown decision {decision!r}")

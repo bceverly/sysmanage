@@ -618,7 +618,7 @@
   },
   "configManagement": {
     "applyAction": "Toepassen",
-    "applyDryRun": "Droge loop (verslag van wijzigingen zonder deze aan te brengen)",
+    "applyDryRun": "simulatie (wijzigingen rapporteren zonder ze aan te brengen)",
     "applyDryRunAction": "Wijzigingen voorbeschouwen",
     "applyEngine": "Motor",
     "applyError": "Kon het configuratieprofiel niet in de wachtrij plaatsen",
@@ -744,7 +744,7 @@
   },
   "dashboard": {
     "antivirusCoverage": "Anti-virus",
-    "hosts": "Hosten",
+    "hosts": "Hosts",
     "openTelemetryCoverage": "OpenTelemetry",
     "rebootRequired": "Herstart Vereist",
     "security": "Beveiliging",
@@ -905,7 +905,7 @@
       "compliance": "Worst case scenario conformiteit",
       "critical": "Critieke CVE's",
       "high": "Hoog CVE's",
-      "hosts": "Hosten",
+      "hosts": "Hosts",
       "site": "Locatie"
     },
     "generate": "Rapport genereren",
@@ -2159,7 +2159,7 @@
     "scopeHosts": "Specifieke hosts",
     "scopeTags": "Hosts per tag",
     "scopeType": "Van toepassing op",
-    "selectHosts": "Hosten",
+    "selectHosts": "Hosts",
     "selectTags": "Labels",
     "startTime": "Starttijd",
     "startsAt": "Begint om (UTC)",
@@ -2402,7 +2402,7 @@
       "engineMissing": "Nodige Pro+ federatie-engine niet geladen; controleer licentie."
     },
     "fips": "FIPS",
-    "hosts": "Hosten",
+    "hosts": "Hosts",
     "logoAlt": "SysManage",
     "logout": "Uitloggen",
     "maintenanceWindows": "Onderhoudsvensters",
@@ -2826,7 +2826,7 @@
     "subtitle": "Genereer uitgebreide rapporten voor hosts, gebruikers en systeemanalyses",
     "tabs": {
       "federation": "Federatie",
-      "hosts": "Hosten",
+      "hosts": "Hosts",
       "security": "Beveiliging",
       "users": "Gebruikers"
     },
@@ -2838,7 +2838,7 @@
       "commercial": "commercieel",
       "compliance": "compliancy",
       "firewall": "firewall",
-      "hosts": "hosten",
+      "hosts": "hosts",
       "network": "netwerk",
       "opensource": "open source",
       "organization": "organisatie",
@@ -3306,7 +3306,7 @@
     },
     "errorLoad": "Kan federatiesites niet laden.",
     "hostCount": "{{count}} hosts",
-    "hostsLink": "Hosten",
+    "hostsLink": "Hosts",
     "lastSync": "Gesynchroniseerd {{when}}",
     "mapView": "Kaartweergave",
     "policiesLink": "Beleid",
@@ -4672,6 +4672,68 @@
       "suffix": "Afteken (optioneel)",
       "tabLabel": "Asset tags",
       "title": "Asset tag naamgevingsschema"
+    },
+    "held": {
+      "bySerial": "Seriënummer {{id}}",
+      "byUuid": "Systeem UUID {{id}}",
+      "explain": "Tags voor machines die nog niet gerapporteerd hebben. Elke tag wordt toegepast wanneer een machine met dat UUID of seriënummer zonder tag rapporteert.",
+      "heldBy": "Toegevoegd door",
+      "loadFailed": "Ongeloste tags kunnen niet worden geladen.",
+      "none": "Er zijn geen tags in afwachting.",
+      "release": "Verwijderen",
+      "title": "Tags in afwachting",
+      "waitingFor": "Wachtend op"
+    },
+    "import": {
+      "applied": "Import toegepast: {{assigned}} toegewezen, {{held}} in afwachting.",
+      "apply": "Import toepassen ({{rows}})",
+      "choose": "CSV importeren...",
+      "col": {
+        "detail": "Details",
+        "hosts": "Hosts",
+        "identifier": "Systeem UUID / seriënummer",
+        "line": "Rij",
+        "outcome": "Uitkomst",
+        "tag": "asset tag"
+      },
+      "discovered": "Gezien door bare-metal discovery ({{mac}})",
+      "export": "Exporteren CSV",
+      "failed": "De aanvraag is mislukt. Probeer het opnieuw.",
+      "fileError": {
+        "missingColumns": "Het bestand moet een kolom 'asset_tag' en een kolom 'system_uuid' of 'system_serial' hebben.",
+        "notCsv": "Het bestand is geen leesbare CSV.",
+        "tooLarge": "Het bestand is groter dan 1 MB.",
+        "tooManyRows": "Het bestand heeft meer dan 10.000 rijen.",
+        "unreadable": "Het bestand kon niet worden gelezen."
+      },
+      "previewTitle": "Voorbeeld: {{file}}",
+      "readOnly": "Importeren vereist de rol 'Beheer Asset Tags'.",
+      "reason": {
+        "ambiguous": "Meer dan één machine rapporteert dit UUID. Voeg het seriënummer toe om er één te kiezen.",
+        "badUuid": "Het systeem-UUID is geen geldig UUID.",
+        "duplicateInFile": "Een eerdere rij in het bestand gebruikt deze tag.",
+        "identifierRepeated": "Een eerdere rij in het bestand verwijst naar deze machine.",
+        "noIdentifier": "De rij heeft geen systeem-UUID of seriënummer.",
+        "noTag": "Geen tag in deze rij; een import verwijdert nooit een tag.",
+        "placeholder": "Een vendorplaceholder identificeert geen machine.",
+        "tagHeld": "Deze tag wacht al op een andere machine.",
+        "tagInUse": "Een andere machine heeft al deze tag."
+      },
+      "replaces": "Vervangt {{previous}}",
+      "status": {
+        "ambiguous": "Ambigue",
+        "assign": "Zal toewijzen",
+        "duplicate": "Duplicaat",
+        "failsScheme": "Faalt het schema",
+        "hold": "Wacht op de machine",
+        "invalid": "Ongeldig",
+        "skipped": "Overgeslagen",
+        "unchanged": "Onveranderd"
+      },
+      "subtitle": "Kaart systeem UUID's of seriënummers naar asset tags met een CSV-bestand. Je ziet wat elke rij zal doen voordat er iets wordt geschreven.",
+      "title": "Importeren en exporteren",
+      "truncated": "De eerste {{shown}} van {{total}} rijen worden getoond.",
+      "working": "Aan het werk"
     }
   },
   "machine": {

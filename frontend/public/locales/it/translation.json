@@ -4672,6 +4672,68 @@
       "suffix": "Suffisso (facoltativo)",
       "tabLabel": "Tag degli asset",
       "title": "Schema di denominazione delle etichette degli asset"
+    },
+    "held": {
+      "bySerial": "Numero di serie {{id}}",
+      "byUuid": "UUID del sistema {{id}}",
+      "explain": "Tag per macchine che non hanno ancora segnalato. Ogni tag viene applicato la prima volta che una macchina con quel UUID o numero di serie segnala senza un tag.",
+      "heldBy": "Aggiunto da",
+      "loadFailed": "Impossibile caricare i tag in attesa.",
+      "none": "Nessun tag in attesa.",
+      "release": "Rimuovi",
+      "title": "Tag in attesa",
+      "waitingFor": "In attesa"
+    },
+    "import": {
+      "applied": "Importazione applicata: {{assigned}} assegnato, {{held}} in attesa.",
+      "apply": "Applica importazione ({{rows}})",
+      "choose": "Importa CSV...",
+      "col": {
+        "detail": "Dettagli",
+        "hosts": "Hosts",
+        "identifier": "UUID del sistema / numero di serie",
+        "line": "Riga",
+        "outcome": "Risultato",
+        "tag": "Etichetta dell'asset"
+      },
+      "discovered": "Visibile nella scoperta a metallo nudo ({{mac}})",
+      "export": "Esporta CSV",
+      "failed": "La richiesta è fallita. Riprovare.",
+      "fileError": {
+        "missingColumns": "Il file richiede una colonna 'asset_tag' e una colonna 'system_uuid' o 'system_serial'.",
+        "notCsv": "Il file non è un CSV leggibile.",
+        "tooLarge": "Il file è più grande di 1 MB.",
+        "tooManyRows": "Il file ha più di 10.000 righe.",
+        "unreadable": "Il file non può essere letto."
+      },
+      "previewTitle": "Anteprima: {{file}}",
+      "readOnly": "L'importazione richiede il ruolo 'Gestisci Etichette degli Asset'.",
+      "reason": {
+        "ambiguous": "Più di una macchina segnala questo UUID. Aggiungi il numero di serie per sceglierne una.",
+        "badUuid": "L'UUID del sistema non è un UUID valido.",
+        "duplicateInFile": "Una riga precedente nel file utilizza questo tag.",
+        "identifierRepeated": "Una riga precedente nel file nomina questa macchina.",
+        "noIdentifier": "La riga non contiene un UUID di sistema o un numero di serie.",
+        "noTag": "Nessun tag in questa riga; l'importazione non cancella mai un tag.",
+        "placeholder": "Un segnaposto del fornitore non identifica alcuna macchina.",
+        "tagHeld": "Questo tag è già in attesa di un'altra macchina.",
+        "tagInUse": "Un'altra macchina ha già questo tag."
+      },
+      "replaces": "Sostituisce {{previous}}",
+      "status": {
+        "ambiguous": "Ambiguo",
+        "assign": "Assegnerà",
+        "duplicate": "Duplicato",
+        "failsScheme": "Non conforme allo schema",
+        "hold": "Aspetterà la macchina",
+        "invalid": "Non valido",
+        "skipped": "Saltato",
+        "unchanged": "Non modificato"
+      },
+      "subtitle": "Mappa gli UUID del sistema o i numeri di serie alle etichette degli asset con un file CSV. Vedrai cosa farà ogni riga prima che venga scritto qualcosa.",
+      "title": "Importa ed esporta",
+      "truncated": "Sono mostrate le prime {{shown}} righe su {{total}}.",
+      "working": "In elaborazione"
     }
   },
   "machine": {

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 10:39-0400\n"
+"POT-Creation-Date: 2026-10-11 14:41-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -90,7 +90,7 @@ msgstr "權限被拒絕：%s 角色所需"
 msgid "Asset tag naming scheme changed"
 msgstr "資產標籤命名方案已更改"
 
-#: backend/api/asset_tags.py:204
+#: backend/api/asset_tags.py:204 backend/services/asset_tag_csv.py:362
 #, python-format
 msgid "Asset tag set to %s"
 msgstr "資產標籤設定為 %s"
@@ -4470,6 +4470,11 @@ msgstr "已從主機成功移除防火牆角色"
 msgid "Failed to remove firewall role: %s"
 msgstr "無法移除防火牆角色：%s"
 
+#: backend/api/asset_tag_csv.py:140
+#, python-format
+msgid "Held asset tag %s released"
+msgstr "已釋放保留的資產標籤 %s"
+
 #: backend/api/lifecycle_actions.py:58 backend/api/lifecycle_actions.py:69
 msgid "OS lifecycle management requires a SysManage Professional license."
 msgstr "操作系統生命周期管理需要 SysManage Professional 許可證。"
@@ -4559,7 +4564,7 @@ msgstr "擷取稽核記錄項目失敗: %s"
 msgid ""
 "%s export requires a SysManage Professional+ license. OSS tier supports CSV "
 "export."
-msgstr "%s 出口需要 SysManage Professional+ 許可證。OSS 層級支援 CSV 出口。"
+msgstr ""
 
 #: backend/api/audit_log.py:306
 msgid "Use /api/v1/audit/export with Pro+ license"
@@ -5206,6 +5211,11 @@ msgstr "目標中沒有任何使用中的主機"
 msgid "At most 10000 hosts can be scanned in one job"
 msgstr "一個工作最多可掃描 10000 台主機"
 
+#: backend/services/held_asset_tags.py:159
+#, python-format
+msgid "Held asset tag %s applied"
+msgstr "已套用保留的資產標籤 %s"
+
 #: backend/services/reboot_orchestration_service.py:253
 #, python-format
 msgid "%(failed_count)d of %(total_count)d child host(s) failed to restart"
@@ -5318,6 +5328,11 @@ msgstr "未知的偵測結果狀態: %s"
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "無法在此作出該處置: %s"
+
+#: backend/services/asset_tag_csv.py:366
+#, python-format
+msgid "Asset tag %s held until the machine reports in"
+msgstr "資產標籤 %s 已保留，待該機器回報後套用"
 
 #: backend/services/vault_service.py:219
 msgid "Vault is not enabled"

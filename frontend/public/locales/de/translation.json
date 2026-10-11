@@ -4672,6 +4672,68 @@
       "suffix": "Nachteil (optional)",
       "tabLabel": "Asset-Tags",
       "title": "Schema für die Benennung von Asset-Tags"
+    },
+    "held": {
+      "bySerial": "Seriennummer {{id}}",
+      "byUuid": "System-UUID {{id}}",
+      "explain": "Tags für Maschinen, die sich noch nicht gemeldet haben. Jedes wird angewendet, wenn eine Maschine mit diesem UUID oder Seriennummer ohne Tag erstmals meldet.",
+      "heldBy": "Hinzugefügt von",
+      "loadFailed": "Ausstehende Tags konnten nicht geladen werden.",
+      "none": "Keine Tags ausstehend.",
+      "release": "Entfernen",
+      "title": "Ausstehende Tags",
+      "waitingFor": "Warten auf"
+    },
+    "import": {
+      "applied": "Import angewendet: {{assigned}} zugewiesen, {{held}} ausstehend.",
+      "apply": "Import anwenden ({{rows}})",
+      "choose": "CSV importieren...",
+      "col": {
+        "detail": "Detailansicht",
+        "hosts": "Hosts",
+        "identifier": "System-UUID / Seriennummer",
+        "line": "Zeile",
+        "outcome": "Ausgabe",
+        "tag": "Asset-Tag"
+      },
+      "discovered": "Von Bare-Metal-Entdeckung ({{mac}}) gesehen",
+      "export": "CSV exportieren",
+      "failed": "Der Antrag ist fehlgeschlagen. Versuchen Sie es erneut.",
+      "fileError": {
+        "missingColumns": "Die Datei benötigt eine Spalte 'asset_tag' und eine Spalte 'system_uuid' oder 'system_serial'.",
+        "notCsv": "Die Datei ist keine lesbare CSV-Datei.",
+        "tooLarge": "Die Datei ist größer als 1 MB.",
+        "tooManyRows": "Die Datei enthält mehr als 10.000 Zeilen.",
+        "unreadable": "Die Datei konnte nicht gelesen werden."
+      },
+      "previewTitle": "Vorschau: {{file}}",
+      "readOnly": "Der Import erfordert die Rolle 'Asset-Tags verwalten'.",
+      "reason": {
+        "ambiguous": "Mehr als eine Maschine berichtet über dieses UUID. Fügen Sie die Seriennummer hinzu, um eine auszuwählen.",
+        "badUuid": "Der angegebene System-UUID ist kein gültiger UUID.",
+        "duplicateInFile": "Eine frühere Zeile in der Datei verwendet diesen Tag.",
+        "identifierRepeated": "Eine frühere Zeile in der Datei benennt diese Maschine.",
+        "noIdentifier": "Die Zeile verfügt über keinen System-UUID oder Seriennummer.",
+        "noTag": "Kein Tag in dieser Zeile; ein Import löscht nie ein Tag.",
+        "placeholder": "Ein Platzhalter des Lieferanten identifiziert keine Maschine.",
+        "tagHeld": "Dieses Tag wartet bereits auf eine andere Maschine.",
+        "tagInUse": "Eine andere Maschine hat bereits diesen Tag."
+      },
+      "replaces": "Ersetzt {{previous}}",
+      "status": {
+        "ambiguous": "Unklar",
+        "assign": "Zuweisen wird",
+        "duplicate": "Duplikat",
+        "failsScheme": "Scheinprüfung fehlgeschlagen",
+        "hold": "Wartet auf die Maschine",
+        "invalid": "Ungültig",
+        "skipped": "Übersprungen",
+        "unchanged": "Unverändert"
+      },
+      "subtitle": "System-UUIDs oder Seriennummern mit einer CSV-Datei zuordnen. Sie sehen, was jede Zeile tun wird, bevor etwas geschrieben wird.",
+      "title": "Import und Export",
+      "truncated": "Die ersten {{shown}} von {{total}} Zeilen werden angezeigt.",
+      "working": "Im Arbeitsprozess"
     }
   },
   "machine": {

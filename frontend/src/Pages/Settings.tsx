@@ -42,6 +42,7 @@ import AuthenticationProvidersSettings from '../Components/AuthenticationProvide
 import ServerRoleSettings from '../Components/ServerRoleSettings';
 import LoggingSettings from '../Components/LoggingSettings';
 import AssetTagSchemeSettings from '../Components/AssetTagSchemeSettings';
+import AssetTagImportExport from '../Components/AssetTagImportExport';
 import axiosInstance from '../Services/api';
 import { formatUTCDate } from '../utils/dateUtils';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
@@ -782,7 +783,12 @@ const Settings: React.FC = () => {
         <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto' }}>
         {tabNames[activeTab] === 'configuration' && <ConfigurationSettings />}
         {tabNames[activeTab] === 'tags' && renderTagsTab()}
-        {tabNames[activeTab] === 'asset-tags' && <AssetTagSchemeSettings />}
+        {tabNames[activeTab] === 'asset-tags' && (
+          <>
+            <AssetTagSchemeSettings />
+            <AssetTagImportExport />
+          </>
+        )}
         {tabNames[activeTab] === 'queues' && <QueuesTab />}
         {tabNames[activeTab] === 'server-role' && <ServerRoleSettings />}
         {tabNames[activeTab] === 'logging' && <LoggingSettings />}

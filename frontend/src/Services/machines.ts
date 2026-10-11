@@ -145,3 +145,63 @@ export const errorCode = (error: unknown): string | null => {
   }
   return null;
 };
+
+// --- CSV import / export and held tags (Phase 23.2 S5) ---------------------
+
+/** What one CSV row will do; ``reason`` is a code the UI translates. */
+export type ImportStatus =
+  | 'assign'
+  | 'unchanged'
+  | 'hold'
+  | 'fails_scheme'
+  | 'duplicate'
+  | 'ambiguous'
+  | 'invalid'
+  | 'skipped';
+
+export interface ImportRow {
+  line: number;
+  asset_tag: string;
+  system_uuid: string;
+  system_serial: string;
+  status: ImportStatus;
+  reason: string | null;
+  machine_id: string | null;
+  /** The machine's (or the hold's) tag before this row. */
+  previous: string | null;
+  hosts: string[];
+  /** MAC of a bare-metal box discovery saw with this serial. */
+  discovered_mac: string | null;
+}
+
+export interface ImportResult {
+  rows: ImportRow[];
+  summary: Partial<Record<ImportStatus, number>>;
+}
+
+export interface HeldTag {
+  id: string;
+  kind: 'system_uuid' | 'system_serial';
+  identifier: string;
+  asset_tag: string;
+  created_at: string | null;
+  created_by: string | null;
+}
+
+/** A dry run of the file: what every row would do.  Writes nothing. */
+export const previewAssetTagImport = async (csv: string): Promise<ImportResult> =>
+  (await axiosInstance.post<ImportResult>('/api/v1/asset-tags/import/preview', { csv })).data;
+
+/** Re-plans the file on the server and writes its assign / hold rows. */
+export const applyAssetTagImport = async (csv: string): Promise<ImportResult> =>
+  (await axiosInstance.post<ImportResult>('/api/v1/asset-tags/import/apply', { csv })).data;
+
+export const exportAssetTags = async (): Promise<Blob> =>
+  (await axiosInstance.get<Blob>('/api/v1/asset-tags/export', { responseType: 'blob' })).data;
+
+export const getHeldTags = async (): Promise<HeldTag[]> =>
+  (await axiosInstance.get<{ held: HeldTag[] }>('/api/v1/asset-tags/held')).data.held;
+
+export const releaseHeldTag = async (id: string): Promise<void> => {
+  await axiosInstance.delete(`/api/v1/asset-tags/held/${id}`);
+};

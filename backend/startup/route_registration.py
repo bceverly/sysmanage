@@ -29,6 +29,7 @@ from backend.api import (
     antivirus_status,
     api_keys,
     asset_discovery,
+    asset_tag_csv,
     asset_tags,
     audit_log,
     auth,
@@ -434,6 +435,7 @@ def register_routes(app: FastAPI):
     logger.debug("Adding machines router (Phase 23.2 S2)")
     _include_versioned(app, machines.router, tags=["machines"])
     _include_versioned(app, asset_tags.router, tags=["machines"])
+    _include_versioned(app, asset_tag_csv.router, tags=["machines"])
 
     logger.debug("Adding asset-discovery router (Phase 21.6 S2)")
     _include_versioned(app, asset_discovery.router, tags=["asset-discovery"])

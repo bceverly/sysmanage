@@ -537,7 +537,7 @@
     "driftingFor": "漂移中",
     "findingsFailed": "無法載入此主機的研究結果",
     "host": "主機",
-    "intro": "不再符合其分配的配置文件的主機。漂移由乾跑檢測，因此這裡沒有任何更改 -- 修復會重新應用配置文件。",
+    "intro": "不再符合分配給它們的配置的主機。 漂移是通過模擬執行檢測的，因此這裡沒有進行任何更改 -- 修復會重新應用實際配置。",
     "loadFailed": "無法載入漂移狀態",
     "noDetail": "無需再報告詳細資訊。",
     "noDrift": "每個主機都符合其分配的配置文件。",
@@ -569,7 +569,7 @@
     "concurrency": "同時處理的主機數",
     "concurrencyClamped": "並發量被調整到 {{value}}，這個伺服器允許的最高值。",
     "concurrencyHelp": "一次可以運行的主機數量。伺服器會限制這個數量。",
-    "confirmLaunchDry": "這會對 {{inventory}} 進行乾跑 {{profile}}。 不會有任何改變。",
+    "confirmLaunchDry": "這進行一個 {{profile}} 的模擬執行對 {{inventory}}。不會有任何改變。",
     "confirmLaunchLive": "這會在 {{inventory}} 中的每台主機上實際執行 {{profile}}，並將其變更為與之一致。處於維護時段內的主機將暫緩下發。",
     "confirmLaunchTitle": "啟動這個工作？",
     "deleteInventoryBody": "必須先刪除使用 {{name}} 的工作範本。",
@@ -618,7 +618,7 @@
   },
   "configManagement": {
     "applyAction": "應用",
-    "applyDryRun": "乾跑 (只列印變更，不實際執行)",
+    "applyDryRun": "模擬執行（在不更改任何內容的情況下報告將要發生的變化）",
     "applyDryRunAction": "預覽變更",
     "applyEngine": "引擎",
     "applyError": "未能排隊套用配置資料表",
@@ -649,7 +649,7 @@
     "prereqInstallError": "請求安裝配置管理必要條件失敗",
     "prereqInstallRequested": "已請求安裝。此卡片在主機回報後更新。",
     "runChanged": "已更改",
-    "runCheckMode": "乾跑",
+    "runCheckMode": "模擬執行",
     "runFailed": "失敗",
     "runNoChanges": "無變更",
     "runNoProfile": "沒有配置檔",
@@ -4672,6 +4672,68 @@
       "suffix": "後綴（可選）",
       "tabLabel": "資產標籤",
       "title": "資產標籤命名規範"
+    },
+    "held": {
+      "bySerial": "序列號{{id}}",
+      "byUuid": "系統 UUID{{id}}",
+      "explain": "尚未報告的機器的標籤。每次有該 UUID 或序列號報告時，都會自動應用第一個沒有標籤的機器的標籤。",
+      "heldBy": "新增者",
+      "loadFailed": "無法加載待處理標籤。",
+      "none": "沒有待處理的標籤。",
+      "release": "刪除",
+      "title": "待處理標籤",
+      "waitingFor": "等待中"
+    },
+    "import": {
+      "applied": "匯入已套用：已指派 {{assigned}} 個，待處理 {{held}} 個。",
+      "apply": "套用匯入 ({{rows}})",
+      "choose": "匯入 CSV...",
+      "col": {
+        "detail": "詳細資料",
+        "hosts": "主機",
+        "identifier": "系統 UUID / 序列號",
+        "line": "行",
+        "outcome": "結果",
+        "tag": "資產標籤"
+      },
+      "discovered": "裸金屬發現可看到{{mac}}",
+      "export": "匯出 CSV",
+      "failed": "請求失敗。請再試一次。",
+      "fileError": {
+        "missingColumns": "這個檔案需要 asset_tag 列和系統 UUID 或 system_serial 列。",
+        "notCsv": "檔案並非可讀取的 CSV 檔案。",
+        "tooLarge": "檔案大小超過 1 MB。",
+        "tooManyRows": "檔案超過 10,000 行。",
+        "unreadable": "無法讀取檔案。"
+      },
+      "previewTitle": "預覽：{{file}}",
+      "readOnly": "匯入需要「管理資產標籤」角色。",
+      "reason": {
+        "ambiguous": "多個機器報告相同的 UUID。請添加序列號以選擇一個。",
+        "badUuid": "系統 UUID 不是有效的 UUID。",
+        "duplicateInFile": "檔案中有一行使用了這個標籤。",
+        "identifierRepeated": "檔案中有一行指定了這台機器。",
+        "noIdentifier": "該行沒有系統 UUID 或序列號。",
+        "noTag": "此列沒有標籤；匯入絕不會清除標籤。",
+        "placeholder": "供應商的預留位無法識別任何機器。",
+        "tagHeld": "此標籤已在等待另一台機器。",
+        "tagInUse": "另一台機器已經有這個標籤。"
+      },
+      "replaces": "取代 {{previous}}",
+      "status": {
+        "ambiguous": "模糊定義",
+        "assign": "將分配",
+        "duplicate": "重複的",
+        "failsScheme": "違反方案",
+        "hold": "將等待該機器回報",
+        "invalid": "無效的",
+        "skipped": "跳過",
+        "unchanged": "未變更"
+      },
+      "subtitle": "使用 CSV 檔案將系統 UUID 或序列號映射到資產標籤。您可以在執行任何寫入之前看到每行的作用。",
+      "title": "匯入與匯出",
+      "truncated": "顯示前 {{shown}} 列，共 {{total}} 列。",
+      "working": "正在處理"
     }
   },
   "machine": {

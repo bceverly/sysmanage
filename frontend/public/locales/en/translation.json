@@ -4672,6 +4672,68 @@
       "suffix": "Suffix (optional)",
       "tabLabel": "Asset Tags",
       "title": "Asset tag naming scheme"
+    },
+    "held": {
+      "bySerial": "Serial number {{id}}",
+      "byUuid": "System UUID {{id}}",
+      "explain": "Tags for machines that have not reported in yet. Each is applied the first time a machine with that UUID or serial number reports in without a tag.",
+      "heldBy": "Added by",
+      "loadFailed": "Pending tags could not be loaded.",
+      "none": "No tags are pending.",
+      "release": "Remove",
+      "title": "Pending tags",
+      "waitingFor": "Waiting for"
+    },
+    "import": {
+      "applied": "Import applied: {{assigned}} assigned, {{held}} pending.",
+      "apply": "Apply import ({{rows}})",
+      "choose": "Import CSV...",
+      "col": {
+        "detail": "Detail",
+        "hosts": "Hosts",
+        "identifier": "System UUID / serial",
+        "line": "Line",
+        "outcome": "Outcome",
+        "tag": "Asset tag"
+      },
+      "discovered": "Seen by bare-metal discovery ({{mac}})",
+      "export": "Export CSV",
+      "failed": "The request failed. Try again.",
+      "fileError": {
+        "missingColumns": "The file needs an asset_tag column and a system_uuid or system_serial column.",
+        "notCsv": "The file is not a readable CSV file.",
+        "tooLarge": "The file is larger than 1 MB.",
+        "tooManyRows": "The file has more than 10,000 rows.",
+        "unreadable": "The file could not be read."
+      },
+      "previewTitle": "Preview: {{file}}",
+      "readOnly": "Importing requires the Manage Asset Tags role.",
+      "reason": {
+        "ambiguous": "More than one machine reports this UUID. Add the serial number to choose one.",
+        "badUuid": "The system UUID is not a valid UUID.",
+        "duplicateInFile": "An earlier row in the file uses this tag.",
+        "identifierRepeated": "An earlier row in the file names this machine.",
+        "noIdentifier": "The row has no system UUID or serial number.",
+        "noTag": "No tag in this row; an import never clears a tag.",
+        "placeholder": "A vendor placeholder identifies no machine.",
+        "tagHeld": "This tag is already waiting for another machine.",
+        "tagInUse": "Another machine already has this tag."
+      },
+      "replaces": "Replaces {{previous}}",
+      "status": {
+        "ambiguous": "Ambiguous",
+        "assign": "Will assign",
+        "duplicate": "Duplicate",
+        "failsScheme": "Fails the scheme",
+        "hold": "Will wait for the machine",
+        "invalid": "Invalid",
+        "skipped": "Skipped",
+        "unchanged": "Unchanged"
+      },
+      "subtitle": "Map system UUIDs or serial numbers to asset tags with a CSV file. You see what every row will do before anything is written.",
+      "title": "Import and export",
+      "truncated": "Showing the first {{shown}} of {{total}} rows.",
+      "working": "Working"
     }
   },
   "machine": {

@@ -827,3 +827,15 @@ class AssetTagScheme(TestBase):
     enforce = Column(Boolean, nullable=False, default=False)
     updated_at = Column(DateTime, nullable=True)
     updated_by = Column(String(255), nullable=True)
+
+
+class HeldAssetTag(TestBase):
+    """Phase 23.2 S5 -- a tag waiting for a machine that has not reported in."""
+
+    __tablename__ = "held_asset_tag"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    kind = Column(String(16), nullable=False)
+    identifier = Column(String(255), nullable=False)
+    asset_tag = Column(String(128), nullable=False, unique=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_by = Column(String(255), nullable=True)

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-11 10:39-0400\n"
+"POT-Creation-Date: 2026-10-11 14:41-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -98,7 +98,7 @@ msgstr ""
 msgid "Asset tag naming scheme changed"
 msgstr ""
 
-#: backend/api/asset_tags.py:204
+#: backend/api/asset_tags.py:204 backend/services/asset_tag_csv.py:362
 #, python-format
 msgid "Asset tag set to %s"
 msgstr ""
@@ -4444,6 +4444,11 @@ msgstr ""
 msgid "Failed to remove firewall role: %s"
 msgstr ""
 
+#: backend/api/asset_tag_csv.py:140
+#, python-format
+msgid "Held asset tag %s released"
+msgstr ""
+
 #: backend/api/lifecycle_actions.py:58 backend/api/lifecycle_actions.py:69
 msgid "OS lifecycle management requires a SysManage Professional license."
 msgstr ""
@@ -5166,6 +5171,11 @@ msgstr ""
 msgid "At most 10000 hosts can be scanned in one job"
 msgstr ""
 
+#: backend/services/held_asset_tags.py:159
+#, python-format
+msgid "Held asset tag %s applied"
+msgstr ""
+
 #: backend/services/reboot_orchestration_service.py:253
 #, python-format
 msgid "%(failed_count)d of %(total_count)d child host(s) failed to restart"
@@ -5277,6 +5287,11 @@ msgstr ""
 #: backend/services/malware_review.py:183
 #, python-format
 msgid "That decision cannot be made here: %s"
+msgstr ""
+
+#: backend/services/asset_tag_csv.py:366
+#, python-format
+msgid "Asset tag %s held until the machine reports in"
 msgstr ""
 
 #: backend/services/vault_service.py:219
