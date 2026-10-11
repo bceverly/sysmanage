@@ -21,6 +21,7 @@ export const SETTINGS_CAT_LABEL = new Map<string, { key: string; def: string }>(
 
 export const SETTINGS_TAB_CATEGORY = new Map<string, string>([
   ['configuration', 'general'], ['tags', 'general'], ['host-defaults', 'general'], ['available-packages', 'general'],
+  ['asset-tags', 'general'],
   ['authentication', 'security'], ['antivirus', 'security'], ['firewall-roles', 'security'],
   ['compliance-profiles', 'security'], ['cve-refresh', 'security'], ['cve-database', 'security'], ['fips-compliance', 'security'],
   ['update-profiles', 'patching'], ['distributions', 'patching'],
@@ -67,6 +68,9 @@ export const SETTINGS_TAB_DEFS: SettingsTabDef[] = [
   { id: 'logging', labelKey: 'logging.title', labelDefault: 'Logging' },
   { id: 'host-defaults', labelKey: 'hostDefaults.title', labelDefault: 'Host Defaults' },
   { id: 'tags', labelKey: 'tags.title', labelDefault: 'Tags' },
+  // Phase 23.2: asset-tag naming scheme.  OSS, ungated; saving needs the
+  // Manage Asset Tags role (the page shows read-only without it).
+  { id: 'asset-tags', labelKey: 'assetTags.scheme.tabLabel', labelDefault: 'Asset Tags' },
   { id: 'queues', labelKey: 'queues.title', labelDefault: 'Queues' },
   {
     id: 'integrations',

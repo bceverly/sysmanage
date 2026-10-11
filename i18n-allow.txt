@@ -127,6 +127,9 @@ re:(rbac|opensource|dead-letter)
 de,es,fr,it,nl,pt,zh_CN,zh_TW: re:Shell
 de,es,fr,it,nl,pt: re:(Backend|Op)
 de,es,it,nl,pt: re:(Hardware|Host|Kernel|Software|hosts)
+es,it,pt: re:hardware
+nl: re:Model
+nl: re:Asset tag: \{\{tag\}\}
 de,es,fr,it,nl: re:[Aa]ntivirus
 es,fr,it,nl,pt: re:Scripts?
 de,fr,it,nl: re:(Client|Digest|Info)

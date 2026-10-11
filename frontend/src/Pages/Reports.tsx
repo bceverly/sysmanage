@@ -290,6 +290,14 @@ const Reports: React.FC = () => {
         tags: [t('reports.tag.hosts', 'hosts'), t('reports.tag.tags', 'tags'), t('reports.tag.organization', 'organization')]
       },
       {
+        id: 'untagged-machines',
+        name: t('reports.untaggedMachines.name', 'Untagged Machines'),
+        description: t('reports.untaggedMachines.description', 'Machines that have no asset tag yet, with every operating system installed on each one, its vendor, model, serial number, and system UUID. Use it to find hardware that still needs a label.'),
+        category: 'hosts',
+        screenshot: `${baseURL}/api/v1/reporting/screenshots/untagged-machines.png`,
+        tags: [t('reports.tag.hosts', 'hosts'), t('reports.tag.assetTags', 'asset tags'), t('reports.tag.hardware', 'hardware')]
+      },
+      {
         id: 'users-list',
         name: t('reports.usersList.name', 'SysManage Users'),
         description: t('reports.usersList.description', 'Comprehensive list of all SysManage users showing their profiles, roles, permissions, and account status. Includes user creation dates and last login times.'),

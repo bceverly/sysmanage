@@ -33,6 +33,7 @@ import {
     getStorageUsagePercentage,
     getStorageUsageColor,
 } from './hostDetailHelpers';
+import HostMachineCard from './HostMachineCard';
 
 interface HostHardwareTabProps {
     host: SysManageHost;
@@ -62,6 +63,12 @@ const HostHardwareTab: React.FC<HostHardwareTabProps> = ({
     const { t } = useTranslation();
     return (
                 <Grid container spacing={3}>
+                {/* Machine (hardware identity + asset tag) */}
+                {host.id && (
+                    <Grid size={{ xs: 12 }}>
+                        <HostMachineCard hostId={host.id} />
+                    </Grid>
+                )}
                 {/* Hardware Information */}
                 <Grid size={{ xs: 12 }}>
                     <Card>

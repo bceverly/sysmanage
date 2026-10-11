@@ -2849,7 +2849,9 @@
       "systemInfo": "시스템 정보",
       "tags": "태그",
       "tracking": "추적",
-      "users": "사용자들"
+      "users": "사용자들",
+      "assetTags": "자산 태그",
+      "hardware": "하드웨어"
     },
     "title": "보고서",
     "unknownError": "알 수 없는 오류",
@@ -2861,7 +2863,11 @@
       "description": "SysManage 사용자의 전체 목록을 보여줍니다. 프로필, 역할, 권한 및 계정 상태가 포함됩니다. 사용자 생성 날짜와 마지막 로그인 시간이 포함됩니다.",
       "name": "SysManage 사용자"
     },
-    "viewReport": "보고서 보기"
+    "viewReport": "보고서 보기",
+    "untaggedMachines": {
+      "description": "아직 자산 태그가 없는 모든 기계, 각 운영 체제가 설치되어 있는 각 기계, 제조업체, 모델, 시리얼 번호 및 시스템 UUID. 이를 사용하여 아직 라벨이 필요한 하드웨어를 찾습니다.",
+      "name": "태그가 없는 머신"
+    }
   },
   "resetPassword": {
     "backToLogin": "로그인으로 돌아가기",
@@ -4620,5 +4626,99 @@
       "inventories": "인벤토리",
       "tags": "태그"
     }
+  },
+  "assetTags": {
+    "grid": {
+      "column": "자산 태그",
+      "paletteResult": "자산 태그: {{tag}}",
+      "untagged": "태그가 없음",
+      "untaggedOnly": "태그가 없는 경우에만",
+      "untaggedOnlyTooltip": "머신이 자산 태그가 없는 호스트만 표시"
+    },
+    "scheme": {
+      "advancedRegex": "고급: 정규 표현식",
+      "allConform": "모든 기존 태그가 저장된 방식에 맞춥니다.",
+      "conformanceTitle": "기존 태그들",
+      "digits": "숫자",
+      "digitsHelp": "숫자는 이 폭에 맞춰 0으로 채워집니다.",
+      "draftNonconforming": "이 초안으로 인해 {{total}}개의 기존 태그 중 {{bad}}개가 일치하지 않게 됩니다.",
+      "enforce": "입력 시 강제",
+      "enforceHelp": "이 옵션이 활성화되면 스키마에 맞지 않는 태그는 입력될 때 거부됩니다. 비활성화하면 허용되고 보고됩니다.",
+      "examplesFail": "실패한 태그",
+      "examplesPass": "통과된 태그",
+      "fieldInvalid": "이 값은 스키마에 유효하지 않습니다.",
+      "loadFailed": "자산 태그 방식을 로드할 수 없습니다.",
+      "loading": "자산 태그 방식을 로드 중입니다.",
+      "nextFree": "다음 자유 태그",
+      "noExamples": "예시 없음",
+      "noTags": "아직 자산 태그가 없는 기계가 없습니다.",
+      "nonconformingCount": "기존 태그 {{total}}개 중 {{bad}}개가 저장된 체계를 따르지 않습니다.",
+      "pattern": "정규 표현식",
+      "patternHelp": "전체 태그가 이 패턴에 일치해야 합니다. 빌더가 표현할 수 없는 스키마에만 사용하십시오.",
+      "prefix": "접두사",
+      "prefixHelp": "예를 들어 IT 또는 HQ-LAPTOP입니다.",
+      "previewFailed": "이 초안은 미리 볼 수 없습니다. 강조 표시된 필드를 확인하십시오.",
+      "previewTitle": "라이브 미리보기",
+      "previewing": "미리보기 업데이트",
+      "readOnly": "이 스키마를 변경하려면 '자산 태그 관리' 권한이 필요합니다.",
+      "reportOnly": "SysManage는 준수하지 않는 태그에 대해서만 보고서를 생성합니다. 기존 태그를 재작성하지 않습니다; 필요에 따라 각 머신에서 변경하십시오.",
+      "sampleTag": "샘플 태그",
+      "saveFailed": "저장된 자산 태그 방식을 저장할 수 없습니다.",
+      "saveInvalid": "스키마가 유효하지 않습니다. 강조 표시된 필드를 수정하고 다시 저장하십시오.",
+      "saved": "저장된 자산 태그 방식이 있습니다.",
+      "separator": "분리기",
+      "separatorNone": "없음",
+      "subtitle": "유효한 자산 태그가 무엇인지 정의하세요. 미리보기가 편집하는 동안 업데이트되며, 저장하기 전까지 아무것도 저장되지 않습니다.",
+      "suffix": "접미어 (선택 사항)",
+      "tabLabel": "자산 태그들",
+      "title": "자산 태그 명명 방식"
+    }
+  },
+  "machine": {
+    "assetTag": "자산 태그",
+    "boardSerial": "보드 시리얼 번호",
+    "changeAssetTag": "변경",
+    "clearAssetTag": "지우기",
+    "conflict": {
+      "different": "다른 기계",
+      "same": "동일한 머신",
+      "serialMismatch": "다른 기계가 동일한 시스템 UUID를 보고하지만 다른 시리얼 번호를 가지고 있습니다.",
+      "title": "기계 식별 충돌",
+      "virtualClone": "다른 호스트가 이 가상 머신의 식별 정보를 이미 보고합니다. 보통 UUID를 유지한 클론입니다."
+    },
+    "hostInactive": "비활성화",
+    "loadFailed": "머신을 로드할 수 없었습니다.",
+    "model": "모델",
+    "noAssetTag": "자산 태그 없음",
+    "noMachine": {
+      "absent": "이 하드웨어는 시스템 UUID 또는 시리얼 번호를 노출하지 않습니다.",
+      "failed": "에이전트는 하드웨어 식별 정보를 읽으려고 시도했지만 읽기가 실패했습니다.",
+      "notReported": "에이전트는 아직 이 호스트의 하드웨어 식별 정보를 보고하지 않았습니다.",
+      "placeholder": "이 하드웨어는 플레이스홀더 UUID를 포함하는 펌웨어를 가지고 있으므로 다른 머신과 구별할 수 없습니다.",
+      "title": "식별된 기계가 없습니다",
+      "unknown": "이 호스트는 아직 머신과 연결되지 않았습니다.",
+      "unprivileged": "이 OS에서 에이전트는 하드웨어 식별 정보를 읽기 위해 관리자 권한이 필요합니다."
+    },
+    "noOtherHosts": "이 기계의 다른 운영 체제가 보고하지 않았습니다.",
+    "notAvailable": "사용 불가",
+    "otherHosts": "기계의 다른 운영 체제",
+    "resolveFailed": "갈등을 해결할 수 없습니다.",
+    "resolveFailedCode": "갈등을 해결할 수 없었습니다 ({{code}}).",
+    "saveFailed": "자산 태그를 저장할 수 없었습니다.",
+    "setAssetTag": "자산 태그 설정",
+    "systemSerial": "시스템 시리얼",
+    "systemUuid": "시스템 UUID",
+    "tagReason": {
+      "badCharacters": "자산 태그에 허용되지 않은 문자가 포함되어 있습니다.",
+      "doesNotMatchScheme": "자산 태그가 스키마와 일치하지 않습니다.",
+      "duplicate": "다른 기계가 이 자산 태그를 이미 가지고 있습니다.",
+      "empty": "자산 태그를 입력하세요.",
+      "schemeTimeout": "자산 태그 스키마가 이 태그를 확인하는 데 너무 오래 걸렸습니다.",
+      "tooLong": "자산 태그가 너무 깁니다.",
+      "unknown": "자산 태그가 거부되었습니다 ({{code}})."
+    },
+    "title": "기계",
+    "vendor": "제조업체",
+    "virtualMachine": "가상 머신"
   }
 }

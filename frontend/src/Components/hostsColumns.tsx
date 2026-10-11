@@ -13,6 +13,7 @@ import { TFunction } from 'i18next';
 import { parseUTCTimestamp } from '../utils/dateUtils';
 import { SysManageHost } from '../Services/hosts';
 import { appLocale } from '../utils/locale';
+import { buildAssetTagColumn } from './hostAssetTag';
 
 interface BuildHostColumnsArgs {
     t: TFunction;
@@ -60,6 +61,7 @@ export function buildHostColumns({
                 );
             }
         },
+        buildAssetTagColumn(t),
         { field: 'platform', headerName: t('hosts.platform'), width: 120 },
         { field: 'ipv4', headerName: t('hosts.ipv4'), width: 150 },
         { field: 'ipv6', headerName: t('hosts.ipv6'), width: 200 },

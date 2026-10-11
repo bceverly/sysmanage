@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 08:17-0400\n"
+"POT-Creation-Date: 2026-10-11 10:39-0400\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -496,7 +496,7 @@ msgstr "Не удалось записать завершение установ
 msgid "Report template not found"
 msgstr "Шаблон отчёта не найден"
 
-#: backend/api/report_templates.py:177 backend/api/package_compliance.py:138
+#: backend/api/report_templates.py:185 backend/api/package_compliance.py:138
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:107
 #: backend/api/upgrade_profiles.py:128
 #: backend/api/repository_mirroring_helpers.py:154
@@ -504,32 +504,32 @@ msgstr "Шаблон отчёта не найден"
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "Недействительный UUID для %(field)s: %(value)s"
 
-#: backend/api/report_templates.py:192 backend/api/report_templates.py:260
+#: backend/api/report_templates.py:200 backend/api/report_templates.py:268
 #, python-format
 msgid "Unknown base_report_type: %s"
 msgstr "Неизвестный base_report_type: %s"
 
-#: backend/api/report_templates.py:201
+#: backend/api/report_templates.py:209
 #, python-format
 msgid "Unknown field code(s) for %(base_report_type)s: %(codes)s"
 msgstr "Неизвестный код поля(-ей) для %(base_report_type)s: %(codes)s"
 
-#: backend/api/report_templates.py:244
+#: backend/api/report_templates.py:252
 #, python-format
 msgid "Created report template '%s'"
 msgstr "Шаблон отчёта '%s' создан"
 
-#: backend/api/report_templates.py:334
+#: backend/api/report_templates.py:342
 #, python-format
 msgid "Updated report template '%s'"
 msgstr "Шаблон отчёта '%s' обновлён"
 
-#: backend/api/report_templates.py:367
+#: backend/api/report_templates.py:375
 #, python-format
 msgid "Deleted report template '%s'"
 msgstr "Шаблон отчёта '%s' удалён"
 
-#: backend/api/report_templates.py:372
+#: backend/api/report_templates.py:380
 msgid "Report template deleted"
 msgstr "Шаблон отчёта удалён"
 
@@ -654,7 +654,7 @@ msgstr "Запрос на отключение репозитория успеш
 msgid "Failed to queue repository disable: %s"
 msgstr "Не удалось добавить отключение репозитория в очередь: %s"
 
-#: backend/api/reports/endpoints.py:69
+#: backend/api/reports/endpoints.py:71
 msgid ""
 "Report generation requires a SysManage Professional+ license. Please upgrade"
 " to access this feature."
@@ -662,47 +662,51 @@ msgstr ""
 "Генерация отчётов требует лицензии SysManage Professional+. Обновите для "
 "доступа к этой функции."
 
-#: backend/api/reports/endpoints.py:150
+#: backend/api/reports/endpoints.py:152
 msgid "Registered Hosts"
 msgstr "Зарегистрированные хосты"
 
-#: backend/api/reports/endpoints.py:152
+#: backend/api/reports/endpoints.py:154
 msgid "Hosts with Tags"
 msgstr "Хосты с тегами"
 
-#: backend/api/reports/endpoints.py:160
+#: backend/api/reports/endpoints.py:162
 msgid "SysManage Users"
 msgstr "Пользователи SysManage"
 
-#: backend/api/reports/endpoints.py:165
+#: backend/api/reports/endpoints.py:167
 msgid "Host Firewall Status"
 msgstr "Состояние брандмауэра хоста"
 
-#: backend/api/reports/endpoints.py:171
+#: backend/api/reports/endpoints.py:173
 msgid "Open-Source Antivirus Status"
 msgstr "Состояние антивируса с открытым исходным кодом"
 
-#: backend/api/reports/endpoints.py:178
+#: backend/api/reports/endpoints.py:180
 msgid "Commercial Antivirus Status"
 msgstr "Состояние коммерческого антивируса"
 
-#: backend/api/reports/endpoints.py:191
+#: backend/api/reports/endpoints.py:193
 msgid "User Security Roles (RBAC)"
 msgstr "Роли безопасности пользователя (RBAC)"
 
-#: backend/api/reports/endpoints.py:201 backend/api/audit_log.py:536
+#: backend/api/reports/endpoints.py:203 backend/api/audit_log.py:536
 msgid "Audit Log"
 msgstr "Журнал аудита"
 
-#: backend/api/reports/endpoints.py:204 backend/api/reports/endpoints.py:342
+#: backend/api/reports/endpoints.py:209
+msgid "Untagged Machines"
+msgstr "Машины без тега"
+
+#: backend/api/reports/endpoints.py:212 backend/api/reports/endpoints.py:357
 msgid "Unknown report type"
 msgstr "Неизвестный тип отчета"
 
-#: backend/api/reports/endpoints.py:295
+#: backend/api/reports/endpoints.py:303
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "Создание PDF недоступно. Пожалуйста, установите пакет reportlab."
 
-#: backend/api/reports/endpoints.py:367
+#: backend/api/reports/endpoints.py:382
 msgid "Report"
 msgstr "Отчёт"
 
@@ -3317,15 +3321,15 @@ msgstr "Доступ запрещен: требуется роль DELETE_HOST"
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Доступ запрещен: требуется роль VIEW_HOST_DETAILS"
 
-#: backend/api/host.py:651
+#: backend/api/host.py:666
 msgid "Host already exists"
 msgstr "Хост уже существует"
 
-#: backend/api/host.py:763
+#: backend/api/host.py:778
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Регистрация включена: хост недавно был удален"
 
-#: backend/api/host.py:843
+#: backend/api/host.py:858
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"

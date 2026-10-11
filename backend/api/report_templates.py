@@ -63,6 +63,7 @@ _BASE_REPORTS: Dict[str, List[Dict[str, str]]] = {
     "registered-hosts": [
         {"code": "hostname", "label": "Hostname"},
         {"code": "fqdn", "label": "FQDN"},
+        {"code": "asset_tag", "label": "Asset Tag"},
         {"code": "ipv4", "label": "IPv4"},
         {"code": "ipv6", "label": "IPv6"},
         {"code": "os", "label": "OS"},
@@ -135,6 +136,13 @@ _BASE_REPORTS: Dict[str, List[Dict[str, str]]] = {
         {"code": "entity_name", "label": "Entity Name"},
         {"code": "result", "label": "Result"},
         {"code": "description", "label": "Description"},
+    ],
+    "untagged-machines": [
+        {"code": "hosts", "label": "Hosts"},
+        {"code": "vendor", "label": "Vendor"},
+        {"code": "model", "label": "Model"},
+        {"code": "system_serial", "label": "Serial Number"},
+        {"code": "system_uuid", "label": "System UUID"},
     ],
 }
 

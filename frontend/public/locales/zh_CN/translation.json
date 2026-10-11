@@ -2849,7 +2849,9 @@
       "systemInfo": "系统信息",
       "tags": "标签",
       "tracking": "跟踪",
-      "users": "用户"
+      "users": "用户",
+      "assetTags": "资产标签",
+      "hardware": "硬件"
     },
     "title": "报告",
     "unknownError": "未知错误",
@@ -2861,7 +2863,11 @@
       "description": "SysManage用户全面清单，显示其配置文件、角色、权限和账户状态。包含用户创建日期和最后登录时间。",
       "name": "SysManage 用户"
     },
-    "viewReport": "查看报告"
+    "viewReport": "查看报告",
+    "untaggedMachines": {
+      "description": "尚未贴有资产标签的机器，每台都安装了操作系统、供应商、型号、序列号和系统UUID。用它来查找仍需贴标签的硬件。",
+      "name": "未标记机器"
+    }
   },
   "resetPassword": {
     "backToLogin": "返回登录",
@@ -4620,5 +4626,99 @@
       "inventories": "清单",
       "tags": "标签"
     }
+  },
+  "assetTags": {
+    "grid": {
+      "column": "资产标签",
+      "paletteResult": "资产标签: {{tag}}",
+      "untagged": "未标记",
+      "untaggedOnly": "仅未标记",
+      "untaggedOnlyTooltip": "仅显示没有资产标签的主机"
+    },
+    "scheme": {
+      "advancedRegex": "高级：正则表达式",
+      "allConform": "每个现有的标签都符合保存的方案。",
+      "conformanceTitle": "现有标签",
+      "digits": "数字",
+      "digitsHelp": "数字被填充到这个宽度。",
+      "draftNonconforming": "此草稿将导致{{bad}}个{{total}}现有标签不符合规则。",
+      "enforce": "在入口强制执行",
+      "enforceHelp": "当启用时，不符合方案的标签将被拒绝。当禁用时，它会被接受并报告。",
+      "examplesFail": "失败的标签",
+      "examplesPass": "通过的标签",
+      "fieldInvalid": "此值不适用于该方案。",
+      "loadFailed": "无法加载资产标签方案。",
+      "loading": "加载资产标签方案",
+      "nextFree": "下一个可用的标签",
+      "noExamples": "没有示例。",
+      "noTags": "没有机器有资产标签。",
+      "nonconformingCount": "{{total}} 个现有标签中有 {{bad}} 个不符合已保存的方案。",
+      "pattern": "正则表达式",
+      "patternHelp": "整个标签必须符合此模式。仅用于构建器无法表达的方案。",
+      "prefix": "前缀",
+      "prefixHelp": "例如，IT或总部笔记本电脑。",
+      "previewFailed": "无法预览此草稿。请检查突出显示的字段。",
+      "previewTitle": "实时预览",
+      "previewing": "更新预览",
+      "readOnly": "您可以查看该方案，但更改该方案需要“管理资产标签”角色。",
+      "reportOnly": "SysManage 只报告不符合规则的标签。它永远不会重写现有的标签；如果需要，请在每台机器上更改它们。",
+      "sampleTag": "采样标签",
+      "saveFailed": "无法保存资产标签方案。",
+      "saveInvalid": "方案无效。请纠正突出显示的字段并保存。",
+      "saved": "资产标签方案已保存。",
+      "separator": "分隔符",
+      "separatorNone": "无",
+      "subtitle": "定义有效资产标签的格式。预览会根据你编辑时实时更新；直到你按下“保存”按钮，什么也不会被保存。",
+      "suffix": "后缀（可选）",
+      "tabLabel": "资产标签",
+      "title": "资产标签命名规则"
+    }
+  },
+  "machine": {
+    "assetTag": "资产标签",
+    "boardSerial": "板序列号",
+    "changeAssetTag": "更改",
+    "clearAssetTag": "清除",
+    "conflict": {
+      "different": "不同的机器",
+      "same": "同一机器",
+      "serialMismatch": "另一个机器报告了相同的系统UUID，但一个不同的序列号。",
+      "title": "机器身份冲突",
+      "virtualClone": "另一个主机已经报告了这个虚拟机的身份。它通常是保留了其UUID的克隆。"
+    },
+    "hostInactive": "未活动",
+    "loadFailed": "无法加载机器。",
+    "model": "模型",
+    "noAssetTag": "没有资产标签",
+    "noMachine": {
+      "absent": "此硬件不暴露系统 UUID 或序列号。",
+      "failed": "代理尝试读取硬件身份但读取失败了。",
+      "notReported": "代理还没有报告此主机的硬件身份。",
+      "placeholder": "此硬件的固件包含一个占位符 UUID，因此无法与其他机器区分开来。",
+      "title": "未识别任何机器",
+      "unknown": "此主机尚未链接到机器。",
+      "unprivileged": "代理需要特权模式才能读取此操作系统上的硬件身份。"
+    },
+    "noOtherHosts": "该机器上没有其他操作系统报告。",
+    "notAvailable": "不可用",
+    "otherHosts": "该机器上的其他操作系统",
+    "resolveFailed": "无法解决冲突。",
+    "resolveFailedCode": "无法解决冲突（{{code}}）。",
+    "saveFailed": "无法保存资产标签。",
+    "setAssetTag": "设置资产标签",
+    "systemSerial": "系统序列号",
+    "systemUuid": "系统 UUID",
+    "tagReason": {
+      "badCharacters": "资产标签包含不允许的字符。",
+      "doesNotMatchScheme": "资产标签不符合资产标签方案。",
+      "duplicate": "另一个机器已经有这个资产标签。",
+      "empty": "输入一个资产标签。",
+      "schemeTimeout": "资产标签方案花了太长时间来检查此标签。",
+      "tooLong": "资产标签过长。",
+      "unknown": "该标签被拒绝（{{code}}）。"
+    },
+    "title": "机器",
+    "vendor": "供应商",
+    "virtualMachine": "虚拟机"
   }
 }

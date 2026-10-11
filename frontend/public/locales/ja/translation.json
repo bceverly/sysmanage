@@ -2849,7 +2849,9 @@
       "systemInfo": "システム情報",
       "tags": "タグ",
       "tracking": "追跡",
-      "users": "ユーザー"
+      "users": "ユーザー",
+      "assetTags": "アセットタグ",
+      "hardware": "ハードウェア"
     },
     "title": "レポート",
     "unknownError": "未知のエラー",
@@ -2861,7 +2863,11 @@
       "description": "SysManageユーザーの包括的なリスト。プロファイル、役割、権限、およびアカウントステータスが含まれます。ユーザー作成日と最終ログイン時間も含みます。",
       "name": "SysManage ユーザー"
     },
-    "viewReport": "レポートを表示"
+    "viewReport": "レポートを表示",
+    "untaggedMachines": {
+      "description": "まだ資産タグが付けられていないマシン、各マシンにインストールされているオペレーティングシステム、ベンダー名、モデル名、シリアル番号、およびシステムUUIDを表示します。これを使って、ラベルが必要なハードウェアを探します。",
+      "name": "タグなしのマシン"
+    }
   },
   "resetPassword": {
     "backToLogin": "ログインに戻る",
@@ -4620,5 +4626,99 @@
       "inventories": "インベントリ",
       "tags": "タグ"
     }
+  },
+  "assetTags": {
+    "grid": {
+      "column": "アセットタグ",
+      "paletteResult": "アセットタグ: {{tag}}",
+      "untagged": "タグなし",
+      "untaggedOnly": "タグなしのみ",
+      "untaggedOnlyTooltip": "このマシンが資産タグを持たないホストのみ表示"
+    },
+    "scheme": {
+      "advancedRegex": "高度: 正規表現",
+      "allConform": "既存のすべてのタグは保存されたスキーマに準拠しています。",
+      "conformanceTitle": "既存のタグ",
+      "digits": "数字",
+      "digitsHelp": "数字はこの幅までゼロ埋めされます。",
+      "draftNonconforming": "このドラフトでは、{{bad}}の{{total}}の既存タグがスキーマと不適合になります。",
+      "enforce": "エントリで強制する",
+      "enforceHelp": "有効化すると、スキーマに合わないタグは入力時に拒否されます。無効化すると、入力され、報告されます。",
+      "examplesFail": "不適合なタグ",
+      "examplesPass": "適合するタグ",
+      "fieldInvalid": "この値はスキーマでは無効です。",
+      "loadFailed": "アセットタグスキームを読み込むことができませんでした。",
+      "loading": "アセットタグスキームを読み込み中",
+      "nextFree": "次の空のタグ",
+      "noExamples": "例はありません。",
+      "noTags": "まだどの機械にも資産タグは付いていません。",
+      "nonconformingCount": "{{bad}}の{{total}}個のタグは保存されたスキームに準拠していません。",
+      "pattern": "正規表現",
+      "patternHelp": "タグ全体がパターンに一致する必要があります。ビルダーが表現できないスキーマのみ使用してください。",
+      "prefix": "プレフィックス",
+      "prefixHelp": "例えば、IT用またはHQのラップトップです。",
+      "previewFailed": "このドラフトはプレビューできません。強調表示されたフィールドを確認してください。",
+      "previewTitle": "ライブプレビュー",
+      "previewing": "プレビューの更新",
+      "readOnly": "スキーマを表示できますが、変更するには「資産タグを管理」権限が必要です。",
+      "reportOnly": "SysManageは、一致しないタグだけを報告します。既存のタグを書き換えることはありません。必要に応じて各マシンで変更してください。",
+      "sampleTag": "サンプルタグ",
+      "saveFailed": "アセットタグスキームの保存ができませんでした。",
+      "saveInvalid": "スキーマが無効です。強調表示されたフィールドを修正してから保存してください。",
+      "saved": "アセットタグスキームが保存されました。",
+      "separator": "区切り文字",
+      "separatorNone": "なし",
+      "subtitle": "有効なアセットタグの形式を定義します。編集するたびにプレビューが更新されますが、保存するまでは何も保存されません。",
+      "suffix": "接尾辞（オプション）",
+      "tabLabel": "アセットタグ",
+      "title": "資産タグ命名規則"
+    }
+  },
+  "machine": {
+    "assetTag": "アセットタグ",
+    "boardSerial": "ボードシリアル",
+    "changeAssetTag": "変更",
+    "clearAssetTag": "クリア",
+    "conflict": {
+      "different": "異なるマシン",
+      "same": "同じマシン",
+      "serialMismatch": "別の機械が同じシステムUUIDを報告していますが、異なるシリアル番号です。",
+      "title": "マシンアイデンティティの競合",
+      "virtualClone": "別のホストがすでにこの仮想マシンの識別情報を報告しています。通常は、そのUUIDを保持したクローンです。"
+    },
+    "hostInactive": "非アクティブ",
+    "loadFailed": "マシンの読み込みに失敗しました。",
+    "model": "モデル",
+    "noAssetTag": "アセットタグがありません",
+    "noMachine": {
+      "absent": "このハードウェアはシステムUUIDまたはシリアル番号を公開していません。",
+      "failed": "エージェントはハードウェアIDの読み取りに失敗しました。",
+      "notReported": "エージェントはまだこのホストのハードウェアIDを報告していません。",
+      "placeholder": "このハードウェアは、プレースホルダーUUIDを組み込みのファームウェアで提供するため、他のマシンと区別できません。",
+      "title": "識別されたマシンがありません",
+      "unknown": "このホストはまだマシンにリンクされていません。",
+      "unprivileged": "このOSでは、エージェントがハードウェアIDを読み取るには管理者権限が必要です。"
+    },
+    "noOtherHosts": "このマシンで報告された他のオペレーティングシステムはありません。",
+    "notAvailable": "利用不可",
+    "otherHosts": "このマシン上の他のオペレーティングシステム",
+    "resolveFailed": "解決できない競合があります。",
+    "resolveFailedCode": "解決できない競合がありました（{{code}}）。",
+    "saveFailed": "資産タグの保存に失敗しました。",
+    "setAssetTag": "資産タグを設定する",
+    "systemSerial": "システムシリアル",
+    "systemUuid": "システムUUID",
+    "tagReason": {
+      "badCharacters": "資産タグに許可されない文字が含まれています。",
+      "doesNotMatchScheme": "資産タグスキームと一致しません。",
+      "duplicate": "別の機械がこの資産タグをすでに持っています。",
+      "empty": "アセットタグを入力してください。",
+      "schemeTimeout": "資産タグスキームは、このタグをチェックするのに時間がかかりすぎました。",
+      "tooLong": "資産タグが長すぎます。",
+      "unknown": "タグが拒否されました（{{code}}）。"
+    },
+    "title": "マシン",
+    "vendor": "ベンダー",
+    "virtualMachine": "仮想マシン"
   }
 }

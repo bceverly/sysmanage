@@ -41,6 +41,7 @@ import RepositoryMirroringSettings from '../Components/RepositoryMirroringSettin
 import AuthenticationProvidersSettings from '../Components/AuthenticationProvidersSettings';
 import ServerRoleSettings from '../Components/ServerRoleSettings';
 import LoggingSettings from '../Components/LoggingSettings';
+import AssetTagSchemeSettings from '../Components/AssetTagSchemeSettings';
 import axiosInstance from '../Services/api';
 import { formatUTCDate } from '../utils/dateUtils';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
@@ -781,6 +782,7 @@ const Settings: React.FC = () => {
         <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto' }}>
         {tabNames[activeTab] === 'configuration' && <ConfigurationSettings />}
         {tabNames[activeTab] === 'tags' && renderTagsTab()}
+        {tabNames[activeTab] === 'asset-tags' && <AssetTagSchemeSettings />}
         {tabNames[activeTab] === 'queues' && <QueuesTab />}
         {tabNames[activeTab] === 'server-role' && <ServerRoleSettings />}
         {tabNames[activeTab] === 'logging' && <LoggingSettings />}

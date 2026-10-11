@@ -13364,6 +13364,24 @@ of its three OSes once).
       and uniqueness enforced; every change audited. Hosts grid column +
       filter, the command palette and global search find a host by tag;
       reports gain the tag (and an "untagged machines" report).
+      *S4 (UI + reports) DONE 2026-10-11: Settings > Asset Tags
+      (`AssetTagSchemeSettings` -- builder, debounced live preview, regex
+      mode, conformance panel, read-only without the role); a Machine card at
+      the top of the host Hardware tab (tag with entry-time check, identity,
+      the other OSes on the machine, "no machine" reasons, same/different
+      conflict resolution); Hosts grid "Asset Tag" column, "Search in" option
+      and "Untagged only" switch; the command palette finds hosts by tag
+      (fetches the host list per opening -- a server-side lookup is the fix
+      if that gets heavy on a large fleet). Reports: the Pro+
+      `reporting_engine` gains an Asset Tag column on Registered Hosts and a
+      new Untagged Machines report (HTML + PDF, templates, scheduler),
+      guarded so an older OSS server without machines still renders; OSS
+      `untagged-machines` report type + card. 84 new UI strings in 14
+      languages; "asset tag" and "untagged" are now glossary terms (nl
+      "Actie-tag" and hi "अटैग्ड" measured). Found and fixed on the way: the
+      translator's staleness hashes could bless stale translations when a
+      new key's English was edited between two partial translation runs
+      (nine `virtualClone` values) -- recording is now per-locale.*
 - [ ] **CSV import and export:** map an identifier (system UUID or serial
       number) to a tag; a dry-run preview shows every row as will-assign /
       unchanged / not-found / fails-the-scheme / duplicate before anything is

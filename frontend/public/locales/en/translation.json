@@ -2868,7 +2868,9 @@
       "systemInfo": "system info",
       "tags": "tags",
       "tracking": "tracking",
-      "users": "users"
+      "users": "users",
+      "assetTags": "asset tags",
+      "hardware": "hardware"
     },
     "title": "Reports",
     "unknownError": "Unknown error",
@@ -2880,7 +2882,11 @@
       "description": "Comprehensive list of all SysManage users showing their profiles, roles, permissions, and account status. Includes user creation dates and last login times.",
       "name": "SysManage Users"
     },
-    "viewReport": "View Report"
+    "viewReport": "View Report",
+    "untaggedMachines": {
+      "description": "Machines that have no asset tag yet, with every operating system installed on each one, its vendor, model, serial number, and system UUID. Use it to find hardware that still needs a label.",
+      "name": "Untagged Machines"
+    }
   },
   "resetPassword": {
     "backToLogin": "Back to Login",
@@ -4620,5 +4626,99 @@
       "inventories": "Inventories",
       "tags": "Tags"
     }
+  },
+  "assetTags": {
+    "grid": {
+      "column": "Asset Tag",
+      "paletteResult": "Asset tag: {{tag}}",
+      "untagged": "Untagged",
+      "untaggedOnly": "Untagged only",
+      "untaggedOnlyTooltip": "Show only hosts whose machine has no asset tag"
+    },
+    "scheme": {
+      "advancedRegex": "Advanced: regular expression",
+      "allConform": "Every existing tag conforms to the saved scheme.",
+      "conformanceTitle": "Existing tags",
+      "digits": "Digits",
+      "digitsHelp": "Numbers are zero padded to this width.",
+      "draftNonconforming": "With this draft, {{bad}} of {{total}} existing tags would not conform.",
+      "enforce": "Enforce at entry",
+      "enforceHelp": "When on, a tag that does not fit the scheme is refused when it is entered. When off, it is accepted and reported.",
+      "examplesFail": "Tags that fail",
+      "examplesPass": "Tags that pass",
+      "fieldInvalid": "This value is not valid for the scheme.",
+      "loadFailed": "Could not load the asset tag scheme.",
+      "loading": "Loading asset tag scheme",
+      "nextFree": "Next free tag",
+      "noExamples": "No examples.",
+      "noTags": "No machine has an asset tag yet.",
+      "nonconformingCount": "{{bad}} of {{total}} existing tags do not conform to the saved scheme.",
+      "pattern": "Regular expression",
+      "patternHelp": "The whole tag must match this pattern. Use it only for schemes the builder cannot express.",
+      "prefix": "Prefix",
+      "prefixHelp": "For example IT or HQ-LAPTOP.",
+      "previewFailed": "This draft cannot be previewed. Check the highlighted fields.",
+      "previewTitle": "Live preview",
+      "previewing": "Updating preview",
+      "readOnly": "You can view the scheme, but changing it requires the Manage Asset Tags role.",
+      "reportOnly": "SysManage only reports tags that do not conform. It never rewrites existing tags; change them on each machine if needed.",
+      "sampleTag": "Sample tag",
+      "saveFailed": "Could not save the asset tag scheme.",
+      "saveInvalid": "The scheme is not valid. Fix the highlighted fields and save again.",
+      "saved": "Asset tag scheme saved.",
+      "separator": "Separator",
+      "separatorNone": "none",
+      "subtitle": "Define what a valid asset tag looks like. The preview updates as you edit; nothing is saved until you press Save.",
+      "suffix": "Suffix (optional)",
+      "tabLabel": "Asset Tags",
+      "title": "Asset tag naming scheme"
+    }
+  },
+  "machine": {
+    "assetTag": "Asset tag",
+    "boardSerial": "Board serial",
+    "changeAssetTag": "Change",
+    "clearAssetTag": "Clear",
+    "conflict": {
+      "different": "Different machine",
+      "same": "Same machine",
+      "serialMismatch": "Another machine reports the same system UUID but a different serial number.",
+      "title": "Machine identity conflict",
+      "virtualClone": "Another host already reports this virtual machine's identity. It is usually a clone that kept its UUID."
+    },
+    "hostInactive": "Inactive",
+    "loadFailed": "The machine could not be loaded.",
+    "model": "Model",
+    "noAssetTag": "No asset tag",
+    "noMachine": {
+      "absent": "This hardware does not expose a system UUID or serial number.",
+      "failed": "The agent tried to read the hardware identity but the read failed.",
+      "notReported": "The agent has not reported this host's hardware identity yet.",
+      "placeholder": "The firmware on this hardware ships a placeholder UUID, so it cannot be told apart from other machines.",
+      "title": "No machine identified",
+      "unknown": "This host is not linked to a machine yet.",
+      "unprivileged": "The agent needs privileged mode to read the hardware identity on this OS."
+    },
+    "noOtherHosts": "No other operating system on this machine has reported in.",
+    "notAvailable": "Not available",
+    "otherHosts": "Other operating systems on this machine",
+    "resolveFailed": "The conflict could not be resolved.",
+    "resolveFailedCode": "The conflict could not be resolved ({{code}}).",
+    "saveFailed": "The asset tag could not be saved.",
+    "setAssetTag": "Set asset tag",
+    "systemSerial": "System serial",
+    "systemUuid": "System UUID",
+    "tagReason": {
+      "badCharacters": "The asset tag contains characters that are not allowed.",
+      "doesNotMatchScheme": "The asset tag does not match the asset tag scheme.",
+      "duplicate": "Another machine already has this asset tag.",
+      "empty": "Enter an asset tag.",
+      "schemeTimeout": "The asset tag scheme took too long to check this tag.",
+      "tooLong": "The asset tag is too long.",
+      "unknown": "The asset tag was refused ({{code}})."
+    },
+    "title": "Machine",
+    "vendor": "Vendor",
+    "virtualMachine": "Virtual machine"
   }
 }

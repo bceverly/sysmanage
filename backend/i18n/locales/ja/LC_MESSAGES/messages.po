@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 08:17-0400\n"
+"POT-Creation-Date: 2026-10-11 10:39-0400\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -487,7 +487,7 @@ msgstr "インストール完了の記録に失敗しました: %s"
 msgid "Report template not found"
 msgstr "レポートテンプレートが見つかりません"
 
-#: backend/api/report_templates.py:177 backend/api/package_compliance.py:138
+#: backend/api/report_templates.py:185 backend/api/package_compliance.py:138
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:107
 #: backend/api/upgrade_profiles.py:128
 #: backend/api/repository_mirroring_helpers.py:154
@@ -495,32 +495,32 @@ msgstr "レポートテンプレートが見つかりません"
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "'%(field)s' の無効な UUID: '%(value)s'"
 
-#: backend/api/report_templates.py:192 backend/api/report_templates.py:260
+#: backend/api/report_templates.py:200 backend/api/report_templates.py:268
 #, python-format
 msgid "Unknown base_report_type: %s"
 msgstr "不明な base_report_type: %s"
 
-#: backend/api/report_templates.py:201
+#: backend/api/report_templates.py:209
 #, python-format
 msgid "Unknown field code(s) for %(base_report_type)s: %(codes)s"
 msgstr "%(base_report_type)s に対する未知のフィールドコード: %(codes)s"
 
-#: backend/api/report_templates.py:244
+#: backend/api/report_templates.py:252
 #, python-format
 msgid "Created report template '%s'"
 msgstr "レポートテンプレート '%s' を作成しました"
 
-#: backend/api/report_templates.py:334
+#: backend/api/report_templates.py:342
 #, python-format
 msgid "Updated report template '%s'"
 msgstr "レポートテンプレート '%s' を更新"
 
-#: backend/api/report_templates.py:367
+#: backend/api/report_templates.py:375
 #, python-format
 msgid "Deleted report template '%s'"
 msgstr "レポートテンプレート '%s' を削除しました"
 
-#: backend/api/report_templates.py:372
+#: backend/api/report_templates.py:380
 msgid "Report template deleted"
 msgstr "レポートテンプレートを削除しました"
 
@@ -643,53 +643,57 @@ msgstr "リポジトリ無効化要求をキューに入れました"
 msgid "Failed to queue repository disable: %s"
 msgstr "リポジトリ無効化をキューに追加できませんでした: %s"
 
-#: backend/api/reports/endpoints.py:69
+#: backend/api/reports/endpoints.py:71
 msgid ""
 "Report generation requires a SysManage Professional+ license. Please upgrade"
 " to access this feature."
 msgstr "レポート生成にはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
 
-#: backend/api/reports/endpoints.py:150
+#: backend/api/reports/endpoints.py:152
 msgid "Registered Hosts"
 msgstr "登録済みホスト"
 
-#: backend/api/reports/endpoints.py:152
+#: backend/api/reports/endpoints.py:154
 msgid "Hosts with Tags"
 msgstr "タグ付きホスト"
 
-#: backend/api/reports/endpoints.py:160
+#: backend/api/reports/endpoints.py:162
 msgid "SysManage Users"
 msgstr "SysManageユーザー"
 
-#: backend/api/reports/endpoints.py:165
+#: backend/api/reports/endpoints.py:167
 msgid "Host Firewall Status"
 msgstr "ホストファイアウォールステータス"
 
-#: backend/api/reports/endpoints.py:171
+#: backend/api/reports/endpoints.py:173
 msgid "Open-Source Antivirus Status"
 msgstr "オープンソースアンチウイルスステータス"
 
-#: backend/api/reports/endpoints.py:178
+#: backend/api/reports/endpoints.py:180
 msgid "Commercial Antivirus Status"
 msgstr "商用アンチウイルスステータス"
 
-#: backend/api/reports/endpoints.py:191
+#: backend/api/reports/endpoints.py:193
 msgid "User Security Roles (RBAC)"
 msgstr "ユーザーセキュリティロール (RBAC)"
 
-#: backend/api/reports/endpoints.py:201 backend/api/audit_log.py:536
+#: backend/api/reports/endpoints.py:203 backend/api/audit_log.py:536
 msgid "Audit Log"
 msgstr "監査ログ"
 
-#: backend/api/reports/endpoints.py:204 backend/api/reports/endpoints.py:342
+#: backend/api/reports/endpoints.py:209
+msgid "Untagged Machines"
+msgstr "タグなしのマシン"
+
+#: backend/api/reports/endpoints.py:212 backend/api/reports/endpoints.py:357
 msgid "Unknown report type"
 msgstr "未知のレポートタイプ"
 
-#: backend/api/reports/endpoints.py:295
+#: backend/api/reports/endpoints.py:303
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF生成は利用できません。reportlabパッケージをインストールしてください。"
 
-#: backend/api/reports/endpoints.py:367
+#: backend/api/reports/endpoints.py:382
 msgid "Report"
 msgstr "レポート"
 
@@ -3192,15 +3196,15 @@ msgstr "アクセス権限がありません: DELETE_HOST ロールが必要で�
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "許可が拒否されました: VIEW_HOST_DETAILS ロールが必要です"
 
-#: backend/api/host.py:651
+#: backend/api/host.py:666
 msgid "Host already exists"
 msgstr "ホストは既に存在しています"
 
-#: backend/api/host.py:763
+#: backend/api/host.py:778
 msgid "Registration absorbed: host was recently deleted"
 msgstr "登録が吸収されました: ホストは最近削除されました"
 
-#: backend/api/host.py:843
+#: backend/api/host.py:858
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"

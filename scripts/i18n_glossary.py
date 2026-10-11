@@ -155,6 +155,8 @@ GLOSSARY: Dict[str, str] = {
     "physical machine, often printed on a label stuck to it. NOT a price tag, "
     "NOT a hashtag, and NOT a host tag (a grouping label)",
     "tag": "a label attached to hosts for grouping. NOT a price tag",
+    "untagged": "having no tag (label) assigned yet. Translate the meaning; "
+    "do NOT transliterate the English word",
     "site": "a location that groups hosts. NOT a building plot, and NOT a " "web site",
     "tenant": "one customer's isolated data within a shared installation. NOT "
     "someone who rents property",

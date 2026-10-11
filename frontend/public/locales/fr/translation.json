@@ -2849,7 +2849,9 @@
       "systemInfo": "informations sur le système",
       "tags": "balises",
       "tracking": "suivi",
-      "users": "utilisateurs"
+      "users": "utilisateurs",
+      "assetTags": "tags d'actifs",
+      "hardware": "matériel"
     },
     "title": "Rapports",
     "unknownError": "Erreur inconnue",
@@ -2861,7 +2863,11 @@
       "description": "Liste complète de tous les utilisateurs SysManage montrant leurs profils, rôles, autorisations et statut du compte. Inclut la date de création des utilisateurs et l'heure de leur dernière connexion.",
       "name": "Utilisateurs SysManage"
     },
-    "viewReport": "Voir le rapport"
+    "viewReport": "Voir le rapport",
+    "untaggedMachines": {
+      "description": "Les machines qui n'ont pas encore de tag d'actif, avec chaque système d'exploitation installé sur chacune, son fabricant, modèle, numéro de série et UUID système. Utilisez-le pour trouver du matériel qui a encore besoin d'un label.",
+      "name": "Machines non étiquetées"
+    }
   },
   "resetPassword": {
     "backToLogin": "Retour à la connexion",
@@ -4620,5 +4626,99 @@
       "inventories": "Inventaires d'hôtes",
       "tags": "Balises"
     }
+  },
+  "assetTags": {
+    "grid": {
+      "column": "Tag d'actif",
+      "paletteResult": "Tag d'actif : {{tag}}",
+      "untagged": "Non étiqueté",
+      "untaggedOnly": "Seule la non-étiquetage",
+      "untaggedOnlyTooltip": "Afficher uniquement les hôtes dont la machine n'a pas d'étiquette d'actif"
+    },
+    "scheme": {
+      "advancedRegex": "Avancé : expression régulière",
+      "allConform": "Tous les tags existants respectent le schéma enregistré.",
+      "conformanceTitle": "Tags existants",
+      "digits": "Chiffres",
+      "digitsHelp": "Les chiffres sont zéro-remplissés à cette largeur.",
+      "draftNonconforming": "Avec ce brouillon, {{bad}} sur {{total}} des étiquettes existantes ne seraient pas conformes.",
+      "enforce": "Imposer à l'entrée",
+      "enforceHelp": "Lorsqu'activé, une étiquette qui ne correspond pas au schéma est refusée lorsqu'elle est saisie. Lorsqu'inactivé, elle est acceptée et signalée.",
+      "examplesFail": "Étiquettes qui échouent",
+      "examplesPass": "Étiquettes qui passent",
+      "fieldInvalid": "Cette valeur n'est pas valide pour le schéma.",
+      "loadFailed": "Impossible de charger le schéma de tag d'actif.",
+      "loading": "Chargement du schéma de tag d'actif",
+      "nextFree": "Prochain tag libre",
+      "noExamples": "Aucun exemple.",
+      "noTags": "Aucune machine n'a encore de tag d'actif.",
+      "nonconformingCount": "{{total}} de {{bad}} tags existants ne correspondent pas au schéma enregistré.",
+      "pattern": "Expression régulière",
+      "patternHelp": "L'ensemble de l'étiquette doit correspondre à ce modèle. N'utilisez-le que pour des schémas que le constructeur ne peut exprimer.",
+      "prefix": "Préfixe",
+      "prefixHelp": "Par exemple IT ou HQ-LAPTOP.",
+      "previewFailed": "Cet aperçu ne peut pas être prévisualisé. Vérifiez les champs mis en évidence.",
+      "previewTitle": "Aperçu en direct",
+      "previewing": "Mise à jour de l'aperçu",
+      "readOnly": "Vous pouvez visualiser le schéma, mais modifier celui-ci nécessite le rôle Gérer les étiquettes d'actif.",
+      "reportOnly": "SysManage ne signale que les étiquettes qui ne sont pas conformes. Il ne réécrit jamais les étiquettes existantes ; modifiez-les sur chaque machine si nécessaire.",
+      "sampleTag": "Étiquette d'échantillon",
+      "saveFailed": "Impossible d'enregistrer le schéma de tag d'actif.",
+      "saveInvalid": "Le schéma n'est pas valide. Corrigez les champs mis en évidence et enregistrez à nouveau.",
+      "saved": "Le schéma de tag d'actif a été enregistré.",
+      "separator": "Séparateur",
+      "separatorNone": "aucun",
+      "subtitle": "Définissez ce qu'un tag d'actif valide ressemble. Le aperçu se met à jour pendant que vous éditez ; rien n'est enregistré jusqu'à ce que vous cliquiez sur Enregistrer.",
+      "suffix": "Suffixe (facultatif)",
+      "tabLabel": "Tags d'actifs",
+      "title": "Schéma de nommage des tags d'actifs"
+    }
+  },
+  "machine": {
+    "assetTag": "Tag d'actif",
+    "boardSerial": "Numéro de série du circuit imprimé",
+    "changeAssetTag": "Modification",
+    "clearAssetTag": "Effacer",
+    "conflict": {
+      "different": "Différente machine",
+      "same": "Même machine",
+      "serialMismatch": "Une autre machine signale le même UUID système mais un numéro de série différent.",
+      "title": "Conflit d'identité de machine",
+      "virtualClone": "Un autre hôte signale déjà l'identité de cette machine virtuelle. Il s'agit généralement d'un clone qui a conservé son UUID."
+    },
+    "hostInactive": "Inactif",
+    "loadFailed": "La machine ne pouvait pas être chargée.",
+    "model": "Modèle",
+    "noAssetTag": "Pas de tag d'actif",
+    "noMachine": {
+      "absent": "Ce matériel n'expose pas d'UUID ou de numéro de série du système.",
+      "failed": "L'agent a tenté de lire l'identité matérielle mais la lecture a échoué.",
+      "notReported": "L'agent n'a pas encore signalé l'identité matérielle de cet hôte.",
+      "placeholder": "Le matériel embarqué fournit un UUID de remplacement, il est donc impossible de le distinguer des autres machines.",
+      "title": "Aucune machine identifiée",
+      "unknown": "Cet hôte n'est pas lié à une machine pour l'instant.",
+      "unprivileged": "L'agent a besoin d'un mode privilégié pour lire l'identité matérielle sur ce système d'exploitation."
+    },
+    "noOtherHosts": "Aucun autre système d'exploitation sur cette machine n'a signalé sa présence.",
+    "notAvailable": "Non disponible",
+    "otherHosts": "Autres systèmes d'exploitation sur cette machine",
+    "resolveFailed": "Le conflit ne peut pas être résolu.",
+    "resolveFailedCode": "Le conflit ne peut pas être résolu ({{code}}).",
+    "saveFailed": "L'étiquette d'actif ne peut pas être enregistrée.",
+    "setAssetTag": "Définir l'étiquette d'actif",
+    "systemSerial": "Numéro de série du système",
+    "systemUuid": "UUID du système",
+    "tagReason": {
+      "badCharacters": "L'étiquette d'actif contient des caractères non autorisés.",
+      "doesNotMatchScheme": "L'étiquette d'actif ne correspond pas au schéma d'étiquette d'actif.",
+      "duplicate": "Une autre machine possède déjà ce tag d'actif.",
+      "empty": "Entrez un tag d'actif.",
+      "schemeTimeout": "Le schéma d'étiquette a mis trop de temps à vérifier cette étiquette.",
+      "tooLong": "L'étiquette d'actif est trop longue.",
+      "unknown": "L'étiquette d'actif a été refusée ({{code}})."
+    },
+    "title": "machine",
+    "vendor": "Fabricant",
+    "virtualMachine": "Machine virtuelle"
   }
 }

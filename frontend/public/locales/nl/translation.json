@@ -2849,7 +2849,9 @@
       "systemInfo": "systeem-informatie",
       "tags": "tags",
       "tracking": "volgen",
-      "users": "gebruikers"
+      "users": "gebruikers",
+      "assetTags": "assettags",
+      "hardware": "Hardware"
     },
     "title": "Rapporten",
     "unknownError": "Onbekende fout",
@@ -2861,7 +2863,11 @@
       "description": "Comprehensive lijst van alle SysManage-gebruikers met hun profielen, rollen, rechten en accountstatus. Bevat gebruikersaanmaakdatum en laatste inlogtijden.",
       "name": "SysManage Gebruikers"
     },
-    "viewReport": "Rapport bekijken"
+    "viewReport": "Rapport bekijken",
+    "untaggedMachines": {
+      "description": "Apparaten die nog geen asset tag hebben, met elk besturingssysteem dat op elk van hen is geïnstalleerd, zijn leverancier, model, seriële nummer en systeem-UUID. Gebruik het om hardware te vinden die nog een label nodig heeft.",
+      "name": "Onttagde machines"
+    }
   },
   "resetPassword": {
     "backToLogin": "Terug naar inloggen",
@@ -4620,5 +4626,99 @@
       "inventories": "Inventarissen",
       "tags": "Labels"
     }
+  },
+  "assetTags": {
+    "grid": {
+      "column": "Asset tag",
+      "paletteResult": "Asset tag: {{tag}}",
+      "untagged": "Onttagd",
+      "untaggedOnly": "Alleen onttagde machines",
+      "untaggedOnlyTooltip": "Toon alleen hosts waarvan de machine geen asset-tag heeft"
+    },
+    "scheme": {
+      "advancedRegex": "Geavanceerd: reguliere expressie",
+      "allConform": "Elke bestaande tag voldoet aan het opgeslagen schema.",
+      "conformanceTitle": "Bestaande tags",
+      "digits": "Cijfers",
+      "digitsHelp": "Getallen worden naar deze breedte opgevuld.",
+      "draftNonconforming": "Met dit ontwerp zouden {{bad}} van {{total}} bestaande tags niet aan het schema voldoen.",
+      "enforce": "Afdwingen bij invoer",
+      "enforceHelp": "Wanneer ingeschakeld, wordt een tag die niet aan het schema voldoet, geweigerd wanneer deze wordt ingevoerd. Wanneer uitgeschakeld, wordt het geaccepteerd en gerapporteerd.",
+      "examplesFail": "Tags die falen",
+      "examplesPass": "Tags die slagen",
+      "fieldInvalid": "Deze waarde is niet geldig voor het schema.",
+      "loadFailed": "Kon het asset tag schema niet laden.",
+      "loading": "Laden asset tag schema",
+      "nextFree": "Volgende vrije tag",
+      "noExamples": "Geen voorbeelden.",
+      "noTags": "Geen apparaat heeft nog geen asset tag.",
+      "nonconformingCount": "{{bad}} van de {{total}} bestaande tags voldoen niet aan het opgeslagen schema.",
+      "pattern": "Reguliere expressie",
+      "patternHelp": "De hele tag moet aan dit patroon voldoen. Gebruik het alleen voor schema's die de builder niet kan uitdrukken.",
+      "prefix": "Voorvoegsel",
+      "prefixHelp": "Bijvoorbeeld IT of HQ-LAPTOP.",
+      "previewFailed": "Dit ontwerp kan niet worden gepreviewd. Controleer de gemarkeerde velden.",
+      "previewTitle": "Live voorbeschouwing",
+      "previewing": "Voorbeeld wordt bijgewerkt",
+      "readOnly": "U kunt het schema bekijken, maar wijzigingen aanbrengen vereist de rol 'Asset Tags beheren'.",
+      "reportOnly": "SysManage rapporteert alleen tags die niet voldoen. Het herschrijft bestaande tags nooit; wijzig ze op elke machine indien nodig.",
+      "sampleTag": "Sample-tag",
+      "saveFailed": "Kon het asset tag schema niet opslaan.",
+      "saveInvalid": "Het schema is niet geldig. Corrigeer de gemarkeerde velden en sla opnieuw op.",
+      "saved": "Asset tag schema opgeslagen.",
+      "separator": "Scheidingsteken",
+      "separatorNone": "geen",
+      "subtitle": "Definieer wat een geldige asset tag eruitziet. De preview wordt bijgewerkt terwijl je bewerkt; niets wordt opgeslagen totdat je op Opslaan drukt.",
+      "suffix": "Afteken (optioneel)",
+      "tabLabel": "Asset tags",
+      "title": "Asset tag naamgevingsschema"
+    }
+  },
+  "machine": {
+    "assetTag": "assettag",
+    "boardSerial": "Bordserial",
+    "changeAssetTag": "Wijziging",
+    "clearAssetTag": "Leegmaken",
+    "conflict": {
+      "different": "Een ander apparaat",
+      "same": "Op dezelfde machine",
+      "serialMismatch": "Een ander apparaat meldt dezelfde systeem-UUID maar een andere seriële nummer.",
+      "title": "Identiteitsconflict apparaat",
+      "virtualClone": "Een andere host meldt al de identiteit van deze virtuele machine. Het is meestal een klon die zijn UUID heeft behouden."
+    },
+    "hostInactive": "Inactief",
+    "loadFailed": "De machine kon niet geladen worden.",
+    "model": "Model",
+    "noAssetTag": "Geen asset tag",
+    "noMachine": {
+      "absent": "Deze hardware biedt geen systeem UUID of seriënummer.",
+      "failed": "De agent probeerde de hardware-identiteit te lezen, maar de leesbewerking is mislukt.",
+      "notReported": "De agent heeft nog geen hardware-identiteit van deze host gerapporteerd.",
+      "placeholder": "De firmware op deze hardware bevat een plaatsaanduiding UUID, dus het kan niet van andere machines worden onderscheiden.",
+      "title": "Geen apparaat geïdentificeerd",
+      "unknown": "Deze host is nog niet aan een machine gekoppeld.",
+      "unprivileged": "De agent heeft privileged modus nodig om de hardware-identiteit op dit besturingssysteem te lezen."
+    },
+    "noOtherHosts": "Geen ander besturingssysteem op dit apparaat heeft zich gemeld.",
+    "notAvailable": "Niet beschikbaar",
+    "otherHosts": "Andere besturingssystemen op dit apparaat",
+    "resolveFailed": "Het conflict kon niet worden opgelost.",
+    "resolveFailedCode": "Het conflict kon niet worden opgelost ({{code}}).",
+    "saveFailed": "Het opslaan van de asset-tag is mislukt.",
+    "setAssetTag": "Asset-tag instellen",
+    "systemSerial": "Systeem seriënummer",
+    "systemUuid": "Systeem UUID",
+    "tagReason": {
+      "badCharacters": "De asset-tag bevat tekens die niet zijn toegestaan.",
+      "doesNotMatchScheme": "De asset-tag voldoet niet aan het asset-tagschema.",
+      "duplicate": "Een ander apparaat heeft al dit asset tag.",
+      "empty": "Voer een asset tag in.",
+      "schemeTimeout": "Het asset-tagschema heeft te lang geduurd om deze tag te controleren.",
+      "tooLong": "De asset-tag is te lang.",
+      "unknown": "De asset-tag is geweigerd ({{code}})."
+    },
+    "title": "Apparaat",
+    "vendor": "Leverancier",
+    "virtualMachine": "Virtuele machine"
   }
 }

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 08:17-0400\n"
+"POT-Creation-Date: 2026-10-11 10:39-0400\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -89,16 +89,16 @@ msgstr "Zugriff verweigert: %s-Rolle erforderlich"
 
 #: backend/api/asset_tags.py:144
 msgid "Asset tag naming scheme changed"
-msgstr "Benennungsschema für Geräteetiketten geändert"
+msgstr "Benennungsschema für Asset-Tags geändert"
 
 #: backend/api/asset_tags.py:204
 #, python-format
 msgid "Asset tag set to %s"
-msgstr "Geräteetikett auf %s gesetzt"
+msgstr "Asset-Tag auf %s gesetzt"
 
 #: backend/api/asset_tags.py:204
 msgid "Asset tag cleared"
-msgstr "Geräteetikett gelöscht"
+msgstr "Asset-Tag entfernt"
 
 #: backend/api/fleet.py:93
 #, python-format
@@ -497,7 +497,7 @@ msgstr "Fehler beim Aufnehmen der Installationserfolgsnachricht: %s"
 msgid "Report template not found"
 msgstr "Berichtsvorlage nicht gefunden"
 
-#: backend/api/report_templates.py:177 backend/api/package_compliance.py:138
+#: backend/api/report_templates.py:185 backend/api/package_compliance.py:138
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:107
 #: backend/api/upgrade_profiles.py:128
 #: backend/api/repository_mirroring_helpers.py:154
@@ -505,32 +505,32 @@ msgstr "Berichtsvorlage nicht gefunden"
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "Ungültige UUID für %(field)s: %(value)s"
 
-#: backend/api/report_templates.py:192 backend/api/report_templates.py:260
+#: backend/api/report_templates.py:200 backend/api/report_templates.py:268
 #, python-format
 msgid "Unknown base_report_type: %s"
 msgstr "Unbekannter base_report_type: %s"
 
-#: backend/api/report_templates.py:201
+#: backend/api/report_templates.py:209
 #, python-format
 msgid "Unknown field code(s) for %(base_report_type)s: %(codes)s"
 msgstr "Unbekannte Feldcodes für %(base_report_type)s: %(codes)s"
 
-#: backend/api/report_templates.py:244
+#: backend/api/report_templates.py:252
 #, python-format
 msgid "Created report template '%s'"
 msgstr "Berichtsvorlage '%s' erstellt"
 
-#: backend/api/report_templates.py:334
+#: backend/api/report_templates.py:342
 #, python-format
 msgid "Updated report template '%s'"
 msgstr "Berichtsvorlage '%s' aktualisiert"
 
-#: backend/api/report_templates.py:367
+#: backend/api/report_templates.py:375
 #, python-format
 msgid "Deleted report template '%s'"
 msgstr "Berichtsvorlage '%s' gelöscht"
 
-#: backend/api/report_templates.py:372
+#: backend/api/report_templates.py:380
 msgid "Report template deleted"
 msgstr "Berichtsvorlage gelöscht"
 
@@ -662,7 +662,7 @@ msgid "Failed to queue repository disable: %s"
 msgstr ""
 "Fehler beim Anwenden des Befehls zur Deaktivierung eines Repositories: %s"
 
-#: backend/api/reports/endpoints.py:69
+#: backend/api/reports/endpoints.py:71
 msgid ""
 "Report generation requires a SysManage Professional+ license. Please upgrade"
 " to access this feature."
@@ -670,49 +670,53 @@ msgstr ""
 "Berichtsgenerierung erfordert eine SysManage Professional+-Lizenz. Bitte "
 "upgraden Sie, um auf diese Funktion zuzugreifen."
 
-#: backend/api/reports/endpoints.py:150
+#: backend/api/reports/endpoints.py:152
 msgid "Registered Hosts"
 msgstr "Registrierte Hosts"
 
-#: backend/api/reports/endpoints.py:152
+#: backend/api/reports/endpoints.py:154
 msgid "Hosts with Tags"
 msgstr "Hosts mit Tags"
 
-#: backend/api/reports/endpoints.py:160
+#: backend/api/reports/endpoints.py:162
 msgid "SysManage Users"
 msgstr "SysManage-Benutzer"
 
-#: backend/api/reports/endpoints.py:165
+#: backend/api/reports/endpoints.py:167
 msgid "Host Firewall Status"
 msgstr "Host-Firewall-Status"
 
-#: backend/api/reports/endpoints.py:171
+#: backend/api/reports/endpoints.py:173
 msgid "Open-Source Antivirus Status"
 msgstr "Open-Source-Antivirus-Status"
 
-#: backend/api/reports/endpoints.py:178
+#: backend/api/reports/endpoints.py:180
 msgid "Commercial Antivirus Status"
 msgstr "Kommerzieller Antivirus-Status"
 
-#: backend/api/reports/endpoints.py:191
+#: backend/api/reports/endpoints.py:193
 msgid "User Security Roles (RBAC)"
 msgstr "Benutzersicherheitsrollen (RBAC)"
 
-#: backend/api/reports/endpoints.py:201 backend/api/audit_log.py:536
+#: backend/api/reports/endpoints.py:203 backend/api/audit_log.py:536
 msgid "Audit Log"
 msgstr "Auditprotokoll"
 
-#: backend/api/reports/endpoints.py:204 backend/api/reports/endpoints.py:342
+#: backend/api/reports/endpoints.py:209
+msgid "Untagged Machines"
+msgstr "Maschinen ohne Asset-Tag"
+
+#: backend/api/reports/endpoints.py:212 backend/api/reports/endpoints.py:357
 msgid "Unknown report type"
 msgstr "Unbekannter Berichtstyp"
 
-#: backend/api/reports/endpoints.py:295
+#: backend/api/reports/endpoints.py:303
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr ""
 "PDF-Generierung ist nicht verfügbar. Bitte installieren Sie das reportlab-"
 "Paket."
 
-#: backend/api/reports/endpoints.py:367
+#: backend/api/reports/endpoints.py:382
 msgid "Report"
 msgstr "Bericht"
 
@@ -3365,15 +3369,15 @@ msgstr "Zugriff verweigert: DELETE_HOST-Rolle erforderlich"
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Berechtigung abgelehnt: VIEW_HOST_DETAILS Rolle erforderlich"
 
-#: backend/api/host.py:651
+#: backend/api/host.py:666
 msgid "Host already exists"
 msgstr "Host existiert bereits"
 
-#: backend/api/host.py:763
+#: backend/api/host.py:778
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registrierung absorbiert: Host wurde kürzlich gelöscht"
 
-#: backend/api/host.py:843
+#: backend/api/host.py:858
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"

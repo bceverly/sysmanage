@@ -2849,7 +2849,9 @@
       "systemInfo": "informazioni sul sistema",
       "tags": "etichette",
       "tracking": "seguimento",
-      "users": "utenti"
+      "users": "utenti",
+      "assetTags": "tag di asset",
+      "hardware": "hardware"
     },
     "title": "Report",
     "unknownError": "Errore sconosciuto",
@@ -2861,7 +2863,11 @@
       "description": "Elenco completo di tutti gli utenti SysManage con i loro profili, ruoli, permessi e stato dell'account. Include date di creazione utente e ultime connessioni.",
       "name": "Utenti SysManage"
     },
-    "viewReport": "Visualizza Report"
+    "viewReport": "Visualizza Report",
+    "untaggedMachines": {
+      "description": "Macchine senza etichetta asset ancora, con ogni sistema operativo installato su ciascuna di esse, il suo fornitore, modello, numero di serie e UUID del sistema. Usarlo per trovare l'hardware che ha ancora bisogno di un'etichetta.",
+      "name": "Macchine senza etichette"
+    }
   },
   "resetPassword": {
     "backToLogin": "Torna all'accesso",
@@ -4620,5 +4626,99 @@
       "inventories": "Inventari di host",
       "tags": "Etichette"
     }
+  },
+  "assetTags": {
+    "grid": {
+      "column": "Tag dell'asset",
+      "paletteResult": "Etichetta asset: {{tag}}",
+      "untagged": "Senza etichette",
+      "untaggedOnly": "Solo senza etichette",
+      "untaggedOnlyTooltip": "Visualizza solo gli host senza tag dell'asset"
+    },
+    "scheme": {
+      "advancedRegex": "Avanzato: espressione regolare",
+      "allConform": "Ogni tag esistente rispetta lo schema salvato.",
+      "conformanceTitle": "Tag esistenti",
+      "digits": "Digi",
+      "digitsHelp": "I numeri sono riempiti con zeri a questa larghezza.",
+      "draftNonconforming": "Con questa bozza, {{bad}} di {{total}} tag esistenti non sarebbero conformi.",
+      "enforce": "Impedire all'ingresso",
+      "enforceHelp": "Quando attivato, un tag che non corrisponde allo schema viene rifiutato quando viene inserito. Quando disattivato, viene accettato e segnalato.",
+      "examplesFail": "Tag non superati",
+      "examplesPass": "Tag superati",
+      "fieldInvalid": "Questo valore non è valido per lo schema.",
+      "loadFailed": "Non è possibile caricare lo schema del tag dell'asset",
+      "loading": "Caricamento dello schema di etichettatura degli asset",
+      "nextFree": "Prossimo tag libero",
+      "noExamples": "Nessun esempio.",
+      "noTags": "Nessuna macchina ha ancora un tag dell'asset.",
+      "nonconformingCount": "{{bad}} tag esistenti su {{total}} non sono conformi allo schema salvato.",
+      "pattern": "Espressione regolare",
+      "patternHelp": "L'intero tag deve corrispondere a questo modello. Usalo solo per gli schemi che il costruttore non può esprimere.",
+      "prefix": "Prefisso",
+      "prefixHelp": "Per esempio IT o HQ-LAPTOP.",
+      "previewFailed": "Non è possibile visualizzare una bozza. Controlla i campi evidenziati.",
+      "previewTitle": "Anteprima in tempo reale",
+      "previewing": "Aggiornamento della vista",
+      "readOnly": "Puoi visualizzare lo schema, ma per modificarlo è necessaria la funzione 'Gestisci etichette asset'.",
+      "reportOnly": "SysManage segnala solo i tag che non sono conformi. Non riscrive mai i tag esistenti; modificali su ogni macchina se necessario.",
+      "sampleTag": "Tag di esempio",
+      "saveFailed": "Non è stato possibile salvare lo schema di etichettatura degli asset.",
+      "saveInvalid": "Lo schema non è valido. Correggi i campi evidenziati e salva nuovamente.",
+      "saved": "Schema di etichettatura degli asset salvato.",
+      "separator": "Separatore",
+      "separatorNone": "nessuno",
+      "subtitle": "Definisci cosa sia un tag di asset valido. La anteprima si aggiorna mentre editi; nulla viene salvato fino a quando non premi Salva.",
+      "suffix": "Suffisso (facoltativo)",
+      "tabLabel": "Tag degli asset",
+      "title": "Schema di denominazione delle etichette degli asset"
+    }
+  },
+  "machine": {
+    "assetTag": "Etichetta asset",
+    "boardSerial": "Seriale del Board",
+    "changeAssetTag": "Modifica",
+    "clearAssetTag": "Cancella",
+    "conflict": {
+      "different": "Macchina diversa",
+      "same": "Stessa macchina",
+      "serialMismatch": "Un'altra macchina segnala lo stesso UUID del sistema ma un numero di serie diverso.",
+      "title": "Conflitto di identità della macchina",
+      "virtualClone": "Un altro host segnala già l'identità di questa macchina virtuale. Di solito è un clone che ha mantenuto il suo UUID."
+    },
+    "hostInactive": "Inattivo",
+    "loadFailed": "La macchina non è stata caricata.",
+    "model": "Modello",
+    "noAssetTag": "Nessun tag dell'asset",
+    "noMachine": {
+      "absent": "Questo hardware non espone un UUID o un numero di serie del sistema.",
+      "failed": "L'agente ha tentato di leggere l'identità hardware ma la lettura è fallita.",
+      "notReported": "L'agente non ha ancora segnalato l'identità hardware di questo host.",
+      "placeholder": "Il firmware di questo hardware include un UUID di placeholder, quindi non può essere distinto da altre macchine.",
+      "title": "Nessuna macchina identificata",
+      "unknown": "Questo host non è ancora collegato a una macchina.",
+      "unprivileged": "L'agente necessita del modo privilegiato per leggere l'identità hardware su questo OS."
+    },
+    "noOtherHosts": "Nessun altro sistema operativo su questa macchina ha segnalato la sua presenza.",
+    "notAvailable": "Non disponibile",
+    "otherHosts": "Altri sistemi operativi su questa macchina",
+    "resolveFailed": "Il conflitto non può essere risolto.",
+    "resolveFailedCode": "Il conflitto non può essere risolto ({{code}}).",
+    "saveFailed": "Impossibile salvare il tag dell'asset.",
+    "setAssetTag": "Imposta il tag dell'asset",
+    "systemSerial": "Numero di serie del sistema",
+    "systemUuid": "UUID del sistema",
+    "tagReason": {
+      "badCharacters": "Il tag dell'asset contiene caratteri non consentiti.",
+      "doesNotMatchScheme": "Il tag dell'asset non corrisponde allo schema del tag dell'asset.",
+      "duplicate": "Un'altra macchina ha già questo tag di asset.",
+      "empty": "Inserisci un tag dell'asset",
+      "schemeTimeout": "Lo schema del tag dell'asset ha impiegato troppo tempo per controllare questo tag.",
+      "tooLong": "Il tag dell'asset è troppo lungo.",
+      "unknown": "Il tag dell'asset è stato rifiutato ({{code}})."
+    },
+    "title": "Macchina",
+    "vendor": "Fornitore",
+    "virtualMachine": "Macchina virtuale"
   }
 }

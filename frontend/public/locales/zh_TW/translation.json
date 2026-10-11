@@ -2849,7 +2849,9 @@
       "systemInfo": "系統信息",
       "tags": "標籤",
       "tracking": "追蹤",
-      "users": "用戶"
+      "users": "用戶",
+      "assetTags": "資產標籤",
+      "hardware": "硬體"
     },
     "title": "報告",
     "unknownError": "未知錯誤",
@@ -2861,7 +2863,11 @@
       "description": "所有SysManage用戶的綜合清單，顯示他們的配置文件、角色、權限和帳戶狀態。包括用戶創建日期和最後登錄時間。",
       "name": "SysManage 用戶"
     },
-    "viewReport": "檢視報告"
+    "viewReport": "檢視報告",
+    "untaggedMachines": {
+      "description": "尚未貼有資產標籤、在每台機器上安裝了各種作業系統及其供應商、型號、序列號和系統UUID的機器。使用它來尋找仍需要標籤的硬體。",
+      "name": "未標記機器"
+    }
   },
   "resetPassword": {
     "backToLogin": "返回登入",
@@ -4620,5 +4626,99 @@
       "inventories": "清單",
       "tags": "標籤"
     }
+  },
+  "assetTags": {
+    "grid": {
+      "column": "資產標籤",
+      "paletteResult": "資產標籤: {{tag}}",
+      "untagged": "未標記",
+      "untaggedOnly": "僅未標記",
+      "untaggedOnlyTooltip": "顯示沒有資產標籤的主機"
+    },
+    "scheme": {
+      "advancedRegex": "高級：正規表達式",
+      "allConform": "每個現有標籤都符合已保存的方案。",
+      "conformanceTitle": "現有標籤",
+      "digits": "數字",
+      "digitsHelp": "數字會填充到這個寬度。",
+      "draftNonconforming": "依此草稿，{{total}} 個現有標籤中將有 {{bad}} 個不符合。",
+      "enforce": "強制入口檢查",
+      "enforceHelp": "當啟用時，不符合方案的標籤會被拒絕。當關閉時，它會被接受並報告。",
+      "examplesFail": "失敗的標籤",
+      "examplesPass": "通過的標籤",
+      "fieldInvalid": "此值不符合方案。",
+      "loadFailed": "無法載入資產標籤方案。",
+      "loading": "載入資產標籤方案",
+      "nextFree": "下一個可用的標籤",
+      "noExamples": "沒有範例。",
+      "noTags": "沒有任何機器有資產標籤。",
+      "nonconformingCount": "{{total}} 個現有標籤中有 {{bad}} 個不符合已儲存的方案。",
+      "pattern": "正規表達式",
+      "patternHelp": "整個標籤必須符合此模式。僅用於建構器無法表達的方案。",
+      "prefix": "前綴",
+      "prefixHelp": "例如，IT或總部筆記型電腦。",
+      "previewFailed": "無法預覽草稿。請檢查突出顯示的欄位。",
+      "previewTitle": "即時預覽",
+      "previewing": "更新預覽",
+      "readOnly": "您可以查看方案，但更改方案需要「管理資產標籤」角色。",
+      "reportOnly": "SysManage 只會報告不符合標籤的資料。它永遠不會重寫現有的標籤；如有需要，請在每台機器上更改它們。",
+      "sampleTag": "樣本標籤",
+      "saveFailed": "無法儲存資產標籤方案。",
+      "saveInvalid": "方案無效。請修正突出顯示的欄位並儲存。",
+      "saved": "資產標籤方案已儲存。",
+      "separator": "分隔符",
+      "separatorNone": "無",
+      "subtitle": "定義有效資產標籤的格式。預覽會根據您的編輯進行更新；直到您按下「儲存」才會保存任何更改。",
+      "suffix": "後綴（可選）",
+      "tabLabel": "資產標籤",
+      "title": "資產標籤命名規範"
+    }
+  },
+  "machine": {
+    "assetTag": "資產標籤",
+    "boardSerial": "板序列號",
+    "changeAssetTag": "更改",
+    "clearAssetTag": "清除",
+    "conflict": {
+      "different": "不同的機器",
+      "same": "同機",
+      "serialMismatch": "另一台機器報告了相同的系統UUID，但序列號不同。",
+      "title": "機器身份衝突",
+      "virtualClone": "另一個主機已經報告了這台虛擬機的身分。通常是保留了其 UUID 的克隆。"
+    },
+    "hostInactive": "未啟用",
+    "loadFailed": "無法載入機器。",
+    "model": "模型",
+    "noAssetTag": "沒有資產標籤",
+    "noMachine": {
+      "absent": "此硬體不暴露系統 UUID 或序列號。",
+      "failed": "代理嘗試讀取硬體身份但讀取失敗。",
+      "notReported": "代理還未報告此主機硬體身份。",
+      "placeholder": "此硬體固件附帶一個占位符 UUID，因此無法區分其他機器。",
+      "title": "未識別任何機器",
+      "unknown": "此主機尚未連結到機器。",
+      "unprivileged": "代理需要特權模式才能讀取此作業系統上的硬體身份。"
+    },
+    "noOtherHosts": "這台機器上沒有其他作業系統報告。",
+    "notAvailable": "不可用",
+    "otherHosts": "此機器上的其他作業系統",
+    "resolveFailed": "無法解決衝突。",
+    "resolveFailedCode": "無法解決衝突（{{code}}）。",
+    "saveFailed": "無法儲存資產標籤。",
+    "setAssetTag": "設定資產標籤",
+    "systemSerial": "系統序列號",
+    "systemUuid": "系統 UUID",
+    "tagReason": {
+      "badCharacters": "資產標籤包含不允許的字符。",
+      "doesNotMatchScheme": "資產標籤不符合標籤方案。",
+      "duplicate": "另一個機器已經有這個資產標籤。",
+      "empty": "請輸入資產標籤。",
+      "schemeTimeout": "標籤方案花了太多時間檢查此標籤。",
+      "tooLong": "資產標籤太長。",
+      "unknown": "標籤被拒絕（{{code}}）。"
+    },
+    "title": "機器",
+    "vendor": "供應商",
+    "virtualMachine": "虛擬機器"
   }
 }

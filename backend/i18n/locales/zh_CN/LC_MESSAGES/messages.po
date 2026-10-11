@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 08:17-0400\n"
+"POT-Creation-Date: 2026-10-11 10:39-0400\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -487,7 +487,7 @@ msgstr "记录安装完成失败：%s"
 msgid "Report template not found"
 msgstr "报告模板未找到"
 
-#: backend/api/report_templates.py:177 backend/api/package_compliance.py:138
+#: backend/api/report_templates.py:185 backend/api/package_compliance.py:138
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:107
 #: backend/api/upgrade_profiles.py:128
 #: backend/api/repository_mirroring_helpers.py:154
@@ -495,32 +495,32 @@ msgstr "报告模板未找到"
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "字段 %(field)s 的无效 UUID：%(value)s"
 
-#: backend/api/report_templates.py:192 backend/api/report_templates.py:260
+#: backend/api/report_templates.py:200 backend/api/report_templates.py:268
 #, python-format
 msgid "Unknown base_report_type: %s"
 msgstr "未知的 base_report_type: %s"
 
-#: backend/api/report_templates.py:201
+#: backend/api/report_templates.py:209
 #, python-format
 msgid "Unknown field code(s) for %(base_report_type)s: %(codes)s"
 msgstr "未知的报告类型 %(base_report_type)s 的代码：%(codes)s"
 
-#: backend/api/report_templates.py:244
+#: backend/api/report_templates.py:252
 #, python-format
 msgid "Created report template '%s'"
 msgstr "已创建报告模板 '%s'"
 
-#: backend/api/report_templates.py:334
+#: backend/api/report_templates.py:342
 #, python-format
 msgid "Updated report template '%s'"
 msgstr "已更新报告模板 '%s'"
 
-#: backend/api/report_templates.py:367
+#: backend/api/report_templates.py:375
 #, python-format
 msgid "Deleted report template '%s'"
 msgstr "已删除报告模板 '%s'"
 
-#: backend/api/report_templates.py:372
+#: backend/api/report_templates.py:380
 msgid "Report template deleted"
 msgstr "报告模板已删除"
 
@@ -643,53 +643,57 @@ msgstr "仓库禁用请求已成功排队"
 msgid "Failed to queue repository disable: %s"
 msgstr "将仓库禁用请求加入队列失败：%s"
 
-#: backend/api/reports/endpoints.py:69
+#: backend/api/reports/endpoints.py:71
 msgid ""
 "Report generation requires a SysManage Professional+ license. Please upgrade"
 " to access this feature."
 msgstr "报告生成需要 SysManage Professional+ 许可证。请升级以访问此功能。"
 
-#: backend/api/reports/endpoints.py:150
+#: backend/api/reports/endpoints.py:152
 msgid "Registered Hosts"
 msgstr "已注册主机"
 
-#: backend/api/reports/endpoints.py:152
+#: backend/api/reports/endpoints.py:154
 msgid "Hosts with Tags"
 msgstr "带标签的主机"
 
-#: backend/api/reports/endpoints.py:160
+#: backend/api/reports/endpoints.py:162
 msgid "SysManage Users"
 msgstr "SysManage用户"
 
-#: backend/api/reports/endpoints.py:165
+#: backend/api/reports/endpoints.py:167
 msgid "Host Firewall Status"
 msgstr "主机防火墙状态"
 
-#: backend/api/reports/endpoints.py:171
+#: backend/api/reports/endpoints.py:173
 msgid "Open-Source Antivirus Status"
 msgstr "开源杀毒软件状态"
 
-#: backend/api/reports/endpoints.py:178
+#: backend/api/reports/endpoints.py:180
 msgid "Commercial Antivirus Status"
 msgstr "商业杀毒软件状态"
 
-#: backend/api/reports/endpoints.py:191
+#: backend/api/reports/endpoints.py:193
 msgid "User Security Roles (RBAC)"
 msgstr "用户安全角色 (RBAC)"
 
-#: backend/api/reports/endpoints.py:201 backend/api/audit_log.py:536
+#: backend/api/reports/endpoints.py:203 backend/api/audit_log.py:536
 msgid "Audit Log"
 msgstr "审计日志"
 
-#: backend/api/reports/endpoints.py:204 backend/api/reports/endpoints.py:342
+#: backend/api/reports/endpoints.py:209
+msgid "Untagged Machines"
+msgstr "未标记的机器"
+
+#: backend/api/reports/endpoints.py:212 backend/api/reports/endpoints.py:357
 msgid "Unknown report type"
 msgstr "未知报告类型"
 
-#: backend/api/reports/endpoints.py:295
+#: backend/api/reports/endpoints.py:303
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF生成不可用。请安装reportlab包。"
 
-#: backend/api/reports/endpoints.py:367
+#: backend/api/reports/endpoints.py:382
 msgid "Report"
 msgstr "报告"
 
@@ -3155,15 +3159,15 @@ msgstr "缺少 DELETE_HOST 角色，无法执行操作"
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "权限 denied: 需要 VIEW_HOST_DETAILS 角色"
 
-#: backend/api/host.py:651
+#: backend/api/host.py:666
 msgid "Host already exists"
 msgstr "主机已存在"
 
-#: backend/api/host.py:763
+#: backend/api/host.py:778
 msgid "Registration absorbed: host was recently deleted"
 msgstr "注册被吸收：主机最近已被删除"
 
-#: backend/api/host.py:843
+#: backend/api/host.py:858
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"

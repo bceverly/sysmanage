@@ -148,3 +148,39 @@ def test_recorded_hash_satisfies_the_gate(base, locales):
     hashes = _sidecar(base)
     # i18n_strict's stale test, verbatim: `hashes[key] != digest(src)`
     assert hashes["a.new"] == i18n_strict.digest(ENGLISH["a.new"])
+
+
+# --- the per-locale rule (2026-10-11) ----------------------------------------
+# Callers pass {key: locales written this run}.  Measured hole it closes: Phase
+# 23.2 machine.conflict.virtualClone was translated in nine locales, its English
+# was edited, and the run that filled the last four gaps recorded the NEW
+# English -- blessing nine translations of the OLD English.
+
+
+def test_a_new_key_is_recorded_on_its_first_partial_translation(base, locales):
+    """fr was written from this English seconds ago; de is a visible gap."""
+    i18n_hashes.record_translated(base, ENGLISH, locales, {"b.partial": {"fr"}})
+    assert _sidecar(base)["b.partial"] == i18n_hashes.digest("Partial")
+
+
+def test_filling_gaps_never_blesses_values_this_run_did_not_write(tmp_path):
+    """The measured hole: no hash yet, fr holds a value of unknown English."""
+    flats = {"fr": {"k": "ancienne traduction"}, "de": {"k": "neu"}}
+    i18n_hashes.record_translated(tmp_path, {"k": "Edited"}, flats, {"k": {"de"}})
+    assert "k" not in i18n_hashes.load(tmp_path / i18n_hashes.SIDECAR_NAME)
+
+
+def test_an_edit_between_partial_runs_stays_stale(tmp_path):
+    """Run 1 records; English changes; run 2 fills de only: fr must stay stale."""
+    first = {"fr": {"k": "Avant"}, "de": {"k": "[TODO] Before"}}
+    i18n_hashes.record_translated(tmp_path, {"k": "Before"}, first, {"k": {"fr"}})
+    second = {"fr": {"k": "Avant"}, "de": {"k": "Nachher"}}
+    i18n_hashes.record_translated(tmp_path, {"k": "After"}, second, {"k": {"de"}})
+    recorded = i18n_hashes.load(tmp_path / i18n_hashes.SIDECAR_NAME)["k"]
+    assert recorded == i18n_hashes.digest("Before") != i18n_strict.digest("After")
+
+
+def test_a_full_retranslation_after_requeue_records_the_new_english(base, locales):
+    """Every locale rewritten this run: the old hash may be replaced."""
+    i18n_hashes.record_translated(base, ENGLISH, locales, {"c.stale": {"fr", "de"}})
+    assert _sidecar(base)["c.stale"] == i18n_hashes.digest(ENGLISH["c.stale"])

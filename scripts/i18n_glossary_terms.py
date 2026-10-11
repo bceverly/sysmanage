@@ -463,6 +463,22 @@ TERMS: Dict[str, Dict[str, Dict[str, object]]] = {
         "canonical": {"zh_CN": "安全公告", "zh_TW": "安全公告"},
         "forbid": {"de": ["Warnungen"], "zh_CN": ["预警"], "zh_TW": ["警示"]},
     },
+    "asset tag": {
+        # Phase 23.2, 2026-10-11.  One rendering per language across the
+        # four repos; nl "Actie-tag" (an action tag) measured from the service.
+        "canonical": {
+            "de": "Asset-Tag",
+            "nl": "asset tag",
+            "hi": "एसेट टैग",
+            "fr": "étiquette d'actif",
+            "it": "etichetta dell'asset",
+        },
+        "forbid": {"nl": ["actie-tag", "actietag"]},
+    },
+    "untagged": {
+        # Measured 2026-10-11: hi transliterated the English word.
+        "forbid": {"hi": ["अटैग्ड"]},
+    },
     "machine": {
         # Measured 2026-10-11: de "Maschineller Link" (a machine-MADE link).
         # Only the measured phrase: the adjective itself is right in

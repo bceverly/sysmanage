@@ -6,7 +6,7 @@ import { useNavigate } from "react-router";
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { DataGrid, GridColDef, GridRowSelectionModel, GridSortModel } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
-import { Autocomplete, TextField, ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material';
+import { Autocomplete, FormControlLabel, Switch, TextField, ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 import { useVisiblePolling } from '../hooks/useVisiblePolling';
@@ -25,6 +25,7 @@ import HostsActionBar from '../Components/HostsActionBar';
 import { buildHostColumns } from '../Components/hostsColumns';
 import { isParentHost, sortHostsGrouped } from '../Components/hostGrouping';
 import { appLocale } from '../utils/locale';
+import { isUntagged } from '../Components/hostAssetTag';
 
 const Hosts = () => {
     const [tableData, setTableData] = useState<SysManageHost[]>([]);
@@ -35,6 +36,7 @@ const Hosts = () => {
     const [searchColumn, setSearchColumn] = useState<string>('fqdn');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [allTags, setAllTags] = useState<Array<{id: string, name: string}>>([]);
+    const [untaggedOnly, setUntaggedOnly] = useState<boolean>(false);
     const navigate = useNavigate();
     const { t } = useTranslation();
 
@@ -159,7 +161,8 @@ const Hosts = () => {
         { field: 'fqdn', label: t('hosts.fqdn') },
         { field: 'platform', label: t('hosts.platform') },
         { field: 'ipv4', label: t('hosts.ipv4') },
-        { field: 'ipv6', label: t('hosts.ipv6') }
+        { field: 'ipv6', label: t('hosts.ipv6') },
+        { field: 'asset_tag', label: t('assetTags.grid.column', 'Asset Tag') }
     ];
 
     const handleApprove = async () => {
@@ -568,6 +571,11 @@ const Hosts = () => {
             });
         }
 
+        // Asset tags live on the machine; this finds machines still to be tagged
+        if (untaggedOnly) {
+            filtered = filtered.filter(isUntagged);
+        }
+
         // Apply custom sorting based on filter mode
         if (childHostFilter === 'all') {
             filtered = sortHostsGrouped(filtered);
@@ -576,7 +584,7 @@ const Hosts = () => {
         }
 
         setFilteredData(filtered);
-    }, [tableData, searchTerm, searchColumn, selectedTags, childHostFilter]);
+    }, [tableData, searchTerm, searchColumn, selectedTags, childHostFilter, untaggedOnly]);
 
     // Update filtered data when any filter criteria changes
     React.useEffect(() => {
@@ -647,6 +655,20 @@ const Hosts = () => {
                     )}
                     sx={{ minWidth: 300, flexGrow: 1 }}
                 />
+
+                {/* Untagged-only filter (Phase 23.2 asset tags) */}
+                <Tooltip describeChild title={t('assetTags.grid.untaggedOnlyTooltip', 'Show only hosts whose machine has no asset tag')}>
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                size="small"
+                                checked={untaggedOnly}
+                                onChange={(event) => setUntaggedOnly(event.target.checked)}
+                            />
+                        }
+                        label={t('assetTags.grid.untaggedOnly', 'Untagged only')}
+                    />
+                </Tooltip>
 
                 {/* Child Host Filter -- Pro+ feature, hidden in OSS builds */}
                 {childHostsLicensed && (

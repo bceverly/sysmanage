@@ -12,6 +12,7 @@ const h = vi.hoisted(() => ({
   navigate: vi.fn(),
   license: null as null | { active: boolean; modules: string[]; features: string[] },
   perms: {} as Record<string, boolean>,
+  getHosts: vi.fn(),
 }));
 
 vi.mock('react-router', async (importOriginal) => {
@@ -23,6 +24,9 @@ vi.mock('../../Services/license', () => ({
 }));
 vi.mock('../../Services/permissions', () => ({
   hasPermissionSync: (name: string) => !!h.perms[name],
+}));
+vi.mock('../../Services/hosts', () => ({
+  doGetHosts: () => h.getHosts(),
 }));
 
 const renderPalette = () =>
@@ -44,6 +48,13 @@ const ctrlK = () =>
 
 const input = () => screen.getByPlaceholderText(/Search pages/i);
 
+// Typing can start the lazy host fetch; let it settle inside act().
+const typeQuery = async (value: string) => {
+  await act(async () => {
+    fireEvent.change(input(), { target: { value } });
+  });
+};
+
 describe('CommandPalette', () => {
   beforeEach(() => {
     h.navigate.mockClear();
@@ -53,6 +64,8 @@ describe('CommandPalette', () => {
       features: ['reports', 'advisory_management', 'vuln', 'compliance', 'fips_mode', 'alerts', 'os_lifecycle', 'health'],
     };
     h.perms = { 'Manage Custom Metrics': true };
+    h.getHosts.mockReset();
+    h.getHosts.mockResolvedValue([]);
     localStorage.setItem('bearer_token', 'tok');
   });
   afterEach(() => localStorage.removeItem('bearer_token'));
@@ -88,18 +101,18 @@ describe('CommandPalette', () => {
     );
   });
 
-  it('filters commands by query', () => {
+  it('filters commands by query', async () => {
     renderPalette();
     dispatchOpen();
-    act(() => { fireEvent.change(input(), { target: { value: 'host' } }); });
+    await typeQuery('host');
     expect(screen.getByText('Hosts')).toBeInTheDocument();
     expect(screen.queryByText('Settings')).toBeNull();
   });
 
-  it('shows a no-matches message for a non-matching query', () => {
+  it('shows a no-matches message for a non-matching query', async () => {
     renderPalette();
     dispatchOpen();
-    act(() => { fireEvent.change(input(), { target: { value: 'zzznotathing' } }); });
+    await typeQuery('zzznotathing');
     expect(screen.getByText(/No matches/i)).toBeInTheDocument();
   });
 
@@ -143,7 +156,7 @@ describe('CommandPalette', () => {
   it('navigates and closes on Enter', async () => {
     renderPalette();
     dispatchOpen();
-    act(() => { fireEvent.change(input(), { target: { value: 'hosts' } }); });
+    await typeQuery('hosts');
     act(() => { fireEvent.keyDown(input(), { key: 'Enter' }); });
     expect(h.navigate).toHaveBeenCalledWith('/hosts');
     await waitFor(() =>
@@ -165,5 +178,66 @@ describe('CommandPalette', () => {
     act(() => { fireEvent.keyDown(input(), { key: 'ArrowUp' }); });
     act(() => { fireEvent.keyDown(input(), { key: 'Enter' }); });
     expect(h.navigate).toHaveBeenCalled();
+  });
+
+  describe('asset tag search', () => {
+    const hosts = [
+      { id: 'h1', fqdn: 'linux.example.com', asset_tag: 'GDR-000042', machine_id: 'm1' },
+      { id: 'h2', fqdn: 'windows.example.com', asset_tag: 'GDR-000042', machine_id: 'm1' },
+      { id: 'h3', fqdn: 'other.example.com', asset_tag: 'GDR-000043', machine_id: 'm2' },
+      { id: 'h4', fqdn: 'untagged.example.com', asset_tag: null, machine_id: null },
+    ];
+
+    beforeEach(() => {
+      h.getHosts.mockResolvedValue(hosts);
+    });
+
+    it('finds every host on the tagged machine and shows the tag', async () => {
+      renderPalette();
+      dispatchOpen();
+      await typeQuery('GDR-000042');
+      expect(await screen.findByText('linux.example.com')).toBeInTheDocument();
+      expect(screen.getByText('windows.example.com')).toBeInTheDocument();
+      expect(screen.queryByText('other.example.com')).toBeNull();
+      expect(screen.queryByText('untagged.example.com')).toBeNull();
+      expect(screen.getAllByText('Asset tag: GDR-000042')).toHaveLength(2);
+    });
+
+    it('matches case-insensitively on a partial tag', async () => {
+      renderPalette();
+      dispatchOpen();
+      await typeQuery('gdr-0000');
+      expect(await screen.findByText('other.example.com')).toBeInTheDocument();
+      expect(screen.getByText('Asset tag: GDR-000043')).toBeInTheDocument();
+    });
+
+    it('navigates to the host on click', async () => {
+      renderPalette();
+      dispatchOpen();
+      await typeQuery('GDR-000043');
+      act(() => { fireEvent.click(screen.getByText('other.example.com')); });
+      expect(h.navigate).toHaveBeenCalledWith('/hosts/h3');
+    });
+
+    it('fetches hosts once per opening and not for a one-letter query', async () => {
+      renderPalette();
+      dispatchOpen();
+      await typeQuery('g');
+      expect(h.getHosts).not.toHaveBeenCalled();
+      await typeQuery('gd');
+      await typeQuery('gdr');
+      expect(h.getHosts).toHaveBeenCalledTimes(1);
+    });
+
+    it('still lists pages when the host fetch fails', async () => {
+      const errSpy = vi.spyOn(globalThis.console, 'error').mockImplementation(() => {});
+      h.getHosts.mockRejectedValue(new Error('boom'));
+      renderPalette();
+      dispatchOpen();
+      await typeQuery('hosts');
+      expect(screen.getByText('Hosts')).toBeInTheDocument();
+      expect(errSpy).toHaveBeenCalled();
+      errSpy.mockRestore();
+    });
   });
 });

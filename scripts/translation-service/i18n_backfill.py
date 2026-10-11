@@ -376,7 +376,7 @@ def run_json(
     # sidecar is per KEY, not per key-per-language: recording a key after
     # translating only some locales would hide the untranslated ones from the
     # stale check.  See i18n_hashes for the full rule.
-    translated_keys: set = set()
+    translated_keys: Dict[str, set] = {}
     locale_flats: Dict[str, Dict[str, str]] = {}
     # Keys the service reported it could NOT change, per locale.  Collected so
     # the run can end with an actionable summary instead of a retry count that
@@ -403,6 +403,7 @@ def run_json(
                     lang_flat.get(key)
                 ):
                     _set_dotted(doc, key, en_src)
+                    translated_keys.setdefault(key, set()).add(lang)
                     healed += 1
             if healed:
                 lang_flat = _flatten(doc)
@@ -424,6 +425,9 @@ def run_json(
         if limit:
             gaps = gaps[:limit]
         print(f"  {lang}: {len(gaps)} gap(s)", flush=True)
+        # EVERY locale, not just ones with gaps: a real value this run does not
+        # rewrite is exactly what can block a stale hash (i18n_hashes).
+        locale_flats[lang] = lang_flat
         if not gaps or service is None:
             continue
 
@@ -438,7 +442,7 @@ def run_json(
             cand = translations.get(en_src)
             if cand is not None:
                 _set_dotted(doc, key, cand)
-                translated_keys.add(key)
+                translated_keys.setdefault(key, set()).add(lang)
                 wrote += 1
             else:
                 skipped += 1

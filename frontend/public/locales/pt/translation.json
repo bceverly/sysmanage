@@ -2849,7 +2849,9 @@
       "systemInfo": "informações do sistema",
       "tags": "etiquetas",
       "tracking": "rastreamento",
-      "users": "usuários"
+      "users": "usuários",
+      "assetTags": "tags de ativos",
+      "hardware": "hardware"
     },
     "title": "Relatórios",
     "unknownError": "Erro desconhecido",
@@ -2861,7 +2863,11 @@
       "description": "Lista abrangente de todos os usuários SysManage mostrando seus perfis, papéis, permissões e status da conta. Inclui datas de criação dos usuários e horas de login mais recentes.",
       "name": "Usuários SysManage"
     },
-    "viewReport": "Ver Relatório"
+    "viewReport": "Ver Relatório",
+    "untaggedMachines": {
+      "description": "Máquinas sem etiqueta de ativo ainda, com todos os sistemas operacionais instalados em cada uma, seu fornecedor, modelo, número de série e UUID do sistema. Use-o para encontrar hardware que ainda precisa de uma etiqueta.",
+      "name": "Máquinas desmarcadas"
+    }
   },
   "resetPassword": {
     "backToLogin": "Voltar ao login",
@@ -4620,5 +4626,99 @@
       "inventories": "Inventários",
       "tags": "Marcadores"
     }
+  },
+  "assetTags": {
+    "grid": {
+      "column": "Etiqueta de Ativo",
+      "paletteResult": "Etiqueta de ativo: {{tag}}",
+      "untagged": "Desmarcado",
+      "untaggedOnly": "Desmarcado apenas",
+      "untaggedOnlyTooltip": "Exibir apenas hosts que não possuem tag de ativo"
+    },
+    "scheme": {
+      "advancedRegex": "Avançado: expressão regular",
+      "allConform": "Todas as tags existentes estão de acordo com o esquema salvo.",
+      "conformanceTitle": "Tags existentes",
+      "digits": "Dígitos",
+      "digitsHelp": "Os números são preenchidos com zeros até esta largura.",
+      "draftNonconforming": "Com este rascunho, {{bad}} de {{total}} tags existentes não estariam em conformidade.",
+      "enforce": "Impor na entrada",
+      "enforceHelp": "Quando ativado, uma tag que não se encaixe no esquema é recusada ao ser inserida. Quando desativado, é aceita e relatada.",
+      "examplesFail": "Tags que falham",
+      "examplesPass": "Tags que passam",
+      "fieldInvalid": "Este valor não é válido para o esquema.",
+      "loadFailed": "Não foi possível carregar o esquema de etiqueta do ativo",
+      "loading": "Carregando esquema de tag de ativo",
+      "nextFree": "Próxima tag livre",
+      "noExamples": "Nenhum exemplo.",
+      "noTags": "Nenhuma máquina possui uma etiqueta de ativo ainda.",
+      "nonconformingCount": "{{bad}} de {{total}} etiquetas existentes não estão em conformidade com o esquema salvo.",
+      "pattern": "Expressão regular",
+      "patternHelp": "A tag inteira deve corresponder a este padrão. Use-o apenas para esquemas que o construtor não puder expressar.",
+      "prefix": "Prefixo",
+      "prefixHelp": "Por exemplo, LAPTOP de TI ou HQ",
+      "previewFailed": "Este rascunho não pode ser visualizado. Verifique os campos destacados.",
+      "previewTitle": "Pré-visualização ao vivo",
+      "previewing": "Atualizando pré-visualização",
+      "readOnly": "Você pode visualizar o esquema, mas alterar requer a função 'Gerenciar Tags de Ativo'.",
+      "reportOnly": "SysManage só relata tags que não estão em conformidade. Nunca sobrescreve tags existentes; altere-as em cada máquina se necessário.",
+      "sampleTag": "Tag de amostra",
+      "saveFailed": "Não foi possível salvar o esquema de etiqueta do ativo",
+      "saveInvalid": "O esquema não é válido. Corrija os campos destacados e salve novamente.",
+      "saved": "Esquema de etiqueta de ativo salvo.",
+      "separator": "Separador",
+      "separatorNone": "nenhum",
+      "subtitle": "Defina o que é uma etiqueta de ativo válida. A pré-visualização atualiza à medida que você edita; nada é salvo até que você pressione Salvar.",
+      "suffix": "Sufixo (opcional)",
+      "tabLabel": "Etiquetas de Ativos",
+      "title": "Esquema de nomenclatura de tags de ativos"
+    }
+  },
+  "machine": {
+    "assetTag": "Etiqueta de Ativo",
+    "boardSerial": "Serial do Board",
+    "changeAssetTag": "Alterar",
+    "clearAssetTag": "Limpar",
+    "conflict": {
+      "different": "Máquina Diferente",
+      "same": "Mesma máquina",
+      "serialMismatch": "Outra máquina relata o mesmo UUID do sistema, mas um número de série diferente.",
+      "title": "Conflito de identidade da máquina",
+      "virtualClone": "Outro host já relata a identidade desta máquina virtual. Geralmente é um clone que manteve seu UUID."
+    },
+    "hostInactive": "Inativo",
+    "loadFailed": "A máquina não pôde ser carregada.",
+    "model": "Modelo",
+    "noAssetTag": "Sem etiqueta de ativo",
+    "noMachine": {
+      "absent": "Este hardware não expõe um UUID ou número de série do sistema.",
+      "failed": "O agente tentou ler a identidade de hardware, mas a leitura falhou.",
+      "notReported": "O agente ainda não relatou a identidade de hardware deste host.",
+      "placeholder": "O firmware deste hardware envia um UUID de lugar-tenente, então não pode ser distinguido de outras máquinas.",
+      "title": "Nenhuma máquina identificada",
+      "unknown": "Este host ainda não está vinculado a uma máquina.",
+      "unprivileged": "O agente precisa de modo privilegiado para ler a identidade de hardware neste sistema operacional."
+    },
+    "noOtherHosts": "Nenhum outro sistema operacional neste máquina relatou.",
+    "notAvailable": "Não disponível",
+    "otherHosts": "Outros sistemas operacionais neste máquina",
+    "resolveFailed": "Não foi possível resolver o conflito",
+    "resolveFailedCode": "O conflito não pôde ser resolvido ({{code}}).",
+    "saveFailed": "Não foi possível salvar a tag de ativo.",
+    "setAssetTag": "Definir tag de ativo",
+    "systemSerial": "Série do sistema",
+    "systemUuid": "UUID do sistema",
+    "tagReason": {
+      "badCharacters": "A tag de ativo contém caracteres inválidos.",
+      "doesNotMatchScheme": "A tag de ativo não corresponde ao esquema de tag de ativo.",
+      "duplicate": "Outra máquina já possui esta etiqueta de ativo.",
+      "empty": "Insira uma etiqueta de ativo.",
+      "schemeTimeout": "O esquema de tag de ativo levou muito tempo para verificar esta tag.",
+      "tooLong": "A tag de ativo é muito longa.",
+      "unknown": "A etiqueta de ativo foi recusada ({{code}})."
+    },
+    "title": "Máquina",
+    "vendor": "Fornecedor",
+    "virtualMachine": "Máquina virtual"
   }
 }

@@ -2,7 +2,7 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -18,6 +18,14 @@ import {
 import { IoSearch } from 'react-icons/io5';
 import { getCachedLicense } from '../Services/license';
 import { hasPermissionSync } from '../Services/permissions';
+import { doGetHosts, SysManageHost } from '../Services/hosts';
+import { findHostsByAssetTag, hostAssetTag } from './hostAssetTag';
+
+// A host is findable here by its machine's asset tag (Phase 23.2): typing
+// "GDR-000042" lists every OS on that machine.  The host list is fetched
+// lazily, once per opening, the first time a query long enough to search is
+// typed -- most palette uses never need it.
+const HOST_QUERY_MIN_LENGTH = 2;
 
 // Global "jump to anything" command palette (Cmd/Ctrl-K).  With the nav now
 // three levels deep, this is the fast path for keyboard users.  Kept in sync
@@ -64,6 +72,8 @@ const CommandPalette: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
+  const [hosts, setHosts] = useState<SysManageHost[]>([]);
+  const hostsRequested = useRef(false);
 
   // Cmd/Ctrl-K toggles; a custom event lets a toolbar button open it too. Only
   // active when authenticated -- no jump targets pre-login.
@@ -92,7 +102,7 @@ const CommandPalette: React.FC = () => {
   const modules: string[] = license?.modules ?? [];
   const features: string[] = license?.features ?? [];
   const q = query.trim().toLowerCase();
-  const results = COMMANDS.filter(
+  const commandResults = COMMANDS.filter(
     c =>
       (!c.module || modules.includes(c.module)) &&
       (!c.feature || features.includes(c.feature)) &&
@@ -101,7 +111,34 @@ const CommandPalette: React.FC = () => {
     .map(c => ({ ...c, label: t(c.labelKey, c.labelDefault) }))
     .filter(
       c => !q || c.label.toLowerCase().includes(q) || c.group.toLowerCase().includes(q),
-    );
+    )
+    .map(c => ({ id: c.id, label: c.label, secondary: c.group, path: c.path }));
+  const hostResults = q.length >= HOST_QUERY_MIN_LENGTH
+    ? findHostsByAssetTag(hosts, q).map(host => ({
+        id: `host-${host.id}`,
+        label: host.fqdn,
+        secondary: t('assetTags.grid.paletteResult', 'Asset tag: {{tag}}', { tag: hostAssetTag(host) }),
+        path: `/hosts/${host.id}`,
+      }))
+    : [];
+  const results = [...commandResults, ...hostResults];
+
+  // Refetch on the next opening (however it was closed) so new tags show up.
+  useEffect(() => {
+    if (open) return;
+    hostsRequested.current = false;
+    setHosts(prev => (prev.length ? [] : prev));
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || hostsRequested.current || q.length < HOST_QUERY_MIN_LENGTH) return;
+    hostsRequested.current = true;
+    doGetHosts()
+      .then(setHosts)
+      .catch((error: unknown) => {
+        console.error('Command palette could not load hosts for asset tag search:', error);
+      });
+  }, [open, q]);
 
   // Keep the active row valid as the result set shrinks.
   useEffect(() => {
@@ -178,7 +215,7 @@ const CommandPalette: React.FC = () => {
           >
             <ListItemText
               primary={cmd.label}
-              secondary={cmd.group}
+              secondary={cmd.secondary}
               slotProps={{
                 primary: { variant: 'body2' },
                 secondary: { variant: 'caption' },

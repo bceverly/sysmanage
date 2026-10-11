@@ -94,6 +94,7 @@ vi.mock("../../Components/RepositoryMirroringSettings", () => stub("RepositoryMi
 vi.mock("../../Components/AuthenticationProvidersSettings", () => stub("AuthenticationProvidersSettings"));
 vi.mock("../../Components/ServerRoleSettings", () => stub("ServerRoleSettings"));
 vi.mock("../../Components/LoggingSettings", () => stub("LoggingSettings"));
+vi.mock("../../Components/AssetTagSchemeSettings", () => stub("AssetTagSchemeSettings"));
 vi.mock("../../Components/settings/IntegrationsTab", () => stub("IntegrationsTab"));
 vi.mock("../../Components/settings/QueuesTab", () => stub("QueuesTab"));
 vi.mock("../../Components/settings/UbuntuProTab", () => stub("UbuntuProTab"));
@@ -582,6 +583,7 @@ describe("tab switching", () => {
       ["Server Role", "stub-ServerRoleSettings"],
       ["Logging", "stub-LoggingSettings"],
       ["Host Defaults", "stub-HostDefaultsSettings"],
+      ["Asset Tags", "stub-AssetTagSchemeSettings"],
       ["Queues", "stub-QueuesTab"],
       ["Integrations", "stub-IntegrationsTab"],
       ["Ubuntu Pro", "stub-UbuntuProTab"],

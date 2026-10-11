@@ -2849,7 +2849,9 @@
       "systemInfo": "Systeminformationen",
       "tags": "Tags",
       "tracking": "Verfolgung",
-      "users": "Benutzer"
+      "users": "Benutzer",
+      "assetTags": "Asset-Tags",
+      "hardware": "Hardware"
     },
     "title": "Berichte",
     "unknownError": "Unbekannter Fehler",
@@ -2861,7 +2863,11 @@
       "description": "Komplette Liste aller SysManage-Benutzer mit ihren Profilen, Rollen, Berechtigungen und Kontostatus. Enthält Benutzereinsatzdaten und letztes Anmeldezeitpunkt.",
       "name": "SysManage Benutzer"
     },
-    "viewReport": "Bericht anzeigen"
+    "viewReport": "Bericht anzeigen",
+    "untaggedMachines": {
+      "description": "Maschinen, die noch kein Asset-Tag haben, mit jedem installierten Betriebssystem auf jeder Maschine, dem Hersteller, Modell, Seriennummer und System-UUID. Verwenden Sie es, um Hardware zu finden, die noch ein Etikett benötigt.",
+      "name": "Ungetagte Maschinen"
+    }
   },
   "resetPassword": {
     "backToLogin": "Zurück zur Anmeldung",
@@ -4620,5 +4626,99 @@
       "inventories": "Inventare",
       "tags": "Tags"
     }
+  },
+  "assetTags": {
+    "grid": {
+      "column": "Asset-Tag",
+      "paletteResult": "Asset-Tag: {{tag}}",
+      "untagged": "Ohne Tag",
+      "untaggedOnly": "Nur ohne Tag",
+      "untaggedOnlyTooltip": "Nur Hosts anzeigen, deren Maschine kein Asset-Tag hat"
+    },
+    "scheme": {
+      "advancedRegex": "Erweiterte: reguläre Ausdrücke",
+      "allConform": "Alle vorhandenen Tags entsprechen dem gespeicherten Schema.",
+      "conformanceTitle": "Vorhandene Tags",
+      "digits": "Ziffern",
+      "digitsHelp": "Zahlen werden zu diesem Format aufgefüllt.",
+      "draftNonconforming": "Mit diesem Entwurf würden {{bad}} von {{total}} bestehenden Tags nicht dem Schema entsprechen.",
+      "enforce": "Bei Eingabe erzwingen",
+      "enforceHelp": "Wenn aktiviert, wird ein Tag, der dem Schema nicht entspricht, abgelehnt, wenn er eingegeben wird. Wenn deaktiviert, wird er akzeptiert und gemeldet.",
+      "examplesFail": "Tags, die fehlschlagen",
+      "examplesPass": "Tags, die passen",
+      "fieldInvalid": "Dieser Wert ist für das Schema nicht gültig.",
+      "loadFailed": "Könnte das Schema für Asset-Tags nicht laden.",
+      "loading": "Laden des Schemas für Asset-Tags",
+      "nextFree": "Nächstes freies Tag",
+      "noExamples": "Keine Beispiele.",
+      "noTags": "Keine Maschine verfügt über ein Asset-Tag.",
+      "nonconformingCount": "{{bad}} von {{total}} vorhandenen Tags entsprechen nicht dem gespeicherten Schema.",
+      "pattern": "Regelmäßiger Ausdruck",
+      "patternHelp": "Der gesamte Tag muss diesem Muster entsprechen. Verwenden Sie es nur für Schemata, die der Builder nicht ausdrücken kann.",
+      "prefix": "Präfix",
+      "prefixHelp": "Zum Beispiel IT oder HQ-LAPTOP.",
+      "previewFailed": "Dieser Entwurf kann nicht vorgewiesen werden. Überprüfen Sie die hervorgehobenen Felder.",
+      "previewTitle": "Live-Vorschau",
+      "previewing": "Vorschau aktualisieren",
+      "readOnly": "Sie können das Schema anzeigen, aber Änderungen erfordern die Rolle 'Asset-Tags verwalten'.",
+      "reportOnly": "SysManage meldet nur Tags, die nicht übereinstimmen. Es überschreibt niemals bestehende Tags; diese müssen bei Bedarf auf jeder Maschine geändert werden.",
+      "sampleTag": "Proben-Tag",
+      "saveFailed": "Könnte das Schema für Asset-Tags nicht speichern.",
+      "saveInvalid": "Das Schema ist ungültig. Korrigieren Sie die hervorgehobenen Felder und speichern Sie es erneut.",
+      "saved": "Das Schema für Asset-Tags wurde gespeichert.",
+      "separator": "Trennzeichen",
+      "separatorNone": "Keine",
+      "subtitle": "Definieren Sie, was ein gültiges Asset-Tag aussieht. Die Vorschau aktualisiert sich beim Bearbeiten; nichts wird gespeichert, bis Sie auf Speichern klicken.",
+      "suffix": "Nachteil (optional)",
+      "tabLabel": "Asset-Tags",
+      "title": "Schema für die Benennung von Asset-Tags"
+    }
+  },
+  "machine": {
+    "assetTag": "Asset-Tag",
+    "boardSerial": "Mainboard-Seriennummer",
+    "changeAssetTag": "Ändern",
+    "clearAssetTag": "Löschen",
+    "conflict": {
+      "different": "Ein anderes Gerät",
+      "same": "Auf derselben Maschine",
+      "serialMismatch": "Ein anderes Gerät meldet dieselbe System-UUID, aber eine andere Seriennummer.",
+      "title": "Konflikt bei der Identität der Maschine",
+      "virtualClone": "Ein anderer Host meldet bereits die Identität dieser virtuellen Maschine. Meist ist es ein Klon, der seine UUID behalten hat."
+    },
+    "hostInactive": "Inaktiv",
+    "loadFailed": "Die Maschine konnte nicht geladen werden.",
+    "model": "Modell",
+    "noAssetTag": "Kein Asset-Tag",
+    "noMachine": {
+      "absent": "Diese Hardware stellt weder System-UUID noch Seriennummer bereit.",
+      "failed": "Der Agent versuchte, die Hardware-Identität zu lesen, aber die Lesevorgang fehlschlug.",
+      "notReported": "Der Agent hat noch keine Hardware-Identität dieses Hosts gemeldet.",
+      "placeholder": "Die Firmware auf dieser Hardware enthält einen Platzhalter-UUID, sodass sie nicht von anderen Maschinen unterschieden werden kann.",
+      "title": "Keine Maschine identifiziert",
+      "unknown": "Dieser Host ist noch nicht mit einer Maschine verknüpft.",
+      "unprivileged": "Der Agent benötigt Privilegienmodus, um die Hardware-Identität auf diesem Betriebssystem zu lesen."
+    },
+    "noOtherHosts": "Kein anderes Betriebssystem auf dieser Maschine hat sich gemeldet.",
+    "notAvailable": "Nicht verfügbar",
+    "otherHosts": "Andere Betriebssysteme auf dieser Maschine",
+    "resolveFailed": "Der Konflikt konnte nicht gelöst werden.",
+    "resolveFailedCode": "Der Konflikt konnte nicht gelöst werden ({{code}}).",
+    "saveFailed": "Das Asset-Tag konnte nicht gespeichert werden.",
+    "setAssetTag": "Asset-Tag festlegen",
+    "systemSerial": "System-Seriennummer",
+    "systemUuid": "System-UUID",
+    "tagReason": {
+      "badCharacters": "Das Asset-Tag enthält Zeichen, die nicht zulässig sind.",
+      "doesNotMatchScheme": "Das Asset-Tag entspricht nicht dem Schema für Asset-Tags.",
+      "duplicate": "Ein anderes Gerät verfügt bereits über diesen Asset-Tag.",
+      "empty": "Geben Sie ein Asset-Tag ein.",
+      "schemeTimeout": "Das Schema zum Überprüfen dieses Tags hat zu viel Zeit in Anspruch genommen.",
+      "tooLong": "Das Asset-Tag ist zu lang.",
+      "unknown": "Das Asset-Tag wurde abgelehnt ({{code}})."
+    },
+    "title": "Maschine",
+    "vendor": "Hersteller",
+    "virtualMachine": "Virtuelle Maschine"
   }
 }

@@ -47,6 +47,22 @@ still ``[TODO]``) is not recorded either, so it stays visible.  The result can
 only ever be a hash that some locale set was demonstrably just translated
 from -- which is the precise claim the sidecar is supposed to make.
 
+THE PER-LOCALE RULE (2026-10-11)
+--------------------------------
+The rule above had a hole.  A new key translated in only SOME locales got no
+hash; its English was then edited; a later run filled the remaining gaps and
+recorded the NEW English -- blessing the earlier locales' translations of the
+OLD English.  Measured on Phase 23.2 ``machine.conflict.virtualClone``: nine
+stale values passed every gate.
+
+So callers now pass ``{key: locales written this run}``, and a key is recorded
+only when every locale's value was either written in this run or is still a
+gap.  A real value this run did NOT write may be a translation of older
+English, and its presence blocks the record.  That allows recording a
+partially translated NEW key (its written locales were made from this English
+seconds ago; the gaps are visible) and refuses to bless anything else.  A
+plain iterable of keys keeps the original all-locales-complete rule.
+
 Dry runs write nothing: with no service configured the translator never
 writes, so ``translated_keys`` is empty and this is a no-op.
 """
@@ -54,7 +70,7 @@ writes, so ``translated_keys`` is empty and this is a no-op.
 import hashlib
 import json
 from pathlib import Path
-from typing import Dict, Iterable, Mapping, Optional, Set
+from typing import Dict, Iterable, Mapping, Optional, Set, Union
 
 # The sidecar lives in the locales root for every surface that has one
 # (docs ``assets/locales``, frontend ``public/locales``), so callers never
@@ -93,11 +109,24 @@ def _is_gap(value: Optional[str]) -> bool:
     return not stripped or stripped.startswith("[TODO]")
 
 
+def _safe_to_record(
+    key: str,
+    locale_flats: Mapping[str, Mapping[str, str]],
+    written: Optional[Set[str]],
+) -> bool:
+    """Whether recording ``key``'s current English can bless nothing stale."""
+    if written is None:  # legacy plain-iterable caller: every locale complete
+        return not any(_is_gap(flat.get(key)) for flat in locale_flats.values())
+    return all(
+        lang in written or _is_gap(flat.get(key)) for lang, flat in locale_flats.items()
+    )
+
+
 def record_translated(
     base: Path,
     en_flat: Mapping[str, str],
     locale_flats: Mapping[str, Mapping[str, str]],
-    translated_keys: Iterable[str],
+    translated_keys: Union[Mapping[str, Iterable[str]], Iterable[str]],
 ) -> int:
     """Record source hashes for keys this run fully translated.
 
@@ -107,21 +136,27 @@ def record_translated(
         locale_flats: ``{lang: {dotted key: value}}`` AFTER writing.  Only
             locales actually processed need appear -- a locale whose file is
             missing is the completeness gate's problem, not this one's.
-        translated_keys: keys the translator wrote a value for in this run.
+        translated_keys: ``{key: locales written}`` for this run (the
+            per-locale rule), or a plain iterable of keys (the original
+            every-locale-complete rule).
 
     Returns:
         How many keys were newly recorded or updated.
     """
-    keys: Set[str] = {k for k in translated_keys if k in en_flat}
-    if not keys:
+    if isinstance(translated_keys, Mapping):
+        written: Dict[str, Optional[Set[str]]] = {
+            k: set(v) for k, v in translated_keys.items() if k in en_flat
+        }
+    else:
+        written = {k: None for k in translated_keys if k in en_flat}
+    if not written:
         return 0
 
     path = sidecar_path(base)
     hashes = load(path)
     changed = 0
-    for key in sorted(keys):
-        # Every processed locale must now hold a real value for this key.
-        if any(_is_gap(flat.get(key)) for flat in locale_flats.values()):
+    for key in sorted(written):
+        if not _safe_to_record(key, locale_flats, written[key]):
             continue
         new = digest(en_flat[key])
         if hashes.get(key) != new:

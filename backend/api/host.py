@@ -462,6 +462,18 @@ def _get_all_hosts_sync(tenant_id=None):
         # Update counts in one grouped query (Phase 22.7) -- not every host's
         # update rows loaded one host at a time.
         update_counts = update_counts_by_host(session)
+        # Asset tags live on the machine (Phase 23.2): one query for all of
+        # them, keyed by machine id.
+        machine_ids = {h.machine_id for h in hosts if h.machine_id}
+        asset_tags = (
+            dict(
+                session.query(models.Machine.id, models.Machine.asset_tag)
+                .filter(models.Machine.id.in_(machine_ids))
+                .all()
+            )
+            if machine_ids
+            else {}
+        )
 
         # Convert to dictionaries with tags included
         result = []
@@ -524,6 +536,9 @@ def _get_all_hosts_sync(tenant_id=None):
                     }
                     for tag in host_tags
                 ],
+                # Phase 23.2: the machine this OS runs on, and its asset tag.
+                "machine_id": str(host.machine_id) if host.machine_id else None,
+                "asset_tag": asset_tags.get(host.machine_id),
                 # Include virtualization support info
                 "virtualization_types": host.virtualization_types,
                 "virtualization_capabilities": host.virtualization_capabilities,

@@ -138,6 +138,10 @@ type SysManageHost = {
     staged_image_digest?: string;
     rollback_available?: boolean;
     image_mode_updated_at?: string;
+    // Phase 23.2: the machine (hardware) under this OS, and its asset tag.
+    // Every OS on a multi-boot machine shares both.
+    machine_id?: string | null;
+    asset_tag?: string | null;
 }
 
 type StorageDevice = {
