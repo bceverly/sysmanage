@@ -4564,7 +4564,7 @@ msgstr "擷取稽核記錄項目失敗: %s"
 msgid ""
 "%s export requires a SysManage Professional+ license. OSS tier supports CSV "
 "export."
-msgstr ""
+msgstr "%s 匯出需要 SysManage Professional+ 授權。OSS 層級支援 CSV 匯出"
 
 #: backend/api/audit_log.py:306
 msgid "Use /api/v1/audit/export with Pro+ license"
