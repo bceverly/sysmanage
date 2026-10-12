@@ -756,7 +756,8 @@
       "saveError": "Konnten die Einstellungen nicht speichern",
       "title": "Dashboard-Einstellungen"
     },
-    "updates": "Aktualisierungen"
+    "updates": "Aktualisierungen",
+    "clocksOutOfBounds": "Uhren außerhalb der Grenzwerte"
   },
   "dataGrid": {
     "columnVisibility": "Spaltensichtbarkeit",
@@ -2430,7 +2431,8 @@
     "advisor": "Berater",
     "hostMetrics": "Host-Metriken",
     "assetDiscovery": "Netzwerkerkennung",
-    "malware": "Schadsoftware"
+    "malware": "Schadsoftware",
+    "timeSync": "Zeitsynchronisierung"
   },
   "notifications": {
     "applicationUpdates": "Anwendungs-Updates",
@@ -4784,5 +4786,124 @@
     "title": "Maschine",
     "vendor": "Hersteller",
     "virtualMachine": "Virtuelle Maschine"
+  },
+  "timeSync": {
+    "bounds": {
+      "add": "Ausnahme hinzufügen",
+      "critical": "Kritisch (Sekunden)",
+      "criticalShort": "Kritisch",
+      "intro": "Ein Host, dessen Uhr um den Warngrenzwert oder mehr abweicht, wird als Warnung angezeigt; ab dem kritischen Grenzwert als kritisch. Es gelten die spezifischsten Grenzwerte: zuerst die eines Tags, dann die eines Standorts, dann die des Mandanten und zuletzt die serverweiten. Für einen Host mit mehreren Tags gelten die strengsten.",
+      "loadError": "Die Grenzwerte für die Uhren konnten nicht geladen werden.",
+      "noOverrides": "Keine Ausnahmen: Jeder Host verwendet die serverweiten Grenzwerte.",
+      "overridesTitle": "Ausnahmen",
+      "readOnly": "Sie können die Grenzwerte anzeigen, aber Änderungen erfordern die Rolle 'Zeitsynchronisierung verwalten'.",
+      "remove": "Ausnahme entfernen",
+      "save": "Speichern",
+      "scope": "Gilt für",
+      "serverSource": "Derzeit: {{source}}.",
+      "serverTitle": "Serverweite Grenzwerte",
+      "tabLabel": "Zeitsynchronisierung",
+      "thisTenant": "Dieser Mandant",
+      "title": "Grenzwerte für die Uhrabweichung",
+      "warning": "Warnung (Sekunden)",
+      "warningShort": "Warnung"
+    },
+    "boundsError": {
+      "notSaved": "Der Server konnte die Grenzwerte nicht speichern.",
+      "number": "Jeder Grenzwert muss eine Zahl sein.",
+      "order": "Der Warngrenzwert muss kleiner als der kritische Grenzwert sein.",
+      "range": "Jeder Grenzwert muss zwischen 1 ms und 24 Stunden liegen.",
+      "scope": "Wählen Sie einen Mandanten, einen Standort oder ein Tag aus.",
+      "tag": "Dieses Tag existiert nicht mehr.",
+      "unknown": "Die Grenzwerte konnten nicht gespeichert werden."
+    },
+    "boundsSource": {
+      "default": "Integrierter Standardwert",
+      "server": "Serverweit",
+      "site": "Standort",
+      "tag": "Tag",
+      "tenant": "Mandant"
+    },
+    "card": {
+      "bounds": "Grenzwerte {{warning}} / {{critical}} ({{source}})",
+      "history": "Gemessene Abweichung, letzte 7 Tage (ms)",
+      "loadError": "Die Uhr dieses Hosts konnte nicht geladen werden.",
+      "measuredAt": "Gemessen",
+      "method": "Gemessen über",
+      "methodExchange": "Heartbeat-Austausch (millisekundengenau)",
+      "methodTimestamp": "Zeitstempel der Nachricht (sekundengenau)",
+      "no": "Nein",
+      "noHistory": "Der Verlauf der Abweichung füllt sich, solange der Host verbunden bleibt (ein Messpunkt alle 15 Minuten).",
+      "notReported": "Nicht gemeldet",
+      "offset": "Gemessene Abweichung",
+      "reportedOffset": "Vom Dienst selbst geschätzte Abweichung",
+      "roundTrip": "Umlaufzeit",
+      "running": "Läuft",
+      "service": "Zeitdienst",
+      "serviceProblem": "Der Zeitdienst auf diesem Host läuft nicht oder ist nicht synchronisiert, daher wird seine Uhr zunehmend abweichen.",
+      "source": "Zeitquelle",
+      "stratum": "Stratum",
+      "synchronized": "Synchronisiert",
+      "title": "Uhr",
+      "yes": "Ja"
+    },
+    "direction": {
+      "ahead": "dem Server voraus",
+      "behind": "hinter dem Server zurück"
+    },
+    "empty": "Es gibt noch keine genehmigten Hosts.",
+    "filter": {
+      "all": "Alle",
+      "search": "Host",
+      "site": "Standort",
+      "status": "Status",
+      "tag": "Tag"
+    },
+    "grid": {
+      "bounds": "Grenzwerte",
+      "host": "Host",
+      "offset": "Abweichung",
+      "roundTrip": "Umlaufzeit",
+      "service": "Zeitdienst",
+      "serviceProblem": "{{service}} (läuft nicht oder nicht synchronisiert)",
+      "site": "Standort",
+      "source": "Zeitquelle",
+      "status": "Status",
+      "tags": "Tags"
+    },
+    "loadError": "Die Uhren der Flotte konnten nicht geladen werden.",
+    "server": {
+      "noReference": "Es ist keine Zeitreferenz konfiguriert, daher wird die Uhr des Servers selbst nicht überprüft. Die Abweichungen der Hosts werden relativ zu ihr gemessen.",
+      "off": "Die Uhr des Servers selbst weicht um {{offset}} von {{reference}} ab. Die Uhren der Hosts werden erst bewertet, wenn die Serveruhr korrigiert ist.",
+      "unreachable": "Der Server konnte seine Zeitreferenz {{reference}} nicht erreichen. Die Abweichungen der Hosts werden relativ zur Serveruhr gemessen, die nicht überprüft werden konnte.",
+      "verified": "Die Uhr des Servers weicht um {{offset}} von {{reference}} ab. Die Abweichungen der Hosts werden relativ zu ihr gemessen."
+    },
+    "service": {
+      "none": "Kein Zeitdienst",
+      "unknown": "Nicht gemeldet"
+    },
+    "status": {
+      "critical": "Kritisch",
+      "ok": "Innerhalb der Grenzwerte",
+      "serverClockOff": "Serveruhr weicht ab",
+      "stale": "Keine aktuelle Messung",
+      "unmeasured": "Nicht gemessen",
+      "warning": "Warnung"
+    },
+    "statusHelp": {
+      "critical": "Die gemessene Abweichung erreicht oder überschreitet den kritischen Grenzwert.",
+      "ok": "Die gemessene Abweichung liegt unter dem Warngrenzwert.",
+      "serverClockOff": "Die Uhr des Servers selbst weicht von ihrer Referenz ab, daher werden die Uhren der Hosts erst bewertet, wenn sie korrigiert ist.",
+      "stale": "Die letzte Messung ist älter als 30 Minuten. Der Host ist wahrscheinlich nicht verbunden.",
+      "unmeasured": "Der Server hat diese Uhr noch nicht gemessen. Der Agent ist möglicherweise zu alt oder hat sich noch nicht verbunden.",
+      "warning": "Die gemessene Abweichung erreicht oder überschreitet den Warngrenzwert."
+    },
+    "title": "Zeitsynchronisierung",
+    "unit": {
+      "h": "{{value}} Stunden",
+      "min": "{{value}} Minuten",
+      "ms": "{{value}} ms",
+      "s": "{{value}} s"
+    }
   }
 }

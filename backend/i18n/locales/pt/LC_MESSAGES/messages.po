@@ -1272,7 +1272,7 @@ msgstr "Falha ao solicitar desativação do serviço Ubuntu Pro: %s"
 
 #: backend/api/host_utils.py:695
 msgid "Host limit reached for this tenant."
-msgstr "Limite de hosts atingido para este inquilino."
+msgstr "Limite de hosts atingido para este locatário."
 
 #: backend/api/processes.py:86 backend/api/processes.py:132
 msgid "Permission denied: View Host Details role required"
@@ -3594,7 +3594,7 @@ msgstr "expires_in_days deve ser 3650 (10 anos) ou menos."
 
 #: backend/api/provisioning_bundle.py:124
 msgid "Enrollment tokens require multi-tenancy to be enabled."
-msgstr "Tokens de inscrição exigem que a multi-locatária esteja habilitada."
+msgstr "Tokens de inscrição exigem que a multilocatária esteja habilitada."
 
 #: backend/api/provisioning_bundle.py:152
 msgid "Could not mint an enrollment token for that tenant."

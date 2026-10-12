@@ -756,7 +756,8 @@
       "saveError": "No se pudo guardar las preferencias",
       "title": "Configuración del Tablero"
     },
-    "updates": "Actualizaciones"
+    "updates": "Actualizaciones",
+    "clocksOutOfBounds": "Relojes fuera de límites"
   },
   "dataGrid": {
     "columnVisibility": "Visibilidad de columnas",
@@ -2430,7 +2431,8 @@
     "advisor": "Asesor",
     "hostMetrics": "Métricas de hosts",
     "assetDiscovery": "Descubrimiento de red",
-    "malware": "Software malicioso"
+    "malware": "Software malicioso",
+    "timeSync": "Sincronización de Hora"
   },
   "notifications": {
     "applicationUpdates": "Actualizaciones de Aplicaciones",
@@ -4784,5 +4786,124 @@
     "title": "Máquina",
     "vendor": "Proveedor",
     "virtualMachine": "Máquina virtual"
+  },
+  "timeSync": {
+    "bounds": {
+      "add": "Agregar excepción",
+      "critical": "Crítico (segundos)",
+      "criticalShort": "Crítico",
+      "intro": "Un host cuyo reloj tiene un desfase igual o superior al límite de advertencia se muestra como advertencia; igual o superior al límite crítico, como crítico. Se aplican los límites más específicos: los de una etiqueta, luego los de un sitio, luego los del inquilino y, por último, los de todo el servidor. Un host con varias etiquetas se rige por los más estrictos.",
+      "loadError": "No se pudieron cargar los límites del reloj.",
+      "noOverrides": "Sin excepciones: todos los hosts usan los límites de todo el servidor.",
+      "overridesTitle": "Excepciones",
+      "readOnly": "Puede ver los límites, pero para cambiarlos necesita el rol 'Administrar Sincronización de Hora'.",
+      "remove": "Quitar excepción",
+      "save": "Guardar",
+      "scope": "Se aplica a",
+      "serverSource": "Actualmente: {{source}}.",
+      "serverTitle": "Límites de todo el servidor",
+      "tabLabel": "Sincronización de Hora",
+      "thisTenant": "Este inquilino",
+      "title": "Límites de desfase del reloj",
+      "warning": "Advertencia (segundos)",
+      "warningShort": "Advertencia"
+    },
+    "boundsError": {
+      "notSaved": "El servidor no pudo guardar los límites.",
+      "number": "Cada límite debe ser un número.",
+      "order": "El límite de advertencia debe ser menor que el límite crítico.",
+      "range": "Cada límite debe estar entre 1 ms y 24 horas.",
+      "scope": "Elija un inquilino, un sitio o una etiqueta.",
+      "tag": "Esa etiqueta ya no existe.",
+      "unknown": "No se pudieron guardar los límites."
+    },
+    "boundsSource": {
+      "default": "Valor predeterminado integrado",
+      "server": "Todo el servidor",
+      "site": "Sitio",
+      "tag": "Etiqueta",
+      "tenant": "Inquilino"
+    },
+    "card": {
+      "bounds": "Límites {{warning}} / {{critical}} ({{source}})",
+      "history": "Desfase medido, últimos 7 días (ms)",
+      "loadError": "No se pudo cargar el reloj de este host.",
+      "measuredAt": "Medido",
+      "method": "Medido mediante",
+      "methodExchange": "Intercambio en el latido (con precisión de milisegundos)",
+      "methodTimestamp": "Marca de tiempo del mensaje (con precisión de segundos)",
+      "no": "No",
+      "noHistory": "El historial de desfase se completa mientras el host permanece conectado (un punto cada 15 minutos).",
+      "notReported": "No informado",
+      "offset": "Desfase medido",
+      "reportedOffset": "Desfase estimado por el propio servicio",
+      "roundTrip": "Tiempo de ida y vuelta",
+      "running": "En ejecución",
+      "service": "Servicio de hora",
+      "serviceProblem": "El servicio de hora de este host no está en ejecución o no está sincronizado, por lo que su reloj se desviará.",
+      "source": "Fuente de hora",
+      "stratum": "Estrato",
+      "synchronized": "Sincronizado",
+      "title": "Reloj",
+      "yes": "Sí"
+    },
+    "direction": {
+      "ahead": "adelantado respecto al servidor",
+      "behind": "atrasado respecto al servidor"
+    },
+    "empty": "Todavía no hay hosts aprobados.",
+    "filter": {
+      "all": "Todos",
+      "search": "Host",
+      "site": "Sitio",
+      "status": "Estado",
+      "tag": "Etiqueta"
+    },
+    "grid": {
+      "bounds": "Límites",
+      "host": "Host",
+      "offset": "Desfase",
+      "roundTrip": "Tiempo de ida y vuelta",
+      "service": "Servicio de hora",
+      "serviceProblem": "{{service}} (no está en ejecución o no está sincronizado)",
+      "site": "Sitio",
+      "source": "Fuente de hora",
+      "status": "Estado",
+      "tags": "Etiquetas"
+    },
+    "loadError": "No se pudieron cargar los relojes de la flota.",
+    "server": {
+      "noReference": "No hay ninguna referencia de hora configurada, por lo que no se comprueba el reloj del propio servidor. Los desfases de los hosts se miden respecto a él.",
+      "off": "El reloj del propio servidor tiene un desfase de {{offset}} respecto a {{reference}}. Los relojes de los hosts no se evalúan hasta que se corrija el reloj del servidor.",
+      "unreachable": "El servidor no pudo contactar con su referencia de hora {{reference}}. Los desfases de los hosts se miden respecto al reloj del servidor, que no se pudo comprobar.",
+      "verified": "El reloj del servidor tiene un desfase de {{offset}} respecto a {{reference}}. Los desfases de los hosts se miden respecto a él."
+    },
+    "service": {
+      "none": "Sin servicio de hora",
+      "unknown": "No informado"
+    },
+    "status": {
+      "critical": "Crítico",
+      "ok": "Dentro de los límites",
+      "serverClockOff": "Reloj del servidor desfasado",
+      "stale": "Sin medición reciente",
+      "unmeasured": "Sin medir",
+      "warning": "Advertencia"
+    },
+    "statusHelp": {
+      "critical": "El desfase medido alcanza o supera el límite crítico.",
+      "ok": "El desfase medido está por debajo del límite de advertencia.",
+      "serverClockOff": "El reloj del propio servidor está desfasado respecto a su referencia, por lo que los relojes de los hosts no se evalúan hasta que se corrija.",
+      "stale": "La última medición tiene más de 30 minutos de antigüedad. Probablemente el host no está conectado.",
+      "unmeasured": "El servidor aún no ha medido este reloj. Puede que el agente sea demasiado antiguo o que no se haya conectado.",
+      "warning": "El desfase medido alcanza o supera el límite de advertencia."
+    },
+    "title": "Sincronización de Hora",
+    "unit": {
+      "h": "{{value}} h",
+      "min": "{{value}} min",
+      "ms": "{{value}} ms",
+      "s": "{{value}} s"
+    }
   }
 }

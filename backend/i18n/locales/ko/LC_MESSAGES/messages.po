@@ -1847,8 +1847,7 @@ msgstr "등록 키가 삭제되었습니다"
 msgid ""
 "External Identity Provider integration requires a SysManage Professional+ "
 "license. Please upgrade to access this feature."
-msgstr ""
-"外部身份提供商集成需要SysManage Professional+许可证。请升级以访问此功能。"
+msgstr "외부 ID 공급자 통합에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
 
 #: backend/api/external_idp.py:89
 msgid "IdP provider not found"
@@ -4371,12 +4370,12 @@ msgstr "잘못된 장치 ID입니다"
 msgid ""
 "Air-gap media export requires the air-gap collector engine (Enterprise). "
 "Please upgrade to access this feature."
-msgstr "Air-gap 매체导出需要空气间隙收集器引擎（企业版）。请升级以访问此功能。"
+msgstr "에어갭 매체 내보내기에는 에어갭 수집기 엔진(Enterprise)이 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
 
 #: backend/api/content_lifecycle_export.py:84
 #, python-format
 msgid "No published version %s to export"
-msgstr "导出的公开展示版本%s不存在"
+msgstr "내보낼 공개된 버전 %s이(가) 없습니다"
 
 #: backend/api/content_lifecycle_export.py:146
 msgid "ensure ISO output dir exists"
@@ -4592,7 +4591,7 @@ msgstr "이 호스트에 방화벽 역할이 이미 할당되어 있습니다"
 #: backend/api/firewall_roles.py:732
 #, python-format
 msgid "Failed to assign firewall role: %s"
-msgstr "无法分配防火墙角色：%s"
+msgstr "방화벽 역할을 할당하지 못했습니다: %s"
 
 #: backend/api/firewall_roles.py:781
 msgid "Firewall role assignment not found"
@@ -4662,7 +4661,7 @@ msgstr "지원되지 않는 플랫폼: %s"
 #: backend/api/repository_mirroring_setup.py:214
 #, python-format
 msgid "A platform config for %s on this host already exists"
-msgstr "이 호스트上的平台配置%s已经存在"
+msgstr "이 호스트에 %s에 대한 플랫폼 구성이 이미 존재합니다"
 
 #: backend/api/repository_mirroring_setup.py:306
 #, python-format
@@ -4709,9 +4708,7 @@ msgstr "감사 로그 항목을 가져오지 못했습니다: %s"
 msgid ""
 "%s export requires a SysManage Professional+ license. OSS tier supports CSV "
 "export."
-msgstr ""
-"'%s'导출은 SysManage 프로페셔널+ 라이선스가 필요합니다. 오픈소스 티어는 CSV导"
-"出。"
+msgstr "%s 내보내기에는 SysManage Professional+ 라이선스가 필요합니다. OSS 티어는 CSV 내보내기를 지원합니다."
 
 #: backend/api/audit_log.py:306
 msgid "Use /api/v1/audit/export with Pro+ license"
@@ -4719,7 +4716,7 @@ msgstr "Pro+ 라이선스로 /api/v1/audit/export를 사용하세요"
 
 #: backend/api/audit_log.py:315
 msgid "Export format: csv, pdf (OSS); json/cef/leef (Pro+)"
-msgstr "导出格式：csv，pdf（OSS）；json/cef/leef（Pro+）"
+msgstr "내보내기 형식: csv, pdf (OSS); json/cef/leef (Pro+)"
 
 #: backend/api/audit_log.py:338
 #, python-format

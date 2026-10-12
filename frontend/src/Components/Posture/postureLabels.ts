@@ -133,6 +133,7 @@ export const GUIDED_ROUTES: Record<string, string> = {
     secrets: '/secrets',
     asset_discovery: '/asset-discovery',
     malware: '/malware',
+    time_sync: '/time-sync',
 };
 
 export const ruleTitle = (t: TFunction, key: string, fallback?: string | null): string => {

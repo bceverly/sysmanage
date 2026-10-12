@@ -163,6 +163,20 @@ de,pt: re:Tags
 it,pt: re:Timestamp
 pt: re:Status
 
+# --- time sync (Phase 23.3): SI unit symbols and the NTP term ----------------
+# "ms" and "s" are SI symbols, unchanged in these scripts; ru writes мс / с and
+# ar / hi spell the units out, so they are deliberately NOT listed.  es/it/pt
+# use symbols for min and h too: the value is a signed decimal ("+1.5"), and a
+# spelled-out word would need plural agreement the number cannot give it.
+de,es,fr,it,ja,ko,nl,pt,zh_CN,zh_TW: re:\{\{value\}\} ms
+de,es,fr,it,nl,pt: re:\{\{value\}\} s
+es,it,pt: re:\{\{value\}\} (min|h)
+# "Stratum" is the NTP term itself in these locales (es/pt Estrato, fr Strate).
+de,it,nl: re:Stratum
+# The loanwords these locales' UIs already use for a tenant and a tag.
+it,nl: re:Tenant
+it: re:Tag
+
 # --- single-locale cognates --------------------------------------------------
 fr: re:(Actions?|Application|Architecture|Configuration|Description|Diagnostics|Direction|Image|Instrumentation|Invitations|Notes|Production|Secrets?|Source|Violations|permissions|commercial)
 nl: re:(Ad-hoc Script|Air-Gap (Compliance|Repos|Repositories)|Compliance|Cross-Site Hosts|Filters|Host Firewall Status|Logging|Metadata|Open-Source Antivirus Status|Platform|Processor|Protocol|Registry|Repositories|Site (ID|URL)|Traces|Updates|accounts|compliance|tags|updates)

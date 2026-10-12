@@ -756,7 +756,8 @@
       "saveError": "Failed to save preferences",
       "title": "Dashboard Settings"
     },
-    "updates": "Updates"
+    "updates": "Updates",
+    "clocksOutOfBounds": "Clocks out of bounds"
   },
   "dataGrid": {
     "columnVisibility": "Column Visibility",
@@ -2449,7 +2450,8 @@
     "advisor": "Advisor",
     "hostMetrics": "Host Metrics",
     "assetDiscovery": "Network Discovery",
-    "malware": "Malware"
+    "malware": "Malware",
+    "timeSync": "Time Sync"
   },
   "notifications": {
     "applicationUpdates": "Application Updates",
@@ -4784,5 +4786,124 @@
     "title": "Machine",
     "vendor": "Vendor",
     "virtualMachine": "Virtual machine"
+  },
+  "timeSync": {
+    "bounds": {
+      "add": "Add override",
+      "critical": "Critical (seconds)",
+      "criticalShort": "Critical",
+      "intro": "A host whose clock is off by the warning bound or more is shown as a warning; by the critical bound or more, as critical. The most specific bounds apply: a tag's, then a site's, then the tenant's, then the server-wide ones. A host with several tags is held to the tightest.",
+      "loadError": "Could not load the clock bounds.",
+      "noOverrides": "No overrides: every host uses the server-wide bounds.",
+      "overridesTitle": "Overrides",
+      "readOnly": "You can view the bounds, but changing them requires the Manage Time Sync role.",
+      "remove": "Remove override",
+      "save": "Save",
+      "scope": "Applies to",
+      "serverSource": "Currently: {{source}}.",
+      "serverTitle": "Server-wide bounds",
+      "tabLabel": "Time Sync",
+      "thisTenant": "This tenant",
+      "title": "Clock offset bounds",
+      "warning": "Warning (seconds)",
+      "warningShort": "Warning"
+    },
+    "boundsError": {
+      "notSaved": "The server could not save the bounds.",
+      "number": "Each bound must be a number.",
+      "order": "The warning bound must be smaller than the critical bound.",
+      "range": "Each bound must be between 1 ms and 24 hours.",
+      "scope": "Choose a tenant, site or tag.",
+      "tag": "That tag no longer exists.",
+      "unknown": "The bounds could not be saved."
+    },
+    "boundsSource": {
+      "default": "Built-in default",
+      "server": "Server-wide",
+      "site": "Site",
+      "tag": "Tag",
+      "tenant": "Tenant"
+    },
+    "card": {
+      "bounds": "Bounds {{warning}} / {{critical}} ({{source}})",
+      "history": "Measured offset, last 7 days (ms)",
+      "loadError": "Could not load this host's clock.",
+      "measuredAt": "Measured",
+      "method": "Measured by",
+      "methodExchange": "Heartbeat exchange (to the millisecond)",
+      "methodTimestamp": "Message timestamp (to the second)",
+      "no": "No",
+      "noHistory": "The offset history fills in as the host stays connected (one point every 15 minutes).",
+      "notReported": "Not reported",
+      "offset": "Measured offset",
+      "reportedOffset": "The service's own offset estimate",
+      "roundTrip": "Round trip",
+      "running": "Running",
+      "service": "Time service",
+      "serviceProblem": "The time service on this host is not running or not synchronized, so its clock will drift.",
+      "source": "Time source",
+      "stratum": "Stratum",
+      "synchronized": "Synchronized",
+      "title": "Clock",
+      "yes": "Yes"
+    },
+    "direction": {
+      "ahead": "ahead of the server",
+      "behind": "behind the server"
+    },
+    "empty": "There are no approved hosts yet.",
+    "filter": {
+      "all": "All",
+      "search": "Host",
+      "site": "Site",
+      "status": "Status",
+      "tag": "Tag"
+    },
+    "grid": {
+      "bounds": "Bounds",
+      "host": "Host",
+      "offset": "Offset",
+      "roundTrip": "Round trip",
+      "service": "Time service",
+      "serviceProblem": "{{service}} (not running or not synchronized)",
+      "site": "Site",
+      "source": "Time source",
+      "status": "Status",
+      "tags": "Tags"
+    },
+    "loadError": "Could not load the fleet clocks.",
+    "server": {
+      "noReference": "No time reference is configured, so the server's own clock is not checked. Host offsets are measured against it.",
+      "off": "The server's own clock is {{offset}} from {{reference}}. Host clocks are not judged until the server's clock is corrected.",
+      "unreachable": "The server could not reach its time reference {{reference}}. Host offsets are measured against the server's clock, which could not be checked.",
+      "verified": "The server's clock is {{offset}} from {{reference}}. Host offsets are measured against it."
+    },
+    "service": {
+      "none": "No time service",
+      "unknown": "Not reported"
+    },
+    "status": {
+      "critical": "Critical",
+      "ok": "In bounds",
+      "serverClockOff": "Server clock off",
+      "stale": "No recent measurement",
+      "unmeasured": "Not measured",
+      "warning": "Warning"
+    },
+    "statusHelp": {
+      "critical": "The measured offset is at or beyond the critical bound.",
+      "ok": "The measured offset is below the warning bound.",
+      "serverClockOff": "The server's own clock is off its reference, so host clocks are not judged until it is corrected.",
+      "stale": "The last measurement is more than 30 minutes old. The host is probably not connected.",
+      "unmeasured": "The server has not measured this clock yet. The agent may be too old, or has not connected.",
+      "warning": "The measured offset is at or beyond the warning bound."
+    },
+    "title": "Time Sync",
+    "unit": {
+      "h": "{{value}} h",
+      "min": "{{value}} min",
+      "ms": "{{value}} ms",
+      "s": "{{value}} s"
+    }
   }
 }

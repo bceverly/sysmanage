@@ -91,7 +91,7 @@
         "empty": "아직 인식된 레포지토리가 없습니다.",
         "freshness": "신선도",
         "freshnessDays": "{{days}} 일",
-        "freshnessNever": "从来未摄取",
+        "freshnessNever": "수집된 적 없음",
         "lastIngest": "최근 성공적인 인GEST",
         "neverIngested": "절대",
         "noFingerprint": "--",
@@ -756,7 +756,8 @@
       "saveError": "선호 설정 저장 실패",
       "title": "대시보드 설정"
     },
-    "updates": "업데이트"
+    "updates": "업데이트",
+    "clocksOutOfBounds": "허용 범위를 벗어난 시계"
   },
   "dataGrid": {
     "columnVisibility": "열 표시",
@@ -2110,7 +2111,7 @@
   "maintenanceWindows": {
     "addWindow": "유지보수 일정 설정",
     "confirmDelete": "이 유지보수 윈도우를 정말로 삭제하시겠습니까?",
-    "confirmOverride": "覆盖",
+    "confirmOverride": "재정의",
     "created": "유지보수 윈도우 생성됨",
     "currentWindow": "현재 창",
     "day": {
@@ -2430,7 +2431,8 @@
     "advisor": "어드바이저",
     "hostMetrics": "호스트 메트릭",
     "assetDiscovery": "네트워크 탐색",
-    "malware": "맬웨어"
+    "malware": "맬웨어",
+    "timeSync": "시간 동기화"
   },
   "notifications": {
     "applicationUpdates": "애플리케이션 업데이트",
@@ -3256,7 +3258,7 @@
       "pushPolicies": "정책 전송",
       "pushPoliciesHint": "이 사이트의 모든 정책을 다시 큐에 추가하여 즉시 재전송합니다 -- 포함된 중지 또는 죽은 편지를 포함합니다.",
       "refresh": "새로고침",
-      "repushFailed": "정책 재推送에 실패했습니다.",
+      "repushFailed": "정책 재푸시를 대기열에 추가하지 못했습니다.",
       "repushQueued": "{{n}}개의 정책 전송이 재전송 대기열에 추가되었습니다.",
       "rollupCompliance": "준수사항",
       "rollupEmpty": "이 사이트에서 아직 동기화된 준수 또는 취약성 데이터가 없습니다.",
@@ -4784,5 +4786,124 @@
     "title": "기계",
     "vendor": "제조업체",
     "virtualMachine": "가상 머신"
+  },
+  "timeSync": {
+    "bounds": {
+      "add": "재정의 추가",
+      "critical": "심각(초)",
+      "criticalShort": "심각",
+      "intro": "시계 오차가 경고 임계값 이상인 호스트는 경고로, 심각 임계값 이상인 호스트는 심각으로 표시됩니다. 가장 구체적인 임계값이 적용되며, 우선순위는 태그, 사이트, 테넌트, 서버 전체 순입니다. 태그가 여러 개인 호스트에는 가장 엄격한 임계값이 적용됩니다.",
+      "loadError": "시계 임계값을 불러올 수 없습니다.",
+      "noOverrides": "재정의가 없습니다. 모든 호스트에 서버 전체 임계값이 적용됩니다.",
+      "overridesTitle": "재정의",
+      "readOnly": "임계값을 볼 수는 있지만, 변경하려면 '시간 동기화 관리' 역할이 필요합니다.",
+      "remove": "재정의 제거",
+      "save": "저장",
+      "scope": "적용 대상",
+      "serverSource": "현재: {{source}}",
+      "serverTitle": "서버 전체 임계값",
+      "tabLabel": "시간 동기화",
+      "thisTenant": "이 테넌트",
+      "title": "시계 오차 임계값",
+      "warning": "경고(초)",
+      "warningShort": "경고"
+    },
+    "boundsError": {
+      "notSaved": "서버가 임계값을 저장하지 못했습니다.",
+      "number": "각 임계값은 숫자여야 합니다.",
+      "order": "경고 임계값은 심각 임계값보다 작아야 합니다.",
+      "range": "각 임계값은 1ms에서 24시간 사이여야 합니다.",
+      "scope": "테넌트, 사이트 또는 태그를 선택하세요.",
+      "tag": "해당 태그가 더 이상 존재하지 않습니다.",
+      "unknown": "임계값을 저장할 수 없습니다."
+    },
+    "boundsSource": {
+      "default": "내장 기본값",
+      "server": "서버 전체",
+      "site": "사이트",
+      "tag": "태그",
+      "tenant": "테넌트"
+    },
+    "card": {
+      "bounds": "임계값 {{warning}} / {{critical}} ({{source}})",
+      "history": "측정된 시계 오차, 최근 7일(ms)",
+      "loadError": "이 호스트의 시계 정보를 불러올 수 없습니다.",
+      "measuredAt": "측정 시각",
+      "method": "측정 방식",
+      "methodExchange": "하트비트 교환(밀리초 단위)",
+      "methodTimestamp": "메시지 타임스탬프(초 단위)",
+      "no": "아니요",
+      "noHistory": "호스트가 계속 연결되어 있으면 시계 오차 기록이 쌓입니다(15분마다 1개 지점).",
+      "notReported": "보고되지 않음",
+      "offset": "측정된 시계 오차",
+      "reportedOffset": "서비스 자체의 오차 추정치",
+      "roundTrip": "왕복 시간",
+      "running": "실행 중",
+      "service": "시간 서비스",
+      "serviceProblem": "이 호스트의 시간 서비스가 실행되고 있지 않거나 동기화되지 않아 시계가 점점 어긋나게 됩니다.",
+      "source": "시간 소스",
+      "stratum": "스트라텀",
+      "synchronized": "동기화됨",
+      "title": "시계",
+      "yes": "예"
+    },
+    "direction": {
+      "ahead": "서버보다 빠름",
+      "behind": "서버보다 느림"
+    },
+    "empty": "아직 승인된 호스트가 없습니다.",
+    "filter": {
+      "all": "모두",
+      "search": "호스트",
+      "site": "사이트",
+      "status": "상태",
+      "tag": "태그"
+    },
+    "grid": {
+      "bounds": "임계값",
+      "host": "호스트",
+      "offset": "시계 오차",
+      "roundTrip": "왕복 시간",
+      "service": "시간 서비스",
+      "serviceProblem": "{{service}}(실행되지 않거나 동기화되지 않음)",
+      "site": "사이트",
+      "source": "시간 소스",
+      "status": "상태",
+      "tags": "태그"
+    },
+    "loadError": "플릿의 시계 정보를 불러올 수 없습니다.",
+    "server": {
+      "noReference": "시간 기준이 설정되어 있지 않아 서버 자체의 시계는 확인되지 않습니다. 호스트의 시계 오차는 서버 시계를 기준으로 측정됩니다.",
+      "off": "서버 자체의 시계가 {{reference}} 대비 {{offset}} 차이가 납니다. 서버 시계가 수정될 때까지 호스트 시계는 판정되지 않습니다.",
+      "unreachable": "서버가 시간 기준 {{reference}}에 연결할 수 없었습니다. 호스트의 시계 오차는 서버 시계를 기준으로 측정되지만, 서버 시계를 확인할 수 없었습니다.",
+      "verified": "서버의 시계는 {{reference}} 대비 {{offset}} 차이가 납니다. 호스트의 시계 오차는 이 시계를 기준으로 측정됩니다."
+    },
+    "service": {
+      "none": "시간 서비스 없음",
+      "unknown": "보고되지 않음"
+    },
+    "status": {
+      "critical": "심각",
+      "ok": "범위 내",
+      "serverClockOff": "서버 시계 오차",
+      "stale": "최근 측정 없음",
+      "unmeasured": "측정되지 않음",
+      "warning": "경고"
+    },
+    "statusHelp": {
+      "critical": "측정된 시계 오차가 심각 임계값 이상입니다.",
+      "ok": "측정된 시계 오차가 경고 임계값 미만입니다.",
+      "serverClockOff": "서버 자체의 시계가 기준 시간과 어긋나 있어, 수정될 때까지 호스트 시계는 판정되지 않습니다.",
+      "stale": "마지막 측정 후 30분 이상 지났습니다. 호스트가 연결되어 있지 않을 가능성이 높습니다.",
+      "unmeasured": "서버가 아직 이 시계를 측정하지 않았습니다. 에이전트 버전이 너무 오래되었거나 아직 연결되지 않았을 수 있습니다.",
+      "warning": "측정된 시계 오차가 경고 임계값 이상입니다."
+    },
+    "title": "시간 동기화",
+    "unit": {
+      "h": "{{value}} 시간",
+      "min": "{{value}} 분",
+      "ms": "{{value}} ms",
+      "s": "{{value}} 초"
+    }
   }
 }

@@ -1691,7 +1691,7 @@ msgstr "無效的標籤ID格式"
 #: backend/api/config_mgmt_inventories.py:365
 #: backend/api/config_mgmt_profiles.py:350
 msgid "Invalid site ID format"
-msgstr "無效的網站ID格式"
+msgstr "無效的站點ID格式"
 
 #: backend/api/file_watches.py:458 backend/api/query_packs.py:284
 #: backend/api/config_mgmt_profiles.py:377
@@ -1788,7 +1788,7 @@ msgstr "存取群組已刪除"
 
 #: backend/api/access_groups.py:393
 msgid "Federation site not found"
-msgstr "聯邦網站未找到"
+msgstr "找不到聯邦站點"
 
 #: backend/api/access_groups.py:418
 #, python-format
@@ -2675,7 +2675,7 @@ msgstr "分配中存在無效的 ID 格式"
 
 #: backend/api/query_packs.py:342
 msgid "A live query targets exactly one of hosts, a tag or a site."
-msgstr "一個實時查詢會精確地針對一個主機、標籤或網站。"
+msgstr "一個實時查詢只能針對主機、標籤或站點三者之一。"
 
 #: backend/api/query_packs.py:423
 msgid "Invalid live query ID format"

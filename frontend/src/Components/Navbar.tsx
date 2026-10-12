@@ -67,6 +67,7 @@ const PATH_CATEGORY: Record<string, CategoryId> = {
   '/fips-compliance': 'security',
   '/alerts': 'security',
   '/malware': 'security',
+  '/time-sync': 'security',
   '/secrets': 'security',
   '/gpg-keys': 'security',
   '/scripts': 'automation',
@@ -97,6 +98,7 @@ const PATH_PERMISSION = new Map<string, string>([
   ['/host-metrics', 'View Host Details'],
   ['/asset-discovery', 'View Host Details'],
   ['/malware', 'View Host Details'],
+  ['/time-sync', 'View Host Details'],
 ]);
 
 interface NavLeaf {
@@ -133,7 +135,7 @@ export function buildNavCategories(
   } = opts;
 
   // Paths hardcoded here -- plugins must not duplicate these.
-  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/maintenance-windows', '/secrets', '/scripts', '/config-profiles', '/config-drift', '/config-jobs', '/query-packs', '/advisor', '/asset-discovery', '/malware', '/reports', '/airgap/repositories', '/airgap/collections']);
+  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/maintenance-windows', '/secrets', '/scripts', '/config-profiles', '/config-drift', '/config-jobs', '/query-packs', '/advisor', '/asset-discovery', '/malware', '/time-sync', '/reports', '/airgap/repositories', '/airgap/collections']);
   const hardcodedLabels = new Set([
     t('nav.secrets'),
     t('nav.scripts'),
@@ -201,6 +203,8 @@ export function buildNavCategories(
     '/malware',
     t('nav.malware', 'Malware'),
   );
+  // Phase 23.3: OSS -- every clock, measured by the server.
+  pushIf(true, '/time-sync', t('nav.timeSync', 'Time Sync'));
   pushIf(
     activeLicenseModules.includes('reporting_engine') &&
       activeLicenseFeatures.includes('reports'),

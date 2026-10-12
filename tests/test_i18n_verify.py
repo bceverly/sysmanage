@@ -338,3 +338,14 @@ def test_code_spans_are_stripped_and_unclosed_ones_are_harmless():
     assert quality.english_words("fr", "the value is set") != []
     # A string of unclosed tags is processed in linear time, not quadratic.
     assert quality.english_words("fr", "<code>" * 20000) == []
+
+
+def test_a_swapped_or_added_emoji_is_a_problem_but_a_flipped_arrow_is_not():
+    """2026-10-12: 501 docs values carried the wrong emoji."""
+    assert "symbols" in quality.problem("de", "🔒 FreeBSD", "⛔ FreeBSD")
+    assert "symbols" in quality.problem("es", "Monitoring", "Monitoreo 📊")
+    assert "symbols" in quality.problem("de", "4. 🔧 Fix", "4.  Korrektur")
+    assert quality.problem("ar", "View docs →", "عرض المستندات ←") is None
+    assert (
+        quality.problem("ja", "🛡️ Fault Tolerance", "🛡️ フォールトトレランス") is None
+    )

@@ -557,7 +557,7 @@
   },
   "configFleet": {
     "allHosts": "Todos os hosts",
-    "allHostsLabel": "Todos os hosts ativos neste inquilino",
+    "allHostsLabel": "Todos os hosts ativos neste locatário",
     "atATime": "{{count}} hosts por vez",
     "atATime_one": "{{count}} host por vez",
     "atATime_other": "{{count}} hosts por vez",
@@ -756,7 +756,8 @@
       "saveError": "Falha ao salvar preferências",
       "title": "Configurações do Painel"
     },
-    "updates": "Atualizações"
+    "updates": "Atualizações",
+    "clocksOutOfBounds": "Relógios fora dos limites"
   },
   "dataGrid": {
     "columnVisibility": "Visibilidade das colunas",
@@ -1949,7 +1950,7 @@
       "issuer": "URL do emissor OIDC",
       "jit": "Provisionamento just-in-time (criar usuários automaticamente no primeiro login SSO)",
       "jitRole": "Função predefinida do JIT",
-      "jitRoleHelp": "Função atribuída aos membros criados automaticamente. Requer um ID de inquilino e uma lista de domínios de e-mail permitidos correspondente nesse inquilino.",
+      "jitRoleHelp": "Função atribuída aos membros criados automaticamente. Requer um ID de locatário e uma lista de domínios de e-mail permitidos correspondente nesse locatário.",
       "ldapServer": "URL do servidor LDAP (ldaps://...)",
       "name": "Nome de exibição",
       "redirect": "URI de redirecionamento",
@@ -1969,8 +1970,8 @@
       "scimToken": "Token SCIM bearer (Vault secret id)",
       "scimTokenHelp": "Token que o IdP apresenta em cada solicitação SCIM. Referência como vault:secret/path ou literal:plaintext",
       "scopes": "Escopos",
-      "tenant": "ID do inquilino (opcional)",
-      "tenantHelp": "Restringir este fornecedor a um inquilino (o respetivo UUID). Deixe em branco para um fornecedor global do servidor.",
+      "tenant": "ID do locatário (opcional)",
+      "tenantHelp": "Restringir este fornecedor a um locatário (o respetivo UUID). Deixe em branco para um fornecedor global do servidor.",
       "timeout": "Timeout de conexão (s)",
       "type": "Tipo",
       "userBase": "Base de busca de usuários",
@@ -2430,7 +2431,8 @@
     "advisor": "Assistente",
     "hostMetrics": "Métricas de hosts",
     "assetDiscovery": "Descoberta de rede",
-    "malware": "Detecção de malware"
+    "malware": "Detecção de malware",
+    "timeSync": "Sincronização de Hora"
   },
   "notifications": {
     "applicationUpdates": "Atualizações de Aplicações",
@@ -4589,7 +4591,7 @@
       "import": "Importar",
       "importButton": "Importar conjunto de regras",
       "importError": "Não foi possível importar o conjunto de regras.",
-      "importExplain": "As regras que o ClamAV não consegue executar (importações de módulos, regras sem strings, diretivas include) são removidas e listadas. Importar novamente o mesmo nome adiciona uma nova versão. Todos os inquilinos fazem verificações com estas regras.",
+      "importExplain": "As regras que o ClamAV não consegue executar (importações de módulos, regras sem strings, diretivas include) são removidas e listadas. Importar novamente o mesmo nome adiciona uma nova versão. Todos os locatários fazem verificações com estas regras.",
       "importTitle": "Importar um conjunto de regras YARA",
       "imported": "{{title}} v{{version}} importado com {{count}} regras.",
       "importedBy": "Importado por {{who}}",
@@ -4784,5 +4786,124 @@
     "title": "Máquina",
     "vendor": "Fornecedor",
     "virtualMachine": "Máquina virtual"
+  },
+  "timeSync": {
+    "bounds": {
+      "add": "Adicionar exceção",
+      "critical": "Crítico (segundos)",
+      "criticalShort": "Crítico",
+      "intro": "Um host cujo relógio tem um desvio igual ou superior ao limite de aviso é exibido como aviso; igual ou superior ao limite crítico, como crítico. Aplicam-se os limites mais específicos: os de um marcador, depois os de um site, depois os do locatário e, por fim, os de todo o servidor. Um host com vários marcadores segue os mais restritivos.",
+      "loadError": "Não foi possível carregar os limites do relógio.",
+      "noOverrides": "Nenhuma exceção: todos os hosts usam os limites de todo o servidor.",
+      "overridesTitle": "Exceções",
+      "readOnly": "Você pode visualizar os limites, mas alterá-los requer a função 'Gerenciar Sincronização de Hora'.",
+      "remove": "Remover exceção",
+      "save": "Salvar",
+      "scope": "Aplica-se a",
+      "serverSource": "Atualmente: {{source}}.",
+      "serverTitle": "Limites de todo o servidor",
+      "tabLabel": "Sincronização de Hora",
+      "thisTenant": "Este locatário",
+      "title": "Limites de desvio do relógio",
+      "warning": "Aviso (segundos)",
+      "warningShort": "Aviso"
+    },
+    "boundsError": {
+      "notSaved": "O servidor não conseguiu salvar os limites.",
+      "number": "Cada limite deve ser um número.",
+      "order": "O limite de aviso deve ser menor que o limite crítico.",
+      "range": "Cada limite deve estar entre 1 ms e 24 horas.",
+      "scope": "Escolha um locatário, um site ou um marcador.",
+      "tag": "Esse marcador não existe mais.",
+      "unknown": "Não foi possível salvar os limites."
+    },
+    "boundsSource": {
+      "default": "Padrão integrado",
+      "server": "Todo o servidor",
+      "site": "Site",
+      "tag": "Marcador",
+      "tenant": "Locatário"
+    },
+    "card": {
+      "bounds": "Limites {{warning}} / {{critical}} ({{source}})",
+      "history": "Desvio medido, últimos 7 dias (ms)",
+      "loadError": "Não foi possível carregar o relógio deste host.",
+      "measuredAt": "Medido",
+      "method": "Medido por",
+      "methodExchange": "Troca no heartbeat (com precisão de milissegundos)",
+      "methodTimestamp": "Carimbo de data/hora da mensagem (com precisão de segundos)",
+      "no": "Não",
+      "noHistory": "O histórico de desvio é preenchido enquanto o host permanece conectado (um ponto a cada 15 minutos).",
+      "notReported": "Não informado",
+      "offset": "Desvio medido",
+      "reportedOffset": "Estimativa de desvio do próprio serviço",
+      "roundTrip": "Tempo de ida e volta",
+      "running": "Em execução",
+      "service": "Serviço de hora",
+      "serviceProblem": "O serviço de hora deste host não está em execução ou não está sincronizado, portanto o relógio dele vai se desviar.",
+      "source": "Fonte de hora",
+      "stratum": "Estrato",
+      "synchronized": "Sincronizado",
+      "title": "Relógio",
+      "yes": "Sim"
+    },
+    "direction": {
+      "ahead": "adiantado em relação ao servidor",
+      "behind": "atrasado em relação ao servidor"
+    },
+    "empty": "Ainda não há hosts aprovados.",
+    "filter": {
+      "all": "Todos",
+      "search": "Host",
+      "site": "Site",
+      "status": "Estado",
+      "tag": "Marcador"
+    },
+    "grid": {
+      "bounds": "Limites",
+      "host": "Host",
+      "offset": "Desvio",
+      "roundTrip": "Tempo de ida e volta",
+      "service": "Serviço de hora",
+      "serviceProblem": "{{service}} (não está em execução ou não está sincronizado)",
+      "site": "Site",
+      "source": "Fonte de hora",
+      "status": "Estado",
+      "tags": "Marcadores"
+    },
+    "loadError": "Não foi possível carregar os relógios da frota.",
+    "server": {
+      "noReference": "Nenhuma referência de hora está configurada, portanto o relógio do próprio servidor não é verificado. Os desvios dos hosts são medidos em relação a ele.",
+      "off": "O relógio do próprio servidor tem um desvio de {{offset}} em relação a {{reference}}. Os relógios dos hosts não são avaliados até que o relógio do servidor seja corrigido.",
+      "unreachable": "O servidor não conseguiu alcançar sua referência de hora {{reference}}. Os desvios dos hosts são medidos em relação ao relógio do servidor, que não pôde ser verificado.",
+      "verified": "O relógio do servidor tem um desvio de {{offset}} em relação a {{reference}}. Os desvios dos hosts são medidos em relação a ele."
+    },
+    "service": {
+      "none": "Sem serviço de hora",
+      "unknown": "Não informado"
+    },
+    "status": {
+      "critical": "Crítico",
+      "ok": "Dentro dos limites",
+      "serverClockOff": "Relógio do servidor desajustado",
+      "stale": "Sem medição recente",
+      "unmeasured": "Não medido",
+      "warning": "Aviso"
+    },
+    "statusHelp": {
+      "critical": "O desvio medido está no limite crítico ou acima dele.",
+      "ok": "O desvio medido está abaixo do limite de aviso.",
+      "serverClockOff": "O relógio do próprio servidor está desajustado em relação à sua referência, portanto os relógios dos hosts não são avaliados até que ele seja corrigido.",
+      "stale": "A última medição tem mais de 30 minutos. Provavelmente o host não está conectado.",
+      "unmeasured": "O servidor ainda não mediu este relógio. O agente pode ser antigo demais ou ainda não ter se conectado.",
+      "warning": "O desvio medido está no limite de aviso ou acima dele."
+    },
+    "title": "Sincronização de Hora",
+    "unit": {
+      "h": "{{value}} h",
+      "min": "{{value}} min",
+      "ms": "{{value}} ms",
+      "s": "{{value}} s"
+    }
   }
 }

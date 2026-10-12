@@ -756,7 +756,8 @@
       "saveError": "Impossible d'enregistrer les préférences",
       "title": "Paramètres du Tableau de Bord"
     },
-    "updates": "Mises à jour"
+    "updates": "Mises à jour",
+    "clocksOutOfBounds": "Horloges hors limites"
   },
   "dataGrid": {
     "columnVisibility": "Visibilité des colonnes",
@@ -2430,7 +2431,8 @@
     "advisor": "Conseiller",
     "hostMetrics": "Métriques des hôtes",
     "assetDiscovery": "Découverte du réseau",
-    "malware": "Logiciels malveillants"
+    "malware": "Logiciels malveillants",
+    "timeSync": "Synchronisation de l'heure"
   },
   "notifications": {
     "applicationUpdates": "Mises à jour d'Applications",
@@ -4784,5 +4786,124 @@
     "title": "machine",
     "vendor": "Fabricant",
     "virtualMachine": "Machine virtuelle"
+  },
+  "timeSync": {
+    "bounds": {
+      "add": "Ajouter une dérogation",
+      "critical": "Critique (secondes)",
+      "criticalShort": "Critique",
+      "intro": "Un hôte dont l'horloge s'écarte d'au moins le seuil d'avertissement est signalé en avertissement ; d'au moins le seuil critique, en critique. Les seuils les plus spécifiques s'appliquent : ceux d'une balise, puis ceux d'un site, puis ceux du locataire, puis ceux de l'ensemble du serveur. Un hôte portant plusieurs balises se voit appliquer les plus stricts.",
+      "loadError": "Impossible de charger les seuils d'horloge.",
+      "noOverrides": "Aucune dérogation : chaque hôte utilise les seuils de l'ensemble du serveur.",
+      "overridesTitle": "Dérogations",
+      "readOnly": "Vous pouvez consulter les seuils, mais leur modification nécessite le rôle 'Gérer la synchronisation de l'heure'.",
+      "remove": "Supprimer la dérogation",
+      "save": "Enregistrer",
+      "scope": "S'applique à",
+      "serverSource": "Actuellement : {{source}}.",
+      "serverTitle": "Seuils de l'ensemble du serveur",
+      "tabLabel": "Synchronisation de l'heure",
+      "thisTenant": "Ce locataire",
+      "title": "Seuils de décalage d'horloge",
+      "warning": "Avertissement (secondes)",
+      "warningShort": "Avertissement"
+    },
+    "boundsError": {
+      "notSaved": "Le serveur n'a pas pu enregistrer les seuils.",
+      "number": "Chaque seuil doit être un nombre.",
+      "order": "Le seuil d'avertissement doit être inférieur au seuil critique.",
+      "range": "Chaque seuil doit être compris entre 1 ms et 24 heures.",
+      "scope": "Choisissez un locataire, un site ou une balise.",
+      "tag": "Cette balise n'existe plus.",
+      "unknown": "Les seuils n'ont pas pu être enregistrés."
+    },
+    "boundsSource": {
+      "default": "Valeur par défaut intégrée",
+      "server": "Ensemble du serveur",
+      "site": "Site",
+      "tag": "Balise",
+      "tenant": "Locataire"
+    },
+    "card": {
+      "bounds": "Seuils {{warning}} / {{critical}} ({{source}})",
+      "history": "Décalage mesuré, 7 derniers jours (ms)",
+      "loadError": "Impossible de charger l'horloge de cet hôte.",
+      "measuredAt": "Mesuré",
+      "method": "Méthode de mesure",
+      "methodExchange": "Échange de heartbeat (à la milliseconde près)",
+      "methodTimestamp": "Horodatage du message (à la seconde près)",
+      "no": "Non",
+      "noHistory": "L'historique du décalage se remplit tant que l'hôte reste connecté (un point toutes les 15 minutes).",
+      "notReported": "Non signalé",
+      "offset": "Décalage mesuré",
+      "reportedOffset": "Décalage estimé par le service lui-même",
+      "roundTrip": "Aller-retour",
+      "running": "En cours d'exécution",
+      "service": "Service de temps",
+      "serviceProblem": "Le service de temps de cet hôte ne fonctionne pas ou n'est pas synchronisé : son horloge va donc dériver.",
+      "source": "Source de temps",
+      "stratum": "Strate",
+      "synchronized": "Synchronisé",
+      "title": "Horloge",
+      "yes": "Oui"
+    },
+    "direction": {
+      "ahead": "en avance sur le serveur",
+      "behind": "en retard sur le serveur"
+    },
+    "empty": "Aucun hôte approuvé pour le moment.",
+    "filter": {
+      "all": "Tous",
+      "search": "Hôte",
+      "site": "Site",
+      "status": "Statut",
+      "tag": "Balise"
+    },
+    "grid": {
+      "bounds": "Seuils",
+      "host": "Hôte",
+      "offset": "Décalage",
+      "roundTrip": "Aller-retour",
+      "service": "Service de temps",
+      "serviceProblem": "{{service}} (arrêté ou non synchronisé)",
+      "site": "Site",
+      "source": "Source de temps",
+      "status": "Statut",
+      "tags": "Balises"
+    },
+    "loadError": "Impossible de charger les horloges du parc.",
+    "server": {
+      "noReference": "Aucune référence de temps n'est configurée : l'horloge du serveur lui-même n'est donc pas vérifiée. Les décalages des hôtes sont mesurés par rapport à celle-ci.",
+      "off": "L'horloge du serveur lui-même s'écarte de {{offset}} par rapport à {{reference}}. Les horloges des hôtes ne sont pas évaluées tant que celle du serveur n'est pas corrigée.",
+      "unreachable": "Le serveur n'a pas pu joindre sa référence de temps {{reference}}. Les décalages des hôtes sont mesurés par rapport à l'horloge du serveur, qui n'a pas pu être vérifiée.",
+      "verified": "L'horloge du serveur s'écarte de {{offset}} par rapport à {{reference}}. Les décalages des hôtes sont mesurés par rapport à celle-ci."
+    },
+    "service": {
+      "none": "Aucun service de temps",
+      "unknown": "Non signalé"
+    },
+    "status": {
+      "critical": "Critique",
+      "ok": "Dans les limites",
+      "serverClockOff": "Horloge du serveur décalée",
+      "stale": "Aucune mesure récente",
+      "unmeasured": "Non mesuré",
+      "warning": "Avertissement"
+    },
+    "statusHelp": {
+      "critical": "Le décalage mesuré atteint ou dépasse le seuil critique.",
+      "ok": "Le décalage mesuré est inférieur au seuil d'avertissement.",
+      "serverClockOff": "L'horloge du serveur lui-même s'écarte de sa référence ; les horloges des hôtes ne sont donc pas évaluées tant qu'elle n'est pas corrigée.",
+      "stale": "La dernière mesure date de plus de 30 minutes. L'hôte n'est probablement pas connecté.",
+      "unmeasured": "Le serveur n'a pas encore mesuré cette horloge. L'agent est peut-être trop ancien, ou ne s'est pas encore connecté.",
+      "warning": "Le décalage mesuré atteint ou dépasse le seuil d'avertissement."
+    },
+    "title": "Synchronisation de l'heure",
+    "unit": {
+      "h": "{{value}} heures",
+      "min": "{{value}} minutes",
+      "ms": "{{value}} ms",
+      "s": "{{value}} s"
+    }
   }
 }

@@ -13531,7 +13531,7 @@ proof (`date -s` on a VM).
       that is unreachable or not configured still judges, relative to the
       server (what Kerberos and token expiry compare against), with
       `server.verified: false` beside every status.*
-- [ ] **Customer-configurable bounds:** a warning and a critical offset
+- [x] **Customer-configurable bounds:** a warning and a critical offset
       (defaults 1 s and 5 s), set for the whole fleet and overridable per
       tenant, site and tag -- tighter for domain controllers and signing
       hosts, looser for lab machines.
@@ -13547,7 +13547,11 @@ proof (`date -s` on a VM).
       as in sync.  API: `GET /api/v1/time-sync/hosts` (worst first, with
       counts), `GET|PUT /time-sync/bounds/server`, `PUT|DELETE
       /time-sync/bounds/override`; bad bounds refused with codes; changes
-      audited.  The setting screens are S4.*
+      audited.*
+      *S4 DONE 2026-10-12: Settings > Time Sync edits the server-wide pair
+      (in seconds) and the tenant / site / tag overrides; read-only without
+      the role; the tenant level is offered only under multi-tenancy (outside
+      it, it IS the server-wide level).*
 - [ ] **Fleet NTP policy (Pro+):** the NTP sources each host should use (an
       internal pair for an air-gapped site), applied to whichever service the
       host runs (chrony, ntpd, timesyncd, OpenNTPD, w32time), the service
@@ -13563,7 +13567,7 @@ proof (`date -s` on a VM).
       to the existing channels (email first), cleared when it recovers, rate
       limited, and digested when a whole site drifts together (a dead NTP
       server -- one alert, not a thousand).
-- [ ] **UI:** a fleet Time Sync view (offset per host, worst first, by
+- [x] **UI:** a fleet Time Sync view (offset per host, worst first, by
       site/tag, time service and source), the offset on the host page with
       its history, a dashboard tile; posture (21.4) gains a "clocks in
       bounds" check.
@@ -13573,6 +13577,16 @@ proof (`date -s` on a VM).
       unmeasured / stale / server off = unknown, so the item can never pass
       on hosts nobody measured.  Remedy `resync_clocks` (guided, to the
       Time Sync page that S4 builds).*
+      *S4 DONE 2026-10-12: `/time-sync` (OSS, Security menu): the server's
+      own clock first, counts per status (click to filter), filters by
+      status / site / tag / host, worst first; offsets read "+1.33 s ahead
+      of the server", never a bare sign.  Host page Overview: a Clock card
+      -- measured offset, round trip, method, the service's own claim beside
+      it, a warning when the service is stopped or unsynchronized, and the
+      7-day offset chart with the warning bound drawn.  Dashboard tile
+      "Clocks out of bounds" (red on any critical, yellow on any warning),
+      fed by the light `GET /time-sync/summary`.  The posture remedy now
+      links here.*
 - [ ] Docs + screenshots + 14-language i18n; tests per OS for the service
       parsers (recorded command output), the offset estimate, bound
       resolution (fleet / tenant / site / tag) and the resync dispatch.
@@ -13664,6 +13678,24 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       `i18n_glossary_terms.py` at the 1000-line limit, gained mark-aware
       boundaries and per-key exceptions (`except_keys`), and its new
       forbidden forms found 80+ more wrong values across the repos.*
+- [x] **Consistency sweep 2026-10-12** (Bryan: "fix the existing
+      mistranslation and update the glossary to use the appropriate term
+      consistently"): canonical = the catalog majority across all four repos.
+      Glossary gained tenant (de Mandant, it/nl tenant, ko 테넌트,
+      pt locatário, ru арендатор, hi टेनेंट; ar مستأجر confirmed correct),
+      site (zh 站點/站点; 網站 is a WEBsite -- 117 values), role (ja ロール,
+      not 権限 = permission; it ruolo, not funzione) and vulnerability (hi
+      भेद्यता, not संवेदनशीलता = sensitivity), with every inflection listed
+      (forbidden forms match whole words, so "inquilinos" and "тенанта" had
+      slipped past the singular).  Three detectors added, all shared:
+      ko values may not contain Hanja (119 wholly or partly Chinese ko
+      values, 106 in the docs), ja values may not contain Simplified-only
+      characters (14), and `i18n_quality` checks emoji parity like
+      placeholder parity (501 docs values had the English emoji swapped for
+      a random one -- FreeBSD's lock became a pill and a police car -- or one
+      added, which also hid five values never translated at all).  About
+      1,900 values corrected by hand across the four repos; every gate and
+      the verifier green in all four.*
 
 
 #### Exit criteria

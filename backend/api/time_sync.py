@@ -19,21 +19,26 @@ bound is refused travel as codes; the UI words them.
 """
 
 import asyncio
+import logging
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
+from backend.config import config
 from backend.i18n import _
+from backend.persistence import db as dbm
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import clock_status, server_clock
 from backend.services.audit_service import ActionType, AuditService, EntityType
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(dependencies=[Depends(JWTBearer())])
 
@@ -140,12 +145,54 @@ async def server_clock_status() -> Dict[str, Any]:
     return await asyncio.to_thread(server_clock.status)
 
 
+def _approved(db: Session):
+    return db.query(models.Host).filter(models.Host.approval_status == "approved").all()
+
+
+def _tags_by_host(db: Session, host_ids) -> Dict[str, List[Dict[str, str]]]:
+    out: Dict[str, List[Dict[str, str]]] = {}
+    if not host_ids:
+        return out
+    for host_id, tag_id, name in (
+        db.query(models.HostTag.host_id, models.Tag.id, models.Tag.name)
+        .join(models.Tag, models.Tag.id == models.HostTag.tag_id)
+        .filter(models.HostTag.host_id.in_(host_ids))
+        .order_by(models.Tag.name)
+    ):
+        out.setdefault(str(host_id), []).append({"id": str(tag_id), "name": name})
+    return out
+
+
+def _site_names(site_ids) -> Dict[str, str]:
+    """Site names live with the coordinator (bootstrap database); best
+    effort -- an unnamed site still filters by its id."""
+    if not site_ids:
+        return {}
+    try:
+        with sessionmaker(bind=dbm.get_engine())() as main:
+            return {
+                str(site_id): name
+                for site_id, name in main.query(
+                    models.FederationSite.id, models.FederationSite.name
+                ).filter(models.FederationSite.id.in_(list(site_ids)))
+            }
+    except Exception:  # pylint: disable=broad-exception-caught
+        logger.exception("Time sync: could not read site names")
+        return {}
+
+
+def _counts(rows) -> Dict[str, int]:
+    counts: Dict[str, int] = {}
+    for _host, _bounds, status in rows:
+        counts[status] = counts.get(status, 0) + 1
+    return counts
+
+
 @router.get("/time-sync/hosts")
 async def fleet_clocks(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
-    """Every approved host's clock against its bounds, worst first."""
-    hosts = (
-        db.query(models.Host).filter(models.Host.approval_status == "approved").all()
-    )
+    """Every approved host's clock against its bounds, worst first, with its
+    site and tags so the page can filter by them."""
+    hosts = _approved(db)
     server, rows = await asyncio.to_thread(clock_status.evaluate, db, hosts)
     rank = {status: i for i, status in enumerate(clock_status.STATUS_ORDER)}
     rows.sort(
@@ -155,12 +202,11 @@ async def fleet_clocks(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
             r[0].fqdn or "",
         )
     )
-    counts: Dict[str, int] = {}
-    for _host, _bounds, status in rows:
-        counts[status] = counts.get(status, 0) + 1
+    tags = _tags_by_host(db, [h.id for h in hosts])
+    sites = _site_names({h.site_id for h in hosts if h.site_id})
     return {
         "server": server,
-        "counts": counts,
+        "counts": _counts(rows),
         "hosts": [
             {
                 "host_id": str(host.id),
@@ -171,10 +217,21 @@ async def fleet_clocks(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
                 "service_ok": clock_status.service_ok(host),
                 "time_service": host.time_service,
                 "time_source": host.time_source,
+                "site_id": str(host.site_id) if host.site_id else None,
+                "site_name": sites.get(str(host.site_id)) if host.site_id else None,
+                "tags": tags.get(str(host.id), []),
             }
             for host, bounds, status in rows
         ],
     }
+
+
+@router.get("/time-sync/summary")
+async def fleet_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+    """Counts per status only -- what the dashboard tile polls."""
+    hosts = _approved(db)
+    server, rows = await asyncio.to_thread(clock_status.evaluate, db, hosts)
+    return {"server": server, "total": len(rows), "counts": _counts(rows)}
 
 
 @router.get("/time-sync/bounds")
@@ -186,6 +243,9 @@ async def get_bounds(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
             "min_ms": clock_status.MIN_BOUND_MS,
             "max_ms": clock_status.MAX_BOUND_MS,
         },
+        # Outside multi-tenancy the tenant level IS the server-wide one; the
+        # UI offers it only when it means something.
+        "multitenancy": bool((config.get_multitenancy_config() or {}).get("enabled")),
     }
 
 

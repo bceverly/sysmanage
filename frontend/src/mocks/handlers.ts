@@ -7,6 +7,14 @@ import { http, HttpResponse } from "msw";
 // Declare process.env for TypeScript
 declare const process: { env: { CI?: string } } | undefined;
 
+const TIME_SYNC_SERVER = {
+  reference: "pool.ntp.org",
+  offset_ms: 0.4,
+  verified: true,
+  reason: null,
+  checked_at: 0,
+};
+
 // Simplified approach - use broad patterns and check URLs in the handler
 export const handlers = [
   // Column preferences: an OBJECT, not the catch-all's empty array.  Declared
@@ -22,6 +30,33 @@ export const handlers = [
       updated_at: "2026-01-01T00:00:00Z",
     });
   }),
+
+  // Time sync (Phase 23.3): objects, not the catch-all's empty array.
+  http.get("*/api/v1/host/:hostId/clock", () =>
+    HttpResponse.json({
+      status: "unmeasured",
+      bounds: { warning_ms: 1000, critical_ms: 5000, source: "default", ref: "" },
+      server: TIME_SYNC_SERVER,
+      service_ok: null,
+      measured: null,
+      time_service: null,
+      history: [],
+    }),
+  ),
+  http.get("*/api/v1/time-sync/summary", () =>
+    HttpResponse.json({ server: TIME_SYNC_SERVER, total: 0, counts: {} }),
+  ),
+  http.get("*/api/v1/time-sync/hosts", () =>
+    HttpResponse.json({ server: TIME_SYNC_SERVER, counts: {}, hosts: [] }),
+  ),
+  http.get("*/api/v1/time-sync/bounds", () =>
+    HttpResponse.json({
+      server: { warning_ms: 1000, critical_ms: 5000, source: "default", ref: "" },
+      overrides: [],
+      limits: { min_ms: 1, max_ms: 86400000 },
+      multitenancy: false,
+    }),
+  ),
 
   // Catch all /api/ requests and handle them dynamically.
   //

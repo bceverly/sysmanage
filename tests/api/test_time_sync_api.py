@@ -233,3 +233,42 @@ def test_changing_bounds_needs_the_role(client, auth_headers, session):
         )
     assert response.status_code == 403
     assert "Manage Time Sync" in response.json()["detail"]
+
+
+def test_fleet_rows_carry_tags_and_the_summary_counts(client, auth_headers, session):
+    now = datetime.utcnow()
+    host = _host(session, clock_offset_ms=6000.0, clock_measured_at=now)
+    tag = _tag(session, name="lab")
+    session.add(
+        models.HostTag(id=uuid.uuid4(), host_id=host.id, tag_id=tag.id, created_at=now)
+    )
+    _host(session)
+    session.commit()
+    rows = client.get("/api/v1/time-sync/hosts", headers=auth_headers).json()["hosts"]
+    assert rows[0]["tags"] == [{"id": str(tag.id), "name": "lab"}]
+    assert (rows[0]["site_id"], rows[0]["site_name"]) == (None, None)
+    assert rows[1]["tags"] == []
+    summary = client.get("/api/v1/time-sync/summary", headers=auth_headers).json()
+    assert summary["total"] == 2
+    assert summary["counts"] == {"critical": 1, "unmeasured": 1}
+    assert summary["server"]["verified"] is True
+
+
+def test_a_sited_host_reports_its_site(client, auth_headers, session):
+    site = uuid.uuid4()
+    _host(session, site_id=site)
+    with patch("backend.api.time_sync._site_names", return_value={str(site): "Dallas"}):
+        row = client.get("/api/v1/time-sync/hosts", headers=auth_headers).json()[
+            "hosts"
+        ][0]
+    assert (row["site_id"], row["site_name"]) == (str(site), "Dallas")
+
+
+def test_bounds_say_whether_the_tenant_level_applies(client, auth_headers):
+    for enabled in (True, False):
+        with patch(
+            "backend.config.config.get_multitenancy_config",
+            return_value={"enabled": enabled},
+        ):
+            body = client.get("/api/v1/time-sync/bounds", headers=auth_headers).json()
+        assert body["multitenancy"] is enabled

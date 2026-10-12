@@ -3323,7 +3323,7 @@ msgstr "Регистрация включена: хост недавно был 
 #, python-format
 msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
-"Узел '%(fqdn)s' подключен к тенанту %(tenant_id)s через токен подключения"
+"Узел '%(fqdn)s' подключен к арендатору %(tenant_id)s через токен подключения"
 
 #: backend/api/agent_poll.py:119
 msgid "Missing agent connection token"

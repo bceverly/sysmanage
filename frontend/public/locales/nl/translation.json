@@ -756,7 +756,8 @@
       "saveError": "Kan voorkeuren niet opslaan",
       "title": "Dashboard Instellingen"
     },
-    "updates": "Updates"
+    "updates": "Updates",
+    "clocksOutOfBounds": "Klokken buiten de grenzen"
   },
   "dataGrid": {
     "columnVisibility": "Kolomzichtbaarheid",
@@ -2430,7 +2431,8 @@
     "advisor": "Adviseur",
     "hostMetrics": "Hostmetrieken",
     "assetDiscovery": "Netwerkdetectie",
-    "malware": "Malware"
+    "malware": "Malware",
+    "timeSync": "Tijdsynchronisatie"
   },
   "notifications": {
     "applicationUpdates": "Applicatie Updates",
@@ -4784,5 +4786,124 @@
     "title": "Apparaat",
     "vendor": "Leverancier",
     "virtualMachine": "Virtuele machine"
+  },
+  "timeSync": {
+    "bounds": {
+      "add": "Uitzondering toevoegen",
+      "critical": "Kritiek (seconden)",
+      "criticalShort": "Kritiek",
+      "intro": "Een host waarvan de klok minstens de waarschuwingsdrempel afwijkt, wordt als waarschuwing weergegeven; bij minstens de kritieke drempel als kritiek. De meest specifieke drempels gelden: eerst die van een label, dan die van een site, dan die van de tenant en ten slotte de serverbrede. Voor een host met meerdere labels gelden de strengste.",
+      "loadError": "De klokdrempels konden niet worden geladen.",
+      "noOverrides": "Geen uitzonderingen: elke host gebruikt de serverbrede drempels.",
+      "overridesTitle": "Uitzonderingen",
+      "readOnly": "U kunt de drempels bekijken, maar voor wijzigingen is de rol 'Tijdsynchronisatie beheren' vereist.",
+      "remove": "Uitzondering verwijderen",
+      "save": "Opslaan",
+      "scope": "Geldt voor",
+      "serverSource": "Momenteel: {{source}}.",
+      "serverTitle": "Serverbrede drempels",
+      "tabLabel": "Tijdsynchronisatie",
+      "thisTenant": "Deze tenant",
+      "title": "Drempels voor klokafwijking",
+      "warning": "Waarschuwing (seconden)",
+      "warningShort": "Waarschuwing"
+    },
+    "boundsError": {
+      "notSaved": "De server kon de drempels niet opslaan.",
+      "number": "Elke drempel moet een getal zijn.",
+      "order": "De waarschuwingsdrempel moet lager zijn dan de kritieke drempel.",
+      "range": "Elke drempel moet tussen 1 ms en 24 uur liggen.",
+      "scope": "Kies een tenant, site of label.",
+      "tag": "Dat label bestaat niet meer.",
+      "unknown": "De drempels konden niet worden opgeslagen."
+    },
+    "boundsSource": {
+      "default": "Ingebouwde standaardwaarde",
+      "server": "Serverbreed",
+      "site": "Site",
+      "tag": "Label",
+      "tenant": "Tenant"
+    },
+    "card": {
+      "bounds": "Drempels {{warning}} / {{critical}} ({{source}})",
+      "history": "Gemeten afwijking, laatste 7 dagen (ms)",
+      "loadError": "De klok van deze host kon niet worden geladen.",
+      "measuredAt": "Gemeten",
+      "method": "Gemeten via",
+      "methodExchange": "Heartbeat-uitwisseling (tot op de milliseconde)",
+      "methodTimestamp": "Tijdstempel van het bericht (tot op de seconde)",
+      "no": "Nee",
+      "noHistory": "De afwijkingsgeschiedenis vult zich zolang de host verbonden blijft (één meetpunt per 15 minuten).",
+      "notReported": "Niet gerapporteerd",
+      "offset": "Gemeten afwijking",
+      "reportedOffset": "Afwijking volgens de eigen schatting van de service",
+      "roundTrip": "Round-trip-tijd",
+      "running": "Actief",
+      "service": "Tijdservice",
+      "serviceProblem": "De tijdservice op deze host draait niet of is niet gesynchroniseerd, waardoor de klok steeds verder zal afwijken.",
+      "source": "Tijdbron",
+      "stratum": "Stratum",
+      "synchronized": "Gesynchroniseerd",
+      "title": "Klok",
+      "yes": "Ja"
+    },
+    "direction": {
+      "ahead": "voor op de server",
+      "behind": "achter op de server"
+    },
+    "empty": "Er zijn nog geen goedgekeurde hosts.",
+    "filter": {
+      "all": "Alle",
+      "search": "Host",
+      "site": "Site",
+      "status": "Status",
+      "tag": "Label"
+    },
+    "grid": {
+      "bounds": "Drempels",
+      "host": "Host",
+      "offset": "Afwijking",
+      "roundTrip": "Round-trip-tijd",
+      "service": "Tijdservice",
+      "serviceProblem": "{{service}} (draait niet of niet gesynchroniseerd)",
+      "site": "Site",
+      "source": "Tijdbron",
+      "status": "Status",
+      "tags": "Labels"
+    },
+    "loadError": "De klokken van het machinepark konden niet worden geladen.",
+    "server": {
+      "noReference": "Er is geen tijdreferentie geconfigureerd, dus de klok van de server zelf wordt niet gecontroleerd. De afwijkingen van hosts worden ten opzichte van die klok gemeten.",
+      "off": "De klok van de server zelf wijkt {{offset}} af van {{reference}}. Hostklokken worden pas beoordeeld als de serverklok is gecorrigeerd.",
+      "unreachable": "De server kon zijn tijdreferentie {{reference}} niet bereiken. De afwijkingen van hosts worden gemeten ten opzichte van de serverklok, die niet kon worden gecontroleerd.",
+      "verified": "De klok van de server wijkt {{offset}} af van {{reference}}. De afwijkingen van hosts worden ten opzichte van die klok gemeten."
+    },
+    "service": {
+      "none": "Geen tijdservice",
+      "unknown": "Niet gerapporteerd"
+    },
+    "status": {
+      "critical": "Kritiek",
+      "ok": "Binnen de grenzen",
+      "serverClockOff": "Serverklok wijkt af",
+      "stale": "Geen recente meting",
+      "unmeasured": "Niet gemeten",
+      "warning": "Waarschuwing"
+    },
+    "statusHelp": {
+      "critical": "De gemeten afwijking bereikt of overschrijdt de kritieke drempel.",
+      "ok": "De gemeten afwijking ligt onder de waarschuwingsdrempel.",
+      "serverClockOff": "De klok van de server zelf wijkt af van zijn referentie, dus hostklokken worden pas beoordeeld als die is gecorrigeerd.",
+      "stale": "De laatste meting is ouder dan 30 minuten. De host is waarschijnlijk niet verbonden.",
+      "unmeasured": "De server heeft deze klok nog niet gemeten. De agent is mogelijk te oud of heeft nog geen verbinding gemaakt.",
+      "warning": "De gemeten afwijking bereikt of overschrijdt de waarschuwingsdrempel."
+    },
+    "title": "Tijdsynchronisatie",
+    "unit": {
+      "h": "{{value}} uur",
+      "min": "{{value}} minuten",
+      "ms": "{{value}} ms",
+      "s": "{{value}} s"
+    }
   }
 }

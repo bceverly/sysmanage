@@ -40,14 +40,16 @@ describe("buildNavCategories", () => {
 
   it("returns only community destinations by default and drops empty categories", () => {
     const cats = buildNavCategories(t, baseOpts);
-    // security + insights are empty without their license → filtered out.
-    expect(cats.map((c) => c.id)).toEqual(["fleet", "patching", "automation", "admin"]);
+    // insights is empty without its license → filtered out.  Security keeps
+    // Time Sync (Phase 23.3, OSS).
+    expect(cats.map((c) => c.id)).toEqual(["fleet", "patching", "security", "automation", "admin"]);
     expect(allPaths(cats)).toEqual([
       "/hosts",
       "/map",
       "/updates",
       "/os-upgrades",
       "/maintenance-windows",
+      "/time-sync",
       "/scripts",
       "/users",
       "/settings",

@@ -53,6 +53,7 @@ import QueryPacks from './Pages/QueryPacks';
 import Advisor from './Pages/Advisor';
 import AssetDiscovery from './Pages/AssetDiscovery';
 import Malware from './Pages/Malware';
+import TimeSync from './Pages/TimeSync';
 import AirgapCollections from './Pages/AirgapCollections';
 import FederationAuditLog from './Pages/FederationAuditLog';
 import FederationHosts from './Pages/FederationHosts';
@@ -86,6 +87,7 @@ function AppRoutes() {
       <Route path="/updates" element={<Updates />} />
       <Route path="/os-upgrades" element={<OSUpgrades />} />
       <Route path="/maintenance-windows" element={<MaintenanceWindows />} />
+      <Route path="/time-sync" element={<TimeSync />} />
       <Route path="/secrets" element={<Secrets />} />
       <Route path="/scripts" element={<Scripts />} />
       {/* Storing/versioning/assigning profiles is the Enterprise half of

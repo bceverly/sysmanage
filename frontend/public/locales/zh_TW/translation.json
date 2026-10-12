@@ -303,7 +303,7 @@
       "details": "詳細資料",
       "openSite": "打開",
       "operation": "操作",
-      "site": "網站",
+      "site": "站點",
       "timestamp": "時間戳記"
     },
     "empty": "尚無聯邦審計條目。",
@@ -314,9 +314,9 @@
       "apply": "應用",
       "clear": "清除",
       "operation": "操作",
-      "siteId": "網站 ID"
+      "siteId": "站點 ID"
     },
-    "subtitle": "每個跨網站操作均由協調器集中記錄。",
+    "subtitle": "每個跨站點操作均由協調器集中記錄。",
     "title": "聯邦稽核日誌"
   },
   "auditLog": {
@@ -756,7 +756,8 @@
       "saveError": "無法保存偏好設置",
       "title": "儀表板設定"
     },
-    "updates": "更新"
+    "updates": "更新",
+    "clocksOutOfBounds": "時鐘偏差超出閾值"
   },
   "dataGrid": {
     "columnVisibility": "欄位可見性",
@@ -819,7 +820,7 @@
     "minOfflineSeconds": "最小離線秒數",
     "minOfflineSecondsHelp": "樓層以如此快的同步間隔不會搖晃",
     "offlineMultiplier": "離線倍率",
-    "offlineMultiplierHelp": "在網站同步間隔乘以一次，才會標記為離線",
+    "offlineMultiplierHelp": "× 站點的同步間隔，超過後即將其標記為離線",
     "save": "保存閾值",
     "saveFailed": "無法更新閾值。",
     "saved": "警報閾值已保存。",
@@ -834,7 +835,7 @@
     "errors": {
       "failed": "無法發送命令。",
       "packagesRequired": "請至少輸入一個套件名稱。",
-      "partial": "{{failed}} 組合中的 {{total}} 個網站發送失敗。",
+      "partial": "{{total}} 個站點發送中有 {{failed}} 個失敗。",
       "scriptRequired": "請輸入要執行的腳本。",
       "unlicensed": "聯邦需要企業版許可證。"
     },
@@ -843,11 +844,11 @@
     "packages": "套件名稱",
     "packagesOptional": "套件名稱（可選 -- 空白表示所有更新）",
     "script": "腳本",
-    "subtitle": "為 {{site}} 排隊命令。該網站在其主機上執行並報告結果 -- 並無立即執行的內容。",
-    "subtitleMulti": "為 {{hosts}} 個選定主機和 {{sites}} 個網站排隊命令。每個網站在其主機上執行並報告結果 -- 並無立即執行的內容。",
+    "subtitle": "為 {{site}} 排隊命令。該站點在其主機上執行並報告結果 -- 並無立即執行的內容。",
+    "subtitleMulti": "為 {{sites}} 個站點中選定的 {{hosts}} 台主機排隊命令。每個站點執行後報告結果 -- 並無立即執行的內容。",
     "targetAll": "此站點上的所有主機",
     "targetSpecific": "特定主機（按ID）",
-    "thisSite": "此網站",
+    "thisSite": "此站點",
     "title": "發送命令",
     "types": {
       "applyUpdates": "更新應用",
@@ -859,7 +860,7 @@
   "federationHosts": {
     "actions": {
       "detail": "詳細資料",
-      "openSite": "網站"
+      "openSite": "站點"
     },
     "bulk": {
       "clear": "清除",
@@ -878,10 +879,10 @@
     "detail": {
       "close": "關閉",
       "ipv6": "IPv6",
-      "noLiveLink": "實時詳細連結不可用（擁有網站沒有URL）。",
+      "noLiveLink": "實時詳細連結不可用（所屬站點沒有 URL）。",
       "notFound": "此主機已不再於目錄中。",
-      "site": "擁有網站",
-      "theSite": "該網站",
+      "site": "所屬站點",
+      "theSite": "該站點",
       "title": "主機詳細資訊",
       "viewLive": "在 {{site}} 查看實時詳情 →"
     },
@@ -895,8 +896,8 @@
       "search": "搜尋 （姓名 / IP）",
       "status": "狀態"
     },
-    "scopedToSite": "針對一個網站範圍",
-    "subtitle": "所有已註冊網站中的每台主機，從協調器同步的目錄中。",
+    "scopedToSite": "僅限單一站點",
+    "subtitle": "來自協調器同步目錄的所有已註冊站點中的每台主機。",
     "title": "跨站點主機"
   },
   "federationReport": {
@@ -906,17 +907,17 @@
       "critical": "關鍵的 CVEs",
       "high": "高CVE數量",
       "hosts": "主機",
-      "site": "網站"
+      "site": "站點"
     },
     "generate": "生成報告",
-    "sites": "網站（若未選取則為所有）",
+    "sites": "站點（若未選取則為全部）",
     "subtitle": "聚合主機、合規性和漏洞滾動報告跨站點。",
-    "totals": "總計（{{n}} 個網站）",
+    "totals": "總計（{{n}} 個站點）",
     "upsell": "多站聯邦需要 Enterprise 版本。"
   },
   "federationRole": {
     "coordinator": {
-      "description": "匯聚主機存貨、合規性和脆弱性摘要的樞紐，從許多下屬網站伺服器收集這些信息並向下分派命令和政策。每個聯邦一個協調器。",
+      "description": "匯聚來自眾多下屬站點伺服器的主機清單、合規性和漏洞摘要，並向下分派命令和策略的樞紐。每個聯邦一個協調器。",
       "title": "聯邦協調器"
     },
     "copied": "已複製！",
@@ -925,11 +926,11 @@
     "currentTag": "(目前)",
     "enroll": {
       "coordIdentityKey": "協調器身分公開金鑰（PEM）",
-      "coordIdentityKeyHelp": "必填。粘貼從協調器的 Server Role 頁面獲取的身份公開金鑰。此網站拒絕入網，除非協調器證明了這個確切的金鑰 -- 這就是防止入網時的中間人攻擊的方法。",
+      "coordIdentityKeyHelp": "必填。粘貼從協調器的 Server Role 頁面獲取的身份公開金鑰。此站點拒絕入網，除非協調器證明了這個確切的金鑰 -- 這就是防止入網時的中間人攻擊的方法。",
       "coordUrl": "協調器 URL",
       "enrolled": "已與協調器註冊",
       "error": "無法與協調器入網。",
-      "help": "將此網站指向其協調員並粘貼協調員發行的一次性註冊令牌（來自其網站頁面）。此網站呼叫回以完成握手並開始同步。",
+      "help": "將此站點指向其協調器，並粘貼協調器發行的一次性註冊令牌（來自其站點頁面）。此站點會回呼以完成握手並開始同步。",
       "notEnrolled": "尚未與協調員註冊。",
       "submit": "與協調器註冊",
       "submitting": "正在註冊…",
@@ -944,7 +945,7 @@
       "title": "此伺服器的身份金鑰"
     },
     "importError": "無法導入金鑰。",
-    "intro": "選擇此伺服器如何參與多網站聯邦。這與左側的空氣隔離角色獨立運作 -- 一台伺服器可以同時具備兩種角色。在下次重新啟動後生效。",
+    "intro": "選擇此伺服器如何參與多站點聯邦。這與左側的空氣隔離角色獨立運作 -- 一台伺服器可以同時具備兩種角色。在下次重新啟動後生效。",
     "loadError": "無法加載聯邦角色。",
     "none": {
       "description": "預設值。此伺服器不是多站點聯邦的一部分。除非您正在運行協調器或下屬站點，否則請選擇此選項。",
@@ -965,7 +966,7 @@
     "saving": "保存中…",
     "site": {
       "description": "一個自主運行並向上報告至協調器的下屬伺服器。即使協調器不可達，它仍會管理自己的主機，並在重新連接時重播隊列中的數據。",
-      "title": "聯邦網站"
+      "title": "聯邦站點"
     }
   },
   "firewallRoles": {
@@ -2430,7 +2431,8 @@
     "advisor": "顧問",
     "hostMetrics": "主機指標",
     "assetDiscovery": "網路探索",
-    "malware": "惡意軟體"
+    "malware": "惡意軟體",
+    "timeSync": "時間同步"
   },
   "notifications": {
     "applicationUpdates": "應用程式更新",
@@ -2566,7 +2568,7 @@
     "active": "活動",
     "assign": {
       "error": "無法更新分配。",
-      "errorLoad": "無法加載網站列表。",
+      "errorLoad": "無法加載站點列表。",
       "noSites": "尚無已註冊的聯邦站點。首先註冊一個站點。",
       "statusLine": "推送狀態：{{status}}",
       "statusLineWithAttempts": "推送狀態：{{status}}（{{attempts}} 次嘗試）",
@@ -2608,7 +2610,7 @@
       "submit": "保存",
       "success": "策略已更新。",
       "title": "編輯策略",
-      "versionNote": "保存將會增加策略版本；網站在下次推送週期時獲取新版本。"
+      "versionNote": "保存將會增加策略版本；站點在下次推送週期時獲取新版本。"
     },
     "empty": "尚未定義策略。點擊“新策略”來創建一個。",
     "errorLoad": "無法加載聯邦策略。",
@@ -2622,7 +2624,7 @@
       "error": "無法推送策略。",
       "success": "已觸發推送 {{name}}。"
     },
-    "subtitle": "中央定義的策略推送到下屬網站。",
+    "subtitle": "中央定義的策略推送到下屬站點。",
     "title": "聯邦政策"
   },
   "processes": {
@@ -3223,12 +3225,12 @@
       "resume": "恢復",
       "suspend": "暫停"
     },
-    "addSite": "註冊網站",
+    "addSite": "註冊站點",
     "confirmRemove": {
-      "body": "網站行將被保留以供審計，但協調器將停止接受來自它的同步。此操作無法從UI中撤消。",
+      "body": "站點記錄將被保留以供審計，但協調器將停止接受來自它的同步。此操作無法從UI中撤消。",
       "cancel": "取消",
-      "confirm": "移除網站",
-      "title": "是否要移除聯邦網站？"
+      "confirm": "移除站點",
+      "title": "是否要移除聯邦站點？"
     },
     "detail": {
       "activeCommands": "活動命令",
@@ -3239,7 +3241,7 @@
       "alertAcked": "已確認",
       "alertsTitle": "打開警報",
       "autonomous": "獨立運行",
-      "backToList": "回到網站",
+      "backToList": "回到站點",
       "backlogDepth": "待處理的上游佇列",
       "backlogUnknown": "--",
       "commandAttempts": "{{n}} 發送嘗試",
@@ -3247,14 +3249,14 @@
       "connection": "連接",
       "dispatchCommand": "發送命令",
       "enrolledAt": "已註冊於",
-      "errorLoad": "無法加載網站。",
+      "errorLoad": "無法加載站點。",
       "hostCount": "主機計數",
       "lastSyncAt": "上次同步時間",
       "lastSyncStatus": "上次同步狀態",
       "metadata": "元數據",
-      "notFound": "網站未找到。",
+      "notFound": "找不到站點。",
       "pushPolicies": "推送策略",
-      "pushPoliciesHint": "將此網站的所有策略重新排隊，包括任何卡住或死信的交付，以便立即重新推送。",
+      "pushPoliciesHint": "將此站點的所有策略重新排隊，包括任何卡住或死信的交付，以便立即重新推送。",
       "refresh": "刷新",
       "repushFailed": "無法重新推送策略",
       "repushQueued": "已排隊 {{n}} 個策略推送以重新發送。",
@@ -3287,24 +3289,24 @@
     "enroll": {
       "cancel": "取消",
       "done": "完成",
-      "engineUnavailable": "聯邦控制器引擎未加載；無法註冊一個網站。",
-      "error": "無法註冊網站。",
+      "engineUnavailable": "聯邦控制器引擎未加載；無法註冊站點。",
+      "error": "無法註冊站點。",
       "location": "位置標籤（可選）",
-      "name": "網站名稱",
-      "siteIdentityKey": "網站身份公鑰 (PEM)",
-      "siteIdentityKeyHelp": "必填。粘貼從該網站的 Server Role 頁面獲取的身份公開金鑰。協調器將驗證網站的入網憑據，以對抗入網時的中間人攻擊。",
+      "name": "站點名稱",
+      "siteIdentityKey": "站點身份公鑰 (PEM)",
+      "siteIdentityKeyHelp": "必填。粘貼從該站點的 Server Role 頁面以帶外方式獲取的身份公開金鑰。協調器將依此金鑰驗證站點的入網證明 -- 這正是防止入網時中間人攻擊的方法。",
       "submit": "生成令牌",
-      "successTitle": "網站已註冊",
+      "successTitle": "站點已註冊",
       "syncIntervalSeconds": "同步間隔（秒）",
-      "title": "加入聯邦網站",
+      "title": "註冊聯邦站點",
       "tokenInstructions": "複製下方的入網令牌，並將其交付給新站點伺服器。這是唯一一次顯示該令牌的機會----如果遺失則無法恢復。",
-      "url": "網站 URL"
+      "url": "站點 URL"
     },
     "enterpriseRequired": {
-      "body": "聯邦功能允許您從一個協調器管理多個SysManage伺服器。升級到企業版許可證以在此處註冊下屬網站。",
+      "body": "聯邦功能允許您從一個協調器管理多個SysManage伺服器。升級到企業版許可證以在此處註冊下屬站點。",
       "title": "多站聯邦需要 Enterprise 版本"
     },
-    "errorLoad": "無法加載聯邦網站。",
+    "errorLoad": "無法加載聯邦站點。",
     "hostCount": "{{count}} 主機",
     "hostsLink": "主機",
     "lastSync": "同步於 {{when}}",
@@ -3312,15 +3314,15 @@
     "policiesLink": "策略",
     "subtitle": "從屬的 SysManage 伺服器已註冊到此協調器。",
     "tilesView": "儀表板",
-    "title": "聯邦網站"
+    "title": "聯邦站點"
   },
   "sitesMap": {
-    "errorLoad": "無法加載聯邦網站。",
+    "errorLoad": "無法加載聯邦站點。",
     "gridView": "格狀視圖",
     "lastSyncLabel": "上次同步：",
     "openSite": "打開站點",
     "statusLabel": "狀態：",
-    "subtitle": "下屬網站伺服器的地理分布。",
+    "subtitle": "下屬站點伺服器的地理分布。",
     "tilesView": "儀表板",
     "title": "聯邦地圖"
   },
@@ -3332,7 +3334,7 @@
     "countPending": "{{n}} 待處理",
     "countSuspended": "{{n}} 暫停",
     "empty": "還沒有註冊站點。",
-    "errorLoad": "無法加載網站列表。",
+    "errorLoad": "無法加載站點列表。",
     "gridView": "格狀視圖",
     "hostsLabel": "{{n}} 主機",
     "lastSync": "同步於 {{when}}",
@@ -4784,5 +4786,124 @@
     "title": "機器",
     "vendor": "供應商",
     "virtualMachine": "虛擬機器"
+  },
+  "timeSync": {
+    "bounds": {
+      "add": "新增覆寫",
+      "critical": "嚴重（秒）",
+      "criticalShort": "嚴重",
+      "intro": "時鐘偏差達到或超過警告閾值的主機會顯示為警告；達到或超過嚴重閾值的則顯示為嚴重。適用範圍最具體的閾值優先：依序為標籤、站點、租戶，最後是全伺服器閾值。具有多個標籤的主機採用其中最嚴格的閾值。",
+      "loadError": "無法載入時鐘閾值。",
+      "noOverrides": "沒有覆寫：每部主機都使用全伺服器閾值。",
+      "overridesTitle": "覆寫",
+      "readOnly": "您可以檢視閾值，但變更閾值需要「管理時間同步」角色。",
+      "remove": "移除覆寫",
+      "save": "儲存",
+      "scope": "適用於",
+      "serverSource": "目前：{{source}}",
+      "serverTitle": "全伺服器閾值",
+      "tabLabel": "時間同步",
+      "thisTenant": "此租戶",
+      "title": "時鐘偏差閾值",
+      "warning": "警告（秒）",
+      "warningShort": "警告"
+    },
+    "boundsError": {
+      "notSaved": "伺服器無法儲存閾值。",
+      "number": "每個閾值都必須是數字。",
+      "order": "警告閾值必須小於嚴重閾值。",
+      "range": "每個閾值必須介於 1 毫秒到 24 小時之間。",
+      "scope": "請選擇租戶、站點或標籤。",
+      "tag": "該標籤已不存在。",
+      "unknown": "無法儲存閾值。"
+    },
+    "boundsSource": {
+      "default": "內建預設值",
+      "server": "全伺服器",
+      "site": "站點",
+      "tag": "標籤",
+      "tenant": "租戶"
+    },
+    "card": {
+      "bounds": "閾值 {{warning}} / {{critical}}（{{source}}）",
+      "history": "測得的時鐘偏差，最近 7 天（毫秒）",
+      "loadError": "無法載入此主機的時鐘資訊。",
+      "measuredAt": "測量時間",
+      "method": "測量方式",
+      "methodExchange": "心跳交換（精確到毫秒）",
+      "methodTimestamp": "訊息時間戳記（精確到秒）",
+      "no": "否",
+      "noHistory": "主機保持連線後，時鐘偏差歷程會逐步累積（每 15 分鐘一個資料點）。",
+      "notReported": "未回報",
+      "offset": "測得的時鐘偏差",
+      "reportedOffset": "服務自身的偏差估計值",
+      "roundTrip": "往返時間",
+      "running": "執行中",
+      "service": "時間服務",
+      "serviceProblem": "此主機上的時間服務未執行或未同步，其時鐘將逐漸漂移。",
+      "source": "時間來源",
+      "stratum": "層級",
+      "synchronized": "已同步",
+      "title": "時鐘",
+      "yes": "是"
+    },
+    "direction": {
+      "ahead": "快於伺服器",
+      "behind": "慢於伺服器"
+    },
+    "empty": "尚無已核准的主機。",
+    "filter": {
+      "all": "全部",
+      "search": "主機",
+      "site": "站點",
+      "status": "狀態",
+      "tag": "標籤"
+    },
+    "grid": {
+      "bounds": "閾值",
+      "host": "主機",
+      "offset": "偏差",
+      "roundTrip": "往返時間",
+      "service": "時間服務",
+      "serviceProblem": "{{service}}（未執行或未同步）",
+      "site": "站點",
+      "source": "時間來源",
+      "status": "狀態",
+      "tags": "標籤"
+    },
+    "loadError": "無法載入主機群的時鐘資訊。",
+    "server": {
+      "noReference": "未設定時間參考來源，因此不會檢查伺服器本身的時鐘。主機的時鐘偏差以伺服器時鐘為基準測量。",
+      "off": "伺服器本身的時鐘與 {{reference}} 相差 {{offset}}。在伺服器時鐘校正之前，不會評判主機時鐘。",
+      "unreachable": "伺服器無法連線到其時間參考來源 {{reference}}。主機的時鐘偏差以伺服器時鐘為基準測量，而伺服器時鐘無法檢查。",
+      "verified": "伺服器時鐘與 {{reference}} 相差 {{offset}}。主機的時鐘偏差以此時鐘為基準測量。"
+    },
+    "service": {
+      "none": "無時間服務",
+      "unknown": "未回報"
+    },
+    "status": {
+      "critical": "嚴重",
+      "ok": "在閾值內",
+      "serverClockOff": "伺服器時鐘偏差",
+      "stale": "無近期測量",
+      "unmeasured": "未測量",
+      "warning": "警告"
+    },
+    "statusHelp": {
+      "critical": "測得的時鐘偏差已達到或超過嚴重閾值。",
+      "ok": "測得的時鐘偏差低於警告閾值。",
+      "serverClockOff": "伺服器本身的時鐘偏離其參考來源，因此在校正之前不會評判主機時鐘。",
+      "stale": "最後一次測量已超過 30 分鐘。主機可能未連線。",
+      "unmeasured": "伺服器尚未測量此時鐘。代理版本可能過舊，或尚未連線。",
+      "warning": "測得的時鐘偏差已達到或超過警告閾值。"
+    },
+    "title": "時間同步",
+    "unit": {
+      "h": "{{value}} 小時",
+      "min": "{{value}} 分鐘",
+      "ms": "{{value}} ms",
+      "s": "{{value}} 秒"
+    }
   }
 }

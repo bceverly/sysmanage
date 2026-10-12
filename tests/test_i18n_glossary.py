@@ -115,3 +115,29 @@ def test_korean_forbidden_forms_match_whole_words_with_particles():
     assert matcher.search("CSV 수입")
     assert matcher.search("수입은 실패했습니다")
     assert not matcher.search("이 단계는 필수입니다")
+
+
+# -- wrong language inside the CJK block (2026-10-12) -------------------------
+
+
+def test_chinese_in_a_korean_value_is_the_wrong_language():
+    import i18n_strict  # noqa: PLC0415
+
+    assert i18n_strict.wrong_script("ko", "覆盖", "Override")
+    assert i18n_strict.wrong_script(
+        "ko", "등록 실패, %s 초后再尝试...", "Retrying in %s"
+    )
+    assert not i18n_strict.wrong_script("ko", "재정의", "Override")
+    # A script the English itself contains stays legitimate.
+    assert not i18n_strict.wrong_script("ko", "zh - 中文", "zh - 中文")
+
+
+def test_simplified_chinese_in_a_japanese_value_is_the_wrong_language():
+    import i18n_strict  # noqa: PLC0415
+
+    assert i18n_strict.wrong_script("ja", "首席技术官", "Chief Technology Officer")
+    assert i18n_strict.wrong_script(
+        "ja", "CA证书バンドルの更新", "Updating CA certificate bundle"
+    )
+    for good in ("会社名", "最終使用日時", "時刻同期", "実行履歴", "設定"):
+        assert not i18n_strict.wrong_script("ja", good, "x"), good

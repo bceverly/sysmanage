@@ -31,6 +31,7 @@ import StopIcon from "@mui/icons-material/Stop";
 import { useTranslation } from "react-i18next";
 import MaintenanceWindowCard from "../MaintenanceWindowCard";
 import HostCapabilitiesCard from "./HostCapabilitiesCard";
+import HostClockCard from "../TimeSync/HostClockCard";
 import ConfigManagementEnginesCard from "../ConfigManagementEnginesCard";
 import ConfigProfileRunHistory from "../ConfigProfileRunHistory";
 import { hasPermissionSync, SecurityRoles } from "../../Services/permissions";
@@ -829,6 +830,12 @@ const HostInfoTab: React.FC<HostInfoTabProps> = ({
           updatedAt={host.agent_capabilities_updated_at}
         />
       </Grid>
+      {/* Clock offset and time service (Phase 23.3) */}
+      {hostId && (
+        <Grid size={{ xs: 12, md: 6 }}>
+          <HostClockCard hostId={hostId} />
+        </Grid>
+      )}
 
       {/* Config-management prerequisite (Phase 20.1) */}
       <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex" }}>

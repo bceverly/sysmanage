@@ -21,7 +21,7 @@ export const SETTINGS_CAT_LABEL = new Map<string, { key: string; def: string }>(
 
 export const SETTINGS_TAB_CATEGORY = new Map<string, string>([
   ['configuration', 'general'], ['tags', 'general'], ['host-defaults', 'general'], ['available-packages', 'general'],
-  ['asset-tags', 'general'],
+  ['asset-tags', 'general'], ['time-sync', 'general'],
   ['authentication', 'security'], ['antivirus', 'security'], ['firewall-roles', 'security'],
   ['compliance-profiles', 'security'], ['cve-refresh', 'security'], ['cve-database', 'security'], ['fips-compliance', 'security'],
   ['update-profiles', 'patching'], ['distributions', 'patching'],
@@ -71,6 +71,9 @@ export const SETTINGS_TAB_DEFS: SettingsTabDef[] = [
   // Phase 23.2: asset-tag naming scheme.  OSS, ungated; saving needs the
   // Manage Asset Tags role (the page shows read-only without it).
   { id: 'asset-tags', labelKey: 'assetTags.scheme.tabLabel', labelDefault: 'Asset Tags' },
+  // Phase 23.3: clock offset bounds.  OSS, ungated; saving needs the Manage
+  // Time Sync role (the page shows read-only without it).
+  { id: 'time-sync', labelKey: 'timeSync.bounds.tabLabel', labelDefault: 'Time Sync' },
   { id: 'queues', labelKey: 'queues.title', labelDefault: 'Queues' },
   {
     id: 'integrations',

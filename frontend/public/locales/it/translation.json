@@ -756,7 +756,8 @@
       "saveError": "Impossibile salvare le preferenze",
       "title": "Impostazioni Dashboard"
     },
-    "updates": "Aggiornamenti"
+    "updates": "Aggiornamenti",
+    "clocksOutOfBounds": "Orologi fuori dai limiti"
   },
   "dataGrid": {
     "columnVisibility": "Visibilità colonne",
@@ -2430,7 +2431,8 @@
     "advisor": "Consulente",
     "hostMetrics": "Metriche degli host",
     "assetDiscovery": "Rilevamento di rete",
-    "malware": "Malware"
+    "malware": "Malware",
+    "timeSync": "Sincronizzazione oraria"
   },
   "notifications": {
     "applicationUpdates": "Aggiornamenti Applicazioni",
@@ -3194,7 +3196,7 @@
       "description": "La parte isolata di una coppia con separazione fisica, senza accesso a Internet. Ingestisce i media ISO prodotti dal Collector, verifica la loro firma e serve i pacchetti ai nodi gestiti sulla rete privata in modo che possano aggiornarsi normalmente. Scegli questo sul server all'interno dell'enclave separato fisicamente.",
       "title": "Ripostiglio aereo (lato disconnesso)"
     },
-    "restartHint": "Riavviare il server SysManage dopo l'aggiornamento per applicare completamente la nuova funzione.",
+    "restartHint": "Riavviare il server SysManage dopo il salvataggio per applicare completamente il nuovo ruolo.",
     "save": "Save Role",
     "saveError": "Impossibile salvare il ruolo del server.",
     "saved": "Ruolo del server salvato. Riavviare il server per applicarlo completamente.",
@@ -4662,7 +4664,7 @@
       "previewFailed": "Non è possibile visualizzare una bozza. Controlla i campi evidenziati.",
       "previewTitle": "Anteprima in tempo reale",
       "previewing": "Aggiornamento della vista",
-      "readOnly": "Puoi visualizzare lo schema, ma per modificarlo è necessaria la funzione 'Gestisci etichette asset'.",
+      "readOnly": "Puoi visualizzare lo schema, ma per modificarlo è necessario il ruolo 'Gestisci etichette asset'.",
       "reportOnly": "SysManage segnala solo i tag che non sono conformi. Non riscrive mai i tag esistenti; modificali su ogni macchina se necessario.",
       "sampleTag": "Tag di esempio",
       "saveFailed": "Non è stato possibile salvare lo schema di etichettatura degli asset.",
@@ -4784,5 +4786,124 @@
     "title": "Macchina",
     "vendor": "Fornitore",
     "virtualMachine": "Macchina virtuale"
+  },
+  "timeSync": {
+    "bounds": {
+      "add": "Aggiungi eccezione",
+      "critical": "Critico (secondi)",
+      "criticalShort": "Critico",
+      "intro": "Un host il cui orologio ha uno scostamento pari o superiore al limite di avviso viene mostrato come avviso; pari o superiore al limite critico, come critico. Si applicano i limiti più specifici: quelli di un tag, poi quelli di un sito, poi quelli del tenant e infine quelli dell'intero server. A un host con più tag si applicano i limiti più restrittivi.",
+      "loadError": "Impossibile caricare i limiti dell'orologio.",
+      "noOverrides": "Nessuna eccezione: ogni host usa i limiti dell'intero server.",
+      "overridesTitle": "Eccezioni",
+      "readOnly": "Puoi visualizzare i limiti, ma per modificarli è necessario il ruolo 'Gestisci sincronizzazione oraria'.",
+      "remove": "Rimuovi eccezione",
+      "save": "Salva",
+      "scope": "Si applica a",
+      "serverSource": "Attualmente: {{source}}.",
+      "serverTitle": "Limiti dell'intero server",
+      "tabLabel": "Sincronizzazione oraria",
+      "thisTenant": "Questo tenant",
+      "title": "Limiti di scostamento dell'orologio",
+      "warning": "Avviso (secondi)",
+      "warningShort": "Avviso"
+    },
+    "boundsError": {
+      "notSaved": "Il server non è riuscito a salvare i limiti.",
+      "number": "Ogni limite deve essere un numero.",
+      "order": "Il limite di avviso deve essere inferiore al limite critico.",
+      "range": "Ogni limite deve essere compreso tra 1 ms e 24 ore.",
+      "scope": "Scegli un tenant, un sito o un tag.",
+      "tag": "Quel tag non esiste più.",
+      "unknown": "Impossibile salvare i limiti."
+    },
+    "boundsSource": {
+      "default": "Predefinito integrato",
+      "server": "Intero server",
+      "site": "Sito",
+      "tag": "Tag",
+      "tenant": "Tenant"
+    },
+    "card": {
+      "bounds": "Limiti {{warning}} / {{critical}} ({{source}})",
+      "history": "Scostamento misurato, ultimi 7 giorni (ms)",
+      "loadError": "Impossibile caricare l'orologio di questo host.",
+      "measuredAt": "Misurato",
+      "method": "Misurato tramite",
+      "methodExchange": "Scambio nell'heartbeat (al millisecondo)",
+      "methodTimestamp": "Timestamp del messaggio (al secondo)",
+      "no": "No",
+      "noHistory": "Lo storico degli scostamenti si riempie man mano che l'host resta connesso (un punto ogni 15 minuti).",
+      "notReported": "Non segnalato",
+      "offset": "Scostamento misurato",
+      "reportedOffset": "Stima dello scostamento fornita dal servizio stesso",
+      "roundTrip": "Tempo di andata e ritorno",
+      "running": "In esecuzione",
+      "service": "Servizio orario",
+      "serviceProblem": "Il servizio orario su questo host non è in esecuzione o non è sincronizzato, quindi il suo orologio andrà alla deriva.",
+      "source": "Fonte oraria",
+      "stratum": "Stratum",
+      "synchronized": "Sincronizzato",
+      "title": "Orologio",
+      "yes": "Sì"
+    },
+    "direction": {
+      "ahead": "avanti rispetto al server",
+      "behind": "indietro rispetto al server"
+    },
+    "empty": "Non ci sono ancora host approvati.",
+    "filter": {
+      "all": "Tutti",
+      "search": "Host",
+      "site": "Sito",
+      "status": "Stato",
+      "tag": "Tag"
+    },
+    "grid": {
+      "bounds": "Limiti",
+      "host": "Host",
+      "offset": "Scostamento",
+      "roundTrip": "Tempo di andata e ritorno",
+      "service": "Servizio orario",
+      "serviceProblem": "{{service}} (non in esecuzione o non sincronizzato)",
+      "site": "Sito",
+      "source": "Fonte oraria",
+      "status": "Stato",
+      "tags": "Tag"
+    },
+    "loadError": "Impossibile caricare gli orologi della flotta.",
+    "server": {
+      "noReference": "Nessun riferimento orario configurato, quindi l'orologio del server stesso non viene verificato. Gli scostamenti degli host vengono misurati rispetto a esso.",
+      "off": "L'orologio del server ha uno scostamento di {{offset}} rispetto a {{reference}}. Gli orologi degli host non vengono valutati finché l'orologio del server non viene corretto.",
+      "unreachable": "Il server non è riuscito a raggiungere il suo riferimento orario {{reference}}. Gli scostamenti degli host vengono misurati rispetto all'orologio del server, che non è stato possibile verificare.",
+      "verified": "L'orologio del server ha uno scostamento di {{offset}} rispetto a {{reference}}. Gli scostamenti degli host vengono misurati rispetto a esso."
+    },
+    "service": {
+      "none": "Nessun servizio orario",
+      "unknown": "Non segnalato"
+    },
+    "status": {
+      "critical": "Critico",
+      "ok": "Entro i limiti",
+      "serverClockOff": "Orologio del server sfasato",
+      "stale": "Nessuna misurazione recente",
+      "unmeasured": "Non misurato",
+      "warning": "Avviso"
+    },
+    "statusHelp": {
+      "critical": "Lo scostamento misurato è pari o superiore al limite critico.",
+      "ok": "Lo scostamento misurato è inferiore al limite di avviso.",
+      "serverClockOff": "L'orologio del server stesso è sfasato rispetto al suo riferimento, quindi gli orologi degli host non vengono valutati finché non viene corretto.",
+      "stale": "L'ultima misurazione risale a più di 30 minuti fa. Probabilmente l'host non è connesso.",
+      "unmeasured": "Il server non ha ancora misurato questo orologio. L'agente potrebbe essere troppo vecchio oppure non essersi ancora connesso.",
+      "warning": "Lo scostamento misurato è pari o superiore al limite di avviso."
+    },
+    "title": "Sincronizzazione oraria",
+    "unit": {
+      "h": "{{value}} h",
+      "min": "{{value}} min",
+      "ms": "{{value}} ms",
+      "s": "{{value}} s"
+    }
   }
 }

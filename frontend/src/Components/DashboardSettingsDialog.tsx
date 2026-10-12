@@ -53,6 +53,7 @@ const DashboardSettingsDialog: React.FC<DashboardSettingsDialogProps> = ({
       { identifier: 'reboot', label: t('dashboard.rebootRequired', 'Reboot Needed') },
       { identifier: 'antivirus', label: t('dashboard.antivirusCoverage', 'Antivirus') },
       { identifier: 'opentelemetry', label: t('dashboard.openTelemetryCoverage', 'OpenTelemetry') },
+      { identifier: 'clocks', label: t('dashboard.clocksOutOfBounds', 'Clocks out of bounds') },
     ];
 
     try {

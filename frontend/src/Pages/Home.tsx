@@ -16,6 +16,7 @@ import { doGetHostsSummary, HostsSummary } from '../Services/hosts'
 import { useVisiblePolling } from '../hooks/useVisiblePolling';
 import { updatesService, UpdateStatsSummary } from '../Services/updates';
 import axiosInstance from '../Services/api';
+import { getFleetSummary, FleetSummary } from '../Services/timeSync';
 import DashboardSettingsDialog from '../Components/DashboardSettingsDialog';
 
 interface DashboardCardProps {
@@ -54,6 +55,14 @@ const getCoverageColor = (coveragePercentage: number): string => {
         return COLOR_YELLOW;
     }
     return COLOR_RED;
+};
+
+// Phase 23.3: red if any clock is critical, yellow if any is at warning.
+const getClockColor = (summary: FleetSummary): string => {
+    if (summary.counts.critical) {
+        return COLOR_RED;
+    }
+    return summary.counts.warning ? COLOR_YELLOW : COLOR_GREEN;
 };
 
 const DashboardCard: React.FC<DashboardCardProps> = ({
@@ -123,6 +132,9 @@ const Dashboard = () => {
     const [antivirusColor, setAntivirusColor] = useState<string>(COLOR_GREEN);
     const [otelCoverage, setOtelCoverage] = useState<number>(0);
     const [otelColor, setOtelColor] = useState<string>(COLOR_GREEN);
+    const [clocksOut, setClocksOut] = useState<number>(0);
+    const [clocksTotal, setClocksTotal] = useState<number>(0);
+    const [clocksColor, setClocksColor] = useState<string>(COLOR_GREEN);
     const [loading, setLoading] = useState<boolean>(true);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [cardVisibility, setCardVisibility] = useState<Record<string, boolean>>({
@@ -132,6 +144,7 @@ const Dashboard = () => {
         reboot: true,
         antivirus: true,
         opentelemetry: true,
+        clocks: true,
     });
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -180,23 +193,36 @@ const Dashboard = () => {
         setColor(getCoverageColor(coveragePercentage));
     };
 
+    const processClocksResponse = (response: PromiseSettledResult<FleetSummary>) => {
+        if (response.status === 'rejected') {
+            console.error('Failed to fetch clock summary:', response.reason);
+            return;
+        }
+        const summary = response.value;
+        setClocksOut((summary.counts.warning ?? 0) + (summary.counts.critical ?? 0));
+        setClocksTotal(summary.total);
+        setClocksColor(getClockColor(summary));
+    };
+
     const fetchData = useCallback(async (isInitialLoad = false) => {
         if (isInitialLoad) {
             setLoading(true);
         }
 
         try {
-            const [hostsResponse, updatesResponse, antivirusResponse, otelResponse] = await Promise.allSettled([
+            const [hostsResponse, updatesResponse, antivirusResponse, otelResponse, clocksResponse] = await Promise.allSettled([
                 doGetHostsSummary(),
                 updatesService.getUpdatesSummary(),
                 axiosInstance.get('/api/v1/antivirus-coverage'),
-                axiosInstance.get('/api/v1/opentelemetry/opentelemetry-coverage')
+                axiosInstance.get('/api/v1/opentelemetry/opentelemetry-coverage'),
+                getFleetSummary(),
             ]);
 
             processHostsResponse(hostsResponse);
             processUpdatesResponse(updatesResponse);
             processCoverageResponse(antivirusResponse, setAntivirusCoverage, setAntivirusColor, 'Failed to fetch antivirus coverage:');
             processCoverageResponse(otelResponse, setOtelCoverage, setOtelColor, 'Failed to fetch OpenTelemetry coverage:');
+            processClocksResponse(clocksResponse);
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
         } finally {
@@ -217,6 +243,7 @@ const Dashboard = () => {
                 reboot: true,
                 antivirus: true,
                 opentelemetry: true,
+                clocks: true,
             };
 
             // Index saved prefs in a Map (prototype-pollution-safe), then write
@@ -383,6 +410,18 @@ const Dashboard = () => {
                             maxValue={100}
                             color={otelColor}
                             onClick={handleOtelClick}
+                            loading={loading}
+                        />
+                    </Grid>
+                )}
+                {cardVisibility.clocks && (
+                    <Grid>
+                        <DashboardCard
+                            title={t('dashboard.clocksOutOfBounds', 'Clocks out of bounds')}
+                            value={clocksOut}
+                            maxValue={clocksTotal || 1}
+                            color={clocksColor}
+                            onClick={() => void navigate('/time-sync')}
                             loading={loading}
                         />
                     </Grid>

@@ -756,7 +756,8 @@
       "saveError": "保存偏好设置失败",
       "title": "仪表板设置"
     },
-    "updates": "更新"
+    "updates": "更新",
+    "clocksOutOfBounds": "时钟偏差超出阈值"
   },
   "dataGrid": {
     "columnVisibility": "列可见性",
@@ -819,7 +820,7 @@
     "minOfflineSeconds": "最小离线秒数",
     "minOfflineSecondsHelp": "地板，防止快速同步间隔波动",
     "offlineMultiplier": "离线乘数",
-    "offlineMultiplierHelp": "在网站同步间隔乘以之前将其标记为离线",
+    "offlineMultiplierHelp": "× 站点的同步间隔，超过后即将其标记为离线",
     "save": "保存阈值",
     "saveFailed": "保存阈值失败。",
     "saved": "警报阈值已保存。",
@@ -2430,7 +2431,8 @@
     "advisor": "顾问",
     "hostMetrics": "主机指标",
     "assetDiscovery": "网络发现",
-    "malware": "恶意软件"
+    "malware": "恶意软件",
+    "timeSync": "时间同步"
   },
   "notifications": {
     "applicationUpdates": "应用程序更新",
@@ -4784,5 +4786,124 @@
     "title": "机器",
     "vendor": "供应商",
     "virtualMachine": "虚拟机"
+  },
+  "timeSync": {
+    "bounds": {
+      "add": "添加覆盖",
+      "critical": "严重（秒）",
+      "criticalShort": "严重",
+      "intro": "时钟偏差达到或超过警告阈值的主机显示为警告；达到或超过严重阈值的显示为严重。适用范围最具体的阈值优先：依次为标签、站点、租户，最后是服务器全局阈值。具有多个标签的主机采用其中最严格的阈值。",
+      "loadError": "无法加载时钟阈值。",
+      "noOverrides": "没有覆盖：所有主机都使用服务器全局阈值。",
+      "overridesTitle": "覆盖",
+      "readOnly": "您可以查看阈值，但更改阈值需要“管理时间同步”角色。",
+      "remove": "删除覆盖",
+      "save": "保存",
+      "scope": "适用范围",
+      "serverSource": "当前：{{source}}",
+      "serverTitle": "服务器全局阈值",
+      "tabLabel": "时间同步",
+      "thisTenant": "此租户",
+      "title": "时钟偏差阈值",
+      "warning": "警告（秒）",
+      "warningShort": "警告"
+    },
+    "boundsError": {
+      "notSaved": "服务器无法保存阈值。",
+      "number": "每个阈值都必须是数字。",
+      "order": "警告阈值必须小于严重阈值。",
+      "range": "每个阈值必须介于 1 毫秒到 24 小时之间。",
+      "scope": "请选择租户、站点或标签。",
+      "tag": "该标签已不存在。",
+      "unknown": "无法保存阈值。"
+    },
+    "boundsSource": {
+      "default": "内置默认值",
+      "server": "服务器全局",
+      "site": "站点",
+      "tag": "标签",
+      "tenant": "租户"
+    },
+    "card": {
+      "bounds": "阈值 {{warning}} / {{critical}}（{{source}}）",
+      "history": "测得的时钟偏差，最近 7 天（毫秒）",
+      "loadError": "无法加载此主机的时钟信息。",
+      "measuredAt": "测量时间",
+      "method": "测量方式",
+      "methodExchange": "心跳交换（精确到毫秒）",
+      "methodTimestamp": "消息时间戳（精确到秒）",
+      "no": "否",
+      "noHistory": "主机保持连接后，时钟偏差历史会逐步积累（每 15 分钟一个数据点）。",
+      "notReported": "未报告",
+      "offset": "测得的时钟偏差",
+      "reportedOffset": "服务自身的偏差估计值",
+      "roundTrip": "往返时间",
+      "running": "运行中",
+      "service": "时间服务",
+      "serviceProblem": "此主机上的时间服务未运行或未同步，其时钟将逐渐漂移。",
+      "source": "时间源",
+      "stratum": "层级",
+      "synchronized": "已同步",
+      "title": "时钟",
+      "yes": "是"
+    },
+    "direction": {
+      "ahead": "快于服务器",
+      "behind": "慢于服务器"
+    },
+    "empty": "还没有已批准的主机。",
+    "filter": {
+      "all": "全部",
+      "search": "主机",
+      "site": "站点",
+      "status": "状态",
+      "tag": "标签"
+    },
+    "grid": {
+      "bounds": "阈值",
+      "host": "主机",
+      "offset": "偏差",
+      "roundTrip": "往返时间",
+      "service": "时间服务",
+      "serviceProblem": "{{service}}（未运行或未同步）",
+      "site": "站点",
+      "source": "时间源",
+      "status": "状态",
+      "tags": "标签"
+    },
+    "loadError": "无法加载主机群的时钟信息。",
+    "server": {
+      "noReference": "未配置时间参考源，因此不会检查服务器自身的时钟。主机的时钟偏差以服务器时钟为基准测量。",
+      "off": "服务器自身的时钟与 {{reference}} 相差 {{offset}}。在服务器时钟校正之前，不会评判主机时钟。",
+      "unreachable": "服务器无法连接其时间参考源 {{reference}}。主机的时钟偏差以服务器时钟为基准测量，而服务器时钟未能得到检查。",
+      "verified": "服务器时钟与 {{reference}} 相差 {{offset}}。主机的时钟偏差以该时钟为基准测量。"
+    },
+    "service": {
+      "none": "无时间服务",
+      "unknown": "未报告"
+    },
+    "status": {
+      "critical": "严重",
+      "ok": "在阈值内",
+      "serverClockOff": "服务器时钟偏差",
+      "stale": "无近期测量",
+      "unmeasured": "未测量",
+      "warning": "警告"
+    },
+    "statusHelp": {
+      "critical": "测得的时钟偏差已达到或超过严重阈值。",
+      "ok": "测得的时钟偏差低于警告阈值。",
+      "serverClockOff": "服务器自身的时钟偏离其参考源，因此在校正之前不会评判主机时钟。",
+      "stale": "最后一次测量已超过 30 分钟。主机可能未连接。",
+      "unmeasured": "服务器尚未测量此时钟。代理版本可能过旧，或尚未连接。",
+      "warning": "测得的时钟偏差已达到或超过警告阈值。"
+    },
+    "title": "时间同步",
+    "unit": {
+      "h": "{{value}} 小时",
+      "min": "{{value}} 分钟",
+      "ms": "{{value}} ms",
+      "s": "{{value}} 秒"
+    }
   }
 }
