@@ -86,3 +86,18 @@ def test_other_refusals_and_unbound_connections_are_not_measured():
             error,
         )
         assert clock_tracking.current(conn) is None
+
+
+def test_a_resync_result_is_routed_to_its_row():
+    from backend.api import message_handlers  # noqa: PLC0415
+
+    with patch("backend.services.clock_resync.record_result") as record:
+        out = asyncio.run(
+            message_handlers.handle_command_result(
+                MagicMock(),
+                SimpleNamespace(hostname="x13s"),
+                {"command_id": "c1", "command_type": "resync_clock", "success": True},
+            )
+        )
+    assert out is None
+    record.assert_called_once()

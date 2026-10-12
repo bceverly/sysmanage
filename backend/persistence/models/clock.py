@@ -59,3 +59,37 @@ class ClockBound(Base):
     critical_ms = Column(Float, nullable=False)
     updated_at = Column(DateTime, nullable=False)
     updated_by = Column(String(255), nullable=True)
+
+
+class ClockResync(Base):
+    """One spot resynchronization of one host's clock (Phase 23.3 S5).
+
+    Queued by an operator (one host, or every host out of bounds at once) and
+    released in waves by ``services/clock_resync.py``: never more than
+    ``WAVE_SIZE`` in flight per database, so a fleet-wide resync does not hit
+    the NTP servers all at once.  ``command_id`` is the envelope id the agent
+    echoes back with its result.
+    """
+
+    __tablename__ = "clock_resync"
+    __table_args__ = (Index("ix_clock_resync_status", "status", "requested_at"),)
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), nullable=False, index=True)
+    batch_id = Column(GUID(), nullable=True, index=True)
+    # queued | sent | succeeded | failed | unsupported | timed_out | canceled
+    status = Column(String(16), nullable=False)
+    requested_by = Column(String(255), nullable=True)
+    requested_at = Column(DateTime, nullable=False)
+    sent_at = Column(DateTime, nullable=True)
+    finished_at = Column(DateTime, nullable=True)
+    command_id = Column(String(36), nullable=True, index=True)
+    # The measured offset when it was asked for, and the service's own
+    # estimate afterwards.
+    offset_before_ms = Column(Float, nullable=True)
+    reported_after_ms = Column(Float, nullable=True)
+    service = Column(String(16), nullable=True)
+    method = Column(String(64), nullable=True)
+    # A code (not_privileged, command_failed, no_tool, agent_too_old, ...).
+    error = Column(String(32), nullable=True)
+    detail = Column(String(500), nullable=True)

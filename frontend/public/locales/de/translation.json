@@ -4904,6 +4904,38 @@
       "min": "{{value}} Minuten",
       "ms": "{{value}} ms",
       "s": "{{value}} s"
+    },
+    "resync": {
+      "after": "Der Zeitdienst meldet jetzt {{offset}}",
+      "alreadyRunning": "Eine Neusynchronisierung läuft bereits.",
+      "button": "Jetzt neu synchronisieren",
+      "cancel": "Abbrechen",
+      "confirm": "Neu synchronisieren",
+      "error": {
+        "agentError": "Der Agent hat einen Fehler gemeldet.",
+        "agentTooOld": "Dieser Agent ist zu alt, um seine Uhr neu zu synchronisieren. Aktualisieren Sie den Agent.",
+        "badServer": "Es war kein verwendbarer Zeitserver verfügbar.",
+        "commandFailed": "Der Zeitdienst des Hosts hat die Neusynchronisierung abgelehnt.",
+        "dispatchFailed": "Der Server konnte die Anfrage nicht an den Host senden.",
+        "hostGone": "Der Host wurde entfernt.",
+        "noResult": "Der Host hat nicht innerhalb von 10 Minuten geantwortet. Er ist möglicherweise offline.",
+        "noTool": "Der Host hat keinen Zeitdienst und kein Zeitwerkzeug, mit dem neu synchronisiert werden kann.",
+        "notPrivileged": "Der Agent läuft nicht mit Administratorrechten, die zum Stellen der Uhr erforderlich sind."
+      },
+      "fleetButton": "Uhren außerhalb der Grenzwerte neu synchronisieren",
+      "fleetConfirm": "Die Uhr jedes Hosts mit Warnung oder kritischem Status ({{count}} Hosts) wird über seinen eigenen Zeitdienst sofort gestellt. Die Anfragen werden in Wellen gesendet; Hosts ohne Administratorrechte werden übersprungen und aufgelistet.",
+      "fleetResult": "{{requested}} Neusynchronisierungen angefordert: {{sent}} gesendet, {{unsupported}} nicht möglich, {{running}} laufen bereits.",
+      "fleetTitle": "Uhren neu synchronisieren",
+      "needsRole": "Erfordert die Rolle 'Hostuhr neu synchronisieren'.",
+      "requestFailed": "Die Neusynchronisierung konnte nicht angefordert werden.",
+      "status": {
+        "failed": "Fehlgeschlagen",
+        "queued": "Wartend",
+        "sent": "Läuft",
+        "succeeded": "Neu synchronisiert",
+        "timedOut": "Keine Antwort",
+        "unsupported": "Nicht möglich"
+      }
     }
   }
 }

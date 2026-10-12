@@ -4904,6 +4904,38 @@
       "min": "{{value}} min",
       "ms": "{{value}} ms",
       "s": "{{value}} s"
+    },
+    "resync": {
+      "after": "O serviço de hora agora informa {{offset}}",
+      "alreadyRunning": "Já há uma ressincronização em andamento.",
+      "button": "Ressincronizar agora",
+      "cancel": "Cancelar",
+      "confirm": "Ressincronizar",
+      "error": {
+        "agentError": "O agente informou um erro.",
+        "agentTooOld": "Este agente é antigo demais para ressincronizar seu relógio. Atualize o agente.",
+        "badServer": "Nenhum servidor de hora utilizável estava disponível.",
+        "commandFailed": "O serviço de hora do host recusou a ressincronização.",
+        "dispatchFailed": "O servidor não conseguiu enviar a solicitação ao host.",
+        "hostGone": "O host foi removido.",
+        "noResult": "O host não respondeu em 10 minutos. Ele pode estar offline.",
+        "noTool": "O host não tem serviço de hora nem ferramenta de hora com que ressincronizar.",
+        "notPrivileged": "O agente não é executado com privilégios de administrador, necessários para ajustar o relógio."
+      },
+      "fleetButton": "Ressincronizar relógios fora dos limites",
+      "fleetConfirm": "O relógio de cada host em aviso ou crítico ({{count}} hosts) será ajustado imediatamente por meio do seu próprio serviço de hora. As solicitações são enviadas em ondas; os hosts sem privilégios de administrador são ignorados e listados.",
+      "fleetResult": "{{requested}} ressincronizações solicitadas: {{sent}} enviadas, {{unsupported}} não possíveis, {{running}} já em andamento.",
+      "fleetTitle": "Ressincronizar relógios",
+      "needsRole": "Requer a função 'Ressincronizar Relógio do Host'.",
+      "requestFailed": "Não foi possível solicitar a ressincronização.",
+      "status": {
+        "failed": "Falhou",
+        "queued": "Aguardando",
+        "sent": "Em andamento",
+        "succeeded": "Ressincronizado",
+        "timedOut": "Sem resposta",
+        "unsupported": "Não possível"
+      }
     }
   }
 }

@@ -4904,6 +4904,38 @@
       "min": "{{value}} 分鐘",
       "ms": "{{value}} ms",
       "s": "{{value}} 秒"
+    },
+    "resync": {
+      "after": "服務目前回報的時鐘偏差：{{offset}}",
+      "alreadyRunning": "已有一次重新同步正在進行。",
+      "button": "立即重新同步",
+      "cancel": "取消",
+      "confirm": "重新同步",
+      "error": {
+        "agentError": "代理回報了錯誤。",
+        "agentTooOld": "此代理版本過舊，無法重新同步其時鐘。請更新代理。",
+        "badServer": "沒有可用的時間伺服器。",
+        "commandFailed": "主機的時間服務拒絕了重新同步。",
+        "dispatchFailed": "伺服器無法將要求傳送至主機。",
+        "hostGone": "該主機已被移除。",
+        "noResult": "主機在 10 分鐘內未回應。它可能已離線。",
+        "noTool": "該主機沒有可用於重新同步的時間服務或時間工具。",
+        "notPrivileged": "代理未以系統管理員權限執行，而設定時鐘需要系統管理員權限。"
+      },
+      "fleetButton": "重新同步超出閾值的時鐘",
+      "fleetConfirm": "透過各主機本身的時間服務，立即校正處於警告或嚴重狀態的所有主機（{{count}} 台）的時鐘。要求會分批傳送；沒有系統管理員權限的主機將被略過並列出。",
+      "fleetResult": "已要求 {{requested}} 次重新同步：{{sent}} 次已傳送，{{unsupported}} 次無法執行，{{running}} 次已在進行中。",
+      "fleetTitle": "重新同步時鐘",
+      "needsRole": "需要「重新同步主機時鐘」角色。",
+      "requestFailed": "無法要求重新同步。",
+      "status": {
+        "failed": "失敗",
+        "queued": "等待中",
+        "sent": "進行中",
+        "succeeded": "已重新同步",
+        "timedOut": "無回應",
+        "unsupported": "無法執行"
+      }
     }
   }
 }

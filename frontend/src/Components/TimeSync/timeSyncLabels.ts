@@ -7,7 +7,7 @@
 // what they are.
 
 import type { TFunction } from 'i18next';
-import type { BoundsSource, ClockStatus, ServerClock } from '../../Services/timeSync';
+import type { BoundsSource, ClockStatus, ResyncStatus, ServerClock } from '../../Services/timeSync';
 
 type ChipColor = 'success' | 'warning' | 'error' | 'default' | 'info';
 
@@ -167,5 +167,59 @@ export const serviceName = (t: TFunction, service: string | null | undefined): s
             return 'macOS timed';
         default:
             return service;
+    }
+};
+
+// --- spot resync (Phase 23.3 S5) -------------------------------------------
+
+export const resyncStatusLabel = (t: TFunction, status: ResyncStatus): string => {
+    const labels: Record<ResyncStatus, string> = {
+        queued: t('timeSync.resync.status.queued', 'Waiting'),
+        sent: t('timeSync.resync.status.sent', 'In progress'),
+        succeeded: t('timeSync.resync.status.succeeded', 'Resynchronized'),
+        failed: t('timeSync.resync.status.failed', 'Failed'),
+        unsupported: t('timeSync.resync.status.unsupported', 'Not possible'),
+        timed_out: t('timeSync.resync.status.timedOut', 'No answer'),
+    };
+    return labels[status] ?? status;
+};
+
+export const resyncStatusColor = (status: ResyncStatus): ChipColor => {
+    switch (status) {
+        case 'succeeded':
+            return 'success';
+        case 'failed':
+        case 'timed_out':
+            return 'error';
+        case 'unsupported':
+            return 'warning';
+        default:
+            return 'info';
+    }
+};
+
+/** Why a resync did not happen, from its code. */
+export const resyncErrorText = (t: TFunction, code: string | null): string => {
+    switch (code) {
+        case null:
+            return '';
+        case 'not_privileged':
+            return t('timeSync.resync.error.notPrivileged', 'The agent does not run with administrator rights, which setting the clock requires.');
+        case 'agent_too_old':
+            return t('timeSync.resync.error.agentTooOld', 'This agent is too old to resynchronize its clock. Update the agent.');
+        case 'no_tool':
+            return t('timeSync.resync.error.noTool', 'The host has no time service or time tool to resynchronize with.');
+        case 'command_failed':
+            return t('timeSync.resync.error.commandFailed', "The host's time service refused the resynchronization.");
+        case 'bad_server':
+            return t('timeSync.resync.error.badServer', 'No usable time server was available.');
+        case 'no_result':
+            return t('timeSync.resync.error.noResult', 'The host did not answer within 10 minutes. It may be offline.');
+        case 'host_gone':
+            return t('timeSync.resync.error.hostGone', 'The host was removed.');
+        case 'dispatch_failed':
+            return t('timeSync.resync.error.dispatchFailed', 'The server could not send the request to the host.');
+        default:
+            return t('timeSync.resync.error.agentError', 'The agent reported an error.');
     }
 };

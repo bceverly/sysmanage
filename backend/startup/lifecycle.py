@@ -738,6 +738,17 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         except Exception as geo_exc:  # pylint: disable=broad-exception-caught
             logger.warning("Failed to start GeoLite2 refresh task: %s", geo_exc)
 
+        # Phase 23.3 S5 (OSS): release queued clock resyncs in waves and time
+        # out the ones whose host went away.
+        try:
+            from backend.services.clock_resync import (  # noqa: PLC0415
+                clock_resync_tick_service,
+            )
+
+            _track_background_task(singleton_task(clock_resync_tick_service()))
+        except Exception as resync_exc:  # pylint: disable=broad-exception-caught
+            logger.warning("Failed to start the clock resync tick: %s", resync_exc)
+
         # Startup: Start the custom-metric sample retention loop (OSS).  The
         # tenant ``custom_metric_sample`` table grows unbounded; this daily
         # loop prunes samples older than ``custom_metrics.retention_days``

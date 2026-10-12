@@ -26,6 +26,7 @@ import { ChartsReferenceLine } from '@mui/x-charts/ChartsReferenceLine';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { getHostClock } from '../../Services/timeSync';
+import HostClockResync from './HostClockResync';
 import type { HostClock, TimeService } from '../../Services/timeSync';
 import {
     formatOffset,
@@ -170,6 +171,7 @@ const HostClockCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                     <Measurement clock={clock} />
                     {clock.time_service && <ClaimFields claim={clock.time_service} />}
                 </Grid>
+                <HostClockResync hostId={hostId} onDone={load} />
                 <History clock={clock} />
             </>
         );

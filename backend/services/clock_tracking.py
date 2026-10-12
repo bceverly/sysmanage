@@ -145,6 +145,17 @@ def current(connection) -> Optional[Dict[str, Any]]:
     }
 
 
+def reset(connection) -> None:
+    """Forget the samples: the clock was just stepped (S5), so every earlier
+    sample measures a clock that no longer exists.  The next figure is
+    persisted as soon as there is one."""
+    state = getattr(connection, "clock_state", None)
+    if isinstance(state, dict):
+        state["samples"].clear()
+        state.pop("persisted_at", None)
+        state.pop("persisted_offset", None)
+
+
 # --------------------------------------------------------------------------
 # persistence: rate-limited, batched
 # --------------------------------------------------------------------------

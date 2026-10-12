@@ -4904,6 +4904,38 @@
       "min": "{{value}} min",
       "ms": "{{value}} ms",
       "s": "{{value}} s"
+    },
+    "resync": {
+      "after": "El servicio de hora ahora indica {{offset}}",
+      "alreadyRunning": "Ya hay una resincronización en curso.",
+      "button": "Volver a sincronizar ahora",
+      "cancel": "Cancelar",
+      "confirm": "Volver a sincronizar",
+      "error": {
+        "agentError": "El agente notificó un error.",
+        "agentTooOld": "Este agente es demasiado antiguo para volver a sincronizar su reloj. Actualice el agente.",
+        "badServer": "No había ningún servidor de hora utilizable disponible.",
+        "commandFailed": "El servicio de hora del host rechazó la resincronización.",
+        "dispatchFailed": "El servidor no pudo enviar la solicitud al host.",
+        "hostGone": "El host fue eliminado.",
+        "noResult": "El host no respondió en 10 minutos. Es posible que esté desconectado.",
+        "noTool": "El host no tiene ningún servicio ni herramienta de hora con los que volver a sincronizar.",
+        "notPrivileged": "El agente no se ejecuta con privilegios de administrador, necesarios para ajustar el reloj."
+      },
+      "fleetButton": "Volver a sincronizar los relojes fuera de los límites",
+      "fleetConfirm": "Se ajustará de inmediato el reloj de cada host en advertencia o crítico ({{count}} hosts) mediante su propio servicio de hora. Las solicitudes se envían por oleadas; los hosts sin privilegios de administrador se omiten y se enumeran.",
+      "fleetResult": "{{requested}} resincronizaciones solicitadas: {{sent}} enviadas, {{unsupported}} no posibles, {{running}} ya en curso.",
+      "fleetTitle": "Volver a sincronizar los relojes",
+      "needsRole": "Requiere el rol 'Resincronizar Reloj del Host'.",
+      "requestFailed": "No se pudo solicitar la resincronización.",
+      "status": {
+        "failed": "Fallida",
+        "queued": "En espera",
+        "sent": "En curso",
+        "succeeded": "Resincronizado",
+        "timedOut": "Sin respuesta",
+        "unsupported": "No posible"
+      }
     }
   }
 }

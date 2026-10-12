@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-12 09:59-0400\n"
+"POT-Creation-Date: 2026-10-12 15:08-0400\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -75,10 +75,10 @@ msgid "You do not have access to the selected account."
 msgstr "У вас нет доступа к выбранной учетной записи."
 
 #: backend/api/asset_tags.py:59 backend/api/malware.py:118
-#: backend/api/file_watches.py:110 backend/api/config_mgmt_drift.py:191
-#: backend/api/advisor.py:93 backend/api/query_packs.py:119
-#: backend/api/config_mgmt_inventories.py:110
-#: backend/api/config_mgmt_remediation.py:137 backend/api/time_sync.py:61
+#: backend/api/file_watches.py:110 backend/api/time_sync_resync.py:56
+#: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:93
+#: backend/api/query_packs.py:119 backend/api/config_mgmt_inventories.py:110
+#: backend/api/config_mgmt_remediation.py:137 backend/api/time_sync.py:66
 #: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:375
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
@@ -339,7 +339,7 @@ msgstr "Не удалось обработать обновление состо
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:572 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:589 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "Хост не зарегистрирован"
@@ -1758,6 +1758,14 @@ msgstr "Неверный формат идентификатора задани�
 #: backend/api/config_mgmt_profiles.py:382
 msgid "Assignment not found"
 msgstr "Задание не найдено"
+
+#: backend/api/time_sync_resync.py:102
+msgid "Clock resync requested"
+msgstr "Запрошена повторная синхронизация часов"
+
+#: backend/api/time_sync_resync.py:145
+msgid "Clock resync requested for the fleet"
+msgstr "Запрошена повторная синхронизация часов для парка"
 
 #: backend/api/federation_identity.py:90
 msgid "Could not load or generate the federation TLS certificate."
@@ -3365,11 +3373,11 @@ msgstr "Необходимо указать target_hostname, target_platform и�
 msgid "Configuration acknowledgment processed"
 msgstr "Подтверждение конфигурации обработано"
 
-#: backend/api/time_sync.py:225 backend/api/time_sync.py:269
+#: backend/api/time_sync.py:285 backend/api/time_sync.py:329
 msgid "Clock offset bounds changed"
 msgstr "Изменены допустимые пределы смещения часов"
 
-#: backend/api/time_sync.py:290
+#: backend/api/time_sync.py:350
 msgid "Clock offset bounds removed"
 msgstr "Удалены допустимые пределы смещения часов"
 
@@ -3410,34 +3418,34 @@ msgstr "Эта задача уже завершена"
 msgid "Cancelled by an operator"
 msgstr "Отменено оператором"
 
-#: backend/api/message_handlers.py:432
+#: backend/api/message_handlers.py:449
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "Не удалось обработать диагностический результат: %s"
 
-#: backend/api/message_handlers.py:466
+#: backend/api/message_handlers.py:483
 msgid "Missing message_id in command acknowledgment"
 msgstr "Отсутствует message_id в подтверждении команды"
 
-#: backend/api/message_handlers.py:533
+#: backend/api/message_handlers.py:550
 msgid "This session cannot acknowledge another host's message"
 msgstr "Этот сеанс не может подтвердить сообщение другого узла"
 
-#: backend/api/message_handlers.py:596
+#: backend/api/message_handlers.py:613
 msgid "Missing installation_id in package installation status"
 msgstr "Отсутствует installation_id в статусе установки пакета"
 
-#: backend/api/message_handlers.py:616
+#: backend/api/message_handlers.py:633
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "В журнале установки не найдена запись для ID: %s"
 
-#: backend/api/message_handlers.py:662
+#: backend/api/message_handlers.py:679
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "Состояние установки пакета {status} на агенте {hostname}"
 
-#: backend/api/message_handlers.py:691
+#: backend/api/message_handlers.py:708
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "Не удалось обновить статус установки пакетов: %s"

@@ -4904,6 +4904,38 @@
       "min": "{{value}} min",
       "ms": "{{value}} ms",
       "s": "{{value}} s"
+    },
+    "resync": {
+      "after": "Service now reports {{offset}}",
+      "alreadyRunning": "A resynchronization is already in progress.",
+      "button": "Resynchronize now",
+      "cancel": "Cancel",
+      "confirm": "Resynchronize",
+      "error": {
+        "agentError": "The agent reported an error.",
+        "agentTooOld": "This agent is too old to resynchronize its clock. Update the agent.",
+        "badServer": "No usable time server was available.",
+        "commandFailed": "The host's time service refused the resynchronization.",
+        "dispatchFailed": "The server could not send the request to the host.",
+        "hostGone": "The host was removed.",
+        "noResult": "The host did not answer within 10 minutes. It may be offline.",
+        "noTool": "The host has no time service or time tool to resynchronize with.",
+        "notPrivileged": "The agent does not run with administrator rights, which setting the clock requires."
+      },
+      "fleetButton": "Resynchronize clocks out of bounds",
+      "fleetConfirm": "Step the clock of every host at warning or critical ({{count}} hosts) through its own time service. They are sent in waves; hosts without administrator rights are skipped and listed.",
+      "fleetResult": "{{requested}} resynchronizations requested: {{sent}} sent, {{unsupported}} not possible, {{running}} already in progress.",
+      "fleetTitle": "Resynchronize clocks",
+      "needsRole": "Requires the Resync Host Clock role.",
+      "requestFailed": "The resynchronization could not be requested.",
+      "status": {
+        "failed": "Failed",
+        "queued": "Waiting",
+        "sent": "In progress",
+        "succeeded": "Resynchronized",
+        "timedOut": "No answer",
+        "unsupported": "Not possible"
+      }
     }
   }
 }

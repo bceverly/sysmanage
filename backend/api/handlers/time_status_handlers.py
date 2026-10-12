@@ -49,6 +49,19 @@ def _text(value: Any, limit: int) -> Optional[str]:
     return value.strip()[:limit] or None if isinstance(value, str) else None
 
 
+def apply_claim(host, payload: Dict[str, Any]) -> None:
+    """Store a time-service claim on ``host`` -- from a status update, or the
+    status a clock resync reports afterwards (S5)."""
+    service = payload.get("service")
+    host.time_service = service if service in _SERVICES else None
+    host.time_service_running = _bool(payload.get("running"))
+    host.time_synchronized = _bool(payload.get("synchronized"))
+    host.time_source = _text(payload.get("source"), 255)
+    host.time_stratum = _int(payload.get("stratum"))
+    host.time_reported_offset_ms = _float(payload.get("reported_offset_ms"))
+    host.time_status_at = datetime.now(timezone.utc).replace(tzinfo=None)
+
+
 async def handle_time_status_update(  # NOSONAR
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
@@ -74,14 +87,7 @@ async def handle_time_status_update(  # NOSONAR
             "data": {},
         }
 
-    service = payload.get("service")
-    host.time_service = service if service in _SERVICES else None
-    host.time_service_running = _bool(payload.get("running"))
-    host.time_synchronized = _bool(payload.get("synchronized"))
-    host.time_source = _text(payload.get("source"), 255)
-    host.time_stratum = _int(payload.get("stratum"))
-    host.time_reported_offset_ms = _float(payload.get("reported_offset_ms"))
-    host.time_status_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    apply_claim(host, payload)
     db.commit()
     if host.time_service_running is False:
         logger.warning(

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-12 09:59-0400\n"
+"POT-Creation-Date: 2026-10-12 15:08-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -74,10 +74,10 @@ msgid "You do not have access to the selected account."
 msgstr "선택한 계정에 액세스 권한이 없습니다."
 
 #: backend/api/asset_tags.py:59 backend/api/malware.py:118
-#: backend/api/file_watches.py:110 backend/api/config_mgmt_drift.py:191
-#: backend/api/advisor.py:93 backend/api/query_packs.py:119
-#: backend/api/config_mgmt_inventories.py:110
-#: backend/api/config_mgmt_remediation.py:137 backend/api/time_sync.py:61
+#: backend/api/file_watches.py:110 backend/api/time_sync_resync.py:56
+#: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:93
+#: backend/api/query_packs.py:119 backend/api/config_mgmt_inventories.py:110
+#: backend/api/config_mgmt_remediation.py:137 backend/api/time_sync.py:66
 #: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:375
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
@@ -336,7 +336,7 @@ msgstr "프로세스 상태 업데이트 처리에 실패했습니다: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:572 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:589 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "호스트가 등록되지 않음"
@@ -1733,6 +1733,14 @@ msgstr "잘못된 할당 ID 형식입니다."
 msgid "Assignment not found"
 msgstr "할당 값이 찾되지 않았습니다."
 
+#: backend/api/time_sync_resync.py:102
+msgid "Clock resync requested"
+msgstr "시계 재동기화가 요청됨"
+
+#: backend/api/time_sync_resync.py:145
+msgid "Clock resync requested for the fleet"
+msgstr "플릿 전체의 시계 재동기화가 요청됨"
+
 #: backend/api/federation_identity.py:90
 msgid "Could not load or generate the federation TLS certificate."
 msgstr "연방 TLS 인증서를 로드하거나 생성할 수 없습니다."
@@ -1847,7 +1855,9 @@ msgstr "등록 키가 삭제되었습니다"
 msgid ""
 "External Identity Provider integration requires a SysManage Professional+ "
 "license. Please upgrade to access this feature."
-msgstr "외부 ID 공급자 통합에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
+msgstr ""
+"외부 ID 공급자 통합에는 SysManage Professional+ 라이선스가 필요합니다. 이 기"
+"능에 액세스하려면 업그레이드하세요."
 
 #: backend/api/external_idp.py:89
 msgid "IdP provider not found"
@@ -3302,11 +3312,11 @@ msgstr "target_hostname, target_platform, 또는 push_to_all을 지정해야 합
 msgid "Configuration acknowledgment processed"
 msgstr "구성 확인 응답을 처리했습니다"
 
-#: backend/api/time_sync.py:225 backend/api/time_sync.py:269
+#: backend/api/time_sync.py:285 backend/api/time_sync.py:329
 msgid "Clock offset bounds changed"
 msgstr "시계 오차 허용 범위가 변경됨"
 
-#: backend/api/time_sync.py:290
+#: backend/api/time_sync.py:350
 msgid "Clock offset bounds removed"
 msgstr "시계 오차 허용 범위가 제거됨"
 
@@ -3347,34 +3357,34 @@ msgstr "이 작업은 이미 완료되었습니다."
 msgid "Cancelled by an operator"
 msgstr "운영자에 의해 취소되었습니다."
 
-#: backend/api/message_handlers.py:432
+#: backend/api/message_handlers.py:449
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "진단 결과 처리에 실패했습니다: %s"
 
-#: backend/api/message_handlers.py:466
+#: backend/api/message_handlers.py:483
 msgid "Missing message_id in command acknowledgment"
 msgstr "message_id가 누락된 명령 확인 응답"
 
-#: backend/api/message_handlers.py:533
+#: backend/api/message_handlers.py:550
 msgid "This session cannot acknowledge another host's message"
 msgstr "이 세션은 다른 호스트의 메시지를 확인할 수 없습니다"
 
-#: backend/api/message_handlers.py:596
+#: backend/api/message_handlers.py:613
 msgid "Missing installation_id in package installation status"
 msgstr "installation_id가 누락된 패키지 설치 상태"
 
-#: backend/api/message_handlers.py:616
+#: backend/api/message_handlers.py:633
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "ID: %s에 대한 설치 로그 항목을 찾을 수 없습니다."
 
-#: backend/api/message_handlers.py:662
+#: backend/api/message_handlers.py:679
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "Agent {hostname}의 패키지 설치 상태: {status}"
 
-#: backend/api/message_handlers.py:691
+#: backend/api/message_handlers.py:708
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "패키지 설치 상태를 업데이트하는 데 실패했습니다: %s"
@@ -4370,7 +4380,9 @@ msgstr "잘못된 장치 ID입니다"
 msgid ""
 "Air-gap media export requires the air-gap collector engine (Enterprise). "
 "Please upgrade to access this feature."
-msgstr "에어갭 매체 내보내기에는 에어갭 수집기 엔진(Enterprise)이 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
+msgstr ""
+"에어갭 매체 내보내기에는 에어갭 수집기 엔진(Enterprise)이 필요합니다. 이 기능"
+"에 액세스하려면 업그레이드하세요."
 
 #: backend/api/content_lifecycle_export.py:84
 #, python-format
@@ -4708,7 +4720,9 @@ msgstr "감사 로그 항목을 가져오지 못했습니다: %s"
 msgid ""
 "%s export requires a SysManage Professional+ license. OSS tier supports CSV "
 "export."
-msgstr "%s 내보내기에는 SysManage Professional+ 라이선스가 필요합니다. OSS 티어는 CSV 내보내기를 지원합니다."
+msgstr ""
+"%s 내보내기에는 SysManage Professional+ 라이선스가 필요합니다. OSS 티어는 "
+"CSV 내보내기를 지원합니다."
 
 #: backend/api/audit_log.py:306
 msgid "Use /api/v1/audit/export with Pro+ license"

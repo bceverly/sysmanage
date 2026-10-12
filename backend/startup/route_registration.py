@@ -106,6 +106,7 @@ from backend.api import (
     telemetry,
     third_party_repos,
     time_sync,
+    time_sync_resync,
     ubuntu_pro_settings,
     updates,
     upgrade_profiles,
@@ -436,6 +437,7 @@ def register_routes(app: FastAPI):
     logger.debug("Adding machines router (Phase 23.2 S2)")
     _include_versioned(app, machines.router, tags=["machines"])
     _include_versioned(app, time_sync.router, tags=["time-sync"])
+    _include_versioned(app, time_sync_resync.router, tags=["time-sync"])
     _include_versioned(app, asset_tags.router, tags=["machines"])
     _include_versioned(app, asset_tag_csv.router, tags=["machines"])
 

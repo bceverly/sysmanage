@@ -141,6 +141,8 @@ class CommandType(str, Enum):
     RUN_MALWARE_SCAN = "run_malware_scan"
     QUARANTINE_FILE = "quarantine_file"
     RESTORE_FILE = "restore_file"
+    # Phase 23.3 S5: step the host's clock through its own time service.
+    RESYNC_CLOCK = "resync_clock"
     CHECK_REBOOT_STATUS = "check_reboot_status"
     COLLECT_DIAGNOSTICS = "collect_diagnostics"
     COLLECT_CERTIFICATES = "collect_certificates"

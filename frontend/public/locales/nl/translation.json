@@ -4904,6 +4904,38 @@
       "min": "{{value}} minuten",
       "ms": "{{value}} ms",
       "s": "{{value}} s"
+    },
+    "resync": {
+      "after": "De tijdservice meldt nu {{offset}}",
+      "alreadyRunning": "Er wordt al opnieuw gesynchroniseerd.",
+      "button": "Nu opnieuw synchroniseren",
+      "cancel": "Annuleren",
+      "confirm": "Opnieuw synchroniseren",
+      "error": {
+        "agentError": "De agent heeft een fout gemeld.",
+        "agentTooOld": "Deze agent is te oud om zijn klok opnieuw te synchroniseren. Werk de agent bij.",
+        "badServer": "Er was geen bruikbare tijdserver beschikbaar.",
+        "commandFailed": "De tijdservice van de host heeft het opnieuw synchroniseren geweigerd.",
+        "dispatchFailed": "De server kon het verzoek niet naar de host verzenden.",
+        "hostGone": "De host is verwijderd.",
+        "noResult": "De host heeft niet binnen 10 minuten geantwoord. Mogelijk is hij offline.",
+        "noTool": "De host heeft geen tijdservice of tijdhulpprogramma om mee opnieuw te synchroniseren.",
+        "notPrivileged": "De agent draait niet met beheerdersrechten, die nodig zijn om de klok in te stellen."
+      },
+      "fleetButton": "Klokken buiten de drempels opnieuw synchroniseren",
+      "fleetConfirm": "De klok van elke host met een waarschuwing of kritieke status ({{count}} hosts) wordt direct via zijn eigen tijdservice ingesteld. De verzoeken worden in golven verzonden; hosts zonder beheerdersrechten worden overgeslagen en weergegeven.",
+      "fleetResult": "{{requested}} hersynchronisaties aangevraagd: {{sent}} verzonden, {{unsupported}} niet mogelijk, {{running}} al bezig.",
+      "fleetTitle": "Klokken opnieuw synchroniseren",
+      "needsRole": "Vereist de rol 'Hostklok opnieuw synchroniseren'.",
+      "requestFailed": "Het opnieuw synchroniseren kon niet worden aangevraagd.",
+      "status": {
+        "failed": "Mislukt",
+        "queued": "Wachtend",
+        "sent": "Bezig",
+        "succeeded": "Opnieuw gesynchroniseerd",
+        "timedOut": "Geen antwoord",
+        "unsupported": "Niet mogelijk"
+      }
     }
   }
 }

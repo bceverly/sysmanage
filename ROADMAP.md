@@ -13562,6 +13562,26 @@ proof (`date -s` on a VM).
       `rdate -n` on OpenBSD, `w32tm /resync /force` -- from the host page or
       for every out-of-bounds host at once (fleet job, in waves); optionally
       automatic on breach, per policy, with its own audit entry.
+      *S5a DONE 2026-10-12 (OSS): agent `resync_clock` steps the clock
+      through the host's own service -- `chronyc makestep`; restart
+      systemd-timesyncd; ntpd via `ntpdate -b -u` where it exists, else a
+      restart (always left running); OpenNTPD `rdate -ncv`; Windows starts a
+      stopped w32time, `w32tm /config /update`, `/resync /force`; macOS
+      `sntp -sS`; no service -> the first of sntp / ntpdate / rdate -- and
+      reports the service's state afterwards.  Root required (unprivileged
+      says `not_privileged`, never half-done); the server name is validated
+      before it touches a command line, and is the SERVER's verified
+      reference (none when the server's own clock is off).  Server:
+      `clock_resync` rows (migration `q39clockresync`, role "Resync Host
+      Clock" granted to admins in the same step), released in waves of at
+      most 25 in flight per database by a leader-elected tick, 10-minute
+      timeout, results correlated by envelope id (`queue_command`, the
+      generalized `queue_apply`); a success clears the host's offset samples
+      so the new figure shows within a minute.  Every request audited.  UI:
+      "Resynchronize now" + last results on the host's Clock card;
+      "Resynchronize clocks out of bounds" (with the count) on /time-sync,
+      hidden when the server's own clock is off.  Automatic-on-breach rides
+      with the Pro+ NTP policy (S5b).*
 - [ ] **Alerts (Pro+, through `alerting_engine`, real time):** raised when a
       host crosses its warning or critical bound or loses time sync, routed
       to the existing channels (email first), cleared when it recovers, rate

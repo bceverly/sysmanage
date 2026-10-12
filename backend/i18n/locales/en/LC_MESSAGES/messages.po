@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-12 09:59-0400\n"
+"POT-Creation-Date: 2026-10-12 15:08-0400\n"
 "Language: en\n"
 "Content-Type: text/plain; charset=ASCII\n"
 
@@ -74,10 +74,10 @@ msgid "You do not have access to the selected account."
 msgstr "You do not have access to the selected account."
 
 #: backend/api/asset_tags.py:59 backend/api/malware.py:118
-#: backend/api/file_watches.py:110 backend/api/config_mgmt_drift.py:191
-#: backend/api/advisor.py:93 backend/api/query_packs.py:119
-#: backend/api/config_mgmt_inventories.py:110
-#: backend/api/config_mgmt_remediation.py:137 backend/api/time_sync.py:61
+#: backend/api/file_watches.py:110 backend/api/time_sync_resync.py:56
+#: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:93
+#: backend/api/query_packs.py:119 backend/api/config_mgmt_inventories.py:110
+#: backend/api/config_mgmt_remediation.py:137 backend/api/time_sync.py:66
 #: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:375
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
@@ -334,7 +334,7 @@ msgstr "Failed to process process status update: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:572 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:589 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "Host not registered"
@@ -1736,6 +1736,14 @@ msgstr "Invalid assignment ID format"
 #: backend/api/config_mgmt_profiles.py:382
 msgid "Assignment not found"
 msgstr "Assignment not found"
+
+#: backend/api/time_sync_resync.py:102
+msgid "Clock resync requested"
+msgstr "Clock resync requested"
+
+#: backend/api/time_sync_resync.py:145
+msgid "Clock resync requested for the fleet"
+msgstr "Clock resync requested for the fleet"
 
 #: backend/api/federation_identity.py:90
 msgid "Could not load or generate the federation TLS certificate."
@@ -3313,11 +3321,11 @@ msgstr "Must specify target_hostname, target_platform, or push_to_all"
 msgid "Configuration acknowledgment processed"
 msgstr "Configuration acknowledgment processed"
 
-#: backend/api/time_sync.py:225 backend/api/time_sync.py:269
+#: backend/api/time_sync.py:285 backend/api/time_sync.py:329
 msgid "Clock offset bounds changed"
 msgstr "Clock offset bounds changed"
 
-#: backend/api/time_sync.py:290
+#: backend/api/time_sync.py:350
 msgid "Clock offset bounds removed"
 msgstr "Clock offset bounds removed"
 
@@ -3358,34 +3366,34 @@ msgstr "This job has already finished"
 msgid "Cancelled by an operator"
 msgstr "Cancelled by an operator"
 
-#: backend/api/message_handlers.py:432
+#: backend/api/message_handlers.py:449
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "Failed to process diagnostic result: %s"
 
-#: backend/api/message_handlers.py:466
+#: backend/api/message_handlers.py:483
 msgid "Missing message_id in command acknowledgment"
 msgstr "Missing message_id in command acknowledgment"
 
-#: backend/api/message_handlers.py:533
+#: backend/api/message_handlers.py:550
 msgid "This session cannot acknowledge another host's message"
 msgstr "This session cannot acknowledge another host's message"
 
-#: backend/api/message_handlers.py:596
+#: backend/api/message_handlers.py:613
 msgid "Missing installation_id in package installation status"
 msgstr "Missing installation_id in package installation status"
 
-#: backend/api/message_handlers.py:616
+#: backend/api/message_handlers.py:633
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "Installation log entry not found for ID: %s"
 
-#: backend/api/message_handlers.py:662
+#: backend/api/message_handlers.py:679
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "Package installation {status} on agent {hostname}"
 
-#: backend/api/message_handlers.py:691
+#: backend/api/message_handlers.py:708
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "Failed to update package installation status: %s"

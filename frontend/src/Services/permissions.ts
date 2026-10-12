@@ -93,6 +93,7 @@ export const SecurityRoles = {
     MANAGE_NETWORK_DISCOVERY: 'Manage Network Discovery',
     MANAGE_ASSET_TAGS: 'Manage Asset Tags',
     MANAGE_TIME_SYNC: 'Manage Time Sync',
+    RESYNC_HOST_CLOCK: 'Resync Host Clock',
     RUN_MALWARE_SCANS: 'Run Malware Scans',
     QUARANTINE_MALWARE: 'Quarantine Malware',
 

@@ -133,11 +133,19 @@ def queue_apply(db_session, host_id, parameters: Dict[str, Any]) -> str:
     # Imported here rather than at module scope: the queue package pulls in the
     # websocket stack, and this module is imported by the assignment tick,
     # which must stay importable in a plain unit test.
-    from backend.websocket.messages import (  # noqa: PLC0415
-        CommandType,
-        Message,
-        MessageType,
+    from backend.websocket.messages import CommandType  # noqa: PLC0415
+
+    return queue_command(
+        db_session, host_id, CommandType.APPLY_CONFIG_PROFILE, parameters
     )
+
+
+def queue_command(db_session, host_id, command_type, parameters: Dict[str, Any]) -> str:
+    """Queue one command of any type with ONE id for the envelope and the
+    queue row, and return it -- the rule ``queue_apply`` documents, for every
+    command whose result must be correlated (clock resync, Phase 23.3 S5)."""
+    # pylint: disable=import-outside-toplevel
+    from backend.websocket.messages import Message, MessageType  # noqa: PLC0415
     from backend.websocket.queue_enums import QueueDirection  # noqa: PLC0415
     from backend.websocket.queue_operations import QueueOperations  # noqa: PLC0415
 
@@ -145,10 +153,7 @@ def queue_apply(db_session, host_id, parameters: Dict[str, Any]) -> str:
     command = Message(
         message_id=command_id,
         message_type=MessageType.COMMAND,
-        data={
-            "command_type": CommandType.APPLY_CONFIG_PROFILE,
-            "parameters": parameters,
-        },
+        data={"command_type": command_type, "parameters": parameters},
     )
     QueueOperations().enqueue_message(
         message_type="command",

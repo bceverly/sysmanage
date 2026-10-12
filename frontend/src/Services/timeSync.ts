@@ -168,3 +168,55 @@ export const clearOverride = async (
       params: { scope_kind: scopeKind, scope_ref: scopeRef },
     })
   ).data.overrides;
+
+// --- spot resync (Phase 23.3 S5) -------------------------------------------
+
+export type ResyncStatus =
+  | "queued"
+  | "sent"
+  | "succeeded"
+  | "failed"
+  | "unsupported"
+  | "timed_out";
+
+export interface ClockResync {
+  id: string;
+  host_id: string;
+  batch_id: string | null;
+  status: ResyncStatus;
+  requested_by: string | null;
+  requested_at: string | null;
+  sent_at: string | null;
+  finished_at: string | null;
+  offset_before_ms: number | null;
+  reported_after_ms: number | null;
+  service: string | null;
+  method: string | null;
+  /** A code: not_privileged, command_failed, no_tool, agent_too_old, ... */
+  error: string | null;
+  detail: string | null;
+}
+
+export interface FleetResync {
+  batch_id: string;
+  requested: number;
+  already_running: number;
+  counts: Partial<Record<ResyncStatus, number>>;
+}
+
+export const resyncHost = async (hostId: string): Promise<ClockResync> =>
+  (await axiosInstance.post(`/api/v1/host/${hostId}/clock/resync`)).data;
+
+export const resyncFleet = async (statuses: ClockStatus[]): Promise<FleetResync> =>
+  (await axiosInstance.post("/api/v1/time-sync/resync", { statuses })).data;
+
+export const getResyncs = async (params: {
+  hostId?: string;
+  batchId?: string;
+  limit?: number;
+}): Promise<ClockResync[]> =>
+  (
+    await axiosInstance.get("/api/v1/time-sync/resyncs", {
+      params: { host_id: params.hostId, batch_id: params.batchId, limit: params.limit },
+    })
+  ).data.resyncs;

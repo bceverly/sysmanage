@@ -156,6 +156,23 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
 
         return await handle_query_pack_result(db, connection, message_data)
 
+    # Phase 23.3 S5 clock resync: close the resync row it answers.
+    if (
+        command_type_of(message_data) == "resync_clock"
+        or command_type_from_queue(db, message_data) == "resync_clock"
+    ):
+        from backend.services import clock_resync  # noqa: PLC0415
+
+        try:
+            clock_resync.record_result(db, message_data)
+        except Exception:  # pylint: disable=broad-except
+            db.rollback()
+            logger.exception(
+                "Clock resync result could not be recorded for %s",
+                getattr(connection, "hostname", "unknown"),
+            )
+        return None
+
     # Phase 21.3 malware scans, routed on command_type like query packs: a
     # refused scan and a completed one look nothing alike.
     if (

@@ -53,6 +53,7 @@ class SecurityRoles(str, Enum):
     MANAGE_ASSET_TAGS = "Manage Asset Tags"
     # - Clock offset bounds and, from S5, the fleet NTP policy (23.3)
     MANAGE_TIME_SYNC = "Manage Time Sync"
+    RESYNC_HOST_CLOCK = "Resync Host Clock"
     # - Malware Detection (Enterprise malware_engine -- 21.3).  Two roles:
     #   moving a file off a host can break it, so quarantine is granted apart
     #   from scanning.

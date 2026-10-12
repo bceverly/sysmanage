@@ -266,3 +266,39 @@ def test_q38_adds_bounds_and_gives_the_role_to_every_admin_once():
     finally:
         if os.path.exists(db):
             os.unlink(db)
+
+
+def test_q39_adds_resyncs_and_gives_the_role_to_every_admin_once():
+    """Phase 23.3 S5."""
+    fd, db = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    os.unlink(db)
+    try:
+        _alembic(["--name", "shared", "upgrade", "head"], db)
+        _alembic(["upgrade", "q38clockbound"], db)
+        engine = create_engine(f"sqlite:///{db}")
+        with sessionmaker(bind=engine)() as session:
+            session.add(
+                models.User(
+                    id=uuid.uuid4(),
+                    userid="admin@example.com",
+                    active=True,
+                    is_admin=True,
+                )
+            )
+            session.commit()
+        engine.dispose()
+        _alembic(["upgrade", "head"], db)
+        assert {"host_id", "status", "command_id", "batch_id"} <= _columns(
+            db, "clock_resync"
+        )
+        assert _grants(db, "Resync Host Clock") == 1
+        _alembic(["stamp", "q38clockbound"], db)
+        _alembic(["upgrade", "head"], db)
+        assert _grants(db, "Resync Host Clock") == 1
+        _alembic(["downgrade", "q38clockbound"], db)
+        assert not _columns(db, "clock_resync")
+        assert _grants(db, "Resync Host Clock") == 0
+    finally:
+        if os.path.exists(db):
+            os.unlink(db)

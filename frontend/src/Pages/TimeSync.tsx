@@ -25,6 +25,7 @@ import { getFleetClocks, STATUS_ORDER } from '../Services/timeSync';
 import type { ClockStatus, FleetClock, FleetClocks } from '../Services/timeSync';
 import ServerClockBanner from '../Components/TimeSync/ServerClockBanner';
 import FleetClockGrid from '../Components/TimeSync/FleetClockGrid';
+import FleetResyncButton from '../Components/TimeSync/FleetResyncButton';
 import { statusColor, statusLabel } from '../Components/TimeSync/timeSyncLabels';
 import { useVisiblePolling } from '../hooks/useVisiblePolling';
 
@@ -90,6 +91,9 @@ const TimeSync: React.FC = () => {
         <Box>
             <Typography variant="h5" sx={{ mb: 2 }}>{t('timeSync.title', 'Time Sync')}</Typography>
             <ServerClockBanner server={data.server} />
+            <Box sx={{ mb: 2 }}>
+                <FleetResyncButton data={data} onDone={() => void load()} />
+            </Box>
             <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', rowGap: 1 }}>
                 {STATUS_ORDER.filter(s => data.counts[s]).map(s => (
                     <Chip

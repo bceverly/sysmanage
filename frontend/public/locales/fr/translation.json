@@ -4904,6 +4904,38 @@
       "min": "{{value}} minutes",
       "ms": "{{value}} ms",
       "s": "{{value}} s"
+    },
+    "resync": {
+      "after": "Le service de temps indique désormais {{offset}}",
+      "alreadyRunning": "Une resynchronisation est déjà en cours.",
+      "button": "Resynchroniser maintenant",
+      "cancel": "Annuler",
+      "confirm": "Resynchroniser",
+      "error": {
+        "agentError": "L'agent a signalé une erreur.",
+        "agentTooOld": "Cet agent est trop ancien pour resynchroniser son horloge. Mettez à jour l'agent.",
+        "badServer": "Aucun serveur de temps utilisable n'était disponible.",
+        "commandFailed": "Le service de temps de l'hôte a refusé la resynchronisation.",
+        "dispatchFailed": "Le serveur n'a pas pu envoyer la demande à l'hôte.",
+        "hostGone": "L'hôte a été supprimé.",
+        "noResult": "L'hôte n'a pas répondu dans les 10 minutes. Il est peut-être hors ligne.",
+        "noTool": "L'hôte ne dispose d'aucun service ni outil de temps permettant de le resynchroniser.",
+        "notPrivileged": "L'agent ne s'exécute pas avec des droits d'administration, qui sont nécessaires pour régler l'horloge."
+      },
+      "fleetButton": "Resynchroniser les horloges hors limites",
+      "fleetConfirm": "L'horloge de chaque hôte en avertissement ou en critique ({{count}} hôtes) sera réglée immédiatement par son propre service de temps. Les demandes sont envoyées par vagues ; les hôtes sans droits d'administration sont ignorés et listés.",
+      "fleetResult": "{{requested}} resynchronisations demandées : {{sent}} envoyées, {{unsupported}} impossibles, {{running}} déjà en cours.",
+      "fleetTitle": "Resynchroniser les horloges",
+      "needsRole": "Nécessite le rôle 'Resynchroniser l'horloge de l'hôte'.",
+      "requestFailed": "Impossible de demander la resynchronisation.",
+      "status": {
+        "failed": "Échec",
+        "queued": "En attente",
+        "sent": "En cours",
+        "succeeded": "Resynchronisée",
+        "timedOut": "Aucune réponse",
+        "unsupported": "Impossible"
+      }
     }
   }
 }

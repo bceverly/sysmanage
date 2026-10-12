@@ -864,3 +864,24 @@ class ClockBound(TestBase):
     critical_ms = Column(Float, nullable=False)
     updated_at = Column(DateTime, nullable=False)
     updated_by = Column(String(255), nullable=True)
+
+
+class ClockResync(TestBase):
+    """Phase 23.3 S5 -- one spot resync of one host's clock."""
+
+    __tablename__ = "clock_resync"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), nullable=False)
+    batch_id = Column(GUID(), nullable=True)
+    status = Column(String(16), nullable=False)
+    requested_by = Column(String(255), nullable=True)
+    requested_at = Column(DateTime, nullable=False)
+    sent_at = Column(DateTime, nullable=True)
+    finished_at = Column(DateTime, nullable=True)
+    command_id = Column(String(36), nullable=True)
+    offset_before_ms = Column(Float, nullable=True)
+    reported_after_ms = Column(Float, nullable=True)
+    service = Column(String(16), nullable=True)
+    method = Column(String(64), nullable=True)
+    error = Column(String(32), nullable=True)
+    detail = Column(String(500), nullable=True)

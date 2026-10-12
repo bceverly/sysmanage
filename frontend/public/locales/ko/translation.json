@@ -4904,6 +4904,38 @@
       "min": "{{value}} 분",
       "ms": "{{value}} ms",
       "s": "{{value}} 초"
+    },
+    "resync": {
+      "after": "서비스가 현재 보고한 시계 오차: {{offset}}",
+      "alreadyRunning": "재동기화가 이미 진행 중입니다.",
+      "button": "지금 재동기화",
+      "cancel": "취소",
+      "confirm": "재동기화",
+      "error": {
+        "agentError": "에이전트가 오류를 보고했습니다.",
+        "agentTooOld": "이 에이전트는 버전이 너무 오래되어 시계를 재동기화할 수 없습니다. 에이전트를 업데이트하세요.",
+        "badServer": "사용 가능한 시간 서버가 없었습니다.",
+        "commandFailed": "호스트의 시간 서비스가 재동기화를 거부했습니다.",
+        "dispatchFailed": "서버가 호스트에 요청을 보낼 수 없었습니다.",
+        "hostGone": "호스트가 제거되었습니다.",
+        "noResult": "호스트가 10분 이내에 응답하지 않았습니다. 오프라인 상태일 수 있습니다.",
+        "noTool": "호스트에 재동기화에 사용할 시간 서비스나 시간 도구가 없습니다.",
+        "notPrivileged": "에이전트가 관리자 권한으로 실행되고 있지 않습니다. 시계를 설정하려면 관리자 권한이 필요합니다."
+      },
+      "fleetButton": "범위를 벗어난 시계 재동기화",
+      "fleetConfirm": "경고 또는 심각 상태인 모든 호스트({{count}}대)의 시계를 각 호스트의 시간 서비스를 통해 즉시 맞춥니다. 요청은 여러 차례로 나누어 전송되며, 관리자 권한이 없는 호스트는 건너뛰고 목록에 표시됩니다.",
+      "fleetResult": "재동기화 {{requested}}건 요청됨: 전송 {{sent}}건, 불가 {{unsupported}}건, 이미 진행 중 {{running}}건.",
+      "fleetTitle": "시계 재동기화",
+      "needsRole": "'호스트 시계 재동기화' 역할이 필요합니다.",
+      "requestFailed": "재동기화를 요청할 수 없었습니다.",
+      "status": {
+        "failed": "실패",
+        "queued": "대기 중",
+        "sent": "진행 중",
+        "succeeded": "재동기화됨",
+        "timedOut": "응답 없음",
+        "unsupported": "불가"
+      }
     }
   }
 }

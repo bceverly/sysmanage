@@ -49,6 +49,7 @@ export const handlers = [
   http.get("*/api/v1/time-sync/hosts", () =>
     HttpResponse.json({ server: TIME_SYNC_SERVER, counts: {}, hosts: [] }),
   ),
+  http.get("*/api/v1/time-sync/resyncs", () => HttpResponse.json({ resyncs: [] })),
   http.get("*/api/v1/time-sync/bounds", () =>
     HttpResponse.json({
       server: { warning_ms: 1000, critical_ms: 5000, source: "default", ref: "" },
