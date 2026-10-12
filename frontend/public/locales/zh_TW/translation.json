@@ -4936,6 +4936,48 @@
         "timedOut": "無回應",
         "unsupported": "無法執行"
       }
+    },
+    "policy": {
+      "apply": {
+        "failed": "套用策略失敗；系統會自動重試。",
+        "queued": "正在套用策略...",
+        "succeeded": "策略已套用。"
+      },
+      "autoResync": "重新同步超出閾值的時鐘",
+      "autoResyncChip": "自動重新同步",
+      "column": "NTP 策略",
+      "compliant": "符合策略",
+      "differences": "{{count}} 項差異",
+      "enforce": "套用到主機",
+      "enforced": "已套用",
+      "error": {
+        "badServer": "每個伺服器都必須是主機名稱或 IP 位址。",
+        "duplicate": "有伺服器被重複列出。",
+        "noServers": "請至少輸入一個 NTP 伺服器。",
+        "scope": "請選擇主機群、站點或標籤。",
+        "tooMany": "最多只能輸入 8 個 NTP 伺服器。",
+        "unknown": "無法儲存策略。"
+      },
+      "finding": {
+        "conflict": "有兩個伺服器不同的標籤策略同時適用",
+        "noService": "沒有可設定的時間服務",
+        "notEnabled": "時間服務未設為開機啟用",
+        "notReported": "代理尚未回報其時間設定",
+        "notRunning": "時間服務未執行",
+        "serversDiffer": "使用的 NTP 伺服器與策略不同"
+      },
+      "has": "主機上的設定：{{servers}}",
+      "intro": "主機應使用的 NTP 伺服器，可為整個主機群設定，也可依站點或標籤設定。標籤策略優先於站點策略，站點策略優先於主機群策略。選擇套用時，SysManage 會寫入主機的時間服務設定並將其設為開機啟用；選擇僅回報時，只顯示差異。",
+      "none": "沒有 NTP 策略：主機繼續使用各自的時間伺服器。",
+      "remove": "移除策略",
+      "reportOnly": "僅回報",
+      "scope": {
+        "fleet": "整個主機群"
+      },
+      "servers": "NTP 伺服器",
+      "serversHelp": "主機名稱或 IP 位址，以空格或逗號分隔",
+      "title": "NTP 策略",
+      "wants": "策略伺服器：{{servers}}"
     }
   }
 }

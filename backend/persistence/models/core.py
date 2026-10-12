@@ -297,6 +297,12 @@ class Host(Base):
     time_stratum = Column(Integer, nullable=True)
     time_reported_offset_ms = Column(Float, nullable=True)
     time_status_at = Column(DateTime, nullable=True)
+    # Phase 23.3 S5b: how the service is configured -- the NTP servers it is
+    # set to use (JSON list), enabled at boot, the real unit name and file.
+    time_configured_servers = Column(Text, nullable=True)
+    time_service_enabled = Column(Boolean, nullable=True)
+    time_service_unit = Column(String(64), nullable=True)
+    time_config_path = Column(String(255), nullable=True)
 
     # Phase 12.7: Public IP + GeoLite2 geo-location.
     #

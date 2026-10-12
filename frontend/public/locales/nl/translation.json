@@ -4936,6 +4936,48 @@
         "timedOut": "Geen antwoord",
         "unsupported": "Niet mogelijk"
       }
+    },
+    "policy": {
+      "apply": {
+        "failed": "Het toepassen van het beleid is mislukt; dit wordt automatisch opnieuw geprobeerd.",
+        "queued": "Beleid wordt toegepast...",
+        "succeeded": "Het beleid is toegepast."
+      },
+      "autoResync": "Klokken die hun drempels overschrijden opnieuw synchroniseren",
+      "autoResyncChip": "Automatisch opnieuw synchroniseren",
+      "column": "NTP-beleid",
+      "compliant": "Volgt het beleid",
+      "differences": "Verschillen: {{count}}",
+      "enforce": "Toepassen op hosts",
+      "enforced": "Toegepast",
+      "error": {
+        "badServer": "Elke server moet een hostnaam of een IP-adres zijn.",
+        "duplicate": "Een server staat er twee keer in.",
+        "noServers": "Voer ten minste één NTP-server in.",
+        "scope": "Kies het machinepark, een site of een label.",
+        "tooMany": "Voer maximaal 8 NTP-servers in.",
+        "unknown": "Het beleid kon niet worden opgeslagen."
+      },
+      "finding": {
+        "conflict": "Twee labels hebben een geldend beleid met verschillende servers",
+        "noService": "Geen tijdservice om te configureren",
+        "notEnabled": "Tijdservice niet ingeschakeld bij het opstarten",
+        "notReported": "De agent heeft zijn tijdconfiguratie niet gerapporteerd",
+        "notRunning": "Tijdservice draait niet",
+        "serversDiffer": "Gebruikt andere NTP-servers dan het beleid"
+      },
+      "has": "Geconfigureerd op de host: {{servers}}",
+      "intro": "De NTP-servers die hosts moeten gebruiken, voor het hele machinepark of per site of label. Het beleid van een label gaat voor dat van een site, en dat van een site voor dat van het machinepark. Bij Toegepast schrijft SysManage de configuratie van de tijdservice van de host en schakelt die in bij het opstarten; bij Alleen rapporteren worden alleen de verschillen weergegeven.",
+      "none": "Geen NTP-beleid: hosts behouden hun eigen tijdservers.",
+      "remove": "Beleid verwijderen",
+      "reportOnly": "Alleen rapporteren",
+      "scope": {
+        "fleet": "Hele machinepark"
+      },
+      "servers": "NTP-servers",
+      "serversHelp": "Hostnamen of IP-adressen, gescheiden door spaties of komma's",
+      "title": "NTP-beleid",
+      "wants": "Servers van het beleid: {{servers}}"
     }
   }
 }

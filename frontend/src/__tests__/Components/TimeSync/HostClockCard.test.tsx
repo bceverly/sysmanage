@@ -28,6 +28,7 @@ import HostClockCard from "../../../Components/TimeSync/HostClockCard";
 
 const CLOCK: HostClock = {
   status: "warning",
+  ntp_policy: null,
   bounds: { warning_ms: 1000, critical_ms: 5000, source: "tag", ref: "t1" },
   server: { reference: "pool.ntp.org", offset_ms: 0.4, verified: true, reason: null, checked_at: 0 },
   service_ok: false,

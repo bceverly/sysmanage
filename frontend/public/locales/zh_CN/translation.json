@@ -4936,6 +4936,48 @@
         "timedOut": "无响应",
         "unsupported": "无法执行"
       }
+    },
+    "policy": {
+      "apply": {
+        "failed": "应用策略失败；系统将自动重试。",
+        "queued": "正在应用策略...",
+        "succeeded": "策略已应用。"
+      },
+      "autoResync": "重新同步超出阈值的时钟",
+      "autoResyncChip": "自动重新同步",
+      "column": "NTP 策略",
+      "compliant": "符合策略",
+      "differences": "{{count}} 项差异",
+      "enforce": "应用到主机",
+      "enforced": "已应用",
+      "error": {
+        "badServer": "每个服务器都必须是主机名或 IP 地址。",
+        "duplicate": "有服务器被重复列出。",
+        "noServers": "请至少输入一个 NTP 服务器。",
+        "scope": "请选择主机群、站点或标签。",
+        "tooMany": "最多只能输入 8 个 NTP 服务器。",
+        "unknown": "无法保存策略。"
+      },
+      "finding": {
+        "conflict": "有两个服务器不同的标签策略同时适用",
+        "noService": "没有可配置的时间服务",
+        "notEnabled": "时间服务未设为开机启用",
+        "notReported": "代理尚未报告其时间配置",
+        "notRunning": "时间服务未运行",
+        "serversDiffer": "使用的 NTP 服务器与策略不同"
+      },
+      "has": "主机上的配置：{{servers}}",
+      "intro": "主机应使用的 NTP 服务器，可为整个主机群设置，也可按站点或标签设置。标签策略优先于站点策略，站点策略优先于主机群策略。选择应用时，SysManage 会写入主机的时间服务配置并将其设为开机启用；选择仅报告时，只显示差异。",
+      "none": "没有 NTP 策略：主机继续使用各自的时间服务器。",
+      "remove": "删除策略",
+      "reportOnly": "仅报告",
+      "scope": {
+        "fleet": "整个主机群"
+      },
+      "servers": "NTP 服务器",
+      "serversHelp": "主机名或 IP 地址，以空格或逗号分隔",
+      "title": "NTP 策略",
+      "wants": "策略服务器：{{servers}}"
     }
   }
 }

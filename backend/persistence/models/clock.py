@@ -19,7 +19,17 @@ reference (a site or tag id; "" for the tenant row).
 
 import uuid
 
-from sqlalchemy import Column, DateTime, Float, Index, String, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
@@ -93,3 +103,50 @@ class ClockResync(Base):
     # A code (not_privileged, command_failed, no_tool, agent_too_old, ...).
     error = Column(String(32), nullable=True)
     detail = Column(String(500), nullable=True)
+
+
+class NtpPolicy(Base):
+    """The NTP servers hosts should use (Phase 23.3 S5b, Pro+).
+
+    One row for the whole fleet in this database (``scope_kind`` "fleet",
+    ``scope_ref`` ""), and one per site or tag that needs other servers -- an
+    air-gapped site's internal pair.  Most specific wins: tag, then site, then
+    fleet.  A host matched by two TAG policies that disagree is a conflict,
+    reported and not applied: there is no "tightest" NTP server.
+    """
+
+    __tablename__ = "ntp_policy"
+    __table_args__ = (
+        UniqueConstraint("scope_kind", "scope_ref", name="uq_ntp_policy_scope"),
+    )
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    scope_kind = Column(String(16), nullable=False)  # fleet | site | tag
+    scope_ref = Column(String(64), nullable=False, default="")
+    servers = Column(Text, nullable=False)  # JSON list of host names / IPs
+    # Apply it (write the configuration, enable the service) or only report
+    # the difference.
+    enforce = Column(Boolean, nullable=False, default=False)
+    # Step a clock automatically when it breaches its bounds.
+    auto_resync = Column(Boolean, nullable=False, default=False)
+    updated_at = Column(DateTime, nullable=False)
+    updated_by = Column(String(255), nullable=True)
+
+
+class NtpPolicyState(Base):
+    """Where applying the policy stands on one host (one row per host)."""
+
+    __tablename__ = "ntp_policy_state"
+
+    host_id = Column(GUID(), primary_key=True)
+    # The policy content this host was last sent (a digest), so a changed
+    # policy is sent again and an unchanged one is not.
+    policy_digest = Column(String(64), nullable=True)
+    status = Column(String(16), nullable=False)  # queued | succeeded | failed
+    command_id = Column(String(36), nullable=True, index=True)
+    attempts = Column(Integer, nullable=False, default=0)
+    sent_at = Column(DateTime, nullable=True)
+    finished_at = Column(DateTime, nullable=True)
+    last_error = Column(String(2000), nullable=True)
+    # The last automatic resync this policy asked for, to rate-limit them.
+    auto_resync_at = Column(DateTime, nullable=True)

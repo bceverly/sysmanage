@@ -16,9 +16,10 @@ Every field is stored as reported, ``None`` included: "not reported" must
 never be read as "in sync".
 """
 
+import json
 import logging
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
@@ -27,6 +28,7 @@ from backend.persistence.models import Host
 logger = logging.getLogger(__name__)
 
 _SERVICES = {"chrony", "ntpd", "timesyncd", "openntpd", "w32time", "timed", "none"}
+MAX_SERVERS = 16
 
 
 def _bool(value: Any) -> Optional[bool]:
@@ -49,6 +51,23 @@ def _text(value: Any, limit: int) -> Optional[str]:
     return value.strip()[:limit] or None if isinstance(value, str) else None
 
 
+def _servers(value: Any) -> Optional[List[str]]:
+    if not isinstance(value, list):
+        return None
+    return [
+        v.strip()[:255] for v in value[:MAX_SERVERS] if isinstance(v, str) and v.strip()
+    ]
+
+
+def configured_servers(host) -> Optional[List[str]]:
+    """The stored list, or None when the host has not reported one."""
+    try:
+        value = json.loads(host.time_configured_servers or "null")
+    except ValueError:
+        return None
+    return value if isinstance(value, list) else None
+
+
 def apply_claim(host, payload: Dict[str, Any]) -> None:
     """Store a time-service claim on ``host`` -- from a status update, or the
     status a clock resync reports afterwards (S5)."""
@@ -59,6 +78,12 @@ def apply_claim(host, payload: Dict[str, Any]) -> None:
     host.time_source = _text(payload.get("source"), 255)
     host.time_stratum = _int(payload.get("stratum"))
     host.time_reported_offset_ms = _float(payload.get("reported_offset_ms"))
+    # S5b: how it is configured.  Older agents send none of these: kept None.
+    servers = _servers(payload.get("configured_servers"))
+    host.time_configured_servers = None if servers is None else json.dumps(servers)
+    host.time_service_enabled = _bool(payload.get("enabled"))
+    host.time_service_unit = _text(payload.get("unit"), 64)
+    host.time_config_path = _text(payload.get("config_path"), 255)
     host.time_status_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
 

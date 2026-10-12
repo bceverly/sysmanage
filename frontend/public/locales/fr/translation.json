@@ -4936,6 +4936,48 @@
         "timedOut": "Aucune réponse",
         "unsupported": "Impossible"
       }
+    },
+    "policy": {
+      "apply": {
+        "failed": "L'application de la politique a échoué ; elle sera relancée automatiquement.",
+        "queued": "Application de la politique...",
+        "succeeded": "La politique a été appliquée."
+      },
+      "autoResync": "Resynchroniser les horloges qui dépassent leurs seuils",
+      "autoResyncChip": "Resynchronisation auto",
+      "column": "Politique NTP",
+      "compliant": "Respecte la politique",
+      "differences": "Écarts : {{count}}",
+      "enforce": "Appliquer aux hôtes",
+      "enforced": "Appliquée",
+      "error": {
+        "badServer": "Chaque serveur doit être un nom d'hôte ou une adresse IP.",
+        "duplicate": "Un serveur figure deux fois dans la liste.",
+        "noServers": "Saisissez au moins un serveur NTP.",
+        "scope": "Choisissez le parc, un site ou une balise.",
+        "tooMany": "Saisissez au plus 8 serveurs NTP.",
+        "unknown": "La politique n'a pas pu être enregistrée."
+      },
+      "finding": {
+        "conflict": "Deux politiques de balise avec des serveurs différents s'appliquent",
+        "noService": "Aucun service de temps à configurer",
+        "notEnabled": "Service de temps non activé au démarrage",
+        "notReported": "L'agent n'a pas signalé sa configuration de temps",
+        "notRunning": "Service de temps arrêté",
+        "serversDiffer": "Utilise d'autres serveurs NTP que ceux de la politique"
+      },
+      "has": "Configurés sur l'hôte : {{servers}}",
+      "intro": "Les serveurs NTP que les hôtes doivent utiliser, pour l'ensemble du parc ou par site ou balise. La politique d'une balise l'emporte sur celle d'un site, et celle d'un site sur celle du parc. En mode appliqué, SysManage écrit la configuration du service de temps de l'hôte et l'active au démarrage ; en mode signalement seul, il affiche les écarts.",
+      "none": "Aucune politique NTP : les hôtes conservent leurs propres serveurs de temps.",
+      "remove": "Supprimer la politique",
+      "reportOnly": "Signalement seul",
+      "scope": {
+        "fleet": "Tout le parc"
+      },
+      "servers": "Serveurs NTP",
+      "serversHelp": "Noms d'hôte ou adresses IP, séparés par des espaces ou des virgules",
+      "title": "Politique NTP",
+      "wants": "Serveurs de la politique : {{servers}}"
     }
   }
 }

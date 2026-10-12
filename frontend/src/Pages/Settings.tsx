@@ -43,7 +43,7 @@ import ServerRoleSettings from '../Components/ServerRoleSettings';
 import LoggingSettings from '../Components/LoggingSettings';
 import AssetTagSchemeSettings from '../Components/AssetTagSchemeSettings';
 import AssetTagImportExport from '../Components/AssetTagImportExport';
-import TimeSyncBoundsSettings from '../Components/TimeSync/TimeSyncBoundsSettings';
+import { TimeSyncSettings } from '../Components/TimeSync/TimeSyncBoundsSettings';
 import axiosInstance from '../Services/api';
 import { formatUTCDate } from '../utils/dateUtils';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
@@ -790,7 +790,7 @@ const Settings: React.FC = () => {
             <AssetTagImportExport />
           </>
         )}
-        {tabNames[activeTab] === 'time-sync' && <TimeSyncBoundsSettings />}
+        {tabNames[activeTab] === 'time-sync' && <TimeSyncSettings />}
         {tabNames[activeTab] === 'queues' && <QueuesTab />}
         {tabNames[activeTab] === 'server-role' && <ServerRoleSettings />}
         {tabNames[activeTab] === 'logging' && <LoggingSettings />}

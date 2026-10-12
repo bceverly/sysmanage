@@ -4936,6 +4936,48 @@
         "timedOut": "Keine Antwort",
         "unsupported": "Nicht möglich"
       }
+    },
+    "policy": {
+      "apply": {
+        "failed": "Das Anwenden der Richtlinie ist fehlgeschlagen; es wird automatisch erneut versucht.",
+        "queued": "Richtlinie wird angewendet...",
+        "succeeded": "Die Richtlinie wurde angewendet."
+      },
+      "autoResync": "Uhren, die ihre Grenzwerte überschreiten, neu synchronisieren",
+      "autoResyncChip": "Automatisch neu synchronisieren",
+      "column": "NTP-Richtlinie",
+      "compliant": "Entspricht der Richtlinie",
+      "differences": "Abweichungen: {{count}}",
+      "enforce": "Auf Hosts anwenden",
+      "enforced": "Angewendet",
+      "error": {
+        "badServer": "Jeder Server muss ein Hostname oder eine IP-Adresse sein.",
+        "duplicate": "Ein Server ist doppelt aufgeführt.",
+        "noServers": "Geben Sie mindestens einen NTP-Server ein.",
+        "scope": "Wählen Sie die Flotte, einen Standort oder ein Tag aus.",
+        "tooMany": "Geben Sie höchstens 8 NTP-Server ein.",
+        "unknown": "Die Richtlinie konnte nicht gespeichert werden."
+      },
+      "finding": {
+        "conflict": "Zwei Tag-Richtlinien mit unterschiedlichen Servern gelten",
+        "noService": "Kein Zeitdienst zum Konfigurieren vorhanden",
+        "notEnabled": "Zeitdienst beim Systemstart nicht aktiviert",
+        "notReported": "Der Agent hat seine Zeitkonfiguration nicht gemeldet",
+        "notRunning": "Zeitdienst läuft nicht",
+        "serversDiffer": "Verwendet andere NTP-Server als die Richtlinie"
+      },
+      "has": "Auf dem Host konfiguriert: {{servers}}",
+      "intro": "Die NTP-Server, die Hosts verwenden sollen, für die gesamte Flotte oder pro Standort oder Tag. Die Richtlinie eines Tags hat Vorrang vor der eines Standorts, die eines Standorts vor der der Flotte. Im Modus 'Angewendet' schreibt SysManage die Konfiguration des Zeitdienstes auf dem Host und aktiviert ihn beim Systemstart; im Modus 'Nur melden' werden nur die Abweichungen angezeigt.",
+      "none": "Keine NTP-Richtlinie: Hosts behalten ihre eigenen Zeitserver.",
+      "remove": "Richtlinie entfernen",
+      "reportOnly": "Nur melden",
+      "scope": {
+        "fleet": "Gesamte Flotte"
+      },
+      "servers": "NTP-Server",
+      "serversHelp": "Hostnamen oder IP-Adressen, getrennt durch Leerzeichen oder Kommas",
+      "title": "NTP-Richtlinie",
+      "wants": "Server der Richtlinie: {{servers}}"
     }
   }
 }

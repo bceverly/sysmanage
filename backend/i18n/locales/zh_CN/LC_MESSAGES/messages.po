@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-12 15:08-0400\n"
+"POT-Creation-Date: 2026-10-12 15:44-0400\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -74,10 +74,11 @@ msgid "You do not have access to the selected account."
 msgstr "您没有访问所选账户的权限。"
 
 #: backend/api/asset_tags.py:59 backend/api/malware.py:118
-#: backend/api/file_watches.py:110 backend/api/time_sync_resync.py:56
-#: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:93
-#: backend/api/query_packs.py:119 backend/api/config_mgmt_inventories.py:110
-#: backend/api/config_mgmt_remediation.py:137 backend/api/time_sync.py:66
+#: backend/api/time_sync_policy.py:54 backend/api/file_watches.py:110
+#: backend/api/time_sync_resync.py:56 backend/api/config_mgmt_drift.py:191
+#: backend/api/advisor.py:93 backend/api/query_packs.py:119
+#: backend/api/config_mgmt_inventories.py:110
+#: backend/api/config_mgmt_remediation.py:137 backend/api/time_sync.py:67
 #: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:375
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
@@ -332,7 +333,7 @@ msgstr "处理进程状态更新失败：%s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:589 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:601 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "主机未注册"
@@ -1353,6 +1354,14 @@ msgstr "未找到消息或已过期"
 #: backend/api/queue.py:249
 msgid "Failed to fetch message details"
 msgstr "获取消息详细信息失败"
+
+#: backend/api/time_sync_policy.py:128
+msgid "NTP policy changed"
+msgstr "已更改 NTP 策略"
+
+#: backend/api/time_sync_policy.py:145
+msgid "NTP policy removed"
+msgstr "已删除 NTP 策略"
 
 #: backend/api/host_account_management.py:75
 msgid "Permission denied: ADD_HOST_ACCOUNT role required"
@@ -3252,11 +3261,11 @@ msgstr "必须指定 target_hostname、target_platform 或 push_to_all"
 msgid "Configuration acknowledgment processed"
 msgstr "配置确认已处理"
 
-#: backend/api/time_sync.py:285 backend/api/time_sync.py:329
+#: backend/api/time_sync.py:312 backend/api/time_sync.py:356
 msgid "Clock offset bounds changed"
 msgstr "已更改时钟偏差允许范围"
 
-#: backend/api/time_sync.py:350
+#: backend/api/time_sync.py:377
 msgid "Clock offset bounds removed"
 msgstr "已删除时钟偏差允许范围"
 
@@ -3297,34 +3306,34 @@ msgstr "该作业已经完成"
 msgid "Cancelled by an operator"
 msgstr "由操作员取消"
 
-#: backend/api/message_handlers.py:449
+#: backend/api/message_handlers.py:461
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "处理诊断结果失败：%s"
 
-#: backend/api/message_handlers.py:483
+#: backend/api/message_handlers.py:495
 msgid "Missing message_id in command acknowledgment"
 msgstr "命令确认中缺少 message_id"
 
-#: backend/api/message_handlers.py:550
+#: backend/api/message_handlers.py:562
 msgid "This session cannot acknowledge another host's message"
 msgstr "此会话无法确认其他主机的消息"
 
-#: backend/api/message_handlers.py:613
+#: backend/api/message_handlers.py:625
 msgid "Missing installation_id in package installation status"
 msgstr "包安装状态中缺少 installation_id"
 
-#: backend/api/message_handlers.py:633
+#: backend/api/message_handlers.py:645
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "未找到 ID 为 %s 的安装日志条目"
 
-#: backend/api/message_handlers.py:679
+#: backend/api/message_handlers.py:691
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "代理 {hostname} 上的软件包安装状态为 {status}"
 
-#: backend/api/message_handlers.py:708
+#: backend/api/message_handlers.py:720
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "更新软件包安装状态失败：%s"

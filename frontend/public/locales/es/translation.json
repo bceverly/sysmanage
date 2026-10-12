@@ -4936,6 +4936,48 @@
         "timedOut": "Sin respuesta",
         "unsupported": "No posible"
       }
+    },
+    "policy": {
+      "apply": {
+        "failed": "No se pudo aplicar la política; se reintentará automáticamente.",
+        "queued": "Aplicando la política...",
+        "succeeded": "Se aplicó la política."
+      },
+      "autoResync": "Volver a sincronizar los relojes que superen sus límites",
+      "autoResyncChip": "Resincronización automática",
+      "column": "Política de NTP",
+      "compliant": "Cumple la política",
+      "differences": "Diferencias: {{count}}",
+      "enforce": "Aplicar a los hosts",
+      "enforced": "Aplicada",
+      "error": {
+        "badServer": "Cada servidor debe ser un nombre de host o una dirección IP.",
+        "duplicate": "Hay un servidor que aparece dos veces.",
+        "noServers": "Introduzca al menos un servidor NTP.",
+        "scope": "Elija la flota, un sitio o una etiqueta.",
+        "tooMany": "Introduzca como máximo 8 servidores NTP.",
+        "unknown": "No se pudo guardar la política."
+      },
+      "finding": {
+        "conflict": "Se aplican dos políticas de etiqueta con servidores distintos",
+        "noService": "No hay ningún servicio de hora que configurar",
+        "notEnabled": "El servicio de hora no está habilitado al arrancar",
+        "notReported": "El agente no ha informado de su configuración de hora",
+        "notRunning": "El servicio de hora no está en ejecución",
+        "serversDiffer": "Usa servidores NTP distintos de los de la política"
+      },
+      "has": "Configurados en el host: {{servers}}",
+      "intro": "Los servidores NTP que deben usar los hosts, para toda la flota o por sitio o etiqueta. La política de una etiqueta prevalece sobre la de un sitio, y la de un sitio sobre la de la flota. En modo aplicado, SysManage escribe la configuración del servicio de hora del host y lo habilita al arrancar; en modo solo informe, muestra las diferencias.",
+      "none": "Sin política de NTP: los hosts conservan sus propios servidores de hora.",
+      "remove": "Quitar política",
+      "reportOnly": "Solo informe",
+      "scope": {
+        "fleet": "Toda la flota"
+      },
+      "servers": "Servidores NTP",
+      "serversHelp": "Nombres de host o direcciones IP, separados por espacios o comas",
+      "title": "Política de NTP",
+      "wants": "Servidores de la política: {{servers}}"
     }
   }
 }

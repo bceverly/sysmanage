@@ -212,6 +212,18 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
                 "Antivirus auto-deploy result could not be recorded for %s",
                 getattr(connection, "hostname", "unknown"),
             )
+        # Phase 23.3 S5b: the same for a fleet NTP policy plan.
+        from backend.services import ntp_policy  # noqa: PLC0415
+
+        try:
+            if ntp_policy.record_result(db, message_data):
+                db.commit()
+        except Exception:  # pylint: disable=broad-except
+            db.rollback()
+            logger.exception(
+                "NTP policy result could not be recorded for %s",
+                getattr(connection, "hostname", "unknown"),
+            )
 
     # Check if this is a script execution result
     if "execution_id" in message_data:

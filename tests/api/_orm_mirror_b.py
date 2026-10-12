@@ -885,3 +885,32 @@ class ClockResync(TestBase):
     method = Column(String(64), nullable=True)
     error = Column(String(32), nullable=True)
     detail = Column(String(500), nullable=True)
+
+
+class NtpPolicy(TestBase):
+    """Phase 23.3 S5b -- fleet / site / tag NTP servers."""
+
+    __tablename__ = "ntp_policy"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    scope_kind = Column(String(16), nullable=False)
+    scope_ref = Column(String(64), nullable=False, default="")
+    servers = Column(Text, nullable=False)
+    enforce = Column(Boolean, nullable=False, default=False)
+    auto_resync = Column(Boolean, nullable=False, default=False)
+    updated_at = Column(DateTime, nullable=False)
+    updated_by = Column(String(255), nullable=True)
+
+
+class NtpPolicyState(TestBase):
+    """Phase 23.3 S5b -- where applying the policy stands on one host."""
+
+    __tablename__ = "ntp_policy_state"
+    host_id = Column(GUID(), primary_key=True)
+    policy_digest = Column(String(64), nullable=True)
+    status = Column(String(16), nullable=False)
+    command_id = Column(String(36), nullable=True)
+    attempts = Column(Integer, nullable=False, default=0)
+    sent_at = Column(DateTime, nullable=True)
+    finished_at = Column(DateTime, nullable=True)
+    last_error = Column(String(2000), nullable=True)
+    auto_resync_at = Column(DateTime, nullable=True)

@@ -33,6 +33,8 @@ const host = (fqdn: string, over: Partial<FleetClock>): FleetClock => ({
   site_id: null,
   site_name: null,
   tags: [],
+  policy_compliant: null,
+  policy_findings: [],
   ...over,
 });
 

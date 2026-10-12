@@ -68,6 +68,8 @@ export interface TimeService {
 
 export interface HostClock {
   status: ClockStatus;
+  /** Null without the policy engine (Pro+). */
+  ntp_policy: HostNtpPolicy | null;
   bounds: Bounds;
   server: ServerClock;
   service_ok: boolean | null;
@@ -88,6 +90,9 @@ export interface FleetClock {
   site_id: string | null;
   site_name: string | null;
   tags: { id: string; name: string }[];
+  /** Null without the policy engine, or with no policy for the host. */
+  policy_compliant: boolean | null;
+  policy_findings: string[];
 }
 
 export interface FleetClocks {
@@ -220,3 +225,54 @@ export const getResyncs = async (params: {
       params: { host_id: params.hostId, batch_id: params.batchId, limit: params.limit },
     })
   ).data.resyncs;
+
+// --- fleet NTP policy (Phase 23.3 S5b, Pro+) --------------------------------
+
+export type PolicyScope = "fleet" | "site" | "tag";
+
+export interface NtpPolicy {
+  id: string;
+  scope_kind: PolicyScope;
+  scope_ref: string;
+  servers: string[];
+  enforce: boolean;
+  auto_resync: boolean;
+  updated_at: string | null;
+  updated_by: string | null;
+}
+
+export interface PolicyFinding {
+  /** servers_differ | not_enabled | not_running | not_reported | ... */
+  code: string;
+  expected?: string[];
+  actual?: string[];
+}
+
+export interface HostNtpPolicy {
+  policy: NtpPolicy | null;
+  conflict: boolean;
+  findings: PolicyFinding[];
+  compliant: boolean | null;
+  apply_status: string | null;
+  apply_error: string | null;
+  configured_servers: string[] | null;
+  enabled: boolean | null;
+}
+
+export const getNtpPolicies = async (): Promise<{ policies: NtpPolicy[]; max_servers: number }> =>
+  (await axiosInstance.get("/api/v1/time-sync/ntp-policies")).data;
+
+export const setNtpPolicy = async (policy: {
+  scope_kind: PolicyScope;
+  scope_ref: string;
+  servers: string[];
+  enforce: boolean;
+  auto_resync: boolean;
+}): Promise<NtpPolicy> =>
+  (await axiosInstance.put("/api/v1/time-sync/ntp-policies", policy)).data;
+
+export const clearNtpPolicy = async (scopeKind: PolicyScope, scopeRef: string): Promise<void> => {
+  await axiosInstance.delete("/api/v1/time-sync/ntp-policies", {
+    params: { scope_kind: scopeKind, scope_ref: scopeRef },
+  });
+};

@@ -28,6 +28,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session, sessionmaker
 
+from backend.api.handlers.time_status_handlers import configured_servers
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.config import config
 from backend.i18n import _
@@ -35,7 +36,7 @@ from backend.persistence import db as dbm
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
-from backend.services import clock_status, server_clock
+from backend.services import clock_status, ntp_policy, server_clock
 from backend.services.audit_service import ActionType, AuditService, EntityType
 
 logger = logging.getLogger(__name__)
@@ -80,6 +81,25 @@ def _measured(host) -> Optional[Dict[str, Any]]:
     }
 
 
+def _policy_verdict(db: Session, host) -> Optional[Dict[str, Any]]:
+    """The host against its fleet NTP policy, or None without the engine."""
+    judged = ntp_policy.evaluate(db, [host]).get(str(host.id))
+    if judged is None:
+        return None
+    state = db.get(models.NtpPolicyState, host.id)
+    policy = judged["policy"]
+    return {
+        "policy": None if policy is None else ntp_policy.as_dict(policy),
+        "conflict": judged["conflict"],
+        "findings": judged["findings"],
+        "compliant": judged["compliant"],
+        "apply_status": state.status if state else None,
+        "apply_error": state.last_error if state else None,
+        "configured_servers": configured_servers(host),
+        "enabled": host.time_service_enabled,
+    }
+
+
 @router.get("/host/{host_id}/clock")
 async def host_clock(
     host_id: str, db: Session = Depends(get_tenant_db)
@@ -110,6 +130,7 @@ async def host_clock(
     return {
         "status": status,
         "bounds": bounds,
+        "ntp_policy": _policy_verdict(db, host),
         "server": server,
         "service_ok": clock_status.service_ok(host),
         "measured": _measured(host),
@@ -203,6 +224,7 @@ async def fleet_clocks(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
         )
     )
     tags = _tags_by_host(db, [h.id for h in hosts])
+    policy = ntp_policy.evaluate(db, hosts)
     sites = _site_names({h.site_id for h in hosts if h.site_id})
     return {
         "server": server,
@@ -220,6 +242,11 @@ async def fleet_clocks(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
                 "site_id": str(host.site_id) if host.site_id else None,
                 "site_name": sites.get(str(host.site_id)) if host.site_id else None,
                 "tags": tags.get(str(host.id), []),
+                # S5b: None without the policy engine, or with no policy.
+                "policy_compliant": policy.get(str(host.id), {}).get("compliant"),
+                "policy_findings": [
+                    f["code"] for f in policy.get(str(host.id), {}).get("findings", [])
+                ],
             }
             for host, bounds, status in rows
         ],

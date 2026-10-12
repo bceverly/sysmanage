@@ -302,3 +302,34 @@ def test_q39_adds_resyncs_and_gives_the_role_to_every_admin_once():
     finally:
         if os.path.exists(db):
             os.unlink(db)
+
+
+def test_q40_adds_ntp_policy_tables_and_host_configuration():
+    """Phase 23.3 S5b."""
+    fd, db = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    os.unlink(db)
+    cols = {
+        "time_configured_servers",
+        "time_service_enabled",
+        "time_service_unit",
+        "time_config_path",
+    }
+    try:
+        _alembic(["--name", "shared", "upgrade", "head"], db)
+        _alembic(["upgrade", "head"], db)
+        assert cols <= _columns(db, "host")
+        assert {"scope_kind", "servers", "enforce", "auto_resync"} <= _columns(
+            db, "ntp_policy"
+        )
+        assert {"policy_digest", "command_id", "auto_resync_at"} <= _columns(
+            db, "ntp_policy_state"
+        )
+        _alembic(["stamp", "q39clockresync"], db)
+        _alembic(["upgrade", "head"], db)
+        _alembic(["downgrade", "q39clockresync"], db)
+        assert not cols & _columns(db, "host")
+        assert not _columns(db, "ntp_policy")
+    finally:
+        if os.path.exists(db):
+            os.unlink(db)

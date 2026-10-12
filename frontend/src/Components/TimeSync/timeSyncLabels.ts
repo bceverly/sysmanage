@@ -223,3 +223,46 @@ export const resyncErrorText = (t: TFunction, code: string | null): string => {
             return t('timeSync.resync.error.agentError', 'The agent reported an error.');
     }
 };
+
+// --- fleet NTP policy (Phase 23.3 S5b) --------------------------------------
+
+/** One difference between a host and its NTP policy, in words. */
+export const policyFindingText = (t: TFunction, code: string): string => {
+    switch (code) {
+        case 'servers_differ':
+            return t('timeSync.policy.finding.serversDiffer', 'Uses other NTP servers than the policy');
+        case 'not_enabled':
+            return t('timeSync.policy.finding.notEnabled', 'Time service not enabled at boot');
+        case 'not_running':
+            return t('timeSync.policy.finding.notRunning', 'Time service not running');
+        case 'no_time_service':
+            return t('timeSync.policy.finding.noService', 'No time service to configure');
+        case 'not_reported':
+        case 'servers_not_reported':
+            return t('timeSync.policy.finding.notReported', 'The agent has not reported its time configuration');
+        case 'policy_conflict':
+            return t('timeSync.policy.finding.conflict', 'Two tag policies with different servers apply');
+        default:
+            return code;
+    }
+};
+
+/** A refused policy, from its code. */
+export const policyErrorText = (t: TFunction, code: string | null): string => {
+    switch (code) {
+        case 'no_servers':
+            return t('timeSync.policy.error.noServers', 'Enter at least one NTP server.');
+        case 'too_many_servers':
+            return t('timeSync.policy.error.tooMany', 'Enter at most 8 NTP servers.');
+        case 'bad_server':
+            return t('timeSync.policy.error.badServer', 'Each server must be a host name or an IP address.');
+        case 'duplicate_server':
+            return t('timeSync.policy.error.duplicate', 'A server is listed twice.');
+        case 'bad_scope':
+            return t('timeSync.policy.error.scope', 'Choose the fleet, a site or a tag.');
+        case 'tag_not_found':
+            return t('timeSync.boundsError.tag', 'That tag no longer exists.');
+        default:
+            return t('timeSync.policy.error.unknown', 'The policy could not be saved.');
+    }
+};

@@ -746,6 +746,12 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
             )
 
             _track_background_task(singleton_task(clock_resync_tick_service()))
+            # S5b: the fleet NTP policy (idles without config_management_engine).
+            from backend.services.ntp_policy import (  # noqa: PLC0415
+                ntp_policy_tick_service,
+            )
+
+            _track_background_task(singleton_task(ntp_policy_tick_service()))
         except Exception as resync_exc:  # pylint: disable=broad-exception-caught
             logger.warning("Failed to start the clock resync tick: %s", resync_exc)
 

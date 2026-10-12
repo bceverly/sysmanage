@@ -4936,6 +4936,48 @@
         "timedOut": "응답 없음",
         "unsupported": "불가"
       }
+    },
+    "policy": {
+      "apply": {
+        "failed": "정책 적용에 실패했습니다. 자동으로 다시 시도됩니다.",
+        "queued": "정책을 적용하는 중...",
+        "succeeded": "정책이 적용되었습니다."
+      },
+      "autoResync": "임계값을 벗어난 시계 재동기화",
+      "autoResyncChip": "자동 재동기화",
+      "column": "NTP 정책",
+      "compliant": "정책 준수",
+      "differences": "차이 {{count}}건",
+      "enforce": "호스트에 적용",
+      "enforced": "적용됨",
+      "error": {
+        "badServer": "각 서버는 호스트 이름 또는 IP 주소여야 합니다.",
+        "duplicate": "같은 서버가 두 번 입력되었습니다.",
+        "noServers": "NTP 서버를 하나 이상 입력하세요.",
+        "scope": "플릿, 사이트 또는 태그를 선택하세요.",
+        "tooMany": "NTP 서버는 최대 8개까지 입력할 수 있습니다.",
+        "unknown": "정책을 저장할 수 없습니다."
+      },
+      "finding": {
+        "conflict": "서버가 서로 다른 두 태그 정책이 적용됨",
+        "noService": "구성할 시간 서비스 없음",
+        "notEnabled": "부팅 시 시간 서비스가 활성화되지 않음",
+        "notReported": "에이전트가 시간 구성을 보고하지 않았습니다",
+        "notRunning": "시간 서비스가 실행되지 않음",
+        "serversDiffer": "정책과 다른 NTP 서버를 사용함"
+      },
+      "has": "호스트에 구성됨: {{servers}}",
+      "intro": "호스트가 사용해야 할 NTP 서버를 플릿 전체 또는 사이트나 태그별로 지정합니다. 태그 정책이 사이트 정책보다, 사이트 정책이 플릿 정책보다 우선합니다. 적용 모드에서는 SysManage가 호스트의 시간 서비스 구성을 작성하고 부팅 시 활성화하며, 보고 전용 모드에서는 차이를 표시합니다.",
+      "none": "NTP 정책이 없습니다. 호스트는 자체 시간 서버를 계속 사용합니다.",
+      "remove": "정책 제거",
+      "reportOnly": "보고 전용",
+      "scope": {
+        "fleet": "플릿 전체"
+      },
+      "servers": "NTP 서버",
+      "serversHelp": "호스트 이름 또는 IP 주소(공백 또는 쉼표로 구분)",
+      "title": "NTP 정책",
+      "wants": "정책 서버: {{servers}}"
     }
   }
 }

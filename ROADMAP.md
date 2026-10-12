@@ -13552,12 +13552,33 @@ proof (`date -s` on a VM).
       (in seconds) and the tenant / site / tag overrides; read-only without
       the role; the tenant level is offered only under multi-tenancy (outside
       it, it IS the server-wide level).*
-- [ ] **Fleet NTP policy (Pro+):** the NTP sources each host should use (an
+- [x] **Fleet NTP policy (Pro+):** the NTP sources each host should use (an
       internal pair for an air-gapped site), applied to whichever service the
       host runs (chrony, ntpd, timesyncd, OpenNTPD, w32time), the service
       enabled at boot, and drift from the policy reported -- through the
       Phase 20 desired-state engine where a profile fits.
-- [ ] **Spot resynchronization:** on any host outside its bound, an
+      *S5b DONE 2026-10-12: built on the antivirus auto-deploy pattern, not
+      config profiles -- a profile is one engine body for one OS (a mixed
+      tag would need one per service, and Ansible as a prerequisite), and
+      NTP drift is field-level, not task-level.  Policies for the fleet, a
+      site or a tag (`ntp_policy`, migration `q40ntppolicy`; most specific
+      wins; two tag policies with different servers are a CONFLICT, shown,
+      applied by neither); report only, or applied.  The rules live in Pro+
+      `config_management_engine/ntp_policy.pxi`: server-name validation (a
+      newline in a "server" would add any directive to chrony.conf), a plan
+      per service written against the unit and file the HOST reported
+      (chrony vs chronyd, /etc/chrony vs /etc/chrony.conf; a timesyncd
+      drop-in with no fallbacks; no OpenNTPD HTTPS constraints, which an
+      air-gapped site can never satisfy; w32time started before
+      `/config /update`; macOS one server), and a field-level compare.
+      The agent now reports configured servers, enabled-at-boot, unit and
+      config path for every service.  Applying rides the agent's generic
+      `apply_deployment_plan`; done = the agent said it succeeded; failures
+      back off 1 h -> 24 h; a changed policy or a host that drifts back is
+      re-applied; at most 100 plans per database per pass.  UI: Settings >
+      Time Sync policy editor (licensed), an NTP policy column on
+      /time-sync, the policy section on the host's Clock card.*
+- [x] **Spot resynchronization:** on any host outside its bound, an
       audited one-click step -- `chronyc makestep`, `ntpdate` / `sntp -sS`,
       `rdate -n` on OpenBSD, `w32tm /resync /force` -- from the host page or
       for every out-of-bounds host at once (fleet job, in waves); optionally
@@ -13582,6 +13603,9 @@ proof (`date -s` on a VM).
       "Resynchronize clocks out of bounds" (with the count) on /time-sync,
       hidden when the server's own clock is off.  Automatic-on-breach rides
       with the Pro+ NTP policy (S5b).*
+      *S5b: automatic on breach is a policy switch -- a clock at warning or
+      critical is resynced through the S5a path, at most once an hour per
+      host, requested by `system:ntp-policy` (audited like any other).*
 - [ ] **Alerts (Pro+, through `alerting_engine`, real time):** raised when a
       host crosses its warning or critical bound or loses time sync, routed
       to the existing channels (email first), cleared when it recovers, rate

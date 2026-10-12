@@ -36,6 +36,8 @@ import { useTimeSyncBounds } from '../../hooks/useTimeSyncBounds';
 import type { Named } from '../../hooks/useTimeSyncBounds';
 import type { BoundOverride, OverrideScope } from '../../Services/timeSync';
 import { boundsErrorText, formatOffset, sourceLabel } from './timeSyncLabels';
+import NtpPolicySettings from './NtpPolicySettings';
+import { useModuleLicensed } from '../../hooks/useModuleLicensed';
 
 const toSeconds = (ms: number): string => String(ms / 1000);
 const toMs = (seconds: string): number => Math.round(Number(seconds) * 1000 * 1000) / 1000;
@@ -187,9 +189,8 @@ const AddOverride: React.FC<{ state: ReturnType<typeof useTimeSyncBounds> }> = (
     );
 };
 
-const TimeSyncBoundsSettings: React.FC = () => {
+const BoundsCard: React.FC<{ state: ReturnType<typeof useTimeSyncBounds> }> = ({ state }) => {
     const { t } = useTranslation();
-    const state = useTimeSyncBounds();
 
     if (state.loadFailed) {
         return <Alert severity="error">{t('timeSync.bounds.loadError', 'Could not load the clock bounds.')}</Alert>;
@@ -249,6 +250,20 @@ const TimeSyncBoundsSettings: React.FC = () => {
                 <AddOverride state={state} />
             </CardContent>
         </Card>
+    );
+};
+
+const TimeSyncBoundsSettings: React.FC = () => <BoundsCard state={useTimeSyncBounds()} />;
+
+/** Settings > Time Sync: the bounds, and (licensed) the fleet NTP policy. */
+export const TimeSyncSettings: React.FC = () => {
+    const state = useTimeSyncBounds();
+    const policyLicensed = useModuleLicensed('config_management_engine');
+    return (
+        <>
+            <BoundsCard state={state} />
+            {policyLicensed && <NtpPolicySettings tags={state.tags} sites={state.sites} />}
+        </>
     );
 };
 

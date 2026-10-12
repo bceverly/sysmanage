@@ -4936,6 +4936,48 @@
         "timedOut": "Nessuna risposta",
         "unsupported": "Non possibile"
       }
+    },
+    "policy": {
+      "apply": {
+        "failed": "Applicazione della politica non riuscita; verrà ritentata automaticamente.",
+        "queued": "Applicazione della politica in corso...",
+        "succeeded": "La politica è stata applicata."
+      },
+      "autoResync": "Risincronizza gli orologi che superano i propri limiti",
+      "autoResyncChip": "Risincronizzazione automatica",
+      "column": "Politica NTP",
+      "compliant": "Rispetta la politica",
+      "differences": "Differenze: {{count}}",
+      "enforce": "Applica agli host",
+      "enforced": "Applicata",
+      "error": {
+        "badServer": "Ogni server deve essere un nome host o un indirizzo IP.",
+        "duplicate": "Un server è elencato due volte.",
+        "noServers": "Inserisci almeno un server NTP.",
+        "scope": "Scegli la flotta, un sito o un tag.",
+        "tooMany": "Inserisci al massimo 8 server NTP.",
+        "unknown": "Impossibile salvare la politica."
+      },
+      "finding": {
+        "conflict": "Si applicano due politiche di tag con server diversi",
+        "noService": "Nessun servizio orario da configurare",
+        "notEnabled": "Servizio orario non abilitato all'avvio",
+        "notReported": "L'agente non ha segnalato la propria configurazione oraria",
+        "notRunning": "Servizio orario non in esecuzione",
+        "serversDiffer": "Usa server NTP diversi da quelli della politica"
+      },
+      "has": "Configurati sull'host: {{servers}}",
+      "intro": "I server NTP che gli host devono usare, per l'intera flotta o per sito o tag. La politica di un tag prevale su quella di un sito, e quella di un sito su quella della flotta. In modalità applicata, SysManage scrive la configurazione del servizio orario dell'host e lo abilita all'avvio; in modalità solo segnalazione, mostra le differenze.",
+      "none": "Nessuna politica NTP: gli host mantengono i propri server orari.",
+      "remove": "Rimuovi politica",
+      "reportOnly": "Solo segnalazione",
+      "scope": {
+        "fleet": "Intera flotta"
+      },
+      "servers": "Server NTP",
+      "serversHelp": "Nomi host o indirizzi IP, separati da spazi o virgole",
+      "title": "Politica NTP",
+      "wants": "Server della politica: {{servers}}"
     }
   }
 }

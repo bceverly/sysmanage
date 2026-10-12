@@ -4936,6 +4936,48 @@
         "timedOut": "Sem resposta",
         "unsupported": "Não possível"
       }
+    },
+    "policy": {
+      "apply": {
+        "failed": "Falha ao aplicar a política; uma nova tentativa será feita automaticamente.",
+        "queued": "Aplicando a política...",
+        "succeeded": "A política foi aplicada."
+      },
+      "autoResync": "Ressincronizar relógios que ultrapassem seus limites",
+      "autoResyncChip": "Ressincronização automática",
+      "column": "Política de NTP",
+      "compliant": "Segue a política",
+      "differences": "Diferenças: {{count}}",
+      "enforce": "Aplicar aos hosts",
+      "enforced": "Aplicada",
+      "error": {
+        "badServer": "Cada servidor deve ser um nome de host ou um endereço IP.",
+        "duplicate": "Um servidor está listado duas vezes.",
+        "noServers": "Insira pelo menos um servidor NTP.",
+        "scope": "Escolha a frota, um site ou um marcador.",
+        "tooMany": "Insira no máximo 8 servidores NTP.",
+        "unknown": "Não foi possível salvar a política."
+      },
+      "finding": {
+        "conflict": "Duas políticas de marcador com servidores diferentes se aplicam",
+        "noService": "Nenhum serviço de hora para configurar",
+        "notEnabled": "Serviço de hora não habilitado na inicialização",
+        "notReported": "O agente não informou sua configuração de hora",
+        "notRunning": "Serviço de hora não está em execução",
+        "serversDiffer": "Usa servidores NTP diferentes dos da política"
+      },
+      "has": "Configurados no host: {{servers}}",
+      "intro": "Os servidores NTP que os hosts devem usar, para toda a frota ou por site ou marcador. A política de um marcador prevalece sobre a de um site, e a de um site sobre a da frota. No modo aplicado, o SysManage grava a configuração do serviço de hora do host e o habilita na inicialização; no modo somente relatório, mostra as diferenças.",
+      "none": "Sem política de NTP: os hosts mantêm seus próprios servidores de hora.",
+      "remove": "Remover política",
+      "reportOnly": "Somente relatório",
+      "scope": {
+        "fleet": "Toda a frota"
+      },
+      "servers": "Servidores NTP",
+      "serversHelp": "Nomes de host ou endereços IP, separados por espaços ou vírgulas",
+      "title": "Política de NTP",
+      "wants": "Servidores da política: {{servers}}"
     }
   }
 }

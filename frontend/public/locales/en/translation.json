@@ -4936,6 +4936,48 @@
         "timedOut": "No answer",
         "unsupported": "Not possible"
       }
+    },
+    "policy": {
+      "apply": {
+        "failed": "Applying the policy failed; it is retried automatically.",
+        "queued": "Applying the policy...",
+        "succeeded": "The policy was applied."
+      },
+      "autoResync": "Resynchronize clocks that breach their bounds",
+      "autoResyncChip": "Auto-resync",
+      "column": "NTP policy",
+      "compliant": "Follows the policy",
+      "differences": "{{count}} differences",
+      "enforce": "Apply to hosts",
+      "enforced": "Applied",
+      "error": {
+        "badServer": "Each server must be a host name or an IP address.",
+        "duplicate": "A server is listed twice.",
+        "noServers": "Enter at least one NTP server.",
+        "scope": "Choose the fleet, a site or a tag.",
+        "tooMany": "Enter at most 8 NTP servers.",
+        "unknown": "The policy could not be saved."
+      },
+      "finding": {
+        "conflict": "Two tag policies with different servers apply",
+        "noService": "No time service to configure",
+        "notEnabled": "Time service not enabled at boot",
+        "notReported": "The agent has not reported its time configuration",
+        "notRunning": "Time service not running",
+        "serversDiffer": "Uses other NTP servers than the policy"
+      },
+      "has": "Configured on the host: {{servers}}",
+      "intro": "The NTP servers hosts should use, for the whole fleet or per site or tag. A tag's policy wins over a site's, a site's over the fleet's. Applied, SysManage writes the host's time service configuration and enables it at boot; report only, it shows the differences.",
+      "none": "No NTP policy: hosts keep their own time servers.",
+      "remove": "Remove policy",
+      "reportOnly": "Report only",
+      "scope": {
+        "fleet": "Whole fleet"
+      },
+      "servers": "NTP servers",
+      "serversHelp": "Host names or IP addresses, separated by spaces or commas",
+      "title": "NTP policy",
+      "wants": "Policy servers: {{servers}}"
     }
   }
 }

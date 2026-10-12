@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-12 15:08-0400\n"
+"POT-Creation-Date: 2026-10-12 15:44-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -74,10 +74,11 @@ msgid "You do not have access to the selected account."
 msgstr "आपके पास चयनित खाते के लिए पहुंच नहीं है।"
 
 #: backend/api/asset_tags.py:59 backend/api/malware.py:118
-#: backend/api/file_watches.py:110 backend/api/time_sync_resync.py:56
-#: backend/api/config_mgmt_drift.py:191 backend/api/advisor.py:93
-#: backend/api/query_packs.py:119 backend/api/config_mgmt_inventories.py:110
-#: backend/api/config_mgmt_remediation.py:137 backend/api/time_sync.py:66
+#: backend/api/time_sync_policy.py:54 backend/api/file_watches.py:110
+#: backend/api/time_sync_resync.py:56 backend/api/config_mgmt_drift.py:191
+#: backend/api/advisor.py:93 backend/api/query_packs.py:119
+#: backend/api/config_mgmt_inventories.py:110
+#: backend/api/config_mgmt_remediation.py:137 backend/api/time_sync.py:67
 #: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:375
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
@@ -337,7 +338,7 @@ msgstr "प्रक्रिया स्थिति अद्यतन सं
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:589 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:601 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "होस्ट पंजीकृत नहीं है"
@@ -1369,6 +1370,14 @@ msgstr "संदेश नहीं पाया गया या प्रल�
 #: backend/api/queue.py:249
 msgid "Failed to fetch message details"
 msgstr "संदेश विवरण प्राप्त करने में विफल हो गया"
+
+#: backend/api/time_sync_policy.py:128
+msgid "NTP policy changed"
+msgstr "NTP नीति बदली गई"
+
+#: backend/api/time_sync_policy.py:145
+msgid "NTP policy removed"
+msgstr "NTP नीति हटाई गई"
 
 #: backend/api/host_account_management.py:75
 msgid "Permission denied: ADD_HOST_ACCOUNT role required"
@@ -3313,11 +3322,11 @@ msgstr "target_hostname, target_platform, या push_to_all निर्दि�
 msgid "Configuration acknowledgment processed"
 msgstr "कॉन्फ़िगरेशन स्वीकृति प्रसंस्कृत की गई"
 
-#: backend/api/time_sync.py:285 backend/api/time_sync.py:329
+#: backend/api/time_sync.py:312 backend/api/time_sync.py:356
 msgid "Clock offset bounds changed"
 msgstr "घड़ी के अंतर की सीमाएँ बदली गईं"
 
-#: backend/api/time_sync.py:350
+#: backend/api/time_sync.py:377
 msgid "Clock offset bounds removed"
 msgstr "घड़ी के अंतर की सीमाएँ हटाई गईं"
 
@@ -3358,34 +3367,34 @@ msgstr "यह जॉब पहले ही पूरा हो चुका �
 msgid "Cancelled by an operator"
 msgstr "ऑपरेटर द्वारा रद्द किया गया"
 
-#: backend/api/message_handlers.py:449
+#: backend/api/message_handlers.py:461
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "डायग्नोस्टिक रिजल्ट को प्रोसेस करने में असफल हुआ: %s"
 
-#: backend/api/message_handlers.py:483
+#: backend/api/message_handlers.py:495
 msgid "Missing message_id in command acknowledgment"
 msgstr "कमांड अद्यावरण के लिए message_id नहीं पाया गया या गलत है"
 
-#: backend/api/message_handlers.py:550
+#: backend/api/message_handlers.py:562
 msgid "This session cannot acknowledge another host's message"
 msgstr "यह सत्र किसी अन्य होस्ट के संदेश की पावती नहीं दे सकता"
 
-#: backend/api/message_handlers.py:613
+#: backend/api/message_handlers.py:625
 msgid "Missing installation_id in package installation status"
 msgstr "पैकेज इनस्टलेशन स्थिति में इनस्टॉलेशन ID नहीं पाया गया"
 
-#: backend/api/message_handlers.py:633
+#: backend/api/message_handlers.py:645
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "इनस्टॉलेशन लॉग एंट्री ID: %s के लिए नहीं मिला"
 
-#: backend/api/message_handlers.py:679
+#: backend/api/message_handlers.py:691
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "पैकेज इनस्टल करने की {status} एजेंट {hostname} पर"
 
-#: backend/api/message_handlers.py:708
+#: backend/api/message_handlers.py:720
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "पैकेज इनस्तॉलेशन संतुलन का अपडेट वापरे में विफल: %s"

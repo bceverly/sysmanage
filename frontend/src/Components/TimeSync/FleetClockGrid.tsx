@@ -12,9 +12,11 @@ import { Link as RouterLink } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import type { FleetClock } from '../../Services/timeSync';
+import { policyChip } from './HostClockPolicy';
 import {
     formatOffset,
     offsetDirection,
+    policyFindingText,
     serviceName,
     sourceLabel,
     statusColor,
@@ -97,6 +99,16 @@ const columns = (t: TFunction): GridColDef<FleetClock>[] => [
             + `(${sourceLabel(t, row.bounds.source)})`,
     },
     {
+        field: 'policy_compliant',
+        headerName: t('timeSync.policy.column', 'NTP policy'),
+        width: 170,
+        renderCell: ({ row }) => (
+            <Tooltip title={row.policy_findings.map(code => policyFindingText(t, code)).join('; ')}>
+                <span>{policyChip(t, row.policy_compliant, row.policy_findings.length)}</span>
+            </Tooltip>
+        ),
+    },
+    {
         field: 'site_name',
         headerName: t('timeSync.grid.site', 'Site'),
         width: 140,
@@ -113,7 +125,11 @@ const columns = (t: TFunction): GridColDef<FleetClock>[] => [
 
 const FleetClockGrid: React.FC<{ rows: FleetClock[] }> = ({ rows }) => {
     const { t } = useTranslation();
-    const cols = useMemo(() => columns(t), [t]);
+    const anyPolicy = rows.some(r => r.policy_compliant !== null);
+    const cols = useMemo(
+        () => columns(t).filter(c => anyPolicy || c.field !== 'policy_compliant'),
+        [t, anyPolicy],
+    );
     return (
         <div style={{ width: '100%' }}>
             <DataGrid

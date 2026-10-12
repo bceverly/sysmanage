@@ -92,6 +92,8 @@ def test_db():
         HostClockSample,
         ClockBound,
         ClockResync,
+        NtpPolicy,
+        NtpPolicyState,
         AirgapCollectionRun,
         AirgapCollectionSchedule,
         AirgapCollectionTarget,
@@ -553,6 +555,8 @@ def test_db():
     original_host_clock_sample = models.HostClockSample
     original_clock_bound = models.ClockBound
     original_clock_resync = models.ClockResync
+    original_ntp_policy = models.NtpPolicy
+    original_ntp_policy_state = models.NtpPolicyState
     models.Host = Host
     models.User = User
     models.SecurityRoleGroup = SecurityRoleGroup
@@ -578,6 +582,8 @@ def test_db():
     models.HostClockSample = HostClockSample
     models.ClockBound = ClockBound
     models.ClockResync = ClockResync
+    models.NtpPolicy = NtpPolicy
+    models.NtpPolicyState = NtpPolicyState
     models.HostFirewallRole = HostFirewallRole
 
     # Override the get_engine dependency
@@ -634,6 +640,8 @@ def test_db():
     models.HostClockSample = original_host_clock_sample
     models.ClockBound = original_clock_bound
     models.ClockResync = original_clock_resync
+    models.NtpPolicy = original_ntp_policy
+    models.NtpPolicyState = original_ntp_policy_state
 
     # Clean up database connections.  In-memory DB: disposing the engine drops
     # the StaticPool's single connection and the schema with it -- no temp file
