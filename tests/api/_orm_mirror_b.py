@@ -839,3 +839,15 @@ class HeldAssetTag(TestBase):
     asset_tag = Column(String(128), nullable=False, unique=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     created_by = Column(String(255), nullable=True)
+
+
+class HostClockSample(TestBase):
+    """Phase 23.3 -- one point of a host's measured clock offset."""
+
+    __tablename__ = "host_clock_sample"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), nullable=False)
+    measured_at = Column(DateTime, nullable=False)
+    offset_ms = Column(Float, nullable=False)
+    rtt_ms = Column(Float, nullable=True)
+    method = Column(String(16), nullable=False)

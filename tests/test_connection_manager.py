@@ -6,6 +6,7 @@
 Tests for WebSocket connection manager.
 """
 
+import json
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -52,7 +53,10 @@ class TestAgentConnection:
         result = await conn.send_message(message)
 
         assert result is True
-        mock_websocket.send_text.assert_called_once_with('{"test": "data"}')
+        mock_websocket.send_text.assert_called_once()
+        sent = json.loads(mock_websocket.send_text.call_args.args[0])
+        assert sent["test"] == "data"
+        assert isinstance(sent["clock"]["t1"], float)  # Phase 23.3 t1 stamp
 
     @pytest.mark.asyncio
     async def test_send_message_failure(self, mock_websocket):

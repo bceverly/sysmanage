@@ -46,6 +46,9 @@ from backend.api.handlers.custom_metric_handlers import (
     handle_host_metrics,
 )
 
+# Import from time_status_handlers (Time synchronization -- 23.3)
+from backend.api.handlers.time_status_handlers import handle_time_status_update
+
 # Import from network_discovery_handlers (Unenrolled Asset Discovery -- 21.6)
 from backend.api.handlers.network_discovery_handlers import (
     handle_network_discovery_report,
@@ -138,5 +141,6 @@ __all__ = [
     # Custom Metrics & Graphs handlers (Slice 3b)
     "handle_custom_metric_samples",
     "handle_host_metrics",
+    "handle_time_status_update",
     "handle_network_discovery_report",
 ]

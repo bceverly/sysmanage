@@ -13295,7 +13295,7 @@ with dry run + held tags for machines not yet enrolled (and 18.2 discovery) ·
 S6 docs, screenshots, i18n, and the T480 multi-boot proof (boot it into each
 of its three OSes once).
 
-- [ ] **Hardware identity, collected by every agent, the same from every OS
+- [x] **Hardware identity, collected by every agent, the same from every OS
       on the machine:** the SMBIOS system UUID (Linux
       `/sys/class/dmi/id/product_uuid`, Windows
       `Win32_ComputerSystemProduct.UUID`, FreeBSD `kenv smbios.system.uuid`,
@@ -13319,7 +13319,7 @@ of its three OSes once).
       that did not mock the database read AND wrote the real agent DB's run
       ledger on the machine running them -- an autouse fixture now gives
       every test an in-memory ledger. Server side (record, display) is S2.*
-- [ ] **Machine record (OSS schema):** hosts that report the same identity
+- [x] **Machine record (OSS schema):** hosts that report the same identity
       are one machine; the asset tag lives on the machine, so the T480's three
       OS hosts share one tag, and a reinstalled OS lands on the same machine
       (and its tag) automatically. Conflicts are surfaced, never merged
@@ -13340,7 +13340,7 @@ of its three OSes once).
       reading its parent's hardware is not linked; an unusable identity
       creates nothing and keeps an existing link. 29 tests + a real-Alembic
       migration test. The UI for all of this is S4.*
-- [ ] **Naming-scheme settings with a builder, not a regex box:** prefix,
+- [x] **Naming-scheme settings with a builder, not a regex box:** prefix,
       separator, digit count with zero padding, optional suffix, allowed
       characters -- with a live preview ("GDR-000042"), examples that pass and
       fail, and the next free number suggested. An advanced regex option for
@@ -13359,7 +13359,7 @@ of its three OSes once).
       Found while testing: `digits: 0` was silently defaulted to 6 by an
       `or` -- fixed, regression-tested. Role names are shown untranslated in
       the user-roles screen (true of every role, pre-existing).*
-- [ ] **Assigning and finding:** set / change / clear the tag on the
+- [x] **Assigning and finding:** set / change / clear the tag on the
       machine (from any of its hosts' pages) with the scheme checked at entry
       and uniqueness enforced; every change audited. Hosts grid column +
       filter, the command palette and global search find a host by tag;
@@ -13382,7 +13382,7 @@ of its three OSes once).
       translator's staleness hashes could bless stale translations when a
       new key's English was edited between two partial translation runs
       (nine `virtualClone` values) -- recording is now per-locale.*
-- [ ] **CSV import and export:** map an identifier (system UUID or serial
+- [x] **CSV import and export:** map an identifier (system UUID or serial
       number) to a tag; a dry-run preview shows every row as will-assign /
       unchanged / not-found / fails-the-scheme / duplicate before anything is
       written. Export the same columns. A tag imported for a machine that has
@@ -13438,22 +13438,94 @@ code signing), Kerberos (5-minute tolerance), TOTP codes, token expiry, and
 the order of events in audit logs and incident timelines. Nothing measures
 it today.
 
-- [ ] **Measure the offset, independently of the host's own time service:**
+**S0 spike DONE 2026-10-12 (`sysmanage-agent/scripts/time_sync_spike.py`,
+stdlib only, server on beast, clients on five OSes).** Heartbeats ride the
+agent's persistent queue and the server's inbound queue, so a timestamp taken
+when a message is CREATED is worthless.  Stamped at the socket EDGES instead
+-- t1 server send, t2 agent receive, t3 agent send, t4 server receive -- the
+NTP formula excludes all queue residence.  With every reply held a random
+0-2 s (standing in for the queue), the median of 30 samples landed within
+**0.4-1.9 ms** of ground truth (both machines' SNTP offset to one public
+reference) on t14 over the VPN (0.95 ms), OpenBSD (0.43), FreeBSD (0.60),
+macOS over Wi-Fi (1.13) and Windows (1.91).  Single samples strayed up to
+47 ms on Wi-Fi -- the median absorbs that; bounds are 1 s / 5 s.  It found
+two REAL drifts nobody knew about: the MacBook Air 224 ms behind, and the
+x13s **1.33 s ahead -- over the warning bound -- because its Windows Time
+service is not running** (`w32tm` 0x80070426), the "no time service is not in
+sync" case exactly.  Service-status fixtures recorded for chrony, ntpd,
+timesyncd, OpenNTPD, macOS and a stopped w32time
+(`tests/fixtures/time_service/`); macOS `systemsetup` needs root, so an
+unprivileged agent falls back to `sntp` (offset only).  NetBSD VM was down --
+its ntpd reads like FreeBSD's; record it in S1.
+
+Slices: S1 agent (time-service readers + parsers per OS; stamp t2 on receipt
+and t3 at the socket write, echoing the last server t1) · S2 server (stamp t1
+at the socket write and t4 on arrival before queueing; offset/delay, median
+of recent samples, host time status + history; the server's own clock check)
+· S3 bounds (fleet / tenant / site / tag) + statuses + posture check · S4 UI
+(fleet Time Sync view, host card + history, dashboard tile) · S5 spot resync
+(audited, per OS, fleet job in waves) + Pro+ NTP policy · S6 Pro+ alerts via
+alerting_engine with site digests · S7 docs, screenshots, i18n and the skew
+proof (`date -s` on a VM).
+
+- [x] **Measure the offset, independently of the host's own time service:**
       the agent and server timestamp the heartbeat exchange NTP-style
       (offset = server time - midpoint of the agent's send and receive), so a
       host whose NTP is broken -- or lying -- is still measured, every
       heartbeat, at no extra traffic.  Smoothed (median of recent samples) so
       one slow round trip is not a false alarm.
-- [ ] **Report the host's own time service:** chrony (`chronyc tracking`),
+      *S1 (agent half) DONE 2026-10-12: `communication/clock_probe.py`.
+      t2 is stamped right after `ws.recv()` (before parsing), t3 inside
+      `send_message_direct` at the socket write, echoing the server's
+      `clock.t1` on the next heartbeat only.  Each receipt is used once and
+      expires after 15 min; `hold` (monotonic t3 - t2) lets the server drop a
+      sample whose clock was stepped while it waited.  An old server sends no
+      t1, so no `clock` block goes out.  Server half is S2.*
+      *S2 (server half) DONE 2026-10-12: `AgentConnection.send_message`
+      stamps `clock.t1` on a copy at the socket write; `api/agent.py` stamps
+      t4 right after `receive_text()`, before validation or any queue.
+      `services/clock_tracking.py` keeps the last 9 samples ON THE CONNECTION
+      (median offset + round trip; rejects stepped clocks and round trips
+      over 30 s) and writes `host.clock_*` at most every 5 min -- sooner on a
+      250 ms move -- in one batched UPDATE per database every 5 s, plus a
+      `host_clock_sample` history point every 15 min (30-day retention;
+      migration `q37clocksync`).  A heartbeat REFUSED for a timestamp more
+      than 30 min off still yields a coarse offset (`method: timestamp`), so
+      the hosts that need this most are measured, not dropped.
+      `GET /api/v1/host/{id}/clock` serves measured + claimed + 7-day history.
+      40 new tests; full backend suite green (8924).*
+- [x] **Report the host's own time service:** chrony (`chronyc tracking`),
       ntpd (`ntpq -c rv`), systemd-timesyncd (`timedatectl
       show-timesync`), OpenNTPD (`ntpctl -s status`, OpenBSD default),
       Windows Time (`w32tm /query /status`), macOS (`sntp` /
       `systemsetup -getusingnetworktime`): which service, synchronized or not,
       its source and stratum, its own estimate of the offset.  "Not
       measured" is never "in sync" -- a host with no time service says so.
+      *S1 (agent) DONE 2026-10-12: `collection/time_service.py` reads
+      chrony, ntpd, timesyncd, OpenNTPD, Windows Time and macOS, normalized
+      to one shape with the offset as local minus true (each tool's sign
+      converted).  Run live on all five lab OSes: correct on every one,
+      including the x13s (`w32time` not running -> running/synchronized
+      false) and the unprivileged Mac (service state unknown, `sntp` offset
+      -208 ms).  Sent as send-on-change `time_status_update` every 5 min.
+      Parsers tested on the S0 recordings (15 tests + 7 for the probe).
+      NetBSD: VM was down -- its ntpd output is FreeBSD's format; record it
+      when the VM is next up.*
+      *S2 (server) DONE 2026-10-12: `time_status_update` stored on the host
+      (`time_*` columns) as reported, unknown values kept as None -- never
+      guessed into "in sync"; a stopped service is logged.  Served beside
+      the server's own measurement so a service claiming "synchronized" on a
+      clock measured seconds off stays visible.*
 - [ ] **The server's own clock first:** the server checks its sync against
       its configured reference and refuses to judge the fleet against a clock
       it cannot vouch for (the 22.9 canary watches it too).
+      *S2: `services/server_clock.py` checks the server against
+      `time_sync.reference` (sysmanage.yaml, default `pool.ntp.org`; an
+      air-gapped site names its own NTP server or sets `""`) -- median of 3
+      SNTP queries, cached 5 min, verified only within 100 ms; unreachable
+      or no reference is never "verified".  `GET /api/v1/time-sync/server`.
+      Live on beast: -1.7 ms, verified.  Refusing to judge (statuses
+      withheld while unverified) lands with the statuses in S3.*
 - [ ] **Customer-configurable bounds:** a warning and a critical offset
       (defaults 1 s and 5 s), set for the whole fleet and overridable per
       tenant, site and tag -- tighter for domain controllers and signing

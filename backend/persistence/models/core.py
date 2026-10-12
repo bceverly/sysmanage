@@ -279,6 +279,25 @@ class Host(Base):
     machine_conflict_id = Column(GUID(), nullable=True)
     machine_conflict_reason = Column(String(32), nullable=True)
 
+    # Phase 23.3 -- this host's clock.  ``clock_*`` is the SERVER's own
+    # measurement (median of recent NTP-style samples from timestamped
+    # heartbeats; ``clock_method`` "exchange", or "timestamp" for a host so far
+    # off its messages are refused -- coarse, but never "unmeasured").
+    # ``time_*`` is what the host's own time service CLAIMS.  Offsets are host
+    # minus server, in ms: positive means the host is ahead.
+    clock_offset_ms = Column(Float, nullable=True)
+    clock_rtt_ms = Column(Float, nullable=True)
+    clock_samples = Column(Integer, nullable=True)
+    clock_method = Column(String(16), nullable=True)
+    clock_measured_at = Column(DateTime, nullable=True)
+    time_service = Column(String(16), nullable=True)
+    time_service_running = Column(Boolean, nullable=True)
+    time_synchronized = Column(Boolean, nullable=True)
+    time_source = Column(String(255), nullable=True)
+    time_stratum = Column(Integer, nullable=True)
+    time_reported_offset_ms = Column(Float, nullable=True)
+    time_status_at = Column(DateTime, nullable=True)
+
     # Phase 12.7: Public IP + GeoLite2 geo-location.
     #
     # The agent fetches its public-facing IP at startup + on a 24h

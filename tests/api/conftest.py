@@ -89,6 +89,7 @@ def test_db():
         AirGapBundle,
         AssetTagScheme,
         HeldAssetTag,
+        HostClockSample,
         AirgapCollectionRun,
         AirgapCollectionSchedule,
         AirgapCollectionTarget,
@@ -535,6 +536,7 @@ def test_db():
     original_machine = models.Machine
     original_asset_tag_scheme = models.AssetTagScheme
     original_held_asset_tag = models.HeldAssetTag
+    original_host_clock_sample = models.HostClockSample
     models.Host = Host
     models.User = User
     models.SecurityRoleGroup = SecurityRoleGroup
@@ -557,6 +559,7 @@ def test_db():
     models.Machine = Machine
     models.AssetTagScheme = AssetTagScheme
     models.HeldAssetTag = HeldAssetTag
+    models.HostClockSample = HostClockSample
     models.HostFirewallRole = HostFirewallRole
 
     # Override the get_engine dependency
@@ -610,6 +613,7 @@ def test_db():
     models.Machine = original_machine
     models.AssetTagScheme = original_asset_tag_scheme
     models.HeldAssetTag = original_held_asset_tag
+    models.HostClockSample = original_host_clock_sample
 
     # Clean up database connections.  In-memory DB: disposing the engine drops
     # the StaticPool's single connection and the schema with it -- no temp file

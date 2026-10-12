@@ -103,7 +103,9 @@ class TestAgentConnection:
         result = await connection.send_message(message)
 
         assert result is True
-        mock_ws.send_text.assert_called_once_with(json.dumps(message))
+        sent = json.loads(mock_ws.send_text.call_args.args[0])
+        assert sent.pop("clock")["t1"] > 0  # Phase 23.3 t1 stamp
+        assert sent == message
 
     @pytest.mark.asyncio
     async def test_send_message_connection_closed(self):

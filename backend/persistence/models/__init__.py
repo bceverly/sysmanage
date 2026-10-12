@@ -34,6 +34,7 @@ from .graylog_attachment import *
 from .graylog_integration import *
 from .hardware import *
 from .machine import *
+from .clock import *
 from .host_certificate import *
 from .host_role import *
 from .logging_config import *

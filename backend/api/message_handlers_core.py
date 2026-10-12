@@ -18,6 +18,7 @@ from backend.api.error_constants import error_host_not_registered
 from backend.i18n import _
 from backend.persistence.models import Host, HostChild
 from backend.security import agent_identity
+from backend.services import clock_tracking
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket import heartbeat_batch, report_window
@@ -597,6 +598,19 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
             "message": error_host_not_registered(),
             "data": {},
         }
+
+    # Phase 23.3: the clock figure measured from this heartbeat (api/agent.py)
+    # is written to the host row when due -- rate-limited and batched, so
+    # nothing extra on the usual heartbeat.
+    try:
+        clock_tracking.persist_if_due(connection, db.get_bind())
+    except Exception:  # pylint: disable=broad-exception-caught
+        # Bookkeeping must never fail the heartbeat itself.  (This function
+        # binds a local ``logger`` further down, so name the module's here.)
+        logging.getLogger(__name__).exception(
+            "Clock tracking: could not queue the clock figure for host %s",
+            getattr(connection, "host_id", None),
+        )
 
     # Phase 22.2: a heartbeat that changes nothing but "seen now" is batched
     # (heartbeat_batch) -- no row load, no commit on the WebSocket path.

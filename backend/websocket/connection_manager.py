@@ -25,6 +25,7 @@ import functools
 import inspect
 import json
 import logging
+import time
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
@@ -121,6 +122,10 @@ class AgentConnection:
     async def send_message(self, message: dict):
         """Send a message to this agent."""
         try:
+            # t1 of the clock measurement (Phase 23.3): stamped HERE, at the
+            # socket write, on a copy -- callers may reuse their dict.
+            if isinstance(message, dict):
+                message = {**message, "clock": {"t1": time.time()}}
             await self.websocket.send_text(json.dumps(message))
             return True
         except ConnectionClosed as e:

@@ -10,6 +10,7 @@ Enhanced with security validation and secure communication protocols.
 
 import asyncio
 import json
+import time
 from datetime import datetime, timezone
 
 from fastapi import (
@@ -39,6 +40,7 @@ from backend.persistence.models import Host, InstallationPackage, InstallationRe
 from backend.security.agent_identity import verified_host_id
 from backend.security.client_address import request_client_address
 from backend.security.communication_security import websocket_security
+from backend.services import clock_tracking
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import get_logger, sanitize_log
 from backend.websocket import admission
@@ -214,10 +216,15 @@ async def agent_connect(websocket: WebSocket):
         while True:
             # Receive message from agent
             data = await websocket.receive_text()
+            # t4 of the clock measurement (Phase 23.3): taken before parsing
+            # or any queue, so neither counts against the host's clock.
+            received_at = time.time()
             logger.info("Received WebSocket message: %s...", data[:100])
             db = next(get_db())
             try:
-                await _process_websocket_message(data, connection, db, connection_id)
+                await _process_websocket_message(
+                    data, connection, db, connection_id, received_at
+                )
             finally:
                 db.close()
 
@@ -285,7 +292,39 @@ async def _handle_time_sensitive_message(message, connection, db):
         tenant_db.close()
 
 
-async def _process_websocket_message(data, connection, db, connection_id):
+def _observe_clock(raw_message, connection, db, received_at, is_valid, error):
+    """Feed a heartbeat's timestamps to the clock measurement (Phase 23.3).
+
+    A heartbeat REFUSED for its timestamp is the most important case: its
+    host is more than 30 minutes off.  Its own timestamp still gives a
+    coarse offset, so that host is reported instead of silently unmeasured."""
+    if received_at is None or not isinstance(raw_message, dict):
+        return
+    if raw_message.get("message_type") != "heartbeat":
+        return
+    if is_valid:
+        clock_tracking.observe(connection, raw_message.get("clock"), received_at)
+    elif error and "timestamp" in error and getattr(connection, "host_id", None):
+        from backend.persistence.partitions import (  # noqa: PLC0415
+            tenant_engine_for_host,
+        )
+
+        clock_tracking.observe_refused(
+            connection, raw_message.get("timestamp"), received_at
+        )
+        # The refused heartbeat never reaches handle_heartbeat: persist here.
+        engine = tenant_engine_for_host(connection.host_id) or db.get_bind()
+        clock_tracking.persist_if_due(connection, engine)
+        logger.warning(
+            "Heartbeat refused for its timestamp from host %s: clock offset ~%s ms",
+            connection.host_id,
+            (clock_tracking.current(connection) or {}).get("offset_ms"),
+        )
+
+
+async def _process_websocket_message(
+    data, connection, db, connection_id, received_at=None
+):
     """Process a single WebSocket message from the agent."""
     try:
         raw_message = json.loads(data)
@@ -293,6 +332,9 @@ async def _process_websocket_message(data, connection, db, connection_id):
         # Validate message integrity and structure
         is_valid, validation_error = websocket_security.validate_message_integrity(
             raw_message, connection_id or connection.agent_id
+        )
+        _observe_clock(
+            raw_message, connection, db, received_at, is_valid, validation_error
         )
         if not is_valid:
             error_msg = ErrorMessage(

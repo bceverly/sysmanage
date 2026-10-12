@@ -55,6 +55,7 @@ class MessageType(str, Enum):
     # from the agent, stored into the OSS ``custom_metric_sample`` tenant table.
     CUSTOM_METRIC_SAMPLES = "custom_metric_samples"
     HOST_METRICS = "host_metrics"
+    TIME_STATUS_UPDATE = "time_status_update"
     NETWORK_DISCOVERY_REPORT = "network_discovery_report"
     HOSTNAME_CHANGED = "hostname_changed"
     # Agent reports completion of a server-initiated package install/uninstall.

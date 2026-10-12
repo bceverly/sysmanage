@@ -183,3 +183,41 @@ def test_q36_grants_the_new_role_to_existing_tag_editors_once():
     finally:
         if os.path.exists(db):
             os.unlink(db)
+
+
+_CLOCK_COLUMNS = {
+    "clock_offset_ms",
+    "clock_rtt_ms",
+    "clock_samples",
+    "clock_method",
+    "clock_measured_at",
+    "time_service",
+    "time_service_running",
+    "time_synchronized",
+    "time_source",
+    "time_stratum",
+    "time_reported_offset_ms",
+    "time_status_at",
+}
+
+
+def test_q37_adds_the_clock_columns_and_history_idempotently():
+    """Phase 23.3 S2: host clock columns + host_clock_sample, re-runnable."""
+    fd, db = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    os.unlink(db)
+    try:
+        _alembic(["--name", "shared", "upgrade", "head"], db)
+        _alembic(["upgrade", "head"], db)
+        assert _CLOCK_COLUMNS <= _columns(db, "host")
+        assert {"host_id", "measured_at", "offset_ms", "rtt_ms", "method"} <= (
+            _columns(db, "host_clock_sample")
+        )
+        _alembic(["stamp", "q36assettagrole"], db)
+        _alembic(["upgrade", "head"], db)  # over the schema it already built
+        _alembic(["downgrade", "q36assettagrole"], db)
+        assert not _CLOCK_COLUMNS & _columns(db, "host")
+        assert not _columns(db, "host_clock_sample")
+    finally:
+        if os.path.exists(db):
+            os.unlink(db)
