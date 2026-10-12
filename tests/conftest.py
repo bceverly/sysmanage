@@ -792,3 +792,19 @@ def _fresh_host_tenant_cache():
     host_tenant_index.clear_cache()
     yield
     host_tenant_index.clear_cache()
+
+
+@pytest.fixture(autouse=True)
+def _no_ntp_queries(request, monkeypatch):
+    """Clock statuses (Phase 23.3) check the server's own clock against an NTP
+    reference.  Tests never reach the network: the reference answers "in
+    sync" -- except in the module that tests that query itself."""
+    from backend.services import (  # pylint: disable=import-outside-toplevel
+        server_clock,
+    )
+
+    server_clock._cache.clear()  # pylint: disable=protected-access
+    if request.module.__name__.rsplit(".", 1)[-1] != "test_server_clock":
+        monkeypatch.setattr(server_clock, "sntp_offset_ms", lambda _server: 0.0)
+    yield
+    server_clock._cache.clear()  # pylint: disable=protected-access

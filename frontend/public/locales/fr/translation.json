@@ -3957,7 +3957,8 @@
       "pmNetDiscovery": "Les appareils de vos réseaux sont découverts",
       "pmNetUnmanaged": "Aucun appareil non géré ne se trouve sur vos réseaux",
       "pmMalwareClean": "Aucun constat de logiciel malveillant de gravité élevée ouvert",
-      "pmMalwareScanned": "Les hôtes sont analysés à la recherche de logiciels malveillants"
+      "pmMalwareScanned": "Les hôtes sont analysés à la recherche de logiciels malveillants",
+      "pmClocksInBounds": "L'horloge de chaque hôte est dans ses limites"
     },
     "curatedPack": {
       "baseline": {
@@ -4070,7 +4071,8 @@
       "failure": {
         "unsupported_platform": "cette correction ne prend pas en charge la plateforme de l'hôte",
         "dispatch_failed": "la modification n'a pas pu être envoyée à l'hôte ; consultez le journal du serveur"
-      }
+      },
+      "resync_clocks": "Vérifiez le service de temps de chaque hôte et resynchronisez les horloges hors de leurs limites."
     },
     "saved": "Modèle de menaces enregistré. La liste des points à traiter sera réévaluée lors du prochain passage du conseiller.",
     "stale": {

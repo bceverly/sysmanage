@@ -46,6 +46,7 @@ from backend.config import settings_service
 from backend.persistence import db as dbm
 from backend.persistence import models
 from backend.persistence.partitions import PARTITION_REGISTRY, partition_session
+from backend.services import clock_status
 
 logger = logging.getLogger(__name__)
 
@@ -282,6 +283,7 @@ COVERAGE_KEYS = (
     "firewall",
     "compliance_scan",
     "critical_vulnerabilities",
+    "clock_sync",
 )
 
 
@@ -365,6 +367,14 @@ def _fleet_coverage(db, now) -> List[Dict[str, Any]]:
         coverage.append(
             _coverage(key, [state(rows.get(str(h.id)), now) for h in hosts])
         )
+    # 23.3 S3: clocks against their bounds.  Unmeasured, stale, or judged by
+    # a server whose own clock is off -- all unknown, never "in bounds".
+    _server, clocks = clock_status.evaluate(db, hosts, now)
+    coverage.append(
+        _coverage(
+            "clock_sync", [clock_status.coverage_state(st) for _h, _b, st in clocks]
+        )
+    )
     return coverage
 
 

@@ -90,6 +90,7 @@ def test_db():
         AssetTagScheme,
         HeldAssetTag,
         HostClockSample,
+        ClockBound,
         AirgapCollectionRun,
         AirgapCollectionSchedule,
         AirgapCollectionTarget,
@@ -228,6 +229,12 @@ def test_db():
                 "10000000-0000-0000-0000-0000000000a7",
                 "Manage Asset Tags",
                 "Set machine asset tags and the naming scheme",
+                "00000000-0000-0000-0000-000000000001",
+            ),
+            (
+                "10000000-0000-0000-0000-0000000000a8",
+                "Manage Time Sync",
+                "Set clock offset bounds and the fleet time policy",
                 "00000000-0000-0000-0000-000000000001",
             ),
             (
@@ -537,6 +544,7 @@ def test_db():
     original_asset_tag_scheme = models.AssetTagScheme
     original_held_asset_tag = models.HeldAssetTag
     original_host_clock_sample = models.HostClockSample
+    original_clock_bound = models.ClockBound
     models.Host = Host
     models.User = User
     models.SecurityRoleGroup = SecurityRoleGroup
@@ -560,6 +568,7 @@ def test_db():
     models.AssetTagScheme = AssetTagScheme
     models.HeldAssetTag = HeldAssetTag
     models.HostClockSample = HostClockSample
+    models.ClockBound = ClockBound
     models.HostFirewallRole = HostFirewallRole
 
     # Override the get_engine dependency
@@ -614,6 +623,7 @@ def test_db():
     models.AssetTagScheme = original_asset_tag_scheme
     models.HeldAssetTag = original_held_asset_tag
     models.HostClockSample = original_host_clock_sample
+    models.ClockBound = original_clock_bound
 
     # Clean up database connections.  In-memory DB: disposing the engine drops
     # the StaticPool's single connection and the schema with it -- no temp file

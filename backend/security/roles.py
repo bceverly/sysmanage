@@ -51,6 +51,8 @@ class SecurityRoles(str, Enum):
     MANAGE_NETWORK_DISCOVERY = "Manage Network Discovery"
     # - Asset tags on the machine, and the tenant's naming scheme (23.2)
     MANAGE_ASSET_TAGS = "Manage Asset Tags"
+    # - Clock offset bounds and, from S5, the fleet NTP policy (23.3)
+    MANAGE_TIME_SYNC = "Manage Time Sync"
     # - Malware Detection (Enterprise malware_engine -- 21.3).  Two roles:
     #   moving a file off a host can break it, so quarantine is granted apart
     #   from scanning.

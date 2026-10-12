@@ -3957,7 +3957,8 @@
       "pmNetDiscovery": "Devices on your networks are being discovered",
       "pmNetUnmanaged": "No unmanaged devices are on your networks",
       "pmMalwareClean": "No open high-severity malware findings",
-      "pmMalwareScanned": "Hosts are scanned for malware"
+      "pmMalwareScanned": "Hosts are scanned for malware",
+      "pmClocksInBounds": "Every host's clock is within its bounds"
     },
     "curatedPack": {
       "baseline": {
@@ -4070,7 +4071,8 @@
       "failure": {
         "unsupported_platform": "this remedy does not support the host's platform",
         "dispatch_failed": "the change could not be sent to the host; see the server log"
-      }
+      },
+      "resync_clocks": "Check each host's time service and resynchronize the clocks outside their bounds."
     },
     "saved": "Threat model saved. The punch list is re-evaluated on the next advisor pass.",
     "stale": {

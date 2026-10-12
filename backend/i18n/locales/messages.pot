@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-11 14:41-0400\n"
+"POT-Creation-Date: 2026-10-12 09:59-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -85,7 +85,7 @@ msgstr ""
 #: backend/api/file_watches.py:110 backend/api/config_mgmt_drift.py:191
 #: backend/api/advisor.py:93 backend/api/query_packs.py:119
 #: backend/api/config_mgmt_inventories.py:110
-#: backend/api/config_mgmt_remediation.py:137
+#: backend/api/config_mgmt_remediation.py:137 backend/api/time_sync.py:61
 #: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:375
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
@@ -479,7 +479,7 @@ msgid "Missing request_id in installation_complete"
 msgstr ""
 
 #: backend/api/handlers/software_package_handlers.py:956
-#: backend/api/agent.py:871 backend/api/packages.py:486
+#: backend/api/agent.py:913 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr ""
@@ -2483,46 +2483,46 @@ msgstr ""
 msgid "Distribution deleted"
 msgstr ""
 
-#: backend/api/message_handlers_core.py:58
+#: backend/api/message_handlers_core.py:59
 msgid "Agent authentication failed: invalid host token"
 msgstr ""
 
-#: backend/api/message_handlers_core.py:67
+#: backend/api/message_handlers_core.py:68
 msgid "Host with token is not registered. Please re-register."
 msgstr ""
 
-#: backend/api/message_handlers_core.py:88
+#: backend/api/message_handlers_core.py:89
 msgid "Agent authentication failed: invalid host ID"
 msgstr ""
 
-#: backend/api/message_handlers_core.py:97 backend/utils/host_validation.py:104
+#: backend/api/message_handlers_core.py:98 backend/utils/host_validation.py:104
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr ""
 
-#: backend/api/message_handlers_core.py:150
+#: backend/api/message_handlers_core.py:151
 msgid "Agent session refused: it did not prove it is this host"
 msgstr ""
 
-#: backend/api/message_handlers_core.py:164
+#: backend/api/message_handlers_core.py:165
 msgid ""
 "This agent did not prove it is this host. If the host was reinstalled, "
 "remove it from SysManage and approve its new registration."
 msgstr ""
 
-#: backend/api/message_handlers_core.py:293 backend/api/agent.py:767
+#: backend/api/message_handlers_core.py:294 backend/api/agent.py:809
 msgid "Host registration pending approval"
 msgstr ""
 
-#: backend/api/message_handlers_core.py:407
+#: backend/api/message_handlers_core.py:408
 msgid "Host auto-approved via child host creation"
 msgstr ""
 
-#: backend/api/message_handlers_core.py:526
+#: backend/api/message_handlers_core.py:527
 msgid "Agent registered and connected successfully"
 msgstr ""
 
-#: backend/api/message_handlers_core.py:871
+#: backend/api/message_handlers_core.py:885
 msgid "Failed to process heartbeat"
 msgstr ""
 
@@ -3196,6 +3196,14 @@ msgstr ""
 
 #: backend/api/config_management.py:276
 msgid "Configuration acknowledgment processed"
+msgstr ""
+
+#: backend/api/time_sync.py:225 backend/api/time_sync.py:269
+msgid "Clock offset bounds changed"
+msgstr ""
+
+#: backend/api/time_sync.py:290
+msgid "Clock offset bounds removed"
 msgstr ""
 
 #: backend/api/config_mgmt_jobs.py:184
@@ -3925,80 +3933,80 @@ msgid ""
 "Triggered upgrade profile '%(profile_name)s' against %(host_count)d host(s)"
 msgstr ""
 
-#: backend/api/agent.py:98
+#: backend/api/agent.py:100
 msgid "Rate limit exceeded"
 msgstr ""
 
-#: backend/api/agent.py:161
+#: backend/api/agent.py:163
 #, python-format
 msgid "Agent WebSocket authentication failed from %s"
 msgstr ""
 
-#: backend/api/agent.py:171
+#: backend/api/agent.py:173
 #, python-format
 msgid "Authentication failed: %s"
 msgstr ""
 
-#: backend/api/agent.py:187
+#: backend/api/agent.py:189
 #, python-format
 msgid "Agent WebSocket connection attempted without token from %s"
 msgstr ""
 
-#: backend/api/agent.py:196
+#: backend/api/agent.py:198
 msgid "Authentication token required"
 msgstr ""
 
-#: backend/api/agent.py:300
+#: backend/api/agent.py:342
 msgid "Message failed security validation"
 msgstr ""
 
-#: backend/api/agent.py:332
+#: backend/api/agent.py:374
 msgid "Message must be valid JSON"
 msgstr ""
 
-#: backend/api/agent.py:641
+#: backend/api/agent.py:683
 msgid "Agent message validation failed: missing hostname and host_id"
 msgstr ""
 
-#: backend/api/agent.py:660
+#: backend/api/agent.py:702
 #, python-brace-format
 msgid "Agent message from unregistered host: {hostname}"
 msgstr ""
 
-#: backend/api/agent.py:677
+#: backend/api/agent.py:719
 #, python-brace-format
 msgid "Agent message from unapproved host: {hostname}"
 msgstr ""
 
-#: backend/api/agent.py:709
+#: backend/api/agent.py:751
 msgid "Message must include hostname or host_id for host validation"
 msgstr ""
 
-#: backend/api/agent.py:727
+#: backend/api/agent.py:769
 msgid "Host ID no longer valid - please re-register"
 msgstr ""
 
-#: backend/api/agent.py:739
+#: backend/api/agent.py:781
 msgid "Host ID and hostname mismatch - please re-register"
 msgstr ""
 
-#: backend/api/agent.py:756
+#: backend/api/agent.py:798
 msgid "Host must register before sending inventory data"
 msgstr ""
 
-#: backend/api/agent.py:833
+#: backend/api/agent.py:875
 msgid "Missing or invalid authorization header"
 msgstr ""
 
-#: backend/api/agent.py:858
+#: backend/api/agent.py:900
 msgid "Invalid host authentication"
 msgstr ""
 
-#: backend/api/agent.py:899 backend/api/packages.py:498
+#: backend/api/agent.py:941 backend/api/packages.py:498
 msgid "Installation completion recorded"
 msgstr ""
 
-#: backend/api/agent.py:905 backend/api/error_constants.py:193
+#: backend/api/agent.py:947 backend/api/error_constants.py:193
 msgid "Internal server error"
 msgstr ""
 
@@ -4806,12 +4814,12 @@ msgstr ""
 msgid "Machine link decided for host %s"
 msgstr ""
 
-#: backend/websocket/message_router.py:240
+#: backend/websocket/message_router.py:245
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr ""
 
-#: backend/websocket/message_router.py:245
+#: backend/websocket/message_router.py:250
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr ""

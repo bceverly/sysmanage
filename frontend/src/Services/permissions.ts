@@ -92,6 +92,7 @@ export const SecurityRoles = {
     // - Unenrolled Asset Discovery (Phase 21.6)
     MANAGE_NETWORK_DISCOVERY: 'Manage Network Discovery',
     MANAGE_ASSET_TAGS: 'Manage Asset Tags',
+    MANAGE_TIME_SYNC: 'Manage Time Sync',
     RUN_MALWARE_SCANS: 'Run Malware Scans',
     QUARANTINE_MALWARE: 'Quarantine Malware',
 

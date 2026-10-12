@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-11 14:41-0400\n"
+"POT-Creation-Date: 2026-10-12 09:59-0400\n"
 "Language: en\n"
 "Content-Type: text/plain; charset=ASCII\n"
 
@@ -77,7 +77,7 @@ msgstr "You do not have access to the selected account."
 #: backend/api/file_watches.py:110 backend/api/config_mgmt_drift.py:191
 #: backend/api/advisor.py:93 backend/api/query_packs.py:119
 #: backend/api/config_mgmt_inventories.py:110
-#: backend/api/config_mgmt_remediation.py:137
+#: backend/api/config_mgmt_remediation.py:137 backend/api/time_sync.py:61
 #: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:375
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
@@ -475,7 +475,7 @@ msgid "Missing request_id in installation_complete"
 msgstr "Missing request_id in installation_complete"
 
 #: backend/api/handlers/software_package_handlers.py:956
-#: backend/api/agent.py:871 backend/api/packages.py:486
+#: backend/api/agent.py:913 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "Installation request not found: %s"
@@ -2570,28 +2570,28 @@ msgstr ""
 msgid "Distribution deleted"
 msgstr "Distribution deleted"
 
-#: backend/api/message_handlers_core.py:58
+#: backend/api/message_handlers_core.py:59
 msgid "Agent authentication failed: invalid host token"
 msgstr "Agent authentication failed: invalid host token"
 
-#: backend/api/message_handlers_core.py:67
+#: backend/api/message_handlers_core.py:68
 msgid "Host with token is not registered. Please re-register."
 msgstr "Host with token is not registered. Please re-register."
 
-#: backend/api/message_handlers_core.py:88
+#: backend/api/message_handlers_core.py:89
 msgid "Agent authentication failed: invalid host ID"
 msgstr "Agent authentication failed: invalid host ID"
 
-#: backend/api/message_handlers_core.py:97 backend/utils/host_validation.py:104
+#: backend/api/message_handlers_core.py:98 backend/utils/host_validation.py:104
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "Host with ID %s is not registered. Please re-register."
 
-#: backend/api/message_handlers_core.py:150
+#: backend/api/message_handlers_core.py:151
 msgid "Agent session refused: it did not prove it is this host"
 msgstr "Agent session refused: it did not prove it is this host"
 
-#: backend/api/message_handlers_core.py:164
+#: backend/api/message_handlers_core.py:165
 msgid ""
 "This agent did not prove it is this host. If the host was reinstalled, "
 "remove it from SysManage and approve its new registration."
@@ -2599,19 +2599,19 @@ msgstr ""
 "This agent did not prove it is this host. If the host was reinstalled, "
 "remove it from SysManage and approve its new registration."
 
-#: backend/api/message_handlers_core.py:293 backend/api/agent.py:767
+#: backend/api/message_handlers_core.py:294 backend/api/agent.py:809
 msgid "Host registration pending approval"
 msgstr "Host registration pending approval"
 
-#: backend/api/message_handlers_core.py:407
+#: backend/api/message_handlers_core.py:408
 msgid "Host auto-approved via child host creation"
 msgstr "Host auto-approved via child host creation"
 
-#: backend/api/message_handlers_core.py:526
+#: backend/api/message_handlers_core.py:527
 msgid "Agent registered and connected successfully"
 msgstr "Agent registered and connected successfully"
 
-#: backend/api/message_handlers_core.py:871
+#: backend/api/message_handlers_core.py:885
 msgid "Failed to process heartbeat"
 msgstr "Failed to process heartbeat"
 
@@ -3312,6 +3312,14 @@ msgstr "Must specify target_hostname, target_platform, or push_to_all"
 #: backend/api/config_management.py:276
 msgid "Configuration acknowledgment processed"
 msgstr "Configuration acknowledgment processed"
+
+#: backend/api/time_sync.py:225 backend/api/time_sync.py:269
+msgid "Clock offset bounds changed"
+msgstr "Clock offset bounds changed"
+
+#: backend/api/time_sync.py:290
+msgid "Clock offset bounds removed"
+msgstr "Clock offset bounds removed"
 
 #: backend/api/config_mgmt_jobs.py:184
 msgid "Invalid job template ID format"
@@ -4084,80 +4092,80 @@ msgid ""
 msgstr ""
 "Triggered upgrade profile '%(profile_name)s' against %(host_count)d host(s)"
 
-#: backend/api/agent.py:98
+#: backend/api/agent.py:100
 msgid "Rate limit exceeded"
 msgstr "Rate limit exceeded"
 
-#: backend/api/agent.py:161
+#: backend/api/agent.py:163
 #, python-format
 msgid "Agent WebSocket authentication failed from %s"
 msgstr "Agent WebSocket authentication failed from %s"
 
-#: backend/api/agent.py:171
+#: backend/api/agent.py:173
 #, python-format
 msgid "Authentication failed: %s"
 msgstr "Authentication failed: %s"
 
-#: backend/api/agent.py:187
+#: backend/api/agent.py:189
 #, python-format
 msgid "Agent WebSocket connection attempted without token from %s"
 msgstr "Agent WebSocket connection attempted without token from %s"
 
-#: backend/api/agent.py:196
+#: backend/api/agent.py:198
 msgid "Authentication token required"
 msgstr "Authentication token required"
 
-#: backend/api/agent.py:300
+#: backend/api/agent.py:342
 msgid "Message failed security validation"
 msgstr "Message failed security validation"
 
-#: backend/api/agent.py:332
+#: backend/api/agent.py:374
 msgid "Message must be valid JSON"
 msgstr "Message must be valid JSON"
 
-#: backend/api/agent.py:641
+#: backend/api/agent.py:683
 msgid "Agent message validation failed: missing hostname and host_id"
 msgstr "Agent message validation failed: missing hostname and host_id"
 
-#: backend/api/agent.py:660
+#: backend/api/agent.py:702
 #, python-brace-format
 msgid "Agent message from unregistered host: {hostname}"
 msgstr "Agent message from unregistered host: {hostname}"
 
-#: backend/api/agent.py:677
+#: backend/api/agent.py:719
 #, python-brace-format
 msgid "Agent message from unapproved host: {hostname}"
 msgstr "Agent message from unapproved host: {hostname}"
 
-#: backend/api/agent.py:709
+#: backend/api/agent.py:751
 msgid "Message must include hostname or host_id for host validation"
 msgstr "Message must include hostname or host_id for host validation"
 
-#: backend/api/agent.py:727
+#: backend/api/agent.py:769
 msgid "Host ID no longer valid - please re-register"
 msgstr "Host ID no longer valid - please re-register"
 
-#: backend/api/agent.py:739
+#: backend/api/agent.py:781
 msgid "Host ID and hostname mismatch - please re-register"
 msgstr "Host ID and hostname mismatch - please re-register"
 
-#: backend/api/agent.py:756
+#: backend/api/agent.py:798
 msgid "Host must register before sending inventory data"
 msgstr "Host must register before sending inventory data"
 
-#: backend/api/agent.py:833
+#: backend/api/agent.py:875
 msgid "Missing or invalid authorization header"
 msgstr "Missing or invalid authorization header"
 
-#: backend/api/agent.py:858
+#: backend/api/agent.py:900
 msgid "Invalid host authentication"
 msgstr "Invalid host authentication"
 
-#: backend/api/agent.py:899 backend/api/packages.py:498
+#: backend/api/agent.py:941 backend/api/packages.py:498
 msgid "Installation completion recorded"
 msgstr "Installation completion recorded"
 
-#: backend/api/agent.py:905 backend/api/error_constants.py:193
+#: backend/api/agent.py:947 backend/api/error_constants.py:193
 msgid "Internal server error"
 msgstr "Internal server error"
 
@@ -4985,12 +4993,12 @@ msgstr "Failed to retrieve commercial antivirus status: %s"
 msgid "Machine link decided for host %s"
 msgstr "Machine link decided for host %s"
 
-#: backend/websocket/message_router.py:240
+#: backend/websocket/message_router.py:245
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "Unknown message type in queue: %s"
 
-#: backend/websocket/message_router.py:245
+#: backend/websocket/message_router.py:250
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "Error routing message type %(message_type)s: %(error)s"

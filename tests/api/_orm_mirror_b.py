@@ -851,3 +851,16 @@ class HostClockSample(TestBase):
     offset_ms = Column(Float, nullable=False)
     rtt_ms = Column(Float, nullable=True)
     method = Column(String(16), nullable=False)
+
+
+class ClockBound(TestBase):
+    """Phase 23.3 S3 -- tenant / site / tag clock offset bounds."""
+
+    __tablename__ = "clock_bound"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    scope_kind = Column(String(16), nullable=False)
+    scope_ref = Column(String(64), nullable=False, default="")
+    warning_ms = Column(Float, nullable=False)
+    critical_ms = Column(Float, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
+    updated_by = Column(String(255), nullable=True)

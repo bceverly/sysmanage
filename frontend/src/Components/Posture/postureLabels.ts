@@ -112,6 +112,7 @@ export const remedyText = (t: TFunction, remedy: string | null): string => {
         review_unmanaged_devices: t('posture.remedy.review_unmanaged_devices', 'Enroll each unmanaged device, or mark it as known with a reason.'),
         scan_for_malware: t('posture.remedy.scan_for_malware', 'Scan every host that can scan, at least once a month.'),
         review_malware_findings: t('posture.remedy.review_malware_findings', 'Quarantine, resolve or dismiss each high-severity finding.'),
+        resync_clocks: t('posture.remedy.resync_clocks', "Check each host's time service and resynchronize the clocks outside their bounds."),
         set_password_policy: t('posture.remedy.set_password_policy', 'The password policy is set in sysmanage.yaml; SysManage cannot change it for you.'),
     };
     return (remedy && texts[remedy]) || '';
@@ -160,6 +161,7 @@ export const ruleTitle = (t: TFunction, key: string, fallback?: string | null): 
         'PM-NET-UNMANAGED': t('advisor.curated.pmNetUnmanaged', 'No unmanaged devices are on your networks'),
         'PM-MALWARE-SCANNED': t('advisor.curated.pmMalwareScanned', 'Hosts are scanned for malware'),
         'PM-MALWARE-CLEAN': t('advisor.curated.pmMalwareClean', 'No open high-severity malware findings'),
+        'PM-CLOCKS-IN-BOUNDS': t('advisor.curated.pmClocksInBounds', "Every host's clock is within its bounds"),
         // Baseline pack (21.2)
         'SM-SEC-001': t('advisor.curated.smSec001', 'Critical vulnerability with a fix available'),
         'SM-SEC-002': t('advisor.curated.smSec002', 'High-severity vulnerability with a fix available'),

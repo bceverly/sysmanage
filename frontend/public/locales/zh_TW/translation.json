@@ -3957,7 +3957,8 @@
       "pmNetDiscovery": "正在探索您網路中的裝置",
       "pmNetUnmanaged": "您的網路中沒有未受管理的裝置",
       "pmMalwareClean": "沒有未處理的高嚴重性惡意軟體偵測結果",
-      "pmMalwareScanned": "主機已進行惡意軟體掃描"
+      "pmMalwareScanned": "主機已進行惡意軟體掃描",
+      "pmClocksInBounds": "每部主機的時鐘都在允許範圍內"
     },
     "curatedPack": {
       "baseline": {
@@ -4070,7 +4071,8 @@
       "failure": {
         "unsupported_platform": "此修復不支援該主機的平台",
         "dispatch_failed": "無法將變更傳送到主機；請查看伺服器記錄"
-      }
+      },
+      "resync_clocks": "檢查每部主機的時間服務，並重新同步超出允許範圍的時鐘。"
     },
     "saved": "威脅模型已儲存。改善清單將在下一次顧問評估時重新評估。",
     "stale": {

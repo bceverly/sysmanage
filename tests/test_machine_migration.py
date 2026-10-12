@@ -221,3 +221,48 @@ def test_q37_adds_the_clock_columns_and_history_idempotently():
     finally:
         if os.path.exists(db):
             os.unlink(db)
+
+
+def test_q38_adds_bounds_and_gives_the_role_to_every_admin_once():
+    """Phase 23.3 S3: the role is granted in the same migration (q36 lesson)."""
+    fd, db = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    os.unlink(db)
+    try:
+        _alembic(["--name", "shared", "upgrade", "head"], db)
+        _alembic(["upgrade", "q37clocksync"], db)
+        engine = create_engine(f"sqlite:///{db}")
+        with sessionmaker(bind=engine)() as session:
+            session.add_all(
+                [
+                    models.User(
+                        id=uuid.uuid4(),
+                        userid="admin@example.com",
+                        active=True,
+                        is_admin=True,
+                    ),
+                    models.User(
+                        id=uuid.uuid4(),
+                        userid="viewer@example.com",
+                        active=True,
+                        is_admin=False,
+                    ),
+                ]
+            )
+            session.commit()
+        engine.dispose()
+
+        _alembic(["upgrade", "head"], db)
+        assert {"scope_kind", "scope_ref", "warning_ms", "critical_ms"} <= _columns(
+            db, "clock_bound"
+        )
+        assert _grants(db, "Manage Time Sync") == 1
+        _alembic(["stamp", "q37clocksync"], db)
+        _alembic(["upgrade", "head"], db)
+        assert _grants(db, "Manage Time Sync") == 1  # never granted twice
+        _alembic(["downgrade", "q37clocksync"], db)
+        assert not _columns(db, "clock_bound")
+        assert _grants(db, "Manage Time Sync") == 0
+    finally:
+        if os.path.exists(db):
+            os.unlink(db)

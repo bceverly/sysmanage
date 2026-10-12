@@ -3957,7 +3957,8 @@
       "pmNetDiscovery": "네트워크의 장치가 검색되고 있습니다",
       "pmNetUnmanaged": "네트워크에 관리되지 않는 장치가 없습니다",
       "pmMalwareClean": "심각도가 높은 미해결 맬웨어 발견 사항이 없음",
-      "pmMalwareScanned": "호스트에서 맬웨어 스캔이 수행됨"
+      "pmMalwareScanned": "호스트에서 맬웨어 스캔이 수행됨",
+      "pmClocksInBounds": "모든 호스트의 시계가 허용 범위 내에 있음"
     },
     "curatedPack": {
       "baseline": {
@@ -4070,7 +4071,8 @@
       "failure": {
         "unsupported_platform": "이 수정은 호스트의 플랫폼을 지원하지 않습니다",
         "dispatch_failed": "변경 사항을 호스트로 보낼 수 없습니다. 서버 로그를 확인하세요"
-      }
+      },
+      "resync_clocks": "각 호스트의 시간 서비스를 확인하고 허용 범위를 벗어난 시계를 다시 동기화합니다."
     },
     "saved": "위협 모델이 저장되었습니다. 조치 항목 목록은 다음 어드바이저 실행 시 다시 평가됩니다.",
     "stale": {

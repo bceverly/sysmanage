@@ -3957,7 +3957,8 @@
       "pmNetDiscovery": "Geräte in Ihren Netzwerken werden erkannt",
       "pmNetUnmanaged": "In Ihren Netzwerken befinden sich keine nicht verwalteten Geräte",
       "pmMalwareClean": "Keine offenen Schadsoftware-Befunde mit hohem Schweregrad",
-      "pmMalwareScanned": "Hosts werden auf Schadsoftware gescannt"
+      "pmMalwareScanned": "Hosts werden auf Schadsoftware gescannt",
+      "pmClocksInBounds": "Die Uhr jedes Hosts liegt innerhalb ihrer Grenzwerte"
     },
     "curatedPack": {
       "baseline": {
@@ -4070,7 +4071,8 @@
       "failure": {
         "unsupported_platform": "diese Korrektur unterstützt die Plattform des Hosts nicht",
         "dispatch_failed": "die Änderung konnte nicht an den Host gesendet werden; siehe Serverprotokoll"
-      }
+      },
+      "resync_clocks": "Prüfen Sie den Zeitdienst jedes Hosts und synchronisieren Sie die Uhren außerhalb ihrer Grenzwerte neu."
     },
     "saved": "Bedrohungsmodell gespeichert. Die Maßnahmenliste wird beim nächsten Durchlauf des Beraters neu ausgewertet.",
     "stale": {

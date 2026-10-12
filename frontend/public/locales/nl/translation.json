@@ -3957,7 +3957,8 @@
       "pmNetDiscovery": "Apparaten in uw netwerken worden gedetecteerd",
       "pmNetUnmanaged": "Er staan geen onbeheerde apparaten in uw netwerken",
       "pmMalwareClean": "Geen openstaande malwarebevindingen met hoge ernst",
-      "pmMalwareScanned": "Hosts worden gescand op malware"
+      "pmMalwareScanned": "Hosts worden gescand op malware",
+      "pmClocksInBounds": "De klok van elke host valt binnen de grenswaarden"
     },
     "curatedPack": {
       "baseline": {
@@ -4070,7 +4071,8 @@
       "failure": {
         "unsupported_platform": "deze herstelactie ondersteunt het platform van de host niet",
         "dispatch_failed": "de wijziging kon niet naar de host worden verzonden; zie het serverlogboek"
-      }
+      },
+      "resync_clocks": "Controleer de tijdservice van elke host en synchroniseer de klokken buiten hun grenswaarden opnieuw."
     },
     "saved": "Dreigingsmodel opgeslagen. De actielijst wordt bij de volgende adviseursronde opnieuw geëvalueerd.",
     "stale": {

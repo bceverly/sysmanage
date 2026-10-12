@@ -3957,7 +3957,8 @@
       "pmNetDiscovery": "正在发现您网络中的设备",
       "pmNetUnmanaged": "您的网络中没有未托管的设备",
       "pmMalwareClean": "没有未处理的高严重性恶意软件检测结果",
-      "pmMalwareScanned": "主机已进行恶意软件扫描"
+      "pmMalwareScanned": "主机已进行恶意软件扫描",
+      "pmClocksInBounds": "每台主机的时钟都在允许范围内"
     },
     "curatedPack": {
       "baseline": {
@@ -4070,7 +4071,8 @@
       "failure": {
         "unsupported_platform": "此修复不支持该主机的平台",
         "dispatch_failed": "无法将更改发送到主机；请查看服务器日志"
-      }
+      },
+      "resync_clocks": "检查每台主机的时间服务，并重新同步超出允许范围的时钟。"
     },
     "saved": "威胁模型已保存。整改清单将在下一次顾问评估时重新评估。",
     "stale": {

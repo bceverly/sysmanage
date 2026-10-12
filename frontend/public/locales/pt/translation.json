@@ -3957,7 +3957,8 @@
       "pmNetDiscovery": "Os dispositivos das suas redes estão sendo descobertos",
       "pmNetUnmanaged": "Não há dispositivos não gerenciados nas suas redes",
       "pmMalwareClean": "Nenhuma constatação de malware aberta com gravidade alta",
-      "pmMalwareScanned": "Os hosts são verificados em busca de malware"
+      "pmMalwareScanned": "Os hosts são verificados em busca de malware",
+      "pmClocksInBounds": "O relógio de todos os hosts está dentro dos limites"
     },
     "curatedPack": {
       "baseline": {
@@ -4070,7 +4071,8 @@
       "failure": {
         "unsupported_platform": "esta correção não oferece suporte à plataforma do host",
         "dispatch_failed": "não foi possível enviar a alteração ao host; consulte o log do servidor"
-      }
+      },
+      "resync_clocks": "Verifique o serviço de hora de cada host e ressincronize os relógios fora dos limites."
     },
     "saved": "Modelo de ameaças salvo. A lista de pendências será reavaliada na próxima execução do assistente.",
     "stale": {

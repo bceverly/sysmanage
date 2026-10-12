@@ -13516,7 +13516,7 @@ proof (`date -s` on a VM).
       guessed into "in sync"; a stopped service is logged.  Served beside
       the server's own measurement so a service claiming "synchronized" on a
       clock measured seconds off stays visible.*
-- [ ] **The server's own clock first:** the server checks its sync against
+- [x] **The server's own clock first:** the server checks its sync against
       its configured reference and refuses to judge the fleet against a clock
       it cannot vouch for (the 22.9 canary watches it too).
       *S2: `services/server_clock.py` checks the server against
@@ -13524,12 +13524,30 @@ proof (`date -s` on a VM).
       air-gapped site names its own NTP server or sets `""`) -- median of 3
       SNTP queries, cached 5 min, verified only within 100 ms; unreachable
       or no reference is never "verified".  `GET /api/v1/time-sync/server`.
-      Live on beast: -1.7 ms, verified.  Refusing to judge (statuses
-      withheld while unverified) lands with the statuses in S3.*
+      Live on beast: -1.7 ms, verified.*
+      *S3 DONE 2026-10-12: a server measured more than 100 ms off its
+      reference reports every host as `server_clock_off` -- the status is
+      withheld, never the server's error charged to the hosts.  A reference
+      that is unreachable or not configured still judges, relative to the
+      server (what Kerberos and token expiry compare against), with
+      `server.verified: false` beside every status.*
 - [ ] **Customer-configurable bounds:** a warning and a critical offset
       (defaults 1 s and 5 s), set for the whole fleet and overridable per
       tenant, site and tag -- tighter for domain controllers and signing
       hosts, looser for lab machines.
+      *S3 (server) DONE 2026-10-12: `services/clock_status.py` resolves
+      tag > site > tenant > server-wide > built-in 1 s / 5 s; a host with
+      several bounded tags gets the TIGHTEST (a domain controller tagged
+      "lab" is still a domain controller).  Server-wide pair in DB Settings
+      (`time_sync_bounds`); overrides in the tenant table `clock_bound`
+      (migration `q38clockbound`, which also seeds the "Manage Time Sync"
+      role AND grants it to every admin in the same step -- the q36 lesson).
+      Statuses: ok / warning / critical, and unmeasured / stale (no
+      measurement for 30 min) / server_clock_off, none of which ever reads
+      as in sync.  API: `GET /api/v1/time-sync/hosts` (worst first, with
+      counts), `GET|PUT /time-sync/bounds/server`, `PUT|DELETE
+      /time-sync/bounds/override`; bad bounds refused with codes; changes
+      audited.  The setting screens are S4.*
 - [ ] **Fleet NTP policy (Pro+):** the NTP sources each host should use (an
       internal pair for an air-gapped site), applied to whichever service the
       host runs (chrony, ntpd, timesyncd, OpenNTPD, w32time), the service
@@ -13549,6 +13567,12 @@ proof (`date -s` on a VM).
       site/tag, time service and source), the offset on the host page with
       its history, a dashboard tile; posture (21.4) gains a "clocks in
       bounds" check.
+      *S3: the posture check is in -- Pro+ `PM-CLOCKS-IN-BOUNDS`
+      (advisor_engine, posture pack v4, every threat model) over a new
+      `clock_sync` coverage row: in bounds = ok, outside = failing,
+      unmeasured / stale / server off = unknown, so the item can never pass
+      on hosts nobody measured.  Remedy `resync_clocks` (guided, to the
+      Time Sync page that S4 builds).*
 - [ ] Docs + screenshots + 14-language i18n; tests per OS for the service
       parsers (recorded command output), the offset estimate, bound
       resolution (fleet / tenant / site / tag) and the resync dispatch.

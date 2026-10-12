@@ -75,6 +75,8 @@ GUIDED = {
     # 21.3 S5: scans and findings are both handled on the Malware page.
     "scan_for_malware": "malware",
     "review_malware_findings": "malware",
+    # 23.3 S3: the time sync page (S4) lists every clock out of its bounds.
+    "resync_clocks": "time_sync",
 }
 NONE = {"set_password_policy"}
 
