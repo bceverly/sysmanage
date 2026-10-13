@@ -253,3 +253,35 @@ def clear_override(db, scope_kind, scope_ref) -> bool:
     )
     db.commit()
     return bool(deleted)
+
+
+def clock_verdict(host, bounds: Dict[str, Any], server: Dict[str, Any], now: datetime):
+    """``"ok"`` / ``"warning"`` / ``"critical"``, or None when the clock
+    cannot be judged (unmeasured, stale, or the server's own clock is off).
+    For alerting (S6): nothing is raised -- or cleared -- on a measurement
+    that was withheld."""
+    status = host_status(host, bounds, server, now)
+    return status if status in (STATUS_OK, STATUS_WARNING, STATUS_CRITICAL) else None
+
+
+def site_names(site_ids) -> Dict[str, str]:
+    """Site names live with the coordinator (bootstrap database); best
+    effort -- an unnamed site is still grouped by its id."""
+    if not site_ids:
+        return {}
+    # pylint: disable=import-outside-toplevel
+    from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
+
+    from backend.persistence import db as dbm  # noqa: PLC0415
+
+    try:
+        with sessionmaker(bind=dbm.get_engine())() as main:
+            return {
+                str(site_id): name
+                for site_id, name in main.query(
+                    models.FederationSite.id, models.FederationSite.name
+                ).filter(models.FederationSite.id.in_(list(site_ids)))
+            }
+    except Exception:  # pylint: disable=broad-exception-caught
+        logger.exception("Clock status: could not read site names")
+        return {}

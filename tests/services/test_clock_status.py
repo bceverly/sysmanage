@@ -177,3 +177,23 @@ def test_posture_counts_clocks(session):
         "hosts_failing": 1,
         "hosts_unknown": 1,
     }
+
+
+def test_the_alerting_verdict_withholds_what_cannot_be_judged():
+    verdict = clock_status.clock_verdict
+    assert verdict(_h(1500.0), BOUNDS, VERIFIED, NOW) == "warning"
+    assert verdict(_h(6000.0), BOUNDS, VERIFIED, NOW) == "critical"
+    assert verdict(_h(1.0), BOUNDS, VERIFIED, NOW) == "ok"
+    assert verdict(_h(), BOUNDS, VERIFIED, NOW) is None
+    assert verdict(_h(1.0, age=timedelta(hours=2)), BOUNDS, VERIFIED, NOW) is None
+    off = {"reason": "server_off", "verified": False}
+    assert verdict(_h(9000.0), BOUNDS, off, NOW) is None
+
+
+def test_site_names_are_best_effort():
+    assert clock_status.site_names(set()) == {}
+    with patch.object(clock_status, "logger") as log, patch(
+        "backend.persistence.db.get_engine", side_effect=RuntimeError("no db")
+    ):
+        assert clock_status.site_names({"s1"}) == {}
+    log.exception.assert_called_once()

@@ -13606,11 +13606,29 @@ proof (`date -s` on a VM).
       *S5b: automatic on breach is a policy switch -- a clock at warning or
       critical is resynced through the S5a path, at most once an hour per
       host, requested by `system:ntp-policy` (audited like any other).*
-- [ ] **Alerts (Pro+, through `alerting_engine`, real time):** raised when a
+- [x] **Alerts (Pro+, through `alerting_engine`, real time):** raised when a
       host crosses its warning or critical bound or loses time sync, routed
       to the existing channels (email first), cleared when it recovers, rate
       limited, and digested when a whole site drifts together (a dead NTP
       server -- one alert, not a thousand).
+      *S6 DONE 2026-10-13: two new conditions in Pro+ `alerting_engine`
+      (`alerting_clock.pxi`): `clock_offset` (the MEASURED offset against
+      the host's bounds; `min_level` warning or critical) and
+      `time_sync_lost` (the host's service says stopped / unsynchronized).
+      Unlike the other nine conditions they are STATEFUL: one open alert
+      per host (never a new row every cooldown); warning -> critical
+      escalates in place and re-notifies; RESOLVED automatically on
+      recovery, with hysteresis (below `clear_ratio` x the warning bound)
+      and a "resolved" notification; unmeasured / stale / server-clock-off
+      raise and clear nothing (`clock_status.clock_verdict`); a resolved
+      alert still counts toward the cooldown, so a flapping clock is rate
+      limited.  SITE DIGEST: when `min_hosts` hosts and `min_fraction` of a
+      site go out together, ONE notification names them all (later hosts
+      at that site join it silently); every host keeps its own row, sharing
+      `alert.group_key` (migration `q41alertgroup`), and the digest is
+      resolved once, when its last host recovers.  Webhooks carry `status`
+      (firing / resolved) and the digest's `hosts`.  Rule editor: both
+      conditions with their defaults.  Messages in 14 languages.*
 - [x] **UI:** a fleet Time Sync view (offset per host, worst first, by
       site/tag, time service and source), the offset on the host page with
       its history, a dashboard tile; posture (21.4) gains a "clocks in

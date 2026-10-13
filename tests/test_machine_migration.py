@@ -333,3 +333,21 @@ def test_q40_adds_ntp_policy_tables_and_host_configuration():
     finally:
         if os.path.exists(db):
             os.unlink(db)
+
+
+def test_q41_adds_the_alert_group_key():
+    """Phase 23.3 S6."""
+    fd, db = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    os.unlink(db)
+    try:
+        _alembic(["--name", "shared", "upgrade", "head"], db)
+        _alembic(["upgrade", "head"], db)
+        assert "group_key" in _columns(db, "alert")
+        _alembic(["stamp", "q40ntppolicy"], db)
+        _alembic(["upgrade", "head"], db)
+        _alembic(["downgrade", "q40ntppolicy"], db)
+        assert "group_key" not in _columns(db, "alert")
+    finally:
+        if os.path.exists(db):
+            os.unlink(db)

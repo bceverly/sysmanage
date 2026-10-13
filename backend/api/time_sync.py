@@ -26,13 +26,12 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
 from backend.api.handlers.time_status_handlers import configured_servers
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.config import config
 from backend.i18n import _
-from backend.persistence import db as dbm
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
@@ -185,21 +184,7 @@ def _tags_by_host(db: Session, host_ids) -> Dict[str, List[Dict[str, str]]]:
 
 
 def _site_names(site_ids) -> Dict[str, str]:
-    """Site names live with the coordinator (bootstrap database); best
-    effort -- an unnamed site still filters by its id."""
-    if not site_ids:
-        return {}
-    try:
-        with sessionmaker(bind=dbm.get_engine())() as main:
-            return {
-                str(site_id): name
-                for site_id, name in main.query(
-                    models.FederationSite.id, models.FederationSite.name
-                ).filter(models.FederationSite.id.in_(list(site_ids)))
-            }
-    except Exception:  # pylint: disable=broad-exception-caught
-        logger.exception("Time sync: could not read site names")
-        return {}
+    return clock_status.site_names(site_ids)
 
 
 def _counts(rows) -> Dict[str, int]:

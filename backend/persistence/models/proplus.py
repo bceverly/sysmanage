@@ -533,9 +533,11 @@ class AlertRule(Base):
     # constraining this to an enum here would mean an OSS migration every time
     # a licensed engine gains a condition. The authoritative list is that
     # engine's CONDITION_EVALUATORS map; this comment tracks it.
-    condition_type = Column(
-        String(50), nullable=False
-    )  # "host_down", "reboot_required", "updates_available", "disk_usage", "cve_severity", "custom_metric", "process_resource", "config_drift"
+    # host_down, reboot_required, updates_available, disk_usage, cve_severity,
+    # custom_metric, process_resource, config_drift, malware_detected, and
+    # (Phase 23.3 S6, stateful: raised once, resolved on recovery)
+    # clock_offset, time_sync_lost.
+    condition_type = Column(String(50), nullable=False)
     condition_params = Column(JSON, nullable=False)  # Condition-specific parameters
     severity = Column(
         String(20), nullable=False
@@ -634,6 +636,9 @@ class Alert(Base):
     acknowledged_by = Column(String(255), nullable=True)  # Username
     resolved_at = Column(DateTime, nullable=True)
     notification_sent = Column(Boolean, nullable=False, default=False)
+    # Phase 23.3 S6: alerts notified together as one site digest share a key
+    # ("<rule id>:<site id or 'fleet'>"); NULL for an alert notified alone.
+    group_key = Column(String(128), nullable=True, index=True)
 
     # Relationships
     rule = relationship("AlertRule")
