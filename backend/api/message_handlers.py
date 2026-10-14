@@ -224,6 +224,18 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
                 "NTP policy result could not be recorded for %s",
                 getattr(connection, "hostname", "unknown"),
             )
+        # Phase 23.1 S6: and for a smartmontools install.
+        from backend.services import smartmontools_install  # noqa: PLC0415
+
+        try:
+            if smartmontools_install.record_result(db, message_data):
+                db.commit()
+        except Exception:  # pylint: disable=broad-except
+            db.rollback()
+            logger.exception(
+                "smartmontools install result could not be recorded for %s",
+                getattr(connection, "hostname", "unknown"),
+            )
 
     # Check if this is a script execution result
     if "execution_id" in message_data:

@@ -5111,6 +5111,20 @@
       "osPowerEvent": "Unexpected loss of power reported by the operating system: {{text}}",
       "osStorageEvent": "Storage error reported by the operating system: {{text}}",
       "osThermalEvent": "Temperature problem reported by the operating system: {{text}}"
+    },
+    "smartmontools": {
+      "auto": "Install automatically wherever it is needed",
+      "autoError": "The setting could not be saved.",
+      "autoLicense": "Automatic installation requires a SysManage Enterprise license.",
+      "failed": "Install failed: {{error}}",
+      "fleetNeeds": "Hosts whose drives can only be read with smartmontools, which is not installed: {{n}}",
+      "hostNeeds": "Some drives on this host can only be read with smartmontools, which is not installed.",
+      "install": "Install smartmontools",
+      "installAll": "Install smartmontools on these hosts",
+      "installError": "The install could not be requested.",
+      "queued": "Install requested.",
+      "queuedHosts": "Hosts where the install was requested: {{n}}",
+      "succeeded": "Installed. The drives are read at the next report."
     }
   }
 }

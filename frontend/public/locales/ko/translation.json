@@ -5111,6 +5111,20 @@
       "osPowerEvent": "운영 체제가 보고한 예기치 않은 전원 손실: {{text}}",
       "osStorageEvent": "운영 체제가 보고한 스토리지 오류: {{text}}",
       "osThermalEvent": "운영 체제가 보고한 온도 문제: {{text}}"
+    },
+    "smartmontools": {
+      "auto": "필요한 곳에 자동으로 설치",
+      "autoError": "설정을 저장할 수 없습니다.",
+      "autoLicense": "자동 설치에는 SysManage 엔터프라이즈 라이선스가 필요합니다.",
+      "failed": "설치 실패: {{error}}",
+      "fleetNeeds": "드라이브를 smartmontools로만 읽을 수 있지만 설치되어 있지 않은 호스트: {{n}}",
+      "hostNeeds": "이 호스트의 일부 드라이브는 smartmontools로만 읽을 수 있지만 설치되어 있지 않습니다.",
+      "install": "smartmontools 설치",
+      "installAll": "이 호스트에 smartmontools 설치",
+      "installError": "설치를 요청할 수 없습니다.",
+      "queued": "설치를 요청했습니다.",
+      "queuedHosts": "설치를 요청한 호스트: {{n}}",
+      "succeeded": "설치되었습니다. 드라이브는 다음 보고 때 읽힙니다."
     }
   }
 }

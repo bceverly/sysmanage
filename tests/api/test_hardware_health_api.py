@@ -131,3 +131,76 @@ def test_changing_events_needs_the_role(client, auth_headers, session):
             headers=auth_headers,
         )
     assert response.status_code == 403
+
+
+def _unreadable(session, fqdn):
+    host = _host(session, fqdn)
+    report = _report("warning", ident="ada0")
+    report["components"][0].update(
+        state="unknown", reasons=[{"code": "smartctl_absent"}], source=None
+    )
+    hardware_health.apply_report(session, host, report)
+    session.commit()
+    return host
+
+
+def test_smartmontools_recommended_and_installed(client, auth_headers, session):
+    needs = _unreadable(session, "freebsd.lab")
+    bad, _good, _silent = _seed(session)
+    body = client.get(
+        "/api/v1/hardware-health/smartmontools", headers=auth_headers
+    ).json()
+    assert [h["fqdn"] for h in body["hosts"]] == ["freebsd.lab"]
+    assert body["auto"] is False and body["hosts"][0]["install"] is None
+    view = client.get(f"/api/v1/host/{needs.id}/hardware-health", headers=auth_headers)
+    assert view.json()["smartmontools"] == {"recommended": True, "install": None}
+    with patch(
+        "backend.services.smartmontools_install.config_mgmt_dispatch.queue_command",
+        return_value="cmd-1",
+    ) as queue:
+        response = client.post(
+            "/api/v1/hardware-health/smartmontools/install",
+            json={"host_ids": [str(needs.id), str(bad.id)]},
+            headers=auth_headers,
+        )
+    assert response.json() == {"queued": 1, "skipped": 1}  # bad needs no smartctl
+    assert queue.call_args.args[3] == {"plan": {"packages": ["smartmontools"]}}
+    view = client.get(f"/api/v1/host/{needs.id}/hardware-health", headers=auth_headers)
+    assert view.json()["smartmontools"]["install"]["status"] == "queued"
+
+
+def test_smartmontools_install_needs_both_roles(client, auth_headers, session):
+    needs = _unreadable(session, "freebsd.lab")
+    with patch(
+        "backend.persistence.models.User.has_role",
+        side_effect=lambda role: role.value != "Add Package",
+        create=True,
+    ):
+        response = client.post(
+            "/api/v1/hardware-health/smartmontools/install",
+            json={"host_ids": [str(needs.id)]},
+            headers=auth_headers,
+        )
+    assert response.status_code == 403
+
+
+def test_automatic_install_is_licensed_and_consented(client, auth_headers, session):
+    with patch("backend.services.smartmontools_install.licensed", return_value=False):
+        response = client.put(
+            "/api/v1/hardware-health/smartmontools",
+            json={"auto": True},
+            headers=auth_headers,
+        )
+    assert response.status_code == 402
+    with patch(
+        "backend.services.smartmontools_install.licensed", return_value=True
+    ), patch(
+        "backend.services.smartmontools_install.set_auto", return_value=True
+    ) as set_auto:
+        response = client.put(
+            "/api/v1/hardware-health/smartmontools",
+            json={"auto": True},
+            headers=auth_headers,
+        )
+    assert response.status_code == 200, response.text
+    set_auto.assert_called_once_with(None, True)

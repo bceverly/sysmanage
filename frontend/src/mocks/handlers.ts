@@ -67,6 +67,9 @@ export const handlers = [
     HttpResponse.json({ counts: {}, hosts: [] }),
   ),
   http.get("*/api/v1/hardware-health/events", () => HttpResponse.json({ events: [] })),
+  http.get("*/api/v1/hardware-health/smartmontools", () =>
+    HttpResponse.json({ licensed: false, auto: false, hosts: [] }),
+  ),
   http.get("*/api/v1/time-sync/bounds", () =>
     HttpResponse.json({
       server: { warning_ms: 1000, critical_ms: 5000, source: "default", ref: "" },

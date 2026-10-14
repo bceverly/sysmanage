@@ -69,12 +69,25 @@ export interface HardwareEvent {
   note: string | null;
 }
 
+/** The last smartmontools install asked of a host (S6). */
+export interface ToolInstall {
+  package: string;
+  status: "queued" | "succeeded" | "failed";
+  attempts: number;
+  requested_by: string | null;
+  requested_at: string | null;
+  finished_at: string | null;
+  last_error: string | null;
+}
+
 export interface HostHardware {
   status: HardwareStatus;
   reported_at: string | null;
   sources: HardwareSource[];
   components: HardwareComponent[];
   events: HardwareEvent[];
+  /** A drive can only be read with smartctl, which is not installed. */
+  smartmontools?: { recommended: boolean; install: ToolInstall | null };
 }
 
 export interface FleetHost {
@@ -140,3 +153,44 @@ export const changeHardwareEvent = async (
 /** How many hosts need attention: failed or warning. */
 export const needingAttention = (counts: HardwareSummary["counts"]): number =>
   (counts.failed ?? 0) + (counts.warning ?? 0);
+
+export interface SmartmontoolsStatus {
+  /** Automatic install is Enterprise. */
+  licensed: boolean;
+  /** An administrator consented to the automatic install. */
+  auto: boolean;
+  hosts: {
+    host_id: string;
+    fqdn: string;
+    platform: string | null;
+    install: ToolInstall | null;
+  }[];
+}
+
+export const getSmartmontools = async (): Promise<SmartmontoolsStatus> =>
+  (
+    await axiosInstance.get<SmartmontoolsStatus>(
+      "/api/v1/hardware-health/smartmontools",
+    )
+  ).data;
+
+/** Only hosts it is recommended for are installed; the rest are skipped. */
+export const installSmartmontools = async (
+  hostIds: string[],
+): Promise<{ queued: number; skipped: number }> =>
+  (
+    await axiosInstance.post<{ queued: number; skipped: number }>(
+      "/api/v1/hardware-health/smartmontools/install",
+      { host_ids: hostIds },
+    )
+  ).data;
+
+export const setSmartmontoolsAuto = async (
+  auto: boolean,
+): Promise<{ auto: boolean }> =>
+  (
+    await axiosInstance.put<{ auto: boolean }>(
+      "/api/v1/hardware-health/smartmontools",
+      { auto },
+    )
+  ).data;

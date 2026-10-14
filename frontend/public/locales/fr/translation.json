@@ -5111,6 +5111,20 @@
       "osPowerEvent": "Coupure d'alimentation inattendue signalée par le système d'exploitation : {{text}}",
       "osStorageEvent": "Erreur de stockage signalée par le système d'exploitation : {{text}}",
       "osThermalEvent": "Problème de température signalé par le système d'exploitation : {{text}}"
+    },
+    "smartmontools": {
+      "auto": "Installer automatiquement partout où c'est nécessaire",
+      "autoError": "Le paramètre n'a pas pu être enregistré.",
+      "autoLicense": "L'installation automatique nécessite une licence SysManage Enterprise.",
+      "failed": "Échec de l'installation : {{error}}",
+      "fleetNeeds": "Hôtes dont les disques ne peuvent être lus qu'avec smartmontools, qui n'est pas installé : {{n}}",
+      "hostNeeds": "Certains disques de cet hôte ne peuvent être lus qu'avec smartmontools, qui n'est pas installé.",
+      "install": "Installer smartmontools",
+      "installAll": "Installer smartmontools sur ces hôtes",
+      "installError": "L'installation n'a pas pu être demandée.",
+      "queued": "Installation demandée.",
+      "queuedHosts": "Hôtes sur lesquels l'installation a été demandée : {{n}}",
+      "succeeded": "Installé. Les disques seront lus au prochain rapport."
     }
   }
 }

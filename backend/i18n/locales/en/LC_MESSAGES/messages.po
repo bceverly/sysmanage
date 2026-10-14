@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-14 06:04-0400\n"
+"POT-Creation-Date: 2026-10-14 09:04-0400\n"
 "Language: en\n"
 "Content-Type: text/plain; charset=ASCII\n"
 
@@ -79,9 +79,9 @@ msgstr "You do not have access to the selected account."
 #: backend/api/advisor.py:93 backend/api/query_packs.py:119
 #: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
-#: backend/api/hardware_health.py:165 backend/api/time_sync.py:66
-#: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:375
-#: backend/api/config_mgmt_profiles.py:136
+#: backend/api/hardware_health.py:195 backend/api/hardware_health.py:269
+#: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
+#: backend/api/posture.py:375 backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:151
 #, python-format
@@ -189,7 +189,7 @@ msgstr "Invalid host ID format"
 #: backend/api/grafana_integration.py:329
 #: backend/api/config_mgmt_remediation.py:433
 #: backend/api/image_mode_actions.py:86 backend/api/host_graylog.py:131
-#: backend/api/hardware_health.py:48 backend/api/hardware_health.py:51
+#: backend/api/hardware_health.py:65 backend/api/hardware_health.py:68
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
 #: backend/api/updates/report_routes.py:34
@@ -337,7 +337,7 @@ msgstr "Failed to process process status update: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:601 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:613 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "Host not registered"
@@ -2634,7 +2634,8 @@ msgstr "Agent registered and connected successfully"
 msgid "Failed to process heartbeat"
 msgstr "Failed to process heartbeat"
 
-#: backend/api/logging_settings.py:71 backend/api/maintenance_windows.py:62
+#: backend/api/logging_settings.py:71 backend/api/hardware_health.py:312
+#: backend/api/maintenance_windows.py:62
 msgid "Permission denied: administrator required"
 msgstr "Permission denied: administrator required"
 
@@ -2996,9 +2997,17 @@ msgstr "No antivirus default found for this OS"
 msgid "Failed to delete antivirus default: %s"
 msgstr "Failed to delete antivirus default: %s"
 
-#: backend/api/hardware_health.py:179
+#: backend/api/hardware_health.py:209
 msgid "Hardware event not found"
 msgstr "Hardware event not found"
+
+#: backend/api/hardware_health.py:318
+msgid "Automatic installation requires a SysManage Enterprise license."
+msgstr "Automatic installation requires a SysManage Enterprise license."
+
+#: backend/api/hardware_health.py:322
+msgid "The setting could not be saved"
+msgstr "The setting could not be saved"
 
 #: backend/api/scim.py:50
 msgid "SCIM provisioning requires a SysManage Professional+ license."
@@ -3381,34 +3390,34 @@ msgstr "This job has already finished"
 msgid "Cancelled by an operator"
 msgstr "Cancelled by an operator"
 
-#: backend/api/message_handlers.py:461
+#: backend/api/message_handlers.py:473
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "Failed to process diagnostic result: %s"
 
-#: backend/api/message_handlers.py:495
+#: backend/api/message_handlers.py:507
 msgid "Missing message_id in command acknowledgment"
 msgstr "Missing message_id in command acknowledgment"
 
-#: backend/api/message_handlers.py:562
+#: backend/api/message_handlers.py:574
 msgid "This session cannot acknowledge another host's message"
 msgstr "This session cannot acknowledge another host's message"
 
-#: backend/api/message_handlers.py:625
+#: backend/api/message_handlers.py:637
 msgid "Missing installation_id in package installation status"
 msgstr "Missing installation_id in package installation status"
 
-#: backend/api/message_handlers.py:645
+#: backend/api/message_handlers.py:657
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "Installation log entry not found for ID: %s"
 
-#: backend/api/message_handlers.py:691
+#: backend/api/message_handlers.py:703
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "Package installation {status} on agent {hostname}"
 
-#: backend/api/message_handlers.py:720
+#: backend/api/message_handlers.py:732
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "Failed to update package installation status: %s"

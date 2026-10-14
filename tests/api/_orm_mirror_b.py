@@ -952,3 +952,18 @@ class HardwareEvent(TestBase):
     resolved_at = Column(DateTime, nullable=True)
     resolved_by = Column(String(255), nullable=True)
     note = Column(String(500), nullable=True)
+
+
+class HardwareToolInstall(TestBase):
+    """Phase 23.1 S6 -- the last smartmontools install asked of a host."""
+
+    __tablename__ = "hardware_tool_install"
+    host_id = Column(GUID(), primary_key=True)
+    package = Column(String(64), nullable=False)
+    status = Column(String(16), nullable=False)
+    attempts = Column(Integer, nullable=False, default=0)
+    command_id = Column(String(36), nullable=True)
+    requested_by = Column(String(255), nullable=True)
+    requested_at = Column(DateTime, nullable=False)
+    finished_at = Column(DateTime, nullable=True)
+    last_error = Column(Text, nullable=True)

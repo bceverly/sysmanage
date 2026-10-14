@@ -5111,6 +5111,20 @@
       "osPowerEvent": "Interruzione di corrente imprevista segnalata dal sistema operativo: {{text}}",
       "osStorageEvent": "Errore di archiviazione segnalato dal sistema operativo: {{text}}",
       "osThermalEvent": "Problema di temperatura segnalato dal sistema operativo: {{text}}"
+    },
+    "smartmontools": {
+      "auto": "Installa automaticamente ovunque serva",
+      "autoError": "Impossibile salvare l'impostazione.",
+      "autoLicense": "L'installazione automatica richiede una licenza SysManage Enterprise.",
+      "failed": "Installazione non riuscita: {{error}}",
+      "fleetNeeds": "Host le cui unità possono essere lette solo con smartmontools, che non è installato: {{n}}",
+      "hostNeeds": "Alcune unità di questo host possono essere lette solo con smartmontools, che non è installato.",
+      "install": "Installa smartmontools",
+      "installAll": "Installa smartmontools su questi host",
+      "installError": "Impossibile richiedere l'installazione.",
+      "queued": "Installazione richiesta.",
+      "queuedHosts": "Host su cui è stata richiesta l'installazione: {{n}}",
+      "succeeded": "Installato. Le unità vengono lette al prossimo rapporto."
     }
   }
 }

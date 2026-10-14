@@ -195,8 +195,14 @@ class TestReconcile:
                 "not_equipped": 0,
                 "deferred": 0,
             }
-            # advisor (21.2), network discovery (21.6), malware (21.3): none licensed.
-            assert background_ticks.start_licensed_ticks() == [None, None, None]
+            # advisor (21.2), network discovery (21.6), malware (21.3),
+            # hardware (23.1): none licensed.
+            with patch.object(
+                background_ticks.hardware_tick.smartmontools_install,
+                "licensed",
+                return_value=False,
+            ):
+                assert background_ticks.start_licensed_ticks() == [None] * 4
 
 
 class TestRecorrelate:

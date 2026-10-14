@@ -17,6 +17,14 @@ first (``?open=true``: not yet resolved).
 ``POST /hardware-health/events/{id}/acknowledge`` and ``.../resolve`` --
 with an optional note; the Manage Hardware Health role.  Reasons travel as
 codes with parameters; the UI words them.
+
+``GET /hardware-health/smartmontools`` -- the hosts whose drives cannot be
+read without smartmontools (S6), each one's last install, and whether the
+automatic install is licensed (Enterprise) and consented to.
+``POST /hardware-health/smartmontools/install`` -- install it on the given
+hosts (Manage Hardware Health + Add Package).  ``PUT
+/hardware-health/smartmontools`` -- an administrator's consent to the
+automatic install.
 """
 
 import uuid
@@ -30,8 +38,9 @@ from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
+from backend.persistence.tenant_context import get_active_tenant
 from backend.security.roles import SecurityRoles
-from backend.services import clock_status, hardware_health
+from backend.services import clock_status, hardware_health, smartmontools_install
 from backend.services.audit_service import ActionType, AuditService, EntityType
 
 router = APIRouter(dependencies=[Depends(JWTBearer())])
@@ -39,6 +48,14 @@ router = APIRouter(dependencies=[Depends(JWTBearer())])
 
 class EventNote(BaseModel):
     note: Optional[str] = Field(default=None, max_length=500)
+
+
+class InstallRequest(BaseModel):
+    host_ids: List[str] = Field(min_length=1, max_length=5000)
+
+
+class AutoInstall(BaseModel):
+    auto: bool
 
 
 def _host_or_404(db: Session, host_id: str) -> models.Host:
@@ -56,7 +73,20 @@ def _host_or_404(db: Session, host_id: str) -> models.Host:
 async def host_hardware_health(
     host_id: str, db: Session = Depends(get_tenant_db)
 ) -> Dict[str, Any]:
-    return hardware_health.host_view(db, _host_or_404(db, host_id))
+    host = _host_or_404(db, host_id)
+    view = hardware_health.host_view(db, host)
+    view["smartmontools"] = {
+        "recommended": any(
+            r.get("code") == smartmontools_install.REASON
+            for c in view["components"]
+            if c["kind"] == "drive"
+            for r in c["reasons"]
+        ),
+        "install": smartmontools_install.installs_by_host(db, [host.id]).get(
+            str(host.id)
+        ),
+    }
+    return view
 
 
 def _approved(db: Session) -> List[models.Host]:
@@ -210,3 +240,99 @@ async def resolve_event(
     current_user=Depends(require_authenticated_user),
 ) -> Dict[str, Any]:
     return _change(db, event_id, body, current_user, "resolve")
+
+
+@router.get("/hardware-health/smartmontools")
+async def smartmontools_status(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+    hosts = smartmontools_install.recommended_hosts(db)
+    installs = smartmontools_install.installs_by_host(db, [h.id for h in hosts])
+    return {
+        "licensed": smartmontools_install.licensed(),
+        "auto": smartmontools_install.auto_enabled(get_active_tenant()),
+        "hosts": [
+            {
+                "host_id": str(h.id),
+                "fqdn": h.fqdn,
+                "platform": h.platform,
+                "install": installs.get(str(h.id)),
+            }
+            for h in hosts
+        ],
+    }
+
+
+def _require_install_roles(current_user) -> None:
+    _require_role(current_user)
+    if not current_user.has_role(SecurityRoles.ADD_PACKAGE):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: %s role required")
+            % SecurityRoles.ADD_PACKAGE.value,
+        )
+
+
+@router.post("/hardware-health/smartmontools/install")
+async def install_smartmontools(
+    body: InstallRequest,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """Only hosts it is recommended for: the rest are skipped, not errors."""
+    _require_install_roles(current_user)
+    wanted = set(body.host_ids)
+    hosts = [
+        h for h in smartmontools_install.recommended_hosts(db) if str(h.id) in wanted
+    ]
+    for host in hosts:
+        smartmontools_install.queue_install(db, host, current_user.userid)
+        AuditService.log(
+            db=db,
+            user_id=current_user.id,
+            username=current_user.userid,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=str(host.id),
+            entity_name=host.fqdn,
+            description=f"{smartmontools_install.PACKAGE} install queued",
+            details={"package": smartmontools_install.PACKAGE},
+        )
+    db.commit()
+    return {"queued": len(hosts), "skipped": len(wanted) - len(hosts)}
+
+
+@router.put("/hardware-health/smartmontools")
+async def set_smartmontools_auto(
+    body: AutoInstall,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """An administrator's consent; Enterprise."""
+    if not getattr(current_user, "is_admin", False):
+        raise HTTPException(
+            status_code=403, detail=_("Permission denied: administrator required")
+        )
+    _require_install_roles(current_user)
+    if body.auto and not smartmontools_install.licensed():
+        raise HTTPException(
+            status_code=402,
+            detail=_("Automatic installation requires a SysManage Enterprise license."),
+        )
+    tenant_id = get_active_tenant()
+    if not smartmontools_install.set_auto(tenant_id, body.auto):
+        raise HTTPException(status_code=500, detail=_("The setting could not be saved"))
+    AuditService.log(
+        db=db,
+        user_id=current_user.id,
+        username=current_user.userid,
+        action_type=ActionType.UPDATE,
+        entity_type=EntityType.SETTING,
+        entity_id=smartmontools_install.SETTING_AUTO,
+        entity_name=smartmontools_install.SETTING_AUTO,
+        description=(
+            f"Automatic {smartmontools_install.PACKAGE} install "
+            + ("enabled" if body.auto else "disabled")
+        ),
+        details={"auto": body.auto, "tenant_id": tenant_id},
+    )
+    db.commit()
+    return {"auto": body.auto}

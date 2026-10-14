@@ -29,6 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { getHostHardware } from '../../Services/hardwareHealth';
 import type { HardwareComponent, HostHardware } from '../../Services/hardwareHealth';
 import HardwareEventsList from './HardwareEventsList';
+import { HostSmartmontools } from './SmartmontoolsRecommendation';
 import {
     kindLabel,
     metricsText,
@@ -88,7 +89,11 @@ const Sources: React.FC<{ hardware: HostHardware }> = ({ hardware }) => {
     );
 };
 
-const Body: React.FC<{ hardware: HostHardware; onChanged: () => void }> = ({ hardware, onChanged }) => {
+const Body: React.FC<{ hostId: string; hardware: HostHardware; onChanged: () => void }> = ({
+    hostId,
+    hardware,
+    onChanged,
+}) => {
     const { t } = useTranslation();
     const [showSensors, setShowSensors] = useState(false);
     const isQuietSensor = (c: HardwareComponent) => c.kind === 'sensor' && c.state === 'ok';
@@ -99,6 +104,12 @@ const Body: React.FC<{ hardware: HostHardware; onChanged: () => void }> = ({ har
     }
     return (
         <>
+            <HostSmartmontools
+                hostId={hostId}
+                recommended={Boolean(hardware.smartmontools?.recommended)}
+                install={hardware.smartmontools?.install ?? null}
+                onChanged={onChanged}
+            />
             {main.length > 0 && <ComponentRows rows={main} />}
             {quiet.length > 0 && (
                 <Box sx={{ mt: 1 }}>
@@ -158,7 +169,7 @@ const HostHardwareCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                 </Stack>
                 {error && <Alert severity="error">{t('hardwareHealth.card.loadError', 'Could not load the hardware health.')}</Alert>}
                 {!error && !hardware && <CircularProgress size={24} />}
-                {hardware && <Body hardware={hardware} onChanged={() => void load()} />}
+                {hardware && <Body hostId={hostId} hardware={hardware} onChanged={() => void load()} />}
             </CardContent>
         </Card>
     );

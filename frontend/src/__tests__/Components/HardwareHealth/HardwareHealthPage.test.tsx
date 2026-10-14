@@ -17,7 +17,12 @@ vi.mock("../../../Services/permissions", () => ({
 }));
 vi.mock("../../../Services/hardwareHealth", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../../Services/hardwareHealth")>();
-  return { ...actual, getFleetHardware: vi.fn(), getHardwareEvents: vi.fn() };
+  return {
+    ...actual,
+    getFleetHardware: vi.fn(),
+    getHardwareEvents: vi.fn(),
+    getSmartmontools: vi.fn().mockResolvedValue({ licensed: false, auto: false, hosts: [] }),
+  };
 });
 
 import { getFleetHardware, getHardwareEvents } from "../../../Services/hardwareHealth";

@@ -96,6 +96,7 @@ def test_db():
         NtpPolicyState,
         HardwareComponent,
         HardwareEvent,
+        HardwareToolInstall,
         AirgapCollectionRun,
         AirgapCollectionSchedule,
         AirgapCollectionTarget,
@@ -567,6 +568,7 @@ def test_db():
     original_ntp_policy_state = models.NtpPolicyState
     original_hardware_component = models.HardwareComponent
     original_hardware_event = models.HardwareEvent
+    original_hardware_tool_install = models.HardwareToolInstall
     models.Host = Host
     models.User = User
     models.SecurityRoleGroup = SecurityRoleGroup
@@ -596,6 +598,7 @@ def test_db():
     models.NtpPolicyState = NtpPolicyState
     models.HardwareComponent = HardwareComponent
     models.HardwareEvent = HardwareEvent
+    models.HardwareToolInstall = HardwareToolInstall
     models.HostFirewallRole = HostFirewallRole
 
     # Override the get_engine dependency
@@ -656,6 +659,7 @@ def test_db():
     models.NtpPolicyState = original_ntp_policy_state
     models.HardwareComponent = original_hardware_component
     models.HardwareEvent = original_hardware_event
+    models.HardwareToolInstall = original_hardware_tool_install
 
     # Clean up database connections.  In-memory DB: disposing the engine drops
     # the StaticPool's single connection and the schema with it -- no temp file

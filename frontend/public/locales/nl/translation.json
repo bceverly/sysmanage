@@ -5111,6 +5111,20 @@
       "osPowerEvent": "Onverwachte stroomonderbreking gemeld door het besturingssysteem: {{text}}",
       "osStorageEvent": "Opslagfout gemeld door het besturingssysteem: {{text}}",
       "osThermalEvent": "Temperatuurprobleem gemeld door het besturingssysteem: {{text}}"
+    },
+    "smartmontools": {
+      "auto": "Automatisch installeren waar het nodig is",
+      "autoError": "De instelling kon niet worden opgeslagen.",
+      "autoLicense": "Automatische installatie vereist een SysManage Enterprise-licentie.",
+      "failed": "Installatie mislukt: {{error}}",
+      "fleetNeeds": "Hosts waarvan de schijven alleen met smartmontools kunnen worden gelezen, dat niet is geïnstalleerd: {{n}}",
+      "hostNeeds": "Sommige schijven op deze host kunnen alleen worden gelezen met smartmontools, dat niet is geïnstalleerd.",
+      "install": "smartmontools installeren",
+      "installAll": "smartmontools op deze hosts installeren",
+      "installError": "De installatie kon niet worden aangevraagd.",
+      "queued": "Installatie aangevraagd.",
+      "queuedHosts": "Hosts waarop de installatie is aangevraagd: {{n}}",
+      "succeeded": "Geïnstalleerd. De schijven worden bij het volgende rapport gelezen."
     }
   }
 }

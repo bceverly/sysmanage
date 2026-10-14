@@ -13352,8 +13352,35 @@ with consent); S7 proof on constructed failures + docs + screenshots +
       ran inside a fresh agent's startup collections, so the proof now
       lets the agent settle first -- a long-running agent is the real case.
       The alert EMAIL is the S7 proof.*
-- [ ] Recommend (Enterprise auto-deploy, as ClamAV in 21.3): install
+- [x] Recommend (Enterprise auto-deploy, as ClamAV in 21.3): install
       smartmontools where absent, with the operator's consent.
+      *S6 (2026-10-14) -- in code (migration `q43hwtools`, not yet
+      applied): a host is RECOMMENDED smartmontools when one of its drives
+      is `unknown` for `smartctl_absent` (SATA / SAS on Linux, and now on
+      FreeBSD too -- the agent read only NVMe there; `geom disk list`,
+      NVMe and empty card readers skipped).  OSS: the host card and the
+      fleet page say so; an operator installs it on one host or on all of
+      them (Manage Hardware Health AND Add Package), through the generic
+      deployment plan, done when the agent says so (`record_result`).
+      Enterprise (fleet bulk operations): an administrator's consent
+      (`hardware_health.auto_install_smartmontools`, off by default, per
+      tenant) lets the hardware tick install it itself -- backoff 1 h to a
+      day, never given up on, undelivered plans count as failed, retried an
+      hour after a "success" that left the drives unreadable, audited as
+      `system:smartmontools-auto-install`.  Debian / Ubuntu install with
+      `--no-install-recommends` (the package recommends a mail client, which
+      pulls in postfix).  Paravirtual disks (virtio, Xen) are no longer
+      treated as SMART drives -- every VM would have been "recommended" a
+      package that cannot read them.*
+      *Manual install live-proven 2026-10-14 (`scripts/smartmontools_vm_proof.py`,
+      gdr-t14, a throwaway Ubuntu VM with a QEMU SATA disk and smartmontools
+      removed -- no lab machine has a SATA drive without it): disk
+      `unknown` / `smartctl_absent`, host recommended, Install -> the agent
+      reported success in 194 s -> the disk read `ok` through smartctl 254 s
+      after the request, recommendation gone.  `--mode auto` (after the
+      gate fix + restart): consent given -> the hardware tick installed it
+      itself (`system:smartmontools-auto-install`), success 240 s after
+      consent, disk read `ok` at 270 s; consent withdrawn again.*
 - [ ] **Proof on real failures, not just fixtures:** file-backed ZFS pool
       with a device offlined/corrupted, mdadm array on loop devices with a
       member failed, recorded `smartctl` JSON from failing drives; an email

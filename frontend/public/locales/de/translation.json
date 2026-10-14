@@ -5111,6 +5111,20 @@
       "osPowerEvent": "Vom Betriebssystem gemeldeter unerwarteter Stromausfall: {{text}}",
       "osStorageEvent": "Vom Betriebssystem gemeldeter Speicherfehler: {{text}}",
       "osThermalEvent": "Vom Betriebssystem gemeldetes Temperaturproblem: {{text}}"
+    },
+    "smartmontools": {
+      "auto": "Überall automatisch installieren, wo es benötigt wird",
+      "autoError": "Die Einstellung konnte nicht gespeichert werden.",
+      "autoLicense": "Die automatische Installation erfordert eine SysManage Enterprise-Lizenz.",
+      "failed": "Installation fehlgeschlagen: {{error}}",
+      "fleetNeeds": "Hosts, deren Laufwerke nur mit smartmontools gelesen werden können, das nicht installiert ist: {{n}}",
+      "hostNeeds": "Einige Laufwerke dieses Hosts können nur mit smartmontools gelesen werden, das nicht installiert ist.",
+      "install": "smartmontools installieren",
+      "installAll": "smartmontools auf diesen Hosts installieren",
+      "installError": "Die Installation konnte nicht angefordert werden.",
+      "queued": "Installation angefordert.",
+      "queuedHosts": "Hosts, auf denen die Installation angefordert wurde: {{n}}",
+      "succeeded": "Installiert. Die Laufwerke werden beim nächsten Bericht gelesen."
     }
   }
 }

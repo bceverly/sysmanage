@@ -26,6 +26,7 @@ import { getFleetHardware, getHardwareEvents, STATUS_ORDER } from '../Services/h
 import type { FleetHardware, FleetHost, HardwareEvent, HardwareStatus } from '../Services/hardwareHealth';
 import FleetHardwareGrid from '../Components/HardwareHealth/FleetHardwareGrid';
 import HardwareEventsList from '../Components/HardwareHealth/HardwareEventsList';
+import { FleetSmartmontools } from '../Components/HardwareHealth/SmartmontoolsRecommendation';
 import { statusColor, statusLabel } from '../Components/HardwareHealth/hardwareHealthLabels';
 import { useVisiblePolling } from '../hooks/useVisiblePolling';
 
@@ -112,6 +113,7 @@ const HardwareHealth: React.FC = () => {
     return (
         <Box>
             <Typography variant="h5" sx={{ mb: 2 }}>{t('hardwareHealth.title', 'Hardware Health')}</Typography>
+            <FleetSmartmontools onChanged={() => void load()} />
             <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', rowGap: 1 }}>
                 {STATUS_ORDER.filter(s => data.counts[s]).map(s => (
                     <Chip

@@ -22,6 +22,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Index,
+    Integer,
     String,
     Text,
     UniqueConstraint,
@@ -81,3 +82,29 @@ class HardwareEvent(Base):
     resolved_at = Column(DateTime, nullable=True)
     resolved_by = Column(String(255), nullable=True)
     note = Column(String(500), nullable=True)
+
+
+class HardwareToolInstall(Base):
+    """The last smartmontools install the server asked a host for (23.1 S6).
+
+    A host whose drives cannot be read (``smartctl_absent``) is RECOMMENDED
+    smartmontools; an operator installs it from the host or the fleet page,
+    or -- Enterprise, and only once an administrator has turned it on --
+    the server does.  One row per host: ``status`` is what the agent answered
+    (matched by ``command_id``), ``attempts`` counts automatic pushes, and
+    ``requested_by`` is the operator or ``system:smartmontools-auto-install``.
+    """
+
+    __tablename__ = "hardware_tool_install"
+
+    host_id = Column(
+        GUID(), ForeignKey("host.id", ondelete="CASCADE"), primary_key=True
+    )
+    package = Column(String(64), nullable=False)
+    status = Column(String(16), nullable=False)  # queued|succeeded|failed
+    attempts = Column(Integer, nullable=False, default=0)
+    command_id = Column(String(36), nullable=True, index=True)
+    requested_by = Column(String(255), nullable=True)
+    requested_at = Column(DateTime, nullable=False)
+    finished_at = Column(DateTime, nullable=True)
+    last_error = Column(Text, nullable=True)

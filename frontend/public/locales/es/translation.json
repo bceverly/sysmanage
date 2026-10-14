@@ -5111,6 +5111,20 @@
       "osPowerEvent": "Pérdida inesperada de alimentación notificada por el sistema operativo: {{text}}",
       "osStorageEvent": "Error de almacenamiento notificado por el sistema operativo: {{text}}",
       "osThermalEvent": "Problema de temperatura notificado por el sistema operativo: {{text}}"
+    },
+    "smartmontools": {
+      "auto": "Instalar automáticamente donde sea necesario",
+      "autoError": "No se pudo guardar la configuración.",
+      "autoLicense": "La instalación automática requiere una licencia de SysManage Enterprise.",
+      "failed": "La instalación falló: {{error}}",
+      "fleetNeeds": "Hosts cuyas unidades solo se pueden leer con smartmontools, que no está instalado: {{n}}",
+      "hostNeeds": "Algunas unidades de este host solo se pueden leer con smartmontools, que no está instalado.",
+      "install": "Instalar smartmontools",
+      "installAll": "Instalar smartmontools en estos hosts",
+      "installError": "No se pudo solicitar la instalación.",
+      "queued": "Instalación solicitada.",
+      "queuedHosts": "Hosts en los que se solicitó la instalación: {{n}}",
+      "succeeded": "Instalado. Las unidades se leen en el próximo informe."
     }
   }
 }

@@ -5111,6 +5111,20 @@
       "osPowerEvent": "操作系统报告的意外断电：{{text}}",
       "osStorageEvent": "操作系统报告的存储错误：{{text}}",
       "osThermalEvent": "操作系统报告的温度问题：{{text}}"
+    },
+    "smartmontools": {
+      "auto": "在需要的地方自动安装",
+      "autoError": "无法保存该设置。",
+      "autoLicense": "自动安装需要 SysManage 企业许可证。",
+      "failed": "安装失败：{{error}}",
+      "fleetNeeds": "驱动器只能通过 smartmontools 读取但尚未安装它的主机：{{n}}",
+      "hostNeeds": "此主机上的某些驱动器只能通过 smartmontools 读取，但它尚未安装。",
+      "install": "安装 smartmontools",
+      "installAll": "在这些主机上安装 smartmontools",
+      "installError": "无法请求安装。",
+      "queued": "已请求安装。",
+      "queuedHosts": "已请求安装的主机：{{n}}",
+      "succeeded": "已安装。驱动器将在下一次报告时读取。"
     }
   }
 }

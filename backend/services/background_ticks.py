@@ -9,7 +9,12 @@ add its own import and call there. Each tick owns its gate and its error
 handling in a ``start_if_licensed()``; this only calls them in turn.
 """
 
-from backend.services import advisor_tick, malware_tick, network_discovery_policy
+from backend.services import (
+    advisor_tick,
+    hardware_tick,
+    malware_tick,
+    network_discovery_policy,
+)
 
 
 def start_licensed_ticks():
@@ -18,4 +23,5 @@ def start_licensed_ticks():
         advisor_tick.start_if_licensed(),  # 21.2 advisor evaluation
         network_discovery_policy.start_if_licensed(),  # 21.6 discovery policy
         malware_tick.start_if_licensed(),  # 21.3 malware rule feed
+        hardware_tick.start_if_licensed(),  # 23.1 smartmontools auto-install
     ]

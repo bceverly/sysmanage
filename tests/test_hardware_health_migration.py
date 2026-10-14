@@ -60,3 +60,21 @@ def test_q42_builds_hardware_health_and_grants_the_role_once():
     finally:
         if os.path.exists(db):
             os.unlink(db)
+
+
+def test_q43_builds_the_install_table_idempotently():
+    fd, db = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    os.unlink(db)
+    try:
+        _alembic(["--name", "shared", "upgrade", "head"], db)
+        _alembic(["upgrade", "head"], db)
+        columns = {"host_id", "package", "status", "attempts", "command_id"}
+        assert columns <= _columns(db, "hardware_tool_install")
+        _alembic(["stamp", "q42hwhealth"], db)
+        _alembic(["upgrade", "head"], db)  # over the table it already built
+        _alembic(["downgrade", "q42hwhealth"], db)
+        assert not _columns(db, "hardware_tool_install")
+    finally:
+        if os.path.exists(db):
+            os.unlink(db)

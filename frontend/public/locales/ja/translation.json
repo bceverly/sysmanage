@@ -5111,6 +5111,20 @@
       "osPowerEvent": "オペレーティングシステムが報告した予期しない電源断: {{text}}",
       "osStorageEvent": "オペレーティングシステムが報告したストレージエラー: {{text}}",
       "osThermalEvent": "オペレーティングシステムが報告した温度の問題: {{text}}"
+    },
+    "smartmontools": {
+      "auto": "必要な場所に自動でインストールする",
+      "autoError": "設定を保存できませんでした。",
+      "autoLicense": "自動インストールには SysManage Enterprise ライセンスが必要です。",
+      "failed": "インストールに失敗しました: {{error}}",
+      "fleetNeeds": "smartmontools でしかドライブを読み取れないのに、それがインストールされていないホスト: {{n}}",
+      "hostNeeds": "このホストの一部のドライブは smartmontools でしか読み取れませんが、インストールされていません。",
+      "install": "smartmontools をインストール",
+      "installAll": "これらのホストに smartmontools をインストール",
+      "installError": "インストールを要求できませんでした。",
+      "queued": "インストールを要求しました。",
+      "queuedHosts": "インストールを要求したホスト: {{n}}",
+      "succeeded": "インストールしました。ドライブは次回のレポートで読み取られます。"
     }
   }
 }

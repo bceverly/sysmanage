@@ -5111,6 +5111,20 @@
       "osPowerEvent": "作業系統回報的意外斷電：{{text}}",
       "osStorageEvent": "作業系統回報的儲存錯誤：{{text}}",
       "osThermalEvent": "作業系統回報的溫度問題：{{text}}"
+    },
+    "smartmontools": {
+      "auto": "在需要的地方自動安裝",
+      "autoError": "無法儲存該設定。",
+      "autoLicense": "自動安裝需要 SysManage Enterprise 授權。",
+      "failed": "安裝失敗：{{error}}",
+      "fleetNeeds": "磁碟機只能透過 smartmontools 讀取但尚未安裝它的主機：{{n}}",
+      "hostNeeds": "此主機上的部分磁碟機只能透過 smartmontools 讀取，但它尚未安裝。",
+      "install": "安裝 smartmontools",
+      "installAll": "在這些主機上安裝 smartmontools",
+      "installError": "無法要求安裝。",
+      "queued": "已要求安裝。",
+      "queuedHosts": "已要求安裝的主機：{{n}}",
+      "succeeded": "已安裝。磁碟機將在下一次報告時讀取。"
     }
   }
 }
