@@ -757,7 +757,8 @@
       "title": "Dashboard Settings"
     },
     "updates": "Updates",
-    "clocksOutOfBounds": "Clocks out of bounds"
+    "clocksOutOfBounds": "Clocks out of bounds",
+    "hardwareNeedsAttention": "Hardware needing attention"
   },
   "dataGrid": {
     "columnVisibility": "Column Visibility",
@@ -2451,7 +2452,8 @@
     "hostMetrics": "Host Metrics",
     "assetDiscovery": "Network Discovery",
     "malware": "Malware",
-    "timeSync": "Time Sync"
+    "timeSync": "Time Sync",
+    "hardwareHealth": "Hardware Health"
   },
   "notifications": {
     "applicationUpdates": "Application Updates",
@@ -4978,6 +4980,137 @@
       "serversHelp": "Host names or IP addresses, separated by spaces or commas",
       "title": "NTP policy",
       "wants": "Policy servers: {{servers}}"
+    }
+  },
+  "hardwareHealth": {
+    "card": {
+      "hideSensors": "Hide healthy sensors",
+      "loadError": "Could not load the hardware health.",
+      "recentEvents": "Recent events",
+      "reportedAt": "Reported {{when}}",
+      "showSensors": "Show {{n}} healthy sensors",
+      "sources": "Sources:",
+      "title": "Hardware health"
+    },
+    "empty": "There are no approved hosts yet.",
+    "event": {
+      "changed": "{{from}} -> {{to}}",
+      "new": "New: {{to}}"
+    },
+    "events": {
+      "acknowledge": "Acknowledge",
+      "acknowledgeTitle": "Acknowledge this event",
+      "acknowledgedBy": "Acknowledged by {{user}}",
+      "change": "Change",
+      "component": "Component",
+      "host": "Host",
+      "none": "No hardware events.",
+      "note": "Note (optional)",
+      "openTitle": "Unresolved events",
+      "resolve": "Resolve",
+      "resolveTitle": "Resolve this event",
+      "resolvedBy": "Resolved by {{user}}",
+      "when": "Time",
+      "why": "Reason"
+    },
+    "filter": {
+      "all": "All",
+      "search": "Host",
+      "site": "Site",
+      "status": "Status",
+      "tag": "Tag"
+    },
+    "grid": {
+      "components": "Components",
+      "host": "Host",
+      "platform": "OS",
+      "problems": "Needs attention",
+      "reported": "Last report",
+      "site": "Site",
+      "status": "Status"
+    },
+    "kind": {
+      "array": "RAID array",
+      "drive": "Drive",
+      "memory": "Memory",
+      "pool": "Storage pool",
+      "sensor": "Sensor",
+      "system": "Operating system"
+    },
+    "loadError": "Could not load the fleet hardware.",
+    "metric": {
+      "hours": "Power-on hours: {{value}}",
+      "temperature": "{{value}} C",
+      "wear": "{{value}}% worn"
+    },
+    "source": {
+      "absent": "not present",
+      "failed": "failed",
+      "ran": "read"
+    },
+    "status": {
+      "failed": "Failed",
+      "gone": "No longer reported",
+      "ok": "Healthy",
+      "stale": "No recent report",
+      "unknown": "Not judged",
+      "unmeasured": "Not reported",
+      "warning": "Warning"
+    },
+    "statusHelp": {
+      "failed": "At least one component has failed.",
+      "ok": "Every component the host reported is healthy.",
+      "stale": "The last report is more than an hour old. The host is probably not connected.",
+      "unknown": "The host reported its hardware, but nothing could judge at least one component.",
+      "unmeasured": "The host has never reported its hardware. Its agent may be too old, or it has not connected.",
+      "warning": "At least one component needs attention."
+    },
+    "title": "Hardware Health",
+    "reason": {
+      "arrayDegraded": "Degraded: {{active}} of {{total}} devices active",
+      "arrayInactive": "The array is not active ({{activity}})",
+      "arrayState": "Array state: {{state}}",
+      "cpuSpeedLimited": "The CPU is held to {{percent}}% of its speed",
+      "dataErrors": "Data errors: {{detail}}",
+      "deviceErrors": "Device errors: {{read}} read, {{write}} write, {{cksum}} checksum",
+      "deviceNotOnline": "{{device}} is {{state}}",
+      "diskutilFailed": "diskutil could not describe the disk",
+      "enduranceUsed": "{{percent}}% of rated endurance used",
+      "failedMembers": "Failed members: {{members}}",
+      "healthStatus": "Health: {{status}}",
+      "mediaErrors": "Media and data integrity errors: {{n}}",
+      "memberState": "Member: {{member}}",
+      "memoryCorrected": "Corrected memory errors: {{n}}",
+      "memoryCountsUnreadable": "Memory error counts could not be read",
+      "memoryUncorrected": "Uncorrected memory errors: {{n}}",
+      "offlineUncorrectable": "Uncorrectable sectors: {{n}}",
+      "operationalStatus": "Operational status: {{status}}",
+      "pendingSectors": "Sectors pending reallocation: {{n}}",
+      "pmrReadOnly": "The persistent memory region is read-only",
+      "poolHealth": "Pool state: {{health}}",
+      "readErrors": "Read errors: {{n}}",
+      "readOnly": "The drive has made itself read-only",
+      "reallocatedSectors": "Reallocated sectors: {{n}}",
+      "rebuilding": "Rebuilding, {{percent}}% done",
+      "reliabilityDegraded": "Reliability is degraded by media or internal errors",
+      "sensorStatus": "{{sensor}}: {{value}} ({{status}})",
+      "smartFailed": "The SMART overall health check failed",
+      "smartNotRead": "The health log could not be read",
+      "smartStatus": "SMART status: {{status}}",
+      "smartctlAbsent": "smartctl is not installed, so SMART was not read",
+      "smartctlFailed": "smartctl failed (exit code {{rc}})",
+      "spareBelowThreshold": "Spare capacity is below its threshold",
+      "temperatureCritical": "{{value}} C, at or above its critical limit of {{limit}} C",
+      "temperatureHigh": "{{value}} C, at or above its limit of {{limit}} C",
+      "temperatureThreshold": "Temperature is beyond a threshold",
+      "thermalUnreported": "The thermal state was not reported",
+      "thermalWarning": "Thermal warning level {{level}}",
+      "volatileBackupFailed": "The volatile memory backup has failed",
+      "writeErrors": "Write errors: {{n}}",
+      "osMemoryEvent": "Hardware error reported by the operating system: {{text}}",
+      "osPowerEvent": "Unexpected loss of power reported by the operating system: {{text}}",
+      "osStorageEvent": "Storage error reported by the operating system: {{text}}",
+      "osThermalEvent": "Temperature problem reported by the operating system: {{text}}"
     }
   }
 }

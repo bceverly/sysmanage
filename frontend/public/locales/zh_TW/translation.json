@@ -757,7 +757,8 @@
       "title": "儀表板設定"
     },
     "updates": "更新",
-    "clocksOutOfBounds": "時鐘偏差超出閾值"
+    "clocksOutOfBounds": "時鐘偏差超出閾值",
+    "hardwareNeedsAttention": "需要注意的硬體"
   },
   "dataGrid": {
     "columnVisibility": "欄位可見性",
@@ -2432,7 +2433,8 @@
     "hostMetrics": "主機指標",
     "assetDiscovery": "網路探索",
     "malware": "惡意軟體",
-    "timeSync": "時間同步"
+    "timeSync": "時間同步",
+    "hardwareHealth": "硬體健康"
   },
   "notifications": {
     "applicationUpdates": "應用程式更新",
@@ -4978,6 +4980,137 @@
       "serversHelp": "主機名稱或 IP 位址，以空格或逗號分隔",
       "title": "NTP 策略",
       "wants": "策略伺服器：{{servers}}"
+    }
+  },
+  "hardwareHealth": {
+    "card": {
+      "hideSensors": "隱藏健康的感測器",
+      "loadError": "無法載入硬體健康狀況。",
+      "recentEvents": "最近事件",
+      "reportedAt": "回報於 {{when}}",
+      "showSensors": "顯示 {{n}} 個健康的感測器",
+      "sources": "來源：",
+      "title": "硬體健康狀況"
+    },
+    "empty": "尚無已核准的主機。",
+    "event": {
+      "changed": "{{from}} -> {{to}}",
+      "new": "新增：{{to}}"
+    },
+    "events": {
+      "acknowledge": "確認",
+      "acknowledgeTitle": "確認此事件",
+      "acknowledgedBy": "已由 {{user}} 確認",
+      "change": "變更",
+      "component": "元件",
+      "host": "主機",
+      "none": "沒有硬體事件。",
+      "note": "備註（選用）",
+      "openTitle": "未解決的事件",
+      "resolve": "解決",
+      "resolveTitle": "解決此事件",
+      "resolvedBy": "已由 {{user}} 解決",
+      "when": "時間",
+      "why": "原因"
+    },
+    "filter": {
+      "all": "全部",
+      "search": "主機",
+      "site": "站點",
+      "status": "狀態",
+      "tag": "標籤"
+    },
+    "grid": {
+      "components": "元件",
+      "host": "主機",
+      "platform": "作業系統",
+      "problems": "需要注意",
+      "reported": "最後回報",
+      "site": "站點",
+      "status": "狀態"
+    },
+    "kind": {
+      "array": "RAID 陣列",
+      "drive": "磁碟機",
+      "memory": "記憶體",
+      "pool": "儲存池",
+      "sensor": "感測器",
+      "system": "作業系統"
+    },
+    "loadError": "無法載入主機群硬體。",
+    "metric": {
+      "hours": "通電時數：{{value}}",
+      "temperature": "{{value}} C",
+      "wear": "已磨損 {{value}}%"
+    },
+    "source": {
+      "absent": "不存在",
+      "failed": "失敗",
+      "ran": "已讀取"
+    },
+    "status": {
+      "failed": "故障",
+      "gone": "不再回報",
+      "ok": "健康",
+      "stale": "近期無回報",
+      "unknown": "無法評估",
+      "unmeasured": "未回報",
+      "warning": "警告"
+    },
+    "statusHelp": {
+      "failed": "至少有一個元件發生故障。",
+      "ok": "主機回報的所有元件皆健康。",
+      "stale": "最後一次回報已超過一小時。此主機可能未連線。",
+      "unknown": "主機已回報其硬體，但至少有一個元件沒有任何方式可以評估。",
+      "unmeasured": "此主機從未回報其硬體。其代理可能版本過舊，或尚未連線。",
+      "warning": "至少有一個元件需要注意。"
+    },
+    "title": "硬體健康狀況",
+    "reason": {
+      "arrayDegraded": "降級：{{total}} 個裝置中有 {{active}} 個處於作用中狀態",
+      "arrayInactive": "陣列未處於作用中狀態（{{activity}}）",
+      "arrayState": "陣列狀態：{{state}}",
+      "cpuSpeedLimited": "CPU 被限制在其速度的 {{percent}}%",
+      "dataErrors": "資料錯誤：{{detail}}",
+      "deviceErrors": "裝置錯誤：讀取 {{read}}，寫入 {{write}}，檢查碼 {{cksum}}",
+      "deviceNotOnline": "{{device}} 處於 {{state}} 狀態",
+      "diskutilFailed": "diskutil 無法描述此磁碟",
+      "enduranceUsed": "已使用額定耐用度的 {{percent}}%",
+      "failedMembers": "故障成員：{{members}}",
+      "healthStatus": "健康狀況：{{status}}",
+      "mediaErrors": "媒體與資料完整性錯誤：{{n}}",
+      "memberState": "成員：{{member}}",
+      "memoryCorrected": "已更正的記憶體錯誤：{{n}}",
+      "memoryCountsUnreadable": "無法讀取記憶體錯誤計數",
+      "memoryUncorrected": "未更正的記憶體錯誤：{{n}}",
+      "offlineUncorrectable": "無法更正的磁區：{{n}}",
+      "operationalStatus": "運作狀態：{{status}}",
+      "pendingSectors": "等待重新配置的磁區：{{n}}",
+      "pmrReadOnly": "持久性記憶體區域為唯讀",
+      "poolHealth": "集區狀態：{{health}}",
+      "readErrors": "讀取錯誤：{{n}}",
+      "readOnly": "磁碟機已自行切換為唯讀",
+      "reallocatedSectors": "已重新配置的磁區：{{n}}",
+      "rebuilding": "正在重建，已完成 {{percent}}%",
+      "reliabilityDegraded": "媒體或內部錯誤導致可靠性下降",
+      "sensorStatus": "{{sensor}}：{{value}}（{{status}}）",
+      "smartFailed": "SMART 整體健康檢查未通過",
+      "smartNotRead": "無法讀取健康記錄",
+      "smartStatus": "SMART 狀態：{{status}}",
+      "smartctlAbsent": "未安裝 smartctl，因此未讀取 SMART",
+      "smartctlFailed": "smartctl 失敗（結束代碼 {{rc}}）",
+      "spareBelowThreshold": "備用容量低於其臨界值",
+      "temperatureCritical": "{{value}} C，已達到或超過臨界上限 {{limit}} C",
+      "temperatureHigh": "{{value}} C，已達到或超過上限 {{limit}} C",
+      "temperatureThreshold": "溫度超出臨界值",
+      "thermalUnreported": "熱狀態未回報",
+      "thermalWarning": "熱警告等級 {{level}}",
+      "volatileBackupFailed": "揮發性記憶體備份失敗",
+      "writeErrors": "寫入錯誤：{{n}}",
+      "osMemoryEvent": "作業系統回報的硬體錯誤：{{text}}",
+      "osPowerEvent": "作業系統回報的意外斷電：{{text}}",
+      "osStorageEvent": "作業系統回報的儲存錯誤：{{text}}",
+      "osThermalEvent": "作業系統回報的溫度問題：{{text}}"
     }
   }
 }

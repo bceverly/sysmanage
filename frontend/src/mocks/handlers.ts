@@ -50,6 +50,23 @@ export const handlers = [
     HttpResponse.json({ server: TIME_SYNC_SERVER, counts: {}, hosts: [] }),
   ),
   http.get("*/api/v1/time-sync/resyncs", () => HttpResponse.json({ resyncs: [] })),
+  // Phase 23.1: hardware health -- never reported, by default.
+  http.get("*/api/v1/host/:hostId/hardware-health", () =>
+    HttpResponse.json({
+      status: "unmeasured",
+      reported_at: null,
+      sources: [],
+      components: [],
+      events: [],
+    }),
+  ),
+  http.get("*/api/v1/hardware-health/summary", () =>
+    HttpResponse.json({ total: 0, counts: {} }),
+  ),
+  http.get("*/api/v1/hardware-health/hosts", () =>
+    HttpResponse.json({ counts: {}, hosts: [] }),
+  ),
+  http.get("*/api/v1/hardware-health/events", () => HttpResponse.json({ events: [] })),
   http.get("*/api/v1/time-sync/bounds", () =>
     HttpResponse.json({
       server: { warning_ms: 1000, critical_ms: 5000, source: "default", ref: "" },

@@ -252,3 +252,16 @@ it: re:^(Malware|File)$
 # Certificate authority as a key type: Spanish keeps the abbreviation CA
 # (French uses AC, translated). Reviewed 2026-10-10.
 es: secrets.key_type.ca
+
+# --- hardware health (Phase 23.1) -------------------------------------------
+# Pure interpolation: a state change, a Celsius reading, and the operating
+# system's own sensor verdict ("{{sensor}}" and "{{status}}" are the kernel's
+# words, shown as it wrote them).
+re:^\{\{from\}\} -> \{\{to\}\}$
+re:^\{\{value\}\} C$
+re:^\{\{sensor\}\}: \{\{value\}\} \(\{\{status\}\}\)$
+# Loanwords that ARE the word in these languages: "Sensor", Dutch
+# "Component"; and Dutch "{{device}} is {{state}}", the same sentence.
+de,es,nl,pt: hardwareHealth.kind.sensor
+nl: hardwareHealth.events.component
+nl: hardwareHealth.reason.deviceNotOnline

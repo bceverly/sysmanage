@@ -276,3 +276,40 @@ def test_the_handler(session):
         )
     )
     assert unknown["error_type"] == "host_not_registered"
+
+
+def test_a_triggered_report_records_the_evidence(session):
+    host = _host(session)
+    hh.apply_report(session, host, _report(_drive("ok", []), _sensor()), now=T0)
+    session.commit()
+    report = _report(_drive("ok", []), _sensor())
+    report["trigger"] = "event"
+    report["evidence"] = [
+        {"source": "kernel", "category": "storage",
+         "text": "Buffer I/O error on dev dm-1, logical block 0, async page read"},
+        {"source": "kernel", "category": "storage",
+         "text": "Buffer I/O error on dev dm-1, logical block 1, async page read"},
+        {"source": "kernel", "category": "memory", "text": "mce: [Hardware Error]: CPU 0"},
+        {"source": "kernel", "category": "plumbing", "text": "not a category"},
+        {"source": "kernel", "category": "storage", "text": ""},
+        "junk",
+    ]  # fmt: skip
+    # no component changed state -- the I/O errors are news on their own
+    events = hh.apply_report(session, host, report, now=T0 + timedelta(minutes=1))
+    session.commit()
+    by_ident = {e.ident: e for e in events}
+    assert set(by_ident) == {"storage", "memory"}
+    storage = by_ident["storage"]
+    assert (storage.kind, storage.from_state, storage.to_state) == (
+        hh.SYSTEM,
+        None,
+        "warning",
+    )
+    reasons = json.loads(storage.reasons)
+    assert [r["code"] for r in reasons] == ["os_storage_event", "os_storage_event"]
+    assert reasons[0]["source"] == "kernel" and "logical block 0" in reasons[0]["text"]
+    assert json.loads(by_ident["memory"].reasons)[0]["code"] == "os_memory_event"
+    # evidence never becomes a component
+    assert (
+        session.query(models.HardwareComponent).filter_by(host_id=host.id).count() == 2
+    )

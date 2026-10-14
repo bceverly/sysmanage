@@ -757,7 +757,8 @@
       "title": "डैशबोर्ड सेटिंग्स"
     },
     "updates": "अपडेट",
-    "clocksOutOfBounds": "सीमा से बाहर की घड़ियाँ"
+    "clocksOutOfBounds": "सीमा से बाहर की घड़ियाँ",
+    "hardwareNeedsAttention": "ध्यान देने योग्य हार्डवेयर"
   },
   "dataGrid": {
     "columnVisibility": "कॉलम दृश्यता",
@@ -2432,7 +2433,8 @@
     "hostMetrics": "होस्ट मेट्रिक्स",
     "assetDiscovery": "नेटवर्क खोज",
     "malware": "मैलवेयर",
-    "timeSync": "समय सिंक"
+    "timeSync": "समय सिंक",
+    "hardwareHealth": "हार्डवेयर स्वास्थ्य"
   },
   "notifications": {
     "applicationUpdates": "एप्लिकेशन अपडेट",
@@ -4978,6 +4980,137 @@
       "serversHelp": "होस्ट नाम या IP पते, स्पेस या कॉमा से अलग किए गए",
       "title": "NTP नीति",
       "wants": "नीति के सर्वर: {{servers}}"
+    }
+  },
+  "hardwareHealth": {
+    "card": {
+      "hideSensors": "स्वस्थ सेंसर छिपाएँ",
+      "loadError": "हार्डवेयर स्वास्थ्य लोड नहीं हो सका।",
+      "recentEvents": "हाल के इवेंट",
+      "reportedAt": "रिपोर्ट किया गया: {{when}}",
+      "showSensors": "स्वस्थ सेंसर दिखाएँ: {{n}}",
+      "sources": "स्रोत:",
+      "title": "हार्डवेयर स्वास्थ्य"
+    },
+    "empty": "अभी तक कोई स्वीकृत होस्ट नहीं है।",
+    "event": {
+      "changed": "{{from}} -> {{to}}",
+      "new": "नया: {{to}}"
+    },
+    "events": {
+      "acknowledge": "स्वीकार करें",
+      "acknowledgeTitle": "इस इवेंट को स्वीकार करें",
+      "acknowledgedBy": "{{user}} द्वारा स्वीकार किया गया",
+      "change": "परिवर्तन",
+      "component": "घटक",
+      "host": "होस्ट",
+      "none": "कोई हार्डवेयर इवेंट नहीं।",
+      "note": "नोट (वैकल्पिक)",
+      "openTitle": "अनसुलझे इवेंट",
+      "resolve": "हल करें",
+      "resolveTitle": "इस इवेंट को हल करें",
+      "resolvedBy": "{{user}} द्वारा हल किया गया",
+      "when": "समय",
+      "why": "कारण"
+    },
+    "filter": {
+      "all": "सभी",
+      "search": "होस्ट",
+      "site": "साइट",
+      "status": "स्थिति",
+      "tag": "टैग"
+    },
+    "grid": {
+      "components": "घटक",
+      "host": "होस्ट",
+      "platform": "OS",
+      "problems": "ध्यान देने की आवश्यकता",
+      "reported": "अंतिम रिपोर्ट",
+      "site": "साइट",
+      "status": "स्थिति"
+    },
+    "kind": {
+      "array": "RAID ऐरे",
+      "drive": "ड्राइव",
+      "memory": "मेमोरी",
+      "pool": "स्टोरेज पूल",
+      "sensor": "सेंसर",
+      "system": "ऑपरेटिंग सिस्टम"
+    },
+    "loadError": "फ़्लीट का हार्डवेयर लोड नहीं हो सका।",
+    "metric": {
+      "hours": "चालू रहने के घंटे: {{value}}",
+      "temperature": "{{value}} C",
+      "wear": "{{value}}% घिसावट"
+    },
+    "source": {
+      "absent": "मौजूद नहीं",
+      "failed": "विफल",
+      "ran": "पढ़ा गया"
+    },
+    "status": {
+      "failed": "विफल",
+      "gone": "अब रिपोर्ट नहीं हो रहा",
+      "ok": "स्वस्थ",
+      "stale": "कोई हालिया रिपोर्ट नहीं",
+      "unknown": "आकलन संभव नहीं",
+      "unmeasured": "रिपोर्ट नहीं किया गया",
+      "warning": "चेतावनी"
+    },
+    "statusHelp": {
+      "failed": "कम से कम एक घटक विफल हो गया है।",
+      "ok": "होस्ट द्वारा रिपोर्ट किया गया हर घटक स्वस्थ है।",
+      "stale": "अंतिम रिपोर्ट एक घंटे से अधिक पुरानी है। होस्ट शायद कनेक्टेड नहीं है।",
+      "unknown": "होस्ट ने अपना हार्डवेयर रिपोर्ट किया, लेकिन कम से कम एक घटक का आकलन संभव नहीं हो सका।",
+      "unmeasured": "होस्ट ने कभी अपना हार्डवेयर रिपोर्ट नहीं किया। इसका एजेंट बहुत पुराना हो सकता है, या यह कनेक्ट नहीं हुआ है।",
+      "warning": "कम से कम एक घटक पर ध्यान देने की आवश्यकता है।"
+    },
+    "title": "हार्डवेयर स्वास्थ्य",
+    "reason": {
+      "arrayDegraded": "क्षीण: {{total}} में से {{active}} डिवाइस सक्रिय",
+      "arrayInactive": "ऐरे सक्रिय नहीं है ({{activity}})",
+      "arrayState": "ऐरे की स्थिति: {{state}}",
+      "cpuSpeedLimited": "CPU को उसकी गति के {{percent}}% तक सीमित रखा गया है",
+      "dataErrors": "डेटा त्रुटियाँ: {{detail}}",
+      "deviceErrors": "डिवाइस त्रुटियाँ: पढ़ने की {{read}}, लिखने की {{write}}, चेकसम की {{cksum}}",
+      "deviceNotOnline": "{{device}} की स्थिति {{state}} है",
+      "diskutilFailed": "diskutil डिस्क का विवरण नहीं दे सका",
+      "enduranceUsed": "निर्धारित सहनशीलता का {{percent}}% उपयोग हो चुका है",
+      "failedMembers": "विफल सदस्य: {{members}}",
+      "healthStatus": "स्वास्थ्य: {{status}}",
+      "mediaErrors": "मीडिया और डेटा अखंडता त्रुटियाँ: {{n}}",
+      "memberState": "सदस्य: {{member}}",
+      "memoryCorrected": "सुधारी गई मेमोरी त्रुटियाँ: {{n}}",
+      "memoryCountsUnreadable": "मेमोरी त्रुटियों की गिनती पढ़ी नहीं जा सकी",
+      "memoryUncorrected": "बिना सुधारी गई मेमोरी त्रुटियाँ: {{n}}",
+      "offlineUncorrectable": "असुधार्य सेक्टर: {{n}}",
+      "operationalStatus": "परिचालन स्थिति: {{status}}",
+      "pendingSectors": "पुनः आवंटन की प्रतीक्षा में सेक्टर: {{n}}",
+      "pmrReadOnly": "स्थायी मेमोरी क्षेत्र केवल-पढ़ने योग्य है",
+      "poolHealth": "पूल की स्थिति: {{health}}",
+      "readErrors": "पढ़ने की त्रुटियाँ: {{n}}",
+      "readOnly": "ड्राइव ने स्वयं को केवल-पढ़ने योग्य बना लिया है",
+      "reallocatedSectors": "पुनः आवंटित सेक्टर: {{n}}",
+      "rebuilding": "पुनर्निर्माण जारी, {{percent}}% पूर्ण",
+      "reliabilityDegraded": "मीडिया या आंतरिक त्रुटियों के कारण विश्वसनीयता घट गई है",
+      "sensorStatus": "{{sensor}}: {{value}} ({{status}})",
+      "smartFailed": "SMART समग्र स्वास्थ्य जाँच विफल रही",
+      "smartNotRead": "स्वास्थ्य लॉग पढ़ा नहीं जा सका",
+      "smartStatus": "SMART स्थिति: {{status}}",
+      "smartctlAbsent": "smartctl इंस्टॉल नहीं है, इसलिए SMART नहीं पढ़ा गया",
+      "smartctlFailed": "smartctl विफल रहा (एग्ज़िट कोड {{rc}})",
+      "spareBelowThreshold": "अतिरिक्त क्षमता अपनी सीमा से नीचे है",
+      "temperatureCritical": "{{value}} C, अपनी {{limit}} C की गंभीर सीमा पर या उससे ऊपर",
+      "temperatureHigh": "{{value}} C, अपनी {{limit}} C की सीमा पर या उससे ऊपर",
+      "temperatureThreshold": "तापमान एक सीमा से बाहर है",
+      "thermalUnreported": "थर्मल स्थिति रिपोर्ट नहीं की गई",
+      "thermalWarning": "थर्मल चेतावनी स्तर {{level}}",
+      "volatileBackupFailed": "अस्थिर मेमोरी का बैकअप विफल हो गया है",
+      "writeErrors": "लिखने की त्रुटियाँ: {{n}}",
+      "osMemoryEvent": "ऑपरेटिंग सिस्टम द्वारा रिपोर्ट की गई हार्डवेयर त्रुटि: {{text}}",
+      "osPowerEvent": "ऑपरेटिंग सिस्टम द्वारा रिपोर्ट की गई अप्रत्याशित बिजली कटौती: {{text}}",
+      "osStorageEvent": "ऑपरेटिंग सिस्टम द्वारा रिपोर्ट की गई स्टोरेज त्रुटि: {{text}}",
+      "osThermalEvent": "ऑपरेटिंग सिस्टम द्वारा रिपोर्ट की गई तापमान समस्या: {{text}}"
     }
   }
 }

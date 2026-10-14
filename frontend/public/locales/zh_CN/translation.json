@@ -757,7 +757,8 @@
       "title": "仪表板设置"
     },
     "updates": "更新",
-    "clocksOutOfBounds": "时钟偏差超出阈值"
+    "clocksOutOfBounds": "时钟偏差超出阈值",
+    "hardwareNeedsAttention": "需要关注的硬件"
   },
   "dataGrid": {
     "columnVisibility": "列可见性",
@@ -2432,7 +2433,8 @@
     "hostMetrics": "主机指标",
     "assetDiscovery": "网络发现",
     "malware": "恶意软件",
-    "timeSync": "时间同步"
+    "timeSync": "时间同步",
+    "hardwareHealth": "硬件健康"
   },
   "notifications": {
     "applicationUpdates": "应用程序更新",
@@ -4978,6 +4980,137 @@
       "serversHelp": "主机名或 IP 地址，以空格或逗号分隔",
       "title": "NTP 策略",
       "wants": "策略服务器：{{servers}}"
+    }
+  },
+  "hardwareHealth": {
+    "card": {
+      "hideSensors": "隐藏健康的传感器",
+      "loadError": "无法加载硬件健康状况。",
+      "recentEvents": "最近事件",
+      "reportedAt": "上报于 {{when}}",
+      "showSensors": "显示 {{n}} 个健康的传感器",
+      "sources": "来源：",
+      "title": "硬件健康状况"
+    },
+    "empty": "尚无已批准的主机。",
+    "event": {
+      "changed": "{{from}} -> {{to}}",
+      "new": "新：{{to}}"
+    },
+    "events": {
+      "acknowledge": "确认",
+      "acknowledgeTitle": "确认此事件",
+      "acknowledgedBy": "已由 {{user}} 确认",
+      "change": "变更",
+      "component": "组件",
+      "host": "主机",
+      "none": "没有硬件事件。",
+      "note": "备注（可选）",
+      "openTitle": "未解决的事件",
+      "resolve": "解决",
+      "resolveTitle": "解决此事件",
+      "resolvedBy": "已由 {{user}} 解决",
+      "when": "时间",
+      "why": "原因"
+    },
+    "filter": {
+      "all": "全部",
+      "search": "主机",
+      "site": "站点",
+      "status": "状态",
+      "tag": "标签"
+    },
+    "grid": {
+      "components": "组件",
+      "host": "主机",
+      "platform": "操作系统",
+      "problems": "需要关注",
+      "reported": "最后上报",
+      "site": "站点",
+      "status": "状态"
+    },
+    "kind": {
+      "array": "RAID 阵列",
+      "drive": "驱动器",
+      "memory": "内存",
+      "pool": "存储池",
+      "sensor": "传感器",
+      "system": "操作系统"
+    },
+    "loadError": "无法加载主机群硬件。",
+    "metric": {
+      "hours": "通电时长（小时）：{{value}}",
+      "temperature": "{{value}} C",
+      "wear": "已磨损 {{value}}%"
+    },
+    "source": {
+      "absent": "不存在",
+      "failed": "失败",
+      "ran": "已读取"
+    },
+    "status": {
+      "failed": "故障",
+      "gone": "不再上报",
+      "ok": "健康",
+      "stale": "近期无上报",
+      "unknown": "无法评估",
+      "unmeasured": "未上报",
+      "warning": "警告"
+    },
+    "statusHelp": {
+      "failed": "至少有一个组件发生故障。",
+      "ok": "主机上报的所有组件均健康。",
+      "stale": "最后一次上报已超过一小时。该主机可能未连接。",
+      "unknown": "主机已上报其硬件，但至少有一个组件没有任何方式可以评估。",
+      "unmeasured": "该主机从未上报其硬件。其代理可能版本过旧，或尚未连接。",
+      "warning": "至少有一个组件需要关注。"
+    },
+    "title": "硬件健康状况",
+    "reason": {
+      "arrayDegraded": "降级：{{total}} 个设备中有 {{active}} 个处于活动状态",
+      "arrayInactive": "阵列未处于活动状态（{{activity}}）",
+      "arrayState": "阵列状态：{{state}}",
+      "cpuSpeedLimited": "CPU 被限制在其速度的 {{percent}}%",
+      "dataErrors": "数据错误：{{detail}}",
+      "deviceErrors": "设备错误：读取 {{read}}，写入 {{write}}，校验和 {{cksum}}",
+      "deviceNotOnline": "{{device}} 处于 {{state}} 状态",
+      "diskutilFailed": "diskutil 无法描述该磁盘",
+      "enduranceUsed": "已使用额定耐久度的 {{percent}}%",
+      "failedMembers": "故障成员：{{members}}",
+      "healthStatus": "健康状况：{{status}}",
+      "mediaErrors": "介质和数据完整性错误：{{n}}",
+      "memberState": "成员：{{member}}",
+      "memoryCorrected": "已纠正的内存错误：{{n}}",
+      "memoryCountsUnreadable": "无法读取内存错误计数",
+      "memoryUncorrected": "未纠正的内存错误：{{n}}",
+      "offlineUncorrectable": "不可纠正的扇区：{{n}}",
+      "operationalStatus": "运行状态：{{status}}",
+      "pendingSectors": "等待重新分配的扇区：{{n}}",
+      "pmrReadOnly": "持久内存区域为只读",
+      "poolHealth": "池状态：{{health}}",
+      "readErrors": "读取错误：{{n}}",
+      "readOnly": "驱动器已自行切换为只读",
+      "reallocatedSectors": "已重新分配的扇区：{{n}}",
+      "rebuilding": "正在重建，已完成 {{percent}}%",
+      "reliabilityDegraded": "介质或内部错误导致可靠性下降",
+      "sensorStatus": "{{sensor}}：{{value}}（{{status}}）",
+      "smartFailed": "SMART 整体健康检查未通过",
+      "smartNotRead": "无法读取健康日志",
+      "smartStatus": "SMART 状态：{{status}}",
+      "smartctlAbsent": "未安装 smartctl，因此未读取 SMART",
+      "smartctlFailed": "smartctl 失败（退出代码 {{rc}}）",
+      "spareBelowThreshold": "备用容量低于其阈值",
+      "temperatureCritical": "{{value}} C，已达到或超过临界上限 {{limit}} C",
+      "temperatureHigh": "{{value}} C，已达到或超过上限 {{limit}} C",
+      "temperatureThreshold": "温度超出阈值",
+      "thermalUnreported": "热状态未上报",
+      "thermalWarning": "热警告级别 {{level}}",
+      "volatileBackupFailed": "易失性内存备份失败",
+      "writeErrors": "写入错误：{{n}}",
+      "osMemoryEvent": "操作系统报告的硬件错误：{{text}}",
+      "osPowerEvent": "操作系统报告的意外断电：{{text}}",
+      "osStorageEvent": "操作系统报告的存储错误：{{text}}",
+      "osThermalEvent": "操作系统报告的温度问题：{{text}}"
     }
   }
 }

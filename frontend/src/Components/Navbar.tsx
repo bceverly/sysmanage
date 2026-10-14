@@ -52,6 +52,7 @@ const PATH_CATEGORY: Record<string, CategoryId> = {
   '/hosts': 'fleet',
   '/map': 'fleet',
   '/sites': 'fleet',
+  '/hardware-health': 'fleet',
   '/tenants': 'fleet',
   '/provisioning': 'fleet',
   '/airgap/repositories': 'fleet',
@@ -99,6 +100,7 @@ const PATH_PERMISSION = new Map<string, string>([
   ['/asset-discovery', 'View Host Details'],
   ['/malware', 'View Host Details'],
   ['/time-sync', 'View Host Details'],
+  ['/hardware-health', 'View Host Details'],
 ]);
 
 interface NavLeaf {
@@ -135,7 +137,7 @@ export function buildNavCategories(
   } = opts;
 
   // Paths hardcoded here -- plugins must not duplicate these.
-  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/maintenance-windows', '/secrets', '/scripts', '/config-profiles', '/config-drift', '/config-jobs', '/query-packs', '/advisor', '/asset-discovery', '/malware', '/time-sync', '/reports', '/airgap/repositories', '/airgap/collections']);
+  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/maintenance-windows', '/secrets', '/scripts', '/config-profiles', '/config-drift', '/config-jobs', '/query-packs', '/advisor', '/asset-discovery', '/malware', '/time-sync', '/hardware-health', '/reports', '/airgap/repositories', '/airgap/collections']);
   const hardcodedLabels = new Set([
     t('nav.secrets'),
     t('nav.scripts'),
@@ -205,6 +207,8 @@ export function buildNavCategories(
   );
   // Phase 23.3: OSS -- every clock, measured by the server.
   pushIf(true, '/time-sync', t('nav.timeSync', 'Time Sync'));
+  // Phase 23.1: OSS -- drives, arrays, pools and sensors, fleet-wide.
+  pushIf(true, '/hardware-health', t('nav.hardwareHealth', 'Hardware Health'));
   pushIf(
     activeLicenseModules.includes('reporting_engine') &&
       activeLicenseFeatures.includes('reports'),

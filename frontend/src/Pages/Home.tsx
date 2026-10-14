@@ -17,6 +17,7 @@ import { useVisiblePolling } from '../hooks/useVisiblePolling';
 import { updatesService, UpdateStatsSummary } from '../Services/updates';
 import axiosInstance from '../Services/api';
 import { getFleetSummary, FleetSummary } from '../Services/timeSync';
+import { getHardwareSummary, HardwareSummary, needingAttention } from '../Services/hardwareHealth';
 import DashboardSettingsDialog from '../Components/DashboardSettingsDialog';
 
 interface DashboardCardProps {
@@ -60,6 +61,13 @@ const getCoverageColor = (coveragePercentage: number): string => {
 // Phase 23.3: red if any clock is critical, yellow if any is at warning.
 const getClockColor = (summary: FleetSummary): string => {
     if (summary.counts.critical) {
+        return COLOR_RED;
+    }
+    return summary.counts.warning ? COLOR_YELLOW : COLOR_GREEN;
+};
+
+const getHardwareColor = (summary: HardwareSummary): string => {
+    if (summary.counts.failed) {
         return COLOR_RED;
     }
     return summary.counts.warning ? COLOR_YELLOW : COLOR_GREEN;
@@ -135,6 +143,9 @@ const Dashboard = () => {
     const [clocksOut, setClocksOut] = useState<number>(0);
     const [clocksTotal, setClocksTotal] = useState<number>(0);
     const [clocksColor, setClocksColor] = useState<string>(COLOR_GREEN);
+    const [hardwareOut, setHardwareOut] = useState<number>(0);
+    const [hardwareTotal, setHardwareTotal] = useState<number>(0);
+    const [hardwareColor, setHardwareColor] = useState<string>(COLOR_GREEN);
     const [loading, setLoading] = useState<boolean>(true);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [cardVisibility, setCardVisibility] = useState<Record<string, boolean>>({
@@ -145,6 +156,7 @@ const Dashboard = () => {
         antivirus: true,
         opentelemetry: true,
         clocks: true,
+        hardware: true,
     });
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -204,18 +216,30 @@ const Dashboard = () => {
         setClocksColor(getClockColor(summary));
     };
 
+    const processHardwareResponse = (response: PromiseSettledResult<HardwareSummary>) => {
+        if (response.status === 'rejected') {
+            console.error('Failed to fetch hardware summary:', response.reason);
+            return;
+        }
+        const summary = response.value;
+        setHardwareOut(needingAttention(summary.counts));
+        setHardwareTotal(summary.total);
+        setHardwareColor(getHardwareColor(summary));
+    };
+
     const fetchData = useCallback(async (isInitialLoad = false) => {
         if (isInitialLoad) {
             setLoading(true);
         }
 
         try {
-            const [hostsResponse, updatesResponse, antivirusResponse, otelResponse, clocksResponse] = await Promise.allSettled([
+            const [hostsResponse, updatesResponse, antivirusResponse, otelResponse, clocksResponse, hardwareResponse] = await Promise.allSettled([
                 doGetHostsSummary(),
                 updatesService.getUpdatesSummary(),
                 axiosInstance.get('/api/v1/antivirus-coverage'),
                 axiosInstance.get('/api/v1/opentelemetry/opentelemetry-coverage'),
                 getFleetSummary(),
+                getHardwareSummary(),
             ]);
 
             processHostsResponse(hostsResponse);
@@ -223,6 +247,7 @@ const Dashboard = () => {
             processCoverageResponse(antivirusResponse, setAntivirusCoverage, setAntivirusColor, 'Failed to fetch antivirus coverage:');
             processCoverageResponse(otelResponse, setOtelCoverage, setOtelColor, 'Failed to fetch OpenTelemetry coverage:');
             processClocksResponse(clocksResponse);
+            processHardwareResponse(hardwareResponse);
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
         } finally {
@@ -244,6 +269,7 @@ const Dashboard = () => {
                 antivirus: true,
                 opentelemetry: true,
                 clocks: true,
+                hardware: true,
             };
 
             // Index saved prefs in a Map (prototype-pollution-safe), then write
@@ -422,6 +448,18 @@ const Dashboard = () => {
                             maxValue={clocksTotal || 1}
                             color={clocksColor}
                             onClick={() => void navigate('/time-sync')}
+                            loading={loading}
+                        />
+                    </Grid>
+                )}
+                {cardVisibility.hardware && (
+                    <Grid>
+                        <DashboardCard
+                            title={t('dashboard.hardwareNeedsAttention', 'Hardware needing attention')}
+                            value={hardwareOut}
+                            maxValue={hardwareTotal || 1}
+                            color={hardwareColor}
+                            onClick={() => void navigate('/hardware-health')}
                             loading={loading}
                         />
                     </Grid>

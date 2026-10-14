@@ -757,7 +757,8 @@
       "title": "Configuración del Tablero"
     },
     "updates": "Actualizaciones",
-    "clocksOutOfBounds": "Relojes fuera de límites"
+    "clocksOutOfBounds": "Relojes fuera de límites",
+    "hardwareNeedsAttention": "Hardware que requiere atención"
   },
   "dataGrid": {
     "columnVisibility": "Visibilidad de columnas",
@@ -2432,7 +2433,8 @@
     "hostMetrics": "Métricas de hosts",
     "assetDiscovery": "Descubrimiento de red",
     "malware": "Software malicioso",
-    "timeSync": "Sincronización de Hora"
+    "timeSync": "Sincronización de Hora",
+    "hardwareHealth": "Estado del hardware"
   },
   "notifications": {
     "applicationUpdates": "Actualizaciones de Aplicaciones",
@@ -4978,6 +4980,137 @@
       "serversHelp": "Nombres de host o direcciones IP, separados por espacios o comas",
       "title": "Política de NTP",
       "wants": "Servidores de la política: {{servers}}"
+    }
+  },
+  "hardwareHealth": {
+    "card": {
+      "hideSensors": "Ocultar sensores en buen estado",
+      "loadError": "No se pudo cargar el estado del hardware.",
+      "recentEvents": "Eventos recientes",
+      "reportedAt": "Informado {{when}}",
+      "showSensors": "Mostrar {{n}} sensores en buen estado",
+      "sources": "Fuentes:",
+      "title": "Estado del hardware"
+    },
+    "empty": "Todavía no hay hosts aprobados.",
+    "event": {
+      "changed": "{{from}} -> {{to}}",
+      "new": "Nuevo: {{to}}"
+    },
+    "events": {
+      "acknowledge": "Aceptar",
+      "acknowledgeTitle": "Aceptar este evento",
+      "acknowledgedBy": "Aceptado por {{user}}",
+      "change": "Cambio",
+      "component": "Componente",
+      "host": "Host",
+      "none": "No hay eventos de hardware.",
+      "note": "Nota (opcional)",
+      "openTitle": "Eventos sin resolver",
+      "resolve": "Resolver",
+      "resolveTitle": "Marcar este evento como resuelto",
+      "resolvedBy": "Resuelto por {{user}}",
+      "when": "Hora",
+      "why": "Motivo"
+    },
+    "filter": {
+      "all": "Todos",
+      "search": "Host",
+      "site": "Sitio",
+      "status": "Estado",
+      "tag": "Etiqueta"
+    },
+    "grid": {
+      "components": "Componentes",
+      "host": "Host",
+      "platform": "OS",
+      "problems": "Requiere atención",
+      "reported": "Último informe",
+      "site": "Sitio",
+      "status": "Estado"
+    },
+    "kind": {
+      "array": "Matriz RAID",
+      "drive": "Unidad",
+      "memory": "Memoria",
+      "pool": "Pool de almacenamiento",
+      "sensor": "Sensor",
+      "system": "Sistema operativo"
+    },
+    "loadError": "No se pudo cargar el hardware de la flota.",
+    "metric": {
+      "hours": "Horas de encendido: {{value}}",
+      "temperature": "{{value}} C",
+      "wear": "{{value}}% de desgaste"
+    },
+    "source": {
+      "absent": "no presente",
+      "failed": "fallido",
+      "ran": "leído"
+    },
+    "status": {
+      "failed": "Averiado",
+      "gone": "Ya no se informa",
+      "ok": "En buen estado",
+      "stale": "Sin informe reciente",
+      "unknown": "No evaluable",
+      "unmeasured": "Sin informar",
+      "warning": "Advertencia"
+    },
+    "statusHelp": {
+      "failed": "Al menos un componente está averiado.",
+      "ok": "Todos los componentes informados por el host están en buen estado.",
+      "stale": "El último informe tiene más de una hora. Probablemente el host no está conectado.",
+      "unknown": "El host informó su hardware, pero al menos un componente no fue evaluable.",
+      "unmeasured": "El host nunca ha informado su hardware. Puede que su agente sea demasiado antiguo o que no se haya conectado.",
+      "warning": "Al menos un componente requiere atención."
+    },
+    "title": "Estado del hardware",
+    "reason": {
+      "arrayDegraded": "Degradado: {{active}} de {{total}} dispositivos activos",
+      "arrayInactive": "La matriz no está activa ({{activity}})",
+      "arrayState": "Estado de la matriz: {{state}}",
+      "cpuSpeedLimited": "La CPU está limitada al {{percent}}% de su velocidad",
+      "dataErrors": "Errores de datos: {{detail}}",
+      "deviceErrors": "Errores del dispositivo: {{read}} de lectura, {{write}} de escritura, {{cksum}} de suma de comprobación",
+      "deviceNotOnline": "{{device}} está {{state}}",
+      "diskutilFailed": "diskutil no pudo describir el disco",
+      "enduranceUsed": "{{percent}}% de la resistencia nominal consumida",
+      "failedMembers": "Miembros averiados: {{members}}",
+      "healthStatus": "Estado: {{status}}",
+      "mediaErrors": "Errores de medio e integridad de datos: {{n}}",
+      "memberState": "Miembro: {{member}}",
+      "memoryCorrected": "Errores de memoria corregidos: {{n}}",
+      "memoryCountsUnreadable": "No se pudieron leer los contadores de errores de memoria",
+      "memoryUncorrected": "Errores de memoria no corregidos: {{n}}",
+      "offlineUncorrectable": "Sectores no corregibles: {{n}}",
+      "operationalStatus": "Estado operativo: {{status}}",
+      "pendingSectors": "Sectores pendientes de reasignación: {{n}}",
+      "pmrReadOnly": "La región de memoria persistente es de solo lectura",
+      "poolHealth": "Estado del pool: {{health}}",
+      "readErrors": "Errores de lectura: {{n}}",
+      "readOnly": "La unidad se ha puesto en modo de solo lectura",
+      "reallocatedSectors": "Sectores reasignados: {{n}}",
+      "rebuilding": "Reconstruyendo, {{percent}}% completado",
+      "reliabilityDegraded": "La fiabilidad está degradada por errores del medio o internos",
+      "sensorStatus": "{{sensor}}: {{value}} ({{status}})",
+      "smartFailed": "La comprobación general de estado SMART falló",
+      "smartNotRead": "No se pudo leer el registro de estado",
+      "smartStatus": "Estado SMART: {{status}}",
+      "smartctlAbsent": "smartctl no está instalado, por lo que no se leyó SMART",
+      "smartctlFailed": "smartctl falló (código de salida {{rc}})",
+      "spareBelowThreshold": "La capacidad de reserva está por debajo de su umbral",
+      "temperatureCritical": "{{value}} C, igual o superior a su límite crítico de {{limit}} C",
+      "temperatureHigh": "{{value}} C, igual o superior a su límite de {{limit}} C",
+      "temperatureThreshold": "La temperatura supera un umbral",
+      "thermalUnreported": "No se informó el estado térmico",
+      "thermalWarning": "Nivel de advertencia térmica {{level}}",
+      "volatileBackupFailed": "La copia de seguridad de la memoria volátil falló",
+      "writeErrors": "Errores de escritura: {{n}}",
+      "osMemoryEvent": "Error de hardware notificado por el sistema operativo: {{text}}",
+      "osPowerEvent": "Pérdida inesperada de alimentación notificada por el sistema operativo: {{text}}",
+      "osStorageEvent": "Error de almacenamiento notificado por el sistema operativo: {{text}}",
+      "osThermalEvent": "Problema de temperatura notificado por el sistema operativo: {{text}}"
     }
   }
 }

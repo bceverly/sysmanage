@@ -757,7 +757,8 @@
       "title": "إعدادات لوحة المعلومات"
     },
     "updates": "التحديثات",
-    "clocksOutOfBounds": "ساعات خارج الحدود"
+    "clocksOutOfBounds": "ساعات خارج الحدود",
+    "hardwareNeedsAttention": "الأجهزة التي تحتاج إلى اهتمام"
   },
   "dataGrid": {
     "columnVisibility": "رؤية الأعمدة",
@@ -2432,7 +2433,8 @@
     "hostMetrics": "مقاييس المضيفين",
     "assetDiscovery": "اكتشاف الشبكة",
     "malware": "البرمجيات الخبيثة",
-    "timeSync": "تزامن الوقت"
+    "timeSync": "تزامن الوقت",
+    "hardwareHealth": "صحة الأجهزة"
   },
   "notifications": {
     "applicationUpdates": "تحديثات التطبيقات",
@@ -3237,7 +3239,7 @@
       "activeCommandsEmpty": "لا يوجد أوامر نشطة.",
       "activeCommandsLoading": "جار التحميل…",
       "agentVersionMin": "الإصدار الأدنى لوكيل النظام",
-      "alertAck": "اعترف",
+      "alertAck": "إقرار",
       "alertAcked": "مقبول",
       "alertsTitle": "إشعارات مفتوحة",
       "autonomous": "يعمل بشكل مستقل",
@@ -4978,6 +4980,137 @@
       "serversHelp": "أسماء مضيفات أو عناوين IP، مفصولة بمسافات أو فواصل",
       "title": "سياسة NTP",
       "wants": "خوادم السياسة: {{servers}}"
+    }
+  },
+  "hardwareHealth": {
+    "card": {
+      "hideSensors": "إخفاء المستشعرات السليمة",
+      "loadError": "تعذّر تحميل صحة الأجهزة.",
+      "recentEvents": "الأحداث الأخيرة",
+      "reportedAt": "أُرسل التقرير {{when}}",
+      "showSensors": "إظهار المستشعرات السليمة: {{n}}",
+      "sources": "المصادر:",
+      "title": "صحة الأجهزة"
+    },
+    "empty": "لا توجد مضيفات معتمدة بعد.",
+    "event": {
+      "changed": "{{from}} -> {{to}}",
+      "new": "جديد: {{to}}"
+    },
+    "events": {
+      "acknowledge": "إقرار",
+      "acknowledgeTitle": "الإقرار بهذا الحدث",
+      "acknowledgedBy": "تم الإقرار بواسطة {{user}}",
+      "change": "التغيير",
+      "component": "المكون",
+      "host": "المضيف",
+      "none": "لا توجد أحداث للأجهزة.",
+      "note": "ملاحظة (اختياري)",
+      "openTitle": "الأحداث غير المحلولة",
+      "resolve": "حل",
+      "resolveTitle": "حل هذا الحدث",
+      "resolvedBy": "تم الحل بواسطة {{user}}",
+      "when": "الوقت",
+      "why": "السبب"
+    },
+    "filter": {
+      "all": "الكل",
+      "search": "المضيف",
+      "site": "الموقع",
+      "status": "الحالة",
+      "tag": "وسم"
+    },
+    "grid": {
+      "components": "المكونات",
+      "host": "المضيف",
+      "platform": "OS",
+      "problems": "يحتاج إلى اهتمام",
+      "reported": "آخر تقرير",
+      "site": "الموقع",
+      "status": "الحالة"
+    },
+    "kind": {
+      "array": "مصفوفة RAID",
+      "drive": "قرص",
+      "memory": "ذاكرة",
+      "pool": "مجمع التخزين",
+      "sensor": "مستشعر",
+      "system": "نظام التشغيل"
+    },
+    "loadError": "تعذّر تحميل أجهزة الأسطول.",
+    "metric": {
+      "hours": "ساعات التشغيل: {{value}}",
+      "temperature": "{{value}} C",
+      "wear": "نسبة الاستهلاك: {{value}}%"
+    },
+    "source": {
+      "absent": "غير موجود",
+      "failed": "فشل",
+      "ran": "تمت القراءة"
+    },
+    "status": {
+      "failed": "فشل",
+      "gone": "لم يعد يُبلغ عنه",
+      "ok": "سليم",
+      "stale": "لا يوجد تقرير حديث",
+      "unknown": "غير قابل للتقييم",
+      "unmeasured": "لم يُبلغ عنه",
+      "warning": "تحذير"
+    },
+    "statusHelp": {
+      "failed": "فشل مكون واحد على الأقل.",
+      "ok": "جميع المكونات التي أبلغ عنها المضيف سليمة.",
+      "stale": "مضى على آخر تقرير أكثر من ساعة. على الأرجح أن المضيف غير متصل.",
+      "unknown": "أبلغ المضيف عن أجهزته، لكن تعذّر تقييم مكون واحد على الأقل.",
+      "unmeasured": "لم يُبلغ المضيف عن أجهزته مطلقاً. قد يكون وكيله قديماً جداً، أو أنه لم يتصل بعد.",
+      "warning": "مكون واحد على الأقل يحتاج إلى اهتمام."
+    },
+    "title": "صحة الأجهزة",
+    "reason": {
+      "arrayDegraded": "متدهورة: الأجهزة النشطة {{active}} من أصل {{total}}",
+      "arrayInactive": "المصفوفة غير نشطة ({{activity}})",
+      "arrayState": "حالة المصفوفة: {{state}}",
+      "cpuSpeedLimited": "سرعة CPU مقيّدة عند {{percent}}% من سرعتها",
+      "dataErrors": "أخطاء البيانات: {{detail}}",
+      "deviceErrors": "أخطاء الجهاز: قراءة {{read}}، كتابة {{write}}، مجموع اختباري {{cksum}}",
+      "deviceNotOnline": "{{device}} في حالة {{state}}",
+      "diskutilFailed": "تعذّر على diskutil وصف القرص",
+      "enduranceUsed": "تم استهلاك {{percent}}% من قدرة التحمّل المقدّرة",
+      "failedMembers": "الأعضاء الفاشلة: {{members}}",
+      "healthStatus": "الصحة: {{status}}",
+      "mediaErrors": "أخطاء الوسائط وسلامة البيانات: {{n}}",
+      "memberState": "العضو: {{member}}",
+      "memoryCorrected": "أخطاء الذاكرة المصحَّحة: {{n}}",
+      "memoryCountsUnreadable": "تعذّرت قراءة أعداد أخطاء الذاكرة",
+      "memoryUncorrected": "أخطاء الذاكرة غير المصحَّحة: {{n}}",
+      "offlineUncorrectable": "القطاعات غير القابلة للتصحيح: {{n}}",
+      "operationalStatus": "الحالة التشغيلية: {{status}}",
+      "pendingSectors": "القطاعات المعلّقة لإعادة التخصيص: {{n}}",
+      "pmrReadOnly": "منطقة الذاكرة الدائمة للقراءة فقط",
+      "poolHealth": "حالة المجموعة: {{health}}",
+      "readErrors": "أخطاء القراءة: {{n}}",
+      "readOnly": "جعل القرص نفسه للقراءة فقط",
+      "reallocatedSectors": "القطاعات المُعاد تخصيصها: {{n}}",
+      "rebuilding": "إعادة البناء جارية، اكتمل {{percent}}%",
+      "reliabilityDegraded": "تدهورت الموثوقية بسبب أخطاء الوسائط أو أخطاء داخلية",
+      "sensorStatus": "{{sensor}}: {{value}} ({{status}})",
+      "smartFailed": "فشل فحص SMART للصحة العامة",
+      "smartNotRead": "تعذّرت قراءة سجل الصحة",
+      "smartStatus": "حالة SMART: {{status}}",
+      "smartctlAbsent": "smartctl غير مثبّت، لذا لم تتم قراءة SMART",
+      "smartctlFailed": "فشل smartctl (رمز الخروج {{rc}})",
+      "spareBelowThreshold": "السعة الاحتياطية أقل من حدها",
+      "temperatureCritical": "{{value}} C، عند حدها الحرج البالغ {{limit}} C أو أعلى منه",
+      "temperatureHigh": "{{value}} C، عند حدها البالغ {{limit}} C أو أعلى منه",
+      "temperatureThreshold": "تجاوزت درجة الحرارة أحد الحدود",
+      "thermalUnreported": "لم يتم الإبلاغ عن الحالة الحرارية",
+      "thermalWarning": "مستوى التحذير الحراري {{level}}",
+      "volatileBackupFailed": "فشل النسخ الاحتياطي للذاكرة المتطايرة",
+      "writeErrors": "أخطاء الكتابة: {{n}}",
+      "osMemoryEvent": "خطأ في الأجهزة أبلغ عنه نظام التشغيل: {{text}}",
+      "osPowerEvent": "انقطاع غير متوقع في الطاقة أبلغ عنه نظام التشغيل: {{text}}",
+      "osStorageEvent": "خطأ في التخزين أبلغ عنه نظام التشغيل: {{text}}",
+      "osThermalEvent": "مشكلة في درجة الحرارة أبلغ عنها نظام التشغيل: {{text}}"
     }
   }
 }

@@ -1085,7 +1085,7 @@ msgstr "تعذر كتابة المفتاح إلى keyring: %s"
 
 #: backend/api/airgap_keys.py:110 backend/api/federation_identity.py:183
 msgid "Trusted key not found"
-msgstr "لم يتم العثور على المفتاح المعترف به"
+msgstr "لم يتم العثور على المفتاح الموثوق"
 
 #: backend/api/user.py:77
 msgid "Permission denied: DELETE_USER role required"

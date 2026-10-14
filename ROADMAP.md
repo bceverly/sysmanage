@@ -13290,6 +13290,25 @@ with consent); S7 proof on constructed failures + docs + screenshots +
       MCE, thermal), FreeBSD `devd`, Windows event log subscriptions -- and
       send a `hardware_health_event` as URGENT immediately; a periodic sweep
       (send-on-change, 22.1) catches anything without an event source.
+      *S3 (2026-10-14) -- in code, live-proven on three OSes:
+      `sysmanage-agent` `collection/hardware_events.py` +
+      `communication/hardware_event_loop.py`.  Sources: the Linux kernel log
+      (`/dev/kmsg`, root), FreeBSD devd's event socket, the Windows System
+      log (polled every 30 s from the last record seen); a match re-collects
+      the hardware health and sends it at once, URGENT and past
+      send-on-change, with the matching lines as evidence -- one report per
+      burst (5 s debounce, distinct lines, at most one a minute, 20 lines),
+      stored by the server as `system` events (`os_<category>_event`
+      reasons) even when no component changed.  Live: a device-mapper error
+      device on beast (Buffer I/O error lines caught as root), a file-backed
+      ZFS mirror offlined on the FreeBSD box (only the OFFLINE statechange
+      counts -- the box's EMPTY card reader sends a CAM "medium not present"
+      error every few seconds, which the first classifier wrongly flagged;
+      sense data is now decoded), a labeled test "disk" event on the x13s.
+      No false positive in 68,000 real kernel lines from three machines.
+      Not done here: smartd / zed / mdadm --monitor hooks (the kernel log
+      and devd already carry their failures), macOS / OpenBSD / NetBSD
+      (periodic report only).  Real-time ALERTS are S5.*
 - [ ] **Server (OSS schema + UI):** components (drive, array, pool, sensor)
       with current state, and an event history (time, severity, source, raw
       evidence); dedupe and flap damping; acknowledge / resolve with a

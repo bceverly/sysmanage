@@ -757,7 +757,8 @@
       "title": "ダッシュボード設定"
     },
     "updates": "アップデート",
-    "clocksOutOfBounds": "時刻のずれが許容範囲外"
+    "clocksOutOfBounds": "時刻のずれが許容範囲外",
+    "hardwareNeedsAttention": "対応が必要なハードウェア"
   },
   "dataGrid": {
     "columnVisibility": "列の表示",
@@ -2432,7 +2433,8 @@
     "hostMetrics": "ホストメトリクス",
     "assetDiscovery": "ネットワーク検出",
     "malware": "マルウェア",
-    "timeSync": "時刻同期"
+    "timeSync": "時刻同期",
+    "hardwareHealth": "ハードウェアの健全性"
   },
   "notifications": {
     "applicationUpdates": "アプリケーションアップデート",
@@ -4978,6 +4980,137 @@
       "serversHelp": "ホスト名または IP アドレス（スペースまたはカンマ区切り）",
       "title": "NTP ポリシー",
       "wants": "ポリシーのサーバー: {{servers}}"
+    }
+  },
+  "hardwareHealth": {
+    "card": {
+      "hideSensors": "正常なセンサーを非表示",
+      "loadError": "ハードウェアの健全性を読み込めませんでした。",
+      "recentEvents": "最近のイベント",
+      "reportedAt": "{{when}} に報告",
+      "showSensors": "正常なセンサー {{n}} 個を表示",
+      "sources": "ソース:",
+      "title": "ハードウェアの健全性"
+    },
+    "empty": "承認済みのホストはまだありません。",
+    "event": {
+      "changed": "{{from}} -> {{to}}",
+      "new": "新規: {{to}}"
+    },
+    "events": {
+      "acknowledge": "確認",
+      "acknowledgeTitle": "このイベントを確認",
+      "acknowledgedBy": "{{user}} が確認済み",
+      "change": "変更",
+      "component": "コンポーネント",
+      "host": "ホスト",
+      "none": "ハードウェアイベントはありません。",
+      "note": "メモ (任意)",
+      "openTitle": "未解決のイベント",
+      "resolve": "解決",
+      "resolveTitle": "このイベントを解決",
+      "resolvedBy": "{{user}} が解決済み",
+      "when": "日時",
+      "why": "理由"
+    },
+    "filter": {
+      "all": "すべて",
+      "search": "ホスト",
+      "site": "サイト",
+      "status": "ステータス",
+      "tag": "タグ"
+    },
+    "grid": {
+      "components": "コンポーネント",
+      "host": "ホスト",
+      "platform": "OS",
+      "problems": "要対応",
+      "reported": "最終報告",
+      "site": "サイト",
+      "status": "ステータス"
+    },
+    "kind": {
+      "array": "RAID アレイ",
+      "drive": "ドライブ",
+      "memory": "メモリ",
+      "pool": "ストレージプール",
+      "sensor": "センサー",
+      "system": "オペレーティングシステム"
+    },
+    "loadError": "フリートのハードウェアを読み込めませんでした。",
+    "metric": {
+      "hours": "通電時間: {{value}}",
+      "temperature": "{{value}} C",
+      "wear": "摩耗 {{value}}%"
+    },
+    "source": {
+      "absent": "なし",
+      "failed": "失敗",
+      "ran": "読み取り済み"
+    },
+    "status": {
+      "failed": "故障",
+      "gone": "報告されなくなった",
+      "ok": "正常",
+      "stale": "最近の報告なし",
+      "unknown": "評価不能",
+      "unmeasured": "未報告",
+      "warning": "警告"
+    },
+    "statusHelp": {
+      "failed": "少なくとも 1 つのコンポーネントが故障しています。",
+      "ok": "ホストが報告したすべてのコンポーネントが正常です。",
+      "stale": "最終報告から 1 時間以上経過しています。ホストは接続されていない可能性があります。",
+      "unknown": "ホストはハードウェアを報告しましたが、少なくとも 1 つのコンポーネントを評価する手段がありませんでした。",
+      "unmeasured": "このホストはハードウェアを一度も報告していません。エージェントが古すぎるか、接続されていない可能性があります。",
+      "warning": "少なくとも 1 つのコンポーネントに対応が必要です。"
+    },
+    "title": "ハードウェアの健全性",
+    "reason": {
+      "arrayDegraded": "縮退: {{total}} 台中 {{active}} 台のデバイスがアクティブ",
+      "arrayInactive": "アレイがアクティブではありません ({{activity}})",
+      "arrayState": "アレイの状態: {{state}}",
+      "cpuSpeedLimited": "CPU が本来の速度の {{percent}}% に制限されています",
+      "dataErrors": "データエラー: {{detail}}",
+      "deviceErrors": "デバイスエラー: 読み取り {{read}}、書き込み {{write}}、チェックサム {{cksum}}",
+      "deviceNotOnline": "{{device}} は {{state}} です",
+      "diskutilFailed": "diskutil がディスクの情報を取得できませんでした",
+      "enduranceUsed": "定格耐久性の {{percent}}% を使用済み",
+      "failedMembers": "故障したメンバー: {{members}}",
+      "healthStatus": "健全性: {{status}}",
+      "mediaErrors": "メディアおよびデータ整合性エラー: {{n}}",
+      "memberState": "メンバー: {{member}}",
+      "memoryCorrected": "訂正済みのメモリエラー: {{n}}",
+      "memoryCountsUnreadable": "メモリエラーのカウントを読み取れませんでした",
+      "memoryUncorrected": "未訂正のメモリエラー: {{n}}",
+      "offlineUncorrectable": "訂正不能なセクター: {{n}}",
+      "operationalStatus": "動作状態: {{status}}",
+      "pendingSectors": "代替処理待ちのセクター: {{n}}",
+      "pmrReadOnly": "永続メモリ領域が読み取り専用です",
+      "poolHealth": "プールの状態: {{health}}",
+      "readErrors": "読み取りエラー: {{n}}",
+      "readOnly": "ドライブが自ら読み取り専用になりました",
+      "reallocatedSectors": "代替処理済みのセクター: {{n}}",
+      "rebuilding": "再構築中、{{percent}}% 完了",
+      "reliabilityDegraded": "メディアまたは内部エラーにより信頼性が低下しています",
+      "sensorStatus": "{{sensor}}: {{value}} ({{status}})",
+      "smartFailed": "SMART の総合健全性チェックに失敗しました",
+      "smartNotRead": "健全性ログを読み取れませんでした",
+      "smartStatus": "SMART ステータス: {{status}}",
+      "smartctlAbsent": "smartctl がインストールされていないため、SMART を読み取っていません",
+      "smartctlFailed": "smartctl が失敗しました (終了コード {{rc}})",
+      "spareBelowThreshold": "予備容量がしきい値を下回っています",
+      "temperatureCritical": "{{value}} C、臨界上限 {{limit}} C 以上",
+      "temperatureHigh": "{{value}} C、上限 {{limit}} C 以上",
+      "temperatureThreshold": "温度がしきい値を超えています",
+      "thermalUnreported": "温度状態が報告されていません",
+      "thermalWarning": "温度警告レベル {{level}}",
+      "volatileBackupFailed": "揮発性メモリのバックアップに失敗しました",
+      "writeErrors": "書き込みエラー: {{n}}",
+      "osMemoryEvent": "オペレーティングシステムが報告したハードウェアエラー: {{text}}",
+      "osPowerEvent": "オペレーティングシステムが報告した予期しない電源断: {{text}}",
+      "osStorageEvent": "オペレーティングシステムが報告したストレージエラー: {{text}}",
+      "osThermalEvent": "オペレーティングシステムが報告した温度の問題: {{text}}"
     }
   }
 }

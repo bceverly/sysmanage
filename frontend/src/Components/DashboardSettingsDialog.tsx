@@ -54,6 +54,7 @@ const DashboardSettingsDialog: React.FC<DashboardSettingsDialogProps> = ({
       { identifier: 'antivirus', label: t('dashboard.antivirusCoverage', 'Antivirus') },
       { identifier: 'opentelemetry', label: t('dashboard.openTelemetryCoverage', 'OpenTelemetry') },
       { identifier: 'clocks', label: t('dashboard.clocksOutOfBounds', 'Clocks out of bounds') },
+      { identifier: 'hardware', label: t('dashboard.hardwareNeedsAttention', 'Hardware needing attention') },
     ];
 
     try {

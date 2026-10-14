@@ -17,7 +17,12 @@ state changes, else every 15 minutes).  Storing it:
   the bus) or was not ok -- unless the source that reported it FAILED this
   time, in which case it is kept: a broken ``smartctl`` is not a drive
   pulled out;
-* the host keeps the worst state, when, and each source's status.
+* the host keeps the worst state, when, and each source's status;
+* a report the operating system TRIGGERED (S3: the kernel log, devd or the
+  Windows System log announced a hardware problem) carries the evidence
+  lines: each category in it (storage, thermal, memory, power) becomes one
+  ``system`` event, its distinct lines as reasons -- whether or not any
+  component's state changed, because an I/O error is news on its own.
 
 How a host stands (``host_status``): its worst component state -- or
 ``unmeasured`` (never reported: an agent too old, or not connected) or
@@ -52,6 +57,10 @@ _GONE_MATTERS = ("drive", "array", "pool")
 # Host statuses beyond a component state, worst first in the fleet view.
 STATUS_ORDER = ("failed", "warning", "stale", "unknown", "unmeasured", "ok")
 STALE_AFTER = timedelta(hours=1)
+
+EVIDENCE_CATEGORIES = ("storage", "thermal", "memory", "power")
+SYSTEM = "system"  # the kind of an event the operating system announced
+MAX_EVIDENCE = 20
 
 MAX_COMPONENTS = 1000
 MAX_SOURCES = 64
@@ -134,6 +143,39 @@ def clean_sources(value: Any) -> List[Dict[str, Any]]:
                 entry["detail"] = detail
             out.append(entry)
     return out
+
+
+def clean_evidence(value: Any) -> Dict[str, List[Dict[str, Any]]]:
+    """``{category: [reason]}`` from a triggered report's evidence lines."""
+    out: Dict[str, List[Dict[str, Any]]] = {}
+    for item in value[:MAX_EVIDENCE] if isinstance(value, list) else []:
+        if not isinstance(item, dict):
+            continue
+        category, text = item.get("category"), _text(item.get("text"), 500)
+        if category not in EVIDENCE_CATEGORIES or not text:
+            continue
+        out.setdefault(category, []).append(
+            {
+                "code": f"os_{category}_event",
+                "source": _text(item.get("source"), 32),
+                "text": text,
+            }
+        )
+    return out
+
+
+def _evidence_events(host, evidence, now) -> List[models.HardwareEvent]:
+    return [
+        _event(
+            host.id,
+            {"kind": SYSTEM, "ident": category, "name": category},
+            None,
+            "warning",
+            reasons,
+            now,
+        )
+        for category, reasons in evidence.items()
+    ]
 
 
 def worst(states) -> str:
@@ -235,6 +277,7 @@ def apply_report(
     ]
     reported = {(c["kind"], c["ident"]) for c in components}
     events += _gone(db, host, rows, reported, failed, now)
+    events += _evidence_events(host, clean_evidence(payload.get("evidence")), now)
     for event in events:
         db.add(event)
     host.hardware_state = (

@@ -757,7 +757,8 @@
       "title": "Dashboard-Einstellungen"
     },
     "updates": "Aktualisierungen",
-    "clocksOutOfBounds": "Uhren außerhalb der Grenzwerte"
+    "clocksOutOfBounds": "Uhren außerhalb der Grenzwerte",
+    "hardwareNeedsAttention": "Hardware mit Handlungsbedarf"
   },
   "dataGrid": {
     "columnVisibility": "Spaltensichtbarkeit",
@@ -2432,7 +2433,8 @@
     "hostMetrics": "Host-Metriken",
     "assetDiscovery": "Netzwerkerkennung",
     "malware": "Schadsoftware",
-    "timeSync": "Zeitsynchronisierung"
+    "timeSync": "Zeitsynchronisierung",
+    "hardwareHealth": "Hardware-Zustand"
   },
   "notifications": {
     "applicationUpdates": "Anwendungs-Updates",
@@ -4978,6 +4980,137 @@
       "serversHelp": "Hostnamen oder IP-Adressen, getrennt durch Leerzeichen oder Kommas",
       "title": "NTP-Richtlinie",
       "wants": "Server der Richtlinie: {{servers}}"
+    }
+  },
+  "hardwareHealth": {
+    "card": {
+      "hideSensors": "Intakte Sensoren ausblenden",
+      "loadError": "Der Hardware-Zustand konnte nicht geladen werden.",
+      "recentEvents": "Letzte Ereignisse",
+      "reportedAt": "Gemeldet {{when}}",
+      "showSensors": "{{n}} intakte Sensoren anzeigen",
+      "sources": "Quellen:",
+      "title": "Hardware-Zustand"
+    },
+    "empty": "Es gibt noch keine genehmigten Hosts.",
+    "event": {
+      "changed": "{{from}} -> {{to}}",
+      "new": "Neu: {{to}}"
+    },
+    "events": {
+      "acknowledge": "Bestätigen",
+      "acknowledgeTitle": "Dieses Ereignis bestätigen",
+      "acknowledgedBy": "Bestätigt von {{user}}",
+      "change": "Änderung",
+      "component": "Komponente",
+      "host": "Host",
+      "none": "Keine Hardware-Ereignisse.",
+      "note": "Notiz (optional)",
+      "openTitle": "Ungelöste Ereignisse",
+      "resolve": "Beheben",
+      "resolveTitle": "Dieses Ereignis als behoben markieren",
+      "resolvedBy": "Behoben von {{user}}",
+      "when": "Zeitpunkt",
+      "why": "Grund"
+    },
+    "filter": {
+      "all": "Alle",
+      "search": "Host",
+      "site": "Standort",
+      "status": "Status",
+      "tag": "Tag"
+    },
+    "grid": {
+      "components": "Komponenten",
+      "host": "Host",
+      "platform": "OS",
+      "problems": "Handlungsbedarf",
+      "reported": "Letzter Bericht",
+      "site": "Standort",
+      "status": "Status"
+    },
+    "kind": {
+      "array": "RAID-Array",
+      "drive": "Laufwerk",
+      "memory": "Speicher",
+      "pool": "Speicherpool",
+      "sensor": "Sensor",
+      "system": "Betriebssystem"
+    },
+    "loadError": "Die Hardware der Flotte konnte nicht geladen werden.",
+    "metric": {
+      "hours": "Betriebsstunden: {{value}}",
+      "temperature": "{{value}} C",
+      "wear": "{{value}}% abgenutzt"
+    },
+    "source": {
+      "absent": "nicht vorhanden",
+      "failed": "fehlgeschlagen",
+      "ran": "gelesen"
+    },
+    "status": {
+      "failed": "Ausgefallen",
+      "gone": "Nicht mehr gemeldet",
+      "ok": "Intakt",
+      "stale": "Kein aktueller Bericht",
+      "unknown": "Nicht bewertbar",
+      "unmeasured": "Nicht gemeldet",
+      "warning": "Warnung"
+    },
+    "statusHelp": {
+      "failed": "Mindestens eine Komponente ist ausgefallen.",
+      "ok": "Alle vom Host gemeldeten Komponenten sind intakt.",
+      "stale": "Der letzte Bericht ist älter als eine Stunde. Der Host ist wahrscheinlich nicht verbunden.",
+      "unknown": "Der Host hat seine Hardware gemeldet, aber mindestens eine Komponente war nicht bewertbar.",
+      "unmeasured": "Der Host hat seine Hardware noch nie gemeldet. Sein Agent ist möglicherweise zu alt, oder er hat sich nicht verbunden.",
+      "warning": "Mindestens eine Komponente erfordert Aufmerksamkeit."
+    },
+    "title": "Hardware-Zustand",
+    "reason": {
+      "arrayDegraded": "Beeinträchtigt: {{active}} von {{total}} Geräten aktiv",
+      "arrayInactive": "Das Array ist nicht aktiv ({{activity}})",
+      "arrayState": "Array-Zustand: {{state}}",
+      "cpuSpeedLimited": "Die CPU ist auf {{percent}}% ihrer Geschwindigkeit begrenzt",
+      "dataErrors": "Datenfehler: {{detail}}",
+      "deviceErrors": "Gerätefehler: {{read}} beim Lesen, {{write}} beim Schreiben, {{cksum}} Prüfsumme",
+      "deviceNotOnline": "{{device}} ist {{state}}",
+      "diskutilFailed": "diskutil konnte den Datenträger nicht beschreiben",
+      "enduranceUsed": "{{percent}}% der Nennlebensdauer verbraucht",
+      "failedMembers": "Ausgefallene Mitglieder: {{members}}",
+      "healthStatus": "Zustand: {{status}}",
+      "mediaErrors": "Medien- und Datenintegritätsfehler: {{n}}",
+      "memberState": "Mitglied: {{member}}",
+      "memoryCorrected": "Korrigierte Speicherfehler: {{n}}",
+      "memoryCountsUnreadable": "Die Speicherfehlerzähler konnten nicht gelesen werden",
+      "memoryUncorrected": "Nicht korrigierte Speicherfehler: {{n}}",
+      "offlineUncorrectable": "Nicht korrigierbare Sektoren: {{n}}",
+      "operationalStatus": "Betriebsstatus: {{status}}",
+      "pendingSectors": "Sektoren mit ausstehender Neuzuweisung: {{n}}",
+      "pmrReadOnly": "Der persistente Speicherbereich ist schreibgeschützt",
+      "poolHealth": "Pool-Zustand: {{health}}",
+      "readErrors": "Lesefehler: {{n}}",
+      "readOnly": "Das Laufwerk hat sich selbst schreibgeschützt",
+      "reallocatedSectors": "Neu zugewiesene Sektoren: {{n}}",
+      "rebuilding": "Wiederherstellung läuft, {{percent}}% abgeschlossen",
+      "reliabilityDegraded": "Die Zuverlässigkeit ist durch Medien- oder interne Fehler beeinträchtigt",
+      "sensorStatus": "{{sensor}}: {{value}} ({{status}})",
+      "smartFailed": "Die SMART-Gesamtzustandsprüfung ist fehlgeschlagen",
+      "smartNotRead": "Das Zustandsprotokoll konnte nicht gelesen werden",
+      "smartStatus": "SMART-Status: {{status}}",
+      "smartctlAbsent": "smartctl ist nicht installiert, daher wurde SMART nicht gelesen",
+      "smartctlFailed": "smartctl ist fehlgeschlagen (Exit-Code {{rc}})",
+      "spareBelowThreshold": "Die Reservekapazität liegt unter ihrem Schwellenwert",
+      "temperatureCritical": "{{value}} C, bei oder über dem kritischen Grenzwert von {{limit}} C",
+      "temperatureHigh": "{{value}} C, bei oder über dem Grenzwert von {{limit}} C",
+      "temperatureThreshold": "Die Temperatur liegt jenseits eines Schwellenwerts",
+      "thermalUnreported": "Der thermische Zustand wurde nicht gemeldet",
+      "thermalWarning": "Thermische Warnstufe {{level}}",
+      "volatileBackupFailed": "Die Sicherung des flüchtigen Speichers ist fehlgeschlagen",
+      "writeErrors": "Schreibfehler: {{n}}",
+      "osMemoryEvent": "Vom Betriebssystem gemeldeter Hardwarefehler: {{text}}",
+      "osPowerEvent": "Vom Betriebssystem gemeldeter unerwarteter Stromausfall: {{text}}",
+      "osStorageEvent": "Vom Betriebssystem gemeldeter Speicherfehler: {{text}}",
+      "osThermalEvent": "Vom Betriebssystem gemeldetes Temperaturproblem: {{text}}"
     }
   }
 }

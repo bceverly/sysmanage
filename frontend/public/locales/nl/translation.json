@@ -757,7 +757,8 @@
       "title": "Dashboard Instellingen"
     },
     "updates": "Updates",
-    "clocksOutOfBounds": "Klokken buiten de grenzen"
+    "clocksOutOfBounds": "Klokken buiten de grenzen",
+    "hardwareNeedsAttention": "Hardware die aandacht vereist"
   },
   "dataGrid": {
     "columnVisibility": "Kolomzichtbaarheid",
@@ -2432,7 +2433,8 @@
     "hostMetrics": "Hostmetrieken",
     "assetDiscovery": "Netwerkdetectie",
     "malware": "Malware",
-    "timeSync": "Tijdsynchronisatie"
+    "timeSync": "Tijdsynchronisatie",
+    "hardwareHealth": "Hardwaregezondheid"
   },
   "notifications": {
     "applicationUpdates": "Applicatie Updates",
@@ -4978,6 +4980,137 @@
       "serversHelp": "Hostnamen of IP-adressen, gescheiden door spaties of komma's",
       "title": "NTP-beleid",
       "wants": "Servers van het beleid: {{servers}}"
+    }
+  },
+  "hardwareHealth": {
+    "card": {
+      "hideSensors": "Gezonde sensoren verbergen",
+      "loadError": "De hardwaregezondheid kon niet worden geladen.",
+      "recentEvents": "Recente gebeurtenissen",
+      "reportedAt": "Gerapporteerd {{when}}",
+      "showSensors": "{{n}} gezonde sensoren tonen",
+      "sources": "Bronnen:",
+      "title": "Hardwaregezondheid"
+    },
+    "empty": "Er zijn nog geen goedgekeurde hosts.",
+    "event": {
+      "changed": "{{from}} -> {{to}}",
+      "new": "Nieuw: {{to}}"
+    },
+    "events": {
+      "acknowledge": "Bevestigen",
+      "acknowledgeTitle": "Deze gebeurtenis bevestigen",
+      "acknowledgedBy": "Bevestigd door {{user}}",
+      "change": "Wijziging",
+      "component": "Component",
+      "host": "Host",
+      "none": "Geen hardwaregebeurtenissen.",
+      "note": "Notitie (optioneel)",
+      "openTitle": "Onopgeloste gebeurtenissen",
+      "resolve": "Oplossen",
+      "resolveTitle": "Deze gebeurtenis oplossen",
+      "resolvedBy": "Opgelost door {{user}}",
+      "when": "Tijdstip",
+      "why": "Reden"
+    },
+    "filter": {
+      "all": "Alle",
+      "search": "Host",
+      "site": "Site",
+      "status": "Status",
+      "tag": "Label"
+    },
+    "grid": {
+      "components": "Componenten",
+      "host": "Host",
+      "platform": "OS",
+      "problems": "Vereist aandacht",
+      "reported": "Laatste rapport",
+      "site": "Site",
+      "status": "Status"
+    },
+    "kind": {
+      "array": "RAID-array",
+      "drive": "Schijf",
+      "memory": "Geheugen",
+      "pool": "Opslagpool",
+      "sensor": "Sensor",
+      "system": "Besturingssysteem"
+    },
+    "loadError": "De hardware van het machinepark kon niet worden geladen.",
+    "metric": {
+      "hours": "Bedrijfsuren: {{value}}",
+      "temperature": "{{value}} C",
+      "wear": "{{value}}% versleten"
+    },
+    "source": {
+      "absent": "niet aanwezig",
+      "failed": "mislukt",
+      "ran": "gelezen"
+    },
+    "status": {
+      "failed": "Defect",
+      "gone": "Niet meer gerapporteerd",
+      "ok": "Gezond",
+      "stale": "Geen recent rapport",
+      "unknown": "Niet te beoordelen",
+      "unmeasured": "Niet gerapporteerd",
+      "warning": "Waarschuwing"
+    },
+    "statusHelp": {
+      "failed": "Ten minste één component is defect.",
+      "ok": "Elke component die de host heeft gerapporteerd is gezond.",
+      "stale": "Het laatste rapport is ouder dan een uur. De host is waarschijnlijk niet verbonden.",
+      "unknown": "De host heeft zijn hardware gerapporteerd, maar ten minste één component kon door niets worden beoordeeld.",
+      "unmeasured": "De host heeft zijn hardware nog nooit gerapporteerd. De agent is mogelijk te oud of heeft nog geen verbinding gemaakt.",
+      "warning": "Ten minste één component vereist aandacht."
+    },
+    "title": "Hardwaregezondheid",
+    "reason": {
+      "arrayDegraded": "Gedegradeerd: {{active}} van {{total}} apparaten actief",
+      "arrayInactive": "De array is niet actief ({{activity}})",
+      "arrayState": "Arraystatus: {{state}}",
+      "cpuSpeedLimited": "De CPU wordt beperkt tot {{percent}}% van zijn snelheid",
+      "dataErrors": "Gegevensfouten: {{detail}}",
+      "deviceErrors": "Apparaatfouten: {{read}} lezen, {{write}} schrijven, {{cksum}} checksum",
+      "deviceNotOnline": "{{device}} is {{state}}",
+      "diskutilFailed": "diskutil kon de schijf niet beschrijven",
+      "enduranceUsed": "{{percent}}% van de nominale levensduur verbruikt",
+      "failedMembers": "Defecte leden: {{members}}",
+      "healthStatus": "Gezondheid: {{status}}",
+      "mediaErrors": "Media- en gegevensintegriteitsfouten: {{n}}",
+      "memberState": "Lid: {{member}}",
+      "memoryCorrected": "Gecorrigeerde geheugenfouten: {{n}}",
+      "memoryCountsUnreadable": "Het aantal geheugenfouten kon niet worden gelezen",
+      "memoryUncorrected": "Niet-gecorrigeerde geheugenfouten: {{n}}",
+      "offlineUncorrectable": "Niet-corrigeerbare sectoren: {{n}}",
+      "operationalStatus": "Operationele status: {{status}}",
+      "pendingSectors": "Sectoren in afwachting van herplaatsing: {{n}}",
+      "pmrReadOnly": "Het persistente geheugengebied is alleen-lezen",
+      "poolHealth": "Poolstatus: {{health}}",
+      "readErrors": "Leesfouten: {{n}}",
+      "readOnly": "De schijf heeft zichzelf alleen-lezen gemaakt",
+      "reallocatedSectors": "Herplaatste sectoren: {{n}}",
+      "rebuilding": "Wordt herbouwd, {{percent}}% voltooid",
+      "reliabilityDegraded": "De betrouwbaarheid is verminderd door media- of interne fouten",
+      "sensorStatus": "{{sensor}}: {{value}} ({{status}})",
+      "smartFailed": "De algemene SMART-gezondheidscontrole is mislukt",
+      "smartNotRead": "Het gezondheidslogboek kon niet worden gelezen",
+      "smartStatus": "SMART-status: {{status}}",
+      "smartctlAbsent": "smartctl is niet geïnstalleerd, dus SMART is niet gelezen",
+      "smartctlFailed": "smartctl is mislukt (afsluitcode {{rc}})",
+      "spareBelowThreshold": "De reservecapaciteit ligt onder de drempel",
+      "temperatureCritical": "{{value}} C, op of boven de kritieke grens van {{limit}} C",
+      "temperatureHigh": "{{value}} C, op of boven de grens van {{limit}} C",
+      "temperatureThreshold": "De temperatuur overschrijdt een drempel",
+      "thermalUnreported": "De thermische toestand is niet gerapporteerd",
+      "thermalWarning": "Thermisch waarschuwingsniveau {{level}}",
+      "volatileBackupFailed": "De back-up van het vluchtige geheugen is mislukt",
+      "writeErrors": "Schrijffouten: {{n}}",
+      "osMemoryEvent": "Hardwarefout gemeld door het besturingssysteem: {{text}}",
+      "osPowerEvent": "Onverwachte stroomonderbreking gemeld door het besturingssysteem: {{text}}",
+      "osStorageEvent": "Opslagfout gemeld door het besturingssysteem: {{text}}",
+      "osThermalEvent": "Temperatuurprobleem gemeld door het besturingssysteem: {{text}}"
     }
   }
 }
