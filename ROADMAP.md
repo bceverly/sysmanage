@@ -13255,7 +13255,7 @@ evaluated on arrival); S6 recommend smartmontools (Enterprise auto-deploy,
 with consent); S7 proof on constructed failures + docs + screenshots +
 14-language i18n.
 
-- [ ] **Agent collectors, per OS, our own schema** (as 21.1: native first,
+- [x] **Agent collectors, per OS, our own schema** (as 21.1: native first,
       "not measured" is never "healthy" -- every source reports
       ran / absent / failed, shown beside the results):
       - drives: `smartctl -j` (SATA/SAS/NVMe: overall verdict, reallocated /
@@ -13285,7 +13285,26 @@ with consent); S7 proof on constructed failures + docs + screenshots +
       Still to do in this item: btrfs / LVM raid, NetBSD `envstat` /
       `raidctl` (its VM was down), `bioctl` detail, vendor RAID CLIs,
       `ipmitool`, MCE / WHEA.*
-- [ ] **Real time, event-first:** subscribe where the OS already raises the
+      *Rest done 2026-10-14: btrfs device stats + missing devices and LVM
+      RAID health (`hardware_health_linux_storage.py`; REAL recordings of
+      constructed failures on beast's loop devices -- a corrupted + scrubbed
+      btrfs raid1 member, a degraded mount, LVM raid1 syncing / mismatches /
+      partial / refresh-needed); OpenBSD `bioctl` volume + chunk detail and
+      NetBSD `envstat -x` / `raidctl -s` / `bioctl` (`hardware_health_bsd_raid.py`;
+      t480 recorded read-only -- its softraid has no volumes; volume and
+      NetBSD fixtures built from the `bioctl.c` / `raidctl.c` / proplib
+      formats because the NetBSD VM is unreachable); storcli / perccli,
+      ssacli, arcconf and `ipmitool` sdr + 24 h SEL
+      (`hardware_health_vendor.py`; no such hardware in the lab -- fixtures
+      from the documented formats, a tool that is absent adds no noise);
+      machine checks through rasdaemon and Windows WHEA-Logger counts
+      (`hardware_health_mce.py`; WHEA recorded on the x13s: zero).  Virtual
+      (virtio / Xen) disks are not SMART drives.  New reason codes worded in
+      14 languages (`btrfs_device_errors`, `machine_checks`[`_fatal`],
+      `controller_status`, `cache_battery`, `sel_events`).  Real-hardware
+      validation of the vendor CLIs / BMC / NetBSD paths waits for such a
+      machine.*
+- [x] **Real time, event-first:** subscribe where the OS already raises the
       event -- ZFS `zed`, `smartd`, `mdadm --monitor`, journald (I/O errors,
       MCE, thermal), FreeBSD `devd`, Windows event log subscriptions -- and
       send a `hardware_health_event` as URGENT immediately; a periodic sweep
@@ -13309,7 +13328,17 @@ with consent); S7 proof on constructed failures + docs + screenshots +
       Not done here: smartd / zed / mdadm --monitor hooks (the kernel log
       and devd already carry their failures), macOS / OpenBSD / NetBSD
       (periodic report only).  Real-time ALERTS are S5.*
-- [ ] **Server (OSS schema + UI):** components (drive, array, pool, sensor)
+      *smartd / zed / mdadm --monitor hooks done 2026-10-14: the Linux agent
+      also follows the journal for those identifiers (`journalctl -f -t
+      smartd -t zed -t mdadm -t mdmonitor`, merged with the kernel-log
+      source; absent journalctl = skipped) -- SMART failures, pending /
+      uncorrectable sectors, damage attributes (not Seagate's routine
+      error-rate drift), zed faults, mdadm Fail / DegradedArray; real
+      mdadm --monitor lines recorded on beast.  Windows WHEA-Logger events
+      count as hardware errors in real time.  Found on the way: /dev/kmsg
+      escapes newlines (md prints two lines as one message), and the agent
+      ran package installs ON its event loop -- both fixed.*
+- [x] **Server (OSS schema + UI):** components (drive, array, pool, sensor)
       with current state, and an event history (time, severity, source, raw
       evidence); dedupe and flap damping; acknowledge / resolve with a
       reason. A fleet **Hardware Health** page (failing drives, degraded
@@ -13322,7 +13351,7 @@ with consent); S7 proof on constructed failures + docs + screenshots +
       host status never `ok` without a report in the last hour
       (`unmeasured` / `stale`), acknowledge / resolve with a note under the
       new Manage Hardware Health role.  Next: the page, tab and tile (S4).*
-- [ ] **Real-time alerts (Pro+, through `alerting_engine`):** an event
+- [x] **Real-time alerts (Pro+, through `alerting_engine`):** an event
       evaluates its rules on arrival, not on the next tick, and dispatches to
       the existing channels (email first); severity routing, re-notify until
       acknowledged, maintenance-window suppression (14.2), per-host rate
@@ -13385,6 +13414,26 @@ with consent); S7 proof on constructed failures + docs + screenshots +
       with a device offlined/corrupted, mdadm array on loop devices with a
       member failed, recorded `smartctl` JSON from failing drives; an email
       arrives within seconds of each. Docs + screenshots + 14-language i18n.
+      *S7 (2026-10-14) -- proofs DONE, every email received (Bryan,
+      bryan@theeverlys.com): `scripts/hardware_alert_proof.py --email`
+      (FreeBSD box, temporary email channel) -- the real worn SSD mailed
+      2.2 s after its report arrived; a file-backed ZFS mirror with a side
+      offlined mailed 11.0 s after `zpool offline`, and the "resolved" mail
+      followed recovery.  `scripts/md_alert_vm_proof.py` (throwaway Ubuntu
+      VM, RAID1 on loop devices): `mdadm --fail` -> alert + mail in 14.7 s
+      (agent ~11 s incl. `vagrant ssh` and the 5 s debounce; server 3.7 s
+      incl. the SMTP send), resolved after the rebuild.  Recorded `smartctl`
+      7.5 JSON from the FreeBSD SSD (fetched package, nothing installed):
+      the drive says PASSED, its 19 media errors still make it a warning
+      (corrupted-ZFS and failed-md recordings are the S1 fixtures).  Found
+      and fixed on the way: `/dev/kmsg` escapes newlines (md's two-line
+      message arrived as `...\x0a...`), and the agent ran package installs
+      ON its event loop -- the first md run took 33 s because the server's
+      ClamAV auto-deploy was installing on the new VM and froze the agent.
+      Docs: sysmanage-docs `docs/administration/hardware-health.html`, 14
+      languages verified; screenshots wired (`seed_hardware.py`,
+      `make screenshots-hardware-seed`, shots `hardware-health-fleet` /
+      `-host`) but not yet captured -- `make screenshots`.*
 
 #### 23.2 Asset tags on the machine, not the OS (OSS)
 

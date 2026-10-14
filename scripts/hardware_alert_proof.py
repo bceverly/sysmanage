@@ -10,8 +10,11 @@ seconds, and the alert resolves itself when the disk comes back.
 On a FreeBSD host you can SSH into with passwordless sudo, and a server with
 Enterprise alerting:
 
-  1. two TEMPORARY ``hardware_health`` rules (no notification channels, so
-     nothing is mailed): one for drives, one for pools;
+  1. two TEMPORARY ``hardware_health`` rules: one for drives, one for pools
+     -- with no notification channel, so nothing is mailed, unless
+     ``--email ADDRESS``: then a temporary email channel to that address is
+     bound to both, and each alert must be MAILED (the server's SMTP send
+     succeeded) -- timed from the failure;
   2. the agent from your working tree runs on the host as root, as a NEW host
      (``clock_skew_host_test.Remote``: test config, original put back);
   3. the host's hardware report arrives; the drives rule opens an alert for
@@ -27,7 +30,8 @@ Enterprise alerting:
 
 Usage:
     python3 scripts/hardware_alert_proof.py --server http://sysmanage.lan:8080 \\
-        --ssh freebsd --agent-server 192.168.4.132:8080 [--enrollment-token T]
+        --ssh freebsd --agent-server 192.168.4.132:8080 [--enrollment-token T] \\
+        [--email you@example.com]
 
 Credentials as for the clock proof.  Exit status: 0 proven, 1 not proven,
 2 could not get as far as testing.
@@ -61,15 +65,36 @@ RULES = {
 class Proof:
     """The server side: rules, host, alerts, events."""
 
-    def __init__(self, server: str, token: str):
+    def __init__(self, server: str, token: str, rules=None):
         self.server, self.token = server, token
+        self.rule_params = rules or RULES
         self.rules = {}
+        self.channel = None
+
+    def create_channel(self, address):
+        status, channel = self.req(
+            "POST",
+            "/alerting/channels",
+            {
+                "name": "Hardware proof email (temporary)",
+                "channel_type": "email",
+                "config": {"recipients": [address]},
+                "enabled": True,
+            },
+        )
+        if status != 200:
+            raise RuntimeError(f"creating the email channel failed (HTTP {status})")
+        self.channel = channel["id"]
+
+    def delete_channel(self):
+        if self.channel:
+            self.req("DELETE", f"/alerting/channels/{self.channel}")
 
     def req(self, method, path, body=None):
         return proof._request(self.server, method, path, self.token, body)
 
     def create_rules(self):
-        for name, params in RULES.items():
+        for name, params in self.rule_params.items():
             status, rule = self.req(
                 "POST",
                 "/alerting/rules",
@@ -81,6 +106,7 @@ class Proof:
                     "severity": "high",
                     "enabled": True,
                     "cooldown_minutes": 1,
+                    "channel_ids": [self.channel] if self.channel else [],
                 },
             )
             if status != 200:
@@ -118,6 +144,23 @@ def wait(what, probe, timeout, interval=2.0):
             return found
         time.sleep(interval)
     return None
+
+
+def mailed(p, hid, rule, results, started, problems, what):
+    """With --email: the alert's notification was sent (SMTP accepted it)."""
+    if not p.channel:
+        return
+
+    def sent():
+        alert = p.open_alert(hid, rule)
+        return alert if alert and alert.get("notification_sent") else None
+
+    alert = wait(f"the {what} email", sent, 120, 1)
+    if alert is None:
+        problems.append(f"the {what} alert was never mailed")
+        return
+    log(results, f"{what} alert MAILED {time.monotonic() - started:.1f} s after "
+                 f"the failure: [{alert['severity'].upper()}] {alert['title']}")  # fmt: skip
 
 
 def register(args, p, remote, results, state):
@@ -192,9 +235,11 @@ def prove(args, p, remote, results, state):
     )
     problems = []
     if any(c["state"] != "ok" for c in drives):
+        started = time.monotonic()
         alert = wait("the drives alert", lambda: p.open_alert(hid, "drives"), 180)
         if alert:
             log(results, f"drives alert: {alert['severity']} -- {alert['message']}")
+            mailed(p, hid, "drives", results, started, problems, "drives")
         else:
             problems.append("a drive is not ok but no drives alert opened")
     # A fresh agent spends its first minutes on its startup collections
@@ -221,6 +266,7 @@ def prove(args, p, remote, results, state):
         return problems
     log(results, f"pools alert {time.monotonic() - started:.1f} s after zpool offline: "
                  f"{alert['severity']} -- {alert['message']}")  # fmt: skip
+    mailed(p, hid, "pools", results, started, problems, "pools")
     events = (p.hardware(hid) or {}).get("events", [])
     system = [e for e in events if e["kind"] == "system"]
     if system:
@@ -262,6 +308,9 @@ def cleanup(p, remote, results, state):
     remote.remove_dir()
     p.delete_rules()
     log(results, "deleted the temporary rules")
+    if p.channel:
+        p.delete_channel()
+        log(results, "deleted the temporary email channel")
 
 
 def main() -> int:
@@ -273,6 +322,7 @@ def main() -> int:
     parser.add_argument("--enrollment-token")
     parser.add_argument("--agent-src", type=Path, default=DEFAULT_AGENT_SRC)
     parser.add_argument("--remote-python")
+    parser.add_argument("--email", help="mail each alert to this address")
     parser.add_argument(
         "--settle", type=int, default=180, help="seconds before the pool test"
     )
@@ -292,6 +342,8 @@ def main() -> int:
     state = {}
     problems = ["the proof did not start"]
     try:
+        if args.email:
+            p.create_channel(args.email)
         p.create_rules()
         problems = prove(args, p, remote, results, state)
     except Exception as exc:  # pylint: disable=broad-exception-caught

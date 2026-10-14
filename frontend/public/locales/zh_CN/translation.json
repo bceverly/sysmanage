@@ -5110,7 +5110,13 @@
       "osMemoryEvent": "操作系统报告的硬件错误：{{text}}",
       "osPowerEvent": "操作系统报告的意外断电：{{text}}",
       "osStorageEvent": "操作系统报告的存储错误：{{text}}",
-      "osThermalEvent": "操作系统报告的温度问题：{{text}}"
+      "osThermalEvent": "操作系统报告的温度问题：{{text}}",
+      "btrfsDeviceErrors": "{{device}}：自计数器上次重置以来的错误：写入 {{write}}，读取 {{read}}，刷新 {{flush}}，损坏 {{corruption}}，代数 {{generation}}",
+      "machineChecks": "过去 24 小时内已纠正的硬件错误（机器检查）：{{n}}",
+      "machineChecksFatal": "过去 24 小时内未纠正的硬件错误（机器检查）：{{n}}",
+      "controllerStatus": "RAID 控制器状态：{{status}}",
+      "cacheBattery": "缓存电池或电容状态：{{status}}",
+      "selEvents": "过去 24 小时内 BMC 事件日志中的硬件问题：{{n}}。最近一次：{{last}}"
     },
     "smartmontools": {
       "auto": "在需要的地方自动安装",

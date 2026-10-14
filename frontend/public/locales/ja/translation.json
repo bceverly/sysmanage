@@ -5110,7 +5110,13 @@
       "osMemoryEvent": "オペレーティングシステムが報告したハードウェアエラー: {{text}}",
       "osPowerEvent": "オペレーティングシステムが報告した予期しない電源断: {{text}}",
       "osStorageEvent": "オペレーティングシステムが報告したストレージエラー: {{text}}",
-      "osThermalEvent": "オペレーティングシステムが報告した温度の問題: {{text}}"
+      "osThermalEvent": "オペレーティングシステムが報告した温度の問題: {{text}}",
+      "btrfsDeviceErrors": "{{device}}: カウンターの前回リセット以降のエラー: 書き込み {{write}}、読み取り {{read}}、フラッシュ {{flush}}、破損 {{corruption}}、世代 {{generation}}",
+      "machineChecks": "過去 24 時間に訂正されたハードウェアエラー (マシンチェック): {{n}}",
+      "machineChecksFatal": "過去 24 時間に訂正されなかったハードウェアエラー (マシンチェック): {{n}}",
+      "controllerStatus": "RAID コントローラーの状態: {{status}}",
+      "cacheBattery": "キャッシュのバッテリーまたはキャパシターの状態: {{status}}",
+      "selEvents": "過去 24 時間の BMC イベントログ内のハードウェアの問題: {{n}}。最新: {{last}}"
     },
     "smartmontools": {
       "auto": "必要な場所に自動でインストールする",

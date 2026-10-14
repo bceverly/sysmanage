@@ -5110,7 +5110,13 @@
       "osMemoryEvent": "Erreur matérielle signalée par le système d'exploitation : {{text}}",
       "osPowerEvent": "Coupure d'alimentation inattendue signalée par le système d'exploitation : {{text}}",
       "osStorageEvent": "Erreur de stockage signalée par le système d'exploitation : {{text}}",
-      "osThermalEvent": "Problème de température signalé par le système d'exploitation : {{text}}"
+      "osThermalEvent": "Problème de température signalé par le système d'exploitation : {{text}}",
+      "btrfsDeviceErrors": "{{device}} : erreurs depuis la dernière remise à zéro des compteurs : {{write}} en écriture, {{read}} en lecture, {{flush}} de vidage, {{corruption}} de corruption, {{generation}} de génération",
+      "machineChecks": "Erreurs matérielles corrigées (machine checks) au cours des dernières 24 heures : {{n}}",
+      "machineChecksFatal": "Erreurs matérielles non corrigées (machine checks) au cours des dernières 24 heures : {{n}}",
+      "controllerStatus": "État du contrôleur RAID : {{status}}",
+      "cacheBattery": "État de la batterie ou du condensateur du cache : {{status}}",
+      "selEvents": "Problèmes matériels dans le journal d'événements du BMC au cours des dernières 24 heures : {{n}}. Le plus récent : {{last}}"
     },
     "smartmontools": {
       "auto": "Installer automatiquement partout où c'est nécessaire",

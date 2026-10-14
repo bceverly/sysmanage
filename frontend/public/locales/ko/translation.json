@@ -5110,7 +5110,13 @@
       "osMemoryEvent": "운영 체제가 보고한 하드웨어 오류: {{text}}",
       "osPowerEvent": "운영 체제가 보고한 예기치 않은 전원 손실: {{text}}",
       "osStorageEvent": "운영 체제가 보고한 스토리지 오류: {{text}}",
-      "osThermalEvent": "운영 체제가 보고한 온도 문제: {{text}}"
+      "osThermalEvent": "운영 체제가 보고한 온도 문제: {{text}}",
+      "btrfsDeviceErrors": "{{device}}: 카운터를 마지막으로 초기화한 이후의 오류: 쓰기 {{write}}, 읽기 {{read}}, 플러시 {{flush}}, 손상 {{corruption}}, 세대 {{generation}}",
+      "machineChecks": "최근 24시간 동안 정정된 하드웨어 오류(머신 체크): {{n}}",
+      "machineChecksFatal": "최근 24시간 동안 정정되지 않은 하드웨어 오류(머신 체크): {{n}}",
+      "controllerStatus": "RAID 컨트롤러 상태: {{status}}",
+      "cacheBattery": "캐시 배터리 또는 커패시터 상태: {{status}}",
+      "selEvents": "최근 24시간 동안 BMC 이벤트 로그의 하드웨어 문제: {{n}}. 가장 최근: {{last}}"
     },
     "smartmontools": {
       "auto": "필요한 곳에 자동으로 설치",

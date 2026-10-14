@@ -5110,7 +5110,13 @@
       "osMemoryEvent": "Vom Betriebssystem gemeldeter Hardwarefehler: {{text}}",
       "osPowerEvent": "Vom Betriebssystem gemeldeter unerwarteter Stromausfall: {{text}}",
       "osStorageEvent": "Vom Betriebssystem gemeldeter Speicherfehler: {{text}}",
-      "osThermalEvent": "Vom Betriebssystem gemeldetes Temperaturproblem: {{text}}"
+      "osThermalEvent": "Vom Betriebssystem gemeldetes Temperaturproblem: {{text}}",
+      "btrfsDeviceErrors": "{{device}}: Fehler seit dem letzten Zurücksetzen der Zähler: {{write}} beim Schreiben, {{read}} beim Lesen, {{flush}} beim Leeren, {{corruption}} Beschädigung, {{generation}} Generation",
+      "machineChecks": "Korrigierte Hardwarefehler (Machine Checks) in den letzten 24 Stunden: {{n}}",
+      "machineChecksFatal": "Nicht korrigierte Hardwarefehler (Machine Checks) in den letzten 24 Stunden: {{n}}",
+      "controllerStatus": "Status des RAID-Controllers: {{status}}",
+      "cacheBattery": "Status der Cache-Batterie oder des Kondensators: {{status}}",
+      "selEvents": "Hardwareprobleme im BMC-Ereignisprotokoll in den letzten 24 Stunden: {{n}}. Zuletzt: {{last}}"
     },
     "smartmontools": {
       "auto": "Überall automatisch installieren, wo es benötigt wird",

@@ -46,6 +46,28 @@ describe("hardware health labels", () => {
     );
   });
 
+  test("btrfs, machine checks, vendor RAID and the BMC log are worded", () => {
+    expect(
+      reasonsText(t, [
+        { code: "machine_checks_fatal", count: 2 },
+        { code: "sel_events", count: 3, last: "Power Supply AC lost" },
+        { code: "controller_status", status: "Needs Attention" },
+      ]),
+    ).toBe(
+      "Uncorrected hardware errors (machine checks) in the last 24 hours: 2; "
+        + "Hardware problems in the BMC event log in the last 24 hours: 3. Most recent: Power Supply AC lost; "
+        + "RAID controller status: Needs Attention",
+    );
+    expect(
+      reasonsText(t, [
+        {
+          code: "btrfs_device_errors", device: "/dev/loop11",
+          write: 0, read: 0, flush: 0, corruption: 25600, generation: 0,
+        },
+      ]),
+    ).toContain("/dev/loop11: errors since the counters were last reset");
+  });
+
   test("a code from a newer agent shows as itself", () => {
     expect(reasonText(t, { code: "quantum_flux" })).toBe("quantum_flux");
   });

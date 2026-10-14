@@ -5110,7 +5110,13 @@
       "osMemoryEvent": "Errore hardware segnalato dal sistema operativo: {{text}}",
       "osPowerEvent": "Interruzione di corrente imprevista segnalata dal sistema operativo: {{text}}",
       "osStorageEvent": "Errore di archiviazione segnalato dal sistema operativo: {{text}}",
-      "osThermalEvent": "Problema di temperatura segnalato dal sistema operativo: {{text}}"
+      "osThermalEvent": "Problema di temperatura segnalato dal sistema operativo: {{text}}",
+      "btrfsDeviceErrors": "{{device}}: errori dall'ultimo azzeramento dei contatori: {{write}} in scrittura, {{read}} in lettura, {{flush}} di flush, {{corruption}} di corruzione, {{generation}} di generazione",
+      "machineChecks": "Errori hardware corretti (machine check) nelle ultime 24 ore: {{n}}",
+      "machineChecksFatal": "Errori hardware non corretti (machine check) nelle ultime 24 ore: {{n}}",
+      "controllerStatus": "Stato del controller RAID: {{status}}",
+      "cacheBattery": "Stato della batteria o del condensatore della cache: {{status}}",
+      "selEvents": "Problemi hardware nel registro eventi del BMC nelle ultime 24 ore: {{n}}. Il più recente: {{last}}"
     },
     "smartmontools": {
       "auto": "Installa automaticamente ovunque serva",

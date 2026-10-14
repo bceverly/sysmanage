@@ -5110,7 +5110,13 @@
       "osMemoryEvent": "Hardwarefout gemeld door het besturingssysteem: {{text}}",
       "osPowerEvent": "Onverwachte stroomonderbreking gemeld door het besturingssysteem: {{text}}",
       "osStorageEvent": "Opslagfout gemeld door het besturingssysteem: {{text}}",
-      "osThermalEvent": "Temperatuurprobleem gemeld door het besturingssysteem: {{text}}"
+      "osThermalEvent": "Temperatuurprobleem gemeld door het besturingssysteem: {{text}}",
+      "btrfsDeviceErrors": "{{device}}: fouten sinds de tellers voor het laatst zijn gereset: {{write}} schrijven, {{read}} lezen, {{flush}} flush, {{corruption}} beschadiging, {{generation}} generatie",
+      "machineChecks": "Gecorrigeerde hardwarefouten (machine checks) in de afgelopen 24 uur: {{n}}",
+      "machineChecksFatal": "Niet-gecorrigeerde hardwarefouten (machine checks) in de afgelopen 24 uur: {{n}}",
+      "controllerStatus": "Status van de RAID-controller: {{status}}",
+      "cacheBattery": "Status van de cachebatterij of -condensator: {{status}}",
+      "selEvents": "Hardwareproblemen in het BMC-gebeurtenislogboek in de afgelopen 24 uur: {{n}}. Meest recent: {{last}}"
     },
     "smartmontools": {
       "auto": "Automatisch installeren waar het nodig is",

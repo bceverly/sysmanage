@@ -5110,7 +5110,13 @@
       "osMemoryEvent": "Hardware error reported by the operating system: {{text}}",
       "osPowerEvent": "Unexpected loss of power reported by the operating system: {{text}}",
       "osStorageEvent": "Storage error reported by the operating system: {{text}}",
-      "osThermalEvent": "Temperature problem reported by the operating system: {{text}}"
+      "osThermalEvent": "Temperature problem reported by the operating system: {{text}}",
+      "btrfsDeviceErrors": "{{device}}: errors since the counters were last reset: {{write}} write, {{read}} read, {{flush}} flush, {{corruption}} corruption, {{generation}} generation",
+      "machineChecks": "Corrected hardware errors (machine checks) in the last 24 hours: {{n}}",
+      "machineChecksFatal": "Uncorrected hardware errors (machine checks) in the last 24 hours: {{n}}",
+      "controllerStatus": "RAID controller status: {{status}}",
+      "cacheBattery": "Cache battery or capacitor status: {{status}}",
+      "selEvents": "Hardware problems in the BMC event log in the last 24 hours: {{n}}. Most recent: {{last}}"
     },
     "smartmontools": {
       "auto": "Install automatically wherever it is needed",
