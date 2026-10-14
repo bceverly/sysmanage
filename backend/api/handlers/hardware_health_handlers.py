@@ -17,7 +17,7 @@ from typing import Any, Dict
 from sqlalchemy.orm import Session
 
 from backend.persistence.models import Host
-from backend.services import hardware_health
+from backend.services import hardware_alerts, hardware_health
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +53,8 @@ async def handle_hardware_health_update(  # NOSONAR
             host_id, host.fqdn, event.kind, event.ident,
             event.from_state or "new", event.to_state,
         )  # fmt: skip
+    # S5: the engine's hardware rules for this host, now -- not next tick.
+    await hardware_alerts.on_report(db, host, events)
     return {
         "message_type": "success",
         "data": {"state": host.hardware_state, "events": len(events)},

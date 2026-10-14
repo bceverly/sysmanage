@@ -281,3 +281,38 @@ class TestOnceRecurrence:
             ends_at=NOW - timedelta(hours=1),
         )
         assert mw.is_dispatch_allowed(db_session, host, NOW) is False
+
+
+class TestInMaintenance:
+    """in_maintenance: is the host inside an ALLOW window now (23.1 S5 holds
+    hardware-alert notifications then)?  Fails closed: an error alerts."""
+
+    def test_open_allow_window(self, db_session):
+        host = uuid.uuid4()
+        _mk_window(
+            db_session, [("host", host, None)], start_time="10:00", duration_minutes=240
+        )
+        assert mw.in_maintenance(db_session, host, NOW) is True
+
+    def test_closed_window_or_none(self, db_session):
+        host = uuid.uuid4()
+        assert mw.in_maintenance(db_session, host, NOW) is False
+        _mk_window(
+            db_session, [("host", host, None)], start_time="02:00", duration_minutes=60
+        )
+        assert mw.in_maintenance(db_session, host, NOW) is False
+
+    def test_a_blackout_is_not_maintenance(self, db_session):
+        host = uuid.uuid4()
+        _mk_window(
+            db_session, [("host", host, None)], kind="blackout",
+            start_time="11:30", duration_minutes=60,
+        )  # fmt: skip
+        assert mw.in_maintenance(db_session, host, NOW) is False
+
+    def test_an_error_alerts_anyway(self, db_session, monkeypatch):
+        def boom(*_args):
+            raise RuntimeError("broken evaluator")
+
+        monkeypatch.setattr(mw, "_windows_for_host", boom)
+        assert mw.in_maintenance(db_session, uuid.uuid4(), NOW) is False

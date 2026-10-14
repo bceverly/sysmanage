@@ -213,6 +213,27 @@ def active_override(db: Session, host_id, now_utc: datetime):
     )
 
 
+def in_maintenance(db: Session, host_id, now_utc: datetime) -> bool:
+    """Is ``host_id`` inside an ALLOW window right now -- planned work, when an
+    alert about it is expected (Phase 23.1 S5 suppresses notifications then)?
+
+    Fails CLOSED (False: not in maintenance, so the alert IS sent) -- the
+    opposite of dispatch gating, because a broken evaluator must never
+    silence a failing disk."""
+    try:
+        matching = _windows_for_host(db, host_id, _host_tag_ids(db, host_id))
+        return any(
+            m["window"].kind != WINDOW_KIND_BLACKOUT
+            and window_contains(m["window"], now_utc)
+            for m in matching
+        )
+    except Exception:  # pylint: disable=broad-exception-caught
+        logger.exception(
+            "Maintenance check failed for host %s; alerting anyway", host_id
+        )
+        return False
+
+
 def is_dispatch_allowed(db: Session, host_id, now_utc: datetime) -> bool:
     """May a gated change reach ``host_id`` right now?  See module docstring for
     the policy.  Fails **open** (returns True) on any internal error -- a broken

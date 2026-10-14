@@ -13328,6 +13328,30 @@ with consent); S7 proof on constructed failures + docs + screenshots +
       acknowledged, maintenance-window suppression (14.2), per-host rate
       limits and a digest when a whole site trips at once (a power or
       cooling event must not send ten thousand emails -- the 22.3 herd rule).
+      *S5 (2026-10-14) -- in code: Pro+ `alerting_engine/alerting_hardware.pxi`,
+      condition `hardware_health` (`min_level` warning / failed, optional
+      `kinds`), stateful as the 23.3 clock alerts -- one open alert per
+      host, critical when a component has FAILED, resolved (and said so)
+      when every component is healthy, silent while the host is not
+      reporting, site digest.  New for every stateful rule (clock rules
+      unchanged by default): re-notify every `renotify_minutes` until
+      acknowledged (hardware: 240) and hold notifications while the host is
+      in a maintenance ALLOW window (hardware by default; the alert is still
+      recorded) -- OSS `maintenance_window_service.in_maintenance`, which
+      fails CLOSED.  Evaluated on arrival: the OSS handler hands a host whose
+      report changed something to `evaluate_host_now` (worker thread, own
+      session; the 60 s tick still catches anything missed).  Rules page
+      offers the condition with those defaults.*
+      *Live-proven 2026-10-14 (`scripts/hardware_alert_proof.py`, gdr-t14 +
+      the FreeBSD box, temporary rules with no channels): the box's REAL
+      SSD (19 media errors) opened a high alert from its first report; a
+      disposable ZFS mirror with one side offlined opened the pools alert
+      7.6 s after `zpool offline` (5 s debounce + collection + send; the
+      server's part -- arrival to alert -- was 190 ms) and resolved itself
+      when the side came back.  A first run measured 25 s: the pool step
+      ran inside a fresh agent's startup collections, so the proof now
+      lets the agent settle first -- a long-running agent is the real case.
+      The alert EMAIL is the S7 proof.*
 - [ ] Recommend (Enterprise auto-deploy, as ClamAV in 21.3): install
       smartmontools where absent, with the operator's consent.
 - [ ] **Proof on real failures, not just fixtures:** file-backed ZFS pool
