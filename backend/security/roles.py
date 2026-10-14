@@ -54,6 +54,8 @@ class SecurityRoles(str, Enum):
     # - Clock offset bounds and, from S5, the fleet NTP policy (23.3)
     MANAGE_TIME_SYNC = "Manage Time Sync"
     RESYNC_HOST_CLOCK = "Resync Host Clock"
+    # - Hardware health events: acknowledge / resolve (23.1)
+    MANAGE_HARDWARE_HEALTH = "Manage Hardware Health"
     # - Malware Detection (Enterprise malware_engine -- 21.3).  Two roles:
     #   moving a file off a host can break it, so quarantine is granted apart
     #   from scanning.

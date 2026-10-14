@@ -204,6 +204,10 @@ class Host(TestBase):
     time_service_enabled = Column(Boolean, nullable=True)
     time_service_unit = Column(String(64), nullable=True)
     time_config_path = Column(String(255), nullable=True)
+    # Phase 23.1 S2: hardware health summary
+    hardware_state = Column(String(16), nullable=True)
+    hardware_reported_at = Column(DateTime, nullable=True)
+    hardware_sources = Column(Text, nullable=True)
 
     # Phase 12.7: agent-reported public IP + GeoLite2 resolution
     public_ip = Column(String(45), nullable=True)

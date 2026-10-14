@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-12 15:44-0400\n"
+"POT-Creation-Date: 2026-10-14 06:04-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -86,7 +86,8 @@ msgstr ""
 #: backend/api/time_sync_resync.py:56 backend/api/config_mgmt_drift.py:191
 #: backend/api/advisor.py:93 backend/api/query_packs.py:119
 #: backend/api/config_mgmt_inventories.py:110
-#: backend/api/config_mgmt_remediation.py:137 backend/api/time_sync.py:67
+#: backend/api/config_mgmt_remediation.py:137
+#: backend/api/hardware_health.py:165 backend/api/time_sync.py:66
 #: backend/api/config_mgmt_jobs.py:168 backend/api/posture.py:375
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
@@ -196,6 +197,7 @@ msgstr ""
 #: backend/api/grafana_integration.py:329
 #: backend/api/config_mgmt_remediation.py:433
 #: backend/api/image_mode_actions.py:86 backend/api/host_graylog.py:131
+#: backend/api/hardware_health.py:48 backend/api/hardware_health.py:51
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
 #: backend/api/updates/report_routes.py:34
@@ -2890,6 +2892,10 @@ msgstr ""
 msgid "Failed to delete antivirus default: %s"
 msgstr ""
 
+#: backend/api/hardware_health.py:179
+msgid "Hardware event not found"
+msgstr ""
+
 #: backend/api/scim.py:50
 msgid "SCIM provisioning requires a SysManage Professional+ license."
 msgstr ""
@@ -3215,11 +3221,11 @@ msgstr ""
 msgid "Configuration acknowledgment processed"
 msgstr ""
 
-#: backend/api/time_sync.py:312 backend/api/time_sync.py:356
+#: backend/api/time_sync.py:297 backend/api/time_sync.py:341
 msgid "Clock offset bounds changed"
 msgstr ""
 
-#: backend/api/time_sync.py:377
+#: backend/api/time_sync.py:362
 msgid "Clock offset bounds removed"
 msgstr ""
 
@@ -4831,12 +4837,12 @@ msgstr ""
 msgid "Machine link decided for host %s"
 msgstr ""
 
-#: backend/websocket/message_router.py:245
+#: backend/websocket/message_router.py:250
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr ""
 
-#: backend/websocket/message_router.py:250
+#: backend/websocket/message_router.py:255
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr ""

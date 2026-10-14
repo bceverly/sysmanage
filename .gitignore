@@ -287,3 +287,6 @@ marketing/executive-opportunity-brief.pdf
 # Working file of scripts/i18n_verify.py (the last run's rejects); the ledger
 # itself, .i18n-verified, IS tracked.
 .i18n-verify-failures.json
+
+# Phase 23.3 skew-proof harness output (scripts/clock_skew_vm_test.py)
+clock-skew-results/

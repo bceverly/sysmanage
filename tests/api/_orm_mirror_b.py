@@ -914,3 +914,41 @@ class NtpPolicyState(TestBase):
     finished_at = Column(DateTime, nullable=True)
     last_error = Column(String(2000), nullable=True)
     auto_resync_at = Column(DateTime, nullable=True)
+
+
+class HardwareComponent(TestBase):
+    """Phase 23.1 S2 -- a host's drive / array / pool / sensor, now."""
+
+    __tablename__ = "hardware_component"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), nullable=False)
+    kind = Column(String(16), nullable=False)
+    ident = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=True)
+    state = Column(String(16), nullable=False)
+    reasons = Column(Text, nullable=True)
+    metrics = Column(Text, nullable=True)
+    source = Column(String(64), nullable=True)
+    first_seen_at = Column(DateTime, nullable=False)
+    last_seen_at = Column(DateTime, nullable=False)
+    state_since = Column(DateTime, nullable=False)
+
+
+class HardwareEvent(TestBase):
+    """Phase 23.1 S2 -- a component's state changed."""
+
+    __tablename__ = "hardware_event"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), nullable=False)
+    kind = Column(String(16), nullable=False)
+    ident = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=True)
+    from_state = Column(String(16), nullable=True)
+    to_state = Column(String(16), nullable=False)
+    reasons = Column(Text, nullable=True)
+    occurred_at = Column(DateTime, nullable=False)
+    acknowledged_at = Column(DateTime, nullable=True)
+    acknowledged_by = Column(String(255), nullable=True)
+    resolved_at = Column(DateTime, nullable=True)
+    resolved_by = Column(String(255), nullable=True)
+    note = Column(String(500), nullable=True)

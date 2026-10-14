@@ -94,6 +94,8 @@ def test_db():
         ClockResync,
         NtpPolicy,
         NtpPolicyState,
+        HardwareComponent,
+        HardwareEvent,
         AirgapCollectionRun,
         AirgapCollectionSchedule,
         AirgapCollectionTarget,
@@ -244,6 +246,12 @@ def test_db():
                 "10000000-0000-0000-0000-0000000000a9",
                 "Resync Host Clock",
                 "Step a host's clock through its time service",
+                "00000000-0000-0000-0000-000000000001",
+            ),
+            (
+                "10000000-0000-0000-0000-0000000000aa",
+                "Manage Hardware Health",
+                "Acknowledge and resolve hardware health events",
                 "00000000-0000-0000-0000-000000000001",
             ),
             (
@@ -557,6 +565,8 @@ def test_db():
     original_clock_resync = models.ClockResync
     original_ntp_policy = models.NtpPolicy
     original_ntp_policy_state = models.NtpPolicyState
+    original_hardware_component = models.HardwareComponent
+    original_hardware_event = models.HardwareEvent
     models.Host = Host
     models.User = User
     models.SecurityRoleGroup = SecurityRoleGroup
@@ -584,6 +594,8 @@ def test_db():
     models.ClockResync = ClockResync
     models.NtpPolicy = NtpPolicy
     models.NtpPolicyState = NtpPolicyState
+    models.HardwareComponent = HardwareComponent
+    models.HardwareEvent = HardwareEvent
     models.HostFirewallRole = HostFirewallRole
 
     # Override the get_engine dependency
@@ -642,6 +654,8 @@ def test_db():
     models.ClockResync = original_clock_resync
     models.NtpPolicy = original_ntp_policy
     models.NtpPolicyState = original_ntp_policy_state
+    models.HardwareComponent = original_hardware_component
+    models.HardwareEvent = original_hardware_event
 
     # Clean up database connections.  In-memory DB: disposing the engine drops
     # the StaticPool's single connection and the schema with it -- no temp file

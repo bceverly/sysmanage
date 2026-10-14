@@ -13202,7 +13202,9 @@ machine; this proof waits for it rather than for a cloud box.
         decommissioned or deleted host stays in Cross-Site Hosts forever.
         Found 2026-10-06 while building the deltas (true before them too):
         the daily full directory could carry a "this is everything" flag so
-        the coordinator removes the site's entries not in it.: failing drives, degraded arrays, overheating (OSS + Pro+)
+        the coordinator removes the site's entries not in it.
+
+#### 23.1 Hardware health: failing drives, degraded arrays, overheating (OSS + Pro+)
 
 **Added 2026-10-01 (Bryan).** "Capture SMART status for failing storage,
 alerts about failed drives in arrays, failed drives in ZFS pools and the
@@ -13213,6 +13215,45 @@ they happen in real-time." Nothing collects this today; `alerting_engine`
 (Pro+) already sends email/webhook/Slack/Teams but on a 60 s rule tick, and
 `health_engine` scores diagnostics -- reuse both, do not build a second
 notifier.
+
+**S0 spike DONE 2026-10-13 -- read-only readings on every reachable lab OS**
+(gdr-t14, beast and t14 Linux; FreeBSD 14.4; t480 OpenBSD 7.9; MacBook Air
+macOS 15; x13s Windows 11 ARM64; the NetBSD VM was down).  What it found:
+
+- **smartmontools is on NONE of them** -- the native path is the product,
+  `smartctl` only an extra where present.  Native sources that work with no
+  package: Linux NVMe SMART through the admin ioctl (root, from Python),
+  hwmon temperatures from sysfs, `/proc/mdstat`, EDAC sysfs; FreeBSD
+  `nvmecontrol logpage -p 2` (critical warning, temperature, spare, wear --
+  5% used on the lab drive), `zpool status`, gmirror/graid when loaded;
+  OpenBSD `hw.sensors` (temperatures, fans, battery; softraid drive
+  sensors) and `bioctl` (needs root -- the agent has it); macOS
+  `diskutil` SMART verdict ("Verified") and `pmset -g therm` thermal
+  pressure; Windows `Get-PhysicalDisk` health + `Get-StorageReliabilityCounter`
+  (temperature, wear) and the ACPI thermal zones.
+- **"Not measured" is everywhere and must never read as healthy or zero:**
+  Windows reliability counters return EMPTY read/write errors and power-on
+  hours; `MSStorageDriver_FailurePredictStatus` is "Not supported" on the
+  x13s (NVMe, ARM); some Linux `temp*_input` files raise ENXIO.
+- **Sentinel readings must be filtered:** x13s thermal zones report
+  -273.2 C and -0.1 C for absent sensors -- a naive reader calls that a
+  failure (or freezing).
+- **No real failures in the lab** (no md arrays, one healthy ZFS pool, no
+  EDAC controllers, 0 WHEA / disk / kernel hardware errors in 7-30 days):
+  the proof needs constructed failures (file-backed ZFS, loop-device md),
+  as planned.
+
+**Slices:** S1 agent collectors, native first, per OS, our schema
+(components drive / array / pool / sensor with state ok / warning /
+failed / unknown, every source ran / absent / failed); S2 server schema,
+ingestion (send-on-change sweep), statuses and history; S3 real-time
+event sources (zed, journald, devd, Windows event subscription) sending an
+URGENT `hardware_health_event`; S4 UI (fleet Hardware Health page, host
+tab, dashboard tile); S5 Pro+ alerts through `alerting_engine` (stateful
+open / escalate / auto-resolve and the site digest, as 23.3 S6, but
+evaluated on arrival); S6 recommend smartmontools (Enterprise auto-deploy,
+with consent); S7 proof on constructed failures + docs + screenshots +
+14-language i18n.
 
 - [ ] **Agent collectors, per OS, our own schema** (as 21.1: native first,
       "not measured" is never "healthy" -- every source reports
@@ -13229,6 +13270,21 @@ notifier.
       - sensors and platform: lm-sensors / `hw.sensors` / `envstat`,
         `ipmitool sel` + `sdr` (BMC), EDAC memory errors, machine-check
         events, Windows WHEA-Logger.
+      *S1 (2026-10-13) -- the core, native first, live-verified as root on
+      every lab OS (gdr-t14, beast, t14, FreeBSD 14.4, OpenBSD 7.9, macOS,
+      the x13s): `sysmanage-agent` `collection/hardware_health*.py` -- NVMe
+      SMART through the Linux admin ioctl and FreeBSD `nvmecontrol` (no
+      packages), `smartctl -j` where present else `unknown`, md, ZFS (an
+      ONLINE pool that just repaired 211 checksum errors is a WARNING),
+      GEOM mirror/raid, hwmon / ACPI / `hw.sensors` temperatures judged
+      only against the limits the hardware declares, EDAC, macOS SMART +
+      thermal pressure, Windows disks / Storage Spaces / thermal zones
+      (sentinels dropped, empty counters = not measured).  Reasons are
+      codes with parameters, worded by the UI.  The first live run found a
+      real aging drive: the FreeBSD box's Crucial P1, 19 media errors.
+      Still to do in this item: btrfs / LVM raid, NetBSD `envstat` /
+      `raidctl` (its VM was down), `bioctl` detail, vendor RAID CLIs,
+      `ipmitool`, MCE / WHEA.*
 - [ ] **Real time, event-first:** subscribe where the OS already raises the
       event -- ZFS `zed`, `smartd`, `mdadm --monitor`, journald (I/O errors,
       MCE, thermal), FreeBSD `devd`, Windows event log subscriptions -- and
@@ -13240,6 +13296,13 @@ notifier.
       reason. A fleet **Hardware Health** page (failing drives, degraded
       arrays and pools, temperatures, filterable by site / tag / OS), a host
       tab, and a dashboard tile.
+      *S2 (2026-10-13) -- schema, ingestion and API in code (migration
+      `q42hwhealth`, not yet applied): `hardware_component` (now) and
+      `hardware_event` (one row per state change; a vanished drive is a
+      `gone` event; a component whose source FAILED is kept, not gone),
+      host status never `ok` without a report in the last hour
+      (`unmeasured` / `stale`), acknowledge / resolve with a note under the
+      new Manage Hardware Health role.  Next: the page, tab and tile (S4).*
 - [ ] **Real-time alerts (Pro+, through `alerting_engine`):** an event
       evaluates its rules on arrival, not on the next tick, and dispatches to
       the existing channels (email first); severity routing, re-notify until
@@ -13446,7 +13509,7 @@ when a message is CREATED is worthless.  Stamped at the socket EDGES instead
 NTP formula excludes all queue residence.  With every reply held a random
 0-2 s (standing in for the queue), the median of 30 samples landed within
 **0.4-1.9 ms** of ground truth (both machines' SNTP offset to one public
-reference) on t14 over the VPN (0.95 ms), OpenBSD (0.43), FreeBSD (0.60),
+reference) on gdr-t14 over the VPN (0.95 ms), OpenBSD (0.43), FreeBSD (0.60),
 macOS over Wi-Fi (1.13) and Windows (1.91).  Single samples strayed up to
 47 ms on Wi-Fi -- the median absorbs that; bounds are 1 s / 5 s.  It found
 two REAL drifts nobody knew about: the MacBook Air 224 ms behind, and the
@@ -13649,9 +13712,35 @@ proof (`date -s` on a VM).
       "Clocks out of bounds" (red on any critical, yellow on any warning),
       fed by the light `GET /time-sync/summary`.  The posture remedy now
       links here.*
-- [ ] Docs + screenshots + 14-language i18n; tests per OS for the service
+- [x] Docs + screenshots + 14-language i18n; tests per OS for the service
       parsers (recorded command output), the offset estimate, bound
       resolution (fleet / tenant / site / tag) and the resync dispatch.
+      *S7 (2026-10-13) -- written, waiting on two runs of yours:
+      sysmanage-docs `docs/administration/time-sync.html` (49 keys,
+      hand-translated into 13 languages, hashes stamped, verified), the
+      Administration card, the Settings guide section, and the roadmap
+      page's Community and Enterprise cards (both re-translated in 13
+      languages).  Screenshots: `screenshots/seed_timesync.py` (measurements
+      dated 20 min ahead so a long capture never sees them go stale; the
+      demo hosts are unprivileged, so the enforced policy and auto-resync
+      stay inert) + `make screenshots-timesync-seed` in every pass + five
+      shotlist entries (fleet, host Clock card, bounds, NTP policy, a host
+      off its policy).  Skew proof: `scripts/clock_skew_proof.py` -- stops a
+      test VM's time service, `date -s` +120 s, then asserts measured,
+      critical, (alert), resynced, back in bounds, (alert resolved), and
+      always restarts the service.  Writing it found two real gaps, fixed
+      in the agent: a STOPPED chronyd (or ntpd) was reported as the next
+      service down the list instead of as stopped, and `chronyc makestep`
+      cannot resync a stopped chronyd -- now `chronyd -q` sets the clock
+      once.  To close: run `make screenshots` and the proof.*
+      *Closed 2026-10-13: screenshots captured; the proof PROVEN on Linux
+      through `scripts/clock_skew_vm_test.py` (a throwaway Vagrant/libvirt
+      Ubuntu 22.04 VM, chrony, privileged agent from the working tree, torn
+      down after): +120 s measured as +119.643 s and critical, `chronyd -q`
+      resync succeeded, back to +0.037 s and ok, in about 3 minutes.  The
+      harness's own first runs found its VM could not resolve names (the
+      screenshot VM's DNSSEC/IPv4 fixes, now shared) and that a timed-out
+      `vagrant up` left a VM behind (process-group kill + virsh fallback).*
 
 #### 23.4 Translation verification: every value proven, not merely defect-free (all four repos)
 
@@ -13762,9 +13851,33 @@ the old word-substitution scripts. Measured design (calibrated on beast against
 
 #### Exit criteria
 
-- [ ] A clock deliberately skewed beyond its bound (a VM with `date -s`) is
-      measured within one heartbeat, raises the alert, and is brought back
+- [x] A clock deliberately skewed beyond its bound (`date -s` / `Set-Date`)
+      is measured within one heartbeat, raises the alert, and is brought back
       by a spot resync -- on Linux, a BSD and Windows.
+      *PROVEN on all three, 2026-10-13, each +120 s, WITH the alert (the
+      gdr-t14 dev server is licensed multitenant_saas, which includes every
+      Enterprise feature; a temporary `clock_offset` rule, deleted after):
+      measured critical, alert opened, resynced, back in bounds, alert
+      resolved itself.*
+      *Linux -- `scripts/clock_skew_vm_test.py`, a throwaway Ubuntu 22.04
+      VM, chrony: +119.6 s, `chronyd -q`.*
+      *FreeBSD 14.4 -- `scripts/clock_skew_host_test.py` on the lab box,
+      ntpd: +119.6 s, `ntpdate -b`.*
+      *Windows 11 ARM64 (x13s) -- same harness, as the machine's existing
+      host (a copy of its agent database), agent as SYSTEM, w32time:
+      +120.064 s, `w32tm /resync` in 31 s, back to +0.018 s.*
+      *Found on the way and FIXED: the agent ran inbound commands strictly
+      one at a time, so a fresh agent's first package collection (11
+      minutes for winget's 4,303 packages) held a resync until the server
+      timed it out.  The agent now has an express lane (`EXPRESS_COMMANDS`,
+      resync_clock first): queued URGENT, run beside a long command,
+      exactly once (`tests/test_express_lane.py`).  Also found:
+      `dequeue_messages` applies its LIMIT before the in-Python priority
+      sort, so with limit=1 inbound priority was never honored -- the
+      express lane filters by priority instead; the ordering itself is
+      left for 22.x review.  The host harness restores everything it
+      touches (config, time service as found, the clock if a run dies
+      mid-skew).*
 - [ ] Real failures, not just fixtures: a degraded ZFS pool, a failed md
       member and failing-drive SMART data each raise an alert email within
       seconds; a multi-boot machine's OS hosts share one asset tag.
@@ -13822,20 +13935,67 @@ Highest value, lowest effort: don't *be* the MDM -- **ingest from the one they a
 
 **Estimated Size:** ~5,000 lines
 
+#### 24.3 Agent memory footprint -- measure, then minimize (all editions / OSS)
+
+**Added 2026-10-13 (Bryan):** "measure the memory footprint of
+sysmanage-agent on all of our supported operating systems and see what we can
+do to minimize it."  The agent runs on every managed host, so every megabyte
+it holds is multiplied across the fleet -- and the smallest hosts (Raspberry
+Pi-class arm64, minimal VMs, OpenBSD/NetBSD boxes) feel it first.  Nothing
+measures it today; no target is set until the numbers exist.
+
+- [ ] **A repeatable measurement harness** (`scripts/agent_memory_profile.py`
+      or similar): the agent's resident memory measured the same way on every
+      OS -- Linux PSS/USS from `/proc/<pid>/smaps_rollup`, FreeBSD
+      `procstat -r`, OpenBSD/NetBSD `ps -o rss,vsz`, macOS `footprint` /
+      `vmmap --summary`, Windows private working set -- for the agent
+      process AND the subprocesses it spawns (package managers, collectors),
+      at idle, at peak during a full inventory collection, and over a 24 h
+      soak (a slow climb is a leak, not a footprint).
+- [ ] **A baseline on every supported OS**, recorded in the ROADMAP with the
+      Python version and install type (deb / rpm / pkg / MSI / Homebrew /
+      Flatpak / source): Ubuntu, Debian, RHEL-family, Fedora, openSUSE,
+      Alpine, FreeBSD, OpenBSD, NetBSD, macOS, Windows -- amd64 and arm64
+      where we ship both.
+- [ ] **Where it goes:** `tracemalloc` / memray profiles of the top
+      allocators -- imported-but-idle modules (heavy dependencies loaded at
+      start for features a host never uses), whole inventories held in memory
+      after they are sent, caches with no bound, per-thread stacks -- ranked
+      by megabytes saved per change.
+- [ ] **Reduce, one measured change at a time** -- candidates, each kept only
+      if the harness shows it pays: lazy imports for optional features
+      (child hosts, virtualization, config management, malware, discovery),
+      streaming large collections instead of building them whole, releasing
+      collection results once delivered, bounded caches, fewer long-lived
+      threads, `malloc_trim` after peaks on glibc, and a smaller packaging of
+      the runtime where an installer bundles its own Python.
+- [ ] **A memory budget per OS, enforced**: once the baseline and the
+      reductions are in, a CI check (and the load harness's fleet agents)
+      fails on a regression beyond the budget, so the footprint cannot
+      quietly grow back.
+- [ ] Docs: the measured footprint per OS on the agent requirements page;
+      i18n for any new user-facing text.
+
+**Estimated Size:** ~1,500 lines (harness + reductions; the reductions depend
+on what the measurements find)
+
 ### Licensing summary
 
-- **Community / OSS:** device model + fleet visibility + manual/self-report registration (24.1). You can *see* devices you or a companion app report; no automated management, no curated EOL/compliance.
+- **Community / OSS:** device model + fleet visibility + manual/self-report registration (24.1); the agent memory-footprint work (24.3) is in every edition. You can *see* devices you or a companion app report; no automated management, no curated EOL/compliance.
 - **Pro+ (Professional):** aggregate **visibility & compliance** -- companion app (24.2), ingest-from-existing-UEM (24.3 ⭐), Android inventory (24.4 read), and mobile EOL/patch compliance + alerting (24.4). The "single pane of glass over the mobile you already manage" tier -- no device control.
 - **Enterprise:** compliance *enforcement* + alerting on ingested devices (24.4).  **Being** the MDM -- native iOS/Android and zero-touch enrollment orchestration / zero-touch (24.7), and compliance *enforcement* + remote actions (lock/wipe/force-update).
 
 ### Exit Criteria
 
 - [ ] Mobile device inventory validated end-to-end via ≥1 ingestion connector
-      (24.3) -- the native Android/Apple paths moved to Phase 29 (Apple) and Phase 30 (Android) with the split,
+      (24.2) -- the native Android/Apple paths moved to Phase 29 (Apple) and Phase 30 (Android) with the split,
       so this phase is validated on ingestion alone
 - [ ] Mobile OS EOL + security-patch compliance surfaces + alerts, reusing the 14.3 / advisory / alerting substrate
 - [ ] Every tier 402-clean when unlicensed; Community shows devices but gates ingestion / native-MDM / enforcement
 - [ ] Air-gap caveat documented; ingestion + companion-app paths verified reachable-only-to-customer-infra
+- [ ] Agent memory footprint (24.3) measured on every supported OS, reduced
+      where the measurements showed it pays, and held by an enforced per-OS
+      budget
 - [ ] Docs + 14-language i18n complete
 - [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before -- including whole i18n workstreams -- which made the backlog look far larger than it was and hid which gaps were real.
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free

@@ -33,6 +33,7 @@ from .grafana_integration import *
 from .graylog_attachment import *
 from .graylog_integration import *
 from .hardware import *
+from .hardware_health import *
 from .machine import *
 from .clock import *
 from .host_certificate import *

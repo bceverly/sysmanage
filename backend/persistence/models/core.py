@@ -304,6 +304,14 @@ class Host(Base):
     time_service_unit = Column(String(64), nullable=True)
     time_config_path = Column(String(255), nullable=True)
 
+    # Phase 23.1 S2: hardware health -- the worst state of the host's
+    # components as last reported (ok / warning / failed / unknown; NULL =
+    # never reported), when, and each source's status (JSON list: which
+    # sources ran, are absent, or failed).  Components: hardware_component.
+    hardware_state = Column(String(16), nullable=True)
+    hardware_reported_at = Column(DateTime, nullable=True)
+    hardware_sources = Column(Text, nullable=True)
+
     # Phase 12.7: Public IP + GeoLite2 geo-location.
     #
     # The agent fetches its public-facing IP at startup + on a 24h
