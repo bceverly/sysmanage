@@ -151,7 +151,7 @@ const AddOverride: React.FC<{ state: ReturnType<typeof useTimeSyncBounds> }> = (
                     labelId="bound-scope"
                     label={t('timeSync.bounds.scope', 'Applies to')}
                     value={scope}
-                    onChange={e => { setScope(e.target.value as OverrideScope); setRef(''); }}
+                    onChange={e => { setScope(e.target.value); setRef(''); }}
                     disabled={!state.canEdit}
                 >
                     {scopes.map(s => <MenuItem key={s} value={s}>{sourceLabel(t, s)}</MenuItem>)}

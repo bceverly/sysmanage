@@ -131,7 +131,9 @@ const FleetClockGrid: React.FC<{ rows: FleetClock[] }> = ({ rows }) => {
         [t, anyPolicy],
     );
     return (
-        <div style={{ width: '100%' }}>
+        // A flex-column parent with no fixed height lets the grid grow with
+        // its rows (the replacement for the deprecated autoHeight prop).
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
             <DataGrid
                 rows={rows}
                 columns={cols}
@@ -140,7 +142,6 @@ const FleetClockGrid: React.FC<{ rows: FleetClock[] }> = ({ rows }) => {
                 pageSizeOptions={[25, 50, 100]}
                 rowHeight={56}
                 disableRowSelectionOnClick
-                autoHeight
             />
         </div>
     );

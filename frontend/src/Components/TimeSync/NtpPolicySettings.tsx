@@ -171,7 +171,7 @@ const NtpPolicySettings: React.FC<Props> = ({ tags, sites }) => {
                             label={t('timeSync.bounds.scope', 'Applies to')}
                             value={scope}
                             disabled={!canEdit}
-                            onChange={e => { setScope(e.target.value as PolicyScope); setRef(''); }}
+                            onChange={e => { setScope(e.target.value); setRef(''); }}
                         >
                             {scopes.map(s => <MenuItem key={s} value={s}>{scopeLabel(t, s)}</MenuItem>)}
                         </Select>

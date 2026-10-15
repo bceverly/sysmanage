@@ -5424,7 +5424,7 @@ Build the advisory abstraction on top of the existing CVE + update tracking: ing
 - [x] "Install by advisory" action (`backend/api/advisory_actions.py`) -- advisory → package set → existing `install_packages_operation` path (audited + maintenance-window-aware).
 - [x] Severity/type filter (Security / Bugfix / Enhancement) + advisory tab in HostDetail (Pro+ `advisory_engine` frontend plugin).
 - [x] Fleet advisory dashboard: applicable advisories across the fleet, by severity.
-- [x] i18n/l10n -- English keys done; foreign translations via the translate pipeline (pending run).
+- [x] i18n/l10n -- English keys done; foreign translations via the translate pipeline (run: every locale translated and verified -- confirmed by the Phase 23 audit, 2026-10-15).
 
 **Estimated Size:** ~4,000 lines · **Status: DONE** (2026-07). OSS schema + Pro+ `advisory_engine` (moat) + OSS seam + install action + Pro+ frontend plugin + Pro+ docs/screenshots; engine/plugin built + published, `make screenshots` green. Remaining: foreign `make translate` run only (shared Phase-14 i18n tail).
 
@@ -10189,7 +10189,7 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
       * **NetBSD -- pkgsrc `pkg-vulnerabilities`** (what `pkg_admin audit`
         reads): one signed file of package patterns; `nbN` revisions. Cheap.
       * **FreeBSD + NetBSD DONE 2026-09-26** (engine-side; live check pending
-        deploy). Each feed is judged by its OWN tool's order, ported line for
+        deploy -- LIVE-checked 2026-09-26, see the LIVE record below). Each feed is judged by its OWN tool's order, ported line for
         line from the C (`version_order_bsd.pxi`): pkg's `pkg_version_cmp`,
         and pkg_install's `dewey_cmp` + `pkg_match` (dewey ranges, globs, csh
         alternates). Differentially tested against the COMPILED originals:
@@ -10219,7 +10219,7 @@ ref to the shared rule id, no cross-partition FK. Two chains, as 14.1/14.3.
         flavor-aware split. The CVE source descriptions on the settings page
         are now translated (7 strings, 13 locales).
       * **Windows + macOS DONE 2026-09-26** (engine-side; live check pending
-        deploy). **Windows** (`feeds_msrc.pxi`) is judged by OS BUILD per
+        deploy -- LIVE-checked 2026-09-26, see the LIVE record below). **Windows** (`feeds_msrc.pxi`) is judged by OS BUILD per
         PRODUCT: each monthly MSRC CVRF gives the fixed build for every CVE and
         product, and a host below it on its own servicing branch is vulnerable
         -- no KB inventory needed, a cumulative update raises the UBR. The
@@ -11408,7 +11408,7 @@ Decisions this forces for S1+:
     from the same review service as the page, so they cannot disagree.
     Tests: engine 34 + advisor 173, backend 15 + 2 posture, agent 47,
     frontend 15. i18n: 24 frontend keys x 14, 3 backend msgids x 13.
-  * **S6 -- DONE 2026-09-29 (pending Bryan's real BSD/macOS host run).**
+  * **S6 -- DONE 2026-09-29 (real-host run DONE 2026-09-29: `arp_listen: ok` on macOS, OpenBSD, FreeBSD and NetBSD -- the BPF record above; note updated by the Phase 23 audit).**
     **BPF**: `network_bpf.py` opens `/dev/bpf` (or the first free
     `/dev/bpfN`), binds each monitored interface, and walks the capture
     buffer with the ONE thing that differs per platform chosen by
@@ -13969,11 +13969,36 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       `docs/administration/hardware-health.html`, screenshots, 14 languages
       verified).  Asset tags page done in 23.2 S6 (screenshots captured
       2026-10-14).*
-- [ ] **Audit ALL previous phases for stale open items.** Same rule as every
+- [x] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
       plainly whether it is real work, blocked externally, or should move or
       be dropped.
+      *DONE 2026-10-15.* Phases 0-22 have NO unticked boxes (the Phase 21
+      and 22 audits moved everything open into Phase 26), so this audit, like
+      theirs, went after deferrals and hedges written into TICKED items since
+      2026-10-07, and re-checked every item those audits carried into Phase
+      26 against the code. Four ticked items still said "pending" though the
+      work was done -- notes corrected, nothing reopened: 14.1's advisory
+      i18n "pending run" (every locale translated and verified), 21.1's BSD
+      and Windows/macOS vulnerability feeds "live check pending deploy"
+      (LIVE-checked 2026-09-26, recorded in the same item), and 21.6 S6's BPF
+      "pending Bryan's real BSD/macOS host run" (done 2026-09-29, `arp_listen:
+      ok` on all four). Phase 22's own hedges ("not yet published", "pending
+      Bryan's OK", "not yet measured") were all closed by later notes in the
+      same items, except the canary MSI's first CI build -- now Phase 26
+      "Carried forward by the Phase 23 audit". The Phase 21/22 carry-overs in
+      Phase 26, checked against the code, are all still genuinely open:
+      advisor `metric_history` still `available: False`, the MSI service
+      removal still has no rollback action, `build-msi.ps1` still trusts a
+      stale ARM64 wheel set, the docs still carry placeholder API paths
+      (`performance-metrics.html`, `performance-optimization.html`) -- real
+      work; the cloud compute providers, physical PXE, real air-gap bundle
+      smoke tests and the pen test -- blocked on hardware / accounts /
+      business; the BSD process resolvers and now the canary MSI -- blocked on
+      CI history only Bryan can read. Moved out of Phase 23 itself: 23.0 and
+      23.4's Hindi model (Phase 26, waiting on the 32-core box) and the
+      same-hostname multi-boot work found by the T480 proof (Phase 26).
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -14405,6 +14430,15 @@ Phase 22 audit item). These were neither done nor tracked:
       set built for older pins (Mako 1.3.12 vs 1.4.3) produces an MSI whose
       offline install fails -- caught only at install time. Check the set
       against `requirements-prod.txt` at BUILD time and refresh or fail.
+
+### Carried forward by the Phase 23 audit (2026-10-15)
+
+- [ ] **Confirm the canary MSI built and install-tested in CI** (Phase 22,
+      "Not yet run: the first CI build is the first WiX build"). Both MSI CI
+      jobs are meant to build and install-test `sysmanage-canary` (service,
+      `--check-config`, psycopg loading libpq, uninstall); nothing records a
+      green run. Needs the workflow history, which only Bryan can read here;
+      tick when a green MSI job is seen.
 
 ### Multi-boot machines that keep one hostname (from the 23.2 T480 proof, 2026-10-15)
 

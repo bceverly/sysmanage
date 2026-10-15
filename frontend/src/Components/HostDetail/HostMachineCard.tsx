@@ -69,7 +69,7 @@ type NoMachineReason = 'not_reported' | 'placeholder' | 'unprivileged' | 'failed
 
 /** Why the host has no machine, from the per-source identity status. */
 export const noMachineReason = (identity: HostMachine['identity']): NoMachineReason => {
-    const statuses = Object.values(identity.status).filter(Boolean) as IdentitySourceStatus[];
+    const statuses = Object.values(identity.status).filter(Boolean);
     if (!identity.reported_at && statuses.length === 0) {
         return 'not_reported';
     }

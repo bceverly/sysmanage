@@ -104,7 +104,8 @@ class TestAgentConnection:
 
         assert result is True
         sent = json.loads(mock_ws.send_text.call_args.args[0])
-        assert sent.pop("clock")["t1"] > 0  # Phase 23.3 t1 stamp
+        clock = sent.pop("clock")  # Phase 23.3 t1 stamp
+        assert clock["t1"] > 0
         assert sent == message
 
     @pytest.mark.asyncio

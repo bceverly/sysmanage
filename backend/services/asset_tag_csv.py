@@ -135,6 +135,18 @@ def _unescape(cell: str) -> str:
     return cell
 
 
+def _column_positions(header_row: List[str]) -> Dict[str, int]:
+    """Each known column's index in the header row (first match wins)."""
+    header = [_header_name(h) for h in header_row]
+    where: Dict[str, int] = {}
+    for column, names in _COLUMNS.items():
+        for index, name in enumerate(header):
+            if name in names:
+                where[column] = index
+                break
+    return where
+
+
 def read(text: str) -> List[Row]:
     """The file's data rows.  CsvError when the file itself is unusable."""
     if len(text.encode("utf-8")) > MAX_BYTES:
@@ -145,13 +157,7 @@ def read(text: str) -> List[Row]:
         raise CsvError(NOT_CSV) from exc
     if not records:
         raise CsvError(MISSING_COLUMNS)
-    header = [_header_name(h) for h in records[0]]
-    where: Dict[str, int] = {}
-    for column, names in _COLUMNS.items():
-        for index, name in enumerate(header):
-            if name in names:
-                where[column] = index
-                break
+    where = _column_positions(records[0])
     if "asset_tag" not in where or not (
         "system_uuid" in where or "system_serial" in where
     ):

@@ -373,7 +373,7 @@ def _record_machine_identity(db: Session, host_id, raw) -> None:
             db.commit()
     except Exception as exc:  # pylint: disable=broad-except
         db.rollback()
-        logger.error(
+        logger.exception(
             "Could not record the hardware identity for host %s: %s", host_id, exc
         )
 

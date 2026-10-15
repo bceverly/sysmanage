@@ -128,7 +128,10 @@ const param = (value: unknown): string => {
     if (value === null || value === undefined) {
         return '-';
     }
-    return String(value);
+    if (typeof value === 'object') {
+        return JSON.stringify(value);
+    }
+    return String(value as string | number | boolean | bigint | symbol);
 };
 
 /** A reason as a sentence; an unknown code (a newer agent) shows as itself. */

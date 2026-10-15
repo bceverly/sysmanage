@@ -91,16 +91,19 @@ const FleetHardwareGrid: React.FC<{ rows: FleetHost[] }> = ({ rows }) => {
     const { t } = useTranslation();
     const cols = useMemo(() => columns(t), [t]);
     return (
-        <DataGrid
-            rows={rows}
-            columns={cols}
-            getRowId={row => row.host_id}
-            getRowHeight={() => 'auto'}
-            disableRowSelectionOnClick
-            pageSizeOptions={[25, 50, 100]}
-            initialState={{ pagination: { paginationModel: { pageSize: 50 } } }}
-            autoHeight
-        />
+        // A flex-column parent with no fixed height lets the grid grow with
+        // its rows (the replacement for the deprecated autoHeight prop).
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <DataGrid
+                rows={rows}
+                columns={cols}
+                getRowId={row => row.host_id}
+                getRowHeight={() => 'auto'}
+                disableRowSelectionOnClick
+                pageSizeOptions={[25, 50, 100]}
+                initialState={{ pagination: { paginationModel: { pageSize: 50 } } }}
+            />
+        </div>
     );
 };
 

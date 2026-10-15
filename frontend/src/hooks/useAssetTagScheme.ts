@@ -74,21 +74,21 @@ const useLoad = (onLoaded: (report: SchemeReport) => void) => {
 };
 
 export const useAssetTagScheme = (): AssetTagSchemeState => {
-  const [draft, setDraftState] = useState<AssetTagScheme | null>(null);
+  const [draft, setDraft] = useState<AssetTagScheme | null>(null);
   // Mirrors ``draft`` so update() can build the next draft without doing its
   // scheduling inside a state updater (updaters must stay pure).
   const draftRef = useRef<AssetTagScheme | null>(null);
-  const setDraft = useCallback((next: AssetTagScheme | null) => {
+  const commitDraft = useCallback((next: AssetTagScheme | null) => {
     draftRef.current = next;
-    setDraftState(next);
+    setDraft(next);
   }, []);
   const [preview, setPreview] = useState<SchemeReport | null>(null);
   const onLoaded = useCallback(
     (report: SchemeReport) => {
-      setDraft(report.scheme);
+      commitDraft(report.scheme);
       setPreview(report);
     },
-    [setDraft],
+    [commitDraft],
   );
   const { loading, loadFailed, canManage, saved, setSaved } = useLoad(onLoaded);
   const [previewing, setPreviewing] = useState(false);
@@ -128,7 +128,7 @@ export const useAssetTagScheme = (): AssetTagSchemeState => {
       const prev = draftRef.current;
       if (prev === null) return;
       const next = { ...prev, ...changes };
-      setDraft(next);
+      commitDraft(next);
       if (timer.current) clearTimeout(timer.current);
       setPreviewing(true);
       timer.current = setTimeout(() => {
@@ -138,7 +138,7 @@ export const useAssetTagScheme = (): AssetTagSchemeState => {
       const touched = Object.keys(changes);
       setInvalidFields(current => current.filter(f => !touched.includes(f)));
     },
-    [runPreview, setDraft],
+    [runPreview, commitDraft],
   );
 
   const save = useCallback(async (): Promise<SaveOutcome> => {
@@ -153,7 +153,7 @@ export const useAssetTagScheme = (): AssetTagSchemeState => {
     try {
       const report = await saveAssetTagScheme(draft);
       setSaved(report);
-      setDraft(report.scheme);
+      commitDraft(report.scheme);
       setPreview(report);
       setPreviewFailed(false);
       setInvalidFields([]);
@@ -165,7 +165,7 @@ export const useAssetTagScheme = (): AssetTagSchemeState => {
     } finally {
       setSaving(false);
     }
-  }, [draft, setSaved, setDraft]);
+  }, [draft, setSaved, commitDraft]);
 
   return {
     loading,

@@ -30,9 +30,6 @@ export interface HostBrief {
   active: boolean;
 }
 
-/** ``virtual_clone`` | ``serial_mismatch`` */
-export type ConflictReason = string;
-
 export interface HostMachine {
   identity: {
     system_uuid: string | null;
@@ -43,12 +40,14 @@ export interface HostMachine {
   };
   machine: MachineSummary | null;
   other_hosts: HostBrief[];
-  conflict: { reason: ConflictReason; machine: MachineSummary | null } | null;
+  /** ``reason``: ``virtual_clone`` | ``serial_mismatch`` */
+  conflict: { reason: string; machine: MachineSummary | null } | null;
 }
 
 export interface MachineConflict {
   host: HostBrief;
-  reason: ConflictReason;
+  /** ``virtual_clone`` | ``serial_mismatch`` */
+  reason: string;
   machine: MachineSummary | null;
 }
 
@@ -74,12 +73,6 @@ export interface SchemeReport {
   /** Existing tags the scheme rejects -- reported, never rewritten. */
   nonconforming: string[];
 }
-
-/**
- * Why a tag was refused: ``empty`` | ``too_long`` | ``bad_characters`` |
- * ``does_not_match_scheme`` | ``scheme_timeout`` | ``duplicate``.
- */
-export type TagReason = string;
 
 export const SEPARATORS = ["", "-", "_", "."] as const;
 export const MIN_DIGITS = 1;
@@ -113,13 +106,18 @@ export const previewAssetTagScheme = async (scheme: AssetTagScheme): Promise<Sch
 export const saveAssetTagScheme = async (scheme: AssetTagScheme): Promise<SchemeReport> =>
   (await axiosInstance.put<SchemeReport>("/api/v1/asset-tags/scheme", scheme)).data;
 
-/** Entry-time check: fits the scheme, and is not another machine's tag. */
+/**
+ * Entry-time check: fits the scheme, and is not another machine's tag.
+ * ``reason`` (why a tag was refused): ``empty`` | ``too_long`` |
+ * ``bad_characters`` | ``does_not_match_scheme`` | ``scheme_timeout`` |
+ * ``duplicate``.
+ */
 export const checkAssetTag = async (
   tag: string,
   machineId?: string,
-): Promise<{ ok: boolean; reason: TagReason | null }> =>
+): Promise<{ ok: boolean; reason: string | null }> =>
   (
-    await axiosInstance.get<{ ok: boolean; reason: TagReason | null }>(
+    await axiosInstance.get<{ ok: boolean; reason: string | null }>(
       "/api/v1/asset-tags/check",
       { params: machineId ? { tag, machine_id: machineId } : { tag } },
     )
@@ -141,7 +139,7 @@ export const setMachineAssetTag = async (
 export const errorCode = (error: unknown): string | null => {
   const detail = (error as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
   if (detail && typeof detail === "object" && "code" in detail) {
-    return String((detail as { code: unknown }).code);
+    return String(detail.code);
   }
   return null;
 };

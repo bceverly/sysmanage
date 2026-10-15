@@ -31,6 +31,8 @@ from sqlalchemy import (
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
 
+_HOST_FK = "host.id"
+
 
 class HardwareComponent(Base):
     """A host's drive, array, pool, sensor or memory controller, now."""
@@ -43,7 +45,7 @@ class HardwareComponent(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     host_id = Column(
-        GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False, index=True
+        GUID(), ForeignKey(_HOST_FK, ondelete="CASCADE"), nullable=False, index=True
     )
     kind = Column(String(16), nullable=False)  # drive|array|pool|sensor|memory
     ident = Column(String(255), nullable=False)
@@ -68,7 +70,7 @@ class HardwareEvent(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     host_id = Column(
-        GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False, index=True
+        GUID(), ForeignKey(_HOST_FK, ondelete="CASCADE"), nullable=False, index=True
     )
     kind = Column(String(16), nullable=False)
     ident = Column(String(255), nullable=False)
@@ -97,9 +99,7 @@ class HardwareToolInstall(Base):
 
     __tablename__ = "hardware_tool_install"
 
-    host_id = Column(
-        GUID(), ForeignKey("host.id", ondelete="CASCADE"), primary_key=True
-    )
+    host_id = Column(GUID(), ForeignKey(_HOST_FK, ondelete="CASCADE"), primary_key=True)
     package = Column(String(64), nullable=False)
     status = Column(String(16), nullable=False)  # queued|succeeded|failed
     attempts = Column(Integer, nullable=False, default=0)

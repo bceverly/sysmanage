@@ -31,6 +31,7 @@ import hashlib
 import json
 import logging
 import uuid
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
@@ -230,13 +231,47 @@ def _auto_resync(db, host, status, state, now) -> bool:
     return bool(rows)
 
 
+@dataclass
+class _Pass:
+    """What one reconcile pass shares across its hosts."""
+
+    db: Any
+    module: Any
+    states: Dict[str, Any]
+    clock_by_host: Dict[str, Any]
+    now: datetime
+    summary: Dict[str, int] = field(
+        default_factory=lambda: {"pushed": 0, "resynced": 0}
+    )
+
+
+def _reconcile_host(run: _Pass, host, verdict: Dict[str, Any]) -> None:
+    """Auto-resync and/or push the policy for one host, counting in ``run``."""
+    policy = verdict.get("policy")
+    if policy is None or not host.is_agent_privileged:
+        return
+    db, summary, now = run.db, run.summary, run.now
+    if policy.auto_resync and _auto_resync(
+        db, host, run.clock_by_host.get(str(host.id)), _state(db, run.states, host), now
+    ):
+        summary["resynced"] += 1
+    fixable = {f["code"] for f in verdict["findings"]} & _FIXABLE
+    if not policy.enforce or not fixable or summary["pushed"] >= MAX_PUSHES_PER_PASS:
+        return
+    view = host_view(host)
+    state = _state(db, run.states, host)
+    if _due(state, digest(policy, view), now) and _push(
+        db, run.module, host, policy, view, state, now
+    ):
+        summary["pushed"] += 1
+
+
 def reconcile(db, now: Optional[datetime] = None) -> Dict[str, int]:
     """Apply enforced policies and auto-resync breaching clocks.  Commits."""
     now = now or _now()
-    summary = {"pushed": 0, "resynced": 0}
     module = engine()
     if module is None or not db.query(models.NtpPolicy).count():
-        return summary
+        return {"pushed": 0, "resynced": 0}
     hosts = (
         db.query(models.Host)
         .filter(models.Host.approval_status == "approved", models.Host.active.is_(True))
@@ -245,33 +280,19 @@ def reconcile(db, now: Optional[datetime] = None) -> Dict[str, int]:
     judged = evaluate(db, hosts)
     states = {str(s.host_id): s for s in db.query(models.NtpPolicyState)}
     _server, clocks = clock_status.evaluate(db, hosts, now)
-    clock_by_host = {str(h.id): st for h, _b, st in clocks}
+    run = _Pass(
+        db=db,
+        module=module,
+        states=states,
+        clock_by_host={str(h.id): st for h, _b, st in clocks},
+        now=now,
+    )
     for host in hosts:
-        verdict = judged.get(str(host.id)) or {}
-        policy = verdict.get("policy")
-        if policy is None or not host.is_agent_privileged:
-            continue
-        if policy.auto_resync and _auto_resync(
-            db, host, clock_by_host.get(str(host.id)), _state(db, states, host), now
-        ):
-            summary["resynced"] += 1
-        fixable = {f["code"] for f in verdict["findings"]} & _FIXABLE
-        if (
-            not policy.enforce
-            or not fixable
-            or summary["pushed"] >= MAX_PUSHES_PER_PASS
-        ):
-            continue
-        view = host_view(host)
-        state = _state(db, states, host)
-        if _due(state, digest(policy, view), now) and _push(
-            db, module, host, policy, view, state, now
-        ):
-            summary["pushed"] += 1
+        _reconcile_host(run, host, judged.get(str(host.id)) or {})
     db.commit()
-    if summary["pushed"]:
-        logger.info("NTP policy: sent %d plan(s)", summary["pushed"])
-    return summary
+    if run.summary["pushed"]:
+        logger.info("NTP policy: sent %d plan(s)", run.summary["pushed"])
+    return run.summary
 
 
 def record_result(db, message_data: Dict[str, Any]) -> bool:

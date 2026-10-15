@@ -209,7 +209,7 @@ def make_router(
         url = f"{ollama_url}/api/embed"
         body = {"model": EMBED_MODEL, "input": texts, "keep_alive": keep_alive}
         # nosemgrep: python.fastapi.net.tainted-fastapi-http-request-httpx.tainted-fastapi-http-request-httpx
-        resp = await client.post(url, json=body, timeout=timeout)
+        resp = await client.post(url, json=body, timeout=timeout)  # nosemgrep
         resp.raise_for_status()
         return resp.json()["embeddings"]
 
@@ -249,7 +249,7 @@ def make_router(
             payload["messages"].insert(1, {"role": "system", "content": terms})
         url = f"{ollama_url}/api/chat"  # operator config, as in embed()
         # nosemgrep: python.fastapi.net.tainted-fastapi-http-request-httpx.tainted-fastapi-http-request-httpx
-        resp = await client.post(url, json=payload, timeout=timeout)
+        resp = await client.post(url, json=payload, timeout=timeout)  # nosemgrep
         resp.raise_for_status()
         try:
             verdict = json.loads(resp.json()["message"]["content"])

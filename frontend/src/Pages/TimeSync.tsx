@@ -118,7 +118,7 @@ const TimeSync: React.FC = () => {
                         labelId="time-sync-status"
                         label={t('timeSync.filter.status', 'Status')}
                         value={filters.status}
-                        onChange={e => set({ status: e.target.value as Filters['status'] })}
+                        onChange={e => set({ status: e.target.value })}
                     >
                         <MenuItem value={ALL}>{t('timeSync.filter.all', 'All')}</MenuItem>
                         {STATUS_ORDER.map(s => <MenuItem key={s} value={s}>{statusLabel(t, s)}</MenuItem>)}

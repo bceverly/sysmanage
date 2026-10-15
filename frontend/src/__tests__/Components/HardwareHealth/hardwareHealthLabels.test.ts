@@ -68,6 +68,15 @@ describe("hardware health labels", () => {
     ).toContain("/dev/loop11: errors since the counters were last reset");
   });
 
+  test("an object parameter is shown as JSON, not [object Object]", () => {
+    expect(
+      reasonText(t, { code: "controller_status", status: { state: "degraded", slot: 2 } }),
+    ).toBe('RAID controller status: {"state":"degraded","slot":2}');
+    expect(reasonText(t, { code: "controller_status", status: true })).toBe(
+      "RAID controller status: true",
+    );
+  });
+
   test("a code from a newer agent shows as itself", () => {
     expect(reasonText(t, { code: "quantum_flux" })).toBe("quantum_flux");
   });

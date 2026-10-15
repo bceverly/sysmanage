@@ -172,9 +172,45 @@ def _forget_samples(host_id) -> None:
         connection_manager,
     )
 
-    for conn in list(getattr(connection_manager, "active_connections", {}).values()):
+    for conn in getattr(connection_manager, "active_connections", {}).values():
         if str(getattr(conn, "host_id", "")) == str(host_id):
             clock_tracking.reset(conn)
+
+
+def _apply_outcome(row, message_data: Dict[str, Any]) -> None:
+    """Finish ``row`` as succeeded or failed per the agent's answer."""
+    error = message_data.get("error")
+    success = bool(message_data.get("success")) and not error
+    if success:
+        _finish(row, SUCCEEDED)
+        return
+    # A code from a current agent; an older one says "Unknown command".
+    code = error if isinstance(error, str) and len(error) <= 32 else None
+    _finish(row, FAILED, code or "agent_error")
+    if code is None and error:
+        row.detail = str(error)[:500]
+
+
+def _apply_result_fields(row, result: Dict[str, Any]) -> None:
+    """Copy the service, method and detail the agent reported onto ``row``."""
+    row.service = (str(result.get("service"))[:16]) if result.get("service") else None
+    row.method = (str(result.get("method"))[:64]) if result.get("method") else None
+    if result.get("detail"):
+        row.detail = str(result["detail"])[:500]
+
+
+def _apply_status_after(db, row, after: Dict[str, Any]) -> None:
+    """Record the time service's state after the step, on the host and row."""
+    from backend.api.handlers.time_status_handlers import (  # noqa: PLC0415
+        apply_claim,
+    )
+
+    host = db.get(models.Host, _uuid(row.host_id))
+    if host is not None:
+        apply_claim(host, after)
+    offset = after.get("reported_offset_ms")
+    if isinstance(offset, (int, float)) and not isinstance(offset, bool):
+        row.reported_after_ms = float(offset)
 
 
 def record_result(db, message_data: Dict[str, Any]) -> Optional[Any]:
@@ -191,32 +227,11 @@ def record_result(db, message_data: Dict[str, Any]) -> Optional[Any]:
         return None
     result = message_data.get("result")
     result = result if isinstance(result, dict) else {}
-    success = bool(message_data.get("success")) and not message_data.get("error")
-    error = message_data.get("error")
-    if not success:
-        # A code from a current agent; an older one says "Unknown command".
-        code = error if isinstance(error, str) and len(error) <= 32 else None
-        _finish(row, FAILED, code or "agent_error")
-        if code is None and error:
-            row.detail = str(error)[:500]
-    else:
-        _finish(row, SUCCEEDED)
-    row.service = (str(result.get("service"))[:16]) if result.get("service") else None
-    row.method = (str(result.get("method"))[:64]) if result.get("method") else None
-    if result.get("detail"):
-        row.detail = str(result["detail"])[:500]
+    _apply_outcome(row, message_data)
+    _apply_result_fields(row, result)
     after = result.get("status_after")
     if isinstance(after, dict):
-        from backend.api.handlers.time_status_handlers import (  # noqa: PLC0415
-            apply_claim,
-        )
-
-        host = db.get(models.Host, _uuid(row.host_id))
-        if host is not None:
-            apply_claim(host, after)
-        offset = after.get("reported_offset_ms")
-        if isinstance(offset, (int, float)) and not isinstance(offset, bool):
-            row.reported_after_ms = float(offset)
+        _apply_status_after(db, row, after)
     db.commit()
     if row.status == SUCCEEDED:
         _forget_samples(row.host_id)

@@ -340,7 +340,6 @@ def main() -> int:
     results.mkdir(parents=True)
     p, remote = Proof(args.server, token), Remote(args.ssh, os_name, args.remote_python)
     state = {}
-    problems = ["the proof did not start"]
     try:
         if args.email:
             p.create_channel(args.email)

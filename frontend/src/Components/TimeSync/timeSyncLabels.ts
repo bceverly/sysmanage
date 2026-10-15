@@ -57,7 +57,12 @@ export const formatOffset = (t: TFunction, ms: number | null | undefined): strin
     if (ms === null || ms === undefined) {
         return '-';
     }
-    const sign = ms > 0 ? '+' : ms < 0 ? '-' : '';
+    let sign = '';
+    if (ms > 0) {
+        sign = '+';
+    } else if (ms < 0) {
+        sign = '-';
+    }
     const abs = Math.abs(ms);
     if (abs < 1000) {
         const value = `${sign}${abs.toFixed(abs < 10 ? 1 : 0)}`;

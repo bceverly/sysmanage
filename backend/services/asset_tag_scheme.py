@@ -83,31 +83,39 @@ class Scheme:
         return asdict(self)
 
 
+def _builder_problems(scheme: Scheme) -> List[str]:
+    """Field codes a builder-mode scheme fails on."""
+    problems: List[str] = []
+    for name, value in (("prefix", scheme.prefix), ("suffix", scheme.suffix)):
+        if len(value) > MAX_AFFIX_LENGTH or not _AFFIX_CHARS.match(value):
+            problems.append(name)
+    if scheme.separator not in SEPARATORS:
+        problems.append("separator")
+    if not MIN_DIGITS <= scheme.digits <= MAX_DIGITS:
+        problems.append("digits")
+    if len(render(scheme, 0)) > MAX_TAG_LENGTH:
+        problems.append("too_long")
+    return problems
+
+
+def _regex_problems(scheme: Scheme) -> List[str]:
+    """Field codes a regex-mode scheme fails on."""
+    if not scheme.pattern or len(scheme.pattern) > MAX_PATTERN_LENGTH:
+        return ["pattern"]
+    try:
+        regex.compile(scheme.pattern)
+    except regex.error:
+        return ["pattern"]
+    return []
+
+
 def scheme_problems(scheme: Scheme) -> List[str]:
     """Why ``scheme`` cannot be saved, as field codes; [] when it can."""
-    problems: List[str] = []
     if scheme.mode not in (MODE_BUILDER, MODE_REGEX):
-        problems.append("mode")
-        return problems
+        return ["mode"]
     if scheme.mode == MODE_BUILDER:
-        for name, value in (("prefix", scheme.prefix), ("suffix", scheme.suffix)):
-            if len(value) > MAX_AFFIX_LENGTH or not _AFFIX_CHARS.match(value):
-                problems.append(name)
-        if scheme.separator not in SEPARATORS:
-            problems.append("separator")
-        if not MIN_DIGITS <= scheme.digits <= MAX_DIGITS:
-            problems.append("digits")
-        if len(render(scheme, 0)) > MAX_TAG_LENGTH:
-            problems.append("too_long")
-    else:
-        if not scheme.pattern or len(scheme.pattern) > MAX_PATTERN_LENGTH:
-            problems.append("pattern")
-        else:
-            try:
-                regex.compile(scheme.pattern)
-            except regex.error:
-                problems.append("pattern")
-    return problems
+        return _builder_problems(scheme)
+    return _regex_problems(scheme)
 
 
 def _builder_regex(scheme: Scheme) -> "re.Pattern[str]":

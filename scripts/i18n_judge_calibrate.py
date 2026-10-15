@@ -31,7 +31,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import importlib
 import json
 import random
 import sys
@@ -46,8 +45,12 @@ JUDGE_REASONS = ("judge", "glossary", "fleet", "over-strict", "false alarm")
 
 
 def _load_verifier(repo: Path):
+    """The TARGET repository's ``i18n_verify`` (its own surfaces and ledger):
+    its scripts directory goes first on the path, then a plain import."""
     sys.path.insert(0, str(repo / "scripts"))
-    return importlib.import_module("i18n_verify")
+    import i18n_verify  # pylint: disable=import-outside-toplevel
+
+    return i18n_verify
 
 
 def _words(text: str) -> int:
@@ -102,12 +105,16 @@ def judge(service: str, lang: str, pairs, glossary: bool) -> List[dict]:
             "glossary": glossary,
         }
     ).encode("utf-8")
-    request = urllib.request.Request(
+    # --service is the operator's own translation service, from the command line.
+    # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
+    request = urllib.request.Request(  # nosemgrep
         f"{service.rstrip('/')}/verify/batch",
         data=body,
         headers={"Content-Type": "application/json"},
     )
-    with urllib.request.urlopen(request, timeout=1800) as resp:  # nosec B310
+    # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
+    resp = urllib.request.urlopen(request, timeout=1800)  # nosec B310 # nosemgrep
+    with resp:
         return json.loads(resp.read())["results"]
 
 
