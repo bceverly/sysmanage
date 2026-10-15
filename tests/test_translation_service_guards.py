@@ -92,3 +92,54 @@ def test_answers_in_the_wrong_order_are_rejected():
 def test_the_guard_never_blocks_translation(client, sources):
     """No embedder, or a single item: accept rather than stall the run."""
     assert _aligned(client, sources, list(sources))
+
+
+def test_the_judge_is_told_the_products_terms():
+    """23.4: the judge rejected the glossary's own zh_TW "fleet" term as "a
+    collection of vehicles"; it is now told what the term means and how the
+    product renders it -- as a correct rendering, not an instruction."""
+    terms = tv.judge_terms("Fleet compliance report", "zh_TW", "Traditional Chinese")
+    assert terms.startswith("DOMAIN TERMS.")
+    assert "fleet" in terms and "主機群" in terms
+    assert tv.judge_terms("Hello there", "zh_TW", "Traditional Chinese") == ""
+
+
+class _Judge:
+    """A stand-in Ollama: records each chat payload, always says yes, and
+    fails the test if anything is embedded."""
+
+    def __init__(self):
+        self.chats = []
+
+    async def post(self, url, json, timeout):  # pylint: disable=redefined-outer-name
+        request = httpx.Request("POST", url)
+        assert url.endswith("/api/chat"), "judge_only must not embed"
+        self.chats.append(json)
+        body = {"message": {"content": '{"answer": "yes", "reason": "ok"}'}}
+        return httpx.Response(200, json=body, request=request)
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *exc):
+        return False
+
+
+@pytest.mark.parametrize("glossary,messages", [(True, 3), (False, 2)])
+def test_judge_only_calibration_path(monkeypatch, glossary, messages):
+    fake = _Judge()
+    monkeypatch.setattr(tv.httpx, "AsyncClient", lambda: fake)
+    router = tv.make_router(
+        "http://ollama", "judge", {"zh_TW": "Traditional Chinese"},
+        lambda text: (text, []), 5.0, "1m",
+    )  # fmt: skip
+    verify = next(r.endpoint for r in router.routes if r.path == "/verify/batch")
+    request = tv.VerifyRequest(
+        lang="zh_TW",
+        items=[tv.VerifyItem(source="Fleet", value="主機群")],
+        judge_only=True,
+        glossary=glossary,
+    )
+    result = asyncio.run(verify(request))["results"][0]
+    assert result["ok"] and result["judge"] and result["cos"] is None
+    assert len(fake.chats[0]["messages"]) == messages

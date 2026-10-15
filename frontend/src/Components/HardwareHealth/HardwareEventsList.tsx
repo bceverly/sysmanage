@@ -160,7 +160,9 @@ const HardwareEventsList: React.FC<{
                                     <Typography variant="caption" color="text.secondary">{event.note}</Typography>
                                 )}
                             </TableCell>
-                            <TableCell align="right">
+                            {/* never wrap the actions: a long reason squeezed "Acknowledge"
+                                into "ACKNOWL / EDGE" on the host card */}
+                            <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
                                 <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
                                     <EventState event={event} />
                                     {canChange && !event.acknowledged_at && (

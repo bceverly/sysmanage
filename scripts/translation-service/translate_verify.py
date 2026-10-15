@@ -41,6 +41,13 @@ Why this shape, measured on beast (RTX 4060 Ti, 16 GiB) on 2026-10-08:
     real ones -- every one genuinely broken (Hindi "Quick Navigation" rendered
     as gibberish, "fleet compliance report" as "network firewall compliance
     report") -- and passed all 25 good controls.
+  * The glossary (2026-10-14, scripts/i18n_judge_calibrate.py, judge alone):
+    sent as a SECOND system message -- the prompt above is untouched -- it
+    took the human-confirmed false alarms from 2/83 to 19/83 (sysmanage) and
+    27/88 to 44/88 (docs; zh_TW 主機群 "fleet", "Dispatch" in seven
+    languages), left good short / long values and swapped values as they
+    were (one more swap rejected), and its one new rejection of a "good"
+    value was a real defect (a French value missing half its sentence).
 """
 
 from __future__ import annotations
@@ -58,14 +65,25 @@ try:
     import i18n_quality  # scripts/, put on sys.path by translate_service
 except ImportError:  # pragma: no cover - deployment accident
     i18n_quality = None
+try:
+    import i18n_glossary  # scripts/, the translator's own glossary
+except ImportError:  # pragma: no cover - deployment accident
+    i18n_glossary = None
 
 EMBED_MODEL = os.getenv("VERIFY_EMBED_MODEL", "bge-m3")
 PASS_AT = float(os.getenv("VERIFY_PASS_AT", "0.65"))
 FAIL_BELOW = float(os.getenv("VERIFY_FAIL_BELOW", "0.40"))
 JUDGE_MAX_TOKENS = 96
+# The judge is told the product's own terms (23.4): without them it rejected
+# the glossary's canonical zh_TW 主機群 for "fleet" as "a collection of
+# vehicles".  Given as a SEPARATE system message, so JUDGE_PROMPT stays the
+# calibrated text; scripts/i18n_judge_calibrate.py measures both ways.
+JUDGE_GLOSSARY = os.getenv("VERIFY_JUDGE_GLOSSARY", "1") not in ("0", "false", "no")
 # Bump when a threshold, model or prompt changes, so a ledger can be traced to
 # the verifier that wrote it (GET /health reports it).
-VERIFIER_VERSION = f"2:{EMBED_MODEL}:{PASS_AT}:{FAIL_BELOW}"
+VERIFIER_VERSION = f"2:{EMBED_MODEL}:{PASS_AT}:{FAIL_BELOW}" + (
+    ":gloss" if JUDGE_GLOSSARY else ""
+)
 
 JUDGE_PROMPT = """You check translations for a systems-administration product. You are given an English SOURCE and a {language} TRANSLATION.
 
@@ -84,6 +102,34 @@ class VerifyItem(BaseModel):
 class VerifyRequest(BaseModel):
     lang: str = Field(..., description="Locale code, e.g. 'fr' or 'zh_TW'.")
     items: List[VerifyItem]
+    # Calibration only (scripts/i18n_judge_calibrate.py): every pair goes to
+    # the judge, skipping the embedding bands, with or without the glossary.
+    judge_only: bool = False
+    glossary: Optional[bool] = None
+
+
+def judge_terms(source: str, lang: str, language: str) -> str:
+    """The judge's view of the glossary: what this source's product terms
+    mean and how the product renders them -- framed as CORRECT renderings to
+    accept, not (as the translator's version is) as instructions."""
+    if i18n_glossary is None:
+        return ""
+    lines = []
+    for term, gloss in i18n_glossary.relevant([source]):
+        spec = i18n_glossary.TERMS.get(term, {})
+        canonical = spec.get("canonical", {}).get(lang) if spec else None
+        line = f"  - {term}: {gloss}"
+        if canonical:
+            line += f" (this product's {language} term: \u201c{canonical}\u201d)"
+        lines.append(line)
+    if not lines:
+        return ""
+    return (
+        "DOMAIN TERMS. These words in the SOURCE are this product's own "
+        "technical terms, with the meaning given; a TRANSLATION that renders "
+        "them this way is correct, whatever the everyday sense of the word:\n"
+        + "\n".join(lines)
+    )
 
 
 def _cosine(a: List[float], b: List[float]) -> float:
@@ -167,8 +213,12 @@ def make_router(
         resp.raise_for_status()
         return resp.json()["embeddings"]
 
-    async def judge(
-        client: httpx.AsyncClient, lang: str, source: str, value: str
+    async def judge(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+        client: httpx.AsyncClient,
+        lang: str,
+        source: str,
+        value: str,
+        glossary: bool = JUDGE_GLOSSARY,
     ) -> Tuple[bool, str]:
         payload = {
             "model": judge_model,
@@ -194,6 +244,9 @@ def make_router(
                 },
             ],
         }
+        terms = judge_terms(source, lang, languages[lang]) if glossary else ""
+        if terms:
+            payload["messages"].insert(1, {"role": "system", "content": terms})
         url = f"{ollama_url}/api/chat"  # operator config, as in embed()
         # nosemgrep: python.fastapi.net.tainted-fastapi-http-request-httpx.tainted-fastapi-http-request-httpx
         resp = await client.post(url, json=payload, timeout=timeout)
@@ -208,6 +261,36 @@ def make_router(
             return False, "the judge gave no readable verdict"
         answer = str(verdict.get("answer", "")).strip().lower()
         return answer == "yes", str(verdict.get("reason", "")).strip()
+
+    async def judged(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+        client: httpx.AsyncClient,
+        req: VerifyRequest,
+        i: int,
+        cos: Optional[float],
+        glossary: bool,
+    ) -> dict:
+        """One pair's judge verdict as a result row."""
+        try:
+            ok, reason = await judge(
+                client, req.lang, req.items[i].source, req.items[i].value, glossary
+            )
+        except httpx.HTTPError as exc:
+            # One slow or failed judge call must not fail the other 63 pairs
+            # in the batch (2026-10-10: a ReadTimeout while a translation run
+            # shared the GPU turned a whole batch into a 500).  "retry" leaves
+            # the pair unverified for the next run.
+            return {
+                "ok": False,
+                "retry": True,
+                "cos": cos,
+                "reason": f"judge unavailable: {type(exc).__name__}",
+            }
+        return {
+            "ok": ok,
+            "cos": cos,
+            "judge": True,
+            "reason": "" if ok else f"meaning: {reason or 'judge said no'}",
+        }
 
     @router.post("/verify/batch")
     async def verify_batch(req: VerifyRequest) -> dict:
@@ -225,8 +308,12 @@ def make_router(
                 results[i] = {"ok": False, "reason": why}
             else:
                 to_embed.append(i)
+        glossary = JUDGE_GLOSSARY if req.glossary is None else req.glossary
         async with httpx.AsyncClient() as client:
-            if to_embed:
+            if to_embed and req.judge_only:
+                for i in to_embed:
+                    results[i] = await judged(client, req, i, None, glossary)
+            elif to_embed:
                 # Masked, so a tag-dense string is compared on its prose rather
                 # than on the markup both sides share.
                 sources = [mask(req.items[i].source)[0] for i in to_embed]
@@ -244,34 +331,7 @@ def make_router(
                             "reason": f"meaning: similarity {cos} to the source",
                         }
                     else:
-                        try:
-                            ok, reason = await judge(
-                                client,
-                                req.lang,
-                                req.items[i].source,
-                                req.items[i].value,
-                            )
-                        except httpx.HTTPError as exc:
-                            # One slow or failed judge call must not fail the
-                            # other 63 pairs in the batch (2026-10-10: a
-                            # ReadTimeout while a translation run shared the
-                            # GPU turned a whole batch into a 500).  "retry"
-                            # leaves the pair unverified for the next run.
-                            results[i] = {
-                                "ok": False,
-                                "retry": True,
-                                "cos": cos,
-                                "reason": f"judge unavailable: {type(exc).__name__}",
-                            }
-                            continue
-                        results[i] = {
-                            "ok": ok,
-                            "cos": cos,
-                            "judge": True,
-                            "reason": (
-                                "" if ok else f"meaning: {reason or 'judge said no'}"
-                            ),
-                        }
+                        results[i] = await judged(client, req, i, cos, glossary)
         return {"verifier": VERIFIER_VERSION, "results": results}
 
     return router

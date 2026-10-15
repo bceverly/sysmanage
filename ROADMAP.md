@@ -13410,7 +13410,7 @@ with consent); S7 proof on constructed failures + docs + screenshots +
       gate fix + restart): consent given -> the hardware tick installed it
       itself (`system:smartmontools-auto-install`), success 240 s after
       consent, disk read `ok` at 270 s; consent withdrawn again.*
-- [ ] **Proof on real failures, not just fixtures:** file-backed ZFS pool
+- [x] **Proof on real failures, not just fixtures:** file-backed ZFS pool
       with a device offlined/corrupted, mdadm array on loop devices with a
       member failed, recorded `smartctl` JSON from failing drives; an email
       arrives within seconds of each. Docs + screenshots + 14-language i18n.
@@ -13433,7 +13433,10 @@ with consent); S7 proof on constructed failures + docs + screenshots +
       Docs: sysmanage-docs `docs/administration/hardware-health.html`, 14
       languages verified; screenshots wired (`seed_hardware.py`,
       `make screenshots-hardware-seed`, shots `hardware-health-fleet` /
-      `-host`) but not yet captured -- `make screenshots`.*
+      `-host`), captured by Bryan's `make screenshots` 2026-10-14.  The
+      host shot showed the event actions wrapping ("ACKNOWL / EDGE") --
+      fixed (no-wrap action cell); re-shoot just those two with
+      `make screenshots-hardware-capture` on a seeded OSS VM.*
 
 #### 23.2 Asset tags on the machine, not the OS (OSS)
 
@@ -13603,7 +13606,8 @@ of its three OSes once).
       shots: q34 created "Manage Asset Tags" but granted it to nobody, so an
       UPGRADED server had no one able to edit tags -- migration
       `q36assettagrole` grants it to every Edit Tags holder (o12's pattern).
-      OUTSTANDING (Bryan): `make screenshots`; the T480 proof -- boot it into
+      Screenshots captured by Bryan's `make screenshots` 2026-10-14 (all five,
+      checked).  OUTSTANDING (Bryan): the T480 proof -- boot it into
       Windows, Ubuntu and OpenBSD once each, approve the three hosts, then
       `scripts/machine_identity_proof.py --hosts ...` (masks the real
       serials).*
@@ -13922,11 +13926,24 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       ("Análisis" -> "An"), which also made the SERVICE refuse correct
       translations -- most of the 58 unfillable strings; (4) en/em dashes
       added to the deterministic checks.*
-- [ ] **Give the judge the domain glossary** (as the translator already
+- [x] **Give the judge the domain glossary** (as the translator already
       gets it), then re-run the calibration: it rejected the glossary's own
       term 主機群 for "fleet" as "a collection of vehicles", and is
       over-strict on one- and two-word headings (roughly 40% of its rejects
       on short strings were correct translations).
+      *Done 2026-10-14: `translate_verify.py` gives the judge the terms its
+      SOURCE uses (meaning + the product's rendering, framed as correct) as a
+      separate system message -- the calibrated prompt is unchanged -- on by
+      default (`VERIFY_JUDGE_GLOSSARY`; verifier version gains `:gloss`).
+      Re-calibrated with the new, repeatable `scripts/i18n_judge_calibrate.py`
+      (judge alone via a `judge_only` request flag, four sets drawn from the
+      repo's own ledger, with and without the glossary) on a scratch service
+      on beast: human-confirmed false alarms 2/83 -> 19/83 (sysmanage) and
+      27/88 -> 44/88 (docs); good short / long and swapped wrong-key values
+      unchanged (one more swap rejected); the only new rejection was a real
+      defect -- a French value with half its sentence missing, now fixed.
+      Short headings are still the judge's weak spot (72-76/78).  Takes
+      effect when the beast service is restarted on this code.*
 - [ ] **A stronger model for Hindi**: aya-expanse:8b wrote a large share of
       the rejected Hindi (1,188 of 2,316 docs rejects); retry with
       aya-expanse:32b on the 32-core box before hand-translating more.
@@ -14000,8 +14017,15 @@ the old word-substitution scripts. Measured design (calibrated on beast against
 - [ ] Real failures, not just fixtures: a degraded ZFS pool, a failed md
       member and failing-drive SMART data each raise an alert email within
       seconds; a multi-boot machine's OS hosts share one asset tag.
+      *Hardware half PROVEN 2026-10-14 (23.1 S7, every email received):
+      ZFS mirror offlined -> mailed in 11.0 s; md member failed -> 14.7 s;
+      the FreeBSD box's real worn SSD -> 2.2 s after its report.  The
+      asset-tag half is the 23.2 T480 multi-boot proof, still open.*
 - [ ] Docs: hardware health and asset tags pages + screenshots + 14-language
       i18n (the docs-are-part-of-done rule).
+      *Hardware health page DONE 2026-10-14 (sysmanage-docs
+      `docs/administration/hardware-health.html`, screenshots, 14 languages
+      verified).  Asset tags page is 23.2 S6, still open.*
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
