@@ -13999,7 +13999,21 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       CI history only Bryan can read. Moved out of Phase 23 itself: 23.0 and
       23.4's Hindi model (Phase 26, waiting on the 32-core box) and the
       same-hostname multi-boot work found by the T480 proof (Phase 26).
-- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+- [x] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+      *PASSED 2026-10-15 (Bryan's v3.11.0.0 tag builds in all four repos).
+      What the tag runs found, all fixed: the agent's Windows CI leg (a
+      top-level `fcntl` import, `os.O_NONBLOCK`, and two journal-reader
+      tests that `select()` on a pipe -- Linux-only, now skipped on
+      Windows); a pylint unbalanced-unpacking in a new test; Lucky 13 #4
+      (`importlib.import_module` in the judge calibration script -> a plain
+      import); 4 code-scanning alerts (an assert with a side effect, a dead
+      assignment, two Semgrep Pro taint findings on operator-configured
+      URLs); and 35 SonarQube issues across sysmanage-agent and sysmanage
+      (complexity, duplicated literals, a deprecated DataGrid `autoHeight`
+      -> MUI's flex-parent layout, redundant assertions and aliases).
+      Phase 23 is complete: 23.1 hardware health, 23.2 asset tags, 23.3
+      time sync and 23.4 translation verification; 23.0 and 23.4's Hindi
+      model moved to Phase 26.*
 
 ---
 
