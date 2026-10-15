@@ -13125,84 +13125,11 @@ built on 22's agent identity (an asset tag needs to know which host is which)
 and send-on-change collection, and its real-time alerts follow 22.3's rule
 that a site-wide event must not become ten thousand emails.
 
-#### 23.0 Scale proof at 50k agents (carried over from Phase 22)
+#### 23.0 Scale proof at 50k agents -- moved to Phase 26
 
-**Moved here 2026-10-05 (Bryan).** Phase 22 proved 10k agents (single
-tenant) and 20k across 20 tenants on a 12-thread box, with a capacity curve
-saying 50k needs ~12-14 dedicated server cores, a separate database and 48
-GB+ (Phase 22 exit criteria notes). Bryan is building a 32-core / 128 GB
-machine; this proof waits for it rather than for a cloud box.
-
-- [ ] **50k agents across many tenants** on the new machine (server +
-      PostgreSQL there, the fleet sharded over the laptops with
-      `--remote-fleet`): a server-restart storm reconnects every agent with
-      no expiry, no lockout and no host marked down; record the curve from
-      30k up, and the worker count and pool sizing it took.
-- [ ] Fold the result into the scaling guide (Phase 22) -- replace its 50k
-      extrapolation with the measured numbers.
-- [ ] **sysmanage-canary on a real NetBSD host** (moved from 22.9,
-      2026-10-07). The NetBSD package carries the canary and an rc script
-      that controls it by pidfile (the launcher execs Python, so rc.subr's
-      process matching cannot find it); that logic was proven under
-      FreeBSD's rc.subr only, because the NetBSD VM was unreachable. Install
-      the package, start / status / stop it, and confirm the account (9996)
-      and the 0600 config.
-- [ ] **One upstream fetch for vulnerability feeds** (moved from 22.4,
-      Bryan 2026-10-06). Every customer server pulls NVD, Ubuntu, Debian, Red
-      Hat and MSRC itself. The minimum shipped in 22.4 (conditional Debian
-      fetch, jittered retries and refresh times, first refresh spread over
-      30 min); still to build: one digested daily feed, with deltas,
-      published via the CDN, so customer servers stop hitting NVD and the
-      distros at all (`cve_refresh.pxi`, `cve_fetchers.pxi`).
-- [ ] **Tenant-pass bursts with the licensed engines loaded** (carried from
-      22.3, 2026-10-06). The 22.3 measurement (50 tenants, 10k agents) found
-      no tick-aligned burst, but its stack loaded only the multitenancy
-      engine: the advisor (15 min), alerting (1 min) and malware (5 min)
-      ticks, which walk every tenant, did not run. Repeat it on the new
-      machine with those engines licensed (the screenshot pipeline's
-      self-signed license) and analyze it the same way (phase-averaged CPU
-      by tick period); spread tenants across the interval only if it bursts.
-- [ ] **Hosts grid at 50k: measure, then page on the server if needed**
-      (carried from 22.7, Bryan 2026-10-06). The Hosts page still fetches
-      every host (`GET /api/v1/hosts`) each minute while its tab is visible:
-      1.7 s and 15 MB per open Hosts tab at 20k hosts, after 22.7 moved the
-      update counts into one grouped query (it was 36 s). Seed 50k hosts on
-      the new machine and time it again (the probe: a disposable stack +
-      20k hosts / 500k updates seeded by SQL, see the 22.7 note). If it grows
-      past what one open tab should cost, page and sort/filter the grid on
-      the server (DataGrid server mode) instead of shipping the whole list;
-      the other `/hosts` callers (Settings, Scripts, Maintenance Windows,
-      Query Packs) want a lighter id/name list too.
-- [ ] **Federation at scale: a many-sites harness, then what it finds**
-      (carried from 22.5 and the Phase 22 exit criterion, Bryan 2026-10-06).
-      Phase 22 jittered the site sync loop and the reconnect backoff, made
-      the host directory send deltas, and moved sync-queue readiness into
-      SQL (`next_attempt_at`) -- but "many tenants and sites" was never
-      proven, because no harness runs a coordinator with many sites. Build
-      it first (a coordinator stack plus N simulated sites, each with its
-      own database and a seeded fleet, speaking the real ingest endpoints),
-      measure, then decide on what it shows:
-      - **Coordinator ingest runs on the event loop.** `ingest_host_directory`
-        (Pro+ `federation_routes_ingest.pxi`) is an `async def` that upserts
-        every entry one at a time with synchronous DB calls -- a full
-        directory is 20,000 upserts per site (6.4 MB at 20k hosts), blocking
-        the coordinator's loop while it runs. Deltas make that rare (a full
-        directory daily and after a site restart), but many sites restarting
-        together still land on it at once. Measure; if it stalls, run it off
-        the loop and upsert in bulk.
-      - **Site drain is 100 entries a tick** (`_DEFAULT_BATCH_SIZE`), about
-        1,200 an hour at the default interval: a site far behind (a long
-        coordinator outage) takes hours to catch up. Drain to a time budget
-        instead, if the harness shows the backlog.
-      - **The coordinator push worker posts serially across tenants**
-        (`federation_push_worker.pxi`): one slow site holds up every other.
-        Parallelize with a bound, if measured.
-      - **Hosts removed at a site never leave the coordinator's directory.**
-        The ingest only upserts and the site only sends hosts it has, so a
-        decommissioned or deleted host stays in Cross-Site Hosts forever.
-        Found 2026-10-06 while building the deltas (true before them too):
-        the daily full directory could carry a "this is everything" flag so
-        the coordinator removes the site's entries not in it.
+*Moved 2026-10-15 (Bryan): the 50k proof and the rest of what was carried
+here from Phase 22 now live in Phase 26, "Carried forward from Phase 23.0".
+Most of it waits on the 32-core machine.*
 
 #### 23.1 Hardware health: failing drives, degraded arrays, overheating (OSS + Pro+)
 
@@ -13435,7 +13362,10 @@ with consent); S7 proof on constructed failures + docs + screenshots +
       `make screenshots-hardware-seed`, shots `hardware-health-fleet` /
       `-host`), captured by Bryan's `make screenshots` 2026-10-14.  The
       host shot showed the event actions wrapping ("ACKNOWL / EDGE") --
-      fixed (no-wrap action cell); re-shoot just those two with
+      the first fix (no-wrap action cell) did nothing, because the app
+      theme lets every Button wrap anywhere and a Button's own style beats
+      the cell's; the buttons now say nowrap themselves, with a test that
+      fails without it.  Re-shoot just those two with
       `make screenshots-hardware-capture` on a seeded OSS VM.*
 
 #### 23.2 Asset tags on the machine, not the OS (OSS)
@@ -13591,7 +13521,7 @@ of its three OSes once).
       escapes spreadsheet formulas). UI: Settings > Asset Tags gains Import
       and export (dry-run table) and Pending tags. Swapping two machines'
       tags in one file reports a duplicate -- clear one first.*
-- [ ] Docs + screenshots + 14-language i18n; tests for the scheme engine,
+- [x] Docs + screenshots + 14-language i18n; tests for the scheme engine,
       the identity normalization (recorded outputs from all six OS families),
       the T480 multi-boot case and the import dry run.
       *S6 2026-10-11 -- done in code: `sysmanage-docs`
@@ -13607,10 +13537,21 @@ of its three OSes once).
       UPGRADED server had no one able to edit tags -- migration
       `q36assettagrole` grants it to every Edit Tags holder (o12's pattern).
       Screenshots captured by Bryan's `make screenshots` 2026-10-14 (all five,
-      checked).  OUTSTANDING (Bryan): the T480 proof -- boot it into
-      Windows, Ubuntu and OpenBSD once each, approve the three hosts, then
-      `scripts/machine_identity_proof.py --hosts ...` (masks the real
-      serials).*
+      checked).*
+      *T480 multi-boot PROVEN 2026-10-15 (`scripts/machine_identity_proof.py
+      --hosts T480,t480.theeverlys.com,t480-ubuntu`): Windows 11, OpenBSD 7.9
+      and Ubuntu 26.04 on the one Lenovo 20L6S0U300 -> one machine record and
+      one asset-tag slot; OpenBSD's byte-swapped SMBIOS UUID matched; each
+      host lists the other two.  Found on the way: (1) Ubuntu was refused
+      because it reported `t480` and Windows `T480` -- registration matches
+      names case-insensitively and refuses a credential-less claim; Ubuntu
+      was renamed `t480-ubuntu` for the proof, and the real fix (multi-boot
+      machines keep ONE hostname) is now Phase 26 "Multi-boot machines that
+      keep one hostname"; (2) the agent sent its registration once per
+      connection, so after a credential refusal it never registered again
+      even once the stale host was removed -- now it re-asks, backing off
+      (`message_handler._retry_after_refusal`); (3) the agent logged the
+      server's `registration_pending` as an unknown message.*
 
 #### 23.3 Time synchronization: measure every clock, keep it in bounds (OSS + Pro+)
 
@@ -13944,9 +13885,8 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       defect -- a French value with half its sentence missing, now fixed.
       Short headings are still the judge's weak spot (72-76/78).  Takes
       effect when the beast service is restarted on this code.*
-- [ ] **A stronger model for Hindi**: aya-expanse:8b wrote a large share of
-      the rejected Hindi (1,188 of 2,316 docs rejects); retry with
-      aya-expanse:32b on the 32-core box before hand-translating more.
+- **A stronger model for Hindi** -- *moved to Phase 26 (Bryan
+      2026-10-15: needs the 32-core box, "isn't happening any time soon").*
 - [x] **Redo every reject**: `python3 scripts/i18n_verify.py --requeue`, then
       `make translate` (which re-verifies); `--accept` only for a genuine false
       alarm, with its reason.
@@ -14014,18 +13954,21 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       left for 22.x review.  The host harness restores everything it
       touches (config, time service as found, the clock if a run dies
       mid-skew).*
-- [ ] Real failures, not just fixtures: a degraded ZFS pool, a failed md
+- [x] Real failures, not just fixtures: a degraded ZFS pool, a failed md
       member and failing-drive SMART data each raise an alert email within
       seconds; a multi-boot machine's OS hosts share one asset tag.
       *Hardware half PROVEN 2026-10-14 (23.1 S7, every email received):
       ZFS mirror offlined -> mailed in 11.0 s; md member failed -> 14.7 s;
       the FreeBSD box's real worn SSD -> 2.2 s after its report.  The
       asset-tag half is the 23.2 T480 multi-boot proof, still open.*
-- [ ] Docs: hardware health and asset tags pages + screenshots + 14-language
+      *Asset-tag half PROVEN 2026-10-15 (the T480's three OS hosts share one
+      machine and asset tag; see 23.2).*
+- [x] Docs: hardware health and asset tags pages + screenshots + 14-language
       i18n (the docs-are-part-of-done rule).
       *Hardware health page DONE 2026-10-14 (sysmanage-docs
       `docs/administration/hardware-health.html`, screenshots, 14 languages
-      verified).  Asset tags page is 23.2 S6, still open.*
+      verified).  Asset tags page done in 23.2 S6 (screenshots captured
+      2026-10-14).*
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -14443,8 +14386,12 @@ Phase 22 audit item). These were neither done nor tracked:
 - [ ] **Confirm the BSD process resolvers ran** (Phase 21, "unexercised until
       the next `bsd-tests.yml` dispatch"). Needs the workflow history, which
       only Bryan can read here; tick when a green dispatch is seen.
-- [ ] **Restart the beast translation service** to load the newer glossary
-      (Phase 21 note; still outstanding, Bryan).
+- [x] **Restart the beast translation service** to load the newer glossary
+      (Phase 21 note; still outstanding, Bryan). The same restart also loads
+      the verifier judge's glossary (23.4, 2026-10-14; verifier version
+      gains `:gloss`).
+      *Done 2026-10-15 (Bryan): beast reports verifier
+      `2:bge-m3:0.65:0.4:gloss`.*
 - [ ] **A failed server MSI upgrade destroys the old install** (found
       2026-10-07 on x13s). The old product's `RemoveService` action deletes
       its Windows services and has no rollback action, and the rollback of
@@ -14458,6 +14405,151 @@ Phase 22 audit item). These were neither done nor tracked:
       set built for older pins (Mako 1.3.12 vs 1.4.3) produces an MSI whose
       offline install fails -- caught only at install time. Check the set
       against `requirements-prod.txt` at BUILD time and refresh or fail.
+
+### Multi-boot machines that keep one hostname (from the 23.2 T480 proof, 2026-10-15)
+
+**Added 2026-10-15 (Bryan): "we need to be able to support multiboot machines
+that keep the same hostname but with multiple operating systems and display it
+in a rational way in the UX."** Phase 23.2 made a machine's OS installs share
+one machine record and asset tag -- but only when each OS reports a DIFFERENT
+hostname. The T480 proof found it: Windows reported `T480`, Ubuntu `t480`, and
+the server refused Ubuntu, because registration finds an existing host by
+case-insensitive FQDN (`_match_host_in_session`, and the token-less
+`_reject_if_fqdn_belongs_to_tenant` 403), and an agent with no credential
+claiming a known name is refused as impersonation (Phase 22.0). Renaming
+Ubuntu to `t480-ubuntu` got the proof through; real multi-boot machines
+almost always keep one hostname in every OS, so this is the normal case, not
+an edge case.
+
+- [ ] **Registration: same name, different OS install = a new host, not a
+      refusal.** An agent with no credential whose name matches an existing
+      host registers as a NEW pending host instead of being refused -- it
+      gains nothing of the existing host's (no record, token or history), and
+      nothing happens until an operator approves it, so the 22.0
+      impersonation rule still holds. Tell the cases apart without trusting
+      the name: same hardware identity (23.2) + a different OS / OS install
+      identity (platform, `/etc/machine-id`, Windows MachineGuid, ...) = a
+      sibling OS on the same machine; same everything = a reinstall of THIS
+      OS (today's "remove it and approve the new registration" path, perhaps
+      offered as one action). Must not reopen the phantom-duplicate hole the
+      FQDN dedup closed (`phantom-duplicate` fixes, the tenant 403): a sibling
+      is created in the SAME tenant as the machine's other hosts, never
+      server-scoped beside a tenant row. Also covers the enrollment-token
+      path (today a tenant-DB FQDN collision) and the token-less 403.
+- [ ] **Display: hosts that share a name are told apart everywhere.** Where a
+      name would be ambiguous, show it as `t480 (Windows 11)` / `t480
+      (Ubuntu 26.04)` / `t480 (OpenBSD 7.9)` -- the Hosts grid, host detail
+      header, search / command palette, every picker (scripts, maintenance
+      windows, fleet jobs, query packs), alerts and notification emails,
+      reports and CSV exports, the audit log. The Machine card lists the
+      machine's OS installs, which one is up now (a multi-boot machine has
+      at most one up at a time -- the others are expected to be "down", so
+      they must not read as failures or raise host-down alerts while a
+      sibling is up), and when each last ran. Consider a "machine view" in
+      the Hosts grid that groups a machine's OS hosts under one row.
+- [ ] **Everything keyed by name stops assuming it is unique:** lookups by
+      FQDN in the inbound processor, hostname-only messages, child-host
+      parents, federation's cross-site directory, the reports that join on
+      fqdn. Inventory each and key it by host id.
+- [ ] **Proof:** the T480 with ONE hostname in all three OSes -- each
+      registers (one approval each), all link to the one machine and asset
+      tag, the UI tells them apart, and booting between them raises no
+      host-down alert for the sibling that is off. Docs: replace the
+      asset-tags page's interim note (`docs.admin.asset_tags.machines_multiboot_note`,
+      added 2026-10-15: "give each operating system its own hostname ...
+      supporting one hostname ... is planned") with how it works.
+      14-language i18n for any new strings.
+
+### Carried forward from Phase 23.0 (2026-10-15)
+
+*Moved from Phase 23 (Bryan 2026-10-15).*
+
+**Moved to Phase 23 2026-10-05 (Bryan).** Phase 22 proved 10k agents (single
+tenant) and 20k across 20 tenants on a 12-thread box, with a capacity curve
+saying 50k needs ~12-14 dedicated server cores, a separate database and 48
+GB+ (Phase 22 exit criteria notes). Bryan is building a 32-core / 128 GB
+machine; this proof waits for it rather than for a cloud box.
+
+- [ ] **50k agents across many tenants** on the new machine (server +
+      PostgreSQL there, the fleet sharded over the laptops with
+      `--remote-fleet`): a server-restart storm reconnects every agent with
+      no expiry, no lockout and no host marked down; record the curve from
+      30k up, and the worker count and pool sizing it took.
+- [ ] Fold the result into the scaling guide (Phase 22) -- replace its 50k
+      extrapolation with the measured numbers.
+- [ ] **sysmanage-canary on a real NetBSD host** (moved from 22.9,
+      2026-10-07). The NetBSD package carries the canary and an rc script
+      that controls it by pidfile (the launcher execs Python, so rc.subr's
+      process matching cannot find it); that logic was proven under
+      FreeBSD's rc.subr only, because the NetBSD VM was unreachable. Install
+      the package, start / status / stop it, and confirm the account (9996)
+      and the 0600 config.
+- [ ] **One upstream fetch for vulnerability feeds** (moved from 22.4,
+      Bryan 2026-10-06). Every customer server pulls NVD, Ubuntu, Debian, Red
+      Hat and MSRC itself. The minimum shipped in 22.4 (conditional Debian
+      fetch, jittered retries and refresh times, first refresh spread over
+      30 min); still to build: one digested daily feed, with deltas,
+      published via the CDN, so customer servers stop hitting NVD and the
+      distros at all (`cve_refresh.pxi`, `cve_fetchers.pxi`).
+- [ ] **Tenant-pass bursts with the licensed engines loaded** (carried from
+      22.3, 2026-10-06). The 22.3 measurement (50 tenants, 10k agents) found
+      no tick-aligned burst, but its stack loaded only the multitenancy
+      engine: the advisor (15 min), alerting (1 min) and malware (5 min)
+      ticks, which walk every tenant, did not run. Repeat it on the new
+      machine with those engines licensed (the screenshot pipeline's
+      self-signed license) and analyze it the same way (phase-averaged CPU
+      by tick period); spread tenants across the interval only if it bursts.
+- [ ] **Hosts grid at 50k: measure, then page on the server if needed**
+      (carried from 22.7, Bryan 2026-10-06). The Hosts page still fetches
+      every host (`GET /api/v1/hosts`) each minute while its tab is visible:
+      1.7 s and 15 MB per open Hosts tab at 20k hosts, after 22.7 moved the
+      update counts into one grouped query (it was 36 s). Seed 50k hosts on
+      the new machine and time it again (the probe: a disposable stack +
+      20k hosts / 500k updates seeded by SQL, see the 22.7 note). If it grows
+      past what one open tab should cost, page and sort/filter the grid on
+      the server (DataGrid server mode) instead of shipping the whole list;
+      the other `/hosts` callers (Settings, Scripts, Maintenance Windows,
+      Query Packs) want a lighter id/name list too.
+- [ ] **Federation at scale: a many-sites harness, then what it finds**
+      (carried from 22.5 and the Phase 22 exit criterion, Bryan 2026-10-06).
+      Phase 22 jittered the site sync loop and the reconnect backoff, made
+      the host directory send deltas, and moved sync-queue readiness into
+      SQL (`next_attempt_at`) -- but "many tenants and sites" was never
+      proven, because no harness runs a coordinator with many sites. Build
+      it first (a coordinator stack plus N simulated sites, each with its
+      own database and a seeded fleet, speaking the real ingest endpoints),
+      measure, then decide on what it shows:
+      - **Coordinator ingest runs on the event loop.** `ingest_host_directory`
+        (Pro+ `federation_routes_ingest.pxi`) is an `async def` that upserts
+        every entry one at a time with synchronous DB calls -- a full
+        directory is 20,000 upserts per site (6.4 MB at 20k hosts), blocking
+        the coordinator's loop while it runs. Deltas make that rare (a full
+        directory daily and after a site restart), but many sites restarting
+        together still land on it at once. Measure; if it stalls, run it off
+        the loop and upsert in bulk.
+      - **Site drain is 100 entries a tick** (`_DEFAULT_BATCH_SIZE`), about
+        1,200 an hour at the default interval: a site far behind (a long
+        coordinator outage) takes hours to catch up. Drain to a time budget
+        instead, if the harness shows the backlog.
+      - **The coordinator push worker posts serially across tenants**
+        (`federation_push_worker.pxi`): one slow site holds up every other.
+        Parallelize with a bound, if measured.
+      - **Hosts removed at a site never leave the coordinator's directory.**
+        The ingest only upserts and the site only sends hosts it has, so a
+        decommissioned or deleted host stays in Cross-Site Hosts forever.
+        Found 2026-10-06 while building the deltas (true before them too):
+        the daily full directory could carry a "this is everything" flag so
+        the coordinator removes the site's entries not in it.
+
+### Carried forward from Phase 23.4 (2026-10-15)
+
+- [ ] **A stronger model for Hindi**: aya-expanse:8b wrote a large share of
+      the rejected Hindi (1,188 of 2,316 docs rejects); retry with
+      aya-expanse:32b on the 32-core box before hand-translating more.
+      *Moved from 23.4 (Bryan 2026-10-15): waits on the 32-core box.  When
+      it runs, re-check with `scripts/i18n_judge_calibrate.py` -- the judge
+      now has the glossary, and some of those Hindi rejects may have been
+      the judge, not the translation.*
 
 ### Exit Criteria
 

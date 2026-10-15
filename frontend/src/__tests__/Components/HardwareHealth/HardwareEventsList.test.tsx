@@ -21,6 +21,7 @@ vi.mock("../../../Services/hardwareHealth", async (importOriginal) => {
 
 import { hasPermission } from "../../../Services/permissions";
 import { changeHardwareEvent } from "../../../Services/hardwareHealth";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 import HardwareEventsList from "../../../Components/HardwareHealth/HardwareEventsList";
 import { event } from "./_fixtures";
 
@@ -49,6 +50,28 @@ describe("HardwareEventsList", () => {
       expect(changeHardwareEvent).toHaveBeenCalledWith("e1", "acknowledge", "replacement ordered"),
     );
     await waitFor(() => expect(onChanged).toHaveBeenCalled());
+  });
+
+  test("the action buttons never wrap, whatever the theme says", async () => {
+    // The app theme lets every Button wrap anywhere (long translations); on
+    // the host card that broke "Acknowledge" into "ACKNOWL / EDGE".
+    vi.mocked(hasPermission).mockResolvedValue(true);
+    const wrapAnywhere = createTheme({
+      components: {
+        MuiButton: { styleOverrides: { root: { whiteSpace: "normal", overflowWrap: "anywhere" } } },
+      },
+    });
+    render(
+      <ThemeProvider theme={wrapAnywhere}>
+        <MemoryRouter>
+          <HardwareEventsList events={[event()]} onChanged={vi.fn()} />
+        </MemoryRouter>
+      </ThemeProvider>,
+    );
+    for (const label of ["Acknowledge", "Resolve"]) {
+      const button = (await screen.findByText(label)).closest("button");
+      expect(button).toHaveStyle({ whiteSpace: "nowrap", overflowWrap: "normal" });
+    }
   });
 
   test("without the role there are no buttons; who acted is shown", async () => {

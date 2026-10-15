@@ -33,6 +33,9 @@ import { kindLabel, reasonsText, statusColor, transitionText } from './hardwareH
 
 type Action = 'acknowledge' | 'resolve';
 
+// See the action cell below: these two buttons must not wrap.
+const NO_WRAP = { whiteSpace: 'nowrap', overflowWrap: 'normal' } as const;
+
 const when = (iso: string | null): string => (iso ? new Date(`${iso}Z`).toLocaleString() : '');
 
 const NoteDialog: React.FC<{
@@ -161,17 +164,20 @@ const HardwareEventsList: React.FC<{
                                 )}
                             </TableCell>
                             {/* never wrap the actions: a long reason squeezed "Acknowledge"
-                                into "ACKNOWL / EDGE" on the host card */}
-                            <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+                                into "ACKNOWL / EDGE" on the host card.  The theme lets every
+                                Button wrap anywhere (long translations), and a Button's own
+                                style beats the cell's, so the buttons say nowrap themselves;
+                                in a table the reason column wraps instead. */}
+                            <TableCell align="right" sx={{ whiteSpace: 'nowrap', width: '1%' }}>
                                 <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
                                     <EventState event={event} />
                                     {canChange && !event.acknowledged_at && (
-                                        <Button size="small" onClick={() => setPending({ event, action: 'acknowledge' })}>
+                                        <Button size="small" sx={NO_WRAP} onClick={() => setPending({ event, action: 'acknowledge' })}>
                                             {t('hardwareHealth.events.acknowledge', 'Acknowledge')}
                                         </Button>
                                     )}
                                     {canChange && !event.resolved_at && (
-                                        <Button size="small" onClick={() => setPending({ event, action: 'resolve' })}>
+                                        <Button size="small" sx={NO_WRAP} onClick={() => setPending({ event, action: 'resolve' })}>
                                             {t('hardwareHealth.events.resolve', 'Resolve')}
                                         </Button>
                                     )}
