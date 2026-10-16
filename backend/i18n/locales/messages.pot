@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-15 16:53-0400\n"
+"POT-Creation-Date: 2026-10-16 07:13-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,27 +57,27 @@ msgstr ""
 msgid "Login attempt allowed"
 msgstr ""
 
-#: backend/auth/auth_bearer.py:41
+#: backend/auth/auth_bearer.py:49
 msgid "Invalid authentication scheme."
 msgstr ""
 
-#: backend/auth/auth_bearer.py:44
+#: backend/auth/auth_bearer.py:53
 msgid "Expired token."
 msgstr ""
 
-#: backend/auth/auth_bearer.py:48
+#: backend/auth/auth_bearer.py:59
 msgid "Invalid authorization code."
 msgstr ""
 
-#: backend/auth/auth_bearer.py:101
+#: backend/auth/auth_bearer.py:114
 msgid "Could not validate credentials"
 msgstr ""
 
-#: backend/auth/auth_bearer.py:132 backend/api/api_keys.py:106
+#: backend/auth/auth_bearer.py:145 backend/api/api_keys.py:106
 msgid "User not found."
 msgstr ""
 
-#: backend/auth/auth_bearer.py:192 backend/api/auth.py:680
+#: backend/auth/auth_bearer.py:205 backend/api/auth.py:680
 msgid "You do not have access to the selected account."
 msgstr ""
 
@@ -201,15 +201,15 @@ msgstr ""
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
 #: backend/api/updates/report_routes.py:34
-#: backend/api/updates/os_upgrade_routes.py:54
+#: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:269 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:262 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
-#: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:82
+#: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
 #: backend/api/repository_mirroring_setup.py:202
 #: backend/api/repository_mirroring_setup.py:263
-#: backend/api/scripts/routes_executions.py:78
+#: backend/api/scripts/routes_executions.py:71
 #: backend/api/commercial_antivirus_status.py:88 backend/api/machines.py:68
 msgid "Host not found"
 msgstr ""
@@ -232,10 +232,8 @@ msgstr ""
 #: backend/api/cve_refresh_settings.py:66 backend/api/scim.py:218
 #: backend/api/scim.py:228 backend/api/packages_operations.py:68
 #: backend/api/packages_operations.py:247 backend/api/license_management.py:116
-#: backend/api/updates/os_upgrade_routes.py:189
-#: backend/api/updates/execution_routes.py:50
 #: backend/api/secrets/permissions.py:39 backend/api/error_constants.py:22
-#: backend/api/child_host_utils.py:33
+#: backend/api/child_host_utils.py:33 backend/api/child_host_utils.py:67
 msgid "User not found"
 msgstr ""
 
@@ -1126,8 +1124,8 @@ msgstr ""
 #: backend/api/host_hostname.py:75 backend/api/config_mgmt_drift.py:205
 #: backend/api/config_mgmt_remediation.py:435
 #: backend/api/reboot_orchestration.py:119 backend/api/config_mgmt_runs.py:374
-#: backend/api/error_constants.py:43 backend/api/child_host_utils.py:89
-#: backend/api/scripts/routes_executions.py:81
+#: backend/api/error_constants.py:43 backend/api/child_host_utils.py:117
+#: backend/api/scripts/routes_executions.py:74
 msgid "Host is not active"
 msgstr ""
 
@@ -3135,8 +3133,8 @@ msgid "No master key configured. Please configure a master key first."
 msgstr ""
 
 #: backend/api/ubuntu_pro_settings.py:381
-#: backend/api/updates/os_upgrade_routes.py:264
-#: backend/api/updates/execution_routes.py:104
+#: backend/api/updates/os_upgrade_routes.py:257
+#: backend/api/updates/execution_routes.py:97
 msgid "Host not found or inactive"
 msgstr ""
 
@@ -3520,34 +3518,34 @@ msgstr ""
 msgid "Invalid image file. Please upload a valid image."
 msgstr ""
 
-#: backend/api/updates/os_upgrade_routes.py:197
+#: backend/api/updates/os_upgrade_routes.py:190
 msgid "Permission denied: APPLY_HOST_OS_UPGRADE role required"
 msgstr ""
 
-#: backend/api/updates/os_upgrade_routes.py:214
+#: backend/api/updates/os_upgrade_routes.py:207
 msgid "Invalid package managers for OS upgrades: {}"
 msgstr ""
 
-#: backend/api/updates/os_upgrade_routes.py:277
+#: backend/api/updates/os_upgrade_routes.py:270
 msgid ""
 "This is an image-mode host; update the OS image instead of applying package "
 "upgrades."
 msgstr ""
 
-#: backend/api/updates/os_upgrade_routes.py:291
+#: backend/api/updates/os_upgrade_routes.py:284
 msgid "No OS upgrades available for this host"
 msgstr ""
 
-#: backend/api/updates/os_upgrade_routes.py:359
+#: backend/api/updates/os_upgrade_routes.py:352
 #, python-format
 msgid "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
 msgstr ""
 
-#: backend/api/updates/os_upgrade_routes.py:390
+#: backend/api/updates/os_upgrade_routes.py:383
 msgid "OS upgrade command queued for host"
 msgstr ""
 
-#: backend/api/updates/os_upgrade_routes.py:400
+#: backend/api/updates/os_upgrade_routes.py:393
 msgid "Failed to queue OS upgrade command"
 msgstr ""
 
@@ -3571,40 +3569,40 @@ msgstr ""
 msgid "Failed to get update results: %s"
 msgstr ""
 
-#: backend/api/updates/execution_routes.py:58
+#: backend/api/updates/execution_routes.py:51
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr ""
 
-#: backend/api/updates/execution_routes.py:119
+#: backend/api/updates/execution_routes.py:112
 msgid ""
 "This is an image-mode host; update the OS image instead of applying package "
 "updates."
 msgstr ""
 
-#: backend/api/updates/execution_routes.py:135
+#: backend/api/updates/execution_routes.py:128
 msgid "No matching updates found for specified packages"
 msgstr ""
 
-#: backend/api/updates/execution_routes.py:221
+#: backend/api/updates/execution_routes.py:214
 msgid "Update execution started"
 msgstr ""
 
-#: backend/api/updates/execution_routes.py:230
+#: backend/api/updates/execution_routes.py:223
 #, python-format
 msgid "Failed to send command: %s"
 msgstr ""
 
-#: backend/api/updates/execution_routes.py:238
+#: backend/api/updates/execution_routes.py:231
 #, python-format
 msgid "Failed to send update command: %s"
 msgstr ""
 
-#: backend/api/updates/execution_routes.py:251
+#: backend/api/updates/execution_routes.py:244
 #, python-format
 msgid "Failed to execute updates: %s"
 msgstr ""
 
-#: backend/api/updates/execution_routes.py:306
+#: backend/api/updates/execution_routes.py:299
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr ""
@@ -4058,7 +4056,7 @@ msgid ""
 msgstr ""
 
 #: backend/api/config_mgmt_runs.py:367
-#: backend/api/scripts/routes_executions.py:67
+#: backend/api/scripts/routes_executions.py:60
 msgid "Permission denied: RUN_SCRIPT role required"
 msgstr ""
 
@@ -4735,66 +4733,66 @@ msgstr ""
 msgid "shell_type is required for ad-hoc scripts"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:100
+#: backend/api/scripts/routes_executions.py:93
 msgid "Saved script not found"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:105
+#: backend/api/scripts/routes_executions.py:98
 msgid "Script is not active"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:185
+#: backend/api/scripts/routes_executions.py:178
 #, python-brace-format
 msgid "Executed script '{script_name}' on host '{host_fqdn}'"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:207
+#: backend/api/scripts/routes_executions.py:200
 msgid "Failed to queue script execution: {}"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:217
+#: backend/api/scripts/routes_executions.py:210
 msgid "Failed to queue script execution"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:230
+#: backend/api/scripts/routes_executions.py:223
 msgid "Script execution queued for delivery"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:238
+#: backend/api/scripts/routes_executions.py:231
 msgid "Failed to execute script"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:322
+#: backend/api/scripts/routes_executions.py:315
 msgid "Failed to fetch script executions"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:351
-#: backend/api/scripts/routes_executions.py:429
+#: backend/api/scripts/routes_executions.py:336
+#: backend/api/scripts/routes_executions.py:406
 msgid "Permission denied: DELETE_SCRIPT_EXECUTION role required"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:363
-#: backend/api/scripts/routes_executions.py:498
+#: backend/api/scripts/routes_executions.py:348
+#: backend/api/scripts/routes_executions.py:475
 msgid "Script execution not found"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:391
+#: backend/api/scripts/routes_executions.py:376
 msgid "Script execution deleted successfully"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:400
+#: backend/api/scripts/routes_executions.py:385
 msgid "Failed to delete script execution"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:469
+#: backend/api/scripts/routes_executions.py:446
 msgid "Script executions deleted successfully"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:476
+#: backend/api/scripts/routes_executions.py:453
 msgid "Failed to delete script executions"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:533
+#: backend/api/scripts/routes_executions.py:510
 msgid "Failed to fetch script execution"
 msgstr ""
 

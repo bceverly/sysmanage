@@ -4,8 +4,8 @@
 #
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-15 16:53-0400\n"
+"Report-Msgid-Bugs-To:  \n"
+"POT-Creation-Date: 2026-10-16 07:13-0400\n"
 "Language: en\n"
 "Content-Type: text/plain; charset=ASCII\n"
 
@@ -49,27 +49,27 @@ msgstr "Too many failed attempts for this user"
 msgid "Login attempt allowed"
 msgstr "Login attempt allowed"
 
-#: backend/auth/auth_bearer.py:41
+#: backend/auth/auth_bearer.py:49
 msgid "Invalid authentication scheme."
 msgstr "Invalid authentication scheme."
 
-#: backend/auth/auth_bearer.py:44
+#: backend/auth/auth_bearer.py:53
 msgid "Expired token."
 msgstr "Expired token."
 
-#: backend/auth/auth_bearer.py:48
+#: backend/auth/auth_bearer.py:59
 msgid "Invalid authorization code."
 msgstr "Invalid authorization code."
 
-#: backend/auth/auth_bearer.py:101
+#: backend/auth/auth_bearer.py:114
 msgid "Could not validate credentials"
 msgstr "Could not validate credentials"
 
-#: backend/auth/auth_bearer.py:132 backend/api/api_keys.py:106
+#: backend/auth/auth_bearer.py:145 backend/api/api_keys.py:106
 msgid "User not found."
 msgstr "User not found."
 
-#: backend/auth/auth_bearer.py:192 backend/api/auth.py:680
+#: backend/auth/auth_bearer.py:205 backend/api/auth.py:680
 msgid "You do not have access to the selected account."
 msgstr "You do not have access to the selected account."
 
@@ -193,15 +193,15 @@ msgstr "Invalid host ID format"
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
 #: backend/api/updates/report_routes.py:34
-#: backend/api/updates/os_upgrade_routes.py:54
+#: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:269 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:262 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
-#: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:82
+#: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
 #: backend/api/repository_mirroring_setup.py:202
 #: backend/api/repository_mirroring_setup.py:263
-#: backend/api/scripts/routes_executions.py:78
+#: backend/api/scripts/routes_executions.py:71
 #: backend/api/commercial_antivirus_status.py:88 backend/api/machines.py:68
 msgid "Host not found"
 msgstr "Host not found"
@@ -223,12 +223,9 @@ msgstr "Host is not approved"
 #: backend/api/opentelemetry/grafana_connection.py:201
 #: backend/api/cve_refresh_settings.py:66 backend/api/scim.py:218
 #: backend/api/scim.py:228 backend/api/packages_operations.py:68
-#: backend/api/packages_operations.py:247
-#: backend/api/license_management.py:116
-#: backend/api/updates/os_upgrade_routes.py:189
-#: backend/api/updates/execution_routes.py:50
+#: backend/api/packages_operations.py:247 backend/api/license_management.py:116
 #: backend/api/secrets/permissions.py:39 backend/api/error_constants.py:22
-#: backend/api/child_host_utils.py:33
+#: backend/api/child_host_utils.py:33 backend/api/child_host_utils.py:67
 msgid "User not found"
 msgstr "User not found"
 
@@ -655,11 +652,11 @@ msgstr "Failed to queue repository disable: %s"
 
 #: backend/api/reports/endpoints.py:71
 msgid ""
-"Report generation requires a SysManage Professional+ license. Please upgrade"
-" to access this feature."
+"Report generation requires a SysManage Professional+ license. Please upgrade "
+"to access this feature."
 msgstr ""
-"Report generation requires a SysManage Professional+ license. Please upgrade"
-" to access this feature."
+"Report generation requires a SysManage Professional+ license. Please upgrade "
+"to access this feature."
 
 #: backend/api/reports/endpoints.py:152
 msgid "Registered Hosts"
@@ -790,11 +787,11 @@ msgstr "Invalid or expired enrollment token"
 
 #: backend/api/host_registration.py:239
 msgid ""
-"This host already belongs to a tenant. Re-register with its enrollment token"
-" instead of registering server-scoped."
+"This host already belongs to a tenant. Re-register with its enrollment token "
+"instead of registering server-scoped."
 msgstr ""
-"This host already belongs to a tenant. Re-register with its enrollment token"
-" instead of registering server-scoped."
+"This host already belongs to a tenant. Re-register with its enrollment token "
+"instead of registering server-scoped."
 
 #: backend/api/graylog_integration.py:177
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -1142,8 +1139,8 @@ msgstr "Permission denied: EDIT_HOST_HOSTNAME role required"
 #: backend/api/host_hostname.py:75 backend/api/config_mgmt_drift.py:205
 #: backend/api/config_mgmt_remediation.py:435
 #: backend/api/reboot_orchestration.py:119 backend/api/config_mgmt_runs.py:374
-#: backend/api/error_constants.py:43 backend/api/child_host_utils.py:89
-#: backend/api/scripts/routes_executions.py:81
+#: backend/api/error_constants.py:43 backend/api/child_host_utils.py:117
+#: backend/api/scripts/routes_executions.py:74
 msgid "Host is not active"
 msgstr "Host is not active"
 
@@ -1513,12 +1510,12 @@ msgstr ""
 
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
-"Air-gap collection runs require the repository_mirroring_engine module to be"
-" loaded -- the collector reads each target's bundle from a snapshot of its "
+"Air-gap collection runs require the repository_mirroring_engine module to be "
+"loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
-"Air-gap collection runs require the repository_mirroring_engine module to be"
-" loaded -- the collector reads each target's bundle from a snapshot of its "
+"Air-gap collection runs require the repository_mirroring_engine module to be "
+"loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 
 #: backend/api/airgap_collector_runs.py:229
@@ -1600,11 +1597,11 @@ msgstr ""
 
 #: backend/api/airgap_collector_runs.py:668
 msgid ""
-"ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
-" the collection to rebuild."
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
+"the collection to rebuild."
 msgstr ""
-"ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
-" the collection to rebuild."
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
+"the collection to rebuild."
 
 #: backend/api/airgap_collector_runs.py:685
 msgid "ISO file not found."
@@ -1640,11 +1637,11 @@ msgstr "Package profile not found"
 
 #: backend/api/package_compliance.py:73
 msgid ""
-"Package compliance profiles require a SysManage Professional license. Please"
-" upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please "
+"upgrade to access this feature."
 msgstr ""
-"Package compliance profiles require a SysManage Professional license. Please"
-" upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please "
+"upgrade to access this feature."
 
 #: backend/api/package_compliance.py:200
 #, python-format
@@ -1927,11 +1924,11 @@ msgstr "OIDC client secret could not be resolved."
 
 #: backend/api/external_idp.py:577 backend/api/external_idp.py:796
 msgid ""
-"No sysmanage account is linked to this IdP identity. Ask an administrator to"
-" provision your account first."
+"No sysmanage account is linked to this IdP identity. Ask an administrator to "
+"provision your account first."
 msgstr ""
-"No sysmanage account is linked to this IdP identity. Ask an administrator to"
-" provision your account first."
+"No sysmanage account is linked to this IdP identity. Ask an administrator to "
+"provision your account first."
 
 #: backend/api/external_idp.py:582 backend/api/external_idp.py:801
 msgid "Account is inactive."
@@ -2090,8 +2087,8 @@ msgstr ""
 #: backend/api/opentelemetry/eligibility.py:111
 #: backend/api/opentelemetry/grafana_connection.py:88
 #: backend/api/opentelemetry/grafana_connection.py:231
-#: backend/api/packages_operations.py:97
-#: backend/api/packages_operations.py:276 backend/api/error_constants.py:119
+#: backend/api/packages_operations.py:97 backend/api/packages_operations.py:276
+#: backend/api/error_constants.py:119
 msgid "Host not found or not active"
 msgstr "Host not found or not active"
 
@@ -2128,11 +2125,11 @@ msgstr "Grafana URL is not available"
 
 #: backend/api/opentelemetry/deployment.py:152
 msgid ""
-"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
-" on the server."
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
+"on the server."
 msgstr ""
-"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
-" on the server."
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
+"on the server."
 
 #: backend/api/opentelemetry/deployment.py:179
 msgid "OpenTelemetry deployment queued successfully"
@@ -2145,11 +2142,11 @@ msgstr "Failed to deploy OpenTelemetry: %s"
 
 #: backend/api/opentelemetry/deployment.py:264
 msgid ""
-"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
-" the server."
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
+"the server."
 msgstr ""
-"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
-" the server."
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
+"the server."
 
 #: backend/api/opentelemetry/deployment.py:291
 msgid "OpenTelemetry removal queued successfully"
@@ -2262,11 +2259,11 @@ msgstr "Failed to disconnect OpenTelemetry from Grafana: %s"
 
 #: backend/api/content_lifecycle.py:64
 msgid ""
-"Content lifecycle management requires a SysManage Professional+ (Enterprise)"
-" license. Please upgrade to access this feature."
+"Content lifecycle management requires a SysManage Professional+ (Enterprise) "
+"license. Please upgrade to access this feature."
 msgstr ""
-"Content lifecycle management requires a SysManage Professional+ (Enterprise)"
-" license. Please upgrade to access this feature."
+"Content lifecycle management requires a SysManage Professional+ (Enterprise) "
+"license. Please upgrade to access this feature."
 
 #: backend/api/content_lifecycle.py:121
 msgid "Environment name is required"
@@ -2479,8 +2476,7 @@ msgstr "Firewall restart command sent successfully"
 msgid "Firewall deploy command sent successfully"
 msgstr "Firewall deploy command sent successfully"
 
-#: backend/api/default_repositories.py:273
-#: backend/api/antivirus_defaults.py:66
+#: backend/api/default_repositories.py:273 backend/api/antivirus_defaults.py:66
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "OS name is required"
@@ -2603,8 +2599,7 @@ msgstr "Host with token is not registered. Please re-register."
 msgid "Agent authentication failed: invalid host ID"
 msgstr "Agent authentication failed: invalid host ID"
 
-#: backend/api/message_handlers_core.py:98
-#: backend/utils/host_validation.py:104
+#: backend/api/message_handlers_core.py:98 backend/utils/host_validation.py:104
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "Host with ID %s is not registered. Please re-register."
@@ -2653,8 +2648,7 @@ msgid "Target '%(t)s' is not valid for %(f)s"
 msgstr "Target '%(t)s' is not valid for %(f)s"
 
 #: backend/api/logging_settings.py:134
-msgid ""
-"Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
+msgid "Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
 msgstr ""
 "Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
 
@@ -2949,8 +2943,7 @@ msgstr "Permission denied: RESET_USER_PASSWORD role required"
 
 #: backend/api/password_reset.py:447
 msgid "Failed to send password reset email. Please check email configuration."
-msgstr ""
-"Failed to send password reset email. Please check email configuration."
+msgstr "Failed to send password reset email. Please check email configuration."
 
 #: backend/api/password_reset.py:453
 #, python-brace-format
@@ -3196,8 +3189,7 @@ msgstr ""
 "Password salt uses default value but JWT secret has been changed. Run: "
 "{command}"
 
-#: backend/api/ubuntu_pro_settings.py:76
-#: backend/api/ubuntu_pro_settings.py:318
+#: backend/api/ubuntu_pro_settings.py:76 backend/api/ubuntu_pro_settings.py:318
 msgid "Ubuntu Pro key must start with 'C' for contract-based keys"
 msgstr "Ubuntu Pro key must start with 'C' for contract-based keys"
 
@@ -3255,8 +3247,8 @@ msgid "No master key configured. Please configure a master key first."
 msgstr "No master key configured. Please configure a master key first."
 
 #: backend/api/ubuntu_pro_settings.py:381
-#: backend/api/updates/os_upgrade_routes.py:264
-#: backend/api/updates/execution_routes.py:104
+#: backend/api/updates/os_upgrade_routes.py:257
+#: backend/api/updates/execution_routes.py:97
 msgid "Host not found or inactive"
 msgstr "Host not found or inactive"
 
@@ -3307,8 +3299,7 @@ msgstr "Registration absorbed: host was recently deleted"
 
 #: backend/api/host.py:858
 #, python-format
-msgid ""
-"Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
+msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 
@@ -3459,8 +3450,7 @@ msgstr "No packages specified for installation"
 
 #: backend/api/packages_operations.py:179
 #, python-format
-msgid ""
-"Queued installation of %(package_count)d packages on host %(host_fqdn)s"
+msgid "Queued installation of %(package_count)d packages on host %(host_fqdn)s"
 msgstr ""
 "Queued installation of %(package_count)d packages on host %(host_fqdn)s"
 
@@ -3602,11 +3592,11 @@ msgstr "Account is locked due to too many failed login attempts"
 
 #: backend/api/auth.py:391
 msgid ""
-"Multi-factor authentication is required for this account. Please enroll from"
-" your profile page before signing in."
+"Multi-factor authentication is required for this account. Please enroll from "
+"your profile page before signing in."
 msgstr ""
-"Multi-factor authentication is required for this account. Please enroll from"
-" your profile page before signing in."
+"Multi-factor authentication is required for this account. Please enroll from "
+"your profile page before signing in."
 
 #: backend/api/auth.py:480
 msgid "Account locked due to too many failed login attempts"
@@ -3648,16 +3638,16 @@ msgstr "Unsupported image format. Allowed formats: PNG, JPEG, JPG, GIF, WEBP"
 msgid "Invalid image file. Please upload a valid image."
 msgstr "Invalid image file. Please upload a valid image."
 
-#: backend/api/updates/os_upgrade_routes.py:197
+#: backend/api/updates/os_upgrade_routes.py:190
 msgid "Permission denied: APPLY_HOST_OS_UPGRADE role required"
 msgstr "Permission denied: APPLY_HOST_OS_UPGRADE role required"
 
 # OS Version Upgrade related strings
-#: backend/api/updates/os_upgrade_routes.py:214
+#: backend/api/updates/os_upgrade_routes.py:207
 msgid "Invalid package managers for OS upgrades: {}"
 msgstr "Invalid package managers for OS upgrades: {}"
 
-#: backend/api/updates/os_upgrade_routes.py:277
+#: backend/api/updates/os_upgrade_routes.py:270
 msgid ""
 "This is an image-mode host; update the OS image instead of applying package "
 "upgrades."
@@ -3665,22 +3655,21 @@ msgstr ""
 "This is an image-mode host; update the OS image instead of applying package "
 "upgrades."
 
-#: backend/api/updates/os_upgrade_routes.py:291
+#: backend/api/updates/os_upgrade_routes.py:284
 msgid "No OS upgrades available for this host"
 msgstr "No OS upgrades available for this host"
 
-#: backend/api/updates/os_upgrade_routes.py:359
+#: backend/api/updates/os_upgrade_routes.py:352
 #, python-format
-msgid ""
-"Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
+msgid "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
 msgstr ""
 "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
 
-#: backend/api/updates/os_upgrade_routes.py:390
+#: backend/api/updates/os_upgrade_routes.py:383
 msgid "OS upgrade command queued for host"
 msgstr "OS upgrade command queued for host"
 
-#: backend/api/updates/os_upgrade_routes.py:400
+#: backend/api/updates/os_upgrade_routes.py:393
 msgid "Failed to queue OS upgrade command"
 msgstr "Failed to queue OS upgrade command"
 
@@ -3704,11 +3693,11 @@ msgstr "Failed to get updates: %s"
 msgid "Failed to get update results: %s"
 msgstr "Failed to get update results: %s"
 
-#: backend/api/updates/execution_routes.py:58
+#: backend/api/updates/execution_routes.py:51
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 
-#: backend/api/updates/execution_routes.py:119
+#: backend/api/updates/execution_routes.py:112
 msgid ""
 "This is an image-mode host; update the OS image instead of applying package "
 "updates."
@@ -3716,30 +3705,30 @@ msgstr ""
 "This is an image-mode host; update the OS image instead of applying package "
 "updates."
 
-#: backend/api/updates/execution_routes.py:135
+#: backend/api/updates/execution_routes.py:128
 msgid "No matching updates found for specified packages"
 msgstr "No matching updates found for specified packages"
 
-#: backend/api/updates/execution_routes.py:221
+#: backend/api/updates/execution_routes.py:214
 msgid "Update execution started"
 msgstr "Update execution started"
 
-#: backend/api/updates/execution_routes.py:230
+#: backend/api/updates/execution_routes.py:223
 #, python-format
 msgid "Failed to send command: %s"
 msgstr "Failed to send command: %s"
 
-#: backend/api/updates/execution_routes.py:238
+#: backend/api/updates/execution_routes.py:231
 #, python-format
 msgid "Failed to send update command: %s"
 msgstr "Failed to send update command: %s"
 
-#: backend/api/updates/execution_routes.py:251
+#: backend/api/updates/execution_routes.py:244
 #, python-format
 msgid "Failed to execute updates: %s"
 msgstr "Failed to execute updates: %s"
 
-#: backend/api/updates/execution_routes.py:306
+#: backend/api/updates/execution_routes.py:299
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "Failed to get execution log: %s"
@@ -3752,11 +3741,9 @@ msgstr "Unknown kind: %(kind)s (allowed: %(allowed)s)"
 #: backend/api/dynamic_secrets.py:153
 #, python-format
 msgid ""
-"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
-"ttl=%(ttl)ds)"
+"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, ttl=%(ttl)ds)"
 msgstr ""
-"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
-"ttl=%(ttl)ds)"
+"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, ttl=%(ttl)ds)"
 
 #: backend/api/dynamic_secrets.py:186
 #, python-format
@@ -3823,11 +3810,9 @@ msgstr "VMM initialization requested"
 
 #: backend/api/child_host_virtualization_enable.py:306
 msgid ""
-"VMM initialization requested. The agent will enable and start the vmd "
-"daemon."
+"VMM initialization requested. The agent will enable and start the vmd daemon."
 msgstr ""
-"VMM initialization requested. The agent will enable and start the vmd "
-"daemon."
+"VMM initialization requested. The agent will enable and start the vmd daemon."
 
 #: backend/api/child_host_virtualization_enable.py:348
 msgid "Agent must be running with root privileges to initialize KVM"
@@ -3860,11 +3845,11 @@ msgstr "bhyve initialization requested"
 
 #: backend/api/child_host_virtualization_enable.py:433
 msgid ""
-"bhyve initialization requested. The agent will load vmm.ko and configure the"
-" system for bhyve virtual machines."
+"bhyve initialization requested. The agent will load vmm.ko and configure the "
+"system for bhyve virtual machines."
 msgstr ""
-"bhyve initialization requested. The agent will load vmm.ko and configure the"
-" system for bhyve virtual machines."
+"bhyve initialization requested. The agent will load vmm.ko and configure the "
+"system for bhyve virtual machines."
 
 #: backend/api/child_host_virtualization_enable.py:474
 msgid "Agent must be running with root privileges to disable bhyve"
@@ -3892,11 +3877,11 @@ msgstr "KVM modules enable requested"
 
 #: backend/api/child_host_virtualization_enable.py:558
 msgid ""
-"KVM modules enable requested. The agent will load the KVM kernel modules via"
-" modprobe."
+"KVM modules enable requested. The agent will load the KVM kernel modules via "
+"modprobe."
 msgstr ""
-"KVM modules enable requested. The agent will load the KVM kernel modules via"
-" modprobe."
+"KVM modules enable requested. The agent will load the KVM kernel modules via "
+"modprobe."
 
 #: backend/api/child_host_virtualization_enable.py:600
 msgid "Agent must be running with root privileges to disable KVM modules"
@@ -3921,8 +3906,7 @@ msgstr "KVM networking is only supported on Linux hosts"
 
 #: backend/api/child_host_virtualization_enable.py:705
 msgid "Agent must be running with root privileges to configure KVM networking"
-msgstr ""
-"Agent must be running with root privileges to configure KVM networking"
+msgstr "Agent must be running with root privileges to configure KVM networking"
 
 #: backend/api/child_host_virtualization_enable.py:714
 msgid "Bridge interface name is required for bridged networking mode"
@@ -4087,8 +4071,7 @@ msgstr ""
 "upgrade to access this feature."
 
 #: backend/api/reboot_orchestration.py:135
-msgid ""
-"No running child hosts found. Use the standard reboot endpoint instead."
+msgid "No running child hosts found. Use the standard reboot endpoint instead."
 msgstr ""
 "No running child hosts found. Use the standard reboot endpoint instead."
 
@@ -4107,11 +4090,11 @@ msgstr "Upgrade profile not found"
 
 #: backend/api/upgrade_profiles.py:74
 msgid ""
-"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
-" upgrade to access this feature."
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
+"upgrade to access this feature."
 msgstr ""
-"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
-" upgrade to access this feature."
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
+"upgrade to access this feature."
 
 #: backend/api/upgrade_profiles.py:196
 #, python-format
@@ -4234,7 +4217,7 @@ msgstr ""
 "server"
 
 #: backend/api/config_mgmt_runs.py:367
-#: backend/api/scripts/routes_executions.py:67
+#: backend/api/scripts/routes_executions.py:60
 msgid "Permission denied: RUN_SCRIPT role required"
 msgstr "Permission denied: RUN_SCRIPT role required"
 
@@ -4353,11 +4336,9 @@ msgstr "Antivirus deployment initiated for all %d hosts"
 #: backend/api/antivirus_status.py:346
 #, python-format
 msgid ""
-"Antivirus deployment initiated for %(success_count)d of %(total_count)d "
-"hosts"
+"Antivirus deployment initiated for %(success_count)d of %(total_count)d hosts"
 msgstr ""
-"Antivirus deployment initiated for %(success_count)d of %(total_count)d "
-"hosts"
+"Antivirus deployment initiated for %(success_count)d of %(total_count)d hosts"
 
 #: backend/api/antivirus_status.py:352
 msgid "Antivirus deployment failed for all hosts"
@@ -4818,8 +4799,7 @@ msgstr "Content can only be promoted forward along the lifecycle path"
 
 #: backend/api/content_lifecycle_promotion.py:282
 msgid "The source environment has no content for this content view to promote"
-msgstr ""
-"The source environment has no content for this content view to promote"
+msgstr "The source environment has no content for this content view to promote"
 
 #: backend/api/content_lifecycle_promotion.py:325
 msgid "This environment has no previous version to roll back to"
@@ -4879,11 +4859,9 @@ msgstr "Permission denied: ADD_ENABLED_PACKAGE_MANAGER role required"
 #: backend/api/enabled_package_managers.py:307
 #, python-format
 msgid ""
-"Package manager '%(package_manager)s' is already enabled for OS "
-"'%(os_name)s'"
+"Package manager '%(package_manager)s' is already enabled for OS '%(os_name)s'"
 msgstr ""
-"Package manager '%(package_manager)s' is already enabled for OS "
-"'%(os_name)s'"
+"Package manager '%(package_manager)s' is already enabled for OS '%(os_name)s'"
 
 #: backend/api/enabled_package_managers.py:382
 #, python-format
@@ -4933,67 +4911,67 @@ msgstr "Either saved_script_id or script_content must be provided"
 msgid "shell_type is required for ad-hoc scripts"
 msgstr "shell_type is required for ad-hoc scripts"
 
-#: backend/api/scripts/routes_executions.py:100
+#: backend/api/scripts/routes_executions.py:93
 msgid "Saved script not found"
 msgstr "Saved script not found"
 
-#: backend/api/scripts/routes_executions.py:105
+#: backend/api/scripts/routes_executions.py:98
 msgid "Script is not active"
 msgstr "Script is not active"
 
-#: backend/api/scripts/routes_executions.py:185
+#: backend/api/scripts/routes_executions.py:178
 #, python-brace-format
 msgid "Executed script '{script_name}' on host '{host_fqdn}'"
 msgstr "Executed script '{script_name}' on host '{host_fqdn}'"
 
-#: backend/api/scripts/routes_executions.py:207
+#: backend/api/scripts/routes_executions.py:200
 msgid "Failed to queue script execution: {}"
 msgstr "Failed to queue script execution: {}"
 
-#: backend/api/scripts/routes_executions.py:217
+#: backend/api/scripts/routes_executions.py:210
 msgid "Failed to queue script execution"
 msgstr "Failed to queue script execution"
 
-#: backend/api/scripts/routes_executions.py:230
+#: backend/api/scripts/routes_executions.py:223
 msgid "Script execution queued for delivery"
 msgstr "Script execution queued for delivery"
 
-#: backend/api/scripts/routes_executions.py:238
+#: backend/api/scripts/routes_executions.py:231
 msgid "Failed to execute script"
 msgstr "Failed to execute script"
 
 # Tag management messages
-#: backend/api/scripts/routes_executions.py:322
+#: backend/api/scripts/routes_executions.py:315
 msgid "Failed to fetch script executions"
 msgstr "Failed to fetch script executions"
 
-#: backend/api/scripts/routes_executions.py:351
-#: backend/api/scripts/routes_executions.py:429
+#: backend/api/scripts/routes_executions.py:336
+#: backend/api/scripts/routes_executions.py:406
 msgid "Permission denied: DELETE_SCRIPT_EXECUTION role required"
 msgstr "Permission denied: DELETE_SCRIPT_EXECUTION role required"
 
-#: backend/api/scripts/routes_executions.py:363
-#: backend/api/scripts/routes_executions.py:498
+#: backend/api/scripts/routes_executions.py:348
+#: backend/api/scripts/routes_executions.py:475
 msgid "Script execution not found"
 msgstr "Script execution not found"
 
-#: backend/api/scripts/routes_executions.py:391
+#: backend/api/scripts/routes_executions.py:376
 msgid "Script execution deleted successfully"
 msgstr "Script execution deleted successfully"
 
-#: backend/api/scripts/routes_executions.py:400
+#: backend/api/scripts/routes_executions.py:385
 msgid "Failed to delete script execution"
 msgstr "Failed to delete script execution"
 
-#: backend/api/scripts/routes_executions.py:469
+#: backend/api/scripts/routes_executions.py:446
 msgid "Script executions deleted successfully"
 msgstr "Script executions deleted successfully"
 
-#: backend/api/scripts/routes_executions.py:476
+#: backend/api/scripts/routes_executions.py:453
 msgid "Failed to delete script executions"
 msgstr "Failed to delete script executions"
 
-#: backend/api/scripts/routes_executions.py:533
+#: backend/api/scripts/routes_executions.py:510
 msgid "Failed to fetch script execution"
 msgstr "Failed to fetch script execution"
 
@@ -5281,8 +5259,7 @@ msgstr "Cannot acknowledge unknown message: %s"
 
 #: backend/websocket/queue_operations.py:608
 #, python-format
-msgid ""
-"Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
+msgid "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
 msgstr ""
 "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
 
@@ -5800,11 +5777,11 @@ msgstr "macOS vulnerabilities by OS version, from NVD's affected-version data"
 
 #, python-format
 #~ msgid ""
-#~ "Host %s not found on this database; deferring %d queued message(s) for retry"
-#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
+#~ "Host %s not found on this database; deferring %d queued message(s) for "
+#~ "retry (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
-#~ "Host %s not found on this database; deferring %d queued message(s) for retry"
-#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
+#~ "Host %s not found on this database; deferring %d queued message(s) for "
+#~ "retry (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 
 #, python-format
 #~ msgid ""
@@ -5868,7 +5845,8 @@ msgstr "macOS vulnerabilities by OS version, from NVD's affected-version data"
 
 #, python-format
 #~ msgid "Message %s failed (attempt %d/%d), scheduled for retry in %d seconds"
-#~ msgstr "Message %s failed (attempt %d/%d), scheduled for retry in %d seconds"
+#~ msgstr ""
+#~ "Message %s failed (attempt %d/%d), scheduled for retry in %d seconds"
 
 #, python-format
 #~ msgid "Message %s permanently failed after %d attempts: %s"
@@ -6028,11 +6006,11 @@ msgstr "macOS vulnerabilities by OS version, from NVD's affected-version data"
 #~ msgstr "Confirm OS Upgrade"
 
 #~ msgid ""
-#~ "This action will upgrade the operating system and require a system reboot. "
-#~ "Continue?"
+#~ "This action will upgrade the operating system and require a system "
+#~ "reboot. Continue?"
 #~ msgstr ""
-#~ "This action will upgrade the operating system and require a system reboot. "
-#~ "Continue?"
+#~ "This action will upgrade the operating system and require a system "
+#~ "reboot. Continue?"
 
 #~ msgid "OS upgrades are always security updates"
 #~ msgstr "OS upgrades are always security updates"
@@ -6152,11 +6130,11 @@ msgstr "macOS vulnerabilities by OS version, from NVD's affected-version data"
 #~ msgstr "KVM/libvirt initialized successfully"
 
 #~ msgid ""
-#~ "Audit log export requires a SysManage Professional+ license. Please upgrade "
-#~ "to access CSV, JSON, CEF, and LEEF export formats."
+#~ "Audit log export requires a SysManage Professional+ license. Please "
+#~ "upgrade to access CSV, JSON, CEF, and LEEF export formats."
 #~ msgstr ""
-#~ "Audit log export requires a SysManage Professional+ license. Please upgrade "
-#~ "to access CSV, JSON, CEF, and LEEF export formats."
+#~ "Audit log export requires a SysManage Professional+ license. Please "
+#~ "upgrade to access CSV, JSON, CEF, and LEEF export formats."
 
 # Pro+ redirect messages
 #~ msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"
