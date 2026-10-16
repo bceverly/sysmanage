@@ -59,6 +59,27 @@ from backend.persistence.db import Base, get_db
 from backend.persistence.models import *  # Import all models explicitly
 from backend.websocket.connection_manager import ConnectionManager
 
+# A test id is printed whole under ``-v``.  One parametrized with a 1 MB
+# string (tests/services/test_asset_tag_csv.py) stalled every CI backend job
+# at the same spot until its 45-minute timeout (v3.11.0.2, 2026-10-16), and
+# nothing pointed at it.  Refuse such ids at collection instead: give the
+# parametrize ``ids=``.
+MAX_TEST_ID_LENGTH = 500
+
+
+def pytest_collection_modifyitems(config, items):  # pylint: disable=unused-argument
+    """Fail collection on a test id too long for a CI log line."""
+    too_long = [item.nodeid for item in items if len(item.nodeid) > MAX_TEST_ID_LENGTH]
+    if too_long:
+        names = "\n".join(
+            f"  {nodeid[:120]}... ({len(nodeid)} chars)" for nodeid in too_long
+        )
+        raise pytest.UsageError(
+            f"test ids longer than {MAX_TEST_ID_LENGTH} characters (pass ids= to "
+            f"the parametrize):\n{names}"
+        )
+
+
 # Register stub routes for Pro+ modules (no modules loaded in test environment).
 # Done while FlexibleLogger.info is still no-op'd so the "Mounted 10 Pro+ stub
 # route group(s)" line doesn't trail the test summary.

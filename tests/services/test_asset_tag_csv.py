@@ -116,6 +116,10 @@ def test_placeholder_serials_identify_nothing():
 # --- reading ----------------------------------------------------------------
 
 
+# Explicit ids: pytest names a case after its string parameters, so the
+# oversized file made a 1,000,080-character test id.  CI's ``-v`` printed it
+# twice and every backend test job stalled at this spot until its 45-minute
+# timeout (v3.11.0.2, 2026-10-16).
 @pytest.mark.parametrize(
     "text,code",
     [
@@ -124,6 +128,7 @@ def test_placeholder_serials_identify_nothing():
         ("", tc.MISSING_COLUMNS),
         ("a" * (tc.MAX_BYTES + 1), tc.FILE_TOO_LARGE),
     ],
+    ids=["no_identifier_column", "no_tag_column", "empty_file", "too_large"],
 )
 def test_an_unusable_file_is_refused_as_a_whole(text, code):
     with pytest.raises(tc.CsvError) as caught:
