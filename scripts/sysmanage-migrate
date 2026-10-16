@@ -1,0 +1,46 @@
+#!/bin/sh
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+#
+# sysmanage-migrate: apply the database schema (control-plane chains and every
+# tenant database) with the server's OWN virtualenv, as the service user,
+# against /etc/sysmanage.yaml.  Arguments pass through to
+# scripts/sysmanage_migrate.py (--status, --dry-run, ...).
+#
+# Running the script by hand with the system python3 fails with
+# "No module named 'alembic'" -- the packages install alembic into the venv,
+# not the system -- so packages put this command on PATH instead.
+SERVICE_USER="${SYSMANAGE_USER:-sysmanage}"
+for root in "$SYSMANAGE_HOME" /opt/sysmanage /usr/local/lib/sysmanage \
+	/usr/pkg/lib/sysmanage; do
+	[ -n "$root" ] && [ -x "$root/.venv/bin/python" ] && break
+	root=""
+done
+if [ -z "$root" ]; then
+	echo "sysmanage-migrate: no SysManage install with a .venv found" >&2
+	echo "  (set SYSMANAGE_HOME to the install directory)" >&2
+	exit 1
+fi
+if [ -z "$SYSMANAGE_CONFIG" ]; then
+	for config in /etc/sysmanage.yaml /usr/local/etc/sysmanage.yaml \
+		/usr/pkg/etc/sysmanage.yaml; do
+		[ -f "$config" ] && SYSMANAGE_CONFIG="$config" && break
+	done
+fi
+cd "$root" || exit 1
+set -- "$root/.venv/bin/python" "$root/scripts/sysmanage_migrate.py" "$@"
+if [ "$(id -un)" = "$SERVICE_USER" ]; then
+	exec env SYSMANAGE_CONFIG="$SYSMANAGE_CONFIG" "$@"
+fi
+if [ "$(id -u)" -ne 0 ]; then
+	echo "sysmanage-migrate: run as root (sudo sysmanage-migrate) or as $SERVICE_USER" >&2
+	exit 1
+fi
+if command -v runuser >/dev/null 2>&1; then
+	exec runuser -u "$SERVICE_USER" -- env SYSMANAGE_CONFIG="$SYSMANAGE_CONFIG" "$@"
+fi
+if command -v sudo >/dev/null 2>&1; then
+	exec sudo -u "$SERVICE_USER" env SYSMANAGE_CONFIG="$SYSMANAGE_CONFIG" "$@"
+fi
+exec doas -u "$SERVICE_USER" env SYSMANAGE_CONFIG="$SYSMANAGE_CONFIG" "$@"

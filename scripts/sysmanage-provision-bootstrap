@@ -1,0 +1,21 @@
+#!/bin/sh
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+#
+# sysmanage-provision-bootstrap: the one-time multi-tenancy provisioning
+# bootstrap (scripts/provision_bootstrap.py) with the server's own virtualenv.
+# Run as root: it reads the OpenBAO root token from the appliance's init
+# material and applies the Postgres role through the local superuser.
+# Arguments pass through (--bao-token, --pg-host, ... for remote setups).
+for root in "$SYSMANAGE_HOME" /opt/sysmanage /usr/local/lib/sysmanage \
+	/usr/pkg/lib/sysmanage; do
+	[ -n "$root" ] && [ -x "$root/.venv/bin/python" ] && break
+	root=""
+done
+if [ -z "$root" ]; then
+	echo "sysmanage-provision-bootstrap: no SysManage install with a .venv found" >&2
+	echo "  (set SYSMANAGE_HOME to the install directory)" >&2
+	exit 1
+fi
+exec "$root/.venv/bin/python" "$root/scripts/provision_bootstrap.py" "$@"

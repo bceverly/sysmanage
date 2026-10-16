@@ -1182,7 +1182,8 @@
     "title": "Agent Capaciteiten",
     "unavailable": "Niet beschikbaar",
     "unknown": "Deze agent heeft zijn capaciteiten niet gemeld. Oudere agents melden ze niet; de host is hierdoor niet beperkt.",
-    "updated": "Gemeld"
+    "updated": "Gemeld",
+    "reasonMissingNamedTool": "Vereist {{tool}}, dat niet op deze host is geïnstalleerd"
   },
   "hostDefaults": {
     "addNewPackageManager": "Nieuwe Ingeschakelde Pakketbeheerder Toevoegen",
@@ -1797,9 +1798,9 @@
     "actionGroupPower": "Voeding",
     "agentVersion": "Agentversie",
     "allHosts": "Alle",
-    "antivirusDeployAllFailed": "Antivirus installatie mislukt voor alle hosts:\\n\\n{{hosts}}",
+    "antivirusDeployAllFailed": "Antivirus installatie mislukt voor alle hosts:\n\n{{hosts}}",
     "antivirusDeployFailed": "Kan antivirus niet implementeren. Probeer het opnieuw.",
-    "antivirusDeployPartialSuccess": "Antivirus installatie gestart voor {{count}} host(s).\\n\\nMislukte hosts:\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "Antivirus installatie gestart voor {{count}} host(s).\n\nMislukte hosts:\n{{hosts}}",
     "antivirusDeploySuccess": "Antivirus installatie gestart voor {{count}} host(s)",
     "approvalNeeded": "Goedkeuring vereist",
     "approveSelected": "Goedkeuren geselecteerde",

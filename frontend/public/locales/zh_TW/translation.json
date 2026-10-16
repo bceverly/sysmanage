@@ -1182,7 +1182,8 @@
     "title": "代理功能",
     "unavailable": "不可用",
     "unknown": "此代理程式尚未宣佈其功能。舊版代理程式不會報告它們；主機不受限制。",
-    "updated": "已報告"
+    "updated": "已報告",
+    "reasonMissingNamedTool": "需要 {{tool}}，但此主機上未安裝"
   },
   "hostDefaults": {
     "addNewPackageManager": "新增已啟用的套件管理員",
@@ -1797,9 +1798,9 @@
     "actionGroupPower": "電源",
     "agentVersion": "代理版本",
     "allHosts": "全部",
-    "antivirusDeployAllFailed": "所有主機的防病毒部署失敗：\\n\\n{{hosts}}",
+    "antivirusDeployAllFailed": "所有主機的防病毒部署失敗：\n\n{{hosts}}",
     "antivirusDeployFailed": "部署防毒軟體失敗。請重試。",
-    "antivirusDeployPartialSuccess": "啟動 {{count}} 主機的防病毒部署。\\n\\n失敗主機：\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "啟動 {{count}} 主機的防病毒部署。\n\n失敗主機：\n{{hosts}}",
     "antivirusDeploySuccess": "啟動 {{count}} 主機的防病毒部署。",
     "approvalNeeded": "需要核准",
     "approveSelected": "批准選定項",

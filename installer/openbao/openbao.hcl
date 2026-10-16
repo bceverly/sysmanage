@@ -1,3 +1,7 @@
+# Managed by SysManage -- keep this line: the SysManage package installers
+# use it to tell this config from the stock one the openbao package ships, and
+# leave a config that carries it (including your edits) alone on upgrade.
+#
 # SysManage-managed OpenBAO configuration.
 #
 # Single-node local secrets broker for THIS SysManage server.  OpenBAO is

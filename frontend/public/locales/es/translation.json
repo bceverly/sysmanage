@@ -1182,7 +1182,8 @@
     "title": "Habilidades del Agente",
     "unavailable": "No disponible",
     "unknown": "Este agente no ha anunciado sus habilidades. Los agentes antiguos no las reportan; la host no está restringida.",
-    "updated": "Reportado"
+    "updated": "Reportado",
+    "reasonMissingNamedTool": "Requiere {{tool}}, que no está instalado en este host"
   },
   "hostDefaults": {
     "addNewPackageManager": "Agregar Nuevo Gestor de Paquetes Habilitado",
@@ -1797,9 +1798,9 @@
     "actionGroupPower": "Energía",
     "agentVersion": "Versión del Agente",
     "allHosts": "Todos",
-    "antivirusDeployAllFailed": "La implementación del antivirus falló para todos los hosts:\\n\\n{{hosts}}",
+    "antivirusDeployAllFailed": "La implementación del antivirus falló para todos los hosts:\n\n{{hosts}}",
     "antivirusDeployFailed": "Error al implementar antivirus. Por favor, inténtelo de nuevo.",
-    "antivirusDeployPartialSuccess": "Iniciada la implementación del antivirus para {{count}} host(es).\\n\\nHosts fallidos:\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "Iniciada la implementación del antivirus para {{count}} host(es).\n\nHosts fallidos:\n{{hosts}}",
     "antivirusDeploySuccess": "Iniciada la implementación del antivirus para {{count}} host(es)",
     "approvalNeeded": "Aprobación necesaria",
     "approveSelected": "Aprobar Seleccionados",

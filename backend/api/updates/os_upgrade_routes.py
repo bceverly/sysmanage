@@ -14,6 +14,7 @@ from sqlalchemy import and_
 from backend.api.error_constants import error_internal_server
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
+from backend.api.child_host_utils import load_user_on_main
 from backend.persistence import models
 from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
@@ -180,16 +181,8 @@ async def execute_os_upgrades(  # NOSONAR
         # Check if user has permission to apply host OS upgrades
         session_factory = request_sessionmaker()
         with session_factory() as session:
-            user = (
-                session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
-            )
-            if not user:
-                raise HTTPException(status_code=401, detail=_("User not found"))
-
-            if user._role_cache is None:
-                user.load_role_cache(session)
+            # Users are server-global: never look one up on a tenant session.
+            user = load_user_on_main(current_user)
 
             if not user.has_role(SecurityRoles.APPLY_HOST_OS_UPGRADE):
                 raise HTTPException(

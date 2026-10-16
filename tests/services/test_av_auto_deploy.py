@@ -62,6 +62,7 @@ def queued():
 
 
 def _host(db, release="Ubuntu 24.04", platform="Linux", **kw):
+    kw.setdefault("memory_total_mb", 8192)
     host = models.Host(
         id=uuid.uuid4(),
         fqdn=f"h-{uuid.uuid4().hex[:6]}.example",
@@ -313,3 +314,36 @@ def test_a_wave_is_audited_in_one_commit(db):
     ):
         assert av_auto_deploy.reconcile(db)["queued"] == 4
     assert len(commits) == 1
+
+
+def test_clamav_is_not_pushed_to_a_host_too_small_for_it(db, queued):
+    """2026-10-15: auto-deploy put ClamAV on a 2 GB, swapless droplet and the
+    machine stopped answering (load 39, kswapd spinning)."""
+    small = _host(db, memory_total_mb=1962)
+    big = _host(db)
+    summary = av_auto_deploy.reconcile(db)
+    assert [m["host_id"] for m in queued] == [str(big.id)]
+    assert summary["low_memory"] == 1
+    assert summary["low_memory_hosts"] == [small.fqdn]
+    assert db.get(models.AntivirusAutoDeploy, small.id) is None
+
+
+def test_a_host_waits_for_its_memory_report(db, queued):
+    host = _host(db, memory_total_mb=None)
+    assert av_auto_deploy.reconcile(db)["memory_unknown"] == 1
+    assert not queued
+    host.memory_total_mb = 3900  # a "4 GB" machine reports a little less
+    db.commit()
+    av_auto_deploy.reconcile(db)
+    assert [m["host_id"] for m in queued] == [str(host.id)]
+
+
+def test_memory_shortfall_names_the_numbers():
+    host = SimpleNamespace(memory_total_mb=1962)
+    assert "3500" in av_auto_deploy.memory_shortfall(host, "clamav")
+    assert "1962" in av_auto_deploy.memory_shortfall(host, "clamav")
+    assert av_auto_deploy.memory_shortfall(host, "clamwin") is None
+    assert (
+        av_auto_deploy.memory_shortfall(SimpleNamespace(memory_total_mb=None), "clamav")
+        is None
+    )

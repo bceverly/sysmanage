@@ -44,13 +44,22 @@ DEFAULT_ADDR = "http://127.0.0.1:8200"
 DEFAULT_KEYFILE = "/var/lib/openbao/init.json"
 
 
-def _api(addr: str, path: str, method: str = "GET", payload=None, timeout: int = 5):
+def _api(
+    addr: str,
+    path: str,
+    method: str = "GET",
+    payload=None,
+    timeout: int = 5,
+    token: str = None,
+):
     """Call the OpenBAO HTTP API; return (status_code, parsed_json|None)."""
     url = f"{addr.rstrip('/')}{path}"
     data = json.dumps(payload).encode() if payload is not None else None
     req = urllib.request.Request(url, data=data, method=method)
     if data is not None:
         req.add_header("Content-Type", "application/json")
+    if token:
+        req.add_header("X-Vault-Token", token)
     try:
         # URL is the local OpenBAO admin endpoint (loopback); not user input.
         # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
@@ -146,6 +155,41 @@ def _write_app_token(app_token_file: str, owner, token: str) -> None:
     print(f"App OpenBAO token written to {app_token_file} (0640).")
 
 
+def _ensure_kv_mount(addr: str, token: str, mount: str) -> bool:
+    """Enable a kv-v2 secrets engine at ``mount`` unless one is there.
+
+    The app stores secrets under ``<mount>/data/...`` and tenant provisioning
+    writes there too; a fresh non-dev OpenBAO has no ``secret/`` mount, so
+    without this every write fails with "no handler for route".
+    """
+    status, mounts = _api(addr, "/v1/sys/mounts", token=token)
+    if status != 200 or mounts is None:
+        print(f"ERROR: listing secrets engines failed: {status}", file=sys.stderr)
+        return False
+    existing = (mounts.get("data") or mounts).get(f"{mount}/")
+    if existing:
+        version = (existing.get("options") or {}).get("version")
+        if existing.get("type") != "kv" or version != "2":
+            print(
+                f"WARNING: '{mount}/' is mounted as {existing.get('type')} "
+                f"(version {version}), not kv-v2; leaving it alone",
+                file=sys.stderr,
+            )
+        return True
+    status, _ = _api(
+        addr,
+        f"/v1/sys/mounts/{mount}",
+        "POST",
+        {"type": "kv", "options": {"version": "2"}},
+        token=token,
+    )
+    if status not in (200, 204):
+        print(f"ERROR: enabling kv-v2 at '{mount}/' failed: {status}", file=sys.stderr)
+        return False
+    print(f"Enabled kv-v2 secrets engine at '{mount}/'.")
+    return True
+
+
 def _ensure_unsealed(addr: str, keyfile: str) -> int:
     """Initialize (once) + unseal OpenBAO.  Returns 0 on success."""
     status, seal = _api(addr, "/v1/sys/seal-status")
@@ -205,6 +249,11 @@ def main() -> int:
         default=None,
         help="chown the app token file to this user/group (e.g. 'sysmanage').",
     )
+    parser.add_argument(
+        "--kv-mount",
+        default="secret",
+        help="Ensure a kv-v2 secrets engine at this path (vault.mount_path).",
+    )
     args = parser.parse_args()
 
     if not _wait_for_listener(args.addr):
@@ -217,9 +266,14 @@ def main() -> int:
     if rc != 0:
         return rc
 
+    # Best-effort: OpenBAO is unsealed either way, and failing this unit would
+    # hold the server down over a mount the operator can add by hand.
+    token = _root_token(args.keyfile)
+    if token:
+        _ensure_kv_mount(args.addr, token, args.kv_mount)
+
     # Deliver the app token (idempotent) once OpenBAO is unsealed.
     if args.app_token_file:
-        token = _root_token(args.keyfile)
         if token:
             _write_app_token(args.app_token_file, args.app_token_owner, token)
         else:

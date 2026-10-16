@@ -18,6 +18,7 @@ an operator gets.  Two of them matter especially:
   "no upgrades available".
 """
 
+import contextlib
 import uuid
 from datetime import datetime
 from types import SimpleNamespace
@@ -119,8 +120,24 @@ def _user(*roles):
     )
 
 
+@contextlib.contextmanager
 def _bound(session):
-    return patch(f"{MOD}.request_sessionmaker", return_value=session)
+    """Tenant data from ``session``; the USER from the main engine, which the
+    route now reads via ``load_user_on_main`` (users never live in a tenant
+    database) -- emulated here from the same fake rows."""
+
+    def _main_user(userid):
+        user = next(iter(session._by_model.get("User", [])), None)
+        if user is None:
+            raise HTTPException(status_code=401, detail="User not found")
+        if user._role_cache is None:
+            user.load_role_cache(None)
+        return user
+
+    with patch(f"{MOD}.request_sessionmaker", return_value=session), patch(
+        f"{MOD}.load_user_on_main", side_effect=_main_user
+    ):
+        yield
 
 
 class TestGetOsUpgrades:

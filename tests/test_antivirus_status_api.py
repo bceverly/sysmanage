@@ -97,6 +97,7 @@ def _host(**overrides):
         platform="Linux",
         platform_release="Ubuntu 24.04",
         platform_version="24.04",
+        memory_total_mb=8192,
     )
     for key, value in overrides.items():
         setattr(host, key, value)
@@ -232,11 +233,11 @@ class TestGetAntivirusStatus:
 
 
 class TestDeployAntivirus:
-    async def _deploy(self, host_ids, db, user=None, env=None):
+    async def _deploy(self, host_ids, db, user=None, env=None, **request):
         env = env or _Env()
         with env:
             out = await av.deploy_antivirus(
-                av.AntivirusDeployRequest(host_ids=host_ids),
+                av.AntivirusDeployRequest(host_ids=host_ids, **request),
                 db_session=db,
                 current_user=user or _user(SecurityRoles.DEPLOY_ANTIVIRUS),
             )
@@ -257,6 +258,34 @@ class TestDeployAntivirus:
         assert "all 1 hosts" in out.message
         assert env.enqueued[0]["host_id"] == str(HOST_ID)
         assert env.audits[0]["details"] == {"antivirus_package": "clamav"}
+
+    @pytest.mark.asyncio
+    async def test_a_host_too_small_for_clamav_is_refused_with_the_numbers(self):
+        db = _FakeSession(
+            Host=[_host(memory_total_mb=1962)], AntivirusDefault=[_default()]
+        )
+        out, env = await self._deploy([str(HOST_ID)], db)
+        assert out.success_count == 0
+        assert env.enqueued == []
+        reason = out.failed_hosts[0]["reason"]
+        assert "3500" in reason and "1962" in reason
+
+    @pytest.mark.asyncio
+    async def test_the_operator_can_override_the_memory_floor(self):
+        db = _FakeSession(
+            Host=[_host(memory_total_mb=1962)], AntivirusDefault=[_default()]
+        )
+        out, env = await self._deploy([str(HOST_ID)], db, allow_low_memory=True)
+        assert out.success_count == 1
+        assert env.enqueued[0]["host_id"] == str(HOST_ID)
+
+    @pytest.mark.asyncio
+    async def test_a_host_with_unreported_memory_is_not_blocked(self):
+        db = _FakeSession(
+            Host=[_host(memory_total_mb=None)], AntivirusDefault=[_default()]
+        )
+        out, _ = await self._deploy([str(HOST_ID)], db)
+        assert out.success_count == 1
 
     @pytest.mark.asyncio
     async def test_a_malformed_id_is_reported_not_raised(self):

@@ -1182,7 +1182,8 @@
     "title": "قدرات الوكيل",
     "unavailable": "غير متاح",
     "unknown": "لم يتم إعلان الوكيل لقدراته. الوكلاء القديمة لا تبلغ عنها؛ لا يوجد قيود على المضيف.",
-    "updated": "تم الإبلاغ عنه"
+    "updated": "تم الإبلاغ عنه",
+    "reasonMissingNamedTool": "يتطلب {{tool}}، وهو غير مثبت على هذا المضيف"
   },
   "hostDefaults": {
     "addNewPackageManager": "إضافة مدير حزم جديد مُفعّل",
@@ -1797,9 +1798,9 @@
     "actionGroupPower": "الطاقة",
     "agentVersion": "إصدار الوكيل",
     "allHosts": "الكل",
-    "antivirusDeployAllFailed": "فشل نشر برنامج مكافحة الفيروسات على جميع المضيفين:\\n\\n{{hosts}}",
+    "antivirusDeployAllFailed": "فشل نشر برنامج مكافحة الفيروسات على جميع المضيفين:\n\n{{hosts}}",
     "antivirusDeployFailed": "فشل نشر برنامج مكافحة الفيروسات. يرجى المحاولة مرة أخرى.",
-    "antivirusDeployPartialSuccess": "تم بدء نشر برنامج مكافحة الفيروسات لـ {{count}} عُقد(ة/ن).\\n\\nالعُقد التي فشلت:\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "تم بدء نشر برنامج مكافحة الفيروسات لـ {{count}} عُقد(ة/ن).\n\nالعُقد التي فشلت:\n{{hosts}}",
     "antivirusDeploySuccess": "تم بدء نشر برنامج مكافحة الفيروسات لـ {{count}} عُقدة(ات)",
     "approvalNeeded": "يتطلب الموافقة",
     "approveSelected": "وافق على المحدد",

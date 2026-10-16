@@ -56,15 +56,59 @@ class TestIsTelemetryEnabled:
 
     @patch.dict(os.environ, {}, clear=True)
     @patch("backend.telemetry.otel_config.TELEMETRY_AVAILABLE", True)
-    def test_enabled_by_default(self):
-        """Test returns True by default when env not set."""
-        # Clear OTEL_ENABLED from env
-        if "OTEL_ENABLED" in os.environ:
-            del os.environ["OTEL_ENABLED"]
+    def test_off_by_default(self):
+        """Off unless asked for: a fresh install has no collector (2026-10-15)."""
+        from backend.telemetry import otel_config
 
-        from backend.telemetry.otel_config import is_telemetry_enabled
+        with patch.object(otel_config, "_telemetry_config", return_value={}):
+            assert otel_config.is_telemetry_enabled() is False
 
-        assert is_telemetry_enabled() is True
+    @patch.dict(os.environ, {}, clear=True)
+    @patch("backend.telemetry.otel_config.TELEMETRY_AVAILABLE", True)
+    def test_sysmanage_yaml_turns_it_on_and_the_environment_wins(self):
+        from backend.telemetry import otel_config
+
+        with patch.object(
+            otel_config, "_telemetry_config", return_value={"enabled": True}
+        ):
+            assert otel_config.is_telemetry_enabled() is True
+            with patch.dict(os.environ, {"OTEL_ENABLED": "false"}):
+                assert otel_config.is_telemetry_enabled() is False
+
+
+class TestTelemetrySettings:
+    """Where telemetry goes when it is on."""
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_no_assumed_collector_and_loopback_metrics(self):
+        from backend.telemetry import otel_config
+
+        with patch.object(otel_config, "_telemetry_config", return_value={}):
+            assert otel_config.telemetry_settings() == {
+                "otlp_endpoint": None,
+                "prometheus_addr": "127.0.0.1",
+                "prometheus_port": 9090,
+            }
+
+    @patch.dict(
+        os.environ,
+        {"OTEL_EXPORTER_OTLP_ENDPOINT": "http://collector:4317"},
+        clear=True,
+    )
+    def test_yaml_values_and_environment_precedence(self):
+        from backend.telemetry import otel_config
+
+        section = {
+            "otlp_endpoint": "http://yaml:4317",
+            "prometheus_addr": "0.0.0.0",  # nosec B104 - an operator's explicit choice
+            "prometheus_port": 9464,
+        }
+        with patch.object(otel_config, "_telemetry_config", return_value=section):
+            assert otel_config.telemetry_settings() == {
+                "otlp_endpoint": "http://collector:4317",
+                "prometheus_addr": "0.0.0.0",  # nosec B104
+                "prometheus_port": 9464,
+            }
 
     @patch.dict(os.environ, {"OTEL_ENABLED": "true"})
     @patch("backend.telemetry.otel_config.TELEMETRY_AVAILABLE", False)

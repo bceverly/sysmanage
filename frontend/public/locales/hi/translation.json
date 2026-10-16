@@ -1182,7 +1182,8 @@
     "title": "एजेंट कैपABILITY",
     "unavailable": "उपलब्ध नहीं",
     "unknown": "इस एजेंट ने अपनी कैपABILITY को घोषित नहीं किया है। पुराने एजेंट इन्हें रिपोर्ट नहीं करते; मेज़ पर सीमित नहीं है।",
-    "updated": "प्रतिवेदित किया गया है"
+    "updated": "प्रतिवेदित किया गया है",
+    "reasonMissingNamedTool": "{{tool}} आवश्यक है, जो इस होस्ट पर इंस्टॉल नहीं है"
   },
   "hostDefaults": {
     "addNewPackageManager": "नया सक्षम पैकेज मैनेजर जोड़ें",
@@ -1797,9 +1798,9 @@
     "actionGroupPower": "पावर",
     "agentVersion": "एजेंट संस्करण",
     "allHosts": "सभी",
-    "antivirusDeployAllFailed": "ऐन्टीवायरस डिप्लोइमेंट सभी होस्ट्स के लिए विफल हुआ:\\n\\n{{hosts}}",
+    "antivirusDeployAllFailed": "ऐन्टीवायरस डिप्लोइमेंट सभी होस्ट्स के लिए विफल हुआ:\n\n{{hosts}}",
     "antivirusDeployFailed": "एंटीवायरस तैनात करने में विफल। कृपया पुनः प्रयास करें।",
-    "antivirusDeployPartialSuccess": "ऐन्टीवायरस डिप्लोइमेंट सुरक्षा के लिए {{count}} होस्ट(s) पर शुरू की गई।\\n\\nअसफल होस्ट(s):\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "ऐन्टीवायरस डिप्लोइमेंट सुरक्षा के लिए {{count}} होस्ट(s) पर शुरू की गई।\n\nअसफल होस्ट(s):\n{{hosts}}",
     "antivirusDeploySuccess": "एन्टीवायरस डिप्लोइमेंट सुरक्षा के लिए {{count}} होस्ट(स) पर शुरू हो गई",
     "approvalNeeded": "अनुमोदन आवश्यक",
     "approveSelected": "चुने हुए को मंजूरी दें",

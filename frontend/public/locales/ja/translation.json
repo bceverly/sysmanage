@@ -1182,7 +1182,8 @@
     "title": "エージェントの機能",
     "unavailable": "利用できません",
     "unknown": "このエージェントは機能を公開していません。古いエージェントは機能を報告しません; ホストには制限はありません。",
-    "updated": "報告済み"
+    "updated": "報告済み",
+    "reasonMissingNamedTool": "{{tool}} が必要ですが、このホストにはインストールされていません"
   },
   "hostDefaults": {
     "addNewPackageManager": "新しい有効なパッケージマネージャーを追加",
@@ -1797,9 +1798,9 @@
     "actionGroupPower": "電源",
     "agentVersion": "エージェントバージョン",
     "allHosts": "すべて",
-    "antivirusDeployAllFailed": "すべてのホストでアンチウイルス展開に失敗しました:\\n\\n{{hosts}}",
+    "antivirusDeployAllFailed": "すべてのホストでアンチウイルス展開に失敗しました:\n\n{{hosts}}",
     "antivirusDeployFailed": "ウイルス対策のデプロイに失敗しました。再度お試しください。",
-    "antivirusDeployPartialSuccess": "アンチウイルス展開を {{count}} ホストに対して開始しました。\\n\\n失敗したホスト:\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "アンチウイルス展開を {{count}} ホストに対して開始しました。\n\n失敗したホスト:\n{{hosts}}",
     "antivirusDeploySuccess": "アンチウイルス展開を {{count}} ホストに対して開始しました。",
     "approvalNeeded": "承認が必要",
     "approveSelected": "選択されたものを承認する",

@@ -41,14 +41,43 @@ interface HostCapabilitiesCardProps {
     report?: AgentCapabilityReport | null;
     limited?: boolean | null;
     updatedAt?: string | null;
+    // The host's platform ("Linux", "Windows", ...): which tool a group needs
+    // can depend on it (config management is ansible-core, or DSC on Windows).
+    platform?: string | null;
 }
 
-const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, limited, updatedAt }) => {
+/**
+ * The tool a group needs when the agent reports it ``missing_tool``.  The
+ * agent sends only the code; naming the tool here turns "a required tool is
+ * not installed" into something an operator can act on.  Product and package
+ * names, so not translated.  Groups absent here keep the generic message.
+ */
+export const missingToolFor = (group: string, platform?: string | null): string | undefined => {
+    const windows = platform === 'Windows';
+    switch (group) {
+        case 'config_management':
+            return windows ? 'DSC (dsc.exe)' : 'ansible-core';
+        case 'malware':
+            return windows ? 'ClamWin or ClamAV' : 'ClamAV';
+        case 'ubuntu_pro':
+            return 'ubuntu-pro-client';
+        case 'virtualization':
+            return 'libvirt (virsh) or LXD';
+        default:
+            return undefined;
+    }
+};
+
+const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, limited, updatedAt, platform }) => {
     const { t } = useTranslation();
 
     // Reason CODES come from the agent, never prose -- so they can be localized
     // here rather than shipped in whatever language the agent was built with.
-    const reasonText = (code: string): string => {
+    const reasonText = (code: string, group?: string): string => {
+        const tool = code === 'missing_tool' && group ? missingToolFor(group, platform) : undefined;
+        if (tool) {
+            return t('hostCapabilities.reasonMissingNamedTool', 'Requires {{tool}}, which is not installed on this host', { tool });
+        }
         const known: Record<string, string> = {
             no_handler: t('hostCapabilities.reasonNoHandler', 'Not built into this agent'),
             unsupported_os: t('hostCapabilities.reasonUnsupportedOs', 'Not supported on this OS'),
@@ -141,12 +170,12 @@ const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, lim
                         </Typography>
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                             {unavailableKeys.map((group) => (
-                                <Tooltip key={group} title={reasonText(unavailable[group])}>
+                                <Tooltip key={group} title={reasonText(unavailable[group], group)}>
                                     <Chip
                                         size="small"
                                         color="warning"
                                         variant="outlined"
-                                        label={`${group} -- ${reasonText(unavailable[group])}`}
+                                        label={`${group} -- ${reasonText(unavailable[group], group)}`}
                                     />
                                 </Tooltip>
                             ))}

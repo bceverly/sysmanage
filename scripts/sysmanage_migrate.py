@@ -39,6 +39,28 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO_ROOT))
 
 
+def _wrong_interpreter() -> str:
+    """Why this python cannot migrate (alembic missing), or "" if it can.
+
+    The packages install alembic into the server's virtualenv only, so
+    ``sudo python3 scripts/sysmanage_migrate.py`` dies with a bare
+    ModuleNotFoundError; say which interpreter to use instead.
+    """
+    # alembic.config, not alembic: the install root holds the migrations in
+    # alembic/, which a bare python3 imports as a namespace package.
+    try:
+        import alembic.config  # noqa: F401,PLC0415  # pylint: disable=unused-import
+    except ImportError:
+        venv_python = _REPO_ROOT / ".venv" / "bin" / "python"
+        return (
+            f"{sys.executable} has no alembic -- run this with the server's "
+            f"virtualenv instead:\n"
+            f"  sudo sysmanage-migrate   (installed packages)\n"
+            f"  or: sudo -u sysmanage {venv_python} {Path(__file__).resolve()}"
+        )
+    return ""
+
+
 def _chain_config(section: str, script_subdir: str):
     """Build an Alembic Config for a named chain, with absolute paths."""
     from alembic.config import Config  # noqa: PLC0415
@@ -305,6 +327,11 @@ def main(argv=None) -> int:
         help="Run only the per-tenant fan-out; skip the chains.",
     )
     args = parser.parse_args(argv)
+
+    problem = _wrong_interpreter()
+    if problem:
+        print(f"[FAIL] {problem}", file=sys.stderr)
+        return 2
 
     if args.status:
         return show_status()

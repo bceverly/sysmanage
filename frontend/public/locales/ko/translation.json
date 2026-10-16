@@ -1182,7 +1182,8 @@
     "title": "Agent 기능",
     "unavailable": "사용 불가능",
     "unknown": "이 에이전트가 기능을 광고하지 않았습니다. 오래된 에이전트는 이를 보고하지 않으며 호스트에는 제한이 없습니다.",
-    "updated": "보고됨"
+    "updated": "보고됨",
+    "reasonMissingNamedTool": "{{tool}}이(가) 필요하지만 이 호스트에 설치되어 있지 않습니다"
   },
   "hostDefaults": {
     "addNewPackageManager": "새 활성화된 패키지 관리자 추가",
@@ -1797,9 +1798,9 @@
     "actionGroupPower": "전원",
     "agentVersion": "에이전트 버전",
     "allHosts": "전체",
-    "antivirusDeployAllFailed": "모든 호스트에서 백신 배포가 실패했습니다:\\n\\n{{hosts}}",
+    "antivirusDeployAllFailed": "모든 호스트에서 백신 배포가 실패했습니다:\n\n{{hosts}}",
     "antivirusDeployFailed": "바이러스 백신 배포에 실패했습니다. 다시 시도하십시오.",
-    "antivirusDeployPartialSuccess": "{{count}} 대상에 대한 백신 배포가 시작되었습니다.\\n\\n실패한 호스트:\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "{{count}} 대상에 대한 백신 배포가 시작되었습니다.\n\n실패한 호스트:\n{{hosts}}",
     "antivirusDeploySuccess": "{{count}} 대상에 대한 백신 배포가 시작되었습니다.",
     "approvalNeeded": "승인 필요",
     "approveSelected": "선택된 항목 승인",

@@ -1182,7 +1182,8 @@
     "title": "代理功能",
     "unavailable": "不可用",
     "unknown": "此代理尚未声明其功能。旧版代理不会报告这些信息；主机不受限制。",
-    "updated": "已报告"
+    "updated": "已报告",
+    "reasonMissingNamedTool": "需要 {{tool}}，但此主机上未安装"
   },
   "hostDefaults": {
     "addNewPackageManager": "添加新的已启用包管理器",
@@ -1797,9 +1798,9 @@
     "actionGroupPower": "电源",
     "agentVersion": "代理版本",
     "allHosts": "全部",
-    "antivirusDeployAllFailed": "防病毒部署对所有主机失败:\\n\\n{{hosts}}",
+    "antivirusDeployAllFailed": "防病毒部署对所有主机失败:\n\n{{hosts}}",
     "antivirusDeployFailed": "部署防病毒失败，请重试。",
-    "antivirusDeployPartialSuccess": "防病毒部署已启动，涉及 {{count}} 个主机。\\n\\n失败的主机：\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "防病毒部署已启动，涉及 {{count}} 个主机。\n\n失败的主机：\n{{hosts}}",
     "antivirusDeploySuccess": "防病毒部署已启动，涉及{{count}}个主机",
     "approvalNeeded": "需要批准",
     "approveSelected": "批准选中的",

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-14 09:05-0400\n"
+"POT-Creation-Date: 2026-10-15 16:53-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -100,7 +100,7 @@ msgstr ""
 msgid "Asset tag naming scheme changed"
 msgstr ""
 
-#: backend/api/asset_tags.py:204 backend/services/asset_tag_csv.py:362
+#: backend/api/asset_tags.py:204 backend/services/asset_tag_csv.py:368
 #, python-format
 msgid "Asset tag set to %s"
 msgstr ""
@@ -182,7 +182,7 @@ msgstr ""
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:208 backend/api/firewall_roles.py:473
+#: backend/api/antivirus_status.py:212 backend/api/firewall_roles.py:473
 #: backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
@@ -205,7 +205,7 @@ msgstr ""
 #: backend/api/updates/query_routes.py:124
 #: backend/api/updates/execution_routes.py:269 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
-#: backend/api/antivirus_status.py:220 backend/api/child_host_utils.py:82
+#: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:82
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
 #: backend/api/repository_mirroring_setup.py:202
 #: backend/api/repository_mirroring_setup.py:263
@@ -4147,47 +4147,54 @@ msgstr ""
 msgid "Failed to retrieve antivirus status: %s"
 msgstr ""
 
-#: backend/api/antivirus_status.py:162
+#: backend/api/antivirus_status.py:166
 msgid "Permission denied: DEPLOY_ANTIVIRUS role required"
 msgstr ""
 
-#: backend/api/antivirus_status.py:232
+#: backend/api/antivirus_status.py:236
 msgid "Unable to determine host operating system"
 msgstr ""
 
-#: backend/api/antivirus_status.py:246
+#: backend/api/antivirus_status.py:250
 #, python-format
 msgid "No antivirus default configured for OS: %s"
 msgstr ""
 
-#: backend/api/antivirus_status.py:314
+#: backend/api/antivirus_status.py:267
+#, python-format
+msgid ""
+"%(package)s needs at least %(needed)d MB of memory; this host has %(total)d "
+"MB"
+msgstr ""
+
+#: backend/api/antivirus_status.py:343
 #, python-format
 msgid "Antivirus deployment initiated for all %d hosts"
 msgstr ""
 
-#: backend/api/antivirus_status.py:317
+#: backend/api/antivirus_status.py:346
 #, python-format
 msgid ""
 "Antivirus deployment initiated for %(success_count)d of %(total_count)d hosts"
 msgstr ""
 
-#: backend/api/antivirus_status.py:323
+#: backend/api/antivirus_status.py:352
 msgid "Antivirus deployment failed for all hosts"
 msgstr ""
 
-#: backend/api/antivirus_status.py:395
+#: backend/api/antivirus_status.py:424
 msgid "Antivirus enable command sent successfully"
 msgstr ""
 
-#: backend/api/antivirus_status.py:463
+#: backend/api/antivirus_status.py:492
 msgid "Antivirus disable command sent successfully"
 msgstr ""
 
-#: backend/api/antivirus_status.py:541
+#: backend/api/antivirus_status.py:570
 msgid "Antivirus remove command sent successfully"
 msgstr ""
 
-#: backend/api/antivirus_status.py:610
+#: backend/api/antivirus_status.py:639
 #, python-format
 msgid "Failed to retrieve antivirus coverage: %s"
 msgstr ""
@@ -5329,7 +5336,7 @@ msgstr ""
 msgid "That decision cannot be made here: %s"
 msgstr ""
 
-#: backend/services/asset_tag_csv.py:366
+#: backend/services/asset_tag_csv.py:372
 #, python-format
 msgid "Asset tag %s held until the machine reports in"
 msgstr ""

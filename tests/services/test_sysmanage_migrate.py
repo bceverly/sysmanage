@@ -107,3 +107,23 @@ def test_main_status_returns_zero():
     with patch.object(mod, "show_status", return_value=0) as status:
         assert mod.main(["--status"]) == 0
     status.assert_called_once()
+
+
+def test_system_python_without_alembic_is_told_which_command_to_use(
+    monkeypatch, capsys
+):
+    """``sudo python3 scripts/sysmanage_migrate.py`` used to die with a bare
+    ModuleNotFoundError; it now names the venv and the packaged command."""
+    mod = _load()
+    monkeypatch.setitem(__import__("sys").modules, "alembic.config", None)
+    with patch.object(mod, "show_status") as status:
+        assert mod.main(["--status"]) == 2
+    status.assert_not_called()
+    err = capsys.readouterr().err
+    assert "has no alembic" in err
+    assert "sudo sysmanage-migrate" in err
+    assert ".venv/bin/python" in err
+
+
+def test_the_venv_interpreter_passes_the_check():
+    assert _load()._wrong_interpreter() == ""

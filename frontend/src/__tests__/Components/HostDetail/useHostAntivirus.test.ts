@@ -84,6 +84,21 @@ describe("deploy", () => {
     expect(setSnackbarSeverity).toHaveBeenCalledWith("error");
   });
 
+  test("the server's reason reaches the snackbar", async () => {
+    // The locale value is the bare label; a {reason} placeholder in the
+    // default text was silently dropped, hiding e.g. "host too small".
+    post().mockResolvedValue({
+      data: { failed_hosts: [{ reason: "clamav needs at least 3500 MB" }] },
+    });
+    const { result, setSnackbarMessage } = setup();
+    await act(async () => {
+      await result.current.handleDeployAntivirus();
+    });
+    expect(setSnackbarMessage).toHaveBeenCalledWith(
+      expect.stringContaining("clamav needs at least 3500 MB"),
+    );
+  });
+
   test("an empty failed_hosts array is still a success", async () => {
     post().mockResolvedValue({ data: { failed_hosts: [] } });
     const { result, setSnackbarSeverity } = setup();

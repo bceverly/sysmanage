@@ -1182,7 +1182,8 @@
     "title": "Возможности агента",
     "unavailable": "Недоступно",
     "unknown": "Этот агент не сообщил о своих возможностях. Старые агенты их не отчитываются; хост не ограничен.",
-    "updated": "Отчет о состоянии"
+    "updated": "Отчет о состоянии",
+    "reasonMissingNamedTool": "Требуется {{tool}}, который не установлен на этом хосте"
   },
   "hostDefaults": {
     "addNewPackageManager": "Добавить новый включенный менеджер пакетов",
@@ -1797,9 +1798,9 @@
     "actionGroupPower": "Сила",
     "agentVersion": "Версия агента",
     "allHosts": "Все",
-    "antivirusDeployAllFailed": "Не удалось развернуть антивирусное ПО на всех хостах:\\n\\n{{hosts}}",
+    "antivirusDeployAllFailed": "Не удалось развернуть антивирусное ПО на всех хостах:\n\n{{hosts}}",
     "antivirusDeployFailed": "Не удалось развернуть антивирус. Пожалуйста, попробуйте снова.",
-    "antivirusDeployPartialSuccess": "Запущено развертывание антивирусного ПО на {{count}} хосте(ах).\\n\\nНеудачные попытки:\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "Запущено развертывание антивирусного ПО на {{count}} хосте(ах).\n\nНеудачные попытки:\n{{hosts}}",
     "antivirusDeploySuccess": "Запущено развертывание антивирусного ПО на {{count}} хосте(ах)",
     "approvalNeeded": "Требуется одобрение",
     "approveSelected": "Утвердить выбранные",

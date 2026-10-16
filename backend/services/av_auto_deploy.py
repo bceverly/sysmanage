@@ -69,6 +69,15 @@ STATUS_FAILED = "failed"
 STATUS_OPTED_OUT = "opted_out"
 SYSTEM_ACTOR = "system:antivirus-auto-deploy"
 
+# ClamAV's daemon keeps the whole signature database resident (about 1.5 GB
+# in 2026) and, while reloading it, briefly holds two copies.  On a 2 GB
+# host with no swap that took the machine down: the production droplet sat
+# at load 39, kswapd spinning, sshd unable to answer (2026-10-15).  So a
+# package listed here is only deployed to hosts reporting at least this much
+# memory -- 3,500 MB lets a "4 GB" machine (which reports a little less)
+# through.  ClamWin is an on-demand scanner with no resident daemon.
+MIN_MEMORY_MB = {"clamav": 3500}
+
 _queue_ops = QueueOperations()
 
 
@@ -102,6 +111,17 @@ def os_name_for_defaults(host: Any) -> Optional[str]:
         return None
     match = re.match(r"^([A-Za-z]+)", raw)
     return match.group(1) if match else raw
+
+
+def memory_shortfall(host: Any, package: str) -> Optional[str]:
+    """Why ``host`` has too little memory for ``package``, or None if it
+    has enough (or the package has no floor).  Unknown memory is not a
+    shortfall here; callers decide what an unreported size means."""
+    floor = MIN_MEMORY_MB.get(package)
+    total = getattr(host, "memory_total_mb", None)
+    if not floor or total is None or total >= floor:
+        return None
+    return f"{package} needs at least {floor} MB of memory; host reports {total} MB"
 
 
 def queue_deploy(session: Session, host: Any, package: str) -> str:
@@ -317,6 +337,14 @@ def _classify(host, defaults, records, now):
     record = records.get(host.id)
     if record is not None and record.status == STATUS_OPTED_OUT:
         return "opted_out", None
+    if package in MIN_MEMORY_MB:
+        # Wait for the hardware report rather than guess: a fresh host is
+        # due the moment it is approved, before it has said how much RAM
+        # it has.  Re-evaluated every pass, so adding memory clears it.
+        if getattr(host, "memory_total_mb", None) is None:
+            return "memory_unknown", None
+        if memory_shortfall(host, package):
+            return "low_memory", None
     if _due(record, now):
         return "due", package
     if record.status == STATUS_SUCCEEDED:
@@ -339,6 +367,7 @@ def reconcile(session: Session, label: str = "") -> Dict[str, Any]:
     _mark_undelivered(session, records.values(), label)
     summary: Dict[str, Any] = {"hosts": 0, "queued": 0, "defaults": len(defaults)}
     no_default = set()
+    low_memory = []
     pushed = []
     for host in session.query(models.Host).all():
         summary["hosts"] += 1
@@ -347,6 +376,8 @@ def reconcile(session: Session, label: str = "") -> Dict[str, Any]:
             reason = "next_wave"  # still due: a later pass takes it
         if reason == "no_default":
             no_default.add(os_name_for_defaults(host) or "?")
+        if reason == "low_memory":
+            low_memory.append(host.fqdn)
         if reason != "due":
             summary[reason] = summary.get(reason, 0) + 1
             continue
@@ -367,6 +398,8 @@ def reconcile(session: Session, label: str = "") -> Dict[str, Any]:
     summary["queued"] = len(pushed)
     if no_default:
         summary["no_default_for"] = sorted(no_default)
+    if low_memory:
+        summary["low_memory_hosts"] = sorted(low_memory)
     if pushed:
         _audit(pushed)
     _summarize(label, summary)

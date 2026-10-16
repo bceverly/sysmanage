@@ -134,6 +134,11 @@ install -m 644 requirements.txt %{buildroot}/opt/sysmanage/
 install -m 644 requirements-prod.txt %{buildroot}/opt/sysmanage/
 cp -r config %{buildroot}/opt/sysmanage/
 cp -r scripts %{buildroot}/opt/sysmanage/
+# sysmanage-migrate and sysmanage-provision-bootstrap on PATH: they run
+# the scripts with the venv (a bare system python3 has no alembic).
+mkdir -p %{buildroot}/usr/bin
+ln -sf /opt/sysmanage/scripts/sysmanage-migrate %{buildroot}/usr/bin/sysmanage-migrate
+ln -sf /opt/sysmanage/scripts/sysmanage-provision-bootstrap %{buildroot}/usr/bin/sysmanage-provision-bootstrap
 
 # Air-gap bundle dispatcher template -- buildAirGapBundle.sh (in scripts/)
 # resolves this relative to itself (../installer/airgap-bundle/install.sh),
@@ -175,8 +180,12 @@ install -m 644 installer/centos/sysmanage.service %{buildroot}/usr/lib/systemd/s
 
 # Install OpenBAO config + init/unseal one-shot (secrets broker -- central to
 # SysManage; see docs/planning/openbao-deployment-and-airgap.md)
-install -d %{buildroot}/etc/openbao
-install -m 640 installer/openbao/openbao.hcl %{buildroot}/etc/openbao/openbao.hcl
+# The template + install helper live in a root-owned SysManage path; the
+# helper copies the template to /etc/openbao/openbao.hcl (a file of the
+# openbao package) at posttrans time -- never package-owned here.
+install -d %{buildroot}/usr/share/sysmanage/openbao
+install -m 644 installer/openbao/openbao.hcl %{buildroot}/usr/share/sysmanage/openbao/openbao.hcl
+install -m 755 installer/openbao/install-openbao-linux.sh %{buildroot}/usr/share/sysmanage/openbao/install-openbao-linux.sh
 install -m 644 installer/openbao/sysmanage-openbao-init.service %{buildroot}/usr/lib/systemd/system/
 
 # Install nginx configuration
@@ -273,50 +282,6 @@ else
 fi
 # END GENERATED TLS PREFLIGHT
 
-# ---------------------------------------------------------------
-# OpenBAO (secrets broker) -- install + start + initialize/unseal.
-# Native package provides the bao binary, the openbao user, and the
-# stock openbao.service; we drop our config + run an init/unseal one-shot.
-# ---------------------------------------------------------------
-if ! command -v bao >/dev/null 2>&1; then
-    echo "Installing OpenBAO..."
-    BUNDLED_BAO="$(ls /opt/sysmanage/installer/openbao/*.rpm 2>/dev/null | head -n1 || true)"
-    if [ -n "$BUNDLED_BAO" ]; then
-        dnf install -y "$BUNDLED_BAO" >/dev/null 2>&1 || rpm -i "$BUNDLED_BAO" >/dev/null 2>&1 || true
-    elif command -v dnf >/dev/null 2>&1; then
-        cat > /etc/yum.repos.d/openbao.repo <<'EOF'
-[openbao]
-name=OpenBAO
-baseurl=https://pkg.openbao.org/rpm
-enabled=1
-gpgcheck=1
-gpgkey=https://pkg.openbao.org/gpg.key
-EOF
-        dnf install -y openbao >/dev/null 2>&1 || true
-    fi
-    if ! command -v bao >/dev/null 2>&1; then
-        echo "[!] OpenBAO ('bao') could not be installed automatically."
-        echo "    Install it manually (https://openbao.org) or set vault.enabled=false."
-    fi
-fi
-
-if command -v bao >/dev/null 2>&1; then
-    if ! getent passwd openbao >/dev/null; then
-        useradd --system --user-group --home-dir /var/lib/openbao --no-create-home \
-            --shell /sbin/nologin --comment "OpenBAO" openbao >/dev/null 2>&1 || true
-    fi
-    mkdir -p /var/lib/openbao/data /etc/openbao
-    chown -R openbao:openbao /var/lib/openbao
-    chown root:openbao /etc/openbao/openbao.hcl 2>/dev/null || true
-    chmod 640 /etc/openbao/openbao.hcl 2>/dev/null || true
-    systemctl daemon-reload >/dev/null 2>&1 || true
-    systemctl enable openbao.service >/dev/null 2>&1 || true
-    systemctl enable sysmanage-openbao-init.service >/dev/null 2>&1 || true
-    systemctl restart openbao.service >/dev/null 2>&1 || true
-    systemctl start sysmanage-openbao-init.service >/dev/null 2>&1 \
-        || echo "[!] OpenBAO init/unseal did not complete; check 'systemctl status sysmanage-openbao-init'."
-fi
-
 # Enable the service (but don't start it yet - user needs to configure first)
 %systemd_post sysmanage.service
 
@@ -352,8 +317,7 @@ echo ""
 echo "3. Database Initialization"
 echo "   -----------------------"
 echo "   Run database migrations (control-plane chains + every tenant database):"
-echo "     cd /opt/sysmanage"
-echo "     sudo -u sysmanage .venv/bin/python scripts/sysmanage_migrate.py"
+echo "     sudo sysmanage-migrate"
 echo ""
 # BEGIN GENERATED TLS MESSAGE - edit scripts/render_nginx_configs.py
 echo '====================================================================='
@@ -406,6 +370,37 @@ echo ""
 echo "Log files: /var/log/sysmanage/"
 echo ""
 
+%posttrans
+# ---------------------------------------------------------------
+# OpenBAO (secrets broker) -- install + configure + initialize/unseal.
+#
+# Runs in posttrans, not post: on an upgrade from a package version that
+# owned /etc/openbao/openbao.hcl, rpm erases the old version's files AFTER
+# the new post, so only here is the final state of that file known.
+#
+# The shared helper (/usr/share/sysmanage/openbao/install-openbao-linux.sh,
+# also used by the deb) keeps an installed `bao`, else uses a package bundled
+# under /opt/sysmanage/installer/openbao/ (air-gap), else downloads the
+# pinned OpenBAO release .rpm from GitHub and verifies its sha256 against
+# the release's checksums-linux.txt.  rpm holds its database lock until the
+# transaction ends, so the helper stages the verified .rpm now and installs
+# it from a detached job once this transaction is done; it then puts
+# SysManage's config at /etc/openbao/openbao.hcl and starts + unseals
+# OpenBAO.  If no OpenBAO can be had it says so loudly and makes sure the
+# server is not left waiting on a dead local vault -- but never fails this
+# install.
+#
+# /etc/openbao/openbao.hcl is NOT a file of this package any more (the
+# openbao package owns it; shipping it too was a file conflict).  On an
+# upgrade from a version that shipped it as config(noreplace), rpm removes
+# an unedited copy and saves an edited one as openbao.hcl.rpmsave.  The
+# helper restores a SysManage .rpmsave to openbao.hcl (operator edits
+# survive) and otherwise installs the SysManage template.
+# ---------------------------------------------------------------
+if [ -f /usr/share/sysmanage/openbao/install-openbao-linux.sh ]; then
+    /bin/sh /usr/share/sysmanage/openbao/install-openbao-linux.sh --format rpm postinst || true
+fi
+
 %preun
 %systemd_preun sysmanage.service
 
@@ -433,13 +428,15 @@ fi
 %license LICENSE
 %doc README.md
 /opt/sysmanage/
+/usr/bin/sysmanage-migrate
+/usr/bin/sysmanage-provision-bootstrap
 /etc/sysmanage/
 %dir /var/lib/sysmanage
 %dir /var/log/sysmanage
 /usr/lib/systemd/system/sysmanage.service
 /usr/lib/systemd/system/sysmanage-openbao-init.service
-%dir /etc/openbao
-%config(noreplace) /etc/openbao/openbao.hcl
+%dir /usr/share/sysmanage
+/usr/share/sysmanage/openbao/
 %config(noreplace) /etc/nginx/conf.d/sysmanage-nginx.conf
 %doc /usr/share/doc/sysmanage/sbom/
 

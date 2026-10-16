@@ -14,9 +14,10 @@ from typing import List, Optional
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlalchemy import desc
 
-from backend.api.error_constants import AD_HOC_SCRIPT, error_user_not_found
+from backend.api.error_constants import AD_HOC_SCRIPT
 from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
+from backend.api.child_host_utils import load_user_on_main
 from backend.persistence import models
 from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
@@ -50,16 +51,8 @@ async def execute_script(  # NOSONAR
     try:
         with session_factory() as db_session:
             # Check if user has permission to run scripts
-            auth_user = (
-                db_session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
-            )
-            if not auth_user:
-                raise HTTPException(status_code=401, detail=error_user_not_found())
-
-            if auth_user._role_cache is None:
-                auth_user.load_role_cache(db_session)
+            # Users are server-global: never look one up on a tenant session.
+            auth_user = load_user_on_main(current_user)
 
             if not auth_user.has_role(SecurityRoles.RUN_SCRIPT):
                 raise HTTPException(
@@ -333,16 +326,8 @@ async def delete_script_execution(
     try:
         with session_factory() as db_session:
             # Check if user has permission to delete script executions
-            auth_user = (
-                db_session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
-            )
-            if not auth_user:
-                raise HTTPException(status_code=401, detail=error_user_not_found())
-
-            if auth_user._role_cache is None:
-                auth_user.load_role_cache(db_session)
+            # Users are server-global: never look one up on a tenant session.
+            auth_user = load_user_on_main(current_user)
 
             if not auth_user.has_role(SecurityRoles.DELETE_SCRIPT_EXECUTION):
                 raise HTTPException(
@@ -411,16 +396,8 @@ async def delete_script_executions_bulk(
     try:
         with session_factory() as db_session:
             # Check if user has permission to delete script executions
-            auth_user = (
-                db_session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
-            )
-            if not auth_user:
-                raise HTTPException(status_code=401, detail=error_user_not_found())
-
-            if auth_user._role_cache is None:
-                auth_user.load_role_cache(db_session)
+            # Users are server-global: never look one up on a tenant session.
+            auth_user = load_user_on_main(current_user)
 
             if not auth_user.has_role(SecurityRoles.DELETE_SCRIPT_EXECUTION):
                 raise HTTPException(

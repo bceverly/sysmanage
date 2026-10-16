@@ -32,7 +32,7 @@ every OS in our support matrix**, including the BSDs:
 
 | OS | Prebuilt binaries | Native package |
 |---|---|---|
-| Linux | x86_64, arm64, armv6, riscv64, ppc64le, s390x (+ HSM) | **`.deb` + `.rpm`**; official apt repo `pkg.openbao.org/deb` |
+| Linux | x86_64, arm64, armv6, riscv64, ppc64le, s390x (+ HSM) | **`.deb` + `.rpm`**; GitHub release assets + `checksums-linux.txt` (there is NO pkg.openbao.org apt/yum repo; installed by `installer/openbao/install-openbao-linux.sh`) |
 | macOS | x86_64, arm64 | tarball only |
 | FreeBSD | x86_64, armv6, arm64 | `pkg install openbao` |
 | **OpenBSD** | **x86_64, armv6, arm64** | tarball only |

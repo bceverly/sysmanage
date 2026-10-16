@@ -84,6 +84,18 @@ webui:
   host: "localhost"
   port: 3000
 
+# Telemetry (OpenTelemetry) -- OFF unless enabled here or with OTEL_ENABLED=true.
+# When on, traces and metrics go over OTLP to otlp_endpoint (no endpoint = no
+# OTLP export), and Prometheus metrics are served on prometheus_addr:port --
+# loopback by default, so nginx stays the only network listener.  Environment
+# variables (OTEL_ENABLED, OTEL_EXPORTER_OTLP_ENDPOINT, OTEL_PROMETHEUS_ADDR,
+# OTEL_PROMETHEUS_PORT) override these.
+# telemetry:
+#   enabled: true
+#   otlp_endpoint: "http://localhost:4317"
+#   prometheus_addr: "127.0.0.1"
+#   prometheus_port: 9090
+
 logging:
   level: "INFO"   # DEBUG | INFO | WARNING | ERROR | CRITICAL
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

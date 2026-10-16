@@ -1182,7 +1182,8 @@
     "title": "Agent-Funktionalitäten",
     "unavailable": "Nicht verfügbar",
     "unknown": "Dieser Agent hat seine Funktionalitäten nicht gemeldet. Ältere Agenten melden sie nicht; der Host ist nicht eingeschränkt.",
-    "updated": "Gemeldet"
+    "updated": "Gemeldet",
+    "reasonMissingNamedTool": "Erfordert {{tool}}, das auf diesem Host nicht installiert ist"
   },
   "hostDefaults": {
     "addNewPackageManager": "Neuen aktivierten Paketmanager hinzufügen",
@@ -1797,9 +1798,9 @@
     "actionGroupPower": "Energie",
     "agentVersion": "Agent-Version",
     "allHosts": "Alle",
-    "antivirusDeployAllFailed": "Antivirus-Deployment fehlgeschlagen für alle Hosts:\\n\\n{{hosts}}",
+    "antivirusDeployAllFailed": "Antivirus-Deployment fehlgeschlagen für alle Hosts:\n\n{{hosts}}",
     "antivirusDeployFailed": "Fehler beim Bereitstellen von Antivirus. Bitte versuchen Sie es erneut.",
-    "antivirusDeployPartialSuccess": "Antivirus-Deployment wurde gestartet für {{count}} Host(s).\\n\\nFehlgeschlagene Hosts:\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "Antivirus-Deployment wurde gestartet für {{count}} Host(s).\n\nFehlgeschlagene Hosts:\n{{hosts}}",
     "antivirusDeploySuccess": "Antivirus-Deployment wurde gestartet für {{count}} Host(s)",
     "approvalNeeded": "Genehmigung erforderlich",
     "approveSelected": "Genehmigen",

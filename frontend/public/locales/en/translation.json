@@ -1201,7 +1201,8 @@
     "title": "Agent Capabilities",
     "unavailable": "Unavailable",
     "unknown": "This agent has not advertised its capabilities. Older agents do not report them; the host is not restricted.",
-    "updated": "Reported"
+    "updated": "Reported",
+    "reasonMissingNamedTool": "Requires {{tool}}, which is not installed on this host"
   },
   "hostDefaults": {
     "addNewPackageManager": "Add New Enabled Package Manager",
@@ -1816,9 +1817,9 @@
     "actionGroupPower": "Power",
     "agentVersion": "Agent Version",
     "allHosts": "All",
-    "antivirusDeployAllFailed": "Antivirus deployment failed for all hosts:\\n\\n{{hosts}}",
+    "antivirusDeployAllFailed": "Antivirus deployment failed for all hosts:\n\n{{hosts}}",
     "antivirusDeployFailed": "Failed to deploy antivirus. Please try again.",
-    "antivirusDeployPartialSuccess": "Antivirus deployment initiated for {{count}} host(s).\\n\\nFailed hosts:\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "Antivirus deployment initiated for {{count}} host(s).\n\nFailed hosts:\n{{hosts}}",
     "antivirusDeploySuccess": "Antivirus deployment initiated for {{count}} host(s)",
     "approvalNeeded": "Approval Needed",
     "approveSelected": "Approve Selected",

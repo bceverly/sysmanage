@@ -1,0 +1,2 @@
+opt/sysmanage/scripts/sysmanage-migrate usr/bin/sysmanage-migrate
+opt/sysmanage/scripts/sysmanage-provision-bootstrap usr/bin/sysmanage-provision-bootstrap

@@ -4,6 +4,8 @@
 
 """Tests for script execution delete endpoints."""
 
+from backend.auth.auth_bearer import get_current_user
+from backend.main import app
 from backend.persistence import models
 
 
@@ -83,7 +85,14 @@ class TestScriptExecutionDelete:
 
     def test_delete_script_execution_unauthorized(self, client):
         """Test deletion without authentication."""
-        response = client.delete("/api/v1/scripts/executions/test-id")
+        # Other test files leave a get_current_user override on the shared
+        # app; with it, this request is authenticated and reads as a 404.
+        leaked = app.dependency_overrides.pop(get_current_user, None)
+        try:
+            response = client.delete("/api/v1/scripts/executions/test-id")
+        finally:
+            if leaked is not None:
+                app.dependency_overrides[get_current_user] = leaked
 
         # Should return 401 or 403, not 404
         assert response.status_code in [401, 403]

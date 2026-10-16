@@ -23,7 +23,13 @@ process never holds superuser/root:
 
 Idempotent: safe to re-run.  Secrets are never printed.
 
-Example:
+On a packaged single-node server, as root, nothing needs passing: the OpenBAO
+token comes from the appliance's init material and the role is applied through
+the local Postgres superuser (peer auth)::
+
+    sudo sysmanage-provision-bootstrap
+
+Example (remote Postgres, explicit credentials):
     python scripts/provision_bootstrap.py \\
         --bao-addr http://127.0.0.1:8200 --bao-token "$ROOT_TOKEN" \\
         --pg-host localhost --pg-port 5432 \\
@@ -35,6 +41,8 @@ import json
 import os
 import re
 import secrets
+import shutil
+import subprocess  # nosec B404
 import sys
 import tempfile
 import urllib.error
@@ -122,21 +130,20 @@ def _create_pg_provisioner_direct(args, provisioner_password):
         conn.close()
 
 
-def _emit_pg_provisioner_sql(args, provisioner_password):
-    """Write idempotent role-creation SQL to a 0600 file for peer-auth setups.
+def _provisioner_sql(args, provisioner_password):
+    """Idempotent role-creation SQL for the provisioner.
 
-    Returns the file path.  The password is URL-safe (no quotes), so embedding
-    it in a single-quoted SQL literal is safe.  The file is mode 0600 so the
-    generated provisioner password isn't world-readable.
+    The password is URL-safe (no quotes), so embedding it in a single-quoted
+    SQL literal is safe.
     """
     role = args.provisioner_user
-    # Validate the identifier so it can't break out of the SQL -- this file is
+    # Validate the identifier so it can't break out of the SQL -- this is
     # applied by a superuser, so we never want surprises in it.
     if not re.match(r"^[a-z_][a-z0-9_]*$", role):
         raise SystemExit(f"[fail] invalid --provisioner-user identifier: {role!r}")
     # role is identifier-validated above; password is URL-safe (no quotes);
-    # file is 0600 and applied by the operator themselves -- not a runtime query.
-    sql_text = (  # nosec B608
+    # applied by the operator themselves -- not a runtime query.
+    return (  # nosec B608
         "DO $$\nBEGIN\n"
         f"  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{role}') THEN\n"
         f'    ALTER ROLE "{role}" WITH LOGIN CREATEDB CREATEROLE '
@@ -146,11 +153,94 @@ def _emit_pg_provisioner_sql(args, provisioner_password):
         f"PASSWORD '{provisioner_password}';\n"
         "  END IF;\nEND\n$$;\n"
     )
+
+
+def _emit_pg_provisioner_sql(args, provisioner_password):
+    """Write the role SQL to a 0600 file for the operator to apply.
+
+    Returns the file path.  Mode 0600 so the generated provisioner password
+    isn't world-readable.
+    """
+    sql_text = _provisioner_sql(args, provisioner_password)
     fd, path = tempfile.mkstemp(prefix="sysmanage_provisioner_", suffix=".sql")
     with os.fdopen(fd, "w") as handle:
         handle.write(sql_text)
     os.chmod(path, 0o600)
     return path
+
+
+_LOCAL_HOSTS = ("localhost", "127.0.0.1", "::1", "")
+
+
+def _as_superuser_command(args):
+    """argv prefix that runs psql as the local Postgres superuser, or None.
+
+    Only as root, against a Postgres on this machine (peer auth over the
+    local socket), and only when psql and a way to switch user exist.
+    """
+    if not hasattr(os, "geteuid") or os.geteuid() != 0:
+        return None
+    if args.pg_host not in _LOCAL_HOSTS or not shutil.which("psql"):
+        return None
+    for runner in (
+        ["runuser", "-u", args.pg_superuser, "--"],
+        ["sudo", "-u", args.pg_superuser],
+        ["doas", "-u", args.pg_superuser],
+    ):
+        if shutil.which(runner[0]):
+            return runner
+    return None
+
+
+def _apply_pg_provisioner_sql(args, provisioner_password):
+    """Apply the role SQL through psql as the local superuser (peer auth).
+
+    The SQL goes over stdin, so the password never touches the disk.
+    Returns True on success, False when this machine can't do it directly.
+    """
+    runner = _as_superuser_command(args)
+    if runner is None:
+        return False
+    # argv is fixed apart from validated config values; no shell is involved.
+    result = subprocess.run(  # nosec B603
+        runner
+        + ["psql", "-X", "-q", "-v", "ON_ERROR_STOP=1", "-p", str(args.pg_port)]
+        + ["-d", args.pg_db],
+        input=_provisioner_sql(args, provisioner_password),
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=60,
+    )
+    if result.returncode != 0:
+        print(
+            f"[warn] applying the provisioner role via psql failed: "
+            f"{result.stderr.strip()}",
+            file=sys.stderr,
+        )
+        return False
+    print(f"[ok] provisioner role '{args.provisioner_user}' applied via local psql")
+    return True
+
+
+def _bao_token(args):
+    """The OpenBAO admin token: --bao-token, BAO_TOKEN, or the appliance's
+    init material (root-only), in that order."""
+    if args.bao_token:
+        return args.bao_token
+    if os.environ.get("BAO_TOKEN"):
+        return os.environ["BAO_TOKEN"]
+    try:
+        with open(args.bao_init_file, encoding="utf-8") as handle:
+            token = json.load(handle).get("root_token")
+    except (OSError, ValueError):
+        token = None
+    if not token:
+        raise SystemExit(
+            "[fail] no OpenBAO admin token: pass --bao-token, set BAO_TOKEN, "
+            f"or run as root so {args.bao_init_file} can be read"
+        )
+    return token
 
 
 def _store_provisioner_secret(addr, token, vault_mount, args, provisioner_password):
@@ -268,7 +358,16 @@ def _issue_server_token(addr, token):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bao-addr", default="http://127.0.0.1:8200")
-    parser.add_argument("--bao-token", required=True, help="OpenBAO admin/root token")
+    parser.add_argument(
+        "--bao-token",
+        default="",
+        help="OpenBAO admin/root token (default: BAO_TOKEN, then --bao-init-file)",
+    )
+    parser.add_argument(
+        "--bao-init-file",
+        default="/var/lib/openbao/init.json",
+        help="Appliance init material holding the root token (root-only)",
+    )
     parser.add_argument("--vault-mount", default="secret", help="KV v2 mount path")
     parser.add_argument("--db-mount", default="database", help="DB secrets mount path")
     parser.add_argument("--pg-host", default="localhost")
@@ -290,6 +389,7 @@ def main(argv=None):
         "not installed) so the server can stop using a root token.",
     )
     args = parser.parse_args(argv)
+    args.bao_token = _bao_token(args)
 
     provisioner_password = args.provisioner_password or secrets.token_urlsafe(32)
 
@@ -312,7 +412,7 @@ def main(argv=None):
     pending_sql = None
     if args.pg_superuser_password:
         _create_pg_provisioner_direct(args, provisioner_password)
-    else:
+    elif not _apply_pg_provisioner_sql(args, provisioner_password):
         pending_sql = _emit_pg_provisioner_sql(args, provisioner_password)
 
     print("=== bootstrap complete ===")

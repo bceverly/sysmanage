@@ -3032,6 +3032,7 @@ jobs:
           # spec's %install; without them %install dies on the builder.
           mkdir -p /tmp/$TAR_NAME/installer/openbao
           cp $WORKSPACE/installer/openbao/openbao.hcl /tmp/$TAR_NAME/installer/openbao/
+          cp $WORKSPACE/installer/openbao/install-openbao-linux.sh /tmp/$TAR_NAME/installer/openbao/
           cp $WORKSPACE/installer/openbao/sysmanage-openbao-init.service /tmp/$TAR_NAME/installer/openbao/
 
           # sysmanage-canary (Phase 22.9) -- the spec's canary subpackage
@@ -3304,6 +3305,7 @@ jobs:
           # spec's %install; without them %install dies on the COPR builder.
           mkdir -p /tmp/$TAR_NAME/installer/openbao
           cp $WORKSPACE/installer/openbao/openbao.hcl /tmp/$TAR_NAME/installer/openbao/
+          cp $WORKSPACE/installer/openbao/install-openbao-linux.sh /tmp/$TAR_NAME/installer/openbao/
           cp $WORKSPACE/installer/openbao/sysmanage-openbao-init.service /tmp/$TAR_NAME/installer/openbao/
 
           # Copy documentation

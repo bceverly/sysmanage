@@ -1182,7 +1182,8 @@
     "title": "Capacités de l'agent",
     "unavailable": "Indisponible",
     "unknown": "Cet agent n'a pas annoncé ses capacités. Les agents plus anciens ne les signalent pas ; l'hôte n'est pas restreint.",
-    "updated": "Signalée"
+    "updated": "Signalée",
+    "reasonMissingNamedTool": "Nécessite {{tool}}, qui n'est pas installé sur cet hôte"
   },
   "hostDefaults": {
     "addNewPackageManager": "Ajouter un Nouveau Gestionnaire de Paquets Activé",
@@ -1797,9 +1798,9 @@
     "actionGroupPower": "Alimentation",
     "agentVersion": "Version de l'agent",
     "allHosts": "Tous",
-    "antivirusDeployAllFailed": "La distribution antivirus a échouée sur tous les hôtes:\\n\\n{{hosts}}",
+    "antivirusDeployAllFailed": "La distribution antivirus a échouée sur tous les hôtes:\n\n{{hosts}}",
     "antivirusDeployFailed": "Échec du déploiement de l'antivirus. Veuillez réessayer.",
-    "antivirusDeployPartialSuccess": "La distribution antivirus a été initiée pour {{count}} hôte(s).\\n\\nHôtes échoués:\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "La distribution antivirus a été initiée pour {{count}} hôte(s).\n\nHôtes échoués:\n{{hosts}}",
     "antivirusDeploySuccess": "La distribution antivirus a été initiée pour {{count}} hôte(s)",
     "approvalNeeded": "Approbation requise",
     "approveSelected": "Approuver la sélection",

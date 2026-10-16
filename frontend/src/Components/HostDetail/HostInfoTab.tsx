@@ -829,6 +829,7 @@ const HostInfoTab: React.FC<HostInfoTabProps> = ({
           report={host.agent_capabilities}
           limited={host.agent_capabilities_limited}
           updatedAt={host.agent_capabilities_updated_at}
+          platform={host.platform}
         />
       </Grid>
       {/* Clock offset and time service (Phase 23.3) */}

@@ -24,7 +24,7 @@ from backend.startup.lifecycle import lifespan
 from backend.startup.logging_config import configure_logging
 from backend.startup.openapi_config import get_openapi_kwargs
 from backend.startup.route_registration import register_app_routes, register_routes
-from backend.telemetry.otel_config import setup_telemetry
+from backend.telemetry.otel_config import setup_telemetry, telemetry_settings
 from backend.utils.verbosity_logger import get_logger
 
 # Initialize logger for startup debugging
@@ -64,14 +64,11 @@ startup_logger.info(
 # Set up OpenTelemetry instrumentation
 startup_logger.info("=== SETTING UP OPENTELEMETRY ===")
 try:
-    otlp_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317")
-    prometheus_port = int(os.getenv("OTEL_PROMETHEUS_PORT", "9090"))
     setup_telemetry(
         app,
         service_name="sysmanage",
         service_version="1.0.0",
-        otlp_endpoint=otlp_endpoint,
-        prometheus_port=prometheus_port,
+        **telemetry_settings(),
     )
     startup_logger.info("OpenTelemetry setup completed")
 except Exception as e:

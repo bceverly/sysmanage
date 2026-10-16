@@ -136,6 +136,10 @@ class AntivirusDeployRequest(BaseModel):
     """Request model for deploying antivirus to hosts."""
 
     host_ids: List[str]
+    # Deploy even to hosts below the package's memory floor
+    # (av_auto_deploy.MIN_MEMORY_MB) -- e.g. a host with swap the server
+    # cannot see.
+    allow_low_memory: bool = False
 
 
 class AntivirusDeployResponse(BaseModel):
@@ -245,6 +249,31 @@ async def deploy_antivirus(  # NOSONAR
                             "hostname": host.fqdn,
                             "reason": _("No antivirus default configured for OS: %s")
                             % os_name,
+                        }
+                    )
+                    continue
+
+                # A resident scanner on a host too small for it takes the
+                # whole machine down; the operator must ask for it explicitly.
+                shortfall = av_auto_deploy.memory_shortfall(
+                    host, antivirus_default.antivirus_package
+                )
+                if shortfall and not deploy_request.allow_low_memory:
+                    failed_hosts.append(
+                        {
+                            "host_id": host_id_str,
+                            "hostname": host.fqdn,
+                            "reason": _(
+                                "%(package)s needs at least %(needed)d MB of memory; "
+                                "this host has %(total)d MB"
+                            )
+                            % {
+                                "package": antivirus_default.antivirus_package,
+                                "needed": av_auto_deploy.MIN_MEMORY_MB[
+                                    antivirus_default.antivirus_package
+                                ],
+                                "total": host.memory_total_mb,
+                            },
                         }
                     )
                     continue

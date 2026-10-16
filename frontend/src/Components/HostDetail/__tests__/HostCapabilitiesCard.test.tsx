@@ -10,7 +10,8 @@ import HostCapabilitiesCard from '../HostCapabilitiesCard';
 vi.mock('react-i18next', () => ({
     useTranslation: () => ({
         // Return the English fallback so assertions read as the user sees it.
-        t: (_key: string, fallback?: string) => fallback ?? _key,
+        t: (_key: string, fallback?: string, params?: Record<string, string>) =>
+            (fallback ?? _key).replace(/\{\{(\w+)\}\}/g, (_m, name) => params?.[name] ?? ''),
     }),
 }));
 
@@ -48,6 +49,37 @@ describe('HostCapabilitiesCard', () => {
         expect(screen.getByText('Limited')).toBeTruthy();
         expect(screen.getByText(/virtualization/)).toBeTruthy();
         expect(screen.getByText(/Not built into this agent/)).toBeTruthy();
+    });
+
+    it('names the missing tool, per platform', () => {
+        // "A required tool is not installed" left the operator guessing which.
+        const { unmount } = render(
+            <HostCapabilitiesCard
+                report={{ unavailable: { config_management: 'missing_tool' } }}
+                limited={true}
+                platform="Linux"
+            />
+        );
+        expect(screen.getByText(/Requires ansible-core/)).toBeTruthy();
+        unmount();
+        render(
+            <HostCapabilitiesCard
+                report={{ unavailable: { config_management: 'missing_tool' } }}
+                limited={true}
+                platform="Windows"
+            />
+        );
+        expect(screen.getByText(/Requires DSC/)).toBeTruthy();
+    });
+
+    it('keeps the generic text for a group with no known tool', () => {
+        render(
+            <HostCapabilitiesCard
+                report={{ unavailable: { scripts: 'missing_tool' } }}
+                limited={true}
+            />
+        );
+        expect(screen.getByText(/A required tool is not installed/)).toBeTruthy();
     });
 
     it('shows an UNKNOWN reason code rather than swallowing it', () => {

@@ -16,6 +16,13 @@ from backend.auth.auth_handler import decode_jwt
 from backend.config import config
 from backend.i18n import _
 
+# Marks a 403 as "your credentials are unusable -- log in again", as opposed
+# to "you may not do this".  The frontend sends the user to /login ONLY for
+# 403s carrying it: it used to match the (translated) detail text, so every
+# permission denial worded differently -- "Only an administrator can change
+# the threat model" -- logged the user out (production, 2026-10-16).
+AUTH_FAILURE_HEADERS = {"WWW-Authenticate": "Bearer"}
+
 
 class JWTBearer(HTTPBearer):
     """
@@ -38,14 +45,20 @@ class JWTBearer(HTTPBearer):
         if credentials:
             if credentials.scheme != "Bearer":
                 raise HTTPException(
-                    status_code=403, detail=_("Invalid authentication scheme.")
+                    status_code=403,
+                    detail=_("Invalid authentication scheme."),
+                    headers=AUTH_FAILURE_HEADERS,
                 )
             if not self.verify_jwt(credentials.credentials):
                 raise HTTPException(status_code=401, detail=_("Expired token."))
 
             return credentials.credentials
 
-        raise HTTPException(status_code=403, detail=_("Invalid authorization code."))
+        raise HTTPException(
+            status_code=403,
+            detail=_("Invalid authorization code."),
+            headers=AUTH_FAILURE_HEADERS,
+        )
 
     def verify_jwt(self, jwtoken: str) -> bool:
         """

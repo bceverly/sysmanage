@@ -2443,7 +2443,9 @@ endif
 	@echo "  - Prometheus: http://localhost:9091"
 	@echo "  - Prometheus metrics scraper: http://localhost:9090 (from SysManage backend)"
 	@echo ""
-	@echo "Note: OpenTelemetry is enabled by default. To disable, set OTEL_ENABLED=false"
+	@echo "Note: the server's OpenTelemetry export is OFF by default. To send it to this"
+	@echo "      collector, start the server with OTEL_ENABLED=true and"
+	@echo "      OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 (or set telemetry: in sysmanage.yaml)."
 
 stop-telemetry:
 	@echo "Stopping telemetry services..."
@@ -2649,6 +2651,7 @@ installer-deb:
 		cp installer/airgap-bundle/install.sh "$$BUILD_DIR/installer/airgap-bundle/"; \
 		mkdir -p "$$BUILD_DIR/installer/openbao"; \
 		cp installer/openbao/openbao.hcl "$$BUILD_DIR/installer/openbao/"; \
+		cp installer/openbao/install-openbao-linux.sh "$$BUILD_DIR/installer/openbao/"; \
 		cp installer/openbao/sysmanage-openbao-init.service "$$BUILD_DIR/installer/openbao/"; \
 	echo "✓ Packaging files copied"; \
 	echo ""; \
@@ -2813,6 +2816,7 @@ installer-rpm-centos:
 		cp installer/airgap-bundle/install.sh "$$TAR_DIR/installer/airgap-bundle/"; \
 	mkdir -p "$$TAR_DIR/installer/openbao"; \
 	cp installer/openbao/openbao.hcl "$$TAR_DIR/installer/openbao/"; \
+	cp installer/openbao/install-openbao-linux.sh "$$TAR_DIR/installer/openbao/"; \
 	cp installer/openbao/sysmanage-openbao-init.service "$$TAR_DIR/installer/openbao/"; \
 	cd "$$BUILD_TEMP/SOURCES" && tar czf "sysmanage-$$VERSION.tar.gz" "$$TAR_NAME/"; \
 	rm -rf "$$TAR_DIR"; \
@@ -2969,6 +2973,7 @@ installer-rpm-opensuse:
 		cp installer/airgap-bundle/install.sh "$$TAR_DIR/installer/airgap-bundle/"; \
 	mkdir -p "$$TAR_DIR/installer/openbao"; \
 	cp installer/openbao/openbao.hcl "$$TAR_DIR/installer/openbao/"; \
+	cp installer/openbao/install-openbao-linux.sh "$$TAR_DIR/installer/openbao/"; \
 	cp installer/openbao/sysmanage-openbao-init.service "$$TAR_DIR/installer/openbao/"; \
 	cd "$$BUILD_TEMP/SOURCES" && tar czf "sysmanage-$$VERSION.tar.gz" "$$TAR_NAME/"; \
 	rm -rf "$$TAR_DIR"; \
@@ -4375,6 +4380,8 @@ deploy-obs:
 	cp "$$WORKSPACE/installer/opensuse/sysmanage-nginx.conf" "/tmp/$$TAR_NAME/installer/opensuse/" || true; \
 		mkdir -p "/tmp/$$TAR_NAME/installer/airgap-bundle"; \
 		cp "$$WORKSPACE/installer/airgap-bundle/install.sh" "/tmp/$$TAR_NAME/installer/airgap-bundle/" || true; \
+	mkdir -p "/tmp/$$TAR_NAME/installer/openbao"; \
+	cp "$$WORKSPACE/installer/openbao/openbao.hcl" "$$WORKSPACE/installer/openbao/install-openbao-linux.sh" "$$WORKSPACE/installer/openbao/sysmanage-openbao-init.service" "/tmp/$$TAR_NAME/installer/openbao/"; \
 	cd /tmp; \
 	tar czf "sysmanage-$$VERSION.tar.gz" "$$TAR_NAME/"; \
 	echo "Created source tarball: sysmanage-$$VERSION.tar.gz"; \
@@ -4508,6 +4515,8 @@ deploy-copr:
 	cp "$$WORKSPACE/installer/centos/"*.example "/tmp/$$TAR_NAME/installer/centos/" 2>/dev/null || true; \
 		mkdir -p "/tmp/$$TAR_NAME/installer/airgap-bundle"; \
 		cp "$$WORKSPACE/installer/airgap-bundle/install.sh" "/tmp/$$TAR_NAME/installer/airgap-bundle/" 2>/dev/null || true; \
+	mkdir -p "/tmp/$$TAR_NAME/installer/openbao"; \
+	cp "$$WORKSPACE/installer/openbao/openbao.hcl" "$$WORKSPACE/installer/openbao/install-openbao-linux.sh" "$$WORKSPACE/installer/openbao/sysmanage-openbao-init.service" "/tmp/$$TAR_NAME/installer/openbao/"; \
 	cp "$$WORKSPACE/README.md" "/tmp/$$TAR_NAME/" || touch "/tmp/$$TAR_NAME/README.md"; \
 	cp "$$WORKSPACE/LICENSE" "/tmp/$$TAR_NAME/" || touch "/tmp/$$TAR_NAME/LICENSE"; \
 	if [ -d "$$WORKSPACE/sbom" ]; then \

@@ -38,7 +38,9 @@ export const useHostAntivirus = ({
 
             if (response.data.failed_hosts?.length > 0) {
                 const failedHost = response.data.failed_hosts[0];
-                setSnackbarMessage(t('hostDetail.antivirusDeployFailed', 'Failed to deploy antivirus: {reason}', { reason: failedHost.reason }));
+                // The locale value is the bare label (no placeholder), so the server's
+                // reason -- e.g. the host is too small for ClamAV -- is appended here.
+                setSnackbarMessage(`${t('hostDetail.antivirusDeployFailed', 'Failed to deploy antivirus')}: ${failedHost.reason}`);
                 setSnackbarSeverity('error');
             } else {
                 setSnackbarMessage(t('hostDetail.antivirusDeploySuccess', 'Antivirus deployment initiated successfully'));

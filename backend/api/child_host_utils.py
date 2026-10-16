@@ -44,6 +44,34 @@ def get_user_with_role_check(session, current_user: str, required_role: Security
     return user
 
 
+def load_user_on_main(current_user: str):
+    """The ``User`` for ``current_user``, read from the server-global
+    (bootstrap) engine with its role cache loaded; 401 if there is none.
+
+    For handlers that check a role with their own message: users never live
+    in a tenant database, so looking one up on a ``request_sessionmaker()``
+    session answers "User not found" for EVERY user once multi-tenancy is on
+    (applying updates failed that way on the production server, 2026-10-16).
+    """
+    # Imported here to avoid a module-level import cycle (db imports models).
+    from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
+
+    auth_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
+    with auth_local() as auth_session:
+        user = (
+            auth_session.query(models.User)
+            .filter(models.User.userid == current_user)
+            .first()
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail=_("User not found"))
+        if user._role_cache is None:
+            user.load_role_cache(auth_session)
+        # Loaded while the session is open; the detached object is used after.
+        _loaded = (user.id, user.userid)
+        return user
+
+
 def authorize_on_main(current_user: str, required_role: SecurityRoles):
     """Authn/authz against the server-global (bootstrap) engine.
 

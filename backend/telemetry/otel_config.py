@@ -73,16 +73,55 @@ _telemetry_enabled = False
 _prometheus_server_started = False
 
 
+_TRUE = ("true", "1", "yes", "on")
+
+
+def _telemetry_config() -> dict:
+    """The ``telemetry:`` section of sysmanage.yaml ({} when absent or unreadable)."""
+    try:
+        from backend.config import config  # pylint: disable=import-outside-toplevel
+
+        section = config.get_config().get("telemetry") or {}
+        return section if isinstance(section, dict) else {}
+    except Exception:  # pylint: disable=broad-except
+        return {}
+
+
 def is_telemetry_enabled() -> bool:
+    """Telemetry is OFF unless asked for (2026-10-15).
+
+    It used to default ON: a fresh install then exported every few seconds to
+    a collector at localhost:4317 that nobody had installed (an ERROR line each
+    time) and opened a Prometheus endpoint on 0.0.0.0:9090 -- a second network
+    listener beside nginx.  Now: ``OTEL_ENABLED`` (environment, wins when set)
+    or ``telemetry.enabled`` in sysmanage.yaml.
     """
-    Check if telemetry is enabled based on environment variable and platform compatibility.
-    Default is True (enabled) unless explicitly disabled or on incompatible platforms.
-    """
-    # Disable telemetry if OpenTelemetry packages are not available
     if not TELEMETRY_AVAILABLE:
         return False
+    override = os.getenv("OTEL_ENABLED")
+    if override is not None:
+        return override.strip().lower() in _TRUE
+    return bool(_telemetry_config().get("enabled", False))
 
-    return os.getenv("OTEL_ENABLED", "true").lower() in ("true", "1", "yes")
+
+def telemetry_settings() -> dict:
+    """Where telemetry goes when it is on: the OTLP endpoint (None = no OTLP
+    export -- never an assumed localhost collector) and the Prometheus
+    endpoint's address and port (loopback by default; scrape it through
+    nginx or a local agent, or set ``prometheus_addr`` to expose it).
+    Environment variables win over sysmanage.yaml."""
+    section = _telemetry_config()
+    return {
+        "otlp_endpoint": os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+        or section.get("otlp_endpoint")
+        or None,
+        "prometheus_addr": os.getenv("OTEL_PROMETHEUS_ADDR")
+        or section.get("prometheus_addr")
+        or "127.0.0.1",
+        "prometheus_port": int(
+            os.getenv("OTEL_PROMETHEUS_PORT") or section.get("prometheus_port") or 9090
+        ),
+    }
 
 
 def setup_telemetry(
@@ -91,6 +130,7 @@ def setup_telemetry(
     service_version: str = "1.0.0",
     otlp_endpoint: Optional[str] = None,
     prometheus_port: int = 9090,
+    prometheus_addr: str = "127.0.0.1",
 ) -> None:
     """
     Set up OpenTelemetry instrumentation for the application.
@@ -106,7 +146,10 @@ def setup_telemetry(
 
     # Check if telemetry should be enabled
     if not is_telemetry_enabled():
-        logger.info("OpenTelemetry is disabled. Remove OTEL_ENABLED=false to enable.")
+        logger.info(
+            "OpenTelemetry is off (the default). Set OTEL_ENABLED=true or "
+            "telemetry.enabled: true in sysmanage.yaml to turn it on."
+        )
         return
 
     try:
@@ -124,7 +167,7 @@ def setup_telemetry(
         setup_tracing(resource, otlp_endpoint)
 
         # Set up metrics
-        setup_metrics(resource, otlp_endpoint, prometheus_port)
+        setup_metrics(resource, otlp_endpoint, prometheus_port, prometheus_addr)
 
         # Instrument FastAPI
         FastAPIInstrumentor.instrument_app(app)
@@ -184,7 +227,10 @@ def setup_tracing(resource: Resource, otlp_endpoint: Optional[str] = None) -> No
 
 
 def setup_metrics(
-    resource: Resource, otlp_endpoint: Optional[str] = None, prometheus_port: int = 9090
+    resource: Resource,
+    otlp_endpoint: Optional[str] = None,
+    prometheus_port: int = 9090,
+    prometheus_addr: str = "127.0.0.1",
 ) -> None:
     """
     Set up OpenTelemetry metrics with both OTLP and Prometheus exporters.
@@ -205,10 +251,14 @@ def setup_metrics(
 
         # Start Prometheus HTTP server if not already started
         if not _prometheus_server_started:
-            # Bind to 0.0.0.0 to allow external monitoring - intentional for metrics
-            start_http_server(port=prometheus_port, addr="0.0.0.0")  # nosec B104
+            # Loopback by default: nginx is the only network listener.
+            start_http_server(port=prometheus_port, addr=prometheus_addr)
             _prometheus_server_started = True
-            logger.info("Prometheus metrics server started on port %s", prometheus_port)
+            logger.info(
+                "Prometheus metrics server started on %s:%s",
+                prometheus_addr,
+                prometheus_port,
+            )
     except Exception as e:  # pylint: disable=broad-except
         logger.warning("Failed to set up Prometheus exporter: %s", e)
 

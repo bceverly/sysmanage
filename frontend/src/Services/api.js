@@ -69,17 +69,19 @@ function redirectToLogin() {
   }
 }
 
-// Pro+ license checks and role-based permission denials must not
-// redirect -- let the calling code show an error toast.  Only redirect
-// to login for auth-related 403s (expired refresh token).
+// Only a 403 that says "these credentials are unusable" sends the user to
+// /login: the backend marks those with WWW-Authenticate (backend/auth/
+// auth_bearer.py AUTH_FAILURE_HEADERS), and FastAPI's own missing-header 403
+// says "Not authenticated" (never translated).  Every other 403 -- a role or
+// administrator check, a Pro+ license gate -- is the calling code's error to
+// show.  This used to redirect unless the detail contained the English words
+// "Permission denied", so "Only an administrator can change the threat model"
+// (and any denial in another language) logged the user out mid-task.
 function handle403(response) {
-  const errorData = response.data;
-  const detail = errorData?.detail || '';
-  const isProPlusError = errorData?.error === 'pro_plus_required' ||
-                         errorData?.detail?.error === 'pro_plus_required';
-  const isPermissionDenied = typeof detail === 'string' &&
-                             detail.includes('Permission denied');
-  if (!isProPlusError && !isPermissionDenied) {
+  const headers = response.headers || {};
+  const challenged = Boolean(headers['www-authenticate'] || headers['WWW-Authenticate']);
+  const notAuthenticated = response.data?.detail === 'Not authenticated';
+  if (challenged || notAuthenticated) {
     redirectToLogin();
   }
 }
@@ -127,5 +129,8 @@ async function handleResponseError(err) {
   }
   throw err;
 }
+
+// Exported for its tests.
+export { handle403 };
 
 export default axiosInstance;
