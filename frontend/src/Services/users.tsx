@@ -21,6 +21,9 @@ type SysManageUser = {
     is_locked: boolean;
     failed_login_attempts: number;
     locked_at: string | null;
+    // Administrator rights (pages no security role covers).  Absent on
+    // servers older than this field.
+    is_admin?: boolean;
 }
 
 function processError(error: AxiosError) {
@@ -244,5 +247,15 @@ const doDeleteUserImage = async (userId: string) => {
     }
 };
 
+// Grant or remove administrator rights.  Only an administrator may call it,
+// and the server refuses (409) to demote the last active administrator.
+const doSetUserAdmin = async (id: string, isAdmin: boolean): Promise<{ id: string; is_admin: boolean }> => {
+    const response = await api.put<{ id: string; is_admin: boolean }>(
+        "/api/v1/user/" + id + "/admin",
+        { is_admin: isAdmin },
+    );
+    return response.data;
+};
+
 export type { SuccessResponse, SysManageUser };
-export { doAddUser, doDeleteUser, doGetMe, doGetUserByID, doGetUserByUserid, doGetUsers, doUpdateUser, doUnlockUser, doLockUser, doUploadUserImage, doGetUserImage, doDeleteUserImage };
+export { doAddUser, doDeleteUser, doGetMe, doGetUserByID, doGetUserByUserid, doGetUsers, doUpdateUser, doUnlockUser, doLockUser, doUploadUserImage, doGetUserImage, doDeleteUserImage, doSetUserAdmin };

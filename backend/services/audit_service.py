@@ -7,6 +7,29 @@ Audit logging service for SysManage.
 
 This service provides functionality to log all user actions and system changes
 for compliance, security, and troubleshooting purposes.
+
+WHERE AN ENTRY IS WRITTEN (multi-tenancy, 2026-10-16)
+-----------------------------------------------------
+Audit rows are PER TENANT.  An event about a tenant's hosts, packages,
+scripts, secrets, firewalls, antivirus, maintenance windows ... belongs in
+that tenant's database, so the tenant's own audit view shows it and no other
+tenant's does.  Events about server-global state -- logins and password
+resets, users, security roles, tenants themselves, server settings -- belong
+in the bootstrap database, where that state lives (``SERVER_SCOPED_*``).
+
+Callers used to pick the session themselves and many picked the main engine,
+so a tenant's actions were split across two databases (production: 24 rows in
+each).  ``log`` now routes:
+
+* a server-scoped event goes to the bootstrap database;
+* a tenant-scoped event handed a BOOTSTRAP session while a tenant is active
+  goes to that tenant's database;
+* a session already bound to a tenant database is never moved -- background
+  ticks iterate tenant databases without binding the active tenant, and the
+  session they pass is the right answer.
+
+Single-tenant / collapsed deployments are untouched: every engine is the
+bootstrap engine there.
 """
 
 import hashlib
@@ -15,7 +38,8 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, Optional
 
-from sqlalchemy.orm import Session
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import Session, sessionmaker
 
 from backend.i18n import _
 from backend.persistence.models import AuditLog
@@ -73,6 +97,60 @@ class Result(str, Enum):
     SUCCESS = "SUCCESS"
     FAILURE = "FAILURE"
     PENDING = "PENDING"
+
+
+# Server-global state: always audited in the bootstrap database (see above).
+SERVER_SCOPED_ACTIONS = frozenset(
+    {
+        "LOGIN",
+        "LOGOUT",
+        "LOGIN_FAILED",
+        "PASSWORD_RESET",
+    }
+)
+SERVER_SCOPED_ENTITIES = frozenset(
+    {
+        "user",
+        "security_role",
+        "authentication",
+        "tenant",
+        "setting",
+    }
+)
+
+
+def _bind_of(db) -> Optional[Engine]:
+    """The engine ``db`` is bound to, or None for anything else (test doubles)."""
+    try:
+        bind = db.get_bind()
+    except Exception:  # pylint: disable=broad-except
+        return None
+    return bind if isinstance(bind, Engine) else None
+
+
+def _target_engine(db, action_type: str, entity_type: str) -> Optional[Engine]:
+    """The engine this entry must be written to when it is NOT ``db``'s own,
+    else None (write to ``db``).  The rule is in the module docstring."""
+    # Imported here: config and partitions import the models this module does.
+    from backend.config import config  # noqa: PLC0415
+    from backend.persistence import db as db_module  # noqa: PLC0415
+
+    if not config.is_multitenancy_enabled():
+        return None
+    bind = _bind_of(db)
+    if bind is None:
+        return None
+    bootstrap = db_module.get_engine()
+    if action_type in SERVER_SCOPED_ACTIONS or entity_type in SERVER_SCOPED_ENTITIES:
+        return None if bind is bootstrap else bootstrap
+    if bind is not bootstrap:
+        return None  # already a tenant database: never second-guessed
+    from backend.persistence.partitions import (  # noqa: PLC0415
+        get_request_engine,
+    )
+
+    target = get_request_engine()
+    return None if target is bootstrap else target
 
 
 class AuditService:
@@ -158,6 +236,17 @@ class AuditService:
             entry_type=kwargs.get("entry_type"),
             integrity_hash=integrity_hash,
         )
+
+        target = _target_engine(db, action_type.value, entity_type.value)
+        if target is not None:
+            # Written on its own session and committed now: it belongs to a
+            # different database than the caller's transaction.
+            with sessionmaker(autocommit=False, autoflush=False, bind=target)() as own:
+                own.add(audit_entry)
+                own.commit()
+                own.refresh(audit_entry)
+                own.expunge(audit_entry)
+            return audit_entry
 
         db.add(audit_entry)
         if commit:

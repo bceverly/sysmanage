@@ -95,6 +95,33 @@ def command_type_from_queue(db, message_data: dict) -> Optional[str]:
         return None
 
 
+def _close_out_command(db, connection, command_id) -> None:
+    """A result proves the agent received its command: close the queue row.
+
+    Without this, a command whose acknowledgment arrived after the queue ran
+    out of retries stayed FAILED even when the agent reported success
+    (production, 2026-10-16: 11 of 11 updates installed, row "failed").
+    Never fails the result handling it rides on.
+    """
+    if not command_id:
+        return
+    from backend.websocket.queue_manager import (  # noqa: PLC0415
+        server_queue_manager,
+    )
+
+    try:
+        # A savepoint: the caller owns (and commits) this session, and a
+        # failure here must not roll back the result handling it rides on.
+        with db.begin_nested():
+            server_queue_manager.complete_on_result(
+                str(command_id), getattr(connection, "host_id", None), db
+            )
+    except Exception:  # pylint: disable=broad-except
+        logger.exception(
+            "Could not close the queue row for command %s", sanitize_log(command_id)
+        )
+
+
 async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
     """Handle command execution result from agent.
 
@@ -122,6 +149,7 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
     # back as command_id.  If we have a match, the engine handles it and
     # we're done -- otherwise let normal handler routing run.
     command_id = message_data.get("command_id")
+    _close_out_command(db, connection, command_id)
     if command_id:
         try:
             from backend.services.proplus_dispatch import route_proplus_command_result
@@ -575,14 +603,21 @@ async def handle_command_acknowledgment(  # NOSONAR
             "data": {},
         }
 
-    # Mark the message as acknowledged (completed)
+    # Mark the message as acknowledged (completed) -- late too: see
+    # queue_operations.close_out_late.
+    status_before = original_msg.status if original_msg is not None else None
     success = server_queue_manager.mark_acknowledged(message_id, db=db)
 
     if success:
         logger.info(
-            "ACK PROCESSED: message %s marked as completed from %s",
+            "ACK PROCESSED: message %s marked as completed from %s%s",
             sanitize_log(message_id),
             sanitize_log(hostname),
+            (
+                f" (late: was {status_before})"
+                if status_before not in (None, "sent", "completed")
+                else ""
+            ),
         )
     else:
         logger.warning(

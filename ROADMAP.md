@@ -57,8 +57,9 @@ This document provides a detailed roadmap for realizing all features in both ope
 46. [Phase 31: High Availability & Disaster Recovery (Enterprise)](#phase-31-high-availability--disaster-recovery-enterprise)
 47. [Phase 32: Browser Remote Terminal (Community / OSS; recording Pro+; approval Enterprise)](#phase-32-browser-remote-terminal-community--oss-recording-pro-approval-enterprise)
 48. [Phase 33: Fleet Targeting by Site & Network Segment (Enterprise)](#phase-33-fleet-targeting-by-site--network-segment-enterprise)
-48. [Release Schedule Summary](#release-schedule-summary)
-49. [Module Migration Plan](#module-migration-plan)
+49. [Phase 34: Dashboard Insight Cards (Community / OSS; Pro+; Enterprise)](#phase-34-dashboard-insight-cards-community--oss-pro-enterprise)
+50. [Release Schedule Summary](#release-schedule-summary)
+51. [Module Migration Plan](#module-migration-plan)
 
 ---
 
@@ -788,6 +789,9 @@ Each stabilization phase produces a release. Feature phases may produce one or m
 │                                                                                 │
 │  Phase 33: Fleet Targeting by Site & Network Segment                 v6.4.0.0   │
 │     └── Target work by site, and by CIDR segment within a site                  │
+│                                                                                 │
+│  Phase 34: Dashboard Insight Cards                                   v6.5.0.0   │
+│     └── Home-screen cards for what needs attention, across every tier           │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -11104,8 +11108,11 @@ CIDRs, rate-limited, and audited** -- never a fleet-wide default.
       (OUI vendor, mDNS service names, open-port fingerprint). A device class
       distinct from `host`: no shell, no package manager, no privileged
       execution -- the same distinction Phase 24.1 draws for `mobile_device`
-      DONE 2026-09-29 (21.6 S1, migration `q13assetdisc`). OUI vendor and
-      open-port fingerprint evidence arrive with S5 / S4.
+      DONE 2026-09-29 (21.6 S1, migration `q13assetdisc`). OUI vendor
+      evidence arrived with S5.  **Correction 2026-10-16:** open-port
+      fingerprint evidence did NOT arrive -- S4 is the address sweep only,
+      and nothing probes ports.  Moved to Phase 33 ("Standard-port probe of
+      unmanaged devices").
 - [x] Agent-side passive neighbor reporting (ARP/NDP cache, mDNS/SSDP) behind
       a `network_discovery` capability, per-platform, defaulting to passive
       S1 2026-09-29: Linux (raw capture as root, sockets otherwise),
@@ -14032,6 +14039,65 @@ the old word-substitution scripts. Measured design (calibrated on beast against
 
 > **⚠️ Multi-tenancy storage (same rule as 14.1/14.3/21.1).** Mobile **device inventory + compliance findings are per-host/tenant data** → `tenant` partition, soft-referencing shared ids (no cross-partition FK). The **mobile OS release / EOL reference feed is global** → reuse the `shared` partition from 14.3 (one copy, offline-updatable), never per tenant.
 
+#### 24.0 Getting-started wizard (Community / OSS; licensed steps appear when licensed)
+
+**Added 2026-10-16 (Bryan).** "A 'getting started wizard' that helps people
+set things up from a new install and we can walk them through it."  Standing
+up the production server on 2026-10-15/16 is the specification: almost
+every snag hit there is a step this wizard owns -- OpenBAO missing / sealed /
+no `secret/` mount, migrations pending after an upgrade, an admin account
+without `is_admin`, the multi-tenancy provisioner never bootstrapped,
+tenants without grants, an agent enrolled with its token in the wrong
+config section, agents "unprivileged" by a probe bug, the EOL registry
+empty, ClamAV pushed onto a 2 GB host, the map's tiles 403'd by a
+Referrer-Policy, telemetry exporting to a collector that did not exist.
+
+**Principles**
+- **Checks first, forms second.** Every step opens with a live self-check
+  of the real state ("OpenBAO: unsealed, kv-v2 at secret/ -- OK") and only
+  asks for input where something is missing.  A step that is already done
+  shows as done; nobody re-enters what the installer already set.
+- **Skippable and resumable.** Progress is stored server-side; the wizard
+  reopens where it was left, and a dismissed wizard leaves a "Setup: 7 of
+  11 done" chip in the header until it is finished or hidden for good.
+- **Re-runnable as a health page.** The same checks back a permanent
+  **Setup health** page (Settings) that an operator can run after an
+  upgrade or when something looks wrong -- the wizard is its first-run view.
+- **Never does something irreversible silently** -- each step says what it
+  will change and links the doc page; destructive or outward-facing actions
+  (sending a test email, pushing an agent install) need an explicit click.
+
+**Steps** (licensed steps appear only when the engine is licensed)
+- [ ] **Administrator** -- set the password, offer MFA, confirm the account
+      is a full administrator (roles AND `is_admin`)
+- [ ] **Reaching the server** -- public URL, TLS certificate (Let's Encrypt
+      guidance or upload), port 443 reachable, nginx config current
+      (including headers third parties depend on, e.g. map tiles)
+- [ ] **Database & schema** -- connection, pool sizing vs max_connections,
+      migrations current (offers `sysmanage-migrate`)
+- [ ] **Secrets store** -- OpenBAO installed, initialized, unsealed, kv-v2
+      mount present, the app token readable; air-gap mode explained
+- [ ] **Email** -- SMTP settings and a test message to the admin
+- [ ] **License** -- install a key (or stay Community); shows what it unlocks
+- [ ] **Multi-tenancy** (licensed) -- enable or not; create tenants; run the
+      provisioning bootstrap; grant users to tenants and set each one's
+      default tenant
+- [ ] **First agents** -- create an enrollment token, then per-OS copy-paste
+      install commands (PPA, COPR/OBS, pkg, MSI, Homebrew...) with the
+      token and server URL already filled in; watch hosts arrive, approve
+      them, and verify each agent's privilege and capabilities
+- [ ] **Keeping hosts current** -- update policy, maintenance windows,
+      Ubuntu Pro token / Livepatch for Ubuntu hosts
+- [ ] **Security baseline** -- the threat-model questionnaire (21.4),
+      antivirus policy (with the memory floor explained), and the scan
+      schedules that start empty: vulnerability, compliance profile, malware
+- [ ] **Reference data** (licensed) -- CVE feed, advisories and the OS
+      end-of-life registry loaded, with their refresh schedules
+- [ ] **Home screen** -- choose the dashboard cards (Phase 34 framework)
+- [ ] **Observability** (optional) -- OpenTelemetry / Prometheus only if
+      the operator has a collector (off by default since 2026-10-15)
+- [ ] Docs page + screenshots via `make screenshots` + 14-language i18n
+
 #### 24.1 Mobile device model + fleet visibility (Community / OSS)
 
 The OSS floor: mobile is a first-class, *visible* endpoint class -- no automated management, but you can see what you know about.
@@ -14104,6 +14170,36 @@ measures it today; no target is set until the numbers exist.
 **Estimated Size:** ~1,500 lines (harness + reductions; the reductions depend
 on what the measurements find)
 
+#### 24.4 Fix it: compliance failures (Pro+; fleet-wide Enterprise)
+
+**Added 2026-10-16 (Bryan).** "Simple instructions or (ideally) automated
+one-click things that resolve compliance surfaced issues."  Today a failed
+check carries an optional free-text `remediation` field, package-profile
+violations get a generated plan, and config drift has remediation playbooks
+(20.3) -- but a failed benchmark check (an SSH setting, a file mode, a
+sysctl, a service that should be off) leaves the operator to work out the
+fix by hand on every host.
+
+- [ ] **Every check says how to fix it** -- per-OS plain-language steps
+      (what to change, where, why it matters) shown beside the failure;
+      the check catalog is not done until each rule has them, gated in CI
+- [ ] **One-click fix where it is safe** -- a declarative fix per check
+      (set a sysctl, set a config-file key, chmod/chown a path, disable a
+      service, remove a package) built as an `apply_deployment_plan`, the
+      same path antivirus and remediation playbooks use; checks whose fix
+      cannot be safely automated (needs a reboot decision, a business
+      choice, a password) stay instructions-only and say so
+- [ ] **Preview, then apply** -- show exactly what will change on which
+      hosts (the posture-remedy pattern from 21.4), back up every file it
+      edits (the agent's sudo-install backup), then re-scan just that check
+      to prove the fix took; a fix that did not take is reported, not
+      marked done
+- [ ] **Respect the guardrails** -- maintenance windows (14.2), the
+      RUN_SCRIPT / compliance roles, audit of every apply, and a rollback
+      button that restores the backups
+- [ ] **Fleet-wide (Enterprise)** -- "fix this check on every failing host"
+      as a fleet job in waves (20.4), with per-host results
+
 ### Licensing summary
 
 - **Community / OSS:** device model + fleet visibility + manual/self-report registration (24.1); the agent memory-footprint work (24.3) is in every edition. You can *see* devices you or a companion app report; no automated management, no curated EOL/compliance.
@@ -14122,6 +14218,9 @@ on what the measurements find)
       where the measurements showed it pays, and held by an enforced per-OS
       budget
 - [ ] Docs + 14-language i18n complete
+- [ ] Home-screen card: **Mobile devices** -- devices by platform,
+      non-compliant OS/patch level, and not seen in N days; links to the
+      filtered device list (card contract: Phase 34.1)
 - [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before -- including whole i18n workstreams -- which made the backlog look far larger than it was and hid which gaps were real.
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
@@ -14165,6 +14264,27 @@ Make the inventory *actionable* -- reuse existing engines rather than rebuild.
 
 **Estimated Size:** ~3,000 lines
 
+#### 25.3 Fix it: advisor findings (Enterprise)
+
+**Added 2026-10-16 (Bryan).** "Same story with the insights -> Advisor."  The
+Advisor already proposes fixes for some findings (21.2 S5: generated
+playbooks an operator approves), but most rules have no proposal and no
+plain explanation of what to do.
+
+- [ ] **Every rule says how to fix it** -- per-OS steps in plain language
+      on the finding, written with the rule (curated packs gated in CI;
+      tenant-authored rules get an optional field)
+- [ ] **A one-click fix for every rule that can have one** -- extend the S5
+      proposal generator beyond its current rules; the same preview ->
+      backup -> apply -> re-evaluate loop as 24.4, and the same
+      instructions-only fallback where automation would be unsafe
+- [ ] **Fix from where the finding is shown** -- the host's Advisor tab, the
+      rule view and the fleet feed all carry the Fix button, not only the
+      Proposed fixes tab
+- [ ] **Proof** -- after a fix, the rule is re-evaluated on that host right
+      away; "fixed" means the advisor says does_not_fire, not that the
+      command exited 0
+
 ### Exit Criteria
 
 - [ ] Companion app reports OS version/build + patch level on ≥1 iOS and ≥1
@@ -14176,6 +14296,9 @@ Make the inventory *actionable* -- reuse existing engines rather than rebuild.
 - [ ] Air-gap compatible -- companion app and compliance talk only to the
       customer's own server
 - [ ] Docs + 14-language i18n complete
+- [ ] Home-screen card: **Mobile compliance** -- BYOD devices out of
+      compliance and enforcement actions waiting on the user (card contract:
+      Phase 34.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -14820,6 +14943,8 @@ one-way ingestion connector only.
 - [ ] Both integrations 402-clean when unlicensed, and documented as
       reachable-only-to-the-customer's-own-server for air-gap
 - [ ] Docs + 14-language i18n complete
+- [ ] Home-screen card: **Security tooling** -- open Wazuh alerts and running
+      Velociraptor hunts, by severity (card contract: Phase 34.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -14866,6 +14991,9 @@ Be the MDM for Apple devices. Heaviest sub-phase (protocol + APNs + enrollment),
 - [ ] **Air-gap limitation documented prominently** -- requires Apple push
       certificate + APNs reachability
 - [ ] Docs + 14-language i18n complete
+- [ ] Home-screen card: **Apple MDM** -- enrolled, pending enrollment, and
+      lock/wipe commands not yet acknowledged; APNs certificate expiry (card
+      contract: Phase 34.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -14918,6 +15046,8 @@ The operational product: getting devices enrolled at scale.
 - [ ] Every tier 402-clean when unlicensed
 - [ ] **Air-gap limitation documented prominently**
 - [ ] Docs + 14-language i18n complete
+- [ ] Home-screen card: **Android MDM** -- enrolled, pending zero-touch
+      enrollment, and policy non-compliance (card contract: Phase 34.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -15080,6 +15210,9 @@ client of one.
 - [ ] Every capability 402-clean when unlicensed; a single-server deployment is
       completely unaffected by all of the above
 - [ ] Docs + 14-language i18n complete
+- [ ] Home-screen card: **Server cluster** -- pool members up, current
+      leader, Postgres replica lag, and DR-site reachability; critical when a
+      failover would fail (card contract: Phase 34.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -15247,6 +15380,8 @@ adjust.*
       session without one; self-approval, a reused approval and an expired
       one are each refused
 - [ ] Docs + 14-language i18n complete
+- [ ] Home-screen card: **Terminal sessions** -- sessions open now and
+      sessions waiting for second-person approval (card contract: Phase 34.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -15285,6 +15420,125 @@ federation (`Host.site_id`) and are not offered to scans yet.
       site or segment (a WAN link or a small subnet must not take a fleet
       job's full parallelism)
 - [ ] Docs + 14-language i18n complete
+- [ ] **Standard-port probe of unmanaged devices** (added 2026-10-16, Bryan:
+      "see what standard ports are open on the scanned unmanaged network
+      devices").  Same rules as the 21.6 sweep, plus its own opt-in:
+      * a THIRD policy switch, off by default (listening is quiet, a sweep
+        pings, a port probe connects -- each is a separate decision), scoped
+        to the operator's CIDRs, rate-limited, audited, refused off-link
+      * TCP connect only (no SYN/raw scanning, no payloads, no banner
+        grabbing beyond what the handshake reveals) to a short fixed list of
+        standard ports -- 21, 22, 23, 25, 53, 80, 110, 139, 143, 443, 445,
+        515, 554, 631, 1883, 3306, 3389, 5432, 5900, 8080, 8443, 9100 --
+        editable per policy
+      * run by an idle agent ON that network (`choose_sweeper`), never the
+        server; managed hosts are skipped (the agent already reports them)
+      * results stored as evidence on `discovered_asset` with when/which
+        agent, shown as port chips on the device row, sortable/filterable;
+        they also feed classification (9100/631/515 printer, 554 camera,
+        3389 Windows, 1883 IoT broker)
+      * risky exposures called out: telnet (23), SMB (445) or RDP (3389)
+        reachable on an unmanaged device raise a posture item (21.4)
+- [ ] Every home-screen card filterable **by site and by network segment** --
+      one dashboard per site or segment, same cards (card contract: Phase
+      34.1)
+- [ ] **Audit ALL previous phases for stale open items.** Same rule as every
+      phase: walk each earlier phase, check every unticked box against the
+      actual codebase, tick what is genuinely done, and for what is not say
+      plainly whether it is real work, blocked externally, or should move or
+      be dropped.
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 34: Dashboard Insight Cards (Community / OSS; Pro+; Enterprise)
+
+**Target Release:** v6.5.0.0
+**Focus:** Make the home screen answer "what needs me today?" across
+everything SysManage already measures, not only hosts, updates, security,
+reboots, antivirus, OpenTelemetry, clocks and hardware.
+
+**Added 2026-10-16 (Bryan).** Asked for home-screen cards that would add value
+for customers. Each card below reports on a capability that already exists;
+cards for features that do not exist yet live in the phase that builds the
+feature (24, 25, 28-33). Production on 2026-10-16 is the case for most of
+them: an unprivileged agent, an empty end-of-life registry, never-run
+malware scans and a hand-hidden nginx misconfiguration were each invisible
+from the home screen and found only by an operator asking why.
+
+**Rules every card follows**
+- A card counts the ACTIVE TENANT only (multi-tenancy), and says
+  "not measured" -- never 0 -- when its data has never been collected
+  (the advisor's "unmeasured is not clean" rule; 2026-10-16 the OS
+  Lifecycle page called every host Unknown because the registry was empty).
+- Every number is a link to the matching pre-filtered list.
+- A card for an unlicensed engine does not appear (no locked teasers on the
+  home screen); the tier of each card is the tier of the feature it reports on.
+- Thresholds that are a judgment call (days until a certificate expires,
+  free disk) are per-card settings with sensible defaults.
+
+#### 34.1 Card framework (Community / OSS)
+
+- [ ] **Engine-contributed cards** -- a Pro+ engine registers its card through
+      the plugin seam the way it registers routes and pages; the dashboard
+      settings dialog lists only the cards this server can serve
+- [ ] **Card contract** -- count, severity (ok / attention / critical / not
+      measured), a drill-down link and an optional "as of" time; one API
+      call per card, cached briefly so a dashboard of 20 cards stays cheap
+- [ ] **Per-card thresholds** stored with the existing dashboard preferences
+- [ ] **Card order and sizing** -- drag to reorder; compact vs detailed
+
+#### 34.2 Community cards (OSS)
+
+- [ ] **Awaiting approval** -- hosts registered but not approved
+- [ ] **Not checking in** -- hosts past the heartbeat timeout, oldest first
+- [ ] **Agents running limited** -- hosts whose agent is unprivileged or
+      reports unavailable capabilities (a privilege-probe bug hid this on
+      2026-10-15: the host page said "privileged: no" with no fleet signal)
+- [ ] **Agent version behind** -- hosts on an older agent than the server's
+      current release
+- [ ] **Certificates expiring** -- host certificates expiring within N days
+      (default 30), from `collect_certificates`
+- [ ] **Low disk space** -- volumes above N% full (default 90%)
+- [ ] **Firewall off** -- hosts with no active firewall
+- [ ] **Ubuntu Pro / Livepatch coverage** -- Ubuntu hosts not attached, or
+      attached without Livepatch
+- [ ] **Maintenance windows** -- the next window, and hosts held by a
+      blackout right now (14.2)
+- [ ] **Release upgrades pending** -- hosts with an OS release upgrade
+      available
+
+#### 34.3 Pro+ cards
+
+- [ ] **Vulnerabilities** -- critical/high findings, hosts affected, and
+      hosts never scanned (`vuln_engine`)
+- [ ] **Security advisories** -- applicable errata not yet installed
+      (`advisory_engine`, 14.1)
+- [ ] **OS end of life** -- hosts approaching or past EOL, with the empty-
+      registry state shown as "not measured" (`lifecycle_engine`, 14.3)
+- [ ] **Compliance** -- hosts failing their profile and the fleet score
+      (`compliance_engine`)
+- [ ] **Alerts firing** -- open alerts by severity (`alerting_engine`)
+
+#### 34.4 Enterprise cards
+
+- [ ] **Fleet risk** -- the advisor's fleet score, with "partly assessed"
+      shown, not hidden (21.2)
+- [ ] **Malware** -- findings, quarantined files, and hosts that can scan but
+      never have (21.3)
+- [ ] **Configuration drift** -- hosts drifted from their profile (20)
+- [ ] **Fleet jobs** -- running now, and failed in the last 24 hours (20)
+- [ ] **Unmanaged devices** -- devices asset discovery saw that are not
+      enrolled hosts (21.6)
+- [ ] **Federation sites** -- sites unreachable or lagging (12)
+- [ ] **Air-gap content freshness** -- age of the last ingested bundle (11)
+
+#### 34.5 Close-out
+
+- [ ] Every card's empty, not-measured, unlicensed and multi-tenant cases
+      covered by tests; a dashboard of every card loads within the existing
+      page-load budget
+- [ ] Docs + screenshots via `make screenshots` + 14-language i18n complete
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -15323,7 +15577,7 @@ federation (`Host.site_id`) and are not offered to scans yet.
 | 21 | v3.9.0.0 | Endpoint Facts & Proactive Advisor | osquery fact substrate, Insights-style recommendations, malware detection, threat-model wizard + posture punch list, unenrolled asset discovery |
 | 22 | v3.10.0.0 | Scale Hardening -- Thundering-Herd Remediation | Jittered agent schedules + send-on-change, high-throughput intake and fair queues, leader election, bounded/spread ticks, fleet pushes in waves, stage-then-swap module updates + CDN delivery, federation deltas, scale harness |
 | 23 | v3.11.0.0 | Hardware, Time & Asset Visibility | Drive health (SMART, NVMe), degraded arrays and ZFS pools, temperatures and hardware errors from every OS, with real-time email alerts; every host's clock drift measured, NTP managed fleet-wide, out-of-bounds hosts resynchronized and alerted on; asset tags bound to the physical machine (shared by every OS on it), a naming-scheme builder, search, reports and CSV import |
-| 24 | **v4.0.0.0** | Mobile Fleet Visibility & UEM Ingestion | **MAJOR -- a new device class enters the product.** Device model, manual/API registration, ingest-from-UEM -- **air-gap compatible** |
+| 24 | **v4.0.0.0** | Mobile Fleet Visibility & UEM Ingestion | **MAJOR -- a new device class enters the product.** Device model, manual/API registration, ingest-from-UEM -- **air-gap compatible**; plus a getting-started wizard and Setup health page for new installs (OSS) |
 | 25 | v4.1.0.0 | Mobile Companion App & Compliance | First-party BYOD self-report app; mobile EOL/patch compliance, alerting + enforcement |
 | 26 | **v5.0.0.0** | Market-Parity GA | **MAJOR -- market parity reached.** All gap features hardened; v5.0 GA |
 | 27 | v5.1.0.0 | Expanded Agent Architecture & Packaging | ppc64le + s390x (big-endian) + riscv64 agent packaging/CI; native channels for alpine/BSD (Community/OSS) |
@@ -15333,6 +15587,7 @@ federation (`Host.site_id`) and are not offered to scans yet.
 | 31 | v6.2.0.0 | High Availability & Disaster Recovery | Active server pool behind a load balancer, leader-elected singleton workers, Postgres failover integration, agent multi-endpoint failover to a DR site |
 | 32 | v6.3.0.0 | Browser Remote Terminal | Agent-tunneled PTY sessions from the web UI -- no sshd, no inbound port, no keys, host posture untouched (OSS); recording (Pro+), second-person approval (Enterprise) |
 | 33 | v6.4.0.0 | Fleet Targeting by Site & Network Segment | Target scans and other fleet work by site, and by CIDR network segment within a site; per-site/segment rollout limits (Enterprise) |
+| 34 | v6.5.0.0 | Dashboard Insight Cards | Card framework (engine-contributed cards, thresholds, drill-down) plus home-screen cards for approvals, check-ins, limited agents, certificates, disk, firewall, Livepatch, vulnerabilities, advisories, EOL, compliance, alerts, fleet risk, malware, drift, fleet jobs, unmanaged devices, sites and air-gap freshness |
 
 ---
 

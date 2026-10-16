@@ -27,7 +27,8 @@ from backend.i18n import N_, _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db as db_module
 from backend.persistence import models
-from backend.persistence.db import get_db
+from backend.persistence.partitions import get_tenant_db, request_sessionmaker
+from backend.persistence.tenant_context import get_active_tenant
 from backend.security.roles import SecurityRoles
 from backend.utils.verbosity_logger import sanitize_log
 
@@ -162,8 +163,11 @@ def _apply_audit_filters(query, filters: AuditLogFilters):
 def _authorize_view_audit_log(db_session: Session, current_user: str) -> None:
     """Raise 401/403 if the caller can't view audit logs.  Shared by
     /list, /{id}, and /export."""
+    # Users and roles are server-global: check them on the bootstrap engine,
+    # never on the (tenant) session the entries are read from.
+    del db_session
     session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
     )
     with session_local() as session:
         auth_user = (
@@ -198,7 +202,7 @@ async def list_audit_logs(
         100, ge=1, le=1000, description=_("Number of entries to return")
     ),
     offset: int = Query(0, ge=0, description=_("Number of entries to skip")),
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
     current_user: str = Depends(get_current_user),
 ):
@@ -238,7 +242,7 @@ async def list_audit_logs(
 @router.get("/{audit_id}", response_model=AuditLogEntryResponse)
 async def get_audit_log_entry(
     audit_id: str,
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
     current_user: str = Depends(get_current_user),
 ):
@@ -314,7 +318,7 @@ async def export_audit_logs(
     fmt: str = Query(
         "csv", description=_("Export format: csv, pdf (OSS); json/cef/leef (Pro+)")
     ),
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
     current_user: str = Depends(get_current_user),
 ):
@@ -344,19 +348,25 @@ async def export_audit_logs(
     # loop -- a blocking build here freezes EVERY other request (including the
     # page waiting on this very download), which is what made the export hang.
     loop = asyncio.get_event_loop()
+    # The active tenant is a ContextVar, which does not cross into the worker
+    # thread: capture it here and hand it over.
     return await loop.run_in_executor(
-        None, _build_audit_export, filters, fmt_lower, current_user
+        None,
+        _build_audit_export,
+        filters,
+        fmt_lower,
+        current_user,
+        get_active_tenant(),
     )
 
 
-def _build_audit_export(filters, fmt_lower, current_user):
+def _build_audit_export(filters, fmt_lower, current_user, tenant_id=None):
     """Materialize the filtered audit-log entries and render the export
     (CSV or PDF).  Runs in a worker thread (see ``export_audit_logs``), so it
-    opens its OWN main-engine session -- the request session can't cross the
-    thread boundary.  Audit logs are server-global (not tenant-partitioned)."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_module.get_engine()
-    )
+    opens its OWN session -- the request session can't cross the thread
+    boundary -- on the database the caller was viewing: audit rows are per
+    tenant (``AuditService``), and server scope reads the bootstrap rows."""
+    session_local = request_sessionmaker(tenant_id)
     with session_local() as session:
         query = _apply_audit_filters(session.query(models.AuditLog), filters)
         entries = query.order_by(models.AuditLog.timestamp.desc()).all()

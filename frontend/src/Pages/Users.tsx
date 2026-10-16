@@ -31,7 +31,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Avatar from '@mui/material/Avatar';
 import SearchBox from '../Components/SearchBox';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
-import { hasPermission, SecurityRoles } from '../Services/permissions';
+import { getUserPermissions, hasPermission, SecurityRoles } from '../Services/permissions';
+import UserAdminToggle from '../Components/Users/UserAdminToggle';
+import Chip from '@mui/material/Chip';
 import InvitationsManager from '../Components/InvitationsManager';
 import SelectionActionBar from '../Components/SelectionActionBar';
 import { appLocale } from '../utils/locale';
@@ -60,6 +62,8 @@ const Users = () => {
     const [canAddUser, setCanAddUser] = useState<boolean>(false);
     const [canEditUser, setCanEditUser] = useState<boolean>(false);
     const [canDeleteUser, setCanDeleteUser] = useState<boolean>(false);
+    // Administrator rights are not a role: only an administrator may grant them.
+    const [viewerIsAdmin, setViewerIsAdmin] = useState<boolean>(false);
 
     const { t } = useTranslation();
 
@@ -119,6 +123,14 @@ const Users = () => {
                     )}
                 </Box>
             )
+        },
+        {
+            field: 'is_admin',
+            headerName: t('users.administrator', 'Administrator'),
+            width: 150,
+            renderCell: (params) => (params.value
+                ? <Chip size="small" color="primary" label={t('users.administrator', 'Administrator')} />
+                : null)
         },
         {
             field: 'actions',
@@ -266,6 +278,7 @@ const Users = () => {
             setCanAddUser(addUser);
             setCanEditUser(editUser);
             setCanDeleteUser(deleteUser);
+            setViewerIsAdmin((await getUserPermissions()).is_admin === true);
         };
         // Fail CLOSED and say so.  Unguarded, an expired session or a network
         // blip rejected here into an UNHANDLED promise: the permission flags
@@ -788,6 +801,18 @@ const Users = () => {
                         onChange={(e) => setEditPassword(e.target.value)}
                         placeholder={t('users.newPassword', { defaultValue: 'Enter new password' })}
                     />
+                    {editUser && (
+                        <UserAdminToggle
+                            userId={String(editUser.id)}
+                            isAdmin={editUser.is_admin === true}
+                            canManage={viewerIsAdmin}
+                            onChanged={(isAdmin) => {
+                                const changed = { ...editUser, is_admin: isAdmin };
+                                setEditUser(changed);
+                                updateUserInTable(changed);
+                            }}
+                        />
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleEditClose}>{t('common.cancel')}</Button>

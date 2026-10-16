@@ -2105,7 +2105,11 @@
     },
     "next": "Suivant",
     "signingInAs": "Connexion en tant que {{email}}",
-    "useAnotherEmail": "Utiliser une autre adresse e-mail"
+    "useAnotherEmail": "Utiliser une autre adresse e-mail",
+    "serverUnreachable": "Impossible de joindre le serveur SysManage. Il est peut-être arrêté ou en cours de redémarrage -- réessayez dans une minute.",
+    "invalidCredentials": "Adresse e-mail ou mot de passe incorrect.",
+    "serverError": "Le serveur a échoué lors de votre connexion. Réessayez ; si le problème persiste, consultez le journal du serveur.",
+    "failed": "Échec de la connexion. Veuillez réessayer."
   },
   "logout": {
     "loading": "Déconnexion en cours..."
@@ -3747,7 +3751,11 @@
     "requiresUnlockedSelection": "Sélectionnez au moins un utilisateur déverrouillé",
     "status": "Statut",
     "unlockSelected": "Déverrouiller la sélection",
-    "unlocked": "Déverrouillé"
+    "unlocked": "Déverrouillé",
+    "administrator": "Administrateur",
+    "administratorHelp": "Les administrateurs accèdent aussi aux pages qu'aucun rôle de sécurité ne couvre : fenêtres de maintenance, modèle de menace, gestion des licences et paramètres du serveur. S'applique immédiatement.",
+    "administratorReadOnly": "Seul un administrateur peut modifier ce paramètre.",
+    "adminChangeFailed": "Les droits d'administrateur n'ont pas pu être modifiés."
   },
   "fileWatch": {
     "add": "Nouvelle liste",
@@ -3839,7 +3847,8 @@
       "insufficientPeers": "aucun hôte comparable",
       "notApplicable": "ne s'applique pas à cette plateforme",
       "unsupported": "non pris en charge par cet agent",
-      "unknown": "l'agent n'a jamais signalé sa couverture"
+      "unknown": "l'agent n'a jamais signalé sa couverture",
+      "notConfigured": "aucun profil de configuration attribué"
     },
     "evidence": {
       "facts": "Faits : {{table}}",
@@ -3974,7 +3983,8 @@
         "description": "Contrôles de sécurité et de résilience à l'échelle de l'installation, appliqués selon votre modèle de menaces.",
         "name": "Posture SysManage"
       }
-    }
+    },
+    "noThreatModel": "Les contrôles de posture à l'échelle de l'installation ne sont pas évalués tant que vous n'avez pas décrit votre installation. Cela ne prend que quelques minutes."
   },
   "posture": {
     "action": {

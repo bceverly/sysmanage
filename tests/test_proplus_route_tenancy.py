@@ -56,17 +56,25 @@ TENANT_SCOPED = {
     "mount_automation_routes",
     "mount_av_management_routes",
     "mount_compliance_routes",
-    "mount_container_routes",
     "mount_federation_controller_routes",
     "mount_federation_site_routes",
     "mount_firewall_orchestration_routes",
     "mount_fleet_routes",
     "mount_health_routes",
-    "mount_observability_routes",
     "mount_provisioning_routes",
     "mount_reporting_routes",
     "mount_secrets_routes",
     "mount_virtualization_routes",
+}
+
+# Engines whose db_dependency is ONLY their role check (users live in the
+# bootstrap DB) while host data goes through a get_tenant_db the engine binds
+# itself.  Mounting them with get_tenant_db -- the 2026-08-29 swap -- made that
+# check look for the user in the tenant DB: every host-metrics call 401'd with
+# "User not found" in a multi-tenant deployment (production, 2026-10-16).
+AUTH_ON_BOOTSTRAP = {
+    "mount_container_routes",
+    "mount_observability_routes",
 }
 
 # Engines that ALSO read the shared partition. See the module docstring.
@@ -101,7 +109,7 @@ class TestEveryMountIsClassified:
     def test_no_mount_is_left_unclassified(self):
         # A NEW engine mounted with get_db would otherwise inherit the bug
         # silently. Adding one must mean making a decision here.
-        classified = TENANT_SCOPED | SHARED_PARTITION_READERS
+        classified = TENANT_SCOPED | SHARED_PARTITION_READERS | AUTH_ON_BOOTSTRAP
         unknown = set(_dependency_map()) - classified
         assert not unknown, (
             f"unclassified Pro+ route mounts: {sorted(unknown)}. Decide whether "
@@ -113,7 +121,9 @@ class TestEveryMountIsClassified:
         # Guards the reverse drift: a renamed mount silently dropping out of
         # the audit.
         present = set(_dependency_map())
-        missing = (TENANT_SCOPED | SHARED_PARTITION_READERS) - present
+        missing = (
+            TENANT_SCOPED | SHARED_PARTITION_READERS | AUTH_ON_BOOTSTRAP
+        ) - present
         assert not missing, f"listed but no longer mounted: {sorted(missing)}"
 
 
@@ -152,6 +162,24 @@ class TestSharedPartitionEnginesSelfRoute:
             f"{mount} passes get_db with no explanation; say why, or it reads "
             "as the multi-tenancy bug rather than a deliberate fallback"
         )
+
+
+class TestAuthOnBootstrapEngines:
+    @pytest.mark.parametrize("mount", sorted(AUTH_ON_BOOTSTRAP))
+    def test_it_is_mounted_with_the_bootstrap_session(self, mount):
+        deps = _dependency_map().get(mount, set())
+        assert deps == {"get_db"}, (
+            f"{mount} checks roles on db_dependency; a tenant session there "
+            "cannot find the user and 401s every caller under multi-tenancy"
+        )
+
+    @pytest.mark.parametrize("mount", sorted(AUTH_ON_BOOTSTRAP))
+    def test_the_reason_is_written_down_next_to_it(self, mount):
+        blob = "\n".join(p.read_text(encoding="utf-8") for p in MOUNT_FILES)
+        body = blob.split(f"def {mount}(")[1].split("\ndef ")[0]
+        assert (
+            "bootstrap" in body.lower()
+        ), f"{mount} passes get_db with no explanation; say why"
 
 
 class TestTheSharedPartitionClaimIsTrue:

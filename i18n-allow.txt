@@ -87,6 +87,7 @@ re:Violations -- \{\{\w+\}\}
 # blessing them too would hide real gaps. An exact key, not a value regex, so
 # it cannot bless "Version ..." prose elsewhere.
 de,fr: configProfiles.versionLabel
+de: users.administrator
 
 # === residue triage, 2026-08-05 ==============================================
 # Only names and identifiers below.  Ordinary words that happen to be cognates

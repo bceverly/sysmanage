@@ -2124,7 +2124,11 @@
     },
     "next": "Next",
     "signingInAs": "Signing in as {{email}}",
-    "useAnotherEmail": "Use a different email"
+    "useAnotherEmail": "Use a different email",
+    "serverUnreachable": "Cannot reach the SysManage server. It may be down or restarting -- try again in a minute.",
+    "invalidCredentials": "Incorrect email or password.",
+    "serverError": "The server failed while signing you in. Try again; if it keeps happening, check the server log.",
+    "failed": "Login failed. Please try again."
   },
   "logout": {
     "loading": "Logging out..."
@@ -3766,7 +3770,11 @@
     "requiresUnlockedSelection": "Select at least one unlocked user",
     "status": "Status",
     "unlockSelected": "Unlock Selected",
-    "unlocked": "Unlocked"
+    "unlocked": "Unlocked",
+    "administrator": "Administrator",
+    "administratorHelp": "Administrators can also reach pages no security role covers: maintenance windows, the threat model, license management and server settings. Applies immediately.",
+    "administratorReadOnly": "Only an administrator can change this.",
+    "adminChangeFailed": "Administrator rights could not be changed."
   },
   "advisor": {
     "totals": {
@@ -3839,7 +3847,8 @@
       "insufficientPeers": "no comparable hosts",
       "notApplicable": "does not apply to this platform",
       "unsupported": "not supported by this agent",
-      "unknown": "agent never reported coverage"
+      "unknown": "agent never reported coverage",
+      "notConfigured": "no configuration profile assigned"
     },
     "evidence": {
       "facts": "Facts: {{table}}",
@@ -3974,7 +3983,8 @@
         "description": "Installation-wide security and resilience checks, applied according to your threat model.",
         "name": "SysManage posture"
       }
-    }
+    },
+    "noThreatModel": "Installation-wide posture checks are not assessed until you describe your installation. It takes a few minutes."
   },
   "posture": {
     "action": {

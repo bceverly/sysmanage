@@ -7,6 +7,7 @@ Pytest configuration and shared fixtures for SysManage server tests.
 """
 
 import logging
+import os
 
 # Silence FastAPI startup-phase logger chatter BEFORE we import backend.main.
 # That import builds the app (CORS generation, route registration,
@@ -745,6 +746,56 @@ def real_engine():
     seam.register_engine(MagicMock(), module=mod)
     yield mod
     seam.unregister_engine()
+
+
+@pytest.fixture(autouse=True)
+def _single_tenant_unless_a_test_says_otherwise():
+    """Tests run single-tenant, as CI does, whatever the developer's own
+    /etc/sysmanage.yaml says.
+
+    Code that reads the global switch (AuditService's per-tenant routing,
+    get_request_engine, ...) otherwise follows the machine's config: on a
+    developer box with multi-tenancy on, a test outside test mode had its
+    audit row routed through ``db.get_engine()`` -- the REAL dev database --
+    which left 14 test rows there (2026-10-16).  A test that needs
+    multi-tenancy patches it on itself, which overrides this.  The INPUTS are
+    pinned (the yaml value, no env override), not the function, so tests of
+    ``is_multitenancy_enabled`` itself still exercise it."""
+    from backend.config import config as config_module  # noqa: PLC0415
+
+    section = dict(config_module.config.get("multitenancy") or {})
+    section["enabled"] = False
+    with patch.dict(config_module.config, {"multitenancy": section}), patch.dict(
+        os.environ, {}, clear=False
+    ):
+        os.environ.pop("SYSMANAGE_MULTITENANCY", None)
+        yield
+
+
+@pytest.fixture(autouse=True)
+def _restore_dependency_overrides():
+    """Put ``app.dependency_overrides`` back exactly as it was after EVERY test.
+
+    About ten test files set a ``get_current_user`` override on the shared app
+    and never removed it, so whichever test ran next on that worker was
+    silently authenticated -- an "unauthenticated" test read 404 instead of
+    401, and a role-escalation test's POST /user got far enough to send a
+    real setup email (2026-10-16).  Snapshot and restore instead of trusting
+    every file to clean up after itself."""
+    saved = dict(app.dependency_overrides)
+    yield
+    app.dependency_overrides.clear()
+    app.dependency_overrides.update(saved)
+
+
+@pytest.fixture(autouse=True)
+def _no_real_email(monkeypatch):
+    """Every test: SMTP goes to tests/smtp_guard.FakeSMTP, never the network
+    (a security test once mailed the developer's Gmail -- see smtp_guard)."""
+    from tests import smtp_guard  # noqa: PLC0415
+
+    smtp_guard.install(monkeypatch)
+    yield
 
 
 @pytest.fixture(autouse=True)

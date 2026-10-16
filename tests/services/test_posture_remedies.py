@@ -41,9 +41,11 @@ def factory():
     )
     Base.metadata.create_all(engine)
     maker = sessionmaker(bind=engine, expire_on_commit=False)
+    # Single-tenant, including AuditService's tenant routing: that reads the
+    # global switch, which a developer's own sysmanage.yaml may turn on.
     with patch.object(pr, "_main_session", maker), patch.object(
         pr, "_multitenant", return_value=False
-    ):
+    ), patch("backend.config.config.is_multitenancy_enabled", return_value=False):
         yield maker
     engine.dispose()
 

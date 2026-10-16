@@ -15,7 +15,7 @@ millions of rows.  Fact tables (query-pack results) are still read per host;
 they only cost anything when a fact rule is enabled.
 """
 
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from sqlalchemy import and_, func
 
@@ -137,6 +137,35 @@ def _firewall(db, host_ids):
     return out
 
 
+def _drift_configured(db, hosts) -> Set[str]:
+    """Ids of ``hosts`` an ENABLED profile assignment reaches -- directly,
+    through a tag, or through the host's site (as
+    ``advisor_evidence.drift_configured``, for a whole chunk at once)."""
+    assignment = models.ConfigProfileAssignment
+    direct, tags, sites = set(), set(), set()
+    for host_id, tag_id, site_id in db.query(
+        assignment.host_id, assignment.tag_id, assignment.site_id
+    ).filter(assignment.enabled.is_(True)):
+        if host_id:
+            direct.add(str(host_id))
+        if tag_id:
+            tags.add(tag_id)
+        if site_id:
+            sites.add(str(site_id))
+    ids = [h.id for h in hosts]
+    reached = {str(h.id) for h in hosts if str(h.id) in direct}
+    reached |= {str(h.id) for h in hosts if h.site_id and str(h.site_id) in sites}
+    if tags:
+        tag = models.HostTag
+        reached |= {
+            str(host_id)
+            for (host_id,) in db.query(tag.host_id).filter(
+                tag.host_id.in_(ids), tag.tag_id.in_(list(tags))
+            )
+        }
+    return reached
+
+
 class Chunk:
     """``domain -> {host_id: (at, rows)}`` for one chunk of hosts."""
 
@@ -151,6 +180,17 @@ class Chunk:
             "firewall": lambda: _firewall(db, ids),
         }
         self.domains = {d: loaders[d]() for d in domains if d in loaders}
+        # Which hosts any enabled profile assignment reaches, for the drift
+        # "nothing to measure" signal -- per chunk, not one query per host.
+        self.drift_configured = (
+            _drift_configured(db, hosts) if "drift" in self.domains else None
+        )
+
+    def is_drift_configured(self, host) -> Optional[bool]:
+        """None when this chunk did not load drift (the caller asks the DB)."""
+        if self.drift_configured is None:
+            return None
+        return str(host.id) in self.drift_configured
 
     def read(self, domain, host) -> Tuple[Any, List[Dict[str, Any]]]:
         return self.domains[domain].get(str(host.id), (None, []))

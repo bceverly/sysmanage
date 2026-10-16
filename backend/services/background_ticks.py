@@ -14,6 +14,7 @@ from backend.services import (
     hardware_tick,
     malware_tick,
     network_discovery_policy,
+    os_lifecycle_tick,
 )
 
 
@@ -24,4 +25,5 @@ def start_licensed_ticks():
         network_discovery_policy.start_if_licensed(),  # 21.6 discovery policy
         malware_tick.start_if_licensed(),  # 21.3 malware rule feed
         hardware_tick.start_if_licensed(),  # 23.1 smartmontools auto-install
+        os_lifecycle_tick.start_if_licensed(),  # 14.3 EOL registry refresh
     ]

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-16 07:13-0400\n"
+"POT-Creation-Date: 2026-10-16 13:57-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -338,7 +338,7 @@ msgstr "प्रक्रिया स्थिति अद्यतन सं
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:613 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:648 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "होस्ट पंजीकृत नहीं है"
@@ -688,7 +688,7 @@ msgstr "वाणिज्यिक एंटीवायरस स्थित�
 msgid "User Security Roles (RBAC)"
 msgstr "उपयोगकर्ता सुरक्षा भूमिकाएँ (RBAC)"
 
-#: backend/api/reports/endpoints.py:203 backend/api/audit_log.py:536
+#: backend/api/reports/endpoints.py:203 backend/api/audit_log.py:546
 msgid "Audit Log"
 msgstr "ऑडिट लॉग"
 
@@ -1084,52 +1084,74 @@ msgstr "कुंजी को कीरिंग में लिखना अ�
 msgid "Trusted key not found"
 msgstr "निष्ठापूर्ण कुंजी नहीं पाई"
 
-#: backend/api/user.py:77
+#: backend/api/user.py:84
+msgid ""
+"This is the last active administrator. Make another user an administrator "
+"first."
+msgstr "यह अंतिम सक्रिय प्रशासक है। पहले किसी अन्य उपयोगकर्ता को प्रशासक बनाएँ।"
+
+#: backend/api/user.py:129
 msgid "Permission denied: DELETE_USER role required"
 msgstr "प्रवेश नहीं: DELETE_USER भूमिका की आवश्यकता है"
 
-#: backend/api/user.py:358
+#: backend/api/user.py:415
 msgid "Permission denied: ADD_USER role required"
 msgstr "प्रवेश नहीं: ADD_USER भूमिका की आवश्यकता है"
 
-#: backend/api/user.py:368 backend/api/user.py:506
+#: backend/api/user.py:425 backend/api/user.py:566
 msgid "User already exists"
 msgstr "उपयोगकर्ता पहले से मौजूद है"
 
-#: backend/api/user.py:462
+#: backend/api/user.py:519
 msgid "Permission denied: EDIT_USER role required"
 msgstr "प्रवेश नहीं: EDIT_USER भूमिका की आवश्यकता है"
 
-#: backend/api/user.py:551
+#: backend/api/user.py:604
+msgid ""
+"Permission denied: only an administrator can grant or remove administrator "
+"rights"
+msgstr "अनुमति अस्वीकृत: केवल एक प्रशासक ही प्रशासक अधिकार दे या हटा सकता है"
+
+#: backend/api/user.py:625
+#, python-brace-format
+msgid "Administrator rights granted to '{userid}'"
+msgstr "'{userid}' को प्रशासक अधिकार दिए गए"
+
+#: backend/api/user.py:627
+#, python-brace-format
+msgid "Administrator rights removed from '{userid}'"
+msgstr "'{userid}' से प्रशासक अधिकार हटाए गए"
+
+#: backend/api/user.py:664
 msgid "Permission denied: UNLOCK_USER role required"
 msgstr "प्रवेश नहीं: UNLOCK_USER भूमिका की आवश्यकता है"
 
-#: backend/api/user.py:601
+#: backend/api/user.py:714
 msgid "Permission denied: LOCK_USER role required"
 msgstr "प्रवेश नहीं: LOCK_USER भूमिका की आवश्यकता है"
 
-#: backend/api/user.py:639 backend/api/profile.py:288
+#: backend/api/user.py:752 backend/api/profile.py:288
 #: backend/api/report_branding.py:133
 msgid "No file provided"
 msgstr "कोई फ़ाइल नहीं दी गई"
 
-#: backend/api/user.py:646 backend/api/profile.py:295
+#: backend/api/user.py:759 backend/api/profile.py:295
 msgid "Error reading uploaded file"
 msgstr "परिभाषित संचयित फ़ाइल को पढ़ने में त्रुटि"
 
-#: backend/api/user.py:674 backend/api/profile.py:328
+#: backend/api/user.py:787 backend/api/profile.py:328
 msgid "Profile image uploaded successfully"
 msgstr "प्रोफाइल छवि सफलतापूर्वक अपलोड की गई"
 
-#: backend/api/user.py:698 backend/api/profile.py:356
+#: backend/api/user.py:811 backend/api/profile.py:356
 msgid "No profile image found"
 msgstr "कोई प्रोफाइल इमेज नहीं मिला"
 
-#: backend/api/user.py:739 backend/api/profile.py:397
+#: backend/api/user.py:852 backend/api/profile.py:397
 msgid "No profile image to delete"
 msgstr "कोई हटाने के लिए प्रोफाइल इमेज नहीं मिला"
 
-#: backend/api/user.py:748 backend/api/profile.py:407
+#: backend/api/user.py:861 backend/api/profile.py:407
 msgid "Profile image deleted successfully"
 msgstr "प्रोफाइल छवि को सफलतापूर्वक हटा दिया गया"
 
@@ -3380,34 +3402,34 @@ msgstr "यह जॉब पहले ही पूरा हो चुका �
 msgid "Cancelled by an operator"
 msgstr "ऑपरेटर द्वारा रद्द किया गया"
 
-#: backend/api/message_handlers.py:473
+#: backend/api/message_handlers.py:501
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "डायग्नोस्टिक रिजल्ट को प्रोसेस करने में असफल हुआ: %s"
 
-#: backend/api/message_handlers.py:507
+#: backend/api/message_handlers.py:535
 msgid "Missing message_id in command acknowledgment"
 msgstr "कमांड अद्यावरण के लिए message_id नहीं पाया गया या गलत है"
 
-#: backend/api/message_handlers.py:574
+#: backend/api/message_handlers.py:602
 msgid "This session cannot acknowledge another host's message"
 msgstr "यह सत्र किसी अन्य होस्ट के संदेश की पावती नहीं दे सकता"
 
-#: backend/api/message_handlers.py:637
+#: backend/api/message_handlers.py:672
 msgid "Missing installation_id in package installation status"
 msgstr "पैकेज इनस्टलेशन स्थिति में इनस्टॉलेशन ID नहीं पाया गया"
 
-#: backend/api/message_handlers.py:657
+#: backend/api/message_handlers.py:692
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "इनस्टॉलेशन लॉग एंट्री ID: %s के लिए नहीं मिला"
 
-#: backend/api/message_handlers.py:703
+#: backend/api/message_handlers.py:738
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "पैकेज इनस्टल करने की {status} एजेंट {hostname} पर"
 
-#: backend/api/message_handlers.py:732
+#: backend/api/message_handlers.py:767
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "पैकेज इनस्तॉलेशन संतुलन का अपडेट वापरे में विफल: %s"
@@ -4702,41 +4724,41 @@ msgstr "इस होस्ट पर इस प्लेटफॉर्म क�
 msgid "Platform config still owns %d mirror(s); delete those first"
 msgstr "प्लेटफ़ोर्म सेटिंग में %d माइरोर(स) अभी तक निर्दिष्ट; पहले उन्हें हटा दें"
 
-#: backend/api/audit_log.py:41
+#: backend/api/audit_log.py:42
 msgid "Permission denied: VIEW_AUDIT_LOG role required"
 msgstr "अनुमति नहीं: VIEW_AUDIT_LOG भूमिका आवश्यक"
 
-#: backend/api/audit_log.py:135
+#: backend/api/audit_log.py:136
 msgid "Invalid user ID format"
 msgstr "अमान्य उपयोगकर्ता ID प्रारूप"
 
-#: backend/api/audit_log.py:198
+#: backend/api/audit_log.py:202
 msgid "Number of entries to return"
 msgstr "वापस करने के लिए प्रविष्टियों की संख्या"
 
-#: backend/api/audit_log.py:200
+#: backend/api/audit_log.py:204
 msgid "Number of entries to skip"
 msgstr "छोड़ने के लिए प्रविष्टियों की संख्या"
 
-#: backend/api/audit_log.py:234
+#: backend/api/audit_log.py:238
 #, python-format
 msgid "Failed to retrieve audit logs: %s"
 msgstr "ऑडिट लॉग प्राप्त करने में विफल: %s"
 
-#: backend/api/audit_log.py:257
+#: backend/api/audit_log.py:261
 msgid "Invalid audit log ID format"
 msgstr "अमान्य ऑडिट लॉग ID प्रारूप"
 
-#: backend/api/audit_log.py:268
+#: backend/api/audit_log.py:272
 msgid "Audit log entry not found"
 msgstr "ऑडिट लॉग प्रविष्टि नहीं मिली"
 
-#: backend/api/audit_log.py:286
+#: backend/api/audit_log.py:290
 #, python-format
 msgid "Failed to retrieve audit log entry: %s"
 msgstr "ऑडिट लॉग प्रविष्टि प्राप्त करने में विफल: %s"
 
-#: backend/api/audit_log.py:299
+#: backend/api/audit_log.py:303
 #, python-format
 msgid ""
 "%s export requires a SysManage Professional+ license. OSS tier supports CSV "
@@ -4745,29 +4767,29 @@ msgstr ""
 "%s एक्सपोर्ट के लिए SysManage प्रोफेशनल+ लाइसेंस की आवश्यकता है। OSS संस्करण CSV "
 "एक्सपोर्ट का समर्थन करता है।"
 
-#: backend/api/audit_log.py:306
+#: backend/api/audit_log.py:310
 msgid "Use /api/v1/audit/export with Pro+ license"
 msgstr "/api/v1/audit/export का उपयोग Pro+ लाइसेंस के साथ करें"
 
-#: backend/api/audit_log.py:315
+#: backend/api/audit_log.py:319
 msgid "Export format: csv, pdf (OSS); json/cef/leef (Pro+)"
 msgstr "इक्सपोर्ट फ़ॉर्मेट: csv, pdf (OSS); json/cef/leef (Pro+)"
 
-#: backend/api/audit_log.py:338
+#: backend/api/audit_log.py:342
 #, python-format
 msgid "Unsupported export format: %s"
 msgstr "असमर्थित एक्सपोर्ट प्रारूप: %s"
 
 # Reports-related strings
-#: backend/api/audit_log.py:538
+#: backend/api/audit_log.py:548
 msgid "Generated"
 msgstr "उत्पन्न"
 
-#: backend/api/audit_log.py:540
+#: backend/api/audit_log.py:550
 msgid "Total Entries"
 msgstr "कुल प्रविष्टियाँ"
 
-#: backend/api/audit_log.py:547
+#: backend/api/audit_log.py:557
 msgid "No audit log entries found."
 msgstr "कोई ऑडिट लॉग प्रविष्टियाँ नहीं मिलीं।"
 
@@ -5191,12 +5213,12 @@ msgstr "SYSTEM_INFO संदेश %(message_id)s प्रोसेस कर�
 msgid "Failed to get failed messages: %s"
 msgstr "फेलिउर मैसेज्स प्राप्त करने में विफलता: %s"
 
-#: backend/websocket/queue_operations.py:113
+#: backend/websocket/queue_operations.py:160
 #, python-brace-format
 msgid "Host ID {host_id} not found"
 msgstr "होस्ट ID {host_id} नहीं मिला"
 
-#: backend/websocket/queue_operations.py:270
+#: backend/websocket/queue_operations.py:317
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -5206,76 +5228,69 @@ msgstr ""
 "होस्ट ID=%(host_id)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:470
+#: backend/websocket/queue_operations.py:517
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "संदेश को प्रसंस्करण के रूप में चिह्नित किया: %s"
 
-#: backend/websocket/queue_operations.py:477
+#: backend/websocket/queue_operations.py:524
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr "%(message_id)s को प्रसंस्करण में घोषित करने में विफल: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:520
+#: backend/websocket/queue_operations.py:567
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "%s को पूरा मार्क किया"
 
-#: backend/websocket/queue_operations.py:527
+#: backend/websocket/queue_operations.py:574
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr "%(message_id)s को पूरा मार्क करने में विफल हुए: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:565
+#: backend/websocket/queue_operations.py:675
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "संदेश को भेजा गया के रूप में चिह्नित (पुष्टि की प्रतीक्षा): %s"
 
-#: backend/websocket/queue_operations.py:572
+#: backend/websocket/queue_operations.py:682
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr "%(message_id)s को भेजे गए मार्क करने में विफल हुए: %(error)s"
 
-#: backend/websocket/queue_operations.py:601
+#: backend/websocket/queue_operations.py:711
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "अज्ञात संदेश की पुष्टि नहीं कर सकते: %s"
 
-#: backend/websocket/queue_operations.py:608
-#, python-format
-msgid "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
-msgstr ""
-"%(message_id)s के संदेश भेजे गए (SENT) स्थिति में नहीं है (संदेश की सबसे बड़ी स्थिति "
-"%(status)s है), पुष्टि के लिए छोड़ दिया जाएगा"
-
-#: backend/websocket/queue_operations.py:621
+#: backend/websocket/queue_operations.py:721
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "एजेंट द्वारा संदेश की पुष्टि की गई: %s"
 
-#: backend/websocket/queue_operations.py:628
+#: backend/websocket/queue_operations.py:734
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr "%(message_id)s को पहचानित मान्यता देने में विफल: %(error)s"
 
-#: backend/websocket/queue_operations.py:692
+#: backend/websocket/queue_operations.py:798
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "%d सेकंड के भीतर कोई पुष्टि प्राप्त नहीं हुई"
 
-#: backend/websocket/queue_operations.py:704
+#: backend/websocket/queue_operations.py:810
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "%d अपुष्ट संदेशों को पुन: प्रयास के लिए शेड्यूल किया गया"
 
-#: backend/websocket/queue_operations.py:712
+#: backend/websocket/queue_operations.py:818
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "अपुष्ट संदेशों का पुन: प्रयास करने में त्रुटि: %s"
 
-#: backend/websocket/queue_operations.py:772
+#: backend/websocket/queue_operations.py:882
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -5284,7 +5299,7 @@ msgstr ""
 "%(message_id)s के संदेश विफल हो गए (प्रयास %(attempt)d/%(max_retries)d), "
 "%(backoff)d सेकंड्स में पुनराचयन की योजना के अनुसार"
 
-#: backend/websocket/queue_operations.py:788
+#: backend/websocket/queue_operations.py:898
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
@@ -5293,12 +5308,12 @@ msgstr ""
 "%(message_id)s की संदेश प्रतिक्रिया %(attempts)d बार प्रयास करने के बाद अन्तिम रूप से "
 "विफल हो गई: %(error)s"
 
-#: backend/websocket/queue_operations.py:806
+#: backend/websocket/queue_operations.py:916
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "%(message_id)s को फ़ैलड मार्क करने में विफल रहा: %(error)s"
 
-#: backend/websocket/queue_operations.py:828
+#: backend/websocket/queue_operations.py:938
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "%(message_id)s के मेसेज डीसरियलाइज़ करने में विफल रहा: %(error)s"
@@ -5505,17 +5520,17 @@ msgstr "ड्राइव मौजूद है लेकिन एक पठ�
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "डिवाइस पर ISO फ़ाइल सिस्टम नहीं मिला (fstype=%s)"
 
-#: backend/services/audit_service.py:198
+#: backend/services/audit_service.py:287
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "बनाया {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:246
+#: backend/services/audit_service.py:335
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' की अपडेशन करवाई गई"
 
-#: backend/services/audit_service.py:294
+#: backend/services/audit_service.py:383
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "बनाया {entity_type} '{entity_name}' हटा दिया गया है"
@@ -5594,6 +5609,13 @@ msgstr "NetBSD pkgsrc पैकेज की भेद्यताएँ (जि
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "OS संस्करण के अनुसार macOS की भेद्यताएँ, NVD के प्रभावित-संस्करण डेटा से"
+
+#, python-format
+#~ msgid ""
+#~ "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
+#~ msgstr ""
+#~ "%(message_id)s के संदेश भेजे गए (SENT) स्थिति में नहीं है (संदेश की सबसे बड़ी स्थिति "
+#~ "%(status)s है), पुष्टि के लिए छोड़ दिया जाएगा"
 
 #, python-format
 #~ msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"

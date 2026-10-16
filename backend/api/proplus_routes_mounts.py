@@ -27,7 +27,7 @@ from backend.api.proplus_routes_common import (
 from backend.auth.auth_bearer import get_current_user
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
-from backend.persistence.db import get_session_local
+from backend.persistence.db import get_db, get_session_local
 from backend.persistence.partitions import get_tenant_db
 from backend.api.proplus_services import build_services
 
@@ -205,8 +205,12 @@ def mount_container_routes(app: FastAPI) -> bool:
 
     try:
         with _cython_compat():
+            # db_dependency is the BOOTSTRAP session here: the engine uses it
+            # only for the caller's User lookup (users live there) and sends
+            # every container query through its own get_tenant_db.  The tenant
+            # session 401'd every caller under multi-tenancy (2026-10-16).
             router = container_engine.get_container_router(
-                db_dependency=Depends(get_tenant_db),
+                db_dependency=Depends(get_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
                 module_gate=_module_dependency,
@@ -616,8 +620,13 @@ def mount_observability_routes(app: FastAPI) -> bool:
 
     try:
         with _cython_compat():
+            # db_dependency is the BOOTSTRAP session here: the engine uses it
+            # only to check the caller's roles (users live there) and routes
+            # host data through its own get_tenant_db.  Passing the tenant
+            # session answered "User not found" for every user once
+            # multi-tenancy was on -- host metrics 401'd (2026-10-16).
             router = observability_engine.get_observability_router(
-                db_dependency=Depends(get_tenant_db),
+                db_dependency=Depends(get_db),
                 auth_dependency=Depends(get_current_user),
                 feature_gate=_feature_dependency,
                 module_gate=_module_dependency,

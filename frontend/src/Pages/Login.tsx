@@ -26,6 +26,7 @@ import type { LoginMethods } from "../Services/sso"
 import { saveRememberedEmail, getRememberedEmail, clearRememberedEmail } from "../utils/cookieUtils"
 import { clearPermissionsCache } from "../Services/permissions"
 import { storeBearerToken } from "../Services/bearerToken";
+import { isServerUnreachable, loginErrorMessage } from "./loginError";
 
 interface LoginResponse {
   Authorization?: string;
@@ -43,6 +44,8 @@ const Login = () => {
     const [methods, setMethods] = useState<LoginMethods | null>(null);
     const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
     const [isLoggingIn, setIsLoggingIn] = useState(false);
+    // Why the last password login failed (server down vs bad password...).
+    const [loginError, setLoginError] = useState<string | null>(null);
     // Phase 10.3 -- MFA challenge state.  When the password login succeeds
     // but the user has a second factor, the server returns
     // ``{mfa_required: true, pending_token: "..."}``.  We store the
@@ -82,6 +85,7 @@ const Login = () => {
       e.preventDefault();
       if (input.userid !== "" && input.password !== "") {
         setIsLoggingIn(true);
+        setLoginError(null);
         api.post<LoginResponse>("/api/v1/login", {
           userid: input.userid,
           password: input.password
@@ -97,10 +101,11 @@ const Login = () => {
             finishLogin(response.data.Authorization);
           }
         })
-        .catch(() => {
+        .catch((err) => {
           // Error situation - clear out storage
           localStorage.removeItem("userid");
           localStorage.removeItem("bearer_token");
+          setLoginError(loginErrorMessage(err, t));
           setIsLoggingIn(false);
         });
       }
@@ -134,6 +139,8 @@ const Login = () => {
             } else {
               setMfaError(t('login.mfaInvalidCode', 'Invalid code. Try again or use a backup code.'));
             }
+          } else if (isServerUnreachable(err)) {
+            setMfaError(loginErrorMessage(err, t));
           } else {
             setMfaError(t('login.mfaError', 'Verification failed. Please try again.'));
           }
@@ -273,6 +280,11 @@ const Login = () => {
               setInput((prev) => ({ ...prev, password: '' }));
             }}
           />
+        {loginError && (
+          <Alert severity="error" sx={{ width: '100%', mt: 2 }} data-testid="login-error">
+            {loginError}
+          </Alert>
+        )}
         {methods.password && (
         <Box component="form" onSubmit={handleSubmitEvent} noValidate sx={{ mt: 1, width: '100%' }}>
           <TextField

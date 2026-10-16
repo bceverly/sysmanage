@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-16 07:13-0400\n"
+"POT-Creation-Date: 2026-10-16 13:57-0400\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -339,7 +339,7 @@ msgstr "プロセス状態の更新の処理に失敗しました: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:613 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:648 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "ホストが登録されていません"
@@ -688,7 +688,7 @@ msgstr "商用アンチウイルスステータス"
 msgid "User Security Roles (RBAC)"
 msgstr "ユーザーセキュリティロール (RBAC)"
 
-#: backend/api/reports/endpoints.py:203 backend/api/audit_log.py:536
+#: backend/api/reports/endpoints.py:203 backend/api/audit_log.py:546
 msgid "Audit Log"
 msgstr "監査ログ"
 
@@ -1087,52 +1087,74 @@ msgstr "キーリングにキーを書き込むことができませんでした
 msgid "Trusted key not found"
 msgstr "信頼されたキーが見つかりません"
 
-#: backend/api/user.py:77
+#: backend/api/user.py:84
+msgid ""
+"This is the last active administrator. Make another user an administrator "
+"first."
+msgstr "これは最後の有効な管理者です。先に別のユーザーを管理者にしてください。"
+
+#: backend/api/user.py:129
 msgid "Permission denied: DELETE_USER role required"
 msgstr "許可が拒否されました: DELETE_USER ロールが必要です"
 
-#: backend/api/user.py:358
+#: backend/api/user.py:415
 msgid "Permission denied: ADD_USER role required"
 msgstr "アクセス権限がありません: ADD_USER ロールが必要です"
 
-#: backend/api/user.py:368 backend/api/user.py:506
+#: backend/api/user.py:425 backend/api/user.py:566
 msgid "User already exists"
 msgstr "ユーザーは既に存在しています"
 
-#: backend/api/user.py:462
+#: backend/api/user.py:519
 msgid "Permission denied: EDIT_USER role required"
 msgstr "許可が拒否されました: EDIT_USER ロールが必要です"
 
-#: backend/api/user.py:551
+#: backend/api/user.py:604
+msgid ""
+"Permission denied: only an administrator can grant or remove administrator "
+"rights"
+msgstr "権限がありません: 管理者権限を付与または削除できるのは管理者だけです"
+
+#: backend/api/user.py:625
+#, python-brace-format
+msgid "Administrator rights granted to '{userid}'"
+msgstr "'{userid}' に管理者権限を付与しました"
+
+#: backend/api/user.py:627
+#, python-brace-format
+msgid "Administrator rights removed from '{userid}'"
+msgstr "'{userid}' から管理者権限を削除しました"
+
+#: backend/api/user.py:664
 msgid "Permission denied: UNLOCK_USER role required"
 msgstr "許可が拒否されました: UNLOCK_USER ロールが必要です"
 
-#: backend/api/user.py:601
+#: backend/api/user.py:714
 msgid "Permission denied: LOCK_USER role required"
 msgstr "許可が拒否されました: LOCK_USER ロールが必要です"
 
-#: backend/api/user.py:639 backend/api/profile.py:288
+#: backend/api/user.py:752 backend/api/profile.py:288
 #: backend/api/report_branding.py:133
 msgid "No file provided"
 msgstr "ファイルが提供されていません"
 
-#: backend/api/user.py:646 backend/api/profile.py:295
+#: backend/api/user.py:759 backend/api/profile.py:295
 msgid "Error reading uploaded file"
 msgstr "アップロードされたファイルの読み取りに失敗しました"
 
-#: backend/api/user.py:674 backend/api/profile.py:328
+#: backend/api/user.py:787 backend/api/profile.py:328
 msgid "Profile image uploaded successfully"
 msgstr "プロファイル画像が正常にアップロードされました"
 
-#: backend/api/user.py:698 backend/api/profile.py:356
+#: backend/api/user.py:811 backend/api/profile.py:356
 msgid "No profile image found"
 msgstr "プロフィール画像が見つかりません"
 
-#: backend/api/user.py:739 backend/api/profile.py:397
+#: backend/api/user.py:852 backend/api/profile.py:397
 msgid "No profile image to delete"
 msgstr "削除するプロフィール画像はありません"
 
-#: backend/api/user.py:748 backend/api/profile.py:407
+#: backend/api/user.py:861 backend/api/profile.py:407
 msgid "Profile image deleted successfully"
 msgstr "プロファイル画像が正常に削除されました"
 
@@ -3414,34 +3436,34 @@ msgstr "このジョブは既に完了しています"
 msgid "Cancelled by an operator"
 msgstr "オペレーターによってキャンセルされました"
 
-#: backend/api/message_handlers.py:473
+#: backend/api/message_handlers.py:501
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "診断結果の処理に失敗しました: %s"
 
-#: backend/api/message_handlers.py:507
+#: backend/api/message_handlers.py:535
 msgid "Missing message_id in command acknowledgment"
 msgstr "コマンド確認メッセージに message_id が含まれていません"
 
-#: backend/api/message_handlers.py:574
+#: backend/api/message_handlers.py:602
 msgid "This session cannot acknowledge another host's message"
 msgstr "このセッションは別のホストのメッセージを確認応答できません"
 
-#: backend/api/message_handlers.py:637
+#: backend/api/message_handlers.py:672
 msgid "Missing installation_id in package installation status"
 msgstr "パッケージインストール状態にインストールIDが含まれていません"
 
-#: backend/api/message_handlers.py:657
+#: backend/api/message_handlers.py:692
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "ID:%s のインストールログエントリが見つかりませんでした。"
 
-#: backend/api/message_handlers.py:703
+#: backend/api/message_handlers.py:738
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "エージェント {hostname} 上でのパッケージインストール {status}"
 
-#: backend/api/message_handlers.py:732
+#: backend/api/message_handlers.py:767
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "パッケージのインストール状態を更新できませんでした: %s"
@@ -4787,41 +4809,41 @@ msgstr ""
 "プラットフォーム設定はまだ %d のミラーを所有しています; それらから始めてくだ"
 "さい"
 
-#: backend/api/audit_log.py:41
+#: backend/api/audit_log.py:42
 msgid "Permission denied: VIEW_AUDIT_LOG role required"
 msgstr "許可が拒否されました: VIEW_AUDIT_LOG ロールが必要です"
 
-#: backend/api/audit_log.py:135
+#: backend/api/audit_log.py:136
 msgid "Invalid user ID format"
 msgstr "無効なユーザーID形式"
 
-#: backend/api/audit_log.py:198
+#: backend/api/audit_log.py:202
 msgid "Number of entries to return"
 msgstr "返すエントリ数"
 
-#: backend/api/audit_log.py:200
+#: backend/api/audit_log.py:204
 msgid "Number of entries to skip"
 msgstr "スキップするエントリ数"
 
-#: backend/api/audit_log.py:234
+#: backend/api/audit_log.py:238
 #, python-format
 msgid "Failed to retrieve audit logs: %s"
 msgstr "監査ログの取得に失敗しました: %s"
 
-#: backend/api/audit_log.py:257
+#: backend/api/audit_log.py:261
 msgid "Invalid audit log ID format"
 msgstr "無効な監査ログID形式"
 
-#: backend/api/audit_log.py:268
+#: backend/api/audit_log.py:272
 msgid "Audit log entry not found"
 msgstr "監査ログエントリが見つかりません"
 
-#: backend/api/audit_log.py:286
+#: backend/api/audit_log.py:290
 #, python-format
 msgid "Failed to retrieve audit log entry: %s"
 msgstr "監査ログエントリの取得に失敗しました: %s"
 
-#: backend/api/audit_log.py:299
+#: backend/api/audit_log.py:303
 #, python-format
 msgid ""
 "%s export requires a SysManage Professional+ license. OSS tier supports CSV "
@@ -4830,29 +4852,29 @@ msgstr ""
 "%s エクスポートには SysManage Professional+ ライセンスが必要です。OSS ティア"
 "では CSV エクスポートがサポートされています。"
 
-#: backend/api/audit_log.py:306
+#: backend/api/audit_log.py:310
 msgid "Use /api/v1/audit/export with Pro+ license"
 msgstr "Pro+ライセンスで/api/v1/audit/exportを使用してください"
 
-#: backend/api/audit_log.py:315
+#: backend/api/audit_log.py:319
 msgid "Export format: csv, pdf (OSS); json/cef/leef (Pro+)"
 msgstr "エクスポート形式: csv, pdf (OSS); json/cef/leef (Pro+)"
 
-#: backend/api/audit_log.py:338
+#: backend/api/audit_log.py:342
 #, python-format
 msgid "Unsupported export format: %s"
 msgstr "サポートされていないエクスポート形式: %s"
 
 # Reports-related strings
-#: backend/api/audit_log.py:538
+#: backend/api/audit_log.py:548
 msgid "Generated"
 msgstr "生成済み"
 
-#: backend/api/audit_log.py:540
+#: backend/api/audit_log.py:550
 msgid "Total Entries"
 msgstr "合計エントリ数"
 
-#: backend/api/audit_log.py:547
+#: backend/api/audit_log.py:557
 msgid "No audit log entries found."
 msgstr "監査ログエントリが見つかりません。"
 
@@ -5287,12 +5309,12 @@ msgstr ""
 msgid "Failed to get failed messages: %s"
 msgstr "失敗したメッセージの取得に失敗しました: %s"
 
-#: backend/websocket/queue_operations.py:113
+#: backend/websocket/queue_operations.py:160
 #, python-brace-format
 msgid "Host ID {host_id} not found"
 msgstr "ホストID {host_id} が見つかりません"
 
-#: backend/websocket/queue_operations.py:270
+#: backend/websocket/queue_operations.py:317
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -5302,80 +5324,73 @@ msgstr ""
 "direction=%(direction)s, host_id=%(host_id)s をキューに追加しました"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:470
+#: backend/websocket/queue_operations.py:517
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "メッセージを処理中としてマーク: %s"
 
-#: backend/websocket/queue_operations.py:477
+#: backend/websocket/queue_operations.py:524
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr ""
 "メッセージ %(message_id)s を処理中としてマークできませんでした: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:520
+#: backend/websocket/queue_operations.py:567
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "メッセージを完了済みとしてマークしました: %s"
 
-#: backend/websocket/queue_operations.py:527
+#: backend/websocket/queue_operations.py:574
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr ""
 "メッセージ %(message_id)s を完了済みとしてマークできませんでした: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:565
+#: backend/websocket/queue_operations.py:675
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "メッセージを送信済みとしてマーク（確認待ち）: %s"
 
-#: backend/websocket/queue_operations.py:572
+#: backend/websocket/queue_operations.py:682
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr ""
 "メッセージ %(message_id)s を送信済みとしてマークできませんでした: %(error)s"
 
-#: backend/websocket/queue_operations.py:601
+#: backend/websocket/queue_operations.py:711
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "不明なメッセージを確認できません: %s"
 
-#: backend/websocket/queue_operations.py:608
-#, python-format
-msgid "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
-msgstr ""
-"メッセージ %(message_id)s は送信ステータスではありません (現在のステータス："
-"%(status)s)。承認をスキップします"
-
-#: backend/websocket/queue_operations.py:621
+#: backend/websocket/queue_operations.py:721
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "エージェントによりメッセージが確認されました: %s"
 
-#: backend/websocket/queue_operations.py:628
+#: backend/websocket/queue_operations.py:734
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr ""
 "メッセージ %(message_id)s を承認済みとしてマークできませんでした: %(error)s"
 
-#: backend/websocket/queue_operations.py:692
+#: backend/websocket/queue_operations.py:798
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "%d 秒以内に確認を受信しませんでした"
 
-#: backend/websocket/queue_operations.py:704
+#: backend/websocket/queue_operations.py:810
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "%d 件の未確認メッセージを再試行にスケジュール"
 
-#: backend/websocket/queue_operations.py:712
+#: backend/websocket/queue_operations.py:818
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "未確認メッセージの再試行エラー: %s"
 
-#: backend/websocket/queue_operations.py:772
+#: backend/websocket/queue_operations.py:882
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -5384,7 +5399,7 @@ msgstr ""
 "メッセージ %(message_id)s が失敗しました（%(attempt)d/%(max_retries)d 回"
 "目）: 再試行は %(backoff)d 秒後にスケジュールされます"
 
-#: backend/websocket/queue_operations.py:788
+#: backend/websocket/queue_operations.py:898
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
@@ -5393,12 +5408,12 @@ msgstr ""
 "メッセージ %(message_id)s が %(attempts)d 回の試行後永久的に失敗しました: "
 "%(error)s"
 
-#: backend/websocket/queue_operations.py:806
+#: backend/websocket/queue_operations.py:916
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "メッセージ%(message_id)sを失敗としてマークに失敗しました: %(error)s"
 
-#: backend/websocket/queue_operations.py:828
+#: backend/websocket/queue_operations.py:938
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "メッセージ %(message_id)s をデシリアライズできませんでした: %(error)s"
@@ -5609,17 +5624,17 @@ msgstr "ドライブは存在しますが、読み取り可能なディスクが
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "デバイス上のISOファイルシステムがありません (fstype=%s)"
 
-#: backend/services/audit_service.py:198
+#: backend/services/audit_service.py:287
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' が作成されました"
 
-#: backend/services/audit_service.py:246
+#: backend/services/audit_service.py:335
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' を更新しました"
 
-#: backend/services/audit_service.py:294
+#: backend/services/audit_service.py:383
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' を削除しました"
@@ -5699,6 +5714,13 @@ msgstr "NetBSD の pkgsrc パッケージの脆弱性 (pkg_admin audit が読む
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "OS バージョン別の macOS の脆弱性 (NVD の影響を受けるバージョンのデータより)"
+
+#, python-format
+#~ msgid ""
+#~ "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
+#~ msgstr ""
+#~ "メッセージ %(message_id)s は送信ステータスではありません (現在のステータ"
+#~ "ス：%(status)s)。承認をスキップします"
 
 #, python-format
 #~ msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"

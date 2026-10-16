@@ -35,10 +35,9 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
 from backend.config import settings_service
-from backend.persistence import db as persistence_db
 from backend.persistence import models
 from backend.services import config_mgmt_dispatch
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
@@ -334,32 +333,28 @@ def reconcile(db: Session, tenant_id: Optional[str], label: str = "") -> int:
             len(queued),
             label or "bootstrap",
         )
-        _audit(queued)
+        _audit(db, queued)
     return len(queued)
 
 
-def _audit(hosts: List[models.Host]) -> None:
-    """Audit every automatic push on the main engine (where the audit trail
-    lives), never failing the pass over it."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=persistence_db.get_engine()
-    )
+def _audit(db: Session, hosts: List[models.Host]) -> None:
+    """Audit every automatic push in the host database being reconciled --
+    audit rows are per tenant -- committed with the pass (the caller
+    commits), never failing the pass over it."""
     try:
-        with session_local() as audit_session:
-            for host in hosts:
-                AuditService.log(
-                    commit=False,
-                    db=audit_session,
-                    action_type=ActionType.EXECUTE,
-                    entity_type=EntityType.HOST,
-                    entity_id=str(host.id),
-                    entity_name=host.fqdn,
-                    username=SYSTEM_ACTOR,
-                    description=f"Automatic {PACKAGE} install queued for host "
-                    f"{host.fqdn} (drive health unreadable)",
-                    result=Result.SUCCESS,
-                    details={"package": PACKAGE},
-                )
-            audit_session.commit()
+        for host in hosts:
+            AuditService.log(
+                commit=False,
+                db=db,
+                action_type=ActionType.EXECUTE,
+                entity_type=EntityType.HOST,
+                entity_id=str(host.id),
+                entity_name=host.fqdn,
+                username=SYSTEM_ACTOR,
+                description=f"Automatic {PACKAGE} install queued for host "
+                f"{host.fqdn} (drive health unreadable)",
+                result=Result.SUCCESS,
+                details={"package": PACKAGE},
+            )
     except Exception:  # pylint: disable=broad-except
         logger.exception("smartmontools auto-install audit failed")

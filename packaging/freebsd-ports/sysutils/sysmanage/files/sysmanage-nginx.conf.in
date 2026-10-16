@@ -100,7 +100,11 @@ server {
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-Frame-Options "DENY" always;
-    add_header Referrer-Policy "same-origin" always;
+    # strict-origin-when-cross-origin, not same-origin: the host map loads
+    # tiles from tile.openstreetmap.org, whose usage policy blocks requests
+    # with no Referer (HTTP 403 "access blocked").  This sends only the
+    # origin cross-site -- never a path or query.
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
     # Inventory payloads from large fleets exceed the 1m default.
     client_max_body_size 32m;
@@ -132,7 +136,7 @@ server {
             add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
             add_header X-Content-Type-Options "nosniff" always;
             add_header X-Frame-Options "DENY" always;
-            add_header Referrer-Policy "same-origin" always;
+            add_header Referrer-Policy "strict-origin-when-cross-origin" always;
         }
     }
 

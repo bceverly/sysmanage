@@ -9,6 +9,7 @@ Handles message enqueuing, dequeuing, and status updates.
 
 import json
 import random
+import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 
@@ -22,6 +23,52 @@ from backend.utils.verbosity_logger import get_logger
 from backend.websocket.queue_enums import Priority, QueueDirection, QueueStatus
 
 logger = get_logger(__name__)
+
+# Statuses an outbound command can be in when the agent's acknowledgment or
+# result arrives LATE: the no-ack sweep scheduled a retry (pending), a resend
+# is mid-flight (in_progress), or the retries ran out (failed / expired).
+LATE_CLOSABLE = (
+    QueueStatus.PENDING,
+    QueueStatus.IN_PROGRESS,
+    QueueStatus.FAILED,
+    QueueStatus.EXPIRED,
+)
+
+
+def close_out_late(message, how: str) -> None:
+    """Mark an outbound command COMPLETED because the agent proved it got it.
+
+    Production, 2026-10-16: an ``apply_updates`` to a host reconnecting after
+    a server upgrade ran out of retries ("No acknowledgment received within
+    60 seconds") a minute before its acknowledgment arrived, then reported
+    11 of 11 updates installed -- and the row stayed FAILED, so the UI said
+    the work failed.  Discarding a late acknowledgment while a retry was
+    scheduled also re-sent a command the agent had already run.  The prior
+    error is kept, prefixed, so the history still shows the retries.
+    """
+    was = message.status
+    message.status = QueueStatus.COMPLETED
+    message.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    note = f"completed by a late {how} (was {was})"
+    message.error_message = (
+        f"{note}; earlier: {message.error_message}" if message.error_message else note
+    )[:2000]
+    logger.info(
+        "LATE %s: message %s for host %s closed as completed (was %s)",
+        how.upper(),
+        message.message_id,
+        message.host_id,
+        was,
+    )
+
+
+def _envelope_message_id(message) -> Any:
+    try:
+        data = message.message_data
+        data = json.loads(data) if isinstance(data, str) else data
+        return (data or {}).get("message_id")
+    except (TypeError, ValueError):
+        return None
 
 
 class QueueOperations:
@@ -532,6 +579,64 @@ class QueueOperations:
             if not session_provided:
                 db.close()
 
+    # How far back a result may reach for its command.  A result arriving
+    # later than this is not "late", it is from another era -- leave it.
+    RESULT_LOOKBACK = timedelta(days=2)
+    RESULT_CANDIDATES_LIMIT = 200
+
+    def complete_on_result(self, command_id: str, host_id, db: Session) -> bool:
+        """A command result proves receipt: close the command's queue row.
+
+        The agent echoes the ENVELOPE's ``message_id`` as ``command_id``, which
+        is the queue row's id for most commands but not for ones built with
+        ``create_command_message`` (e.g. ``apply_updates``), so both are
+        matched.  Only the reporting host's own outbound commands are
+        considered, and only ones not already completed.  Caller commits.
+        """
+        if not command_id or host_id is None:
+            return False
+        try:
+            host_id = uuid.UUID(str(host_id))
+        except ValueError:
+            return False
+        row = (
+            db.query(MessageQueue)
+            .filter(
+                MessageQueue.message_id == str(command_id),
+                MessageQueue.host_id == host_id,
+                MessageQueue.direction == QueueDirection.OUTBOUND,
+            )
+            .first()
+        )
+        if row is None:
+            since = (
+                datetime.now(timezone.utc).replace(tzinfo=None) - self.RESULT_LOOKBACK
+            )
+            candidates = (
+                db.query(MessageQueue)
+                .filter(
+                    MessageQueue.host_id == host_id,
+                    MessageQueue.direction == QueueDirection.OUTBOUND,
+                    MessageQueue.status.in_((QueueStatus.SENT,) + LATE_CLOSABLE),
+                    MessageQueue.created_at >= since,
+                )
+                .order_by(MessageQueue.created_at.desc())
+                .limit(self.RESULT_CANDIDATES_LIMIT)
+                .all()
+            )
+            row = next(
+                (c for c in candidates if _envelope_message_id(c) == str(command_id)),
+                None,
+            )
+        if row is None or row.status == QueueStatus.COMPLETED:
+            return False
+        if row.status == QueueStatus.SENT:
+            row.status = QueueStatus.COMPLETED
+            row.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+            return True
+        close_out_late(row, "result")
+        return True
+
     def mark_sent(self, message_id: str, db: Session = None) -> bool:
         """
         Mark a message as sent to the agent, awaiting acknowledgment.
@@ -555,6 +660,11 @@ class QueueOperations:
 
             if not message:
                 return False
+            if message.status == QueueStatus.COMPLETED:
+                # A late acknowledgment of an EARLIER delivery closed it while
+                # this resend was in flight; SENT would restart the no-ack
+                # retries for work the agent already confirmed.
+                return True
 
             message.status = QueueStatus.SENT
             message.started_at = datetime.now(timezone.utc).replace(tzinfo=None)
@@ -601,24 +711,20 @@ class QueueOperations:
                 logger.warning(_("Cannot acknowledge unknown message: %s"), message_id)
                 return False
 
-            # Only acknowledge messages that are in SENT status
-            if message.status != QueueStatus.SENT:
-                logger.debug(
-                    _(
-                        "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
-                    ),
-                    {"message_id": message_id, "status": message.status},
-                )
-                # Still return True if already completed - idempotent behavior
-                return message.status == QueueStatus.COMPLETED
-
-            message.status = QueueStatus.COMPLETED
-            message.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
-
+            if message.status == QueueStatus.COMPLETED:
+                return True  # idempotent: a duplicate ack of finished work
+            if message.status == QueueStatus.SENT:
+                message.status = QueueStatus.COMPLETED
+                message.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+                if not session_provided:
+                    db.commit()
+                logger.info(_("Message acknowledged by agent: %s"), message_id)
+                return True
+            if message.direction != QueueDirection.OUTBOUND:
+                return False
+            close_out_late(message, "acknowledgment")
             if not session_provided:
                 db.commit()
-
-            logger.info(_("Message acknowledged by agent: %s"), message_id)
             return True
 
         except Exception as e:
@@ -743,6 +849,10 @@ class QueueOperations:
 
             if not message:
                 return False
+            if message.status == QueueStatus.COMPLETED:
+                # Closed by a (late) acknowledgment or result meanwhile: a
+                # send failure on a redundant resend must not reopen it.
+                return True
 
             message.retry_count += 1
             message.last_error_at = datetime.now(timezone.utc).replace(tzinfo=None)

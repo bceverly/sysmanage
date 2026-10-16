@@ -38,6 +38,19 @@ vi.mock('../../../Services/advisorService', () => ({
     },
 }));
 
+vi.mock('../../../Services/postureService', () => ({
+    postureService: { getThreatModel: vi.fn() },
+}));
+
+// The Posture tab's own behavior is tested elsewhere; here only whether the
+// banner hands it the "open the questionnaire" request.
+vi.mock('../../Posture/PostureTab', () => ({
+    default: ({ startWizard }: { startWizard?: boolean }) => (
+        <div data-testid="posture-tab">{startWizard ? 'wizard requested' : 'posture'}</div>
+    ),
+}));
+
+import { postureService } from '../../../Services/postureService';
 import { advisorService } from '../../../Services/advisorService';
 import type { AdvisorFeed, AdvisorHostView, AdvisorProposal } from '../../../Services/advisorService';
 import AdvisorScoreSummary from '../AdvisorScoreSummary';
@@ -198,6 +211,40 @@ describe('HostAdvisorTab', () => {
 });
 
 describe('Advisor page', () => {
+    const posture = vi.mocked(postureService);
+    const loadPage = () => {
+        svc.getFeed.mockResolvedValue(FEED);
+        svc.listProposals.mockResolvedValue([PROPOSAL]);
+        svc.listPacks.mockResolvedValue([]);
+        render(<MemoryRouter><Advisor /></MemoryRouter>);
+    };
+
+    test('points at the questionnaire while there is no threat model', async () => {
+        posture.getThreatModel.mockResolvedValue({ current: null, versions: [] });
+        loadPage();
+        expect(await screen.findByTestId('advisor-no-threat-model')).toBeInTheDocument();
+        fireEvent.click(screen.getByText('Start the questionnaire'));
+        expect(await screen.findByText('wizard requested')).toBeInTheDocument();
+    });
+
+    test('says nothing once a threat model exists', async () => {
+        posture.getThreatModel.mockResolvedValue({
+            current: { model_version: 1 } as never,
+            versions: [],
+        });
+        loadPage();
+        expect(await screen.findByText('2 findings')).toBeInTheDocument();
+        await waitFor(() => expect(posture.getThreatModel).toHaveBeenCalled());
+        expect(screen.queryByTestId('advisor-no-threat-model')).toBeNull();
+    });
+
+    test('says nothing when the check itself fails', async () => {
+        posture.getThreatModel.mockRejectedValue(new Error('403'));
+        loadPage();
+        expect(await screen.findByText('2 findings')).toBeInTheDocument();
+        expect(screen.queryByTestId('advisor-no-threat-model')).toBeNull();
+    });
+
     test('loads the fleet and evaluates on request', async () => {
         svc.getFeed.mockResolvedValue(FEED);
         svc.listProposals.mockResolvedValue([PROPOSAL]);

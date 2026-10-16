@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-16 07:13-0400\n"
+"POT-Creation-Date: 2026-10-16 13:57-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -335,7 +335,7 @@ msgstr "فشل في معالجة تحديث حالة العملية: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:613 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:648 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "المضيف غير مسجل"
@@ -687,7 +687,7 @@ msgstr "حالة مكافحة الفيروسات التجارية"
 msgid "User Security Roles (RBAC)"
 msgstr "أدوار أمان المستخدم (RBAC)"
 
-#: backend/api/reports/endpoints.py:203 backend/api/audit_log.py:536
+#: backend/api/reports/endpoints.py:203 backend/api/audit_log.py:546
 msgid "Audit Log"
 msgstr "سجل التدقيق"
 
@@ -1084,52 +1084,74 @@ msgstr "تعذر كتابة المفتاح إلى keyring: %s"
 msgid "Trusted key not found"
 msgstr "لم يتم العثور على المفتاح الموثوق"
 
-#: backend/api/user.py:77
+#: backend/api/user.py:84
+msgid ""
+"This is the last active administrator. Make another user an administrator "
+"first."
+msgstr "هذا آخر مسؤول نشط. اجعل مستخدمًا آخر مسؤولًا أولًا."
+
+#: backend/api/user.py:129
 msgid "Permission denied: DELETE_USER role required"
 msgstr " رفض الوصول: يتطلب دور DELETE_USER"
 
-#: backend/api/user.py:358
+#: backend/api/user.py:415
 msgid "Permission denied: ADD_USER role required"
 msgstr " رفض الوصول: يتطلب دور ADD_USER"
 
-#: backend/api/user.py:368 backend/api/user.py:506
+#: backend/api/user.py:425 backend/api/user.py:566
 msgid "User already exists"
 msgstr "المستخدم موجود بالفعل"
 
-#: backend/api/user.py:462
+#: backend/api/user.py:519
 msgid "Permission denied: EDIT_USER role required"
 msgstr "غير مسموح بالوصول: يتطلب دور تحرير المستخدم"
 
-#: backend/api/user.py:551
+#: backend/api/user.py:604
+msgid ""
+"Permission denied: only an administrator can grant or remove administrator "
+"rights"
+msgstr "تم رفض الإذن: يمكن للمسؤول فقط منح حقوق المسؤول أو إزالتها"
+
+#: backend/api/user.py:625
+#, python-brace-format
+msgid "Administrator rights granted to '{userid}'"
+msgstr "تم منح حقوق المسؤول إلى '{userid}'"
+
+#: backend/api/user.py:627
+#, python-brace-format
+msgid "Administrator rights removed from '{userid}'"
+msgstr "تمت إزالة حقوق المسؤول من '{userid}'"
+
+#: backend/api/user.py:664
 msgid "Permission denied: UNLOCK_USER role required"
 msgstr "لا تملك الإذن: يتطلب دور UNLOCK_USER"
 
-#: backend/api/user.py:601
+#: backend/api/user.py:714
 msgid "Permission denied: LOCK_USER role required"
 msgstr "غير مسموح بالوصول: يتطلب دور LOCK_USER"
 
-#: backend/api/user.py:639 backend/api/profile.py:288
+#: backend/api/user.py:752 backend/api/profile.py:288
 #: backend/api/report_branding.py:133
 msgid "No file provided"
 msgstr "لم يتم تقديم ملف"
 
-#: backend/api/user.py:646 backend/api/profile.py:295
+#: backend/api/user.py:759 backend/api/profile.py:295
 msgid "Error reading uploaded file"
 msgstr "خطأ في قراءة الملف المرفوع"
 
-#: backend/api/user.py:674 backend/api/profile.py:328
+#: backend/api/user.py:787 backend/api/profile.py:328
 msgid "Profile image uploaded successfully"
 msgstr "تم تحميل صورة الملف الشخصي بنجاح"
 
-#: backend/api/user.py:698 backend/api/profile.py:356
+#: backend/api/user.py:811 backend/api/profile.py:356
 msgid "No profile image found"
 msgstr "لم يتم العثور على صورة الملف الشخصي"
 
-#: backend/api/user.py:739 backend/api/profile.py:397
+#: backend/api/user.py:852 backend/api/profile.py:397
 msgid "No profile image to delete"
 msgstr "لا يوجد صورة ملف شخصي للحذف"
 
-#: backend/api/user.py:748 backend/api/profile.py:407
+#: backend/api/user.py:861 backend/api/profile.py:407
 msgid "Profile image deleted successfully"
 msgstr "تم حذف صورة الملف الشخصي بنجاح"
 
@@ -3373,34 +3395,34 @@ msgstr "انتهت هذه الوظيفة بالفعل"
 msgid "Cancelled by an operator"
 msgstr "ألغاه مشغل"
 
-#: backend/api/message_handlers.py:473
+#: backend/api/message_handlers.py:501
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "فشل في معالجة نتيجة التشخيص: %s"
 
-#: backend/api/message_handlers.py:507
+#: backend/api/message_handlers.py:535
 msgid "Missing message_id in command acknowledgment"
 msgstr "لم يتم تحديد معرف الرسالة في تأكيد الطلب"
 
-#: backend/api/message_handlers.py:574
+#: backend/api/message_handlers.py:602
 msgid "This session cannot acknowledge another host's message"
 msgstr "لا يمكن لهذه الجلسة الإقرار برسالة مضيف آخر"
 
-#: backend/api/message_handlers.py:637
+#: backend/api/message_handlers.py:672
 msgid "Missing installation_id in package installation status"
 msgstr "لم يتم تحديد معرف التثبيت في حالة التثبيت"
 
-#: backend/api/message_handlers.py:657
+#: backend/api/message_handlers.py:692
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "لم يتم العثور على سجل تثبيت للاستعلام: %s"
 
-#: backend/api/message_handlers.py:703
+#: backend/api/message_handlers.py:738
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr " حالة تثبيت الحزمة {status} على الوكيل {hostname}"
 
-#: backend/api/message_handlers.py:732
+#: backend/api/message_handlers.py:767
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "فشل في تحديث حالة تثبيت الحزم: %s"
@@ -4692,41 +4714,41 @@ msgstr "يوجد بالفعل تكوين منصة لـ %s على هذا المض
 msgid "Platform config still owns %d mirror(s); delete those first"
 msgstr "التكوين الخاص بالمنصة لا يزال يمتلك %d مرآة (ات); قم بإزالتها أولاً"
 
-#: backend/api/audit_log.py:41
+#: backend/api/audit_log.py:42
 msgid "Permission denied: VIEW_AUDIT_LOG role required"
 msgstr "تم رفض الإذن: يتطلب دور `VIEW_AUDIT_LOG`"
 
-#: backend/api/audit_log.py:135
+#: backend/api/audit_log.py:136
 msgid "Invalid user ID format"
 msgstr "تنسيق معرف المستخدم غير صالح"
 
-#: backend/api/audit_log.py:198
+#: backend/api/audit_log.py:202
 msgid "Number of entries to return"
 msgstr "عدد الإدخالات المراد إرجاعها"
 
-#: backend/api/audit_log.py:200
+#: backend/api/audit_log.py:204
 msgid "Number of entries to skip"
 msgstr "عدد الإدخالات المراد تخطيها"
 
-#: backend/api/audit_log.py:234
+#: backend/api/audit_log.py:238
 #, python-format
 msgid "Failed to retrieve audit logs: %s"
 msgstr "فشل استرداد سجلات التدقيق: %s"
 
-#: backend/api/audit_log.py:257
+#: backend/api/audit_log.py:261
 msgid "Invalid audit log ID format"
 msgstr "تنسيق معرف سجل التدقيق غير صالح"
 
-#: backend/api/audit_log.py:268
+#: backend/api/audit_log.py:272
 msgid "Audit log entry not found"
 msgstr "إدخال سجل التدقيق غير موجود"
 
-#: backend/api/audit_log.py:286
+#: backend/api/audit_log.py:290
 #, python-format
 msgid "Failed to retrieve audit log entry: %s"
 msgstr "فشل استرداد إدخال سجل التدقيق: %s"
 
-#: backend/api/audit_log.py:299
+#: backend/api/audit_log.py:303
 #, python-format
 msgid ""
 "%s export requires a SysManage Professional+ license. OSS tier supports CSV "
@@ -4735,29 +4757,29 @@ msgstr ""
 "يتطلب التصدير %s ترخيصًا احترافيًا من SysManage. يدعم مستوى المصدر المفتوح "
 "تصدير ملفات CSV."
 
-#: backend/api/audit_log.py:306
+#: backend/api/audit_log.py:310
 msgid "Use /api/v1/audit/export with Pro+ license"
 msgstr "استخدم /api/v1/audit/export مع ترخيص Pro+"
 
-#: backend/api/audit_log.py:315
+#: backend/api/audit_log.py:319
 msgid "Export format: csv, pdf (OSS); json/cef/leef (Pro+)"
 msgstr "تنسيق التصدير: csv، pdf (OSS)؛ json/cef/leef (Pro+)"
 
-#: backend/api/audit_log.py:338
+#: backend/api/audit_log.py:342
 #, python-format
 msgid "Unsupported export format: %s"
 msgstr "تنسيق التصدير غير مدعوم: %s"
 
 # Reports-related strings
-#: backend/api/audit_log.py:538
+#: backend/api/audit_log.py:548
 msgid "Generated"
 msgstr "تم الإنشاء"
 
-#: backend/api/audit_log.py:540
+#: backend/api/audit_log.py:550
 msgid "Total Entries"
 msgstr "إجمالي الإدخالات"
 
-#: backend/api/audit_log.py:547
+#: backend/api/audit_log.py:557
 msgid "No audit log entries found."
 msgstr "لم يتم العثور على إدخالات في سجل التدقيق."
 
@@ -5178,12 +5200,12 @@ msgstr "خطأ في معالجة رسالة SYSTEM_INFO %(message_id)s: %(error)
 msgid "Failed to get failed messages: %s"
 msgstr "فشل في الحصول على الرسائل الفاشلة: %s"
 
-#: backend/websocket/queue_operations.py:113
+#: backend/websocket/queue_operations.py:160
 #, python-brace-format
 msgid "Host ID {host_id} not found"
 msgstr "لم يتم العثور على رقم المضيف {host_id}"
 
-#: backend/websocket/queue_operations.py:270
+#: backend/websocket/queue_operations.py:317
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -5193,76 +5215,69 @@ msgstr ""
 "الاتجاه=%(direction)s, مستضياف=%(host_id)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:470
+#: backend/websocket/queue_operations.py:517
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "أعلنت الرسالة بأنها تحت التجهيز: %s"
 
-#: backend/websocket/queue_operations.py:477
+#: backend/websocket/queue_operations.py:524
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كجارية: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:520
+#: backend/websocket/queue_operations.py:567
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "أعلنت الرسالة بأنها مكتملة: %s"
 
-#: backend/websocket/queue_operations.py:527
+#: backend/websocket/queue_operations.py:574
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كمنجزة: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:565
+#: backend/websocket/queue_operations.py:675
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "تم تعليم الرسالة كمرسلة (في انتظار التأكيد): %s"
 
-#: backend/websocket/queue_operations.py:572
+#: backend/websocket/queue_operations.py:682
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كمرسلة: %(error)s"
 
-#: backend/websocket/queue_operations.py:601
+#: backend/websocket/queue_operations.py:711
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "لا يمكن تأكيد رسالة غير معروفة: %s"
 
-#: backend/websocket/queue_operations.py:608
-#, python-format
-msgid "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
-msgstr ""
-"الرسالة %(message_id)s ليست في حالة المرسل، تم تخطي التأكيد (حاليًا "
-"%(status)s)"
-
-#: backend/websocket/queue_operations.py:621
+#: backend/websocket/queue_operations.py:721
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "تم تأكيد الرسالة بواسطة الوكيل: %s"
 
-#: backend/websocket/queue_operations.py:628
+#: backend/websocket/queue_operations.py:734
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كمقبولة: %(error)s"
 
-#: backend/websocket/queue_operations.py:692
+#: backend/websocket/queue_operations.py:798
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "لم يتم استلام أي تأكيد خلال %d ثانية"
 
-#: backend/websocket/queue_operations.py:704
+#: backend/websocket/queue_operations.py:810
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "تمت جدولة %d رسالة غير مؤكدة لإعادة المحاولة"
 
-#: backend/websocket/queue_operations.py:712
+#: backend/websocket/queue_operations.py:818
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "خطأ في إعادة محاولة الرسائل غير المؤكدة: %s"
 
-#: backend/websocket/queue_operations.py:772
+#: backend/websocket/queue_operations.py:882
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -5271,19 +5286,19 @@ msgstr ""
 "رسالة %(message_id)s فشلت في المحاولة (%(attempt)d/%(max_retries)d)، مجدولة "
 "لإعادة المحاولة بعد %(backoff)d ثانية"
 
-#: backend/websocket/queue_operations.py:788
+#: backend/websocket/queue_operations.py:898
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
 "%(error)s"
 msgstr "رسالة %(message_id)s فشلت بشكل دائم بعد %(attempts)d محاولة: %(error)s"
 
-#: backend/websocket/queue_operations.py:806
+#: backend/websocket/queue_operations.py:916
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كفاشلة: %(error)s"
 
-#: backend/websocket/queue_operations.py:828
+#: backend/websocket/queue_operations.py:938
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "فشل في فك ترميز الرسالة %(message_id)s: %(error)s"
@@ -5489,17 +5504,17 @@ msgstr "وجود القرص لكن لا يوجد قرص قابل للقراءة 
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "لا يوجد نظام ملفات ISO على الجهاز (fstype=%s)"
 
-#: backend/services/audit_service.py:198
+#: backend/services/audit_service.py:287
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "تم إنشاء {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:246
+#: backend/services/audit_service.py:335
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "تم تحديث {entity_type} '\\u0027{entity_name}\\u0027"
 
-#: backend/services/audit_service.py:294
+#: backend/services/audit_service.py:383
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "حُذِفَت الكيان من نوع ‘{entity_type}’ باسم ‘{entity_name}’"
@@ -5579,6 +5594,13 @@ msgstr "ثغرات حزم pkgsrc في NetBSD (ما يقرؤه pkg_admin audit)"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "ثغرات macOS حسب إصدار نظام التشغيل، من بيانات NVD عن الإصدارات المتأثرة"
+
+#, python-format
+#~ msgid ""
+#~ "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
+#~ msgstr ""
+#~ "الرسالة %(message_id)s ليست في حالة المرسل، تم تخطي التأكيد (حاليًا "
+#~ "%(status)s)"
 
 #, python-format
 #~ msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"

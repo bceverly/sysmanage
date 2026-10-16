@@ -2105,7 +2105,11 @@
     },
     "next": "Weiter",
     "signingInAs": "Anmeldung als {{email}}",
-    "useAnotherEmail": "Andere E-Mail-Adresse verwenden"
+    "useAnotherEmail": "Andere E-Mail-Adresse verwenden",
+    "serverUnreachable": "Der SysManage-Server ist nicht erreichbar. Er ist möglicherweise ausgefallen oder startet neu -- versuchen Sie es in einer Minute erneut.",
+    "invalidCredentials": "E-Mail-Adresse oder Passwort ist falsch.",
+    "serverError": "Beim Anmelden ist auf dem Server ein Fehler aufgetreten. Versuchen Sie es erneut; wenn es weiterhin passiert, prüfen Sie das Serverprotokoll.",
+    "failed": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut."
   },
   "logout": {
     "loading": "Abmeldung läuft..."
@@ -3747,7 +3751,11 @@
     "requiresUnlockedSelection": "Wählen Sie mindestens einen entsperrten Benutzer aus",
     "status": "Status",
     "unlockSelected": "Ausgewählte entsperren",
-    "unlocked": "Entsperrt"
+    "unlocked": "Entsperrt",
+    "administrator": "Administrator",
+    "administratorHelp": "Administratoren erreichen auch Seiten, die keine Sicherheitsrolle abdeckt: Wartungsfenster, das Bedrohungsmodell, die Lizenzverwaltung und Servereinstellungen. Wird sofort wirksam.",
+    "administratorReadOnly": "Nur ein Administrator kann dies ändern.",
+    "adminChangeFailed": "Die Administratorrechte konnten nicht geändert werden."
   },
   "fileWatch": {
     "add": "Neue Liste",
@@ -3839,7 +3847,8 @@
       "insufficientPeers": "keine vergleichbaren Hosts",
       "notApplicable": "gilt nicht für diese Plattform",
       "unsupported": "von diesem Agent nicht unterstützt",
-      "unknown": "Agent hat nie eine Abdeckung gemeldet"
+      "unknown": "Agent hat nie eine Abdeckung gemeldet",
+      "notConfigured": "kein Konfigurationsprofil zugewiesen"
     },
     "evidence": {
       "facts": "Fakten: {{table}}",
@@ -3974,7 +3983,8 @@
         "description": "Installationsweite Prüfungen zu Sicherheit und Ausfallsicherheit, angewendet gemäß Ihrem Bedrohungsmodell.",
         "name": "SysManage-Sicherheitslage"
       }
-    }
+    },
+    "noThreatModel": "Installationsweite Sicherheitsprüfungen werden erst bewertet, wenn Sie Ihre Installation beschrieben haben. Das dauert nur wenige Minuten."
   },
   "posture": {
     "action": {

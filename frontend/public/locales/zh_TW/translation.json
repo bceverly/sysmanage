@@ -2105,7 +2105,11 @@
     },
     "next": "下一步",
     "signingInAs": "以 {{email}} 登入",
-    "useAnotherEmail": "使用其他電子郵件"
+    "useAnotherEmail": "使用其他電子郵件",
+    "serverUnreachable": "無法連線到 SysManage 伺服器。伺服器可能已停止或正在重新啟動，請一分鐘後再試。",
+    "invalidCredentials": "電子郵件或密碼不正確。",
+    "serverError": "登入時伺服器發生錯誤。請再試一次；如果問題持續發生，請檢查伺服器記錄。",
+    "failed": "登入失敗，請再試一次。"
   },
   "logout": {
     "loading": "正在登出..."
@@ -3747,7 +3751,11 @@
     "requiresUnlockedSelection": "選擇至少一個未鎖定的使用者",
     "status": "狀態",
     "unlockSelected": "解除鎖定所選項目",
-    "unlocked": "已解除鎖定"
+    "unlocked": "已解除鎖定",
+    "administrator": "管理員",
+    "administratorHelp": "管理員還可以存取任何安全角色都未涵蓋的頁面：維護時段、威脅模型、授權管理與伺服器設定。立即生效。",
+    "administratorReadOnly": "只有管理員可以變更此項。",
+    "adminChangeFailed": "無法變更管理員權限。"
   },
   "fileWatch": {
     "add": "新清單",
@@ -3839,7 +3847,8 @@
       "insufficientPeers": "沒有可比較的主機",
       "notApplicable": "不適用於此平台",
       "unsupported": "此代理不支援",
-      "unknown": "代理從未回報涵蓋範圍"
+      "unknown": "代理從未回報涵蓋範圍",
+      "notConfigured": "未指派組態設定檔"
     },
     "evidence": {
       "facts": "事實：{{table}}",
@@ -3974,7 +3983,8 @@
         "description": "依據您的威脅模型套用的全域安全性與韌性檢查。",
         "name": "SysManage 安全態勢"
       }
-    }
+    },
+    "noThreatModel": "在您描述您的安裝環境之前，不會評估整個安裝範圍的安全態勢檢查。只需幾分鐘。"
   },
   "posture": {
     "action": {

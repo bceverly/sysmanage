@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-16 07:13-0400\n"
+"POT-Creation-Date: 2026-10-16 13:57-0400\n"
 "Language: es\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -340,7 +340,7 @@ msgstr "Error al procesar la actualización del estado de procesos: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:613 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:648 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "Host no registrado"
@@ -694,7 +694,7 @@ msgstr "Estado del Antivirus Comercial"
 msgid "User Security Roles (RBAC)"
 msgstr "Roles de Seguridad de Usuario (RBAC)"
 
-#: backend/api/reports/endpoints.py:203 backend/api/audit_log.py:536
+#: backend/api/reports/endpoints.py:203 backend/api/audit_log.py:546
 msgid "Audit Log"
 msgstr "Registro de auditoría"
 
@@ -1098,52 +1098,78 @@ msgstr "No se pudo escribir la clave en el almacén: %s"
 msgid "Trusted key not found"
 msgstr "Clave confiable no encontrada"
 
-#: backend/api/user.py:77
+#: backend/api/user.py:84
+msgid ""
+"This is the last active administrator. Make another user an administrator "
+"first."
+msgstr ""
+"Este es el último administrador activo. Primero convierta a otro usuario en "
+"administrador."
+
+#: backend/api/user.py:129
 msgid "Permission denied: DELETE_USER role required"
 msgstr "Permiso denegado: se requiere el rol DELETE_USER"
 
-#: backend/api/user.py:358
+#: backend/api/user.py:415
 msgid "Permission denied: ADD_USER role required"
 msgstr "Permiso denegado: se requiere el rol ADD_USER"
 
-#: backend/api/user.py:368 backend/api/user.py:506
+#: backend/api/user.py:425 backend/api/user.py:566
 msgid "User already exists"
 msgstr "El usuario ya existe"
 
-#: backend/api/user.py:462
+#: backend/api/user.py:519
 msgid "Permission denied: EDIT_USER role required"
 msgstr "Permiso denegado: se requiere el rol EDIT_USER"
 
-#: backend/api/user.py:551
+#: backend/api/user.py:604
+msgid ""
+"Permission denied: only an administrator can grant or remove administrator "
+"rights"
+msgstr ""
+"Permiso denegado: solo un administrador puede conceder o retirar derechos de "
+"administrador"
+
+#: backend/api/user.py:625
+#, python-brace-format
+msgid "Administrator rights granted to '{userid}'"
+msgstr "Derechos de administrador concedidos a '{userid}'"
+
+#: backend/api/user.py:627
+#, python-brace-format
+msgid "Administrator rights removed from '{userid}'"
+msgstr "Derechos de administrador retirados de '{userid}'"
+
+#: backend/api/user.py:664
 msgid "Permission denied: UNLOCK_USER role required"
 msgstr "Permiso denegado: se requiere el rol UNLOCK_USER"
 
-#: backend/api/user.py:601
+#: backend/api/user.py:714
 msgid "Permission denied: LOCK_USER role required"
 msgstr "Permiso denegado: se requiere el rol LOCK_USER"
 
-#: backend/api/user.py:639 backend/api/profile.py:288
+#: backend/api/user.py:752 backend/api/profile.py:288
 #: backend/api/report_branding.py:133
 msgid "No file provided"
 msgstr "No se proporcionó archivo"
 
-#: backend/api/user.py:646 backend/api/profile.py:295
+#: backend/api/user.py:759 backend/api/profile.py:295
 msgid "Error reading uploaded file"
 msgstr "Error al leer el archivo subido"
 
-#: backend/api/user.py:674 backend/api/profile.py:328
+#: backend/api/user.py:787 backend/api/profile.py:328
 msgid "Profile image uploaded successfully"
 msgstr "Imagen del perfil cargada exitosamente"
 
-#: backend/api/user.py:698 backend/api/profile.py:356
+#: backend/api/user.py:811 backend/api/profile.py:356
 msgid "No profile image found"
 msgstr "No se encontró imagen del perfil"
 
-#: backend/api/user.py:739 backend/api/profile.py:397
+#: backend/api/user.py:852 backend/api/profile.py:397
 msgid "No profile image to delete"
 msgstr "No hay imagen del perfil para eliminar"
 
-#: backend/api/user.py:748 backend/api/profile.py:407
+#: backend/api/user.py:861 backend/api/profile.py:407
 msgid "Profile image deleted successfully"
 msgstr "Imagen del perfil eliminada exitosamente"
 
@@ -3459,34 +3485,34 @@ msgstr "Este trabajo ya ha finalizado"
 msgid "Cancelled by an operator"
 msgstr "Cancelado por un operador"
 
-#: backend/api/message_handlers.py:473
+#: backend/api/message_handlers.py:501
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "No se pudo procesar el resultado diagnóstico: %s"
 
-#: backend/api/message_handlers.py:507
+#: backend/api/message_handlers.py:535
 msgid "Missing message_id in command acknowledgment"
 msgstr "Falta message_id en la confirmación de comando"
 
-#: backend/api/message_handlers.py:574
+#: backend/api/message_handlers.py:602
 msgid "This session cannot acknowledge another host's message"
 msgstr "Esta sesión no puede confirmar el mensaje de otro host"
 
-#: backend/api/message_handlers.py:637
+#: backend/api/message_handlers.py:672
 msgid "Missing installation_id in package installation status"
 msgstr "Falta installation_id en el estado de instalación del paquete"
 
-#: backend/api/message_handlers.py:657
+#: backend/api/message_handlers.py:692
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "No se encontró entrada de registro de instalación para ID: %s"
 
-#: backend/api/message_handlers.py:703
+#: backend/api/message_handlers.py:738
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "Instalación del paquete {status} en el agente {hostname}"
 
-#: backend/api/message_handlers.py:732
+#: backend/api/message_handlers.py:767
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "Falló la actualización del estado de instalación del paquete: %s"
@@ -4832,41 +4858,41 @@ msgstr ""
 "La configuración de la plataforma aún posee %d espejo(s); elimine esos "
 "primero"
 
-#: backend/api/audit_log.py:41
+#: backend/api/audit_log.py:42
 msgid "Permission denied: VIEW_AUDIT_LOG role required"
 msgstr "Permiso denegado: se requiere el rol VIEW_AUDIT_LOG"
 
-#: backend/api/audit_log.py:135
+#: backend/api/audit_log.py:136
 msgid "Invalid user ID format"
 msgstr "Formato de ID de usuario no válido"
 
-#: backend/api/audit_log.py:198
+#: backend/api/audit_log.py:202
 msgid "Number of entries to return"
 msgstr "Número de entradas a devolver"
 
-#: backend/api/audit_log.py:200
+#: backend/api/audit_log.py:204
 msgid "Number of entries to skip"
 msgstr "Número de entradas a omitir"
 
-#: backend/api/audit_log.py:234
+#: backend/api/audit_log.py:238
 #, python-format
 msgid "Failed to retrieve audit logs: %s"
 msgstr "Error al recuperar los registros de auditoría: %s"
 
-#: backend/api/audit_log.py:257
+#: backend/api/audit_log.py:261
 msgid "Invalid audit log ID format"
 msgstr "Formato de ID de registro de auditoría no válido"
 
-#: backend/api/audit_log.py:268
+#: backend/api/audit_log.py:272
 msgid "Audit log entry not found"
 msgstr "Entrada de registro de auditoría no encontrada"
 
-#: backend/api/audit_log.py:286
+#: backend/api/audit_log.py:290
 #, python-format
 msgid "Failed to retrieve audit log entry: %s"
 msgstr "Error al recuperar la entrada del registro de auditoría: %s"
 
-#: backend/api/audit_log.py:299
+#: backend/api/audit_log.py:303
 #, python-format
 msgid ""
 "%s export requires a SysManage Professional+ license. OSS tier supports CSV "
@@ -4875,29 +4901,29 @@ msgstr ""
 "La exportación %s requiere una licencia SysManage Professional+. La tier OSS "
 "solo admite la exportación CSV."
 
-#: backend/api/audit_log.py:306
+#: backend/api/audit_log.py:310
 msgid "Use /api/v1/audit/export with Pro+ license"
 msgstr "Use /api/v1/audit/export con licencia Pro+"
 
-#: backend/api/audit_log.py:315
+#: backend/api/audit_log.py:319
 msgid "Export format: csv, pdf (OSS); json/cef/leef (Pro+)"
 msgstr "Formato de exportación: csv, pdf (OSS); json/cef/leef (Pro+)"
 
-#: backend/api/audit_log.py:338
+#: backend/api/audit_log.py:342
 #, python-format
 msgid "Unsupported export format: %s"
 msgstr "Formato de exportación no soportado: %s"
 
 # Reports-related strings
-#: backend/api/audit_log.py:538
+#: backend/api/audit_log.py:548
 msgid "Generated"
 msgstr "Generado"
 
-#: backend/api/audit_log.py:540
+#: backend/api/audit_log.py:550
 msgid "Total Entries"
 msgstr "Total de entradas"
 
-#: backend/api/audit_log.py:547
+#: backend/api/audit_log.py:557
 msgid "No audit log entries found."
 msgstr "No se encontraron entradas en el registro de auditoría."
 
@@ -5331,12 +5357,12 @@ msgstr "Error procesando mensaje SYSTEM_INFO %(message_id)s: %(error)s"
 msgid "Failed to get failed messages: %s"
 msgstr "No se pudo obtener los mensajes fallidos: %s"
 
-#: backend/websocket/queue_operations.py:113
+#: backend/websocket/queue_operations.py:160
 #, python-brace-format
 msgid "Host ID {host_id} not found"
 msgstr "Host ID {host_id} no encontrado"
 
-#: backend/websocket/queue_operations.py:270
+#: backend/websocket/queue_operations.py:317
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -5346,76 +5372,69 @@ msgstr ""
 "dirección=%(direction)s, host_id=%(host_id)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:470
+#: backend/websocket/queue_operations.py:517
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "Se marcó el mensaje como en procesamiento: %s"
 
-#: backend/websocket/queue_operations.py:477
+#: backend/websocket/queue_operations.py:524
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr "No se pudo marcar mensaje %(message_id)s como en proceso: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:520
+#: backend/websocket/queue_operations.py:567
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "Se marcó el mensaje como completado: %s"
 
-#: backend/websocket/queue_operations.py:527
+#: backend/websocket/queue_operations.py:574
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr "No se pudo marcar mensaje %(message_id)s como completado: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:565
+#: backend/websocket/queue_operations.py:675
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "Mensaje marcado como enviado (esperando confirmación): %s"
 
-#: backend/websocket/queue_operations.py:572
+#: backend/websocket/queue_operations.py:682
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr "No se pudo marcar mensaje %(message_id)s como enviado: %(error)s"
 
-#: backend/websocket/queue_operations.py:601
+#: backend/websocket/queue_operations.py:711
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "No se puede confirmar mensaje desconocido: %s"
 
-#: backend/websocket/queue_operations.py:608
-#, python-format
-msgid "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
-msgstr ""
-"El mensaje %(message_id)s no está en estado ENVIADO (es %(status)s), "
-"omitiendo la confirmación de recepción"
-
-#: backend/websocket/queue_operations.py:621
+#: backend/websocket/queue_operations.py:721
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "Mensaje confirmado por el agente: %s"
 
-#: backend/websocket/queue_operations.py:628
+#: backend/websocket/queue_operations.py:734
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr "No se pudo marcar mensaje %(message_id)s como reconocido: %(error)s"
 
-#: backend/websocket/queue_operations.py:692
+#: backend/websocket/queue_operations.py:798
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "No se recibió confirmación dentro de %d segundos"
 
-#: backend/websocket/queue_operations.py:704
+#: backend/websocket/queue_operations.py:810
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "Programados %d mensajes no confirmados para reintento"
 
-#: backend/websocket/queue_operations.py:712
+#: backend/websocket/queue_operations.py:818
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "Error al reintentar mensajes no confirmados: %s"
 
-#: backend/websocket/queue_operations.py:772
+#: backend/websocket/queue_operations.py:882
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -5424,7 +5443,7 @@ msgstr ""
 "El mensaje %(message_id)s falló (intento %(attempt)d/%(max_retries)d), "
 "programado para reintentar en %(backoff)d segundos"
 
-#: backend/websocket/queue_operations.py:788
+#: backend/websocket/queue_operations.py:898
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
@@ -5433,12 +5452,12 @@ msgstr ""
 "El mensaje %(message_id)s fracasó permanentemente después de %(attempts)d "
 "intentos: %(error)s"
 
-#: backend/websocket/queue_operations.py:806
+#: backend/websocket/queue_operations.py:916
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "No se pudo marcar mensaje %(message_id)s como fallido: %(error)s"
 
-#: backend/websocket/queue_operations.py:828
+#: backend/websocket/queue_operations.py:938
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "No se pudo deserializar mensaje %(message_id)s: %(error)s"
@@ -5654,17 +5673,17 @@ msgstr "unidad presente pero sin disco leíble insertado"
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "no hay sistema de archivos ISO en el dispositivo (fstype=%s)"
 
-#: backend/services/audit_service.py:198
+#: backend/services/audit_service.py:287
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "Se creó {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:246
+#: backend/services/audit_service.py:335
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "Actualizado {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:294
+#: backend/services/audit_service.py:383
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "Se eliminó {entity_type} '{entity_name}'"
@@ -5749,6 +5768,13 @@ msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "Vulnerabilidades de macOS por versión del sistema operativo, según los datos "
 "de versiones afectadas del NVD"
+
+#, python-format
+#~ msgid ""
+#~ "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
+#~ msgstr ""
+#~ "El mensaje %(message_id)s no está en estado ENVIADO (es %(status)s), "
+#~ "omitiendo la confirmación de recepción"
 
 #, python-format
 #~ msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"

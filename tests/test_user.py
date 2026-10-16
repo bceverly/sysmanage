@@ -45,6 +45,7 @@ class MockUser:
         self.is_locked = is_locked
         self.failed_login_attempts = 0
         self.locked_at = None
+        self.is_admin = False
         self.profile_image = None
         self.profile_image_type = None
         self.profile_image_uploaded_at = None

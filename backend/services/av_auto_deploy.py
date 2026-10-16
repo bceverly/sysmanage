@@ -32,9 +32,8 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
-from backend.persistence import db as persistence_db
 from backend.persistence import models
 from backend.services import av_plan_builder
 from backend.utils.host_spread import host_offset
@@ -401,36 +400,33 @@ def reconcile(session: Session, label: str = "") -> Dict[str, Any]:
     if low_memory:
         summary["low_memory_hosts"] = sorted(low_memory)
     if pushed:
-        _audit(pushed)
+        _audit(session, pushed)
     _summarize(label, summary)
     return summary
 
 
-def _audit(pushed) -> None:
-    """Audit every automatic push on the main engine (where the audit trail
-    lives), never failing the reconcile over it."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=persistence_db.get_engine()
-    )
+def _audit(session: Session, pushed) -> None:
+    """Audit every automatic push in the host database being reconciled --
+    audit rows are per tenant -- committed with the wave (the caller
+    commits; one commit for the whole wave, 22.3), never failing the
+    reconcile over it."""
     try:
-        with session_local() as audit_session:
-            for host, package, attempts in pushed:
-                AuditService.log(
-                    commit=False,  # one commit for the whole wave (22.3)
-                    db=audit_session,
-                    action_type=ActionType.EXECUTE,
-                    entity_type=EntityType.HOST,
-                    entity_id=str(host.id),
-                    entity_name=host.fqdn,
-                    username=SYSTEM_ACTOR,
-                    description=f"Automatic antivirus deployment queued for host {host.fqdn}",
-                    result=Result.SUCCESS,
-                    details={
-                        "antivirus_package": package,
-                        "plan_version": av_plan_builder.PLAN_VERSION,
-                        "attempt": attempts,
-                    },
-                )
-            audit_session.commit()
+        for host, package, attempts in pushed:
+            AuditService.log(
+                commit=False,
+                db=session,
+                action_type=ActionType.EXECUTE,
+                entity_type=EntityType.HOST,
+                entity_id=str(host.id),
+                entity_name=host.fqdn,
+                username=SYSTEM_ACTOR,
+                description=f"Automatic antivirus deployment queued for host {host.fqdn}",
+                result=Result.SUCCESS,
+                details={
+                    "antivirus_package": package,
+                    "plan_version": av_plan_builder.PLAN_VERSION,
+                    "attempt": attempts,
+                },
+            )
     except Exception:  # pylint: disable=broad-except
         logger.exception("Antivirus auto-deploy audit failed")

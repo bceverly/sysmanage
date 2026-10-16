@@ -219,6 +219,7 @@ def _effective(desc: dict) -> Any:
         desc["key"],
         lambda: _yaml_value(desc["yaml"]),
         default=desc["default"],
+        yaml_path=tuple(desc["yaml"]),
     )
 
 

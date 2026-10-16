@@ -2105,7 +2105,11 @@
     },
     "next": "Avanti",
     "signingInAs": "Accesso come {{email}}",
-    "useAnotherEmail": "Usa un altro indirizzo email"
+    "useAnotherEmail": "Usa un altro indirizzo email",
+    "serverUnreachable": "Impossibile raggiungere il server SysManage. Potrebbe essere inattivo o in riavvio: riprova tra un minuto.",
+    "invalidCredentials": "Email o password errate.",
+    "serverError": "Il server ha avuto un errore durante l'accesso. Riprova; se continua a succedere, controlla il log del server.",
+    "failed": "Accesso non riuscito. Riprova."
   },
   "logout": {
     "loading": "Disconnessione in corso..."
@@ -3747,7 +3751,11 @@
     "requiresUnlockedSelection": "Seleziona almeno un utente sbloccato",
     "status": "Stato",
     "unlockSelected": "Sblocca selezionati",
-    "unlocked": "Sbloccato"
+    "unlocked": "Sbloccato",
+    "administrator": "Amministratore",
+    "administratorHelp": "Gli amministratori accedono anche alle pagine non coperte da alcun ruolo di sicurezza: finestre di manutenzione, modello delle minacce, gestione delle licenze e impostazioni del server. Si applica subito.",
+    "administratorReadOnly": "Solo un amministratore può modificare questa impostazione.",
+    "adminChangeFailed": "Impossibile modificare i diritti di amministratore."
   },
   "fileWatch": {
     "add": "Nuova lista",
@@ -3839,7 +3847,8 @@
       "insufficientPeers": "nessun host confrontabile",
       "notApplicable": "non si applica a questa piattaforma",
       "unsupported": "non supportato da questo agente",
-      "unknown": "l'agente non ha mai segnalato la copertura"
+      "unknown": "l'agente non ha mai segnalato la copertura",
+      "notConfigured": "nessun profilo di configurazione assegnato"
     },
     "evidence": {
       "facts": "Fatti: {{table}}",
@@ -3974,7 +3983,8 @@
         "description": "Controlli di sicurezza e resilienza a livello di installazione, applicati in base al tuo modello delle minacce.",
         "name": "Postura SysManage"
       }
-    }
+    },
+    "noThreatModel": "I controlli di postura a livello di installazione non vengono valutati finché non descrivi la tua installazione. Bastano pochi minuti."
   },
   "posture": {
     "action": {

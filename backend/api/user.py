@@ -7,6 +7,7 @@ This module contains the API implementation for the user object in the system.
 """
 
 import asyncio
+import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -26,7 +27,7 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.login_security import login_security
 from backend.security.roles import SecurityRoles
-from backend.services.audit_service import AuditService, EntityType
+from backend.services.audit_service import ActionType, AuditService, EntityType
 
 # Import will be added at runtime to avoid circular imports
 
@@ -45,6 +46,57 @@ class User(BaseModel):
     password: Optional[str] = None  # Optional for new user creation
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+
+
+class AdminFlag(BaseModel):
+    """Body of PUT /user/{user_id}/admin."""
+
+    is_admin: bool
+
+
+def _is_administrator(session, userid: str) -> bool:
+    """Whether ``userid`` may grant or remove administrator rights: an
+    ``is_admin`` user, or the ``security.admin_userid`` recovery account.
+    Holding EDIT_USER is NOT enough -- administrator rights unlock what no
+    role covers (maintenance windows, the threat model, license...)."""
+    admin_userid = config.get_config().get("security", {}).get("admin_userid")
+    if admin_userid and userid == admin_userid:
+        return True
+    user = session.query(models.User).filter(models.User.userid == userid).first()
+    return bool(user is not None and user.is_admin)
+
+
+def _refuse_losing_last_admin(session, target) -> None:
+    """409 if ``target`` is the only active administrator: demoting,
+    deactivating or deleting it would leave nobody able to reach the
+    administrator-only pages (or to make someone else an administrator)."""
+    if not (target.is_admin and target.active):
+        return
+    active_admins = (
+        session.query(models.User)
+        .filter(models.User.is_admin.is_(True), models.User.active.is_(True))
+        .count()
+    )
+    if active_admins <= 1:
+        raise HTTPException(
+            status_code=409,
+            detail=_(
+                "This is the last active administrator. Make another user an "
+                "administrator first."
+            ),
+        )
+
+
+def _user_by_id(session, user_id: str):
+    """The user row for ``user_id``, or 404 (also for a malformed id)."""
+    try:
+        wanted = uuid.UUID(str(user_id))
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=error_user_not_found()) from exc
+    user = session.query(models.User).filter(models.User.id == wanted).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail=error_user_not_found())
+    return user
 
 
 @router.delete("/user/{user_id}", dependencies=[Depends(JWTBearer())])
@@ -85,6 +137,7 @@ async def delete_user(user_id: str, current_user: str = Depends(get_current_user
             raise HTTPException(status_code=404, detail=error_user_not_found())
 
         deleted_user = users[0]
+        _refuse_losing_last_admin(session, deleted_user)
         # Extract values before deletion to avoid ObjectDeletedError
         deleted_userid = deleted_user.userid
 
@@ -203,6 +256,7 @@ async def get_logged_in_user(request: Request):
             is_locked=users[0].is_locked,
             failed_login_attempts=users[0].failed_login_attempts,
             locked_at=users[0].locked_at,
+            is_admin=users[0].is_admin,
         )
 
         return ret_user
@@ -235,6 +289,7 @@ async def get_user(user_id: str):
             is_locked=users[0].is_locked,
             failed_login_attempts=users[0].failed_login_attempts,
             locked_at=users[0].locked_at,
+            is_admin=users[0].is_admin,
         )
 
         return ret_user
@@ -267,6 +322,7 @@ async def get_user_by_userid(userid: str):
             is_locked=users[0].is_locked,
             failed_login_attempts=users[0].failed_login_attempts,
             locked_at=users[0].locked_at,
+            is_admin=users[0].is_admin,
         )
 
         return ret_user
@@ -297,6 +353,7 @@ def _get_all_users_sync():
                 is_locked=user.is_locked,
                 failed_login_attempts=user.failed_login_attempts,
                 locked_at=user.locked_at,
+                is_admin=user.is_admin,
             )
             ret_users.append(the_user)
 
@@ -469,6 +526,9 @@ async def update_user(
         if len(users) != 1:
             raise HTTPException(status_code=404, detail=error_user_not_found())
 
+        if not user_data.active:
+            _refuse_losing_last_admin(session, users[0])
+
         # No need to check for userid duplicates explicitly - the database unique constraint will handle this
 
         # Update the values
@@ -520,6 +580,59 @@ async def update_user(
         )
 
     return ret_user
+
+
+@router.put("/user/{user_id}/admin", dependencies=[Depends(JWTBearer())])
+async def set_user_admin(
+    user_id: str, flag: AdminFlag, current_user: str = Depends(get_current_user)
+):
+    """Grant or remove administrator rights (``is_admin``).
+
+    Only an administrator may do this, and the last active administrator
+    cannot be demoted.  Users are server-global, so this always runs on the
+    bootstrap engine, never a tenant session; the audit entry (a ``user``
+    entity) is server-scoped and lands there too.
+    """
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+    with session_local() as session:
+        if not _is_administrator(session, current_user):
+            raise HTTPException(
+                status_code=403,
+                detail=_(
+                    "Permission denied: only an administrator can grant or remove "
+                    "administrator rights"
+                ),
+            )
+        target = _user_by_id(session, user_id)
+        previous = bool(target.is_admin)
+        if previous != flag.is_admin:
+            if not flag.is_admin:
+                _refuse_losing_last_admin(session, target)
+            target.is_admin = flag.is_admin
+            session.commit()
+            actor = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
+            )
+            AuditService.log(
+                db=session,
+                action_type=ActionType.UPDATE,
+                entity_type=EntityType.USER,
+                description=(
+                    _("Administrator rights granted to '{userid}'")
+                    if flag.is_admin
+                    else _("Administrator rights removed from '{userid}'")
+                ).format(userid=target.userid),
+                user_id=actor.id if actor is not None else None,
+                username=current_user,
+                entity_id=str(target.id),
+                entity_name=target.userid,
+                details={"is_admin": flag.is_admin, "previous": previous},
+            )
+        return {"id": str(target.id), "is_admin": bool(target.is_admin)}
 
 
 @router.post("/user/{user_id}/unlock", dependencies=[Depends(JWTBearer())])

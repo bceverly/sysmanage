@@ -15,8 +15,12 @@
 # (the same hasher backend/api/user.py uses) so the new hash is in the
 # format the login path expects.  After the password reset, every row
 # from ``security_roles`` is mapped to the user via
-# ``user_security_roles``, replacing any prior role assignments -- so
-# this user becomes a full administrator with access to every UI page.
+# ``user_security_roles``, replacing any prior role assignments, and the
+# user's ``is_admin`` flag is set -- so this user becomes a full
+# administrator with access to every UI page.  Both are needed: most pages
+# check roles, but a handful (maintenance windows, the threat model, posture
+# remedies, malware rule sets, logging / CVE-refresh / hardware-health
+# settings, license management) check ``is_admin`` instead.
 
 set -euo pipefail
 
@@ -88,9 +92,9 @@ hashed = PasswordHasher().hash(os.environ["FORCE_NEWPW"])
 
 with psycopg.connect(dsn) as conn:
     with conn.cursor() as cur:
-        # Columns per backend/persistence/models/core.py:277 (User model):
+        # Columns per backend/persistence/models/core.py (User model):
         #   hashed_password, failed_login_attempts, is_locked, locked_at,
-        #   active.  Table is "user" (singular) -- quoted because it's a
+        #   active, is_admin.  Table is "user" (singular) -- quoted because it's a
         #   postgres reserved word.
         cur.execute(
             'UPDATE "user" '
@@ -98,7 +102,8 @@ with psycopg.connect(dsn) as conn:
             '    failed_login_attempts = 0, '
             '    is_locked = FALSE, '
             '    locked_at = NULL, '
-            '    active = TRUE '
+            '    active = TRUE, '
+            '    is_admin = TRUE '
             'WHERE userid = %s '
             'RETURNING id',
             (hashed, os.environ["FORCE_USERID"]),
@@ -108,7 +113,7 @@ with psycopg.connect(dsn) as conn:
             print(f"no user found with userid={os.environ['FORCE_USERID']!r}", file=sys.stderr)
             sys.exit(3)
         user_id = row[0]
-        print(f"reset password for {os.environ['FORCE_USERID']} (id={user_id})")
+        print(f"reset password for {os.environ['FORCE_USERID']} (id={user_id}); is_admin set")
 
         # Grant every security role to the user.  Replaces any prior
         # role assignment so re-running yields an idempotent state of

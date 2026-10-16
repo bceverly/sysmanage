@@ -8,6 +8,7 @@ This module encapsulates the reading and processing of the config file
 various properties specified therein.
 """
 
+import copy
 import os
 import sys
 
@@ -44,6 +45,9 @@ try:
             )
             print("Please configure the file with valid YAML settings")
             sys.exit(1)
+        # What the operator actually wrote, before built-in defaults are
+        # merged in -- see file_has().
+        _FILE_CONFIG = copy.deepcopy(config)
         apply_defaults(config, CONFIG_PATH)
 except yaml.YAMLError as exc:
     if hasattr(exc, "problem_mark"):
@@ -61,7 +65,23 @@ def get_config():
     return config
 
 
-def _server_setting(key, yaml_getter, default=None):
+def file_has(*path) -> bool:
+    """True when sysmanage.yaml ITSELF sets ``path`` (e.g. "security",
+    "jwt_auth_timeout") -- not when the value is a built-in default that
+    apply_defaults() merged in.  The deprecation warning for YAML-sourced
+    settings fires only for these; it used to fire for every default too,
+    about twenty warnings per start for keys nobody had written."""
+    node = globals().get("_FILE_CONFIG")
+    if node is None:
+        return True  # unknown provenance: keep the old (warning) behavior
+    for part in path:
+        if not isinstance(node, dict) or part not in node:
+            return False
+        node = node[part]
+    return node is not None
+
+
+def _server_setting(key, yaml_getter, default=None, yaml_path=None):
     """Resolve a server-scoped operational setting (Phase 13.1.H).
 
     Reads the DB-backed Settings table first (via settings_service), falling
@@ -72,7 +92,9 @@ def _server_setting(key, yaml_getter, default=None):
     try:
         from backend.config import settings_service  # noqa: PLC0415
 
-        return settings_service.get_setting(key, yaml_getter, default=default)
+        return settings_service.get_setting(
+            key, yaml_getter, default=default, yaml_path=yaml_path
+        )
     except Exception:  # noqa: BLE001
         try:
             return yaml_getter()
@@ -107,6 +129,7 @@ def get_heartbeat_timeout_minutes():
         "heartbeat_timeout",
         lambda: config["monitoring"]["heartbeat_timeout"],
         default=5,
+        yaml_path=("monitoring", "heartbeat_timeout"),
     )
 
 
@@ -115,7 +138,10 @@ def get_max_failed_logins():
     Get the maximum number of failed login attempts before account lockout.
     """
     return _server_setting(
-        "max_failed_logins", lambda: config["security"]["max_failed_logins"], default=5
+        "max_failed_logins",
+        lambda: config["security"]["max_failed_logins"],
+        default=5,
+        yaml_path=("security", "max_failed_logins"),
     )
 
 
@@ -127,6 +153,7 @@ def get_account_lockout_duration():
         "account_lockout_duration",
         lambda: config["security"]["account_lockout_duration"],
         default=15,
+        yaml_path=("security", "account_lockout_duration"),
     )
 
 
@@ -179,6 +206,7 @@ def get_jwt_auth_timeout():
             "jwt_auth_timeout",
             lambda: config["security"]["jwt_auth_timeout"],
             default=3600,
+            yaml_path=("security", "jwt_auth_timeout"),
         )
     )
 
@@ -193,6 +221,7 @@ def get_jwt_refresh_timeout():
             "jwt_refresh_timeout",
             lambda: config["security"]["jwt_refresh_timeout"],
             default=86400,
+            yaml_path=("security", "jwt_refresh_timeout"),
         )
     )
 
@@ -208,6 +237,7 @@ def get_cookie_domain():
         "cookie_domain",
         lambda: config["security"].get("cookie_domain"),
         default=None,
+        yaml_path=("security", "cookie_domain"),
     )
     return value or None
 
@@ -370,7 +400,10 @@ def is_email_enabled():
         return bool(tenant_value)
     return bool(
         _server_setting(
-            "email_enabled", lambda: config["email"]["enabled"], default=False
+            "email_enabled",
+            lambda: config["email"]["enabled"],
+            default=False,
+            yaml_path=("email", "enabled"),
         )
     )
 
@@ -527,6 +560,7 @@ def get_license_phone_home_url():
         "license_phone_home_url",
         lambda: config["license"]["phone_home_url"],
         default="https://license.sysmanage.io",
+        yaml_path=("license", "phone_home_url"),
     )
 
 
@@ -538,6 +572,7 @@ def get_license_phone_home_interval():
         "license_phone_home_interval_hours",
         lambda: config["license"]["phone_home_interval_hours"],
         default=24,
+        yaml_path=("license", "phone_home_interval_hours"),
     )
 
 
@@ -560,6 +595,7 @@ def get_custom_metrics_retention_days():
         "custom_metrics_retention_days",
         lambda: config["custom_metrics"]["retention_days"],
         default=90,
+        yaml_path=("custom_metrics", "retention_days"),
     )
 
 
@@ -627,6 +663,7 @@ def is_geo_lookup_enabled() -> bool:
             "geo_lookup_enabled",
             lambda: config.get("geo_lookup", {}).get("enabled", False),
             default=False,
+            yaml_path=("geo_lookup", "enabled"),
         )
     )
 
@@ -660,6 +697,7 @@ def get_geo_lookup_refresh_interval_hours() -> int:
             "geo_lookup_refresh_interval_hours",
             lambda: config.get("geo_lookup", {}).get("refresh_interval_hours", 168),
             default=168,
+            yaml_path=("geo_lookup", "refresh_interval_hours"),
         )
     )
 
@@ -674,6 +712,7 @@ def is_geo_lookup_ipapi_fallback_enabled() -> bool:
             "geo_lookup_ipapi_fallback_enabled",
             lambda: config.get("geo_lookup", {}).get("ipapi_fallback_enabled", True),
             default=True,
+            yaml_path=("geo_lookup", "ipapi_fallback_enabled"),
         )
     )
 

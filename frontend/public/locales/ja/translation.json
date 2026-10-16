@@ -2105,7 +2105,11 @@
     },
     "next": "次へ",
     "signingInAs": "{{email}} としてサインイン",
-    "useAnotherEmail": "別のメールアドレスを使用"
+    "useAnotherEmail": "別のメールアドレスを使用",
+    "serverUnreachable": "SysManage サーバーに接続できません。停止中または再起動中の可能性があります。1 分ほどしてから再試行してください。",
+    "invalidCredentials": "メールアドレスまたはパスワードが正しくありません。",
+    "serverError": "サインイン中にサーバーでエラーが発生しました。再試行してください。繰り返し発生する場合はサーバーログを確認してください。",
+    "failed": "ログインに失敗しました。もう一度お試しください。"
   },
   "logout": {
     "loading": "ログアウト中..."
@@ -3747,7 +3751,11 @@
     "requiresUnlockedSelection": "少なくとも1人のアンロックされたユーザーを選択する",
     "status": "ステータス",
     "unlockSelected": "選択項目のロック解除",
-    "unlocked": "ロック解除済み"
+    "unlocked": "ロック解除済み",
+    "administrator": "管理者",
+    "administratorHelp": "管理者は、どのセキュリティロールにも含まれないページ（メンテナンスウィンドウ、脅威モデル、ライセンス管理、サーバー設定）にもアクセスできます。すぐに適用されます。",
+    "administratorReadOnly": "これを変更できるのは管理者だけです。",
+    "adminChangeFailed": "管理者権限を変更できませんでした。"
   },
   "fileWatch": {
     "add": "新しいリスト",
@@ -3839,7 +3847,8 @@
       "insufficientPeers": "比較対象のホストがありません",
       "notApplicable": "このプラットフォームには適用されません",
       "unsupported": "このエージェントではサポートされていません",
-      "unknown": "エージェントが収集範囲を一度も報告していません"
+      "unknown": "エージェントが収集範囲を一度も報告していません",
+      "notConfigured": "構成プロファイルが割り当てられていません"
     },
     "evidence": {
       "facts": "ファクト: {{table}}",
@@ -3974,7 +3983,8 @@
         "description": "脅威モデルに応じて適用される、インストール全体のセキュリティおよびレジリエンスのチェック。",
         "name": "SysManage 態勢"
       }
-    }
+    },
+    "noThreatModel": "インストール全体のポスチャーチェックは、インストール環境を説明するまで評価されません。数分で完了します。"
   },
   "posture": {
     "action": {

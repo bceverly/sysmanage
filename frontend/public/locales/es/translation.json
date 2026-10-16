@@ -2105,7 +2105,11 @@
     },
     "next": "Siguiente",
     "signingInAs": "Iniciando sesión como {{email}}",
-    "useAnotherEmail": "Usar otro correo"
+    "useAnotherEmail": "Usar otro correo",
+    "serverUnreachable": "No se puede conectar con el servidor de SysManage. Puede estar caído o reiniciándose; inténtelo de nuevo en un minuto.",
+    "invalidCredentials": "Correo electrónico o contraseña incorrectos.",
+    "serverError": "El servidor falló al iniciar su sesión. Inténtelo de nuevo; si sigue ocurriendo, revise el registro del servidor.",
+    "failed": "Error al iniciar sesión. Inténtelo de nuevo."
   },
   "logout": {
     "loading": "Cerrando sesión..."
@@ -3747,7 +3751,11 @@
     "requiresUnlockedSelection": "Seleccionar al menos un usuario desbloqueado",
     "status": "Estado",
     "unlockSelected": "Desbloquear seleccionados",
-    "unlocked": "Desbloqueado"
+    "unlocked": "Desbloqueado",
+    "administrator": "Administrador",
+    "administratorHelp": "Los administradores también pueden acceder a páginas que ningún rol de seguridad cubre: ventanas de mantenimiento, el modelo de amenazas, la gestión de licencias y la configuración del servidor. Se aplica de inmediato.",
+    "administratorReadOnly": "Solo un administrador puede cambiar esto.",
+    "adminChangeFailed": "No se pudieron cambiar los derechos de administrador."
   },
   "fileWatch": {
     "add": "Nueva lista",
@@ -3839,7 +3847,8 @@
       "insufficientPeers": "no hay hosts comparables",
       "notApplicable": "no se aplica a esta plataforma",
       "unsupported": "este agente no lo admite",
-      "unknown": "el agente nunca informó su cobertura"
+      "unknown": "el agente nunca informó su cobertura",
+      "notConfigured": "no hay ningún perfil de configuración asignado"
     },
     "evidence": {
       "facts": "Hechos: {{table}}",
@@ -3974,7 +3983,8 @@
         "description": "Comprobaciones de seguridad y resiliencia de toda la instalación, aplicadas según su modelo de amenazas.",
         "name": "Postura de SysManage"
       }
-    }
+    },
+    "noThreatModel": "Las comprobaciones de postura de toda la instalación no se evalúan hasta que describa su instalación. Solo lleva unos minutos."
   },
   "posture": {
     "action": {

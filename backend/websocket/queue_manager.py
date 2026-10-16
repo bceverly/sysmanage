@@ -226,6 +226,13 @@ class ServerMessageQueueManager:
         """
         return self._operations.mark_sent(message_id=message_id, db=db)
 
+    def complete_on_result(self, command_id: str, host_id, db: Session) -> bool:
+        """Close the command a result answers, even if the queue gave up on it.
+
+        See ``QueueOperations.complete_on_result``.  Caller commits.
+        """
+        return self._operations.complete_on_result(command_id, host_id, db)
+
     def mark_acknowledged(self, message_id: str, db: Session = None) -> bool:
         """
         Mark a sent message as acknowledged by the agent.

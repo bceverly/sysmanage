@@ -44,6 +44,7 @@ import AdvisorRuleTable from '../Components/Advisor/AdvisorRuleTable';
 import AdvisorProposalList from '../Components/Advisor/AdvisorProposalList';
 import AdvisorPacks from '../Components/Advisor/AdvisorPacks';
 import PostureTab from '../Components/Posture/PostureTab';
+import { postureService } from '../Services/postureService';
 import { lensLabel } from '../Components/Advisor/advisorLabels';
 
 const LENSES = ['security', 'performance', 'availability', 'stability'];
@@ -66,6 +67,8 @@ const Totals: React.FC<{ feed: AdvisorFeed }> = ({ feed }) => {
         </Card>
     );
 };
+
+const POSTURE_TAB = 3;
 
 const Advisor: React.FC = () => {
     const { t } = useTranslation();
@@ -98,6 +101,19 @@ const Advisor: React.FC = () => {
 
     useEffect(() => { void load(); }, [load]);
 
+    // Without a threat model the installation-wide posture checks cannot be
+    // assessed, and the questionnaire that fixes that sits on the fourth
+    // tab -- easy to miss.  null = not known yet (or the check failed):
+    // say nothing rather than nag on a guess.  Re-checked on every tab change
+    // so the banner goes away once the questionnaire is saved.
+    const [hasThreatModel, setHasThreatModel] = useState<boolean | null>(null);
+    const [startWizard, setStartWizard] = useState(false);
+    useEffect(() => {
+        postureService.getThreatModel()
+            .then(m => setHasThreatModel(m.current !== null))
+            .catch(() => setHasThreatModel(null));
+    }, [tab]);
+
     const evaluate = async () => {
         setEvaluating(true);
         try {
@@ -128,6 +144,18 @@ const Advisor: React.FC = () => {
                     <Grid size={{ xs: 12, md: 6 }}><Totals feed={feed} /></Grid>
                 </Grid>
             )}
+            {hasThreatModel === false && tab !== POSTURE_TAB && (
+                <Alert severity="info" sx={{ mb: 2 }} data-testid="advisor-no-threat-model"
+                    action={
+                        <Button color="inherit" size="small"
+                            onClick={() => { setStartWizard(true); setTab(POSTURE_TAB); }}>
+                            {t('posture.noModel.start', 'Start the questionnaire')}
+                        </Button>
+                    }>
+                    {t('advisor.noThreatModel',
+                        'Installation-wide posture checks are not assessed until you describe your installation. It takes a few minutes.')}
+                </Alert>
+            )}
             <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 1 }}>
                 <Tab label={t('advisor.tabs.recommendations', 'Recommendations')} />
                 <Tab label={t('advisor.tabs.proposals', 'Proposed fixes ({{count}})', { count: openProposals })} />
@@ -149,7 +177,7 @@ const Advisor: React.FC = () => {
             )}
             {tab === 1 && <AdvisorProposalList proposals={proposals} onChanged={load} />}
             {tab === 2 && <AdvisorPacks packs={packs} onChanged={load} />}
-            {tab === 3 && <PostureTab />}
+            {tab === POSTURE_TAB && <PostureTab startWizard={startWizard} />}
         </Box>
     );
 };

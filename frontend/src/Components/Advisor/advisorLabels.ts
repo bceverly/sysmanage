@@ -67,6 +67,7 @@ export const gapReasonLabel = (t: TFunction, reason: string): string => {
         domain_unavailable: t('advisor.gap.domainUnavailable', 'not measured by this version'),
         rule_error: t('advisor.gap.ruleError', 'the rule could not be evaluated'),
         insufficient_peers: t('advisor.gap.insufficientPeers', 'no comparable hosts'),
+        not_configured: t('advisor.gap.notConfigured', 'no configuration profile assigned'),
         not_applicable: t('advisor.gap.notApplicable', 'does not apply to this platform'),
         unsupported: t('advisor.gap.unsupported', 'not supported by this agent'),
         unknown: t('advisor.gap.unknown', 'agent never reported coverage'),

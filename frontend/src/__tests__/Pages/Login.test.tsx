@@ -90,6 +90,40 @@ describe('Login page (email first, then password or single sign-on)', () => {
     });
     expect(api.post).toHaveBeenCalledWith('/api/v1/login', { userid: 'bryan@acme.com', password: 'secret' });
   });
+
+  // A failed login used to show nothing, so a server down for an upgrade
+  // (nginx 502) looked exactly like a wrong password (2026-10-16).
+  const failLogin = async (failure: unknown) => {
+    vi.mocked(discoverLoginMethods).mockResolvedValue({ password: true, providers: [] });
+    vi.mocked(api.post).mockRejectedValue(failure);
+    await renderLogin();
+    await enterEmail('bryan@acme.com');
+    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'secret' } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /login/i }));
+    });
+    return screen.getByTestId('login-error');
+  };
+
+  test('a server that is down says so', async () => {
+    const alert = await failLogin({ response: { status: 502 } });
+    expect(alert).toHaveTextContent(/Cannot reach the SysManage server/);
+  });
+
+  test('no response at all is also the server being unreachable', async () => {
+    const alert = await failLogin(new Error('Network Error'));
+    expect(alert).toHaveTextContent(/Cannot reach the SysManage server/);
+  });
+
+  test('a wrong password says so', async () => {
+    const alert = await failLogin({ response: { status: 401, data: { detail: 'Invalid username or password' } } });
+    expect(alert).toHaveTextContent(/Incorrect email or password/);
+  });
+
+  test("a lockout shows the server's own reason", async () => {
+    const alert = await failLogin({ response: { status: 423, data: { detail: 'Account locked for 15 minutes' } } });
+    expect(alert).toHaveTextContent('Account locked for 15 minutes');
+  });
 });
 
 // The rest drive the password / MFA flow end to end.  MemoryRouter keeps the
@@ -265,11 +299,18 @@ describe('Login page (password and two-factor flow)', () => {
 
     test('other failures show a generic error', async () => {
       await toChallenge();
-      vi.mocked(api.post).mockRejectedValueOnce(new Error('network'));
+      vi.mocked(api.post).mockRejectedValueOnce({ response: { status: 400 } });
       await submitCode('123456');
       expect(
         screen.getByText('Verification failed. Please try again.'),
       ).toBeInTheDocument();
+    });
+
+    test('a server that went away mid-challenge says so', async () => {
+      await toChallenge();
+      vi.mocked(api.post).mockRejectedValueOnce(new Error('network'));
+      await submitCode('123456');
+      expect(screen.getByText(/Cannot reach the SysManage server/)).toBeInTheDocument();
     });
 
     test('submitting a blank code is ignored', async () => {

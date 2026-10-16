@@ -2105,7 +2105,11 @@
     },
     "next": "Avançar",
     "signingInAs": "Entrando como {{email}}",
-    "useAnotherEmail": "Usar outro e-mail"
+    "useAnotherEmail": "Usar outro e-mail",
+    "serverUnreachable": "Não é possível acessar o servidor SysManage. Ele pode estar fora do ar ou reiniciando -- tente novamente em um minuto.",
+    "invalidCredentials": "E-mail ou senha incorretos.",
+    "serverError": "O servidor falhou ao fazer seu login. Tente novamente; se continuar acontecendo, verifique o log do servidor.",
+    "failed": "Falha no login. Tente novamente."
   },
   "logout": {
     "loading": "Fazendo logout..."
@@ -3747,7 +3751,11 @@
     "requiresUnlockedSelection": "Selecione pelo menos um usuário desbloqueado",
     "status": "Estado",
     "unlockSelected": "Desbloquear selecionados",
-    "unlocked": "Desbloqueado"
+    "unlocked": "Desbloqueado",
+    "administrator": "Administrador",
+    "administratorHelp": "Os administradores também acessam páginas que nenhuma função de segurança cobre: janelas de manutenção, o modelo de ameaças, o gerenciamento de licenças e as configurações do servidor. Aplica-se imediatamente.",
+    "administratorReadOnly": "Somente um administrador pode alterar isto.",
+    "adminChangeFailed": "Não foi possível alterar os direitos de administrador."
   },
   "fileWatch": {
     "add": "Nova lista",
@@ -3839,7 +3847,8 @@
       "insufficientPeers": "nenhum host comparável",
       "notApplicable": "não se aplica a esta plataforma",
       "unsupported": "não suportado por este agente",
-      "unknown": "o agente nunca informou a cobertura"
+      "unknown": "o agente nunca informou a cobertura",
+      "notConfigured": "nenhum perfil de configuração atribuído"
     },
     "evidence": {
       "facts": "Fatos: {{table}}",
@@ -3974,7 +3983,8 @@
         "description": "Verificações de segurança e resiliência de toda a instalação, aplicadas de acordo com seu modelo de ameaças.",
         "name": "Postura do SysManage"
       }
-    }
+    },
+    "noThreatModel": "As verificações de postura de toda a instalação não são avaliadas até que você descreva sua instalação. Leva só alguns minutos."
   },
   "posture": {
     "action": {

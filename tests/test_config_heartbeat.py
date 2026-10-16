@@ -29,7 +29,7 @@ def _isolate_config_from_db_and_vault(monkeypatch):
     monkeypatch.setattr(
         _cfg,
         "_server_setting",
-        lambda key, yaml_getter=None, default=None: (
+        lambda key, yaml_getter=None, default=None, yaml_path=None: (
             yaml_getter() if yaml_getter else default
         ),
     )

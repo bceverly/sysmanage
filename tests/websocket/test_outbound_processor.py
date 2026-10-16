@@ -383,3 +383,13 @@ class TestOutboundProcessorModuleImports:
         assert hasattr(QueueStatus, "SENT")
         assert hasattr(QueueStatus, "COMPLETED")
         assert hasattr(QueueStatus, "FAILED")
+
+
+@pytest.fixture(autouse=True)
+def _host_has_a_live_connection(monkeypatch):
+    """These tests exercise the send paths, which run only for a host this
+    process holds a socket for; a disconnected host's commands are held
+    without spending a retry (tests/websocket/test_late_acknowledgment.py)."""
+    from backend.websocket import outbound_processor as _outbound  # noqa: PLC0415
+
+    monkeypatch.setattr(_outbound, "_connected", lambda host: True)

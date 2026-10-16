@@ -2105,7 +2105,11 @@
     },
     "next": "Volgende",
     "signingInAs": "Aanmelden als {{email}}",
-    "useAnotherEmail": "Een ander e-mailadres gebruiken"
+    "useAnotherEmail": "Een ander e-mailadres gebruiken",
+    "serverUnreachable": "De SysManage-server is niet bereikbaar. Hij is mogelijk uitgevallen of wordt opnieuw gestart -- probeer het over een minuut opnieuw.",
+    "invalidCredentials": "Onjuist e-mailadres of wachtwoord.",
+    "serverError": "Er ging iets mis op de server tijdens het aanmelden. Probeer het opnieuw; als het blijft gebeuren, controleer dan het serverlogboek.",
+    "failed": "Aanmelden mislukt. Probeer het opnieuw."
   },
   "logout": {
     "loading": "Uitloggen..."
@@ -3747,7 +3751,11 @@
     "requiresUnlockedSelection": "Selecteer ten minste één ontgrendelde gebruiker",
     "status": "Status",
     "unlockSelected": "Geselecteerde ontgrendelen",
-    "unlocked": "Ontgrendeld"
+    "unlocked": "Ontgrendeld",
+    "administrator": "Beheerder",
+    "administratorHelp": "Beheerders kunnen ook pagina's openen die geen beveiligingsrol dekt: onderhoudsvensters, het dreigingsmodel, licentiebeheer en serverinstellingen. Wordt direct toegepast.",
+    "administratorReadOnly": "Alleen een beheerder kan dit wijzigen.",
+    "adminChangeFailed": "De beheerdersrechten konden niet worden gewijzigd."
   },
   "fileWatch": {
     "add": "Nieuwe lijst",
@@ -3839,7 +3847,8 @@
       "insufficientPeers": "geen vergelijkbare hosts",
       "notApplicable": "niet van toepassing op dit platform",
       "unsupported": "niet ondersteund door deze agent",
-      "unknown": "agent heeft nooit dekking gerapporteerd"
+      "unknown": "agent heeft nooit dekking gerapporteerd",
+      "notConfigured": "geen configuratieprofiel toegewezen"
     },
     "evidence": {
       "facts": "Feiten: {{table}}",
@@ -3974,7 +3983,8 @@
         "description": "Installatiebrede controles op beveiliging en veerkracht, toegepast volgens uw dreigingsmodel.",
         "name": "SysManage-beveiligingsstatus"
       }
-    }
+    },
+    "noThreatModel": "Postuurcontroles voor de hele installatie worden pas beoordeeld als u uw installatie hebt beschreven. Dat kost maar een paar minuten."
   },
   "posture": {
     "action": {

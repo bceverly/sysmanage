@@ -201,6 +201,28 @@ def _log_command_sent(message, message_data, host) -> None:
     )
 
 
+# How soon a command for a host with no live connection is looked at again.
+NOT_CONNECTED_RECHECK_SECONDS = 15
+
+
+def _connected(host) -> bool:
+    """True when THIS process holds a live WebSocket for ``host``.
+
+    Matches the way ``connection_manager.send_to_host`` resolves a host
+    (its fqdn against the connected hostnames, case-insensitively), so a
+    False here is exactly a send that would have failed.
+    """
+    from backend.websocket.connection_manager import (  # noqa: PLC0415
+        connection_manager,
+    )
+
+    name = (host.fqdn or "").lower()
+    return any(
+        hostname.lower() == name and agent_id in connection_manager.active_connections
+        for hostname, agent_id in connection_manager.hostname_to_agent.items()
+    )
+
+
 def _awaiting_poll(host) -> bool:
     """True when ``host`` has no WebSocket but is polling over HTTP."""
     from backend.websocket import poll_presence  # noqa: PLC0415
@@ -211,6 +233,22 @@ def _awaiting_poll(host) -> bool:
     if connection_manager.get_agent_by_hostname(host.fqdn):
         return False
     return poll_presence.recently_polled(host.id)
+
+
+# Server -> agent notices delivered as-is (not commands, never acknowledged).
+# Every outbound type a server path enqueues must be listed here or under
+# "command", or it is failed as unknown.  host_approved and broadcast were
+# not: no agent ever received its approval notice, so it never re-sent the
+# reports it had sent while still pending (they were dropped) -- beast's
+# hardware and network interfaces stayed missing and network discovery
+# called it unmanaged (production, 2026-10-16).
+NOTICE_MESSAGE_TYPES = frozenset(
+    {
+        "logging_config_update",
+        "host_approved",
+        "broadcast",
+    }
+)
 
 
 async def process_outbound_message(message, host, db: Session) -> None:
@@ -225,6 +263,21 @@ async def process_outbound_message(message, host, db: Session) -> None:
     if _awaiting_poll(host):
         # No socket, but the agent is on the HTTP fallback: leave the message
         # PENDING so its next poll collects it (see poll_presence).
+        return
+    if not _connected(host):
+        # No socket at all -- typically the minutes after a server restart,
+        # while agents back off and reconnect.  Sending would fail and burn
+        # one of the message's three retries: an apply_updates created then
+        # ran out of retries before its host came back (2026-10-16).  Leave it
+        # PENDING, look again shortly; its expiry still bounds the wait.
+        message.scheduled_at = datetime.now(timezone.utc).replace(
+            tzinfo=None
+        ) + timedelta(seconds=NOT_CONNECTED_RECHECK_SECONDS)
+        logger.debug(
+            "Host %s not connected; holding message %s",
+            host.fqdn,
+            message.message_id,
+        )
         return
     try:
         # Mark message as processing
@@ -258,16 +311,16 @@ async def process_outbound_message(message, host, db: Session) -> None:
                 server_queue_manager.mark_failed(
                     message.message_id, "Failed to send message to agent", db=db
                 )
-        elif message.message_type == "logging_config_update":
-            # Fire-and-forget config push: the agent applies it and does not
-            # send an acknowledgment, so mark COMPLETED on a successful send
-            # rather than SENT-awaiting-ack (which would retry forever).
+        elif message.message_type in NOTICE_MESSAGE_TYPES:
+            # Fire-and-forget notice: the agent acts on it and does not send
+            # an acknowledgment, so mark COMPLETED on a successful send rather
+            # than SENT-awaiting-ack (which would retry forever).
             success = await send_message_to_agent(
                 message_data, host, message.message_id
             )
             if success:
                 server_queue_manager.mark_completed(message.message_id, db=db)
-                logger.info("Sent logging_config_update to host %s", host.fqdn)
+                logger.info("Sent %s to host %s", message.message_type, host.fqdn)
             else:
                 server_queue_manager.mark_failed(
                     message.message_id, "Failed to send message to agent", db=db

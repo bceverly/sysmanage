@@ -472,9 +472,8 @@ class TestExportAuditLogs:
 class TestBuildAuditExport:
     def _build(self, entries, fmt):
         session = _FakeSession(AuditLog=entries)
-        with patch(f"{MOD}.sessionmaker", return_value=session):
-            with patch(f"{MOD}.db_module.get_engine"):
-                return al._build_audit_export(_filters(), fmt, "admin@invalid")
+        with patch(f"{MOD}.request_sessionmaker", return_value=session):
+            return al._build_audit_export(_filters(), fmt, "admin@invalid")
 
     def test_csv_is_the_default_render(self):
         out = self._build([_entry()], "csv")
@@ -484,13 +483,14 @@ class TestBuildAuditExport:
         out = self._build([_entry()], "pdf")
         assert out.media_type == "application/pdf"
 
-    def test_it_opens_its_own_session_because_it_runs_off_thread(self):
-        # The request session can't cross the thread-pool boundary, so this
-        # must bind the main engine itself.
-        with patch(f"{MOD}.sessionmaker", return_value=_FakeSession()) as maker:
-            with patch(f"{MOD}.db_module.get_engine", return_value="main"):
-                al._build_audit_export(_filters(), "csv", "u")
-        assert maker.call_args.kwargs["bind"] == "main"
+    def test_it_reads_the_tenant_the_caller_was_viewing(self):
+        # Runs off-thread, where the active-tenant ContextVar is unset: the
+        # handler captures the tenant and this binds that tenant's database
+        # (audit rows are per tenant).  None = server scope = bootstrap.
+        with patch(f"{MOD}.request_sessionmaker", return_value=_FakeSession()) as maker:
+            al._build_audit_export(_filters(), "csv", "u", "tenant-a")
+            al._build_audit_export(_filters(), "csv", "u")
+        assert [c.args[0] for c in maker.call_args_list] == ["tenant-a", None]
 
 
 class TestCsvExport:

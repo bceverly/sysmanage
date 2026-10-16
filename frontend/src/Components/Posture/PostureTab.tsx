@@ -92,14 +92,20 @@ const ChangesNotice: React.FC<{ changes: ModelChanges; onClose: () => void }> = 
 
 type Dialog = { item: PostureItem; action: RowAction } | null;
 
-const PostureTab: React.FC = () => {
+interface PostureTabProps {
+    // Open the questionnaire straight away (the Advisor page's "no threat
+    // model yet" banner sends the user here to fill it in).
+    startWizard?: boolean;
+}
+
+const PostureTab: React.FC<PostureTabProps> = ({ startWizard = false }) => {
     const { t } = useTranslation();
     const [questionnaire, setQuestionnaire] = useState<Questionnaire | null>(null);
     const [versions, setVersions] = useState<ThreatModelVersion[]>([]);
     const [posture, setPosture] = useState<PostureList | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [wizard, setWizard] = useState(false);
+    const [wizard, setWizard] = useState(startWizard);
     const [changes, setChanges] = useState<ModelChanges | null>(null);
     const [filter, setFilter] = useState<PostureState | ''>('');
     const [dialog, setDialog] = useState<Dialog>(null);

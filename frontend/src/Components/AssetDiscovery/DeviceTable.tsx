@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 // The discovered devices, with what each one says about itself and who saw
-// it (Phase 21.6 S3).  A plain MUI table rather than a DataGrid: bulk
+// it (Phase 21.6 S3).  Columns sort on click (deviceSort.ts).  A plain MUI table rather than a DataGrid: bulk
 // selection is simple here, and a DataGrid does not render in jsdom tests.
 
 import React from 'react';
@@ -17,12 +17,14 @@ import {
     TableCell,
     TableHead,
     TableRow,
+    TableSortLabel,
     Tooltip,
     Typography,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { DiscoveredDevice } from '../../Services/assetDiscoveryService';
 import { categoryLabel, deviceTypeLabel, formatSeen } from './discoveryLabels';
+import { sortDevices, type SortDirection, type SortKey } from './deviceSort';
 
 interface Props {
     devices: DiscoveredDevice[];
@@ -102,8 +104,40 @@ const StatusNote: React.FC<{ device: DiscoveredDevice }> = ({ device }) => {
     return <Chip size="small" color="warning" label={t('assetDiscovery.status.unmanaged', 'Unmanaged')} />;
 };
 
+interface SortState {
+    key: SortKey;
+    direction: SortDirection;
+}
+
+// A column header that sorts: first click ascending, the next flips it.
+const SortHeader: React.FC<{
+    column: SortKey;
+    sort: SortState | null;
+    onSort: (column: SortKey) => void;
+    children: React.ReactNode;
+}> = ({ column, sort, onSort, children }) => {
+    const active = sort?.key === column;
+    return (
+        <TableCell sortDirection={active ? sort.direction : false}>
+            <TableSortLabel active={active} direction={active ? sort.direction : 'asc'} onClick={() => onSort(column)}>
+                {children}
+            </TableSortLabel>
+        </TableCell>
+    );
+};
+
 const DeviceTable: React.FC<Props> = ({ devices, selectable, selected, onToggle, onToggleAll }) => {
     const { t } = useTranslation();
+    // No sort until a header is clicked: the server's order (newest first) stands.
+    const [sort, setSort] = React.useState<SortState | null>(null);
+    const onSort = (column: SortKey) => setSort(previous => ({
+        key: column,
+        direction: previous?.key === column && previous.direction === 'asc' ? 'desc' : 'asc',
+    }));
+    const rows = React.useMemo(
+        () => (sort ? sortDevices(devices, sort.key, sort.direction) : devices),
+        [devices, sort],
+    );
     if (devices.length === 0) {
         return (
             <Typography color="text.secondary" sx={{ py: 3 }}>
@@ -123,16 +157,16 @@ const DeviceTable: React.FC<Props> = ({ devices, selectable, selected, onToggle,
                                 slotProps={{ input: { 'aria-label': t('assetDiscovery.table.selectAll', 'Select all') } }} />
                         </TableCell>
                     )}
-                    <TableCell>{t('assetDiscovery.table.device', 'Device')}</TableCell>
-                    <TableCell>{t('assetDiscovery.table.address', 'Address')}</TableCell>
+                    <SortHeader column="device" sort={sort} onSort={onSort}>{t('assetDiscovery.table.device', 'Device')}</SortHeader>
+                    <SortHeader column="address" sort={sort} onSort={onSort}>{t('assetDiscovery.table.address', 'Address')}</SortHeader>
                     <TableCell>{t('assetDiscovery.table.evidence', 'What it says it is')}</TableCell>
-                    <TableCell>{t('assetDiscovery.table.seenBy', 'Seen by')}</TableCell>
-                    <TableCell>{t('assetDiscovery.table.lastSeen', 'Last seen')}</TableCell>
-                    <TableCell>{t('assetDiscovery.table.status', 'Status')}</TableCell>
+                    <SortHeader column="seenBy" sort={sort} onSort={onSort}>{t('assetDiscovery.table.seenBy', 'Seen by')}</SortHeader>
+                    <SortHeader column="lastSeen" sort={sort} onSort={onSort}>{t('assetDiscovery.table.lastSeen', 'Last seen')}</SortHeader>
+                    <SortHeader column="status" sort={sort} onSort={onSort}>{t('assetDiscovery.table.status', 'Status')}</SortHeader>
                 </TableRow>
             </TableHead>
             <TableBody>
-                {devices.map(device => (
+                {rows.map(device => (
                     <TableRow key={device.id} hover selected={selected.has(device.id)}>
                         {selectable && (
                             <TableCell padding="checkbox">

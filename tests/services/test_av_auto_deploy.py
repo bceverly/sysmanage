@@ -290,30 +290,28 @@ def test_hosts_that_failed_together_do_not_retry_together():
     )
 
 
-def test_a_wave_is_audited_in_one_commit(db):
-    for _ in range(4):
-        _host(db)
+def test_a_wave_is_audited_in_the_reconciled_database_with_one_commit(db):
+    """Audit rows are per tenant (2026-10-16): the wave's rows go into the
+    host database being reconciled -- not a separate main-engine session --
+    and reconcile commits nothing; the caller commits the wave once."""
+    hosts = [_host(db) for _ in range(4)]
     commits = []
-    real = av_auto_deploy.sessionmaker
-
-    def counting_sessionmaker(*args, **kwargs):
-        factory = real(*args, **kwargs)
-
-        def make():
-            session = factory()
-            original = session.commit
-            session.commit = lambda: (commits.append(1), original())[1]
-            return session
-
-        return make
-
-    with patch.object(
-        av_auto_deploy, "sessionmaker", counting_sessionmaker
-    ), patch.object(
-        av_auto_deploy.persistence_db, "get_engine", return_value=db.get_bind()
-    ):
-        assert av_auto_deploy.reconcile(db)["queued"] == 4
-    assert len(commits) == 1
+    original = db.commit
+    db.commit = lambda: (commits.append(1), original())[1]
+    try:
+        with patch.object(av_auto_deploy._queue_ops, "enqueue_message"):
+            assert av_auto_deploy.reconcile(db)["queued"] == 4
+        assert commits == []  # the caller commits, once
+    finally:
+        db.commit = original
+    db.commit()
+    audited = {
+        row.entity_id
+        for row in db.query(models.AuditLog)
+        .filter(models.AuditLog.username == av_auto_deploy.SYSTEM_ACTOR)
+        .all()
+    }
+    assert audited == {str(h.id) for h in hosts}
 
 
 def test_clamav_is_not_pushed_to_a_host_too_small_for_it(db, queued):

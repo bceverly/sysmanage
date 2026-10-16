@@ -29,7 +29,7 @@ YAML fallback or ``default``.
 import logging
 import threading
 import time
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Tuple
 
 from backend.utils.log_sanitize import scrub
 
@@ -112,6 +112,7 @@ def get_setting(
     yaml_getter: Optional[Callable[[], Any]] = None,
     *,
     default: Any = None,
+    yaml_path: Optional[Tuple[str, ...]] = None,
 ) -> Any:
     """Return server setting ``key``, preferring the DB over the YAML fallback.
 
@@ -120,6 +121,10 @@ def get_setting(
         yaml_getter: zero-arg callable returning the legacy YAML value.  When
             it supplies the value, a one-time deprecation warning is logged.
         default: returned when neither the DB nor YAML has the setting.
+        yaml_path: where ``yaml_getter`` looks in sysmanage.yaml.  When given,
+            the deprecation warning fires only if the file itself sets it --
+            a built-in default merged into the loaded config is not a YAML
+            setting and must not be reported as one.
     """
     bag = _get_cached_settings_bag()
     if bag is not None and key in bag and bag[key] is not None:
@@ -132,7 +137,7 @@ def get_setting(
             logger.debug("YAML fallback for setting %r failed: %s", key, exc)
             legacy = None
         if legacy is not None:
-            if key not in _warned:
+            if key not in _warned and _from_file(yaml_path):
                 logger.warning(
                     "Setting '%s' is being read from sysmanage.yaml. Operational "
                     "config should live in the Settings DB -- see "
@@ -144,6 +149,18 @@ def get_setting(
             return legacy
 
     return default
+
+
+def _from_file(yaml_path: Optional[Tuple[str, ...]]) -> bool:
+    """Whether a YAML-fallback value came from the operator's file."""
+    if yaml_path is None:
+        return True
+    try:
+        from backend.config import config as config_module  # noqa: PLC0415
+
+        return config_module.file_has(*yaml_path)
+    except Exception:  # noqa: BLE001  # pylint: disable=broad-except
+        return True
 
 
 def set_setting(key: str, value: Any) -> bool:

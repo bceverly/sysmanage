@@ -37,7 +37,7 @@ visible, rather than evaluated against nothing.
 import logging
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from backend.persistence import models
@@ -127,6 +127,34 @@ def _drift(db: Session, host) -> Tuple[Any, List[Dict[str, Any]]]:
         )
     )
     return at, rows
+
+
+def drift_configured(db: Session, host) -> bool:
+    """Has this host been given any desired state at all?
+
+    True when an ENABLED profile assignment reaches it -- directly, through
+    one of its tags, or through its site (the targets the assignment tick
+    dispatches to).  A host with none has no drift to measure: the engine
+    reports drift rules as not applicable for it instead of withholding its
+    score forever over evidence that can never exist (2026-10-16).
+    """
+    assignment = models.ConfigProfileAssignment
+    tags = db.query(models.HostTag.tag_id).filter(models.HostTag.host_id == host.id)
+    targets = [assignment.host_id == host.id, assignment.tag_id.in_(tags)]
+    if getattr(host, "site_id", None):
+        targets.append(assignment.site_id == host.site_id)
+    return (
+        db.query(assignment.id)
+        .filter(assignment.enabled.is_(True), or_(*targets))
+        .first()
+        is not None
+    )
+
+
+def _configured(db: Session, host, bulk) -> bool:
+    """``drift_configured``, from the chunk when it loaded drift."""
+    known = bulk.is_drift_configured(host) if bulk is not None else None
+    return drift_configured(db, host) if known is None else known
 
 
 def _updates(db: Session, host) -> Tuple[Any, List[Dict[str, Any]]]:
@@ -236,6 +264,9 @@ def _gather_domains(db, host, domains, bulk, evidence, tables) -> None:
             else:
                 at, rows = reader(db, host)
             evidence["domains"][domain] = {"at": at}
+            if domain == "drift" and at is None and not _configured(db, host, bulk):
+                # Never checked AND nothing assigned: nothing to measure.
+                evidence["domains"][domain]["configured"] = False
             tables[view] = rows
         # Anything else (metric_history, or a domain this server does not
         # know) is left out: the engine reports it domain_unavailable.
