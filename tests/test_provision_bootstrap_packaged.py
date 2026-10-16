@@ -63,8 +63,11 @@ class TestToken:
 
 
 class TestLocalApply:
+    # raising=False: Windows has no os.geteuid; the code path under test is
+    # the POSIX one, and it checks for geteuid itself.
+
     def _as_root(self, boot, monkeypatch, have=("psql", "runuser")):
-        monkeypatch.setattr(boot.os, "geteuid", lambda: 0)
+        monkeypatch.setattr(boot.os, "geteuid", lambda: 0, raising=False)
         monkeypatch.setattr(
             boot.shutil,
             "which",
@@ -110,7 +113,7 @@ class TestLocalApply:
     def test_not_possible_here_is_declined(
         self, boot, tmp_path, monkeypatch, euid, host, have
     ):
-        monkeypatch.setattr(boot.os, "geteuid", lambda: euid)
+        monkeypatch.setattr(boot.os, "geteuid", lambda: euid, raising=False)
         monkeypatch.setattr(
             boot.shutil,
             "which",

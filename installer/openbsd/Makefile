@@ -55,6 +55,7 @@ RUN_DEPENDS =		databases/py-alembic${MODPY_FLAVOR} \
 			devel/py-babel${MODPY_FLAVOR} \
 			devel/py-gevent${MODPY_FLAVOR} \
 			devel/py-pydantic${MODPY_FLAVOR} \
+			devel/py-regex${MODPY_FLAVOR} \
 			graphics/py-Pillow${MODPY_FLAVOR} \
 			net/py-websockets${MODPY_FLAVOR} \
 			print/py-reportlab${MODPY_FLAVOR} \

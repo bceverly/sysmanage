@@ -51,12 +51,21 @@ def _wrong_interpreter() -> str:
     try:
         import alembic.config  # noqa: F401,PLC0415  # pylint: disable=unused-import
     except ImportError:
-        venv_python = _REPO_ROOT / ".venv" / "bin" / "python"
+        script = Path(__file__).resolve()
+        if os.name == "nt":
+            # No sudo and no wrapper on Windows; the venv keeps its
+            # interpreter under Scripts\.
+            venv_python = _REPO_ROOT / ".venv" / "Scripts" / "python.exe"
+            how = f"  {venv_python} {script}"
+        else:
+            venv_python = _REPO_ROOT / ".venv" / "bin" / "python"
+            how = (
+                f"  sudo sysmanage-migrate   (installed packages)\n"
+                f"  or: sudo -u sysmanage {venv_python} {script}"
+            )
         return (
             f"{sys.executable} has no alembic -- run this with the server's "
-            f"virtualenv instead:\n"
-            f"  sudo sysmanage-migrate   (installed packages)\n"
-            f"  or: sudo -u sysmanage {venv_python} {Path(__file__).resolve()}"
+            f"virtualenv instead:\n{how}"
         )
     return ""
 

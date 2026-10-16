@@ -7,6 +7,7 @@ Tests for the sysmanage-migrate CLI (production migration tool).
 """
 
 import importlib.util
+import os
 from pathlib import Path
 from unittest.mock import patch
 
@@ -121,8 +122,13 @@ def test_system_python_without_alembic_is_told_which_command_to_use(
     status.assert_not_called()
     err = capsys.readouterr().err
     assert "has no alembic" in err
-    assert "sudo sysmanage-migrate" in err
-    assert ".venv/bin/python" in err
+    venv = mod._REPO_ROOT / ".venv"
+    if os.name == "nt":
+        assert str(venv / "Scripts" / "python.exe") in err
+        assert "sudo" not in err
+    else:
+        assert "sudo sysmanage-migrate" in err
+        assert str(venv / "bin" / "python") in err
 
 
 def test_the_venv_interpreter_passes_the_check():

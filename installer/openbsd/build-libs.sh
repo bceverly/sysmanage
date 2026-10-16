@@ -48,7 +48,7 @@ STAGE="${OUT}/${TOP}"
 # (pydantic-core, greenlet, cffi, MarkupSafe, ...) are provided by those ports.
 PORT_PROVIDED="aiohttp alembic annotated-types argon2-cffi Babel bcrypt cffi \
 cryptography gevent greenlet Jinja2 Mako MarkupSafe orjson Pillow pycparser \
-pydantic pydantic-core PyYAML reportlab SQLAlchemy websockets zope.event \
+pydantic pydantic-core PyYAML regex reportlab SQLAlchemy websockets zope.event \
 zope.interface"
 
 # Deliberately NOT shipped.  The Makefile's "Offline build model" block explains
@@ -83,9 +83,13 @@ OMIT="opentelemetry-exporter-otlp geoip2 maxminddb httptools ujson watchfiles \
 python3-saml"
 
 # The dep ports, pkg_add'd so the venv sees them satisfied.
+# py3-regex (devel/py-regex): asset-tag scheme matching needs regex's timeout
+# (Phase 23.2), and it is compiled -- pip-bundling it tripped the pure-Python
+# check below and failed the v3.11.0.3 release.  7.8 has 2025.9.18, 7.9 has
+# 2026.1.15; both satisfy requirements-prod's regex>=2024.11.6.
 PKGS="py3-alembic py3-sqlalchemy py3-babel py3-gevent py3-pydantic py3-Pillow \
 py3-websockets py3-reportlab py3-argon2-cffi py3-bcrypt py3-cryptography \
-py3-orjson py3-yaml py3-aiohttp py3-jinja2"
+py3-orjson py3-yaml py3-aiohttp py3-jinja2 py3-regex"
 
 echo "=== Installing dependency ports (so the venv skips them) ==="
 # shellcheck disable=SC2086
