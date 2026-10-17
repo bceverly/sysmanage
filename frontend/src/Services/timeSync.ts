@@ -15,6 +15,7 @@ export type ClockStatus =
   | "critical"
   | "unmeasured"
   | "stale"
+  | "uncertain"
   | "server_clock_off";
 
 /** Worst first -- the order the fleet view sorts by. */
@@ -23,6 +24,7 @@ export const STATUS_ORDER: ClockStatus[] = [
   "warning",
   "server_clock_off",
   "stale",
+  "uncertain",
   "unmeasured",
   "ok",
 ];
@@ -75,7 +77,28 @@ export interface HostClock {
   service_ok: boolean | null;
   measured: Measured | null;
   time_service: TimeService | null;
-  history: { at: string; offset_ms: number; rtt_ms: number | null; method: string }[];
+  /** How far the last figure can be trusted (absent on older servers). */
+  measurement?: MeasurementNote;
+  history: {
+    at: string;
+    offset_ms: number;
+    rtt_ms: number | null;
+    method: string;
+    /** Too uncertain to judge: kept off the offset line. */
+    uncertain?: boolean;
+  }[];
+}
+
+/** An exchange's error is up to half its round trip; when that reaches the
+ *  warning bound the figure is not judged (2026-10-17: 8.06 s round trip,
+ *  "+4.03 s" on a synchronized host). */
+export interface MeasurementNote {
+  uncertain: boolean;
+  uncertainty_ms: number | null;
+  /** The newest certain sample the status was taken from instead. */
+  judged_from: { at: string; offset_ms: number; rtt_ms: number | null } | null;
+  /** The host's own time service is synchronized and close. */
+  time_service_vouches: boolean;
 }
 
 export interface FleetClock {

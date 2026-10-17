@@ -20,11 +20,18 @@ a domain controller that is also tagged "lab" is still a domain controller.
 STATUS
 ------
 ``ok`` / ``warning`` / ``critical`` from the measured offset against the
-host's bounds, and three that never pass for "in sync":
+host's bounds, and four that never pass for "in sync":
 
 * ``unmeasured`` -- no measurement yet (an older agent, or never connected);
 * ``stale`` -- the last measurement is older than ``STALE_AFTER`` (the host is
   not connected, so its clock is no longer being watched);
+* ``uncertain`` -- the last measurement's uncertainty (half the exchange's
+  round trip) reaches the warning bound, so it cannot say whether the clock
+  is in bounds.  2026-10-17: a busy agent answered late, the round trip was
+  8.06 s and the "offset" +4.03 s -- exactly half -- while the host's own time
+  service was synchronized to the millisecond.  Such a figure is not judged:
+  no warning, no alert, no resync.  ``evaluate`` falls back to the newest
+  CERTAIN history sample still inside ``STALE_AFTER`` when there is one;
 * ``server_clock_off`` -- the SERVER's own clock is measured off its reference
   by more than ``server_clock.TRUST_MS``.  Every host offset is relative to
   the server, so judging hosts against a clock known to be wrong would report
@@ -67,15 +74,20 @@ STATUS_CRITICAL = "critical"
 STATUS_UNMEASURED = "unmeasured"
 STATUS_STALE = "stale"
 STATUS_SERVER_OFF = "server_clock_off"
+STATUS_UNCERTAIN = "uncertain"
 # Worst first: the order the fleet view sorts by.
 STATUS_ORDER = (
     STATUS_CRITICAL,
     STATUS_WARNING,
     STATUS_SERVER_OFF,
     STATUS_STALE,
+    STATUS_UNCERTAIN,
     STATUS_UNMEASURED,
     STATUS_OK,
 )
+# The exchange method's error bound is half its round trip; the coarse
+# timestamp method has none (it exists for clocks minutes to hours off).
+METHOD_EXCHANGE = "exchange"
 
 
 def _now() -> datetime:
@@ -157,6 +169,30 @@ class Resolver:
         return site or self.tenant or self.base
 
 
+def uncertainty_ms(method: Optional[str], rtt_ms: Optional[float]) -> Optional[float]:
+    """How far the true offset may be from a measured one: half the round
+    trip for an exchange (the delay may have been all on one leg), None when
+    the method gives no bound."""
+    if method == METHOD_EXCHANGE and isinstance(rtt_ms, (int, float)):
+        return max(0.0, float(rtt_ms)) / 2
+    return None
+
+
+def too_uncertain(method, rtt_ms, bounds: Dict[str, Any]) -> bool:
+    """True when the measurement cannot tell in-bounds from out of bounds."""
+    error = uncertainty_ms(method, rtt_ms)
+    return error is not None and error >= bounds["warning_ms"]
+
+
+def _judge(offset_ms: float, bounds: Dict[str, Any]) -> str:
+    offset = abs(offset_ms)
+    if offset >= bounds["critical_ms"]:
+        return STATUS_CRITICAL
+    if offset >= bounds["warning_ms"]:
+        return STATUS_WARNING
+    return STATUS_OK
+
+
 def host_status(
     host, bounds: Dict[str, Any], server: Dict[str, Any], now: datetime
 ) -> str:
@@ -166,12 +202,63 @@ def host_status(
         return STATUS_UNMEASURED
     if now - host.clock_measured_at > STALE_AFTER:
         return STATUS_STALE
-    offset = abs(host.clock_offset_ms)
-    if offset >= bounds["critical_ms"]:
-        return STATUS_CRITICAL
-    if offset >= bounds["warning_ms"]:
-        return STATUS_WARNING
-    return STATUS_OK
+    if too_uncertain(
+        getattr(host, "clock_method", None), getattr(host, "clock_rtt_ms", None), bounds
+    ):
+        return STATUS_UNCERTAIN
+    return _judge(host.clock_offset_ms, bounds)
+
+
+def last_certain_sample(db, host, bounds: Dict[str, Any], now: datetime):
+    """The newest history sample for ``host`` that is both inside
+    ``STALE_AFTER`` and certain enough to judge, or None."""
+    rows = (
+        db.query(models.HostClockSample)
+        .filter(
+            models.HostClockSample.host_id == host.id,
+            models.HostClockSample.measured_at >= now - STALE_AFTER,
+        )
+        .order_by(models.HostClockSample.measured_at.desc())
+        .limit(20)
+        .all()
+    )
+    for row in rows:
+        if row.offset_ms is not None and not too_uncertain(
+            row.method, row.rtt_ms, bounds
+        ):
+            return row
+    return None
+
+
+def measurement_note(db, host, bounds: Dict[str, Any], now: datetime) -> Dict[str, Any]:
+    """What the card says about the latest measurement's quality."""
+    method = getattr(host, "clock_method", None)
+    rtt_ms = getattr(host, "clock_rtt_ms", None)
+    error = uncertainty_ms(method, rtt_ms)
+    uncertain = too_uncertain(method, rtt_ms, bounds)
+    fallback = last_certain_sample(db, host, bounds, now) if uncertain else None
+    reported = getattr(host, "time_reported_offset_ms", None)
+    vouches = bool(
+        service_ok(host)
+        and isinstance(reported, (int, float))
+        and abs(reported) < bounds["warning_ms"]
+    )
+    return {
+        "uncertain": uncertain,
+        "uncertainty_ms": error,
+        "judged_from": (
+            None
+            if fallback is None
+            else {
+                "at": fallback.measured_at.isoformat(),
+                "offset_ms": fallback.offset_ms,
+                "rtt_ms": fallback.rtt_ms,
+            }
+        ),
+        # The host's own time service says it is synchronized and close:
+        # trusted over an exchange too slow to measure anything.
+        "time_service_vouches": vouches,
+    }
 
 
 def service_ok(host) -> Optional[bool]:
@@ -196,7 +283,12 @@ def evaluate(
     rows = []
     for host in hosts:
         bounds = resolver.bounds_for(host)
-        rows.append((host, bounds, host_status(host, bounds, server, now)))
+        status = host_status(host, bounds, server, now)
+        if status == STATUS_UNCERTAIN:
+            fallback = last_certain_sample(db, host, bounds, now)
+            if fallback is not None:
+                status = _judge(fallback.offset_ms, bounds)
+        rows.append((host, bounds, status))
     return server, rows
 
 

@@ -135,8 +135,17 @@ def current(connection) -> Optional[Dict[str, Any]]:
     state = getattr(connection, "clock_state", None)
     if not isinstance(state, dict) or not state["samples"]:
         return None
-    offsets = [s[0] for s in state["samples"]]
-    delays = [s[1] for s in state["samples"] if s[1] is not None]
+    samples = list(state["samples"])
+    timed = [s for s in samples if s[1] is not None]
+    if timed:
+        # The fastest exchanges are the trustworthy ones: a slow one's error
+        # is up to half its round trip, all of it possibly on one leg.  Keep
+        # the samples within twice the quickest (plus 50 ms of jitter), so
+        # one late reply in the window cannot drag the median.
+        floor = min(s[1] for s in timed)
+        samples = [s for s in timed if s[1] <= floor * 2 + 0.05]
+    offsets = [s[0] for s in samples]
+    delays = [s[1] for s in samples if s[1] is not None]
     return {
         "offset_ms": round(statistics.median(offsets) * 1000, 3),
         "rtt_ms": round(statistics.median(delays) * 1000, 3) if delays else None,

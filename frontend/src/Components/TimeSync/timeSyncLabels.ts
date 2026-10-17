@@ -18,6 +18,7 @@ export const statusLabel = (t: TFunction, status: ClockStatus): string => {
         critical: t('timeSync.status.critical', 'Critical'),
         unmeasured: t('timeSync.status.unmeasured', 'Not measured'),
         stale: t('timeSync.status.stale', 'No recent measurement'),
+        uncertain: t('timeSync.status.uncertain', 'Uncertain'),
         server_clock_off: t('timeSync.status.serverClockOff', 'Server clock off'),
     };
     return labels[status] ?? status;
@@ -46,6 +47,7 @@ export const statusHelp = (t: TFunction, status: ClockStatus): string => {
         critical: t('timeSync.statusHelp.critical', 'The measured offset is at or beyond the critical bound.'),
         unmeasured: t('timeSync.statusHelp.unmeasured', 'The server has not measured this clock yet. The agent may be too old, or has not connected.'),
         stale: t('timeSync.statusHelp.stale', 'The last measurement is more than 30 minutes old. The host is probably not connected.'),
+        uncertain: t('timeSync.statusHelp.uncertain', 'The last exchange took too long to measure the offset to within the warning bound, so the clock is not judged until a quicker exchange.'),
         server_clock_off: t('timeSync.statusHelp.serverClockOff', "The server's own clock is off its reference, so host clocks are not judged until it is corrected."),
     };
     return help[status] ?? '';

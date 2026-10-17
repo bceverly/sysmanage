@@ -54,6 +54,31 @@ export interface HostWindowStatus {
     override: { reason: string; expires_at: string; username?: string } | null;
     active_blackout: string | null;
     next_window: { id: string; name: string; starts_at: string | null } | null;
+    // Commands a window is holding for this host (absent on older servers).
+    held_commands?: { count: number; oldest_at: string | null };
+}
+
+// One command a maintenance window is holding (never its raw payload: the
+// server keeps only a safe summary -- no tokens, no file contents).
+export interface HeldCommand {
+    id: string;
+    host_id: string | null;
+    fqdn: string | null;
+    command_type: string | null;
+    details: {
+        packages?: { names: string[]; count: number };
+        [key: string]: unknown;
+    };
+    queued_at: string | null;
+    rechecks_at: string | null;
+    expires_at: string | null;
+    retry_count: number;
+    max_retries: number;
+    release: {
+        state: HostWindowStatus['state'] | null;
+        blackout: string | null;
+        window: { id: string; name: string; starts_at: string | null } | null;
+    } | null;
 }
 
 export const maintenanceWindowsService = {
@@ -92,6 +117,17 @@ export const maintenanceWindowsService = {
             reason,
             duration_minutes: durationMinutes,
         });
+    },
+
+    async listHeld(limit = 50, offset = 0): Promise<{ total: number; items: HeldCommand[] }> {
+        const res = await axiosInstance.get('/api/v1/maintenance-windows/held', {
+            params: { limit, offset },
+        });
+        return res.data;
+    },
+
+    async cancelHeld(messageId: string): Promise<void> {
+        await axiosInstance.post(`/api/v1/maintenance-windows/held/${messageId}/cancel`);
     },
 
     async hostStatus(hostId: string): Promise<HostWindowStatus> {

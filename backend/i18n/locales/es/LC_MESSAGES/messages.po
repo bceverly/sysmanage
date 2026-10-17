@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-16 13:57-0400\n"
+"POT-Creation-Date: 2026-10-17 09:30-0400\n"
 "Language: es\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -176,8 +176,8 @@ msgstr "Error al obtener el certificado CA: %s"
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:212 backend/api/firewall_roles.py:473
-#: backend/api/firewall_roles.py:544
+#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:424
+#: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "Formato de ID de host inválido"
@@ -1312,6 +1312,7 @@ msgid "Host limit reached for this tenant."
 msgstr "Se alcanzó el límite de hosts para este inquilino."
 
 #: backend/api/processes.py:86 backend/api/processes.py:132
+#: backend/api/maintenance_windows.py:77
 msgid "Permission denied: View Host Details role required"
 msgstr "Permiso denegado: se requiere el rol Ver detalles del host"
 
@@ -2703,7 +2704,7 @@ msgid "Failed to process heartbeat"
 msgstr "No se pudo procesar el latido"
 
 #: backend/api/logging_settings.py:71 backend/api/hardware_health.py:312
-#: backend/api/maintenance_windows.py:62
+#: backend/api/maintenance_windows.py:64
 msgid "Permission denied: administrator required"
 msgstr "Permiso denegado: se requiere administrador"
 
@@ -3377,23 +3378,23 @@ msgstr "No se pudo contar paquetes: %s"
 msgid "Failed to search packages: %s"
 msgstr "Error al buscar paquetes: %s"
 
-#: backend/api/host.py:195
+#: backend/api/host.py:196
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "Permiso denegado: se requiere el rol DELETE_HOST"
 
-#: backend/api/host.py:259
+#: backend/api/host.py:260
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Permiso denegado: se requiere el rol VIEW_HOST_DETAILS"
 
-#: backend/api/host.py:666
+#: backend/api/host.py:678
 msgid "Host already exists"
 msgstr "El host ya existe"
 
-#: backend/api/host.py:778
+#: backend/api/host.py:790
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registro absorbido: el host fue recientemente eliminado"
 
-#: backend/api/host.py:858
+#: backend/api/host.py:870
 #, python-format
 msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
@@ -3440,11 +3441,11 @@ msgstr "Debe especificar target_hostname, target_platform, o push_to_all"
 msgid "Configuration acknowledgment processed"
 msgstr "Confirmación de configuración procesada"
 
-#: backend/api/time_sync.py:297 backend/api/time_sync.py:341
+#: backend/api/time_sync.py:303 backend/api/time_sync.py:347
 msgid "Clock offset bounds changed"
 msgstr "Se cambiaron los límites de desfase del reloj"
 
-#: backend/api/time_sync.py:362
+#: backend/api/time_sync.py:368
 msgid "Clock offset bounds removed"
 msgstr "Se eliminaron los límites de desfase del reloj"
 
@@ -4614,67 +4615,81 @@ msgstr "Se eliminó el registro de instalación correctamente"
 msgid "Failed to delete installation record: %s"
 msgstr "No se pudo borrar el registro de instalación: %s"
 
-#: backend/api/maintenance_windows.py:111
+#: backend/api/maintenance_windows.py:126
 msgid "A window name is required."
 msgstr "Se requiere un nombre de ventana."
 
-#: backend/api/maintenance_windows.py:114
+#: backend/api/maintenance_windows.py:129
 msgid "kind must be 'allow' or 'blackout'."
 msgstr "kind debe ser 'allow' o 'blackout'."
 
-#: backend/api/maintenance_windows.py:119
+#: backend/api/maintenance_windows.py:134
 msgid "recurrence must be 'once', 'daily', or 'weekly'."
 msgstr "recurrence debe ser 'once', 'daily' o 'weekly'."
 
-#: backend/api/maintenance_windows.py:128
+#: backend/api/maintenance_windows.py:143
 #, python-format
 msgid "Unknown timezone: %s"
 msgstr "Zona horaria desconocida: %s"
 
-#: backend/api/maintenance_windows.py:140
+#: backend/api/maintenance_windows.py:155
 msgid "A one-time window needs starts_at before ends_at."
 msgstr "Una ventana única requiere que starts_at sea anterior a ends_at."
 
-#: backend/api/maintenance_windows.py:147
+#: backend/api/maintenance_windows.py:162
 msgid "A recurring window needs a start_time as 'HH:MM'."
 msgstr "Una ventana recurrente necesita un start_time en formato 'HH:MM'."
 
-#: backend/api/maintenance_windows.py:152
+#: backend/api/maintenance_windows.py:167
 msgid "A recurring window needs a positive duration_minutes."
 msgstr "Una ventana recurrente necesita una duración positiva en minutos."
 
-#: backend/api/maintenance_windows.py:159
+#: backend/api/maintenance_windows.py:174
 msgid "A weekly window needs valid days_of_week."
 msgstr "Una ventana semanal necesita días válidos de la semana."
 
-#: backend/api/maintenance_windows.py:168
+#: backend/api/maintenance_windows.py:183
 msgid "scope_type must be 'all', 'host', or 'tag'."
 msgstr "scope_type debe ser 'all', 'host' o 'tag'."
 
-#: backend/api/maintenance_windows.py:171
+#: backend/api/maintenance_windows.py:186
 msgid "A host scope needs a host_id."
 msgstr "Un ámbito de host necesita un host_id."
 
-#: backend/api/maintenance_windows.py:173
+#: backend/api/maintenance_windows.py:188
 msgid "A tag scope needs a tag_id."
 msgstr "Un ámbito de etiqueta necesita un tag_id."
 
-#: backend/api/maintenance_windows.py:183
+#: backend/api/maintenance_windows.py:198
 msgid "A window needs at least one scope (all, host, or tag)."
 msgstr "Una ventana necesita al menos un ámbito (todos, host o etiqueta)."
 
-#: backend/api/maintenance_windows.py:305
-#: backend/api/maintenance_windows.py:329
+#: backend/api/maintenance_windows.py:320
+#: backend/api/maintenance_windows.py:344
 msgid "Maintenance window not found."
 msgstr "Ventana de mantenimiento no encontrada."
 
-#: backend/api/maintenance_windows.py:349
+#: backend/api/maintenance_windows.py:364
 msgid "An override reason is required."
 msgstr "Se requiere una razón para el cambio."
 
-#: backend/api/maintenance_windows.py:353
+#: backend/api/maintenance_windows.py:368
 msgid "Override duration must be positive."
 msgstr "La duración del cambio debe ser positiva."
+
+#: backend/api/maintenance_windows.py:454
+msgid "Permission denied: Delete Queue Message role required"
+msgstr "Permiso denegado: se requiere el rol Delete Queue Message"
+
+#: backend/api/maintenance_windows.py:471
+msgid "Message not found"
+msgstr "Mensaje no encontrado"
+
+#: backend/api/maintenance_windows.py:479
+msgid "Only a command a maintenance window is holding can be canceled."
+msgstr ""
+"Solo se puede cancelar un comando que una ventana de mantenimiento esté "
+"reteniendo."
 
 #: backend/api/report_branding.py:116
 msgid "Updated report branding"
@@ -5211,7 +5226,7 @@ msgstr "Eliminadas %(count)d mensajes para el host %(host_id)s"
 msgid "Failed to delete messages for host %(host_id)s: %(error)s"
 msgstr "No se pudo eliminar mensajes para el host %(host_id)s: %(error)s"
 
-#: backend/websocket/queue_maintenance.py:226
+#: backend/websocket/queue_maintenance.py:250
 #, python-format
 msgid ""
 "Marked %(count)d old messages as expired (older than %(timeout)d minutes)"
@@ -5219,17 +5234,17 @@ msgstr ""
 "Se marcaron %(count)d mensajes antiguos como expirados (más viejos que "
 "%(timeout)d minutos)"
 
-#: backend/websocket/queue_maintenance.py:236
+#: backend/websocket/queue_maintenance.py:260
 #, python-format
 msgid "Failed to expire old messages: %s"
 msgstr "No se pudo vencer los mensajes antiguos: %s"
 
-#: backend/websocket/queue_maintenance.py:284
+#: backend/websocket/queue_maintenance.py:308
 #, python-format
 msgid "Deleted %d failed/expired messages"
 msgstr "Se eliminaron %d mensajes fallidos/vencidos"
 
-#: backend/websocket/queue_maintenance.py:291
+#: backend/websocket/queue_maintenance.py:315
 #, python-format
 msgid "Failed to delete failed messages: %s"
 msgstr "No se pudo borrar los mensajes fallidos: %s"
@@ -5509,7 +5524,7 @@ msgstr "Estado de dispositivo desconocido: %s"
 
 #: backend/services/asset_discovery_review.py:342
 #: backend/services/malware_quarantine.py:136
-#: backend/services/malware_review.py:186
+#: backend/services/malware_review.py:233
 msgid "A reason of at least 3 characters is required"
 msgstr "Se requiere un motivo de al menos 3 caracteres"
 
@@ -5693,7 +5708,7 @@ msgstr "Se eliminó {entity_type} '{entity_name}'"
 msgid "Unknown finding status: %s"
 msgstr "Estado de hallazgo desconocido: %s"
 
-#: backend/services/malware_review.py:183
+#: backend/services/malware_review.py:230
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "Esa decisión no se puede tomar aquí: %s"

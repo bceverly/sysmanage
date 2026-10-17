@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-16 13:57-0400\n"
+"POT-Creation-Date: 2026-10-17 09:30-0400\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -174,8 +174,8 @@ msgstr "Ophalen van CA-certificaat mislukt: %s"
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:212 backend/api/firewall_roles.py:473
-#: backend/api/firewall_roles.py:544
+#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:424
+#: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "Ongeldige host-ID formaat"
@@ -1296,6 +1296,7 @@ msgid "Host limit reached for this tenant."
 msgstr "Hostlimiet voor deze tenant bereikt."
 
 #: backend/api/processes.py:86 backend/api/processes.py:132
+#: backend/api/maintenance_windows.py:77
 msgid "Permission denied: View Host Details role required"
 msgstr "Toegang geweigerd: rol Hostdetails bekijken vereist"
 
@@ -2679,7 +2680,7 @@ msgid "Failed to process heartbeat"
 msgstr "Fout bij verwerken van hartslag"
 
 #: backend/api/logging_settings.py:71 backend/api/hardware_health.py:312
-#: backend/api/maintenance_windows.py:62
+#: backend/api/maintenance_windows.py:64
 msgid "Permission denied: administrator required"
 msgstr "Toegang geweigerd: beheerder vereist"
 
@@ -3338,23 +3339,23 @@ msgstr "Mislukt om het aantal pakketten te tellen: %s"
 msgid "Failed to search packages: %s"
 msgstr "Pakketten zoeken mislukt: %s"
 
-#: backend/api/host.py:195
+#: backend/api/host.py:196
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "Toegang geweigerd: rol DELETE_HOST vereist"
 
-#: backend/api/host.py:259
+#: backend/api/host.py:260
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Toegang geweigerd: VIEW_HOST_DETAILS rol vereist"
 
-#: backend/api/host.py:666
+#: backend/api/host.py:678
 msgid "Host already exists"
 msgstr "Host bestaat al"
 
-#: backend/api/host.py:778
+#: backend/api/host.py:790
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registratie opgepakt: host was recent verwijderd"
 
-#: backend/api/host.py:858
+#: backend/api/host.py:870
 #, python-format
 msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
@@ -3400,11 +3401,11 @@ msgstr "Moet target_hostname, target_platform, of push_to_all specificeren"
 msgid "Configuration acknowledgment processed"
 msgstr "Configuratie bevestiging verwerkt"
 
-#: backend/api/time_sync.py:297 backend/api/time_sync.py:341
+#: backend/api/time_sync.py:303 backend/api/time_sync.py:347
 msgid "Clock offset bounds changed"
 msgstr "Grenswaarden voor klokafwijking gewijzigd"
 
-#: backend/api/time_sync.py:362
+#: backend/api/time_sync.py:368
 msgid "Clock offset bounds removed"
 msgstr "Grenswaarden voor klokafwijking verwijderd"
 
@@ -4553,67 +4554,81 @@ msgstr "Installatie-record succesvol verwijderd"
 msgid "Failed to delete installation record: %s"
 msgstr "Mislukt om het installatieoverzicht te verwijderen: %s"
 
-#: backend/api/maintenance_windows.py:111
+#: backend/api/maintenance_windows.py:126
 msgid "A window name is required."
 msgstr "Een vensternaam is verplicht."
 
-#: backend/api/maintenance_windows.py:114
+#: backend/api/maintenance_windows.py:129
 msgid "kind must be 'allow' or 'blackout'."
 msgstr "kind moet 'allow' of 'blackout' zijn."
 
-#: backend/api/maintenance_windows.py:119
+#: backend/api/maintenance_windows.py:134
 msgid "recurrence must be 'once', 'daily', or 'weekly'."
 msgstr "recurrence moet 'once', 'daily' of 'weekly' zijn."
 
-#: backend/api/maintenance_windows.py:128
+#: backend/api/maintenance_windows.py:143
 #, python-format
 msgid "Unknown timezone: %s"
 msgstr "Onbekende tijdzone: %s"
 
-#: backend/api/maintenance_windows.py:140
+#: backend/api/maintenance_windows.py:155
 msgid "A one-time window needs starts_at before ends_at."
 msgstr "Een enkele-gebeurtenis venster moet starts_at vóór ends_at hebben."
 
-#: backend/api/maintenance_windows.py:147
+#: backend/api/maintenance_windows.py:162
 msgid "A recurring window needs a start_time as 'HH:MM'."
 msgstr "Een herhalend venster moet een starttijd hebben als 'HH:MM'."
 
-#: backend/api/maintenance_windows.py:152
+#: backend/api/maintenance_windows.py:167
 msgid "A recurring window needs a positive duration_minutes."
 msgstr "Een herhalend venster moet een positieve duur in minuten hebben."
 
-#: backend/api/maintenance_windows.py:159
+#: backend/api/maintenance_windows.py:174
 msgid "A weekly window needs valid days_of_week."
 msgstr "Een weeklijks venster moet geldige dagen van de week hebben."
 
-#: backend/api/maintenance_windows.py:168
+#: backend/api/maintenance_windows.py:183
 msgid "scope_type must be 'all', 'host', or 'tag'."
 msgstr "scope_type moet 'all', 'host' of 'tag' zijn."
 
-#: backend/api/maintenance_windows.py:171
+#: backend/api/maintenance_windows.py:186
 msgid "A host scope needs a host_id."
 msgstr "Een host-scope heeft een host_id nodig."
 
-#: backend/api/maintenance_windows.py:173
+#: backend/api/maintenance_windows.py:188
 msgid "A tag scope needs a tag_id."
 msgstr "Een tag-scope heeft een tag_id nodig."
 
-#: backend/api/maintenance_windows.py:183
+#: backend/api/maintenance_windows.py:198
 msgid "A window needs at least one scope (all, host, or tag)."
 msgstr "Een venster moet ten minste één scope hebben (all, host of tag)."
 
-#: backend/api/maintenance_windows.py:305
-#: backend/api/maintenance_windows.py:329
+#: backend/api/maintenance_windows.py:320
+#: backend/api/maintenance_windows.py:344
 msgid "Maintenance window not found."
 msgstr "Maintenance venster niet gevonden."
 
-#: backend/api/maintenance_windows.py:349
+#: backend/api/maintenance_windows.py:364
 msgid "An override reason is required."
 msgstr "Een reden voor het overschrijven is vereist."
 
-#: backend/api/maintenance_windows.py:353
+#: backend/api/maintenance_windows.py:368
 msgid "Override duration must be positive."
 msgstr "De duur van het overschrijving moet positief zijn."
+
+#: backend/api/maintenance_windows.py:454
+msgid "Permission denied: Delete Queue Message role required"
+msgstr "Toegang geweigerd: de rol Delete Queue Message is vereist"
+
+#: backend/api/maintenance_windows.py:471
+msgid "Message not found"
+msgstr "Bericht niet gevonden"
+
+#: backend/api/maintenance_windows.py:479
+msgid "Only a command a maintenance window is holding can be canceled."
+msgstr ""
+"Alleen een opdracht die door een onderhoudsvenster wordt vastgehouden, kan "
+"worden geannuleerd."
 
 #: backend/api/report_branding.py:116
 msgid "Updated report branding"
@@ -5141,7 +5156,7 @@ msgstr "%(count)d berichten verwijderd voor host %(host_id)s"
 msgid "Failed to delete messages for host %(host_id)s: %(error)s"
 msgstr "Kan berichten niet verwijderen voor host %(host_id)s: %(error)s"
 
-#: backend/websocket/queue_maintenance.py:226
+#: backend/websocket/queue_maintenance.py:250
 #, python-format
 msgid ""
 "Marked %(count)d old messages as expired (older than %(timeout)d minutes)"
@@ -5149,17 +5164,17 @@ msgstr ""
 "%(count)d oude berichten gemarkeerd als verlopen (ouder dan %(timeout)d "
 "minuten)"
 
-#: backend/websocket/queue_maintenance.py:236
+#: backend/websocket/queue_maintenance.py:260
 #, python-format
 msgid "Failed to expire old messages: %s"
 msgstr "Mislukt om oude berichten te verlopen: %s"
 
-#: backend/websocket/queue_maintenance.py:284
+#: backend/websocket/queue_maintenance.py:308
 #, python-format
 msgid "Deleted %d failed/expired messages"
 msgstr "%d mislukte/verlopen berichten zijn verwijderd"
 
-#: backend/websocket/queue_maintenance.py:291
+#: backend/websocket/queue_maintenance.py:315
 #, python-format
 msgid "Failed to delete failed messages: %s"
 msgstr "Mislukt om oude berichten te verwijderen: %s"
@@ -5438,7 +5453,7 @@ msgstr "Onbekende apparaatstatus: %s"
 
 #: backend/services/asset_discovery_review.py:342
 #: backend/services/malware_quarantine.py:136
-#: backend/services/malware_review.py:186
+#: backend/services/malware_review.py:233
 msgid "A reason of at least 3 characters is required"
 msgstr "Een reden van minstens 3 tekens is vereist"
 
@@ -5625,7 +5640,7 @@ msgstr "Verwijderd {entity_type} '{entity_name}'"
 msgid "Unknown finding status: %s"
 msgstr "Onbekende status van bevinding: %s"
 
-#: backend/services/malware_review.py:183
+#: backend/services/malware_review.py:230
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "Die beslissing kan hier niet worden genomen: %s"

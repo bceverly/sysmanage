@@ -1769,7 +1769,13 @@
     "wslEnableFailed": "启用WSL失败",
     "wslEnabledRebootRequired": "WSL已启用。需要重新启动以完成安装。",
     "wslEnabledSuccess": "WSL已成功启用。",
-    "advisorTab": "顾问"
+    "advisorTab": "顾问",
+    "heldCommands": "有 {{count}} 条命令正在等待将于 {{time}} 开始的维护时段“{{name}}”。",
+    "heldCommands_one": "有 {{count}} 条命令正在等待将于 {{time}} 开始的维护时段“{{name}}”。",
+    "heldCommands_other": "有 {{count}} 条命令正在等待将于 {{time}} 开始的维护时段“{{name}}”。",
+    "heldCommandsBlackout": "有 {{count}} 条命令正在等待“{{name}}”禁止时段结束。",
+    "heldCommandsBlackout_one": "有 {{count}} 条命令正在等待“{{name}}”禁止时段结束。",
+    "heldCommandsBlackout_other": "有 {{count}} 条命令正在等待“{{name}}”禁止时段结束。"
   },
   "hostGroup": {
     "add": "添加",
@@ -1913,7 +1919,9 @@
     "confirmReenroll": "重新注册此主机的代理？",
     "confirmReenrollMessage": "这会清除 {{hostname}} 的代理凭据，并将主机恢复为待批准状态。在代理被重新安装并丢失凭据时使用：下一个以此主机身份连接的代理会获得新凭据，在您再次批准该主机之前，不接受它发送的任何内容。",
     "reenrollDone": "凭据已清除。代理重新连接后，请再次批准该主机。",
-    "reenrollFailed": "重新注册主机失败"
+    "reenrollFailed": "重新注册主机失败",
+    "heldCount": "暂缓：{{count}}",
+    "heldTitle": "有命令正在等待维护时段"
   },
   "idp": {
     "action": {
@@ -2179,7 +2187,51 @@
     "timezone": "时区",
     "title": "维护窗口",
     "unrestrictedHint": "没有适用的维护窗口 -- 更改立即运行。",
-    "updated": "更新了维护窗口"
+    "updated": "更新了维护窗口",
+    "overrideFailed": "无法创建紧急放行。",
+    "pendingNextWindow": "等待下一个维护时段（“{{name}}”，{{time}} 开始）。",
+    "pendingBlackout": "待处理：“{{name}}”禁止时段正在生效。",
+    "held": {
+      "cmd": {
+        "unknown": "命令",
+        "applyUpdates": "应用更新",
+        "deploymentPlan": "部署计划",
+        "proAttach": "附加 Ubuntu Pro",
+        "proDetach": "分离 Ubuntu Pro",
+        "proEnable": "Ubuntu Pro：启用服务",
+        "proDisable": "Ubuntu Pro：禁用服务",
+        "reboot": "重启",
+        "shutdown": "关机",
+        "restartService": "重启服务",
+        "runScript": "运行脚本",
+        "updateAgent": "更新代理",
+        "collectPackages": "刷新软件包列表",
+        "networkDiscovery": "配置网络发现",
+        "queryPack": "收集事实数据"
+      },
+      "packagesMore": "{{names}} (+{{more}})",
+      "releasedBy": "“{{name}}”，{{time}}",
+      "afterBlackout": "“{{name}}”禁止时段结束时",
+      "nextCheck": "下次检查时",
+      "loadFailed": "无法加载暂缓的命令。",
+      "cancelFailed": "无法取消该命令。",
+      "title": "暂缓的命令",
+      "intro": "等待维护时段的命令。它们会在时段开始时运行；如果您放行主机，则立即运行。",
+      "none": "没有命令在等待维护时段。",
+      "col": {
+        "host": "主机",
+        "command": "命令",
+        "queued": "等待开始时间",
+        "runs": "预计运行",
+        "expires": "过期时间",
+        "actions": "操作"
+      },
+      "release": "立即放行主机",
+      "cancel": "取消命令",
+      "cancelTitle": "要取消此命令吗？",
+      "cancelExplain": "它将不会运行。此操作会被审计。",
+      "keep": "保留"
+    }
   },
   "map": {
     "errorLoadHosts": "加载主机位置失败。",
@@ -3171,7 +3223,13 @@
     "today": "今天",
     "unknown": "未知",
     "version": "版本",
-    "yesterday": "昨天"
+    "yesterday": "昨天",
+    "deployingAntivirus": "正在部署...",
+    "removingAntivirus": "正在删除...",
+    "enablingAntivirus": "正在启用...",
+    "disablingAntivirus": "正在禁用...",
+    "awaitingAgent": "正在等待代理报告此更改，可能需要几分钟。",
+    "agentNotConfirmed": "代理尚未确认此更改，可能仍在处理中；请稍后再查看该主机。"
   },
   "serverDown": {
     "attempts": "尝试次数：{{count}}",
@@ -4374,7 +4432,9 @@
       "seenBy": "发现者",
       "selectAll": "全选",
       "status": "状态",
-      "maybe": "可能是：{{type}}"
+      "maybe": "可能是：{{type}}",
+      "searchesFor": "搜索：{{what}}",
+      "searchesForHint": "此设备在网络上搜索的内容（SSDP 搜索）。它说明设备在寻找什么，而不是设备本身是什么。"
     },
     "tabs": {
       "excluded": "已知且可接受",
@@ -4446,7 +4506,17 @@
       "legNotRun_one": "{{leg}} 未在 {{count}} 台主机上运行：{{reason}}",
       "legNotRun_other": "{{leg}} 未在 {{count}} 台主机上运行：{{reason}}",
       "rulesShort_one": "在 {{count}} 台主机上，ClamAV 加载的规则少于下发的规则",
-      "rulesShort_other": "在 {{count}} 台主机上，ClamAV 加载的规则少于下发的规则"
+      "rulesShort_other": "在 {{count}} 台主机上，ClamAV 加载的规则少于下发的规则",
+      "more": "以及另外 {{count}} 台",
+      "more_one": "以及另外 {{count}} 台",
+      "more_other": "以及另外 {{count}} 台",
+      "deployAntivirus": "部署防病毒软件",
+      "scanNow": "立即扫描",
+      "actionFailed": "无法发送请求。",
+      "noPermission": "您没有执行此操作所需的角色。",
+      "deployRequested": "已为 {{count}} 台主机请求部署防病毒软件",
+      "deployRequested_one": "已为 {{count}} 台主机请求部署防病毒软件",
+      "deployRequested_other": "已为 {{count}} 台主机请求部署防病毒软件"
     },
     "counts": {
       "feed": "规则源：{{title}} v{{version}}，{{count}} 条规则",
@@ -4858,7 +4928,13 @@
       "stratum": "层级",
       "synchronized": "已同步",
       "title": "时钟",
-      "yes": "是"
+      "yes": "是",
+      "uncertain": "不确定：上一次交换耗时 {{roundTrip}}，因此时钟偏差的测量精度无法优于 {{error}}。",
+      "uncertainServiceVouches": "主机的时间服务报告其已同步。",
+      "judgedFrom": "该状态来自 {{time}} 的测量：{{offset}}。",
+      "uncertainPoints": "有 {{count}} 个测量值因过于不确定而无法评估，未予显示。",
+      "uncertainPoints_one": "有 {{count}} 个测量值因过于不确定而无法评估，未予显示。",
+      "uncertainPoints_other": "有 {{count}} 个测量值因过于不确定而无法评估，未予显示。"
     },
     "direction": {
       "ahead": "快于服务器",
@@ -4901,7 +4977,8 @@
       "serverClockOff": "服务器时钟偏差",
       "stale": "无近期测量",
       "unmeasured": "未测量",
-      "warning": "警告"
+      "warning": "警告",
+      "uncertain": "不确定"
     },
     "statusHelp": {
       "critical": "测得的时钟偏差已达到或超过严重阈值。",
@@ -4909,7 +4986,8 @@
       "serverClockOff": "服务器自身的时钟偏离其参考源，因此在校正之前不会评判主机时钟。",
       "stale": "最后一次测量已超过 30 分钟。主机可能未连接。",
       "unmeasured": "服务器尚未测量此时钟。代理版本可能过旧，或尚未连接。",
-      "warning": "测得的时钟偏差已达到或超过警告阈值。"
+      "warning": "测得的时钟偏差已达到或超过警告阈值。",
+      "uncertain": "上一次交换耗时过长，无法在警告界限内测量时间偏差，因此在出现更快的交换之前不评估时钟。"
     },
     "title": "时间同步",
     "unit": {

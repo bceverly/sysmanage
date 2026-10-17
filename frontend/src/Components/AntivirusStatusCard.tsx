@@ -2,7 +2,7 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { formatUTCTimestamp } from '../utils/dateUtils';
 import {
   Card,
@@ -13,22 +13,21 @@ import {
   CircularProgress,
   Alert,
   Stack,
-  Button,
 } from '@mui/material';
 import ShieldIcon from '@mui/icons-material/Shield';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
-import SecurityIcon from '@mui/icons-material/Security';
 import { useTranslation } from 'react-i18next';
 import { AntivirusStatus, getAntivirusStatus } from '../Services/antivirusService';
+import AntivirusActionButtons, { AntivirusAction } from './AntivirusActionButtons';
 
 interface AntivirusStatusCardProps {
   hostId: string;
-  onDeployAntivirus?: () => void;
-  onEnableAntivirus?: () => void;
-  onDisableAntivirus?: () => void;
-  onRemoveAntivirus?: () => void;
+  onDeployAntivirus?: AntivirusAction;
+  onEnableAntivirus?: AntivirusAction;
+  onDisableAntivirus?: AntivirusAction;
+  onRemoveAntivirus?: AntivirusAction;
   canDeployAntivirus?: boolean;
   canEnableAntivirus?: boolean;
   canDisableAntivirus?: boolean;
@@ -175,21 +174,21 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
     }
   }, [hostId, t, refreshTrigger]);
 
+  // A quiet re-read (no spinner): the 30 s auto-refresh, and the faster poll
+  // the action buttons run while waiting for the agent to report a change.
+  const refreshStatus = useCallback(() => {
+    if (!hostId) return;
+    getAntivirusStatus(hostId)
+      .then(setAntivirusStatus)
+      .catch((err) => console.error('Error refreshing antivirus status:', err));
+  }, [hostId]);
+
   // Auto-refresh every 30 seconds
   useEffect(() => {
     if (!hostId) return;
-
-    const intervalId = setInterval(async () => {
-      try {
-        const status = await getAntivirusStatus(hostId);
-        setAntivirusStatus(status);
-      } catch (err) {
-        console.error('Error refreshing antivirus status:', err);
-      }
-    }, 30000); // 30 seconds
-
+    const intervalId = setInterval(refreshStatus, 30000);
     return () => clearInterval(intervalId);
-  }, [hostId]);
+  }, [hostId, refreshStatus]);
 
   if (loading) {
     return (
@@ -285,78 +284,28 @@ const AntivirusStatusCard: React.FC<AntivirusStatusCardProps> = ({
           </Box>
         )}
 
-        {/* Antivirus Action Buttons */}
-        <Box sx={{ mt: 3, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-          {/* Deploy Button */}
-          {canDeployAntivirus && onDeployAntivirus && (
-            <Button
-              variant="contained"
-              color="success"
-              startIcon={<SecurityIcon />}
-              onClick={onDeployAntivirus}
-              disabled={
-                !isHostActive ||
-                !isAgentPrivileged ||
-                !hasOsDefault ||
-                Boolean(antivirusStatus?.software_name)
-              }
-              title={getDeployButtonTitle(antivirusStatus)}
-            >
-              {t('hostDetail.deployAntivirus', 'Deploy Antivirus')}
-            </Button>
-          )}
-
-          {/* Remove Button */}
-          {canRemoveAntivirus && onRemoveAntivirus && (
-            <Button
-              variant="contained"
-              color="error"
-              onClick={onRemoveAntivirus}
-              disabled={
-                !isHostActive ||
-                !isAgentPrivileged ||
-                !antivirusStatus?.software_name
-              }
-              title={getRemoveButtonTitle(antivirusStatus)}
-            >
-              {t('security.removeAntivirus', 'Remove Antivirus')}
-            </Button>
-          )}
-
-          {/* Enable Button */}
-          {canEnableAntivirus && onEnableAntivirus && antivirusStatus?.software_name && (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={onEnableAntivirus}
-              disabled={
-                !isHostActive ||
-                !isAgentPrivileged ||
-                antivirusStatus.enabled === true
-              }
-              title={getEnableButtonTitle(antivirusStatus)}
-            >
-              {t('security.enableAntivirus', 'Enable Antivirus')}
-            </Button>
-          )}
-
-          {/* Disable Button */}
-          {canDisableAntivirus && onDisableAntivirus && antivirusStatus?.software_name && (
-            <Button
-              variant="contained"
-              color="warning"
-              onClick={onDisableAntivirus}
-              disabled={
-                !isHostActive ||
-                !isAgentPrivileged ||
-                antivirusStatus.enabled === false
-              }
-              title={getDisableButtonTitle(antivirusStatus)}
-            >
-              {t('security.disableAntivirus', 'Disable Antivirus')}
-            </Button>
-          )}
-        </Box>
+        <AntivirusActionButtons
+          status={antivirusStatus}
+          onPoll={refreshStatus}
+          onDeploy={onDeployAntivirus}
+          onRemove={onRemoveAntivirus}
+          onEnable={onEnableAntivirus}
+          onDisable={onDisableAntivirus}
+          canDeploy={canDeployAntivirus}
+          canRemove={canRemoveAntivirus}
+          canEnable={canEnableAntivirus}
+          canDisable={canDisableAntivirus}
+          blocked={{
+            deploy: !isHostActive || !isAgentPrivileged || !hasOsDefault,
+            other: !isHostActive || !isAgentPrivileged,
+          }}
+          titles={{
+            deploy: getDeployButtonTitle(antivirusStatus),
+            remove: getRemoveButtonTitle(antivirusStatus),
+            enable: antivirusStatus ? getEnableButtonTitle(antivirusStatus) : '',
+            disable: antivirusStatus ? getDisableButtonTitle(antivirusStatus) : '',
+          }}
+        />
       </CardContent>
     </Card>
   );

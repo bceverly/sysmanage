@@ -1769,7 +1769,13 @@
     "wslEnableFailed": "啟用WSL失敗",
     "wslEnabledRebootRequired": "WSL已啟用。需要重新啟動以完成安裝。",
     "wslEnabledSuccess": "WSL已成功啟用。",
-    "advisorTab": "顧問"
+    "advisorTab": "顧問",
+    "heldCommands": "有 {{count}} 個命令正在等待將於 {{time}} 開始的維護時段「{{name}}」。",
+    "heldCommands_one": "有 {{count}} 個命令正在等待將於 {{time}} 開始的維護時段「{{name}}」。",
+    "heldCommands_other": "有 {{count}} 個命令正在等待將於 {{time}} 開始的維護時段「{{name}}」。",
+    "heldCommandsBlackout": "有 {{count}} 個命令正在等待「{{name}}」禁止時段結束。",
+    "heldCommandsBlackout_one": "有 {{count}} 個命令正在等待「{{name}}」禁止時段結束。",
+    "heldCommandsBlackout_other": "有 {{count}} 個命令正在等待「{{name}}」禁止時段結束。"
   },
   "hostGroup": {
     "add": "新增",
@@ -1913,7 +1919,9 @@
     "confirmReenroll": "重新註冊此主機的代理？",
     "confirmReenrollMessage": "這會清除 {{hostname}} 的代理憑證，並將主機恢復為待核准狀態。在代理被重新安裝並遺失憑證時使用：下一個以此主機身分連線的代理會取得新憑證，在您再次核准該主機之前，不接受它傳送的任何內容。",
     "reenrollDone": "憑證已清除。代理重新連線後，請再次核准該主機。",
-    "reenrollFailed": "重新註冊主機失敗"
+    "reenrollFailed": "重新註冊主機失敗",
+    "heldCount": "暫緩：{{count}}",
+    "heldTitle": "有命令正在等待維護時段"
   },
   "idp": {
     "action": {
@@ -2179,7 +2187,51 @@
     "timezone": "時區",
     "title": "維護窗口",
     "unrestrictedHint": "沒有適用的維護窗口 -- 更改將立即運行。",
-    "updated": "維護窗口已更新"
+    "updated": "維護窗口已更新",
+    "overrideFailed": "無法建立緊急放行。",
+    "pendingNextWindow": "等待下一個維護時段（「{{name}}」，{{time}} 開始）。",
+    "pendingBlackout": "待處理：「{{name}}」禁止時段正在生效。",
+    "held": {
+      "cmd": {
+        "unknown": "命令",
+        "applyUpdates": "套用更新",
+        "deploymentPlan": "部署計畫",
+        "proAttach": "附加 Ubuntu Pro",
+        "proDetach": "分離 Ubuntu Pro",
+        "proEnable": "Ubuntu Pro：啟用服務",
+        "proDisable": "Ubuntu Pro：停用服務",
+        "reboot": "重新啟動",
+        "shutdown": "關機",
+        "restartService": "重新啟動服務",
+        "runScript": "執行指令碼",
+        "updateAgent": "更新代理程式",
+        "collectPackages": "重新整理套件清單",
+        "networkDiscovery": "設定網路探索",
+        "queryPack": "收集事實資料"
+      },
+      "packagesMore": "{{names}} (+{{more}})",
+      "releasedBy": "「{{name}}」，{{time}}",
+      "afterBlackout": "「{{name}}」禁止時段結束時",
+      "nextCheck": "下次檢查時",
+      "loadFailed": "無法載入暫緩的命令。",
+      "cancelFailed": "無法取消該命令。",
+      "title": "暫緩的命令",
+      "intro": "等待維護時段的命令。它們會在時段開始時執行；如果您放行主機，則立即執行。",
+      "none": "沒有命令在等待維護時段。",
+      "col": {
+        "host": "主機",
+        "command": "命令",
+        "queued": "等待開始時間",
+        "runs": "預計執行",
+        "expires": "到期時間",
+        "actions": "操作"
+      },
+      "release": "立即放行主機",
+      "cancel": "取消命令",
+      "cancelTitle": "要取消此命令嗎？",
+      "cancelExplain": "它將不會執行。此操作會被稽核。",
+      "keep": "保留"
+    }
   },
   "map": {
     "errorLoadHosts": "無法加載主機位置。",
@@ -3171,7 +3223,13 @@
     "today": "今天",
     "unknown": "未知",
     "version": "版本",
-    "yesterday": "昨天"
+    "yesterday": "昨天",
+    "deployingAntivirus": "正在部署...",
+    "removingAntivirus": "正在移除...",
+    "enablingAntivirus": "正在啟用...",
+    "disablingAntivirus": "正在停用...",
+    "awaitingAgent": "正在等待代理程式回報此變更，可能需要幾分鐘。",
+    "agentNotConfirmed": "代理程式尚未確認此變更，可能仍在處理中；請稍後再查看該主機。"
   },
   "serverDown": {
     "attempts": "嘗試次數： {{count}}",
@@ -4374,7 +4432,9 @@
       "seenBy": "已見過",
       "selectAll": "全選",
       "status": "狀態",
-      "maybe": "可能是：{{type}}"
+      "maybe": "可能是：{{type}}",
+      "searchesFor": "搜尋：{{what}}",
+      "searchesForHint": "此裝置在網路上搜尋的內容（SSDP 搜尋）。它說明裝置在尋找什麼，而不是裝置本身是什麼。"
     },
     "tabs": {
       "excluded": "已知且可接受",
@@ -4446,7 +4506,17 @@
       "legNotRun_one": "{{leg}} 未在 {{count}} 台主機上執行：{{reason}}",
       "legNotRun_other": "{{leg}} 未在 {{count}} 台主機上執行：{{reason}}",
       "rulesShort_one": "在 {{count}} 台主機上，ClamAV 載入的規則少於派送的規則",
-      "rulesShort_other": "在 {{count}} 台主機上，ClamAV 載入的規則少於派送的規則"
+      "rulesShort_other": "在 {{count}} 台主機上，ClamAV 載入的規則少於派送的規則",
+      "more": "以及另外 {{count}} 台",
+      "more_one": "以及另外 {{count}} 台",
+      "more_other": "以及另外 {{count}} 台",
+      "deployAntivirus": "部署防毒軟體",
+      "scanNow": "立即掃描",
+      "actionFailed": "無法傳送要求。",
+      "noPermission": "您沒有執行此操作所需的角色。",
+      "deployRequested": "已為 {{count}} 台主機要求部署防毒軟體",
+      "deployRequested_one": "已為 {{count}} 台主機要求部署防毒軟體",
+      "deployRequested_other": "已為 {{count}} 台主機要求部署防毒軟體"
     },
     "counts": {
       "feed": "規則來源：{{title}} v{{version}}，{{count}} 條規則",
@@ -4858,7 +4928,13 @@
       "stratum": "層級",
       "synchronized": "已同步",
       "title": "時鐘",
-      "yes": "是"
+      "yes": "是",
+      "uncertain": "不確定：上一次交換耗時 {{roundTrip}}，因此時鐘偏差的測量精度無法優於 {{error}}。",
+      "uncertainServiceVouches": "主機的時間服務回報其已同步。",
+      "judgedFrom": "此狀態來自 {{time}} 的測量：{{offset}}。",
+      "uncertainPoints": "有 {{count}} 個測量值因過於不確定而無法評估，未予顯示。",
+      "uncertainPoints_one": "有 {{count}} 個測量值因過於不確定而無法評估，未予顯示。",
+      "uncertainPoints_other": "有 {{count}} 個測量值因過於不確定而無法評估，未予顯示。"
     },
     "direction": {
       "ahead": "快於伺服器",
@@ -4901,7 +4977,8 @@
       "serverClockOff": "伺服器時鐘偏差",
       "stale": "無近期測量",
       "unmeasured": "未測量",
-      "warning": "警告"
+      "warning": "警告",
+      "uncertain": "不確定"
     },
     "statusHelp": {
       "critical": "測得的時鐘偏差已達到或超過嚴重閾值。",
@@ -4909,7 +4986,8 @@
       "serverClockOff": "伺服器本身的時鐘偏離其參考來源，因此在校正之前不會評判主機時鐘。",
       "stale": "最後一次測量已超過 30 分鐘。主機可能未連線。",
       "unmeasured": "伺服器尚未測量此時鐘。代理版本可能過舊，或尚未連線。",
-      "warning": "測得的時鐘偏差已達到或超過警告閾值。"
+      "warning": "測得的時鐘偏差已達到或超過警告閾值。",
+      "uncertain": "上一次交換耗時過長，無法在警告界限內測量時間偏差，因此在出現更快的交換之前不評估時鐘。"
     },
     "title": "時間同步",
     "unit": {

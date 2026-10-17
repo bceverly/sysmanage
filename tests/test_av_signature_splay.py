@@ -15,6 +15,10 @@ from backend.services import av_plan_builder as builder
 from backend.services import av_scan_schedule as schedule
 
 LINUX = {"platform": "Linux", "platform_release": "Ubuntu 24.04"}
+# The one-shot signature refresh the wait holds back exists only where the
+# package starts no updater (RPM / SUSE / Arch); on Debian / Ubuntu the
+# updater the package starts does the first download (2026-10-17).
+RPM = {"platform": "Linux", "platform_release": "Fedora 42"}
 WINDOWS = {"platform": "Windows", "platform_release": "Windows 11"}
 
 
@@ -35,7 +39,7 @@ class TestPreDownloadDelay:
     def test_linux_plan_waits_its_hosts_share_first(self):
         waits = []
         for host_id in _hosts():
-            plan = builder.build_deploy_plan({**LINUX, "host_id": host_id}, "clamav")
+            plan = builder.build_deploy_plan({**RPM, "host_id": host_id}, "clamav")
             delay = _delay(plan)
             if delay is None:  # a share under one second
                 continue
@@ -62,9 +66,11 @@ class TestPreDownloadDelay:
         raise AssertionError("no Windows plan had a wait")
 
     def test_no_host_id_no_wait(self):
-        plan = builder.build_deploy_plan(LINUX, "clamav")
+        plan = builder.build_deploy_plan(RPM, "clamav")
         assert _delay(plan) is None
         assert plan["commands"][0]["description"] == builder.REFRESH_SIGNATURES
+        # Debian / Ubuntu: no wait and no one-shot -- nothing to run at all.
+        assert builder.build_deploy_plan(LINUX, "clamav")["commands"] == []
 
     def test_the_command_timeout_covers_the_wait(self):
         info = {**LINUX, "host_id": "any-host"}

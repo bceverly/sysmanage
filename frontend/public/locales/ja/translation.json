@@ -1769,7 +1769,13 @@
     "wslEnableFailed": "WSLの有効化に失敗しました",
     "wslEnabledRebootRequired": "WSLが有効になりました。インストールを完了するには再起動が必要です。",
     "wslEnabledSuccess": "WSLが正常に有効になりました。",
-    "advisorTab": "アドバイザー"
+    "advisorTab": "アドバイザー",
+    "heldCommands": "{{count}} 件のコマンドが、{{time}} に開始するメンテナンスウィンドウ「{{name}}」を待っています。",
+    "heldCommands_one": "{{count}} 件のコマンドが、{{time}} に開始するメンテナンスウィンドウ「{{name}}」を待っています。",
+    "heldCommands_other": "{{count}} 件のコマンドが、{{time}} に開始するメンテナンスウィンドウ「{{name}}」を待っています。",
+    "heldCommandsBlackout": "{{count}} 件のコマンドが、ブラックアウト「{{name}}」の終了を待っています。",
+    "heldCommandsBlackout_one": "{{count}} 件のコマンドが、ブラックアウト「{{name}}」の終了を待っています。",
+    "heldCommandsBlackout_other": "{{count}} 件のコマンドが、ブラックアウト「{{name}}」の終了を待っています。"
   },
   "hostGroup": {
     "add": "追加",
@@ -1913,7 +1919,9 @@
     "confirmReenroll": "このホストのエージェントを再登録しますか?",
     "confirmReenrollMessage": "{{hostname}} のエージェントの資格情報を消去し、ホストを承認待ちに戻します。エージェントを再インストールして資格情報を失った場合に使用します。このホストとして次に接続したエージェントに新しい資格情報が発行され、ホストを再承認するまで、そのエージェントが送信するものは何も受け付けられません。",
     "reenrollDone": "資格情報を消去しました。エージェントが再接続したら、ホストを再承認してください。",
-    "reenrollFailed": "ホストの再登録に失敗しました"
+    "reenrollFailed": "ホストの再登録に失敗しました",
+    "heldCount": "保留中: {{count}}",
+    "heldTitle": "コマンドがメンテナンスウィンドウを待っています"
   },
   "idp": {
     "action": {
@@ -2179,7 +2187,51 @@
     "timezone": "タイムゾーン",
     "title": "メンテナンスウィンドウ",
     "unrestrictedHint": "適用されるメンテナンスウィンドウはありません -- 変更はすぐに実行されます。",
-    "updated": "メンテナンスウィンドウが更新されました"
+    "updated": "メンテナンスウィンドウが更新されました",
+    "overrideFailed": "オーバーライドを作成できませんでした。",
+    "pendingNextWindow": "次のメンテナンスウィンドウを待機中です（「{{name}}」、{{time}} に開始）。",
+    "pendingBlackout": "保留中: ブラックアウト「{{name}}」が有効です。",
+    "held": {
+      "cmd": {
+        "unknown": "コマンド",
+        "applyUpdates": "更新を適用",
+        "deploymentPlan": "デプロイ計画",
+        "proAttach": "Ubuntu Pro のアタッチ",
+        "proDetach": "Ubuntu Pro のデタッチ",
+        "proEnable": "Ubuntu Pro: サービスを有効化",
+        "proDisable": "Ubuntu Pro: サービスを無効化",
+        "reboot": "再起動",
+        "shutdown": "シャットダウン",
+        "restartService": "サービスを再起動",
+        "runScript": "スクリプトを実行",
+        "updateAgent": "エージェントを更新",
+        "collectPackages": "パッケージ一覧を更新",
+        "networkDiscovery": "ネットワーク検出を構成",
+        "queryPack": "ファクトを収集"
+      },
+      "packagesMore": "{{names}} (+{{more}})",
+      "releasedBy": "「{{name}}」{{time}}",
+      "afterBlackout": "ブラックアウト「{{name}}」の終了時",
+      "nextCheck": "次回のチェック時",
+      "loadFailed": "保留中のコマンドを読み込めませんでした。",
+      "cancelFailed": "コマンドを取り消せませんでした。",
+      "title": "保留中のコマンド",
+      "intro": "メンテナンスウィンドウを待っているコマンドです。ウィンドウの開始時、またはホストを解放するとすぐに実行されます。",
+      "none": "ウィンドウを待っているコマンドはありません。",
+      "col": {
+        "host": "ホスト",
+        "command": "コマンド",
+        "queued": "待機中（開始日時）",
+        "runs": "実行予定",
+        "expires": "有効期限",
+        "actions": "操作"
+      },
+      "release": "今すぐホストを解放",
+      "cancel": "コマンドを取り消す",
+      "cancelTitle": "このコマンドを取り消しますか？",
+      "cancelExplain": "実行されません。この操作は監査されます。",
+      "keep": "残す"
+    }
   },
   "map": {
     "errorLoadHosts": "ホスト位置情報の読み込みに失敗しました。",
@@ -3171,7 +3223,13 @@
     "today": "今日",
     "unknown": "不明",
     "version": "バージョン",
-    "yesterday": "昨日"
+    "yesterday": "昨日",
+    "deployingAntivirus": "展開中...",
+    "removingAntivirus": "削除中...",
+    "enablingAntivirus": "有効化中...",
+    "disablingAntivirus": "無効化中...",
+    "awaitingAgent": "エージェントが変更を報告するのを待っています。数分かかる場合があります。",
+    "agentNotConfirmed": "エージェントはまだ変更を確認していません。処理中の可能性があります。後でもう一度ホストを確認してください。"
   },
   "serverDown": {
     "attempts": "試行回数: {{count}}",
@@ -4374,7 +4432,9 @@
       "seenBy": "検出元",
       "selectAll": "すべて選択",
       "status": "ステータス",
-      "maybe": "おそらく: {{type}}"
+      "maybe": "おそらく: {{type}}",
+      "searchesFor": "検索対象: {{what}}",
+      "searchesForHint": "このデバイスがネットワーク上で探していたもの (SSDP 検索)。デバイスが何であるかではなく、何を探しているかを示します。"
     },
     "tabs": {
       "excluded": "既知・許容済み",
@@ -4446,7 +4506,17 @@
       "legNotRun_one": "{{count}} 台のホストで {{leg}} が実行されませんでした: {{reason}}",
       "legNotRun_other": "{{count}} 台のホストで {{leg}} が実行されませんでした: {{reason}}",
       "rulesShort_one": "{{count}} 台のホストで ClamAV が読み込んだルールが指定数より少なくなっています",
-      "rulesShort_other": "{{count}} 台のホストで ClamAV が読み込んだルールが指定数より少なくなっています"
+      "rulesShort_other": "{{count}} 台のホストで ClamAV が読み込んだルールが指定数より少なくなっています",
+      "more": "ほか {{count}} 台",
+      "more_one": "ほか {{count}} 台",
+      "more_other": "ほか {{count}} 台",
+      "deployAntivirus": "ウイルス対策を展開",
+      "scanNow": "今すぐスキャン",
+      "actionFailed": "リクエストを送信できませんでした。",
+      "noPermission": "この操作に必要なロールがありません。",
+      "deployRequested": "{{count}} 台のホストにウイルス対策の展開を要求しました",
+      "deployRequested_one": "{{count}} 台のホストにウイルス対策の展開を要求しました",
+      "deployRequested_other": "{{count}} 台のホストにウイルス対策の展開を要求しました"
     },
     "counts": {
       "feed": "ルールフィード: {{title}} v{{version}}、{{count}} 件のルール",
@@ -4858,7 +4928,13 @@
       "stratum": "ストラタム",
       "synchronized": "同期済み",
       "title": "時計",
-      "yes": "はい"
+      "yes": "はい",
+      "uncertain": "不確実: 直近のやり取りに {{roundTrip}} かかったため、時計のずれは {{error}} より高い精度では測定できません。",
+      "uncertainServiceVouches": "ホストの時刻サービスは同期済みと報告しています。",
+      "judgedFrom": "ステータスは {{time}} の測定値に基づいています: {{offset}}。",
+      "uncertainPoints": "判定するには不確実すぎる測定値 {{count}} 件は表示していません。",
+      "uncertainPoints_one": "判定するには不確実すぎる測定値 {{count}} 件は表示していません。",
+      "uncertainPoints_other": "判定するには不確実すぎる測定値 {{count}} 件は表示していません。"
     },
     "direction": {
       "ahead": "サーバーより進んでいる",
@@ -4901,7 +4977,8 @@
       "serverClockOff": "サーバー時計のずれ",
       "stale": "最近の測定なし",
       "unmeasured": "未測定",
-      "warning": "警告"
+      "warning": "警告",
+      "uncertain": "不確実"
     },
     "statusHelp": {
       "critical": "測定された時刻のずれが重大しきい値以上です。",
@@ -4909,7 +4986,8 @@
       "serverClockOff": "サーバー自身の時計が参照先からずれているため、修正されるまでホストの時計は判定されません。",
       "stale": "最後の測定から 30 分以上経過しています。ホストが接続されていない可能性があります。",
       "unmeasured": "サーバーはまだこの時計を測定していません。エージェントが古すぎるか、まだ接続していない可能性があります。",
-      "warning": "測定された時刻のずれが警告しきい値以上です。"
+      "warning": "測定された時刻のずれが警告しきい値以上です。",
+      "uncertain": "直近のやり取りに時間がかかりすぎ、警告しきい値の範囲内で時刻のずれを測定できませんでした。より速いやり取りがあるまで時計は判定されません。"
     },
     "title": "時刻同期",
     "unit": {

@@ -1902,8 +1902,8 @@ jobs:
           cp $RF/sysmanage-*-netbsd.tgz.sha256 "repo/server/netbsd/$VERSION/" 2>/dev/null || true
           cp $RF/sysmanage-*el*.rpm "repo/server/rpm/centos/$VERSION/" 2>/dev/null || true
           cp $RF/sysmanage-*el*.rpm.sha256 "repo/server/rpm/centos/$VERSION/" 2>/dev/null || true
-          cp $RF/sysmanage-$VERSION-*.noarch.rpm "repo/server/rpm/opensuse/$VERSION/" 2>/dev/null || true
-          cp $RF/sysmanage-$VERSION-*.noarch.rpm.sha256 "repo/server/rpm/opensuse/$VERSION/" 2>/dev/null || true
+          cp $RF/sysmanage-*opensuse*.rpm "repo/server/rpm/opensuse/$VERSION/" 2>/dev/null || true
+          cp $RF/sysmanage-*opensuse*.rpm.sha256 "repo/server/rpm/opensuse/$VERSION/" 2>/dev/null || true
           cp $RF/sysmanage-*-windows-*.msi "repo/server/windows/$VERSION/" 2>/dev/null || true
           cp $RF/sysmanage-*-windows-*.msi.sha256 "repo/server/windows/$VERSION/" 2>/dev/null || true
           cp $RF/sysmanage-*-alpine*.apk "repo/server/alpine/$VERSION/" 2>/dev/null || true
@@ -2033,6 +2033,22 @@ jobs:
             fi
             echo "verified in R2: $DEB_KEY"
           done
+          # The same proof for the direct-download formats.  3.11.0.4/.5 shipped
+          # the MSI .sha256 files with no MSIs, and the openSUSE rpm never
+          # reached the bucket at all (its copy glob matched nothing), all
+          # under a green run (docs audit, 2026-10-17).
+          for KEY in \
+              "server/windows/$VERSION/sysmanage-$VERSION-windows-x64.msi" \
+              "server/windows/$VERSION/sysmanage-$VERSION-windows-arm64.msi"; do
+            s3 ls "s3://${R2_BUCKET}/$KEY" >/dev/null 2>&1 \
+              || { echo "::error::published package missing from R2: $KEY"; exit 1; }
+            echo "verified in R2: $KEY"
+          done
+          if ! s3 ls "s3://${R2_BUCKET}/server/rpm/opensuse/$VERSION/" 2>/dev/null | grep -q 'opensuse.*\.rpm$'; then
+            echo "::error::no openSUSE rpm in R2 under server/rpm/opensuse/$VERSION/"
+            exit 1
+          fi
+          echo "verified in R2: server/rpm/opensuse/$VERSION/"
           echo "Published SysManage Server v$VERSION to https://repo.sysmanage.org/server/"
 
       # Cloudflare fronts R2 and caches NEGATIVE responses: a GET for a path
@@ -2139,7 +2155,7 @@ jobs:
           sudo apt install nginx
 
           # Configure the server
-          sudo nano /etc/sysmanage.yaml
+          sudo vim /etc/sysmanage.yaml
 
           # Run database migrations
           cd /opt/sysmanage
@@ -2852,7 +2868,7 @@ jobs:
   deploy-obs:
     name: Deploy to OBS
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 100  # includes waiting for the OBS build
     needs: [release]
     if: startsWith(github.ref, 'refs/tags/')
 
@@ -3144,6 +3160,46 @@ jobs:
           echo "  - SLE 15 SP6"
           echo "  - SLE 15 SP5"
           echo "=========================================="
+
+      # A commit is not a release: the agent sat at 0.9.9.6 on every OBS
+      # repository (and the server at 3.9.0.26 on Tumbleweed) for months
+      # while this job stayed green, because nothing ever looked at what OBS
+      # built.  Wait for the build and fail loudly, with the log, if any
+      # repository failed (found in the docs audit, 2026-10-17).
+      - name: Wait for OBS build results
+        env:
+          OBS_USERNAME: ${{ secrets.OBS_USERNAME }}
+        run: |
+          cd "home:${OBS_USERNAME}/sysmanage"
+          sleep 120  # let the scheduler see the new sources
+          deadline=$(( $(date +%s) + 60*60 ))
+          while :; do
+            if results=$(osc results 2>&1); then
+              pending=$(printf '%s\n' "$results" | awk '$3 ~ /\*$/ || $3 ~ /^(scheduled|building|dispatching|finished|signing|blocked)/' | wc -l)
+            else
+              echo "::warning::osc results failed: $results"; pending=1
+            fi
+            if [ "$pending" -eq 0 ]; then break; fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then
+              echo "::warning::OBS still building after 60 minutes; check https://build.opensuse.org/package/show/home:${OBS_USERNAME}/sysmanage"
+              printf '%s\n' "$results"
+              exit 0
+            fi
+            sleep 60
+          done
+          printf '%s\n' "$results"
+          bad=$(printf '%s\n' "$results" | awk '$3 ~ /^(failed|unresolvable|broken)/ {print $1" "$2" "$3}')
+          if [ -n "$bad" ]; then
+            printf '%s\n' "$bad" | while read -r repo arch state; do
+              echo "::error::OBS sysmanage $repo/$arch: $state"
+              if [ "$state" = unresolvable ]; then
+                osc results -v -r "$repo" -a "$arch" 2>&1 | tail -5
+              else
+                osc remotebuildlog "home:${OBS_USERNAME}" sysmanage "$repo" "$arch" 2>&1 | tail -60
+              fi
+            done
+            exit 1
+          fi
 
   # Deploy to COPR (Fedora Community Build Service) - runs in parallel with OBS, Launchpad, Snap
   deploy-copr:

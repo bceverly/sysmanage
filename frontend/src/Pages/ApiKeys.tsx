@@ -29,6 +29,7 @@ import {
     revokeApiKey,
 } from '../Services/apiKeys';
 import { appLocale } from '../utils/locale';
+import AsyncButton from '../Components/AsyncButton';
 
 const formatDate = (value?: string | null): string => {
     if (!value) return '--';
@@ -327,9 +328,9 @@ const ApiKeys: React.FC = () => {
                     <Button onClick={() => setRevokeTarget(null)}>
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button onClick={handleRevoke} color="error" variant="contained">
+                    <AsyncButton onClick={handleRevoke} color="error" variant="contained">
                         {t('apiKeys.revoke', 'Revoke')}
-                    </Button>
+                    </AsyncButton>
                 </DialogActions>
             </Dialog>
         </Box>

@@ -41,6 +41,7 @@ import {
     getFindingRemediation,
     repairFinding,
 } from '../Services/configFleetService';
+import AsyncButton from '../Components/AsyncButton';
 
 /** Pull the server's explanation out of an axios error, or fall back. */
 const messageFrom = (err: unknown, fallback: string): string => {
@@ -466,14 +467,14 @@ const ConfigDrift: React.FC = () => {
                     <Button onClick={() => setConfirmTarget(null)} disabled={remediating}>
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button
+                    <AsyncButton
                         variant="contained"
                         color="warning"
                         onClick={confirmRemediation}
                         disabled={remediating}
                     >
                         {t('configDrift.confirmAction', 'Remediate')}
-                    </Button>
+                    </AsyncButton>
                 </DialogActions>
             </Dialog>
         </Box>

@@ -96,8 +96,10 @@ def _defer(messages, now, reason) -> None:
 async def _send_to_host(db, host_id, now, deadline, seen) -> int:
     """Deliver this host's due messages; returns how many were handled."""
     from backend.persistence.models import Host  # noqa: PLC0415
+    from backend.services.maintenance_command_classes import (  # noqa: PLC0415
+        is_window_gated,
+    )
     from backend.services.maintenance_window_service import (  # noqa: PLC0415
-        GATED_MESSAGE_TYPES,
         is_dispatch_allowed,
     )
 
@@ -128,13 +130,16 @@ async def _send_to_host(db, host_id, now, deadline, seen) -> int:
         return len(messages)
 
     # Maintenance-window gating (Phase 14.2): change actions wait while the
-    # host is outside its windows or in a blackout; control-plane pushes
-    # (e.g. logging_config_update) are never gated.  Deferred with a
-    # not-before time, so they stop occupying the drain until it is re-checked.
-    gated = [m for m in messages if m.message_type in GATED_MESSAGE_TYPES]
+    # host is outside its windows or in a blackout; read-only commands and
+    # control-plane pushes (e.g. logging_config_update) are never gated.  A
+    # row held before a command became exempt is simply pending, so it goes
+    # out here on its next pass.  Deferred rows get a not-before time, so
+    # they stop occupying the drain until it is re-checked.
+    gated = [m for m in messages if is_window_gated(m.message_type, m.message_data)]
     if gated and not is_dispatch_allowed(db, host_id, now):
         _defer(gated, now, f"Maintenance window closed for host {host.fqdn}")
-        messages = [m for m in messages if m.message_type not in GATED_MESSAGE_TYPES]
+        held = {id(m) for m in gated}
+        messages = [m for m in messages if id(m) not in held]
 
     sent = 0
     for message in messages:

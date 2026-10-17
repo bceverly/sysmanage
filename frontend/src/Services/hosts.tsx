@@ -53,6 +53,8 @@ type DiagnosticDetailResponse = {
 }
 
 type SysManageHost = {
+    // Commands a maintenance window is holding for this host.
+    held_commands?: number;
     id: string;
     active: boolean;
     fqdn: string;

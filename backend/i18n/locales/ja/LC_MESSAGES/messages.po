@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-16 13:57-0400\n"
+"POT-Creation-Date: 2026-10-17 09:30-0400\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -177,8 +177,8 @@ msgstr "CA証明書の取得に失敗しました: %s"
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:212 backend/api/firewall_roles.py:473
-#: backend/api/firewall_roles.py:544
+#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:424
+#: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "ホストIDの形式が無効です"
@@ -1296,6 +1296,7 @@ msgid "Host limit reached for this tenant."
 msgstr "このテナントのホスト上限に達しました。"
 
 #: backend/api/processes.py:86 backend/api/processes.py:132
+#: backend/api/maintenance_windows.py:77
 msgid "Permission denied: View Host Details role required"
 msgstr "アクセスが拒否されました: 「ホスト詳細の表示」ロールが必要です"
 
@@ -2674,7 +2675,7 @@ msgid "Failed to process heartbeat"
 msgstr "ハートビートの処理に失敗しました"
 
 #: backend/api/logging_settings.py:71 backend/api/hardware_health.py:312
-#: backend/api/maintenance_windows.py:62
+#: backend/api/maintenance_windows.py:64
 msgid "Permission denied: administrator required"
 msgstr "アクセスが拒否されました: 管理者権限が必要です"
 
@@ -3328,23 +3329,23 @@ msgstr "パッケージのカウントに失敗しました: %s"
 msgid "Failed to search packages: %s"
 msgstr "パッケージの検索に失敗しました: %s"
 
-#: backend/api/host.py:195
+#: backend/api/host.py:196
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "アクセス権限がありません: DELETE_HOST ロールが必要です"
 
-#: backend/api/host.py:259
+#: backend/api/host.py:260
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "許可が拒否されました: VIEW_HOST_DETAILS ロールが必要です"
 
-#: backend/api/host.py:666
+#: backend/api/host.py:678
 msgid "Host already exists"
 msgstr "ホストは既に存在しています"
 
-#: backend/api/host.py:778
+#: backend/api/host.py:790
 msgid "Registration absorbed: host was recently deleted"
 msgstr "登録が吸収されました: ホストは最近削除されました"
 
-#: backend/api/host.py:858
+#: backend/api/host.py:870
 #, python-format
 msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
@@ -3391,11 +3392,11 @@ msgstr ""
 msgid "Configuration acknowledgment processed"
 msgstr "設定の確認応答を処理しました"
 
-#: backend/api/time_sync.py:297 backend/api/time_sync.py:341
+#: backend/api/time_sync.py:303 backend/api/time_sync.py:347
 msgid "Clock offset bounds changed"
 msgstr "時計のずれの許容範囲を変更しました"
 
-#: backend/api/time_sync.py:362
+#: backend/api/time_sync.py:368
 msgid "Clock offset bounds removed"
 msgstr "時計のずれの許容範囲を削除しました"
 
@@ -4562,73 +4563,85 @@ msgstr "インストール記録を正常に削除しました。"
 msgid "Failed to delete installation record: %s"
 msgstr "インストール記録を削除できませんでした: %s"
 
-#: backend/api/maintenance_windows.py:111
+#: backend/api/maintenance_windows.py:126
 msgid "A window name is required."
 msgstr "ウィンドウ名が必須です。"
 
-#: backend/api/maintenance_windows.py:114
+#: backend/api/maintenance_windows.py:129
 msgid "kind must be 'allow' or 'blackout'."
 msgstr "kind は 'allow' もしくは 'blackout' のいずれかでなければなりません。"
 
-#: backend/api/maintenance_windows.py:119
+#: backend/api/maintenance_windows.py:134
 msgid "recurrence must be 'once', 'daily', or 'weekly'."
 msgstr ""
 "recurrence は 'once', 'daily', または 'weekly' のいずれかでなければなりませ"
 "ん。"
 
-#: backend/api/maintenance_windows.py:128
+#: backend/api/maintenance_windows.py:143
 #, python-format
 msgid "Unknown timezone: %s"
 msgstr "未知のタイムゾーン: %s"
 
-#: backend/api/maintenance_windows.py:140
+#: backend/api/maintenance_windows.py:155
 msgid "A one-time window needs starts_at before ends_at."
 msgstr ""
 "一回限りのウィンドウでは starts_at が ends_at より前に設定する必要がありま"
 "す。"
 
-#: backend/api/maintenance_windows.py:147
+#: backend/api/maintenance_windows.py:162
 msgid "A recurring window needs a start_time as 'HH:MM'."
 msgstr "再発生ウィンドウには 'HH:MM' 形式の start_time が必要です。"
 
-#: backend/api/maintenance_windows.py:152
+#: backend/api/maintenance_windows.py:167
 msgid "A recurring window needs a positive duration_minutes."
 msgstr "再発生ウィンドウには正の duration_minutes が必要です。"
 
-#: backend/api/maintenance_windows.py:159
+#: backend/api/maintenance_windows.py:174
 msgid "A weekly window needs valid days_of_week."
 msgstr "週間ウィンドウには有効な days_of_week が必要です。"
 
-#: backend/api/maintenance_windows.py:168
+#: backend/api/maintenance_windows.py:183
 msgid "scope_type must be 'all', 'host', or 'tag'."
 msgstr ""
 "scope_type は 'all', 'host', または 'tag' のいずれかでなければなりません。"
 
-#: backend/api/maintenance_windows.py:171
+#: backend/api/maintenance_windows.py:186
 msgid "A host scope needs a host_id."
 msgstr "ホストスコープには host_id が必要です。"
 
-#: backend/api/maintenance_windows.py:173
+#: backend/api/maintenance_windows.py:188
 msgid "A tag scope needs a tag_id."
 msgstr "タグスコープには tag_id が必要です。"
 
-#: backend/api/maintenance_windows.py:183
+#: backend/api/maintenance_windows.py:198
 msgid "A window needs at least one scope (all, host, or tag)."
 msgstr ""
 "ウィンドウには少なくとも 1 つのスコープ（all、host、または tag）が必要です。"
 
-#: backend/api/maintenance_windows.py:305
-#: backend/api/maintenance_windows.py:329
+#: backend/api/maintenance_windows.py:320
+#: backend/api/maintenance_windows.py:344
 msgid "Maintenance window not found."
 msgstr "メンテナンスウィンドウが見つかりません。"
 
-#: backend/api/maintenance_windows.py:349
+#: backend/api/maintenance_windows.py:364
 msgid "An override reason is required."
 msgstr "オーバーライド理由を指定する必要があります。"
 
-#: backend/api/maintenance_windows.py:353
+#: backend/api/maintenance_windows.py:368
 msgid "Override duration must be positive."
 msgstr "オーバーライド期間は正数でなければなりません。"
+
+#: backend/api/maintenance_windows.py:454
+msgid "Permission denied: Delete Queue Message role required"
+msgstr "権限がありません: Delete Queue Message ロールが必要です"
+
+#: backend/api/maintenance_windows.py:471
+msgid "Message not found"
+msgstr "メッセージが見つかりません"
+
+#: backend/api/maintenance_windows.py:479
+msgid "Only a command a maintenance window is holding can be canceled."
+msgstr "取り消せるのは、メンテナンスウィンドウで保留中のコマンドだけです。"
 
 #: backend/api/report_branding.py:116
 msgid "Updated report branding"
@@ -5157,7 +5170,7 @@ msgstr "%(host_id)s に属する %(count)d のメッセージを削除しまし�
 msgid "Failed to delete messages for host %(host_id)s: %(error)s"
 msgstr "ホスト %(host_id)s に対してメッセージを削除できませんでした: %(error)s"
 
-#: backend/websocket/queue_maintenance.py:226
+#: backend/websocket/queue_maintenance.py:250
 #, python-format
 msgid ""
 "Marked %(count)d old messages as expired (older than %(timeout)d minutes)"
@@ -5165,17 +5178,17 @@ msgstr ""
 "%(timeout)d 分以上前の %(count)d の古いメッセージを期限切れとしてマークしまし"
 "た"
 
-#: backend/websocket/queue_maintenance.py:236
+#: backend/websocket/queue_maintenance.py:260
 #, python-format
 msgid "Failed to expire old messages: %s"
 msgstr "古いメッセージの期限切れに失敗しました: %s"
 
-#: backend/websocket/queue_maintenance.py:284
+#: backend/websocket/queue_maintenance.py:308
 #, python-format
 msgid "Deleted %d failed/expired messages"
 msgstr "%d件の失敗または期限切れメッセージを削除しました"
 
-#: backend/websocket/queue_maintenance.py:291
+#: backend/websocket/queue_maintenance.py:315
 #, python-format
 msgid "Failed to delete failed messages: %s"
 msgstr "失敗したメッセージを削除できませんでした: %s"
@@ -5463,7 +5476,7 @@ msgstr "不明なデバイスの状態: %s"
 
 #: backend/services/asset_discovery_review.py:342
 #: backend/services/malware_quarantine.py:136
-#: backend/services/malware_review.py:186
+#: backend/services/malware_review.py:233
 msgid "A reason of at least 3 characters is required"
 msgstr "3文字以上の理由が必要です"
 
@@ -5644,7 +5657,7 @@ msgstr "{entity_type} '{entity_name}' を削除しました"
 msgid "Unknown finding status: %s"
 msgstr "不明な検出事項のステータスです: %s"
 
-#: backend/services/malware_review.py:183
+#: backend/services/malware_review.py:230
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "この判定はここでは行えません: %s"

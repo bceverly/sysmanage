@@ -15,7 +15,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -36,6 +36,8 @@ from backend.persistence.models.maintenance_windows import (
     WEEKDAYS,
     WINDOW_KINDS,
 )
+from backend.security.roles import SecurityRoles
+from backend.services import held_commands as held_svc
 from backend.services import maintenance_window_service as mw
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
@@ -61,6 +63,19 @@ def _require_admin(current_user) -> None:
             status_code=403,
             detail=_("Permission denied: administrator required"),
         )
+
+
+def _require_view_host(current_user) -> None:
+    """An administrator, or anyone holding View Host Details."""
+    if getattr(current_user, "is_admin", False):
+        return
+    has_role = getattr(current_user, "has_role", None)
+    if callable(has_role) and has_role(SecurityRoles.VIEW_HOST_DETAILS):
+        return
+    raise HTTPException(
+        status_code=403,
+        detail=_("Permission denied: View Host Details role required"),
+    )
 
 
 class ScopeIn(BaseModel):
@@ -396,8 +411,88 @@ async def host_window_status(
     host_id: str,
     current_user=Depends(require_authenticated_user),
 ):
-    """Current gating state + next window for a host (HostDetail surface)."""
-    _require_admin(current_user)
+    """Current gating state, next window and held commands for a host.
+
+    Readable by anyone who may view the host (not only administrators): the
+    host page tells every viewer why their action has not run yet.  Changing
+    windows and the emergency override stay administrator-only."""
+    _require_view_host(current_user)
+    try:
+        host_uuid = uuid.UUID(host_id)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400, detail=_("Invalid host ID format")
+        ) from exc
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     with _sessionmaker()() as session:
-        return mw.next_window_for_host(session, uuid.UUID(host_id), now)
+        status = mw.next_window_for_host(session, host_uuid, now)
+        status["held_commands"] = mw.held_commands(session, host_uuid)
+        return status
+
+
+@router.get("/maintenance-windows/held", dependencies=[Depends(JWTBearer())])
+async def list_held_commands(
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0, le=1_000_000),
+    current_user=Depends(require_authenticated_user),
+):
+    """Every command a window is holding in this tenant, newest first."""
+    _require_view_host(current_user)
+    with _sessionmaker()() as session:
+        return held_svc.list_held(session, limit=limit, offset=offset)
+
+
+def _require_cancel_rights(current_user) -> None:
+    """An administrator, or a holder of Delete Queue Message."""
+    if getattr(current_user, "is_admin", False):
+        return
+    has_role = getattr(current_user, "has_role", None)
+    if callable(has_role) and has_role(SecurityRoles.DELETE_QUEUE_MESSAGE):
+        return
+    raise HTTPException(
+        status_code=403,
+        detail=_("Permission denied: Delete Queue Message role required"),
+    )
+
+
+@router.post(
+    "/maintenance-windows/held/{message_id}/cancel",
+    dependencies=[Depends(JWTBearer())],
+)
+async def cancel_held_command(
+    message_id: str,
+    current_user=Depends(require_authenticated_user),
+):
+    """Cancel a command a window is still holding (audited)."""
+    _require_cancel_rights(current_user)
+    try:
+        row_id = uuid.UUID(message_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=_("Message not found")) from exc
+    username = getattr(current_user, "userid", None) or "unknown"
+    with _sessionmaker()() as session:
+        row = held_svc.cancel(session, row_id, username)
+        if row is None:
+            raise HTTPException(
+                status_code=409,
+                detail=_(
+                    "Only a command a maintenance window is holding can be canceled."
+                ),
+            )
+        described = held_svc.describe(row.message_data)
+        AuditService.log(
+            db=session,
+            action_type=ActionType.DELETE,
+            entity_type=EntityType.MAINTENANCE_WINDOW,
+            description=(
+                f"Canceled held command {described['command_type']} "
+                f"for host {row.host_id}"
+            ),
+            result=Result.SUCCESS,
+            user_id=getattr(current_user, "id", None),
+            username=username,
+            entity_id=str(row.host_id) if row.host_id else None,
+            details={"message_id": str(row.id), **described},
+        )
+        session.commit()
+        return {"result": True}

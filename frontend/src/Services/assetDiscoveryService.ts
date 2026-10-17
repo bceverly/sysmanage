@@ -65,11 +65,13 @@ export interface DiscoveredDevice {
   last_ip: string | null;
   ips: string[];
   hostnames: string[];
-  evidence: { mdns_services?: string[]; ssdp?: string[] };
+  // ssdp = what the device says it IS; ssdp_searches = what it searched for
+  // (SSDP M-SEARCH), sent by agents from 2026-10-17 -- never identity.
+  evidence: { mdns_services?: string[]; ssdp?: string[]; ssdp_searches?: string[] };
   methods: string[];
   vendor?: string | null;
   device_type?: DeviceType | null;
-  classification?: { confidence?: "high" | "low" | "none"; reasons?: string[] };
+  classification?: { confidence?: "high" | "low" | "none"; reasons?: string[]; also?: string[] };
   managed_host_id: string | null;
   managed_host_fqdn: string | null;
   managed_reason: string | null;

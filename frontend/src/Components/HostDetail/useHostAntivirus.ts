@@ -27,8 +27,10 @@ export const useHostAntivirus = ({
 }: UseHostAntivirusArgs) => {
     const [antivirusRefreshTrigger, setAntivirusRefreshTrigger] = useState<number>(0);
 
-    const handleDeployAntivirus = async () => {
-        if (!host?.id) return;
+    // Resolves true when the server accepted the request (the card then
+    // waits for the agent to report the change), false when it did not.
+    const handleDeployAntivirus = async (): Promise<boolean> => {
+        if (!host?.id) return false;
 
         try {
             // Call backend API to deploy antivirus to this specific host
@@ -42,23 +44,28 @@ export const useHostAntivirus = ({
                 // reason -- e.g. the host is too small for ClamAV -- is appended here.
                 setSnackbarMessage(`${t('hostDetail.antivirusDeployFailed', 'Failed to deploy antivirus')}: ${failedHost.reason}`);
                 setSnackbarSeverity('error');
-            } else {
-                setSnackbarMessage(t('hostDetail.antivirusDeploySuccess', 'Antivirus deployment initiated successfully'));
-                setSnackbarSeverity('success');
-                // Trigger refresh after a short delay to allow agent to update
-                setTimeout(() => setAntivirusRefreshTrigger(prev => prev + 1), 10000);
+                setSnackbarOpen(true);
+                return false;
             }
+            setSnackbarMessage(t('hostDetail.antivirusDeploySuccess', 'Antivirus deployment initiated successfully'));
+            setSnackbarSeverity('success');
             setSnackbarOpen(true);
+            // Trigger refresh after a short delay to allow agent to update
+            setTimeout(() => setAntivirusRefreshTrigger(prev => prev + 1), 10000);
+            return true;
         } catch (error) {
             console.error('Failed to deploy antivirus:', error);
             setSnackbarMessage(t('hostDetail.antivirusDeployFailed', 'Failed to deploy antivirus'));
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
+            return false;
         }
     };
 
-    const handleEnableAntivirus = async () => {
-        if (!host?.id) return;
+    // Resolves true when the server accepted the request (the card then
+    // waits for the agent to report the change), false when it did not.
+    const handleEnableAntivirus = async (): Promise<boolean> => {
+        if (!host?.id) return false;
 
         try {
             await axiosInstance.post(`/api/v1/hosts/${host.id}/antivirus/enable`);
@@ -67,16 +74,20 @@ export const useHostAntivirus = ({
             setSnackbarOpen(true);
             // Trigger refresh after a short delay
             setTimeout(() => setAntivirusRefreshTrigger(prev => prev + 1), 10000);
+            return true;
         } catch (error) {
             console.error('Failed to enable antivirus:', error);
             setSnackbarMessage(t('security.antivirusEnableFailed', 'Failed to enable antivirus'));
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
+            return false;
         }
     };
 
-    const handleDisableAntivirus = async () => {
-        if (!host?.id) return;
+    // Resolves true when the server accepted the request (the card then
+    // waits for the agent to report the change), false when it did not.
+    const handleDisableAntivirus = async (): Promise<boolean> => {
+        if (!host?.id) return false;
 
         try {
             await axiosInstance.post(`/api/v1/hosts/${host.id}/antivirus/disable`);
@@ -85,16 +96,20 @@ export const useHostAntivirus = ({
             setSnackbarOpen(true);
             // Trigger refresh after a short delay
             setTimeout(() => setAntivirusRefreshTrigger(prev => prev + 1), 10000);
+            return true;
         } catch (error) {
             console.error('Failed to disable antivirus:', error);
             setSnackbarMessage(t('security.antivirusDisableFailed', 'Failed to disable antivirus'));
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
+            return false;
         }
     };
 
-    const handleRemoveAntivirus = async () => {
-        if (!host?.id) return;
+    // Resolves true when the server accepted the request (the card then
+    // waits for the agent to report the change), false when it did not.
+    const handleRemoveAntivirus = async (): Promise<boolean> => {
+        if (!host?.id) return false;
 
         try {
             await axiosInstance.post(`/api/v1/hosts/${host.id}/antivirus/remove`);
@@ -103,11 +118,13 @@ export const useHostAntivirus = ({
             setSnackbarOpen(true);
             // Trigger refresh after a short delay
             setTimeout(() => setAntivirusRefreshTrigger(prev => prev + 1), 10000);
+            return true;
         } catch (error) {
             console.error('Failed to remove antivirus:', error);
             setSnackbarMessage(t('security.antivirusRemoveFailed', 'Failed to remove antivirus'));
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
+            return false;
         }
     };
 

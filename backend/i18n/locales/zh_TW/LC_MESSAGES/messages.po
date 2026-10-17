@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-16 13:57-0400\n"
+"POT-Creation-Date: 2026-10-17 09:30-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -174,8 +174,8 @@ msgstr "取得 CA 憑證失敗：%s"
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:212 backend/api/firewall_roles.py:473
-#: backend/api/firewall_roles.py:544
+#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:424
+#: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "主機ID格式無效"
@@ -1278,6 +1278,7 @@ msgid "Host limit reached for this tenant."
 msgstr "已達到此租戶的主機數量上限。"
 
 #: backend/api/processes.py:86 backend/api/processes.py:132
+#: backend/api/maintenance_windows.py:77
 msgid "Permission denied: View Host Details role required"
 msgstr "權限遭拒：需要「檢視主機詳細資料」角色"
 
@@ -2608,7 +2609,7 @@ msgid "Failed to process heartbeat"
 msgstr "無法處理心跳"
 
 #: backend/api/logging_settings.py:71 backend/api/hardware_health.py:312
-#: backend/api/maintenance_windows.py:62
+#: backend/api/maintenance_windows.py:64
 msgid "Permission denied: administrator required"
 msgstr "權限遭拒：需要管理員"
 
@@ -3236,23 +3237,23 @@ msgstr "計算套件數量時失敗：%s"
 msgid "Failed to search packages: %s"
 msgstr "無法搜尋套件：%s"
 
-#: backend/api/host.py:195
+#: backend/api/host.py:196
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "權限被拒絕：需要 DELETE_HOST 角色"
 
-#: backend/api/host.py:259
+#: backend/api/host.py:260
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "權限 denied: VIEW_HOST_DETAILS 角色所需"
 
-#: backend/api/host.py:666
+#: backend/api/host.py:678
 msgid "Host already exists"
 msgstr "主機已存在"
 
-#: backend/api/host.py:778
+#: backend/api/host.py:790
 msgid "Registration absorbed: host was recently deleted"
 msgstr "註冊被吸收：主機最近已被刪除"
 
-#: backend/api/host.py:858
+#: backend/api/host.py:870
 #, python-format
 msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "主機 '%(fqdn)s' 通過入網令牌加入租戶 %(tenant_id)s"
@@ -3297,11 +3298,11 @@ msgstr "必須指定 target_hostname、target_platform 或 push_to_all"
 msgid "Configuration acknowledgment processed"
 msgstr "設定確認已處理"
 
-#: backend/api/time_sync.py:297 backend/api/time_sync.py:341
+#: backend/api/time_sync.py:303 backend/api/time_sync.py:347
 msgid "Clock offset bounds changed"
 msgstr "已變更時鐘偏差允許範圍"
 
-#: backend/api/time_sync.py:362
+#: backend/api/time_sync.py:368
 msgid "Clock offset bounds removed"
 msgstr "已移除時鐘偏差允許範圍"
 
@@ -4392,67 +4393,79 @@ msgstr "成功刪除安裝記錄"
 msgid "Failed to delete installation record: %s"
 msgstr "刪除安裝記錄時失敗：%s"
 
-#: backend/api/maintenance_windows.py:111
+#: backend/api/maintenance_windows.py:126
 msgid "A window name is required."
 msgstr "窗口名稱是必需的。"
 
-#: backend/api/maintenance_windows.py:114
+#: backend/api/maintenance_windows.py:129
 msgid "kind must be 'allow' or 'blackout'."
 msgstr "kind 必須是 'allow' 或 'blackout'。"
 
-#: backend/api/maintenance_windows.py:119
+#: backend/api/maintenance_windows.py:134
 msgid "recurrence must be 'once', 'daily', or 'weekly'."
 msgstr "recurrence 必須是 'once'、'daily' 或 'weekly'。"
 
-#: backend/api/maintenance_windows.py:128
+#: backend/api/maintenance_windows.py:143
 #, python-format
 msgid "Unknown timezone: %s"
 msgstr "未知時區： %s"
 
-#: backend/api/maintenance_windows.py:140
+#: backend/api/maintenance_windows.py:155
 msgid "A one-time window needs starts_at before ends_at."
 msgstr "一次性窗口的 starts_at 需要在 ends_at 之前。"
 
-#: backend/api/maintenance_windows.py:147
+#: backend/api/maintenance_windows.py:162
 msgid "A recurring window needs a start_time as 'HH:MM'."
 msgstr "重複性窗口需要一個 start_time，格式為 'HH:MM'。"
 
-#: backend/api/maintenance_windows.py:152
+#: backend/api/maintenance_windows.py:167
 msgid "A recurring window needs a positive duration_minutes."
 msgstr "重複性窗口需要一個正數 duration_minutes。"
 
-#: backend/api/maintenance_windows.py:159
+#: backend/api/maintenance_windows.py:174
 msgid "A weekly window needs valid days_of_week."
 msgstr "週期性窗口需要有效的 days_of_week。"
 
-#: backend/api/maintenance_windows.py:168
+#: backend/api/maintenance_windows.py:183
 msgid "scope_type must be 'all', 'host', or 'tag'."
 msgstr "scope_type 必須是 'all'、'host' 或 'tag'。"
 
-#: backend/api/maintenance_windows.py:171
+#: backend/api/maintenance_windows.py:186
 msgid "A host scope needs a host_id."
 msgstr "主機範圍需要一個 host_id。"
 
-#: backend/api/maintenance_windows.py:173
+#: backend/api/maintenance_windows.py:188
 msgid "A tag scope needs a tag_id."
 msgstr "標籤範圍需要一個 tag_id。"
 
-#: backend/api/maintenance_windows.py:183
+#: backend/api/maintenance_windows.py:198
 msgid "A window needs at least one scope (all, host, or tag)."
 msgstr "窗口至少需要一個範圍（all、host 或 tag）。"
 
-#: backend/api/maintenance_windows.py:305
-#: backend/api/maintenance_windows.py:329
+#: backend/api/maintenance_windows.py:320
+#: backend/api/maintenance_windows.py:344
 msgid "Maintenance window not found."
 msgstr "維護窗口未找到。"
 
-#: backend/api/maintenance_windows.py:349
+#: backend/api/maintenance_windows.py:364
 msgid "An override reason is required."
 msgstr "需要提供覆蓋理由。"
 
-#: backend/api/maintenance_windows.py:353
+#: backend/api/maintenance_windows.py:368
 msgid "Override duration must be positive."
 msgstr "覆蓋持續時間必須為正數。"
+
+#: backend/api/maintenance_windows.py:454
+msgid "Permission denied: Delete Queue Message role required"
+msgstr "權限遭拒：需要 Delete Queue Message 角色"
+
+#: backend/api/maintenance_windows.py:471
+msgid "Message not found"
+msgstr "找不到訊息"
+
+#: backend/api/maintenance_windows.py:479
+msgid "Only a command a maintenance window is holding can be canceled."
+msgstr "只能取消被維護時段暫緩的命令。"
 
 #: backend/api/report_branding.py:116
 msgid "Updated report branding"
@@ -4968,23 +4981,23 @@ msgstr "刪除主機 %(host_id)s 的 %(count)d 條消息"
 msgid "Failed to delete messages for host %(host_id)s: %(error)s"
 msgstr "無法刪除主機 %(host_id)s 的消息：%(error)s"
 
-#: backend/websocket/queue_maintenance.py:226
+#: backend/websocket/queue_maintenance.py:250
 #, python-format
 msgid ""
 "Marked %(count)d old messages as expired (older than %(timeout)d minutes)"
 msgstr "標記 %(count)d 條舊消息為過期（超過 %(timeout)d 分鐘）"
 
-#: backend/websocket/queue_maintenance.py:236
+#: backend/websocket/queue_maintenance.py:260
 #, python-format
 msgid "Failed to expire old messages: %s"
 msgstr "過期舊消息時失敗：%s"
 
-#: backend/websocket/queue_maintenance.py:284
+#: backend/websocket/queue_maintenance.py:308
 #, python-format
 msgid "Deleted %d failed/expired messages"
 msgstr "已刪除 %d 個失效/過期的消息"
 
-#: backend/websocket/queue_maintenance.py:291
+#: backend/websocket/queue_maintenance.py:315
 #, python-format
 msgid "Failed to delete failed messages: %s"
 msgstr "刪除失敗消息時失敗：%s"
@@ -5250,7 +5263,7 @@ msgstr "未知的裝置狀態：%s"
 
 #: backend/services/asset_discovery_review.py:342
 #: backend/services/malware_quarantine.py:136
-#: backend/services/malware_review.py:186
+#: backend/services/malware_review.py:233
 msgid "A reason of at least 3 characters is required"
 msgstr "需要至少 3 個字元的原因"
 
@@ -5425,7 +5438,7 @@ msgstr "已刪除 {entity_type} '{entity_name}'"
 msgid "Unknown finding status: %s"
 msgstr "未知的偵測結果狀態: %s"
 
-#: backend/services/malware_review.py:183
+#: backend/services/malware_review.py:230
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "無法在此作出該處置: %s"

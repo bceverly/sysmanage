@@ -52,6 +52,7 @@ import {
   regenerateBackupCodes,
 } from '../Services/mfa';
 import { appLocale } from '../utils/locale';
+import AsyncButton from './AsyncButton';
 
 const MfaEnrollmentCard: React.FC = () => {
   const { t } = useTranslation();
@@ -355,14 +356,14 @@ const MfaEnrollmentCard: React.FC = () => {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setDisableOpen(false)}>{t('common.cancel', 'Cancel')}</Button>
-            <Button
+            <AsyncButton
               color="error"
               variant="contained"
               disabled={disabling || !disablePassword}
               onClick={handleDisable}
             >
               {disabling ? <CircularProgress size={20} /> : t('mfa.disableConfirm', 'Disable')}
-            </Button>
+            </AsyncButton>
           </DialogActions>
         </Dialog>
 
@@ -425,9 +426,9 @@ const MfaEnrollmentCard: React.FC = () => {
             )}
           </Alert>
         )}
-        <Button variant="contained" disabled={enrolling} onClick={handleStartEnroll}>
+        <AsyncButton variant="contained" disabled={enrolling} onClick={handleStartEnroll}>
           {enrolling ? <CircularProgress size={20} /> : t('mfa.enable', 'Enable MFA')}
-        </Button>
+        </AsyncButton>
       </CardContent>
     </Card>
   );

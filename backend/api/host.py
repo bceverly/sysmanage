@@ -50,6 +50,7 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security import agent_identity
 from backend.security.roles import SecurityRoles
+from backend.services import maintenance_window_service
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.queue_operations import QueueOperations
@@ -475,6 +476,9 @@ def _get_all_hosts_sync(tenant_id=None):
             else {}
         )
 
+        # Commands a maintenance window is holding, one grouped query.
+        held = maintenance_window_service.held_counts(session, host_ids)
+
         # Convert to dictionaries with tags included
         result = []
         for host in hosts:
@@ -497,6 +501,7 @@ def _get_all_hosts_sync(tenant_id=None):
                 ),
                 "status": host.status,
                 "approval_status": host.approval_status,
+                "held_commands": held.get(str(host.id), 0),
                 "platform": host.platform,
                 "platform_release": host.platform_release,
                 "platform_version": host.platform_version,
@@ -568,7 +573,7 @@ async def get_all_hosts():
     return await loop.run_in_executor(None, _get_all_hosts_sync, tenant_id)
 
 
-def _get_host_geolocations_sync():
+def _get_host_geolocations_sync(tenant_id=None):
     """
     Phase 12.7: return geo-locatable hosts for the world-map UI.
 
@@ -588,11 +593,14 @@ def _get_host_geolocations_sync():
     the full Host row.  Keeps the response under a few hundred KB even
     at 10k-host scale.
     """
+    from backend.persistence.partitions import request_sessionmaker  # noqa: PLC0415
     from backend.services.geolocation_service import NO_GEO_TRACK_TAG
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Hosts live in the ACTIVE TENANT's database -- the bootstrap database
+    # holds none once multi-tenancy is on, so the map was empty (production,
+    # 2026-10-16).  ``tenant_id`` is captured by the handler: this runs in a
+    # thread-pool executor, which the active-tenant ContextVar does not reach.
+    session_local = request_sessionmaker(tenant_id)
     with session_local() as session:
         # NOT EXISTS subquery: exclude hosts where any tag with
         # name = NO_GEO_TRACK_TAG is linked to the host via host_tags.
@@ -634,8 +642,12 @@ def _get_host_geolocations_sync():
 @auth_router.get("/hosts/geolocations", dependencies=[Depends(JWTBearer())])
 async def get_host_geolocations():
     """Return geo-located hosts for the world-map visualization (Phase 12.7)."""
+    from backend.persistence.tenant_context import get_active_tenant  # noqa: PLC0415
+
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, _get_host_geolocations_sync)
+    return await loop.run_in_executor(
+        None, _get_host_geolocations_sync, get_active_tenant()
+    )
 
 
 @auth_router.post("/host", dependencies=[Depends(JWTBearer())])

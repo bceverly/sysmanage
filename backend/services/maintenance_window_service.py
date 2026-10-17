@@ -52,8 +52,10 @@ from backend.persistence.models.maintenance_windows import (
 
 logger = logging.getLogger(__name__)
 
-# Message types that represent an actual change action and are therefore gated.
-# Control-plane pushes (config/logging updates) flow freely.
+# Message types that CAN be held by a window.  Control-plane pushes
+# (config/logging updates) flow freely.  Whether a given command is held is
+# decided per command: read-only ones (inventory, facts, reports) are not --
+# see maintenance_command_classes.is_window_gated.
 GATED_MESSAGE_TYPES = ("command", "update_request")
 
 # How far ahead to look when computing a host's "next window open" (days).
@@ -341,6 +343,59 @@ def next_window_for_host(db: Session, host_id, now_utc: datetime) -> dict:
 # deleted, an emergency override -- releases every tagged message at once, so
 # the change takes effect on the next tick instead of after the re-check delay.
 DEFERRED_MARKER = "deferred: maintenance window"
+
+
+def _held_query(db: Session):
+    """Outbound rows a closed window is holding (see DEFERRED_MARKER)."""
+    from backend.persistence.models import MessageQueue  # noqa: PLC0415
+    from backend.websocket.queue_enums import (  # noqa: PLC0415
+        QueueDirection,
+        QueueStatus,
+    )
+
+    return MessageQueue, db.query(MessageQueue).filter(
+        MessageQueue.direction == QueueDirection.OUTBOUND,
+        MessageQueue.status == QueueStatus.PENDING,
+        MessageQueue.error_message == DEFERRED_MARKER,
+    )
+
+
+def held_commands(db: Session, host_id) -> dict:
+    """How many of ``host_id``'s commands a window is holding, and since when.
+
+    Without this a held command looked like a failed one: the Ubuntu Pro
+    Attach button said "requested" and then nothing happened until the
+    window opened (production, 2026-10-16)."""
+    from sqlalchemy import func  # noqa: PLC0415
+
+    model, query = _held_query(db)
+    count, oldest = (
+        query.filter(model.host_id == host_id)
+        .with_entities(func.count(model.id), func.min(model.created_at))
+        .one()
+    )
+    return {
+        "count": int(count or 0),
+        "oldest_at": oldest.isoformat() if oldest else None,
+    }
+
+
+def held_counts(db: Session, host_ids) -> dict:
+    """``{str(host_id): held count}`` for ``host_ids`` in one grouped query;
+    hosts with nothing held are absent."""
+    from sqlalchemy import func  # noqa: PLC0415
+
+    ids = list(host_ids)
+    if not ids:
+        return {}
+    model, query = _held_query(db)
+    rows = (
+        query.filter(model.host_id.in_(ids))
+        .with_entities(model.host_id, func.count(model.id))
+        .group_by(model.host_id)
+        .all()
+    )
+    return {str(host_id): int(count) for host_id, count in rows}
 
 
 def release_deferred(db: Session) -> int:

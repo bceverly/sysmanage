@@ -70,8 +70,8 @@ def _approved_host(session):
     return host
 
 
-def _enqueue_command(session, host_id):
-    """Enqueue a gated outbound ``command`` for a host, return its message_id."""
+def _enqueue_command(session, host_id, command_type="install_package", **extra):
+    """Enqueue an outbound ``command`` for a host, return its message_id."""
     message = MessageQueue(
         message_id=str(uuid4()),
         host_id=host_id,
@@ -79,8 +79,9 @@ def _enqueue_command(session, host_id):
         status=QueueStatus.PENDING,
         priority="normal",
         message_type="command",
-        message_data='{"data": {"command_type": "install_package"}}',
+        message_data='{"data": {"command_type": "%s"}}' % command_type,
         created_at=NOW,
+        **extra,
     )
     session.add(message)
     session.commit()
@@ -239,6 +240,39 @@ async def test_a_held_message_is_not_rechecked_every_tick(session):
     assert (
         held.scheduled_at is None or session.refresh(held) or held.scheduled_at is None
     )
+
+
+@pytest.mark.asyncio
+async def test_a_closed_window_holds_changes_but_not_reads(session):
+    """2026-10-16: an all-hosts window held package lists, facts and report
+    requests too, so host data went stale until it opened.  Reads go out;
+    the change is still held."""
+    host = _approved_host(session)
+    change = _enqueue_command(session, host.id, "install_package")
+    read = _enqueue_command(session, host.id, "run_query_pack")
+    _mk_window(session, host.id, start_time="02:00", duration_minutes=60)
+
+    send_mock = await _run(session)
+    assert send_mock.call_count == 1
+    assert _status(session, read) == QueueStatus.SENT
+    assert _status(session, change) == QueueStatus.PENDING
+
+
+@pytest.mark.asyncio
+async def test_a_read_held_under_the_old_rule_goes_out_on_its_next_pass(session):
+    host = _approved_host(session)
+    read = _enqueue_command(
+        session,
+        host.id,
+        "collect_available_packages",
+        error_message=mw_service.DEFERRED_MARKER,
+        scheduled_at=NOW,
+    )
+    _mk_window(session, host.id, start_time="02:00", duration_minutes=60)
+
+    send_mock = await _run(session)
+    assert send_mock.called
+    assert _status(session, read) == QueueStatus.SENT
 
 
 @pytest.fixture(autouse=True)

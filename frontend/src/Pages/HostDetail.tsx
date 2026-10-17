@@ -31,6 +31,8 @@ import { SysManageUser } from '../Services/users';
 import { usePlugins } from '../plugins';
 
 import HostDetailHeader from '../Components/HostDetail/HostDetailHeader';
+import HeldCommandsBanner from '../Components/HostDetail/HeldCommandsBanner';
+import { useHeldAwareNotices, useHeldCommands } from '../Components/HostDetail/useHeldCommands';
 import HostDetailNavRail from '../Components/HostDetail/HostDetailNavRail';
 import HostDetailTabContent from '../Components/HostDetail/HostDetailTabContent';
 import HostConfirmDialogs from '../Components/HostDetail/HostConfirmDialogs';
@@ -172,13 +174,18 @@ const HostDetail = () => { // NOSONAR
         handleCloseSnackbar,
     } = useHostSnackbar();
 
+    // Commands a maintenance window is holding: a banner on every tab, and
+    // "pending the next window" toasts from the hooks that queue commands.
+    const { status: heldStatus, refresh: refreshHeld } = useHeldCommands(hostId);
+    const held = useHeldAwareNotices({ t, setSnackbarMessage, setSnackbarSeverity, setSnackbarOpen, refresh: refreshHeld });
+
     const {
         antivirusRefreshTrigger,
         handleDeployAntivirus,
         handleEnableAntivirus,
         handleDisableAntivirus,
         handleRemoveAntivirus,
-    } = useHostAntivirus({ host, t, setSnackbarMessage, setSnackbarSeverity, setSnackbarOpen });
+    } = useHostAntivirus({ host, t, ...held });
 
     const {
         ubuntuProTokenDialog,
@@ -201,7 +208,7 @@ const HostDetail = () => { // NOSONAR
         handleServicesEditToggle,
         handleServiceToggle,
         handleServicesSave,
-    } = useHostUbuntuPro({ hostId, host, ubuntuProInfo, setUbuntuProInfo, isUbuntu, t, setSnackbarMessage, setSnackbarSeverity, setSnackbarOpen });
+    } = useHostUbuntuPro({ hostId, host, ubuntuProInfo, setUbuntuProInfo, isUbuntu, t, ...held });
 
     const {
         hostTags,
@@ -341,7 +348,7 @@ const HostDetail = () => { // NOSONAR
         handleDeleteInstallation,
         handleConfirmDeleteInstallation,
         handleCancelDeleteInstallation,
-    } = useHostSoftware({ hostId, host, currentTabId, currentUser, tabDefinitions, setCurrentTab, t, setSnackbarMessage, setSnackbarSeverity, setSnackbarOpen });
+    } = useHostSoftware({ hostId, host, currentTabId, currentUser, tabDefinitions, setCurrentTab, t, ...held });
 
     const {
         dialogOpen,
@@ -392,7 +399,7 @@ const HostDetail = () => { // NOSONAR
         handleDeployCertificates,
         loadAvailableCertificates,
         handleDeploySSHKeys,
-    } = useHostAccessManagement({ hostId, host, t, setSnackbarMessage, setSnackbarSeverity, setSnackbarOpen });
+    } = useHostAccessManagement({ hostId, host, t, ...held });
 
     const {
         certificates,
@@ -410,7 +417,7 @@ const HostDetail = () => { // NOSONAR
         selectAllRoles,
         deselectAllRoles,
         handleServiceControl,
-    } = useHostRolesAndCerts({ hostId, host, currentTabId, t, setSnackbarMessage, setSnackbarSeverity, setSnackbarOpen });
+    } = useHostRolesAndCerts({ hostId, host, currentTabId, t, ...held });
 
     const {
         openTelemetryStatus,
@@ -436,7 +443,7 @@ const HostDetail = () => { // NOSONAR
         handleAttachToGraylog,
         handleGraylogAttachModalClose,
         handleDeployOpenTelemetry,
-    } = useHostObservability({ hostId, host, currentTabId, t, setSnackbarMessage, setSnackbarSeverity, setSnackbarOpen, setSoftwarePackages });
+    } = useHostObservability({ hostId, host, currentTabId, t, ...held, setSoftwarePackages });
 
     const {
         childHosts,
@@ -489,7 +496,7 @@ const HostDetail = () => { // NOSONAR
         getVmmEmptyMessage,
         getBhyveEmptyMessage,
         getCreateChildHostTitle,
-    } = useChildHosts({ hostId, host, licenseModules, currentTabId, supportsChildHosts, t, setSnackbarMessage, setSnackbarSeverity, setSnackbarOpen });
+    } = useChildHosts({ hostId, host, licenseModules, currentTabId, supportsChildHosts, t, ...held });
 
     const {
         diagnosticsData,
@@ -530,7 +537,7 @@ const HostDetail = () => { // NOSONAR
         handleConfirmDelete,
         handleCancelDelete,
         handleRequestDiagnostics,
-    } = useHostLifecycle({ hostId, host, setHost, supportsChildHosts, fetchVirtualizationStatus, t, setSnackbarMessage, setSnackbarSeverity, setSnackbarOpen });
+    } = useHostLifecycle({ hostId, host, setHost, supportsChildHosts, fetchVirtualizationStatus, t, ...held });
 
     const {
         filteredStorageDevices,
@@ -609,6 +616,8 @@ const HostDetail = () => { // NOSONAR
                 handleReenrollClick={handleReenrollClick}
                 handleUpdateAgent={handleUpdateAgent}
             />
+
+            <HeldCommandsBanner hostId={hostId || ''} status={heldStatus} onReleased={() => { void refreshHeld(); }} />
 
             {/* Two-pane layout: grouped category rail on the left, content on the
                 right -- replaces the old overflowing horizontal tab strip. */}

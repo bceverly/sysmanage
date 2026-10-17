@@ -128,6 +128,31 @@ class TestClassificationOnIngest:
         assert asset.device_type == "printer"
         assert asset.classification == {"confidence": "high", "reasons": ["mdns:_ipp"]}
 
+    def test_other_roles_are_kept_and_a_new_verdict_replaces_the_old(self):
+        """A computer sharing a printer (gdr-t14, 2026-10-17): the engine's
+        ``also`` is stored, and a device first classified as a printer is
+        reclassified on its next sighting, not frozen at the first guess."""
+        asset = SimpleNamespace(
+            mac="9c:97:1b:95:b8:48",
+            device_type="printer",
+            classification={"confidence": "high", "reasons": ["mdns:_ipp"]},
+            to_dict=lambda: {},
+        )
+        verdict = {
+            "device_type": "computer",
+            "confidence": "high",
+            "reasons": ["mdns:_sftp-ssh"],
+            "also": ["print_server"],
+        }
+        engine = SimpleNamespace(classify=lambda device: verdict)
+        svc._classify(engine, asset)
+        assert asset.device_type == "computer"
+        assert asset.classification == {
+            "confidence": "high",
+            "reasons": ["mdns:_sftp-ssh"],
+            "also": ["print_server"],
+        }
+
     def test_an_engine_without_classify_still_stores(self, db):
         observer = _host(db, "a1")
         report = {

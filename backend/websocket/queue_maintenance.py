@@ -178,9 +178,33 @@ class QueueMaintenance:
                     MessageQueue.created_at < now - timedelta(hours=ceiling_hours),
                 ),
             )
+            # A command a maintenance window is holding is waiting ON PURPOSE:
+            # expiring it by age killed every command queued more than an hour
+            # before the window opened (a 02:00 window, an attach at 19:38 --
+            # production, 2026-10-16).  Held rows get their own, much longer
+            # ceiling instead, so one behind a permanent blackout cannot sit
+            # forever.
+            from backend.services.maintenance_window_service import (  # noqa: PLC0415
+                DEFERRED_MARKER,
+            )
+
+            held_ceiling_hours = config.get("message_queue", {}).get(
+                "held_max_age_hours", 168
+            )
+            held = MessageQueue.error_message == DEFERRED_MARKER
             outbound_stale = and_(
                 MessageQueue.direction != QueueDirection.INBOUND,
-                MessageQueue.created_at < cutoff_time,
+                or_(
+                    and_(
+                        or_(MessageQueue.error_message.is_(None), ~held),
+                        MessageQueue.created_at < cutoff_time,
+                    ),
+                    and_(
+                        held,
+                        MessageQueue.created_at
+                        < now - timedelta(hours=held_ceiling_hours),
+                    ),
+                ),
             )
             # Only messages still pending or in progress; completed, failed and
             # already-expired rows are left alone.

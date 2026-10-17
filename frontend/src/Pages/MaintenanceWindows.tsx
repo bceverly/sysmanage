@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import HeldCommandsPanel from '../Components/MaintenanceWindows/HeldCommandsPanel';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -722,6 +723,8 @@ const MaintenanceWindows: React.FC = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            <HeldCommandsPanel />
 
             <Snackbar
                 open={!!toast}

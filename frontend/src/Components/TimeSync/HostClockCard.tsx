@@ -80,18 +80,50 @@ const History: React.FC<{ clock: HostClock }> = ({ clock }) => {
         );
     }
     const warning = clock.bounds.warning_ms;
+    // An uncertain point is a gap, not a spike: its "offset" may be mostly
+    // queueing delay (see MeasurementNote).
+    const uncertain = clock.history.filter(p => p.uncertain).length;
     return (
         <Box sx={{ mt: 2 }}>
             <Typography variant="subtitle2">{t('timeSync.card.history', 'Measured offset, last 7 days (ms)')}</Typography>
             <LineChart
                 height={220}
                 xAxis={[{ data: clock.history.map(p => new Date(p.at)), scaleType: 'time' }]}
-                series={[{ data: clock.history.map(p => p.offset_ms), showMark: false }]}
+                series={[{ data: clock.history.map(p => (p.uncertain ? null : p.offset_ms)), showMark: false }]}
             >
                 <ChartsReferenceLine y={warning} lineStyle={{ strokeDasharray: '4 4' }} />
                 <ChartsReferenceLine y={-warning} lineStyle={{ strokeDasharray: '4 4' }} />
             </LineChart>
+            {uncertain > 0 && (
+                <Typography variant="caption" color="text.secondary" data-testid="clock-uncertain-points">
+                    {t('timeSync.card.uncertainPoints', '{{count}} measurements too uncertain to judge are not drawn.', { count: uncertain })}
+                </Typography>
+            )}
         </Box>
+    );
+};
+
+const UncertainNotice: React.FC<{ clock: HostClock }> = ({ clock }) => {
+    const { t } = useTranslation();
+    const note = clock.measurement;
+    if (!note?.uncertain) {
+        return null;
+    }
+    const roundTrip = formatOffset(t, clock.measured?.rtt_ms).replace('+', '');
+    const error = formatOffset(t, note.uncertainty_ms).replace('+', '');
+    return (
+        <Alert severity="info" sx={{ mb: 2 }} data-testid="clock-uncertain">
+            {t('timeSync.card.uncertain', 'Uncertain: the last exchange took {{roundTrip}}, so the clock offset cannot be measured to better than {{error}}.', { roundTrip, error })}
+            {note.time_service_vouches && (
+                <> {t('timeSync.card.uncertainServiceVouches', "The host's time service reports it is synchronized.")}</>
+            )}
+            {note.judged_from && (
+                <> {t('timeSync.card.judgedFrom', 'The status comes from the measurement at {{time}}: {{offset}}.', {
+                    time: new Date(`${note.judged_from.at}Z`).toLocaleString(),
+                    offset: formatOffset(t, note.judged_from.offset_ms),
+                })}</>
+            )}
+        </Alert>
     );
 };
 
@@ -163,6 +195,7 @@ const HostClockCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                         })}
                     </Typography>
                 </Stack>
+                <UncertainNotice clock={clock} />
                 {clock.service_ok === false && (
                     <Alert severity="warning" sx={{ mb: 2 }}>
                         {t('timeSync.card.serviceProblem', 'The time service on this host is not running or not synchronized, so its clock will drift.')}

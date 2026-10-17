@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { useAgentCommandProgress } from '../hooks/useActionInFlight';
 import { formatUTCTimestamp } from '../utils/dateUtils';
 import {
   Card,
@@ -36,6 +37,7 @@ import { SecurityRoles, hasPermission } from '../Services/permissions';
 import { deployFirewall, enableFirewall, disableFirewall, restartFirewall } from '../Services/firewallOperationsService';
 import { isModuleLicensed } from '../Services/license';
 import axiosInstance from '../Services/api';
+import AsyncButton from './AsyncButton';
 
 interface FirewallStatusCardProps {
   hostId: string;
@@ -67,6 +69,21 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [firewallStatus, setFirewallStatus] = useState<FirewallStatus | null>(null);
+  // After the server accepts a firewall command, keep the buttons disabled and
+  // say so until the agent's next report shows the change (2026-10-17: buttons
+  // looked idle for minutes and invited repeat presses).
+  const { awaitingKey, timedOut, begin } = useAgentCommandProgress<FirewallStatus>(firewallStatus);
+  // Poll every 5 s while waiting (the card's own refresh is slower).
+  useEffect(() => {
+    if (!awaitingKey) return undefined;
+    const timer = setInterval(() => {
+      getFirewallStatus(hostId)
+        .then(setFirewallStatus)
+        .catch((err) => console.error('Error refreshing firewall status:', err));
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [awaitingKey, hostId]);
+
   const isInitialLoad = useRef(true);
 
   // Firewall roles state
@@ -308,6 +325,18 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="150px">
             <CircularProgress />
           </Box>
+          {awaitingKey && (
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}
+              data-testid="firewall-awaiting">
+              {t('security.awaitingAgent', 'Waiting for the agent to report the change. This can take a few minutes.')}
+            </Typography>
+          )}
+          {timedOut && (
+            <Alert severity="warning" sx={{ mt: 1 }}>
+              {t('security.agentNotConfirmed',
+                'The agent has not confirmed the change yet. It may still be working; check the host again later.')}
+            </Alert>
+          )}
         </CardContent>
       </Card>
     );
@@ -368,6 +397,7 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
   const handleDeployFirewall = async () => {
     try {
       await deployFirewall(hostId);
+      begin('deploy', (s) => Boolean(s?.firewall_name));
       // Refresh firewall status after a delay to allow command to execute
       setTimeout(async () => {
         try {
@@ -390,6 +420,7 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
   const handleEnableFirewall = async () => {
     try {
       await enableFirewall(hostId);
+      begin('enable', (s) => s?.enabled === true);
       // Refresh firewall status after a delay to allow command to execute
       setTimeout(async () => {
         try {
@@ -408,6 +439,7 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
   const handleDisableFirewall = async () => {
     try {
       await disableFirewall(hostId);
+      begin('disable', (s) => s?.enabled === false);
       // Refresh firewall status after a delay
       setTimeout(async () => {
         try {
@@ -425,7 +457,9 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
 
   const handleRestartFirewall = async () => {
     try {
+      const before = firewallStatus?.last_updated;
       await restartFirewall(hostId);
+      begin('restart', (s) => Boolean(s) && s?.last_updated !== before);
       // Refresh firewall status after a delay
       setTimeout(async () => {
         try {
@@ -585,50 +619,54 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
 
                   {/* Remove Button */}
                   {canRemoveFirewall && (
-                    <Button
+                    <AsyncButton
+                disabled={Boolean(awaitingKey)}
                       variant="contained"
                       color="error"
                       size="small"
                       onClick={handleRemoveFirewall}
                     >
                       {t('security.removeFirewall', 'Remove Firewall')}
-                    </Button>
+                    </AsyncButton>
                   )}
 
                   {/* Enable Button - only show if firewall is disabled */}
                   {canEnableFirewall && !firewallStatus.enabled && (
-                    <Button
+                    <AsyncButton
+                disabled={Boolean(awaitingKey)}
                       variant="contained"
                       color="primary"
                       size="small"
                       onClick={handleEnableFirewall}
                     >
                       {t('security.enableFirewall', 'Enable Firewall')}
-                    </Button>
+                    </AsyncButton>
                   )}
 
                   {/* Disable Button - only show if firewall is enabled */}
                   {canDisableFirewall && firewallStatus.enabled && (
-                    <Button
+                    <AsyncButton
+                disabled={Boolean(awaitingKey)}
                       variant="contained"
                       color="warning"
                       size="small"
                       onClick={handleDisableFirewall}
                     >
                       {t('security.disableFirewall', 'Disable Firewall')}
-                    </Button>
+                    </AsyncButton>
                   )}
 
                   {/* Restart Button - only show if firewall is enabled */}
                   {canRestartFirewall && firewallStatus.enabled && (
-                    <Button
+                    <AsyncButton
+                disabled={Boolean(awaitingKey)}
                       variant="contained"
                       color="primary"
                       size="small"
                       onClick={handleRestartFirewall}
                     >
                       {t('security.restartFirewall', 'Restart Firewall')}
-                    </Button>
+                    </AsyncButton>
                   )}
                 </Box>
               )}
@@ -645,14 +683,15 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
           {/* Deploy button when no firewall is detected */}
           {!firewallStatus?.firewall_name && canDeployFirewall && (
             <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
-              <Button
+              <AsyncButton
+                disabled={Boolean(awaitingKey)}
                 variant="contained"
                 color="success"
                 size="small"
                 onClick={handleDeployFirewall}
               >
                 {t('security.deployFirewall', 'Deploy Firewall')}
-              </Button>
+              </AsyncButton>
             </Box>
           )}
         </CardContent>

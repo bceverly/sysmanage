@@ -1769,7 +1769,13 @@
     "wslEnableFailed": "Falha ao habilitar o WSL",
     "wslEnabledRebootRequired": "O WSL foi habilitado. Uma reinicialização é necessária para concluir a instalação.",
     "wslEnabledSuccess": "O WSL foi habilitado com sucesso.",
-    "advisorTab": "Assistente"
+    "advisorTab": "Assistente",
+    "heldCommands": "{{count}} comandos estão aguardando a janela de manutenção \"{{name}}\", que abre às {{time}}.",
+    "heldCommands_one": "{{count}} comando está aguardando a janela de manutenção \"{{name}}\", que abre às {{time}}.",
+    "heldCommands_other": "{{count}} comandos estão aguardando a janela de manutenção \"{{name}}\", que abre às {{time}}.",
+    "heldCommandsBlackout": "{{count}} comandos estão aguardando o fim do bloqueio \"{{name}}\".",
+    "heldCommandsBlackout_one": "{{count}} comando está aguardando o fim do bloqueio \"{{name}}\".",
+    "heldCommandsBlackout_other": "{{count}} comandos estão aguardando o fim do bloqueio \"{{name}}\"."
   },
   "hostGroup": {
     "add": "Adicionar",
@@ -1913,7 +1919,9 @@
     "confirmReenroll": "Registrar novamente o agente deste host?",
     "confirmReenrollMessage": "Isto apaga a credencial do agente de {{hostname}} e retorna o host para aprovação pendente. Use quando o agente foi reinstalado e perdeu sua credencial: o próximo agente que se conectar como este host receberá uma nova, e nada do que ele enviar será aceito até que você aprove o host novamente.",
     "reenrollDone": "Credencial apagada. Aprove o host novamente quando o agente se reconectar.",
-    "reenrollFailed": "Falha ao registrar o host novamente"
+    "reenrollFailed": "Falha ao registrar o host novamente",
+    "heldCount": "Retidos: {{count}}",
+    "heldTitle": "Há comandos aguardando uma janela de manutenção"
   },
   "idp": {
     "action": {
@@ -2179,7 +2187,51 @@
     "timezone": "Fuso Horário",
     "title": "Janelas de ManutenÇão",
     "unrestrictedHint": "Nenhuma janela de manutenÇão se aplica -- alterações são executadas imediatamente.",
-    "updated": "Janela de manutenÇão atualizada"
+    "updated": "Janela de manutenÇão atualizada",
+    "overrideFailed": "Não foi possível criar a substituição.",
+    "pendingNextWindow": "Aguardando a próxima janela de manutenção (\"{{name}}\", abre {{time}}).",
+    "pendingBlackout": "Pendente: o bloqueio \"{{name}}\" está em vigor.",
+    "held": {
+      "cmd": {
+        "unknown": "Comando",
+        "applyUpdates": "Aplicar atualizações",
+        "deploymentPlan": "Plano de implantação",
+        "proAttach": "Vincular Ubuntu Pro",
+        "proDetach": "Desvincular Ubuntu Pro",
+        "proEnable": "Ubuntu Pro: habilitar serviço",
+        "proDisable": "Ubuntu Pro: desabilitar serviço",
+        "reboot": "Reiniciar",
+        "shutdown": "Desligar",
+        "restartService": "Reiniciar serviço",
+        "runScript": "Executar script",
+        "updateAgent": "Atualizar agente",
+        "collectPackages": "Atualizar lista de pacotes",
+        "networkDiscovery": "Configurar descoberta de rede",
+        "queryPack": "Coletar dados"
+      },
+      "packagesMore": "{{names}} (+{{more}})",
+      "releasedBy": "\"{{name}}\" às {{time}}",
+      "afterBlackout": "Quando o bloqueio \"{{name}}\" terminar",
+      "nextCheck": "Na próxima verificação",
+      "loadFailed": "Não foi possível carregar os comandos retidos.",
+      "cancelFailed": "Não foi possível cancelar o comando.",
+      "title": "Comandos retidos",
+      "intro": "Comandos aguardando uma janela de manutenção. Eles são executados quando a janela abre, ou agora se você liberar o host.",
+      "none": "Nenhum comando está aguardando uma janela.",
+      "col": {
+        "host": "Host",
+        "command": "Comando",
+        "queued": "Aguardando desde",
+        "runs": "Será executado",
+        "expires": "Expira",
+        "actions": "Ações"
+      },
+      "release": "Liberar host agora",
+      "cancel": "Cancelar comando",
+      "cancelTitle": "Cancelar este comando?",
+      "cancelExplain": "Ele não será executado. Isso é auditado.",
+      "keep": "Manter"
+    }
   },
   "map": {
     "errorLoadHosts": "Falha ao carregar localizações do host.",
@@ -3171,7 +3223,13 @@
     "today": "Hoje",
     "unknown": "Desconhecido",
     "version": "Versão",
-    "yesterday": "Ontem"
+    "yesterday": "Ontem",
+    "deployingAntivirus": "Implantando...",
+    "removingAntivirus": "Removendo...",
+    "enablingAntivirus": "Ativando...",
+    "disablingAntivirus": "Desativando...",
+    "awaitingAgent": "Aguardando o agente informar a alteração. Isso pode levar alguns minutos.",
+    "agentNotConfirmed": "O agente ainda não confirmou a alteração. Ele pode ainda estar trabalhando; verifique o host novamente mais tarde."
   },
   "serverDown": {
     "attempts": "Tentativas: {{count}}",
@@ -4374,7 +4432,9 @@
       "seenBy": "Visto por",
       "selectAll": "Selecionar tudo",
       "status": "Estado",
-      "maybe": "Talvez: {{type}}"
+      "maybe": "Talvez: {{type}}",
+      "searchesFor": "Procura: {{what}}",
+      "searchesForHint": "O que este dispositivo procurou na rede (busca SSDP). Descreve o que o dispositivo procura, não o que ele é."
     },
     "tabs": {
       "excluded": "Conhecidos e aceitos",
@@ -4446,7 +4506,17 @@
       "legNotRun_one": "{{leg}} não foi executado em {{count}} host: {{reason}}",
       "legNotRun_other": "{{leg}} não foi executado em {{count}} hosts: {{reason}}",
       "rulesShort_one": "Em {{count}} host, o ClamAV carregou menos regras do que recebeu",
-      "rulesShort_other": "Em {{count}} hosts, o ClamAV carregou menos regras do que recebeu"
+      "rulesShort_other": "Em {{count}} hosts, o ClamAV carregou menos regras do que recebeu",
+      "more": "e mais {{count}}",
+      "more_one": "e mais {{count}}",
+      "more_other": "e mais {{count}}",
+      "deployAntivirus": "Implantar antivírus",
+      "scanNow": "Verificar agora",
+      "actionFailed": "Não foi possível enviar a solicitação.",
+      "noPermission": "Você não tem a função necessária.",
+      "deployRequested": "Implantação de antivírus solicitada para {{count}} hosts",
+      "deployRequested_one": "Implantação de antivírus solicitada para {{count}} host",
+      "deployRequested_other": "Implantação de antivírus solicitada para {{count}} hosts"
     },
     "counts": {
       "feed": "Feed de regras: {{title}} v{{version}}, {{count}} regras",
@@ -4858,7 +4928,13 @@
       "stratum": "Estrato",
       "synchronized": "Sincronizado",
       "title": "Relógio",
-      "yes": "Sim"
+      "yes": "Sim",
+      "uncertain": "Incerto: a última troca levou {{roundTrip}}, então a diferença do relógio não pode ser medida com precisão melhor que {{error}}.",
+      "uncertainServiceVouches": "O serviço de hora do host informa que está sincronizado.",
+      "judgedFrom": "O status vem da medição de {{time}}: {{offset}}.",
+      "uncertainPoints": "{{count}} medições incertas demais para avaliar não são exibidas.",
+      "uncertainPoints_one": "{{count}} medição incerta demais para avaliar não é exibida.",
+      "uncertainPoints_other": "{{count}} medições incertas demais para avaliar não são exibidas."
     },
     "direction": {
       "ahead": "adiantado em relação ao servidor",
@@ -4901,7 +4977,8 @@
       "serverClockOff": "Relógio do servidor desajustado",
       "stale": "Sem medição recente",
       "unmeasured": "Não medido",
-      "warning": "Aviso"
+      "warning": "Aviso",
+      "uncertain": "Incerto"
     },
     "statusHelp": {
       "critical": "O desvio medido está no limite crítico ou acima dele.",
@@ -4909,7 +4986,8 @@
       "serverClockOff": "O relógio do próprio servidor está desajustado em relação à sua referência, portanto os relógios dos hosts não são avaliados até que ele seja corrigido.",
       "stale": "A última medição tem mais de 30 minutos. Provavelmente o host não está conectado.",
       "unmeasured": "O servidor ainda não mediu este relógio. O agente pode ser antigo demais ou ainda não ter se conectado.",
-      "warning": "O desvio medido está no limite de aviso ou acima dele."
+      "warning": "O desvio medido está no limite de aviso ou acima dele.",
+      "uncertain": "A última troca demorou demais para medir a diferença dentro do limite de aviso, então o relógio não é avaliado até uma troca mais rápida."
     },
     "title": "Sincronização de Hora",
     "unit": {

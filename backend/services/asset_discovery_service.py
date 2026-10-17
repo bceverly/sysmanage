@@ -143,6 +143,10 @@ def _classify(engine, asset) -> None:
         "confidence": result["confidence"],
         "reasons": result["reasons"],
     }
+    # Other roles the device advertises ("a computer that also shares a
+    # printer"); engines older than 2026-10-17 do not send it.
+    if result.get("also"):
+        asset.classification["also"] = list(result["also"])
 
 
 def _apply(asset, fields, verdict, now) -> None:

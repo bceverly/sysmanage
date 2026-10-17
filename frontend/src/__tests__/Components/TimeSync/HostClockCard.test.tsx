@@ -76,6 +76,46 @@ describe("HostClockCard", () => {
     expect(screen.getByText(/fills in as the host stays connected/)).toBeInTheDocument();
   });
 
+  // 2026-10-17, production: an 8.06 s round trip read as "+4.03 s ahead"
+  // while chrony was synchronized at -0.0 ms.
+  const UNCERTAIN: HostClock = {
+    ...CLOCK,
+    status: "uncertain",
+    service_ok: true,
+    measured: { offset_ms: 4030, rtt_ms: 8060, samples: 1, method: "exchange", measured_at: "2026-10-17T11:52:54" },
+    measurement: { uncertain: true, uncertainty_ms: 4030, judged_from: null, time_service_vouches: true },
+    history: [
+      { at: "2026-10-17T11:30:00", offset_ms: 2, rtt_ms: 12, method: "exchange" },
+      { at: "2026-10-17T11:45:00", offset_ms: 4030, rtt_ms: 8060, method: "exchange", uncertain: true },
+    ],
+  };
+
+  test("an uncertain reading is explained, not called a warning", async () => {
+    vi.mocked(getHostClock).mockResolvedValue(UNCERTAIN);
+    render(<HostClockCard hostId="h1" />);
+    const notice = await screen.findByTestId("clock-uncertain");
+    expect(notice).toHaveTextContent(/cannot be measured to better than/);
+    expect(notice).toHaveTextContent(/time service reports it is synchronized/);
+    expect(screen.getByText("Uncertain")).toBeInTheDocument();
+    expect(screen.queryByText("Warning")).toBeNull();
+  });
+
+  test("uncertain points are left off the chart and counted", async () => {
+    vi.mocked(getHostClock).mockResolvedValue(UNCERTAIN);
+    render(<HostClockCard hostId="h1" />);
+    expect(await screen.findByTestId("clock-uncertain-points")).toHaveTextContent(/1 measurements? too uncertain/);
+  });
+
+  test("a certain reading shows no uncertainty notice", async () => {
+    vi.mocked(getHostClock).mockResolvedValue({
+      ...CLOCK,
+      measurement: { uncertain: false, uncertainty_ms: 10, judged_from: null, time_service_vouches: false },
+    });
+    render(<HostClockCard hostId="h1" />);
+    await screen.findByText("Warning");
+    expect(screen.queryByTestId("clock-uncertain")).toBeNull();
+  });
+
   test("a load failure says so", async () => {
     vi.mocked(getHostClock).mockRejectedValue(new Error("down"));
     render(<HostClockCard hostId="h1" />);

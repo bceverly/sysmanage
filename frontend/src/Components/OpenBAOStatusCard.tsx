@@ -34,6 +34,7 @@ import {
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { openBAOService, OpenBAOStatus, OpenBAOConfig, OpenBAOOperationResult } from '../Services/openBAOService';
+import AsyncButton from './AsyncButton';
 
 const OpenBAOStatusCard: React.FC = () => {
   const { t } = useTranslation();
@@ -244,7 +245,7 @@ const OpenBAOStatusCard: React.FC = () => {
 
     if (isRunning) {
       return (
-        <Button
+        <AsyncButton
           variant="outlined"
           color="error"
           onClick={handleStop}
@@ -252,12 +253,12 @@ const OpenBAOStatusCard: React.FC = () => {
           startIcon={operationLoading ? loadingIcon : <StopIcon />}
         >
           {operationLoading ? t('openbao.stopping', 'Stopping...') : t('openbao.stop', 'Stop')}
-        </Button>
+        </AsyncButton>
       );
     }
 
     return (
-      <Button
+      <AsyncButton
         variant="contained"
         color="success"
         onClick={handleStart}
@@ -265,7 +266,7 @@ const OpenBAOStatusCard: React.FC = () => {
         startIcon={operationLoading ? loadingIcon : <PlayIcon />}
       >
         {operationLoading ? t('openbao.starting', 'Starting...') : t('openbao.start', 'Start')}
-      </Button>
+      </AsyncButton>
     );
   }, [status?.running, config?.enabled, operationLoading, handleStart, handleStop, t]);
 

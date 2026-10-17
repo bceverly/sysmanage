@@ -33,6 +33,7 @@ import { useTranslation } from 'react-i18next';
 import { SysManageHost, RebootPreCheckResponse, DiagnosticDetailResponse } from '../../Services/hosts';
 import { ChildHost } from './hostDetailTypes';
 import { formatDate } from './hostDetailHelpers';
+import AsyncButton from '../AsyncButton';
 
 interface HostConfirmDialogsProps {
     host: SysManageHost | null;
@@ -226,7 +227,7 @@ const HostConfirmDialogs: React.FC<HostConfirmDialogsProps> = ({
                         {t('common.cancel', 'Cancel')}
                     </Button>
                     {!rebootPreCheckLoading && (
-                        <Button onClick={handleRebootConfirm} color="warning" variant="contained">
+                        <AsyncButton onClick={handleRebootConfirm} color="warning" variant="contained">
                             {(() => {
                                 if (!rebootPreCheckData?.has_running_children) {
                                     return t('hosts.reboot', 'Reboot');
@@ -236,7 +237,7 @@ const HostConfirmDialogs: React.FC<HostConfirmDialogsProps> = ({
                                 }
                                 return t('hosts.rebootOrchestration.rebootAnywayButton', 'Reboot Anyway');
                             })()}
-                        </Button>
+                        </AsyncButton>
                     )}
                 </DialogActions>
             </Dialog>
@@ -260,9 +261,9 @@ const HostConfirmDialogs: React.FC<HostConfirmDialogsProps> = ({
                     <Button onClick={() => setShutdownConfirmOpen(false)}>
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button onClick={handleShutdownConfirm} color="error" variant="contained">
+                    <AsyncButton onClick={handleShutdownConfirm} color="error" variant="contained">
                         {t('hosts.shutdown', 'Shutdown')}
-                    </Button>
+                    </AsyncButton>
                 </DialogActions>
             </Dialog>
 
@@ -285,9 +286,9 @@ const HostConfirmDialogs: React.FC<HostConfirmDialogsProps> = ({
                     <Button onClick={() => setReenrollConfirmOpen(false)}>
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button onClick={handleReenrollConfirm} color="warning" variant="contained">
+                    <AsyncButton onClick={handleReenrollConfirm} color="warning" variant="contained">
                         {t('hosts.reenroll', 'Re-enroll Agent')}
-                    </Button>
+                    </AsyncButton>
                 </DialogActions>
             </Dialog>
 
@@ -321,14 +322,14 @@ const HostConfirmDialogs: React.FC<HostConfirmDialogsProps> = ({
                     <Button onClick={() => setHostnameEditOpen(false)} disabled={hostnameEditLoading}>
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button
+                    <AsyncButton
                         onClick={handleHostnameChange}
                         color="primary"
                         variant="contained"
                         disabled={hostnameEditLoading || !newHostname.trim()}
                     >
                         {hostnameEditLoading ? <CircularProgress size={24} /> : t('common.save', 'Save')}
-                    </Button>
+                    </AsyncButton>
                 </DialogActions>
             </Dialog>
 
@@ -354,9 +355,9 @@ const HostConfirmDialogs: React.FC<HostConfirmDialogsProps> = ({
                     <Button onClick={handleCancelDelete}>
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button onClick={handleConfirmDelete} color="error" variant="contained">
+                    <AsyncButton onClick={handleConfirmDelete} color="error" variant="contained">
                         {t('hosts.delete', 'Delete')}
-                    </Button>
+                    </AsyncButton>
                 </DialogActions>
             </Dialog>
 
@@ -412,11 +413,11 @@ const HostConfirmDialogs: React.FC<HostConfirmDialogsProps> = ({
                     <Button onClick={handleChildHostDeleteCancel}>
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button onClick={handleChildHostDelete} color={childHostToDelete?.status === 'creating' || childHostToDelete?.status === 'pending' ? 'warning' : 'error'} variant="contained">
+                    <AsyncButton onClick={handleChildHostDelete} color={childHostToDelete?.status === 'creating' || childHostToDelete?.status === 'pending' ? 'warning' : 'error'} variant="contained">
                         {childHostToDelete?.status === 'creating' || childHostToDelete?.status === 'pending'
                             ? t('hostDetail.cancelChildHostConfirmButton', 'Cancel Creation')
                             : t('hostDetail.deleteChildHostConfirmButton', 'Delete Permanently')}
-                    </Button>
+                    </AsyncButton>
                 </DialogActions>
             </Dialog>
 
@@ -561,14 +562,14 @@ const HostConfirmDialogs: React.FC<HostConfirmDialogsProps> = ({
                     <Button onClick={handleCancelUbuntuProDetach} color="primary">
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button
+                    <AsyncButton
                         onClick={handleConfirmUbuntuProDetach}
                         color="warning"
                         variant="contained"
                         autoFocus
                     >
                         {t('hostDetail.ubuntuProDetachConfirm', 'Detach')}
-                    </Button>
+                    </AsyncButton>
                 </DialogActions>
             </Dialog>
 
@@ -601,13 +602,13 @@ const HostConfirmDialogs: React.FC<HostConfirmDialogsProps> = ({
                     <Button onClick={handleUbuntuProTokenCancel}>
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button
+                    <AsyncButton
                         onClick={handleUbuntuProTokenSubmit}
                         variant="contained"
                         disabled={!ubuntuProToken.trim()}
                     >
                         {t('hostDetail.ubuntuProAttachConfirm', 'Attach')}
-                    </Button>
+                    </AsyncButton>
                 </DialogActions>
             </Dialog>        </>
     );

@@ -1769,7 +1769,13 @@
     "wslEnableFailed": "Échec de l'activation de WSL",
     "wslEnabledRebootRequired": "WSL a été activé. Un redémarrage est requis pour terminer l'installation.",
     "wslEnabledSuccess": "WSL a été activé avec succès.",
-    "advisorTab": "Conseiller"
+    "advisorTab": "Conseiller",
+    "heldCommands": "{{count}} commandes attendent la fenêtre de maintenance « {{name}} », qui s'ouvre à {{time}}.",
+    "heldCommands_one": "{{count}} commande attend la fenêtre de maintenance « {{name}} », qui s'ouvre à {{time}}.",
+    "heldCommands_other": "{{count}} commandes attendent la fenêtre de maintenance « {{name}} », qui s'ouvre à {{time}}.",
+    "heldCommandsBlackout": "{{count}} commandes attendent la fin de la période de blocage « {{name}} ».",
+    "heldCommandsBlackout_one": "{{count}} commande attend la fin de la période de blocage « {{name}} ».",
+    "heldCommandsBlackout_other": "{{count}} commandes attendent la fin de la période de blocage « {{name}} »."
   },
   "hostGroup": {
     "add": "Ajouter",
@@ -1913,7 +1919,9 @@
     "confirmReenroll": "Réinscrire l'agent de cet hôte ?",
     "confirmReenrollMessage": "Cette action efface les identifiants de l'agent de {{hostname}} et remet l'hôte en attente d'approbation. Utilisez-la lorsque l'agent a été réinstallé et a perdu ses identifiants : le prochain agent qui se connecte en tant que cet hôte en reçoit de nouveaux, et rien de ce qu'il envoie n'est accepté tant que vous n'avez pas de nouveau approuvé l'hôte.",
     "reenrollDone": "Identifiants effacés. Approuvez de nouveau l'hôte dès que son agent se reconnecte.",
-    "reenrollFailed": "Échec de la réinscription de l'hôte"
+    "reenrollFailed": "Échec de la réinscription de l'hôte",
+    "heldCount": "Retenues : {{count}}",
+    "heldTitle": "Des commandes attendent une fenêtre de maintenance"
   },
   "idp": {
     "action": {
@@ -2179,7 +2187,51 @@
     "timezone": "Fuseau horaire",
     "title": "Fenêtres de maintenance",
     "unrestrictedHint": "Aucune fenêtre de maintenance ne s'applique -- les modifications sont exécutées immédiatement.",
-    "updated": "Fenêtre de maintenance mise à jour"
+    "updated": "Fenêtre de maintenance mise à jour",
+    "overrideFailed": "La dérogation n'a pas pu être créée.",
+    "pendingNextWindow": "En attente de la prochaine fenêtre de maintenance (« {{name}} », ouverture {{time}}).",
+    "pendingBlackout": "En attente : la période de blocage « {{name}} » est en vigueur.",
+    "held": {
+      "cmd": {
+        "unknown": "Commande",
+        "applyUpdates": "Appliquer les mises à jour",
+        "deploymentPlan": "Plan de déploiement",
+        "proAttach": "Rattacher Ubuntu Pro",
+        "proDetach": "Détacher Ubuntu Pro",
+        "proEnable": "Ubuntu Pro : activer le service",
+        "proDisable": "Ubuntu Pro : désactiver le service",
+        "reboot": "Redémarrer",
+        "shutdown": "Arrêter",
+        "restartService": "Redémarrer le service",
+        "runScript": "Exécuter le script",
+        "updateAgent": "Mettre à jour l'agent",
+        "collectPackages": "Actualiser la liste des paquets",
+        "networkDiscovery": "Configurer la découverte réseau",
+        "queryPack": "Collecter les faits"
+      },
+      "packagesMore": "{{names}} (+{{more}})",
+      "releasedBy": "« {{name}} » à {{time}}",
+      "afterBlackout": "À la fin de la période de blocage « {{name}} »",
+      "nextCheck": "Lors de la prochaine vérification",
+      "loadFailed": "Les commandes retenues n'ont pas pu être chargées.",
+      "cancelFailed": "La commande n'a pas pu être annulée.",
+      "title": "Commandes retenues",
+      "intro": "Commandes en attente d'une fenêtre de maintenance. Elles s'exécutent à l'ouverture de la fenêtre, ou immédiatement si vous libérez l'hôte.",
+      "none": "Aucune commande n'attend de fenêtre.",
+      "col": {
+        "host": "Hôte",
+        "command": "Commande",
+        "queued": "En attente depuis",
+        "runs": "Sera exécutée",
+        "expires": "Expire",
+        "actions": "Actions"
+      },
+      "release": "Libérer l'hôte maintenant",
+      "cancel": "Annuler la commande",
+      "cancelTitle": "Annuler cette commande ?",
+      "cancelExplain": "Elle ne sera pas exécutée. Cette action est auditée.",
+      "keep": "Le conserver"
+    }
   },
   "map": {
     "errorLoadHosts": "Impossible de charger les emplacements des hôtes.",
@@ -3171,7 +3223,13 @@
     "today": "Aujourd'hui",
     "unknown": "Inconnu",
     "version": "Version",
-    "yesterday": "Hier"
+    "yesterday": "Hier",
+    "deployingAntivirus": "Déploiement...",
+    "removingAntivirus": "Suppression...",
+    "enablingAntivirus": "Activation...",
+    "disablingAntivirus": "Désactivation...",
+    "awaitingAgent": "En attente du rapport de l'agent sur la modification. Cela peut prendre quelques minutes.",
+    "agentNotConfirmed": "L'agent n'a pas encore confirmé la modification. Il est peut-être encore en train de travailler ; vérifiez l'hôte plus tard."
   },
   "serverDown": {
     "attempts": "Essais : {{count}}",
@@ -4374,7 +4432,9 @@
       "seenBy": "Vu par",
       "selectAll": "Tout sélectionner",
       "status": "Statut",
-      "maybe": "Peut-être : {{type}}"
+      "maybe": "Peut-être : {{type}}",
+      "searchesFor": "Recherche : {{what}}",
+      "searchesForHint": "Ce que cet appareil a recherché sur le réseau (recherche SSDP). Cela décrit ce que l'appareil cherche, pas ce qu'il est."
     },
     "tabs": {
       "excluded": "Connus et acceptés",
@@ -4446,7 +4506,17 @@
       "legNotRun_one": "{{leg}} : aucune exécution sur {{count}} hôte ({{reason}})",
       "legNotRun_other": "{{leg}} : aucune exécution sur {{count}} hôtes ({{reason}})",
       "rulesShort_one": "Sur {{count}} hôte, ClamAV a chargé moins de règles que celles fournies",
-      "rulesShort_other": "Sur {{count}} hôtes, ClamAV a chargé moins de règles que celles fournies"
+      "rulesShort_other": "Sur {{count}} hôtes, ClamAV a chargé moins de règles que celles fournies",
+      "more": "et {{count}} autres",
+      "more_one": "et {{count}} autre",
+      "more_other": "et {{count}} autres",
+      "deployAntivirus": "Déployer l'antivirus",
+      "scanNow": "Analyser maintenant",
+      "actionFailed": "La demande n'a pas pu être envoyée.",
+      "noPermission": "Vous n'avez pas le rôle nécessaire.",
+      "deployRequested": "Déploiement de l'antivirus demandé pour {{count}} hôtes",
+      "deployRequested_one": "Déploiement de l'antivirus demandé pour {{count}} hôte",
+      "deployRequested_other": "Déploiement de l'antivirus demandé pour {{count}} hôtes"
     },
     "counts": {
       "feed": "Flux de règles : {{title}} v{{version}}, {{count}} règles",
@@ -4858,7 +4928,13 @@
       "stratum": "Strate",
       "synchronized": "Synchronisé",
       "title": "Horloge",
-      "yes": "Oui"
+      "yes": "Oui",
+      "uncertain": "Incertain : le dernier échange a pris {{roundTrip}}, le décalage de l'horloge ne peut donc pas être mesuré à mieux que {{error}}.",
+      "uncertainServiceVouches": "Le service de temps de l'hôte indique qu'il est synchronisé.",
+      "judgedFrom": "L'état provient de la mesure du {{time}} : {{offset}}.",
+      "uncertainPoints": "{{count}} mesures trop incertaines pour être évaluées ne sont pas affichées.",
+      "uncertainPoints_one": "{{count}} mesure trop incertaine pour être évaluée n'est pas affichée.",
+      "uncertainPoints_other": "{{count}} mesures trop incertaines pour être évaluées ne sont pas affichées."
     },
     "direction": {
       "ahead": "en avance sur le serveur",
@@ -4901,7 +4977,8 @@
       "serverClockOff": "Horloge du serveur décalée",
       "stale": "Aucune mesure récente",
       "unmeasured": "Non mesuré",
-      "warning": "Avertissement"
+      "warning": "Avertissement",
+      "uncertain": "Incertain"
     },
     "statusHelp": {
       "critical": "Le décalage mesuré atteint ou dépasse le seuil critique.",
@@ -4909,7 +4986,8 @@
       "serverClockOff": "L'horloge du serveur lui-même s'écarte de sa référence ; les horloges des hôtes ne sont donc pas évaluées tant qu'elle n'est pas corrigée.",
       "stale": "La dernière mesure date de plus de 30 minutes. L'hôte n'est probablement pas connecté.",
       "unmeasured": "Le serveur n'a pas encore mesuré cette horloge. L'agent est peut-être trop ancien, ou ne s'est pas encore connecté.",
-      "warning": "Le décalage mesuré atteint ou dépasse le seuil d'avertissement."
+      "warning": "Le décalage mesuré atteint ou dépasse le seuil d'avertissement.",
+      "uncertain": "Le dernier échange a pris trop de temps pour mesurer le décalage dans la limite d'avertissement ; l'horloge n'est donc pas évaluée avant un échange plus rapide."
     },
     "title": "Synchronisation de l'heure",
     "unit": {

@@ -14861,6 +14861,37 @@ first-submission gates.*
       `is_agent_install_legacy()` into the dispatch path or delete it -- an
       unused predicate reads as protection that isn't there.
 
+#### 27.7 Firewall appliances -- pfSense / OPNsense (OSS)
+
+**Added 2026-10-17 (Bryan).** Wanted the agent on his pfSense router: 8 GB RAM,
+6.8 GB free, so memory was never the problem (the agent idles at ~75-115 MiB
+RSS on Ubuntu).  The blockers were real and are what this item solves:
+pfSense 2.8.1 is **FreeBSD 15.0-CURRENT, ABI `FreeBSD:15:amd64`**, while our
+FreeBSD packages are built for 14.x, so `pkg` refuses them; and the agent's
+Python dependencies come from the stock FreeBSD repository, which Netgate
+warns can replace shared libraries under pfSense and break the box (now or
+at its next upgrade).
+
+- [ ] **Builds for the appliances' base** -- detect pfSense / OPNsense and
+      their FreeBSD release/ABI (`pkg config abi`, `/etc/version`,
+      `/usr/local/opnsense/version`); build and CI-test agent packages for
+      every base they currently ship on, including FreeBSD 15
+- [ ] **Self-contained package** -- the agent and its Python runtime /
+      dependencies installed under one prefix (no stock FreeBSD repository,
+      no shared-library upgrades), removable without leaving anything behind;
+      survives a pfSense / OPNsense upgrade, or the upgrade path says how to
+      reinstall it
+- [ ] **Appliance mode** -- the agent recognizes it is on a firewall
+      appliance and turns OFF package management, OS updates, service
+      control, firewall writes and script execution (the appliance's own GUI
+      owns those); inventory, hardware health, metrics, network interfaces,
+      firewall status and Network Discovery stay on.  The server shows the
+      host as an appliance and hides the actions it will refuse
+- [ ] **Low footprint verified** on the smallest supported appliance hardware
+      (Phase 24.3 harness): idle and peak RSS within budget
+- [ ] **Docs** -- install / remove per appliance, what appliance mode does and
+      why, 14-language i18n
+
 ### Exit Criteria
 
 - [ ] Agent enroll → inventory → command dispatch validated on emulated ppc64le, s390x (big-endian), and riscv64 guests
@@ -15420,6 +15451,22 @@ federation (`Host.site_id`) and are not offered to scans yet.
       site or segment (a WAN link or a small subnet must not take a fleet
       job's full parallelism)
 - [ ] Docs + 14-language i18n complete
+- [ ] **Device hostnames in Network Discovery** (added 2026-10-17, Bryan:
+      "detect hostname if the device advertises it").  `discovered_asset`
+      already has `hostnames` and the engine merges them, but the agent never
+      fills it: the collector keeps only mDNS *service* names and SSDP SERVER
+      lines.  Read the names devices already announce, passive first:
+      * **passive (no new opt-in)** -- mDNS answers' A/AAAA/PTR names
+        (`printer.local`), DHCP requests seen on the segment (option 12 host
+        name, option 81 FQDN), NetBIOS name-service and LLMNR announcements
+        (Windows), the UPnP `friendlyName` when an SSDP NOTIFY's LOCATION is
+        on-link (one GET of the device's own description, rate-limited)
+      * **active (behind the sweep opt-in)** -- reverse DNS (PTR) through the
+        agent's own resolver, NetBIOS node-status query, mDNS unicast query
+      * each name stored with its source and when it was seen, the most
+        trustworthy shown in the grid (DHCP/mDNS over PTR over NetBIOS), all
+        of them on the device detail; names are evidence for correlation only
+        when a MAC is absent -- a MAC stays decisive (21.6 identity rule)
 - [ ] **Standard-port probe of unmanaged devices** (added 2026-10-16, Bryan:
       "see what standard ports are open on the scanned unmanaged network
       devices").  Same rules as the 21.6 sweep, plus its own opt-in:

@@ -76,6 +76,7 @@ import {
   syncHealth,
   SYNC_HEALTH_COLOR,
 } from "../Components/SiteDetailHelpers";
+import AsyncButton from '../Components/AsyncButton';
 
 const SiteDetail: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -810,13 +811,13 @@ const SiteDetail: React.FC = () => {
           >
             {t("sites.confirmRemove.cancel", "Cancel")}
           </Button>
-          <Button
+          <AsyncButton
             color="error"
             onClick={handleRemoveConfirmed}
             disabled={actionInFlight}
           >
             {t("sites.confirmRemove.confirm", "Remove site")}
-          </Button>
+          </AsyncButton>
         </DialogActions>
       </Dialog>
 

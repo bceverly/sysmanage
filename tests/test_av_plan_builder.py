@@ -78,13 +78,29 @@ def test_deploy_caller_supplied_package_is_appended_when_unknown_distro():
     assert "some-custom-clam" in plan["packages"]
 
 
-def test_deploy_emits_freshclam_to_refresh_definitions_on_linux():
+def _freshclam_steps(release):
     plan = build_deploy_plan(
-        {"platform": "Linux", "platform_release": "Ubuntu 24.04"},
-        antivirus_package="clamav",
+        {"platform": "Linux", "platform_release": release}, antivirus_package="clamav"
     )
-    fresh_cmds = [c for c in plan["commands"] if c["argv"] == ["freshclam"]]
-    assert len(fresh_cmds) == 1
+    return [c for c in plan["commands"] if c["argv"] == ["freshclam"]]
+
+
+def test_rpm_suse_and_arch_refresh_definitions_before_clamd_starts():
+    # Their packages start no updater, so the one-shot is what gives clamd a
+    # database; it must stay best-effort and argument-free (the agent's
+    # sudoers allows exactly "freshclam" with no arguments).
+    for release in ("Fedora 42", "Rocky Linux 9", "openSUSE Leap 15.6", "Arch Linux"):
+        steps = _freshclam_steps(release)
+        assert len(steps) == 1, release
+        assert steps[0]["sudo"] is True and steps[0]["ignore_errors"] is True
+
+
+def test_debian_family_leaves_the_refresh_to_the_updater_it_starts():
+    # Installing clamav-freshclam starts the updater, which downloads at once;
+    # a one-shot beside it can only fail (sudo refused it on milsurpmonitor,
+    # Ubuntu 26.04, 2026-10-17, while the updater fetched the database).
+    for release in ("Ubuntu 26.04", "Ubuntu 24.04", "Debian 13"):
+        assert _freshclam_steps(release) == [], release
 
 
 # ---------------------------------------------------------------------------
@@ -612,12 +628,19 @@ def test_freebsd_clamd_is_visible_to_rc_and_restarted_on_deploy():
     plan = build_deploy_plan({"platform": "FreeBSD"}, antivirus_package="clamav")
     clamd_conf = plan["files"][0]["content"]
     assert "PidFile /var/run/clamav/clamd.pid" in clamd_conf
-    stop = [
-        c["argv"] for c in plan["commands"] if "pkill -x clamd" in " ".join(c["argv"])
-    ]
+    by_argv = {tuple(c["argv"]): c for c in plan["commands"]}
+    # Only the signal is privileged, with exactly the arguments the agent's
+    # sudoers allows; no root shell (an allowlist can never grant /bin/sh).
+    kill = by_argv[("pkill", "-x", "clamd")]
+    assert kill["sudo"] is True and kill["ok_exit_codes"] == [0, 1]
     # It must WAIT for the old clamd to exit: the start raced its shutdown,
     # rc said "already running", and nothing was left (2026-09-30).
-    assert len(stop) == 1 and "while pgrep -x clamd" in stop[0][-1]
+    waits = [c for c in plan["commands"] if "while pgrep -x clamd" in c["argv"][-1]]
+    assert len(waits) == 1 and waits[0]["sudo"] is False
+    assert plan["commands"].index(kill) < plan["commands"].index(waits[0])
+    assert not any(
+        c.get("sudo") and c["argv"][0] in ("/bin/sh", "sh") for c in plan["commands"]
+    )
     other = build_deploy_plan({"platform": "OpenBSD"}, antivirus_package="clamav")
     assert "PidFile" not in other["files"][0]["content"]
     assert not any("pkill" in " ".join(c["argv"]) for c in other["commands"])

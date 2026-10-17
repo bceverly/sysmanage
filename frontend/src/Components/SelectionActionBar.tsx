@@ -40,6 +40,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+    CircularProgress,
     Box,
     Button,
     Chip,
@@ -57,6 +58,7 @@ import {
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
+import { useActionInFlight } from '../hooks/useActionInFlight';
 
 export type SelectionActionColor =
     | 'inherit'
@@ -73,7 +75,12 @@ export interface SelectionAction {
     /** Already translated by the caller -- screens own their own wording. */
     label: string;
     icon?: React.ReactNode;
-    onClick: () => void;
+    /**
+     * May return a promise: the bar then disables every action and shows a
+     * spinner on this one until it settles, so a slow request cannot be sent
+     * twice by an impatient second click.
+     */
+    onClick: () => void | Promise<unknown>;
     disabled?: boolean;
     /**
      * WHY it is disabled, in the operator's language.  Shown as a tooltip on a
@@ -207,17 +214,27 @@ const SelectionActionBar: React.FC<SelectionActionBarProps> = ({
 
     const closeMenu = () => setAnchorEl(null);
 
+    // While an action's request is in flight every action is unavailable and
+    // that one shows a spinner (2026-10-17: a bulk "Deploy antivirus" gave no
+    // sign it had been pressed, inviting a second and third press).
+    const { busy, run } = useActionInFlight();
+    const isDisabled = (action: SelectionAction) => Boolean(action.disabled) || busy !== null;
+    const iconFor = (action: SelectionAction) =>
+        busy === action.id ? <CircularProgress size={16} color="inherit" /> : action.icon;
+
     const runAction = (action: SelectionAction) => {
         // A disabled MenuItem is only blocked by CSS pointer-events, not by a
         // real `disabled` attribute the way a Button is -- so anything that
         // dispatches a synthetic click (tests, automation, an extension) would
         // otherwise fire the handler.  Correctness should not depend on a
         // stylesheet.
-        if (action.disabled) {
+        if (isDisabled(action)) {
             return;
         }
         closeMenu();
-        action.onClick();
+        // A plain handler (opening a dialog) leaves the bar as it was; one
+        // returning a promise holds it busy until the promise settles.
+        void run(action.id, action.onClick);
     };
 
     // Composed from common.rowSelected / common.rowsSelected, which already
@@ -239,26 +256,29 @@ const SelectionActionBar: React.FC<SelectionActionBarProps> = ({
         const tip = action.disabled
             ? action.disabledReason || ''
             : action.tooltip || '';
+        // (Busy is not a reason to explain: the spinner already says it.)
         const control = iconOnly && action.icon ? (
             <IconButton
                 aria-label={action.label}
                 data-testid={`action-${action.id}`}
                 color={action.color || (action.destructive ? 'error' : 'primary')}
-                disabled={action.disabled}
-                onClick={action.onClick}
+                disabled={isDisabled(action)}
+                aria-busy={busy === action.id}
+                onClick={() => runAction(action)}
                 size="small"
                 sx={{ border: 1, borderColor: 'divider', borderRadius: 1 }}
             >
-                {action.icon}
+                {iconFor(action)}
             </IconButton>
         ) : (
             <Button
                 variant="outlined"
                 data-testid={`action-${action.id}`}
-                startIcon={action.icon}
+                startIcon={iconFor(action)}
                 color={action.color || (action.destructive ? 'error' : 'primary')}
-                disabled={action.disabled}
-                onClick={action.onClick}
+                disabled={isDisabled(action)}
+                aria-busy={busy === action.id}
+                onClick={() => runAction(action)}
                 sx={{ whiteSpace: 'nowrap' }}
             >
                 {action.label}
@@ -382,7 +402,7 @@ const SelectionActionBar: React.FC<SelectionActionBarProps> = ({
                                     <MenuItem
                                         key={action.id}
                                         data-testid={`action-${action.id}`}
-                                        disabled={action.disabled}
+                                        disabled={isDisabled(action)}
                                         onClick={() => runAction(action)}
                                         sx={
                                             action.destructive
@@ -390,7 +410,7 @@ const SelectionActionBar: React.FC<SelectionActionBarProps> = ({
                                                 : undefined
                                         }
                                     >
-                                        {action.icon && (
+                                        {(action.icon || busy === action.id) && (
                                             <ListItemIcon
                                                 sx={
                                                     action.destructive
@@ -398,7 +418,7 @@ const SelectionActionBar: React.FC<SelectionActionBarProps> = ({
                                                         : undefined
                                                 }
                                             >
-                                                {action.icon}
+                                                {iconFor(action)}
                                             </ListItemIcon>
                                         )}
                                         <ListItemText

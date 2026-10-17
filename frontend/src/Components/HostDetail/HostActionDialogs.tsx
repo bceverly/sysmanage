@@ -47,6 +47,7 @@ import {
     getInstallationStatusColor,
     getTranslatedStatus,
 } from './hostDetailHelpers';
+import AsyncButton from '../AsyncButton';
 
 interface HostActionDialogsProps {
     host: SysManageHost | null;
@@ -400,14 +401,14 @@ const HostActionDialogs: React.FC<HostActionDialogsProps> = ({
                     <Button onClick={handleClosePackageDialog}>
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button
+                    <AsyncButton
                         onClick={handleInstallPackages}
                         variant="contained"
                         disabled={selectedPackages.size === 0}
                         startIcon={<SystemUpdateAltIcon />}
                     >
                         {t('hostDetail.installSelectedPackages', 'Install Selected Packages')} ({selectedPackages.size})
-                    </Button>
+                    </AsyncButton>
                 </DialogActions>
             </Dialog>
 
@@ -554,13 +555,13 @@ const HostActionDialogs: React.FC<HostActionDialogsProps> = ({
                     <Button onClick={handleCancelDeleteInstallation}>
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button
+                    <AsyncButton
                         onClick={handleConfirmDeleteInstallation}
                         color="error"
                         variant="contained"
                     >
                         {t('common.delete', 'Delete')}
-                    </Button>
+                    </AsyncButton>
                 </DialogActions>
             </Dialog>
 
@@ -583,13 +584,13 @@ const HostActionDialogs: React.FC<HostActionDialogsProps> = ({
                     <Button onClick={() => setRequestPackagesConfirmOpen(false)}>
                         {t('common.no', 'No')}
                     </Button>
-                    <Button
+                    <AsyncButton
                         onClick={handleRequestPackagesConfirm}
                         color="primary"
                         variant="contained"
                     >
                         {t('common.yes', 'Yes')}
-                    </Button>
+                    </AsyncButton>
                 </DialogActions>
             </Dialog>
 
@@ -617,13 +618,13 @@ const HostActionDialogs: React.FC<HostActionDialogsProps> = ({
                     <Button onClick={handleUninstallCancel}>
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button
+                    <AsyncButton
                         onClick={handleUninstallConfirm}
                         color="error"
                         variant="contained"
                     >
                         {t('hostDetail.uninstall', 'Uninstall')}
-                    </Button>
+                    </AsyncButton>
                 </DialogActions>
             </Dialog>
 
@@ -741,13 +742,13 @@ const HostActionDialogs: React.FC<HostActionDialogsProps> = ({
                     <Button onClick={handleSSHKeyDialogClose}>
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button
+                    <AsyncButton
                         variant="contained"
                         onClick={handleDeploySSHKeys}
                         disabled={selectedSSHKeys.length === 0}
                     >
                         {t('common.add', 'Add')}
-                    </Button>
+                    </AsyncButton>
                 </DialogActions>
             </Dialog>
 
@@ -842,13 +843,13 @@ const HostActionDialogs: React.FC<HostActionDialogsProps> = ({
                     <Button onClick={handleCertificateDialogClose} color="primary">
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button
+                    <AsyncButton
                         variant="contained"
                         onClick={handleDeployCertificates}
                         disabled={selectedCertificates.length === 0}
                     >
                         {t('common.add', 'Add')}
-                    </Button>
+                    </AsyncButton>
                 </DialogActions>
             </Dialog>
 
@@ -908,7 +909,7 @@ const HostActionDialogs: React.FC<HostActionDialogsProps> = ({
                     <Button onClick={handleDeleteUserCancel} disabled={deletingUser}>
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button
+                    <AsyncButton
                         variant="contained"
                         color="error"
                         onClick={handleDeleteUserConfirm}
@@ -916,7 +917,7 @@ const HostActionDialogs: React.FC<HostActionDialogsProps> = ({
                         startIcon={deletingUser ? <CircularProgress size={16} /> : <DeleteIcon />}
                     >
                         {t('common.delete', 'Delete')}
-                    </Button>
+                    </AsyncButton>
                 </DialogActions>
             </Dialog>
 
@@ -941,7 +942,7 @@ const HostActionDialogs: React.FC<HostActionDialogsProps> = ({
                     <Button onClick={handleDeleteGroupCancel} disabled={deletingGroup}>
                         {t('common.cancel', 'Cancel')}
                     </Button>
-                    <Button
+                    <AsyncButton
                         variant="contained"
                         color="error"
                         onClick={handleDeleteGroupConfirm}
@@ -949,7 +950,7 @@ const HostActionDialogs: React.FC<HostActionDialogsProps> = ({
                         startIcon={deletingGroup ? <CircularProgress size={16} /> : <DeleteIcon />}
                     >
                         {t('common.delete', 'Delete')}
-                    </Button>
+                    </AsyncButton>
                 </DialogActions>
             </Dialog>        </>
     );

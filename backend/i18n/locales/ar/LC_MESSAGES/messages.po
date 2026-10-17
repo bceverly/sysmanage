@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-16 13:57-0400\n"
+"POT-Creation-Date: 2026-10-17 09:30-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -174,8 +174,8 @@ msgstr "فشل في الحصول على شهادة المرجع المعتمد: 
 #: backend/api/config_mgmt_inventories.py:355 backend/api/host_graylog.py:89
 #: backend/api/config_mgmt_profiles.py:340 backend/api/diagnostics.py:87
 #: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
-#: backend/api/antivirus_status.py:212 backend/api/firewall_roles.py:473
-#: backend/api/firewall_roles.py:544
+#: backend/api/antivirus_status.py:212 backend/api/maintenance_windows.py:424
+#: backend/api/firewall_roles.py:473 backend/api/firewall_roles.py:544
 #: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "تنسيق ID المضيف غير صحيح"
@@ -1291,6 +1291,7 @@ msgid "Host limit reached for this tenant."
 msgstr "تم بلوغ الحد الأقصى لعدد المضيفين لهذا المستأجر."
 
 #: backend/api/processes.py:86 backend/api/processes.py:132
+#: backend/api/maintenance_windows.py:77
 msgid "Permission denied: View Host Details role required"
 msgstr "تم رفض الإذن: مطلوب دور عرض تفاصيل المضيف"
 
@@ -2644,7 +2645,7 @@ msgid "Failed to process heartbeat"
 msgstr "فشل في معالجة النبضة القلبية"
 
 #: backend/api/logging_settings.py:71 backend/api/hardware_health.py:312
-#: backend/api/maintenance_windows.py:62
+#: backend/api/maintenance_windows.py:64
 msgid "Permission denied: administrator required"
 msgstr "تم رفض الإذن: مطلوب مسؤول"
 
@@ -3289,23 +3290,23 @@ msgstr "فشل في إحصاء الحزم: %s"
 msgid "Failed to search packages: %s"
 msgstr "فشل في البحث عن الحزم: %s"
 
-#: backend/api/host.py:195
+#: backend/api/host.py:196
 msgid "Permission denied: DELETE_HOST role required"
 msgstr " رفض الوصول: يتطلب دور DELETE_HOST"
 
-#: backend/api/host.py:259
+#: backend/api/host.py:260
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "تم رفض الإذن: يتطلب دور `VIEW_HOST_DETAILS`"
 
-#: backend/api/host.py:666
+#: backend/api/host.py:678
 msgid "Host already exists"
 msgstr "المضيف موجود بالفعل"
 
-#: backend/api/host.py:778
+#: backend/api/host.py:790
 msgid "Registration absorbed: host was recently deleted"
 msgstr "التسجيل تم امتصاصه: كان المضيف قد حُذف مؤخرا"
 
-#: backend/api/host.py:858
+#: backend/api/host.py:870
 #, python-format
 msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "تم تسجيل مستضياف '%(fqdn)s' في المستأجر %(tenant_id)s عبر رمز التسجيل"
@@ -3350,11 +3351,11 @@ msgstr "يجب تحديد target_hostname أو target_platform أو push_to_all"
 msgid "Configuration acknowledgment processed"
 msgstr "تمت معالجة إقرار التكوين"
 
-#: backend/api/time_sync.py:297 backend/api/time_sync.py:341
+#: backend/api/time_sync.py:303 backend/api/time_sync.py:347
 msgid "Clock offset bounds changed"
 msgstr "تم تغيير حدود انحراف الساعة"
 
-#: backend/api/time_sync.py:362
+#: backend/api/time_sync.py:368
 msgid "Clock offset bounds removed"
 msgstr "تمت إزالة حدود انحراف الساعة"
 
@@ -4476,67 +4477,79 @@ msgstr "تم حذف سجل التثبيت بنجاح"
 msgid "Failed to delete installation record: %s"
 msgstr "فشل في حذف سجل التثبيت: %s"
 
-#: backend/api/maintenance_windows.py:111
+#: backend/api/maintenance_windows.py:126
 msgid "A window name is required."
 msgstr "اسم النافذة مطلوب."
 
-#: backend/api/maintenance_windows.py:114
+#: backend/api/maintenance_windows.py:129
 msgid "kind must be 'allow' or 'blackout'."
 msgstr "يجب أن يكون kind 'allow' أو 'blackout'."
 
-#: backend/api/maintenance_windows.py:119
+#: backend/api/maintenance_windows.py:134
 msgid "recurrence must be 'once', 'daily', or 'weekly'."
 msgstr "يجب أن يكون recurrence 'once'، 'daily'، أو 'weekly'."
 
-#: backend/api/maintenance_windows.py:128
+#: backend/api/maintenance_windows.py:143
 #, python-format
 msgid "Unknown timezone: %s"
 msgstr "المنطقة الزمنية غير معروفة: %s"
 
-#: backend/api/maintenance_windows.py:140
+#: backend/api/maintenance_windows.py:155
 msgid "A one-time window needs starts_at before ends_at."
 msgstr "يتطلب نافذة مرة واحدة أن يكون starts_at قبل ends_at."
 
-#: backend/api/maintenance_windows.py:147
+#: backend/api/maintenance_windows.py:162
 msgid "A recurring window needs a start_time as 'HH:MM'."
 msgstr "يتطلب نافذة متكررة وقت بدء بتنسيق 'HH:MM'."
 
-#: backend/api/maintenance_windows.py:152
+#: backend/api/maintenance_windows.py:167
 msgid "A recurring window needs a positive duration_minutes."
 msgstr "يتطلب نافذة متكررة فترة زمنية إيجابية في الدقائق (duration_minutes)."
 
-#: backend/api/maintenance_windows.py:159
+#: backend/api/maintenance_windows.py:174
 msgid "A weekly window needs valid days_of_week."
 msgstr "يتطلب نافذة أسبوعية أيامًا فعالة في الأسبوع."
 
-#: backend/api/maintenance_windows.py:168
+#: backend/api/maintenance_windows.py:183
 msgid "scope_type must be 'all', 'host', or 'tag'."
 msgstr "يجب أن يكون scope_type 'all'، 'host'، أو 'tag'."
 
-#: backend/api/maintenance_windows.py:171
+#: backend/api/maintenance_windows.py:186
 msgid "A host scope needs a host_id."
 msgstr "يحتاج نطاق المستضيفة إلى معرف مستضيفة (host_id)."
 
-#: backend/api/maintenance_windows.py:173
+#: backend/api/maintenance_windows.py:188
 msgid "A tag scope needs a tag_id."
 msgstr "يحتاج نطاق الوسم إلى معرف وسم (tag_id)."
 
-#: backend/api/maintenance_windows.py:183
+#: backend/api/maintenance_windows.py:198
 msgid "A window needs at least one scope (all, host, or tag)."
 msgstr "يجب أن يكون للنافذة على الأقل نطاق واحد (all، host، أو tag)."
 
-#: backend/api/maintenance_windows.py:305
-#: backend/api/maintenance_windows.py:329
+#: backend/api/maintenance_windows.py:320
+#: backend/api/maintenance_windows.py:344
 msgid "Maintenance window not found."
 msgstr "لم يتم العثور على نافذة الصيانة المحددة."
 
-#: backend/api/maintenance_windows.py:349
+#: backend/api/maintenance_windows.py:364
 msgid "An override reason is required."
 msgstr "سبب التعديل مطلوب."
 
-#: backend/api/maintenance_windows.py:353
+#: backend/api/maintenance_windows.py:368
 msgid "Override duration must be positive."
 msgstr "يجب أن تكون فترة التعديل إيجابية."
+
+#: backend/api/maintenance_windows.py:454
+msgid "Permission denied: Delete Queue Message role required"
+msgstr "تم رفض الإذن: يلزم دور Delete Queue Message"
+
+#: backend/api/maintenance_windows.py:471
+msgid "Message not found"
+msgstr "لم يتم العثور على الرسالة"
+
+#: backend/api/maintenance_windows.py:479
+msgid "Only a command a maintenance window is holding can be canceled."
+msgstr "لا يمكن إلغاء سوى أمر تحتجزه نافذة صيانة."
 
 #: backend/api/report_branding.py:116
 msgid "Updated report branding"
@@ -5060,7 +5073,7 @@ msgstr "حذف %(count)d رسالة لمستضياف %(host_id)s"
 msgid "Failed to delete messages for host %(host_id)s: %(error)s"
 msgstr "فشل حذف الرسائل لمستضياف %(host_id)s: %(error)s"
 
-#: backend/websocket/queue_maintenance.py:226
+#: backend/websocket/queue_maintenance.py:250
 #, python-format
 msgid ""
 "Marked %(count)d old messages as expired (older than %(timeout)d minutes)"
@@ -5068,17 +5081,17 @@ msgstr ""
 "وضع علامة على %(count)d رسالة قديمة كمنتهية الصلاحية (أقدم من %(timeout)d "
 "دقيقة)"
 
-#: backend/websocket/queue_maintenance.py:236
+#: backend/websocket/queue_maintenance.py:260
 #, python-format
 msgid "Failed to expire old messages: %s"
 msgstr "فشل في إلغاء صلاحية الرسائل القديمة: %s"
 
-#: backend/websocket/queue_maintenance.py:284
+#: backend/websocket/queue_maintenance.py:308
 #, python-format
 msgid "Deleted %d failed/expired messages"
 msgstr "حُذِفَت %d رسائل فاشلة/منتهية الصلاحية"
 
-#: backend/websocket/queue_maintenance.py:291
+#: backend/websocket/queue_maintenance.py:315
 #, python-format
 msgid "Failed to delete failed messages: %s"
 msgstr "فشل في حذف الرسائل الفاشلة: %s"
@@ -5348,7 +5361,7 @@ msgstr "حالة جهاز غير معروفة: %s"
 
 #: backend/services/asset_discovery_review.py:342
 #: backend/services/malware_quarantine.py:136
-#: backend/services/malware_review.py:186
+#: backend/services/malware_review.py:233
 msgid "A reason of at least 3 characters is required"
 msgstr "يلزم سبب لا يقل عن 3 أحرف"
 
@@ -5524,7 +5537,7 @@ msgstr "حُذِفَت الكيان من نوع ‘{entity_type}’ باسم ‘
 msgid "Unknown finding status: %s"
 msgstr "حالة نتيجة غير معروفة: %s"
 
-#: backend/services/malware_review.py:183
+#: backend/services/malware_review.py:230
 #, python-format
 msgid "That decision cannot be made here: %s"
 msgstr "لا يمكن اتخاذ هذا القرار هنا: %s"

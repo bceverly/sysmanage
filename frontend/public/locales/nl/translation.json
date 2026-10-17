@@ -1769,7 +1769,13 @@
     "wslEnableFailed": "WSL inschakelen mislukt",
     "wslEnabledRebootRequired": "WSL is ingeschakeld. Een herstart is vereist om de installatie te voltooien.",
     "wslEnabledSuccess": "WSL is succesvol ingeschakeld.",
-    "advisorTab": "Adviseur"
+    "advisorTab": "Adviseur",
+    "heldCommands": "{{count}} opdrachten wachten op het onderhoudsvenster '{{name}}', dat om {{time}} opent.",
+    "heldCommands_one": "{{count}} opdracht wacht op het onderhoudsvenster '{{name}}', dat om {{time}} opent.",
+    "heldCommands_other": "{{count}} opdrachten wachten op het onderhoudsvenster '{{name}}', dat om {{time}} opent.",
+    "heldCommandsBlackout": "{{count}} opdrachten wachten tot de blokkade '{{name}}' voorbij is.",
+    "heldCommandsBlackout_one": "{{count}} opdracht wacht tot de blokkade '{{name}}' voorbij is.",
+    "heldCommandsBlackout_other": "{{count}} opdrachten wachten tot de blokkade '{{name}}' voorbij is."
   },
   "hostGroup": {
     "add": "Toevoegen",
@@ -1913,7 +1919,9 @@
     "confirmReenroll": "De agent van deze host opnieuw registreren?",
     "confirmReenrollMessage": "Dit wist de agentreferenties van {{hostname}} en zet de host terug naar wachten op goedkeuring. Gebruik dit wanneer de agent opnieuw is geïnstalleerd en zijn referenties kwijt is: de volgende agent die als deze host verbinding maakt krijgt nieuwe, en niets wat hij verstuurt wordt geaccepteerd totdat u de host opnieuw goedkeurt.",
     "reenrollDone": "Referenties gewist. Keur de host opnieuw goed zodra de agent weer verbinding maakt.",
-    "reenrollFailed": "Opnieuw registreren van de host mislukt"
+    "reenrollFailed": "Opnieuw registreren van de host mislukt",
+    "heldCount": "Vastgehouden: {{count}}",
+    "heldTitle": "Er wachten opdrachten op een onderhoudsvenster"
   },
   "idp": {
     "action": {
@@ -2179,7 +2187,51 @@
     "timezone": "Tijdzone",
     "title": "Onderhoudsvensters",
     "unrestrictedHint": "Geen toepassend onderhoudsvenster -- wijzigingen worden onmiddellijk uitgevoerd.",
-    "updated": "Onderhoudsvenster bijgewerkt"
+    "updated": "Onderhoudsvenster bijgewerkt",
+    "overrideFailed": "De uitzondering kon niet worden gemaakt.",
+    "pendingNextWindow": "Wacht op het volgende onderhoudsvenster ('{{name}}', opent {{time}}).",
+    "pendingBlackout": "In afwachting: de blokkade '{{name}}' is van kracht.",
+    "held": {
+      "cmd": {
+        "unknown": "Opdracht",
+        "applyUpdates": "Updates toepassen",
+        "deploymentPlan": "Uitrolplan",
+        "proAttach": "Ubuntu Pro koppelen",
+        "proDetach": "Ubuntu Pro ontkoppelen",
+        "proEnable": "Ubuntu Pro: dienst inschakelen",
+        "proDisable": "Ubuntu Pro: dienst uitschakelen",
+        "reboot": "Opnieuw opstarten",
+        "shutdown": "Afsluiten",
+        "restartService": "Dienst opnieuw starten",
+        "runScript": "Script uitvoeren",
+        "updateAgent": "Agent bijwerken",
+        "collectPackages": "Pakketlijst vernieuwen",
+        "networkDiscovery": "Netwerkdetectie configureren",
+        "queryPack": "Gegevens verzamelen"
+      },
+      "packagesMore": "{{names}} (+{{more}})",
+      "releasedBy": "'{{name}}' om {{time}}",
+      "afterBlackout": "Wanneer de blokkade '{{name}}' eindigt",
+      "nextCheck": "Bij de volgende controle",
+      "loadFailed": "De vastgehouden opdrachten konden niet worden geladen.",
+      "cancelFailed": "De opdracht kon niet worden geannuleerd.",
+      "title": "Vastgehouden opdrachten",
+      "intro": "Opdrachten die wachten op een onderhoudsvenster. Ze worden uitgevoerd wanneer het venster opent, of nu als u de host vrijgeeft.",
+      "none": "Er wachten geen opdrachten op een venster.",
+      "col": {
+        "host": "Host",
+        "command": "Opdracht",
+        "queued": "Wacht sinds",
+        "runs": "Wordt uitgevoerd",
+        "expires": "Verloopt",
+        "actions": "Acties"
+      },
+      "release": "Host nu vrijgeven",
+      "cancel": "Opdracht annuleren",
+      "cancelTitle": "Deze opdracht annuleren?",
+      "cancelExplain": "Hij wordt niet uitgevoerd. Dit wordt vastgelegd.",
+      "keep": "Behouden"
+    }
   },
   "map": {
     "errorLoadHosts": "Kan locaties van hosts niet laden.",
@@ -3171,7 +3223,13 @@
     "today": "Vandaag",
     "unknown": "Onbekend",
     "version": "Versie",
-    "yesterday": "Gisteren"
+    "yesterday": "Gisteren",
+    "deployingAntivirus": "Bezig met uitrollen...",
+    "removingAntivirus": "Bezig met verwijderen...",
+    "enablingAntivirus": "Bezig met inschakelen...",
+    "disablingAntivirus": "Bezig met uitschakelen...",
+    "awaitingAgent": "Wachten tot de agent de wijziging meldt. Dit kan enkele minuten duren.",
+    "agentNotConfirmed": "De agent heeft de wijziging nog niet bevestigd. Mogelijk is hij nog bezig; controleer de host later opnieuw."
   },
   "serverDown": {
     "attempts": "Pogingen: {{count}}",
@@ -4374,7 +4432,9 @@
       "seenBy": "Gezien door",
       "selectAll": "Alles selecteren",
       "status": "Toestand",
-      "maybe": "Misschien: {{type}}"
+      "maybe": "Misschien: {{type}}",
+      "searchesFor": "Zoekt naar: {{what}}",
+      "searchesForHint": "Waar dit apparaat op het netwerk naar zocht (SSDP-zoekopdracht). Het beschrijft wat het apparaat zoekt, niet wat het is."
     },
     "tabs": {
       "excluded": "Bekend en in orde",
@@ -4446,7 +4506,17 @@
       "legNotRun_one": "{{leg}} is niet uitgevoerd op {{count}} host: {{reason}}",
       "legNotRun_other": "{{leg}} is niet uitgevoerd op {{count}} hosts: {{reason}}",
       "rulesShort_one": "Op {{count}} host heeft ClamAV minder regels geladen dan er zijn aangeboden",
-      "rulesShort_other": "Op {{count}} hosts heeft ClamAV minder regels geladen dan er zijn aangeboden"
+      "rulesShort_other": "Op {{count}} hosts heeft ClamAV minder regels geladen dan er zijn aangeboden",
+      "more": "en nog {{count}}",
+      "more_one": "en nog {{count}}",
+      "more_other": "en nog {{count}}",
+      "deployAntivirus": "Antivirus uitrollen",
+      "scanNow": "Nu scannen",
+      "actionFailed": "Het verzoek kon niet worden verzonden.",
+      "noPermission": "U hebt niet de rol die hiervoor nodig is.",
+      "deployRequested": "Uitrol van antivirus aangevraagd voor {{count}} hosts",
+      "deployRequested_one": "Uitrol van antivirus aangevraagd voor {{count}} host",
+      "deployRequested_other": "Uitrol van antivirus aangevraagd voor {{count}} hosts"
     },
     "counts": {
       "feed": "Regelfeed: {{title}} v{{version}}, {{count}} regels",
@@ -4858,7 +4928,13 @@
       "stratum": "Stratum",
       "synchronized": "Gesynchroniseerd",
       "title": "Klok",
-      "yes": "Ja"
+      "yes": "Ja",
+      "uncertain": "Onzeker: de laatste uitwisseling duurde {{roundTrip}}, dus de afwijking van de klok is niet nauwkeuriger te meten dan {{error}}.",
+      "uncertainServiceVouches": "De tijdservice van de host meldt dat hij gesynchroniseerd is.",
+      "judgedFrom": "De status komt uit de meting van {{time}}: {{offset}}.",
+      "uncertainPoints": "{{count}} metingen die te onzeker zijn om te beoordelen, worden niet weergegeven.",
+      "uncertainPoints_one": "{{count}} meting die te onzeker is om te beoordelen, wordt niet weergegeven.",
+      "uncertainPoints_other": "{{count}} metingen die te onzeker zijn om te beoordelen, worden niet weergegeven."
     },
     "direction": {
       "ahead": "voor op de server",
@@ -4901,7 +4977,8 @@
       "serverClockOff": "Serverklok wijkt af",
       "stale": "Geen recente meting",
       "unmeasured": "Niet gemeten",
-      "warning": "Waarschuwing"
+      "warning": "Waarschuwing",
+      "uncertain": "Onzeker"
     },
     "statusHelp": {
       "critical": "De gemeten afwijking bereikt of overschrijdt de kritieke drempel.",
@@ -4909,7 +4986,8 @@
       "serverClockOff": "De klok van de server zelf wijkt af van zijn referentie, dus hostklokken worden pas beoordeeld als die is gecorrigeerd.",
       "stale": "De laatste meting is ouder dan 30 minuten. De host is waarschijnlijk niet verbonden.",
       "unmeasured": "De server heeft deze klok nog niet gemeten. De agent is mogelijk te oud of heeft nog geen verbinding gemaakt.",
-      "warning": "De gemeten afwijking bereikt of overschrijdt de waarschuwingsdrempel."
+      "warning": "De gemeten afwijking bereikt of overschrijdt de waarschuwingsdrempel.",
+      "uncertain": "De laatste uitwisseling duurde te lang om de afwijking binnen de waarschuwingsgrens te meten, dus de klok wordt pas beoordeeld na een snellere uitwisseling."
     },
     "title": "Tijdsynchronisatie",
     "unit": {

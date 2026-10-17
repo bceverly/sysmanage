@@ -41,6 +41,7 @@ import {
   refreshMirrorSetupStatus,
   installMirrorTools,
 } from '../Services/repositoryMirroring';
+import AsyncButton from './AsyncButton';
 
 interface Props {
   hostId: string;
@@ -266,7 +267,7 @@ const MirrorSetupStatusCard: React.FC<Props> = ({
                 : t('mirror.setupStatus.refresh', 'Refresh')}
             </Button>
             {(neverProbed || ready === false) && (
-              <Button
+              <AsyncButton
                 variant="contained"
                 size="small"
                 color="primary"
@@ -279,7 +280,7 @@ const MirrorSetupStatusCard: React.FC<Props> = ({
                 {installInFlight
                   ? t('mirror.setupStatus.installing', 'Installing…')
                   : t('mirror.setupStatus.install', 'Install Tools')}
-              </Button>
+              </AsyncButton>
             )}
           </Stack>
         </Stack>

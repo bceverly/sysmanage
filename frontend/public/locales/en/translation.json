@@ -1788,7 +1788,13 @@
     "wslEnableFailed": "Failed to enable WSL",
     "wslEnabledRebootRequired": "WSL has been enabled. A reboot is required to complete the installation.",
     "wslEnabledSuccess": "WSL has been enabled successfully.",
-    "advisorTab": "Advisor"
+    "advisorTab": "Advisor",
+    "heldCommands": "{{count}} commands are waiting for the '{{name}}' maintenance window, which opens at {{time}}.",
+    "heldCommands_one": "{{count}} command is waiting for the '{{name}}' maintenance window, which opens at {{time}}.",
+    "heldCommands_other": "{{count}} commands are waiting for the '{{name}}' maintenance window, which opens at {{time}}.",
+    "heldCommandsBlackout": "{{count}} commands are waiting for the '{{name}}' blackout to end.",
+    "heldCommandsBlackout_one": "{{count}} command is waiting for the '{{name}}' blackout to end.",
+    "heldCommandsBlackout_other": "{{count}} commands are waiting for the '{{name}}' blackout to end."
   },
   "hostGroup": {
     "add": "Add",
@@ -1932,7 +1938,9 @@
     "confirmReenroll": "Re-enroll the Agent of This Host?",
     "confirmReenrollMessage": "This clears the agent credential of {{hostname}} and returns the host to pending approval. Use it when the agent was reinstalled and lost its credential: the next agent to connect as this host gets a new one, and nothing it sends is accepted until you approve the host again.",
     "reenrollDone": "Credential cleared. Approve the host again once its agent reconnects.",
-    "reenrollFailed": "Failed to re-enroll the host"
+    "reenrollFailed": "Failed to re-enroll the host",
+    "heldCount": "Held: {{count}}",
+    "heldTitle": "Commands are waiting for a maintenance window"
   },
   "idp": {
     "action": {
@@ -2198,7 +2206,51 @@
     "timezone": "Timezone",
     "title": "Maintenance Windows",
     "unrestrictedHint": "No maintenance window applies -- changes run immediately.",
-    "updated": "Maintenance window updated"
+    "updated": "Maintenance window updated",
+    "overrideFailed": "The override could not be created.",
+    "pendingNextWindow": "Pending the next maintenance window ('{{name}}', opens {{time}}).",
+    "pendingBlackout": "Pending: the '{{name}}' blackout is in effect.",
+    "held": {
+      "cmd": {
+        "unknown": "Command",
+        "applyUpdates": "Apply updates",
+        "deploymentPlan": "Deployment plan",
+        "proAttach": "Ubuntu Pro attach",
+        "proDetach": "Ubuntu Pro detach",
+        "proEnable": "Ubuntu Pro: enable service",
+        "proDisable": "Ubuntu Pro: disable service",
+        "reboot": "Reboot",
+        "shutdown": "Shut down",
+        "restartService": "Restart service",
+        "runScript": "Run script",
+        "updateAgent": "Update agent",
+        "collectPackages": "Refresh package list",
+        "networkDiscovery": "Configure network discovery",
+        "queryPack": "Collect facts"
+      },
+      "packagesMore": "{{names}} (+{{more}})",
+      "releasedBy": "'{{name}}' at {{time}}",
+      "afterBlackout": "When the '{{name}}' blackout ends",
+      "nextCheck": "At the next check",
+      "loadFailed": "The held commands could not be loaded.",
+      "cancelFailed": "The command could not be canceled.",
+      "title": "Held commands",
+      "intro": "Commands waiting for a maintenance window. They run when the window opens, or now if you release the host.",
+      "none": "No commands are waiting for a window.",
+      "col": {
+        "host": "Host",
+        "command": "Command",
+        "queued": "Waiting since",
+        "runs": "Will run",
+        "expires": "Expires",
+        "actions": "Actions"
+      },
+      "release": "Release host now",
+      "cancel": "Cancel command",
+      "cancelTitle": "Cancel this command?",
+      "cancelExplain": "It will not run. This is audited.",
+      "keep": "Keep it"
+    }
   },
   "map": {
     "errorLoadHosts": "Failed to load host locations.",
@@ -3190,7 +3242,13 @@
     "today": "Today",
     "unknown": "Unknown",
     "version": "Version",
-    "yesterday": "Yesterday"
+    "yesterday": "Yesterday",
+    "deployingAntivirus": "Deploying...",
+    "removingAntivirus": "Removing...",
+    "enablingAntivirus": "Enabling...",
+    "disablingAntivirus": "Disabling...",
+    "awaitingAgent": "Waiting for the agent to report the change. This can take a few minutes.",
+    "agentNotConfirmed": "The agent has not confirmed the change yet. It may still be working; check the host again later."
   },
   "serverDown": {
     "attempts": "Attempts: {{count}}",
@@ -4374,7 +4432,9 @@
       "seenBy": "Seen by",
       "selectAll": "Select all",
       "status": "Status",
-      "maybe": "Maybe: {{type}}"
+      "maybe": "Maybe: {{type}}",
+      "searchesFor": "Searches for: {{what}}",
+      "searchesForHint": "What this device looked for on the network (SSDP search). It describes what the device wants, not what it is."
     },
     "tabs": {
       "excluded": "Known and fine",
@@ -4446,7 +4506,17 @@
       "legNotRun_one": "{{leg}} did not run on {{count}} host: {{reason}}",
       "legNotRun_other": "{{leg}} did not run on {{count}} hosts: {{reason}}",
       "rulesShort_one": "On {{count}} host ClamAV loaded fewer rules than it was given",
-      "rulesShort_other": "On {{count}} hosts ClamAV loaded fewer rules than it was given"
+      "rulesShort_other": "On {{count}} hosts ClamAV loaded fewer rules than it was given",
+      "more": "and {{count}} more",
+      "more_one": "and {{count}} more",
+      "more_other": "and {{count}} more",
+      "deployAntivirus": "Deploy antivirus",
+      "scanNow": "Scan now",
+      "actionFailed": "The request could not be sent.",
+      "noPermission": "You do not have the role this needs.",
+      "deployRequested": "Antivirus deployment requested for {{count}} hosts",
+      "deployRequested_one": "Antivirus deployment requested for {{count}} host",
+      "deployRequested_other": "Antivirus deployment requested for {{count}} hosts"
     },
     "counts": {
       "feed": "Rule feed: {{title}} v{{version}}, {{count}} rules",
@@ -4858,7 +4928,13 @@
       "stratum": "Stratum",
       "synchronized": "Synchronized",
       "title": "Clock",
-      "yes": "Yes"
+      "yes": "Yes",
+      "uncertain": "Uncertain: the last exchange took {{roundTrip}}, so the clock offset cannot be measured to better than {{error}}.",
+      "uncertainServiceVouches": "The host's time service reports it is synchronized.",
+      "judgedFrom": "The status comes from the measurement at {{time}}: {{offset}}.",
+      "uncertainPoints": "{{count}} measurements too uncertain to judge are not drawn.",
+      "uncertainPoints_one": "{{count}} measurement too uncertain to judge is not drawn.",
+      "uncertainPoints_other": "{{count}} measurements too uncertain to judge are not drawn."
     },
     "direction": {
       "ahead": "ahead of the server",
@@ -4901,7 +4977,8 @@
       "serverClockOff": "Server clock off",
       "stale": "No recent measurement",
       "unmeasured": "Not measured",
-      "warning": "Warning"
+      "warning": "Warning",
+      "uncertain": "Uncertain"
     },
     "statusHelp": {
       "critical": "The measured offset is at or beyond the critical bound.",
@@ -4909,7 +4986,8 @@
       "serverClockOff": "The server's own clock is off its reference, so host clocks are not judged until it is corrected.",
       "stale": "The last measurement is more than 30 minutes old. The host is probably not connected.",
       "unmeasured": "The server has not measured this clock yet. The agent may be too old, or has not connected.",
-      "warning": "The measured offset is at or beyond the warning bound."
+      "warning": "The measured offset is at or beyond the warning bound.",
+      "uncertain": "The last exchange took too long to measure the offset to within the warning bound, so the clock is not judged until a quicker exchange."
     },
     "title": "Time Sync",
     "unit": {

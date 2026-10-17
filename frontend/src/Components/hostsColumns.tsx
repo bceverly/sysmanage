@@ -91,6 +91,15 @@ export function buildHostColumns({
                             size="small"
                             title={t('hosts.lastSeen', 'Last seen {{minutes}} minutes ago', { minutes: diffMinutes })}
                         />
+                        {(row.held_commands ?? 0) > 0 && (
+                            <Chip
+                                label={t('hosts.heldCount', 'Held: {{count}}', { count: row.held_commands })}
+                                color="warning"
+                                size="small"
+                                variant="outlined"
+                                title={t('hosts.heldTitle', 'Commands are waiting for a maintenance window')}
+                            />
+                        )}
                         {needsApproval && (
                             <Chip
                                 label={t('hosts.approvalNeeded')}

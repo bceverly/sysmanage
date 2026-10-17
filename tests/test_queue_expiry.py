@@ -96,6 +96,38 @@ def test_outbound_keeps_age_based_expiry(session):
     assert _expired(session, late)
 
 
+def _held(session, message_id):
+    from backend.services.maintenance_window_service import (  # pylint: disable=import-outside-toplevel
+        DEFERRED_MARKER,
+    )
+
+    row = session.query(MessageQueue).filter_by(message_id=message_id).first()
+    row.error_message = DEFERRED_MARKER
+    session.commit()
+
+
+def test_a_command_a_window_is_holding_does_not_age_out(session):
+    """2026-10-16: an attach queued at 19:38 behind a 02:00 window would have
+    expired an hour later, long before the window opened."""
+    host = _host(session)
+    waiting = _message(
+        session, host, QueueDirection.OUTBOUND, _now() - timedelta(hours=5)
+    )
+    _held(session, waiting)
+    server_queue_manager.expire_old_messages(session)
+    assert not _expired(session, waiting)
+
+
+def test_a_held_command_still_has_a_ceiling(session):
+    host = _host(session)
+    forgotten = _message(
+        session, host, QueueDirection.OUTBOUND, _now() - timedelta(days=8)
+    )
+    _held(session, forgotten)
+    server_queue_manager.expire_old_messages(session)
+    assert _expired(session, forgotten)
+
+
 async def test_expiry_runs_at_most_once_per_interval(session):
     """Phase 22.2: expiry is maintenance, not part of every drain pass."""
     from unittest.mock import patch  # pylint: disable=import-outside-toplevel

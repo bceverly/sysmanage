@@ -345,3 +345,38 @@ def test_memory_shortfall_names_the_numbers():
         av_auto_deploy.memory_shortfall(SimpleNamespace(memory_total_mb=None), "clamav")
         is None
     )
+
+
+REFUSED = "Command 'refresh ClamAV signature database' exited 1: sudo: I'm sorry"
+
+
+def test_a_plan_with_only_best_effort_failures_succeeds_and_warns(db, queued, caplog):
+    """2026-10-17: the agent said success AND listed the refused, ignorable
+    refresh under errors.  That is a warning, not a failed deploy."""
+    host = _host(db)
+    av_auto_deploy.reconcile(db)
+    db.commit()
+    with caplog.at_level("WARNING"):
+        assert _answer(db, queued[0], True, errors=[REFUSED])
+    record = db.get(models.AntivirusAutoDeploy, host.id)
+    assert record.status == av_auto_deploy.STATUS_SUCCEEDED
+    assert record.last_error is None
+    assert "with warnings" in caplog.text and "sudo: I'm sorry" in caplog.text
+
+
+def test_a_failed_required_step_is_failed_and_retried(db, queued):
+    host = _host(db)
+    av_auto_deploy.reconcile(db)
+    db.commit()
+    assert _answer(db, queued[0], False, errors=["Package install failed for clamav"])
+    record = db.get(models.AntivirusAutoDeploy, host.id)
+    assert record.status == av_auto_deploy.STATUS_FAILED
+    assert "Package install failed" in record.last_error
+
+
+def test_plan_warnings_reads_both_result_shapes():
+    new = {"result": {"success": True, "errors": [], "warnings": [REFUSED]}}
+    old = {"result": {"success": True, "errors": [REFUSED]}}
+    assert av_auto_deploy.plan_warnings(new) == [REFUSED]
+    assert av_auto_deploy.plan_warnings(old) == [REFUSED]
+    assert av_auto_deploy.plan_warnings({"result": "text"}) == []

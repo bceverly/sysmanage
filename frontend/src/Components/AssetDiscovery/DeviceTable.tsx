@@ -34,17 +34,63 @@ interface Props {
     onToggleAll: (ids: string[]) => void;
 }
 
+/**
+ * SSDP lines that say what the device IS, and what it only SEARCHED for.
+ *
+ * An M-SEARCH's ST is what the sender is looking for: a Windows laptop
+ * searching for its router, Chrome searching for cast targets.  Agents from
+ * 2026-10-17 send those apart (``ssdp_searches``) and mark a reply's ST as
+ * "RST:".  Older agents mixed both into ``ssdp`` as bare "ST:" lines, so --
+ * like the engine -- a bare ST counts as identity only when the device also
+ * sent a SERVER line (replies and announcements carry one; searches do not).
+ */
+export const splitSsdp = (device: DiscoveredDevice): { identity: string[]; searches: string[] } => {
+    const lines = device.evidence.ssdp ?? [];
+    const replied = lines.some(line => line.toLowerCase().startsWith('server:'));
+    const identity: string[] = [];
+    const searches: string[] = [...(device.evidence.ssdp_searches ?? [])];
+    for (const line of lines) {
+        const bareSt = line.toLowerCase().startsWith('st:');
+        if (bareSt && !replied) {
+            const what = line.slice(3).trim();
+            if (what && !searches.includes(what)) searches.push(what);
+        } else {
+            identity.push(line);
+        }
+    }
+    return { identity, searches };
+};
+
 const Evidence: React.FC<{ device: DiscoveredDevice }> = ({ device }) => {
+    const { t } = useTranslation();
+    const { identity, searches } = splitSsdp(device);
     const items = [
         ...device.hostnames,
         ...(device.evidence.mdns_services ?? []),
-        ...(device.evidence.ssdp ?? []),
+        ...identity,
     ];
-    if (items.length === 0) return <Typography variant="body2" color="text.secondary">-</Typography>;
+    if (items.length === 0 && searches.length === 0) {
+        return <Typography variant="body2" color="text.secondary">-</Typography>;
+    }
     return (
         <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap', rowGap: 0.5 }}>
             {items.slice(0, 4).map(item => <Chip key={item} size="small" variant="outlined" label={item} />)}
             {items.length > 4 && <Chip size="small" label={`+${items.length - 4}`} />}
+            {searches.length > 0 && (
+                <Tooltip title={t('assetDiscovery.table.searchesForHint',
+                    'What this device looked for on the network (SSDP search). It describes what the device wants, not what it is.')}>
+                    <Chip
+                        size="small"
+                        variant="outlined"
+                        color="default"
+                        sx={{ borderStyle: 'dashed' }}
+                        label={t('assetDiscovery.table.searchesFor', 'Searches for: {{what}}', {
+                            what: searches.length > 1 ? `${searches[0]} (+${searches.length - 1})` : searches[0],
+                        })}
+                        data-testid="ssdp-searches"
+                    />
+                </Tooltip>
+            )}
         </Stack>
     );
 };
@@ -58,7 +104,11 @@ const LooksLike: React.FC<{ device: DiscoveredDevice }> = ({ device }) => {
         ? t('assetDiscovery.table.maybe', 'Maybe: {{type}}', { type: deviceTypeLabel(t, device.device_type) })
         : deviceTypeLabel(t, device.device_type);
     return (
-        <Tooltip title={(device.classification?.reasons ?? []).join(', ')}>
+        <Tooltip title={[
+            ...(device.classification?.reasons ?? []),
+            // Other roles it advertises, e.g. a computer that shares a printer.
+            ...(device.classification?.also ?? []).map(role => `also:${role}`),
+        ].join(', ')}>
             <Chip size="small" variant={low ? 'outlined' : 'filled'} sx={{ mt: 0.5 }} label={label} />
         </Tooltip>
     );

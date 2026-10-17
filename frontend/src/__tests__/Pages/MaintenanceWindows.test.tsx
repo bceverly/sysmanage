@@ -75,6 +75,9 @@ vi.mock("../../Services/maintenanceWindows", () => ({
     create: vi.fn(),
     update: vi.fn(),
     remove: vi.fn(),
+    // The page also lists held commands; none here.
+    listHeld: vi.fn(() => Promise.resolve({ total: 0, items: [] })),
+    cancelHeld: vi.fn(),
   },
 }));
 

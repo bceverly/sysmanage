@@ -202,6 +202,10 @@ de: re:^Edition$
 # localized by the engine that produced it.
 re:^\{\{step\}\}/\{\{total\}\} · \{\{description\}\}$
 
+# Pure interpolation: a list of package names and how many more were left out
+# -- "cups, snapd (+2)".  Nothing here is prose.
+re:^\{\{names\}\} \(\+\{\{more\}\}\)$
+
 # --- nav / settings labels that are the SAME WORD in some target languages ---
 # Exact keys, not a glob on `nav.*` or `settings.cat.*`: the neighbouring
 # labels DO translate (fr Analyses, de Einblicke, de Verwaltung, fr Général)

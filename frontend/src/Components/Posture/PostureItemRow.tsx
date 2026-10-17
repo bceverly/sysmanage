@@ -32,6 +32,7 @@ import {
     staleLabel,
 } from './postureLabels';
 import { appLocale } from '../../utils/locale';
+import AsyncButton from '../AsyncButton';
 
 export type RowAction = 'fix' | 'waive' | 'reaffirm';
 
@@ -70,7 +71,7 @@ const WaiverDetail: React.FC<{ item: PostureItem; onRevoke: () => void; onReaffi
             action={
                 <Stack direction="row" spacing={1}>
                     {w.stale_reason && <Button size="small" onClick={onReaffirm}>{t('posture.waiver.reaffirm', 'Re-affirm')}</Button>}
-                    <Button size="small" onClick={onRevoke}>{t('posture.waiver.revoke', 'Revoke')}</Button>
+                    <AsyncButton size="small" onClick={onRevoke}>{t('posture.waiver.revoke', 'Revoke')}</AsyncButton>
                 </Stack>
             }>
             {t('posture.waiver.grantedBy', 'Waived by {{user}} on {{date}}: {{reason}}',

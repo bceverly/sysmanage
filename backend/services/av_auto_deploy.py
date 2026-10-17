@@ -265,6 +265,22 @@ def _plan_errors(message_data: Dict[str, Any]) -> str:
     return text[:2000]
 
 
+def plan_warnings(message_data: Dict[str, Any]) -> list:
+    """What went wrong in a plan's best-effort steps.
+
+    Agents from 2026-10-17 report those in ``warnings``; older ones put them
+    in ``errors`` even when the plan succeeded (a refused, ignorable
+    signature refresh read as an error on a working install).  For a plan
+    that succeeded, either is a warning -- never a reason to retry."""
+    result = message_data.get("result")
+    if not isinstance(result, dict):
+        return []
+    found = result.get("warnings")
+    if found is None:
+        found = result.get("errors")
+    return [str(w) for w in (found or [])]
+
+
 def record_result(session: Session, message_data: Dict[str, Any]) -> bool:
     """Record an ``apply_deployment_plan`` result if it answers an automatic
     deploy.  Returns False for any other plan (e.g. the Deploy button's), so
@@ -287,11 +303,21 @@ def record_result(session: Session, message_data: Dict[str, Any]) -> bool:
     if succeeded:
         record.status = STATUS_SUCCEEDED
         record.last_error = None
-        logger.info(
-            "Antivirus auto-deploy: plan v%d succeeded on host %s",
-            record.plan_version,
-            record.host_id,
-        )
+        warnings = plan_warnings(message_data)
+        if warnings:
+            logger.warning(
+                "Antivirus auto-deploy: plan v%d succeeded on host %s with "
+                "warnings: %s",
+                record.plan_version,
+                record.host_id,
+                "; ".join(warnings)[:2000],
+            )
+        else:
+            logger.info(
+                "Antivirus auto-deploy: plan v%d succeeded on host %s",
+                record.plan_version,
+                record.host_id,
+            )
         return True
     record.status = STATUS_FAILED
     record.last_error = _plan_errors(message_data)

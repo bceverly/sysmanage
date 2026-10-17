@@ -22,6 +22,7 @@ import {
   getConfigProfiles,
   ConfigProfile,
 } from "../Services/configManagementService";
+import AsyncButton from './AsyncButton';
 
 interface ApplyConfigProfileDialogProps {
   open: boolean;
@@ -303,7 +304,7 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
         <Button onClick={handleClose} disabled={submitting}>
           {t("common.cancel", "Cancel")}
         </Button>
-        <Button
+        <AsyncButton
           variant="contained"
           onClick={handleApply}
           // A stored profile has no pasted body -- the server reads it -- so
@@ -313,7 +314,7 @@ const ApplyConfigProfileDialog: React.FC<ApplyConfigProfileDialogProps> = ({
           {checkMode
             ? t("configManagement.applyDryRunAction", "Preview changes")
             : t("configManagement.applyAction", "Apply")}
-        </Button>
+        </AsyncButton>
       </DialogActions>
     </Dialog>
   );

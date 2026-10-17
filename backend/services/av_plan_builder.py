@@ -195,30 +195,47 @@ def _macos_freshclam_job(prefix: str) -> str:
 FREEBSD_CLAMD_PIDFILE = "/var/run/clamav/clamd.pid"
 
 
-def _freebsd_stop_unseen_clamd() -> Dict[str, Any]:
+def _freebsd_stop_unseen_clamd() -> List[Dict[str, Any]]:
     """A clamd started without PidFile is invisible to rc ("not running"), so
     rc can neither stop it nor start another (its socket is live).  Ending
     it here lets the service actions start it under the new config -- which
     a redeploy needs anyway, since "start" leaves a running clamd on the old
-    one."""
-    return {
-        # pkill only signals: wait (at most 30 s) for the old clamd to EXIT,
-        # or the start that follows sees its pid file, says "already running",
-        # and nothing is left once it finishes dying (FreeBSD, 2026-09-30).
-        "argv": [
-            "/bin/sh",
-            "-c",
-            (
-                "pkill -x clamd; i=0; "
-                "while pgrep -x clamd >/dev/null && [ $i -lt 30 ]; "
-                "do sleep 1; i=$((i+1)); done; true"
-            ),
-        ],
-        "sudo": True,
-        "timeout": 60,
-        "ignore_errors": True,
-        "description": "restart clamd under the deployed configuration",
-    }
+    one.
+
+    Two steps, so only the signal needs root: the agent's sudoers allows
+    exactly ``pkill -x clamd``.  This used to be ONE ``sudo /bin/sh -c``
+    step -- which no allowlist may grant (a root shell is everything), so
+    an unprivileged agent's sudo refused it (2026-10-17)."""
+    return [
+        {
+            "argv": ["pkill", "-x", "clamd"],
+            "sudo": True,
+            "timeout": 30,
+            # 1 = no clamd was running: nothing to stop, which is fine.
+            "ok_exit_codes": [0, 1],
+            "ignore_errors": True,
+            "description": "stop clamd before restarting it under the deployed configuration",
+        },
+        {
+            # pkill only signals: wait (at most 30 s) for the old clamd to
+            # EXIT, or the start that follows sees its pid file, says
+            # "already running", and nothing is left once it finishes dying
+            # (FreeBSD, 2026-09-30).  Unprivileged: pgrep needs no root.
+            "argv": [
+                "/bin/sh",
+                "-c",
+                (
+                    "i=0; "
+                    "while pgrep -x clamd >/dev/null && [ $i -lt 30 ]; "
+                    "do sleep 1; i=$((i+1)); done; true"
+                ),
+            ],
+            "sudo": False,
+            "timeout": 60,
+            "ignore_errors": True,
+            "description": "wait for the old clamd to exit",
+        },
+    ]
 
 
 def _bsd_clamd_conf(plat: str, host_info: Optional[Dict[str, Any]]) -> str:
@@ -392,18 +409,7 @@ def _linux_deploy(
         "distro": distro,
         "packages": pkgs,
         "files": files,
-        "commands": _delayed(
-            host_info,
-            [
-                {
-                    "argv": ["freshclam"],
-                    "sudo": True,
-                    "timeout": 300,
-                    "ignore_errors": True,
-                    "description": REFRESH_SIGNATURES,
-                },
-            ],
-        ),
+        "commands": _delayed(host_info, _linux_refresh_commands(distro)),
         "service_actions": [
             {"service": fresh_svc, "action": "enable"},
             {"service": fresh_svc, "action": "start"},
@@ -412,6 +418,38 @@ def _linux_deploy(
         ],
         "scan_schedule": schedule or None,
     }
+
+
+def _debian_family(distro: str) -> bool:
+    """The layouts ``_linux_clamav_layout`` maps to the Debian packages."""
+    return _linux_clamav_layout(distro)[3] == "clamav-daemon" and not any(
+        k in (distro or "").lower() for k in ("arch", "manjaro")
+    )
+
+
+def _linux_refresh_commands(distro: str) -> List[Dict[str, Any]]:
+    """Fetch signatures once, before clamd first starts -- where needed.
+
+    Debian / Ubuntu: none.  Installing ``clamav-freshclam`` starts the updater,
+    which downloads the database at once (milsurpmonitor, Ubuntu 26.04,
+    2026-10-17: installed 11:50, database in place 11:51:51, clamd up
+    11:52:20); a one-shot ``freshclam`` beside it can only fail on the
+    updater's lock -- and an unprivileged agent's sudo refused it anyway.
+    RPM / SUSE / Arch packages start nothing, so the one-shot is what puts a
+    database in place for clamd; the agent's sudoers allows exactly
+    ``freshclam`` with no arguments on those platforms.
+    """
+    if _debian_family(distro):
+        return []
+    return [
+        {
+            "argv": ["freshclam"],
+            "sudo": True,
+            "timeout": 300,
+            "ignore_errors": True,
+            "description": REFRESH_SIGNATURES,
+        },
+    ]
 
 
 def _linux_enable(host_info: Dict[str, Any]) -> Dict[str, Any]:
@@ -551,7 +589,7 @@ def _bsd_update_commands(plat: str, host_info: Dict[str, Any]) -> List[Dict[str,
             },
         ]
         if plat == "freebsd":
-            commands.append(_freebsd_stop_unseen_clamd())
+            commands.extend(_freebsd_stop_unseen_clamd())
         return commands
     prefix = _brew_prefix(host_info)
     return [

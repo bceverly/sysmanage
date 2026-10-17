@@ -16,6 +16,7 @@ import {
   Typography,
 } from '@mui/material';
 import { TagWithHosts } from './settingsTypes';
+import AsyncButton from '../AsyncButton';
 
 interface SettingsDialogsProps {
   // Add Tag dialog
@@ -114,7 +115,7 @@ const SettingsDialogs: React.FC<SettingsDialogsProps> = ({
         </DialogContent>
         <DialogActions>
           <Button onClick={onEditDialogClose}>{t('common.cancel', 'Cancel')}</Button>
-          <Button onClick={onUpdateTag} variant="contained">{t('common.save', 'Save')}</Button>
+          <AsyncButton onClick={onUpdateTag} variant="contained">{t('common.save', 'Save')}</AsyncButton>
         </DialogActions>
       </Dialog>
 

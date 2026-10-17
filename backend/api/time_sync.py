@@ -133,6 +133,11 @@ async def host_clock(
         "server": server,
         "service_ok": clock_status.service_ok(host),
         "measured": _measured(host),
+        # How far the last figure can be trusted (2026-10-17: an 8.06 s round
+        # trip read as "+4.03 s ahead" on a synchronized host).
+        "measurement": clock_status.measurement_note(
+            db, host, bounds, datetime.now(timezone.utc).replace(tzinfo=None)
+        ),
         "time_service": (
             None
             if host.time_status_at is None
@@ -152,6 +157,7 @@ async def host_clock(
                 "offset_ms": s.offset_ms,
                 "rtt_ms": s.rtt_ms,
                 "method": s.method,
+                "uncertain": clock_status.too_uncertain(s.method, s.rtt_ms, bounds),
             }
             for s in history
         ],

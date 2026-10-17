@@ -1769,7 +1769,13 @@
     "wslEnableFailed": "Fehler beim Aktivieren von WSL",
     "wslEnabledRebootRequired": "WSL wurde aktiviert. Ein Neustart ist erforderlich, um die Installation abzuschließen.",
     "wslEnabledSuccess": "WSL wurde erfolgreich aktiviert.",
-    "advisorTab": "Berater"
+    "advisorTab": "Berater",
+    "heldCommands": "{{count}} Befehle warten auf das Wartungsfenster „{{name}}“, das um {{time}} öffnet.",
+    "heldCommands_one": "{{count}} Befehl wartet auf das Wartungsfenster „{{name}}“, das um {{time}} öffnet.",
+    "heldCommands_other": "{{count}} Befehle warten auf das Wartungsfenster „{{name}}“, das um {{time}} öffnet.",
+    "heldCommandsBlackout": "{{count}} Befehle warten auf das Ende der Sperrzeit „{{name}}“.",
+    "heldCommandsBlackout_one": "{{count}} Befehl wartet auf das Ende der Sperrzeit „{{name}}“.",
+    "heldCommandsBlackout_other": "{{count}} Befehle warten auf das Ende der Sperrzeit „{{name}}“."
   },
   "hostGroup": {
     "add": "Hinzufügen",
@@ -1913,7 +1919,9 @@
     "confirmReenroll": "Agent dieses Hosts neu registrieren?",
     "confirmReenrollMessage": "Dies löscht die Agent-Anmeldedaten von {{hostname}} und setzt den Host auf ausstehende Genehmigung zurück. Verwenden Sie es, wenn der Agent neu installiert wurde und seine Anmeldedaten verloren hat: Der nächste Agent, der sich als dieser Host verbindet, erhält neue, und nichts, was er sendet, wird angenommen, bis Sie den Host erneut genehmigen.",
     "reenrollDone": "Anmeldedaten gelöscht. Genehmigen Sie den Host erneut, sobald sich sein Agent wieder verbindet.",
-    "reenrollFailed": "Fehler beim Neuregistrieren des Hosts"
+    "reenrollFailed": "Fehler beim Neuregistrieren des Hosts",
+    "heldCount": "Zurückgehalten: {{count}}",
+    "heldTitle": "Befehle warten auf ein Wartungsfenster"
   },
   "idp": {
     "action": {
@@ -2179,7 +2187,51 @@
     "timezone": "Zeitzone",
     "title": "Wartungsfenster",
     "unrestrictedHint": "Kein Wartungsfenster geltend - Änderungen werden sofort ausgeführt.",
-    "updated": "Wartungsfenster aktualisiert"
+    "updated": "Wartungsfenster aktualisiert",
+    "overrideFailed": "Die Ausnahme konnte nicht erstellt werden.",
+    "pendingNextWindow": "Wartet auf das nächste Wartungsfenster („{{name}}“, öffnet {{time}}).",
+    "pendingBlackout": "Ausstehend: Die Sperrzeit „{{name}}“ ist aktiv.",
+    "held": {
+      "cmd": {
+        "unknown": "Befehl",
+        "applyUpdates": "Updates anwenden",
+        "deploymentPlan": "Bereitstellungsplan",
+        "proAttach": "Ubuntu Pro anbinden",
+        "proDetach": "Ubuntu Pro trennen",
+        "proEnable": "Ubuntu Pro: Dienst aktivieren",
+        "proDisable": "Ubuntu Pro: Dienst deaktivieren",
+        "reboot": "Neustart",
+        "shutdown": "Herunterfahren",
+        "restartService": "Dienst neu starten",
+        "runScript": "Skript ausführen",
+        "updateAgent": "Agent aktualisieren",
+        "collectPackages": "Paketliste aktualisieren",
+        "networkDiscovery": "Netzwerkerkennung konfigurieren",
+        "queryPack": "Fakten erfassen"
+      },
+      "packagesMore": "{{names}} (+{{more}})",
+      "releasedBy": "„{{name}}“ um {{time}}",
+      "afterBlackout": "Wenn die Sperrzeit „{{name}}“ endet",
+      "nextCheck": "Bei der nächsten Prüfung",
+      "loadFailed": "Die zurückgehaltenen Befehle konnten nicht geladen werden.",
+      "cancelFailed": "Der Befehl konnte nicht abgebrochen werden.",
+      "title": "Zurückgehaltene Befehle",
+      "intro": "Befehle, die auf ein Wartungsfenster warten. Sie laufen, wenn das Fenster öffnet, oder sofort, wenn Sie den Host freigeben.",
+      "none": "Keine Befehle warten auf ein Fenster.",
+      "col": {
+        "host": "Host",
+        "command": "Befehl",
+        "queued": "Wartet seit",
+        "runs": "Wird ausgeführt",
+        "expires": "Läuft ab",
+        "actions": "Aktionen"
+      },
+      "release": "Host jetzt freigeben",
+      "cancel": "Befehl abbrechen",
+      "cancelTitle": "Diesen Befehl abbrechen?",
+      "cancelExplain": "Er wird nicht ausgeführt. Dies wird protokolliert.",
+      "keep": "Behalten"
+    }
   },
   "map": {
     "errorLoadHosts": "Host-Locations laden fehlgeschlagen.",
@@ -3171,7 +3223,13 @@
     "today": "Heute",
     "unknown": "Unbekannt",
     "version": "Version",
-    "yesterday": "Gestern"
+    "yesterday": "Gestern",
+    "deployingAntivirus": "Wird bereitgestellt...",
+    "removingAntivirus": "Wird entfernt...",
+    "enablingAntivirus": "Wird aktiviert...",
+    "disablingAntivirus": "Wird deaktiviert...",
+    "awaitingAgent": "Warten, bis der Agent die Änderung meldet. Das kann einige Minuten dauern.",
+    "agentNotConfirmed": "Der Agent hat die Änderung noch nicht bestätigt. Möglicherweise arbeitet er noch; prüfen Sie den Host später erneut."
   },
   "serverDown": {
     "attempts": "Versuche: {{count}}",
@@ -4374,7 +4432,9 @@
       "seenBy": "Gesehen von",
       "selectAll": "Alle auswählen",
       "status": "Zustand",
-      "maybe": "Vielleicht: {{type}}"
+      "maybe": "Vielleicht: {{type}}",
+      "searchesFor": "Sucht nach: {{what}}",
+      "searchesForHint": "Wonach dieses Gerät im Netzwerk gesucht hat (SSDP-Suche). Das beschreibt, was das Gerät sucht, nicht was es ist."
     },
     "tabs": {
       "excluded": "Bekannt und unbedenklich",
@@ -4446,7 +4506,17 @@
       "legNotRun_one": "{{leg}} wurde auf {{count}} Host nicht ausgeführt: {{reason}}",
       "legNotRun_other": "{{leg}} wurde auf {{count}} Hosts nicht ausgeführt: {{reason}}",
       "rulesShort_one": "Auf {{count}} Host hat ClamAV weniger Regeln geladen, als übergeben wurden",
-      "rulesShort_other": "Auf {{count}} Hosts hat ClamAV weniger Regeln geladen, als übergeben wurden"
+      "rulesShort_other": "Auf {{count}} Hosts hat ClamAV weniger Regeln geladen, als übergeben wurden",
+      "more": "und {{count}} weitere",
+      "more_one": "und {{count}} weiterer",
+      "more_other": "und {{count}} weitere",
+      "deployAntivirus": "Antivirus bereitstellen",
+      "scanNow": "Jetzt scannen",
+      "actionFailed": "Die Anfrage konnte nicht gesendet werden.",
+      "noPermission": "Ihnen fehlt die dafür nötige Rolle.",
+      "deployRequested": "Antivirus-Bereitstellung für {{count}} Hosts angefordert",
+      "deployRequested_one": "Antivirus-Bereitstellung für {{count}} Host angefordert",
+      "deployRequested_other": "Antivirus-Bereitstellung für {{count}} Hosts angefordert"
     },
     "counts": {
       "feed": "Regel-Feed: {{title}} v{{version}}, {{count}} Regeln",
@@ -4858,7 +4928,13 @@
       "stratum": "Stratum",
       "synchronized": "Synchronisiert",
       "title": "Uhr",
-      "yes": "Ja"
+      "yes": "Ja",
+      "uncertain": "Unsicher: Der letzte Austausch dauerte {{roundTrip}}, daher lässt sich die Abweichung der Uhr nicht genauer als {{error}} messen.",
+      "uncertainServiceVouches": "Der Zeitdienst des Hosts meldet, dass er synchronisiert ist.",
+      "judgedFrom": "Der Status stammt aus der Messung vom {{time}}: {{offset}}.",
+      "uncertainPoints": "{{count}} Messungen, die zu unsicher für eine Bewertung sind, werden nicht dargestellt.",
+      "uncertainPoints_one": "{{count}} Messung, die zu unsicher für eine Bewertung ist, wird nicht dargestellt.",
+      "uncertainPoints_other": "{{count}} Messungen, die zu unsicher für eine Bewertung sind, werden nicht dargestellt."
     },
     "direction": {
       "ahead": "dem Server voraus",
@@ -4901,7 +4977,8 @@
       "serverClockOff": "Serveruhr weicht ab",
       "stale": "Keine aktuelle Messung",
       "unmeasured": "Nicht gemessen",
-      "warning": "Warnung"
+      "warning": "Warnung",
+      "uncertain": "Unsicher"
     },
     "statusHelp": {
       "critical": "Die gemessene Abweichung erreicht oder überschreitet den kritischen Grenzwert.",
@@ -4909,7 +4986,8 @@
       "serverClockOff": "Die Uhr des Servers selbst weicht von ihrer Referenz ab, daher werden die Uhren der Hosts erst bewertet, wenn sie korrigiert ist.",
       "stale": "Die letzte Messung ist älter als 30 Minuten. Der Host ist wahrscheinlich nicht verbunden.",
       "unmeasured": "Der Server hat diese Uhr noch nicht gemessen. Der Agent ist möglicherweise zu alt oder hat sich noch nicht verbunden.",
-      "warning": "Die gemessene Abweichung erreicht oder überschreitet den Warngrenzwert."
+      "warning": "Die gemessene Abweichung erreicht oder überschreitet den Warngrenzwert.",
+      "uncertain": "Der letzte Austausch hat zu lange gedauert, um die Abweichung innerhalb des Warngrenzwerts zu messen. Die Uhr wird erst nach einem schnelleren Austausch bewertet."
     },
     "title": "Zeitsynchronisierung",
     "unit": {

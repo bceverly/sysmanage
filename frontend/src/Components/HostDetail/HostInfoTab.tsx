@@ -47,6 +47,7 @@ import {
   getOpenTelemetryServiceLabel,
   getOpenTelemetryServiceColor,
 } from "./hostDetailHelpers";
+import AsyncButton from '../AsyncButton';
 
 interface HostTag {
   id: string;
@@ -150,14 +151,14 @@ const HostOpenTelemetryActions: React.FC<{
               {t("hostDetail.opentelemetryConnect", "Connect to Grafana")}
             </Button>
           )}
-        <Button
+        <AsyncButton
           variant="outlined"
           size="small"
           onClick={handleRemoveOpenTelemetry}
           disabled={openTelemetryLoading}
         >
           {t("hostDetail.opentelemetryRemove", "Remove OpenTelemetry")}
-        </Button>
+        </AsyncButton>
         {openTelemetryStatus.grafana_url && (
           <Button
             variant="outlined"
@@ -241,7 +242,7 @@ const HostOpenTelemetryCard: React.FC<{
                     hasPermissionSync(SecurityRoles.DEPLOY_OPENTELEMETRY) &&
                     host?.is_agent_privileged && (
                       <Grid size={{ xs: 12 }}>
-                        <Button
+                        <AsyncButton
                           variant="contained"
                           color="primary"
                           size="small"
@@ -256,7 +257,7 @@ const HostOpenTelemetryCard: React.FC<{
                                 "hostDetail.deployOpenTelemetry",
                                 "Deploy OpenTelemetry",
                               )}
-                        </Button>
+                        </AsyncButton>
                       </Grid>
                     )}
                   {openTelemetryStatus.deployed && (
@@ -740,7 +741,7 @@ const HostGraylogCard: React.FC<{
               )}
               {!graylogAttached && canAttachGraylog && graylogEligible && (
                 <Grid size={{ xs: 12 }}>
-                  <Button
+                  <AsyncButton
                     variant="contained"
                     color="primary"
                     size="small"
@@ -748,7 +749,7 @@ const HostGraylogCard: React.FC<{
                     disabled={graylogLoading}
                   >
                     {t("hostDetail.attachToGraylog", "Attach To Graylog")}
-                  </Button>
+                  </AsyncButton>
                 </Grid>
               )}
               {!canAttachGraylog && (
