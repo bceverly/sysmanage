@@ -56,7 +56,8 @@ type SortValue = string | number | number[] | null;
 function sortValue(device: DiscoveredDevice, key: SortKey): SortValue {
     switch (key) {
         case 'device':
-            return text(device.mac ?? device.last_ip ?? device.identity);
+            // The name it announces when it has one: that is what the cell shows.
+            return text(device.display_name ?? device.mac ?? device.last_ip ?? device.identity);
         case 'address':
             return ipSortKey(device.last_ip);
         case 'seenBy':

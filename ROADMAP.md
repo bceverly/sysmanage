@@ -15221,6 +15221,66 @@ client of one.
 
 **Estimated Size:** ~1,500 lines
 
+#### 31.5 Power resilience -- UPS health, configuration and orderly shutdown (Community / OSS monitoring; Pro+ / Enterprise orchestration)
+
+**Added 2026-10-17 (Bryan).** Track UPS health and support configuring it.
+Servers survive power loss only if the UPS is healthy AND each machine shuts
+down in time -- today SysManage sees neither.  Builds on 23.1 hardware
+health (same alerting, hardware page and dashboard card) and belongs here
+because an orderly power-loss shutdown is part of surviving a site outage.
+
+**Discover and read (Community / OSS)**
+- [ ] Agent detects the UPS stack per OS, read-only first: **NUT** (Network
+      UPS Tools: `upsc` against local or networked `upsd`, Linux and the
+      BSDs), **apcupsd** (`apcaccess`), Windows (WMI `Win32_Battery` /
+      the native UPS service), macOS (`pmset -g ps` / `-g batt` for USB
+      UPSes); USB HID UPSes with no daemon reported as "present, not
+      monitored" with the package to install
+- [ ] Per UPS: model, serial, firmware, status (online / on battery / low
+      battery / bypass / overload / replace battery), charge %, runtime
+      remaining, load %, input / output voltage and frequency, battery
+      voltage, temperature, last self-test result and date, battery
+      install / replacement date where the device reports it
+- [ ] Which hosts a UPS powers: the host its USB/serial cable is on, plus
+      NUT/apcupsd network clients (`upsmon` slaves) mapped to the same UPS,
+      so the server knows every machine that goes down with it
+- [ ] Network-managed UPSes and PDUs with no attached host (SNMP UPS-MIB /
+      APC PowerNet, read-only) polled by an agent on that network, reusing
+      the 21.6 discovery opt-in rules
+
+**Health and alerting (Community / OSS)**
+- [ ] UPS card on the host page and a fleet Power view; a dashboard card
+      (Phase 34) for UPSes on battery, needing a battery, or overloaded
+- [ ] Alerts through the existing alerting path: on battery, low runtime
+      (below the configured shutdown margin), replace battery, failed
+      self-test, overload, communication lost; on-battery events grouped
+      per UPS so one outage is one alert, not one per host
+- [ ] History: charge / runtime / load charts, outage log (start, duration,
+      lowest runtime reached), battery-health trend (runtime at a given
+      load over months) so aging batteries are flagged before they fail
+
+**Configuration (Pro+)**
+- [ ] Install and configure NUT / apcupsd through a deployment plan
+      (driver, `upsd`, `upsmon` server or client role, shutdown thresholds,
+      notify commands) -- previewed, backed up, audited, rollback (the
+      24.4 fix-it pattern)
+- [ ] Shutdown policy per host: shut down at N% charge or M minutes runtime,
+      ordered by role (VMs and child hosts first, then their hypervisor,
+      storage last), with a "this host keeps power on X% longer" warning
+      when a client is set to outlast its UPS
+- [ ] Scheduled self-tests and battery calibration, inside maintenance
+      windows (14.2)
+
+**Orderly fleet shutdown (Enterprise)**
+- [ ] On a sustained outage, shut down every host on the affected UPS in
+      dependency order across the fleet (child hosts, then hypervisors,
+      then NAS / databases), honoring each host's policy; dry-run mode that
+      shows the order; audit of every step; restart order documented
+- [ ] Ties into 31.3 DR: a site whose UPSes are all on battery can be
+      pre-emptively failed over before it goes dark
+
+- [ ] Docs page + screenshots via `make screenshots` + 14-language i18n
+
 ### Exit Criteria
 
 - [ ] **Kill an instance under load and lose nothing** -- with 3 servers behind
@@ -15451,8 +15511,25 @@ federation (`Host.site_id`) and are not offered to scans yet.
       site or segment (a WAN link or a small subnet must not take a fleet
       job's full parallelism)
 - [ ] Docs + 14-language i18n complete
-- [ ] **Device hostnames in Network Discovery** (added 2026-10-17, Bryan:
-      "detect hostname if the device advertises it").  `discovered_asset`
+- [x] **Device hostnames in Network Discovery** (added 2026-10-17, Bryan:
+      "detect hostname if the device advertises it").  **DONE 2026-10-17**
+      (pulled forward): agent `network_names.py` reads mDNS A/AAAA (own
+      address only), reverse-PTR and SRV targets (sleep-proxy answers
+      refused), DHCP options 12/81 keyed by `chaddr` (relayed requests
+      skipped), NetBIOS registrations/refreshes (unique host suffixes, own
+      address) and LLMNR responses; queries are never read as names.  New
+      methods `dhcp`/`netbios`/`llmnr`.  Reverse DNS runs only when the
+      server sends `name_lookups` (= the sweep opt-in; dispatch column
+      `q45discnames`), rate-limited, 1 s timeout, cached, and on sweep
+      results.  Engine `hostnames.pxi`: `{name, source, seen_at}` with
+      plain-string back-compat, trust order dhcp_fqdn > dhcp > mdns > ptr >
+      netbios > llmnr, MAC-less devices may match a managed host by short
+      name (reason `hostname`), names are low-confidence classification
+      hints.  Server exposes `display_name` + all names with source, search
+      matches names; grid shows Address before Device, the name over the
+      MAC/vendor, every name and source on hover, Device sorts by name.
+      NOT done (moved to the next item): UPnP `friendlyName`, NetBIOS
+      node-status, mDNS unicast query; docs page + screenshot.  `discovered_asset`
       already has `hostnames` and the engine merges them, but the agent never
       fills it: the collector keeps only mDNS *service* names and SSDP SERVER
       lines.  Read the names devices already announce, passive first:
@@ -15467,6 +15544,13 @@ federation (`Host.site_id`) and are not offered to scans yet.
         trustworthy shown in the grid (DHCP/mDNS over PTR over NetBIOS), all
         of them on the device detail; names are evidence for correlation only
         when a MAC is absent -- a MAC stays decisive (21.6 identity rule)
+- [ ] **Device hostnames: the remaining sources + docs** (split from the item
+      above, 2026-10-17): the UPnP `friendlyName` (one rate-limited GET of an
+      on-link SSDP LOCATION), NetBIOS node-status query and mDNS unicast query
+      (both active, behind the sweep opt-in); the Windows multicast-socket
+      fallback hears mDNS names only (DHCP/NetBIOS/LLMNR need raw capture);
+      sysmanage-docs Network Discovery page section + a `make screenshots`
+      capture of the grid with names.
 - [ ] **Standard-port probe of unmanaged devices** (added 2026-10-16, Bryan:
       "see what standard ports are open on the scanned unmanaged network
       devices").  Same rules as the 21.6 sweep, plus its own opt-in:

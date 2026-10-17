@@ -13,6 +13,9 @@ Contract (from the agent, on its discovery interval):
         "observations": [{"mac", "ip", "ips", "interface", "methods",
                           "count", "hostnames", "evidence"}],
     }
+    hostnames = [{"name", "source", "seen_at"}] from agents of 2026-10-17 on
+    (source: dhcp_fqdn | dhcp | mdns | ptr | netbios | llmnr); plain strings
+    from older ones.
 
 Routing only: ``asset_discovery_service`` stores, the licensed engine judges.
 Nothing is stored unless ``asset_discovery_engine`` is loaded. Never raises.

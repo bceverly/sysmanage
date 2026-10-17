@@ -30,7 +30,7 @@ import ipaddress
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-from sqlalchemy import func, or_
+from sqlalchemy import String, cast, func, or_
 
 from backend.i18n import _
 from backend.persistence.models import (
@@ -140,6 +140,8 @@ def list_devices(
             or_(
                 func.lower(DiscoveredAsset.identity).like(pattern),
                 func.lower(DiscoveredAsset.last_ip).like(pattern),
+                # The names it announces (a JSON list; matched as its text).
+                func.lower(cast(DiscoveredAsset.hostnames, String)).like(pattern),
             )
         )
     total = query.count()

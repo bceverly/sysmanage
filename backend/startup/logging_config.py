@@ -49,6 +49,9 @@ def _maybe_add_native_handler():
         )
 
 
+QUIET_HTTP_LOGGERS = ("httpx", "httpcore")
+
+
 def configure_logging():
     """Configure logging with UTC timestamp formatter and file/console handlers."""
     logger.debug("=== CONFIGURING LOGGING ===")
@@ -94,6 +97,13 @@ def configure_logging():
         )
     except Exception as e:
         logger.exception("Failed to create file handler: %s", e)
+
+    # httpx / httpcore log every request's FULL URL at INFO, query string
+    # included -- so a credential carried as a parameter (MaxMind's
+    # ``license_key=``) landed in the journal on every GeoLite2 refresh
+    # (production, 2026-10-17).  Our own code logs what it needs.
+    for noisy in QUIET_HTTP_LOGGERS:
+        logging.getLogger(noisy).setLevel(logging.WARNING)
 
     # Under pytest, skip the basicConfig + handler reconfiguration that
     # would override pytest.ini's log_level and re-introduce the import-time

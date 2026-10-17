@@ -152,9 +152,14 @@ def needs_send(host, sent: Optional[NetworkDiscoveryDispatch], policy) -> bool:
     if sent is None:
         # Never told: the agent's own default is OFF, so only "on" is news.
         return policy["enabled"]
-    if (bool(sent.enabled), sent.report_interval_seconds) != (
+    if (
+        bool(sent.enabled),
+        sent.report_interval_seconds,
+        bool(sent.name_lookups),
+    ) != (
         policy["enabled"],
         policy["report_interval_seconds"],
+        policy["sweep_enabled"],
     ):
         return True
     readvertised = getattr(host, "agent_capabilities_updated_at", None)
@@ -183,6 +188,10 @@ def _enqueue(db, host, policy) -> str:
             "parameters": {
                 "enabled": policy["enabled"],
                 "report_interval_seconds": policy["report_interval_seconds"],
+                # Reverse DNS for devices that announce no name: ACTIVE, so
+                # it rides the operator's active-discovery opt-in (the sweep
+                # switch).  Agents before 2026-10-17 ignore it.
+                "name_lookups": policy["sweep_enabled"],
             },
         },
     )
@@ -228,6 +237,7 @@ def reconcile(db, summary: Optional[Dict[str, int]] = None) -> Dict[str, int]:
             db.add(row)
         row.enabled = policy["enabled"]
         row.report_interval_seconds = policy["report_interval_seconds"]
+        row.name_lookups = policy["sweep_enabled"]
         row.command_id = command_id
         row.sent_at = now
         summary["queued"] += 1

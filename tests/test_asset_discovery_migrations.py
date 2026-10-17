@@ -153,10 +153,15 @@ def test_tenant_chain_creates_the_tables_and_the_orm_agrees():
                 r[1]
                 for r in conn.execute("PRAGMA table_info(network_discovery_policy)")
             }
+            dispatch_cols = {
+                r[1]
+                for r in conn.execute("PRAGMA table_info(network_discovery_dispatch)")
+            }
         finally:
             conn.close()
         assert {"vendor", "device_type", "classification"} <= cols  # q17 (S5)
         assert "retention_days" in policy_cols
+        assert "name_lookups" in dispatch_cols  # q45discnames (device hostnames)
 
         # Idempotent: re-running over existing tables is a no-op, and the role
         # is not seeded twice.

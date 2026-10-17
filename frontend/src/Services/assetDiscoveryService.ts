@@ -56,6 +56,16 @@ export interface Exclusion {
   last_seen_at?: string | null;
 }
 
+// A name the device uses, and how we learned it.  Most trustworthy first
+// (DHCP / mDNS, then reverse DNS, then NetBIOS / LLMNR); "unknown" marks a
+// name stored before sources were recorded (2026-10-17).
+export type HostnameSource = "dhcp_fqdn" | "dhcp" | "mdns" | "ptr" | "netbios" | "llmnr" | "unknown";
+export interface HostnameEntry {
+  name: string;
+  source: HostnameSource | string;
+  seen_at: string | null;
+}
+
 export interface DiscoveredDevice {
   id: string;
   identity: string;
@@ -64,7 +74,9 @@ export interface DiscoveredDevice {
   mac_locally_administered: boolean;
   last_ip: string | null;
   ips: string[];
-  hostnames: string[];
+  hostnames: HostnameEntry[];
+  // hostnames[0].name -- the name the grid shows; null when it announced none.
+  display_name?: string | null;
   // ssdp = what the device says it IS; ssdp_searches = what it searched for
   // (SSDP M-SEARCH), sent by agents from 2026-10-17 -- never identity.
   evidence: { mdns_services?: string[]; ssdp?: string[]; ssdp_searches?: string[] };

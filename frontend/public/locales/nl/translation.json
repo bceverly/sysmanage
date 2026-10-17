@@ -4395,7 +4395,10 @@
       "mdns": "mDNS",
       "ndListen": "IPv6-buurdetectie",
       "ssdp": "SSDP",
-      "sweep": "Actieve sweep"
+      "sweep": "Actieve sweep",
+      "dhcp": "DHCP",
+      "netbios": "NetBIOS",
+      "llmnr": "LLMNR"
     },
     "policy": {
       "enabled": "Agents luisteren naar apparaten op hun netwerken",
@@ -4409,7 +4412,8 @@
       "days": "{{count}} dagen",
       "days_other": "{{count}} dagen",
       "days_one": "{{count}} dag",
-      "retention": "Apparaten vergeten die niet gezien zijn gedurende"
+      "retention": "Apparaten vergeten die niet gezien zijn gedurende",
+      "sweepsHelp": "Operators mogen een netwerk verkennen op stille apparaten, en agents mogen de namen opzoeken van apparaten die er zelf geen bekendmaken (omgekeerde DNS)."
     },
     "revoke": {
       "confirm": "Intrekken",
@@ -4434,7 +4438,9 @@
       "status": "Toestand",
       "maybe": "Misschien: {{type}}",
       "searchesFor": "Zoekt naar: {{what}}",
-      "searchesForHint": "Waar dit apparaat op het netwerk naar zocht (SSDP-zoekopdracht). Het beschrijft wat het apparaat zoekt, niet wat het is."
+      "searchesForHint": "Waar dit apparaat op het netwerk naar zocht (SSDP-zoekopdracht). Het beschrijft wat het apparaat zoekt, niet wat het is.",
+      "names": "Namen die dit apparaat gebruikt",
+      "nameSeen": "{{source}}, laatst gezien {{when}}"
     },
     "tabs": {
       "excluded": "Bekend en in orde",
@@ -4490,6 +4496,15 @@
       "unknown": "Onbekend",
       "virtualAddress": "Virtueel routeradres",
       "virtualMachine": "Virtuele machine"
+    },
+    "nameSource": {
+      "mdns": "mDNS",
+      "netbios": "NetBIOS",
+      "llmnr": "LLMNR",
+      "dhcpFqdn": "DHCP (client-FQDN)",
+      "dhcp": "DHCP (hostnaam)",
+      "ptr": "Omgekeerde DNS",
+      "unknown": "Gemeld door een oudere agent"
     }
   },
   "malware": {
@@ -4846,7 +4861,8 @@
       "placeholder": "De firmware op deze hardware bevat een plaatsaanduiding UUID, dus het kan niet van andere machines worden onderscheiden.",
       "title": "Geen apparaat geïdentificeerd",
       "unknown": "Deze host is nog niet aan een machine gekoppeld.",
-      "unprivileged": "De agent heeft privileged modus nodig om de hardware-identiteit op dit besturingssysteem te lezen."
+      "unprivileged": "De agent draait niet als root en kan sudo niet gebruiken, dus kan hij de hardware-identiteit op dit besturingssysteem niet lezen.",
+      "needsSudoRule": "De sudo-regels van de agent staan het lezen van de hardware-identiteit niet toe. Werk het agentpakket bij om de huidige regels te installeren."
     },
     "noOtherHosts": "Geen ander besturingssysteem op dit apparaat heeft zich gemeld.",
     "notAvailable": "Niet beschikbaar",

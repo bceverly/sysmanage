@@ -10,7 +10,7 @@
 import axiosInstance from "./api";
 
 /** Per-source outcome of reading the hardware identity on the host. */
-export type IdentitySourceStatus = "ran" | "absent" | "unprivileged" | "failed" | "placeholder";
+export type IdentitySourceStatus = "ran" | "absent" | "unprivileged" | "needs_sudo_rule" | "failed" | "placeholder";
 
 export interface MachineSummary {
   id: string;

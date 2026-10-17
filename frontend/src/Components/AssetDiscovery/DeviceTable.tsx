@@ -3,7 +3,8 @@
 // See the LICENSE file in the project root for the full terms.
 
 // The discovered devices, with what each one says about itself and who saw
-// it (Phase 21.6 S3).  Columns sort on click (deviceSort.ts).  A plain MUI table rather than a DataGrid: bulk
+// it (Phase 21.6 S3).  Address first, then the device by the name it announces
+// (2026-10-17).  Columns sort on click (deviceSort.ts).  A plain MUI table rather than a DataGrid: bulk
 // selection is simple here, and a DataGrid does not render in jsdom tests.
 
 import React from 'react';
@@ -23,7 +24,7 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { DiscoveredDevice } from '../../Services/assetDiscoveryService';
-import { categoryLabel, deviceTypeLabel, formatSeen } from './discoveryLabels';
+import { categoryLabel, deviceTypeLabel, formatSeen, nameSourceLabel } from './discoveryLabels';
 import { sortDevices, type SortDirection, type SortKey } from './deviceSort';
 
 interface Props {
@@ -65,7 +66,6 @@ const Evidence: React.FC<{ device: DiscoveredDevice }> = ({ device }) => {
     const { t } = useTranslation();
     const { identity, searches } = splitSsdp(device);
     const items = [
-        ...device.hostnames,
         ...(device.evidence.mdns_services ?? []),
         ...identity,
     ];
@@ -114,11 +114,43 @@ const LooksLike: React.FC<{ device: DiscoveredDevice }> = ({ device }) => {
     );
 };
 
+// The name the device announces, with every name and its source on hover.
+const DeviceName: React.FC<{ device: DiscoveredDevice; name: string }> = ({ device, name }) => {
+    const { t } = useTranslation();
+    const title = (
+        <Box data-testid="device-names">
+            <Typography variant="caption" display="block" sx={{ fontWeight: 600 }}>
+                {t('assetDiscovery.table.names', 'Names this device uses')}
+            </Typography>
+            {device.hostnames.map(entry => (
+                <Typography key={`${entry.source}:${entry.name}`} variant="caption" display="block">
+                    {entry.name}{' '}
+                    ({entry.seen_at
+                        ? t('assetDiscovery.table.nameSeen', '{{source}}, last seen {{when}}', {
+                            source: nameSourceLabel(t, entry.source), when: formatSeen(entry.seen_at),
+                        })
+                        : nameSourceLabel(t, entry.source)})
+                </Typography>
+            ))}
+        </Box>
+    );
+    return (
+        <Tooltip title={title}>
+            <Typography variant="body2" sx={{ fontWeight: 600, wordBreak: 'break-all' }} data-testid="device-name">
+                {name}
+            </Typography>
+        </Tooltip>
+    );
+};
+
 const Identity: React.FC<{ device: DiscoveredDevice }> = ({ device }) => {
     const { t } = useTranslation();
+    const name = device.display_name ?? device.hostnames[0]?.name ?? null;
     return (
         <Box>
-            <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+            {name && <DeviceName device={device} name={name} />}
+            <Typography variant={name ? 'caption' : 'body2'} display="block"
+                color={name ? 'text.secondary' : undefined} sx={{ fontFamily: 'monospace' }}>
                 {device.mac ?? device.last_ip ?? device.identity}
             </Typography>
             {device.vendor && (
@@ -207,8 +239,8 @@ const DeviceTable: React.FC<Props> = ({ devices, selectable, selected, onToggle,
                                 slotProps={{ input: { 'aria-label': t('assetDiscovery.table.selectAll', 'Select all') } }} />
                         </TableCell>
                     )}
-                    <SortHeader column="device" sort={sort} onSort={onSort}>{t('assetDiscovery.table.device', 'Device')}</SortHeader>
                     <SortHeader column="address" sort={sort} onSort={onSort}>{t('assetDiscovery.table.address', 'Address')}</SortHeader>
+                    <SortHeader column="device" sort={sort} onSort={onSort}>{t('assetDiscovery.table.device', 'Device')}</SortHeader>
                     <TableCell>{t('assetDiscovery.table.evidence', 'What it says it is')}</TableCell>
                     <SortHeader column="seenBy" sort={sort} onSort={onSort}>{t('assetDiscovery.table.seenBy', 'Seen by')}</SortHeader>
                     <SortHeader column="lastSeen" sort={sort} onSort={onSort}>{t('assetDiscovery.table.lastSeen', 'Last seen')}</SortHeader>
@@ -224,11 +256,11 @@ const DeviceTable: React.FC<Props> = ({ devices, selectable, selected, onToggle,
                                     slotProps={{ input: { 'aria-label': device.identity } }} />
                             </TableCell>
                         )}
-                        <TableCell><Identity device={device} /></TableCell>
                         <TableCell>
                             <Typography variant="body2">{device.last_ip ?? '-'}</Typography>
                             <Typography variant="caption" color="text.secondary">{device.networks.join(', ')}</Typography>
                         </TableCell>
+                        <TableCell><Identity device={device} /></TableCell>
                         <TableCell><Evidence device={device} /></TableCell>
                         <TableCell><Typography variant="body2">{device.observers.join(', ') || '-'}</Typography></TableCell>
                         <TableCell><Typography variant="body2">{formatSeen(device.last_seen_at)}</Typography></TableCell>

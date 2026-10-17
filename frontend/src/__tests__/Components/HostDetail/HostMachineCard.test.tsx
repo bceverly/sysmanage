@@ -143,7 +143,10 @@ describe("HostMachineCard", () => {
   });
 
   test.each([
-    [{ system_uuid: "unprivileged" as const }, "2026-10-01T00:00:00Z", /needs privileged mode/],
+    [{ system_uuid: "unprivileged" as const }, "2026-10-01T00:00:00Z", /cannot use sudo/],
+    // A sudo-privileged packaged agent whose sudo rules predate the identity
+    // reads: say what to do, not "needs privileged mode" (2026-10-17).
+    [{ system_uuid: "needs_sudo_rule" as const }, "2026-10-01T00:00:00Z", /Upgrade the agent package/],
     [{ system_uuid: "placeholder" as const }, "2026-10-01T00:00:00Z", /placeholder UUID/],
     [{ system_uuid: "failed" as const }, "2026-10-01T00:00:00Z", /read failed/],
     [

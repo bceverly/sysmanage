@@ -4395,7 +4395,10 @@
       "mdns": "mDNS",
       "ndListen": "IPv6 이웃 탐색",
       "ssdp": "SSDP",
-      "sweep": "능동 스캔"
+      "sweep": "능동 스캔",
+      "dhcp": "DHCP",
+      "netbios": "NetBIOS",
+      "llmnr": "LLMNR"
     },
     "policy": {
       "enabled": "에이전트가 네트워크에서 장치를 수신 대기합니다",
@@ -4409,7 +4412,8 @@
       "days": "{{count}}일",
       "days_other": "{{count}}일",
       "days_one": "{{count}}일",
-      "retention": "보이지 않은 장치를 잊기까지의 기간"
+      "retention": "보이지 않은 장치를 잊기까지의 기간",
+      "sweepsHelp": "운영자는 네트워크를 스캔하여 통신하지 않는 장치를 찾을 수 있으며, 에이전트는 이름을 알리지 않는 장치의 이름을 조회할 수 있습니다 (역방향 DNS)."
     },
     "revoke": {
       "confirm": "취소",
@@ -4434,7 +4438,9 @@
       "status": "상태",
       "maybe": "아마도: {{type}}",
       "searchesFor": "검색 대상: {{what}}",
-      "searchesForHint": "이 장치가 네트워크에서 찾던 대상입니다 (SSDP 검색). 장치가 무엇인지가 아니라 무엇을 찾고 있는지를 나타냅니다."
+      "searchesForHint": "이 장치가 네트워크에서 찾던 대상입니다 (SSDP 검색). 장치가 무엇인지가 아니라 무엇을 찾고 있는지를 나타냅니다.",
+      "names": "이 장치가 사용하는 이름",
+      "nameSeen": "{{source}}, 마지막 확인 {{when}}"
     },
     "tabs": {
       "excluded": "알고 있고 양호함",
@@ -4490,6 +4496,15 @@
       "unknown": "알 수 없음",
       "virtualAddress": "가상 라우터 주소",
       "virtualMachine": "가상 머신"
+    },
+    "nameSource": {
+      "mdns": "mDNS",
+      "netbios": "NetBIOS",
+      "llmnr": "LLMNR",
+      "dhcpFqdn": "DHCP (클라이언트 FQDN)",
+      "dhcp": "DHCP (호스트 이름)",
+      "ptr": "역방향 DNS",
+      "unknown": "이전 에이전트가 보고함"
     }
   },
   "malware": {
@@ -4846,7 +4861,8 @@
       "placeholder": "이 하드웨어는 플레이스홀더 UUID를 포함하는 펌웨어를 가지고 있으므로 다른 머신과 구별할 수 없습니다.",
       "title": "식별된 기계가 없습니다",
       "unknown": "이 호스트는 아직 머신과 연결되지 않았습니다.",
-      "unprivileged": "이 OS에서 에이전트는 하드웨어 식별 정보를 읽기 위해 관리자 권한이 필요합니다."
+      "unprivileged": "에이전트가 root로 실행되지 않고 sudo도 사용할 수 없으므로 이 OS에서 하드웨어 ID를 읽을 수 없습니다.",
+      "needsSudoRule": "에이전트의 sudo 규칙이 하드웨어 ID 읽기를 허용하지 않습니다. 에이전트 패키지를 업그레이드하여 최신 규칙을 설치하세요."
     },
     "noOtherHosts": "이 기계의 다른 운영 체제가 보고하지 않았습니다.",
     "notAvailable": "사용 불가",

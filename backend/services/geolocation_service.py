@@ -438,7 +438,13 @@ _MAX_EXTRACT_BYTES = 512 * 1024 * 1024  # 512 MB
 def _download_maxmind_tarball(url: str, db_dir: str) -> Optional[str]:
     """Stream the MaxMind tarball to a temp file; return its path or None."""
     try:
-        with httpx.stream("GET", url, timeout=_DOWNLOAD_TIMEOUT_SECONDS) as response:
+        # MaxMind answers the download URL with a 302 to short-lived signed
+        # storage; without following it every refresh failed ("HTTP 302;
+        # keeping existing DB", production 2026-10-17) and no database ever
+        # arrived.  The redirect target carries no license key.
+        with httpx.stream(
+            "GET", url, timeout=_DOWNLOAD_TIMEOUT_SECONDS, follow_redirects=True
+        ) as response:
             if response.status_code != 200:
                 logger.warning(
                     "MaxMind download returned HTTP %d; keeping existing DB",
@@ -452,7 +458,9 @@ def _download_maxmind_tarball(url: str, db_dir: str) -> Optional[str]:
                     tmp_tarball.write(chunk)
                 return tmp_tarball.name
     except (httpx.RequestError, httpx.TimeoutException) as exc:
-        logger.warning("MaxMind download network error: %s", exc)
+        # The exception text can include the request URL -- and with it the
+        # license key; log the kind of failure only.
+        logger.warning("MaxMind download network error: %s", type(exc).__name__)
         return None
 
 

@@ -17,6 +17,7 @@ import {
     Select,
     Stack,
     Switch,
+    Tooltip,
     Typography,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -72,9 +73,12 @@ const DiscoveryPolicyCard: React.FC<Props> = ({ policy, canManage, onSave }) => 
                             ))}
                         </Select>
                     </FormControl>
-                    <FormControlLabel
-                        control={<Switch checked={sweeps} disabled={!canManage || !enabled} onChange={e => setSweeps(e.target.checked)} />}
-                        label={t('assetDiscovery.policy.sweeps', 'Allow active sweeps')} />
+                    <Tooltip title={t('assetDiscovery.policy.sweepsHelp',
+                        'Operators may sweep a network for silent devices, and agents may look up the names of devices that announce none (reverse DNS).')}>
+                        <FormControlLabel
+                            control={<Switch checked={sweeps} disabled={!canManage || !enabled} onChange={e => setSweeps(e.target.checked)} />}
+                            label={t('assetDiscovery.policy.sweeps', 'Allow active sweeps')} />
+                    </Tooltip>
                     {canManage && (
                         <Button variant="contained" disabled={!dirty || busy}
                             onClick={async () => { setBusy(true); try { await onSave(enabled, intervalSeconds, sweeps, retention); } finally { setBusy(false); } }}>

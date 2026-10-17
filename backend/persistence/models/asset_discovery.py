@@ -56,6 +56,28 @@ def _utcnow():
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
+def hostname_entries(raw):
+    """``hostnames`` as ``[{"name", "source", "seen_at"}]``, whatever was stored.
+
+    The engine stores them most trustworthy first (DHCP / mDNS, then reverse
+    DNS, then NetBIOS / LLMNR), so ``[0]`` is the display name.  Rows from
+    before 2026-10-17 hold plain strings: shown with source ``unknown``.
+    """
+    out = []
+    for item in raw or []:
+        if isinstance(item, str):
+            out.append({"name": item, "source": "unknown", "seen_at": None})
+        elif isinstance(item, dict) and isinstance(item.get("name"), str):
+            out.append(
+                {
+                    "name": item["name"],
+                    "source": item.get("source") or "unknown",
+                    "seen_at": item.get("seen_at"),
+                }
+            )
+    return out
+
+
 class DiscoveredAsset(Base):
     """One device seen on a segment, managed or not."""
 
@@ -69,7 +91,8 @@ class DiscoveredAsset(Base):
     mac_locally_administered = Column(Boolean, nullable=False, default=False)
     last_ip = Column(String(45), nullable=True)
     ips = Column(JSON, nullable=True)  # most recent first, bounded
-    hostnames = Column(JSON, nullable=True)  # mDNS names, bounded
+    # [{"name", "source", "seen_at"}], most trustworthy first (engine order).
+    hostnames = Column(JSON, nullable=True)
     # {"mdns_services": [...], "ssdp": [...]} -- what the device says it is.
     evidence = Column(JSON, nullable=True)
     methods = Column(JSON, nullable=True)  # every method that has seen it
@@ -91,6 +114,7 @@ class DiscoveredAsset(Base):
     last_seen_at = Column(DateTime, nullable=False, default=_utcnow, index=True)
 
     def to_dict(self):
+        names = hostname_entries(self.hostnames)
         return {
             "id": str(self.id),
             "identity": self.identity,
@@ -99,7 +123,8 @@ class DiscoveredAsset(Base):
             "mac_locally_administered": bool(self.mac_locally_administered),
             "last_ip": self.last_ip,
             "ips": self.ips or [],
-            "hostnames": self.hostnames or [],
+            "hostnames": names,
+            "display_name": names[0]["name"] if names else None,
             "evidence": self.evidence or {},
             "methods": self.methods or [],
             "vendor": self.vendor,
@@ -232,6 +257,10 @@ class NetworkDiscoveryDispatch(Base):
     )
     enabled = Column(Boolean, nullable=False)
     report_interval_seconds = Column(Integer, nullable=False)
+    # Was the agent told it may do reverse-DNS lookups (the sweep opt-in)?
+    name_lookups = Column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
     command_id = Column(String(36), nullable=True)
     sent_at = Column(DateTime, nullable=False, default=_utcnow)
 

@@ -26,12 +26,13 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, List, Optional
 
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 from sqlalchemy.exc import IntegrityError
 
 from backend.persistence.models import (
     DiscoveredAsset,
     DiscoveredAssetSighting,
+    Host,
     NetworkDiscoveryObserver,
     NetworkInterface,
 )
@@ -89,7 +90,7 @@ def _fleet_rows(db, keys: Dict[str, List[str]]) -> List[Dict[str, Any]]:
             )
             .all()
         )
-    return [
+    out = [
         {
             "host_id": str(r.host_id),
             "mac_address": r.mac_address,
@@ -98,6 +99,24 @@ def _fleet_rows(db, keys: Dict[str, List[str]]) -> List[Dict[str, Any]]:
         }
         for r in rows
     ]
+    return out + _hosts_named(db, keys.get("names") or [])
+
+
+def _hosts_named(db, names: List[str]) -> List[Dict[str, Any]]:
+    """Managed hosts whose FQDN starts with one of ``names`` (short, lower).
+
+    Only devices seen WITHOUT a MAC produce names (the engine decides), so
+    this is a handful of lookups per report, not the fleet.
+    """
+    rows = []
+    fqdn = func.lower(Host.fqdn)
+    for chunk in _chunks(names):
+        rows += (
+            db.query(Host.id, Host.fqdn)
+            .filter(or_(fqdn.in_(chunk), *[fqdn.like(name + ".%") for name in chunk]))
+            .all()
+        )
+    return [{"host_id": str(r.id), "fqdn": r.fqdn} for r in rows]
 
 
 def _existing_assets(db, identities: List[str]) -> Dict[str, DiscoveredAsset]:
@@ -294,9 +313,13 @@ def recorrelate_host(db, host_id: Any) -> int:
     assets = _candidates(db, host_uuid, engine)
     if not assets:
         return 0
+    # Names too: a device matched BY NAME (no MAC seen) must not be
+    # un-matched just because this host re-reported its hardware.
     observations = [
-        {"mac": a.mac, "ips": list(a.ips or []), "identity": a.identity} for a in assets
-    ]
+        {"mac": a.mac, "ips": list(a.ips or []), "identity": a.identity,
+         "hostnames": list(a.hostnames or [])}
+        for a in assets
+    ]  # fmt: skip
     fleet = engine.build_fleet_index(_fleet_rows(db, engine.lookup_keys(observations)))
     now = _utcnow()
     changed = 0

@@ -4395,7 +4395,10 @@
       "mdns": "mDNS",
       "ndListen": "Rilevamento dei vicini IPv6",
       "ssdp": "SSDP",
-      "sweep": "Scansione attiva"
+      "sweep": "Scansione attiva",
+      "dhcp": "DHCP",
+      "netbios": "NetBIOS",
+      "llmnr": "LLMNR"
     },
     "policy": {
       "enabled": "Gli agenti restano in ascolto dei dispositivi sulle proprie reti",
@@ -4409,7 +4412,8 @@
       "days": "{{count}} giorni",
       "days_other": "{{count}} giorni",
       "days_one": "{{count}} giorno",
-      "retention": "Dimentica i dispositivi non visti da"
+      "retention": "Dimentica i dispositivi non visti da",
+      "sweepsHelp": "Gli operatori possono scansionare una rete alla ricerca di dispositivi silenziosi, e gli agenti possono cercare i nomi dei dispositivi che non ne annunciano alcuno (DNS inverso)."
     },
     "revoke": {
       "confirm": "Revoca",
@@ -4434,7 +4438,9 @@
       "status": "Stato",
       "maybe": "Forse: {{type}}",
       "searchesFor": "Cerca: {{what}}",
-      "searchesForHint": "Ciò che questo dispositivo ha cercato sulla rete (ricerca SSDP). Descrive ciò che il dispositivo cerca, non ciò che è."
+      "searchesForHint": "Ciò che questo dispositivo ha cercato sulla rete (ricerca SSDP). Descrive ciò che il dispositivo cerca, non ciò che è.",
+      "names": "Nomi usati da questo dispositivo",
+      "nameSeen": "{{source}}, ultimo rilevamento {{when}}"
     },
     "tabs": {
       "excluded": "Noti e accettati",
@@ -4490,6 +4496,15 @@
       "unknown": "Sconosciuto",
       "virtualAddress": "Indirizzo di router virtuale",
       "virtualMachine": "Macchina virtuale"
+    },
+    "nameSource": {
+      "mdns": "mDNS",
+      "netbios": "NetBIOS",
+      "llmnr": "LLMNR",
+      "dhcpFqdn": "DHCP (FQDN del client)",
+      "dhcp": "DHCP (nome host)",
+      "ptr": "DNS inverso",
+      "unknown": "Segnalato da un agente meno recente"
     }
   },
   "malware": {
@@ -4846,7 +4861,8 @@
       "placeholder": "Il firmware di questo hardware include un UUID di placeholder, quindi non può essere distinto da altre macchine.",
       "title": "Nessuna macchina identificata",
       "unknown": "Questo host non è ancora collegato a una macchina.",
-      "unprivileged": "L'agente necessita del modo privilegiato per leggere l'identità hardware su questo OS."
+      "unprivileged": "L'agente non è in esecuzione come root e non può usare sudo, quindi non può leggere l'identità hardware su questo sistema operativo.",
+      "needsSudoRule": "Le regole sudo dell'agente non consentono di leggere l'identità hardware. Aggiorna il pacchetto dell'agente per installare le regole attuali."
     },
     "noOtherHosts": "Nessun altro sistema operativo su questa macchina ha segnalato la sua presenza.",
     "notAvailable": "Non disponibile",

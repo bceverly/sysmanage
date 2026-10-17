@@ -4395,7 +4395,10 @@
       "mdns": "mDNS",
       "ndListen": "IPv6 neighbor discovery",
       "ssdp": "SSDP",
-      "sweep": "Active sweep"
+      "sweep": "Active sweep",
+      "dhcp": "DHCP",
+      "netbios": "NetBIOS",
+      "llmnr": "LLMNR"
     },
     "policy": {
       "enabled": "Agents listen for devices on their networks",
@@ -4409,7 +4412,8 @@
       "days": "{{count}} days",
       "days_other": "{{count}} days",
       "days_one": "{{count}} day",
-      "retention": "Forget devices not seen for"
+      "retention": "Forget devices not seen for",
+      "sweepsHelp": "Operators may sweep a network for silent devices, and agents may look up the names of devices that announce none (reverse DNS)."
     },
     "revoke": {
       "confirm": "Revoke",
@@ -4434,7 +4438,9 @@
       "status": "Status",
       "maybe": "Maybe: {{type}}",
       "searchesFor": "Searches for: {{what}}",
-      "searchesForHint": "What this device looked for on the network (SSDP search). It describes what the device wants, not what it is."
+      "searchesForHint": "What this device looked for on the network (SSDP search). It describes what the device wants, not what it is.",
+      "names": "Names this device uses",
+      "nameSeen": "{{source}}, last seen {{when}}"
     },
     "tabs": {
       "excluded": "Known and fine",
@@ -4490,6 +4496,15 @@
       "unknown": "Unknown",
       "virtualAddress": "Virtual router address",
       "virtualMachine": "Virtual machine"
+    },
+    "nameSource": {
+      "mdns": "mDNS",
+      "netbios": "NetBIOS",
+      "llmnr": "LLMNR",
+      "dhcpFqdn": "DHCP (client FQDN)",
+      "dhcp": "DHCP (host name)",
+      "ptr": "Reverse DNS",
+      "unknown": "Reported by an older agent"
     }
   },
   "malware": {
@@ -4846,7 +4861,8 @@
       "placeholder": "The firmware on this hardware ships a placeholder UUID, so it cannot be told apart from other machines.",
       "title": "No machine identified",
       "unknown": "This host is not linked to a machine yet.",
-      "unprivileged": "The agent needs privileged mode to read the hardware identity on this OS."
+      "unprivileged": "The agent is not running as root and cannot use sudo, so it cannot read the hardware identity on this OS.",
+      "needsSudoRule": "The agent's sudo rules do not allow reading the hardware identity. Upgrade the agent package to install the current rules."
     },
     "noOtherHosts": "No other operating system on this machine has reported in.",
     "notAvailable": "Not available",

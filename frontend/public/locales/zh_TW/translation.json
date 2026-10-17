@@ -4395,7 +4395,10 @@
       "mdns": "mDNS",
       "ndListen": "IPv6 鄰居探索",
       "ssdp": "SSDP",
-      "sweep": "主動掃描"
+      "sweep": "主動掃描",
+      "dhcp": "DHCP",
+      "netbios": "NetBIOS",
+      "llmnr": "LLMNR"
     },
     "policy": {
       "enabled": "代理在其網路上監聽裝置",
@@ -4409,7 +4412,8 @@
       "days": "{{count}} 天",
       "days_other": "{{count}} 天",
       "days_one": "{{count}} 天",
-      "retention": "未見裝置的遺忘期限"
+      "retention": "未見裝置的遺忘期限",
+      "sweepsHelp": "操作員可以掃描網路以尋找靜默裝置，代理可以查詢未通告名稱的裝置的名稱（反向 DNS）。"
     },
     "revoke": {
       "confirm": "撤銷",
@@ -4434,7 +4438,9 @@
       "status": "狀態",
       "maybe": "可能是：{{type}}",
       "searchesFor": "搜尋：{{what}}",
-      "searchesForHint": "此裝置在網路上搜尋的內容（SSDP 搜尋）。它說明裝置在尋找什麼，而不是裝置本身是什麼。"
+      "searchesForHint": "此裝置在網路上搜尋的內容（SSDP 搜尋）。它說明裝置在尋找什麼，而不是裝置本身是什麼。",
+      "names": "此裝置使用的名稱",
+      "nameSeen": "{{source}}，最後發現時間 {{when}}"
     },
     "tabs": {
       "excluded": "已知且可接受",
@@ -4490,6 +4496,15 @@
       "unknown": "未知",
       "virtualAddress": "虛擬路由器位址",
       "virtualMachine": "虛擬機器"
+    },
+    "nameSource": {
+      "mdns": "mDNS",
+      "netbios": "NetBIOS",
+      "llmnr": "LLMNR",
+      "dhcpFqdn": "DHCP（用戶端 FQDN）",
+      "dhcp": "DHCP（主機名稱）",
+      "ptr": "反向 DNS",
+      "unknown": "由較舊的代理回報"
     }
   },
   "malware": {
@@ -4846,7 +4861,8 @@
       "placeholder": "此硬體固件附帶一個占位符 UUID，因此無法區分其他機器。",
       "title": "未識別任何機器",
       "unknown": "此主機尚未連結到機器。",
-      "unprivileged": "代理需要特權模式才能讀取此作業系統上的硬體身份。"
+      "unprivileged": "代理程式未以 root 身分執行且無法使用 sudo，因此無法在此作業系統上讀取硬體識別資訊。",
+      "needsSudoRule": "代理程式的 sudo 規則不允許讀取硬體識別資訊。請升級代理程式套件以安裝目前的規則。"
     },
     "noOtherHosts": "這台機器上沒有其他作業系統報告。",
     "notAvailable": "不可用",

@@ -65,7 +65,7 @@ export const tagReasonText = (t: TFunction, reason: string): string => {
     }
 };
 
-type NoMachineReason = 'not_reported' | 'placeholder' | 'unprivileged' | 'failed' | 'absent' | 'unknown';
+type NoMachineReason = 'not_reported' | 'placeholder' | 'needs_sudo_rule' | 'unprivileged' | 'failed' | 'absent' | 'unknown';
 
 /** Why the host has no machine, from the per-source identity status. */
 export const noMachineReason = (identity: HostMachine['identity']): NoMachineReason => {
@@ -73,7 +73,7 @@ export const noMachineReason = (identity: HostMachine['identity']): NoMachineRea
     if (!identity.reported_at && statuses.length === 0) {
         return 'not_reported';
     }
-    const order: IdentitySourceStatus[] = ['placeholder', 'unprivileged', 'failed'];
+    const order: IdentitySourceStatus[] = ['placeholder', 'needs_sudo_rule', 'unprivileged', 'failed'];
     const found = order.find((s) => statuses.includes(s));
     if (found) {
         return found as NoMachineReason;
@@ -90,8 +90,13 @@ const noMachineText = (t: TFunction, reason: NoMachineReason): string => {
             return t('machine.noMachine.notReported', 'The agent has not reported this host\'s hardware identity yet.');
         case 'placeholder':
             return t('machine.noMachine.placeholder', 'The firmware on this hardware ships a placeholder UUID, so it cannot be told apart from other machines.');
+        case 'needs_sudo_rule':
+            // The agent runs unprivileged and its installed sudo rules predate
+            // the identity reads (an older agent package) -- not a host
+            // without privilege, which is what the old text claimed.
+            return t('machine.noMachine.needsSudoRule', 'The agent\'s sudo rules do not allow reading the hardware identity. Upgrade the agent package to install the current rules.');
         case 'unprivileged':
-            return t('machine.noMachine.unprivileged', 'The agent needs privileged mode to read the hardware identity on this OS.');
+            return t('machine.noMachine.unprivileged', 'The agent is not running as root and cannot use sudo, so it cannot read the hardware identity on this OS.');
         case 'failed':
             return t('machine.noMachine.failed', 'The agent tried to read the hardware identity but the read failed.');
         case 'absent':

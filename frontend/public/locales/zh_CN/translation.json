@@ -4395,7 +4395,10 @@
       "mdns": "mDNS",
       "ndListen": "IPv6 邻居发现",
       "ssdp": "SSDP",
-      "sweep": "主动扫描"
+      "sweep": "主动扫描",
+      "dhcp": "DHCP",
+      "netbios": "NetBIOS",
+      "llmnr": "LLMNR"
     },
     "policy": {
       "enabled": "代理在其网络上监听设备",
@@ -4409,7 +4412,8 @@
       "days": "{{count}} 天",
       "days_other": "{{count}} 天",
       "days_one": "{{count}} 天",
-      "retention": "未见设备的遗忘期限"
+      "retention": "未见设备的遗忘期限",
+      "sweepsHelp": "操作员可以扫描网络以查找静默设备，代理可以查询未通告名称的设备的名称（反向 DNS）。"
     },
     "revoke": {
       "confirm": "撤销",
@@ -4434,7 +4438,9 @@
       "status": "状态",
       "maybe": "可能是：{{type}}",
       "searchesFor": "搜索：{{what}}",
-      "searchesForHint": "此设备在网络上搜索的内容（SSDP 搜索）。它说明设备在寻找什么，而不是设备本身是什么。"
+      "searchesForHint": "此设备在网络上搜索的内容（SSDP 搜索）。它说明设备在寻找什么，而不是设备本身是什么。",
+      "names": "此设备使用的名称",
+      "nameSeen": "{{source}}，最后发现时间 {{when}}"
     },
     "tabs": {
       "excluded": "已知且可接受",
@@ -4490,6 +4496,15 @@
       "unknown": "未知",
       "virtualAddress": "虚拟路由器地址",
       "virtualMachine": "虚拟机"
+    },
+    "nameSource": {
+      "mdns": "mDNS",
+      "netbios": "NetBIOS",
+      "llmnr": "LLMNR",
+      "dhcpFqdn": "DHCP（客户端 FQDN）",
+      "dhcp": "DHCP（主机名）",
+      "ptr": "反向 DNS",
+      "unknown": "由较旧的代理报告"
     }
   },
   "malware": {
@@ -4846,7 +4861,8 @@
       "placeholder": "此硬件的固件包含一个占位符 UUID，因此无法与其他机器区分开来。",
       "title": "未识别任何机器",
       "unknown": "此主机尚未链接到机器。",
-      "unprivileged": "代理需要特权模式才能读取此操作系统上的硬件身份。"
+      "unprivileged": "代理未以 root 身份运行且无法使用 sudo，因此无法在此操作系统上读取硬件标识。",
+      "needsSudoRule": "代理的 sudo 规则不允许读取硬件标识。请升级代理软件包以安装当前规则。"
     },
     "noOtherHosts": "该机器上没有其他操作系统报告。",
     "notAvailable": "不可用",

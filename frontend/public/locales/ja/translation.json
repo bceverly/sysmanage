@@ -4395,7 +4395,10 @@
       "mdns": "mDNS",
       "ndListen": "IPv6 近隣探索",
       "ssdp": "SSDP",
-      "sweep": "アクティブスキャン"
+      "sweep": "アクティブスキャン",
+      "dhcp": "DHCP",
+      "netbios": "NetBIOS",
+      "llmnr": "LLMNR"
     },
     "policy": {
       "enabled": "エージェントがネットワーク上のデバイスをリッスンする",
@@ -4409,7 +4412,8 @@
       "days": "{{count}}日",
       "days_other": "{{count}}日",
       "days_one": "{{count}}日",
-      "retention": "未検出のデバイスを忘れるまでの期間"
+      "retention": "未検出のデバイスを忘れるまでの期間",
+      "sweepsHelp": "オペレーターはネットワークをスキャンして通信しないデバイスを探すことができ、エージェントは名前を通知しないデバイスの名前を検索できます (逆引き DNS)。"
     },
     "revoke": {
       "confirm": "取り消し",
@@ -4434,7 +4438,9 @@
       "status": "ステータス",
       "maybe": "おそらく: {{type}}",
       "searchesFor": "検索対象: {{what}}",
-      "searchesForHint": "このデバイスがネットワーク上で探していたもの (SSDP 検索)。デバイスが何であるかではなく、何を探しているかを示します。"
+      "searchesForHint": "このデバイスがネットワーク上で探していたもの (SSDP 検索)。デバイスが何であるかではなく、何を探しているかを示します。",
+      "names": "このデバイスが使用している名前",
+      "nameSeen": "{{source}}、最終検出 {{when}}"
     },
     "tabs": {
       "excluded": "既知・許容済み",
@@ -4490,6 +4496,15 @@
       "unknown": "不明",
       "virtualAddress": "仮想ルーターアドレス",
       "virtualMachine": "仮想マシン"
+    },
+    "nameSource": {
+      "mdns": "mDNS",
+      "netbios": "NetBIOS",
+      "llmnr": "LLMNR",
+      "dhcpFqdn": "DHCP (クライアント FQDN)",
+      "dhcp": "DHCP (ホスト名)",
+      "ptr": "逆引き DNS",
+      "unknown": "古いエージェントからの報告"
     }
   },
   "malware": {
@@ -4846,7 +4861,8 @@
       "placeholder": "このハードウェアは、プレースホルダーUUIDを組み込みのファームウェアで提供するため、他のマシンと区別できません。",
       "title": "識別されたマシンがありません",
       "unknown": "このホストはまだマシンにリンクされていません。",
-      "unprivileged": "このOSでは、エージェントがハードウェアIDを読み取るには管理者権限が必要です。"
+      "unprivileged": "エージェントは root として実行されておらず sudo も使用できないため、この OS ではハードウェア ID を読み取れません。",
+      "needsSudoRule": "エージェントの sudo ルールではハードウェア ID を読み取れません。エージェント パッケージを更新して最新のルールをインストールしてください。"
     },
     "noOtherHosts": "このマシンで報告された他のオペレーティングシステムはありません。",
     "notAvailable": "利用不可",

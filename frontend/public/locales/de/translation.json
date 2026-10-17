@@ -4395,7 +4395,10 @@
       "mdns": "mDNS",
       "ndListen": "IPv6-Nachbarerkennung",
       "ssdp": "SSDP",
-      "sweep": "Aktive Netzabtastung"
+      "sweep": "Aktive Netzabtastung",
+      "dhcp": "DHCP",
+      "netbios": "NetBIOS",
+      "llmnr": "LLMNR"
     },
     "policy": {
       "enabled": "Agenten hören in ihren Netzwerken nach Geräten",
@@ -4409,7 +4412,8 @@
       "days": "{{count}} Tage",
       "days_other": "{{count}} Tage",
       "days_one": "{{count}} Tag",
-      "retention": "Geräte vergessen, die so lange nicht gesehen wurden"
+      "retention": "Geräte vergessen, die so lange nicht gesehen wurden",
+      "sweepsHelp": "Operatoren dürfen ein Netzwerk nach stillen Geräten abtasten, und Agenten dürfen die Namen von Geräten nachschlagen, die keinen Namen bekanntgeben (Reverse-DNS)."
     },
     "revoke": {
       "confirm": "Widerrufen",
@@ -4434,7 +4438,9 @@
       "status": "Zustand",
       "maybe": "Vielleicht: {{type}}",
       "searchesFor": "Sucht nach: {{what}}",
-      "searchesForHint": "Wonach dieses Gerät im Netzwerk gesucht hat (SSDP-Suche). Das beschreibt, was das Gerät sucht, nicht was es ist."
+      "searchesForHint": "Wonach dieses Gerät im Netzwerk gesucht hat (SSDP-Suche). Das beschreibt, was das Gerät sucht, nicht was es ist.",
+      "names": "Namen, die dieses Gerät verwendet",
+      "nameSeen": "{{source}}, zuletzt gesehen {{when}}"
     },
     "tabs": {
       "excluded": "Bekannt und unbedenklich",
@@ -4490,6 +4496,15 @@
       "unknown": "Unbekannt",
       "virtualAddress": "Virtuelle Router-Adresse",
       "virtualMachine": "Virtuelle Maschine"
+    },
+    "nameSource": {
+      "mdns": "mDNS",
+      "netbios": "NetBIOS",
+      "llmnr": "LLMNR",
+      "dhcpFqdn": "DHCP (Client-FQDN)",
+      "dhcp": "DHCP (Hostname)",
+      "ptr": "Reverse-DNS",
+      "unknown": "Von einem älteren Agenten gemeldet"
     }
   },
   "malware": {
@@ -4846,7 +4861,8 @@
       "placeholder": "Die Firmware auf dieser Hardware enthält einen Platzhalter-UUID, sodass sie nicht von anderen Maschinen unterschieden werden kann.",
       "title": "Keine Maschine identifiziert",
       "unknown": "Dieser Host ist noch nicht mit einer Maschine verknüpft.",
-      "unprivileged": "Der Agent benötigt Privilegienmodus, um die Hardware-Identität auf diesem Betriebssystem zu lesen."
+      "unprivileged": "Der Agent läuft nicht als root und kann sudo nicht verwenden, daher kann er die Hardware-Identität unter diesem Betriebssystem nicht lesen.",
+      "needsSudoRule": "Die sudo-Regeln des Agenten erlauben das Lesen der Hardware-Identität nicht. Aktualisieren Sie das Agent-Paket, um die aktuellen Regeln zu installieren."
     },
     "noOtherHosts": "Kein anderes Betriebssystem auf dieser Maschine hat sich gemeldet.",
     "notAvailable": "Nicht verfügbar",

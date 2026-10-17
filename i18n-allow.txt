@@ -248,6 +248,13 @@ posture.remedy.hostFailed
 # Phase 21.6: discovery protocol names -- identical in every language.
 assetDiscovery.method.mdns
 assetDiscovery.method.ssdp
+# Device hostnames (2026-10-17): the protocols a name came from.
+assetDiscovery.method.dhcp
+assetDiscovery.method.netbios
+assetDiscovery.method.llmnr
+assetDiscovery.nameSource.mdns
+assetDiscovery.nameSource.netbios
+assetDiscovery.nameSource.llmnr
 # Phase 21.6 S5: "Computer" is the standard word in Italian and Dutch.
 assetDiscovery.type.computer
 # Phase 21.3 malware page: correct native words that happen to equal English.

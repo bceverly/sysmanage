@@ -31,8 +31,25 @@ export const methodLabel = (t: TFunction, method: string): string => {
         mdns: t('assetDiscovery.method.mdns', 'mDNS'),
         ssdp: t('assetDiscovery.method.ssdp', 'SSDP'),
         sweep: t('assetDiscovery.method.sweep', 'Active sweep'),
+        dhcp: t('assetDiscovery.method.dhcp', 'DHCP'),
+        netbios: t('assetDiscovery.method.netbios', 'NetBIOS'),
+        llmnr: t('assetDiscovery.method.llmnr', 'LLMNR'),
     };
     return labels[method] ?? method;
+};
+
+// Where a device's name came from (the agent records it with each name).
+export const nameSourceLabel = (t: TFunction, source: string): string => {
+    const labels: Record<string, string> = {
+        dhcp_fqdn: t('assetDiscovery.nameSource.dhcpFqdn', 'DHCP (client FQDN)'),
+        dhcp: t('assetDiscovery.nameSource.dhcp', 'DHCP (host name)'),
+        mdns: t('assetDiscovery.nameSource.mdns', 'mDNS'),
+        ptr: t('assetDiscovery.nameSource.ptr', 'Reverse DNS'),
+        netbios: t('assetDiscovery.nameSource.netbios', 'NetBIOS'),
+        llmnr: t('assetDiscovery.nameSource.llmnr', 'LLMNR'),
+        unknown: t('assetDiscovery.nameSource.unknown', 'Reported by an older agent'),
+    };
+    return labels[source] ?? source;
 };
 
 export const unavailableLabel = (t: TFunction, reason: string): string => {

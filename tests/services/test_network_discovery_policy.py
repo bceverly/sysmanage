@@ -142,6 +142,7 @@ class TestReconcile:
         assert envelope["data"]["parameters"] == {
             "enabled": True,
             "report_interval_seconds": 300,
+            "name_lookups": False,  # reverse DNS follows the sweep opt-in
         }
         # ONE id for the envelope and the queue row -- the agent echoes it back.
         assert envelope["message_id"] == sent[0]["message_id"]
