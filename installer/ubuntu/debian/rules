@@ -40,6 +40,24 @@ ifeq ($(DEB_HOST_ARCH),riscv64)
 		{ echo "riscv64-wheels/ is empty: see riscv64-wheels.yml" >&2; exit 1; }
 	install -d debian/sysmanage/opt/sysmanage/wheels
 	install -m 644 riscv64-wheels/*.whl debian/sysmanage/opt/sysmanage/wheels/
+	# The wheels CI compiled (linux_riscv64, unlike PyPI's manylinux ones)
+	# link SYSTEM libraries -- libyaml, libxml2, libxslt, libxmlsec1, libjpeg,
+	# libpq.  dh_shlibdeps never sees them (they stay zipped until the
+	# postinst), so compute those dependencies here into riscv64:Depends.
+	rm -rf debian/riscv64-so && mkdir -p debian/riscv64-so
+	for w in riscv64-wheels/*-linux_riscv64.whl; do \
+		[ -e "$$w" ] || continue; \
+		python3 -m zipfile -e "$$w" debian/riscv64-so/ || exit 1; \
+	done
+	sos="$$(find debian/riscv64-so -name '*.so*' -type f)"; \
+	if [ -n "$$sos" ]; then \
+		dpkg-shlibdeps -Tdebian/sysmanage.substvars -priscv64 -e $$sos; \
+	else \
+		echo 'riscv64:Depends=' >> debian/sysmanage.substvars; \
+	fi
+	rm -rf debian/riscv64-so
+else
+	echo 'riscv64:Depends=' >> debian/sysmanage.substvars
 endif
 
 override_dh_installinit:

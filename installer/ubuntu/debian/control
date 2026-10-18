@@ -2,7 +2,11 @@ Source: sysmanage
 Section: admin
 Priority: optional
 Maintainer: Bryan Everly <bryan@theeverlys.com>
-Build-Depends: debhelper-compat (= 13), dh-python, python3-all (>= 3.10), python3-setuptools
+Build-Depends: debhelper-compat (= 13), dh-python, python3-all (>= 3.10), python3-setuptools,
+ libyaml-dev [riscv64], libxml2-dev [riscv64], libxslt1-dev [riscv64],
+ libxmlsec1-dev [riscv64], libjpeg-dev [riscv64], libfreetype-dev [riscv64],
+ libpq-dev [riscv64], libffi-dev [riscv64], libssl-dev [riscv64],
+ zlib1g-dev [riscv64]
 Standards-Version: 4.6.2
 Homepage: https://sysmanage.org
 Vcs-Git: https://github.com/bceverly/sysmanage.git
@@ -11,7 +15,7 @@ Rules-Requires-Root: no
 
 Package: sysmanage
 Architecture: any
-Depends: ${misc:Depends},
+Depends: ${misc:Depends}, ${riscv64:Depends},
  python3 (>= 3.10),
  python3-pip,
  python3-venv,
