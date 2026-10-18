@@ -36,6 +36,7 @@ from .hardware import *
 from .hardware_health import *
 from .machine import *
 from .clock import *
+from .compliance_evidence import *
 from .host_certificate import *
 from .host_role import *
 from .logging_config import *

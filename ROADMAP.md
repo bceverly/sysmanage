@@ -341,7 +341,7 @@ This section documents the development history of SysManage from initial commit 
 ### Professional Tier Modules
 
 - [x] **proplus_core** - License management UI
-- [x] **health_engine** - AI-powered health analysis & recommendations
+- [x] **compliance_engine** - CIS/DISA STIG auditing (host evidence collected on Linux since 2026-10-18, scheduled scans; other OSes still "not collected" -- see 24.4)
 - [x] **compliance_engine** - CIS/DISA STIG auditing
 
 ### Enterprise Tier Modules
@@ -14180,6 +14180,49 @@ violations get a generated plan, and config drift has remediation playbooks
 sysctl, a service that should be off) leaves the operator to work out the
 fix by hand on every host.
 
+**Found 2026-10-18 (prerequisite for everything below).** The benchmark
+scan never read the host: `gather_host_compliance_data` handed the checks
+EMPTY sshd, sysctl, kernel-module, file-mode, login.defs, PAM, faillock,
+auditd, umask, chrony and AIDE sections, and a missing sshd option scored
+as a failure -- so every host got the same 34% "F" with a critical "root
+login permitted", and setting `PermitRootLogin no` could not change it.
+Interim fix (compliance_engine, same day): an uncollected section is
+`None` and its rules are `not_applicable` ("not collected"); a scan with
+nothing applicable is graded `N/A` and left out of the fleet average.  The
+real fix is the collection:
+
+- [x] **Collect the evidence the checks read -- Linux** (2026-10-18) --
+      agent `collection/compliance_evidence.py` (+ `_parsers`): `sshd -T`
+      (the EFFECTIVE settings, keywords in the catalog's CamelCase), the
+      catalog's sysctls from /proc/sys, loaded (/proc/modules) + disabled
+      (modprobe.d blacklist / `install /bin/false`) modules, mode/uid/gid of
+      the catalog's paths (grub2 path aliased), login.defs (+ /usr/etc and
+      drop-ins), the weakest umask any login path sets, every PAM module,
+      the effective faillock (defaults -> faillock.conf -> pam args; none
+      when no stack uses pam_faillock), auditd.conf, `auditctl -l`, chrony,
+      AIDE selection lines, the FIPS flag, and enabled services
+      (`systemctl is-enabled`, first unit that exists).  Root-only reads go
+      through `sudo -n` with exact forms only (`SYSMANAGE_COMPLIANCE_READ`
+      in the ubuntu/centos/opensuse sudoers: `sshd -T`, `auditctl -l`, `cat`
+      of auditd.conf and /etc/aide.conf); a refused sudo is `None`, never
+      empty-as-compliant.  Sent as `compliance_evidence_update` under
+      send-on-change (on change, else daily).  Server: `host_compliance_
+      evidence` (q46compevid, which also widens `compliance_grade` to
+      VARCHAR(8) for `N/A`), `services/compliance_evidence.py` keeps only
+      known sections with the engine's types; the engine's
+      `gather_host_compliance_data` merges them in place of `None`
+- [ ] **Collect the evidence on the other OSes** -- FreeBSD / OpenBSD /
+      NetBSD / macOS / Windows send nothing yet (every rule stays "not
+      collected"); Alpine's sudoers lacks the compliance reads, and non-
+      systemd Linux (OpenRC) reports no services
+- [x] **Scan on a schedule and on fresh evidence** (2026-10-18) --
+      `services/compliance_scan_tick.py`, a `singleton_task` started from
+      `background_ticks` only with the engine loaded: every 5 minutes, in
+      every host database, it scans each approved, active host never
+      scanned, with evidence newer than its latest scan, or last scanned
+      over 24 h ago (200 per database per pass, never-scanned first), via
+      the engine's new `scan_host_compliance`; prunes scan history older
+      than 180 days, keeping each host's latest
 - [ ] **Every check says how to fix it** -- per-OS plain-language steps
       (what to change, where, why it matters) shown beside the failure;
       the check catalog is not done until each rule has them, gated in CI

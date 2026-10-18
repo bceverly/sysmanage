@@ -2598,12 +2598,20 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # Deploy to Launchpad PPA - Matrix strategy for parallel uploads
+  # riscv64 wheels for the Launchpad upload: see riscv64-wheels.yml.  A
+  # failure there costs only the riscv64 build, never the amd64/arm64 upload.
+  build-riscv64-wheels:
+    needs: [release]
+    if: startsWith(github.ref, 'refs/tags/')
+    uses: ./.github/workflows/riscv64-wheels.yml
+
   deploy-launchpad:
     name: Deploy to Launchpad PPA (${{ matrix.release_name }})
     runs-on: ubuntu-22.04
     timeout-minutes: 30
-    needs: [release]
-    if: startsWith(github.ref, 'refs/tags/')
+    needs: [release, build-riscv64-wheels]
+    # Runs even when a riscv64 wheel build failed: that only costs riscv64.
+    if: startsWith(github.ref, 'refs/tags/') && !cancelled() && needs.release.result == 'success'
     strategy:
       # Don't let one series' upload hiccup (e.g. a transient Launchpad SSH auth
       # timeout, or a not-yet-open series) cancel the others -- each PPA target
@@ -2783,6 +2791,23 @@ jobs:
         run: |
           echo "Generating SBOM files..."
           make sbom
+
+      # Only the riscv64 build puts these in its .deb (debian/rules); missing
+      # (that build failed) means riscv64 fails on Launchpad, nothing else.
+      - name: Add riscv64 wheels
+        id: riscv64
+        continue-on-error: true
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: riscv64-wheels-${{ matrix.release }}
+          path: riscv64-wheels
+
+      - name: Report riscv64 wheels
+        run: |
+          if [ "${{ steps.riscv64.outcome }}" != success ]; then
+            echo "::warning::No riscv64 wheels for ${{ matrix.release }}; its Launchpad riscv64 build will fail"
+          fi
+          find riscv64-wheels -name "*.whl" 2>/dev/null | wc -l
 
       - name: Build and upload source package
         env:

@@ -47,6 +47,9 @@ from backend.api.handlers.custom_metric_handlers import (
 )
 
 # Import from time_status_handlers (Time synchronization -- 23.3)
+from backend.api.handlers.compliance_evidence_handlers import (
+    handle_compliance_evidence_update,
+)
 from backend.api.handlers.hardware_health_handlers import (
     handle_hardware_health_update,
 )
@@ -146,5 +149,6 @@ __all__ = [
     "handle_host_metrics",
     "handle_time_status_update",
     "handle_hardware_health_update",
+    "handle_compliance_evidence_update",
     "handle_network_discovery_report",
 ]

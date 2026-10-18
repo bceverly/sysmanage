@@ -229,10 +229,10 @@ async def handle_package_updates_update(  # NOSONAR
             else:
                 update_type = "enhancement"
 
-            # Get bundle_id or update_id (Windows Update uses update_id)
-            bundle_id = package_update.get("bundle_id") or package_update.get(
-                "update_id"
-            )
+            # What the manager installs by: winget bundle / WU update / fwupd device
+            bundle_id = next(
+                (package_update.get(k) for k in ("bundle_id", "update_id", "device_id")
+                 if package_update.get(k)), None)  # fmt: skip
 
             package_update_record = PackageUpdate(
                 host_id=connection.host_id,

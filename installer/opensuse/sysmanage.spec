@@ -214,6 +214,9 @@ chmod 750 /etc/sysmanage
 # We don't need to recreate it here - just ensure ownership is correct
 # The venv paths have been fixed during build to point to /opt/sysmanage
 
+# The helpers below run as root AFTER the chown above: PYTHONDONTWRITEBYTECODE
+# keeps them from rewriting a stale .pyc as a root-owned file inside the
+# sysmanage-owned venv (OBS fails the build on that filelist change).
 # Create config file if it doesn't exist
 if [ ! -f /etc/sysmanage.yaml ]; then
     cp /etc/sysmanage/sysmanage.yaml.example /etc/sysmanage.yaml
@@ -221,12 +224,12 @@ if [ ! -f /etc/sysmanage.yaml ]; then
     chmod 640 /etc/sysmanage.yaml
     # Generate this install's secrets (Lucky 13 #12): jwt_secret, password_salt and
     # the recovery admin password -- only in a config just created from the example.
-    ( cd /opt/sysmanage && .venv/bin/python -m backend.config.install_secrets --apply /etc/sysmanage.yaml ) || true
+    ( cd /opt/sysmanage && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m backend.config.install_secrets --apply /etc/sysmanage.yaml ) || true
 fi
 # Size the database connection pool for THIS machine (Phase 22.2): adds a
 # commented database_pool block only if the config has none -- an
 # administrator's own values are never touched.
-( cd /opt/sysmanage && .venv/bin/python -m backend.persistence.pool_sizing --apply /etc/sysmanage.yaml ) || true
+( cd /opt/sysmanage && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m backend.persistence.pool_sizing --apply /etc/sysmanage.yaml ) || true
 
 # Configure nginx
 # BEGIN GENERATED TLS PREFLIGHT - edit scripts/render_nginx_configs.py

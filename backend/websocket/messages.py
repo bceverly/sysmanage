@@ -57,6 +57,8 @@ class MessageType(str, Enum):
     HOST_METRICS = "host_metrics"
     TIME_STATUS_UPDATE = "time_status_update"
     HARDWARE_HEALTH_UPDATE = "hardware_health_update"
+    # ROADMAP 24.4 -- what the compliance checks read (sshd -T, sysctls...).
+    COMPLIANCE_EVIDENCE_UPDATE = "compliance_evidence_update"
     NETWORK_DISCOVERY_REPORT = "network_discovery_report"
     HOSTNAME_CHANGED = "hostname_changed"
     # Agent reports completion of a server-initiated package install/uninstall.

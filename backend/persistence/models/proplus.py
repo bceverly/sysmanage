@@ -905,8 +905,8 @@ class HostComplianceScan(Base):
     not_applicable_rules = Column(Integer, nullable=False, default=0)
     compliance_score = Column(Integer, nullable=False, default=0)  # 0-100
     compliance_grade = Column(
-        String(2), nullable=False, default="F"
-    )  # A+, A, B, C, D, F
+        String(8), nullable=False, default="F"
+    )  # A+, A, B, C, D, F -- or N/A: nothing applicable could be judged
     critical_failures = Column(Integer, nullable=False, default=0)
     high_failures = Column(Integer, nullable=False, default=0)
     medium_failures = Column(Integer, nullable=False, default=0)

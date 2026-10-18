@@ -31,6 +31,20 @@ router = APIRouter()
 queue_ops = QueueOperations()
 
 
+def command_package(update) -> dict:
+    """One package of an apply_updates command."""
+    package = {
+        "package_name": update.package_name,
+        "bundle_id": update.bundle_id,
+        "package_manager": update.package_manager,
+    }
+    if update.package_manager == "fwupd":
+        # fwupd installs by device; agents read it as device_id (bundle_id
+        # is where the server stores it).
+        package["device_id"] = update.bundle_id
+    return package
+
+
 @router.post("/execute")
 async def execute_updates(  # NOSONAR
     request: UpdateExecutionRequest,
@@ -159,13 +173,7 @@ async def execute_updates(  # NOSONAR
                     # Build package list with bundle_id for each package
                     packages_to_update = []
                     for update in updates:
-                        packages_to_update.append(
-                            {
-                                "package_name": update.package_name,
-                                "bundle_id": update.bundle_id,
-                                "package_manager": update.package_manager,
-                            }
-                        )
+                        packages_to_update.append(command_package(update))
 
                     command_message = create_command_message(
                         "apply_updates",

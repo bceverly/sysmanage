@@ -315,6 +315,31 @@ class TestHandlePackageUpdatesUpdate:
         assert len(updates) == 2
 
     @pytest.mark.asyncio
+    async def test_a_firmware_update_keeps_its_fwupd_device_id(
+        self, session, mock_connection, sample_host
+    ):
+        """fwupd installs by device id; an update stored without it can never
+        be applied (every UEFI dbx install failed "No device ID available")."""
+        message_data = {
+            "available_updates": [
+                {
+                    "package_name": "Microsoft UEFI dbx (\u2192 20260707)",
+                    "device_id": "362301da643102b9f38477387e2193e57abaa590",
+                    "current_version": "20260402",
+                    "available_version": "20260707",
+                    "package_manager": "fwupd",
+                    "is_security_update": True,
+                }
+            ]
+        }
+
+        with patch("backend.utils.host_validation.validate_host_id"):
+            await handle_package_updates_update(session, mock_connection, message_data)
+
+        row = session.query(models.PackageUpdate).one()
+        assert row.bundle_id == "362301da643102b9f38477387e2193e57abaa590"
+
+    @pytest.mark.asyncio
     async def test_handle_package_updates_empty_list(
         self, session, mock_connection, sample_host
     ):
@@ -706,3 +731,18 @@ class TestHandleAntivirusStatusUpdate:
 
         assert result["message_type"] == "error"
         assert "Failed to process antivirus status update" in result["message"]
+
+
+def test_a_firmware_install_command_names_the_fwupd_device():
+    from types import SimpleNamespace
+
+    from backend.api.updates.execution_routes import command_package
+
+    firmware = SimpleNamespace(
+        package_name="Microsoft UEFI dbx (→ 20260707)",
+        bundle_id="362301da643102b9f38477387e2193e57abaa590",
+        package_manager="fwupd",
+    )
+    assert command_package(firmware)["device_id"] == firmware.bundle_id
+    apt = SimpleNamespace(package_name="curl", bundle_id=None, package_manager="apt")
+    assert "device_id" not in command_package(apt)

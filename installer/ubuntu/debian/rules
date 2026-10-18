@@ -25,9 +25,22 @@ override_dh_auto_build:
 override_dh_auto_test:
 	# Skip tests during package build
 
+DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+
 override_dh_auto_install:
 	# Files are installed via debian/install file
 	dh_auto_install
+ifeq ($(DEB_HOST_ARCH),riscv64)
+	# PyPI has no riscv64 wheels for a dozen of the server's dependencies, and
+	# the postinst would have to compile them (four in Rust) during apt
+	# install.  CI builds them (.github/workflows/riscv64-wheels.yml) into the
+	# source upload; ship them, and refuse to build a riscv64 package that
+	# could not install.
+	test -n "$$(ls riscv64-wheels/*.whl 2>/dev/null)" || \
+		{ echo "riscv64-wheels/ is empty: see riscv64-wheels.yml" >&2; exit 1; }
+	install -d debian/sysmanage/opt/sysmanage/wheels
+	install -m 644 riscv64-wheels/*.whl debian/sysmanage/opt/sysmanage/wheels/
+endif
 
 override_dh_installinit:
 	dh_installinit -psysmanage --name=sysmanage --no-start

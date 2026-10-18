@@ -21,6 +21,7 @@ from backend.api.handlers import (
     handle_custom_metric_samples,
     handle_host_metrics,
     handle_time_status_update,
+    handle_compliance_evidence_update,
     handle_hardware_health_update,
     handle_network_discovery_report,
     handle_fips_compliance_update,
@@ -182,6 +183,10 @@ async def route_inbound_message(  # NOSONAR
 
         elif message_type == MessageType.HARDWARE_HEALTH_UPDATE:
             await handle_hardware_health_update(db, mock_connection, message_data)
+            success = True
+
+        elif message_type == MessageType.COMPLIANCE_EVIDENCE_UPDATE:
+            await handle_compliance_evidence_update(db, mock_connection, message_data)
             success = True
 
         elif message_type == MessageType.NETWORK_DISCOVERY_REPORT:

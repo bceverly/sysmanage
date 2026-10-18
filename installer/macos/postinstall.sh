@@ -46,7 +46,7 @@ if [ ! -f "/etc/sysmanage.yaml" ]; then
 	chmod 600 /etc/sysmanage.yaml.example
 	# Generate this install's secrets (Lucky 13 #12) into the copy the admin
 	# turns into /etc/sysmanage.yaml.
-	( cd /usr/local/lib/sysmanage && ./.venv/bin/python -m backend.config.install_secrets --apply /etc/sysmanage.yaml.example ) || true
+	( cd /usr/local/lib/sysmanage && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m backend.config.install_secrets --apply /etc/sysmanage.yaml.example ) || true
 	echo "IMPORTANT: Configure /etc/sysmanage.yaml before starting the service"
 fi
 # Size the database connection pool for THIS machine (Phase 22.2): adds a
@@ -56,7 +56,7 @@ fi
 # already carries it.)
 SIZED_CONFIG=/etc/sysmanage.yaml
 [ -f "$SIZED_CONFIG" ] || SIZED_CONFIG=/etc/sysmanage.yaml.example
-( cd /usr/local/lib/sysmanage && ./.venv/bin/python -m backend.persistence.pool_sizing --apply "$SIZED_CONFIG" ) || true
+( cd /usr/local/lib/sysmanage && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m backend.persistence.pool_sizing --apply "$SIZED_CONFIG" ) || true
 
 chown -R root:wheel /usr/local/lib/sysmanage
 chown -R root:wheel /var/lib/sysmanage
