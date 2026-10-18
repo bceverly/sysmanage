@@ -39,8 +39,10 @@ pluggy>=1.0.0
 # else (the BSDs, Windows-ARM64) there is no binary wheel, so use the pure-Python
 # psycopg, which links libpq at runtime (pg_config/postgresql-client is installed
 # by the platform bootstrap).
-psycopg[binary]>=3.2; platform_system == "Linux" or platform_system == "Darwin" or (platform_system == "Windows" and platform_machine != "ARM64")
-psycopg>=3.2; (platform_system != "Linux" and platform_system != "Darwin" and platform_system != "Windows") or (platform_system == "Windows" and platform_machine == "ARM64")
+# riscv64 takes plain psycopg too: psycopg-binary has no riscv64 wheel for
+# jammy's glibc and no sdist to build one from (Launchpad riscv64, 2026-10-18).
+psycopg[binary]>=3.2; (platform_system == "Linux" and platform_machine != "riscv64") or platform_system == "Darwin" or (platform_system == "Windows" and platform_machine != "ARM64")
+psycopg>=3.2; (platform_system != "Linux" and platform_system != "Darwin" and platform_system != "Windows") or (platform_system == "Windows" and platform_machine == "ARM64") or platform_machine == "riscv64"
 argon2-cffi==25.1.0
 bcrypt>=4.0.0
 pyotp>=2.9.0  # Phase 10.3: TOTP-based multi-factor authentication
@@ -126,7 +128,10 @@ opentelemetry-instrumentation-logging>=0.48b0
 # the Prometheus exporter and every FastAPI/SQLAlchemy/requests/logging
 # instrumentation keep working.  The OpenBSD port omits this package for exactly
 # the same reason (installer/openbsd/build-libs.sh).
-opentelemetry-exporter-otlp>=1.12.0; platform_system != "Windows" or platform_machine != "ARM64"  # win_arm64: see note below
+# Also excluded on riscv64, for the same grpcio: PyPI has no riscv64 wheel, and
+# compiling it under the emulated riscv64 wheel build (riscv64-wheels.yml)
+# would take hours.  Same cost: OTLP export only.
+opentelemetry-exporter-otlp>=1.12.0; (platform_system != "Windows" or platform_machine != "ARM64") and platform_machine != "riscv64"  # win_arm64/riscv64: see note
 opentelemetry-exporter-prometheus>=0.48b0
 # Asset-tag schemes (Phase 23.2): admin-supplied patterns are matched with a
 # hard timeout, which the standard re module cannot do.

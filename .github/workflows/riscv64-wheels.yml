@@ -88,6 +88,7 @@ jobs:
             apt-get update -q
             apt-get install -y -q python3-venv python3-dev build-essential \
               libffi-dev libssl-dev libyaml-dev libpq-dev libjpeg-dev zlib1g-dev \
+              libxml2-dev libxslt1-dev libxmlsec1-dev libxmlsec1-openssl \
               libfreetype-dev pkg-config curl ca-certificates
             # The distro rustc is too old for current cryptography on jammy.
             curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs \
