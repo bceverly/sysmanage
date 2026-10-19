@@ -1202,7 +1202,8 @@
     "unavailable": "Unavailable",
     "unknown": "This agent has not advertised its capabilities. Older agents do not report them; the host is not restricted.",
     "updated": "Reported",
-    "reasonMissingNamedTool": "Requires {{tool}}, which is not installed on this host"
+    "reasonMissingNamedTool": "Requires {{tool}}, which is not installed on this host",
+    "optionalNotInstalled": "Available once its tool is installed"
   },
   "hostDefaults": {
     "addNewPackageManager": "Add New Enabled Package Manager",
@@ -5116,7 +5117,18 @@
       "resolveTitle": "Resolve this event",
       "resolvedBy": "Resolved by {{user}}",
       "when": "Time",
-      "why": "Reason"
+      "why": "Reason",
+      "acknowledgeSelected": "Acknowledge selected",
+      "allMatchingSelected": "All unresolved events are selected ({{n}}).",
+      "bulkChanged": "Events changed: {{n}}",
+      "bulkError": "The selected events could not be changed.",
+      "bulkSkipped": "Already done or not found: {{n}}",
+      "clearSelection": "Clear selection",
+      "resolveSelected": "Resolve selected",
+      "selectAllMatching": "Select all {{n}} unresolved events",
+      "selectEvent": "Select this event",
+      "selectPage": "Select all events on this page",
+      "selectedCount": "Selected: {{n}}"
     },
     "filter": {
       "all": "All",
@@ -5161,7 +5173,8 @@
       "stale": "No recent report",
       "unknown": "Not judged",
       "unmeasured": "Not reported",
-      "warning": "Warning"
+      "warning": "Warning",
+      "none": "No physical hardware"
     },
     "statusHelp": {
       "failed": "At least one component has failed.",
@@ -5169,7 +5182,8 @@
       "stale": "The last report is more than an hour old. The host is probably not connected.",
       "unknown": "The host reported its hardware, but nothing could judge at least one component.",
       "unmeasured": "The host has never reported its hardware. Its agent may be too old, or it has not connected.",
-      "warning": "At least one component needs attention."
+      "warning": "At least one component needs attention.",
+      "none": "Nothing to monitor: no drives, sensors or ECC memory were found (typical for a virtual machine)."
     },
     "title": "Hardware Health",
     "reason": {

@@ -133,7 +133,12 @@ const Body: React.FC<{ hostId: string; hardware: HostHardware; onChanged: () => 
             <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>
                 {t('hardwareHealth.card.recentEvents', 'Recent events')}
             </Typography>
-            <HardwareEventsList events={hardware.events.slice(0, 10)} onChanged={onChanged} />
+            <HardwareEventsList
+                events={hardware.events.slice(0, 10)}
+                total={hardware.events.filter(e => !e.resolved_at).length}
+                hostId={hostId}
+                onChanged={onChanged}
+            />
         </>
     );
 };

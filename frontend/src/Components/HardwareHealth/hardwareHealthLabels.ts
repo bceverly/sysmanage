@@ -25,6 +25,7 @@ export const statusLabel = (t: TFunction, status: HardwareStatus | 'gone'): stri
         unknown: t('hardwareHealth.status.unknown', 'Not judged'),
         unmeasured: t('hardwareHealth.status.unmeasured', 'Not reported'),
         stale: t('hardwareHealth.status.stale', 'No recent report'),
+        none: t('hardwareHealth.status.none', 'No physical hardware'),
         gone: t('hardwareHealth.status.gone', 'No longer reported'),
     };
     return labels[status] ?? status;
@@ -37,6 +38,7 @@ export const statusColor = (status: HardwareStatus | 'gone'): ChipColor => {
         failed: 'error',
         gone: 'error',
         stale: 'info',
+        // none: 'default' -- neutral; a VM with nothing to watch is not a problem
     };
     return colors[status] ?? 'default';
 };
@@ -49,6 +51,7 @@ export const statusHelp = (t: TFunction, status: HardwareStatus): string => {
         unknown: t('hardwareHealth.statusHelp.unknown', 'The host reported its hardware, but nothing could judge at least one component.'),
         unmeasured: t('hardwareHealth.statusHelp.unmeasured', 'The host has never reported its hardware. Its agent may be too old, or it has not connected.'),
         stale: t('hardwareHealth.statusHelp.stale', 'The last report is more than an hour old. The host is probably not connected.'),
+        none: t('hardwareHealth.statusHelp.none', 'Nothing to monitor: no drives, sensors or ECC memory were found (typical for a virtual machine).'),
     };
     return help[status] ?? '';
 };

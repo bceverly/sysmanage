@@ -1183,7 +1183,8 @@
     "unavailable": "利用できません",
     "unknown": "このエージェントは機能を公開していません。古いエージェントは機能を報告しません; ホストには制限はありません。",
     "updated": "報告済み",
-    "reasonMissingNamedTool": "{{tool}} が必要ですが、このホストにはインストールされていません"
+    "reasonMissingNamedTool": "{{tool}} が必要ですが、このホストにはインストールされていません",
+    "optionalNotInstalled": "ツールがインストールされた後利用可能"
   },
   "hostDefaults": {
     "addNewPackageManager": "新しい有効なパッケージマネージャーを追加",
@@ -5116,7 +5117,18 @@
       "resolveTitle": "このイベントを解決",
       "resolvedBy": "{{user}} が解決済み",
       "when": "日時",
-      "why": "理由"
+      "why": "理由",
+      "acknowledgeSelected": "選択したものを確認",
+      "allMatchingSelected": "未解決のイベントがすべて選択されています（{{n}}）。",
+      "bulkChanged": "変更されたイベント: {{n}}",
+      "bulkError": "選択されたイベントを変更できませんでした。",
+      "bulkSkipped": "すでに完了または見つかりません: {{n}}",
+      "clearSelection": "選択をクリア",
+      "resolveSelected": "選択したものを解決",
+      "selectAllMatching": "未解決のイベント {{n}} 件をすべて選択",
+      "selectEvent": "このイベントを選択",
+      "selectPage": "このページのイベントをすべて選択",
+      "selectedCount": "選択済み: {{n}}"
     },
     "filter": {
       "all": "すべて",
@@ -5161,7 +5173,8 @@
       "stale": "最近の報告なし",
       "unknown": "評価不能",
       "unmeasured": "未報告",
-      "warning": "警告"
+      "warning": "警告",
+      "none": "物理ハードウェアなし"
     },
     "statusHelp": {
       "failed": "少なくとも 1 つのコンポーネントが故障しています。",
@@ -5169,7 +5182,8 @@
       "stale": "最終報告から 1 時間以上経過しています。ホストは接続されていない可能性があります。",
       "unknown": "ホストはハードウェアを報告しましたが、少なくとも 1 つのコンポーネントを評価する手段がありませんでした。",
       "unmeasured": "このホストはハードウェアを一度も報告していません。エージェントが古すぎるか、接続されていない可能性があります。",
-      "warning": "少なくとも 1 つのコンポーネントに対応が必要です。"
+      "warning": "少なくとも 1 つのコンポーネントに対応が必要です。",
+      "none": "監視対象なし: ドライブ、センサー、ECC メモリが見つかりませんでした（仮想マシンでは一般的です）。"
     },
     "title": "ハードウェアの健全性",
     "reason": {

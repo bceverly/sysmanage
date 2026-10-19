@@ -1183,7 +1183,8 @@
     "unavailable": "不可用",
     "unknown": "此代理尚未声明其功能。旧版代理不会报告这些信息；主机不受限制。",
     "updated": "已报告",
-    "reasonMissingNamedTool": "需要 {{tool}}，但此主机上未安装"
+    "reasonMissingNamedTool": "需要 {{tool}}，但此主机上未安装",
+    "optionalNotInstalled": "在其工具安装完成后可用"
   },
   "hostDefaults": {
     "addNewPackageManager": "添加新的已启用包管理器",
@@ -5116,7 +5117,18 @@
       "resolveTitle": "解决此事件",
       "resolvedBy": "已由 {{user}} 解决",
       "when": "时间",
-      "why": "原因"
+      "why": "原因",
+      "acknowledgeSelected": "确认所选",
+      "allMatchingSelected": "已选中所有未解决的事件（{{n}}）。",
+      "bulkChanged": "已更改的事件：{{n}}",
+      "bulkError": "无法更改所选事件。",
+      "bulkSkipped": "已完成或未找到：{{n}}",
+      "clearSelection": "清除选择",
+      "resolveSelected": "解决所选",
+      "selectAllMatching": "选择全部 {{n}} 个未解决的事件",
+      "selectEvent": "选择此事件",
+      "selectPage": "选择此页面上的所有事件",
+      "selectedCount": "已选中：{{n}}"
     },
     "filter": {
       "all": "全部",
@@ -5161,7 +5173,8 @@
       "stale": "近期无上报",
       "unknown": "无法评估",
       "unmeasured": "未上报",
-      "warning": "警告"
+      "warning": "警告",
+      "none": "没有物理硬件"
     },
     "statusHelp": {
       "failed": "至少有一个组件发生故障。",
@@ -5169,7 +5182,8 @@
       "stale": "最后一次上报已超过一小时。该主机可能未连接。",
       "unknown": "主机已上报其硬件，但至少有一个组件没有任何方式可以评估。",
       "unmeasured": "该主机从未上报其硬件。其代理可能版本过旧，或尚未连接。",
-      "warning": "至少有一个组件需要关注。"
+      "warning": "至少有一个组件需要关注。",
+      "none": "没有可监控的内容：未发现磁盘、传感器或 ECC 内存（虚拟机通常如此）。"
     },
     "title": "硬件健康状况",
     "reason": {

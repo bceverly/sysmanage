@@ -1183,7 +1183,8 @@
     "unavailable": "사용 불가능",
     "unknown": "이 에이전트가 기능을 광고하지 않았습니다. 오래된 에이전트는 이를 보고하지 않으며 호스트에는 제한이 없습니다.",
     "updated": "보고됨",
-    "reasonMissingNamedTool": "{{tool}}이(가) 필요하지만 이 호스트에 설치되어 있지 않습니다"
+    "reasonMissingNamedTool": "{{tool}}이(가) 필요하지만 이 호스트에 설치되어 있지 않습니다",
+    "optionalNotInstalled": "툴이 설치된 후 사용 가능"
   },
   "hostDefaults": {
     "addNewPackageManager": "새 활성화된 패키지 관리자 추가",
@@ -5116,7 +5117,18 @@
       "resolveTitle": "이 이벤트 해결",
       "resolvedBy": "{{user}}님이 해결함",
       "when": "시각",
-      "why": "이유"
+      "why": "이유",
+      "acknowledgeSelected": "선택 항목 확인",
+      "allMatchingSelected": "미해결 이벤트가 모두 선택됨({{n}}개).",
+      "bulkChanged": "변경된 이벤트: {{n}}",
+      "bulkError": "선택된 이벤트를 변경할 수 없습니다.",
+      "bulkSkipped": "이미 완료되었거나 찾을 수 없음: {{n}}",
+      "clearSelection": "선택 해제",
+      "resolveSelected": "선택 항목 해결",
+      "selectAllMatching": "미해결 이벤트 {{n}}개 모두 선택",
+      "selectEvent": "이 이벤트 선택",
+      "selectPage": "이 페이지의 모든 이벤트 선택",
+      "selectedCount": "선택됨: {{n}}"
     },
     "filter": {
       "all": "모두",
@@ -5161,7 +5173,8 @@
       "stale": "최근 보고 없음",
       "unknown": "평가 불가",
       "unmeasured": "보고되지 않음",
-      "warning": "경고"
+      "warning": "경고",
+      "none": "물리적 하드웨어 없음"
     },
     "statusHelp": {
       "failed": "하나 이상의 구성 요소가 고장 났습니다.",
@@ -5169,7 +5182,8 @@
       "stale": "마지막 보고가 1시간 이상 지났습니다. 호스트가 연결되어 있지 않을 가능성이 높습니다.",
       "unknown": "호스트가 하드웨어를 보고했지만, 하나 이상의 구성 요소를 평가할 수단이 없었습니다.",
       "unmeasured": "호스트가 하드웨어를 보고한 적이 없습니다. 에이전트가 너무 오래되었거나 연결되지 않았을 수 있습니다.",
-      "warning": "하나 이상의 구성 요소에 조치가 필요합니다."
+      "warning": "하나 이상의 구성 요소에 조치가 필요합니다.",
+      "none": "모니터링할 항목 없음: 드라이브, 센서 또는 ECC 메모리를 찾지 못했습니다(가상 머신에서는 일반적임)."
     },
     "title": "하드웨어 상태",
     "reason": {

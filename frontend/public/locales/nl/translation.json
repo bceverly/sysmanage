@@ -1183,7 +1183,8 @@
     "unavailable": "Niet beschikbaar",
     "unknown": "Deze agent heeft zijn capaciteiten niet gemeld. Oudere agents melden ze niet; de host is hierdoor niet beperkt.",
     "updated": "Gemeld",
-    "reasonMissingNamedTool": "Vereist {{tool}}, dat niet op deze host is geïnstalleerd"
+    "reasonMissingNamedTool": "Vereist {{tool}}, dat niet op deze host is geïnstalleerd",
+    "optionalNotInstalled": "Beschikbaar zodra het hulpprogramma is geïnstalleerd"
   },
   "hostDefaults": {
     "addNewPackageManager": "Nieuwe Ingeschakelde Pakketbeheerder Toevoegen",
@@ -5116,7 +5117,18 @@
       "resolveTitle": "Deze gebeurtenis oplossen",
       "resolvedBy": "Opgelost door {{user}}",
       "when": "Tijdstip",
-      "why": "Reden"
+      "why": "Reden",
+      "acknowledgeSelected": "Selectie bevestigen",
+      "allMatchingSelected": "Alle onopgeloste gebeurtenissen zijn geselecteerd ({{n}}).",
+      "bulkChanged": "Gebeurtenissen gewijzigd: {{n}}",
+      "bulkError": "De geselecteerde gebeurtenissen konden niet worden aangepast.",
+      "bulkSkipped": "Al afgehandeld of niet gevonden: {{n}}",
+      "clearSelection": "Selectie wissen",
+      "resolveSelected": "Geselecteerde oplossen",
+      "selectAllMatching": "Alle {{n}} onopgeloste gebeurtenissen selecteren",
+      "selectEvent": "Deze gebeurtenis selecteren",
+      "selectPage": "Alle gebeurtenissen op deze pagina selecteren",
+      "selectedCount": "Geselecteerd: {{n}}"
     },
     "filter": {
       "all": "Alle",
@@ -5161,7 +5173,8 @@
       "stale": "Geen recent rapport",
       "unknown": "Niet te beoordelen",
       "unmeasured": "Niet gerapporteerd",
-      "warning": "Waarschuwing"
+      "warning": "Waarschuwing",
+      "none": "Geen fysieke hardware"
     },
     "statusHelp": {
       "failed": "Ten minste één component is defect.",
@@ -5169,7 +5182,8 @@
       "stale": "Het laatste rapport is ouder dan een uur. De host is waarschijnlijk niet verbonden.",
       "unknown": "De host heeft zijn hardware gerapporteerd, maar ten minste één component kon door niets worden beoordeeld.",
       "unmeasured": "De host heeft zijn hardware nog nooit gerapporteerd. De agent is mogelijk te oud of heeft nog geen verbinding gemaakt.",
-      "warning": "Ten minste één component vereist aandacht."
+      "warning": "Ten minste één component vereist aandacht.",
+      "none": "Niets te bewaken: er zijn geen schijven, sensoren of ECC-geheugen gevonden (gebruikelijk bij een virtuele machine)."
     },
     "title": "Hardwaregezondheid",
     "reason": {

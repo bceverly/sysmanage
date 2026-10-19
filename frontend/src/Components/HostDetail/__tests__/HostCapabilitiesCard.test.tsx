@@ -94,6 +94,35 @@ describe('HostCapabilitiesCard', () => {
         expect(screen.getByText(/some_future_reason/)).toBeTruthy();
     });
 
+    it('lists an optional tool apart from real gaps, not as Unavailable', () => {
+        render(
+            <HostCapabilitiesCard
+                report={{ unavailable: { config_management: 'missing_tool', scripts: 'no_handler' } }}
+                limited
+                platform="Linux"
+            />
+        );
+        expect(screen.getByText('Available once its tool is installed')).toBeTruthy();
+        expect(
+            screen.getByText('config_management -- Requires ansible-core, which is not installed on this host')
+        ).toBeTruthy();
+        // only the real gap is under Unavailable
+        expect(screen.getByText('Unavailable')).toBeTruthy();
+        expect(screen.getByText('scripts -- Not built into this agent')).toBeTruthy();
+    });
+
+    it('shows no Unavailable heading when the only gap is an optional tool', () => {
+        render(
+            <HostCapabilitiesCard
+                report={{ unavailable: { config_management: 'missing_tool' } }}
+                limited={false}
+                platform="Linux"
+            />
+        );
+        expect(screen.queryByText('Unavailable')).toBeNull();
+        expect(screen.getByText('Full')).toBeTruthy();
+    });
+
     it('lists partially-supported groups with a count', () => {
         render(
             <HostCapabilitiesCard

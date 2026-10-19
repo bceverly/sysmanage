@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-19 06:59-0400\n"
+"POT-Creation-Date: 2026-10-19 15:02-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -79,7 +79,7 @@ msgstr "आपके पास चयनित खाते के लिए प
 #: backend/api/advisor.py:93 backend/api/query_packs.py:119
 #: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
-#: backend/api/hardware_health.py:206 backend/api/hardware_health.py:319
+#: backend/api/hardware_health.py:231 backend/api/hardware_health.py:407
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
 #: backend/api/posture.py:375 backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
@@ -189,7 +189,7 @@ msgstr "अमान्य होस्ट ID फॉर्मेट"
 #: backend/api/grafana_integration.py:329
 #: backend/api/config_mgmt_remediation.py:433
 #: backend/api/image_mode_actions.py:86 backend/api/host_graylog.py:131
-#: backend/api/hardware_health.py:76 backend/api/hardware_health.py:79
+#: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
 #: backend/api/updates/report_routes.py:34
@@ -2651,7 +2651,7 @@ msgstr "एजेंट की पंजीकरण और संपर्क �
 msgid "Failed to process heartbeat"
 msgstr "हैर्टबीट प्रोसेस करने में विफल हुए"
 
-#: backend/api/logging_settings.py:71 backend/api/hardware_health.py:362
+#: backend/api/logging_settings.py:71 backend/api/hardware_health.py:450
 #: backend/api/maintenance_windows.py:64
 msgid "Permission denied: administrator required"
 msgstr "अनुमति अस्वीकृत: व्यवस्थापक आवश्यक"
@@ -3011,19 +3011,23 @@ msgstr "इस OS के लिए कोई antivirus मानक नहीं
 msgid "Failed to delete antivirus default: %s"
 msgstr "वायरस निषेधक प्रत्यक्षित मूल्य को हटाने में विफल: %s"
 
-#: backend/api/hardware_health.py:220
+#: backend/api/hardware_health.py:245
 msgid "Hardware event not found"
 msgstr "हार्डवेयर इवेंट नहीं मिला"
 
-#: backend/api/hardware_health.py:272
+#: backend/api/hardware_health.py:307
+msgid "Choose either specific events or all unresolved events, not both."
+msgstr "या तो चुनिंदा इवेंट चुनें या सभी अनसुलझे इवेंट, दोनों नहीं।"
+
+#: backend/api/hardware_health.py:360
 msgid "The temperature limit must be between 30 and 125 C"
 msgstr "तापमान सीमा 30 और 125 C के बीच होनी चाहिए"
 
-#: backend/api/hardware_health.py:368
+#: backend/api/hardware_health.py:456
 msgid "Automatic installation requires a SysManage Enterprise license."
 msgstr "स्वचालित इंस्टॉलेशन के लिए SysManage Enterprise लाइसेंस की आवश्यकता है।"
 
-#: backend/api/hardware_health.py:372
+#: backend/api/hardware_health.py:460
 msgid "The setting could not be saved"
 msgstr "सेटिंग सहेजी नहीं जा सकी"
 
@@ -4680,7 +4684,7 @@ msgstr "फाइरवॉल भूमिका को होस्ट से �
 msgid "Failed to remove firewall role: %s"
 msgstr "%s के फायरवॉल रोल हटाने में विफल हुए"
 
-#: backend/api/asset_tag_csv.py:140
+#: backend/api/asset_tag_csv.py:143
 #, python-format
 msgid "Held asset tag %s released"
 msgstr "होल्ड किया गया एसेट टैग %s रिलीज़ किया गया"
@@ -5360,11 +5364,11 @@ msgstr "सर्वर मेसेज क्वो निरीक्षक �
 msgid "Rate limit exceeded. Please retry later."
 msgstr "रेट लिमिट अतिक्रांत हो गया। कृपया बाद में पुन: प्रयास करें।"
 
-#: backend/services/agent_capability_service.py:306
+#: backend/services/agent_capability_service.py:327
 msgid "this host"
 msgstr "इस होस्ट"
 
-#: backend/services/agent_capability_service.py:309
+#: backend/services/agent_capability_service.py:330
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "
@@ -5626,6 +5630,9 @@ msgstr "NetBSD pkgsrc पैकेज की भेद्यताएँ (जि
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "OS संस्करण के अनुसार macOS की भेद्यताएँ, NVD के प्रभावित-संस्करण डेटा से"
+
+#~ msgid "Choose either specific events or all open events, not both."
+#~ msgstr "केवल विशेष कार्यों या सभी खुले कार्यों में से एक को चुनें, दोनों को नहीं।"
 
 #, python-format
 #~ msgid ""

@@ -161,6 +161,24 @@ def normalize_report(report: Any) -> Optional[Dict[str, Any]]:
     }
 
 
+# Unavailable for a reason the operator closes by installing a tool on the
+# host (ansible-core for config_management, ClamAV, libvirt...).  The agent
+# has the capability; the host simply has not opted in.  Flagging every host
+# without Ansible as "limited" (Bryan, 2026-10-19) made the flag meaningless --
+# "limited" now means the AGENT lacks something (no handler, excluded from
+# this build), which an operator cannot fix on the host.
+OPTIONAL_REASONS = frozenset({"missing_tool"})
+
+
+def is_limited(report: Dict[str, Any]) -> bool:
+    """The "limited" rule, in one place: an unavailable group whose reason is
+    not an optional tool, or any partially supported group."""
+    unavailable = report.get("unavailable") or {}
+    return bool(report.get("partial")) or any(
+        reason not in OPTIONAL_REASONS for reason in unavailable.values()
+    )
+
+
 def limited_flag(host) -> Optional[bool]:
     """Three-valued 'is this agent limited?' for API responses.
 
@@ -173,6 +191,11 @@ def limited_flag(host) -> Optional[bool]:
     """
     if not getattr(host, "agent_capabilities", None):
         return None
+    # Re-derived from the stored report, not read from the column, so a host
+    # advertised before the rule changed is judged by today's rule.
+    report = get_capability_report(host)
+    if report is not None:
+        return is_limited(report)
     return bool(getattr(host, "agent_capabilities_limited", False))
 
 
@@ -192,12 +215,10 @@ def capability_update_values(report: Any) -> Dict[str, Any]:
         return {}
     return {
         "agent_capabilities": json.dumps(normalized, sort_keys=True),
-        # "not_applicable" is deliberately NOT consulted: a Linux host is not
-        # limited for lacking bhyve.  The agent has already excluded those
-        # groups from unavailable/partial, so this stays a two-term rule.
-        "agent_capabilities_limited": bool(
-            normalized["unavailable"] or normalized["partial"]
-        ),
+        # "not_applicable" is deliberately NOT consulted (a Linux host is not
+        # limited for lacking bhyve), nor is an optional tool the host has not
+        # installed: see is_limited.
+        "agent_capabilities_limited": is_limited(normalized),
         "agent_capabilities_updated_at": _utcnow_naive(),
     }
 

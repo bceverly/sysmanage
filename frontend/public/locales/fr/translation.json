@@ -1183,7 +1183,8 @@
     "unavailable": "Indisponible",
     "unknown": "Cet agent n'a pas annoncé ses capacités. Les agents plus anciens ne les signalent pas ; l'hôte n'est pas restreint.",
     "updated": "Signalée",
-    "reasonMissingNamedTool": "Nécessite {{tool}}, qui n'est pas installé sur cet hôte"
+    "reasonMissingNamedTool": "Nécessite {{tool}}, qui n'est pas installé sur cet hôte",
+    "optionalNotInstalled": "Disponible une fois son outil installé"
   },
   "hostDefaults": {
     "addNewPackageManager": "Ajouter un Nouveau Gestionnaire de Paquets Activé",
@@ -5116,7 +5117,18 @@
       "resolveTitle": "Marquer cet événement comme résolu",
       "resolvedBy": "Résolu par {{user}}",
       "when": "Heure",
-      "why": "Motif"
+      "why": "Motif",
+      "acknowledgeSelected": "Confirmer la sélection",
+      "allMatchingSelected": "Tous les événements non résolus sont sélectionnés ({{n}}).",
+      "bulkChanged": "Événements modifiés : {{n}}",
+      "bulkError": "Les événements sélectionnés n'ont pas pu être modifiés.",
+      "bulkSkipped": "Déjà traités ou introuvables : {{n}}",
+      "clearSelection": "Effacer la sélection",
+      "resolveSelected": "Résoudre la sélection",
+      "selectAllMatching": "Sélectionner les {{n}} événements non résolus",
+      "selectEvent": "Sélectionner cet événement",
+      "selectPage": "Sélectionner tous les événements de cette page",
+      "selectedCount": "Sélectionnés : {{n}}"
     },
     "filter": {
       "all": "Tous",
@@ -5161,7 +5173,8 @@
       "stale": "Aucun rapport récent",
       "unknown": "Non évaluable",
       "unmeasured": "Non signalé",
-      "warning": "Avertissement"
+      "warning": "Avertissement",
+      "none": "Aucun matériel physique"
     },
     "statusHelp": {
       "failed": "Au moins un composant est défaillant.",
@@ -5169,7 +5182,8 @@
       "stale": "Le dernier rapport date de plus d'une heure. L'hôte n'est probablement pas connecté.",
       "unknown": "L'hôte a signalé son matériel, mais au moins un composant était non évaluable.",
       "unmeasured": "L'hôte n'a jamais signalé son matériel. Son agent est peut-être trop ancien, ou il ne s'est pas connecté.",
-      "warning": "Au moins un composant nécessite une attention."
+      "warning": "Au moins un composant nécessite une attention.",
+      "none": "Rien à surveiller : aucun disque, capteur ou mémoire ECC n'a été trouvé (typique pour une machine virtuelle)."
     },
     "title": "État du matériel",
     "reason": {

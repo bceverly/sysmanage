@@ -242,8 +242,20 @@ def test_not_applicable_is_stored_but_never_makes_a_host_limited():
 def test_not_applicable_does_not_mask_a_real_gap():
     """Applicability must not become a blanket excuse: a genuine
     unavailable/partial entry still flags the host."""
-    report = _report(["install_package"], unavailable={"packages": "missing_tool"})
+    report = _report(["install_package"], unavailable={"packages": "no_handler"})
     report["not_applicable"] = {"ubuntu_pro": "wrong_platform"}
+    assert capability_update_values(report)["agent_capabilities_limited"] is True
+
+
+def test_an_optional_tool_the_host_lacks_is_not_a_limitation():
+    """config_management without ansible-core is a host that has not opted in,
+    not a degraded agent (Bryan, 2026-10-19)."""
+    report = _report(
+        ["install_package"], unavailable={"config_management": "missing_tool"}
+    )
+    assert capability_update_values(report)["agent_capabilities_limited"] is False
+    # ...but it does not excuse a real gap beside it
+    report["unavailable"]["scripts"] = "no_handler"
     assert capability_update_values(report)["agent_capabilities_limited"] is True
 
 

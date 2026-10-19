@@ -20,12 +20,12 @@ vi.mock("../../../Services/hardwareHealth", async (importOriginal) => {
   return {
     ...actual,
     getFleetHardware: vi.fn(),
-    getHardwareEvents: vi.fn(),
+    getHardwareEventsPage: vi.fn(),
     getSmartmontools: vi.fn().mockResolvedValue({ licensed: false, auto: false, hosts: [] }),
   };
 });
 
-import { getFleetHardware, getHardwareEvents } from "../../../Services/hardwareHealth";
+import { getFleetHardware, getHardwareEventsPage } from "../../../Services/hardwareHealth";
 import type { FleetHost } from "../../../Services/hardwareHealth";
 import HardwareHealth from "../../../Pages/HardwareHealth";
 import { drive, event } from "./_fixtures";
@@ -54,7 +54,7 @@ describe("Hardware Health page", () => {
         host({ host_id: "h3", fqdn: "beast.lab", status: "ok", problems: [], component_counts: { ok: 9 } }),
       ],
     });
-    vi.mocked(getHardwareEvents).mockResolvedValue([event()]);
+    vi.mocked(getHardwareEventsPage).mockResolvedValue({ events: [event()], total: 1 });
   });
 
   test("lists the fleet worst first with why, and the open events", async () => {
@@ -65,7 +65,7 @@ describe("Hardware Health page", () => {
     expect(screen.getAllByText("freebsd.lab").length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Media and data integrity errors: 19/).length).toBeGreaterThan(0);
     expect(screen.getByText("Unresolved events")).toBeInTheDocument();
-    expect(getHardwareEvents).toHaveBeenCalledWith(true);
+    expect(getHardwareEventsPage).toHaveBeenCalled();
   });
 
   test("a status chip filters the hosts", async () => {

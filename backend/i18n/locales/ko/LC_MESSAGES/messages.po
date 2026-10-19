@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-19 06:59-0400\n"
+"POT-Creation-Date: 2026-10-19 15:02-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -79,7 +79,7 @@ msgstr "선택한 계정에 액세스 권한이 없습니다."
 #: backend/api/advisor.py:93 backend/api/query_packs.py:119
 #: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
-#: backend/api/hardware_health.py:206 backend/api/hardware_health.py:319
+#: backend/api/hardware_health.py:231 backend/api/hardware_health.py:407
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
 #: backend/api/posture.py:375 backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
@@ -190,7 +190,7 @@ msgstr "호스트 ID 형식이 잘못되었습니다"
 #: backend/api/grafana_integration.py:329
 #: backend/api/config_mgmt_remediation.py:433
 #: backend/api/image_mode_actions.py:86 backend/api/host_graylog.py:131
-#: backend/api/hardware_health.py:76 backend/api/hardware_health.py:79
+#: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
 #: backend/api/updates/report_routes.py:34
@@ -2651,7 +2651,7 @@ msgstr "_AGENT이 성공적으로 등록되고 연결됨_"
 msgid "Failed to process heartbeat"
 msgstr "심장 박동 처리에 실패했습니다"
 
-#: backend/api/logging_settings.py:71 backend/api/hardware_health.py:362
+#: backend/api/logging_settings.py:71 backend/api/hardware_health.py:450
 #: backend/api/maintenance_windows.py:64
 msgid "Permission denied: administrator required"
 msgstr "권한 거부됨: 관리자 권한이 필요합니다"
@@ -3013,19 +3013,25 @@ msgstr "이 운영 체제에 대한 기본_ANTIVIRUS_설정을 찾을 수 없습
 msgid "Failed to delete antivirus default: %s"
 msgstr "디폴트 악성코드 제거 프로그램 삭제 실패: %s"
 
-#: backend/api/hardware_health.py:220
+#: backend/api/hardware_health.py:245
 msgid "Hardware event not found"
 msgstr "하드웨어 이벤트가 발견되지 않았습니다"
 
-#: backend/api/hardware_health.py:272
+#: backend/api/hardware_health.py:307
+msgid "Choose either specific events or all unresolved events, not both."
+msgstr ""
+"특정 이벤트 또는 모든 미해결 이벤트 중 하나를 선택해야 합니다. 두 가지 모두 "
+"선택할 수 없습니다."
+
+#: backend/api/hardware_health.py:360
 msgid "The temperature limit must be between 30 and 125 C"
 msgstr "온도 한도는 30에서 125 C 사이여야 합니다"
 
-#: backend/api/hardware_health.py:368
+#: backend/api/hardware_health.py:456
 msgid "Automatic installation requires a SysManage Enterprise license."
 msgstr "자동 설치에는 SysManage 엔터프라이즈 라이선스가 필요합니다."
 
-#: backend/api/hardware_health.py:372
+#: backend/api/hardware_health.py:460
 msgid "The setting could not be saved"
 msgstr "설정을 저장할 수 없습니다"
 
@@ -4689,7 +4695,7 @@ msgstr "호스트에서 방화벽 역할을 성공적으로 제거했습니다"
 msgid "Failed to remove firewall role: %s"
 msgstr "방화벽 역할 제거에 실패했습니다: %s"
 
-#: backend/api/asset_tag_csv.py:140
+#: backend/api/asset_tag_csv.py:143
 #, python-format
 msgid "Held asset tag %s released"
 msgstr "보류된 자산 태그 %s 해제됨"
@@ -5369,11 +5375,11 @@ msgstr "서버 메시지 큐 관리자가 초기화되었습니다"
 msgid "Rate limit exceeded. Please retry later."
 msgstr "요청 제한이 초과되었습니다. 나중에 다시 시도해주세요."
 
-#: backend/services/agent_capability_service.py:306
+#: backend/services/agent_capability_service.py:327
 msgid "this host"
 msgstr "이 호스트"
 
-#: backend/services/agent_capability_service.py:309
+#: backend/services/agent_capability_service.py:330
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "
@@ -5636,6 +5642,11 @@ msgstr "NetBSD pkgsrc 패키지 취약점(pkg_admin audit가 읽는 데이터)"
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "OS 버전별 macOS 취약점(NVD의 영향받는 버전 데이터 기준)"
+
+#~ msgid "Choose either specific events or all open events, not both."
+#~ msgstr ""
+#~ "특정 이벤트 또는 모든 오픈 이벤트 중 하나를 선택해야 합니다. 두 가지 모두 "
+#~ "선택할 수 없습니다."
 
 #, python-format
 #~ msgid ""

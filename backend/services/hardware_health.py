@@ -56,7 +56,12 @@ GONE = "gone"
 # Kinds whose disappearance is itself news (a failed drive leaves the bus).
 _GONE_MATTERS = ("drive", "array", "pool")
 # Host statuses beyond a component state, worst first in the fleet view.
-STATUS_ORDER = ("failed", "warning", "stale", "unknown", "unmeasured", "ok")
+STATUS_ORDER = ("failed", "warning", "stale", "unknown", "unmeasured", "ok", "none")
+# A host that reported, every source ran or was absent, and none found any
+# hardware to judge -- a virtual machine.  Not "unknown" (Not judged): nothing
+# went unread, there is just nothing to watch (Bryan, 2026-10-19).
+NONE = "none"
+UNKNOWN = "unknown"
 STALE_AFTER = timedelta(hours=1)
 
 EVIDENCE_CATEGORIES = ("storage", "thermal", "memory", "power")
@@ -310,21 +315,53 @@ def apply_report(
     events += _evidence_events(host, clean_evidence(payload.get("evidence")), now)
     for event in events:
         db.add(event)
-    host.hardware_state = (
-        worst(c["state"] for c in components) if components else "unknown"
-    )
+    if components:
+        host.hardware_state = worst(c["state"] for c in components)
+    else:
+        # "none" needs a source to have looked; a failed one may hide hardware
+        host.hardware_state = NONE if sources and not failed else UNKNOWN
     host.hardware_reported_at = now
     host.hardware_sources = json.dumps(sources)
     return events
 
 
-def host_status(host: models.Host, now: Optional[datetime] = None) -> str:
-    """failed / warning / unknown / ok -- or unmeasured / stale."""
+def _looked_and_found_nothing(host: models.Host) -> bool:
+    """Some source ran (or was absent) and none failed."""
+    sources = _loads(host.hardware_sources, [])
+    return bool(sources) and not any(s.get("status") == "failed" for s in sources)
+
+
+def host_status(
+    host: models.Host,
+    now: Optional[datetime] = None,
+    has_components: Optional[bool] = None,
+) -> str:
+    """failed / warning / unknown / ok / none -- or unmeasured / stale.
+
+    ``has_components`` (when the caller knows) re-derives "none" for a host
+    stored as "unknown" before that state existed: no components and no
+    failed source is a VM, right from the deploy rather than its next report.
+    """
     if host.hardware_reported_at is None:
         return "unmeasured"
     if (now or _now()) - host.hardware_reported_at > STALE_AFTER:
         return "stale"
-    return host.hardware_state or "unknown"
+    state = host.hardware_state or UNKNOWN
+    if state == UNKNOWN and has_components is False and _looked_and_found_nothing(host):
+        return NONE
+    return state
+
+
+def hosts_with_components(db: Session, host_ids) -> set:
+    """String ids of the hosts that have any hardware component stored."""
+    if not host_ids:
+        return set()
+    return {
+        str(row[0])
+        for row in db.query(models.HardwareComponent.host_id)
+        .filter(models.HardwareComponent.host_id.in_(list(host_ids)))
+        .distinct()
+    }
 
 
 def _loads(text: Optional[str], default):
@@ -391,7 +428,7 @@ def host_view(db: Session, host: models.Host, event_limit: int = 50) -> Dict[str
         .all()
     )
     return {
-        "status": host_status(host),
+        "status": host_status(host, has_components=bool(rows)),
         "reported_at": (
             host.hardware_reported_at.isoformat() if host.hardware_reported_at else None
         ),
@@ -443,23 +480,103 @@ def _open_event(db: Session, event_id: str) -> Optional[models.HardwareEvent]:
     return db.query(models.HardwareEvent).filter(models.HardwareEvent.id == key).first()
 
 
-def acknowledge(db: Session, event_id: str, user: str, note: Optional[str] = None):
-    event = _open_event(db, event_id)
-    if event is None or event.acknowledged_at is not None:
-        return event
-    event.acknowledged_at, event.acknowledged_by = _now(), user
+def _acknowledge(event, user: str, note: Optional[str], now) -> bool:
+    """Acknowledge ``event``; False when it already was."""
+    if event.acknowledged_at is not None:
+        return False
+    event.acknowledged_at, event.acknowledged_by = now, user
     if note:
         event.note = note[:500]
+    return True
+
+
+def _resolve(event, user: str, note: Optional[str], now) -> bool:
+    """Resolve (and so acknowledge) ``event``; False when it already was."""
+    if event.resolved_at is not None:
+        return False
+    event.resolved_at, event.resolved_by = now, user
+    if event.acknowledged_at is None:
+        event.acknowledged_at, event.acknowledged_by = now, user
+    if note:
+        event.note = note[:500]
+    return True
+
+
+def acknowledge(db: Session, event_id: str, user: str, note: Optional[str] = None):
+    event = _open_event(db, event_id)
+    if event is not None:
+        _acknowledge(event, user, note, _now())
     return event
 
 
 def resolve(db: Session, event_id: str, user: str, note: Optional[str] = None):
     event = _open_event(db, event_id)
-    if event is None or event.resolved_at is not None:
-        return event
-    event.resolved_at, event.resolved_by = _now(), user
-    if event.acknowledged_at is None:
-        event.acknowledged_at, event.acknowledged_by = event.resolved_at, user
-    if note:
-        event.note = note[:500]
+    if event is not None:
+        _resolve(event, user, note, _now())
     return event
+
+
+# Bulk acknowledge / resolve (2026-10-19): one click instead of one per event
+# on a host whose sensor flapped dozens of times a night.
+MAX_BULK_EVENTS = 1000
+BULK_ACTIONS = {"acknowledge": _acknowledge, "resolve": _resolve}
+
+
+def _uuids(event_ids) -> List[uuid.UUID]:
+    keys = []
+    for value in event_ids or []:
+        try:
+            keys.append(uuid.UUID(str(value)))
+        except ValueError:
+            continue  # counted as skipped by the caller
+    return keys
+
+
+def _still_open(query, action: str):
+    """Events the action would still change -- "all open" means these."""
+    query = query.filter(models.HardwareEvent.resolved_at.is_(None))
+    if action == "acknowledge":
+        query = query.filter(models.HardwareEvent.acknowledged_at.is_(None))
+    return query
+
+
+def bulk_change(
+    db: Session,
+    action: str,
+    user: str,
+    *,
+    event_ids=None,
+    host_id: Optional[uuid.UUID] = None,
+    note: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Acknowledge or resolve many events; the caller commits.
+
+    Either the listed ``event_ids`` (at most ``MAX_BULK_EVENTS``), or -- with
+    no ids -- every event the action would still change, optionally on one
+    host ("select all N matching").  Returns the changed events and how many
+    asked-for ones were skipped (unknown, malformed, or already done).
+    """
+    change = BULK_ACTIONS[action]
+    query = db.query(models.HardwareEvent)
+    asked = None
+    if event_ids is not None:
+        asked = len(event_ids)
+        query = query.filter(models.HardwareEvent.id.in_(_uuids(event_ids)))
+    else:
+        query = _still_open(query, action)
+    if host_id is not None:
+        query = query.filter(models.HardwareEvent.host_id == host_id)
+    now = _now()
+    changed = [
+        e for e in query.limit(MAX_BULK_EVENTS).all() if change(e, user, note, now)
+    ]
+    skipped = (asked - len(changed)) if asked is not None else 0
+    return {"changed": changed, "skipped": skipped}
+
+
+def count_open(db: Session, action: str, host_id: Optional[uuid.UUID] = None) -> int:
+    """How many events "select all" would cover for ``action``."""
+    query = _still_open(db.query(models.HardwareEvent), action)
+    if host_id is not None:
+        query = query.filter(models.HardwareEvent.host_id == host_id)
+    return query.count()

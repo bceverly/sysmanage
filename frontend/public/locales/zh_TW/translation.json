@@ -1183,7 +1183,8 @@
     "unavailable": "不可用",
     "unknown": "此代理程式尚未宣佈其功能。舊版代理程式不會報告它們；主機不受限制。",
     "updated": "已報告",
-    "reasonMissingNamedTool": "需要 {{tool}}，但此主機上未安裝"
+    "reasonMissingNamedTool": "需要 {{tool}}，但此主機上未安裝",
+    "optionalNotInstalled": "在其工具安裝後可用"
   },
   "hostDefaults": {
     "addNewPackageManager": "新增已啟用的套件管理員",
@@ -5116,7 +5117,18 @@
       "resolveTitle": "解決此事件",
       "resolvedBy": "已由 {{user}} 解決",
       "when": "時間",
-      "why": "原因"
+      "why": "原因",
+      "acknowledgeSelected": "確認所選",
+      "allMatchingSelected": "已選取所有未解決的事件（{{n}}）。",
+      "bulkChanged": "已變更的事件：{{n}}",
+      "bulkError": "無法更改所選的事件",
+      "bulkSkipped": "已經完成或未找到：{{n}}",
+      "clearSelection": "清除選取",
+      "resolveSelected": "解決所選",
+      "selectAllMatching": "選取全部 {{n}} 個未解決的事件",
+      "selectEvent": "選取此事件",
+      "selectPage": "選取此頁面上的所有事件",
+      "selectedCount": "已選取：{{n}}"
     },
     "filter": {
       "all": "全部",
@@ -5161,7 +5173,8 @@
       "stale": "近期無回報",
       "unknown": "無法評估",
       "unmeasured": "未回報",
-      "warning": "警告"
+      "warning": "警告",
+      "none": "沒有實體硬體"
     },
     "statusHelp": {
       "failed": "至少有一個元件發生故障。",
@@ -5169,7 +5182,8 @@
       "stale": "最後一次回報已超過一小時。此主機可能未連線。",
       "unknown": "主機已回報其硬體，但至少有一個元件沒有任何方式可以評估。",
       "unmeasured": "此主機從未回報其硬體。其代理可能版本過舊，或尚未連線。",
-      "warning": "至少有一個元件需要注意。"
+      "warning": "至少有一個元件需要注意。",
+      "none": "沒有需要監控的項目：未發現磁碟機、感測器或 ECC 記憶體（虛擬機器通常如此）。"
     },
     "title": "硬體健康狀況",
     "reason": {

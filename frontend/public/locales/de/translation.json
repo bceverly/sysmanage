@@ -1183,7 +1183,8 @@
     "unavailable": "Nicht verfügbar",
     "unknown": "Dieser Agent hat seine Funktionalitäten nicht gemeldet. Ältere Agenten melden sie nicht; der Host ist nicht eingeschränkt.",
     "updated": "Gemeldet",
-    "reasonMissingNamedTool": "Erfordert {{tool}}, das auf diesem Host nicht installiert ist"
+    "reasonMissingNamedTool": "Erfordert {{tool}}, das auf diesem Host nicht installiert ist",
+    "optionalNotInstalled": "Verfügbar, sobald sein Tool installiert ist"
   },
   "hostDefaults": {
     "addNewPackageManager": "Neuen aktivierten Paketmanager hinzufügen",
@@ -5116,7 +5117,18 @@
       "resolveTitle": "Dieses Ereignis als behoben markieren",
       "resolvedBy": "Behoben von {{user}}",
       "when": "Zeitpunkt",
-      "why": "Grund"
+      "why": "Grund",
+      "acknowledgeSelected": "Auswahl bestätigen",
+      "allMatchingSelected": "Alle ungelösten Ereignisse sind ausgewählt ({{n}}).",
+      "bulkChanged": "Geänderte Ereignisse: {{n}}",
+      "bulkError": "Die ausgewählten Ereignisse konnten nicht geändert werden.",
+      "bulkSkipped": "Bereits durchgeführt oder nicht gefunden: {{n}}",
+      "clearSelection": "Auswahl löschen",
+      "resolveSelected": "Auswahl beheben",
+      "selectAllMatching": "Alle {{n}} ungelösten Ereignisse auswählen",
+      "selectEvent": "Dieses Ereignis auswählen",
+      "selectPage": "Alle Ereignisse auf dieser Seite auswählen",
+      "selectedCount": "Ausgewählt: {{n}}"
     },
     "filter": {
       "all": "Alle",
@@ -5161,7 +5173,8 @@
       "stale": "Kein aktueller Bericht",
       "unknown": "Nicht bewertbar",
       "unmeasured": "Nicht gemeldet",
-      "warning": "Warnung"
+      "warning": "Warnung",
+      "none": "Keine physische Hardware"
     },
     "statusHelp": {
       "failed": "Mindestens eine Komponente ist ausgefallen.",
@@ -5169,7 +5182,8 @@
       "stale": "Der letzte Bericht ist älter als eine Stunde. Der Host ist wahrscheinlich nicht verbunden.",
       "unknown": "Der Host hat seine Hardware gemeldet, aber mindestens eine Komponente war nicht bewertbar.",
       "unmeasured": "Der Host hat seine Hardware noch nie gemeldet. Sein Agent ist möglicherweise zu alt, oder er hat sich nicht verbunden.",
-      "warning": "Mindestens eine Komponente erfordert Aufmerksamkeit."
+      "warning": "Mindestens eine Komponente erfordert Aufmerksamkeit.",
+      "none": "Nichts zu überwachen: Es wurden keine Laufwerke, Sensoren oder ECC-Speicher gefunden (typisch für eine virtuelle Maschine)."
     },
     "title": "Hardware-Zustand",
     "reason": {

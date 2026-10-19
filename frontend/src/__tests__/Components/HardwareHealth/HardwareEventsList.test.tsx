@@ -16,11 +16,11 @@ vi.mock("../../../Services/permissions", () => ({
 }));
 vi.mock("../../../Services/hardwareHealth", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../../Services/hardwareHealth")>();
-  return { ...actual, changeHardwareEvent: vi.fn() };
+  return { ...actual, changeHardwareEvent: vi.fn(), bulkChangeHardwareEvents: vi.fn() };
 });
 
 import { hasPermission } from "../../../Services/permissions";
-import { changeHardwareEvent } from "../../../Services/hardwareHealth";
+import { bulkChangeHardwareEvents, changeHardwareEvent } from "../../../Services/hardwareHealth";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import HardwareEventsList from "../../../Components/HardwareHealth/HardwareEventsList";
 import { event } from "./_fixtures";
@@ -102,5 +102,77 @@ describe("HardwareEventsList", () => {
     vi.mocked(hasPermission).mockResolvedValue(false);
     renderList([]);
     expect(screen.getByText("No hardware events.")).toBeInTheDocument();
+  });
+});
+
+
+describe("HardwareEventsList bulk actions", () => {
+  const three = [event({ id: "e1" }), event({ id: "e2" }), event({ id: "e3" })];
+  const renderBulk = (total = 3, onChanged = vi.fn()) =>
+    render(
+      <MemoryRouter>
+        <HardwareEventsList events={three} total={total} hostId="h1" showHost onChanged={onChanged} />
+      </MemoryRouter>,
+    );
+
+  beforeEach(() => {
+    vi.mocked(bulkChangeHardwareEvents).mockReset();
+    vi.mocked(hasPermission).mockResolvedValue(true);
+  });
+
+  test("no checkboxes without the role", async () => {
+    vi.mocked(hasPermission).mockResolvedValue(false);
+    renderBulk();
+    await waitFor(() => expect(hasPermission).toHaveBeenCalled());
+    expect(screen.queryByLabelText("Select all events on this page")).toBeNull();
+  });
+
+  test("resolves the picked events in one call", async () => {
+    vi.mocked(bulkChangeHardwareEvents).mockResolvedValue({ changed: 2, skipped: 0 });
+    const onChanged = vi.fn();
+    renderBulk(3, onChanged);
+    const boxes = await screen.findAllByLabelText("Select this event");
+    fireEvent.click(boxes[0]);
+    fireEvent.click(boxes[2]);
+    expect(screen.getByText("Selected: 2")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Resolve selected"));
+    await waitFor(() =>
+      expect(bulkChangeHardwareEvents).toHaveBeenCalledWith("resolve", { eventIds: ["e1", "e3"] }),
+    );
+    expect(await screen.findByText("Events changed: 2")).toBeInTheDocument();
+    expect(onChanged).toHaveBeenCalled();
+  });
+
+  test("select all offers every open event beyond the page", async () => {
+    vi.mocked(bulkChangeHardwareEvents).mockResolvedValue({ changed: 40, skipped: 0 });
+    renderBulk(40);
+    fireEvent.click(await screen.findByLabelText("Select all events on this page"));
+    fireEvent.click(screen.getByText("Select all 40 unresolved events"));
+    expect(screen.getByText("All unresolved events are selected (40).")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Acknowledge selected"));
+    await waitFor(() =>
+      expect(bulkChangeHardwareEvents).toHaveBeenCalledWith("acknowledge", { allOpen: true, hostId: "h1" }),
+    );
+  });
+
+  test("a failure is shown and nothing is cleared", async () => {
+    vi.mocked(bulkChangeHardwareEvents).mockRejectedValue(new Error("boom"));
+    renderBulk();
+    fireEvent.click((await screen.findAllByLabelText("Select this event"))[1]);
+    fireEvent.click(screen.getByText("Resolve selected"));
+    expect(await screen.findByText("The selected events could not be changed.")).toBeInTheDocument();
+    expect(screen.getByText("Selected: 1")).toBeInTheDocument();
+  });
+
+  test("resolved events cannot be picked", async () => {
+    render(
+      <MemoryRouter>
+        <HardwareEventsList
+          events={[event({ id: "done", resolved_at: "2026-10-19T10:00:00", resolved_by: "op" }), event({ id: "open" })]}
+          showHost
+        />
+      </MemoryRouter>,
+    );
+    expect(await screen.findAllByLabelText("Select this event")).toHaveLength(1);
   });
 });

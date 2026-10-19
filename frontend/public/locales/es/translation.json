@@ -1183,7 +1183,8 @@
     "unavailable": "No disponible",
     "unknown": "Este agente no ha anunciado sus habilidades. Los agentes antiguos no las reportan; la host no está restringida.",
     "updated": "Reportado",
-    "reasonMissingNamedTool": "Requiere {{tool}}, que no está instalado en este host"
+    "reasonMissingNamedTool": "Requiere {{tool}}, que no está instalado en este host",
+    "optionalNotInstalled": "Disponible una vez que se instale su herramienta"
   },
   "hostDefaults": {
     "addNewPackageManager": "Agregar Nuevo Gestor de Paquetes Habilitado",
@@ -5116,7 +5117,18 @@
       "resolveTitle": "Marcar este evento como resuelto",
       "resolvedBy": "Resuelto por {{user}}",
       "when": "Hora",
-      "why": "Motivo"
+      "why": "Motivo",
+      "acknowledgeSelected": "Aceptar seleccionados",
+      "allMatchingSelected": "Todos los eventos sin resolver están seleccionados ({{n}}).",
+      "bulkChanged": "Eventos cambiados: {{n}}",
+      "bulkError": "No se pudieron cambiar los eventos seleccionados.",
+      "bulkSkipped": "Ya hechos o no encontrados: {{n}}",
+      "clearSelection": "Limpiar selección",
+      "resolveSelected": "Resolver seleccionados",
+      "selectAllMatching": "Seleccionar los {{n}} eventos sin resolver",
+      "selectEvent": "Seleccionar este evento",
+      "selectPage": "Seleccionar todos los eventos en esta página",
+      "selectedCount": "Seleccionados: {{n}}"
     },
     "filter": {
       "all": "Todos",
@@ -5161,7 +5173,8 @@
       "stale": "Sin informe reciente",
       "unknown": "No evaluable",
       "unmeasured": "Sin informar",
-      "warning": "Advertencia"
+      "warning": "Advertencia",
+      "none": "Sin hardware físico"
     },
     "statusHelp": {
       "failed": "Al menos un componente está averiado.",
@@ -5169,7 +5182,8 @@
       "stale": "El último informe tiene más de una hora. Probablemente el host no está conectado.",
       "unknown": "El host informó su hardware, pero al menos un componente no fue evaluable.",
       "unmeasured": "El host nunca ha informado su hardware. Puede que su agente sea demasiado antiguo o que no se haya conectado.",
-      "warning": "Al menos un componente requiere atención."
+      "warning": "Al menos un componente requiere atención.",
+      "none": "No hay nada que supervisar: no se encontraron discos, sensores ni memoria ECC (lo habitual en una máquina virtual)."
     },
     "title": "Estado del hardware",
     "reason": {

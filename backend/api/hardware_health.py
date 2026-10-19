@@ -55,6 +55,17 @@ class EventNote(BaseModel):
     note: Optional[str] = Field(default=None, max_length=500)
 
 
+class BulkEvents(BaseModel):
+    # Either the events picked on screen, or every event the action would
+    # still change ("Select all N matching"), optionally on one host.
+    event_ids: Optional[List[str]] = Field(
+        default=None, max_length=hardware_health.MAX_BULK_EVENTS
+    )
+    all_open: bool = False
+    host_id: Optional[str] = None
+    note: Optional[str] = Field(default=None, max_length=500)
+
+
 class InstallRequest(BaseModel):
     host_ids: List[str] = Field(min_length=1, max_length=5000)
 
@@ -131,11 +142,19 @@ async def fleet_hardware_health(db: Session = Depends(get_tenant_db)) -> Dict[st
     hosts = _approved(db)
     ids = [h.id for h in hosts]
     rank = {s: i for i, s in enumerate(hardware_health.STATUS_ORDER)}
+    counts = hardware_health.counts_by_host(db, ids)
     rows = sorted(
-        ((h, hardware_health.host_status(h)) for h in hosts),
+        (
+            (
+                h,
+                hardware_health.host_status(
+                    h, has_components=bool(counts.get(str(h.id)))
+                ),
+            )
+            for h in hosts
+        ),
         key=lambda r: (rank.get(r[1], len(rank)), r[0].fqdn or ""),
     )
-    counts = hardware_health.counts_by_host(db, ids)
     problems = hardware_health.problems_by_host(db, ids)
     tags = _tags_by_host(db, ids)
     sites = clock_status.site_names({h.site_id for h in hosts if h.site_id})
@@ -166,7 +185,11 @@ async def fleet_hardware_health(db: Session = Depends(get_tenant_db)) -> Dict[st
 @router.get("/hardware-health/summary")
 async def fleet_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
     hosts = _approved(db)
-    statuses = [hardware_health.host_status(h) for h in hosts]
+    with_parts = hardware_health.hosts_with_components(db, [h.id for h in hosts])
+    statuses = [
+        hardware_health.host_status(h, has_components=str(h.id) in with_parts)
+        for h in hosts
+    ]
     return {"total": len(statuses), "counts": _counts(statuses)}
 
 
@@ -184,6 +207,7 @@ async def fleet_events(
         query = query.filter(
             models.HardwareEvent.host_id == _host_or_404(db, host_id).id
         )
+    total = query.count()  # "Select all N matching" needs N beyond the page
     events = query.order_by(models.HardwareEvent.occurred_at.desc()).limit(limit).all()
     fqdns = {
         str(h.id): h.fqdn
@@ -195,7 +219,8 @@ async def fleet_events(
         "events": [
             {**hardware_health.event_view(e), "fqdn": fqdns.get(str(e.host_id))}
             for e in events
-        ]
+        ],
+        "total": total,
     }
 
 
@@ -251,6 +276,71 @@ async def resolve_event(
     current_user=Depends(require_authenticated_user),
 ) -> Dict[str, Any]:
     return _change(db, event_id, body, current_user, "resolve")
+
+
+def _bulk_audit(db, current_user, action: str, changed, note) -> None:
+    """One entry per host touched, not one per event: a bulk resolve of a
+    flapping sensor's 200 events is one decision, and the host's own audit
+    trail still shows it."""
+    by_host: Dict[str, List[models.HardwareEvent]] = {}
+    for event in changed:
+        by_host.setdefault(str(event.host_id), []).append(event)
+    for host_id, events in by_host.items():
+        AuditService.log(
+            db=db,
+            user_id=current_user.id,
+            username=current_user.userid,
+            action_type=ActionType.UPDATE,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            description=f"Hardware events {action}d in bulk: {len(events)}",
+            details={"event_ids": [str(e.id) for e in events], "note": note},
+            commit=False,
+        )
+
+
+def _bulk(db, body: BulkEvents, current_user, action: str) -> Dict[str, Any]:
+    _require_role(current_user)
+    if (body.event_ids is None) == (not body.all_open):
+        raise HTTPException(
+            status_code=422,
+            detail=_(
+                "Choose either specific events or all unresolved events, not both."
+            ),
+        )
+    host = _host_or_404(db, body.host_id).id if body.host_id else None
+    result = hardware_health.bulk_change(
+        db, action, current_user.userid,
+        event_ids=body.event_ids, host_id=host, note=body.note,
+    )  # fmt: skip
+    _bulk_audit(db, current_user, action, result["changed"], body.note)
+    db.flush()
+    # "all open" changes at most MAX_BULK_EVENTS per call; say what is left
+    remaining = hardware_health.count_open(db, action, host) if body.all_open else 0
+    db.commit()
+    return {
+        f"{action}d": len(result["changed"]),
+        "skipped": result["skipped"],
+        "remaining": remaining,
+    }
+
+
+@router.post("/hardware-health/events/acknowledge")
+async def acknowledge_events(
+    body: BulkEvents,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    return _bulk(db, body, current_user, "acknowledge")
+
+
+@router.post("/hardware-health/events/resolve")
+async def resolve_events(
+    body: BulkEvents,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    return _bulk(db, body, current_user, "resolve")
 
 
 @router.put("/host/{host_id}/hardware-health/temperature-limit")

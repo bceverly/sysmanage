@@ -117,9 +117,25 @@ def test_limited_flag_is_three_valued():
     assert limited_flag(full) is False
 
     lim = _H()
-    lim.agent_capabilities = '{"commands": ["x"]}'
+    lim.agent_capabilities = (
+        '{"commands": ["x"], "unavailable": {"scripts": "no_handler"}}'
+    )
     lim.agent_capabilities_limited = True
     assert limited_flag(lim) is True
+
+
+def test_limited_flag_applies_todays_rule_to_a_stored_report():
+    """A host advertised before optional tools stopped counting (its column
+    still says True) reads as full once the server is upgraded."""
+    from backend.services.agent_capability_service import limited_flag
+
+    class _H:
+        agent_capabilities = (
+            '{"commands": ["x"], "unavailable": {"config_management": "missing_tool"}}'
+        )
+        agent_capabilities_limited = True
+
+    assert limited_flag(_H()) is False
 
 
 def test_limited_flag_ignores_a_stale_true_with_no_report():

@@ -4,6 +4,7 @@
 
 """Hardware health endpoints (Phase 23.1 S2)."""
 
+import json
 import uuid
 from unittest.mock import patch
 
@@ -259,3 +260,130 @@ def test_setting_a_temperature_limit_needs_the_role(client, auth_headers, sessio
     assert response.status_code == 403
     session.expire_all()
     assert session.get(models.Host, host.id).hardware_temp_warning_c is None
+
+
+def _flapping(session, fqdn, flips):
+    """A host whose drive flapped ``flips`` times: one open event per flip."""
+    host = _host(session, fqdn)
+    for i in range(flips):
+        hardware_health.apply_report(
+            session, host, _report("warning" if i % 2 == 0 else "ok")
+        )
+        session.commit()
+    return host
+
+
+def _open_ids(client, auth_headers, host):
+    return [
+        e["id"]
+        for e in client.get(
+            "/api/v1/hardware-health/events",
+            params={"open": "true", "host_id": str(host.id)},
+            headers=auth_headers,
+        ).json()["events"]
+    ]
+
+
+def test_bulk_resolve_the_picked_events(client, auth_headers, session):
+    """Bryan, 2026-10-19: "managing the bajillion resolves is exhausting"."""
+    host = _flapping(session, "nextcloud.lab", 4)
+    ids = _open_ids(client, auth_headers, host)
+    assert len(ids) == 4
+    body = client.post(
+        "/api/v1/hardware-health/events/resolve",
+        json={"event_ids": ids[:3] + [str(uuid.uuid4()), "not-a-uuid"]},
+        headers=auth_headers,
+    ).json()
+    assert body == {"resolved": 3, "skipped": 2, "remaining": 0}
+    assert len(_open_ids(client, auth_headers, host)) == 1
+    # one audit entry for the host, naming the events
+    (audit,) = (
+        session.query(models.AuditLog)
+        .filter(models.AuditLog.entity_id == str(host.id))
+        .filter(models.AuditLog.description.like("Hardware events resolved%"))
+        .all()
+    )
+    details = (
+        audit.details if isinstance(audit.details, dict) else json.loads(audit.details)
+    )
+    assert sorted(details["event_ids"]) == sorted(ids[:3])
+    # resolving them again changes nothing
+    again = client.post(
+        "/api/v1/hardware-health/events/resolve",
+        json={"event_ids": ids[:3]},
+        headers=auth_headers,
+    ).json()
+    assert again["resolved"] == 0 and again["skipped"] == 3
+
+
+def test_bulk_acknowledge_every_open_event_on_one_host(client, auth_headers, session):
+    noisy = _flapping(session, "mail.lab", 3)
+    other = _flapping(session, "beast.lab", 2)
+    total = client.get(
+        "/api/v1/hardware-health/events",
+        params={"open": "true", "host_id": str(noisy.id)},
+        headers=auth_headers,
+    ).json()["total"]
+    assert total == 3
+    body = client.post(
+        "/api/v1/hardware-health/events/acknowledge",
+        json={"all_open": True, "host_id": str(noisy.id), "note": "lid closed"},
+        headers=auth_headers,
+    ).json()
+    assert body == {"acknowledged": 3, "skipped": 0, "remaining": 0}
+    events = hardware_health.host_view(session, noisy)["events"]
+    assert all(e["acknowledged_at"] and not e["resolved_at"] for e in events)
+    # the other host is untouched
+    assert all(
+        not e["acknowledged_at"]
+        for e in hardware_health.host_view(session, other)["events"]
+    )
+
+
+def test_bulk_needs_the_role_and_one_selection(client, auth_headers, session):
+    host = _flapping(session, "laptop.lab", 2)
+    ids = _open_ids(client, auth_headers, host)
+    with patch(
+        "backend.persistence.models.User.has_role", return_value=False, create=True
+    ):
+        denied = client.post(
+            "/api/v1/hardware-health/events/resolve",
+            json={"event_ids": ids},
+            headers=auth_headers,
+        )
+    assert denied.status_code == 403
+    for body in ({}, {"event_ids": ids, "all_open": True}):
+        bad = client.post(
+            "/api/v1/hardware-health/events/resolve", json=body, headers=auth_headers
+        )
+        assert bad.status_code == 422
+    too_many = client.post(
+        "/api/v1/hardware-health/events/resolve",
+        json={"event_ids": [str(uuid.uuid4()) for _ in range(1001)]},
+        headers=auth_headers,
+    )
+    assert too_many.status_code == 422
+    unknown_host = client.post(
+        "/api/v1/hardware-health/events/resolve",
+        json={"all_open": True, "host_id": str(uuid.uuid4())},
+        headers=auth_headers,
+    )
+    assert unknown_host.status_code == 404
+    assert len(_open_ids(client, auth_headers, host)) == 2
+
+
+def test_a_vm_reads_no_physical_hardware_in_the_fleet(client, auth_headers, session):
+    vm = _host(session, "droplet.lab")
+    hardware_health.apply_report(
+        session,
+        vm,
+        {"components": [], "sources": [{"name": "nvme", "status": "absent"}]},
+    )
+    vm.hardware_state = "unknown"  # stored by an older server: re-derived
+    session.commit()
+    body = client.get("/api/v1/hardware-health/hosts", headers=auth_headers).json()
+    (row,) = [h for h in body["hosts"] if h["fqdn"] == "droplet.lab"]
+    assert row["status"] == "none"
+    assert body["hosts"][-1]["fqdn"] == "droplet.lab"  # least severe, last
+    summary = client.get("/api/v1/hardware-health/summary", headers=auth_headers).json()
+    assert summary["counts"].get("none") == 1 and "unknown" not in summary["counts"]

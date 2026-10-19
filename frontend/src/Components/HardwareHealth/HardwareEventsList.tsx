@@ -9,6 +9,7 @@
 import React, { useEffect, useState } from 'react';
 import {
     Button,
+    Checkbox,
     Chip,
     Dialog,
     DialogActions,
@@ -30,6 +31,7 @@ import { hasPermission, SecurityRoles } from '../../Services/permissions';
 import { changeHardwareEvent } from '../../Services/hardwareHealth';
 import type { HardwareEvent } from '../../Services/hardwareHealth';
 import { kindLabel, reasonsText, statusColor, transitionText } from './hardwareHealthLabels';
+import HardwareEventsBulkBar, { useEventSelection } from './HardwareEventsBulkBar';
 
 type Action = 'acknowledge' | 'resolve';
 
@@ -95,9 +97,15 @@ const HardwareEventsList: React.FC<{
     events: HardwareEvent[];
     showHost?: boolean;
     onChanged?: () => void;
-}> = ({ events, showHost = false, onChanged }) => {
+    /** Open events in all; more than listed offers "Select all N". */
+    total?: number;
+    /** Scopes "all open" to one host. */
+    hostId?: string;
+}> = ({ events, showHost = false, onChanged, total, hostId }) => {
     const { t } = useTranslation();
     const [canChange, setCanChange] = useState(false);
+    const selection = useEventSelection(events);
+    const bulk = canChange && events.some(selection.selectable);
     const [pending, setPending] = useState<{ event: HardwareEvent; action: Action } | null>(null);
 
     useEffect(() => {
@@ -127,9 +135,28 @@ const HardwareEventsList: React.FC<{
     }
     return (
         <>
+            {bulk && (
+                <HardwareEventsBulkBar
+                    selection={selection}
+                    total={total ?? events.filter(selection.selectable).length}
+                    hostId={hostId}
+                    onChanged={onChanged}
+                />
+            )}
             <Table size="small">
                 <TableHead>
                     <TableRow>
+                        {bulk && (
+                            <TableCell padding="checkbox">
+                                <Checkbox
+                                    size="small"
+                                    checked={selection.pageSelected}
+                                    indeterminate={selection.somePageSelected}
+                                    onChange={selection.togglePage}
+                                    slotProps={{ input: { 'aria-label': t('hardwareHealth.events.selectPage', 'Select all events on this page') } }}
+                                />
+                            </TableCell>
+                        )}
                         <TableCell>{t('hardwareHealth.events.when', 'Time')}</TableCell>
                         {showHost && <TableCell>{t('hardwareHealth.events.host', 'Host')}</TableCell>}
                         <TableCell>{t('hardwareHealth.events.component', 'Component')}</TableCell>
@@ -140,7 +167,19 @@ const HardwareEventsList: React.FC<{
                 </TableHead>
                 <TableBody>
                     {events.map(event => (
-                        <TableRow key={event.id}>
+                        <TableRow key={event.id} selected={selection.selected.has(event.id)}>
+                            {bulk && (
+                                <TableCell padding="checkbox">
+                                    {selection.selectable(event) && (
+                                        <Checkbox
+                                            size="small"
+                                            checked={selection.selected.has(event.id)}
+                                            onChange={() => selection.toggle(event.id)}
+                                            slotProps={{ input: { 'aria-label': t('hardwareHealth.events.selectEvent', 'Select this event') } }}
+                                        />
+                                    )}
+                                </TableCell>
+                            )}
                             <TableCell>{when(event.occurred_at)}</TableCell>
                             {showHost && (
                                 <TableCell>

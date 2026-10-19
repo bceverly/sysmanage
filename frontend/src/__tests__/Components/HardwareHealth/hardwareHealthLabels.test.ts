@@ -10,9 +10,11 @@ import {
   reasonText,
   reasonsText,
   statusColor,
+  statusHelp,
   statusLabel,
   transitionText,
 } from "../../../Components/HardwareHealth/hardwareHealthLabels";
+import { needingAttention, STATUS_ORDER } from "../../../Services/hardwareHealth";
 import { event } from "./_fixtures";
 
 const t = mockT as unknown as TFunction;
@@ -100,5 +102,15 @@ describe("hardware health labels", () => {
       "39.85 C, 5% worn, Power-on hours: 16161",
     );
     expect(metricsText(t, {})).toBe("");
+  });
+});
+
+describe("a host with no physical hardware (a VM)", () => {
+  test("is neutral, ordered last, and says why", () => {
+    expect(statusLabel(t, "none")).toBe("No physical hardware");
+    expect(statusColor("none")).toBe("default");
+    expect(statusHelp(t, "none")).toMatch(/virtual machine/);
+    expect(STATUS_ORDER[STATUS_ORDER.length - 1]).toBe("none");
+    expect(needingAttention({ none: 3, ok: 1 })).toBe(0);
   });
 });

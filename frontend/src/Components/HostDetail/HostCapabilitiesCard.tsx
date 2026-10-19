@@ -120,7 +120,12 @@ const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, lim
     // persistent_host_token is an agent trait the server acts on (Phase 22.0
     // identity), not a command group -- it is not a "supported" feature.
     const groups = (report.capabilities || []).filter(group => group !== 'persistent_host_token');
-    const unavailableKeys = Object.keys(unavailable);
+    // An optional tool the host has not installed (ansible-core, ClamAV...)
+    // is not a limitation of the agent: shown apart, neutral, and not counted
+    // by the server's "limited" rule (agent_capability_service.is_limited).
+    const isOptional = (group: string) => unavailable[group] === 'missing_tool';
+    const unavailableKeys = Object.keys(unavailable).filter((group) => !isOptional(group));
+    const optionalKeys = Object.keys(unavailable).filter(isOptional);
     const partialKeys = Object.keys(partial);
     const notApplicableKeys = Object.keys(notApplicable);
 
@@ -174,6 +179,26 @@ const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, lim
                                     <Chip
                                         size="small"
                                         color="warning"
+                                        variant="outlined"
+                                        label={`${group} -- ${reasonText(unavailable[group], group)}`}
+                                    />
+                                </Tooltip>
+                            ))}
+                        </Box>
+                    </>
+                )}
+
+                {optionalKeys.length > 0 && (
+                    <>
+                        <Divider sx={{ my: 2 }} />
+                        <Typography variant="subtitle2" gutterBottom>
+                            {t('hostCapabilities.optionalNotInstalled', 'Available once its tool is installed')}
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            {optionalKeys.map((group) => (
+                                <Tooltip key={group} title={reasonText(unavailable[group], group)}>
+                                    <Chip
+                                        size="small"
                                         variant="outlined"
                                         label={`${group} -- ${reasonText(unavailable[group], group)}`}
                                     />

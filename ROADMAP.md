@@ -14446,6 +14446,27 @@ mark, so every report crossed the limit one way or the other.
       sections in docs/administration/hardware-health.html, 13 locales;
       `hardware-health-templimit` shotlist entry + seed_hardware.py hot host
       wired -- the PNG itself is captured by the next `make screenshots`)
+- [x] **Bulk acknowledge / resolve** (2026-10-19, Bryan: "managing the
+      bajillion resolves is exhausting") -- the events list (Hardware Health
+      page and host card) has a checkbox column, a page select-all, "Select
+      all N unresolved events" beyond the page, and "Acknowledge selected" /
+      "Resolve selected".  `POST /api/v1/hardware-health/events/acknowledge`
+      and `.../resolve` take `event_ids` (at most 1000) or `all_open` (+
+      optional `host_id`, changed in batches of 1000 with `remaining`
+      reported); Manage Hardware Health role; one audit entry per host
+      touched.  The events list now returns `total`
+- [x] **"No physical hardware" instead of "Not judged" for VMs**
+      (2026-10-19) -- a report with no components where a source looked and
+      none failed is host state `none` (least severe, after Healthy, neutral,
+      never counted as needing attention).  No components because a source
+      FAILED, or no sources at all, stays `unknown`.  Hosts stored as
+      `unknown` by an older server re-derive to `none` on read when they have
+      no components and no failed source, so VMs read right straight after
+      the deploy
+- [ ] **Docs: bulk actions + "No physical hardware"** -- the sysmanage-docs
+      hardware health page needs the select / bulk acknowledge-resolve flow
+      and the new VM state (status table + help text), with a
+      `make screenshots` shotlist entry for the selection toolbar
 
 ### Production serving topology: nginx is the only thing facing the network (tech debt)
 

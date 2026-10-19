@@ -22,7 +22,7 @@ import {
     Typography,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { getFleetHardware, getHardwareEvents, STATUS_ORDER } from '../Services/hardwareHealth';
+import { getFleetHardware, getHardwareEventsPage, STATUS_ORDER } from '../Services/hardwareHealth';
 import type { FleetHardware, FleetHost, HardwareEvent, HardwareStatus } from '../Services/hardwareHealth';
 import FleetHardwareGrid from '../Components/HardwareHealth/FleetHardwareGrid';
 import HardwareEventsList from '../Components/HardwareHealth/HardwareEventsList';
@@ -72,14 +72,16 @@ const HardwareHealth: React.FC = () => {
     const { t } = useTranslation();
     const [data, setData] = useState<FleetHardware | null>(null);
     const [events, setEvents] = useState<HardwareEvent[]>([]);
+    const [openTotal, setOpenTotal] = useState(0);
     const [error, setError] = useState(false);
     const [filters, setFilters] = useState<Filters>({ status: ALL, site: '', tag: '', search: '' });
 
     const load = useCallback(async () => {
         try {
-            const [fleet, open] = await Promise.all([getFleetHardware(), getHardwareEvents(true)]);
+            const [fleet, open] = await Promise.all([getFleetHardware(), getHardwareEventsPage()]);
             setData(fleet);
-            setEvents(open);
+            setEvents(open.events);
+            setOpenTotal(open.total);
             setError(false);
         } catch {
             setError(true);
@@ -157,7 +159,7 @@ const HardwareHealth: React.FC = () => {
                 <Typography variant="h6" sx={{ mb: 1 }}>
                     {t('hardwareHealth.events.openTitle', 'Unresolved events')}
                 </Typography>
-                <HardwareEventsList events={events} showHost onChanged={() => void load()} />
+                <HardwareEventsList events={events} total={openTotal} showHost onChanged={() => void load()} />
             </Paper>
         </Box>
     );

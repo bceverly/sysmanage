@@ -209,8 +209,9 @@ def test_host_status_is_never_ok_without_a_recent_report(session):
     hh.apply_report(session, host, _report(_sensor()), now=T0)
     assert hh.host_status(host, now=T0 + timedelta(minutes=59)) == "ok"
     assert hh.host_status(host, now=T0 + timedelta(minutes=61)) == "stale"
+    # sources ran and found nothing: no hardware to judge (a VM), not unknown
     hh.apply_report(session, host, _report(), now=T0)
-    assert hh.host_status(host, now=T0) == "unknown"
+    assert hh.host_status(host, now=T0) == "none"
 
 
 def test_acknowledge_and_resolve(session):
@@ -503,3 +504,82 @@ def test_a_host_limit_past_a_sensors_critical_keeps_its_own_warning():
     assert "high_source" not in judged["metrics"]
     hot = dict(nvme, metrics=dict(nvme["metrics"], temperature_c=85.0))
     assert tl.apply_limit(hot, 95.0)["state"] == "failed"
+
+
+def test_bulk_all_open_is_capped_and_reports_what_is_left(session, monkeypatch):
+    host = _host(session)
+    for minute, state in enumerate(["warning", "ok", "warning"]):
+        hh.apply_report(
+            session, host, _report(_drive(state, None if state == "warning" else [])),
+            T0 + timedelta(minutes=minute),
+        )  # fmt: skip
+        session.commit()
+    monkeypatch.setattr(hh, "MAX_BULK_EVENTS", 2)
+    done = hh.bulk_change(session, "resolve", "op@example.invalid", host_id=host.id)
+    session.commit()
+    assert len(done["changed"]) == 2 and done["skipped"] == 0
+    assert hh.count_open(session, "resolve", host.id) == 1
+    # acknowledge-all skips what resolve already acknowledged
+    assert hh.count_open(session, "acknowledge", host.id) == 1
+    rest = hh.bulk_change(session, "acknowledge", "op@example.invalid", host_id=host.id)
+    session.commit()
+    assert len(rest["changed"]) == 1
+    assert hh.count_open(session, "acknowledge", host.id) == 0
+    assert hh.count_open(session, "resolve", host.id) == 1  # acknowledged, not resolved
+
+
+def _vm_report(failed=()):
+    """A VM's report: every source ran or was absent, nothing found."""
+    return {
+        "components": [],
+        "sources": [
+            {"name": n, "status": "failed" if n in failed else "absent"}
+            for n in ("nvme", "hwmon", "edac")
+        ]
+        + [{"name": "mdstat", "status": "ran"}],
+    }
+
+
+def test_a_vm_with_no_hardware_is_none_not_unknown(session):
+    """milsurpmonitor and the droplet read "Not judged" (Bryan, 2026-10-19):
+    nothing went unread, there is simply nothing physical to watch."""
+    vm = _host(session)
+    hh.apply_report(session, vm, _vm_report())  # now: host_view is not stale
+    session.commit()
+    assert vm.hardware_state == "none"
+    assert hh.host_status(vm) == "none"
+    assert hh.host_view(session, vm)["status"] == "none"
+
+
+def test_no_components_because_a_source_failed_stays_unknown(session):
+    host = _host(session)
+    hh.apply_report(session, host, _vm_report(failed=("nvme",)), T0)
+    session.commit()
+    assert host.hardware_state == "unknown"
+    assert hh.host_status(host, now=T0, has_components=False) == "unknown"
+
+
+def test_a_vm_stored_as_unknown_reads_none_right_after_deploy(session):
+    vm = _host(session)
+    hh.apply_report(session, vm, _vm_report())
+    vm.hardware_state = "unknown"  # what an older server stored
+    session.commit()
+    assert hh.host_status(vm) == "unknown"  # caller did not say
+    assert hh.host_status(vm, has_components=False) == "none"
+    assert hh.host_view(session, vm)["status"] == "none"
+    # a garbage report (no sources at all) never proves "no hardware"
+    hh.apply_report(session, vm, {"components": [], "sources": []})
+    assert vm.hardware_state == "unknown"
+    assert hh.host_status(vm, has_components=False) == "unknown"
+
+
+def test_real_hardware_is_judged_as_before(session):
+    host = _host(session)
+    hh.apply_report(session, host, _report(_drive("ok", [])), T0)
+    session.commit()
+    assert hh.host_status(host, now=T0, has_components=True) == "ok"
+    unreadable = _drive("unknown", [{"code": "smartctl_absent"}])
+    hh.apply_report(session, host, _report(unreadable), T0)
+    session.commit()
+    # an unreadable drive is still "Not judged", not "no hardware"
+    assert hh.host_status(host, now=T0, has_components=True) == "unknown"

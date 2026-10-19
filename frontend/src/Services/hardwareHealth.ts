@@ -12,8 +12,9 @@ import axiosInstance from "./api";
 export type ComponentKind = "drive" | "array" | "pool" | "sensor" | "memory";
 export type ComponentState = "ok" | "warning" | "failed" | "unknown";
 
-/** A host's standing: a component state, or never reported / not recently. */
-export type HardwareStatus = ComponentState | "unmeasured" | "stale";
+/** A host's standing: a component state, never reported / not recently, or
+ * "none" -- it reported and has no physical hardware to watch (a VM). */
+export type HardwareStatus = ComponentState | "unmeasured" | "stale" | "none";
 
 /** Worst first -- the order the fleet view sorts by. */
 export const STATUS_ORDER: HardwareStatus[] = [
@@ -23,6 +24,7 @@ export const STATUS_ORDER: HardwareStatus[] = [
   "unknown",
   "unmeasured",
   "ok",
+  "none",
 ];
 
 export interface Reason {
@@ -139,6 +141,47 @@ export const getHardwareEvents = async (
       { params: { open: openOnly, ...(hostId ? { host_id: hostId } : {}) } },
     )
   ).data.events;
+
+/** The open events, plus how many there are beyond the page ("Select all N"). */
+export const getHardwareEventsPage = async (
+  hostId?: string,
+): Promise<{ events: HardwareEvent[]; total: number }> => {
+  const { data } = await axiosInstance.get<{ events: HardwareEvent[]; total?: number }>(
+    "/api/v1/hardware-health/events",
+    { params: { open: true, ...(hostId ? { host_id: hostId } : {}) } },
+  );
+  return { events: data.events, total: data.total ?? data.events.length };
+};
+
+export type BulkScope =
+  | { eventIds: string[] }
+  | { allOpen: true; hostId?: string };
+
+/**
+ * Acknowledge or resolve many events at once.  "All open" is changed by the
+ * server in batches (at most 1000 a call); this repeats until none remain,
+ * with a ceiling so a misbehaving server cannot loop it forever.
+ */
+export const bulkChangeHardwareEvents = async (
+  action: "acknowledge" | "resolve",
+  scope: BulkScope,
+): Promise<{ changed: number; skipped: number }> => {
+  const url = `/api/v1/hardware-health/events/${action}`;
+  const body = "eventIds" in scope
+    ? { event_ids: scope.eventIds }
+    : { all_open: true, ...(scope.hostId ? { host_id: scope.hostId } : {}) };
+  let changed = 0;
+  let skipped = 0;
+  for (let round = 0; round < 100; round += 1) {
+    const { data } = await axiosInstance.post<Record<string, number>>(url, body);
+    changed += data[`${action}d`] ?? 0;
+    skipped += data.skipped ?? 0;
+    if (!data.remaining || !("allOpen" in scope)) {
+      break;
+    }
+  }
+  return { changed, skipped };
+};
 
 export const changeHardwareEvent = async (
   eventId: string,

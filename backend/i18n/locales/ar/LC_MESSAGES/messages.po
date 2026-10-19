@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-19 06:59-0400\n"
+"POT-Creation-Date: 2026-10-19 15:02-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -79,7 +79,7 @@ msgstr "ليس لديك إذن لوصول الحساب المحدد."
 #: backend/api/advisor.py:93 backend/api/query_packs.py:119
 #: backend/api/config_mgmt_inventories.py:110
 #: backend/api/config_mgmt_remediation.py:137
-#: backend/api/hardware_health.py:206 backend/api/hardware_health.py:319
+#: backend/api/hardware_health.py:231 backend/api/hardware_health.py:407
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
 #: backend/api/posture.py:375 backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
@@ -189,7 +189,7 @@ msgstr "تنسيق ID المضيف غير صحيح"
 #: backend/api/grafana_integration.py:329
 #: backend/api/config_mgmt_remediation.py:433
 #: backend/api/image_mode_actions.py:86 backend/api/host_graylog.py:131
-#: backend/api/hardware_health.py:76 backend/api/hardware_health.py:79
+#: backend/api/hardware_health.py:87 backend/api/hardware_health.py:90
 #: backend/api/tag.py:498 backend/api/tag.py:652
 #: backend/api/airgap_repository_buckets.py:64
 #: backend/api/updates/report_routes.py:34
@@ -2644,7 +2644,7 @@ msgstr "تم تسجيل وكيل وإحالته بنجاح"
 msgid "Failed to process heartbeat"
 msgstr "فشل في معالجة النبضة القلبية"
 
-#: backend/api/logging_settings.py:71 backend/api/hardware_health.py:362
+#: backend/api/logging_settings.py:71 backend/api/hardware_health.py:450
 #: backend/api/maintenance_windows.py:64
 msgid "Permission denied: administrator required"
 msgstr "تم رفض الإذن: مطلوب مسؤول"
@@ -3004,19 +3004,23 @@ msgstr ""
 msgid "Failed to delete antivirus default: %s"
 msgstr "فشل في حذف الإعدادات الافتراضية لمكافحة الفيروسات: %s"
 
-#: backend/api/hardware_health.py:220
+#: backend/api/hardware_health.py:245
 msgid "Hardware event not found"
 msgstr "حدث الأجهزة غير موجود"
 
-#: backend/api/hardware_health.py:272
+#: backend/api/hardware_health.py:307
+msgid "Choose either specific events or all unresolved events, not both."
+msgstr "اختر إما أحداثًا محددة أو جميع الأحداث غير المحلولة، وليس كليهما."
+
+#: backend/api/hardware_health.py:360
 msgid "The temperature limit must be between 30 and 125 C"
 msgstr "يجب أن يكون حد درجة الحرارة بين 30 و125 C"
 
-#: backend/api/hardware_health.py:368
+#: backend/api/hardware_health.py:456
 msgid "Automatic installation requires a SysManage Enterprise license."
 msgstr "يتطلب التثبيت التلقائي ترخيص SysManage Enterprise."
 
-#: backend/api/hardware_health.py:372
+#: backend/api/hardware_health.py:460
 msgid "The setting could not be saved"
 msgstr "تعذّر حفظ الإعداد"
 
@@ -4670,7 +4674,7 @@ msgstr "تم إزالة دور جدار الحماية من الجهاز بنج�
 msgid "Failed to remove firewall role: %s"
 msgstr "فشل في حذف دور جدار الحماية: %s"
 
-#: backend/api/asset_tag_csv.py:140
+#: backend/api/asset_tag_csv.py:143
 #, python-format
 msgid "Held asset tag %s released"
 msgstr "تم إلغاء حجز علامة الأصول %s"
@@ -5345,11 +5349,11 @@ msgstr "تم تمهيد مدير صفوف الرسائل للخادم بنجاح
 msgid "Rate limit exceeded. Please retry later."
 msgstr " تم تجاوز حد التكرار. يرجى المحاولة لاحقاً."
 
-#: backend/services/agent_capability_service.py:306
+#: backend/services/agent_capability_service.py:327
 msgid "this host"
 msgstr "هذا المستضِغف"
 
-#: backend/services/agent_capability_service.py:309
+#: backend/services/agent_capability_service.py:330
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "
@@ -5611,6 +5615,9 @@ msgstr "ثغرات حزم pkgsrc في NetBSD (ما يقرؤه pkg_admin audit)"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "ثغرات macOS حسب إصدار نظام التشغيل، من بيانات NVD عن الإصدارات المتأثرة"
+
+#~ msgid "Choose either specific events or all open events, not both."
+#~ msgstr "اختر إما أحداثًا محددة أو جميع الأحداث المفتوحة، وليس كلاهما."
 
 #, python-format
 #~ msgid ""
