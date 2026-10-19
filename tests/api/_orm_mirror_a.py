@@ -208,6 +208,7 @@ class Host(TestBase):
     hardware_state = Column(String(16), nullable=True)
     hardware_reported_at = Column(DateTime, nullable=True)
     hardware_sources = Column(Text, nullable=True)
+    hardware_temp_warning_c = Column(Float, nullable=True)
 
     # Phase 12.7: agent-reported public IP + GeoLite2 resolution
     public_ip = Column(String(45), nullable=True)

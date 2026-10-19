@@ -204,3 +204,58 @@ def test_automatic_install_is_licensed_and_consented(client, auth_headers, sessi
         )
     assert response.status_code == 200, response.text
     set_auto.assert_called_once_with(None, True)
+
+
+def test_a_host_temperature_limit_is_set_shown_audited_and_cleared(
+    client, auth_headers, session
+):
+    host = _host(session, "nextcloud.lab")
+    url = f"/api/v1/host/{host.id}/hardware-health/temperature-limit"
+    response = client.put(url, json={"limit_c": 95}, headers=auth_headers)
+    assert response.status_code == 200
+    assert response.json() == {"temperature_limit_c": 95.0}
+    view = client.get(f"/api/v1/host/{host.id}/hardware-health", headers=auth_headers)
+    assert view.json()["temperature_limit_c"] == 95.0
+    session.expire_all()
+    audit = (
+        session.query(models.AuditLog)
+        .filter(models.AuditLog.entity_id == str(host.id))
+        .order_by(models.AuditLog.timestamp.desc())
+        .first()
+    )
+    assert audit is not None and "95" in audit.description
+    cleared = client.put(url, json={"limit_c": None}, headers=auth_headers)
+    assert cleared.json() == {"temperature_limit_c": None}
+    session.expire_all()
+    assert session.get(models.Host, host.id).hardware_temp_warning_c is None
+
+
+def test_a_host_temperature_limit_is_range_checked(client, auth_headers, session):
+    host = _host(session, "mail.lab")
+    url = f"/api/v1/host/{host.id}/hardware-health/temperature-limit"
+    for bad in (29, 126, -5):
+        response = client.put(url, json={"limit_c": bad}, headers=auth_headers)
+        assert response.status_code == 422
+    session.expire_all()
+    assert session.get(models.Host, host.id).hardware_temp_warning_c is None
+    missing = client.put(
+        f"/api/v1/host/{uuid.uuid4()}/hardware-health/temperature-limit",
+        json={"limit_c": 90},
+        headers=auth_headers,
+    )
+    assert missing.status_code == 404
+
+
+def test_setting_a_temperature_limit_needs_the_role(client, auth_headers, session):
+    host = _host(session, "laptop.lab")
+    with patch(
+        "backend.persistence.models.User.has_role", return_value=False, create=True
+    ):
+        response = client.put(
+            f"/api/v1/host/{host.id}/hardware-health/temperature-limit",
+            json={"limit_c": 90},
+            headers=auth_headers,
+        )
+    assert response.status_code == 403
+    session.expire_all()
+    assert session.get(models.Host, host.id).hardware_temp_warning_c is None

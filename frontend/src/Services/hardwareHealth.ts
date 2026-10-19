@@ -88,6 +88,8 @@ export interface HostHardware {
   events: HardwareEvent[];
   /** A drive can only be read with smartctl, which is not installed. */
   smartmontools?: { recommended: boolean; install: ToolInstall | null };
+  /** The host's own temperature warning limit (C); null = each device's. */
+  temperature_limit_c?: number | null;
 }
 
 export interface FleetHost {
@@ -192,5 +194,18 @@ export const setSmartmontoolsAuto = async (
     await axiosInstance.put<{ auto: boolean }>(
       "/api/v1/hardware-health/smartmontools",
       { auto },
+    )
+  ).data;
+
+/** The host's own temperature warning limit (C); null clears it.  It takes
+ * effect at the host's next report. */
+export const setTemperatureLimit = async (
+  hostId: string,
+  limitC: number | null,
+): Promise<{ temperature_limit_c: number | null }> =>
+  (
+    await axiosInstance.put<{ temperature_limit_c: number | null }>(
+      `/api/v1/host/${encodeURIComponent(hostId)}/hardware-health/temperature-limit`,
+      { limit_c: limitC },
     )
   ).data;

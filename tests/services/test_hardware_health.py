@@ -313,3 +313,173 @@ def test_a_triggered_report_records_the_evidence(session):
     assert (
         session.query(models.HardwareComponent).filter_by(host_id=host.id).count() == 2
     )
+
+
+def _coretemp(celsius, state):
+    return {
+        "kind": "sensor",
+        "id": "coretemp/temp1",
+        "name": "coretemp Package id 0",
+        "state": state,
+        "reasons": (
+            [{"code": "temperature_high", "value": celsius, "limit": 84.0}]
+            if state == "warning"
+            else []
+        ),
+        "metrics": {"temperature_c": celsius, "high_c": 84.0, "critical_c": 100.0},
+        "source": "hwmon",
+    }
+
+
+def test_a_sensor_hovering_at_its_limit_does_not_flap(session):
+    """A lid-closed laptop idling at its "high" mark used to log Warning <->
+    Healthy on every report (nextcloud, dozens a night, 2026-10-19)."""
+    host = _host(session)
+    readings = [
+        (86, "warning"),
+        (83, "ok"),
+        (85, "warning"),
+        (82, "ok"),
+        (84, "warning"),
+    ]
+    for minute, (celsius, state) in enumerate(readings):
+        hh.apply_report(
+            session,
+            host,
+            _report(_coretemp(celsius, state)),
+            T0 + timedelta(minutes=minute),
+        )
+        session.commit()
+    (event,) = _events(session, host)  # the one real crossing, nothing after
+    assert event.to_state == "warning"
+    assert host.hardware_state == "warning"
+    row = session.query(models.HardwareComponent).one()
+    assert json.loads(row.reasons)[0]["code"] == "temperature_high"
+
+
+def test_a_sensor_clears_once_it_cools_past_the_band(session):
+    host = _host(session)
+    hh.apply_report(session, host, _report(_coretemp(86, "warning")), T0)
+    session.commit()
+    hh.apply_report(
+        session, host, _report(_coretemp(79, "ok")), T0 + timedelta(minutes=1)
+    )
+    session.commit()
+    first, second = _events(session, host)
+    assert (first.to_state, second.to_state) == ("warning", "ok")
+    assert host.hardware_state == "ok"
+
+
+def test_hysteresis_never_holds_a_drive_or_a_sensor_without_a_limit(session):
+    host = _host(session)
+    hh.apply_report(
+        session, host, _report(_drive("warning"), _sensor("warning", 90)), T0
+    )
+    session.commit()
+    hh.apply_report(
+        session,
+        host,
+        _report(_drive("ok", []), _sensor("ok", 89)),
+        T0 + timedelta(minutes=1),
+    )
+    session.commit()
+    assert {r.state for r in session.query(models.HardwareComponent)} == {"ok"}
+
+
+def _hot_host(session, limit):
+    host = _host(session)
+    host.hardware_temp_warning_c = limit
+    session.commit()
+    return host
+
+
+def _state_after(session, host, *readings):
+    """Report each (celsius, agent_state) in turn; the stored row after."""
+    for minute, (celsius, state) in enumerate(readings):
+        hh.apply_report(
+            session,
+            host,
+            _report(_coretemp(celsius, state)),
+            T0 + timedelta(minutes=minute),
+        )
+        session.commit()
+    return session.query(models.HardwareComponent).one()
+
+
+def test_a_host_limit_above_the_device_limit_quiets_a_hot_laptop(session):
+    """nextcloud idles at 85-90 C with the lid closed; its owner sets 95 C."""
+    host = _hot_host(session, 95.0)
+    row = _state_after(session, host, (90, "warning"))
+    assert row.state == "ok"
+    assert not _events(session, host)
+    metrics = json.loads(row.metrics)
+    assert metrics["high_c"] == 95.0
+    assert metrics["device_high_c"] == 84.0
+    assert metrics["high_source"] == "host"
+    row = _state_after(session, host, (96, "warning"))
+    assert row.state == "warning"
+    assert json.loads(row.reasons) == [
+        {"code": "temperature_high", "value": 96, "limit": 95.0}
+    ]
+
+
+def test_a_host_limit_below_the_device_limit_warns_earlier(session):
+    host = _hot_host(session, 70.0)
+    row = _state_after(session, host, (75, "ok"))
+    assert row.state == "warning"
+    assert host.hardware_state == "warning"
+
+
+def test_the_device_critical_limit_still_fails_whatever_the_host_limit(session):
+    host = _hot_host(session, 120.0)
+    hot = _coretemp(101, "failed")
+    hot["reasons"] = [{"code": "temperature_critical", "value": 101, "limit": 100.0}]
+    hh.apply_report(session, host, _report(hot), T0)
+    session.commit()
+    assert session.query(models.HardwareComponent).one().state == "failed"
+    # an agent that only said "warning" at 100 C is still judged critical
+    later = hh.apply_report(
+        session, host, _report(_coretemp(100, "warning")), T0 + timedelta(minutes=1)
+    )
+    session.commit()
+    assert not later  # still failed: no change, no event
+    assert session.query(models.HardwareComponent).one().state == "failed"
+
+
+def test_hysteresis_uses_the_host_limit(session):
+    host = _hot_host(session, 90.0)
+    row = _state_after(session, host, (91, "warning"), (87, "warning"))
+    assert row.state == "warning"  # 87 is inside the 5 C band below 90
+    row = _state_after(session, host, (84, "warning"))
+    assert row.state == "ok"
+
+
+def test_a_cleared_limit_falls_back_to_the_device_limit(session):
+    host = _hot_host(session, 95.0)
+    _state_after(session, host, (90, "warning"))
+    host.hardware_temp_warning_c = None
+    session.commit()
+    row = _state_after(session, host, (90, "warning"))
+    assert row.state == "warning"
+    assert "high_source" not in json.loads(row.metrics)
+
+
+def test_the_host_limit_leaves_drives_and_non_temperature_reasons_alone():
+    from backend.services import hardware_temperature_limit as tl
+
+    drive = hh.clean_component(_drive("warning"))
+    assert tl.apply_limit(drive, 95.0) is drive
+    fan = hh.clean_component(
+        dict(_sensor("warning", 50), reasons=[{"code": "fan_stopped"}])
+    )
+    assert tl.apply_limit(fan, 95.0) is fan
+    assert (
+        tl.apply_limit(hh.clean_component(_coretemp(90, "warning")), None)["state"]
+        == "warning"
+    )
+    assert tl.valid_limit(None) and tl.valid_limit(30) and tl.valid_limit(125.0)
+    assert (
+        not tl.valid_limit(29.9)
+        and not tl.valid_limit(126)
+        and not tl.valid_limit(True)
+    )

@@ -23,7 +23,7 @@ The install is the generic deployment plan (``packages: ["smartmontools"]``,
 the agent picks the package manager) -- except on Debian and Ubuntu, where
 the package RECOMMENDS a mail client and that pulls in a mail server
 (postfix): a disk-health tool must not put an MTA on every host, so there
-it is ``apt-get install --no-install-recommends`` (non-interactive) through
+it is ``apt-get install -y --no-install-recommends`` through
 the plan's commands.  Done means the agent said so
 (``record_result``, matched by command id).  The drives turn readable on the
 agent's next collection (at most five minutes), which ends the
@@ -192,8 +192,13 @@ def build_plan(host: models.Host) -> Dict[str, Any]:
                     "description": "refresh the package index",
                 },
                 {
+                    # NOT ``env DEBIAN_FRONTEND=... apt-get``: the agent runs
+                    # a sudo command as ``sudo -n <argv>``, the sudoers
+                    # allowlist grants apt-get but not env, so every install
+                    # was refused (beast, nextcloud, mail.archive,
+                    # 2026-10-19).  smartmontools asks no debconf questions,
+                    # and with no terminal apt never prompts.
                     "argv": [
-                        "env", "DEBIAN_FRONTEND=noninteractive",
                         "apt-get", "install", "-y", "-q",
                         "--no-install-recommends", PACKAGE,
                     ],  # fmt: skip

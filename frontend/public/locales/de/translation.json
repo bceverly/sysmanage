@@ -5144,6 +5144,7 @@
     },
     "loadError": "Die Hardware der Flotte konnte nicht geladen werden.",
     "metric": {
+      "hostLimit": "warnt bei {{limit}} C (Host-Grenzwert)",
       "hours": "Betriebsstunden: {{value}}",
       "temperature": "{{value}} C",
       "wear": "{{value}}% abgenutzt"
@@ -5236,6 +5237,17 @@
       "queued": "Installation angefordert.",
       "queuedHosts": "Hosts, auf denen die Installation angefordert wurde: {{n}}",
       "succeeded": "Installiert. Die Laufwerke werden beim nächsten Bericht gelesen."
+    },
+    "tempLimit": {
+      "active": "Dieser Host warnt bei {{limit}} C statt beim eigenen Grenzwert jedes Sensors.",
+      "clear": "Gerätegrenzwerte verwenden",
+      "help": "Der kritische Grenzwert der Hardware gilt immer weiter. Eine Änderung wirkt ab dem nächsten Bericht des Hosts; frühere Ereignisse werden nicht umgeschrieben.",
+      "invalid": "Geben Sie eine Temperatur zwischen 30 und 125 C ein.",
+      "label": "Warnen bei (C)",
+      "none": "Jeder Sensor warnt bei dem Grenzwert, den seine Hardware angibt.",
+      "save": "Speichern",
+      "saveError": "Der Grenzwert konnte nicht gespeichert werden.",
+      "title": "Temperatur-Warngrenzwert"
     }
   }
 }

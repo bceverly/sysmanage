@@ -311,6 +311,9 @@ class Host(Base):
     hardware_state = Column(String(16), nullable=True)
     hardware_reported_at = Column(DateTime, nullable=True)
     hardware_sources = Column(Text, nullable=True)
+    # The host's own temperature warning limit (C), replacing each sensor's
+    # device "high" limit; NULL = judge by the hardware's own.  2026-10-19.
+    hardware_temp_warning_c = Column(Float, nullable=True)
 
     # Phase 12.7: Public IP + GeoLite2 geo-location.
     #

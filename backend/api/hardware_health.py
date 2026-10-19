@@ -25,6 +25,10 @@ automatic install is licensed (Enterprise) and consented to.
 hosts (Manage Hardware Health + Add Package).  ``PUT
 /hardware-health/smartmontools`` -- an administrator's consent to the
 automatic install.
+
+``PUT /host/{id}/hardware-health/temperature-limit`` -- the host's own
+temperature warning limit, replacing each sensor's device "high" limit
+(``{"limit_c": null}`` clears it); the Manage Hardware Health role.
 """
 
 import uuid
@@ -41,6 +45,7 @@ from backend.persistence.partitions import get_tenant_db
 from backend.persistence.tenant_context import get_active_tenant
 from backend.security.roles import SecurityRoles
 from backend.services import clock_status, hardware_health, smartmontools_install
+from backend.services import hardware_temperature_limit as temperature_limit
 from backend.services.audit_service import ActionType, AuditService, EntityType
 
 router = APIRouter(dependencies=[Depends(JWTBearer())])
@@ -56,6 +61,12 @@ class InstallRequest(BaseModel):
 
 class AutoInstall(BaseModel):
     auto: bool
+
+
+class TemperatureLimit(BaseModel):
+    # None clears the host's limit; the range is checked in the endpoint so
+    # the error is worded for people, not as a schema failure.
+    limit_c: Optional[float] = None
 
 
 def _host_or_404(db: Session, host_id: str) -> models.Host:
@@ -240,6 +251,45 @@ async def resolve_event(
     current_user=Depends(require_authenticated_user),
 ) -> Dict[str, Any]:
     return _change(db, event_id, body, current_user, "resolve")
+
+
+@router.put("/host/{host_id}/hardware-health/temperature-limit")
+async def set_temperature_limit(
+    host_id: str,
+    body: TemperatureLimit,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """The host's own temperature warning limit (C), or None for the
+    hardware's own.  Applies from the host's next report."""
+    _require_role(current_user)
+    host = _host_or_404(db, host_id)
+    if not temperature_limit.valid_limit(body.limit_c):
+        # The range is written out, not interpolated: the translator has
+        # mangled named placeholders before.  Keep it equal to LIMIT_RANGE_C.
+        raise HTTPException(
+            status_code=422,
+            detail=_("The temperature limit must be between 30 and 125 C"),
+        )
+    previous = host.hardware_temp_warning_c
+    host.hardware_temp_warning_c = body.limit_c
+    AuditService.log(
+        db=db,
+        user_id=current_user.id,
+        username=current_user.userid,
+        action_type=ActionType.UPDATE,
+        entity_type=EntityType.HOST,
+        entity_id=str(host.id),
+        entity_name=host.fqdn,
+        description=(
+            f"Temperature warning limit set to {body.limit_c} C"
+            if body.limit_c is not None
+            else "Temperature warning limit cleared (device limits apply)"
+        ),
+        details={"previous_c": previous, "limit_c": body.limit_c},
+    )
+    db.commit()
+    return {"temperature_limit_c": host.hardware_temp_warning_c}
 
 
 @router.get("/hardware-health/smartmontools")

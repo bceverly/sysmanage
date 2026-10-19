@@ -5144,6 +5144,7 @@
     },
     "loadError": "De hardware van het machinepark kon niet worden geladen.",
     "metric": {
+      "hostLimit": "waarschuwt bij {{limit}} C (hostgrens)",
       "hours": "Bedrijfsuren: {{value}}",
       "temperature": "{{value}} C",
       "wear": "{{value}}% versleten"
@@ -5236,6 +5237,17 @@
       "queued": "Installatie aangevraagd.",
       "queuedHosts": "Hosts waarop de installatie is aangevraagd: {{n}}",
       "succeeded": "Geïnstalleerd. De schijven worden bij het volgende rapport gelezen."
+    },
+    "tempLimit": {
+      "active": "Deze host waarschuwt bij {{limit}} C in plaats van bij de eigen grens van elke sensor.",
+      "clear": "Apparaatgrenzen gebruiken",
+      "help": "De kritieke grens van de hardware blijft altijd gelden. Een wijziging gaat in bij het volgende rapport van de host; eerdere gebeurtenissen worden niet herschreven.",
+      "invalid": "Voer een temperatuur tussen 30 en 125 C in.",
+      "label": "Waarschuwen bij (C)",
+      "none": "Elke sensor waarschuwt bij de grens die zijn hardware opgeeft.",
+      "save": "Opslaan",
+      "saveError": "De grens kon niet worden opgeslagen.",
+      "title": "Waarschuwingsgrens voor temperatuur"
     }
   }
 }

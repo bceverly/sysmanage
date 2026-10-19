@@ -45,6 +45,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy.orm import Session
 
 from backend.persistence import models
+from backend.services import hardware_temperature_limit as temperature_limit
 
 logger = logging.getLogger(__name__)
 
@@ -196,6 +197,29 @@ def _event(host_id, comp, from_state, to_state, reasons, now) -> models.Hardware
     )
 
 
+# A temperature that crossed its limit stays a warning until it falls this far
+# below it.  Without the band a laptop idling at its "high" mark flipped
+# Warning <-> Healthy on every report -- dozens of events a night, each a
+# one-degree wobble (2026-10-19).
+SENSOR_HYSTERESIS_C = 5.0
+
+
+def _with_hysteresis(comp, row) -> Dict[str, Any]:
+    """``comp``, held at warning if it is a sensor still inside the band."""
+    if row is None or row.state != "warning" or comp["state"] != "ok":
+        return comp
+    temp, high = comp["metrics"].get("temperature_c"), comp["metrics"].get("high_c")
+    if comp["kind"] != "sensor" or not all(
+        isinstance(v, (int, float)) and not isinstance(v, bool) for v in (temp, high)
+    ):
+        return comp
+    if temp <= high - SENSOR_HYSTERESIS_C:
+        return comp
+    held = dict(comp, state="warning")
+    held["reasons"] = _loads(row.reasons, []) or comp["reasons"]
+    return held
+
+
 def _upsert(db, host, comp, row, now) -> Optional[models.HardwareEvent]:
     """Store one component; the event its change makes, if any."""
     reasons = json.dumps(comp["reasons"])
@@ -258,7 +282,6 @@ def apply_report(
     """Store a hardware health report for ``host``; the events it made.
     The caller commits."""
     now = now or _now()
-    components = _components(payload)
     sources = clean_sources(payload.get("sources"))
     failed = {s["name"] for s in sources if s["status"] == "failed"}
     rows = {
@@ -267,6 +290,13 @@ def apply_report(
             models.HardwareComponent.host_id == host.id
         )
     }
+    limit = host.hardware_temp_warning_c
+    components = [
+        _with_hysteresis(
+            temperature_limit.apply_limit(c, limit), rows.get((c["kind"], c["ident"]))
+        )
+        for c in _components(payload)
+    ]
     events = [
         event
         for event in (
@@ -366,6 +396,7 @@ def host_view(db: Session, host: models.Host, event_limit: int = 50) -> Dict[str
             host.hardware_reported_at.isoformat() if host.hardware_reported_at else None
         ),
         "sources": _loads(host.hardware_sources, []),
+        "temperature_limit_c": host.hardware_temp_warning_c,
         "components": [component_view(r) for r in sorted(rows, key=_component_order)],
         "events": [event_view(e) for e in events],
     }

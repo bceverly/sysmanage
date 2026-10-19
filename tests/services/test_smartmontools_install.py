@@ -116,7 +116,9 @@ def test_debian_family_installs_without_a_mail_server():
     plan = si.build_plan(ubuntu)
     install = plan["commands"][1]["argv"]
     assert "--no-install-recommends" in install and install[-1] == "smartmontools"
-    assert "DEBIAN_FRONTEND=noninteractive" in install
+    # The agent runs it as ``sudo -n <argv>`` and sudoers grants apt-get, not
+    # env: an ``env DEBIAN_FRONTEND=...`` wrapper was refused on every host.
+    assert install[0] == "apt-get" and "env" not in install
     assert plan["commands"][0]["ignore_errors"] and "packages" not in plan
     for host in (
         models.Host(platform="Linux", platform_release="Fedora Linux 42"),

@@ -5144,6 +5144,7 @@
     },
     "loadError": "Impossible de charger le matériel du parc.",
     "metric": {
+      "hostLimit": "alerte à {{limit}} C (limite de l'hôte)",
       "hours": "Heures sous tension : {{value}}",
       "temperature": "{{value}} C",
       "wear": "{{value}}% d'usure"
@@ -5236,6 +5237,17 @@
       "queued": "Installation demandée.",
       "queuedHosts": "Hôtes sur lesquels l'installation a été demandée : {{n}}",
       "succeeded": "Installé. Les disques seront lus au prochain rapport."
+    },
+    "tempLimit": {
+      "active": "Cet hôte alerte à {{limit}} C au lieu de la limite propre à chaque capteur.",
+      "clear": "Utiliser les limites de l'appareil",
+      "help": "La limite critique du matériel s'applique toujours. Une modification prend effet au prochain rapport de l'hôte ; les événements passés ne sont pas réécrits.",
+      "invalid": "Saisissez une température comprise entre 30 et 125 C.",
+      "label": "Alerter à (C)",
+      "none": "Chaque capteur alerte à la limite déclarée par son matériel.",
+      "save": "Enregistrer",
+      "saveError": "Impossible d'enregistrer la limite.",
+      "title": "Limite d'alerte de température"
     }
   }
 }

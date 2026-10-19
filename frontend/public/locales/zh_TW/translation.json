@@ -5144,6 +5144,7 @@
     },
     "loadError": "無法載入主機群硬體。",
     "metric": {
+      "hostLimit": "在 {{limit}} C 時警告（主機上限）",
       "hours": "通電時數：{{value}}",
       "temperature": "{{value}} C",
       "wear": "已磨損 {{value}}%"
@@ -5236,6 +5237,17 @@
       "queued": "已要求安裝。",
       "queuedHosts": "已要求安裝的主機：{{n}}",
       "succeeded": "已安裝。磁碟機將在下一次報告時讀取。"
+    },
+    "tempLimit": {
+      "active": "此主機在 {{limit}} C 時警告，而非依各感測器自身的上限。",
+      "clear": "使用裝置上限",
+      "help": "硬體的臨界上限始終適用。變更會在主機下次回報時生效；過去的事件不會被改寫。",
+      "invalid": "請輸入 30 到 125 C 之間的溫度。",
+      "label": "警告溫度 (C)",
+      "none": "每個感測器依其硬體宣告的上限發出警告。",
+      "save": "儲存",
+      "saveError": "無法儲存上限。",
+      "title": "溫度警告上限"
     }
   }
 }

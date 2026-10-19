@@ -14421,6 +14421,28 @@ plain explanation of what to do.
 **Target Release:** **v5.0.0.0**
 **Focus:** Full market-parity GA -- content lifecycle + provisioning + config management + advisor hardened together; performance, security, docs, i18n.
 
+### Hardware health: hot-by-design hosts (follow-up to 23.1)
+
+**Added 2026-10-19 (Bryan).** Two production hosts are laptops serving with
+their lids closed; they idle at 85-97 C against their CPU's 84/87 C "high"
+mark, so every report crossed the limit one way or the other.
+
+- [x] **Sensor hysteresis** -- a temperature that crossed its limit stays a
+      warning until it falls 5 C below it (`SENSOR_HYSTERESIS_C`,
+      `backend/services/hardware_health.py`); one real crossing is one event,
+      not dozens a night
+- [x] **Per-host temperature warning limit** -- `host.hardware_temp_warning_c`
+      (migration `q47hwtemplimit`), set from the host's Hardware health card
+      or `PUT /api/v1/host/{id}/hardware-health/temperature-limit` (Manage
+      Hardware Health role, audited, 30-125 C, `null` clears).  The server
+      re-judges every temperature sensor on the host against it
+      (`backend/services/hardware_temperature_limit.py`); the device's
+      critical limit always still fails, drives and non-temperature reasons
+      are untouched, hysteresis uses the effective limit, and a change applies
+      from the next report (history is never rewritten).  No agent change
+- [ ] **Docs** -- the sysmanage-docs hardware health page describes the
+      limit and the hysteresis, with a screenshot of the control
+
 ### Production serving topology: nginx is the only thing facing the network (tech debt)
 
 **Added 2026-10-02 (Bryan).** A production install must never have the

@@ -30,6 +30,7 @@ import { getHostHardware } from '../../Services/hardwareHealth';
 import type { HardwareComponent, HostHardware } from '../../Services/hardwareHealth';
 import HardwareEventsList from './HardwareEventsList';
 import { HostSmartmontools } from './SmartmontoolsRecommendation';
+import TemperatureLimitControl from './TemperatureLimitControl';
 import {
     kindLabel,
     metricsText,
@@ -122,6 +123,13 @@ const Body: React.FC<{ hostId: string; hardware: HostHardware; onChanged: () => 
                 </Box>
             )}
             <Sources hardware={hardware} />
+            {hardware.components.some(c => c.kind === 'sensor') && (
+                <TemperatureLimitControl
+                    hostId={hostId}
+                    limit={hardware.temperature_limit_c ?? null}
+                    onChanged={onChanged}
+                />
+            )}
             <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>
                 {t('hardwareHealth.card.recentEvents', 'Recent events')}
             </Typography>

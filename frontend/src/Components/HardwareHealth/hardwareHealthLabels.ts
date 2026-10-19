@@ -177,6 +177,9 @@ export const metricsText = (t: TFunction, metrics: Record<string, unknown>): str
     if (typeof metrics.temperature_c === 'number') {
         parts.push(t('hardwareHealth.metric.temperature', '{{value}} C', { value: metrics.temperature_c }));
     }
+    if (metrics.high_source === 'host' && typeof metrics.high_c === 'number') {
+        parts.push(t('hardwareHealth.metric.hostLimit', 'warns at {{limit}} C (host limit)', { limit: metrics.high_c }));
+    }
     if (typeof metrics.percent_used === 'number') {
         parts.push(t('hardwareHealth.metric.wear', '{{value}}% worn', { value: metrics.percent_used }));
     }

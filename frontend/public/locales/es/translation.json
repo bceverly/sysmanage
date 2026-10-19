@@ -5144,6 +5144,7 @@
     },
     "loadError": "No se pudo cargar el hardware de la flota.",
     "metric": {
+      "hostLimit": "avisa a {{limit}} C (límite del host)",
       "hours": "Horas de encendido: {{value}}",
       "temperature": "{{value}} C",
       "wear": "{{value}}% de desgaste"
@@ -5236,6 +5237,17 @@
       "queued": "Instalación solicitada.",
       "queuedHosts": "Hosts en los que se solicitó la instalación: {{n}}",
       "succeeded": "Instalado. Las unidades se leen en el próximo informe."
+    },
+    "tempLimit": {
+      "active": "Este host avisa a {{limit}} C en lugar del límite propio de cada sensor.",
+      "clear": "Usar los límites del dispositivo",
+      "help": "El límite crítico del hardware siempre sigue aplicándose. Un cambio surte efecto en el siguiente informe del host; los eventos anteriores no se reescriben.",
+      "invalid": "Introduzca una temperatura entre 30 y 125 C.",
+      "label": "Avisar a (C)",
+      "none": "Cada sensor avisa en el límite que declara su hardware.",
+      "save": "Guardar",
+      "saveError": "No se pudo guardar el límite.",
+      "title": "Límite de advertencia de temperatura"
     }
   }
 }
