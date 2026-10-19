@@ -399,27 +399,14 @@ def reconcile(session: Session, label: str = "") -> Dict[str, Any]:
         reason, package = _classify(host, defaults, records, now)
         if reason == "due" and len(pushed) >= MAX_PUSHES_PER_PASS:
             reason = "next_wave"  # still due: a later pass takes it
-        if reason == "no_default":
-            no_default.add(os_name_for_defaults(host) or "?")
-        if reason == "low_memory":
-            low_memory.append(host.fqdn)
         if reason != "due":
-            summary[reason] = summary.get(reason, 0) + 1
+            _tally(summary, reason, host, no_default, low_memory)
             continue
-        record = records.get(host.id)
-        try:
-            command_id = queue_deploy(session, host, package)
-        except Exception:  # pylint: disable=broad-except
-            logger.exception(
-                "Antivirus auto-deploy could not queue a plan for host %s (%s) in %s",
-                host.fqdn,
-                host.id,
-                label or "bootstrap",
-            )
+        push = _push(session, host, package, records.get(host.id), now, label)
+        if push is None:
             summary["queue_failed"] = summary.get("queue_failed", 0) + 1
-            continue
-        attempts = _record_push(session, record, host.id, package, now, command_id)
-        pushed.append((host, package, attempts))
+        else:
+            pushed.append(push)
     summary["queued"] = len(pushed)
     if no_default:
         summary["no_default_for"] = sorted(no_default)
@@ -429,6 +416,32 @@ def reconcile(session: Session, label: str = "") -> Dict[str, Any]:
         _audit(session, pushed)
     _summarize(label, summary)
     return summary
+
+
+def _tally(summary, reason, host, no_default, low_memory) -> None:
+    """Count a host that is not being pushed this pass, by why."""
+    if reason == "no_default":
+        no_default.add(os_name_for_defaults(host) or "?")
+    if reason == "low_memory":
+        low_memory.append(host.fqdn)
+    summary[reason] = summary.get(reason, 0) + 1
+
+
+def _push(session, host, package, record, now, label):
+    """Queue one host's deploy plan: ``(host, package, attempts)``, or None
+    when the plan could not be queued (logged; a later pass retries)."""
+    try:
+        command_id = queue_deploy(session, host, package)
+    except Exception:  # pylint: disable=broad-except
+        logger.exception(
+            "Antivirus auto-deploy could not queue a plan for host %s (%s) in %s",
+            host.fqdn,
+            host.id,
+            label or "bootstrap",
+        )
+        return None
+    attempts = _record_push(session, record, host.id, package, now, command_id)
+    return host, package, attempts
 
 
 def _audit(session: Session, pushed) -> None:

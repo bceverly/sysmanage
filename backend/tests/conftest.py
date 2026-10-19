@@ -12,8 +12,7 @@ def _no_real_email(monkeypatch):
     """No test may reach a real SMTP server -- see tests/smtp_guard.py."""
     from tests import smtp_guard  # noqa: PLC0415
 
-    smtp_guard.install(monkeypatch)
-    yield
+    smtp_guard.install(monkeypatch)  # monkeypatch undoes it after the test
 
 
 @pytest.fixture(autouse=True)
@@ -28,4 +27,3 @@ def _single_tenant_unless_a_test_says_otherwise(monkeypatch):
     section["enabled"] = False
     monkeypatch.setitem(config.config, "multitenancy", section)
     monkeypatch.delenv("SYSMANAGE_MULTITENANCY", raising=False)
-    yield

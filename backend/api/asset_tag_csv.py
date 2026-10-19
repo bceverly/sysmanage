@@ -27,6 +27,7 @@ from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.services import asset_tag_csv as tag_csv
 from backend.services.audit_service import ActionType, AuditService, EntityType
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +81,9 @@ async def apply_import(
     )
     db.commit()
     logger.info(
-        "Asset tag CSV import by %s: %s", current_user.userid, result["summary"]
+        "Asset tag CSV import by %s: %s",
+        sanitize_log(current_user.userid),
+        sanitize_log(result["summary"]),
     )
     return result
 

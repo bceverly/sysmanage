@@ -483,3 +483,23 @@ def test_the_host_limit_leaves_drives_and_non_temperature_reasons_alone():
         and not tl.valid_limit(126)
         and not tl.valid_limit(True)
     )
+
+
+def test_a_host_limit_past_a_sensors_critical_keeps_its_own_warning():
+    """A 95 C laptop limit must not silence an NVMe drive that is critical at
+    84.8 C: it would go from healthy straight to failed (docs seed,
+    2026-10-19).  That sensor keeps the warning limit its hardware declares."""
+    from backend.services import hardware_temperature_limit as tl
+
+    nvme = {
+        "kind": "sensor", "id": "nvme/temp1", "name": "nvme Composite",
+        "state": "warning",
+        "reasons": [{"code": "temperature_high", "value": 81.0, "limit": 79.8}],
+        "metrics": {"temperature_c": 81.0, "high_c": 79.8, "critical_c": 84.8},
+        "source": "hwmon",
+    }  # fmt: skip
+    judged = tl.apply_limit(nvme, 95.0)
+    assert judged["state"] == "warning" and judged["metrics"]["high_c"] == 79.8
+    assert "high_source" not in judged["metrics"]
+    hot = dict(nvme, metrics=dict(nvme["metrics"], temperature_c=85.0))
+    assert tl.apply_limit(hot, 95.0)["state"] == "failed"

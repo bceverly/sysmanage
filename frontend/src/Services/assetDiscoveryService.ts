@@ -62,7 +62,9 @@ export interface Exclusion {
 export type HostnameSource = "dhcp_fqdn" | "dhcp" | "mdns" | "ptr" | "netbios" | "llmnr" | "unknown";
 export interface HostnameEntry {
   name: string;
-  source: HostnameSource | string;
+  // A known source, or one a newer agent reports that this UI predates
+  // (``string & {}`` keeps the known names in autocomplete).
+  source: HostnameSource | (string & {});
   seen_at: string | null;
 }
 

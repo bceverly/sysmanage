@@ -72,7 +72,7 @@ export const useAgentCommandProgress = <S>(status: S | null, timeoutMs = AGENT_C
     }, []);
 
     useEffect(() => {
-        if (awaiting && awaiting.done(status)) setAwaiting(null);
+        if (awaiting?.done(status)) setAwaiting(null);
     }, [awaiting, status]);
 
     useEffect(() => {

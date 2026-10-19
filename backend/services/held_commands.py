@@ -51,9 +51,9 @@ def _scalars(params: Dict[str, Any]) -> Dict[str, Any]:
     for key, value in params.items():
         if _SECRET_KEY.search(str(key)):
             continue
-        if isinstance(value, (bool, int, float)):
-            out[key] = value
-        elif isinstance(value, str) and len(value) <= 80:
+        if isinstance(value, (bool, int, float)) or (
+            isinstance(value, str) and len(value) <= 80
+        ):
             out[key] = value
     return out
 

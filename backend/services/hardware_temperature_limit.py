@@ -8,7 +8,9 @@ Some hosts run hot by design -- laptops serving with their lids closed sit
 at their CPU's "high" mark all day.  An administrator can give such a host
 its own warning limit; every temperature sensor on it is then judged against
 that instead of the limit the hardware declares.  The device's CRITICAL
-limit is never overridden: at or above it a sensor still fails.
+limit is never overridden: at or above it a sensor still fails, and a
+sensor whose critical limit is at or below the host's keeps its own warning
+limit, so it is never pushed from healthy straight to failed.
 
 The agent judged the sensor; this re-judges it on the server from the
 reading in its metrics, so no agent change is needed and a new or cleared
@@ -49,15 +51,22 @@ def apply_limit(comp: Dict[str, Any], limit: Optional[float]) -> Dict[str, Any]:
     ):
         return comp
     critical = metrics.get("critical_c")
-    judged = dict(metrics, high_c=limit, high_source=HOST_SOURCE)
-    if _number(metrics.get("high_c")):
-        judged["device_high_c"] = metrics["high_c"]
     if _number(critical) and temperature >= critical:
-        state = "failed"
+        # Critical is the hardware's and always wins, whoever set a limit.
         reasons = [
             {"code": "temperature_critical", "value": temperature, "limit": critical}
         ]
-    elif temperature >= limit:
+        return dict(comp, state="failed", reasons=reasons)
+    if _number(critical) and limit >= critical:
+        # A host limit at or above this sensor's critical point would take
+        # it straight from healthy to failed with no warning at all (an
+        # NVMe drive critical at 84.8 C under a 95 C laptop limit): it
+        # keeps the limit its hardware declares.
+        return comp
+    judged = dict(metrics, high_c=limit, high_source=HOST_SOURCE)
+    if _number(metrics.get("high_c")):
+        judged["device_high_c"] = metrics["high_c"]
+    if temperature >= limit:
         state = "warning"
         reasons = [{"code": "temperature_high", "value": temperature, "limit": limit}]
     else:

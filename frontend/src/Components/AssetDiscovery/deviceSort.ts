@@ -33,9 +33,9 @@ function ipv6SortKey(ip: string): number[] | null {
     const tail = halves.length === 2 && halves[1] ? halves[1].split(':') : [];
     const missing = 8 - head.length - tail.length;
     if (missing < 0 || (halves.length === 1 && missing !== 0)) return null;
-    const groups: string[] = [...head, ...Array(missing).fill('0'), ...tail];
+    const groups: string[] = [...head, ...new Array(missing).fill('0'), ...tail];
     if (!groups.every(group => /^[0-9a-fA-F]{1,4}$/.test(group))) return null;
-    return [6, ...groups.map(group => parseInt(group, 16))];
+    return [6, ...groups.map(group => Number.parseInt(group, 16))];
 }
 
 const text = (value: string | null | undefined): string | null =>

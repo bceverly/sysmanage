@@ -18,8 +18,9 @@ person meant to use it.  A migration that seeds a role calls
 * every user who already holds EVERY other role (the "full holders").
 
 A partial holder is left alone: holding some roles says nothing about this
-one.  Plain SQL on the migration's connection, so it imports no application
-code; idempotent (``NOT EXISTS``) and portable (SQLite + PostgreSQL).
+one.  SQLAlchemy Core on the migration's connection, so it imports no
+application code; idempotent (``NOT EXISTS``) and portable (SQLite +
+PostgreSQL).
 ``tests/test_role_migrations_grant_full_holders.py`` fails a new migration
 that inserts into ``user_security_roles`` without it.
 """
@@ -34,29 +35,55 @@ _UUID_SQLITE = (
     "||'-'||substr(hex(randomblob(6)),1,12))"
 )
 
-# :role is the role granted; :new are the roles that do not count when deciding
-# whether someone is a full holder (always at least :role itself).
-_SELECT = """
-    FROM "user" u
-    JOIN security_roles target ON target.name = :role
-    WHERE NOT EXISTS (
-        SELECT 1 FROM user_security_roles ex
-        WHERE ex.user_id = u.id AND ex.role_id = target.id
+# Bare table shapes -- not the ORM models -- so a migration imports no
+# application code and sees the schema as it is at that revision.
+_USER = sa.table("user", sa.column("id"), sa.column("is_admin"))
+_ROLES = sa.table("security_roles", sa.column("id"), sa.column("name"))
+_GRANTS = sa.table(
+    "user_security_roles",
+    sa.column("id"),
+    sa.column("user_id"),
+    sa.column("role_id"),
+    sa.column("granted_at"),
+)
+
+
+def _holds(user_id, role_id):
+    # correlate_except: auto-correlation reaches only the enclosing query, and
+    # this sits two levels below the outer user row in the full-holder test.
+    grant = _GRANTS.alias()
+    return (
+        sa.exists()
+        .where(grant.c.user_id == user_id, grant.c.role_id == role_id)
+        .correlate_except(grant)
     )
-    AND (
-        u.is_admin = :yes
-        OR (
-            EXISTS (SELECT 1 FROM security_roles r0 WHERE r0.name NOT IN :new)
-            AND NOT EXISTS (
-                SELECT 1 FROM security_roles r
-                WHERE r.name NOT IN :new AND NOT EXISTS (
-                    SELECT 1 FROM user_security_roles held
-                    WHERE held.user_id = u.id AND held.role_id = r.id
-                )
-            )
+
+
+def _grant_select(role_name: str, excluded, postgres: bool):
+    """Admins and full holders of every role but ``excluded``, not yet
+    holding ``role_name``: (new id, user id, role id, granted at)."""
+    target, other, any_other = _ROLES.alias(), _ROLES.alias(), _ROLES.alias()
+    if postgres:
+        new_id, granted_at = sa.func.gen_random_uuid(), sa.func.now()
+    else:
+        # A constant expression (no input reaches it): SQLite has no uuid().
+        new_id = sa.literal_column(_UUID_SQLITE)
+        granted_at = sa.func.datetime("now")
+    full_holder = sa.and_(
+        # with no other roles yet, "holds every other role" is vacuous
+        sa.exists().where(any_other.c.name.notin_(excluded)),
+        ~sa.exists().where(
+            other.c.name.notin_(excluded), ~_holds(_USER.c.id, other.c.id)
+        ),
+    )
+    return (
+        sa.select(new_id, _USER.c.id, target.c.id, granted_at)
+        .select_from(_USER.join(target, target.c.name == role_name))
+        .where(
+            ~_holds(_USER.c.id, target.c.id),
+            sa.or_(_USER.c.is_admin == sa.true(), full_holder),
         )
     )
-"""
 
 
 def grant_new_role_to_full_holders(
@@ -70,15 +97,9 @@ def grant_new_role_to_full_holders(
     a database with no roles yet grants to admins only.
     """
     excluded = sorted(set(new_roles or ()) | {role_name})
-    postgres = conn.dialect.name == "postgresql"
-    columns = (
-        "gen_random_uuid(), u.id, target.id, now()"
-        if postgres
-        else f"{_UUID_SQLITE}, u.id, target.id, datetime('now')"
+    select = _grant_select(role_name, excluded, conn.dialect.name == "postgresql")
+    statement = _GRANTS.insert().from_select(
+        ["id", "user_id", "role_id", "granted_at"], select
     )
-    statement = sa.text(
-        "INSERT INTO user_security_roles (id, user_id, role_id, granted_at) "
-        f"SELECT {columns}" + _SELECT
-    ).bindparams(sa.bindparam("new", expanding=True))
-    result = conn.execute(statement, {"role": role_name, "yes": True, "new": excluded})
+    result = conn.execute(statement)
     return result.rowcount or 0

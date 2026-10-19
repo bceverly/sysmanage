@@ -14440,8 +14440,12 @@ mark, so every report crossed the limit one way or the other.
       critical limit always still fails, drives and non-temperature reasons
       are untouched, hysteresis uses the effective limit, and a change applies
       from the next report (history is never rewritten).  No agent change
-- [ ] **Docs** -- the sysmanage-docs hardware health page describes the
+- [x] **Docs** -- the sysmanage-docs hardware health page describes the
       limit and the hysteresis, with a screenshot of the control
+      (2026-10-19: "Temperature warnings" + "A host's own temperature limit"
+      sections in docs/administration/hardware-health.html, 13 locales;
+      `hardware-health-templimit` shotlist entry + seed_hardware.py hot host
+      wired -- the PNG itself is captured by the next `make screenshots`)
 
 ### Production serving topology: nginx is the only thing facing the network (tech debt)
 
