@@ -13,8 +13,12 @@ Vcs-Git: https://github.com/bceverly/sysmanage.git
 Vcs-Browser: https://github.com/bceverly/sysmanage
 Rules-Requires-Root: no
 
+# Architecture stays "all" here: the GitHub release, the R2 apt pool and its
+# installers all name sysmanage_<v>-1_all.deb.  Only the Launchpad upload
+# switches it to "any" (build-and-release.yml deploy-launchpad), so each PPA
+# architecture builds its own package and riscv64 can carry its wheels.
 Package: sysmanage
-Architecture: any
+Architecture: all
 Depends: ${misc:Depends}, ${riscv64:Depends},
  python3 (>= 3.10),
  python3-pip,

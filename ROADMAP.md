@@ -600,6 +600,16 @@ the explicit bullet is added to the in-progress and future phases.)
   records at `backend/services/script_plan_builder.py:87` (created
   2026-04-27) until both were marked **Safe** on 2026-08-26, which took
   the condition straight to 100.
+- **Pro+ engines built for EVERY OS and architecture, and in R2** -- every
+  engine's CURRENT version has a bundle in R2 for each of the nine targets:
+  linux/x86_64, linux/aarch64, linux/riscv64 (`make build-all-architectures`
+  on a Linux box), darwin/aarch64, windows/x86_64, windows/aarch64,
+  freebsd/x86_64, openbsd/x86_64 and netbsd/x86_64 (each built on its own OS),
+  each published with `make publish-modules`, then `sudo make update` on the
+  license server.  Bryan builds and publishes; Claude verifies with a
+  read-only R2 listing that no (engine, current version, platform, arch) is
+  missing, and names any gaps.  Added 2026-10-19 (Bryan): an engine bumped
+  without a rebuild everywhere silently leaves that OS on the old version.
 - **`sysmanage-docs` documents EVERYTHING this phase added** -- every
   user-visible feature shipped this phase has matching documentation on
   the docs site, landed *in the same phase*, not deferred:
@@ -14243,9 +14253,45 @@ real fix is the collection:
 - [ ] **Fleet-wide (Enterprise)** -- "fix this check on every failing host"
       as a fleet job in waves (20.4), with per-host results
 
+#### 24.5 Server packages built per architecture, like the agent (all editions / OSS)
+
+**Added 2026-10-19 (Bryan).** The server and the agent install their Python
+dependencies differently.  The agent vendors every wheel into its source
+upload and builds the venv at package-build time, so its `.deb` is
+`Architecture: any` -- one build per architecture.  The server's `.deb` is
+`Architecture: all`: it ships no dependencies and its postinst builds the venv
+on the target from PyPI.  That held until riscv64, where PyPI lacks wheels for
+about a dozen server dependencies (cryptography, orjson, watchfiles, bcrypt,
+gevent, Pillow, PyYAML, ...).
+
+**Interim (2026-10-18/19, keep until this lands):** `debian/control` stays
+`all` for the GitHub release and the R2 apt pool, whose filenames and
+installers name `sysmanage_<v>-1_all.deb`.  Only the Launchpad upload switches
+`sysmanage` to `any` (`deploy-launchpad` in build-and-release.yml), and only
+the riscv64 build ships the CI-built wheels (`riscv64-wheels.yml`) with their
+system-library dependencies computed in `debian/rules`.  So the same package is
+`all` in one channel and `any` in another, and every non-riscv64 server
+install still needs PyPI at install time.
+
+- [ ] **Vendor the server's dependencies at build time** -- the agent's model:
+      wheels for each architecture in the source upload (PyPI where it has
+      them, `riscv64-wheels.yml`-style builds where it does not), the venv
+      built in `debian/rules`, the postinst no longer fetching from PyPI
+- [ ] **`Architecture: any` everywhere** -- drop the Launchpad-only sed; the
+      GitHub release, the R2 apt pool + its `Packages` indexes, the install
+      test, the checksum step, the Makefile messages and the docs (incl. the
+      air-gap deployment page) use per-architecture filenames, one build per
+      architecture (amd64, arm64, riscv64)
+- [ ] **Install with no network** -- prove a server `.deb` installs on a host
+      with PyPI unreachable (an air-gap win: today only the air-gap bundle
+      does this); the CI install test runs that way
+- [ ] **RPM side checked too** -- the openSUSE/CentOS server specs build their
+      venv at build time already; confirm their arch handling matches, and
+      add aarch64/riscv64 where OBS/COPR can build them
+
 ### Licensing summary
 
-- **Community / OSS:** device model + fleet visibility + manual/self-report registration (24.1); the agent memory-footprint work (24.3) is in every edition. You can *see* devices you or a companion app report; no automated management, no curated EOL/compliance.
+- **Community / OSS:** device model + fleet visibility + manual/self-report registration (24.1); the agent memory-footprint work (24.3) and per-architecture server packages (24.5) are in every edition. You can *see* devices you or a companion app report; no automated management, no curated EOL/compliance.
 - **Pro+ (Professional):** aggregate **visibility & compliance** -- companion app (24.2), ingest-from-existing-UEM (24.3 ⭐), Android inventory (24.4 read), and mobile EOL/patch compliance + alerting (24.4). The "single pane of glass over the mobile you already manage" tier -- no device control.
 - **Enterprise:** compliance *enforcement* + alerting on ingested devices (24.4).  **Being** the MDM -- native iOS/Android and zero-touch enrollment orchestration / zero-touch (24.7), and compliance *enforcement* + remote actions (lock/wipe/force-update).
 
@@ -14260,11 +14306,22 @@ real fix is the collection:
 - [ ] Agent memory footprint (24.3) measured on every supported OS, reduced
       where the measurements showed it pays, and held by an enforced per-OS
       budget
+- [ ] Server packages built per architecture with vendored dependencies
+      (24.5): the Launchpad-only `Architecture: any` switch is gone and a
+      server `.deb` installs with PyPI unreachable
 - [ ] Docs + 14-language i18n complete
 - [ ] Home-screen card: **Mobile devices** -- devices by platform,
       non-compliant OS/patch level, and not seen in N days; links to the
       filtered device list (card contract: Phase 34.1)
 - [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before -- including whole i18n workstreams -- which made the backlog look far larger than it was and hid which gaps were real.
+- [ ] **Pro+ engines built for every OS + architecture and verified in R2**
+      (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)):
+      Bryan builds and publishes all nine targets (`make build-all-architectures`
+      for linux x86_64/aarch64/riscv64, plus darwin/aarch64, windows
+      x86_64/aarch64, freebsd, openbsd and netbsd on their own OS, then
+      `make publish-modules` and `sudo make update` on the license server);
+      Claude confirms from a read-only R2 listing that every engine's current
+      version is present for all nine
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -14347,6 +14404,14 @@ plain explanation of what to do.
       actual codebase, tick what is genuinely done, and for what is not say
       plainly whether it is real work, blocked externally, or should move or
       be dropped.
+- [ ] **Pro+ engines built for every OS + architecture and verified in R2**
+      (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)):
+      Bryan builds and publishes all nine targets (`make build-all-architectures`
+      for linux x86_64/aarch64/riscv64, plus darwin/aarch64, windows
+      x86_64/aarch64, freebsd, openbsd and netbsd on their own OS, then
+      `make publish-modules` and `sudo make update` on the license server);
+      Claude confirms from a read-only R2 listing that every engine's current
+      version is present for all nine
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -14775,6 +14840,14 @@ machine; this proof waits for it rather than for a cloud box.
       (OSS / license-server / Pro+ components), matching the backend; the
       ratchet thresholds hold the parity line going forward
 - [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before -- including whole i18n workstreams -- which made the backlog look far larger than it was and hid which gaps were real.
+- [ ] **Pro+ engines built for every OS + architecture and verified in R2**
+      (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)):
+      Bryan builds and publishes all nine targets (`make build-all-architectures`
+      for linux x86_64/aarch64/riscv64, plus darwin/aarch64, windows
+      x86_64/aarch64, freebsd, openbsd and netbsd on their own OS, then
+      `make publish-modules` and `sudo make update` on the license server);
+      Claude confirms from a read-only R2 listing that every engine's current
+      version is present for all nine
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -14954,6 +15027,14 @@ at its next upgrade).
       a self-hosted Windows runner, which is a hardware/cost decision, not code.
 - [ ] Docs + 14-language i18n complete
 - [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before -- including whole i18n workstreams -- which made the backlog look far larger than it was and hid which gaps were real.
+- [ ] **Pro+ engines built for every OS + architecture and verified in R2**
+      (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)):
+      Bryan builds and publishes all nine targets (`make build-all-architectures`
+      for linux x86_64/aarch64/riscv64, plus darwin/aarch64, windows
+      x86_64/aarch64, freebsd, openbsd and netbsd on their own OS, then
+      `make publish-modules` and `sudo make update` on the license server);
+      Claude confirms from a read-only R2 listing that every engine's current
+      version is present for all nine
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -15024,6 +15105,14 @@ one-way ingestion connector only.
       actual codebase, tick what is genuinely done, and for what is not say
       plainly whether it is real work, blocked externally, or should move or
       be dropped.
+- [ ] **Pro+ engines built for every OS + architecture and verified in R2**
+      (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)):
+      Bryan builds and publishes all nine targets (`make build-all-architectures`
+      for linux x86_64/aarch64/riscv64, plus darwin/aarch64, windows
+      x86_64/aarch64, freebsd, openbsd and netbsd on their own OS, then
+      `make publish-modules` and `sudo make update` on the license server);
+      Claude confirms from a read-only R2 listing that every engine's current
+      version is present for all nine
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -15073,6 +15162,14 @@ Be the MDM for Apple devices. Heaviest sub-phase (protocol + APNs + enrollment),
       actual codebase, tick what is genuinely done, and for what is not say
       plainly whether it is real work, blocked externally, or should move or
       be dropped.
+- [ ] **Pro+ engines built for every OS + architecture and verified in R2**
+      (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)):
+      Bryan builds and publishes all nine targets (`make build-all-architectures`
+      for linux x86_64/aarch64/riscv64, plus darwin/aarch64, windows
+      x86_64/aarch64, freebsd, openbsd and netbsd on their own OS, then
+      `make publish-modules` and `sudo make update` on the license server);
+      Claude confirms from a read-only R2 listing that every engine's current
+      version is present for all nine
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -15127,6 +15224,14 @@ The operational product: getting devices enrolled at scale.
       actual codebase, tick what is genuinely done, and for what is not say
       plainly whether it is real work, blocked externally, or should move or
       be dropped.
+- [ ] **Pro+ engines built for every OS + architecture and verified in R2**
+      (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)):
+      Bryan builds and publishes all nine targets (`make build-all-architectures`
+      for linux x86_64/aarch64/riscv64, plus darwin/aarch64, windows
+      x86_64/aarch64, freebsd, openbsd and netbsd on their own OS, then
+      `make publish-modules` and `sudo make update` on the license server);
+      Claude confirms from a read-only R2 listing that every engine's current
+      version is present for all nine
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -15352,6 +15457,14 @@ because an orderly power-loss shutdown is part of surviving a site outage.
       actual codebase, tick what is genuinely done, and for what is not say
       plainly whether it is real work, blocked externally, or should move or
       be dropped.
+- [ ] **Pro+ engines built for every OS + architecture and verified in R2**
+      (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)):
+      Bryan builds and publishes all nine targets (`make build-all-architectures`
+      for linux x86_64/aarch64/riscv64, plus darwin/aarch64, windows
+      x86_64/aarch64, freebsd, openbsd and netbsd on their own OS, then
+      `make publish-modules` and `sudo make update` on the license server);
+      Claude confirms from a read-only R2 listing that every engine's current
+      version is present for all nine
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -15521,6 +15634,14 @@ adjust.*
       actual codebase, tick what is genuinely done, and for what is not say
       plainly whether it is real work, blocked externally, or should move or
       be dropped.
+- [ ] **Pro+ engines built for every OS + architecture and verified in R2**
+      (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)):
+      Bryan builds and publishes all nine targets (`make build-all-architectures`
+      for linux x86_64/aarch64/riscv64, plus darwin/aarch64, windows
+      x86_64/aarch64, freebsd, openbsd and netbsd on their own OS, then
+      `make publish-modules` and `sudo make update` on the license server);
+      Claude confirms from a read-only R2 listing that every engine's current
+      version is present for all nine
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -15621,6 +15742,14 @@ federation (`Host.site_id`) and are not offered to scans yet.
       actual codebase, tick what is genuinely done, and for what is not say
       plainly whether it is real work, blocked externally, or should move or
       be dropped.
+- [ ] **Pro+ engines built for every OS + architecture and verified in R2**
+      (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)):
+      Bryan builds and publishes all nine targets (`make build-all-architectures`
+      for linux x86_64/aarch64/riscv64, plus darwin/aarch64, windows
+      x86_64/aarch64, freebsd, openbsd and netbsd on their own OS, then
+      `make publish-modules` and `sudo make update` on the license server);
+      Claude confirms from a read-only R2 listing that every engine's current
+      version is present for all nine
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -15718,6 +15847,14 @@ from the home screen and found only by an operator asking why.
       actual codebase, tick what is genuinely done, and for what is not say
       plainly whether it is real work, blocked externally, or should move or
       be dropped.
+- [ ] **Pro+ engines built for every OS + architecture and verified in R2**
+      (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)):
+      Bryan builds and publishes all nine targets (`make build-all-architectures`
+      for linux x86_64/aarch64/riscv64, plus darwin/aarch64, windows
+      x86_64/aarch64, freebsd, openbsd and netbsd on their own OS, then
+      `make publish-modules` and `sudo make update` on the license server);
+      Claude confirms from a read-only R2 listing that every engine's current
+      version is present for all nine
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---

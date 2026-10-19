@@ -2842,6 +2842,13 @@ jobs:
             exit 1
           fi
 
+          # Launchpad builds sysmanage per architecture (debian/control keeps
+          # "all" for the GitHub/R2 builds, whose filenames depend on it): the
+          # riscv64 build ships the wheels PyPI lacks (debian/rules).
+          sed -i '/^Package: sysmanage$/,/^Architecture:/ s/^Architecture: all$/Architecture: any/' debian/control
+          grep -A1 '^Package: sysmanage$' debian/control | grep -q 'Architecture: any' \
+            || { echo "::error::could not switch sysmanage to Architecture: any"; exit 1; }
+
           # Update changelog
           dch -v "${VERSION}+ppa1~${RELEASE}1" -D "$RELEASE" "New upstream release ${VERSION}"
 
