@@ -130,7 +130,7 @@ def test_the_host_never_gets_prune_and_storage_gets_seal(session):
     storage_jobs = jobs.storage_configuration(s.policy, s.target, s.host)
     assert set(host_jobs["jobs"]) == {"capture", "snapshots", "estimate"}
     assert host_jobs["target"]["mount_point"] == "/mnt/backups"
-    assert set(storage_jobs["jobs"]) == {"seal", "prune", "check"}
+    assert set(storage_jobs["jobs"]) == {"seal", "prune", "check", "du"}
     assert storage_jobs["target"]["mount_point"] == "/srv/backups/restate"
     assert storage_jobs["jobs"]["seal"] == {
         "mode": "zfs_snapshot",
@@ -215,7 +215,8 @@ def test_no_seal_mode_goes_straight_to_prune(session, sent):
     assert str(prune.host_id) == str(s.nas.id)
     results.record_result(session, s.nas.id, _result(prune, pruned=["a1"]))
     assert session.query(models.BackupSnapshot).one().gone_at is not None
-    assert len(sent) == 2  # the capture and the prune; nothing after a prune
+    # the capture, the prune, and then du sizes what is left
+    assert [p["action"] for _h, _c, p in sent] == ["capture", "prune", "du"]
 
 
 def test_a_snapshot_listing_retires_missing_snapshots(session, sent):
@@ -231,7 +232,7 @@ def test_a_snapshot_listing_retires_missing_snapshots(session, sent):
     assert rows["keep"].gone_at is None and rows["new"].gone_at is None
 
 
-def test_storage_jobs_never_include_du_or_paths_the_agent_owns(session):
+def test_storage_jobs_never_include_paths_the_agent_owns(session):
     s = _setup(session)
     for config in (
         jobs.host_configuration(s.policy, s.target, s.host),
@@ -239,9 +240,10 @@ def test_storage_jobs_never_include_du_or_paths_the_agent_owns(session):
     ):
         assert "config_version" not in config
         for job in config["jobs"].values():
-            assert not {"command", "repository", "result", "progress_file"} & set(job)
+            assert not {"command", "repository", "result", "progress"} & set(job)
     storage = jobs.storage_configuration(s.policy, s.target, s.host)
-    assert "du" not in storage["jobs"] and storage["jobs"]["seal"] == {"mode": "none"}
+    # du takes nothing from the server: the agent fills in the repository
+    assert storage["jobs"]["du"] == {} and storage["jobs"]["seal"] == {"mode": "none"}
 
 
 def test_a_busy_refusal_is_retried_and_not_configured_resends(session, sent):
@@ -366,3 +368,36 @@ def test_a_capture_that_created_its_repository_is_logged(session, sent, caplog):
     with caplog.at_level("INFO", logger="backend.services.backup_results"):
         results.record_result(session, s.host.id, payload)
     assert "created repository /mnt/backups/h-1" in caplog.text
+
+
+def test_a_good_prune_sizes_the_repository_with_du(session, sent):
+    s = _setup(session)
+    _upsert = results._upsert_snapshot  # pylint: disable=protected-access
+    _upsert(session, s.policy, "2026-10-20T010000Z", {"bytes": 1})
+    _upsert(session, s.policy, "2026-10-19T010000Z", {"bytes": 1})
+    prune = jobs.queue_run(session, s.policy, s.nas.id, "prune")
+    results.record_result(session, s.nas.id, _result(prune, pruned=[]))
+    du = session.query(models.BackupRun).filter_by(action="du").one()
+    assert du.host_id == s.nas.id
+    payload = _result(du, du={
+        "repository": "/srv/backups/restate/h", "bytes": 52_000, "packs": 9,
+        "snapshots": [
+            {"name": "2026-10-20T010000Z", "bytes": 50_000, "new_bytes": 2_000,
+             "unique_bytes": 1_500, "listed": True},
+            {"name": "gone-or-unknown", "bytes": 7},
+            "not-an-object",
+        ],
+    })  # fmt: skip
+    results.record_result(session, s.nas.id, payload)
+    assert s.policy.repository_bytes == 52_000
+    snap = (
+        session.query(models.BackupSnapshot).filter_by(name="2026-10-20T010000Z").one()
+    )
+    assert (snap.bytes, snap.new_bytes, snap.unique_bytes) == (50_000, 2_000, 1_500)
+
+
+def test_a_failed_prune_does_not_run_du(session, sent):
+    s = _setup(session)
+    prune = jobs.queue_run(session, s.policy, s.nas.id, "prune")
+    results.record_result(session, s.nas.id, _result(prune, "failed"))
+    assert session.query(models.BackupRun).filter_by(action="du").count() == 0

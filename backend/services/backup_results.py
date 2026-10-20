@@ -321,6 +321,37 @@ def _after_prune(db: Session, run: models.BackupRun, policy, result) -> None:
         policy.storage_restate_version = run.restate_version
     pruned = [n for n in result.get("pruned") or [] if isinstance(n, str)]
     _mark_gone(db, policy, pruned)
+    if run.status == "ok":
+        _storage_next(db, policy, "du")  # what is left, and what each holds
+
+
+def _after_du(db: Session, run: models.BackupRun, policy, result) -> None:
+    """The repository's size on the storage host and, per snapshot, its
+    size, what it added, and what dropping it alone would free."""
+    if run.status != "ok":
+        return
+    usage = result.get("du") if isinstance(result.get("du"), dict) else {}
+    total = _int(usage.get("bytes"))
+    if total is not None:
+        policy.repository_bytes = total
+    for entry in usage.get("snapshots") or []:
+        if not isinstance(entry, dict) or not isinstance(entry.get("name"), str):
+            continue
+        snapshot = (
+            db.query(models.BackupSnapshot)
+            .filter(
+                models.BackupSnapshot.policy_id == policy.id,
+                models.BackupSnapshot.name == entry["name"],
+                models.BackupSnapshot.gone_at.is_(None),
+            )
+            .first()
+        )
+        if snapshot is None:
+            continue
+        for field in ("bytes", "new_bytes", "unique_bytes"):
+            value = _int(entry.get(field))
+            if value is not None:
+                setattr(snapshot, field, value)
 
 
 def _named(entries: Any) -> List[Dict[str, Any]]:
@@ -391,6 +422,7 @@ _AFTER = {
     "snapshots": _after_snapshots,
     "estimate": _after_estimate,
     "check": _after_check,
+    "du": _after_du,
 }
 
 

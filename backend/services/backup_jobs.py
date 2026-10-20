@@ -53,7 +53,7 @@ GROUP = "backup"
 SYSTEM_ACTOR = "system:backup-scheduler"
 
 HOST_ACTIONS = ("capture", "snapshots", "estimate")
-STORAGE_ACTIONS = ("seal", "prune", "check")
+STORAGE_ACTIONS = ("seal", "prune", "check", "du")
 CONFIGURE = "configure"
 RESTORE = "restore"
 
@@ -162,6 +162,9 @@ def storage_configuration(
             "seal": seal_job(target),
             "prune": {"keep_last": policy.keep_last},
             "check": {"read_all": False},
+            # After each prune: the repository's size and what each
+            # snapshot alone would free (pack lists only; no key needed).
+            "du": {},
         },
     }
 
