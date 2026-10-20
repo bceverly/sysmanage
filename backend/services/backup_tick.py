@@ -209,6 +209,50 @@ def _policy_host(db: Session, policy) -> Optional[models.Host]:
     return db.query(models.Host).filter(models.Host.id == policy.host_id).first()
 
 
+def _requested(db: Session, target) -> List[models.BackupPolicy]:
+    return (
+        db.query(models.BackupPolicy)
+        .filter(
+            models.BackupPolicy.target_id == target.id,
+            models.BackupPolicy.capture_requested_at.isnot(None),
+        )
+        .order_by(models.BackupPolicy.capture_requested_at)
+        .all()
+    )
+
+
+def start_requested(db: Session, actor: str = jobs.SYSTEM_ACTOR) -> int:
+    """Start requested captures (a bulk "Back up now") oldest first, while
+    the target has a free slot.  The rest keep waiting: each finished
+    capture calls this again, and so does every tick.  A request a host can
+    no longer run is dropped, loudly."""
+    db.flush()
+    target = jobs.the_target(db)
+    if target is None:
+        return 0
+    free = max(1, target.max_concurrent or 1) - running_captures(db, target.id)
+    started = 0
+    for policy in _requested(db, target):
+        host = _policy_host(db, policy)
+        if not _eligible(host) or policy.host_acked_version < 1:
+            logger.warning(
+                "Backup now for policy %s dropped: host %s can no longer run it",
+                policy.id,
+                policy.host_id,
+            )
+            policy.capture_requested_at = None
+            continue
+        if jobs.pending(db, policy.id, "capture"):
+            policy.capture_requested_at = None  # already running: satisfied
+            continue
+        if started >= free:
+            break
+        jobs.queue_run(db, policy, host.id, "capture", actor)
+        policy.capture_requested_at = None
+        started += 1
+    return started
+
+
 def configure_now(db: Session) -> None:
     """Send outdated job files at once rather than on the next tick: a saved
     target or policy takes effect while the operator is watching.  Queues
@@ -238,7 +282,7 @@ def reconcile(db: Session, now: Optional[datetime] = None) -> int:
     if target is None:
         return 0
     storage_ready = _eligible(jobs.storage_host(db, target))
-    queued = 0
+    queued = start_requested(db)  # asked for first, then the schedule
     for policy in _target_policies(db, target):
         host = _policy_host(db, policy)
         if not _eligible(host):

@@ -5318,7 +5318,8 @@
       "size": "Repository",
       "snapshots": "Snapshot: {{n}}",
       "starting": "Avvio...",
-      "status": "Stato"
+      "status": "Stato",
+      "waiting": "In attesa di un posto libero"
     },
     "loadError": "Impossibile caricare i backup.",
     "policy": {
@@ -5332,7 +5333,11 @@
       "saveError": "Impossibile salvare il criterio di backup.",
       "title": "Criterio di backup per {{host}}",
       "windowHelp": "I backup partono solo nelle sei ore a partire da questa ora.",
-      "windowStart": "Ora di inizio (UTC, facoltativa)"
+      "windowStart": "Ora di inizio (UTC, facoltativa)",
+      "keepHelp": "Percorsi che le regole integrate escludono, come /home/*/Downloads. Un percorso che corrisponde a un modello di esclusione resta escluso.",
+      "keepPaths": "Includi anche nel backup (un modello di percorso per riga)",
+      "skipHelp": "Ad esempio: /home/*/.local/share/Trash o **/previews. Cache, download e output di compilazione sono già esclusi.",
+      "skipPaths": "Escludi (un modello di percorso per riga)"
     },
     "reason": {
       "agentOutdated": "Aggiorna l'agente",
@@ -5442,6 +5447,18 @@
       "lastPrune": "Ultima pulizia",
       "lastSeal": "Ultima sigillatura",
       "never": "Mai"
+    },
+    "bulk": {
+      "backupSelected": "Esegui il backup dei selezionati",
+      "error": "Non è stato possibile richiedere i backup.",
+      "result": "Avviati: {{started}}. In attesa di un posto libero: {{waiting}}. Saltati: {{skipped}}.",
+      "selectAll": "Seleziona tutti gli host che possono eseguire il backup ora",
+      "selectHost": "Seleziona {{host}}",
+      "selected": "Host selezionati: {{n}}",
+      "skipNoHost": "Host non trovato",
+      "skipNoPolicy": "Nessun criterio di backup",
+      "skipNotConfigured": "File dei processi non ancora confermati dall'host",
+      "skipRunning": "Backup già in corso"
     }
   }
 }

@@ -3,8 +3,9 @@
 // See the LICENSE file in the project root for the full terms.
 
 // One host's backup policy (Phase 24): how often, when, how many snapshots
-// the storage host keeps, how often it checks the repository, and which
-// services restate pauses while it reads.
+// the storage host keeps, how often it checks the repository, which
+// services restate pauses while it reads, and which paths to also back up
+// or leave out (one restate pattern per line; leave-outs win).
 
 import React, { useEffect, useState } from 'react';
 import {
@@ -33,7 +34,12 @@ const DEFAULTS: PolicyInput = {
     check_interval_days: 7,
     quiesce: false,
     quiesce_with: [],
+    keep_paths: [],
+    skip_paths: [],
 };
+
+const lines = (text: string): string[] =>
+    text.split('\n').map(line => line.trim()).filter(Boolean);
 
 const toInput = (policy: BackupPolicy | null): PolicyInput =>
     policy
@@ -45,6 +51,8 @@ const toInput = (policy: BackupPolicy | null): PolicyInput =>
               check_interval_days: policy.check_interval_days,
               quiesce: policy.quiesce,
               quiesce_with: policy.quiesce_with,
+              keep_paths: policy.keep_paths ?? [],
+              skip_paths: policy.skip_paths ?? [],
           }
         : DEFAULTS;
 
@@ -59,6 +67,8 @@ const BackupPolicyDialog: React.FC<{
     const { t } = useTranslation();
     const [form, setForm] = useState<PolicyInput>(toInput(policy));
     const [hooks, setHooks] = useState('');
+    const [keep, setKeep] = useState('');
+    const [skip, setSkip] = useState('');
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -66,6 +76,8 @@ const BackupPolicyDialog: React.FC<{
             const input = toInput(policy);
             setForm(input);
             setHooks(input.quiesce_with.join(', '));
+            setKeep(input.keep_paths.join('\n'));
+            setSkip(input.skip_paths.join('\n'));
             setError(null);
         }
     }, [open, policy]);
@@ -76,7 +88,12 @@ const BackupPolicyDialog: React.FC<{
     const save = async () => {
         const quiesce_with = hooks.split(',').map(h => h.trim()).filter(Boolean);
         try {
-            await savePolicy(hostId, { ...form, quiesce_with });
+            await savePolicy(hostId, {
+                ...form,
+                quiesce_with,
+                keep_paths: lines(keep),
+                skip_paths: lines(skip),
+            });
             onSaved();
             onClose();
         } catch (err) {
@@ -116,6 +133,14 @@ const BackupPolicyDialog: React.FC<{
                             onChange={e => setHooks(e.target.value)}
                             helperText={t('backups.policy.quiesceHelp', 'For example: postgres, nextcloud')} />
                     )}
+                    <TextField multiline minRows={2} label={t('backups.policy.skipPaths', 'Leave out (one path pattern per line)')}
+                        value={skip} onChange={e => setSkip(e.target.value)}
+                        helperText={t('backups.policy.skipHelp',
+                            'For example: /home/*/.local/share/Trash or **/previews. Caches, Downloads and build output are already left out.')} />
+                    <TextField multiline minRows={2} label={t('backups.policy.keepPaths', 'Also back up (one path pattern per line)')}
+                        value={keep} onChange={e => setKeep(e.target.value)}
+                        helperText={t('backups.policy.keepHelp',
+                            'Paths the built-in rules leave out, such as /home/*/Downloads. A path matched by a leave-out pattern is still left out.')} />
                 </Stack>
             </DialogContent>
             <DialogActions>

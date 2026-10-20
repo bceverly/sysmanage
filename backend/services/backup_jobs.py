@@ -106,12 +106,27 @@ def equipped(host: Optional[models.Host]) -> Tuple[bool, Optional[str]]:
     return False, "agent_outdated"
 
 
-def quiesce_names(policy: models.BackupPolicy) -> List[str]:
+def _json_strings(text: Optional[str]) -> List[str]:
     try:
-        names = json.loads(policy.quiesce_with) if policy.quiesce_with else []
+        values = json.loads(text) if text else []
     except ValueError:
         return []
-    return [str(n) for n in names if isinstance(n, str)]
+    if not isinstance(values, list):
+        return []
+    return [str(v) for v in values if isinstance(v, str)]
+
+
+def quiesce_names(policy: models.BackupPolicy) -> List[str]:
+    return _json_strings(policy.quiesce_with)
+
+
+def path_rules(policy: models.BackupPolicy) -> Dict[str, List[str]]:
+    """The operator's ``keep_paths`` / ``skip_paths``, only those set."""
+    rules = {
+        "keep_paths": _json_strings(policy.keep_paths),
+        "skip_paths": _json_strings(policy.skip_paths),
+    }
+    return {key: value for key, value in rules.items() if value}
 
 
 def host_configuration(
@@ -127,9 +142,10 @@ def host_configuration(
                 "baseline_content": False,
                 "quiesce": bool(policy.quiesce),
                 "quiesce_with": quiesce_names(policy),
+                **path_rules(policy),
             },
             "snapshots": {},
-            "estimate": {},
+            "estimate": dict(path_rules(policy)),
         },
     }
 

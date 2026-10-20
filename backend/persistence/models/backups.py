@@ -97,6 +97,12 @@ class BackupPolicy(Base):
     check_interval_days = Column(Integer, nullable=False, default=7)
     quiesce = Column(Boolean, nullable=False, default=False)
     quiesce_with = Column(Text, nullable=True)  # JSON list of hook names
+    # JSON lists of restate path patterns: kept although the built-in rules
+    # leave them out / left out.  The agent writes them as a rules file.
+    keep_paths = Column(Text, nullable=True)
+    skip_paths = Column(Text, nullable=True)
+    # A bulk "Back up now" waiting for a free slot under the target's cap.
+    capture_requested_at = Column(DateTime, nullable=True)
     estimate_bytes = Column(BigInteger, nullable=True)
     repository_bytes = Column(BigInteger, nullable=True)
     config_version = Column(Integer, nullable=False, default=1)

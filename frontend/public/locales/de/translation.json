@@ -5318,7 +5318,8 @@
       "size": "Repository",
       "snapshots": "Snapshots: {{n}}",
       "starting": "Wird gestartet...",
-      "status": "Status"
+      "status": "Status",
+      "waiting": "Wartet auf einen freien Platz"
     },
     "loadError": "Die Sicherungen konnten nicht geladen werden.",
     "policy": {
@@ -5332,7 +5333,11 @@
       "saveError": "Die Sicherungsrichtlinie konnte nicht gespeichert werden.",
       "title": "Sicherungsrichtlinie für {{host}}",
       "windowHelp": "Sicherungen starten nur in den sechs Stunden ab dieser Stunde.",
-      "windowStart": "Startstunde (UTC, optional)"
+      "windowStart": "Startstunde (UTC, optional)",
+      "keepHelp": "Pfade, die die integrierten Regeln ausschließen, etwa /home/*/Downloads. Ein Pfad, der zu einem Ausschlussmuster passt, bleibt ausgeschlossen.",
+      "keepPaths": "Zusätzlich sichern (ein Pfadmuster pro Zeile)",
+      "skipHelp": "Zum Beispiel: /home/*/.local/share/Trash oder **/previews. Caches, Downloads und Build-Ausgaben sind bereits ausgeschlossen.",
+      "skipPaths": "Ausschließen (ein Pfadmuster pro Zeile)"
     },
     "reason": {
       "agentOutdated": "Agent aktualisieren",
@@ -5442,6 +5447,18 @@
       "lastPrune": "Letzte Bereinigung",
       "lastSeal": "Letzte Versiegelung",
       "never": "Nie"
+    },
+    "bulk": {
+      "backupSelected": "Ausgewählte sichern",
+      "error": "Die Sicherungen konnten nicht angefordert werden.",
+      "result": "Gestartet: {{started}}. Warten auf einen freien Platz: {{waiting}}. Übersprungen: {{skipped}}.",
+      "selectAll": "Alle Hosts auswählen, die jetzt sichern können",
+      "selectHost": "{{host}} auswählen",
+      "selected": "Ausgewählte Hosts: {{n}}",
+      "skipNoHost": "Host nicht gefunden",
+      "skipNoPolicy": "Keine Sicherungsrichtlinie",
+      "skipNotConfigured": "Auftragsdateien vom Host noch nicht bestätigt",
+      "skipRunning": "Sicherung läuft bereits"
     }
   }
 }

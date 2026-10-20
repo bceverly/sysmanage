@@ -5318,7 +5318,8 @@
       "size": "リポジトリ",
       "snapshots": "スナップショット: {{n}}",
       "starting": "開始しています...",
-      "status": "状態"
+      "status": "状態",
+      "waiting": "空き枠を待っています"
     },
     "loadError": "バックアップを読み込めませんでした。",
     "policy": {
@@ -5332,7 +5333,11 @@
       "saveError": "バックアップポリシーを保存できませんでした。",
       "title": "{{host}} のバックアップポリシー",
       "windowHelp": "バックアップはこの時刻から6時間以内にのみ開始されます。",
-      "windowStart": "開始時刻（UTC、任意）"
+      "windowStart": "開始時刻（UTC、任意）",
+      "keepHelp": "組み込みのルールが除外するパス (例: /home/*/Downloads)。除外パターンに一致するパスは除外されたままです。",
+      "keepPaths": "追加でバックアップ (1 行に 1 つのパスパターン)",
+      "skipHelp": "例: /home/*/.local/share/Trash や **/previews。キャッシュ、ダウンロード、ビルド出力はすでに除外されています。",
+      "skipPaths": "除外 (1 行に 1 つのパスパターン)"
     },
     "reason": {
       "agentOutdated": "エージェントをアップグレードしてください",
@@ -5442,6 +5447,18 @@
       "lastPrune": "前回のプルーニング",
       "lastSeal": "前回の封印",
       "never": "なし"
+    },
+    "bulk": {
+      "backupSelected": "選択したホストをバックアップ",
+      "error": "バックアップを要求できませんでした。",
+      "result": "開始: {{started}}。空き枠待ち: {{waiting}}。スキップ: {{skipped}}。",
+      "selectAll": "今すぐバックアップできるホストをすべて選択",
+      "selectHost": "{{host}} を選択",
+      "selected": "選択したホスト: {{n}}",
+      "skipNoHost": "ホストが見つかりません",
+      "skipNoPolicy": "バックアップポリシーがありません",
+      "skipNotConfigured": "ホストがジョブファイルをまだ確認していません",
+      "skipRunning": "すでにバックアップ中"
     }
   }
 }

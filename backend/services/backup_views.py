@@ -101,6 +101,8 @@ def policy_dict(policy: models.BackupPolicy) -> Dict[str, Any]:
         "check_interval_days": policy.check_interval_days,
         "quiesce": bool(policy.quiesce),
         "quiesce_with": jobs.quiesce_names(policy),
+        "keep_paths": jobs.path_rules(policy).get("keep_paths", []),
+        "skip_paths": jobs.path_rules(policy).get("skip_paths", []),
         "estimate_bytes": policy.estimate_bytes,
         "repository_bytes": policy.repository_bytes,
         "config_version": policy.config_version,
@@ -196,6 +198,7 @@ def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
         "last_good_capture": None,
         "last_check": None,
         "running": None,
+        "capture_requested": False,
         "next_due": None,
         "snapshot_count": 0,
     }
@@ -218,6 +221,8 @@ def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
     entry["last_good_capture"] = run_dict(good) if good else None
     entry["last_check"] = run_dict(last_check) if last_check else None
     entry["running"] = run_dict(running) if running else None
+    # A bulk "Back up now" waiting for a free slot under the target's cap.
+    entry["capture_requested"] = policy.capture_requested_at is not None
     due = backup_tick.capture_due_at(db, policy)
     capturing = running is not None and running.action == "capture"
     entry["next_due"] = iso(due or now) if policy.enabled and not capturing else None

@@ -87,10 +87,19 @@ class PolicyBody(BaseModel):
     check_interval_days: int = 7
     quiesce: bool = False
     quiesce_with: List[str] = Field(default_factory=list)
+    keep_paths: List[str] = Field(default_factory=list)
+    skip_paths: List[str] = Field(default_factory=list)
 
 
 class RunBody(BaseModel):
     action: str = "capture"
+
+
+MAX_BULK_HOSTS = 500
+
+
+class BulkBackupBody(BaseModel):
+    host_ids: List[str] = Field(min_length=1, max_length=MAX_BULK_HOSTS)
 
 
 class RestoreBody(BaseModel):
@@ -126,6 +135,14 @@ def _host_or_404(db: Session, host_id: str) -> models.Host:
     if host is None:
         raise HTTPException(status_code=404, detail=_("Host not found"))
     return host
+
+
+def _host_or_none(db: Session, host_id: str) -> Optional[models.Host]:
+    try:
+        key = uuid.UUID(str(host_id))
+    except ValueError:
+        return None
+    return db.query(models.Host).filter(models.Host.id == key).first()
 
 
 def _absolute_path(value: Optional[str], label: str) -> None:
@@ -203,6 +220,33 @@ def _validate_policy(body: PolicyBody) -> None:
         _HOOK_NAME.match(n) for n in body.quiesce_with
     ):
         raise _bad(_("Quiesce hooks must be up to 10 short lowercase names"))
+    _validate_path_rules(body.keep_paths + body.skip_paths)
+
+
+# Each pattern becomes one line of a restate rules file on the host (the
+# agent checks again): no control characters, no leading or trailing space,
+# no comment marker.
+MAX_PATH_RULES = 50
+MAX_PATH_RULE = 512
+
+
+def _validate_path_rules(patterns: List[str]) -> None:
+    if len(patterns) > MAX_PATH_RULES:
+        raise _bad(_("At most 50 path rules can be set"))
+    for pattern in patterns:
+        if (
+            not pattern
+            or len(pattern) > MAX_PATH_RULE
+            or pattern != pattern.strip()
+            or pattern.startswith("#")
+            or any(ord(ch) < 32 or ord(ch) == 127 for ch in pattern)
+        ):
+            raise _bad(
+                _(
+                    "Each path rule is one line of up to 512 characters, "
+                    "without leading or trailing spaces or a leading #"
+                )
+            )
 
 
 def _validate_restore(body: RestoreBody) -> None:
@@ -424,6 +468,8 @@ def _apply_policy(policy: models.BackupPolicy, body: PolicyBody) -> None:
     policy.check_interval_days = body.check_interval_days
     policy.quiesce = body.quiesce
     policy.quiesce_with = json.dumps(list(body.quiesce_with))
+    policy.keep_paths = json.dumps(list(body.keep_paths))
+    policy.skip_paths = json.dumps(list(body.skip_paths))
     policy.updated_at = jobs.now()
 
 
@@ -559,6 +605,61 @@ async def backup_now(
     )
     db.commit()
     return views.run_dict(run)
+
+
+def _bulk_skip_reason(db: Session, host: Optional[models.Host]) -> Optional[str]:
+    """Why a host cannot take a "Back up now" from the bulk action, or None."""
+    if host is None:
+        return "no_host"
+    ready, reason = jobs.equipped(host)
+    if not ready:
+        return reason or "not_equipped"
+    policy = _policy_of(db, host)
+    if policy is None:
+        return "no_policy"
+    if policy.host_acked_version < 1:
+        return "not_configured"
+    if jobs.pending(db, policy.id, "capture"):
+        return "running"
+    return None
+
+
+@router.post("/backups/backup-now")
+async def bulk_backup_now(
+    body: BulkBackupBody,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """ "Back up now" for many hosts.  Each ready host's request starts as
+    soon as the target has a free slot under its concurrency cap -- at once
+    for the first ones, and as running captures finish for the rest -- so a
+    fleet-wide click never floods the storage host.  A host that cannot run
+    a capture is skipped, with the reason."""
+    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
+    requested, skipped = 0, []
+    now = jobs.now()
+    for host_id in dict.fromkeys(body.host_ids):  # de-duplicated, in order
+        host = _host_or_none(db, host_id)
+        reason = _bulk_skip_reason(db, host)
+        if reason is not None:
+            skipped.append(
+                {"host_id": host_id, "fqdn": host.fqdn if host else None,
+                 "reason": reason}
+            )  # fmt: skip
+            continue
+        policy = _policy_of(db, host)
+        policy.capture_requested_at = policy.capture_requested_at or now
+        requested += 1
+        _audit(db, current_user, EntityType.HOST, host.id, host.fqdn,
+               "Backup capture requested (bulk)", {})  # fmt: skip
+    started = backup_tick.start_requested(db, current_user.userid)
+    db.commit()
+    return {
+        "requested": requested,
+        "started": started,
+        "waiting": max(0, requested - started),
+        "skipped": skipped,
+    }
 
 
 @router.post("/host/{host_id}/backup-restore")

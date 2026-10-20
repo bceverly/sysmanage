@@ -25,6 +25,8 @@ vi.mock("../../../Services/backups", async (importOriginal) => {
     getSnapshots: vi.fn(),
     restoreFiles: vi.fn(),
     getRun: vi.fn(),
+    savePolicy: vi.fn(),
+    bulkBackupNow: vi.fn(),
   };
 });
 
@@ -34,6 +36,8 @@ import {
   getRuns,
   getSnapshots,
   restoreFiles,
+  savePolicy,
+  bulkBackupNow,
 } from "../../../Services/backups";
 import type { BackupHost, BackupOverview, BackupRun } from "../../../Services/backups";
 import Backups from "../../../Pages/Backups";
@@ -49,6 +53,8 @@ const policy = {
   check_interval_days: 7,
   quiesce: false,
   quiesce_with: [],
+  keep_paths: [],
+  skip_paths: [],
   estimate_bytes: null,
   repository_bytes: 2048,
   configured: true,
@@ -71,6 +77,7 @@ const host = (over: Partial<BackupHost>): BackupHost => ({
   last_good_capture: null,
   last_check: null,
   running: null,
+  capture_requested: false,
   next_due: null,
   snapshot_count: 3,
   ...over,
@@ -173,6 +180,58 @@ describe("Backups page", () => {
     render(<MemoryRouter><Backups /></MemoryRouter>);
     expect((await screen.findAllByText("Backing up")).length).toBeGreaterThan(0);
     expect(screen.queryByText("Failed")).not.toBeInTheDocument();
+  });
+
+  test("the policy dialog saves leave-out and keep path patterns, one per line", async () => {
+    vi.mocked(savePolicy).mockResolvedValue(policy);
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    fireEvent.click((await screen.findAllByText("Configure"))[0]);
+    fireEvent.change(screen.getByLabelText("Leave out (one path pattern per line)"), {
+      target: { value: "**/previews\n\n  /var/tmp  \n" },
+    });
+    fireEvent.change(screen.getByLabelText("Also back up (one path pattern per line)"), {
+      target: { value: "/home/*/Downloads" },
+    });
+    fireEvent.click(screen.getByText("Save"));
+    await waitFor(() =>
+      expect(savePolicy).toHaveBeenCalledWith("h3", expect.objectContaining({
+        skip_paths: ["**/previews", "/var/tmp"],
+        keep_paths: ["/home/*/Downloads"],
+      })),
+    );
+  });
+
+  test("Back up selected sends the picked hosts and reports started, waiting and skipped", async () => {
+    vi.mocked(getBackupOverview).mockResolvedValue(overview({
+      hosts: [
+        host({}),
+        host({ host_id: "h4", fqdn: "db.lab" }),
+        host({ host_id: "h5", fqdn: "busy.lab", status: "running",
+               running: run({ id: "r5", action: "capture", status: "running" }) }),
+      ],
+    }));
+    vi.mocked(bulkBackupNow).mockResolvedValue({
+      requested: 2, started: 1, waiting: 1,
+      skipped: [{ host_id: "h4", fqdn: "db.lab", reason: "running" }],
+    });
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    const all = await screen.findByLabelText("Select every host that can back up now");
+    // busy.lab is already backing up: it cannot be picked
+    expect(screen.getByLabelText("Select busy.lab")).toBeDisabled();
+    fireEvent.click(all);
+    expect(screen.getByText("Hosts selected: 2")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Back up selected"));
+    await waitFor(() => expect(bulkBackupNow).toHaveBeenCalledWith(["h1", "h4"]));
+    expect(await screen.findByText("Started: 1. Waiting for a free slot: 1. Skipped: 1.")).toBeInTheDocument();
+    expect(screen.getByText("db.lab: Already backing up")).toBeInTheDocument();
+  });
+
+  test("a host waiting for a free slot says so", async () => {
+    vi.mocked(getBackupOverview).mockResolvedValue(overview({
+      hosts: [host({ capture_requested: true })],
+    }));
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    expect(await screen.findByText("Waiting for a free slot")).toBeInTheDocument();
   });
 
   test("Back up now queues a capture", async () => {

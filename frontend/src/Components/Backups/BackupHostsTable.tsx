@@ -3,11 +3,13 @@
 // See the LICENSE file in the project root for the full terms.
 
 // Every approved host's backup standing (Phase 24), worst first, with what
-// an operator can do about it: configure, back up now, restore files.
+// an operator can do about it: configure, back up now (one host, or the
+// picked ones through the bulk bar), restore files.
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
     Button,
+    Checkbox,
     Chip,
     LinearProgress,
     Stack,
@@ -23,6 +25,7 @@ import { useTranslation } from 'react-i18next';
 import AsyncButton from '../AsyncButton';
 import { backupNow, BACKUP_STATUS_ORDER } from '../../Services/backups';
 import type { BackupHost } from '../../Services/backups';
+import BackupBulkBar from './BackupBulkBar';
 import BackupPolicyDialog from './BackupPolicyDialog';
 import RestoreFilesDialog from './RestoreFilesDialog';
 import {
@@ -36,6 +39,10 @@ import {
 } from './backupLabels';
 
 const rank = (row: BackupHost) => BACKUP_STATUS_ORDER.indexOf(row.status);
+
+/** A host the bulk "Back up now" can take: configured, idle, not waiting. */
+export const canBackUp = (row: BackupHost): boolean =>
+    row.equipped && !!row.policy?.configured && row.running?.action !== 'capture' && !row.capture_requested;
 
 export const sortHosts = (rows: BackupHost[]): BackupHost[] =>
     [...rows].sort((a, b) => rank(a) - rank(b) || a.fqdn.localeCompare(b.fqdn));
@@ -72,6 +79,11 @@ const StatusCell: React.FC<{ row: BackupHost }> = ({ row }) => {
                 </Typography>
             )}
             <Progress row={row} />
+            {row.capture_requested && !row.running && (
+                <Typography variant="caption" display="block" color="text.secondary">
+                    {t('backups.hosts.waiting', 'Waiting for a free slot')}
+                </Typography>
+            )}
         </TableCell>
     );
 };
@@ -87,6 +99,24 @@ const BackupHostsTable: React.FC<{
     const { t } = useTranslation();
     const [editing, setEditing] = useState<BackupHost | null>(null);
     const [restoring, setRestoring] = useState<BackupHost | null>(null);
+    const [picked, setPicked] = useState<Set<string>>(new Set());
+    const pickable = useMemo(() => rows.filter(canBackUp).map(r => r.host_id), [rows]);
+    // A refresh drops picks that can no longer back up (started, say).
+    useEffect(() => {
+        const still = new Set(pickable);
+        setPicked(prev => {
+            const kept = Array.from(prev).filter(id => still.has(id));
+            return kept.length === prev.size ? prev : new Set(kept);
+        });
+    }, [pickable]);
+    const allPicked = pickable.length > 0 && pickable.every(id => picked.has(id));
+    const toggle = (id: string) =>
+        setPicked(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
 
     const runNow = async (row: BackupHost) => {
         try {
@@ -99,9 +129,20 @@ const BackupHostsTable: React.FC<{
 
     return (
         <>
+            {canManage && (
+                <BackupBulkBar selected={Array.from(picked)} onClear={() => setPicked(new Set())} onDone={onChanged} />
+            )}
             <Table size="small">
                 <TableHead>
                     <TableRow>
+                        {canManage && (
+                            <TableCell padding="checkbox">
+                                <Checkbox size="small" checked={allPicked}
+                                    indeterminate={picked.size > 0 && !allPicked} disabled={pickable.length === 0}
+                                    onChange={() => setPicked(allPicked ? new Set() : new Set(pickable))}
+                                    inputProps={{ 'aria-label': t('backups.bulk.selectAll', 'Select every host that can back up now') }} />
+                            </TableCell>
+                        )}
                         <TableCell>{t('backups.hosts.host', 'Host')}</TableCell>
                         <TableCell>{t('backups.hosts.status', 'Status')}</TableCell>
                         <TableCell>{t('backups.hosts.lastBackup', 'Last backup')}</TableCell>
@@ -113,7 +154,14 @@ const BackupHostsTable: React.FC<{
                 </TableHead>
                 <TableBody>
                     {sortHosts(rows).map(row => (
-                        <TableRow key={row.host_id}>
+                        <TableRow key={row.host_id} selected={picked.has(row.host_id)}>
+                            {canManage && (
+                                <TableCell padding="checkbox">
+                                    <Checkbox size="small" checked={picked.has(row.host_id)}
+                                        disabled={!canBackUp(row)} onChange={() => toggle(row.host_id)}
+                                        inputProps={{ 'aria-label': t('backups.bulk.selectHost', 'Select {{host}}', { host: row.fqdn }) }} />
+                                </TableCell>
+                            )}
                             <TableCell>
                                 <Typography variant="body2">{row.fqdn}</Typography>
                                 {row.policy?.restate_version && (

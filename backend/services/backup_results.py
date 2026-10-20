@@ -31,6 +31,7 @@ from sqlalchemy.orm import Session
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
 from backend.services import backup_storage_status as storage_status
+from backend.services import backup_tick
 
 logger = logging.getLogger(__name__)
 
@@ -281,6 +282,11 @@ def _after_capture(
     _storage_next(db, policy, "seal" if sealing else "prune")
 
 
+def _free_slot(db: Session) -> None:
+    """A capture ended: a waiting "Back up now" can take its slot."""
+    backup_tick.start_requested(db)
+
+
 def _after_seal(db: Session, run: models.BackupRun, policy, _result) -> None:
     if run.status == "ok":
         _storage_next(db, policy, "prune")
@@ -410,6 +416,8 @@ def record_result(
     after = _AFTER.get(run.action)
     if policy is not None and after is not None:
         after(db, run, policy, result)
+    if run.action == "capture":
+        _free_slot(db)
     if run.status in ("failed", "untrusted"):
         logger.error(
             "Backup %s for policy %s ended %s (exit %s): %s",

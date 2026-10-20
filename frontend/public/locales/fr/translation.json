@@ -5318,7 +5318,8 @@
       "size": "Dépôt",
       "snapshots": "Instantanés : {{n}}",
       "starting": "Démarrage...",
-      "status": "État"
+      "status": "État",
+      "waiting": "En attente d'une place libre"
     },
     "loadError": "Impossible de charger les sauvegardes.",
     "policy": {
@@ -5332,7 +5333,11 @@
       "saveError": "La politique de sauvegarde n'a pas pu être enregistrée.",
       "title": "Politique de sauvegarde de {{host}}",
       "windowHelp": "Les sauvegardes ne démarrent que dans les six heures qui suivent cette heure.",
-      "windowStart": "Heure de début (UTC, facultative)"
+      "windowStart": "Heure de début (UTC, facultative)",
+      "keepHelp": "Chemins que les règles intégrées excluent, comme /home/*/Downloads. Un chemin qui correspond à un motif d'exclusion reste exclu.",
+      "keepPaths": "Sauvegarder aussi (un motif de chemin par ligne)",
+      "skipHelp": "Par exemple : /home/*/.local/share/Trash ou **/previews. Les caches, les téléchargements et les produits de compilation sont déjà exclus.",
+      "skipPaths": "Exclure (un motif de chemin par ligne)"
     },
     "reason": {
       "agentOutdated": "Mettez à jour l'agent",
@@ -5442,6 +5447,18 @@
       "lastPrune": "Dernière purge",
       "lastSeal": "Dernier scellement",
       "never": "Jamais"
+    },
+    "bulk": {
+      "backupSelected": "Sauvegarder la sélection",
+      "error": "Les sauvegardes n'ont pas pu être demandées.",
+      "result": "Lancées : {{started}}. En attente d'une place libre : {{waiting}}. Ignorées : {{skipped}}.",
+      "selectAll": "Sélectionner tous les hôtes qui peuvent être sauvegardés maintenant",
+      "selectHost": "Sélectionner {{host}}",
+      "selected": "Hôtes sélectionnés : {{n}}",
+      "skipNoHost": "Hôte introuvable",
+      "skipNoPolicy": "Aucune politique de sauvegarde",
+      "skipNotConfigured": "Fichiers de tâche pas encore confirmés par l'hôte",
+      "skipRunning": "Sauvegarde déjà en cours"
     }
   }
 }

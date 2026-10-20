@@ -5318,7 +5318,8 @@
       "size": "Repository",
       "snapshots": "Snapshots: {{n}}",
       "starting": "Bezig met starten...",
-      "status": "Status"
+      "status": "Status",
+      "waiting": "Wacht op een vrije plek"
     },
     "loadError": "De back-ups konden niet worden geladen.",
     "policy": {
@@ -5332,7 +5333,11 @@
       "saveError": "Het back-upbeleid kon niet worden opgeslagen.",
       "title": "Back-upbeleid voor {{host}}",
       "windowHelp": "Back-ups starten alleen in de zes uur vanaf dit uur.",
-      "windowStart": "Startuur (UTC, optioneel)"
+      "windowStart": "Startuur (UTC, optioneel)",
+      "keepHelp": "Paden die de ingebouwde regels uitsluiten, zoals /home/*/Downloads. Een pad dat overeenkomt met een uitsluitingspatroon blijft uitgesloten.",
+      "keepPaths": "Ook back-uppen (één padpatroon per regel)",
+      "skipHelp": "Bijvoorbeeld: /home/*/.local/share/Trash of **/previews. Caches, downloads en build-uitvoer worden al uitgesloten.",
+      "skipPaths": "Uitsluiten (één padpatroon per regel)"
     },
     "reason": {
       "agentOutdated": "Werk de agent bij",
@@ -5442,6 +5447,18 @@
       "lastPrune": "Laatste opschoning",
       "lastSeal": "Laatste verzegeling",
       "never": "Nooit"
+    },
+    "bulk": {
+      "backupSelected": "Selectie back-uppen",
+      "error": "De back-ups konden niet worden aangevraagd.",
+      "result": "Gestart: {{started}}. Wachtend op een vrije plek: {{waiting}}. Overgeslagen: {{skipped}}.",
+      "selectAll": "Alle hosts selecteren die nu een back-up kunnen maken",
+      "selectHost": "{{host}} selecteren",
+      "selected": "Geselecteerde hosts: {{n}}",
+      "skipNoHost": "Host niet gevonden",
+      "skipNoPolicy": "Geen back-upbeleid",
+      "skipNotConfigured": "Taakbestanden nog niet bevestigd door de host",
+      "skipRunning": "Back-up al bezig"
     }
   }
 }

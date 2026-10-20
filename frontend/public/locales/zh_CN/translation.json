@@ -5318,7 +5318,8 @@
       "size": "仓库",
       "snapshots": "快照：{{n}}",
       "starting": "正在启动...",
-      "status": "状态"
+      "status": "状态",
+      "waiting": "等待空闲名额"
     },
     "loadError": "无法加载备份。",
     "policy": {
@@ -5332,7 +5333,11 @@
       "saveError": "无法保存备份策略。",
       "title": "{{host}} 的备份策略",
       "windowHelp": "备份仅在此小时起的六小时内开始。",
-      "windowStart": "开始小时（UTC，可选）"
+      "windowStart": "开始小时（UTC，可选）",
+      "keepHelp": "内置规则排除的路径，例如 /home/*/Downloads。与排除模式匹配的路径仍会被排除。",
+      "keepPaths": "额外备份（每行一个路径模式）",
+      "skipHelp": "例如：/home/*/.local/share/Trash 或 **/previews。缓存、下载和构建输出已默认排除。",
+      "skipPaths": "排除（每行一个路径模式）"
     },
     "reason": {
       "agentOutdated": "请升级代理",
@@ -5442,6 +5447,18 @@
       "lastPrune": "上次修剪",
       "lastSeal": "上次封存",
       "never": "从未"
+    },
+    "bulk": {
+      "backupSelected": "备份所选主机",
+      "error": "无法请求备份。",
+      "result": "已开始：{{started}}。等待空闲名额：{{waiting}}。已跳过：{{skipped}}。",
+      "selectAll": "选择所有现在可以备份的主机",
+      "selectHost": "选择 {{host}}",
+      "selected": "已选主机：{{n}}",
+      "skipNoHost": "未找到主机",
+      "skipNoPolicy": "没有备份策略",
+      "skipNotConfigured": "主机尚未确认作业文件",
+      "skipRunning": "正在备份中"
     }
   }
 }

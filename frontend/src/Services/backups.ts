@@ -114,6 +114,10 @@ export interface BackupPolicy {
   check_interval_days: number;
   quiesce: boolean;
   quiesce_with: string[];
+  /** restate path patterns kept although the built-in rules leave them out. */
+  keep_paths: string[];
+  /** restate path patterns left out of the backup (they win over keeps). */
+  skip_paths: string[];
   estimate_bytes: number | null;
   repository_bytes: number | null;
   configured: boolean;
@@ -131,6 +135,8 @@ export type PolicyInput = Pick<
   | "check_interval_days"
   | "quiesce"
   | "quiesce_with"
+  | "keep_paths"
+  | "skip_paths"
 >;
 
 export interface BackupProgress {
@@ -180,6 +186,8 @@ export interface BackupHost {
   last_good_capture: BackupRun | null;
   last_check: BackupRun | null;
   running: BackupRun | null;
+  /** A bulk "Back up now" waiting for a free slot under the target's cap. */
+  capture_requested: boolean;
   next_due: string | null;
   snapshot_count: number;
 }
@@ -250,6 +258,17 @@ export const deletePolicy = async (hostId: string): Promise<void> => {
 
 export const backupNow = async (hostId: string, action = "capture"): Promise<BackupRun> =>
   (await axiosInstance.post<BackupRun>(`${base}/host/${hostId}/backup-now`, { action })).data;
+
+export interface BulkBackupResult {
+  requested: number;
+  started: number;
+  waiting: number;
+  skipped: { host_id: string; fqdn: string | null; reason: string }[];
+}
+
+/** "Back up now" for many hosts: started as the target's cap allows. */
+export const bulkBackupNow = async (hostIds: string[]): Promise<BulkBackupResult> =>
+  (await axiosInstance.post<BulkBackupResult>(`${base}/backups/backup-now`, { host_ids: hostIds })).data;
 
 export const getRuns = async (
   params: { host_id?: string; action?: string; limit?: number; offset?: number } = {},

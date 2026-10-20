@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 08:12-0400\n"
+"POT-Creation-Date: 2026-10-20 14:08-0400\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -82,7 +82,7 @@ msgstr "Sie haben keinen Zugriff auf das gewählte Konto."
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:111
+#: backend/api/posture.py:375 backend/api/backups.py:114
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:151
@@ -197,8 +197,8 @@ msgstr "Ungültiges Host-ID-Format"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:123
-#: backend/api/backups.py:126 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:126
+#: backend/api/backups.py:129 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -4120,58 +4120,58 @@ msgid "KVM network list requested. Results will be returned shortly."
 msgstr ""
 "KVM-Netzwerkliste angefordert. Die Ergebnisse werden in Kürze angezeigt."
 
-#: backend/api/backups.py:134
+#: backend/api/backups.py:137
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s muss ein absoluter Pfad ohne '..' sein"
 
-#: backend/api/backups.py:139
+#: backend/api/backups.py:142
 #, python-format
 msgid "%s is out of range"
 msgstr "%s liegt außerhalb des zulässigen Bereichs"
 
-#: backend/api/backups.py:143
+#: backend/api/backups.py:146
 msgid "Host mount point"
 msgstr "Einhängepunkt auf dem Host"
 
-#: backend/api/backups.py:144 backend/api/backups.py:179
+#: backend/api/backups.py:147 backend/api/backups.py:182
 msgid "Storage path"
 msgstr "Speicherpfad"
 
-#: backend/api/backups.py:145
+#: backend/api/backups.py:148
 msgid "Concurrent backups"
 msgstr "Gleichzeitige Sicherungen"
 
-#: backend/api/backups.py:147
+#: backend/api/backups.py:150
 msgid "Unknown seal mode"
 msgstr "Unbekannter Versiegelungsmodus"
 
-#: backend/api/backups.py:149
+#: backend/api/backups.py:152
 msgid "A ZFS snapshot seal needs the dataset name"
 msgstr "Eine Versiegelung per ZFS-Snapshot benötigt den Namen des Datasets"
 
-#: backend/api/backups.py:151
+#: backend/api/backups.py:154
 msgid "The ZFS dataset name is not valid"
 msgstr "Der Name des ZFS-Datasets ist ungültig"
 
-#: backend/api/backups.py:158
+#: backend/api/backups.py:161
 msgid "A storage host needs the storage path"
 msgstr "Ein Speicher-Host benötigt den Speicherpfad"
 
-#: backend/api/backups.py:175
+#: backend/api/backups.py:178
 msgid "A btrfs snapshot seal needs the snapshot directory"
 msgstr ""
 "Eine Versiegelung per btrfs-Snapshot benötigt das Snapshot-Verzeichnis"
 
-#: backend/api/backups.py:177
+#: backend/api/backups.py:180
 msgid "A btrfs snapshot seal needs the storage path"
 msgstr "Eine Versiegelung per btrfs-Snapshot benötigt den Speicherpfad"
 
-#: backend/api/backups.py:180
+#: backend/api/backups.py:183
 msgid "Snapshot directory"
 msgstr "Snapshot-Verzeichnis"
 
-#: backend/api/backups.py:185
+#: backend/api/backups.py:188
 #, python-format
 msgid ""
 "%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
@@ -4180,100 +4180,112 @@ msgstr ""
 "%s muss ein einfacher absoluter Pfad sein (Buchstaben, Ziffern, '_', '.', "
 "'-' und '/'; kein abschließendes '/')"
 
-#: backend/api/backups.py:193
+#: backend/api/backups.py:196
 msgid "The snapshot directory must be outside the storage path"
 msgstr "Das Snapshot-Verzeichnis muss außerhalb des Speicherpfads liegen"
 
-#: backend/api/backups.py:197
+#: backend/api/backups.py:200
 msgid "Interval (hours)"
 msgstr "Intervall (Stunden)"
 
-#: backend/api/backups.py:198
+#: backend/api/backups.py:201
 msgid "Window start hour"
 msgstr "Startstunde des Zeitfensters"
 
-#: backend/api/backups.py:199
+#: backend/api/backups.py:202
 msgid "Snapshots to keep"
 msgstr "Aufzubewahrende Snapshots"
 
-#: backend/api/backups.py:200
+#: backend/api/backups.py:203
 msgid "Check interval (days)"
 msgstr "Prüfintervall (Tage)"
 
-#: backend/api/backups.py:204
+#: backend/api/backups.py:207
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "Quiesce-Hooks: höchstens 10 kurze Namen in Kleinbuchstaben"
 
-#: backend/api/backups.py:209
+#: backend/api/backups.py:220
+msgid "At most 50 path rules can be set"
+msgstr "Maximal 50 Pfadregeln können gesetzt werden"
+
+#: backend/api/backups.py:231
+msgid ""
+"Each path rule is one line of up to 512 characters, without leading or "
+"trailing spaces or a leading #"
+msgstr ""
+"Jede Pfadregel ist eine Zeile von maximal 512 Zeichen ohne führende oder "
+"nachfolgende Leerzeichen oder ein führendes #"
+
+#: backend/api/backups.py:239
 msgid "The snapshot name is not valid"
 msgstr "Der Name des Snapshots ist ungültig"
 
-#: backend/api/backups.py:211
+#: backend/api/backups.py:241
 msgid "At most 50 paths can be restored at once"
 msgstr "Es können höchstens 50 Pfade auf einmal wiederhergestellt werden"
 
-#: backend/api/backups.py:214
+#: backend/api/backups.py:244
 msgid "A restore path is empty or too long"
 msgstr "Ein Wiederherstellungspfad ist leer oder zu lang"
 
-#: backend/api/backups.py:216
+#: backend/api/backups.py:246
 msgid "A restore path must not contain '..'"
 msgstr "Ein Wiederherstellungspfad darf kein '..' enthalten"
 
-#: backend/api/backups.py:235 backend/api/backups.py:238
+#: backend/api/backups.py:265 backend/api/backups.py:268
 msgid "Backup target not found"
 msgstr "Sicherungsziel nicht gefunden"
 
-#: backend/api/backups.py:286
+#: backend/api/backups.py:316
 msgid "This edition supports one backup target; edit the existing one"
 msgstr ""
 "Diese Edition unterstützt ein Sicherungsziel; bearbeiten Sie das vorhandene"
 
-#: backend/api/backups.py:361
+#: backend/api/backups.py:393
 msgid "Remove the hosts' backup policies before the target"
 msgstr ""
 "Entfernen Sie zuerst die Sicherungsrichtlinien der Hosts, dann das Ziel"
 
-#: backend/api/backups.py:439
+#: backend/api/backups.py:473
 msgid "Set up the backup target first"
 msgstr "Richten Sie zuerst das Sicherungsziel ein"
 
-#: backend/api/backups.py:479
+#: backend/api/backups.py:514
 msgid "No backup policy"
 msgstr "Keine Sicherungsrichtlinie"
 
-#: backend/api/backups.py:499
+#: backend/api/backups.py:534
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "Dieser Host kann noch keine Sicherungen ausführen (%s)"
 
-#: backend/api/backups.py:505
+#: backend/api/backups.py:540
 msgid "This host's backup is not configured yet"
 msgstr "Die Sicherung dieses Hosts ist noch nicht konfiguriert"
 
-#: backend/api/backups.py:522
+#: backend/api/backups.py:557
 msgid "The backup storage host is not ready"
 msgstr "Der Speicher-Host für Sicherungen ist nicht bereit"
 
-#: backend/api/backups.py:537
+#: backend/api/backups.py:572
 msgid "Unknown backup action"
 msgstr "Unbekannte Sicherungsaktion"
 
-#: backend/api/backups.py:542
+#: backend/api/backups.py:577
 msgid "That backup job is already queued or running"
 msgstr "Dieser Sicherungsauftrag ist bereits eingereiht oder läuft"
 
-#: backend/api/backups.py:581
+#: backend/api/backups.py:616
 msgid "Snapshot not found"
 msgstr "Snapshot nicht gefunden"
 
-#: backend/api/backups.py:585
+#: backend/api/backups.py:620
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr ""
 "Dieser Snapshot ist nicht signiert; bestätigen Sie, um ihn trotzdem "
 "wiederherzustellen"
 
-#: backend/api/backups.py:656 backend/api/backups.py:659
+#: backend/api/backups.py:691 backend/api/backups.py:694
 msgid "Backup run not found"
 msgstr "Sicherungsauftrag nicht gefunden"
 

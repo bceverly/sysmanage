@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 08:12-0400\n"
+"POT-Creation-Date: 2026-10-20 14:08-0400\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -82,7 +82,7 @@ msgstr "Vous n'avez pas accès au compte sélectionné."
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:111
+#: backend/api/posture.py:375 backend/api/backups.py:114
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:151
@@ -197,8 +197,8 @@ msgstr "Format d'ID hôte incorrect"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:123
-#: backend/api/backups.py:126 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:126
+#: backend/api/backups.py:129 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -4128,58 +4128,58 @@ msgid "KVM network list requested. Results will be returned shortly."
 msgstr ""
 "Liste des réseaux KVM demandée. Les résultats seront affichés sous peu."
 
-#: backend/api/backups.py:134
+#: backend/api/backups.py:137
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s doit être un chemin absolu sans '..'"
 
-#: backend/api/backups.py:139
+#: backend/api/backups.py:142
 #, python-format
 msgid "%s is out of range"
 msgstr "%s est hors de la plage autorisée"
 
-#: backend/api/backups.py:143
+#: backend/api/backups.py:146
 msgid "Host mount point"
 msgstr "Point de montage sur l'hôte"
 
-#: backend/api/backups.py:144 backend/api/backups.py:179
+#: backend/api/backups.py:147 backend/api/backups.py:182
 msgid "Storage path"
 msgstr "Chemin de stockage"
 
-#: backend/api/backups.py:145
+#: backend/api/backups.py:148
 msgid "Concurrent backups"
 msgstr "Sauvegardes simultanées"
 
-#: backend/api/backups.py:147
+#: backend/api/backups.py:150
 msgid "Unknown seal mode"
 msgstr "Mode de scellement inconnu"
 
-#: backend/api/backups.py:149
+#: backend/api/backups.py:152
 msgid "A ZFS snapshot seal needs the dataset name"
 msgstr "Le scellement par instantané ZFS nécessite le nom du jeu de données"
 
-#: backend/api/backups.py:151
+#: backend/api/backups.py:154
 msgid "The ZFS dataset name is not valid"
 msgstr "Le nom du jeu de données ZFS n'est pas valide"
 
-#: backend/api/backups.py:158
+#: backend/api/backups.py:161
 msgid "A storage host needs the storage path"
 msgstr "Un hôte de stockage nécessite le chemin de stockage"
 
-#: backend/api/backups.py:175
+#: backend/api/backups.py:178
 msgid "A btrfs snapshot seal needs the snapshot directory"
 msgstr ""
 "Un scellement par instantané btrfs nécessite le répertoire des instantanés"
 
-#: backend/api/backups.py:177
+#: backend/api/backups.py:180
 msgid "A btrfs snapshot seal needs the storage path"
 msgstr "Un scellement par instantané btrfs nécessite le chemin de stockage"
 
-#: backend/api/backups.py:180
+#: backend/api/backups.py:183
 msgid "Snapshot directory"
 msgstr "Répertoire des instantanés"
 
-#: backend/api/backups.py:185
+#: backend/api/backups.py:188
 #, python-format
 msgid ""
 "%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
@@ -4188,102 +4188,114 @@ msgstr ""
 "%s doit être un chemin absolu simple (lettres, chiffres, '_', '.', '-' et "
 "'/' ; sans '/' final)"
 
-#: backend/api/backups.py:193
+#: backend/api/backups.py:196
 msgid "The snapshot directory must be outside the storage path"
 msgstr ""
 "Le répertoire des instantanés doit se trouver en dehors du chemin de "
 "stockage"
 
-#: backend/api/backups.py:197
+#: backend/api/backups.py:200
 msgid "Interval (hours)"
 msgstr "Intervalle (heures)"
 
-#: backend/api/backups.py:198
+#: backend/api/backups.py:201
 msgid "Window start hour"
 msgstr "Heure de début de la fenêtre"
 
-#: backend/api/backups.py:199
+#: backend/api/backups.py:202
 msgid "Snapshots to keep"
 msgstr "Instantanés à conserver"
 
-#: backend/api/backups.py:200
+#: backend/api/backups.py:203
 msgid "Check interval (days)"
 msgstr "Intervalle de vérification (jours)"
 
-#: backend/api/backups.py:204
+#: backend/api/backups.py:207
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr ""
 "Les hooks de mise en pause doivent être au plus 10 noms courts en minuscules"
 
-#: backend/api/backups.py:209
+#: backend/api/backups.py:220
+msgid "At most 50 path rules can be set"
+msgstr "Au maximum 50 règles de chemin peuvent être définies"
+
+#: backend/api/backups.py:231
+msgid ""
+"Each path rule is one line of up to 512 characters, without leading or "
+"trailing spaces or a leading #"
+msgstr ""
+"Chaque règle de chemin est une ligne d’un maximum de 512 caractères, sans "
+"espaces en tête ou en queue ni un symbole # en tête"
+
+#: backend/api/backups.py:239
 msgid "The snapshot name is not valid"
 msgstr "Le nom de l'instantané n'est pas valide"
 
-#: backend/api/backups.py:211
+#: backend/api/backups.py:241
 msgid "At most 50 paths can be restored at once"
 msgstr "Au plus 50 chemins peuvent être restaurés à la fois"
 
-#: backend/api/backups.py:214
+#: backend/api/backups.py:244
 msgid "A restore path is empty or too long"
 msgstr "Un chemin de restauration est vide ou trop long"
 
-#: backend/api/backups.py:216
+#: backend/api/backups.py:246
 msgid "A restore path must not contain '..'"
 msgstr "Un chemin de restauration ne doit pas contenir '..'"
 
-#: backend/api/backups.py:235 backend/api/backups.py:238
+#: backend/api/backups.py:265 backend/api/backups.py:268
 msgid "Backup target not found"
 msgstr "Cible de sauvegarde introuvable"
 
-#: backend/api/backups.py:286
+#: backend/api/backups.py:316
 msgid "This edition supports one backup target; edit the existing one"
 msgstr ""
 "Cette édition prend en charge une seule cible de sauvegarde ; modifiez celle"
 " qui existe"
 
-#: backend/api/backups.py:361
+#: backend/api/backups.py:393
 msgid "Remove the hosts' backup policies before the target"
 msgstr "Supprimez les politiques de sauvegarde des hôtes avant la cible"
 
-#: backend/api/backups.py:439
+#: backend/api/backups.py:473
 msgid "Set up the backup target first"
 msgstr "Configurez d'abord la cible de sauvegarde"
 
-#: backend/api/backups.py:479
+#: backend/api/backups.py:514
 msgid "No backup policy"
 msgstr "Aucune politique de sauvegarde"
 
-#: backend/api/backups.py:499
+#: backend/api/backups.py:534
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "Cet hôte ne peut pas encore exécuter de sauvegardes (%s)"
 
-#: backend/api/backups.py:505
+#: backend/api/backups.py:540
 msgid "This host's backup is not configured yet"
 msgstr "La sauvegarde de cet hôte n'est pas encore configurée"
 
-#: backend/api/backups.py:522
+#: backend/api/backups.py:557
 msgid "The backup storage host is not ready"
 msgstr "L'hôte de stockage des sauvegardes n'est pas prêt"
 
-#: backend/api/backups.py:537
+#: backend/api/backups.py:572
 msgid "Unknown backup action"
 msgstr "Action de sauvegarde inconnue"
 
-#: backend/api/backups.py:542
+#: backend/api/backups.py:577
 msgid "That backup job is already queued or running"
 msgstr "Cette tâche de sauvegarde est déjà en file d'attente ou en cours"
 
-#: backend/api/backups.py:581
+#: backend/api/backups.py:616
 msgid "Snapshot not found"
 msgstr "Instantané introuvable"
 
-#: backend/api/backups.py:585
+#: backend/api/backups.py:620
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr ""
 "Cet instantané n'est pas signé ; confirmez pour le restaurer quand même"
 
-#: backend/api/backups.py:656 backend/api/backups.py:659
+#: backend/api/backups.py:691 backend/api/backups.py:694
 msgid "Backup run not found"
 msgstr "Tâche de sauvegarde introuvable"
 

@@ -19,6 +19,8 @@ from backend.api import backups as api
 from backend.persistence import models
 from backend.security.roles import SecurityRoles
 from backend.services import backup_jobs as jobs
+from backend.services import backup_results as results
+from backend.services import backup_tick as tick
 from backend.services import backup_views as views
 from tests.services.test_backup_results import _host, _setup
 
@@ -181,6 +183,38 @@ async def test_a_policy_needs_a_target_and_bumps_its_version(session):
     ):
         assert await _status(api.put_policy(str(host.id), bad, session, MANAGER)) == 422
     assert await _status(api.put_policy(str(host.id), body, session, NOBODY)) == 403
+
+
+@pytest.mark.asyncio
+async def test_path_rules_reach_the_hosts_capture_and_estimate(session, sent):
+    s = _setup(session)
+    body = api.PolicyBody(
+        keep_paths=["/home/*/Downloads"], skip_paths=["**/previews", "/var/tmp"]
+    )
+    saved = await api.put_policy(str(s.host.id), body, session, MANAGER)
+    assert saved["keep_paths"] == ["/home/*/Downloads"]
+    assert saved["skip_paths"] == ["**/previews", "/var/tmp"]
+    config = jobs.host_configuration(s.policy, s.target, s.host)
+    for action in ("capture", "estimate"):
+        assert config["jobs"][action]["keep_paths"] == ["/home/*/Downloads"]
+        assert config["jobs"][action]["skip_paths"] == ["**/previews", "/var/tmp"]
+    cleared = await api.put_policy(str(s.host.id), api.PolicyBody(), session, MANAGER)
+    assert cleared["keep_paths"] == [] and cleared["skip_paths"] == []
+    config = jobs.host_configuration(s.policy, s.target, s.host)
+    assert "skip_paths" not in config["jobs"]["capture"]
+    assert config["jobs"]["estimate"] == {}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "pattern",
+    ["", " /lead", "/trail ", "/a\nstate /etc", "#x", "x" * 513],
+    ids=["empty", "leading", "trailing", "newline", "comment", "too-long"],
+)
+async def test_a_path_rule_that_could_break_the_rules_file_is_refused(session, pattern):
+    s = _setup(session)
+    body = api.PolicyBody(skip_paths=[pattern])
+    assert await _status(api.put_policy(str(s.host.id), body, session, MANAGER)) == 422
 
 
 @pytest.mark.asyncio
@@ -353,3 +387,82 @@ def test_a_keyless_check_is_never_verified():
     assert views.check_label(run("ok", {"read_all": True})) == "verified"
     assert views.check_label(run("different", {"read_all": True})) == "changed"
     assert views.check_label(run("failed", {})) is None
+
+
+# ---------------------------------------------------------------------------
+# bulk "Back up now": requests drain under the target's concurrency cap
+# ---------------------------------------------------------------------------
+
+
+def _another_policy(session, s, fqdn):
+    host = _host(session, fqdn=fqdn)
+    policy = models.BackupPolicy(
+        id=uuid.uuid4(), host_id=host.id, target_id=s.target.id, enabled=True,
+        interval_hours=24, keep_last=14, check_interval_days=7, quiesce=False,
+        config_version=1, host_acked_version=1, storage_acked_version=1,
+        created_at=s.policy.created_at, updated_at=s.policy.updated_at,
+    )  # fmt: skip
+    session.add(policy)
+    session.commit()
+    return host, policy
+
+
+def _captures_sent(sent):
+    return [h for h, c, p in sent if c == "backup_run" and p.get("action") == "capture"]
+
+
+@pytest.mark.asyncio
+async def test_bulk_backup_now_starts_up_to_the_cap_and_queues_the_rest(session, sent):
+
+    s = _setup(session)  # max_concurrent=2
+    h2, _p2 = _another_policy(session, s, "two.lab")
+    h3, p3 = _another_policy(session, s, "three.lab")
+    bare = _host(session, fqdn="bare.lab")
+    answer = await api.bulk_backup_now(
+        api.BulkBackupBody(host_ids=[str(s.host.id), str(h2.id), str(h3.id),
+                                     str(bare.id), "not-a-uuid", str(h2.id)]),
+        session, MANAGER,
+    )  # fmt: skip
+    assert (answer["requested"], answer["started"], answer["waiting"]) == (3, 2, 1)
+    assert {(x["fqdn"], x["reason"]) for x in answer["skipped"]} == {
+        ("bare.lab", "no_policy"), (None, "no_host")
+    }  # fmt: skip
+    assert sorted(_captures_sent(sent)) == sorted([str(s.host.id), str(h2.id)])
+    assert p3.capture_requested_at is not None
+    assert views.host_status(session, h3)["capture_requested"] is True
+    # the first capture ends: its slot goes to the waiting host
+    first = (
+        session.query(models.BackupRun)
+        .filter_by(host_id=s.host.id, action="capture")
+        .one()
+    )
+    results.record_result(session, s.host.id, {
+        "run_id": str(first.id), "policy_id": str(first.policy_id),
+        "action": "capture", "status": "failed", "exit": 2, "result": {},
+    })  # fmt: skip
+    assert str(h3.id) in _captures_sent(sent)
+    assert p3.capture_requested_at is None
+
+
+@pytest.mark.asyncio
+async def test_bulk_backup_now_skips_a_running_host_and_needs_the_role(session, sent):
+    s = _setup(session)
+    jobs.queue_run(session, s.policy, s.host.id, "capture")
+    session.commit()
+    answer = await api.bulk_backup_now(
+        api.BulkBackupBody(host_ids=[str(s.host.id)]), session, MANAGER
+    )
+    assert answer["requested"] == 0 and answer["skipped"][0]["reason"] == "running"
+    body = api.BulkBackupBody(host_ids=[str(s.host.id)])
+    assert await _status(api.bulk_backup_now(body, session, NOBODY)) == 403
+
+
+def test_a_request_the_host_can_no_longer_run_is_dropped(session, sent, caplog):
+
+    s = _setup(session)
+    s.policy.capture_requested_at = jobs.now()
+    s.host.approval_status = "pending"
+    session.commit()
+    assert tick.start_requested(session) == 0
+    assert s.policy.capture_requested_at is None
+    assert "can no longer run it" in caplog.text

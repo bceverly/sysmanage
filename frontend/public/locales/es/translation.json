@@ -5318,7 +5318,8 @@
       "size": "Repositorio",
       "snapshots": "Instantáneas: {{n}}",
       "starting": "Iniciando...",
-      "status": "Estado"
+      "status": "Estado",
+      "waiting": "En espera de un hueco libre"
     },
     "loadError": "No se pudieron cargar las copias de seguridad.",
     "policy": {
@@ -5332,7 +5333,11 @@
       "saveError": "No se pudo guardar la política de copias de seguridad.",
       "title": "Política de copias de seguridad de {{host}}",
       "windowHelp": "Las copias de seguridad solo se inician en las seis horas a partir de esta hora.",
-      "windowStart": "Hora de inicio (UTC, opcional)"
+      "windowStart": "Hora de inicio (UTC, opcional)",
+      "keepHelp": "Rutas que las reglas integradas excluyen, como /home/*/Downloads. Una ruta que coincide con un patrón de exclusión sigue excluida.",
+      "keepPaths": "Incluir también en la copia de seguridad (un patrón de ruta por línea)",
+      "skipHelp": "Por ejemplo: /home/*/.local/share/Trash o **/previews. Las cachés, las descargas y los resultados de compilación ya se excluyen.",
+      "skipPaths": "Excluir (un patrón de ruta por línea)"
     },
     "reason": {
       "agentOutdated": "Actualice el agente",
@@ -5442,6 +5447,18 @@
       "lastPrune": "Última depuración",
       "lastSeal": "Último sellado",
       "never": "Nunca"
+    },
+    "bulk": {
+      "backupSelected": "Hacer copia de seguridad de los seleccionados",
+      "error": "No se pudieron solicitar las copias de seguridad.",
+      "result": "Iniciadas: {{started}}. En espera de un hueco libre: {{waiting}}. Omitidas: {{skipped}}.",
+      "selectAll": "Seleccionar todos los hosts que pueden hacer copia de seguridad ahora",
+      "selectHost": "Seleccionar {{host}}",
+      "selected": "Hosts seleccionados: {{n}}",
+      "skipNoHost": "Host no encontrado",
+      "skipNoPolicy": "Sin política de copia de seguridad",
+      "skipNotConfigured": "El host aún no ha confirmado los archivos de tarea",
+      "skipRunning": "Copia de seguridad ya en curso"
     }
   }
 }

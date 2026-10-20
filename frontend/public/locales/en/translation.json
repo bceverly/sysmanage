@@ -5318,7 +5318,8 @@
       "size": "Repository",
       "snapshots": "Snapshots: {{n}}",
       "starting": "Starting...",
-      "status": "Status"
+      "status": "Status",
+      "waiting": "Waiting for a free slot"
     },
     "loadError": "Could not load the backups.",
     "policy": {
@@ -5332,7 +5333,11 @@
       "saveError": "The backup policy could not be saved.",
       "title": "Backup policy for {{host}}",
       "windowHelp": "Backups start only in the six hours from this hour.",
-      "windowStart": "Start hour (UTC, optional)"
+      "windowStart": "Start hour (UTC, optional)",
+      "keepHelp": "Paths the built-in rules leave out, such as /home/*/Downloads. A path matched by a leave-out pattern is still left out.",
+      "keepPaths": "Also back up (one path pattern per line)",
+      "skipHelp": "For example: /home/*/.local/share/Trash or **/previews. Caches, Downloads and build output are already left out.",
+      "skipPaths": "Leave out (one path pattern per line)"
     },
     "reason": {
       "agentOutdated": "Upgrade the agent",
@@ -5442,6 +5447,18 @@
       "lastPrune": "Last prune",
       "lastSeal": "Last seal",
       "never": "Never"
+    },
+    "bulk": {
+      "backupSelected": "Back up selected",
+      "error": "The backups could not be requested.",
+      "result": "Started: {{started}}. Waiting for a free slot: {{waiting}}. Skipped: {{skipped}}.",
+      "selectAll": "Select every host that can back up now",
+      "selectHost": "Select {{host}}",
+      "selected": "Hosts selected: {{n}}",
+      "skipNoHost": "Host not found",
+      "skipNoPolicy": "No backup policy",
+      "skipNotConfigured": "Job files not confirmed by the host yet",
+      "skipRunning": "Already backing up"
     }
   }
 }
