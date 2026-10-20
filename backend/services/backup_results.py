@@ -248,6 +248,15 @@ def _after_capture(
         policy.restate_version = run.restate_version
     if run.status not in jobs.GOOD_CAPTURE:
         return
+    if result.get("created_repository") is True:
+        # The host's first capture made its repository (restate ``create``).
+        logger.info(
+            "Backup capture %s for policy %s created repository %s on host %s",
+            run.id,
+            policy.id,
+            result.get("repository"),
+            run.host_id,
+        )
     if run.snapshot:
         _upsert_snapshot(
             db,

@@ -354,3 +354,15 @@ async def test_command_results_route_to_the_backup_recorder(session, sent):
     with patch.object(message_handlers, "_close_out_command"):
         await message_handlers.handle_command_result(session, connection, message)
     assert run.status == "running"
+
+
+def test_a_capture_that_created_its_repository_is_logged(session, sent, caplog):
+    s = _setup(session)
+    run = jobs.queue_run(session, s.policy, s.host.id, "capture")
+    payload = _result(
+        run, "ok", snapshot="2026-10-20T020000Z", created_repository=True,
+        repository="/mnt/backups/h-1",
+    )  # fmt: skip
+    with caplog.at_level("INFO", logger="backend.services.backup_results"):
+        results.record_result(session, s.host.id, payload)
+    assert "created repository /mnt/backups/h-1" in caplog.text
