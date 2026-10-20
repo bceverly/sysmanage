@@ -1,4 +1,13 @@
 {
+  "about.airgapRole": "cd9067656bfd550c",
+  "about.edition": "f37695a23c899c52",
+  "about.federationRole": "6ff1f59145aae74b",
+  "about.license": "7d505ed04c6eb93d",
+  "about.menu": "4efca0d10c5feb8e",
+  "about.serverBuild": "63b8685b7a8b254a",
+  "about.serverVersion": "3f34bb234d6dc35e",
+  "about.title": "a20eaf1f1887ea0a",
+  "about.unknown": "b764cdc0eab71374",
   "acceptInvitation.acceptError": "50b0394d905e906b",
   "acceptInvitation.backToLogin": "40c55c13690170c6",
   "acceptInvitation.confirmPassword": "c292210c44167923",

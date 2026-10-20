@@ -67,7 +67,7 @@ import SitesTiles from './Pages/SitesTiles';
 import Logout from './Pages/Logout';
 import LicensedRoute from './Components/LicensedRoute';
 import AuthGate from './Components/AuthGate';
-import { getLicenseInfo } from './Services/license';
+import { getCachedLicense, onLicenseChange, refreshLicenseCache } from './Services/license';
 import { PluginProvider, usePlugins } from './plugins';
 
 function AppRoutes() {
@@ -168,17 +168,21 @@ function PluginAppBanners() {
     if (!localStorage.getItem('bearer_token')) {
       return;
     }
-    getLicenseInfo()
-      .then((info) => {
-        if (!cancelled) {
-          setLicense({ features: info.features || [], modules: info.modules || [] });
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setLicense({ features: [], modules: [] });
-      });
+    // The shared license cache: a failed fetch (server restarting) keeps the
+    // last known license and is retried, instead of hiding every licensed
+    // banner until the next login.
+    const mirror = () => {
+      const info = getCachedLicense();
+      if (!cancelled && info) {
+        setLicense({ features: info.features || [], modules: info.modules || [] });
+      }
+    };
+    const unsubscribe = onLicenseChange(mirror);
+    mirror();
+    void refreshLicenseCache();
     return () => {
       cancelled = true;
+      unsubscribe();
     };
   }, []);
   return (

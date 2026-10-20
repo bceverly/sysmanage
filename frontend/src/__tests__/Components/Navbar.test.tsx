@@ -38,6 +38,7 @@ vi.mock('../../Services/license', () => ({
   isFeatureLicensed: vi.fn((f: string) => mockLicenseInfo.features.includes(f)),
   isModuleLicensed: vi.fn((m: string) => mockLicenseInfo.modules.includes(m)),
   onLicenseChange: vi.fn(() => () => {}),
+  watchLicense: vi.fn(),
   clearLicenseCache: vi.fn()
 }));
 

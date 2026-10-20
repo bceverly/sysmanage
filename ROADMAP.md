@@ -47,19 +47,20 @@ This document provides a detailed roadmap for realizing all features in both ope
 36. [Phase 21: Endpoint Facts & Proactive Advisor (Enterprise)](#phase-21-endpoint-facts--proactive-advisor-enterprise)
 37. [Phase 22: Scale Hardening -- Thundering-Herd Remediation (Community / OSS; Pro+ / Enterprise)](#phase-22-scale-hardening----thundering-herd-remediation-community--oss-pro--enterprise)
 38. [Phase 23: Hardware, Time & Asset Visibility (Community / OSS; Pro+)](#phase-23-hardware-time--asset-visibility-community--oss-pro)
-39. [Phase 24: Mobile Fleet Visibility & UEM Ingestion (Community / Pro+ / Enterprise)](#phase-24-mobile-fleet-visibility--uem-ingestion-community--pro--enterprise)
-40. [Phase 25: Mobile Companion App & Compliance (Pro+ / Enterprise)](#phase-25-mobile-companion-app--compliance-pro--enterprise)
-41. [Phase 26: Stabilization & v5.0 GA](#phase-26-stabilization--v50-ga)
-42. [Phase 27: Expanded Agent Architecture & Packaging (Community / OSS)](#phase-27-expanded-agent-architecture--packaging-community--oss)
-43. [Phase 28: Security Tooling Coexistence (Enterprise)](#phase-28-security-tooling-coexistence-enterprise)
-44. [Phase 29: Apple Native MDM (Enterprise)](#phase-29-apple-native-mdm-enterprise)
-45. [Phase 30: Android Native MDM & Zero-Touch Enrollment (Pro+ / Enterprise)](#phase-30-android-native-mdm--zero-touch-enrollment-pro--enterprise)
-46. [Phase 31: High Availability & Disaster Recovery (Enterprise)](#phase-31-high-availability--disaster-recovery-enterprise)
-47. [Phase 32: Browser Remote Terminal (Community / OSS; recording Pro+; approval Enterprise)](#phase-32-browser-remote-terminal-community--oss-recording-pro-approval-enterprise)
-48. [Phase 33: Fleet Targeting by Site & Network Segment (Enterprise)](#phase-33-fleet-targeting-by-site--network-segment-enterprise)
-49. [Phase 34: Dashboard Insight Cards (Community / OSS; Pro+; Enterprise)](#phase-34-dashboard-insight-cards-community--oss-pro-enterprise)
-50. [Release Schedule Summary](#release-schedule-summary)
-51. [Module Migration Plan](#module-migration-plan)
+39. [Phase 24: Fleet Backup & Recovery with restate (Community / Pro+ / Enterprise)](#phase-24-fleet-backup--recovery-with-restate-community--pro--enterprise)
+40. [Phase 25: Mobile Fleet Visibility & UEM Ingestion (Community / Pro+ / Enterprise)](#phase-25-mobile-fleet-visibility--uem-ingestion-community--pro--enterprise)
+41. [Phase 26: Mobile Companion App & Compliance (Pro+ / Enterprise)](#phase-26-mobile-companion-app--compliance-pro--enterprise)
+42. [Phase 27: Stabilization & v5.0 GA](#phase-27-stabilization--v50-ga)
+43. [Phase 28: Expanded Agent Architecture & Packaging (Community / OSS)](#phase-28-expanded-agent-architecture--packaging-community--oss)
+44. [Phase 29: Security Tooling Coexistence (Enterprise)](#phase-29-security-tooling-coexistence-enterprise)
+45. [Phase 30: Apple Native MDM (Enterprise)](#phase-30-apple-native-mdm-enterprise)
+46. [Phase 31: Android Native MDM & Zero-Touch Enrollment (Pro+ / Enterprise)](#phase-31-android-native-mdm--zero-touch-enrollment-pro--enterprise)
+47. [Phase 32: High Availability & Disaster Recovery (Enterprise)](#phase-32-high-availability--disaster-recovery-enterprise)
+48. [Phase 33: Browser Remote Terminal (Community / OSS; recording Pro+; approval Enterprise)](#phase-33-browser-remote-terminal-community--oss-recording-pro-approval-enterprise)
+49. [Phase 34: Fleet Targeting by Site & Network Segment (Enterprise)](#phase-34-fleet-targeting-by-site--network-segment-enterprise)
+50. [Phase 35: Dashboard Insight Cards (Community / OSS; Pro+; Enterprise)](#phase-35-dashboard-insight-cards-community--oss-pro-enterprise)
+51. [Release Schedule Summary](#release-schedule-summary)
+52. [Module Migration Plan](#module-migration-plan)
 
 ---
 
@@ -341,7 +342,7 @@ This section documents the development history of SysManage from initial commit 
 ### Professional Tier Modules
 
 - [x] **proplus_core** - License management UI
-- [x] **compliance_engine** - CIS/DISA STIG auditing (host evidence collected on Linux since 2026-10-18, scheduled scans; other OSes still "not collected" -- see 24.4)
+- [x] **compliance_engine** - CIS/DISA STIG auditing (host evidence collected on Linux since 2026-10-18, scheduled scans; other OSes still "not collected" -- see 25.4)
 - [x] **compliance_engine** - CIS/DISA STIG auditing
 
 ### Enterprise Tier Modules
@@ -498,7 +499,7 @@ the ladder front-loads gains then tapers:
 | **Phase 13 (Enterprise GA)** -- install the ratchet | ≥12% floor ✅ | ≥25% target → **~50% achieved, floor ≥48** ✅ | ≥25% target → **~54% achieved, floor ≥53** ✅ |
 | **Phase 15 (Stabilization)** | 30% ✅ (measured ~34%) | 40% ✅ (already met) | 30% ✅ (already met) |
 | **Phase 19 (Stabilization)** | 50% | 55% | 50% ✅ (already met) |
-| **Phase 26 (Stabilization & v5.0 GA)** | **70%** | **70%** | **70%** |
+| **Phase 27 (Stabilization & v5.0 GA)** | **70%** | **70%** | **70%** |
 
 **OSS frontend line-coverage ramp to Python parity (revised):** rather than
 the coarse table rungs above, the OSS frontend now climbs its enforced **line**
@@ -769,38 +770,41 @@ Each stabilization phase produces a release. Feature phases may produce one or m
 │  Phase 23: Hardware, Time & Asset Visibility                         v3.11.0.0  │
 │     └── Drive/array/ZFS/sensor health + alerts; clock drift; asset tags         │
 │                                                                                 │
-│  Phase 24: Mobile Fleet Visibility & UEM Ingestion                   v4.0.0.0   │
+│  Phase 24: Fleet Backup & Recovery (restate)                         v3.12.0.0  │
+│     └── Scheduled per-host backups to the NAS, quiesce, restore, rebuild        │
+│                                                                                 │
+│  Phase 25: Mobile Fleet Visibility & UEM Ingestion                   v4.0.0.0   │
 │     └── MAJOR - a new device class. Model, registration, ingest-from-UEM        │
 │                                                                                 │
-│  Phase 25: Mobile Companion App & Compliance                         v4.1.0.0   │
+│  Phase 26: Mobile Companion App & Compliance                         v4.1.0.0   │
 │     └── BYOD self-report app; mobile EOL/patch compliance + enforcement         │
 │                                                                                 │
-│  Phase 26: Market-Parity GA                                          v5.0.0.0   │
+│  Phase 27: Market-Parity GA                                          v5.0.0.0   │
 │     └── MAJOR - market parity reached. All gap features hardened; v5.0 GA       │
 │                                                                                 │
-│  Phase 27: Expanded Agent Architecture                               v5.1.0.0   │
+│  Phase 28: Expanded Agent Architecture                               v5.1.0.0   │
 │     └── ppc64le + s390x + riscv64 agent packaging/CI (Community/OSS)            │
 │                                                                                 │
-│  Phase 28: Security Tooling Coexistence                              v5.2.0.0   │
+│  Phase 29: Security Tooling Coexistence                              v5.2.0.0   │
 │     └── Velociraptor IR/hunting + Wazuh ingestion                               │
 │                                                                                 │
-│  Phase 29: Apple Native MDM                                          v6.0.0.0   │
+│  Phase 30: Apple Native MDM                                          v6.0.0.0   │
 │     └── MAJOR - device authority: Apple MDM protocol, APNs, remote wipe         │
 │                                                                                 │
-│  Phase 30: Android Native MDM & Zero-Touch                           v6.1.0.0   │
+│  Phase 31: Android Native MDM & Zero-Touch                           v6.1.0.0   │
 │     └── Android Management API policy + bulk/zero-touch enrollment              │
 │                                                                                 │
-│  Phase 31: High Availability & Disaster Recovery                     v6.2.0.0   │
+│  Phase 32: High Availability & Disaster Recovery                     v6.2.0.0   │
 │     └── Server pool behind a LB, leader-elected workers, Postgres failover      │
 │                Agent multi-endpoint failover to a DR site                       │
 │                                                                                 │
-│  Phase 32: Browser Remote Terminal                                   v6.3.0.0   │
+│  Phase 33: Browser Remote Terminal                                   v6.3.0.0   │
 │     └── Agent-tunneled PTY: no sshd, no inbound port, no keys (OSS)             │
 │                                                                                 │
-│  Phase 33: Fleet Targeting by Site & Network Segment                 v6.4.0.0   │
+│  Phase 34: Fleet Targeting by Site & Network Segment                 v6.4.0.0   │
 │     └── Target work by site, and by CIDR segment within a site                  │
 │                                                                                 │
-│  Phase 34: Dashboard Insight Cards                                   v6.5.0.0   │
+│  Phase 35: Dashboard Insight Cards                                   v6.5.0.0   │
 │     └── Home-screen cards for what needs attention, across every tier           │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
@@ -1245,11 +1249,11 @@ shipped, the generic handlers should be implemented early as a Phase 3 prerequis
 
 2. **Container Engine Testing**
    - [x] LXD container lifecycle testing on Ubuntu -- `sysmanage-agent/tests/integration/test_lxd_lifecycle.py` (7 tests) drives `LxdOperations` through stop → start → restart → delete against a real Alpine container created via `lxc launch` as test setup; observable state verified via `lxc list` between transitions; auto-skips when LXD daemon isn't available
-   - *(WSL instance lifecycle testing on Windows -- **moved to Phase 27 on 2026-08-04.**
+   - *(WSL instance lifecycle testing on Windows -- **moved to Phase 28 on 2026-08-04.**
      Blocked on GitHub rather than on us: `actions/runner-images` [#10563](https://github.com/actions/runner-images/issues/10563)
      asking for WSL2 on hosted Windows runners was closed as *not planned*, and a
      job cannot switch WSL versions in-build because that needs a reboot. Re-check
-     at Phase 27.)*
+     at Phase 28.)*
    - [x] Verify read-only mode for unlicensed users
 
 3. **Security Engine Testing**
@@ -3624,8 +3628,8 @@ deliberately stopped at the docs body paragraphs.
 | OpenBSD ports (workflow builds; not yet upstream-submitted) | OpenBSD | ⚠️ tarball-published only |
 | **winget** | Windows | ✅ merged 2026-06-08 -- `sysmanage.sysmanage` (#376004) + `sysmanage.sysmanage-agent` (#376005) are in `microsoft:master`; `komac update` runs on tag.  (Earlier sandbox-validation stall on PR #375773 is resolved.) |
 | **Homebrew tap (``bceverly/tap/sysmanage-agent``)** | macOS, Linux via Linuxbrew | ✅ auto-published on every release tag |
-| **Microsoft Store (MSIX)** | Windows | 🔜 in scope -- needs `runFullTrust`/privileged-helper identity (deferred to Phase 26 -- see “Consumer app-store distribution”) |
-| **Mac App Store** | macOS (sandboxed) | 🔜 in scope -- needs sandboxed-UI + privileged-helper split (deferred to Phase 26 -- see “Consumer app-store distribution”) |
+| **Microsoft Store (MSIX)** | Windows | 🔜 in scope -- needs `runFullTrust`/privileged-helper identity (deferred to Phase 27 -- see “Consumer app-store distribution”) |
+| **Mac App Store** | macOS (sandboxed) | 🔜 in scope -- needs sandboxed-UI + privileged-helper split (deferred to Phase 27 -- see “Consumer app-store distribution”) |
 | FreeBSD ports | FreeBSD | ❌ not published, not consumed (direct .pkg today) |
 | NetBSD pkgsrc | NetBSD | ❌ not published, not consumed |
 | AUR (``sysmanage-agent``) | Arch | ✅ auto-published on every release tag |
@@ -3677,7 +3681,7 @@ direct GitHub-release URLs cannot easily be mirrored).
        2026-05-12 (manual TTY step); future releases auto-update
        via ``komac update`` in the build-and-release workflow.
        Microsoft Store submission for the "official" channel
-       is deferred to Phase 26 (see "Consumer app-store
+       is deferred to Phase 27 (see "Consumer app-store
        distribution") -- it is gated on a Partner Center account,
        not on code.
      * **Homebrew tap** -- ``bceverly/homebrew-tap`` repo exists and
@@ -4648,7 +4652,7 @@ plan-builder + UI integration.
       up/idempotent/down on sqlite; black + `backend/` pylint + `tsc` + eslint +
       offline i18n gate all green. *Follow-ups (non-blocking; Phase 21 audit 2026-10-01: the strings and the
       `.so` rebuild are done, but this browser landing was NEVER wired -- for
-      OIDC either -- and is carried to Phase 26):* the ACS browser
+      OIDC either -- and is carried to Phase 27):* the ACS browser
       landing (cookie+redirect) is wired in the frontend like OIDC; SAML UI/API
       strings are inline-English defaults pending a `make translate` GPU backfill;
       and the engine `.so` needs a release rebuild for the other Python versions
@@ -6477,7 +6481,7 @@ close the gap between our output and the parsers that consume it.
       Whatever lands should also make "the MSI succeeded but the service is
       absent" a loud, detectable state rather than a silent one.
 - [x] **FreeBSD port made submission-ready, and statically gated.** *(Pulled
-      forward from Phase 27 on 2026-08-07, at Bryan's request, while assessing
+      forward from Phase 28 on 2026-08-07, at Bryan's request, while assessing
       whether the BSD ports could be submitted upstream.)*
 
       Reviewing the skeleton found three defects a ports committer would have
@@ -6527,7 +6531,7 @@ close the gap between our output and the parsers that consume it.
       Do FreeBSD alone first and treat it as the pilot -- three simultaneous
       submissions to three communities with three conventions, none ever built,
       invites three reviewers finding the same class of problem. OpenBSD
-      (`ports@`, strictest) and NetBSD (`pkgsrc-wip` first) stay in Phase 27.
+      (`ports@`, strictest) and NetBSD (`pkgsrc-wip` first) stay in Phase 28.
 
 - [x] **Child hosts enroll with NO TENANT -- they need an enrollment token.**
       *(DONE 2026-08-12 -- `_build_agent_config_yaml` now emits `security.enrollment_token`, minted against the PARENT's tenant via `tenant_for_host` + the existing provisioning mint, threaded through all three creation paths (KVM/WSL/LXD) with a test that counts the call sites so a new path cannot silently regress. Declines rather than guessing when the parent's tenant cannot be resolved -- a token naming the wrong tenant would put the child in someone else's data plane.)*
@@ -6568,7 +6572,7 @@ close the gap between our output and the parsers that consume it.
 Not architecture work: it is about agent HETEROGENEITY, and it is needed
 now.  alpine/freebsd/openbsd/netbsd already run reduced-capability agents,
 and the server will happily dispatch a command they cannot run.  It also
-underpins the mobile companion app (Phase 25), where a device reports
+underpins the mobile companion app (Phase 26), where a device reports
 inventory but executes nothing -- the limiting case of a limited agent.
 
 Some platforms this phase reaches can't run the *full* agent: a native library may have no build for a given arch, or a very old target OS may lack a prerequisite. Rather than silently degrade, the agent should **declare what it can do**, and the server should make any shortfall visible so operators aren't surprised when a feature is unavailable on a host. Baseline agents report everything; the value shows up later when a trimmed agent has to be shipped for a constrained target.
@@ -8375,7 +8379,7 @@ nearly free and makes the dashboard actionable rather than merely informative.
       · **Version** -- v3.8.0.0; engine bumped to 1.0.4. The phase was
         originally targeted at v3.7.0.0 and shipped one minor higher, so
         Phase 21 moved from v3.8.0.0 to v3.9.0.0 rather than collide with
-        it. The v4.0.0.0 anchor at Phase 24 is unchanged.
+        it. The v4.0.0.0 anchor at Phase 25 is unchanged.
 
       · **Screenshots** -- `make screenshots` captures all 50 Enterprise
         shots and `make test-links` passes (1608 OK, 0 errors), so the four
@@ -11117,11 +11121,11 @@ CIDRs, rate-limited, and audited** -- never a fleet-wide default.
       last-seen, which agents observed it, and the evidence for the guess
       (OUI vendor, mDNS service names, open-port fingerprint). A device class
       distinct from `host`: no shell, no package manager, no privileged
-      execution -- the same distinction Phase 24.1 draws for `mobile_device`
+      execution -- the same distinction Phase 25.1 draws for `mobile_device`
       DONE 2026-09-29 (21.6 S1, migration `q13assetdisc`). OUI vendor
       evidence arrived with S5.  **Correction 2026-10-16:** open-port
       fingerprint evidence did NOT arrive -- S4 is the address sweep only,
-      and nothing probes ports.  Moved to Phase 33 ("Standard-port probe of
+      and nothing probes ports.  Moved to Phase 34 ("Standard-port probe of
       unmanaged devices").
 - [x] Agent-side passive neighbor reporting (ARP/NDP cache, mDNS/SSDP) behind
       a `network_discovery` capability, per-platform, defaulting to passive
@@ -11153,7 +11157,7 @@ CIDRs, rate-limited, and audited** -- never a fleet-wide default.
       DONE 21.6 S1-S5: managed hosts by MAC (every spelling), enrolled child
       hosts via their own interfaces, hypervisor tap ports, VIPs / load
       balancers by static-address registration + VRRP/HSRP/CARP recognition.
-      `mobile_device` does not exist yet -- tracked as a 24.1 item.
+      `mobile_device` does not exist yet -- tracked as a 25.1 item.
 - [x] Review page: unenrolled assets with evidence, bulk triage, and a
       **permanent allow-list exclusion** ("this is an IoT sensor / printer /
       switch / appliance -- never show it again") carrying a reason and an
@@ -11543,9 +11547,9 @@ are the bulk; the review UI is small).
       federation 1M-host run + strings, federation Slice 3, the pool/** CDN
       cache, the vuln-engine shared-CVE fix, the GPG remove-on-confirm, the
       external_idp abi3 rebuild, agent dead-code cleanup, the bundle
-      builders), 2 were already tracked (WSL lifecycle -> Phase 27, app-store
-      distribution -> Phase 26). Seven were neither, and are now open items
-      in Phase 26 "Carried forward by the Phase 21 audit" -- most important:
+      builders), 2 were already tracked (WSL lifecycle -> Phase 28, app-store
+      distribution -> Phase 27). Seven were neither, and are now open items
+      in Phase 27 "Carried forward by the Phase 21 audit" -- most important:
       **browser SSO (OIDC + SAML) has no landing page** (fixed 2026-10-01), behind a ticked
       Phase 13 box; also EC2/Azure/GCE/vSphere compute providers, physical
       bare-metal PXE validation, air-gap bundle smoke tests, the federation
@@ -11572,7 +11576,7 @@ were re-verified by hand. Findings are cited as `repo:file:line` at audit time.
 
 **SEQUENCING (2026-10-01, Bryan).** Pulled forward to come right after
 Phase 21 -- every later phase moved out by one. It is a prerequisite for real
-enterprise scale and for Phase 31 (HA/DR, which runs multiple server workers
+enterprise scale and for Phase 32 (HA/DR, which runs multiple server workers
 and therefore NEEDS 22.2's leader election and atomic queue claiming). A
 minor release (v3.10) rather than a major: it changes how the product
 behaves under load, not what it does.
@@ -12400,7 +12404,7 @@ misconfigured or bypassed IdP policy that skips MFA is invisible to us.
       walkthrough (app registration, redirect URI = `webui.public_url`,
       group object IDs in role mappings, security defaults vs Conditional
       Access) -- verified against a real Entra tenant, which also closes the
-      "SSO never exercised against a real IdP" note on the Phase 26 item.
+      "SSO never exercised against a real IdP" note on the Phase 27 item.
       *Setting documented 2026-10-06 (`external-idp.html`, "Requiring
       Multi-Factor Sign-In", 14 languages). STILL OPEN: the Microsoft 365
       walkthrough -- it must be verified against a real Entra tenant.*
@@ -12411,7 +12415,7 @@ misconfigured or bypassed IdP policy that skips MFA is invisible to us.
       ID"), 14 languages. Key finding written into it: Entra's v2.0 ID tokens
       carry no `amr`, so MFA requires the v1.0 issuer
       (`https://sts.windows.net/<tenant>/`) and v1.0 discovery URL. This also
-      closes the "SSO never exercised against a real IdP" note on Phase 26.*
+      closes the "SSO never exercised against a real IdP" note on Phase 27.*
 
 - [x] **Found in the first real Entra ID sign-in (2026-10-07)** -- the walkthrough
       run turned up a chain of defects no test had reached; all fixed:
@@ -12967,7 +12971,7 @@ unforgivable.
       `api.workers` in sysmanage.yaml (SYSMANAGE_UVICORN_WORKERS still wins);
       main.py exports the count so pool sizing and leader election agree.
       Service files across the installers now start `backend.main` instead of
-      uvicorn (see Phase 26 "Production serving topology"). 10k storm, auto =
+      uvicorn (see Phase 27 "Production serving topology"). 10k storm, auto =
       6 workers on the 8-core laptop: connected 10,000 / 10,000, reconnect
       211 s, heartbeat p95 3.3 s, processing 50/s (best minute 124), backlog
       136,607 at the end. Profile at that load: the laptop is SATURATED --
@@ -13100,7 +13104,7 @@ unforgivable.
       be dropped.
       *Done 2026-10-07: no unticked boxes in Phases 0-21; 29 "still pending"
       notes checked against the code -- 20 stale, 3 correctly carried, the
-      rest untracked: six are now in Phase 26 ("Carried forward by the Phase
+      rest untracked: six are now in Phase 27 ("Carried forward by the Phase
       22 audit") and two were live defects, fixed here: (1) the multitenancy plugin shipped
       91 strings as "[TODO] ..." in all 13 locales (users saw "[TODO]
       Tenants") -- `plugin_i18n_lib.looks_untranslated` treated a placeholder
@@ -13142,10 +13146,10 @@ built on 22's agent identity (an asset tag needs to know which host is which)
 and send-on-change collection, and its real-time alerts follow 22.3's rule
 that a site-wide event must not become ten thousand emails.
 
-#### 23.0 Scale proof at 50k agents -- moved to Phase 26
+#### 23.0 Scale proof at 50k agents -- moved to Phase 27
 
 *Moved 2026-10-15 (Bryan): the 50k proof and the rest of what was carried
-here from Phase 22 now live in Phase 26, "Carried forward from Phase 23.0".
+here from Phase 22 now live in Phase 27, "Carried forward from Phase 23.0".
 Most of it waits on the 32-core machine.*
 
 #### 23.1 Hardware health: failing drives, degraded arrays, overheating (OSS + Pro+)
@@ -13563,7 +13567,7 @@ of its three OSes once).
       because it reported `t480` and Windows `T480` -- registration matches
       names case-insensitively and refuses a credential-less claim; Ubuntu
       was renamed `t480-ubuntu` for the proof, and the real fix (multi-boot
-      machines keep ONE hostname) is now Phase 26 "Multi-boot machines that
+      machines keep ONE hostname) is now Phase 27 "Multi-boot machines that
       keep one hostname"; (2) the agent sent its registration once per
       connection, so after a credential refusal it never registered again
       even once the stale host was removed -- now it re-asks, backing off
@@ -13902,7 +13906,7 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       defect -- a French value with half its sentence missing, now fixed.
       Short headings are still the judge's weak spot (72-76/78).  Takes
       effect when the beast service is restarted on this code.*
-- **A stronger model for Hindi** -- *moved to Phase 26 (Bryan
+- **A stronger model for Hindi** -- *moved to Phase 27 (Bryan
       2026-10-15: needs the 32-core box, "isn't happening any time soon").*
 - [x] **Redo every reject**: `python3 scripts/i18n_verify.py --requeue`, then
       `make translate` (which re-verifies); `--accept` only for a genuine false
@@ -13992,7 +13996,7 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       plainly whether it is real work, blocked externally, or should move or
       be dropped.
       *DONE 2026-10-15.* Phases 0-22 have NO unticked boxes (the Phase 21
-      and 22 audits moved everything open into Phase 26), so this audit, like
+      and 22 audits moved everything open into Phase 27), so this audit, like
       theirs, went after deferrals and hedges written into TICKED items since
       2026-10-07, and re-checked every item those audits carried into Phase
       26 against the code. Four ticked items still said "pending" though the
@@ -14003,9 +14007,9 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       "pending Bryan's real BSD/macOS host run" (done 2026-09-29, `arp_listen:
       ok` on all four). Phase 22's own hedges ("not yet published", "pending
       Bryan's OK", "not yet measured") were all closed by later notes in the
-      same items, except the canary MSI's first CI build -- now Phase 26
+      same items, except the canary MSI's first CI build -- now Phase 27
       "Carried forward by the Phase 23 audit". The Phase 21/22 carry-overs in
-      Phase 26, checked against the code, are all still genuinely open:
+      Phase 27, checked against the code, are all still genuinely open:
       advisor `metric_history` still `available: False`, the MSI service
       removal still has no rollback action, `build-msi.ps1` still trusts a
       stale ARM64 wheel set, the docs still carry placeholder API paths
@@ -14014,8 +14018,8 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       smoke tests and the pen test -- blocked on hardware / accounts /
       business; the BSD process resolvers and now the canary MSI -- blocked on
       CI history only Bryan can read. Moved out of Phase 23 itself: 23.0 and
-      23.4's Hindi model (Phase 26, waiting on the 32-core box) and the
-      same-hostname multi-boot work found by the T480 proof (Phase 26).
+      23.4's Hindi model (Phase 27, waiting on the 32-core box) and the
+      same-hostname multi-boot work found by the T480 proof (Phase 27).
 - [x] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
       *PASSED 2026-10-15 (Bryan's v3.11.0.0 tag builds in all four repos).
       What the tag runs found, all fixed: the agent's Windows CI leg (a
@@ -14030,11 +14034,275 @@ the old word-substitution scripts. Measured design (calibrated on beast against
       -> MUI's flex-parent layout, redundant assertions and aliases).
       Phase 23 is complete: 23.1 hardware health, 23.2 asset tags, 23.3
       time sync and 23.4 translation verification; 23.0 and 23.4's Hindi
-      model moved to Phase 26.*
+      model moved to Phase 27.*
 
 ---
 
-## Phase 24: Mobile Fleet Visibility & UEM Ingestion (Community / Pro+ / Enterprise)
+## Phase 24: Fleet Backup & Recovery with restate (Community / Pro+ / Enterprise)
+
+**Target Release:** **v3.12.0.0**
+**Focus:** Scheduled, verified, per-host backups of the managed fleet -- and the recovery paths that make them worth having (a file back, a whole host rebuilt, a clone) -- built on **restate**, so the hosts SysManage already manages are also the hosts it can put back. Every edition can back up and restore a host; the paid editions add what running backups across a fleet, several sites and many tenants takes.
+
+**Market gap addressed:** Veeam Agent / Acronis Cyber Protect / Datto / Bacula / UrBackup / restic + borg wrappers -- fleet backup is the obvious missing pillar next to patching, compliance and hardware health: SysManage tells you a drive is failing (ubiquiti, 706 reallocated sectors, 2026-10-19) but cannot yet save what is on it.
+
+**Why here (and why it is v3.12, not v4.0):** Bryan, 2026-10-19: "let's hold off ticking over to v4.0.0.0 yet and call this 3.12.0.0." It deepens management of the hosts we already have rather than admitting a new device class, so it is a minor release; mobile (Phase 25) keeps the v4.0.0.0 major bump. It lands now because the substrate exists: restate is mature (v1.5.0.1, 4,538 unit + 507 end-to-end checks, 92% line coverage), the agent's optional-tool capability model, privileged sudo-install path and background command execution are in place, and the scheduler, alerting, reporting, federation, provisioning, virtualization and dashboard-card machinery it reports into already ship.
+
+**Foundation -- what restate is.** Bryan's own C11 tool (`~/dev/restate`, `ppa:bceverly/restate`, BSD-2-Clause, links only libc) records what makes a machine differ from a fresh install of its OS:
+
+- **Path classification** into `ephemeral` / `expendable` / `baseline` / `state` / `identity`, dpkg-aware (an unmodified package file is baseline; an edited conffile is state; an unmatched path is state).
+- **A manifest** of installed packages (apt, snap, flatpak, pip, npm, cargo, pipx, gem) and of the machine (hardware, disks, LUKS/LVM/RAID, fstab, firmware, network).
+- **A repository** of per-host snapshots (`REPO::YYYYMMDDTHHMMSSZ`): FastCDC-chunked, SHA-256-addressed, deduplicated, incremental (an unchanged file is not reread), optionally encrypted (`--encrypt-to`, public key only at capture time), prunable (`--keep-daily/weekly/monthly`) and checkable (`check --read-all` = a test restore that writes nothing).
+- **Restore** with `--dry-run`, `--check-first` and `--packages`; **rebuild recipes** (`buildsheet`, Ubuntu `autoinstall`); **quiesce hooks** (`--quiesce`, shipped for PostgreSQL, MySQL, MongoDB, Redis, Docker, libvirt and LXD: dumps plus short just-in-time service stops).
+- **Exit codes** 0 ok / 1 differences / 2 trouble / 3 incomplete / 4 untrusted signature / 5 busy, and a one-line `--syslog` key=value outcome (`status=ok exit=0 seconds=... kept=... reused=... unreadable=...`).
+
+**Design notes -- the constraints this phase designs around.**
+
+- **Local paths only.** restate opens no network connection, so a storage target reaches each host as a mounted path (24.1).
+- **Locks are `flock(2)`**, which "some network filesystems do not honor" (restate man page): validated on the NAS before anything depends on it.
+- **No JSON output.** The agent reads the exit code and the `--syslog` line; structured output is a restate-side request.
+- **Signing needs a passphrase, and `restate sign` signs images only** -- not repository snapshots. Captures run unsigned; snapshot signing is a restate-side request.
+- **restate runs as root.** The agent never passes server-chosen flags to it through sudo (24.2).
+- **A host that can prune can delete its own history.** So hosts only ever append; deletion runs on the storage side (24.5).
+- **Backup data is heavy and local; backup status is light and global.** Data stays at its site (24.8); only status travels to the server, the federation controller or the operator.
+
+**restate-side changes** this phase depends on are tracked as items 1-21 in `~/dev/restate/sysmanage-todo.md`: a `--result` JSON outcome and `--progress=json`; a job file + `restate run` and a `restate-job@.service` unit; NFS locking, staging and squashed-ownership handling; `--quiesce-with` plus Nextcloud and UniFi hooks; `restore --include`; `restate features --json`; an append-only writer mode and storage-side maintenance (18, 19); snapshot signing; restore key handling; `restate copy`; `--estimate`; a repository usage report (20); clone identity; man page fixes; rpm/BSD package awareness; an autoinstall contract; and a shared store scoped so it can never cross a tenant (17, 21). Each sub-phase below names the items it needs.
+
+> **Editions in one paragraph.** Data protection is table stakes, and restate itself is BSD-2-Clause, so **every edition can back up a host and put a file back**: Community gets the agent integration, one storage target, per-host schedules, keep-last-N retention, basic checks, the Backups page and plan-first file restore. **Pro+** (a new `backup_engine`) is "a fleet you can trust": policies by tag or group, maintenance-window-aware schedules, grandfather-father-son retention, scheduled full-read verification, quiesce-hook distribution, OpenBAO-held keys and signing, alerting, SLA reporting, compliance evidence, drift timelines, capacity forecasting and package-level restore. **Enterprise** is multi-site and recovery at scale: many targets, per-site targets through federation, off-site replication, immutable copies, air-gap media, bare-metal recovery, clones and migrations, fleet-wide restore jobs in waves, four-eyes restore approval, legal hold and automated restore drills. **MULTITENANT_SAAS** adds per-tenant storage, keys, quotas and metering. Details: 24.13.
+
+> **Warning: Hosts must never be able to destroy their own backups (ransomware).** A compromised host with delete rights on its repository deletes its history along with everything else. The design rule for every sub-phase: **hosts append only.** A host's mount can add snapshots but never remove or rewrite one; prune, check and replication run as storage-side jobs on the target (24.5); and the target keeps immutable snapshots of the backup tree, or replicates to storage hosts cannot reach at all. A backup a host can delete is not counted as a backup by any exit criterion below.
+
+> **Warning: Multi-tenancy storage (same rule as 14.1/14.3/21.1).** Backup targets, policies, snapshot records and restore jobs are **per-tenant data** -> the `tenant` partition (unprefixed tables), like hosts. Operator capacity -- the storage pools a SaaS operator offers -- is the **registry** partition (`registry_*`). No cross-partition foreign keys: a tenant target soft-references a registry pool by id. Repositories, encryption keys and deduplication are **never shared across tenants** (24.11).
+
+> **Self-hosted / air-gap caveat.** Nothing in this phase needs the public internet: restate opens no connection, targets are local mounts, keys live in the local OpenBAO. An air-gapped site backs up to a local target only; off-site copies leave on media through the air-gap content workflow (24.10). Cloud targets (S3 and friends) are deliberately out of scope until restate has a storage-agnostic repository format (its own roadmap); a site that wants one mounts it.
+
+#### 24.0 Spike: back up ubiquiti by hand (first)
+
+ubiquiti's drive reports 706 reallocated sectors (2026-10-19): it gets a backup before any code is written, and the spike doubles as the measurement every later sub-phase sizes against.
+
+- [ ] Manual NFSv4 mount of the NAS export on ubiquiti; `restate init`, a first `capture --quiesce`, then `check --read-all`
+- [ ] Measure and record: first-capture time and size, an incremental re-capture, repository growth, CPU / IO load on the host, network throughput to the NAS
+- [ ] Prove `flock` locking over the NAS's NFS (two concurrent captures: one must get exit 5), or record that it does not hold and what replaces it
+- [ ] Prove the append-only premise: from ubiquiti, attempt to delete or overwrite a pack and a snapshot through the mount -- it must fail -- and record what NAS-side setting (export options, ownership, NAS-side snapshot) made it fail
+- [ ] A test file restore into a staging root, compared against the live file
+- [ ] Record which UniFi approach (embedded-mongod hook vs `.unf` autobackups) produced a restorable controller database
+
+#### 24.1 Storage targets (Community / OSS: one target; Enterprise: many)
+
+A **storage target** is a place repositories live, reached by hosts as a mount: a NAS NFS export to start with, an SMB share or a SAN-backed filesystem later.
+
+- [ ] **Target model:** name, kind (NFSv4 first), server + export path, mount options, site (24.8), the host that serves it when it is a managed host (the NAS is), capacity thresholds, and the per-host directory scheme below; tenant-partition data (24.11)
+- [ ] **One repository per host**, named by **host id with a readable label**: `<target>/<fqdn>-<short host id>/` (e.g. `/srv/backups/restate/nas.example-1f3a9c2e/`). The host is its token, never its name (agent identity, 22.0): two hosts may share an fqdn across tenants or sites, a reinstalled host may come back under the same name, and a renamed host must keep its history. The server records the mapping; the Backups page shows the friendly name
+- [ ] **Per-host exports:** NFSv4, one export per host restricted to that host's IP, `all_squash` + `anonuid` mapped to a dedicated `restate` user on the target (root on the client must not be root on the target); a host can reach only its own directory
+- [ ] **Append-only writes:** the host's access can create new packs and snapshots but cannot delete or rewrite existing ones -- through restate's append-only writer mode (sysmanage-todo.md item 18) plus target-side enforcement (directory permissions, NAS-side immutable snapshots of the tree, 24.5). Proven in 24.0
+- [ ] **On-demand mount:** the agent mounts `<target>/<dir>` when a job starts and unmounts after; the server verifies the mount before the first capture (writable, locking holds, append-only holds, free space) and on every run
+- [ ] **Encryption:** every repository initialized with `--encrypt-to <public key>`; hosts hold only the public key, the private key never lives on a backed-up host (24.6 / 24.8 key handling)
+- [ ] **Local write cache:** restate keeps a plaintext write cache under `/var/cache/restate/repositories/` on each host even for encrypted repositories -- its size is reported per host, budgeted, and alerted on; the cache directory is mode 0700 and excluded from the host's own backup
+- [ ] **Community limit:** exactly one target; a second target is an Enterprise feature (24.10) and shows as such
+
+#### 24.2 Agent: restate as a backup executor (Community / OSS)
+
+- [ ] **Capability:** restate detected as an optional-tool capability group `backup` -- `missing_tool` shows as "Available once its tool is installed", never as a limited agent; installed through the PPA via the existing package path; the reported restate version and `restate features --json` (sysmanage-todo.md item 8) decide what the server may ask of it
+- [ ] **Privilege boundary:** restate runs as root, so server-chosen flags never reach it through sudo. A systemd unit runs the job as root -- restate's own `restate-job@.service` + `restate run JOBFILE` (items 3, 4), with an agent-shipped `restate-backup@.service` only until those exist; the server's policy reaches the host as **data**, is validated by the agent (target confined to the mount, rules and flags from an allow-list, no executable content) and installed root-owned as `/etc/restate/sysmanage.d/<policy>.conf` through the existing sudo-install path; the agent triggers `sudo systemctl start restate-backup@<policy>` -- one exact sudoers form, added to every platform's sudoers file
+- [ ] **Hosts never prune:** the host-side job file can only `capture`, `status` and `snapshots`; `prune`, `check` and `copy` are storage-side jobs (24.5). The allow-list rejects anything else
+- [ ] The unit applies `nice` / `ionice` (several hosts here are laptops serving with lids closed that already run hot) and a timeout, uses `KillMode=mixed` so resume hooks always run, logs to the journal, and survives an agent restart
+- [ ] **Commands:** `backup_capture`, `backup_snapshots`, `backup_status` (live host vs the last snapshot), `backup_restore` -- **plan-first**: always a `--dry-run` result shown to the operator before any real restore -- and `backup_estimate` (item 12) before a first capture
+- [ ] Long-running work runs in the background, never in the WebSocket receive loop; the result is reported even if the agent restarted mid-run (the unit's result file is read on the next start)
+- [ ] **Results** from restate's `--result` JSON (item 1), falling back to the exit code + the `--syslog` line: exit 3 = warning (some files unreadable -- the first N paths shown), 5 = busy (retry later, never a failure), 2 / 4 = failure; progress from `--progress=json` (item 2), else `-P` lines
+- [ ] Every new agent string externalized (gettext) and every new sudoers line present in all platform sudoers files
+
+#### 24.3 Quiesce hooks for the services we run (Community / OSS; distribution Pro+)
+
+restate already ships hooks for PostgreSQL, MySQL, MongoDB, Redis, Docker, libvirt and LXD. The gaps are the services those do not fit:
+
+- [ ] **Nextcloud** has no hook: `occ maintenance:mode --on` / `--off` (as the web server user) around the data directory, with its database through the existing PostgreSQL / MySQL hook (item 6)
+- [ ] **UniFi** runs its own embedded `mongod` (port 27117) under the `unifi` service, which the shipped MongoDB hook (it stops a `mongod` unit) does not cover: a hook doing `mongodump --port 27117` with a stop / start of `unifi`, or simply include UniFi's own `.unf` autobackups -- whichever the 24.0 spike showed is reliable
+- [ ] Hooks selected per policy through restate's `--quiesce-with` (item 6), not every hook on every host
+- [ ] **Mail stores:** Maildir copies crash-safely without a stop; the existing database hook covers postfixadmin where it is used
+- [ ] A failed pause marks the run `incomplete`, never `ok`; each hook's pause / resume time and outcome are on the run's detail
+- [ ] **Pro+: hook distribution** -- the backup engine pushes the hooks a policy needs to its hosts (root-owned, mode 0755, under `/etc/restate/hooks.d/`) through the sudo-install path, versioned, and reports which hosts carry which hook version
+
+#### 24.4 Server: target, schedule, Backups page (Community / OSS)
+
+The Community feature set, complete on its own:
+
+- [ ] **One backup target** (24.1) and a per-host backup setting: on/off, schedule (daily at a time, or every N hours), keep-last-N retention, include / exclude rules (e.g. drop caches and Nextcloud previews), quiesce on/off
+- [ ] **"Back up now"** on the host page and from the Backups page (multi-select), with the in-flight feedback pattern
+- [ ] **Scheduler tick** that starts captures and the storage-side jobs (24.5) -- a `singleton_task()`, iterating tenants with the active tenant set explicitly, spreading start times per host (24.8)
+- [ ] **Basic check:** a regular `restate check` (metadata only) per repository, as a storage-side job
+- [ ] **Backups page:** per host -- last good snapshot and its age, size and new bytes, unreadable count, overdue / incomplete / failed / never status, next run, repository size on the target, restate coverage (24.8); filters and sorting; the snapshot list per host
+- [ ] **Overdue status** on the host page and the Home dashboard (card contract: Phase 35.1); an "overdue" threshold per host (default: two missed schedules)
+- [ ] Every endpoint behind a new **Manage Backups** role (and a narrower **Restore Files** role), granted to existing admins by the q44 role-grant rule; every change audited
+- [ ] All new UI strings externalized in 14 locales; every backend string through gettext
+
+#### 24.5 Storage-side jobs and append-only enforcement (Community / OSS)
+
+Ransomware resistance (see the warning box): hosts append; the storage side deletes.
+
+- [ ] **Storage-side runner:** `prune`, `check` (and `check --read-all` on its cadence) and `copy` (24.10) run on the **target's** managed host -- the NAS's own agent -- against the repository directory locally, never from the backed-up host (sysmanage-todo.md item 19). A target that is not a managed host gets a documented "storage helper" mode (a small managed VM or container with the export mounted read-write) before it can be used
+- [ ] **Encrypted repositories:** the storage-side runner prunes and checks without the private key (packs are opaque to it); `check --read-all` on an encrypted repository runs where the key may be used (24.8 key handling) or is reported as "metadata-only"
+- [ ] **Immutable snapshots on the target** (ZFS / btrfs snapshots of the backup tree, taken after each prune), retained independently of restate's retention, so even a compromised target agent cannot remove the last N days; configured and reported per target
+- [ ] **Scheduling:** storage-side jobs never overlap a capture on the same repository (restate exit 5 = retry later); prune runs after the night's captures, per target
+- [ ] **Proof:** an automated test that a host-side job file cannot express `prune` / `copy`, and a lab proof that a root shell on a backed-up host cannot delete its snapshots
+
+#### 24.6 Fleet scale: policies, verification, keys, reporting (Pro+ `backup_engine`)
+
+A new Pro+ engine, `backup_engine`. Follow the new-engine checklist: registered in **both** repos (Pro+ `MODULES` + `PROFESSIONAL_FEATURES`; OSS feature/module enums and the frontend gates), a license-server code pull before its first bundle is served, and built for all nine targets and published to R2 (Phase Exit Gate item).
+
+- [ ] **Backup policies** by tag or host group: hosts, schedule, retention, rules, quiesce hooks, encryption key, verification cadence, RPO / RTO (24.8); a host covered by several policies resolves to one, with the rule shown
+- [ ] **Maintenance-window-aware schedules:** captures run inside a host's window (14.2) when it has one, outside blackout periods, and are held (not dropped) when a window closes
+- [ ] **Grandfather-father-son retention:** `--keep-daily` / `--keep-weekly` / `--keep-monthly` (and yearly), applied by the storage-side runner (24.5), with a preview of what the next prune will remove
+- [ ] **Scheduled verification:** `check --read-all` on its own cadence as a periodic test restore; a repository that has not passed one within its window shows "unverified"
+- [ ] **Quiesce-hook distribution** (24.3)
+- [ ] **Keys in OpenBAO:** each policy's encryption key pair generated and held in OpenBAO (the tenant's mount under multi-tenancy); hosts receive only the public key; restores fetch the private key for one job and never write it to disk (sysmanage-todo.md item 10); key rotation keeps old keys for old snapshots
+- [ ] **Snapshot signing** by a trusted signer (the server or the target host), not the backed-up host (item 9); restore refuses unsigned or untrusted snapshots (exit 4) with a clear "this snapshot is not signed" message, never a silent `--allow-unverified`
+- [ ] **Alerts** through the alerting engine: no good backup in N hours, exit 3, a failed check, a failed verification, a target filling up, a host's write cache over budget, a key nearing rotation
+- [ ] **Backup SLA report** (reporting engine): per host and policy -- RPO met / missed over the period, last verified restore, failures, growth
+- [ ] **Compliance and advisor evidence:** "backups verified in the last N days" as a compliance-engine check and an advisor recommendation (with a Fix-it link to the policy)
+- [ ] **Capacity forecasting:** per target, growth rate from snapshot history and the days until a threshold, from the usage report (item 20)
+- [ ] **Package-level restore:** `restore --packages` onto a running host (reinstall the recorded packages at their versions, then the files), plan-first, with the generated package script shown before it runs
+
+#### 24.7 Drift timeline (Pro+)
+
+- [ ] `restate diff` between consecutive snapshots (including `--packages`, JSON per item 1) as a per-host "what changed" timeline: files added / removed / modified, packages installed / upgraded / removed, with the snapshot it appeared in
+- [ ] Linked from configuration drift (20.3) and the host's history: "this config file changed between Tuesday's and Wednesday's backup"
+- [ ] Filters that hide expected churn (logs, caches already expendable; per-policy ignore patterns)
+
+#### 24.8 Fleet operations: sites, load, health, readiness
+
+How backups behave once they cover a real fleet. Most items are Community behavior; the multi-site ones are Enterprise (24.10).
+
+- [ ] **Storage per site, not a central SAN.** Backup data is heavy: a first capture moves everything a host keeps, and pulling every site's first backups across the WAN to one SAN is slow, costly, and ties every site's recoverability to one link. Each site has its own target; a host uses **its site's default target** unless a policy overrides it. Disaster recovery is a **second copy** from site to site (later: cloud) run off-hours -- never the primary path
+- [ ] **Federation:** each site server owns its site's targets and data; the federation controller aggregates **status only** -- last good backup, sizes, failures, verification state -- and **backup data never travels to the controller**
+- [ ] **Air-gapped sites:** the target is always local; off-site copies leave on media through the air-gap content workflow (24.10)
+- [ ] **Load management:** start times spread per host (`host_offset`, as the smartmontools auto-install does); maintenance windows respected (Pro+); captures at low CPU and IO priority; a **per-target concurrency cap** (at most N captures writing to one target at once, default from the target's measured throughput); a capture never overlaps a prune / check on the same repository (exit 5 = retry later, with backoff)
+- [ ] **Target health:** when the target is a managed host, its hardware-health warnings (drives, temperature) and capacity mark every host that uses it "backups at risk" on the Backups page and the dashboard; per-target usage, growth rate and threshold alerts; first-capture estimates (`--estimate`, item 12) checked against free space before a new host's first backup, with suggested exclusions
+- [ ] **Restore readiness:** per-policy **RPO** (maximum age of the last good snapshot) and **RTO** (expected restore time, from measured throughput); evidence is a passing full-read check (Pro+) or an Enterprise sandbox restore drill (24.9); a host whose evidence is stale shows "unproven"
+- [ ] **Keys are critical infrastructure:** a lost key is lost backups. Escrow in OpenBAO, rotation that keeps old keys for old snapshots, and a documented **break-glass** procedure (sealed key copy, who may open it, how a restore proceeds with the server down) -- in the docs, tested once per phase exit
+- [ ] **Platform coverage, stated honestly:** until restate understands rpm and the BSDs (item 15), those hosts get file backups without package-aware classification or package restore; the Backups page shows each host's coverage level ("full", "files only", "unsupported") rather than implying full coverage
+
+#### 24.9 Restore and recovery (Community file restore; Pro+ packages; Enterprise recovery at scale)
+
+- [ ] **File / directory restore (Community):** pick a snapshot, browse it (from the snapshot index, no data read), pick paths; restored into a staging root on the host with restate's `restore --include` (item 7); plan-first (`--dry-run`, then `--check-first`); then copied into place by an explicit second step, or left in staging; every restore audited with who, what and which snapshot
+- [ ] **Package-level restore (Pro+):** 24.6
+- [ ] **Whole-host rebuild / bare-metal recovery (Enterprise):** `buildsheet` / `autoinstall --image-at` (item 16) + the provisioning engine's PXE / autoinstall path (Phase 18): a dead host's last good snapshot rebuilt onto new or repaired hardware -- restate's own roadmap item "bare-metal recovery from a boot image"
+- [ ] **Clone / migrate (Enterprise):** to a VM (virtualization engine) or new metal with a fresh identity (`--as NAME`); the clone never keeps the source's SysManage agent database or host token (item 13) and enrolls as a new host
+- [ ] **Fleet-wide restore and rebuild jobs (Enterprise):** many hosts restored or rebuilt as a fleet job in waves (20.4), with per-host results and the usual concurrency clamps
+- [ ] **Four-eyes approval (Enterprise):** a restore over existing data, a rebuild or a clone needs a second approver with the restore role; a file restore into staging does not
+- [ ] **Legal hold (Enterprise):** snapshots under hold are excluded from prune (24.5) until released, with the hold, its owner and reason audited
+- [ ] **Automated restore drills (Enterprise):** on a schedule, restore a host's latest snapshot into a sandbox VM (virtualization engine), run a per-policy probe (boots, a service answers, a file hash matches) and record pass / fail as the host's restore evidence (24.8); the VM is destroyed afterwards
+
+#### 24.10 Multi-site and resilience (Enterprise)
+
+- [ ] **Multiple targets** per installation, each with its site, capacity and health
+- [ ] **Per-site targets through federation:** a site's hosts default to the site's target (24.8); the controller can set fleet-wide policies whose target resolves per site
+- [ ] **Off-site replication:** `restate copy` (item 11) of each snapshot to a second repository at another site, run by the storage-side runner (24.5) off-hours, encrypted packs copied as they are; replication lag shown per host
+- [ ] **Immutable copies:** the off-site copy lands on storage the source site cannot delete (a different target with its own append-only enforcement and NAS-side snapshots)
+- [ ] **Air-gap media:** for isolated sites, snapshots exported to removable media through the air-gap content workflow, with a manifest and signature, and imported at the receiving site
+- [ ] **Site loss drill:** with a site's primary target unavailable, a host from that site restored from the off-site copy (an exit criterion)
+
+#### 24.11 Multi-tenancy (MULTITENANT_SAAS)
+
+- [ ] **Tenant-partition data:** targets, policies, snapshot records, restore jobs and backup audit live in the tenant partition, like hosts and policies
+- [ ] **Never shared across tenants:** no repository, and no future machine-shared deduplicating store (sysmanage-todo.md items 17, 21), is shared between tenants -- shared chunks would let one tenant learn whether another holds a given file
+- [ ] **Per-tenant storage namespace:** `/srv/backups/<tenant>/<fqdn>-<short host id>/` on a shared pool, or separate storage per tenant -- matching the database-per-tenant silo; exports per host per tenant, so no host can reach another tenant's directory
+- [ ] **Keys per tenant** in that tenant's OpenBAO mount; the operator cannot read tenant backups unless the tenant deliberately escrows a key with the operator
+- [ ] **Operator-provided storage:** a **storage pool** in the registry partition (`registry_backup_pool`: the operator's capacity, location, kind); each tenant's **quota**, **usage metering** and its target (soft-referencing the pool id) in the tenant partition; usage metered from the repository usage report (item 20) for billing
+- [ ] **Quota enforcement:** a minimum retention for prunes (a tenant cannot prune below what its plan guarantees), new captures blocked -- loudly, with an alert -- once a tenant is over quota, and a grace period before blocking
+- [ ] **Bring-your-own storage:** a tenant points SysManage at its own NAS or share; the target definition and any credentials live in the tenant's own config and OpenBAO mount, and the operator never touches the data
+- [ ] **Lifecycle:** tenant provisioning (self-service provisioning) creates the tenant's storage namespace and keys, or prompts for a bring-your-own target; tenant removal has a **retention and export step** (the tenant takes its backups or has them deleted, both audited) before its storage is destroyed
+- [ ] **Isolation tests:** two tenants on one pool; neither can list, read, mount or deduplicate against the other's data, and neither's keys open the other's repositories
+
+#### 24.12 Docs, screenshots, i18n
+
+- [ ] sysmanage-docs: a Backups page set -- concepts (targets, policies, append-only), setup (NAS export recipe, per-host exports, NAS-side snapshots), restore (file, packages, rebuild, clone), fleet operations (sites, load, readiness), multi-tenancy, and the break-glass key procedure; each Pro+ / Enterprise feature on its tier page
+- [ ] Screenshots through `make screenshots` (shotlist + seed data for hosts with snapshots, an overdue host, a restore plan)
+- [ ] All new strings in 14 locales, verified; the docs roadmap page gets a "Fleet backup & recovery" card
+
+#### 24.13 Editions
+
+- [ ] **Community / OSS:**
+  - the agent integration: optional-tool capability, the job-file + systemd-unit boundary, result reporting (24.2)
+  - **one** backup target (24.1), per-host schedule and "Back up now", keep-last-N retention, a basic check (24.4)
+  - the Backups page: per-host snapshot list, last good backup, overdue status on the host page and the dashboard (24.4)
+  - append-only enforcement and the storage-side runner (24.5) -- safety is not a paid feature
+  - plan-first file / directory restore into a staging directory (24.9)
+  - rationale: data protection is table stakes, and restate is BSD-2-Clause
+- [ ] **Pro+ (Professional) -- "a fleet you can trust"** (`backup_engine`, 24.6):
+  - policies by tag or group; maintenance-window-aware schedules; grandfather-father-son retention
+  - scheduled `check --read-all` as a periodic test restore
+  - quiesce-hook distribution (Nextcloud, UniFi, databases) through the agent
+  - OpenBAO-held encryption keys and snapshot signing
+  - alerting-engine alerts; the backup SLA report (reporting engine); "backups verified" compliance / advisor evidence
+  - the drift timeline from `restate diff`, including `--packages` (24.7)
+  - capacity forecasting; `restore --packages` onto a running host
+- [ ] **Enterprise -- multi-site and recovery at scale:**
+  - multiple targets; per-site targets through federation; off-site replication (`restate copy`) to a second site; immutable copies; air-gap media for isolated sites (24.10)
+  - bare-metal recovery through the provisioning engine (PXE + autoinstall); clone / migrate to a VM or metal (`--as`) (24.9)
+  - fleet-wide restore and rebuild jobs in waves (fleet-job machinery); four-eyes restore approval; legal hold
+  - automated restore drills into a sandbox VM through the virtualization engine, with pass / fail
+- [ ] **MULTITENANT_SAAS:** per-tenant storage, keys, quotas and usage metering (24.11)
+- [ ] Every tier gate in **both** repos, and every paid feature 402-clean when unlicensed, with Community still able to back up and restore
+
+### Licensing summary
+
+- **Community / OSS:** every host can be backed up to one target and a file put back: the agent integration, per-host schedules and "Back up now", keep-last-N retention, basic checks, append-only enforcement with storage-side pruning, the Backups page with overdue status, and plan-first file restore.
+- **Pro+ (Professional):** a fleet you can trust -- the `backup_engine`: policies by tag or group, maintenance-window-aware schedules, grandfather-father-son retention, scheduled full-read verification, quiesce-hook distribution, OpenBAO-held keys and snapshot signing, alerting, the SLA report, compliance and advisor evidence, the drift timeline, capacity forecasting and package-level restore.
+- **Enterprise:** multi-site and recovery at scale -- many targets, per-site targets through federation, off-site replication, immutable copies, air-gap media, bare-metal recovery, clones and migrations, fleet-wide restore jobs in waves, four-eyes approval, legal hold and automated restore drills.
+- **MULTITENANT_SAAS:** per-tenant storage namespaces and keys, operator storage pools, quotas and usage metering, bring-your-own storage, and tenant lifecycle handling for backup data.
+
+### Exit Criteria
+
+**Community / OSS**
+
+- [ ] ubiquiti, nextcloud and mail.archive-theeverlys.com back up nightly to their own `<fqdn>-<short host id>` directories on the NAS, encrypted, quiesced where they run databases, with a passing `check --read-all` on each
+- [ ] Captures run under the agent's sudo allowlist via the systemd unit -- no server-chosen flag ever reaches restate as root (an automated test feeds a hostile policy and shows it rejected)
+- [ ] **Append-only proven:** from a root shell on a backed-up host, its snapshots and packs cannot be deleted or rewritten; prune runs only on the storage side
+- [ ] A file restored from a snapshot onto each of those hosts, plan-first, into staging and then into place
+- [ ] An overdue, incomplete or failed backup is visible on the Backups page, the host page and the dashboard; the Backups page shows every host's last good snapshot and coverage level
+- [ ] Load management proven: a scheduled night for the fleet stays under the per-target concurrency cap, and a capture colliding with a prune retries rather than fails
+
+**Pro+**
+
+- [ ] A tag-based policy with grandfather-father-son retention and a maintenance window covers the lab fleet; the prune preview matches what prune removes
+- [ ] Keys held in OpenBAO: a restore fetches the private key for one job and no host holds it afterwards; a rotation keeps old snapshots restorable
+- [ ] Unsigned snapshots are refused with a clear message; signed ones restore
+- [ ] Alerts fire for a missed RPO, an exit 3, a failed verification and a filling target; the SLA report and the compliance "backups verified" check reflect them
+- [ ] The drift timeline shows a known change (an edited config file, an upgraded package) between two snapshots
+- [ ] `restore --packages` reinstalls a host's recorded packages and files on a fresh VM, plan-first
+
+**Enterprise**
+
+- [ ] **Per-site target proven with a federated site:** the site's hosts back up to the site's target; the controller shows their status and holds none of their data
+- [ ] Off-site replication to a second target, and a **site-loss drill**: a host restored from the off-site copy with its site's primary target unavailable
+- [ ] Bare-metal recovery: a host rebuilt from its last snapshot through PXE + autoinstall; a clone to a VM enrolls as a new host and never as the source
+- [ ] A fleet-wide restore job runs in waves with per-host results; four-eyes approval blocks a single operator; legal hold survives a prune
+- [ ] **Restore drill passes:** a scheduled sandbox-VM drill restores, probes and records pass / fail for at least three hosts
+
+**MULTITENANT_SAAS**
+
+- [ ] **Tenant isolation proven:** two tenants on one pool -- no cross-tenant listing, reading, mounting or deduplication, and neither tenant's keys open the other's repositories
+- [ ] **Quota enforcement proven:** a tenant over quota has new captures blocked with an alert, cannot prune below its plan's minimum retention, and recovers when space is freed
+- [ ] Bring-your-own storage works with the operator holding no credentials; tenant removal runs its retention / export step before storage is destroyed
+
+**Every phase**
+
+- [ ] Every tier 402-clean when unlicensed, in both repos, with Community still able to back up and restore
+- [ ] Docs + 14-language i18n complete (24.12), including the break-glass key procedure, tested once
+- [ ] Home-screen card: **Backups** -- hosts with no good backup in N hours, incomplete or failed runs, unproven restore readiness and target space; links to the Backups page (card contract: Phase 35.1)
+- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before -- including whole i18n workstreams -- which made the backlog look far larger than it was and hid which gaps were real.
+- [ ] **Pro+ engines built for every OS + architecture and verified in R2**
+      (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)):
+      Bryan builds and publishes all nine targets (`make build-all-architectures`
+      for linux x86_64/aarch64/riscv64, plus darwin/aarch64, windows
+      x86_64/aarch64, freebsd, openbsd and netbsd on their own OS, then
+      `make publish-modules` and `sudo make update` on the license server);
+      Claude confirms from a read-only R2 listing that every engine's current
+      version is present for all nine -- including the new `backup_engine`
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 25: Mobile Fleet Visibility & UEM Ingestion (Community / Pro+ / Enterprise)
 
 **Target Release:** **v4.0.0.0**
 **Focus:** Extend the managed fleet beyond servers and desktops to enterprise phones & tablets -- inventory + OS/patch compliance across tiers, up to full native MDM control at Enterprise -- so the v4.0 "manage everything" promise covers every endpoint class.
@@ -14045,11 +14313,11 @@ the old word-substitution scripts. Measured design (calibrated on beast against
 
 **Design note -- this is NOT a ported agent.** iOS and Android forbid a persistent privileged daemon (sandboxing + background-execution limits), so there is no `sysmanage-agent` port. Management runs over vendor MDM/UEM channels and is mostly *server-side*; the only device-side pieces are an optional small companion app and/or an OS-native enrollment profile -- separate codebases (Swift/Apple MDM, Android Enterprise) from the agent.
 
-> **⚠️ Self-hosted / air-gap caveat.** Native mobile management needs outbound cloud reachability the rest of SysManage does not: **Apple MDM requires Apple's APNs** and the **Android Management API is Google-cloud-hosted**, so the native-MDM tiers are **not air-gappable**. The air-gap-friendly options are ingest-from-an-existing-UEM (24.3) and the self-hosted companion app (24.2), both of which reach only the customer's own infra. Called out per sub-phase.
+> **⚠️ Self-hosted / air-gap caveat.** Native mobile management needs outbound cloud reachability the rest of SysManage does not: **Apple MDM requires Apple's APNs** and the **Android Management API is Google-cloud-hosted**, so the native-MDM tiers are **not air-gappable**. The air-gap-friendly options are ingest-from-an-existing-UEM (25.3) and the self-hosted companion app (25.2), both of which reach only the customer's own infra. Called out per sub-phase.
 
 > **⚠️ Multi-tenancy storage (same rule as 14.1/14.3/21.1).** Mobile **device inventory + compliance findings are per-host/tenant data** → `tenant` partition, soft-referencing shared ids (no cross-partition FK). The **mobile OS release / EOL reference feed is global** → reuse the `shared` partition from 14.3 (one copy, offline-updatable), never per tenant.
 
-#### 24.0 Getting-started wizard (Community / OSS; licensed steps appear when licensed)
+#### 25.0 Getting-started wizard (Community / OSS; licensed steps appear when licensed)
 
 **Added 2026-10-16 (Bryan).** "A 'getting started wizard' that helps people
 set things up from a new install and we can walk them through it."  Standing
@@ -14103,12 +14371,12 @@ Referrer-Policy, telemetry exporting to a collector that did not exist.
       schedules that start empty: vulnerability, compliance profile, malware
 - [ ] **Reference data** (licensed) -- CVE feed, advisories and the OS
       end-of-life registry loaded, with their refresh schedules
-- [ ] **Home screen** -- choose the dashboard cards (Phase 34 framework)
+- [ ] **Home screen** -- choose the dashboard cards (Phase 35 framework)
 - [ ] **Observability** (optional) -- OpenTelemetry / Prometheus only if
       the operator has a collector (off by default since 2026-10-15)
 - [ ] Docs page + screenshots via `make screenshots` + 14-language i18n
 
-#### 24.1 Mobile device model + fleet visibility (Community / OSS)
+#### 25.1 Mobile device model + fleet visibility (Community / OSS)
 
 The OSS floor: mobile is a first-class, *visible* endpoint class -- no automated management, but you can see what you know about.
 
@@ -14124,7 +14392,7 @@ The OSS floor: mobile is a first-class, *visible* endpoint class -- no automated
 
 **Estimated Size:** ~2,500 lines
 
-#### 24.2 UEM/MDM ingestion -- single pane of glass (Pro+) ⭐
+#### 25.2 UEM/MDM ingestion -- single pane of glass (Pro+) ⭐
 
 Highest value, lowest effort: don't *be* the MDM -- **ingest from the one they already run.** Makes SysManage the single pane of glass across servers + desktops + mobile.
 
@@ -14136,7 +14404,7 @@ Highest value, lowest effort: don't *be* the MDM -- **ingest from the one they a
 
 **Estimated Size:** ~5,000 lines
 
-#### 24.3 Agent memory footprint -- measure, then minimize (all editions / OSS)
+#### 25.3 Agent memory footprint -- measure, then minimize (all editions / OSS)
 
 **Added 2026-10-13 (Bryan):** "measure the memory footprint of
 sysmanage-agent on all of our supported operating systems and see what we can
@@ -14180,7 +14448,7 @@ measures it today; no target is set until the numbers exist.
 **Estimated Size:** ~1,500 lines (harness + reductions; the reductions depend
 on what the measurements find)
 
-#### 24.4 Fix it: compliance failures (Pro+; fleet-wide Enterprise)
+#### 25.4 Fix it: compliance failures (Pro+; fleet-wide Enterprise)
 
 **Added 2026-10-16 (Bryan).** "Simple instructions or (ideally) automated
 one-click things that resolve compliance surfaced issues."  Today a failed
@@ -14253,7 +14521,7 @@ real fix is the collection:
 - [ ] **Fleet-wide (Enterprise)** -- "fix this check on every failing host"
       as a fleet job in waves (20.4), with per-host results
 
-#### 24.5 Server packages built per architecture, like the agent (all editions / OSS)
+#### 25.5 Server packages built per architecture, like the agent (all editions / OSS)
 
 **Added 2026-10-19 (Bryan).** The server and the agent install their Python
 dependencies differently.  The agent vendors every wheel into its source
@@ -14291,28 +14559,28 @@ install still needs PyPI at install time.
 
 ### Licensing summary
 
-- **Community / OSS:** device model + fleet visibility + manual/self-report registration (24.1); the agent memory-footprint work (24.3) and per-architecture server packages (24.5) are in every edition. You can *see* devices you or a companion app report; no automated management, no curated EOL/compliance.
-- **Pro+ (Professional):** aggregate **visibility & compliance** -- companion app (24.2), ingest-from-existing-UEM (24.3 ⭐), Android inventory (24.4 read), and mobile EOL/patch compliance + alerting (24.4). The "single pane of glass over the mobile you already manage" tier -- no device control.
-- **Enterprise:** compliance *enforcement* + alerting on ingested devices (24.4).  **Being** the MDM -- native iOS/Android and zero-touch enrollment orchestration / zero-touch (24.7), and compliance *enforcement* + remote actions (lock/wipe/force-update).
+- **Community / OSS:** device model + fleet visibility + manual/self-report registration (25.1); the agent memory-footprint work (25.3) and per-architecture server packages (25.5) are in every edition. You can *see* devices you or a companion app report; no automated management, no curated EOL/compliance.
+- **Pro+ (Professional):** aggregate **visibility & compliance** -- companion app (25.2), ingest-from-existing-UEM (25.3 ⭐), Android inventory (25.4 read), and mobile EOL/patch compliance + alerting (25.4). The "single pane of glass over the mobile you already manage" tier -- no device control.
+- **Enterprise:** compliance *enforcement* + alerting on ingested devices (25.4).  **Being** the MDM -- native iOS/Android and zero-touch enrollment orchestration / zero-touch (25.7), and compliance *enforcement* + remote actions (lock/wipe/force-update).
 
 ### Exit Criteria
 
 - [ ] Mobile device inventory validated end-to-end via ≥1 ingestion connector
-      (24.2) -- the native Android/Apple paths moved to Phase 29 (Apple) and Phase 30 (Android) with the split,
+      (25.2) -- the native Android/Apple paths moved to Phase 30 (Apple) and Phase 31 (Android) with the split,
       so this phase is validated on ingestion alone
 - [ ] Mobile OS EOL + security-patch compliance surfaces + alerts, reusing the 14.3 / advisory / alerting substrate
 - [ ] Every tier 402-clean when unlicensed; Community shows devices but gates ingestion / native-MDM / enforcement
 - [ ] Air-gap caveat documented; ingestion + companion-app paths verified reachable-only-to-customer-infra
-- [ ] Agent memory footprint (24.3) measured on every supported OS, reduced
+- [ ] Agent memory footprint (25.3) measured on every supported OS, reduced
       where the measurements showed it pays, and held by an enforced per-OS
       budget
 - [ ] Server packages built per architecture with vendored dependencies
-      (24.5): the Launchpad-only `Architecture: any` switch is gone and a
+      (25.5): the Launchpad-only `Architecture: any` switch is gone and a
       server `.deb` installs with PyPI unreachable
 - [ ] Docs + 14-language i18n complete
 - [ ] Home-screen card: **Mobile devices** -- devices by platform,
       non-compliant OS/patch level, and not seen in N days; links to the
-      filtered device list (card contract: Phase 34.1)
+      filtered device list (card contract: Phase 35.1)
 - [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before -- including whole i18n workstreams -- which made the backlog look far larger than it was and hid which gaps were real.
 - [ ] **Pro+ engines built for every OS + architecture and verified in R2**
       (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)):
@@ -14326,21 +14594,21 @@ install still needs PyPI at install time.
 
 ---
 
-## Phase 25: Mobile Companion App & Compliance (Pro+ / Enterprise)
+## Phase 26: Mobile Companion App & Compliance (Pro+ / Enterprise)
 
 **Target Release:** v4.1.0.0
 **Focus:** Our own inventory path for devices no UEM covers, and the assessment
 layer that turns mobile inventory into findings -- EOL/patch compliance, alerts
 and enforcement.
 
-**Why split from Phase 24 (2026-08-07):** the mobile work totalled ~14,000
+**Why split from Phase 25 (2026-08-07):** the mobile work totalled ~14,000
 estimated lines, second-largest in the roadmap. The seam is *where the data comes
-from and what you do with it*: Phase 24 populates the fleet from systems the
+from and what you do with it*: Phase 25 populates the fleet from systems the
 customer already runs (ingestion), while this phase adds a first-party reporting
-path and the compliance/alerting layer on top. Phase 24 must land first -- this
+path and the compliance/alerting layer on top. Phase 25 must land first -- this
 phase assesses devices it cannot itself enroll.
 
-#### 25.1 Companion inventory app -- BYOD self-report (Pro+)
+#### 26.1 Companion inventory app -- BYOD self-report (Pro+)
 
 A thin, customer-deployable iOS/Android app for visibility where full MDM is overkill (BYOD). Honest about its limits: uninstallable, sandbox-limited, best-effort background check-in -- **visibility only, never enforcement.**
 
@@ -14348,11 +14616,11 @@ A thin, customer-deployable iOS/Android app for visibility where full MDM is ove
 - [ ] Token/QR enrollment against a tenant; check-ins land in `mobile_device` (tenant partition)
 - [ ] Air-gap-friendly (talks only to the customer's SysManage server)
 - [ ] i18n/l10n
-- **Tier note:** the app + richer reporting/compliance is Pro+; the raw self-report endpoint it uses is the OSS 24.1 one.
+- **Tier note:** the app + richer reporting/compliance is Pro+; the raw self-report endpoint it uses is the OSS 25.1 one.
 
 **Estimated Size:** ~3,500 lines (app + server)
 
-#### 25.2 Mobile compliance, lifecycle & alerting (Pro+ / Enterprise)
+#### 26.2 Mobile compliance, lifecycle & alerting (Pro+ / Enterprise)
 
 Make the inventory *actionable* -- reuse existing engines rather than rebuild.
 
@@ -14364,7 +14632,7 @@ Make the inventory *actionable* -- reuse existing engines rather than rebuild.
 
 **Estimated Size:** ~3,000 lines
 
-#### 25.3 Fix it: advisor findings (Enterprise)
+#### 26.3 Fix it: advisor findings (Enterprise)
 
 **Added 2026-10-16 (Bryan).** "Same story with the insights -> Advisor."  The
 Advisor already proposes fixes for some findings (21.2 S5: generated
@@ -14376,7 +14644,7 @@ plain explanation of what to do.
       tenant-authored rules get an optional field)
 - [ ] **A one-click fix for every rule that can have one** -- extend the S5
       proposal generator beyond its current rules; the same preview ->
-      backup -> apply -> re-evaluate loop as 24.4, and the same
+      backup -> apply -> re-evaluate loop as 25.4, and the same
       instructions-only fallback where automation would be unsafe
 - [ ] **Fix from where the finding is shown** -- the host's Advisor tab, the
       rule view and the fleet feed all carry the Fix button, not only the
@@ -14398,7 +14666,7 @@ plain explanation of what to do.
 - [ ] Docs + 14-language i18n complete
 - [ ] Home-screen card: **Mobile compliance** -- BYOD devices out of
       compliance and enforcement actions waiting on the user (card contract:
-      Phase 34.1)
+      Phase 35.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -14416,7 +14684,7 @@ plain explanation of what to do.
 
 ---
 
-## Phase 26: Stabilization & v5.0 GA
+## Phase 27: Stabilization & v5.0 GA
 
 **Target Release:** **v5.0.0.0**
 **Focus:** Full market-parity GA -- content lifecycle + provisioning + config management + advisor hardened together; performance, security, docs, i18n.
@@ -14467,6 +14735,28 @@ mark, so every report crossed the limit one way or the other.
       hardware health page needs the select / bulk acknowledge-resolve flow
       and the new VM state (status table + help text), with a
       `make screenshots` shotlist entry for the selection toolbar
+
+### Web UI: About dialog and license refresh after a server restart (2026-10-19)
+
+- [x] **About dialog** (Bryan: "how do i know what version of sysmanage server
+      i am running?") -- the user (avatar) menu has an About item that opens a
+      dialog with the server version (release number, plus the full packaged
+      build string such as `3.11.0.11+ppa1~resolute1`), the edition, any
+      air-gap or federation role, the copyright, the AGPL-3.0 license and a
+      link to sysmanage.org.  It reuses the Navbar's `/api/v1/server-info`
+      response (`AboutDialog.tsx`); there is no separate frontend build
+      version to show
+- [x] **The license survives a server restart** -- an open session showed the
+      OSS menus after an upgrade until logout/login, because the one license
+      fetch at mount failed (502 / no connection) and the failure was stored
+      as "no license".  The shared cache (`Services/license.ts`) now replaces
+      its snapshot only on a real answer (2xx, or a genuine 402), keeps the
+      last known license on a failure and retries on a 2 s / 5 s / 10 s / 30 s
+      backoff, and refetches when the window regains focus or visibility.
+      The Navbar and the app-shell banners follow every cache change instead
+      of reading it once
+- [ ] **Docs** -- if sysmanage-docs gains a UI tour of the menus, list the
+      About item there (no such page today)
 
 ### Production serving topology: nginx is the only thing facing the network (tech debt)
 
@@ -14607,7 +14897,7 @@ omits the package to keep its pip bundle pure-Python.
 Phases 0-20 had no unticked boxes, so the Phase 21 audit checked every place
 an earlier phase closed by DEFERRING or noting a follow-up, against the code.
 Most were done (and the stale notes are now marked so); these were neither
-done nor tracked anywhere. Re-home any of them if Phase 26 is the wrong fit.
+done nor tracked anywhere. Re-home any of them if Phase 27 is the wrong fit.
 
 - [x] **SSO browser landing (OIDC + SAML) -- a user-facing gap behind a ticked
       Phase 13 box.** *Fixed 2026-10-01 (pulled forward into Phase 21):* the
@@ -14675,7 +14965,7 @@ Phases 0-21 again had no unticked boxes; the audit read every ticked item
 whose own note still said "pending", "still open", "deferred" or "remains",
 against the code. 20 of 29 were stale notes for finished work, three were
 correctly carried (12.3 cluster overlay and cloud/vSphere providers to Phase
-26 above, Alpine/BSD package repos to Phase 27). Two were defects and were
+26 above, Alpine/BSD package repos to Phase 28). Two were defects and were
 fixed in Phase 22 (multitenancy `[TODO]` strings, leaked test keys -- see the
 Phase 22 audit item). These were neither done nor tracked:
 
@@ -14899,20 +15189,20 @@ machine; this proof waits for it rather than for a cloud box.
 
 ---
 
-## Phase 27: Expanded Agent Architecture & Packaging (Community / OSS)
+## Phase 28: Expanded Agent Architecture & Packaging (Community / OSS)
 
 **Target Release:** v5.1.0.0
 **Focus:** Run the `sysmanage-agent` on CPU architectures beyond x86-64 and arm64 -- **IBM Power (ppc64le)**, **IBM Z (s390x)**, and **RISC-V (riscv64)** -- so SysManage manages the enterprise iron and emerging silicon our competitors reach but we currently don't. The agent is AGPL, so this lands entirely in Community/OSS; no new Pro+ engine -- it's portability, packaging, and build-matrix work.
 
 **Market gap addressed:** Red Hat Satellite / Canonical Landscape / IBM BigFix manage ppc64le + s390x fleets (RHEL, SLES, Ubuntu on Power/Z) -- mainframe & Power shops are exactly the regulated enterprises we target. RISC-V is the forward bet on emerging server/edge silicon.
 
-**Why post-GA (Phase 27):** the parity arc (14-24) is about *features*; this is a *reach* expansion of an existing capability -- the same agent on more silicon, not a new capability class, so it is a minor (**v5.1.0.0**) rather than a major. It follows the v5.0 GA and builds directly on the arm64/QEMU cross-arch work already in place.
+**Why post-GA (Phase 28):** the parity arc (14-25) is about *features*; this is a *reach* expansion of an existing capability -- the same agent on more silicon, not a new capability class, so it is a minor (**v5.1.0.0**) rather than a major. It follows the v5.0 GA and builds directly on the arm64/QEMU cross-arch work already in place.
 
 > **⚠️ Endianness -- s390x is big-endian.** x86-64, arm64, ppc64le, and riscv64 are all little-endian; **s390x is big-endian** -- the one place latent byte-order bugs surface. Every `struct.pack`/`ctypes`/binary-protocol/hash-of-packed-bytes assumption in the agent (and the store-and-forward queue serialization) must be endian-audited, not assumed. JSON/text paths are safe; raw-binary paths are the risk. It gets its own slice so it isn't hand-waved.
 
 > **⚠️ Native-dependency wheels.** The agent's compiled deps (notably `cryptography`'s Rust core, `psutil`) don't always ship manylinux wheels for ppc64le/s390x/riscv64 -- so these arches may need a source-build toolchain (Rust + dev headers) in the package build, or vendored/pinned floors. That's the real effort, not the Python. Must preserve the Py3.9-floor and no-eager-asyncio agent constraints.
 
-#### 27.1 Portability foundation -- endian audit + CI matrix (OSS)
+#### 28.1 Portability foundation -- endian audit + CI matrix (OSS)
 
 - [ ] Endianness/portability audit of the agent + store-and-forward serialization; make any binary byte order explicit (no implicit native order); add a big-endian regression test leg
 - [ ] Extend `make build-all-architectures` QEMU cross-arch matrix to ppc64le / s390x / riscv64 (binfmt/QEMU already used for arm64)
@@ -14921,7 +15211,7 @@ machine; this proof waits for it rather than for a cloud box.
 
 **Estimated Size:** ~2,500 lines (build/CI + audit fixes)
 
-#### 27.2 IBM Power -- ppc64le packaging (OSS)
+#### 28.2 IBM Power -- ppc64le packaging (OSS)
 
 - [ ] deb (Debian/Ubuntu ppc64el) + rpm (RHEL/Fedora el9 ppc64le, SLES) + Alpine (ppc64le) agent packages; `control`/spec arch toggles like the arm64 work
 - [ ] Launchpad PPA + COPR ppc64le arch enablement
@@ -14929,15 +15219,15 @@ machine; this proof waits for it rather than for a cloud box.
 
 **Estimated Size:** ~1,500 lines
 
-#### 27.3 IBM Z -- s390x packaging + big-endian correctness (OSS)
+#### 28.3 IBM Z -- s390x packaging + big-endian correctness (OSS)
 
 - [ ] deb (Debian/Ubuntu s390x) + rpm (RHEL/SLES s390x) agent packages
-- [ ] Big-endian correctness (27.1 audit) validated green on an emulated s390x guest: enroll → inventory → command dispatch, plus a store-and-forward round-trip across a simulated outage
+- [ ] Big-endian correctness (28.1 audit) validated green on an emulated s390x guest: enroll → inventory → command dispatch, plus a store-and-forward round-trip across a simulated outage
 - [ ] Confirm TLS + message signing produce identical results big- vs little-endian
 
 **Estimated Size:** ~1,500 lines
 
-#### 27.4 RISC-V -- riscv64 packaging (OSS)
+#### 28.4 RISC-V -- riscv64 packaging (OSS)
 
 - [ ] deb (Debian/Ubuntu riscv64) + Alpine (riscv64) + Fedora riscv64 (as available) agent packages
 - [ ] Handle the still-maturing wheel/toolchain story (source-build `cryptography` where no wheel exists)
@@ -14945,7 +15235,7 @@ machine; this proof waits for it rather than for a cloud box.
 
 **Estimated Size:** ~1,500 lines
 
-#### 27.5 Server-side arch awareness + docs (OSS)
+#### 28.5 Server-side arch awareness + docs (OSS)
 
 - [ ] Server recognizes / normalizes / displays the new `machine_architecture` values (fleet, host detail, reports); package/repo + OS-lifecycle/EOL selection keyed by arch where relevant
 - [ ] Install docs + a supported-architecture matrix updated; agent download / repo pages list the new arches
@@ -14953,7 +15243,7 @@ machine; this proof waits for it rather than for a cloud box.
 
 **Estimated Size:** ~1,000 lines
 
-#### 27.6 Native agent channels for the remaining platforms (OSS)
+#### 28.6 Native agent channels for the remaining platforms (OSS)
 
 *Scope note (2026-08-07): the FreeBSD port cleanup + its static gate were
 pulled forward into Phase 19; the upstream SUBMISSION of the FreeBSD port is
@@ -15024,7 +15314,7 @@ first-submission gates.*
       `is_agent_install_legacy()` into the dispatch path or delete it -- an
       unused predicate reads as protection that isn't there.
 
-#### 27.7 Firewall appliances -- pfSense / OPNsense (OSS)
+#### 28.7 Firewall appliances -- pfSense / OPNsense (OSS)
 
 **Added 2026-10-17 (Bryan).** Wanted the agent on his pfSense router: 8 GB RAM,
 6.8 GB free, so memory was never the problem (the agent idles at ~75-115 MiB
@@ -15051,7 +15341,7 @@ at its next upgrade).
       firewall status and Network Discovery stay on.  The server shows the
       host as an appliance and hides the actions it will refuse
 - [ ] **Low footprint verified** on the smallest supported appliance hardware
-      (Phase 24.3 harness): idle and peak RSS within budget
+      (Phase 25.3 harness): idle and peak RSS within budget
 - [ ] **Docs** -- install / remove per appliance, what appliance mode does and
       why, 14-language i18n
 
@@ -15086,7 +15376,7 @@ at its next upgrade).
 
 ---
 
-## Phase 28: Security Tooling Coexistence (Enterprise)
+## Phase 29: Security Tooling Coexistence (Enterprise)
 
 **Target Release:** v5.2.0.0
 **Focus:** Integrate with the security tooling customers already run, rather than
@@ -15101,7 +15391,7 @@ different failure surface. Splitting lets the advisor ship on its own schedule
 and keeps integration risk (someone else's API, someone else's release cadence)
 out of a phase that gates GA.
 
-#### 28.1 Incident Response & Threat Hunting -- Velociraptor integration (Enterprise)
+#### 29.1 Incident Response & Threat Hunting -- Velociraptor integration (Enterprise)
 
 The **response/triage arm** for advisor (21.1), malware (21.2), `vuln_engine`, and
 `alerting_engine` findings. SysManage stays the management/orchestration plane;
@@ -15118,7 +15408,7 @@ being ours).
 
 **Estimated Size:** ~2,500 lines
 
-#### 28.2 Security Tooling Coexistence -- Wazuh ingestion (Enterprise)
+#### 29.2 Security Tooling Coexistence -- Wazuh ingestion (Enterprise)
 
 Meet customers who already run Wazuh where they are: **ingest, don't rebuild.** Wazuh
 alerts / FIM / SCA become additional inputs to `advisor_engine` (21.1) and the alert
@@ -15146,7 +15436,7 @@ one-way ingestion connector only.
       reachable-only-to-the-customer's-own-server for air-gap
 - [ ] Docs + 14-language i18n complete
 - [ ] Home-screen card: **Security tooling** -- open Wazuh alerts and running
-      Velociraptor hunts, by severity (card contract: Phase 34.1)
+      Velociraptor hunts, by severity (card contract: Phase 35.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -15164,7 +15454,7 @@ one-way ingestion connector only.
 
 ---
 
-## Phase 29: Apple Native MDM (Enterprise)
+## Phase 30: Apple Native MDM (Enterprise)
 
 **Target Release:** v6.0.0.0
 **Focus:** Be the MDM authority for iOS/iPadOS -- the Apple MDM protocol itself:
@@ -15172,15 +15462,15 @@ APNs push, signed enrollment profiles, device queries, restriction/configuration
 profiles, and remote lock/wipe.
 
 **Why its own phase (split 2026-08-07):** at ~10,000 estimated lines this single
-slice was larger than all of Phase 28, and it dominated a combined native-MDM
+slice was larger than all of Phase 29, and it dominated a combined native-MDM
 phase of ~18,500 lines -- the largest in the roadmap. It is also the most
 self-contained: a protocol implementation against Apple's spec, gated on an Apple
 push certificate and APNs reachability, sharing little with the Android path.
 
-**Not air-gappable.** APNs reachability is mandatory; Phase 24 remains the
+**Not air-gappable.** APNs reachability is mandatory; Phase 25 remains the
 air-gap-compatible mobile story.
 
-#### 29.1 iOS/iPadOS native MDM -- Apple MDM protocol (Enterprise)
+#### 30.1 iOS/iPadOS native MDM -- Apple MDM protocol (Enterprise)
 
 Be the MDM for Apple devices. Heaviest sub-phase (protocol + APNs + enrollment), Enterprise-only.
 
@@ -15203,7 +15493,7 @@ Be the MDM for Apple devices. Heaviest sub-phase (protocol + APNs + enrollment),
 - [ ] Docs + 14-language i18n complete
 - [ ] Home-screen card: **Apple MDM** -- enrolled, pending enrollment, and
       lock/wipe commands not yet acknowledged; APNs certificate expiry (card
-      contract: Phase 34.1)
+      contract: Phase 35.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -15221,7 +15511,7 @@ Be the MDM for Apple devices. Heaviest sub-phase (protocol + APNs + enrollment),
 
 ---
 
-## Phase 30: Android Native MDM & Zero-Touch Enrollment (Pro+ / Enterprise)
+## Phase 31: Android Native MDM & Zero-Touch Enrollment (Pro+ / Enterprise)
 
 **Target Release:** v6.1.0.0
 **Focus:** Android Management API enrollment and policy, plus bulk/zero-touch
@@ -15229,11 +15519,11 @@ enrollment orchestration across BOTH platforms.
 
 **Why enrollment orchestration sits here:** Apple ADE/ABM and Android zero-touch
 are one feature with two back ends, and it needs both MDM implementations to
-exist -- so it follows Phase 29 rather than shipping half-built alongside it.
+exist -- so it follows Phase 30 rather than shipping half-built alongside it.
 
 **Not air-gappable.** Google cloud reachability is mandatory.
 
-#### 30.1 Android native MDM -- Android Management API (Pro+ inventory → Enterprise policy)
+#### 31.1 Android native MDM -- Android Management API (Pro+ inventory → Enterprise policy)
 
 Google hosts the heavy lifting; we integrate the API. Split by tier: **read = Pro+, control = Enterprise.**
 
@@ -15244,7 +15534,7 @@ Google hosts the heavy lifting; we integrate the API. Split by tier: **read = Pr
 
 **Estimated Size:** ~4,500 lines
 
-#### 30.2 Enrollment orchestration & zero-touch (Enterprise)
+#### 31.2 Enrollment orchestration & zero-touch (Enterprise)
 
 The operational product: getting devices enrolled at scale.
 
@@ -15265,7 +15555,7 @@ The operational product: getting devices enrolled at scale.
 - [ ] **Air-gap limitation documented prominently**
 - [ ] Docs + 14-language i18n complete
 - [ ] Home-screen card: **Android MDM** -- enrolled, pending zero-touch
-      enrollment, and policy non-compliance (card contract: Phase 34.1)
+      enrollment, and policy non-compliance (card contract: Phase 35.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -15283,7 +15573,7 @@ The operational product: getting devices enrolled at scale.
 
 ---
 
-## Phase 31: High Availability & Disaster Recovery (Enterprise)
+## Phase 32: High Availability & Disaster Recovery (Enterprise)
 
 **Target Release:** v6.2.0.0
 **Focus:** Survive losing a server, and survive losing a site. Multiple
@@ -15296,7 +15586,7 @@ deliberately built on top of it rather than beside it.
 
 **SEQUENCING NOTE -- worth revisiting.** This is placed last because it does not
 block anything else, but it is the phase most likely to be pulled forward:
-enterprise procurement asks about HA at evaluation time, and Phase 26 claims
+enterprise procurement asks about HA at evaluation time, and Phase 27 claims
 "market parity" at v5.0 while a single server outage still takes the whole
 control plane down. If a deal needs it, moving this ahead of the mobile arc
 (22/23/27/28) costs nothing structurally -- nothing in those phases depends on
@@ -15322,7 +15612,7 @@ quietly assumes it is the only one:
   * **Migrations race on startup.** N servers starting together will all try
     to run Alembic.
 
-#### 31.1 Make the server horizontally runnable (Enterprise)
+#### 32.1 Make the server horizontally runnable (Enterprise)
 
 - [ ] **Connection registry + inter-server dispatch** -- a shared record of
       which instance holds which agent's socket, and a path to hand a command
@@ -15354,7 +15644,7 @@ quietly assumes it is the only one:
 
 **Estimated Size:** ~5,000 lines
 
-#### 31.2 Database high availability (Enterprise -- integrate, don't build)
+#### 32.2 Database high availability (Enterprise -- integrate, don't build)
 
 **We do not write a Postgres failover system.** Patroni, repmgr and
 pg_auto_failover exist and customers already run them; building a fifth would
@@ -15379,14 +15669,14 @@ client of one.
 
 **Estimated Size:** ~2,000 lines
 
-#### 31.3 Cross-site failover / DR (Enterprise)
+#### 32.3 Cross-site failover / DR (Enterprise)
 
 - [ ] **Agent-side multi-endpoint failover** -- the agent takes an ORDERED list
       of server endpoints rather than one, health-checks, fails over with
       backoff and fails back deliberately. Without this the whole feature is
       theatre: a VIP that is unreachable because the *network* is gone cannot
       be fixed by anything on the server side. This is the single most
-      important item in 31.3 and it lands in the OSS agent
+      important item in 32.3 and it lands in the OSS agent
 - [ ] Warm secondary: streaming replication to the DR site plus artifact
       replication, with a measured and documented RPO
 - [ ] **Promotion is explicit and fenced, and the secondary is READ-ONLY until
@@ -15403,7 +15693,7 @@ client of one.
 
 **Estimated Size:** ~4,500 lines
 
-#### 31.4 Operating it (Enterprise)
+#### 32.4 Operating it (Enterprise)
 
 - [ ] Server Cluster page -- instances and their health, which holds the leader
       lock, how agents are distributed across instances, replication lag, and
@@ -15416,7 +15706,7 @@ client of one.
 
 **Estimated Size:** ~1,500 lines
 
-#### 31.5 Power resilience -- UPS health, configuration and orderly shutdown (Community / OSS monitoring; Pro+ / Enterprise orchestration)
+#### 32.5 Power resilience -- UPS health, configuration and orderly shutdown (Community / OSS monitoring; Pro+ / Enterprise orchestration)
 
 **Added 2026-10-17 (Bryan).** Track UPS health and support configuring it.
 Servers survive power loss only if the UPS is healthy AND each machine shuts
@@ -15445,7 +15735,7 @@ because an orderly power-loss shutdown is part of surviving a site outage.
 
 **Health and alerting (Community / OSS)**
 - [ ] UPS card on the host page and a fleet Power view; a dashboard card
-      (Phase 34) for UPSes on battery, needing a battery, or overloaded
+      (Phase 35) for UPSes on battery, needing a battery, or overloaded
 - [ ] Alerts through the existing alerting path: on battery, low runtime
       (below the configured shutdown margin), replace battery, failed
       self-test, overload, communication lost; on-battery events grouped
@@ -15458,7 +15748,7 @@ because an orderly power-loss shutdown is part of surviving a site outage.
 - [ ] Install and configure NUT / apcupsd through a deployment plan
       (driver, `upsd`, `upsmon` server or client role, shutdown thresholds,
       notify commands) -- previewed, backed up, audited, rollback (the
-      24.4 fix-it pattern)
+      25.4 fix-it pattern)
 - [ ] Shutdown policy per host: shut down at N% charge or M minutes runtime,
       ordered by role (VMs and child hosts first, then their hypervisor,
       storage last), with a "this host keeps power on X% longer" warning
@@ -15471,7 +15761,7 @@ because an orderly power-loss shutdown is part of surviving a site outage.
       dependency order across the fleet (child hosts, then hypervisors,
       then NAS / databases), honoring each host's policy; dry-run mode that
       shows the order; audit of every step; restart order documented
-- [ ] Ties into 31.3 DR: a site whose UPSes are all on battery can be
+- [ ] Ties into 32.3 DR: a site whose UPSes are all on battery can be
       pre-emptively failed over before it goes dark
 
 - [ ] Docs page + screenshots via `make screenshots` + 14-language i18n
@@ -15498,7 +15788,7 @@ because an orderly power-loss shutdown is part of surviving a site outage.
 - [ ] Docs + 14-language i18n complete
 - [ ] Home-screen card: **Server cluster** -- pool members up, current
       leader, Postgres replica lag, and DR-site reachability; critical when a
-      failover would fail (card contract: Phase 34.1)
+      failover would fail (card contract: Phase 35.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -15516,7 +15806,7 @@ because an orderly power-loss shutdown is part of surviving a site outage.
 
 ---
 
-## Phase 32: Browser Remote Terminal (Community / OSS; recording Pro+; approval Enterprise)
+## Phase 33: Browser Remote Terminal (Community / OSS; recording Pro+; approval Enterprise)
 
 **Target Release:** v6.3.0.0
 **Focus:** Open an interactive shell on a managed host from the web UI, with
@@ -15531,7 +15821,7 @@ session closes.
 
 **SEQUENCING NOTE -- worth revisiting.** Placed last so no phase is
 renumbered, but a browser terminal is table stakes in this market (Cockpit,
-Landscape, AWS SSM Session Manager, Teleport all have one) and Phase 26 claims
+Landscape, AWS SSM Session Manager, Teleport all have one) and Phase 27 claims
 market parity at v5.0. Nothing here depends on 22-29, so pulling it ahead of
 the mobile arc costs nothing structurally. Bryan's call, not a silent reorder.
 
@@ -15588,7 +15878,7 @@ nicety:
     Idle timeout and maximum duration, with a kill switch in the UI.
   * **Not the store-and-forward queue.** Interactive bytes cannot go through
     `message_queue`; this needs a live streaming channel on the agent's
-    WebSocket. Under Phase 31 HA the browser must land on (or be relayed to)
+    WebSocket. Under Phase 32 HA the browser must land on (or be relayed to)
     the server instance holding that agent's connection.
 
 **Community / OSS -- the terminal and the controls that make it safe to ship
@@ -15603,7 +15893,7 @@ is a liability, not a feature.
       multiplexed on the agent's existing WebSocket -- NOT the store-and-forward
       `message_queue`, which is built for resilience, not keystrokes;
       per-session ids; backpressure so a flood of output cannot starve the
-      agent's heartbeats or queued command results; under Phase 31 HA the
+      agent's heartbeats or queued command results; under Phase 32 HA the
       browser is relayed to the server instance holding that agent's connection
 - [ ] **Its own role**: "Open Remote Terminal", separate from View/Manage
       Host, scoped per host / access group / tenant like every other role,
@@ -15675,7 +15965,7 @@ adjust.*
       one are each refused
 - [ ] Docs + 14-language i18n complete
 - [ ] Home-screen card: **Terminal sessions** -- sessions open now and
-      sessions waiting for second-person approval (card contract: Phase 34.1)
+      sessions waiting for second-person approval (card contract: Phase 35.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -15693,7 +15983,7 @@ adjust.*
 
 ---
 
-## Phase 33: Fleet Targeting by Site & Network Segment (Enterprise)
+## Phase 34: Fleet Targeting by Site & Network Segment (Enterprise)
 
 **Target Release:** v6.4.0.0
 **Focus:** Choose WHERE work runs the way large estates are actually laid out:
@@ -15783,7 +16073,7 @@ federation (`Host.site_id`) and are not offered to scans yet.
         reachable on an unmanaged device raise a posture item (21.4)
 - [ ] Every home-screen card filterable **by site and by network segment** --
       one dashboard per site or segment, same cards (card contract: Phase
-      34.1)
+      35.1)
 - [ ] **Audit ALL previous phases for stale open items.** Same rule as every
       phase: walk each earlier phase, check every unticked box against the
       actual codebase, tick what is genuinely done, and for what is not say
@@ -15801,7 +16091,7 @@ federation (`Host.site_id`) and are not offered to scans yet.
 
 ---
 
-## Phase 34: Dashboard Insight Cards (Community / OSS; Pro+; Enterprise)
+## Phase 35: Dashboard Insight Cards (Community / OSS; Pro+; Enterprise)
 
 **Target Release:** v6.5.0.0
 **Focus:** Make the home screen answer "what needs me today?" across
@@ -15827,7 +16117,7 @@ from the home screen and found only by an operator asking why.
 - Thresholds that are a judgment call (days until a certificate expires,
   free disk) are per-card settings with sensible defaults.
 
-#### 34.1 Card framework (Community / OSS)
+#### 35.1 Card framework (Community / OSS)
 
 - [ ] **Engine-contributed cards** -- a Pro+ engine registers its card through
       the plugin seam the way it registers routes and pages; the dashboard
@@ -15838,7 +16128,7 @@ from the home screen and found only by an operator asking why.
 - [ ] **Per-card thresholds** stored with the existing dashboard preferences
 - [ ] **Card order and sizing** -- drag to reorder; compact vs detailed
 
-#### 34.2 Community cards (OSS)
+#### 35.2 Community cards (OSS)
 
 - [ ] **Awaiting approval** -- hosts registered but not approved
 - [ ] **Not checking in** -- hosts past the heartbeat timeout, oldest first
@@ -15858,7 +16148,7 @@ from the home screen and found only by an operator asking why.
 - [ ] **Release upgrades pending** -- hosts with an OS release upgrade
       available
 
-#### 34.3 Pro+ cards
+#### 35.3 Pro+ cards
 
 - [ ] **Vulnerabilities** -- critical/high findings, hosts affected, and
       hosts never scanned (`vuln_engine`)
@@ -15870,7 +16160,7 @@ from the home screen and found only by an operator asking why.
       (`compliance_engine`)
 - [ ] **Alerts firing** -- open alerts by severity (`alerting_engine`)
 
-#### 34.4 Enterprise cards
+#### 35.4 Enterprise cards
 
 - [ ] **Fleet risk** -- the advisor's fleet score, with "partly assessed"
       shown, not hidden (21.2)
@@ -15883,7 +16173,7 @@ from the home screen and found only by an operator asking why.
 - [ ] **Federation sites** -- sites unreachable or lagging (12)
 - [ ] **Air-gap content freshness** -- age of the last ingested bundle (11)
 
-#### 34.5 Close-out
+#### 35.5 Close-out
 
 - [ ] Every card's empty, not-measured, unlicensed and multi-tenant cases
       covered by tests; a dashboard of every card loads within the existing
@@ -15935,17 +16225,18 @@ from the home screen and found only by an operator asking why.
 | 21 | v3.9.0.0 | Endpoint Facts & Proactive Advisor | osquery fact substrate, Insights-style recommendations, malware detection, threat-model wizard + posture punch list, unenrolled asset discovery |
 | 22 | v3.10.0.0 | Scale Hardening -- Thundering-Herd Remediation | Jittered agent schedules + send-on-change, high-throughput intake and fair queues, leader election, bounded/spread ticks, fleet pushes in waves, stage-then-swap module updates + CDN delivery, federation deltas, scale harness |
 | 23 | v3.11.0.0 | Hardware, Time & Asset Visibility | Drive health (SMART, NVMe), degraded arrays and ZFS pools, temperatures and hardware errors from every OS, with real-time email alerts; every host's clock drift measured, NTP managed fleet-wide, out-of-bounds hosts resynchronized and alerted on; asset tags bound to the physical machine (shared by every OS on it), a naming-scheme builder, search, reports and CSV import |
-| 24 | **v4.0.0.0** | Mobile Fleet Visibility & UEM Ingestion | **MAJOR -- a new device class enters the product.** Device model, manual/API registration, ingest-from-UEM -- **air-gap compatible**; plus a getting-started wizard and Setup health page for new installs (OSS) |
-| 25 | v4.1.0.0 | Mobile Companion App & Compliance | First-party BYOD self-report app; mobile EOL/patch compliance, alerting + enforcement |
-| 26 | **v5.0.0.0** | Market-Parity GA | **MAJOR -- market parity reached.** All gap features hardened; v5.0 GA |
-| 27 | v5.1.0.0 | Expanded Agent Architecture & Packaging | ppc64le + s390x (big-endian) + riscv64 agent packaging/CI; native channels for alpine/BSD (Community/OSS) |
-| 28 | v5.2.0.0 | Security Tooling Coexistence | Velociraptor IR/hunting + Wazuh ingestion (Enterprise) |
-| 29 | **v6.0.0.0** | Apple Native MDM | **MAJOR -- SysManage becomes the device authority**, not just an observer: Apple MDM protocol, APNs, profiles, remote lock/wipe -- **not air-gappable** |
-| 30 | v6.1.0.0 | Android Native MDM & Zero-Touch | Android Management API policy + bulk/zero-touch enrollment across both vendors -- **not air-gappable** |
-| 31 | v6.2.0.0 | High Availability & Disaster Recovery | Active server pool behind a load balancer, leader-elected singleton workers, Postgres failover integration, agent multi-endpoint failover to a DR site |
-| 32 | v6.3.0.0 | Browser Remote Terminal | Agent-tunneled PTY sessions from the web UI -- no sshd, no inbound port, no keys, host posture untouched (OSS); recording (Pro+), second-person approval (Enterprise) |
-| 33 | v6.4.0.0 | Fleet Targeting by Site & Network Segment | Target scans and other fleet work by site, and by CIDR network segment within a site; per-site/segment rollout limits (Enterprise) |
-| 34 | v6.5.0.0 | Dashboard Insight Cards | Card framework (engine-contributed cards, thresholds, drill-down) plus home-screen cards for approvals, check-ins, limited agents, certificates, disk, firewall, Livepatch, vulnerabilities, advisories, EOL, compliance, alerts, fleet risk, malware, drift, fleet jobs, unmanaged devices, sites and air-gap freshness |
+| 24 | v3.12.0.0 | Fleet Backup & Recovery with restate | Scheduled, encrypted, deduplicated per-host backups to a NAS target with restate (per-host repositories over NFSv4), service quiesce hooks (Nextcloud, UniFi, databases), a Backups page and alerts, file restore, drift timeline (Pro+) and bare-metal rebuild through provisioning (Enterprise) |
+| 25 | **v4.0.0.0** | Mobile Fleet Visibility & UEM Ingestion | **MAJOR -- a new device class enters the product.** Device model, manual/API registration, ingest-from-UEM -- **air-gap compatible**; plus a getting-started wizard and Setup health page for new installs (OSS) |
+| 26 | v4.1.0.0 | Mobile Companion App & Compliance | First-party BYOD self-report app; mobile EOL/patch compliance, alerting + enforcement |
+| 27 | **v5.0.0.0** | Market-Parity GA | **MAJOR -- market parity reached.** All gap features hardened; v5.0 GA |
+| 28 | v5.1.0.0 | Expanded Agent Architecture & Packaging | ppc64le + s390x (big-endian) + riscv64 agent packaging/CI; native channels for alpine/BSD (Community/OSS) |
+| 29 | v5.2.0.0 | Security Tooling Coexistence | Velociraptor IR/hunting + Wazuh ingestion (Enterprise) |
+| 30 | **v6.0.0.0** | Apple Native MDM | **MAJOR -- SysManage becomes the device authority**, not just an observer: Apple MDM protocol, APNs, profiles, remote lock/wipe -- **not air-gappable** |
+| 31 | v6.1.0.0 | Android Native MDM & Zero-Touch | Android Management API policy + bulk/zero-touch enrollment across both vendors -- **not air-gappable** |
+| 32 | v6.2.0.0 | High Availability & Disaster Recovery | Active server pool behind a load balancer, leader-elected singleton workers, Postgres failover integration, agent multi-endpoint failover to a DR site |
+| 33 | v6.3.0.0 | Browser Remote Terminal | Agent-tunneled PTY sessions from the web UI -- no sshd, no inbound port, no keys, host posture untouched (OSS); recording (Pro+), second-person approval (Enterprise) |
+| 34 | v6.4.0.0 | Fleet Targeting by Site & Network Segment | Target scans and other fleet work by site, and by CIDR network segment within a site; per-site/segment rollout limits (Enterprise) |
+| 35 | v6.5.0.0 | Dashboard Insight Cards | Card framework (engine-contributed cards, thresholds, drill-down) plus home-screen cards for approvals, check-ins, limited agents, certificates, disk, firewall, Livepatch, vulnerabilities, advisories, EOL, compliance, alerts, fleet risk, malware, drift, fleet jobs, unmanaged devices, sites and air-gap freshness |
 
 ---
 

@@ -5263,5 +5263,16 @@
       "saveError": "Impossible d'enregistrer la limite.",
       "title": "Limite d'alerte de température"
     }
+  },
+  "about": {
+    "airgapRole": "Rôle d'isolement réseau",
+    "edition": "Édition",
+    "federationRole": "Rôle de fédération",
+    "license": "Licencié sous {{license}}",
+    "menu": "À propos",
+    "serverBuild": "Build du serveur",
+    "serverVersion": "Version du serveur",
+    "title": "À propos de SysManage",
+    "unknown": "Inconnu"
   }
 }

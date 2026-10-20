@@ -5263,5 +5263,16 @@
       "saveError": "Der Grenzwert konnte nicht gespeichert werden.",
       "title": "Temperatur-Warngrenzwert"
     }
+  },
+  "about": {
+    "airgapRole": "Air-Gap-Rolle",
+    "edition": "Edition",
+    "federationRole": "Federierungsrolle",
+    "license": "Lizenziert unter {{license}}",
+    "menu": "Über",
+    "serverBuild": "Serverbuild",
+    "serverVersion": "Serverversion",
+    "title": "Über SysManage",
+    "unknown": "Unbekannt"
   }
 }

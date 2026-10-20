@@ -5263,5 +5263,16 @@
       "saveError": "无法保存上限。",
       "title": "温度警告上限"
     }
+  },
+  "about": {
+    "airgapRole": "气隙隔离角色",
+    "edition": "版本",
+    "federationRole": "联邦角色",
+    "license": "采用 {{license}} 许可",
+    "menu": "关于",
+    "serverBuild": "服务器构建版本",
+    "serverVersion": "服务器版本",
+    "title": "关于SysManage",
+    "unknown": "未知"
   }
 }

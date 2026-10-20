@@ -5263,5 +5263,16 @@
       "saveError": "De grens kon niet worden opgeslagen.",
       "title": "Waarschuwingsgrens voor temperatuur"
     }
+  },
+  "about": {
+    "airgapRole": "Air-gap-rol",
+    "edition": "Editie",
+    "federationRole": "Federatierol",
+    "license": "Gelicenseerd onder {{license}}",
+    "menu": "Over",
+    "serverBuild": "Serverbuild",
+    "serverVersion": "Serverversie",
+    "title": "Over SysManage",
+    "unknown": "Onbekend"
   }
 }

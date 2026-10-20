@@ -5263,5 +5263,16 @@
       "saveError": "上限を保存できませんでした。",
       "title": "温度警告の上限"
     }
+  },
+  "about": {
+    "airgapRole": "エアギャップのロール",
+    "edition": "エディション",
+    "federationRole": "連合のロール",
+    "license": "ライセンス: {{license}}",
+    "menu": "このアプリについて",
+    "serverBuild": "サーバービルド",
+    "serverVersion": "サーバーバージョン",
+    "title": "SysManageについて",
+    "unknown": "不明"
   }
 }

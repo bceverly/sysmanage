@@ -5263,5 +5263,16 @@
       "saveError": "No se pudo guardar el límite.",
       "title": "Límite de advertencia de temperatura"
     }
+  },
+  "about": {
+    "airgapRole": "Rol de aislamiento de red",
+    "edition": "Edición",
+    "federationRole": "Rol de federación",
+    "license": "Licenciado bajo {{license}}",
+    "menu": "Acerca de",
+    "serverBuild": "Compilación del servidor",
+    "serverVersion": "Versión del servidor",
+    "title": "Acerca de SysManage",
+    "unknown": "Desconocido"
   }
 }

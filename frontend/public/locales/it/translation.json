@@ -5263,5 +5263,16 @@
       "saveError": "Impossibile salvare il limite.",
       "title": "Limite di avviso della temperatura"
     }
+  },
+  "about": {
+    "airgapRole": "Ruolo nell'ambiente isolato",
+    "edition": "Edizione",
+    "federationRole": "Ruolo di federazione",
+    "license": "Concesso in licenza con {{license}}",
+    "menu": "Informazioni su",
+    "serverBuild": "Build del server",
+    "serverVersion": "Versione del server",
+    "title": "Informazioni su SysManage",
+    "unknown": "Sconosciuto"
   }
 }

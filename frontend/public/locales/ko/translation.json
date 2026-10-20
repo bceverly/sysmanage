@@ -5263,5 +5263,16 @@
       "saveError": "한도를 저장할 수 없습니다.",
       "title": "온도 경고 한도"
     }
+  },
+  "about": {
+    "airgapRole": "에어갭 역할",
+    "edition": "판본",
+    "federationRole": "연방 역할",
+    "license": "{{license}} 라이선스 적용",
+    "menu": "정보",
+    "serverBuild": "서버 빌드",
+    "serverVersion": "서버 버전",
+    "title": "SysManage 정보",
+    "unknown": "알 수 없음"
   }
 }

@@ -5263,5 +5263,16 @@
       "saveError": "Não foi possível salvar o limite.",
       "title": "Limite de alerta de temperatura"
     }
+  },
+  "about": {
+    "airgapRole": "Função no ambiente isolado",
+    "edition": "Edição",
+    "federationRole": "Função de federação",
+    "license": "Licenciado sob {{license}}",
+    "menu": "Sobre",
+    "serverBuild": "Build do servidor",
+    "serverVersion": "Versão do servidor",
+    "title": "Sobre o SysManage",
+    "unknown": "Desconhecido"
   }
 }

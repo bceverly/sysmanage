@@ -15,9 +15,15 @@ import SysManageLogo from "../assets/sysmanage-logo.svg";
 import LanguageSelector from "./LanguageSelector";
 import ConnectionStatusIndicator from "./ConnectionStatusIndicator";
 import UserProfileDropdown from "./UserProfileDropdown";
+import type { AboutServerInfo } from "./AboutDialog";
 import { useFederationLicensed } from "../Services/federation";
 import NotificationBell from "./NotificationBell";
-import { refreshLicenseCache } from "../Services/license";
+import {
+  getCachedLicense,
+  onLicenseChange,
+  refreshLicenseCache,
+  watchLicense,
+} from "../Services/license";
 import { fetchUserPermissions, hasPermissionSync } from "../Services/permissions";
 import { usePlugins } from "../plugins";
 
@@ -275,6 +281,8 @@ const Navbar = () => {
   // Phase 11 -- server role chip ("Collector" / "Repository").  Hidden on
   // ``standard`` deployments so the OSS UI stays uncluttered.
   const [serverRole, setServerRole] = useState<string>("standard");
+  // The whole server-info response, for the user menu's About dialog.
+  const [serverInfo, setServerInfo] = useState<AboutServerInfo | null>(null);
   const [roleEngineLoaded, setRoleEngineLoaded] = useState<boolean>(true);
   // Phase 12 -- federation role chip ("Coordinator" / "Site").  Independent
   // axis from the air-gap role above; hidden when federation_role is "none".
@@ -283,28 +291,22 @@ const Navbar = () => {
     useState<boolean>(true);
 
   // Refresh the license cache (shared with HostDetail / Hosts / Settings via
-  // ``getCachedLicense``) and mirror the result into local state so this
-  // component re-renders when it changes.
+  // ``getCachedLicense``) and mirror it into local state -- on EVERY cache
+  // change, not just the first fetch: a fetch that failed while the server
+  // was restarting is retried by the cache, and the menu must follow it.
   useEffect(() => {
-    const checkLicenseFeatures = async () => {
-      try {
-        const licenseInfo = await refreshLicenseCache();
-        if (licenseInfo?.active) {
-          setActiveLicenseFeatures(licenseInfo.features ?? []);
-          setActiveLicenseModules(licenseInfo.modules ?? []);
-        } else {
-          setActiveLicenseFeatures([]);
-          setActiveLicenseModules([]);
-        }
-      } catch {
-        setActiveLicenseFeatures([]);
-        setActiveLicenseModules([]);
-      }
+    const mirror = () => {
+      const licenseInfo = getCachedLicense();
+      setActiveLicenseFeatures(licenseInfo?.active ? (licenseInfo.features ?? []) : []);
+      setActiveLicenseModules(licenseInfo?.active ? (licenseInfo.modules ?? []) : []);
     };
-
+    const unsubscribe = onLicenseChange(mirror);
+    mirror(); // whatever is already known (e.g. from a previous page)
     if (localStorage.getItem('bearer_token')) {
-      void checkLicenseFeatures();
+      watchLicense();
+      void refreshLicenseCache().then(mirror);
     }
+    return () => { unsubscribe(); };
   }, []);
 
   // Load the caller's security-role permissions so the nav can HIDE
@@ -330,6 +332,7 @@ const Navbar = () => {
       .then(r => (r.ok ? r.json() : null))
       .then(info => {
         if (cancelled || !info) return;
+        setServerInfo(info);
         setServerRole(info.role || 'standard');
         setRoleEngineLoaded(Boolean(info.role_engine_loaded));
         setFederationRole(info.federation_role || 'none');
@@ -514,7 +517,7 @@ const Navbar = () => {
             </IconButton>
             <ConnectionStatusIndicator />
             <NotificationBell />
-            <UserProfileDropdown />
+            <UserProfileDropdown serverInfo={serverInfo} />
             <LanguageSelector />
           </div>
         )}

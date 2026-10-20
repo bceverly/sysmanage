@@ -20,6 +20,8 @@ import {
   isModuleLicensed,
   clearLicenseCache,
   onLicenseChange,
+  watchLicense,
+  LICENSE_RETRY_DELAYS_S,
 } from '../../Services/license';
 
 const mockGet = axiosInstance.get as unknown as ReturnType<typeof vi.fn>;
@@ -66,15 +68,61 @@ describe('license cache helpers', () => {
     expect(isModuleLicensed('compliance_engine')).toBe(false);
   });
 
-  test('refreshLicenseCache clears cache to null on API failure', async () => {
+  test('a failed fetch keeps the last known license (server restarting)', async () => {
+    // A 502 / connection error during an upgrade is not "no license": it
+    // used to empty the menus until the user logged in again (2026-10-19).
     mockGet.mockResolvedValueOnce({ data: PRO_PLUS_LICENSE });
     await refreshLicenseCache();
-    expect(getCachedLicense()).not.toBeNull();
-    mockGet.mockRejectedValueOnce(new Error('boom'));
+    mockGet.mockRejectedValueOnce({ response: { status: 502 } });
     const info = await refreshLicenseCache();
-    expect(info).toBeNull();
-    expect(getCachedLicense()).toBeNull();
+    expect(info).toEqual(PRO_PLUS_LICENSE);
+    expect(isModuleLicensed('secrets_engine')).toBe(true);
+  });
+
+  test('a failed fetch is retried until one succeeds', async () => {
+    vi.useFakeTimers();
+    try {
+      mockGet.mockRejectedValueOnce(new Error('connect ECONNREFUSED'));
+      mockGet.mockRejectedValueOnce({ response: { status: 503 } });
+      mockGet.mockResolvedValueOnce({ data: PRO_PLUS_LICENSE });
+      await refreshLicenseCache();
+      expect(getCachedLicense()).toBeNull();
+      await vi.advanceTimersByTimeAsync(LICENSE_RETRY_DELAYS_S[0] * 1000);
+      expect(getCachedLicense()).toBeNull();
+      await vi.advanceTimersByTimeAsync(LICENSE_RETRY_DELAYS_S[1] * 1000);
+      expect(isModuleLicensed('secrets_engine')).toBe(true);
+      expect(mockGet).toHaveBeenCalledTimes(3);
+      // ...and it stops retrying once it has an answer
+      await vi.advanceTimersByTimeAsync(60_000);
+      expect(mockGet).toHaveBeenCalledTimes(3);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  test('a genuine "no license" answer still replaces a licensed snapshot', async () => {
+    mockGet.mockResolvedValueOnce({ data: PRO_PLUS_LICENSE });
+    await refreshLicenseCache();
+    mockGet.mockResolvedValueOnce({ data: { active: false } }); // OSS
+    await refreshLicenseCache();
     expect(isModuleLicensed('secrets_engine')).toBe(false);
+    mockGet.mockResolvedValueOnce({ data: PRO_PLUS_LICENSE });
+    await refreshLicenseCache();
+    mockGet.mockRejectedValueOnce({ response: { status: 402 } });
+    await refreshLicenseCache();
+    expect(getCachedLicense()).toEqual({ active: false });
+  });
+
+  test('regaining focus refetches the license', async () => {
+    localStorage.setItem('bearer_token', 'tok');
+    try {
+      watchLicense();
+      mockGet.mockResolvedValue({ data: PRO_PLUS_LICENSE });
+      globalThis.dispatchEvent(new Event('focus'));
+      await vi.waitFor(() => expect(isModuleLicensed('secrets_engine')).toBe(true));
+    } finally {
+      localStorage.removeItem('bearer_token');
+    }
   });
 
   test('license without modules array returns false for any module check', async () => {

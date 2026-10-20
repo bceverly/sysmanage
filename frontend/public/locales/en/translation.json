@@ -5263,5 +5263,16 @@
       "saveError": "The limit could not be saved.",
       "title": "Temperature warning limit"
     }
+  },
+  "about": {
+    "airgapRole": "Air-gap role",
+    "edition": "Edition",
+    "federationRole": "Federation role",
+    "license": "Licensed under {{license}}",
+    "menu": "About",
+    "serverBuild": "Server build",
+    "serverVersion": "Server version",
+    "title": "About SysManage",
+    "unknown": "Unknown"
   }
 }

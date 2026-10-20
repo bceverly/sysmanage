@@ -5263,5 +5263,16 @@
       "saveError": "تعذّر حفظ الحد.",
       "title": "حد التحذير من درجة الحرارة"
     }
+  },
+  "about": {
+    "airgapRole": "دور الخادم المعزول عن الشبكة",
+    "edition": "الإصدار",
+    "federationRole": "دور الاتحاد",
+    "license": "مرخّص بموجب {{license}}",
+    "menu": "حول",
+    "serverBuild": "رقم بناء الخادم",
+    "serverVersion": "إصدار الخادم",
+    "title": "حول SysManage",
+    "unknown": "غير معروف"
   }
 }

@@ -6,6 +6,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
+import AboutDialog, { AboutServerInfo } from './AboutDialog';
 import {
     Avatar,
     Menu,
@@ -19,7 +20,8 @@ import {
 import {
     Person as PersonIcon,
     Logout as LogoutIcon,
-    VpnKey as VpnKeyIcon
+    VpnKey as VpnKeyIcon,
+    InfoOutlined as InfoOutlinedIcon
 } from '@mui/icons-material';
 
 // Extend window interface for global function
@@ -29,8 +31,14 @@ declare global {
     }
 }
 
-const UserProfileDropdown: React.FC = () => {
+interface UserProfileDropdownProps {
+    // The Navbar's server-info, for the About dialog (no second request).
+    serverInfo?: AboutServerInfo | null;
+}
+
+const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ serverInfo }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [aboutOpen, setAboutOpen] = useState(false);
     const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
     const open = Boolean(anchorEl);
     const navigate = useNavigate();
@@ -125,6 +133,11 @@ const UserProfileDropdown: React.FC = () => {
         void navigate('/api-keys');
     };
 
+    const handleAbout = () => {
+        handleClose();
+        setAboutOpen(true);
+    };
+
     const handleLogout = () => {
         handleClose();
         void navigate('/logout');
@@ -206,6 +219,14 @@ const UserProfileDropdown: React.FC = () => {
                     <ListItemText primary={t('apiKeys.title', 'API Keys')} />
                 </MenuItem>
 
+                {/* About: product, server version, license */}
+                <MenuItem onClick={handleAbout}>
+                    <ListItemIcon>
+                        <InfoOutlinedIcon fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText primary={t('about.menu', 'About')} />
+                </MenuItem>
+
                 <Divider />
                 
                 {/* Logout link */}
@@ -216,6 +237,7 @@ const UserProfileDropdown: React.FC = () => {
                     <ListItemText primary={t('nav.logout', 'Logout')} />
                 </MenuItem>
             </Menu>
+            <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} serverInfo={serverInfo} />
         </>
     );
 };

@@ -56,27 +56,88 @@ export const installLicense = async (licenseKey: string): Promise<{
 // after login / license-key changes, and expose synchronous predicate
 // helpers for components.
 //
-// The cache is intentionally simple: no TTL, no auto-refresh.  It
-// invalidates explicitly when the user installs a new license or signs
-// in.  Components that need the freshest value can ``await
-// refreshLicenseCache()`` first, but the typical render path reads the
-// cached snapshot.
+// The cache is refreshed after login / license-key changes, when the window
+// regains focus, and -- after a FAILED fetch -- on a backoff until one
+// succeeds.  A failure is never stored as "no license": during a server
+// upgrade every request 502s or cannot connect, and storing that as an empty
+// license left an open session showing the OSS menus (no Pro+ items) until
+// the user logged out and back in (Bryan, 2026-10-19).  Only a real answer
+// replaces the snapshot: a 2xx (an unlicensed server says ``active: false``)
+// or a genuine 402.
 
 let _cachedLicense: LicenseInfo | null = null;
 const _subscribers = new Set<() => void>();
 
+// Seconds between retries after a failed fetch; the last repeats forever.
+export const LICENSE_RETRY_DELAYS_S = [2, 5, 10, 30];
+let _retryTimer: ReturnType<typeof setTimeout> | null = null;
+let _retryIndex = 0;
+let _watching = false;
+
+type FetchOutcome = { ok: true; license: LicenseInfo } | { ok: false };
+
+/** A real answer (2xx, or 402 "no license") -- or a failure to retry. */
+const fetchLicense = async (): Promise<FetchOutcome> => {
+    try {
+        return { ok: true, license: await getLicenseInfo() };
+    } catch (error) {
+        const status = (error as { response?: { status?: number } })?.response?.status;
+        if (status === 402) return { ok: true, license: { active: false } };
+        return { ok: false };
+    }
+};
+
+const cancelRetry = () => {
+    if (_retryTimer !== null) clearTimeout(_retryTimer);
+    _retryTimer = null;
+};
+
+const scheduleRetry = () => {
+    if (_retryTimer !== null) return;
+    const delays = LICENSE_RETRY_DELAYS_S;
+    const seconds = delays[Math.min(_retryIndex, delays.length - 1)];
+    _retryIndex += 1;
+    _retryTimer = setTimeout(() => {
+        _retryTimer = null;
+        void refreshLicenseCache();
+    }, seconds * 1000);
+};
+
 /**
  * Refresh the cached license snapshot from the server.  Call after
- * login and after ``installLicense`` to invalidate stale state.
+ * login and after ``installLicense`` to invalidate stale state.  On a
+ * failure the last known license stays and a retry is scheduled.
  */
 export const refreshLicenseCache = async (): Promise<LicenseInfo | null> => {
-    try {
-        _cachedLicense = await getLicenseInfo();
-    } catch {
-        _cachedLicense = null;
+    const outcome = await fetchLicense();
+    if (!outcome.ok) {
+        scheduleRetry();
+        return _cachedLicense;
     }
+    cancelRetry();
+    _retryIndex = 0;
+    _cachedLicense = outcome.license;
     _subscribers.forEach(fn => fn());
     return _cachedLicense;
+};
+
+const onFocusOrVisible = () => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+    if (!localStorage.getItem('bearer_token')) return;
+    void refreshLicenseCache();
+};
+
+/**
+ * Refetch the license whenever the window regains focus or becomes visible
+ * (cheap; catches a server upgrade under an open session).  Idempotent.
+ */
+export const watchLicense = (): void => {
+    if (_watching || typeof globalThis.addEventListener !== 'function') return;
+    _watching = true;
+    globalThis.addEventListener('focus', onFocusOrVisible);
+    if (typeof document !== 'undefined') {
+        document.addEventListener('visibilitychange', onFocusOrVisible);
+    }
 };
 
 /** Read the cached license (or null if it hasn't been fetched yet). */
@@ -111,6 +172,8 @@ export const isModuleLicensed = (moduleCode: string): boolean =>
 
 /** Clear the cached license -- used by tests and on logout. */
 export const clearLicenseCache = (): void => {
+    cancelRetry();
+    _retryIndex = 0;
     _cachedLicense = null;
     _subscribers.forEach(fn => fn());
 };
