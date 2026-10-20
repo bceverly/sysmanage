@@ -5292,6 +5292,7 @@
     },
     "card": {
       "lastCheck": "Laatste controle",
+      "lastAttempt": "Laatste poging",
       "noTarget": "Er is nog geen back-updoel ingesteld.",
       "open": "Alle back-ups",
       "title": "Back-up"
@@ -5386,6 +5387,7 @@
     "status": {
       "disabled": "Uitgeschakeld",
       "failed": "Mislukt",
+      "running": "Back-up bezig",
       "incomplete": "Onvolledig",
       "never": "Nog nooit een back-up gemaakt",
       "noPolicy": "Niet geconfigureerd",

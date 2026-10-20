@@ -6,7 +6,9 @@
 host's backup status and coverage, and the target's warnings.
 
 Status, worst first: ``not_equipped`` (the agent cannot run restate, with
-its reason), ``failed`` (the last capture failed or was untrusted),
+its reason), ``running`` (a capture is in progress -- it outranks how the
+previous one ended, which is still in ``last_capture``), ``failed`` (the
+last capture failed or was untrusted),
 ``overdue`` (no good capture for twice the interval), ``incomplete`` (the
 last capture skipped unreadable files), ``never``, ``ok``; and ``disabled``
 or ``no_policy``.  A keyless ``check`` is ``metadata_only``: it proves the
@@ -191,6 +193,7 @@ def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
         "coverage": coverage(host),
         "policy": policy_dict(policy) if policy else None,
         "last_capture": None,
+        "last_good_capture": None,
         "last_check": None,
         "running": None,
         "next_due": None,
@@ -211,10 +214,13 @@ def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
         .first()
     )
     entry["last_capture"] = run_dict(last_capture) if last_capture else None
+    good = jobs.latest_run(db, policy.id, "capture", statuses=jobs.GOOD_CAPTURE)
+    entry["last_good_capture"] = run_dict(good) if good else None
     entry["last_check"] = run_dict(last_check) if last_check else None
     entry["running"] = run_dict(running) if running else None
     due = backup_tick.capture_due_at(db, policy)
-    entry["next_due"] = iso(due or now) if policy.enabled else None
+    capturing = running is not None and running.action == "capture"
+    entry["next_due"] = iso(due or now) if policy.enabled and not capturing else None
     entry["snapshot_count"] = (
         db.query(models.BackupSnapshot)
         .filter(
@@ -225,6 +231,8 @@ def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
     )
     if not ready:
         entry["status"] = "not_equipped"
+    elif capturing:
+        entry["status"] = "running"
     elif not policy.enabled:
         entry["status"] = "disabled"
     else:

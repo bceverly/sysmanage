@@ -68,6 +68,7 @@ const host = (over: Partial<BackupHost>): BackupHost => ({
   policy,
   status: "ok",
   last_capture: null,
+  last_good_capture: null,
   last_check: null,
   running: null,
   next_due: null,
@@ -155,6 +156,23 @@ describe("Backups page", () => {
     expect(screen.getByText("Install restate")).toBeInTheDocument();
     expect(await screen.findByText("Metadata check passed")).toBeInTheDocument();
     expect(screen.queryByText("Verified")).not.toBeInTheDocument();
+  });
+
+  test("a running capture shows Backing up, not the earlier failure", async () => {
+    const failed = run({ id: "r0", action: "capture", status: "failed", finished_at: "2026-10-20T09:32:33" });
+    const good = run({ id: "r9", action: "capture", status: "ok", finished_at: "2026-10-19T03:00:00" });
+    vi.mocked(getBackupOverview).mockResolvedValue(overview({
+      hosts: [host({
+        status: "running",
+        last_capture: failed,
+        last_good_capture: good,
+        running: run({ id: "r1", action: "capture", status: "running", finished_at: null }),
+      })],
+      counts: { running: 1 },
+    }));
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    expect((await screen.findAllByText("Backing up")).length).toBeGreaterThan(0);
+    expect(screen.queryByText("Failed")).not.toBeInTheDocument();
   });
 
   test("Back up now queues a capture", async () => {

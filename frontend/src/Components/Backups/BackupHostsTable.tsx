@@ -126,7 +126,7 @@ const BackupHostsTable: React.FC<{
                             </TableCell>
                             <StatusCell row={row} />
                             <TableCell>
-                                {formatTime(row.last_capture?.finished_at)}
+                                {formatTime(row.last_good_capture?.finished_at)}
                                 {row.snapshot_count > 0 && (
                                     <Typography variant="caption" display="block" color="text.secondary">
                                         {t('backups.hosts.snapshots', 'Snapshots: {{n}}', { n: row.snapshot_count })}

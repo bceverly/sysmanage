@@ -5292,6 +5292,7 @@
     },
     "card": {
       "lastCheck": "Dernière vérification",
+      "lastAttempt": "Dernière tentative",
       "noTarget": "Aucune cible de sauvegarde n'est encore configurée.",
       "open": "Toutes les sauvegardes",
       "title": "Sauvegarde"
@@ -5386,6 +5387,7 @@
     "status": {
       "disabled": "Désactivé",
       "failed": "Échec",
+      "running": "En sauvegarde",
       "incomplete": "Incomplet",
       "never": "Jamais sauvegardé",
       "noPolicy": "Non configuré",

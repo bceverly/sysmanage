@@ -297,6 +297,29 @@ def test_host_status_words(session, history, expected):
     assert views.host_status(session, s.host)["status"] == expected
 
 
+def test_a_running_capture_outranks_the_last_failure(session):
+    # Lab 2026-10-20: the page said "Failed" while a capture was running,
+    # and "Last backup" showed when the failed run ended.
+    s = _setup(session)
+    _capture(session, s, "ok", 30)
+    _capture(session, s, "failed", 2)
+    entry = views.host_status(session, s.host)
+    assert entry["status"] == "failed"
+    assert entry["last_capture"]["status"] == "failed"
+    assert entry["last_good_capture"]["status"] == "ok"
+    jobs.queue_run(session, s.policy, s.host.id, "capture")
+    session.commit()
+    entry = views.host_status(session, s.host)
+    assert entry["status"] == "running" and entry["next_due"] is None
+    assert entry["last_capture"]["status"] == "failed"  # still reported
+
+
+def test_never_backed_up_has_no_last_good_capture(session):
+    s = _setup(session)
+    _capture(session, s, "failed", 1)
+    assert views.host_status(session, s.host)["last_good_capture"] is None
+
+
 def test_status_not_equipped_and_coverage(session):
     s = _setup(session)
     s.host.agent_capabilities = json.dumps(

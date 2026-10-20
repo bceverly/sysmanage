@@ -5292,6 +5292,7 @@
     },
     "card": {
       "lastCheck": "Last check",
+      "lastAttempt": "Last attempt",
       "noTarget": "No backup target is set up yet.",
       "open": "All backups",
       "title": "Backup"
@@ -5386,6 +5387,7 @@
     "status": {
       "disabled": "Disabled",
       "failed": "Failed",
+      "running": "Backing up",
       "incomplete": "Incomplete",
       "never": "Never backed up",
       "noPolicy": "Not configured",

@@ -14,6 +14,7 @@ export type BackupStatus =
   | "incomplete"
   | "overdue"
   | "failed"
+  | "running"
   | "never"
   | "not_equipped"
   | "disabled"
@@ -26,6 +27,7 @@ export const BACKUP_STATUS_ORDER: BackupStatus[] = [
   "incomplete",
   "not_equipped",
   "never",
+  "running",
   "disabled",
   "ok",
   "no_policy",
@@ -174,6 +176,8 @@ export interface BackupHost {
   policy: BackupPolicy | null;
   status: BackupStatus;
   last_capture: BackupRun | null;
+  /** The newest capture that produced a snapshot (ok, different, incomplete). */
+  last_good_capture: BackupRun | null;
   last_check: BackupRun | null;
   running: BackupRun | null;
   next_due: string | null;

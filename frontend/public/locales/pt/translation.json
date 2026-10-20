@@ -5292,6 +5292,7 @@
     },
     "card": {
       "lastCheck": "Última verificação",
+      "lastAttempt": "Última tentativa",
       "noTarget": "Nenhum destino de backup foi configurado ainda.",
       "open": "Todos os backups",
       "title": "Backup"
@@ -5386,6 +5387,7 @@
     "status": {
       "disabled": "Desativado",
       "failed": "Falhou",
+      "running": "Fazendo backup",
       "incomplete": "Incompleto",
       "never": "Nunca teve backup",
       "noPolicy": "Não configurado",

@@ -5292,6 +5292,7 @@
     },
     "card": {
       "lastCheck": "Última comprobación",
+      "lastAttempt": "Último intento",
       "noTarget": "Todavía no se ha configurado ningún destino de copia de seguridad.",
       "open": "Todas las copias de seguridad",
       "title": "Copia de seguridad"
@@ -5386,6 +5387,7 @@
     "status": {
       "disabled": "Desactivado",
       "failed": "Fallido",
+      "running": "Haciendo copia de seguridad",
       "incomplete": "Incompleto",
       "never": "Nunca respaldado",
       "noPolicy": "Sin configurar",

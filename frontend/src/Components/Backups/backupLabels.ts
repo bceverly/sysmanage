@@ -21,6 +21,7 @@ export const statusColor = (status: BackupStatus): ChipColor => {
         case 'not_equipped':
             return 'warning';
         case 'never':
+        case 'running':
             return 'info';
         default:
             return 'default';
@@ -33,6 +34,7 @@ export const statusLabel = (t: TFunction, status: BackupStatus): string => {
         incomplete: t('backups.status.incomplete', 'Incomplete'),
         overdue: t('backups.status.overdue', 'Overdue'),
         failed: t('backups.status.failed', 'Failed'),
+        running: t('backups.status.running', 'Backing up'),
         never: t('backups.status.never', 'Never backed up'),
         not_equipped: t('backups.status.notEquipped', 'Not equipped'),
         disabled: t('backups.status.disabled', 'Disabled'),

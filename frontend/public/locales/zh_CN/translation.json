@@ -5292,6 +5292,7 @@
     },
     "card": {
       "lastCheck": "上次检查",
+      "lastAttempt": "上次尝试",
       "noTarget": "尚未设置备份目标。",
       "open": "所有备份",
       "title": "备份"
@@ -5386,6 +5387,7 @@
     "status": {
       "disabled": "已禁用",
       "failed": "失败",
+      "running": "正在备份",
       "incomplete": "不完整",
       "never": "从未备份",
       "noPolicy": "未配置",

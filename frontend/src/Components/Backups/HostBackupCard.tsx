@@ -90,9 +90,15 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                 {data.policy && (
                     <>
                         <Typography variant="body2">
-                            {t('backups.hosts.lastBackup', 'Last backup')}: {formatTime(data.last_capture?.finished_at)}
-                            {data.last_capture && ` (${runStatusLabel(t, data.last_capture)})`}
+                            {t('backups.hosts.lastBackup', 'Last backup')}: {formatTime(data.last_good_capture?.finished_at)}
+                            {data.last_good_capture && ` (${runStatusLabel(t, data.last_good_capture)})`}
                         </Typography>
+                        {data.last_capture && data.last_capture.id !== data.last_good_capture?.id && (
+                            <Typography variant="body2">
+                                {t('backups.card.lastAttempt', 'Last attempt')}: {formatTime(data.last_capture.finished_at)}
+                                {` (${runStatusLabel(t, data.last_capture)})`}
+                            </Typography>
+                        )}
                         <Typography variant="body2">
                             {t('backups.card.lastCheck', 'Last check')}: {formatTime(data.last_check?.finished_at)}
                             {data.last_check && ` (${runStatusLabel(t, data.last_check)})`}

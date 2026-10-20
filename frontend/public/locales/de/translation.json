@@ -5292,6 +5292,7 @@
     },
     "card": {
       "lastCheck": "Letzte Prüfung",
+      "lastAttempt": "Letzter Versuch",
       "noTarget": "Es ist noch kein Sicherungsziel eingerichtet.",
       "open": "Alle Sicherungen",
       "title": "Sicherung"
@@ -5386,6 +5387,7 @@
     "status": {
       "disabled": "Deaktiviert",
       "failed": "Fehlgeschlagen",
+      "running": "Sicherung läuft",
       "incomplete": "Unvollständig",
       "never": "Noch nie gesichert",
       "noPolicy": "Nicht konfiguriert",

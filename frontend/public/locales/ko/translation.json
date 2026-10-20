@@ -5292,6 +5292,7 @@
     },
     "card": {
       "lastCheck": "마지막 검사",
+      "lastAttempt": "마지막 시도",
       "noTarget": "아직 백업 대상이 설정되지 않았습니다.",
       "open": "모든 백업",
       "title": "백업"
@@ -5386,6 +5387,7 @@
     "status": {
       "disabled": "비활성화됨",
       "failed": "실패",
+      "running": "백업 중",
       "incomplete": "불완전",
       "never": "백업한 적 없음",
       "noPolicy": "구성되지 않음",
