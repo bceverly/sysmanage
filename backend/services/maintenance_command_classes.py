@@ -99,6 +99,12 @@ WINDOW_GATED_COMMANDS = frozenset(
         "quarantine_file",
         "restore_file",
         "resync_clock",
+        # Phase 24 backups: configure installs root-owned job files, a run
+        # can pause services (quiesce) or seal/prune on the storage host, a
+        # restore writes files -- read-only runs are exempt in is_window_gated
+        "backup_configure",
+        "backup_run",
+        "backup_restore",
         "attach_to_graylog",
         "fips_enable",
         "fips_disable",
@@ -132,6 +138,9 @@ WINDOW_GATED_COMMANDS = frozenset(
     }
 )
 
+# backup_run actions that only read the repository or the host.
+_READ_ONLY_BACKUP = frozenset({"snapshots", "estimate", "check"})
+
 # Message types other than "command" that are change actions.
 _GATED_MESSAGE_TYPES = frozenset({"update_request"})
 
@@ -162,4 +171,6 @@ def is_window_gated(message_type: str, message_data: Optional[str]) -> bool:
     command_type, params = _command_of(message_data)
     if command_type == "apply_config_profile" and params.get("check_mode") is True:
         return False  # a check-mode run reports drift and changes nothing
+    if command_type == "backup_run" and params.get("action") in _READ_ONLY_BACKUP:
+        return False  # lists, measures or verifies; changes nothing
     return command_type not in WINDOW_EXEMPT_COMMANDS

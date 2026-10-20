@@ -1,0 +1,161 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
+"""
+Fleet backup with restate (ROADMAP Phase 24, Community scope).
+
+Tenant data, like hosts:
+
+* ``backup_target`` -- where repositories live: the path hosts mount it at,
+  the storage host (the NAS's own agent) and the path there.  Community has
+  exactly one.  ``seal_mode`` says how the storage side makes each capture
+  immutable (``zfs_snapshot``) or that it does not (``none``) -- restate cannot
+  enforce append-only from a host a root attacker controls, so the NAS must.
+* ``backup_policy`` -- one per host in Community: how often, retention
+  (``keep_last``), the check cadence, quiesce.  ``config_version`` bumps on
+  every change; the ``*_acked_version`` columns record what the host and the
+  storage host last confirmed, so the scheduler re-sends ``backup_configure``
+  until both agree.
+* ``backup_run`` -- one row per job sent: configure, capture, seal, prune,
+  check, du, estimate, restore.  Its id is the ``run_id`` the agent echoes in
+  ``backup_result``; ``command_id`` is the queue row that carried it.
+* ``backup_snapshot`` -- the snapshots a host's repository holds, refreshed
+  from capture, prune and du results; a pruned one keeps its row with
+  ``gone_at`` set.
+"""
+
+import uuid
+
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
+
+from backend.persistence.db import Base
+from backend.persistence.models.core import GUID
+
+_HOST_FK = "host.id"
+
+
+class BackupTarget(Base):
+    """Where a tenant's backup repositories live."""
+
+    __tablename__ = "backup_target"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    name = Column(String(255), nullable=False)
+    host_mount_point = Column(String(1024), nullable=False)
+    # Soft reference (no FK): a NAS host can be removed and re-registered
+    # without taking the target's history with it.
+    storage_host_id = Column(GUID(), nullable=True, index=True)
+    storage_path = Column(String(1024), nullable=True)
+    max_concurrent = Column(Integer, nullable=False, default=2)
+    seal_mode = Column(String(16), nullable=False, default="none")
+    zfs_dataset = Column(String(255), nullable=True)
+    created_at = Column(DateTime, nullable=False)
+    created_by = Column(String(255), nullable=True)
+    updated_at = Column(DateTime, nullable=False)
+
+
+class BackupPolicy(Base):
+    """One host's backup schedule and retention."""
+
+    __tablename__ = "backup_policy"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(
+        GUID(),
+        ForeignKey(_HOST_FK, ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+    target_id = Column(
+        GUID(), ForeignKey("backup_target.id", ondelete="CASCADE"), nullable=False
+    )
+    enabled = Column(Boolean, nullable=False, default=True)
+    interval_hours = Column(Integer, nullable=False, default=24)
+    window_start_hour = Column(Integer, nullable=True)  # UTC, 0-23
+    keep_last = Column(Integer, nullable=False, default=14)
+    check_interval_days = Column(Integer, nullable=False, default=7)
+    quiesce = Column(Boolean, nullable=False, default=False)
+    quiesce_with = Column(Text, nullable=True)  # JSON list of hook names
+    estimate_bytes = Column(BigInteger, nullable=True)
+    repository_bytes = Column(BigInteger, nullable=True)
+    config_version = Column(Integer, nullable=False, default=1)
+    host_acked_version = Column(Integer, nullable=False, default=0)
+    storage_acked_version = Column(Integer, nullable=False, default=0)
+    restate_version = Column(String(64), nullable=True)
+    storage_restate_version = Column(String(64), nullable=True)
+    created_at = Column(DateTime, nullable=False)
+    created_by = Column(String(255), nullable=True)
+    updated_at = Column(DateTime, nullable=False)
+
+
+class BackupRun(Base):
+    """One backup job sent to a host or to the storage host."""
+
+    __tablename__ = "backup_run"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    policy_id = Column(
+        GUID(),
+        ForeignKey("backup_policy.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    # Where it runs: the backed-up host, or the storage host.
+    host_id = Column(
+        GUID(), ForeignKey(_HOST_FK, ondelete="CASCADE"), nullable=False, index=True
+    )
+    action = Column(String(16), nullable=False)
+    status = Column(String(16), nullable=False, default="queued", index=True)
+    exit_code = Column(Integer, nullable=True)
+    queued_at = Column(DateTime, nullable=False)
+    started_at = Column(DateTime, nullable=True)
+    finished_at = Column(DateTime, nullable=True)
+    result = Column(Text, nullable=True)  # restate's result JSON, as sent
+    snapshot = Column(String(255), nullable=True)
+    progress = Column(Text, nullable=True)  # the latest progress line (JSON)
+    message = Column(String(1000), nullable=True)
+    restate_version = Column(String(64), nullable=True)
+    requested_by = Column(String(255), nullable=True)
+    command_id = Column(String(64), nullable=True, index=True)
+    parameters = Column(Text, nullable=True)  # JSON: what was asked
+
+
+class BackupSnapshot(Base):
+    """A snapshot in one host's repository."""
+
+    __tablename__ = "backup_snapshot"
+    __table_args__ = (
+        UniqueConstraint("policy_id", "name", name="uq_backup_snapshot_name"),
+    )
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    policy_id = Column(
+        GUID(),
+        ForeignKey("backup_policy.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    host_id = Column(
+        GUID(), ForeignKey(_HOST_FK, ondelete="CASCADE"), nullable=False, index=True
+    )
+    name = Column(String(255), nullable=False)
+    created_at = Column(DateTime, nullable=True)
+    bytes = Column(BigInteger, nullable=True)
+    new_bytes = Column(BigInteger, nullable=True)
+    unique_bytes = Column(BigInteger, nullable=True)
+    files = Column(BigInteger, nullable=True)
+    signed = Column(Boolean, nullable=False, default=False)
+    seen_at = Column(DateTime, nullable=False)
+    gone_at = Column(DateTime, nullable=True)

@@ -758,7 +758,8 @@
     },
     "updates": "Updates",
     "clocksOutOfBounds": "Clocks out of bounds",
-    "hardwareNeedsAttention": "Hardware needing attention"
+    "hardwareNeedsAttention": "Hardware needing attention",
+    "backupsNeedAttention": "Backups overdue or failed"
   },
   "dataGrid": {
     "columnVisibility": "Column Visibility",
@@ -1203,7 +1204,9 @@
     "unknown": "This agent has not advertised its capabilities. Older agents do not report them; the host is not restricted.",
     "updated": "Reported",
     "reasonMissingNamedTool": "Requires {{tool}}, which is not installed on this host",
-    "optionalNotInstalled": "Available once its tool is installed"
+    "optionalNotInstalled": "Available once its tool is installed",
+    "reasonOutdatedNamedTool": "Requires a newer {{tool}} than this host has",
+    "reasonToolOutdated": "A required tool on this host is too old"
   },
   "hostDefaults": {
     "addNewPackageManager": "Add New Enabled Package Manager",
@@ -2511,7 +2514,8 @@
     "assetDiscovery": "Network Discovery",
     "malware": "Malware",
     "timeSync": "Time Sync",
-    "hardwareHealth": "Hardware Health"
+    "hardwareHealth": "Hardware Health",
+    "backups": "Backups"
   },
   "notifications": {
     "applicationUpdates": "Application Updates",
@@ -5274,5 +5278,148 @@
     "serverVersion": "Server version",
     "title": "About SysManage",
     "unknown": "Unknown"
+  },
+  "backups": {
+    "action": {
+      "capture": "Backup",
+      "check": "Check",
+      "configure": "Configure",
+      "estimate": "Estimate",
+      "prune": "Prune",
+      "restore": "Restore",
+      "seal": "Seal",
+      "snapshots": "List snapshots"
+    },
+    "card": {
+      "lastCheck": "Last check",
+      "noTarget": "No backup target is set up yet.",
+      "open": "All backups",
+      "title": "Backup"
+    },
+    "coverage": {
+      "filesOnly": "Files only",
+      "full": "Full (files and packages)",
+      "unsupported": "Not supported"
+    },
+    "empty": "There are no approved hosts yet.",
+    "hosts": {
+      "actions": "Actions",
+      "backupNow": "Back up now",
+      "backupNowError": "The backup could not be started.",
+      "configure": "Configure",
+      "coverage": "Coverage",
+      "host": "Host",
+      "lastBackup": "Last backup",
+      "nextDue": "Next due",
+      "progress": "{{paths}} paths, {{size}} read",
+      "restateVersion": "restate {{version}}",
+      "restore": "Restore files",
+      "size": "Repository",
+      "snapshots": "Snapshots: {{n}}",
+      "starting": "Starting...",
+      "status": "Status"
+    },
+    "loadError": "Could not load the backups.",
+    "policy": {
+      "checkDays": "Check the repository every (days)",
+      "enabled": "Back up this host on a schedule",
+      "intervalHours": "Every (hours)",
+      "keepLast": "Snapshots to keep",
+      "quiesce": "Pause services while reading their data",
+      "quiesceHelp": "For example: postgres, nextcloud",
+      "quiesceWith": "Hooks (comma separated)",
+      "saveError": "The backup policy could not be saved.",
+      "title": "Backup policy for {{host}}",
+      "windowHelp": "Backups start only in the six hours from this hour.",
+      "windowStart": "Start hour (UTC, optional)"
+    },
+    "reason": {
+      "agentOutdated": "Upgrade the agent",
+      "missingTool": "Install restate",
+      "noStorageHost": "No storage host is set",
+      "notPrivileged": "The agent must run as root",
+      "toolOutdated": "Upgrade restate"
+    },
+    "restore": {
+      "confirm": "Restore to staging",
+      "counts": "Files: {{files}}, size: {{size}}",
+      "error": "The restore could not be requested.",
+      "exclude": "Paths to leave out (one per line)",
+      "loadError": "Could not load the snapshots.",
+      "missing": "Not in the snapshot: {{n}}",
+      "more": "Not shown: {{n}}",
+      "noSnapshots": "This host has no snapshots yet.",
+      "paths": "Paths to restore (one per line; empty = everything)",
+      "preview": "Preview",
+      "refused": "Refused: {{n}}",
+      "snapshot": "Snapshot",
+      "stagedAt": "Staged on the host at",
+      "stagingNote": "Files are restored into a staging directory on the host, never over the live files. Move them into place yourself.",
+      "title": "Restore files to {{host}}",
+      "unsignedAck": "This snapshot is not signed. Restore it anyway."
+    },
+    "run": {
+      "busy": "Busy, will retry",
+      "changed": "Changed",
+      "different": "Differences found",
+      "failed": "Failed",
+      "incomplete": "Incomplete",
+      "metadataChanged": "Metadata changed",
+      "metadataCheckPassed": "Metadata check passed",
+      "ok": "Succeeded",
+      "queued": "Queued",
+      "running": "Running",
+      "untrusted": "Untrusted",
+      "verified": "Verified"
+    },
+    "runs": {
+      "action": "Job",
+      "detail": "Detail",
+      "empty": "No backup jobs yet.",
+      "host": "Runs on",
+      "loadError": "Could not load the backup jobs.",
+      "queued": "Queued at",
+      "status": "Status",
+      "title": "Recent jobs"
+    },
+    "status": {
+      "disabled": "Disabled",
+      "failed": "Failed",
+      "incomplete": "Incomplete",
+      "never": "Never backed up",
+      "noPolicy": "Not configured",
+      "notEquipped": "Not equipped",
+      "ok": "Backed up",
+      "overdue": "Overdue"
+    },
+    "target": {
+      "add": "Set up target",
+      "dialogTitle": "Backup target",
+      "edit": "Edit target",
+      "hostMountPoint": "Mount point on each host",
+      "hostMountPointHelp": "Where every backed-up host mounts the target (NFS); each host writes only its own repository.",
+      "intro": "Point every host at one NFS share. Hosts only add to their own repository; the storage host seals, prunes and checks.",
+      "maxConcurrent": "Backups at the same time",
+      "mountedAt": "Hosts mount it at",
+      "name": "Name",
+      "noStorageHost": "None",
+      "none": "No backup target yet",
+      "restateVersions": "restate versions in use",
+      "saveError": "The target could not be saved.",
+      "sealMode": "Seal each backup",
+      "sealNone": "Do not seal",
+      "sealZfs": "ZFS snapshot",
+      "storageHost": "Storage host",
+      "storagePath": "Path on the storage host",
+      "storagePathHelp": "The storage host prunes, checks and seals here; backed-up hosts never prune.",
+      "zfsDataset": "ZFS dataset",
+      "zfsRetention": "Removing old ZFS snapshots is up to you for now; set retention on the storage host."
+    },
+    "title": "Backups",
+    "warning": {
+      "noStorageHost": "No storage host: old snapshots are never pruned and the repository is never checked",
+      "notSealed": "Not sealed (no immutable copies)",
+      "storageNotEquipped": "The storage host cannot run restate yet"
+    }
   }
 }

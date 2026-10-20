@@ -758,7 +758,8 @@
     },
     "updates": "Updates",
     "clocksOutOfBounds": "Klokken buiten de grenzen",
-    "hardwareNeedsAttention": "Hardware die aandacht vereist"
+    "hardwareNeedsAttention": "Hardware die aandacht vereist",
+    "backupsNeedAttention": "Achterstallige of mislukte back-ups"
   },
   "dataGrid": {
     "columnVisibility": "Kolomzichtbaarheid",
@@ -1184,7 +1185,9 @@
     "unknown": "Deze agent heeft zijn capaciteiten niet gemeld. Oudere agents melden ze niet; de host is hierdoor niet beperkt.",
     "updated": "Gemeld",
     "reasonMissingNamedTool": "Vereist {{tool}}, dat niet op deze host is geïnstalleerd",
-    "optionalNotInstalled": "Beschikbaar zodra het hulpprogramma is geïnstalleerd"
+    "optionalNotInstalled": "Beschikbaar zodra het hulpprogramma is geïnstalleerd",
+    "reasonOutdatedNamedTool": "Vereist een nieuwere {{tool}} dan deze host heeft",
+    "reasonToolOutdated": "Een vereist hulpprogramma op deze host is te oud"
   },
   "hostDefaults": {
     "addNewPackageManager": "Nieuwe Ingeschakelde Pakketbeheerder Toevoegen",
@@ -2492,7 +2495,8 @@
     "assetDiscovery": "Netwerkdetectie",
     "malware": "Malware",
     "timeSync": "Tijdsynchronisatie",
-    "hardwareHealth": "Hardwaregezondheid"
+    "hardwareHealth": "Hardwaregezondheid",
+    "backups": "Back-ups"
   },
   "notifications": {
     "applicationUpdates": "Applicatie Updates",
@@ -5274,5 +5278,148 @@
     "serverVersion": "Serverversie",
     "title": "Over SysManage",
     "unknown": "Onbekend"
+  },
+  "backups": {
+    "action": {
+      "capture": "Back-up",
+      "check": "Controle",
+      "configure": "Configuratie",
+      "estimate": "Schatting",
+      "prune": "Opschonen",
+      "restore": "Herstel",
+      "seal": "Verzegelen",
+      "snapshots": "Snapshots weergeven"
+    },
+    "card": {
+      "lastCheck": "Laatste controle",
+      "noTarget": "Er is nog geen back-updoel ingesteld.",
+      "open": "Alle back-ups",
+      "title": "Back-up"
+    },
+    "coverage": {
+      "filesOnly": "Alleen bestanden",
+      "full": "Volledig (bestanden en pakketten)",
+      "unsupported": "Niet ondersteund"
+    },
+    "empty": "Er zijn nog geen goedgekeurde hosts.",
+    "hosts": {
+      "actions": "Acties",
+      "backupNow": "Nu back-uppen",
+      "backupNowError": "De back-up kon niet worden gestart.",
+      "configure": "Configureren",
+      "coverage": "Dekking",
+      "host": "Host",
+      "lastBackup": "Laatste back-up",
+      "nextDue": "Volgende gepland",
+      "progress": "{{paths}} paden, {{size}} gelezen",
+      "restateVersion": "restate {{version}}",
+      "restore": "Bestanden herstellen",
+      "size": "Repository",
+      "snapshots": "Snapshots: {{n}}",
+      "starting": "Bezig met starten...",
+      "status": "Status"
+    },
+    "loadError": "De back-ups konden niet worden geladen.",
+    "policy": {
+      "checkDays": "Repository controleren elke (dagen)",
+      "enabled": "Deze host volgens een schema back-uppen",
+      "intervalHours": "Elke (uren)",
+      "keepLast": "Te bewaren snapshots",
+      "quiesce": "Services pauzeren terwijl hun gegevens worden gelezen",
+      "quiesceHelp": "Bijvoorbeeld: postgres, nextcloud",
+      "quiesceWith": "Hooks (gescheiden door komma's)",
+      "saveError": "Het back-upbeleid kon niet worden opgeslagen.",
+      "title": "Back-upbeleid voor {{host}}",
+      "windowHelp": "Back-ups starten alleen in de zes uur vanaf dit uur.",
+      "windowStart": "Startuur (UTC, optioneel)"
+    },
+    "reason": {
+      "agentOutdated": "Werk de agent bij",
+      "missingTool": "Installeer restate",
+      "noStorageHost": "Er is geen opslaghost ingesteld",
+      "notPrivileged": "De agent moet als root draaien",
+      "toolOutdated": "restate upgraden"
+    },
+    "restore": {
+      "confirm": "Herstellen naar staging",
+      "counts": "Bestanden: {{files}}, grootte: {{size}}",
+      "error": "Het herstel kon niet worden aangevraagd.",
+      "exclude": "Uit te sluiten paden (één per regel)",
+      "loadError": "De snapshots konden niet worden geladen.",
+      "missing": "Niet in de snapshot: {{n}}",
+      "more": "Niet weergegeven: {{n}}",
+      "noSnapshots": "Deze host heeft nog geen snapshots.",
+      "paths": "Te herstellen paden (één per regel; leeg = alles)",
+      "preview": "Voorbeeld",
+      "refused": "Geweigerd: {{n}}",
+      "snapshot": "Snapshot",
+      "stagedAt": "Klaargezet op de host in",
+      "stagingNote": "Bestanden worden hersteld in een stagingmap op de host, nooit over de actieve bestanden heen. Zet ze zelf op hun plaats.",
+      "title": "Bestanden herstellen op {{host}}",
+      "unsignedAck": "Deze snapshot is niet ondertekend. Toch herstellen."
+    },
+    "run": {
+      "busy": "Bezet, wordt opnieuw geprobeerd",
+      "changed": "Gewijzigd",
+      "different": "Verschillen gevonden",
+      "failed": "Mislukt",
+      "incomplete": "Onvolledig",
+      "metadataChanged": "Metadata gewijzigd",
+      "metadataCheckPassed": "Metadatacontrole geslaagd",
+      "ok": "Geslaagd",
+      "queued": "In wachtrij",
+      "running": "Wordt uitgevoerd",
+      "untrusted": "Niet vertrouwd",
+      "verified": "Geverifieerd"
+    },
+    "runs": {
+      "action": "Taak",
+      "detail": "Details",
+      "empty": "Nog geen back-uptaken.",
+      "host": "Draait op",
+      "loadError": "De back-uptaken konden niet worden geladen.",
+      "queued": "In wachtrij gezet op",
+      "status": "Status",
+      "title": "Recente taken"
+    },
+    "status": {
+      "disabled": "Uitgeschakeld",
+      "failed": "Mislukt",
+      "incomplete": "Onvolledig",
+      "never": "Nog nooit een back-up gemaakt",
+      "noPolicy": "Niet geconfigureerd",
+      "notEquipped": "Niet uitgerust",
+      "ok": "Geback-upt",
+      "overdue": "Achterstallig"
+    },
+    "target": {
+      "add": "Doel instellen",
+      "dialogTitle": "Back-updoel",
+      "edit": "Doel bewerken",
+      "hostMountPoint": "Koppelpunt op elke host",
+      "hostMountPointHelp": "Waar elke geback-upte host het doel koppelt (NFS); elke host schrijft alleen naar zijn eigen repository.",
+      "intro": "Laat alle hosts naar één NFS-share wijzen. Hosts voegen alleen toe aan hun eigen repository; de opslaghost verzegelt, schoont op en controleert.",
+      "maxConcurrent": "Gelijktijdige back-ups",
+      "mountedAt": "Hosts koppelen het op",
+      "name": "Naam",
+      "noStorageHost": "Geen",
+      "none": "Nog geen back-updoel",
+      "restateVersions": "Gebruikte restate-versies",
+      "saveError": "Het doel kon niet worden opgeslagen.",
+      "sealMode": "Elke back-up verzegelen",
+      "sealNone": "Niet verzegelen",
+      "sealZfs": "ZFS-snapshot",
+      "storageHost": "Opslaghost",
+      "storagePath": "Pad op de opslaghost",
+      "storagePathHelp": "De opslaghost schoont hier op, controleert en verzegelt; geback-upte hosts schonen nooit op.",
+      "zfsDataset": "ZFS-dataset",
+      "zfsRetention": "Oude ZFS-snapshots verwijderen is voorlopig aan u; stel de bewaartermijn in op de opslaghost."
+    },
+    "title": "Back-ups",
+    "warning": {
+      "noStorageHost": "Geen opslaghost: oude snapshots worden nooit opgeschoond en de repository wordt nooit gecontroleerd",
+      "notSealed": "Niet verzegeld (geen onveranderlijke kopieën)",
+      "storageNotEquipped": "De opslaghost kan restate nog niet uitvoeren"
+    }
   }
 }

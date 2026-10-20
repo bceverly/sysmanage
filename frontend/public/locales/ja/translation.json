@@ -758,7 +758,8 @@
     },
     "updates": "アップデート",
     "clocksOutOfBounds": "時刻のずれが許容範囲外",
-    "hardwareNeedsAttention": "対応が必要なハードウェア"
+    "hardwareNeedsAttention": "対応が必要なハードウェア",
+    "backupsNeedAttention": "期限切れまたは失敗したバックアップ"
   },
   "dataGrid": {
     "columnVisibility": "列の表示",
@@ -1184,7 +1185,9 @@
     "unknown": "このエージェントは機能を公開していません。古いエージェントは機能を報告しません; ホストには制限はありません。",
     "updated": "報告済み",
     "reasonMissingNamedTool": "{{tool}} が必要ですが、このホストにはインストールされていません",
-    "optionalNotInstalled": "ツールがインストールされた後利用可能"
+    "optionalNotInstalled": "ツールがインストールされた後利用可能",
+    "reasonOutdatedNamedTool": "このホストにあるものより新しい {{tool}} が必要です",
+    "reasonToolOutdated": "このホストの必要なツールが古すぎます"
   },
   "hostDefaults": {
     "addNewPackageManager": "新しい有効なパッケージマネージャーを追加",
@@ -2492,7 +2495,8 @@
     "assetDiscovery": "ネットワーク検出",
     "malware": "マルウェア",
     "timeSync": "時刻同期",
-    "hardwareHealth": "ハードウェアの健全性"
+    "hardwareHealth": "ハードウェアの健全性",
+    "backups": "バックアップ"
   },
   "notifications": {
     "applicationUpdates": "アプリケーションアップデート",
@@ -5274,5 +5278,148 @@
     "serverVersion": "サーバーバージョン",
     "title": "SysManageについて",
     "unknown": "不明"
+  },
+  "backups": {
+    "action": {
+      "capture": "バックアップ",
+      "check": "チェック",
+      "configure": "設定",
+      "estimate": "見積もり",
+      "prune": "古いスナップショットの整理",
+      "restore": "復元",
+      "seal": "封印",
+      "snapshots": "スナップショットの一覧"
+    },
+    "card": {
+      "lastCheck": "最終チェック",
+      "noTarget": "バックアップ先はまだ設定されていません。",
+      "open": "すべてのバックアップ",
+      "title": "バックアップ"
+    },
+    "coverage": {
+      "filesOnly": "ファイルのみ",
+      "full": "完全（ファイルとパッケージ）",
+      "unsupported": "非対応"
+    },
+    "empty": "承認済みのホストはまだありません。",
+    "hosts": {
+      "actions": "操作",
+      "backupNow": "今すぐバックアップ",
+      "backupNowError": "バックアップを開始できませんでした。",
+      "configure": "設定",
+      "coverage": "対象範囲",
+      "host": "ホスト",
+      "lastBackup": "最終バックアップ",
+      "nextDue": "次回予定",
+      "progress": "{{paths}} パス、{{size}} 読み取り済み",
+      "restateVersion": "restate {{version}}",
+      "restore": "ファイルを復元",
+      "size": "リポジトリ",
+      "snapshots": "スナップショット: {{n}}",
+      "starting": "開始しています...",
+      "status": "状態"
+    },
+    "loadError": "バックアップを読み込めませんでした。",
+    "policy": {
+      "checkDays": "リポジトリのチェック間隔（日）",
+      "enabled": "このホストをスケジュールに従ってバックアップする",
+      "intervalHours": "間隔（時間）",
+      "keepLast": "保持するスナップショット数",
+      "quiesce": "データの読み取り中はサービスを一時停止する",
+      "quiesceHelp": "例: postgres, nextcloud",
+      "quiesceWith": "フック（カンマ区切り）",
+      "saveError": "バックアップポリシーを保存できませんでした。",
+      "title": "{{host}} のバックアップポリシー",
+      "windowHelp": "バックアップはこの時刻から6時間以内にのみ開始されます。",
+      "windowStart": "開始時刻（UTC、任意）"
+    },
+    "reason": {
+      "agentOutdated": "エージェントをアップグレードしてください",
+      "missingTool": "restate をインストールしてください",
+      "noStorageHost": "ストレージホストが設定されていません",
+      "notPrivileged": "エージェントは root で実行する必要があります",
+      "toolOutdated": "restate をアップグレードしてください"
+    },
+    "restore": {
+      "confirm": "ステージング領域に復元",
+      "counts": "ファイル: {{files}}、サイズ: {{size}}",
+      "error": "復元を要求できませんでした。",
+      "exclude": "除外するパス（1行に1つ）",
+      "loadError": "スナップショットを読み込めませんでした。",
+      "missing": "スナップショットにないもの: {{n}}",
+      "more": "表示されていないもの: {{n}}",
+      "noSnapshots": "このホストにはまだスナップショットがありません。",
+      "paths": "復元するパス（1行に1つ。空欄 = すべて）",
+      "preview": "プレビュー",
+      "refused": "拒否: {{n}}",
+      "snapshot": "スナップショット",
+      "stagedAt": "ホスト上のステージング先",
+      "stagingNote": "ファイルはホスト上のステージングディレクトリに復元され、使用中のファイルが上書きされることはありません。所定の場所への移動はご自身で行ってください。",
+      "title": "{{host}} にファイルを復元",
+      "unsignedAck": "このスナップショットは署名されていません。それでも復元します。"
+    },
+    "run": {
+      "busy": "使用中、再試行します",
+      "changed": "変更あり",
+      "different": "差分あり",
+      "failed": "失敗",
+      "incomplete": "不完全",
+      "metadataChanged": "メタデータに変更あり",
+      "metadataCheckPassed": "メタデータチェック合格",
+      "ok": "成功",
+      "queued": "キュー待ち",
+      "running": "実行中",
+      "untrusted": "信頼できない",
+      "verified": "検証済み"
+    },
+    "runs": {
+      "action": "ジョブ",
+      "detail": "詳細",
+      "empty": "バックアップジョブはまだありません。",
+      "host": "実行ホスト",
+      "loadError": "バックアップジョブを読み込めませんでした。",
+      "queued": "キュー登録日時",
+      "status": "状態",
+      "title": "最近のジョブ"
+    },
+    "status": {
+      "disabled": "無効",
+      "failed": "失敗",
+      "incomplete": "不完全",
+      "never": "未バックアップ",
+      "noPolicy": "未設定",
+      "notEquipped": "未対応",
+      "ok": "バックアップ済み",
+      "overdue": "期限超過"
+    },
+    "target": {
+      "add": "ターゲットを設定",
+      "dialogTitle": "バックアップ先",
+      "edit": "ターゲットを編集",
+      "hostMountPoint": "各ホストのマウントポイント",
+      "hostMountPointHelp": "バックアップ対象の各ホストがバックアップ先（NFS）をマウントする場所です。各ホストは自分のリポジトリにのみ書き込みます。",
+      "intro": "すべてのホストを1つのNFS共有に向けます。ホストは自分のリポジトリに追加するだけで、封印、古いスナップショットの整理、チェックはストレージホストが行います。",
+      "maxConcurrent": "同時バックアップ数",
+      "mountedAt": "ホストのマウント先",
+      "name": "名前",
+      "noStorageHost": "なし",
+      "none": "バックアップ先はまだありません",
+      "restateVersions": "使用中の restate バージョン",
+      "saveError": "バックアップ先を保存できませんでした。",
+      "sealMode": "各バックアップの封印",
+      "sealNone": "封印しない",
+      "sealZfs": "ZFS スナップショット",
+      "storageHost": "ストレージホスト",
+      "storagePath": "ストレージホスト上のパス",
+      "storagePathHelp": "ストレージホストはここで整理、チェック、封印を行います。バックアップ対象のホストが整理することはありません。",
+      "zfsDataset": "ZFS データセット",
+      "zfsRetention": "古い ZFS スナップショットの削除は当面ご自身で行ってください。保持期間はストレージホストで設定します。"
+    },
+    "title": "バックアップ",
+    "warning": {
+      "noStorageHost": "ストレージホストがありません: 古いスナップショットは整理されず、リポジトリもチェックされません",
+      "notSealed": "未封印（変更不可のコピーがありません）",
+      "storageNotEquipped": "ストレージホストではまだ restate を実行できません"
+    }
   }
 }

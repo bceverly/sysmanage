@@ -177,6 +177,14 @@ de,it,nl: re:Stratum
 # The loanwords these locales' UIs already use for a tenant and a tag.
 it,nl: re:Tenant
 it: re:Tag
+# Backups (Phase 24): the loanwords these UIs already use ("Backup
+# contemporanei", "Alvo de backup", "Aufzubewahrende Snapshots").
+it,pt: re:^Backup$
+pt: re:^Backups$
+de,nl,pt: re:^Snapshot$
+de,nl,pt: re:^Snapshots: \{\{n\}\}$
+# "restate {{version}}": the product's name and its version number.
+backups.hosts.restateVersion
 
 # --- single-locale cognates --------------------------------------------------
 fr: re:(Actions?|Application|Architecture|Configuration|Description|Diagnostics|Direction|Image|Instrumentation|Invitations|Notes|Production|Secrets?|Source|Violations|permissions|commercial)

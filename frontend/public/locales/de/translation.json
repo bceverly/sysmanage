@@ -758,7 +758,8 @@
     },
     "updates": "Aktualisierungen",
     "clocksOutOfBounds": "Uhren außerhalb der Grenzwerte",
-    "hardwareNeedsAttention": "Hardware mit Handlungsbedarf"
+    "hardwareNeedsAttention": "Hardware mit Handlungsbedarf",
+    "backupsNeedAttention": "Überfällige oder fehlgeschlagene Sicherungen"
   },
   "dataGrid": {
     "columnVisibility": "Spaltensichtbarkeit",
@@ -1184,7 +1185,9 @@
     "unknown": "Dieser Agent hat seine Funktionalitäten nicht gemeldet. Ältere Agenten melden sie nicht; der Host ist nicht eingeschränkt.",
     "updated": "Gemeldet",
     "reasonMissingNamedTool": "Erfordert {{tool}}, das auf diesem Host nicht installiert ist",
-    "optionalNotInstalled": "Verfügbar, sobald sein Tool installiert ist"
+    "optionalNotInstalled": "Verfügbar, sobald sein Tool installiert ist",
+    "reasonOutdatedNamedTool": "Erfordert eine neuere Version von {{tool}}, als auf diesem Host installiert ist",
+    "reasonToolOutdated": "Ein benötigtes Werkzeug auf diesem Host ist zu alt"
   },
   "hostDefaults": {
     "addNewPackageManager": "Neuen aktivierten Paketmanager hinzufügen",
@@ -2492,7 +2495,8 @@
     "assetDiscovery": "Netzwerkerkennung",
     "malware": "Schadsoftware",
     "timeSync": "Zeitsynchronisierung",
-    "hardwareHealth": "Hardware-Zustand"
+    "hardwareHealth": "Hardware-Zustand",
+    "backups": "Sicherungen"
   },
   "notifications": {
     "applicationUpdates": "Anwendungs-Updates",
@@ -5274,5 +5278,148 @@
     "serverVersion": "Serverversion",
     "title": "Über SysManage",
     "unknown": "Unbekannt"
+  },
+  "backups": {
+    "action": {
+      "capture": "Sicherung",
+      "check": "Prüfung",
+      "configure": "Konfiguration",
+      "estimate": "Schätzung",
+      "prune": "Bereinigung",
+      "restore": "Wiederherstellung",
+      "seal": "Versiegelung",
+      "snapshots": "Snapshots auflisten"
+    },
+    "card": {
+      "lastCheck": "Letzte Prüfung",
+      "noTarget": "Es ist noch kein Sicherungsziel eingerichtet.",
+      "open": "Alle Sicherungen",
+      "title": "Sicherung"
+    },
+    "coverage": {
+      "filesOnly": "Nur Dateien",
+      "full": "Vollständig (Dateien und Pakete)",
+      "unsupported": "Nicht unterstützt"
+    },
+    "empty": "Es gibt noch keine genehmigten Hosts.",
+    "hosts": {
+      "actions": "Aktionen",
+      "backupNow": "Jetzt sichern",
+      "backupNowError": "Die Sicherung konnte nicht gestartet werden.",
+      "configure": "Konfigurieren",
+      "coverage": "Abdeckung",
+      "host": "Host",
+      "lastBackup": "Letzte Sicherung",
+      "nextDue": "Nächste Fälligkeit",
+      "progress": "{{paths}} Pfade, {{size}} gelesen",
+      "restateVersion": "restate {{version}}",
+      "restore": "Dateien wiederherstellen",
+      "size": "Repository",
+      "snapshots": "Snapshots: {{n}}",
+      "starting": "Wird gestartet...",
+      "status": "Status"
+    },
+    "loadError": "Die Sicherungen konnten nicht geladen werden.",
+    "policy": {
+      "checkDays": "Repository prüfen alle (Tage)",
+      "enabled": "Diesen Host nach Zeitplan sichern",
+      "intervalHours": "Alle (Stunden)",
+      "keepLast": "Aufzubewahrende Snapshots",
+      "quiesce": "Dienste anhalten, während ihre Daten gelesen werden",
+      "quiesceHelp": "Zum Beispiel: postgres, nextcloud",
+      "quiesceWith": "Hooks (durch Kommas getrennt)",
+      "saveError": "Die Sicherungsrichtlinie konnte nicht gespeichert werden.",
+      "title": "Sicherungsrichtlinie für {{host}}",
+      "windowHelp": "Sicherungen starten nur in den sechs Stunden ab dieser Stunde.",
+      "windowStart": "Startstunde (UTC, optional)"
+    },
+    "reason": {
+      "agentOutdated": "Agent aktualisieren",
+      "missingTool": "restate installieren",
+      "noStorageHost": "Kein Speicher-Host festgelegt",
+      "notPrivileged": "Der Agent muss als root laufen",
+      "toolOutdated": "restate aktualisieren"
+    },
+    "restore": {
+      "confirm": "In Staging wiederherstellen",
+      "counts": "Dateien: {{files}}, Größe: {{size}}",
+      "error": "Die Wiederherstellung konnte nicht angefordert werden.",
+      "exclude": "Auszulassende Pfade (einer pro Zeile)",
+      "loadError": "Die Snapshots konnten nicht geladen werden.",
+      "missing": "Nicht im Snapshot: {{n}}",
+      "more": "Nicht angezeigt: {{n}}",
+      "noSnapshots": "Dieser Host hat noch keine Snapshots.",
+      "paths": "Wiederherzustellende Pfade (einer pro Zeile; leer = alles)",
+      "preview": "Vorschau",
+      "refused": "Abgelehnt: {{n}}",
+      "snapshot": "Snapshot",
+      "stagedAt": "Auf dem Host bereitgestellt unter",
+      "stagingNote": "Dateien werden in ein Staging-Verzeichnis auf dem Host wiederhergestellt, nie über die laufenden Dateien. Verschieben Sie sie selbst an ihren Platz.",
+      "title": "Dateien auf {{host}} wiederherstellen",
+      "unsignedAck": "Dieser Snapshot ist nicht signiert. Trotzdem wiederherstellen."
+    },
+    "run": {
+      "busy": "Belegt, wird wiederholt",
+      "changed": "Geändert",
+      "different": "Unterschiede gefunden",
+      "failed": "Fehlgeschlagen",
+      "incomplete": "Unvollständig",
+      "metadataChanged": "Metadaten geändert",
+      "metadataCheckPassed": "Metadatenprüfung bestanden",
+      "ok": "Erfolgreich",
+      "queued": "In Warteschlange",
+      "running": "Läuft",
+      "untrusted": "Nicht vertrauenswürdig",
+      "verified": "Verifiziert"
+    },
+    "runs": {
+      "action": "Auftrag",
+      "detail": "Details",
+      "empty": "Noch keine Sicherungsaufträge.",
+      "host": "Läuft auf",
+      "loadError": "Die Sicherungsaufträge konnten nicht geladen werden.",
+      "queued": "Eingereiht am",
+      "status": "Status",
+      "title": "Letzte Aufträge"
+    },
+    "status": {
+      "disabled": "Deaktiviert",
+      "failed": "Fehlgeschlagen",
+      "incomplete": "Unvollständig",
+      "never": "Noch nie gesichert",
+      "noPolicy": "Nicht konfiguriert",
+      "notEquipped": "Nicht ausgestattet",
+      "ok": "Gesichert",
+      "overdue": "Überfällig"
+    },
+    "target": {
+      "add": "Ziel einrichten",
+      "dialogTitle": "Sicherungsziel",
+      "edit": "Ziel bearbeiten",
+      "hostMountPoint": "Einhängepunkt auf jedem Host",
+      "hostMountPointHelp": "Wo jeder gesicherte Host das Ziel einhängt (NFS); jeder Host schreibt nur in sein eigenes Repository.",
+      "intro": "Richten Sie alle Hosts auf eine NFS-Freigabe aus. Hosts fügen nur ihrem eigenen Repository etwas hinzu; der Speicher-Host versiegelt, bereinigt und prüft.",
+      "maxConcurrent": "Gleichzeitige Sicherungen",
+      "mountedAt": "Hosts hängen es ein unter",
+      "name": "Name",
+      "noStorageHost": "Keiner",
+      "none": "Noch kein Sicherungsziel",
+      "restateVersions": "Verwendete restate-Versionen",
+      "saveError": "Das Ziel konnte nicht gespeichert werden.",
+      "sealMode": "Jede Sicherung versiegeln",
+      "sealNone": "Nicht versiegeln",
+      "sealZfs": "ZFS-Snapshot",
+      "storageHost": "Speicher-Host",
+      "storagePath": "Pfad auf dem Speicher-Host",
+      "storagePathHelp": "Der Speicher-Host bereinigt, prüft und versiegelt hier; gesicherte Hosts bereinigen nie.",
+      "zfsDataset": "ZFS-Dataset",
+      "zfsRetention": "Alte ZFS-Snapshots müssen Sie vorerst selbst entfernen; legen Sie die Aufbewahrung auf dem Speicher-Host fest."
+    },
+    "title": "Sicherungen",
+    "warning": {
+      "noStorageHost": "Kein Speicher-Host: Alte Snapshots werden nie bereinigt und das Repository wird nie geprüft",
+      "notSealed": "Nicht versiegelt (keine unveränderlichen Kopien)",
+      "storageNotEquipped": "Der Speicher-Host kann restate noch nicht ausführen"
+    }
   }
 }

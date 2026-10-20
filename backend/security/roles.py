@@ -56,6 +56,10 @@ class SecurityRoles(str, Enum):
     RESYNC_HOST_CLOCK = "Resync Host Clock"
     # - Hardware health events: acknowledge / resolve (23.1)
     MANAGE_HARDWARE_HEALTH = "Manage Hardware Health"
+    # - Backups with restate (Phase 24): set targets and policies, run a
+    #   backup now; restoring is granted apart -- it puts files back on a host.
+    MANAGE_BACKUPS = "Manage Backups"
+    RESTORE_FILES = "Restore Files"
     # - Malware Detection (Enterprise malware_engine -- 21.3).  Two roles:
     #   moving a file off a host can break it, so quarantine is granted apart
     #   from scanning.

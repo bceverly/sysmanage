@@ -650,7 +650,13 @@ const AirgapCollections: React.FC = () => {
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={4000}
-        onClose={() => setSnackbarOpen(false)}
+        // MUI's documented pattern: a click elsewhere must not close it.  The
+        // click that SHOWED a new message also counted as a clickaway, so the
+        // message was gone the moment it appeared -- the full-suite flake of
+        // the "create requires a label" test (reproduced 2026-10-20 under load).
+        onClose={(_event, reason) => {
+          if (reason !== 'clickaway') setSnackbarOpen(false);
+        }}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Alert

@@ -18,6 +18,7 @@ import { updatesService, UpdateStatsSummary } from '../Services/updates';
 import axiosInstance from '../Services/api';
 import { getFleetSummary, FleetSummary } from '../Services/timeSync';
 import { getHardwareSummary, HardwareSummary, needingAttention } from '../Services/hardwareHealth';
+import { getBackupSummary, BackupSummary } from '../Services/backups';
 import DashboardSettingsDialog from '../Components/DashboardSettingsDialog';
 
 interface DashboardCardProps {
@@ -71,6 +72,14 @@ const getHardwareColor = (summary: HardwareSummary): string => {
         return COLOR_RED;
     }
     return summary.counts.warning ? COLOR_YELLOW : COLOR_GREEN;
+};
+
+// Phase 24: red if a backup failed, yellow if one is only overdue.
+const getBackupColor = (summary: BackupSummary): string => {
+    if (summary.counts.failed) {
+        return COLOR_RED;
+    }
+    return summary.counts.overdue ? COLOR_YELLOW : COLOR_GREEN;
 };
 
 const DashboardCard: React.FC<DashboardCardProps> = ({
@@ -146,6 +155,9 @@ const Dashboard = () => {
     const [hardwareOut, setHardwareOut] = useState<number>(0);
     const [hardwareTotal, setHardwareTotal] = useState<number>(0);
     const [hardwareColor, setHardwareColor] = useState<string>(COLOR_GREEN);
+    const [backupsOut, setBackupsOut] = useState<number>(0);
+    const [backupsTotal, setBackupsTotal] = useState<number>(0);
+    const [backupsColor, setBackupsColor] = useState<string>(COLOR_GREEN);
     const [loading, setLoading] = useState<boolean>(true);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [cardVisibility, setCardVisibility] = useState<Record<string, boolean>>({
@@ -157,6 +169,7 @@ const Dashboard = () => {
         opentelemetry: true,
         clocks: true,
         hardware: true,
+        backups: true,
     });
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -227,19 +240,31 @@ const Dashboard = () => {
         setHardwareColor(getHardwareColor(summary));
     };
 
+    const processBackupsResponse = (response: PromiseSettledResult<BackupSummary>) => {
+        if (response.status !== 'fulfilled') {
+            console.error('Failed to fetch backup summary:', response.reason);
+            return;
+        }
+        const summary = response.value;
+        setBackupsOut(summary.attention);
+        setBackupsTotal(summary.total);
+        setBackupsColor(getBackupColor(summary));
+    };
+
     const fetchData = useCallback(async (isInitialLoad = false) => {
         if (isInitialLoad) {
             setLoading(true);
         }
 
         try {
-            const [hostsResponse, updatesResponse, antivirusResponse, otelResponse, clocksResponse, hardwareResponse] = await Promise.allSettled([
+            const [hostsResponse, updatesResponse, antivirusResponse, otelResponse, clocksResponse, hardwareResponse, backupsResponse] = await Promise.allSettled([
                 doGetHostsSummary(),
                 updatesService.getUpdatesSummary(),
                 axiosInstance.get('/api/v1/antivirus-coverage'),
                 axiosInstance.get('/api/v1/opentelemetry/opentelemetry-coverage'),
                 getFleetSummary(),
                 getHardwareSummary(),
+                getBackupSummary(),
             ]);
 
             processHostsResponse(hostsResponse);
@@ -248,6 +273,7 @@ const Dashboard = () => {
             processCoverageResponse(otelResponse, setOtelCoverage, setOtelColor, 'Failed to fetch OpenTelemetry coverage:');
             processClocksResponse(clocksResponse);
             processHardwareResponse(hardwareResponse);
+            processBackupsResponse(backupsResponse);
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
         } finally {
@@ -270,6 +296,7 @@ const Dashboard = () => {
                 opentelemetry: true,
                 clocks: true,
                 hardware: true,
+                backups: true,
             };
 
             // Index saved prefs in a Map (prototype-pollution-safe), then write
@@ -460,6 +487,18 @@ const Dashboard = () => {
                             maxValue={hardwareTotal || 1}
                             color={hardwareColor}
                             onClick={() => void navigate('/hardware-health')}
+                            loading={loading}
+                        />
+                    </Grid>
+                )}
+                {cardVisibility.backups && (
+                    <Grid>
+                        <DashboardCard
+                            title={t('dashboard.backupsNeedAttention', 'Backups overdue or failed')}
+                            value={backupsOut}
+                            maxValue={backupsTotal || 1}
+                            color={backupsColor}
+                            onClick={() => void navigate('/backups')}
                             loading={loading}
                         />
                     </Grid>

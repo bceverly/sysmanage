@@ -167,7 +167,9 @@ def normalize_report(report: Any) -> Optional[Dict[str, Any]]:
 # without Ansible as "limited" (Bryan, 2026-10-19) made the flag meaningless --
 # "limited" now means the AGENT lacks something (no handler, excluded from
 # this build), which an operator cannot fix on the host.
-OPTIONAL_REASONS = frozenset({"missing_tool"})
+# ``tool_outdated``: the tool is installed but older than this agent needs
+# (restate without the 2.0 job interface, Phase 24) -- also the host's to fix.
+OPTIONAL_REASONS = frozenset({"missing_tool", "tool_outdated"})
 
 
 def is_limited(report: Dict[str, Any]) -> bool:

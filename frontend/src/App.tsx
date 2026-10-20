@@ -55,6 +55,7 @@ import AssetDiscovery from './Pages/AssetDiscovery';
 import Malware from './Pages/Malware';
 import TimeSync from './Pages/TimeSync';
 import HardwareHealth from './Pages/HardwareHealth';
+import Backups from './Pages/Backups';
 import AirgapCollections from './Pages/AirgapCollections';
 import FederationAuditLog from './Pages/FederationAuditLog';
 import FederationHosts from './Pages/FederationHosts';
@@ -90,6 +91,7 @@ function AppRoutes() {
       <Route path="/maintenance-windows" element={<MaintenanceWindows />} />
       <Route path="/time-sync" element={<TimeSync />} />
       <Route path="/hardware-health" element={<HardwareHealth />} />
+      <Route path="/backups" element={<Backups />} />
       <Route path="/secrets" element={<Secrets />} />
       <Route path="/scripts" element={<Scripts />} />
       {/* Storing/versioning/assigning profiles is the Enterprise half of

@@ -1,0 +1,266 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
+"""What the Backups page shows (ROADMAP Phase 24): serialized rows, each
+host's backup status and coverage, and the target's warnings.
+
+Status, worst first: ``not_equipped`` (the agent cannot run restate, with
+its reason), ``failed`` (the last capture failed or was untrusted),
+``overdue`` (no good capture for twice the interval), ``incomplete`` (the
+last capture skipped unreadable files), ``never``, ``ok``; and ``disabled``
+or ``no_policy``.  A keyless ``check`` is ``metadata_only``: it proves the
+repository's structure, not its content, and is never shown as "verified".
+"""
+
+import json
+from datetime import timedelta
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy.orm import Session
+
+from backend.persistence import models
+from backend.services import backup_jobs as jobs
+from backend.services import backup_tick
+
+OVERDUE_GRACE = timedelta(hours=1)
+FULL_COVERAGE = ("ubuntu", "debian")
+UNSUPPORTED = ("windows", "macos", "darwin")
+
+
+def iso(value) -> Optional[str]:
+    return value.isoformat() if value else None
+
+
+def _json(text: Optional[str]) -> Any:
+    if not text:
+        return None
+    try:
+        return json.loads(text)
+    except ValueError:
+        return None
+
+
+def coverage(host: models.Host) -> str:
+    """``full`` (files plus the package baseline restate restores from),
+    ``files_only``, or ``unsupported`` (restate has no driver there)."""
+    platform = (host.platform or "").lower()
+    if platform in UNSUPPORTED:
+        return "unsupported"
+    release = (host.platform_release or "").lower()
+    if release.startswith(FULL_COVERAGE):
+        return "full"
+    return "files_only"
+
+
+def target_dict(target: models.BackupTarget, db: Session) -> Dict[str, Any]:
+    storage = jobs.storage_host(db, target)
+    ready, reason = jobs.equipped(storage) if storage else (False, "no_storage_host")
+    warnings = []
+    if (target.seal_mode or "none") == "none":
+        warnings.append("not_sealed")
+    if storage is None:
+        warnings.append("no_storage_host")
+    elif not ready:
+        warnings.append("storage_not_equipped")
+    return {
+        "id": str(target.id),
+        "name": target.name,
+        "host_mount_point": target.host_mount_point,
+        "storage_host_id": (
+            str(target.storage_host_id) if target.storage_host_id else None
+        ),
+        "storage_hostname": storage.fqdn if storage else None,
+        "storage_path": target.storage_path,
+        "storage_reason": None if ready else reason,
+        "max_concurrent": target.max_concurrent,
+        "seal_mode": target.seal_mode or "none",
+        "zfs_dataset": target.zfs_dataset,
+        "warnings": warnings,
+        "created_at": iso(target.created_at),
+        "updated_at": iso(target.updated_at),
+    }
+
+
+def policy_dict(policy: models.BackupPolicy) -> Dict[str, Any]:
+    return {
+        "id": str(policy.id),
+        "host_id": str(policy.host_id),
+        "target_id": str(policy.target_id),
+        "enabled": bool(policy.enabled),
+        "interval_hours": policy.interval_hours,
+        "window_start_hour": policy.window_start_hour,
+        "keep_last": policy.keep_last,
+        "check_interval_days": policy.check_interval_days,
+        "quiesce": bool(policy.quiesce),
+        "quiesce_with": jobs.quiesce_names(policy),
+        "estimate_bytes": policy.estimate_bytes,
+        "repository_bytes": policy.repository_bytes,
+        "config_version": policy.config_version,
+        "configured": policy.host_acked_version >= policy.config_version,
+        "storage_configured": policy.storage_acked_version >= policy.config_version,
+        "restate_version": policy.restate_version,
+        "storage_restate_version": policy.storage_restate_version,
+    }
+
+
+def check_label(run: models.BackupRun) -> Optional[str]:
+    """``verified`` only for a full read; a keyless check is metadata-only."""
+    if run.action != "check" or run.status not in ("ok", "different"):
+        return None
+    result = _json(run.result) or {}
+    if result.get("metadata_only") or not result.get("read_all"):
+        return "metadata_check_passed" if run.status == "ok" else "metadata_changed"
+    return "verified" if run.status == "ok" else "changed"
+
+
+def run_dict(run: models.BackupRun) -> Dict[str, Any]:
+    return {
+        "id": str(run.id),
+        "policy_id": str(run.policy_id),
+        "host_id": str(run.host_id),
+        "action": run.action,
+        "status": run.status,
+        "exit_code": run.exit_code,
+        "queued_at": iso(run.queued_at),
+        "started_at": iso(run.started_at),
+        "finished_at": iso(run.finished_at),
+        "snapshot": run.snapshot,
+        "message": run.message,
+        "restate_version": run.restate_version,
+        "requested_by": run.requested_by,
+        "progress": _json(run.progress),
+        "result": _json(run.result),
+        "check_label": check_label(run),
+        "parameters": _json(run.parameters),
+    }
+
+
+def snapshot_dict(row: models.BackupSnapshot) -> Dict[str, Any]:
+    return {
+        "id": str(row.id),
+        "name": row.name,
+        "created_at": iso(row.created_at),
+        "bytes": row.bytes,
+        "new_bytes": row.new_bytes,
+        "unique_bytes": row.unique_bytes,
+        "files": row.files,
+        "signed": bool(row.signed),
+        "seen_at": iso(row.seen_at),
+        "gone_at": iso(row.gone_at),
+    }
+
+
+def _status(db: Session, policy, last_capture, now) -> str:
+    good = jobs.latest_run(db, policy.id, "capture", statuses=jobs.GOOD_CAPTURE)
+    if last_capture is None:
+        return "never"
+    if last_capture.status in ("failed", "untrusted"):
+        return "failed"
+    if good is not None:
+        ended = good.finished_at or good.queued_at
+        if ended + timedelta(hours=2 * policy.interval_hours) + OVERDUE_GRACE < now:
+            return "overdue"
+        if last_capture.status == "incomplete":
+            return "incomplete"
+        return "ok"
+    return "overdue" if last_capture.status == "busy" else "never"
+
+
+def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
+    """One host's backup summary, for the hosts table and the Info tab."""
+    now = now or jobs.now()
+    ready, reason = jobs.equipped(host)
+    policy = (
+        db.query(models.BackupPolicy)
+        .filter(models.BackupPolicy.host_id == host.id)
+        .first()
+    )
+    entry: Dict[str, Any] = {
+        "host_id": str(host.id),
+        "fqdn": host.fqdn,
+        "platform": host.platform,
+        "platform_release": host.platform_release,
+        "equipped": ready,
+        "reason": reason,
+        "coverage": coverage(host),
+        "policy": policy_dict(policy) if policy else None,
+        "last_capture": None,
+        "last_check": None,
+        "running": None,
+        "next_due": None,
+        "snapshot_count": 0,
+    }
+    if policy is None:
+        entry["status"] = "no_policy" if ready else "not_equipped"
+        return entry
+    last_capture = jobs.latest_run(db, policy.id, "capture", statuses=jobs.FINAL)
+    last_check = jobs.latest_run(db, policy.id, "check", statuses=jobs.FINAL)
+    running = (
+        db.query(models.BackupRun)
+        .filter(
+            models.BackupRun.policy_id == policy.id,
+            models.BackupRun.status.in_(jobs.PENDING),
+        )
+        .order_by(models.BackupRun.queued_at.desc())
+        .first()
+    )
+    entry["last_capture"] = run_dict(last_capture) if last_capture else None
+    entry["last_check"] = run_dict(last_check) if last_check else None
+    entry["running"] = run_dict(running) if running else None
+    due = backup_tick.capture_due_at(db, policy)
+    entry["next_due"] = iso(due or now) if policy.enabled else None
+    entry["snapshot_count"] = (
+        db.query(models.BackupSnapshot)
+        .filter(
+            models.BackupSnapshot.policy_id == policy.id,
+            models.BackupSnapshot.gone_at.is_(None),
+        )
+        .count()
+    )
+    if not ready:
+        entry["status"] = "not_equipped"
+    elif not policy.enabled:
+        entry["status"] = "disabled"
+    else:
+        entry["status"] = _status(db, policy, last_capture, now)
+    return entry
+
+
+def overview(db: Session) -> Dict[str, Any]:
+    target = jobs.the_target(db)
+    hosts = (
+        db.query(models.Host)
+        .filter(models.Host.approval_status == "approved")
+        .order_by(models.Host.fqdn)
+        .all()
+    )
+    rows: List[Dict[str, Any]] = [host_status(db, host) for host in hosts]
+    counts: Dict[str, int] = {}
+    for row in rows:
+        counts[row["status"]] = counts.get(row["status"], 0) + 1
+    versions = sorted(
+        {
+            version
+            for row in rows
+            if row["policy"]
+            for version in (
+                row["policy"]["restate_version"],
+                row["policy"]["storage_restate_version"],
+            )
+            if version
+        }
+    )
+    return {
+        "target": target_dict(target, db) if target else None,
+        "hosts": rows,
+        "counts": counts,
+        "restate_versions": versions,
+    }
+
+
+def overdue_count(db: Session) -> int:
+    """Hosts the dashboard should flag: overdue or failed."""
+    return sum(
+        1 for row in overview(db)["hosts"] if row["status"] in ("overdue", "failed")
+    )

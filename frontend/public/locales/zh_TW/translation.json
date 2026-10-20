@@ -758,7 +758,8 @@
     },
     "updates": "更新",
     "clocksOutOfBounds": "時鐘偏差超出閾值",
-    "hardwareNeedsAttention": "需要注意的硬體"
+    "hardwareNeedsAttention": "需要注意的硬體",
+    "backupsNeedAttention": "逾期或失敗的備份"
   },
   "dataGrid": {
     "columnVisibility": "欄位可見性",
@@ -1184,7 +1185,9 @@
     "unknown": "此代理程式尚未宣佈其功能。舊版代理程式不會報告它們；主機不受限制。",
     "updated": "已報告",
     "reasonMissingNamedTool": "需要 {{tool}}，但此主機上未安裝",
-    "optionalNotInstalled": "在其工具安裝後可用"
+    "optionalNotInstalled": "在其工具安裝後可用",
+    "reasonOutdatedNamedTool": "需要比此主機上更新的 {{tool}}",
+    "reasonToolOutdated": "此主機上的某個必要工具版本過舊"
   },
   "hostDefaults": {
     "addNewPackageManager": "新增已啟用的套件管理員",
@@ -2492,7 +2495,8 @@
     "assetDiscovery": "網路探索",
     "malware": "惡意軟體",
     "timeSync": "時間同步",
-    "hardwareHealth": "硬體健康"
+    "hardwareHealth": "硬體健康",
+    "backups": "備份"
   },
   "notifications": {
     "applicationUpdates": "應用程式更新",
@@ -5274,5 +5278,148 @@
     "serverVersion": "伺服器版本",
     "title": "關於SysManage",
     "unknown": "未知"
+  },
+  "backups": {
+    "action": {
+      "capture": "備份",
+      "check": "檢查",
+      "configure": "設定",
+      "estimate": "估算",
+      "prune": "清理舊快照",
+      "restore": "還原",
+      "seal": "封存",
+      "snapshots": "列出快照"
+    },
+    "card": {
+      "lastCheck": "上次檢查",
+      "noTarget": "尚未設定備份目標。",
+      "open": "所有備份",
+      "title": "備份"
+    },
+    "coverage": {
+      "filesOnly": "僅檔案",
+      "full": "完整（檔案和套件）",
+      "unsupported": "不支援"
+    },
+    "empty": "尚無已核准的主機。",
+    "hosts": {
+      "actions": "操作",
+      "backupNow": "立即備份",
+      "backupNowError": "無法啟動備份。",
+      "configure": "設定",
+      "coverage": "涵蓋範圍",
+      "host": "主機",
+      "lastBackup": "上次備份",
+      "nextDue": "下次排程",
+      "progress": "{{paths}} 個路徑，已讀取 {{size}}",
+      "restateVersion": "restate {{version}}",
+      "restore": "還原檔案",
+      "size": "儲存庫",
+      "snapshots": "快照：{{n}}",
+      "starting": "正在啟動...",
+      "status": "狀態"
+    },
+    "loadError": "無法載入備份。",
+    "policy": {
+      "checkDays": "儲存庫檢查間隔（天）",
+      "enabled": "依排程備份此主機",
+      "intervalHours": "間隔（小時）",
+      "keepLast": "保留的快照數",
+      "quiesce": "讀取資料時暫停服務",
+      "quiesceHelp": "例如：postgres, nextcloud",
+      "quiesceWith": "掛鉤（以逗號分隔）",
+      "saveError": "無法儲存備份原則。",
+      "title": "{{host}} 的備份原則",
+      "windowHelp": "備份僅在此小時起的六小時內開始。",
+      "windowStart": "開始小時（UTC，選填）"
+    },
+    "reason": {
+      "agentOutdated": "請升級代理程式",
+      "missingTool": "請安裝 restate",
+      "noStorageHost": "未設定儲存主機",
+      "notPrivileged": "代理程式必須以 root 身分執行",
+      "toolOutdated": "請升級 restate"
+    },
+    "restore": {
+      "confirm": "還原到暫存區",
+      "counts": "檔案：{{files}}，大小：{{size}}",
+      "error": "無法要求還原。",
+      "exclude": "要排除的路徑（每行一個）",
+      "loadError": "無法載入快照。",
+      "missing": "不在快照中：{{n}}",
+      "more": "未顯示：{{n}}",
+      "noSnapshots": "此主機尚無快照。",
+      "paths": "要還原的路徑（每行一個；留空 = 全部）",
+      "preview": "預覽",
+      "refused": "已拒絕：{{n}}",
+      "snapshot": "快照",
+      "stagedAt": "已暫存到主機上的",
+      "stagingNote": "檔案會還原到主機上的暫存目錄，絕不會覆蓋使用中的檔案。請自行將其移到目標位置。",
+      "title": "將檔案還原到 {{host}}",
+      "unsignedAck": "此快照未簽署。仍然還原。"
+    },
+    "run": {
+      "busy": "忙碌，將重試",
+      "changed": "已變更",
+      "different": "發現差異",
+      "failed": "失敗",
+      "incomplete": "不完整",
+      "metadataChanged": "中繼資料已變更",
+      "metadataCheckPassed": "中繼資料檢查通過",
+      "ok": "成功",
+      "queued": "已排入佇列",
+      "running": "執行中",
+      "untrusted": "不受信任",
+      "verified": "已驗證"
+    },
+    "runs": {
+      "action": "工作",
+      "detail": "詳細資料",
+      "empty": "尚無備份工作。",
+      "host": "執行於",
+      "loadError": "無法載入備份工作。",
+      "queued": "排入佇列時間",
+      "status": "狀態",
+      "title": "最近的工作"
+    },
+    "status": {
+      "disabled": "已停用",
+      "failed": "失敗",
+      "incomplete": "不完整",
+      "never": "從未備份",
+      "noPolicy": "未設定",
+      "notEquipped": "未就緒",
+      "ok": "已備份",
+      "overdue": "逾期"
+    },
+    "target": {
+      "add": "設定目標",
+      "dialogTitle": "備份目標",
+      "edit": "編輯目標",
+      "hostMountPoint": "每台主機上的掛載點",
+      "hostMountPointHelp": "每台被備份主機掛載目標（NFS）的位置；每台主機只寫入自己的儲存庫。",
+      "intro": "讓所有主機指向同一個 NFS 共用。主機只向自己的儲存庫新增內容；儲存主機負責封存、清理和檢查。",
+      "maxConcurrent": "同時進行的備份數",
+      "mountedAt": "主機將其掛載到",
+      "name": "名稱",
+      "noStorageHost": "無",
+      "none": "尚無備份目標",
+      "restateVersions": "使用中的 restate 版本",
+      "saveError": "無法儲存目標。",
+      "sealMode": "封存每個備份",
+      "sealNone": "不封存",
+      "sealZfs": "ZFS 快照",
+      "storageHost": "儲存主機",
+      "storagePath": "儲存主機上的路徑",
+      "storagePathHelp": "儲存主機在此清理、檢查和封存；被備份的主機從不清理。",
+      "zfsDataset": "ZFS 資料集",
+      "zfsRetention": "目前需由您自行刪除舊的 ZFS 快照；請在儲存主機上設定保留原則。"
+    },
+    "title": "備份",
+    "warning": {
+      "noStorageHost": "沒有儲存主機：舊快照永遠不會被清理，儲存庫也永遠不會被檢查",
+      "notSealed": "未封存（沒有不可變副本）",
+      "storageNotEquipped": "儲存主機暫時無法執行 restate"
+    }
   }
 }

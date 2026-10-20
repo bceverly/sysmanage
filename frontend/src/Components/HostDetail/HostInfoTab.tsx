@@ -31,6 +31,7 @@ import StopIcon from "@mui/icons-material/Stop";
 import { useTranslation } from "react-i18next";
 import MaintenanceWindowCard from "../MaintenanceWindowCard";
 import HostCapabilitiesCard from "./HostCapabilitiesCard";
+import HostBackupCard from "../Backups/HostBackupCard";
 import HostClockCard from "../TimeSync/HostClockCard";
 import HostHardwareCard from "../HardwareHealth/HostHardwareCard";
 import ConfigManagementEnginesCard from "../ConfigManagementEnginesCard";
@@ -833,6 +834,12 @@ const HostInfoTab: React.FC<HostInfoTabProps> = ({
           platform={host.platform}
         />
       </Grid>
+      {/* Backup with restate (Phase 24) */}
+      {hostId && (
+        <Grid size={{ xs: 12, md: 6 }}>
+          <HostBackupCard hostId={hostId} />
+        </Grid>
+      )}
       {/* Clock offset and time service (Phase 23.3) */}
       {hostId && (
         <Grid size={{ xs: 12, md: 6 }}>

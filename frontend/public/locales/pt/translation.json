@@ -758,7 +758,8 @@
     },
     "updates": "Atualizações",
     "clocksOutOfBounds": "Relógios fora dos limites",
-    "hardwareNeedsAttention": "Hardware que requer atenção"
+    "hardwareNeedsAttention": "Hardware que requer atenção",
+    "backupsNeedAttention": "Backups atrasados ou com falha"
   },
   "dataGrid": {
     "columnVisibility": "Visibilidade das colunas",
@@ -1184,7 +1185,9 @@
     "unknown": "Este agente não anunciou suas habilidades. Agentes mais antigos não relatam; o host não está restrito.",
     "updated": "Relatado",
     "reasonMissingNamedTool": "Requer {{tool}}, que não está instalado neste host",
-    "optionalNotInstalled": "Disponível uma vez que sua ferramenta seja instalada"
+    "optionalNotInstalled": "Disponível uma vez que sua ferramenta seja instalada",
+    "reasonOutdatedNamedTool": "Requer uma versão do {{tool}} mais recente do que a deste host",
+    "reasonToolOutdated": "Uma ferramenta necessária neste host está desatualizada"
   },
   "hostDefaults": {
     "addNewPackageManager": "Adicionar Novo Gerenciador de Pacotes Habilitado",
@@ -2492,7 +2495,8 @@
     "assetDiscovery": "Descoberta de rede",
     "malware": "Detecção de malware",
     "timeSync": "Sincronização de Hora",
-    "hardwareHealth": "Saúde do hardware"
+    "hardwareHealth": "Saúde do hardware",
+    "backups": "Backups"
   },
   "notifications": {
     "applicationUpdates": "Atualizações de Aplicações",
@@ -5274,5 +5278,148 @@
     "serverVersion": "Versão do servidor",
     "title": "Sobre o SysManage",
     "unknown": "Desconhecido"
+  },
+  "backups": {
+    "action": {
+      "capture": "Backup",
+      "check": "Verificação",
+      "configure": "Configuração",
+      "estimate": "Estimativa",
+      "prune": "Limpeza",
+      "restore": "Restauração",
+      "seal": "Selagem",
+      "snapshots": "Listar snapshots"
+    },
+    "card": {
+      "lastCheck": "Última verificação",
+      "noTarget": "Nenhum destino de backup foi configurado ainda.",
+      "open": "Todos os backups",
+      "title": "Backup"
+    },
+    "coverage": {
+      "filesOnly": "Somente arquivos",
+      "full": "Completa (arquivos e pacotes)",
+      "unsupported": "Não suportado"
+    },
+    "empty": "Ainda não há hosts aprovados.",
+    "hosts": {
+      "actions": "Ações",
+      "backupNow": "Fazer backup agora",
+      "backupNowError": "Não foi possível iniciar o backup.",
+      "configure": "Configurar",
+      "coverage": "Cobertura",
+      "host": "Host",
+      "lastBackup": "Último backup",
+      "nextDue": "Próximo agendado",
+      "progress": "{{paths}} caminhos, {{size}} lidos",
+      "restateVersion": "restate {{version}}",
+      "restore": "Restaurar arquivos",
+      "size": "Repositório",
+      "snapshots": "Snapshots: {{n}}",
+      "starting": "Iniciando...",
+      "status": "Status"
+    },
+    "loadError": "Não foi possível carregar os backups.",
+    "policy": {
+      "checkDays": "Verificar o repositório a cada (dias)",
+      "enabled": "Fazer backup deste host conforme um agendamento",
+      "intervalHours": "A cada (horas)",
+      "keepLast": "Snapshots a manter",
+      "quiesce": "Pausar os serviços durante a leitura dos seus dados",
+      "quiesceHelp": "Por exemplo: postgres, nextcloud",
+      "quiesceWith": "Hooks (separados por vírgulas)",
+      "saveError": "Não foi possível salvar a política de backup.",
+      "title": "Política de backup de {{host}}",
+      "windowHelp": "Os backups só começam nas seis horas a partir desta hora.",
+      "windowStart": "Hora de início (UTC, opcional)"
+    },
+    "reason": {
+      "agentOutdated": "Atualize o agente",
+      "missingTool": "Instale o restate",
+      "noStorageHost": "Nenhum host de armazenamento definido",
+      "notPrivileged": "O agente deve ser executado como root",
+      "toolOutdated": "Atualize o restate"
+    },
+    "restore": {
+      "confirm": "Restaurar na área de preparação",
+      "counts": "Arquivos: {{files}}, tamanho: {{size}}",
+      "error": "Não foi possível solicitar a restauração.",
+      "exclude": "Caminhos a excluir (um por linha)",
+      "loadError": "Não foi possível carregar os snapshots.",
+      "missing": "Fora do snapshot: {{n}}",
+      "more": "Não exibidos: {{n}}",
+      "noSnapshots": "Este host ainda não tem snapshots.",
+      "paths": "Caminhos a restaurar (um por linha; vazio = tudo)",
+      "preview": "Pré-visualizar",
+      "refused": "Recusados: {{n}}",
+      "snapshot": "Snapshot",
+      "stagedAt": "Preparado no host em",
+      "stagingNote": "Os arquivos são restaurados em um diretório de preparação no host, nunca sobre os arquivos em uso. Mova-os para o lugar você mesmo.",
+      "title": "Restaurar arquivos em {{host}}",
+      "unsignedAck": "Este snapshot não está assinado. Restaurar mesmo assim."
+    },
+    "run": {
+      "busy": "Ocupado, será tentado novamente",
+      "changed": "Alterado",
+      "different": "Diferenças encontradas",
+      "failed": "Falhou",
+      "incomplete": "Incompleto",
+      "metadataChanged": "Metadados alterados",
+      "metadataCheckPassed": "Verificação de metadados aprovada",
+      "ok": "Concluído",
+      "queued": "Na fila",
+      "running": "Em execução",
+      "untrusted": "Não confiável",
+      "verified": "Verificado"
+    },
+    "runs": {
+      "action": "Tarefa",
+      "detail": "Detalhe",
+      "empty": "Nenhuma tarefa de backup ainda.",
+      "host": "Executado em",
+      "loadError": "Não foi possível carregar as tarefas de backup.",
+      "queued": "Enfileirado em",
+      "status": "Status",
+      "title": "Tarefas recentes"
+    },
+    "status": {
+      "disabled": "Desativado",
+      "failed": "Falhou",
+      "incomplete": "Incompleto",
+      "never": "Nunca teve backup",
+      "noPolicy": "Não configurado",
+      "notEquipped": "Não preparado",
+      "ok": "Backup concluído",
+      "overdue": "Atrasado"
+    },
+    "target": {
+      "add": "Configurar destino",
+      "dialogTitle": "Destino de backup",
+      "edit": "Editar destino",
+      "hostMountPoint": "Ponto de montagem em cada host",
+      "hostMountPointHelp": "Onde cada host com backup monta o destino (NFS); cada host grava apenas no próprio repositório.",
+      "intro": "Aponte todos os hosts para um único compartilhamento NFS. Os hosts apenas adicionam ao próprio repositório; o host de armazenamento sela, limpa e verifica.",
+      "maxConcurrent": "Backups simultâneos",
+      "mountedAt": "Os hosts montam em",
+      "name": "Nome",
+      "noStorageHost": "Nenhum",
+      "none": "Ainda sem destino de backup",
+      "restateVersions": "Versões do restate em uso",
+      "saveError": "Não foi possível salvar o destino.",
+      "sealMode": "Selar cada backup",
+      "sealNone": "Não selar",
+      "sealZfs": "Snapshot ZFS",
+      "storageHost": "Host de armazenamento",
+      "storagePath": "Caminho no host de armazenamento",
+      "storagePathHelp": "O host de armazenamento limpa, verifica e sela aqui; hosts com backup nunca fazem limpeza.",
+      "zfsDataset": "Conjunto de dados ZFS",
+      "zfsRetention": "Por enquanto, remover snapshots ZFS antigos é com você; defina a retenção no host de armazenamento."
+    },
+    "title": "Backups",
+    "warning": {
+      "noStorageHost": "Sem host de armazenamento: snapshots antigos nunca são limpos e o repositório nunca é verificado",
+      "notSealed": "Não selado (sem cópias imutáveis)",
+      "storageNotEquipped": "O host de armazenamento ainda não pode executar o restate"
+    }
   }
 }

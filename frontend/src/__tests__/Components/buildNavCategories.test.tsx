@@ -47,6 +47,7 @@ describe("buildNavCategories", () => {
       "/hosts",
       "/map",
       "/hardware-health",
+      "/backups",
       "/updates",
       "/os-upgrades",
       "/maintenance-windows",

@@ -63,6 +63,8 @@ export const missingToolFor = (group: string, platform?: string | null): string 
             return 'ubuntu-pro-client';
         case 'virtualization':
             return 'libvirt (virsh) or LXD';
+        case 'backup':
+            return 'restate';
         default:
             return undefined;
     }
@@ -74,7 +76,12 @@ const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, lim
     // Reason CODES come from the agent, never prose -- so they can be localized
     // here rather than shipped in whatever language the agent was built with.
     const reasonText = (code: string, group?: string): string => {
-        const tool = code === 'missing_tool' && group ? missingToolFor(group, platform) : undefined;
+        const tool = (code === 'missing_tool' || code === 'tool_outdated') && group
+            ? missingToolFor(group, platform)
+            : undefined;
+        if (tool && code === 'tool_outdated') {
+            return t('hostCapabilities.reasonOutdatedNamedTool', 'Requires a newer {{tool}} than this host has', { tool });
+        }
         if (tool) {
             return t('hostCapabilities.reasonMissingNamedTool', 'Requires {{tool}}, which is not installed on this host', { tool });
         }
@@ -85,6 +92,7 @@ const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, lim
             // Emitted by the agent's runtime probes (capability_probes.py):
             // the code shipped, but this host cannot deliver it.
             missing_tool: t('hostCapabilities.reasonMissingTool', 'A required tool is not installed on this host'),
+            tool_outdated: t('hostCapabilities.reasonToolOutdated', 'A required tool on this host is too old'),
             wrong_platform: t('hostCapabilities.reasonWrongPlatform', 'Not applicable to this operating system'),
             build_excluded: t('hostCapabilities.reasonBuildExcluded', 'Omitted from this agent build'),
         };
@@ -123,7 +131,8 @@ const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, lim
     // An optional tool the host has not installed (ansible-core, ClamAV...)
     // is not a limitation of the agent: shown apart, neutral, and not counted
     // by the server's "limited" rule (agent_capability_service.is_limited).
-    const isOptional = (group: string) => unavailable[group] === 'missing_tool';
+    const isOptional = (group: string) =>
+        unavailable[group] === 'missing_tool' || unavailable[group] === 'tool_outdated';
     const unavailableKeys = Object.keys(unavailable).filter((group) => !isOptional(group));
     const optionalKeys = Object.keys(unavailable).filter(isOptional);
     const partialKeys = Object.keys(partial);

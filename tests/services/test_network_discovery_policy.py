@@ -198,13 +198,16 @@ class TestReconcile:
             }
             # advisor (21.2), network discovery (21.6), malware (21.3),
             # hardware (23.1), OS lifecycle (14.3), compliance scan (24.4):
-            # none licensed.
+            # none licensed.  Backups (24) are Community and always start --
+            # stubbed here so no real task is created.
             with patch.object(
                 background_ticks.hardware_tick.smartmontools_install,
                 "licensed",
                 return_value=False,
+            ), patch.object(
+                background_ticks.backup_tick, "start_if_licensed", return_value=None
             ):
-                assert background_ticks.start_licensed_ticks() == [None] * 6
+                assert background_ticks.start_licensed_ticks() == [None] * 7
 
 
 class TestRecorrelate:

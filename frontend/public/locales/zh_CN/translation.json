@@ -758,7 +758,8 @@
     },
     "updates": "更新",
     "clocksOutOfBounds": "时钟偏差超出阈值",
-    "hardwareNeedsAttention": "需要关注的硬件"
+    "hardwareNeedsAttention": "需要关注的硬件",
+    "backupsNeedAttention": "逾期或失败的备份"
   },
   "dataGrid": {
     "columnVisibility": "列可见性",
@@ -1184,7 +1185,9 @@
     "unknown": "此代理尚未声明其功能。旧版代理不会报告这些信息；主机不受限制。",
     "updated": "已报告",
     "reasonMissingNamedTool": "需要 {{tool}}，但此主机上未安装",
-    "optionalNotInstalled": "在其工具安装完成后可用"
+    "optionalNotInstalled": "在其工具安装完成后可用",
+    "reasonOutdatedNamedTool": "需要比此主机上更新的 {{tool}}",
+    "reasonToolOutdated": "此主机上的某个必需工具版本过旧"
   },
   "hostDefaults": {
     "addNewPackageManager": "添加新的已启用包管理器",
@@ -2492,7 +2495,8 @@
     "assetDiscovery": "网络发现",
     "malware": "恶意软件",
     "timeSync": "时间同步",
-    "hardwareHealth": "硬件健康"
+    "hardwareHealth": "硬件健康",
+    "backups": "备份"
   },
   "notifications": {
     "applicationUpdates": "应用程序更新",
@@ -5274,5 +5278,148 @@
     "serverVersion": "服务器版本",
     "title": "关于SysManage",
     "unknown": "未知"
+  },
+  "backups": {
+    "action": {
+      "capture": "备份",
+      "check": "检查",
+      "configure": "配置",
+      "estimate": "估算",
+      "prune": "清理旧快照",
+      "restore": "恢复",
+      "seal": "封存",
+      "snapshots": "列出快照"
+    },
+    "card": {
+      "lastCheck": "上次检查",
+      "noTarget": "尚未设置备份目标。",
+      "open": "所有备份",
+      "title": "备份"
+    },
+    "coverage": {
+      "filesOnly": "仅文件",
+      "full": "完整（文件和软件包）",
+      "unsupported": "不支持"
+    },
+    "empty": "还没有已批准的主机。",
+    "hosts": {
+      "actions": "操作",
+      "backupNow": "立即备份",
+      "backupNowError": "无法启动备份。",
+      "configure": "配置",
+      "coverage": "覆盖范围",
+      "host": "主机",
+      "lastBackup": "上次备份",
+      "nextDue": "下次计划",
+      "progress": "{{paths}} 个路径，已读取 {{size}}",
+      "restateVersion": "restate {{version}}",
+      "restore": "恢复文件",
+      "size": "仓库",
+      "snapshots": "快照：{{n}}",
+      "starting": "正在启动...",
+      "status": "状态"
+    },
+    "loadError": "无法加载备份。",
+    "policy": {
+      "checkDays": "仓库检查间隔（天）",
+      "enabled": "按计划备份此主机",
+      "intervalHours": "间隔（小时）",
+      "keepLast": "保留的快照数",
+      "quiesce": "读取数据时暂停服务",
+      "quiesceHelp": "例如：postgres, nextcloud",
+      "quiesceWith": "钩子（以逗号分隔）",
+      "saveError": "无法保存备份策略。",
+      "title": "{{host}} 的备份策略",
+      "windowHelp": "备份仅在此小时起的六小时内开始。",
+      "windowStart": "开始小时（UTC，可选）"
+    },
+    "reason": {
+      "agentOutdated": "请升级代理",
+      "missingTool": "请安装 restate",
+      "noStorageHost": "未设置存储主机",
+      "notPrivileged": "代理必须以 root 身份运行",
+      "toolOutdated": "请升级 restate"
+    },
+    "restore": {
+      "confirm": "恢复到暂存目录",
+      "counts": "文件：{{files}}，大小：{{size}}",
+      "error": "无法请求恢复。",
+      "exclude": "要排除的路径（每行一个）",
+      "loadError": "无法加载快照。",
+      "missing": "不在快照中：{{n}}",
+      "more": "未显示：{{n}}",
+      "noSnapshots": "此主机还没有快照。",
+      "paths": "要恢复的路径（每行一个；留空 = 全部）",
+      "preview": "预览",
+      "refused": "已拒绝：{{n}}",
+      "snapshot": "快照",
+      "stagedAt": "已暂存到主机上的",
+      "stagingNote": "文件会恢复到主机上的暂存目录，绝不会覆盖正在使用的文件。请自行将其移到目标位置。",
+      "title": "将文件恢复到 {{host}}",
+      "unsignedAck": "此快照未签名。仍然恢复。"
+    },
+    "run": {
+      "busy": "忙碌，将重试",
+      "changed": "已更改",
+      "different": "发现差异",
+      "failed": "失败",
+      "incomplete": "不完整",
+      "metadataChanged": "元数据已更改",
+      "metadataCheckPassed": "元数据检查通过",
+      "ok": "成功",
+      "queued": "已排队",
+      "running": "运行中",
+      "untrusted": "不受信任",
+      "verified": "已验证"
+    },
+    "runs": {
+      "action": "作业",
+      "detail": "详情",
+      "empty": "还没有备份作业。",
+      "host": "运行于",
+      "loadError": "无法加载备份作业。",
+      "queued": "排队时间",
+      "status": "状态",
+      "title": "最近的作业"
+    },
+    "status": {
+      "disabled": "已禁用",
+      "failed": "失败",
+      "incomplete": "不完整",
+      "never": "从未备份",
+      "noPolicy": "未配置",
+      "notEquipped": "未配备",
+      "ok": "已备份",
+      "overdue": "逾期"
+    },
+    "target": {
+      "add": "设置目标",
+      "dialogTitle": "备份目标",
+      "edit": "编辑目标",
+      "hostMountPoint": "每台主机上的挂载点",
+      "hostMountPointHelp": "每台被备份主机挂载目标（NFS）的位置；每台主机只写入自己的仓库。",
+      "intro": "让所有主机指向同一个 NFS 共享。主机只向自己的仓库添加内容；存储主机负责封存、清理和检查。",
+      "maxConcurrent": "同时进行的备份数",
+      "mountedAt": "主机将其挂载到",
+      "name": "名称",
+      "noStorageHost": "无",
+      "none": "尚无备份目标",
+      "restateVersions": "正在使用的 restate 版本",
+      "saveError": "无法保存目标。",
+      "sealMode": "封存每个备份",
+      "sealNone": "不封存",
+      "sealZfs": "ZFS 快照",
+      "storageHost": "存储主机",
+      "storagePath": "存储主机上的路径",
+      "storagePathHelp": "存储主机在此清理、检查和封存；被备份的主机从不清理。",
+      "zfsDataset": "ZFS 数据集",
+      "zfsRetention": "目前需由您自行删除旧的 ZFS 快照；请在存储主机上设置保留策略。"
+    },
+    "title": "备份",
+    "warning": {
+      "noStorageHost": "没有存储主机：旧快照永远不会被清理，仓库也永远不会被检查",
+      "notSealed": "未封存（没有不可变副本）",
+      "storageNotEquipped": "存储主机暂时无法运行 restate"
+    }
   }
 }

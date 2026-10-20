@@ -758,7 +758,8 @@
     },
     "updates": "Mises à jour",
     "clocksOutOfBounds": "Horloges hors limites",
-    "hardwareNeedsAttention": "Matériel nécessitant une attention"
+    "hardwareNeedsAttention": "Matériel nécessitant une attention",
+    "backupsNeedAttention": "Sauvegardes en retard ou en échec"
   },
   "dataGrid": {
     "columnVisibility": "Visibilité des colonnes",
@@ -1184,7 +1185,9 @@
     "unknown": "Cet agent n'a pas annoncé ses capacités. Les agents plus anciens ne les signalent pas ; l'hôte n'est pas restreint.",
     "updated": "Signalée",
     "reasonMissingNamedTool": "Nécessite {{tool}}, qui n'est pas installé sur cet hôte",
-    "optionalNotInstalled": "Disponible une fois son outil installé"
+    "optionalNotInstalled": "Disponible une fois son outil installé",
+    "reasonOutdatedNamedTool": "Nécessite une version de {{tool}} plus récente que celle de cet hôte",
+    "reasonToolOutdated": "Un outil requis sur cet hôte est trop ancien"
   },
   "hostDefaults": {
     "addNewPackageManager": "Ajouter un Nouveau Gestionnaire de Paquets Activé",
@@ -2492,7 +2495,8 @@
     "assetDiscovery": "Découverte du réseau",
     "malware": "Logiciels malveillants",
     "timeSync": "Synchronisation de l'heure",
-    "hardwareHealth": "État du matériel"
+    "hardwareHealth": "État du matériel",
+    "backups": "Sauvegardes"
   },
   "notifications": {
     "applicationUpdates": "Mises à jour d'Applications",
@@ -5274,5 +5278,148 @@
     "serverVersion": "Version du serveur",
     "title": "À propos de SysManage",
     "unknown": "Inconnu"
+  },
+  "backups": {
+    "action": {
+      "capture": "Sauvegarde",
+      "check": "Vérification",
+      "configure": "Configuration",
+      "estimate": "Estimation",
+      "prune": "Élagage",
+      "restore": "Restauration",
+      "seal": "Scellement",
+      "snapshots": "Lister les instantanés"
+    },
+    "card": {
+      "lastCheck": "Dernière vérification",
+      "noTarget": "Aucune cible de sauvegarde n'est encore configurée.",
+      "open": "Toutes les sauvegardes",
+      "title": "Sauvegarde"
+    },
+    "coverage": {
+      "filesOnly": "Fichiers uniquement",
+      "full": "Complète (fichiers et paquets)",
+      "unsupported": "Non pris en charge"
+    },
+    "empty": "Il n'y a encore aucun hôte approuvé.",
+    "hosts": {
+      "actions": "Actions",
+      "backupNow": "Sauvegarder maintenant",
+      "backupNowError": "La sauvegarde n'a pas pu être lancée.",
+      "configure": "Configurer",
+      "coverage": "Couverture",
+      "host": "Hôte",
+      "lastBackup": "Dernière sauvegarde",
+      "nextDue": "Prochaine échéance",
+      "progress": "{{paths}} chemins, {{size}} lus",
+      "restateVersion": "restate {{version}}",
+      "restore": "Restaurer des fichiers",
+      "size": "Dépôt",
+      "snapshots": "Instantanés : {{n}}",
+      "starting": "Démarrage...",
+      "status": "État"
+    },
+    "loadError": "Impossible de charger les sauvegardes.",
+    "policy": {
+      "checkDays": "Vérifier le dépôt tous les (jours)",
+      "enabled": "Sauvegarder cet hôte selon une planification",
+      "intervalHours": "Toutes les (heures)",
+      "keepLast": "Instantanés à conserver",
+      "quiesce": "Suspendre les services pendant la lecture de leurs données",
+      "quiesceHelp": "Par exemple : postgres, nextcloud",
+      "quiesceWith": "Hooks (séparés par des virgules)",
+      "saveError": "La politique de sauvegarde n'a pas pu être enregistrée.",
+      "title": "Politique de sauvegarde de {{host}}",
+      "windowHelp": "Les sauvegardes ne démarrent que dans les six heures qui suivent cette heure.",
+      "windowStart": "Heure de début (UTC, facultative)"
+    },
+    "reason": {
+      "agentOutdated": "Mettez à jour l'agent",
+      "missingTool": "Installez restate",
+      "noStorageHost": "Aucun hôte de stockage n'est défini",
+      "notPrivileged": "L'agent doit s'exécuter en tant que root",
+      "toolOutdated": "Mettez à jour restate"
+    },
+    "restore": {
+      "confirm": "Restaurer dans la zone de préparation",
+      "counts": "Fichiers : {{files}}, taille : {{size}}",
+      "error": "La restauration n'a pas pu être demandée.",
+      "exclude": "Chemins à exclure (un par ligne)",
+      "loadError": "Impossible de charger les instantanés.",
+      "missing": "Absents de l'instantané : {{n}}",
+      "more": "Non affichés : {{n}}",
+      "noSnapshots": "Cet hôte n'a encore aucun instantané.",
+      "paths": "Chemins à restaurer (un par ligne ; vide = tout)",
+      "preview": "Aperçu",
+      "refused": "Refusés : {{n}}",
+      "snapshot": "Instantané",
+      "stagedAt": "Placé en zone de préparation sur l'hôte dans",
+      "stagingNote": "Les fichiers sont restaurés dans un répertoire de préparation sur l'hôte, jamais par-dessus les fichiers en service. Mettez-les en place vous-même.",
+      "title": "Restaurer des fichiers sur {{host}}",
+      "unsignedAck": "Cet instantané n'est pas signé. Le restaurer quand même."
+    },
+    "run": {
+      "busy": "Occupé, nouvelle tentative prévue",
+      "changed": "Modifié",
+      "different": "Différences trouvées",
+      "failed": "Échec",
+      "incomplete": "Incomplet",
+      "metadataChanged": "Métadonnées modifiées",
+      "metadataCheckPassed": "Vérification des métadonnées réussie",
+      "ok": "Réussi",
+      "queued": "En file d'attente",
+      "running": "En cours",
+      "untrusted": "Non fiable",
+      "verified": "Vérifié"
+    },
+    "runs": {
+      "action": "Tâche",
+      "detail": "Détail",
+      "empty": "Aucune tâche de sauvegarde pour le moment.",
+      "host": "S'exécute sur",
+      "loadError": "Impossible de charger les tâches de sauvegarde.",
+      "queued": "Mis en file le",
+      "status": "État",
+      "title": "Tâches récentes"
+    },
+    "status": {
+      "disabled": "Désactivé",
+      "failed": "Échec",
+      "incomplete": "Incomplet",
+      "never": "Jamais sauvegardé",
+      "noPolicy": "Non configuré",
+      "notEquipped": "Non équipé",
+      "ok": "Sauvegardé",
+      "overdue": "En retard"
+    },
+    "target": {
+      "add": "Configurer la cible",
+      "dialogTitle": "Cible de sauvegarde",
+      "edit": "Modifier la cible",
+      "hostMountPoint": "Point de montage sur chaque hôte",
+      "hostMountPointHelp": "Où chaque hôte sauvegardé monte la cible (NFS) ; chaque hôte écrit uniquement dans son propre dépôt.",
+      "intro": "Faites pointer tous les hôtes vers un même partage NFS. Les hôtes ne font qu'ajouter à leur propre dépôt ; l'hôte de stockage scelle, élague et vérifie.",
+      "maxConcurrent": "Sauvegardes simultanées",
+      "mountedAt": "Les hôtes le montent sur",
+      "name": "Nom",
+      "noStorageHost": "Aucun",
+      "none": "Pas encore de cible de sauvegarde",
+      "restateVersions": "Versions de restate utilisées",
+      "saveError": "La cible n'a pas pu être enregistrée.",
+      "sealMode": "Sceller chaque sauvegarde",
+      "sealNone": "Ne pas sceller",
+      "sealZfs": "Instantané ZFS",
+      "storageHost": "Hôte de stockage",
+      "storagePath": "Chemin sur l'hôte de stockage",
+      "storagePathHelp": "L'hôte de stockage élague, vérifie et scelle ici ; les hôtes sauvegardés n'élaguent jamais.",
+      "zfsDataset": "Jeu de données ZFS",
+      "zfsRetention": "Pour l'instant, la suppression des anciens instantanés ZFS vous incombe ; définissez la rétention sur l'hôte de stockage."
+    },
+    "title": "Sauvegardes",
+    "warning": {
+      "noStorageHost": "Aucun hôte de stockage : les anciens instantanés ne sont jamais élagués et le dépôt n'est jamais vérifié",
+      "notSealed": "Non scellé (aucune copie immuable)",
+      "storageNotEquipped": "L'hôte de stockage ne peut pas encore exécuter restate"
+    }
   }
 }

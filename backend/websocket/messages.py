@@ -59,6 +59,9 @@ class MessageType(str, Enum):
     HARDWARE_HEALTH_UPDATE = "hardware_health_update"
     # ROADMAP 24.4 -- what the compliance checks read (sshd -T, sysctls...).
     COMPLIANCE_EVIDENCE_UPDATE = "compliance_evidence_update"
+    # Phase 24 -- restate backups: a job's outcome, and its live progress.
+    BACKUP_RESULT = "backup_result"
+    BACKUP_PROGRESS = "backup_progress"
     NETWORK_DISCOVERY_REPORT = "network_discovery_report"
     HOSTNAME_CHANGED = "hostname_changed"
     # Agent reports completion of a server-initiated package install/uninstall.
@@ -146,6 +149,12 @@ class CommandType(str, Enum):
     RESTORE_FILE = "restore_file"
     # Phase 23.3 S5: step the host's clock through its own time service.
     RESYNC_CLOCK = "resync_clock"
+    # Phase 24: restate backups.  backup_configure installs a policy's job
+    # files on the host (or the storage host); backup_run runs one of them;
+    # backup_restore restores into the agent's staging directory.
+    BACKUP_CONFIGURE = "backup_configure"
+    BACKUP_RUN = "backup_run"
+    BACKUP_RESTORE = "backup_restore"
     CHECK_REBOOT_STATUS = "check_reboot_status"
     COLLECT_DIAGNOSTICS = "collect_diagnostics"
     COLLECT_CERTIFICATES = "collect_certificates"

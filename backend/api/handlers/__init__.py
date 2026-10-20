@@ -50,6 +50,10 @@ from backend.api.handlers.custom_metric_handlers import (
 from backend.api.handlers.compliance_evidence_handlers import (
     handle_compliance_evidence_update,
 )
+from backend.api.handlers.backup_handlers import (
+    handle_backup_progress,
+    handle_backup_result,
+)
 from backend.api.handlers.hardware_health_handlers import (
     handle_hardware_health_update,
 )
@@ -150,5 +154,7 @@ __all__ = [
     "handle_time_status_update",
     "handle_hardware_health_update",
     "handle_compliance_evidence_update",
+    "handle_backup_result",
+    "handle_backup_progress",
     "handle_network_discovery_report",
 ]

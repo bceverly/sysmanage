@@ -95,6 +95,8 @@ export const SecurityRoles = {
     MANAGE_TIME_SYNC: 'Manage Time Sync',
     RESYNC_HOST_CLOCK: 'Resync Host Clock',
     MANAGE_HARDWARE_HEALTH: 'Manage Hardware Health',
+    MANAGE_BACKUPS: 'Manage Backups',
+    RESTORE_FILES: 'Restore Files',
     RUN_MALWARE_SCANS: 'Run Malware Scans',
     QUARANTINE_MALWARE: 'Quarantine Malware',
 

@@ -63,6 +63,12 @@ export const handlers = [
   http.get("*/api/v1/hardware-health/summary", () =>
     HttpResponse.json({ total: 0, counts: {} }),
   ),
+  http.get("*/api/v1/host/:hostId/backup", () =>
+    HttpResponse.json({ detail: "Host not found" }, { status: 404 }),
+  ),
+  http.get("*/api/v1/backups/summary", () =>
+    HttpResponse.json({ configured: false, counts: {}, attention: 0, total: 0 }),
+  ),
   http.get("*/api/v1/hardware-health/hosts", () =>
     HttpResponse.json({ counts: {}, hosts: [] }),
   ),

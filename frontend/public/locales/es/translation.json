@@ -758,7 +758,8 @@
     },
     "updates": "Actualizaciones",
     "clocksOutOfBounds": "Relojes fuera de límites",
-    "hardwareNeedsAttention": "Hardware que requiere atención"
+    "hardwareNeedsAttention": "Hardware que requiere atención",
+    "backupsNeedAttention": "Copias de seguridad atrasadas o fallidas"
   },
   "dataGrid": {
     "columnVisibility": "Visibilidad de columnas",
@@ -1184,7 +1185,9 @@
     "unknown": "Este agente no ha anunciado sus habilidades. Los agentes antiguos no las reportan; la host no está restringida.",
     "updated": "Reportado",
     "reasonMissingNamedTool": "Requiere {{tool}}, que no está instalado en este host",
-    "optionalNotInstalled": "Disponible una vez que se instale su herramienta"
+    "optionalNotInstalled": "Disponible una vez que se instale su herramienta",
+    "reasonOutdatedNamedTool": "Requiere una versión de {{tool}} más reciente que la de este host",
+    "reasonToolOutdated": "Una herramienta necesaria en este host es demasiado antigua"
   },
   "hostDefaults": {
     "addNewPackageManager": "Agregar Nuevo Gestor de Paquetes Habilitado",
@@ -2492,7 +2495,8 @@
     "assetDiscovery": "Descubrimiento de red",
     "malware": "Software malicioso",
     "timeSync": "Sincronización de Hora",
-    "hardwareHealth": "Estado del hardware"
+    "hardwareHealth": "Estado del hardware",
+    "backups": "Copias de seguridad"
   },
   "notifications": {
     "applicationUpdates": "Actualizaciones de Aplicaciones",
@@ -5274,5 +5278,148 @@
     "serverVersion": "Versión del servidor",
     "title": "Acerca de SysManage",
     "unknown": "Desconocido"
+  },
+  "backups": {
+    "action": {
+      "capture": "Copia de seguridad",
+      "check": "Comprobación",
+      "configure": "Configuración",
+      "estimate": "Estimación",
+      "prune": "Depuración",
+      "restore": "Restauración",
+      "seal": "Sellado",
+      "snapshots": "Listar instantáneas"
+    },
+    "card": {
+      "lastCheck": "Última comprobación",
+      "noTarget": "Todavía no se ha configurado ningún destino de copia de seguridad.",
+      "open": "Todas las copias de seguridad",
+      "title": "Copia de seguridad"
+    },
+    "coverage": {
+      "filesOnly": "Solo archivos",
+      "full": "Completa (archivos y paquetes)",
+      "unsupported": "No compatible"
+    },
+    "empty": "Todavía no hay hosts aprobados.",
+    "hosts": {
+      "actions": "Acciones",
+      "backupNow": "Hacer copia de seguridad ahora",
+      "backupNowError": "No se pudo iniciar la copia de seguridad.",
+      "configure": "Configurar",
+      "coverage": "Cobertura",
+      "host": "Host",
+      "lastBackup": "Última copia de seguridad",
+      "nextDue": "Próxima programada",
+      "progress": "{{paths}} rutas, {{size}} leídos",
+      "restateVersion": "restate {{version}}",
+      "restore": "Restaurar archivos",
+      "size": "Repositorio",
+      "snapshots": "Instantáneas: {{n}}",
+      "starting": "Iniciando...",
+      "status": "Estado"
+    },
+    "loadError": "No se pudieron cargar las copias de seguridad.",
+    "policy": {
+      "checkDays": "Comprobar el repositorio cada (días)",
+      "enabled": "Hacer copia de seguridad de este host según una programación",
+      "intervalHours": "Cada (horas)",
+      "keepLast": "Instantáneas que conservar",
+      "quiesce": "Pausar los servicios mientras se leen sus datos",
+      "quiesceHelp": "Por ejemplo: postgres, nextcloud",
+      "quiesceWith": "Hooks (separados por comas)",
+      "saveError": "No se pudo guardar la política de copias de seguridad.",
+      "title": "Política de copias de seguridad de {{host}}",
+      "windowHelp": "Las copias de seguridad solo se inician en las seis horas a partir de esta hora.",
+      "windowStart": "Hora de inicio (UTC, opcional)"
+    },
+    "reason": {
+      "agentOutdated": "Actualice el agente",
+      "missingTool": "Instale restate",
+      "noStorageHost": "No se ha definido ningún host de almacenamiento",
+      "notPrivileged": "El agente debe ejecutarse como root",
+      "toolOutdated": "Actualice restate"
+    },
+    "restore": {
+      "confirm": "Restaurar en el área de preparación",
+      "counts": "Archivos: {{files}}, tamaño: {{size}}",
+      "error": "No se pudo solicitar la restauración.",
+      "exclude": "Rutas que omitir (una por línea)",
+      "loadError": "No se pudieron cargar las instantáneas.",
+      "missing": "No están en la instantánea: {{n}}",
+      "more": "No mostrados: {{n}}",
+      "noSnapshots": "Este host todavía no tiene instantáneas.",
+      "paths": "Rutas que restaurar (una por línea; vacío = todo)",
+      "preview": "Vista previa",
+      "refused": "Rechazados: {{n}}",
+      "snapshot": "Instantánea",
+      "stagedAt": "Preparado en el host en",
+      "stagingNote": "Los archivos se restauran en un directorio de preparación del host, nunca sobre los archivos en uso. Muévalos usted mismo a su lugar.",
+      "title": "Restaurar archivos en {{host}}",
+      "unsignedAck": "Esta instantánea no está firmada. Restaurarla de todos modos."
+    },
+    "run": {
+      "busy": "Ocupado, se reintentará",
+      "changed": "Cambios",
+      "different": "Diferencias encontradas",
+      "failed": "Fallido",
+      "incomplete": "Incompleto",
+      "metadataChanged": "Metadatos cambiados",
+      "metadataCheckPassed": "Comprobación de metadatos superada",
+      "ok": "Completado",
+      "queued": "En cola",
+      "running": "En ejecución",
+      "untrusted": "No fiable",
+      "verified": "Verificado"
+    },
+    "runs": {
+      "action": "Trabajo",
+      "detail": "Detalle",
+      "empty": "Todavía no hay tareas de copia de seguridad.",
+      "host": "Se ejecuta en",
+      "loadError": "No se pudieron cargar las tareas de copia de seguridad.",
+      "queued": "En cola desde",
+      "status": "Estado",
+      "title": "Tareas recientes"
+    },
+    "status": {
+      "disabled": "Desactivado",
+      "failed": "Fallido",
+      "incomplete": "Incompleto",
+      "never": "Nunca respaldado",
+      "noPolicy": "Sin configurar",
+      "notEquipped": "Sin preparar",
+      "ok": "Respaldado",
+      "overdue": "Atrasado"
+    },
+    "target": {
+      "add": "Configurar destino",
+      "dialogTitle": "Destino de copia de seguridad",
+      "edit": "Editar destino",
+      "hostMountPoint": "Punto de montaje en cada host",
+      "hostMountPointHelp": "Donde cada host respaldado monta el destino (NFS); cada host escribe solo en su propio repositorio.",
+      "intro": "Apunte todos los hosts a un recurso compartido NFS. Los hosts solo añaden a su propio repositorio; el host de almacenamiento sella, depura y comprueba.",
+      "maxConcurrent": "Copias de seguridad simultáneas",
+      "mountedAt": "Los hosts lo montan en",
+      "name": "Nombre",
+      "noStorageHost": "Ninguno",
+      "none": "Aún no hay destino de copia de seguridad",
+      "restateVersions": "Versiones de restate en uso",
+      "saveError": "No se pudo guardar el destino.",
+      "sealMode": "Sellar cada copia de seguridad",
+      "sealNone": "No sellar",
+      "sealZfs": "Instantánea de ZFS",
+      "storageHost": "Host de almacenamiento",
+      "storagePath": "Ruta en el host de almacenamiento",
+      "storagePathHelp": "Aquí el host de almacenamiento depura, comprueba y sella; los hosts respaldados nunca depuran.",
+      "zfsDataset": "Conjunto de datos ZFS",
+      "zfsRetention": "Por ahora, eliminar las instantáneas antiguas de ZFS le corresponde a usted; configure la retención en el host de almacenamiento."
+    },
+    "title": "Copias de seguridad",
+    "warning": {
+      "noStorageHost": "Sin host de almacenamiento: las instantáneas antiguas nunca se depuran y el repositorio nunca se comprueba",
+      "notSealed": "Sin sellar (no hay copias inmutables)",
+      "storageNotEquipped": "El host de almacenamiento todavía no puede ejecutar restate"
+    }
   }
 }

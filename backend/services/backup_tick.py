@@ -1,0 +1,266 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
+"""The backup scheduler tick (ROADMAP Phase 24, Community).
+
+Every five minutes, in every host database, for each enabled policy on an
+approved, active host whose agent can run backups:
+
+1. job files -- (re)send ``backup_configure`` to the host and to the storage
+   host until each has acknowledged the policy's ``config_version``;
+2. capture -- when due: ``interval_hours`` after the last good capture
+   (sooner after a failure, later after ``busy``), inside the policy's UTC
+   window when it has one, spread across the hour by ``host_offset`` so a
+   fleet does not start at once, and never more than the target's
+   ``max_concurrent`` captures at a time;
+3. storage upkeep, on the storage host only: finish a seal-then-prune a
+   capture's result could not queue, and ``check`` every
+   ``check_interval_days``.
+
+Runs left queued or running for twelve hours are marked failed and logged.
+No target, or no equipped host, is a clean no-op.  Community: always runs.
+"""
+
+import asyncio
+import logging
+from datetime import datetime, timedelta
+from typing import Optional
+
+from sqlalchemy.orm import Session
+
+from backend.persistence import models
+from backend.persistence.partitions import iter_host_databases
+from backend.services import backup_jobs as jobs
+from backend.startup.leadership import singleton_task
+from backend.startup.tick_runner import run_periodic
+from backend.utils.host_spread import host_offset
+
+logger = logging.getLogger(__name__)
+
+TICK_INTERVAL_SECONDS = 300
+ERROR_BACKOFF_SECONDS = 60
+STUCK_AFTER = timedelta(hours=12)
+BUSY_RETRY = timedelta(minutes=30)
+FAILED_RETRY = timedelta(hours=1)
+WINDOW_HOURS = 6
+
+_TASK: Optional[asyncio.Task] = None
+
+
+def fail_stuck(db: Session, now: datetime) -> int:
+    """Close runs no result will ever answer, loudly."""
+    stuck = (
+        db.query(models.BackupRun)
+        .filter(
+            models.BackupRun.status.in_(jobs.PENDING),
+            models.BackupRun.queued_at < now - STUCK_AFTER,
+        )
+        .all()
+    )
+    for run in stuck:
+        run.status = "failed"
+        run.finished_at = now
+        run.message = "no result within 12 hours"
+        logger.error(
+            "Backup %s run %s for policy %s on host %s got no result in 12 hours; "
+            "marked failed",
+            run.action,
+            run.id,
+            run.policy_id,
+            run.host_id,
+        )
+    return len(stuck)
+
+
+def in_window(policy: models.BackupPolicy, now: datetime) -> bool:
+    if policy.window_start_hour is None:
+        return True
+    return (now.hour - policy.window_start_hour) % 24 < WINDOW_HOURS
+
+
+def spread(policy: models.BackupPolicy) -> timedelta:
+    """This host's fixed slice of the first hour (at most a quarter interval)."""
+    span = min(timedelta(hours=1), timedelta(hours=policy.interval_hours) / 4)
+    return span * host_offset(policy.host_id)
+
+
+def capture_due_at(db: Session, policy: models.BackupPolicy) -> Optional[datetime]:
+    """When the next capture may start; None = as soon as possible."""
+    last = jobs.latest_run(db, policy.id, "capture", statuses=jobs.FINAL)
+    if last is None:
+        return None
+    ended = last.finished_at or last.queued_at
+    if last.status == "busy":
+        return ended + BUSY_RETRY
+    if last.status not in jobs.GOOD_CAPTURE:
+        return ended + FAILED_RETRY
+    good = jobs.latest_run(db, policy.id, "capture", statuses=jobs.GOOD_CAPTURE)
+    base = good.finished_at or good.queued_at
+    return base + timedelta(hours=policy.interval_hours) + spread(policy)
+
+
+def running_captures(db: Session, target_id) -> int:
+    return (
+        db.query(models.BackupRun)
+        .join(models.BackupPolicy, models.BackupPolicy.id == models.BackupRun.policy_id)
+        .filter(
+            models.BackupPolicy.target_id == target_id,
+            models.BackupRun.action == "capture",
+            models.BackupRun.status.in_(jobs.PENDING),
+        )
+        .count()
+    )
+
+
+def _configure(db, policy, target, host, storage_ready: bool) -> bool:
+    """Send outdated job files.  True when the HOST's are current."""
+    if policy.host_acked_version < policy.config_version and not jobs.pending(
+        db, policy.id, jobs.CONFIGURE, host.id
+    ):
+        jobs.queue_configure(db, policy, target, host, "host")
+    if (
+        storage_ready
+        and policy.storage_acked_version < policy.config_version
+        and not jobs.pending(db, policy.id, jobs.CONFIGURE, target.storage_host_id)
+    ):
+        jobs.queue_configure(db, policy, target, host, "storage")
+    return policy.host_acked_version >= 1
+
+
+def _maybe_capture(db, policy, target, host, now: datetime) -> bool:
+    if jobs.pending(db, policy.id, "capture") or not in_window(policy, now):
+        return False
+    due = capture_due_at(db, policy)
+    if due is not None and due > now:
+        return False
+    if running_captures(db, target.id) >= max(1, target.max_concurrent or 1):
+        logger.info("Backup capture for host %s waits: target is at capacity", host.id)
+        return False
+    jobs.queue_run(db, policy, host.id, "capture")
+    return True
+
+
+def _last_finished(db, policy, action, statuses=None) -> Optional[datetime]:
+    run = jobs.latest_run(db, policy.id, action, statuses=statuses)
+    return (run.finished_at or run.queued_at) if run else None
+
+
+def _storage_retry_ok(db, policy, action, now: datetime) -> bool:
+    """Not pending, and not a ``busy``/failed one moments ago."""
+    if jobs.pending(db, policy.id, action):
+        return False
+    last = jobs.latest_run(db, policy.id, action)
+    if last is None or last.status in ("ok", "different", "incomplete"):
+        return True
+    ended = last.finished_at or last.queued_at
+    wait = BUSY_RETRY if last.status == "busy" else FAILED_RETRY
+    return ended + wait <= now
+
+
+def _upkeep_action(db, policy, target, now: datetime) -> Optional[str]:
+    """The one storage-side job this policy needs now, if any."""
+    captured = _last_finished(db, policy, "capture", jobs.GOOD_CAPTURE)
+    pruned = _last_finished(db, policy, "prune", ("ok",))
+    if captured and (pruned is None or pruned < captured):
+        sealing = (target.seal_mode or "none") != "none"
+        sealed = _last_finished(db, policy, "seal", ("ok",))
+        if sealing and (sealed is None or sealed < captured):
+            return "seal"
+        return "prune"
+    if captured is None:
+        return None
+    checked = _last_finished(db, policy, "check", ("ok", "different"))
+    if checked is None or checked + timedelta(days=policy.check_interval_days) <= now:
+        return "check"
+    return None
+
+
+def _storage_upkeep(db, policy, target, now: datetime) -> Optional[str]:
+    if policy.storage_acked_version < 1:
+        return None
+    action = _upkeep_action(db, policy, target, now)
+    if action is None or not _storage_retry_ok(db, policy, action, now):
+        return None
+    if any(jobs.pending(db, policy.id, a) for a in jobs.STORAGE_ACTIONS):
+        return None  # one storage job per repository at a time
+    jobs.queue_run(db, policy, target.storage_host_id, action)
+    return action
+
+
+def _eligible(host: Optional[models.Host]) -> bool:
+    return (
+        host is not None
+        and host.approval_status == "approved"
+        and bool(host.active)
+        and jobs.equipped(host)[0]
+    )
+
+
+def reconcile(db: Session, now: Optional[datetime] = None) -> int:
+    """One database's pass; how many jobs were queued."""
+    now = now or jobs.now()
+    fail_stuck(db, now)
+    target = jobs.the_target(db)
+    if target is None:
+        return 0
+    storage = jobs.storage_host(db, target)
+    storage_ready = _eligible(storage)
+    queued = 0
+    policies = (
+        db.query(models.BackupPolicy)
+        .filter(
+            models.BackupPolicy.target_id == target.id,
+            models.BackupPolicy.enabled.is_(True),
+        )
+        .all()
+    )
+    for policy in policies:
+        host = db.query(models.Host).filter(models.Host.id == policy.host_id).first()
+        if not _eligible(host):
+            continue
+        if not _configure(db, policy, target, host, storage_ready):
+            continue
+        queued += int(_maybe_capture(db, policy, target, host, now))
+        if storage_ready and _storage_upkeep(db, policy, target, now):
+            queued += 1
+    return queued
+
+
+def run_one_tick() -> int:
+    """One pass over every host database.  Never raises."""
+    queued = 0
+    for label, _, db in iter_host_databases():
+        try:
+            queued += reconcile(db)
+            db.commit()
+        except Exception:  # pylint: disable=broad-except
+            logger.exception("Backup scheduling failed for %s", label)
+            db.rollback()
+        finally:
+            db.close()
+    return queued
+
+
+async def backup_tick_service() -> None:
+    await run_periodic(
+        "Backup tick",
+        run_one_tick,
+        TICK_INTERVAL_SECONDS,
+        ERROR_BACKOFF_SECONDS,
+        logger=logger,
+    )
+
+
+def start_if_licensed():
+    """Community: always starts.  The task, or None when it cannot."""
+    global _TASK  # pylint: disable=global-statement
+    if _TASK is not None and not _TASK.done():
+        return _TASK
+    try:
+        _TASK = singleton_task(backup_tick_service())
+        logger.info("Backup scheduler tick started")
+        return _TASK
+    except Exception as exc:  # pylint: disable=broad-except
+        logger.warning("Backup tick did not start: %s", exc)
+        return None

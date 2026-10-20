@@ -1,0 +1,612 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
+"""
+Fleet backup with restate (ROADMAP Phase 24, Community scope).
+
+``GET /backups/overview`` -- the target, every approved host's backup
+status (``ok``, ``incomplete``, ``overdue``, ``failed``, ``never``,
+``not_equipped`` with its reason, ...), coverage, next due, and the restate
+versions in use.  ``GET /backups/summary`` -- counts, for the dashboard.
+
+``POST /backups/targets``, ``PUT``/``DELETE /backups/targets/{id}`` -- the
+one target (Community: a second is 409).  Manage Backups.
+
+``GET /host/{id}/backup`` -- one host's status, policy and snapshots.
+``PUT``/``DELETE /host/{id}/backup-policy`` -- its schedule, retention,
+check cadence and quiesce.  ``POST /host/{id}/backup-now`` -- a capture now
+(or ``estimate``/``snapshots`` on the host, ``check`` on the storage host).  Manage Backups.
+
+``GET /backups/runs`` (``?host_id``, ``limit``, ``offset``), ``GET
+/backups/runs/{id}`` and ``GET /host/{id}/backup-snapshots``.
+
+``POST /host/{id}/backup-restore`` -- Restore Files.  Always into the
+agent's staging directory, never over the live tree; ``dry_run`` (the
+default) only previews.  Snapshots are not signed in Community, so the
+request must acknowledge that explicitly (``acknowledge_unsigned``).
+
+Every change is audited.
+"""
+
+import json
+import re
+import uuid
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
+
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
+from backend.i18n import _
+from backend.persistence import models
+from backend.persistence.partitions import get_tenant_db
+from backend.security.roles import SecurityRoles
+from backend.services import backup_jobs as jobs
+from backend.services import backup_views as views
+from backend.services.audit_service import ActionType, AuditService, EntityType
+
+router = APIRouter(dependencies=[Depends(JWTBearer())])
+
+_HOOK_NAME = re.compile(r"^[a-z0-9_-]{1,32}$")
+_SNAPSHOT_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:+-]{0,254}$")
+_DATASET = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,254}$")
+_RUNNABLE = {
+    "capture": "host",
+    "estimate": "host",
+    "snapshots": "host",
+    "check": "storage",
+}
+
+
+class TargetBody(BaseModel):
+    name: str = Field(min_length=1, max_length=255)
+    host_mount_point: str = Field(min_length=1, max_length=1024)
+    storage_host_id: Optional[str] = None
+    storage_path: Optional[str] = Field(default=None, max_length=1024)
+    max_concurrent: int = 2
+    seal_mode: str = "none"
+    zfs_dataset: Optional[str] = Field(default=None, max_length=255)
+
+
+class PolicyBody(BaseModel):
+    enabled: bool = True
+    interval_hours: int = 24
+    window_start_hour: Optional[int] = None
+    keep_last: int = 14
+    check_interval_days: int = 7
+    quiesce: bool = False
+    quiesce_with: List[str] = Field(default_factory=list)
+
+
+class RunBody(BaseModel):
+    action: str = "capture"
+
+
+class RestoreBody(BaseModel):
+    snapshot: str = Field(min_length=1, max_length=255)
+    include: List[str] = Field(default_factory=list)
+    exclude: List[str] = Field(default_factory=list)
+    dry_run: bool = True
+    acknowledge_unsigned: bool = False
+
+
+def _bad(message: str) -> HTTPException:
+    return HTTPException(status_code=422, detail=message)
+
+
+def _require(current_user, role: SecurityRoles) -> None:
+    if not current_user.has_role(role):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: %s role required") % role.value,
+        )
+
+
+def _uuid_or_404(value: str, message: str) -> uuid.UUID:
+    try:
+        return uuid.UUID(str(value))
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=message) from exc
+
+
+def _host_or_404(db: Session, host_id: str) -> models.Host:
+    key = _uuid_or_404(host_id, _("Host not found"))
+    host = db.query(models.Host).filter(models.Host.id == key).first()
+    if host is None:
+        raise HTTPException(status_code=404, detail=_("Host not found"))
+    return host
+
+
+def _absolute_path(value: Optional[str], label: str) -> None:
+    if value is None:
+        return
+    if not value.startswith("/") or ".." in value.split("/") or "\x00" in value:
+        raise _bad(_("%s must be an absolute path without '..'") % label)
+
+
+def _in_range(value: Optional[int], low: int, high: int, label: str) -> None:
+    if value is not None and not low <= value <= high:
+        raise _bad(_("%s is out of range") % label + f" ({low}-{high})")
+
+
+def _validate_target(db: Session, body: TargetBody) -> Optional[uuid.UUID]:
+    _absolute_path(body.host_mount_point, _("Host mount point"))
+    _absolute_path(body.storage_path, _("Storage path"))
+    _in_range(body.max_concurrent, 1, 50, _("Concurrent backups"))
+    if body.seal_mode not in jobs.SEAL_MODES:
+        raise _bad(_("Unknown seal mode"))
+    if body.seal_mode == "zfs_snapshot" and not body.zfs_dataset:
+        raise _bad(_("A ZFS snapshot seal needs the dataset name"))
+    if body.zfs_dataset and not _DATASET.match(body.zfs_dataset):
+        raise _bad(_("The ZFS dataset name is not valid"))
+    if not body.storage_host_id:
+        return None
+    storage = _host_or_404(db, body.storage_host_id)
+    if not body.storage_path:
+        raise _bad(_("A storage host needs the storage path"))
+    return storage.id
+
+
+def _validate_policy(body: PolicyBody) -> None:
+    _in_range(body.interval_hours, 1, 720, _("Interval (hours)"))
+    _in_range(body.window_start_hour, 0, 23, _("Window start hour"))
+    _in_range(body.keep_last, 1, 1000, _("Snapshots to keep"))
+    _in_range(body.check_interval_days, 1, 90, _("Check interval (days)"))
+    if len(body.quiesce_with) > 10 or not all(
+        _HOOK_NAME.match(n) for n in body.quiesce_with
+    ):
+        raise _bad(_("Quiesce hooks must be up to 10 short lowercase names"))
+
+
+def _validate_restore(body: RestoreBody) -> None:
+    if not _SNAPSHOT_NAME.match(body.snapshot):
+        raise _bad(_("The snapshot name is not valid"))
+    if len(body.include) > 50 or len(body.exclude) > 50:
+        raise _bad(_("At most 50 paths can be restored at once"))
+    for pattern in body.include + body.exclude:
+        if not pattern or len(pattern) > 1024 or "\x00" in pattern:
+            raise _bad(_("A restore path is empty or too long"))
+        if ".." in pattern.split("/"):
+            raise _bad(_("A restore path must not contain '..'"))
+
+
+def _audit(db, current_user, entity_type, entity_id, name, description, details):
+    AuditService.log(
+        db=db,
+        user_id=current_user.id,
+        username=current_user.userid,
+        action_type=ActionType.UPDATE,
+        entity_type=entity_type,
+        entity_id=str(entity_id) if entity_id else None,
+        entity_name=name,
+        description=description,
+        details=details,
+        commit=False,
+    )
+
+
+def _target_or_404(db: Session, target_id: str) -> models.BackupTarget:
+    key = _uuid_or_404(target_id, _("Backup target not found"))
+    target = db.query(models.BackupTarget).filter(models.BackupTarget.id == key).first()
+    if target is None:
+        raise HTTPException(status_code=404, detail=_("Backup target not found"))
+    return target
+
+
+def _apply_target(target: models.BackupTarget, body: TargetBody, storage_id) -> None:
+    target.name = body.name.strip()
+    target.host_mount_point = body.host_mount_point
+    target.storage_host_id = storage_id
+    target.storage_path = body.storage_path
+    target.max_concurrent = body.max_concurrent
+    target.seal_mode = body.seal_mode
+    target.zfs_dataset = body.zfs_dataset or None
+    target.updated_at = jobs.now()
+
+
+# --- overview -------------------------------------------------------------
+
+
+@router.get("/backups/overview")
+async def backups_overview(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+    return views.overview(db)
+
+
+@router.get("/backups/summary")
+async def backups_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+    data = views.overview(db)
+    return {
+        "configured": data["target"] is not None,
+        "counts": data["counts"],
+        "attention": sum(data["counts"].get(s, 0) for s in ("overdue", "failed")),
+        "total": sum(1 for row in data["hosts"] if row["policy"]),
+    }
+
+
+# --- targets --------------------------------------------------------------
+
+
+@router.post("/backups/targets")
+async def create_target(
+    body: TargetBody,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
+    if jobs.the_target(db) is not None:
+        raise HTTPException(
+            status_code=409,
+            detail=_("This edition supports one backup target; edit the existing one"),
+        )
+    storage_id = _validate_target(db, body)
+    target = models.BackupTarget(created_at=jobs.now(), created_by=current_user.userid)
+    _apply_target(target, body, storage_id)
+    db.add(target)
+    db.flush()
+    _audit(
+        db,
+        current_user,
+        EntityType.SETTING,
+        target.id,
+        target.name,
+        "Backup target created",
+        body.model_dump(),
+    )
+    db.commit()
+    return views.target_dict(target, db)
+
+
+@router.put("/backups/targets/{target_id}")
+async def update_target(
+    target_id: str,
+    body: TargetBody,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
+    target = _target_or_404(db, target_id)
+    storage_id = _validate_target(db, body)
+    _apply_target(target, body, storage_id)
+    # Every host's job files name the mount point; the storage side's, the
+    # path and seal.  Re-send both.
+    for policy in (
+        db.query(models.BackupPolicy)
+        .filter(models.BackupPolicy.target_id == target.id)
+        .all()
+    ):
+        policy.config_version += 1
+        policy.updated_at = jobs.now()
+    _audit(
+        db,
+        current_user,
+        EntityType.SETTING,
+        target.id,
+        target.name,
+        "Backup target changed",
+        body.model_dump(),
+    )
+    db.commit()
+    return views.target_dict(target, db)
+
+
+@router.delete("/backups/targets/{target_id}")
+async def delete_target(
+    target_id: str,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
+    target = _target_or_404(db, target_id)
+    in_use = (
+        db.query(models.BackupPolicy)
+        .filter(models.BackupPolicy.target_id == target.id)
+        .count()
+    )
+    if in_use:
+        raise HTTPException(
+            status_code=409,
+            detail=_("Remove the hosts' backup policies before the target"),
+        )
+    _audit(
+        db,
+        current_user,
+        EntityType.SETTING,
+        target.id,
+        target.name,
+        "Backup target deleted",
+        {},
+    )
+    db.delete(target)
+    db.commit()
+    return {"deleted": True}
+
+
+# --- per host -------------------------------------------------------------
+
+
+def _policy_of(db: Session, host: models.Host) -> Optional[models.BackupPolicy]:
+    return (
+        db.query(models.BackupPolicy)
+        .filter(models.BackupPolicy.host_id == host.id)
+        .first()
+    )
+
+
+def _snapshots(db: Session, host: models.Host, include_gone: bool = False):
+    query = db.query(models.BackupSnapshot).filter(
+        models.BackupSnapshot.host_id == host.id
+    )
+    if not include_gone:
+        query = query.filter(models.BackupSnapshot.gone_at.is_(None))
+    return query.order_by(models.BackupSnapshot.created_at.desc()).all()
+
+
+@router.get("/host/{host_id}/backup")
+async def host_backup(host_id: str, db: Session = Depends(get_tenant_db)):
+    host = _host_or_404(db, host_id)
+    view = views.host_status(db, host)
+    target = jobs.the_target(db)
+    view["target"] = views.target_dict(target, db) if target else None
+    return view
+
+
+@router.get("/host/{host_id}/backup-snapshots")
+async def host_snapshots(
+    host_id: str,
+    include_gone: bool = False,
+    db: Session = Depends(get_tenant_db),
+) -> List[Dict[str, Any]]:
+    host = _host_or_404(db, host_id)
+    return [views.snapshot_dict(s) for s in _snapshots(db, host, include_gone)]
+
+
+def _apply_policy(policy: models.BackupPolicy, body: PolicyBody) -> None:
+    policy.enabled = body.enabled
+    policy.interval_hours = body.interval_hours
+    policy.window_start_hour = body.window_start_hour
+    policy.keep_last = body.keep_last
+    policy.check_interval_days = body.check_interval_days
+    policy.quiesce = body.quiesce
+    policy.quiesce_with = json.dumps(list(body.quiesce_with))
+    policy.updated_at = jobs.now()
+
+
+@router.put("/host/{host_id}/backup-policy")
+async def put_policy(
+    host_id: str,
+    body: PolicyBody,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
+    host = _host_or_404(db, host_id)
+    _validate_policy(body)
+    target = jobs.the_target(db)
+    if target is None:
+        raise HTTPException(status_code=409, detail=_("Set up the backup target first"))
+    policy = _policy_of(db, host)
+    if policy is None:
+        policy = models.BackupPolicy(
+            host_id=host.id,
+            target_id=target.id,
+            config_version=1,
+            host_acked_version=0,
+            storage_acked_version=0,
+            created_at=jobs.now(),
+            created_by=current_user.userid,
+        )
+        db.add(policy)
+    else:
+        policy.config_version += 1
+    _apply_policy(policy, body)
+    _audit(
+        db,
+        current_user,
+        EntityType.HOST,
+        host.id,
+        host.fqdn,
+        "Backup policy set",
+        body.model_dump(),
+    )
+    db.commit()
+    return views.policy_dict(policy)
+
+
+@router.delete("/host/{host_id}/backup-policy")
+async def delete_policy(
+    host_id: str,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """Stops scheduling; the repository and its snapshots are left alone."""
+    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
+    host = _host_or_404(db, host_id)
+    policy = _policy_of(db, host)
+    if policy is None:
+        raise HTTPException(status_code=404, detail=_("No backup policy"))
+    _audit(
+        db,
+        current_user,
+        EntityType.HOST,
+        host.id,
+        host.fqdn,
+        "Backup policy removed",
+        {},
+    )
+    db.delete(policy)
+    db.commit()
+    return {"deleted": True}
+
+
+def _ready_policy(db: Session, host: models.Host) -> models.BackupPolicy:
+    ready, reason = jobs.equipped(host)
+    if not ready:
+        raise HTTPException(
+            status_code=409,
+            detail=_("This host cannot run backups yet (%s)") % reason,
+        )
+    policy = _policy_of(db, host)
+    if policy is None or policy.host_acked_version < 1:
+        raise HTTPException(
+            status_code=409,
+            detail=_("This host's backup is not configured yet"),
+        )
+    return policy
+
+
+def _run_host(db: Session, policy, host: models.Host, action: str):
+    if _RUNNABLE[action] == "host":
+        return host.id
+    target = jobs.the_target(db)
+    storage = jobs.storage_host(db, target)
+    if (
+        storage is None
+        or not jobs.equipped(storage)[0]
+        or not (policy.storage_acked_version)
+    ):
+        raise HTTPException(
+            status_code=409,
+            detail=_("The backup storage host is not ready"),
+        )
+    return storage.id
+
+
+@router.post("/host/{host_id}/backup-now")
+async def backup_now(
+    host_id: str,
+    body: Optional[RunBody] = None,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
+    action = (body or RunBody()).action
+    if action not in _RUNNABLE:
+        raise _bad(_("Unknown backup action"))
+    host = _host_or_404(db, host_id)
+    policy = _ready_policy(db, host)
+    if jobs.pending(db, policy.id, action):
+        raise HTTPException(
+            status_code=409, detail=_("That backup job is already queued or running")
+        )
+    run = jobs.queue_run(
+        db, policy, _run_host(db, policy, host, action), action, current_user.userid
+    )
+    _audit(
+        db,
+        current_user,
+        EntityType.HOST,
+        host.id,
+        host.fqdn,
+        f"Backup {action} requested",
+        {"run_id": str(run.id)},
+    )
+    db.commit()
+    return views.run_dict(run)
+
+
+@router.post("/host/{host_id}/backup-restore")
+async def backup_restore(
+    host_id: str,
+    body: RestoreBody,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    _require(current_user, SecurityRoles.RESTORE_FILES)
+    host = _host_or_404(db, host_id)
+    _validate_restore(body)
+    policy = _ready_policy(db, host)
+    snapshot = (
+        db.query(models.BackupSnapshot)
+        .filter(
+            models.BackupSnapshot.policy_id == policy.id,
+            models.BackupSnapshot.name == body.snapshot,
+            models.BackupSnapshot.gone_at.is_(None),
+        )
+        .first()
+    )
+    if snapshot is None:
+        raise HTTPException(status_code=404, detail=_("Snapshot not found"))
+    if not snapshot.signed and not body.acknowledge_unsigned:
+        raise HTTPException(
+            status_code=409,
+            detail=_("This snapshot is not signed; confirm to restore it anyway"),
+        )
+    run = jobs.queue_restore(
+        db,
+        policy,
+        host,
+        snapshot.name,
+        body.include,
+        body.dry_run,
+        allow_unverified=not snapshot.signed,
+        actor=current_user.userid,
+        exclude=body.exclude,
+    )
+    _audit(
+        db,
+        current_user,
+        EntityType.HOST,
+        host.id,
+        host.fqdn,
+        (
+            "Backup restore preview requested"
+            if body.dry_run
+            else "Backup restore to staging requested"
+        ),
+        {
+            "run_id": str(run.id),
+            "snapshot": snapshot.name,
+            "include": body.include,
+            "exclude": body.exclude,
+            "dry_run": body.dry_run,
+            "unsigned_acknowledged": not snapshot.signed,
+        },
+    )
+    db.commit()
+    out = views.run_dict(run)
+    out["staging_path"] = jobs.staging_dir(run.id)
+    return out
+
+
+# --- runs -----------------------------------------------------------------
+
+
+@router.get("/backups/runs")
+async def list_runs(
+    host_id: Optional[str] = None,
+    action: Optional[str] = None,
+    limit: int = Query(50, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    db: Session = Depends(get_tenant_db),
+) -> Dict[str, Any]:
+    query = db.query(models.BackupRun)
+    if host_id:
+        host = _host_or_404(db, host_id)
+        policy = _policy_of(db, host)
+        if policy is None:
+            return {"total": 0, "runs": []}
+        query = query.filter(models.BackupRun.policy_id == policy.id)
+    if action:
+        query = query.filter(models.BackupRun.action == action)
+    total = query.count()
+    rows = (
+        query.order_by(models.BackupRun.queued_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+    return {"total": total, "runs": [views.run_dict(r) for r in rows]}
+
+
+@router.get("/backups/runs/{run_id}")
+async def get_run(run_id: str, db: Session = Depends(get_tenant_db)) -> Dict[str, Any]:
+    key = _uuid_or_404(run_id, _("Backup run not found"))
+    run = db.query(models.BackupRun).filter(models.BackupRun.id == key).first()
+    if run is None:
+        raise HTTPException(status_code=404, detail=_("Backup run not found"))
+    out = views.run_dict(run)
+    if run.action == jobs.RESTORE:
+        out["staging_path"] = jobs.staging_dir(run.id)
+    return out

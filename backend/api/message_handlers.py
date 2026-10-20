@@ -95,6 +95,16 @@ def command_type_from_queue(db, message_data: dict) -> Optional[str]:
         return None
 
 
+_BACKUP_COMMANDS = ("backup_configure", "backup_run", "backup_restore")
+
+
+def _is_backup_command(db, message_data: dict) -> bool:
+    return (
+        command_type_of(message_data) in _BACKUP_COMMANDS
+        or command_type_from_queue(db, message_data) in _BACKUP_COMMANDS
+    )
+
+
 def _close_out_command(db, connection, command_id) -> None:
     """A result proves the agent received its command: close the queue row.
 
@@ -197,6 +207,22 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
             db.rollback()
             logger.exception(
                 "Clock resync result could not be recorded for %s",
+                getattr(connection, "hostname", "unknown"),
+            )
+        return None
+
+    # Phase 24 backups: the agent's answer to a queued backup command (for
+    # backup_configure, the acknowledgment itself).
+    if _is_backup_command(db, message_data):
+        from backend.services import backup_results  # noqa: PLC0415
+
+        try:
+            if backup_results.record_command_result(db, message_data):
+                db.commit()
+        except Exception:  # pylint: disable=broad-except
+            db.rollback()
+            logger.exception(
+                "Backup command result could not be recorded for %s",
                 getattr(connection, "hostname", "unknown"),
             )
         return None
