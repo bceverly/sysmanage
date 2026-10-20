@@ -25,7 +25,7 @@ No target, or no equipped host, is a clean no-op.  Community: always runs.
 import asyncio
 import logging
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
@@ -197,31 +197,56 @@ def _eligible(host: Optional[models.Host]) -> bool:
     )
 
 
+def _target_policies(db: Session, target) -> List[models.BackupPolicy]:
+    return (
+        db.query(models.BackupPolicy)
+        .filter(models.BackupPolicy.target_id == target.id)
+        .all()
+    )
+
+
+def _policy_host(db: Session, policy) -> Optional[models.Host]:
+    return db.query(models.Host).filter(models.Host.id == policy.host_id).first()
+
+
+def configure_now(db: Session) -> None:
+    """Send outdated job files at once rather than on the next tick: a saved
+    target or policy takes effect while the operator is watching.  Queues
+    configuration only -- never a capture."""
+    db.flush()
+    target = jobs.the_target(db)
+    if target is None:
+        return
+    storage_ready = _eligible(jobs.storage_host(db, target))
+    for policy in _target_policies(db, target):
+        host = _policy_host(db, policy)
+        if _eligible(host):
+            _configure(db, policy, target, host, storage_ready)
+
+
 def reconcile(db: Session, now: Optional[datetime] = None) -> int:
-    """One database's pass; how many jobs were queued."""
+    """One database's pass; how many jobs were queued.
+
+    Every policy is configured, enabled or not: a host backed up only by
+    "Back up now" still needs its job files.  ``enabled`` governs only the
+    scheduled captures.  Storage upkeep (seal, prune, check) follows any
+    capture, scheduled or manual.
+    """
     now = now or jobs.now()
     fail_stuck(db, now)
     target = jobs.the_target(db)
     if target is None:
         return 0
-    storage = jobs.storage_host(db, target)
-    storage_ready = _eligible(storage)
+    storage_ready = _eligible(jobs.storage_host(db, target))
     queued = 0
-    policies = (
-        db.query(models.BackupPolicy)
-        .filter(
-            models.BackupPolicy.target_id == target.id,
-            models.BackupPolicy.enabled.is_(True),
-        )
-        .all()
-    )
-    for policy in policies:
-        host = db.query(models.Host).filter(models.Host.id == policy.host_id).first()
+    for policy in _target_policies(db, target):
+        host = _policy_host(db, policy)
         if not _eligible(host):
             continue
         if not _configure(db, policy, target, host, storage_ready):
             continue
-        queued += int(_maybe_capture(db, policy, target, host, now))
+        if policy.enabled:
+            queued += int(_maybe_capture(db, policy, target, host, now))
         if storage_ready and _storage_upkeep(db, policy, target, now):
             queued += 1
     return queued

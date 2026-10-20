@@ -75,6 +75,49 @@ def test_unconfigured_hosts_get_their_job_files_first(session, sent):
     assert len(sent) == 2
 
 
+def test_a_policy_off_schedule_is_still_configured_but_never_captured(session, sent):
+    # "Back up now" needs the job files even when nothing is scheduled
+    # (found in the 24.0 lab, 2026-10-20: such a host was never configured).
+    s = _setup(session, storage_acked=0)
+    s.policy.host_acked_version = 0
+    s.policy.enabled = False
+    tick.reconcile(session, NOW)
+    assert _actions(sent) == [
+        ("backup_configure", "host"),
+        ("backup_configure", "storage"),
+    ]
+    s.policy.host_acked_version = s.policy.storage_acked_version = 1
+    sent.clear()
+    tick.reconcile(session, NOW)
+    assert ("backup_run", "capture") not in _actions(sent)
+
+
+def test_a_manual_capture_off_schedule_is_still_sealed(session, sent):
+    s = _setup(session)
+    s.policy.enabled = False
+    _finish(session, s.policy, s.host.id, "capture", at=NOW - timedelta(minutes=5))
+    tick.reconcile(session, NOW)
+    assert _actions(sent)[0] in (("backup_run", "seal"), ("backup_run", "prune"))
+
+
+def test_configure_now_sends_job_files_without_capturing(session, sent):
+    s = _setup(session, storage_acked=0)
+    s.policy.host_acked_version = 0
+    tick.configure_now(session)
+    assert _actions(sent) == [
+        ("backup_configure", "host"),
+        ("backup_configure", "storage"),
+    ]
+    tick.configure_now(session)  # pending: not re-sent
+    assert len(sent) == 2
+
+
+def test_configure_now_with_no_target_is_a_no_op(session, sent):
+    _host(session)
+    tick.configure_now(session)
+    assert sent == []
+
+
 def test_a_never_backed_up_host_captures_now(session, sent):
     _setup(session)
     tick.reconcile(session, NOW)

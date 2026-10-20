@@ -5338,7 +5338,8 @@
       "missingTool": "Instale restate",
       "noStorageHost": "No se ha definido ningún host de almacenamiento",
       "notPrivileged": "El agente debe ejecutarse como root",
-      "toolOutdated": "Actualice restate"
+      "toolOutdated": "Actualice restate",
+      "wrongPlatform": "No compatible con este sistema operativo"
     },
     "restore": {
       "confirm": "Restaurar en el área de preparación",
@@ -5413,13 +5414,32 @@
       "storagePath": "Ruta en el host de almacenamiento",
       "storagePathHelp": "Aquí el host de almacenamiento depura, comprueba y sella; los hosts respaldados nunca depuran.",
       "zfsDataset": "Conjunto de datos ZFS",
-      "zfsRetention": "Por ahora, eliminar las instantáneas antiguas de ZFS le corresponde a usted; configure la retención en el host de almacenamiento."
+      "zfsRetention": "Por ahora, eliminar las instantáneas antiguas de ZFS le corresponde a usted; configure la retención en el host de almacenamiento.",
+      "btrfsHelp": "Los repositorios deben estar en un subvolumen de btrfs; las instantáneas van a un directorio del mismo sistema de archivos, fuera del subvolumen.",
+      "btrfsRetention": "Por ahora, eliminar las instantáneas antiguas de btrfs le corresponde a usted; configure la retención en el host de almacenamiento.",
+      "btrfsSnapshotDir": "Directorio de instantáneas en el host de almacenamiento",
+      "sealBtrfs": "Instantánea de btrfs (solo lectura)"
     },
     "title": "Copias de seguridad",
     "warning": {
-      "noStorageHost": "Sin host de almacenamiento: las instantáneas antiguas nunca se depuran y el repositorio nunca se comprueba",
+      "noStorageHost": "No hay host de almacenamiento: las copias de seguridad nunca se sellan, depuran ni comprueban, y los repositorios no dejan de crecer.",
       "notSealed": "Sin sellar (no hay copias inmutables)",
-      "storageNotEquipped": "El host de almacenamiento todavía no puede ejecutar restate"
+      "storageNotEquipped": "El host de almacenamiento no puede ejecutar trabajos de copia de seguridad ({{reason}}), así que los trabajos de almacenamiento no pueden ejecutarse: nada se sella, depura ni comprueba.",
+      "btrfsNotSubvolume": "Las instantáneas de btrfs requieren que el directorio del repositorio sea un subvolumen, así que todos los sellados fallarán. Créelo con:",
+      "checkStale": "Sin comprobar durante más del doble del intervalo de comprobación: {{hosts}}",
+      "fsCannotSnapshot": "La ruta de almacenamiento está en {{type}}, que no admite instantáneas, así que las copias de seguridad no pueden sellarse frente a un host comprometido. Funciona, pero considere ZFS o btrfs para tener copias inmutables.",
+      "fsUnchecked": "Sistema de archivos aún sin comprobar",
+      "pruneStale": "Sin depurar durante más del doble del intervalo de copia de seguridad: {{hosts}}",
+      "sealFsMismatch": "El modo de sellado requiere {{needed}}, pero la ruta de almacenamiento está en {{type}}: todos los sellados fallarán.",
+      "sealStale": "Sin sellar desde la última copia de seguridad: {{hosts}}"
+    },
+    "storage": {
+      "confirmed": "Archivos de trabajos de almacenamiento confirmados: {{confirmed}} de {{total}}",
+      "filesystem": "Sistema de archivos del almacenamiento",
+      "lastCheck": "Última comprobación",
+      "lastPrune": "Última depuración",
+      "lastSeal": "Último sellado",
+      "never": "Nunca"
     }
   }
 }

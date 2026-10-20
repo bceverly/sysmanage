@@ -27,8 +27,10 @@ storage-side ``du`` is a follow-up.
 
 Append-only is the storage host's job, not restate's: a root attacker on the
 backed-up host would simply not pass the flag.  So every good capture is
-followed, on the storage host, by ``seal`` (a ZFS snapshot when the target
-has one) and only then ``prune`` -- never a prune on the host itself.
+followed, on the storage host, by ``seal`` (a ZFS snapshot, or a read-only
+btrfs snapshot of ``storage_path`` into ``btrfs_snapshot_dir``, when the
+target has one) and only then ``prune`` -- never a prune on the host itself.
+
 """
 
 import json
@@ -60,7 +62,7 @@ PENDING = (QUEUED, RUNNING)
 # restate's own status words (its exit codes 0, 1, 3, 2, 4, 5).
 FINAL = ("ok", "different", "incomplete", "failed", "untrusted", "busy")
 GOOD_CAPTURE = ("ok", "incomplete")
-SEAL_MODES = ("none", "zfs_snapshot")
+SEAL_MODES = ("none", "zfs_snapshot", "btrfs_snapshot")
 
 # Where the agent stages a restore (the agent's own, never the live tree).
 STAGING_ROOT = "/var/lib/sysmanage-agent/restore"
@@ -136,19 +138,31 @@ def storage_configuration(
     policy: models.BackupPolicy, target: models.BackupTarget, host: models.Host
 ) -> Dict[str, Any]:
     """The storage host's jobs for ONE backed-up host's repository."""
-    seal = {"mode": "none"}
-    if (target.seal_mode or "none") != "none":
-        seal = {"mode": target.seal_mode, "dataset": target.zfs_dataset}
     return {
         "policy_id": str(policy.id),
         "role": "storage",
         "target": {"mount_point": target.storage_path, "repo_dir": repo_dir(host)},
         "jobs": {
-            "seal": seal,
+            "seal": seal_job(target),
             "prune": {"keep_last": policy.keep_last},
             "check": {"read_all": False},
         },
     }
+
+
+def seal_job(target: models.BackupTarget) -> Dict[str, Any]:
+    """The storage side's seal job: ``{"mode": "none"}``, a ZFS snapshot of
+    the dataset, or a read-only btrfs snapshot of the storage path."""
+    mode = target.seal_mode or "none"
+    if mode == "zfs_snapshot":
+        return {"mode": mode, "dataset": target.zfs_dataset}
+    if mode == "btrfs_snapshot":
+        return {
+            "mode": mode,
+            "subvolume": target.storage_path,
+            "snapshot_dir": target.btrfs_snapshot_dir,
+        }
+    return {"mode": "none"}
 
 
 def _queue(  # pylint: disable=too-many-arguments,too-many-positional-arguments

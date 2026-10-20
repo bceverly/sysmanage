@@ -5338,7 +5338,8 @@
       "missingTool": "Instale o restate",
       "noStorageHost": "Nenhum host de armazenamento definido",
       "notPrivileged": "O agente deve ser executado como root",
-      "toolOutdated": "Atualize o restate"
+      "toolOutdated": "Atualize o restate",
+      "wrongPlatform": "Não compatível com este sistema operacional"
     },
     "restore": {
       "confirm": "Restaurar na área de preparação",
@@ -5413,13 +5414,32 @@
       "storagePath": "Caminho no host de armazenamento",
       "storagePathHelp": "O host de armazenamento limpa, verifica e sela aqui; hosts com backup nunca fazem limpeza.",
       "zfsDataset": "Conjunto de dados ZFS",
-      "zfsRetention": "Por enquanto, remover snapshots ZFS antigos é com você; defina a retenção no host de armazenamento."
+      "zfsRetention": "Por enquanto, remover snapshots ZFS antigos é com você; defina a retenção no host de armazenamento.",
+      "btrfsHelp": "Os repositórios devem ficar em um subvolume btrfs; os snapshots vão para um diretório no mesmo sistema de arquivos, fora do subvolume.",
+      "btrfsRetention": "Por enquanto, remover snapshots btrfs antigos é com você; defina a retenção no host de armazenamento.",
+      "btrfsSnapshotDir": "Diretório de snapshots no host de armazenamento",
+      "sealBtrfs": "Snapshot btrfs (somente leitura)"
     },
     "title": "Backups",
     "warning": {
-      "noStorageHost": "Sem host de armazenamento: snapshots antigos nunca são limpos e o repositório nunca é verificado",
+      "noStorageHost": "Sem host de armazenamento: os backups nunca são selados, limpos ou verificados, e os repositórios continuam crescendo.",
       "notSealed": "Não selado (sem cópias imutáveis)",
-      "storageNotEquipped": "O host de armazenamento ainda não pode executar o restate"
+      "storageNotEquipped": "O host de armazenamento não pode executar tarefas de backup ({{reason}}), então as tarefas de armazenamento não podem ser executadas: nada é selado, limpo ou verificado.",
+      "btrfsNotSubvolume": "Os snapshots do btrfs exigem que o diretório do repositório seja um subvolume, então toda selagem vai falhar. Crie-o com:",
+      "checkStale": "Sem verificação há mais do dobro do intervalo de verificação: {{hosts}}",
+      "fsCannotSnapshot": "O caminho de armazenamento está em {{type}}, que não pode criar snapshots, então os backups não podem ser selados contra um host comprometido. Funciona, mas considere ZFS ou btrfs para ter cópias imutáveis.",
+      "fsUnchecked": "Sistema de arquivos ainda não verificado",
+      "pruneStale": "Sem limpeza há mais do dobro do intervalo de backup: {{hosts}}",
+      "sealFsMismatch": "O modo de selagem exige {{needed}}, mas o caminho de armazenamento está em {{type}}: toda selagem vai falhar.",
+      "sealStale": "Não selado desde o último backup: {{hosts}}"
+    },
+    "storage": {
+      "confirmed": "Arquivos de tarefas de armazenamento confirmados: {{confirmed}} de {{total}}",
+      "filesystem": "Sistema de arquivos do armazenamento",
+      "lastCheck": "Última verificação",
+      "lastPrune": "Última limpeza",
+      "lastSeal": "Última selagem",
+      "never": "Nunca"
     }
   }
 }

@@ -5338,7 +5338,8 @@
       "missingTool": "请安装 restate",
       "noStorageHost": "未设置存储主机",
       "notPrivileged": "代理必须以 root 身份运行",
-      "toolOutdated": "请升级 restate"
+      "toolOutdated": "请升级 restate",
+      "wrongPlatform": "此操作系统不支持"
     },
     "restore": {
       "confirm": "恢复到暂存目录",
@@ -5413,13 +5414,32 @@
       "storagePath": "存储主机上的路径",
       "storagePathHelp": "存储主机在此清理、检查和封存；被备份的主机从不清理。",
       "zfsDataset": "ZFS 数据集",
-      "zfsRetention": "目前需由您自行删除旧的 ZFS 快照；请在存储主机上设置保留策略。"
+      "zfsRetention": "目前需由您自行删除旧的 ZFS 快照；请在存储主机上设置保留策略。",
+      "btrfsHelp": "存储库必须位于 btrfs 子卷上；快照存放在同一文件系统上、该子卷之外的目录中。",
+      "btrfsRetention": "目前需由您自行删除旧的 btrfs 快照；请在存储主机上设置保留策略。",
+      "btrfsSnapshotDir": "存储主机上的快照目录",
+      "sealBtrfs": "btrfs 快照（只读）"
     },
     "title": "备份",
     "warning": {
-      "noStorageHost": "没有存储主机：旧快照永远不会被清理，仓库也永远不会被检查",
+      "noStorageHost": "没有存储主机：备份永远不会被封存、清理或检查，存储库会持续增长。",
       "notSealed": "未封存（没有不可变副本）",
-      "storageNotEquipped": "存储主机暂时无法运行 restate"
+      "storageNotEquipped": "存储主机无法运行备份作业（{{reason}}），因此存储作业无法运行：不会进行任何封存、清理或检查。",
+      "btrfsNotSubvolume": "btrfs 快照要求存储库目录是一个子卷，因此每次封存都会失败。请用以下命令创建：",
+      "checkStale": "超过检查间隔的两倍时间未检查：{{hosts}}",
+      "fsCannotSnapshot": "存储路径位于 {{type}} 上，它无法创建快照，因此无法封存备份以防范被入侵的主机。这可以正常工作，但如需不可变副本，请考虑使用 ZFS 或 btrfs。",
+      "fsUnchecked": "尚未检查文件系统",
+      "pruneStale": "超过备份间隔的两倍时间未清理旧快照：{{hosts}}",
+      "sealFsMismatch": "封存模式需要 {{needed}}，但存储路径位于 {{type}} 上：每次封存都会失败。",
+      "sealStale": "自上次备份以来未封存：{{hosts}}"
+    },
+    "storage": {
+      "confirmed": "已确认的存储作业文件：{{confirmed}}/{{total}}",
+      "filesystem": "存储文件系统",
+      "lastCheck": "上次检查",
+      "lastPrune": "上次修剪",
+      "lastSeal": "上次封存",
+      "never": "从未"
     }
   }
 }

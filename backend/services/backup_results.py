@@ -30,6 +30,7 @@ from sqlalchemy.orm import Session
 
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
+from backend.services import backup_storage_status as storage_status
 
 logger = logging.getLogger(__name__)
 
@@ -102,6 +103,15 @@ def _acknowledge(db: Session, run: models.BackupRun) -> None:
         policy.host_acked_version = max(policy.host_acked_version or 0, version)
 
 
+def _storage_filesystem(db: Session, run: models.BackupRun, reply: Any) -> None:
+    """A storage host's configure reply says which filesystem it is on."""
+    if _parameters(run).get("role") != "storage":
+        return
+    target = jobs.the_target(db)
+    if target is not None and str(target.storage_host_id) == str(run.host_id):
+        storage_status.record_storage_fs(target, reply)
+
+
 def _refused(db: Session, run: models.BackupRun, code: str) -> None:
     """The agent would not run it.  ``busy`` is retried by the scheduler;
     ``not_configured`` means its job files are gone -- forget the
@@ -141,6 +151,7 @@ def record_command_result(db: Session, message_data: Dict[str, Any]) -> bool:
         run.status = "ok"
         run.finished_at = jobs.now()
         _acknowledge(db, run)
+        _storage_filesystem(db, run, message_data.get("result"))
     else:
         run.status = jobs.RUNNING
         run.started_at = run.started_at or jobs.now()

@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session
 
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
+from backend.services import backup_storage_status as storage_status
 from backend.services import backup_tick
 
 OVERDUE_GRACE = timedelta(hours=1)
@@ -56,13 +57,8 @@ def coverage(host: models.Host) -> str:
 def target_dict(target: models.BackupTarget, db: Session) -> Dict[str, Any]:
     storage = jobs.storage_host(db, target)
     ready, reason = jobs.equipped(storage) if storage else (False, "no_storage_host")
-    warnings = []
-    if (target.seal_mode or "none") == "none":
-        warnings.append("not_sealed")
-    if storage is None:
-        warnings.append("no_storage_host")
-    elif not ready:
-        warnings.append("storage_not_equipped")
+    status = storage_status.storage_status(db, target) if ready else None
+    warnings = storage_status.target_warnings(target, storage, ready, status)
     return {
         "id": str(target.id),
         "name": target.name,
@@ -76,7 +72,16 @@ def target_dict(target: models.BackupTarget, db: Session) -> Dict[str, Any]:
         "max_concurrent": target.max_concurrent,
         "seal_mode": target.seal_mode or "none",
         "zfs_dataset": target.zfs_dataset,
+        "btrfs_snapshot_dir": target.btrfs_snapshot_dir,
+        "storage_fs": {
+            "type": target.storage_fs_type,
+            "mount_point": target.storage_fs_mount,
+            "btrfs_subvolume": target.storage_is_btrfs_subvolume,
+            "checked_at": iso(target.storage_fs_checked_at),
+        },
+        "storage_status": status,
         "warnings": warnings,
+        "problem": storage_status.has_problem(warnings),
         "created_at": iso(target.created_at),
         "updated_at": iso(target.updated_at),
     }
@@ -257,6 +262,14 @@ def overview(db: Session) -> Dict[str, Any]:
         "counts": counts,
         "restate_versions": versions,
     }
+
+
+def attention_count(data: Dict[str, Any]) -> int:
+    """What the dashboard flags: hosts overdue or failed, plus the target
+    once when its storage side is broken (no storage host, say)."""
+    hosts = sum(data["counts"].get(s, 0) for s in ("overdue", "failed"))
+    target = data["target"]
+    return hosts + int(bool(target and target["problem"]))
 
 
 def overdue_count(db: Session) -> int:

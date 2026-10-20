@@ -5338,7 +5338,8 @@
       "missingTool": "Installez restate",
       "noStorageHost": "Aucun hôte de stockage n'est défini",
       "notPrivileged": "L'agent doit s'exécuter en tant que root",
-      "toolOutdated": "Mettez à jour restate"
+      "toolOutdated": "Mettez à jour restate",
+      "wrongPlatform": "Non pris en charge sur ce système d'exploitation"
     },
     "restore": {
       "confirm": "Restaurer dans la zone de préparation",
@@ -5413,13 +5414,32 @@
       "storagePath": "Chemin sur l'hôte de stockage",
       "storagePathHelp": "L'hôte de stockage élague, vérifie et scelle ici ; les hôtes sauvegardés n'élaguent jamais.",
       "zfsDataset": "Jeu de données ZFS",
-      "zfsRetention": "Pour l'instant, la suppression des anciens instantanés ZFS vous incombe ; définissez la rétention sur l'hôte de stockage."
+      "zfsRetention": "Pour l'instant, la suppression des anciens instantanés ZFS vous incombe ; définissez la rétention sur l'hôte de stockage.",
+      "btrfsHelp": "Les dépôts doivent se trouver sur un sous-volume btrfs ; les instantanés vont dans un répertoire du même système de fichiers, en dehors du sous-volume.",
+      "btrfsRetention": "Pour l'instant, la suppression des anciens instantanés btrfs vous incombe ; définissez la rétention sur l'hôte de stockage.",
+      "btrfsSnapshotDir": "Répertoire des instantanés sur l'hôte de stockage",
+      "sealBtrfs": "Instantané btrfs (lecture seule)"
     },
     "title": "Sauvegardes",
     "warning": {
-      "noStorageHost": "Aucun hôte de stockage : les anciens instantanés ne sont jamais élagués et le dépôt n'est jamais vérifié",
+      "noStorageHost": "Aucun hôte de stockage : les sauvegardes ne sont jamais scellées, élaguées ni vérifiées, et les dépôts ne cessent de grossir.",
       "notSealed": "Non scellé (aucune copie immuable)",
-      "storageNotEquipped": "L'hôte de stockage ne peut pas encore exécuter restate"
+      "storageNotEquipped": "L'hôte de stockage ne peut pas exécuter de tâches de sauvegarde ({{reason}}), donc les tâches de stockage ne peuvent pas s'exécuter : rien n'est scellé, élagué ni vérifié.",
+      "btrfsNotSubvolume": "Les instantanés btrfs exigent que le répertoire du dépôt soit un sous-volume ; chaque scellement échouera donc. Créez-le avec :",
+      "checkStale": "Non vérifié depuis plus de deux fois l'intervalle de vérification : {{hosts}}",
+      "fsCannotSnapshot": "Le chemin de stockage se trouve sur {{type}}, qui ne peut pas prendre d'instantanés : les sauvegardes ne peuvent donc pas être scellées contre un hôte compromis. Cela fonctionne, mais envisagez ZFS ou btrfs pour des copies immuables.",
+      "fsUnchecked": "Système de fichiers pas encore vérifié",
+      "pruneStale": "Non élagué depuis plus de deux fois l'intervalle de sauvegarde : {{hosts}}",
+      "sealFsMismatch": "Le mode de scellement nécessite {{needed}}, mais le chemin de stockage se trouve sur {{type}} : chaque scellement échouera.",
+      "sealStale": "Non scellé depuis la dernière sauvegarde : {{hosts}}"
+    },
+    "storage": {
+      "confirmed": "Fichiers de tâches de stockage confirmés : {{confirmed}} sur {{total}}",
+      "filesystem": "Système de fichiers du stockage",
+      "lastCheck": "Dernière vérification",
+      "lastPrune": "Dernière purge",
+      "lastSeal": "Dernier scellement",
+      "never": "Jamais"
     }
   }
 }

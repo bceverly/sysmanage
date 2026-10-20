@@ -8,7 +8,10 @@ Fleet backup with restate (ROADMAP Phase 24, Community scope).
 ``GET /backups/overview`` -- the target, every approved host's backup
 status (``ok``, ``incomplete``, ``overdue``, ``failed``, ``never``,
 ``not_equipped`` with its reason, ...), coverage, next due, and the restate
-versions in use.  ``GET /backups/summary`` -- counts, for the dashboard.
+versions in use; the target carries its storage side's status and
+warnings (``backend.services.backup_storage_status``).  ``GET
+/backups/summary`` -- counts, for the dashboard (a target whose storage side
+is broken counts once).
 
 ``POST /backups/targets``, ``PUT``/``DELETE /backups/targets/{id}`` -- the
 one target (Community: a second is 409).  Manage Backups.
@@ -30,6 +33,7 @@ Every change is audited.
 """
 
 import json
+import posixpath
 import re
 import uuid
 from typing import Any, Dict, List, Optional
@@ -44,6 +48,8 @@ from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import backup_jobs as jobs
+from backend.services import backup_storage_status as storage_fs
+from backend.services import backup_tick
 from backend.services import backup_views as views
 from backend.services.audit_service import ActionType, AuditService, EntityType
 
@@ -52,6 +58,8 @@ router = APIRouter(dependencies=[Depends(JWTBearer())])
 _HOOK_NAME = re.compile(r"^[a-z0-9_-]{1,32}$")
 _SNAPSHOT_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:+-]{0,254}$")
 _DATASET = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,254}$")
+# What the agent accepts for a btrfs seal path (it checks again).
+_SEAL_PATH = re.compile(r"^/[A-Za-z0-9_./-]*$")
 _RUNNABLE = {
     "capture": "host",
     "estimate": "host",
@@ -68,6 +76,7 @@ class TargetBody(BaseModel):
     max_concurrent: int = 2
     seal_mode: str = "none"
     zfs_dataset: Optional[str] = Field(default=None, max_length=255)
+    btrfs_snapshot_dir: Optional[str] = Field(default=None, max_length=1024)
 
 
 class PolicyBody(BaseModel):
@@ -141,12 +150,48 @@ def _validate_target(db: Session, body: TargetBody) -> Optional[uuid.UUID]:
         raise _bad(_("A ZFS snapshot seal needs the dataset name"))
     if body.zfs_dataset and not _DATASET.match(body.zfs_dataset):
         raise _bad(_("The ZFS dataset name is not valid"))
+    if body.seal_mode == "btrfs_snapshot":
+        _validate_btrfs(body)
     if not body.storage_host_id:
         return None
     storage = _host_or_404(db, body.storage_host_id)
     if not body.storage_path:
         raise _bad(_("A storage host needs the storage path"))
     return storage.id
+
+
+def _seal_path_ok(value: str) -> bool:
+    return (
+        bool(_SEAL_PATH.match(value))
+        and value != "/"
+        and posixpath.normpath(value) == value
+        and not any(part.startswith("-") for part in value.split("/"))
+    )
+
+
+def _validate_btrfs(body: TargetBody) -> None:
+    """The subvolume is the storage path; snapshots go outside it."""
+    snapshot_dir = body.btrfs_snapshot_dir
+    if not snapshot_dir:
+        raise _bad(_("A btrfs snapshot seal needs the snapshot directory"))
+    if not body.storage_path:
+        raise _bad(_("A btrfs snapshot seal needs the storage path"))
+    for value, label in (
+        (body.storage_path, _("Storage path")),
+        (snapshot_dir, _("Snapshot directory")),
+    ):
+        if not _seal_path_ok(value):
+            raise _bad(
+                _(
+                    "%s must be a plain absolute path (letters, digits, "
+                    "'_', '.', '-' and '/'; no trailing '/')"
+                )
+                % label
+            )
+    if snapshot_dir == body.storage_path or snapshot_dir.startswith(
+        body.storage_path + "/"
+    ):
+        raise _bad(_("The snapshot directory must be outside the storage path"))
 
 
 def _validate_policy(body: PolicyBody) -> None:
@@ -203,6 +248,7 @@ def _apply_target(target: models.BackupTarget, body: TargetBody, storage_id) -> 
     target.max_concurrent = body.max_concurrent
     target.seal_mode = body.seal_mode
     target.zfs_dataset = body.zfs_dataset or None
+    target.btrfs_snapshot_dir = body.btrfs_snapshot_dir or None
     target.updated_at = jobs.now()
 
 
@@ -220,7 +266,7 @@ async def backups_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any
     return {
         "configured": data["target"] is not None,
         "counts": data["counts"],
-        "attention": sum(data["counts"].get(s, 0) for s in ("overdue", "failed")),
+        "attention": views.attention_count(data),
         "total": sum(1 for row in data["hosts"] if row["policy"]),
     }
 
@@ -254,6 +300,7 @@ async def create_target(
         "Backup target created",
         body.model_dump(),
     )
+    backup_tick.configure_now(db)  # take effect now, not on the next tick
     db.commit()
     return views.target_dict(target, db)
 
@@ -268,7 +315,13 @@ async def update_target(
     _require(current_user, SecurityRoles.MANAGE_BACKUPS)
     target = _target_or_404(db, target_id)
     storage_id = _validate_target(db, body)
+    moved = (str(target.storage_host_id or ""), target.storage_path) != (
+        str(storage_id or ""),
+        body.storage_path,
+    )
     _apply_target(target, body, storage_id)
+    if moved:  # the filesystem report was about the old place
+        storage_fs.forget_storage_fs(target)
     # Every host's job files name the mount point; the storage side's, the
     # path and seal.  Re-send both.
     for policy in (
@@ -287,6 +340,7 @@ async def update_target(
         "Backup target changed",
         body.model_dump(),
     )
+    backup_tick.configure_now(db)  # take effect now, not on the next tick
     db.commit()
     return views.target_dict(target, db)
 
@@ -410,6 +464,7 @@ async def put_policy(
         "Backup policy set",
         body.model_dump(),
     )
+    backup_tick.configure_now(db)  # take effect now, not on the next tick
     db.commit()
     return views.policy_dict(policy)
 

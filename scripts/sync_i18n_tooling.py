@@ -192,7 +192,7 @@ def main():
         have = target.read_text(encoding="utf-8")
         if want == have:
             continue
-        drifted.append(f"{repo}/{target.name}")
+        drifted.append(f"{repo}/{target.parent.name}/{target.name}")
         if args.diff:
             sys.stdout.writelines(
                 difflib.unified_diff(
@@ -216,10 +216,17 @@ def main():
     if args.check or args.diff:
         if drifted:
             print(
-                "\nDRIFT: "
-                + ", ".join(drifted)
-                + "\n  Edit the canonical copy in sysmanage/, then run:"
-                + "\n    python3 scripts/sync_i18n_tooling.py",
+                "\nOUT OF SYNC: these copies of the shared i18n tooling"
+                " do not match the master copy in sysmanage/scripts/:\n"
+                + "".join(f"    {path}\n" for path in drifted)
+                + "\nThis is not a problem in your code: the master copy was"
+                " edited without being copied out (or a copy was edited by"
+                " hand).\nTo fix it:\n"
+                "  1. In the sysmanage repo, run:"
+                " python3 scripts/sync_i18n_tooling.py\n"
+                "  2. Commit the updated file in each repo listed above.\n"
+                "(Do not edit those copies by hand: the next sync overwrites"
+                " them.)",
                 file=sys.stderr,
             )
             return 1

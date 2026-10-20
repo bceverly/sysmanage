@@ -5338,7 +5338,8 @@
       "missingTool": "Installeer restate",
       "noStorageHost": "Er is geen opslaghost ingesteld",
       "notPrivileged": "De agent moet als root draaien",
-      "toolOutdated": "restate upgraden"
+      "toolOutdated": "restate upgraden",
+      "wrongPlatform": "Niet ondersteund op dit besturingssysteem"
     },
     "restore": {
       "confirm": "Herstellen naar staging",
@@ -5413,13 +5414,32 @@
       "storagePath": "Pad op de opslaghost",
       "storagePathHelp": "De opslaghost schoont hier op, controleert en verzegelt; geback-upte hosts schonen nooit op.",
       "zfsDataset": "ZFS-dataset",
-      "zfsRetention": "Oude ZFS-snapshots verwijderen is voorlopig aan u; stel de bewaartermijn in op de opslaghost."
+      "zfsRetention": "Oude ZFS-snapshots verwijderen is voorlopig aan u; stel de bewaartermijn in op de opslaghost.",
+      "btrfsHelp": "De repository's moeten op een btrfs-subvolume staan; snapshots gaan naar een map op hetzelfde bestandssysteem, buiten het subvolume.",
+      "btrfsRetention": "Oude btrfs-snapshots verwijderen is voorlopig aan u; stel de bewaartermijn in op de opslaghost.",
+      "btrfsSnapshotDir": "Snapshotmap op de opslaghost",
+      "sealBtrfs": "btrfs-snapshot (alleen-lezen)"
     },
     "title": "Back-ups",
     "warning": {
-      "noStorageHost": "Geen opslaghost: oude snapshots worden nooit opgeschoond en de repository wordt nooit gecontroleerd",
+      "noStorageHost": "Geen opslaghost: back-ups worden nooit verzegeld, opgeschoond of gecontroleerd, en de repository's blijven groeien.",
       "notSealed": "Niet verzegeld (geen onveranderlijke kopieën)",
-      "storageNotEquipped": "De opslaghost kan restate nog niet uitvoeren"
+      "storageNotEquipped": "De opslaghost kan geen back-uptaken uitvoeren ({{reason}}), dus kunnen er geen opslagtaken draaien: niets wordt verzegeld, opgeschoond of gecontroleerd.",
+      "btrfsNotSubvolume": "btrfs-snapshots vereisen dat de repositorymap een subvolume is, dus elke verzegeling mislukt. Maak het aan met:",
+      "checkStale": "Langer dan twee keer het controle-interval niet gecontroleerd: {{hosts}}",
+      "fsCannotSnapshot": "Het opslagpad staat op {{type}}, dat geen snapshots kan maken, dus back-ups kunnen niet worden verzegeld tegen een gecompromitteerde host. Het werkt, maar overweeg ZFS of btrfs voor onveranderlijke kopieën.",
+      "fsUnchecked": "Bestandssysteem nog niet gecontroleerd",
+      "pruneStale": "Langer dan twee keer het back-upinterval niet opgeschoond: {{hosts}}",
+      "sealFsMismatch": "De verzegelmodus vereist {{needed}}, maar het opslagpad staat op {{type}}: elke verzegeling mislukt.",
+      "sealStale": "Niet verzegeld sinds de laatste back-up: {{hosts}}"
+    },
+    "storage": {
+      "confirmed": "Opslagtaakbestanden bevestigd: {{confirmed}} van {{total}}",
+      "filesystem": "Opslagbestandssysteem",
+      "lastCheck": "Laatste controle",
+      "lastPrune": "Laatste opschoning",
+      "lastSeal": "Laatste verzegeling",
+      "never": "Nooit"
     }
   }
 }

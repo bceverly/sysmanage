@@ -10,8 +10,11 @@ Tenant data, like hosts:
 * ``backup_target`` -- where repositories live: the path hosts mount it at,
   the storage host (the NAS's own agent) and the path there.  Community has
   exactly one.  ``seal_mode`` says how the storage side makes each capture
-  immutable (``zfs_snapshot``) or that it does not (``none``) -- restate cannot
-  enforce append-only from a host a root attacker controls, so the NAS must.
+  immutable (``zfs_snapshot``, ``btrfs_snapshot``) or that it does not
+  (``none``) -- restate cannot enforce append-only from a host a root
+  attacker controls, so the NAS must.  The ``storage_fs_*`` columns are what
+  the storage host's agent last reported about the filesystem under
+  ``storage_path`` (NULL until it does).
 * ``backup_policy`` -- one per host in Community: how often, retention
   (``keep_last``), the check cadence, quiesce.  ``config_version`` bumps on
   every change; the ``*_acked_version`` columns record what the host and the
@@ -60,6 +63,12 @@ class BackupTarget(Base):
     max_concurrent = Column(Integer, nullable=False, default=2)
     seal_mode = Column(String(16), nullable=False, default="none")
     zfs_dataset = Column(String(255), nullable=True)
+    # btrfs seal: read-only snapshots of storage_path (the subvolume) go here.
+    btrfs_snapshot_dir = Column(String(1024), nullable=True)
+    storage_fs_type = Column(String(64), nullable=True)
+    storage_fs_mount = Column(String(1024), nullable=True)
+    storage_fs_checked_at = Column(DateTime, nullable=True)
+    storage_is_btrfs_subvolume = Column(Boolean, nullable=True)
     created_at = Column(DateTime, nullable=False)
     created_by = Column(String(255), nullable=True)
     updated_at = Column(DateTime, nullable=False)

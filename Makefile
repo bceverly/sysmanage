@@ -1035,10 +1035,8 @@ endif
 # nothing is running, so this is safe on fresh installs / CI.
 #
 # After migrate completes the user has to start the server back up
-# themselves -- we don't auto-start because:
-#   * we don't know whether they wanted ``make start`` or
-#     ``make start-privileged``;
-#   * if migrate failed they'd want to investigate before restarting.
+# themselves (``make start``) -- we don't auto-start because if migrate
+# failed they'd want to investigate before restarting.
 migrate: stop
 	@echo "Running database migrations (via sysmanage-migrate -- the same tool"
 	@echo "operators run in production)..."
@@ -1068,7 +1066,7 @@ endif
 	@echo "NOTE: In the default single-database deployment all chains run against"
 	@echo "      the SAME database (collapsed/homelab mode)."
 	@echo "      backend / frontend / telemetry / OpenBAO were stopped before migrate."
-	@echo "      Run 'make start' or 'make start-privileged' to bring everything back up."
+	@echo "      Run 'make start' to bring everything back up."
 
 # Fan out the tenant chain to every provisioned tenant database (standalone).
 # 'make migrate' already does this; use this target to re-run JUST the fan-out

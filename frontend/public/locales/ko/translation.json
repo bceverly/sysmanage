@@ -5338,7 +5338,8 @@
       "missingTool": "restate를 설치하세요",
       "noStorageHost": "스토리지 호스트가 설정되지 않았습니다",
       "notPrivileged": "에이전트는 root로 실행되어야 합니다",
-      "toolOutdated": "restate를 업그레이드하세요"
+      "toolOutdated": "restate를 업그레이드하세요",
+      "wrongPlatform": "이 운영 체제에서는 지원되지 않음"
     },
     "restore": {
       "confirm": "스테이징 영역으로 복원",
@@ -5413,13 +5414,32 @@
       "storagePath": "스토리지 호스트의 경로",
       "storagePathHelp": "스토리지 호스트가 여기에서 정리, 검사, 봉인을 합니다. 백업되는 호스트는 절대 정리하지 않습니다.",
       "zfsDataset": "ZFS 데이터 세트",
-      "zfsRetention": "오래된 ZFS 스냅샷 삭제는 당분간 직접 해야 합니다. 스토리지 호스트에서 보존 기간을 설정하세요."
+      "zfsRetention": "오래된 ZFS 스냅샷 삭제는 당분간 직접 해야 합니다. 스토리지 호스트에서 보존 기간을 설정하세요.",
+      "btrfsHelp": "리포지토리는 btrfs 서브볼륨에 있어야 하며, 스냅샷은 같은 파일 시스템에서 서브볼륨 바깥에 있는 디렉터리에 저장됩니다.",
+      "btrfsRetention": "오래된 btrfs 스냅샷 삭제는 당분간 직접 해야 합니다. 스토리지 호스트에서 보존 기간을 설정하세요.",
+      "btrfsSnapshotDir": "스토리지 호스트의 스냅샷 디렉터리",
+      "sealBtrfs": "btrfs 스냅샷 (읽기 전용)"
     },
     "title": "백업",
     "warning": {
-      "noStorageHost": "스토리지 호스트 없음: 오래된 스냅샷이 정리되지 않고 리포지토리도 검사되지 않습니다",
+      "noStorageHost": "스토리지 호스트가 없습니다. 백업이 봉인되지도, 오래된 스냅샷이 정리되지도, 검사되지도 않으며 리포지토리는 계속 커집니다.",
       "notSealed": "봉인되지 않음 (변경 불가능한 사본 없음)",
-      "storageNotEquipped": "스토리지 호스트에서 아직 restate를 실행할 수 없습니다"
+      "storageNotEquipped": "스토리지 호스트가 백업 작업을 실행할 수 없으므로({{reason}}) 스토리지 작업을 실행할 수 없습니다. 봉인, 정리, 검사가 모두 이루어지지 않습니다.",
+      "btrfsNotSubvolume": "btrfs 스냅샷을 사용하려면 리포지토리 디렉터리가 서브볼륨이어야 하므로 모든 봉인이 실패합니다. 다음 명령으로 만드세요:",
+      "checkStale": "검사 간격의 두 배가 넘도록 검사되지 않음: {{hosts}}",
+      "fsCannotSnapshot": "스토리지 경로가 스냅샷을 만들 수 없는 {{type}}에 있으므로, 손상된 호스트로부터 백업을 보호하도록 봉인할 수 없습니다. 동작은 하지만 변경 불가능한 사본을 위해 ZFS 또는 btrfs를 고려하세요.",
+      "fsUnchecked": "파일 시스템이 아직 검사되지 않음",
+      "pruneStale": "백업 간격의 두 배가 넘도록 오래된 스냅샷이 정리되지 않음: {{hosts}}",
+      "sealFsMismatch": "봉인 모드에는 {{needed}}이(가) 필요하지만 스토리지 경로가 {{type}}에 있습니다. 모든 봉인이 실패합니다.",
+      "sealStale": "마지막 백업 이후 봉인되지 않음: {{hosts}}"
+    },
+    "storage": {
+      "confirmed": "확인된 스토리지 작업 파일: {{total}}개 중 {{confirmed}}개",
+      "filesystem": "스토리지 파일 시스템",
+      "lastCheck": "마지막 검사",
+      "lastPrune": "마지막 정리",
+      "lastSeal": "마지막 봉인",
+      "never": "없음"
     }
   }
 }

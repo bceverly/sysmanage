@@ -4,8 +4,8 @@
 
 // Fleet backup with restate (Phase 24, Community).  Hosts capture into their
 // own repository on the target and NEVER prune; the target's storage host
-// seals each capture (a ZFS snapshot) and only then prunes; it also checks
-// the repository.  Restores always land in the agent's staging directory.
+// seals each capture (a ZFS snapshot or a read-only btrfs snapshot) and only
+// then prunes; it also checks the repository.  Restores always land in the agent's staging directory.
 
 import axiosInstance from "./api";
 
@@ -32,8 +32,45 @@ export const BACKUP_STATUS_ORDER: BackupStatus[] = [
 ];
 
 export type Coverage = "full" | "files_only" | "unsupported";
-export type SealMode = "none" | "zfs_snapshot";
-export type TargetWarning = "not_sealed" | "no_storage_host" | "storage_not_equipped";
+export type SealMode = "none" | "zfs_snapshot" | "btrfs_snapshot";
+/** Worst first, as the server orders them. */
+export type TargetWarning =
+  | "no_storage_host"
+  | "storage_not_equipped"
+  | "seal_fs_mismatch"
+  | "btrfs_not_subvolume"
+  | "seal_stale"
+  | "prune_stale"
+  | "check_stale"
+  | "not_sealed"
+  | "fs_cannot_snapshot"
+  | "fs_unchecked";
+
+/** What the storage host last reported about the filesystem under the
+ *  storage path; every field null until it has. */
+export interface StorageFilesystem {
+  type: string | null;
+  mount_point: string | null;
+  btrfs_subvolume: boolean | null;
+  checked_at: string | null;
+}
+
+export interface StorageRunBrief {
+  status: string;
+  finished_at: string | null;
+  message: string | null;
+}
+
+/** The storage side, when the storage host can run restate. */
+export interface StorageStatus {
+  policies: number;
+  confirmed: number;
+  last_seal: StorageRunBrief | null;
+  last_prune: StorageRunBrief | null;
+  last_check: StorageRunBrief | null;
+  /** Host ids whose repository is behind on each storage job. */
+  stale: Record<"seal_stale" | "prune_stale" | "check_stale", string[]>;
+}
 
 export interface BackupTarget {
   id: string;
@@ -46,7 +83,12 @@ export interface BackupTarget {
   max_concurrent: number;
   seal_mode: SealMode;
   zfs_dataset: string | null;
+  btrfs_snapshot_dir: string | null;
+  storage_fs: StorageFilesystem;
+  storage_status: StorageStatus | null;
   warnings: TargetWarning[];
+  /** The target counts once on the dashboard's overdue-or-failed card. */
+  problem: boolean;
 }
 
 export interface TargetInput {
@@ -57,6 +99,7 @@ export interface TargetInput {
   max_concurrent: number;
   seal_mode: SealMode;
   zfs_dataset: string | null;
+  btrfs_snapshot_dir: string | null;
 }
 
 export interface BackupPolicy {

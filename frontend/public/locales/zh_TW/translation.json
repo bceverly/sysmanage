@@ -5338,7 +5338,8 @@
       "missingTool": "請安裝 restate",
       "noStorageHost": "未設定儲存主機",
       "notPrivileged": "代理程式必須以 root 身分執行",
-      "toolOutdated": "請升級 restate"
+      "toolOutdated": "請升級 restate",
+      "wrongPlatform": "此作業系統不支援"
     },
     "restore": {
       "confirm": "還原到暫存區",
@@ -5413,13 +5414,32 @@
       "storagePath": "儲存主機上的路徑",
       "storagePathHelp": "儲存主機在此清理、檢查和封存；被備份的主機從不清理。",
       "zfsDataset": "ZFS 資料集",
-      "zfsRetention": "目前需由您自行刪除舊的 ZFS 快照；請在儲存主機上設定保留原則。"
+      "zfsRetention": "目前需由您自行刪除舊的 ZFS 快照；請在儲存主機上設定保留原則。",
+      "btrfsHelp": "儲存庫必須位於 btrfs 子磁碟區上；快照存放在同一檔案系統上、該子磁碟區之外的目錄中。",
+      "btrfsRetention": "目前需由您自行刪除舊的 btrfs 快照；請在儲存主機上設定保留原則。",
+      "btrfsSnapshotDir": "儲存主機上的快照目錄",
+      "sealBtrfs": "btrfs 快照（唯讀）"
     },
     "title": "備份",
     "warning": {
-      "noStorageHost": "沒有儲存主機：舊快照永遠不會被清理，儲存庫也永遠不會被檢查",
+      "noStorageHost": "沒有儲存主機：備份永遠不會被封存、清理或檢查，儲存庫會持續增長。",
       "notSealed": "未封存（沒有不可變副本）",
-      "storageNotEquipped": "儲存主機暫時無法執行 restate"
+      "storageNotEquipped": "儲存主機無法執行備份作業（{{reason}}），因此儲存作業無法執行：不會進行任何封存、清理或檢查。",
+      "btrfsNotSubvolume": "btrfs 快照要求儲存庫目錄是一個子磁碟區，因此每次封存都會失敗。請用以下命令建立：",
+      "checkStale": "超過檢查間隔的兩倍時間未檢查：{{hosts}}",
+      "fsCannotSnapshot": "儲存路徑位於 {{type}} 上，它無法建立快照，因此無法封存備份以防範遭入侵的主機。這可以正常運作，但如需不可變副本，請考慮使用 ZFS 或 btrfs。",
+      "fsUnchecked": "尚未檢查檔案系統",
+      "pruneStale": "超過備份間隔的兩倍時間未清理舊快照：{{hosts}}",
+      "sealFsMismatch": "封存模式需要 {{needed}}，但儲存路徑位於 {{type}} 上：每次封存都會失敗。",
+      "sealStale": "自上次備份以來未封存：{{hosts}}"
+    },
+    "storage": {
+      "confirmed": "已確認的儲存作業檔案：{{confirmed}}/{{total}}",
+      "filesystem": "儲存檔案系統",
+      "lastCheck": "上次檢查",
+      "lastPrune": "上次修剪",
+      "lastSeal": "上次封存",
+      "never": "從未"
     }
   }
 }

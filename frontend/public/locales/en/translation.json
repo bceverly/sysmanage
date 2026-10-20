@@ -5338,7 +5338,8 @@
       "missingTool": "Install restate",
       "noStorageHost": "No storage host is set",
       "notPrivileged": "The agent must run as root",
-      "toolOutdated": "Upgrade restate"
+      "toolOutdated": "Upgrade restate",
+      "wrongPlatform": "Not supported on this OS"
     },
     "restore": {
       "confirm": "Restore to staging",
@@ -5413,13 +5414,32 @@
       "storagePath": "Path on the storage host",
       "storagePathHelp": "The storage host prunes, checks and seals here; backed-up hosts never prune.",
       "zfsDataset": "ZFS dataset",
-      "zfsRetention": "Removing old ZFS snapshots is up to you for now; set retention on the storage host."
+      "zfsRetention": "Removing old ZFS snapshots is up to you for now; set retention on the storage host.",
+      "btrfsHelp": "The repositories must sit on a btrfs subvolume; snapshots go to a directory on the same filesystem, outside the subvolume.",
+      "btrfsRetention": "Removing old btrfs snapshots is up to you for now; set retention on the storage host.",
+      "btrfsSnapshotDir": "Snapshot directory on the storage host",
+      "sealBtrfs": "btrfs snapshot (read-only)"
     },
     "title": "Backups",
     "warning": {
-      "noStorageHost": "No storage host: old snapshots are never pruned and the repository is never checked",
+      "noStorageHost": "No storage host: backups are never sealed, pruned or checked, and the repositories keep growing.",
       "notSealed": "Not sealed (no immutable copies)",
-      "storageNotEquipped": "The storage host cannot run restate yet"
+      "storageNotEquipped": "The storage host cannot run backup jobs ({{reason}}), so storage jobs cannot run: nothing is sealed, pruned or checked.",
+      "btrfsNotSubvolume": "btrfs snapshots need the repository directory to be a subvolume, so every seal will fail. Create it with:",
+      "checkStale": "Not checked for more than twice the check interval: {{hosts}}",
+      "fsCannotSnapshot": "The storage path is on {{type}}, which cannot take snapshots, so backups cannot be sealed against a compromised host. It works, but consider ZFS or btrfs for immutable copies.",
+      "fsUnchecked": "Filesystem not checked yet",
+      "pruneStale": "Not pruned for more than twice the backup interval: {{hosts}}",
+      "sealFsMismatch": "The seal mode needs {{needed}}, but the storage path is on {{type}}: every seal will fail.",
+      "sealStale": "Not sealed since the last backup: {{hosts}}"
+    },
+    "storage": {
+      "confirmed": "Storage job files confirmed: {{confirmed}} of {{total}}",
+      "filesystem": "Storage filesystem",
+      "lastCheck": "Last check",
+      "lastPrune": "Last prune",
+      "lastSeal": "Last seal",
+      "never": "Never"
     }
   }
 }

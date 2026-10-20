@@ -62,10 +62,71 @@ async def _status(coro):
 async def test_targets_need_the_role_and_community_has_one(session):
     assert await _status(api.create_target(_target_body(), session, NOBODY)) == 403
     made = await api.create_target(_target_body(), session, MANAGER)
-    assert made["warnings"] == ["not_sealed", "no_storage_host"]
+    assert made["warnings"] == ["no_storage_host", "not_sealed"]
+    assert made["problem"] is True
     assert await _status(api.create_target(_target_body(), session, MANAGER)) == 409
     audit = session.query(models.AuditLog).all()
     assert any("Backup target created" in a.description for a in audit)
+
+
+def _btrfs(
+    nas_id, storage_path="/srv/backups/restate", snapshot_dir="/srv/backups/.snapshots"
+):
+    return _target_body(
+        storage_host_id=nas_id, storage_path=storage_path,
+        seal_mode="btrfs_snapshot", btrfs_snapshot_dir=snapshot_dir,
+    )  # fmt: skip
+
+
+def _bad_btrfs_bodies(nas_id):
+    return (
+        _btrfs(nas_id, snapshot_dir=None),  # needs the snapshot directory
+        _btrfs(nas_id, snapshot_dir="snapshots"),  # relative
+        _btrfs(nas_id, snapshot_dir="/srv/backups/restate"),  # the subvolume
+        _btrfs(nas_id, snapshot_dir="/srv/backups/restate/.snap"),  # inside it
+        _btrfs(nas_id, snapshot_dir="/srv/../etc"),
+        _btrfs(nas_id, snapshot_dir="/srv/snaps/"),  # not normalized
+        _btrfs(nas_id, snapshot_dir="/srv/-r"),  # an option to btrfs
+        _btrfs(nas_id, snapshot_dir="/srv/snap shots"),
+        _btrfs(nas_id, storage_path="/srv/back ups"),
+        _btrfs(nas_id, snapshot_dir="/"),
+    )
+
+
+@pytest.mark.asyncio
+async def test_a_btrfs_target_is_accepted_and_sends_its_seal(session):
+    nas = _host(session, fqdn="nas.lab")
+    made = await api.create_target(_btrfs(str(nas.id)), session, MANAGER)
+    assert made["seal_mode"] == "btrfs_snapshot"
+    assert made["btrfs_snapshot_dir"] == "/srv/backups/.snapshots"
+    target = session.query(models.BackupTarget).one()
+    assert jobs.seal_job(target) == {
+        "mode": "btrfs_snapshot",
+        "subvolume": "/srv/backups/restate",
+        "snapshot_dir": "/srv/backups/.snapshots",
+    }
+
+
+def test_the_seal_job_for_each_mode():
+    zfs = SimpleNamespace(seal_mode="zfs_snapshot", zfs_dataset="tank/b")
+    assert jobs.seal_job(zfs) == {"mode": "zfs_snapshot", "dataset": "tank/b"}
+    assert jobs.seal_job(SimpleNamespace(seal_mode=None)) == {"mode": "none"}
+
+
+@pytest.mark.asyncio
+async def test_moving_the_storage_path_forgets_the_filesystem(session):
+    s = _setup(session)
+    s.target.storage_fs_type = "ext4"
+    s.target.storage_fs_checked_at = jobs.now()
+    session.commit()
+    same = _target_body(
+        storage_host_id=str(s.nas.id), storage_path="/srv/backups/restate"
+    )
+    await api.update_target(str(s.target.id), same, session, MANAGER)
+    assert s.target.storage_fs_type == "ext4"
+    moved = _target_body(storage_host_id=str(s.nas.id), storage_path="/srv/new")
+    await api.update_target(str(s.target.id), moved, session, MANAGER)
+    assert s.target.storage_fs_type is None and s.target.storage_fs_checked_at is None
 
 
 @pytest.mark.asyncio
@@ -78,6 +139,7 @@ async def test_target_validation(session):
         _target_body(seal_mode="zfs_snapshot"),
         _target_body(max_concurrent=0),
         _target_body(storage_host_id=str(nas.id)),  # no storage path
+        *_bad_btrfs_bodies(str(nas.id)),
     ):
         assert await _status(api.create_target(body, session, MANAGER)) == 422
     sealed = await api.create_target(
@@ -87,7 +149,8 @@ async def test_target_validation(session):
         ),
         session, MANAGER,
     )  # fmt: skip
-    assert sealed["warnings"] == [] and sealed["storage_hostname"] == "nas.lab"
+    assert sealed["warnings"] == ["fs_unchecked"]
+    assert sealed["storage_hostname"] == "nas.lab" and sealed["problem"] is False
 
 
 @pytest.mark.asyncio
@@ -118,6 +181,18 @@ async def test_a_policy_needs_a_target_and_bumps_its_version(session):
     ):
         assert await _status(api.put_policy(str(host.id), bad, session, MANAGER)) == 422
     assert await _status(api.put_policy(str(host.id), body, session, NOBODY)) == 403
+
+
+@pytest.mark.asyncio
+async def test_saving_a_policy_sends_its_job_files_at_once(session, sent):
+    # Not on the next five-minute tick, and even with no schedule: "Back up
+    # now" needs the job files (24.0 lab, 2026-10-20).
+    s = _setup(session)
+    body = api.PolicyBody(enabled=False)
+    await api.put_policy(str(s.host.id), body, session, MANAGER)
+    configured = sorted((h, p["role"]) for h, c, p in sent if c == "backup_configure")
+    assert configured == sorted([(str(s.host.id), "host"), (str(s.nas.id), "storage")])
+    assert not [c for _h, c, p in sent if c == "backup_run"]
 
 
 @pytest.mark.asyncio
@@ -155,7 +230,7 @@ async def test_restore_stages_and_needs_the_unsigned_acknowledgment(session, sen
     )
     body.acknowledge_unsigned = True
     out = await api.backup_restore(str(s.host.id), body, session, RESTORER)
-    _host_id, command, params = sent[-1]
+    _, command, params = sent[-1]
     assert command == "backup_restore"
     assert params["dry_run"] is True and params["allow_unverified"] is True
     assert params["include"] == ["/etc/nginx"]
@@ -191,6 +266,9 @@ async def test_runs_are_paginated_and_overview_counts(session, sent):
     assert rows[str(s.nas.id)]["status"] == "no_policy"
     summary = await api.backups_summary(session)
     assert summary["configured"] is True and summary["attention"] == 0
+    s.target.storage_host_id = None  # no storage host: one problem
+    session.commit()
+    assert (await api.backups_summary(session))["attention"] == 1
 
 
 def _capture(session, s, status, ago_hours):

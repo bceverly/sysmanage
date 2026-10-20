@@ -3,8 +3,9 @@
 // See the LICENSE file in the project root for the full terms.
 
 // The backup target (Phase 24): where repositories live, the storage host
-// that maintains them, and whether each capture is sealed.  Community has
-// one target.
+// that maintains them, and whether each capture is sealed (a ZFS snapshot or
+// a read-only btrfs snapshot).  Community has one target.  The storage
+// side's status and warnings are in BackupStorageStatus.
 
 import React, { useEffect, useState } from 'react';
 import {
@@ -27,10 +28,12 @@ import {
 } from '@mui/material';
 import StorageIcon from '@mui/icons-material/Storage';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import AsyncButton from '../AsyncButton';
 import { saveTarget } from '../../Services/backups';
 import type { BackupHost, BackupTarget, SealMode, TargetInput } from '../../Services/backups';
-import { apiDetail, reasonLabel, warningLabel } from './backupLabels';
+import { apiDetail, reasonLabel } from './backupLabels';
+import BackupStorageStatus from './BackupStorageStatus';
 
 const EMPTY: TargetInput = {
     name: '',
@@ -40,6 +43,7 @@ const EMPTY: TargetInput = {
     max_concurrent: 2,
     seal_mode: 'none',
     zfs_dataset: null,
+    btrfs_snapshot_dir: null,
 };
 
 const toInput = (target: BackupTarget | null): TargetInput =>
@@ -52,6 +56,7 @@ const toInput = (target: BackupTarget | null): TargetInput =>
               max_concurrent: target.max_concurrent,
               seal_mode: target.seal_mode,
               zfs_dataset: target.zfs_dataset,
+              btrfs_snapshot_dir: target.btrfs_snapshot_dir,
           }
         : EMPTY;
 
@@ -78,7 +83,12 @@ export const TargetDialog: React.FC<{
     const save = async () => {
         try {
             await saveTarget(
-                { ...form, storage_host_id: form.storage_host_id || null, zfs_dataset: form.zfs_dataset || null },
+                {
+                    ...form,
+                    storage_host_id: form.storage_host_id || null,
+                    zfs_dataset: form.zfs_dataset || null,
+                    btrfs_snapshot_dir: form.btrfs_snapshot_dir || null,
+                },
                 target?.id,
             );
             onSaved();
@@ -122,8 +132,20 @@ export const TargetDialog: React.FC<{
                             value={form.seal_mode} onChange={e => set({ seal_mode: e.target.value as SealMode })}>
                             <MenuItem value="none">{t('backups.target.sealNone', 'Do not seal')}</MenuItem>
                             <MenuItem value="zfs_snapshot">{t('backups.target.sealZfs', 'ZFS snapshot')}</MenuItem>
+                            <MenuItem value="btrfs_snapshot">
+                                {t('backups.target.sealBtrfs', 'btrfs snapshot (read-only)')}
+                            </MenuItem>
                         </Select>
                     </FormControl>
+                    {form.seal_mode === 'btrfs_snapshot' && (
+                        <TextField label={t('backups.target.btrfsSnapshotDir', 'Snapshot directory on the storage host')}
+                            value={form.btrfs_snapshot_dir ?? ''} placeholder="/srv/backups/.snapshots"
+                            onChange={e => set({ btrfs_snapshot_dir: e.target.value || null })} required
+                            helperText={`${t('backups.target.btrfsHelp',
+                                'The repositories must sit on a btrfs subvolume; snapshots go to a directory on the same filesystem, outside the subvolume.')} ${t(
+                                'backups.target.btrfsRetention',
+                                'Removing old btrfs snapshots is up to you for now; set retention on the storage host.')}`} />
+                    )}
                     {form.seal_mode === 'zfs_snapshot' && (
                         <TextField label={t('backups.target.zfsDataset', 'ZFS dataset')} value={form.zfs_dataset ?? ''}
                             onChange={e => set({ zfs_dataset: e.target.value || null })} required
@@ -141,6 +163,17 @@ export const TargetDialog: React.FC<{
             </DialogActions>
         </Dialog>
     );
+};
+
+const sealDescription = (t: TFunction, target: BackupTarget): string => {
+    switch (target.seal_mode) {
+        case 'zfs_snapshot':
+            return `${t('backups.target.sealZfs', 'ZFS snapshot')} (${target.zfs_dataset})`;
+        case 'btrfs_snapshot':
+            return `${t('backups.target.sealBtrfs', 'btrfs snapshot (read-only)')} (${target.btrfs_snapshot_dir})`;
+        default:
+            return t('backups.target.sealNone', 'Do not seal');
+    }
 };
 
 const BackupTargetCard: React.FC<{
@@ -186,22 +219,14 @@ const BackupTargetCard: React.FC<{
                         </Typography>
                         <Typography variant="body2">
                             {t('backups.target.sealMode', 'Seal each backup')}:{' '}
-                            {target.seal_mode === 'zfs_snapshot'
-                                ? `${t('backups.target.sealZfs', 'ZFS snapshot')} (${target.zfs_dataset})`
-                                : t('backups.target.sealNone', 'Do not seal')}
+                            {sealDescription(t, target)}
                         </Typography>
                         {versions.length > 0 && (
                             <Typography variant="body2" color="text.secondary">
                                 {t('backups.target.restateVersions', 'restate versions in use')}: {versions.join(', ')}
                             </Typography>
                         )}
-                        <Stack spacing={1} sx={{ mt: 1 }}>
-                            {target.warnings.map(w => (
-                                <Alert key={w} severity={w === 'not_sealed' ? 'warning' : 'error'}>
-                                    {warningLabel(t, w)}
-                                </Alert>
-                            ))}
-                        </Stack>
+                        <BackupStorageStatus target={target} hosts={hosts} />
                     </Box>
                 )}
                 <TargetDialog open={open} target={target} hosts={hosts} onClose={() => setOpen(false)} onSaved={onChanged} />

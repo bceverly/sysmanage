@@ -87,7 +87,11 @@ const overview = (over: Partial<BackupOverview> = {}): BackupOverview => ({
     max_concurrent: 2,
     seal_mode: "none",
     zfs_dataset: null,
+    btrfs_snapshot_dir: null,
+    storage_fs: { type: null, mount_point: null, btrfs_subvolume: null, checked_at: null },
+    storage_status: null,
     warnings: ["not_sealed"],
+    problem: false,
   },
   hosts: [
     host({}),

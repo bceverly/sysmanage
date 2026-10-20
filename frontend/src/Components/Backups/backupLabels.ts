@@ -6,7 +6,7 @@
 
 import type { TFunction } from 'i18next';
 import { appLocale } from '../../utils/locale';
-import type { BackupRun, BackupStatus, Coverage, TargetWarning } from '../../Services/backups';
+import type { BackupRun, BackupStatus, Coverage } from '../../Services/backups';
 
 type ChipColor = 'default' | 'success' | 'warning' | 'error' | 'info';
 
@@ -52,6 +52,8 @@ export const reasonLabel = (t: TFunction, reason: string | null): string => {
             return t('backups.reason.agentOutdated', 'Upgrade the agent');
         case 'not_privileged':
             return t('backups.reason.notPrivileged', 'The agent must run as root');
+        case 'wrong_platform':
+            return t('backups.reason.wrongPlatform', 'Not supported on this OS');
         case 'no_host':
         case 'no_storage_host':
             return t('backups.reason.noStorageHost', 'No storage host is set');
@@ -67,21 +69,6 @@ export const coverageLabel = (t: TFunction, coverage: Coverage): string => {
         unsupported: t('backups.coverage.unsupported', 'Not supported'),
     };
     return labels[coverage] ?? coverage;
-};
-
-export const warningLabel = (t: TFunction, warning: TargetWarning): string => {
-    const labels: Record<TargetWarning, string> = {
-        not_sealed: t('backups.warning.notSealed', 'Not sealed (no immutable copies)'),
-        no_storage_host: t(
-            'backups.warning.noStorageHost',
-            'No storage host: old snapshots are never pruned and the repository is never checked',
-        ),
-        storage_not_equipped: t(
-            'backups.warning.storageNotEquipped',
-            'The storage host cannot run restate yet',
-        ),
-    };
-    return labels[warning] ?? warning;
 };
 
 export const actionLabel = (t: TFunction, action: string): string => {

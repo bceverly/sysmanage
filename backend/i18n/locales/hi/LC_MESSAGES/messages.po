@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 04:22-0400\n"
+"POT-Creation-Date: 2026-10-20 08:12-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -82,7 +82,7 @@ msgstr "आपके पास चयनित खाते के लिए प
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:103
+#: backend/api/posture.py:375 backend/api/backups.py:111
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:151
@@ -197,8 +197,8 @@ msgstr "अमान्य होस्ट ID फॉर्मेट"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:115
-#: backend/api/backups.py:118 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:123
+#: backend/api/backups.py:126 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -4039,132 +4039,157 @@ msgstr "KVM नेटवर्क केवल Linux होस्ट पर उ�
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "KVM नेटवर्क सूची का अनुरोध किया गया। परिणाम शीघ्र ही प्रदर्शित होंगे।"
 
-#: backend/api/backups.py:126
+#: backend/api/backups.py:134
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s एक पूर्ण (absolute) पथ होना चाहिए, जिसमें '..' न हो"
 
-#: backend/api/backups.py:131
+#: backend/api/backups.py:139
 #, python-format
 msgid "%s is out of range"
 msgstr "%s अनुमत सीमा से बाहर है"
 
-#: backend/api/backups.py:135
+#: backend/api/backups.py:143
 msgid "Host mount point"
 msgstr "होस्ट पर माउंट पॉइंट"
 
-#: backend/api/backups.py:136
+#: backend/api/backups.py:144 backend/api/backups.py:179
 msgid "Storage path"
 msgstr "स्टोरेज पथ"
 
-#: backend/api/backups.py:137
+#: backend/api/backups.py:145
 msgid "Concurrent backups"
 msgstr "एक साथ बैकअप"
 
-#: backend/api/backups.py:139
+#: backend/api/backups.py:147
 msgid "Unknown seal mode"
 msgstr "अज्ञात सील मोड"
 
-#: backend/api/backups.py:141
+#: backend/api/backups.py:149
 msgid "A ZFS snapshot seal needs the dataset name"
 msgstr "ZFS स्नैपशॉट से सील करने के लिए डेटासेट का नाम आवश्यक है"
 
-#: backend/api/backups.py:143
+#: backend/api/backups.py:151
 msgid "The ZFS dataset name is not valid"
 msgstr "ZFS डेटासेट का नाम मान्य नहीं है"
 
-#: backend/api/backups.py:148
+#: backend/api/backups.py:158
 msgid "A storage host needs the storage path"
 msgstr "स्टोरेज होस्ट के लिए स्टोरेज पथ आवश्यक है"
 
-#: backend/api/backups.py:153
+#: backend/api/backups.py:175
+msgid "A btrfs snapshot seal needs the snapshot directory"
+msgstr "btrfs स्नैपशॉट सील के लिए स्नैपशॉट डायरेक्टरी चाहिए"
+
+#: backend/api/backups.py:177
+msgid "A btrfs snapshot seal needs the storage path"
+msgstr "btrfs स्नैपशॉट सील के लिए स्टोरेज पथ चाहिए"
+
+#: backend/api/backups.py:180
+msgid "Snapshot directory"
+msgstr "स्नैपशॉट डायरेक्टरी"
+
+#: backend/api/backups.py:185
+#, python-format
+msgid ""
+"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
+" trailing '/')"
+msgstr ""
+"%s एक सरल पूर्ण पथ होना चाहिए (अक्षर, अंक, '_', '.', '-' और '/'; अंत में '/'"
+" नहीं)"
+
+#: backend/api/backups.py:193
+msgid "The snapshot directory must be outside the storage path"
+msgstr "स्नैपशॉट डायरेक्टरी स्टोरेज पथ के बाहर होनी चाहिए"
+
+#: backend/api/backups.py:197
 msgid "Interval (hours)"
 msgstr "अंतराल (घंटे)"
 
-#: backend/api/backups.py:154
+#: backend/api/backups.py:198
 msgid "Window start hour"
 msgstr "विंडो का प्रारंभ घंटा"
 
-#: backend/api/backups.py:155
+#: backend/api/backups.py:199
 msgid "Snapshots to keep"
 msgstr "रखे जाने वाले स्नैपशॉट"
 
-#: backend/api/backups.py:156
+#: backend/api/backups.py:200
 msgid "Check interval (days)"
 msgstr "जाँच अंतराल (दिन)"
 
-#: backend/api/backups.py:160
+#: backend/api/backups.py:204
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "पॉज़ हुक अधिकतम 10 छोटे, लोअरकेस नाम होने चाहिए"
 
-#: backend/api/backups.py:165
+#: backend/api/backups.py:209
 msgid "The snapshot name is not valid"
 msgstr "स्नैपशॉट का नाम मान्य नहीं है"
 
-#: backend/api/backups.py:167
+#: backend/api/backups.py:211
 msgid "At most 50 paths can be restored at once"
 msgstr "एक बार में अधिकतम 50 पथ पुनर्स्थापित किए जा सकते हैं"
 
-#: backend/api/backups.py:170
+#: backend/api/backups.py:214
 msgid "A restore path is empty or too long"
 msgstr "एक पुनर्स्थापना पथ खाली है या बहुत लंबा है"
 
-#: backend/api/backups.py:172
+#: backend/api/backups.py:216
 msgid "A restore path must not contain '..'"
 msgstr "पुनर्स्थापना पथ में '..' नहीं होना चाहिए"
 
-#: backend/api/backups.py:191 backend/api/backups.py:194
+#: backend/api/backups.py:235 backend/api/backups.py:238
 msgid "Backup target not found"
 msgstr "बैकअप लक्ष्य नहीं मिला"
 
-#: backend/api/backups.py:241
+#: backend/api/backups.py:286
 msgid "This edition supports one backup target; edit the existing one"
 msgstr ""
 "यह संस्करण एक ही बैकअप लक्ष्य का समर्थन करता है; मौजूदा लक्ष्य संपादित करें"
 
-#: backend/api/backups.py:310
+#: backend/api/backups.py:361
 msgid "Remove the hosts' backup policies before the target"
 msgstr "लक्ष्य से पहले होस्ट की बैकअप नीतियाँ हटाएँ"
 
-#: backend/api/backups.py:388
+#: backend/api/backups.py:439
 msgid "Set up the backup target first"
 msgstr "पहले बैकअप लक्ष्य सेट करें"
 
-#: backend/api/backups.py:428
+#: backend/api/backups.py:479
 msgid "No backup policy"
 msgstr "कोई बैकअप नीति नहीं"
 
-#: backend/api/backups.py:448
+#: backend/api/backups.py:499
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "यह होस्ट अभी बैकअप नहीं चला सकता (%s)"
 
-#: backend/api/backups.py:454
+#: backend/api/backups.py:505
 msgid "This host's backup is not configured yet"
 msgstr "इस होस्ट का बैकअप अभी कॉन्फ़िगर नहीं हुआ है"
 
-#: backend/api/backups.py:471
+#: backend/api/backups.py:522
 msgid "The backup storage host is not ready"
 msgstr "बैकअप स्टोरेज होस्ट तैयार नहीं है"
 
-#: backend/api/backups.py:486
+#: backend/api/backups.py:537
 msgid "Unknown backup action"
 msgstr "अज्ञात बैकअप कार्रवाई"
 
-#: backend/api/backups.py:491
+#: backend/api/backups.py:542
 msgid "That backup job is already queued or running"
 msgstr "वह बैकअप कार्य पहले से कतार में है या चल रहा है"
 
-#: backend/api/backups.py:530
+#: backend/api/backups.py:581
 msgid "Snapshot not found"
 msgstr "स्नैपशॉट नहीं मिला"
 
-#: backend/api/backups.py:534
+#: backend/api/backups.py:585
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr ""
 "यह स्नैपशॉट हस्ताक्षरित नहीं है; फिर भी पुनर्स्थापित करने के लिए पुष्टि करें"
 
-#: backend/api/backups.py:605 backend/api/backups.py:608
+#: backend/api/backups.py:656 backend/api/backups.py:659
 msgid "Backup run not found"
 msgstr "बैकअप कार्य नहीं मिला"
 

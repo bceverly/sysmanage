@@ -5338,7 +5338,8 @@
       "missingTool": "restate installieren",
       "noStorageHost": "Kein Speicher-Host festgelegt",
       "notPrivileged": "Der Agent muss als root laufen",
-      "toolOutdated": "restate aktualisieren"
+      "toolOutdated": "restate aktualisieren",
+      "wrongPlatform": "Auf diesem Betriebssystem nicht unterstützt"
     },
     "restore": {
       "confirm": "In Staging wiederherstellen",
@@ -5413,13 +5414,32 @@
       "storagePath": "Pfad auf dem Speicher-Host",
       "storagePathHelp": "Der Speicher-Host bereinigt, prüft und versiegelt hier; gesicherte Hosts bereinigen nie.",
       "zfsDataset": "ZFS-Dataset",
-      "zfsRetention": "Alte ZFS-Snapshots müssen Sie vorerst selbst entfernen; legen Sie die Aufbewahrung auf dem Speicher-Host fest."
+      "zfsRetention": "Alte ZFS-Snapshots müssen Sie vorerst selbst entfernen; legen Sie die Aufbewahrung auf dem Speicher-Host fest.",
+      "btrfsHelp": "Die Repositorys müssen auf einem btrfs-Subvolume liegen; Snapshots landen in einem Verzeichnis auf demselben Dateisystem, außerhalb des Subvolumes.",
+      "btrfsRetention": "Alte btrfs-Snapshots müssen Sie vorerst selbst entfernen; legen Sie die Aufbewahrung auf dem Speicher-Host fest.",
+      "btrfsSnapshotDir": "Snapshot-Verzeichnis auf dem Speicher-Host",
+      "sealBtrfs": "btrfs-Snapshot (schreibgeschützt)"
     },
     "title": "Sicherungen",
     "warning": {
-      "noStorageHost": "Kein Speicher-Host: Alte Snapshots werden nie bereinigt und das Repository wird nie geprüft",
+      "noStorageHost": "Kein Speicher-Host: Backups werden nie versiegelt, bereinigt oder geprüft, und die Repositorys wachsen immer weiter.",
       "notSealed": "Nicht versiegelt (keine unveränderlichen Kopien)",
-      "storageNotEquipped": "Der Speicher-Host kann restate noch nicht ausführen"
+      "storageNotEquipped": "Der Speicher-Host kann keine Backup-Jobs ausführen ({{reason}}), daher können keine Speicher-Jobs laufen: Nichts wird versiegelt, bereinigt oder geprüft.",
+      "btrfsNotSubvolume": "btrfs-Snapshots setzen voraus, dass das Repository-Verzeichnis ein Subvolume ist; daher schlägt jede Versiegelung fehl. Erstellen Sie es mit:",
+      "checkStale": "Seit mehr als dem doppelten Prüfintervall nicht geprüft: {{hosts}}",
+      "fsCannotSnapshot": "Der Speicherpfad liegt auf {{type}}, das keine Snapshots erstellen kann; Backups lassen sich daher nicht gegen einen kompromittierten Host versiegeln. Das funktioniert, aber für unveränderliche Kopien sollten Sie ZFS oder btrfs in Betracht ziehen.",
+      "fsUnchecked": "Dateisystem noch nicht geprüft",
+      "pruneStale": "Seit mehr als dem doppelten Backup-Intervall nicht bereinigt: {{hosts}}",
+      "sealFsMismatch": "Der Versiegelungsmodus erfordert {{needed}}, aber der Speicherpfad liegt auf {{type}}: Jede Versiegelung schlägt fehl.",
+      "sealStale": "Seit dem letzten Backup nicht versiegelt: {{hosts}}"
+    },
+    "storage": {
+      "confirmed": "Speicher-Jobdateien bestätigt: {{confirmed}} von {{total}}",
+      "filesystem": "Speicher-Dateisystem",
+      "lastCheck": "Letzte Prüfung",
+      "lastPrune": "Letzte Bereinigung",
+      "lastSeal": "Letzte Versiegelung",
+      "never": "Nie"
     }
   }
 }

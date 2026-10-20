@@ -5338,7 +5338,8 @@
       "missingTool": "Installa restate",
       "noStorageHost": "Nessun host di archiviazione impostato",
       "notPrivileged": "L'agente deve essere eseguito come root",
-      "toolOutdated": "Aggiorna restate"
+      "toolOutdated": "Aggiorna restate",
+      "wrongPlatform": "Non supportato su questo sistema operativo"
     },
     "restore": {
       "confirm": "Ripristina nell'area di staging",
@@ -5413,13 +5414,32 @@
       "storagePath": "Percorso sull'host di archiviazione",
       "storagePathHelp": "Qui l'host di archiviazione pulisce, verifica e sigilla; gli host sottoposti a backup non eliminano mai nulla.",
       "zfsDataset": "Dataset ZFS",
-      "zfsRetention": "Per ora la rimozione dei vecchi snapshot ZFS spetta a te; imposta la conservazione sull'host di archiviazione."
+      "zfsRetention": "Per ora la rimozione dei vecchi snapshot ZFS spetta a te; imposta la conservazione sull'host di archiviazione.",
+      "btrfsHelp": "I repository devono trovarsi su un sottovolume btrfs; gli snapshot vanno in una directory dello stesso file system, fuori dal sottovolume.",
+      "btrfsRetention": "Per ora la rimozione dei vecchi snapshot btrfs spetta a te; imposta la conservazione sull'host di archiviazione.",
+      "btrfsSnapshotDir": "Directory degli snapshot sull'host di archiviazione",
+      "sealBtrfs": "Snapshot btrfs (sola lettura)"
     },
     "title": "Backup",
     "warning": {
-      "noStorageHost": "Nessun host di archiviazione: i vecchi snapshot non vengono mai eliminati e il repository non viene mai verificato",
+      "noStorageHost": "Nessun host di archiviazione: i backup non vengono mai sigillati, ripuliti o verificati e i repository continuano a crescere.",
       "notSealed": "Non sigillato (nessuna copia immutabile)",
-      "storageNotEquipped": "L'host di archiviazione non può ancora eseguire restate"
+      "storageNotEquipped": "L'host di archiviazione non può eseguire i processi di backup ({{reason}}), quindi i processi di archiviazione non possono essere eseguiti: nulla viene sigillato, ripulito o verificato.",
+      "btrfsNotSubvolume": "Gli snapshot btrfs richiedono che la directory del repository sia un sottovolume, quindi ogni sigillatura fallirà. Crealo con:",
+      "checkStale": "Non verificato da più del doppio dell'intervallo di verifica: {{hosts}}",
+      "fsCannotSnapshot": "Il percorso di archiviazione si trova su {{type}}, che non può creare snapshot, quindi i backup non possono essere sigillati contro un host compromesso. Funziona, ma valuta ZFS o btrfs per avere copie immutabili.",
+      "fsUnchecked": "File system non ancora verificato",
+      "pruneStale": "Non ripulito da più del doppio dell'intervallo di backup: {{hosts}}",
+      "sealFsMismatch": "La modalità di sigillatura richiede {{needed}}, ma il percorso di archiviazione si trova su {{type}}: ogni sigillatura fallirà.",
+      "sealStale": "Non sigillato dall'ultimo backup: {{hosts}}"
+    },
+    "storage": {
+      "confirmed": "File dei processi di archiviazione confermati: {{confirmed}} su {{total}}",
+      "filesystem": "File system di archiviazione",
+      "lastCheck": "Ultima verifica",
+      "lastPrune": "Ultima pulizia",
+      "lastSeal": "Ultima sigillatura",
+      "never": "Mai"
     }
   }
 }
