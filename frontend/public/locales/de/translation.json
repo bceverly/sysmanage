@@ -5363,7 +5363,8 @@
       "stagedAt": "Auf dem Host bereitgestellt unter",
       "stagingNote": "Dateien werden in ein Staging-Verzeichnis auf dem Host wiederhergestellt, nie über die laufenden Dateien. Verschieben Sie sie selbst an ihren Platz.",
       "title": "Dateien auf {{host}} wiederherstellen",
-      "unsignedAck": "Dieser Snapshot ist nicht signiert. Trotzdem wiederherstellen."
+      "unsignedAck": "Dieser Snapshot ist nicht signiert. Trotzdem wiederherstellen.",
+      "planned": "Aus dem Snapshot-Index geplant. Die gesicherten Daten wurden nicht gelesen, ihre Unversehrtheit wurde hier also nicht geprüft; das übernimmt die wöchentliche Prüfung."
     },
     "run": {
       "busy": "Belegt, wird wiederholt",

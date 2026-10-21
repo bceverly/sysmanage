@@ -793,5 +793,22 @@ async def get_run(run_id: str, db: Session = Depends(get_tenant_db)) -> Dict[str
         raise HTTPException(status_code=404, detail=_("Backup run not found"))
     out = views.run_dict(run)
     if run.action == jobs.RESTORE:
-        out["staging_path"] = jobs.staging_dir(run.id)
+        out["staging_path"] = _staging_path(run)
     return out
+
+
+def _staging_path(run: models.BackupRun) -> str:
+    """Where the restore landed, as restate reports it (``restore.root``):
+    the agent keeps its staging directory beside its own database, which is
+    not always /var/lib/sysmanage-agent (a source checkout keeps it there)."""
+    try:
+        result = json.loads(run.result) if run.result else {}
+    except ValueError:
+        result = {}
+    restore = result.get("restore") if isinstance(result, dict) else None
+    root = restore.get("root") if isinstance(restore, dict) else None
+    return (
+        root
+        if isinstance(root, str) and root.startswith("/")
+        else jobs.staging_dir(run.id)
+    )

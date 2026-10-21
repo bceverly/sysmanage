@@ -42,6 +42,8 @@ interface RestoreResult {
     missing?: unknown[];
     plan?: unknown[];
     plan_count?: number;
+    /** false: restate planned from the snapshot's index and read no backed-up data. */
+    content_read?: boolean;
 }
 
 const planLine = (entry: unknown): string => {
@@ -78,6 +80,12 @@ const RunOutcome: React.FC<{ run: BackupRun }> = ({ run }) => {
                 {Array.isArray(result.missing) && result.missing.length > 0
                     && ` - ${t('backups.restore.missing', 'Not in the snapshot: {{n}}', { n: result.missing.length })}`}
             </Typography>
+            {result.content_read === false && (
+                <Typography variant="caption" display="block" color="text.secondary">
+                    {t('backups.restore.planned',
+                        'Planned from the snapshot index. The backed-up data was not read, so its integrity was not checked here; the weekly check does that.')}
+                </Typography>
+            )}
             {plan.length > 0 && (
                 <Box component="pre" sx={{ maxHeight: 200, overflow: 'auto', fontSize: 12, bgcolor: 'action.hover', p: 1 }}>
                     {plan.slice(0, PLAN_SHOWN).map(planLine).join('\n')}

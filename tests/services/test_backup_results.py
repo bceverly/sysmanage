@@ -434,3 +434,18 @@ def test_the_first_restate_error_is_the_runs_message(session, sent):
                                              "follow-on"])  # fmt: skip
     results.record_result(session, s.host.id, payload)
     assert run.message == "/mnt/backups/h: Permission denied"
+
+
+def test_a_captures_repository_qualified_snapshot_is_stored_by_its_bare_name(
+    session, sent
+):
+    # restate names a capture's snapshot <repository>::<name>; restore, prune,
+    # du and the listing use <name> (lab 2026-10-21: every restore refused).
+    s = _setup(session)
+    run = jobs.queue_run(session, s.policy, s.host.id, "capture")
+    payload = _result(run, snapshot="/mnt/backups/h-1::20261021T153126Z")
+    results.record_result(session, s.host.id, payload)
+    assert run.snapshot == "20261021T153126Z"
+    snap = session.query(models.BackupSnapshot).one()
+    assert snap.name == "20261021T153126Z"
+    assert results.snapshot_name("20261021T153126Z") == "20261021T153126Z"

@@ -5363,7 +5363,8 @@
       "stagedAt": "Preparado en el host en",
       "stagingNote": "Los archivos se restauran en un directorio de preparación del host, nunca sobre los archivos en uso. Muévalos usted mismo a su lugar.",
       "title": "Restaurar archivos en {{host}}",
-      "unsignedAck": "Esta instantánea no está firmada. Restaurarla de todos modos."
+      "unsignedAck": "Esta instantánea no está firmada. Restaurarla de todos modos.",
+      "planned": "Planificado a partir del índice de la instantánea. No se leyeron los datos de la copia de seguridad, así que aquí no se comprobó su integridad; de eso se encarga la comprobación semanal."
     },
     "run": {
       "busy": "Ocupado, se reintentará",

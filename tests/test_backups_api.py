@@ -506,3 +506,21 @@ def test_retention_deletes_old_runs_but_keeps_each_kinds_newest(session):
     assert removed == 3  # the three old ok captures; the newest ok is recent
     assert sorted(r.status for r in left) == ["failed", "ok"]
     assert session.get(models.BackupRun, old_pending.id) is not None  # not final
+
+
+@pytest.mark.asyncio
+async def test_a_restores_staging_path_is_where_restate_put_it(session, sent):
+    s = _setup(session)
+    run = models.BackupRun(
+        id=uuid.uuid4(), policy_id=s.policy.id, host_id=s.host.id, action=jobs.RESTORE,
+        status="ok", queued_at=jobs.now(), finished_at=jobs.now(),
+        result=json.dumps({"restore": {"root": "/home/me/dev/sysmanage-agent/restore/r1"}}),
+    )  # fmt: skip
+    session.add(run)
+    session.commit()
+    got = await api.get_run(str(run.id), session)
+    assert got["staging_path"] == "/home/me/dev/sysmanage-agent/restore/r1"
+    run.result = json.dumps({})  # an older result: the computed default
+    session.commit()
+    got = await api.get_run(str(run.id), session)
+    assert got["staging_path"] == jobs.staging_dir(run.id)

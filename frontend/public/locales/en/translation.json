@@ -5363,7 +5363,8 @@
       "stagedAt": "Staged on the host at",
       "stagingNote": "Files are restored into a staging directory on the host, never over the live files. Move them into place yourself.",
       "title": "Restore files to {{host}}",
-      "unsignedAck": "This snapshot is not signed. Restore it anyway."
+      "unsignedAck": "This snapshot is not signed. Restore it anyway.",
+      "planned": "Planned from the snapshot index. The backed-up data was not read, so its integrity was not checked here; the weekly check does that."
     },
     "run": {
       "busy": "Busy, will retry",

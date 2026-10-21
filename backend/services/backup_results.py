@@ -173,6 +173,15 @@ def _first_error(result: Dict[str, Any]) -> Optional[str]:
     return None
 
 
+def snapshot_name(value: str) -> str:
+    """The snapshot's own name.  A capture's result names it as
+    ``<repository>::<name>``; prune, du and the snapshot listing use the bare
+    name, which is also what a restore asks for.  Store the bare name only
+    (2026-10-21: the full form made every restore "not a valid snapshot
+    name" and kept du's sizes from ever matching)."""
+    return value.rsplit("::", 1)[-1]
+
+
 def _store_outcome(run: models.BackupRun, payload: Dict[str, Any]) -> Dict[str, Any]:
     status = payload.get("status")
     run.status = status if status in jobs.FINAL else "failed"
@@ -185,7 +194,7 @@ def _store_outcome(run: models.BackupRun, payload: Dict[str, Any]) -> Dict[str, 
     version = payload.get("restate_version")
     run.restate_version = str(version)[:64] if version else None
     if isinstance(result.get("snapshot"), str):
-        run.snapshot = result["snapshot"][:255]
+        run.snapshot = snapshot_name(result["snapshot"])[:255]
     message = _first_error(result) or result.get("error") or result.get("message")
     if message:
         run.message = str(message)[:_MESSAGE_LIMIT]

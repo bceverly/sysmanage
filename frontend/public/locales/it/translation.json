@@ -5363,7 +5363,8 @@
       "stagedAt": "Preparato sull'host in",
       "stagingNote": "I file vengono ripristinati in una directory di staging sull'host, mai sopra i file in uso. Spostali tu nella posizione finale.",
       "title": "Ripristina file su {{host}}",
-      "unsignedAck": "Questo snapshot non è firmato. Ripristinalo comunque."
+      "unsignedAck": "Questo snapshot non è firmato. Ripristinalo comunque.",
+      "planned": "Pianificato dall'indice dello snapshot. I dati di backup non sono stati letti, quindi la loro integrità non è stata verificata qui; se ne occupa la verifica settimanale."
     },
     "run": {
       "busy": "Occupato, verrà ritentato",

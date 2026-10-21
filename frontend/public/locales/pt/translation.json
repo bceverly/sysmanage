@@ -5363,7 +5363,8 @@
       "stagedAt": "Preparado no host em",
       "stagingNote": "Os arquivos são restaurados em um diretório de preparação no host, nunca sobre os arquivos em uso. Mova-os para o lugar você mesmo.",
       "title": "Restaurar arquivos em {{host}}",
-      "unsignedAck": "Este snapshot não está assinado. Restaurar mesmo assim."
+      "unsignedAck": "Este snapshot não está assinado. Restaurar mesmo assim.",
+      "planned": "Planejado a partir do índice do snapshot. Os dados do backup não foram lidos, então a integridade deles não foi verificada aqui; a verificação semanal faz isso."
     },
     "run": {
       "busy": "Ocupado, será tentado novamente",

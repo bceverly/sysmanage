@@ -5363,7 +5363,8 @@
       "stagedAt": "Placé en zone de préparation sur l'hôte dans",
       "stagingNote": "Les fichiers sont restaurés dans un répertoire de préparation sur l'hôte, jamais par-dessus les fichiers en service. Mettez-les en place vous-même.",
       "title": "Restaurer des fichiers sur {{host}}",
-      "unsignedAck": "Cet instantané n'est pas signé. Le restaurer quand même."
+      "unsignedAck": "Cet instantané n'est pas signé. Le restaurer quand même.",
+      "planned": "Planifié à partir de l'index de l'instantané. Les données sauvegardées n'ont pas été lues, leur intégrité n'a donc pas été vérifiée ici ; la vérification hebdomadaire s'en charge."
     },
     "run": {
       "busy": "Occupé, nouvelle tentative prévue",

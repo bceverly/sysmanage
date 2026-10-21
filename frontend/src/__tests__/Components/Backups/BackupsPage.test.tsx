@@ -249,6 +249,22 @@ describe("Backups page", () => {
     await waitFor(() => expect(vi.mocked(getRuns).mock.calls.length).toBeGreaterThan(before));
   });
 
+  test("a preview planned from the index says the data was not read", async () => {
+    vi.mocked(getSnapshots).mockResolvedValue([{
+      id: "s1", name: "20261021T153126Z", created_at: "2026-10-21T15:31:26", bytes: 10,
+      new_bytes: 1, unique_bytes: null, files: 2, signed: false, gone_at: null,
+    }]);
+    vi.mocked(restoreFiles).mockResolvedValue(run({
+      action: "restore", status: "ok",
+      result: { files: 1, bytes: 8, plan: ["/home/a/contract.txt"], content_read: false },
+    }));
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    fireEvent.click(await screen.findByText("Restore files"));
+    fireEvent.click(await screen.findByLabelText("This snapshot is not signed. Restore it anyway."));
+    fireEvent.click(screen.getByText("Preview"));
+    expect(await screen.findByText(/Planned from the snapshot index/)).toBeInTheDocument();
+  });
+
   test("Back up now queues a capture", async () => {
     vi.mocked(backupNow).mockResolvedValue(run({ action: "capture", status: "queued" }));
     render(<MemoryRouter><Backups /></MemoryRouter>);

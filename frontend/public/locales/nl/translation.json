@@ -5363,7 +5363,8 @@
       "stagedAt": "Klaargezet op de host in",
       "stagingNote": "Bestanden worden hersteld in een stagingmap op de host, nooit over de actieve bestanden heen. Zet ze zelf op hun plaats.",
       "title": "Bestanden herstellen op {{host}}",
-      "unsignedAck": "Deze snapshot is niet ondertekend. Toch herstellen."
+      "unsignedAck": "Deze snapshot is niet ondertekend. Toch herstellen.",
+      "planned": "Gepland op basis van de snapshotindex. De geback-upte gegevens zijn niet gelezen, dus hun integriteit is hier niet gecontroleerd; dat doet de wekelijkse controle."
     },
     "run": {
       "busy": "Bezet, wordt opnieuw geprobeerd",
