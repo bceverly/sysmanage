@@ -5387,7 +5387,11 @@
       "loadError": "Could not load the backup jobs.",
       "queued": "Queued at",
       "status": "Status",
-      "title": "Recent jobs"
+      "title": "Recent jobs",
+      "clear": "Clear list",
+      "clearTitle": "Clear the job list?",
+      "clearBody": "Finished jobs leave this list; queued and running jobs stay. Nothing is removed from the audit log, and the backup status above is not affected.",
+      "clearError": "The job list could not be cleared."
     },
     "status": {
       "disabled": "Disabled",

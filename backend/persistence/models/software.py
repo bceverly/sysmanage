@@ -111,7 +111,7 @@ class SoftwarePackage(Base):
     # Snap channel-aware detection (Phase 17.1): tracking channel, revision, and
     # best-effort confinement. Nullable -- only populated for snap packages.
     channel = Column(String(100), nullable=True)
-    revision = Column(String(50), nullable=True)
+    revision = Column(String(255), nullable=True)  # snap revision or image digest
     confinement = Column(String(20), nullable=True)
     created_at = Column(DateTime, nullable=False)
     updated_at = Column(DateTime, nullable=False)

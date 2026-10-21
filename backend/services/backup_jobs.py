@@ -37,9 +37,10 @@ import json
 import logging
 import re
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from backend.persistence import models
@@ -316,6 +317,51 @@ def latest_run(
     if statuses:
         query = query.filter(models.BackupRun.status.in_(statuses))
     return query.order_by(models.BackupRun.queued_at.desc()).first()
+
+
+# Finished runs older than this are deleted by the scheduler -- except, for
+# each policy, the newest run of each action and outcome, which the status
+# column and the storage-side scheduling read.
+RUN_RETENTION_DAYS = 30
+RUN_RETENTION_BATCH = 5000
+
+
+def prune_run_history(db: Session, now) -> int:
+    """Delete old finished runs, keeping each (policy, action, status)'s
+    newest.  Bounded per call; the next tick takes the rest."""
+    cutoff = now - timedelta(days=RUN_RETENTION_DAYS)
+    newest = (
+        db.query(
+            models.BackupRun.policy_id,
+            models.BackupRun.action,
+            models.BackupRun.status,
+            func.max(models.BackupRun.queued_at),
+        )
+        .group_by(
+            models.BackupRun.policy_id,
+            models.BackupRun.action,
+            models.BackupRun.status,
+        )
+        .all()
+    )
+    keep = {(str(p), a, s, q) for p, a, s, q in newest}
+    old = (
+        db.query(models.BackupRun)
+        .filter(
+            models.BackupRun.status.in_(FINAL),
+            models.BackupRun.queued_at < cutoff,
+        )
+        .order_by(models.BackupRun.queued_at)
+        .limit(RUN_RETENTION_BATCH)
+        .all()
+    )
+    removed = 0
+    for run in old:
+        if (str(run.policy_id), run.action, run.status, run.queued_at) in keep:
+            continue
+        db.delete(run)
+        removed += 1
+    return removed
 
 
 def the_target(db: Session) -> Optional[models.BackupTarget]:

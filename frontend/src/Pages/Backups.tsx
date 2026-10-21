@@ -13,6 +13,7 @@ import type { BackupOverview } from '../Services/backups';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import BackupTargetCard from '../Components/Backups/BackupTargetCard';
 import BackupHostsTable from '../Components/Backups/BackupHostsTable';
+import BackupClearJobs from '../Components/Backups/BackupClearJobs';
 import BackupRunsList from '../Components/Backups/BackupRunsList';
 import { statusColor, statusLabel } from '../Components/Backups/backupLabels';
 import { useVisiblePolling } from '../hooks/useVisiblePolling';
@@ -83,7 +84,10 @@ const Backups: React.FC = () => {
                 )}
             </Paper>
             <Paper variant="outlined" sx={{ p: 2, overflowX: 'auto' }}>
-                <Typography variant="h6" sx={{ mb: 1 }}>{t('backups.runs.title', 'Recent jobs')}</Typography>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                    <Typography variant="h6">{t('backups.runs.title', 'Recent jobs')}</Typography>
+                    {canManage && <BackupClearJobs onCleared={changed} />}
+                </Stack>
                 <BackupRunsList hostNames={hostNames} refreshKey={refreshKey} />
             </Paper>
             <Snackbar open={message !== null} autoHideDuration={6000} onClose={() => setMessage(null)}>

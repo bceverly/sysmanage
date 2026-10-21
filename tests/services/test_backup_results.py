@@ -401,3 +401,36 @@ def test_a_failed_prune_does_not_run_du(session, sent):
     prune = jobs.queue_run(session, s.policy, s.nas.id, "prune")
     results.record_result(session, s.nas.id, _result(prune, "failed"))
     assert session.query(models.BackupRun).filter_by(action="du").count() == 0
+
+
+def test_a_new_restate_version_re_sends_the_job_files(session, sent):
+    s = _setup(session)
+    s.policy.restate_version = "2.0.0.1"
+    s.policy.storage_restate_version = "2.0.0.1"
+    session.commit()
+    version = s.policy.config_version
+    run = jobs.queue_run(session, s.policy, s.host.id, "capture")
+    payload = _result(run, snapshot="a1")
+    payload["restate_version"] = "2.0.0.1"
+    results.record_result(session, s.host.id, payload)
+    assert s.policy.config_version == version  # same restate: nothing to do
+    run = jobs.queue_run(session, s.policy, s.host.id, "capture")
+    payload = _result(run, snapshot="a2")
+    payload["restate_version"] = "2.0.0.4"
+    results.record_result(session, s.host.id, payload)
+    assert s.policy.config_version == version + 1
+    assert s.policy.restate_version == "2.0.0.4"
+    check = jobs.queue_run(session, s.policy, s.nas.id, "check")
+    payload = _result(check)
+    payload["restate_version"] = "2.0.0.4"
+    results.record_result(session, s.nas.id, payload)
+    assert s.policy.config_version == version + 2  # the storage side too
+
+
+def test_the_first_restate_error_is_the_runs_message(session, sent):
+    s = _setup(session)
+    run = jobs.queue_run(session, s.policy, s.host.id, "capture")
+    payload = _result(run, "failed", errors=["", "/mnt/backups/h: Permission denied",
+                                             "follow-on"])  # fmt: skip
+    results.record_result(session, s.host.id, payload)
+    assert run.message == "/mnt/backups/h: Permission denied"

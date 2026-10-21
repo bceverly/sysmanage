@@ -162,6 +162,17 @@ def record_command_result(db: Session, message_data: Dict[str, Any]) -> bool:
 # --- backup_result --------------------------------------------------------
 
 
+def _first_error(result: Dict[str, Any]) -> Optional[str]:
+    """restate 2.0.0.4+ lists why a run failed in ``errors``; the first is
+    the reason (the rest usually follow from it)."""
+    errors = result.get("errors")
+    if isinstance(errors, list):
+        first = next((e for e in errors if isinstance(e, str) and e.strip()), None)
+        if first:
+            return first
+    return None
+
+
 def _store_outcome(run: models.BackupRun, payload: Dict[str, Any]) -> Dict[str, Any]:
     status = payload.get("status")
     run.status = status if status in jobs.FINAL else "failed"
@@ -175,7 +186,7 @@ def _store_outcome(run: models.BackupRun, payload: Dict[str, Any]) -> Dict[str, 
     run.restate_version = str(version)[:64] if version else None
     if isinstance(result.get("snapshot"), str):
         run.snapshot = result["snapshot"][:255]
-    message = result.get("error") or result.get("message")
+    message = _first_error(result) or result.get("error") or result.get("message")
     if message:
         run.message = str(message)[:_MESSAGE_LIMIT]
     run.progress = None
@@ -242,11 +253,35 @@ def _storage_next(
     return jobs.queue_run(db, policy, storage.id, action)
 
 
+def _note_version(
+    policy: models.BackupPolicy, field: str, version: Optional[str]
+) -> None:
+    """Record which restate ran; when it CHANGED, re-send the job files.
+
+    The agent writes job files for the restate it found at configure time --
+    a key such as ``create`` only when that restate lists it.  A restate
+    upgraded in place keeps those old job files until something re-sends
+    them (lab, 2026-10-20: 2.0.0.1 -> 2.0.0.4 never got ``create``), so a
+    new version bumps ``config_version`` and the scheduler re-configures.
+    """
+    if not version:
+        return
+    known = getattr(policy, field)
+    if known and known != version:
+        policy.config_version += 1
+        logger.info(
+            "Backup policy %s: restate changed %s -> %s; re-sending job files",
+            policy.id,
+            known,
+            version,
+        )
+    setattr(policy, field, version)
+
+
 def _after_capture(
     db: Session, run: models.BackupRun, policy: models.BackupPolicy, result
 ) -> None:
-    if run.restate_version:
-        policy.restate_version = run.restate_version
+    _note_version(policy, "restate_version", run.restate_version)
     if run.status not in jobs.GOOD_CAPTURE:
         return
     if result.get("created_repository") is True:
@@ -317,8 +352,7 @@ def _mark_gone(db: Session, policy, names: List[str]) -> None:
 
 
 def _after_prune(db: Session, run: models.BackupRun, policy, result) -> None:
-    if run.restate_version:
-        policy.storage_restate_version = run.restate_version
+    _note_version(policy, "storage_restate_version", run.restate_version)
     pruned = [n for n in result.get("pruned") or [] if isinstance(n, str)]
     _mark_gone(db, policy, pruned)
     if run.status == "ok":
@@ -404,8 +438,7 @@ def _after_estimate(_db: Session, run: models.BackupRun, policy, result) -> None
 
 
 def _after_check(_db: Session, run: models.BackupRun, policy, _result) -> None:
-    if run.restate_version:
-        policy.storage_restate_version = run.restate_version
+    _note_version(policy, "storage_restate_version", run.restate_version)
     if run.status not in ("ok",):
         logger.error(
             "Backup policy %s: repository check ended %s on host %s",

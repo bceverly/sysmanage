@@ -270,6 +270,10 @@ export interface BulkBackupResult {
 export const bulkBackupNow = async (hostIds: string[]): Promise<BulkBackupResult> =>
   (await axiosInstance.post<BulkBackupResult>(`${base}/backups/backup-now`, { host_ids: hostIds })).data;
 
+/** Clear the Recent jobs list: finished jobs leave it (none are deleted). */
+export const clearRuns = async (): Promise<{ cleared: number }> =>
+  (await axiosInstance.post<{ cleared: number }>(`${base}/backups/runs/clear`)).data;
+
 export const getRuns = async (
   params: { host_id?: string; action?: string; limit?: number; offset?: number } = {},
 ): Promise<{ total: number; runs: BackupRun[] }> =>

@@ -5387,7 +5387,11 @@
       "loadError": "Die Sicherungsaufträge konnten nicht geladen werden.",
       "queued": "Eingereiht am",
       "status": "Status",
-      "title": "Letzte Aufträge"
+      "title": "Letzte Aufträge",
+      "clear": "Liste leeren",
+      "clearTitle": "Auftragsliste leeren?",
+      "clearBody": "Abgeschlossene Aufträge verschwinden aus dieser Liste; wartende und laufende bleiben. Aus dem Prüfprotokoll wird nichts entfernt, und der Sicherungsstatus oben ändert sich nicht.",
+      "clearError": "Die Auftragsliste konnte nicht geleert werden."
     },
     "status": {
       "disabled": "Deaktiviert",

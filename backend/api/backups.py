@@ -736,6 +736,7 @@ async def list_runs(
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_tenant_db),
+    include_cleared: bool = False,
 ) -> Dict[str, Any]:
     query = db.query(models.BackupRun)
     if host_id:
@@ -746,6 +747,8 @@ async def list_runs(
         query = query.filter(models.BackupRun.policy_id == policy.id)
     if action:
         query = query.filter(models.BackupRun.action == action)
+    if not include_cleared:
+        query = query.filter(models.BackupRun.dismissed_at.is_(None))
     total = query.count()
     rows = (
         query.order_by(models.BackupRun.queued_at.desc())
@@ -754,6 +757,32 @@ async def list_runs(
         .all()
     )
     return {"total": total, "runs": [views.run_dict(r) for r in rows]}
+
+
+@router.post("/backups/runs/clear")
+async def clear_runs(
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """Clear the job list: finished runs leave it; queued and running ones
+    stay.  Nothing is deleted -- the scheduler and the status read history,
+    and the audit log records each run's own changes as well as this."""
+    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
+    now = jobs.now()
+    cleared = (
+        db.query(models.BackupRun)
+        .filter(
+            models.BackupRun.status.in_(jobs.FINAL),
+            models.BackupRun.dismissed_at.is_(None),
+        )
+        .update({models.BackupRun.dismissed_at: now}, synchronize_session=False)
+    )
+    target = jobs.the_target(db)
+    _audit(db, current_user, EntityType.SETTING,
+           target.id if target else None, target.name if target else "backups",
+           "Backup job list cleared", {"runs": cleared})  # fmt: skip
+    db.commit()
+    return {"cleared": cleared}
 
 
 @router.get("/backups/runs/{run_id}")

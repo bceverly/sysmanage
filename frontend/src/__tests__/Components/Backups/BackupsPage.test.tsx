@@ -27,6 +27,7 @@ vi.mock("../../../Services/backups", async (importOriginal) => {
     getRun: vi.fn(),
     savePolicy: vi.fn(),
     bulkBackupNow: vi.fn(),
+    clearRuns: vi.fn(),
   };
 });
 
@@ -38,6 +39,7 @@ import {
   restoreFiles,
   savePolicy,
   bulkBackupNow,
+  clearRuns,
 } from "../../../Services/backups";
 import type { BackupHost, BackupOverview, BackupRun } from "../../../Services/backups";
 import Backups from "../../../Pages/Backups";
@@ -232,6 +234,19 @@ describe("Backups page", () => {
     }));
     render(<MemoryRouter><Backups /></MemoryRouter>);
     expect(await screen.findByText("Waiting for a free slot")).toBeInTheDocument();
+  });
+
+  test("Clear asks first, then clears the job list and reloads it", async () => {
+    vi.mocked(clearRuns).mockResolvedValue({ cleared: 1 });
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    fireEvent.click(await screen.findByText("Clear list"));
+    expect(screen.getByText("Clear the job list?")).toBeInTheDocument();
+    expect(clearRuns).not.toHaveBeenCalled();
+    const before = vi.mocked(getRuns).mock.calls.length;
+    const buttons = screen.getAllByText("Clear list");
+    fireEvent.click(buttons[buttons.length - 1]);
+    await waitFor(() => expect(clearRuns).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(vi.mocked(getRuns).mock.calls.length).toBeGreaterThan(before));
   });
 
   test("Back up now queues a capture", async () => {

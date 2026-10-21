@@ -5387,7 +5387,11 @@
       "loadError": "No se pudieron cargar las tareas de copia de seguridad.",
       "queued": "En cola desde",
       "status": "Estado",
-      "title": "Tareas recientes"
+      "title": "Tareas recientes",
+      "clear": "Borrar la lista",
+      "clearTitle": "¿Borrar la lista de tareas?",
+      "clearBody": "Las tareas terminadas salen de esta lista; las que están en cola o en ejecución se quedan. No se elimina nada del registro de auditoría y el estado de las copias de seguridad de arriba no cambia.",
+      "clearError": "No se pudo borrar la lista de tareas."
     },
     "status": {
       "disabled": "Desactivado",

@@ -5387,7 +5387,11 @@
       "loadError": "Não foi possível carregar as tarefas de backup.",
       "queued": "Enfileirado em",
       "status": "Status",
-      "title": "Tarefas recentes"
+      "title": "Tarefas recentes",
+      "clear": "Limpar a lista",
+      "clearTitle": "Limpar a lista de tarefas?",
+      "clearBody": "As tarefas concluídas saem desta lista; as que estão na fila ou em execução continuam. Nada é removido do log de auditoria, e o status de backup acima não é afetado.",
+      "clearError": "Não foi possível limpar a lista de tarefas."
     },
     "status": {
       "disabled": "Desativado",

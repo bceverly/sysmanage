@@ -5387,7 +5387,11 @@
       "loadError": "De back-uptaken konden niet worden geladen.",
       "queued": "In wachtrij gezet op",
       "status": "Status",
-      "title": "Recente taken"
+      "title": "Recente taken",
+      "clear": "Lijst leegmaken",
+      "clearTitle": "De takenlijst wissen?",
+      "clearBody": "Afgeronde taken verdwijnen uit deze lijst; taken in de wachtrij en lopende taken blijven. Er wordt niets uit het auditlogboek verwijderd en de back-upstatus hierboven verandert niet.",
+      "clearError": "De takenlijst kon niet worden gewist."
     },
     "status": {
       "disabled": "Uitgeschakeld",

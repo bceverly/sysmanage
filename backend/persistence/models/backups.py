@@ -145,6 +145,9 @@ class BackupRun(Base):
     requested_by = Column(String(255), nullable=True)
     command_id = Column(String(64), nullable=True, index=True)
     parameters = Column(Text, nullable=True)  # JSON: what was asked
+    # "Clear" on the job list hides a finished run; it is not deleted (the
+    # scheduler and the status read history; the audit log keeps it).
+    dismissed_at = Column(DateTime, nullable=True)
 
 
 class BackupSnapshot(Base):

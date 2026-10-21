@@ -278,6 +278,10 @@ def reconcile(db: Session, now: Optional[datetime] = None) -> int:
     """
     now = now or jobs.now()
     fail_stuck(db, now)
+    removed = jobs.prune_run_history(db, now)
+    if removed:
+        logger.info("Backup job history: removed %d runs older than %d days",
+                    removed, jobs.RUN_RETENTION_DAYS)  # fmt: skip
     target = jobs.the_target(db)
     if target is None:
         return 0

@@ -5387,7 +5387,11 @@
       "loadError": "Impossibile caricare le attività di backup.",
       "queued": "Accodato il",
       "status": "Stato",
-      "title": "Attività recenti"
+      "title": "Attività recenti",
+      "clear": "Cancella l'elenco",
+      "clearTitle": "Cancellare l'elenco dei processi?",
+      "clearBody": "I processi terminati escono da questo elenco; quelli in coda o in esecuzione restano. Dal registro di controllo non viene rimosso nulla e lo stato dei backup qui sopra non cambia.",
+      "clearError": "Impossibile cancellare l'elenco dei processi."
     },
     "status": {
       "disabled": "Disattivato",

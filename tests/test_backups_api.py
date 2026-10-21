@@ -466,3 +466,43 @@ def test_a_request_the_host_can_no_longer_run_is_dropped(session, sent, caplog):
     assert tick.start_requested(session) == 0
     assert s.policy.capture_requested_at is None
     assert "can no longer run it" in caplog.text
+
+
+# ---------------------------------------------------------------------------
+# the job list: Clear hides finished runs; retention deletes old ones
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_clear_hides_finished_runs_but_keeps_pending_and_history(session, sent):
+    s = _setup(session)
+    _capture(session, s, "ok", 5)
+    _capture(session, s, "failed", 2)
+    jobs.queue_run(session, s.policy, s.host.id, "capture")  # still queued
+    session.commit()
+    answer = await api.clear_runs(session, MANAGER)
+    assert answer == {"cleared": 2}
+    listed = await api.list_runs(None, None, 50, 0, session)
+    assert [r["status"] for r in listed["runs"]] == ["queued"]
+    everything = await api.list_runs(None, None, 50, 0, session, include_cleared=True)
+    assert everything["total"] == 3
+    # history still drives the page: the last good capture is still known
+    assert views.host_status(session, s.host)["last_good_capture"] is not None
+    assert await _status(api.clear_runs(session, NOBODY)) == 403
+
+
+def test_retention_deletes_old_runs_but_keeps_each_kinds_newest(session):
+    s = _setup(session)
+    for ago_days in (90, 60, 45):
+        _capture(session, s, "ok", ago_days * 24)
+    _capture(session, s, "failed", 50 * 24)  # the only failed one: kept
+    _capture(session, s, "ok", 1)  # recent
+    old_pending = jobs.queue_run(session, s.policy, s.host.id, "check")
+    old_pending.queued_at = jobs.now() - timedelta(days=99)
+    session.commit()
+    removed = jobs.prune_run_history(session, jobs.now())
+    session.commit()
+    left = session.query(models.BackupRun).filter_by(action="capture").all()
+    assert removed == 3  # the three old ok captures; the newest ok is recent
+    assert sorted(r.status for r in left) == ["failed", "ok"]
+    assert session.get(models.BackupRun, old_pending.id) is not None  # not final
