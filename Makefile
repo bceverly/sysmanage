@@ -133,7 +133,7 @@ help:
 	@echo "  make test-typescript   - TypeScript/React tests"
 	@echo "  make test-playwright   - DEPRECATED, use make test-e2e"
 	@echo "  make run-dev / stop-dev - DEPRECATED, use make start / make stop"
-	@echo "  make build-grpcio-openbsd - Build grpcio from source on OpenBSD"
+	@echo "  make build-grpcio-openbsd - grpcio on OpenBSD: py3-grpcio package (8.0+), else built from source"
 	@echo ""
 	@echo "More packaging:"
 	@echo "  make installer-freebsd - Build the FreeBSD port tarball"
@@ -194,6 +194,24 @@ else
     # update-requirements): prefer python3, else the newest versioned binary (NetBSD
     # ships only python3.13, no python3 symlink). No-op where python3 exists.
     PYTHON3 := $(shell for p in python3 python3.14 python3.13 python3.12 python3.11; do command -v $$p >/dev/null 2>&1 && { echo $$p; exit 0; }; done; echo python3)
+endif
+
+# A venv made by a Python this system no longer has -- an OS upgrade replaced
+# the interpreter (OpenBSD 7.9 -> 8.0 swapped 3.13 for 3.14) -- still has a
+# bin/python, but its packages sit under lib/python<old>/ and nothing imports,
+# while its activate file keeps make from ever rebuilding it.  Such a venv is
+# removed here (with what records its packages as installed), so the rules
+# below rebuild it on this run.
+ifneq ($(OS),Windows_NT)
+stale_venv = $(shell d=$(1); [ -f "$$d/pyvenv.cfg" ] || exit 0; \
+	cfg=$$(sed -n 's/^version[_a-z]* *= *\([0-9]*\.[0-9]*\).*/\1/p' "$$d/pyvenv.cfg" | head -1); \
+	run=$$("$$d/bin/python" -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null); \
+	if [ -z "$$run" ] || [ "$$cfg" != "$$run" ]; then echo "$$d"; fi)
+STALE_VENVS := $(strip $(call stale_venv,$(VENV)) $(call stale_venv,$(SEMGREP_VENV)))
+ifneq ($(STALE_VENVS),)
+$(info [INFO] Rebuilding virtual environment(s) made by a Python this system no longer has: $(STALE_VENVS))
+$(shell rm -rf $(STALE_VENVS))
+endif
 endif
 
 # Create or repair virtual environment
@@ -425,7 +443,7 @@ else
 		grep -v "playwright" requirements.txt | $(PYTHON) -m pip install -r /dev/stdin || true; \
 		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
 	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
-		echo "[INFO] OpenBSD - patching and building grpcio with bundled abseil..."; \
+		echo "[INFO] OpenBSD - grpcio from the py3-grpcio package (8.0+) or a patched source build..."; \
 		export TMPDIR=$$HOME/tmp && \
 		$(MAKE) build-grpcio-openbsd || { echo "[ERROR] grpcio build failed - see ~/tmp/grpcio-build.log"; exit 1; }; \
 		echo "[INFO] Now installing remaining dependencies..."; \
@@ -2500,8 +2518,32 @@ endif
 	@echo "  - OpenTelemetry Collector UI: http://localhost:55679"
 	@echo "  - Prometheus: http://localhost:9091"
 
-# OpenBSD grpcio build target
+# OpenBSD grpcio: OpenBSD 8.0 packages it (py3-grpcio); 7.9 does not.  Where
+# the package exists it is used -- installed with pkg_add and linked into the
+# venv (grpcio's own files only, so no other system package leaks in), and pip
+# then sees grpcio as satisfied.  Elsewhere the patched source build below runs
+# (5-10 minutes).
 build-grpcio-openbsd: $(VENV_ACTIVATE)
+	@if pkg_info -Q py3-grpcio 2>/dev/null | grep -q '^py3-grpcio-[0-9]'; then \
+		echo "[INFO] This OpenBSD release packages grpcio (py3-grpcio) - using it instead of building from source"; \
+		pkg_info -e 'py3-grpcio-*' >/dev/null 2>&1 || doas pkg_add py3-grpcio || { \
+			echo "[ERROR] Could not install the py3-grpcio package. Run:  doas pkg_add py3-grpcio  then re-run make install-dev"; exit 1; }; \
+		$(PYTHON) -m pip uninstall -y grpcio >/dev/null 2>&1 || true; \
+		SITE=$$($(PYTHON) -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])'); \
+		SYS=$$($(PYTHON) -c 'import sys, sysconfig; print(sysconfig.get_paths(vars={"base": sys.base_prefix, "platbase": sys.base_prefix})["purelib"])'); \
+		for d in $$(pkg_info -L py3-grpcio | sed -n "s|^$$SYS/\([^/]*\)/.*|\1|p" | sort -u); do \
+			ln -sfn "$$SYS/$$d" "$$SITE/$$d"; \
+		done; \
+		$(PYTHON) -c 'from importlib.metadata import requires; print("\n".join(r for r in (requires("grpcio") or []) if "extra ==" not in r))' \
+			| $(PYTHON) -m pip install -q -r /dev/stdin || { echo "[ERROR] Could not install grpcio's own dependencies into the venv"; exit 1; }; \
+		$(PYTHON) -c 'import grpc; print("[OK] grpcio", grpc.__version__, "from the OpenBSD package")' || { \
+			echo "[ERROR] grpcio from py3-grpcio does not import in the venv (built for another Python?). Run:  doas pkg_add -u py3-grpcio"; exit 1; }; \
+	else \
+		$(MAKE) --no-print-directory build-grpcio-openbsd-source; \
+	fi
+
+# The patched grpcio source build (OpenBSD releases without py3-grpcio).
+build-grpcio-openbsd-source: $(VENV_ACTIVATE)
 	@echo "=== Building grpcio for OpenBSD ==="
 	@echo "[INFO] Uninstalling any existing grpcio..."
 	@$(PYTHON) -m pip uninstall -y grpcio 2>/dev/null || true

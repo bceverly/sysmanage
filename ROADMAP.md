@@ -14894,6 +14894,46 @@ omits the package to keep its pip bundle pure-Python.
 - [ ] If it stays excluded, document it on the Windows install page rather than
       leaving it to be discovered from a log line
 
+### OpenBSD 8.0 (2026-10-22, Bryan)
+
+OpenBSD 8.0 shipped 2026-10-20; OpenBSD supports only its two newest
+releases, so the supported pair is now **7.9 and 8.0** and 7.8 is EOL.
+7.9 ships Python 3.13 only, 8.0 Python 3.14 only.
+
+- [x] **CI** -- every OpenBSD build (server + agent package matrices, the
+      server libs distfile, Pro+ engines) is 7.9/8.0 on vmactions/openbsd-vm
+      v1.4.9 (the first with 8.0); the libs distfile is built on 8.0 (it is
+      pure-Python, release-independent); the agent's dead 7.6 Python
+      workaround is gone; Pro+ engines build per release with that release's
+      only Python (7.9 -> 3.13, 8.0 -> 3.14; it had pinned `python%3.12`, which
+      neither release ships); the agent workflows ask `make show=PKGFILE`
+      instead of assuming /usr/ports/packages
+- [x] **Proof on t480 (8.0)** -- every RUN/BUILD dependency of both ports is
+      in the 8.0 package set; the agent port (v3.11.0.14) builds a package on
+      the 8.0 ports tree, and `pkg_add -n` resolves all its dependencies (an
+      upgrade from the old 0.9.4p2 package resolves cleanly)
+- [x] **VMM child hosts** -- the catalog offers OpenBSD 7.9 and 8.0
+      (migration `q58vmmopenbsd80`); 7.4-7.7 kept but inactive, since agent
+      packages are no longer built for them; a VMM child defaults to 8.0
+- [x] **Agent upgrade detection** -- reads openbsd.org's "The current release
+      is ..." line and offers only a NEWER release (it took the first
+      "OpenBSD X.Y" on the page and offered any different one -- an 8.0 host
+      would have been told to "upgrade" to 7.9 had the page named 7.9 first)
+- [x] **Docs** -- install pages name 7.9 and 8.0 (`openbsd80` examples), 14 locales
+- [x] **Dev venvs** -- an OS upgrade that replaces Python left every venv on
+      t480 importing nothing (packages under lib/python3.13, interpreter
+      3.14) while make kept reusing them; the sysmanage, agent and Pro+
+      Makefiles now detect a venv made by a Python the system no longer has
+      and rebuild it
+- [x] **grpcio** -- 8.0 packages it (`py3-grpcio` 1.83.0; 7.9 does not):
+      `make install-dev` on OpenBSD links the package into the venv instead
+      of the 5-10 minute patched source build, which stays for 7.9
+- [ ] **Packaged server OTLP export on OpenBSD** -- still left out of the
+      libs bundle (grpcio is compiled); the port can take `net/py-grpcio` as a
+      RUN_DEPENDS once 7.9 is EOL (8.1, ~2027-04), restoring OTLP export
+- [ ] **Run the agent and server from source on t480 under 8.0** -- needs
+      the stale-venv Makefile change pulled there, then `make install-dev`
+
 ### Carried forward by the Phase 21 audit (2026-10-01)
 
 Phases 0-20 had no unticked boxes, so the Phase 21 audit checked every place

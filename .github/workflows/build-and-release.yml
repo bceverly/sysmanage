@@ -380,11 +380,11 @@ jobs:
           test -d dist && [ -n "$(ls -A dist)" ] || { echo "ERROR: no frontend dist/"; exit 1; }
 
       - name: Assemble libs distfile + distinfo (OpenBSD VM)
-        uses: vmactions/openbsd-vm@18edb32f4e48dae5865d7b8b3a9587bc01218a20 # v1.4.4
+        uses: vmactions/openbsd-vm@f1ca8bc8ecc5b6ef7218e5b914836e067e1546d3 # v1.4.9
         env:
           RELEASE_VERSION: ${{ steps.version.outputs.version }}
         with:
-          release: '7.9'
+          release: '8.0'
           usesh: true
           sync: rsync
           envs: 'RELEASE_VERSION'
@@ -400,7 +400,7 @@ jobs:
             # which reads like the mirror is down rather than like the VM has no
             # v6 route.  Forcing IPv4 skips the address that can never work.
             # Broke the 7.8 and 7.9 release jobs on 2026-08-25.
-            ftp -4 -o /tmp/ports.tar.gz "https://ftp.openbsd.org/pub/OpenBSD/7.9/ports.tar.gz"
+            ftp -4 -o /tmp/ports.tar.gz "https://ftp.openbsd.org/pub/OpenBSD/8.0/ports.tar.gz"
             tar xzf /tmp/ports.tar.gz -C /usr && rm /tmp/ports.tar.gz
 
             sh "$GITHUB_WORKSPACE/installer/openbsd/build-libs.sh" \
@@ -589,7 +589,7 @@ jobs:
             sysmanage-*-node-modules.tar.gz.sha256
           if-no-files-found: error
 
-  # OpenBSD Binary Package Build (.tgz) for the supported releases (7.8, 7.9).
+  # OpenBSD Binary Package Build (.tgz) for the supported releases (7.9, 8.0).
   # These are pre-built packages users `pkg_add` directly.  Built FULLY OFFLINE
   # from the libs distfile above (no pip/npm/compiler at port-build time);
   # per-version because the .tgz records version-specific dependency-package
@@ -603,8 +603,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # OpenBSD supports only the latest two releases; 7.7 is EOL.
-        openbsd-version: ['7.8', '7.9']
+        # OpenBSD supports only the latest two releases; 7.8 is EOL since 8.0 (2026-10).
+        openbsd-version: ['7.9', '8.0']
 
     steps:
       - name: Checkout code
@@ -623,7 +623,7 @@ jobs:
           path: libs/
 
       - name: Build on OpenBSD ${{ matrix.openbsd-version }}
-        uses: vmactions/openbsd-vm@18edb32f4e48dae5865d7b8b3a9587bc01218a20 # v1.4.4
+        uses: vmactions/openbsd-vm@f1ca8bc8ecc5b6ef7218e5b914836e067e1546d3 # v1.4.9
         env:
           RELEASE_VERSION: ${{ steps.version.outputs.version }}
         with:

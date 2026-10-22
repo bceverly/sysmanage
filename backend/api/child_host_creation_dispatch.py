@@ -729,7 +729,7 @@ def _build_vmm_create_request(virt_engine, command_params):
         "disk_path": _param_or(command_params, "disk_path", ""),
         "network_switch": _param_or(command_params, "network_switch", "default"),
         "autoinstall": autoinstall,
-        "openbsd_version": _param_or(command_params, "openbsd_version", "7.7"),
+        "openbsd_version": _param_or(command_params, "openbsd_version", "8.0"),
         "username": _param_or(command_params, "username", ""),
         "user_password_hash": user_pw_hash,
         "root_password_hash": root_pw_hash,

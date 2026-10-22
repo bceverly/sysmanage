@@ -421,7 +421,7 @@ class TestVmmCreateRequest:
         req = _build_vmm_create_request(_virt_engine(), {"vm_name": "vm1"})
         assert req.kwargs["gateway_ip"] == "100.64.0.1"
         assert req.kwargs["vm_ip"] == "100.64.0.101"
-        assert req.kwargs["openbsd_version"] == "7.7"
+        assert req.kwargs["openbsd_version"] == "8.0"
 
 
 class TestVmmPlanPath:
