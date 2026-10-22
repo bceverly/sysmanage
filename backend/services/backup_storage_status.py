@@ -32,6 +32,7 @@ from sqlalchemy.orm import Session
 
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
+from backend.services import backup_storage_health as health_checks
 
 SNAPSHOT_FILESYSTEMS = {"zfs_snapshot": "zfs", "btrfs_snapshot": "btrfs"}
 # A seal is queued by the capture's own result, or by the next tick.
@@ -44,7 +45,7 @@ PROBLEMS = (
     "seal_stale",
     "prune_stale",
     "check_stale",
-)
+) + health_checks.HEALTH_PROBLEMS
 _STORAGE_FS_LIMITS = {"type": 64, "mount_point": 1024}
 
 
@@ -211,6 +212,7 @@ def target_warnings(
     storage: Optional[models.Host],
     ready: bool,
     status: Optional[Dict[str, Any]],
+    health: Optional[Dict[str, Any]] = None,
 ) -> List[str]:
     """Every warning code for the target, worst first."""
     if storage is None:
@@ -221,6 +223,7 @@ def target_warnings(
         found = []
     fs = fs_warnings(target) if storage is not None else []
     found += [w for w in fs if w in ("seal_fs_mismatch", "btrfs_not_subvolume")]
+    found += health_checks.health_warnings(health)
     if status is not None:
         found += [code for code, hosts in status["stale"].items() if hosts]
     if (target.seal_mode or "none") == "none":

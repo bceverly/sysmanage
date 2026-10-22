@@ -23,6 +23,8 @@ from sqlalchemy.orm import Session
 
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
+from backend.services import backup_storage_audit as storage_audit
+from backend.services import backup_storage_health as storage_health
 from backend.services import backup_storage_status as storage_status
 from backend.services import backup_tick
 
@@ -60,7 +62,10 @@ def target_dict(target: models.BackupTarget, db: Session) -> Dict[str, Any]:
     storage = jobs.storage_host(db, target)
     ready, reason = jobs.equipped(storage) if storage else (False, "no_storage_host")
     status = storage_status.storage_status(db, target) if ready else None
-    warnings = storage_status.target_warnings(target, storage, ready, status)
+    health = storage_health.storage_health(db, target, storage)
+    warnings = storage_status.target_warnings(target, storage, ready, status, health)
+    audit = storage_audit.summarize(db, target)
+    warnings += storage_audit.warnings(audit)
     return {
         "id": str(target.id),
         "name": target.name,
@@ -82,8 +87,12 @@ def target_dict(target: models.BackupTarget, db: Session) -> Dict[str, Any]:
             "checked_at": iso(target.storage_fs_checked_at),
         },
         "storage_status": status,
+        "storage_health": health,
+        "storage_audit": audit,
+        "service_account": target.service_account or jobs.DEFAULT_SERVICE_ACCOUNT,
         "warnings": warnings,
-        "problem": storage_status.has_problem(warnings),
+        "problem": storage_status.has_problem(warnings)
+        or storage_audit.has_error(audit),
         "created_at": iso(target.created_at),
         "updated_at": iso(target.updated_at),
     }

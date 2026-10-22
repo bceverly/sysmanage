@@ -5288,7 +5288,10 @@
       "prune": "Opschonen",
       "restore": "Herstel",
       "seal": "Verzegelen",
-      "snapshots": "Snapshots weergeven"
+      "snapshots": "Snapshots weergeven",
+      "du": "Opslaggebruik",
+      "repack": "Opnieuw inpakken",
+      "prepare": "Opslag voorbereiden"
     },
     "card": {
       "lastCheck": "Laatste controle",
@@ -5430,7 +5433,9 @@
       "btrfsHelp": "De repository's moeten op een btrfs-subvolume staan; snapshots gaan naar een map op hetzelfde bestandssysteem, buiten het subvolume.",
       "btrfsRetention": "Oude btrfs-snapshots verwijderen is voorlopig aan u; stel de bewaartermijn in op de opslaghost.",
       "btrfsSnapshotDir": "Snapshotmap op de opslaghost",
-      "sealBtrfs": "btrfs-snapshot (alleen-lezen)"
+      "sealBtrfs": "btrfs-snapshot (alleen-lezen)",
+      "serviceAccount": "Back-upaccount op de opslaghost",
+      "serviceAccountHelp": "De export van elke host wordt gekoppeld aan dit account en zijn groep. Standaard: restate."
     },
     "title": "Back-ups",
     "warning": {
@@ -5443,7 +5448,10 @@
       "fsUnchecked": "Bestandssysteem nog niet gecontroleerd",
       "pruneStale": "Langer dan twee keer het back-upinterval niet opgeschoond: {{hosts}}",
       "sealFsMismatch": "De verzegelmodus vereist {{needed}}, maar het opslagpad staat op {{type}}: elke verzegeling mislukt.",
-      "sealStale": "Niet verzegeld sinds de laatste back-up: {{hosts}}"
+      "sealStale": "Niet verzegeld sinds de laatste back-up: {{hosts}}",
+      "storageDriveFailed": "De opslaghost meldt een defecte schijf of array ({{names}}): de back-ups van alle hosts lopen gevaar. Vervang hem of verplaats de back-ups.",
+      "storageDriveWarning": "De opslaghost meldt een schijf, array of pool met een waarschuwing ({{names}}). Zie Hardwarestatus.",
+      "storageSpace": "Het bestandssysteem van het opslagpad is {{percent}}% vol ({{free}} vrij): als het vol is, stoppen de back-ups. Verlaag \"Te bewaren snapshots\", sluit meer uit of voeg ruimte toe."
     },
     "storage": {
       "confirmed": "Opslagtaakbestanden bevestigd: {{confirmed}} van {{total}}",
@@ -5451,7 +5459,8 @@
       "lastCheck": "Laatste controle",
       "lastPrune": "Laatste opschoning",
       "lastSeal": "Laatste verzegeling",
-      "never": "Nooit"
+      "never": "Nooit",
+      "space": "Opslagruimte: {{percent}}% gebruikt, {{free}} vrij van {{total}}"
     },
     "bulk": {
       "backupSelected": "Selectie back-uppen",
@@ -5464,6 +5473,33 @@
       "skipNoPolicy": "Geen back-upbeleid",
       "skipNotConfigured": "Taakbestanden nog niet bevestigd door de host",
       "skipRunning": "Back-up al bezig"
+    },
+    "repack": {
+      "button": "Opnieuw inpakken",
+      "title": "De back-ups van deze host opnieuw inpakken?",
+      "body": "De opslaghost herschrijft de oudere back-uppakketten van deze host, zodat het herstellen van een paar bestanden alleen leest wat nodig is (restate 2.0.0.8 of later). Hij leest en herschrijft de hele repository op de opslaghost, wat lang kan duren, en de back-ups van deze host wachten tot het klaar is. Er gaat geen snapshot verloren.",
+      "error": "Het opnieuw inpakken kon niet worden gestart."
+    },
+    "audit": {
+      "nfsServer": "De NFS-server van de opslaghost draait niet of start niet bij het opstarten.",
+      "nfsV4": "De opslaghost biedt geen NFSv4, waarmee hosts hun back-ups bereiken.",
+      "nfsV4Only": "De opslaghost biedt nog NFS-versies ouder dan 4. Bied alleen NFSv4.",
+      "nfsLocalLocks": "De opslaghost toont de vergrendelingen van hosts niet aan zijn eigen programma's (FreeBSD: stel vfs.nfsd.enable_locallocks=1 in), dus een opschoning kan tijdens een back-up lopen.",
+      "nfsV4Root": "In /etc/exports van de opslaghost ontbreekt de hoofdregel \"V4:\", dus hosts kunnen niet via NFSv4 koppelen.",
+      "serviceAccount": "Het back-upserviceaccount {{account}} bestaat niet op de opslaghost.",
+      "ownFilesystem": "Niet op een eigen bestandssysteem: {{hosts}}. Geef elke host een eigen ZFS-dataset of btrfs-subvolume, zodat elke host een eigen export krijgt.",
+      "exportShared": "Bereikbaar via een gedeelde export: {{hosts}}. Een gecompromitteerde host kan de back-ups van andere hosts bereiken. Exporteer de repository van elke host afzonderlijk.",
+      "exportOwn": "Zonder eigen export: {{hosts}}.",
+      "exportRestricted": "Exports die niet beperkt zijn tot het eigen adres van de host: {{hosts}}.",
+      "exportMapping": "Exports die niet elke client aan het back-upaccount koppelen: {{hosts}}. FreeBSD: -mapall=ACCOUNT:GROUP; Linux: all_squash met anonuid en anongid.",
+      "appendOnly": "Niet alleen-toevoegen: {{hosts}} kunnen hun eigen voltooide back-ups verwijderen of overschrijven. Voltooide pakketten en snapshots moeten van root zijn, in mappen van root die schrijfbaar zijn voor de groep en de sticky-bit hebben (modus 1770).",
+      "other": "Opslagcontrole: {{code}}",
+      "prepareHint": "Opslag voorbereiden, op het tabblad Back-ups van elke host, geeft die host een eigen bestandssysteem en een export die tot die host beperkt is. De NFS-serverinstellingen van de opslaghost blijven uw verantwoordelijkheid."
+    },
+    "prepare": {
+      "title": "De opslag voor deze host voorbereiden?",
+      "body": "De opslaghost geeft de repository van deze host een eigen ZFS-dataset of btrfs-subvolume, exporteert die via NFS alleen naar het adres van deze host waarbij elk bestand aan het back-upaccount wordt gekoppeld, en maakt die alleen-toevoegen. Bestaande back-ups worden nooit verplaatst: een repository die al bestanden op het gedeelde bestandssysteem bevat, wordt geweigerd, met de stappen om die te verplaatsen. Voer het opnieuw uit wanneer het adres van deze host verandert.",
+      "error": "Het voorbereiden van de opslag kon niet worden gestart."
     }
   }
 }

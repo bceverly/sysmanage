@@ -5288,7 +5288,10 @@
       "prune": "Élagage",
       "restore": "Restauration",
       "seal": "Scellement",
-      "snapshots": "Lister les instantanés"
+      "snapshots": "Lister les instantanés",
+      "du": "Utilisation du stockage",
+      "repack": "Réempaqueter",
+      "prepare": "Préparer le stockage"
     },
     "card": {
       "lastCheck": "Dernière vérification",
@@ -5430,7 +5433,9 @@
       "btrfsHelp": "Les dépôts doivent se trouver sur un sous-volume btrfs ; les instantanés vont dans un répertoire du même système de fichiers, en dehors du sous-volume.",
       "btrfsRetention": "Pour l'instant, la suppression des anciens instantanés btrfs vous incombe ; définissez la rétention sur l'hôte de stockage.",
       "btrfsSnapshotDir": "Répertoire des instantanés sur l'hôte de stockage",
-      "sealBtrfs": "Instantané btrfs (lecture seule)"
+      "sealBtrfs": "Instantané btrfs (lecture seule)",
+      "serviceAccount": "Compte de sauvegarde sur l'hôte de stockage",
+      "serviceAccountHelp": "L'export de chaque hôte est associé à ce compte et à son groupe. Par défaut : restate."
     },
     "title": "Sauvegardes",
     "warning": {
@@ -5443,7 +5448,10 @@
       "fsUnchecked": "Système de fichiers pas encore vérifié",
       "pruneStale": "Non élagué depuis plus de deux fois l'intervalle de sauvegarde : {{hosts}}",
       "sealFsMismatch": "Le mode de scellement nécessite {{needed}}, mais le chemin de stockage se trouve sur {{type}} : chaque scellement échouera.",
-      "sealStale": "Non scellé depuis la dernière sauvegarde : {{hosts}}"
+      "sealStale": "Non scellé depuis la dernière sauvegarde : {{hosts}}",
+      "storageDriveFailed": "L'hôte de stockage signale un disque ou une grappe en panne ({{names}}) : les sauvegardes de tous les hôtes sont en danger. Remplacez-le ou déplacez les sauvegardes.",
+      "storageDriveWarning": "L'hôte de stockage signale un disque, une grappe ou un pool en avertissement ({{names}}). Voir Santé du matériel.",
+      "storageSpace": "Le système de fichiers du chemin de stockage est plein à {{percent}} % ({{free}} libres) : les sauvegardes s'arrêtent quand il est plein. Réduisez « Instantanés à conserver », excluez davantage ou ajoutez de l'espace."
     },
     "storage": {
       "confirmed": "Fichiers de tâches de stockage confirmés : {{confirmed}} sur {{total}}",
@@ -5451,7 +5459,8 @@
       "lastCheck": "Dernière vérification",
       "lastPrune": "Dernière purge",
       "lastSeal": "Dernier scellement",
-      "never": "Jamais"
+      "never": "Jamais",
+      "space": "Espace de stockage : {{percent}} % utilisé, {{free}} libres sur {{total}}"
     },
     "bulk": {
       "backupSelected": "Sauvegarder la sélection",
@@ -5464,6 +5473,33 @@
       "skipNoPolicy": "Aucune politique de sauvegarde",
       "skipNotConfigured": "Fichiers de tâche pas encore confirmés par l'hôte",
       "skipRunning": "Sauvegarde déjà en cours"
+    },
+    "repack": {
+      "button": "Réempaqueter",
+      "title": "Réempaqueter les sauvegardes de cet hôte ?",
+      "body": "L'hôte de stockage réécrit les anciens paquets de sauvegarde de cet hôte afin que la restauration de quelques fichiers ne lise que le nécessaire (restate 2.0.0.8 ou plus récent). Il lit et réécrit tout le dépôt sur l'hôte de stockage, ce qui peut être long, et les sauvegardes de cet hôte attendent la fin. Aucun instantané n'est perdu.",
+      "error": "Le réempaquetage n'a pas pu être lancé."
+    },
+    "audit": {
+      "nfsServer": "Le serveur NFS de l'hôte de stockage ne fonctionne pas ou ne démarre pas au boot.",
+      "nfsV4": "L'hôte de stockage ne sert pas NFSv4, que les hôtes utilisent pour atteindre leurs sauvegardes.",
+      "nfsV4Only": "L'hôte de stockage sert encore des versions de NFS antérieures à la 4. Ne servez que NFSv4.",
+      "nfsLocalLocks": "L'hôte de stockage ne montre pas les verrous des hôtes à ses propres programmes (FreeBSD : définissez vfs.nfsd.enable_locallocks=1), donc un élagage pourrait s'exécuter pendant une sauvegarde.",
+      "nfsV4Root": "Le fichier /etc/exports de l'hôte de stockage n'a pas de ligne racine \"V4:\", donc les hôtes ne peuvent pas monter en NFSv4.",
+      "serviceAccount": "Le compte de service de sauvegarde {{account}} n'existe pas sur l'hôte de stockage.",
+      "ownFilesystem": "Pas sur leur propre système de fichiers : {{hosts}}. Donnez à chaque hôte son propre dataset ZFS ou sous-volume btrfs, pour qu'il ait son propre export.",
+      "exportShared": "Accessibles par un export partagé : {{hosts}}. Un hôte compromis pourrait atteindre les sauvegardes d'autres hôtes. Exportez le dépôt de chaque hôte séparément.",
+      "exportOwn": "Sans export propre : {{hosts}}.",
+      "exportRestricted": "Exports non limités à l'adresse propre de l'hôte : {{hosts}}.",
+      "exportMapping": "Exports qui n'associent pas chaque client au compte de sauvegarde : {{hosts}}. FreeBSD : -mapall=ACCOUNT:GROUP ; Linux : all_squash avec anonuid et anongid.",
+      "appendOnly": "Pas en ajout seul : {{hosts}} pourraient supprimer ou écraser leurs propres sauvegardes terminées. Les paquets et instantanés terminés doivent appartenir à root, dans des répertoires de root, inscriptibles par le groupe et avec le bit sticky (mode 1770).",
+      "other": "Vérification du stockage : {{code}}",
+      "prepareHint": "Préparer le stockage, dans l'onglet Sauvegardes de chaque hôte, donne à cet hôte son propre système de fichiers et un export limité à lui. Les paramètres du serveur NFS de l'hôte de stockage restent à votre charge."
+    },
+    "prepare": {
+      "title": "Préparer le stockage pour cet hôte ?",
+      "body": "L'hôte de stockage donne au dépôt de cet hôte son propre dataset ZFS ou sous-volume btrfs, l'exporte en NFS vers l'adresse de cet hôte uniquement en associant chaque fichier au compte de sauvegarde, et le rend en ajout seul. Il ne déplace jamais les sauvegardes existantes : un dépôt qui contient déjà des fichiers sur le système de fichiers partagé est refusé, avec les étapes pour le déplacer. Relancez-le lorsque l'adresse de cet hôte change.",
+      "error": "La préparation du stockage n'a pas pu être lancée."
     }
   }
 }

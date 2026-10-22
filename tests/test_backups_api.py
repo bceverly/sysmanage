@@ -524,3 +524,43 @@ async def test_a_restores_staging_path_is_where_restate_put_it(session, sent):
     session.commit()
     got = await api.get_run(str(run.id), session)
     assert got["staging_path"] == jobs.staging_dir(run.id)
+
+
+@pytest.mark.asyncio
+async def test_repack_now_goes_to_the_storage_host(session, sent):
+    s = _setup(session)
+    run = await api.backup_now(
+        str(s.host.id), api.RunBody(action="repack"), session, MANAGER
+    )
+    assert run["action"] == "repack" and run["host_id"] == str(s.nas.id)
+
+
+@pytest.mark.asyncio
+async def test_the_service_account_is_validated_and_kept(session):
+    good = await api.create_target(
+        _target_body(service_account="backup_1"), session, MANAGER
+    )
+    assert good["service_account"] == "backup_1"
+    with pytest.raises(ValueError):  # too long: refused by the request model
+        _target_body(service_account="a" * 40)
+    for bad in ("Root!", "-mapall", "9lives"):
+        assert await _status(
+            api.update_target(good["id"], _target_body(service_account=bad), session, MANAGER)
+        ) == 422  # fmt: skip
+
+
+@pytest.mark.asyncio
+async def test_prepare_storage_goes_to_the_storage_host(session, sent):
+    s = _setup(session)
+    run = await api.backup_now(
+        str(s.host.id), api.RunBody(action="prepare"), session, MANAGER
+    )
+    assert run["action"] == "prepare" and run["host_id"] == str(s.nas.id)
+    assert (
+        await _status(
+            api.backup_now(
+                str(s.host.id), api.RunBody(action="prepare"), session, MANAGER
+            )
+        )
+        == 409
+    )  # already queued

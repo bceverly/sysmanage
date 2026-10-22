@@ -5288,7 +5288,10 @@
       "prune": "Limpeza",
       "restore": "Restauração",
       "seal": "Selagem",
-      "snapshots": "Listar snapshots"
+      "snapshots": "Listar snapshots",
+      "du": "Uso do armazenamento",
+      "repack": "Reempacotar",
+      "prepare": "Preparar armazenamento"
     },
     "card": {
       "lastCheck": "Última verificação",
@@ -5430,7 +5433,9 @@
       "btrfsHelp": "Os repositórios devem ficar em um subvolume btrfs; os snapshots vão para um diretório no mesmo sistema de arquivos, fora do subvolume.",
       "btrfsRetention": "Por enquanto, remover snapshots btrfs antigos é com você; defina a retenção no host de armazenamento.",
       "btrfsSnapshotDir": "Diretório de snapshots no host de armazenamento",
-      "sealBtrfs": "Snapshot btrfs (somente leitura)"
+      "sealBtrfs": "Snapshot btrfs (somente leitura)",
+      "serviceAccount": "Conta de backup no host de armazenamento",
+      "serviceAccountHelp": "A exportação de cada host é mapeada para esta conta e seu grupo. Padrão: restate."
     },
     "title": "Backups",
     "warning": {
@@ -5443,7 +5448,10 @@
       "fsUnchecked": "Sistema de arquivos ainda não verificado",
       "pruneStale": "Sem limpeza há mais do dobro do intervalo de backup: {{hosts}}",
       "sealFsMismatch": "O modo de selagem exige {{needed}}, mas o caminho de armazenamento está em {{type}}: toda selagem vai falhar.",
-      "sealStale": "Não selado desde o último backup: {{hosts}}"
+      "sealStale": "Não selado desde o último backup: {{hosts}}",
+      "storageDriveFailed": "O host de armazenamento relata uma unidade ou matriz com falha ({{names}}): os backups de todos os hosts estão em risco. Substitua-a ou mova os backups.",
+      "storageDriveWarning": "O host de armazenamento relata uma unidade, matriz ou pool em alerta ({{names}}). Veja Integridade do hardware.",
+      "storageSpace": "O sistema de arquivos do caminho de armazenamento está {{percent}}% cheio ({{free}} livres): os backups param quando ele enche. Diminua \"Snapshots a manter\", exclua mais ou adicione espaço."
     },
     "storage": {
       "confirmed": "Arquivos de tarefas de armazenamento confirmados: {{confirmed}} de {{total}}",
@@ -5451,7 +5459,8 @@
       "lastCheck": "Última verificação",
       "lastPrune": "Última limpeza",
       "lastSeal": "Última selagem",
-      "never": "Nunca"
+      "never": "Nunca",
+      "space": "Espaço de armazenamento: {{percent}}% usado, {{free}} livres de {{total}}"
     },
     "bulk": {
       "backupSelected": "Fazer backup dos selecionados",
@@ -5464,6 +5473,33 @@
       "skipNoPolicy": "Sem política de backup",
       "skipNotConfigured": "Arquivos de tarefa ainda não confirmados pelo host",
       "skipRunning": "Backup já em andamento"
+    },
+    "repack": {
+      "button": "Reempacotar",
+      "title": "Reempacotar os backups deste host?",
+      "body": "O host de armazenamento reescreve os pacotes de backup mais antigos deste host para que a restauração de poucos arquivos leia apenas o necessário (restate 2.0.0.8 ou posterior). Ele lê e reescreve todo o repositório no host de armazenamento, o que pode demorar bastante, e os backups deste host aguardam até terminar. Nenhum snapshot é perdido.",
+      "error": "Não foi possível iniciar o reempacotamento."
+    },
+    "audit": {
+      "nfsServer": "O servidor NFS do host de armazenamento não está em execução ou não inicia com o sistema.",
+      "nfsV4": "O host de armazenamento não oferece NFSv4, que os hosts usam para acessar seus backups.",
+      "nfsV4Only": "O host de armazenamento ainda oferece versões do NFS anteriores à 4. Ofereça apenas NFSv4.",
+      "nfsLocalLocks": "O host de armazenamento não mostra os bloqueios dos hosts aos seus próprios programas (FreeBSD: defina vfs.nfsd.enable_locallocks=1), então uma limpeza poderia rodar durante um backup.",
+      "nfsV4Root": "O /etc/exports do host de armazenamento não tem a linha raiz \"V4:\", então os hosts não conseguem montar via NFSv4.",
+      "serviceAccount": "A conta de serviço de backup {{account}} não existe no host de armazenamento.",
+      "ownFilesystem": "Fora de um sistema de arquivos próprio: {{hosts}}. Dê a cada host seu próprio dataset ZFS ou subvolume btrfs, para que cada um tenha sua própria exportação.",
+      "exportShared": "Acessíveis por uma exportação compartilhada: {{hosts}}. Um host comprometido poderia acessar os backups de outros hosts. Exporte o repositório de cada host separadamente.",
+      "exportOwn": "Sem exportação própria: {{hosts}}.",
+      "exportRestricted": "Exportações não restritas ao endereço do próprio host: {{hosts}}.",
+      "exportMapping": "Exportações que não mapeiam todos os clientes para a conta de backup: {{hosts}}. FreeBSD: -mapall=ACCOUNT:GROUP; Linux: all_squash com anonuid e anongid.",
+      "appendOnly": "Não é somente acréscimo: {{hosts}} poderiam excluir ou sobrescrever seus próprios backups concluídos. Pacotes e snapshots concluídos devem pertencer ao root, em diretórios do root graváveis pelo grupo e com sticky bit (modo 1770).",
+      "other": "Verificação do armazenamento: {{code}}",
+      "prepareHint": "Preparar armazenamento, na aba Backups de cada host, dá a esse host um sistema de arquivos próprio e uma exportação restrita a ele. As configurações do servidor NFS do host de armazenamento continuam por sua conta."
+    },
+    "prepare": {
+      "title": "Preparar o armazenamento para este host?",
+      "body": "O host de armazenamento dá ao repositório deste host um dataset ZFS ou subvolume btrfs próprio, exporta-o por NFS somente para o endereço deste host com cada arquivo mapeado para a conta de backup, e o torna somente acréscimo. Nunca move backups existentes: um repositório que já contém arquivos no sistema de arquivos compartilhado é recusado, com as etapas para movê-lo. Execute novamente quando o endereço deste host mudar.",
+      "error": "Não foi possível iniciar a preparação do armazenamento."
     }
   }
 }

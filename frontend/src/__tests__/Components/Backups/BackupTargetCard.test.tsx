@@ -138,6 +138,49 @@ describe("BackupTargetCard storage side", () => {
     expect(alertWith(/Filesystem not checked yet/)!.className).toMatch(/Info/);
   });
 
+  test("a failed drive on the storage host is an error naming it; space is shown", () => {
+    show(target({
+      storage_status: status(),
+      storage_health: {
+        drives: { failed: ["ada1"], warning: [] },
+        space: { mount_point: "/srv", total_bytes: 1000 * 1024 ** 3, available_bytes: 30 * 1024 ** 3, used_percent: 97 },
+      },
+      warnings: ["storage_drive_failed", "storage_space_critical"],
+      problem: true,
+    }));
+    const drive = alertWith(/failed drive or array \(ada1\)/);
+    expect(drive?.className).toMatch(/Error/);
+    const space = alertWith(/97% full/);
+    expect(space?.className).toMatch(/Error/);
+    expect(screen.getByText(/Storage space: 97% used/)).toBeInTheDocument();
+  });
+
+  test("a filling disk below the critical line is a warning", () => {
+    show(target({
+      storage_health: {
+        drives: { failed: [], warning: [] },
+        space: { mount_point: "/srv", total_bytes: 1000, available_bytes: 120, used_percent: 88 },
+      },
+      warnings: ["storage_space_low"],
+    }));
+    expect(alertWith(/88% full/)?.className).toMatch(/Warning/);
+  });
+
+  test("audit findings name the hosts and take their level from the audit", () => {
+    show(target({
+      storage_audit: {
+        export_shared: { level: "error", hosts: ["h1"], params: { exports: ["/srv/backups/restate"] } },
+        append_only_layout: { level: "warning", hosts: ["h1"], params: { unprotected_files: 9 } },
+        nfs_local_locks: { level: "error", hosts: [], params: {} },
+      },
+      warnings: ["audit_export_shared", "audit_nfs_local_locks", "audit_append_only_layout"],
+      problem: true,
+    }));
+    expect(alertWith(/Reachable through a shared export: web.lab/)?.className).toMatch(/Error/);
+    expect(alertWith(/Not append-only: web.lab/)?.className).toMatch(/Warning/);
+    expect(alertWith(/enable_locallocks=1/)?.className).toMatch(/Error/);
+  });
+
   test("the dialog offers the btrfs seal and sends its snapshot directory", async () => {
     vi.mocked(saveTarget).mockResolvedValue(target());
     show(target(), true);

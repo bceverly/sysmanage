@@ -60,11 +60,15 @@ _SNAPSHOT_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:+-]{0,254}$")
 _DATASET = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,254}$")
 # What the agent accepts for a btrfs seal path (it checks again).
 _SEAL_PATH = re.compile(r"^/[A-Za-z0-9_./-]*$")
+# A POSIX account name, as the storage host's agent accepts it.
+_ACCOUNT_NAME = re.compile(r"^[a-z_][a-z0-9_-]{0,31}$")
 _RUNNABLE = {
     "capture": "host",
     "estimate": "host",
     "snapshots": "host",
     "check": "storage",
+    "repack": "storage",
+    "prepare": "storage",
 }
 
 
@@ -77,6 +81,8 @@ class TargetBody(BaseModel):
     seal_mode: str = "none"
     zfs_dataset: Optional[str] = Field(default=None, max_length=255)
     btrfs_snapshot_dir: Optional[str] = Field(default=None, max_length=1024)
+    # The storage host's backup account every host's export maps to.
+    service_account: Optional[str] = Field(default=None, max_length=32)
 
 
 class PolicyBody(BaseModel):
@@ -161,6 +167,8 @@ def _validate_target(db: Session, body: TargetBody) -> Optional[uuid.UUID]:
     _absolute_path(body.host_mount_point, _("Host mount point"))
     _absolute_path(body.storage_path, _("Storage path"))
     _in_range(body.max_concurrent, 1, 50, _("Concurrent backups"))
+    if body.service_account and not _ACCOUNT_NAME.match(body.service_account):
+        raise _bad(_("The backup service account is not a valid account name"))
     if body.seal_mode not in jobs.SEAL_MODES:
         raise _bad(_("Unknown seal mode"))
     if body.seal_mode == "zfs_snapshot" and not body.zfs_dataset:
@@ -293,6 +301,7 @@ def _apply_target(target: models.BackupTarget, body: TargetBody, storage_id) -> 
     target.seal_mode = body.seal_mode
     target.zfs_dataset = body.zfs_dataset or None
     target.btrfs_snapshot_dir = body.btrfs_snapshot_dir or None
+    target.service_account = body.service_account or None
     target.updated_at = jobs.now()
 
 

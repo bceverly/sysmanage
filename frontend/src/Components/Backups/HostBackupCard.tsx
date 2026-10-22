@@ -15,6 +15,8 @@ import { backupNow, getHostBackup } from '../../Services/backups';
 import type { HostBackup } from '../../Services/backups';
 import { hasPermission, SecurityRoles } from '../../Services/permissions';
 import BackupPolicyDialog from './BackupPolicyDialog';
+import BackupPrepareButton from './BackupPrepareButton';
+import BackupRepackButton from './BackupRepackButton';
 import RestoreFilesDialog from './RestoreFilesDialog';
 import {
     apiDetail,
@@ -124,6 +126,12 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                             busyLabel={t('backups.hosts.starting', 'Starting...')}>
                             {t('backups.hosts.backupNow', 'Back up now')}
                         </AsyncButton>
+                    )}
+                    {canManage && data.policy && data.target?.storage_host_id && (
+                        <BackupPrepareButton hostId={hostId} disabled={!!data.running} onStarted={() => void load()} />
+                    )}
+                    {canManage && data.policy && data.snapshot_count > 0 && (
+                        <BackupRepackButton hostId={hostId} disabled={!!data.running} onStarted={() => void load()} />
                     )}
                     {canRestore && data.snapshot_count > 0 && (
                         <Button size="small" onClick={() => setRestoring(true)}>

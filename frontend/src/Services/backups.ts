@@ -46,7 +46,31 @@ export type TargetWarning =
   | "check_stale"
   | "not_sealed"
   | "fs_cannot_snapshot"
-  | "fs_unchecked";
+  | "fs_unchecked"
+  | "storage_drive_failed"
+  | "storage_drive_warning"
+  | "storage_space_critical"
+  | "storage_space_low"
+  | `audit_${string}`;
+
+/** One storage-audit finding summarized over the target's repositories. */
+export interface StorageAuditEntry {
+  level: "error" | "warning" | "ok";
+  /** Affected hosts; empty for host-wide findings (the NFS baseline). */
+  hosts: string[];
+  params: Record<string, unknown>;
+}
+
+/** The storage host's own health: its drives and the space under the path. */
+export interface StorageHealth {
+  drives: { failed: string[]; warning: string[] };
+  space: {
+    mount_point: string;
+    total_bytes: number;
+    available_bytes: number;
+    used_percent: number;
+  } | null;
+}
 
 /** What the storage host last reported about the filesystem under the
  *  storage path; every field null until it has. */
@@ -88,6 +112,9 @@ export interface BackupTarget {
   btrfs_snapshot_dir: string | null;
   storage_fs: StorageFilesystem;
   storage_status: StorageStatus | null;
+  storage_health?: StorageHealth | null;
+  storage_audit?: Record<string, StorageAuditEntry>;
+  service_account?: string;
   warnings: TargetWarning[];
   /** The target counts once on the dashboard's overdue-or-failed card. */
   problem: boolean;
@@ -102,6 +129,7 @@ export interface TargetInput {
   seal_mode: SealMode;
   zfs_dataset: string | null;
   btrfs_snapshot_dir: string | null;
+  service_account?: string | null;
 }
 
 export interface BackupPolicy {

@@ -5288,7 +5288,10 @@
       "prune": "Prune",
       "restore": "Restore",
       "seal": "Seal",
-      "snapshots": "List snapshots"
+      "snapshots": "List snapshots",
+      "du": "Storage use",
+      "repack": "Repack",
+      "prepare": "Prepare storage"
     },
     "card": {
       "lastCheck": "Last check",
@@ -5430,7 +5433,9 @@
       "btrfsHelp": "The repositories must sit on a btrfs subvolume; snapshots go to a directory on the same filesystem, outside the subvolume.",
       "btrfsRetention": "Removing old btrfs snapshots is up to you for now; set retention on the storage host.",
       "btrfsSnapshotDir": "Snapshot directory on the storage host",
-      "sealBtrfs": "btrfs snapshot (read-only)"
+      "sealBtrfs": "btrfs snapshot (read-only)",
+      "serviceAccount": "Backup account on the storage host",
+      "serviceAccountHelp": "Every host's export maps to this account and its group. Default: restate."
     },
     "title": "Backups",
     "warning": {
@@ -5443,7 +5448,10 @@
       "fsUnchecked": "Filesystem not checked yet",
       "pruneStale": "Not pruned for more than twice the backup interval: {{hosts}}",
       "sealFsMismatch": "The seal mode needs {{needed}}, but the storage path is on {{type}}: every seal will fail.",
-      "sealStale": "Not sealed since the last backup: {{hosts}}"
+      "sealStale": "Not sealed since the last backup: {{hosts}}",
+      "storageDriveFailed": "The storage host reports a failed drive or array ({{names}}): every host's backups are at risk. Replace it, or move the backups.",
+      "storageDriveWarning": "The storage host reports a drive, array or pool in warning ({{names}}). See Hardware Health.",
+      "storageSpace": "The storage path's filesystem is {{percent}}% full ({{free}} free): backups stop when it is full. Lower \"Snapshots to keep\", leave more out, or add space."
     },
     "storage": {
       "confirmed": "Storage job files confirmed: {{confirmed}} of {{total}}",
@@ -5451,7 +5459,8 @@
       "lastCheck": "Last check",
       "lastPrune": "Last prune",
       "lastSeal": "Last seal",
-      "never": "Never"
+      "never": "Never",
+      "space": "Storage space: {{percent}}% used, {{free}} free of {{total}}"
     },
     "bulk": {
       "backupSelected": "Back up selected",
@@ -5464,6 +5473,33 @@
       "skipNoPolicy": "No backup policy",
       "skipNotConfigured": "Job files not confirmed by the host yet",
       "skipRunning": "Already backing up"
+    },
+    "repack": {
+      "button": "Repack",
+      "title": "Repack this host's backups?",
+      "body": "The storage host rewrites this host's older backup packs so that restoring a few files reads only what it needs (restate 2.0.0.8 or later). It reads and rewrites the whole repository on the storage host, which can take a long time, and this host's backups wait until it is done. No snapshot is lost.",
+      "error": "The repack could not be started."
+    },
+    "audit": {
+      "nfsServer": "The storage host's NFS server is not running, or does not start at boot.",
+      "nfsV4": "The storage host does not serve NFSv4, which hosts use to reach their backups.",
+      "nfsV4Only": "The storage host still serves NFS versions older than 4. Serve NFSv4 only.",
+      "nfsLocalLocks": "The storage host does not show hosts' locks to its own programs (FreeBSD: set vfs.nfsd.enable_locallocks=1), so a prune could run during a backup.",
+      "nfsV4Root": "The storage host's /etc/exports has no \"V4:\" root line, so hosts cannot mount over NFSv4.",
+      "serviceAccount": "The backup service account {{account}} does not exist on the storage host.",
+      "ownFilesystem": "Not on their own filesystem: {{hosts}}. Give each host its own ZFS dataset or btrfs subvolume, so each gets its own export.",
+      "exportShared": "Reachable through a shared export: {{hosts}}. A compromised host could reach other hosts' backups. Export each host's repository on its own.",
+      "exportOwn": "Without an export of their own: {{hosts}}.",
+      "exportRestricted": "Exports not limited to the host's own address: {{hosts}}.",
+      "exportMapping": "Exports that do not map every client to the backup account: {{hosts}}. FreeBSD: -mapall=ACCOUNT:GROUP; Linux: all_squash with anonuid and anongid.",
+      "appendOnly": "Not append-only: {{hosts}} could delete or overwrite their own finished backups. Finished packs and snapshots must belong to root, in root-owned, group-writable, sticky directories (mode 1770).",
+      "other": "Storage check: {{code}}",
+      "prepareHint": "Prepare storage, on each host's Backups tab, gives that host its own filesystem and an export limited to it. The storage host's NFS server settings stay yours to set."
+    },
+    "prepare": {
+      "title": "Prepare the storage for this host?",
+      "body": "The storage host gives this host's repository its own ZFS dataset or btrfs subvolume, exports it over NFS to this host's address only with every file mapped to the backup account, and makes it append-only. It never moves existing backups: a repository that already holds files on the shared filesystem is refused, with the steps to move it. Run it again after this host's address changes.",
+      "error": "Preparing the storage could not be started."
     }
   }
 }

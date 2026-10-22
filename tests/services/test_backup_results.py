@@ -130,7 +130,7 @@ def test_the_host_never_gets_prune_and_storage_gets_seal(session):
     storage_jobs = jobs.storage_configuration(s.policy, s.target, s.host)
     assert set(host_jobs["jobs"]) == {"capture", "snapshots", "estimate"}
     assert host_jobs["target"]["mount_point"] == "/mnt/backups"
-    assert set(storage_jobs["jobs"]) == {"seal", "prune", "check", "du"}
+    assert set(storage_jobs["jobs"]) == {"seal", "prune", "check", "du", "repack"}
     assert storage_jobs["target"]["mount_point"] == "/srv/backups/restate"
     assert storage_jobs["jobs"]["seal"] == {
         "mode": "zfs_snapshot",
@@ -449,3 +449,40 @@ def test_a_captures_repository_qualified_snapshot_is_stored_by_its_bare_name(
     snap = session.query(models.BackupSnapshot).one()
     assert snap.name == "20261021T153126Z"
     assert results.snapshot_name("20261021T153126Z") == "20261021T153126Z"
+
+
+def test_a_repack_runs_on_the_storage_host_and_is_sized_after(session, sent):
+    s = _setup(session)
+    run = jobs.queue_run(session, s.policy, s.nas.id, "repack")
+    assert run.host_id == s.nas.id
+    results.record_result(session, s.nas.id, _result(
+        run, "ok", packs_rewritten=688, packs_removed=3, bytes_freed=1234,
+    ))  # fmt: skip
+    assert [p["action"] for _h, _c, p in sent] == ["repack", "du"]
+
+
+def test_a_stopped_repack_is_sized_too_and_a_failed_one_is_not(session, sent):
+    s = _setup(session)
+    run = jobs.queue_run(session, s.policy, s.nas.id, "repack")
+    results.record_result(session, s.nas.id, _result(run, "incomplete"))
+    assert [p["action"] for _h, _c, p in sent] == ["repack", "du"]
+    sent.clear()
+    run = jobs.queue_run(session, s.policy, s.nas.id, "repack")
+    results.record_result(session, s.nas.id, _result(run, "failed"))
+    assert [p["action"] for _h, _c, p in sent] == ["repack"]
+
+
+def test_a_prepare_keeps_the_fresh_audit_and_queues_nothing_after(session, sent):
+    s = _setup(session)
+    run = jobs.queue_run(session, s.policy, s.nas.id, "prepare")
+    payload = _result(
+        run,
+        "failed",
+        reason="zfs_required",
+        errors=["FreeBSD exports whole filesystems"],
+    )
+    payload["storage_audit"] = [{"code": "export_own", "level": "ok", "params": {}}]
+    results.record_result(session, s.nas.id, payload)
+    assert run.status == "failed" and run.message == "FreeBSD exports whole filesystems"
+    assert json.loads(s.policy.storage_audit)[0]["code"] == "export_own"
+    assert [p["action"] for _h, _c, p in sent] == ["prepare"]

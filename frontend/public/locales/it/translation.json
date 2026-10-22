@@ -5288,7 +5288,10 @@
       "prune": "Pulizia",
       "restore": "Ripristino",
       "seal": "Sigillatura",
-      "snapshots": "Elenco degli snapshot"
+      "snapshots": "Elenco degli snapshot",
+      "du": "Uso dell'archiviazione",
+      "repack": "Reimpacchetta",
+      "prepare": "Prepara archiviazione"
     },
     "card": {
       "lastCheck": "Ultima verifica",
@@ -5430,7 +5433,9 @@
       "btrfsHelp": "I repository devono trovarsi su un sottovolume btrfs; gli snapshot vanno in una directory dello stesso file system, fuori dal sottovolume.",
       "btrfsRetention": "Per ora la rimozione dei vecchi snapshot btrfs spetta a te; imposta la conservazione sull'host di archiviazione.",
       "btrfsSnapshotDir": "Directory degli snapshot sull'host di archiviazione",
-      "sealBtrfs": "Snapshot btrfs (sola lettura)"
+      "sealBtrfs": "Snapshot btrfs (sola lettura)",
+      "serviceAccount": "Account dei backup sull'host di archiviazione",
+      "serviceAccountHelp": "L'esportazione di ogni host è associata a questo account e al suo gruppo. Predefinito: restate."
     },
     "title": "Backup",
     "warning": {
@@ -5443,7 +5448,10 @@
       "fsUnchecked": "File system non ancora verificato",
       "pruneStale": "Non ripulito da più del doppio dell'intervallo di backup: {{hosts}}",
       "sealFsMismatch": "La modalità di sigillatura richiede {{needed}}, ma il percorso di archiviazione si trova su {{type}}: ogni sigillatura fallirà.",
-      "sealStale": "Non sigillato dall'ultimo backup: {{hosts}}"
+      "sealStale": "Non sigillato dall'ultimo backup: {{hosts}}",
+      "storageDriveFailed": "L'host di archiviazione segnala un'unità o un array guasto ({{names}}): i backup di tutti gli host sono a rischio. Sostituiscilo o sposta i backup.",
+      "storageDriveWarning": "L'host di archiviazione segnala un'unità, un array o un pool in avviso ({{names}}). Vedi Stato dell'hardware.",
+      "storageSpace": "Il file system del percorso di archiviazione è pieno al {{percent}}% ({{free}} liberi): quando è pieno i backup si fermano. Riduci \"Snapshot da conservare\", escludi di più o aggiungi spazio."
     },
     "storage": {
       "confirmed": "File dei processi di archiviazione confermati: {{confirmed}} su {{total}}",
@@ -5451,7 +5459,8 @@
       "lastCheck": "Ultima verifica",
       "lastPrune": "Ultima pulizia",
       "lastSeal": "Ultima sigillatura",
-      "never": "Mai"
+      "never": "Mai",
+      "space": "Spazio di archiviazione: {{percent}}% usato, {{free}} liberi su {{total}}"
     },
     "bulk": {
       "backupSelected": "Esegui il backup dei selezionati",
@@ -5464,6 +5473,33 @@
       "skipNoPolicy": "Nessun criterio di backup",
       "skipNotConfigured": "File dei processi non ancora confermati dall'host",
       "skipRunning": "Backup già in corso"
+    },
+    "repack": {
+      "button": "Reimpacchetta",
+      "title": "Reimpacchettare i backup di questo host?",
+      "body": "L'host di archiviazione riscrive i pacchetti di backup meno recenti di questo host, così il ripristino di pochi file legge solo ciò che serve (restate 2.0.0.8 o successivo). Legge e riscrive l'intero repository sull'host di archiviazione, il che può richiedere molto tempo, e i backup di questo host attendono la fine. Nessuno snapshot va perso.",
+      "error": "Impossibile avviare la reimpacchettatura."
+    },
+    "audit": {
+      "nfsServer": "Il server NFS dell'host di archiviazione non è in esecuzione o non si avvia all'avvio del sistema.",
+      "nfsV4": "L'host di archiviazione non offre NFSv4, che gli host usano per raggiungere i propri backup.",
+      "nfsV4Only": "L'host di archiviazione offre ancora versioni di NFS precedenti alla 4. Offri solo NFSv4.",
+      "nfsLocalLocks": "L'host di archiviazione non mostra i lock degli host ai propri programmi (FreeBSD: imposta vfs.nfsd.enable_locallocks=1), quindi un'eliminazione potrebbe avvenire durante un backup.",
+      "nfsV4Root": "Il file /etc/exports dell'host di archiviazione non ha la riga radice \"V4:\", quindi gli host non possono montare tramite NFSv4.",
+      "serviceAccount": "L'account di servizio per i backup {{account}} non esiste sull'host di archiviazione.",
+      "ownFilesystem": "Non su un proprio file system: {{hosts}}. Dai a ogni host un proprio dataset ZFS o subvolume btrfs, così ognuno ha la propria esportazione.",
+      "exportShared": "Raggiungibili tramite un'esportazione condivisa: {{hosts}}. Un host compromesso potrebbe raggiungere i backup di altri host. Esporta il repository di ogni host separatamente.",
+      "exportOwn": "Senza un'esportazione propria: {{hosts}}.",
+      "exportRestricted": "Esportazioni non limitate all'indirizzo dell'host: {{hosts}}.",
+      "exportMapping": "Esportazioni che non associano ogni client all'account dei backup: {{hosts}}. FreeBSD: -mapall=ACCOUNT:GROUP; Linux: all_squash con anonuid e anongid.",
+      "appendOnly": "Non solo in aggiunta: {{hosts}} potrebbero eliminare o sovrascrivere i propri backup completati. Pacchetti e snapshot completati devono appartenere a root, in directory di root scrivibili dal gruppo e con sticky bit (modalità 1770).",
+      "other": "Verifica dell'archiviazione: {{code}}",
+      "prepareHint": "Prepara archiviazione, nella scheda Backup di ogni host, assegna a quell'host un proprio file system e un'esportazione limitata a esso. Le impostazioni del server NFS dell'host di archiviazione restano a tuo carico."
+    },
+    "prepare": {
+      "title": "Preparare l'archiviazione per questo host?",
+      "body": "L'host di archiviazione assegna al repository di questo host un proprio dataset ZFS o subvolume btrfs, lo esporta via NFS solo all'indirizzo di questo host associando ogni file all'account dei backup, e lo rende di sola aggiunta. Non sposta mai i backup esistenti: un repository che contiene già file sul file system condiviso viene rifiutato, con i passaggi per spostarlo. Eseguilo di nuovo quando cambia l'indirizzo di questo host.",
+      "error": "Impossibile avviare la preparazione dell'archiviazione."
     }
   }
 }

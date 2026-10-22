@@ -20,14 +20,18 @@ import type {
     StorageRunBrief,
     TargetWarning,
 } from '../../Services/backups';
-import { formatTime, reasonLabel, runStatusLabel } from './backupLabels';
+import { auditSeverity, auditText } from './backupAuditMessages';
+import { formatBytes, formatTime, reasonLabel, runStatusLabel } from './backupLabels';
 
-export const warningSeverity = (warning: TargetWarning): AlertColor => {
+export const warningSeverity = (warning: TargetWarning, target?: BackupTarget): AlertColor => {
+    if (warning.startsWith('audit_') && target) return auditSeverity(target, warning);
     switch (warning) {
         case 'no_storage_host':
         case 'storage_not_equipped':
         case 'seal_fs_mismatch':
         case 'btrfs_not_subvolume':
+        case 'storage_drive_failed':
+        case 'storage_space_critical':
             return 'error';
         case 'fs_cannot_snapshot':
         case 'fs_unchecked':
@@ -90,7 +94,21 @@ const warningText = (
                 { type: fsType });
         case 'fs_unchecked':
             return t('backups.warning.fsUnchecked', 'Filesystem not checked yet');
+        case 'storage_drive_failed':
+            return t('backups.warning.storageDriveFailed',
+                'The storage host reports a failed drive or array ({{names}}): every host\'s backups are at risk. Replace it, or move the backups.',
+                { names: target.storage_health?.drives.failed.join(', ') ?? '' });
+        case 'storage_drive_warning':
+            return t('backups.warning.storageDriveWarning',
+                'The storage host reports a drive, array or pool in warning ({{names}}). See Hardware Health.',
+                { names: target.storage_health?.drives.warning.join(', ') ?? '' });
+        case 'storage_space_critical':
+        case 'storage_space_low':
+            return t('backups.warning.storageSpace',
+                'The storage path\'s filesystem is {{percent}}% full ({{free}} free): backups stop when it is full. Lower "Snapshots to keep", leave more out, or add space.',
+                { percent: target.storage_health?.space?.used_percent ?? '', free: formatBytes(target.storage_health?.space?.available_bytes) });
         default:
+            if (warning.startsWith('audit_')) return auditText(t, target, hosts, warning);
             return warning;
     }
 };
@@ -107,6 +125,10 @@ const LastRun: React.FC<{ label: string; run: StorageRunBrief | null }> = ({ lab
     );
 };
 
+// Per-host findings that "Prepare storage" fixes (the rest are host-wide).
+const PREPARE_FIXES = ['audit_own_filesystem', 'audit_export_shared', 'audit_export_own',
+    'audit_export_restricted', 'audit_export_mapping'];
+
 const BackupStorageStatus: React.FC<{ target: BackupTarget; hosts: BackupHost[] }> = ({ target, hosts }) => {
     const { t } = useTranslation();
     const status = target.storage_status;
@@ -122,6 +144,15 @@ const BackupStorageStatus: React.FC<{ target: BackupTarget; hosts: BackupHost[] 
                     <LastRun label={t('backups.storage.lastSeal', 'Last seal')} run={status.last_seal} />
                     <LastRun label={t('backups.storage.lastPrune', 'Last prune')} run={status.last_prune} />
                     <LastRun label={t('backups.storage.lastCheck', 'Last check')} run={status.last_check} />
+                    {target.storage_health?.space && (
+                        <Typography variant="body2">
+                            {t('backups.storage.space', 'Storage space: {{percent}}% used, {{free}} free of {{total}}', {
+                                percent: target.storage_health.space.used_percent,
+                                free: formatBytes(target.storage_health.space.available_bytes),
+                                total: formatBytes(target.storage_health.space.total_bytes),
+                            })}
+                        </Typography>
+                    )}
                     {fs.type && (
                         <Typography variant="body2">
                             {t('backups.storage.filesystem', 'Storage filesystem')}: {fs.type}
@@ -132,10 +163,16 @@ const BackupStorageStatus: React.FC<{ target: BackupTarget; hosts: BackupHost[] 
             )}
             <Stack spacing={1} sx={{ mt: 1 }}>
                 {target.warnings.map(w => (
-                    <Alert key={w} severity={warningSeverity(w)} variant={w === 'fs_unchecked' ? 'outlined' : 'standard'}>
+                    <Alert key={w} severity={warningSeverity(w, target)} variant={w === 'fs_unchecked' ? 'outlined' : 'standard'}>
                         {warningText(t, target, hosts, w)}
                     </Alert>
                 ))}
+                {target.warnings.some(w => PREPARE_FIXES.includes(w)) && (
+                    <Alert severity="info" variant="outlined" data-testid="backup-prepare-hint">
+                        {t('backups.audit.prepareHint',
+                            'Prepare storage, on each host\'s Backups tab, gives that host its own filesystem and an export limited to it. The storage host\'s NFS server settings stay yours to set.')}
+                    </Alert>
+                )}
             </Stack>
         </Box>
     );

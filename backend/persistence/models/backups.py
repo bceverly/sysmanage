@@ -65,6 +65,8 @@ class BackupTarget(Base):
     zfs_dataset = Column(String(255), nullable=True)
     # btrfs seal: read-only snapshots of storage_path (the subvolume) go here.
     btrfs_snapshot_dir = Column(String(1024), nullable=True)
+    # The storage host's backup account exports map hosts to (None = restate).
+    service_account = Column(String(32), nullable=True)
     storage_fs_type = Column(String(64), nullable=True)
     storage_fs_mount = Column(String(1024), nullable=True)
     storage_fs_checked_at = Column(DateTime, nullable=True)
@@ -103,6 +105,10 @@ class BackupPolicy(Base):
     skip_paths = Column(Text, nullable=True)
     # A bulk "Back up now" waiting for a free slot under the target's cap.
     capture_requested_at = Column(DateTime, nullable=True)
+    # The storage host's latest audit of this host's repository (JSON list of
+    # {code, level, params}): NFS baseline, own export, append-only layout.
+    storage_audit = Column(Text, nullable=True)
+    storage_audit_at = Column(DateTime, nullable=True)
     estimate_bytes = Column(BigInteger, nullable=True)
     repository_bytes = Column(BigInteger, nullable=True)
     config_version = Column(Integer, nullable=False, default=1)

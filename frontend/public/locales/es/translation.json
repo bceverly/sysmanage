@@ -5288,7 +5288,10 @@
       "prune": "Depuración",
       "restore": "Restauración",
       "seal": "Sellado",
-      "snapshots": "Listar instantáneas"
+      "snapshots": "Listar instantáneas",
+      "du": "Uso del almacenamiento",
+      "repack": "Reempaquetar",
+      "prepare": "Preparar almacenamiento"
     },
     "card": {
       "lastCheck": "Última comprobación",
@@ -5430,7 +5433,9 @@
       "btrfsHelp": "Los repositorios deben estar en un subvolumen de btrfs; las instantáneas van a un directorio del mismo sistema de archivos, fuera del subvolumen.",
       "btrfsRetention": "Por ahora, eliminar las instantáneas antiguas de btrfs le corresponde a usted; configure la retención en el host de almacenamiento.",
       "btrfsSnapshotDir": "Directorio de instantáneas en el host de almacenamiento",
-      "sealBtrfs": "Instantánea de btrfs (solo lectura)"
+      "sealBtrfs": "Instantánea de btrfs (solo lectura)",
+      "serviceAccount": "Cuenta de copias de seguridad en el host de almacenamiento",
+      "serviceAccountHelp": "La exportación de cada host se asigna a esta cuenta y a su grupo. Predeterminado: restate."
     },
     "title": "Copias de seguridad",
     "warning": {
@@ -5443,7 +5448,10 @@
       "fsUnchecked": "Sistema de archivos aún sin comprobar",
       "pruneStale": "Sin depurar durante más del doble del intervalo de copia de seguridad: {{hosts}}",
       "sealFsMismatch": "El modo de sellado requiere {{needed}}, pero la ruta de almacenamiento está en {{type}}: todos los sellados fallarán.",
-      "sealStale": "Sin sellar desde la última copia de seguridad: {{hosts}}"
+      "sealStale": "Sin sellar desde la última copia de seguridad: {{hosts}}",
+      "storageDriveFailed": "El host de almacenamiento informa de una unidad o matriz averiada ({{names}}): las copias de seguridad de todos los hosts están en riesgo. Sustitúyala o traslade las copias de seguridad.",
+      "storageDriveWarning": "El host de almacenamiento informa de una unidad, matriz o grupo con advertencia ({{names}}). Consulte Estado del hardware.",
+      "storageSpace": "El sistema de archivos de la ruta de almacenamiento está lleno al {{percent}} % ({{free}} libres): las copias de seguridad se detienen cuando se llena. Reduzca \"Instantáneas que conservar\", excluya más o añada espacio."
     },
     "storage": {
       "confirmed": "Archivos de trabajos de almacenamiento confirmados: {{confirmed}} de {{total}}",
@@ -5451,7 +5459,8 @@
       "lastCheck": "Última comprobación",
       "lastPrune": "Última depuración",
       "lastSeal": "Último sellado",
-      "never": "Nunca"
+      "never": "Nunca",
+      "space": "Espacio de almacenamiento: {{percent}} % usado, {{free}} libres de {{total}}"
     },
     "bulk": {
       "backupSelected": "Hacer copia de seguridad de los seleccionados",
@@ -5464,6 +5473,33 @@
       "skipNoPolicy": "Sin política de copia de seguridad",
       "skipNotConfigured": "El host aún no ha confirmado los archivos de tarea",
       "skipRunning": "Copia de seguridad ya en curso"
+    },
+    "repack": {
+      "button": "Reempaquetar",
+      "title": "¿Reempaquetar las copias de seguridad de este host?",
+      "body": "El host de almacenamiento reescribe los paquetes de copia de seguridad más antiguos de este host para que, al restaurar unos pocos archivos, solo se lea lo necesario (restate 2.0.0.8 o posterior). Lee y reescribe todo el repositorio en el host de almacenamiento, lo que puede tardar mucho, y las copias de seguridad de este host esperan hasta que termine. No se pierde ninguna instantánea.",
+      "error": "No se pudo iniciar el reempaquetado."
+    },
+    "audit": {
+      "nfsServer": "El servidor NFS del host de almacenamiento no está en ejecución o no se inicia al arrancar.",
+      "nfsV4": "El host de almacenamiento no ofrece NFSv4, que los hosts usan para llegar a sus copias de seguridad.",
+      "nfsV4Only": "El host de almacenamiento aún ofrece versiones de NFS anteriores a la 4. Ofrezca solo NFSv4.",
+      "nfsLocalLocks": "El host de almacenamiento no muestra los bloqueos de los hosts a sus propios programas (FreeBSD: establezca vfs.nfsd.enable_locallocks=1), así que una depuración podría ejecutarse durante una copia de seguridad.",
+      "nfsV4Root": "El /etc/exports del host de almacenamiento no tiene la línea raíz \"V4:\", así que los hosts no pueden montar mediante NFSv4.",
+      "serviceAccount": "La cuenta de servicio de copias de seguridad {{account}} no existe en el host de almacenamiento.",
+      "ownFilesystem": "Sin sistema de archivos propio: {{hosts}}. Dé a cada host su propio dataset ZFS o subvolumen btrfs, para que cada uno tenga su propia exportación.",
+      "exportShared": "Accesibles mediante una exportación compartida: {{hosts}}. Un host comprometido podría llegar a las copias de seguridad de otros hosts. Exporte el repositorio de cada host por separado.",
+      "exportOwn": "Sin exportación propia: {{hosts}}.",
+      "exportRestricted": "Exportaciones no limitadas a la propia dirección del host: {{hosts}}.",
+      "exportMapping": "Exportaciones que no asignan todos los clientes a la cuenta de copias de seguridad: {{hosts}}. FreeBSD: -mapall=ACCOUNT:GROUP; Linux: all_squash con anonuid y anongid.",
+      "appendOnly": "No es solo de anexión: {{hosts}} podrían borrar o sobrescribir sus propias copias de seguridad terminadas. Los paquetes e instantáneas terminados deben pertenecer a root, en directorios de root con escritura de grupo y bit sticky (modo 1770).",
+      "other": "Comprobación del almacenamiento: {{code}}",
+      "prepareHint": "Preparar almacenamiento, en la pestaña Copias de seguridad de cada host, da a ese host su propio sistema de archivos y una exportación limitada a él. La configuración del servidor NFS del host de almacenamiento sigue siendo cosa suya."
+    },
+    "prepare": {
+      "title": "¿Preparar el almacenamiento para este host?",
+      "body": "El host de almacenamiento da al repositorio de este host su propio dataset ZFS o subvolumen btrfs, lo exporta por NFS solo a la dirección de este host con cada archivo asignado a la cuenta de copias de seguridad, y lo hace de solo anexión. Nunca mueve copias de seguridad existentes: un repositorio que ya contiene archivos en el sistema de archivos compartido se rechaza, con los pasos para moverlo. Vuelva a ejecutarlo cuando cambie la dirección de este host.",
+      "error": "No se pudo iniciar la preparación del almacenamiento."
     }
   }
 }

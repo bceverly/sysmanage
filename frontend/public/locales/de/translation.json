@@ -5288,7 +5288,10 @@
       "prune": "Bereinigung",
       "restore": "Wiederherstellung",
       "seal": "Versiegelung",
-      "snapshots": "Snapshots auflisten"
+      "snapshots": "Snapshots auflisten",
+      "du": "Speicherbelegung",
+      "repack": "Neu packen",
+      "prepare": "Speicher vorbereiten"
     },
     "card": {
       "lastCheck": "Letzte Prüfung",
@@ -5430,7 +5433,9 @@
       "btrfsHelp": "Die Repositorys müssen auf einem btrfs-Subvolume liegen; Snapshots landen in einem Verzeichnis auf demselben Dateisystem, außerhalb des Subvolumes.",
       "btrfsRetention": "Alte btrfs-Snapshots müssen Sie vorerst selbst entfernen; legen Sie die Aufbewahrung auf dem Speicher-Host fest.",
       "btrfsSnapshotDir": "Snapshot-Verzeichnis auf dem Speicher-Host",
-      "sealBtrfs": "btrfs-Snapshot (schreibgeschützt)"
+      "sealBtrfs": "btrfs-Snapshot (schreibgeschützt)",
+      "serviceAccount": "Sicherungskonto auf dem Speicher-Host",
+      "serviceAccountHelp": "Die Freigabe jedes Hosts wird auf dieses Konto und seine Gruppe abgebildet. Standard: restate."
     },
     "title": "Sicherungen",
     "warning": {
@@ -5443,7 +5448,10 @@
       "fsUnchecked": "Dateisystem noch nicht geprüft",
       "pruneStale": "Seit mehr als dem doppelten Backup-Intervall nicht bereinigt: {{hosts}}",
       "sealFsMismatch": "Der Versiegelungsmodus erfordert {{needed}}, aber der Speicherpfad liegt auf {{type}}: Jede Versiegelung schlägt fehl.",
-      "sealStale": "Seit dem letzten Backup nicht versiegelt: {{hosts}}"
+      "sealStale": "Seit dem letzten Backup nicht versiegelt: {{hosts}}",
+      "storageDriveFailed": "Der Speicher-Host meldet ein ausgefallenes Laufwerk oder Array ({{names}}): Die Sicherungen aller Hosts sind gefährdet. Ersetzen Sie es oder verlagern Sie die Sicherungen.",
+      "storageDriveWarning": "Der Speicher-Host meldet ein Laufwerk, Array oder einen Pool mit Warnung ({{names}}). Siehe Hardware-Zustand.",
+      "storageSpace": "Das Dateisystem des Speicherpfads ist zu {{percent}} % voll ({{free}} frei): Wenn es voll ist, stoppen die Sicherungen. Senken Sie \"Zu behaltende Snapshots\", schließen Sie mehr aus oder schaffen Sie Platz."
     },
     "storage": {
       "confirmed": "Speicher-Jobdateien bestätigt: {{confirmed}} von {{total}}",
@@ -5451,7 +5459,8 @@
       "lastCheck": "Letzte Prüfung",
       "lastPrune": "Letzte Bereinigung",
       "lastSeal": "Letzte Versiegelung",
-      "never": "Nie"
+      "never": "Nie",
+      "space": "Speicherplatz: {{percent}} % belegt, {{free}} von {{total}} frei"
     },
     "bulk": {
       "backupSelected": "Ausgewählte sichern",
@@ -5464,6 +5473,33 @@
       "skipNoPolicy": "Keine Sicherungsrichtlinie",
       "skipNotConfigured": "Auftragsdateien vom Host noch nicht bestätigt",
       "skipRunning": "Sicherung läuft bereits"
+    },
+    "repack": {
+      "button": "Neu packen",
+      "title": "Die Sicherungen dieses Hosts neu packen?",
+      "body": "Der Speicher-Host schreibt die älteren Sicherungspakete dieses Hosts neu, damit beim Wiederherstellen weniger Dateien nur das Nötige gelesen wird (restate 2.0.0.8 oder neuer). Er liest das ganze Repository auf dem Speicher-Host und schreibt es neu; das kann lange dauern, und die Sicherungen dieses Hosts warten so lange. Es geht kein Snapshot verloren.",
+      "error": "Das Neupacken konnte nicht gestartet werden."
+    },
+    "audit": {
+      "nfsServer": "Der NFS-Server des Speicher-Hosts läuft nicht oder startet nicht beim Booten.",
+      "nfsV4": "Der Speicher-Host stellt kein NFSv4 bereit, über das die Hosts ihre Sicherungen erreichen.",
+      "nfsV4Only": "Der Speicher-Host stellt noch NFS-Versionen vor 4 bereit. Stellen Sie nur NFSv4 bereit.",
+      "nfsLocalLocks": "Der Speicher-Host zeigt die Sperren der Hosts seinen eigenen Programmen nicht an (FreeBSD: vfs.nfsd.enable_locallocks=1 setzen), daher könnte während einer Sicherung ein Bereinigen laufen.",
+      "nfsV4Root": "In /etc/exports des Speicher-Hosts fehlt die Stammzeile \"V4:\", daher können Hosts nicht über NFSv4 einhängen.",
+      "serviceAccount": "Das Sicherungs-Dienstkonto {{account}} existiert auf dem Speicher-Host nicht.",
+      "ownFilesystem": "Nicht auf einem eigenen Dateisystem: {{hosts}}. Geben Sie jedem Host ein eigenes ZFS-Dataset oder btrfs-Subvolume, damit jeder eine eigene Freigabe erhält.",
+      "exportShared": "Über eine gemeinsame Freigabe erreichbar: {{hosts}}. Ein kompromittierter Host könnte die Sicherungen anderer Hosts erreichen. Geben Sie das Repository jedes Hosts einzeln frei.",
+      "exportOwn": "Ohne eigene Freigabe: {{hosts}}.",
+      "exportRestricted": "Freigaben, die nicht auf die eigene Adresse des Hosts beschränkt sind: {{hosts}}.",
+      "exportMapping": "Freigaben, die nicht jeden Client auf das Sicherungskonto abbilden: {{hosts}}. FreeBSD: -mapall=ACCOUNT:GROUP; Linux: all_squash mit anonuid und anongid.",
+      "appendOnly": "Nicht nur anhängend: {{hosts}} könnten ihre eigenen fertigen Sicherungen löschen oder überschreiben. Fertige Pakete und Snapshots müssen root gehören, in root-eigenen, gruppenbeschreibbaren Sticky-Verzeichnissen (Modus 1770).",
+      "other": "Speicherprüfung: {{code}}",
+      "prepareHint": "\"Speicher vorbereiten\" auf der Registerkarte \"Sicherungen\" jedes Hosts gibt diesem Host ein eigenes Dateisystem und eine auf ihn beschränkte Freigabe. Die NFS-Servereinstellungen des Speicher-Hosts legen Sie weiterhin selbst fest."
+    },
+    "prepare": {
+      "title": "Speicher für diesen Host vorbereiten?",
+      "body": "Der Speicher-Host gibt dem Repository dieses Hosts ein eigenes ZFS-Dataset oder btrfs-Subvolume, gibt es per NFS nur für die Adresse dieses Hosts frei, wobei jede Datei auf das Sicherungskonto abgebildet wird, und macht es nur anhängend. Vorhandene Sicherungen werden nie verschoben: Ein Repository, das bereits Dateien auf dem gemeinsamen Dateisystem enthält, wird abgelehnt, mit den Schritten zum Verschieben. Führen Sie es erneut aus, wenn sich die Adresse dieses Hosts ändert.",
+      "error": "Das Vorbereiten des Speichers konnte nicht gestartet werden."
     }
   }
 }

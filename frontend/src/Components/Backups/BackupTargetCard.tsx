@@ -44,6 +44,7 @@ const EMPTY: TargetInput = {
     seal_mode: 'none',
     zfs_dataset: null,
     btrfs_snapshot_dir: null,
+    service_account: null,
 };
 
 const toInput = (target: BackupTarget | null): TargetInput =>
@@ -57,6 +58,7 @@ const toInput = (target: BackupTarget | null): TargetInput =>
               seal_mode: target.seal_mode,
               zfs_dataset: target.zfs_dataset,
               btrfs_snapshot_dir: target.btrfs_snapshot_dir,
+              service_account: target.service_account ?? null,
           }
         : EMPTY;
 
@@ -88,6 +90,7 @@ export const TargetDialog: React.FC<{
                     storage_host_id: form.storage_host_id || null,
                     zfs_dataset: form.zfs_dataset || null,
                     btrfs_snapshot_dir: form.btrfs_snapshot_dir || null,
+                    service_account: form.service_account || null,
                 },
                 target?.id,
             );
@@ -146,6 +149,11 @@ export const TargetDialog: React.FC<{
                                 'backups.target.btrfsRetention',
                                 'Removing old btrfs snapshots is up to you for now; set retention on the storage host.')}`} />
                     )}
+                    <TextField label={t('backups.target.serviceAccount', 'Backup account on the storage host')}
+                        value={form.service_account ?? ''} placeholder="restate"
+                        onChange={e => set({ service_account: e.target.value || null })}
+                        helperText={t('backups.target.serviceAccountHelp',
+                            'Every host\'s export maps to this account and its group. Default: restate.')} />
                     {form.seal_mode === 'zfs_snapshot' && (
                         <TextField label={t('backups.target.zfsDataset', 'ZFS dataset')} value={form.zfs_dataset ?? ''}
                             onChange={e => set({ zfs_dataset: e.target.value || null })} required

@@ -54,7 +54,9 @@ GROUP = "backup"
 SYSTEM_ACTOR = "system:backup-scheduler"
 
 HOST_ACTIONS = ("capture", "snapshots", "estimate")
-STORAGE_ACTIONS = ("seal", "prune", "check", "du")
+# ``prepare`` is started by an administrator: the storage host gives the
+# repository its own dataset / subvolume and an export to that host only.
+STORAGE_ACTIONS = ("seal", "prune", "check", "du", "repack", "prepare")
 CONFIGURE = "configure"
 RESTORE = "restore"
 
@@ -151,6 +153,15 @@ def host_configuration(
     }
 
 
+DEFAULT_SERVICE_ACCOUNT = "restate"
+
+
+def host_address(host: models.Host) -> Optional[str]:
+    """The backed-up host's address as the storage host sees it, if known."""
+    value = (host.ipv4 or "").strip()
+    return value or None
+
+
 def storage_configuration(
     policy: models.BackupPolicy, target: models.BackupTarget, host: models.Host
 ) -> Dict[str, Any]:
@@ -158,7 +169,14 @@ def storage_configuration(
     return {
         "policy_id": str(policy.id),
         "role": "storage",
-        "target": {"mount_point": target.storage_path, "repo_dir": repo_dir(host)},
+        "target": {
+            "mount_point": target.storage_path,
+            "repo_dir": repo_dir(host),
+            # Whom this repository's export may serve, and the account it maps
+            # them to: what the storage host's audit checks the export against.
+            "client_address": host_address(host),
+            "service_account": target.service_account or DEFAULT_SERVICE_ACCOUNT,
+        },
         "jobs": {
             "seal": seal_job(target),
             "prune": {"keep_last": policy.keep_last},
@@ -166,6 +184,9 @@ def storage_configuration(
             # After each prune: the repository's size and what each
             # snapshot alone would free (pack lists only; no key needed).
             "du": {},
+            # Rewrite old packs as seekable ones (restate 2.0.0.8+; the agent
+            # installs it only where restate has it).  Started by hand.
+            "repack": {},
         },
     }
 

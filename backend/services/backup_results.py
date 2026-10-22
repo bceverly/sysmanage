@@ -153,6 +153,9 @@ def record_command_result(db: Session, message_data: Dict[str, Any]) -> bool:
         run.finished_at = jobs.now()
         _acknowledge(db, run)
         _storage_filesystem(db, run, message_data.get("result"))
+        reply = message_data.get("result")
+        if isinstance(reply, dict) and _parameters(run).get("role") == "storage":
+            _store_audit(_policy(db, run), reply.get("storage_audit"))
     else:
         run.status = jobs.RUNNING
         run.started_at = run.started_at or jobs.now()
@@ -180,6 +183,34 @@ def snapshot_name(value: str) -> str:
     (2026-10-21: the full form made every restore "not a valid snapshot
     name" and kept du's sizes from ever matching)."""
     return value.rsplit("::", 1)[-1]
+
+
+AUDIT_LEVELS = ("error", "warning", "ok")
+MAX_AUDIT_FINDINGS = 64
+
+
+def _store_audit(policy: Optional[models.BackupPolicy], audit: Any) -> None:
+    """Keep the storage host's latest audit of this repository: findings
+    ``{code, level, params}``, anything else dropped."""
+    if policy is None or not isinstance(audit, list):
+        return
+    clean = []
+    for finding in audit[:MAX_AUDIT_FINDINGS]:
+        if (
+            isinstance(finding, dict)
+            and isinstance(finding.get("code"), str)
+            and finding.get("level") in AUDIT_LEVELS
+        ):
+            params = finding.get("params")
+            clean.append(
+                {
+                    "code": finding["code"][:64],
+                    "level": finding["level"],
+                    "params": params if isinstance(params, dict) else {},
+                }
+            )
+    policy.storage_audit = json.dumps(clean)
+    policy.storage_audit_at = jobs.now()
 
 
 def _store_outcome(run: models.BackupRun, payload: Dict[str, Any]) -> Dict[str, Any]:
@@ -368,6 +399,21 @@ def _after_prune(db: Session, run: models.BackupRun, policy, result) -> None:
         _storage_next(db, policy, "du")  # what is left, and what each holds
 
 
+def _after_repack(db: Session, run: models.BackupRun, policy, result) -> None:
+    """Packs rewritten (or stopped part-way: the next repack resumes): the
+    repository's size changed, so size it again."""
+    _note_version(policy, "storage_restate_version", run.restate_version)
+    if run.status in ("ok", "incomplete"):
+        logger.info(
+            "Backup repack for policy %s: %s packs rewritten, %s removed, %s bytes freed",
+            policy.id,
+            result.get("packs_rewritten"),
+            result.get("packs_removed"),
+            result.get("bytes_freed"),
+        )
+        _storage_next(db, policy, "du")
+
+
 def _after_du(db: Session, run: models.BackupRun, policy, result) -> None:
     """The repository's size on the storage host and, per snapshot, its
     size, what it added, and what dropping it alone would free."""
@@ -465,6 +511,7 @@ _AFTER = {
     "estimate": _after_estimate,
     "check": _after_check,
     "du": _after_du,
+    "repack": _after_repack,
 }
 
 
@@ -487,6 +534,10 @@ def record_result(
         return run
     result = _store_outcome(run, payload)
     policy = _policy(db, run)
+    if "storage_audit" in payload and str(run.host_id) != str(
+        getattr(policy, "host_id", None)
+    ):
+        _store_audit(policy, payload.get("storage_audit"))
     after = _AFTER.get(run.action)
     if policy is not None and after is not None:
         after(db, run, policy, result)

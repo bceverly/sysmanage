@@ -5288,7 +5288,10 @@
       "prune": "清理舊快照",
       "restore": "還原",
       "seal": "封存",
-      "snapshots": "列出快照"
+      "snapshots": "列出快照",
+      "du": "儲存用量",
+      "repack": "重新打包",
+      "prepare": "準備儲存"
     },
     "card": {
       "lastCheck": "上次檢查",
@@ -5430,7 +5433,9 @@
       "btrfsHelp": "儲存庫必須位於 btrfs 子磁碟區上；快照存放在同一檔案系統上、該子磁碟區之外的目錄中。",
       "btrfsRetention": "目前需由您自行刪除舊的 btrfs 快照；請在儲存主機上設定保留原則。",
       "btrfsSnapshotDir": "儲存主機上的快照目錄",
-      "sealBtrfs": "btrfs 快照（唯讀）"
+      "sealBtrfs": "btrfs 快照（唯讀）",
+      "serviceAccount": "儲存主機上的備份帳戶",
+      "serviceAccountHelp": "每台主機的匯出都對應到此帳戶及其群組。預設：restate。"
     },
     "title": "備份",
     "warning": {
@@ -5443,7 +5448,10 @@
       "fsUnchecked": "尚未檢查檔案系統",
       "pruneStale": "超過備份間隔的兩倍時間未清理舊快照：{{hosts}}",
       "sealFsMismatch": "封存模式需要 {{needed}}，但儲存路徑位於 {{type}} 上：每次封存都會失敗。",
-      "sealStale": "自上次備份以來未封存：{{hosts}}"
+      "sealStale": "自上次備份以來未封存：{{hosts}}",
+      "storageDriveFailed": "儲存主機回報有磁碟機或陣列故障（{{names}}）：所有主機的備份都面臨風險。請更換它，或搬移備份。",
+      "storageDriveWarning": "儲存主機回報有磁碟機、陣列或集區處於警告狀態（{{names}}）。請查看硬體健康。",
+      "storageSpace": "儲存路徑所在的檔案系統已使用 {{percent}}%（剩餘 {{free}}）：一旦寫滿，備份就會停止。請減少「保留的快照數」、排除更多內容或增加空間。"
     },
     "storage": {
       "confirmed": "已確認的儲存作業檔案：{{confirmed}}/{{total}}",
@@ -5451,7 +5459,8 @@
       "lastCheck": "上次檢查",
       "lastPrune": "上次修剪",
       "lastSeal": "上次封存",
-      "never": "從未"
+      "never": "從未",
+      "space": "儲存空間：已使用 {{percent}}%，{{total}} 中剩餘 {{free}}"
     },
     "bulk": {
       "backupSelected": "備份所選主機",
@@ -5464,6 +5473,33 @@
       "skipNoPolicy": "沒有備份原則",
       "skipNotConfigured": "主機尚未確認作業檔案",
       "skipRunning": "正在備份中"
+    },
+    "repack": {
+      "button": "重新打包",
+      "title": "重新打包此主機的備份？",
+      "body": "儲存主機會重寫此主機較舊的備份包，讓還原少量檔案時只讀取需要的部分（restate 2.0.0.8 或更新版本）。它會在儲存主機上讀取並重寫整個存放庫，可能耗時較長，在此期間此主機的備份會等待。不會遺失任何快照。",
+      "error": "無法開始重新打包。"
+    },
+    "audit": {
+      "nfsServer": "儲存主機的 NFS 伺服器未執行，或不會在開機時啟動。",
+      "nfsV4": "儲存主機未提供 NFSv4，而主機要透過它存取自己的備份。",
+      "nfsV4Only": "儲存主機仍提供低於 4 的 NFS 版本。請只提供 NFSv4。",
+      "nfsLocalLocks": "儲存主機不會向自身的程式顯示主機的鎖定（FreeBSD：設定 vfs.nfsd.enable_locallocks=1），因此清理可能會在備份期間執行。",
+      "nfsV4Root": "儲存主機的 /etc/exports 中沒有 \"V4:\" 根行，因此主機無法透過 NFSv4 掛載。",
+      "serviceAccount": "儲存主機上不存在備份服務帳戶 {{account}}。",
+      "ownFilesystem": "不在自己的檔案系統上：{{hosts}}。請為每台主機提供個別的 ZFS 資料集或 btrfs 子磁碟區，使每台主機都有自己的匯出。",
+      "exportShared": "可透過共用匯出存取：{{hosts}}。遭入侵的主機可能存取其他主機的備份。請分別匯出每台主機的存放庫。",
+      "exportOwn": "沒有自己的匯出：{{hosts}}。",
+      "exportRestricted": "未限制為主機自身位址的匯出：{{hosts}}。",
+      "exportMapping": "未將所有用戶端對應到備份帳戶的匯出：{{hosts}}。FreeBSD：-mapall=ACCOUNT:GROUP；Linux：all_squash 搭配 anonuid 與 anongid。",
+      "appendOnly": "不是僅附加：{{hosts}} 可能刪除或覆寫自己已完成的備份。已完成的包與快照必須歸 root 所有，並位於歸 root 所有、群組可寫、具黏著位元的目錄中（模式 1770）。",
+      "other": "儲存檢查：{{code}}",
+      "prepareHint": "每台主機「備份」分頁中的「準備儲存」會為該主機提供獨立的檔案系統和僅限於它的匯出。儲存主機的 NFS 伺服器設定仍由您自行設定。"
+    },
+    "prepare": {
+      "title": "要為此主機準備儲存嗎？",
+      "body": "儲存主機會為此主機的存放庫配置獨立的 ZFS 資料集或 btrfs 子磁碟區，透過 NFS 只匯出到此主機的位址，並將每個檔案對應到備份帳戶，同時使其僅可附加。它從不移動現有備份：若存放庫已在共用檔案系統上存有檔案，將會被拒絕，並附上移動步驟。此主機的位址變更後，請再次執行。",
+      "error": "無法開始準備儲存。"
     }
   }
 }

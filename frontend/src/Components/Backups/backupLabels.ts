@@ -83,6 +83,9 @@ export const actionLabel = (t: TFunction, action: string): string => {
         estimate: t('backups.action.estimate', 'Estimate'),
         snapshots: t('backups.action.snapshots', 'List snapshots'),
         restore: t('backups.action.restore', 'Restore'),
+        du: t('backups.action.du', 'Storage use'),
+        repack: t('backups.action.repack', 'Repack'),
+        prepare: t('backups.action.prepare', 'Prepare storage'),
     };
     return labels[action] ?? action;
 };
