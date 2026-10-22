@@ -57,6 +57,7 @@ HOST_ACTIONS = ("capture", "snapshots", "estimate")
 # ``prepare`` is started by an administrator: the storage host gives the
 # repository its own dataset / subvolume and an export to that host only.
 STORAGE_ACTIONS = ("seal", "prune", "check", "du", "repack", "prepare")
+PREPARE = "prepare"
 CONFIGURE = "configure"
 RESTORE = "restore"
 
@@ -250,6 +251,7 @@ def queue_configure(
     if role == "storage":
         payload = storage_configuration(policy, target, host)
         run_host = target.storage_host_id
+        policy.storage_client_address = payload["target"]["client_address"]
     else:
         payload = host_configuration(policy, target, host)
         run_host = host.id
@@ -276,6 +278,11 @@ def queue_run(
     the storage host.  The caller picks the right host."""
     if action not in HOST_ACTIONS + STORAGE_ACTIONS:
         raise ValueError(f"unknown backup action {action!r}")
+    # A prepare remembers the address its export was made for, so a later
+    # address change can re-prepare it (backup_results).
+    record = (
+        {"client_address": policy.storage_client_address} if action == PREPARE else None
+    )
     return _queue(
         db,
         policy,
@@ -284,6 +291,18 @@ def queue_run(
         CommandType.BACKUP_RUN,
         {"policy_id": str(policy.id), "action": action},
         actor,
+        record=record,
+    )
+
+
+def address_changed(policy: models.BackupPolicy, host: models.Host) -> bool:
+    """Has the host's address moved since the storage side was told?  Only
+    once the storage side has been told something (never on a first send)."""
+    told = policy.storage_client_address
+    return (
+        policy.storage_acked_version > 0
+        and told is not None
+        and (told != host_address(host))
     )
 
 

@@ -109,6 +109,9 @@ class BackupPolicy(Base):
     # {code, level, params}): NFS baseline, own export, append-only layout.
     storage_audit = Column(Text, nullable=True)
     storage_audit_at = Column(DateTime, nullable=True)
+    # The host's address as last sent to the storage host (q56): a change
+    # re-sends the storage side's job files and re-prepares its export.
+    storage_client_address = Column(String(64), nullable=True)
     estimate_bytes = Column(BigInteger, nullable=True)
     repository_bytes = Column(BigInteger, nullable=True)
     config_version = Column(Integer, nullable=False, default=1)

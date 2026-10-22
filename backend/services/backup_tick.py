@@ -115,6 +115,15 @@ def running_captures(db: Session, target_id) -> int:
 
 def _configure(db, policy, target, host, storage_ready: bool) -> bool:
     """Send outdated job files.  True when the HOST's are current."""
+    if jobs.address_changed(policy, host):
+        # The export must follow the host: re-send the storage side's job
+        # files (and, on its acknowledgment, re-prepare -- backup_results).
+        logger.info(
+            "Backup policy %s: host %s moved from %s to %s; re-sending storage jobs",
+            policy.id, host.id, policy.storage_client_address, jobs.host_address(host),
+        )  # fmt: skip
+        policy.config_version += 1
+        policy.storage_client_address = jobs.host_address(host)
     if policy.host_acked_version < policy.config_version and not jobs.pending(
         db, policy.id, jobs.CONFIGURE, host.id
     ):

@@ -486,3 +486,38 @@ def test_a_prepare_keeps_the_fresh_audit_and_queues_nothing_after(session, sent)
     assert run.status == "failed" and run.message == "FreeBSD exports whole filesystems"
     assert json.loads(s.policy.storage_audit)[0]["code"] == "export_own"
     assert [p["action"] for _h, _c, p in sent] == ["prepare"]
+
+
+def _ack_storage(session, s):
+    run = jobs.queue_configure(session, s.policy, s.target, s.host, "storage")
+    results.record_command_result(
+        session, {"command_id": run.command_id, "success": True}
+    )
+
+
+def test_a_prepared_repository_is_re_prepared_when_its_host_moves(session, sent):
+    s = _setup(session)
+    s.host.ipv4 = "192.168.4.196"
+    _ack_storage(session, s)
+    prepare = jobs.queue_run(session, s.policy, s.nas.id, "prepare")
+    assert json.loads(prepare.parameters)["client_address"] == "192.168.4.196"
+    results.record_result(session, s.nas.id, _result(prepare, "ok", kind="zfs"))
+    sent.clear()
+    _ack_storage(session, s)  # same address: nothing more
+    assert [p.get("action") for _h, _c, p in sent] == [None]
+    sent.clear()
+    s.host.ipv4 = "192.168.4.200"
+    _ack_storage(session, s)
+    assert [p.get("action") for _h, _c, p in sent] == [None, "prepare"]
+    assert sent[-1][0] == str(s.nas.id)
+
+
+def test_a_never_prepared_repository_is_not_prepared_behind_the_admins_back(
+    session, sent
+):
+    s = _setup(session)
+    s.host.ipv4 = "192.168.4.196"
+    _ack_storage(session, s)
+    s.host.ipv4 = "192.168.4.200"
+    _ack_storage(session, s)
+    assert "prepare" not in [p.get("action") for _h, _c, p in sent]

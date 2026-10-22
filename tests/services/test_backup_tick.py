@@ -271,3 +271,21 @@ def test_community_always_starts():
 
 def test_equipped_fixture_is_the_backup_group():
     assert "backup" in json.loads(EQUIPPED)["capabilities"]
+
+
+def test_a_moved_host_gets_its_storage_jobs_re_sent(session, sent):
+    s = _setup(session)
+    s.host.ipv4 = "192.168.4.196"
+    first = jobs.queue_configure(session, s.policy, s.target, s.host, "storage")
+    first.status = "ok"  # acknowledged
+    assert s.policy.storage_client_address == "192.168.4.196"
+    sent.clear()
+    s.policy.storage_acked_version = s.policy.config_version
+    tick.reconcile(session, NOW)
+    assert ("backup_configure", "storage") not in _actions(sent)  # unchanged
+    s.host.ipv4 = "192.168.4.200"
+    version = s.policy.config_version
+    tick.reconcile(session, NOW)
+    assert s.policy.config_version == version + 1
+    storage = [p for _h, c, p in sent if p.get("role") == "storage"]
+    assert storage[-1]["target"]["client_address"] == "192.168.4.200"

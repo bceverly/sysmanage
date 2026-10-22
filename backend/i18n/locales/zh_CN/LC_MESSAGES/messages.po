@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 14:08-0400\n"
+"POT-Creation-Date: 2026-10-22 10:57-0400\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -81,7 +81,7 @@ msgstr "您没有访问所选账户的权限。"
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:114
+#: backend/api/posture.py:375 backend/api/backups.py:127
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:151
@@ -196,8 +196,8 @@ msgstr "无效的主机ID格式"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:126
-#: backend/api/backups.py:129 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:139
+#: backend/api/backups.py:142 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -3843,163 +3843,167 @@ msgstr "KVM 网络仅在 Linux 主机上可用"
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "已请求 KVM 网络列表。结果将很快显示。"
 
-#: backend/api/backups.py:137
+#: backend/api/backups.py:158
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s 必须是不含 '..' 的绝对路径"
 
-#: backend/api/backups.py:142
+#: backend/api/backups.py:163
 #, python-format
 msgid "%s is out of range"
 msgstr "%s 超出允许范围"
 
-#: backend/api/backups.py:146
+#: backend/api/backups.py:167
 msgid "Host mount point"
 msgstr "主机挂载点"
 
-#: backend/api/backups.py:147 backend/api/backups.py:182
+#: backend/api/backups.py:168 backend/api/backups.py:205
 msgid "Storage path"
 msgstr "存储路径"
 
-#: backend/api/backups.py:148
+#: backend/api/backups.py:169
 msgid "Concurrent backups"
 msgstr "同时进行的备份数"
 
-#: backend/api/backups.py:150
+#: backend/api/backups.py:171
+msgid "The backup service account is not a valid account name"
+msgstr "备份服务账户不是有效的账户名"
+
+#: backend/api/backups.py:173
 msgid "Unknown seal mode"
 msgstr "未知的封存模式"
 
-#: backend/api/backups.py:152
+#: backend/api/backups.py:175
 msgid "A ZFS snapshot seal needs the dataset name"
 msgstr "使用 ZFS 快照封存需要数据集名称"
 
-#: backend/api/backups.py:154
+#: backend/api/backups.py:177
 msgid "The ZFS dataset name is not valid"
 msgstr "ZFS 数据集名称无效"
 
-#: backend/api/backups.py:161
+#: backend/api/backups.py:184
 msgid "A storage host needs the storage path"
 msgstr "存储主机需要存储路径"
 
-#: backend/api/backups.py:178
+#: backend/api/backups.py:201
 msgid "A btrfs snapshot seal needs the snapshot directory"
 msgstr "btrfs 快照封存需要快照目录"
 
-#: backend/api/backups.py:180
+#: backend/api/backups.py:203
 msgid "A btrfs snapshot seal needs the storage path"
 msgstr "btrfs 快照封存需要存储路径"
 
-#: backend/api/backups.py:183
+#: backend/api/backups.py:206
 msgid "Snapshot directory"
 msgstr "快照目录"
 
-#: backend/api/backups.py:188
+#: backend/api/backups.py:211
 #, python-format
 msgid ""
 "%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
 " trailing '/')"
 msgstr "%s 必须是简单的绝对路径（仅限字母、数字、'_'、'.'、'-' 和 '/'；末尾不能有 '/'）"
 
-#: backend/api/backups.py:196
+#: backend/api/backups.py:219
 msgid "The snapshot directory must be outside the storage path"
 msgstr "快照目录必须位于存储路径之外"
 
-#: backend/api/backups.py:200
+#: backend/api/backups.py:223
 msgid "Interval (hours)"
 msgstr "间隔（小时）"
 
-#: backend/api/backups.py:201
+#: backend/api/backups.py:224
 msgid "Window start hour"
 msgstr "时间窗口开始小时"
 
-#: backend/api/backups.py:202
+#: backend/api/backups.py:225
 msgid "Snapshots to keep"
 msgstr "保留的快照数"
 
-#: backend/api/backups.py:203
+#: backend/api/backups.py:226
 msgid "Check interval (days)"
 msgstr "检查间隔（天）"
 
-#: backend/api/backups.py:207
+#: backend/api/backups.py:230
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "暂停钩子最多 10 个，且须为简短的小写名称"
 
-#: backend/api/backups.py:220
+#: backend/api/backups.py:243
 msgid "At most 50 path rules can be set"
 msgstr "最多可以设置50条路径规则"
 
-#: backend/api/backups.py:231
+#: backend/api/backups.py:254
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
 msgstr "每条路径规则是一行，长度不超过512个字符，不允许有前导或尾随空格或以#开头"
 
-#: backend/api/backups.py:239
+#: backend/api/backups.py:262
 msgid "The snapshot name is not valid"
 msgstr "快照名称无效"
 
-#: backend/api/backups.py:241
+#: backend/api/backups.py:264
 msgid "At most 50 paths can be restored at once"
 msgstr "一次最多只能恢复 50 个路径"
 
-#: backend/api/backups.py:244
+#: backend/api/backups.py:267
 msgid "A restore path is empty or too long"
 msgstr "某个恢复路径为空或过长"
 
-#: backend/api/backups.py:246
+#: backend/api/backups.py:269
 msgid "A restore path must not contain '..'"
 msgstr "恢复路径不得包含 '..'"
 
-#: backend/api/backups.py:265 backend/api/backups.py:268
+#: backend/api/backups.py:288 backend/api/backups.py:291
 msgid "Backup target not found"
 msgstr "未找到备份目标"
 
-#: backend/api/backups.py:316
+#: backend/api/backups.py:340
 msgid "This edition supports one backup target; edit the existing one"
 msgstr "此版本仅支持一个备份目标；请编辑现有目标"
 
-#: backend/api/backups.py:393
+#: backend/api/backups.py:417
 msgid "Remove the hosts' backup policies before the target"
 msgstr "请先删除各主机的备份策略，再删除目标"
 
-#: backend/api/backups.py:473
+#: backend/api/backups.py:497
 msgid "Set up the backup target first"
 msgstr "请先设置备份目标"
 
-#: backend/api/backups.py:514
+#: backend/api/backups.py:538
 msgid "No backup policy"
 msgstr "没有备份策略"
 
-#: backend/api/backups.py:534
+#: backend/api/backups.py:558
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "此主机暂时无法运行备份（%s）"
 
-#: backend/api/backups.py:540
+#: backend/api/backups.py:564
 msgid "This host's backup is not configured yet"
 msgstr "此主机的备份尚未配置"
 
-#: backend/api/backups.py:557
+#: backend/api/backups.py:581
 msgid "The backup storage host is not ready"
 msgstr "备份存储主机尚未就绪"
 
-#: backend/api/backups.py:572
+#: backend/api/backups.py:596
 msgid "Unknown backup action"
 msgstr "未知的备份操作"
 
-#: backend/api/backups.py:577
+#: backend/api/backups.py:601
 msgid "That backup job is already queued or running"
 msgstr "该备份作业已在排队或正在运行"
 
-#: backend/api/backups.py:616
+#: backend/api/backups.py:695
 msgid "Snapshot not found"
 msgstr "未找到快照"
 
-#: backend/api/backups.py:620
+#: backend/api/backups.py:699
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "此快照未签名；请确认以仍然恢复它"
 
-#: backend/api/backups.py:691 backend/api/backups.py:694
+#: backend/api/backups.py:799 backend/api/backups.py:802
 msgid "Backup run not found"
 msgstr "未找到备份作业"
 

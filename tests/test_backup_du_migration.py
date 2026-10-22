@@ -46,7 +46,8 @@ def test_the_migration_bumps_every_policy_and_survives_a_down_and_up():
             ).fetchone()
         finally:
             conn.close()
-        assert row == (4, 3)  # behind: the storage host gets new job files
+        # behind (q51, and q56 again): the storage host gets new job files
+        assert row[0] > row[1] == 3
         _alembic(["downgrade", "q50backuprules"], db_path)
         _alembic(["upgrade", "head"], db_path)
     finally:

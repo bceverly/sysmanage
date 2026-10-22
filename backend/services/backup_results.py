@@ -113,6 +113,35 @@ def _storage_filesystem(db: Session, run: models.BackupRun, reply: Any) -> None:
         storage_status.record_storage_fs(target, reply)
 
 
+def _reprepare(db: Session, run: models.BackupRun) -> None:
+    """The storage side now knows a new address for this host: a repository
+    that was prepared for the old one is prepared again, so its export
+    follows the host (never one that was not prepared -- that is the
+    administrator's to start)."""
+    policy = _policy(db, run)
+    address = (_parameters(run).get("target") or {}).get("client_address")
+    if policy is None or not address or jobs.pending(db, policy.id, jobs.PREPARE):
+        return
+    last = (
+        db.query(models.BackupRun)
+        .filter(
+            models.BackupRun.policy_id == policy.id,
+            models.BackupRun.action == jobs.PREPARE,
+            models.BackupRun.status == "ok",
+        )
+        .order_by(models.BackupRun.finished_at.desc())
+        .first()
+    )
+    if last is None or _parameters(last).get("client_address") == address:
+        return
+    logger.info(
+        "Backup policy %s: re-preparing storage for the host's new address %s",
+        policy.id,
+        address,
+    )
+    jobs.queue_run(db, policy, run.host_id, jobs.PREPARE)
+
+
 def _refused(db: Session, run: models.BackupRun, code: str) -> None:
     """The agent would not run it.  ``busy`` is retried by the scheduler;
     ``not_configured`` means its job files are gone -- forget the
@@ -154,8 +183,10 @@ def record_command_result(db: Session, message_data: Dict[str, Any]) -> bool:
         _acknowledge(db, run)
         _storage_filesystem(db, run, message_data.get("result"))
         reply = message_data.get("result")
-        if isinstance(reply, dict) and _parameters(run).get("role") == "storage":
-            _store_audit(_policy(db, run), reply.get("storage_audit"))
+        if _parameters(run).get("role") == "storage":
+            if isinstance(reply, dict):
+                _store_audit(_policy(db, run), reply.get("storage_audit"))
+            _reprepare(db, run)
     else:
         run.status = jobs.RUNNING
         run.started_at = run.started_at or jobs.now()
