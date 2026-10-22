@@ -521,3 +521,31 @@ def test_a_never_prepared_repository_is_not_prepared_behind_the_admins_back(
     s.host.ipv4 = "192.168.4.200"
     _ack_storage(session, s)
     assert "prepare" not in [p.get("action") for _h, _c, p in sent]
+
+
+def test_the_reported_nfs_path_reaches_the_host_with_the_storage_address(session, sent):
+    s = _setup(session)
+    s.nas.ipv4 = "192.168.4.10"
+    assert (
+        "nfs"
+        not in jobs.host_configuration(s.policy, s.target, s.host, s.nas)["target"]
+    )
+    run = jobs.queue_configure(session, s.policy, s.target, s.host, "storage")
+    version = s.policy.config_version
+    results.record_command_result(session, {
+        "command_id": run.command_id, "success": True,
+        "result": {"nfs_path": "/restate/web-01"},
+    })  # fmt: skip
+    assert s.policy.storage_nfs_path == "/restate/web-01"
+    assert s.policy.config_version == version + 1  # the host is re-sent its jobs
+    host_jobs = jobs.queue_configure(session, s.policy, s.target, s.host, "host")
+    assert json.loads(host_jobs.parameters)["target"]["nfs"] == {
+        "server": "192.168.4.10",
+        "path": "/restate/web-01",
+    }
+    run = jobs.queue_configure(session, s.policy, s.target, s.host, "storage")
+    results.record_command_result(session, {
+        "command_id": run.command_id, "success": True,
+        "result": {"nfs_path": "/restate/web-01"},
+    })  # fmt: skip
+    assert s.policy.config_version == version + 1  # unchanged: no more re-sends

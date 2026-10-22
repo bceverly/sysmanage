@@ -113,6 +113,18 @@ def _storage_filesystem(db: Session, run: models.BackupRun, reply: Any) -> None:
         storage_status.record_storage_fs(target, reply)
 
 
+def _store_nfs_path(policy: Optional[models.BackupPolicy], path: Any) -> None:
+    """Where the host mounts its repository, as the storage host reports it.
+    A new or changed path re-sends the HOST's job files (bumping the version
+    re-sends the storage side's too -- harmless)."""
+    if policy is None or path is not None and not isinstance(path, str):
+        return
+    path = path[:1024] if path and path.startswith("/") else None
+    if path != policy.storage_nfs_path:
+        policy.storage_nfs_path = path
+        policy.config_version += 1
+
+
 def _reprepare(db: Session, run: models.BackupRun) -> None:
     """The storage side now knows a new address for this host: a repository
     that was prepared for the old one is prepared again, so its export
@@ -186,6 +198,7 @@ def record_command_result(db: Session, message_data: Dict[str, Any]) -> bool:
         if _parameters(run).get("role") == "storage":
             if isinstance(reply, dict):
                 _store_audit(_policy(db, run), reply.get("storage_audit"))
+                _store_nfs_path(_policy(db, run), reply.get("nfs_path"))
             _reprepare(db, run)
     else:
         run.status = jobs.RUNNING

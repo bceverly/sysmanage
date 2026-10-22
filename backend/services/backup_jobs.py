@@ -134,12 +134,19 @@ def path_rules(policy: models.BackupPolicy) -> Dict[str, List[str]]:
 
 
 def host_configuration(
-    policy: models.BackupPolicy, target: models.BackupTarget, host: models.Host
+    policy: models.BackupPolicy,
+    target: models.BackupTarget,
+    host: models.Host,
+    storage: Optional[models.Host] = None,
 ) -> Dict[str, Any]:
     return {
         "policy_id": str(policy.id),
         "role": "host",
-        "target": {"mount_point": target.host_mount_point, "repo_dir": repo_dir(host)},
+        "target": {
+            "mount_point": target.host_mount_point,
+            "repo_dir": repo_dir(host),
+            **nfs_source(policy, storage),
+        },
         "jobs": {
             "capture": {
                 "all": False,
@@ -155,6 +162,18 @@ def host_configuration(
 
 
 DEFAULT_SERVICE_ACCOUNT = "restate"
+
+
+def nfs_source(
+    policy: models.BackupPolicy, storage: Optional[models.Host]
+) -> Dict[str, Any]:
+    """``{"nfs": {"server", "path"}}`` once the storage host has said where
+    this host's repository is exported, else ``{}`` (the operator mounts
+    it).  The host's agent mounts it only while a job runs."""
+    server = host_address(storage) if storage is not None else None
+    if not server or not policy.storage_nfs_path:
+        return {}
+    return {"nfs": {"server": server, "path": policy.storage_nfs_path}}
 
 
 def host_address(host: models.Host) -> Optional[str]:
@@ -253,7 +272,7 @@ def queue_configure(
         run_host = target.storage_host_id
         policy.storage_client_address = payload["target"]["client_address"]
     else:
-        payload = host_configuration(policy, target, host)
+        payload = host_configuration(policy, target, host, storage_host(db, target))
         run_host = host.id
     return _queue(
         db,

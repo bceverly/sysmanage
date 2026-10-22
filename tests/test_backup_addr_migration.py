@@ -50,7 +50,7 @@ def test_the_address_column_is_added_and_job_files_re_sent():
             conn.commit()
         finally:
             conn.close()
-        _alembic(["upgrade", "head"], db_path)
+        _alembic(["upgrade", "q56backupaddr"], db_path)
         assert _state(db_path) == (True, 8)
         _alembic(["stamp", "q55backupaudit"], db_path)
         _alembic(["upgrade", "head"], db_path)  # column already there

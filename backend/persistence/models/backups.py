@@ -112,6 +112,9 @@ class BackupPolicy(Base):
     # The host's address as last sent to the storage host (q56): a change
     # re-sends the storage side's job files and re-prepares its export.
     storage_client_address = Column(String(64), nullable=True)
+    # Where the host mounts its repository over NFSv4, as the storage host
+    # reported it (q57); sent to the host, which mounts it per job.
+    storage_nfs_path = Column(String(1024), nullable=True)
     estimate_bytes = Column(BigInteger, nullable=True)
     repository_bytes = Column(BigInteger, nullable=True)
     config_version = Column(Integer, nullable=False, default=1)
