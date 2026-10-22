@@ -142,6 +142,8 @@ export interface BackupPolicy {
   check_interval_days: number;
   quiesce: boolean;
   quiesce_with: string[];
+  /** Quiesce hooks the host's restate reports present (2.1+); null until reported. */
+  available_hooks?: string[] | null;
   /** restate path patterns kept although the built-in rules leave them out. */
   keep_paths: string[];
   /** restate path patterns left out of the backup (they win over keeps). */

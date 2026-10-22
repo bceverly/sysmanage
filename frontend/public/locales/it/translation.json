@@ -5291,7 +5291,8 @@
       "snapshots": "Elenco degli snapshot",
       "du": "Uso dell'archiviazione",
       "repack": "Reimpacchetta",
-      "prepare": "Prepara archiviazione"
+      "prepare": "Prepara archiviazione",
+      "protect": "Protezione"
     },
     "card": {
       "lastCheck": "Ultima verifica",
@@ -5332,7 +5333,6 @@
       "keepLast": "Snapshot da conservare",
       "quiesce": "Sospendi i servizi durante la lettura dei loro dati",
       "quiesceHelp": "Ad esempio: postgres, nextcloud",
-      "quiesceWith": "Hook (separati da virgole)",
       "saveError": "Impossibile salvare il criterio di backup.",
       "title": "Criterio di backup per {{host}}",
       "windowHelp": "I backup partono solo nelle sei ore a partire da questa ora.",
@@ -5340,7 +5340,9 @@
       "keepHelp": "Percorsi che le regole integrate escludono, come /home/*/Downloads. Un percorso che corrisponde a un modello di esclusione resta escluso.",
       "keepPaths": "Includi anche nel backup (un modello di percorso per riga)",
       "skipHelp": "Ad esempio: /home/*/.local/share/Trash o **/previews. Cache, download e output di compilazione sono già esclusi.",
-      "skipPaths": "Escludi (un modello di percorso per riga)"
+      "skipPaths": "Escludi (un modello di percorso per riga)",
+      "quiesceWithPick": "Servizi da sospendere",
+      "quiesceFound": "Trovati su questo host: {{hooks}}"
     },
     "reason": {
       "agentOutdated": "Aggiorna l'agente",

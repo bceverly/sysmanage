@@ -5291,7 +5291,8 @@
       "snapshots": "スナップショットの一覧",
       "du": "ストレージ使用量",
       "repack": "再パック",
-      "prepare": "ストレージを準備"
+      "prepare": "ストレージを準備",
+      "protect": "保護"
     },
     "card": {
       "lastCheck": "最終チェック",
@@ -5332,7 +5333,6 @@
       "keepLast": "保持するスナップショット数",
       "quiesce": "データの読み取り中はサービスを一時停止する",
       "quiesceHelp": "例: postgres, nextcloud",
-      "quiesceWith": "フック（カンマ区切り）",
       "saveError": "バックアップポリシーを保存できませんでした。",
       "title": "{{host}} のバックアップポリシー",
       "windowHelp": "バックアップはこの時刻から6時間以内にのみ開始されます。",
@@ -5340,7 +5340,9 @@
       "keepHelp": "組み込みのルールが除外するパス (例: /home/*/Downloads)。除外パターンに一致するパスは除外されたままです。",
       "keepPaths": "追加でバックアップ (1 行に 1 つのパスパターン)",
       "skipHelp": "例: /home/*/.local/share/Trash や **/previews。キャッシュ、ダウンロード、ビルド出力はすでに除外されています。",
-      "skipPaths": "除外 (1 行に 1 つのパスパターン)"
+      "skipPaths": "除外 (1 行に 1 つのパスパターン)",
+      "quiesceWithPick": "一時停止するサービス",
+      "quiesceFound": "このホストで見つかったもの: {{hooks}}"
     },
     "reason": {
       "agentOutdated": "エージェントをアップグレードしてください",

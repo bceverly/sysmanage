@@ -56,7 +56,7 @@ SYSTEM_ACTOR = "system:backup-scheduler"
 HOST_ACTIONS = ("capture", "snapshots", "estimate")
 # ``prepare`` is started by an administrator: the storage host gives the
 # repository its own dataset / subvolume and an export to that host only.
-STORAGE_ACTIONS = ("seal", "prune", "check", "du", "repack", "prepare")
+STORAGE_ACTIONS = ("seal", "prune", "check", "du", "repack", "prepare", "protect")
 PREPARE = "prepare"
 CONFIGURE = "configure"
 RESTORE = "restore"
@@ -207,6 +207,10 @@ def storage_configuration(
             # Rewrite old packs as seekable ones (restate 2.0.0.8+; the agent
             # installs it only where restate has it).  Started by hand.
             "repack": {},
+            # After each capture: finished packs and snapshots root's and
+            # read-only -- hosts append only (restate 2.1.0.1+; installed only
+            # where restate has it, which the configure reply says).
+            "protect": {},
         },
     }
 

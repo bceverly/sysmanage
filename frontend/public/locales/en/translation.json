@@ -5291,7 +5291,8 @@
       "snapshots": "List snapshots",
       "du": "Storage use",
       "repack": "Repack",
-      "prepare": "Prepare storage"
+      "prepare": "Prepare storage",
+      "protect": "Protect"
     },
     "card": {
       "lastCheck": "Last check",
@@ -5332,7 +5333,6 @@
       "keepLast": "Snapshots to keep",
       "quiesce": "Pause services while reading their data",
       "quiesceHelp": "For example: postgres, nextcloud",
-      "quiesceWith": "Hooks (comma separated)",
       "saveError": "The backup policy could not be saved.",
       "title": "Backup policy for {{host}}",
       "windowHelp": "Backups start only in the six hours from this hour.",
@@ -5340,7 +5340,9 @@
       "keepHelp": "Paths the built-in rules leave out, such as /home/*/Downloads. A path matched by a leave-out pattern is still left out.",
       "keepPaths": "Also back up (one path pattern per line)",
       "skipHelp": "For example: /home/*/.local/share/Trash or **/previews. Caches, Downloads and build output are already left out.",
-      "skipPaths": "Leave out (one path pattern per line)"
+      "skipPaths": "Leave out (one path pattern per line)",
+      "quiesceWithPick": "Services to pause",
+      "quiesceFound": "Found on this host: {{hooks}}"
     },
     "reason": {
       "agentOutdated": "Upgrade the agent",

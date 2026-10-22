@@ -5291,7 +5291,8 @@
       "snapshots": "Listar snapshots",
       "du": "Uso do armazenamento",
       "repack": "Reempacotar",
-      "prepare": "Preparar armazenamento"
+      "prepare": "Preparar armazenamento",
+      "protect": "Proteger"
     },
     "card": {
       "lastCheck": "Última verificação",
@@ -5332,7 +5333,6 @@
       "keepLast": "Snapshots a manter",
       "quiesce": "Pausar os serviços durante a leitura dos seus dados",
       "quiesceHelp": "Por exemplo: postgres, nextcloud",
-      "quiesceWith": "Hooks (separados por vírgulas)",
       "saveError": "Não foi possível salvar a política de backup.",
       "title": "Política de backup de {{host}}",
       "windowHelp": "Os backups só começam nas seis horas a partir desta hora.",
@@ -5340,7 +5340,9 @@
       "keepHelp": "Caminhos que as regras integradas excluem, como /home/*/Downloads. Um caminho que corresponde a um padrão de exclusão continua excluído.",
       "keepPaths": "Incluir também no backup (um padrão de caminho por linha)",
       "skipHelp": "Por exemplo: /home/*/.local/share/Trash ou **/previews. Caches, downloads e saídas de compilação já são excluídos.",
-      "skipPaths": "Excluir (um padrão de caminho por linha)"
+      "skipPaths": "Excluir (um padrão de caminho por linha)",
+      "quiesceWithPick": "Serviços a pausar",
+      "quiesceFound": "Encontrados neste host: {{hooks}}"
     },
     "reason": {
       "agentOutdated": "Atualize o agente",

@@ -5291,7 +5291,8 @@
       "snapshots": "Lister les instantanés",
       "du": "Utilisation du stockage",
       "repack": "Réempaqueter",
-      "prepare": "Préparer le stockage"
+      "prepare": "Préparer le stockage",
+      "protect": "Protéger"
     },
     "card": {
       "lastCheck": "Dernière vérification",
@@ -5332,7 +5333,6 @@
       "keepLast": "Instantanés à conserver",
       "quiesce": "Suspendre les services pendant la lecture de leurs données",
       "quiesceHelp": "Par exemple : postgres, nextcloud",
-      "quiesceWith": "Hooks (séparés par des virgules)",
       "saveError": "La politique de sauvegarde n'a pas pu être enregistrée.",
       "title": "Politique de sauvegarde de {{host}}",
       "windowHelp": "Les sauvegardes ne démarrent que dans les six heures qui suivent cette heure.",
@@ -5340,7 +5340,9 @@
       "keepHelp": "Chemins que les règles intégrées excluent, comme /home/*/Downloads. Un chemin qui correspond à un motif d'exclusion reste exclu.",
       "keepPaths": "Sauvegarder aussi (un motif de chemin par ligne)",
       "skipHelp": "Par exemple : /home/*/.local/share/Trash ou **/previews. Les caches, les téléchargements et les produits de compilation sont déjà exclus.",
-      "skipPaths": "Exclure (un motif de chemin par ligne)"
+      "skipPaths": "Exclure (un motif de chemin par ligne)",
+      "quiesceWithPick": "Services à mettre en pause",
+      "quiesceFound": "Trouvés sur cet hôte : {{hooks}}"
     },
     "reason": {
       "agentOutdated": "Mettez à jour l'agent",

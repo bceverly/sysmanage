@@ -110,6 +110,10 @@ def policy_dict(policy: models.BackupPolicy) -> Dict[str, Any]:
         "check_interval_days": policy.check_interval_days,
         "quiesce": bool(policy.quiesce),
         "quiesce_with": jobs.quiesce_names(policy),
+        # None: not reported yet (older agent or restate) -- names are typed.
+        "available_hooks": (
+            json.loads(policy.available_hooks) if policy.available_hooks else None
+        ),
         "keep_paths": jobs.path_rules(policy).get("keep_paths", []),
         "skip_paths": jobs.path_rules(policy).get("skip_paths", []),
         "estimate_bytes": policy.estimate_bytes,

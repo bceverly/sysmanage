@@ -115,6 +115,11 @@ class BackupPolicy(Base):
     # Where the host mounts its repository over NFSv4, as the storage host
     # reported it (q57); sent to the host, which mounts it per job.
     storage_nfs_path = Column(String(1024), nullable=True)
+    # The storage host's restate has ``protect`` (2.1.0.1+) and its job is
+    # installed (q59): capture -> protect -> seal -> prune.
+    storage_protects = Column(Boolean, nullable=False, default=False)
+    # Quiesce hooks the host's restate reports present (JSON list, q59).
+    available_hooks = Column(Text, nullable=True)
     estimate_bytes = Column(BigInteger, nullable=True)
     repository_bytes = Column(BigInteger, nullable=True)
     config_version = Column(Integer, nullable=False, default=1)

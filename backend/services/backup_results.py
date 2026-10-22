@@ -21,6 +21,7 @@ not yet immutable).  The repository's size is each capture's
 """
 
 import json
+import re
 import logging
 import uuid
 from datetime import datetime
@@ -125,6 +126,23 @@ def _store_nfs_path(policy: Optional[models.BackupPolicy], path: Any) -> None:
         policy.config_version += 1
 
 
+_HOOK_NAME = re.compile(r"^[a-z0-9_-]{1,32}$")
+
+
+def _store_hooks(policy: Optional[models.BackupPolicy], hooks: Any) -> None:
+    """The quiesce hooks the host's restate finds present (older agents and
+    restates send none: the dialog then takes names as typed)."""
+    if policy is not None and isinstance(hooks, list):
+        names = sorted({h for h in hooks if isinstance(h, str) and _HOOK_NAME.match(h)})
+        policy.available_hooks = json.dumps(names[:64])
+
+
+def _store_protects(policy: Optional[models.BackupPolicy], installed: Any) -> None:
+    """Did the storage host install the ``protect`` job (its restate has it)?"""
+    if policy is not None and isinstance(installed, list):
+        policy.storage_protects = "protect" in installed
+
+
 def _reprepare(db: Session, run: models.BackupRun) -> None:
     """The storage side now knows a new address for this host: a repository
     that was prepared for the old one is prepared again, so its export
@@ -195,10 +213,13 @@ def record_command_result(db: Session, message_data: Dict[str, Any]) -> bool:
         _acknowledge(db, run)
         _storage_filesystem(db, run, message_data.get("result"))
         reply = message_data.get("result")
+        if _parameters(run).get("role") == "host" and isinstance(reply, dict):
+            _store_hooks(_policy(db, run), reply.get("hooks"))
         if _parameters(run).get("role") == "storage":
             if isinstance(reply, dict):
                 _store_audit(_policy(db, run), reply.get("storage_audit"))
                 _store_nfs_path(_policy(db, run), reply.get("nfs_path"))
+                _store_protects(_policy(db, run), reply.get("installed"))
             _reprepare(db, run)
     else:
         run.status = jobs.RUNNING
@@ -392,6 +413,13 @@ def _after_capture(
     repository = _int(result.get("repository_bytes"))
     if repository is not None:
         policy.repository_bytes = repository
+    if policy.storage_protects:
+        _storage_next(db, policy, "protect")
+        return
+    _seal_or_prune(db, policy)
+
+
+def _seal_or_prune(db: Session, policy: models.BackupPolicy) -> None:
     target = (
         db.query(models.BackupTarget)
         .filter(models.BackupTarget.id == policy.target_id)
@@ -399,6 +427,22 @@ def _after_capture(
     )
     sealing = target is not None and (target.seal_mode or "none") != "none"
     _storage_next(db, policy, "seal" if sealing else "prune")
+
+
+def _after_protect(db: Session, run: models.BackupRun, policy, _result) -> None:
+    """Protected (or not): seal and prune follow either way -- an immutable
+    snapshot is worth taking even of a repository that is not yet
+    append-only -- but a failure is loud: until it is fixed the host can
+    still delete its own backups."""
+    if run.status != "ok":
+        logger.error(
+            "Backup policy %s: the storage-side protect ended %s (%s); the "
+            "host can still change or remove its finished backups",
+            policy.id,
+            run.status,
+            run.message,
+        )
+    _seal_or_prune(db, policy)
 
 
 def _free_slot(db: Session) -> None:
@@ -556,6 +600,7 @@ _AFTER = {
     "check": _after_check,
     "du": _after_du,
     "repack": _after_repack,
+    "protect": _after_protect,
 }
 
 

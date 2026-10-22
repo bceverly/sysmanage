@@ -5291,7 +5291,8 @@
       "snapshots": "Snapshots auflisten",
       "du": "Speicherbelegung",
       "repack": "Neu packen",
-      "prepare": "Speicher vorbereiten"
+      "prepare": "Speicher vorbereiten",
+      "protect": "Schutz"
     },
     "card": {
       "lastCheck": "Letzte Prüfung",
@@ -5332,7 +5333,6 @@
       "keepLast": "Aufzubewahrende Snapshots",
       "quiesce": "Dienste anhalten, während ihre Daten gelesen werden",
       "quiesceHelp": "Zum Beispiel: postgres, nextcloud",
-      "quiesceWith": "Hooks (durch Kommas getrennt)",
       "saveError": "Die Sicherungsrichtlinie konnte nicht gespeichert werden.",
       "title": "Sicherungsrichtlinie für {{host}}",
       "windowHelp": "Sicherungen starten nur in den sechs Stunden ab dieser Stunde.",
@@ -5340,7 +5340,9 @@
       "keepHelp": "Pfade, die die integrierten Regeln ausschließen, etwa /home/*/Downloads. Ein Pfad, der zu einem Ausschlussmuster passt, bleibt ausgeschlossen.",
       "keepPaths": "Zusätzlich sichern (ein Pfadmuster pro Zeile)",
       "skipHelp": "Zum Beispiel: /home/*/.local/share/Trash oder **/previews. Caches, Downloads und Build-Ausgaben sind bereits ausgeschlossen.",
-      "skipPaths": "Ausschließen (ein Pfadmuster pro Zeile)"
+      "skipPaths": "Ausschließen (ein Pfadmuster pro Zeile)",
+      "quiesceWithPick": "Zu pausierende Dienste",
+      "quiesceFound": "Auf diesem Host gefunden: {{hooks}}"
     },
     "reason": {
       "agentOutdated": "Agent aktualisieren",

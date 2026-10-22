@@ -5291,7 +5291,8 @@
       "snapshots": "스냅샷 목록",
       "du": "스토리지 사용량",
       "repack": "다시 패킹",
-      "prepare": "스토리지 준비"
+      "prepare": "스토리지 준비",
+      "protect": "보호"
     },
     "card": {
       "lastCheck": "마지막 검사",
@@ -5332,7 +5333,6 @@
       "keepLast": "보존할 스냅샷 수",
       "quiesce": "데이터를 읽는 동안 서비스 일시 중지",
       "quiesceHelp": "예: postgres, nextcloud",
-      "quiesceWith": "후크 (쉼표로 구분)",
       "saveError": "백업 정책을 저장할 수 없습니다.",
       "title": "{{host}}의 백업 정책",
       "windowHelp": "백업은 이 시각부터 6시간 이내에만 시작됩니다.",
@@ -5340,7 +5340,9 @@
       "keepHelp": "기본 제공 규칙이 제외하는 경로입니다(예: /home/*/Downloads). 제외 패턴과 일치하는 경로는 계속 제외됩니다.",
       "keepPaths": "추가로 백업 (한 줄에 경로 패턴 하나)",
       "skipHelp": "예: /home/*/.local/share/Trash 또는 **/previews. 캐시, 다운로드, 빌드 출력은 이미 제외됩니다.",
-      "skipPaths": "제외 (한 줄에 경로 패턴 하나)"
+      "skipPaths": "제외 (한 줄에 경로 패턴 하나)",
+      "quiesceWithPick": "일시 중지할 서비스",
+      "quiesceFound": "이 호스트에서 찾음: {{hooks}}"
     },
     "reason": {
       "agentOutdated": "에이전트를 업그레이드하세요",

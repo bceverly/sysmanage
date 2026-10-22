@@ -86,6 +86,7 @@ export const actionLabel = (t: TFunction, action: string): string => {
         du: t('backups.action.du', 'Storage use'),
         repack: t('backups.action.repack', 'Repack'),
         prepare: t('backups.action.prepare', 'Prepare storage'),
+        protect: t('backups.action.protect', 'Protect'),
     };
     return labels[action] ?? action;
 };

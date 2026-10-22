@@ -5291,7 +5291,8 @@
       "snapshots": "Listar instantáneas",
       "du": "Uso del almacenamiento",
       "repack": "Reempaquetar",
-      "prepare": "Preparar almacenamiento"
+      "prepare": "Preparar almacenamiento",
+      "protect": "Proteger"
     },
     "card": {
       "lastCheck": "Última comprobación",
@@ -5332,7 +5333,6 @@
       "keepLast": "Instantáneas que conservar",
       "quiesce": "Pausar los servicios mientras se leen sus datos",
       "quiesceHelp": "Por ejemplo: postgres, nextcloud",
-      "quiesceWith": "Hooks (separados por comas)",
       "saveError": "No se pudo guardar la política de copias de seguridad.",
       "title": "Política de copias de seguridad de {{host}}",
       "windowHelp": "Las copias de seguridad solo se inician en las seis horas a partir de esta hora.",
@@ -5340,7 +5340,9 @@
       "keepHelp": "Rutas que las reglas integradas excluyen, como /home/*/Downloads. Una ruta que coincide con un patrón de exclusión sigue excluida.",
       "keepPaths": "Incluir también en la copia de seguridad (un patrón de ruta por línea)",
       "skipHelp": "Por ejemplo: /home/*/.local/share/Trash o **/previews. Las cachés, las descargas y los resultados de compilación ya se excluyen.",
-      "skipPaths": "Excluir (un patrón de ruta por línea)"
+      "skipPaths": "Excluir (un patrón de ruta por línea)",
+      "quiesceWithPick": "Servicios que pausar",
+      "quiesceFound": "Encontrados en este host: {{hooks}}"
     },
     "reason": {
       "agentOutdated": "Actualice el agente",

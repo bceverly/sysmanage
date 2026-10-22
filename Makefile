@@ -214,6 +214,15 @@ $(shell rm -rf $(STALE_VENVS))
 endif
 endif
 
+# cryptography on OpenBSD is built against OpenSSL 3.5 from packages, not base
+# LibreSSL: OpenBSD 8.0's LibreSSL 4.4.0 is newer than the Rust openssl-sys
+# crate accepts (<= 4.3.x), and the packaged py3-cryptography (49.0.0) is older
+# than the version requirements.txt pins for a CVE.  Shell prefix for a pip run.
+OPENBSD_CRYPTO_ENV = { [ -d /usr/local/lib/eopenssl35 ] || doas pkg_add openssl%3.5 || \
+	{ echo "[ERROR] cryptography needs OpenSSL 3.5 here. Run:  doas pkg_add openssl%3.5  then re-run make install-dev"; exit 1; }; }; \
+	export OPENSSL_LIB_DIR=/usr/local/lib/eopenssl35 OPENSSL_INCLUDE_DIR=/usr/local/include/eopenssl35 \
+	RUSTFLAGS="-C link-arg=-Wl,-rpath,/usr/local/lib/eopenssl35" &&
+
 # Create or repair virtual environment
 $(VENV_ACTIVATE):
 	@echo "Creating/repairing virtual environment..."
@@ -448,6 +457,7 @@ else
 		$(MAKE) build-grpcio-openbsd || { echo "[ERROR] grpcio build failed - see ~/tmp/grpcio-build.log"; exit 1; }; \
 		echo "[INFO] Now installing remaining dependencies..."; \
 		export TMPDIR=$$HOME/tmp && \
+		$(OPENBSD_CRYPTO_ENV) \
 		grep -v "playwright" requirements.txt | $(PYTHON) -m pip install -r /dev/stdin || { echo "[ERROR] Failed to install requirements"; exit 1; }; \
 		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
 	else \
@@ -2519,25 +2529,14 @@ endif
 	@echo "  - Prometheus: http://localhost:9091"
 
 # OpenBSD grpcio: OpenBSD 8.0 packages it (py3-grpcio); 7.9 does not.  Where
-# the package exists it is used -- installed with pkg_add and linked into the
-# venv (grpcio's own files only, so no other system package leaks in), and pip
-# then sees grpcio as satisfied.  Elsewhere the patched source build below runs
-# (5-10 minutes).
+# the package exists it is used -- scripts/link-openbsd-package.sh installs it
+# and links only its own files into the venv, so pip sees grpcio as
+# satisfied.  Elsewhere the patched source build below runs (5-10 minutes).
 build-grpcio-openbsd: $(VENV_ACTIVATE)
-	@if pkg_info -Q py3-grpcio 2>/dev/null | grep -q '^py3-grpcio-[0-9]'; then \
+	@if pkg_info -Q py3-grpcio 2>/dev/null | grep -q '^py3-grpcio-[0-9]' || pkg_info -e 'py3-grpcio-*' >/dev/null 2>&1; then \
 		echo "[INFO] This OpenBSD release packages grpcio (py3-grpcio) - using it instead of building from source"; \
-		pkg_info -e 'py3-grpcio-*' >/dev/null 2>&1 || doas pkg_add py3-grpcio || { \
-			echo "[ERROR] Could not install the py3-grpcio package. Run:  doas pkg_add py3-grpcio  then re-run make install-dev"; exit 1; }; \
-		$(PYTHON) -m pip uninstall -y grpcio >/dev/null 2>&1 || true; \
-		SITE=$$($(PYTHON) -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])'); \
-		SYS=$$($(PYTHON) -c 'import sys, sysconfig; print(sysconfig.get_paths(vars={"base": sys.base_prefix, "platbase": sys.base_prefix})["purelib"])'); \
-		for d in $$(pkg_info -L py3-grpcio | sed -n "s|^$$SYS/\([^/]*\)/.*|\1|p" | sort -u); do \
-			ln -sfn "$$SYS/$$d" "$$SITE/$$d"; \
-		done; \
-		$(PYTHON) -c 'from importlib.metadata import requires; print("\n".join(r for r in (requires("grpcio") or []) if "extra ==" not in r))' \
-			| $(PYTHON) -m pip install -q -r /dev/stdin || { echo "[ERROR] Could not install grpcio's own dependencies into the venv"; exit 1; }; \
-		$(PYTHON) -c 'import grpc; print("[OK] grpcio", grpc.__version__, "from the OpenBSD package")' || { \
-			echo "[ERROR] grpcio from py3-grpcio does not import in the venv (built for another Python?). Run:  doas pkg_add -u py3-grpcio"; exit 1; }; \
+		sh scripts/link-openbsd-package.sh $(PYTHON) py3-grpcio || exit 1; \
+		$(PYTHON) -c 'import grpc; print("[OK] grpcio", grpc.__version__, "from the OpenBSD package")'; \
 	else \
 		$(MAKE) --no-print-directory build-grpcio-openbsd-source; \
 	fi

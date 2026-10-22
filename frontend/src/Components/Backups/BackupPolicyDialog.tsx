@@ -10,6 +10,7 @@
 import React, { useEffect, useState } from 'react';
 import {
     Alert,
+    Autocomplete,
     Button,
     Dialog,
     DialogActions,
@@ -66,7 +67,7 @@ const BackupPolicyDialog: React.FC<{
 }> = ({ open, hostId, fqdn, policy, onClose, onSaved }) => {
     const { t } = useTranslation();
     const [form, setForm] = useState<PolicyInput>(toInput(policy));
-    const [hooks, setHooks] = useState('');
+    const [hooks, setHooks] = useState<string[]>([]);
     const [keep, setKeep] = useState('');
     const [skip, setSkip] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -75,7 +76,7 @@ const BackupPolicyDialog: React.FC<{
         if (open) {
             const input = toInput(policy);
             setForm(input);
-            setHooks(input.quiesce_with.join(', '));
+            setHooks(input.quiesce_with);
             setKeep(input.keep_paths.join('\n'));
             setSkip(input.skip_paths.join('\n'));
             setError(null);
@@ -83,10 +84,11 @@ const BackupPolicyDialog: React.FC<{
     }, [open, policy]);
 
     const set = (patch: Partial<PolicyInput>) => setForm(f => ({ ...f, ...patch }));
+    const available = policy?.available_hooks ?? [];
     const number = (value: string) => (value === '' ? 0 : Number(value));
 
     const save = async () => {
-        const quiesce_with = hooks.split(',').map(h => h.trim()).filter(Boolean);
+        const quiesce_with = hooks.map(h => h.trim()).filter(Boolean);
         try {
             await savePolicy(hostId, {
                 ...form,
@@ -129,9 +131,16 @@ const BackupPolicyDialog: React.FC<{
                         label={t('backups.policy.quiesce', 'Pause services while reading their data')}
                     />
                     {form.quiesce && (
-                        <TextField label={t('backups.policy.quiesceWith', 'Hooks (comma separated)')} value={hooks}
-                            onChange={e => setHooks(e.target.value)}
-                            helperText={t('backups.policy.quiesceHelp', 'For example: postgres, nextcloud')} />
+                        // The hooks restate found on this host (2.1+), and any
+                        // name typed in -- older restates report none.
+                        <Autocomplete multiple freeSolo options={available}
+                            value={hooks} onChange={(_e, value) => setHooks(value as string[])}
+                            renderInput={params => (
+                                <TextField {...params} label={t('backups.policy.quiesceWithPick', 'Services to pause')}
+                                    helperText={available.length
+                                        ? t('backups.policy.quiesceFound', 'Found on this host: {{hooks}}', { hooks: available.join(', ') })
+                                        : t('backups.policy.quiesceHelp', 'For example: postgres, nextcloud')} />
+                            )} />
                     )}
                     <TextField multiline minRows={2} label={t('backups.policy.skipPaths', 'Leave out (one path pattern per line)')}
                         value={skip} onChange={e => setSkip(e.target.value)}

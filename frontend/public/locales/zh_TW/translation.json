@@ -5291,7 +5291,8 @@
       "snapshots": "列出快照",
       "du": "儲存用量",
       "repack": "重新打包",
-      "prepare": "準備儲存"
+      "prepare": "準備儲存",
+      "protect": "保護"
     },
     "card": {
       "lastCheck": "上次檢查",
@@ -5332,7 +5333,6 @@
       "keepLast": "保留的快照數",
       "quiesce": "讀取資料時暫停服務",
       "quiesceHelp": "例如：postgres, nextcloud",
-      "quiesceWith": "掛鉤（以逗號分隔）",
       "saveError": "無法儲存備份原則。",
       "title": "{{host}} 的備份原則",
       "windowHelp": "備份僅在此小時起的六小時內開始。",
@@ -5340,7 +5340,9 @@
       "keepHelp": "內建規則排除的路徑，例如 /home/*/Downloads。與排除模式相符的路徑仍會被排除。",
       "keepPaths": "額外備份（每行一個路徑模式）",
       "skipHelp": "例如：/home/*/.local/share/Trash 或 **/previews。快取、下載和建置輸出已預設排除。",
-      "skipPaths": "排除（每行一個路徑模式）"
+      "skipPaths": "排除（每行一個路徑模式）",
+      "quiesceWithPick": "要暫停的服務",
+      "quiesceFound": "在此主機上找到：{{hooks}}"
     },
     "reason": {
       "agentOutdated": "請升級代理程式",

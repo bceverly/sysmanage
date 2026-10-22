@@ -5291,7 +5291,8 @@
       "snapshots": "Snapshots weergeven",
       "du": "Opslaggebruik",
       "repack": "Opnieuw inpakken",
-      "prepare": "Opslag voorbereiden"
+      "prepare": "Opslag voorbereiden",
+      "protect": "Beveiligen"
     },
     "card": {
       "lastCheck": "Laatste controle",
@@ -5332,7 +5333,6 @@
       "keepLast": "Te bewaren snapshots",
       "quiesce": "Services pauzeren terwijl hun gegevens worden gelezen",
       "quiesceHelp": "Bijvoorbeeld: postgres, nextcloud",
-      "quiesceWith": "Hooks (gescheiden door komma's)",
       "saveError": "Het back-upbeleid kon niet worden opgeslagen.",
       "title": "Back-upbeleid voor {{host}}",
       "windowHelp": "Back-ups starten alleen in de zes uur vanaf dit uur.",
@@ -5340,7 +5340,9 @@
       "keepHelp": "Paden die de ingebouwde regels uitsluiten, zoals /home/*/Downloads. Een pad dat overeenkomt met een uitsluitingspatroon blijft uitgesloten.",
       "keepPaths": "Ook back-uppen (één padpatroon per regel)",
       "skipHelp": "Bijvoorbeeld: /home/*/.local/share/Trash of **/previews. Caches, downloads en build-uitvoer worden al uitgesloten.",
-      "skipPaths": "Uitsluiten (één padpatroon per regel)"
+      "skipPaths": "Uitsluiten (één padpatroon per regel)",
+      "quiesceWithPick": "Te pauzeren services",
+      "quiesceFound": "Gevonden op deze host: {{hooks}}"
     },
     "reason": {
       "agentOutdated": "Werk de agent bij",

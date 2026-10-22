@@ -18,6 +18,7 @@ from backend.api.handlers import backup_handlers
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
 from backend.services import backup_results as results
+from backend.services import backup_views as views
 
 EQUIPPED = json.dumps({"capabilities": ["backup"], "commands": []})
 
@@ -130,7 +131,14 @@ def test_the_host_never_gets_prune_and_storage_gets_seal(session):
     storage_jobs = jobs.storage_configuration(s.policy, s.target, s.host)
     assert set(host_jobs["jobs"]) == {"capture", "snapshots", "estimate"}
     assert host_jobs["target"]["mount_point"] == "/mnt/backups"
-    assert set(storage_jobs["jobs"]) == {"seal", "prune", "check", "du", "repack"}
+    assert set(storage_jobs["jobs"]) == {
+        "seal",
+        "prune",
+        "check",
+        "du",
+        "repack",
+        "protect",
+    }
     assert storage_jobs["target"]["mount_point"] == "/srv/backups/restate"
     assert storage_jobs["jobs"]["seal"] == {
         "mode": "zfs_snapshot",
@@ -549,3 +557,65 @@ def test_the_reported_nfs_path_reaches_the_host_with_the_storage_address(session
         "result": {"nfs_path": "/restate/web-01"},
     })  # fmt: skip
     assert s.policy.config_version == version + 1  # unchanged: no more re-sends
+
+
+def test_the_configure_reply_says_whether_the_storage_host_protects(session, sent):
+    s = _setup(session)
+    for installed, protects in (
+        (["check", "prune", "protect"], True),
+        (["check"], False),
+    ):
+        run = jobs.queue_configure(session, s.policy, s.target, s.host, "storage")
+        results.record_command_result(session, {
+            "command_id": run.command_id, "success": True,
+            "result": {"installed": installed},
+        })  # fmt: skip
+        assert s.policy.storage_protects is protects
+
+
+@pytest.mark.parametrize(
+    "seal_mode,after", [("none", "prune"), ("zfs_snapshot", "seal")]
+)
+def test_a_good_capture_is_protected_first_where_it_can_be(
+    session, sent, seal_mode, after
+):
+    s = _setup(session, seal_mode=seal_mode)
+    s.policy.storage_protects = True
+    capture = jobs.queue_run(session, s.policy, s.host.id, "capture")
+    results.record_result(session, s.host.id, _result(capture, snapshot="s1"))
+    assert [p["action"] for _h, _c, p in sent][-1] == "protect"
+    protect = session.query(models.BackupRun).filter_by(action="protect").one()
+    assert protect.host_id == s.nas.id
+    sent.clear()
+    results.record_result(session, s.nas.id, _result(protect, "ok"))
+    assert [p["action"] for _h, _c, p in sent] == [after]
+
+
+def test_a_failed_protect_still_seals(session, sent, caplog):
+    s = _setup(session, seal_mode="zfs_snapshot")
+    s.policy.storage_protects = True
+    protect = jobs.queue_run(session, s.policy, s.nas.id, "protect")
+    sent.clear()
+    results.record_result(
+        session, s.nas.id, _result(protect, "failed", errors=["chown: EPERM"])
+    )
+    assert [p["action"] for _h, _c, p in sent] == ["seal"]
+    assert "can still change or remove" in caplog.text
+
+
+def test_without_protect_the_chain_is_unchanged(session, sent):
+    s = _setup(session)
+    capture = jobs.queue_run(session, s.policy, s.host.id, "capture")
+    results.record_result(session, s.host.id, _result(capture, snapshot="s1"))
+    assert [p["action"] for _h, _c, p in sent][-1] == "prune"
+
+
+def test_the_host_reports_its_present_quiesce_hooks(session, sent):
+    s = _setup(session)
+    run = jobs.queue_configure(session, s.policy, s.target, s.host, "host")
+    results.record_command_result(session, {
+        "command_id": run.command_id, "success": True,
+        "result": {"installed": ["capture"], "hooks": ["lxd", "docker", "rm -rf /"]},
+    })  # fmt: skip
+    assert json.loads(s.policy.available_hooks) == ["docker", "lxd"]
+    assert views.policy_dict(s.policy)["available_hooks"] == ["docker", "lxd"]
