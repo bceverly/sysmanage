@@ -343,6 +343,7 @@ else
 			doas pkg_add xmlsec || echo "[WARN] Could not auto-install xmlsec; if the xmlsec wheel later fails to build, run:  doas pkg_add xmlsec"; \
 		fi; \
 		export TMPDIR=$$HOME/tmp && \
+		$(OPENBSD_CRYPTO_ENV) \
 		$(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r requirements-dev.txt; \
 	elif [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "[INFO] NetBSD detected - configuring source builds (grpcio, cryptography, lxml)..."; \

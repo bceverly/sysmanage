@@ -14941,10 +14941,13 @@ releases, so the supported pair is now **7.9 and 8.0** and 7.8 is EOL.
       it); sysmanage and Pro+ pin 50.0.0 (a PKCS#7 CVE 49.0.0 still has), so
       they build it against OpenSSL 3.5 from packages (`openssl%3.5`,
       `OPENSSL_*_DIR`) -- proven on t480: 50.0.0 built, reports OpenSSL 3.5.9
-- [ ] **Run the agent and server from source on t480 under 8.0** -- agent
-      venv rebuilt on 3.14 with everything installed (cryptography/grpcio
-      linked); its suite ran 1,222 tests before stopping on a hygiene rule
-      (fixed); the full suite and the server's install-dev wait on the next pull
+- [x] **Run the agent and server from source on t480 under 8.0** -- 2026-10-22:
+      both venvs rebuilt automatically on Python 3.14 (stale-venv detection);
+      agent suite 6,006 passed / 17 skipped (cryptography 49.0.0 + grpcio
+      1.83.0 linked from packages); server `gmake install-dev` with
+      cryptography 50.0.0 built against OpenSSL 3.5.9 and grpcio from
+      py3-grpcio, server suite 9,365 passed / 5 skipped (tests/ui is the
+      separate Selenium suite, excluded as `make test` does)
 
 ### Carried forward by the Phase 21 audit (2026-10-01)
 
