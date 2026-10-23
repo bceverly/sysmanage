@@ -5494,7 +5494,7 @@
       "exportOwn": "Senza un'esportazione propria: {{hosts}}.",
       "exportRestricted": "Esportazioni non limitate all'indirizzo dell'host: {{hosts}}.",
       "exportMapping": "Esportazioni che non associano ogni client all'account dei backup: {{hosts}}. FreeBSD: -mapall=ACCOUNT:GROUP; Linux: all_squash con anonuid e anongid.",
-      "appendOnly": "Non solo in aggiunta: {{hosts}} potrebbero eliminare o sovrascrivere i propri backup completati. Pacchetti e snapshot completati devono appartenere a root, in directory di root scrivibili dal gruppo e con sticky bit (modalità 1770).",
+      "appendOnly": "Non solo in aggiunta: {{hosts}} potrebbero eliminare o sovrascrivere i propri backup completati. La fase di protezione dopo il prossimo backup li blocca (restate 2.1.0.1 o successivo; 2.1.0.3 su FreeBSD con ZFS).",
       "other": "Verifica dell'archiviazione: {{code}}",
       "prepareHint": "Prepara archiviazione, nella scheda Backup di ogni host, assegna a quell'host un proprio file system e un'esportazione limitata a esso. Le impostazioni del server NFS dell'host di archiviazione restano a tuo carico."
     },

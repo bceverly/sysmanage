@@ -5494,7 +5494,7 @@
       "exportOwn": "Sin exportación propia: {{hosts}}.",
       "exportRestricted": "Exportaciones no limitadas a la propia dirección del host: {{hosts}}.",
       "exportMapping": "Exportaciones que no asignan todos los clientes a la cuenta de copias de seguridad: {{hosts}}. FreeBSD: -mapall=ACCOUNT:GROUP; Linux: all_squash con anonuid y anongid.",
-      "appendOnly": "No es solo de anexión: {{hosts}} podrían borrar o sobrescribir sus propias copias de seguridad terminadas. Los paquetes e instantáneas terminados deben pertenecer a root, en directorios de root con escritura de grupo y bit sticky (modo 1770).",
+      "appendOnly": "No es solo de anexión: {{hosts}} podrían borrar o sobrescribir sus propias copias de seguridad terminadas. El paso de protección tras la próxima copia de seguridad las bloquea (restate 2.1.0.1 o posterior; 2.1.0.3 en FreeBSD con ZFS).",
       "other": "Comprobación del almacenamiento: {{code}}",
       "prepareHint": "Preparar almacenamiento, en la pestaña Copias de seguridad de cada host, da a ese host su propio sistema de archivos y una exportación limitada a él. La configuración del servidor NFS del host de almacenamiento sigue siendo cosa suya."
     },

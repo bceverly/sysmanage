@@ -5494,7 +5494,7 @@
       "exportOwn": "자체 내보내기 없음: {{hosts}}.",
       "exportRestricted": "호스트 자신의 주소로 제한되지 않은 내보내기: {{hosts}}.",
       "exportMapping": "모든 클라이언트를 백업 계정에 매핑하지 않는 내보내기: {{hosts}}. FreeBSD: -mapall=ACCOUNT:GROUP, Linux: all_squash와 anonuid 및 anongid.",
-      "appendOnly": "추가 전용이 아님: {{hosts}}이(가) 자신의 완료된 백업을 삭제하거나 덮어쓸 수 있습니다. 완료된 팩과 스냅샷은 root 소유여야 하며, root 소유이고 그룹 쓰기가 가능한 sticky 디렉터리(모드 1770)에 있어야 합니다.",
+      "appendOnly": "추가 전용이 아님: {{hosts}}이(가) 자신의 완료된 백업을 삭제하거나 덮어쓸 수 있습니다. 다음 백업 후의 보호 단계에서 잠깁니다(restate 2.1.0.1 이상, ZFS를 사용하는 FreeBSD에서는 2.1.0.3 이상).",
       "other": "스토리지 검사: {{code}}",
       "prepareHint": "각 호스트의 백업 탭에 있는 스토리지 준비는 해당 호스트에 자체 파일 시스템과 그 호스트로 제한된 내보내기를 제공합니다. 스토리지 호스트의 NFS 서버 설정은 계속 직접 지정해야 합니다."
     },

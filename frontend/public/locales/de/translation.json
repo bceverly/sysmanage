@@ -5494,7 +5494,7 @@
       "exportOwn": "Ohne eigene Freigabe: {{hosts}}.",
       "exportRestricted": "Freigaben, die nicht auf die eigene Adresse des Hosts beschränkt sind: {{hosts}}.",
       "exportMapping": "Freigaben, die nicht jeden Client auf das Sicherungskonto abbilden: {{hosts}}. FreeBSD: -mapall=ACCOUNT:GROUP; Linux: all_squash mit anonuid und anongid.",
-      "appendOnly": "Nicht nur anhängend: {{hosts}} könnten ihre eigenen fertigen Sicherungen löschen oder überschreiben. Fertige Pakete und Snapshots müssen root gehören, in root-eigenen, gruppenbeschreibbaren Sticky-Verzeichnissen (Modus 1770).",
+      "appendOnly": "Nicht nur anhängend: {{hosts}} könnten ihre eigenen fertigen Sicherungen löschen oder überschreiben. Der Schutzschritt nach der nächsten Sicherung sperrt sie (restate 2.1.0.1 oder neuer; 2.1.0.3 unter FreeBSD mit ZFS).",
       "other": "Speicherprüfung: {{code}}",
       "prepareHint": "\"Speicher vorbereiten\" auf der Registerkarte \"Sicherungen\" jedes Hosts gibt diesem Host ein eigenes Dateisystem und eine auf ihn beschränkte Freigabe. Die NFS-Servereinstellungen des Speicher-Hosts legen Sie weiterhin selbst fest."
     },

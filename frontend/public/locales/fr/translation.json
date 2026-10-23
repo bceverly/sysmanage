@@ -5494,7 +5494,7 @@
       "exportOwn": "Sans export propre : {{hosts}}.",
       "exportRestricted": "Exports non limités à l'adresse propre de l'hôte : {{hosts}}.",
       "exportMapping": "Exports qui n'associent pas chaque client au compte de sauvegarde : {{hosts}}. FreeBSD : -mapall=ACCOUNT:GROUP ; Linux : all_squash avec anonuid et anongid.",
-      "appendOnly": "Pas en ajout seul : {{hosts}} pourraient supprimer ou écraser leurs propres sauvegardes terminées. Les paquets et instantanés terminés doivent appartenir à root, dans des répertoires de root, inscriptibles par le groupe et avec le bit sticky (mode 1770).",
+      "appendOnly": "Pas en ajout seul : {{hosts}} pourraient supprimer ou écraser leurs propres sauvegardes terminées. L'étape de protection après la prochaine sauvegarde les verrouille (restate 2.1.0.1 ou ultérieur ; 2.1.0.3 sous FreeBSD avec ZFS).",
       "other": "Vérification du stockage : {{code}}",
       "prepareHint": "Préparer le stockage, dans l'onglet Sauvegardes de chaque hôte, donne à cet hôte son propre système de fichiers et un export limité à lui. Les paramètres du serveur NFS de l'hôte de stockage restent à votre charge."
     },

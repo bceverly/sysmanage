@@ -5494,7 +5494,7 @@
       "exportOwn": "Without an export of their own: {{hosts}}.",
       "exportRestricted": "Exports not limited to the host's own address: {{hosts}}.",
       "exportMapping": "Exports that do not map every client to the backup account: {{hosts}}. FreeBSD: -mapall=ACCOUNT:GROUP; Linux: all_squash with anonuid and anongid.",
-      "appendOnly": "Not append-only: {{hosts}} could delete or overwrite their own finished backups. Finished packs and snapshots must belong to root, in root-owned, group-writable, sticky directories (mode 1770).",
+      "appendOnly": "Not append-only: {{hosts}} could delete or overwrite their own finished backups. The protect step after the next backup locks them (restate 2.1.0.1 or later; 2.1.0.3 on FreeBSD with ZFS).",
       "other": "Storage check: {{code}}",
       "prepareHint": "Prepare storage, on each host's Backups tab, gives that host its own filesystem and an export limited to it. The storage host's NFS server settings stay yours to set."
     },

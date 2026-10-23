@@ -5494,7 +5494,7 @@
       "exportOwn": "沒有自己的匯出：{{hosts}}。",
       "exportRestricted": "未限制為主機自身位址的匯出：{{hosts}}。",
       "exportMapping": "未將所有用戶端對應到備份帳戶的匯出：{{hosts}}。FreeBSD：-mapall=ACCOUNT:GROUP；Linux：all_squash 搭配 anonuid 與 anongid。",
-      "appendOnly": "不是僅附加：{{hosts}} 可能刪除或覆寫自己已完成的備份。已完成的包與快照必須歸 root 所有，並位於歸 root 所有、群組可寫、具黏著位元的目錄中（模式 1770）。",
+      "appendOnly": "不是僅附加：{{hosts}} 可能刪除或覆寫自己已完成的備份。下次備份之後的保護步驟會將其鎖定（restate 2.1.0.1 或更新版本；在使用 ZFS 的 FreeBSD 上為 2.1.0.3 或更新版本）。",
       "other": "儲存檢查：{{code}}",
       "prepareHint": "每台主機「備份」分頁中的「準備儲存」會為該主機提供獨立的檔案系統和僅限於它的匯出。儲存主機的 NFS 伺服器設定仍由您自行設定。"
     },

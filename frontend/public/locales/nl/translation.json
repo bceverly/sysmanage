@@ -5494,7 +5494,7 @@
       "exportOwn": "Zonder eigen export: {{hosts}}.",
       "exportRestricted": "Exports die niet beperkt zijn tot het eigen adres van de host: {{hosts}}.",
       "exportMapping": "Exports die niet elke client aan het back-upaccount koppelen: {{hosts}}. FreeBSD: -mapall=ACCOUNT:GROUP; Linux: all_squash met anonuid en anongid.",
-      "appendOnly": "Niet alleen-toevoegen: {{hosts}} kunnen hun eigen voltooide back-ups verwijderen of overschrijven. Voltooide pakketten en snapshots moeten van root zijn, in mappen van root die schrijfbaar zijn voor de groep en de sticky-bit hebben (modus 1770).",
+      "appendOnly": "Niet alleen-toevoegen: {{hosts}} kunnen hun eigen voltooide back-ups verwijderen of overschrijven. De beveiligingsstap na de volgende back-up vergrendelt ze (restate 2.1.0.1 of later; 2.1.0.3 op FreeBSD met ZFS).",
       "other": "Opslagcontrole: {{code}}",
       "prepareHint": "Opslag voorbereiden, op het tabblad Back-ups van elke host, geeft die host een eigen bestandssysteem en een export die tot die host beperkt is. De NFS-serverinstellingen van de opslaghost blijven uw verantwoordelijkheid."
     },

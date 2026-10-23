@@ -58,7 +58,7 @@ export const auditText = (t: TFunction, target: BackupTarget, hosts: BackupHost[
                 { hosts: who });
         case 'audit_append_only_layout':
             return t('backups.audit.appendOnly',
-                'Not append-only: {{hosts}} could delete or overwrite their own finished backups. Finished packs and snapshots must belong to root, in root-owned, group-writable, sticky directories (mode 1770).',
+                'Not append-only: {{hosts}} could delete or overwrite their own finished backups. The protect step after the next backup locks them (restate 2.1.0.1 or later; 2.1.0.3 on FreeBSD with ZFS).',
                 { hosts: who });
         default:
             return t('backups.audit.other', 'Storage check: {{code}}', { code: code.replace(/^audit_/, '') });
