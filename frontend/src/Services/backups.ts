@@ -110,6 +110,11 @@ export interface BackupTarget {
   seal_mode: SealMode;
   zfs_dataset: string | null;
   btrfs_snapshot_dir: string | null;
+  /** Days the storage host keeps its seal snapshots (the newest always stays). */
+  seal_keep_days?: number | null;
+  /** Percent used at which the target warns, and warns critically (85 / 95). */
+  space_low_percent?: number | null;
+  space_critical_percent?: number | null;
   storage_fs: StorageFilesystem;
   storage_status: StorageStatus | null;
   storage_health?: StorageHealth | null;
@@ -129,6 +134,11 @@ export interface TargetInput {
   seal_mode: SealMode;
   zfs_dataset: string | null;
   btrfs_snapshot_dir: string | null;
+  /** Days the storage host keeps its seal snapshots (the newest always stays). */
+  seal_keep_days?: number | null;
+  /** Percent used at which the target warns, and warns critically (85 / 95). */
+  space_low_percent?: number | null;
+  space_critical_percent?: number | null;
   service_account?: string | null;
 }
 

@@ -5323,7 +5323,9 @@
       "snapshots": "Snapshot: {{n}}",
       "starting": "Avvio...",
       "status": "Stato",
-      "waiting": "In attesa di un posto libero"
+      "waiting": "In attesa di un posto libero",
+      "unreadable": "File non letti: {{n}}",
+      "showAll": "Mostra tutti gli host"
     },
     "loadError": "Impossibile caricare i backup.",
     "policy": {
@@ -5397,7 +5399,9 @@
       "clear": "Cancella l'elenco",
       "clearTitle": "Cancellare l'elenco dei processi?",
       "clearBody": "I processi terminati escono da questo elenco; quelli in coda o in esecuzione restano. Dal registro di controllo non viene rimosso nulla e lo stato dei backup qui sopra non cambia.",
-      "clearError": "Impossibile cancellare l'elenco dei processi."
+      "clearError": "Impossibile cancellare l'elenco dei processi.",
+      "paused": "{{service}} sospeso per {{seconds}} s",
+      "pauseFailed": "Impossibile sospendere o riprendere {{service}}: {{message}}"
     },
     "status": {
       "disabled": "Disattivato",
@@ -5431,13 +5435,15 @@
       "storagePath": "Percorso sull'host di archiviazione",
       "storagePathHelp": "Qui l'host di archiviazione pulisce, verifica e sigilla; gli host sottoposti a backup non eliminano mai nulla.",
       "zfsDataset": "Dataset ZFS",
-      "zfsRetention": "Per ora la rimozione dei vecchi snapshot ZFS spetta a te; imposta la conservazione sull'host di archiviazione.",
       "btrfsHelp": "I repository devono trovarsi su un sottovolume btrfs; gli snapshot vanno in una directory dello stesso file system, fuori dal sottovolume.",
-      "btrfsRetention": "Per ora la rimozione dei vecchi snapshot btrfs spetta a te; imposta la conservazione sull'host di archiviazione.",
       "btrfsSnapshotDir": "Directory degli snapshot sull'host di archiviazione",
       "sealBtrfs": "Snapshot btrfs (sola lettura)",
       "serviceAccount": "Account dei backup sull'host di archiviazione",
-      "serviceAccountHelp": "L'esportazione di ogni host è associata a questo account e al suo gruppo. Predefinito: restate."
+      "serviceAccountHelp": "L'esportazione di ogni host è associata a questo account e al suo gruppo. Predefinito: restate.",
+      "sealKeepDays": "Conserva gli snapshot sigillati per (giorni)",
+      "sealKeepHelp": "L'host di archiviazione rimuove da solo gli snapshot sigillati più vecchi; il più recente viene sempre conservato.",
+      "spaceLow": "Avvisa quando l'archiviazione è piena a questo livello (%)",
+      "spaceCritical": "Critico quando l'archiviazione è piena a questo livello (%)"
     },
     "title": "Backup",
     "warning": {

@@ -5323,7 +5323,9 @@
       "snapshots": "스냅샷: {{n}}",
       "starting": "시작하는 중...",
       "status": "상태",
-      "waiting": "빈 자리 대기 중"
+      "waiting": "빈 자리 대기 중",
+      "unreadable": "읽지 못한 파일: {{n}}",
+      "showAll": "모든 호스트 표시"
     },
     "loadError": "백업을 불러올 수 없습니다.",
     "policy": {
@@ -5397,7 +5399,9 @@
       "clear": "목록 지우기",
       "clearTitle": "작업 목록을 지울까요?",
       "clearBody": "완료된 작업은 이 목록에서 사라지고, 대기 중이거나 실행 중인 작업은 남습니다. 감사 로그에서는 아무것도 삭제되지 않으며 위의 백업 상태도 바뀌지 않습니다.",
-      "clearError": "작업 목록을 지울 수 없습니다."
+      "clearError": "작업 목록을 지울 수 없습니다.",
+      "paused": "{{service}}을(를) {{seconds}}초 동안 일시 중지함",
+      "pauseFailed": "{{service}}을(를) 일시 중지하거나 재개하지 못했습니다: {{message}}"
     },
     "status": {
       "disabled": "비활성화됨",
@@ -5431,13 +5435,15 @@
       "storagePath": "스토리지 호스트의 경로",
       "storagePathHelp": "스토리지 호스트가 여기에서 정리, 검사, 봉인을 합니다. 백업되는 호스트는 절대 정리하지 않습니다.",
       "zfsDataset": "ZFS 데이터 세트",
-      "zfsRetention": "오래된 ZFS 스냅샷 삭제는 당분간 직접 해야 합니다. 스토리지 호스트에서 보존 기간을 설정하세요.",
       "btrfsHelp": "리포지토리는 btrfs 서브볼륨에 있어야 하며, 스냅샷은 같은 파일 시스템에서 서브볼륨 바깥에 있는 디렉터리에 저장됩니다.",
-      "btrfsRetention": "오래된 btrfs 스냅샷 삭제는 당분간 직접 해야 합니다. 스토리지 호스트에서 보존 기간을 설정하세요.",
       "btrfsSnapshotDir": "스토리지 호스트의 스냅샷 디렉터리",
       "sealBtrfs": "btrfs 스냅샷 (읽기 전용)",
       "serviceAccount": "스토리지 호스트의 백업 계정",
-      "serviceAccountHelp": "각 호스트의 내보내기는 이 계정과 그 그룹에 매핑됩니다. 기본값: restate."
+      "serviceAccountHelp": "각 호스트의 내보내기는 이 계정과 그 그룹에 매핑됩니다. 기본값: restate.",
+      "sealKeepDays": "봉인된 스냅샷 보관 기간(일)",
+      "sealKeepHelp": "스토리지 호스트가 오래된 봉인 스냅샷을 직접 제거하며, 가장 최근 스냅샷은 항상 보관됩니다.",
+      "spaceLow": "스토리지가 이만큼 차면 경고(%)",
+      "spaceCritical": "스토리지가 이만큼 차면 심각(%)"
     },
     "title": "백업",
     "warning": {

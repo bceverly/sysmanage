@@ -308,6 +308,54 @@ describe("Backups page", () => {
     expect(screen.getByText("Restore to staging").closest("button")).not.toBeDisabled();
   });
 
+  test("a status chip filters the hosts, and clicking it again shows all", async () => {
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    expect(await screen.findByText("old.lab")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Backed up: 1"));
+    expect(screen.queryByText("old.lab")).not.toBeInTheDocument();
+    expect(screen.queryByText("bare.lab")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText("Backed up: 1"));
+    expect(await screen.findByText("old.lab")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Not equipped: 2"));
+    expect(screen.getByText("old.lab")).toBeInTheDocument();
+    expect(screen.getByText("bare.lab")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Show all hosts"));
+    expect(screen.queryByText("Show all hosts")).not.toBeInTheDocument();
+  });
+
+  test("a backup that skipped files says how many, with the first ones", async () => {
+    const incomplete = run({ id: "r5", action: "capture", status: "incomplete",
+      result: {
+        unreadable: { count: 3, first: [{ path: "/var/lib/secret", reason: "Permission denied" }] },
+        quiesce: [
+          { kind: "postgresql", name: "16-main", paused_at: "2026-10-23T02:00:00Z",
+            resumed_at: "2026-10-23T02:00:12Z", status: "ok", message: "" },
+          { kind: "nextcloud", name: "", paused_at: "2026-10-23T02:00:00Z",
+            resumed_at: "", status: "failed", message: "occ exited 1" },
+        ],
+      } });
+    vi.mocked(getBackupOverview).mockResolvedValue(overview({
+      hosts: [host({ status: "incomplete", last_capture: incomplete, last_good_capture: incomplete })],
+      counts: { incomplete: 1 },
+    }));
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    expect(await screen.findByText("Files not read: 3")).toBeInTheDocument();
+  });
+
+  test("a capture's job shows each paused service and a failed pause", async () => {
+    const paused = run({ id: "r6", action: "capture", status: "incomplete",
+      result: { quiesce: [
+        { kind: "postgresql", name: "16-main", paused_at: "2026-10-23T02:00:00Z",
+          resumed_at: "2026-10-23T02:00:12Z", status: "ok", message: "" },
+        { kind: "nextcloud", name: "", paused_at: "2026-10-23T02:00:00Z",
+          resumed_at: "", status: "failed", message: "occ exited 1" },
+      ] } });
+    vi.mocked(getRuns).mockResolvedValue({ total: 1, runs: [paused] });
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    expect(await screen.findByText("Paused postgresql 16-main for 12 s")).toBeInTheDocument();
+    expect(screen.getByText("Could not pause or resume nextcloud: occ exited 1")).toBeInTheDocument();
+  });
+
   test("a load failure is shown", async () => {
     vi.mocked(getBackupOverview).mockRejectedValue(new Error("boom"));
     render(<MemoryRouter><Backups /></MemoryRouter>);

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 10:57-0400\n"
+"POT-Creation-Date: 2026-10-23 17:06-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -81,7 +81,7 @@ msgstr "선택한 계정에 액세스 권한이 없습니다."
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:127
+#: backend/api/posture.py:375 backend/api/backups.py:132
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:151
@@ -196,8 +196,8 @@ msgstr "호스트 ID 형식이 잘못되었습니다"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:139
-#: backend/api/backups.py:142 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:144
+#: backend/api/backups.py:147 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -3877,167 +3877,183 @@ msgstr "KVM 네트워크는 Linux 호스트에서만 사용할 수 있습니다"
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "KVM 네트워크 목록이 요청되었습니다. 결과가 곧 표시됩니다."
 
-#: backend/api/backups.py:158
+#: backend/api/backups.py:163
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s은(는) '..'이 없는 절대 경로여야 합니다"
 
-#: backend/api/backups.py:163
+#: backend/api/backups.py:168
 #, python-format
 msgid "%s is out of range"
 msgstr "%s이(가) 허용 범위를 벗어났습니다"
 
-#: backend/api/backups.py:167
+#: backend/api/backups.py:172
 msgid "Host mount point"
 msgstr "호스트 마운트 지점"
 
-#: backend/api/backups.py:168 backend/api/backups.py:205
+#: backend/api/backups.py:173 backend/api/backups.py:217
 msgid "Storage path"
 msgstr "스토리지 경로"
 
-#: backend/api/backups.py:169
+#: backend/api/backups.py:174
 msgid "Concurrent backups"
 msgstr "동시 백업 수"
 
-#: backend/api/backups.py:171
+#: backend/api/backups.py:175
+msgid "Days to keep sealed snapshots"
+msgstr "봉인된 스냅샷 보관 일수"
+
+#: backend/api/backups.py:176
+msgid "Storage space warning"
+msgstr "스토리지 공간 경고"
+
+#: backend/api/backups.py:177
+msgid "Storage space critical"
+msgstr "스토리지 공간 심각"
+
+#: backend/api/backups.py:181
+msgid "The storage space warning must be below the critical level"
+msgstr "스토리지 공간 경고는 심각 수준보다 낮아야 합니다"
+
+#: backend/api/backups.py:183
 msgid "The backup service account is not a valid account name"
 msgstr "백업 서비스 계정이 유효한 계정 이름이 아닙니다"
 
-#: backend/api/backups.py:173
+#: backend/api/backups.py:185
 msgid "Unknown seal mode"
 msgstr "알 수 없는 봉인 모드입니다"
 
-#: backend/api/backups.py:175
+#: backend/api/backups.py:187
 msgid "A ZFS snapshot seal needs the dataset name"
 msgstr "ZFS 스냅샷 봉인에는 데이터 세트 이름이 필요합니다"
 
-#: backend/api/backups.py:177
+#: backend/api/backups.py:189
 msgid "The ZFS dataset name is not valid"
 msgstr "ZFS 데이터 세트 이름이 올바르지 않습니다"
 
-#: backend/api/backups.py:184
+#: backend/api/backups.py:196
 msgid "A storage host needs the storage path"
 msgstr "스토리지 호스트에는 스토리지 경로가 필요합니다"
 
-#: backend/api/backups.py:201
+#: backend/api/backups.py:213
 msgid "A btrfs snapshot seal needs the snapshot directory"
 msgstr "btrfs 스냅샷 봉인에는 스냅샷 디렉터리가 필요합니다"
 
-#: backend/api/backups.py:203
+#: backend/api/backups.py:215
 msgid "A btrfs snapshot seal needs the storage path"
 msgstr "btrfs 스냅샷 봉인에는 스토리지 경로가 필요합니다"
 
-#: backend/api/backups.py:206
+#: backend/api/backups.py:218
 msgid "Snapshot directory"
 msgstr "스냅샷 디렉터리"
 
-#: backend/api/backups.py:211
+#: backend/api/backups.py:223
 #, python-format
 msgid ""
 "%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
 " trailing '/')"
 msgstr "%s은(는) 단순한 절대 경로여야 합니다(문자, 숫자, '_', '.', '-', '/'만 사용, 끝에 '/' 없음)"
 
-#: backend/api/backups.py:219
+#: backend/api/backups.py:231
 msgid "The snapshot directory must be outside the storage path"
 msgstr "스냅샷 디렉터리는 스토리지 경로 바깥에 있어야 합니다"
 
-#: backend/api/backups.py:223
+#: backend/api/backups.py:235
 msgid "Interval (hours)"
 msgstr "간격 (시간)"
 
-#: backend/api/backups.py:224
+#: backend/api/backups.py:236
 msgid "Window start hour"
 msgstr "시간대 시작 시각"
 
-#: backend/api/backups.py:225
+#: backend/api/backups.py:237
 msgid "Snapshots to keep"
 msgstr "보존할 스냅샷 수"
 
-#: backend/api/backups.py:226
+#: backend/api/backups.py:238
 msgid "Check interval (days)"
 msgstr "검사 간격 (일)"
 
-#: backend/api/backups.py:230
+#: backend/api/backups.py:242
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "일시 중지 후크는 소문자로 된 짧은 이름 최대 10개여야 합니다"
 
-#: backend/api/backups.py:243
+#: backend/api/backups.py:255
 msgid "At most 50 path rules can be set"
 msgstr "경로 규칙은 최대 50개까지 설정할 수 있습니다"
 
-#: backend/api/backups.py:254
+#: backend/api/backups.py:266
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
 msgstr "각 경로 규칙은 앞뒤 공백이나 #으로 시작하지 않는 512자 이내의 한 줄입니다"
 
-#: backend/api/backups.py:262
+#: backend/api/backups.py:274
 msgid "The snapshot name is not valid"
 msgstr "스냅샷 이름이 올바르지 않습니다"
 
-#: backend/api/backups.py:264
+#: backend/api/backups.py:276
 msgid "At most 50 paths can be restored at once"
 msgstr "한 번에 최대 50개 경로만 복원할 수 있습니다"
 
-#: backend/api/backups.py:267
+#: backend/api/backups.py:279
 msgid "A restore path is empty or too long"
 msgstr "복원 경로가 비어 있거나 너무 깁니다"
 
-#: backend/api/backups.py:269
+#: backend/api/backups.py:281
 msgid "A restore path must not contain '..'"
 msgstr "복원 경로에 '..'을 포함할 수 없습니다"
 
-#: backend/api/backups.py:288 backend/api/backups.py:291
+#: backend/api/backups.py:300 backend/api/backups.py:303
 msgid "Backup target not found"
 msgstr "백업 대상을 찾을 수 없습니다"
 
-#: backend/api/backups.py:340
+#: backend/api/backups.py:355
 msgid "This edition supports one backup target; edit the existing one"
 msgstr "이 에디션은 백업 대상을 하나만 지원합니다. 기존 대상을 편집하세요"
 
-#: backend/api/backups.py:417
+#: backend/api/backups.py:432
 msgid "Remove the hosts' backup policies before the target"
 msgstr "대상을 삭제하기 전에 호스트의 백업 정책을 제거하세요"
 
-#: backend/api/backups.py:497
+#: backend/api/backups.py:512
 msgid "Set up the backup target first"
 msgstr "먼저 백업 대상을 설정하세요"
 
-#: backend/api/backups.py:538
+#: backend/api/backups.py:553
 msgid "No backup policy"
 msgstr "백업 정책이 없습니다"
 
-#: backend/api/backups.py:558
+#: backend/api/backups.py:573
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "이 호스트는 아직 백업을 실행할 수 없습니다 (%s)"
 
-#: backend/api/backups.py:564
+#: backend/api/backups.py:579
 msgid "This host's backup is not configured yet"
 msgstr "이 호스트의 백업이 아직 구성되지 않았습니다"
 
-#: backend/api/backups.py:581
+#: backend/api/backups.py:596
 msgid "The backup storage host is not ready"
 msgstr "백업 스토리지 호스트가 준비되지 않았습니다"
 
-#: backend/api/backups.py:596
+#: backend/api/backups.py:611
 msgid "Unknown backup action"
 msgstr "알 수 없는 백업 작업입니다"
 
-#: backend/api/backups.py:601
+#: backend/api/backups.py:616
 msgid "That backup job is already queued or running"
 msgstr "해당 백업 작업이 이미 대기 중이거나 실행 중입니다"
 
-#: backend/api/backups.py:695
+#: backend/api/backups.py:710
 msgid "Snapshot not found"
 msgstr "스냅샷을 찾을 수 없습니다"
 
-#: backend/api/backups.py:699
+#: backend/api/backups.py:714
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "이 스냅샷은 서명되지 않았습니다. 그래도 복원하려면 확인하세요"
 
-#: backend/api/backups.py:799 backend/api/backups.py:802
+#: backend/api/backups.py:814 backend/api/backups.py:817
 msgid "Backup run not found"
 msgstr "백업 작업을 찾을 수 없습니다"
 
@@ -5685,6 +5701,9 @@ msgstr "NetBSD pkgsrc 패키지 취약점(pkg_admin audit가 읽는 데이터)"
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "OS 버전별 macOS 취약점(NVD의 영향받는 버전 데이터 기준)"
+
+#~ msgid "Days to keep seals"
+#~ msgstr "봉인된 스냅샷 보관 일수"
 
 #~ msgid "Choose either specific events or all open events, not both."
 #~ msgstr "특정 이벤트 또는 모든 오픈 이벤트 중 하나를 선택해야 합니다. 두 가지 모두 선택할 수 없습니다."

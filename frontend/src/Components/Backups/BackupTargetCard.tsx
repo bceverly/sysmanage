@@ -45,6 +45,9 @@ const EMPTY: TargetInput = {
     zfs_dataset: null,
     btrfs_snapshot_dir: null,
     service_account: null,
+    seal_keep_days: 14,
+    space_low_percent: 85,
+    space_critical_percent: 95,
 };
 
 const toInput = (target: BackupTarget | null): TargetInput =>
@@ -59,6 +62,9 @@ const toInput = (target: BackupTarget | null): TargetInput =>
               zfs_dataset: target.zfs_dataset,
               btrfs_snapshot_dir: target.btrfs_snapshot_dir,
               service_account: target.service_account ?? null,
+              seal_keep_days: target.seal_keep_days ?? 14,
+              space_low_percent: target.space_low_percent ?? 85,
+              space_critical_percent: target.space_critical_percent ?? 95,
           }
         : EMPTY;
 
@@ -144,11 +150,17 @@ export const TargetDialog: React.FC<{
                         <TextField label={t('backups.target.btrfsSnapshotDir', 'Snapshot directory on the storage host')}
                             value={form.btrfs_snapshot_dir ?? ''} placeholder="/srv/backups/.snapshots"
                             onChange={e => set({ btrfs_snapshot_dir: e.target.value || null })} required
-                            helperText={`${t('backups.target.btrfsHelp',
-                                'The repositories must sit on a btrfs subvolume; snapshots go to a directory on the same filesystem, outside the subvolume.')} ${t(
-                                'backups.target.btrfsRetention',
-                                'Removing old btrfs snapshots is up to you for now; set retention on the storage host.')}`} />
+                            helperText={t('backups.target.btrfsHelp',
+                                'The repositories must sit on a btrfs subvolume; snapshots go to a directory on the same filesystem, outside the subvolume.')} />
                     )}
+                    <Stack direction="row" spacing={2}>
+                        <TextField type="number" fullWidth label={t('backups.target.spaceLow', 'Warn when the storage is this full (%)')}
+                            value={form.space_low_percent ?? ''} inputProps={{ min: 50, max: 99 }}
+                            onChange={e => set({ space_low_percent: e.target.value === '' ? null : Number(e.target.value) })} />
+                        <TextField type="number" fullWidth label={t('backups.target.spaceCritical', 'Critical when the storage is this full (%)')}
+                            value={form.space_critical_percent ?? ''} inputProps={{ min: 51, max: 100 }}
+                            onChange={e => set({ space_critical_percent: e.target.value === '' ? null : Number(e.target.value) })} />
+                    </Stack>
                     <TextField label={t('backups.target.serviceAccount', 'Backup account on the storage host')}
                         value={form.service_account ?? ''} placeholder="restate"
                         onChange={e => set({ service_account: e.target.value || null })}
@@ -156,9 +168,14 @@ export const TargetDialog: React.FC<{
                             'Every host\'s export maps to this account and its group. Default: restate.')} />
                     {form.seal_mode === 'zfs_snapshot' && (
                         <TextField label={t('backups.target.zfsDataset', 'ZFS dataset')} value={form.zfs_dataset ?? ''}
-                            onChange={e => set({ zfs_dataset: e.target.value || null })} required
-                            helperText={t('backups.target.zfsRetention',
-                                'Removing old ZFS snapshots is up to you for now; set retention on the storage host.')} />
+                            onChange={e => set({ zfs_dataset: e.target.value || null })} required />
+                    )}
+                    {form.seal_mode !== 'none' && (
+                        <TextField type="number" label={t('backups.target.sealKeepDays', 'Keep sealed snapshots for (days)')}
+                            value={form.seal_keep_days ?? ''} inputProps={{ min: 1, max: 3650 }}
+                            onChange={e => set({ seal_keep_days: e.target.value === '' ? null : Number(e.target.value) })}
+                            helperText={t('backups.target.sealKeepHelp',
+                                'The storage host removes older sealed snapshots itself; the newest is always kept.')} />
                     )}
                 </Stack>
             </DialogContent>
@@ -173,12 +190,15 @@ export const TargetDialog: React.FC<{
     );
 };
 
+const keptFor = (t: TFunction, target: BackupTarget): string =>
+    `${t('backups.target.sealKeepDays', 'Keep sealed snapshots for (days)')}: ${target.seal_keep_days ?? 14}`;
+
 const sealDescription = (t: TFunction, target: BackupTarget): string => {
     switch (target.seal_mode) {
         case 'zfs_snapshot':
-            return `${t('backups.target.sealZfs', 'ZFS snapshot')} (${target.zfs_dataset})`;
+            return `${t('backups.target.sealZfs', 'ZFS snapshot')} (${target.zfs_dataset}) - ${keptFor(t, target)}`;
         case 'btrfs_snapshot':
-            return `${t('backups.target.sealBtrfs', 'btrfs snapshot (read-only)')} (${target.btrfs_snapshot_dir})`;
+            return `${t('backups.target.sealBtrfs', 'btrfs snapshot (read-only)')} (${target.btrfs_snapshot_dir}) - ${keptFor(t, target)}`;
         default:
             return t('backups.target.sealNone', 'Do not seal');
     }

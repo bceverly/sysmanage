@@ -82,3 +82,23 @@ def test_no_inventory_means_no_space_figure(session):
     s = _setup(session)
     assert health.storage_health(session, s.target, s.nas)["space"] is None
     assert health.storage_health(session, s.target, None) is None
+
+
+def test_each_target_sets_when_space_warns():
+    def report(used, low=None, critical=None):
+        found = {"drives": {"failed": [], "warning": []},
+                 "space": {"used_percent": used}}  # fmt: skip
+        if low is not None:
+            found.update(space_low_percent=low, space_critical_percent=critical)
+        return found
+
+    assert health.health_warnings(report(86)) == [
+        "storage_space_low"
+    ]  # default 85 / 95
+    assert health.health_warnings(report(86, low=90, critical=97)) == []
+    assert health.health_warnings(report(92, low=90, critical=97)) == [
+        "storage_space_low"
+    ]
+    assert health.health_warnings(report(97, low=90, critical=97)) == [
+        "storage_space_critical"
+    ]

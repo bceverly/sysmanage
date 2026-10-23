@@ -5323,7 +5323,9 @@
       "snapshots": "Snapshots: {{n}}",
       "starting": "Wird gestartet...",
       "status": "Status",
-      "waiting": "Wartet auf einen freien Platz"
+      "waiting": "Wartet auf einen freien Platz",
+      "unreadable": "Nicht gelesene Dateien: {{n}}",
+      "showAll": "Alle Hosts anzeigen"
     },
     "loadError": "Die Sicherungen konnten nicht geladen werden.",
     "policy": {
@@ -5397,7 +5399,9 @@
       "clear": "Liste leeren",
       "clearTitle": "Auftragsliste leeren?",
       "clearBody": "Abgeschlossene Aufträge verschwinden aus dieser Liste; wartende und laufende bleiben. Aus dem Prüfprotokoll wird nichts entfernt, und der Sicherungsstatus oben ändert sich nicht.",
-      "clearError": "Die Auftragsliste konnte nicht geleert werden."
+      "clearError": "Die Auftragsliste konnte nicht geleert werden.",
+      "paused": "{{service}} für {{seconds}} s pausiert",
+      "pauseFailed": "{{service}} konnte nicht pausiert oder fortgesetzt werden: {{message}}"
     },
     "status": {
       "disabled": "Deaktiviert",
@@ -5431,13 +5435,15 @@
       "storagePath": "Pfad auf dem Speicher-Host",
       "storagePathHelp": "Der Speicher-Host bereinigt, prüft und versiegelt hier; gesicherte Hosts bereinigen nie.",
       "zfsDataset": "ZFS-Dataset",
-      "zfsRetention": "Alte ZFS-Snapshots müssen Sie vorerst selbst entfernen; legen Sie die Aufbewahrung auf dem Speicher-Host fest.",
       "btrfsHelp": "Die Repositorys müssen auf einem btrfs-Subvolume liegen; Snapshots landen in einem Verzeichnis auf demselben Dateisystem, außerhalb des Subvolumes.",
-      "btrfsRetention": "Alte btrfs-Snapshots müssen Sie vorerst selbst entfernen; legen Sie die Aufbewahrung auf dem Speicher-Host fest.",
       "btrfsSnapshotDir": "Snapshot-Verzeichnis auf dem Speicher-Host",
       "sealBtrfs": "btrfs-Snapshot (schreibgeschützt)",
       "serviceAccount": "Sicherungskonto auf dem Speicher-Host",
-      "serviceAccountHelp": "Die Freigabe jedes Hosts wird auf dieses Konto und seine Gruppe abgebildet. Standard: restate."
+      "serviceAccountHelp": "Die Freigabe jedes Hosts wird auf dieses Konto und seine Gruppe abgebildet. Standard: restate.",
+      "sealKeepDays": "Versiegelte Snapshots aufbewahren (Tage)",
+      "sealKeepHelp": "Der Speicher-Host entfernt ältere versiegelte Snapshots selbst; der neueste wird immer behalten.",
+      "spaceLow": "Warnen, wenn der Speicher so voll ist (%)",
+      "spaceCritical": "Kritisch, wenn der Speicher so voll ist (%)"
     },
     "title": "Sicherungen",
     "warning": {

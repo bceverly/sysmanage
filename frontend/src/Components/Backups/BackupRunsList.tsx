@@ -22,11 +22,31 @@ import { useTranslation } from 'react-i18next';
 import { getRuns } from '../../Services/backups';
 import type { BackupRun } from '../../Services/backups';
 import { useVisiblePolling } from '../../hooks/useVisiblePolling';
-import { actionLabel, formatTime, runStatusColor, runStatusLabel } from './backupLabels';
+import { actionLabel, formatTime, pausedServicesOf, runStatusColor, runStatusLabel } from './backupLabels';
 
 const runDetail = (run: BackupRun): string => {
     if (run.snapshot) return run.snapshot;
     return run.message ?? '';
+};
+
+// Each service restate paused for this capture, how long, and how it ended:
+// a failed pause or resume is why a run is Incomplete.
+const PausedServices: React.FC<{ run: BackupRun }> = ({ run }) => {
+    const { t } = useTranslation();
+    return (
+        <>
+            {pausedServicesOf(run).map(paused => (
+                <Typography key={paused.service} variant="caption" display="block"
+                    color={paused.ok ? 'text.secondary' : 'warning.main'}>
+                    {paused.ok
+                        ? t('backups.runs.paused', 'Paused {{service}} for {{seconds}} s', {
+                            service: paused.service, seconds: paused.seconds ?? '?' })
+                        : t('backups.runs.pauseFailed', 'Could not pause or resume {{service}}: {{message}}', {
+                            service: paused.service, message: paused.message })}
+                </Typography>
+            ))}
+        </>
+    );
 };
 
 const BackupRunsList: React.FC<{
@@ -84,7 +104,7 @@ const BackupRunsList: React.FC<{
                             <TableCell>
                                 <Chip size="small" color={runStatusColor(run.status)} label={runStatusLabel(t, run)} />
                             </TableCell>
-                            <TableCell sx={{ wordBreak: 'break-all' }}>{runDetail(run)}</TableCell>
+                            <TableCell sx={{ wordBreak: 'break-all' }}>{runDetail(run)}<PausedServices run={run} /></TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

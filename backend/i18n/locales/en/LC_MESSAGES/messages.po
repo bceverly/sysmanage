@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-22 10:57-0400\n"
+"POT-Creation-Date: 2026-10-23 17:06-0400\n"
 "Language: en\n"
 "Content-Type: text/plain; charset=ASCII\n"
 
@@ -81,7 +81,7 @@ msgstr "You do not have access to the selected account."
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:127
+#: backend/api/posture.py:375 backend/api/backups.py:132
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:151
@@ -196,8 +196,8 @@ msgstr "Invalid host ID format"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:139
-#: backend/api/backups.py:142 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:144
+#: backend/api/backups.py:147 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -3971,61 +3971,77 @@ msgstr "KVM networks are only available on Linux hosts"
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "KVM network list requested. Results will be returned shortly."
 
-#: backend/api/backups.py:158
+#: backend/api/backups.py:163
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s must be an absolute path without '..'"
 
-#: backend/api/backups.py:163
+#: backend/api/backups.py:168
 #, python-format
 msgid "%s is out of range"
 msgstr "%s is out of range"
 
-#: backend/api/backups.py:167
+#: backend/api/backups.py:172
 msgid "Host mount point"
 msgstr "Host mount point"
 
-#: backend/api/backups.py:168 backend/api/backups.py:205
+#: backend/api/backups.py:173 backend/api/backups.py:217
 msgid "Storage path"
 msgstr "Storage path"
 
-#: backend/api/backups.py:169
+#: backend/api/backups.py:174
 msgid "Concurrent backups"
 msgstr "Concurrent backups"
 
-#: backend/api/backups.py:171
+#: backend/api/backups.py:175
+msgid "Days to keep sealed snapshots"
+msgstr "Days to keep sealed snapshots"
+
+#: backend/api/backups.py:176
+msgid "Storage space warning"
+msgstr "Storage space warning"
+
+#: backend/api/backups.py:177
+msgid "Storage space critical"
+msgstr "Storage space critical"
+
+#: backend/api/backups.py:181
+msgid "The storage space warning must be below the critical level"
+msgstr "The storage space warning must be below the critical level"
+
+#: backend/api/backups.py:183
 msgid "The backup service account is not a valid account name"
 msgstr "The backup service account is not a valid account name"
 
-#: backend/api/backups.py:173
+#: backend/api/backups.py:185
 msgid "Unknown seal mode"
 msgstr "Unknown seal mode"
 
-#: backend/api/backups.py:175
+#: backend/api/backups.py:187
 msgid "A ZFS snapshot seal needs the dataset name"
 msgstr "A ZFS snapshot seal needs the dataset name"
 
-#: backend/api/backups.py:177
+#: backend/api/backups.py:189
 msgid "The ZFS dataset name is not valid"
 msgstr "The ZFS dataset name is not valid"
 
-#: backend/api/backups.py:184
+#: backend/api/backups.py:196
 msgid "A storage host needs the storage path"
 msgstr "A storage host needs the storage path"
 
-#: backend/api/backups.py:201
+#: backend/api/backups.py:213
 msgid "A btrfs snapshot seal needs the snapshot directory"
 msgstr "A btrfs snapshot seal needs the snapshot directory"
 
-#: backend/api/backups.py:203
+#: backend/api/backups.py:215
 msgid "A btrfs snapshot seal needs the storage path"
 msgstr "A btrfs snapshot seal needs the storage path"
 
-#: backend/api/backups.py:206
+#: backend/api/backups.py:218
 msgid "Snapshot directory"
 msgstr "Snapshot directory"
 
-#: backend/api/backups.py:211
+#: backend/api/backups.py:223
 #, python-format
 msgid ""
 "%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no "
@@ -4034,35 +4050,35 @@ msgstr ""
 "%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no "
 "trailing '/')"
 
-#: backend/api/backups.py:219
+#: backend/api/backups.py:231
 msgid "The snapshot directory must be outside the storage path"
 msgstr "The snapshot directory must be outside the storage path"
 
-#: backend/api/backups.py:223
+#: backend/api/backups.py:235
 msgid "Interval (hours)"
 msgstr "Interval (hours)"
 
-#: backend/api/backups.py:224
+#: backend/api/backups.py:236
 msgid "Window start hour"
 msgstr "Window start hour"
 
-#: backend/api/backups.py:225
+#: backend/api/backups.py:237
 msgid "Snapshots to keep"
 msgstr "Snapshots to keep"
 
-#: backend/api/backups.py:226
+#: backend/api/backups.py:238
 msgid "Check interval (days)"
 msgstr "Check interval (days)"
 
-#: backend/api/backups.py:230
+#: backend/api/backups.py:242
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "Quiesce hooks must be up to 10 short lowercase names"
 
-#: backend/api/backups.py:243
+#: backend/api/backups.py:255
 msgid "At most 50 path rules can be set"
 msgstr "At most 50 path rules can be set"
 
-#: backend/api/backups.py:254
+#: backend/api/backups.py:266
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
@@ -4070,72 +4086,72 @@ msgstr ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
 
-#: backend/api/backups.py:262
+#: backend/api/backups.py:274
 msgid "The snapshot name is not valid"
 msgstr "The snapshot name is not valid"
 
-#: backend/api/backups.py:264
+#: backend/api/backups.py:276
 msgid "At most 50 paths can be restored at once"
 msgstr "At most 50 paths can be restored at once"
 
-#: backend/api/backups.py:267
+#: backend/api/backups.py:279
 msgid "A restore path is empty or too long"
 msgstr "A restore path is empty or too long"
 
-#: backend/api/backups.py:269
+#: backend/api/backups.py:281
 msgid "A restore path must not contain '..'"
 msgstr "A restore path must not contain '..'"
 
-#: backend/api/backups.py:288 backend/api/backups.py:291
+#: backend/api/backups.py:300 backend/api/backups.py:303
 msgid "Backup target not found"
 msgstr "Backup target not found"
 
-#: backend/api/backups.py:340
+#: backend/api/backups.py:355
 msgid "This edition supports one backup target; edit the existing one"
 msgstr "This edition supports one backup target; edit the existing one"
 
-#: backend/api/backups.py:417
+#: backend/api/backups.py:432
 msgid "Remove the hosts' backup policies before the target"
 msgstr "Remove the hosts' backup policies before the target"
 
-#: backend/api/backups.py:497
+#: backend/api/backups.py:512
 msgid "Set up the backup target first"
 msgstr "Set up the backup target first"
 
-#: backend/api/backups.py:538
+#: backend/api/backups.py:553
 msgid "No backup policy"
 msgstr "No backup policy"
 
-#: backend/api/backups.py:558
+#: backend/api/backups.py:573
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "This host cannot run backups yet (%s)"
 
-#: backend/api/backups.py:564
+#: backend/api/backups.py:579
 msgid "This host's backup is not configured yet"
 msgstr "This host's backup is not configured yet"
 
-#: backend/api/backups.py:581
+#: backend/api/backups.py:596
 msgid "The backup storage host is not ready"
 msgstr "The backup storage host is not ready"
 
-#: backend/api/backups.py:596
+#: backend/api/backups.py:611
 msgid "Unknown backup action"
 msgstr "Unknown backup action"
 
-#: backend/api/backups.py:601
+#: backend/api/backups.py:616
 msgid "That backup job is already queued or running"
 msgstr "That backup job is already queued or running"
 
-#: backend/api/backups.py:695
+#: backend/api/backups.py:710
 msgid "Snapshot not found"
 msgstr "Snapshot not found"
 
-#: backend/api/backups.py:699
+#: backend/api/backups.py:714
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "This snapshot is not signed; confirm to restore it anyway"
 
-#: backend/api/backups.py:799 backend/api/backups.py:802
+#: backend/api/backups.py:814 backend/api/backups.py:817
 msgid "Backup run not found"
 msgstr "Backup run not found"
 
@@ -5817,6 +5833,9 @@ msgstr "NetBSD pkgsrc package vulnerabilities (what pkg_admin audit reads)"
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "macOS vulnerabilities by OS version, from NVD's affected-version data"
+
+#~ msgid "Days to keep seals"
+#~ msgstr "Days to keep seals"
 
 #~ msgid "Choose either specific events or all open events, not both."
 #~ msgstr "Choose either specific events or all open events, not both."

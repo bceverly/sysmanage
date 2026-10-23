@@ -36,6 +36,7 @@ import {
     reasonLabel,
     statusColor,
     statusLabel,
+    unreadableOf,
 } from './backupLabels';
 
 const rank = (row: BackupHost) => BACKUP_STATUS_ORDER.indexOf(row.status);
@@ -68,6 +69,21 @@ const Progress: React.FC<{ row: BackupHost }> = ({ row }) => {
     );
 };
 
+// Files the last backup skipped because it could not read them; the first
+// ones in the tooltip, so "Incomplete" says what is missing.
+const Unreadable: React.FC<{ row: BackupHost }> = ({ row }) => {
+    const { t } = useTranslation();
+    const skipped = unreadableOf(row.last_good_capture);
+    if (!skipped) return null;
+    return (
+        <Tooltip title={skipped.first.join('\n')} placement="bottom-start">
+            <Typography variant="caption" display="block" color="warning.main" sx={{ whiteSpace: 'pre-line' }}>
+                {t('backups.hosts.unreadable', 'Files not read: {{n}}', { n: skipped.count })}
+            </Typography>
+        </Tooltip>
+    );
+};
+
 const StatusCell: React.FC<{ row: BackupHost }> = ({ row }) => {
     const { t } = useTranslation();
     return (
@@ -79,6 +95,7 @@ const StatusCell: React.FC<{ row: BackupHost }> = ({ row }) => {
                 </Typography>
             )}
             <Progress row={row} />
+            <Unreadable row={row} />
             {row.capture_requested && !row.running && (
                 <Typography variant="caption" display="block" color="text.secondary">
                     {t('backups.hosts.waiting', 'Waiting for a free slot')}

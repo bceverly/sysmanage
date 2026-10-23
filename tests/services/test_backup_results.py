@@ -143,6 +143,7 @@ def test_the_host_never_gets_prune_and_storage_gets_seal(session):
     assert storage_jobs["jobs"]["seal"] == {
         "mode": "zfs_snapshot",
         "dataset": "tank/backups",
+        "keep_days": 14,
     }
     assert storage_jobs["jobs"]["prune"] == {"keep_last": 14}
     assert host_jobs["target"]["repo_dir"] == storage_jobs["target"]["repo_dir"]
@@ -645,3 +646,16 @@ def test_a_storage_host_without_protect_is_not_asked_to(session, sent):
         "result": {"installed": ["check", "prune"]},
     })  # fmt: skip
     assert "protect" not in [p.get("action") for _h, _c, p in sent]
+
+
+def test_the_seal_job_carries_how_long_seals_are_kept(session, sent):
+    s = _setup(session, seal_mode="zfs_snapshot")
+    assert jobs.seal_job(s.target)["keep_days"] == jobs.DEFAULT_SEAL_KEEP_DAYS
+    s.target.seal_keep_days = 30
+    assert jobs.seal_job(s.target) == {
+        "mode": "zfs_snapshot",
+        "dataset": "tank/backups",
+        "keep_days": 30,
+    }
+    s.target.seal_mode = "none"
+    assert jobs.seal_job(s.target) == {"mode": "none"}

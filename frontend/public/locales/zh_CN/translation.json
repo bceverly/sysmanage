@@ -5323,7 +5323,9 @@
       "snapshots": "快照：{{n}}",
       "starting": "正在启动...",
       "status": "状态",
-      "waiting": "等待空闲名额"
+      "waiting": "等待空闲名额",
+      "unreadable": "未读取的文件：{{n}}",
+      "showAll": "显示所有主机"
     },
     "loadError": "无法加载备份。",
     "policy": {
@@ -5397,7 +5399,9 @@
       "clear": "清除列表",
       "clearTitle": "清除作业列表？",
       "clearBody": "已完成的作业会从此列表中移除；排队中和运行中的作业会保留。审计日志中的内容不会被删除，上方的备份状态也不受影响。",
-      "clearError": "无法清除作业列表。"
+      "clearError": "无法清除作业列表。",
+      "paused": "已暂停 {{service}} {{seconds}} 秒",
+      "pauseFailed": "无法暂停或恢复 {{service}}：{{message}}"
     },
     "status": {
       "disabled": "已禁用",
@@ -5431,13 +5435,15 @@
       "storagePath": "存储主机上的路径",
       "storagePathHelp": "存储主机在此清理、检查和封存；被备份的主机从不清理。",
       "zfsDataset": "ZFS 数据集",
-      "zfsRetention": "目前需由您自行删除旧的 ZFS 快照；请在存储主机上设置保留策略。",
       "btrfsHelp": "存储库必须位于 btrfs 子卷上；快照存放在同一文件系统上、该子卷之外的目录中。",
-      "btrfsRetention": "目前需由您自行删除旧的 btrfs 快照；请在存储主机上设置保留策略。",
       "btrfsSnapshotDir": "存储主机上的快照目录",
       "sealBtrfs": "btrfs 快照（只读）",
       "serviceAccount": "存储主机上的备份账户",
-      "serviceAccountHelp": "每台主机的导出都映射到此账户及其组。默认：restate。"
+      "serviceAccountHelp": "每台主机的导出都映射到此账户及其组。默认：restate。",
+      "sealKeepDays": "封存快照保留天数",
+      "sealKeepHelp": "存储主机会自行删除较旧的封存快照；最新的快照始终保留。",
+      "spaceLow": "存储使用率达到此值时警告 (%)",
+      "spaceCritical": "存储使用率达到此值时为严重 (%)"
     },
     "title": "备份",
     "warning": {

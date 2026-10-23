@@ -5323,7 +5323,9 @@
       "snapshots": "Snapshots: {{n}}",
       "starting": "Iniciando...",
       "status": "Status",
-      "waiting": "Aguardando uma vaga livre"
+      "waiting": "Aguardando uma vaga livre",
+      "unreadable": "Arquivos não lidos: {{n}}",
+      "showAll": "Mostrar todos os hosts"
     },
     "loadError": "Não foi possível carregar os backups.",
     "policy": {
@@ -5397,7 +5399,9 @@
       "clear": "Limpar a lista",
       "clearTitle": "Limpar a lista de tarefas?",
       "clearBody": "As tarefas concluídas saem desta lista; as que estão na fila ou em execução continuam. Nada é removido do log de auditoria, e o status de backup acima não é afetado.",
-      "clearError": "Não foi possível limpar a lista de tarefas."
+      "clearError": "Não foi possível limpar a lista de tarefas.",
+      "paused": "{{service}} pausado por {{seconds}} s",
+      "pauseFailed": "Não foi possível pausar ou retomar {{service}}: {{message}}"
     },
     "status": {
       "disabled": "Desativado",
@@ -5431,13 +5435,15 @@
       "storagePath": "Caminho no host de armazenamento",
       "storagePathHelp": "O host de armazenamento limpa, verifica e sela aqui; hosts com backup nunca fazem limpeza.",
       "zfsDataset": "Conjunto de dados ZFS",
-      "zfsRetention": "Por enquanto, remover snapshots ZFS antigos é com você; defina a retenção no host de armazenamento.",
       "btrfsHelp": "Os repositórios devem ficar em um subvolume btrfs; os snapshots vão para um diretório no mesmo sistema de arquivos, fora do subvolume.",
-      "btrfsRetention": "Por enquanto, remover snapshots btrfs antigos é com você; defina a retenção no host de armazenamento.",
       "btrfsSnapshotDir": "Diretório de snapshots no host de armazenamento",
       "sealBtrfs": "Snapshot btrfs (somente leitura)",
       "serviceAccount": "Conta de backup no host de armazenamento",
-      "serviceAccountHelp": "A exportação de cada host é mapeada para esta conta e seu grupo. Padrão: restate."
+      "serviceAccountHelp": "A exportação de cada host é mapeada para esta conta e seu grupo. Padrão: restate.",
+      "sealKeepDays": "Manter os snapshots selados por (dias)",
+      "sealKeepHelp": "O host de armazenamento remove sozinho os snapshots selados mais antigos; o mais recente é sempre mantido.",
+      "spaceLow": "Avisar quando o armazenamento estiver tão cheio (%)",
+      "spaceCritical": "Crítico quando o armazenamento estiver tão cheio (%)"
     },
     "title": "Backups",
     "warning": {

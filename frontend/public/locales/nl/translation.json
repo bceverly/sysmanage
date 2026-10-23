@@ -5323,7 +5323,9 @@
       "snapshots": "Snapshots: {{n}}",
       "starting": "Bezig met starten...",
       "status": "Status",
-      "waiting": "Wacht op een vrije plek"
+      "waiting": "Wacht op een vrije plek",
+      "unreadable": "Niet gelezen bestanden: {{n}}",
+      "showAll": "Alle hosts tonen"
     },
     "loadError": "De back-ups konden niet worden geladen.",
     "policy": {
@@ -5397,7 +5399,9 @@
       "clear": "Lijst leegmaken",
       "clearTitle": "De takenlijst wissen?",
       "clearBody": "Afgeronde taken verdwijnen uit deze lijst; taken in de wachtrij en lopende taken blijven. Er wordt niets uit het auditlogboek verwijderd en de back-upstatus hierboven verandert niet.",
-      "clearError": "De takenlijst kon niet worden gewist."
+      "clearError": "De takenlijst kon niet worden gewist.",
+      "paused": "{{service}} {{seconds}} s gepauzeerd",
+      "pauseFailed": "Kan {{service}} niet pauzeren of hervatten: {{message}}"
     },
     "status": {
       "disabled": "Uitgeschakeld",
@@ -5431,13 +5435,15 @@
       "storagePath": "Pad op de opslaghost",
       "storagePathHelp": "De opslaghost schoont hier op, controleert en verzegelt; geback-upte hosts schonen nooit op.",
       "zfsDataset": "ZFS-dataset",
-      "zfsRetention": "Oude ZFS-snapshots verwijderen is voorlopig aan u; stel de bewaartermijn in op de opslaghost.",
       "btrfsHelp": "De repository's moeten op een btrfs-subvolume staan; snapshots gaan naar een map op hetzelfde bestandssysteem, buiten het subvolume.",
-      "btrfsRetention": "Oude btrfs-snapshots verwijderen is voorlopig aan u; stel de bewaartermijn in op de opslaghost.",
       "btrfsSnapshotDir": "Snapshotmap op de opslaghost",
       "sealBtrfs": "btrfs-snapshot (alleen-lezen)",
       "serviceAccount": "Back-upaccount op de opslaghost",
-      "serviceAccountHelp": "De export van elke host wordt gekoppeld aan dit account en zijn groep. Standaard: restate."
+      "serviceAccountHelp": "De export van elke host wordt gekoppeld aan dit account en zijn groep. Standaard: restate.",
+      "sealKeepDays": "Verzegelde snapshots bewaren (dagen)",
+      "sealKeepHelp": "De opslaghost verwijdert oudere verzegelde snapshots zelf; de nieuwste wordt altijd bewaard.",
+      "spaceLow": "Waarschuwen als de opslag zo vol is (%)",
+      "spaceCritical": "Kritiek als de opslag zo vol is (%)"
     },
     "title": "Back-ups",
     "warning": {

@@ -80,6 +80,9 @@ def target_dict(target: models.BackupTarget, db: Session) -> Dict[str, Any]:
         "seal_mode": target.seal_mode or "none",
         "zfs_dataset": target.zfs_dataset,
         "btrfs_snapshot_dir": target.btrfs_snapshot_dir,
+        "seal_keep_days": jobs.seal_keep_days(target),
+        "space_low_percent": storage_health.space_thresholds(target)[0],
+        "space_critical_percent": storage_health.space_thresholds(target)[1],
         "storage_fs": {
             "type": target.storage_fs_type,
             "mount_point": target.storage_fs_mount,

@@ -5323,7 +5323,9 @@
       "snapshots": "Snapshots: {{n}}",
       "starting": "Starting...",
       "status": "Status",
-      "waiting": "Waiting for a free slot"
+      "waiting": "Waiting for a free slot",
+      "unreadable": "Files not read: {{n}}",
+      "showAll": "Show all hosts"
     },
     "loadError": "Could not load the backups.",
     "policy": {
@@ -5397,7 +5399,9 @@
       "clear": "Clear list",
       "clearTitle": "Clear the job list?",
       "clearBody": "Finished jobs leave this list; queued and running jobs stay. Nothing is removed from the audit log, and the backup status above is not affected.",
-      "clearError": "The job list could not be cleared."
+      "clearError": "The job list could not be cleared.",
+      "paused": "Paused {{service}} for {{seconds}} s",
+      "pauseFailed": "Could not pause or resume {{service}}: {{message}}"
     },
     "status": {
       "disabled": "Disabled",
@@ -5431,13 +5435,15 @@
       "storagePath": "Path on the storage host",
       "storagePathHelp": "The storage host prunes, checks and seals here; backed-up hosts never prune.",
       "zfsDataset": "ZFS dataset",
-      "zfsRetention": "Removing old ZFS snapshots is up to you for now; set retention on the storage host.",
       "btrfsHelp": "The repositories must sit on a btrfs subvolume; snapshots go to a directory on the same filesystem, outside the subvolume.",
-      "btrfsRetention": "Removing old btrfs snapshots is up to you for now; set retention on the storage host.",
       "btrfsSnapshotDir": "Snapshot directory on the storage host",
       "sealBtrfs": "btrfs snapshot (read-only)",
       "serviceAccount": "Backup account on the storage host",
-      "serviceAccountHelp": "Every host's export maps to this account and its group. Default: restate."
+      "serviceAccountHelp": "Every host's export maps to this account and its group. Default: restate.",
+      "sealKeepDays": "Keep sealed snapshots for (days)",
+      "sealKeepHelp": "The storage host removes older sealed snapshots itself; the newest is always kept.",
+      "spaceLow": "Warn when the storage is this full (%)",
+      "spaceCritical": "Critical when the storage is this full (%)"
     },
     "title": "Backups",
     "warning": {

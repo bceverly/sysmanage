@@ -219,15 +219,25 @@ def seal_job(target: models.BackupTarget) -> Dict[str, Any]:
     """The storage side's seal job: ``{"mode": "none"}``, a ZFS snapshot of
     the dataset, or a read-only btrfs snapshot of the storage path."""
     mode = target.seal_mode or "none"
+    keep = seal_keep_days(target)
     if mode == "zfs_snapshot":
-        return {"mode": mode, "dataset": target.zfs_dataset}
+        return {"mode": mode, "dataset": target.zfs_dataset, "keep_days": keep}
     if mode == "btrfs_snapshot":
         return {
             "mode": mode,
             "subvolume": target.storage_path,
             "snapshot_dir": target.btrfs_snapshot_dir,
+            "keep_days": keep,
         }
     return {"mode": "none"}
+
+
+DEFAULT_SEAL_KEEP_DAYS = 14
+
+
+def seal_keep_days(target: models.BackupTarget) -> int:
+    """How long the storage host keeps its seals (the newest always stays)."""
+    return getattr(target, "seal_keep_days", None) or DEFAULT_SEAL_KEEP_DAYS
 
 
 def _queue(  # pylint: disable=too-many-arguments,too-many-positional-arguments

@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Box, Chip, CircularProgress, Paper, Snackbar, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { BACKUP_STATUS_ORDER, getBackupOverview } from '../Services/backups';
-import type { BackupOverview } from '../Services/backups';
+import type { BackupOverview, BackupStatus } from '../Services/backups';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import BackupTargetCard from '../Components/Backups/BackupTargetCard';
 import BackupHostsTable from '../Components/Backups/BackupHostsTable';
@@ -26,6 +26,8 @@ const Backups: React.FC = () => {
     const [canManage, setCanManage] = useState(false);
     const [canRestore, setCanRestore] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
+    // A status chip filters the hosts table; clicking it again shows all.
+    const [shown, setShown] = useState<BackupStatus | null>(null);
 
     const load = useCallback(async () => {
         try {
@@ -71,15 +73,21 @@ const Backups: React.FC = () => {
                 canManage={canManage} onChanged={changed} />
             <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', rowGap: 1 }}>
                 {BACKUP_STATUS_ORDER.filter(s => data.counts[s]).map(s => (
-                    <Chip key={s} variant="outlined" color={statusColor(s)}
-                        label={`${statusLabel(t, s)}: ${data.counts[s]}`} />
+                    <Chip key={s} variant={shown === s ? 'filled' : 'outlined'} color={statusColor(s)}
+                        label={`${statusLabel(t, s)}: ${data.counts[s]}`}
+                        onClick={() => setShown(current => (current === s ? null : s))}
+                        aria-pressed={shown === s} />
                 ))}
+                {shown && (
+                    <Chip variant="outlined" label={t('backups.hosts.showAll', 'Show all hosts')}
+                        onClick={() => setShown(null)} />
+                )}
             </Stack>
             <Paper variant="outlined" sx={{ p: 2, mb: 3, overflowX: 'auto' }}>
                 {data.hosts.length === 0 ? (
                     <Alert severity="info">{t('backups.empty', 'There are no approved hosts yet.')}</Alert>
                 ) : (
-                    <BackupHostsTable rows={data.hosts} hasTarget={data.target !== null} canManage={canManage}
+                    <BackupHostsTable rows={shown ? data.hosts.filter(h => h.status === shown) : data.hosts} hasTarget={data.target !== null} canManage={canManage}
                         canRestore={canRestore} onChanged={changed} onError={setMessage} />
                 )}
             </Paper>

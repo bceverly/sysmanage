@@ -5323,7 +5323,9 @@
       "snapshots": "快照：{{n}}",
       "starting": "正在啟動...",
       "status": "狀態",
-      "waiting": "等待空閒名額"
+      "waiting": "等待空閒名額",
+      "unreadable": "未讀取的檔案：{{n}}",
+      "showAll": "顯示所有主機"
     },
     "loadError": "無法載入備份。",
     "policy": {
@@ -5397,7 +5399,9 @@
       "clear": "清除清單",
       "clearTitle": "清除作業清單？",
       "clearBody": "已完成的作業會從此清單中移除；排隊中和執行中的作業會保留。稽核記錄中的內容不會被刪除，上方的備份狀態也不受影響。",
-      "clearError": "無法清除作業清單。"
+      "clearError": "無法清除作業清單。",
+      "paused": "已暫停 {{service}} {{seconds}} 秒",
+      "pauseFailed": "無法暫停或繼續 {{service}}：{{message}}"
     },
     "status": {
       "disabled": "已停用",
@@ -5431,13 +5435,15 @@
       "storagePath": "儲存主機上的路徑",
       "storagePathHelp": "儲存主機在此清理、檢查和封存；被備份的主機從不清理。",
       "zfsDataset": "ZFS 資料集",
-      "zfsRetention": "目前需由您自行刪除舊的 ZFS 快照；請在儲存主機上設定保留原則。",
       "btrfsHelp": "儲存庫必須位於 btrfs 子磁碟區上；快照存放在同一檔案系統上、該子磁碟區之外的目錄中。",
-      "btrfsRetention": "目前需由您自行刪除舊的 btrfs 快照；請在儲存主機上設定保留原則。",
       "btrfsSnapshotDir": "儲存主機上的快照目錄",
       "sealBtrfs": "btrfs 快照（唯讀）",
       "serviceAccount": "儲存主機上的備份帳戶",
-      "serviceAccountHelp": "每台主機的匯出都對應到此帳戶及其群組。預設：restate。"
+      "serviceAccountHelp": "每台主機的匯出都對應到此帳戶及其群組。預設：restate。",
+      "sealKeepDays": "封存快照保留天數",
+      "sealKeepHelp": "儲存主機會自行刪除較舊的封存快照；最新的快照一律保留。",
+      "spaceLow": "儲存使用率達到此值時警告 (%)",
+      "spaceCritical": "儲存使用率達到此值時為嚴重 (%)"
     },
     "title": "備份",
     "warning": {

@@ -83,6 +83,11 @@ class TargetBody(BaseModel):
     btrfs_snapshot_dir: Optional[str] = Field(default=None, max_length=1024)
     # The storage host's backup account every host's export maps to.
     service_account: Optional[str] = Field(default=None, max_length=32)
+    # Days the storage host keeps its seals; None = the default (14).
+    seal_keep_days: Optional[int] = None
+    # Percent used at which the target warns, and warns critically.
+    space_low_percent: Optional[int] = None
+    space_critical_percent: Optional[int] = None
 
 
 class PolicyBody(BaseModel):
@@ -167,6 +172,13 @@ def _validate_target(db: Session, body: TargetBody) -> Optional[uuid.UUID]:
     _absolute_path(body.host_mount_point, _("Host mount point"))
     _absolute_path(body.storage_path, _("Storage path"))
     _in_range(body.max_concurrent, 1, 50, _("Concurrent backups"))
+    _in_range(body.seal_keep_days, 1, 3650, _("Days to keep sealed snapshots"))
+    _in_range(body.space_low_percent, 50, 99, _("Storage space warning"))
+    _in_range(body.space_critical_percent, 51, 100, _("Storage space critical"))
+    low = body.space_low_percent or 85
+    critical = body.space_critical_percent or 95
+    if low >= critical:
+        raise _bad(_("The storage space warning must be below the critical level"))
     if body.service_account and not _ACCOUNT_NAME.match(body.service_account):
         raise _bad(_("The backup service account is not a valid account name"))
     if body.seal_mode not in jobs.SEAL_MODES:
@@ -302,6 +314,9 @@ def _apply_target(target: models.BackupTarget, body: TargetBody, storage_id) -> 
     target.zfs_dataset = body.zfs_dataset or None
     target.btrfs_snapshot_dir = body.btrfs_snapshot_dir or None
     target.service_account = body.service_account or None
+    target.seal_keep_days = body.seal_keep_days
+    target.space_low_percent = body.space_low_percent
+    target.space_critical_percent = body.space_critical_percent
     target.updated_at = jobs.now()
 
 

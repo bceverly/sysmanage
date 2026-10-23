@@ -5323,7 +5323,9 @@
       "snapshots": "Instantanés : {{n}}",
       "starting": "Démarrage...",
       "status": "État",
-      "waiting": "En attente d'une place libre"
+      "waiting": "En attente d'une place libre",
+      "unreadable": "Fichiers non lus : {{n}}",
+      "showAll": "Afficher tous les hôtes"
     },
     "loadError": "Impossible de charger les sauvegardes.",
     "policy": {
@@ -5397,7 +5399,9 @@
       "clear": "Effacer la liste",
       "clearTitle": "Effacer la liste des tâches ?",
       "clearBody": "Les tâches terminées quittent cette liste ; celles en attente ou en cours restent. Rien n'est supprimé du journal d'audit, et l'état des sauvegardes ci-dessus ne change pas.",
-      "clearError": "La liste des tâches n'a pas pu être effacée."
+      "clearError": "La liste des tâches n'a pas pu être effacée.",
+      "paused": "{{service}} mis en pause pendant {{seconds}} s",
+      "pauseFailed": "Impossible de mettre en pause ou de reprendre {{service}} : {{message}}"
     },
     "status": {
       "disabled": "Désactivé",
@@ -5431,13 +5435,15 @@
       "storagePath": "Chemin sur l'hôte de stockage",
       "storagePathHelp": "L'hôte de stockage élague, vérifie et scelle ici ; les hôtes sauvegardés n'élaguent jamais.",
       "zfsDataset": "Jeu de données ZFS",
-      "zfsRetention": "Pour l'instant, la suppression des anciens instantanés ZFS vous incombe ; définissez la rétention sur l'hôte de stockage.",
       "btrfsHelp": "Les dépôts doivent se trouver sur un sous-volume btrfs ; les instantanés vont dans un répertoire du même système de fichiers, en dehors du sous-volume.",
-      "btrfsRetention": "Pour l'instant, la suppression des anciens instantanés btrfs vous incombe ; définissez la rétention sur l'hôte de stockage.",
       "btrfsSnapshotDir": "Répertoire des instantanés sur l'hôte de stockage",
       "sealBtrfs": "Instantané btrfs (lecture seule)",
       "serviceAccount": "Compte de sauvegarde sur l'hôte de stockage",
-      "serviceAccountHelp": "L'export de chaque hôte est associé à ce compte et à son groupe. Par défaut : restate."
+      "serviceAccountHelp": "L'export de chaque hôte est associé à ce compte et à son groupe. Par défaut : restate.",
+      "sealKeepDays": "Conserver les instantanés scellés (jours)",
+      "sealKeepHelp": "L'hôte de stockage supprime lui-même les instantanés scellés plus anciens ; le plus récent est toujours conservé.",
+      "spaceLow": "Avertir quand le stockage est rempli à ce point (%)",
+      "spaceCritical": "Critique quand le stockage est rempli à ce point (%)"
     },
     "title": "Sauvegardes",
     "warning": {

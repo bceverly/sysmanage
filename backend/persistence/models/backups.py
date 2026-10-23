@@ -67,6 +67,11 @@ class BackupTarget(Base):
     btrfs_snapshot_dir = Column(String(1024), nullable=True)
     # The storage host's backup account exports map hosts to (None = restate).
     service_account = Column(String(32), nullable=True)
+    # Days the storage host keeps its seal snapshots (q60); NULL = 14.
+    seal_keep_days = Column(Integer, nullable=True)
+    # When the storage path counts as filling up (q60); NULL = 85 / 95.
+    space_low_percent = Column(Integer, nullable=True)
+    space_critical_percent = Column(Integer, nullable=True)
     storage_fs_type = Column(String(64), nullable=True)
     storage_fs_mount = Column(String(1024), nullable=True)
     storage_fs_checked_at = Column(DateTime, nullable=True)

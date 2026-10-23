@@ -141,3 +141,39 @@ export const apiDetail = (error: unknown, fallback: string): string => {
     const detail = (error as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
     return typeof detail === 'string' && detail ? detail : fallback;
 };
+
+/** What the newest capture that made a snapshot could not read (restate's
+ *  result: a count and the first paths, each with why), or null. */
+type UnreadablePath = string | { path?: string; reason?: string };
+export const unreadableOf = (run: BackupRun | null): { count: number; first: string[] } | null => {
+    const unreadable = (run?.result as { unreadable?: { count?: number; first?: UnreadablePath[] } } | null)?.unreadable;
+    const count = unreadable?.count ?? 0;
+    if (count <= 0) return null;
+    const first = (unreadable?.first ?? []).map(entry =>
+        typeof entry === 'string' ? entry : [entry.path, entry.reason].filter(Boolean).join(': '));
+    return { count, first };
+};
+
+/** Each service restate paused for a capture: kind and name, how long it was
+ *  paused, and how it ended (restate's result ``quiesce`` list). */
+export interface PausedService {
+    service: string;
+    seconds: number | null;
+    ok: boolean;
+    message: string;
+}
+
+export const pausedServicesOf = (run: BackupRun): PausedService[] => {
+    const entries = (run.result as { quiesce?: Array<Record<string, string>> } | null)?.quiesce;
+    if (!Array.isArray(entries)) return [];
+    return entries.map(entry => {
+        const paused = Date.parse(entry.paused_at ?? '');
+        const resumed = Date.parse(entry.resumed_at ?? '');
+        return {
+            service: [entry.kind, entry.name].filter(Boolean).join(' '),
+            seconds: Number.isFinite(paused) && Number.isFinite(resumed) ? Math.round((resumed - paused) / 1000) : null,
+            ok: entry.status === 'ok',
+            message: entry.message ?? '',
+        };
+    });
+};

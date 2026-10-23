@@ -5323,7 +5323,9 @@
       "snapshots": "Instantáneas: {{n}}",
       "starting": "Iniciando...",
       "status": "Estado",
-      "waiting": "En espera de un hueco libre"
+      "waiting": "En espera de un hueco libre",
+      "unreadable": "Archivos no leídos: {{n}}",
+      "showAll": "Mostrar todos los hosts"
     },
     "loadError": "No se pudieron cargar las copias de seguridad.",
     "policy": {
@@ -5397,7 +5399,9 @@
       "clear": "Borrar la lista",
       "clearTitle": "¿Borrar la lista de tareas?",
       "clearBody": "Las tareas terminadas salen de esta lista; las que están en cola o en ejecución se quedan. No se elimina nada del registro de auditoría y el estado de las copias de seguridad de arriba no cambia.",
-      "clearError": "No se pudo borrar la lista de tareas."
+      "clearError": "No se pudo borrar la lista de tareas.",
+      "paused": "{{service}} pausado durante {{seconds}} s",
+      "pauseFailed": "No se pudo pausar o reanudar {{service}}: {{message}}"
     },
     "status": {
       "disabled": "Desactivado",
@@ -5431,13 +5435,15 @@
       "storagePath": "Ruta en el host de almacenamiento",
       "storagePathHelp": "Aquí el host de almacenamiento depura, comprueba y sella; los hosts respaldados nunca depuran.",
       "zfsDataset": "Conjunto de datos ZFS",
-      "zfsRetention": "Por ahora, eliminar las instantáneas antiguas de ZFS le corresponde a usted; configure la retención en el host de almacenamiento.",
       "btrfsHelp": "Los repositorios deben estar en un subvolumen de btrfs; las instantáneas van a un directorio del mismo sistema de archivos, fuera del subvolumen.",
-      "btrfsRetention": "Por ahora, eliminar las instantáneas antiguas de btrfs le corresponde a usted; configure la retención en el host de almacenamiento.",
       "btrfsSnapshotDir": "Directorio de instantáneas en el host de almacenamiento",
       "sealBtrfs": "Instantánea de btrfs (solo lectura)",
       "serviceAccount": "Cuenta de copias de seguridad en el host de almacenamiento",
-      "serviceAccountHelp": "La exportación de cada host se asigna a esta cuenta y a su grupo. Predeterminado: restate."
+      "serviceAccountHelp": "La exportación de cada host se asigna a esta cuenta y a su grupo. Predeterminado: restate.",
+      "sealKeepDays": "Conservar las instantáneas selladas (días)",
+      "sealKeepHelp": "El host de almacenamiento elimina por sí mismo las instantáneas selladas más antiguas; la más reciente siempre se conserva.",
+      "spaceLow": "Avisar cuando el almacenamiento esté así de lleno (%)",
+      "spaceCritical": "Crítico cuando el almacenamiento esté así de lleno (%)"
     },
     "title": "Copias de seguridad",
     "warning": {

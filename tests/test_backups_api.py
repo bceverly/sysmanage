@@ -106,12 +106,17 @@ async def test_a_btrfs_target_is_accepted_and_sends_its_seal(session):
         "mode": "btrfs_snapshot",
         "subvolume": "/srv/backups/restate",
         "snapshot_dir": "/srv/backups/.snapshots",
+        "keep_days": 14,
     }
 
 
 def test_the_seal_job_for_each_mode():
     zfs = SimpleNamespace(seal_mode="zfs_snapshot", zfs_dataset="tank/b")
-    assert jobs.seal_job(zfs) == {"mode": "zfs_snapshot", "dataset": "tank/b"}
+    assert jobs.seal_job(zfs) == {
+        "mode": "zfs_snapshot",
+        "dataset": "tank/b",
+        "keep_days": jobs.DEFAULT_SEAL_KEEP_DAYS,
+    }
     assert jobs.seal_job(SimpleNamespace(seal_mode=None)) == {"mode": "none"}
 
 
@@ -564,3 +569,28 @@ async def test_prepare_storage_goes_to_the_storage_host(session, sent):
         )
         == 409
     )  # already queued
+
+
+@pytest.mark.asyncio
+async def test_seal_keep_days_is_validated_and_kept(session):
+    good = await api.create_target(_target_body(seal_keep_days=30), session, MANAGER)
+    assert good["seal_keep_days"] == 30
+    for bad in (0, 3651):
+        assert await _status(
+            api.update_target(good["id"], _target_body(seal_keep_days=bad), session, MANAGER)
+        ) == 422  # fmt: skip
+    cleared = await api.update_target(good["id"], _target_body(), session, MANAGER)
+    assert cleared["seal_keep_days"] == 14  # the default
+
+
+@pytest.mark.asyncio
+async def test_space_thresholds_are_validated_and_kept(session):
+    made = await api.create_target(
+        _target_body(space_low_percent=80, space_critical_percent=90), session, MANAGER
+    )
+    assert (made["space_low_percent"], made["space_critical_percent"]) == (80, 90)
+    for low, critical in ((95, 90), (40, 90), (80, 101)):
+        assert await _status(api.update_target(
+            made["id"], _target_body(space_low_percent=low, space_critical_percent=critical),
+            session, MANAGER,
+        )) in (400, 422)  # fmt: skip

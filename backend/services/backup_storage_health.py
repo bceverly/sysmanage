@@ -86,10 +86,20 @@ def storage_health(
     """The storage host's drives and the space under the storage path."""
     if storage is None:
         return None
+    low, critical = space_thresholds(target)
     return {
         "drives": _drives(db, storage.id),
         "space": _space(db, storage.id, target.storage_path),
+        "space_low_percent": low,
+        "space_critical_percent": critical,
     }
+
+
+def space_thresholds(target: models.BackupTarget) -> tuple:
+    """``(low, critical)`` percent used: the target's own, else 85 / 95."""
+    low = getattr(target, "space_low_percent", None) or SPACE_LOW_PERCENT
+    critical = getattr(target, "space_critical_percent", None) or SPACE_CRITICAL_PERCENT
+    return low, critical
 
 
 def health_warnings(health: Optional[Dict[str, Any]]) -> List[str]:
@@ -101,11 +111,13 @@ def health_warnings(health: Optional[Dict[str, Any]]) -> List[str]:
     if drives["failed"]:
         found.append("storage_drive_failed")
     space = health["space"]
-    if space and space["used_percent"] >= SPACE_CRITICAL_PERCENT:
+    low = health.get("space_low_percent", SPACE_LOW_PERCENT)
+    critical = health.get("space_critical_percent", SPACE_CRITICAL_PERCENT)
+    if space and space["used_percent"] >= critical:
         found.append("storage_space_critical")
     if drives["warning"]:
         found.append("storage_drive_warning")
-    if space and SPACE_LOW_PERCENT <= space["used_percent"] < SPACE_CRITICAL_PERCENT:
+    if space and low <= space["used_percent"] < critical:
         found.append("storage_space_low")
     return found
 
