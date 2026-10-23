@@ -290,12 +290,13 @@ def queue_configure(
     )
 
 
-def queue_run(
+def queue_run(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     db: Session,
     policy: models.BackupPolicy,
     run_host_id: Any,
     action: str,
     actor: str = SYSTEM_ACTOR,
+    record: Optional[Dict[str, Any]] = None,
 ) -> models.BackupRun:
     """Run one configured job: a host action on the host, a storage action on
     the storage host.  The caller picks the right host."""
@@ -303,9 +304,8 @@ def queue_run(
         raise ValueError(f"unknown backup action {action!r}")
     # A prepare remembers the address its export was made for, so a later
     # address change can re-prepare it (backup_results).
-    record = (
-        {"client_address": policy.storage_client_address} if action == PREPARE else None
-    )
+    if action == PREPARE:
+        record = dict(record or {}, client_address=policy.storage_client_address)
     return _queue(
         db,
         policy,

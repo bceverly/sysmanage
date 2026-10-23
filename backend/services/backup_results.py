@@ -143,6 +143,16 @@ def _store_protects(policy: Optional[models.BackupPolicy], installed: Any) -> No
         policy.storage_protects = "protect" in installed
 
 
+def _reprotect(db: Session, run: models.BackupRun) -> None:
+    """New job files on the storage host -- a restate upgrade among the
+    reasons -- may change HOW protect protects (2.1.0.2 moved ZFS on FreeBSD
+    from the sticky bit to an NFSv4 ACL), and a capture cannot run against
+    the old form.  Protect once now, outside the capture chain."""
+    policy = _policy(db, run)
+    if policy is not None and policy.storage_protects:
+        _storage_next(db, policy, "protect", record={"chain": False})
+
+
 def _reprepare(db: Session, run: models.BackupRun) -> None:
     """The storage side now knows a new address for this host: a repository
     that was prepared for the old one is prepared again, so its export
@@ -220,6 +230,7 @@ def record_command_result(db: Session, message_data: Dict[str, Any]) -> bool:
                 _store_audit(_policy(db, run), reply.get("storage_audit"))
                 _store_nfs_path(_policy(db, run), reply.get("nfs_path"))
                 _store_protects(_policy(db, run), reply.get("installed"))
+            _reprotect(db, run)
             _reprepare(db, run)
     else:
         run.status = jobs.RUNNING
@@ -324,7 +335,10 @@ def _upsert_snapshot(
 
 
 def _storage_next(
-    db: Session, policy: models.BackupPolicy, action: str
+    db: Session,
+    policy: models.BackupPolicy,
+    action: str,
+    record: Optional[Dict[str, Any]] = None,
 ) -> Optional[models.BackupRun]:
     """Queue ``action`` on the target's storage host, when it can run it."""
     target = (
@@ -355,7 +369,7 @@ def _storage_next(
         return None
     if jobs.pending(db, policy.id, action, storage.id):
         return None
-    return jobs.queue_run(db, policy, storage.id, action)
+    return jobs.queue_run(db, policy, storage.id, action, record=record)
 
 
 def _note_version(
@@ -442,6 +456,8 @@ def _after_protect(db: Session, run: models.BackupRun, policy, _result) -> None:
             run.status,
             run.message,
         )
+    if _parameters(run).get("chain") is False:
+        return  # a re-protect after new job files: no capture to follow up
     _seal_or_prune(db, policy)
 
 

@@ -619,3 +619,29 @@ def test_the_host_reports_its_present_quiesce_hooks(session, sent):
     })  # fmt: skip
     assert json.loads(s.policy.available_hooks) == ["docker", "lxd"]
     assert views.policy_dict(s.policy)["available_hooks"] == ["docker", "lxd"]
+
+
+def test_new_storage_job_files_re_protect_without_sealing(session, sent):
+    # restate 2.1.0.2 changed how protect protects on ZFS/FreeBSD; a capture
+    # cannot run against the old form, so protect once on new job files.
+    s = _setup(session, seal_mode="zfs_snapshot")
+    run = jobs.queue_configure(session, s.policy, s.target, s.host, "storage")
+    results.record_command_result(session, {
+        "command_id": run.command_id, "success": True,
+        "result": {"installed": ["check", "prune", "protect"]},
+    })  # fmt: skip
+    assert [p.get("action") for _h, _c, p in sent][-1] == "protect"
+    protect = session.query(models.BackupRun).filter_by(action="protect").one()
+    sent.clear()
+    results.record_result(session, s.nas.id, _result(protect, "ok"))
+    assert sent == []  # no seal, no prune: nothing was captured
+
+
+def test_a_storage_host_without_protect_is_not_asked_to(session, sent):
+    s = _setup(session)
+    run = jobs.queue_configure(session, s.policy, s.target, s.host, "storage")
+    results.record_command_result(session, {
+        "command_id": run.command_id, "success": True,
+        "result": {"installed": ["check", "prune"]},
+    })  # fmt: skip
+    assert "protect" not in [p.get("action") for _h, _c, p in sent]
