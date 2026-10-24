@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-23 17:06-0400\n"
+"POT-Creation-Date: 2026-10-23 20:49-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -81,7 +81,7 @@ msgstr "您沒有權限訪問所選的帳戶"
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:132
+#: backend/api/posture.py:375 backend/api/backups.py:134
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:151
@@ -196,8 +196,8 @@ msgstr "主機ID格式無效"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:144
-#: backend/api/backups.py:147 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:146
+#: backend/api/backups.py:149 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -3844,183 +3844,187 @@ msgstr "KVM 網路僅在 Linux 主機上可用"
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "已請求 KVM 網路清單。結果將很快顯示。"
 
-#: backend/api/backups.py:163
+#: backend/api/backups.py:165
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s 必須是不含 '..' 的絕對路徑"
 
-#: backend/api/backups.py:168
+#: backend/api/backups.py:170
 #, python-format
 msgid "%s is out of range"
 msgstr "%s 超出允許範圍"
 
-#: backend/api/backups.py:172
+#: backend/api/backups.py:174
 msgid "Host mount point"
 msgstr "主機掛載點"
 
-#: backend/api/backups.py:173 backend/api/backups.py:217
+#: backend/api/backups.py:175 backend/api/backups.py:220
 msgid "Storage path"
 msgstr "儲存路徑"
 
-#: backend/api/backups.py:174
+#: backend/api/backups.py:176
 msgid "Concurrent backups"
 msgstr "同時進行的備份數"
 
-#: backend/api/backups.py:175
+#: backend/api/backups.py:177
 msgid "Days to keep sealed snapshots"
 msgstr "封存快照保留天數"
 
-#: backend/api/backups.py:176
+#: backend/api/backups.py:178
+msgid "Write cache budget"
+msgstr "寫入快取預算"
+
+#: backend/api/backups.py:179
 msgid "Storage space warning"
 msgstr "儲存空間警告"
 
-#: backend/api/backups.py:177
+#: backend/api/backups.py:180
 msgid "Storage space critical"
 msgstr "儲存空間嚴重"
 
-#: backend/api/backups.py:181
+#: backend/api/backups.py:184
 msgid "The storage space warning must be below the critical level"
 msgstr "儲存空間警告必須低於嚴重等級"
 
-#: backend/api/backups.py:183
+#: backend/api/backups.py:186
 msgid "The backup service account is not a valid account name"
 msgstr "備份服務帳戶不是有效的帳戶名稱"
 
-#: backend/api/backups.py:185
+#: backend/api/backups.py:188
 msgid "Unknown seal mode"
 msgstr "未知的封存模式"
 
-#: backend/api/backups.py:187
+#: backend/api/backups.py:190
 msgid "A ZFS snapshot seal needs the dataset name"
 msgstr "使用 ZFS 快照封存需要資料集名稱"
 
-#: backend/api/backups.py:189
+#: backend/api/backups.py:192
 msgid "The ZFS dataset name is not valid"
 msgstr "ZFS 資料集名稱無效"
 
-#: backend/api/backups.py:196
+#: backend/api/backups.py:199
 msgid "A storage host needs the storage path"
 msgstr "儲存主機需要儲存路徑"
 
-#: backend/api/backups.py:213
+#: backend/api/backups.py:216
 msgid "A btrfs snapshot seal needs the snapshot directory"
 msgstr "btrfs 快照封存需要快照目錄"
 
-#: backend/api/backups.py:215
+#: backend/api/backups.py:218
 msgid "A btrfs snapshot seal needs the storage path"
 msgstr "btrfs 快照封存需要儲存路徑"
 
-#: backend/api/backups.py:218
+#: backend/api/backups.py:221
 msgid "Snapshot directory"
 msgstr "快照目錄"
 
-#: backend/api/backups.py:223
+#: backend/api/backups.py:226
 #, python-format
 msgid ""
 "%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
 " trailing '/')"
 msgstr "%s 必須是簡單的絕對路徑（僅限字母、數字、'_'、'.'、'-' 和 '/'；結尾不能有 '/'）"
 
-#: backend/api/backups.py:231
+#: backend/api/backups.py:234
 msgid "The snapshot directory must be outside the storage path"
 msgstr "快照目錄必須位於儲存路徑之外"
 
-#: backend/api/backups.py:235
+#: backend/api/backups.py:238
 msgid "Interval (hours)"
 msgstr "間隔（小時）"
 
-#: backend/api/backups.py:236
+#: backend/api/backups.py:239
 msgid "Window start hour"
 msgstr "時間窗開始小時"
 
-#: backend/api/backups.py:237
+#: backend/api/backups.py:240
 msgid "Snapshots to keep"
 msgstr "保留的快照數"
 
-#: backend/api/backups.py:238
+#: backend/api/backups.py:241
 msgid "Check interval (days)"
 msgstr "檢查間隔（天）"
 
-#: backend/api/backups.py:242
+#: backend/api/backups.py:245
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "暫停掛鉤最多 10 個，且須為簡短的小寫名稱"
 
-#: backend/api/backups.py:255
+#: backend/api/backups.py:258
 msgid "At most 50 path rules can be set"
 msgstr "最多可以設定 50 個路徑規則"
 
-#: backend/api/backups.py:266
+#: backend/api/backups.py:269
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
 msgstr "每個路徑規則是一行，長度最多為 512 字元，且不能有開頭或結尾的空白字元或開頭的 #"
 
-#: backend/api/backups.py:274
+#: backend/api/backups.py:277 backend/api/backups_browse.py:85
 msgid "The snapshot name is not valid"
 msgstr "快照名稱無效"
 
-#: backend/api/backups.py:276
+#: backend/api/backups.py:279
 msgid "At most 50 paths can be restored at once"
 msgstr "一次最多只能還原 50 個路徑"
 
-#: backend/api/backups.py:279
+#: backend/api/backups.py:282
 msgid "A restore path is empty or too long"
 msgstr "某個還原路徑為空或過長"
 
-#: backend/api/backups.py:281
+#: backend/api/backups.py:284
 msgid "A restore path must not contain '..'"
 msgstr "還原路徑不得包含 '..'"
 
-#: backend/api/backups.py:300 backend/api/backups.py:303
+#: backend/api/backups.py:303 backend/api/backups.py:306
 msgid "Backup target not found"
 msgstr "找不到備份目標"
 
-#: backend/api/backups.py:355
+#: backend/api/backups.py:359
 msgid "This edition supports one backup target; edit the existing one"
 msgstr "此版本僅支援一個備份目標；請編輯現有目標"
 
-#: backend/api/backups.py:432
+#: backend/api/backups.py:436
 msgid "Remove the hosts' backup policies before the target"
 msgstr "請先移除各主機的備份原則，再移除目標"
 
-#: backend/api/backups.py:512
+#: backend/api/backups.py:516
 msgid "Set up the backup target first"
 msgstr "請先設定備份目標"
 
-#: backend/api/backups.py:553
+#: backend/api/backups.py:557
 msgid "No backup policy"
 msgstr "沒有備份原則"
 
-#: backend/api/backups.py:573
+#: backend/api/backups.py:577
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "此主機暫時無法執行備份（%s）"
 
-#: backend/api/backups.py:579
+#: backend/api/backups.py:583
 msgid "This host's backup is not configured yet"
 msgstr "此主機的備份尚未設定"
 
-#: backend/api/backups.py:596
+#: backend/api/backups.py:600
 msgid "The backup storage host is not ready"
 msgstr "備份儲存主機尚未就緒"
 
-#: backend/api/backups.py:611
+#: backend/api/backups.py:615
 msgid "Unknown backup action"
 msgstr "未知的備份操作"
 
-#: backend/api/backups.py:616
+#: backend/api/backups.py:620
 msgid "That backup job is already queued or running"
 msgstr "該備份工作已在佇列中或正在執行"
 
-#: backend/api/backups.py:710
+#: backend/api/backups.py:714 backend/api/backups_browse.py:70
 msgid "Snapshot not found"
 msgstr "找不到快照"
 
-#: backend/api/backups.py:714
+#: backend/api/backups.py:718
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "此快照未簽署；請確認以仍然還原它"
 
-#: backend/api/backups.py:814 backend/api/backups.py:817
+#: backend/api/backups.py:820 backend/api/backups.py:823
 msgid "Backup run not found"
 msgstr "找不到備份工作"
 
@@ -5107,6 +5111,18 @@ msgstr "無法取得商業防毒狀態：%s"
 #, python-format
 msgid "Machine link decided for host %s"
 msgstr "主機連結已決定為 %s"
+
+#: backend/api/backups_browse.py:55
+msgid "This host's restate cannot do this yet; upgrade restate"
+msgstr "此主機的 restate 尚不支援此操作；請升級 restate"
+
+#: backend/api/backups_browse.py:87
+msgid "The path must be absolute"
+msgstr "路徑必須是絕對路徑"
+
+#: backend/api/backups_browse.py:116
+msgid "A check of what changed is already running"
+msgstr "變更檢查已在執行"
 
 #: backend/websocket/message_router.py:265
 #, python-format

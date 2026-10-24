@@ -11,6 +11,10 @@ default, 14) is sent with the seal job, and after each seal the storage host
 removes its own seals older than that, never the newest.
 ``space_low_percent`` / ``space_critical_percent`` (NULL = 85 / 95) are when
 the target card warns that the storage path is filling up.
+``cache_budget_gb`` (NULL = 20) is when a host's restate write cache is
+flagged, and ``backup_policy.host_abilities`` (JSON) what the host's restate
+offers beyond the 2.0 contract: browse (``list``), what changed (``status``)
+and its write-cache size (``cache``).
 
 Also bumps every policy's ``config_version`` so storage hosts get the new
 seal job now.  Additive, idempotent in effect; safe on SQLite + PostgreSQL.
@@ -32,7 +36,12 @@ branch_labels: Union[str, None] = None
 depends_on: Union[str, None] = None
 
 
-_COLUMNS = ("seal_keep_days", "space_low_percent", "space_critical_percent")
+_COLUMNS = (
+    "seal_keep_days",
+    "space_low_percent",
+    "space_critical_percent",
+    "cache_budget_gb",
+)
 
 
 def upgrade() -> None:
@@ -45,6 +54,12 @@ def upgrade() -> None:
                 op.add_column(
                     "backup_target", sa.Column(name, sa.Integer(), nullable=True)
                 )
+    if "backup_policy" in tables and "host_abilities" not in {
+        c["name"] for c in insp.get_columns("backup_policy")
+    }:
+        op.add_column(
+            "backup_policy", sa.Column("host_abilities", sa.Text(), nullable=True)
+        )
     if "backup_policy" in tables:
         op.execute(
             sa.text("UPDATE backup_policy SET config_version = config_version + 1")
@@ -53,7 +68,13 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     insp = inspect(op.get_bind())
-    if "backup_target" not in set(insp.get_table_names()):
+    tables = set(insp.get_table_names())
+    if "backup_policy" in tables and "host_abilities" in {
+        c["name"] for c in insp.get_columns("backup_policy")
+    }:
+        with op.batch_alter_table("backup_policy") as batch:
+            batch.drop_column("host_abilities")
+    if "backup_target" not in tables:
         return
     present = {c["name"] for c in insp.get_columns("backup_target")}
     drop = [name for name in _COLUMNS if name in present]

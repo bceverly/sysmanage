@@ -5299,7 +5299,9 @@
       "lastAttempt": "Laatste poging",
       "noTarget": "Er is nog geen back-updoel ingesteld.",
       "open": "Alle back-ups",
-      "title": "Back-up"
+      "title": "Back-up",
+      "writeCache": "Schrijfcache op deze host: {{size}}",
+      "writeCacheOver": "boven het budget van {{budget}} GB"
     },
     "coverage": {
       "filesOnly": "Alleen bestanden",
@@ -5443,7 +5445,9 @@
       "sealKeepDays": "Verzegelde snapshots bewaren (dagen)",
       "sealKeepHelp": "De opslaghost verwijdert oudere verzegelde snapshots zelf; de nieuwste wordt altijd bewaard.",
       "spaceLow": "Waarschuwen als de opslag zo vol is (%)",
-      "spaceCritical": "Kritiek als de opslag zo vol is (%)"
+      "spaceCritical": "Kritiek als de opslag zo vol is (%)",
+      "cacheBudget": "Budget schrijfcache per host (GB)",
+      "cacheBudgetHelp": "restate houdt op elke host van een versleutelde repository een onversleutelde schrijfcache bij; een host die dit overschrijdt, wordt gemarkeerd."
     },
     "title": "Back-ups",
     "warning": {
@@ -5508,6 +5512,30 @@
       "title": "De opslag voor deze host voorbereiden?",
       "body": "De opslaghost geeft de repository van deze host een eigen ZFS-dataset of btrfs-subvolume, exporteert die via NFS alleen naar het adres van deze host waarbij elk bestand aan het back-upaccount wordt gekoppeld, en maakt die alleen-toevoegen. Bestaande back-ups worden nooit verplaatst: een repository die al bestanden op het gedeelde bestandssysteem bevat, wordt geweigerd, met de stappen om die te verplaatsen. Voer het opnieuw uit wanneer het adres van deze host verandert.",
       "error": "Het voorbereiden van de opslag kon niet worden gestart."
+    },
+    "browse": {
+      "error": "Deze map kon niet worden weergegeven.",
+      "loading": "Index van de snapshot wordt gelezen...",
+      "notText": "Deze naam is geen geldige tekst en kan hier dus niet worden gekozen.",
+      "added": "Toegevoegd",
+      "add": "Toevoegen",
+      "truncated": "Deze map bevat meer items dan kunnen worden getoond; typ een pad om de rest te bereiken.",
+      "hide": "Mappen van de snapshot verbergen",
+      "show": "Mappen van de snapshot doorbladeren"
+    },
+    "changes": {
+      "added": "Toegevoegd",
+      "deleted": "Verwijderd",
+      "modified": "Gewijzigd",
+      "error": "De controle kon niet worden gestart.",
+      "title": "Wat er op {{host}} is veranderd sinds de laatste back-up",
+      "running": "De host wordt vergeleken met zijn nieuwste snapshot...",
+      "counts": "Toegevoegd: {{added}}, verwijderd: {{deleted}}, gewijzigd: {{modified}}",
+      "change": "Wijziging",
+      "path": "Bestand of map",
+      "what": "Wat is veranderd",
+      "more": "Alleen de eerste wijzigingen worden getoond.",
+      "button": "Wat is veranderd"
     }
   }
 }

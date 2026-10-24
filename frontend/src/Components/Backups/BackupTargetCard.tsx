@@ -48,6 +48,7 @@ const EMPTY: TargetInput = {
     seal_keep_days: 14,
     space_low_percent: 85,
     space_critical_percent: 95,
+    cache_budget_gb: 20,
 };
 
 const toInput = (target: BackupTarget | null): TargetInput =>
@@ -65,6 +66,7 @@ const toInput = (target: BackupTarget | null): TargetInput =>
               seal_keep_days: target.seal_keep_days ?? 14,
               space_low_percent: target.space_low_percent ?? 85,
               space_critical_percent: target.space_critical_percent ?? 95,
+              cache_budget_gb: target.cache_budget_gb ?? 20,
           }
         : EMPTY;
 
@@ -161,6 +163,11 @@ export const TargetDialog: React.FC<{
                             value={form.space_critical_percent ?? ''} inputProps={{ min: 51, max: 100 }}
                             onChange={e => set({ space_critical_percent: e.target.value === '' ? null : Number(e.target.value) })} />
                     </Stack>
+                    <TextField type="number" label={t('backups.target.cacheBudget', 'Write cache budget per host (GB)')}
+                        value={form.cache_budget_gb ?? ''} inputProps={{ min: 1, max: 10000 }}
+                        onChange={e => set({ cache_budget_gb: e.target.value === '' ? null : Number(e.target.value) })}
+                        helperText={t('backups.target.cacheBudgetHelp',
+                            'restate keeps an unencrypted write cache on each host of an encrypted repository; a host over this is flagged.')} />
                     <TextField label={t('backups.target.serviceAccount', 'Backup account on the storage host')}
                         value={form.service_account ?? ''} placeholder="restate"
                         onChange={e => set({ service_account: e.target.value || null })}

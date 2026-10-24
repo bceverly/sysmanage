@@ -5299,7 +5299,9 @@
       "lastAttempt": "Ultimo tentativo",
       "noTarget": "Non è ancora stata configurata alcuna destinazione di backup.",
       "open": "Tutti i backup",
-      "title": "Backup"
+      "title": "Backup",
+      "writeCache": "Cache di scrittura su questo host: {{size}}",
+      "writeCacheOver": "oltre il limite di {{budget}} GB"
     },
     "coverage": {
       "filesOnly": "Solo file",
@@ -5443,7 +5445,9 @@
       "sealKeepDays": "Conserva gli snapshot sigillati per (giorni)",
       "sealKeepHelp": "L'host di archiviazione rimuove da solo gli snapshot sigillati più vecchi; il più recente viene sempre conservato.",
       "spaceLow": "Avvisa quando l'archiviazione è piena a questo livello (%)",
-      "spaceCritical": "Critico quando l'archiviazione è piena a questo livello (%)"
+      "spaceCritical": "Critico quando l'archiviazione è piena a questo livello (%)",
+      "cacheBudget": "Limite della cache di scrittura per host (GB)",
+      "cacheBudgetHelp": "restate mantiene una cache di scrittura non cifrata su ogni host di un repository cifrato; un host che supera questo valore viene segnalato."
     },
     "title": "Backup",
     "warning": {
@@ -5508,6 +5512,30 @@
       "title": "Preparare l'archiviazione per questo host?",
       "body": "L'host di archiviazione assegna al repository di questo host un proprio dataset ZFS o subvolume btrfs, lo esporta via NFS solo all'indirizzo di questo host associando ogni file all'account dei backup, e lo rende di sola aggiunta. Non sposta mai i backup esistenti: un repository che contiene già file sul file system condiviso viene rifiutato, con i passaggi per spostarlo. Eseguilo di nuovo quando cambia l'indirizzo di questo host.",
       "error": "Impossibile avviare la preparazione dell'archiviazione."
+    },
+    "browse": {
+      "error": "Impossibile elencare questa cartella.",
+      "loading": "Lettura dell'indice dello snapshot...",
+      "notText": "Questo nome non è un testo valido, quindi non può essere scelto qui.",
+      "added": "Aggiunto",
+      "add": "Aggiungi",
+      "truncated": "Questa cartella ha più voci di quante se ne possano mostrare; digita un percorso per raggiungere le altre.",
+      "hide": "Nascondi le cartelle dello snapshot",
+      "show": "Sfoglia le cartelle dello snapshot"
+    },
+    "changes": {
+      "added": "Aggiunto",
+      "deleted": "Eliminato",
+      "modified": "Modificato",
+      "error": "Impossibile avviare il controllo.",
+      "title": "Cosa è cambiato su {{host}} dall'ultimo backup",
+      "running": "Confronto dell'host con il suo snapshot più recente...",
+      "counts": "Aggiunti: {{added}}, eliminati: {{deleted}}, modificati: {{modified}}",
+      "change": "Modifica",
+      "path": "File o cartella",
+      "what": "Cosa è cambiato",
+      "more": "Vengono mostrate solo le prime modifiche.",
+      "button": "Cosa è cambiato"
     }
   }
 }

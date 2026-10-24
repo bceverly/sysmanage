@@ -5299,7 +5299,9 @@
       "lastAttempt": "Last attempt",
       "noTarget": "No backup target is set up yet.",
       "open": "All backups",
-      "title": "Backup"
+      "title": "Backup",
+      "writeCache": "Write cache on this host: {{size}}",
+      "writeCacheOver": "over the {{budget}} GB budget"
     },
     "coverage": {
       "filesOnly": "Files only",
@@ -5443,7 +5445,9 @@
       "sealKeepDays": "Keep sealed snapshots for (days)",
       "sealKeepHelp": "The storage host removes older sealed snapshots itself; the newest is always kept.",
       "spaceLow": "Warn when the storage is this full (%)",
-      "spaceCritical": "Critical when the storage is this full (%)"
+      "spaceCritical": "Critical when the storage is this full (%)",
+      "cacheBudget": "Write cache budget per host (GB)",
+      "cacheBudgetHelp": "restate keeps an unencrypted write cache on each host of an encrypted repository; a host over this is flagged."
     },
     "title": "Backups",
     "warning": {
@@ -5508,6 +5512,30 @@
       "title": "Prepare the storage for this host?",
       "body": "The storage host gives this host's repository its own ZFS dataset or btrfs subvolume, exports it over NFS to this host's address only with every file mapped to the backup account, and makes it append-only. It never moves existing backups: a repository that already holds files on the shared filesystem is refused, with the steps to move it. Run it again after this host's address changes.",
       "error": "Preparing the storage could not be started."
+    },
+    "browse": {
+      "error": "This folder could not be listed.",
+      "loading": "Reading the snapshot index...",
+      "notText": "This name is not valid text, so it cannot be picked here.",
+      "added": "Added",
+      "add": "Add",
+      "truncated": "This folder has more entries than can be shown; type a path to reach the rest.",
+      "hide": "Hide the snapshot's folders",
+      "show": "Browse the snapshot's folders"
+    },
+    "changes": {
+      "added": "Added",
+      "deleted": "Deleted",
+      "modified": "Modified",
+      "error": "The check could not be started.",
+      "title": "What changed on {{host}} since its last backup",
+      "running": "Comparing the host with its newest snapshot...",
+      "counts": "Added: {{added}}, deleted: {{deleted}}, modified: {{modified}}",
+      "change": "Change",
+      "path": "File or folder",
+      "what": "What changed",
+      "more": "Only the first changes are shown.",
+      "button": "What changed"
     }
   }
 }

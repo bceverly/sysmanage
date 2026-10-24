@@ -5299,7 +5299,9 @@
       "lastAttempt": "Letzter Versuch",
       "noTarget": "Es ist noch kein Sicherungsziel eingerichtet.",
       "open": "Alle Sicherungen",
-      "title": "Sicherung"
+      "title": "Sicherung",
+      "writeCache": "Schreibcache auf diesem Host: {{size}}",
+      "writeCacheOver": "über dem Budget von {{budget}} GB"
     },
     "coverage": {
       "filesOnly": "Nur Dateien",
@@ -5443,7 +5445,9 @@
       "sealKeepDays": "Versiegelte Snapshots aufbewahren (Tage)",
       "sealKeepHelp": "Der Speicher-Host entfernt ältere versiegelte Snapshots selbst; der neueste wird immer behalten.",
       "spaceLow": "Warnen, wenn der Speicher so voll ist (%)",
-      "spaceCritical": "Kritisch, wenn der Speicher so voll ist (%)"
+      "spaceCritical": "Kritisch, wenn der Speicher so voll ist (%)",
+      "cacheBudget": "Schreibcache-Budget pro Host (GB)",
+      "cacheBudgetHelp": "restate hält auf jedem Host eines verschlüsselten Repositorys einen unverschlüsselten Schreibcache; ein Host darüber wird markiert."
     },
     "title": "Sicherungen",
     "warning": {
@@ -5508,6 +5512,30 @@
       "title": "Speicher für diesen Host vorbereiten?",
       "body": "Der Speicher-Host gibt dem Repository dieses Hosts ein eigenes ZFS-Dataset oder btrfs-Subvolume, gibt es per NFS nur für die Adresse dieses Hosts frei, wobei jede Datei auf das Sicherungskonto abgebildet wird, und macht es nur anhängend. Vorhandene Sicherungen werden nie verschoben: Ein Repository, das bereits Dateien auf dem gemeinsamen Dateisystem enthält, wird abgelehnt, mit den Schritten zum Verschieben. Führen Sie es erneut aus, wenn sich die Adresse dieses Hosts ändert.",
       "error": "Das Vorbereiten des Speichers konnte nicht gestartet werden."
+    },
+    "browse": {
+      "error": "Dieser Ordner konnte nicht aufgelistet werden.",
+      "loading": "Snapshot-Index wird gelesen...",
+      "notText": "Dieser Name ist kein gültiger Text und kann hier nicht ausgewählt werden.",
+      "added": "Hinzugefügt",
+      "add": "Hinzufügen",
+      "truncated": "Dieser Ordner hat mehr Einträge, als angezeigt werden können; geben Sie einen Pfad ein, um den Rest zu erreichen.",
+      "hide": "Ordner des Snapshots ausblenden",
+      "show": "Ordner des Snapshots durchsuchen"
+    },
+    "changes": {
+      "added": "Hinzugefügt",
+      "deleted": "Gelöscht",
+      "modified": "Geändert",
+      "error": "Die Prüfung konnte nicht gestartet werden.",
+      "title": "Änderungen auf {{host}} seit der letzten Sicherung",
+      "running": "Host wird mit seinem neuesten Snapshot verglichen...",
+      "counts": "Hinzugefügt: {{added}}, gelöscht: {{deleted}}, geändert: {{modified}}",
+      "change": "Änderung",
+      "path": "Datei oder Ordner",
+      "what": "Was sich geändert hat",
+      "more": "Nur die ersten Änderungen werden angezeigt.",
+      "button": "Was hat sich geändert"
     }
   }
 }

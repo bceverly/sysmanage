@@ -85,6 +85,8 @@ class TargetBody(BaseModel):
     service_account: Optional[str] = Field(default=None, max_length=32)
     # Days the storage host keeps its seals; None = the default (14).
     seal_keep_days: Optional[int] = None
+    # GB of restate write cache per host before it is flagged; None = 20.
+    cache_budget_gb: Optional[int] = None
     # Percent used at which the target warns, and warns critically.
     space_low_percent: Optional[int] = None
     space_critical_percent: Optional[int] = None
@@ -173,6 +175,7 @@ def _validate_target(db: Session, body: TargetBody) -> Optional[uuid.UUID]:
     _absolute_path(body.storage_path, _("Storage path"))
     _in_range(body.max_concurrent, 1, 50, _("Concurrent backups"))
     _in_range(body.seal_keep_days, 1, 3650, _("Days to keep sealed snapshots"))
+    _in_range(body.cache_budget_gb, 1, 10000, _("Write cache budget"))
     _in_range(body.space_low_percent, 50, 99, _("Storage space warning"))
     _in_range(body.space_critical_percent, 51, 100, _("Storage space critical"))
     low = body.space_low_percent or 85
@@ -315,6 +318,7 @@ def _apply_target(target: models.BackupTarget, body: TargetBody, storage_id) -> 
     target.btrfs_snapshot_dir = body.btrfs_snapshot_dir or None
     target.service_account = body.service_account or None
     target.seal_keep_days = body.seal_keep_days
+    target.cache_budget_gb = body.cache_budget_gb
     target.space_low_percent = body.space_low_percent
     target.space_critical_percent = body.space_critical_percent
     target.updated_at = jobs.now()
@@ -771,6 +775,8 @@ async def list_runs(
         query = query.filter(models.BackupRun.policy_id == policy.id)
     if action:
         query = query.filter(models.BackupRun.action == action)
+    else:  # every folder opened while browsing is a run; keep them off the list
+        query = query.filter(models.BackupRun.action != jobs.LIST)
     if not include_cleared:
         query = query.filter(models.BackupRun.dismissed_at.is_(None))
     total = query.count()

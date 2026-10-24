@@ -137,6 +137,15 @@ def _store_hooks(policy: Optional[models.BackupPolicy], hooks: Any) -> None:
         policy.available_hooks = json.dumps(names[:64])
 
 
+_ABILITIES = ("list", "status", "cache")
+
+
+def _store_abilities(policy: Optional[models.BackupPolicy], found: Any) -> None:
+    """Browse / what changed / write cache: what the host's restate offers."""
+    if policy is not None and isinstance(found, list):
+        policy.host_abilities = json.dumps(sorted(set(found) & set(_ABILITIES)))
+
+
 def _store_protects(policy: Optional[models.BackupPolicy], installed: Any) -> None:
     """Did the storage host install the ``protect`` job (its restate has it)?"""
     if policy is not None and isinstance(installed, list):
@@ -190,7 +199,11 @@ def _refused(db: Session, run: models.BackupRun, code: str) -> None:
     run.finished_at = jobs.now()
     run.message = code[:_MESSAGE_LIMIT]
     policy = _policy(db, run)
-    if code == "not_configured" and policy is not None:
+    if (
+        code == "not_configured"
+        and policy is not None
+        and run.action not in jobs.BROWSE_ACTIONS
+    ):
         if str(run.host_id) == str(policy.host_id):
             policy.host_acked_version = 0
         else:
@@ -225,6 +238,7 @@ def record_command_result(db: Session, message_data: Dict[str, Any]) -> bool:
         reply = message_data.get("result")
         if _parameters(run).get("role") == "host" and isinstance(reply, dict):
             _store_hooks(_policy(db, run), reply.get("hooks"))
+            _store_abilities(_policy(db, run), reply.get("abilities"))
         if _parameters(run).get("role") == "storage":
             if isinstance(reply, dict):
                 _store_audit(_policy(db, run), reply.get("storage_audit"))

@@ -72,6 +72,8 @@ class BackupTarget(Base):
     # When the storage path counts as filling up (q60); NULL = 85 / 95.
     space_low_percent = Column(Integer, nullable=True)
     space_critical_percent = Column(Integer, nullable=True)
+    # GB of restate write cache per host before it is flagged (q60); NULL = 20.
+    cache_budget_gb = Column(Integer, nullable=True)
     storage_fs_type = Column(String(64), nullable=True)
     storage_fs_mount = Column(String(1024), nullable=True)
     storage_fs_checked_at = Column(DateTime, nullable=True)
@@ -125,6 +127,8 @@ class BackupPolicy(Base):
     storage_protects = Column(Boolean, nullable=False, default=False)
     # Quiesce hooks the host's restate reports present (JSON list, q59).
     available_hooks = Column(Text, nullable=True)
+    # What the host's restate offers: list / status / cache (JSON, q60).
+    host_abilities = Column(Text, nullable=True)
     estimate_bytes = Column(BigInteger, nullable=True)
     repository_bytes = Column(BigInteger, nullable=True)
     config_version = Column(Integer, nullable=False, default=1)

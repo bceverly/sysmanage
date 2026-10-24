@@ -29,6 +29,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import AsyncButton from '../AsyncButton';
 import { getRun, getSnapshots, restoreFiles } from '../../Services/backups';
+import SnapshotBrowser from './SnapshotBrowser';
 import type { BackupRun, BackupSnapshot } from '../../Services/backups';
 import { apiDetail, formatBytes, formatTime, runStatusLabel } from './backupLabels';
 
@@ -103,8 +104,10 @@ const RestoreFilesDialog: React.FC<{
     open: boolean;
     hostId: string;
     fqdn: string;
+    /** The host's restate can list a snapshot's folders (2.1.0.4+). */
+    canBrowse?: boolean;
     onClose: () => void;
-}> = ({ open, hostId, fqdn, onClose }) => {
+}> = ({ open, hostId, fqdn, canBrowse = false, onClose }) => {
     const { t } = useTranslation();
     const [snapshots, setSnapshots] = useState<BackupSnapshot[]>([]);
     const [snapshot, setSnapshot] = useState('');
@@ -114,6 +117,7 @@ const RestoreFilesDialog: React.FC<{
     const [preview, setPreview] = useState<BackupRun | null>(null);
     const [restore, setRestore] = useState<BackupRun | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [browsing, setBrowsing] = useState(false);
 
     useEffect(() => {
         if (!open) return;
@@ -195,6 +199,18 @@ const RestoreFilesDialog: React.FC<{
                                 ))}
                             </Select>
                         </FormControl>
+                    )}
+                    {canBrowse && snapshot && (
+                        <Box>
+                            <Button size="small" onClick={() => setBrowsing(b => !b)}>
+                                {browsing ? t('backups.browse.hide', 'Hide the snapshot\'s folders')
+                                    : t('backups.browse.show', 'Browse the snapshot\'s folders')}
+                            </Button>
+                            {browsing && (
+                                <SnapshotBrowser hostId={hostId} snapshot={snapshot} picked={include}
+                                    onPick={path => { setPaths(text => (text.trim() ? `${text.trim()}\n${path}` : path)); setPreview(null); }} />
+                            )}
+                        </Box>
                     )}
                     <TextField multiline minRows={3} label={t('backups.restore.paths', 'Paths to restore (one per line; empty = everything)')}
                         value={paths} onChange={e => { setPaths(e.target.value); setPreview(null); }}

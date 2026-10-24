@@ -5299,7 +5299,9 @@
       "lastAttempt": "Dernière tentative",
       "noTarget": "Aucune cible de sauvegarde n'est encore configurée.",
       "open": "Toutes les sauvegardes",
-      "title": "Sauvegarde"
+      "title": "Sauvegarde",
+      "writeCache": "Cache d'écriture sur cet hôte : {{size}}",
+      "writeCacheOver": "au-delà du budget de {{budget}} GB"
     },
     "coverage": {
       "filesOnly": "Fichiers uniquement",
@@ -5443,7 +5445,9 @@
       "sealKeepDays": "Conserver les instantanés scellés (jours)",
       "sealKeepHelp": "L'hôte de stockage supprime lui-même les instantanés scellés plus anciens ; le plus récent est toujours conservé.",
       "spaceLow": "Avertir quand le stockage est rempli à ce point (%)",
-      "spaceCritical": "Critique quand le stockage est rempli à ce point (%)"
+      "spaceCritical": "Critique quand le stockage est rempli à ce point (%)",
+      "cacheBudget": "Budget du cache d'écriture par hôte (GB)",
+      "cacheBudgetHelp": "restate conserve un cache d'écriture non chiffré sur chaque hôte d'un dépôt chiffré ; un hôte qui dépasse cette valeur est signalé."
     },
     "title": "Sauvegardes",
     "warning": {
@@ -5508,6 +5512,30 @@
       "title": "Préparer le stockage pour cet hôte ?",
       "body": "L'hôte de stockage donne au dépôt de cet hôte son propre dataset ZFS ou sous-volume btrfs, l'exporte en NFS vers l'adresse de cet hôte uniquement en associant chaque fichier au compte de sauvegarde, et le rend en ajout seul. Il ne déplace jamais les sauvegardes existantes : un dépôt qui contient déjà des fichiers sur le système de fichiers partagé est refusé, avec les étapes pour le déplacer. Relancez-le lorsque l'adresse de cet hôte change.",
       "error": "La préparation du stockage n'a pas pu être lancée."
+    },
+    "browse": {
+      "error": "Impossible de lister ce dossier.",
+      "loading": "Lecture de l'index de l'instantané...",
+      "notText": "Ce nom n'est pas un texte valide, il ne peut donc pas être choisi ici.",
+      "added": "Ajouté",
+      "add": "Ajouter",
+      "truncated": "Ce dossier contient plus d'entrées que ce qui peut être affiché ; saisissez un chemin pour accéder au reste.",
+      "hide": "Masquer les dossiers de l'instantané",
+      "show": "Parcourir les dossiers de l'instantané"
+    },
+    "changes": {
+      "added": "Ajouté",
+      "deleted": "Supprimé",
+      "modified": "Modifié",
+      "error": "La vérification n'a pas pu être lancée.",
+      "title": "Ce qui a changé sur {{host}} depuis sa dernière sauvegarde",
+      "running": "Comparaison de l'hôte avec son instantané le plus récent...",
+      "counts": "Ajoutés : {{added}}, supprimés : {{deleted}}, modifiés : {{modified}}",
+      "change": "Modification",
+      "path": "Fichier ou dossier",
+      "what": "Ce qui a changé",
+      "more": "Seules les premières modifications sont affichées.",
+      "button": "Ce qui a changé"
     }
   }
 }

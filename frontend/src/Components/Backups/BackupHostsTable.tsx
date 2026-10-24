@@ -233,6 +233,7 @@ const BackupHostsTable: React.FC<{
             )}
             {restoring && (
                 <RestoreFilesDialog open hostId={restoring.host_id} fqdn={restoring.fqdn}
+                    canBrowse={!!restoring.policy?.abilities?.includes('list')}
                     onClose={() => setRestoring(null)} />
             )}
         </>

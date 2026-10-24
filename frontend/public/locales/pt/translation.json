@@ -5299,7 +5299,9 @@
       "lastAttempt": "Última tentativa",
       "noTarget": "Nenhum destino de backup foi configurado ainda.",
       "open": "Todos os backups",
-      "title": "Backup"
+      "title": "Backup",
+      "writeCache": "Cache de gravação neste host: {{size}}",
+      "writeCacheOver": "acima do limite de {{budget}} GB"
     },
     "coverage": {
       "filesOnly": "Somente arquivos",
@@ -5443,7 +5445,9 @@
       "sealKeepDays": "Manter os snapshots selados por (dias)",
       "sealKeepHelp": "O host de armazenamento remove sozinho os snapshots selados mais antigos; o mais recente é sempre mantido.",
       "spaceLow": "Avisar quando o armazenamento estiver tão cheio (%)",
-      "spaceCritical": "Crítico quando o armazenamento estiver tão cheio (%)"
+      "spaceCritical": "Crítico quando o armazenamento estiver tão cheio (%)",
+      "cacheBudget": "Limite do cache de gravação por host (GB)",
+      "cacheBudgetHelp": "O restate mantém um cache de gravação não criptografado em cada host de um repositório criptografado; um host acima deste valor é sinalizado."
     },
     "title": "Backups",
     "warning": {
@@ -5508,6 +5512,30 @@
       "title": "Preparar o armazenamento para este host?",
       "body": "O host de armazenamento dá ao repositório deste host um dataset ZFS ou subvolume btrfs próprio, exporta-o por NFS somente para o endereço deste host com cada arquivo mapeado para a conta de backup, e o torna somente acréscimo. Nunca move backups existentes: um repositório que já contém arquivos no sistema de arquivos compartilhado é recusado, com as etapas para movê-lo. Execute novamente quando o endereço deste host mudar.",
       "error": "Não foi possível iniciar a preparação do armazenamento."
+    },
+    "browse": {
+      "error": "Não foi possível listar esta pasta.",
+      "loading": "Lendo o índice do snapshot...",
+      "notText": "Este nome não é um texto válido, por isso não pode ser escolhido aqui.",
+      "added": "Adicionado",
+      "add": "Adicionar",
+      "truncated": "Esta pasta tem mais entradas do que é possível mostrar; digite um caminho para chegar ao restante.",
+      "hide": "Ocultar as pastas do snapshot",
+      "show": "Navegar pelas pastas do snapshot"
+    },
+    "changes": {
+      "added": "Adicionado",
+      "deleted": "Excluído",
+      "modified": "Modificado",
+      "error": "Não foi possível iniciar a verificação.",
+      "title": "O que mudou em {{host}} desde o último backup",
+      "running": "Comparando o host com o snapshot mais recente...",
+      "counts": "Adicionados: {{added}}, excluídos: {{deleted}}, modificados: {{modified}}",
+      "change": "Alteração",
+      "path": "Arquivo ou pasta",
+      "what": "O que mudou",
+      "more": "Somente as primeiras alterações são mostradas.",
+      "button": "O que mudou"
     }
   }
 }

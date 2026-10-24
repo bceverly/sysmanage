@@ -115,6 +115,8 @@ export interface BackupTarget {
   /** Percent used at which the target warns, and warns critically (85 / 95). */
   space_low_percent?: number | null;
   space_critical_percent?: number | null;
+  /** GB of restate write cache per host before it is flagged (20). */
+  cache_budget_gb?: number | null;
   storage_fs: StorageFilesystem;
   storage_status: StorageStatus | null;
   storage_health?: StorageHealth | null;
@@ -140,6 +142,7 @@ export interface TargetInput {
   space_low_percent?: number | null;
   space_critical_percent?: number | null;
   service_account?: string | null;
+  cache_budget_gb?: number | null;
 }
 
 export interface BackupPolicy {
@@ -152,6 +155,8 @@ export interface BackupPolicy {
   check_interval_days: number;
   quiesce: boolean;
   quiesce_with: string[];
+  /** What the host's restate offers: "list" (browse), "status" (what changed), "cache". */
+  abilities?: string[];
   /** Quiesce hooks the host's restate reports present (2.1+); null until reported. */
   available_hooks?: string[] | null;
   /** restate path patterns kept although the built-in rules leave them out. */
@@ -325,6 +330,14 @@ export const getRun = async (runId: string): Promise<BackupRun> =>
 
 export const getSnapshots = async (hostId: string): Promise<BackupSnapshot[]> =>
   (await axiosInstance.get<BackupSnapshot[]>(`${base}/host/${hostId}/backup-snapshots`)).data;
+
+/** List one folder of a snapshot (restate 2.1.0.4 ``list``); poll the run. */
+export const browseSnapshot = async (hostId: string, snapshot: string, path: string): Promise<BackupRun> =>
+  (await axiosInstance.post<BackupRun>(`${base}/host/${hostId}/backup-browse`, { snapshot, path })).data;
+
+/** What changed on the host since its newest snapshot (restate ``status``). */
+export const backupChanges = async (hostId: string): Promise<BackupRun> =>
+  (await axiosInstance.post<BackupRun>(`${base}/host/${hostId}/backup-changes`, {})).data;
 
 export const restoreFiles = async (hostId: string, input: RestoreInput): Promise<BackupRun> =>
   (await axiosInstance.post<BackupRun>(`${base}/host/${hostId}/backup-restore`, input)).data;

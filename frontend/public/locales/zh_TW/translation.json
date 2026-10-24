@@ -5299,7 +5299,9 @@
       "lastAttempt": "上次嘗試",
       "noTarget": "尚未設定備份目標。",
       "open": "所有備份",
-      "title": "備份"
+      "title": "備份",
+      "writeCache": "此主機上的寫入快取：{{size}}",
+      "writeCacheOver": "超出 {{budget}} GB 上限"
     },
     "coverage": {
       "filesOnly": "僅檔案",
@@ -5443,7 +5445,9 @@
       "sealKeepDays": "封存快照保留天數",
       "sealKeepHelp": "儲存主機會自行刪除較舊的封存快照；最新的快照一律保留。",
       "spaceLow": "儲存使用率達到此值時警告 (%)",
-      "spaceCritical": "儲存使用率達到此值時為嚴重 (%)"
+      "spaceCritical": "儲存使用率達到此值時為嚴重 (%)",
+      "cacheBudget": "每台主機的寫入快取上限（GB）",
+      "cacheBudgetHelp": "restate 會在加密儲存庫的每台主機上保留未加密的寫入快取；超過此值的主機將被標記。"
     },
     "title": "備份",
     "warning": {
@@ -5508,6 +5512,30 @@
       "title": "要為此主機準備儲存嗎？",
       "body": "儲存主機會為此主機的存放庫配置獨立的 ZFS 資料集或 btrfs 子磁碟區，透過 NFS 只匯出到此主機的位址，並將每個檔案對應到備份帳戶，同時使其僅可附加。它從不移動現有備份：若存放庫已在共用檔案系統上存有檔案，將會被拒絕，並附上移動步驟。此主機的位址變更後，請再次執行。",
       "error": "無法開始準備儲存。"
+    },
+    "browse": {
+      "error": "無法列出此資料夾。",
+      "loading": "正在讀取快照索引...",
+      "notText": "此名稱不是有效的文字，因此無法在此處選取。",
+      "added": "已新增",
+      "add": "新增",
+      "truncated": "此資料夾的項目多於可顯示的數量；請輸入路徑以存取其餘項目。",
+      "hide": "隱藏快照的資料夾",
+      "show": "瀏覽快照的資料夾"
+    },
+    "changes": {
+      "added": "新增",
+      "deleted": "刪除",
+      "modified": "修改",
+      "error": "無法啟動檢查。",
+      "title": "{{host}} 自上次備份以來的變更",
+      "running": "正在將主機與其最新快照進行比較...",
+      "counts": "新增：{{added}}，刪除：{{deleted}}，修改：{{modified}}",
+      "change": "變更",
+      "path": "檔案或資料夾",
+      "what": "變更內容",
+      "more": "僅顯示前面的變更。",
+      "button": "變更內容"
     }
   }
 }

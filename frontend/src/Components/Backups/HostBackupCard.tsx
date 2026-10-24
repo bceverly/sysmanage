@@ -12,9 +12,10 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import AsyncButton from '../AsyncButton';
 import { backupNow, getHostBackup } from '../../Services/backups';
-import type { HostBackup } from '../../Services/backups';
+import type { BackupRun, HostBackup } from '../../Services/backups';
 import { hasPermission, SecurityRoles } from '../../Services/permissions';
 import BackupPolicyDialog from './BackupPolicyDialog';
+import BackupChangesDialog from './BackupChangesDialog';
 import BackupPrepareButton from './BackupPrepareButton';
 import BackupRepackButton from './BackupRepackButton';
 import RestoreFilesDialog from './RestoreFilesDialog';
@@ -29,6 +30,22 @@ import {
     statusLabel,
 } from './backupLabels';
 
+// restate's plaintext write cache on this host (encrypted repositories only;
+// restate 2.1.0.4 reports its size with each capture), against the target's
+// budget.
+const WriteCache: React.FC<{ run: BackupRun | null; budgetGb: number }> = ({ run, budgetGb }) => {
+    const { t } = useTranslation();
+    const cache = (run?.result as { cache?: { bytes?: number } | null } | null)?.cache;
+    if (!cache || typeof cache.bytes !== 'number') return null;
+    const over = cache.bytes > budgetGb * 1e9;
+    return (
+        <Typography variant="body2" color={over ? 'warning.main' : undefined}>
+            {t('backups.card.writeCache', 'Write cache on this host: {{size}}', { size: formatBytes(cache.bytes) })}
+            {over && ` - ${t('backups.card.writeCacheOver', 'over the {{budget}} GB budget', { budget: budgetGb })}`}
+        </Typography>
+    );
+};
+
 const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -37,6 +54,7 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
     const [canRestore, setCanRestore] = useState(false);
     const [editing, setEditing] = useState(false);
     const [restoring, setRestoring] = useState(false);
+    const [changes, setChanges] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const load = useCallback(async () => {
@@ -112,6 +130,7 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                             {t('backups.hosts.snapshots', 'Snapshots: {{n}}', { n: data.snapshot_count })}
                             {' - '}{formatBytes(data.policy.repository_bytes)}
                         </Typography>
+                        <WriteCache run={data.last_good_capture} budgetGb={data.target?.cache_budget_gb ?? 20} />
                     </>
                 )}
                 <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', rowGap: 1 }}>
@@ -133,6 +152,11 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                     {canManage && data.policy && data.snapshot_count > 0 && (
                         <BackupRepackButton hostId={hostId} disabled={!!data.running} onStarted={() => void load()} />
                     )}
+                    {canManage && data.snapshot_count > 0 && data.policy?.abilities?.includes('status') && (
+                        <Button size="small" onClick={() => setChanges(true)}>
+                            {t('backups.changes.button', 'What changed')}
+                        </Button>
+                    )}
                     {canRestore && data.snapshot_count > 0 && (
                         <Button size="small" onClick={() => setRestoring(true)}>
                             {t('backups.hosts.restore', 'Restore files')}
@@ -146,8 +170,10 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                     <BackupPolicyDialog open hostId={hostId} fqdn={data.fqdn} policy={data.policy}
                         onClose={() => setEditing(false)} onSaved={() => void load()} />
                 )}
+                {changes && <BackupChangesDialog hostId={hostId} fqdn={data.fqdn} onClose={() => setChanges(false)} />}
                 {restoring && (
-                    <RestoreFilesDialog open hostId={hostId} fqdn={data.fqdn} onClose={() => setRestoring(false)} />
+                    <RestoreFilesDialog open hostId={hostId} fqdn={data.fqdn}
+                        canBrowse={!!data.policy?.abilities?.includes('list')} onClose={() => setRestoring(false)} />
                 )}
             </CardContent>
         </Card>

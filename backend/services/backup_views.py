@@ -81,6 +81,7 @@ def target_dict(target: models.BackupTarget, db: Session) -> Dict[str, Any]:
         "zfs_dataset": target.zfs_dataset,
         "btrfs_snapshot_dir": target.btrfs_snapshot_dir,
         "seal_keep_days": jobs.seal_keep_days(target),
+        "cache_budget_gb": jobs.cache_budget_gb(target),
         "space_low_percent": storage_health.space_thresholds(target)[0],
         "space_critical_percent": storage_health.space_thresholds(target)[1],
         "storage_fs": {
@@ -113,6 +114,7 @@ def policy_dict(policy: models.BackupPolicy) -> Dict[str, Any]:
         "check_interval_days": policy.check_interval_days,
         "quiesce": bool(policy.quiesce),
         "quiesce_with": jobs.quiesce_names(policy),
+        "abilities": jobs.abilities(policy),
         # None: not reported yet (older agent or restate) -- names are typed.
         "available_hooks": (
             json.loads(policy.available_hooks) if policy.available_hooks else None

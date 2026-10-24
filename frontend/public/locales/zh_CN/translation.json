@@ -5299,7 +5299,9 @@
       "lastAttempt": "上次尝试",
       "noTarget": "尚未设置备份目标。",
       "open": "所有备份",
-      "title": "备份"
+      "title": "备份",
+      "writeCache": "此主机上的写入缓存：{{size}}",
+      "writeCacheOver": "超出 {{budget}} GB 上限"
     },
     "coverage": {
       "filesOnly": "仅文件",
@@ -5443,7 +5445,9 @@
       "sealKeepDays": "封存快照保留天数",
       "sealKeepHelp": "存储主机会自行删除较旧的封存快照；最新的快照始终保留。",
       "spaceLow": "存储使用率达到此值时警告 (%)",
-      "spaceCritical": "存储使用率达到此值时为严重 (%)"
+      "spaceCritical": "存储使用率达到此值时为严重 (%)",
+      "cacheBudget": "每台主机的写入缓存上限（GB）",
+      "cacheBudgetHelp": "restate 会在加密仓库的每台主机上保留未加密的写入缓存；超过此值的主机将被标记。"
     },
     "title": "备份",
     "warning": {
@@ -5508,6 +5512,30 @@
       "title": "为此主机准备存储？",
       "body": "存储主机为此主机的存储库分配独立的 ZFS 数据集或 btrfs 子卷，通过 NFS 只导出到此主机的地址，并将每个文件映射到备份账户，同时使其仅可追加。它从不移动现有备份：如果存储库已在共享文件系统上存有文件，将被拒绝，并给出移动步骤。此主机的地址更改后，请再次运行。",
       "error": "无法开始准备存储。"
+    },
+    "browse": {
+      "error": "无法列出此文件夹。",
+      "loading": "正在读取快照索引...",
+      "notText": "此名称不是有效文本，因此无法在此处选择。",
+      "added": "已添加",
+      "add": "添加",
+      "truncated": "此文件夹的条目多于可显示的数量；请输入路径以访问其余条目。",
+      "hide": "隐藏快照的文件夹",
+      "show": "浏览快照的文件夹"
+    },
+    "changes": {
+      "added": "新增",
+      "deleted": "删除",
+      "modified": "修改",
+      "error": "无法启动检查。",
+      "title": "{{host}} 自上次备份以来的变更",
+      "running": "正在将主机与其最新快照进行比较...",
+      "counts": "新增：{{added}}，删除：{{deleted}}，修改：{{modified}}",
+      "change": "变更",
+      "path": "文件或文件夹",
+      "what": "变更内容",
+      "more": "仅显示前面的变更。",
+      "button": "变更内容"
     }
   }
 }

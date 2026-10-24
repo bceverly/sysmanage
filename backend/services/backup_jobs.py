@@ -58,6 +58,11 @@ HOST_ACTIONS = ("capture", "snapshots", "estimate")
 # repository its own dataset / subvolume and an export to that host only.
 STORAGE_ACTIONS = ("seal", "prune", "check", "du", "repack", "prepare", "protect")
 PREPARE = "prepare"
+# Read-only host jobs started from the UI (restate 2.1.0.4+): browse one
+# directory of a snapshot, and what changed since one.
+LIST = "list"
+STATUS = "status"
+BROWSE_ACTIONS = (LIST, STATUS)
 CONFIGURE = "configure"
 RESTORE = "restore"
 
@@ -233,6 +238,13 @@ def seal_job(target: models.BackupTarget) -> Dict[str, Any]:
 
 
 DEFAULT_SEAL_KEEP_DAYS = 14
+# restate's plaintext write cache on each host of an encrypted repository.
+DEFAULT_CACHE_BUDGET_GB = 20
+
+
+def cache_budget_gb(target: models.BackupTarget) -> int:
+    """When a host's write cache counts as over budget (GB)."""
+    return getattr(target, "cache_budget_gb", None) or DEFAULT_CACHE_BUDGET_GB
 
 
 def seal_keep_days(target: models.BackupTarget) -> int:
@@ -369,6 +381,31 @@ def queue_restore(  # pylint: disable=too-many-arguments,too-many-positional-arg
     )
 
 
+def queue_browse(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    db: Session,
+    policy: models.BackupPolicy,
+    host: models.Host,
+    action: str,
+    snapshot: Optional[str],
+    path: Optional[str],
+    actor: str,
+) -> models.BackupRun:
+    """A snapshot listing or a what-changed check on the host itself."""
+    if action not in BROWSE_ACTIONS:
+        raise ValueError(f"unknown browse action {action!r}")
+    params: Dict[str, Any] = {"policy_id": str(policy.id), "action": action}
+    if snapshot:
+        params["snapshot"] = snapshot
+    if action == LIST:
+        params["path"] = path or "/"
+    return _queue(db, policy, host.id, action, CommandType.BACKUP_RUN, params, actor)
+
+
+def abilities(policy: models.BackupPolicy) -> List[str]:
+    """What the host's restate offers beyond the 2.0 contract."""
+    return _json_strings(getattr(policy, "host_abilities", None))
+
+
 def pending(db: Session, policy_id: Any, action: str, host_id: Any = None) -> bool:
     """A run of ``action`` for this policy is still queued or running."""
     query = db.query(models.BackupRun.id).filter(
@@ -432,6 +469,21 @@ def prune_run_history(db: Session, now) -> int:
     for run in old:
         if (str(run.policy_id), run.action, run.status, run.queued_at) in keep:
             continue
+        db.delete(run)
+        removed += 1
+    # A folder listing is only read once, by the browser that asked: a day
+    # is plenty, and there are many of them.
+    listings = (
+        db.query(models.BackupRun)
+        .filter(
+            models.BackupRun.action == LIST,
+            models.BackupRun.status.in_(FINAL),
+            models.BackupRun.queued_at < now - timedelta(days=1),
+        )
+        .limit(RUN_RETENTION_BATCH)
+        .all()
+    )
+    for run in listings:
         db.delete(run)
         removed += 1
     return removed

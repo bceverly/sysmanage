@@ -5299,7 +5299,9 @@
       "lastAttempt": "Último intento",
       "noTarget": "Todavía no se ha configurado ningún destino de copia de seguridad.",
       "open": "Todas las copias de seguridad",
-      "title": "Copia de seguridad"
+      "title": "Copia de seguridad",
+      "writeCache": "Caché de escritura en este host: {{size}}",
+      "writeCacheOver": "por encima del límite de {{budget}} GB"
     },
     "coverage": {
       "filesOnly": "Solo archivos",
@@ -5443,7 +5445,9 @@
       "sealKeepDays": "Conservar las instantáneas selladas (días)",
       "sealKeepHelp": "El host de almacenamiento elimina por sí mismo las instantáneas selladas más antiguas; la más reciente siempre se conserva.",
       "spaceLow": "Avisar cuando el almacenamiento esté así de lleno (%)",
-      "spaceCritical": "Crítico cuando el almacenamiento esté así de lleno (%)"
+      "spaceCritical": "Crítico cuando el almacenamiento esté así de lleno (%)",
+      "cacheBudget": "Límite de caché de escritura por host (GB)",
+      "cacheBudgetHelp": "restate mantiene una caché de escritura sin cifrar en cada host de un repositorio cifrado; se marca el host que supere este valor."
     },
     "title": "Copias de seguridad",
     "warning": {
@@ -5508,6 +5512,30 @@
       "title": "¿Preparar el almacenamiento para este host?",
       "body": "El host de almacenamiento da al repositorio de este host su propio dataset ZFS o subvolumen btrfs, lo exporta por NFS solo a la dirección de este host con cada archivo asignado a la cuenta de copias de seguridad, y lo hace de solo anexión. Nunca mueve copias de seguridad existentes: un repositorio que ya contiene archivos en el sistema de archivos compartido se rechaza, con los pasos para moverlo. Vuelva a ejecutarlo cuando cambie la dirección de este host.",
       "error": "No se pudo iniciar la preparación del almacenamiento."
+    },
+    "browse": {
+      "error": "No se pudo listar esta carpeta.",
+      "loading": "Leyendo el índice de la instantánea...",
+      "notText": "Este nombre no es texto válido, por lo que no se puede elegir aquí.",
+      "added": "Añadido",
+      "add": "Añadir",
+      "truncated": "Esta carpeta tiene más entradas de las que se pueden mostrar; escriba una ruta para llegar al resto.",
+      "hide": "Ocultar las carpetas de la instantánea",
+      "show": "Explorar las carpetas de la instantánea"
+    },
+    "changes": {
+      "added": "Añadido",
+      "deleted": "Eliminado",
+      "modified": "Modificado",
+      "error": "No se pudo iniciar la comprobación.",
+      "title": "Qué cambió en {{host}} desde su última copia de seguridad",
+      "running": "Comparando el host con su instantánea más reciente...",
+      "counts": "Añadidos: {{added}}, eliminados: {{deleted}}, modificados: {{modified}}",
+      "change": "Cambio",
+      "path": "Archivo o carpeta",
+      "what": "Qué cambió",
+      "more": "Solo se muestran los primeros cambios.",
+      "button": "Qué cambió"
     }
   }
 }
