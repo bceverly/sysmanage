@@ -31,11 +31,7 @@ import StopIcon from "@mui/icons-material/Stop";
 import { useTranslation } from "react-i18next";
 import MaintenanceWindowCard from "../MaintenanceWindowCard";
 import HostCapabilitiesCard from "./HostCapabilitiesCard";
-import HostBackupCard from "../Backups/HostBackupCard";
 import HostClockCard from "../TimeSync/HostClockCard";
-import HostHardwareCard from "../HardwareHealth/HostHardwareCard";
-import ConfigManagementEnginesCard from "../ConfigManagementEnginesCard";
-import ConfigProfileRunHistory from "../ConfigProfileRunHistory";
 import { hasPermissionSync, SecurityRoles } from "../../Services/permissions";
 import { SysManageHost } from "../../Services/hosts";
 import { OpenTelemetryStatus } from "./hostDetailTypes";
@@ -66,7 +62,6 @@ interface HostInfoTabProps {
   selectedTagToAdd: string;
   setSelectedTagToAdd: (value: string) => void;
   canEditTags: boolean;
-  canAddPackage: boolean;
   handleAddTag: () => void;
   handleRemoveTag: (tagId: string) => void;
   handleShowDialog: (title: string, content: string) => void;
@@ -791,7 +786,6 @@ const HostInfoTab: React.FC<HostInfoTabProps> = ({
   selectedTagToAdd,
   setSelectedTagToAdd,
   canEditTags,
-  canAddPackage,
   handleAddTag,
   handleRemoveTag,
   handleShowDialog,
@@ -816,11 +810,14 @@ const HostInfoTab: React.FC<HostInfoTabProps> = ({
   handleAttachToGraylog,
 }) => {
   const { t } = useTranslation();
-  // Bumped when a profile is applied so the run-history panel re-reads instead
-  // of leaving the operator staring at a stale list wondering if it took.
-  const [configRunsRefresh, setConfigRunsRefresh] = React.useState(0);
   return (
     <Grid container spacing={3}>
+      {/* Basic Information */}
+      <HostBasicInfoCard host={host} enabledShells={enabledShells} />
+
+      {/* Operating System Information */}
+      <HostOsInfoCard host={host} handleShowDialog={handleShowDialog} />
+
       {/* Maintenance window status (Phase 14.2) */}
       <Grid size={{ xs: 12, md: 6 }}>
         <MaintenanceWindowCard hostId={hostId || ""} />
@@ -834,53 +831,12 @@ const HostInfoTab: React.FC<HostInfoTabProps> = ({
           platform={host.platform}
         />
       </Grid>
-      {/* Backup with restate (Phase 24) */}
-      {hostId && (
-        <Grid size={{ xs: 12, md: 6 }}>
-          <HostBackupCard hostId={hostId} />
-        </Grid>
-      )}
       {/* Clock offset and time service (Phase 23.3) */}
       {hostId && (
         <Grid size={{ xs: 12, md: 6 }}>
           <HostClockCard hostId={hostId} />
         </Grid>
       )}
-      {/* Drives, arrays, pools, sensors and memory (Phase 23.1) */}
-      {hostId && (
-        <Grid size={{ xs: 12 }}>
-          <HostHardwareCard hostId={hostId} />
-        </Grid>
-      )}
-
-      {/* Config-management prerequisite (Phase 20.1) */}
-      <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex" }}>
-        <ConfigManagementEnginesCard
-          hostId={hostId || ""}
-          canInstall={canAddPackage}
-          onProfileApplied={() => setConfigRunsRefresh((n) => n + 1)}
-          isHostActive={host?.active || false}
-          isAgentPrivileged={host?.is_agent_privileged || false}
-          sx={{ height: "100%", width: "100%" }}
-        />
-      </Grid>
-
-      {/* Config-management run history (Phase 20.1).  Full width:
-                    it is a table, and squeezing it into a half column makes
-                    every row wrap. */}
-      <Grid size={{ xs: 12 }}>
-        <ConfigProfileRunHistory
-          hostId={hostId || ""}
-          refreshTrigger={configRunsRefresh}
-        />
-      </Grid>
-
-      {/* Basic Information */}
-      <HostBasicInfoCard host={host} enabledShells={enabledShells} />
-
-      {/* Operating System Information */}
-      <HostOsInfoCard host={host} handleShowDialog={handleShowDialog} />
-
       {/* OpenTelemetry Status -- Pro+ feature gated on observability_engine */}
       {licenseModules.includes("observability_engine") && (
         <HostOpenTelemetryCard

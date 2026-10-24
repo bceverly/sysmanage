@@ -628,7 +628,7 @@
     "applyLiveWarning": "Cela apportera des modifications réelles à cet hôte.",
     "applyNoStored": "Aucun -- coller ci-dessous",
     "applyPlaybook": "Contenu du playbook (YAML)",
-    "applyProfile": "Profil appliqué",
+    "applyProfile": "Appliquer le profil",
     "applyProfileName": "Nom du profil (facultatif)",
     "applyResources": "Ressources DSC (JSON)",
     "applyStoredChosen": "Ceci exécute le profil enregistré tel qu'il est stocké. L'exécution est enregistrée contre ce profil.",

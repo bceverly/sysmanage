@@ -33,6 +33,7 @@ import {
     getStorageUsagePercentage,
     getStorageUsageColor,
 } from './hostDetailHelpers';
+import HostHardwareCard from "../HardwareHealth/HostHardwareCard";
 import HostMachineCard from './HostMachineCard';
 
 interface HostHardwareTabProps {
@@ -63,6 +64,12 @@ const HostHardwareTab: React.FC<HostHardwareTabProps> = ({
     const { t } = useTranslation();
     return (
                 <Grid container spacing={3}>
+                {/* Drives, arrays, pools, sensors and memory (Phase 23.1) */}
+                {host.id && (
+                    <Grid size={{ xs: 12 }}>
+                        <HostHardwareCard hostId={host.id} />
+                    </Grid>
+                )}
                 {/* Machine (hardware identity + asset tag) */}
                 {host.id && (
                     <Grid size={{ xs: 12 }}>

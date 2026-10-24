@@ -174,7 +174,7 @@ describe('HostDetail page', () => {
         renderPage({ host: { fqdn: 'plain.example', platform: 'Plan9' } });
         expect(await screen.findByTestId('header')).toHaveTextContent('plain.example');
         expect(tabIds()).toEqual([
-            'info', 'hardware', 'processes', 'software', 'software-changes',
+            'info', 'hardware', 'processes', 'automation', 'backup', 'software', 'software-changes',
             'access', 'security', 'certificates', 'server-roles', 'diagnostics',
         ]);
         expect(screen.getByTestId('current-tab')).toHaveTextContent('info');
@@ -198,7 +198,7 @@ describe('HostDetail page', () => {
         });
         await screen.findByTestId('header');
         expect(tabIds()).toEqual([
-            'info', 'advisor', 'hardware', 'processes', 'software', 'software-changes',
+            'info', 'advisor', 'hardware', 'processes', 'automation', 'backup', 'software', 'software-changes',
             'third-party-repos', 'access', 'security', 'compliance', 'certificates',
             'server-roles', 'child-hosts', 'ubuntu-pro', 'image-mode', 'diagnostics',
         ]);
@@ -272,7 +272,7 @@ describe('HostDetail page', () => {
         renderPage({ host: { fqdn: 'p.example', platform: 'Plan9' }, modules: ['mod_a'], features: ['feat_b'] });
         await screen.findByTestId('header');
         expect(tabIds()).toEqual([
-            'info', 'p-after-info', 'hardware', 'processes', 'software', 'software-changes',
+            'info', 'p-after-info', 'hardware', 'processes', 'automation', 'backup', 'software', 'software-changes',
             'access', 'security', 'p-after-sec', 'certificates', 'server-roles',
             'p-before-diag', 'diagnostics',
         ]);

@@ -22,6 +22,8 @@ import ShieldIcon from '@mui/icons-material/Shield';
 import RuleIcon from '@mui/icons-material/Rule';
 import LayersIcon from '@mui/icons-material/Layers';
 import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
+import BackupIcon from '@mui/icons-material/Backup';
+import AutoModeIcon from '@mui/icons-material/AutoMode';
 
 import { useTranslation } from 'react-i18next';
 
@@ -268,7 +270,7 @@ const HostDetail = () => { // NOSONAR
             'info', 'hardware', 'processes', 'software', 'software-changes',
             'third-party-repos', 'access', 'security', 'compliance',
             'certificates', 'server-roles', 'child-hosts', 'ubuntu-pro',
-            'image-mode', 'diagnostics', 'advisor',
+            'image-mode', 'diagnostics', 'advisor', 'automation', 'backup',
         ]);
         const safePluginTabs = visiblePluginTabs.filter(
             p => !HARDCODED_IDS.has(p.id),
@@ -279,6 +281,8 @@ const HostDetail = () => { // NOSONAR
             ...(licenseModules.includes('advisor_engine') ? [{ id: 'advisor', icon: <TipsAndUpdatesIcon />, label: t('hostDetail.advisorTab', 'Advisor') }] : []),
             { id: 'hardware', icon: <MemoryIcon />, label: t('hostDetail.hardwareTab', 'Hardware') },
             { id: 'processes', icon: <DvrIcon />, label: t('hostDetail.processesTab', 'Processes') },
+            { id: 'automation', icon: <AutoModeIcon />, label: t('nav.cat.automation', 'Automation') },
+            { id: 'backup', icon: <BackupIcon />, label: t('backups.card.title', 'Backup') },
             { id: 'software', icon: <AppsIcon />, label: t('hostDetail.softwareTab', 'Software') },
             { id: 'software-changes', icon: <HistoryIcon />, label: t('hostDetail.softwareChangesTab', 'Software Changes') },
             ...(supportsThirdPartyRepos() ? [{ id: 'third-party-repos', icon: <SourceIcon />, label: t('hostDetail.thirdPartyReposTab', 'Third-Party Repositories') }] : []),

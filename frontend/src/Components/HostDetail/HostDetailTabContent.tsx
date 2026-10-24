@@ -20,6 +20,8 @@ import HostUbuntuProTab from "./HostUbuntuProTab";
 import HostImageModeTab from "./HostImageModeTab";
 import HostAdvisorTab from "./HostAdvisorTab";
 import HostDiagnosticsTab from "./HostDiagnosticsTab";
+import HostAutomationTab from "./HostAutomationTab";
+import HostBackupCard from "../Backups/HostBackupCard";
 import {
   DiagnosticReport,
   PaginationInfo,
@@ -422,7 +424,6 @@ const HostDetailTabContent: React.FC<HostDetailTabContentProps> = (props) => {
           selectedTagToAdd={selectedTagToAdd}
           setSelectedTagToAdd={setSelectedTagToAdd}
           canEditTags={canEditTags}
-          canAddPackage={canAddPackage}
           handleAddTag={handleAddTag}
           handleRemoveTag={handleRemoveTag}
           handleShowDialog={handleShowDialog}
@@ -462,6 +463,21 @@ const HostDetailTabContent: React.FC<HostDetailTabContentProps> = (props) => {
           handleShowDialog={handleShowDialog}
         />
       )}
+      {/* Automation Tab: config-management engines and run history (Phase
+          20.1), plus the Pro+ automation engine's panel (saved scripts,
+          executions, approvals) when it is licensed -- that plugin registers
+          the same tab id, so the host has ONE Automation tab. */}
+      {currentTabId === "automation" && hostId && (
+        <HostAutomationTab
+          hostId={hostId}
+          canInstall={canAddPackage}
+          isHostActive={host?.active || false}
+          isAgentPrivileged={host?.is_agent_privileged || false}
+          extension={visiblePluginTabs.find((pt) => pt.id === "automation")?.component}
+        />
+      )}
+      {/* Backup Tab (Phase 24) */}
+      {currentTabId === "backup" && hostId && <HostBackupCard hostId={hostId} />}
       {/* Processes Tab */}
       {currentTabId === "processes" && hostId && (
         <ProcessesPanel
@@ -568,6 +584,8 @@ const HostDetailTabContent: React.FC<HostDetailTabContentProps> = (props) => {
               "image-mode",
               "diagnostics",
               "advisor",
+              "automation",
+              "backup",
             ]).has(pt.id),
         )
         .map(
