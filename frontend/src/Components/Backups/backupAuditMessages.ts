@@ -38,7 +38,7 @@ export const auditText = (t: TFunction, target: BackupTarget, hosts: BackupHost[
             return t('backups.audit.nfsV4Root', 'The storage host\'s /etc/exports has no "V4:" root line, so hosts cannot mount over NFSv4.');
         case 'audit_service_account':
             return t('backups.audit.serviceAccount', 'The backup service account {{account}} does not exist on the storage host.',
-                { account: String(params.account ?? target.service_account) });
+                { account: typeof params.account === 'string' ? params.account : (target.service_account ?? '') });
         case 'audit_own_filesystem':
             return t('backups.audit.ownFilesystem',
                 'Not on their own filesystem: {{hosts}}. Give each host its own ZFS dataset or btrfs subvolume, so each gets its own export.',

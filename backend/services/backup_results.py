@@ -231,25 +231,32 @@ def record_command_result(db: Session, message_data: Dict[str, Any]) -> bool:
         _refused(db, run, str(error or "agent_error"))
         return True
     if run.action == jobs.CONFIGURE:
-        run.status = "ok"
-        run.finished_at = jobs.now()
-        _acknowledge(db, run)
-        _storage_filesystem(db, run, message_data.get("result"))
-        reply = message_data.get("result")
-        if _parameters(run).get("role") == "host" and isinstance(reply, dict):
-            _store_hooks(_policy(db, run), reply.get("hooks"))
-            _store_abilities(_policy(db, run), reply.get("abilities"))
-        if _parameters(run).get("role") == "storage":
-            if isinstance(reply, dict):
-                _store_audit(_policy(db, run), reply.get("storage_audit"))
-                _store_nfs_path(_policy(db, run), reply.get("nfs_path"))
-                _store_protects(_policy(db, run), reply.get("installed"))
-            _reprotect(db, run)
-            _reprepare(db, run)
+        _configured(db, run, message_data.get("result"))
     else:
         run.status = jobs.RUNNING
         run.started_at = run.started_at or jobs.now()
     return True
+
+
+def _configured(db: Session, run: models.BackupRun, reply: Any) -> None:
+    """A configure the agent accepted: acknowledge it and keep what the
+    reply reports for the host or storage role."""
+    run.status = "ok"
+    run.finished_at = jobs.now()
+    _acknowledge(db, run)
+    _storage_filesystem(db, run, reply)
+    role = _parameters(run).get("role")
+    if role == "host" and isinstance(reply, dict):
+        _store_hooks(_policy(db, run), reply.get("hooks"))
+        _store_abilities(_policy(db, run), reply.get("abilities"))
+    if role != "storage":
+        return
+    if isinstance(reply, dict):
+        _store_audit(_policy(db, run), reply.get("storage_audit"))
+        _store_nfs_path(_policy(db, run), reply.get("nfs_path"))
+        _store_protects(_policy(db, run), reply.get("installed"))
+    _reprotect(db, run)
+    _reprepare(db, run)
 
 
 # --- backup_result --------------------------------------------------------

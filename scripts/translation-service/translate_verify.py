@@ -108,6 +108,11 @@ class VerifyRequest(BaseModel):
     glossary: Optional[bool] = None
 
 
+# Ollama endpoints, relative to the service's configured ollama_url.
+EMBED_PATH = "/api/embed"
+CHAT_PATH = "/api/chat"
+
+
 def judge_terms(source: str, lang: str, language: str) -> str:
     """The judge's view of the glossary: what this source's product terms
     mean and how the product renders them -- framed as CORRECT renderings to
@@ -204,12 +209,11 @@ def make_router(
     router = APIRouter()
 
     async def embed(client: httpx.AsyncClient, texts: List[str]) -> List[List[float]]:
-        # ollama_url is operator config, not request input; the request's text
-        # travels in the JSON body to that fixed URL, so there is no forgery.
-        url = f"{ollama_url}/api/embed"
+        # The client's base_url is the operator's ollama_url (see verify_batch);
+        # the path is a constant, and the request's text travels only in the
+        # JSON body, so no request input can choose where this goes.
         body = {"model": EMBED_MODEL, "input": texts, "keep_alive": keep_alive}
-        # nosemgrep: python.fastapi.net.tainted-fastapi-http-request-httpx.tainted-fastapi-http-request-httpx
-        resp = await client.post(url, json=body, timeout=timeout)  # nosemgrep
+        resp = await client.post(EMBED_PATH, json=body, timeout=timeout)
         resp.raise_for_status()
         return resp.json()["embeddings"]
 
@@ -247,9 +251,8 @@ def make_router(
         terms = judge_terms(source, lang, languages[lang]) if glossary else ""
         if terms:
             payload["messages"].insert(1, {"role": "system", "content": terms})
-        url = f"{ollama_url}/api/chat"  # operator config, as in embed()
-        # nosemgrep: python.fastapi.net.tainted-fastapi-http-request-httpx.tainted-fastapi-http-request-httpx
-        resp = await client.post(url, json=payload, timeout=timeout)  # nosemgrep
+        # A constant path on the operator-configured base_url, as in embed().
+        resp = await client.post(CHAT_PATH, json=payload, timeout=timeout)
         resp.raise_for_status()
         try:
             verdict = json.loads(resp.json()["message"]["content"])
@@ -309,7 +312,9 @@ def make_router(
             else:
                 to_embed.append(i)
         glossary = JUDGE_GLOSSARY if req.glossary is None else req.glossary
-        async with httpx.AsyncClient() as client:
+        # Every call goes to the operator's own Ollama: the URL is fixed here,
+        # from service configuration, never from the request.
+        async with httpx.AsyncClient(base_url=ollama_url) as client:
             if to_embed and req.judge_only:
                 for i in to_embed:
                     results[i] = await judged(client, req, i, None, glossary)

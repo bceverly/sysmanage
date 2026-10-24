@@ -194,6 +194,32 @@ def _status(db: Session, policy, last_capture, now) -> str:
     return "overdue" if last_capture.status == "busy" else "never"
 
 
+def _running(db: Session, policy: models.BackupPolicy):
+    """The policy's newest queued or running job, if any."""
+    return (
+        db.query(models.BackupRun)
+        .filter(
+            models.BackupRun.policy_id == policy.id,
+            models.BackupRun.status.in_(jobs.PENDING),
+        )
+        .order_by(models.BackupRun.queued_at.desc())
+        .first()
+    )
+
+
+def _recent_runs(db: Session, policy, last_capture, running) -> Dict[str, Any]:
+    """The last capture, last good capture, last check and running job."""
+    good = jobs.latest_run(db, policy.id, "capture", statuses=jobs.GOOD_CAPTURE)
+    last_check = jobs.latest_run(db, policy.id, "check", statuses=jobs.FINAL)
+    found = {
+        "last_capture": last_capture,
+        "last_good_capture": good,
+        "last_check": last_check,
+        "running": running,
+    }
+    return {key: run_dict(run) if run else None for key, run in found.items()}
+
+
 def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
     """One host's backup summary, for the hosts table and the Info tab."""
     now = now or jobs.now()
@@ -224,21 +250,8 @@ def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
         entry["status"] = "no_policy" if ready else "not_equipped"
         return entry
     last_capture = jobs.latest_run(db, policy.id, "capture", statuses=jobs.FINAL)
-    last_check = jobs.latest_run(db, policy.id, "check", statuses=jobs.FINAL)
-    running = (
-        db.query(models.BackupRun)
-        .filter(
-            models.BackupRun.policy_id == policy.id,
-            models.BackupRun.status.in_(jobs.PENDING),
-        )
-        .order_by(models.BackupRun.queued_at.desc())
-        .first()
-    )
-    entry["last_capture"] = run_dict(last_capture) if last_capture else None
-    good = jobs.latest_run(db, policy.id, "capture", statuses=jobs.GOOD_CAPTURE)
-    entry["last_good_capture"] = run_dict(good) if good else None
-    entry["last_check"] = run_dict(last_check) if last_check else None
-    entry["running"] = run_dict(running) if running else None
+    running = _running(db, policy)
+    entry.update(_recent_runs(db, policy, last_capture, running))
     # A bulk "Back up now" waiting for a free slot under the target's cap.
     entry["capture_requested"] = policy.capture_requested_at is not None
     due = backup_tick.capture_due_at(db, policy)

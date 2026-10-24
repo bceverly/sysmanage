@@ -112,8 +112,8 @@ class _Judge:
         self.chats = []
 
     async def post(self, url, json, timeout):  # pylint: disable=redefined-outer-name
-        request = httpx.Request("POST", url)
-        assert url.endswith("/api/chat"), "judge_only must not embed"
+        request = httpx.Request("POST", "http://ollama" + url)
+        assert url == tv.CHAT_PATH, "judge_only must not embed"
         self.chats.append(json)
         body = {"message": {"content": '{"answer": "yes", "reason": "ok"}'}}
         return httpx.Response(200, json=body, request=request)
@@ -128,7 +128,10 @@ class _Judge:
 @pytest.mark.parametrize("glossary,messages", [(True, 3), (False, 2)])
 def test_judge_only_calibration_path(monkeypatch, glossary, messages):
     fake = _Judge()
-    monkeypatch.setattr(tv.httpx, "AsyncClient", lambda: fake)
+    clients = []
+    monkeypatch.setattr(
+        tv.httpx, "AsyncClient", lambda **kw: clients.append(kw) or fake
+    )
     router = tv.make_router(
         "http://ollama", "judge", {"zh_TW": "Traditional Chinese"},
         lambda text: (text, []), 5.0, "1m",
@@ -143,3 +146,5 @@ def test_judge_only_calibration_path(monkeypatch, glossary, messages):
     result = asyncio.run(verify(request))["results"][0]
     assert result["ok"] and result["judge"] and result["cos"] is None
     assert len(fake.chats[0]["messages"]) == messages
+    # The Ollama URL comes from the service's configuration, not the request.
+    assert clients == [{"base_url": "http://ollama"}]

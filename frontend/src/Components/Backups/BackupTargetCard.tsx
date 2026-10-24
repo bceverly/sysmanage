@@ -135,7 +135,7 @@ export const TargetDialog: React.FC<{
                         helperText={t('backups.target.storagePathHelp',
                             'The storage host prunes, checks and seals here; backed-up hosts never prune.')} />
                     <TextField type="number" label={t('backups.target.maxConcurrent', 'Backups at the same time')}
-                        value={form.max_concurrent} inputProps={{ min: 1, max: 50 }}
+                        value={form.max_concurrent} slotProps={{ htmlInput: { min: 1, max: 50 } }}
                         onChange={e => set({ max_concurrent: Number(e.target.value) })} />
                     <FormControl fullWidth>
                         <InputLabel id="backup-seal-mode">{t('backups.target.sealMode', 'Seal each backup')}</InputLabel>
@@ -157,14 +157,14 @@ export const TargetDialog: React.FC<{
                     )}
                     <Stack direction="row" spacing={2}>
                         <TextField type="number" fullWidth label={t('backups.target.spaceLow', 'Warn when the storage is this full (%)')}
-                            value={form.space_low_percent ?? ''} inputProps={{ min: 50, max: 99 }}
+                            value={form.space_low_percent ?? ''} slotProps={{ htmlInput: { min: 50, max: 99 } }}
                             onChange={e => set({ space_low_percent: e.target.value === '' ? null : Number(e.target.value) })} />
                         <TextField type="number" fullWidth label={t('backups.target.spaceCritical', 'Critical when the storage is this full (%)')}
-                            value={form.space_critical_percent ?? ''} inputProps={{ min: 51, max: 100 }}
+                            value={form.space_critical_percent ?? ''} slotProps={{ htmlInput: { min: 51, max: 100 } }}
                             onChange={e => set({ space_critical_percent: e.target.value === '' ? null : Number(e.target.value) })} />
                     </Stack>
                     <TextField type="number" label={t('backups.target.cacheBudget', 'Write cache budget per host (GB)')}
-                        value={form.cache_budget_gb ?? ''} inputProps={{ min: 1, max: 10000 }}
+                        value={form.cache_budget_gb ?? ''} slotProps={{ htmlInput: { min: 1, max: 10000 } }}
                         onChange={e => set({ cache_budget_gb: e.target.value === '' ? null : Number(e.target.value) })}
                         helperText={t('backups.target.cacheBudgetHelp',
                             'restate keeps an unencrypted write cache on each host of an encrypted repository; a host over this is flagged.')} />
@@ -179,7 +179,7 @@ export const TargetDialog: React.FC<{
                     )}
                     {form.seal_mode !== 'none' && (
                         <TextField type="number" label={t('backups.target.sealKeepDays', 'Keep sealed snapshots for (days)')}
-                            value={form.seal_keep_days ?? ''} inputProps={{ min: 1, max: 3650 }}
+                            value={form.seal_keep_days ?? ''} slotProps={{ htmlInput: { min: 1, max: 3650 } }}
                             onChange={e => set({ seal_keep_days: e.target.value === '' ? null : Number(e.target.value) })}
                             helperText={t('backups.target.sealKeepHelp',
                                 'The storage host removes older sealed snapshots itself; the newest is always kept.')} />

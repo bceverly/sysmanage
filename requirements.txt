@@ -5,8 +5,8 @@ aiohttp>=3.14.1  # 27 CVEs across 3.9-3.13; 3.14.1 patches the newer PYSEC-2026-
 anyio>=4.5.0
 astroid>=3.3.8
 bandit==1.9.2
-black==26.3.1  # CVE-2026-32274 (arbitrary file writes via cache filename)
-certifi==2026.1.4
+black==26.10.1  # CVE-2026-32274 (arbitrary file writes via cache filename)
+certifi==2026.10.23
 cffi>=2.0.0
 coverage>=7.0.0
 click>=8.1.8

@@ -68,3 +68,10 @@
   visibility: hidden;
   pointer-events: none;
 }
+
+/* Respect the OS "reduce motion" setting: jump instead of scrolling. */
+@media (prefers-reduced-motion: reduce) {
+  .scrollnav__scroller {
+    scroll-behavior: auto;
+  }
+}

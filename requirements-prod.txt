@@ -9,7 +9,7 @@ annotated-types==0.7.0
 aiofiles>=24.1.0
 aiohttp>=3.14.1  # 27 CVEs across 3.9-3.13; 3.14.1 patches the newer PYSEC-2026-2104..2113 chain (3.13.5 is affected)
 anyio>=4.5.0
-certifi==2026.1.4
+certifi==2026.10.23
 cffi>=2.0.0
 click>=8.1.8
 cryptography==50.0.0  # PKCS#7 EnvelopedData Bleichenbacher oracle (GHSA, Aug 2026); 49.0.0 was still affected. Earlier: CVE-2026-34073, CVE-2026-39892 (46.0.7->49.0.0)

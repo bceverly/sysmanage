@@ -33,7 +33,7 @@
   border-radius: 8px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
 }
 
 .updates__refresh:hover:not(:disabled) {
@@ -152,7 +152,7 @@
   background: var(--container-color);
   border: 2px solid var(--border-color);
   border-radius: 8px;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   color: var(--text-color);
 }
 
@@ -266,7 +266,7 @@
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .updates__execute:hover {
@@ -302,7 +302,7 @@
   background: var(--container-color, var(--body-color));
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   cursor: pointer;
 }
 
@@ -468,7 +468,7 @@
   color: var(--text-color);
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
 }
 
 .updates__pagination button:hover:not(:disabled) {
@@ -531,5 +531,25 @@
   
   .updates__item-header {
     justify-content: flex-start;
+  }
+}
+
+/* Respect the OS "reduce motion" setting: no lifting cards or buttons, and
+   a slow spin that still says a refresh is running. */
+@media (prefers-reduced-motion: reduce) {
+  .updates__refresh.refreshing svg {
+    animation-duration: 3s;
+  }
+
+  .updates__stat-card,
+  .updates__refresh,
+  .updates__execute {
+    transition: none;
+  }
+
+  .updates__stat-card:hover,
+  .updates__refresh:hover:not(:disabled),
+  .updates__execute:hover {
+    transform: none;
   }
 }

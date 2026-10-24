@@ -114,17 +114,17 @@ const BackupPolicyDialog: React.FC<{
                         label={t('backups.policy.enabled', 'Back up this host on a schedule')}
                     />
                     <TextField type="number" label={t('backups.policy.intervalHours', 'Every (hours)')}
-                        value={form.interval_hours} inputProps={{ min: 1, max: 720 }}
+                        value={form.interval_hours} slotProps={{ htmlInput: { min: 1, max: 720 } }}
                         onChange={e => set({ interval_hours: number(e.target.value) })} />
                     <TextField type="number" label={t('backups.policy.windowStart', 'Start hour (UTC, optional)')}
-                        value={form.window_start_hour ?? ''} inputProps={{ min: 0, max: 23 }}
+                        value={form.window_start_hour ?? ''} slotProps={{ htmlInput: { min: 0, max: 23 } }}
                         helperText={t('backups.policy.windowHelp', 'Backups start only in the six hours from this hour.')}
                         onChange={e => set({ window_start_hour: e.target.value === '' ? null : Number(e.target.value) })} />
                     <TextField type="number" label={t('backups.policy.keepLast', 'Snapshots to keep')}
-                        value={form.keep_last} inputProps={{ min: 1, max: 1000 }}
+                        value={form.keep_last} slotProps={{ htmlInput: { min: 1, max: 1000 } }}
                         onChange={e => set({ keep_last: number(e.target.value) })} />
                     <TextField type="number" label={t('backups.policy.checkDays', 'Check the repository every (days)')}
-                        value={form.check_interval_days} inputProps={{ min: 1, max: 90 }}
+                        value={form.check_interval_days} slotProps={{ htmlInput: { min: 1, max: 90 } }}
                         onChange={e => set({ check_interval_days: number(e.target.value) })} />
                     <FormControlLabel
                         control={<Switch checked={form.quiesce} onChange={e => set({ quiesce: e.target.checked })} />}

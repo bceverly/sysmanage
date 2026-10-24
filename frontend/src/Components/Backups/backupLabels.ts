@@ -133,8 +133,12 @@ export const formatBytes = (bytes: number | null | undefined): string => {
     return `${(bytes / 1024 ** 4).toFixed(2)} TB`;
 };
 
-export const formatTime = (iso: string | null | undefined): string =>
-    iso ? new Date(iso.endsWith('Z') || iso.includes('+') ? iso : `${iso}Z`).toLocaleString(appLocale()) : '--';
+export const formatTime = (iso: string | null | undefined): string => {
+    if (!iso) return '--';
+    // A naive timestamp from the server is UTC.
+    const zoned = iso.endsWith('Z') || iso.includes('+') ? iso : `${iso}Z`;
+    return new Date(zoned).toLocaleString(appLocale());
+};
 
 /** The server's own (translated) message, or ``fallback``. */
 export const apiDetail = (error: unknown, fallback: string): string => {

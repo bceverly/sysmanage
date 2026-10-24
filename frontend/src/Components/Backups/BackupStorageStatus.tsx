@@ -126,8 +126,8 @@ const LastRun: React.FC<{ label: string; run: StorageRunBrief | null }> = ({ lab
 };
 
 // Per-host findings that "Prepare storage" fixes (the rest are host-wide).
-const PREPARE_FIXES = ['audit_own_filesystem', 'audit_export_shared', 'audit_export_own',
-    'audit_export_restricted', 'audit_export_mapping'];
+const PREPARE_FIXES = new Set(['audit_own_filesystem', 'audit_export_shared', 'audit_export_own',
+    'audit_export_restricted', 'audit_export_mapping']);
 
 const BackupStorageStatus: React.FC<{ target: BackupTarget; hosts: BackupHost[] }> = ({ target, hosts }) => {
     const { t } = useTranslation();
@@ -167,7 +167,7 @@ const BackupStorageStatus: React.FC<{ target: BackupTarget; hosts: BackupHost[] 
                         {warningText(t, target, hosts, w)}
                     </Alert>
                 ))}
-                {target.warnings.some(w => PREPARE_FIXES.includes(w)) && (
+                {target.warnings.some(w => PREPARE_FIXES.has(w)) && (
                     <Alert severity="info" variant="outlined" data-testid="backup-prepare-hint">
                         {t('backups.audit.prepareHint',
                             'Prepare storage, on each host\'s Backups tab, gives that host its own filesystem and an export limited to it. The storage host\'s NFS server settings stay yours to set.')}

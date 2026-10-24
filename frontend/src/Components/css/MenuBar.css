@@ -179,3 +179,10 @@
   display: block;
   padding: 0.45rem 0;
 }
+
+/* Respect the OS "reduce motion" setting: the menu just appears. */
+@media (prefers-reduced-motion: reduce) {
+  .menubar__content {
+    animation: none;
+  }
+}

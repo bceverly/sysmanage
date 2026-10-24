@@ -157,7 +157,7 @@ const BackupHostsTable: React.FC<{
                                 <Checkbox size="small" checked={allPicked}
                                     indeterminate={picked.size > 0 && !allPicked} disabled={pickable.length === 0}
                                     onChange={() => setPicked(allPicked ? new Set() : new Set(pickable))}
-                                    inputProps={{ 'aria-label': t('backups.bulk.selectAll', 'Select every host that can back up now') }} />
+                                    slotProps={{ input: { 'aria-label': t('backups.bulk.selectAll', 'Select every host that can back up now') } }} />
                             </TableCell>
                         )}
                         <TableCell>{t('backups.hosts.host', 'Host')}</TableCell>
@@ -176,7 +176,7 @@ const BackupHostsTable: React.FC<{
                                 <TableCell padding="checkbox">
                                     <Checkbox size="small" checked={picked.has(row.host_id)}
                                         disabled={!canBackUp(row)} onChange={() => toggle(row.host_id)}
-                                        inputProps={{ 'aria-label': t('backups.bulk.selectHost', 'Select {{host}}', { host: row.fqdn }) }} />
+                                        slotProps={{ input: { 'aria-label': t('backups.bulk.selectHost', 'Select {{host}}', { host: row.fqdn }) } }} />
                                 </TableCell>
                             )}
                             <TableCell>
