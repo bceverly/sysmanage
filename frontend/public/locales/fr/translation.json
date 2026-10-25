@@ -5535,7 +5535,8 @@
       "path": "Fichier ou dossier",
       "what": "Ce qui a changé",
       "more": "Seules les premières modifications sont affichées.",
-      "button": "Ce qui a changé"
+      "button": "Ce qui a changé",
+      "unclassified": "Cet instantané a été pris avant restate 2.2.0.2 : la liste inclut donc aussi des fichiers que la sauvegarde exclut volontairement. Ils n'apparaissent plus une fois la prochaine sauvegarde effectuée."
     }
   }
 }

@@ -5535,7 +5535,8 @@
       "path": "File or folder",
       "what": "What changed",
       "more": "Only the first changes are shown.",
-      "button": "What changed"
+      "button": "What changed",
+      "unclassified": "This snapshot was taken before restate 2.2.0.2, so the list also includes files the backup leaves out on purpose. They no longer appear once the next backup has run."
     }
   }
 }

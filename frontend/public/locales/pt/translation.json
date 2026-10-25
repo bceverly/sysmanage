@@ -5535,7 +5535,8 @@
       "path": "Arquivo ou pasta",
       "what": "O que mudou",
       "more": "Somente as primeiras alterações são mostradas.",
-      "button": "O que mudou"
+      "button": "O que mudou",
+      "unclassified": "Este snapshot foi criado antes do restate 2.2.0.2, por isso a lista também inclui arquivos que o backup deixa de fora de propósito. Eles deixam de aparecer depois que o próximo backup for executado."
     }
   }
 }

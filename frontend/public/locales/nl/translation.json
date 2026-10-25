@@ -5535,7 +5535,8 @@
       "path": "Bestand of map",
       "what": "Wat is veranderd",
       "more": "Alleen de eerste wijzigingen worden getoond.",
-      "button": "Wat is veranderd"
+      "button": "Wat is veranderd",
+      "unclassified": "Deze snapshot is gemaakt vóór restate 2.2.0.2, dus de lijst bevat ook bestanden die de back-up met opzet overslaat. Ze verschijnen niet meer zodra de volgende back-up is uitgevoerd."
     }
   }
 }

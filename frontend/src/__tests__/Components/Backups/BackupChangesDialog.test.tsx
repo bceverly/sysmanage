@@ -38,6 +38,29 @@ describe("BackupChangesDialog", () => {
     expect(screen.getByText("Modified")).toBeInTheDocument();
   });
 
+  test("a snapshot from before restate 2.2.0.2 is called out", async () => {
+    vi.mocked(backupChanges).mockResolvedValue({ id: "r2", status: "queued" } as unknown as BackupRun);
+    vi.mocked(getRun).mockResolvedValue({
+      id: "r2", status: "different",
+      result: { capture_rules: false, diff: { added: 1, deleted: 0, modified: 0, changes: [
+        { change: "A", path: "/home/u/Nextcloud/a.txt" },
+      ] } },
+    } as unknown as BackupRun);
+    render(<BackupChangesDialog hostId="h1" fqdn="t14" onClose={vi.fn()} />);
+    expect(await screen.findByText(/taken before restate 2.2.0.2/)).toBeInTheDocument();
+  });
+
+  test("no note when restate used the capture's rules", async () => {
+    vi.mocked(backupChanges).mockResolvedValue({ id: "r3", status: "queued" } as unknown as BackupRun);
+    vi.mocked(getRun).mockResolvedValue({
+      id: "r3", status: "ok",
+      result: { capture_rules: true, diff: { added: 0, deleted: 0, modified: 0, changes: [] } },
+    } as unknown as BackupRun);
+    render(<BackupChangesDialog hostId="h1" fqdn="t14" onClose={vi.fn()} />);
+    expect(await screen.findByText("Added: 0, deleted: 0, modified: 0")).toBeInTheDocument();
+    expect(screen.queryByText(/taken before restate 2.2.0.2/)).not.toBeInTheDocument();
+  });
+
   test("a refusal is shown", async () => {
     vi.mocked(backupChanges).mockRejectedValue({ response: { data: { detail: "This host's restate cannot do this yet; upgrade restate" } } });
     render(<BackupChangesDialog hostId="h1" fqdn="t14" onClose={vi.fn()} />);

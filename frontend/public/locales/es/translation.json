@@ -5535,7 +5535,8 @@
       "path": "Archivo o carpeta",
       "what": "Qué cambió",
       "more": "Solo se muestran los primeros cambios.",
-      "button": "Qué cambió"
+      "button": "Qué cambió",
+      "unclassified": "Esta instantánea se tomó antes de restate 2.2.0.2, por lo que la lista también incluye archivos que la copia de seguridad omite a propósito. Dejan de aparecer después de la próxima copia de seguridad."
     }
   }
 }

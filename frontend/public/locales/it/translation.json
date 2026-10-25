@@ -5535,7 +5535,8 @@
       "path": "File o cartella",
       "what": "Cosa è cambiato",
       "more": "Vengono mostrate solo le prime modifiche.",
-      "button": "Cosa è cambiato"
+      "button": "Cosa è cambiato",
+      "unclassified": "Questo snapshot è stato creato prima di restate 2.2.0.2, quindi l'elenco include anche file che il backup esclude di proposito. Non compaiono più dopo il prossimo backup."
     }
   }
 }

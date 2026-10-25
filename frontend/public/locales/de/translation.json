@@ -5535,7 +5535,8 @@
       "path": "Datei oder Ordner",
       "what": "Was sich geändert hat",
       "more": "Nur die ersten Änderungen werden angezeigt.",
-      "button": "Was hat sich geändert"
+      "button": "Was hat sich geändert",
+      "unclassified": "Dieser Snapshot wurde vor restate 2.2.0.2 erstellt, daher enthält die Liste auch Dateien, die die Sicherung absichtlich auslässt. Sie erscheinen nicht mehr, sobald die nächste Sicherung gelaufen ist."
     }
   }
 }

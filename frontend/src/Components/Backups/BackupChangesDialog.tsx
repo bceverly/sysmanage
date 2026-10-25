@@ -84,6 +84,9 @@ const BackupChangesDialog: React.FC<{ hostId: string; fqdn: string; onClose: () 
 
     const done = run && FINISHED.has(run.status);
     const diff = done ? diffOf(run) : null;
+    // restate 2.2.0.2+ says whether it classified by the capture's recorded
+    // rules; false = a snapshot from before then, compared with everything.
+    const unclassified = (run?.result as { capture_rules?: boolean } | null)?.capture_rules === false;
 
     return (
         <Dialog open onClose={onClose} maxWidth="md" fullWidth>
@@ -101,6 +104,11 @@ const BackupChangesDialog: React.FC<{ hostId: string; fqdn: string; onClose: () 
                 )}
                 {diff && (
                     <>
+                        {unclassified && (
+                            <Alert severity="info" sx={{ mb: 1 }}>
+                                {t('backups.changes.unclassified', 'This snapshot was taken before restate 2.2.0.2, so the list also includes files the backup leaves out on purpose. They no longer appear once the next backup has run.')}
+                            </Alert>
+                        )}
                         <Typography variant="body2" sx={{ mb: 1 }}>
                             {t('backups.changes.counts', 'Added: {{added}}, deleted: {{deleted}}, modified: {{modified}}',
                                 { added: diff.added, deleted: diff.deleted, modified: diff.modified })}
