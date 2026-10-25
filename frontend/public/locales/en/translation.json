@@ -5301,7 +5301,8 @@
       "open": "All backups",
       "title": "Backup",
       "writeCache": "Write cache on this host: {{size}}",
-      "writeCacheOver": "over the {{budget}} GB budget"
+      "writeCacheOver": "over the {{budget}} GB budget",
+      "encrypted": "Encrypted"
     },
     "coverage": {
       "filesOnly": "Files only",
@@ -5379,7 +5380,8 @@
       "placeNote": "The files at these paths on the host are replaced with the snapshot's copies. restate checks the whole selection before it writes anything, and each file against the snapshot before it replaces the old one. Name specific paths, such as /etc/nginx; a whole host is not restored in place. Preview first to see what would change.",
       "placePaths": "Paths to put back (one per line)",
       "placeAck": "Replace the files at these paths on {{host}}.",
-      "confirmPlace": "Restore into place"
+      "confirmPlace": "Restore into place",
+      "nothing": "Nothing in the snapshot matches these paths. Check the spelling, and give absolute paths such as /home/alice/notes.txt."
     },
     "run": {
       "busy": "Busy, will retry",

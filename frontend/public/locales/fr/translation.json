@@ -5301,7 +5301,8 @@
       "open": "Toutes les sauvegardes",
       "title": "Sauvegarde",
       "writeCache": "Cache d'écriture sur cet hôte : {{size}}",
-      "writeCacheOver": "au-delà du budget de {{budget}} GB"
+      "writeCacheOver": "au-delà du budget de {{budget}} GB",
+      "encrypted": "Chiffré"
     },
     "coverage": {
       "filesOnly": "Fichiers uniquement",
@@ -5379,7 +5380,8 @@
       "placeNote": "Les fichiers situés à ces chemins sur l'hôte sont remplacés par les copies de l'instantané. restate vérifie toute la sélection avant d'écrire quoi que ce soit, et chaque fichier par rapport à l'instantané avant qu'il ne remplace l'ancien. Indiquez des chemins précis, comme /etc/nginx ; un hôte entier n'est pas restauré en place. Faites d'abord un aperçu pour voir ce qui changerait.",
       "placePaths": "Chemins à remettre en place (un par ligne)",
       "placeAck": "Remplacer les fichiers situés à ces chemins sur {{host}}.",
-      "confirmPlace": "Restaurer en place"
+      "confirmPlace": "Restaurer en place",
+      "nothing": "Rien dans l'instantané ne correspond à ces chemins. Vérifiez l'orthographe et indiquez des chemins absolus, comme /home/alice/notes.txt."
     },
     "run": {
       "busy": "Occupé, nouvelle tentative prévue",

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 07:34-0400\n"
+"POT-Creation-Date: 2026-10-25 14:50-0400\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -81,7 +81,7 @@ msgstr "選択したアカウントにアクセス権限がありません"
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:139
+#: backend/api/posture.py:375 backend/api/backups.py:140
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:151
@@ -196,8 +196,8 @@ msgstr "ホストIDの形式が無効です"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:151
-#: backend/api/backups.py:154 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:152
+#: backend/api/backups.py:155 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -2060,7 +2060,15 @@ msgstr "接続が失敗しました - Grafanaサーバーがダウンまたは�
 msgid "Unexpected error checking Grafana health"
 msgstr "Grafanaのヘルスチェックで予期しないエラー"
 
-#: backend/api/proplus_routes_stubs.py:75
+#: backend/api/proplus_routes_stubs.py:69
+msgid ""
+"Encrypted backups require a SysManage Professional+ license with the backup "
+"engine. Please upgrade to access this feature."
+msgstr ""
+"暗号化されたバックアップには、バックアップエンジンを含む SysManage Professional+ "
+"ライセンスが必要です。この機能を使用するにはアップグレードしてください。"
+
+#: backend/api/proplus_routes_stubs.py:104
 msgid ""
 "Host provisioning requires a SysManage Professional+ license with the "
 "provisioning engine. Please upgrade to access this feature."
@@ -3883,199 +3891,219 @@ msgstr "KVMネットワークはLinuxホストでのみ利用可能です"
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "KVMネットワーク一覧がリクエストされました。まもなく結果が表示されます。"
 
-#: backend/api/backups.py:170
+#: backend/api/backups.py:171
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s は '..' を含まない絶対パスである必要があります"
 
-#: backend/api/backups.py:175
+#: backend/api/backups.py:176
 #, python-format
 msgid "%s is out of range"
 msgstr "%s が範囲外です"
 
-#: backend/api/backups.py:179
+#: backend/api/backups.py:180
 msgid "Host mount point"
 msgstr "ホストのマウントポイント"
 
-#: backend/api/backups.py:180 backend/api/backups.py:225
+#: backend/api/backups.py:181 backend/api/backups.py:226
 msgid "Storage path"
 msgstr "ストレージパス"
 
-#: backend/api/backups.py:181
+#: backend/api/backups.py:182
 msgid "Concurrent backups"
 msgstr "同時バックアップ数"
 
-#: backend/api/backups.py:182
+#: backend/api/backups.py:183
 msgid "Days to keep sealed snapshots"
 msgstr "封印したスナップショットの保持日数"
 
-#: backend/api/backups.py:183
+#: backend/api/backups.py:184
 msgid "Write cache budget"
 msgstr "書き込みキャッシュの上限"
 
-#: backend/api/backups.py:184
+#: backend/api/backups.py:185
 msgid "Storage space warning"
 msgstr "ストレージ容量の警告"
 
-#: backend/api/backups.py:185
+#: backend/api/backups.py:186
 msgid "Storage space critical"
 msgstr "ストレージ容量が重大"
 
-#: backend/api/backups.py:189
+#: backend/api/backups.py:190
 msgid "The storage space warning must be below the critical level"
 msgstr "ストレージ容量の警告は重大レベルより低くする必要があります"
 
-#: backend/api/backups.py:191
+#: backend/api/backups.py:192
 msgid "The backup service account is not a valid account name"
 msgstr "バックアップ用サービスアカウントが有効なアカウント名ではありません"
 
-#: backend/api/backups.py:193
+#: backend/api/backups.py:194
 msgid "Unknown seal mode"
 msgstr "不明な封印モードです"
 
-#: backend/api/backups.py:195
+#: backend/api/backups.py:196
 msgid "A ZFS snapshot seal needs the dataset name"
 msgstr "ZFS スナップショットによる封印にはデータセット名が必要です"
 
-#: backend/api/backups.py:197
+#: backend/api/backups.py:198
 msgid "The ZFS dataset name is not valid"
 msgstr "ZFS データセット名が無効です"
 
-#: backend/api/backups.py:204
+#: backend/api/backups.py:205
 msgid "A storage host needs the storage path"
 msgstr "ストレージホストにはストレージパスが必要です"
 
-#: backend/api/backups.py:221
+#: backend/api/backups.py:222
 msgid "A btrfs snapshot seal needs the snapshot directory"
 msgstr "btrfs スナップショットによる封印にはスナップショットディレクトリが必要です"
 
-#: backend/api/backups.py:223
+#: backend/api/backups.py:224
 msgid "A btrfs snapshot seal needs the storage path"
 msgstr "btrfs スナップショットによる封印にはストレージパスが必要です"
 
-#: backend/api/backups.py:226
+#: backend/api/backups.py:227
 msgid "Snapshot directory"
 msgstr "スナップショットディレクトリ"
 
-#: backend/api/backups.py:231
+#: backend/api/backups.py:232
 #, python-format
 msgid ""
 "%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
 " trailing '/')"
 msgstr "%s は単純な絶対パスである必要があります (英字、数字、'_'、'.'、'-'、'/' のみ。末尾に '/' は不可)"
 
-#: backend/api/backups.py:239
+#: backend/api/backups.py:240
 msgid "The snapshot directory must be outside the storage path"
 msgstr "スナップショットディレクトリはストレージパスの外にある必要があります"
 
-#: backend/api/backups.py:243
+#: backend/api/backups.py:244
 msgid "Interval (hours)"
 msgstr "間隔（時間）"
 
-#: backend/api/backups.py:244
+#: backend/api/backups.py:245
 msgid "Window start hour"
 msgstr "時間帯の開始時刻"
 
-#: backend/api/backups.py:245
+#: backend/api/backups.py:246
 msgid "Snapshots to keep"
 msgstr "保持するスナップショット数"
 
-#: backend/api/backups.py:246
+#: backend/api/backups.py:247
 msgid "Check interval (days)"
 msgstr "チェック間隔（日）"
 
-#: backend/api/backups.py:250
+#: backend/api/backups.py:251
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "一時停止フックは小文字の短い名前で最大 10 個までです"
 
-#: backend/api/backups.py:263
+#: backend/api/backups.py:264
 msgid "At most 50 path rules can be set"
 msgstr "パスルールは最大で50個まで設定できます"
 
-#: backend/api/backups.py:274
+#: backend/api/backups.py:275
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
 msgstr "各パスルールは先頭や末尾のスペースがない512文字以内の一行です。また、先頭に#を含んではいけません"
 
-#: backend/api/backups.py:282 backend/api/backups_browse.py:85
+#: backend/api/backups.py:283 backend/api/backups_browse.py:92
 msgid "The snapshot name is not valid"
 msgstr "スナップショット名が無効です"
 
-#: backend/api/backups.py:284
+#: backend/api/backups.py:285
 msgid "At most 50 paths can be restored at once"
 msgstr "一度に復元できるパスは最大 50 個です"
 
-#: backend/api/backups.py:287
+#: backend/api/backups.py:288
 msgid "A restore path is empty or too long"
 msgstr "復元パスが空か、長すぎます"
 
-#: backend/api/backups.py:289
+#: backend/api/backups.py:290
 msgid "A restore path must not contain '..'"
 msgstr "復元パスに '..' を含めることはできません"
 
-#: backend/api/backups.py:302
+#: backend/api/backups.py:296
+msgid "A restore path must be absolute, such as /home/alice/notes.txt"
+msgstr "復元するパスは /home/alice/notes.txt のような絶対パスである必要があります"
+
+#: backend/api/backups.py:310
 msgid "Name the paths to put back; a whole host is not restored in place"
 msgstr "元に戻すパスを指定してください。ホスト全体を元の場所に復元することはできません"
 
-#: backend/api/backups.py:308
+#: backend/api/backups.py:316
 msgid "Each path restored in place must be specific, such as /etc/nginx"
 msgstr "元の場所に復元する各パスは、/etc/nginx のように具体的である必要があります"
 
-#: backend/api/backups.py:313
+#: backend/api/backups.py:321
 msgid "Confirm that the host's files at these paths will be replaced"
 msgstr "これらのパスにあるホストのファイルが置き換えられることを確認してください"
 
-#: backend/api/backups.py:333 backend/api/backups.py:336
+#: backend/api/backups.py:341 backend/api/backups.py:344
 msgid "Backup target not found"
 msgstr "バックアップ先が見つかりません"
 
-#: backend/api/backups.py:390
+#: backend/api/backups.py:398
 msgid "This edition supports one backup target; edit the existing one"
 msgstr "このエディションではバックアップ先は1つだけです。既存のものを編集してください"
 
-#: backend/api/backups.py:467
+#: backend/api/backups.py:475
 msgid "Remove the hosts' backup policies before the target"
 msgstr "バックアップ先より先に、各ホストのバックアップポリシーを削除してください"
 
-#: backend/api/backups.py:547
+#: backend/api/backups.py:555
 msgid "Set up the backup target first"
 msgstr "先にバックアップ先を設定してください"
 
-#: backend/api/backups.py:588
+#: backend/api/backups.py:596
 msgid "No backup policy"
 msgstr "バックアップポリシーがありません"
 
-#: backend/api/backups.py:608
+#: backend/api/backups.py:616
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "このホストはまだバックアップを実行できません（%s）"
 
-#: backend/api/backups.py:614
+#: backend/api/backups.py:622
 msgid "This host's backup is not configured yet"
 msgstr "このホストのバックアップはまだ設定されていません"
 
-#: backend/api/backups.py:631
+#: backend/api/backups.py:639
 msgid "The backup storage host is not ready"
 msgstr "バックアップのストレージホストの準備ができていません"
 
-#: backend/api/backups.py:646
+#: backend/api/backups.py:654
 msgid "Unknown backup action"
 msgstr "不明なバックアップ操作です"
 
-#: backend/api/backups.py:651
+#: backend/api/backups.py:662
+msgid "An encrypted repository cannot be repacked on the storage host"
+msgstr "暗号化されたリポジトリはストレージホストで再パックできません"
+
+#: backend/api/backups.py:666
 msgid "That backup job is already queued or running"
 msgstr "そのバックアップジョブはすでにキューにあるか実行中です"
 
-#: backend/api/backups.py:745 backend/api/backups_browse.py:70
+#: backend/api/backups.py:760 backend/api/backups_browse.py:77
 msgid "Snapshot not found"
 msgstr "スナップショットが見つかりません"
 
-#: backend/api/backups.py:749
+#: backend/api/backups.py:765
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "このスナップショットは署名されていません。それでも復元するには確認してください"
 
-#: backend/api/backups.py:864 backend/api/backups.py:867
+#: backend/api/backups.py:816 backend/services/backup_key_release.py:105
+msgid "Encrypted backups need the Professional+ backup engine"
+msgstr "暗号化されたバックアップには Professional+ のバックアップエンジンが必要です"
+
+#: backend/api/backups.py:821 backend/api/backups_browse.py:62
+msgid "This host's restate cannot do this yet; upgrade restate"
+msgstr "このホストの restate ではまだこの操作ができません。restate を更新してください"
+
+#: backend/api/backups.py:833
+msgid "This snapshot's repository is no longer kept"
+msgstr "このスナップショットのリポジトリはもう保持されていません"
+
+#: backend/api/backups.py:915 backend/api/backups.py:918
 msgid "Backup run not found"
 msgstr "バックアップジョブが見つかりません"
 
@@ -5178,15 +5206,15 @@ msgstr "商用アンチウイルスステータスの取得に失敗しました
 msgid "Machine link decided for host %s"
 msgstr "ホスト %s へのマシンリンクが決定しました"
 
-#: backend/api/backups_browse.py:55
-msgid "This host's restate cannot do this yet; upgrade restate"
-msgstr "このホストの restate ではまだこの操作ができません。restate を更新してください"
-
-#: backend/api/backups_browse.py:87
+#: backend/api/backups_browse.py:94
 msgid "The path must be absolute"
 msgstr "パスは絶対パスである必要があります"
 
-#: backend/api/backups_browse.py:116
+#: backend/api/backups_browse.py:126
+msgid "What changed compares with the current repository only"
+msgstr "変更内容は現在のリポジトリとのみ比較されます"
+
+#: backend/api/backups_browse.py:132
 msgid "A check of what changed is already running"
 msgstr "変更内容の確認はすでに実行中です"
 
@@ -5584,6 +5612,30 @@ msgstr "スキャンするホストを少なくとも 1 台選択してくださ
 msgid "At most 500 hosts can be scanned in one request"
 msgstr "1 回のリクエストでスキャンできるホストは最大 500 台です"
 
+#: backend/services/backup_key_release.py:73
+msgid "No such backup run for this host"
+msgstr "このホストにそのようなバックアップジョブはありません"
+
+#: backend/services/backup_key_release.py:79
+msgid "This backup run does not need a key"
+msgstr "このバックアップジョブにキーは必要ありません"
+
+#: backend/services/backup_key_release.py:81
+msgid "This backup run has already ended"
+msgstr "このバックアップジョブはすでに終了しています"
+
+#: backend/services/backup_key_release.py:83
+msgid "This backup run's key was already released"
+msgstr "このバックアップジョブのキーはすでに渡されています"
+
+#: backend/services/backup_key_release.py:85
+msgid "This backup run is too old to release its key"
+msgstr "このバックアップジョブは古すぎるため、キーを渡せません"
+
+#: backend/services/backup_key_release.py:101
+msgid "This host's backups are not encrypted"
+msgstr "このホストのバックアップは暗号化されていません"
+
 #: backend/services/malware_quarantine.py:132
 msgid "Unknown action"
 msgstr "不明な操作です"
@@ -5748,6 +5800,13 @@ msgstr "NetBSD の pkgsrc パッケージの脆弱性 (pkg_admin audit が読む
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr "OS バージョン別の macOS の脆弱性 (NVD の影響を受けるバージョンのデータより)"
+
+#~ msgid ""
+#~ "This snapshot is encrypted; restoring or browsing it needs a restate that "
+#~ "can take the key for one job, which is not released yet"
+#~ msgstr ""
+#~ "このスナップショットは暗号化されています。復元や参照には、1 つのジョブのためにキーを受け取れる restate "
+#~ "が必要ですが、まだリリースされていません"
 
 #~ msgid "Days to keep seals"
 #~ msgstr "封印したスナップショットの保持日数"

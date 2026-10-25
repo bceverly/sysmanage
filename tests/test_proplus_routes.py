@@ -249,6 +249,7 @@ class TestMountProplusRoutes:
             "vuln_engine",
             "advisory_engine",
             "lifecycle_engine",
+            "backup_engine",
             "provisioning_engine",
             "health_engine",
             "compliance_engine",
@@ -464,6 +465,7 @@ class TestStubsSkippedWhenModuleLoaded:
                 # licensed server must not mount them either. This test caught
                 # the omission when they were added, which is exactly its job.
                 "provisioning_engine": True,
+                "backup_engine": True,
             },
         )
         assert len(app.routes) == before

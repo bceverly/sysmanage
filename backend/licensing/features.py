@@ -33,6 +33,9 @@ class FeatureCode(str, Enum):
     VULNERABILITY_SCANNING = "vuln"  # Matches license server feature code
     ADVISORY_MANAGEMENT = "advisory_management"  # Phase 14.1 errata/advisory
     OS_LIFECYCLE = "os_lifecycle"  # Phase 14.3 EOL tracking + release upgrades
+    BACKUP_ENCRYPTION = (
+        "backup_encryption"  # Phase 24.6 encrypted backups, keys in OpenBAO
+    )
     COMPLIANCE_REPORTS = "compliance"  # Matches license server feature code
     SECURITY_HARDENING = "security_hardening"
     FIPS_MODE = "fips_mode"  # Phase 14.4 FIPS compliance mode management (Enterprise)
@@ -194,6 +197,7 @@ class ModuleCode(str, Enum):
     VULN_ENGINE = "vuln_engine"  # Renamed from security_scanner
     ADVISORY_ENGINE = "advisory_engine"  # Phase 14.1 errata/advisory
     LIFECYCLE_ENGINE = "lifecycle_engine"  # Phase 14.3 EOL + release upgrades
+    BACKUP_ENGINE = "backup_engine"  # Phase 24.6 fleet backups (encryption, keys)
     COMPLIANCE_ENGINE = "compliance_engine"
     PERFORMANCE_ANALYZER = "performance_analyzer"
 
@@ -353,6 +357,7 @@ TIER_FEATURES = {
         FeatureCode.VULNERABILITY_SCANNING,
         FeatureCode.ADVISORY_MANAGEMENT,
         FeatureCode.OS_LIFECYCLE,
+        FeatureCode.BACKUP_ENCRYPTION,
         FeatureCode.ADVANCED_MONITORING,
         FeatureCode.CUSTOM_REPORTS,
         # Phase 11.4 -- CVE feed management (paired with VULN_ENGINE module)
@@ -381,6 +386,7 @@ TIER_FEATURES = {
         FeatureCode.VULNERABILITY_SCANNING,
         FeatureCode.ADVISORY_MANAGEMENT,
         FeatureCode.OS_LIFECYCLE,
+        FeatureCode.BACKUP_ENCRYPTION,
         FeatureCode.COMPLIANCE_REPORTS,
         FeatureCode.SECURITY_HARDENING,
         # Phase 14.4 -- FIPS mode enable/disable + fleet posture (Enterprise only)
@@ -486,6 +492,7 @@ TIER_MODULES = {
         ModuleCode.VULN_ENGINE,
         ModuleCode.ADVISORY_ENGINE,
         ModuleCode.LIFECYCLE_ENGINE,
+        ModuleCode.BACKUP_ENGINE,
         ModuleCode.COMPLIANCE_ENGINE,
         ModuleCode.ALERTING_ENGINE,
         ModuleCode.REPORTING_ENGINE,
@@ -505,6 +512,7 @@ TIER_MODULES = {
         ModuleCode.VULN_ENGINE,
         ModuleCode.ADVISORY_ENGINE,
         ModuleCode.LIFECYCLE_ENGINE,
+        ModuleCode.BACKUP_ENGINE,
         ModuleCode.COMPLIANCE_ENGINE,
         ModuleCode.ALERTING_ENGINE,
         ModuleCode.REPORTING_ENGINE,

@@ -5301,7 +5301,8 @@
       "open": "所有备份",
       "title": "备份",
       "writeCache": "此主机上的写入缓存：{{size}}",
-      "writeCacheOver": "超出 {{budget}} GB 上限"
+      "writeCacheOver": "超出 {{budget}} GB 上限",
+      "encrypted": "已加密"
     },
     "coverage": {
       "filesOnly": "仅文件",
@@ -5379,7 +5380,8 @@
       "placeNote": "主机上这些路径中的文件将被快照中的副本替换。restate 会在写入任何内容之前检查整个选择，并在每个文件替换旧文件之前将其与快照进行核对。请指定具体路径，例如 /etc/nginx；不能将整个主机恢复到原位置。请先预览，查看会发生哪些变化。",
       "placePaths": "要放回的路径（每行一个）",
       "placeAck": "替换 {{host}} 上这些路径中的文件。",
-      "confirmPlace": "恢复到原位置"
+      "confirmPlace": "恢复到原位置",
+      "nothing": "快照中没有与这些路径匹配的内容。请检查拼写，并提供绝对路径，例如 /home/alice/notes.txt。"
     },
     "run": {
       "busy": "忙碌，将重试",

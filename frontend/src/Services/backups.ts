@@ -169,6 +169,9 @@ export interface BackupPolicy {
   storage_configured: boolean;
   restate_version: string | null;
   storage_restate_version: string | null;
+  /** Pro+ backup_engine: the current repository's key (never the secret
+   *  key) and the plain repository it replaced; null when not encrypted. */
+  encryption?: { fingerprint: string | null; since: string | null; previous_repository: string | null } | null;
 }
 
 export type PolicyInput = Pick<

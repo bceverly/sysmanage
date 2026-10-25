@@ -21,7 +21,7 @@ import HostImageModeTab from "./HostImageModeTab";
 import HostAdvisorTab from "./HostAdvisorTab";
 import HostDiagnosticsTab from "./HostDiagnosticsTab";
 import HostAutomationTab from "./HostAutomationTab";
-import HostBackupCard from "../Backups/HostBackupCard";
+import HostBackupTab from "./HostBackupTab";
 import {
   DiagnosticReport,
   PaginationInfo,
@@ -476,8 +476,15 @@ const HostDetailTabContent: React.FC<HostDetailTabContentProps> = (props) => {
           extension={visiblePluginTabs.find((pt) => pt.id === "automation")?.component}
         />
       )}
-      {/* Backup Tab (Phase 24) */}
-      {currentTabId === "backup" && hostId && <HostBackupCard hostId={hostId} />}
+      {/* Backup Tab (Phase 24): the Community card, then the Pro+
+          backup_engine panel (encryption) when it is licensed -- that plugin
+          registers the same tab id, so the host has ONE Backup tab. */}
+      {currentTabId === "backup" && hostId && (
+        <HostBackupTab
+          hostId={hostId}
+          extension={visiblePluginTabs.find((pt) => pt.id === "backup")?.component}
+        />
+      )}
       {/* Processes Tab */}
       {currentTabId === "processes" && hostId && (
         <ProcessesPanel

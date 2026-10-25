@@ -163,6 +163,40 @@ def _reprotect(db: Session, run: models.BackupRun) -> None:
         _storage_next(db, policy, "protect", record={"chain": False})
 
 
+def _prepare_new_repository(db: Session, run: models.BackupRun) -> bool:
+    """Encryption started a new repository (Pro+ backup_engine): once the
+    storage host has its job files, prepare the new repository's dataset and
+    export -- the administrator asked for it by turning encryption on.  Only
+    where storage was prepared before (a hand-made layout stays the
+    administrator's), and once."""
+    policy = _policy(db, run)
+    if (
+        policy is None
+        or not policy.encrypted_at
+        or jobs.pending(db, policy.id, jobs.PREPARE)
+    ):
+        return False
+    done = (
+        db.query(models.BackupRun)
+        .filter(
+            models.BackupRun.policy_id == policy.id,
+            models.BackupRun.action == jobs.PREPARE,
+            models.BackupRun.status == "ok",
+        )
+        .order_by(models.BackupRun.finished_at.desc())
+        .first()
+    )
+    if done is None or (done.finished_at and done.finished_at >= policy.encrypted_at):
+        return False
+    logger.info(
+        "Backup policy %s: preparing storage for the new encrypted repository %s",
+        policy.id,
+        policy.repository_dir,
+    )
+    jobs.queue_run(db, policy, run.host_id, jobs.PREPARE)
+    return True
+
+
 def _reprepare(db: Session, run: models.BackupRun) -> None:
     """The storage side now knows a new address for this host: a repository
     that was prepared for the old one is prepared again, so its export
@@ -257,7 +291,8 @@ def _configured(db: Session, run: models.BackupRun, reply: Any) -> None:
         _store_nfs_path(_policy(db, run), reply.get("nfs_path"))
         _store_protects(_policy(db, run), reply.get("installed"))
     _reprotect(db, run)
-    _reprepare(db, run)
+    if not _prepare_new_repository(db, run):
+        _reprepare(db, run)
 
 
 # --- backup_result --------------------------------------------------------
@@ -343,8 +378,13 @@ def _upsert_snapshot(
         .first()
     )
     if row is None:
+        # In the policy's CURRENT repository (NULL = the default one).
         row = models.BackupSnapshot(
-            policy_id=policy.id, host_id=policy.host_id, name=name, signed=False
+            policy_id=policy.id,
+            host_id=policy.host_id,
+            name=name,
+            signed=False,
+            repository_dir=policy.repository_dir,
         )
         db.add(row)
     for key, value in fields.items():
@@ -583,7 +623,9 @@ def _named(entries: Any) -> List[Dict[str, Any]]:
 def _refresh(
     db: Session, policy, entries: List[Dict[str, Any]], sizes: bool = False
 ) -> None:
-    """The repository holds exactly ``entries``: upsert them, retire the rest."""
+    """The CURRENT repository holds exactly ``entries``: upsert them, retire
+    the rest of ITS snapshots -- never those of the repository before an
+    encrypted one, which this listing does not cover."""
     present = set()
     for entry in entries:
         present.add(entry["name"])
@@ -596,11 +638,17 @@ def _refresh(
             )
         _upsert_snapshot(db, policy, entry["name"][:255], fields)
     stamp = jobs.now()
+    in_current = (
+        models.BackupSnapshot.repository_dir.is_(None)
+        if policy.repository_dir is None
+        else models.BackupSnapshot.repository_dir == policy.repository_dir
+    )
     for row in (
         db.query(models.BackupSnapshot)
         .filter(
             models.BackupSnapshot.policy_id == policy.id,
             models.BackupSnapshot.gone_at.is_(None),
+            in_current,
         )
         .all()
     ):

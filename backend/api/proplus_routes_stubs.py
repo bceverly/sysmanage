@@ -39,12 +39,41 @@ def mount_proplus_stub_routes(app, results: dict) -> None:
     stubs_mounted = _mount_stub_group_a(app, results)
     stubs_mounted += _mount_stub_group_b(app, results)
     stubs_mounted += _mount_provisioning_stubs(app, results)
+    stubs_mounted += _mount_backup_stubs(app, results)
 
     if stubs_mounted > 0:
         logger.info(
             "Mounted %d Pro+ stub route group(s) for unlicensed modules",
             stubs_mounted,
         )
+
+
+def _mount_backup_stubs(app, results: dict) -> int:
+    """402 for backup encryption (Phase 24.6) without backup_engine, for the
+    same reason as the provisioning stubs: only a licensed UI calls these, so
+    a caller that reaches them unlicensed is a script, and "it worked" (200)
+    or "no such page" (404) would both mislead it."""
+    if results.get("backup_engine"):
+        return 0
+    router = APIRouter(prefix="/v1/backup-encryption", tags=["backup-stubs"])
+
+    @router.get("/host/{host_id}")
+    @router.post("/host/{host_id}")
+    async def backup_encryption_stub(
+        host_id: str, current_user=Depends(get_current_user)
+    ):
+        del host_id
+        raise HTTPException(
+            status_code=402,
+            detail=_(
+                "Encrypted backups require a SysManage Professional+ license "
+                "with the backup engine. Please upgrade to access this feature."
+            ),
+        )
+
+    app.include_router(router, prefix="/api")
+    logger.debug("Mounted backup engine 402 stub routes")
+    return 1
 
 
 def _mount_provisioning_stubs(app, results: dict) -> int:

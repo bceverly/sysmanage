@@ -5301,7 +5301,8 @@
       "open": "Todos os backups",
       "title": "Backup",
       "writeCache": "Cache de gravação neste host: {{size}}",
-      "writeCacheOver": "acima do limite de {{budget}} GB"
+      "writeCacheOver": "acima do limite de {{budget}} GB",
+      "encrypted": "Criptografado"
     },
     "coverage": {
       "filesOnly": "Somente arquivos",
@@ -5379,7 +5380,8 @@
       "placeNote": "Os arquivos nesses caminhos no host são substituídos pelas cópias do snapshot. O restate verifica toda a seleção antes de gravar qualquer coisa, e cada arquivo em relação ao snapshot antes de substituir o antigo. Informe caminhos específicos, como /etc/nginx; um host inteiro não é restaurado no local original. Faça primeiro uma prévia para ver o que mudaria.",
       "placePaths": "Caminhos a colocar de volta (um por linha)",
       "placeAck": "Substituir os arquivos nesses caminhos em {{host}}.",
-      "confirmPlace": "Restaurar no local original"
+      "confirmPlace": "Restaurar no local original",
+      "nothing": "Nada no snapshot corresponde a esses caminhos. Verifique a grafia e informe caminhos absolutos, como /home/alice/notes.txt."
     },
     "run": {
       "busy": "Ocupado, será tentado novamente",

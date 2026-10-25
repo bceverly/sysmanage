@@ -5301,7 +5301,8 @@
       "open": "Alle Sicherungen",
       "title": "Sicherung",
       "writeCache": "Schreibcache auf diesem Host: {{size}}",
-      "writeCacheOver": "über dem Budget von {{budget}} GB"
+      "writeCacheOver": "über dem Budget von {{budget}} GB",
+      "encrypted": "Verschlüsselt"
     },
     "coverage": {
       "filesOnly": "Nur Dateien",
@@ -5379,7 +5380,8 @@
       "placeNote": "Die Dateien unter diesen Pfaden auf dem Host werden durch die Kopien aus dem Snapshot ersetzt. restate prüft die gesamte Auswahl, bevor es etwas schreibt, und jede Datei gegen den Snapshot, bevor sie die alte ersetzt. Geben Sie bestimmte Pfade an, etwa /etc/nginx; ein ganzer Host wird nicht an Ort und Stelle wiederhergestellt. Sehen Sie sich zuerst die Vorschau an, um zu sehen, was sich ändern würde.",
       "placePaths": "Zurückzulegende Pfade (einer pro Zeile)",
       "placeAck": "Die Dateien unter diesen Pfaden auf {{host}} ersetzen.",
-      "confirmPlace": "An Ort und Stelle wiederherstellen"
+      "confirmPlace": "An Ort und Stelle wiederherstellen",
+      "nothing": "Nichts im Snapshot passt zu diesen Pfaden. Prüfen Sie die Schreibweise und geben Sie absolute Pfade an, etwa /home/alice/notes.txt."
     },
     "run": {
       "busy": "Belegt, wird wiederholt",

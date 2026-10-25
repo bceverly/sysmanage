@@ -499,6 +499,42 @@ def mount_fleet_routes(app: FastAPI) -> bool:
         return False
 
 
+def mount_backup_routes(app: FastAPI) -> bool:
+    """Mount the backup_engine routes (Phase 24.6: encrypted backups, keys in
+    OpenBAO) when the module is loaded.  Without it backups stay Community."""
+    backup_engine = module_loader.get_module("backup_engine")
+    if backup_engine is None:
+        logger.debug("backup_engine module not loaded, skipping backup routes")
+        return False
+    module_info = backup_engine.get_module_info()
+    if not module_info.get("provides_routes", False):
+        logger.debug("backup_engine module does not provide routes")
+        return False
+    try:
+        with _cython_compat():
+            router = call_engine_router(
+                "backup_engine",
+                backup_engine.get_backup_router,
+                db_dependency=Depends(get_tenant_db),
+                auth_dependency=Depends(get_current_user),
+                feature_gate=_feature_dependency,
+                module_gate=_module_dependency,
+                models=models,
+                http_exception=HTTPException,
+                status_codes=status,
+                logger=logger,
+            )
+            app.include_router(router, prefix="/api")
+        logger.info(
+            "Mounted backup routes from backup_engine v%s",
+            module_info.get("version", "unknown"),
+        )
+        return True
+    except Exception as e:
+        logger.exception("Failed to mount backup routes: %s", e)
+        return False
+
+
 def _make_virtualization_audit_log_fn():
     """Audit-log adapter for the virtualization engine."""
     from backend.services.audit_service import (

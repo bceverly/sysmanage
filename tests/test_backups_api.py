@@ -278,6 +278,9 @@ async def test_restore_stages_and_needs_the_unsigned_acknowledgment(session, sen
         api.RestoreBody(snapshot="../x", acknowledge_unsigned=True),
         api.RestoreBody(snapshot="ok", include=["/a/../b"], acknowledge_unsigned=True),
         api.RestoreBody(snapshot="ok", include=["/a"] * 51, acknowledge_unsigned=True),
+        # restate does not expand "~" or relative paths: they match nothing.
+        api.RestoreBody(snapshot="ok", include=["~/notes"], acknowledge_unsigned=True),
+        api.RestoreBody(snapshot="ok", exclude=["etc/x"], acknowledge_unsigned=True),
     ):
         assert (
             await _status(api.backup_restore(str(s.host.id), bad, session, RESTORER))

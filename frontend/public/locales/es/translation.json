@@ -5301,7 +5301,8 @@
       "open": "Todas las copias de seguridad",
       "title": "Copia de seguridad",
       "writeCache": "Caché de escritura en este host: {{size}}",
-      "writeCacheOver": "por encima del límite de {{budget}} GB"
+      "writeCacheOver": "por encima del límite de {{budget}} GB",
+      "encrypted": "Cifrado"
     },
     "coverage": {
       "filesOnly": "Solo archivos",
@@ -5379,7 +5380,8 @@
       "placeNote": "Los archivos de estas rutas en el host se reemplazan por las copias de la instantánea. restate comprueba toda la selección antes de escribir nada, y cada archivo con la instantánea antes de que sustituya al anterior. Indique rutas concretas, como /etc/nginx; un host completo no se restaura en su ubicación. Haga primero una vista previa para ver qué cambiaría.",
       "placePaths": "Rutas que devolver a su lugar (una por línea)",
       "placeAck": "Reemplazar los archivos de estas rutas en {{host}}.",
-      "confirmPlace": "Restaurar en su ubicación"
+      "confirmPlace": "Restaurar en su ubicación",
+      "nothing": "Nada de la instantánea coincide con estas rutas. Compruebe la ortografía e indique rutas absolutas, como /home/alice/notes.txt."
     },
     "run": {
       "busy": "Ocupado, se reintentará",

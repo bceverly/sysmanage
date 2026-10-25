@@ -75,6 +75,9 @@ PUBLIC_ROUTES = {
     ("WS", "/api/agent/connect"): _AGENT,
     ("POST", "/api/agent/installation-complete"): _AGENT,
     ("POST", "/api/agent/poll"): _AGENT,
+    # Same credentials as the poll (connection token + X-Host-Token), and
+    # releases only the asking host's own pending run's keys, once.
+    ("POST", "/api/agent/backup-key"): _AGENT,
     (
         "POST",
         "/api/host/register",

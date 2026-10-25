@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 07:34-0400\n"
+"POT-Creation-Date: 2026-10-25 14:50-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -81,7 +81,7 @@ msgstr "ليس لديك إذن لوصول الحساب المحدد."
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:139
+#: backend/api/posture.py:375 backend/api/backups.py:140
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:151
@@ -196,8 +196,8 @@ msgstr "تنسيق ID المضيف غير صحيح"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:151
-#: backend/api/backups.py:154 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:152
+#: backend/api/backups.py:155 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -2093,7 +2093,15 @@ msgstr "فشل الاتصال - خادم Grafana قد يكون غير متاح �
 msgid "Unexpected error checking Grafana health"
 msgstr "خطأ غير متوقع أثناء التحقق من صحة Grafana"
 
-#: backend/api/proplus_routes_stubs.py:75
+#: backend/api/proplus_routes_stubs.py:69
+msgid ""
+"Encrypted backups require a SysManage Professional+ license with the backup "
+"engine. Please upgrade to access this feature."
+msgstr ""
+"تتطلب النسخ الاحتياطية المشفّرة ترخيص SysManage Professional+ مع محرك النسخ "
+"الاحتياطي. يُرجى الترقية للوصول إلى هذه الميزة."
+
+#: backend/api/proplus_routes_stubs.py:104
 msgid ""
 "Host provisioning requires a SysManage Professional+ license with the "
 "provisioning engine. Please upgrade to access this feature."
@@ -3957,81 +3965,81 @@ msgstr "شبكات KVM متاحة فقط على مضيفات Linux"
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "تم طلب قائمة شبكات KVM. ستُعرض النتائج قريبًا."
 
-#: backend/api/backups.py:170
+#: backend/api/backups.py:171
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "يجب أن يكون %s مسارًا مطلقًا بدون '..'"
 
-#: backend/api/backups.py:175
+#: backend/api/backups.py:176
 #, python-format
 msgid "%s is out of range"
 msgstr "%s خارج النطاق المسموح"
 
-#: backend/api/backups.py:179
+#: backend/api/backups.py:180
 msgid "Host mount point"
 msgstr "نقطة التركيب على المضيف"
 
-#: backend/api/backups.py:180 backend/api/backups.py:225
+#: backend/api/backups.py:181 backend/api/backups.py:226
 msgid "Storage path"
 msgstr "مسار التخزين"
 
-#: backend/api/backups.py:181
+#: backend/api/backups.py:182
 msgid "Concurrent backups"
 msgstr "النسخ الاحتياطية المتزامنة"
 
-#: backend/api/backups.py:182
+#: backend/api/backups.py:183
 msgid "Days to keep sealed snapshots"
 msgstr "أيام الاحتفاظ باللقطات المختومة"
 
-#: backend/api/backups.py:183
+#: backend/api/backups.py:184
 msgid "Write cache budget"
 msgstr "حد ذاكرة الكتابة المؤقتة"
 
-#: backend/api/backups.py:184
+#: backend/api/backups.py:185
 msgid "Storage space warning"
 msgstr "تحذير مساحة التخزين"
 
-#: backend/api/backups.py:185
+#: backend/api/backups.py:186
 msgid "Storage space critical"
 msgstr "مساحة التخزين حرجة"
 
-#: backend/api/backups.py:189
+#: backend/api/backups.py:190
 msgid "The storage space warning must be below the critical level"
 msgstr "يجب أن يكون تحذير مساحة التخزين أقل من المستوى الحرج"
 
-#: backend/api/backups.py:191
+#: backend/api/backups.py:192
 msgid "The backup service account is not a valid account name"
 msgstr "حساب خدمة النسخ الاحتياطي ليس اسم حساب صالحًا"
 
-#: backend/api/backups.py:193
+#: backend/api/backups.py:194
 msgid "Unknown seal mode"
 msgstr "وضع ختم غير معروف"
 
-#: backend/api/backups.py:195
+#: backend/api/backups.py:196
 msgid "A ZFS snapshot seal needs the dataset name"
 msgstr "يتطلب الختم بلقطة ZFS اسم مجموعة البيانات"
 
-#: backend/api/backups.py:197
+#: backend/api/backups.py:198
 msgid "The ZFS dataset name is not valid"
 msgstr "اسم مجموعة بيانات ZFS غير صالح"
 
-#: backend/api/backups.py:204
+#: backend/api/backups.py:205
 msgid "A storage host needs the storage path"
 msgstr "يحتاج مضيف التخزين إلى مسار التخزين"
 
-#: backend/api/backups.py:221
+#: backend/api/backups.py:222
 msgid "A btrfs snapshot seal needs the snapshot directory"
 msgstr "يتطلب ختم لقطات btrfs دليل اللقطات"
 
-#: backend/api/backups.py:223
+#: backend/api/backups.py:224
 msgid "A btrfs snapshot seal needs the storage path"
 msgstr "يتطلب ختم لقطات btrfs مسار التخزين"
 
-#: backend/api/backups.py:226
+#: backend/api/backups.py:227
 msgid "Snapshot directory"
 msgstr "دليل اللقطات"
 
-#: backend/api/backups.py:231
+#: backend/api/backups.py:232
 #, python-format
 msgid ""
 "%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
@@ -4040,35 +4048,35 @@ msgstr ""
 "يجب أن يكون %s مسارًا مطلقًا بسيطًا (حروف وأرقام و'_' و'.' و'-' و'/'؛ بدون "
 "'/' في النهاية)"
 
-#: backend/api/backups.py:239
+#: backend/api/backups.py:240
 msgid "The snapshot directory must be outside the storage path"
 msgstr "يجب أن يكون دليل اللقطات خارج مسار التخزين"
 
-#: backend/api/backups.py:243
+#: backend/api/backups.py:244
 msgid "Interval (hours)"
 msgstr "الفترة (بالساعات)"
 
-#: backend/api/backups.py:244
+#: backend/api/backups.py:245
 msgid "Window start hour"
 msgstr "ساعة بدء النافذة"
 
-#: backend/api/backups.py:245
+#: backend/api/backups.py:246
 msgid "Snapshots to keep"
 msgstr "عدد اللقطات المحتفظ بها"
 
-#: backend/api/backups.py:246
+#: backend/api/backups.py:247
 msgid "Check interval (days)"
 msgstr "فترة الفحص (بالأيام)"
 
-#: backend/api/backups.py:250
+#: backend/api/backups.py:251
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "يجب ألا يتجاوز عدد خطافات الإيقاف المؤقت 10، بأسماء قصيرة بأحرف صغيرة"
 
-#: backend/api/backups.py:263
+#: backend/api/backups.py:264
 msgid "At most 50 path rules can be set"
 msgstr "لا يمكن إعداد أكثر من 50 قاعدة مسار"
 
-#: backend/api/backups.py:274
+#: backend/api/backups.py:275
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
@@ -4076,84 +4084,105 @@ msgstr ""
 "كل قاعدة مسار هي سطر يحتوي على ما يصل إلى 512 حرف، بدون فراغات في البداية أو"
 " النهاية أو علامة # في البداية"
 
-#: backend/api/backups.py:282 backend/api/backups_browse.py:85
+#: backend/api/backups.py:283 backend/api/backups_browse.py:92
 msgid "The snapshot name is not valid"
 msgstr "اسم اللقطة غير صالح"
 
-#: backend/api/backups.py:284
+#: backend/api/backups.py:285
 msgid "At most 50 paths can be restored at once"
 msgstr "يمكن استعادة 50 مسارًا كحد أقصى في المرة الواحدة"
 
-#: backend/api/backups.py:287
+#: backend/api/backups.py:288
 msgid "A restore path is empty or too long"
 msgstr "أحد مسارات الاستعادة فارغ أو طويل جدًا"
 
-#: backend/api/backups.py:289
+#: backend/api/backups.py:290
 msgid "A restore path must not contain '..'"
 msgstr "يجب ألا يحتوي مسار الاستعادة على '..'"
 
-#: backend/api/backups.py:302
+#: backend/api/backups.py:296
+msgid "A restore path must be absolute, such as /home/alice/notes.txt"
+msgstr "يجب أن يكون مسار الاستعادة مسارًا مطلقًا، مثل /home/alice/notes.txt"
+
+#: backend/api/backups.py:310
 msgid "Name the paths to put back; a whole host is not restored in place"
 msgstr "حدد المسارات المراد إعادتها؛ لا تُستعاد مضيفات كاملة في مكانها الأصلي"
 
-#: backend/api/backups.py:308
+#: backend/api/backups.py:316
 msgid "Each path restored in place must be specific, such as /etc/nginx"
 msgstr "يجب أن يكون كل مسار يُستعاد في مكانه الأصلي محددًا، مثل /etc/nginx"
 
-#: backend/api/backups.py:313
+#: backend/api/backups.py:321
 msgid "Confirm that the host's files at these paths will be replaced"
 msgstr "أكّد أن ملفات المضيف الموجودة في هذه المسارات ستُستبدل"
 
-#: backend/api/backups.py:333 backend/api/backups.py:336
+#: backend/api/backups.py:341 backend/api/backups.py:344
 msgid "Backup target not found"
 msgstr "لم يتم العثور على وجهة النسخ الاحتياطي"
 
-#: backend/api/backups.py:390
+#: backend/api/backups.py:398
 msgid "This edition supports one backup target; edit the existing one"
 msgstr "يدعم هذا الإصدار وجهة نسخ احتياطي واحدة؛ عدّل الوجهة الموجودة"
 
-#: backend/api/backups.py:467
+#: backend/api/backups.py:475
 msgid "Remove the hosts' backup policies before the target"
 msgstr "أزل سياسات النسخ الاحتياطي للمضيفات قبل حذف الوجهة"
 
-#: backend/api/backups.py:547
+#: backend/api/backups.py:555
 msgid "Set up the backup target first"
 msgstr "أعدّ وجهة النسخ الاحتياطي أولًا"
 
-#: backend/api/backups.py:588
+#: backend/api/backups.py:596
 msgid "No backup policy"
 msgstr "لا توجد سياسة نسخ احتياطي"
 
-#: backend/api/backups.py:608
+#: backend/api/backups.py:616
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "لا يستطيع هذا المضيف تشغيل النسخ الاحتياطي بعد (%s)"
 
-#: backend/api/backups.py:614
+#: backend/api/backups.py:622
 msgid "This host's backup is not configured yet"
 msgstr "لم تتم تهيئة النسخ الاحتياطي لهذا المضيف بعد"
 
-#: backend/api/backups.py:631
+#: backend/api/backups.py:639
 msgid "The backup storage host is not ready"
 msgstr "مضيف تخزين النسخ الاحتياطية غير جاهز"
 
-#: backend/api/backups.py:646
+#: backend/api/backups.py:654
 msgid "Unknown backup action"
 msgstr "إجراء نسخ احتياطي غير معروف"
 
-#: backend/api/backups.py:651
+#: backend/api/backups.py:662
+msgid "An encrypted repository cannot be repacked on the storage host"
+msgstr "لا يمكن إعادة حزم مستودع مشفّر على مضيف التخزين"
+
+#: backend/api/backups.py:666
 msgid "That backup job is already queued or running"
 msgstr "مهمة النسخ الاحتياطي هذه في قائمة الانتظار أو قيد التشغيل بالفعل"
 
-#: backend/api/backups.py:745 backend/api/backups_browse.py:70
+#: backend/api/backups.py:760 backend/api/backups_browse.py:77
 msgid "Snapshot not found"
 msgstr "لم يتم العثور على اللقطة"
 
-#: backend/api/backups.py:749
+#: backend/api/backups.py:765
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "هذه اللقطة غير موقّعة؛ أكّد لاستعادتها على أي حال"
 
-#: backend/api/backups.py:864 backend/api/backups.py:867
+#: backend/api/backups.py:816 backend/services/backup_key_release.py:105
+msgid "Encrypted backups need the Professional+ backup engine"
+msgstr ""
+"تحتاج النسخ الاحتياطية المشفّرة إلى محرك النسخ الاحتياطي في Professional+"
+
+#: backend/api/backups.py:821 backend/api/backups_browse.py:62
+msgid "This host's restate cannot do this yet; upgrade restate"
+msgstr "لا يستطيع restate على هذا المضيف فعل ذلك بعد؛ حدّث restate"
+
+#: backend/api/backups.py:833
+msgid "This snapshot's repository is no longer kept"
+msgstr "لم يعد مستودع هذه اللقطة محفوظًا"
+
+#: backend/api/backups.py:915 backend/api/backups.py:918
 msgid "Backup run not found"
 msgstr "لم يتم العثور على مهمة النسخ الاحتياطي"
 
@@ -5270,15 +5299,15 @@ msgstr "فشل في استرداد حالة برنامج مكافحة الفير
 msgid "Machine link decided for host %s"
 msgstr "تم تحديد رابط الآلة للمضيف %s"
 
-#: backend/api/backups_browse.py:55
-msgid "This host's restate cannot do this yet; upgrade restate"
-msgstr "لا يستطيع restate على هذا المضيف فعل ذلك بعد؛ حدّث restate"
-
-#: backend/api/backups_browse.py:87
+#: backend/api/backups_browse.py:94
 msgid "The path must be absolute"
 msgstr "يجب أن يكون المسار مطلقًا"
 
-#: backend/api/backups_browse.py:116
+#: backend/api/backups_browse.py:126
+msgid "What changed compares with the current repository only"
+msgstr "لا يقارن ما الذي تغيّر إلا بالمستودع الحالي"
+
+#: backend/api/backups_browse.py:132
 msgid "A check of what changed is already running"
 msgstr "يجري بالفعل التحقق مما تغيّر"
 
@@ -5681,6 +5710,30 @@ msgstr "اختر مضيفًا واحدًا على الأقل لفحصه"
 msgid "At most 500 hosts can be scanned in one request"
 msgstr "يمكن فحص 500 مضيف كحد أقصى في طلب واحد"
 
+#: backend/services/backup_key_release.py:73
+msgid "No such backup run for this host"
+msgstr "لا توجد مهمة نسخ احتياطي كهذه لهذا المضيف"
+
+#: backend/services/backup_key_release.py:79
+msgid "This backup run does not need a key"
+msgstr "لا تحتاج مهمة النسخ الاحتياطي هذه إلى مفتاح"
+
+#: backend/services/backup_key_release.py:81
+msgid "This backup run has already ended"
+msgstr "انتهت مهمة النسخ الاحتياطي هذه بالفعل"
+
+#: backend/services/backup_key_release.py:83
+msgid "This backup run's key was already released"
+msgstr "سبق إطلاق مفتاح مهمة النسخ الاحتياطي هذه"
+
+#: backend/services/backup_key_release.py:85
+msgid "This backup run is too old to release its key"
+msgstr "مهمة النسخ الاحتياطي هذه قديمة جدًا لإطلاق مفتاحها"
+
+#: backend/services/backup_key_release.py:101
+msgid "This host's backups are not encrypted"
+msgstr "النسخ الاحتياطية لهذا المضيف غير مشفّرة"
+
 #: backend/services/malware_quarantine.py:132
 msgid "Unknown action"
 msgstr "إجراء غير معروف"
@@ -5848,6 +5901,13 @@ msgstr "ثغرات حزم pkgsrc في NetBSD (ما يقرؤه pkg_admin audit)"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "ثغرات macOS حسب إصدار نظام التشغيل، من بيانات NVD عن الإصدارات المتأثرة"
+
+#~ msgid ""
+#~ "This snapshot is encrypted; restoring or browsing it needs a restate that "
+#~ "can take the key for one job, which is not released yet"
+#~ msgstr ""
+#~ "هذه اللقطة مشفّرة؛ تتطلب استعادتها أو استعراضها إصدارًا من restate يمكنه "
+#~ "تلقي المفتاح لمهمة واحدة، ولم يصدر بعد"
 
 #~ msgid "Days to keep seals"
 #~ msgstr "أيام الاحتفاظ باللقطات المختومة"

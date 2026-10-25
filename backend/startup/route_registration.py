@@ -16,6 +16,7 @@ from backend.api import (
     advisor,
     advisory_actions,
     agent,
+    agent_backup_key,
     agent_poll,
     airgap_agent_mirrors,
     airgap_bundles,
@@ -352,6 +353,12 @@ def register_routes(app: FastAPI):
         agent_poll.router, prefix="/api", tags=["agent"]
     )  # /api/agent/poll
     logger.debug("Agent poll router added")
+
+    # Pro+ backup encryption (24.6 S4): a host fetches its run's decryption
+    # keys here, with the poll's credentials -- never through the queue.
+    app.include_router(
+        agent_backup_key.router, prefix="/api", tags=["agent"]
+    )  # /api/agent/backup-key
 
     logger.debug("Adding host public router with /api prefix")
     app.include_router(

@@ -5301,7 +5301,8 @@
       "open": "所有備份",
       "title": "備份",
       "writeCache": "此主機上的寫入快取：{{size}}",
-      "writeCacheOver": "超出 {{budget}} GB 上限"
+      "writeCacheOver": "超出 {{budget}} GB 上限",
+      "encrypted": "已加密"
     },
     "coverage": {
       "filesOnly": "僅檔案",
@@ -5379,7 +5380,8 @@
       "placeNote": "主機上這些路徑中的檔案將被快照中的副本取代。restate 會在寫入任何內容之前檢查整個選取範圍，並在每個檔案取代舊檔案之前將其與快照進行核對。請指定具體路徑，例如 /etc/nginx；無法將整台主機還原到原位置。請先預覽，查看會有哪些變更。",
       "placePaths": "要放回的路徑（每行一個）",
       "placeAck": "取代 {{host}} 上這些路徑中的檔案。",
-      "confirmPlace": "還原到原位置"
+      "confirmPlace": "還原到原位置",
+      "nothing": "快照中沒有與這些路徑相符的內容。請檢查拼寫，並提供絕對路徑，例如 /home/alice/notes.txt。"
     },
     "run": {
       "busy": "忙碌，將重試",

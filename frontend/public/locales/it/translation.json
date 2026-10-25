@@ -5301,7 +5301,8 @@
       "open": "Tutti i backup",
       "title": "Backup",
       "writeCache": "Cache di scrittura su questo host: {{size}}",
-      "writeCacheOver": "oltre il limite di {{budget}} GB"
+      "writeCacheOver": "oltre il limite di {{budget}} GB",
+      "encrypted": "Cifrato"
     },
     "coverage": {
       "filesOnly": "Solo file",
@@ -5379,7 +5380,8 @@
       "placeNote": "I file in questi percorsi sull'host vengono sostituiti con le copie dello snapshot. restate controlla l'intera selezione prima di scrivere qualsiasi cosa, e ogni file rispetto allo snapshot prima che sostituisca quello vecchio. Indica percorsi specifici, come /etc/nginx; un intero host non viene ripristinato sul posto. Esegui prima l'anteprima per vedere cosa cambierebbe.",
       "placePaths": "Percorsi da rimettere al loro posto (uno per riga)",
       "placeAck": "Sostituisci i file in questi percorsi su {{host}}.",
-      "confirmPlace": "Ripristina sul posto"
+      "confirmPlace": "Ripristina sul posto",
+      "nothing": "Nulla nello snapshot corrisponde a questi percorsi. Controlla l'ortografia e indica percorsi assoluti, come /home/alice/notes.txt."
     },
     "run": {
       "busy": "Occupato, verrà ritentato",

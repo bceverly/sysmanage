@@ -50,6 +50,27 @@ describe("RestoreFilesDialog", () => {
     expect(button("Restore to staging")).toBeEnabled();
   });
 
+  test("a preview that matches nothing says so (restate 2.2 nests the counts)", async () => {
+    await open();
+    vi.mocked(restoreFiles).mockResolvedValue({
+      id: "p2", status: "ok",
+      result: { restore: { files: 0, bytes: 0, plan_count: 0, plan: [] } },
+    } as unknown as BackupRun);
+    fireEvent.click(button("Preview"));
+    expect(await screen.findByText(/Nothing in the snapshot matches these paths/)).toBeInTheDocument();
+  });
+
+  test("nested counts are shown", async () => {
+    await open();
+    vi.mocked(restoreFiles).mockResolvedValue({
+      id: "p3", status: "ok",
+      result: { restore: { files: 3, bytes: 2048, plan_count: 3, plan: ["/etc/a", "/etc/b", "/etc/c"] } },
+    } as unknown as BackupRun);
+    fireEvent.click(button("Preview"));
+    expect(await screen.findByText(/Files: 3/)).toBeInTheDocument();
+    expect(screen.getByText(/\/etc\/a/)).toBeInTheDocument();
+  });
+
   test("into place needs paths, a preview and its own confirmation", async () => {
     await open();
     fireEvent.click(screen.getByLabelText("Into place, replacing the host's files"));

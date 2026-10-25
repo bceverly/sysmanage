@@ -68,14 +68,24 @@ const RunOutcome: React.FC<{ run: BackupRun }> = ({ run }) => {
             </Stack>
         );
     }
-    const result = (run.result ?? {}) as RestoreResult;
+    // restate 2.2 nests a restore's counts and plan under ``restore``;
+    // earlier results had them at the top.
+    const raw = (run.result ?? {}) as RestoreResult & { restore?: RestoreResult };
+    const result: RestoreResult = { ...raw, ...(raw.restore ?? {}) };
     const plan = Array.isArray(result.plan) ? result.plan : [];
+    const nothing = run.status === 'ok' && !(result.files ?? result.plan_count ?? 0);
     return (
         <Box>
-            <Alert severity={run.status === 'ok' ? 'success' : 'warning'} sx={{ mb: 1 }}>
-                {runStatusLabel(t, run)}
-                {run.message ? `: ${run.message}` : ''}
-            </Alert>
+            {nothing ? (
+                <Alert severity="warning" sx={{ mb: 1 }}>
+                    {t('backups.restore.nothing', 'Nothing in the snapshot matches these paths. Check the spelling, and give absolute paths such as /home/alice/notes.txt.')}
+                </Alert>
+            ) : (
+                <Alert severity={run.status === 'ok' ? 'success' : 'warning'} sx={{ mb: 1 }}>
+                    {runStatusLabel(t, run)}
+                    {run.message ? `: ${run.message}` : ''}
+                </Alert>
+            )}
             <Typography variant="body2">
                 {t('backups.restore.counts', 'Files: {{files}}, size: {{size}}', {
                     files: result.files ?? result.plan_count ?? 0,

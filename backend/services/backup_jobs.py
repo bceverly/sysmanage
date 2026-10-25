@@ -91,6 +91,70 @@ def repo_dir(host: models.Host) -> str:
     return f"{fqdn}-{short}"
 
 
+def policy_repo_dir(policy: models.BackupPolicy, host: models.Host) -> str:
+    """The policy's CURRENT repository directory: its own once encryption has
+    started a new repository (Pro+ backup_engine), else ``repo_dir``."""
+    return policy.repository_dir or repo_dir(host)
+
+
+def snapshot_repo_dir(snapshot: models.BackupSnapshot, host: models.Host) -> str:
+    """Which repository holds a snapshot (NULL = the default one)."""
+    return snapshot.repository_dir or repo_dir(host)
+
+
+def in_previous_repository(
+    snapshot: models.BackupSnapshot, policy: models.BackupPolicy, host: models.Host
+) -> bool:
+    """The snapshot is in the repository before the current one."""
+    return (
+        bool(policy.previous_repository_dir)
+        and snapshot_repo_dir(snapshot, host) == policy.previous_repository_dir
+    )
+
+
+def encrypted(policy: models.BackupPolicy) -> bool:
+    """The CURRENT repository is encrypted (its key is in OpenBAO).  The
+    public key is sent whether or not backup_engine is loaded now: an
+    encrypted repository refuses a capture without it, so a lapsed licence
+    must not stop backups."""
+    return bool(policy.encrypt_public_key)
+
+
+def _previous(policy: models.BackupPolicy, storage) -> Dict[str, Any]:
+    """The repository before an encrypted one, for restores from it."""
+    if not policy.previous_repository_dir:
+        return {}
+    previous: Dict[str, Any] = {"repo_dir": policy.previous_repository_dir}
+    server = host_address(storage) if storage is not None else None
+    if server and policy.previous_nfs_path:
+        previous["nfs"] = {"server": server, "path": policy.previous_nfs_path}
+    return {"previous": previous}
+
+
+CURRENT = "current"
+PREVIOUS = "previous"
+
+
+def snapshot_repository(
+    snapshot: models.BackupSnapshot, policy: models.BackupPolicy, host: models.Host
+) -> Optional[str]:
+    """CURRENT, PREVIOUS, or None when no repository the policy keeps holds
+    it any more."""
+    where = snapshot_repo_dir(snapshot, host)
+    if where == policy_repo_dir(policy, host):
+        return CURRENT
+    if where == policy.previous_repository_dir:
+        return PREVIOUS
+    return None
+
+
+def needs_secret_key(where: Optional[str], policy: models.BackupPolicy) -> bool:
+    """Reading this repository's indexes needs the secret key (restore,
+    browse, what changed): the current one when it is encrypted.  The one
+    before an encrypted repository is the plain one it replaced."""
+    return where == CURRENT and encrypted(policy)
+
+
 def staging_dir(run_id: Any) -> str:
     return f"{STAGING_ROOT}/{run_id}"
 
@@ -144,13 +208,14 @@ def host_configuration(
     host: models.Host,
     storage: Optional[models.Host] = None,
 ) -> Dict[str, Any]:
-    return {
+    out: Dict[str, Any] = {
         "policy_id": str(policy.id),
         "role": "host",
         "target": {
             "mount_point": target.host_mount_point,
-            "repo_dir": repo_dir(host),
+            "repo_dir": policy_repo_dir(policy, host),
             **nfs_source(policy, storage),
+            **_previous(policy, storage),
         },
         "jobs": {
             "capture": {
@@ -164,6 +229,11 @@ def host_configuration(
             "estimate": dict(path_rules(policy)),
         },
     }
+    if encrypted(policy):
+        # The agent installs it root-owned and adds ``encrypt_to`` to the
+        # capture; it never receives the secret key here.
+        out["encrypt_key"] = policy.encrypt_public_key
+    return out
 
 
 DEFAULT_SERVICE_ACCOUNT = "restate"
@@ -196,7 +266,7 @@ def storage_configuration(
         "role": "storage",
         "target": {
             "mount_point": target.storage_path,
-            "repo_dir": repo_dir(host),
+            "repo_dir": policy_repo_dir(policy, host),
             # Whom this repository's export may serve, and the account it maps
             # them to: what the storage host's audit checks the export against.
             "client_address": host_address(host),
@@ -362,6 +432,8 @@ def queue_restore(  # pylint: disable=too-many-arguments,too-many-positional-arg
     actor: str,
     exclude: Optional[List[str]] = None,
     in_place: bool = False,
+    previous: bool = False,
+    needs_key: bool = False,
 ) -> models.BackupRun:
     """Restore into the agent's staging directory, or (``in_place``) over the
     host's own files; the agent chooses the root either way."""
@@ -379,6 +451,10 @@ def queue_restore(  # pylint: disable=too-many-arguments,too-many-positional-arg
             "dry_run": bool(dry_run),
             "allow_unverified": bool(allow_unverified),
             "in_place": bool(in_place),
+            **({"previous": True} if previous else {}),
+            # Never the key itself (this goes through the queue and the run
+            # row): the agent fetches it for this run (backup_key_release).
+            **({"needs_key": True} if needs_key else {}),
         },
         actor,
     )
@@ -392,11 +468,18 @@ def queue_browse(  # pylint: disable=too-many-arguments,too-many-positional-argu
     snapshot: Optional[str],
     path: Optional[str],
     actor: str,
+    previous: bool = False,
+    needs_key: bool = False,
 ) -> models.BackupRun:
-    """A snapshot listing or a what-changed check on the host itself."""
+    """A snapshot listing or a what-changed check on the host itself
+    (``previous``: in the repository before an encrypted one)."""
     if action not in BROWSE_ACTIONS:
         raise ValueError(f"unknown browse action {action!r}")
     params: Dict[str, Any] = {"policy_id": str(policy.id), "action": action}
+    if previous:
+        params["previous"] = True
+    if needs_key:
+        params["needs_key"] = True  # fetched by the agent, never sent here
     if snapshot:
         params["snapshot"] = snapshot
     if action == LIST:

@@ -102,6 +102,9 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
                     <BackupIcon />
                     <Typography variant="h6" sx={{ flexGrow: 1 }}>{t('backups.card.title', 'Backup')}</Typography>
+                    {data.policy?.encryption && (
+                        <Chip size="small" variant="outlined" label={t('backups.card.encrypted', 'Encrypted')} />
+                    )}
                     <Chip size="small" color={statusColor(data.status)} label={statusLabel(t, data.status)} />
                 </Stack>
                 {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
@@ -159,7 +162,7 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                     {canManage && data.policy && data.target?.storage_host_id && (
                         <BackupPrepareButton hostId={hostId} disabled={!!data.running} onStarted={() => void load()} />
                     )}
-                    {canManage && data.policy && data.snapshot_count > 0 && (
+                    {canManage && data.policy && !data.policy.encryption && data.snapshot_count > 0 && (
                         <BackupRepackButton hostId={hostId} disabled={!!data.running} onStarted={() => void load()} />
                     )}
                     {canManage && data.snapshot_count > 0 && data.policy?.abilities?.includes('status') && (

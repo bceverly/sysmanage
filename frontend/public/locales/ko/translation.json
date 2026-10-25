@@ -5301,7 +5301,8 @@
       "open": "모든 백업",
       "title": "백업",
       "writeCache": "이 호스트의 쓰기 캐시: {{size}}",
-      "writeCacheOver": "한도 {{budget}} GB 초과"
+      "writeCacheOver": "한도 {{budget}} GB 초과",
+      "encrypted": "암호화됨"
     },
     "coverage": {
       "filesOnly": "파일만",
@@ -5379,7 +5380,8 @@
       "placeNote": "호스트의 이 경로에 있는 파일이 스냅샷의 사본으로 대체됩니다. restate는 무엇이든 쓰기 전에 전체 선택 항목을 검사하고, 각 파일이 이전 파일을 대체하기 전에 스냅샷과 대조합니다. /etc/nginx처럼 구체적인 경로를 지정하세요. 호스트 전체는 원래 위치로 복원되지 않습니다. 먼저 미리 보기로 무엇이 바뀔지 확인하세요.",
       "placePaths": "되돌릴 경로 (한 줄에 하나)",
       "placeAck": "{{host}}의 이 경로에 있는 파일을 대체합니다.",
-      "confirmPlace": "원래 위치로 복원"
+      "confirmPlace": "원래 위치로 복원",
+      "nothing": "스냅샷에 이 경로와 일치하는 항목이 없습니다. 철자를 확인하고 /home/alice/notes.txt처럼 절대 경로를 지정하세요."
     },
     "run": {
       "busy": "사용 중, 다시 시도합니다",

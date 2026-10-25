@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 07:34-0400\n"
+"POT-Creation-Date: 2026-10-25 14:50-0400\n"
 "Language: es\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -83,7 +83,7 @@ msgstr "No tienes acceso al cuenta seleccionada."
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:139
+#: backend/api/posture.py:375 backend/api/backups.py:140
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:151
@@ -198,8 +198,8 @@ msgstr "Formato de ID de host inválido"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:151
-#: backend/api/backups.py:154 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:152
+#: backend/api/backups.py:155 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -2146,7 +2146,16 @@ msgstr ""
 msgid "Unexpected error checking Grafana health"
 msgstr "Error inesperado al comprobar la salud de Grafana"
 
-#: backend/api/proplus_routes_stubs.py:75
+#: backend/api/proplus_routes_stubs.py:69
+msgid ""
+"Encrypted backups require a SysManage Professional+ license with the backup "
+"engine. Please upgrade to access this feature."
+msgstr ""
+"Las copias de seguridad cifradas requieren una licencia de SysManage "
+"Professional+ con el motor de copias de seguridad. Actualice para acceder a "
+"esta función."
+
+#: backend/api/proplus_routes_stubs.py:104
 msgid ""
 "Host provisioning requires a SysManage Professional+ license with the "
 "provisioning engine. Please upgrade to access this feature."
@@ -4097,88 +4106,88 @@ msgstr "Las redes KVM solo están disponibles en hosts Linux"
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "Lista de redes KVM solicitada. Los resultados se mostrarán en breve."
 
-#: backend/api/backups.py:170
+#: backend/api/backups.py:171
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s debe ser una ruta absoluta sin '..'"
 
-#: backend/api/backups.py:175
+#: backend/api/backups.py:176
 #, python-format
 msgid "%s is out of range"
 msgstr "%s está fuera del intervalo permitido"
 
-#: backend/api/backups.py:179
+#: backend/api/backups.py:180
 msgid "Host mount point"
 msgstr "Punto de montaje en el host"
 
-#: backend/api/backups.py:180 backend/api/backups.py:225
+#: backend/api/backups.py:181 backend/api/backups.py:226
 msgid "Storage path"
 msgstr "Ruta de almacenamiento"
 
-#: backend/api/backups.py:181
+#: backend/api/backups.py:182
 msgid "Concurrent backups"
 msgstr "Copias de seguridad simultáneas"
 
-#: backend/api/backups.py:182
+#: backend/api/backups.py:183
 msgid "Days to keep sealed snapshots"
 msgstr "Días que se conservan las instantáneas selladas"
 
-#: backend/api/backups.py:183
+#: backend/api/backups.py:184
 msgid "Write cache budget"
 msgstr "Presupuesto de la caché de escritura"
 
-#: backend/api/backups.py:184
+#: backend/api/backups.py:185
 msgid "Storage space warning"
 msgstr "Aviso de espacio de almacenamiento"
 
-#: backend/api/backups.py:185
+#: backend/api/backups.py:186
 msgid "Storage space critical"
 msgstr "Espacio de almacenamiento crítico"
 
-#: backend/api/backups.py:189
+#: backend/api/backups.py:190
 msgid "The storage space warning must be below the critical level"
 msgstr ""
 "El aviso de espacio de almacenamiento debe estar por debajo del nivel "
 "crítico"
 
-#: backend/api/backups.py:191
+#: backend/api/backups.py:192
 msgid "The backup service account is not a valid account name"
 msgstr ""
 "La cuenta de servicio de copias de seguridad no es un nombre de cuenta "
 "válido"
 
-#: backend/api/backups.py:193
+#: backend/api/backups.py:194
 msgid "Unknown seal mode"
 msgstr "Modo de sellado desconocido"
 
-#: backend/api/backups.py:195
+#: backend/api/backups.py:196
 msgid "A ZFS snapshot seal needs the dataset name"
 msgstr ""
 "El sellado con instantánea de ZFS necesita el nombre del conjunto de datos"
 
-#: backend/api/backups.py:197
+#: backend/api/backups.py:198
 msgid "The ZFS dataset name is not valid"
 msgstr "El nombre del conjunto de datos ZFS no es válido"
 
-#: backend/api/backups.py:204
+#: backend/api/backups.py:205
 msgid "A storage host needs the storage path"
 msgstr "Un host de almacenamiento necesita la ruta de almacenamiento"
 
-#: backend/api/backups.py:221
+#: backend/api/backups.py:222
 msgid "A btrfs snapshot seal needs the snapshot directory"
 msgstr ""
 "Un sellado con instantánea de btrfs necesita el directorio de instantáneas"
 
-#: backend/api/backups.py:223
+#: backend/api/backups.py:224
 msgid "A btrfs snapshot seal needs the storage path"
 msgstr ""
 "Un sellado con instantánea de btrfs necesita la ruta de almacenamiento"
 
-#: backend/api/backups.py:226
+#: backend/api/backups.py:227
 msgid "Snapshot directory"
 msgstr "Directorio de instantáneas"
 
-#: backend/api/backups.py:231
+#: backend/api/backups.py:232
 #, python-format
 msgid ""
 "%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
@@ -4187,37 +4196,37 @@ msgstr ""
 "%s debe ser una ruta absoluta simple (letras, dígitos, '_', '.', '-' y '/'; "
 "sin '/' al final)"
 
-#: backend/api/backups.py:239
+#: backend/api/backups.py:240
 msgid "The snapshot directory must be outside the storage path"
 msgstr ""
 "El directorio de instantáneas debe estar fuera de la ruta de almacenamiento"
 
-#: backend/api/backups.py:243
+#: backend/api/backups.py:244
 msgid "Interval (hours)"
 msgstr "Intervalo (horas)"
 
-#: backend/api/backups.py:244
+#: backend/api/backups.py:245
 msgid "Window start hour"
 msgstr "Hora de inicio de la ventana"
 
-#: backend/api/backups.py:245
+#: backend/api/backups.py:246
 msgid "Snapshots to keep"
 msgstr "Instantáneas que conservar"
 
-#: backend/api/backups.py:246
+#: backend/api/backups.py:247
 msgid "Check interval (days)"
 msgstr "Intervalo de comprobación (días)"
 
-#: backend/api/backups.py:250
+#: backend/api/backups.py:251
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr ""
 "Los hooks de pausa deben ser como máximo 10 nombres cortos en minúsculas"
 
-#: backend/api/backups.py:263
+#: backend/api/backups.py:264
 msgid "At most 50 path rules can be set"
 msgstr "Se pueden definir como máximo 50 reglas de ruta"
 
-#: backend/api/backups.py:274
+#: backend/api/backups.py:275
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
@@ -4225,91 +4234,115 @@ msgstr ""
 "Cada regla de ruta es una línea de hasta 512 caracteres, sin espacios al "
 "principio ni al final y sin # al principio"
 
-#: backend/api/backups.py:282 backend/api/backups_browse.py:85
+#: backend/api/backups.py:283 backend/api/backups_browse.py:92
 msgid "The snapshot name is not valid"
 msgstr "El nombre de la instantánea no es válido"
 
-#: backend/api/backups.py:284
+#: backend/api/backups.py:285
 msgid "At most 50 paths can be restored at once"
 msgstr "Se pueden restaurar como máximo 50 rutas a la vez"
 
-#: backend/api/backups.py:287
+#: backend/api/backups.py:288
 msgid "A restore path is empty or too long"
 msgstr "Una ruta de restauración está vacía o es demasiado larga"
 
-#: backend/api/backups.py:289
+#: backend/api/backups.py:290
 msgid "A restore path must not contain '..'"
 msgstr "Una ruta de restauración no debe contener '..'"
 
-#: backend/api/backups.py:302
+#: backend/api/backups.py:296
+msgid "A restore path must be absolute, such as /home/alice/notes.txt"
+msgstr ""
+"Una ruta de restauración debe ser absoluta, como /home/alice/notes.txt"
+
+#: backend/api/backups.py:310
 msgid "Name the paths to put back; a whole host is not restored in place"
 msgstr ""
 "Indique las rutas que devolver a su lugar; un host completo no se restaura "
 "en su ubicación"
 
-#: backend/api/backups.py:308
+#: backend/api/backups.py:316
 msgid "Each path restored in place must be specific, such as /etc/nginx"
 msgstr ""
 "Cada ruta restaurada en su ubicación debe ser concreta, como /etc/nginx"
 
-#: backend/api/backups.py:313
+#: backend/api/backups.py:321
 msgid "Confirm that the host's files at these paths will be replaced"
 msgstr "Confirme que se reemplazarán los archivos del host en estas rutas"
 
-#: backend/api/backups.py:333 backend/api/backups.py:336
+#: backend/api/backups.py:341 backend/api/backups.py:344
 msgid "Backup target not found"
 msgstr "No se encontró el destino de copia de seguridad"
 
-#: backend/api/backups.py:390
+#: backend/api/backups.py:398
 msgid "This edition supports one backup target; edit the existing one"
 msgstr ""
 "Esta edición admite un único destino de copia de seguridad; edite el "
 "existente"
 
-#: backend/api/backups.py:467
+#: backend/api/backups.py:475
 msgid "Remove the hosts' backup policies before the target"
 msgstr ""
 "Elimine las políticas de copias de seguridad de los hosts antes del destino"
 
-#: backend/api/backups.py:547
+#: backend/api/backups.py:555
 msgid "Set up the backup target first"
 msgstr "Configure primero el destino de copia de seguridad"
 
-#: backend/api/backups.py:588
+#: backend/api/backups.py:596
 msgid "No backup policy"
 msgstr "No hay política de copias de seguridad"
 
-#: backend/api/backups.py:608
+#: backend/api/backups.py:616
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "Este host todavía no puede ejecutar copias de seguridad (%s)"
 
-#: backend/api/backups.py:614
+#: backend/api/backups.py:622
 msgid "This host's backup is not configured yet"
 msgstr "La copia de seguridad de este host todavía no está configurada"
 
-#: backend/api/backups.py:631
+#: backend/api/backups.py:639
 msgid "The backup storage host is not ready"
 msgstr "El host de almacenamiento de copias de seguridad no está listo"
 
-#: backend/api/backups.py:646
+#: backend/api/backups.py:654
 msgid "Unknown backup action"
 msgstr "Acción de copia de seguridad desconocida"
 
-#: backend/api/backups.py:651
+#: backend/api/backups.py:662
+msgid "An encrypted repository cannot be repacked on the storage host"
+msgstr ""
+"Un repositorio cifrado no se puede reempaquetar en el host de almacenamiento"
+
+#: backend/api/backups.py:666
 msgid "That backup job is already queued or running"
 msgstr "Esa tarea de copia de seguridad ya está en cola o en ejecución"
 
-#: backend/api/backups.py:745 backend/api/backups_browse.py:70
+#: backend/api/backups.py:760 backend/api/backups_browse.py:77
 msgid "Snapshot not found"
 msgstr "No se encontró la instantánea"
 
-#: backend/api/backups.py:749
+#: backend/api/backups.py:765
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr ""
 "Esta instantánea no está firmada; confirme para restaurarla de todos modos"
 
-#: backend/api/backups.py:864 backend/api/backups.py:867
+#: backend/api/backups.py:816 backend/services/backup_key_release.py:105
+msgid "Encrypted backups need the Professional+ backup engine"
+msgstr ""
+"Las copias de seguridad cifradas necesitan el motor de copias de seguridad "
+"de Professional+"
+
+#: backend/api/backups.py:821 backend/api/backups_browse.py:62
+msgid "This host's restate cannot do this yet; upgrade restate"
+msgstr "El restate de este host aún no puede hacer esto; actualice restate"
+
+#: backend/api/backups.py:833
+msgid "This snapshot's repository is no longer kept"
+msgstr "El repositorio de esta instantánea ya no se conserva"
+
+#: backend/api/backups.py:915 backend/api/backups.py:918
 msgid "Backup run not found"
 msgstr "No se encontró la tarea de copia de seguridad"
 
@@ -5457,15 +5490,15 @@ msgstr "No se pudo recuperar el estado del antivirus comercial: %s"
 msgid "Machine link decided for host %s"
 msgstr "Enlace de máquina decidido para el host %s"
 
-#: backend/api/backups_browse.py:55
-msgid "This host's restate cannot do this yet; upgrade restate"
-msgstr "El restate de este host aún no puede hacer esto; actualice restate"
-
-#: backend/api/backups_browse.py:87
+#: backend/api/backups_browse.py:94
 msgid "The path must be absolute"
 msgstr "La ruta debe ser absoluta"
 
-#: backend/api/backups_browse.py:116
+#: backend/api/backups_browse.py:126
+msgid "What changed compares with the current repository only"
+msgstr "Qué cambió solo compara con el repositorio actual"
+
+#: backend/api/backups_browse.py:132
 msgid "A check of what changed is already running"
 msgstr "Ya se está comprobando qué ha cambiado"
 
@@ -5878,6 +5911,31 @@ msgstr "Elija al menos un host para escanear"
 msgid "At most 500 hosts can be scanned in one request"
 msgstr "Se pueden escanear como máximo 500 hosts en una solicitud"
 
+#: backend/services/backup_key_release.py:73
+msgid "No such backup run for this host"
+msgstr "No existe esa tarea de copia de seguridad para este host"
+
+#: backend/services/backup_key_release.py:79
+msgid "This backup run does not need a key"
+msgstr "Esta tarea de copia de seguridad no necesita ninguna clave"
+
+#: backend/services/backup_key_release.py:81
+msgid "This backup run has already ended"
+msgstr "Esta tarea de copia de seguridad ya ha terminado"
+
+#: backend/services/backup_key_release.py:83
+msgid "This backup run's key was already released"
+msgstr "La clave de esta tarea de copia de seguridad ya se entregó"
+
+#: backend/services/backup_key_release.py:85
+msgid "This backup run is too old to release its key"
+msgstr ""
+"Esta tarea de copia de seguridad es demasiado antigua para entregar su clave"
+
+#: backend/services/backup_key_release.py:101
+msgid "This host's backups are not encrypted"
+msgstr "Las copias de seguridad de este host no están cifradas"
+
 #: backend/services/malware_quarantine.py:132
 msgid "Unknown action"
 msgstr "Acción desconocida"
@@ -6057,6 +6115,14 @@ msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "Vulnerabilidades de macOS por versión del sistema operativo, según los datos"
 " de versiones afectadas del NVD"
+
+#~ msgid ""
+#~ "This snapshot is encrypted; restoring or browsing it needs a restate that "
+#~ "can take the key for one job, which is not released yet"
+#~ msgstr ""
+#~ "Esta instantánea está cifrada; para restaurarla o explorarla se necesita un "
+#~ "restate que pueda recibir la clave para una sola tarea, y aún no se ha "
+#~ "publicado"
 
 #~ msgid "Days to keep seals"
 #~ msgstr "Días que se conservan las instantáneas selladas"

@@ -59,6 +59,7 @@ TENANT_SCOPED = {
     "mount_federation_controller_routes",
     "mount_federation_site_routes",
     "mount_firewall_orchestration_routes",
+    "mount_backup_routes",
     "mount_fleet_routes",
     "mount_health_routes",
     "mount_provisioning_routes",

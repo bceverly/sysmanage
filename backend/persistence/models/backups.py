@@ -132,6 +132,19 @@ class BackupPolicy(Base):
     estimate_bytes = Column(BigInteger, nullable=True)
     # The estimate's largest directories, JSON [{path, bytes}] (24.8).
     estimate_dirs = Column(Text, nullable=True)
+    # Encryption (Pro+ backup_engine, 24.6).  The repository directory under
+    # the target, when it is not the default ``<fqdn>-<short id>`` -- an
+    # encrypted repository is a NEW one (restate cannot convert in place);
+    # the one before it stays read-only and restorable.  Only the public key
+    # and fingerprint are here; the secret key is in OpenBAO
+    # (``encrypt_key_ref``).  Community never sets any of them.
+    repository_dir = Column(String(255), nullable=True)
+    previous_repository_dir = Column(String(255), nullable=True)
+    previous_nfs_path = Column(String(1024), nullable=True)
+    encrypt_public_key = Column(Text, nullable=True)
+    encrypt_fingerprint = Column(String(64), nullable=True)
+    encrypt_key_ref = Column(String(1024), nullable=True)
+    encrypted_at = Column(DateTime, nullable=True)
     repository_bytes = Column(BigInteger, nullable=True)
     config_version = Column(Integer, nullable=False, default=1)
     host_acked_version = Column(Integer, nullable=False, default=0)
@@ -165,6 +178,9 @@ class BackupRun(Base):
     queued_at = Column(DateTime, nullable=False)
     started_at = Column(DateTime, nullable=True)
     finished_at = Column(DateTime, nullable=True)
+    # When the agent fetched this run's decryption keys (Pro+, 24.6 S4): a
+    # run's keys are released once, and never stored anywhere on the server.
+    key_released_at = Column(DateTime, nullable=True)
     result = Column(Text, nullable=True)  # restate's result JSON, as sent
     snapshot = Column(String(255), nullable=True)
     progress = Column(Text, nullable=True)  # the latest progress line (JSON)
@@ -197,6 +213,9 @@ class BackupSnapshot(Base):
         GUID(), ForeignKey(_HOST_FK, ondelete="CASCADE"), nullable=False, index=True
     )
     name = Column(String(255), nullable=False)
+    # Which of the policy's repositories holds it (NULL = the default one);
+    # after encryption starts a new repository the old snapshots stay.
+    repository_dir = Column(String(255), nullable=True)
     created_at = Column(DateTime, nullable=True)
     bytes = Column(BigInteger, nullable=True)
     new_bytes = Column(BigInteger, nullable=True)

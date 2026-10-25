@@ -129,6 +129,17 @@ def policy_dict(policy: models.BackupPolicy) -> Dict[str, Any]:
         "storage_configured": policy.storage_acked_version >= policy.config_version,
         "restate_version": policy.restate_version,
         "storage_restate_version": policy.storage_restate_version,
+        # Pro+ backup_engine: the current repository's key (never the secret
+        # key) and the plain repository it replaced, still restorable.
+        "encryption": (
+            {
+                "fingerprint": policy.encrypt_fingerprint,
+                "since": iso(policy.encrypted_at),
+                "previous_repository": policy.previous_repository_dir,
+            }
+            if jobs.encrypted(policy)
+            else None
+        ),
     }
 
 

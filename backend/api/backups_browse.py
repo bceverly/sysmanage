@@ -23,7 +23,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from backend.api.backups import _audit, _host_or_404, _ready_policy, _require
+from backend.api.backups import (
+    _audit,
+    _host_or_404,
+    _readable_repository,
+    key_needed,
+    _ready_policy,
+    _require,
+)
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.persistence import models
@@ -89,9 +96,11 @@ async def browse_snapshot(
     policy = _ready_policy(db, host)
     _able(policy, "list")
     snapshot = _snapshot_or_404(db, policy, body.snapshot)
+    where = _readable_repository(snapshot, policy, host)
     run = jobs.queue_browse(
-        db, policy, host, jobs.LIST, snapshot.name, body.path, current_user.userid
-    )
+        db, policy, host, jobs.LIST, snapshot.name, body.path, current_user.userid,
+        previous=where == jobs.PREVIOUS, needs_key=key_needed(where, policy),
+    )  # fmt: skip
     db.commit()
     return views.run_dict(run)
 
@@ -110,14 +119,22 @@ async def backup_changes(
     _able(policy, "status")
     name = (body or ChangesBody()).snapshot
     if name:
-        name = _snapshot_or_404(db, policy, name).name
+        named = _snapshot_or_404(db, policy, name)
+        if _readable_repository(named, policy, host) != jobs.CURRENT:
+            raise HTTPException(
+                status_code=409,
+                detail=_("What changed compares with the current repository only"),
+            )
+        name = named.name
+    needs_key = key_needed(jobs.CURRENT, policy)
     if jobs.pending(db, policy.id, jobs.STATUS):
         raise HTTPException(
             status_code=409, detail=_("A check of what changed is already running")
         )
     run = jobs.queue_browse(
-        db, policy, host, jobs.STATUS, name, None, current_user.userid
-    )
+        db, policy, host, jobs.STATUS, name, None, current_user.userid,
+        needs_key=needs_key,
+    )  # fmt: skip
     _audit(
         db,
         current_user,

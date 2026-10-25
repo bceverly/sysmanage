@@ -46,6 +46,7 @@ from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
+from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
@@ -287,6 +288,13 @@ def _validate_restore(body: RestoreBody) -> None:
             raise _bad(_("A restore path is empty or too long"))
         if ".." in pattern.split("/"):
             raise _bad(_("A restore path must not contain '..'"))
+        if not pattern.startswith(("/", "**/")):
+            # restate matches paths as a rules file writes them; "~" or a
+            # relative path matches nothing, so a preview would "succeed"
+            # with no files (lab 2026-10-25).
+            raise _bad(
+                _("A restore path must be absolute, such as /home/alice/notes.txt")
+            )
     if body.in_place:
         _validate_in_place(body)
 
@@ -646,6 +654,13 @@ async def backup_now(
         raise _bad(_("Unknown backup action"))
     host = _host_or_404(db, host_id)
     policy = _ready_policy(db, host)
+    if action == "repack" and jobs.encrypted(policy):
+        # Rewriting packs needs the secret key, which the storage host never
+        # holds (Pro+ backup_engine: it stays keyless).
+        raise HTTPException(
+            status_code=409,
+            detail=_("An encrypted repository cannot be repacked on the storage host"),
+        )
     if jobs.pending(db, policy.id, action):
         raise HTTPException(
             status_code=409, detail=_("That backup job is already queued or running")
@@ -743,6 +758,7 @@ async def backup_restore(
     )
     if snapshot is None:
         raise HTTPException(status_code=404, detail=_("Snapshot not found"))
+    where = _readable_repository(snapshot, policy, host)
     if not snapshot.signed and not body.acknowledge_unsigned:
         raise HTTPException(
             status_code=409,
@@ -759,6 +775,8 @@ async def backup_restore(
         actor=current_user.userid,
         exclude=body.exclude,
         in_place=body.in_place,
+        previous=where == jobs.PREVIOUS,
+        needs_key=key_needed(where, policy),
     )
     _audit(
         db,
@@ -782,6 +800,39 @@ async def backup_restore(
     out["in_place"] = body.in_place
     out["staging_path"] = None if body.in_place else jobs.staging_dir(run.id)
     return out
+
+
+def key_needed(where: str, policy: models.BackupPolicy) -> bool:
+    """Does reading this repository need the policy's secret key on the host
+    (Pro+ backup_engine, 24.6 S4)?  Then the run says ``needs_key`` and the
+    agent fetches the key for that run only (``/api/agent/backup-key``).
+    HTTP 409 when it cannot be handed over: no backup engine to read it from
+    OpenBAO, or a restate on the host that cannot take it (``decrypt_with``)."""
+    if not jobs.needs_secret_key(where, policy):
+        return False
+    if module_loader.get_module("backup_engine") is None:
+        raise HTTPException(
+            status_code=409,
+            detail=_("Encrypted backups need the Professional+ backup engine"),
+        )
+    if "decrypt" not in jobs.abilities(policy):
+        raise HTTPException(
+            status_code=409,
+            detail=_("This host's restate cannot do this yet; upgrade restate"),
+        )
+    return True
+
+
+def _readable_repository(snapshot, policy, host) -> str:
+    """The repository a restore or listing reads; HTTP 409 when the policy
+    no longer keeps the one that holds the snapshot."""
+    where = jobs.snapshot_repository(snapshot, policy, host)
+    if where is None:
+        raise HTTPException(
+            status_code=409,
+            detail=_("This snapshot's repository is no longer kept"),
+        )
+    return where
 
 
 def _restore_audit_text(body: RestoreBody) -> str:
