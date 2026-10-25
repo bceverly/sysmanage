@@ -531,6 +531,48 @@ def test_retention_deletes_old_runs_but_keeps_each_kinds_newest(session):
     assert session.get(models.BackupRun, old_pending.id) is not None  # not final
 
 
+def _unsigned_snapshot(session, s, name="2026-10-20T010000Z"):
+    session.add(models.BackupSnapshot(
+        id=uuid.uuid4(), policy_id=s.policy.id, host_id=s.host.id,
+        name=name, signed=False, seen_at=datetime(2026, 10, 20),
+    ))  # fmt: skip
+    session.commit()
+    return name
+
+
+@pytest.mark.asyncio
+async def test_a_restore_into_place_needs_specific_paths_and_a_confirmation(
+    session, sent
+):
+    s = _setup(session)
+    name = _unsigned_snapshot(session, s)
+
+    def body(**over):
+        fields = {"snapshot": name, "include": ["/etc/nginx"], "in_place": True,
+                  "acknowledge_unsigned": True}  # fmt: skip
+        fields.update(over)
+        return api.RestoreBody(**fields)
+
+    host = str(s.host.id)
+    for include in ([], ["/"], ["/*"], ["**/x"], ["etc/nginx"]):
+        assert await _status(
+            api.backup_restore(host, body(include=include), session, RESTORER)
+        ) == 422  # fmt: skip
+    # A preview needs no confirmation; the real thing does.
+    preview = await api.backup_restore(host, body(), session, RESTORER)
+    assert preview["in_place"] is True and preview["staging_path"] is None
+    assert sent[-1][2]["in_place"] is True and sent[-1][2]["dry_run"] is True
+    assert await _status(
+        api.backup_restore(host, body(dry_run=False), session, RESTORER)
+    ) == 409  # fmt: skip
+    out = await api.backup_restore(
+        host, body(dry_run=False, acknowledge_in_place=True), session, RESTORER
+    )
+    assert sent[-1][2]["in_place"] is True and sent[-1][2]["dry_run"] is False
+    fetched = await api.get_run(out["id"], session)
+    assert fetched["in_place"] is True and fetched["staging_path"] is None
+
+
 @pytest.mark.asyncio
 async def test_a_restores_staging_path_is_where_restate_put_it(session, sent):
     s = _setup(session)

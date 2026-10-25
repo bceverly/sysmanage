@@ -5373,7 +5373,13 @@
       "stagingNote": "Os arquivos são restaurados em um diretório de preparação no host, nunca sobre os arquivos em uso. Mova-os para o lugar você mesmo.",
       "title": "Restaurar arquivos em {{host}}",
       "unsignedAck": "Este snapshot não está assinado. Restaurar mesmo assim.",
-      "planned": "Planejado a partir do índice do snapshot. Os dados do backup não foram lidos, então a integridade deles não foi verificada aqui; a verificação semanal faz isso."
+      "planned": "Planejado a partir do índice do snapshot. Os dados do backup não foram lidos, então a integridade deles não foi verificada aqui; a verificação semanal faz isso.",
+      "toStaging": "Em um diretório de preparação no host",
+      "toPlace": "No local original, substituindo os arquivos do host",
+      "placeNote": "Os arquivos nesses caminhos no host são substituídos pelas cópias do snapshot. O restate verifica toda a seleção antes de gravar qualquer coisa, e cada arquivo em relação ao snapshot antes de substituir o antigo. Informe caminhos específicos, como /etc/nginx; um host inteiro não é restaurado no local original. Faça primeiro uma prévia para ver o que mudaria.",
+      "placePaths": "Caminhos a colocar de volta (um por linha)",
+      "placeAck": "Substituir os arquivos nesses caminhos em {{host}}.",
+      "confirmPlace": "Restaurar no local original"
     },
     "run": {
       "busy": "Ocupado, será tentado novamente",

@@ -5373,7 +5373,13 @@
       "stagingNote": "Les fichiers sont restaurés dans un répertoire de préparation sur l'hôte, jamais par-dessus les fichiers en service. Mettez-les en place vous-même.",
       "title": "Restaurer des fichiers sur {{host}}",
       "unsignedAck": "Cet instantané n'est pas signé. Le restaurer quand même.",
-      "planned": "Planifié à partir de l'index de l'instantané. Les données sauvegardées n'ont pas été lues, leur intégrité n'a donc pas été vérifiée ici ; la vérification hebdomadaire s'en charge."
+      "planned": "Planifié à partir de l'index de l'instantané. Les données sauvegardées n'ont pas été lues, leur intégrité n'a donc pas été vérifiée ici ; la vérification hebdomadaire s'en charge.",
+      "toStaging": "Dans un répertoire de préparation sur l'hôte",
+      "toPlace": "En place, en remplaçant les fichiers de l'hôte",
+      "placeNote": "Les fichiers situés à ces chemins sur l'hôte sont remplacés par les copies de l'instantané. restate vérifie toute la sélection avant d'écrire quoi que ce soit, et chaque fichier par rapport à l'instantané avant qu'il ne remplace l'ancien. Indiquez des chemins précis, comme /etc/nginx ; un hôte entier n'est pas restauré en place. Faites d'abord un aperçu pour voir ce qui changerait.",
+      "placePaths": "Chemins à remettre en place (un par ligne)",
+      "placeAck": "Remplacer les fichiers situés à ces chemins sur {{host}}.",
+      "confirmPlace": "Restaurer en place"
     },
     "run": {
       "busy": "Occupé, nouvelle tentative prévue",

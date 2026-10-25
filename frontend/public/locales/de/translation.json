@@ -5373,7 +5373,13 @@
       "stagingNote": "Dateien werden in ein Staging-Verzeichnis auf dem Host wiederhergestellt, nie über die laufenden Dateien. Verschieben Sie sie selbst an ihren Platz.",
       "title": "Dateien auf {{host}} wiederherstellen",
       "unsignedAck": "Dieser Snapshot ist nicht signiert. Trotzdem wiederherstellen.",
-      "planned": "Aus dem Snapshot-Index geplant. Die gesicherten Daten wurden nicht gelesen, ihre Unversehrtheit wurde hier also nicht geprüft; das übernimmt die wöchentliche Prüfung."
+      "planned": "Aus dem Snapshot-Index geplant. Die gesicherten Daten wurden nicht gelesen, ihre Unversehrtheit wurde hier also nicht geprüft; das übernimmt die wöchentliche Prüfung.",
+      "toStaging": "In ein Staging-Verzeichnis auf dem Host",
+      "toPlace": "An Ort und Stelle, die Dateien des Hosts ersetzend",
+      "placeNote": "Die Dateien unter diesen Pfaden auf dem Host werden durch die Kopien aus dem Snapshot ersetzt. restate prüft die gesamte Auswahl, bevor es etwas schreibt, und jede Datei gegen den Snapshot, bevor sie die alte ersetzt. Geben Sie bestimmte Pfade an, etwa /etc/nginx; ein ganzer Host wird nicht an Ort und Stelle wiederhergestellt. Sehen Sie sich zuerst die Vorschau an, um zu sehen, was sich ändern würde.",
+      "placePaths": "Zurückzulegende Pfade (einer pro Zeile)",
+      "placeAck": "Die Dateien unter diesen Pfaden auf {{host}} ersetzen.",
+      "confirmPlace": "An Ort und Stelle wiederherstellen"
     },
     "run": {
       "busy": "Belegt, wird wiederholt",

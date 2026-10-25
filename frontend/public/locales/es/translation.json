@@ -5373,7 +5373,13 @@
       "stagingNote": "Los archivos se restauran en un directorio de preparación del host, nunca sobre los archivos en uso. Muévalos usted mismo a su lugar.",
       "title": "Restaurar archivos en {{host}}",
       "unsignedAck": "Esta instantánea no está firmada. Restaurarla de todos modos.",
-      "planned": "Planificado a partir del índice de la instantánea. No se leyeron los datos de la copia de seguridad, así que aquí no se comprobó su integridad; de eso se encarga la comprobación semanal."
+      "planned": "Planificado a partir del índice de la instantánea. No se leyeron los datos de la copia de seguridad, así que aquí no se comprobó su integridad; de eso se encarga la comprobación semanal.",
+      "toStaging": "En un directorio de preparación del host",
+      "toPlace": "En su ubicación, reemplazando los archivos del host",
+      "placeNote": "Los archivos de estas rutas en el host se reemplazan por las copias de la instantánea. restate comprueba toda la selección antes de escribir nada, y cada archivo con la instantánea antes de que sustituya al anterior. Indique rutas concretas, como /etc/nginx; un host completo no se restaura en su ubicación. Haga primero una vista previa para ver qué cambiaría.",
+      "placePaths": "Rutas que devolver a su lugar (una por línea)",
+      "placeAck": "Reemplazar los archivos de estas rutas en {{host}}.",
+      "confirmPlace": "Restaurar en su ubicación"
     },
     "run": {
       "busy": "Ocupado, se reintentará",

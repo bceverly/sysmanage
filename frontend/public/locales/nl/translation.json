@@ -5373,7 +5373,13 @@
       "stagingNote": "Bestanden worden hersteld in een stagingmap op de host, nooit over de actieve bestanden heen. Zet ze zelf op hun plaats.",
       "title": "Bestanden herstellen op {{host}}",
       "unsignedAck": "Deze snapshot is niet ondertekend. Toch herstellen.",
-      "planned": "Gepland op basis van de snapshotindex. De geback-upte gegevens zijn niet gelezen, dus hun integriteit is hier niet gecontroleerd; dat doet de wekelijkse controle."
+      "planned": "Gepland op basis van de snapshotindex. De geback-upte gegevens zijn niet gelezen, dus hun integriteit is hier niet gecontroleerd; dat doet de wekelijkse controle.",
+      "toStaging": "In een staging-map op de host",
+      "toPlace": "Op de oorspronkelijke plek, ter vervanging van de bestanden van de host",
+      "placeNote": "De bestanden op deze paden op de host worden vervangen door de kopieën uit de snapshot. restate controleert de hele selectie voordat het iets schrijft, en elk bestand tegen de snapshot voordat het het oude vervangt. Geef specifieke paden op, zoals /etc/nginx; een hele host wordt niet op de oorspronkelijke plek hersteld. Bekijk eerst de voorvertoning om te zien wat er zou veranderen.",
+      "placePaths": "Terug te zetten paden (één per regel)",
+      "placeAck": "De bestanden op deze paden op {{host}} vervangen.",
+      "confirmPlace": "Op de oorspronkelijke plek herstellen"
     },
     "run": {
       "busy": "Bezet, wordt opnieuw geprobeerd",

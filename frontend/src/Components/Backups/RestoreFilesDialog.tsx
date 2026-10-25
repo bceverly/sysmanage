@@ -2,8 +2,11 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-// Restore files (Phase 24, Community): preview first, then restore -- always
-// into the agent's staging directory on the host, never over the live files.
+// Restore files (Phase 24, Community): preview first, then restore -- into
+// the agent's staging directory on the host (the default), or into place over
+// the host's own files at the paths named (24.9).  Into place needs specific
+// paths and its own confirmation; restate checks the whole selection before
+// writing and each file against the snapshot before it replaces the old one.
 // Snapshots are not signed in Community, so the operator says so explicitly.
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -21,6 +24,8 @@ import {
     FormControlLabel,
     InputLabel,
     MenuItem,
+    Radio,
+    RadioGroup,
     Select,
     Stack,
     TextField,
@@ -118,6 +123,8 @@ const RestoreFilesDialog: React.FC<{
     const [restore, setRestore] = useState<BackupRun | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [browsing, setBrowsing] = useState(false);
+    const [inPlace, setInPlace] = useState(false);
+    const [placeAck, setPlaceAck] = useState(false);
 
     useEffect(() => {
         if (!open) return;
@@ -125,6 +132,8 @@ const RestoreFilesDialog: React.FC<{
         setRestore(null);
         setError(null);
         setAcknowledged(false);
+        setInPlace(false);
+        setPlaceAck(false);
         getSnapshots(hostId)
             .then(rows => {
                 setSnapshots(rows);
@@ -162,6 +171,8 @@ const RestoreFilesDialog: React.FC<{
                 exclude,
                 dry_run: dryRun,
                 acknowledge_unsigned: acknowledged,
+                in_place: inPlace,
+                acknowledge_in_place: inPlace && placeAck,
             });
             if (dryRun) {
                 setPreview(run);
@@ -175,15 +186,35 @@ const RestoreFilesDialog: React.FC<{
     };
 
     const previewDone = preview !== null && preview.status === 'ok';
+    const blocked = (needsAck && !acknowledged) || (inPlace && include.length === 0);
+    const chooseDestination = (place: boolean) => {
+        setInPlace(place);
+        setPlaceAck(false);
+        setPreview(null);
+    };
     return (
         <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
             <DialogTitle>{t('backups.restore.title', 'Restore files to {{host}}', { host: fqdn })}</DialogTitle>
             <DialogContent>
                 <Stack spacing={2} sx={{ mt: 1 }}>
-                    <Alert severity="info">
-                        {t('backups.restore.stagingNote',
-                            'Files are restored into a staging directory on the host, never over the live files. Move them into place yourself.')}
-                    </Alert>
+                    <RadioGroup value={inPlace ? 'place' : 'staging'}
+                        onChange={e => chooseDestination(e.target.value === 'place')}>
+                        <FormControlLabel value="staging" control={<Radio size="small" />}
+                            label={t('backups.restore.toStaging', 'Into a staging directory on the host')} />
+                        <FormControlLabel value="place" control={<Radio size="small" />}
+                            label={t('backups.restore.toPlace', 'Into place, replacing the host\'s files')} />
+                    </RadioGroup>
+                    {inPlace ? (
+                        <Alert severity="warning">
+                            {t('backups.restore.placeNote',
+                                'The files at these paths on the host are replaced with the snapshot\'s copies. restate checks the whole selection before it writes anything, and each file against the snapshot before it replaces the old one. Name specific paths, such as /etc/nginx; a whole host is not restored in place. Preview first to see what would change.')}
+                        </Alert>
+                    ) : (
+                        <Alert severity="info">
+                            {t('backups.restore.stagingNote',
+                                'Files are restored into a staging directory on the host, never over the live files. Move them into place yourself.')}
+                        </Alert>
+                    )}
                     {error && <Alert severity="error">{error}</Alert>}
                     {snapshots.length === 0 && !error ? (
                         <Typography variant="body2">{t('backups.restore.noSnapshots', 'This host has no snapshots yet.')}</Typography>
@@ -212,7 +243,9 @@ const RestoreFilesDialog: React.FC<{
                             )}
                         </Box>
                     )}
-                    <TextField multiline minRows={3} label={t('backups.restore.paths', 'Paths to restore (one per line; empty = everything)')}
+                    <TextField multiline minRows={3}
+                        label={inPlace ? t('backups.restore.placePaths', 'Paths to put back (one per line)')
+                            : t('backups.restore.paths', 'Paths to restore (one per line; empty = everything)')}
                         value={paths} onChange={e => { setPaths(e.target.value); setPreview(null); }}
                         placeholder="/etc/nginx" />
                     <TextField multiline minRows={2} label={t('backups.restore.exclude', 'Paths to leave out (one per line)')}
@@ -221,6 +254,12 @@ const RestoreFilesDialog: React.FC<{
                         <FormControlLabel
                             control={<Checkbox checked={acknowledged} onChange={e => setAcknowledged(e.target.checked)} />}
                             label={t('backups.restore.unsignedAck', 'This snapshot is not signed. Restore it anyway.')}
+                        />
+                    )}
+                    {inPlace && (
+                        <FormControlLabel
+                            control={<Checkbox checked={placeAck} onChange={e => setPlaceAck(e.target.checked)} />}
+                            label={t('backups.restore.placeAck', 'Replace the files at these paths on {{host}}.', { host: fqdn })}
                         />
                     )}
                     {preview && <RunOutcome run={preview} />}
@@ -238,12 +277,13 @@ const RestoreFilesDialog: React.FC<{
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose}>{t('common.close', 'Close')}</Button>
-                <AsyncButton onClick={() => send(true)} disabled={!snapshot || (needsAck && !acknowledged)}>
+                <AsyncButton onClick={() => send(true)} disabled={!snapshot || blocked}>
                     {t('backups.restore.preview', 'Preview')}
                 </AsyncButton>
-                <AsyncButton variant="contained" onClick={() => send(false)}
-                    disabled={!previewDone || restore !== null || (needsAck && !acknowledged)}>
-                    {t('backups.restore.confirm', 'Restore to staging')}
+                <AsyncButton variant="contained" color={inPlace ? 'warning' : 'primary'} onClick={() => send(false)}
+                    disabled={!previewDone || restore !== null || blocked || (inPlace && !placeAck)}>
+                    {inPlace ? t('backups.restore.confirmPlace', 'Restore into place')
+                        : t('backups.restore.confirm', 'Restore to staging')}
                 </AsyncButton>
             </DialogActions>
         </Dialog>

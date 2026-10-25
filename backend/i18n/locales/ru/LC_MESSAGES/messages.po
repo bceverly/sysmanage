@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-23 20:49-0400\n"
+"POT-Creation-Date: 2026-10-25 07:34-0400\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -82,7 +82,7 @@ msgstr "У вас нет доступа к выбранной учетной з�
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:134
+#: backend/api/posture.py:375 backend/api/backups.py:139
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:151
@@ -197,8 +197,8 @@ msgstr "Неверный формат идентификатора узла"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:146
-#: backend/api/backups.py:149 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:151
+#: backend/api/backups.py:154 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -4054,84 +4054,84 @@ msgid "KVM network list requested. Results will be returned shortly."
 msgstr ""
 "Запрошен список сетей KVM. Результаты будут отображены в ближайшее время."
 
-#: backend/api/backups.py:165
+#: backend/api/backups.py:170
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s должен быть абсолютным путем без '..'"
 
-#: backend/api/backups.py:170
+#: backend/api/backups.py:175
 #, python-format
 msgid "%s is out of range"
 msgstr "%s вне допустимого диапазона"
 
-#: backend/api/backups.py:174
+#: backend/api/backups.py:179
 msgid "Host mount point"
 msgstr "Точка монтирования на хосте"
 
-#: backend/api/backups.py:175 backend/api/backups.py:220
+#: backend/api/backups.py:180 backend/api/backups.py:225
 msgid "Storage path"
 msgstr "Путь хранения"
 
-#: backend/api/backups.py:176
+#: backend/api/backups.py:181
 msgid "Concurrent backups"
 msgstr "Одновременные резервные копии"
 
-#: backend/api/backups.py:177
+#: backend/api/backups.py:182
 msgid "Days to keep sealed snapshots"
 msgstr "Дней хранения запечатанных снимков"
 
-#: backend/api/backups.py:178
+#: backend/api/backups.py:183
 msgid "Write cache budget"
 msgstr "Лимит кеша записи"
 
-#: backend/api/backups.py:179
+#: backend/api/backups.py:184
 msgid "Storage space warning"
 msgstr "Предупреждение о месте в хранилище"
 
-#: backend/api/backups.py:180
+#: backend/api/backups.py:185
 msgid "Storage space critical"
 msgstr "Критическое заполнение хранилища"
 
-#: backend/api/backups.py:184
+#: backend/api/backups.py:189
 msgid "The storage space warning must be below the critical level"
 msgstr ""
 "Порог предупреждения о месте в хранилище должен быть ниже критического"
 
-#: backend/api/backups.py:186
+#: backend/api/backups.py:191
 msgid "The backup service account is not a valid account name"
 msgstr ""
 "Служебная учетная запись резервного копирования не является допустимым "
 "именем учетной записи"
 
-#: backend/api/backups.py:188
+#: backend/api/backups.py:193
 msgid "Unknown seal mode"
 msgstr "Неизвестный режим запечатывания"
 
-#: backend/api/backups.py:190
+#: backend/api/backups.py:195
 msgid "A ZFS snapshot seal needs the dataset name"
 msgstr "Для запечатывания снимком ZFS нужно имя набора данных"
 
-#: backend/api/backups.py:192
+#: backend/api/backups.py:197
 msgid "The ZFS dataset name is not valid"
 msgstr "Недопустимое имя набора данных ZFS"
 
-#: backend/api/backups.py:199
+#: backend/api/backups.py:204
 msgid "A storage host needs the storage path"
 msgstr "Для хоста хранения нужен путь хранения"
 
-#: backend/api/backups.py:216
+#: backend/api/backups.py:221
 msgid "A btrfs snapshot seal needs the snapshot directory"
 msgstr "Для запечатывания снимком btrfs нужен каталог снимков"
 
-#: backend/api/backups.py:218
+#: backend/api/backups.py:223
 msgid "A btrfs snapshot seal needs the storage path"
 msgstr "Для запечатывания снимком btrfs нужен путь хранения"
 
-#: backend/api/backups.py:221
+#: backend/api/backups.py:226
 msgid "Snapshot directory"
 msgstr "Каталог снимков"
 
-#: backend/api/backups.py:226
+#: backend/api/backups.py:231
 #, python-format
 msgid ""
 "%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
@@ -4140,35 +4140,35 @@ msgstr ""
 "%s должен быть простым абсолютным путем (буквы, цифры, '_', '.', '-' и '/'; "
 "без '/' в конце)"
 
-#: backend/api/backups.py:234
+#: backend/api/backups.py:239
 msgid "The snapshot directory must be outside the storage path"
 msgstr "Каталог снимков должен находиться вне пути хранения"
 
-#: backend/api/backups.py:238
+#: backend/api/backups.py:243
 msgid "Interval (hours)"
 msgstr "Интервал (часов)"
 
-#: backend/api/backups.py:239
+#: backend/api/backups.py:244
 msgid "Window start hour"
 msgstr "Час начала окна"
 
-#: backend/api/backups.py:240
+#: backend/api/backups.py:245
 msgid "Snapshots to keep"
 msgstr "Сколько снимков хранить"
 
-#: backend/api/backups.py:241
+#: backend/api/backups.py:246
 msgid "Check interval (days)"
 msgstr "Интервал проверки (дней)"
 
-#: backend/api/backups.py:245
+#: backend/api/backups.py:250
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "Хуки приостановки: не более 10 коротких имен в нижнем регистре"
 
-#: backend/api/backups.py:258
+#: backend/api/backups.py:263
 msgid "At most 50 path rules can be set"
 msgstr "Не более 50 правил для путей можно задать"
 
-#: backend/api/backups.py:269
+#: backend/api/backups.py:274
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
@@ -4176,75 +4176,91 @@ msgstr ""
 "Каждое правило пути состоит из одной строки не более 512 символов без "
 "начальных или конечных пробелов или начального символа #"
 
-#: backend/api/backups.py:277 backend/api/backups_browse.py:85
+#: backend/api/backups.py:282 backend/api/backups_browse.py:85
 msgid "The snapshot name is not valid"
 msgstr "Недопустимое имя снимка"
 
-#: backend/api/backups.py:279
+#: backend/api/backups.py:284
 msgid "At most 50 paths can be restored at once"
 msgstr "За один раз можно восстановить не более 50 путей"
 
-#: backend/api/backups.py:282
+#: backend/api/backups.py:287
 msgid "A restore path is empty or too long"
 msgstr "Путь восстановления пуст или слишком длинный"
 
-#: backend/api/backups.py:284
+#: backend/api/backups.py:289
 msgid "A restore path must not contain '..'"
 msgstr "Путь восстановления не должен содержать '..'"
 
-#: backend/api/backups.py:303 backend/api/backups.py:306
+#: backend/api/backups.py:302
+msgid "Name the paths to put back; a whole host is not restored in place"
+msgstr ""
+"Укажите пути для возврата на место; хост целиком на место не "
+"восстанавливается"
+
+#: backend/api/backups.py:308
+msgid "Each path restored in place must be specific, such as /etc/nginx"
+msgstr ""
+"Каждый путь, восстанавливаемый на место, должен быть конкретным, например "
+"/etc/nginx"
+
+#: backend/api/backups.py:313
+msgid "Confirm that the host's files at these paths will be replaced"
+msgstr "Подтвердите, что файлы хоста по этим путям будут заменены"
+
+#: backend/api/backups.py:333 backend/api/backups.py:336
 msgid "Backup target not found"
 msgstr "Цель резервного копирования не найдена"
 
-#: backend/api/backups.py:359
+#: backend/api/backups.py:390
 msgid "This edition supports one backup target; edit the existing one"
 msgstr ""
 "Эта редакция поддерживает одну цель резервного копирования; измените "
 "существующую"
 
-#: backend/api/backups.py:436
+#: backend/api/backups.py:467
 msgid "Remove the hosts' backup policies before the target"
 msgstr "Сначала удалите политики резервного копирования хостов, затем цель"
 
-#: backend/api/backups.py:516
+#: backend/api/backups.py:547
 msgid "Set up the backup target first"
 msgstr "Сначала настройте цель резервного копирования"
 
-#: backend/api/backups.py:557
+#: backend/api/backups.py:588
 msgid "No backup policy"
 msgstr "Нет политики резервного копирования"
 
-#: backend/api/backups.py:577
+#: backend/api/backups.py:608
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "Этот хост пока не может выполнять резервное копирование (%s)"
 
-#: backend/api/backups.py:583
+#: backend/api/backups.py:614
 msgid "This host's backup is not configured yet"
 msgstr "Резервное копирование этого хоста еще не настроено"
 
-#: backend/api/backups.py:600
+#: backend/api/backups.py:631
 msgid "The backup storage host is not ready"
 msgstr "Хост хранения резервных копий не готов"
 
-#: backend/api/backups.py:615
+#: backend/api/backups.py:646
 msgid "Unknown backup action"
 msgstr "Неизвестное действие резервного копирования"
 
-#: backend/api/backups.py:620
+#: backend/api/backups.py:651
 msgid "That backup job is already queued or running"
 msgstr "Это задание резервного копирования уже в очереди или выполняется"
 
-#: backend/api/backups.py:714 backend/api/backups_browse.py:70
+#: backend/api/backups.py:745 backend/api/backups_browse.py:70
 msgid "Snapshot not found"
 msgstr "Снимок не найден"
 
-#: backend/api/backups.py:718
+#: backend/api/backups.py:749
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr ""
 "Этот снимок не подписан; подтвердите, чтобы всё равно восстановить его"
 
-#: backend/api/backups.py:820 backend/api/backups.py:823
+#: backend/api/backups.py:864 backend/api/backups.py:867
 msgid "Backup run not found"
 msgstr "Задание резервного копирования не найдено"
 

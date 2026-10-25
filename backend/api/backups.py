@@ -24,10 +24,12 @@ check cadence and quiesce.  ``POST /host/{id}/backup-now`` -- a capture now
 ``GET /backups/runs`` (``?host_id``, ``limit``, ``offset``), ``GET
 /backups/runs/{id}`` and ``GET /host/{id}/backup-snapshots``.
 
-``POST /host/{id}/backup-restore`` -- Restore Files.  Always into the
-agent's staging directory, never over the live tree; ``dry_run`` (the
-default) only previews.  Snapshots are not signed in Community, so the
-request must acknowledge that explicitly (``acknowledge_unsigned``).
+``POST /host/{id}/backup-restore`` -- Restore Files.  Into the agent's
+staging directory, or with ``in_place`` over the host's own files (specific
+paths only, acknowledged with ``acknowledge_in_place``; the agent picks the
+root and spares its own state); ``dry_run`` (the default) only previews.
+Snapshots are not signed in Community, so the request must acknowledge that
+explicitly (``acknowledge_unsigned``).
 
 Every change is audited.
 """
@@ -121,6 +123,9 @@ class RestoreBody(BaseModel):
     exclude: List[str] = Field(default_factory=list)
     dry_run: bool = True
     acknowledge_unsigned: bool = False
+    # Over the host's own files rather than into staging (24.9).
+    in_place: bool = False
+    acknowledge_in_place: bool = False
 
 
 def _bad(message: str) -> HTTPException:
@@ -282,6 +287,31 @@ def _validate_restore(body: RestoreBody) -> None:
             raise _bad(_("A restore path is empty or too long"))
         if ".." in pattern.split("/"):
             raise _bad(_("A restore path must not contain '..'"))
+    if body.in_place:
+        _validate_in_place(body)
+
+
+_WILDCARDS = set("*?[")
+
+
+def _validate_in_place(body: RestoreBody) -> None:
+    """The agent's own rule (job_builder._in_place_includes), said early:
+    name what is replaced -- never the whole host, which is a rebuild."""
+    if not body.include:
+        raise _bad(
+            _("Name the paths to put back; a whole host is not restored in place")
+        )
+    for pattern in body.include:
+        first = pattern.lstrip("/").split("/", 1)[0]
+        if not pattern.startswith("/") or not first or _WILDCARDS & set(first):
+            raise _bad(
+                _("Each path restored in place must be specific, such as /etc/nginx")
+            )
+    if not body.dry_run and not body.acknowledge_in_place:
+        raise HTTPException(
+            status_code=409,
+            detail=_("Confirm that the host's files at these paths will be replaced"),
+        )
 
 
 def _audit(db, current_user, entity_type, entity_id, name, description, details):
@@ -728,6 +758,7 @@ async def backup_restore(
         allow_unverified=not snapshot.signed,
         actor=current_user.userid,
         exclude=body.exclude,
+        in_place=body.in_place,
     )
     _audit(
         db,
@@ -735,24 +766,36 @@ async def backup_restore(
         EntityType.HOST,
         host.id,
         host.fqdn,
-        (
-            "Backup restore preview requested"
-            if body.dry_run
-            else "Backup restore to staging requested"
-        ),
+        _restore_audit_text(body),
         {
             "run_id": str(run.id),
             "snapshot": snapshot.name,
             "include": body.include,
             "exclude": body.exclude,
             "dry_run": body.dry_run,
+            "in_place": body.in_place,
             "unsigned_acknowledged": not snapshot.signed,
         },
     )
     db.commit()
     out = views.run_dict(run)
-    out["staging_path"] = jobs.staging_dir(run.id)
+    out["in_place"] = body.in_place
+    out["staging_path"] = None if body.in_place else jobs.staging_dir(run.id)
     return out
+
+
+def _restore_audit_text(body: RestoreBody) -> str:
+    if body.in_place:
+        return (
+            "Backup restore into place previewed"
+            if body.dry_run
+            else "Backup restore into place requested"
+        )
+    return (
+        "Backup restore preview requested"
+        if body.dry_run
+        else "Backup restore to staging requested"
+    )
 
 
 # --- runs -----------------------------------------------------------------
@@ -824,7 +867,8 @@ async def get_run(run_id: str, db: Session = Depends(get_tenant_db)) -> Dict[str
         raise HTTPException(status_code=404, detail=_("Backup run not found"))
     out = views.run_dict(run)
     if run.action == jobs.RESTORE:
-        out["staging_path"] = _staging_path(run)
+        out["in_place"] = bool((out.get("parameters") or {}).get("in_place"))
+        out["staging_path"] = None if out["in_place"] else _staging_path(run)
     return out
 
 

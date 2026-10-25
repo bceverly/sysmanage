@@ -361,8 +361,10 @@ def queue_restore(  # pylint: disable=too-many-arguments,too-many-positional-arg
     allow_unverified: bool,
     actor: str,
     exclude: Optional[List[str]] = None,
+    in_place: bool = False,
 ) -> models.BackupRun:
-    """Restore into the agent's staging directory -- never over the live tree."""
+    """Restore into the agent's staging directory, or (``in_place``) over the
+    host's own files; the agent chooses the root either way."""
     return _queue(
         db,
         policy,
@@ -376,6 +378,7 @@ def queue_restore(  # pylint: disable=too-many-arguments,too-many-positional-arg
             "exclude": list(exclude or []),
             "dry_run": bool(dry_run),
             "allow_unverified": bool(allow_unverified),
+            "in_place": bool(in_place),
         },
         actor,
     )

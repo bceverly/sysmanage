@@ -213,7 +213,10 @@ export interface BackupRun {
   /** For a check: ``verified`` only after a full read; a keyless check is
    *  ``metadata_check_passed`` and must never read as verified. */
   check_label: "verified" | "changed" | "metadata_check_passed" | "metadata_changed" | null;
-  staging_path?: string;
+  /** A restore's staging directory; null for one into place. */
+  staging_path?: string | null;
+  /** A restore over the host's own files (24.9). */
+  in_place?: boolean;
 }
 
 export interface BackupHost {
@@ -284,6 +287,9 @@ export interface RestoreInput {
   exclude: string[];
   dry_run: boolean;
   acknowledge_unsigned: boolean;
+  /** Over the host's own files rather than into staging. */
+  in_place?: boolean;
+  acknowledge_in_place?: boolean;
 }
 
 const base = "/api/v1";

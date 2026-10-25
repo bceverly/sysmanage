@@ -5373,7 +5373,13 @@
       "stagingNote": "Files are restored into a staging directory on the host, never over the live files. Move them into place yourself.",
       "title": "Restore files to {{host}}",
       "unsignedAck": "This snapshot is not signed. Restore it anyway.",
-      "planned": "Planned from the snapshot index. The backed-up data was not read, so its integrity was not checked here; the weekly check does that."
+      "planned": "Planned from the snapshot index. The backed-up data was not read, so its integrity was not checked here; the weekly check does that.",
+      "toStaging": "Into a staging directory on the host",
+      "toPlace": "Into place, replacing the host's files",
+      "placeNote": "The files at these paths on the host are replaced with the snapshot's copies. restate checks the whole selection before it writes anything, and each file against the snapshot before it replaces the old one. Name specific paths, such as /etc/nginx; a whole host is not restored in place. Preview first to see what would change.",
+      "placePaths": "Paths to put back (one per line)",
+      "placeAck": "Replace the files at these paths on {{host}}.",
+      "confirmPlace": "Restore into place"
     },
     "run": {
       "busy": "Busy, will retry",
