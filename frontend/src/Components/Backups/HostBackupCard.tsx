@@ -11,6 +11,7 @@ import BackupIcon from '@mui/icons-material/Backup';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import AsyncButton from '../AsyncButton';
+import { useVisiblePolling } from '../../hooks/useVisiblePolling';
 import { backupNow, getHostBackup } from '../../Services/backups';
 import type { BackupRun, HostBackup } from '../../Services/backups';
 import { hasPermission, SecurityRoles } from '../../Services/permissions';
@@ -46,6 +47,8 @@ const WriteCache: React.FC<{ run: BackupRun | null; budgetGb: number }> = ({ run
     );
 };
 
+const RUNNING_POLL_MS = 5000;
+
 const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -74,6 +77,11 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
             })
             .catch(() => undefined);
     }, [load]);
+
+    // While a job runs, re-read the card so "Backing up" turns into the
+    // result on its own.  Polling stops once nothing is running, and pauses
+    // while the tab is hidden.
+    useVisiblePolling(load, RUNNING_POLL_MS, !!data?.running);
 
     if (!data) return null;
 

@@ -213,6 +213,7 @@ def make_router(
         # the path is a constant, and the request's text travels only in the
         # JSON body, so no request input can choose where this goes.
         body = {"model": EMBED_MODEL, "input": texts, "keep_alive": keep_alive}
+        # nosemgrep: python.fastapi.net.tainted-fastapi-http-request-httpx.tainted-fastapi-http-request-httpx
         resp = await client.post(EMBED_PATH, json=body, timeout=timeout)
         resp.raise_for_status()
         return resp.json()["embeddings"]
@@ -251,7 +252,9 @@ def make_router(
         terms = judge_terms(source, lang, languages[lang]) if glossary else ""
         if terms:
             payload["messages"].insert(1, {"role": "system", "content": terms})
-        # A constant path on the operator-configured base_url, as in embed().
+        # A constant path on the operator-configured base_url, as in embed();
+        # the request's text is the payload the judge must read (not SSRF).
+        # nosemgrep: python.fastapi.net.tainted-fastapi-http-request-httpx.tainted-fastapi-http-request-httpx
         resp = await client.post(CHAT_PATH, json=payload, timeout=timeout)
         resp.raise_for_status()
         try:

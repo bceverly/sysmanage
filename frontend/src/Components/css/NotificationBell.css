@@ -258,3 +258,15 @@
     left: -30px;
   }
 }
+
+/* Respect the OS "reduce motion" setting: the action button changes color
+   on hover but does not lift. */
+@media (prefers-reduced-motion: reduce) {
+  .notification-bell__action {
+    transition: background 0.2s ease;
+  }
+
+  .notification-bell__action:hover {
+    transform: none;
+  }
+}

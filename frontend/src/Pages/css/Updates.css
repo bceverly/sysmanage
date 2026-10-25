@@ -534,11 +534,12 @@
   }
 }
 
-/* Respect the OS "reduce motion" setting: no lifting cards or buttons, and
-   a slow spin that still says a refresh is running. */
+/* Respect the OS "reduce motion" setting: no lifting cards or buttons and
+   no spinning icon (the refresh button is disabled while it runs, which
+   still says a refresh is under way). */
 @media (prefers-reduced-motion: reduce) {
   .updates__refresh.refreshing svg {
-    animation-duration: 3s;
+    animation: none;
   }
 
   .updates__stat-card,
