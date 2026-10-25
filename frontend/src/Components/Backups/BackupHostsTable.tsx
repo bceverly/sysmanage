@@ -38,6 +38,7 @@ import {
     statusLabel,
     unreadableOf,
 } from './backupLabels';
+import { FirstFitCaption } from './BackupFirstFit';
 
 const rank = (row: BackupHost) => BACKUP_STATUS_ORDER.indexOf(row.status);
 
@@ -96,6 +97,7 @@ const StatusCell: React.FC<{ row: BackupHost }> = ({ row }) => {
             )}
             <Progress row={row} />
             <Unreadable row={row} />
+            <FirstFitCaption fit={row.first_fit} />
             {row.capture_requested && !row.running && (
                 <Typography variant="caption" display="block" color="text.secondary">
                     {t('backups.hosts.waiting', 'Waiting for a free slot')}

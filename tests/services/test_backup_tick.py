@@ -118,9 +118,14 @@ def test_configure_now_with_no_target_is_a_no_op(session, sent):
     assert sent == []
 
 
-def test_a_never_backed_up_host_captures_now(session, sent):
-    _setup(session)
+def test_a_never_backed_up_host_is_estimated_then_captured(session, sent):
+    s = _setup(session)
     tick.reconcile(session, NOW)
+    assert ("backup_run", "estimate") in _actions(sent)
+    assert ("backup_run", "capture") not in _actions(sent)
+    session.query(models.BackupRun).filter_by(action="estimate").delete()
+    _finish(session, s.policy, s.host.id, "estimate", at=NOW)
+    tick.reconcile(session, NOW + timedelta(minutes=5))
     assert ("backup_run", "capture") in _actions(sent)
 
 
@@ -170,6 +175,7 @@ def test_the_target_cap_holds_captures_back(session, sent):
         interval_hours=24, keep_last=3, check_interval_days=7, config_version=1,
         host_acked_version=1, storage_acked_version=1, created_at=NOW, updated_at=NOW,
     ))  # fmt: skip
+    _finish(session, s.policy, s.host.id, "estimate", at=NOW)
     session.commit()
     tick.reconcile(session, NOW)
     assert [a for a in _actions(sent) if a[1] == "capture"] == [
@@ -223,6 +229,7 @@ def test_an_unequipped_host_is_skipped(session, sent):
 def test_no_storage_host_means_no_upkeep_but_captures_continue(session, sent):
     s = _setup(session)
     s.nas.agent_capabilities = None
+    _finish(session, s.policy, s.host.id, "estimate", at=NOW)
     session.commit()
     tick.reconcile(session, NOW)
     assert _actions(sent) == [("backup_run", "capture")]

@@ -30,6 +30,7 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session
 
 from backend.persistence import models
+from backend.services import backup_first_fit as first_fit
 from backend.services import backup_jobs as jobs
 from backend.services import backup_storage_status as storage_status
 from backend.services import backup_tick
@@ -615,6 +616,7 @@ def _after_snapshots(db: Session, run: models.BackupRun, policy, result) -> None
 def _after_estimate(_db: Session, run: models.BackupRun, policy, result) -> None:
     if run.status == "ok" and _int(result.get("bytes")) is not None:
         policy.estimate_bytes = _int(result.get("bytes"))
+        policy.estimate_dirs = json.dumps(first_fit.largest_dirs(result.get("by_dir")))
 
 
 def _after_check(_db: Session, run: models.BackupRun, policy, _result) -> None:

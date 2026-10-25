@@ -55,7 +55,7 @@ const DashboardSettingsDialog: React.FC<DashboardSettingsDialogProps> = ({
       { identifier: 'opentelemetry', label: t('dashboard.openTelemetryCoverage', 'OpenTelemetry') },
       { identifier: 'clocks', label: t('dashboard.clocksOutOfBounds', 'Clocks out of bounds') },
       { identifier: 'hardware', label: t('dashboard.hardwareNeedsAttention', 'Hardware needing attention') },
-      { identifier: 'backups', label: t('dashboard.backupsNeedAttention', 'Backups overdue or failed') },
+      { identifier: 'backups', label: t('dashboard.backupsAttention', 'Backups needing attention') },
     ];
 
     try {

@@ -9,7 +9,9 @@ approved, active host whose agent can run backups:
 
 1. job files -- (re)send ``backup_configure`` to the host and to the storage
    host until each has acknowledged the policy's ``config_version``;
-2. capture -- when due: ``interval_hours`` after the last good capture
+2. capture -- a host's first scheduled one only once restate's estimate
+   says it fits the target's free space (``backup_first_fit``); then, when
+   due: ``interval_hours`` after the last good capture
    (sooner after a failure, later after ``busy``), inside the policy's UTC
    window when it has one, spread across the hour by ``host_offset`` so a
    fleet does not start at once, and never more than the target's
@@ -31,6 +33,7 @@ from sqlalchemy.orm import Session
 
 from backend.persistence import models
 from backend.persistence.partitions import iter_host_databases
+from backend.services import backup_first_fit as first_fit
 from backend.services import backup_jobs as jobs
 from backend.startup.leadership import singleton_task
 from backend.startup.tick_runner import run_periodic
@@ -145,6 +148,13 @@ def _maybe_capture(db, policy, target, host, now: datetime) -> bool:
         return False
     if running_captures(db, target.id) >= max(1, target.max_concurrent or 1):
         logger.info("Backup capture for host %s waits: target is at capacity", host.id)
+        return False
+    decision = first_fit.first_capture_decision(db, policy, target, now)
+    if decision == first_fit.RUN_ESTIMATE:
+        # A first backup: learn whether it fits before writing anything.
+        jobs.queue_run(db, policy, host.id, first_fit.ESTIMATE)
+        return True
+    if decision == first_fit.HOLD:
         return False
     jobs.queue_run(db, policy, host.id, "capture")
     return True

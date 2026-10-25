@@ -19,6 +19,7 @@ import axiosInstance from '../Services/api';
 import { getFleetSummary, FleetSummary } from '../Services/timeSync';
 import { getHardwareSummary, HardwareSummary, needingAttention } from '../Services/hardwareHealth';
 import { getBackupSummary, BackupSummary } from '../Services/backups';
+import { backupSummaryLevel } from '../Components/Backups/backupLabels';
 import DashboardSettingsDialog from '../Components/DashboardSettingsDialog';
 
 interface DashboardCardProps {
@@ -74,13 +75,9 @@ const getHardwareColor = (summary: HardwareSummary): string => {
     return summary.counts.warning ? COLOR_YELLOW : COLOR_GREEN;
 };
 
-// Phase 24: red if a backup failed, yellow if one is only overdue.
-const getBackupColor = (summary: BackupSummary): string => {
-    if (summary.counts.failed) {
-        return COLOR_RED;
-    }
-    return summary.counts.overdue ? COLOR_YELLOW : COLOR_GREEN;
-};
+// Phase 24: the level comes from backupSummaryLevel (backupLabels.ts).
+const BACKUP_COLORS = { error: COLOR_RED, warning: COLOR_YELLOW, ok: COLOR_GREEN } as const;
+const getBackupColor = (summary: BackupSummary): string => BACKUP_COLORS[backupSummaryLevel(summary)];
 
 const DashboardCard: React.FC<DashboardCardProps> = ({
     title,
@@ -494,7 +491,7 @@ const Dashboard = () => {
                 {cardVisibility.backups && (
                     <Grid>
                         <DashboardCard
-                            title={t('dashboard.backupsNeedAttention', 'Backups overdue or failed')}
+                            title={t('dashboard.backupsAttention', 'Backups needing attention')}
                             value={backupsOut}
                             maxValue={backupsTotal || 1}
                             color={backupsColor}

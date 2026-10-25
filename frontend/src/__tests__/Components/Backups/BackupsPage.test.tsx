@@ -82,6 +82,7 @@ const host = (over: Partial<BackupHost>): BackupHost => ({
   capture_requested: false,
   next_due: null,
   snapshot_count: 3,
+  first_fit: null,
   ...over,
 });
 

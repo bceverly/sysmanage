@@ -305,9 +305,27 @@ async def test_runs_are_paginated_and_overview_counts(session, sent):
     assert rows[str(s.nas.id)]["status"] == "no_policy"
     summary = await api.backups_summary(session)
     assert summary["configured"] is True and summary["attention"] == 0
+    assert summary["target_problem"] is False
     s.target.storage_host_id = None  # no storage host: one problem
     session.commit()
-    assert (await api.backups_summary(session))["attention"] == 1
+    summary = await api.backups_summary(session)
+    assert summary["attention"] == 1 and summary["target_problem"] is True
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "status, flagged", [("ok", 0), ("incomplete", 1), ("failed", 1)]
+)
+async def test_the_dashboard_flags_incomplete_and_failed_backups(
+    session, sent, status, flagged
+):
+    """An incomplete run (files not read, a service not paused) needs a look
+    as much as an overdue or failed one (Phase 24 exit criterion)."""
+    s = _setup(session)
+    _capture(session, s, status, 1)
+    summary = await api.backups_summary(session)
+    assert summary["counts"].get(status) == 1
+    assert summary["attention"] == flagged
 
 
 def _capture(session, s, status, ago_hours):

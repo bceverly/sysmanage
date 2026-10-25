@@ -49,7 +49,10 @@ def _contains(mount: str, path: str) -> bool:
     return path == mount or path.startswith(mount.rstrip("/") + "/")
 
 
-def _space(db: Session, host_id, path: Optional[str]) -> Optional[Dict[str, Any]]:
+def storage_space(
+    db: Session, host_id, path: Optional[str]
+) -> Optional[Dict[str, Any]]:
+    """Total, free and percent used of the filesystem holding ``path``."""
     if not path:
         return None
     best = None
@@ -89,7 +92,7 @@ def storage_health(
     low, critical = space_thresholds(target)
     return {
         "drives": _drives(db, storage.id),
-        "space": _space(db, storage.id, target.storage_path),
+        "space": storage_space(db, storage.id, target.storage_path),
         "space_low_percent": low,
         "space_critical_percent": critical,
     }

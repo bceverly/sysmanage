@@ -759,7 +759,7 @@
     "updates": "Aggiornamenti",
     "clocksOutOfBounds": "Orologi fuori dai limiti",
     "hardwareNeedsAttention": "Hardware che richiede attenzione",
-    "backupsNeedAttention": "Backup in ritardo o non riusciti"
+    "backupsAttention": "Backup che richiedono attenzione"
   },
   "dataGrid": {
     "columnVisibility": "Visibilità colonne",
@@ -5537,6 +5537,12 @@
       "more": "Vengono mostrate solo le prime modifiche.",
       "button": "Cosa è cambiato",
       "unclassified": "Questo snapshot è stato creato prima di restate 2.2.0.2, quindi l'elenco include anche file che il backup esclude di proposito. Non compaiono più dopo il prossimo backup."
+    },
+    "firstFit": {
+      "short": "Il primo backup potrebbe non entrare",
+      "estimate": "Primo backup: circa {{size}} da conservare",
+      "wontFit": "Il primo backup potrebbe non entrare: circa {{size}} da conservare e {{free}} liberi sull'archiviazione. Attende finché c'è spazio, o finché non ne escludi una parte nell'elenco Escludi del criterio. Esegui backup ora lo avvia comunque.",
+      "largest": "Cartelle più grandi:"
     }
   }
 }

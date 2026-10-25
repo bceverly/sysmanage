@@ -20,6 +20,7 @@ import BackupChangesDialog from './BackupChangesDialog';
 import BackupPrepareButton from './BackupPrepareButton';
 import BackupRepackButton from './BackupRepackButton';
 import RestoreFilesDialog from './RestoreFilesDialog';
+import { FirstFitNote } from './BackupFirstFit';
 import {
     apiDetail,
     coverageLabel,
@@ -139,6 +140,7 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                             {' - '}{formatBytes(data.policy.repository_bytes)}
                         </Typography>
                         <WriteCache run={data.last_good_capture} budgetGb={data.target?.cache_budget_gb ?? 20} />
+                        <FirstFitNote fit={data.first_fit} />
                     </>
                 )}
                 <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', rowGap: 1 }}>

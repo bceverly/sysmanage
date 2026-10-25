@@ -759,7 +759,7 @@
     "updates": "Aktualisierungen",
     "clocksOutOfBounds": "Uhren außerhalb der Grenzwerte",
     "hardwareNeedsAttention": "Hardware mit Handlungsbedarf",
-    "backupsNeedAttention": "Überfällige oder fehlgeschlagene Sicherungen"
+    "backupsAttention": "Sicherungen, die Aufmerksamkeit erfordern"
   },
   "dataGrid": {
     "columnVisibility": "Spaltensichtbarkeit",
@@ -5537,6 +5537,12 @@
       "more": "Nur die ersten Änderungen werden angezeigt.",
       "button": "Was hat sich geändert",
       "unclassified": "Dieser Snapshot wurde vor restate 2.2.0.2 erstellt, daher enthält die Liste auch Dateien, die die Sicherung absichtlich auslässt. Sie erscheinen nicht mehr, sobald die nächste Sicherung gelaufen ist."
+    },
+    "firstFit": {
+      "short": "Erste Sicherung passt möglicherweise nicht",
+      "estimate": "Erste Sicherung: etwa {{size}} zu sichern",
+      "wontFit": "Die erste Sicherung passt möglicherweise nicht: etwa {{size}} zu sichern und {{free}} frei auf dem Speicher. Sie wartet, bis Platz ist oder bis Sie einen Teil davon in der Liste Ausschließen der Richtlinie ausschließen. Jetzt sichern führt sie trotzdem aus.",
+      "largest": "Größte Ordner:"
     }
   }
 }

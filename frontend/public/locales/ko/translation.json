@@ -759,7 +759,7 @@
     "updates": "업데이트",
     "clocksOutOfBounds": "허용 범위를 벗어난 시계",
     "hardwareNeedsAttention": "조치가 필요한 하드웨어",
-    "backupsNeedAttention": "지연되었거나 실패한 백업"
+    "backupsAttention": "주의가 필요한 백업"
   },
   "dataGrid": {
     "columnVisibility": "열 표시",
@@ -5537,6 +5537,12 @@
       "more": "처음 변경 사항만 표시됩니다.",
       "button": "변경 내용",
       "unclassified": "이 스냅샷은 restate 2.2.0.2 이전에 만들어졌으므로 백업이 의도적으로 제외하는 파일도 목록에 포함됩니다. 다음 백업이 실행되면 더 이상 표시되지 않습니다."
+    },
+    "firstFit": {
+      "short": "첫 백업이 들어가지 않을 수 있습니다",
+      "estimate": "첫 백업: 보관할 양 약 {{size}}",
+      "wontFit": "첫 백업이 들어가지 않을 수 있습니다. 보관할 양은 약 {{size}}이고 스토리지 여유 공간은 {{free}}입니다. 공간이 생기거나 정책의 제외 목록에서 일부를 제외할 때까지 기다립니다. 지금 백업을 사용하면 그래도 실행됩니다.",
+      "largest": "가장 큰 폴더:"
     }
   }
 }

@@ -339,6 +339,7 @@ async def backups_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any
         "configured": data["target"] is not None,
         "counts": data["counts"],
         "attention": views.attention_count(data),
+        "target_problem": views.target_problem(data),
         "total": sum(1 for row in data["hosts"] if row["policy"]),
     }
 

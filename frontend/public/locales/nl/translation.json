@@ -759,7 +759,7 @@
     "updates": "Updates",
     "clocksOutOfBounds": "Klokken buiten de grenzen",
     "hardwareNeedsAttention": "Hardware die aandacht vereist",
-    "backupsNeedAttention": "Achterstallige of mislukte back-ups"
+    "backupsAttention": "Back-ups die aandacht nodig hebben"
   },
   "dataGrid": {
     "columnVisibility": "Kolomzichtbaarheid",
@@ -5537,6 +5537,12 @@
       "more": "Alleen de eerste wijzigingen worden getoond.",
       "button": "Wat is veranderd",
       "unclassified": "Deze snapshot is gemaakt vóór restate 2.2.0.2, dus de lijst bevat ook bestanden die de back-up met opzet overslaat. Ze verschijnen niet meer zodra de volgende back-up is uitgevoerd."
+    },
+    "firstFit": {
+      "short": "Eerste back-up past mogelijk niet",
+      "estimate": "Eerste back-up: ongeveer {{size}} te bewaren",
+      "wontFit": "De eerste back-up past mogelijk niet: ongeveer {{size}} te bewaren en {{free}} vrij op de opslag. Hij wacht tot er ruimte is, of tot u een deel ervan uitsluit in de lijst Uitsluiten van het beleid. Nu back-uppen voert hem toch uit.",
+      "largest": "Grootste mappen:"
     }
   }
 }

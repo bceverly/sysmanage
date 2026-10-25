@@ -759,7 +759,7 @@
     "updates": "Actualizaciones",
     "clocksOutOfBounds": "Relojes fuera de límites",
     "hardwareNeedsAttention": "Hardware que requiere atención",
-    "backupsNeedAttention": "Copias de seguridad atrasadas o fallidas"
+    "backupsAttention": "Copias de seguridad que requieren atención"
   },
   "dataGrid": {
     "columnVisibility": "Visibilidad de columnas",
@@ -5537,6 +5537,12 @@
       "more": "Solo se muestran los primeros cambios.",
       "button": "Qué cambió",
       "unclassified": "Esta instantánea se tomó antes de restate 2.2.0.2, por lo que la lista también incluye archivos que la copia de seguridad omite a propósito. Dejan de aparecer después de la próxima copia de seguridad."
+    },
+    "firstFit": {
+      "short": "Es posible que la primera copia de seguridad no quepa",
+      "estimate": "Primera copia de seguridad: unos {{size}} que conservar",
+      "wontFit": "Es posible que la primera copia de seguridad no quepa: unos {{size}} que conservar y {{free}} libres en el almacenamiento. Espera hasta que haya espacio o hasta que excluya parte de ella en la lista Excluir de la política. Hacer copia de seguridad ahora la ejecuta de todos modos.",
+      "largest": "Carpetas más grandes:"
     }
   }
 }

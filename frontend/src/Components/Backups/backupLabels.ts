@@ -6,7 +6,7 @@
 
 import type { TFunction } from 'i18next';
 import { appLocale } from '../../utils/locale';
-import type { BackupRun, BackupStatus, Coverage } from '../../Services/backups';
+import type { BackupRun, BackupStatus, BackupSummary, Coverage } from '../../Services/backups';
 
 type ChipColor = 'default' | 'success' | 'warning' | 'error' | 'info';
 
@@ -180,4 +180,14 @@ export const pausedServicesOf = (run: BackupRun): PausedService[] => {
             message: entry.message ?? '',
         };
     });
+};
+
+/** The dashboard Backups card's level: an error when a backup failed or the
+ *  backup storage is broken (or critically full), a warning when one is
+ *  only overdue or incomplete. */
+export const backupSummaryLevel = (
+    summary: Pick<BackupSummary, 'counts' | 'target_problem'>,
+): 'error' | 'warning' | 'ok' => {
+    if (summary.counts.failed || summary.target_problem) return 'error';
+    return summary.counts.overdue || summary.counts.incomplete ? 'warning' : 'ok';
 };

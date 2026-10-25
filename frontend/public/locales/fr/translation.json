@@ -759,7 +759,7 @@
     "updates": "Mises à jour",
     "clocksOutOfBounds": "Horloges hors limites",
     "hardwareNeedsAttention": "Matériel nécessitant une attention",
-    "backupsNeedAttention": "Sauvegardes en retard ou en échec"
+    "backupsAttention": "Sauvegardes nécessitant une attention"
   },
   "dataGrid": {
     "columnVisibility": "Visibilité des colonnes",
@@ -5537,6 +5537,12 @@
       "more": "Seules les premières modifications sont affichées.",
       "button": "Ce qui a changé",
       "unclassified": "Cet instantané a été pris avant restate 2.2.0.2 : la liste inclut donc aussi des fichiers que la sauvegarde exclut volontairement. Ils n'apparaissent plus une fois la prochaine sauvegarde effectuée."
+    },
+    "firstFit": {
+      "short": "La première sauvegarde risque de ne pas tenir",
+      "estimate": "Première sauvegarde : environ {{size}} à conserver",
+      "wontFit": "La première sauvegarde risque de ne pas tenir : environ {{size}} à conserver et {{free}} libres sur le stockage. Elle attend qu'il y ait de la place, ou que vous en excluiez une partie dans la liste Exclure de la politique. Sauvegarder maintenant la lance quand même.",
+      "largest": "Dossiers les plus volumineux :"
     }
   }
 }

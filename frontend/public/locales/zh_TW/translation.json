@@ -759,7 +759,7 @@
     "updates": "更新",
     "clocksOutOfBounds": "時鐘偏差超出閾值",
     "hardwareNeedsAttention": "需要注意的硬體",
-    "backupsNeedAttention": "逾期或失敗的備份"
+    "backupsAttention": "需要注意的備份"
   },
   "dataGrid": {
     "columnVisibility": "欄位可見性",
@@ -5537,6 +5537,12 @@
       "more": "僅顯示前面的變更。",
       "button": "變更內容",
       "unclassified": "此快照是在 restate 2.2.0.2 之前建立的，因此清單中也包含備份刻意排除的檔案。下一次備份執行後，它們將不再出現。"
+    },
+    "firstFit": {
+      "short": "首次備份可能放不下",
+      "estimate": "首次備份：約需保存 {{size}}",
+      "wontFit": "首次備份可能放不下：約需保存 {{size}}，儲存空間剩餘 {{free}}。它會等待，直到有足夠空間，或直到您在原則的排除清單中排除其中一部分。「立即備份」仍會執行它。",
+      "largest": "最大的資料夾："
     }
   }
 }

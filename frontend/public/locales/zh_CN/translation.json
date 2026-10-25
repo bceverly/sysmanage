@@ -759,7 +759,7 @@
     "updates": "更新",
     "clocksOutOfBounds": "时钟偏差超出阈值",
     "hardwareNeedsAttention": "需要关注的硬件",
-    "backupsNeedAttention": "逾期或失败的备份"
+    "backupsAttention": "需要关注的备份"
   },
   "dataGrid": {
     "columnVisibility": "列可见性",
@@ -5537,6 +5537,12 @@
       "more": "仅显示前面的变更。",
       "button": "变更内容",
       "unclassified": "此快照是在 restate 2.2.0.2 之前创建的，因此列表中也包含备份有意排除的文件。下一次备份运行后，它们将不再出现。"
+    },
+    "firstFit": {
+      "short": "首次备份可能放不下",
+      "estimate": "首次备份：约需保存 {{size}}",
+      "wontFit": "首次备份可能放不下：约需保存 {{size}}，存储上剩余 {{free}}。它会等待，直到有足够空间，或直到您在策略的排除列表中排除其中一部分。“立即备份”仍会运行它。",
+      "largest": "最大的文件夹："
     }
   }
 }

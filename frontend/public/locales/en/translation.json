@@ -759,7 +759,7 @@
     "updates": "Updates",
     "clocksOutOfBounds": "Clocks out of bounds",
     "hardwareNeedsAttention": "Hardware needing attention",
-    "backupsNeedAttention": "Backups overdue or failed"
+    "backupsAttention": "Backups needing attention"
   },
   "dataGrid": {
     "columnVisibility": "Column Visibility",
@@ -5537,6 +5537,12 @@
       "more": "Only the first changes are shown.",
       "button": "What changed",
       "unclassified": "This snapshot was taken before restate 2.2.0.2, so the list also includes files the backup leaves out on purpose. They no longer appear once the next backup has run."
+    },
+    "firstFit": {
+      "short": "First backup may not fit",
+      "estimate": "First backup: about {{size}} to keep",
+      "wontFit": "The first backup may not fit: about {{size}} to keep and {{free}} free on the storage. It waits until there is room, or until you leave some of it out in the policy's Leave out list. Back up now runs it anyway.",
+      "largest": "Largest folders:"
     }
   }
 }

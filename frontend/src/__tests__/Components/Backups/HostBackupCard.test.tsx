@@ -37,7 +37,7 @@ const card = (running: unknown): HostBackup => ({
   host_id: "h1", fqdn: "t14", platform: "Linux", platform_release: "Ubuntu 26.04",
   equipped: true, reason: null, coverage: "full", policy, status: "ok",
   last_capture: null, last_good_capture: null, last_check: null, running,
-  capture_requested: false, next_due: null, snapshot_count: 3, target: null,
+  capture_requested: false, next_due: null, snapshot_count: 3, target: null, first_fit: null,
 } as unknown as HostBackup);
 
 afterEach(() => {

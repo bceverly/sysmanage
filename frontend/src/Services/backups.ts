@@ -235,6 +235,16 @@ export interface BackupHost {
   capture_requested: boolean;
   next_due: string | null;
   snapshot_count: number;
+  /** Before a host's first good backup: does restate's estimate fit the
+   *  target's free space?  Null when there is nothing to compare. */
+  first_fit: FirstFit | null;
+}
+
+export interface FirstFit {
+  estimate_bytes: number;
+  available_bytes: number;
+  fits: boolean;
+  largest: { path: string; bytes: number }[];
 }
 
 export interface BackupOverview {
@@ -248,6 +258,7 @@ export interface BackupSummary {
   configured: boolean;
   counts: Partial<Record<BackupStatus, number>>;
   attention: number;
+  target_problem: boolean;
   total: number;
 }
 

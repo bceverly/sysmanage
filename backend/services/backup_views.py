@@ -22,6 +22,7 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session
 
 from backend.persistence import models
+from backend.services import backup_first_fit as first_fit
 from backend.services import backup_jobs as jobs
 from backend.services import backup_storage_audit as storage_audit
 from backend.services import backup_storage_health as storage_health
@@ -245,6 +246,7 @@ def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
         "capture_requested": False,
         "next_due": None,
         "snapshot_count": 0,
+        "first_fit": None,
     }
     if policy is None:
         entry["status"] = "no_policy" if ready else "not_equipped"
@@ -265,6 +267,7 @@ def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
         )
         .count()
     )
+    entry["first_fit"] = first_fit.fit(db, policy, jobs.the_target(db))
     if not ready:
         entry["status"] = "not_equipped"
     elif capturing:
@@ -308,16 +311,29 @@ def overview(db: Session) -> Dict[str, Any]:
     }
 
 
-def attention_count(data: Dict[str, Any]) -> int:
-    """What the dashboard flags: hosts overdue or failed, plus the target
-    once when its storage side is broken (no storage host, say)."""
-    hosts = sum(data["counts"].get(s, 0) for s in ("overdue", "failed"))
+# Host statuses the dashboard flags: no good backup in time, a run that
+# ended incomplete (files it could not read, a service it could not pause),
+# or a failed one.
+ATTENTION_STATUSES = ("overdue", "incomplete", "failed")
+
+
+def target_problem(data: Dict[str, Any]) -> bool:
+    """The target's storage side is broken: no storage host, stale seal /
+    prune / check, a failed drive or critically full storage."""
     target = data["target"]
-    return hosts + int(bool(target and target["problem"]))
+    return bool(target and target["problem"])
 
 
-def overdue_count(db: Session) -> int:
-    """Hosts the dashboard should flag: overdue or failed."""
-    return sum(
-        1 for row in overview(db)["hosts"] if row["status"] in ("overdue", "failed")
+def attention_count(data: Dict[str, Any]) -> int:
+    """What the dashboard flags: hosts in ATTENTION_STATUSES, plus the
+    target once when its storage side is broken."""
+    hosts = sum(data["counts"].get(s, 0) for s in ATTENTION_STATUSES)
+    # A host whose first backup would not fit is held: it needs a look too.
+    held = sum(
+        1
+        for row in data["hosts"]
+        if row["status"] not in ATTENTION_STATUSES
+        and row.get("first_fit")
+        and not row["first_fit"]["fits"]
     )
+    return hosts + held + int(target_problem(data))

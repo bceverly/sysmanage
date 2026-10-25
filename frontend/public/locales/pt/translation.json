@@ -759,7 +759,7 @@
     "updates": "Atualizações",
     "clocksOutOfBounds": "Relógios fora dos limites",
     "hardwareNeedsAttention": "Hardware que requer atenção",
-    "backupsNeedAttention": "Backups atrasados ou com falha"
+    "backupsAttention": "Backups que precisam de atenção"
   },
   "dataGrid": {
     "columnVisibility": "Visibilidade das colunas",
@@ -5537,6 +5537,12 @@
       "more": "Somente as primeiras alterações são mostradas.",
       "button": "O que mudou",
       "unclassified": "Este snapshot foi criado antes do restate 2.2.0.2, por isso a lista também inclui arquivos que o backup deixa de fora de propósito. Eles deixam de aparecer depois que o próximo backup for executado."
+    },
+    "firstFit": {
+      "short": "O primeiro backup pode não caber",
+      "estimate": "Primeiro backup: cerca de {{size}} a guardar",
+      "wontFit": "O primeiro backup pode não caber: cerca de {{size}} a guardar e {{free}} livres no armazenamento. Ele aguarda até haver espaço, ou até você deixar parte dele de fora na lista Excluir da política. Fazer backup agora o executa mesmo assim.",
+      "largest": "Maiores pastas:"
     }
   }
 }

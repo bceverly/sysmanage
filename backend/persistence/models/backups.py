@@ -130,6 +130,8 @@ class BackupPolicy(Base):
     # What the host's restate offers: list / status / cache (JSON, q60).
     host_abilities = Column(Text, nullable=True)
     estimate_bytes = Column(BigInteger, nullable=True)
+    # The estimate's largest directories, JSON [{path, bytes}] (24.8).
+    estimate_dirs = Column(Text, nullable=True)
     repository_bytes = Column(BigInteger, nullable=True)
     config_version = Column(Integer, nullable=False, default=1)
     host_acked_version = Column(Integer, nullable=False, default=0)
