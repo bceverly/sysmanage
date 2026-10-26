@@ -28,6 +28,11 @@ export const auditText = (t: TFunction, target: BackupTarget, hosts: BackupHost[
         case 'audit_nfs_server':
             return t('backups.audit.nfsServer', 'The storage host\'s NFS server is not running, or does not start at boot.');
         case 'audit_nfs_v4':
+            // The agent could not tell (no rights to read what nfsd serves,
+            // and no rpcinfo answer): say so rather than claim it is missing.
+            if (params.checked === false) {
+                return t('backups.audit.nfsV4Unknown', 'Could not check whether the storage host serves NFSv4, which hosts use to reach their backups.');
+            }
             return t('backups.audit.nfsV4', 'The storage host does not serve NFSv4, which hosts use to reach their backups.');
         case 'audit_nfs_v4_only':
             return t('backups.audit.nfsV4Only', 'The storage host still serves NFS versions older than 4. Serve NFSv4 only.');

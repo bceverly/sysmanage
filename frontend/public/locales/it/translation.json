@@ -5514,7 +5514,8 @@
       "exportMapping": "Esportazioni che non associano ogni client all'account dei backup: {{hosts}}. FreeBSD: -mapall=ACCOUNT:GROUP; Linux: all_squash con anonuid e anongid.",
       "appendOnly": "Non solo in aggiunta: {{hosts}} potrebbero eliminare o sovrascrivere i propri backup completati. La fase di protezione dopo il prossimo backup li blocca (restate 2.1.0.1 o successivo; 2.1.0.3 su FreeBSD con ZFS).",
       "other": "Verifica dell'archiviazione: {{code}}",
-      "prepareHint": "Prepara archiviazione, nella scheda Backup di ogni host, assegna a quell'host un proprio file system e un'esportazione limitata a esso. Le impostazioni del server NFS dell'host di archiviazione restano a tuo carico."
+      "prepareHint": "Prepara archiviazione, nella scheda Backup di ogni host, assegna a quell'host un proprio file system e un'esportazione limitata a esso. Le impostazioni del server NFS dell'host di archiviazione restano a tuo carico.",
+      "nfsV4Unknown": "Impossibile verificare se l'host di archiviazione offre NFSv4, che gli host usano per raggiungere i propri backup."
     },
     "prepare": {
       "title": "Preparare l'archiviazione per questo host?",

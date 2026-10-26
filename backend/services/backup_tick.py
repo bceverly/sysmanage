@@ -38,8 +38,12 @@ from backend.services import backup_jobs as jobs
 from backend.startup.leadership import singleton_task
 from backend.startup.tick_runner import run_periodic
 from backend.utils.host_spread import host_offset
+from backend.websocket.queue_enums import QueueStatus
 
 logger = logging.getLogger(__name__)
+
+# Queue states that mean "this command will never be delivered".
+UNDELIVERED = (QueueStatus.FAILED, QueueStatus.EXPIRED)
 
 TICK_INTERVAL_SECONDS = 300
 ERROR_BACKOFF_SECONDS = 60
@@ -74,6 +78,50 @@ def fail_stuck(db: Session, now: datetime) -> int:
             run.host_id,
         )
     return len(stuck)
+
+
+def fail_undeliverable(db: Session, now: datetime) -> int:
+    """Close runs whose command the queue gave up delivering.
+
+    The queue retries a command that is not acknowledged and then marks it
+    failed; nothing answered the backup run, which stayed queued until the
+    12-hour sweep -- holding back every other job for the policy (Prepare
+    storage was disabled and the configure was never re-sent; production,
+    ubiquiti, 2026-10-25, its connection dropping every few minutes).  Failed
+    now, the next tick sends a fresh one."""
+    pending = (
+        db.query(models.BackupRun)
+        .filter(
+            models.BackupRun.status.in_(jobs.PENDING),
+            models.BackupRun.command_id.isnot(None),
+        )
+        .all()
+    )
+    if not pending:
+        return 0
+    given_up = {
+        row.message_id
+        for row in db.query(models.MessageQueue.message_id)
+        .filter(
+            models.MessageQueue.message_id.in_([run.command_id for run in pending]),
+            models.MessageQueue.status.in_(UNDELIVERED),
+        )
+        .all()
+    }
+    closed = 0
+    for run in pending:
+        if run.command_id not in given_up:
+            continue
+        run.status = "failed"
+        run.finished_at = now
+        run.message = "the host never acknowledged this command; it is sent again"
+        logger.error(
+            "Backup %s run %s for policy %s on host %s: the queue gave up "
+            "delivering command %s; marked failed so it is sent again",
+            run.action, run.id, run.policy_id, run.host_id, run.command_id,
+        )  # fmt: skip
+        closed += 1
+    return closed
 
 
 def in_window(policy: models.BackupPolicy, now: datetime) -> bool:
@@ -297,6 +345,7 @@ def reconcile(db: Session, now: Optional[datetime] = None) -> int:
     """
     now = now or jobs.now()
     fail_stuck(db, now)
+    fail_undeliverable(db, now)
     removed = jobs.prune_run_history(db, now)
     if removed:
         logger.info("Backup job history: removed %d runs older than %d days",

@@ -5514,7 +5514,8 @@
       "exportMapping": "Freigaben, die nicht jeden Client auf das Sicherungskonto abbilden: {{hosts}}. FreeBSD: -mapall=ACCOUNT:GROUP; Linux: all_squash mit anonuid und anongid.",
       "appendOnly": "Nicht nur anhängend: {{hosts}} könnten ihre eigenen fertigen Sicherungen löschen oder überschreiben. Der Schutzschritt nach der nächsten Sicherung sperrt sie (restate 2.1.0.1 oder neuer; 2.1.0.3 unter FreeBSD mit ZFS).",
       "other": "Speicherprüfung: {{code}}",
-      "prepareHint": "\"Speicher vorbereiten\" auf der Registerkarte \"Sicherungen\" jedes Hosts gibt diesem Host ein eigenes Dateisystem und eine auf ihn beschränkte Freigabe. Die NFS-Servereinstellungen des Speicher-Hosts legen Sie weiterhin selbst fest."
+      "prepareHint": "\"Speicher vorbereiten\" auf der Registerkarte \"Sicherungen\" jedes Hosts gibt diesem Host ein eigenes Dateisystem und eine auf ihn beschränkte Freigabe. Die NFS-Servereinstellungen des Speicher-Hosts legen Sie weiterhin selbst fest.",
+      "nfsV4Unknown": "Es konnte nicht geprüft werden, ob der Speicher-Host NFSv4 bereitstellt, über das Hosts ihre Sicherungen erreichen."
     },
     "prepare": {
       "title": "Speicher für diesen Host vorbereiten?",

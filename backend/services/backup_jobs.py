@@ -155,6 +155,25 @@ def needs_secret_key(where: Optional[str], policy: models.BackupPolicy) -> bool:
     return where == CURRENT and encrypted(policy)
 
 
+def current_repository_has_snapshots(db: Session, policy: models.BackupPolicy) -> bool:
+    """The policy's CURRENT repository exists: it holds a snapshot."""
+    in_current = (
+        models.BackupSnapshot.repository_dir.is_(None)
+        if policy.repository_dir is None
+        else models.BackupSnapshot.repository_dir == policy.repository_dir
+    )
+    return (
+        db.query(models.BackupSnapshot.id)
+        .filter(
+            models.BackupSnapshot.policy_id == policy.id,
+            models.BackupSnapshot.gone_at.is_(None),
+            in_current,
+        )
+        .first()
+        is not None
+    )
+
+
 def staging_dir(run_id: Any) -> str:
     return f"{STAGING_ROOT}/{run_id}"
 

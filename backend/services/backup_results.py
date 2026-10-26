@@ -159,7 +159,14 @@ def _reprotect(db: Session, run: models.BackupRun) -> None:
     from the sticky bit to an NFSv4 ACL), and a capture cannot run against
     the old form.  Protect once now, outside the capture chain."""
     policy = _policy(db, run)
-    if policy is not None and policy.storage_protects:
+    # Nothing to protect before the host's first capture has made the
+    # repository: restate answers "not a restate repository" (production,
+    # ubiquiti, 2026-10-25); the capture's own chain protects it then.
+    if (
+        policy is not None
+        and policy.storage_protects
+        and jobs.current_repository_has_snapshots(db, policy)
+    ):
         _storage_next(db, policy, "protect", record={"chain": False})
 
 

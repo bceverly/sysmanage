@@ -5514,7 +5514,8 @@
       "exportMapping": "未将所有客户端映射到备份账户的导出：{{hosts}}。FreeBSD：-mapall=ACCOUNT:GROUP；Linux：all_squash 配合 anonuid 和 anongid。",
       "appendOnly": "不是仅追加：{{hosts}} 可能删除或覆盖自己已完成的备份。下次备份之后的保护步骤会将其锁定（restate 2.1.0.1 或更高版本；在使用 ZFS 的 FreeBSD 上为 2.1.0.3 或更高版本）。",
       "other": "存储检查：{{code}}",
-      "prepareHint": "每台主机“备份”选项卡中的“准备存储”会为该主机提供独立的文件系统和仅限于它的导出。存储主机的 NFS 服务器设置仍由您自行配置。"
+      "prepareHint": "每台主机“备份”选项卡中的“准备存储”会为该主机提供独立的文件系统和仅限于它的导出。存储主机的 NFS 服务器设置仍由您自行配置。",
+      "nfsV4Unknown": "无法检查存储主机是否提供 NFSv4，主机通过它访问其备份。"
     },
     "prepare": {
       "title": "为此主机准备存储？",

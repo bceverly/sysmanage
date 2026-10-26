@@ -5514,7 +5514,8 @@
       "exportMapping": "Exports die niet elke client aan het back-upaccount koppelen: {{hosts}}. FreeBSD: -mapall=ACCOUNT:GROUP; Linux: all_squash met anonuid en anongid.",
       "appendOnly": "Niet alleen-toevoegen: {{hosts}} kunnen hun eigen voltooide back-ups verwijderen of overschrijven. De beveiligingsstap na de volgende back-up vergrendelt ze (restate 2.1.0.1 of later; 2.1.0.3 op FreeBSD met ZFS).",
       "other": "Opslagcontrole: {{code}}",
-      "prepareHint": "Opslag voorbereiden, op het tabblad Back-ups van elke host, geeft die host een eigen bestandssysteem en een export die tot die host beperkt is. De NFS-serverinstellingen van de opslaghost blijven uw verantwoordelijkheid."
+      "prepareHint": "Opslag voorbereiden, op het tabblad Back-ups van elke host, geeft die host een eigen bestandssysteem en een export die tot die host beperkt is. De NFS-serverinstellingen van de opslaghost blijven uw verantwoordelijkheid.",
+      "nfsV4Unknown": "Kon niet controleren of de opslaghost NFSv4 aanbiedt, waarmee hosts hun back-ups bereiken."
     },
     "prepare": {
       "title": "De opslag voor deze host voorbereiden?",

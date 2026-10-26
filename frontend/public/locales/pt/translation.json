@@ -5514,7 +5514,8 @@
       "exportMapping": "Exportações que não mapeiam todos os clientes para a conta de backup: {{hosts}}. FreeBSD: -mapall=ACCOUNT:GROUP; Linux: all_squash com anonuid e anongid.",
       "appendOnly": "Não é somente acréscimo: {{hosts}} poderiam excluir ou sobrescrever seus próprios backups concluídos. A etapa de proteção após o próximo backup os bloqueia (restate 2.1.0.1 ou posterior; 2.1.0.3 no FreeBSD com ZFS).",
       "other": "Verificação do armazenamento: {{code}}",
-      "prepareHint": "Preparar armazenamento, na aba Backups de cada host, dá a esse host um sistema de arquivos próprio e uma exportação restrita a ele. As configurações do servidor NFS do host de armazenamento continuam por sua conta."
+      "prepareHint": "Preparar armazenamento, na aba Backups de cada host, dá a esse host um sistema de arquivos próprio e uma exportação restrita a ele. As configurações do servidor NFS do host de armazenamento continuam por sua conta.",
+      "nfsV4Unknown": "Não foi possível verificar se o host de armazenamento oferece NFSv4, que os hosts usam para acessar seus backups."
     },
     "prepare": {
       "title": "Preparar o armazenamento para este host?",

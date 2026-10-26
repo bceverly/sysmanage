@@ -626,6 +626,11 @@ def test_new_storage_job_files_re_protect_without_sealing(session, sent):
     # restate 2.1.0.2 changed how protect protects on ZFS/FreeBSD; a capture
     # cannot run against the old form, so protect once on new job files.
     s = _setup(session, seal_mode="zfs_snapshot")
+    session.add(models.BackupSnapshot(
+        id=uuid.uuid4(), policy_id=s.policy.id, host_id=s.host.id,
+        name="20261020T010000Z", signed=False, seen_at=datetime(2026, 10, 20),
+    ))  # fmt: skip
+    session.commit()
     run = jobs.queue_configure(session, s.policy, s.target, s.host, "storage")
     results.record_command_result(session, {
         "command_id": run.command_id, "success": True,
@@ -636,6 +641,18 @@ def test_new_storage_job_files_re_protect_without_sealing(session, sent):
     sent.clear()
     results.record_result(session, s.nas.id, _result(protect, "ok"))
     assert sent == []  # no seal, no prune: nothing was captured
+
+
+def test_no_protect_before_the_first_capture_made_the_repository(session, sent):
+    """Production, ubiquiti, 2026-10-25: protect on new job files ran before
+    the host's first backup and restate said "not a restate repository"."""
+    s = _setup(session)
+    run = jobs.queue_configure(session, s.policy, s.target, s.host, "storage")
+    results.record_command_result(session, {
+        "command_id": run.command_id, "success": True,
+        "result": {"installed": ["check", "prune", "protect"]},
+    })  # fmt: skip
+    assert "protect" not in [p.get("action") for _h, _c, p in sent]
 
 
 def test_a_storage_host_without_protect_is_not_asked_to(session, sent):
