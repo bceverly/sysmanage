@@ -156,8 +156,10 @@ def _store_protects(policy: Optional[models.BackupPolicy], installed: Any) -> No
 def _reprotect(db: Session, run: models.BackupRun) -> None:
     """New job files on the storage host -- a restate upgrade among the
     reasons -- may change HOW protect protects (2.1.0.2 moved ZFS on FreeBSD
-    from the sticky bit to an NFSv4 ACL), and a capture cannot run against
-    the old form.  Protect once now, outside the capture chain."""
+    from the sticky bit to an NFSv4 ACL; Linux then moved to the append-only
+    and immutable flags, since Linux NFS clients refuse files they made in a
+    sticky directory), and a capture cannot run against the old form.
+    Protect once now, outside the capture chain."""
     policy = _policy(db, run)
     # Nothing to protect before the host's first capture has made the
     # repository: restate answers "not a restate repository" (production,
