@@ -9,8 +9,9 @@ new captures are encrypted only to it, and a restore is given every key the
 policy has held (a capture after a rotation reuses packs written before
 it).  ``backup_policy_key`` is that history, one row per key: its
 fingerprint and the OpenBAO reference of its secret key -- never the key
-itself -- with when it was made, replaced by the next, and (later, once
-restate can say no pack needs it) retired.  ``backup_policy.encrypt_rotated_at``
+itself -- and its encryption subkey's key id (how restate's ``du`` names
+it), with when it was made, replaced by the next, and (later, once restate's
+report says no file needs it) retired.  ``backup_policy.encrypt_rotated_at``
 is when the current key was made by a rotation; ``backup_target.
 key_rotation_days`` how often the engine rotates on its own (NULL = the
 default, 365; 0 = never).  A policy encrypted before this revision gets its
@@ -79,6 +80,9 @@ def _create_table(insp) -> None:
             index=True,
         ),
         sa.Column("fingerprint", sa.String(64), nullable=False),
+        # The encryption subkey's 16-hex key id: what restate's keyless
+        # ``du`` report names (the key a file's session key is sealed to).
+        sa.Column("subkey_id", sa.String(16), nullable=True),
         sa.Column("key_ref", sa.String(1024), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.Column("replaced_at", sa.DateTime(), nullable=True),

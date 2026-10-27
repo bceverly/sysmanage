@@ -26,7 +26,14 @@ def _present(db_path):
     return (
         "encrypt_rotated_at" in _columns(db_path, "backup_policy")
         and "key_rotation_days" in _columns(db_path, "backup_target")
-        and {"policy_id", "fingerprint", "key_ref", "replaced_at", "retired_at"}
+        and {
+            "policy_id",
+            "fingerprint",
+            "subkey_id",
+            "key_ref",
+            "replaced_at",
+            "retired_at",
+        }
         <= _columns(db_path, "backup_policy_key")
     )
 
