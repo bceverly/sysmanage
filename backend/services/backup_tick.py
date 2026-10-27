@@ -20,7 +20,9 @@ approved, active host whose agent can run backups:
    capture's result could not queue, and ``check`` every
    ``check_interval_days``.
 
-Runs left queued or running for twelve hours are marked failed and logged.
+Runs that got no result twelve hours after their command was sent are
+marked failed and logged; a run a maintenance window holds is waiting, not
+stuck.
 No target, or no equipped host, is a clean no-op.  Community: always runs.
 """
 
@@ -35,6 +37,7 @@ from backend.persistence import models
 from backend.persistence.partitions import iter_host_databases
 from backend.services import backup_first_fit as first_fit
 from backend.services import backup_jobs as jobs
+from backend.services import queue_clock
 from backend.startup.leadership import singleton_task
 from backend.startup.tick_runner import run_periodic
 from backend.utils.host_spread import host_offset
@@ -56,8 +59,13 @@ _TASK: Optional[asyncio.Task] = None
 
 
 def fail_stuck(db: Session, now: datetime) -> int:
-    """Close runs no result will ever answer, loudly."""
-    stuck = (
+    """Close runs no result will ever answer, loudly.
+
+    The twelve hours count from when the command was SENT: a run held by
+    the host's maintenance window, or waiting for its agent to come back,
+    is not stuck -- failing it queued a second one, and the host got both
+    when the window opened (services/queue_clock.py)."""
+    candidates = (
         db.query(models.BackupRun)
         .filter(
             models.BackupRun.status.in_(jobs.PENDING),
@@ -65,6 +73,12 @@ def fail_stuck(db: Session, now: datetime) -> int:
         )
         .all()
     )
+    sent = queue_clock.deliveries(db, [run.command_id for run in candidates])
+    stuck = []
+    for run in candidates:
+        started = queue_clock.clock_start(sent.get(str(run.command_id)), run.queued_at)
+        if started is not None and started < now - STUCK_AFTER:
+            stuck.append(run)
     for run in stuck:
         run.status = "failed"
         run.finished_at = now

@@ -5328,7 +5328,8 @@
       "status": "État",
       "waiting": "En attente d'une place libre",
       "unreadable": "Fichiers non lus : {{n}}",
-      "showAll": "Afficher tous les hôtes"
+      "showAll": "Afficher tous les hôtes",
+      "heldNote": "La prochaine sauvegarde attend la fenêtre de maintenance de cet hôte"
     },
     "loadError": "Impossible de charger les sauvegardes.",
     "policy": {
@@ -5422,7 +5423,8 @@
       "noPolicy": "Non configuré",
       "notEquipped": "Non équipé",
       "ok": "Sauvegardé",
-      "overdue": "En retard"
+      "overdue": "En retard",
+      "waitingWindow": "En attente de fenêtre"
     },
     "target": {
       "add": "Configurer la cible",

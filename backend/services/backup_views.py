@@ -7,7 +7,9 @@ host's backup status and coverage, and the target's warnings.
 
 Status, worst first: ``not_equipped`` (the agent cannot run restate, with
 its reason), ``running`` (a capture is in progress -- it outranks how the
-previous one ended, which is still in ``last_capture``), ``failed`` (the
+previous one ended, which is still in ``last_capture``), ``waiting_window``
+(a capture a closed maintenance window holds; an overdue or failed host
+stays overdue or failed, with ``capture_held``), ``failed`` (the
 last capture failed or was untrusted),
 ``overdue`` (no good capture for twice the interval), ``incomplete`` (the
 last capture skipped unreadable files), ``never``, ``ok``; and ``disabled``
@@ -29,6 +31,7 @@ from backend.services import backup_storage_audit as storage_audit
 from backend.services import backup_storage_health as storage_health
 from backend.services import backup_storage_status as storage_status
 from backend.services import backup_tick
+from backend.services import queue_clock
 
 OVERDUE_GRACE = timedelta(hours=1)
 FULL_COVERAGE = ("ubuntu", "debian")
@@ -260,6 +263,7 @@ def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
         "last_check": None,
         "running": None,
         "capture_requested": False,
+        "capture_held": False,
         "next_due": None,
         "snapshot_count": 0,
         "first_fit": None,
@@ -284,15 +288,34 @@ def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
         .count()
     )
     entry["first_fit"] = first_fit.fit(db, policy, jobs.the_target(db))
+    # A capture a closed maintenance window holds is waiting, not backing up
+    # (14.2): it is sent when the window opens.
+    held = capturing and _held(db, running)
+    entry["capture_held"] = held
     if not ready:
         entry["status"] = "not_equipped"
     elif capturing:
-        entry["status"] = "running"
+        entry["status"] = _capturing_status(db, policy, last_capture, now, held)
     elif not policy.enabled:
         entry["status"] = "disabled"
     else:
         entry["status"] = _status(db, policy, last_capture, now)
     return entry
+
+
+def _held(db: Session, run: models.BackupRun) -> bool:
+    found = queue_clock.delivery(db, run.command_id)
+    return found is not None and found.held
+
+
+def _capturing_status(db: Session, policy, last_capture, now, held: bool) -> str:
+    """``running``, or ``waiting_window`` while a window holds the capture --
+    unless the host is already overdue or failed: that still needs a look,
+    and a window that never opens must not hide it."""
+    if not held:
+        return "running"
+    underlying = _status(db, policy, last_capture, now)
+    return underlying if underlying in ("overdue", "failed") else "waiting_window"
 
 
 def overview(db: Session) -> Dict[str, Any]:

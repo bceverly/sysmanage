@@ -5328,7 +5328,8 @@
       "status": "Status",
       "waiting": "Aguardando uma vaga livre",
       "unreadable": "Arquivos não lidos: {{n}}",
-      "showAll": "Mostrar todos os hosts"
+      "showAll": "Mostrar todos os hosts",
+      "heldNote": "O próximo backup aguarda a janela de manutenção deste host"
     },
     "loadError": "Não foi possível carregar os backups.",
     "policy": {
@@ -5422,7 +5423,8 @@
       "noPolicy": "Não configurado",
       "notEquipped": "Não preparado",
       "ok": "Backup concluído",
-      "overdue": "Atrasado"
+      "overdue": "Atrasado",
+      "waitingWindow": "Aguardando janela"
     },
     "target": {
       "add": "Configurar destino",

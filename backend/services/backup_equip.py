@@ -20,8 +20,7 @@ from sqlalchemy.orm import Session
 from backend.persistence import models
 from backend.services import agent_capability_service as capabilities
 from backend.services import backup_jobs as jobs
-from backend.services.maintenance_window_service import DEFERRED_MARKER
-from backend.websocket.queue_enums import QueueStatus
+from backend.services import queue_clock
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +30,7 @@ RUNNING, OK, FAILED = "running", "ok", "failed"
 # An install that has not answered in this long AFTER IT WAS SENT is shown as
 # failed (the agent went away, or its answer was lost); a new attempt may
 # start.  Time spent queued -- held for a maintenance window, or waiting for
-# an offline agent -- does not count (see _clock_start).
+# an offline agent -- does not count (services/queue_clock.py).
 STALE_AFTER = timedelta(hours=1)
 # Why "Equip for backup" is not offered, as codes the UI translates.
 NOT_NEEDED = "equipped"
@@ -50,49 +49,19 @@ def _row(db: Session, host_id: Any) -> Optional[models.BackupEquip]:
     )
 
 
-def _queued(db: Session, row: models.BackupEquip) -> Optional[models.MessageQueue]:
-    """The command's outbound queue row (one id for the command and its row),
-    or None once the queue has cleaned it up."""
-    if not row.command_id:
-        return None
-    return (
-        db.query(models.MessageQueue)
-        .filter(models.MessageQueue.message_id == str(row.command_id))
-        .first()
+def _running(db: Session, row: Optional[models.BackupEquip], now) -> bool:
+    if row is None or row.status != RUNNING:
+        return False
+    started = queue_clock.clock_start(
+        queue_clock.delivery(db, row.command_id), row.requested_at
     )
-
-
-def _clock_start(db: Session, row: models.BackupEquip):
-    """When the hour an install gets to answer began: when the command went to
-    the agent; None while it is still queued (held for a maintenance window, or
-    the agent is offline), which never goes stale; the request time when the
-    queue row is gone or ended without being sent."""
-    queued = _queued(db, row)
-    if queued is None:
-        return row.requested_at
-    if queued.started_at is not None:
-        return queued.started_at
-    if queued.status == QueueStatus.PENDING:
-        return None
-    return row.requested_at
+    return started is None or now - started < STALE_AFTER
 
 
 def _held(db: Session, row: models.BackupEquip) -> bool:
     """Queued and deferred by the host's maintenance window."""
-    queued = _queued(db, row)
-    return (
-        queued is not None
-        and queued.started_at is None
-        and queued.status == QueueStatus.PENDING
-        and queued.error_message == DEFERRED_MARKER
-    )
-
-
-def _running(db: Session, row: Optional[models.BackupEquip], now) -> bool:
-    if row is None or row.status != RUNNING:
-        return False
-    started = _clock_start(db, row)
-    return started is None or now - started < STALE_AFTER
+    found = queue_clock.delivery(db, row.command_id)
+    return found is not None and found.held
 
 
 def blocker(db: Session, host: models.Host, now=None) -> Optional[str]:

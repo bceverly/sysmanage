@@ -5328,7 +5328,8 @@
       "status": "Status",
       "waiting": "Wacht op een vrije plek",
       "unreadable": "Niet gelezen bestanden: {{n}}",
-      "showAll": "Alle hosts tonen"
+      "showAll": "Alle hosts tonen",
+      "heldNote": "De volgende back-up wacht op het onderhoudsvenster van deze host"
     },
     "loadError": "De back-ups konden niet worden geladen.",
     "policy": {
@@ -5422,7 +5423,8 @@
       "noPolicy": "Niet geconfigureerd",
       "notEquipped": "Niet uitgerust",
       "ok": "Geback-upt",
-      "overdue": "Achterstallig"
+      "overdue": "Achterstallig",
+      "waitingWindow": "Wacht op venster"
     },
     "target": {
       "add": "Doel instellen",

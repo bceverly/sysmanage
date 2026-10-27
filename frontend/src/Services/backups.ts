@@ -15,6 +15,7 @@ export type BackupStatus =
   | "overdue"
   | "failed"
   | "running"
+  | "waiting_window"
   | "never"
   | "not_equipped"
   | "disabled"
@@ -28,6 +29,7 @@ export const BACKUP_STATUS_ORDER: BackupStatus[] = [
   "not_equipped",
   "never",
   "running",
+  "waiting_window",
   "disabled",
   "ok",
   "no_policy",
@@ -239,6 +241,10 @@ export interface BackupHost {
   running: BackupRun | null;
   /** A bulk "Back up now" waiting for a free slot under the target's cap. */
   capture_requested: boolean;
+  /** The pending capture is held by the host's maintenance window; shown
+   *  as a note when the host is overdue or failed (otherwise the status is
+   *  ``waiting_window``). */
+  capture_held?: boolean;
   next_due: string | null;
   snapshot_count: number;
   /** Before a host's first good backup: does restate's estimate fit the

@@ -281,6 +281,18 @@ describe("Backups page", () => {
     )).toBeInTheDocument();
   });
 
+  test("a capture held by a maintenance window reads waiting, and an overdue one says why", async () => {
+    vi.mocked(getBackupOverview).mockResolvedValue(overview({
+      hosts: [
+        host({ status: "waiting_window", capture_held: true }),
+        host({ host_id: "h2", fqdn: "db.lab", status: "overdue", capture_held: true }),
+      ],
+    }));
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    expect((await screen.findAllByText("Waiting for window")).length).toBeGreaterThan(0);
+    expect(screen.getAllByText("The next backup waits for this host's maintenance window")).toHaveLength(1);
+  });
+
   test("an equip held by a maintenance window says it is waiting", async () => {
     vi.mocked(getBackupOverview).mockResolvedValue(overview({
       hosts: [

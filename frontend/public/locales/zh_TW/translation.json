@@ -5328,7 +5328,8 @@
       "status": "狀態",
       "waiting": "等待空閒名額",
       "unreadable": "未讀取的檔案：{{n}}",
-      "showAll": "顯示所有主機"
+      "showAll": "顯示所有主機",
+      "heldNote": "下一次備份將等待此主機的維護時段"
     },
     "loadError": "無法載入備份。",
     "policy": {
@@ -5422,7 +5423,8 @@
       "noPolicy": "未設定",
       "notEquipped": "未就緒",
       "ok": "已備份",
-      "overdue": "逾期"
+      "overdue": "逾期",
+      "waitingWindow": "等待維護時段"
     },
     "target": {
       "add": "設定目標",

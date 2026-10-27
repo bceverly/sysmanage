@@ -5328,7 +5328,8 @@
       "status": "Status",
       "waiting": "Wartet auf einen freien Platz",
       "unreadable": "Nicht gelesene Dateien: {{n}}",
-      "showAll": "Alle Hosts anzeigen"
+      "showAll": "Alle Hosts anzeigen",
+      "heldNote": "Das nächste Backup wartet auf das Wartungsfenster dieses Hosts"
     },
     "loadError": "Die Sicherungen konnten nicht geladen werden.",
     "policy": {
@@ -5422,7 +5423,8 @@
       "noPolicy": "Nicht konfiguriert",
       "notEquipped": "Nicht ausgestattet",
       "ok": "Gesichert",
-      "overdue": "Überfällig"
+      "overdue": "Überfällig",
+      "waitingWindow": "Wartet auf Fenster"
     },
     "target": {
       "add": "Ziel einrichten",

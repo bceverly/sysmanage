@@ -26,6 +26,7 @@ import {
     coverageLabel,
     formatBytes,
     formatTime,
+    heldNote,
     reasonLabel,
     runStatusLabel,
     statusColor,
@@ -109,6 +110,9 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                     <Chip size="small" color={statusColor(data.status)} label={statusLabel(t, data.status)} />
                 </Stack>
                 {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
+                {heldNote(t, data) && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{heldNote(t, data)}</Typography>
+                )}
                 {!data.equipped && data.reason && (
                     <Alert severity="warning" sx={{ mb: 1 }}>
                         {reasonLabel(t, data.reason)}

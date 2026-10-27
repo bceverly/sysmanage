@@ -33,6 +33,7 @@ import {
     coverageLabel,
     formatBytes,
     formatTime,
+    heldNote,
     reasonLabel,
     statusColor,
     statusLabel,
@@ -113,6 +114,11 @@ const StatusCell: React.FC<{ row: BackupHost; canManage: boolean; onChanged: () 
             <Progress row={row} />
             <Unreadable row={row} />
             <FirstFitCaption fit={row.first_fit} />
+            {heldNote(t, row) && (
+                <Typography variant="caption" display="block" color="text.secondary">
+                    {heldNote(t, row)}
+                </Typography>
+            )}
             {row.capture_requested && !row.running && (
                 <Typography variant="caption" display="block" color="text.secondary">
                     {t('backups.hosts.waiting', 'Waiting for a free slot')}

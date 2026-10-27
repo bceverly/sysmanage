@@ -5328,7 +5328,8 @@
       "status": "状態",
       "waiting": "空き枠を待っています",
       "unreadable": "読み取れなかったファイル: {{n}}",
-      "showAll": "すべてのホストを表示"
+      "showAll": "すべてのホストを表示",
+      "heldNote": "次のバックアップは、このホストのメンテナンスウィンドウを待っています"
     },
     "loadError": "バックアップを読み込めませんでした。",
     "policy": {
@@ -5422,7 +5423,8 @@
       "noPolicy": "未設定",
       "notEquipped": "未対応",
       "ok": "バックアップ済み",
-      "overdue": "期限超過"
+      "overdue": "期限超過",
+      "waitingWindow": "ウィンドウ待ち"
     },
     "target": {
       "add": "ターゲットを設定",

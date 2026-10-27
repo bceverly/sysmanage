@@ -5328,7 +5328,8 @@
       "status": "状态",
       "waiting": "等待空闲名额",
       "unreadable": "未读取的文件：{{n}}",
-      "showAll": "显示所有主机"
+      "showAll": "显示所有主机",
+      "heldNote": "下一次备份将等待此主机的维护时段"
     },
     "loadError": "无法加载备份。",
     "policy": {
@@ -5422,7 +5423,8 @@
       "noPolicy": "未配置",
       "notEquipped": "未配备",
       "ok": "已备份",
-      "overdue": "逾期"
+      "overdue": "逾期",
+      "waitingWindow": "等待维护时段"
     },
     "target": {
       "add": "设置目标",

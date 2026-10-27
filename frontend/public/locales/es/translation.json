@@ -5328,7 +5328,8 @@
       "status": "Estado",
       "waiting": "En espera de un hueco libre",
       "unreadable": "Archivos no leídos: {{n}}",
-      "showAll": "Mostrar todos los hosts"
+      "showAll": "Mostrar todos los hosts",
+      "heldNote": "La próxima copia de seguridad espera la ventana de mantenimiento de este host"
     },
     "loadError": "No se pudieron cargar las copias de seguridad.",
     "policy": {
@@ -5422,7 +5423,8 @@
       "noPolicy": "Sin configurar",
       "notEquipped": "Sin preparar",
       "ok": "Respaldado",
-      "overdue": "Atrasado"
+      "overdue": "Atrasado",
+      "waitingWindow": "Esperando ventana"
     },
     "target": {
       "add": "Configurar destino",

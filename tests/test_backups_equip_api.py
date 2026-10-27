@@ -202,6 +202,7 @@ async def test_the_hour_to_answer_starts_when_the_command_is_sent(session, sent)
 
     queued.status, queued.error_message = "sent", None
     queued.started_at = days_later
+    session.flush()
     sent_state = backup_equip.state(
         session, s.host.id, days_later + timedelta(minutes=5)
     )

@@ -22,11 +22,19 @@ export const statusColor = (status: BackupStatus): ChipColor => {
             return 'warning';
         case 'never':
         case 'running':
+        case 'waiting_window':
             return 'info';
         default:
             return 'default';
     }
 };
+
+/** A note under an overdue or failed host whose next backup a closed
+ *  maintenance window holds; null otherwise. */
+export const heldNote = (t: TFunction, host: { capture_held?: boolean; status: BackupStatus }): string | null =>
+    host.capture_held && host.status !== 'waiting_window'
+        ? t('backups.hosts.heldNote', "The next backup waits for this host's maintenance window")
+        : null;
 
 export const statusLabel = (t: TFunction, status: BackupStatus): string => {
     const labels: Record<BackupStatus, string> = {
@@ -35,6 +43,7 @@ export const statusLabel = (t: TFunction, status: BackupStatus): string => {
         overdue: t('backups.status.overdue', 'Overdue'),
         failed: t('backups.status.failed', 'Failed'),
         running: t('backups.status.running', 'Backing up'),
+        waiting_window: t('backups.status.waitingWindow', 'Waiting for window'),
         never: t('backups.status.never', 'Never backed up'),
         not_equipped: t('backups.status.notEquipped', 'Not equipped'),
         disabled: t('backups.status.disabled', 'Disabled'),

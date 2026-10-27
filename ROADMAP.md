@@ -14164,7 +14164,7 @@ A new Pro+ engine, `backup_engine`. Follow the new-engine checklist: registered 
 - **S7 UI, docs, i18n, screenshots:** the policy's encryption toggle, key fingerprint and rotation in the plugin; docs tier page; 14 locales; `make screenshots`.
 
 - [ ] **Backup policies** by tag or host group: hosts, schedule, retention, rules, quiesce hooks, encryption key, verification cadence, RPO / RTO (24.8); a host covered by several policies resolves to one, with the rule shown
-- [ ] **Maintenance-window-aware schedules:** captures run inside a host's window (14.2) when it has one, outside blackout periods, and are held (not dropped) when a window closes
+- [ ] **Maintenance-window-aware schedules:** captures run inside a host's window (14.2) when it has one, outside blackout periods, and are held (not dropped) when a window closes -- 2026-10-27 done in code: backup runs are change commands, so the 14.2 dispatch gate already held them (blackouts included) and read-only runs (snapshots, estimate, check) go through; fixed on the way: the 12-hour stuck sweep timed a run from when it was QUEUED, so a run held past 12 hours was marked failed and queued again, and the host got both when the window opened -- it now counts from the send (`services/queue_clock.py`, shared with Equip for backup), and a run still waiting to be sent is never stuck; a held capture reads "Waiting for window" (`waiting_window`), except that an overdue or failed host keeps that status with a note, so a window that never opens cannot hide it; to tick: a capture on a lab host with a closed window, held, then run when the window opens, with exactly one run
 - [ ] **Grandfather-father-son retention:** `--keep-daily` / `--keep-weekly` / `--keep-monthly` (and yearly), applied by the storage-side runner (24.5), with a preview of what the next prune will remove
 - [ ] **Scheduled verification:** `check --read-all` on its own cadence as a periodic test restore; a repository that has not passed one within its window shows "unverified"
 - [ ] **Quiesce-hook distribution** (24.3)
@@ -14216,6 +14216,75 @@ How backups behave once they cover a real fleet. Most items are Community behavi
 - [ ] **Immutable copies:** the off-site copy lands on storage the source site cannot delete (a different target with its own append-only enforcement and NAS-side snapshots)
 - [ ] **Air-gap media:** for isolated sites, snapshots exported to removable media through the air-gap content workflow, with a manifest and signature, and imported at the receiving site
 - [ ] **Site loss drill:** with a site's primary target unavailable, a host from that site restored from the off-site copy (an exit criterion)
+
+##### Off-site cloud copy: Amazon S3 Glacier Deep Archive (added 2026-10-27, Bryan)
+
+"Two is one, one is none": a second, encrypted copy of the backup store that
+lives outside every site, for the day the site and its off-site sibling are
+both gone.  It copies the storage host's repositories, never a host's live
+files, so it adds no load to backed-up hosts.  *Tier: to decide (this
+sub-phase is Enterprise; Bryan to confirm when it is sliced).*
+
+- [ ] **Straight from the storage host (design rule, Bryan 2026-10-27):** the
+      storage host's own agent reads the repositories, encrypts and uploads
+      them directly to AWS; no backup data passes through the SysManage
+      server, a federation controller or any other intermediate place.  The
+      server only sends the job's settings and receives status.  The
+      credentials and public key reach the storage host's agent the way
+      24.6 S4 releases a restore key: fetched once over HTTPS for the job,
+      never through the command queue, held only in memory or a root-only
+      tmpfs file, and removed when the job ends
+- [ ] **Post-quantum secure encryption:** everything leaves the site encrypted
+      with a hybrid post-quantum key encapsulation (ML-KEM, FIPS 203, combined
+      with X25519, so it is never weaker than today's keys) wrapping AES-256
+      data keys; AWS never sees plaintext or a usable key.  The restate
+      repository's own OpenPGP encryption (24.6, cv25519) is not
+      post-quantum, so this layer is added on top, or restate gains PQ keys
+      -- decide in the spike (GnuPG's ML-KEM composite keys and restate-31
+      are the first things to check)
+- [ ] **Keys and credentials in OpenBAO:** the AWS credentials (an IAM
+      identity allowed only to put objects into its own bucket and prefix --
+      no delete, no list beyond it) and the PQ key pair are generated or
+      entered once and kept in OpenBAO (the tenant's path under
+      multi-tenancy); the runner fetches them for one job and never writes
+      them to disk; covered by key rotation (24.6 S5) and break-glass
+      (24.6 S6), since a lost key here is a lost last resort
+- [ ] **Immutable in the cloud:** S3 Object Lock (compliance mode) on the
+      bucket, so neither a compromised SysManage nor a stolen credential can
+      delete or shorten a copy before its retention ends
+- [ ] **Full images with incrementals:** a periodic full copy of each
+      repository, with incrementals (only what is new since the last copy)
+      between them, so a restore needs at most one full plus its chain;
+      the full / incremental cadence is configurable
+- [ ] **Grandfather-father-son retention:** daily / weekly / monthly / yearly
+      counts, configurable, aware of Deep Archive's 180-day minimum storage
+      charge (deleting earlier is still billed) -- the settings screen shows
+      what a retention choice costs in early-deletion charges, and the
+      defaults never incur them
+- [ ] **Exclusions:** leave out whole hosts and directories (repositories or
+      paths inside the store) from the cloud copy, with the list shown on the
+      target
+- [ ] **Bandwidth limits by hour of day:** a weekly schedule of upload caps
+      (e.g. a low cap during business hours, unlimited overnight), applied by
+      the uploader as it runs; a copy that cannot finish in its window
+      resumes, never restarts
+- [ ] **Sane defaults (Bryan: "setup should be easy"):** a new cloud copy
+      needs only the bucket, region and credentials; everything else has a
+      default chosen for safety and cost -- proposed: monthly full, daily
+      incremental, keep 6 monthly and 7 yearly fulls (all past the 180-day
+      minimum), every host and repository included, uploads capped during
+      08:00-18:00 local time and unlimited otherwise, Object Lock on
+- [ ] **Restore from the cloud:** Deep Archive takes 12-48 hours to thaw, so
+      a restore is a two-step job -- request the thaw of the full and its
+      incrementals, then pull, decrypt and rebuild the repository on a
+      storage host once they are ready -- with its progress and the
+      expected thaw time shown, and the thaw cost estimated before it starts
+- [ ] **Status and alerts:** last good cloud copy per repository, bytes
+      stored, monthly cost estimate, and an alert (24.6 alerts) when a copy
+      is overdue or fails
+- [ ] **Proof:** one repository copied, the site copy destroyed, and a file
+      restored from the Deep Archive copy alone (an exit criterion when this
+      ships)
 
 #### 24.11 Multi-tenancy (MULTITENANT_SAAS)
 
@@ -15239,6 +15308,23 @@ machine; this proof waits for it rather than for a cloud box.
       it runs, re-check with `scripts/i18n_judge_calibrate.py` -- the judge
       now has the glossary, and some of those Hindi rejects may have been
       the judge, not the translation.*
+
+### Sane defaults everywhere (added 2026-10-27, Bryan)
+
+- [ ] **Audit every setting for a default, and for a sane one.** Bryan, a BSD
+      person: setup should be easy, and a fresh install should be safe and
+      useful before anyone changes a thing.  Walk every configurable
+      surface -- `sysmanage.yaml`, the installer, settings stored in the
+      database (email, policies, retention, schedules, pools), every create
+      dialog in the web UI and the plugins, the agent's configuration, and
+      the Pro+ / Enterprise engines -- and list for each setting whether it
+      has a default, what it is, and whether it is the one most operators
+      should keep.  Then: add the missing defaults, change the ones that are
+      unsafe or merely arbitrary, make every dialog pre-fill them, and
+      document each default (and why) in sysmanage-docs.  A setting that
+      genuinely cannot have a default (a hostname, a credential) says so
+      and explains what to enter.  Changed defaults never alter an existing
+      installation's saved settings.
 
 ### Exit Criteria
 

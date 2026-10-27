@@ -5328,7 +5328,8 @@
       "status": "Status",
       "waiting": "Waiting for a free slot",
       "unreadable": "Files not read: {{n}}",
-      "showAll": "Show all hosts"
+      "showAll": "Show all hosts",
+      "heldNote": "The next backup waits for this host's maintenance window"
     },
     "loadError": "Could not load the backups.",
     "policy": {
@@ -5422,7 +5423,8 @@
       "noPolicy": "Not configured",
       "notEquipped": "Not equipped",
       "ok": "Backed up",
-      "overdue": "Overdue"
+      "overdue": "Overdue",
+      "waitingWindow": "Waiting for window"
     },
     "target": {
       "add": "Set up target",

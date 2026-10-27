@@ -5328,7 +5328,8 @@
       "status": "상태",
       "waiting": "빈 자리 대기 중",
       "unreadable": "읽지 못한 파일: {{n}}",
-      "showAll": "모든 호스트 표시"
+      "showAll": "모든 호스트 표시",
+      "heldNote": "다음 백업은 이 호스트의 유지 관리 기간을 기다립니다"
     },
     "loadError": "백업을 불러올 수 없습니다.",
     "policy": {
@@ -5422,7 +5423,8 @@
       "noPolicy": "구성되지 않음",
       "notEquipped": "준비되지 않음",
       "ok": "백업됨",
-      "overdue": "기한 초과"
+      "overdue": "기한 초과",
+      "waitingWindow": "기간 대기 중"
     },
     "target": {
       "add": "대상 설정",
