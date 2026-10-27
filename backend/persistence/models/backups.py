@@ -69,6 +69,9 @@ class BackupTarget(Base):
     service_account = Column(String(32), nullable=True)
     # Days the storage host keeps its seal snapshots (q60); NULL = 14.
     seal_keep_days = Column(Integer, nullable=True)
+    # How often backup_engine rotates each encrypted policy's key on its own
+    # (q66, Pro+ 24.6 S5); NULL = 365 days, 0 = never.
+    key_rotation_days = Column(Integer, nullable=True)
     # When the storage path counts as filling up (q60); NULL = 85 / 95.
     space_low_percent = Column(Integer, nullable=True)
     space_critical_percent = Column(Integer, nullable=True)
@@ -145,6 +148,9 @@ class BackupPolicy(Base):
     encrypt_fingerprint = Column(String(64), nullable=True)
     encrypt_key_ref = Column(String(1024), nullable=True)
     encrypted_at = Column(DateTime, nullable=True)
+    # When the current key was made by a rotation (q66); every key the policy
+    # has held is a BackupPolicyKey row.
+    encrypt_rotated_at = Column(DateTime, nullable=True)
     repository_bytes = Column(BigInteger, nullable=True)
     config_version = Column(Integer, nullable=False, default=1)
     host_acked_version = Column(Integer, nullable=False, default=0)
@@ -224,6 +230,29 @@ class BackupSnapshot(Base):
     signed = Column(Boolean, nullable=False, default=False)
     seen_at = Column(DateTime, nullable=False)
     gone_at = Column(DateTime, nullable=True)
+
+
+class BackupPolicyKey(Base):
+    """One encryption key a policy has held (q66, Pro+ backup_engine 24.6
+    S5).  Rotation makes a new, independent key pair; new captures use only
+    the newest, and a restore is given every key not yet retired, since a
+    capture after a rotation reuses packs written before it.  Only the
+    fingerprint and the OpenBAO reference of the secret key are here."""
+
+    __tablename__ = "backup_policy_key"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    policy_id = Column(
+        GUID(),
+        ForeignKey("backup_policy.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    fingerprint = Column(String(64), nullable=False)
+    key_ref = Column(String(1024), nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    replaced_at = Column(DateTime, nullable=True)
+    retired_at = Column(DateTime, nullable=True)
 
 
 class BackupEquip(Base):

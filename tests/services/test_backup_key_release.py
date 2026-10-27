@@ -28,7 +28,8 @@ class _Engine:
     def __init__(self, fail=None):
         self.fail, self.asked = fail, []
 
-    def secret_keys(self, policy):
+    def secret_keys(self, policy, db=None):
+        assert db is not None  # every key the policy holds is read from the database
         self.asked.append(policy.id)
         if self.fail:
             raise self.fail

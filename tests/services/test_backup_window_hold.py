@@ -129,3 +129,42 @@ def test_the_clock_rules():
     assert queue_clock.clock_start(waiting, NOW) is None
     expired = queue_clock.Delivery(sent_at=None, waiting=False, held=False)
     assert queue_clock.clock_start(expired, NOW) == NOW
+
+
+# --- Pro+ key rotation from the tick (24.6 S5) ---------------------------------
+
+
+class _Engine:
+    def __init__(self, fail=False):
+        self.calls, self.fail = [], fail
+
+    def rotate_due(self, db, target, policies, now=None, logger=None):
+        self.calls.append([p.id for p in policies])
+        if self.fail:
+            raise RuntimeError("engine bug")
+        return len(policies)
+
+
+def test_the_tick_hands_only_encrypted_policies_to_the_engine(session, monkeypatch):
+    s = _setup(session)
+    engine = _Engine()
+    monkeypatch.setattr(tick, "_encryption_engine", lambda: engine)
+    target = jobs.the_target(session)
+    assert tick.rotate_keys(session, target, NOW) == 0  # nothing encrypted
+    assert engine.calls == []
+    s.policy.encrypt_public_key = "-----BEGIN PGP PUBLIC KEY BLOCK-----\nk\n"
+    assert tick.rotate_keys(session, target, NOW) == 1
+    assert engine.calls == [[s.policy.id]]
+
+
+def test_no_engine_no_rotation_and_an_engine_failure_never_stops_the_tick(
+    session, monkeypatch
+):
+    s = _setup(session)
+    s.policy.encrypt_public_key = "-----BEGIN PGP PUBLIC KEY BLOCK-----\nk\n"
+    target = jobs.the_target(session)
+    monkeypatch.setattr(tick, "_encryption_engine", lambda: None)
+    assert tick.rotate_keys(session, target, NOW) == 0
+    monkeypatch.setattr(tick, "_encryption_engine", lambda: _Engine(fail=True))
+    assert tick.rotate_keys(session, target, NOW) == 0  # logged, not raised
+    tick.reconcile(session, NOW)  # and the pass itself still runs

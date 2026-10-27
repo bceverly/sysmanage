@@ -105,7 +105,7 @@ def release(
             402, _("Encrypted backups need the Professional+ backup engine")
         )
     try:
-        keys = engine.secret_keys(policy)
+        keys = engine.secret_keys(policy, db=db)
     except Exception as error:  # the engine's own message says why
         logger.error(
             "Backup key for run %s (host %s, policy %s) could not be read: %s",

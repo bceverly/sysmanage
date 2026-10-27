@@ -18,7 +18,8 @@ approved, active host whose agent can run backups:
    ``max_concurrent`` captures at a time;
 3. storage upkeep, on the storage host only: finish a seal-then-prune a
    capture's result could not queue, and ``check`` every
-   ``check_interval_days``.
+   ``check_interval_days``;
+4. with Pro+ backup_engine, rotate the encryption keys that are due.
 
 Runs that got no result twelve hours after their command was sent are
 marked failed and logged; a run a maintenance window holds is waiting, not
@@ -367,6 +368,8 @@ def reconcile(db: Session, now: Optional[datetime] = None) -> int:
     target = jobs.the_target(db)
     if target is None:
         return 0
+    # First, so a rotated key's job files go out on this same pass.
+    rotate_keys(db, target, now)
     storage_ready = _eligible(jobs.storage_host(db, target))
     queued = start_requested(db)  # asked for first, then the schedule
     for policy in _target_policies(db, target):
@@ -380,6 +383,46 @@ def reconcile(db: Session, now: Optional[datetime] = None) -> int:
         if storage_ready and _storage_upkeep(db, policy, target, now):
             queued += 1
     return queued
+
+
+def _encryption_engine():
+    """backup_engine when it is loaded and backup encryption is licensed."""
+    # pylint: disable=import-outside-toplevel
+    from backend.licensing.module_loader import module_loader  # noqa: PLC0415
+
+    engine = module_loader.get_module("backup_engine")
+    if engine is None or not hasattr(engine, "rotate_due"):
+        return None
+    try:
+        from backend.licensing.features import FeatureCode  # noqa: PLC0415
+        from backend.licensing.license_service import (  # noqa: PLC0415
+            license_service,
+        )
+
+        if not license_service.has_feature(FeatureCode.BACKUP_ENCRYPTION):
+            return None
+    except Exception:  # pylint: disable=broad-except
+        logger.debug("license check failed; no key rotation", exc_info=True)
+        return None
+    return engine
+
+
+def rotate_keys(db: Session, target, now: datetime) -> int:
+    """Pro+ backup_engine (24.6 S5): rotate the encryption keys that are due
+    (every ``key_rotation_days`` of the target, default 365).  The engine
+    logs and retries its own failures; anything else is logged here and
+    never stops the backups this tick queued."""
+    engine = _encryption_engine()
+    if engine is None:
+        return 0
+    policies = [p for p in _target_policies(db, target) if p.encrypt_public_key]
+    if not policies:
+        return 0
+    try:
+        return engine.rotate_due(db, target, policies, now=now, logger=logger)
+    except Exception:  # pylint: disable=broad-except
+        logger.exception("Backup key rotation failed for target %s", target.id)
+        return 0
 
 
 def run_one_tick() -> int:
