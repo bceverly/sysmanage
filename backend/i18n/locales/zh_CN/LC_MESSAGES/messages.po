@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 14:50-0400\n"
+"POT-Creation-Date: 2026-10-27 08:02-0400\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -334,7 +334,7 @@ msgstr "处理进程状态更新失败：%s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:674 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:715 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "主机未注册"
@@ -2889,6 +2889,29 @@ msgstr "无法发送密码重置电子邮件。请检查邮件配置。"
 msgid "Password reset email has been sent to {email}"
 msgstr "重置密码的邮件已经发送到 {email}"
 
+#: backend/api/backups_equip.py:62
+msgid "This host can already run backups"
+msgstr "此主机已经可以运行备份"
+
+#: backend/api/backups_equip.py:64
+msgid "This host's agent cannot install restate yet; upgrade the agent first"
+msgstr "此主机的代理还不能安装 restate；请先升级代理"
+
+#: backend/api/backups_equip.py:67
+msgid ""
+"restate has no package the agent can install on this operating system; build"
+" and install it by hand (see restate's README)"
+msgstr "restate 没有代理可以在此操作系统上安装的软件包；请手动构建并安装（参见 restate 的 README）"
+
+#: backend/api/backups_equip.py:70
+msgid "Equipping this host is already in progress"
+msgstr "此主机正在配备备份中"
+
+#: backend/api/backups_equip.py:71
+#, python-format
+msgid "This host cannot run backups: %s"
+msgstr "此主机无法运行备份：%s"
+
 #: backend/api/antivirus_defaults.py:68
 msgid "OS name must be 100 characters or less"
 msgstr "操作系统名称必须少于100个字符"
@@ -3327,34 +3350,34 @@ msgstr "该作业已经完成"
 msgid "Cancelled by an operator"
 msgstr "由操作员取消"
 
-#: backend/api/message_handlers.py:527
+#: backend/api/message_handlers.py:568
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "处理诊断结果失败：%s"
 
-#: backend/api/message_handlers.py:561
+#: backend/api/message_handlers.py:602
 msgid "Missing message_id in command acknowledgment"
 msgstr "命令确认中缺少 message_id"
 
-#: backend/api/message_handlers.py:628
+#: backend/api/message_handlers.py:669
 msgid "This session cannot acknowledge another host's message"
 msgstr "此会话无法确认其他主机的消息"
 
-#: backend/api/message_handlers.py:698
+#: backend/api/message_handlers.py:739
 msgid "Missing installation_id in package installation status"
 msgstr "包安装状态中缺少 installation_id"
 
-#: backend/api/message_handlers.py:718
+#: backend/api/message_handlers.py:759
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "未找到 ID 为 %s 的安装日志条目"
 
-#: backend/api/message_handlers.py:764
+#: backend/api/message_handlers.py:805
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "代理 {hostname} 上的软件包安装状态为 {status}"
 
-#: backend/api/message_handlers.py:793
+#: backend/api/message_handlers.py:834
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "更新软件包安装状态失败：%s"
@@ -5161,12 +5184,12 @@ msgstr "变更内容仅与当前存储库进行比较"
 msgid "A check of what changed is already running"
 msgstr "变更检查已在运行"
 
-#: backend/websocket/message_router.py:265
+#: backend/websocket/message_router.py:270
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "队列中未知的消息类型: %s"
 
-#: backend/websocket/message_router.py:270
+#: backend/websocket/message_router.py:275
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "路由消息类型 %(message_type)s 时出错：%(error)s"

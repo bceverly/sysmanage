@@ -5486,13 +5486,19 @@
       "backupSelected": "Sauvegarder la sélection",
       "error": "Les sauvegardes n'ont pas pu être demandées.",
       "result": "Lancées : {{started}}. En attente d'une place libre : {{waiting}}. Ignorées : {{skipped}}.",
-      "selectAll": "Sélectionner tous les hôtes qui peuvent être sauvegardés maintenant",
       "selectHost": "Sélectionner {{host}}",
       "selected": "Hôtes sélectionnés : {{n}}",
       "skipNoHost": "Hôte introuvable",
       "skipNoPolicy": "Aucune politique de sauvegarde",
       "skipNotConfigured": "Fichiers de tâche pas encore confirmés par l'hôte",
-      "skipRunning": "Sauvegarde déjà en cours"
+      "skipRunning": "Sauvegarde déjà en cours",
+      "equipError": "L'équipement pour la sauvegarde n'a pas pu être demandé.",
+      "equipResult": "Équipement en cours : {{started}}. Ignorés : {{skipped}}.",
+      "equipSelected": "Équiper la sélection pour la sauvegarde ({{n}})",
+      "selectAllActionable": "Sélectionner tous les hôtes qui peuvent être sauvegardés ou équipés maintenant",
+      "skipEquipPlatform": "restate n'a pas de paquet que l'agent puisse installer ici",
+      "skipEquipped": "Déjà équipé",
+      "skipEquipping": "Équipement déjà en cours"
     },
     "repack": {
       "button": "Réempaqueter",
@@ -5552,6 +5558,26 @@
       "estimate": "Première sauvegarde : environ {{size}} à conserver",
       "wontFit": "La première sauvegarde risque de ne pas tenir : environ {{size}} à conserver et {{free}} libres sur le stockage. Elle attend qu'il y ait de la place, ou que vous en excluiez une partie dans la liste Exclure de la politique. Sauvegarder maintenant la lance quand même.",
       "largest": "Dossiers les plus volumineux :"
+    },
+    "equip": {
+      "blockedAgent": "Mettez à jour l'agent pour équiper cet hôte d'ici",
+      "blockedPlatform": "Installez restate à la main sur ce système (compilez-le depuis les sources)",
+      "button": "Équiper pour la sauvegarde",
+      "checking": "Agent interrogé ; l'état se met à jour dans quelques secondes.",
+      "error": "L'équipement pour la sauvegarde n'a pas pu être lancé.",
+      "failChecksum": "Le paquet téléchargé ne correspondait pas à sa somme de contrôle publiée ; il n'a donc pas été installé",
+      "failDownload": "Le paquet n'a pas pu être téléchargé",
+      "failInstall": "L'installation ne s'est pas terminée",
+      "failNoAnswer": "L'agent n'a pas répondu en une heure",
+      "failNoRelease": "restate n'a pas de paquet pour cette version du système d'exploitation",
+      "failUnsupported": "restate n'a pas de paquet que l'agent puisse installer sur ce système",
+      "failed": "Échec de l'équipement pour la sauvegarde : {{why}}",
+      "held": "En attente de la fenêtre de maintenance de cet hôte pour installer restate",
+      "installed": "restate installé ; en attente de la confirmation de l'agent.",
+      "recheck": "Vérifier de nouveau",
+      "recheckError": "La vérification n'a pas pu être demandée.",
+      "running": "Équipement en cours : installation de restate...",
+      "started": "Installation de restate ; cela peut prendre quelques minutes."
     }
   }
 }

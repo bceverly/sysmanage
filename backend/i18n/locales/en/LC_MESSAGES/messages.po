@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-25 14:50-0400\n"
+"POT-Creation-Date: 2026-10-27 08:02-0400\n"
 "Language: en\n"
 "Content-Type: text/plain; charset=ASCII\n"
 
@@ -337,7 +337,7 @@ msgstr "Failed to process process status update: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:674 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:715 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "Host not registered"
@@ -2987,6 +2987,31 @@ msgstr "Failed to send password reset email. Please check email configuration."
 msgid "Password reset email has been sent to {email}"
 msgstr "Password reset email has been sent to {email}"
 
+#: backend/api/backups_equip.py:62
+msgid "This host can already run backups"
+msgstr "This host can already run backups"
+
+#: backend/api/backups_equip.py:64
+msgid "This host's agent cannot install restate yet; upgrade the agent first"
+msgstr "This host's agent cannot install restate yet; upgrade the agent first"
+
+#: backend/api/backups_equip.py:67
+msgid ""
+"restate has no package the agent can install on this operating system; build "
+"and install it by hand (see restate's README)"
+msgstr ""
+"restate has no package the agent can install on this operating system; build "
+"and install it by hand (see restate's README)"
+
+#: backend/api/backups_equip.py:70
+msgid "Equipping this host is already in progress"
+msgstr "Equipping this host is already in progress"
+
+#: backend/api/backups_equip.py:71
+#, python-format
+msgid "This host cannot run backups: %s"
+msgstr "This host cannot run backups: %s"
+
 #: backend/api/antivirus_defaults.py:68
 msgid "OS name must be 100 characters or less"
 msgstr "OS name must be 100 characters or less"
@@ -3433,34 +3458,34 @@ msgstr "This job has already finished"
 msgid "Cancelled by an operator"
 msgstr "Cancelled by an operator"
 
-#: backend/api/message_handlers.py:527
+#: backend/api/message_handlers.py:568
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "Failed to process diagnostic result: %s"
 
-#: backend/api/message_handlers.py:561
+#: backend/api/message_handlers.py:602
 msgid "Missing message_id in command acknowledgment"
 msgstr "Missing message_id in command acknowledgment"
 
-#: backend/api/message_handlers.py:628
+#: backend/api/message_handlers.py:669
 msgid "This session cannot acknowledge another host's message"
 msgstr "This session cannot acknowledge another host's message"
 
-#: backend/api/message_handlers.py:698
+#: backend/api/message_handlers.py:739
 msgid "Missing installation_id in package installation status"
 msgstr "Missing installation_id in package installation status"
 
-#: backend/api/message_handlers.py:718
+#: backend/api/message_handlers.py:759
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "Installation log entry not found for ID: %s"
 
-#: backend/api/message_handlers.py:764
+#: backend/api/message_handlers.py:805
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "Package installation {status} on agent {hostname}"
 
-#: backend/api/message_handlers.py:793
+#: backend/api/message_handlers.py:834
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "Failed to update package installation status: %s"
@@ -5321,12 +5346,12 @@ msgstr "What changed compares with the current repository only"
 msgid "A check of what changed is already running"
 msgstr "A check of what changed is already running"
 
-#: backend/websocket/message_router.py:265
+#: backend/websocket/message_router.py:270
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "Unknown message type in queue: %s"
 
-#: backend/websocket/message_router.py:270
+#: backend/websocket/message_router.py:275
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "Error routing message type %(message_type)s: %(error)s"

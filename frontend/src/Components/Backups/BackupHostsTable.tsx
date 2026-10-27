@@ -38,6 +38,7 @@ import {
     statusLabel,
     unreadableOf,
 } from './backupLabels';
+import EquipForBackup from './EquipForBackup';
 import { FirstFitCaption } from './BackupFirstFit';
 
 const rank = (row: BackupHost) => BACKUP_STATUS_ORDER.indexOf(row.status);
@@ -45,6 +46,12 @@ const rank = (row: BackupHost) => BACKUP_STATUS_ORDER.indexOf(row.status);
 /** A host the bulk "Back up now" can take: configured, idle, not waiting. */
 export const canBackUp = (row: BackupHost): boolean =>
     row.equipped && !!row.policy?.configured && row.running?.action !== 'capture' && !row.capture_requested;
+
+/** A host the bulk "Equip for backup" can take: the server offers it. */
+export const canEquip = (row: BackupHost): boolean => !row.equipped && row.equip_blocker === null;
+
+/** A host the bulk bar can act on at all. */
+const canPick = (row: BackupHost): boolean => canBackUp(row) || canEquip(row);
 
 export const sortHosts = (rows: BackupHost[]): BackupHost[] =>
     [...rows].sort((a, b) => rank(a) - rank(b) || a.fqdn.localeCompare(b.fqdn));
@@ -85,15 +92,23 @@ const Unreadable: React.FC<{ row: BackupHost }> = ({ row }) => {
     );
 };
 
-const StatusCell: React.FC<{ row: BackupHost }> = ({ row }) => {
+const StatusCell: React.FC<{ row: BackupHost; canManage: boolean; onChanged: () => void }> = ({
+    row,
+    canManage,
+    onChanged,
+}) => {
     const { t } = useTranslation();
     return (
         <TableCell>
             <Chip size="small" color={statusColor(row.status)} label={statusLabel(t, row.status)} />
             {!row.equipped && row.reason && (
-                <Typography variant="caption" display="block" color="warning.main">
-                    {reasonLabel(t, row.reason)}
-                </Typography>
+                <>
+                    <Typography variant="caption" display="block" color="warning.main">
+                        {reasonLabel(t, row.reason)}
+                    </Typography>
+                    <EquipForBackup hostId={row.host_id} equip={row.equip} blocker={row.equip_blocker}
+                        canManage={canManage} onChanged={onChanged} />
+                </>
             )}
             <Progress row={row} />
             <Unreadable row={row} />
@@ -119,7 +134,7 @@ const BackupHostsTable: React.FC<{
     const [editing, setEditing] = useState<BackupHost | null>(null);
     const [restoring, setRestoring] = useState<BackupHost | null>(null);
     const [picked, setPicked] = useState<Set<string>>(new Set());
-    const pickable = useMemo(() => rows.filter(canBackUp).map(r => r.host_id), [rows]);
+    const pickable = useMemo(() => rows.filter(canPick).map(r => r.host_id), [rows]);
     // A refresh drops picks that can no longer back up (started, say).
     useEffect(() => {
         const still = new Set(pickable);
@@ -149,7 +164,7 @@ const BackupHostsTable: React.FC<{
     return (
         <>
             {canManage && (
-                <BackupBulkBar selected={Array.from(picked)} onClear={() => setPicked(new Set())} onDone={onChanged} />
+                <BackupBulkBar selected={Array.from(picked)} rows={rows} onClear={() => setPicked(new Set())} onDone={onChanged} />
             )}
             <Table size="small">
                 <TableHead>
@@ -159,7 +174,7 @@ const BackupHostsTable: React.FC<{
                                 <Checkbox size="small" checked={allPicked}
                                     indeterminate={picked.size > 0 && !allPicked} disabled={pickable.length === 0}
                                     onChange={() => setPicked(allPicked ? new Set() : new Set(pickable))}
-                                    slotProps={{ input: { 'aria-label': t('backups.bulk.selectAll', 'Select every host that can back up now') } }} />
+                                    slotProps={{ input: { 'aria-label': t('backups.bulk.selectAllActionable', 'Select every host that can be backed up or equipped now') } }} />
                             </TableCell>
                         )}
                         <TableCell>{t('backups.hosts.host', 'Host')}</TableCell>
@@ -177,7 +192,7 @@ const BackupHostsTable: React.FC<{
                             {canManage && (
                                 <TableCell padding="checkbox">
                                     <Checkbox size="small" checked={picked.has(row.host_id)}
-                                        disabled={!canBackUp(row)} onChange={() => toggle(row.host_id)}
+                                        disabled={!canPick(row)} onChange={() => toggle(row.host_id)}
                                         slotProps={{ input: { 'aria-label': t('backups.bulk.selectHost', 'Select {{host}}', { host: row.fqdn }) } }} />
                                 </TableCell>
                             )}
@@ -191,7 +206,7 @@ const BackupHostsTable: React.FC<{
                                     </Typography>
                                 )}
                             </TableCell>
-                            <StatusCell row={row} />
+                            <StatusCell row={row} canManage={canManage} onChanged={onChanged} />
                             <TableCell>
                                 {formatTime(row.last_good_capture?.finished_at)}
                                 {row.snapshot_count > 0 && (

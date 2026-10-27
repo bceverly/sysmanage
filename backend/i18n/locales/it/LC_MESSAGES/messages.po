@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 14:50-0400\n"
+"POT-Creation-Date: 2026-10-27 08:02-0400\n"
 "Language: it\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -342,7 +342,7 @@ msgstr ""
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:674 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:715 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "Host non registrato"
@@ -3060,6 +3060,29 @@ msgstr ""
 msgid "Password reset email has been sent to {email}"
 msgstr "Email di reset della password inviata a {email}"
 
+#: backend/api/backups_equip.py:62
+msgid "This host can already run backups"
+msgstr "Questo host può già eseguire backup"
+
+#: backend/api/backups_equip.py:64
+msgid "This host's agent cannot install restate yet; upgrade the agent first"
+msgstr "L'agente di questo host non può ancora installare restate; aggiorna prima l'agente"
+
+#: backend/api/backups_equip.py:67
+msgid ""
+"restate has no package the agent can install on this operating system; build"
+" and install it by hand (see restate's README)"
+msgstr "restate non ha un pacchetto che l'agente possa installare su questo sistema operativo; compilalo e installalo a mano (vedi il README di restate)"
+
+#: backend/api/backups_equip.py:70
+msgid "Equipping this host is already in progress"
+msgstr "La predisposizione di questo host è già in corso"
+
+#: backend/api/backups_equip.py:71
+#, python-format
+msgid "This host cannot run backups: %s"
+msgstr "Questo host non può eseguire backup: %s"
+
 #: backend/api/antivirus_defaults.py:68
 msgid "OS name must be 100 characters or less"
 msgstr "Il nome del sistema operativo deve essere lungo 100 caratteri o meno"
@@ -3522,34 +3545,34 @@ msgstr "Questo lavoro si è già concluso"
 msgid "Cancelled by an operator"
 msgstr "Annullato da un operatore"
 
-#: backend/api/message_handlers.py:527
+#: backend/api/message_handlers.py:568
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "Impossibile elaborare il risultato diagnostico: %s"
 
-#: backend/api/message_handlers.py:561
+#: backend/api/message_handlers.py:602
 msgid "Missing message_id in command acknowledgment"
 msgstr "Mancante message_id nell'accettazione del comando"
 
-#: backend/api/message_handlers.py:628
+#: backend/api/message_handlers.py:669
 msgid "This session cannot acknowledge another host's message"
 msgstr "Questa sessione non può confermare il messaggio di un altro host"
 
-#: backend/api/message_handlers.py:698
+#: backend/api/message_handlers.py:739
 msgid "Missing installation_id in package installation status"
 msgstr "Mancante installation_id nello stato di installazione del pacchetto"
 
-#: backend/api/message_handlers.py:718
+#: backend/api/message_handlers.py:759
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "Voce non trovata nel registro delle installazioni per ID: %s"
 
-#: backend/api/message_handlers.py:764
+#: backend/api/message_handlers.py:805
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "Installazione del pacchetto {status} sull'agente {hostname}"
 
-#: backend/api/message_handlers.py:793
+#: backend/api/message_handlers.py:834
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "Impossibile aggiornare lo stato dell'installazione dei pacchetti: %s"
@@ -5498,12 +5521,12 @@ msgstr "Cosa è cambiato confronta solo con il repository attuale"
 msgid "A check of what changed is already running"
 msgstr "È già in corso una verifica delle modifiche"
 
-#: backend/websocket/message_router.py:265
+#: backend/websocket/message_router.py:270
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "Tipo di messaggio sconosciuto nella coda: %s"
 
-#: backend/websocket/message_router.py:270
+#: backend/websocket/message_router.py:275
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr ""

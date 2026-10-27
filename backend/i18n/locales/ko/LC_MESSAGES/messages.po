@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 14:50-0400\n"
+"POT-Creation-Date: 2026-10-27 08:02-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -335,7 +335,7 @@ msgstr "프로세스 상태 업데이트 처리에 실패했습니다: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:674 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:715 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "호스트가 등록되지 않음"
@@ -2919,6 +2919,29 @@ msgstr "비밀번호 재설정 이메일을 보내는데 실패했습니다. 이
 msgid "Password reset email has been sent to {email}"
 msgstr "비밀번호 재설정 이메일을 {email}로 발송했습니다"
 
+#: backend/api/backups_equip.py:62
+msgid "This host can already run backups"
+msgstr "이 호스트는 이미 백업을 실행할 수 있습니다"
+
+#: backend/api/backups_equip.py:64
+msgid "This host's agent cannot install restate yet; upgrade the agent first"
+msgstr "이 호스트의 에이전트는 아직 restate를 설치할 수 없습니다. 먼저 에이전트를 업그레이드하세요"
+
+#: backend/api/backups_equip.py:67
+msgid ""
+"restate has no package the agent can install on this operating system; build"
+" and install it by hand (see restate's README)"
+msgstr "이 운영 체제에는 에이전트가 설치할 수 있는 restate 패키지가 없습니다. 직접 빌드하여 설치하세요 (restate README 참조)"
+
+#: backend/api/backups_equip.py:70
+msgid "Equipping this host is already in progress"
+msgstr "이 호스트는 이미 백업 준비 중입니다"
+
+#: backend/api/backups_equip.py:71
+#, python-format
+msgid "This host cannot run backups: %s"
+msgstr "이 호스트는 백업을 실행할 수 없습니다: %s"
+
 #: backend/api/antivirus_defaults.py:68
 msgid "OS name must be 100 characters or less"
 msgstr "OS 이름은 100자 이하여야 합니다"
@@ -3359,34 +3382,34 @@ msgstr "이 작업은 이미 완료되었습니다."
 msgid "Cancelled by an operator"
 msgstr "운영자에 의해 취소되었습니다."
 
-#: backend/api/message_handlers.py:527
+#: backend/api/message_handlers.py:568
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "진단 결과 처리에 실패했습니다: %s"
 
-#: backend/api/message_handlers.py:561
+#: backend/api/message_handlers.py:602
 msgid "Missing message_id in command acknowledgment"
 msgstr "message_id가 누락된 명령 확인 응답"
 
-#: backend/api/message_handlers.py:628
+#: backend/api/message_handlers.py:669
 msgid "This session cannot acknowledge another host's message"
 msgstr "이 세션은 다른 호스트의 메시지를 확인할 수 없습니다"
 
-#: backend/api/message_handlers.py:698
+#: backend/api/message_handlers.py:739
 msgid "Missing installation_id in package installation status"
 msgstr "installation_id가 누락된 패키지 설치 상태"
 
-#: backend/api/message_handlers.py:718
+#: backend/api/message_handlers.py:759
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "ID: %s에 대한 설치 로그 항목을 찾을 수 없습니다."
 
-#: backend/api/message_handlers.py:764
+#: backend/api/message_handlers.py:805
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "Agent {hostname}의 패키지 설치 상태: {status}"
 
-#: backend/api/message_handlers.py:793
+#: backend/api/message_handlers.py:834
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "패키지 설치 상태를 업데이트하는 데 실패했습니다: %s"
@@ -5204,12 +5227,12 @@ msgstr "변경 내용은 현재 저장소와만 비교됩니다"
 msgid "A check of what changed is already running"
 msgstr "변경 사항 확인이 이미 실행 중입니다"
 
-#: backend/websocket/message_router.py:265
+#: backend/websocket/message_router.py:270
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "큐에 알 수 없는 메시지 유형: %s"
 
-#: backend/websocket/message_router.py:270
+#: backend/websocket/message_router.py:275
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "메시지 유형 %(message_type)s 라우팅 중 오류 발생: %(error)s"

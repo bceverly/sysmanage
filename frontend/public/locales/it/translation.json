@@ -5486,13 +5486,19 @@
       "backupSelected": "Esegui il backup dei selezionati",
       "error": "Non è stato possibile richiedere i backup.",
       "result": "Avviati: {{started}}. In attesa di un posto libero: {{waiting}}. Saltati: {{skipped}}.",
-      "selectAll": "Seleziona tutti gli host che possono eseguire il backup ora",
       "selectHost": "Seleziona {{host}}",
       "selected": "Host selezionati: {{n}}",
       "skipNoHost": "Host non trovato",
       "skipNoPolicy": "Nessun criterio di backup",
       "skipNotConfigured": "File dei processi non ancora confermati dall'host",
-      "skipRunning": "Backup già in corso"
+      "skipRunning": "Backup già in corso",
+      "equipError": "Impossibile richiedere la predisposizione per il backup.",
+      "equipResult": "Predisposizione in corso: {{started}}. Saltati: {{skipped}}.",
+      "equipSelected": "Predisponi per il backup i selezionati ({{n}})",
+      "selectAllActionable": "Seleziona tutti gli host di cui ora si può eseguire il backup o che si possono predisporre",
+      "skipEquipPlatform": "restate non ha un pacchetto che l'agente possa installare qui",
+      "skipEquipped": "Già predisposto",
+      "skipEquipping": "Predisposizione già in corso"
     },
     "repack": {
       "button": "Reimpacchetta",
@@ -5552,6 +5558,26 @@
       "estimate": "Primo backup: circa {{size}} da conservare",
       "wontFit": "Il primo backup potrebbe non entrare: circa {{size}} da conservare e {{free}} liberi sull'archiviazione. Attende finché c'è spazio, o finché non ne escludi una parte nell'elenco Escludi del criterio. Esegui backup ora lo avvia comunque.",
       "largest": "Cartelle più grandi:"
+    },
+    "equip": {
+      "blockedAgent": "Aggiorna l'agente per predisporre questo host da qui",
+      "blockedPlatform": "Installa restate a mano su questo sistema (compilalo dal sorgente)",
+      "button": "Predisponi per il backup",
+      "checking": "Agente interpellato; lo stato si aggiorna fra pochi secondi.",
+      "error": "Impossibile avviare la predisposizione per il backup.",
+      "failChecksum": "Il pacchetto scaricato non corrispondeva al checksum pubblicato, quindi non è stato installato",
+      "failDownload": "Impossibile scaricare il pacchetto",
+      "failInstall": "L'installazione non è terminata",
+      "failNoAnswer": "L'agente non ha risposto entro un'ora",
+      "failNoRelease": "restate non ha un pacchetto per questa versione del sistema operativo",
+      "failUnsupported": "restate non ha un pacchetto che l'agente possa installare su questo sistema",
+      "failed": "Predisposizione per il backup non riuscita: {{why}}",
+      "held": "In attesa della finestra di manutenzione di questo host per installare restate",
+      "installed": "restate installato; in attesa della conferma dell'agente.",
+      "recheck": "Verifica di nuovo",
+      "recheckError": "Impossibile richiedere la verifica.",
+      "running": "Predisposizione in corso: installazione di restate...",
+      "started": "Installazione di restate; può richiedere alcuni minuti."
     }
   }
 }

@@ -5486,13 +5486,19 @@
       "backupSelected": "Back up selected",
       "error": "The backups could not be requested.",
       "result": "Started: {{started}}. Waiting for a free slot: {{waiting}}. Skipped: {{skipped}}.",
-      "selectAll": "Select every host that can back up now",
       "selectHost": "Select {{host}}",
       "selected": "Hosts selected: {{n}}",
       "skipNoHost": "Host not found",
       "skipNoPolicy": "No backup policy",
       "skipNotConfigured": "Job files not confirmed by the host yet",
-      "skipRunning": "Already backing up"
+      "skipRunning": "Already backing up",
+      "equipError": "Equip for backup could not be requested.",
+      "equipResult": "Equipping: {{started}}. Skipped: {{skipped}}.",
+      "equipSelected": "Equip selected for backup ({{n}})",
+      "selectAllActionable": "Select every host that can be backed up or equipped now",
+      "skipEquipPlatform": "restate has no package the agent can install here",
+      "skipEquipped": "Already equipped",
+      "skipEquipping": "Already equipping"
     },
     "repack": {
       "button": "Repack",
@@ -5552,6 +5558,26 @@
       "estimate": "First backup: about {{size}} to keep",
       "wontFit": "The first backup may not fit: about {{size}} to keep and {{free}} free on the storage. It waits until there is room, or until you leave some of it out in the policy's Leave out list. Back up now runs it anyway.",
       "largest": "Largest folders:"
+    },
+    "equip": {
+      "blockedAgent": "Upgrade the agent to equip this host from here",
+      "blockedPlatform": "Install restate by hand on this system (build it from source)",
+      "button": "Equip for backup",
+      "checking": "Asked the agent; the status updates in a few seconds.",
+      "error": "Equip for backup could not be started.",
+      "failChecksum": "The downloaded package did not match its published checksum, so it was not installed",
+      "failDownload": "The package could not be downloaded",
+      "failInstall": "The install did not finish",
+      "failNoAnswer": "The agent did not answer within an hour",
+      "failNoRelease": "restate has no package for this release of the operating system",
+      "failUnsupported": "restate has no package the agent can install on this system",
+      "failed": "Equip for backup failed: {{why}}",
+      "held": "Waiting for this host's maintenance window to install restate",
+      "installed": "restate installed; waiting for the agent to confirm.",
+      "recheck": "Check again",
+      "recheckError": "The check could not be requested.",
+      "running": "Equipping: installing restate...",
+      "started": "Installing restate; this can take a few minutes."
     }
   }
 }

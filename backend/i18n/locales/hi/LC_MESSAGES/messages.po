@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 14:50-0400\n"
+"POT-Creation-Date: 2026-10-27 08:02-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -344,7 +344,7 @@ msgstr "प्रक्रिया स्थिति अद्यतन सं
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:674 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:715 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "होस्ट पंजीकृत नहीं है"
@@ -3027,6 +3027,29 @@ msgstr ""
 "\\u091a\\u094c\\u092e\\u093e\\u0930 \\u0915\\u093f\\u0932\\u0947\\u0915 "
 "{email} \\u0966\\u0928\\u094d\\u0938\\u0947"
 
+#: backend/api/backups_equip.py:62
+msgid "This host can already run backups"
+msgstr "यह होस्ट पहले से बैकअप चला सकता है"
+
+#: backend/api/backups_equip.py:64
+msgid "This host's agent cannot install restate yet; upgrade the agent first"
+msgstr "इस होस्ट का एजेंट अभी restate इंस्टॉल नहीं कर सकता; पहले एजेंट अपग्रेड करें"
+
+#: backend/api/backups_equip.py:67
+msgid ""
+"restate has no package the agent can install on this operating system; build"
+" and install it by hand (see restate's README)"
+msgstr "इस ऑपरेटिंग सिस्टम के लिए restate का ऐसा कोई पैकेज नहीं है जिसे एजेंट इंस्टॉल कर सके; इसे हाथ से बिल्ड और इंस्टॉल करें (restate की README देखें)"
+
+#: backend/api/backups_equip.py:70
+msgid "Equipping this host is already in progress"
+msgstr "इस होस्ट की तैयारी पहले से जारी है"
+
+#: backend/api/backups_equip.py:71
+#, python-format
+msgid "This host cannot run backups: %s"
+msgstr "यह होस्ट बैकअप नहीं चला सकता: %s"
+
 #: backend/api/antivirus_defaults.py:68
 msgid "OS name must be 100 characters or less"
 msgstr "OS नाम 100 अक्षरों की सीमा के भीतर होना चाहिए"
@@ -3480,34 +3503,34 @@ msgstr "यह जॉब पहले ही पूरा हो चुका �
 msgid "Cancelled by an operator"
 msgstr "ऑपरेटर द्वारा रद्द किया गया"
 
-#: backend/api/message_handlers.py:527
+#: backend/api/message_handlers.py:568
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "डायग्नोस्टिक रिजल्ट को प्रोसेस करने में असफल हुआ: %s"
 
-#: backend/api/message_handlers.py:561
+#: backend/api/message_handlers.py:602
 msgid "Missing message_id in command acknowledgment"
 msgstr "कमांड अद्यावरण के लिए message_id नहीं पाया गया या गलत है"
 
-#: backend/api/message_handlers.py:628
+#: backend/api/message_handlers.py:669
 msgid "This session cannot acknowledge another host's message"
 msgstr "यह सत्र किसी अन्य होस्ट के संदेश की पावती नहीं दे सकता"
 
-#: backend/api/message_handlers.py:698
+#: backend/api/message_handlers.py:739
 msgid "Missing installation_id in package installation status"
 msgstr "पैकेज इनस्टलेशन स्थिति में इनस्टॉलेशन ID नहीं पाया गया"
 
-#: backend/api/message_handlers.py:718
+#: backend/api/message_handlers.py:759
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "इनस्टॉलेशन लॉग एंट्री ID: %s के लिए नहीं मिला"
 
-#: backend/api/message_handlers.py:764
+#: backend/api/message_handlers.py:805
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "पैकेज इनस्टल करने की {status} एजेंट {hostname} पर"
 
-#: backend/api/message_handlers.py:793
+#: backend/api/message_handlers.py:834
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "पैकेज इनस्तॉलेशन संतुलन का अपडेट वापरे में विफल: %s"
@@ -5416,12 +5439,12 @@ msgstr "क्या बदला केवल मौजूदा रिपॉ�
 msgid "A check of what changed is already running"
 msgstr "क्या बदला, इसकी जाँच पहले से चल रही है"
 
-#: backend/websocket/message_router.py:265
+#: backend/websocket/message_router.py:270
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "कोई अज्ञात संदेश प्रकार है: %s"
 
-#: backend/websocket/message_router.py:270
+#: backend/websocket/message_router.py:275
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "%(message_type)s के संदेश प्रकार को लूटने में त्रुटि: %(error)s"

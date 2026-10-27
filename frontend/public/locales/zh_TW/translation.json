@@ -5486,13 +5486,19 @@
       "backupSelected": "備份所選主機",
       "error": "無法要求備份。",
       "result": "已開始：{{started}}。等待空閒名額：{{waiting}}。已略過：{{skipped}}。",
-      "selectAll": "選取所有現在可以備份的主機",
       "selectHost": "選取 {{host}}",
       "selected": "已選主機：{{n}}",
       "skipNoHost": "找不到主機",
       "skipNoPolicy": "沒有備份原則",
       "skipNotConfigured": "主機尚未確認作業檔案",
-      "skipRunning": "正在備份中"
+      "skipRunning": "正在備份中",
+      "equipError": "無法要求準備備份。",
+      "equipResult": "準備中：{{started}}。已略過：{{skipped}}。",
+      "equipSelected": "為所選主機準備備份（{{n}}）",
+      "selectAllActionable": "選擇現在可以備份或可以準備的所有主機",
+      "skipEquipPlatform": "restate 沒有代理程式可在此安裝的套件",
+      "skipEquipped": "已就緒",
+      "skipEquipping": "正在準備中"
     },
     "repack": {
       "button": "重新打包",
@@ -5552,6 +5558,26 @@
       "estimate": "首次備份：約需保存 {{size}}",
       "wontFit": "首次備份可能放不下：約需保存 {{size}}，儲存空間剩餘 {{free}}。它會等待，直到有足夠空間，或直到您在原則的排除清單中排除其中一部分。「立即備份」仍會執行它。",
       "largest": "最大的資料夾："
+    },
+    "equip": {
+      "blockedAgent": "請升級代理程式，才能從這裡讓此主機準備好備份",
+      "blockedPlatform": "請在此系統上手動安裝 restate（從原始碼建置）",
+      "button": "準備備份",
+      "checking": "已詢問代理程式；狀態將在幾秒內更新。",
+      "error": "無法開始準備備份。",
+      "failChecksum": "下載的套件與其公布的總和檢查碼不符，因此未安裝",
+      "failDownload": "無法下載套件",
+      "failInstall": "安裝未完成",
+      "failNoAnswer": "代理程式在一小時內沒有回應",
+      "failNoRelease": "restate 沒有適用於此作業系統版本的套件",
+      "failUnsupported": "restate 沒有代理程式可在此系統上安裝的套件",
+      "failed": "準備備份失敗：{{why}}",
+      "held": "正在等待此主機的維護時段以安裝 restate",
+      "installed": "restate 已安裝；正在等待代理程式確認。",
+      "recheck": "重新檢查",
+      "recheckError": "無法要求檢查。",
+      "running": "準備中：正在安裝 restate...",
+      "started": "正在安裝 restate；這可能需要幾分鐘。"
     }
   }
 }

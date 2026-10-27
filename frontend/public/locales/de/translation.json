@@ -5486,13 +5486,19 @@
       "backupSelected": "Ausgewählte sichern",
       "error": "Die Sicherungen konnten nicht angefordert werden.",
       "result": "Gestartet: {{started}}. Warten auf einen freien Platz: {{waiting}}. Übersprungen: {{skipped}}.",
-      "selectAll": "Alle Hosts auswählen, die jetzt sichern können",
       "selectHost": "{{host}} auswählen",
       "selected": "Ausgewählte Hosts: {{n}}",
       "skipNoHost": "Host nicht gefunden",
       "skipNoPolicy": "Keine Sicherungsrichtlinie",
       "skipNotConfigured": "Auftragsdateien vom Host noch nicht bestätigt",
-      "skipRunning": "Sicherung läuft bereits"
+      "skipRunning": "Sicherung läuft bereits",
+      "equipError": "„Für Backup ausstatten“ konnte nicht angefordert werden.",
+      "equipResult": "Wird ausgestattet: {{started}}. Übersprungen: {{skipped}}.",
+      "equipSelected": "Auswahl für Backup ausstatten ({{n}})",
+      "selectAllActionable": "Alle Hosts auswählen, die jetzt gesichert oder ausgestattet werden können",
+      "skipEquipPlatform": "Für dieses System gibt es kein restate-Paket, das der Agent installieren kann",
+      "skipEquipped": "Bereits ausgestattet",
+      "skipEquipping": "Wird bereits ausgestattet"
     },
     "repack": {
       "button": "Neu packen",
@@ -5552,6 +5558,26 @@
       "estimate": "Erste Sicherung: etwa {{size}} zu sichern",
       "wontFit": "Die erste Sicherung passt möglicherweise nicht: etwa {{size}} zu sichern und {{free}} frei auf dem Speicher. Sie wartet, bis Platz ist oder bis Sie einen Teil davon in der Liste Ausschließen der Richtlinie ausschließen. Jetzt sichern führt sie trotzdem aus.",
       "largest": "Größte Ordner:"
+    },
+    "equip": {
+      "blockedAgent": "Aktualisieren Sie den Agenten, um diesen Host von hier aus auszustatten",
+      "blockedPlatform": "Installieren Sie restate auf diesem System von Hand (aus dem Quellcode bauen)",
+      "button": "Für Backup ausstatten",
+      "checking": "Agent angefragt; der Status wird in wenigen Sekunden aktualisiert.",
+      "error": "„Für Backup ausstatten“ konnte nicht gestartet werden.",
+      "failChecksum": "Das heruntergeladene Paket stimmte nicht mit seiner veröffentlichten Prüfsumme überein und wurde daher nicht installiert",
+      "failDownload": "Das Paket konnte nicht heruntergeladen werden",
+      "failInstall": "Die Installation wurde nicht abgeschlossen",
+      "failNoAnswer": "Der Agent hat innerhalb einer Stunde nicht geantwortet",
+      "failNoRelease": "Für diese Version des Betriebssystems gibt es kein restate-Paket",
+      "failUnsupported": "Für dieses System gibt es kein restate-Paket, das der Agent installieren kann",
+      "failed": "„Für Backup ausstatten“ fehlgeschlagen: {{why}}",
+      "held": "Wartet auf das Wartungsfenster dieses Hosts, um restate zu installieren",
+      "installed": "restate installiert; warte auf die Bestätigung des Agenten.",
+      "recheck": "Erneut prüfen",
+      "recheckError": "Die Prüfung konnte nicht angefordert werden.",
+      "running": "Wird ausgestattet: restate wird installiert...",
+      "started": "restate wird installiert; das kann einige Minuten dauern."
     }
   }
 }

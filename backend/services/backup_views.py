@@ -22,6 +22,7 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session
 
 from backend.persistence import models
+from backend.services import backup_equip
 from backend.services import backup_first_fit as first_fit
 from backend.services import backup_jobs as jobs
 from backend.services import backup_storage_audit as storage_audit
@@ -248,6 +249,10 @@ def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
         "platform_release": host.platform_release,
         "equipped": ready,
         "reason": reason,
+        # Equip for backup: the latest attempt, and why it cannot start now
+        # (None when it can) -- see services/backup_equip.py.
+        "equip": backup_equip.state(db, host.id, now),
+        "equip_blocker": backup_equip.blocker(db, host, now),
         "coverage": coverage(host),
         "policy": policy_dict(policy) if policy else None,
         "last_capture": None,

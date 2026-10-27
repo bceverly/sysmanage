@@ -211,6 +211,47 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
             )
         return None
 
+    # Equip for backup: the agent's answer to installing restate.
+    if (
+        command_type_of(message_data) == "equip_backup"
+        or command_type_from_queue(db, message_data) == "equip_backup"
+    ):
+        from backend.services import backup_equip  # noqa: PLC0415
+
+        try:
+            if backup_equip.record_result(
+                db, getattr(connection, "host_id", None), message_data
+            ):
+                db.commit()
+        except Exception:  # pylint: disable=broad-except
+            db.rollback()
+            logger.exception(
+                "Equip for backup result could not be recorded for %s",
+                getattr(connection, "hostname", "unknown"),
+            )
+        return None
+
+    # A fresh capability report the server asked for (after restate was
+    # installed, or Check again on the Backups page).
+    if (
+        command_type_of(message_data) == "get_capabilities"
+        or command_type_from_queue(db, message_data) == "get_capabilities"
+    ):
+        from backend.services import agent_capability_service  # noqa: PLC0415
+
+        try:
+            if agent_capability_service.record_refresh(
+                db, getattr(connection, "host_id", None), message_data
+            ):
+                db.commit()
+        except Exception:  # pylint: disable=broad-except
+            db.rollback()
+            logger.exception(
+                "Capability report could not be refreshed for %s",
+                getattr(connection, "hostname", "unknown"),
+            )
+        return None
+
     # Phase 24 backups: the agent's answer to a queued backup command (for
     # backup_configure, the acknowledgment itself).
     if _is_backup_command(db, message_data):

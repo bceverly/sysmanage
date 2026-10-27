@@ -28,6 +28,9 @@ vi.mock("../../../Services/backups", async (importOriginal) => {
     savePolicy: vi.fn(),
     bulkBackupNow: vi.fn(),
     clearRuns: vi.fn(),
+    equipBackup: vi.fn(),
+    bulkEquipBackup: vi.fn(),
+    recheckBackup: vi.fn(),
   };
 });
 
@@ -40,6 +43,9 @@ import {
   savePolicy,
   bulkBackupNow,
   clearRuns,
+  equipBackup,
+  bulkEquipBackup,
+  recheckBackup,
 } from "../../../Services/backups";
 import type { BackupHost, BackupOverview, BackupRun } from "../../../Services/backups";
 import Backups from "../../../Pages/Backups";
@@ -218,7 +224,7 @@ describe("Backups page", () => {
       skipped: [{ host_id: "h4", fqdn: "db.lab", reason: "running" }],
     });
     render(<MemoryRouter><Backups /></MemoryRouter>);
-    const all = await screen.findByLabelText("Select every host that can back up now");
+    const all = await screen.findByLabelText("Select every host that can be backed up or equipped now");
     // busy.lab is already backing up: it cannot be picked
     expect(screen.getByLabelText("Select busy.lab")).toBeDisabled();
     fireEvent.click(all);
@@ -227,6 +233,84 @@ describe("Backups page", () => {
     await waitFor(() => expect(bulkBackupNow).toHaveBeenCalledWith(["h1", "h4"]));
     expect(await screen.findByText("Started: 1. Waiting for a free slot: 1. Skipped: 1.")).toBeInTheDocument();
     expect(screen.getByText("db.lab: Already backing up")).toBeInTheDocument();
+  });
+
+  test("a host without restate offers Equip for backup, which asks its agent", async () => {
+    vi.mocked(getBackupOverview).mockResolvedValue(overview({
+      hosts: [host({ equipped: false, reason: "missing_tool", status: "not_equipped",
+                     policy: null, equip: null, equip_blocker: null })],
+    }));
+    vi.mocked(equipBackup).mockResolvedValue({ command_id: "c1", equip: null });
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    fireEvent.click(await screen.findByText("Equip for backup"));
+    await waitFor(() => expect(equipBackup).toHaveBeenCalledWith("h1"));
+    expect(await screen.findByText("Installing restate; this can take a few minutes.")).toBeInTheDocument();
+  });
+
+  test("Check again asks the agent for a fresh report", async () => {
+    vi.mocked(getBackupOverview).mockResolvedValue(overview({
+      hosts: [host({ equipped: false, reason: "missing_tool", status: "not_equipped",
+                     policy: null, equip_blocker: "not_applicable" })],
+    }));
+    vi.mocked(recheckBackup).mockResolvedValue({ command_id: "c2" });
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    // no package for this system: no Equip button, but a way forward
+    expect(await screen.findByText("Install restate by hand on this system (build it from source)")).toBeInTheDocument();
+    expect(screen.queryByText("Equip for backup")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText("Check again"));
+    await waitFor(() => expect(recheckBackup).toHaveBeenCalledWith("h1"));
+  });
+
+  test("an equip in progress or failed says so", async () => {
+    vi.mocked(getBackupOverview).mockResolvedValue(overview({
+      hosts: [
+        host({ equipped: false, reason: "missing_tool", status: "not_equipped", policy: null,
+               equip_blocker: "in_progress",
+               equip: { status: "running", reason: null, detail: null, installed: null,
+                        requested_at: "2026-10-27T10:00:00", finished_at: null } }),
+        host({ host_id: "h2", fqdn: "db.lab", equipped: false, reason: "missing_tool",
+               status: "not_equipped", policy: null, equip_blocker: null,
+               equip: { status: "failed", reason: "checksum_mismatch", detail: "x.pkg", installed: null,
+                        requested_at: "2026-10-27T10:00:00", finished_at: "2026-10-27T10:01:00" } }),
+      ],
+    }));
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    expect(await screen.findByText("Equipping: installing restate...")).toBeInTheDocument();
+    expect(screen.getByText(
+      "Equip for backup failed: The downloaded package did not match its published checksum, so it was not installed",
+    )).toBeInTheDocument();
+  });
+
+  test("an equip held by a maintenance window says it is waiting", async () => {
+    vi.mocked(getBackupOverview).mockResolvedValue(overview({
+      hosts: [
+        host({ equipped: false, reason: "missing_tool", status: "not_equipped", policy: null,
+               equip_blocker: "in_progress",
+               equip: { status: "running", reason: null, held: true, detail: null, installed: null,
+                        requested_at: "2026-10-27T10:00:00", finished_at: null } }),
+      ],
+    }));
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    expect(await screen.findByText(
+      "Waiting for this host's maintenance window to install restate",
+    )).toBeInTheDocument();
+    expect(screen.queryByText("Equipping: installing restate...")).not.toBeInTheDocument();
+  });
+
+  test("Equip selected sends only the picked hosts that are not equipped", async () => {
+    vi.mocked(getBackupOverview).mockResolvedValue(overview({
+      hosts: [
+        host({}),
+        host({ host_id: "h6", fqdn: "new.lab", equipped: false, reason: "missing_tool",
+               status: "not_equipped", policy: null, equip_blocker: null }),
+      ],
+    }));
+    vi.mocked(bulkEquipBackup).mockResolvedValue({ requested: 1, started: 1, skipped: [] });
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    fireEvent.click(await screen.findByLabelText("Select every host that can be backed up or equipped now"));
+    fireEvent.click(screen.getByText("Equip selected for backup (1)"));
+    await waitFor(() => expect(bulkEquipBackup).toHaveBeenCalledWith(["h6"]));
+    expect(await screen.findByText("Equipping: 1. Skipped: 0.")).toBeInTheDocument();
   });
 
   test("a host waiting for a free slot says so", async () => {

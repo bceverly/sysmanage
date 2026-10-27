@@ -353,3 +353,45 @@ def assert_host_supports(host, command_type: Optional[str]) -> None:
         raise UnsupportedCapabilityError(
             command_name(command_type), getattr(host, "fqdn", None)
         )
+
+
+# --- refreshing a host's report ------------------------------------------------
+#
+# An agent advertises its capabilities when it registers, which is the only
+# time the server learned them: a tool installed afterwards (restate, for
+# backups) left the host reading "not equipped" until its agent restarted
+# (production, 2026-10-25).  The agent already answers ``get_capabilities``
+# with the same report; these ask for it and keep the answer.
+
+
+def request_refresh(db, host_id: Any) -> str:
+    """Queue a ``get_capabilities`` command to the host; its command id.  The
+    answer lands in :func:`record_refresh`.  The caller commits."""
+    # pylint: disable=import-outside-toplevel
+    from backend.services.config_mgmt_dispatch import queue_command  # noqa: PLC0415
+    from backend.websocket.messages import CommandType  # noqa: PLC0415
+
+    return queue_command(db, host_id, CommandType.GET_CAPABILITIES, {})
+
+
+def record_refresh(db, host_id: Any, message_data: Dict[str, Any]) -> bool:
+    """Keep the report from a ``get_capabilities`` result on its host.  False
+    when the agent refused or sent nothing usable (the previous report stays,
+    as at registration).  The caller commits.
+
+    The agent wraps its handler's ``{"success", "result": report}`` as the
+    command_result's ``result``, so the report is ``result["result"]``."""
+    # pylint: disable=import-outside-toplevel
+    from backend.persistence import models  # noqa: PLC0415
+
+    if not message_data.get("success") or message_data.get("error"):
+        return False
+    result = message_data.get("result")
+    report = result.get("result") if isinstance(result, dict) else None
+    host = db.query(models.Host).filter(models.Host.id == host_id).first()
+    if host is None:
+        return False
+    updated = apply_capability_report(host, report)
+    if updated:
+        logger.info("Capability report refreshed for host %s", host_id)
+    return updated

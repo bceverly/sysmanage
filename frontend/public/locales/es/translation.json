@@ -5486,13 +5486,19 @@
       "backupSelected": "Hacer copia de seguridad de los seleccionados",
       "error": "No se pudieron solicitar las copias de seguridad.",
       "result": "Iniciadas: {{started}}. En espera de un hueco libre: {{waiting}}. Omitidas: {{skipped}}.",
-      "selectAll": "Seleccionar todos los hosts que pueden hacer copia de seguridad ahora",
       "selectHost": "Seleccionar {{host}}",
       "selected": "Hosts seleccionados: {{n}}",
       "skipNoHost": "Host no encontrado",
       "skipNoPolicy": "Sin política de copia de seguridad",
       "skipNotConfigured": "El host aún no ha confirmado los archivos de tarea",
-      "skipRunning": "Copia de seguridad ya en curso"
+      "skipRunning": "Copia de seguridad ya en curso",
+      "equipError": "No se pudo solicitar la preparación para copias de seguridad.",
+      "equipResult": "Preparando: {{started}}. Omitidos: {{skipped}}.",
+      "equipSelected": "Preparar los seleccionados para copias de seguridad ({{n}})",
+      "selectAllActionable": "Seleccionar todos los hosts que pueden respaldarse o prepararse ahora",
+      "skipEquipPlatform": "restate no tiene un paquete que el agente pueda instalar aquí",
+      "skipEquipped": "Ya preparado",
+      "skipEquipping": "Ya se está preparando"
     },
     "repack": {
       "button": "Reempaquetar",
@@ -5552,6 +5558,26 @@
       "estimate": "Primera copia de seguridad: unos {{size}} que conservar",
       "wontFit": "Es posible que la primera copia de seguridad no quepa: unos {{size}} que conservar y {{free}} libres en el almacenamiento. Espera hasta que haya espacio o hasta que excluya parte de ella en la lista Excluir de la política. Hacer copia de seguridad ahora la ejecuta de todos modos.",
       "largest": "Carpetas más grandes:"
+    },
+    "equip": {
+      "blockedAgent": "Actualice el agente para preparar este host desde aquí",
+      "blockedPlatform": "Instale restate a mano en este sistema (compílelo desde el código fuente)",
+      "button": "Preparar para copias de seguridad",
+      "checking": "Se ha consultado al agente; el estado se actualiza en unos segundos.",
+      "error": "No se pudo iniciar la preparación para copias de seguridad.",
+      "failChecksum": "El paquete descargado no coincidía con su suma de comprobación publicada, así que no se instaló",
+      "failDownload": "No se pudo descargar el paquete",
+      "failInstall": "La instalación no terminó",
+      "failNoAnswer": "El agente no respondió en una hora",
+      "failNoRelease": "restate no tiene paquete para esta versión del sistema operativo",
+      "failUnsupported": "restate no tiene un paquete que el agente pueda instalar en este sistema",
+      "failed": "Falló la preparación para copias de seguridad: {{why}}",
+      "held": "Esperando la ventana de mantenimiento de este host para instalar restate",
+      "installed": "restate instalado; esperando la confirmación del agente.",
+      "recheck": "Comprobar de nuevo",
+      "recheckError": "No se pudo solicitar la comprobación.",
+      "running": "Preparando: instalando restate...",
+      "started": "Instalando restate; puede tardar unos minutos."
     }
   }
 }

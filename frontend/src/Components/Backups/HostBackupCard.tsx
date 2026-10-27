@@ -31,6 +31,7 @@ import {
     statusColor,
     statusLabel,
 } from './backupLabels';
+import EquipForBackup from './EquipForBackup';
 
 // restate's plaintext write cache on this host (encrypted repositories only;
 // restate 2.1.0.4 reports its size with each capture), against the target's
@@ -109,7 +110,11 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                 </Stack>
                 {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
                 {!data.equipped && data.reason && (
-                    <Alert severity="warning" sx={{ mb: 1 }}>{reasonLabel(t, data.reason)}</Alert>
+                    <Alert severity="warning" sx={{ mb: 1 }}>
+                        {reasonLabel(t, data.reason)}
+                        <EquipForBackup hostId={hostId} equip={data.equip} blocker={data.equip_blocker}
+                            canManage={canManage} onChanged={() => void load()} />
+                    </Alert>
                 )}
                 {!data.target && (
                     <Typography variant="body2" color="text.secondary">

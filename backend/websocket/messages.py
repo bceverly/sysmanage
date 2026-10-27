@@ -158,8 +158,14 @@ class CommandType(str, Enum):
     BACKUP_CONFIGURE = "backup_configure"
     BACKUP_RUN = "backup_run"
     BACKUP_RESTORE = "backup_restore"
+    # "Equip for backup": the agent installs restate (Ubuntu PPA, FreeBSD
+    # release package) -- it decides how; the server only asks.
+    EQUIP_BACKUP = "equip_backup"
     CHECK_REBOOT_STATUS = "check_reboot_status"
     COLLECT_DIAGNOSTICS = "collect_diagnostics"
+    # Ask the agent for a fresh capability report (Phase 24: after restate is
+    # installed, so a host stops reading "not equipped" without a restart).
+    GET_CAPABILITIES = "get_capabilities"
     COLLECT_CERTIFICATES = "collect_certificates"
     # Phase 13.3 -- process management.
     COLLECT_PROCESSES = "collect_processes"

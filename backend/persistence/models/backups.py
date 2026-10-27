@@ -224,3 +224,23 @@ class BackupSnapshot(Base):
     signed = Column(Boolean, nullable=False, default=False)
     seen_at = Column(DateTime, nullable=False)
     gone_at = Column(DateTime, nullable=True)
+
+
+class BackupEquip(Base):
+    """The last "Equip for backup" of a host: its agent installing restate
+    (Ubuntu's PPA, FreeBSD's release package).  ``status`` is running, ok or
+    failed; ``reason`` the agent's code on failure (unsupported, no_release,
+    download_failed, checksum_mismatch, install_failed), ``detail`` the tail
+    of the tool's output."""
+
+    __tablename__ = "backup_equip"
+
+    host_id = Column(GUID(), ForeignKey(_HOST_FK, ondelete="CASCADE"), primary_key=True)
+    status = Column(String(16), nullable=False)
+    reason = Column(String(32), nullable=True)
+    detail = Column(Text, nullable=True)
+    installed = Column(String(32), nullable=True)
+    command_id = Column(String(36), nullable=True, index=True)
+    requested_by = Column(String(255), nullable=True)
+    requested_at = Column(DateTime, nullable=False)
+    finished_at = Column(DateTime, nullable=True)

@@ -5486,13 +5486,19 @@
       "backupSelected": "备份所选主机",
       "error": "无法请求备份。",
       "result": "已开始：{{started}}。等待空闲名额：{{waiting}}。已跳过：{{skipped}}。",
-      "selectAll": "选择所有现在可以备份的主机",
       "selectHost": "选择 {{host}}",
       "selected": "已选主机：{{n}}",
       "skipNoHost": "未找到主机",
       "skipNoPolicy": "没有备份策略",
       "skipNotConfigured": "主机尚未确认作业文件",
-      "skipRunning": "正在备份中"
+      "skipRunning": "正在备份中",
+      "equipError": "无法请求配备备份。",
+      "equipResult": "正在配备：{{started}}。已跳过：{{skipped}}。",
+      "equipSelected": "为所选主机配备备份（{{n}}）",
+      "selectAllActionable": "选择现在可以备份或可以配备的所有主机",
+      "skipEquipPlatform": "restate 没有代理可以在此处安装的软件包",
+      "skipEquipped": "已配备",
+      "skipEquipping": "正在配备中"
     },
     "repack": {
       "button": "重新打包",
@@ -5552,6 +5558,26 @@
       "estimate": "首次备份：约需保存 {{size}}",
       "wontFit": "首次备份可能放不下：约需保存 {{size}}，存储上剩余 {{free}}。它会等待，直到有足够空间，或直到您在策略的排除列表中排除其中一部分。“立即备份”仍会运行它。",
       "largest": "最大的文件夹："
+    },
+    "equip": {
+      "blockedAgent": "请升级代理，以便从此处配备此主机",
+      "blockedPlatform": "请在此系统上手动安装 restate（从源代码构建）",
+      "button": "配备备份",
+      "checking": "已询问代理；状态将在几秒钟内更新。",
+      "error": "无法开始配备备份。",
+      "failChecksum": "下载的软件包与其公布的校验和不一致，因此未安装",
+      "failDownload": "无法下载软件包",
+      "failInstall": "安装未完成",
+      "failNoAnswer": "代理在一小时内没有响应",
+      "failNoRelease": "restate 没有适用于此操作系统版本的软件包",
+      "failUnsupported": "restate 没有代理可以在此系统上安装的软件包",
+      "failed": "配备备份失败：{{why}}",
+      "held": "正在等待此主机的维护时段以安装 restate",
+      "installed": "restate 已安装；正在等待代理确认。",
+      "recheck": "重新检查",
+      "recheckError": "无法请求检查。",
+      "running": "正在配备：正在安装 restate...",
+      "started": "正在安装 restate；这可能需要几分钟。"
     }
   }
 }

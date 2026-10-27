@@ -5486,13 +5486,19 @@
       "backupSelected": "Selectie back-uppen",
       "error": "De back-ups konden niet worden aangevraagd.",
       "result": "Gestart: {{started}}. Wachtend op een vrije plek: {{waiting}}. Overgeslagen: {{skipped}}.",
-      "selectAll": "Alle hosts selecteren die nu een back-up kunnen maken",
       "selectHost": "{{host}} selecteren",
       "selected": "Geselecteerde hosts: {{n}}",
       "skipNoHost": "Host niet gevonden",
       "skipNoPolicy": "Geen back-upbeleid",
       "skipNotConfigured": "Taakbestanden nog niet bevestigd door de host",
-      "skipRunning": "Back-up al bezig"
+      "skipRunning": "Back-up al bezig",
+      "equipError": "Uitrusten voor back-up kon niet worden aangevraagd.",
+      "equipResult": "Bezig met uitrusten: {{started}}. Overgeslagen: {{skipped}}.",
+      "equipSelected": "Selectie uitrusten voor back-up ({{n}})",
+      "selectAllActionable": "Selecteer elke host die nu een back-up kan krijgen of kan worden uitgerust",
+      "skipEquipPlatform": "restate heeft geen pakket dat de agent hier kan installeren",
+      "skipEquipped": "Al uitgerust",
+      "skipEquipping": "Wordt al uitgerust"
     },
     "repack": {
       "button": "Opnieuw inpakken",
@@ -5552,6 +5558,26 @@
       "estimate": "Eerste back-up: ongeveer {{size}} te bewaren",
       "wontFit": "De eerste back-up past mogelijk niet: ongeveer {{size}} te bewaren en {{free}} vrij op de opslag. Hij wacht tot er ruimte is, of tot u een deel ervan uitsluit in de lijst Uitsluiten van het beleid. Nu back-uppen voert hem toch uit.",
       "largest": "Grootste mappen:"
+    },
+    "equip": {
+      "blockedAgent": "Werk de agent bij om deze host van hieruit uit te rusten",
+      "blockedPlatform": "Installeer restate op dit systeem met de hand (bouw het vanuit de broncode)",
+      "button": "Uitrusten voor back-up",
+      "checking": "Agent gevraagd; de status wordt over een paar seconden bijgewerkt.",
+      "error": "Uitrusten voor back-up kon niet worden gestart.",
+      "failChecksum": "Het gedownloade pakket kwam niet overeen met de gepubliceerde controlesom en is daarom niet geïnstalleerd",
+      "failDownload": "Het pakket kon niet worden gedownload",
+      "failInstall": "De installatie is niet voltooid",
+      "failNoAnswer": "De agent heeft binnen een uur niet geantwoord",
+      "failNoRelease": "restate heeft geen pakket voor deze versie van het besturingssysteem",
+      "failUnsupported": "restate heeft geen pakket dat de agent op dit systeem kan installeren",
+      "failed": "Uitrusten voor back-up mislukt: {{why}}",
+      "held": "Wacht op het onderhoudsvenster van deze host om restate te installeren",
+      "installed": "restate geïnstalleerd; wachten op bevestiging van de agent.",
+      "recheck": "Opnieuw controleren",
+      "recheckError": "De controle kon niet worden aangevraagd.",
+      "running": "Bezig met uitrusten: restate wordt geïnstalleerd...",
+      "started": "restate wordt geïnstalleerd; dit kan enkele minuten duren."
     }
   }
 }

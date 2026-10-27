@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 14:50-0400\n"
+"POT-Creation-Date: 2026-10-27 08:02-0400\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -343,7 +343,7 @@ msgstr "Verarbeitung der Prozessstatusaktualisierung fehlgeschlagen: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:674 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:715 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "Host nicht registriert"
@@ -3084,6 +3084,29 @@ msgstr ""
 msgid "Password reset email has been sent to {email}"
 msgstr "Passwortzurücksetzung-E-Mail wurde an {email} gesendet"
 
+#: backend/api/backups_equip.py:62
+msgid "This host can already run backups"
+msgstr "Dieser Host kann bereits Backups ausführen"
+
+#: backend/api/backups_equip.py:64
+msgid "This host's agent cannot install restate yet; upgrade the agent first"
+msgstr "Der Agent dieses Hosts kann restate noch nicht installieren; aktualisieren Sie zuerst den Agenten"
+
+#: backend/api/backups_equip.py:67
+msgid ""
+"restate has no package the agent can install on this operating system; build"
+" and install it by hand (see restate's README)"
+msgstr "Für dieses Betriebssystem gibt es kein restate-Paket, das der Agent installieren kann; erstellen und installieren Sie es von Hand (siehe die README von restate)"
+
+#: backend/api/backups_equip.py:70
+msgid "Equipping this host is already in progress"
+msgstr "Dieser Host wird bereits für Backups ausgestattet"
+
+#: backend/api/backups_equip.py:71
+#, python-format
+msgid "This host cannot run backups: %s"
+msgstr "Dieser Host kann keine Backups ausführen: %s"
+
 #: backend/api/antivirus_defaults.py:68
 msgid "OS name must be 100 characters or less"
 msgstr "Der Name des Betriebssystems muss 100 Zeichen oder weniger betragen"
@@ -3549,34 +3572,34 @@ msgstr "Dieser Job hat bereits abgeschlossen"
 msgid "Cancelled by an operator"
 msgstr "Abgebrochen von einem Betreiber"
 
-#: backend/api/message_handlers.py:527
+#: backend/api/message_handlers.py:568
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "Fehler beim Verarbeiten des Diagnoseergebnisses: %s"
 
-#: backend/api/message_handlers.py:561
+#: backend/api/message_handlers.py:602
 msgid "Missing message_id in command acknowledgment"
 msgstr "Fehlender message_id in der Befehlsbestätigung"
 
-#: backend/api/message_handlers.py:628
+#: backend/api/message_handlers.py:669
 msgid "This session cannot acknowledge another host's message"
 msgstr "Diese Sitzung kann die Nachricht eines anderen Hosts nicht bestätigen"
 
-#: backend/api/message_handlers.py:698
+#: backend/api/message_handlers.py:739
 msgid "Missing installation_id in package installation status"
 msgstr "Fehlende installation_id in der Paket-Installationsstatus"
 
-#: backend/api/message_handlers.py:718
+#: backend/api/message_handlers.py:759
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "Installationsprotokolleintrag nicht für ID gefunden: %s"
 
-#: backend/api/message_handlers.py:764
+#: backend/api/message_handlers.py:805
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "Installationsstatus {status} auf Agent {hostname}"
 
-#: backend/api/message_handlers.py:793
+#: backend/api/message_handlers.py:834
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "Fehler beim Aktualisieren des Paketinstallationstatus: %s"
@@ -5527,12 +5550,12 @@ msgstr ""
 msgid "A check of what changed is already running"
 msgstr "Eine Prüfung der Änderungen läuft bereits"
 
-#: backend/websocket/message_router.py:265
+#: backend/websocket/message_router.py:270
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "Unbekannter Nachrichtentyp in Warteschlange: %s"
 
-#: backend/websocket/message_router.py:270
+#: backend/websocket/message_router.py:275
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "Fehler beim Routing der Nachrichtentyp %(message_type)s: %(error)s"

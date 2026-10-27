@@ -244,6 +244,26 @@ export interface BackupHost {
   /** Before a host's first good backup: does restate's estimate fit the
    *  target's free space?  Null when there is nothing to compare. */
   first_fit: FirstFit | null;
+  /** The latest "Equip for backup" (the agent installing restate). */
+  equip?: BackupEquipState | null;
+  /** Why Equip for backup is not offered now -- equipped, agent_outdated,
+   *  not_applicable, in_progress, or another not-equipped reason -- or null
+   *  when it is. */
+  equip_blocker?: string | null;
+}
+
+export interface BackupEquipState {
+  status: "running" | "ok" | "failed";
+  /** On failure: unsupported, no_release, download_failed,
+   *  checksum_mismatch, install_failed, no_answer. */
+  reason: string | null;
+  /** Running, but the command is queued behind the host's maintenance
+   *  window; the hour to answer starts when it is sent. */
+  held?: boolean;
+  detail: string | null;
+  installed: string | null;
+  requested_at: string | null;
+  finished_at: string | null;
 }
 
 export interface FirstFit {
@@ -334,6 +354,26 @@ export interface BulkBackupResult {
 /** "Back up now" for many hosts: started as the target's cap allows. */
 export const bulkBackupNow = async (hostIds: string[]): Promise<BulkBackupResult> =>
   (await axiosInstance.post<BulkBackupResult>(`${base}/backups/backup-now`, { host_ids: hostIds })).data;
+
+/** Have the host's agent install restate ("Equip for backup"). */
+export const equipBackup = async (hostId: string): Promise<{ command_id: string; equip: BackupEquipState | null }> =>
+  (await axiosInstance.post<{ command_id: string; equip: BackupEquipState | null }>(
+    `${base}/host/${hostId}/backup-equip`,
+  )).data;
+
+export interface BulkEquipResult {
+  requested: number;
+  started: number;
+  skipped: { host_id: string; fqdn: string | null; reason: string }[];
+}
+
+/** Equip for backup on many hosts; the rest come back with why. */
+export const bulkEquipBackup = async (hostIds: string[]): Promise<BulkEquipResult> =>
+  (await axiosInstance.post<BulkEquipResult>(`${base}/backups/equip`, { host_ids: hostIds })).data;
+
+/** Ask the host's agent whether it can run restate now ("Check again"). */
+export const recheckBackup = async (hostId: string): Promise<{ command_id: string }> =>
+  (await axiosInstance.post<{ command_id: string }>(`${base}/host/${hostId}/backup-recheck`)).data;
 
 /** Clear the Recent jobs list: finished jobs leave it (none are deleted). */
 export const clearRuns = async (): Promise<{ cleared: number }> =>

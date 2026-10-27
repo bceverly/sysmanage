@@ -5486,13 +5486,19 @@
       "backupSelected": "Fazer backup dos selecionados",
       "error": "Não foi possível solicitar os backups.",
       "result": "Iniciados: {{started}}. Aguardando uma vaga livre: {{waiting}}. Ignorados: {{skipped}}.",
-      "selectAll": "Selecionar todos os hosts que podem fazer backup agora",
       "selectHost": "Selecionar {{host}}",
       "selected": "Hosts selecionados: {{n}}",
       "skipNoHost": "Host não encontrado",
       "skipNoPolicy": "Sem política de backup",
       "skipNotConfigured": "Arquivos de tarefa ainda não confirmados pelo host",
-      "skipRunning": "Backup já em andamento"
+      "skipRunning": "Backup já em andamento",
+      "equipError": "Não foi possível solicitar a preparação para backup.",
+      "equipResult": "Preparando: {{started}}. Ignorados: {{skipped}}.",
+      "equipSelected": "Preparar os selecionados para backup ({{n}})",
+      "selectAllActionable": "Selecionar todos os hosts que podem receber backup ou ser preparados agora",
+      "skipEquipPlatform": "O restate não tem um pacote que o agente possa instalar aqui",
+      "skipEquipped": "Já preparado",
+      "skipEquipping": "Já em preparação"
     },
     "repack": {
       "button": "Reempacotar",
@@ -5552,6 +5558,26 @@
       "estimate": "Primeiro backup: cerca de {{size}} a guardar",
       "wontFit": "O primeiro backup pode não caber: cerca de {{size}} a guardar e {{free}} livres no armazenamento. Ele aguarda até haver espaço, ou até você deixar parte dele de fora na lista Excluir da política. Fazer backup agora o executa mesmo assim.",
       "largest": "Maiores pastas:"
+    },
+    "equip": {
+      "blockedAgent": "Atualize o agente para preparar este host daqui",
+      "blockedPlatform": "Instale o restate manualmente neste sistema (compile-o a partir do código-fonte)",
+      "button": "Preparar para backup",
+      "checking": "Agente consultado; o status é atualizado em alguns segundos.",
+      "error": "Não foi possível iniciar a preparação para backup.",
+      "failChecksum": "O pacote baixado não correspondia à sua soma de verificação publicada, por isso não foi instalado",
+      "failDownload": "Não foi possível baixar o pacote",
+      "failInstall": "A instalação não terminou",
+      "failNoAnswer": "O agente não respondeu em uma hora",
+      "failNoRelease": "O restate não tem pacote para esta versão do sistema operacional",
+      "failUnsupported": "O restate não tem um pacote que o agente possa instalar neste sistema",
+      "failed": "Falha na preparação para backup: {{why}}",
+      "held": "Aguardando a janela de manutenção deste host para instalar o restate",
+      "installed": "restate instalado; aguardando a confirmação do agente.",
+      "recheck": "Verificar novamente",
+      "recheckError": "Não foi possível solicitar a verificação.",
+      "running": "Preparando: instalando o restate...",
+      "started": "Instalando o restate; isso pode levar alguns minutos."
     }
   }
 }

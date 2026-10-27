@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 14:50-0400\n"
+"POT-Creation-Date: 2026-10-27 08:02-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -338,7 +338,7 @@ msgstr "فشل في معالجة تحديث حالة العملية: %s"
 
 #: backend/api/handlers/user_access_handlers.py:262
 #: backend/api/handlers/user_access_handlers.py:270
-#: backend/api/message_handlers.py:674 backend/api/update_handlers.py:39
+#: backend/api/message_handlers.py:715 backend/api/update_handlers.py:39
 #: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "المضيف غير مسجل"
@@ -2975,6 +2975,29 @@ msgstr ""
 msgid "Password reset email has been sent to {email}"
 msgstr " تم إرسال بريد إلكتروني لإعادة تعيين كلمة المرور إلى {email}"
 
+#: backend/api/backups_equip.py:62
+msgid "This host can already run backups"
+msgstr "يمكن لهذا المضيف تشغيل النسخ الاحتياطي بالفعل"
+
+#: backend/api/backups_equip.py:64
+msgid "This host's agent cannot install restate yet; upgrade the agent first"
+msgstr "لا يستطيع وكيل هذا المضيف تثبيت restate بعد؛ حدّث الوكيل أولًا"
+
+#: backend/api/backups_equip.py:67
+msgid ""
+"restate has no package the agent can install on this operating system; build"
+" and install it by hand (see restate's README)"
+msgstr "لا توجد حزمة restate يستطيع الوكيل تثبيتها على نظام التشغيل هذا؛ ابنِها وثبّتها يدويًا (راجع ملف README الخاص بـ restate)"
+
+#: backend/api/backups_equip.py:70
+msgid "Equipping this host is already in progress"
+msgstr "تجهيز هذا المضيف جارٍ بالفعل"
+
+#: backend/api/backups_equip.py:71
+#, python-format
+msgid "This host cannot run backups: %s"
+msgstr "لا يمكن لهذا المضيف تشغيل النسخ الاحتياطي: %s"
+
 #: backend/api/antivirus_defaults.py:68
 msgid "OS name must be 100 characters or less"
 msgstr "يجب أن يكون اسم النظام التشغیعي 100 حرف أو أقل"
@@ -3423,34 +3446,34 @@ msgstr "انتهت هذه الوظيفة بالفعل"
 msgid "Cancelled by an operator"
 msgstr "ألغاه مشغل"
 
-#: backend/api/message_handlers.py:527
+#: backend/api/message_handlers.py:568
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "فشل في معالجة نتيجة التشخيص: %s"
 
-#: backend/api/message_handlers.py:561
+#: backend/api/message_handlers.py:602
 msgid "Missing message_id in command acknowledgment"
 msgstr "لم يتم تحديد معرف الرسالة في تأكيد الطلب"
 
-#: backend/api/message_handlers.py:628
+#: backend/api/message_handlers.py:669
 msgid "This session cannot acknowledge another host's message"
 msgstr "لا يمكن لهذه الجلسة الإقرار برسالة مضيف آخر"
 
-#: backend/api/message_handlers.py:698
+#: backend/api/message_handlers.py:739
 msgid "Missing installation_id in package installation status"
 msgstr "لم يتم تحديد معرف التثبيت في حالة التثبيت"
 
-#: backend/api/message_handlers.py:718
+#: backend/api/message_handlers.py:759
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "لم يتم العثور على سجل تثبيت للاستعلام: %s"
 
-#: backend/api/message_handlers.py:764
+#: backend/api/message_handlers.py:805
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr " حالة تثبيت الحزمة {status} على الوكيل {hostname}"
 
-#: backend/api/message_handlers.py:793
+#: backend/api/message_handlers.py:834
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "فشل في تحديث حالة تثبيت الحزم: %s"
@@ -5311,12 +5334,12 @@ msgstr "لا يقارن ما الذي تغيّر إلا بالمستودع ال�
 msgid "A check of what changed is already running"
 msgstr "يجري بالفعل التحقق مما تغيّر"
 
-#: backend/websocket/message_router.py:265
+#: backend/websocket/message_router.py:270
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "نوع الرسالة غير المعروفة في الصف: %s"
 
-#: backend/websocket/message_router.py:270
+#: backend/websocket/message_router.py:275
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "خطأ في توجيه نوع الرسالة %(message_type)s: %(error)s"

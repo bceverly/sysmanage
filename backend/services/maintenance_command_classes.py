@@ -105,6 +105,8 @@ WINDOW_GATED_COMMANDS = frozenset(
         "backup_configure",
         "backup_run",
         "backup_restore",
+        # installs restate (a PPA plus a package, or pkg add on FreeBSD)
+        "equip_backup",
         "attach_to_graylog",
         "fips_enable",
         "fips_disable",

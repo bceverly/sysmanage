@@ -5486,13 +5486,19 @@
       "backupSelected": "선택한 호스트 백업",
       "error": "백업을 요청할 수 없습니다.",
       "result": "시작됨: {{started}}. 빈 자리 대기 중: {{waiting}}. 건너뜀: {{skipped}}.",
-      "selectAll": "지금 백업할 수 있는 모든 호스트 선택",
       "selectHost": "{{host}} 선택",
       "selected": "선택한 호스트: {{n}}",
       "skipNoHost": "호스트를 찾을 수 없음",
       "skipNoPolicy": "백업 정책 없음",
       "skipNotConfigured": "호스트가 아직 작업 파일을 확인하지 않음",
-      "skipRunning": "이미 백업 중"
+      "skipRunning": "이미 백업 중",
+      "equipError": "백업 준비를 요청할 수 없습니다.",
+      "equipResult": "준비 중: {{started}}. 건너뜀: {{skipped}}.",
+      "equipSelected": "선택한 호스트 백업 준비 ({{n}})",
+      "selectAllActionable": "지금 백업하거나 백업 준비할 수 있는 모든 호스트 선택",
+      "skipEquipPlatform": "여기에는 에이전트가 설치할 수 있는 restate 패키지가 없습니다",
+      "skipEquipped": "이미 준비됨",
+      "skipEquipping": "이미 준비 중"
     },
     "repack": {
       "button": "다시 패킹",
@@ -5552,6 +5558,26 @@
       "estimate": "첫 백업: 보관할 양 약 {{size}}",
       "wontFit": "첫 백업이 들어가지 않을 수 있습니다. 보관할 양은 약 {{size}}이고 스토리지 여유 공간은 {{free}}입니다. 공간이 생기거나 정책의 제외 목록에서 일부를 제외할 때까지 기다립니다. 지금 백업을 사용하면 그래도 실행됩니다.",
       "largest": "가장 큰 폴더:"
+    },
+    "equip": {
+      "blockedAgent": "여기에서 이 호스트를 백업 준비하려면 에이전트를 업그레이드하세요",
+      "blockedPlatform": "이 시스템에서는 restate를 직접 설치하세요 (소스에서 빌드)",
+      "button": "백업 준비",
+      "checking": "에이전트에 요청했습니다. 몇 초 후 상태가 업데이트됩니다.",
+      "error": "백업 준비를 시작할 수 없습니다.",
+      "failChecksum": "다운로드한 패키지가 게시된 체크섬과 일치하지 않아 설치하지 않았습니다",
+      "failDownload": "패키지를 다운로드할 수 없습니다",
+      "failInstall": "설치가 완료되지 않았습니다",
+      "failNoAnswer": "에이전트가 1시간 안에 응답하지 않았습니다",
+      "failNoRelease": "이 운영 체제 버전용 restate 패키지가 없습니다",
+      "failUnsupported": "이 시스템에는 에이전트가 설치할 수 있는 restate 패키지가 없습니다",
+      "failed": "백업 준비 실패: {{why}}",
+      "held": "restate를 설치하기 위해 이 호스트의 유지 관리 기간을 기다리는 중",
+      "installed": "restate가 설치되었습니다. 에이전트의 확인을 기다리는 중입니다.",
+      "recheck": "다시 확인",
+      "recheckError": "확인을 요청할 수 없습니다.",
+      "running": "준비 중: restate 설치 중...",
+      "started": "restate를 설치하는 중입니다. 몇 분 정도 걸릴 수 있습니다."
     }
   }
 }
