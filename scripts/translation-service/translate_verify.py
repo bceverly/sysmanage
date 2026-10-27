@@ -171,17 +171,18 @@ async def aligned(  # pylint: disable=too-many-arguments,too-many-positional-arg
     """
     if len(sources) < 2:
         return True
+    # The URL is the operator's OLLAMA_URL plus a constant path; the request's
+    # text travels only in the JSON body, so no request input picks where this
+    # goes.  One line, so the suppression sits directly above the whole call.
+    url = f"{ollama_url}/api/embed"
+    body = {
+        "model": EMBED_MODEL,
+        "input": list(sources) + list(answers),
+        "keep_alive": keep_alive,
+    }
     try:
         # nosemgrep: python.fastapi.net.tainted-fastapi-http-request-httpx.tainted-fastapi-http-request-httpx
-        resp = await client.post(
-            f"{ollama_url}/api/embed",
-            json={
-                "model": EMBED_MODEL,
-                "input": list(sources) + list(answers),
-                "keep_alive": keep_alive,
-            },
-            timeout=timeout,
-        )
+        resp = await client.post(url, json=body, timeout=timeout)
         resp.raise_for_status()
         vectors = resp.json()["embeddings"]
     except (httpx.HTTPError, KeyError, ValueError, TypeError):
