@@ -62,6 +62,9 @@ class MessageType(str, Enum):
     # Phase 24 -- restate backups: a job's outcome, and its live progress.
     BACKUP_RESULT = "backup_result"
     BACKUP_PROGRESS = "backup_progress"
+    # A storage host's audit outside any job: at agent start, daily, and on
+    # Request Host Data (the agent's backup/storage_reaudit.py).
+    BACKUP_STORAGE_AUDIT = "backup_storage_audit"
     NETWORK_DISCOVERY_REPORT = "network_discovery_report"
     HOSTNAME_CHANGED = "hostname_changed"
     # Agent reports completion of a server-initiated package install/uninstall.

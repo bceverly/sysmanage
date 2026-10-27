@@ -740,6 +740,42 @@ def record_result(
     return run
 
 
+def record_storage_audit(db: Session, host_id: Any, payload: Dict[str, Any]) -> bool:
+    """A storage host's audit sent outside any job -- at agent start, daily,
+    and on Request Host Data -- so a check fixed since the last job (a new
+    agent, or a repair made by hand) reaches the UI.  Kept only from the
+    policy's own storage host: a backed-up host cannot speak for storage.
+    False (logged) otherwise.  The caller commits."""
+    try:
+        policy_id = uuid.UUID(str(payload.get("policy_id")))
+    except (TypeError, ValueError):
+        policy_id = None
+    policy = (
+        db.query(models.BackupPolicy)
+        .filter(models.BackupPolicy.id == policy_id)
+        .first()
+        if policy_id
+        else None
+    )
+    target = (
+        db.query(models.BackupTarget)
+        .filter(models.BackupTarget.id == policy.target_id)
+        .first()
+        if policy is not None
+        else None
+    )
+    if target is None or str(target.storage_host_id) != str(host_id):
+        logger.warning(
+            "storage audit from host %s for policy %s ignored: not that "
+            "policy's storage host (or no such policy)",
+            host_id,
+            payload.get("policy_id"),
+        )
+        return False
+    _store_audit(policy, payload.get("storage_audit"))
+    return True
+
+
 def record_progress(
     db: Session, host_id: Any, payload: Dict[str, Any]
 ) -> Optional[models.BackupRun]:

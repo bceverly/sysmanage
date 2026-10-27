@@ -52,6 +52,7 @@ from backend.api.handlers.compliance_evidence_handlers import (
 )
 from backend.api.handlers.backup_handlers import (
     handle_backup_progress,
+    handle_backup_storage_audit,
     handle_backup_result,
 )
 from backend.api.handlers.hardware_health_handlers import (
@@ -156,5 +157,6 @@ __all__ = [
     "handle_compliance_evidence_update",
     "handle_backup_result",
     "handle_backup_progress",
+    "handle_backup_storage_audit",
     "handle_network_discovery_report",
 ]

@@ -106,3 +106,35 @@ def test_the_target_summarizes_audits_worst_first(session):
     assert tail == ["audit_export_shared", "audit_nfs_local_locks",
                     "audit_append_only_layout"]  # fmt: skip
     assert target["problem"] is True
+
+
+def test_a_storage_hosts_audit_outside_any_job_is_stored(session, sent):
+    # The agent's storage_reaudit: at start, daily, Request Host Data
+    # (production 2026-10-27: an NFSv4 finding two days stale).
+    s = _setup(session)
+    fresh = [{"code": "nfs_v4", "level": "ok", "params": {}}]
+    stored = results.record_storage_audit(
+        session, s.nas.id, {"policy_id": str(s.policy.id), "storage_audit": fresh}
+    )
+    assert stored is True
+    assert json.loads(s.policy.storage_audit) == fresh
+    assert s.policy.storage_audit_at is not None
+
+
+def test_an_audit_from_any_other_host_or_policy_is_ignored(session, sent):
+    s = _setup(session)
+    s.policy.storage_audit = json.dumps(
+        [{"code": "nfs_v4", "level": "error", "params": {}}]
+    )
+    ok = [{"code": "nfs_v4", "level": "ok", "params": {}}]
+    # the backed-up host cannot speak for its storage
+    assert not results.record_storage_audit(
+        session, s.host.id, {"policy_id": str(s.policy.id), "storage_audit": ok}
+    )
+    # nor can anyone name a policy that does not exist, or no policy at all
+    assert not results.record_storage_audit(
+        session, s.nas.id, {"policy_id": "00000000-0000-4000-8000-000000000000",
+                            "storage_audit": ok}
+    )  # fmt: skip
+    assert not results.record_storage_audit(session, s.nas.id, {"storage_audit": ok})
+    assert json.loads(s.policy.storage_audit)[0]["level"] == "error"  # unchanged

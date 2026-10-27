@@ -8,7 +8,8 @@ Backup results and progress from the agent (ROADMAP Phase 24).
 ``backup_result`` -- restate's status word and result JSON for one run
 (``services/backup_results.py`` stores it and queues the storage-side jobs
 that follow a good capture); ``backup_progress`` -- the latest progress
-line of a run still going.  A message naming a run that belongs to another
+line of a run still going; ``backup_storage_audit`` -- a storage host's audit
+sent outside any job (agent start, daily, Request Host Data).  A message naming a run that belongs to another
 host is ignored and logged.
 """
 
@@ -47,6 +48,30 @@ async def handle_backup_result(  # NOSONAR
         logger.exception("backup_result from host %s could not be recorded", host_id)
         return {"message_type": "error", "error_type": "backup_result", "data": {}}
     return {"message_type": "success", "data": {"stored": run is not None}}
+
+
+async def handle_backup_storage_audit(  # NOSONAR
+    db: Session, connection: Any, message_data: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Store a storage host's audit sent outside any job.  Never raises."""
+    host_id = getattr(connection, "host_id", None)
+    if not host_id:
+        return _error()
+    payload = message_data if "policy_id" in message_data else message_data.get("data")
+    try:
+        stored = backup_results.record_storage_audit(
+            db, host_id, payload if isinstance(payload, dict) else {}
+        )
+        db.commit()
+    except Exception:  # pylint: disable=broad-except
+        db.rollback()
+        logger.exception("storage audit from host %s could not be recorded", host_id)
+        return {
+            "message_type": "error",
+            "error_type": "backup_storage_audit",
+            "data": {},
+        }
+    return {"message_type": "success", "data": {"stored": stored}}
 
 
 async def handle_backup_progress(  # NOSONAR
