@@ -111,6 +111,8 @@ class BackupPolicy(Base):
     keep_daily = Column(Integer, nullable=True)
     keep_weekly = Column(Integer, nullable=True)
     keep_monthly = Column(Integer, nullable=True)
+    # ... and of the last N years (q68; restate 2.2.0.12 on the storage host).
+    keep_yearly = Column(Integer, nullable=True)
     check_interval_days = Column(Integer, nullable=False, default=7)
     quiesce = Column(Boolean, nullable=False, default=False)
     quiesce_with = Column(Text, nullable=True)  # JSON list of hook names
@@ -137,6 +139,9 @@ class BackupPolicy(Base):
     available_hooks = Column(Text, nullable=True)
     # What the host's restate offers: list / status / cache (JSON, q60).
     host_abilities = Column(Text, nullable=True)
+    # What the storage host's restate offers that the server must know
+    # before allowing it: keep_yearly (JSON list, q68).
+    storage_abilities = Column(Text, nullable=True)
     estimate_bytes = Column(BigInteger, nullable=True)
     # The estimate's largest directories, JSON [{path, bytes}] (24.8).
     estimate_dirs = Column(Text, nullable=True)

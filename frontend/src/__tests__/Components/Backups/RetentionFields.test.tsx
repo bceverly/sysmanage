@@ -69,4 +69,36 @@ describe("RetentionFields", () => {
       counts={{ keep_last: 7, keep_daily: 0, keep_weekly: 0, keep_monthly: 0 }} onChange={vi.fn()} />);
     expect(container).toBeEmptyDOMElement();
   });
+
+  test("years show only where the storage host can keep them, or when already set", () => {
+    const { rerender } = render(
+      <RetentionFields hostId="h1" hasPolicy counts={counts} onChange={vi.fn()} />);
+    expect(screen.queryByLabelText("Years to keep")).toBeNull();
+    rerender(<RetentionFields hostId="h1" hasPolicy yearlySupported
+      counts={{ ...counts, keep_yearly: 0 }} onChange={vi.fn()} />);
+    expect(screen.getByLabelText("Years to keep")).toHaveValue(0);
+    rerender(<RetentionFields hostId="h1" hasPolicy
+      counts={{ ...counts, keep_yearly: 3 }} onChange={vi.fn()} />);
+    expect(screen.getByLabelText("Years to keep")).toHaveValue(3);
+  });
+
+  test("a yearly count is passed up and previewed", async () => {
+    const onChange = vi.fn();
+    vi.mocked(previewRetention).mockResolvedValue({ kept: [], removed: [] });
+    const withYears = { ...counts, keep_yearly: 2 };
+    render(<RetentionFields hostId="h1" hasPolicy yearlySupported counts={withYears}
+      onChange={onChange} />);
+    fireEvent.change(screen.getByLabelText("Years to keep"), { target: { value: "5" } });
+    expect(onChange).toHaveBeenCalledWith({ keep_yearly: 5 });
+    fireEvent.click(screen.getByText("Preview the next prune"));
+    expect(await screen.findByText("Next prune: 0 kept, 0 removed.")).toBeInTheDocument();
+    expect(previewRetention).toHaveBeenCalledWith("h1", withYears);
+  });
+
+  test("without the engine an existing yearly count is still shown", () => {
+    licensed.value = false;
+    render(<RetentionFields hostId="h1" hasPolicy counts={{ ...counts, keep_yearly: 3 }}
+      onChange={vi.fn()} />);
+    expect(screen.getByText(/And of the last 3 years\./)).toBeInTheDocument();
+  });
 });

@@ -119,6 +119,9 @@ def policy_dict(policy: models.BackupPolicy) -> Dict[str, Any]:
         "keep_daily": policy.keep_daily or 0,
         "keep_weekly": policy.keep_weekly or 0,
         "keep_monthly": policy.keep_monthly or 0,
+        "keep_yearly": policy.keep_yearly or 0,
+        # The storage host's restate honors a yearly count (2.2.0.12+).
+        "yearly_supported": "keep_yearly" in jobs.storage_abilities(policy),
         "check_interval_days": policy.check_interval_days,
         "quiesce": bool(policy.quiesce),
         "quiesce_with": jobs.quiesce_names(policy),

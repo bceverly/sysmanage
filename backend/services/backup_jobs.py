@@ -507,7 +507,7 @@ def queue_browse(  # pylint: disable=too-many-arguments,too-many-positional-argu
 
 
 # Grandfather-father-son counts a prune keeps beside keep_last (q67).
-GFS_KEYS = ("keep_daily", "keep_weekly", "keep_monthly")
+GFS_KEYS = ("keep_daily", "keep_weekly", "keep_monthly", "keep_yearly")
 
 
 def prune_keep(policy: models.BackupPolicy) -> Dict[str, int]:
@@ -526,6 +526,11 @@ def prune_keep(policy: models.BackupPolicy) -> Dict[str, int]:
 def abilities(policy: models.BackupPolicy) -> List[str]:
     """What the host's restate offers beyond the 2.0 contract."""
     return _json_strings(getattr(policy, "host_abilities", None))
+
+
+def storage_abilities(policy: models.BackupPolicy) -> List[str]:
+    """What the storage host's restate offers for this policy (keep_yearly)."""
+    return _json_strings(getattr(policy, "storage_abilities", None))
 
 
 def pending(db: Session, policy_id: Any, action: str, host_id: Any = None) -> bool:

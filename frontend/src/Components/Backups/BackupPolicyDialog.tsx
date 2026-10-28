@@ -36,6 +36,7 @@ const DEFAULTS: PolicyInput = {
     keep_daily: 0,
     keep_weekly: 0,
     keep_monthly: 0,
+    keep_yearly: 0,
     check_interval_days: 7,
     quiesce: false,
     quiesce_with: [],
@@ -56,6 +57,7 @@ const toInput = (policy: BackupPolicy | null): PolicyInput =>
               keep_daily: policy.keep_daily ?? 0,
               keep_weekly: policy.keep_weekly ?? 0,
               keep_monthly: policy.keep_monthly ?? 0,
+              keep_yearly: policy.keep_yearly ?? 0,
               check_interval_days: policy.check_interval_days,
               quiesce: policy.quiesce,
               quiesce_with: policy.quiesce_with,
@@ -131,8 +133,10 @@ const BackupPolicyDialog: React.FC<{
                         value={form.keep_last} slotProps={{ htmlInput: { min: 1, max: 1000 } }}
                         onChange={e => set({ keep_last: number(e.target.value) })} />
                     <RetentionFields hostId={hostId} hasPolicy={policy !== null}
+                        yearlySupported={policy?.yearly_supported ?? false}
                         counts={{ keep_last: form.keep_last, keep_daily: form.keep_daily,
-                            keep_weekly: form.keep_weekly, keep_monthly: form.keep_monthly }}
+                            keep_weekly: form.keep_weekly, keep_monthly: form.keep_monthly,
+                            keep_yearly: form.keep_yearly }}
                         onChange={counts => set(counts)} />
                     <TextField type="number" label={t('backups.policy.checkDays', 'Check the repository every (days)')}
                         value={form.check_interval_days} slotProps={{ htmlInput: { min: 1, max: 90 } }}

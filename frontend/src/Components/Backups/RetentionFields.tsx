@@ -4,7 +4,8 @@
 
 // Grandfather-father-son retention in the backup policy dialog (ROADMAP
 // 24.6): beside "Snapshots to keep", the newest snapshot of each of the last
-// N days, ISO weeks and months.  Setting them needs the Pro+ backup engine;
+// N days, ISO weeks and months -- and years, once the storage host's restate
+// (2.2.0.12+) has reported it can keep them.  Setting them needs the Pro+ backup engine;
 // without it a policy that already has them shows them read-only (they are
 // still honored).  "Preview the next prune" asks the server which snapshots
 // the next prune would keep and remove -- restate's own choice, ported.
@@ -17,22 +18,27 @@ import type { PolicyInput, RetentionPreview } from '../../Services/backups';
 import { useModuleLicensed } from '../../hooks/useModuleLicensed';
 import { apiDetail } from './backupLabels';
 
-type Counts = Pick<PolicyInput, 'keep_last' | 'keep_daily' | 'keep_weekly' | 'keep_monthly'>;
+type Counts = Pick<PolicyInput, 'keep_last' | 'keep_daily' | 'keep_weekly' | 'keep_monthly' | 'keep_yearly'>;
 
 const SHOWN = 5;
 
 const RetentionFields: React.FC<{
     hostId: string;
     hasPolicy: boolean;
+    /** The storage host's restate honors a yearly count. */
+    yearlySupported?: boolean;
     counts: Counts;
     onChange: (counts: Partial<Counts>) => void;
-}> = ({ hostId, hasPolicy, counts, onChange }) => {
+}> = ({ hostId, hasPolicy, yearlySupported = false, counts, onChange }) => {
     const { t } = useTranslation();
     const licensed = useModuleLicensed('backup_engine');
     const [preview, setPreview] = useState<RetentionPreview | null>(null);
     const [error, setError] = useState<string | null>(null);
     const number = (text: string): number => (text === '' ? 0 : Math.max(0, Math.floor(Number(text))));
-    const any = (counts.keep_daily ?? 0) + (counts.keep_weekly ?? 0) + (counts.keep_monthly ?? 0) > 0;
+    const any = (counts.keep_daily ?? 0) + (counts.keep_weekly ?? 0) + (counts.keep_monthly ?? 0)
+        + (counts.keep_yearly ?? 0) > 0;
+    // A policy that already keeps years always shows (and honors) them.
+    const showYearly = yearlySupported || (counts.keep_yearly ?? 0) > 0;
 
     if (!licensed) {
         return any ? (
@@ -40,6 +46,10 @@ const RetentionFields: React.FC<{
                 {t('backups.policy.gfsReadOnly',
                     'Also keeps the newest of the last {{daily}} days, {{weekly}} weeks and {{monthly}} months (changing these needs Professional+).',
                     { daily: counts.keep_daily ?? 0, weekly: counts.keep_weekly ?? 0, monthly: counts.keep_monthly ?? 0 })}
+                {(counts.keep_yearly ?? 0) > 0 && (
+                    ` ${t('backups.policy.gfsReadOnlyYearly', 'And of the last {{yearly}} years.',
+                        { yearly: counts.keep_yearly ?? 0 })}`
+                )}
             </Typography>
         ) : null;
     }
@@ -53,7 +63,7 @@ const RetentionFields: React.FC<{
         }
     };
 
-    const field = (key: 'keep_daily' | 'keep_weekly' | 'keep_monthly', label: string, max: number) => (
+    const field = (key: 'keep_daily' | 'keep_weekly' | 'keep_monthly' | 'keep_yearly', label: string, max: number) => (
         <TextField type="number" label={label} value={counts[key] ?? 0}
             slotProps={{ htmlInput: { min: 0, max } }}
             onChange={e => { onChange({ [key]: number(e.target.value) }); setPreview(null); }} />
@@ -69,6 +79,7 @@ const RetentionFields: React.FC<{
                 {field('keep_daily', t('backups.policy.keepDaily', 'Days to keep'), 3650)}
                 {field('keep_weekly', t('backups.policy.keepWeekly', 'Weeks to keep'), 520)}
                 {field('keep_monthly', t('backups.policy.keepMonthly', 'Months to keep'), 240)}
+                {showYearly && field('keep_yearly', t('backups.policy.keepYearly', 'Years to keep'), 100)}
             </Stack>
             {hasPolicy && (
                 <div>

@@ -4,8 +4,8 @@
 #
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 17:26-0400\n"
+"Report-Msgid-Bugs-To:  \n"
+"POT-Creation-Date: 2026-10-28 10:00-0400\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -82,7 +82,7 @@ msgstr "У вас нет доступа к выбранной учетной з�
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:145
+#: backend/api/posture.py:375 backend/api/backups.py:146
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:151
@@ -197,8 +197,8 @@ msgstr "Неверный формат идентификатора узла"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:157
-#: backend/api/backups.py:160 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:158
+#: backend/api/backups.py:161 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -226,10 +226,9 @@ msgstr "Узел не одобрен"
 #: backend/api/opentelemetry/grafana_connection.py:201
 #: backend/api/cve_refresh_settings.py:66 backend/api/scim.py:218
 #: backend/api/scim.py:228 backend/api/packages_operations.py:68
-#: backend/api/packages_operations.py:247
-#: backend/api/license_management.py:116 backend/api/secrets/permissions.py:39
-#: backend/api/error_constants.py:22 backend/api/child_host_utils.py:33
-#: backend/api/child_host_utils.py:67
+#: backend/api/packages_operations.py:247 backend/api/license_management.py:116
+#: backend/api/secrets/permissions.py:39 backend/api/error_constants.py:22
+#: backend/api/child_host_utils.py:33 backend/api/child_host_utils.py:67
 msgid "User not found"
 msgstr "Пользователь не найден"
 
@@ -659,8 +658,8 @@ msgstr "Не удалось добавить отключение репозит
 
 #: backend/api/reports/endpoints.py:71
 msgid ""
-"Report generation requires a SysManage Professional+ license. Please upgrade"
-" to access this feature."
+"Report generation requires a SysManage Professional+ license. Please upgrade "
+"to access this feature."
 msgstr ""
 "Генерация отчётов требует лицензии SysManage Professional+. Обновите для "
 "доступа к этой функции."
@@ -794,8 +793,8 @@ msgstr "Недействительный или истекший токен ре
 
 #: backend/api/host_registration.py:239
 msgid ""
-"This host already belongs to a tenant. Re-register with its enrollment token"
-" instead of registering server-scoped."
+"This host already belongs to a tenant. Re-register with its enrollment token "
+"instead of registering server-scoped."
 msgstr ""
 "Этот хост уже принадлежит арендатору. Вместо регистрации серверного уровня "
 "используйте токен регистрации для перерегистрации."
@@ -1121,8 +1120,8 @@ msgid ""
 "Permission denied: only an administrator can grant or remove administrator "
 "rights"
 msgstr ""
-"Доступ запрещён: только администратор может предоставлять или отзывать права"
-" администратора"
+"Доступ запрещён: только администратор может предоставлять или отзывать права "
+"администратора"
 
 #: backend/api/user.py:625
 #, python-brace-format
@@ -1464,8 +1463,8 @@ msgid ""
 "User account deletion requested. The user list will update automatically "
 "after deletion."
 msgstr ""
-"Запрошенное удаление учетной записи пользователя. Список пользователей будет"
-" автоматически обновлен после удаления."
+"Запрошенное удаление учетной записи пользователя. Список пользователей будет "
+"автоматически обновлен после удаления."
 
 #: backend/api/host_account_management.py:407
 msgid "Permission denied: DELETE_HOST_GROUP role required"
@@ -1520,8 +1519,8 @@ msgid ""
 "Mirror %(mirror_name)s is for %(package_manager)s, can't assign to a "
 "%(platform)s default"
 msgstr ""
-"Зеркало %(mirror_name)s предназначено для %(package_manager)s, не может быть"
-" назначено по умолчанию для платформы %(platform)s"
+"Зеркало %(mirror_name)s предназначено для %(package_manager)s, не может быть "
+"назначено по умолчанию для платформы %(platform)s"
 
 #: backend/api/repository_mirroring.py:696
 msgid "Unknown (platform, version, os_family) tuple"
@@ -1556,8 +1555,8 @@ msgstr ""
 
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
-"Air-gap collection runs require the repository_mirroring_engine module to be"
-" loaded -- the collector reads each target's bundle from a snapshot of its "
+"Air-gap collection runs require the repository_mirroring_engine module to be "
+"loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 "Коллекция в изолированном режиме требует загрузки модуля "
@@ -1570,8 +1569,8 @@ msgid ""
 "Configure mirror settings before creating a collection run."
 msgstr ""
 "Отсутствуют глобальные параметры зеркалирования или не настроен "
-"mirror_root_path. Настройте параметры зеркалирования перед созданием запуска"
-" коллекции."
+"mirror_root_path. Настройте параметры зеркалирования перед созданием запуска "
+"коллекции."
 
 #: backend/api/airgap_collector_runs.py:289
 #, python-format
@@ -1634,8 +1633,8 @@ msgid ""
 "Created one-shot air-gap collection run '%(iso_label)s' with "
 "%(mirror_count)d target mirror(s); snapshots dispatched."
 msgstr ""
-"Создан одноразовый сбор данных в изоляции '%(iso_label)s' с %(mirror_count)d"
-" целевым зеркалом; отправлены снимки."
+"Создан одноразовый сбор данных в изоляции '%(iso_label)s' с %(mirror_count)d "
+"целевым зеркалом; отправлены снимки."
 
 #: backend/api/airgap_collector_runs.py:658
 #, python-format
@@ -1648,8 +1647,8 @@ msgstr ""
 
 #: backend/api/airgap_collector_runs.py:668
 msgid ""
-"ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
-" the collection to rebuild."
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
+"the collection to rebuild."
 msgstr ""
 "Файловая система ISO больше не находится на диске; возможно, стадия сборки "
 "была очищена. Повторите сборку."
@@ -1689,8 +1688,8 @@ msgstr "Профиль пакета не найден"
 
 #: backend/api/package_compliance.py:73
 msgid ""
-"Package compliance profiles require a SysManage Professional license. Please"
-" upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please "
+"upgrade to access this feature."
 msgstr ""
 "Профили соответствия пакетов требуют лицензии SysManage Professional. "
 "Пожалуйста, обновитесь для доступа к этой функции."
@@ -1720,8 +1719,8 @@ msgid ""
 "Scanned host '%(host_fqdn)s' against profile '%(profile_name)s': %(status)s "
 "(%(violation_count)d violation(s))"
 msgstr ""
-"Сканирование хоста '%(host_fqdn)s' по профилю '%(profile_name)s': %(status)s"
-" (%(violation_count)d нарушений)"
+"Сканирование хоста '%(host_fqdn)s' по профилю '%(profile_name)s': %(status)s "
+"(%(violation_count)d нарушений)"
 
 #: backend/api/package_compliance.py:500
 #, python-format
@@ -1979,8 +1978,8 @@ msgstr "OIDC секрет клиента не может быть разреше
 
 #: backend/api/external_idp.py:577 backend/api/external_idp.py:796
 msgid ""
-"No sysmanage account is linked to this IdP identity. Ask an administrator to"
-" provision your account first."
+"No sysmanage account is linked to this IdP identity. Ask an administrator to "
+"provision your account first."
 msgstr ""
 "Связанного аккаунта SysManage с этим идентификатором IdP не существует. "
 "Обратитесь к администратору для создания вашего аккаунта."
@@ -2154,8 +2153,8 @@ msgstr ""
 #: backend/api/opentelemetry/eligibility.py:111
 #: backend/api/opentelemetry/grafana_connection.py:88
 #: backend/api/opentelemetry/grafana_connection.py:231
-#: backend/api/packages_operations.py:97
-#: backend/api/packages_operations.py:276 backend/api/error_constants.py:119
+#: backend/api/packages_operations.py:97 backend/api/packages_operations.py:276
+#: backend/api/error_constants.py:119
 msgid "Host not found or not active"
 msgstr "Узел не найден или не активен"
 
@@ -2192,11 +2191,11 @@ msgstr "URL Grafana недоступен"
 
 #: backend/api/opentelemetry/deployment.py:152
 msgid ""
-"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
-" on the server."
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
+"on the server."
 msgstr ""
-"Для развертки OpenTelemetry требуется загрузить Pro+ observability_engine на"
-" сервере."
+"Для развертки OpenTelemetry требуется загрузить Pro+ observability_engine на "
+"сервере."
 
 #: backend/api/opentelemetry/deployment.py:179
 msgid "OpenTelemetry deployment queued successfully"
@@ -2209,8 +2208,8 @@ msgstr "Не удалось развернуть OpenTelemetry: %s"
 
 #: backend/api/opentelemetry/deployment.py:264
 msgid ""
-"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
-" the server."
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
+"the server."
 msgstr ""
 "Для удаления OpenTelemetry требуется загрузить набор инструментов "
 "observability_engine Pro+ на сервере."
@@ -2326,12 +2325,12 @@ msgstr "Не удалось отключить OpenTelemetry от Grafana: %s"
 
 #: backend/api/content_lifecycle.py:64
 msgid ""
-"Content lifecycle management requires a SysManage Professional+ (Enterprise)"
-" license. Please upgrade to access this feature."
+"Content lifecycle management requires a SysManage Professional+ (Enterprise) "
+"license. Please upgrade to access this feature."
 msgstr ""
 "Управление жизненным циклом контента требует лицензии SysManage "
-"Professional+ (Enterprise). Пожалуйста, обновите лицензию для доступа к этой"
-" функции."
+"Professional+ (Enterprise). Пожалуйста, обновите лицензию для доступа к этой "
+"функции."
 
 #: backend/api/content_lifecycle.py:121
 msgid "Environment name is required"
@@ -2427,8 +2426,8 @@ msgstr "Зеркало '%s' не имеет назначенного хоста"
 #: backend/api/content_lifecycle.py:684 backend/api/content_lifecycle.py:726
 msgid "All mirrors in a content view must share one host in this release"
 msgstr ""
-"Все зеркала в представлении содержимого должны использовать одну хост-машину"
-" в этой версии"
+"Все зеркала в представлении содержимого должны использовать одну хост-машину "
+"в этой версии"
 
 #: backend/api/content_lifecycle.py:697
 #, python-format
@@ -2550,8 +2549,7 @@ msgstr "Команда перезапуска сетевого экрана от
 msgid "Firewall deploy command sent successfully"
 msgstr "Команда развертывания сетевого экрана отправлена успешно"
 
-#: backend/api/default_repositories.py:273
-#: backend/api/antivirus_defaults.py:66
+#: backend/api/default_repositories.py:273 backend/api/antivirus_defaults.py:66
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "Требуется имя операционной системы"
@@ -2656,8 +2654,7 @@ msgstr "Запрошено обновление дочернего хоста"
 msgid ""
 "Distribution '%(name)s %(version)s' already exists for type '%(child_type)s'"
 msgstr ""
-"Распределение '%(name)s %(version)s' уже существует для типа "
-"'%(child_type)s'"
+"Распределение '%(name)s %(version)s' уже существует для типа '%(child_type)s'"
 
 #: backend/api/child_host_crud.py:833
 msgid "Distribution deleted"
@@ -2677,8 +2674,7 @@ msgstr ""
 msgid "Agent authentication failed: invalid host ID"
 msgstr "Ошибка аутентификации агента: недействительный идентификатор хоста"
 
-#: backend/api/message_handlers_core.py:98
-#: backend/utils/host_validation.py:104
+#: backend/api/message_handlers_core.py:98 backend/utils/host_validation.py:104
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr ""
@@ -2729,8 +2725,7 @@ msgid "Target '%(t)s' is not valid for %(f)s"
 msgstr "Цель '%(t)s' недопустима для %(f)s"
 
 #: backend/api/logging_settings.py:134
-msgid ""
-"Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
+msgid "Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
 msgstr ""
 "Передача удаленного syslog требует профессиональную лицензию (LOG_ROUTING)."
 
@@ -2806,8 +2801,7 @@ msgstr ""
 
 #: backend/api/child_host_virtualization.py:660
 msgid "Child host creation requested. This may take several minutes."
-msgstr ""
-"Запрошенная создание дочернего узла. Это может занять несколько минут."
+msgstr "Запрошенная создание дочернего узла. Это может занять несколько минут."
 
 #: backend/api/query_packs.py:53
 msgid "Invalid query pack ID format"
@@ -2948,8 +2942,7 @@ msgstr "Для этого нахождения не найдено соотве�
 #: backend/api/config_mgmt_remediation.py:426
 msgid "The profile this rule repairs with is missing or not active"
 msgstr ""
-"Профиль, по которому восстанавливается это правило, отсутствует или "
-"неактивен"
+"Профиль, по которому восстанавливается это правило, отсутствует или неактивен"
 
 #: backend/api/config_mgmt_remediation.py:460
 msgid "The repair was queued for this host"
@@ -3016,8 +3009,7 @@ msgid ""
 "Your password has been successfully reset. You can now log in with your new "
 "password."
 msgstr ""
-"Ваш пароль успешно сброшен. Теперь вы можете войти в систему с новым "
-"паролем."
+"Ваш пароль успешно сброшен. Теперь вы можете войти в систему с новым паролем."
 
 #: backend/api/password_reset.py:396
 msgid "Token is valid"
@@ -3051,8 +3043,8 @@ msgstr ""
 
 #: backend/api/backups_equip.py:67
 msgid ""
-"restate has no package the agent can install on this operating system; build"
-" and install it by hand (see restate's README)"
+"restate has no package the agent can install on this operating system; build "
+"and install it by hand (see restate's README)"
 msgstr ""
 "Для этой операционной системы нет пакета restate, который может установить "
 "агент; соберите и установите его вручную (см. README restate)"
@@ -3264,8 +3256,8 @@ msgid ""
 "instructions and will be unable to log in."
 msgstr ""
 "Включите электронную почту в файле конфигурации YAML и настройте параметры "
-"SMTP. Без интеграции электронной почты новые пользователи не смогут получить"
-" инструкции по установке пароля и не смогут войти в систему."
+"SMTP. Без интеграции электронной почты новые пользователи не смогут получить "
+"инструкции по установке пароля и не смогут войти в систему."
 
 #: backend/api/security.py:171
 msgid "Default admin credentials are configured in your YAML file"
@@ -3320,11 +3312,9 @@ msgstr ""
 "Соль пароля использует значение по умолчанию, но JWT-секрет был изменён. "
 "Запуск: {command}"
 
-#: backend/api/ubuntu_pro_settings.py:76
-#: backend/api/ubuntu_pro_settings.py:318
+#: backend/api/ubuntu_pro_settings.py:76 backend/api/ubuntu_pro_settings.py:318
 msgid "Ubuntu Pro key must start with 'C' for contract-based keys"
-msgstr ""
-"Ключ Ubuntu Pro должен начинаться с 'C' для ключей на основе контракта"
+msgstr "Ключ Ubuntu Pro должен начинаться с 'C' для ключей на основе контракта"
 
 #: backend/api/ubuntu_pro_settings.py:80
 msgid "Ubuntu Pro key appears to be too short"
@@ -3379,8 +3369,8 @@ msgstr ""
 #: backend/api/ubuntu_pro_settings.py:350
 msgid "No master key configured. Please configure a master key first."
 msgstr ""
-"Конфигурация главного ключа не настроена. Пожалуйста, настройте главный ключ"
-" в первую очередь."
+"Конфигурация главного ключа не настроена. Пожалуйста, настройте главный ключ "
+"в первую очередь."
 
 #: backend/api/ubuntu_pro_settings.py:381
 #: backend/api/updates/os_upgrade_routes.py:257
@@ -3435,8 +3425,7 @@ msgstr "Регистрация включена: хост недавно был 
 
 #: backend/api/host.py:870
 #, python-format
-msgid ""
-"Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
+msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
 "Узел '%(fqdn)s' подключен к арендатору %(tenant_id)s через токен подключения"
 
@@ -3589,8 +3578,7 @@ msgstr "Нет пакетов для установки"
 
 #: backend/api/packages_operations.py:179
 #, python-format
-msgid ""
-"Queued installation of %(package_count)d packages on host %(host_fqdn)s"
+msgid "Queued installation of %(package_count)d packages on host %(host_fqdn)s"
 msgstr ""
 "Добавлены в очередь установка %(package_count)d пакетов на хосте "
 "%(host_fqdn)s"
@@ -3738,8 +3726,8 @@ msgstr ""
 
 #: backend/api/auth.py:391
 msgid ""
-"Multi-factor authentication is required for this account. Please enroll from"
-" your profile page before signing in."
+"Multi-factor authentication is required for this account. Please enroll from "
+"your profile page before signing in."
 msgstr ""
 "Двухфакторная аутентификация требуется для этого аккаунта. Пожалуйста, "
 "зарегистрируйтесь через страницу вашего профиля перед входом в систему."
@@ -3813,8 +3801,7 @@ msgstr "Нет доступных обновлений ОС для этого х
 
 #: backend/api/updates/os_upgrade_routes.py:352
 #, python-format
-msgid ""
-"Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
+msgid "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
 msgstr ""
 "Запущено обновление ОС на узле %(fqdn)s с %(upgrade_count)d обновлением(ями)"
 
@@ -3894,8 +3881,7 @@ msgstr "Неизвестный тип: %(kind)s (допустимые значе
 #: backend/api/dynamic_secrets.py:153
 #, python-format
 msgid ""
-"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
-"ttl=%(ttl)ds)"
+"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, ttl=%(ttl)ds)"
 msgstr ""
 "Выдан динамический секрет '%(name)s' (тип=%(kind)s, роль=%(role)s, "
 "ttl=%(ttl)ds)"
@@ -3927,8 +3913,8 @@ msgid ""
 "WSL enablement requested. A reboot may be required to complete the "
 "installation."
 msgstr ""
-"Запрошенное включение WSL. Возможно, потребуется перезагрузка для завершения"
-" установки."
+"Запрошенное включение WSL. Возможно, потребуется перезагрузка для завершения "
+"установки."
 
 # LXD Container Management strings
 #: backend/api/child_host_virtualization_enable.py:213
@@ -3964,8 +3950,7 @@ msgstr "Запрошена инициализация VMM"
 
 #: backend/api/child_host_virtualization_enable.py:306
 msgid ""
-"VMM initialization requested. The agent will enable and start the vmd "
-"daemon."
+"VMM initialization requested. The agent will enable and start the vmd daemon."
 msgstr "Запрошена инициализация VMM. Агент включит и запустит демон vmd."
 
 #: backend/api/child_host_virtualization_enable.py:348
@@ -3999,8 +3984,8 @@ msgstr "Запрошенная инициализация bhyve"
 
 #: backend/api/child_host_virtualization_enable.py:433
 msgid ""
-"bhyve initialization requested. The agent will load vmm.ko and configure the"
-" system for bhyve virtual machines."
+"bhyve initialization requested. The agent will load vmm.ko and configure the "
+"system for bhyve virtual machines."
 msgstr ""
 "Запрошенная инициализация bhyve. Агент загрузит vmm.ko и настроит систему "
 "для работы с виртуальными машинами bhyve."
@@ -4019,8 +4004,7 @@ msgid ""
 "configuration. This will fail if any VMs are running."
 msgstr ""
 "Запрошенное отключение bhyve. Агент выгрузит vmm.ko и обновит конфигурацию "
-"системы. Это завершится ошибкой, если какие-либо виртуальные машины "
-"работают."
+"системы. Это завершится ошибкой, если какие-либо виртуальные машины работают."
 
 #: backend/api/child_host_virtualization_enable.py:536
 msgid "Agent must be running with root privileges to enable KVM modules"
@@ -4032,8 +4016,8 @@ msgstr "Модули KVM разрешены"
 
 #: backend/api/child_host_virtualization_enable.py:558
 msgid ""
-"KVM modules enable requested. The agent will load the KVM kernel modules via"
-" modprobe."
+"KVM modules enable requested. The agent will load the KVM kernel modules via "
+"modprobe."
 msgstr ""
 "Модули KVM включены по запросу. Агент загрузит модули ядра KVM с помощью "
 "команды modprobe."
@@ -4089,121 +4073,120 @@ msgid "KVM network list requested. Results will be returned shortly."
 msgstr ""
 "Запрошен список сетей KVM. Результаты будут отображены в ближайшее время."
 
-#: backend/api/backups.py:176
+#: backend/api/backups.py:177
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s должен быть абсолютным путем без '..'"
 
-#: backend/api/backups.py:181
+#: backend/api/backups.py:182
 #, python-format
 msgid "%s is out of range"
 msgstr "%s вне допустимого диапазона"
 
-#: backend/api/backups.py:185
+#: backend/api/backups.py:186
 msgid "Host mount point"
 msgstr "Точка монтирования на хосте"
 
-#: backend/api/backups.py:186 backend/api/backups.py:231
+#: backend/api/backups.py:187 backend/api/backups.py:232
 msgid "Storage path"
 msgstr "Путь хранения"
 
-#: backend/api/backups.py:187
+#: backend/api/backups.py:188
 msgid "Concurrent backups"
 msgstr "Одновременные резервные копии"
 
-#: backend/api/backups.py:188
+#: backend/api/backups.py:189
 msgid "Days to keep sealed snapshots"
 msgstr "Дней хранения запечатанных снимков"
 
-#: backend/api/backups.py:189
+#: backend/api/backups.py:190
 msgid "Write cache budget"
 msgstr "Лимит кеша записи"
 
-#: backend/api/backups.py:190
+#: backend/api/backups.py:191
 msgid "Storage space warning"
 msgstr "Предупреждение о месте в хранилище"
 
-#: backend/api/backups.py:191
+#: backend/api/backups.py:192
 msgid "Storage space critical"
 msgstr "Критическое заполнение хранилища"
 
-#: backend/api/backups.py:195
+#: backend/api/backups.py:196
 msgid "The storage space warning must be below the critical level"
-msgstr ""
-"Порог предупреждения о месте в хранилище должен быть ниже критического"
+msgstr "Порог предупреждения о месте в хранилище должен быть ниже критического"
 
-#: backend/api/backups.py:197
+#: backend/api/backups.py:198
 msgid "The backup service account is not a valid account name"
 msgstr ""
 "Служебная учетная запись резервного копирования не является допустимым "
 "именем учетной записи"
 
-#: backend/api/backups.py:199
+#: backend/api/backups.py:200
 msgid "Unknown seal mode"
 msgstr "Неизвестный режим запечатывания"
 
-#: backend/api/backups.py:201
+#: backend/api/backups.py:202
 msgid "A ZFS snapshot seal needs the dataset name"
 msgstr "Для запечатывания снимком ZFS нужно имя набора данных"
 
-#: backend/api/backups.py:203
+#: backend/api/backups.py:204
 msgid "The ZFS dataset name is not valid"
 msgstr "Недопустимое имя набора данных ZFS"
 
-#: backend/api/backups.py:210
+#: backend/api/backups.py:211
 msgid "A storage host needs the storage path"
 msgstr "Для хоста хранения нужен путь хранения"
 
-#: backend/api/backups.py:227
+#: backend/api/backups.py:228
 msgid "A btrfs snapshot seal needs the snapshot directory"
 msgstr "Для запечатывания снимком btrfs нужен каталог снимков"
 
-#: backend/api/backups.py:229
+#: backend/api/backups.py:230
 msgid "A btrfs snapshot seal needs the storage path"
 msgstr "Для запечатывания снимком btrfs нужен путь хранения"
 
-#: backend/api/backups.py:232
+#: backend/api/backups.py:233
 msgid "Snapshot directory"
 msgstr "Каталог снимков"
 
-#: backend/api/backups.py:237
+#: backend/api/backups.py:238
 #, python-format
 msgid ""
-"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
-" trailing '/')"
+"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no "
+"trailing '/')"
 msgstr ""
 "%s должен быть простым абсолютным путем (буквы, цифры, '_', '.', '-' и '/'; "
 "без '/' в конце)"
 
-#: backend/api/backups.py:245
+#: backend/api/backups.py:246
 msgid "The snapshot directory must be outside the storage path"
 msgstr "Каталог снимков должен находиться вне пути хранения"
 
-#: backend/api/backups.py:249
+#: backend/api/backups.py:250
 msgid "Interval (hours)"
 msgstr "Интервал (часов)"
 
-#: backend/api/backups.py:250
+#: backend/api/backups.py:251
 msgid "Window start hour"
 msgstr "Час начала окна"
 
-#: backend/api/backups.py:251
+#: backend/api/backups.py:252
 msgid "Snapshots to keep"
 msgstr "Сколько снимков хранить"
 
-#: backend/api/backups.py:252
+#: backend/api/backups.py:253
 msgid "Check interval (days)"
 msgstr "Интервал проверки (дней)"
 
-#: backend/api/backups.py:256
+#: backend/api/backups.py:257
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "Хуки приостановки: не более 10 коротких имен в нижнем регистре"
 
-#: backend/api/backups.py:269
+#: backend/api/backups.py:270
 msgid "At most 50 path rules can be set"
 msgstr "Не более 50 правил для путей можно задать"
 
-#: backend/api/backups.py:280
+#: backend/api/backups.py:281
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
@@ -4211,114 +4194,113 @@ msgstr ""
 "Каждое правило пути состоит из одной строки не более 512 символов без "
 "начальных или конечных пробелов или начального символа #"
 
-#: backend/api/backups.py:288 backend/api/backups_browse.py:92
+#: backend/api/backups.py:289 backend/api/backups_browse.py:92
 msgid "The snapshot name is not valid"
 msgstr "Недопустимое имя снимка"
 
-#: backend/api/backups.py:290
+#: backend/api/backups.py:291
 msgid "At most 50 paths can be restored at once"
 msgstr "За один раз можно восстановить не более 50 путей"
 
-#: backend/api/backups.py:293
+#: backend/api/backups.py:294
 msgid "A restore path is empty or too long"
 msgstr "Путь восстановления пуст или слишком длинный"
 
-#: backend/api/backups.py:295
+#: backend/api/backups.py:296
 msgid "A restore path must not contain '..'"
 msgstr "Путь восстановления не должен содержать '..'"
 
-#: backend/api/backups.py:301
+#: backend/api/backups.py:302
 msgid "A restore path must be absolute, such as /home/alice/notes.txt"
 msgstr ""
 "Путь восстановления должен быть абсолютным, например /home/alice/notes.txt"
 
-#: backend/api/backups.py:315
+#: backend/api/backups.py:316
 msgid "Name the paths to put back; a whole host is not restored in place"
 msgstr ""
 "Укажите пути для возврата на место; хост целиком на место не "
 "восстанавливается"
 
-#: backend/api/backups.py:321
+#: backend/api/backups.py:322
 msgid "Each path restored in place must be specific, such as /etc/nginx"
 msgstr ""
-"Каждый путь, восстанавливаемый на место, должен быть конкретным, например "
-"/etc/nginx"
+"Каждый путь, восстанавливаемый на место, должен быть конкретным, например /"
+"etc/nginx"
 
-#: backend/api/backups.py:326
+#: backend/api/backups.py:327
 msgid "Confirm that the host's files at these paths will be replaced"
 msgstr "Подтвердите, что файлы хоста по этим путям будут заменены"
 
-#: backend/api/backups.py:346 backend/api/backups.py:349
+#: backend/api/backups.py:347 backend/api/backups.py:350
 msgid "Backup target not found"
 msgstr "Цель резервного копирования не найдена"
 
-#: backend/api/backups.py:403
+#: backend/api/backups.py:404
 msgid "This edition supports one backup target; edit the existing one"
 msgstr ""
 "Эта редакция поддерживает одну цель резервного копирования; измените "
 "существующую"
 
-#: backend/api/backups.py:480
+#: backend/api/backups.py:481
 msgid "Remove the hosts' backup policies before the target"
 msgstr "Сначала удалите политики резервного копирования хостов, затем цель"
 
-#: backend/api/backups.py:560
+#: backend/api/backups.py:561
 msgid "Set up the backup target first"
 msgstr "Сначала настройте цель резервного копирования"
 
-#: backend/api/backups.py:603
+#: backend/api/backups.py:604
 msgid "No backup policy"
 msgstr "Нет политики резервного копирования"
 
-#: backend/api/backups.py:623
+#: backend/api/backups.py:624
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "Этот хост пока не может выполнять резервное копирование (%s)"
 
-#: backend/api/backups.py:629
+#: backend/api/backups.py:630
 msgid "This host's backup is not configured yet"
 msgstr "Резервное копирование этого хоста еще не настроено"
 
-#: backend/api/backups.py:646
+#: backend/api/backups.py:647
 msgid "The backup storage host is not ready"
 msgstr "Хост хранения резервных копий не готов"
 
-#: backend/api/backups.py:661
+#: backend/api/backups.py:662
 msgid "Unknown backup action"
 msgstr "Неизвестное действие резервного копирования"
 
-#: backend/api/backups.py:669
+#: backend/api/backups.py:670
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr "Зашифрованный репозиторий нельзя переупаковать на хосте хранения"
 
-#: backend/api/backups.py:673
+#: backend/api/backups.py:674
 msgid "That backup job is already queued or running"
 msgstr "Это задание резервного копирования уже в очереди или выполняется"
 
-#: backend/api/backups.py:767 backend/api/backups_browse.py:77
+#: backend/api/backups.py:768 backend/api/backups_browse.py:77
 msgid "Snapshot not found"
 msgstr "Снимок не найден"
 
-#: backend/api/backups.py:772
+#: backend/api/backups.py:773
 msgid "This snapshot is not signed; confirm to restore it anyway"
-msgstr ""
-"Этот снимок не подписан; подтвердите, чтобы всё равно восстановить его"
+msgstr "Этот снимок не подписан; подтвердите, чтобы всё равно восстановить его"
 
-#: backend/api/backups.py:823 backend/services/backup_key_release.py:105
+#: backend/api/backups.py:824 backend/services/backup_key_release.py:105
 msgid "Encrypted backups need the Professional+ backup engine"
 msgstr ""
 "Для зашифрованных резервных копий нужен модуль резервного копирования "
 "Professional+"
 
-#: backend/api/backups.py:828 backend/api/backups_browse.py:62
+#: backend/api/backups.py:829 backend/api/backups_browse.py:62
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "restate на этом хосте пока не умеет этого; обновите restate"
 
-#: backend/api/backups.py:840
+#: backend/api/backups.py:841
 msgid "This snapshot's repository is no longer kept"
 msgstr "Репозиторий этого снимка больше не хранится"
 
-#: backend/api/backups.py:922 backend/api/backups.py:925
+#: backend/api/backups.py:923 backend/api/backups.py:926
 msgid "Backup run not found"
 msgstr "Задание резервного копирования не найдено"
 
@@ -4459,11 +4441,10 @@ msgstr ""
 "Обновите для доступа к этой функции."
 
 #: backend/api/reboot_orchestration.py:135
-msgid ""
-"No running child hosts found. Use the standard reboot endpoint instead."
+msgid "No running child hosts found. Use the standard reboot endpoint instead."
 msgstr ""
-"Запущенные дочерние хосты не найдены. Используйте стандартную конечную точку"
-" перезагрузки."
+"Запущенные дочерние хосты не найдены. Используйте стандартную конечную точку "
+"перезагрузки."
 
 #: backend/api/reboot_orchestration.py:204
 #, python-format
@@ -4482,11 +4463,11 @@ msgstr "Профиль обновления не найден"
 
 #: backend/api/upgrade_profiles.py:74
 msgid ""
-"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
-" upgrade to access this feature."
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
+"upgrade to access this feature."
 msgstr ""
-"Запланированные профили обновлений требуют лицензии SysManage Professional+."
-" Выполните обновление для доступа к этой функции."
+"Запланированные профили обновлений требуют лицензии SysManage Professional+. "
+"Выполните обновление для доступа к этой функции."
 
 #: backend/api/upgrade_profiles.py:196
 #, python-format
@@ -4718,8 +4699,8 @@ msgid ""
 "%(package)s needs at least %(needed)d MB of memory; this host has %(total)d "
 "MB"
 msgstr ""
-"%(package)s требуется не менее %(needed)d МБ памяти; у этого хоста %(total)d"
-" МБ"
+"%(package)s требуется не менее %(needed)d МБ памяти; у этого хоста %(total)d "
+"МБ"
 
 #: backend/api/antivirus_status.py:343
 #, python-format
@@ -4729,8 +4710,7 @@ msgstr "Инициировано развертывание антивируса
 #: backend/api/antivirus_status.py:346
 #, python-format
 msgid ""
-"Antivirus deployment initiated for %(success_count)d of %(total_count)d "
-"hosts"
+"Antivirus deployment initiated for %(success_count)d of %(total_count)d hosts"
 msgstr ""
 "Запущено развертывание антивируса для %(success_count)d из %(total_count)d "
 "узлов"
@@ -4815,8 +4795,8 @@ msgid ""
 "Air-gap media export requires the air-gap collector engine (Enterprise). "
 "Please upgrade to access this feature."
 msgstr ""
-"Экспорт носителей в условиях изолированной сети требует использования движка"
-" сборщика для изолированных сетей (Enterprise). Обновитесь, чтобы получить "
+"Экспорт носителей в условиях изолированной сети требует использования движка "
+"сборщика для изолированных сетей (Enterprise). Обновитесь, чтобы получить "
 "доступ к этой функции."
 
 #: backend/api/content_lifecycle_export.py:84
@@ -5170,8 +5150,8 @@ msgid ""
 "%s export requires a SysManage Professional+ license. OSS tier supports CSV "
 "export."
 msgstr ""
-"Экспорт %s требует лицензии SysManage Professional+. Термин OSS поддерживает"
-" экспорт в формате CSV."
+"Экспорт %s требует лицензии SysManage Professional+. Термин OSS поддерживает "
+"экспорт в формате CSV."
 
 #: backend/api/audit_log.py:310
 msgid "Use /api/v1/audit/export with Pro+ license"
@@ -5278,8 +5258,7 @@ msgstr "Доступ запрещен: требуется роль ADD_ENABLED_P
 #: backend/api/enabled_package_managers.py:307
 #, python-format
 msgid ""
-"Package manager '%(package_manager)s' is already enabled for OS "
-"'%(os_name)s'"
+"Package manager '%(package_manager)s' is already enabled for OS '%(os_name)s'"
 msgstr ""
 "Пакетный менеджер '%(package_manager)s' уже включен для ОС '%(os_name)s'"
 
@@ -5446,16 +5425,26 @@ msgstr "Не удалось удалить сохраненный скрипт"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "Не удалось получить статус коммерческого антивируса: %s"
 
-#: backend/api/backups_retention.py:41
+#: backend/api/backups_retention.py:47
 msgid "Grandfather-father-son retention needs the Professional+ backup engine"
 msgstr ""
 "Для хранения по схеме «дед-отец-сын» нужен модуль резервного копирования "
 "Professional+"
 
-#: backend/api/backups_retention.py:53
+#: backend/api/backups_retention.py:60
 #, python-format
 msgid "%(field)s must be a whole number from 0 to %(max)d"
 msgstr "%(field)s должно быть целым числом от 0 до %(max)d"
+
+#: backend/api/backups_retention.py:97
+msgid ""
+"The storage host's restate cannot keep yearly snapshots yet: update restate "
+"there to 2.2.0.12 or later, then save the policy without years and set them "
+"once it has reported in"
+msgstr ""
+"restate на хосте хранения пока не может хранить годовые снимки: обновите там "
+"restate до 2.2.0.12 или новее, затем сохраните политику без лет и задайте "
+"их, когда хост отчитается"
 
 #: backend/api/machines.py:170
 #, python-format
@@ -5562,8 +5551,8 @@ msgid ""
 "deleted host"
 msgstr ""
 "Хост %(host_id)s не найден в этой базе данных; откладываю %(count)d "
-"сообщение(я) в очереди на повторную отправку (БЕЗ удаления) -- возможно, это"
-" хост в процессе регистрации или уже удаленный хост"
+"сообщение(я) в очереди на повторную отправку (БЕЗ удаления) -- возможно, это "
+"хост в процессе регистрации или уже удаленный хост"
 
 #: backend/websocket/inbound_processor.py:407
 #, python-format
@@ -5743,8 +5732,8 @@ msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
 "%(error)s"
 msgstr ""
-"Сообщение %(message_id)s окончательно не удалось после %(attempts)d попыток:"
-" %(error)s"
+"Сообщение %(message_id)s окончательно не удалось после %(attempts)d попыток: "
+"%(error)s"
 
 #: backend/websocket/queue_operations.py:916
 #, python-format
@@ -5900,8 +5889,7 @@ msgstr "Ключ этой задачи резервного копировани
 
 #: backend/services/backup_key_release.py:85
 msgid "This backup run is too old to release its key"
-msgstr ""
-"Эта задача резервного копирования слишком старая, чтобы выдать ее ключ"
+msgstr "Эта задача резервного копирования слишком старая, чтобы выдать ее ключ"
 
 #: backend/services/backup_key_release.py:101
 msgid "This host's backups are not encrypted"
@@ -6066,8 +6054,7 @@ msgstr "Уязвимости Windows и продуктов Microsoft"
 
 #: backend/vulnerability/cve_sources.py:55
 msgid "FreeBSD ports and base system vulnerabilities (what pkg audit reads)"
-msgstr ""
-"Уязвимости портов и базовой системы FreeBSD (то, что читает pkg audit)"
+msgstr "Уязвимости портов и базовой системы FreeBSD (то, что читает pkg audit)"
 
 #: backend/vulnerability/cve_sources.py:63
 msgid "NetBSD pkgsrc package vulnerabilities (what pkg_admin audit reads)"
@@ -6082,8 +6069,8 @@ msgstr ""
 #~ "This snapshot is encrypted; restoring or browsing it needs a restate that "
 #~ "can take the key for one job, which is not released yet"
 #~ msgstr ""
-#~ "Этот снимок зашифрован; для его восстановления или просмотра нужен restate, "
-#~ "который может принять ключ для одной задачи, а он еще не выпущен"
+#~ "Этот снимок зашифрован; для его восстановления или просмотра нужен "
+#~ "restate, который может принять ключ для одной задачи, а он еще не выпущен"
 
 #~ msgid "Days to keep seals"
 #~ msgstr "Дней хранения запечатанных снимков"
@@ -6097,8 +6084,8 @@ msgstr ""
 #~ msgid ""
 #~ "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
 #~ msgstr ""
-#~ "Сообщение %(message_id)s не в статусе SENT (является %(status)s), пропущено "
-#~ "подтверждение"
+#~ "Сообщение %(message_id)s не в статусе SENT (является %(status)s), "
+#~ "пропущено подтверждение"
 
 #, python-format
 #~ msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"
@@ -6106,11 +6093,12 @@ msgstr ""
 #~ "Обработка сообщений для одобренного хоста %(host_id)s (FQDN: %(fqdn)s)"
 
 #~ msgid "Email service is disabled. Enable it in the configuration file."
-#~ msgstr "Служба электронной почты отключена. Включите её в файле конфигурации."
+#~ msgstr ""
+#~ "Служба электронной почты отключена. Включите её в файле конфигурации."
 
 #~ msgid ""
-#~ "Multi-factor authentication is required for this account. Please enrol from "
-#~ "your profile page before signing in."
+#~ "Multi-factor authentication is required for this account. Please enrol "
+#~ "from your profile page before signing in."
 #~ msgstr ""
 #~ "Требуется многофакторная аутентификация для этого аккаунта. Пожалуйста, "
 #~ "зарегистрируйтесь на странице профиля перед входом."
@@ -6150,8 +6138,8 @@ msgstr ""
 #, python-format
 #~ msgid "Mirror %s is for %s, can't assign to a %s default"
 #~ msgstr ""
-#~ "Зеркало %s предназначено для %s, нельзя назначить как значение по умолчанию "
-#~ "для %s"
+#~ "Зеркало %s предназначено для %s, нельзя назначить как значение по "
+#~ "умолчанию для %s"
 
 #, python-format
 #~ msgid ""
@@ -6279,8 +6267,8 @@ msgstr ""
 
 #, python-format
 #~ msgid ""
-#~ "Host %s not found on this database; deferring %d queued message(s) for retry"
-#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
+#~ "Host %s not found on this database; deferring %d queued message(s) for "
+#~ "retry (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
 #~ "Узел '%s' не найден в этой базе данных; откладываются %d сообщения из "
 #~ "очереди (НЕ УДАЛЯЮТСЯ) -- возможно, это процесс регистрации или удаленный "
@@ -6351,8 +6339,8 @@ msgstr ""
 #, python-format
 #~ msgid "Message %s failed (attempt %d/%d), scheduled for retry in %d seconds"
 #~ msgstr ""
-#~ "Сообщение %s не удалось (попытка %d/%d), запланировано повторное выполнение "
-#~ "через %d секунд"
+#~ "Сообщение %s не удалось (попытка %d/%d), запланировано повторное "
+#~ "выполнение через %d секунд"
 
 #, python-format
 #~ msgid "Message %s permanently failed after %d attempts: %s"
@@ -6522,11 +6510,11 @@ msgstr ""
 #~ msgstr "Подтвердить Обновление ОС"
 
 #~ msgid ""
-#~ "This action will upgrade the operating system and require a system reboot. "
-#~ "Continue?"
+#~ "This action will upgrade the operating system and require a system "
+#~ "reboot. Continue?"
 #~ msgstr ""
-#~ "Это действие обновит операционную систему и потребует перезагрузки системы. "
-#~ "Продолжить?"
+#~ "Это действие обновит операционную систему и потребует перезагрузки "
+#~ "системы. Продолжить?"
 
 #~ msgid "OS upgrades are always security updates"
 #~ msgstr "Обновления ОС всегда являются обновлениями безопасности"
@@ -6640,8 +6628,8 @@ msgstr ""
 #~ msgstr "KVM/libvirt успешно инициализирован"
 
 #~ msgid ""
-#~ "Audit log export requires a SysManage Professional+ license. Please upgrade "
-#~ "to access CSV, JSON, CEF, and LEEF export formats."
+#~ "Audit log export requires a SysManage Professional+ license. Please "
+#~ "upgrade to access CSV, JSON, CEF, and LEEF export formats."
 #~ msgstr ""
 #~ "Экспорт журнала аудита требует лицензии SysManage Professional+. Обновите "
 #~ "для доступа к форматам экспорта CSV, JSON, CEF и LEEF."

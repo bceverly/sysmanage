@@ -147,6 +147,19 @@ def _store_abilities(policy: Optional[models.BackupPolicy], found: Any) -> None:
         policy.host_abilities = json.dumps(sorted(set(found) & set(_ABILITIES)))
 
 
+_STORAGE_ABILITIES = ("keep_yearly",)
+
+
+def _store_storage_abilities(policy: Optional[models.BackupPolicy], found: Any) -> None:
+    """What the storage host's restate offers (yearly retention): a policy
+    may keep yearly snapshots only where the prune that honors them runs.
+    An older agent reports nothing, which leaves what was known."""
+    if policy is not None and isinstance(found, list):
+        policy.storage_abilities = json.dumps(
+            sorted(set(found) & set(_STORAGE_ABILITIES))
+        )
+
+
 def _store_protects(policy: Optional[models.BackupPolicy], installed: Any) -> None:
     """Did the storage host install the ``protect`` job (its restate has it)?"""
     if policy is not None and isinstance(installed, list):
@@ -296,6 +309,7 @@ def _configured(db: Session, run: models.BackupRun, reply: Any) -> None:
     if role != "storage":
         return
     if isinstance(reply, dict):
+        _store_storage_abilities(_policy(db, run), reply.get("abilities"))
         _store_audit(_policy(db, run), reply.get("storage_audit"))
         _store_nfs_path(_policy(db, run), reply.get("nfs_path"))
         _store_protects(_policy(db, run), reply.get("installed"))

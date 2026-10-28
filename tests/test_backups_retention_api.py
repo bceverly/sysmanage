@@ -119,6 +119,7 @@ async def test_the_preview_reads_the_current_repository_only(session):
         "keep_daily": 0,
         "keep_weekly": 3,
         "keep_monthly": 0,
+        "keep_yearly": 0,
     }
     with patch.object(retention, "_engine", return_value=None):
         assert await _status(retention.retention_preview(str(s.host.id), keep_last=2,

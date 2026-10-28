@@ -159,6 +159,10 @@ export interface BackupPolicy {
   keep_daily?: number;
   keep_weekly?: number;
   keep_monthly?: number;
+  /** ... and of the last N years (restate 2.2.0.12 on the storage host). */
+  keep_yearly?: number;
+  /** The storage host's restate honors a yearly count (it has reported in). */
+  yearly_supported?: boolean;
   check_interval_days: number;
   quiesce: boolean;
   quiesce_with: string[];
@@ -190,6 +194,7 @@ export type PolicyInput = Pick<
   | "keep_daily"
   | "keep_weekly"
   | "keep_monthly"
+  | "keep_yearly"
   | "check_interval_days"
   | "quiesce"
   | "quiesce_with"
@@ -425,13 +430,17 @@ export interface RetentionPreview {
 
 export const previewRetention = async (
   hostId: string,
-  values: Pick<PolicyInput, "keep_last" | "keep_daily" | "keep_weekly" | "keep_monthly">,
+  values: Pick<
+    PolicyInput,
+    "keep_last" | "keep_daily" | "keep_weekly" | "keep_monthly" | "keep_yearly"
+  >,
 ): Promise<RetentionPreview> => {
   const params = new URLSearchParams({
     keep_last: String(values.keep_last),
     keep_daily: String(values.keep_daily ?? 0),
     keep_weekly: String(values.keep_weekly ?? 0),
     keep_monthly: String(values.keep_monthly ?? 0),
+    keep_yearly: String(values.keep_yearly ?? 0),
   });
   const response = await axiosInstance.get(
     `${base}/host/${hostId}/backup-retention-preview?${params.toString()}`,

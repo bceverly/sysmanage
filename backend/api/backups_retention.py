@@ -28,7 +28,12 @@ from backend.services import backup_jobs as jobs
 router = APIRouter(dependencies=[Depends(JWTBearer())])
 
 # The most each count may be (restate takes any; these keep a typo sane).
-GFS_LIMITS = {"keep_daily": 3650, "keep_weekly": 520, "keep_monthly": 240}
+GFS_LIMITS = {
+    "keep_daily": 3650,
+    "keep_weekly": 520,
+    "keep_monthly": 240,
+    "keep_yearly": 100,
+}
 
 
 def _engine():
@@ -74,7 +79,26 @@ def check_gfs_change(
     values = gfs_values(body)
     if values != stored_gfs(policy) and _engine() is None:
         raise _needs_engine()
+    check_yearly(policy, values)
     return values
+
+
+def check_yearly(policy: Optional[models.BackupPolicy], values: Dict[str, int]) -> None:
+    """A yearly count needs the storage host's restate to honor it (restate
+    2.2.0.12, reported at configure time); HTTP 409 otherwise.  Only a new
+    or changed count is checked -- a policy that already has one keeps it."""
+    yearly = values.get("keep_yearly") or 0
+    if not yearly or yearly == stored_gfs(policy).get("keep_yearly"):
+        return
+    if policy is None or "keep_yearly" not in jobs.storage_abilities(policy):
+        raise HTTPException(
+            status_code=409,
+            detail=_(
+                "The storage host's restate cannot keep yearly snapshots yet: "
+                "update restate there to 2.2.0.12 or later, then save the "
+                "policy without years and set them once it has reported in"
+            ),
+        )
 
 
 def apply_gfs(policy: models.BackupPolicy, values: Dict[str, int]) -> None:
@@ -89,6 +113,7 @@ async def retention_preview(
     keep_daily: int = 0,
     keep_weekly: int = 0,
     keep_monthly: int = 0,
+    keep_yearly: int = 0,
     db: Session = Depends(get_tenant_db),
 ) -> Dict[str, Any]:
     """What the next prune would keep and remove from this host's current
@@ -124,6 +149,7 @@ async def retention_preview(
         "keep_daily": keep_daily,
         "keep_weekly": keep_weekly,
         "keep_monthly": keep_monthly,
+        "keep_yearly": keep_yearly,
     }
     try:
         return engine.retention_preview(names, values)
