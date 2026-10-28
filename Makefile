@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: install-psycopg-c lint-license-headers lint-license-headers-fix test-lucky13 check-black check-msi-guids provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript lint-css lint-css-fix security security-full security-python security-frontend security-secrets security-semgrep security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-macos-canary installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
+.PHONY: install-psycopg-c lint-license-headers lint-license-headers-fix lint-test-constraints test-lucky13 check-black check-msi-guids provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript lint-css lint-css-fix security security-full security-python security-frontend security-secrets security-semgrep security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-macos-canary installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
 
 # Default target
 help:
@@ -322,7 +322,7 @@ ifeq ($(OS),Windows_NT)
 	@REM BSD branches) BEFORE the pip install, so opentelemetry-exporter-otlp resolves
 	@REM against it. No-ops on x64 (prebuilt wheel) and if grpcio is already built.
 	-@powershell -ExecutionPolicy Bypass -File scripts/build-grpcio-win-arm64.ps1
-	@$(WIN_ARM64_ENV) $(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r requirements-dev.txt
+	@$(WIN_ARM64_ENV) $(PYTHON) -m pip install -c constraints-test.txt --upgrade --upgrade-strategy eager -r requirements-dev.txt
 else
 	@if [ "$$(uname -s)" = "Darwin" ]; then \
 		echo "[INFO] macOS detected - checking for packaging tools..."; \
@@ -335,7 +335,7 @@ else
 		if command -v pkgbuild >/dev/null 2>&1 && command -v productbuild >/dev/null 2>&1; then \
 			echo "✓ All macOS packaging tools available"; \
 		fi; \
-		$(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r requirements-dev.txt; \
+		$(PYTHON) -m pip install -c constraints-test.txt --upgrade --upgrade-strategy eager -r requirements-dev.txt; \
 	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
 		echo "[INFO] OpenBSD detected - using ~/tmp for builds..."; \
 		if ! command -v xmlsec1 >/dev/null 2>&1; then \
@@ -344,7 +344,7 @@ else
 		fi; \
 		export TMPDIR=$$HOME/tmp && \
 		$(OPENBSD_CRYPTO_ENV) \
-		$(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r requirements-dev.txt; \
+		$(PYTHON) -m pip install -c constraints-test.txt --upgrade --upgrade-strategy eager -r requirements-dev.txt; \
 	elif [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "[INFO] NetBSD detected - configuring source builds (grpcio, cryptography, lxml)..."; \
 		export PATH="$$HOME/.cargo/bin:/usr/pkg/bin:$$PATH"; \
@@ -399,7 +399,7 @@ else
 		export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 && \
 		export GRPC_PYTHON_BUILD_SYSTEM_CARES=1 && \
 		export GRPC_PYTHON_BUILD_EXT_COMPILER_JOBS=1 && \
-		$(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r requirements-dev.txt; \
+		$(PYTHON) -m pip install -c constraints-test.txt --upgrade --upgrade-strategy eager -r requirements-dev.txt; \
 	elif [ "$$(uname -s)" = "FreeBSD" ]; then \
 		echo "[INFO] FreeBSD detected - checking for system dependencies..."; \
 		PYVER=$$($(PYTHON) -c "import sys; v=sys.version_info; print(f'py{v.major}{v.minor}')"); \
@@ -424,14 +424,14 @@ else
 				exit 1; \
 			}; \
 		fi; \
-		$(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r requirements-dev.txt; \
+		$(PYTHON) -m pip install -c constraints-test.txt --upgrade --upgrade-strategy eager -r requirements-dev.txt; \
 	else \
-		$(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r requirements-dev.txt; \
+		$(PYTHON) -m pip install -c constraints-test.txt --upgrade --upgrade-strategy eager -r requirements-dev.txt; \
 	fi
 endif
 	@echo "Installing requirements.txt (includes Selenium WebDriver)..."
 ifeq ($(OS),Windows_NT)
-	@$(WIN_ARM64_ENV) $(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r requirements.txt
+	@$(WIN_ARM64_ENV) $(PYTHON) -m pip install -c constraints-test.txt --upgrade --upgrade-strategy eager -r requirements.txt
 else
 	@if [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "[INFO] NetBSD - using /var/tmp and excluding Playwright and gevent..."; \
@@ -446,11 +446,11 @@ else
 		export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 && \
 		export GRPC_PYTHON_BUILD_SYSTEM_CARES=1 && \
 		export GRPC_PYTHON_BUILD_EXT_COMPILER_JOBS=1 && \
-		grep -v "playwright" requirements.txt | grep -v "gevent==" | $(PYTHON) -m pip install -r /dev/stdin || true; \
+		grep -v "playwright" requirements.txt | grep -v "gevent==" | $(PYTHON) -m pip install -c constraints-test.txt -r /dev/stdin || true; \
 		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
 	elif [ "$$(uname -s)" = "FreeBSD" ]; then \
 		echo "[INFO] Installing packages except Playwright (not available on BSD systems)..."; \
-		grep -v "playwright" requirements.txt | $(PYTHON) -m pip install -r /dev/stdin || true; \
+		grep -v "playwright" requirements.txt | $(PYTHON) -m pip install -c constraints-test.txt -r /dev/stdin || true; \
 		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
 	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
 		echo "[INFO] OpenBSD - grpcio from the py3-grpcio package (8.0+) or a patched source build..."; \
@@ -459,10 +459,10 @@ else
 		echo "[INFO] Now installing remaining dependencies..."; \
 		export TMPDIR=$$HOME/tmp && \
 		$(OPENBSD_CRYPTO_ENV) \
-		grep -v "playwright" requirements.txt | $(PYTHON) -m pip install -r /dev/stdin || { echo "[ERROR] Failed to install requirements"; exit 1; }; \
+		grep -v "playwright" requirements.txt | $(PYTHON) -m pip install -c constraints-test.txt -r /dev/stdin || { echo "[ERROR] Failed to install requirements"; exit 1; }; \
 		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
 	else \
-		$(PYTHON) -m pip install --upgrade --upgrade-strategy eager -r requirements.txt; \
+		$(PYTHON) -m pip install -c constraints-test.txt --upgrade --upgrade-strategy eager -r requirements.txt; \
 	fi
 endif
 ifneq ($(OS),Windows_NT)
@@ -1216,7 +1216,7 @@ ifeq ($(OS),Windows_NT)
 		echo. & \
 		echo [FAIL] black is NOT INSTALLED in $(PYTHON). & \
 		echo        Nothing was reformatted - the formatter never ran. & \
-		echo        Fix: $(PYTHON) -m pip install -r requirements-dev.txt & \
+		echo        Fix: $(PYTHON) -m pip install -c constraints-test.txt -r requirements-dev.txt & \
 		echo. & \
 		exit /b 1 )
 else
@@ -1224,7 +1224,7 @@ else
 		echo ""; \
 		echo "[FAIL] black is NOT INSTALLED in $(PYTHON)."; \
 		echo "       Nothing was reformatted - the formatter never ran."; \
-		echo "       Fix: $(PYTHON) -m pip install -r requirements-dev.txt"; \
+		echo "       Fix: $(PYTHON) -m pip install -c constraints-test.txt -r requirements-dev.txt"; \
 		echo ""; \
 		exit 1; }
 endif
@@ -1323,6 +1323,10 @@ release:
 # THIS repository's license (AGPL here; proprietary in Pro+, never crossed).
 # The fix target adds missing headers and bumps a stale end year; a header
 # naming the wrong license is reported for a person to correct.
+# The test toolchain stays pinned (constraints-test.txt); see the script's docstring.
+lint-test-constraints:
+	@$(PYTHON) scripts/check_test_constraints.py
+
 lint-license-headers:
 	@$(PYTHON) scripts/check_license_headers.py
 
@@ -1362,7 +1366,7 @@ lint-freebsd-port:
 	@$(PYTHON) scripts/check_freebsd_port.py --port-dir packaging/freebsd-ports/sysutils/sysmanage-canary
 
 
-lint: lint-file-length lint-license-headers lint-python lint-typescript lint-css check-engine-codes check-nginx-configs check-msi-guids i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-verify i18n-markup i18n-complete i18n-sync-check lint-version check-migrations lint-freebsd-port
+lint: lint-file-length lint-license-headers lint-test-constraints lint-python lint-typescript lint-css check-engine-codes check-nginx-configs check-msi-guids i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-verify i18n-markup i18n-complete i18n-sync-check lint-version check-migrations lint-freebsd-port
 	@echo "[OK] All linting completed successfully!"
 
 # Guard: the per-platform nginx configs are GENERATED from one template.

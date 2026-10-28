@@ -81,8 +81,8 @@ jobs:
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest pytest-cov pytest-asyncio
+        pip install -c constraints-test.txt -r requirements.txt
+        pip install -c constraints-test.txt pytest pytest-cov pytest-asyncio
 
     - name: Create test config
       run: |
@@ -314,7 +314,7 @@ jobs:
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -c constraints-test.txt -r requirements.txt
 
     - name: Start the disposable server
       run: python tests/load/stack.py up --db-url postgresql://sysmanage:abc123@localhost:5432/sysmanage_impersonation
@@ -362,7 +362,7 @@ jobs:
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements-dev.txt
+        pip install -c constraints-test.txt -r requirements-dev.txt
 
     - name: Run Black formatter check
       run: |
@@ -724,7 +724,7 @@ jobs:
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -c constraints-test.txt -r requirements.txt
 
     - name: Install frontend dependencies
       working-directory: frontend
@@ -1173,7 +1173,7 @@ jobs:
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -c constraints-test.txt -r requirements.txt
 
     - name: Install frontend dependencies
       working-directory: frontend

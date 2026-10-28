@@ -152,7 +152,7 @@ jobs:
           # hard imports in the agent's main.py; pip them too as a fallback for a
           # skipped py*-pkg (no-op in the --system-site-packages venv if the pkg
           # installed).
-          python -m pip install pytest pytest-asyncio sqlalchemy aiofiles defusedxml websockets pyyaml
+          python -m pip install -c constraints-test.txt pytest pytest-asyncio sqlalchemy aiofiles defusedxml websockets pyyaml
           set +e
           python -m pytest tests/ -m "$PYTEST_MARKER" \
             -v --tb=short --junit-xml=bsd-freebsd-junit.xml
@@ -225,7 +225,7 @@ jobs:
           # missing name there installs NONE of them (no-op if they installed).
           # Pure-Python SQLAlchemy: no wheels here, and its optional C extension
           # must not be the reason the job fails.
-          DISABLE_SQLALCHEMY_CEXT=1 python -m pip install pytest pytest-asyncio aiofiles defusedxml websockets sqlalchemy pyyaml
+          DISABLE_SQLALCHEMY_CEXT=1 python -m pip install -c constraints-test.txt pytest pytest-asyncio aiofiles defusedxml websockets sqlalchemy pyyaml
           set +e
           python -m pytest tests/ -m "$PYTEST_MARKER" \
             -v --tb=short --junit-xml=bsd-openbsd-junit.xml
@@ -312,7 +312,7 @@ jobs:
           # is what failed 2026-09-26: "No module named 'sqlalchemy'".
           # Pure-Python SQLAlchemy: no wheels here, and its optional C extension
           # must not be the reason the job fails.
-          DISABLE_SQLALCHEMY_CEXT=1 python -m pip install pytest pytest-asyncio defusedxml websockets sqlalchemy aiofiles pyyaml
+          DISABLE_SQLALCHEMY_CEXT=1 python -m pip install -c constraints-test.txt pytest pytest-asyncio defusedxml websockets sqlalchemy aiofiles pyyaml
           set +e
           python -m pytest tests/ -m "$PYTEST_MARKER" \
             -v --tb=short --junit-xml=bsd-netbsd-junit.xml

@@ -15347,10 +15347,99 @@ machine; this proof waits for it rather than for a cloud box.
       and explains what to enter.  Changed defaults never alter an existing
       installation's saved settings.
 
+### Package & kernel hygiene (added 2026-10-28, Bryan)
+
+**Why.** Bryan runs `sudo apt autoremove` and removes old kernels by hand on
+every host.  SysManage should do it, and do it more safely than a person at a
+prompt: the classic failure is removing the last kernel that is known to boot
+while a newly installed one has not yet been booted (or does not boot), and the
+classic symptom is a full `/boot` that makes the next kernel install fail.
+Landscape, Satellite and BigFix all offer some form of this; it is parity.
+
+**The safety model (the point of the feature).**
+
+- **A kernel is "proven" only by a boot.**  The agent records every boot --
+  boot id (`/proc/sys/kernel/random/boot_id` or the OS equivalent), kernel
+  release, boot time -- and the server marks a kernel *proven* once a boot on
+  it has stayed up and checked in for a set time (default 15 minutes,
+  configurable).  "Installed" is never "known good".
+- **The protected set is computed at removal time, never trusted from the
+  distro.**  Always kept: the running kernel; the newest installed kernel;
+  the bootloader's default entry; the newest *proven* kernel other than the
+  running one (the fallback); anything held/locked by the operator; and at
+  least N kernels in total (default 2, minimum 2).  Debian's
+  `01autoremove-kernels` list is written when a kernel is installed, so it
+  goes stale after booting into an older kernel -- one reason not to hand
+  removal to `apt autoremove` blindly.
+- **Pending reboot narrows it further.**  While a new kernel is installed but
+  not yet running (the agent already reports reboot-required), the running
+  kernel and the newest proven kernel are both protected, whatever the count.
+- **No proof, no removal.**  A host whose boot history does not yet prove any
+  kernel other than the running one is refused, with the reason
+  ("no known-good fallback kernel yet").
+- **Plan, then apply exactly the plan.**  Every cleanup is a dry run first
+  (`apt-get -s autoremove`, `dnf autoremove --assumeno`, `zypper packages
+  --unneeded`, `pkg autoremove -n`, `pkgin -n autoremove`, `pacman -Qdtq`,
+  `brew autoremove --dry-run`, `DISM /AnalyzeComponentStore`, ...).  The
+  operator reviews the exact package list, with each protected kernel labeled
+  *why* it is kept.  Apply removes that explicit list (`apt-get remove
+  --purge <pkgs>`, not a bare `autoremove`), re-simulates first, and refuses
+  if anything outside the approved list would go.
+- **Verify the boot path after.**  Afterwards the agent checks that the
+  default boot entry still names an installed kernel whose image and
+  initramfs exist (GRUB / systemd-boot / boot environments), and alerts
+  loudly if not.  Removed kernel packages stay in the package cache until the
+  newer kernel is proven, so a reinstall needs no network; cache cleaning
+  never runs in the same operation as a kernel removal.
+- **Fits the existing guard rails.**  Runs only inside maintenance windows
+  (14.2), is audited per package and version (with a one-click reinstall of
+  what was removed), honors holds and version locks, and on a btrfs/ZFS root
+  takes a snapshot first; a policy may also require a good backup (Phase 24)
+  within N hours.
+
+**Per platform (S0 confirms each command and its dnf4/dnf5 differences).**
+Debian/Ubuntu: autoremove + old `linux-image`/`-modules`/`-headers`; RHEL /
+Fedora: `dnf autoremove`, old install-only kernels (`installonly_limit`);
+openSUSE/SLES: unneeded packages, `zypper purge-kernels` (`multiversion.kernels`);
+Arch: orphans only (one kernel per package -- but the running kernel's modules
+vanish on upgrade, so reboot-required matters); Alpine: cache only (no orphan
+concept); FreeBSD: `pkg autoremove`, old boot environments (`bectl`; never the
+active, next-boot or last proven one); OpenBSD / NetBSD: unused packages;
+macOS: `brew autoremove` / `brew cleanup`; Windows: component store cleanup
+(`/StartComponentCleanup`, never `/ResetBase` by default -- it makes installed
+updates impossible to uninstall).  Also: disabled snap revisions, unused
+Flatpak runtimes, package caches.
+
+**Slices.**
+
+- [ ] **S0 spike** -- every platform's dry-run and remove commands, their
+      output, and how each names kernels; where each bootloader keeps its
+      default; proven against real lab hosts (beast, t14, t480, freebsd)
+- [ ] **S1 boot history** (agent + server, OSS) -- per-boot record, "proven"
+      kernels, reboot-required tie-in; shown on the host's page
+- [ ] **S2 reclaimable inventory** (OSS) -- per host: orphaned packages
+      (count, size), old kernels (with protected ones and why), caches, old
+      snap revisions; `/boot` free space
+- [ ] **S3 review and apply** (OSS) -- host "Cleanup" card: plan dialog,
+      apply-exactly-the-plan, post-removal boot-path check, audit, reinstall
+- [ ] **S4 alerts** -- `/boot` filling (default 80%), and "boot path broken
+      after cleanup" (critical), via the alerting engine
+- [ ] **S5 fleet policy** (Pro+) -- scheduled cleanup per host group inside
+      maintenance windows: keep-N, orphans yes/no, caches yes/no, never-remove
+      list, report-only mode, canary-first rollout through fleet jobs (20.x),
+      fleet report of reclaimable space
+- [ ] **Stretch: trial boot** -- boot a new kernel once (`grub-reboot`,
+      `bectl activate -t`) with the default left on the proven kernel, and
+      promote it only after it proves itself; a kernel that hangs falls back
+      on the next power cycle without anyone at the console
+- [ ] **Docs** -- sysmanage-docs page (the safety model above, per-platform
+      behavior, screenshots via `make screenshots`), 14 locales
+
 ### Exit Criteria
 
 - [ ] All Phase 14-21 engines license-gated + 402-clean when unlicensed
 - [ ] Advisor recommendations validated against a known-issue corpus per distro
+- [ ] **Package & kernel hygiene** shipped (S1-S4 OSS, S5 Pro+) and proven on the lab: a host with a newly installed, not-yet-booted kernel keeps its running and last proven kernels through a cleanup, and `/boot` alerts fire
 - [ ] End-to-end: provision → enroll → content-view assign → config profile → advisor remediation, on one host, across all supported distros
 - [ ] 14-language i18n + docs complete; performance + security targets met
 - [ ] **Coverage parity reached:** all three frontends at **≥70% lines**

@@ -1,0 +1,128 @@
+# Latest-deps canary (2026-10-28).  Every other workflow installs the test
+# toolchain through constraints-test.txt, so a new pytest / plugin release
+# cannot break them.  This one installs the NEWEST releases on purpose, weekly,
+# so we hear about a breaking release here -- alone, ahead of time, without
+# blocking a release -- and bump the pin when it is green.  Upstream pytest
+# deprecations are fatal here (they are only shown elsewhere): this is where
+# we act on them.  scripts/check_test_constraints.py exempts this file.
+
+name: Latest-deps canary
+
+on:
+  schedule:
+    - cron: '7 6 * * 1'  # Mondays 06:07 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  canary:
+    name: Newest test toolchain (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.14']  # the oldest and newest CI Pythons
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: abc123
+          POSTGRES_USER: sysmanage
+          POSTGRES_DB: sysmanage
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install the newest test toolchain (no constraints)
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade -r requirements.txt
+          pip install --upgrade pytest pytest-asyncio pytest-cov pytest-xdist pytest-timeout coverage
+
+      - name: Report releases newer than the pins
+        run: |
+          python - <<'PY'
+          import re
+          from importlib.metadata import version, PackageNotFoundError
+          pins = {}
+          for line in open("constraints-test.txt"):
+              m = re.match(r"^([A-Za-z0-9_.-]+)==([^;\s]+)", line)
+              if m:
+                  pins.setdefault(m.group(1), set()).add(m.group(2))
+          for name, wanted in sorted(pins.items()):
+              try:
+                  have = version(name)
+              except PackageNotFoundError:
+                  continue
+              if have not in wanted:
+                  print(f"::notice::{name} {have} differs from the pin ({', '.join(sorted(wanted))})")
+          PY
+
+      - name: Create test config
+        run: |
+          sudo mkdir -p /etc
+          sudo tee /etc/sysmanage.yaml > /dev/null <<EOF
+          api:
+            host: "localhost"
+            port: 8000
+            certFile: ""
+            chainFile: ""
+            keyFile: ""
+          database:
+            user: "sysmanage"
+            password: "abc123"
+            host: "localhost"
+            port: 5432
+            name: "sysmanage"
+          security:
+            password_salt: "TEST_fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
+            admin_userid: "admin@sysmanage.org"
+            admin_password: "TEST_AdminPass123!"
+            jwt_secret: "TEST_SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
+            jwt_algorithm: "HS256"
+            jwt_auth_timeout: 6000
+            jwt_refresh_timeout: 60000
+          webui:
+            host: "localhost"
+            port: 7443
+          EOF
+
+      - name: Run backend database migrations
+        # Run ALL THREE partition chains on PostgreSQL -- registry, shared, and
+        # tenant (the default section) -- not just the tenant chain.  The
+        # registry/shared chains were previously never exercised on PG in CI,
+        # which let dialect-specific migration bugs (CHAR-vs-UUID, FK naming)
+        # reach ``make migrate``.  tests/test_alembic_postgres.py additionally
+        # runs them against an isolated scratch DB with assertions.
+        run: |
+          for chain in registry shared; do
+            python -m alembic --name "$chain" upgrade head
+          done
+          python -m alembic upgrade head   # tenant chain (default section)
+        env:
+          PYTHONPATH: .
+          DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+
+      - name: Run the tests
+        run: |
+          python -m pytest tests/ --ignore=tests/ui/ -q -p no:cacheprovider -n auto --dist=loadfile -W error::pytest.PytestDeprecationWarning
+          python -m pytest backend/tests/ -q -p no:cacheprovider -n auto --dist=loadfile -W error::pytest.PytestDeprecationWarning
+        env:
+          PYTHONPATH: .
+          DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
