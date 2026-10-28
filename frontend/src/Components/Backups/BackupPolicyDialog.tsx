@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 // One host's backup policy (Phase 24): how often, when, how many snapshots
-// the storage host keeps, how often it checks the repository, which
+// the storage host keeps (and, Pro+, how many daily / weekly / monthly), how often it checks the repository, which
 // services restate pauses while it reads, and which paths to also back up
 // or leave out (one restate pattern per line; leave-outs win).
 
@@ -26,12 +26,16 @@ import AsyncButton from '../AsyncButton';
 import { savePolicy } from '../../Services/backups';
 import type { BackupPolicy, PolicyInput } from '../../Services/backups';
 import { apiDetail } from './backupLabels';
+import RetentionFields from './RetentionFields';
 
 const DEFAULTS: PolicyInput = {
     enabled: true,
     interval_hours: 24,
     window_start_hour: null,
     keep_last: 14,
+    keep_daily: 0,
+    keep_weekly: 0,
+    keep_monthly: 0,
     check_interval_days: 7,
     quiesce: false,
     quiesce_with: [],
@@ -49,6 +53,9 @@ const toInput = (policy: BackupPolicy | null): PolicyInput =>
               interval_hours: policy.interval_hours,
               window_start_hour: policy.window_start_hour,
               keep_last: policy.keep_last,
+              keep_daily: policy.keep_daily ?? 0,
+              keep_weekly: policy.keep_weekly ?? 0,
+              keep_monthly: policy.keep_monthly ?? 0,
               check_interval_days: policy.check_interval_days,
               quiesce: policy.quiesce,
               quiesce_with: policy.quiesce_with,
@@ -123,6 +130,10 @@ const BackupPolicyDialog: React.FC<{
                     <TextField type="number" label={t('backups.policy.keepLast', 'Snapshots to keep')}
                         value={form.keep_last} slotProps={{ htmlInput: { min: 1, max: 1000 } }}
                         onChange={e => set({ keep_last: number(e.target.value) })} />
+                    <RetentionFields hostId={hostId} hasPolicy={policy !== null}
+                        counts={{ keep_last: form.keep_last, keep_daily: form.keep_daily,
+                            keep_weekly: form.keep_weekly, keep_monthly: form.keep_monthly }}
+                        onChange={counts => set(counts)} />
                     <TextField type="number" label={t('backups.policy.checkDays', 'Check the repository every (days)')}
                         value={form.check_interval_days} slotProps={{ htmlInput: { min: 1, max: 90 } }}
                         onChange={e => set({ check_interval_days: number(e.target.value) })} />

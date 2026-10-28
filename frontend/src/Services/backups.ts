@@ -154,6 +154,11 @@ export interface BackupPolicy {
   interval_hours: number;
   window_start_hour: number | null;
   keep_last: number;
+  /** Grandfather-father-son (Pro+ to set, always honored): the newest
+   *  snapshot of each of the last N days / ISO weeks / months; 0 = unused. */
+  keep_daily?: number;
+  keep_weekly?: number;
+  keep_monthly?: number;
   check_interval_days: number;
   quiesce: boolean;
   quiesce_with: string[];
@@ -182,6 +187,9 @@ export type PolicyInput = Pick<
   | "interval_hours"
   | "window_start_hour"
   | "keep_last"
+  | "keep_daily"
+  | "keep_weekly"
+  | "keep_monthly"
   | "check_interval_days"
   | "quiesce"
   | "quiesce_with"
@@ -407,3 +415,26 @@ export const backupChanges = async (hostId: string): Promise<BackupRun> =>
 
 export const restoreFiles = async (hostId: string, input: RestoreInput): Promise<BackupRun> =>
   (await axiosInstance.post<BackupRun>(`${base}/host/${hostId}/backup-restore`, input)).data;
+
+/** What the next prune would keep and remove (Pro+ backup_engine; the
+ *  server ports restate's own choice).  HTTP 402 without the engine. */
+export interface RetentionPreview {
+  kept: string[];
+  removed: string[];
+}
+
+export const previewRetention = async (
+  hostId: string,
+  values: Pick<PolicyInput, "keep_last" | "keep_daily" | "keep_weekly" | "keep_monthly">,
+): Promise<RetentionPreview> => {
+  const params = new URLSearchParams({
+    keep_last: String(values.keep_last),
+    keep_daily: String(values.keep_daily ?? 0),
+    keep_weekly: String(values.keep_weekly ?? 0),
+    keep_monthly: String(values.keep_monthly ?? 0),
+  });
+  const response = await axiosInstance.get(
+    `${base}/host/${hostId}/backup-retention-preview?${params.toString()}`,
+  );
+  return response.data;
+};

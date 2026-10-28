@@ -293,7 +293,7 @@ def storage_configuration(
         },
         "jobs": {
             "seal": seal_job(target),
-            "prune": {"keep_last": policy.keep_last},
+            "prune": prune_keep(policy),
             "check": {"read_all": False},
             # After each prune: the repository's size and what each
             # snapshot alone would free (pack lists only; no key needed).
@@ -504,6 +504,23 @@ def queue_browse(  # pylint: disable=too-many-arguments,too-many-positional-argu
     if action == LIST:
         params["path"] = path or "/"
     return _queue(db, policy, host.id, action, CommandType.BACKUP_RUN, params, actor)
+
+
+# Grandfather-father-son counts a prune keeps beside keep_last (q67).
+GFS_KEYS = ("keep_daily", "keep_weekly", "keep_monthly")
+
+
+def prune_keep(policy: models.BackupPolicy) -> Dict[str, int]:
+    """The storage-side prune's keep rules: keep_last, plus each
+    grandfather-father-son count that is set.  Sent whatever the license:
+    a lapsed one must never make a prune delete history the operator chose
+    to keep (setting them is what needs Pro+)."""
+    keep = {"keep_last": policy.keep_last}
+    for key in GFS_KEYS:
+        value = getattr(policy, key, None)
+        if value:
+            keep[key] = int(value)
+    return keep
 
 
 def abilities(policy: models.BackupPolicy) -> List[str]:

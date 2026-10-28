@@ -5348,7 +5348,16 @@
       "skipHelp": "Por ejemplo: /home/*/.local/share/Trash o **/previews. Las cachés, las descargas y los resultados de compilación ya se excluyen.",
       "skipPaths": "Excluir (un patrón de ruta por línea)",
       "quiesceWithPick": "Servicios que pausar",
-      "quiesceFound": "Encontrados en este host: {{hooks}}"
+      "quiesceFound": "Encontrados en este host: {{hooks}}",
+      "gfsHelp": "Conservar también la instantánea más reciente de cada uno de los últimos N días, semanas y meses que tengan una (0 = no se usa).",
+      "gfsReadOnly": "También conserva la instantánea más reciente de los últimos {{daily}} días, {{weekly}} semanas y {{monthly}} meses (cambiarlo requiere Professional+).",
+      "keepDaily": "Días que conservar",
+      "keepMonthly": "Meses que conservar",
+      "keepWeekly": "Semanas que conservar",
+      "preview": "Vista previa de la próxima depuración",
+      "previewError": "No se pudo generar la vista previa.",
+      "previewMore": "y {{n}} más",
+      "previewResult": "Próxima depuración: {{kept}} conservadas, {{removed}} eliminadas."
     },
     "reason": {
       "agentOutdated": "Actualice el agente",

@@ -5348,7 +5348,16 @@
       "skipHelp": "例如：/home/*/.local/share/Trash 或 **/previews。快取、下載和建置輸出已預設排除。",
       "skipPaths": "排除（每行一個路徑模式）",
       "quiesceWithPick": "要暫停的服務",
-      "quiesceFound": "在此主機上找到：{{hooks}}"
+      "quiesceFound": "在此主機上找到：{{hooks}}",
+      "gfsHelp": "還會保留最近 N 天、N 週和 N 個月中每個有快照的週期的最新快照（0 = 不使用）。",
+      "gfsReadOnly": "還會保留最近 {{daily}} 天、{{weekly}} 週和 {{monthly}} 個月中每個週期的最新快照（變更需要 Professional+）。",
+      "keepDaily": "保留的天數",
+      "keepMonthly": "保留的月數",
+      "keepWeekly": "保留的週數",
+      "preview": "預覽下一次清理",
+      "previewError": "無法產生預覽。",
+      "previewMore": "以及另外 {{n}} 個",
+      "previewResult": "下一次清理：保留 {{kept}} 個，刪除 {{removed}} 個。"
     },
     "reason": {
       "agentOutdated": "請升級代理程式",

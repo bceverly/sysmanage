@@ -5348,7 +5348,16 @@
       "skipHelp": "例如：/home/*/.local/share/Trash 或 **/previews。缓存、下载和构建输出已默认排除。",
       "skipPaths": "排除（每行一个路径模式）",
       "quiesceWithPick": "要暂停的服务",
-      "quiesceFound": "在此主机上找到：{{hooks}}"
+      "quiesceFound": "在此主机上找到：{{hooks}}",
+      "gfsHelp": "还会保留最近 N 天、N 周和 N 个月中每个有快照的周期的最新快照（0 = 不使用）。",
+      "gfsReadOnly": "还会保留最近 {{daily}} 天、{{weekly}} 周和 {{monthly}} 个月中每个周期的最新快照（更改需要 Professional+）。",
+      "keepDaily": "保留的天数",
+      "keepMonthly": "保留的月数",
+      "keepWeekly": "保留的周数",
+      "preview": "预览下一次清理",
+      "previewError": "无法生成预览。",
+      "previewMore": "以及另外 {{n}} 个",
+      "previewResult": "下一次清理：保留 {{kept}} 个，删除 {{removed}} 个。"
     },
     "reason": {
       "agentOutdated": "请升级代理",

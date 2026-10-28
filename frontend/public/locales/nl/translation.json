@@ -5348,7 +5348,16 @@
       "skipHelp": "Bijvoorbeeld: /home/*/.local/share/Trash of **/previews. Caches, downloads en build-uitvoer worden al uitgesloten.",
       "skipPaths": "Uitsluiten (één padpatroon per regel)",
       "quiesceWithPick": "Te pauzeren services",
-      "quiesceFound": "Gevonden op deze host: {{hooks}}"
+      "quiesceFound": "Gevonden op deze host: {{hooks}}",
+      "gfsHelp": "Bewaar ook de nieuwste momentopname van elk van de laatste N dagen, weken en maanden die er een hebben (0 = niet gebruikt).",
+      "gfsReadOnly": "Bewaart ook de nieuwste momentopname van de laatste {{daily}} dagen, {{weekly}} weken en {{monthly}} maanden (wijzigen vereist Professional+).",
+      "keepDaily": "Te bewaren dagen",
+      "keepMonthly": "Te bewaren maanden",
+      "keepWeekly": "Te bewaren weken",
+      "preview": "Volgende opschoning bekijken",
+      "previewError": "Het voorbeeld kon niet worden gemaakt.",
+      "previewMore": "en nog {{n}}",
+      "previewResult": "Volgende opschoning: {{kept}} bewaard, {{removed}} verwijderd."
     },
     "reason": {
       "agentOutdated": "Werk de agent bij",

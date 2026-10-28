@@ -5348,7 +5348,16 @@
       "skipHelp": "For example: /home/*/.local/share/Trash or **/previews. Caches, Downloads and build output are already left out.",
       "skipPaths": "Leave out (one path pattern per line)",
       "quiesceWithPick": "Services to pause",
-      "quiesceFound": "Found on this host: {{hooks}}"
+      "quiesceFound": "Found on this host: {{hooks}}",
+      "gfsHelp": "Also keep the newest snapshot of each of the last N days, weeks and months that have one (0 = not used).",
+      "gfsReadOnly": "Also keeps the newest of the last {{daily}} days, {{weekly}} weeks and {{monthly}} months (changing these needs Professional+).",
+      "keepDaily": "Days to keep",
+      "keepMonthly": "Months to keep",
+      "keepWeekly": "Weeks to keep",
+      "preview": "Preview the next prune",
+      "previewError": "The preview could not be made.",
+      "previewMore": "and {{n}} more",
+      "previewResult": "Next prune: {{kept}} kept, {{removed}} removed."
     },
     "reason": {
       "agentOutdated": "Upgrade the agent",

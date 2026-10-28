@@ -5348,7 +5348,16 @@
       "skipHelp": "Ad esempio: /home/*/.local/share/Trash o **/previews. Cache, download e output di compilazione sono già esclusi.",
       "skipPaths": "Escludi (un modello di percorso per riga)",
       "quiesceWithPick": "Servizi da sospendere",
-      "quiesceFound": "Trovati su questo host: {{hooks}}"
+      "quiesceFound": "Trovati su questo host: {{hooks}}",
+      "gfsHelp": "Conserva anche lo snapshot più recente di ciascuno degli ultimi N giorni, settimane e mesi che ne hanno uno (0 = non usato).",
+      "gfsReadOnly": "Conserva anche lo snapshot più recente degli ultimi {{daily}} giorni, {{weekly}} settimane e {{monthly}} mesi (modificarli richiede Professional+).",
+      "keepDaily": "Giorni da conservare",
+      "keepMonthly": "Mesi da conservare",
+      "keepWeekly": "Settimane da conservare",
+      "preview": "Anteprima della prossima pulizia",
+      "previewError": "Impossibile creare l'anteprima.",
+      "previewMore": "e altri {{n}}",
+      "previewResult": "Prossima pulizia: {{kept}} conservati, {{removed}} rimossi."
     },
     "reason": {
       "agentOutdated": "Aggiorna l'agente",

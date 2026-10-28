@@ -5348,7 +5348,16 @@
       "skipHelp": "Par exemple : /home/*/.local/share/Trash ou **/previews. Les caches, les téléchargements et les produits de compilation sont déjà exclus.",
       "skipPaths": "Exclure (un motif de chemin par ligne)",
       "quiesceWithPick": "Services à mettre en pause",
-      "quiesceFound": "Trouvés sur cet hôte : {{hooks}}"
+      "quiesceFound": "Trouvés sur cet hôte : {{hooks}}",
+      "gfsHelp": "Conserver aussi l'instantané le plus récent de chacun des N derniers jours, semaines et mois qui en ont un (0 = non utilisé).",
+      "gfsReadOnly": "Conserve aussi l'instantané le plus récent des {{daily}} derniers jours, {{weekly}} dernières semaines et {{monthly}} derniers mois (les modifier nécessite Professional+).",
+      "keepDaily": "Jours à conserver",
+      "keepMonthly": "Mois à conserver",
+      "keepWeekly": "Semaines à conserver",
+      "preview": "Aperçu du prochain élagage",
+      "previewError": "L'aperçu n'a pas pu être généré.",
+      "previewMore": "et {{n}} de plus",
+      "previewResult": "Prochain élagage : {{kept}} conservés, {{removed}} supprimés."
     },
     "reason": {
       "agentOutdated": "Mettez à jour l'agent",

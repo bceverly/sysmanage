@@ -44,6 +44,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from backend.api import backups_retention as retention
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
@@ -100,6 +101,10 @@ class PolicyBody(BaseModel):
     interval_hours: int = 24
     window_start_hour: Optional[int] = None
     keep_last: int = 14
+    # Grandfather-father-son (Pro+ to set): 0 = not used.
+    keep_daily: int = 0
+    keep_weekly: int = 0
+    keep_monthly: int = 0
     check_interval_days: int = 7
     quiesce: bool = False
     quiesce_with: List[str] = Field(default_factory=list)
@@ -554,6 +559,7 @@ async def put_policy(
     if target is None:
         raise HTTPException(status_code=409, detail=_("Set up the backup target first"))
     policy = _policy_of(db, host)
+    gfs = retention.check_gfs_change(policy, body)  # 402 to change without Pro+
     if policy is None:
         policy = models.BackupPolicy(
             host_id=host.id,
@@ -568,6 +574,7 @@ async def put_policy(
     else:
         policy.config_version += 1
     _apply_policy(policy, body)
+    retention.apply_gfs(policy, gfs)
     _audit(
         db,
         current_user,

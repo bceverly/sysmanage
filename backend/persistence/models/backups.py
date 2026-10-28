@@ -106,6 +106,11 @@ class BackupPolicy(Base):
     interval_hours = Column(Integer, nullable=False, default=24)
     window_start_hour = Column(Integer, nullable=True)  # UTC, 0-23
     keep_last = Column(Integer, nullable=False, default=14)
+    # Grandfather-father-son (q67, Pro+ to set, always honored): the newest
+    # snapshot of each of the last N days / ISO weeks / months; NULL = unused.
+    keep_daily = Column(Integer, nullable=True)
+    keep_weekly = Column(Integer, nullable=True)
+    keep_monthly = Column(Integer, nullable=True)
     check_interval_days = Column(Integer, nullable=False, default=7)
     quiesce = Column(Boolean, nullable=False, default=False)
     quiesce_with = Column(Text, nullable=True)  # JSON list of hook names
