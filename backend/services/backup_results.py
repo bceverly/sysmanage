@@ -138,7 +138,7 @@ def _store_hooks(policy: Optional[models.BackupPolicy], hooks: Any) -> None:
         policy.available_hooks = json.dumps(names[:64])
 
 
-_ABILITIES = ("list", "status", "cache")
+_ABILITIES = ("list", "status", "cache", "decrypt", "verify")
 
 
 def _store_abilities(policy: Optional[models.BackupPolicy], found: Any) -> None:
@@ -303,6 +303,8 @@ def _configured(db: Session, run: models.BackupRun, reply: Any) -> None:
     _acknowledge(db, run)
     _storage_filesystem(db, run, reply)
     role = _parameters(run).get("role")
+    if isinstance(reply, dict):
+        _configured_version(_policy(db, run), role, reply.get("restate_version"))
     if role == "host" and isinstance(reply, dict):
         _store_hooks(_policy(db, run), reply.get("hooks"))
         _store_abilities(_policy(db, run), reply.get("abilities"))
@@ -455,6 +457,19 @@ def _storage_next(
     if jobs.pending(db, policy.id, action, storage.id):
         return None
     return jobs.queue_run(db, policy, storage.id, action, record=record)
+
+
+def _version_field(role: Optional[str]) -> str:
+    return "storage_restate_version" if role == "storage" else "restate_version"
+
+
+def _configured_version(
+    policy: Optional[models.BackupPolicy], role: Optional[str], version: Any
+) -> None:
+    """The restate a configure reply's job files were written for: recorded
+    as it is -- those files already suit it, so nothing is re-sent."""
+    if policy is not None and isinstance(version, str) and version:
+        setattr(policy, _version_field(role), version[:64])
 
 
 def _note_version(
@@ -690,6 +705,19 @@ def _after_estimate(_db: Session, run: models.BackupRun, policy, result) -> None
         policy.estimate_dirs = json.dumps(first_fit.largest_dirs(result.get("by_dir")))
 
 
+def _after_verify(_db: Session, run: models.BackupRun, policy, _result) -> None:
+    """A host's full-read check (Pro+ scheduled verification)."""
+    _note_version(policy, "restate_version", run.restate_version)
+    if run.status != "ok":
+        logger.error(
+            "Backup policy %s: full-read verification ended %s on host %s: %s",
+            policy.id,
+            run.status,
+            run.host_id,
+            run.message,
+        )
+
+
 def _after_check(_db: Session, run: models.BackupRun, policy, _result) -> None:
     _note_version(policy, "storage_restate_version", run.restate_version)
     if run.status not in ("ok",):
@@ -702,6 +730,7 @@ def _after_check(_db: Session, run: models.BackupRun, policy, _result) -> None:
 
 
 _AFTER = {
+    "verify": _after_verify,
     "capture": _after_capture,
     "seal": _after_seal,
     "prune": _after_prune,
@@ -759,7 +788,9 @@ def record_storage_audit(db: Session, host_id: Any, payload: Dict[str, Any]) -> 
     and on Request Host Data -- so a check fixed since the last job (a new
     agent, or a repair made by hand) reaches the UI.  Kept only from the
     policy's own storage host: a backed-up host cannot speak for storage.
-    False (logged) otherwise.  The caller commits."""
+    The same message carries the sender's restate version, from the storage
+    host or (version only) the backed-up host; a changed one re-sends the
+    job files.  False (logged) from any other host.  The caller commits."""
     try:
         policy_id = uuid.UUID(str(payload.get("policy_id")))
     except (TypeError, ValueError):
@@ -778,15 +809,27 @@ def record_storage_audit(db: Session, host_id: Any, payload: Dict[str, Any]) -> 
         if policy is not None
         else None
     )
-    if target is None or str(target.storage_host_id) != str(host_id):
+    is_storage = target is not None and str(target.storage_host_id) == str(host_id)
+    is_host = policy is not None and str(policy.host_id) == str(host_id)
+    version = payload.get("restate_version")
+    version = version[:64] if isinstance(version, str) and version else None
+    # The backed-up host may report its restate version, never an audit.
+    if not (is_storage or (is_host and version)):
         logger.warning(
             "storage audit from host %s for policy %s ignored: not that "
-            "policy's storage host (or no such policy)",
+            "policy's host or storage host (or no such policy)",
             host_id,
             payload.get("policy_id"),
         )
         return False
-    _store_audit(policy, payload.get("storage_audit"))
+    if version:
+        # A changed restate re-sends the job files (they were written for
+        # the old one); this reaches hosts whose runs never got to restate.
+        _note_version(
+            policy, _version_field("storage" if is_storage else "host"), version
+        )
+    if is_storage and "storage_audit" in payload:
+        _store_audit(policy, payload.get("storage_audit"))
     return True
 
 

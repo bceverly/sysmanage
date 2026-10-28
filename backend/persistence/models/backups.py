@@ -114,6 +114,9 @@ class BackupPolicy(Base):
     # ... and of the last N years (q68; restate 2.2.0.12 on the storage host).
     keep_yearly = Column(Integer, nullable=True)
     check_interval_days = Column(Integer, nullable=False, default=7)
+    # Pro+ scheduled verification (q69): a full-read check on the host every
+    # N days; NULL / 0 = off.
+    verify_interval_days = Column(Integer, nullable=True)
     quiesce = Column(Boolean, nullable=False, default=False)
     quiesce_with = Column(Text, nullable=True)  # JSON list of hook names
     # JSON lists of restate path patterns: kept although the built-in rules

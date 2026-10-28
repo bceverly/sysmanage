@@ -19,7 +19,9 @@ approved, active host whose agent can run backups:
 3. storage upkeep, on the storage host only: finish a seal-then-prune a
    capture's result could not queue, and ``check`` every
    ``check_interval_days``;
-4. with Pro+ backup_engine, rotate the encryption keys that are due.
+4. with Pro+ backup_engine, rotate the encryption keys that are due;
+5. with Pro+ backup_engine, a full-read verification on the host every
+   ``verify_interval_days`` (``backup_verify``).
 
 Runs that got no result twelve hours after their command was sent are
 marked failed and logged; a run a maintenance window holds is waiting, not
@@ -38,6 +40,7 @@ from backend.persistence import models
 from backend.persistence.partitions import iter_host_databases
 from backend.services import backup_first_fit as first_fit
 from backend.services import backup_jobs as jobs
+from backend.services import backup_verify as verify
 from backend.services import queue_clock
 from backend.startup.leadership import singleton_task
 from backend.startup.tick_runner import run_periodic
@@ -382,6 +385,7 @@ def reconcile(db: Session, now: Optional[datetime] = None) -> int:
             queued += int(_maybe_capture(db, policy, target, host, now))
         if storage_ready and _storage_upkeep(db, policy, target, now):
             queued += 1
+        queued += int(verify.maybe_verify(db, policy, host, now))
     return queued
 
 

@@ -11,6 +11,9 @@ engine; once set they are always sent with the prune (services/backup_jobs
 ``prune_keep``), so a lapsed license never makes a prune delete history the
 operator chose to keep.  The engine also previews what the next prune would
 remove, choosing exactly as restate does.
+
+The scheduled-verification cadence (``verify_interval_days``, Pro+ 24.6) is
+checked and stored the same way: changing it needs the engine.
 """
 
 from typing import Any, Dict, Optional
@@ -26,6 +29,8 @@ from backend.persistence.partitions import get_tenant_db
 from backend.services import backup_jobs as jobs
 
 router = APIRouter(dependencies=[Depends(JWTBearer())])
+
+MAX_VERIFY_DAYS = 365
 
 # The most each count may be (restate takes any; these keep a typo sane).
 GFS_LIMITS = {
@@ -80,7 +85,27 @@ def check_gfs_change(
     if values != stored_gfs(policy) and _engine() is None:
         raise _needs_engine()
     check_yearly(policy, values)
+    values["verify_interval_days"] = check_verify_change(policy, body)
     return values
+
+
+def check_verify_change(policy: Optional[models.BackupPolicy], body: Any) -> int:
+    """The scheduled-verification cadence to store (days, 0 = off); HTTP 422
+    out of range, 402 when it CHANGES without the engine."""
+    days = getattr(body, "verify_interval_days", None) or 0
+    if not 0 <= days <= MAX_VERIFY_DAYS:
+        raise HTTPException(
+            status_code=422,
+            detail=_("%(field)s must be a whole number from 0 to %(max)d")
+            % {"field": "verify_interval_days", "max": MAX_VERIFY_DAYS},
+        )
+    stored = (getattr(policy, "verify_interval_days", None) or 0) if policy else 0
+    if days != stored and _engine() is None:
+        raise HTTPException(
+            status_code=402,
+            detail=_("Scheduled verification needs the Professional+ backup engine"),
+        )
+    return days
 
 
 def check_yearly(policy: Optional[models.BackupPolicy], values: Dict[str, int]) -> None:

@@ -41,6 +41,7 @@ import {
 } from './backupLabels';
 import EquipForBackup from './EquipForBackup';
 import { FirstFitCaption } from './BackupFirstFit';
+import { VerificationCaption } from './VerificationStatus';
 
 const rank = (row: BackupHost) => BACKUP_STATUS_ORDER.indexOf(row.status);
 
@@ -114,6 +115,7 @@ const StatusCell: React.FC<{ row: BackupHost; canManage: boolean; onChanged: () 
             <Progress row={row} />
             <Unreadable row={row} />
             <FirstFitCaption fit={row.first_fit} />
+            <VerificationCaption verification={row.verification} />
             {heldNote(t, row) && (
                 <Typography variant="caption" display="block" color="text.secondary">
                     {heldNote(t, row)}

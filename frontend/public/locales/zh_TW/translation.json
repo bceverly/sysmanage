@@ -2917,7 +2917,8 @@
       "tracking": "追蹤",
       "users": "用戶",
       "assetTags": "資產標籤",
-      "hardware": "硬體"
+      "hardware": "硬體",
+      "backups": "備份"
     },
     "title": "報告",
     "unknownError": "未知錯誤",
@@ -2933,6 +2934,10 @@
     "untaggedMachines": {
       "description": "尚未貼有資產標籤、在每台機器上安裝了各種作業系統及其供應商、型號、序列號和系統UUID的機器。使用它來尋找仍需要標籤的硬體。",
       "name": "未標記機器"
+    },
+    "backupSla": {
+      "name": "備份 SLA",
+      "description": "針對每台已備份的主機：其復原點目標（備份間隔的兩倍）目前以及最近 30 天中每一天是否達成、失敗的備份、最近一次完整讀取驗證，以及存放庫大小。"
     }
   },
   "resetPassword": {
@@ -5292,7 +5297,8 @@
       "du": "儲存用量",
       "repack": "重新打包",
       "prepare": "準備儲存",
-      "protect": "保護"
+      "protect": "保護",
+      "verify": "完整讀取驗證"
     },
     "card": {
       "lastCheck": "上次檢查",
@@ -5591,6 +5597,24 @@
       "recheckError": "無法要求檢查。",
       "running": "準備中：正在安裝 restate...",
       "started": "正在安裝 restate；這可能需要幾分鐘。"
+    },
+    "verify": {
+      "title": "完整讀取驗證",
+      "verified": "已驗證（上次成功：{{when}}）",
+      "running": "正在執行",
+      "failed": "上次執行失敗",
+      "unverified": "已 {{days}} 天未驗證（上次成功：{{when}}）",
+      "never": "尚未驗證",
+      "readOnly": "每 {{days}} 天重新讀取整個存放庫（變更此項需要 Professional+）。",
+      "field": "每隔（天）重新讀取整個存放庫",
+      "help": "0 = 關閉。每次都會透過網路讀取整個存放庫，因此請按週而非按天設定。"
+    },
+    "forecast": {
+      "title": "預測",
+      "growth": "每天成長約 {{size}}（最近 {{days}} 天）",
+      "flat": "未成長（最近 {{days}} 天）",
+      "reached": "已達到 {{percent}}%",
+      "until": "約 {{days}} 天後達到 {{percent}}%"
     }
   }
 }

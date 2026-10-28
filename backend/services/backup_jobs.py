@@ -63,6 +63,9 @@ PREPARE = "prepare"
 LIST = "list"
 STATUS = "status"
 BROWSE_ACTIONS = (LIST, STATUS)
+# Pro+ scheduled verification: ``check --read-all`` on the backed-up host
+# (it holds the keys for one job; the storage host never does).
+VERIFY = "verify"
 CONFIGURE = "configure"
 RESTORE = "restore"
 
@@ -504,6 +507,18 @@ def queue_browse(  # pylint: disable=too-many-arguments,too-many-positional-argu
     if action == LIST:
         params["path"] = path or "/"
     return _queue(db, policy, host.id, action, CommandType.BACKUP_RUN, params, actor)
+
+
+def queue_verify(
+    db: Session, policy: models.BackupPolicy, host_id: Any, needs_key: bool = False
+) -> models.BackupRun:
+    """A full-read check of the host's current repository, on the host."""
+    params: Dict[str, Any] = {"policy_id": str(policy.id), "action": VERIFY}
+    if needs_key:
+        params["needs_key"] = True  # fetched by the agent, never sent here
+    return _queue(
+        db, policy, host_id, VERIFY, CommandType.BACKUP_RUN, params, SYSTEM_ACTOR
+    )
 
 
 # Grandfather-father-son counts a prune keeps beside keep_last (q67).

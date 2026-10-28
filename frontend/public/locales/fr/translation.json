@@ -2917,7 +2917,8 @@
       "tracking": "suivi",
       "users": "utilisateurs",
       "assetTags": "tags d'actifs",
-      "hardware": "matériel"
+      "hardware": "matériel",
+      "backups": "sauvegardes"
     },
     "title": "Rapports",
     "unknownError": "Erreur inconnue",
@@ -2933,6 +2934,10 @@
     "untaggedMachines": {
       "description": "Les machines qui n'ont pas encore de tag d'actif, avec chaque système d'exploitation installé sur chacune, son fabricant, modèle, numéro de série et UUID système. Utilisez-le pour trouver du matériel qui a encore besoin d'un label.",
       "name": "Machines non étiquetées"
+    },
+    "backupSla": {
+      "name": "SLA des sauvegardes",
+      "description": "Pour chaque hôte sauvegardé : si son objectif de point de reprise (le double de son intervalle de sauvegarde) est respecté maintenant et chacun des 30 derniers jours, ses sauvegardes en échec, sa dernière vérification par lecture complète et la taille de son dépôt."
     }
   },
   "resetPassword": {
@@ -5292,7 +5297,8 @@
       "du": "Utilisation du stockage",
       "repack": "Réempaqueter",
       "prepare": "Préparer le stockage",
-      "protect": "Protéger"
+      "protect": "Protéger",
+      "verify": "Vérification par lecture complète"
     },
     "card": {
       "lastCheck": "Dernière vérification",
@@ -5591,6 +5597,24 @@
       "recheckError": "La vérification n'a pas pu être demandée.",
       "running": "Équipement en cours : installation de restate...",
       "started": "Installation de restate ; cela peut prendre quelques minutes."
+    },
+    "verify": {
+      "title": "Vérification par lecture complète",
+      "verified": "Vérifié (dernière réussite le {{when}})",
+      "running": "En cours",
+      "failed": "Le dernier passage a échoué",
+      "unverified": "Non vérifié depuis {{days}} jours (dernière réussite le {{when}})",
+      "never": "Pas encore vérifié",
+      "readOnly": "Relit tout le dépôt tous les {{days}} jours (le modifier nécessite Professional+).",
+      "field": "Relire tout le dépôt tous les (jours)",
+      "help": "0 = désactivé. Chaque passage lit tout le dépôt sur le réseau : comptez en semaines plutôt qu'en jours."
+    },
+    "forecast": {
+      "title": "Prévision",
+      "growth": "Croît d'environ {{size}} par jour ({{days}} derniers jours)",
+      "flat": "Ne croît pas ({{days}} derniers jours)",
+      "reached": "{{percent}}% atteint",
+      "until": "{{percent}}% dans environ {{days}} jours"
     }
   }
 }

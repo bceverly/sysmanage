@@ -41,6 +41,31 @@ export const warningSeverity = (warning: TargetWarning, target?: BackupTarget): 
     }
 };
 
+/** Pro+ capacity forecasting: growth per day and days to the marks. */
+export const ForecastLine: React.FC<{ target: BackupTarget }> = ({ target }) => {
+    const { t } = useTranslation();
+    const f = target.forecast;
+    if (!f) {
+        return null;
+    }
+    const low = target.space_low_percent ?? 85;
+    const critical = target.space_critical_percent ?? 95;
+    const growth = f.growth_bytes_per_day > 0
+        ? t('backups.forecast.growth', 'Growing about {{size}} a day (last {{days}} days)',
+            { size: formatBytes(f.growth_bytes_per_day), days: f.basis_days })
+        : t('backups.forecast.flat', 'Not growing (last {{days}} days)', { days: f.basis_days });
+    const until = (days: number | null, percent: number) => days === null ? null
+        : days === 0
+            ? t('backups.forecast.reached', '{{percent}}% reached', { percent })
+            : t('backups.forecast.until', '{{percent}}% in about {{days}} days', { percent, days });
+    const marks = [until(f.days_to_low, low), until(f.days_to_critical, critical)].filter(Boolean);
+    return (
+        <Typography variant="body2" color={f.days_to_critical !== null && f.days_to_critical < 30 ? 'warning.main' : undefined}>
+            {t('backups.forecast.title', 'Forecast')}: {growth}{marks.length ? `; ${marks.join(', ')}` : ''}
+        </Typography>
+    );
+};
+
 const SEAL_FILESYSTEM: Record<string, string> = { zfs_snapshot: 'ZFS', btrfs_snapshot: 'btrfs' };
 
 const staleHosts = (target: BackupTarget, hosts: BackupHost[], code: TargetWarning): string => {
@@ -153,6 +178,7 @@ const BackupStorageStatus: React.FC<{ target: BackupTarget; hosts: BackupHost[] 
                             })}
                         </Typography>
                     )}
+                    <ForecastLine target={target} />
                     {fs.type && (
                         <Typography variant="body2">
                             {t('backups.storage.filesystem', 'Storage filesystem')}: {fs.type}

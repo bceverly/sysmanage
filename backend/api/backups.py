@@ -106,6 +106,8 @@ class PolicyBody(BaseModel):
     keep_weekly: int = 0
     keep_monthly: int = 0
     keep_yearly: int = 0
+    # Pro+ scheduled verification: a full-read check every N days (0 = off).
+    verify_interval_days: int = 0
     check_interval_days: int = 7
     quiesce: bool = False
     quiesce_with: List[str] = Field(default_factory=list)

@@ -2936,7 +2936,8 @@
       "tracking": "tracking",
       "users": "users",
       "assetTags": "asset tags",
-      "hardware": "hardware"
+      "hardware": "hardware",
+      "backups": "backups"
     },
     "title": "Reports",
     "unknownError": "Unknown error",
@@ -2952,6 +2953,10 @@
     "untaggedMachines": {
       "description": "Machines that have no asset tag yet, with every operating system installed on each one, its vendor, model, serial number, and system UUID. Use it to find hardware that still needs a label.",
       "name": "Untagged Machines"
+    },
+    "backupSla": {
+      "name": "Backup SLA",
+      "description": "For every backed-up host: whether its recovery point objective (twice its backup interval) is met now and on each of the last 30 days, its failed backups, its last full-read verification, and its repository size."
     }
   },
   "resetPassword": {
@@ -5292,7 +5297,8 @@
       "du": "Storage use",
       "repack": "Repack",
       "prepare": "Prepare storage",
-      "protect": "Protect"
+      "protect": "Protect",
+      "verify": "Full-read verification"
     },
     "card": {
       "lastCheck": "Last check",
@@ -5591,6 +5597,24 @@
       "recheckError": "The check could not be requested.",
       "running": "Equipping: installing restate...",
       "started": "Installing restate; this can take a few minutes."
+    },
+    "verify": {
+      "title": "Full-read verification",
+      "verified": "Verified (last passed {{when}})",
+      "running": "Running now",
+      "failed": "The last pass failed",
+      "unverified": "Not verified in {{days}} days (last passed {{when}})",
+      "never": "Not verified yet",
+      "readOnly": "Reads the whole repository back every {{days}} days (changing this needs Professional+).",
+      "field": "Read the whole repository back every (days)",
+      "help": "0 = off. Each pass reads the whole repository over the network, so weeks rather than days."
+    },
+    "forecast": {
+      "title": "Forecast",
+      "growth": "Growing about {{size}} a day (last {{days}} days)",
+      "flat": "Not growing (last {{days}} days)",
+      "reached": "{{percent}}% reached",
+      "until": "{{percent}}% in about {{days}} days"
     }
   }
 }

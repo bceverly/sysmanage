@@ -42,6 +42,7 @@ class ReportType(str, Enum):
     USER_RBAC = "user-rbac"
     AUDIT_LOG = "audit-log"
     UNTAGGED_MACHINES = "untagged-machines"
+    BACKUP_SLA = "backup-sla"
 
 
 # Report types whose data is HOST-SCOPED (tenant database) vs server-global.
@@ -57,6 +58,7 @@ _HOST_SCOPED_REPORTS = frozenset(
         ReportType.ANTIVIRUS_OPENSOURCE,
         ReportType.ANTIVIRUS_COMMERCIAL,
         ReportType.UNTAGGED_MACHINES,
+        ReportType.BACKUP_SLA,
     }
 )
 
@@ -208,6 +210,12 @@ def _build_report_html(reporting_engine, report_type, template_id, tenant_id):
             html_content = html_gen.generate_untagged_machines_html(
                 _("Untagged Machines"), selected_fields=selected_fields
             )
+        elif report_type == ReportType.BACKUP_SLA and hasattr(
+            html_gen, "generate_backup_sla_html"
+        ):
+            html_content = html_gen.generate_backup_sla_html(
+                _("Backup SLA"), selected_fields=selected_fields
+            )
         else:
             raise HTTPException(status_code=400, detail=_("Unknown report type"))
 
@@ -353,6 +361,13 @@ def _build_report_pdf(reporting_engine, report_type, template_id, tenant_id):
                 models, selected_fields=selected_fields
             )
             filename = f"untagged_machines_{ts}.pdf"
+        elif report_type == ReportType.BACKUP_SLA and hasattr(
+            hosts_gen, "generate_backup_sla_report"
+        ):
+            pdf_buffer = hosts_gen.generate_backup_sla_report(
+                models, selected_fields=selected_fields
+            )
+            filename = f"backup_sla_{ts}.pdf"
         else:
             raise HTTPException(status_code=400, detail=_("Unknown report type"))
 

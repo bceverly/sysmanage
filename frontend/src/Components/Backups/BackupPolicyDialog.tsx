@@ -27,6 +27,7 @@ import { savePolicy } from '../../Services/backups';
 import type { BackupPolicy, PolicyInput } from '../../Services/backups';
 import { apiDetail } from './backupLabels';
 import RetentionFields from './RetentionFields';
+import { VerificationField } from './VerificationStatus';
 
 const DEFAULTS: PolicyInput = {
     enabled: true,
@@ -37,6 +38,7 @@ const DEFAULTS: PolicyInput = {
     keep_weekly: 0,
     keep_monthly: 0,
     keep_yearly: 0,
+    verify_interval_days: 0,
     check_interval_days: 7,
     quiesce: false,
     quiesce_with: [],
@@ -58,6 +60,7 @@ const toInput = (policy: BackupPolicy | null): PolicyInput =>
               keep_weekly: policy.keep_weekly ?? 0,
               keep_monthly: policy.keep_monthly ?? 0,
               keep_yearly: policy.keep_yearly ?? 0,
+              verify_interval_days: policy.verify_interval_days ?? 0,
               check_interval_days: policy.check_interval_days,
               quiesce: policy.quiesce,
               quiesce_with: policy.quiesce_with,
@@ -141,6 +144,8 @@ const BackupPolicyDialog: React.FC<{
                     <TextField type="number" label={t('backups.policy.checkDays', 'Check the repository every (days)')}
                         value={form.check_interval_days} slotProps={{ htmlInput: { min: 1, max: 90 } }}
                         onChange={e => set({ check_interval_days: number(e.target.value) })} />
+                    <VerificationField days={form.verify_interval_days ?? 0}
+                        onChange={days => set({ verify_interval_days: days })} />
                     <FormControlLabel
                         control={<Switch checked={form.quiesce} onChange={e => set({ quiesce: e.target.checked })} />}
                         label={t('backups.policy.quiesce', 'Pause services while reading their data')}

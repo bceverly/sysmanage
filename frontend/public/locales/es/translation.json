@@ -2917,7 +2917,8 @@
       "tracking": "seguimiento",
       "users": "usuarios",
       "assetTags": "etiquetas de activos",
-      "hardware": "hardware"
+      "hardware": "hardware",
+      "backups": "respaldos"
     },
     "title": "Informes",
     "unknownError": "Error desconocido",
@@ -2933,6 +2934,10 @@
     "untaggedMachines": {
       "description": "Máquinas sin etiqueta de activo aún, con cada sistema operativo instalado en cada una, su proveedor, modelo, número de serie y UUID del sistema. Úselo para encontrar hardware que todavía necesita una etiqueta.",
       "name": "Máquinas sin etiquetar"
+    },
+    "backupSla": {
+      "name": "SLA de copias de seguridad",
+      "description": "Para cada host con copia de seguridad: si su objetivo de punto de recuperación (el doble de su intervalo de copia) se cumple ahora y en cada uno de los últimos 30 días, sus copias fallidas, su última verificación con lectura completa y el tamaño de su repositorio."
     }
   },
   "resetPassword": {
@@ -5292,7 +5297,8 @@
       "du": "Uso del almacenamiento",
       "repack": "Reempaquetar",
       "prepare": "Preparar almacenamiento",
-      "protect": "Proteger"
+      "protect": "Proteger",
+      "verify": "Verificación con lectura completa"
     },
     "card": {
       "lastCheck": "Última comprobación",
@@ -5591,6 +5597,24 @@
       "recheckError": "No se pudo solicitar la comprobación.",
       "running": "Preparando: instalando restate...",
       "started": "Instalando restate; puede tardar unos minutos."
+    },
+    "verify": {
+      "title": "Verificación con lectura completa",
+      "verified": "Verificado (última superada el {{when}})",
+      "running": "En ejecución",
+      "failed": "La última pasada falló",
+      "unverified": "Sin verificar en {{days}} días (última superada el {{when}})",
+      "never": "Aún no verificado",
+      "readOnly": "Vuelve a leer todo el repositorio cada {{days}} días (cambiarlo requiere Professional+).",
+      "field": "Volver a leer todo el repositorio cada (días)",
+      "help": "0 = desactivado. Cada pasada lee todo el repositorio por la red, así que mejor semanas que días."
+    },
+    "forecast": {
+      "title": "Previsión",
+      "growth": "Crece unos {{size}} al día (últimos {{days}} días)",
+      "flat": "No crece (últimos {{days}} días)",
+      "reached": "{{percent}}% alcanzado",
+      "until": "{{percent}}% en unos {{days}} días"
     }
   }
 }

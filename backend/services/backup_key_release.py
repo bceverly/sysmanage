@@ -13,9 +13,10 @@ only says ``needs_key``; the agent then fetches the keys over HTTPS with its
 own host credentials (``POST /api/agent/backup-key``), and this module decides
 whether to hand them over:
 
-* the run exists, belongs to the asking host, is a restore / list / status
-  that asked for a key, and is still queued or running;
-* it was queued within ``RELEASE_WINDOW``, and its keys were not released
+* the run exists, belongs to the asking host, is a restore / list / status /
+  verify that asked for a key, and is still queued or running;
+* it was SENT within ``RELEASE_WINDOW`` (a window-held run is not stale), and
+  its keys were not released
   before (``key_released_at``) -- a key is handed out once per run;
 * the policy's repository is encrypted, and backup_engine is loaded.
 
@@ -34,11 +35,12 @@ from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
+from backend.services import queue_clock
 
 logger = logging.getLogger(__name__)
 
 RELEASE_WINDOW = timedelta(hours=1)
-KEYED_ACTIONS = (jobs.RESTORE, jobs.LIST, jobs.STATUS)
+KEYED_ACTIONS = (jobs.RESTORE, jobs.LIST, jobs.STATUS, jobs.VERIFY)
 
 
 class KeyRefused(Exception):
@@ -74,14 +76,19 @@ def _run_for(db: Session, host_id: str, run_id: Any) -> models.BackupRun:
     return run
 
 
-def _check_run(run: models.BackupRun, now: datetime) -> None:
+def _check_run(db: Session, run: models.BackupRun, now: datetime) -> None:
     if run.action not in KEYED_ACTIONS or not _parameters(run).get("needs_key"):
         raise KeyRefused(409, _("This backup run does not need a key"))
     if run.status not in jobs.PENDING:
         raise KeyRefused(409, _("This backup run has already ended"))
     if run.key_released_at is not None:
         raise KeyRefused(409, _("This backup run's key was already released"))
-    if run.queued_at and now - run.queued_at > RELEASE_WINDOW:
+    # From when the command was SENT, not queued: a run a closed maintenance
+    # window held for hours (a scheduled verification) is fresh when it goes.
+    started = queue_clock.clock_start(
+        queue_clock.delivery(db, run.command_id), run.queued_at
+    )
+    if started and now - started > RELEASE_WINDOW:
         raise KeyRefused(409, _("This backup run is too old to release its key"))
 
 
@@ -91,7 +98,7 @@ def release(
     """The armored secret keys for this host's own pending run, once."""
     now = now or jobs.now()
     run = _run_for(db, host_id, run_id)
-    _check_run(run, now)
+    _check_run(db, run, now)
     policy = (
         db.query(models.BackupPolicy)
         .filter(models.BackupPolicy.id == run.policy_id)

@@ -2917,7 +2917,8 @@
       "tracking": "volgen",
       "users": "gebruikers",
       "assetTags": "assettags",
-      "hardware": "Hardware"
+      "hardware": "Hardware",
+      "backups": "backuppen"
     },
     "title": "Rapporten",
     "unknownError": "Onbekende fout",
@@ -2933,6 +2934,10 @@
     "untaggedMachines": {
       "description": "Apparaten die nog geen asset tag hebben, met elk besturingssysteem dat op elk van hen is geïnstalleerd, zijn leverancier, model, seriële nummer en systeem-UUID. Gebruik het om hardware te vinden die nog een label nodig heeft.",
       "name": "Onttagde machines"
+    },
+    "backupSla": {
+      "name": "Back-up-SLA",
+      "description": "Voor elke host waarvan een back-up wordt gemaakt: of zijn recovery point objective (tweemaal zijn back-upinterval) nu en op elk van de laatste 30 dagen wordt gehaald, zijn mislukte back-ups, zijn laatste verificatie met volledig lezen en de grootte van zijn repository."
     }
   },
   "resetPassword": {
@@ -5292,7 +5297,8 @@
       "du": "Opslaggebruik",
       "repack": "Opnieuw inpakken",
       "prepare": "Opslag voorbereiden",
-      "protect": "Beveiligen"
+      "protect": "Beveiligen",
+      "verify": "Verificatie met volledig lezen"
     },
     "card": {
       "lastCheck": "Laatste controle",
@@ -5591,6 +5597,24 @@
       "recheckError": "De controle kon niet worden aangevraagd.",
       "running": "Bezig met uitrusten: restate wordt geïnstalleerd...",
       "started": "restate wordt geïnstalleerd; dit kan enkele minuten duren."
+    },
+    "verify": {
+      "title": "Verificatie met volledig lezen",
+      "verified": "Geverifieerd (laatst geslaagd op {{when}})",
+      "running": "Nu bezig",
+      "failed": "De laatste ronde is mislukt",
+      "unverified": "Niet geverifieerd in {{days}} dagen (laatst geslaagd op {{when}})",
+      "never": "Nog niet geverifieerd",
+      "readOnly": "Leest de hele repository elke {{days}} dagen terug (wijzigen vereist Professional+).",
+      "field": "De hele repository elke (dagen) teruglezen",
+      "help": "0 = uit. Elke ronde leest de hele repository over het netwerk, dus liever weken dan dagen."
+    },
+    "forecast": {
+      "title": "Prognose",
+      "growth": "Groeit met ongeveer {{size}} per dag (laatste {{days}} dagen)",
+      "flat": "Groeit niet (laatste {{days}} dagen)",
+      "reached": "{{percent}}% bereikt",
+      "until": "{{percent}}% over ongeveer {{days}} dagen"
     }
   }
 }

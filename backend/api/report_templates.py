@@ -144,6 +144,17 @@ _BASE_REPORTS: Dict[str, List[Dict[str, str]]] = {
         {"code": "system_serial", "label": "Serial Number"},
         {"code": "system_uuid", "label": "System UUID"},
     ],
+    # Pro+ reporting_engine BACKUP_SLA_CODES (generators_backups.pxi).
+    "backup-sla": [
+        {"code": "host", "label": "Host"},
+        {"code": "interval", "label": "Backup Interval"},
+        {"code": "last_good", "label": "Last Good Backup"},
+        {"code": "rpo", "label": "RPO Status Now"},
+        {"code": "rpo_days", "label": "RPO Met (Last 30 Days)"},
+        {"code": "failures", "label": "Failed Backups (30 Days)"},
+        {"code": "verified", "label": "Last Full-Read Verification"},
+        {"code": "size", "label": "Repository Size"},
+    ],
 }
 
 _VALID_BASE_TYPES = tuple(_BASE_REPORTS.keys())

@@ -138,3 +138,62 @@ def test_an_audit_from_any_other_host_or_policy_is_ignored(session, sent):
     )  # fmt: skip
     assert not results.record_storage_audit(session, s.nas.id, {"storage_audit": ok})
     assert json.loads(s.policy.storage_audit)[0]["level"] == "error"  # unchanged
+
+
+# --- the restate version travels with the daily re-audit (2026-10-28) -------
+
+
+def test_a_changed_restate_from_the_daily_message_re_sends_the_job_files(session, sent):
+    """A host whose runs never reached restate (refused before it started)
+    kept its old version on the page and its old job files; the daily
+    message now carries the version from the host and the storage host."""
+    s = _setup(session)
+    s.policy.restate_version, s.policy.storage_restate_version = "2.2.0.2", "2.2.0.2"
+    before = s.policy.config_version
+    assert results.record_storage_audit(
+        session,
+        s.host.id,
+        {"policy_id": str(s.policy.id), "restate_version": "2.2.0.11"},
+    )
+    assert s.policy.restate_version == "2.2.0.11"
+    assert s.policy.config_version == before + 1
+    assert results.record_storage_audit(
+        session,
+        s.nas.id,
+        {"policy_id": str(s.policy.id), "restate_version": "2.2.0.11"},
+    )
+    assert s.policy.storage_restate_version == "2.2.0.11"
+    assert s.policy.config_version == before + 2
+    # the same version again changes nothing
+    results.record_storage_audit(
+        session,
+        s.nas.id,
+        {"policy_id": str(s.policy.id), "restate_version": "2.2.0.11"},
+    )
+    assert s.policy.config_version == before + 2
+
+
+def test_a_backed_up_host_can_report_its_version_but_never_an_audit(session, sent):
+    s = _setup(session)
+    s.policy.storage_audit = json.dumps(
+        [{"code": "nfs_v4", "level": "error", "params": {}}]
+    )
+    ok = [{"code": "nfs_v4", "level": "ok", "params": {}}]
+    assert results.record_storage_audit(session, s.host.id, {
+        "policy_id": str(s.policy.id), "restate_version": "2.2.0.12", "storage_audit": ok,
+    })  # fmt: skip
+    assert json.loads(s.policy.storage_audit)[0]["level"] == "error"  # unchanged
+    assert s.policy.restate_version == "2.2.0.12"
+
+
+def test_a_configure_reply_records_its_version_without_re_sending(session, sent):
+    s = _setup(session)
+    s.policy.storage_restate_version = "2.2.0.2"
+    before = s.policy.config_version
+    run = jobs.queue_configure(session, s.policy, s.target, s.host, "storage")
+    results.record_command_result(session, {
+        "command_id": run.command_id, "success": True,
+        "result": {"restate_version": "2.2.0.12"},
+    })  # fmt: skip
+    assert s.policy.storage_restate_version == "2.2.0.12"
+    assert s.policy.config_version == before

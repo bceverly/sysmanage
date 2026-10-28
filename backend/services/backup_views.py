@@ -26,10 +26,12 @@ from sqlalchemy.orm import Session
 from backend.persistence import models
 from backend.services import backup_equip
 from backend.services import backup_first_fit as first_fit
+from backend.services import backup_forecast
 from backend.services import backup_jobs as jobs
 from backend.services import backup_storage_audit as storage_audit
 from backend.services import backup_storage_health as storage_health
 from backend.services import backup_storage_status as storage_status
+from backend.services import backup_verify
 from backend.services import backup_tick
 from backend.services import queue_clock
 
@@ -97,6 +99,8 @@ def target_dict(target: models.BackupTarget, db: Session) -> Dict[str, Any]:
         },
         "storage_status": status,
         "storage_health": health,
+        # Pro+ capacity forecasting (growth per day, days to the marks).
+        "forecast": backup_forecast.for_target(db, target, health, jobs.now()),
         "storage_audit": audit,
         "service_account": target.service_account or jobs.DEFAULT_SERVICE_ACCOUNT,
         "warnings": warnings,
@@ -120,6 +124,8 @@ def policy_dict(policy: models.BackupPolicy) -> Dict[str, Any]:
         "keep_weekly": policy.keep_weekly or 0,
         "keep_monthly": policy.keep_monthly or 0,
         "keep_yearly": policy.keep_yearly or 0,
+        # Pro+ scheduled verification: a full-read check every N days (0 = off).
+        "verify_interval_days": policy.verify_interval_days or 0,
         # The storage host's restate honors a yearly count (2.2.0.12+).
         "yearly_supported": "keep_yearly" in jobs.storage_abilities(policy),
         "check_interval_days": policy.check_interval_days,
@@ -273,6 +279,7 @@ def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
         "next_due": None,
         "snapshot_count": 0,
         "first_fit": None,
+        "verification": None,
     }
     if policy is None:
         entry["status"] = "no_policy" if ready else "not_equipped"
@@ -294,6 +301,7 @@ def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
         .count()
     )
     entry["first_fit"] = first_fit.fit(db, policy, jobs.the_target(db))
+    entry["verification"] = backup_verify.state(db, policy, now)
     # A capture a closed maintenance window holds is waiting, not backing up
     # (14.2): it is sent when the window opens.
     held = capturing and _held(db, running)

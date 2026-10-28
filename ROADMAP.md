@@ -14071,7 +14071,7 @@ the old word-substitution scripts. Measured design (calibrated on beast against
 
 **restate-side changes** this phase depends on are tracked as items 1-21 in `~/dev/restate/sysmanage-todo.md`: a `--result` JSON outcome and `--progress=json`; a job file + `restate run` and a `restate-job@.service` unit; NFS locking, staging and squashed-ownership handling; `--quiesce-with` plus Nextcloud and UniFi hooks; `restore --include`; `restate features --json`; an append-only writer mode and storage-side maintenance (18, 19); snapshot signing; restore key handling; `restate copy`; `--estimate`; a repository usage report (20); clone identity; man page fixes; rpm/BSD package awareness; an autoinstall contract; and a shared store scoped so it can never cross a tenant (17, 21). Each sub-phase below names the items it needs.
 
-> **Editions in one paragraph.** Data protection is table stakes, and restate itself is BSD-2-Clause, so **every edition can back up a host and put a file back**: Community gets the agent integration, one storage target, per-host schedules, keep-last-N retention, basic checks, the Backups page and plan-first file restore. **Pro+** (a new `backup_engine`) is "a fleet you can trust": policies by tag or group, maintenance-window-aware schedules, grandfather-father-son retention, scheduled full-read verification, quiesce-hook distribution, OpenBAO-held keys and signing, alerting, SLA reporting, compliance evidence, drift timelines, capacity forecasting and package-level restore. **Enterprise** (Phase 25) is multi-site and recovery at scale: many targets, per-site targets through federation, off-site replication, immutable copies, air-gap media, bare-metal recovery, clones and migrations, fleet-wide restore jobs in waves, four-eyes restore approval, legal hold and automated restore drills. **MULTITENANT_SAAS** (Phase 25) adds per-tenant storage, keys, quotas and metering. Details: 24.11 and 25.6.
+> **Editions in one paragraph.** Data protection is table stakes, and restate itself is BSD-2-Clause, so **every edition can back up a host and put a file back**: Community gets the agent integration, one storage target, per-host schedules, keep-last-N retention, basic checks, the Backups page and plan-first file restore. **Pro+** (a new `backup_engine`) is "a fleet you can trust": policies by tag or group, maintenance-window-aware schedules, grandfather-father-son retention, scheduled full-read verification, quiesce-hook distribution, OpenBAO-held keys and signing, alerting, SLA reporting, compliance evidence, drift timelines, capacity forecasting and package-level restore. **Enterprise** (Phase 25) is multi-site and recovery at scale: many targets, per-site targets through federation, off-site replication, immutable copies, air-gap media, bare-metal recovery, clones and migrations, fleet-wide restore jobs in waves, four-eyes restore approval, legal hold and automated restore drills. **MULTITENANT_SAAS** (Phase 25) adds per-tenant storage, keys, quotas and metering. Details: 24.11 and 25.7.
 
 > **Warning: Hosts must never be able to destroy their own backups (ransomware).** A compromised host with delete rights on its repository deletes its history along with everything else. The design rule for every sub-phase: **hosts append only.** A host's mount can add snapshots but never remove or rewrite one; prune, check and replication run as storage-side jobs on the target (24.5); and the target keeps immutable snapshots of the backup tree, or replicates to storage hosts cannot reach at all. A backup a host can delete is not counted as a backup by any exit criterion below.
 
@@ -14123,7 +14123,7 @@ restate already ships hooks for PostgreSQL, MySQL, MongoDB, Redis, Docker, libvi
 - [x] Hooks selected per policy through restate's `--quiesce-with` (item 6), not every hook on every host -- DONE (audit 2026-10-23): quiesce_with per policy; 2.1+ reports which hooks are present on each host and the policy dialog offers them (Services to pause)
 - [x] **Mail stores:** Maildir copies crash-safely without a stop; the existing database hook covers postfixadmin where it is used -- audit 2026-10-25: nothing for SysManage to build: restate(8) documents Maildir as crash-safe to copy without a stop (each message is its own file, renamed into place) and pauses MySQL / MariaDB / PostgreSQL with that database's own hook (`--quiesce`), which covers postfixadmin; proven when mail.archive backs up nightly (exit criterion)
 - [x] A failed pause marks the run `incomplete`, never `ok`; each hook's pause / resume time and outcome are on the run's detail -- DONE 2026-10-23: restate marks a failed pause incomplete; the job's Detail lists each paused service (kind and name), how long it was paused, and any that could not be paused or resumed with restate's message
-- [ ] **Pro+: hook distribution** -- the backup engine pushes the hooks a policy needs to its hosts (root-owned, mode 0755, under `/etc/restate/hooks.d/`) through the sudo-install path, versioned, and reports which hosts carry which hook version
+- [ ] **Pro+: hook distribution** -- the backup engine pushes the hooks a policy needs to its hosts (root-owned, mode 0755, under `/etc/restate/hooks.d/`) through the sudo-install path, versioned, and reports which hosts carry which hook version -- 2026-10-28: restate 2.1.0.0 now ships the Nextcloud and UniFi hooks this item was for, and every host reports which hooks it has (policy dialog). Proposed (Bryan to decide): close this as covered -- a custom hook is a root-owned file under `/etc/restate/hooks.d/`, which SysManage's existing file deployment / configuration-management profiles already deliver (versioned, drift-checked), rather than a second root-file channel in the backup engine
 - [x] **Hooks offered from the host (restate 2.1.0.0+)** -- 2026-10-22: restate lists only hooks whose application is present (`HOOK present NAME`), and a `quiesce_with` hook that is absent is skipped with a notice (the run stays ok); the host's configure reply carries that list (`backup_policy.available_hooks`, q59) and the policy dialog's "Services to pause" offers it as a pick-list (names can still be typed for an older restate). UniFi's own mongod and the Nextcloud snap's mysqld are paused by their own hooks, not the generic mongodb/mysql ones (restate 2.1.0.0). t14 reports docker, libvirt, lxd; freebsd reports postgresql
 
 #### 24.4 Server: target, schedule, Backups page (Community / OSS)
@@ -14170,20 +14170,20 @@ A new Pro+ engine, `backup_engine`. Follow the new-engine checklist: registered 
 - [ ] **Backup policies** by tag or host group: hosts, schedule, retention, rules, quiesce hooks, encryption key, verification cadence, RPO / RTO (25.1); a host covered by several policies resolves to one, with the rule shown
 - [ ] **Maintenance-window-aware schedules:** captures run inside a host's window (14.2) when it has one, outside blackout periods, and are held (not dropped) when a window closes -- 2026-10-27 done in code: backup runs are change commands, so the 14.2 dispatch gate already held them (blackouts included) and read-only runs (snapshots, estimate, check) go through; fixed on the way: the 12-hour stuck sweep timed a run from when it was QUEUED, so a run held past 12 hours was marked failed and queued again, and the host got both when the window opened -- it now counts from the send (`services/queue_clock.py`, shared with Equip for backup), and a run still waiting to be sent is never stuck; a held capture reads "Waiting for window" (`waiting_window`), except that an overdue or failed host keeps that status with a note, so a window that never opens cannot hide it; to tick: a capture on a lab host with a closed window, held, then run when the window opens, with exactly one run
 - [ ] **Grandfather-father-son retention:** `--keep-daily` / `--keep-weekly` / `--keep-monthly` (and yearly), applied by the storage-side runner (24.5), with a preview of what the next prune will remove -- 2026-10-27 done in code (daily / weekly / monthly): policy columns (q67), the storage-side prune sends restate's `keep_daily` / `keep_weekly` / `keep_monthly` (the agent already passed them); setting them needs the Pro+ backup engine (402 otherwise) but once set they are ALWAYS sent, so a lapsed license never makes a prune delete chosen history; "Preview the next prune" (Pro+) is an exact port of restate's `rs_repo_choose()` (UTC dates from snapshot names, ISO weeks, undated names always kept), cross-checked against Python's isocalendar for 1999-2031; still open: yearly -- asked restate-31 for `--keep-yearly` (2026-10-27), to be sent only where the storage host's restate advertises it -- 2026-10-28: yearly coded: restate 2.2.0.12 added `keep_yearly`; the storage host's agent reports it (`storage_abilities`, migration q68backupyearly), "Years to keep" shows once it has (or when a policy already keeps years), a new or changed yearly count is refused with HTTP 409 until then, an older restate is refused the key (`tool_outdated`) rather than given a prune without it, and the preview takes it; docs `fleet-backups-pro.html` `gfs.yearly`, 14 locales; to tick: the lab policy's prune preview matching what prune removes (exit criterion)
-- [ ] **Scheduled verification:** `check --read-all` on its own cadence as a periodic test restore; a repository that has not passed one within its window shows "unverified"
+- [ ] **Scheduled verification:** `check --read-all` on its own cadence as a periodic test restore; a repository that has not passed one within its window shows "unverified" -- 2026-10-28 coded: Pro+ cadence `verify_interval_days` (migration q69backupverify; 402 to change without the engine; dialog field), `backup_verify.py` schedules restate `check --read-all` ON THE HOST (keys released for that run only, so the storage host never holds one), never beside a capture, held by maintenance windows like a capture (the key release now measures its window from the SEND, not the queueing), retried a day after a failure; states verified / unverified / failed / running on the host card and the Backups page; agent `verify` read-only job (needs restate's `check` job command, reported as the host's `verify` ability). Found on the way: the server dropped the agent's `decrypt` ability, so encrypted restore / browse / what-changed were all refused 409 -- fixed and regression-tested. To tick: a lab pass on an encrypted repository (it reads the whole repository over NFS each time)
 - [ ] **Quiesce-hook distribution** (24.3)
 - [ ] **Keys in OpenBAO:** each policy's encryption key pair generated and held in OpenBAO (the tenant's mount under multi-tenancy); hosts receive only the public key; restores fetch the private key for one job and never write it to disk (sysmanage-todo.md item 10); key rotation keeps old keys for old snapshots
-- [ ] **Snapshot signing** by a trusted signer (the server or the target host), not the backed-up host (item 9); restore refuses unsigned or untrusted snapshots (exit 4) with a clear "this snapshot is not signed" message, never a silent `--allow-unverified`
-- [ ] **Alerts** through the alerting engine: no good backup in N hours, exit 3, a failed check, a failed verification, a target filling up, a host's write cache over budget, a key nearing rotation -- 2026-10-27 done in code: a stateful `backup_health` condition in the Pro+ alerting engine (one alert per host, escalated in place, resolved with a notice, re-notified daily until acknowledged): failed / overdue (statuses, `incomplete` optional), no good backup in `max_age_hours`, a failed repository check, a write cache over the target's budget, and on the storage host the target's storage problems (failed drive, critically full, stale seal / prune / check); failed backup, failed drive or full storage is critical; hosts without a policy never alert; still open: a failed full-read verification (waits on scheduled verification) and a key nearing rotation
+- [ ] **Snapshot signing** by a trusted signer (the server or the target host), not the backed-up host (item 9); restore refuses unsigned or untrusted snapshots (exit 4) with a clear "this snapshot is not signed" message, never a silent `--allow-unverified` -- 2026-10-28: restate has the `sign` job (keys repository / snapshot / sign_with / passphrase_file; result `signed` + `signer`) and snapshot signer reporting (`snapshot_signer`, `trusted_key`), not yet released; SysManage wiring waits on the tag. restate requires the signing key file root's, 0600, in an owner-only directory
+- [ ] **Alerts** through the alerting engine: no good backup in N hours, exit 3, a failed check, a failed verification, a target filling up, a host's write cache over budget, a key nearing rotation -- 2026-10-27 done in code: a stateful `backup_health` condition in the Pro+ alerting engine (one alert per host, escalated in place, resolved with a notice, re-notified daily until acknowledged): failed / overdue (statuses, `incomplete` optional), no good backup in `max_age_hours`, a failed repository check, a write cache over the target's budget, and on the storage host the target's storage problems (failed drive, critically full, stale seal / prune / check); failed backup, failed drive or full storage is critical; hosts without a policy never alert; still open: a failed full-read verification (waits on scheduled verification) and a key nearing rotation -- 2026-10-28: scheduled verification joins `backup_health`: a failed full-read pass is critical, none within the cadence is a warning (`verification` param, default on)
 - [ ] **Write cache proven on an encrypted repository:** the host's Backup card shows "Write cache on this host" with its size after a capture into an encrypted repository, and the over-budget alert fires (moved from 24.1, 2026-10-25)
-- [ ] **Backup SLA report** (reporting engine): per host and policy -- RPO met / missed over the period, last verified restore, failures, growth
-- [ ] **Compliance and advisor evidence:** "backups verified in the last N days" as a compliance-engine check and an advisor recommendation (with a Fix-it link to the policy)
-- [ ] **Capacity forecasting:** per target, growth rate from snapshot history and the days until a threshold, from the usage report (item 20)
-- [ ] **Package-level restore:** `restore --packages` onto a running host (reinstall the recorded packages at their versions, then the files), plan-first, with the generated package script shown before it runs
+- [ ] **Backup SLA report** (reporting engine): per host and policy -- RPO met / missed over the period, last verified restore, failures, growth -- 2026-10-28 coded: reporting_engine `backup-sla` (PDF / HTML / scheduled email): per backed-up host its interval, last good backup, RPO status now (RPO = twice the interval, the overdue line), RPO met on N of the last 30 days, failed backups in 30 days, last full-read verification, repository size; OSS template codes + Reports card
+- [ ] **Compliance and advisor evidence:** "backups verified in the last N days" as a compliance-engine check and an advisor recommendation (with a Fix-it link to the policy) -- 2026-10-28: compliance coded -- `SYSMANAGE-BACKUP-1` (benchmark SYSMANAGE, scanned with ALL): passed a full-read verification within 30 days; no backup policy = not applicable. The advisor recommendation (with Fix-it) is NOT done: it needs a backup domain in the advisor's gatherer
+- [ ] **Capacity forecasting:** per target, growth rate from snapshot history and the days until a threshold, from the usage report (item 20) -- 2026-10-28 coded: backup_engine `capacity_forecast` + OSS `backup_forecast.py`: net growth per day over 30 days (captures' new bytes less pruned snapshots' unique bytes) and days to the target's warning / critical marks, on the target card
+- [ ] **Package-level restore:** `restore --packages` onto a running host (reinstall the recorded packages at their versions, then the files), plan-first, with the generated package script shown before it runs -- 2026-10-28: blocked on restate -- restore jobs take no `packages` key yet (asked restate for it, plan-first with the package script in the result)
 
 #### 24.7 Drift timeline (Pro+)
 
-- [ ] `restate diff` between consecutive snapshots (including `--packages`, JSON per item 1) as a per-host "what changed" timeline: files added / removed / modified, packages installed / upgraded / removed, with the snapshot it appeared in
+- [ ] `restate diff` between consecutive snapshots (including `--packages`, JSON per item 1) as a per-host "what changed" timeline: files added / removed / modified, packages installed / upgraded / removed, with the snapshot it appeared in -- 2026-10-28: blocked on restate -- no `diff` job command yet (asked restate for one: from / to snapshots, packages, decrypt_with, the change list in the result)
 - [ ] Linked from configuration drift (20.3) and the host's history: "this config file changed between Tuesday's and Wednesday's backup"
 - [ ] Filters that hide expected churn (logs, caches already expendable; per-policy ignore patterns)
 
@@ -14276,7 +14276,7 @@ How backups behave once they cover a real fleet (Community behavior; the multi-s
 ## Phase 25: Fleet Backup at Scale -- Multi-Site, Recovery & Multi-Tenancy (Enterprise / MULTITENANT_SAAS)
 
 **Target Release:** **v3.13.0.0**
-**Focus:** The backup work that only matters once there are several sites, a dead host to rebuild, or many tenants: per-site storage through federation, restore readiness, bare-metal recovery, clones, fleet-wide restore jobs, four-eyes approval, legal hold, restore drills, off-site and cloud copies, and backup multi-tenancy -- on top of Phase 24's Community and Pro+ backups.
+**Focus:** The backup work that only matters once there are several sites, a dead host to rebuild, or many tenants: per-site storage through federation, restore readiness, bare-metal recovery, clones, fleet-wide restore jobs, four-eyes approval, legal hold, restore drills, off-site and cloud copies, a storage-side backup gateway so hosts never mount the storage, and backup multi-tenancy -- on top of Phase 24's Community and Pro+ backups.
 
 **Why here (and why still v3.x):** split out of Phase 24 on 2026-10-28 so 24 can ship and close as Community + Pro+. Bryan: "don't let it tick over to 4.0 until we have backup fully in our rear-view mirror" -- so this is **v3.13.0.0**, and mobile (Phase 26) keeps the **v4.0.0.0** major bump and starts after it.
 
@@ -14409,12 +14409,90 @@ sub-phase is Enterprise; Bryan to confirm when it is sliced).*
 - [ ] **Lifecycle:** tenant provisioning (self-service provisioning) creates the tenant's storage namespace and keys, or prompts for a bring-your-own target; tenant removal has a **retention and export step** (the tenant takes its backups or has them deleted, both audited) before its storage is destroyed
 - [ ] **Isolation tests:** two tenants on one pool; neither can list, read, mount or deduplicate against the other's data, and neither's keys open the other's repositories
 
-#### 25.5 Docs, screenshots, i18n
+#### 25.5 Storage-side backup gateway: hosts never reach the storage (added 2026-10-28, Bryan)
 
-- [ ] sysmanage-docs, Enterprise / MULTITENANT_SAAS: fleet operations across sites and restore readiness; rebuild, clone and fleet restore jobs; four-eyes approval, legal hold and restore drills; off-site, immutable, air-gap and cloud copies; multi-tenancy -- each on its tier page, with screenshots through `make screenshots`
+Today every backed-up host mounts its own NFSv4 export of the storage host.
+That works, but it means every host can reach the storage network, the
+append-only guarantee rests on NFS permissions, ownership squashing and
+directory ACLs (with per-OS quirks: FreeBSD refuses creates in sticky
+directories, Linux `protected_regular` breaks them), and every host runs an
+NFS client (the 2026-10-28 production bug -- systemd's private mount
+namespace hiding the mount from restate's unit, so a capture wrote to local
+disk -- exists only because hosts mount).  The gateway replaces the mount
+with an authenticated, append-only HTTPS service on the storage side.
+
+**Design rule (Bryan, 2026-10-28): the proxy is on the storage side, never
+the SysManage server.**  Routing backup data through the server was weighed
+and rejected: it doubles every byte's trip (host -> server -> storage),
+makes the server the bandwidth bottleneck and a single point of failure for
+backups, pulls each site's data across the WAN, and -- for unencrypted
+Community repositories -- puts plaintext on the server.  Backup data stays at
+its site (the Phase 24 rule "heavy and local; status light and global"); the
+server stays the control plane.
+
+- [ ] **The gateway:** a small HTTPS service on the storage host (or on a
+      per-site relay host where the storage host cannot run one), installed
+      and kept current by SysManage like restate is today,
+      listening only where the site's hosts can reach it; TLS with the
+      server-issued certificate chain the agent already trusts
+- [ ] **Host authentication by credential, not address:** a host presents its
+      host token (or a short-lived grant the server issues for one job); the
+      gateway maps it to that host's repository, so a host cannot even name
+      another host's repository -- no per-host exports, no client-address
+      allow-lists, no NAS credentials or mounts on any backed-up host
+- [ ] **Append-only by protocol:** the API can list and read what an
+      incremental capture needs (index, record, the host's own snapshots) and
+      add new packs and snapshots -- there is no delete, rename or overwrite
+      operation at all.  Prune, check, seal, protect and copy stay local jobs
+      on the storage host (24.5), unchanged
+- [ ] **Restores through the gateway** with a one-time grant the server issues
+      under the Restore Files role (audited); browse and plan read the index
+      only, as today
+- [ ] **Locking at the gateway:** a capture holds its repository's lock in the
+      gateway, replacing `flock` over NFS (which some network filesystems do
+      not honor); a busy repository still answers "busy" (exit 5 semantics) so
+      the existing retry with backoff applies
+- [ ] **Per-host limits at the gateway:** concurrency (the target's cap, 24.8),
+      optional bandwidth caps by hour of day (shared with 25.3's uploader),
+      and a quota hook for 25.4 multi-tenancy
+- [ ] **Encryption unchanged:** with Pro+ encryption the gateway and the
+      storage host only ever see ciphertext packs; Community repositories are
+      plaintext at rest exactly as they are on NFS today (the gateway adds no
+      new place where data is readable)
+- [ ] **Coexists with NFS:** per target, "hosts mount NFS" (today) or "hosts
+      use the gateway"; a target can switch, and the storage audit (24.5)
+      checks whichever is in use.  Hosts that cannot mount NFS well (Windows,
+      macOS, the BSDs' clients) are the first users
+- [ ] **A standalone project, not a restate feature (Bryan, 2026-10-28):**
+      the gateway is its own piece of code, installed on the NAS / storage
+      host (a new GitHub repository is fine), with its own packaging and
+      release, branded SysManage (e.g. `sysmanage-backup-gateway`; name to
+      settle): its trust model is SysManage's -- host tokens, server-issued
+      grants, installed and updated by SysManage -- so without SysManage it
+      could not tell who may write where.  restate stays as it is, "do one
+      thing and do it well": local paths only, no network code.
+      So the host side needs a matching piece that presents the repository
+      to restate as a local path while the data goes to the gateway: the
+      choice between a FUSE filesystem shipped by the gateway project, a
+      staging directory the agent uploads from (the write cache shows restate
+      already tolerates a local copy), or another approach is the first
+      design spike of this sub-phase.  restic's rest-server in
+      `--append-only` mode is prior art for the server side
+- [ ] **Smaller first step to consider:** where a site's hosts cannot reach the
+      storage at all, the federation site server can act as the relay -- data
+      stays within the site, at the cost of one hop and that server's
+      bandwidth
+- [ ] **Tier: to decide (Bryan).** Append-only safety has been Community from
+      the start (Phase 24: "safety is not a paid feature"), which argues for
+      Community; per-site relays and multi-tenant quotas at the gateway are
+      Enterprise / MULTITENANT_SAAS
+
+#### 25.6 Docs, screenshots, i18n
+
+- [ ] sysmanage-docs, Enterprise / MULTITENANT_SAAS: fleet operations across sites and restore readiness; rebuild, clone and fleet restore jobs; four-eyes approval, legal hold and restore drills; off-site, immutable, air-gap and cloud copies; the storage-side gateway; multi-tenancy -- each on its tier page, with screenshots through `make screenshots`
 - [ ] All new strings in 14 locales, verified
 
-#### 25.6 Editions
+#### 25.7 Editions
 
 - [ ] **Enterprise -- multi-site and recovery at scale:**
   - multiple targets; per-site targets through federation; off-site replication (`restate copy`) to a second site; immutable copies; air-gap media for isolated sites (25.3)
@@ -14439,6 +14517,10 @@ sub-phase is Enterprise; Bryan to confirm when it is sliced).*
 - [ ] A fleet-wide restore job runs in waves with per-host results; four-eyes approval blocks a single operator; legal hold survives a prune
 - [ ] **Restore drill passes:** a scheduled sandbox-VM drill restores, probes and records pass / fail for at least three hosts
 
+**Storage-side gateway (tier to decide)**
+
+- [ ] A host with no route to the storage network backs up and restores through the gateway; from that host, deleting, renaming or overwriting any pack or snapshot, or naming another host's repository, is refused; a concurrent capture and storage-side prune still resolve to "busy, retry"
+
 **MULTITENANT_SAAS**
 
 - [ ] **Tenant isolation proven:** two tenants on one pool -- no cross-tenant listing, reading, mounting or deduplication, and neither tenant's keys open the other's repositories
@@ -14448,7 +14530,7 @@ sub-phase is Enterprise; Bryan to confirm when it is sliced).*
 **Every phase**
 
 - [ ] Every tier 402-clean when unlicensed, in both repos
-- [ ] Docs + 14-language i18n complete (25.5)
+- [ ] Docs + 14-language i18n complete (25.6)
 - [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped.
 - [ ] **Pro+ engines built for every OS + architecture and verified in R2**
       (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase))

@@ -33,6 +33,7 @@ import {
     statusLabel,
 } from './backupLabels';
 import EquipForBackup from './EquipForBackup';
+import { VerificationLine } from './VerificationStatus';
 
 // restate's plaintext write cache on this host (encrypted repositories only;
 // restate 2.1.0.4 reports its size with each capture), against the target's
@@ -151,6 +152,7 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                             {t('backups.hosts.snapshots', 'Snapshots: {{n}}', { n: data.snapshot_count })}
                             {' - '}{formatBytes(data.policy.repository_bytes)}
                         </Typography>
+                        <VerificationLine verification={data.verification} />
                         <WriteCache run={data.last_good_capture} budgetGb={data.target?.cache_budget_gb ?? 20} />
                         <FirstFitNote fit={data.first_fit} />
                     </>

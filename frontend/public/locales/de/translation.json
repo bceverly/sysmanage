@@ -2917,7 +2917,8 @@
       "tracking": "Verfolgung",
       "users": "Benutzer",
       "assetTags": "Asset-Tags",
-      "hardware": "Hardware"
+      "hardware": "Hardware",
+      "backups": "Sicherungen"
     },
     "title": "Berichte",
     "unknownError": "Unbekannter Fehler",
@@ -2933,6 +2934,10 @@
     "untaggedMachines": {
       "description": "Maschinen, die noch kein Asset-Tag haben, mit jedem installierten Betriebssystem auf jeder Maschine, dem Hersteller, Modell, Seriennummer und System-UUID. Verwenden Sie es, um Hardware zu finden, die noch ein Etikett benötigt.",
       "name": "Ungetagte Maschinen"
+    },
+    "backupSla": {
+      "name": "Backup-SLA",
+      "description": "Für jeden gesicherten Host: ob sein Recovery Point Objective (das Doppelte seines Sicherungsintervalls) jetzt und an jedem der letzten 30 Tage eingehalten wird, seine fehlgeschlagenen Sicherungen, seine letzte Verifizierung mit vollständigem Lesen und die Größe seines Repositorys."
     }
   },
   "resetPassword": {
@@ -5292,7 +5297,8 @@
       "du": "Speicherbelegung",
       "repack": "Neu packen",
       "prepare": "Speicher vorbereiten",
-      "protect": "Schutz"
+      "protect": "Schutz",
+      "verify": "Verifizierung mit vollständigem Lesen"
     },
     "card": {
       "lastCheck": "Letzte Prüfung",
@@ -5591,6 +5597,24 @@
       "recheckError": "Die Prüfung konnte nicht angefordert werden.",
       "running": "Wird ausgestattet: restate wird installiert...",
       "started": "restate wird installiert; das kann einige Minuten dauern."
+    },
+    "verify": {
+      "title": "Verifizierung mit vollständigem Lesen",
+      "verified": "Verifiziert (zuletzt bestanden am {{when}})",
+      "running": "Läuft gerade",
+      "failed": "Der letzte Durchlauf ist fehlgeschlagen",
+      "unverified": "Seit {{days}} Tagen nicht verifiziert (zuletzt bestanden am {{when}})",
+      "never": "Noch nicht verifiziert",
+      "readOnly": "Liest das gesamte Repository alle {{days}} Tage zurück (eine Änderung erfordert Professional+).",
+      "field": "Das gesamte Repository alle (Tage) zurücklesen",
+      "help": "0 = aus. Jeder Durchlauf liest das gesamte Repository über das Netzwerk, also eher Wochen als Tage."
+    },
+    "forecast": {
+      "title": "Prognose",
+      "growth": "Wächst um etwa {{size}} pro Tag (letzte {{days}} Tage)",
+      "flat": "Wächst nicht (letzte {{days}} Tage)",
+      "reached": "{{percent}}% erreicht",
+      "until": "{{percent}}% in etwa {{days}} Tagen"
     }
   }
 }

@@ -2917,7 +2917,8 @@
       "tracking": "seguimento",
       "users": "utenti",
       "assetTags": "tag di asset",
-      "hardware": "hardware"
+      "hardware": "hardware",
+      "backups": "backup"
     },
     "title": "Report",
     "unknownError": "Errore sconosciuto",
@@ -2933,6 +2934,10 @@
     "untaggedMachines": {
       "description": "Macchine senza etichetta asset ancora, con ogni sistema operativo installato su ciascuna di esse, il suo fornitore, modello, numero di serie e UUID del sistema. Usarlo per trovare l'hardware che ha ancora bisogno di un'etichetta.",
       "name": "Macchine senza etichette"
+    },
+    "backupSla": {
+      "name": "SLA dei backup",
+      "description": "Per ogni host sottoposto a backup: se il suo obiettivo del punto di ripristino (il doppio del suo intervallo di backup) è rispettato ora e in ciascuno degli ultimi 30 giorni, i backup non riusciti, l'ultima verifica con lettura completa e la dimensione del repository."
     }
   },
   "resetPassword": {
@@ -5292,7 +5297,8 @@
       "du": "Uso dell'archiviazione",
       "repack": "Reimpacchetta",
       "prepare": "Prepara archiviazione",
-      "protect": "Protezione"
+      "protect": "Protezione",
+      "verify": "Verifica con lettura completa"
     },
     "card": {
       "lastCheck": "Ultima verifica",
@@ -5591,6 +5597,24 @@
       "recheckError": "Impossibile richiedere la verifica.",
       "running": "Predisposizione in corso: installazione di restate...",
       "started": "Installazione di restate; può richiedere alcuni minuti."
+    },
+    "verify": {
+      "title": "Verifica con lettura completa",
+      "verified": "Verificato (ultimo superato il {{when}})",
+      "running": "In esecuzione",
+      "failed": "L'ultimo passaggio non è riuscito",
+      "unverified": "Non verificato da {{days}} giorni (ultimo superato il {{when}})",
+      "never": "Non ancora verificato",
+      "readOnly": "Rilegge l'intero repository ogni {{days}} giorni (modificarlo richiede Professional+).",
+      "field": "Rileggere l'intero repository ogni (giorni)",
+      "help": "0 = disattivato. Ogni passaggio legge l'intero repository in rete, quindi meglio settimane che giorni."
+    },
+    "forecast": {
+      "title": "Previsione",
+      "growth": "Cresce di circa {{size}} al giorno (ultimi {{days}} giorni)",
+      "flat": "Non cresce (ultimi {{days}} giorni)",
+      "reached": "{{percent}}% raggiunto",
+      "until": "{{percent}}% tra circa {{days}} giorni"
     }
   }
 }

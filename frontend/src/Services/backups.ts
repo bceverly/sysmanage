@@ -64,6 +64,14 @@ export interface StorageAuditEntry {
 }
 
 /** The storage host's own health: its drives and the space under the path. */
+/** How fast the target fills, and when it crosses its marks (Pro+ 24.6). */
+export interface CapacityForecast {
+  growth_bytes_per_day: number;
+  days_to_low: number | null;
+  days_to_critical: number | null;
+  basis_days: number;
+}
+
 export interface StorageHealth {
   drives: { failed: string[]; warning: string[] };
   space: {
@@ -122,6 +130,8 @@ export interface BackupTarget {
   storage_fs: StorageFilesystem;
   storage_status: StorageStatus | null;
   storage_health?: StorageHealth | null;
+  /** Pro+ capacity forecasting; null without the engine or enough history. */
+  forecast?: CapacityForecast | null;
   storage_audit?: Record<string, StorageAuditEntry>;
   service_account?: string;
   warnings: TargetWarning[];
@@ -163,6 +173,8 @@ export interface BackupPolicy {
   keep_yearly?: number;
   /** The storage host's restate honors a yearly count (it has reported in). */
   yearly_supported?: boolean;
+  /** Pro+ scheduled verification: a full-read check every N days (0 = off). */
+  verify_interval_days?: number;
   check_interval_days: number;
   quiesce: boolean;
   quiesce_with: string[];
@@ -195,6 +207,7 @@ export type PolicyInput = Pick<
   | "keep_weekly"
   | "keep_monthly"
   | "keep_yearly"
+  | "verify_interval_days"
   | "check_interval_days"
   | "quiesce"
   | "quiesce_with"
@@ -251,6 +264,8 @@ export interface BackupHost {
   /** The newest capture that produced a snapshot (ok, different, incomplete). */
   last_good_capture: BackupRun | null;
   last_check: BackupRun | null;
+  /** Pro+ scheduled verification (null without a policy). */
+  verification?: Verification | null;
   running: BackupRun | null;
   /** A bulk "Back up now" waiting for a free slot under the target's cap. */
   capture_requested: boolean;
@@ -423,6 +438,16 @@ export const restoreFiles = async (hostId: string, input: RestoreInput): Promise
 
 /** What the next prune would keep and remove (Pro+ backup_engine; the
  *  server ports restate's own choice).  HTTP 402 without the engine. */
+/** A repository's scheduled full-read verification (Pro+ 24.6). */
+export interface Verification {
+  interval_days: number;
+  state: "off" | "verified" | "unverified" | "failed" | "running";
+  last_good_at: string | null;
+  last_status: string | null;
+  last_at: string | null;
+  last_message: string | null;
+}
+
 export interface RetentionPreview {
   kept: string[];
   removed: string[];

@@ -2917,7 +2917,8 @@
       "tracking": "跟踪",
       "users": "用户",
       "assetTags": "资产标签",
-      "hardware": "硬件"
+      "hardware": "硬件",
+      "backups": "备份"
     },
     "title": "报告",
     "unknownError": "未知错误",
@@ -2933,6 +2934,10 @@
     "untaggedMachines": {
       "description": "尚未贴有资产标签的机器，每台都安装了操作系统、供应商、型号、序列号和系统UUID。用它来查找仍需贴标签的硬件。",
       "name": "未标记机器"
+    },
+    "backupSla": {
+      "name": "备份 SLA",
+      "description": "针对每台已备份的主机：其恢复点目标（备份间隔的两倍）当前以及最近 30 天中每一天是否满足、失败的备份、最近一次完整读取验证以及存储库大小。"
     }
   },
   "resetPassword": {
@@ -5292,7 +5297,8 @@
       "du": "存储用量",
       "repack": "重新打包",
       "prepare": "准备存储",
-      "protect": "保护"
+      "protect": "保护",
+      "verify": "完整读取验证"
     },
     "card": {
       "lastCheck": "上次检查",
@@ -5591,6 +5597,24 @@
       "recheckError": "无法请求检查。",
       "running": "正在配备：正在安装 restate...",
       "started": "正在安装 restate；这可能需要几分钟。"
+    },
+    "verify": {
+      "title": "完整读取验证",
+      "verified": "已验证（上次成功：{{when}}）",
+      "running": "正在运行",
+      "failed": "上次运行失败",
+      "unverified": "已 {{days}} 天未验证（上次成功：{{when}}）",
+      "never": "尚未验证",
+      "readOnly": "每 {{days}} 天重新读取整个存储库（更改此项需要 Professional+）。",
+      "field": "每隔（天）重新读取整个存储库",
+      "help": "0 = 关闭。每次都会通过网络读取整个存储库，因此请按周而不是按天设置。"
+    },
+    "forecast": {
+      "title": "预测",
+      "growth": "每天增长约 {{size}}（最近 {{days}} 天）",
+      "flat": "未增长（最近 {{days}} 天）",
+      "reached": "已达到 {{percent}}%",
+      "until": "约 {{days}} 天后达到 {{percent}}%"
     }
   }
 }

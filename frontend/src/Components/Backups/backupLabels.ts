@@ -96,6 +96,7 @@ export const actionLabel = (t: TFunction, action: string): string => {
         repack: t('backups.action.repack', 'Repack'),
         prepare: t('backups.action.prepare', 'Prepare storage'),
         protect: t('backups.action.protect', 'Protect'),
+        verify: t('backups.action.verify', 'Full-read verification'),
     };
     return labels[action] ?? action;
 };

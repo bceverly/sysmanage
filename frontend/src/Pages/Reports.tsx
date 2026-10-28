@@ -298,6 +298,14 @@ const Reports: React.FC = () => {
         tags: [t('reports.tag.hosts', 'hosts'), t('reports.tag.assetTags', 'asset tags'), t('reports.tag.hardware', 'hardware')]
       },
       {
+        id: 'backup-sla',
+        name: t('reports.backupSla.name', 'Backup SLA'),
+        description: t('reports.backupSla.description', 'For every backed-up host: whether its recovery point objective (twice its backup interval) is met now and on each of the last 30 days, its failed backups, its last full-read verification, and its repository size.'),
+        category: 'hosts',
+        screenshot: `${baseURL}/api/v1/reporting/screenshots/backup-sla.png`,
+        tags: [t('reports.tag.hosts', 'hosts'), t('reports.tag.backups', 'backups'), t('reports.tag.compliance', 'compliance')]
+      },
+      {
         id: 'users-list',
         name: t('reports.usersList.name', 'SysManage Users'),
         description: t('reports.usersList.description', 'Comprehensive list of all SysManage users showing their profiles, roles, permissions, and account status. Includes user creation dates and last login times.'),
