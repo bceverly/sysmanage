@@ -5,7 +5,9 @@
 """Equip for backup: have a host's agent install restate (ROADMAP Phase 24).
 
 The agent decides everything about the install (backup/equip.py: Ubuntu's PPA,
-FreeBSD's checked release package); the server only asks, keeps the latest
+Fedora's COPR, Homebrew on macOS, and restate's checked release packages for
+EL, openSUSE, Alpine and the BSDs, each with the NFS client where it is a
+package); the server only asks, keeps the latest
 attempt per host in ``backup_equip``, and -- when it succeeds -- asks the
 agent for a fresh capability report, so the host reads "equipped" within
 seconds instead of after its agent's next restart.
