@@ -57,6 +57,13 @@ ERROR_BACKOFF_SECONDS = 60
 STUCK_AFTER = timedelta(hours=12)
 BUSY_RETRY = timedelta(minutes=30)
 FAILED_RETRY = timedelta(hours=1)
+# A protect that left files unprotected runs again: right after a capture the
+# host's NFS client can still hold its newest files (NFSv4 delegations), and
+# the storage host's immutable flag is refused until it lets them go
+# (production, nextcloud, 2026-10-29: 121 of 7,224 files).  A few tries, a
+# few minutes apart; after that it stays failed, loudly.
+PROTECT_RETRY = timedelta(minutes=5)
+PROTECT_TRIES = 3
 WINDOW_HOURS = 6
 
 _TASK: Optional[asyncio.Task] = None
@@ -243,8 +250,32 @@ def _storage_retry_ok(db, policy, action, now: datetime) -> bool:
     return ended + wait <= now
 
 
+def _protect_again(db, policy, now: datetime) -> bool:
+    """The newest protect ended without protecting everything, the last
+    PROTECT_TRIES protects were not all such, and PROTECT_RETRY has passed."""
+    if not policy.storage_protects:
+        return False
+    runs = (
+        db.query(models.BackupRun)
+        .filter(
+            models.BackupRun.policy_id == policy.id,
+            models.BackupRun.action == "protect",
+        )
+        .order_by(models.BackupRun.queued_at.desc())
+        .limit(PROTECT_TRIES)
+        .all()
+    )
+    if not runs or runs[0].status == "ok" or runs[0].status in jobs.PENDING:
+        return False
+    if len(runs) == PROTECT_TRIES and all(r.status != "ok" for r in runs):
+        return False
+    return (runs[0].finished_at or runs[0].queued_at) + PROTECT_RETRY <= now
+
+
 def _upkeep_action(db, policy, target, now: datetime) -> Optional[str]:
     """The one storage-side job this policy needs now, if any."""
+    if _protect_again(db, policy, now):
+        return "protect"
     captured = _last_finished(db, policy, "capture", jobs.GOOD_CAPTURE)
     pruned = _last_finished(db, policy, "prune", ("ok",))
     if captured and (pruned is None or pruned < captured):
@@ -269,7 +300,10 @@ def _storage_upkeep(db, policy, target, now: datetime) -> Optional[str]:
         return None
     if any(jobs.pending(db, policy.id, a) for a in jobs.STORAGE_ACTIONS):
         return None  # one storage job per repository at a time
-    jobs.queue_run(db, policy, target.storage_host_id, action)
+    # A protect again is outside the capture chain: seal and prune followed
+    # the first one already.
+    record = {"chain": False} if action == "protect" else None
+    jobs.queue_run(db, policy, target.storage_host_id, action, record=record)
     return action
 
 

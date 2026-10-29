@@ -217,6 +217,40 @@ def test_a_busy_storage_job_waits_before_retrying(session):
     )
 
 
+def test_an_incomplete_protect_runs_again_a_few_times(session, sent):
+    """Production, nextcloud, 2026-10-29: protect ran a second after the
+    capture and the client still held its newest files."""
+    s = _setup(session)
+    s.policy.storage_protects = True
+    _finish(session, s.policy, s.host.id, "capture", at=NOW - timedelta(hours=1))
+    _finish(session, s.policy, s.nas.id, "prune", at=NOW - timedelta(minutes=50))
+    _finish(session, s.policy, s.nas.id, "check", at=NOW - timedelta(minutes=50))
+    _finish(session, s.policy, s.nas.id, "protect", "incomplete", at=NOW)
+    assert tick._upkeep_action(session, s.policy, s.target, NOW) is None  # too soon
+    later = NOW + tick.PROTECT_RETRY
+    assert tick._storage_upkeep(session, s.policy, s.target, later) == "protect"
+    queued = jobs.latest_run(session, s.policy.id, "protect")
+    assert json.loads(queued.parameters)["chain"] is False
+    assert sent[-1][0] == str(s.nas.id) and sent[-1][2]["action"] == "protect"
+    queued.status, queued.finished_at = "failed", later
+    _finish(session, s.policy, s.nas.id, "protect", "incomplete",
+            at=later + timedelta(minutes=1))  # fmt: skip
+    # Three in a row without an ok: no more.
+    assert (
+        tick._upkeep_action(session, s.policy, s.target, NOW + timedelta(hours=2))
+        is None
+    )
+
+
+def test_a_protect_that_succeeded_or_is_off_is_left_alone(session):
+    s = _setup(session)
+    _finish(session, s.policy, s.nas.id, "protect", "incomplete", at=NOW)
+    assert not tick._protect_again(session, s.policy, NOW + timedelta(hours=1))
+    s.policy.storage_protects = True
+    _finish(session, s.policy, s.nas.id, "protect", "ok", at=NOW + timedelta(minutes=1))
+    assert not tick._protect_again(session, s.policy, NOW + timedelta(hours=1))
+
+
 def test_an_unequipped_host_is_skipped(session, sent):
     s = _setup(session)
     s.host.agent_capabilities = json.dumps(
