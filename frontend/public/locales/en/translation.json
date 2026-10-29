@@ -1206,7 +1206,8 @@
     "reasonMissingNamedTool": "Requires {{tool}}, which is not installed on this host",
     "optionalNotInstalled": "Available once its tool is installed",
     "reasonOutdatedNamedTool": "Requires a newer {{tool}} than this host has",
-    "reasonToolOutdated": "A required tool on this host is too old"
+    "reasonToolOutdated": "A required tool on this host is too old",
+    "reasonMissingNfsClient": "The NFS client is not installed on this host (Equip for backup installs it)"
   },
   "hostDefaults": {
     "addNewPackageManager": "Add New Enabled Package Manager",
@@ -5344,7 +5345,7 @@
       "intervalHours": "Every (hours)",
       "keepLast": "Snapshots to keep",
       "quiesce": "Pause services while reading their data",
-      "quiesceHelp": "For example: postgres, nextcloud",
+      "quiesceBuiltin": "This host has not reported which it has yet. Pick its database or app; mysql also covers MariaDB.",
       "saveError": "The backup policy could not be saved.",
       "title": "Backup policy for {{host}}",
       "windowHelp": "Backups start only in the six hours from this hour.",
@@ -5373,7 +5374,8 @@
       "noStorageHost": "No storage host is set",
       "notPrivileged": "The agent must run as root",
       "toolOutdated": "Upgrade restate",
-      "wrongPlatform": "Not supported on this OS"
+      "wrongPlatform": "Not supported on this OS",
+      "missingNfsClient": "Install the NFS client"
     },
     "restore": {
       "confirm": "Restore to staging",
@@ -5517,7 +5519,12 @@
       "selectAllActionable": "Select every host that can be backed up or equipped now",
       "skipEquipPlatform": "restate has no package the agent can install here",
       "skipEquipped": "Already equipped",
-      "skipEquipping": "Already equipping"
+      "skipEquipping": "Already equipping",
+      "skipHasPolicy": "Already has a backup policy",
+      "skipNotEquipped": "Not equipped for backup yet",
+      "setupError": "Backups could not be set up.",
+      "setupSelected": "Set up backups for selected ({{n}})",
+      "setupResult": "Set up with the default policy: {{created}}. Skipped: {{skipped}}. Choose the services to pause on each host with Configure."
     },
     "repack": {
       "button": "Repack",

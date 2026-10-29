@@ -1187,7 +1187,8 @@
     "reasonMissingNamedTool": "{{tool}}이(가) 필요하지만 이 호스트에 설치되어 있지 않습니다",
     "optionalNotInstalled": "툴이 설치된 후 사용 가능",
     "reasonOutdatedNamedTool": "이 호스트에 있는 것보다 최신 {{tool}}이(가) 필요합니다",
-    "reasonToolOutdated": "이 호스트에 필요한 도구가 너무 오래되었습니다"
+    "reasonToolOutdated": "이 호스트에 필요한 도구가 너무 오래되었습니다",
+    "reasonMissingNfsClient": "이 호스트에 NFS 클라이언트가 설치되어 있지 않습니다(\"백업 준비\"가 설치합니다)"
   },
   "hostDefaults": {
     "addNewPackageManager": "새 활성화된 패키지 관리자 추가",
@@ -5344,7 +5345,7 @@
       "intervalHours": "간격 (시간)",
       "keepLast": "보존할 스냅샷 수",
       "quiesce": "데이터를 읽는 동안 서비스 일시 중지",
-      "quiesceHelp": "예: postgres, nextcloud",
+      "quiesceBuiltin": "이 호스트는 아직 어떤 것이 있는지 보고하지 않았습니다. 데이터베이스나 앱을 선택하세요. mysql은 MariaDB도 포함합니다.",
       "saveError": "백업 정책을 저장할 수 없습니다.",
       "title": "{{host}}의 백업 정책",
       "windowHelp": "백업은 이 시각부터 6시간 이내에만 시작됩니다.",
@@ -5373,7 +5374,8 @@
       "noStorageHost": "스토리지 호스트가 설정되지 않았습니다",
       "notPrivileged": "에이전트는 root로 실행되어야 합니다",
       "toolOutdated": "restate를 업그레이드하세요",
-      "wrongPlatform": "이 운영 체제에서는 지원되지 않음"
+      "wrongPlatform": "이 운영 체제에서는 지원되지 않음",
+      "missingNfsClient": "NFS 클라이언트 설치"
     },
     "restore": {
       "confirm": "스테이징 영역으로 복원",
@@ -5517,7 +5519,12 @@
       "selectAllActionable": "지금 백업하거나 백업 준비할 수 있는 모든 호스트 선택",
       "skipEquipPlatform": "여기에는 에이전트가 설치할 수 있는 restate 패키지가 없습니다",
       "skipEquipped": "이미 준비됨",
-      "skipEquipping": "이미 준비 중"
+      "skipEquipping": "이미 준비 중",
+      "skipHasPolicy": "이미 백업 정책이 있습니다",
+      "skipNotEquipped": "아직 백업 준비가 되지 않았습니다",
+      "setupError": "백업을 설정할 수 없습니다.",
+      "setupSelected": "선택한 호스트 백업 설정({{n}})",
+      "setupResult": "기본 정책으로 설정됨: {{created}}. 건너뜀: {{skipped}}. 일시 중지할 서비스는 각 호스트의 \"구성\"에서 선택하세요."
     },
     "repack": {
       "button": "다시 패킹",

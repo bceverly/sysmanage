@@ -111,6 +111,7 @@ from backend.api import (
     backups_browse,
     backups_equip,
     backups_retention,
+    backups_setup,
     time_sync,
     time_sync_policy,
     time_sync_resync,
@@ -457,6 +458,7 @@ def register_routes(app: FastAPI):
     _include_versioned(app, backups_browse.router, tags=["backups"])
     _include_versioned(app, backups_equip.router, tags=["backups"])
     _include_versioned(app, backups_retention.router, tags=["backups"])
+    _include_versioned(app, backups_setup.router, tags=["backups"])
     _include_versioned(app, asset_tags.router, tags=["machines"])
     _include_versioned(app, asset_tag_csv.router, tags=["machines"])
 

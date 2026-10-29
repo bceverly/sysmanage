@@ -1187,7 +1187,8 @@
     "reasonMissingNamedTool": "Richiede {{tool}}, che non è installato su questo host",
     "optionalNotInstalled": "Disponibile una volta che il suo strumento è stato installato",
     "reasonOutdatedNamedTool": "Richiede una versione di {{tool}} più recente di quella presente su questo host",
-    "reasonToolOutdated": "Uno strumento necessario su questo host è troppo vecchio"
+    "reasonToolOutdated": "Uno strumento necessario su questo host è troppo vecchio",
+    "reasonMissingNfsClient": "Il client NFS non è installato su questo host (\"Predisponi per il backup\" lo installa)"
   },
   "hostDefaults": {
     "addNewPackageManager": "Aggiungi Nuovo Gestore Pacchetti Abilitato",
@@ -5344,7 +5345,7 @@
       "intervalHours": "Ogni (ore)",
       "keepLast": "Snapshot da conservare",
       "quiesce": "Sospendi i servizi durante la lettura dei loro dati",
-      "quiesceHelp": "Ad esempio: postgres, nextcloud",
+      "quiesceBuiltin": "Questo host non ha ancora segnalato quali ha. Scegli il suo database o la sua applicazione; mysql copre anche MariaDB.",
       "saveError": "Impossibile salvare il criterio di backup.",
       "title": "Criterio di backup per {{host}}",
       "windowHelp": "I backup partono solo nelle sei ore a partire da questa ora.",
@@ -5373,7 +5374,8 @@
       "noStorageHost": "Nessun host di archiviazione impostato",
       "notPrivileged": "L'agente deve essere eseguito come root",
       "toolOutdated": "Aggiorna restate",
-      "wrongPlatform": "Non supportato su questo sistema operativo"
+      "wrongPlatform": "Non supportato su questo sistema operativo",
+      "missingNfsClient": "Installa il client NFS"
     },
     "restore": {
       "confirm": "Ripristina nell'area di staging",
@@ -5517,7 +5519,12 @@
       "selectAllActionable": "Seleziona tutti gli host di cui ora si può eseguire il backup o che si possono predisporre",
       "skipEquipPlatform": "restate non ha un pacchetto che l'agente possa installare qui",
       "skipEquipped": "Già predisposto",
-      "skipEquipping": "Predisposizione già in corso"
+      "skipEquipping": "Predisposizione già in corso",
+      "skipHasPolicy": "Ha già un criterio di backup",
+      "skipNotEquipped": "Non ancora attrezzato per i backup",
+      "setupError": "Non è stato possibile configurare i backup.",
+      "setupSelected": "Configura i backup dei selezionati ({{n}})",
+      "setupResult": "Configurati con il criterio predefinito: {{created}}. Saltati: {{skipped}}. Scegli i servizi da mettere in pausa su ogni host con \"Configura\"."
     },
     "repack": {
       "button": "Reimpacchetta",

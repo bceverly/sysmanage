@@ -6,7 +6,7 @@
 // storage are errors; overdue and incomplete runs are warnings.
 
 import { describe, test, expect } from "vitest";
-import { backupSummaryLevel } from "../../../Components/Backups/backupLabels";
+import { backupSummaryLevel, reasonLabel } from "../../../Components/Backups/backupLabels";
 
 describe("backupSummaryLevel", () => {
   test.each([
@@ -18,5 +18,12 @@ describe("backupSummaryLevel", () => {
     [{ incomplete: 1, failed: 1 }, false, "error"],
   ])("counts %o, storage problem %s -> %s", (counts, problem, level) => {
     expect(backupSummaryLevel({ counts, target_problem: problem })).toBe(level);
+  });
+});
+
+describe("reasonLabel", () => {
+  test("a missing NFS client says what to install", () => {
+    const t = ((_k: string, fallback: string) => fallback) as never;
+    expect(reasonLabel(t, "missing_nfs_client")).toBe("Install the NFS client");
   });
 });

@@ -27,13 +27,19 @@ import { savePolicy } from '../../Services/backups';
 import type { BackupPolicy, PolicyInput } from '../../Services/backups';
 import { apiDetail } from './backupLabels';
 import RetentionFields from './RetentionFields';
+import { useModuleLicensed } from '../../hooks/useModuleLicensed';
 import { VerificationField } from './VerificationStatus';
 
-const DEFAULTS: PolicyInput = {
+// Sane defaults for a NEW policy (Bryan, 2026-10-29).  Community has only
+// keep-last, so a month of daily backups; with the Pro+ engine,
+// grandfather-father-son: the newest 7, then the newest of each of the last
+// 14 days, 8 weeks, 12 months and 3 years.
+// restate deduplicates, so the extra snapshots cost only what changed.
+export const DEFAULTS: PolicyInput = {
     enabled: true,
     interval_hours: 24,
     window_start_hour: null,
-    keep_last: 14,
+    keep_last: 30,
     keep_daily: 0,
     keep_weekly: 0,
     keep_monthly: 0,
@@ -69,6 +75,20 @@ const toInput = (policy: BackupPolicy | null): PolicyInput =>
           }
         : DEFAULTS;
 
+export const GFS_DEFAULTS: Partial<PolicyInput> = {
+    keep_last: 7,
+    keep_daily: 14,
+    keep_weekly: 8,
+    keep_monthly: 12,
+    keep_yearly: 3,
+};
+
+// The pause hooks restate ships.  A host lists the ones whose service it
+// has only once its restate has reported (after the first Save), so until
+// then these are offered (Bryan, 2026-10-29: mail showed nothing).
+export const BUILTIN_HOOKS = ['docker', 'libvirt', 'lxd', 'mongodb', 'mysql', 'nextcloud',
+    'postgresql', 'redis', 'unifi'];
+
 const BackupPolicyDialog: React.FC<{
     open: boolean;
     hostId: string;
@@ -78,29 +98,38 @@ const BackupPolicyDialog: React.FC<{
     onSaved: () => void;
 }> = ({ open, hostId, fqdn, policy, onClose, onSaved }) => {
     const { t } = useTranslation();
-    const [form, setForm] = useState<PolicyInput>(toInput(policy));
+    const gfsLicensed = useModuleLicensed('backup_engine');
+    const initial = (): PolicyInput =>
+        policy === null && gfsLicensed ? { ...DEFAULTS, ...GFS_DEFAULTS } : toInput(policy);
+    const [form, setForm] = useState<PolicyInput>(initial());
     const [hooks, setHooks] = useState<string[]>([]);
+    // A name typed but not yet turned into a chip (no Enter): saved too, so
+    // typing "mysql" and clicking Save keeps it (Bryan, 2026-10-29).
+    const [typed, setTyped] = useState('');
     const [keep, setKeep] = useState('');
     const [skip, setSkip] = useState('');
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (open) {
-            const input = toInput(policy);
+            const input = initial();
             setForm(input);
             setHooks(input.quiesce_with);
+            setTyped('');
             setKeep(input.keep_paths.join('\n'));
             setSkip(input.skip_paths.join('\n'));
             setError(null);
         }
-    }, [open, policy]);
+    }, [open, policy, gfsLicensed]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const set = (patch: Partial<PolicyInput>) => setForm(f => ({ ...f, ...patch }));
     const available = policy?.available_hooks ?? [];
+    const offered = available.length ? available : BUILTIN_HOOKS;
     const number = (value: string) => (value === '' ? 0 : Number(value));
 
     const save = async () => {
-        const quiesce_with = hooks.map(h => h.trim()).filter(Boolean);
+        const quiesce_with = [...hooks, typed].map(h => h.trim())
+            .filter((h, i, all) => h && all.indexOf(h) === i);
         try {
             await savePolicy(hostId, {
                 ...form,
@@ -136,7 +165,6 @@ const BackupPolicyDialog: React.FC<{
                         value={form.keep_last} slotProps={{ htmlInput: { min: 1, max: 1000 } }}
                         onChange={e => set({ keep_last: number(e.target.value) })} />
                     <RetentionFields hostId={hostId} hasPolicy={policy !== null}
-                        yearlySupported={policy?.yearly_supported ?? false}
                         counts={{ keep_last: form.keep_last, keep_daily: form.keep_daily,
                             keep_weekly: form.keep_weekly, keep_monthly: form.keep_monthly,
                             keep_yearly: form.keep_yearly }}
@@ -151,15 +179,17 @@ const BackupPolicyDialog: React.FC<{
                         label={t('backups.policy.quiesce', 'Pause services while reading their data')}
                     />
                     {form.quiesce && (
-                        // The hooks restate found on this host (2.1+), and any
-                        // name typed in -- older restates report none.
-                        <Autocomplete multiple freeSolo options={available}
-                            value={hooks} onChange={(_e, value) => setHooks(value as string[])}
+                        // The hooks restate found on this host (2.1+), else
+                        // the built-in ones, and any name typed in.
+                        <Autocomplete multiple freeSolo options={offered}
+                            value={hooks} onChange={(_e, value) => { setHooks(value as string[]); setTyped(''); }}
+                            inputValue={typed} onInputChange={(_e, value) => setTyped(value)}
                             renderInput={params => (
                                 <TextField {...params} label={t('backups.policy.quiesceWithPick', 'Services to pause')}
                                     helperText={available.length
                                         ? t('backups.policy.quiesceFound', 'Found on this host: {{hooks}}', { hooks: available.join(', ') })
-                                        : t('backups.policy.quiesceHelp', 'For example: postgres, nextcloud')} />
+                                        : t('backups.policy.quiesceBuiltin',
+                                            'This host has not reported which it has yet. Pick its database or app; mysql also covers MariaDB.')} />
                             )} />
                     )}
                     <TextField multiline minRows={2} label={t('backups.policy.skipPaths', 'Leave out (one path pattern per line)')}

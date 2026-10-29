@@ -8,16 +8,17 @@
 // how many are waiting for a slot, and which were skipped and why.
 //
 // "Equip selected for backup" has each picked host that is not equipped
-// install restate (Phase 24); each action goes only to the picked hosts it
-// applies to.
+// install restate (Phase 24); "Set up backups for selected" gives each picked
+// equipped host without a policy the default one (2026-10-29).  Each action
+// goes only to the picked hosts it applies to.
 
 import React, { useState } from 'react';
 import { Alert, Box, Button, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import AsyncButton from '../AsyncButton';
-import { bulkBackupNow, bulkEquipBackup } from '../../Services/backups';
-import type { BackupHost, BulkBackupResult, BulkEquipResult } from '../../Services/backups';
+import { bulkBackupNow, bulkEquipBackup, bulkSetupBackups } from '../../Services/backups';
+import type { BackupHost, BulkBackupResult, BulkEquipResult, BulkSetupResult } from '../../Services/backups';
 import { apiDetail, reasonLabel } from './backupLabels';
 
 /** Why a picked host was not backed up, as something to act on. */
@@ -37,6 +38,10 @@ export const skipLabel = (t: TFunction, reason: string): string => {
             return t('backups.bulk.skipEquipping', 'Already equipping');
         case 'not_applicable':
             return t('backups.bulk.skipEquipPlatform', 'restate has no package the agent can install here');
+        case 'has_policy':
+            return t('backups.bulk.skipHasPolicy', 'Already has a backup policy');
+        case 'not_equipped':
+            return t('backups.bulk.skipNotEquipped', 'Not equipped for backup yet');
         default:
             return reasonLabel(t, reason);
     }
@@ -51,10 +56,12 @@ const BackupBulkBar: React.FC<{
     const { t } = useTranslation();
     const [result, setResult] = useState<BulkBackupResult | null>(null);
     const [equipResult, setEquipResult] = useState<BulkEquipResult | null>(null);
+    const [setupResult, setSetupResult] = useState<BulkSetupResult | null>(null);
     const [error, setError] = useState<string | null>(null);
     const picked = new Set(selected);
     const toEquip = rows.filter(r => picked.has(r.host_id) && !r.equipped).map(r => r.host_id);
-    const toBackUp = rows.filter(r => picked.has(r.host_id) && r.equipped).map(r => r.host_id);
+    const toBackUp = rows.filter(r => picked.has(r.host_id) && r.equipped && r.policy).map(r => r.host_id);
+    const toSetUp = rows.filter(r => picked.has(r.host_id) && r.equipped && !r.policy).map(r => r.host_id);
 
     const run = async () => {
         setError(null);
@@ -80,6 +87,18 @@ const BackupBulkBar: React.FC<{
         }
     };
 
+    const setUp = async () => {
+        setError(null);
+        try {
+            setSetupResult(await bulkSetupBackups(toSetUp));
+            onClear();
+            onDone();
+        } catch (err) {
+            setSetupResult(null);
+            setError(apiDetail(err, t('backups.bulk.setupError', 'Backups could not be set up.')));
+        }
+    };
+
     return (
         <Box sx={{ mb: 1 }}>
             {selected.length > 0 && (
@@ -99,10 +118,30 @@ const BackupBulkBar: React.FC<{
                             {t('backups.bulk.equipSelected', 'Equip selected for backup ({{n}})', { n: toEquip.length })}
                         </AsyncButton>
                     )}
+                    {toSetUp.length > 0 && (
+                        <AsyncButton size="small" variant="outlined" onClick={setUp}
+                            busyLabel={t('backups.hosts.starting', 'Starting...')}>
+                            {t('backups.bulk.setupSelected', 'Set up backups for selected ({{n}})', { n: toSetUp.length })}
+                        </AsyncButton>
+                    )}
                     <Button size="small" onClick={onClear}>{t('common.clearSelection', 'Clear selection')}</Button>
                 </Stack>
             )}
             {error && <Alert severity="error" onClose={() => setError(null)}>{error}</Alert>}
+            {setupResult && (
+                <Alert severity={setupResult.skipped.length ? 'warning' : 'success'} onClose={() => setSetupResult(null)}>
+                    {t('backups.bulk.setupResult',
+                        'Set up with the default policy: {{created}}. Skipped: {{skipped}}. Choose the services to pause on each host with Configure.', {
+                            created: setupResult.created,
+                            skipped: setupResult.skipped.length,
+                        })}
+                    {setupResult.skipped.map(s => (
+                        <Typography key={s.host_id} variant="body2">
+                            {s.fqdn ?? s.host_id}: {skipLabel(t, s.reason)}
+                        </Typography>
+                    ))}
+                </Alert>
+            )}
             {equipResult && (
                 <Alert severity={equipResult.skipped.length ? 'warning' : 'success'} onClose={() => setEquipResult(null)}>
                     {t('backups.bulk.equipResult', 'Equipping: {{started}}. Skipped: {{skipped}}.', {

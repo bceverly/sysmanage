@@ -100,7 +100,8 @@ class PolicyBody(BaseModel):
     enabled: bool = True
     interval_hours: int = 24
     window_start_hour: Optional[int] = None
-    keep_last: int = 14
+    # A month of daily backups when a caller gives no count (2026-10-29).
+    keep_last: int = 30
     # Grandfather-father-son (Pro+ to set): 0 = not used.
     keep_daily: int = 0
     keep_weekly: int = 0
@@ -562,7 +563,9 @@ async def put_policy(
     if target is None:
         raise HTTPException(status_code=409, detail=_("Set up the backup target first"))
     policy = _policy_of(db, host)
-    gfs = retention.check_gfs_change(policy, body)  # 402 to change without Pro+
+    gfs = retention.check_gfs_change(  # 402 to change without Pro+
+        policy, body, jobs.target_storage_abilities(db, target.id)
+    )
     if policy is None:
         policy = models.BackupPolicy(
             host_id=host.id,

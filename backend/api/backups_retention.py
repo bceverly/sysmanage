@@ -16,7 +16,7 @@ The scheduled-verification cadence (``verify_interval_days``, Pro+ 24.6) is
 checked and stored the same way: changing it needs the engine.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -76,7 +76,9 @@ def stored_gfs(policy: Optional[models.BackupPolicy]) -> Dict[str, int]:
 
 
 def check_gfs_change(
-    policy: Optional[models.BackupPolicy], body: Any
+    policy: Optional[models.BackupPolicy],
+    body: Any,
+    storage_abilities: Optional[List[str]] = None,
 ) -> Dict[str, int]:
     """The counts to store; HTTP 402 when they CHANGE without the engine
     (leaving them as they are -- including saving other settings of a policy
@@ -84,7 +86,7 @@ def check_gfs_change(
     values = gfs_values(body)
     if values != stored_gfs(policy) and _engine() is None:
         raise _needs_engine()
-    check_yearly(policy, values)
+    check_yearly(policy, values, storage_abilities)
     values["verify_interval_days"] = check_verify_change(policy, body)
     return values
 
@@ -108,14 +110,21 @@ def check_verify_change(policy: Optional[models.BackupPolicy], body: Any) -> int
     return days
 
 
-def check_yearly(policy: Optional[models.BackupPolicy], values: Dict[str, int]) -> None:
+def check_yearly(
+    policy: Optional[models.BackupPolicy],
+    values: Dict[str, int],
+    storage_abilities: Optional[List[str]] = None,
+) -> None:
     """A yearly count needs the storage host's restate to honor it (restate
-    2.2.0.12, reported at configure time); HTTP 409 otherwise.  Only a new
-    or changed count is checked -- a policy that already has one keeps it."""
+    2.2.0.12, reported at configure time by any host on the target); HTTP
+    409 only when the storage host HAS reported and lacks it -- before any
+    report (a target's first host) the count is taken, so the field is
+    always there and needs no second save (Bryan, 2026-10-29).  A policy
+    that already has a count keeps it."""
     yearly = values.get("keep_yearly") or 0
     if not yearly or yearly == stored_gfs(policy).get("keep_yearly"):
         return
-    if policy is None or "keep_yearly" not in jobs.storage_abilities(policy):
+    if storage_abilities is not None and "keep_yearly" not in storage_abilities:
         raise HTTPException(
             status_code=409,
             detail=_(

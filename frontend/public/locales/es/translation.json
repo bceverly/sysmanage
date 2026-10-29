@@ -1187,7 +1187,8 @@
     "reasonMissingNamedTool": "Requiere {{tool}}, que no está instalado en este host",
     "optionalNotInstalled": "Disponible una vez que se instale su herramienta",
     "reasonOutdatedNamedTool": "Requiere una versión de {{tool}} más reciente que la de este host",
-    "reasonToolOutdated": "Una herramienta necesaria en este host es demasiado antigua"
+    "reasonToolOutdated": "Una herramienta necesaria en este host es demasiado antigua",
+    "reasonMissingNfsClient": "El cliente NFS no está instalado en este host (\"Preparar para copias de seguridad\" lo instala)"
   },
   "hostDefaults": {
     "addNewPackageManager": "Agregar Nuevo Gestor de Paquetes Habilitado",
@@ -5344,7 +5345,7 @@
       "intervalHours": "Cada (horas)",
       "keepLast": "Instantáneas que conservar",
       "quiesce": "Pausar los servicios mientras se leen sus datos",
-      "quiesceHelp": "Por ejemplo: postgres, nextcloud",
+      "quiesceBuiltin": "Este host aún no ha informado cuáles tiene. Elija su base de datos o aplicación; mysql también cubre MariaDB.",
       "saveError": "No se pudo guardar la política de copias de seguridad.",
       "title": "Política de copias de seguridad de {{host}}",
       "windowHelp": "Las copias de seguridad solo se inician en las seis horas a partir de esta hora.",
@@ -5373,7 +5374,8 @@
       "noStorageHost": "No se ha definido ningún host de almacenamiento",
       "notPrivileged": "El agente debe ejecutarse como root",
       "toolOutdated": "Actualice restate",
-      "wrongPlatform": "No compatible con este sistema operativo"
+      "wrongPlatform": "No compatible con este sistema operativo",
+      "missingNfsClient": "Instalar el cliente NFS"
     },
     "restore": {
       "confirm": "Restaurar en el área de preparación",
@@ -5517,7 +5519,12 @@
       "selectAllActionable": "Seleccionar todos los hosts que pueden respaldarse o prepararse ahora",
       "skipEquipPlatform": "restate no tiene un paquete que el agente pueda instalar aquí",
       "skipEquipped": "Ya preparado",
-      "skipEquipping": "Ya se está preparando"
+      "skipEquipping": "Ya se está preparando",
+      "skipHasPolicy": "Ya tiene una política de copias de seguridad",
+      "skipNotEquipped": "Aún no está equipado para copias de seguridad",
+      "setupError": "No se pudieron configurar las copias de seguridad.",
+      "setupSelected": "Configurar copias de los seleccionados ({{n}})",
+      "setupResult": "Configurados con la política predeterminada: {{created}}. Omitidos: {{skipped}}. Elija en cada host los servicios que pausar con \"Configurar\"."
     },
     "repack": {
       "button": "Reempaquetar",

@@ -169,7 +169,9 @@ def normalize_report(report: Any) -> Optional[Dict[str, Any]]:
 # this build), which an operator cannot fix on the host.
 # ``tool_outdated``: the tool is installed but older than this agent needs
 # (restate without the 2.0 job interface, Phase 24) -- also the host's to fix.
-OPTIONAL_REASONS = frozenset({"missing_tool", "tool_outdated"})
+# ``missing_nfs_client``: backups' NFS client (nfs-common) is not installed --
+# Equip for backup installs it (2026-10-29).
+OPTIONAL_REASONS = frozenset({"missing_tool", "tool_outdated", "missing_nfs_client"})
 
 
 def is_limited(report: Dict[str, Any]) -> bool:

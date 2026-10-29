@@ -1187,7 +1187,8 @@
     "reasonMissingNamedTool": "Erfordert {{tool}}, das auf diesem Host nicht installiert ist",
     "optionalNotInstalled": "Verfügbar, sobald sein Tool installiert ist",
     "reasonOutdatedNamedTool": "Erfordert eine neuere Version von {{tool}}, als auf diesem Host installiert ist",
-    "reasonToolOutdated": "Ein benötigtes Werkzeug auf diesem Host ist zu alt"
+    "reasonToolOutdated": "Ein benötigtes Werkzeug auf diesem Host ist zu alt",
+    "reasonMissingNfsClient": "Der NFS-Client ist auf diesem Host nicht installiert (\"Für Backup ausstatten\" installiert ihn)"
   },
   "hostDefaults": {
     "addNewPackageManager": "Neuen aktivierten Paketmanager hinzufügen",
@@ -5344,7 +5345,7 @@
       "intervalHours": "Alle (Stunden)",
       "keepLast": "Aufzubewahrende Snapshots",
       "quiesce": "Dienste anhalten, während ihre Daten gelesen werden",
-      "quiesceHelp": "Zum Beispiel: postgres, nextcloud",
+      "quiesceBuiltin": "Dieser Host hat noch nicht gemeldet, welche er hat. Wählen Sie seine Datenbank oder Anwendung; mysql deckt auch MariaDB ab.",
       "saveError": "Die Sicherungsrichtlinie konnte nicht gespeichert werden.",
       "title": "Sicherungsrichtlinie für {{host}}",
       "windowHelp": "Sicherungen starten nur in den sechs Stunden ab dieser Stunde.",
@@ -5373,7 +5374,8 @@
       "noStorageHost": "Kein Speicher-Host festgelegt",
       "notPrivileged": "Der Agent muss als root laufen",
       "toolOutdated": "restate aktualisieren",
-      "wrongPlatform": "Auf diesem Betriebssystem nicht unterstützt"
+      "wrongPlatform": "Auf diesem Betriebssystem nicht unterstützt",
+      "missingNfsClient": "NFS-Client installieren"
     },
     "restore": {
       "confirm": "In Staging wiederherstellen",
@@ -5517,7 +5519,12 @@
       "selectAllActionable": "Alle Hosts auswählen, die jetzt gesichert oder ausgestattet werden können",
       "skipEquipPlatform": "Für dieses System gibt es kein restate-Paket, das der Agent installieren kann",
       "skipEquipped": "Bereits ausgestattet",
-      "skipEquipping": "Wird bereits ausgestattet"
+      "skipEquipping": "Wird bereits ausgestattet",
+      "skipHasPolicy": "Hat bereits eine Sicherungsrichtlinie",
+      "skipNotEquipped": "Noch nicht für Sicherungen ausgestattet",
+      "setupError": "Sicherungen konnten nicht eingerichtet werden.",
+      "setupSelected": "Sicherungen für Auswahl einrichten ({{n}})",
+      "setupResult": "Mit der Standardrichtlinie eingerichtet: {{created}}. Übersprungen: {{skipped}}. Wählen Sie die anzuhaltenden Dienste pro Host unter \"Konfigurieren\"."
     },
     "repack": {
       "button": "Neu packen",

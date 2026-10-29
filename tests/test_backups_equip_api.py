@@ -129,6 +129,22 @@ def _needs_restate(host, report=None):
 
 
 @pytest.mark.asyncio
+async def test_equip_is_offered_for_a_missing_nfs_client(session, sent):
+    """It installs the client with restate (nextcloud, 2026-10-29), and a
+    host without one is not a "limited" agent: the host's to fix."""
+    s = _setup(session)
+    _needs_restate(
+        s.host, dict(NEEDS_RESTATE, unavailable={"backup": "missing_nfs_client"})
+    )
+    assert jobs.equipped(s.host) == (False, "missing_nfs_client")
+    assert not capabilities.is_limited(
+        {"unavailable": {"backup": "missing_nfs_client"}}
+    )
+    answer = await equip.backup_equip(str(s.host.id), session, MANAGER)
+    assert answer["equip"]["status"] == "running"
+
+
+@pytest.mark.asyncio
 async def test_equip_asks_the_agent_to_install_restate(session, sent):
     s = _setup(session)
     _needs_restate(s.host)

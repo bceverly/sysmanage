@@ -1187,7 +1187,8 @@
     "reasonMissingNamedTool": "Requer {{tool}}, que não está instalado neste host",
     "optionalNotInstalled": "Disponível uma vez que sua ferramenta seja instalada",
     "reasonOutdatedNamedTool": "Requer uma versão do {{tool}} mais recente do que a deste host",
-    "reasonToolOutdated": "Uma ferramenta necessária neste host está desatualizada"
+    "reasonToolOutdated": "Uma ferramenta necessária neste host está desatualizada",
+    "reasonMissingNfsClient": "O cliente NFS não está instalado neste host (\"Preparar para backup\" o instala)"
   },
   "hostDefaults": {
     "addNewPackageManager": "Adicionar Novo Gerenciador de Pacotes Habilitado",
@@ -5344,7 +5345,7 @@
       "intervalHours": "A cada (horas)",
       "keepLast": "Snapshots a manter",
       "quiesce": "Pausar os serviços durante a leitura dos seus dados",
-      "quiesceHelp": "Por exemplo: postgres, nextcloud",
+      "quiesceBuiltin": "Este host ainda não informou quais possui. Escolha o banco de dados ou aplicativo dele; mysql também abrange o MariaDB.",
       "saveError": "Não foi possível salvar a política de backup.",
       "title": "Política de backup de {{host}}",
       "windowHelp": "Os backups só começam nas seis horas a partir desta hora.",
@@ -5373,7 +5374,8 @@
       "noStorageHost": "Nenhum host de armazenamento definido",
       "notPrivileged": "O agente deve ser executado como root",
       "toolOutdated": "Atualize o restate",
-      "wrongPlatform": "Não compatível com este sistema operacional"
+      "wrongPlatform": "Não compatível com este sistema operacional",
+      "missingNfsClient": "Instalar o cliente NFS"
     },
     "restore": {
       "confirm": "Restaurar na área de preparação",
@@ -5517,7 +5519,12 @@
       "selectAllActionable": "Selecionar todos os hosts que podem receber backup ou ser preparados agora",
       "skipEquipPlatform": "O restate não tem um pacote que o agente possa instalar aqui",
       "skipEquipped": "Já preparado",
-      "skipEquipping": "Já em preparação"
+      "skipEquipping": "Já em preparação",
+      "skipHasPolicy": "Já tem uma política de backup",
+      "skipNotEquipped": "Ainda não está preparado para backup",
+      "setupError": "Não foi possível configurar os backups.",
+      "setupSelected": "Configurar backups dos selecionados ({{n}})",
+      "setupResult": "Configurados com a política padrão: {{created}}. Ignorados: {{skipped}}. Escolha em cada host os serviços a pausar com \"Configurar\"."
     },
     "repack": {
       "button": "Reempacotar",

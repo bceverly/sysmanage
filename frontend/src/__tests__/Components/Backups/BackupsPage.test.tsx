@@ -30,6 +30,7 @@ vi.mock("../../../Services/backups", async (importOriginal) => {
     clearRuns: vi.fn(),
     equipBackup: vi.fn(),
     bulkEquipBackup: vi.fn(),
+    bulkSetupBackups: vi.fn(),
     recheckBackup: vi.fn(),
   };
 });
@@ -45,6 +46,7 @@ import {
   clearRuns,
   equipBackup,
   bulkEquipBackup,
+  bulkSetupBackups,
   recheckBackup,
 } from "../../../Services/backups";
 import type { BackupHost, BackupOverview, BackupRun } from "../../../Services/backups";
@@ -323,6 +325,32 @@ describe("Backups page", () => {
     fireEvent.click(screen.getByText("Equip selected for backup (1)"));
     await waitFor(() => expect(bulkEquipBackup).toHaveBeenCalledWith(["h6"]));
     expect(await screen.findByText("Equipping: 1. Skipped: 0.")).toBeInTheDocument();
+  });
+
+  test("Set up backups sends the picked equipped hosts that have no policy", async () => {
+    vi.mocked(getBackupOverview).mockResolvedValue(overview({
+      hosts: [
+        host({}),
+        host({ host_id: "h7", fqdn: "nopolicy.lab", policy: null, status: "no_policy" }),
+      ],
+    }));
+    vi.mocked(bulkSetupBackups).mockResolvedValue({ requested: 1, created: 1, skipped: [] });
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    fireEvent.click(await screen.findByLabelText("Select nopolicy.lab"));
+    fireEvent.click(screen.getByText("Set up backups for selected (1)"));
+    await waitFor(() => expect(bulkSetupBackups).toHaveBeenCalledWith(["h7"]));
+    expect(await screen.findByText(/Set up with the default policy: 1\. Skipped: 0\./)).toBeInTheDocument();
+  });
+
+  test("a host that cannot be picked says why on hover", async () => {
+    vi.mocked(getBackupOverview).mockResolvedValue(overview({
+      hosts: [host({ running: run({ action: "capture", status: "running" }) })],
+    }));
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    const box = await screen.findByLabelText(`Select ${host({}).fqdn}`);
+    expect(box).toBeDisabled();
+    fireEvent.mouseOver(box.closest("span") as HTMLElement);
+    expect(await screen.findByText("Already backing up")).toBeInTheDocument();
   });
 
   test("a host waiting for a free slot says so", async () => {

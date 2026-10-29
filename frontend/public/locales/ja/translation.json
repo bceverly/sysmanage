@@ -1187,7 +1187,8 @@
     "reasonMissingNamedTool": "{{tool}} が必要ですが、このホストにはインストールされていません",
     "optionalNotInstalled": "ツールがインストールされた後利用可能",
     "reasonOutdatedNamedTool": "このホストにあるものより新しい {{tool}} が必要です",
-    "reasonToolOutdated": "このホストの必要なツールが古すぎます"
+    "reasonToolOutdated": "このホストの必要なツールが古すぎます",
+    "reasonMissingNfsClient": "このホストには NFS クライアントがインストールされていません (「バックアップ対応にする」でインストールされます)"
   },
   "hostDefaults": {
     "addNewPackageManager": "新しい有効なパッケージマネージャーを追加",
@@ -5344,7 +5345,7 @@
       "intervalHours": "間隔（時間）",
       "keepLast": "保持するスナップショット数",
       "quiesce": "データの読み取り中はサービスを一時停止する",
-      "quiesceHelp": "例: postgres, nextcloud",
+      "quiesceBuiltin": "このホストはまだどれがあるかを報告していません。データベースまたはアプリを選んでください。mysql は MariaDB にも対応します。",
       "saveError": "バックアップポリシーを保存できませんでした。",
       "title": "{{host}} のバックアップポリシー",
       "windowHelp": "バックアップはこの時刻から6時間以内にのみ開始されます。",
@@ -5373,7 +5374,8 @@
       "noStorageHost": "ストレージホストが設定されていません",
       "notPrivileged": "エージェントは root で実行する必要があります",
       "toolOutdated": "restate をアップグレードしてください",
-      "wrongPlatform": "この OS ではサポートされていません"
+      "wrongPlatform": "この OS ではサポートされていません",
+      "missingNfsClient": "NFS クライアントをインストール"
     },
     "restore": {
       "confirm": "ステージング領域に復元",
@@ -5517,7 +5519,12 @@
       "selectAllActionable": "今すぐバックアップまたはバックアップ対応にできるホストをすべて選択",
       "skipEquipPlatform": "ここには、エージェントがインストールできる restate パッケージがありません",
       "skipEquipped": "すでに対応済み",
-      "skipEquipping": "すでに対応処理中"
+      "skipEquipping": "すでに対応処理中",
+      "skipHasPolicy": "バックアップポリシーが既にあります",
+      "skipNotEquipped": "まだバックアップの準備ができていません",
+      "setupError": "バックアップを設定できませんでした。",
+      "setupSelected": "選択したホストのバックアップを設定 ({{n}})",
+      "setupResult": "既定のポリシーで設定: {{created}}。スキップ: {{skipped}}。一時停止するサービスは各ホストの「構成」で選択してください。"
     },
     "repack": {
       "button": "再パック",

@@ -22,6 +22,7 @@ import {
     Typography,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import AsyncButton from '../AsyncButton';
 import { backupNow, BACKUP_STATUS_ORDER } from '../../Services/backups';
 import type { BackupHost } from '../../Services/backups';
@@ -52,8 +53,35 @@ export const canBackUp = (row: BackupHost): boolean =>
 /** A host the bulk "Equip for backup" can take: the server offers it. */
 export const canEquip = (row: BackupHost): boolean => !row.equipped && row.equip_blocker === null;
 
+/** A host the bulk "Set up backups" can take: equipped, with no policy. */
+export const canSetUp = (row: BackupHost): boolean => row.equipped && !row.policy;
+
 /** A host the bulk bar can act on at all. */
-const canPick = (row: BackupHost): boolean => canBackUp(row) || canEquip(row);
+const canPick = (row: BackupHost): boolean => canBackUp(row) || canEquip(row) || canSetUp(row);
+
+/** Why a host's checkbox is off, shown on hover: a disabled box with no
+ *  reason looked broken (Bryan, 2026-10-29). */
+export const pickBlocked = (t: TFunction, row: BackupHost): string | null => {
+    if (canPick(row)) return null;
+    if (!row.equipped) {
+        switch (row.equip_blocker) {
+            case 'agent_outdated':
+                return t('backups.equip.blockedAgent', 'Upgrade the agent to equip this host from here');
+            case 'not_applicable':
+                return t('backups.bulk.skipEquipPlatform', 'restate has no package the agent can install here');
+            case 'in_progress':
+                return t('backups.bulk.skipEquipping', 'Already equipping');
+            default:
+                return row.reason ? reasonLabel(t, row.reason) : null;
+        }
+    }
+    if (row.running?.action === 'capture') return t('backups.bulk.skipRunning', 'Already backing up');
+    if (row.capture_requested) return t('backups.hosts.waiting', 'Waiting for a free slot');
+    if (row.policy && !row.policy.configured) {
+        return t('backups.bulk.skipNotConfigured', 'Job files not confirmed by the host yet');
+    }
+    return null;
+};
 
 export const sortHosts = (rows: BackupHost[]): BackupHost[] =>
     [...rows].sort((a, b) => rank(a) - rank(b) || a.fqdn.localeCompare(b.fqdn));
@@ -199,9 +227,14 @@ const BackupHostsTable: React.FC<{
                         <TableRow key={row.host_id} selected={picked.has(row.host_id)}>
                             {canManage && (
                                 <TableCell padding="checkbox">
-                                    <Checkbox size="small" checked={picked.has(row.host_id)}
-                                        disabled={!canPick(row)} onChange={() => toggle(row.host_id)}
-                                        slotProps={{ input: { 'aria-label': t('backups.bulk.selectHost', 'Select {{host}}', { host: row.fqdn }) } }} />
+                                    <Tooltip title={pickBlocked(t, row) ?? ''}>
+                                        {/* a span: a disabled control takes no hover */}
+                                        <span>
+                                            <Checkbox size="small" checked={picked.has(row.host_id)}
+                                                disabled={!canPick(row)} onChange={() => toggle(row.host_id)}
+                                                slotProps={{ input: { 'aria-label': t('backups.bulk.selectHost', 'Select {{host}}', { host: row.fqdn }) } }} />
+                                        </span>
+                                    </Tooltip>
                                 </TableCell>
                             )}
                             <TableCell>

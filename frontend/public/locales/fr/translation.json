@@ -1187,7 +1187,8 @@
     "reasonMissingNamedTool": "Nécessite {{tool}}, qui n'est pas installé sur cet hôte",
     "optionalNotInstalled": "Disponible une fois son outil installé",
     "reasonOutdatedNamedTool": "Nécessite une version de {{tool}} plus récente que celle de cet hôte",
-    "reasonToolOutdated": "Un outil requis sur cet hôte est trop ancien"
+    "reasonToolOutdated": "Un outil requis sur cet hôte est trop ancien",
+    "reasonMissingNfsClient": "Le client NFS n'est pas installé sur cet hôte (« Équiper pour la sauvegarde » l'installe)"
   },
   "hostDefaults": {
     "addNewPackageManager": "Ajouter un Nouveau Gestionnaire de Paquets Activé",
@@ -5344,7 +5345,7 @@
       "intervalHours": "Toutes les (heures)",
       "keepLast": "Instantanés à conserver",
       "quiesce": "Suspendre les services pendant la lecture de leurs données",
-      "quiesceHelp": "Par exemple : postgres, nextcloud",
+      "quiesceBuiltin": "Cet hôte n'a pas encore indiqué lesquels il possède. Choisissez sa base de données ou son application ; mysql couvre aussi MariaDB.",
       "saveError": "La politique de sauvegarde n'a pas pu être enregistrée.",
       "title": "Politique de sauvegarde de {{host}}",
       "windowHelp": "Les sauvegardes ne démarrent que dans les six heures qui suivent cette heure.",
@@ -5373,7 +5374,8 @@
       "noStorageHost": "Aucun hôte de stockage n'est défini",
       "notPrivileged": "L'agent doit s'exécuter en tant que root",
       "toolOutdated": "Mettez à jour restate",
-      "wrongPlatform": "Non pris en charge sur ce système d'exploitation"
+      "wrongPlatform": "Non pris en charge sur ce système d'exploitation",
+      "missingNfsClient": "Installer le client NFS"
     },
     "restore": {
       "confirm": "Restaurer dans la zone de préparation",
@@ -5517,7 +5519,12 @@
       "selectAllActionable": "Sélectionner tous les hôtes qui peuvent être sauvegardés ou équipés maintenant",
       "skipEquipPlatform": "restate n'a pas de paquet que l'agent puisse installer ici",
       "skipEquipped": "Déjà équipé",
-      "skipEquipping": "Équipement déjà en cours"
+      "skipEquipping": "Équipement déjà en cours",
+      "skipHasPolicy": "A déjà une politique de sauvegarde",
+      "skipNotEquipped": "Pas encore équipé pour les sauvegardes",
+      "setupError": "Les sauvegardes n'ont pas pu être configurées.",
+      "setupSelected": "Configurer les sauvegardes de la sélection ({{n}})",
+      "setupResult": "Configurés avec la politique par défaut : {{created}}. Ignorés : {{skipped}}. Choisissez les services à mettre en pause sur chaque hôte avec « Configurer »."
     },
     "repack": {
       "button": "Réempaqueter",

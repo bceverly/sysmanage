@@ -12,6 +12,11 @@ vi.mock("react-i18next", async () => {
   const { t } = await import("../TimeSync/_i18nMock");
   return { useTranslation: () => ({ t, i18n: { language: "en" } }) };
 });
+const licensed = vi.hoisted(() => ({ value: false }));
+vi.mock("../../../hooks/useModuleLicensed", () => ({
+  useModuleLicensed: () => licensed.value,
+  default: () => licensed.value,
+}));
 vi.mock("../../../Services/backups", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../../Services/backups")>();
   return { ...actual, savePolicy: vi.fn() };
@@ -42,9 +47,21 @@ describe("BackupPolicyDialog services to pause", () => {
     expect(screen.getByText("lxd")).toBeInTheDocument();
   });
 
-  test("falls back to an example when the host reported none", () => {
+  test("offers restate's built-in hooks when the host has reported none", async () => {
     open(policy({ available_hooks: null, quiesce_with: [] }));
-    expect(screen.getByText("For example: postgres, nextcloud")).toBeInTheDocument();
+    expect(screen.getByText(/has not reported which it has yet/)).toBeInTheDocument();
+    fireEvent.mouseDown(screen.getByLabelText("Services to pause"));
+    expect(await screen.findByText("mysql")).toBeInTheDocument();
+    expect(screen.getByText("nextcloud")).toBeInTheDocument();
+  });
+
+  test("a name typed without Enter is saved too", async () => {
+    vi.mocked(savePolicy).mockResolvedValue({} as never);
+    open(policy({ quiesce_with: [] }));
+    fireEvent.change(screen.getByLabelText("Services to pause"), { target: { value: "mysql" } });
+    fireEvent.click(screen.getByText("Save"));
+    await waitFor(() => expect(savePolicy).toHaveBeenCalled());
+    expect(vi.mocked(savePolicy).mock.calls[0][1].quiesce_with).toEqual(["mysql"]);
   });
 
   test("saves the chosen services as quiesce_with", async () => {
@@ -55,3 +72,43 @@ describe("BackupPolicyDialog services to pause", () => {
     expect(vi.mocked(savePolicy).mock.calls[0][1].quiesce_with).toEqual(["lxd"]);
   });
 });
+
+describe("BackupPolicyDialog defaults for a new policy", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    licensed.value = false;
+    vi.mocked(savePolicy).mockResolvedValue({} as never);
+  });
+
+  const saved = async () => {
+    render(<BackupPolicyDialog open hostId="h1" fqdn="new" policy={null} onClose={vi.fn()}
+      onSaved={vi.fn()} />);
+    fireEvent.click(screen.getByText("Save"));
+    await waitFor(() => expect(savePolicy).toHaveBeenCalled());
+    return vi.mocked(savePolicy).mock.calls[0][1];
+  };
+
+  test("without the engine: a month of daily backups", async () => {
+    const body = await saved();
+    expect(body.keep_last).toBe(30);
+    expect(body.keep_daily ?? 0).toBe(0);
+  });
+
+  test("with the engine: grandfather-father-son", async () => {
+    licensed.value = true;
+    const body = await saved();
+    expect([body.keep_last, body.keep_daily, body.keep_weekly, body.keep_monthly]).toEqual(
+      [7, 14, 8, 12]);
+    expect(body.keep_yearly).toBe(3);
+  });
+
+  test("an existing policy keeps its own counts", async () => {
+    licensed.value = true;
+    render(<BackupPolicyDialog open hostId="h1" fqdn="t14" policy={policy()} onClose={vi.fn()}
+      onSaved={vi.fn()} />);
+    fireEvent.click(screen.getByText("Save"));
+    await waitFor(() => expect(savePolicy).toHaveBeenCalled());
+    expect(vi.mocked(savePolicy).mock.calls[0][1].keep_last).toBe(14);
+  });
+});
+

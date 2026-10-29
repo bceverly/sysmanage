@@ -1187,7 +1187,8 @@
     "reasonMissingNamedTool": "需要 {{tool}}，但此主机上未安装",
     "optionalNotInstalled": "在其工具安装完成后可用",
     "reasonOutdatedNamedTool": "需要比此主机上更新的 {{tool}}",
-    "reasonToolOutdated": "此主机上的某个必需工具版本过旧"
+    "reasonToolOutdated": "此主机上的某个必需工具版本过旧",
+    "reasonMissingNfsClient": "此主机未安装 NFS 客户端（“配备备份”会安装它）"
   },
   "hostDefaults": {
     "addNewPackageManager": "添加新的已启用包管理器",
@@ -5344,7 +5345,7 @@
       "intervalHours": "间隔（小时）",
       "keepLast": "保留的快照数",
       "quiesce": "读取数据时暂停服务",
-      "quiesceHelp": "例如：postgres, nextcloud",
+      "quiesceBuiltin": "此主机尚未报告它有哪些。请选择它的数据库或应用；mysql 也适用于 MariaDB。",
       "saveError": "无法保存备份策略。",
       "title": "{{host}} 的备份策略",
       "windowHelp": "备份仅在此小时起的六小时内开始。",
@@ -5373,7 +5374,8 @@
       "noStorageHost": "未设置存储主机",
       "notPrivileged": "代理必须以 root 身份运行",
       "toolOutdated": "请升级 restate",
-      "wrongPlatform": "此操作系统不支持"
+      "wrongPlatform": "此操作系统不支持",
+      "missingNfsClient": "安装 NFS 客户端"
     },
     "restore": {
       "confirm": "恢复到暂存目录",
@@ -5517,7 +5519,12 @@
       "selectAllActionable": "选择现在可以备份或可以配备的所有主机",
       "skipEquipPlatform": "restate 没有代理可以在此处安装的软件包",
       "skipEquipped": "已配备",
-      "skipEquipping": "正在配备中"
+      "skipEquipping": "正在配备中",
+      "skipHasPolicy": "已有备份策略",
+      "skipNotEquipped": "尚未准备好备份",
+      "setupError": "无法设置备份。",
+      "setupSelected": "为所选主机设置备份 ({{n}})",
+      "setupResult": "已使用默认策略设置：{{created}}。已跳过：{{skipped}}。请在每台主机上通过“配置”选择要暂停的服务。"
     },
     "repack": {
       "button": "重新打包",

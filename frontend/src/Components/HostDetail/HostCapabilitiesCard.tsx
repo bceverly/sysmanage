@@ -93,6 +93,8 @@ const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, lim
             // the code shipped, but this host cannot deliver it.
             missing_tool: t('hostCapabilities.reasonMissingTool', 'A required tool is not installed on this host'),
             tool_outdated: t('hostCapabilities.reasonToolOutdated', 'A required tool on this host is too old'),
+            missing_nfs_client: t('hostCapabilities.reasonMissingNfsClient',
+                'The NFS client is not installed on this host (Equip for backup installs it)'),
             wrong_platform: t('hostCapabilities.reasonWrongPlatform', 'Not applicable to this operating system'),
             build_excluded: t('hostCapabilities.reasonBuildExcluded', 'Omitted from this agent build'),
         };
@@ -132,7 +134,7 @@ const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, lim
     // is not a limitation of the agent: shown apart, neutral, and not counted
     // by the server's "limited" rule (agent_capability_service.is_limited).
     const isOptional = (group: string) =>
-        unavailable[group] === 'missing_tool' || unavailable[group] === 'tool_outdated';
+        ['missing_tool', 'tool_outdated', 'missing_nfs_client'].includes(unavailable[group]);
     const unavailableKeys = Object.keys(unavailable).filter((group) => !isOptional(group));
     const optionalKeys = Object.keys(unavailable).filter(isOptional);
     const partialKeys = Object.keys(partial);

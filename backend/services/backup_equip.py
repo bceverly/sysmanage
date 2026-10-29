@@ -37,8 +37,8 @@ NOT_NEEDED = "equipped"
 AGENT_OUTDATED = "agent_outdated"
 NOT_APPLICABLE = "not_applicable"
 IN_PROGRESS = "in_progress"
-# The equipped reasons Equip can fix.
-FIXABLE = ("missing_tool", "tool_outdated")
+# The equipped reasons Equip can fix (it installs restate and the NFS client).
+FIXABLE = ("missing_tool", "tool_outdated", "missing_nfs_client")
 
 
 def _row(db: Session, host_id: Any) -> Optional[models.BackupEquip]:

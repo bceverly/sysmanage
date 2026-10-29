@@ -1187,7 +1187,8 @@
     "reasonMissingNamedTool": "يتطلب {{tool}}، وهو غير مثبت على هذا المضيف",
     "optionalNotInstalled": "متوفر بعد تثبيت أداته",
     "reasonOutdatedNamedTool": "يتطلب إصدارًا أحدث من {{tool}} من المثبت على هذا المضيف",
-    "reasonToolOutdated": "إحدى الأدوات المطلوبة على هذا المضيف قديمة جدًا"
+    "reasonToolOutdated": "إحدى الأدوات المطلوبة على هذا المضيف قديمة جدًا",
+    "reasonMissingNfsClient": "عميل NFS غير مثبت على هذا المضيف (يثبّته \"تجهيز للنسخ الاحتياطي\")"
   },
   "hostDefaults": {
     "addNewPackageManager": "إضافة مدير حزم جديد مُفعّل",
@@ -5344,7 +5345,7 @@
       "intervalHours": "كل (ساعات)",
       "keepLast": "عدد اللقطات المحتفظ بها",
       "quiesce": "إيقاف الخدمات مؤقتًا أثناء قراءة بياناتها",
-      "quiesceHelp": "على سبيل المثال: postgres, nextcloud",
+      "quiesceBuiltin": "لم يُبلغ هذا المضيف بعد عن الخدمات الموجودة لديه. اختر قاعدة بياناته أو تطبيقه؛ يشمل mysql أيضًا MariaDB.",
       "saveError": "تعذّر حفظ سياسة النسخ الاحتياطي.",
       "title": "سياسة النسخ الاحتياطي لـ {{host}}",
       "windowHelp": "لا تبدأ النسخ الاحتياطية إلا خلال الساعات الست التي تلي هذه الساعة.",
@@ -5373,7 +5374,8 @@
       "noStorageHost": "لم يتم تعيين مضيف تخزين",
       "notPrivileged": "يجب تشغيل الوكيل بصلاحيات root",
       "toolOutdated": "رقِّ restate",
-      "wrongPlatform": "غير مدعوم على نظام التشغيل هذا"
+      "wrongPlatform": "غير مدعوم على نظام التشغيل هذا",
+      "missingNfsClient": "ثبّت عميل NFS"
     },
     "restore": {
       "confirm": "الاستعادة إلى منطقة التجهيز",
@@ -5517,7 +5519,12 @@
       "selectAllActionable": "تحديد كل مضيف يمكن نسخه احتياطيًا أو تجهيزه الآن",
       "skipEquipPlatform": "لا توجد حزمة restate يستطيع الوكيل تثبيتها هنا",
       "skipEquipped": "مجهز بالفعل",
-      "skipEquipping": "التجهيز جارٍ بالفعل"
+      "skipEquipping": "التجهيز جارٍ بالفعل",
+      "skipHasPolicy": "لديه سياسة نسخ احتياطي بالفعل",
+      "skipNotEquipped": "غير مجهز للنسخ الاحتياطي بعد",
+      "setupError": "تعذر إعداد النسخ الاحتياطية.",
+      "setupSelected": "إعداد النسخ الاحتياطية للمحدد ({{n}})",
+      "setupResult": "تم الإعداد بالسياسة الافتراضية: {{created}}. تم تخطي: {{skipped}}. اختر الخدمات المراد إيقافها مؤقتًا على كل مضيف عبر \"تهيئة\"."
     },
     "repack": {
       "button": "إعادة التحزيم",

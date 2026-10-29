@@ -59,6 +59,8 @@ export const reasonLabel = (t: TFunction, reason: string | null): string => {
             return t('backups.reason.missingTool', 'Install restate');
         case 'tool_outdated':
             return t('backups.reason.toolOutdated', 'Upgrade restate');
+        case 'missing_nfs_client':
+            return t('backups.reason.missingNfsClient', 'Install the NFS client');
         case 'agent_outdated':
             return t('backups.reason.agentOutdated', 'Upgrade the agent');
         case 'not_privileged':

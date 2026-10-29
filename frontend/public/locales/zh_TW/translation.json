@@ -1187,7 +1187,8 @@
     "reasonMissingNamedTool": "需要 {{tool}}，但此主機上未安裝",
     "optionalNotInstalled": "在其工具安裝後可用",
     "reasonOutdatedNamedTool": "需要比此主機上更新的 {{tool}}",
-    "reasonToolOutdated": "此主機上的某個必要工具版本過舊"
+    "reasonToolOutdated": "此主機上的某個必要工具版本過舊",
+    "reasonMissingNfsClient": "此主機未安裝 NFS 用戶端（「準備備份」會安裝它）"
   },
   "hostDefaults": {
     "addNewPackageManager": "新增已啟用的套件管理員",
@@ -5344,7 +5345,7 @@
       "intervalHours": "間隔（小時）",
       "keepLast": "保留的快照數",
       "quiesce": "讀取資料時暫停服務",
-      "quiesceHelp": "例如：postgres, nextcloud",
+      "quiesceBuiltin": "此主機尚未回報它有哪些。請選擇它的資料庫或應用程式；mysql 也適用於 MariaDB。",
       "saveError": "無法儲存備份原則。",
       "title": "{{host}} 的備份原則",
       "windowHelp": "備份僅在此小時起的六小時內開始。",
@@ -5373,7 +5374,8 @@
       "noStorageHost": "未設定儲存主機",
       "notPrivileged": "代理程式必須以 root 身分執行",
       "toolOutdated": "請升級 restate",
-      "wrongPlatform": "此作業系統不支援"
+      "wrongPlatform": "此作業系統不支援",
+      "missingNfsClient": "安裝 NFS 用戶端"
     },
     "restore": {
       "confirm": "還原到暫存區",
@@ -5517,7 +5519,12 @@
       "selectAllActionable": "選擇現在可以備份或可以準備的所有主機",
       "skipEquipPlatform": "restate 沒有代理程式可在此安裝的套件",
       "skipEquipped": "已就緒",
-      "skipEquipping": "正在準備中"
+      "skipEquipping": "正在準備中",
+      "skipHasPolicy": "已有備份原則",
+      "skipNotEquipped": "尚未準備好備份",
+      "setupError": "無法設定備份。",
+      "setupSelected": "為所選主機設定備份 ({{n}})",
+      "setupResult": "已使用預設原則設定：{{created}}。已略過：{{skipped}}。請在每台主機上透過「設定」選擇要暫停的服務。"
     },
     "repack": {
       "button": "重新打包",

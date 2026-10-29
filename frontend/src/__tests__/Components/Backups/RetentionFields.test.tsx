@@ -70,12 +70,10 @@ describe("RetentionFields", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  test("years show only where the storage host can keep them, or when already set", () => {
+  test("years are always there, on a new policy too", () => {
     const { rerender } = render(
-      <RetentionFields hostId="h1" hasPolicy counts={counts} onChange={vi.fn()} />);
-    expect(screen.queryByLabelText("Years to keep")).toBeNull();
-    rerender(<RetentionFields hostId="h1" hasPolicy yearlySupported
-      counts={{ ...counts, keep_yearly: 0 }} onChange={vi.fn()} />);
+      <RetentionFields hostId="h1" hasPolicy={false} counts={{ ...counts, keep_yearly: 0 }}
+        onChange={vi.fn()} />);
     expect(screen.getByLabelText("Years to keep")).toHaveValue(0);
     rerender(<RetentionFields hostId="h1" hasPolicy
       counts={{ ...counts, keep_yearly: 3 }} onChange={vi.fn()} />);
@@ -86,7 +84,7 @@ describe("RetentionFields", () => {
     const onChange = vi.fn();
     vi.mocked(previewRetention).mockResolvedValue({ kept: [], removed: [] });
     const withYears = { ...counts, keep_yearly: 2 };
-    render(<RetentionFields hostId="h1" hasPolicy yearlySupported counts={withYears}
+    render(<RetentionFields hostId="h1" hasPolicy counts={withYears}
       onChange={onChange} />);
     fireEvent.change(screen.getByLabelText("Years to keep"), { target: { value: "5" } });
     expect(onChange).toHaveBeenCalledWith({ keep_yearly: 5 });

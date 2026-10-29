@@ -1187,7 +1187,8 @@
     "reasonMissingNamedTool": "Vereist {{tool}}, dat niet op deze host is geïnstalleerd",
     "optionalNotInstalled": "Beschikbaar zodra het hulpprogramma is geïnstalleerd",
     "reasonOutdatedNamedTool": "Vereist een nieuwere {{tool}} dan deze host heeft",
-    "reasonToolOutdated": "Een vereist hulpprogramma op deze host is te oud"
+    "reasonToolOutdated": "Een vereist hulpprogramma op deze host is te oud",
+    "reasonMissingNfsClient": "De NFS-client is niet geïnstalleerd op deze host (\"Uitrusten voor back-up\" installeert hem)"
   },
   "hostDefaults": {
     "addNewPackageManager": "Nieuwe Ingeschakelde Pakketbeheerder Toevoegen",
@@ -5344,7 +5345,7 @@
       "intervalHours": "Elke (uren)",
       "keepLast": "Te bewaren snapshots",
       "quiesce": "Services pauzeren terwijl hun gegevens worden gelezen",
-      "quiesceHelp": "Bijvoorbeeld: postgres, nextcloud",
+      "quiesceBuiltin": "Deze host heeft nog niet gemeld welke hij heeft. Kies zijn database of app; mysql dekt ook MariaDB.",
       "saveError": "Het back-upbeleid kon niet worden opgeslagen.",
       "title": "Back-upbeleid voor {{host}}",
       "windowHelp": "Back-ups starten alleen in de zes uur vanaf dit uur.",
@@ -5373,7 +5374,8 @@
       "noStorageHost": "Er is geen opslaghost ingesteld",
       "notPrivileged": "De agent moet als root draaien",
       "toolOutdated": "restate upgraden",
-      "wrongPlatform": "Niet ondersteund op dit besturingssysteem"
+      "wrongPlatform": "Niet ondersteund op dit besturingssysteem",
+      "missingNfsClient": "NFS-client installeren"
     },
     "restore": {
       "confirm": "Herstellen naar staging",
@@ -5517,7 +5519,12 @@
       "selectAllActionable": "Selecteer elke host die nu een back-up kan krijgen of kan worden uitgerust",
       "skipEquipPlatform": "restate heeft geen pakket dat de agent hier kan installeren",
       "skipEquipped": "Al uitgerust",
-      "skipEquipping": "Wordt al uitgerust"
+      "skipEquipping": "Wordt al uitgerust",
+      "skipHasPolicy": "Heeft al een back-upbeleid",
+      "skipNotEquipped": "Nog niet uitgerust voor back-ups",
+      "setupError": "Back-ups konden niet worden ingesteld.",
+      "setupSelected": "Back-ups instellen voor selectie ({{n}})",
+      "setupResult": "Ingesteld met het standaardbeleid: {{created}}. Overgeslagen: {{skipped}}. Kies per host met \"Configureren\" welke services worden gepauzeerd."
     },
     "repack": {
       "button": "Opnieuw inpakken",

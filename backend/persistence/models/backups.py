@@ -105,7 +105,7 @@ class BackupPolicy(Base):
     enabled = Column(Boolean, nullable=False, default=True)
     interval_hours = Column(Integer, nullable=False, default=24)
     window_start_hour = Column(Integer, nullable=True)  # UTC, 0-23
-    keep_last = Column(Integer, nullable=False, default=14)
+    keep_last = Column(Integer, nullable=False, default=30)
     # Grandfather-father-son (q67, Pro+ to set, always honored): the newest
     # snapshot of each of the last N days / ISO weeks / months; NULL = unused.
     keep_daily = Column(Integer, nullable=True)

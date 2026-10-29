@@ -11,7 +11,7 @@
 // the next prune would keep and remove -- restate's own choice, ported.
 
 import React, { useState } from 'react';
-import { Alert, Button, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Stack, TextField, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { previewRetention } from '../../Services/backups';
 import type { PolicyInput, RetentionPreview } from '../../Services/backups';
@@ -25,11 +25,9 @@ const SHOWN = 5;
 const RetentionFields: React.FC<{
     hostId: string;
     hasPolicy: boolean;
-    /** The storage host's restate honors a yearly count. */
-    yearlySupported?: boolean;
     counts: Counts;
     onChange: (counts: Partial<Counts>) => void;
-}> = ({ hostId, hasPolicy, yearlySupported = false, counts, onChange }) => {
+}> = ({ hostId, hasPolicy, counts, onChange }) => {
     const { t } = useTranslation();
     const licensed = useModuleLicensed('backup_engine');
     const [preview, setPreview] = useState<RetentionPreview | null>(null);
@@ -37,8 +35,6 @@ const RetentionFields: React.FC<{
     const number = (text: string): number => (text === '' ? 0 : Math.max(0, Math.floor(Number(text))));
     const any = (counts.keep_daily ?? 0) + (counts.keep_weekly ?? 0) + (counts.keep_monthly ?? 0)
         + (counts.keep_yearly ?? 0) > 0;
-    // A policy that already keeps years always shows (and honors) them.
-    const showYearly = yearlySupported || (counts.keep_yearly ?? 0) > 0;
 
     if (!licensed) {
         return any ? (
@@ -64,7 +60,7 @@ const RetentionFields: React.FC<{
     };
 
     const field = (key: 'keep_daily' | 'keep_weekly' | 'keep_monthly' | 'keep_yearly', label: string, max: number) => (
-        <TextField type="number" label={label} value={counts[key] ?? 0}
+        <TextField type="number" label={label} value={counts[key] ?? 0} fullWidth
             slotProps={{ htmlInput: { min: 0, max } }}
             onChange={e => { onChange({ [key]: number(e.target.value) }); setPreview(null); }} />
     );
@@ -75,12 +71,16 @@ const RetentionFields: React.FC<{
                 {t('backups.policy.gfsHelp',
                     'Also keep the newest snapshot of each of the last N days, weeks and months that have one (0 = not used).')}
             </Typography>
-            <Stack direction="row" spacing={1}>
+            {/* Two to a row: four labels in one row were cut off (Bryan,
+                2026-10-29), and translations run longer than English. */}
+            <Box sx={{ display: 'grid', gap: 1, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
                 {field('keep_daily', t('backups.policy.keepDaily', 'Days to keep'), 3650)}
                 {field('keep_weekly', t('backups.policy.keepWeekly', 'Weeks to keep'), 520)}
                 {field('keep_monthly', t('backups.policy.keepMonthly', 'Months to keep'), 240)}
-                {showYearly && field('keep_yearly', t('backups.policy.keepYearly', 'Years to keep'), 100)}
-            </Stack>
+                {/* Always shown (Bryan, 2026-10-29): the server refuses a
+                    count only where the storage host has said it cannot. */}
+                {field('keep_yearly', t('backups.policy.keepYearly', 'Years to keep'), 100)}
+            </Box>
             {hasPolicy && (
                 <div>
                     <Button size="small" onClick={() => void runPreview()}>

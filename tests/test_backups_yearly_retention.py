@@ -5,8 +5,10 @@
 """Yearly retention (restate 2.2.0.12, ``keep_yearly``).
 
 The prune that honors a yearly count runs on the storage host, so a count
-is accepted only once the storage host's restate has reported it can; once
-set it is always sent with the prune, like the other counts."""
+is refused once the storage host's restate has reported it cannot -- as
+heard by any policy on the target, since they share that host.  Before any
+report (a target's first host) it is taken, so the field needs no second
+save.  Once set it is always sent with the prune, like the other counts."""
 
 import json
 import os
@@ -37,6 +39,7 @@ def _storage_reports(session, s, abilities):
         "command_id": run.command_id, "success": True,
         "result": {"abilities": abilities},
     })  # fmt: skip
+    session.flush()  # read back by a query (the target's report)
 
 
 @pytest.mark.asyncio
@@ -44,6 +47,7 @@ async def test_years_need_a_storage_host_that_can_keep_them(session):
     s = _setup(session)
     body = api.PolicyBody(keep_last=7, keep_yearly=5)
     with patch.object(retention, "_engine", return_value=ENGINE):
+        _storage_reports(session, s, [])
         assert (
             await _status(api.put_policy(str(s.host.id), body, session, MANAGER)) == 409
         )
@@ -67,6 +71,26 @@ async def test_a_policy_that_has_years_keeps_them_whatever_the_storage_side(sess
         saved = await api.put_policy(str(s.host.id), body, session, MANAGER)
     assert saved["keep_yearly"] == 3 and saved["yearly_supported"] is False
     assert jobs.prune_keep(s.policy)["keep_yearly"] == 3
+
+
+@pytest.mark.asyncio
+async def test_a_first_policy_takes_years_before_any_report(session):
+    """No second save, no trick: before the storage host has said anything,
+    a new host's policy keeps the years it was given (Bryan, 2026-10-29)."""
+    s = _setup(session)
+    session.delete(s.policy)
+    session.flush()
+    body = api.PolicyBody(keep_last=7, keep_monthly=12, keep_yearly=3)
+    with patch.object(retention, "_engine", return_value=ENGINE):
+        saved = await api.put_policy(str(s.host.id), body, session, MANAGER)
+    assert saved["keep_yearly"] == 3
+
+
+def test_any_policy_on_the_target_speaks_for_its_storage_host(session):
+    s = _setup(session)
+    assert jobs.target_storage_abilities(session, s.target.id) is None
+    _storage_reports(session, s, ["keep_yearly"])
+    assert jobs.target_storage_abilities(session, s.target.id) == ["keep_yearly"]
 
 
 def test_an_older_agent_reporting_nothing_leaves_what_was_known(session):

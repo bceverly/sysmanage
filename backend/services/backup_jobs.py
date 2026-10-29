@@ -548,6 +548,27 @@ def storage_abilities(policy: models.BackupPolicy) -> List[str]:
     return _json_strings(getattr(policy, "storage_abilities", None))
 
 
+def target_storage_abilities(db: Session, target_id: Any) -> Optional[List[str]]:
+    """What the target's storage host's restate offers, as any policy on the
+    target last heard it (they all share that storage host), or None before
+    any has reported -- so a host's FIRST policy is not held to its own,
+    still empty, report."""
+    rows = (
+        db.query(models.BackupPolicy.storage_abilities)
+        .filter(
+            models.BackupPolicy.target_id == target_id,
+            models.BackupPolicy.storage_abilities.isnot(None),
+        )
+        .all()
+    )
+    if not rows:
+        return None
+    found = set()
+    for (text,) in rows:
+        found.update(_json_strings(text))
+    return sorted(found)
+
+
 def pending(db: Session, policy_id: Any, action: str, host_id: Any = None) -> bool:
     """A run of ``action`` for this policy is still queued or running."""
     query = db.query(models.BackupRun.id).filter(

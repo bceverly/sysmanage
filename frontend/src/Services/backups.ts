@@ -405,6 +405,16 @@ export interface BulkEquipResult {
 export const bulkEquipBackup = async (hostIds: string[]): Promise<BulkEquipResult> =>
   (await axiosInstance.post<BulkEquipResult>(`${base}/backups/equip`, { host_ids: hostIds })).data;
 
+export interface BulkSetupResult {
+  requested: number;
+  created: number;
+  skipped: { host_id: string; fqdn: string | null; reason: string }[];
+}
+
+/** Give each picked equipped host without a policy the default policy. */
+export const bulkSetupBackups = async (hostIds: string[]): Promise<BulkSetupResult> =>
+  (await axiosInstance.post<BulkSetupResult>(`${base}/backups/setup`, { host_ids: hostIds })).data;
+
 /** Ask the host's agent whether it can run restate now ("Check again"). */
 export const recheckBackup = async (hostId: string): Promise<{ command_id: string }> =>
   (await axiosInstance.post<{ command_id: string }>(`${base}/host/${hostId}/backup-recheck`)).data;

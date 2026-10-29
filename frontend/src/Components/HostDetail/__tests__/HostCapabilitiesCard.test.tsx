@@ -123,6 +123,20 @@ describe('HostCapabilitiesCard', () => {
         expect(screen.getByText('Full')).toBeTruthy();
     });
 
+    it('lists a missing NFS client as an optional tool Equip installs', () => {
+        render(
+            <HostCapabilitiesCard
+                report={{ unavailable: { backup: 'missing_nfs_client' } }}
+                limited={false}
+                platform="Linux"
+            />
+        );
+        expect(screen.queryByText('Unavailable')).toBeNull();
+        expect(screen.getByText(
+            'backup -- The NFS client is not installed on this host (Equip for backup installs it)'
+        )).toBeTruthy();
+    });
+
     it('lists partially-supported groups with a count', () => {
         render(
             <HostCapabilitiesCard
