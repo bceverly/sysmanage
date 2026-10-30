@@ -1182,6 +1182,10 @@ jobs:
         npm install --legacy-peer-deps || npm ci --legacy-peer-deps
 
     - name: Install Artillery for load testing
+      # The load test drives HTTP and WebSockets, never a browser; and
+      # Playwright has no Chromium for Ubuntu 26.04 (ubuntu-latest).
+      env:
+        PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
       run: |
         npm install -g artillery@2.0.29
 
