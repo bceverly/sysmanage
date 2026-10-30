@@ -176,6 +176,16 @@ describe("Backups page", () => {
     expect(screen.queryByText("Verified")).not.toBeInTheDocument();
   });
 
+  test("a host that cannot reach the storage cannot restore files either", async () => {
+    vi.mocked(getBackupOverview).mockResolvedValue(overview({
+      hosts: [host({ reach: { reachable: false, address: "192.168.4.10", port: 2049,
+        storage_fqdn: "nas", error: "timed out", checked_at: "2026-10-30T12:00:00" } })],
+    }));
+    render(<MemoryRouter><Backups /></MemoryRouter>);
+    const restore = await screen.findByRole("button", { name: "Restore files" });
+    expect(restore).toBeDisabled();
+  });
+
   test("a running capture shows Backing up, not the earlier failure", async () => {
     const failed = run({ id: "r0", action: "capture", status: "failed", finished_at: "2026-10-20T09:32:33" });
     const good = run({ id: "r9", action: "capture", status: "ok", finished_at: "2026-10-19T03:00:00" });

@@ -283,7 +283,7 @@ const BackupHostsTable: React.FC<{
                                         </AsyncButton>
                                     )}
                                     {canRestore && row.snapshot_count > 0 && (
-                                        <Button size="small" onClick={() => setRestoring(row)}>
+                                        <Button size="small" onClick={() => setRestoring(row)} disabled={unreachable(row)}>
                                             {t('backups.hosts.restore', 'Restore files')}
                                         </Button>
                                     )}

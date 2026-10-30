@@ -765,6 +765,8 @@ async def backup_restore(
     host = _host_or_404(db, host_id)
     _validate_restore(body)
     policy = _ready_policy(db, host)
+    # A restore (and its preview) mounts the repository on the host.
+    reach.refuse_if_blocked(db, host)
     snapshot = (
         db.query(models.BackupSnapshot)
         .filter(

@@ -186,7 +186,7 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                         </Button>
                     )}
                     {canRestore && data.snapshot_count > 0 && (
-                        <Button size="small" onClick={() => setRestoring(true)}>
+                        <Button size="small" onClick={() => setRestoring(true)} disabled={unreachable(data)}>
                             {t('backups.hosts.restore', 'Restore files')}
                         </Button>
                     )}

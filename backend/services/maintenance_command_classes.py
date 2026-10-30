@@ -52,6 +52,8 @@ WINDOW_EXEMPT_COMMANDS = frozenset(
         "run_query_pack",
         "run_malware_scan",  # reads files; quarantine_file is the change
         "evaluate_package_compliance",  # checks packages against a profile
+        # a TCP connect to the backup storage's NFS port; changes nothing
+        "check_backup_storage",
         # changes only what the agent itself observes and reports (passive
         # listening on the host's own segments), not the host
         "configure_network_discovery",

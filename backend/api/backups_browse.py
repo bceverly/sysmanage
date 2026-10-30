@@ -37,6 +37,7 @@ from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import backup_jobs as jobs
+from backend.services import backup_reach as reach
 from backend.services import backup_views as views
 from backend.services.audit_service import EntityType
 
@@ -94,6 +95,7 @@ async def browse_snapshot(
         raise HTTPException(status_code=422, detail=_("The path must be absolute"))
     host = _host_or_404(db, host_id)
     policy = _ready_policy(db, host)
+    reach.refuse_if_blocked(db, host)  # both read the repository on the host
     _able(policy, "list")
     snapshot = _snapshot_or_404(db, policy, body.snapshot)
     where = _readable_repository(snapshot, policy, host)
@@ -116,6 +118,7 @@ async def backup_changes(
     _require(current_user, SecurityRoles.MANAGE_BACKUPS)
     host = _host_or_404(db, host_id)
     policy = _ready_policy(db, host)
+    reach.refuse_if_blocked(db, host)  # both read the repository on the host
     _able(policy, "status")
     name = (body or ChangesBody()).snapshot
     if name:

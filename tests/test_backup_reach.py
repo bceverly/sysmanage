@@ -14,6 +14,7 @@ from datetime import timedelta
 import pytest
 
 from backend.api import backups as api
+from backend.api import backups_browse as browse
 from backend.api import backups_equip as equip_api
 from backend.api import backups_setup as setup
 from backend.persistence import models
@@ -26,7 +27,7 @@ from tests.services.test_backup_results import (  # noqa: F401  # pylint: disabl
     _setup,
     sent,
 )
-from tests.test_backups_api import MANAGER, _status
+from tests.test_backups_api import MANAGER, RESTORER, _status
 
 CAN_CHECK = json.dumps({"capabilities": ["backup", "backup_reach"], "commands": []})
 NAS = "192.168.4.10"
@@ -124,6 +125,23 @@ async def test_policy_backup_now_and_bulk_actions_refuse_an_unreachable_host(
         api.BulkBackupBody(host_ids=[str(s.host.id)]), session, MANAGER
     )
     assert answer["skipped"][0]["reason"] == "storage_unreachable"
+
+
+@pytest.mark.asyncio
+async def test_restore_preview_and_browsing_refuse_an_unreachable_host(session, sent):
+    """Each mounts the repository on the host, so each would only fail there."""
+    s = _ready(session)
+    _unreachable(session, s, sent)
+    host_id = str(s.host.id)
+    restore = api.RestoreBody(snapshot="20261029T140053Z", include=["/etc/hostname"])
+    assert await _status(api.backup_restore(host_id, restore, session, RESTORER)) == 409
+    look = browse.BrowseBody(snapshot="20261029T140053Z", path="/etc")
+    assert (
+        await _status(browse.browse_snapshot(host_id, look, session, RESTORER)) == 409
+    )
+    assert await _status(browse.backup_changes(host_id, None, session, RESTORER)) == 409
+    queued = [c for c in sent if c[1] != "check_backup_storage"]
+    assert queued == []  # nothing went to the host
 
 
 @pytest.mark.asyncio
