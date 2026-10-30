@@ -263,8 +263,14 @@ async def test_restore_stages_and_needs_the_unsigned_acknowledgment(session, sen
     assert (
         await _status(api.backup_restore(str(s.host.id), body, session, MANAGER)) == 403
     )
+    # A preview writes nothing: it needs no acknowledgment (2026-10-30).
+    await api.backup_restore(str(s.host.id), body, session, RESTORER)
+    assert sent[-1][2]["dry_run"] is True
+    real = api.RestoreBody(
+        snapshot="2026-10-20T010000Z", include=["/etc/nginx"], dry_run=False
+    )
     assert (
-        await _status(api.backup_restore(str(s.host.id), body, session, RESTORER))
+        await _status(api.backup_restore(str(s.host.id), real, session, RESTORER))
         == 409
     )
     body.acknowledge_unsigned = True

@@ -779,7 +779,9 @@ async def backup_restore(
     if snapshot is None:
         raise HTTPException(status_code=404, detail=_("Snapshot not found"))
     where = _readable_repository(snapshot, policy, host)
-    if not snapshot.signed and not body.acknowledge_unsigned:
+    # Only a real restore needs the operator to accept an unsigned snapshot: a
+    # preview (dry run) writes nothing on the host (Bryan, 2026-10-30).
+    if not snapshot.signed and not body.dry_run and not body.acknowledge_unsigned:
         raise HTTPException(
             status_code=409,
             detail=_("This snapshot is not signed; confirm to restore it anyway"),
@@ -812,7 +814,7 @@ async def backup_restore(
             "exclude": body.exclude,
             "dry_run": body.dry_run,
             "in_place": body.in_place,
-            "unsigned_acknowledged": not snapshot.signed,
+            "unsigned_acknowledged": not snapshot.signed and body.acknowledge_unsigned,
         },
     )
     db.commit()

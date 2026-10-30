@@ -196,7 +196,10 @@ const RestoreFilesDialog: React.FC<{
     };
 
     const previewDone = preview !== null && preview.status === 'ok';
-    const blocked = (needsAck && !acknowledged) || (inPlace && include.length === 0);
+    // A preview writes nothing, so it does not need the unsigned-snapshot
+    // acknowledgment; only the restore itself does (Bryan, 2026-10-30).
+    const previewBlocked = inPlace && include.length === 0;
+    const blocked = previewBlocked || (needsAck && !acknowledged);
     const chooseDestination = (place: boolean) => {
         setInPlace(place);
         setPlaceAck(false);
@@ -287,7 +290,7 @@ const RestoreFilesDialog: React.FC<{
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose}>{t('common.close', 'Close')}</Button>
-                <AsyncButton onClick={() => send(true)} disabled={!snapshot || blocked}>
+                <AsyncButton onClick={() => send(true)} disabled={!snapshot || previewBlocked}>
                     {t('backups.restore.preview', 'Preview')}
                 </AsyncButton>
                 <AsyncButton variant="contained" color={inPlace ? 'warning' : 'primary'} onClick={() => send(false)}

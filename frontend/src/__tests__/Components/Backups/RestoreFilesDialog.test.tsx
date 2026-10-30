@@ -41,6 +41,18 @@ const open = async () => {
 const button = (name: string) => screen.getByRole("button", { name });
 
 describe("RestoreFilesDialog", () => {
+  test("an unsigned snapshot can be previewed before it is acknowledged", async () => {
+    render(<RestoreFilesDialog open hostId="h1" fqdn="t14" onClose={vi.fn()} />);
+    await waitFor(() => expect(getSnapshots).toHaveBeenCalled());
+    vi.mocked(restoreFiles).mockResolvedValue(done("p0"));
+    expect(button("Preview")).toBeEnabled();
+    fireEvent.click(button("Preview"));
+    await waitFor(() => expect(restoreFiles).toHaveBeenCalledTimes(1));
+    expect(button("Restore to staging")).toBeDisabled();
+    fireEvent.click(screen.getByLabelText("This snapshot is not signed. Restore it anyway."));
+    expect(button("Restore to staging")).toBeEnabled();
+  });
+
   test("restores to staging by default", async () => {
     await open();
     vi.mocked(restoreFiles).mockResolvedValue(done("p1"));
