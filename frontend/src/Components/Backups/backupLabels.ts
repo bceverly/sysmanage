@@ -6,7 +6,7 @@
 
 import type { TFunction } from 'i18next';
 import { appLocale } from '../../utils/locale';
-import type { BackupRun, BackupStatus, BackupSummary, Coverage } from '../../Services/backups';
+import type { BackupReach, BackupRun, BackupStatus, BackupSummary, Coverage } from '../../Services/backups';
 
 type ChipColor = 'default' | 'success' | 'warning' | 'error' | 'info';
 
@@ -70,6 +70,8 @@ export const reasonLabel = (t: TFunction, reason: string | null): string => {
         case 'no_host':
         case 'no_storage_host':
             return t('backups.reason.noStorageHost', 'No storage host is set');
+        case 'storage_unreachable':
+            return t('backups.reason.storageUnreachable', 'Cannot reach the backup storage');
         default:
             return reason ?? '';
     }
@@ -203,3 +205,12 @@ export const backupSummaryLevel = (
     if (summary.counts.failed || summary.target_problem) return 'error';
     return summary.counts.overdue || summary.counts.incomplete ? 'warning' : 'ok';
 };
+
+/** A host known not to reach the backup storage (unknown never blocks). */
+export const unreachable = (row: { reach?: BackupReach | null }): boolean => row.reach?.reachable === false;
+
+/** Why backups are not offered to a host that cannot reach the storage. */
+export const reachMessage = (t: TFunction, reach: BackupReach): string =>
+    t('backups.reach.unreachable',
+        'This host cannot reach the backup storage ({{storage}}, {{address}}, NFS port {{port}}). Backups need a network path to it.',
+        { storage: reach.storage_fqdn ?? '', address: reach.address, port: reach.port });

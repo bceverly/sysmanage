@@ -5375,7 +5375,8 @@
       "notPrivileged": "يجب تشغيل الوكيل بصلاحيات root",
       "toolOutdated": "رقِّ restate",
       "wrongPlatform": "غير مدعوم على نظام التشغيل هذا",
-      "missingNfsClient": "ثبّت عميل NFS"
+      "missingNfsClient": "ثبّت عميل NFS",
+      "storageUnreachable": "تعذر الوصول إلى تخزين النسخ الاحتياطي"
     },
     "restore": {
       "confirm": "الاستعادة إلى منطقة التجهيز",
@@ -5622,6 +5623,9 @@
       "reached": "تم بلوغ {{percent}}%",
       "until": "{{percent}}% خلال نحو {{days}} يومًا",
       "flat": "لا يزداد (آخر {{days}} يومًا)"
+    },
+    "reach": {
+      "unreachable": "لا يمكن لهذا المضيف الوصول إلى تخزين النسخ الاحتياطي ({{storage}}، {{address}}، منفذ NFS ‏{{port}}). تحتاج النسخ الاحتياطية إلى مسار شبكة إليه."
     }
   }
 }

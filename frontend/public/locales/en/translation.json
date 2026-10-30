@@ -5375,7 +5375,8 @@
       "notPrivileged": "The agent must run as root",
       "toolOutdated": "Upgrade restate",
       "wrongPlatform": "Not supported on this OS",
-      "missingNfsClient": "Install the NFS client"
+      "missingNfsClient": "Install the NFS client",
+      "storageUnreachable": "Cannot reach the backup storage"
     },
     "restore": {
       "confirm": "Restore to staging",
@@ -5622,6 +5623,9 @@
       "flat": "Not growing (last {{days}} days)",
       "reached": "{{percent}}% reached",
       "until": "{{percent}}% in about {{days}} days"
+    },
+    "reach": {
+      "unreachable": "This host cannot reach the backup storage ({{storage}}, {{address}}, NFS port {{port}}). Backups need a network path to it."
     }
   }
 }

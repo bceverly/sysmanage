@@ -71,7 +71,7 @@ const RunOutcome: React.FC<{ run: BackupRun }> = ({ run }) => {
     // restate 2.2 nests a restore's counts and plan under ``restore``;
     // earlier results had them at the top.
     const raw = (run.result ?? {}) as RestoreResult & { restore?: RestoreResult };
-    const result: RestoreResult = { ...raw, ...(raw.restore ?? {}) };
+    const result: RestoreResult = { ...raw, ...raw.restore };
     const plan = Array.isArray(result.plan) ? result.plan : [];
     const nothing = run.status === 'ok' && !(result.files ?? result.plan_count ?? 0);
     return (

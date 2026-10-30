@@ -25,6 +25,7 @@ from sqlalchemy.orm import Session
 
 from backend.persistence import models
 from backend.services import backup_equip
+from backend.services import backup_reach
 from backend.services import backup_first_fit as first_fit
 from backend.services import backup_forecast
 from backend.services import backup_jobs as jobs
@@ -268,6 +269,8 @@ def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
         # (None when it can) -- see services/backup_equip.py.
         "equip": backup_equip.state(db, host.id, now),
         "equip_blocker": backup_equip.blocker(db, host, now),
+        # Can it reach the backup storage?  None = not known (never blocks).
+        "reach": backup_reach.state(db, host),
         "coverage": coverage(host),
         "policy": policy_dict(policy) if policy else None,
         "last_capture": None,

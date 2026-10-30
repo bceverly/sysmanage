@@ -5375,7 +5375,8 @@
       "notPrivileged": "Der Agent muss als root laufen",
       "toolOutdated": "restate aktualisieren",
       "wrongPlatform": "Auf diesem Betriebssystem nicht unterstützt",
-      "missingNfsClient": "NFS-Client installieren"
+      "missingNfsClient": "NFS-Client installieren",
+      "storageUnreachable": "Sicherungsspeicher nicht erreichbar"
     },
     "restore": {
       "confirm": "In Staging wiederherstellen",
@@ -5622,6 +5623,9 @@
       "flat": "Wächst nicht (letzte {{days}} Tage)",
       "reached": "{{percent}}% erreicht",
       "until": "{{percent}}% in etwa {{days}} Tagen"
+    },
+    "reach": {
+      "unreachable": "Dieser Host erreicht den Sicherungsspeicher nicht ({{storage}}, {{address}}, NFS-Port {{port}}). Sicherungen brauchen einen Netzwerkpfad dorthin."
     }
   }
 }

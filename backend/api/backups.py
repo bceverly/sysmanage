@@ -52,6 +52,7 @@ from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import backup_jobs as jobs
+from backend.services import backup_reach as reach
 from backend.services import backup_storage_status as storage_fs
 from backend.services import backup_tick
 from backend.services import backup_views as views
@@ -562,6 +563,7 @@ async def put_policy(
     target = jobs.the_target(db)
     if target is None:
         raise HTTPException(status_code=409, detail=_("Set up the backup target first"))
+    reach.refuse_if_blocked(db, host)
     policy = _policy_of(db, host)
     gfs = retention.check_gfs_change(  # 402 to change without Pro+
         policy, body, jobs.target_storage_abilities(db, target.id)
@@ -591,6 +593,7 @@ async def put_policy(
         body.model_dump(),
     )
     backup_tick.configure_now(db)  # take effect now, not on the next tick
+    reach.start(db, host)  # when due
     db.commit()
     return views.policy_dict(policy)
 
@@ -667,6 +670,8 @@ async def backup_now(
         raise _bad(_("Unknown backup action"))
     host = _host_or_404(db, host_id)
     policy = _ready_policy(db, host)
+    if _RUNNABLE[action] == "host":
+        reach.refuse_if_blocked(db, host)
     if action == "repack" and jobs.encrypted(policy):
         # Rewriting packs needs the secret key, which the storage host never
         # holds (Pro+ backup_engine: it stays keyless).
@@ -708,7 +713,7 @@ def _bulk_skip_reason(db: Session, host: Optional[models.Host]) -> Optional[str]
         return "not_configured"
     if jobs.pending(db, policy.id, "capture"):
         return "running"
-    return None
+    return reach.UNREACHABLE if reach.blocked(db, host) else None
 
 
 @router.post("/backups/backup-now")

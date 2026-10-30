@@ -5375,7 +5375,8 @@
       "notPrivileged": "代理必须以 root 身份运行",
       "toolOutdated": "请升级 restate",
       "wrongPlatform": "此操作系统不支持",
-      "missingNfsClient": "安装 NFS 客户端"
+      "missingNfsClient": "安装 NFS 客户端",
+      "storageUnreachable": "无法访问备份存储"
     },
     "restore": {
       "confirm": "恢复到暂存目录",
@@ -5622,6 +5623,9 @@
       "flat": "未增长（最近 {{days}} 天）",
       "reached": "已达到 {{percent}}%",
       "until": "约 {{days}} 天后达到 {{percent}}%"
+    },
+    "reach": {
+      "unreachable": "此主机无法访问备份存储（{{storage}}、{{address}}、NFS 端口 {{port}}）。备份需要一条通往它的网络路径。"
     }
   }
 }

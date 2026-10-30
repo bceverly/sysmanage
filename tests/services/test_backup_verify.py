@@ -109,6 +109,18 @@ def test_cadence_and_retry_after_a_failure(session, sent, loaded_engine):
     assert verify.maybe_verify(session, s2.policy, s2.host, NOW + timedelta(hours=23))
 
 
+def test_a_busy_verify_is_retried_soon(session, sent, loaded_engine):
+    """Refused while the storage host pruned: nothing failed (mail.archive,
+    2026-10-29), so not the day-long wait of a failure."""
+    s = _setup(session)
+    _ready(session, s)
+    _run(session, s, "verify", "busy", NOW)
+    assert not verify.maybe_verify(
+        session, s.policy, s.host, NOW + timedelta(minutes=10)
+    )
+    assert verify.maybe_verify(session, s.policy, s.host, NOW + verify.BUSY_RETRY)
+
+
 def test_a_host_whose_restate_cannot_check_or_decrypt_is_skipped(
     session, sent, loaded_engine
 ):

@@ -35,12 +35,15 @@ import {
     formatBytes,
     formatTime,
     heldNote,
+    reachMessage,
     reasonLabel,
     statusColor,
     statusLabel,
+    unreachable,
     unreadableOf,
 } from './backupLabels';
 import EquipForBackup from './EquipForBackup';
+import StorageReachNote from './StorageReachNote';
 import { FirstFitCaption } from './BackupFirstFit';
 import { VerificationCaption } from './VerificationStatus';
 
@@ -48,13 +51,15 @@ const rank = (row: BackupHost) => BACKUP_STATUS_ORDER.indexOf(row.status);
 
 /** A host the bulk "Back up now" can take: configured, idle, not waiting. */
 export const canBackUp = (row: BackupHost): boolean =>
-    row.equipped && !!row.policy?.configured && row.running?.action !== 'capture' && !row.capture_requested;
+    row.equipped && !!row.policy?.configured && row.running?.action !== 'capture' && !row.capture_requested
+    && !unreachable(row);
 
 /** A host the bulk "Equip for backup" can take: the server offers it. */
-export const canEquip = (row: BackupHost): boolean => !row.equipped && row.equip_blocker === null;
+export const canEquip = (row: BackupHost): boolean =>
+    !row.equipped && row.equip_blocker === null && !unreachable(row);
 
 /** A host the bulk "Set up backups" can take: equipped, with no policy. */
-export const canSetUp = (row: BackupHost): boolean => row.equipped && !row.policy;
+export const canSetUp = (row: BackupHost): boolean => row.equipped && !row.policy && !unreachable(row);
 
 /** A host the bulk bar can act on at all. */
 const canPick = (row: BackupHost): boolean => canBackUp(row) || canEquip(row) || canSetUp(row);
@@ -63,6 +68,7 @@ const canPick = (row: BackupHost): boolean => canBackUp(row) || canEquip(row) ||
  *  reason looked broken (Bryan, 2026-10-29). */
 export const pickBlocked = (t: TFunction, row: BackupHost): string | null => {
     if (canPick(row)) return null;
+    if (row.reach && unreachable(row)) return reachMessage(t, row.reach);
     if (!row.equipped) {
         switch (row.equip_blocker) {
             case 'agent_outdated':
@@ -140,6 +146,7 @@ const StatusCell: React.FC<{ row: BackupHost; canManage: boolean; onChanged: () 
                         canManage={canManage} onChanged={onChanged} />
                 </>
             )}
+            <StorageReachNote hostId={row.host_id} reach={row.reach} canManage={canManage} onChanged={onChanged} />
             <Progress row={row} />
             <Unreadable row={row} />
             <FirstFitCaption fit={row.first_fit} />
@@ -262,13 +269,14 @@ const BackupHostsTable: React.FC<{
                             <TableCell align="right">
                                 <Stack direction="row" spacing={1} justifyContent="flex-end">
                                     {canManage && hasTarget && (
-                                        <Button size="small" onClick={() => setEditing(row)}>
+                                        <Button size="small" onClick={() => setEditing(row)} disabled={unreachable(row)}>
                                             {t('backups.hosts.configure', 'Configure')}
                                         </Button>
                                     )}
                                     {canManage && row.policy && (
                                         <AsyncButton size="small" variant="outlined"
-                                            disabled={!row.equipped || !row.policy.configured || row.running?.action === 'capture'}
+                                            disabled={!row.equipped || !row.policy.configured || row.running?.action === 'capture'
+                                                || unreachable(row)}
                                             onClick={() => runNow(row)}
                                             busyLabel={t('backups.hosts.starting', 'Starting...')}>
                                             {t('backups.hosts.backupNow', 'Back up now')}

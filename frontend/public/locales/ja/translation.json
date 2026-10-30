@@ -5375,7 +5375,8 @@
       "notPrivileged": "エージェントは root で実行する必要があります",
       "toolOutdated": "restate をアップグレードしてください",
       "wrongPlatform": "この OS ではサポートされていません",
-      "missingNfsClient": "NFS クライアントをインストール"
+      "missingNfsClient": "NFS クライアントをインストール",
+      "storageUnreachable": "バックアップストレージに到達できません"
     },
     "restore": {
       "confirm": "ステージング領域に復元",
@@ -5622,6 +5623,9 @@
       "flat": "増加なし（直近 {{days}} 日間）",
       "reached": "{{percent}}% に到達",
       "until": "約 {{days}} 日で {{percent}}%"
+    },
+    "reach": {
+      "unreachable": "このホストはバックアップストレージ ({{storage}}、{{address}}、NFS ポート {{port}}) に到達できません。バックアップにはそこへのネットワーク経路が必要です。"
     }
   }
 }

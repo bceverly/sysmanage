@@ -5375,7 +5375,8 @@
       "notPrivileged": "El agente debe ejecutarse como root",
       "toolOutdated": "Actualice restate",
       "wrongPlatform": "No compatible con este sistema operativo",
-      "missingNfsClient": "Instalar el cliente NFS"
+      "missingNfsClient": "Instalar el cliente NFS",
+      "storageUnreachable": "No llega al almacenamiento de copias de seguridad"
     },
     "restore": {
       "confirm": "Restaurar en el área de preparación",
@@ -5622,6 +5623,9 @@
       "flat": "No crece (últimos {{days}} días)",
       "reached": "{{percent}}% alcanzado",
       "until": "{{percent}}% en unos {{days}} días"
+    },
+    "reach": {
+      "unreachable": "Este host no puede llegar al almacenamiento de copias de seguridad ({{storage}}, {{address}}, puerto NFS {{port}}). Las copias de seguridad necesitan una ruta de red hasta él."
     }
   }
 }

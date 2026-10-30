@@ -5375,7 +5375,8 @@
       "notPrivileged": "L'agent doit s'exécuter en tant que root",
       "toolOutdated": "Mettez à jour restate",
       "wrongPlatform": "Non pris en charge sur ce système d'exploitation",
-      "missingNfsClient": "Installer le client NFS"
+      "missingNfsClient": "Installer le client NFS",
+      "storageUnreachable": "Stockage des sauvegardes inaccessible"
     },
     "restore": {
       "confirm": "Restaurer dans la zone de préparation",
@@ -5622,6 +5623,9 @@
       "flat": "Ne croît pas ({{days}} derniers jours)",
       "reached": "{{percent}}% atteint",
       "until": "{{percent}}% dans environ {{days}} jours"
+    },
+    "reach": {
+      "unreachable": "Cet hôte ne peut pas atteindre le stockage des sauvegardes ({{storage}}, {{address}}, port NFS {{port}}). Les sauvegardes ont besoin d'un chemin réseau jusqu'à lui."
     }
   }
 }

@@ -27,6 +27,7 @@ from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import agent_capability_service as capabilities
 from backend.services import backup_equip as equip
+from backend.services import backup_reach as reach
 from backend.services.audit_service import EntityType
 
 router = APIRouter(dependencies=[Depends(JWTBearer())])
@@ -83,6 +84,8 @@ async def backup_equip(
     _require(current_user, SecurityRoles.MANAGE_BACKUPS)
     host = _host_or_404(db, host_id)
     command_id, why = equip.start(db, host, current_user.userid)
+    if why == equip.STORAGE_UNREACHABLE:
+        raise HTTPException(status_code=409, detail=reach.message(db, host))
     if why:
         raise _refusal(why)
     _audit(
@@ -134,3 +137,30 @@ async def bulk_backup_equip(
         )
     db.commit()
     return {"requested": len(body.host_ids), "started": started, "skipped": skipped}
+
+
+@router.post("/host/{host_id}/backup-reach")
+async def backup_reach_check(
+    host_id: str,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """Check again whether the host can reach the backup storage; its row
+    follows within seconds of the agent's answer."""
+    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
+    host = _host_or_404(db, host_id)
+    if not reach.can_check(host):
+        raise HTTPException(
+            status_code=409,
+            detail=_(
+                "This host's agent cannot check that yet; upgrade the agent first"
+            ),
+        )
+    if reach.storage_address(db) is None:
+        raise HTTPException(status_code=409, detail=_("Set up the backup target first"))
+    # None for the storage host itself: it holds the backups, never mounts them.
+    command_id = reach.start(db, host, force=True)
+    _audit(db, current_user, EntityType.HOST, host.id, host.fqdn,
+           "Backup storage reach check requested", {"command_id": command_id})  # fmt: skip
+    db.commit()
+    return {"command_id": command_id}

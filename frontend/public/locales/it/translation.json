@@ -5375,7 +5375,8 @@
       "notPrivileged": "L'agente deve essere eseguito come root",
       "toolOutdated": "Aggiorna restate",
       "wrongPlatform": "Non supportato su questo sistema operativo",
-      "missingNfsClient": "Installa il client NFS"
+      "missingNfsClient": "Installa il client NFS",
+      "storageUnreachable": "Spazio di backup non raggiungibile"
     },
     "restore": {
       "confirm": "Ripristina nell'area di staging",
@@ -5622,6 +5623,9 @@
       "flat": "Non cresce (ultimi {{days}} giorni)",
       "reached": "{{percent}}% raggiunto",
       "until": "{{percent}}% tra circa {{days}} giorni"
+    },
+    "reach": {
+      "unreachable": "Questo host non riesce a raggiungere lo spazio di backup ({{storage}}, {{address}}, porta NFS {{port}}). I backup richiedono un percorso di rete fino a esso."
     }
   }
 }

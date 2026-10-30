@@ -284,6 +284,18 @@ export interface BackupHost {
    *  not_applicable, in_progress, or another not-equipped reason -- or null
    *  when it is. */
   equip_blocker?: string | null;
+  /** Can this host reach the backup storage (NFS port 2049 of the storage
+   *  host)?  Null when not known yet, which never blocks. */
+  reach?: BackupReach | null;
+}
+
+export interface BackupReach {
+  reachable: boolean;
+  address: string;
+  port: number;
+  storage_fqdn: string | null;
+  error: string | null;
+  checked_at: string | null;
 }
 
 export interface BackupEquipState {
@@ -416,6 +428,10 @@ export const bulkSetupBackups = async (hostIds: string[]): Promise<BulkSetupResu
   (await axiosInstance.post<BulkSetupResult>(`${base}/backups/setup`, { host_ids: hostIds })).data;
 
 /** Ask the host's agent whether it can run restate now ("Check again"). */
+/** Check again whether the host can reach the backup storage. */
+export const checkBackupReach = async (hostId: string): Promise<{ command_id: string | null }> =>
+  (await axiosInstance.post<{ command_id: string | null }>(`${base}/host/${hostId}/backup-reach`)).data;
+
 export const recheckBackup = async (hostId: string): Promise<{ command_id: string }> =>
   (await axiosInstance.post<{ command_id: string }>(`${base}/host/${hostId}/backup-recheck`)).data;
 

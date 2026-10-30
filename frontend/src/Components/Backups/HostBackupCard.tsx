@@ -31,8 +31,10 @@ import {
     runStatusLabel,
     statusColor,
     statusLabel,
+    unreachable,
 } from './backupLabels';
 import EquipForBackup from './EquipForBackup';
+import StorageReachNote from './StorageReachNote';
 import { VerificationLine } from './VerificationStatus';
 
 // restate's plaintext write cache on this host (encrypted repositories only;
@@ -121,6 +123,7 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                             canManage={canManage} onChanged={() => void load()} />
                     </Alert>
                 )}
+                <StorageReachNote hostId={hostId} reach={data.reach} canManage={canManage} onChanged={() => void load()} />
                 {!data.target && (
                     <Typography variant="body2" color="text.secondary">
                         {t('backups.card.noTarget', 'No backup target is set up yet.')}
@@ -159,13 +162,14 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                 )}
                 <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', rowGap: 1 }}>
                     {canManage && data.target && (
-                        <Button size="small" onClick={() => setEditing(true)}>
+                        <Button size="small" onClick={() => setEditing(true)} disabled={unreachable(data)}>
                             {t('backups.hosts.configure', 'Configure')}
                         </Button>
                     )}
                     {canManage && data.policy && (
                         <AsyncButton size="small" variant="outlined" onClick={runNow}
-                            disabled={!data.equipped || !data.policy.configured || data.running?.action === 'capture'}
+                            disabled={!data.equipped || !data.policy.configured || data.running?.action === 'capture'
+                                || unreachable(data)}
                             busyLabel={t('backups.hosts.starting', 'Starting...')}>
                             {t('backups.hosts.backupNow', 'Back up now')}
                         </AsyncButton>

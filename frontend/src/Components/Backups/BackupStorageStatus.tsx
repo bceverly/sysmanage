@@ -54,10 +54,15 @@ export const ForecastLine: React.FC<{ target: BackupTarget }> = ({ target }) => 
         ? t('backups.forecast.growth', 'Growing about {{size}} a day (last {{days}} days)',
             { size: formatBytes(f.growth_bytes_per_day), days: f.basis_days })
         : t('backups.forecast.flat', 'Not growing (last {{days}} days)', { days: f.basis_days });
-    const until = (days: number | null, percent: number) => days === null ? null
-        : days === 0
-            ? t('backups.forecast.reached', '{{percent}}% reached', { percent })
-            : t('backups.forecast.until', '{{percent}}% in about {{days}} days', { percent, days });
+    const until = (days: number | null, percent: number) => {
+        if (days === null) {
+            return null;
+        }
+        if (days === 0) {
+            return t('backups.forecast.reached', '{{percent}}% reached', { percent });
+        }
+        return t('backups.forecast.until', '{{percent}}% in about {{days}} days', { percent, days });
+    };
     const marks = [until(f.days_to_low, low), until(f.days_to_critical, critical)].filter(Boolean);
     return (
         <Typography variant="body2" color={f.days_to_critical !== null && f.days_to_critical < 30 ? 'warning.main' : undefined}>

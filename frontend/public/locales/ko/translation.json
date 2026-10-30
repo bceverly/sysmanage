@@ -5375,7 +5375,8 @@
       "notPrivileged": "에이전트는 root로 실행되어야 합니다",
       "toolOutdated": "restate를 업그레이드하세요",
       "wrongPlatform": "이 운영 체제에서는 지원되지 않음",
-      "missingNfsClient": "NFS 클라이언트 설치"
+      "missingNfsClient": "NFS 클라이언트 설치",
+      "storageUnreachable": "백업 스토리지에 연결할 수 없음"
     },
     "restore": {
       "confirm": "스테이징 영역으로 복원",
@@ -5622,6 +5623,9 @@
       "flat": "증가하지 않음(최근 {{days}}일)",
       "reached": "{{percent}}% 도달",
       "until": "약 {{days}}일 후 {{percent}}%"
+    },
+    "reach": {
+      "unreachable": "이 호스트는 백업 스토리지({{storage}}, {{address}}, NFS 포트 {{port}})에 연결할 수 없습니다. 백업하려면 그곳까지의 네트워크 경로가 필요합니다."
     }
   }
 }

@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 from backend.persistence import models
 from backend.services import agent_capability_service as capabilities
 from backend.services import backup_jobs as jobs
+from backend.services import backup_reach as reach
 from backend.services import queue_clock
 
 logger = logging.getLogger(__name__)
@@ -39,6 +40,7 @@ NOT_NEEDED = "equipped"
 AGENT_OUTDATED = "agent_outdated"
 NOT_APPLICABLE = "not_applicable"
 IN_PROGRESS = "in_progress"
+STORAGE_UNREACHABLE = reach.UNREACHABLE
 # The equipped reasons Equip can fix (it installs restate and the NFS client).
 FIXABLE = ("missing_tool", "tool_outdated", "missing_nfs_client")
 
@@ -77,6 +79,8 @@ def blocker(db: Session, host: models.Host, now=None) -> Optional[str]:
         return NOT_APPLICABLE
     if GROUP not in (report.get("capabilities") or []):
         return AGENT_OUTDATED
+    if reach.blocked(db, host):
+        return STORAGE_UNREACHABLE
     if _running(db, _row(db, host.id), now):
         return IN_PROGRESS
     return None
@@ -112,6 +116,7 @@ def start(
     from backend.services.config_mgmt_dispatch import queue_command  # noqa: PLC0415
     from backend.websocket.messages import CommandType  # noqa: PLC0415
 
+    reach.start(db, host)  # when due; an unknown answer never blocks
     why = blocker(db, host)
     if why:
         return None, why

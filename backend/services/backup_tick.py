@@ -40,6 +40,7 @@ from backend.persistence import models
 from backend.persistence.partitions import iter_host_databases
 from backend.services import backup_first_fit as first_fit
 from backend.services import backup_jobs as jobs
+from backend.services import backup_reach as reach
 from backend.services import backup_verify as verify
 from backend.services import queue_clock
 from backend.startup.leadership import singleton_task
@@ -64,6 +65,9 @@ FAILED_RETRY = timedelta(hours=1)
 # few minutes apart; after that it stays failed, loudly.
 PROTECT_RETRY = timedelta(minutes=5)
 PROTECT_TRIES = 3
+# Reach checks asked for per pass (each is one short TCP connection on the
+# host; a new fleet is covered over a few passes, then once a day each).
+REACH_CHECKS_PER_TICK = 200
 WINDOW_HOURS = 6
 
 _TASK: Optional[asyncio.Task] = None
@@ -415,12 +419,29 @@ def reconcile(db: Session, now: Optional[datetime] = None) -> int:
             continue
         if not _configure(db, policy, target, host, storage_ready):
             continue
-        if policy.enabled:
+        if policy.enabled and not reach.blocked(db, host):
             queued += int(_maybe_capture(db, policy, target, host, now))
         if storage_ready and _storage_upkeep(db, policy, target, now):
             queued += 1
         queued += int(verify.maybe_verify(db, policy, host, now))
-    return queued
+    return queued + reach_checks(db, now)
+
+
+def reach_checks(db: Session, now: datetime) -> int:
+    """Ask hosts whose agents can check whether they reach the backup storage
+    (services/backup_reach.py), where one is due; how many were asked."""
+    asked = 0
+    hosts = (
+        db.query(models.Host)
+        .filter(models.Host.approval_status == "approved", models.Host.active)
+        .all()
+    )
+    for host in hosts:
+        if asked >= REACH_CHECKS_PER_TICK:
+            break
+        if reach.can_check(host) and reach.due(db, host, now):
+            asked += int(reach.start(db, host) is not None)
+    return asked
 
 
 def _encryption_engine():

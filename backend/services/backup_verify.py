@@ -35,6 +35,10 @@ VERIFY = jobs.VERIFY
 DEFAULT_INTERVAL_DAYS = 30
 MAX_INTERVAL_DAYS = 365
 FAILED_RETRY = timedelta(hours=24)
+# Refused because the storage host was pruning or checking the repository
+# (production, mail.archive, 2026-10-29: right after its first capture):
+# nothing failed, so try again soon, as the storage-side jobs do.
+BUSY_RETRY = timedelta(minutes=30)
 GOOD = ("ok",)
 
 OFF, VERIFIED, UNVERIFIED, FAILED, RUNNING = (
@@ -103,7 +107,8 @@ def due(db: Session, policy: models.BackupPolicy, now: datetime) -> bool:
         return False
     latest = jobs.latest_run(db, policy.id, VERIFY)
     if latest is not None and latest.status not in GOOD:
-        if _ended(latest) + FAILED_RETRY > now:
+        wait = BUSY_RETRY if latest.status == "busy" else FAILED_RETRY
+        if _ended(latest) + wait > now:
             return False
     good = jobs.latest_run(db, policy.id, VERIFY, statuses=GOOD)
     return good is None or _ended(good) + timedelta(days=days) <= now

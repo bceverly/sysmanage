@@ -5375,7 +5375,8 @@
       "notPrivileged": "De agent moet als root draaien",
       "toolOutdated": "restate upgraden",
       "wrongPlatform": "Niet ondersteund op dit besturingssysteem",
-      "missingNfsClient": "NFS-client installeren"
+      "missingNfsClient": "NFS-client installeren",
+      "storageUnreachable": "Back-upopslag niet bereikbaar"
     },
     "restore": {
       "confirm": "Herstellen naar staging",
@@ -5622,6 +5623,9 @@
       "flat": "Groeit niet (laatste {{days}} dagen)",
       "reached": "{{percent}}% bereikt",
       "until": "{{percent}}% over ongeveer {{days}} dagen"
+    },
+    "reach": {
+      "unreachable": "Deze host kan de back-upopslag niet bereiken ({{storage}}, {{address}}, NFS-poort {{port}}). Back-ups hebben een netwerkpad ernaartoe nodig."
     }
   }
 }

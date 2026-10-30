@@ -37,6 +37,7 @@ from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import backup_jobs as jobs
+from backend.services import backup_reach as reach
 from backend.services import backup_tick
 from backend.services.audit_service import EntityType
 
@@ -76,7 +77,7 @@ def _skip_reason(db: Session, host: models.Host) -> str:
         return "not_equipped"
     if _policy_of(db, host) is not None:
         return "has_policy"
-    return ""
+    return reach.UNREACHABLE if reach.blocked(db, host) else ""
 
 
 @router.post("/backups/setup")

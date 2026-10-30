@@ -114,7 +114,7 @@ def release(
     try:
         keys = engine.secret_keys(policy, db=db)
     except Exception as error:  # the engine's own message says why
-        logger.error(
+        logger.exception(
             "Backup key for run %s (host %s, policy %s) could not be read: %s",
             run.id,
             host_id,

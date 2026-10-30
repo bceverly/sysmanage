@@ -46,6 +46,7 @@ from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
 
 _HOST_FK = "host.id"
+_POLICY_FK = "backup_policy.id"
 
 
 class BackupTarget(Base):
@@ -183,7 +184,7 @@ class BackupRun(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     policy_id = Column(
         GUID(),
-        ForeignKey("backup_policy.id", ondelete="CASCADE"),
+        ForeignKey(_POLICY_FK, ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -224,7 +225,7 @@ class BackupSnapshot(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     policy_id = Column(
         GUID(),
-        ForeignKey("backup_policy.id", ondelete="CASCADE"),
+        ForeignKey(_POLICY_FK, ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -257,7 +258,7 @@ class BackupPolicyKey(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     policy_id = Column(
         GUID(),
-        ForeignKey("backup_policy.id", ondelete="CASCADE"),
+        ForeignKey(_POLICY_FK, ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -289,3 +290,21 @@ class BackupEquip(Base):
     requested_by = Column(String(255), nullable=True)
     requested_at = Column(DateTime, nullable=False)
     finished_at = Column(DateTime, nullable=True)
+
+
+class BackupReach(Base):
+    """Can this host reach the backup storage?  The agent's last TCP check of
+    the storage host's NFS port (2049) at the address it would mount from.
+    ``reachable`` is None while a check is out; a check of another address
+    (the storage host moved) is not this one's answer."""
+
+    __tablename__ = "backup_reach"
+
+    host_id = Column(GUID(), ForeignKey(_HOST_FK, ondelete="CASCADE"), primary_key=True)
+    address = Column(String(255), nullable=False)
+    port = Column(Integer, nullable=False)
+    reachable = Column(Boolean, nullable=True)
+    error = Column(String(255), nullable=True)
+    command_id = Column(String(36), nullable=True, index=True)
+    requested_at = Column(DateTime, nullable=False)
+    checked_at = Column(DateTime, nullable=True)

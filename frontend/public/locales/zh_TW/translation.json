@@ -5375,7 +5375,8 @@
       "notPrivileged": "代理程式必須以 root 身分執行",
       "toolOutdated": "請升級 restate",
       "wrongPlatform": "此作業系統不支援",
-      "missingNfsClient": "安裝 NFS 用戶端"
+      "missingNfsClient": "安裝 NFS 用戶端",
+      "storageUnreachable": "無法連到備份儲存"
     },
     "restore": {
       "confirm": "還原到暫存區",
@@ -5622,6 +5623,9 @@
       "flat": "未成長（最近 {{days}} 天）",
       "reached": "已達到 {{percent}}%",
       "until": "約 {{days}} 天後達到 {{percent}}%"
+    },
+    "reach": {
+      "unreachable": "此主機無法連到備份儲存（{{storage}}、{{address}}、NFS 連接埠 {{port}}）。備份需要一條通往它的網路路徑。"
     }
   }
 }

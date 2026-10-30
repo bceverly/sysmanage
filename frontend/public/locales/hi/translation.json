@@ -5375,7 +5375,8 @@
       "notPrivileged": "एजेंट को root के रूप में चलना चाहिए",
       "toolOutdated": "restate अपग्रेड करें",
       "wrongPlatform": "इस ऑपरेटिंग सिस्टम पर समर्थित नहीं",
-      "missingNfsClient": "NFS क्लाइंट इंस्टॉल करें"
+      "missingNfsClient": "NFS क्लाइंट इंस्टॉल करें",
+      "storageUnreachable": "बैकअप स्टोरेज तक नहीं पहुँच सकता"
     },
     "restore": {
       "confirm": "स्टेजिंग में पुनर्स्थापित करें",
@@ -5622,6 +5623,9 @@
       "flat": "नहीं बढ़ रहा (पिछले {{days}} दिन)",
       "reached": "{{percent}}% पहुँच गया",
       "until": "लगभग {{days}} दिनों में {{percent}}%"
+    },
+    "reach": {
+      "unreachable": "यह होस्ट बैकअप स्टोरेज तक नहीं पहुँच सकता ({{storage}}, {{address}}, NFS पोर्ट {{port}})। बैकअप के लिए उस तक नेटवर्क पथ होना ज़रूरी है।"
     }
   }
 }
