@@ -410,7 +410,7 @@ describe("Backups page", () => {
     await waitFor(() => expect(backupNow).toHaveBeenCalledWith("h1"));
   });
 
-  test("a restore needs the unsigned acknowledgment and previews first", async () => {
+  test("a preview needs no acknowledgment; the restore needs it and a preview first", async () => {
     vi.mocked(getSnapshots).mockResolvedValue([
       {
         id: "s1",
@@ -430,16 +430,14 @@ describe("Backups page", () => {
     render(<MemoryRouter><Backups /></MemoryRouter>);
     fireEvent.click(await screen.findByText("Restore files"));
     const preview = await screen.findByText("Preview");
-    expect(preview.closest("button")).toBeDisabled();
-    fireEvent.click(screen.getByLabelText("This snapshot is not signed. Restore it anyway."));
+    expect(preview.closest("button")).not.toBeDisabled();
     fireEvent.click(preview);
     await waitFor(() =>
-      expect(restoreFiles).toHaveBeenCalledWith("h1", expect.objectContaining({
-        dry_run: true,
-        acknowledge_unsigned: true,
-      })),
+      expect(restoreFiles).toHaveBeenCalledWith("h1", expect.objectContaining({ dry_run: true })),
     );
     expect(await screen.findByText("/etc/a")).toBeInTheDocument();
+    expect(screen.getByText("Restore to staging").closest("button")).toBeDisabled();
+    fireEvent.click(screen.getByLabelText("This snapshot is not signed. Restore it anyway."));
     expect(screen.getByText("Restore to staging").closest("button")).not.toBeDisabled();
   });
 
