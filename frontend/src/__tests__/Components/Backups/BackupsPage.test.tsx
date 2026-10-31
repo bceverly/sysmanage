@@ -157,6 +157,11 @@ const run = (over: Partial<BackupRun>): BackupRun => ({
   ...over,
 });
 
+/** Opens a row's "More" menu (its secondary actions). */
+const openMore = async (fqdn: string) =>
+  fireEvent.click(await screen.findByRole("button", { name: `More: ${fqdn}` }));
+const menuItem = (name: string) => screen.getByRole("menuitem", { name });
+
 describe("Backups page", () => {
   beforeEach(() => {
     vi.mocked(getBackupOverview).mockResolvedValue(overview());
@@ -182,8 +187,10 @@ describe("Backups page", () => {
         storage_fqdn: "nas", error: "timed out", checked_at: "2026-10-30T12:00:00" } })],
     }));
     render(<MemoryRouter><Backups /></MemoryRouter>);
-    const restore = await screen.findByRole("button", { name: "Restore files" });
-    expect(restore).toBeDisabled();
+    // Check again leads; Restore files waits in the menu, switched off.
+    expect(await screen.findByRole("button", { name: "Check again" })).toBeEnabled();
+    await openMore("web.lab");
+    expect(menuItem("Restore files")).toHaveAttribute("aria-disabled", "true");
   });
 
   test("a running capture shows Backing up, not the earlier failure", async () => {
@@ -206,7 +213,8 @@ describe("Backups page", () => {
   test("the policy dialog saves leave-out and keep path patterns, one per line", async () => {
     vi.mocked(savePolicy).mockResolvedValue(policy);
     render(<MemoryRouter><Backups /></MemoryRouter>);
-    fireEvent.click((await screen.findAllByText("Configure"))[0]);
+    await openMore("bare.lab");
+    fireEvent.click(menuItem("Configure"));
     fireEvent.change(screen.getByLabelText("Leave out (one path pattern per line)"), {
       target: { value: "**/previews\n\n  /var/tmp  \n" },
     });
@@ -288,9 +296,11 @@ describe("Backups page", () => {
     }));
     render(<MemoryRouter><Backups /></MemoryRouter>);
     expect(await screen.findByText("Equipping: installing restate...")).toBeInTheDocument();
+    // One line in the status cell; the full story is its tooltip.
     expect(screen.getByText(
-      "Equip for backup failed: The downloaded package did not match its published checksum, so it was not installed",
+      "The downloaded package did not match its published checksum, so it was not installed",
     )).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Equip for backup" })).toBeEnabled();
   });
 
   test("a capture held by a maintenance window reads waiting, and an overdue one says why", async () => {
@@ -394,7 +404,8 @@ describe("Backups page", () => {
       result: { files: 1, bytes: 8, plan: ["/home/a/contract.txt"], content_read: false },
     }));
     render(<MemoryRouter><Backups /></MemoryRouter>);
-    fireEvent.click(await screen.findByText("Restore files"));
+    await openMore("web.lab");
+    fireEvent.click(menuItem("Restore files"));
     fireEvent.click(await screen.findByLabelText("This snapshot is not signed. Restore it anyway."));
     fireEvent.click(screen.getByText("Preview"));
     expect(await screen.findByText(/Planned from the snapshot index/)).toBeInTheDocument();
@@ -403,10 +414,13 @@ describe("Backups page", () => {
   test("Back up now queues a capture", async () => {
     vi.mocked(backupNow).mockResolvedValue(run({ action: "capture", status: "queued" }));
     render(<MemoryRouter><Backups /></MemoryRouter>);
-    const buttons = (await screen.findAllByText("Back up now")).map(b => b.closest("button"));
-    // old.lab cannot run restate yet: its button is disabled.
-    expect(buttons.filter(b => b?.disabled)).toHaveLength(1);
-    fireEvent.click(buttons.find(b => !b?.disabled) as HTMLButtonElement);
+    // web.lab leads with Back up now; old.lab (cannot run restate yet) keeps
+    // it in its menu, switched off.
+    const primary = await screen.findByRole("button", { name: "Back up now" });
+    await openMore("old.lab");
+    expect(menuItem("Back up now")).toHaveAttribute("aria-disabled", "true");
+    fireEvent.keyDown(screen.getByRole("menu"), { key: "Escape" });
+    fireEvent.click(primary);
     await waitFor(() => expect(backupNow).toHaveBeenCalledWith("h1"));
   });
 
@@ -428,7 +442,8 @@ describe("Backups page", () => {
       run({ action: "restore", status: "ok", result: { files: 2, bytes: 10, plan: ["/etc/a"] } }),
     );
     render(<MemoryRouter><Backups /></MemoryRouter>);
-    fireEvent.click(await screen.findByText("Restore files"));
+    await openMore("web.lab");
+    fireEvent.click(menuItem("Restore files"));
     const preview = await screen.findByText("Preview");
     expect(preview.closest("button")).not.toBeDisabled();
     fireEvent.click(preview);

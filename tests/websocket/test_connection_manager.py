@@ -237,6 +237,36 @@ class TestConnectionManager:
         assert "agent-123" not in manager.active_connections
         assert "test-host.example.com" not in manager.hostname_to_agent
 
+    @pytest.mark.asyncio
+    async def test_a_late_close_of_the_old_connection_keeps_the_new_one_routed(self):
+        """Production, mail.archive, 2026-10-30 22:31: the agent reconnected
+        (new connection registered) and only then did the server see the old
+        one close.  The old disconnect must not unroute the new connection,
+        or every command to that host waits until it expires."""
+        manager = ConnectionManager()
+        old = await manager.connect(AsyncMock(spec=WebSocket), agent_id="old")
+        manager.register_agent("old", "mail.lab")
+        new = await manager.connect(AsyncMock(spec=WebSocket), agent_id="new")
+        manager.register_agent("new", "mail.lab")
+        manager.disconnect("old")
+        assert manager.hostname_to_agent["mail.lab"] == "new"
+        assert "old" not in manager.active_connections
+        assert manager.get_agent_by_hostname("mail.lab")["agent_id"] == "new"
+        assert old is not new
+
+    @pytest.mark.asyncio
+    async def test_closing_the_mapped_connection_falls_back_to_another_live_one(self):
+        manager = ConnectionManager()
+        await manager.connect(AsyncMock(spec=WebSocket), agent_id="a")
+        manager.register_agent("a", "mail.lab")
+        await manager.connect(AsyncMock(spec=WebSocket), agent_id="b")
+        manager.register_agent("b", "mail.lab")
+        manager.hostname_to_agent["mail.lab"] = "a"  # an older one mapped
+        manager.disconnect("a")
+        assert manager.hostname_to_agent["mail.lab"] == "b"
+        manager.disconnect("b")
+        assert "mail.lab" not in manager.hostname_to_agent
+
     def test_disconnect_nonexistent_agent(self):
         """Test disconnect with nonexistent agent_id does not raise."""
         manager = ConnectionManager()

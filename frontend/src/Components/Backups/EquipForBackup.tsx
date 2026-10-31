@@ -51,7 +51,7 @@ export const equipFailureLabel = (t: TFunction, reason: string | null): string =
 };
 
 /** Why Equip for backup is not offered, when that is worth saying. */
-const blockerLabel = (t: TFunction, blocker: string | null | undefined): string | null => {
+export const blockerLabel = (t: TFunction, blocker: string | null | undefined): string | null => {
     switch (blocker) {
         case 'agent_outdated':
             return t('backups.equip.blockedAgent', 'Upgrade the agent to equip this host from here');

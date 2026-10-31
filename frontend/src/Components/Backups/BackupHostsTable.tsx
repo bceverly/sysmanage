@@ -3,15 +3,14 @@
 // See the LICENSE file in the project root for the full terms.
 
 // Every approved host's backup standing (Phase 24), worst first, with what
-// an operator can do about it: configure, back up now (one host, or the
-// picked ones through the bulk bar), restore files.
+// an operator can do about it: one primary action per row and the rest in a
+// "More" menu (BackupRowActions), the status as one chip and one line
+// (BackupStatusCell), compact dates with the full time on hover.  The
+// target's storage host is listed last, as such, with no host actions.
 
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-    Button,
     Checkbox,
-    Chip,
-    LinearProgress,
     Stack,
     Table,
     TableBody,
@@ -21,31 +20,25 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import AsyncButton from '../AsyncButton';
-import { backupNow, BACKUP_STATUS_ORDER } from '../../Services/backups';
+import { BACKUP_STATUS_ORDER } from '../../Services/backups';
 import type { BackupHost } from '../../Services/backups';
 import BackupBulkBar from './BackupBulkBar';
 import BackupPolicyDialog from './BackupPolicyDialog';
 import RestoreFilesDialog from './RestoreFilesDialog';
+import BackupRowActions from './BackupRowActions';
+import BackupStatusCell from './BackupStatusCell';
 import {
-    apiDetail,
     coverageLabel,
     formatBytes,
+    formatShortTime,
     formatTime,
-    heldNote,
     reachMessage,
     reasonLabel,
-    statusColor,
-    statusLabel,
     unreachable,
-    unreadableOf,
 } from './backupLabels';
-import EquipForBackup from './EquipForBackup';
-import StorageReachNote from './StorageReachNote';
-import { FirstFitCaption } from './BackupFirstFit';
-import { VerificationCaption } from './VerificationStatus';
 
 const rank = (row: BackupHost) => BACKUP_STATUS_ORDER.indexOf(row.status);
 
@@ -60,6 +53,11 @@ export const canEquip = (row: BackupHost): boolean =>
 
 /** A host the bulk "Set up backups" can take: equipped, with no policy. */
 export const canSetUp = (row: BackupHost): boolean => row.equipped && !row.policy && !unreachable(row);
+
+/** The target's storage host, with no backup policy of its own: it holds the
+ *  backups, so it is not offered host actions. */
+export const isStorageHost = (row: BackupHost, storageHostId: string | null | undefined): boolean =>
+    !!storageHostId && row.host_id === storageHostId && !row.policy;
 
 /** A host the bulk bar can act on at all. */
 const canPick = (row: BackupHost): boolean => canBackUp(row) || canEquip(row) || canSetUp(row);
@@ -89,76 +87,38 @@ export const pickBlocked = (t: TFunction, row: BackupHost): string | null => {
     return null;
 };
 
-export const sortHosts = (rows: BackupHost[]): BackupHost[] =>
-    [...rows].sort((a, b) => rank(a) - rank(b) || a.fqdn.localeCompare(b.fqdn));
+export const sortHosts = (rows: BackupHost[], storageHostId?: string | null): BackupHost[] =>
+    [...rows].sort((a, b) =>
+        Number(isStorageHost(a, storageHostId)) - Number(isStorageHost(b, storageHostId))
+        || rank(a) - rank(b) || a.fqdn.localeCompare(b.fqdn));
 
-const Progress: React.FC<{ row: BackupHost }> = ({ row }) => {
+const NOWRAP = { whiteSpace: 'nowrap' } as const;
+
+/** A time in a table: short, with the full one on hover. */
+const When: React.FC<{ iso: string | null | undefined }> = ({ iso }) => (
+    <Tooltip title={iso ? formatTime(iso) : ''}>
+        <span>{formatShortTime(iso)}</span>
+    </Tooltip>
+);
+
+const HostCell: React.FC<{ row: BackupHost }> = ({ row }) => {
     const { t } = useTranslation();
-    const progress = row.running?.progress;
-    if (!row.running) return null;
     return (
-        <Tooltip title={progress?.phase ?? ''}>
-            <Stack spacing={0.5} sx={{ mt: 0.5, minWidth: 140 }}>
-                <LinearProgress />
-                <Typography variant="caption" color="text.secondary">
-                    {progress
-                        ? t('backups.hosts.progress', '{{paths}} paths, {{size}} read', {
-                              paths: progress.paths ?? 0,
-                              size: formatBytes(progress.read_bytes ?? 0),
-                          })
-                        : t('backups.run.queued', 'Queued')}
-                </Typography>
+        <TableCell sx={{ maxWidth: 280 }}>
+            <Stack direction="row" spacing={0.5} alignItems="center">
+                <Tooltip title={row.fqdn}>
+                    <Typography variant="body2" noWrap>{row.fqdn}</Typography>
+                </Tooltip>
+                {row.coverage !== 'full' && (
+                    // Only the exception is shown: full coverage is the norm.
+                    <Tooltip title={coverageLabel(t, row.coverage)}>
+                        <InfoOutlinedIcon fontSize="inherit" color="warning" titleAccess={coverageLabel(t, row.coverage)} />
+                    </Tooltip>
+                )}
             </Stack>
-        </Tooltip>
-    );
-};
-
-// Files the last backup skipped because it could not read them; the first
-// ones in the tooltip, so "Incomplete" says what is missing.
-const Unreadable: React.FC<{ row: BackupHost }> = ({ row }) => {
-    const { t } = useTranslation();
-    const skipped = unreadableOf(row.last_good_capture);
-    if (!skipped) return null;
-    return (
-        <Tooltip title={skipped.first.join('\n')} placement="bottom-start">
-            <Typography variant="caption" display="block" color="warning.main" sx={{ whiteSpace: 'pre-line' }}>
-                {t('backups.hosts.unreadable', 'Files not read: {{n}}', { n: skipped.count })}
-            </Typography>
-        </Tooltip>
-    );
-};
-
-const StatusCell: React.FC<{ row: BackupHost; canManage: boolean; onChanged: () => void }> = ({
-    row,
-    canManage,
-    onChanged,
-}) => {
-    const { t } = useTranslation();
-    return (
-        <TableCell>
-            <Chip size="small" color={statusColor(row.status)} label={statusLabel(t, row.status)} />
-            {!row.equipped && row.reason && (
-                <>
-                    <Typography variant="caption" display="block" color="warning.main">
-                        {reasonLabel(t, row.reason)}
-                    </Typography>
-                    <EquipForBackup hostId={row.host_id} equip={row.equip} blocker={row.equip_blocker}
-                        canManage={canManage} onChanged={onChanged} />
-                </>
-            )}
-            <StorageReachNote hostId={row.host_id} reach={row.reach} canManage={canManage} onChanged={onChanged} />
-            <Progress row={row} />
-            <Unreadable row={row} />
-            <FirstFitCaption fit={row.first_fit} />
-            <VerificationCaption verification={row.verification} />
-            {heldNote(t, row) && (
-                <Typography variant="caption" display="block" color="text.secondary">
-                    {heldNote(t, row)}
-                </Typography>
-            )}
-            {row.capture_requested && !row.running && (
-                <Typography variant="caption" display="block" color="text.secondary">
-                    {t('backups.hosts.waiting', 'Waiting for a free slot')}
+            {row.policy?.restate_version && (
+                <Typography variant="caption" color="text.secondary" sx={NOWRAP}>
+                    {t('backups.hosts.restateVersion', 'restate {{version}}', { version: row.policy.restate_version })}
                 </Typography>
             )}
         </TableCell>
@@ -168,16 +128,21 @@ const StatusCell: React.FC<{ row: BackupHost; canManage: boolean; onChanged: () 
 const BackupHostsTable: React.FC<{
     rows: BackupHost[];
     hasTarget: boolean;
+    storageHostId?: string | null;
     canManage: boolean;
     canRestore: boolean;
     onChanged: () => void;
     onError: (message: string) => void;
-}> = ({ rows, hasTarget, canManage, canRestore, onChanged, onError }) => {
+    onNotice?: (message: string) => void;
+}> = ({ rows, hasTarget, storageHostId, canManage, canRestore, onChanged, onError, onNotice }) => {
     const { t } = useTranslation();
     const [editing, setEditing] = useState<BackupHost | null>(null);
     const [restoring, setRestoring] = useState<BackupHost | null>(null);
     const [picked, setPicked] = useState<Set<string>>(new Set());
-    const pickable = useMemo(() => rows.filter(canPick).map(r => r.host_id), [rows]);
+    const pickable = useMemo(
+        () => rows.filter(r => canPick(r) && !isStorageHost(r, storageHostId)).map(r => r.host_id),
+        [rows, storageHostId],
+    );
     // A refresh drops picks that can no longer back up (started, say).
     useEffect(() => {
         const still = new Set(pickable);
@@ -195,21 +160,12 @@ const BackupHostsTable: React.FC<{
             return next;
         });
 
-    const runNow = async (row: BackupHost) => {
-        try {
-            await backupNow(row.host_id);
-            onChanged();
-        } catch (err) {
-            onError(apiDetail(err, t('backups.hosts.backupNowError', 'The backup could not be started.')));
-        }
-    };
-
     return (
         <>
             {canManage && (
                 <BackupBulkBar selected={Array.from(picked)} rows={rows} onClear={() => setPicked(new Set())} onDone={onChanged} />
             )}
-            <Table size="small">
+            <Table size="small" sx={{ '& td, & th': { verticalAlign: 'middle' } }}>
                 <TableHead>
                     <TableRow>
                         {canManage && (
@@ -221,76 +177,55 @@ const BackupHostsTable: React.FC<{
                             </TableCell>
                         )}
                         <TableCell>{t('backups.hosts.host', 'Host')}</TableCell>
-                        <TableCell>{t('backups.hosts.status', 'Status')}</TableCell>
-                        <TableCell>{t('backups.hosts.lastBackup', 'Last backup')}</TableCell>
-                        <TableCell>{t('backups.hosts.nextDue', 'Next due')}</TableCell>
-                        <TableCell>{t('backups.hosts.size', 'Repository')}</TableCell>
-                        <TableCell>{t('backups.hosts.coverage', 'Coverage')}</TableCell>
-                        <TableCell align="right">{t('backups.hosts.actions', 'Actions')}</TableCell>
+                        <TableCell sx={{ width: 260 }}>{t('backups.hosts.status', 'Status')}</TableCell>
+                        <TableCell sx={NOWRAP}>{t('backups.hosts.lastBackup', 'Last backup')}</TableCell>
+                        <TableCell sx={NOWRAP}>{t('backups.hosts.nextDue', 'Next due')}</TableCell>
+                        <TableCell sx={NOWRAP}>{t('backups.hosts.size', 'Repository')}</TableCell>
+                        <TableCell align="right" sx={{ ...NOWRAP, width: 200 }}>{t('backups.hosts.actions', 'Actions')}</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {sortHosts(rows).map(row => (
-                        <TableRow key={row.host_id} selected={picked.has(row.host_id)}>
-                            {canManage && (
-                                <TableCell padding="checkbox">
-                                    <Tooltip title={pickBlocked(t, row) ?? ''}>
-                                        {/* a span: a disabled control takes no hover */}
-                                        <span>
-                                            <Checkbox size="small" checked={picked.has(row.host_id)}
-                                                disabled={!canPick(row)} onChange={() => toggle(row.host_id)}
-                                                slotProps={{ input: { 'aria-label': t('backups.bulk.selectHost', 'Select {{host}}', { host: row.fqdn }) } }} />
-                                        </span>
-                                    </Tooltip>
+                    {sortHosts(rows, storageHostId).map(row => {
+                        const storage = isStorageHost(row, storageHostId);
+                        return (
+                            <TableRow key={row.host_id} selected={picked.has(row.host_id)}>
+                                {canManage && (
+                                    <TableCell padding="checkbox">
+                                        <Tooltip title={storage ? t('backups.target.storageHost', 'Storage host') : pickBlocked(t, row) ?? ''}>
+                                            {/* a span: a disabled control takes no hover */}
+                                            <span>
+                                                <Checkbox size="small" checked={picked.has(row.host_id)}
+                                                    disabled={storage || !canPick(row)} onChange={() => toggle(row.host_id)}
+                                                    slotProps={{ input: { 'aria-label': t('backups.bulk.selectHost', 'Select {{host}}', { host: row.fqdn }) } }} />
+                                            </span>
+                                        </Tooltip>
+                                    </TableCell>
+                                )}
+                                <HostCell row={row} />
+                                <TableCell><BackupStatusCell row={row} storageHost={storage} /></TableCell>
+                                <TableCell sx={NOWRAP}>
+                                    <When iso={row.last_good_capture?.finished_at} />
+                                    {row.snapshot_count > 0 && (
+                                        <Typography variant="caption" display="block" color="text.secondary">
+                                            {t('backups.hosts.snapshots', 'Snapshots: {{n}}', { n: row.snapshot_count })}
+                                        </Typography>
+                                    )}
                                 </TableCell>
-                            )}
-                            <TableCell>
-                                <Typography variant="body2">{row.fqdn}</Typography>
-                                {row.policy?.restate_version && (
-                                    <Typography variant="caption" color="text.secondary">
-                                        {t('backups.hosts.restateVersion', 'restate {{version}}', {
-                                            version: row.policy.restate_version,
-                                        })}
-                                    </Typography>
-                                )}
-                            </TableCell>
-                            <StatusCell row={row} canManage={canManage} onChanged={onChanged} />
-                            <TableCell>
-                                {formatTime(row.last_good_capture?.finished_at)}
-                                {row.snapshot_count > 0 && (
-                                    <Typography variant="caption" display="block" color="text.secondary">
-                                        {t('backups.hosts.snapshots', 'Snapshots: {{n}}', { n: row.snapshot_count })}
-                                    </Typography>
-                                )}
-                            </TableCell>
-                            <TableCell>{formatTime(row.next_due)}</TableCell>
-                            <TableCell>{formatBytes(row.policy?.repository_bytes)}</TableCell>
-                            <TableCell>{coverageLabel(t, row.coverage)}</TableCell>
-                            <TableCell align="right">
-                                <Stack direction="row" spacing={1} justifyContent="flex-end">
-                                    {canManage && hasTarget && (
-                                        <Button size="small" onClick={() => setEditing(row)} disabled={unreachable(row)}>
-                                            {t('backups.hosts.configure', 'Configure')}
-                                        </Button>
-                                    )}
-                                    {canManage && row.policy && (
-                                        <AsyncButton size="small" variant="outlined"
-                                            disabled={!row.equipped || !row.policy.configured || row.running?.action === 'capture'
-                                                || unreachable(row)}
-                                            onClick={() => runNow(row)}
-                                            busyLabel={t('backups.hosts.starting', 'Starting...')}>
-                                            {t('backups.hosts.backupNow', 'Back up now')}
-                                        </AsyncButton>
-                                    )}
-                                    {canRestore && row.snapshot_count > 0 && (
-                                        <Button size="small" onClick={() => setRestoring(row)} disabled={unreachable(row)}>
-                                            {t('backups.hosts.restore', 'Restore files')}
-                                        </Button>
-                                    )}
-                                </Stack>
-                            </TableCell>
-                        </TableRow>
-                    ))}
+                                <TableCell sx={NOWRAP}>
+                                    {row.running?.action === 'capture'
+                                        ? t('backups.run.running', 'Running')
+                                        : <When iso={row.next_due} />}
+                                </TableCell>
+                                <TableCell sx={NOWRAP}>{formatBytes(row.policy?.repository_bytes)}</TableCell>
+                                <TableCell align="right">
+                                    <BackupRowActions row={row}
+                                        ctx={{ canManage, canRestore, hasTarget, storageHost: storage }}
+                                        onConfigure={setEditing} onRestore={setRestoring}
+                                        onChanged={onChanged} onError={onError} onNotice={onNotice ?? (() => undefined)} />
+                                </TableCell>
+                            </TableRow>
+                        );
+                    })}
                 </TableBody>
             </Table>
             {editing && (

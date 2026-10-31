@@ -154,6 +154,21 @@ export const formatTime = (iso: string | null | undefined): string => {
     return new Date(zoned).toLocaleString(appLocale());
 };
 
+/** A table's short form: "Oct 29, 15:45" (the year only when it is not this
+ *  year's), in the user's language; ``formatTime`` gives the full one. */
+export const formatShortTime = (iso: string | null | undefined, now = new Date()): string => {
+    if (!iso) return '--';
+    const zoned = iso.endsWith('Z') || iso.includes('+') ? iso : `${iso}Z`;
+    const when = new Date(zoned);
+    return when.toLocaleString(appLocale(), {
+        month: 'short',
+        day: 'numeric',
+        ...(when.getFullYear() === now.getFullYear() ? {} : { year: 'numeric' }),
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+};
+
 /** The server's own (translated) message, or ``fallback``. */
 export const apiDetail = (error: unknown, fallback: string): string => {
     const detail = (error as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;

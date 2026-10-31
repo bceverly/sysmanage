@@ -222,11 +222,23 @@ class ConnectionManager:
             hostname = connection.hostname
             logger.info("Disconnecting agent %s with hostname %s", agent_id, hostname)
 
-            if hostname and hostname in self.hostname_to_agent:
+            del self.active_connections[agent_id]
+            # Only this connection's own mapping goes.  An agent that
+            # reconnects registers its new connection before the server
+            # notices the old one closed; dropping the hostname mapping then
+            # unrouted the NEW connection, so every command to that host sat
+            # in the queue until it expired while the host kept reporting in
+            # (production, mail.archive, 2026-10-30 22:32 to 2026-10-31 10:42).
+            if hostname and self.hostname_to_agent.get(hostname) == agent_id:
                 logger.info("Removing hostname mapping: %s -> %s", hostname, agent_id)
                 del self.hostname_to_agent[hostname]
-
-            del self.active_connections[agent_id]
+                self._remap_hostname(hostname)
+            elif hostname:
+                logger.info(
+                    "Keeping hostname mapping %s -> %s (a newer connection)",
+                    hostname,
+                    self.hostname_to_agent.get(hostname),
+                )
 
             # A count, not the list: every connected hostname on every
             # disconnect was ~125 KB a line at 5,000 agents (Phase 22).
@@ -234,6 +246,21 @@ class ConnectionManager:
                 "Agent %s disconnected. %d hostnames remain",
                 agent_id,
                 len(self.hostname_to_agent),
+            )
+
+    def _remap_hostname(self, hostname: str) -> None:
+        """Point ``hostname`` at its newest remaining live connection, if any."""
+        live = [
+            (conn.connected_at, other_id)
+            for other_id, conn in self.active_connections.items()
+            if conn.hostname == hostname
+        ]
+        if live:
+            self.hostname_to_agent[hostname] = max(live)[1]
+            logger.info(
+                "Hostname mapping %s now -> %s",
+                hostname,
+                self.hostname_to_agent[hostname],
             )
 
     def register_agent(  # pylint: disable=too-many-positional-arguments

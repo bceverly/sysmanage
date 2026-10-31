@@ -23,6 +23,7 @@ const Backups: React.FC = () => {
     const [data, setData] = useState<BackupOverview | null>(null);
     const [error, setError] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
+    const [notice, setNotice] = useState<string | null>(null);
     const [canManage, setCanManage] = useState(false);
     const [canRestore, setCanRestore] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
@@ -87,8 +88,9 @@ const Backups: React.FC = () => {
                 {data.hosts.length === 0 ? (
                     <Alert severity="info">{t('backups.empty', 'There are no approved hosts yet.')}</Alert>
                 ) : (
-                    <BackupHostsTable rows={shown ? data.hosts.filter(h => h.status === shown) : data.hosts} hasTarget={data.target !== null} canManage={canManage}
-                        canRestore={canRestore} onChanged={changed} onError={setMessage} />
+                    <BackupHostsTable rows={shown ? data.hosts.filter(h => h.status === shown) : data.hosts} hasTarget={data.target !== null}
+                        storageHostId={data.target?.storage_host_id} canManage={canManage}
+                        canRestore={canRestore} onChanged={changed} onError={setMessage} onNotice={setNotice} />
                 )}
             </Paper>
             <Paper variant="outlined" sx={{ p: 2, overflowX: 'auto' }}>
@@ -100,6 +102,9 @@ const Backups: React.FC = () => {
             </Paper>
             <Snackbar open={message !== null} autoHideDuration={6000} onClose={() => setMessage(null)}>
                 <Alert severity="error" onClose={() => setMessage(null)}>{message}</Alert>
+            </Snackbar>
+            <Snackbar open={notice !== null && message === null} autoHideDuration={6000} onClose={() => setNotice(null)}>
+                <Alert severity="info" onClose={() => setNotice(null)}>{notice}</Alert>
             </Snackbar>
         </Box>
     );
