@@ -106,4 +106,29 @@ describe("RestoreFilesDialog", () => {
       dry_run: false, in_place: true, acknowledge_in_place: true,
     });
   });
+
+  test("a preview naming a path the snapshot lacks is Incomplete and says which", async () => {
+    await open();
+    vi.mocked(restoreFiles).mockResolvedValue({
+      id: "p4", status: "incomplete", exit_code: 3,
+      result: { restore: {
+        files: 2, bytes: 10, plan_count: 2, plan: [],
+        unmatched: ["/etc/nothing-here"],
+        resolved: [{ include: "/var/snap/nextcloud/current/nextcloud/config",
+                     path: "/var/snap/nextcloud/54589/nextcloud/config",
+                     through: ["/var/snap/nextcloud/current"] }],
+        hooks: [{ dump_dir: "/var/lib/restate/dumps/nextcloud-nextcloud", status: "would_run" }],
+      } },
+    } as unknown as BackupRun);
+    fireEvent.click(button("Preview"));
+    expect(await screen.findByText("Incomplete")).toBeInTheDocument();
+    expect(screen.queryByText("Succeeded")).not.toBeInTheDocument();
+    expect(screen.getByText("1 of your paths matched nothing in the snapshot: /etc/nothing-here"))
+      .toBeInTheDocument();
+    expect(screen.getByText(/\/var\/snap\/nextcloud\/current\/nextcloud\/config was followed to \/var\/snap\/nextcloud\/54589\/nextcloud\/config/))
+      .toBeInTheDocument();
+    expect(screen.getByText(/After the restore, restate will run the nextcloud hook to/))
+      .toBeInTheDocument();
+    expect(button("Restore to staging")).toBeDisabled();
+  });
 });

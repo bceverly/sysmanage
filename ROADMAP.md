@@ -14045,7 +14045,7 @@ the old word-substitution scripts. Measured design (calibrated on beast against
 ## Phase 24: Fleet Backup & Recovery with restate (Community / Pro+)
 
 **Target Release:** **v3.12.0.0**
-**Focus:** Scheduled, verified, per-host backups of the managed fleet -- and the recovery paths that make them worth having (a file back, a whole host rebuilt, a clone) -- built on **restate**, so the hosts SysManage already manages are also the hosts it can put back. Every edition can back up and restore a host; Pro+ adds what running backups across a fleet takes. **Split 2026-10-28 (Bryan):** this phase is Community + Pro+; multi-site, recovery at scale and multi-tenancy (Enterprise / MULTITENANT_SAAS) are **Phase 25 (v3.13.0.0)**.
+**Focus:** Scheduled, verified, per-host backups of the managed fleet -- and the recovery paths that make them worth having (a file back, a whole host rebuilt, a clone) -- built on **restate**, so the hosts SysManage already manages are also the hosts it can put back. Every edition can back up and restore a host; Pro+ adds what running backups across a fleet takes. Every edition can also bring cloud-held data home: 24.12 downloads iCloud Photos for one or more Apple IDs onto the backup storage (added 2026-11-01). **Split 2026-10-28 (Bryan):** this phase is Community + Pro+; multi-site, recovery at scale and multi-tenancy (Enterprise / MULTITENANT_SAAS) are **Phase 25 (v3.13.0.0)**.
 
 **Market gap addressed:** Veeam Agent / Acronis Cyber Protect / Datto / Bacula / UrBackup / restic + borg wrappers -- fleet backup is the obvious missing pillar next to patching, compliance and hardware health: SysManage tells you a drive is failing (ubiquiti, 706 reallocated sectors, 2026-10-19) but cannot yet save what is on it.
 
@@ -14077,7 +14077,7 @@ the old word-substitution scripts. Measured design (calibrated on beast against
 
 > **Warning: Multi-tenancy storage (same rule as 14.1/14.3/21.1).** Backup targets, policies, snapshot records and restore jobs are **per-tenant data** -> the `tenant` partition (unprefixed tables), like hosts. Operator capacity -- the storage pools a SaaS operator offers -- is the **registry** partition (`registry_*`). No cross-partition foreign keys: a tenant target soft-references a registry pool by id. Repositories, encryption keys and deduplication are **never shared across tenants** (25.4).
 
-> **Self-hosted / air-gap caveat.** Nothing in this phase needs the public internet: restate opens no connection, targets are local mounts, keys live in the local OpenBAO. An air-gapped site backs up to a local target only; off-site copies leave on media through the air-gap content workflow (25.3). Cloud targets (S3 and friends) are deliberately out of scope until restate has a storage-agnostic repository format (its own roadmap); a site that wants one mounts it.
+> **Self-hosted / air-gap caveat.** Nothing in this phase needs the public internet: restate opens no connection, targets are local mounts, keys live in the local OpenBAO. An air-gapped site backs up to a local target only; off-site copies leave on media through the air-gap content workflow (25.3). Cloud targets (S3 and friends) are deliberately out of scope until restate has a storage-agnostic repository format (its own roadmap); a site that wants one mounts it. The one exception is **24.12 (cloud storage to local)**, which needs the internet by its nature and is hidden on air-gapped installs.
 
 #### 24.0 Spike: back up ubiquiti by hand (first)
 
@@ -14222,6 +14222,8 @@ How backups behave once they cover a real fleet (Community behavior; the multi-s
   - the Backups page: per-host snapshot list, last good backup, overdue status on the host page and the dashboard (24.4)
   - append-only enforcement and the storage-side runner (24.5) -- safety is not a paid feature
   - plan-first file / directory restore into a staging directory (24.9)
+  - local backup of cloud storage: iCloud Photos for one or more Apple IDs onto the storage host, credentials in OpenBAO, scheduled full then incremental (24.12)
+  - the storage host backs up its own operating system into a repository on its own storage, without touching the pool's data or other hosts' backups (24.13)
   - rationale: data protection is table stakes, and restate is BSD-2-Clause
 - [ ] **Pro+ (Professional) -- "a fleet you can trust"** (`backup_engine`, 24.6):
   - policies by tag or group; maintenance-window-aware schedules; grandfather-father-son retention
@@ -14233,9 +14235,47 @@ How backups behave once they cover a real fleet (Community behavior; the multi-s
   - capacity forecasting; `restore --packages` onto a running host
 - [ ] Every tier gate in **both** repos, and every Pro+ feature 402-clean when unlicensed, with Community still able to back up and restore (Enterprise and MULTITENANT_SAAS: Phase 25)
 
+#### 24.12 Cloud storage to local: iCloud Photos (Community / OSS) (added 2026-11-01, Bryan)
+
+The other half of "everything we care about is in one place we control": a household's or small office's photos live in iCloud, not on any managed host. SysManage downloads them, with their metadata, onto the same storage host that holds the fleet's backups, on a schedule, for one or more Apple IDs. The tool is **icloudpd** ([icloud-photos-downloader/icloud_photos_downloader](https://github.com/icloud-photos-downloader/icloud_photos_downloader), MIT, v1.32.3 at the time of writing), installed and driven by the agent on the storage host -- never bundled, never run on the server. iCloud Photos is the first provider; the model (a "cloud account" with credentials in OpenBAO, a destination on the storage host, a schedule, results) is built so further providers can follow (Google Photos, OneDrive / Dropbox / Google Drive via rclone -- not in this phase).
+
+**What icloudpd gives us (checked 2026-11-01 against its docs):**
+- Installs: release executables, PyPI (`pip install icloudpd`), Docker, AUR, npm.
+- Authentication: Apple ID + password and Apple's two-factor code; `--auth-only` creates a session without downloading; the session is kept in `--cookie-directory` (default `~/.pyicloud`). **Two-factor sign-in expires about every two months** and must be redone. Password providers `parameter`, `keyring`, `console`, `webui`; MFA providers `console` (default), `webui`.
+- **Advanced Data Protection is not supported** (it simulates web access): the account needs "Access iCloud Data on the Web" turned on.
+- Incremental: files already present are skipped; `--until-found N` stops after N consecutive already-present assets (newest first) -- a fast daily run; `--recent N`; `--watch-with-interval` (we use our own scheduler instead).
+- Live Photos: the still and the video as separate files (`--live-photo-size`, `--live-photo-mov-filename-policy`); RAW+JPEG (`--align-raw`); originals by default (`--size`).
+- Metadata: `--xmp-sidecar` exports the extra data as XMP sidecars, `--set-exif-datetime` fills a missing EXIF date, `--folder-structure` lays files out by date, `--keep-unicode-in-filenames`.
+- Several accounts: `--username` may be repeated, each its own configuration; one library per run (`--library`, default "Personal Library"; `--list-libraries` for shared ones).
+- Deletion: nothing local is deleted unless `--auto-delete` (follows iCloud's Recently Deleted) -- we leave it off by default: a backup keeps what was deleted upstream.
+
+- [ ] **Spike (first):** by hand on nas, one Apple ID: install icloudpd, `--auth-only` with the two-factor code, a full download of a real library with `--xmp-sidecar --set-exif-datetime` and Live Photo videos, then an incremental run with `--until-found`. Record: time and size of the full run, of an incremental run, what the XMP sidecars hold, how Live Photo pairs are named, how a password and an MFA code can reach icloudpd without appearing on a command line, in an environment variable visible to other users, or on disk (keyring in a per-job keyring, stdin, or the `webui` provider bound to localhost), and where the session lands and how long it lasted
+- [ ] **Provision the tool on the storage host ("Equip for cloud backup"):** the agent installs a pinned icloudpd -- the release executable for Linux x86_64 / aarch64, checksum-verified like restate's release packages (24.8 Equip), else from PyPI into a dedicated venv under the agent's state directory -- on the target's storage host only; refused with a plain reason on an OS icloudpd does not support; reported as a capability (`cloud_backup`, version) so the UI offers it only where it can run. Upgrades are an explicit action, as for restate
+- [ ] **Cloud accounts (one or more):** a new "Cloud backup" area on the Backups page: add an iCloud account (Apple ID, a display name, which library -- personal and, optionally, shared ones from `--list-libraries`), each with its own destination, schedule and status. Per-tenant data (tenant partition), like backup policies
+- [ ] **Credentials in OpenBAO:** the Apple ID password is written straight to OpenBAO (per tenant, per account) and never stored in the database, logged or shown again; the agent receives it for one job only (the 24.6 key-release pattern: fetched at job start, never written to disk) and hands it to icloudpd by the mechanism the spike chose. The session (cookie directory) lives in a root-only directory per account on the storage host -- it is itself a credential, so it is never backed up into a host repository or shown, and deleting the account removes it
+- [ ] **Two-factor sign-in from the UI:** "Connect" runs `--auth-only`; Apple sends the code to the account's trusted devices; the operator types it into SysManage, which relays it to the waiting job (the `webui` MFA provider on localhost or stdin, per the spike). SysManage records when the session was created, warns ahead of the roughly two-month expiry (dashboard card, alerts where licensed, email when configured) and shows "Sign in again" when a run fails for authentication -- a failed sign-in never looks like "no new photos"
+- [ ] **Destination:** each account downloads into its own directory under the storage path -- its own ZFS dataset or btrfs subvolume where the filesystem allows, like a host's repository (24.1 Prepare) -- laid out by date (`--folder-structure`), originals with Live Photo videos and XMP sidecars, Unicode filenames kept; never under a host's repository; the target's seal (ZFS / btrfs snapshots, 24.5) covers it, so a photo deleted or overwritten later is still in an older seal
+- [ ] **Schedule, full then incremental:** an interval and a start window like a backup policy; the first run is a full download (resumable -- a run that stops is picked up by the next, since present files are skipped); later runs are incremental with `--until-found` (default 50); a weekly full reconciliation without `--until-found` catches anything an incremental run missed; runs share the target's concurrency cap with captures (24.8); "Run now" like "Back up now"
+- [ ] **Results and status:** each run records downloaded / already present / failed counts, bytes, duration and icloudpd's exit status; the account shows last good run, photos held locally, next due, and states such as "Needs sign-in", "Running", "Failed"; failures and a session about to expire count on the Backups dashboard card
+- [ ] **Deletion policy, stated plainly:** default keep everything ever downloaded; an explicit per-account option mirrors iCloud deletions (`--auto-delete`) with a warning that the seal is then the only copy of a deleted photo; `--keep-icloud-recent-days` (deleting from iCloud) is never offered
+- [ ] **Getting photos back:** they are ordinary files on the storage host -- browse, copy, or import into Photos; the docs show how, and that XMP sidecars and EXIF carry dates, places and descriptions
+- [ ] **Security and roles:** a "Manage Cloud Backups" role (add accounts, enter codes, run now); every credential change, sign-in and run audited; the password never leaves OpenBAO except to the job that needs it; air-gapped installs hide the feature (it needs the internet, unlike the rest of this phase)
+- [ ] Docs (setup, the Advanced Data Protection / "Access iCloud Data on the Web" requirement, the two-month sign-in, restore), screenshots, and every string in 14 locales
+
+#### 24.13 The storage host backs itself up (Community / OSS) (added 2026-11-01, Bryan)
+
+The storage host keeps everyone else's backups, but today the Backups page shows it as "Storage host" with nothing to configure, so its own operating system and configuration are backed up nowhere. On nas (2026-11-01) that is a 512 GB NVMe OS disk (ext4 on LVM, 322 GB used) holding the OS, the NFS exports, NUT, sanoid's configuration, the SysManage agent and its state, separate from the ZFS pool. If that disk dies the pool survives, but rebuilding the machine around it is by hand.
+
+- [ ] **Self-backup mode:** the storage host gets a policy like any host ("Configure self-backup" on its row), but its capture runs locally: the repository is a path on its own storage (`<storage path>/<fqdn>-<short id>`, its own ZFS dataset or btrfs subvolume, prepared as for any host), written directly with no NFS mount and no export
+- [ ] **Never the pool or the backups:** the capture uses restate's `one_file_system`, so it records the OS disk and never descends into any ZFS dataset (the backups, case data, archives); network mounts and automounts are left out as for any host (24.8 / network mounts); caches that rebuild themselves are excluded by default (e.g. an L2ARC backing file such as nas's `/var/lib/zfs-l2arc/cache0.img`, 120 GB)
+- [ ] **Never in the way of other hosts' backups:** its repository has its own lock, so other hosts keep capturing while it runs; it counts toward the target's concurrency cap and has its own schedule window, and storage-side jobs (seal, prune, check) treat it like any repository; protect and seal apply to it too
+- [ ] **Off-site for free:** its repository lives under the backup tree, so the off-site copy (25.3 Glacier) carries the storage host's own OS along with every other host's backups
+- [ ] **Recovery runbook (docs, tested once):** the OS disk dies -> reinstall, `zpool import` the pool, restore the storage host's own repository from it (restate `buildsheet` gives the disk and package layout), reconnect the agent; the pool dies -> restore the pool from the off-site copy first
+- [ ] Docs, screenshots and strings in 14 locales
+
 ### Licensing summary
 
-- **Community / OSS:** every host can be backed up to one target and a file put back: the agent integration, per-host schedules and "Back up now", keep-last-N retention, basic checks, append-only enforcement with storage-side pruning, the Backups page with overdue status, and plan-first file restore.
+- **Community / OSS:** every host can be backed up to one target and a file put back: the agent integration, per-host schedules and "Back up now", keep-last-N retention, basic checks, append-only enforcement with storage-side pruning, the Backups page with overdue status, and plan-first file restore; and local backup of cloud storage, starting with iCloud Photos for one or more Apple IDs (24.12).
 - **Pro+ (Professional):** a fleet you can trust -- the `backup_engine`: policies by tag or group, maintenance-window-aware schedules, grandfather-father-son retention, scheduled full-read verification, quiesce-hook distribution, OpenBAO-held keys and snapshot signing, alerting, the SLA report, compliance and advisor evidence, the drift timeline, capacity forecasting and package-level restore.
 - **Enterprise and MULTITENANT_SAAS:** Phase 25 (multi-site, recovery at scale, multi-tenancy).
 
@@ -14249,6 +14289,8 @@ How backups behave once they cover a real fleet (Community behavior; the multi-s
 - [x] A file restored from a snapshot onto each of those hosts, plan-first, into staging and then into place -- 2026-10-29 ubiquiti PROVEN both ways: /etc/hostname + /etc/ssh/sshd_config to staging byte-identical with owners and modes; ~/.profile changed then restored in place (restate checked the whole selection first); package-pristine files such as /etc/issue.net are not copied (recorded by package version), so a file restore covers changed and non-package files only. 2026-10-30 nextcloud PROVEN: config.php (snap revision path) to staging identical apart from the expected `'maintenance' => true` (the nextcloud hook records it in maintenance mode), the snap database dump `/var/lib/restate/dumps/nextcloud-nextcloud/mysqldump.sql.gz` intact with 165 `oc_` tables, a user file (Nextcloud.png, 59,462 bytes) byte-identical with owner, mode and date, and ~/.profile restored in place. 2026-10-30 mail.archive PROVEN: its MariaDB dump (mysql hook) from snapshot 20261029T140050Z restored to staging, `/var/lib/restate/dumps/mysql-mariadb/mysqldump.sql.gz` (628,234 bytes), gzip-intact, CREATE DATABASE for mysql and roundcube, ending "-- Dump completed on 2026-10-29 19:44:52" (MariaDB paused 7 s); the file and in-place mechanics were already proven on ubiquiti and nextcloud, so Bryan judged repeating them on mail redundant. Found on the way: a restore path through a symlink (`/var/snap/nextcloud/current/...`) matches nothing yet reports Succeeded -- restate fix queued (25.8)
 - [x] An overdue, incomplete or failed backup is visible on the Backups page, the host page and the dashboard; the Backups page shows every host's last good snapshot and coverage level -- 2026-10-25: Backups page (status chips + per-host status and last good snapshot + coverage) and the host's Backup tab show all three; the dashboard counted only overdue and failed until today, now incomplete too (tests: `test_the_dashboard_flags_incomplete_and_failed_backups`); seen on the lab dashboard by Bryan 2026-10-25
 - [ ] Load management proven: a scheduled night for the fleet stays under the per-target concurrency cap, and a capture colliding with a prune retries rather than fails
+- [ ] **iCloud Photos to local (24.12):** two Apple IDs downloaded to their own directories on nas -- originals, Live Photo videos and XMP sidecars, dates correct -- with each password only in OpenBAO; a second run is incremental (a small fraction of the first); a two-factor sign-in done from the UI; an expired or wrong session shows "Needs sign-in", not success
+- [ ] **Storage host self-backup (24.13):** nas backs up its OS disk nightly into its own repository on the pool, with no ZFS dataset and no backup data in the snapshot, while another host's capture runs at the same time; a restore of one file from it proven
 
 **Pro+**
 
@@ -14343,6 +14385,19 @@ sub-phase is Enterprise; Bryan to confirm when it is sliced).*
       is sent on its own (`zfs send`, full then incremental), not as one
       recursive stream; restate's datasets appear as hosts are added, so a
       new one starts with a full instead of breaking a recursive incremental
+- [ ] **The storage host's other data, opt-in (added 2026-11-01, Bryan):**
+      a storage host often keeps more than backups -- on nas about 4.8 TB of
+      case data (`zfs-pool/gdr`), archives (`zfs-pool/legacy`,
+      `zfs-pool/yam-hist`) and live IMAP data (`zfs-pool/yam-live`).  The
+      operator can add any of its datasets to the off-site copy: each is
+      sent like a repository dataset (per dataset, full then incremental,
+      AES-256, its own snapshot prefix -- never sanoid's), with its own
+      cadence and retention, and shown with its size and estimated monthly
+      cost before it is enabled (Deep Archive, about $1 per TB-month at the
+      time of writing; retrieval slow and extra).  restate is not used for
+      these: ZFS sends are the right tool for multi-terabyte datasets.  The
+      storage host's own OS is already in the backup tree (24.13), so it
+      travels with the repositories
 - [ ] **Its own snapshot prefix:** the cloud copy takes and keeps its own
       ZFS snapshots (e.g. `sysmanage-offsite-<time>`) as incremental bases --
       never sanoid's (or the storage-side seal's), which are pruned on their

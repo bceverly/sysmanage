@@ -29,6 +29,7 @@ import { apiDetail } from './backupLabels';
 import RetentionFields from './RetentionFields';
 import { useModuleLicensed } from '../../hooks/useModuleLicensed';
 import { VerificationField } from './VerificationStatus';
+import { NetworkMountsNote } from './NetworkMountsNote';
 
 // Sane defaults for a NEW policy (Bryan, 2026-10-29).  Community has only
 // keep-last, so a month of daily backups; with the Pro+ engine,
@@ -200,6 +201,7 @@ const BackupPolicyDialog: React.FC<{
                         value={keep} onChange={e => setKeep(e.target.value)}
                         helperText={t('backups.policy.keepHelp',
                             'Paths the built-in rules leave out, such as /home/*/Downloads. A path matched by a leave-out pattern is still left out.')} />
+                    <NetworkMountsNote mounts={policy?.network_mounts} />
                 </Stack>
             </DialogContent>
             <DialogActions>

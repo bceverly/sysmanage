@@ -44,6 +44,16 @@ def _findings(policy: models.BackupPolicy) -> List[Dict[str, Any]]:
     return [f for f in found if isinstance(f, dict) and f.get("level") in _RANK]
 
 
+def needs_prepare(policy: models.BackupPolicy) -> bool:
+    """The storage host reports this repository has no export of its own --
+    what Prepare storage makes.  False when nothing was reported (an older
+    agent, or before the first storage configure)."""
+    return any(
+        f.get("code") == "export_own" and f.get("level") != "ok"
+        for f in _findings(policy)
+    )
+
+
 def summarize(db: Session, target: models.BackupTarget) -> Dict[str, Dict[str, Any]]:
     """``{code: {level, hosts, params}}`` for every finding that is not ok,
     the worst level across the repositories; ``hosts`` empty when host-wide."""

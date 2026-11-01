@@ -157,6 +157,18 @@ export interface TargetInput {
   cache_budget_gb?: number | null;
 }
 
+/** The host's network and automount points its backup leaves out, those
+ *  an operator opted back in ("Also back up"), and whether restate itself
+ *  leaves them out (native). */
+export interface NetworkMounts {
+  excluded: string[];
+  kept: string[];
+  native: boolean;
+  /** What restate itself left out of the last capture (native), each with
+   *  its filesystem type; absent until a capture reports it. */
+  skipped?: { path: string; type: string }[];
+}
+
 export interface BackupPolicy {
   id: string;
   host_id: string;
@@ -182,6 +194,8 @@ export interface BackupPolicy {
   abilities?: string[];
   /** Quiesce hooks the host's restate reports present (2.1+); null until reported. */
   available_hooks?: string[] | null;
+  /** The host's network shares its backup leaves out; null until reported. */
+  network_mounts?: NetworkMounts | null;
   /** restate path patterns kept although the built-in rules leave them out. */
   keep_paths: string[];
   /** restate path patterns left out of the backup (they win over keeps). */
@@ -190,6 +204,9 @@ export interface BackupPolicy {
   repository_bytes: number | null;
   configured: boolean;
   storage_configured: boolean;
+  /** The storage host reports this repository has no export of its own yet:
+   *  Prepare storage makes it. */
+  needs_prepare?: boolean;
   restate_version: string | null;
   storage_restate_version: string | null;
   /** Pro+ backup_engine: the current repository's key (never the secret

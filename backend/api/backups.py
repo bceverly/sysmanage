@@ -624,7 +624,11 @@ async def delete_policy(
     return {"deleted": True}
 
 
-def _ready_policy(db: Session, host: models.Host) -> models.BackupPolicy:
+def _ready_policy(
+    db: Session, host: models.Host, host_ack: bool = True
+) -> models.BackupPolicy:
+    """The host's policy, refused (409) until the host can run backups and,
+    unless ``host_ack`` is False, has accepted its job files."""
     ready, reason = jobs.equipped(host)
     if not ready:
         raise HTTPException(
@@ -632,7 +636,7 @@ def _ready_policy(db: Session, host: models.Host) -> models.BackupPolicy:
             detail=_("This host cannot run backups yet (%s)") % reason,
         )
     policy = _policy_of(db, host)
-    if policy is None or policy.host_acked_version < 1:
+    if policy is None or (host_ack and policy.host_acked_version < 1):
         raise HTTPException(
             status_code=409,
             detail=_("This host's backup is not configured yet"),
@@ -669,7 +673,10 @@ async def backup_now(
     if action not in _RUNNABLE:
         raise _bad(_("Unknown backup action"))
     host = _host_or_404(db, host_id)
-    policy = _ready_policy(db, host)
+    # Prepare runs on the storage host and needs only the storage side's job
+    # files (_run_host checks those): a new host's own configure is refused
+    # until its export exists, which is what Prepare makes.
+    policy = _ready_policy(db, host, host_ack=action != jobs.PREPARE)
     if _RUNNABLE[action] == "host":
         reach.refuse_if_blocked(db, host)
     if action == "repack" and jobs.encrypted(policy):

@@ -143,6 +143,9 @@ class BackupPolicy(Base):
     available_hooks = Column(Text, nullable=True)
     # What the host's restate offers: list / status / cache (JSON, q60).
     host_abilities = Column(Text, nullable=True)
+    # The host's network shares its backup leaves out, as its agent last
+    # reported: JSON {"excluded", "kept", "native"} (q71).
+    network_mounts = Column(Text, nullable=True)
     # What the storage host's restate offers that the server must know
     # before allowing it: keep_yearly (JSON list, q68).
     storage_abilities = Column(Text, nullable=True)

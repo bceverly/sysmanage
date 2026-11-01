@@ -5402,7 +5402,15 @@
       "placePaths": "Paths to put back (one per line)",
       "placeAck": "Replace the files at these paths on {{host}}.",
       "confirmPlace": "Restore into place",
-      "nothing": "Nothing in the snapshot matches these paths. Check the spelling, and give absolute paths such as /home/alice/notes.txt."
+      "nothing": "Nothing in the snapshot matches these paths. Check the spelling, and give absolute paths such as /home/alice/notes.txt.",
+      "unmatched": "{{n}} of your paths matched nothing in the snapshot: {{paths}}",
+      "resolved": "{{include}} was followed to {{path}} through the snapshot's symbolic links.",
+      "hookWillRun": "After the restore, restate will run the {{service}} hook to put right what pausing it left in the restored files.",
+      "hookRan": "The {{service}} hook put right what pausing it left in the restored files.",
+      "hookNothing": "The {{service}} hook had nothing to put right.",
+      "hookFailed": "The {{service}} hook failed after the restore, so the restore is incomplete. The restate log on the host says why.",
+      "hookMissing": "This host has no {{service}} hook to put right what pausing it left in the restored files. Do that by hand.",
+      "hookUnreadable": "restate could not tell which hook {{dir}} is for, so no hook was run."
     },
     "run": {
       "busy": "Busy, will retry",
@@ -5553,7 +5561,9 @@
     "prepare": {
       "title": "Prepare the storage for this host?",
       "body": "The storage host gives this host's repository its own ZFS dataset or btrfs subvolume, exports it over NFS to this host's address only with every file mapped to the backup account, and makes it append-only. It never moves existing backups: a repository that already holds files on the shared filesystem is refused, with the steps to move it. Run it again after this host's address changes.",
-      "error": "Preparing the storage could not be started."
+      "error": "Preparing the storage could not be started.",
+      "busy": "Wait until this host's running backup job finishes.",
+      "notConfirmed": "Job files not confirmed by the storage host yet"
     },
     "browse": {
       "error": "This folder could not be listed.",
@@ -5626,6 +5636,12 @@
     },
     "reach": {
       "unreachable": "This host cannot reach the backup storage ({{storage}}, {{address}}, NFS port {{port}}). Backups need a network path to it."
+    },
+    "network": {
+      "leftOut": "Left out automatically (network mounts on this host): {{paths}}",
+      "kept": "Backed up although they are network mounts, because \"Also back up\" names a path inside them: {{paths}}",
+      "hint": "A network share is best backed up on the server that owns it.",
+      "skipped": "Left out of the last backup by restate (network mounts on this host): {{paths}}"
     }
   }
 }

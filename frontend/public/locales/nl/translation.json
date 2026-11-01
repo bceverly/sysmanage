@@ -5402,7 +5402,15 @@
       "placePaths": "Terug te zetten paden (één per regel)",
       "placeAck": "De bestanden op deze paden op {{host}} vervangen.",
       "confirmPlace": "Op de oorspronkelijke plek herstellen",
-      "nothing": "Niets in de snapshot komt overeen met deze paden. Controleer de spelling en geef absolute paden op, zoals /home/alice/notes.txt."
+      "nothing": "Niets in de snapshot komt overeen met deze paden. Controleer de spelling en geef absolute paden op, zoals /home/alice/notes.txt.",
+      "unmatched": "{{n}} van uw paden kwamen met niets in de snapshot overeen: {{paths}}",
+      "resolved": "{{include}} is via de symbolische koppelingen van de snapshot gevolgd naar {{path}}.",
+      "hookWillRun": "Na het herstel voert restate de hook {{service}} uit om te herstellen wat het pauzeren van de dienst in de herstelde bestanden heeft achtergelaten.",
+      "hookRan": "De hook {{service}} heeft hersteld wat het pauzeren van de dienst in de herstelde bestanden heeft achtergelaten.",
+      "hookNothing": "De hook {{service}} had niets te herstellen.",
+      "hookFailed": "De hook {{service}} is na het herstel mislukt, dus het herstel is onvolledig. Het restate-logboek op de host vermeldt waarom.",
+      "hookMissing": "Deze host heeft geen hook {{service}} om te herstellen wat het pauzeren van de dienst in de herstelde bestanden heeft achtergelaten. Doe dat handmatig.",
+      "hookUnreadable": "restate kon niet bepalen bij welke hook {{dir}} hoort, dus er is geen hook uitgevoerd."
     },
     "run": {
       "busy": "Bezet, wordt opnieuw geprobeerd",
@@ -5553,7 +5561,9 @@
     "prepare": {
       "title": "De opslag voor deze host voorbereiden?",
       "body": "De opslaghost geeft de repository van deze host een eigen ZFS-dataset of btrfs-subvolume, exporteert die via NFS alleen naar het adres van deze host waarbij elk bestand aan het back-upaccount wordt gekoppeld, en maakt die alleen-toevoegen. Bestaande back-ups worden nooit verplaatst: een repository die al bestanden op het gedeelde bestandssysteem bevat, wordt geweigerd, met de stappen om die te verplaatsen. Voer het opnieuw uit wanneer het adres van deze host verandert.",
-      "error": "Het voorbereiden van de opslag kon niet worden gestart."
+      "error": "Het voorbereiden van de opslag kon niet worden gestart.",
+      "busy": "Wacht tot de lopende back-uptaak van deze host klaar is.",
+      "notConfirmed": "Taakbestanden nog niet bevestigd door de opslaghost"
     },
     "browse": {
       "error": "Deze map kon niet worden weergegeven.",
@@ -5626,6 +5636,12 @@
     },
     "reach": {
       "unreachable": "Deze host kan de back-upopslag niet bereiken ({{storage}}, {{address}}, NFS-poort {{port}}). Back-ups hebben een netwerkpad ernaartoe nodig."
+    },
+    "network": {
+      "leftOut": "Automatisch uitgesloten (netwerkkoppelingen op deze host): {{paths}}",
+      "kept": "Worden geback-upt hoewel het netwerkkoppelingen zijn, omdat \"Ook back-uppen\" een pad erin noemt: {{paths}}",
+      "hint": "Een netwerkshare kunt u het beste back-uppen op de server waar die bij hoort.",
+      "skipped": "Door restate uitgesloten van de laatste back-up (netwerkkoppelingen op deze host): {{paths}}"
     }
   }
 }

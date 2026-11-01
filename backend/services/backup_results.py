@@ -32,6 +32,7 @@ from sqlalchemy.orm import Session
 from backend.persistence import models
 from backend.services import backup_first_fit as first_fit
 from backend.services import backup_jobs as jobs
+from backend.services import backup_network_mounts as network_mounts
 from backend.services import backup_storage_status as storage_status
 from backend.services import backup_tick
 
@@ -115,16 +116,54 @@ def _storage_filesystem(db: Session, run: models.BackupRun, reply: Any) -> None:
         storage_status.record_storage_fs(target, reply)
 
 
-def _store_nfs_path(policy: Optional[models.BackupPolicy], path: Any) -> None:
+def _store_nfs_path(policy: Optional[models.BackupPolicy], path: Any) -> bool:
     """Where the host mounts its repository, as the storage host reports it.
     A new or changed path re-sends the HOST's job files (bumping the version
-    re-sends the storage side's too -- harmless)."""
+    re-sends the storage side's too -- harmless).  True when it changed."""
     if policy is None or path is not None and not isinstance(path, str):
-        return
+        return False
     path = path[:1024] if path and path.startswith("/") else None
-    if path != policy.storage_nfs_path:
-        policy.storage_nfs_path = path
-        policy.config_version += 1
+    if path == policy.storage_nfs_path:
+        return False
+    policy.storage_nfs_path = path
+    policy.config_version += 1
+    return True
+
+
+def _superseded(run: models.BackupRun, policy: Optional[models.BackupPolicy]) -> bool:
+    """A configure for an older version than the policy now has."""
+    version = _int(_parameters(run).get("config_version"))
+    return (
+        run.action == jobs.CONFIGURE
+        and policy is not None
+        and version is not None
+        and version < (policy.config_version or 0)
+    )
+
+
+def _dismiss_superseded_configures(db: Session, run: models.BackupRun) -> None:
+    """A newer configure of the same side was accepted: earlier failed ones
+    of that side are history, not problems (a new host's first configure is
+    refused until the storage host has reported where its export is --
+    production milsurpmonitor, 2026-10-31).  Hidden from the job list like
+    "Clear" does; kept in the database and the audit log."""
+    version = _int(_parameters(run).get("config_version"))
+    if version is None:
+        return
+    for old in (
+        db.query(models.BackupRun)
+        .filter(
+            models.BackupRun.policy_id == run.policy_id,
+            models.BackupRun.host_id == run.host_id,
+            models.BackupRun.action == jobs.CONFIGURE,
+            models.BackupRun.status == "failed",
+            models.BackupRun.dismissed_at.is_(None),
+        )
+        .all()
+    ):
+        older = _int(_parameters(old).get("config_version"))
+        if older is not None and older < version:
+            old.dismissed_at = jobs.now()
 
 
 _HOOK_NAME = re.compile(r"^[a-z0-9_-]{1,32}$")
@@ -256,6 +295,11 @@ def _refused(db: Session, run: models.BackupRun, code: str) -> None:
     run.finished_at = jobs.now()
     run.message = code[:_MESSAGE_LIMIT]
     policy = _policy(db, run)
+    if _superseded(run, policy):
+        # Refused, but a newer version is already on its way (or will be at
+        # once): not a failure worth showing.
+        run.dismissed_at = jobs.now()
+        backup_tick.configure_now(db)
     if (
         code == "not_configured"
         and policy is not None
@@ -301,6 +345,7 @@ def _configured(db: Session, run: models.BackupRun, reply: Any) -> None:
     run.status = "ok"
     run.finished_at = jobs.now()
     _acknowledge(db, run)
+    _dismiss_superseded_configures(db, run)
     _storage_filesystem(db, run, reply)
     role = _parameters(run).get("role")
     if isinstance(reply, dict):
@@ -308,12 +353,17 @@ def _configured(db: Session, run: models.BackupRun, reply: Any) -> None:
     if role == "host" and isinstance(reply, dict):
         _store_hooks(_policy(db, run), reply.get("hooks"))
         _store_abilities(_policy(db, run), reply.get("abilities"))
+        network_mounts.store_configured(_policy(db, run), reply.get("network_mounts"))
     if role != "storage":
         return
     if isinstance(reply, dict):
         _store_storage_abilities(_policy(db, run), reply.get("abilities"))
         _store_audit(_policy(db, run), reply.get("storage_audit"))
-        _store_nfs_path(_policy(db, run), reply.get("nfs_path"))
+        if _store_nfs_path(_policy(db, run), reply.get("nfs_path")):
+            # The host needs the new version now, not on the next tick: its
+            # first configure is refused until it knows where its export is,
+            # and Back up now / Prepare wait on its acknowledgment.
+            backup_tick.configure_now(db)
         _store_protects(_policy(db, run), reply.get("installed"))
     _reprotect(db, run)
     if not _prepare_new_repository(db, run):
@@ -503,6 +553,7 @@ def _after_capture(
     _note_version(policy, "restate_version", run.restate_version)
     if run.status not in jobs.GOOD_CAPTURE:
         return
+    network_mounts.store_captured(policy, result)
     if result.get("created_repository") is True:
         # The host's first capture made its repository (restate ``create``).
         logger.info(

@@ -9,12 +9,52 @@
 // automatically: it creates filesystems and changes exports on the storage
 // host.  Run again, it re-exports to the host's current address.
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import AsyncButton from '../AsyncButton';
 import { backupNow } from '../../Services/backups';
 import { apiDetail } from './backupLabels';
+
+/** The confirmation that starts Prepare storage: the host's Backup tab and
+ *  the Backups page row (2026-10-31) both open this one. */
+export const BackupPrepareDialog: React.FC<{
+    hostId: string;
+    open: boolean;
+    onClose: () => void;
+    onStarted: () => void;
+}> = ({ hostId, open, onClose, onStarted }) => {
+    const { t } = useTranslation();
+    const [error, setError] = useState<string | null>(null);
+    useEffect(() => { if (open) setError(null); }, [open]);
+
+    const start = async () => {
+        try {
+            await backupNow(hostId, 'prepare');
+            onClose();
+            onStarted();
+        } catch (err) {
+            setError(apiDetail(err, t('backups.prepare.error', 'Preparing the storage could not be started.')));
+        }
+    };
+
+    return (
+        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+            <DialogTitle>{t('backups.prepare.title', 'Prepare the storage for this host?')}</DialogTitle>
+            <DialogContent>
+                {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
+                <DialogContentText>
+                    {t('backups.prepare.body',
+                        'The storage host gives this host\'s repository its own ZFS dataset or btrfs subvolume, exports it over NFS to this host\'s address only with every file mapped to the backup account, and makes it append-only. It never moves existing backups: a repository that already holds files on the shared filesystem is refused, with the steps to move it. Run it again after this host\'s address changes.')}
+                </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>{t('common.cancel', 'Cancel')}</Button>
+                <AsyncButton variant="contained" onClick={start}>{t('backups.action.prepare', 'Prepare storage')}</AsyncButton>
+            </DialogActions>
+        </Dialog>
+    );
+};
 
 const BackupPrepareButton: React.FC<{ hostId: string; disabled?: boolean; onStarted: () => void }> = ({
     hostId,
@@ -23,37 +63,12 @@ const BackupPrepareButton: React.FC<{ hostId: string; disabled?: boolean; onStar
 }) => {
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    const start = async () => {
-        try {
-            await backupNow(hostId, 'prepare');
-            setOpen(false);
-            onStarted();
-        } catch (err) {
-            setError(apiDetail(err, t('backups.prepare.error', 'Preparing the storage could not be started.')));
-        }
-    };
-
     return (
         <>
-            <Button size="small" disabled={disabled} onClick={() => { setError(null); setOpen(true); }}>
+            <Button size="small" disabled={disabled} onClick={() => setOpen(true)}>
                 {t('backups.action.prepare', 'Prepare storage')}
             </Button>
-            <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
-                <DialogTitle>{t('backups.prepare.title', 'Prepare the storage for this host?')}</DialogTitle>
-                <DialogContent>
-                    {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
-                    <DialogContentText>
-                        {t('backups.prepare.body',
-                            'The storage host gives this host\'s repository its own ZFS dataset or btrfs subvolume, exports it over NFS to this host\'s address only with every file mapped to the backup account, and makes it append-only. It never moves existing backups: a repository that already holds files on the shared filesystem is refused, with the steps to move it. Run it again after this host\'s address changes.')}
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpen(false)}>{t('common.cancel', 'Cancel')}</Button>
-                    <AsyncButton variant="contained" onClick={start}>{t('backups.action.prepare', 'Prepare storage')}</AsyncButton>
-                </DialogActions>
-            </Dialog>
+            <BackupPrepareDialog hostId={hostId} open={open} onClose={() => setOpen(false)} onStarted={onStarted} />
         </>
     );
 };

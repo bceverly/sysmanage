@@ -16,7 +16,7 @@ whose row is gone is timed from the caller's own fallback.
 """
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Iterable, Optional
 
 from sqlalchemy.orm import Session
@@ -54,6 +54,13 @@ def deliveries(
     )
     found = {}
     for message_id, status, started_at, error_message in rows:
+        # message_queue.started_at is timezone-aware on PostgreSQL; every
+        # caller compares it with naive-UTC times (jobs.now(), queued_at,
+        # requested_at), which raised "can't subtract offset-naive and
+        # offset-aware datetimes" and broke the Backups page as soon as an
+        # Equip command had been sent (production, 2026-10-31 20:48).
+        if started_at is not None and started_at.tzinfo is not None:
+            started_at = started_at.astimezone(timezone.utc).replace(tzinfo=None)
         waiting = started_at is None and status == QueueStatus.PENDING
         found[message_id] = Delivery(
             sent_at=started_at,

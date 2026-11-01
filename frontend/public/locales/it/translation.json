@@ -5402,7 +5402,15 @@
       "placePaths": "Percorsi da rimettere al loro posto (uno per riga)",
       "placeAck": "Sostituisci i file in questi percorsi su {{host}}.",
       "confirmPlace": "Ripristina sul posto",
-      "nothing": "Nulla nello snapshot corrisponde a questi percorsi. Controlla l'ortografia e indica percorsi assoluti, come /home/alice/notes.txt."
+      "nothing": "Nulla nello snapshot corrisponde a questi percorsi. Controlla l'ortografia e indica percorsi assoluti, come /home/alice/notes.txt.",
+      "unmatched": "{{n}} dei tuoi percorsi non corrispondono a nulla nello snapshot: {{paths}}",
+      "resolved": "{{include}} è stato seguito fino a {{path}} tramite i collegamenti simbolici dello snapshot.",
+      "hookWillRun": "Dopo il ripristino, restate eseguirà l'hook {{service}} per sistemare ciò che la sospensione del servizio ha lasciato nei file ripristinati.",
+      "hookRan": "L'hook {{service}} ha sistemato ciò che la sospensione del servizio ha lasciato nei file ripristinati.",
+      "hookNothing": "L'hook {{service}} non aveva nulla da sistemare.",
+      "hookFailed": "L'hook {{service}} non è riuscito dopo il ripristino, quindi il ripristino è incompleto. Il log di restate sull'host ne indica il motivo.",
+      "hookMissing": "Questo host non ha alcun hook {{service}} per sistemare ciò che la sospensione del servizio ha lasciato nei file ripristinati. Fallo a mano.",
+      "hookUnreadable": "restate non è riuscito a capire a quale hook appartiene {{dir}}, quindi non è stato eseguito alcun hook."
     },
     "run": {
       "busy": "Occupato, verrà ritentato",
@@ -5553,7 +5561,9 @@
     "prepare": {
       "title": "Preparare l'archiviazione per questo host?",
       "body": "L'host di archiviazione assegna al repository di questo host un proprio dataset ZFS o subvolume btrfs, lo esporta via NFS solo all'indirizzo di questo host associando ogni file all'account dei backup, e lo rende di sola aggiunta. Non sposta mai i backup esistenti: un repository che contiene già file sul file system condiviso viene rifiutato, con i passaggi per spostarlo. Eseguilo di nuovo quando cambia l'indirizzo di questo host.",
-      "error": "Impossibile avviare la preparazione dell'archiviazione."
+      "error": "Impossibile avviare la preparazione dell'archiviazione.",
+      "busy": "Attendi che il processo di backup in corso di questo host finisca.",
+      "notConfirmed": "File dei processi non ancora confermati dall'host di archiviazione"
     },
     "browse": {
       "error": "Impossibile elencare questa cartella.",
@@ -5626,6 +5636,12 @@
     },
     "reach": {
       "unreachable": "Questo host non riesce a raggiungere lo spazio di backup ({{storage}}, {{address}}, porta NFS {{port}}). I backup richiedono un percorso di rete fino a esso."
+    },
+    "network": {
+      "leftOut": "Esclusi automaticamente (mount di rete su questo host): {{paths}}",
+      "kept": "Inclusi nel backup anche se sono mount di rete, perché \"Includi anche nel backup\" indica un percorso al loro interno: {{paths}}",
+      "hint": "È meglio eseguire il backup di una condivisione di rete sul server a cui appartiene.",
+      "skipped": "Esclusi dall'ultimo backup da restate (mount di rete su questo host): {{paths}}"
     }
   }
 }

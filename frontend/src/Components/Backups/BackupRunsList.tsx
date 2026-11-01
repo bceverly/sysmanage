@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { getRuns } from '../../Services/backups';
 import type { BackupRun } from '../../Services/backups';
 import { useVisiblePolling } from '../../hooks/useVisiblePolling';
+import RestoreNotes from './RestoreNotes';
 import { actionLabel, formatTime, pausedServicesOf, runStatusColor, runStatusLabel } from './backupLabels';
 
 const runDetail = (run: BackupRun): string => {
@@ -104,7 +105,9 @@ const BackupRunsList: React.FC<{
                             <TableCell>
                                 <Chip size="small" color={runStatusColor(run.status)} label={runStatusLabel(t, run)} />
                             </TableCell>
-                            <TableCell sx={{ wordBreak: 'break-all' }}>{runDetail(run)}<PausedServices run={run} /></TableCell>
+                            <TableCell sx={{ wordBreak: 'break-all' }}>{runDetail(run)}<PausedServices run={run} />
+                                {run.action === 'restore' && <RestoreNotes run={run} warningsOnly />}
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

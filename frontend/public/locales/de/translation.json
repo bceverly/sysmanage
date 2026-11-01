@@ -5402,7 +5402,15 @@
       "placePaths": "Zurückzulegende Pfade (einer pro Zeile)",
       "placeAck": "Die Dateien unter diesen Pfaden auf {{host}} ersetzen.",
       "confirmPlace": "An Ort und Stelle wiederherstellen",
-      "nothing": "Nichts im Snapshot passt zu diesen Pfaden. Prüfen Sie die Schreibweise und geben Sie absolute Pfade an, etwa /home/alice/notes.txt."
+      "nothing": "Nichts im Snapshot passt zu diesen Pfaden. Prüfen Sie die Schreibweise und geben Sie absolute Pfade an, etwa /home/alice/notes.txt.",
+      "unmatched": "{{n}} Ihrer Pfade haben im Snapshot keinen Treffer: {{paths}}",
+      "resolved": "{{include}} wurde über die symbolischen Links des Snapshots bis {{path}} verfolgt.",
+      "hookWillRun": "Nach der Wiederherstellung führt restate den Hook {{service}} aus, um zu beheben, was das Pausieren des Dienstes in den wiederhergestellten Dateien hinterlassen hat.",
+      "hookRan": "Der Hook {{service}} hat behoben, was das Pausieren des Dienstes in den wiederhergestellten Dateien hinterlassen hat.",
+      "hookNothing": "Der Hook {{service}} hatte nichts zu beheben.",
+      "hookFailed": "Der Hook {{service}} ist nach der Wiederherstellung fehlgeschlagen, daher ist die Wiederherstellung unvollständig. Das restate-Protokoll auf dem Host nennt den Grund.",
+      "hookMissing": "Dieser Host hat keinen Hook {{service}}, der beheben könnte, was das Pausieren des Dienstes in den wiederhergestellten Dateien hinterlassen hat. Erledigen Sie das von Hand.",
+      "hookUnreadable": "restate konnte nicht erkennen, zu welchem Hook {{dir}} gehört, daher wurde kein Hook ausgeführt."
     },
     "run": {
       "busy": "Belegt, wird wiederholt",
@@ -5553,7 +5561,9 @@
     "prepare": {
       "title": "Speicher für diesen Host vorbereiten?",
       "body": "Der Speicher-Host gibt dem Repository dieses Hosts ein eigenes ZFS-Dataset oder btrfs-Subvolume, gibt es per NFS nur für die Adresse dieses Hosts frei, wobei jede Datei auf das Sicherungskonto abgebildet wird, und macht es nur anhängend. Vorhandene Sicherungen werden nie verschoben: Ein Repository, das bereits Dateien auf dem gemeinsamen Dateisystem enthält, wird abgelehnt, mit den Schritten zum Verschieben. Führen Sie es erneut aus, wenn sich die Adresse dieses Hosts ändert.",
-      "error": "Das Vorbereiten des Speichers konnte nicht gestartet werden."
+      "error": "Das Vorbereiten des Speichers konnte nicht gestartet werden.",
+      "busy": "Warten Sie, bis der laufende Sicherungsauftrag dieses Hosts abgeschlossen ist.",
+      "notConfirmed": "Auftragsdateien vom Speicherhost noch nicht bestätigt"
     },
     "browse": {
       "error": "Dieser Ordner konnte nicht aufgelistet werden.",
@@ -5626,6 +5636,12 @@
     },
     "reach": {
       "unreachable": "Dieser Host erreicht den Sicherungsspeicher nicht ({{storage}}, {{address}}, NFS-Port {{port}}). Sicherungen brauchen einen Netzwerkpfad dorthin."
+    },
+    "network": {
+      "leftOut": "Automatisch ausgeschlossen (Netzwerk-Mounts auf diesem Host): {{paths}}",
+      "kept": "Werden gesichert, obwohl es Netzwerk-Mounts sind, weil \"Zusätzlich sichern\" einen Pfad darin nennt: {{paths}}",
+      "hint": "Eine Netzwerkfreigabe sichern Sie am besten auf dem Server, dem sie gehört.",
+      "skipped": "Von restate aus der letzten Sicherung ausgeschlossen (Netzwerk-Mounts auf diesem Host): {{paths}}"
     }
   }
 }

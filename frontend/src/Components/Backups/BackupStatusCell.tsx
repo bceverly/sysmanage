@@ -25,6 +25,7 @@ import {
 import { blockerLabel, equipFailureLabel } from './EquipForBackup';
 import { FirstFitCaption } from './BackupFirstFit';
 import { VerificationCaption } from './VerificationStatus';
+import { NetworkMountsIcon } from './NetworkMountsNote';
 
 const ONE_LINE = { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 320 } as const;
 
@@ -108,7 +109,10 @@ const BackupStatusCell: React.FC<{ row: BackupHost; storageHost: boolean }> = ({
     const detail = detailLine(t, row);
     return (
         <>
-            <Chip size="small" color={statusColor(row.status)} label={statusLabel(t, row.status)} />
+            <Stack direction="row" alignItems="center">
+                <Chip size="small" color={statusColor(row.status)} label={statusLabel(t, row.status)} />
+                <NetworkMountsIcon mounts={row.policy?.network_mounts} />
+            </Stack>
             {detail ?? (
                 // Nothing more urgent: the first-fit warning, else verification's.
                 <Stack sx={{ '& > *': ONE_LINE }}>

@@ -6,7 +6,7 @@
 // the rest in a "More" menu, the storage host listed as such, coverage only
 // when it is not full, and compact dates with the full time on hover.
 
-import { render, screen, fireEvent, within } from "@testing-library/react";
+import { render, screen, fireEvent, within, waitFor } from "@testing-library/react";
 import { vi, describe, test, expect } from "vitest";
 
 vi.mock("react-i18next", async () => {
@@ -18,6 +18,7 @@ vi.mock("../../../Services/backups", async (importOriginal) => {
   return { ...actual, backupNow: vi.fn(), equipBackup: vi.fn(), recheckBackup: vi.fn(), checkBackupReach: vi.fn() };
 });
 
+import { backupNow } from "../../../Services/backups";
 import type { BackupHost, BackupPolicy } from "../../../Services/backups";
 import BackupHostsTable from "../../../Components/Backups/BackupHostsTable";
 import { hostActions } from "../../../Components/Backups/BackupRowActions";
@@ -40,6 +41,7 @@ const all = { canManage: true, canRestore: true, hasTarget: true, storageHost: f
 describe("the primary action follows the host's state", () => {
   test.each([
     ["backed up", host(), "backupNow"],
+    ["policy confirmed, storage never prepared", host({ policy: { ...policy, needs_prepare: true } }), "prepare"],
     ["equipped, no policy", host({ policy: null, snapshot_count: 0 }), "configure"],
     ["not equipped, Equip offered", host({ equipped: false, policy: null, equip_blocker: null }), "equip"],
     ["not equipped, nothing to install", host({ equipped: false, policy: null, equip_blocker: "not_applicable" }), "recheck"],
@@ -66,7 +68,26 @@ describe("BackupHostsTable", () => {
     expect(screen.queryByRole("button", { name: "Configure" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "More: web.lab" }));
     const menu = screen.getByRole("menu");
-    expect(within(menu).getAllByRole("menuitem").map(i => i.textContent)).toEqual(["Configure", "Restore files"]);
+    expect(within(menu).getAllByRole("menuitem").map(i => i.textContent))
+      .toEqual(["Configure", "Prepare storage", "Restore files"]);
+  });
+
+  test("Prepare storage asks first, then starts the prepare job", async () => {
+    vi.mocked(backupNow).mockResolvedValue({} as never);
+    show([host({ policy: { ...policy, needs_prepare: true } })]);
+    fireEvent.click(screen.getByRole("button", { name: "Prepare storage" }));
+    expect(screen.getByText("Prepare the storage for this host?")).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: "Prepare storage" }));
+    await waitFor(() => expect(backupNow).toHaveBeenCalledWith("h1", "prepare"));
+  });
+
+  test("Prepare storage waits for the storage host to confirm its job files, and says so", () => {
+    show([host({ policy: { ...policy, storage_configured: false } })]);
+    fireEvent.click(screen.getByRole("button", { name: "More: web.lab" }));
+    const item = within(screen.getByRole("menu")).getByRole("menuitem", { name: "Prepare storage" });
+    expect(item).toHaveAttribute("aria-disabled", "true");
+    expect(item).toHaveAttribute("title", "Job files not confirmed by the storage host yet");
   });
 
   test("the storage host is listed last, as such, with no actions or checkbox", () => {

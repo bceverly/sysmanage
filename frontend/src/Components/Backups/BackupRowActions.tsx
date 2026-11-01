@@ -16,8 +16,9 @@ import type { TFunction } from 'i18next';
 import { backupNow, checkBackupReach, equipBackup, recheckBackup } from '../../Services/backups';
 import type { BackupHost } from '../../Services/backups';
 import { apiDetail, reachMessage, unreachable } from './backupLabels';
+import { BackupPrepareDialog } from './BackupPrepareButton';
 
-export type HostAction = 'reach' | 'equip' | 'recheck' | 'configure' | 'backupNow' | 'restore';
+export type HostAction = 'reach' | 'equip' | 'recheck' | 'configure' | 'backupNow' | 'prepare' | 'restore';
 
 export interface ActionContext {
     canManage: boolean;
@@ -50,15 +51,20 @@ const manageActions = (row: BackupHost, hasTarget: boolean): HostAction[] => {
     }
     if (hasTarget) offered.push('configure');
     if (row.policy) offered.push('backupNow');
+    // Also on the host's Backup tab; here so a new host needs no detour
+    // (Bryan, 2026-10-31).
+    if (row.policy && hasTarget) offered.push('prepare');
     return offered;
 };
 
-/** The action a ready host leads with: Back up now once it has a policy,
- *  Configure before.  None for an unreachable or unequipped host, which keeps
- *  its first action (Check again, Equip for backup). */
+/** The action a ready host leads with: Prepare storage while the storage
+ *  host reports no export of its own for it, then Back up now; Configure
+ *  before it has a policy.  None for an unreachable or unequipped host,
+ *  which keeps its first action (Check again, Equip for backup). */
 const leadAction = (row: BackupHost): HostAction | undefined => {
     if (unreachable(row) || !row.equipped) return undefined;
-    return row.policy ? 'backupNow' : 'configure';
+    if (!row.policy) return 'configure';
+    return row.policy.needs_prepare ? 'prepare' : 'backupNow';
 };
 
 /** Every action this row offers, the primary one first. */
@@ -74,6 +80,13 @@ export const hostActions = (row: BackupHost, ctx: ActionContext): HostAction[] =
 export const actionBlocked = (t: TFunction, row: BackupHost, action: HostAction): string | null => {
     if (action === 'reach' || action === 'recheck') return null;
     if (row.reach && unreachable(row)) return reachMessage(t, row.reach);
+    if (action === 'prepare') {
+        if (row.running) return t('backups.prepare.busy', 'Wait until this host\'s running backup job finishes.');
+        if (!row.policy?.storage_configured) {
+            return t('backups.prepare.notConfirmed', 'Job files not confirmed by the storage host yet');
+        }
+        return null;
+    }
     if (action !== 'backupNow') return null;
     if (row.running?.action === 'capture') return t('backups.bulk.skipRunning', 'Already backing up');
     if (!row.equipped || !row.policy?.configured) {
@@ -93,6 +106,8 @@ const label = (t: TFunction, action: HostAction): string => {
             return t('backups.hosts.configure', 'Configure');
         case 'backupNow':
             return t('backups.hosts.backupNow', 'Back up now');
+        case 'prepare':
+            return t('backups.action.prepare', 'Prepare storage');
         default:
             return t('backups.hosts.restore', 'Restore files');
     }
@@ -112,6 +127,7 @@ const BackupRowActions: React.FC<{
 }> = ({ row, ctx, onConfigure, onRestore, onChanged, onError, onNotice }) => {
     const { t } = useTranslation();
     const [busy, setBusy] = useState(false);
+    const [preparing, setPreparing] = useState(false);
     const [anchor, setAnchor] = useState<HTMLElement | null>(null);
     const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
     useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
@@ -143,6 +159,9 @@ const BackupRowActions: React.FC<{
                 return;
             case 'restore':
                 onRestore(row);
+                return;
+            case 'prepare':
+                setPreparing(true);
                 return;
             case 'backupNow':
                 void call(() => backupNow(row.host_id), null,
@@ -201,6 +220,8 @@ const BackupRowActions: React.FC<{
                 // Keeps the primary buttons aligned with the rows that have a menu.
                 <span style={{ width: 34, display: 'inline-block' }} />
             )}
+            <BackupPrepareDialog hostId={row.host_id} open={preparing} onClose={() => setPreparing(false)}
+                onStarted={onChanged} />
         </Stack>
     );
 };

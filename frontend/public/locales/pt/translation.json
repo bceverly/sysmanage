@@ -5402,7 +5402,15 @@
       "placePaths": "Caminhos a colocar de volta (um por linha)",
       "placeAck": "Substituir os arquivos nesses caminhos em {{host}}.",
       "confirmPlace": "Restaurar no local original",
-      "nothing": "Nada no snapshot corresponde a esses caminhos. Verifique a grafia e informe caminhos absolutos, como /home/alice/notes.txt."
+      "nothing": "Nada no snapshot corresponde a esses caminhos. Verifique a grafia e informe caminhos absolutos, como /home/alice/notes.txt.",
+      "unmatched": "{{n}} dos seus caminhos não corresponderam a nada no snapshot: {{paths}}",
+      "resolved": "{{include}} foi seguido até {{path}} pelos links simbólicos do snapshot.",
+      "hookWillRun": "Após a restauração, o restate executará o hook {{service}} para corrigir o que a pausa do serviço deixou nos arquivos restaurados.",
+      "hookRan": "O hook {{service}} corrigiu o que a pausa do serviço deixou nos arquivos restaurados.",
+      "hookNothing": "O hook {{service}} não tinha nada a corrigir.",
+      "hookFailed": "O hook {{service}} falhou após a restauração, portanto a restauração está incompleta. O log do restate no host informa o motivo.",
+      "hookMissing": "Este host não tem nenhum hook {{service}} para corrigir o que a pausa do serviço deixou nos arquivos restaurados. Faça isso manualmente.",
+      "hookUnreadable": "O restate não conseguiu identificar a qual hook {{dir}} pertence, portanto nenhum hook foi executado."
     },
     "run": {
       "busy": "Ocupado, será tentado novamente",
@@ -5553,7 +5561,9 @@
     "prepare": {
       "title": "Preparar o armazenamento para este host?",
       "body": "O host de armazenamento dá ao repositório deste host um dataset ZFS ou subvolume btrfs próprio, exporta-o por NFS somente para o endereço deste host com cada arquivo mapeado para a conta de backup, e o torna somente acréscimo. Nunca move backups existentes: um repositório que já contém arquivos no sistema de arquivos compartilhado é recusado, com as etapas para movê-lo. Execute novamente quando o endereço deste host mudar.",
-      "error": "Não foi possível iniciar a preparação do armazenamento."
+      "error": "Não foi possível iniciar a preparação do armazenamento.",
+      "busy": "Aguarde até que o trabalho de backup em execução deste host termine.",
+      "notConfirmed": "Arquivos de trabalho ainda não confirmados pelo host de armazenamento"
     },
     "browse": {
       "error": "Não foi possível listar esta pasta.",
@@ -5626,6 +5636,12 @@
     },
     "reach": {
       "unreachable": "Este host não consegue alcançar o armazenamento de backup ({{storage}}, {{address}}, porta NFS {{port}}). Os backups precisam de um caminho de rede até ele."
+    },
+    "network": {
+      "leftOut": "Excluídos automaticamente (montagens de rede neste host): {{paths}}",
+      "kept": "Incluídos no backup embora sejam montagens de rede, porque \"Incluir também no backup\" indica um caminho dentro deles: {{paths}}",
+      "hint": "O melhor é fazer backup de um compartilhamento de rede no servidor a que ele pertence.",
+      "skipped": "Excluídos do último backup pelo restate (montagens de rede neste host): {{paths}}"
     }
   }
 }

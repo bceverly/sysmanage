@@ -64,6 +64,12 @@ describe("BackupPolicyDialog services to pause", () => {
     expect(vi.mocked(savePolicy).mock.calls[0][1].quiesce_with).toEqual(["mysql"]);
   });
 
+  test("says which network mounts the host's backup leaves out", () => {
+    open(policy({ network_mounts: { excluded: ["/srv/share"], kept: [], native: false } }));
+    expect(screen.getByText("Left out automatically (network mounts on this host): /srv/share"))
+      .toBeInTheDocument();
+  });
+
   test("saves the chosen services as quiesce_with", async () => {
     vi.mocked(savePolicy).mockResolvedValue({} as never);
     open(policy());

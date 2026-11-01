@@ -137,6 +137,8 @@ def policy_dict(policy: models.BackupPolicy) -> Dict[str, Any]:
         "available_hooks": (
             json.loads(policy.available_hooks) if policy.available_hooks else None
         ),
+        # The network shares the host's backup leaves out (None: not reported).
+        "network_mounts": _json(getattr(policy, "network_mounts", None)),
         "keep_paths": jobs.path_rules(policy).get("keep_paths", []),
         "skip_paths": jobs.path_rules(policy).get("skip_paths", []),
         "estimate_bytes": policy.estimate_bytes,
@@ -144,6 +146,8 @@ def policy_dict(policy: models.BackupPolicy) -> Dict[str, Any]:
         "config_version": policy.config_version,
         "configured": policy.host_acked_version >= policy.config_version,
         "storage_configured": policy.storage_acked_version >= policy.config_version,
+        # The storage host has not given this repository its own export yet.
+        "needs_prepare": storage_audit.needs_prepare(policy),
         "restate_version": policy.restate_version,
         "storage_restate_version": policy.storage_restate_version,
         # Pro+ backup_engine: the current repository's key (never the secret

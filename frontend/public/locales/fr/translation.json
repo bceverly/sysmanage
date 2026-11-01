@@ -5402,7 +5402,15 @@
       "placePaths": "Chemins à remettre en place (un par ligne)",
       "placeAck": "Remplacer les fichiers situés à ces chemins sur {{host}}.",
       "confirmPlace": "Restaurer en place",
-      "nothing": "Rien dans l'instantané ne correspond à ces chemins. Vérifiez l'orthographe et indiquez des chemins absolus, comme /home/alice/notes.txt."
+      "nothing": "Rien dans l'instantané ne correspond à ces chemins. Vérifiez l'orthographe et indiquez des chemins absolus, comme /home/alice/notes.txt.",
+      "unmatched": "{{n}} de vos chemins ne correspondent à rien dans l'instantané : {{paths}}",
+      "resolved": "{{include}} a été suivi jusqu'à {{path}} via les liens symboliques de l'instantané.",
+      "hookWillRun": "Après la restauration, restate exécutera le hook {{service}} pour corriger ce que la mise en pause du service a laissé dans les fichiers restaurés.",
+      "hookRan": "Le hook {{service}} a corrigé ce que la mise en pause du service a laissé dans les fichiers restaurés.",
+      "hookNothing": "Le hook {{service}} n'avait rien à corriger.",
+      "hookFailed": "Le hook {{service}} a échoué après la restauration ; la restauration est donc incomplète. Le journal de restate sur l'hôte en indique la raison.",
+      "hookMissing": "Cet hôte n'a aucun hook {{service}} pour corriger ce que la mise en pause du service a laissé dans les fichiers restaurés. Faites-le à la main.",
+      "hookUnreadable": "restate n'a pas pu déterminer à quel hook correspond {{dir}} ; aucun hook n'a donc été exécuté."
     },
     "run": {
       "busy": "Occupé, nouvelle tentative prévue",
@@ -5553,7 +5561,9 @@
     "prepare": {
       "title": "Préparer le stockage pour cet hôte ?",
       "body": "L'hôte de stockage donne au dépôt de cet hôte son propre dataset ZFS ou sous-volume btrfs, l'exporte en NFS vers l'adresse de cet hôte uniquement en associant chaque fichier au compte de sauvegarde, et le rend en ajout seul. Il ne déplace jamais les sauvegardes existantes : un dépôt qui contient déjà des fichiers sur le système de fichiers partagé est refusé, avec les étapes pour le déplacer. Relancez-le lorsque l'adresse de cet hôte change.",
-      "error": "La préparation du stockage n'a pas pu être lancée."
+      "error": "La préparation du stockage n'a pas pu être lancée.",
+      "busy": "Attendez la fin de la tâche de sauvegarde en cours de cet hôte.",
+      "notConfirmed": "Fichiers de tâches pas encore confirmés par l'hôte de stockage"
     },
     "browse": {
       "error": "Impossible de lister ce dossier.",
@@ -5626,6 +5636,12 @@
     },
     "reach": {
       "unreachable": "Cet hôte ne peut pas atteindre le stockage des sauvegardes ({{storage}}, {{address}}, port NFS {{port}}). Les sauvegardes ont besoin d'un chemin réseau jusqu'à lui."
+    },
+    "network": {
+      "leftOut": "Exclus automatiquement (montages réseau sur cet hôte) : {{paths}}",
+      "kept": "Sauvegardés bien qu'il s'agisse de montages réseau, car « Sauvegarder aussi » cite un chemin à l'intérieur : {{paths}}",
+      "hint": "Un partage réseau se sauvegarde de préférence sur le serveur auquel il appartient.",
+      "skipped": "Exclus de la dernière sauvegarde par restate (montages réseau sur cet hôte) : {{paths}}"
     }
   }
 }

@@ -35,6 +35,7 @@ import { useTranslation } from 'react-i18next';
 import AsyncButton from '../AsyncButton';
 import { getRun, getSnapshots, restoreFiles } from '../../Services/backups';
 import SnapshotBrowser from './SnapshotBrowser';
+import RestoreNotes from './RestoreNotes';
 import type { BackupRun, BackupSnapshot } from '../../Services/backups';
 import { apiDetail, formatBytes, formatTime, runStatusLabel } from './backupLabels';
 
@@ -96,6 +97,7 @@ const RunOutcome: React.FC<{ run: BackupRun }> = ({ run }) => {
                 {Array.isArray(result.missing) && result.missing.length > 0
                     && ` - ${t('backups.restore.missing', 'Not in the snapshot: {{n}}', { n: result.missing.length })}`}
             </Typography>
+            <RestoreNotes run={run} />
             {result.content_read === false && (
                 <Typography variant="caption" display="block" color="text.secondary">
                     {t('backups.restore.planned',

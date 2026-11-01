@@ -5402,7 +5402,15 @@
       "placePaths": "Rutas que devolver a su lugar (una por línea)",
       "placeAck": "Reemplazar los archivos de estas rutas en {{host}}.",
       "confirmPlace": "Restaurar en su ubicación",
-      "nothing": "Nada de la instantánea coincide con estas rutas. Compruebe la ortografía e indique rutas absolutas, como /home/alice/notes.txt."
+      "nothing": "Nada de la instantánea coincide con estas rutas. Compruebe la ortografía e indique rutas absolutas, como /home/alice/notes.txt.",
+      "unmatched": "{{n}} de sus rutas no coincidieron con nada en la instantánea: {{paths}}",
+      "resolved": "{{include}} se siguió hasta {{path}} a través de los enlaces simbólicos de la instantánea.",
+      "hookWillRun": "Tras la restauración, restate ejecutará el hook {{service}} para corregir lo que la pausa del servicio dejó en los archivos restaurados.",
+      "hookRan": "El hook {{service}} corrigió lo que la pausa del servicio dejó en los archivos restaurados.",
+      "hookNothing": "El hook {{service}} no tenía nada que corregir.",
+      "hookFailed": "El hook {{service}} falló después de la restauración, por lo que la restauración está incompleta. El registro de restate en el host indica el motivo.",
+      "hookMissing": "Este host no tiene ningún hook {{service}} que corrija lo que la pausa del servicio dejó en los archivos restaurados. Hágalo a mano.",
+      "hookUnreadable": "restate no pudo determinar a qué hook corresponde {{dir}}, por lo que no se ejecutó ningún hook."
     },
     "run": {
       "busy": "Ocupado, se reintentará",
@@ -5553,7 +5561,9 @@
     "prepare": {
       "title": "¿Preparar el almacenamiento para este host?",
       "body": "El host de almacenamiento da al repositorio de este host su propio dataset ZFS o subvolumen btrfs, lo exporta por NFS solo a la dirección de este host con cada archivo asignado a la cuenta de copias de seguridad, y lo hace de solo anexión. Nunca mueve copias de seguridad existentes: un repositorio que ya contiene archivos en el sistema de archivos compartido se rechaza, con los pasos para moverlo. Vuelva a ejecutarlo cuando cambie la dirección de este host.",
-      "error": "No se pudo iniciar la preparación del almacenamiento."
+      "error": "No se pudo iniciar la preparación del almacenamiento.",
+      "busy": "Espere a que termine el trabajo de copia de seguridad en curso de este host.",
+      "notConfirmed": "El host de almacenamiento aún no ha confirmado los archivos de trabajo"
     },
     "browse": {
       "error": "No se pudo listar esta carpeta.",
@@ -5626,6 +5636,12 @@
     },
     "reach": {
       "unreachable": "Este host no puede llegar al almacenamiento de copias de seguridad ({{storage}}, {{address}}, puerto NFS {{port}}). Las copias de seguridad necesitan una ruta de red hasta él."
+    },
+    "network": {
+      "leftOut": "Excluidos automáticamente (montajes de red en este host): {{paths}}",
+      "kept": "Se respaldan aunque son montajes de red, porque \"Incluir también en la copia de seguridad\" indica una ruta dentro de ellos: {{paths}}",
+      "hint": "Lo mejor es respaldar un recurso compartido de red en el servidor al que pertenece.",
+      "skipped": "Excluidos de la última copia de seguridad por restate (montajes de red en este host): {{paths}}"
     }
   }
 }
