@@ -188,6 +188,7 @@ def test_the_new_repository_is_prepared_once_on_the_storage_acknowledgment(
     s.host.ipv4 = "192.168.4.196"
     _ack_storage(session, s)
     prepare = jobs.queue_run(session, s.policy, s.nas.id, jobs.PREPARE)
+    prepare.queued_at = datetime(2026, 10, 25, 11, 0)  # before encryption
     results.record_result(session, s.nas.id, _result(prepare, "ok", kind="zfs"))
     _encrypt(session, s)
     sent.clear()
@@ -197,12 +198,56 @@ def test_the_new_repository_is_prepared_once_on_the_storage_acknowledgment(
         action=jobs.PREPARE, status="queued"
     )
     run = queued.one()
+    run.queued_at = datetime(2026, 10, 25, 12, 5)  # after encryption
     results.record_result(session, s.nas.id, _result(run, "ok", kind="zfs"))
-    run.finished_at = datetime(2026, 10, 25, 12, 5)
     session.commit()
     sent.clear()
     _ack_storage(session, s)
     assert not [p for _h, _c, p in sent if p.get("action") == jobs.PREPARE]
+
+
+def _host_configures(sent, s):
+    return [p for h, c, p in sent if c == "backup_configure" and h == str(s.host.id)]
+
+
+def test_the_hosts_job_files_wait_for_the_new_repositorys_export(session, sent):
+    """Sent before the storage host prepared the new repository, the host's
+    job files were refused ("mount_point is not an NFS mount on this host")
+    and re-sent seconds later -- a "Failed" left in Recent jobs (lab t14,
+    production beast, 2026-11-01/02).  They now wait for the prepare and go
+    out the moment it succeeds."""
+    from backend.services import backup_tick  # pylint: disable=import-outside-toplevel
+
+    s = _setup(session)
+    s.host.ipv4 = "192.168.4.196"
+    _ack_storage(session, s)
+    first = jobs.queue_run(session, s.policy, s.nas.id, jobs.PREPARE)
+    results.record_result(session, s.nas.id, _result(first, "ok", kind="zfs"))
+    first.queued_at = datetime(2026, 10, 25, 11, 0)  # before encryption
+    _encrypt(session, s)
+    sent.clear()
+    backup_tick.configure_now(session)
+    assert not _host_configures(sent, s)
+    assert jobs.awaiting_prepare(session, s.policy)
+    _ack_storage(session, s)  # queues the new repository's prepare
+    backup_tick.configure_now(session)
+    assert not _host_configures(sent, s)
+    prepare = (
+        session.query(models.BackupRun)
+        .filter_by(action=jobs.PREPARE, status="queued")
+        .one()
+    )
+    prepare.queued_at = datetime(2026, 10, 25, 12, 5)  # after encryption
+    results.record_result(session, s.nas.id, _result(prepare, "ok", kind="zfs"))
+    assert not jobs.awaiting_prepare(session, s.policy)
+    assert len(_host_configures(sent, s)) == 1
+
+
+def test_a_host_never_prepared_is_not_held(session, sent):
+    """A hand-made storage layout has no prepare to wait for."""
+    s = _setup(session)
+    _encrypt(session, s)
+    assert not jobs.awaiting_prepare(session, s.policy)
 
 
 def test_storage_never_prepared_is_not_prepared_for_encryption(session, sent):

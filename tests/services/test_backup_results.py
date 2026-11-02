@@ -405,6 +405,42 @@ def test_a_good_prune_sizes_the_repository_with_du(session, sent):
     assert (snap.bytes, snap.new_bytes, snap.unique_bytes) == (50_000, 2_000, 1_500)
 
 
+def test_du_retires_snapshots_it_no_longer_lists(session, sent):
+    """A snapshot pruned without the prune's result arriving stayed "live"
+    forever; du lists the whole repository, so what it omits is gone (lab,
+    t14, 2026-11-02).  The repository before an encrypted one is untouched."""
+    s = _setup(session)
+    _upsert = results._upsert_snapshot  # pylint: disable=protected-access
+    _upsert(session, s.policy, "kept", {"bytes": 1})
+    _upsert(session, s.policy, "pruned-long-ago", {"bytes": 1})
+    old_repo = models.BackupSnapshot(
+        id=uuid.uuid4(), policy_id=s.policy.id, host_id=s.host.id,
+        name="in-the-old-repository", repository_dir="h-old", seen_at=datetime(2026, 11, 1),
+    )  # fmt: skip
+    session.add(old_repo)
+    session.flush()
+    du = jobs.queue_run(session, s.policy, s.nas.id, "du")
+    results.record_result(session, s.nas.id, _result(du, du={
+        "bytes": 10, "snapshots": [{"name": "kept", "bytes": 1, "listed": True}],
+    }))  # fmt: skip
+    gone = {
+        row.name: row.gone_at is not None
+        for row in session.query(models.BackupSnapshot).all()
+    }
+    assert gone == {"kept": False, "pruned-long-ago": True,
+                    "in-the-old-repository": False}  # fmt: skip
+
+
+def test_a_du_without_a_snapshot_list_retires_nothing(session, sent):
+    s = _setup(session)
+    results._upsert_snapshot(  # pylint: disable=protected-access
+        session, s.policy, "kept", {"bytes": 1}
+    )
+    du = jobs.queue_run(session, s.policy, s.nas.id, "du")
+    results.record_result(session, s.nas.id, _result(du, du={"bytes": 10}))
+    assert session.query(models.BackupSnapshot).one().gone_at is None
+
+
 def test_a_failed_prune_does_not_run_du(session, sent):
     s = _setup(session)
     prune = jobs.queue_run(session, s.policy, s.nas.id, "prune")

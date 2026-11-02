@@ -569,6 +569,39 @@ def target_storage_abilities(db: Session, target_id: Any) -> Optional[List[str]]
     return sorted(found)
 
 
+def last_prepare(
+    db: Session, policy: models.BackupPolicy
+) -> Optional[models.BackupRun]:
+    """The policy's latest successful storage prepare, or None (latest by
+    when the server queued it: the agent's own times follow its clock)."""
+    return (
+        db.query(models.BackupRun)
+        .filter(
+            models.BackupRun.policy_id == policy.id,
+            models.BackupRun.action == PREPARE,
+            models.BackupRun.status == "ok",
+        )
+        .order_by(models.BackupRun.queued_at.desc())
+        .first()
+    )
+
+
+def awaiting_prepare(db: Session, policy: models.BackupPolicy) -> bool:
+    """The storage host is preparing this host's export, or owes one to the
+    new repository encryption started (it was prepared before, not since):
+    the host's job files wait for it, since the host refuses a mount point
+    with no export behind it ("mount_point is not an NFS mount on this
+    host": lab t14 and production beast, 2026-11-01/02)."""
+    if pending(db, policy.id, PREPARE):
+        return True
+    if not policy.encrypted_at:
+        return False
+    done = last_prepare(db, policy)
+    # Server time on both sides (queued_at, encrypted_at): the agent's own
+    # finish time would hold a host whose clock runs behind for good.
+    return done is not None and done.queued_at < policy.encrypted_at
+
+
 def pending(db: Session, policy_id: Any, action: str, host_id: Any = None) -> bool:
     """A run of ``action`` for this policy is still queued or running."""
     query = db.query(models.BackupRun.id).filter(

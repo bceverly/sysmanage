@@ -237,17 +237,8 @@ def _prepare_new_repository(db: Session, run: models.BackupRun) -> bool:
         or jobs.pending(db, policy.id, jobs.PREPARE)
     ):
         return False
-    done = (
-        db.query(models.BackupRun)
-        .filter(
-            models.BackupRun.policy_id == policy.id,
-            models.BackupRun.action == jobs.PREPARE,
-            models.BackupRun.status == "ok",
-        )
-        .order_by(models.BackupRun.finished_at.desc())
-        .first()
-    )
-    if done is None or (done.finished_at and done.finished_at >= policy.encrypted_at):
+    done = jobs.last_prepare(db, policy)
+    if done is None or done.queued_at >= policy.encrypted_at:
         return False
     logger.info(
         "Backup policy %s: preparing storage for the new encrypted repository %s",
@@ -696,6 +687,13 @@ def _after_du(db: Session, run: models.BackupRun, policy, result) -> None:
             value = _int(entry.get(field))
             if value is not None:
                 setattr(snapshot, field, value)
+    # du lists every snapshot in the repository, so one it does not list is
+    # gone.  The prune's own "pruned" list was the only other source, and a
+    # prune whose result never arrived left its snapshots "live" forever --
+    # the lab's retention preview counted two that storage no longer held
+    # (lab, t14, 2026-11-02).
+    if isinstance(usage.get("snapshots"), list):
+        _retire_missing(db, policy, {e["name"] for e in _named(usage["snapshots"])})
 
 
 def _named(entries: Any) -> List[Dict[str, Any]]:
@@ -726,6 +724,12 @@ def _refresh(
                 new_bytes=_int(entry.get("new_bytes")),
             )
         _upsert_snapshot(db, policy, entry["name"][:255], fields)
+    _retire_missing(db, policy, present)
+
+
+def _retire_missing(db: Session, policy, present: set) -> None:
+    """Mark gone every snapshot of the CURRENT repository not in
+    ``present`` -- never those of the repository before an encrypted one."""
     stamp = jobs.now()
     in_current = (
         models.BackupSnapshot.repository_dir.is_(None)
@@ -780,7 +784,15 @@ def _after_check(_db: Session, run: models.BackupRun, policy, _result) -> None:
         )
 
 
+def _after_prepare(db: Session, run: models.BackupRun, _policy_row, _result) -> None:
+    """The export exists now: the host's job files, held for it
+    (``jobs.awaiting_prepare``), go out at once."""
+    if run.status == "ok":
+        backup_tick.configure_now(db)
+
+
 _AFTER = {
+    "prepare": _after_prepare,
     "verify": _after_verify,
     "capture": _after_capture,
     "seal": _after_seal,

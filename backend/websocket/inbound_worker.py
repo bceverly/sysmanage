@@ -48,13 +48,19 @@ class InboundWorker:
             ready = threading.Event()
 
             def run():
-                self._loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(self._loop)
+                # This thread's own loop, closed by this thread alone: after
+                # stop() a new thread may already have replaced self._loop,
+                # and closing THAT one raised "Cannot close a running event
+                # loop" in the old thread (CI, test_custom_metric_exporter,
+                # 2026-11-02).
+                loop = asyncio.new_event_loop()
+                self._loop = loop
+                asyncio.set_event_loop(loop)
                 ready.set()
                 try:
-                    self._loop.run_forever()
+                    loop.run_forever()
                 finally:
-                    self._loop.close()
+                    loop.close()
 
             self._thread = threading.Thread(target=run, name=self._name, daemon=True)
             self._thread.start()

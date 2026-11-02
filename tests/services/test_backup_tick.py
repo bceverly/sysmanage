@@ -360,6 +360,31 @@ def test_every_database_and_a_failure_is_contained():
     assert good.close.called and bad.close.called
 
 
+def test_each_database_is_reconciled_as_its_tenant():
+    """Keys rotated on schedule are stored under the active tenant's OpenBAO
+    path; the tick has no request, so it sets each tenant itself."""
+    from backend.persistence.tenant_context import (  # pylint: disable=import-outside-toplevel
+        get_active_tenant,
+    )
+
+    seen = []
+
+    def reconcile(_db):
+        seen.append(get_active_tenant())
+        return 0
+
+    with patch.object(
+        tick,
+        "iter_host_databases",
+        return_value=iter(
+            [("bootstrap", None, MagicMock()), ("t1", "tenant-1", MagicMock())]
+        ),
+    ), patch.object(tick, "reconcile", side_effect=reconcile):
+        tick.run_one_tick()
+    assert seen == [None, "tenant-1"]
+    assert get_active_tenant() is None  # restored after the pass
+
+
 def test_community_always_starts():
     with patch.object(
         tick, "singleton_task", return_value="task"

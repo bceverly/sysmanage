@@ -38,6 +38,7 @@ from sqlalchemy.orm import Session
 
 from backend.persistence import models
 from backend.persistence.partitions import iter_host_databases
+from backend.persistence.tenant_context import tenant_scope
 from backend.services import backup_first_fit as first_fit
 from backend.services import backup_jobs as jobs
 from backend.services import backup_reach as reach
@@ -219,8 +220,10 @@ def _configure(db, policy, target, host, storage_ready: bool) -> bool:
         )  # fmt: skip
         policy.config_version += 1
         policy.storage_client_address = jobs.host_address(host)
-    if policy.host_acked_version < policy.config_version and not jobs.pending(
-        db, policy.id, jobs.CONFIGURE, host.id
+    if (
+        policy.host_acked_version < policy.config_version
+        and not jobs.pending(db, policy.id, jobs.CONFIGURE, host.id)
+        and not jobs.awaiting_prepare(db, policy)
     ):
         jobs.queue_configure(db, policy, target, host, "host")
     if (
@@ -502,9 +505,13 @@ def rotate_keys(db: Session, target, now: datetime) -> int:
 def run_one_tick() -> int:
     """One pass over every host database.  Never raises."""
     queued = 0
-    for label, _, db in iter_host_databases():
+    for label, tenant_id, db in iter_host_databases():
         try:
-            queued += reconcile(db)
+            # The tenant, as a request would have it: what the pass does for
+            # Pro+ -- a key rotated on schedule -- lands in that tenant's
+            # OpenBAO path, never the server's (lab, 2026-11-02).
+            with tenant_scope(tenant_id):
+                queued += reconcile(db)
             db.commit()
         except Exception:  # pylint: disable=broad-except
             logger.exception("Backup scheduling failed for %s", label)
