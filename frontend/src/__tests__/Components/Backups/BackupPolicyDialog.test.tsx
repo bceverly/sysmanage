@@ -118,3 +118,15 @@ describe("BackupPolicyDialog defaults for a new policy", () => {
   });
 });
 
+describe("BackupPolicyDialog start hour", () => {
+  test("shows the window on the viewer's own clock", () => {
+    open(policy({ window_start_hour: 7 }));
+    expect(screen.getByText(/Backups start only in the six hours from this hour\. In your time zone: .+ to .+\./))
+      .toBeInTheDocument();
+  });
+
+  test("says nothing about local time without a start hour", () => {
+    open(policy({ window_start_hour: null }));
+    expect(screen.queryByText(/In your time zone/)).not.toBeInTheDocument();
+  });
+});

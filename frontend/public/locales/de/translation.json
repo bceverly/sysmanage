@@ -1926,7 +1926,9 @@
     "reenrollDone": "Anmeldedaten gelöscht. Genehmigen Sie den Host erneut, sobald sich sein Agent wieder verbindet.",
     "reenrollFailed": "Fehler beim Neuregistrieren des Hosts",
     "heldCount": "Zurückgehalten: {{count}}",
-    "heldTitle": "Befehle warten auf ein Wartungsfenster"
+    "heldTitle": "Befehle warten auf ein Wartungsfenster",
+    "scriptsNeedApproval": "Skripte erfordern Genehmigung",
+    "scriptsNeedApprovalTooltip": "Der Agent dieses Hosts führt nur Skripte aus, die über den Genehmigungsablauf (Professional+) genehmigt wurden. Einmalige Skripte werden abgelehnt."
   },
   "idp": {
     "action": {
@@ -5366,7 +5368,8 @@
       "preview": "Nächste Bereinigung anzeigen",
       "previewError": "Die Vorschau konnte nicht erstellt werden.",
       "previewMore": "und {{n}} weitere",
-      "previewResult": "Nächste Bereinigung: {{kept}} behalten, {{removed}} entfernt."
+      "previewResult": "Nächste Bereinigung: {{kept}} behalten, {{removed}} entfernt.",
+      "windowLocal": "In Ihrer Zeitzone: {{start}} bis {{end}}."
     },
     "reason": {
       "agentOutdated": "Agent aktualisieren",

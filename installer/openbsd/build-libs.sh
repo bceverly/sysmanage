@@ -92,8 +92,21 @@ py3-websockets py3-reportlab py3-argon2-cffi py3-bcrypt py3-cryptography \
 py3-orjson py3-yaml py3-aiohttp py3-jinja2 py3-regex"
 
 echo "=== Installing dependency ports (so the venv skips them) ==="
+# Retried: a mirror that drops one download mid-handshake ("ftp: TLS
+# handshake failure: handshake failed: unexpected EOF") fails every package
+# that needs it, and failed the v3.12.0.21 release (2026-11-01).  pkg_add -I
+# keeps what is already installed, so each try fetches only what is missing.
+tries=0
 # shellcheck disable=SC2086
-pkg_add -I ${PKGS}
+until pkg_add -I ${PKGS}; do
+  tries=$((tries + 1))
+  if [ "$tries" -ge 4 ]; then
+    echo "pkg_add failed 4 times; giving up" >&2
+    exit 1
+  fi
+  echo "pkg_add failed (try $tries of 4); trying again in 30 seconds" >&2
+  sleep 30
+done
 
 rm -rf "$STAGE"
 mkdir -p "$STAGE/pip-packages" "$STAGE/frontend"

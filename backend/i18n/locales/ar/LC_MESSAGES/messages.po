@@ -4,8 +4,8 @@
 #
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-30 07:48-0400\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-02 09:14-0500\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -225,9 +225,10 @@ msgstr "المضيف غير معتمد"
 #: backend/api/opentelemetry/grafana_connection.py:201
 #: backend/api/cve_refresh_settings.py:66 backend/api/scim.py:218
 #: backend/api/scim.py:228 backend/api/packages_operations.py:68
-#: backend/api/packages_operations.py:247 backend/api/license_management.py:116
-#: backend/api/secrets/permissions.py:39 backend/api/error_constants.py:22
-#: backend/api/child_host_utils.py:33 backend/api/child_host_utils.py:67
+#: backend/api/packages_operations.py:247
+#: backend/api/license_management.py:116 backend/api/secrets/permissions.py:39
+#: backend/api/error_constants.py:22 backend/api/child_host_utils.py:33
+#: backend/api/child_host_utils.py:67
 msgid "User not found"
 msgstr "لم يتم العثور على المستخدم"
 
@@ -655,8 +656,8 @@ msgstr "فشل في ترتيب تعطيل المستودع في قائمة ال�
 
 #: backend/api/reports/endpoints.py:73
 msgid ""
-"Report generation requires a SysManage Professional+ license. Please upgrade "
-"to access this feature."
+"Report generation requires a SysManage Professional+ license. Please upgrade"
+" to access this feature."
 msgstr ""
 "يتطلب إنشاء التقارير ترخيص SysManage Professional+. يرجى الترقية للوصول إلى "
 "هذه الميزة."
@@ -794,11 +795,11 @@ msgstr "رمز التسجيل غير صالح أو منتهٍ الصلاحية"
 
 #: backend/api/host_registration.py:239
 msgid ""
-"This host already belongs to a tenant. Re-register with its enrollment token "
-"instead of registering server-scoped."
+"This host already belongs to a tenant. Re-register with its enrollment token"
+" instead of registering server-scoped."
 msgstr ""
-"هذا المستضِغف ينتمي بالفعل إلى مستأجر. قم بإعادة التسجيل باستخدام رمز تسجيله "
-"بدلاً من تسجيل نطاق الخادم"
+"هذا المستضِغف ينتمي بالفعل إلى مستأجر. قم بإعادة التسجيل باستخدام رمز تسجيله"
+" بدلاً من تسجيل نطاق الخادم"
 
 #: backend/api/graylog_integration.py:177
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -1292,7 +1293,7 @@ msgstr "تم طلب تعطيل خدمة Ubuntu Pro"
 msgid "Failed to request Ubuntu Pro service disable: %s"
 msgstr "فشل في طلب تعطيل خدمة Ubuntu Pro: %s"
 
-#: backend/api/host_utils.py:695
+#: backend/api/host_utils.py:700
 msgid "Host limit reached for this tenant."
 msgstr "تم بلوغ الحد الأقصى لعدد المضيفين لهذا المستأجر."
 
@@ -1533,8 +1534,8 @@ msgstr ""
 
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
-"Air-gap collection runs require the repository_mirroring_engine module to be "
-"loaded -- the collector reads each target's bundle from a snapshot of its "
+"Air-gap collection runs require the repository_mirroring_engine module to be"
+" loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 "تتطلب عمليات جمع الفجوة الهوائية تحميل وحدة معالجة نسخ المستودع "
@@ -1588,8 +1589,8 @@ msgstr "لم يتم العثور على المرآة %s"
 msgid ""
 "Mirror %r is disabled; enable + sync it before using it in a collection run."
 msgstr ""
-"يحتوي المرآة %r على الخاصية غير مفعلة؛ قم بتفعيلها وتحديثها قبل استخدامها في "
-"تشغيل جمع البيانات."
+"يحتوي المرآة %r على الخاصية غير مفعلة؛ قم بتفعيلها وتحديثها قبل استخدامها في"
+" تشغيل جمع البيانات."
 
 #: backend/api/airgap_collector_runs.py:439
 #, python-format
@@ -1598,8 +1599,8 @@ msgid ""
 "dispatches to a single agent). Selected mirrors span %d hosts."
 msgstr ""
 "يجب أن تعيش جميع المرآات المستهدفة على نفس المضيف (يقوم خطة التجميع بإرسال "
-"الدعوات إلى وكيل واحد فقط). تم اختيار المرآات التي تغطي مضيفًا أو أكثر من %d "
-"مضيف."
+"الدعوات إلى وكيل واحد فقط). تم اختيار المرآات التي تغطي مضيفًا أو أكثر من %d"
+" مضيف."
 
 #: backend/api/airgap_collector_runs.py:535
 #, python-format
@@ -1607,8 +1608,8 @@ msgid ""
 "Created one-shot air-gap collection run '%(iso_label)s' with "
 "%(mirror_count)d target mirror(s); snapshots dispatched."
 msgstr ""
-"إنشاء عملية جمع فورية واحدة '(%(iso_label)s)' مع %(mirror_count)d هدف مرآة ؛ "
-"تم توزيع النسخ الاحتياطية."
+"إنشاء عملية جمع فورية واحدة '(%(iso_label)s)' مع %(mirror_count)d هدف مرآة ؛"
+" تم توزيع النسخ الاحتياطية."
 
 #: backend/api/airgap_collector_runs.py:658
 #, python-format
@@ -1620,8 +1621,8 @@ msgstr ""
 
 #: backend/api/airgap_collector_runs.py:668
 msgid ""
-"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
-"the collection to rebuild."
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
+" the collection to rebuild."
 msgstr ""
 "تم تنظيف مجلد التخزين المؤقت؛ يرجى إعادة تشغيل جمع البيانات لإعادة بناء ملف "
 "ISO."
@@ -1633,7 +1634,8 @@ msgstr "ملف ISO غير موجود."
 #: backend/api/airgap_collector_runs.py:705
 #, python-format
 msgid "Disc %(disc)d not found for this run.  Available discs: %(available)s"
-msgstr "القرص %(disc)d غير موجود لهذه العملية.  الأقراص المتاحة: %(available)s"
+msgstr ""
+"القرص %(disc)d غير موجود لهذه العملية.  الأقراص المتاحة: %(available)s"
 
 #: backend/api/airgap_collector_runs.py:790
 msgid "Invalid or expired download token."
@@ -1660,11 +1662,11 @@ msgstr "لم يتم العثور على ملف تعريف الحزمة"
 
 #: backend/api/package_compliance.py:73
 msgid ""
-"Package compliance profiles require a SysManage Professional license. Please "
-"upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
 msgstr ""
-"تستلزم ملفات الحزم المطابقة ترخيص SysManage Pro. يرجى الترقية للوصول إلى هذه "
-"الميزة."
+"تستلزم ملفات الحزم المطابقة ترخيص SysManage Pro. يرجى الترقية للوصول إلى هذه"
+" الميزة."
 
 #: backend/api/package_compliance.py:200
 #, python-format
@@ -1700,7 +1702,8 @@ msgid ""
 "Dispatched compliance check to agent '%(host_fqdn)s' for profile "
 "'%(profile_name)s'"
 msgstr ""
-"تم إرسال فحص التوافق إلى وكيل '%(host_fqdn)s' للملف الشخصي '%(profile_name)s'"
+"تم إرسال فحص التوافق إلى وكيل '%(host_fqdn)s' للملف الشخصي "
+"'%(profile_name)s'"
 
 #: backend/api/file_watches.py:63
 msgid "Invalid watch ID format"
@@ -1946,8 +1949,8 @@ msgstr "تعذر حل سر مفتاح عميل OIDC."
 
 #: backend/api/external_idp.py:577 backend/api/external_idp.py:796
 msgid ""
-"No sysmanage account is linked to this IdP identity. Ask an administrator to "
-"provision your account first."
+"No sysmanage account is linked to this IdP identity. Ask an administrator to"
+" provision your account first."
 msgstr ""
 "لا يوجد حساب SysManage مرتبط بهذا الهوية IdP. اطلب من المسؤول توفير الحساب "
 "أولاً."
@@ -2116,8 +2119,8 @@ msgstr ""
 #: backend/api/opentelemetry/eligibility.py:111
 #: backend/api/opentelemetry/grafana_connection.py:88
 #: backend/api/opentelemetry/grafana_connection.py:231
-#: backend/api/packages_operations.py:97 backend/api/packages_operations.py:276
-#: backend/api/error_constants.py:119
+#: backend/api/packages_operations.py:97
+#: backend/api/packages_operations.py:276 backend/api/error_constants.py:119
 msgid "Host not found or not active"
 msgstr "المضيف غير موجود أو غير نشط"
 
@@ -2154,8 +2157,8 @@ msgstr "URL لـ Grafana غير متاحة"
 
 #: backend/api/opentelemetry/deployment.py:152
 msgid ""
-"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
-"on the server."
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
+" on the server."
 msgstr ""
 "يحتاج نشر OpenTelemetry إلى تحميل observability_engine Pro+ على الخادم."
 
@@ -2170,8 +2173,8 @@ msgstr "فشل في نشر OpenTelemetry: %s"
 
 #: backend/api/opentelemetry/deployment.py:264
 msgid ""
-"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
-"the server."
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
+" the server."
 msgstr ""
 "يحتاج إزالة OpenTelemetry إلى تحميل observability_engine Pro+ على الخادم."
 
@@ -2206,8 +2209,8 @@ msgid ""
 "OpenTelemetry service control requires the Pro+ observability_engine to be "
 "loaded on the server."
 msgstr ""
-"يحتاج التحكم في خدمة OpenTelemetry إلى تحميلobservability_engine من نوع Pro+ "
-"على الخادم."
+"يحتاج التحكم في خدمة OpenTelemetry إلى تحميلobservability_engine من نوع Pro+"
+" على الخادم."
 
 #: backend/api/opentelemetry/service_control.py:81
 msgid "Permission denied: START_OPENTELEMETRY_SERVICE role required"
@@ -2286,8 +2289,8 @@ msgstr "فشل في فصل OpenTelemetry عن Grafana: %s"
 
 #: backend/api/content_lifecycle.py:64
 msgid ""
-"Content lifecycle management requires a SysManage Professional+ (Enterprise) "
-"license. Please upgrade to access this feature."
+"Content lifecycle management requires a SysManage Professional+ (Enterprise)"
+" license. Please upgrade to access this feature."
 msgstr ""
 "تطلب إدارة دورة حياة المحتوى ترخيص SysManage Professional+ (Enterprise). "
 "يرجى الترقية للاستفادة من هذه الوظيفة."
@@ -2383,7 +2386,8 @@ msgstr "المرآة '%s' ليس لها مستضيئ م_assigned"
 
 #: backend/api/content_lifecycle.py:684 backend/api/content_lifecycle.py:726
 msgid "All mirrors in a content view must share one host in this release"
-msgstr "جميع المرآت في رؤية المحتوى يجب أن تشارك في مستضيئ واحد في هذه الإصدار"
+msgstr ""
+"جميع المرآت في رؤية المحتوى يجب أن تشارك في مستضيئ واحد في هذه الإصدار"
 
 #: backend/api/content_lifecycle.py:697
 #, python-format
@@ -2508,7 +2512,8 @@ msgstr "لện إعادة تشغيل جدار الحماية تم إرساله �
 msgid "Firewall deploy command sent successfully"
 msgstr " lệnh إرسال تثبيت جدار الحماية تم بنجاح"
 
-#: backend/api/default_repositories.py:273 backend/api/antivirus_defaults.py:66
+#: backend/api/default_repositories.py:273
+#: backend/api/antivirus_defaults.py:66
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "اسم النظام التشغیعي مطلوب"
@@ -2630,7 +2635,8 @@ msgstr "المضيف الذي يحمل رمزًا غير مسجل. الرجاء 
 msgid "Agent authentication failed: invalid host ID"
 msgstr "فشل التحقق من هوية وكيل: معرف المستضِغف غير صحيح"
 
-#: backend/api/message_handlers_core.py:98 backend/utils/host_validation.py:104
+#: backend/api/message_handlers_core.py:98
+#: backend/utils/host_validation.py:104
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "المضيف الذي يحمل رقم %s لم يتم التسجيل. الرجاء إعادة التسجيل."
@@ -2647,19 +2653,19 @@ msgstr ""
 "لم يثبت هذا الوكيل أنه هذا المضيف. إذا تمت إعادة تثبيت المضيف، فأزله من "
 "SysManage ووافق على تسجيله الجديد."
 
-#: backend/api/message_handlers_core.py:294 backend/api/agent.py:809
+#: backend/api/message_handlers_core.py:299 backend/api/agent.py:809
 msgid "Host registration pending approval"
 msgstr "تمت الموافقة على تسجيل المضيف وانتظار التحقق منها"
 
-#: backend/api/message_handlers_core.py:408
+#: backend/api/message_handlers_core.py:413
 msgid "Host auto-approved via child host creation"
 msgstr "تم الموافقة تلقائيًا عند إنشاء مضيف فرعي"
 
-#: backend/api/message_handlers_core.py:527
+#: backend/api/message_handlers_core.py:537
 msgid "Agent registered and connected successfully"
 msgstr "تم تسجيل وكيل وإحالته بنجاح"
 
-#: backend/api/message_handlers_core.py:885
+#: backend/api/message_handlers_core.py:904
 msgid "Failed to process heartbeat"
 msgstr "فشل في معالجة النبضة القلبية"
 
@@ -2679,7 +2685,8 @@ msgid "Target '%(t)s' is not valid for %(f)s"
 msgstr "الوجهة '%(t)s' غير صالحة لـ %(f)s"
 
 #: backend/api/logging_settings.py:134
-msgid "Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
+msgid ""
+"Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
 msgstr "يتطلب تحويل syslog البعيد ترخيصًا محترفًا (LOG_ROUTING)."
 
 #: backend/api/logging_settings.py:141
@@ -2987,8 +2994,8 @@ msgstr "لا يستطيع وكيل هذا المضيف تثبيت restate بعد
 
 #: backend/api/backups_equip.py:68
 msgid ""
-"restate has no package the agent can install on this operating system; build "
-"and install it by hand (see restate's README)"
+"restate has no package the agent can install on this operating system; build"
+" and install it by hand (see restate's README)"
 msgstr ""
 "لا توجد حزمة restate يستطيع الوكيل تثبيتها على نظام التشغيل هذا؛ ابنِها "
 "وثبّتها يدويًا (راجع ملف README الخاص بـ restate)"
@@ -3254,7 +3261,8 @@ msgstr ""
 "ملح كلمة المرور يستخدم القيمة الافتراضية ولكن تم تغيير سر JWT. تشغيل: "
 "{command}"
 
-#: backend/api/ubuntu_pro_settings.py:76 backend/api/ubuntu_pro_settings.py:318
+#: backend/api/ubuntu_pro_settings.py:76
+#: backend/api/ubuntu_pro_settings.py:318
 msgid "Ubuntu Pro key must start with 'C' for contract-based keys"
 msgstr "يجب أن يبدأ مفتاح Ubuntu Pro بـ 'C' للمفاتيح القائمة على العقود"
 
@@ -3354,17 +3362,18 @@ msgstr " رفض الوصول: يتطلب دور DELETE_HOST"
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "تم رفض الإذن: يتطلب دور `VIEW_HOST_DETAILS`"
 
-#: backend/api/host.py:678
+#: backend/api/host.py:687
 msgid "Host already exists"
 msgstr "المضيف موجود بالفعل"
 
-#: backend/api/host.py:790
+#: backend/api/host.py:799
 msgid "Registration absorbed: host was recently deleted"
 msgstr "التسجيل تم امتصاصه: كان المضيف قد حُذف مؤخرا"
 
-#: backend/api/host.py:870
+#: backend/api/host.py:879
 #, python-format
-msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
+msgid ""
+"Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "تم تسجيل مستضياف '%(fqdn)s' في المستأجر %(tenant_id)s عبر رمز التسجيل"
 
 #: backend/api/agent_poll.py:119
@@ -3514,7 +3523,8 @@ msgstr "لم يتم تحديد حزم للاستعراض"
 
 #: backend/api/packages_operations.py:179
 #, python-format
-msgid "Queued installation of %(package_count)d packages on host %(host_fqdn)s"
+msgid ""
+"Queued installation of %(package_count)d packages on host %(host_fqdn)s"
 msgstr "تثبيت موقوف لـ %(package_count)d حزم على المستضيء %(host_fqdn)s"
 
 #: backend/api/packages_operations.py:199
@@ -3653,8 +3663,8 @@ msgstr "الحساب مقفل بسبب محاولات تسجيل دخول فاش
 
 #: backend/api/auth.py:391
 msgid ""
-"Multi-factor authentication is required for this account. Please enroll from "
-"your profile page before signing in."
+"Multi-factor authentication is required for this account. Please enroll from"
+" your profile page before signing in."
 msgstr ""
 "تتطلب عملية تسجيل الدخول إلى هذا الحساب المصادقة متعددة العوامل. يرجى "
 "التسجيل من صفحة ملفك الشخصي قبل تسجيل الدخول."
@@ -3723,8 +3733,10 @@ msgstr "لا توجد ترقيات نظام التشغيل متاحة لهذا �
 
 #: backend/api/updates/os_upgrade_routes.py:352
 #, python-format
-msgid "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
-msgstr "بدء تحديث نظام التشغيل على مستضياف %(fqdn)s مع %(upgrade_count)d تحديث"
+msgid ""
+"Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
+msgstr ""
+"بدء تحديث نظام التشغيل على مستضياف %(fqdn)s مع %(upgrade_count)d تحديث"
 
 #: backend/api/updates/os_upgrade_routes.py:383
 msgid "OS upgrade command queued for host"
@@ -3802,7 +3814,8 @@ msgstr "نوع غير معروف: %(kind)s (مسموح به: %(allowed)s)"
 #: backend/api/dynamic_secrets.py:153
 #, python-format
 msgid ""
-"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, ttl=%(ttl)ds)"
+"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
+"ttl=%(ttl)ds)"
 msgstr ""
 "أرسلت سرية ديناميكية '%(name)s' (نوع=%(kind)s, الدور=%(role)s, فترة "
 "الصلاحية=%(ttl)ds)"
@@ -3868,7 +3881,8 @@ msgstr "تم طلب تهيئة VMM"
 
 #: backend/api/child_host_virtualization_enable.py:306
 msgid ""
-"VMM initialization requested. The agent will enable and start the vmd daemon."
+"VMM initialization requested. The agent will enable and start the vmd "
+"daemon."
 msgstr "تم طلب تهيئة VMM. سيقوم الوكيل بتمكين وبدء عفريت vmd."
 
 #: backend/api/child_host_virtualization_enable.py:348
@@ -3902,8 +3916,8 @@ msgstr "طلب تمهيد bhyve"
 
 #: backend/api/child_host_virtualization_enable.py:433
 msgid ""
-"bhyve initialization requested. The agent will load vmm.ko and configure the "
-"system for bhyve virtual machines."
+"bhyve initialization requested. The agent will load vmm.ko and configure the"
+" system for bhyve virtual machines."
 msgstr ""
 "طلب تمهيد bhyve. سيفك حمل vmm.ko وت congigure النظام لدعم ماكنات bhyve "
 "الافتراضية."
@@ -3934,8 +3948,8 @@ msgstr "طلب تمكين الوحدات النمطية لـ KVM"
 
 #: backend/api/child_host_virtualization_enable.py:558
 msgid ""
-"KVM modules enable requested. The agent will load the KVM kernel modules via "
-"modprobe."
+"KVM modules enable requested. The agent will load the KVM kernel modules via"
+" modprobe."
 msgstr ""
 "طلب تمكين الوحدات النمطية لـ KVM. سيعمل الوكيل على تحميل الوحدات النمطية لـ "
 "KVM باستخدام modprobe."
@@ -4066,11 +4080,11 @@ msgstr "دليل اللقطات"
 #: backend/api/backups.py:242
 #, python-format
 msgid ""
-"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no "
-"trailing '/')"
+"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
+" trailing '/')"
 msgstr ""
-"يجب أن يكون %s مسارًا مطلقًا بسيطًا (حروف وأرقام و'_' و'.' و'-' و'/'؛ بدون '/' "
-"في النهاية)"
+"يجب أن يكون %s مسارًا مطلقًا بسيطًا (حروف وأرقام و'_' و'.' و'-' و'/'؛ بدون "
+"'/' في النهاية)"
 
 #: backend/api/backups.py:250
 msgid "The snapshot directory must be outside the storage path"
@@ -4105,10 +4119,10 @@ msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
 msgstr ""
-"كل قاعدة مسار هي سطر يحتوي على ما يصل إلى 512 حرف، بدون فراغات في البداية أو "
-"النهاية أو علامة # في البداية"
+"كل قاعدة مسار هي سطر يحتوي على ما يصل إلى 512 حرف، بدون فراغات في البداية أو"
+" النهاية أو علامة # في البداية"
 
-#: backend/api/backups.py:293 backend/api/backups_browse.py:92
+#: backend/api/backups.py:293 backend/api/backups_browse.py:93
 msgid "The snapshot name is not valid"
 msgstr "اسم اللقطة غير صالح"
 
@@ -4156,53 +4170,53 @@ msgstr "أزل سياسات النسخ الاحتياطي للمضيفات قب�
 msgid "No backup policy"
 msgstr "لا توجد سياسة نسخ احتياطي"
 
-#: backend/api/backups.py:632
+#: backend/api/backups.py:636
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "لا يستطيع هذا المضيف تشغيل النسخ الاحتياطي بعد (%s)"
 
-#: backend/api/backups.py:638
+#: backend/api/backups.py:642
 msgid "This host's backup is not configured yet"
 msgstr "لم تتم تهيئة النسخ الاحتياطي لهذا المضيف بعد"
 
-#: backend/api/backups.py:655
+#: backend/api/backups.py:659
 msgid "The backup storage host is not ready"
 msgstr "مضيف تخزين النسخ الاحتياطية غير جاهز"
 
-#: backend/api/backups.py:670
+#: backend/api/backups.py:674
 msgid "Unknown backup action"
 msgstr "إجراء نسخ احتياطي غير معروف"
 
-#: backend/api/backups.py:680
+#: backend/api/backups.py:687
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr "لا يمكن إعادة حزم مستودع مشفّر على مضيف التخزين"
 
-#: backend/api/backups.py:684
+#: backend/api/backups.py:691
 msgid "That backup job is already queued or running"
 msgstr "مهمة النسخ الاحتياطي هذه في قائمة الانتظار أو قيد التشغيل بالفعل"
 
-#: backend/api/backups.py:778 backend/api/backups_browse.py:77
+#: backend/api/backups.py:787 backend/api/backups_browse.py:78
 msgid "Snapshot not found"
 msgstr "لم يتم العثور على اللقطة"
 
-#: backend/api/backups.py:783
+#: backend/api/backups.py:794
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "هذه اللقطة غير موقّعة؛ أكّد لاستعادتها على أي حال"
 
-#: backend/api/backups.py:834 backend/services/backup_key_release.py:112
+#: backend/api/backups.py:845 backend/services/backup_key_release.py:112
 msgid "Encrypted backups need the Professional+ backup engine"
 msgstr ""
 "تحتاج النسخ الاحتياطية المشفّرة إلى محرك النسخ الاحتياطي في Professional+"
 
-#: backend/api/backups.py:839 backend/api/backups_browse.py:62
+#: backend/api/backups.py:850 backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "لا يستطيع restate على هذا المضيف فعل ذلك بعد؛ حدّث restate"
 
-#: backend/api/backups.py:851
+#: backend/api/backups.py:862
 msgid "This snapshot's repository is no longer kept"
 msgstr "لم يعد مستودع هذه اللقطة محفوظًا"
 
-#: backend/api/backups.py:933 backend/api/backups.py:936
+#: backend/api/backups.py:944 backend/api/backups.py:947
 msgid "Backup run not found"
 msgstr "لم يتم العثور على مهمة النسخ الاحتياطي"
 
@@ -4300,8 +4314,8 @@ msgid ""
 "Secrets deployment requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr ""
-"يتطلب نشر الأسرار ترخيص SysManage Professional+. يرجى الترقية للوصول إلى هذه "
-"الميزة."
+"يتطلب نشر الأسرار ترخيص SysManage Professional+. يرجى الترقية للوصول إلى هذه"
+" الميزة."
 
 #: backend/api/secrets/deployment.py:56
 msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
@@ -4343,10 +4357,11 @@ msgstr ""
 "للوصول إلى هذه الميزة."
 
 #: backend/api/reboot_orchestration.py:135
-msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgid ""
+"No running child hosts found. Use the standard reboot endpoint instead."
 msgstr ""
-"لم يتم العثور على مضيفين فرعيين قيد التشغيل. استخدم نقطة نهاية إعادة التشغيل "
-"القياسية بدلاً من ذلك."
+"لم يتم العثور على مضيفين فرعيين قيد التشغيل. استخدم نقطة نهاية إعادة التشغيل"
+" القياسية بدلاً من ذلك."
 
 #: backend/api/reboot_orchestration.py:204
 #, python-format
@@ -4363,8 +4378,8 @@ msgstr "لم يتم العثور على ملف التعديل"
 
 #: backend/api/upgrade_profiles.py:74
 msgid ""
-"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
-"upgrade to access this feature."
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
+" upgrade to access this feature."
 msgstr ""
 "تتطلب ملفات تعريف الترقية المجدولة ترخيص SysManage Professional+. يرجى "
 "الترقية للوصول إلى هذه الميزة."
@@ -4607,7 +4622,8 @@ msgstr "تم بدء نشر برنامج مكافحة الفيروسات لجمي
 #: backend/api/antivirus_status.py:346
 #, python-format
 msgid ""
-"Antivirus deployment initiated for %(success_count)d of %(total_count)d hosts"
+"Antivirus deployment initiated for %(success_count)d of %(total_count)d "
+"hosts"
 msgstr ""
 "تم بدء نشر برنامج مكافحة الفيروسات لـ %(success_count)d من %(total_count)d "
 "المستضياف"
@@ -4973,16 +4989,16 @@ msgid ""
 "Snap store proxy requires a SysManage Professional+ license. Please upgrade "
 "to access this feature."
 msgstr ""
-"يتطلب مستودع العروض ترخيص SysManage Professional+. يرجى الترقية لاستخدام هذه "
-"الميزة."
+"يتطلب مستودع العروض ترخيص SysManage Professional+. يرجى الترقية لاستخدام هذه"
+" الميزة."
 
 #: backend/api/repository_mirroring_helpers.py:78
 msgid ""
 "Container image registry proxy requires a SysManage Professional+ license. "
 "Please upgrade to access this feature."
 msgstr ""
-"تتطلب واجهة مستودع الصور للحاويات ترخيص SysManage مهني أو أعلى. يرجى الترقية "
-"للاستفادة من هذه الميزة."
+"تتطلب واجهة مستودع الصور للحاويات ترخيص SysManage مهني أو أعلى. يرجى الترقية"
+" للاستفادة من هذه الميزة."
 
 #: backend/api/repository_mirroring_setup.py:197
 #: backend/api/repository_mirroring_setup.py:259
@@ -5143,7 +5159,8 @@ msgstr " رفض الوصول: يتطلب دور ADD_ENABLED_PACKAGE_MANAGER"
 #: backend/api/enabled_package_managers.py:307
 #, python-format
 msgid ""
-"Package manager '%(package_manager)s' is already enabled for OS '%(os_name)s'"
+"Package manager '%(package_manager)s' is already enabled for OS "
+"'%(os_name)s'"
 msgstr ""
 "'مدير الحزم '%(package_manager)s' تم تمكينه بالفعل لنظام التشغيل "
 "'%(os_name)s'"
@@ -5196,66 +5213,73 @@ msgstr "يجب توفير saved_script_id أو script_content"
 msgid "shell_type is required for ad-hoc scripts"
 msgstr "จำเป็นต้องมี shell_type สำหรับสคริปต์แบบชั่วคราว"
 
-#: backend/api/scripts/routes_executions.py:93
+#: backend/api/scripts/routes_executions.py:82
+msgid ""
+"This host requires approval for scripts; run it from a saved script with "
+"approval."
+msgstr ""
+"يتطلب هذا المضيف الموافقة على السكربتات؛ شغّله من سكربت محفوظ مع الموافقة."
+
+#: backend/api/scripts/routes_executions.py:104
 msgid "Saved script not found"
 msgstr "المسcript المحفوظ غير موجود"
 
-#: backend/api/scripts/routes_executions.py:98
+#: backend/api/scripts/routes_executions.py:109
 msgid "Script is not active"
 msgstr "لا يزال السكربت غير نشط"
 
-#: backend/api/scripts/routes_executions.py:178
+#: backend/api/scripts/routes_executions.py:189
 #, python-brace-format
 msgid "Executed script '{script_name}' on host '{host_fqdn}'"
 msgstr "تنفيذ النص '{script_name}' على النظام المستضافة (host) '{host_fqdn}'"
 
-#: backend/api/scripts/routes_executions.py:200
+#: backend/api/scripts/routes_executions.py:211
 msgid "Failed to queue script execution: {}"
 msgstr "فشل في ترتيب تنفيذ النص في قائمة الانتظار: {}"
 
-#: backend/api/scripts/routes_executions.py:210
+#: backend/api/scripts/routes_executions.py:221
 msgid "Failed to queue script execution"
 msgstr "فشل في ترتيب تنفيذ النص في قائمة الانتظار"
 
-#: backend/api/scripts/routes_executions.py:223
+#: backend/api/scripts/routes_executions.py:234
 msgid "Script execution queued for delivery"
 msgstr "تم ترحيل تنفيذ السكربت للتسليم"
 
-#: backend/api/scripts/routes_executions.py:231
+#: backend/api/scripts/routes_executions.py:242
 msgid "Failed to execute script"
 msgstr "فشل في تنفيذ السكريبت"
 
-#: backend/api/scripts/routes_executions.py:315
+#: backend/api/scripts/routes_executions.py:326
 msgid "Failed to fetch script executions"
 msgstr "فشل في استلام تنفيذات السكريبت"
 
-#: backend/api/scripts/routes_executions.py:336
-#: backend/api/scripts/routes_executions.py:406
+#: backend/api/scripts/routes_executions.py:347
+#: backend/api/scripts/routes_executions.py:417
 msgid "Permission denied: DELETE_SCRIPT_EXECUTION role required"
 msgstr " رفض الوصول: يتطلب دور DELETE_SCRIPT_EXECUTION"
 
-#: backend/api/scripts/routes_executions.py:348
-#: backend/api/scripts/routes_executions.py:475
+#: backend/api/scripts/routes_executions.py:359
+#: backend/api/scripts/routes_executions.py:486
 msgid "Script execution not found"
 msgstr "لم يتم العثور على تنفيذ السكربت"
 
-#: backend/api/scripts/routes_executions.py:376
+#: backend/api/scripts/routes_executions.py:387
 msgid "Script execution deleted successfully"
 msgstr "تم حذف تنفيذ سكربت بنجاح"
 
-#: backend/api/scripts/routes_executions.py:385
+#: backend/api/scripts/routes_executions.py:396
 msgid "Failed to delete script execution"
 msgstr "فشل في حذف تنفيذ السكريبت"
 
-#: backend/api/scripts/routes_executions.py:446
+#: backend/api/scripts/routes_executions.py:457
 msgid "Script executions deleted successfully"
 msgstr "تم حذف تنفيذات السكربت بنجاح"
 
-#: backend/api/scripts/routes_executions.py:453
+#: backend/api/scripts/routes_executions.py:464
 msgid "Failed to delete script executions"
 msgstr "فشل في حذف تنفيذات السكريبت"
 
-#: backend/api/scripts/routes_executions.py:510
+#: backend/api/scripts/routes_executions.py:521
 msgid "Failed to fetch script execution"
 msgstr "فشل في استلام تنفيذ السكريبت"
 
@@ -5332,23 +5356,23 @@ msgid ""
 "once it has reported in"
 msgstr ""
 "لا يستطيع restate على مضيف التخزين الاحتفاظ باللقطات السنوية بعد: حدِّث "
-"restate هناك إلى 2.2.0.12 أو أحدث، ثم احفظ السياسة بدون سنوات وحدِّدها بعد أن "
-"يُبلغ عن حالته"
+"restate هناك إلى 2.2.0.12 أو أحدث، ثم احفظ السياسة بدون سنوات وحدِّدها بعد "
+"أن يُبلغ عن حالته"
 
 #: backend/api/machines.py:170
 #, python-format
 msgid "Machine link decided for host %s"
 msgstr "تم تحديد رابط الآلة للمضيف %s"
 
-#: backend/api/backups_browse.py:94
+#: backend/api/backups_browse.py:95
 msgid "The path must be absolute"
 msgstr "يجب أن يكون المسار مطلقًا"
 
-#: backend/api/backups_browse.py:126
+#: backend/api/backups_browse.py:129
 msgid "What changed compares with the current repository only"
 msgstr "لا يقارن ما الذي تغيّر إلا بالمستودع الحالي"
 
-#: backend/api/backups_browse.py:132
+#: backend/api/backups_browse.py:135
 msgid "A check of what changed is already running"
 msgstr "يجري بالفعل التحقق مما تغيّر"
 
@@ -5613,7 +5637,8 @@ msgstr ""
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
 "%(error)s"
-msgstr "رسالة %(message_id)s فشلت بشكل دائم بعد %(attempts)d محاولة: %(error)s"
+msgstr ""
+"رسالة %(message_id)s فشلت بشكل دائم بعد %(attempts)d محاولة: %(error)s"
 
 #: backend/websocket/queue_operations.py:916
 #, python-format
@@ -5919,7 +5944,8 @@ msgstr " định dạng bí mật không hợp lệ"
 
 #: backend/vulnerability/cve_sources.py:23
 msgid "Primary CVE data source from NIST (includes Apple/macOS CVEs)"
-msgstr "مصدر بيانات CVE الأساسي من NIST (يشمل ثغرات CVE الخاصة بـ Apple/macOS)"
+msgstr ""
+"مصدر بيانات CVE الأساسي من NIST (يشمل ثغرات CVE الخاصة بـ Apple/macOS)"
 
 #: backend/vulnerability/cve_sources.py:30
 msgid "Ubuntu-specific vulnerability data with package fixes"
@@ -5978,8 +6004,8 @@ msgstr ""
 #~ msgstr "خدمة البريد الإلكتروني معطلة. قم بتمكينها في ملف التكوين."
 
 #~ msgid ""
-#~ "Multi-factor authentication is required for this account. Please enrol "
-#~ "from your profile page before signing in."
+#~ "Multi-factor authentication is required for this account. Please enrol from "
+#~ "your profile page before signing in."
 #~ msgstr ""
 #~ "يجب استخدام التحقق المتعدد العوامل لهذا الحساب. يرجى تسجيل الدخول من صفحة "
 #~ "الملف الشخصي الخاصة بك."
@@ -6143,8 +6169,8 @@ msgstr ""
 
 #, python-format
 #~ msgid ""
-#~ "Host %s not found on this database; deferring %d queued message(s) for "
-#~ "retry (NOT deleting) -- may be an in-flight enrollment or a deleted host"
+#~ "Host %s not found on this database; deferring %d queued message(s) for retry"
+#~ " (NOT deleting) -- may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
 #~ "المضيف %s غير موجود في هذه قاعدة البيانات؛ سيتم تأجيل إعادة إرسال الرسائل "
 #~ "المتبقية (%d) -- قد يكون هناك تسجيل جديد أو مضيف محذوف"
@@ -6380,8 +6406,8 @@ msgstr ""
 #~ msgstr "تأكيد ترقية نظام التشغيل"
 
 #~ msgid ""
-#~ "This action will upgrade the operating system and require a system "
-#~ "reboot. Continue?"
+#~ "This action will upgrade the operating system and require a system reboot. "
+#~ "Continue?"
 #~ msgstr "هذا الإجراء سيرقي نظام التشغيل ويتطلب إعادة تشغيل النظام. متابعة؟"
 
 #~ msgid "OS upgrades are always security updates"
@@ -6496,11 +6522,11 @@ msgstr ""
 #~ msgstr "تم تهيئة KVM/libvirt بنجاح"
 
 #~ msgid ""
-#~ "Audit log export requires a SysManage Professional+ license. Please "
-#~ "upgrade to access CSV, JSON, CEF, and LEEF export formats."
+#~ "Audit log export requires a SysManage Professional+ license. Please upgrade "
+#~ "to access CSV, JSON, CEF, and LEEF export formats."
 #~ msgstr ""
-#~ "يتطلب تصدير سجل التدقيق ترخيص SysManage Professional+. يرجى الترقية "
-#~ "للوصول إلى تنسيقات التصدير CSV وJSON وCEF وLEEF."
+#~ "يتطلب تصدير سجل التدقيق ترخيص SysManage Professional+. يرجى الترقية للوصول "
+#~ "إلى تنسيقات التصدير CSV وJSON وCEF وLEEF."
 
 # Pro+ redirect messages
 #~ msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"

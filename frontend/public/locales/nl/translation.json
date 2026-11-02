@@ -1926,7 +1926,9 @@
     "reenrollDone": "Referenties gewist. Keur de host opnieuw goed zodra de agent weer verbinding maakt.",
     "reenrollFailed": "Opnieuw registreren van de host mislukt",
     "heldCount": "Vastgehouden: {{count}}",
-    "heldTitle": "Er wachten opdrachten op een onderhoudsvenster"
+    "heldTitle": "Er wachten opdrachten op een onderhoudsvenster",
+    "scriptsNeedApproval": "Scripts vereisen goedkeuring",
+    "scriptsNeedApprovalTooltip": "De agent van deze host voert alleen scripts uit die via de goedkeuringsworkflow (Professional+) zijn goedgekeurd. Eenmalige scripts worden geweigerd."
   },
   "idp": {
     "action": {
@@ -5366,7 +5368,8 @@
       "preview": "Volgende opschoning bekijken",
       "previewError": "Het voorbeeld kon niet worden gemaakt.",
       "previewMore": "en nog {{n}}",
-      "previewResult": "Volgende opschoning: {{kept}} bewaard, {{removed}} verwijderd."
+      "previewResult": "Volgende opschoning: {{kept}} bewaard, {{removed}} verwijderd.",
+      "windowLocal": "In uw tijdzone: {{start}} tot {{end}}."
     },
     "reason": {
       "agentOutdated": "Werk de agent bij",

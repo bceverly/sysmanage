@@ -218,7 +218,12 @@ async def _handle_system_info_impl(db: Session, connection, message_data: dict):
             sanitize_log(script_execution_enabled),
         )
         host = await update_or_create_host(
-            db, hostname, ipv4, ipv6, script_execution_enabled
+            db,
+            hostname,
+            ipv4,
+            ipv6,
+            script_execution_enabled,
+            script_approval_required=message_data.get("script_approval_required"),
         )
 
         # Check for auto-approve token and perform auto-approval if valid
@@ -429,6 +434,11 @@ def _build_system_info_update_values(message_data, connection, host, platform):
     is_privileged = message_data.get("is_privileged")
     if is_privileged is not None:
         update_values["is_agent_privileged"] = is_privileged
+
+    # The agent runs only approved scripts (script_approval_required)
+    approval_required = message_data.get("script_approval_required")
+    if approval_required is not None:
+        update_values["script_approval_required"] = bool(approval_required)
 
     # Update enabled shells if provided
     enabled_shells = message_data.get("enabled_shells")
@@ -652,6 +662,12 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                 if is_privileged is not None:
                     host.is_agent_privileged = is_privileged
 
+                # Unlike script_execution_enabled, the approval requirement is
+                # the agent's own restriction on itself: it follows the agent.
+                approval_required = message_data.get("script_approval_required")
+                if approval_required is not None:
+                    host.script_approval_required = bool(approval_required)
+
                 # NOTE: Script execution status should not be updated from heartbeats
                 # This prevents agent heartbeats from overwriting the server-configured setting
                 # Script execution capability should only be set during initial registration
@@ -826,6 +842,9 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                         last_access=last_access_value,
                         is_agent_privileged=is_privileged,
                         script_execution_enabled=script_execution_enabled,
+                        script_approval_required=bool(
+                            message_data.get("script_approval_required", False)
+                        ),
                         enabled_shells=enabled_shells_json,
                     )
                     # Phase 19: a host auto-created here would otherwise carry no

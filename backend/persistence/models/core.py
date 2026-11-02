@@ -214,6 +214,10 @@ class Host(Base):
 
     # Script execution permission
     script_execution_enabled = Column(Boolean, nullable=False, default=False)
+    # The agent runs only approved scripts (its require_approval setting).
+    script_approval_required = Column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
 
     # Available shells on the host (JSON)
     enabled_shells = Column(Text, nullable=True)

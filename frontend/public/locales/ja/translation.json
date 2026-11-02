@@ -1926,7 +1926,9 @@
     "reenrollDone": "資格情報を消去しました。エージェントが再接続したら、ホストを再承認してください。",
     "reenrollFailed": "ホストの再登録に失敗しました",
     "heldCount": "保留中: {{count}}",
-    "heldTitle": "コマンドがメンテナンスウィンドウを待っています"
+    "heldTitle": "コマンドがメンテナンスウィンドウを待っています",
+    "scriptsNeedApproval": "スクリプトには承認が必要",
+    "scriptsNeedApprovalTooltip": "このホストのエージェントは、承認ワークフロー（Professional+）で承認されたスクリプトのみを実行します。単発のスクリプトは拒否されます。"
   },
   "idp": {
     "action": {
@@ -5366,7 +5368,8 @@
       "preview": "次回の整理をプレビュー",
       "previewError": "プレビューを作成できませんでした。",
       "previewMore": "ほか {{n}} 件",
-      "previewResult": "次回の整理: {{kept}} 件保持、{{removed}} 件削除。"
+      "previewResult": "次回の整理: {{kept}} 件保持、{{removed}} 件削除。",
+      "windowLocal": "お使いのタイムゾーンでは {{start}} から {{end}} まで。"
     },
     "reason": {
       "agentOutdated": "エージェントをアップグレードしてください",

@@ -1926,7 +1926,9 @@
     "reenrollDone": "Credenziali cancellate. Approvare di nuovo l'host quando il suo agente si riconnette.",
     "reenrollFailed": "Impossibile registrare di nuovo l'host",
     "heldCount": "Trattenuti: {{count}}",
-    "heldTitle": "Ci sono comandi in attesa di una finestra di manutenzione"
+    "heldTitle": "Ci sono comandi in attesa di una finestra di manutenzione",
+    "scriptsNeedApproval": "Gli script richiedono approvazione",
+    "scriptsNeedApprovalTooltip": "L'agente di questo host esegue solo script approvati tramite il flusso di approvazione (Professional+). Gli script occasionali vengono rifiutati."
   },
   "idp": {
     "action": {
@@ -5366,7 +5368,8 @@
       "preview": "Anteprima della prossima pulizia",
       "previewError": "Impossibile creare l'anteprima.",
       "previewMore": "e altri {{n}}",
-      "previewResult": "Prossima pulizia: {{kept}} conservati, {{removed}} rimossi."
+      "previewResult": "Prossima pulizia: {{kept}} conservati, {{removed}} rimossi.",
+      "windowLocal": "Nel suo fuso orario: dalle {{start}} alle {{end}}."
     },
     "reason": {
       "agentOutdated": "Aggiorna l'agente",

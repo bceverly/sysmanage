@@ -503,9 +503,11 @@ async def update_or_create_host(  # NOSONAR
     ipv4: str = None,
     ipv6: str = None,
     script_execution_enabled: bool = False,
+    script_approval_required: Optional[bool] = None,
 ):
     """
-    Update existing host record or create a new one.
+    Update existing host record or create a new one.  ``script_approval_required``
+    is the agent's own setting; None (an older agent) leaves it as it is.
     """
     import logging
 
@@ -534,6 +536,8 @@ async def update_or_create_host(  # NOSONAR
         host.script_execution_enabled = script_execution_enabled
         # If agent can enable script execution, it's running in privileged mode
         host.is_agent_privileged = script_execution_enabled
+        if script_approval_required is not None:
+            host.script_approval_required = bool(script_approval_required)
         logger.info(
             "Set is_agent_privileged=%s, script_execution_enabled=%s",
             sanitize_log(script_execution_enabled),
@@ -570,6 +574,7 @@ async def update_or_create_host(  # NOSONAR
             approval_status="pending",  # New hosts need approval
             script_execution_enabled=script_execution_enabled,  # Set from agent message
             is_agent_privileged=script_execution_enabled,  # If agent can enable scripts, it's privileged
+            script_approval_required=bool(script_approval_required),
         )
         db_session.add(host)
 

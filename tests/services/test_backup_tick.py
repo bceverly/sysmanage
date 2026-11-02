@@ -148,6 +148,66 @@ def test_busy_and_failed_retry_sooner(session):
     assert tick.capture_due_at(session, s.policy) == NOW + timedelta(minutes=61)
 
 
+def _started(session, policy, host_id, start, minutes):
+    run = _finish(session, policy, host_id, "capture",
+                  at=start + timedelta(minutes=minutes))  # fmt: skip
+    run.queued_at = run.started_at = start
+    session.flush()
+    return run
+
+
+def test_a_daily_backup_with_a_window_starts_when_the_window_opens(session):
+    """No creep: a long backup does not push tomorrow's start later
+    (Bryan, 2026-11-02)."""
+    s = _setup(session)
+    s.policy.window_start_hour, s.policy.interval_hours = 5, 24
+    _started(session, s.policy, s.host.id, NOW.replace(hour=5, minute=10), 240)
+    assert tick.capture_due_at(session, s.policy) == (
+        NOW.replace(hour=5) + timedelta(days=1)
+    )
+
+
+def test_a_backup_started_late_in_its_window_still_waits_for_the_next(session):
+    s = _setup(session)
+    s.policy.window_start_hour, s.policy.interval_hours = 5, 24
+    _started(session, s.policy, s.host.id, NOW.replace(hour=13, minute=38), 2)
+    assert tick.capture_due_at(session, s.policy) == (
+        NOW.replace(hour=5) + timedelta(days=1)
+    )
+
+
+def test_every_other_day_skips_a_window(session):
+    s = _setup(session)
+    s.policy.window_start_hour, s.policy.interval_hours = 22, 48
+    _started(session, s.policy, s.host.id, NOW.replace(hour=22, minute=5), 30)
+    assert tick.capture_due_at(session, s.policy) == (
+        NOW.replace(hour=22) + timedelta(days=2)
+    )
+
+
+def test_the_host_spread_moves_the_opening(session):
+    s = _setup(session)
+    s.policy.window_start_hour, s.policy.interval_hours = 5, 24
+    _started(session, s.policy, s.host.id, NOW.replace(hour=5), 10)
+    with patch.object(tick, "host_offset", return_value=0.5):
+        assert tick.capture_due_at(session, s.policy) == (
+            NOW.replace(hour=5, minute=30) + timedelta(days=1)
+        )
+
+
+def test_short_intervals_and_no_window_still_count_from_the_finish(session):
+    s = _setup(session)
+    s.policy.window_start_hour, s.policy.interval_hours = 5, 4
+    run = _started(session, s.policy, s.host.id, NOW.replace(hour=5), 30)
+    assert tick.capture_due_at(session, s.policy) == run.finished_at + timedelta(
+        hours=4
+    )
+    s.policy.window_start_hour, s.policy.interval_hours = None, 24
+    assert tick.capture_due_at(session, s.policy) == run.finished_at + timedelta(
+        hours=24
+    )
+
+
 def test_the_window_is_honored_across_midnight():
     policy = models.BackupPolicy(window_start_hour=22)
     assert tick.in_window(policy, NOW.replace(hour=23))

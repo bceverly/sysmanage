@@ -73,6 +73,17 @@ async def execute_script(  # NOSONAR
             if not host.active:
                 raise HTTPException(status_code=400, detail=_("Host is not active"))
 
+            # The host's agent runs only approved scripts, and a one-off run
+            # has no approval: its agent would refuse it anyway.
+            if getattr(host, "script_approval_required", False):
+                raise HTTPException(
+                    status_code=400,
+                    detail=_(
+                        "This host requires approval for scripts; run it from a "
+                        "saved script with approval."
+                    ),
+                )
+
             # Prepare script execution data
             execution_id = str(uuid.uuid4())
             execution_uuid = str(uuid.uuid4())  # Separate UUID for agent tracking

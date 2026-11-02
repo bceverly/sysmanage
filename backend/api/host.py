@@ -315,6 +315,9 @@ async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
             "script_execution_enabled": getattr(
                 host, "script_execution_enabled", False
             ),
+            "script_approval_required": getattr(
+                host, "script_approval_required", False
+            ),
             "enabled_shells": getattr(host, "enabled_shells", None),
             # Include parent host ID for child host filtering
             "parent_host_id": (
@@ -407,6 +410,9 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
             ),
             "script_execution_enabled": getattr(
                 host, "script_execution_enabled", False
+            ),
+            "script_approval_required": getattr(
+                host, "script_approval_required", False
             ),
             "enabled_shells": getattr(host, "enabled_shells", None),
             # Include update counts
@@ -520,6 +526,9 @@ def _get_all_hosts_sync(tenant_id=None):
                 "agent_capabilities_limited": _limited_flag(host),
                 "script_execution_enabled": getattr(
                     host, "script_execution_enabled", False
+                ),
+                "script_approval_required": getattr(
+                    host, "script_approval_required", False
                 ),
                 "enabled_shells": getattr(host, "enabled_shells", None),
                 # Include parent host ID for child host filtering

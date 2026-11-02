@@ -30,6 +30,7 @@ import RetentionFields from './RetentionFields';
 import { useModuleLicensed } from '../../hooks/useModuleLicensed';
 import { VerificationField } from './VerificationStatus';
 import { NetworkMountsNote } from './NetworkMountsNote';
+import { localWindow } from './windowLocalTime';
 
 // Sane defaults for a NEW policy (Bryan, 2026-10-29).  Community has only
 // keep-last, so a month of daily backups; with the Pro+ engine,
@@ -98,7 +99,7 @@ const BackupPolicyDialog: React.FC<{
     onClose: () => void;
     onSaved: () => void;
 }> = ({ open, hostId, fqdn, policy, onClose, onSaved }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const gfsLicensed = useModuleLicensed('backup_engine');
     const initial = (): PolicyInput =>
         policy === null && gfsLicensed ? { ...DEFAULTS, ...GFS_DEFAULTS } : toInput(policy);
@@ -145,6 +146,12 @@ const BackupPolicyDialog: React.FC<{
         }
     };
 
+    const local = localWindow(form.window_start_hour, i18n.language);
+    const windowHelp = [
+        t('backups.policy.windowHelp', 'Backups start only in the six hours from this hour.'),
+        local ? t('backups.policy.windowLocal', 'In your time zone: {{start}} to {{end}}.', local) : '',
+    ].filter(Boolean).join(' ');
+
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
             <DialogTitle>{t('backups.policy.title', 'Backup policy for {{host}}', { host: fqdn })}</DialogTitle>
@@ -160,7 +167,7 @@ const BackupPolicyDialog: React.FC<{
                         onChange={e => set({ interval_hours: number(e.target.value) })} />
                     <TextField type="number" label={t('backups.policy.windowStart', 'Start hour (UTC, optional)')}
                         value={form.window_start_hour ?? ''} slotProps={{ htmlInput: { min: 0, max: 23 } }}
-                        helperText={t('backups.policy.windowHelp', 'Backups start only in the six hours from this hour.')}
+                        helperText={windowHelp}
                         onChange={e => set({ window_start_hour: e.target.value === '' ? null : Number(e.target.value) })} />
                     <TextField type="number" label={t('backups.policy.keepLast', 'Snapshots to keep')}
                         value={form.keep_last} slotProps={{ htmlInput: { min: 1, max: 1000 } }}

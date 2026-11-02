@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-10-30 07:48-0400\n"
+"POT-Creation-Date: 2026-11-02 09:14-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1276,7 +1276,7 @@ msgstr ""
 msgid "Failed to request Ubuntu Pro service disable: %s"
 msgstr ""
 
-#: backend/api/host_utils.py:695
+#: backend/api/host_utils.py:700
 msgid "Host limit reached for this tenant."
 msgstr ""
 
@@ -2567,19 +2567,19 @@ msgid ""
 "remove it from SysManage and approve its new registration."
 msgstr ""
 
-#: backend/api/message_handlers_core.py:294 backend/api/agent.py:809
+#: backend/api/message_handlers_core.py:299 backend/api/agent.py:809
 msgid "Host registration pending approval"
 msgstr ""
 
-#: backend/api/message_handlers_core.py:408
+#: backend/api/message_handlers_core.py:413
 msgid "Host auto-approved via child host creation"
 msgstr ""
 
-#: backend/api/message_handlers_core.py:527
+#: backend/api/message_handlers_core.py:537
 msgid "Agent registered and connected successfully"
 msgstr ""
 
-#: backend/api/message_handlers_core.py:885
+#: backend/api/message_handlers_core.py:904
 msgid "Failed to process heartbeat"
 msgstr ""
 
@@ -3250,15 +3250,15 @@ msgstr ""
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr ""
 
-#: backend/api/host.py:678
+#: backend/api/host.py:687
 msgid "Host already exists"
 msgstr ""
 
-#: backend/api/host.py:790
+#: backend/api/host.py:799
 msgid "Registration absorbed: host was recently deleted"
 msgstr ""
 
-#: backend/api/host.py:870
+#: backend/api/host.py:879
 #, python-format
 msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
@@ -3978,7 +3978,7 @@ msgid ""
 "trailing spaces or a leading #"
 msgstr ""
 
-#: backend/api/backups.py:293 backend/api/backups_browse.py:92
+#: backend/api/backups.py:293 backend/api/backups_browse.py:93
 msgid "The snapshot name is not valid"
 msgstr ""
 
@@ -4026,52 +4026,52 @@ msgstr ""
 msgid "No backup policy"
 msgstr ""
 
-#: backend/api/backups.py:632
+#: backend/api/backups.py:636
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr ""
 
-#: backend/api/backups.py:638
+#: backend/api/backups.py:642
 msgid "This host's backup is not configured yet"
 msgstr ""
 
-#: backend/api/backups.py:655
+#: backend/api/backups.py:659
 msgid "The backup storage host is not ready"
 msgstr ""
 
-#: backend/api/backups.py:670
+#: backend/api/backups.py:674
 msgid "Unknown backup action"
 msgstr ""
 
-#: backend/api/backups.py:680
+#: backend/api/backups.py:687
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr ""
 
-#: backend/api/backups.py:684
+#: backend/api/backups.py:691
 msgid "That backup job is already queued or running"
 msgstr ""
 
-#: backend/api/backups.py:778 backend/api/backups_browse.py:77
+#: backend/api/backups.py:787 backend/api/backups_browse.py:78
 msgid "Snapshot not found"
 msgstr ""
 
-#: backend/api/backups.py:783
+#: backend/api/backups.py:794
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr ""
 
-#: backend/api/backups.py:834 backend/services/backup_key_release.py:112
+#: backend/api/backups.py:845 backend/services/backup_key_release.py:112
 msgid "Encrypted backups need the Professional+ backup engine"
 msgstr ""
 
-#: backend/api/backups.py:839 backend/api/backups_browse.py:62
+#: backend/api/backups.py:850 backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr ""
 
-#: backend/api/backups.py:851
+#: backend/api/backups.py:862
 msgid "This snapshot's repository is no longer kept"
 msgstr ""
 
-#: backend/api/backups.py:933 backend/api/backups.py:936
+#: backend/api/backups.py:944 backend/api/backups.py:947
 msgid "Backup run not found"
 msgstr ""
 
@@ -5032,66 +5032,72 @@ msgstr ""
 msgid "shell_type is required for ad-hoc scripts"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:93
+#: backend/api/scripts/routes_executions.py:82
+msgid ""
+"This host requires approval for scripts; run it from a saved script with "
+"approval."
+msgstr ""
+
+#: backend/api/scripts/routes_executions.py:104
 msgid "Saved script not found"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:98
+#: backend/api/scripts/routes_executions.py:109
 msgid "Script is not active"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:178
+#: backend/api/scripts/routes_executions.py:189
 #, python-brace-format
 msgid "Executed script '{script_name}' on host '{host_fqdn}'"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:200
+#: backend/api/scripts/routes_executions.py:211
 msgid "Failed to queue script execution: {}"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:210
+#: backend/api/scripts/routes_executions.py:221
 msgid "Failed to queue script execution"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:223
+#: backend/api/scripts/routes_executions.py:234
 msgid "Script execution queued for delivery"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:231
+#: backend/api/scripts/routes_executions.py:242
 msgid "Failed to execute script"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:315
+#: backend/api/scripts/routes_executions.py:326
 msgid "Failed to fetch script executions"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:336
-#: backend/api/scripts/routes_executions.py:406
+#: backend/api/scripts/routes_executions.py:347
+#: backend/api/scripts/routes_executions.py:417
 msgid "Permission denied: DELETE_SCRIPT_EXECUTION role required"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:348
-#: backend/api/scripts/routes_executions.py:475
+#: backend/api/scripts/routes_executions.py:359
+#: backend/api/scripts/routes_executions.py:486
 msgid "Script execution not found"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:376
+#: backend/api/scripts/routes_executions.py:387
 msgid "Script execution deleted successfully"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:385
+#: backend/api/scripts/routes_executions.py:396
 msgid "Failed to delete script execution"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:446
+#: backend/api/scripts/routes_executions.py:457
 msgid "Script executions deleted successfully"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:453
+#: backend/api/scripts/routes_executions.py:464
 msgid "Failed to delete script executions"
 msgstr ""
 
-#: backend/api/scripts/routes_executions.py:510
+#: backend/api/scripts/routes_executions.py:521
 msgid "Failed to fetch script execution"
 msgstr ""
 
@@ -5170,15 +5176,15 @@ msgstr ""
 msgid "Machine link decided for host %s"
 msgstr ""
 
-#: backend/api/backups_browse.py:94
+#: backend/api/backups_browse.py:95
 msgid "The path must be absolute"
 msgstr ""
 
-#: backend/api/backups_browse.py:126
+#: backend/api/backups_browse.py:129
 msgid "What changed compares with the current repository only"
 msgstr ""
 
-#: backend/api/backups_browse.py:132
+#: backend/api/backups_browse.py:135
 msgid "A check of what changed is already running"
 msgstr ""
 

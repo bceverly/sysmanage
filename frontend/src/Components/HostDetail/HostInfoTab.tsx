@@ -31,6 +31,7 @@ import StopIcon from "@mui/icons-material/Stop";
 import { useTranslation } from "react-i18next";
 import MaintenanceWindowCard from "../MaintenanceWindowCard";
 import HostCapabilitiesCard from "./HostCapabilitiesCard";
+import ScriptApprovalChip from "./ScriptApprovalChip";
 import HostClockCard from "../TimeSync/HostClockCard";
 import { hasPermissionSync, SecurityRoles } from "../../Services/permissions";
 import { SysManageHost } from "../../Services/hosts";
@@ -466,6 +467,7 @@ const HostBasicInfoCard: React.FC<{
                 yesTooltip={t("hosts.scriptsEnabledTooltip")}
                 noTooltip={t("hosts.scriptsDisabledTooltip")}
               />
+              <ScriptApprovalChip required={host.script_approval_required} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography variant="body2" color="textSecondary">

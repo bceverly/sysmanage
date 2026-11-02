@@ -176,8 +176,23 @@ def capture_due_at(db: Session, policy: models.BackupPolicy) -> Optional[datetim
     if last.status not in jobs.GOOD_CAPTURE:
         return ended + FAILED_RETRY
     good = jobs.latest_run(db, policy.id, "capture", statuses=jobs.GOOD_CAPTURE)
-    base = good.finished_at or good.queued_at
-    return base + timedelta(hours=policy.interval_hours) + spread(policy)
+    if policy.window_start_hour is None or policy.interval_hours < WINDOW_HOURS:
+        base = good.finished_at or good.queued_at
+        return base + timedelta(hours=policy.interval_hours) + spread(policy)
+    # With a window, the next one starts when a window OPENS: timed from
+    # when the last one finished, each start came later by the backup's
+    # length, until a "while I sleep" window began running into the working
+    # day (Bryan, 2026-11-02).  So it is timed from the window the last one
+    # belonged to (the latest start hour at or before it): a day's interval
+    # is once per window, always near its start, even after a backup that
+    # ran late or by hand; two days, every other window.
+    started = good.started_at or good.queued_at
+    opened = started.replace(
+        hour=policy.window_start_hour, minute=0, second=0, microsecond=0
+    )
+    if opened > started:
+        opened -= timedelta(days=1)
+    return opened + timedelta(hours=policy.interval_hours) + spread(policy)
 
 
 def running_captures(db: Session, target_id) -> int:

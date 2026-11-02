@@ -1926,7 +1926,9 @@
     "reenrollDone": "Credencial apagada. Aprove o host novamente quando o agente se reconectar.",
     "reenrollFailed": "Falha ao registrar o host novamente",
     "heldCount": "Retidos: {{count}}",
-    "heldTitle": "Há comandos aguardando uma janela de manutenção"
+    "heldTitle": "Há comandos aguardando uma janela de manutenção",
+    "scriptsNeedApproval": "Scripts exigem aprovação",
+    "scriptsNeedApprovalTooltip": "O agente deste host executa apenas scripts aprovados pelo fluxo de aprovação (Professional+). Scripts avulsos são recusados."
   },
   "idp": {
     "action": {
@@ -5366,7 +5368,8 @@
       "preview": "Prévia da próxima limpeza",
       "previewError": "Não foi possível gerar a prévia.",
       "previewMore": "e mais {{n}}",
-      "previewResult": "Próxima limpeza: {{kept}} mantidos, {{removed}} removidos."
+      "previewResult": "Próxima limpeza: {{kept}} mantidos, {{removed}} removidos.",
+      "windowLocal": "Em seu fuso horário: {{start}} a {{end}}."
     },
     "reason": {
       "agentOutdated": "Atualize o agente",

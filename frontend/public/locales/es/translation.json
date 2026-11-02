@@ -1926,7 +1926,9 @@
     "reenrollDone": "Credencial borrada. Vuelva a aprobar el host cuando su agente se reconecte.",
     "reenrollFailed": "Error al reinscribir el host",
     "heldCount": "Retenidos: {{count}}",
-    "heldTitle": "Hay comandos esperando una ventana de mantenimiento"
+    "heldTitle": "Hay comandos esperando una ventana de mantenimiento",
+    "scriptsNeedApproval": "Los scripts requieren aprobación",
+    "scriptsNeedApprovalTooltip": "El agente de este host solo ejecuta scripts aprobados mediante el flujo de aprobación (Professional+). Los scripts puntuales se rechazan."
   },
   "idp": {
     "action": {
@@ -5366,7 +5368,8 @@
       "preview": "Vista previa de la próxima depuración",
       "previewError": "No se pudo generar la vista previa.",
       "previewMore": "y {{n}} más",
-      "previewResult": "Próxima depuración: {{kept}} conservadas, {{removed}} eliminadas."
+      "previewResult": "Próxima depuración: {{kept}} conservadas, {{removed}} eliminadas.",
+      "windowLocal": "En su zona horaria: de {{start}} a {{end}}."
     },
     "reason": {
       "agentOutdated": "Actualice el agente",

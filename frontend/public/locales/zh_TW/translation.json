@@ -1926,7 +1926,9 @@
     "reenrollDone": "憑證已清除。代理重新連線後，請再次核准該主機。",
     "reenrollFailed": "重新註冊主機失敗",
     "heldCount": "暫緩：{{count}}",
-    "heldTitle": "有命令正在等待維護時段"
+    "heldTitle": "有命令正在等待維護時段",
+    "scriptsNeedApproval": "腳本需要批准",
+    "scriptsNeedApprovalTooltip": "此主機的代理僅執行經批准流程（Professional+）批准的腳本。一次性腳本將被拒絕。"
   },
   "idp": {
     "action": {
@@ -5366,7 +5368,8 @@
       "preview": "預覽下一次清理",
       "previewError": "無法產生預覽。",
       "previewMore": "以及另外 {{n}} 個",
-      "previewResult": "下一次清理：保留 {{kept}} 個，刪除 {{removed}} 個。"
+      "previewResult": "下一次清理：保留 {{kept}} 個，刪除 {{removed}} 個。",
+      "windowLocal": "在您的時區：{{start}} 至 {{end}}。"
     },
     "reason": {
       "agentOutdated": "請升級代理程式",

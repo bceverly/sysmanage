@@ -1926,7 +1926,9 @@
     "reenrollDone": "Identifiants effacés. Approuvez de nouveau l'hôte dès que son agent se reconnecte.",
     "reenrollFailed": "Échec de la réinscription de l'hôte",
     "heldCount": "Retenues : {{count}}",
-    "heldTitle": "Des commandes attendent une fenêtre de maintenance"
+    "heldTitle": "Des commandes attendent une fenêtre de maintenance",
+    "scriptsNeedApproval": "Les scripts nécessitent une approbation",
+    "scriptsNeedApprovalTooltip": "L'agent de cet hôte n'exécute que les scripts approuvés via le processus d'approbation (Professional+). Les scripts ponctuels sont refusés."
   },
   "idp": {
     "action": {
@@ -5366,7 +5368,8 @@
       "preview": "Aperçu du prochain élagage",
       "previewError": "L'aperçu n'a pas pu être généré.",
       "previewMore": "et {{n}} de plus",
-      "previewResult": "Prochain élagage : {{kept}} conservés, {{removed}} supprimés."
+      "previewResult": "Prochain élagage : {{kept}} conservés, {{removed}} supprimés.",
+      "windowLocal": "Dans votre fuseau horaire : {{start}} à {{end}}."
     },
     "reason": {
       "agentOutdated": "Mettez à jour l'agent",

@@ -375,67 +375,10 @@ def register_airgap_ingest_correlation(
 # ---------------------------------------------------------------------------
 
 
-def queue_automation_execution(execution, schedule) -> None:
-    """
-    Dispatch a scheduler-triggered ScriptExecution to its target hosts.
-
-    Called by ``automation_engine.start_schedule_dispatcher`` for each
-    scheduled execution that fires.  Builds a per-host APPLY_DEPLOYMENT_PLAN
-    using the engine's own ``build_script_command_plan`` factory and queues
-    one message per host_id.
-    """
-    automation_engine = module_loader.get_module("automation_engine")
-    if automation_engine is None:
-        logger.warning(
-            "queue_automation_execution called but automation_engine isn't loaded"
-        )
-        return
-
-    # Pull the script's shell + timeout off the saved-script registry to
-    # build the deploy plan (the execution carries the rendered content
-    # but not the metadata).
-    script = automation_engine.get_script(execution.script_id)
-    if script is None:
-        logger.warning(
-            "Scheduled execution %s references unknown script %s",
-            execution.id,
-            execution.script_id,
-        )
-        return
-
-    plan = automation_engine.build_script_command_plan(
-        execution.rendered_content,
-        script.shell,
-        script.timeout_seconds,
-    )
-
-    queued = 0
-    for host_result in execution.host_results:
-        try:
-            msg_id = _enqueue_apply_plan(
-                host_result.host_id, plan, script.timeout_seconds
-            )
-            _register_correlation(
-                msg_id,
-                "automation_engine",
-                execution.id,
-                host_result.host_id,
-            )
-            queued += 1
-        except Exception as exc:
-            logger.warning(
-                "Failed to queue scheduled execution %s for host %s: %s",
-                execution.id,
-                host_result.host_id,
-                exc,
-            )
-    logger.info(
-        "Scheduled execution %s (script=%s schedule=%s) queued on %d host(s)",
-        execution.id,
-        execution.script_id,
-        schedule.name,
-        queued,
-    )
+# queue_automation_execution moved to proplus_automation_dispatch (the
+# per-host approval hold pushed this module past the 1000-line limit); it is
+# re-exported at the bottom so ``proplus_dispatch.queue_automation_execution``
+# keeps working for lifecycle.py and existing callers.
 
 
 # ---------------------------------------------------------------------------
@@ -956,3 +899,10 @@ def route_proplus_command_result(command_id: str, result_data: dict) -> bool:
             exc,
         )
     return True
+
+
+# Re-export (see the note at "Automation engine dispatch").  At the bottom:
+# the moved function reads this module's helpers at call time.
+from backend.services.proplus_automation_dispatch import (  # noqa: E402,F401  pylint: disable=wrong-import-position,unused-import
+    queue_automation_execution,
+)

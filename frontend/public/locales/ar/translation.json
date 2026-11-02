@@ -1926,7 +1926,9 @@
     "reenrollDone": "تم مسح بيانات الاعتماد. وافق على المضيف مرة أخرى بعد أن يعيد وكيله الاتصال.",
     "reenrollFailed": "فشل إعادة تسجيل المضيف",
     "heldCount": "محتجزة: {{count}}",
-    "heldTitle": "هناك أوامر تنتظر نافذة صيانة"
+    "heldTitle": "هناك أوامر تنتظر نافذة صيانة",
+    "scriptsNeedApproval": "السكربتات تحتاج إلى موافقة",
+    "scriptsNeedApprovalTooltip": "لا يشغّل وكيل هذا المضيف إلا السكربتات التي تمت الموافقة عليها عبر سير عمل الموافقة (Professional+). تُرفض السكربتات الفردية."
   },
   "idp": {
     "action": {
@@ -5366,7 +5368,8 @@
       "preview": "معاينة التقليم القادم",
       "previewError": "تعذّر إنشاء المعاينة.",
       "previewMore": "و{{n}} أخرى",
-      "previewResult": "التقليم القادم: يُحتفظ بـ {{kept}}، ويُحذف {{removed}}."
+      "previewResult": "التقليم القادم: يُحتفظ بـ {{kept}}، ويُحذف {{removed}}.",
+      "windowLocal": "في منطقتك الزمنية: من {{start}} إلى {{end}}."
     },
     "reason": {
       "agentOutdated": "حدّث الوكيل",

@@ -35,6 +35,8 @@ from typing import Any, Dict, Optional
 from uuid import uuid4
 
 SUPPORTED_SHELLS = ("bash", "zsh", "sh", "ksh", "powershell", "cmd")
+# The deploy-plan "kind" the agent treats as a script (operations/script_approval.py).
+SCRIPT_PLAN_KIND = "script"
 
 
 def build_adhoc_script_plan(
@@ -89,6 +91,10 @@ def build_adhoc_script_plan(
         cleanup = ["rm", "-f", script_path]
 
     return {
+        # A script: the agent of a host that requires approval for scripts
+        # refuses a plan of this kind without an approval_id (an ad-hoc run
+        # never has one).
+        "kind": SCRIPT_PLAN_KIND,
         "files": [
             {
                 "path": script_path,

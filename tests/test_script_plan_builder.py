@@ -64,3 +64,10 @@ class TestBuildAdhocScriptPlan:
             # Should not raise -- each supported shell produces a valid plan
             plan = build_adhoc_script_plan("noop", shell=shell)
             assert "commands" in plan and "files" in plan
+
+    def test_the_plan_is_marked_as_a_script(self):
+        """The agent of a host that requires approval refuses a plan of this
+        kind without an approval id; an ad-hoc plan never has one."""
+        plan = build_adhoc_script_plan("echo hi")
+        assert plan["kind"] == "script"
+        assert "approval_id" not in plan

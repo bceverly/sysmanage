@@ -107,6 +107,8 @@ type SysManageHost = {
     agent_capabilities_updated_at?: string | null;
     // Script execution status
     script_execution_enabled?: boolean;
+    // The agent runs only approved scripts (its require_approval setting)
+    script_approval_required?: boolean;
     // Enabled shells for script execution
     enabled_shells?: string;
     // Tags

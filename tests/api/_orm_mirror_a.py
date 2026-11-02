@@ -141,6 +141,9 @@ class Host(TestBase):
 
     # Script execution permission
     script_execution_enabled = Column(Boolean, nullable=False, default=False)
+    script_approval_required = Column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
 
     # Available shells on the host (JSON)
     enabled_shells = Column(

@@ -15,7 +15,22 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from backend.services import proplus_dispatch
+from backend.services import proplus_automation_dispatch, proplus_dispatch
+
+
+@pytest.fixture(autouse=True)
+def no_approval_hosts():
+    """No host requires approval unless a test says so (no database here)."""
+    with patch.object(
+        proplus_automation_dispatch, "_approval_hosts", return_value=[]
+    ) as hosts:
+        yield hosts
+
+
+def _send_all(execution_id, approval_hosts=None):
+    """An engine's plan_dispatch that holds nothing."""
+    del execution_id, approval_hosts
+    return {"send": ["h1", "h2", "h3"], "held": [], "approval_id": None}
 
 
 @pytest.fixture
@@ -49,6 +64,7 @@ class TestQueueAutomationExecution:
             timeout_seconds=300,
         )
         engine.build_script_command_plan.return_value = {"files": [], "commands": []}
+        engine.plan_dispatch.side_effect = _send_all
         stub_module_loader.get_module.return_value = engine
 
         execution = SimpleNamespace(
@@ -77,6 +93,7 @@ class TestQueueAutomationExecution:
             shell="bash", timeout_seconds=60
         )
         engine.build_script_command_plan.return_value = {"files": [], "commands": []}
+        engine.plan_dispatch.side_effect = _send_all
         stub_module_loader.get_module.return_value = engine
 
         execution = SimpleNamespace(
@@ -101,6 +118,53 @@ class TestQueueAutomationExecution:
             proplus_dispatch.queue_automation_execution(execution, schedule)
         # Tried all 3 despite middle failure
         assert enq.call_count == 3
+
+    def test_held_hosts_are_not_sent_and_the_approval_goes_with_the_plan(
+        self, stub_module_loader, no_approval_hosts
+    ):
+        """A host whose agent runs only approved scripts waits for approval;
+        once approved, the plan carries the approval's id."""
+        engine = MagicMock()
+        engine.get_script.return_value = SimpleNamespace(
+            shell="bash", timeout_seconds=60
+        )
+        engine.plan_dispatch.return_value = {
+            "send": ["h1"],
+            "held": ["h2"],
+            "approval_id": "a1",
+        }
+        stub_module_loader.get_module.return_value = engine
+        no_approval_hosts.return_value = ["h2"]
+        execution = SimpleNamespace(
+            id="e1",
+            script_id="s1",
+            rendered_content="echo",
+            host_results=[SimpleNamespace(host_id="h1"), SimpleNamespace(host_id="h2")],
+        )
+        with patch.object(proplus_dispatch, "_enqueue_apply_plan") as enq:
+            proplus_dispatch.queue_automation_execution(execution, None)
+        assert [c.args[0] for c in enq.call_args_list] == ["h1"]
+        engine.plan_dispatch.assert_called_once_with("e1", approval_hosts=["h2"])
+        assert engine.build_script_command_plan.call_args.args[3] == "a1"
+
+    def test_an_engine_without_plan_dispatch_sends_every_host(self, stub_module_loader):
+        engine = SimpleNamespace(
+            get_script=lambda _sid: SimpleNamespace(shell="bash", timeout_seconds=60),
+            build_script_command_plan=MagicMock(return_value={"files": []}),
+        )
+        stub_module_loader.get_module.return_value = engine
+        execution = SimpleNamespace(
+            id="e1",
+            script_id="s1",
+            rendered_content="echo",
+            host_results=[SimpleNamespace(host_id="h1"), SimpleNamespace(host_id="h2")],
+        )
+        with patch.object(proplus_dispatch, "_enqueue_apply_plan") as enq:
+            proplus_dispatch.queue_automation_execution(
+                execution, SimpleNamespace(name="n")
+            )
+        assert enq.call_count == 2
+        assert engine.build_script_command_plan.call_args.args[3] is None
 
 
 class TestQueueFleetBulkOp:

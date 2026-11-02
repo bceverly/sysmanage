@@ -1926,7 +1926,9 @@
     "reenrollDone": "凭据已清除。代理重新连接后，请再次批准该主机。",
     "reenrollFailed": "重新注册主机失败",
     "heldCount": "暂缓：{{count}}",
-    "heldTitle": "有命令正在等待维护时段"
+    "heldTitle": "有命令正在等待维护时段",
+    "scriptsNeedApproval": "脚本需要批准",
+    "scriptsNeedApprovalTooltip": "此主机的代理仅运行经批准流程（Professional+）批准的脚本。一次性脚本将被拒绝。"
   },
   "idp": {
     "action": {
@@ -5366,7 +5368,8 @@
       "preview": "预览下一次清理",
       "previewError": "无法生成预览。",
       "previewMore": "以及另外 {{n}} 个",
-      "previewResult": "下一次清理：保留 {{kept}} 个，删除 {{removed}} 个。"
+      "previewResult": "下一次清理：保留 {{kept}} 个，删除 {{removed}} 个。",
+      "windowLocal": "在您的时区：{{start}}到{{end}}。"
     },
     "reason": {
       "agentOutdated": "请升级代理",
