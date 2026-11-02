@@ -77,6 +77,11 @@ GUIDED = {
     "review_malware_findings": "malware",
     # 23.3 S3: the time sync page (S4) lists every clock out of its bounds.
     "resync_clocks": "time_sync",
+    # 24.6: policies, failed backups, verification cadences and break-glass
+    # exports are all handled on the Backups page.
+    "review_backups": "backups",
+    "verify_backups": "backups",
+    "export_backup_keys": "backups",
 }
 NONE = {"set_password_policy"}
 

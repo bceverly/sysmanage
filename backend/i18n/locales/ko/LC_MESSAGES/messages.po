@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 09:14-0500\n"
+"POT-Creation-Date: 2026-11-02 15:53-0500\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -4119,7 +4119,7 @@ msgstr "스냅샷을 찾을 수 없습니다"
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "이 스냅샷은 서명되지 않았습니다. 그래도 복원하려면 확인하세요"
 
-#: backend/api/backups.py:845 backend/services/backup_key_release.py:112
+#: backend/api/backups.py:845 backend/services/backup_key_release.py:117
 msgid "Encrypted backups need the Professional+ backup engine"
 msgstr "암호화된 백업에는 Professional+ 백업 엔진이 필요합니다"
 
@@ -5655,29 +5655,38 @@ msgstr "스캔할 호스트를 하나 이상 선택하세요"
 msgid "At most 500 hosts can be scanned in one request"
 msgstr "한 번의 요청으로 최대 500개의 호스트를 스캔할 수 있습니다"
 
-#: backend/services/backup_key_release.py:75
+#: backend/services/backup_key_release.py:78
+#: backend/services/backup_key_release.py:149
 msgid "No such backup run for this host"
 msgstr "이 호스트에 그런 백업 작업이 없습니다"
 
-#: backend/services/backup_key_release.py:81
+#: backend/services/backup_key_release.py:84
 msgid "This backup run does not need a key"
 msgstr "이 백업 작업에는 키가 필요하지 않습니다"
 
-#: backend/services/backup_key_release.py:83
+#: backend/services/backup_key_release.py:86
 msgid "This backup run has already ended"
 msgstr "이 백업 작업은 이미 끝났습니다"
 
-#: backend/services/backup_key_release.py:85
+#: backend/services/backup_key_release.py:88
 msgid "This backup run's key was already released"
 msgstr "이 백업 작업의 키는 이미 내주었습니다"
 
-#: backend/services/backup_key_release.py:92
+#: backend/services/backup_key_release.py:95
 msgid "This backup run is too old to release its key"
 msgstr "이 백업 작업은 너무 오래되어 키를 내줄 수 없습니다"
 
-#: backend/services/backup_key_release.py:108
+#: backend/services/backup_key_release.py:113
 msgid "This host's backups are not encrypted"
 msgstr "이 호스트의 백업은 암호화되어 있지 않습니다"
+
+#: backend/services/backup_key_release.py:147
+msgid "Snapshot signing is not turned on"
+msgstr "스냅샷 서명이 켜져 있지 않습니다"
+
+#: backend/services/backup_key_release.py:152
+msgid "Signed backups need the Professional+ backup engine"
+msgstr "서명된 백업에는 Professional+ 백업 엔진이 필요합니다"
 
 #: backend/services/malware_quarantine.py:132
 msgid "Unknown action"

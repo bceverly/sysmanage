@@ -4043,7 +4043,11 @@
       "pmNetUnmanaged": "Er staan geen onbeheerde apparaten in uw netwerken",
       "pmMalwareClean": "Geen openstaande malwarebevindingen met hoge ernst",
       "pmMalwareScanned": "Hosts worden gescand op malware",
-      "pmClocksInBounds": "De klok van elke host valt binnen de grenswaarden"
+      "pmClocksInBounds": "De klok van elke host valt binnen de grenswaarden",
+      "pmBackupCoverage": "Elke host waarvan een back-up kan worden gemaakt, heeft een back-upbeleid",
+      "pmBackupHealthy": "Geen back-up van een host is mislukt of achterstallig",
+      "pmBackupKeyEscrow": "De back-upsleutels van elke versleutelde host zijn geëxporteerd voor noodgevallen",
+      "pmBackupVerified": "De back-ups van elke host zijn in de afgelopen 30 dagen geslaagd voor een verificatie met volledig lezen"
     },
     "curatedPack": {
       "baseline": {
@@ -4158,7 +4162,10 @@
         "unsupported_platform": "deze herstelactie ondersteunt het platform van de host niet",
         "dispatch_failed": "de wijziging kon niet naar de host worden verzonden; zie het serverlogboek"
       },
-      "resync_clocks": "Controleer de tijdservice van elke host en synchroniseer de klokken buiten hun grenswaarden opnieuw."
+      "resync_clocks": "Controleer de tijdservice van elke host en synchroniseer de klokken buiten hun grenswaarden opnieuw.",
+      "export_backup_keys": "Exporteer de back-upsleutels opnieuw via de pagina Back-ups, verzegeld met uw escrow-sleutel, en vervang de oudere export.",
+      "review_backups": "Stel op de pagina Back-ups een back-upbeleid in voor elke host zonder beleid, en herstel mislukte of achterstallige back-ups.",
+      "verify_backups": "Stel in het back-upbeleid van elke host in hoe vaak een verificatie met volledig lezen wordt uitgevoerd, en herstel elke mislukte verificatie."
     },
     "saved": "Dreigingsmodel opgeslagen. De actielijst wordt bij de volgende adviseursronde opnieuw geëvalueerd.",
     "stale": {
@@ -5413,7 +5420,9 @@
       "hookNothing": "De hook {{service}} had niets te herstellen.",
       "hookFailed": "De hook {{service}} is na het herstel mislukt, dus het herstel is onvolledig. Het restate-logboek op de host vermeldt waarom.",
       "hookMissing": "Deze host heeft geen hook {{service}} om te herstellen wat het pauzeren van de dienst in de herstelde bestanden heeft achtergelaten. Doe dat handmatig.",
-      "hookUnreadable": "restate kon niet bepalen bij welke hook {{dir}} hoort, dus er is geen hook uitgevoerd."
+      "hookUnreadable": "restate kon niet bepalen bij welke hook {{dir}} hoort, dus er is geen hook uitgevoerd.",
+      "signed": "ondertekend",
+      "unsigned": "niet ondertekend"
     },
     "run": {
       "busy": "Bezet, wordt opnieuw geprobeerd",
@@ -5472,6 +5481,9 @@
       "restateVersions": "Gebruikte restate-versies",
       "saveError": "Het doel kon niet worden opgeslagen.",
       "sealMode": "Elke back-up verzegelen",
+      "signing": "Elke snapshot ondertekenen",
+      "signingOn": "Aan, sleutel {{fingerprint}}",
+      "signingOff": "Uit (Professional+)",
       "sealNone": "Niet verzegelen",
       "sealZfs": "ZFS-snapshot",
       "storageHost": "Opslaghost",

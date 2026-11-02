@@ -104,6 +104,15 @@ def target_dict(target: models.BackupTarget, db: Session) -> Dict[str, Any]:
         "forecast": backup_forecast.for_target(db, target, health, jobs.now()),
         "storage_audit": audit,
         "service_account": target.service_account or jobs.DEFAULT_SERVICE_ACCOUNT,
+        # Snapshot signing (Pro+ 24.6): the signer's fingerprint, or None.
+        "signing": (
+            {
+                "fingerprint": target.sign_fingerprint,
+                "since": iso(target.signing_enabled_at),
+            }
+            if target.sign_fingerprint and target.sign_public_key
+            else None
+        ),
         "warnings": warnings,
         "problem": storage_status.has_problem(warnings)
         or storage_audit.has_error(audit),
@@ -206,6 +215,7 @@ def snapshot_dict(row: models.BackupSnapshot) -> Dict[str, Any]:
         "unique_bytes": row.unique_bytes,
         "files": row.files,
         "signed": bool(row.signed),
+        "signer": row.signer,
         "seen_at": iso(row.seen_at),
         "gone_at": iso(row.gone_at),
     }

@@ -241,6 +241,7 @@ const RestoreFilesDialog: React.FC<{
                                 {snapshots.map(s => (
                                     <MenuItem key={s.id} value={s.name}>
                                         {s.name} ({formatTime(s.created_at)}, {formatBytes(s.bytes)})
+                                        {s.signed ? ` - ${t('backups.restore.signed', 'signed')}` : ` - ${t('backups.restore.unsigned', 'not signed')}`}
                                     </MenuItem>
                                 ))}
                             </Select>

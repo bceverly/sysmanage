@@ -4043,7 +4043,11 @@
       "pmNetUnmanaged": "您的网络中没有未托管的设备",
       "pmMalwareClean": "没有未处理的高严重性恶意软件检测结果",
       "pmMalwareScanned": "主机已进行恶意软件扫描",
-      "pmClocksInBounds": "每台主机的时钟都在允许范围内"
+      "pmClocksInBounds": "每台主机的时钟都在允许范围内",
+      "pmBackupCoverage": "每台可以备份的主机都有备份策略",
+      "pmBackupHealthy": "没有主机的备份失败或逾期",
+      "pmBackupKeyEscrow": "每台加密主机的备份密钥都已导出以备紧急使用",
+      "pmBackupVerified": "每台主机的备份在过去 30 天内都通过了完整读取验证"
     },
     "curatedPack": {
       "baseline": {
@@ -4158,7 +4162,10 @@
         "unsupported_platform": "此修复不支持该主机的平台",
         "dispatch_failed": "无法将更改发送到主机；请查看服务器日志"
       },
-      "resync_clocks": "检查每台主机的时间服务，并重新同步超出允许范围的时钟。"
+      "resync_clocks": "检查每台主机的时间服务，并重新同步超出允许范围的时钟。",
+      "export_backup_keys": "在备份页面上重新导出备份密钥，用您的托管密钥封存，并替换旧的导出。",
+      "review_backups": "在备份页面上，为每台没有备份策略的主机配置备份策略，并修复失败或逾期的备份。",
+      "verify_backups": "在每台主机的备份策略中设置完整读取验证的周期，并修复任何失败的验证。"
     },
     "saved": "威胁模型已保存。整改清单将在下一次顾问评估时重新评估。",
     "stale": {
@@ -5413,7 +5420,9 @@
       "hookNothing": "{{service}} 钩子没有需要修复的内容。",
       "hookFailed": "还原后 {{service}} 钩子运行失败，因此还原不完整。原因请查看主机上的 restate 日志。",
       "hookMissing": "此主机没有 {{service}} 钩子来修复暂停该服务在已还原文件中留下的问题。请手动处理。",
-      "hookUnreadable": "restate 无法判断 {{dir}} 属于哪个钩子，因此没有运行任何钩子。"
+      "hookUnreadable": "restate 无法判断 {{dir}} 属于哪个钩子，因此没有运行任何钩子。",
+      "signed": "已签名",
+      "unsigned": "未签名"
     },
     "run": {
       "busy": "忙碌，将重试",
@@ -5472,6 +5481,9 @@
       "restateVersions": "正在使用的 restate 版本",
       "saveError": "无法保存目标。",
       "sealMode": "封存每个备份",
+      "signing": "为每个快照签名",
+      "signingOn": "已启用，密钥 {{fingerprint}}",
+      "signingOff": "已关闭（Professional+）",
       "sealNone": "不封存",
       "sealZfs": "ZFS 快照",
       "storageHost": "存储主机",

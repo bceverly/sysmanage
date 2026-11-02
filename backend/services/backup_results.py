@@ -33,6 +33,7 @@ from backend.persistence import models
 from backend.services import backup_first_fit as first_fit
 from backend.services import backup_jobs as jobs
 from backend.services import backup_network_mounts as network_mounts
+from backend.services import backup_signing
 from backend.services import backup_storage_status as storage_status
 from backend.services import backup_tick
 
@@ -186,7 +187,7 @@ def _store_abilities(policy: Optional[models.BackupPolicy], found: Any) -> None:
         policy.host_abilities = json.dumps(sorted(set(found) & set(_ABILITIES)))
 
 
-_STORAGE_ABILITIES = ("keep_yearly",)
+_STORAGE_ABILITIES = ("keep_yearly", "sign")
 
 
 def _store_storage_abilities(policy: Optional[models.BackupPolicy], found: Any) -> None:
@@ -291,6 +292,11 @@ def _refused(db: Session, run: models.BackupRun, code: str) -> None:
         # once): not a failure worth showing.
         run.dismissed_at = jobs.now()
         backup_tick.configure_now(db)
+    if run.action == backup_signing.SIGN and policy is not None:
+        # A storage host that cannot sign (or got no key) never holds back
+        # protect: the snapshot just stays unsigned.
+        _after_sign(db, run, policy, {})
+        return
     if (
         code == "not_configured"
         and policy is not None
@@ -569,10 +575,32 @@ def _after_capture(
     repository = _int(result.get("repository_bytes"))
     if repository is not None:
         policy.repository_bytes = repository
+    if run.snapshot and backup_signing.wanted(db, policy) and _sign(db, policy, run):
+        return  # protect follows the sign (restate cannot sign protected)
+    _protect_or_seal(db, policy)
+
+
+def _sign(db: Session, policy: models.BackupPolicy, run: models.BackupRun) -> bool:
+    """Queue the snapshot's signing on the storage host (Pro+ 24.6)."""
+    storage = jobs.storage_host(db, backup_signing.target_of(db, policy))
+    if not jobs.equipped(storage)[0] or not policy.storage_acked_version:
+        return False
+    backup_signing.queue_sign(db, policy, storage.id, run.snapshot)
+    return True
+
+
+def _protect_or_seal(db: Session, policy: models.BackupPolicy) -> None:
     if policy.storage_protects:
         _storage_next(db, policy, "protect")
         return
     _seal_or_prune(db, policy)
+
+
+def _after_sign(db: Session, run: models.BackupRun, policy, result) -> None:
+    """Signed or not, the chain goes on: an unsigned snapshot is still
+    protected, sealed and pruned (backup_signing)."""
+    backup_signing.record_signed(db, run, policy, result)
+    _protect_or_seal(db, policy)
 
 
 def _seal_or_prune(db: Session, policy: models.BackupPolicy) -> None:
@@ -793,6 +821,7 @@ def _after_prepare(db: Session, run: models.BackupRun, _policy_row, _result) -> 
 
 _AFTER = {
     "prepare": _after_prepare,
+    "sign": _after_sign,
     "verify": _after_verify,
     "capture": _after_capture,
     "seal": _after_seal,

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 09:14-0500\n"
+"POT-Creation-Date: 2026-11-02 15:53-0500\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -4081,7 +4081,7 @@ msgstr "未找到快照"
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "此快照未签名；请确认以仍然恢复它"
 
-#: backend/api/backups.py:845 backend/services/backup_key_release.py:112
+#: backend/api/backups.py:845 backend/services/backup_key_release.py:117
 msgid "Encrypted backups need the Professional+ backup engine"
 msgstr "加密备份需要 Professional+ 备份引擎"
 
@@ -5606,29 +5606,38 @@ msgstr "请至少选择一台要扫描的主机"
 msgid "At most 500 hosts can be scanned in one request"
 msgstr "一次请求最多可扫描 500 台主机"
 
-#: backend/services/backup_key_release.py:75
+#: backend/services/backup_key_release.py:78
+#: backend/services/backup_key_release.py:149
 msgid "No such backup run for this host"
 msgstr "此主机没有这样的备份作业"
 
-#: backend/services/backup_key_release.py:81
+#: backend/services/backup_key_release.py:84
 msgid "This backup run does not need a key"
 msgstr "此备份作业不需要密钥"
 
-#: backend/services/backup_key_release.py:83
+#: backend/services/backup_key_release.py:86
 msgid "This backup run has already ended"
 msgstr "此备份作业已结束"
 
-#: backend/services/backup_key_release.py:85
+#: backend/services/backup_key_release.py:88
 msgid "This backup run's key was already released"
 msgstr "此备份作业的密钥已发放"
 
-#: backend/services/backup_key_release.py:92
+#: backend/services/backup_key_release.py:95
 msgid "This backup run is too old to release its key"
 msgstr "此备份作业太旧，无法发放其密钥"
 
-#: backend/services/backup_key_release.py:108
+#: backend/services/backup_key_release.py:113
 msgid "This host's backups are not encrypted"
 msgstr "此主机的备份未加密"
+
+#: backend/services/backup_key_release.py:147
+msgid "Snapshot signing is not turned on"
+msgstr "快照签名未启用"
+
+#: backend/services/backup_key_release.py:152
+msgid "Signed backups need the Professional+ backup engine"
+msgstr "签名备份需要 Professional+ 备份引擎"
 
 #: backend/services/malware_quarantine.py:132
 msgid "Unknown action"

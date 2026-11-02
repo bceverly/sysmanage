@@ -137,6 +137,8 @@ export interface BackupTarget {
   warnings: TargetWarning[];
   /** The target counts once on the dashboard's overdue-or-failed card. */
   problem: boolean;
+  /** Snapshot signing (Pro+ 24.6): the signer's key, or null when off. */
+  signing?: { fingerprint: string; since: string | null } | null;
 }
 
 export interface TargetInput {
@@ -360,6 +362,8 @@ export interface BackupSnapshot {
   unique_bytes: number | null;
   files: number | null;
   signed: boolean;
+  /** The key the storage host signed it with (Pro+ 24.6), when signed. */
+  signer?: string | null;
   gone_at: string | null;
 }
 

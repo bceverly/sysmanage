@@ -82,6 +82,14 @@ class BackupTarget(Base):
     storage_fs_mount = Column(String(1024), nullable=True)
     storage_fs_checked_at = Column(DateTime, nullable=True)
     storage_is_btrfs_subvolume = Column(Boolean, nullable=True)
+    # The snapshot signer (q73, Pro+ backup_engine 24.6): the storage host
+    # signs each snapshot between capture and protect with the secret key
+    # OpenBAO holds (sign_key_ref, released for one sign job at a time);
+    # every backed-up host gets the public key to check restores against.
+    sign_public_key = Column(Text, nullable=True)
+    sign_fingerprint = Column(String(64), nullable=True)
+    sign_key_ref = Column(String(512), nullable=True)
+    signing_enabled_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, nullable=False)
     created_by = Column(String(255), nullable=True)
     updated_at = Column(DateTime, nullable=False)
@@ -245,6 +253,8 @@ class BackupSnapshot(Base):
     unique_bytes = Column(BigInteger, nullable=True)
     files = Column(BigInteger, nullable=True)
     signed = Column(Boolean, nullable=False, default=False)
+    # The key restate signed it with (q73): the target's signer, by fingerprint.
+    signer = Column(String(64), nullable=True)
     seen_at = Column(DateTime, nullable=False)
     gone_at = Column(DateTime, nullable=True)
 

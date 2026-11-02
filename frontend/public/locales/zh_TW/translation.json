@@ -4043,7 +4043,11 @@
       "pmNetUnmanaged": "您的網路中沒有未受管理的裝置",
       "pmMalwareClean": "沒有未處理的高嚴重性惡意軟體偵測結果",
       "pmMalwareScanned": "主機已進行惡意軟體掃描",
-      "pmClocksInBounds": "每部主機的時鐘都在允許範圍內"
+      "pmClocksInBounds": "每部主機的時鐘都在允許範圍內",
+      "pmBackupCoverage": "每台可以備份的主機都有備份原則",
+      "pmBackupHealthy": "沒有主機的備份失敗或逾期",
+      "pmBackupKeyEscrow": "每台加密主機的備份金鑰都已匯出以備緊急使用",
+      "pmBackupVerified": "每台主機的備份在過去 30 天內都通過了完整讀取驗證"
     },
     "curatedPack": {
       "baseline": {
@@ -4158,7 +4162,10 @@
         "unsupported_platform": "此修復不支援該主機的平台",
         "dispatch_failed": "無法將變更傳送到主機；請查看伺服器記錄"
       },
-      "resync_clocks": "檢查每部主機的時間服務，並重新同步超出允許範圍的時鐘。"
+      "resync_clocks": "檢查每部主機的時間服務，並重新同步超出允許範圍的時鐘。",
+      "export_backup_keys": "在備份頁面上重新匯出備份金鑰，以您的託管金鑰封存，並取代舊的匯出。",
+      "review_backups": "在備份頁面上，為每台沒有備份原則的主機設定備份原則，並修正失敗或逾期的備份。",
+      "verify_backups": "在每台主機的備份原則中設定完整讀取驗證的週期，並修正任何失敗的驗證。"
     },
     "saved": "威脅模型已儲存。改善清單將在下一次顧問評估時重新評估。",
     "stale": {
@@ -5413,7 +5420,9 @@
       "hookNothing": "{{service}} 掛鉤沒有需要修復的內容。",
       "hookFailed": "還原後 {{service}} 掛鉤執行失敗，因此還原不完整。原因請查看主機上的 restate 記錄。",
       "hookMissing": "此主機沒有 {{service}} 掛鉤來修復暫停該服務在已還原檔案中留下的問題。請手動處理。",
-      "hookUnreadable": "restate 無法判斷 {{dir}} 屬於哪個掛鉤，因此沒有執行任何掛鉤。"
+      "hookUnreadable": "restate 無法判斷 {{dir}} 屬於哪個掛鉤，因此沒有執行任何掛鉤。",
+      "signed": "已簽署",
+      "unsigned": "未簽署"
     },
     "run": {
       "busy": "忙碌，將重試",
@@ -5472,6 +5481,9 @@
       "restateVersions": "使用中的 restate 版本",
       "saveError": "無法儲存目標。",
       "sealMode": "封存每個備份",
+      "signing": "為每個快照簽署",
+      "signingOn": "已啟用，金鑰 {{fingerprint}}",
+      "signingOff": "已關閉（Professional+）",
       "sealNone": "不封存",
       "sealZfs": "ZFS 快照",
       "storageHost": "儲存主機",

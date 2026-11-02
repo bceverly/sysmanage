@@ -256,6 +256,12 @@ const BackupTargetCard: React.FC<{
                             {t('backups.target.sealMode', 'Seal each backup')}:{' '}
                             {sealDescription(t, target)}
                         </Typography>
+                        <Typography variant="body2">
+                            {t('backups.target.signing', 'Sign each snapshot')}:{' '}
+                            {target.signing
+                                ? t('backups.target.signingOn', 'On, key {{fingerprint}}', { fingerprint: target.signing.fingerprint })
+                                : t('backups.target.signingOff', 'Off (Professional+)')}
+                        </Typography>
                         {versions.length > 0 && (
                             <Typography variant="body2" color="text.secondary">
                                 {t('backups.target.restateVersions', 'restate versions in use')}: {versions.join(', ')}

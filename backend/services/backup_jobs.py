@@ -255,6 +255,12 @@ def host_configuration(
         # The agent installs it root-owned and adds ``encrypt_to`` to the
         # capture; it never receives the secret key here.
         out["encrypt_key"] = policy.encrypt_public_key
+    if getattr(target, "sign_public_key", None):
+        # The snapshot signer's PUBLIC key (Pro+ 24.6): restores check each
+        # snapshot's signature against it.  Sent like encrypt_key, whether or
+        # not backup_engine is loaded now -- a lapsed licence must not turn
+        # signature checking off.
+        out["trusted_key"] = target.sign_public_key
     return out
 
 

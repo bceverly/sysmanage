@@ -4043,7 +4043,11 @@
       "pmNetUnmanaged": "Não há dispositivos não gerenciados nas suas redes",
       "pmMalwareClean": "Nenhuma constatação de malware aberta com gravidade alta",
       "pmMalwareScanned": "Os hosts são verificados em busca de malware",
-      "pmClocksInBounds": "O relógio de todos os hosts está dentro dos limites"
+      "pmClocksInBounds": "O relógio de todos os hosts está dentro dos limites",
+      "pmBackupCoverage": "Todo host que pode ter backup tem uma política de backup",
+      "pmBackupHealthy": "Nenhum backup de host falhou ou está atrasado",
+      "pmBackupKeyEscrow": "As chaves de backup de cada host criptografado estão exportadas para emergências",
+      "pmBackupVerified": "Os backups de cada host passaram em uma verificação com leitura completa nos últimos 30 dias"
     },
     "curatedPack": {
       "baseline": {
@@ -4158,7 +4162,10 @@
         "unsupported_platform": "esta correção não oferece suporte à plataforma do host",
         "dispatch_failed": "não foi possível enviar a alteração ao host; consulte o log do servidor"
       },
-      "resync_clocks": "Verifique o serviço de hora de cada host e ressincronize os relógios fora dos limites."
+      "resync_clocks": "Verifique o serviço de hora de cada host e ressincronize os relógios fora dos limites.",
+      "export_backup_keys": "Exporte novamente as chaves de backup na página Backups, seladas com a sua chave de custódia, e substitua a exportação anterior.",
+      "review_backups": "Configure uma política de backup para cada host que não tenha nenhuma e corrija os backups com falha ou atrasados, na página Backups.",
+      "verify_backups": "Defina a frequência da verificação com leitura completa na política de backup de cada host e corrija qualquer verificação com falha."
     },
     "saved": "Modelo de ameaças salvo. A lista de pendências será reavaliada na próxima execução do assistente.",
     "stale": {
@@ -5413,7 +5420,9 @@
       "hookNothing": "O hook {{service}} não tinha nada a corrigir.",
       "hookFailed": "O hook {{service}} falhou após a restauração, portanto a restauração está incompleta. O log do restate no host informa o motivo.",
       "hookMissing": "Este host não tem nenhum hook {{service}} para corrigir o que a pausa do serviço deixou nos arquivos restaurados. Faça isso manualmente.",
-      "hookUnreadable": "O restate não conseguiu identificar a qual hook {{dir}} pertence, portanto nenhum hook foi executado."
+      "hookUnreadable": "O restate não conseguiu identificar a qual hook {{dir}} pertence, portanto nenhum hook foi executado.",
+      "signed": "assinado",
+      "unsigned": "não assinado"
     },
     "run": {
       "busy": "Ocupado, será tentado novamente",
@@ -5472,6 +5481,9 @@
       "restateVersions": "Versões do restate em uso",
       "saveError": "Não foi possível salvar o destino.",
       "sealMode": "Selar cada backup",
+      "signing": "Assinar cada snapshot",
+      "signingOn": "Ativada, chave {{fingerprint}}",
+      "signingOff": "Desativada (Professional+)",
       "sealNone": "Não selar",
       "sealZfs": "Snapshot ZFS",
       "storageHost": "Host de armazenamento",

@@ -201,3 +201,16 @@ describe("BackupTargetCard storage side", () => {
     });
   });
 });
+
+describe("BackupTargetCard snapshot signing (Pro+ 24.6)", () => {
+  test("says whether snapshots are signed, and with which key", () => {
+    show(target());
+    expect(screen.getByText(/Sign each snapshot/)).toHaveTextContent("Off (Professional+)");
+  });
+
+  test("names the signer's key when signing is on", () => {
+    show(target({ signing: { fingerprint: "B".repeat(40), since: "2026-11-02T12:00:00Z" } }));
+    expect(screen.getByText(/Sign each snapshot/)).toHaveTextContent("On, key " + "B".repeat(40));
+  });
+});
+

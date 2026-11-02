@@ -113,6 +113,9 @@ export const remedyText = (t: TFunction, remedy: string | null): string => {
         scan_for_malware: t('posture.remedy.scan_for_malware', 'Scan every host that can scan, at least once a month.'),
         review_malware_findings: t('posture.remedy.review_malware_findings', 'Quarantine, resolve or dismiss each high-severity finding.'),
         resync_clocks: t('posture.remedy.resync_clocks', "Check each host's time service and resynchronize the clocks outside their bounds."),
+        review_backups: t('posture.remedy.review_backups', 'Configure a backup policy for each host that has none, and fix the backups that failed or are overdue, on the Backups page.'),
+        verify_backups: t('posture.remedy.verify_backups', "Set a full-read verification cadence on each host's backup policy, and fix any failed pass."),
+        export_backup_keys: t('posture.remedy.export_backup_keys', 'Export the backup keys again from the Backups page, sealed to your escrow key, and replace the older export.'),
         set_password_policy: t('posture.remedy.set_password_policy', 'The password policy is set in sysmanage.yaml; SysManage cannot change it for you.'),
     };
     return (remedy && texts[remedy]) || '';
@@ -134,6 +137,7 @@ export const GUIDED_ROUTES: Record<string, string> = {
     asset_discovery: '/asset-discovery',
     malware: '/malware',
     time_sync: '/time-sync',
+    backups: '/backups',
 };
 
 export const ruleTitle = (t: TFunction, key: string, fallback?: string | null): string => {
@@ -163,6 +167,10 @@ export const ruleTitle = (t: TFunction, key: string, fallback?: string | null): 
         'PM-MALWARE-SCANNED': t('advisor.curated.pmMalwareScanned', 'Hosts are scanned for malware'),
         'PM-MALWARE-CLEAN': t('advisor.curated.pmMalwareClean', 'No open high-severity malware findings'),
         'PM-CLOCKS-IN-BOUNDS': t('advisor.curated.pmClocksInBounds', "Every host's clock is within its bounds"),
+        'PM-BACKUP-COVERAGE': t('advisor.curated.pmBackupCoverage', 'Every host that can be backed up has a backup policy'),
+        'PM-BACKUP-HEALTHY': t('advisor.curated.pmBackupHealthy', "No host's backups have failed or fallen behind"),
+        'PM-BACKUP-VERIFIED': t('advisor.curated.pmBackupVerified', "Every host's backups passed a full-read verification in the last 30 days"),
+        'PM-BACKUP-KEY-ESCROW': t('advisor.curated.pmBackupKeyEscrow', "Every encrypted host's backup keys are exported for break-glass"),
         // Baseline pack (21.2)
         'SM-SEC-001': t('advisor.curated.smSec001', 'Critical vulnerability with a fix available'),
         'SM-SEC-002': t('advisor.curated.smSec002', 'High-severity vulnerability with a fix available'),

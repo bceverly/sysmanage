@@ -4043,7 +4043,11 @@
       "pmNetUnmanaged": "Nessun dispositivo non gestito è presente nelle tue reti",
       "pmMalwareClean": "Nessun rilevamento di malware aperto con gravità alta",
       "pmMalwareScanned": "Gli host vengono analizzati alla ricerca di malware",
-      "pmClocksInBounds": "L'orologio di ogni host è entro i suoi limiti"
+      "pmClocksInBounds": "L'orologio di ogni host è entro i suoi limiti",
+      "pmBackupCoverage": "Ogni host di cui si può eseguire il backup ha un criterio di backup",
+      "pmBackupHealthy": "Nessun backup di un host è fallito o in ritardo",
+      "pmBackupKeyEscrow": "Le chiavi di backup di ogni host cifrato sono esportate per le emergenze",
+      "pmBackupVerified": "I backup di ogni host hanno superato una verifica con lettura completa negli ultimi 30 giorni"
     },
     "curatedPack": {
       "baseline": {
@@ -4158,7 +4162,10 @@
         "unsupported_platform": "questa correzione non supporta la piattaforma dell'host",
         "dispatch_failed": "impossibile inviare la modifica all'host; consulta il log del server"
       },
-      "resync_clocks": "Controlla il servizio orario di ogni host e risincronizza gli orologi fuori dai loro limiti."
+      "resync_clocks": "Controlla il servizio orario di ogni host e risincronizza gli orologi fuori dai loro limiti.",
+      "export_backup_keys": "Esporti di nuovo le chiavi di backup dalla pagina Backup, sigillate con la sua chiave in custodia, e sostituisca l'esportazione precedente.",
+      "review_backups": "Configuri un criterio di backup per ogni host che non ne ha uno e corregga i backup non riusciti o in ritardo, nella pagina Backup.",
+      "verify_backups": "Imposti la frequenza della verifica con lettura completa nel criterio di backup di ogni host e corregga ogni verifica non riuscita."
     },
     "saved": "Modello delle minacce salvato. L'elenco dei punti aperti verrà rivalutato al prossimo passaggio del consulente.",
     "stale": {
@@ -5413,7 +5420,9 @@
       "hookNothing": "L'hook {{service}} non aveva nulla da sistemare.",
       "hookFailed": "L'hook {{service}} non è riuscito dopo il ripristino, quindi il ripristino è incompleto. Il log di restate sull'host ne indica il motivo.",
       "hookMissing": "Questo host non ha alcun hook {{service}} per sistemare ciò che la sospensione del servizio ha lasciato nei file ripristinati. Fallo a mano.",
-      "hookUnreadable": "restate non è riuscito a capire a quale hook appartiene {{dir}}, quindi non è stato eseguito alcun hook."
+      "hookUnreadable": "restate non è riuscito a capire a quale hook appartiene {{dir}}, quindi non è stato eseguito alcun hook.",
+      "signed": "firmato",
+      "unsigned": "non firmato"
     },
     "run": {
       "busy": "Occupato, verrà ritentato",
@@ -5472,6 +5481,9 @@
       "restateVersions": "Versioni di restate in uso",
       "saveError": "Impossibile salvare la destinazione.",
       "sealMode": "Sigilla ogni backup",
+      "signing": "Firma ogni snapshot",
+      "signingOn": "Attiva, chiave {{fingerprint}}",
+      "signingOff": "Disattivata (Professional+)",
       "sealNone": "Non sigillare",
       "sealZfs": "Snapshot ZFS",
       "storageHost": "Host di archiviazione",

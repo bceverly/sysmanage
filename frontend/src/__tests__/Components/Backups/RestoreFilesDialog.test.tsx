@@ -131,4 +131,18 @@ describe("RestoreFilesDialog", () => {
       .toBeInTheDocument();
     expect(button("Restore to staging")).toBeDisabled();
   });
+
+  test("a signed snapshot needs no acknowledgment (Pro+ 24.6)", async () => {
+    vi.mocked(getSnapshots).mockResolvedValue([
+      { id: "s2", name: "20261102T120000Z", created_at: null, bytes: 1, new_bytes: null,
+        unique_bytes: null, files: 1, signed: true, signer: "B".repeat(40), gone_at: null },
+    ]);
+    vi.mocked(restoreFiles).mockResolvedValue(done("p9"));
+    render(<RestoreFilesDialog open hostId="h1" fqdn="t14" onClose={vi.fn()} />);
+    await waitFor(() => expect(getSnapshots).toHaveBeenCalled());
+    expect(screen.queryByLabelText("This snapshot is not signed. Restore it anyway.")).toBeNull();
+    fireEvent.click(button("Preview"));
+    await waitFor(() => expect(restoreFiles).toHaveBeenCalledTimes(1));
+    expect(button("Restore to staging")).toBeEnabled();
+  });
 });

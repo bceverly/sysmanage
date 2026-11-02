@@ -47,6 +47,7 @@ from backend.persistence import db as dbm
 from backend.persistence import models
 from backend.persistence.partitions import PARTITION_REGISTRY, partition_session
 from backend.services import clock_status
+from backend.services import posture_backups
 
 logger = logging.getLogger(__name__)
 
@@ -284,7 +285,7 @@ COVERAGE_KEYS = (
     "compliance_scan",
     "critical_vulnerabilities",
     "clock_sync",
-)
+) + posture_backups.BACKUP_COVERAGE_KEYS
 
 
 def _av_state(row, now) -> str:
@@ -375,6 +376,8 @@ def _fleet_coverage(db, now) -> List[Dict[str, Any]]:
             "clock_sync", [clock_status.coverage_state(st) for _h, _b, st in clocks]
         )
     )
+    # 24.6: backups -- a policy, healthy, verified, keys in escrow.
+    coverage.extend(posture_backups.coverage(db, hosts, now, _coverage))
     return coverage
 
 

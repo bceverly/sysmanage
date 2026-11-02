@@ -4043,7 +4043,11 @@
       "pmNetUnmanaged": "No hay dispositivos no administrados en sus redes",
       "pmMalwareClean": "No hay hallazgos abiertos de software malicioso de gravedad alta",
       "pmMalwareScanned": "Los hosts se escanean en busca de software malicioso",
-      "pmClocksInBounds": "El reloj de todos los hosts está dentro de sus límites"
+      "pmClocksInBounds": "El reloj de todos los hosts está dentro de sus límites",
+      "pmBackupCoverage": "Cada host del que se puede hacer copia de seguridad tiene una política de copias de seguridad",
+      "pmBackupHealthy": "Ninguna copia de seguridad de un host ha fallado ni está atrasada",
+      "pmBackupKeyEscrow": "Las claves de copia de seguridad de cada host cifrado están exportadas para emergencias",
+      "pmBackupVerified": "Las copias de seguridad de cada host superaron una verificación con lectura completa en los últimos 30 días"
     },
     "curatedPack": {
       "baseline": {
@@ -4158,7 +4162,10 @@
         "unsupported_platform": "esta corrección no admite la plataforma del host",
         "dispatch_failed": "no se pudo enviar el cambio al host; consulte el registro del servidor"
       },
-      "resync_clocks": "Compruebe el servicio de hora de cada host y vuelva a sincronizar los relojes que estén fuera de sus límites."
+      "resync_clocks": "Compruebe el servicio de hora de cada host y vuelva a sincronizar los relojes que estén fuera de sus límites.",
+      "export_backup_keys": "Exporte de nuevo las claves de copia de seguridad desde la página Copias de seguridad, selladas con su clave en custodia, y reemplace la exportación anterior.",
+      "review_backups": "Configure una política de copias de seguridad para cada host que no tenga ninguna y corrija las copias de seguridad fallidas o atrasadas, en la página Copias de seguridad.",
+      "verify_backups": "Establezca la frecuencia de verificación con lectura completa en la política de copias de seguridad de cada host y corrija cualquier verificación fallida."
     },
     "saved": "Modelo de amenazas guardado. La lista de pendientes se reevaluará en la próxima pasada del asesor.",
     "stale": {
@@ -5413,7 +5420,9 @@
       "hookNothing": "El hook {{service}} no tenía nada que corregir.",
       "hookFailed": "El hook {{service}} falló después de la restauración, por lo que la restauración está incompleta. El registro de restate en el host indica el motivo.",
       "hookMissing": "Este host no tiene ningún hook {{service}} que corrija lo que la pausa del servicio dejó en los archivos restaurados. Hágalo a mano.",
-      "hookUnreadable": "restate no pudo determinar a qué hook corresponde {{dir}}, por lo que no se ejecutó ningún hook."
+      "hookUnreadable": "restate no pudo determinar a qué hook corresponde {{dir}}, por lo que no se ejecutó ningún hook.",
+      "signed": "firmada",
+      "unsigned": "sin firmar"
     },
     "run": {
       "busy": "Ocupado, se reintentará",
@@ -5472,6 +5481,9 @@
       "restateVersions": "Versiones de restate en uso",
       "saveError": "No se pudo guardar el destino.",
       "sealMode": "Sellar cada copia de seguridad",
+      "signing": "Firmar cada instantánea",
+      "signingOn": "Activada, clave {{fingerprint}}",
+      "signingOff": "Desactivada (Professional+)",
       "sealNone": "No sellar",
       "sealZfs": "Instantánea de ZFS",
       "storageHost": "Host de almacenamiento",

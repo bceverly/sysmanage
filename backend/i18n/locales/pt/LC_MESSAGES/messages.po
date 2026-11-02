@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 09:14-0500\n"
+"POT-Creation-Date: 2026-11-02 15:53-0500\n"
 "Language: pt\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -4319,7 +4319,7 @@ msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr ""
 "Este snapshot não está assinado; confirme para restaurá-lo mesmo assim"
 
-#: backend/api/backups.py:845 backend/services/backup_key_release.py:112
+#: backend/api/backups.py:845 backend/services/backup_key_release.py:117
 msgid "Encrypted backups need the Professional+ backup engine"
 msgstr ""
 "Backups criptografados precisam do mecanismo de backup do Professional+"
@@ -5924,29 +5924,38 @@ msgstr "Escolha pelo menos um host para verificar"
 msgid "At most 500 hosts can be scanned in one request"
 msgstr "No máximo 500 hosts podem ser verificados em uma solicitação"
 
-#: backend/services/backup_key_release.py:75
+#: backend/services/backup_key_release.py:78
+#: backend/services/backup_key_release.py:149
 msgid "No such backup run for this host"
 msgstr "Não há essa tarefa de backup para este host"
 
-#: backend/services/backup_key_release.py:81
+#: backend/services/backup_key_release.py:84
 msgid "This backup run does not need a key"
 msgstr "Esta tarefa de backup não precisa de chave"
 
-#: backend/services/backup_key_release.py:83
+#: backend/services/backup_key_release.py:86
 msgid "This backup run has already ended"
 msgstr "Esta tarefa de backup já terminou"
 
-#: backend/services/backup_key_release.py:85
+#: backend/services/backup_key_release.py:88
 msgid "This backup run's key was already released"
 msgstr "A chave desta tarefa de backup já foi entregue"
 
-#: backend/services/backup_key_release.py:92
+#: backend/services/backup_key_release.py:95
 msgid "This backup run is too old to release its key"
 msgstr "Esta tarefa de backup é antiga demais para entregar sua chave"
 
-#: backend/services/backup_key_release.py:108
+#: backend/services/backup_key_release.py:113
 msgid "This host's backups are not encrypted"
 msgstr "Os backups deste host não estão criptografados"
+
+#: backend/services/backup_key_release.py:147
+msgid "Snapshot signing is not turned on"
+msgstr "A assinatura de snapshots não está ativada"
+
+#: backend/services/backup_key_release.py:152
+msgid "Signed backups need the Professional+ backup engine"
+msgstr "Backups assinados exigem o mecanismo de backup do Professional+"
 
 #: backend/services/malware_quarantine.py:132
 msgid "Unknown action"

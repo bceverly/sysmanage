@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-02 09:14-0500\n"
+"POT-Creation-Date: 2026-11-02 15:53-0500\n"
 "Language: en\n"
 "Content-Type: text/plain; charset=ASCII\n"
 
@@ -4217,7 +4217,7 @@ msgstr "Snapshot not found"
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "This snapshot is not signed; confirm to restore it anyway"
 
-#: backend/api/backups.py:845 backend/services/backup_key_release.py:112
+#: backend/api/backups.py:845 backend/services/backup_key_release.py:117
 msgid "Encrypted backups need the Professional+ backup engine"
 msgstr "Encrypted backups need the Professional+ backup engine"
 
@@ -5789,29 +5789,38 @@ msgstr "Choose at least one host to scan"
 msgid "At most 500 hosts can be scanned in one request"
 msgstr "At most 500 hosts can be scanned in one request"
 
-#: backend/services/backup_key_release.py:75
+#: backend/services/backup_key_release.py:78
+#: backend/services/backup_key_release.py:149
 msgid "No such backup run for this host"
 msgstr "No such backup run for this host"
 
-#: backend/services/backup_key_release.py:81
+#: backend/services/backup_key_release.py:84
 msgid "This backup run does not need a key"
 msgstr "This backup run does not need a key"
 
-#: backend/services/backup_key_release.py:83
+#: backend/services/backup_key_release.py:86
 msgid "This backup run has already ended"
 msgstr "This backup run has already ended"
 
-#: backend/services/backup_key_release.py:85
+#: backend/services/backup_key_release.py:88
 msgid "This backup run's key was already released"
 msgstr "This backup run's key was already released"
 
-#: backend/services/backup_key_release.py:92
+#: backend/services/backup_key_release.py:95
 msgid "This backup run is too old to release its key"
 msgstr "This backup run is too old to release its key"
 
-#: backend/services/backup_key_release.py:108
+#: backend/services/backup_key_release.py:113
 msgid "This host's backups are not encrypted"
 msgstr "This host's backups are not encrypted"
+
+#: backend/services/backup_key_release.py:147
+msgid "Snapshot signing is not turned on"
+msgstr "Snapshot signing is not turned on"
+
+#: backend/services/backup_key_release.py:152
+msgid "Signed backups need the Professional+ backup engine"
+msgstr "Signed backups need the Professional+ backup engine"
 
 #: backend/services/malware_quarantine.py:132
 msgid "Unknown action"

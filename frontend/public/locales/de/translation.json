@@ -4043,7 +4043,11 @@
       "pmNetUnmanaged": "In Ihren Netzwerken befinden sich keine nicht verwalteten Geräte",
       "pmMalwareClean": "Keine offenen Schadsoftware-Befunde mit hohem Schweregrad",
       "pmMalwareScanned": "Hosts werden auf Schadsoftware gescannt",
-      "pmClocksInBounds": "Die Uhr jedes Hosts liegt innerhalb ihrer Grenzwerte"
+      "pmClocksInBounds": "Die Uhr jedes Hosts liegt innerhalb ihrer Grenzwerte",
+      "pmBackupCoverage": "Jeder Host, der gesichert werden kann, hat eine Sicherungsrichtlinie",
+      "pmBackupHealthy": "Keine Sicherung eines Hosts ist fehlgeschlagen oder überfällig",
+      "pmBackupKeyEscrow": "Die Sicherungsschlüssel jedes verschlüsselten Hosts sind für den Notfall exportiert",
+      "pmBackupVerified": "Die Sicherungen jedes Hosts haben in den letzten 30 Tagen eine Verifizierung mit vollständigem Lesen bestanden"
     },
     "curatedPack": {
       "baseline": {
@@ -4158,7 +4162,10 @@
         "unsupported_platform": "diese Korrektur unterstützt die Plattform des Hosts nicht",
         "dispatch_failed": "die Änderung konnte nicht an den Host gesendet werden; siehe Serverprotokoll"
       },
-      "resync_clocks": "Prüfen Sie den Zeitdienst jedes Hosts und synchronisieren Sie die Uhren außerhalb ihrer Grenzwerte neu."
+      "resync_clocks": "Prüfen Sie den Zeitdienst jedes Hosts und synchronisieren Sie die Uhren außerhalb ihrer Grenzwerte neu.",
+      "export_backup_keys": "Exportieren Sie die Sicherungsschlüssel auf der Seite Sicherungen erneut, versiegelt mit Ihrem Treuhandschlüssel, und ersetzen Sie den älteren Export.",
+      "review_backups": "Richten Sie auf der Seite Sicherungen für jeden Host ohne Sicherungsrichtlinie eine ein, und beheben Sie fehlgeschlagene oder überfällige Sicherungen.",
+      "verify_backups": "Legen Sie in der Sicherungsrichtlinie jedes Hosts ein Intervall für die Verifizierung mit vollständigem Lesen fest, und beheben Sie jede fehlgeschlagene Verifizierung."
     },
     "saved": "Bedrohungsmodell gespeichert. Die Maßnahmenliste wird beim nächsten Durchlauf des Beraters neu ausgewertet.",
     "stale": {
@@ -5413,7 +5420,9 @@
       "hookNothing": "Der Hook {{service}} hatte nichts zu beheben.",
       "hookFailed": "Der Hook {{service}} ist nach der Wiederherstellung fehlgeschlagen, daher ist die Wiederherstellung unvollständig. Das restate-Protokoll auf dem Host nennt den Grund.",
       "hookMissing": "Dieser Host hat keinen Hook {{service}}, der beheben könnte, was das Pausieren des Dienstes in den wiederhergestellten Dateien hinterlassen hat. Erledigen Sie das von Hand.",
-      "hookUnreadable": "restate konnte nicht erkennen, zu welchem Hook {{dir}} gehört, daher wurde kein Hook ausgeführt."
+      "hookUnreadable": "restate konnte nicht erkennen, zu welchem Hook {{dir}} gehört, daher wurde kein Hook ausgeführt.",
+      "signed": "signiert",
+      "unsigned": "nicht signiert"
     },
     "run": {
       "busy": "Belegt, wird wiederholt",
@@ -5472,6 +5481,9 @@
       "restateVersions": "Verwendete restate-Versionen",
       "saveError": "Das Ziel konnte nicht gespeichert werden.",
       "sealMode": "Jede Sicherung versiegeln",
+      "signing": "Jeden Snapshot signieren",
+      "signingOn": "Ein, Schlüssel {{fingerprint}}",
+      "signingOff": "Aus (Professional+)",
       "sealNone": "Nicht versiegeln",
       "sealZfs": "ZFS-Snapshot",
       "storageHost": "Speicher-Host",

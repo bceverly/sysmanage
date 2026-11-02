@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 09:14-0500\n"
+"POT-Creation-Date: 2026-11-02 15:53-0500\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -4313,7 +4313,7 @@ msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr ""
 "Этот снимок не подписан; подтвердите, чтобы всё равно восстановить его"
 
-#: backend/api/backups.py:845 backend/services/backup_key_release.py:112
+#: backend/api/backups.py:845 backend/services/backup_key_release.py:117
 msgid "Encrypted backups need the Professional+ backup engine"
 msgstr ""
 "Для зашифрованных резервных копий нужен модуль резервного копирования "
@@ -5914,30 +5914,41 @@ msgstr "Выберите хотя бы один хост для сканиров
 msgid "At most 500 hosts can be scanned in one request"
 msgstr "За один запрос можно просканировать не более 500 хостов"
 
-#: backend/services/backup_key_release.py:75
+#: backend/services/backup_key_release.py:78
+#: backend/services/backup_key_release.py:149
 msgid "No such backup run for this host"
 msgstr "Такой задачи резервного копирования для этого хоста нет"
 
-#: backend/services/backup_key_release.py:81
+#: backend/services/backup_key_release.py:84
 msgid "This backup run does not need a key"
 msgstr "Этой задаче резервного копирования ключ не нужен"
 
-#: backend/services/backup_key_release.py:83
+#: backend/services/backup_key_release.py:86
 msgid "This backup run has already ended"
 msgstr "Эта задача резервного копирования уже завершена"
 
-#: backend/services/backup_key_release.py:85
+#: backend/services/backup_key_release.py:88
 msgid "This backup run's key was already released"
 msgstr "Ключ этой задачи резервного копирования уже выдан"
 
-#: backend/services/backup_key_release.py:92
+#: backend/services/backup_key_release.py:95
 msgid "This backup run is too old to release its key"
 msgstr ""
 "Эта задача резервного копирования слишком старая, чтобы выдать ее ключ"
 
-#: backend/services/backup_key_release.py:108
+#: backend/services/backup_key_release.py:113
 msgid "This host's backups are not encrypted"
 msgstr "Резервные копии этого хоста не зашифрованы"
+
+#: backend/services/backup_key_release.py:147
+msgid "Snapshot signing is not turned on"
+msgstr "Подпись снимков не включена"
+
+#: backend/services/backup_key_release.py:152
+msgid "Signed backups need the Professional+ backup engine"
+msgstr ""
+"Для подписанных резервных копий нужен механизм резервного копирования "
+"Professional+"
 
 #: backend/services/malware_quarantine.py:132
 msgid "Unknown action"

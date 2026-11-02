@@ -35,12 +35,15 @@ from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
+from backend.services import backup_signing
 from backend.services import queue_clock
 
 logger = logging.getLogger(__name__)
 
 RELEASE_WINDOW = timedelta(hours=1)
-KEYED_ACTIONS = (jobs.RESTORE, jobs.LIST, jobs.STATUS, jobs.VERIFY)
+# ``sign`` runs on the STORAGE host and gets the snapshot signer's secret
+# key, not the repository's (Pro+ 24.6, backup_signing).
+KEYED_ACTIONS = (jobs.RESTORE, jobs.LIST, jobs.STATUS, jobs.VERIFY, backup_signing.SIGN)
 
 
 class KeyRefused(Exception):
@@ -104,6 +107,8 @@ def release(
         .filter(models.BackupPolicy.id == run.policy_id)
         .first()
     )
+    if run.action == backup_signing.SIGN:
+        return _release_signer(db, run, policy, host_id, now)
     if policy is None or not jobs.encrypted(policy):
         raise KeyRefused(409, _("This host's backups are not encrypted"))
     engine = module_loader.get_module("backup_engine")
@@ -131,3 +136,35 @@ def release(
         run.action,
     )
     return keys
+
+
+def _release_signer(
+    db: Session, run: models.BackupRun, policy, host_id: str, now: datetime
+) -> List[str]:
+    """The snapshot signer's secret key, for the target's own storage host."""
+    target = backup_signing.target_of(db, policy) if policy is not None else None
+    if not backup_signing.signing_on(target):
+        raise KeyRefused(409, _("Snapshot signing is not turned on"))
+    if str(target.storage_host_id) != str(host_id):
+        raise KeyRefused(404, _("No such backup run for this host"))
+    engine = module_loader.get_module("backup_engine")
+    if engine is None or not hasattr(engine, "signing_secret_key"):
+        raise KeyRefused(402, _("Signed backups need the Professional+ backup engine"))
+    try:
+        key = engine.signing_secret_key(target)
+    except Exception as error:  # the engine's own message says why
+        logger.exception(
+            "Snapshot signing key for run %s (host %s) could not be read: %s",
+            run.id,
+            host_id,
+            error,
+        )
+        raise KeyRefused(503, str(error)) from error
+    run.key_released_at = now
+    logger.info(
+        "Snapshot signing key %s released to storage host %s for run %s",
+        target.sign_fingerprint,
+        host_id,
+        run.id,
+    )
+    return [key]

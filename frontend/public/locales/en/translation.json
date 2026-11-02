@@ -4043,7 +4043,11 @@
       "pmNetUnmanaged": "No unmanaged devices are on your networks",
       "pmMalwareClean": "No open high-severity malware findings",
       "pmMalwareScanned": "Hosts are scanned for malware",
-      "pmClocksInBounds": "Every host's clock is within its bounds"
+      "pmClocksInBounds": "Every host's clock is within its bounds",
+      "pmBackupCoverage": "Every host that can be backed up has a backup policy",
+      "pmBackupHealthy": "No host's backups have failed or fallen behind",
+      "pmBackupVerified": "Every host's backups passed a full-read verification in the last 30 days",
+      "pmBackupKeyEscrow": "Every encrypted host's backup keys are exported for break-glass"
     },
     "curatedPack": {
       "baseline": {
@@ -4158,7 +4162,10 @@
         "unsupported_platform": "this remedy does not support the host's platform",
         "dispatch_failed": "the change could not be sent to the host; see the server log"
       },
-      "resync_clocks": "Check each host's time service and resynchronize the clocks outside their bounds."
+      "resync_clocks": "Check each host's time service and resynchronize the clocks outside their bounds.",
+      "review_backups": "Configure a backup policy for each host that has none, and fix the backups that failed or are overdue, on the Backups page.",
+      "verify_backups": "Set a full-read verification cadence on each host's backup policy, and fix any failed pass.",
+      "export_backup_keys": "Export the backup keys again from the Backups page, sealed to your escrow key, and replace the older export."
     },
     "saved": "Threat model saved. The punch list is re-evaluated on the next advisor pass.",
     "stale": {
@@ -5413,7 +5420,9 @@
       "hookNothing": "The {{service}} hook had nothing to put right.",
       "hookFailed": "The {{service}} hook failed after the restore, so the restore is incomplete. The restate log on the host says why.",
       "hookMissing": "This host has no {{service}} hook to put right what pausing it left in the restored files. Do that by hand.",
-      "hookUnreadable": "restate could not tell which hook {{dir}} is for, so no hook was run."
+      "hookUnreadable": "restate could not tell which hook {{dir}} is for, so no hook was run.",
+      "signed": "signed",
+      "unsigned": "not signed"
     },
     "run": {
       "busy": "Busy, will retry",
@@ -5472,6 +5481,9 @@
       "restateVersions": "restate versions in use",
       "saveError": "The target could not be saved.",
       "sealMode": "Seal each backup",
+      "signing": "Sign each snapshot",
+      "signingOn": "On, key {{fingerprint}}",
+      "signingOff": "Off (Professional+)",
       "sealNone": "Do not seal",
       "sealZfs": "ZFS snapshot",
       "storageHost": "Storage host",

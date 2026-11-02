@@ -4043,7 +4043,11 @@
       "pmNetUnmanaged": "Aucun appareil non géré ne se trouve sur vos réseaux",
       "pmMalwareClean": "Aucun constat de logiciel malveillant de gravité élevée ouvert",
       "pmMalwareScanned": "Les hôtes sont analysés à la recherche de logiciels malveillants",
-      "pmClocksInBounds": "L'horloge de chaque hôte est dans ses limites"
+      "pmClocksInBounds": "L'horloge de chaque hôte est dans ses limites",
+      "pmBackupCoverage": "Chaque hôte pouvant être sauvegardé a une politique de sauvegarde",
+      "pmBackupHealthy": "Aucune sauvegarde d'hôte n'a échoué ni pris de retard",
+      "pmBackupKeyEscrow": "Les clés de sauvegarde de chaque hôte chiffré sont exportées pour les urgences",
+      "pmBackupVerified": "Les sauvegardes de chaque hôte ont réussi une vérification par lecture complète au cours des 30 derniers jours"
     },
     "curatedPack": {
       "baseline": {
@@ -4158,7 +4162,10 @@
         "unsupported_platform": "cette correction ne prend pas en charge la plateforme de l'hôte",
         "dispatch_failed": "la modification n'a pas pu être envoyée à l'hôte ; consultez le journal du serveur"
       },
-      "resync_clocks": "Vérifiez le service de temps de chaque hôte et resynchronisez les horloges hors de leurs limites."
+      "resync_clocks": "Vérifiez le service de temps de chaque hôte et resynchronisez les horloges hors de leurs limites.",
+      "export_backup_keys": "Exportez de nouveau les clés de sauvegarde depuis la page Sauvegardes, scellées avec votre clé de séquestre, et remplacez l'export précédent.",
+      "review_backups": "Configurez une politique de sauvegarde pour chaque hôte qui n'en a pas, et corrigez les sauvegardes échouées ou en retard, sur la page Sauvegardes.",
+      "verify_backups": "Définissez une fréquence de vérification par lecture complète dans la politique de sauvegarde de chaque hôte, et corrigez toute vérification échouée."
     },
     "saved": "Modèle de menaces enregistré. La liste des points à traiter sera réévaluée lors du prochain passage du conseiller.",
     "stale": {
@@ -5413,7 +5420,9 @@
       "hookNothing": "Le hook {{service}} n'avait rien à corriger.",
       "hookFailed": "Le hook {{service}} a échoué après la restauration ; la restauration est donc incomplète. Le journal de restate sur l'hôte en indique la raison.",
       "hookMissing": "Cet hôte n'a aucun hook {{service}} pour corriger ce que la mise en pause du service a laissé dans les fichiers restaurés. Faites-le à la main.",
-      "hookUnreadable": "restate n'a pas pu déterminer à quel hook correspond {{dir}} ; aucun hook n'a donc été exécuté."
+      "hookUnreadable": "restate n'a pas pu déterminer à quel hook correspond {{dir}} ; aucun hook n'a donc été exécuté.",
+      "signed": "signé",
+      "unsigned": "non signé"
     },
     "run": {
       "busy": "Occupé, nouvelle tentative prévue",
@@ -5472,6 +5481,9 @@
       "restateVersions": "Versions de restate utilisées",
       "saveError": "La cible n'a pas pu être enregistrée.",
       "sealMode": "Sceller chaque sauvegarde",
+      "signing": "Signer chaque instantané",
+      "signingOn": "Activée, clé {{fingerprint}}",
+      "signingOff": "Désactivée (Professional+)",
       "sealNone": "Ne pas sceller",
       "sealZfs": "Instantané ZFS",
       "storageHost": "Hôte de stockage",
