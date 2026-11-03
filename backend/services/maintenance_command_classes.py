@@ -149,7 +149,7 @@ WINDOW_GATED_COMMANDS = frozenset(
 )
 
 # backup_run actions that only read the repository or the host.
-_READ_ONLY_BACKUP = frozenset({"snapshots", "estimate", "check"})
+_READ_ONLY_BACKUP = frozenset({"snapshots", "signatures", "estimate", "check"})
 
 # cloud_backup_run actions that only sign in or list (an operator is waiting).
 _INTERACTIVE_CLOUD = frozenset({"connect", "libraries"})

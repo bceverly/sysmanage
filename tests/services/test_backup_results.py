@@ -405,6 +405,101 @@ def test_a_good_prune_sizes_the_repository_with_du(session, sent):
     assert (snap.bytes, snap.new_bytes, snap.unique_bytes) == (50_000, 2_000, 1_500)
 
 
+def test_du_puts_back_snapshots_the_catalog_lost(session, sent):
+    """du lists the whole repository: a snapshot the catalog does not know
+    is added, dated from its name (lab, t14, 2026-11-03: a deleted policy
+    cascaded the catalog and three intact snapshots vanished from the UI)."""
+    s = _setup(session)
+    du = jobs.queue_run(session, s.policy, s.nas.id, "du")
+    results.record_result(session, s.nas.id, _result(du, du={
+        "repository": "/srv/backups/restate/h", "bytes": 9_000,
+        "snapshots": [{"name": "20261102T181741Z", "bytes": 5_000, "listed": True},
+                      {"name": "20261103T184011Z", "bytes": 4_000, "listed": True}],
+    }))  # fmt: skip
+    rows = {
+        r.name: r
+        for r in session.query(models.BackupSnapshot).filter_by(policy_id=s.policy.id)
+    }
+    assert set(rows) == {"20261102T181741Z", "20261103T184011Z"}
+    old = rows["20261102T181741Z"]
+    assert old.gone_at is None and old.bytes == 5_000
+    assert old.created_at == datetime(2026, 11, 2, 18, 17, 41)
+    assert old.repository_dir == s.policy.repository_dir
+
+
+def _recovered(session, sent, abilities):
+    s = _setup(session)
+    s.policy.storage_abilities = json.dumps(abilities)
+    du = jobs.queue_run(session, s.policy, s.nas.id, "du")
+    results.record_result(session, s.nas.id, _result(du, du={
+        "snapshots": [{"name": "20261103T154610Z", "bytes": 5, "listed": True}],
+    }))  # fmt: skip
+    return s
+
+
+def test_recovered_snapshots_get_their_signatures_listed_on_storage(session, sent):
+    """A snapshot du put back lost its signed flag with its row: the storage
+    host (never the backed-up host) lists signatures against the signer."""
+    s = _recovered(session, sent, ["sign", "signatures"])
+    listing = session.query(models.BackupRun).filter_by(action="signatures").one()
+    assert listing.host_id == s.nas.id
+    assert sent[-1][0] == str(s.nas.id) and sent[-1][2]["action"] == "signatures"
+
+
+def test_no_signature_listing_where_the_storage_agent_cannot(session, sent):
+    _recovered(session, sent, ["sign"])
+    assert session.query(models.BackupRun).filter_by(action="signatures").count() == 0
+
+
+def test_the_signature_listing_only_adds_trusted_signatures(session, sent):
+    s = _setup(session)
+    _upsert = results._upsert_snapshot  # pylint: disable=protected-access
+    for name in ("trusted", "foreign", "unsigned", "was-signed"):
+        _upsert(session, s.policy, name, {"bytes": 1})
+    row = session.query(models.BackupSnapshot).filter_by(name="was-signed").one()
+    row.signed, row.signer = True, "F00D"
+    listing = jobs.queue_run(session, s.policy, s.nas.id, "signatures")
+    results.record_result(session, s.nas.id, _result(listing, snapshots=[
+        {"name": "trusted", "signed": True, "trusted": True, "signer": "9F8B"},
+        {"name": "foreign", "signed": True, "trusted": False, "issuer": "BAD1"},
+        {"name": "unsigned", "signed": False, "trusted": False},
+        {"name": "was-signed", "signed": False, "trusted": False},
+        {"name": "not-in-the-catalog", "trusted": True, "signer": "9F8B"},
+        "not-an-object",
+    ]))  # fmt: skip
+    rows = {r.name: r for r in session.query(models.BackupSnapshot).all()}
+    assert (rows["trusted"].signed, rows["trusted"].signer) == (True, "9F8B")
+    assert not rows["foreign"].signed and not rows["unsigned"].signed
+    assert (rows["was-signed"].signed, rows["was-signed"].signer) == (True, "F00D")
+    assert "not-in-the-catalog" not in rows
+
+
+def test_the_storage_side_gets_the_signatures_job_only_where_it_runs(session):
+    s = _setup(session)
+    s.target.sign_public_key = "-----BEGIN PGP PUBLIC KEY BLOCK-----"
+    out = jobs.storage_configuration(s.policy, s.target, s.host)
+    assert "signatures" not in out["jobs"] and "trusted_key" not in out
+    s.policy.storage_abilities = json.dumps(["signatures"])
+    out = jobs.storage_configuration(s.policy, s.target, s.host)
+    assert out["jobs"]["signatures"] == {}
+    assert out["trusted_key"] == s.target.sign_public_key
+
+
+def test_a_storage_agent_newly_listing_signatures_gets_its_job_file(session):
+    """Its configure was built before the server knew, so the version moves
+    once and the next tick sends the signatures job."""
+    s = _setup(session)
+    version = s.policy.config_version
+    jobs.store_storage_abilities(s.policy, ["sign", "made-up"])
+    assert s.policy.config_version == version
+    assert json.loads(s.policy.storage_abilities) == ["sign"]
+    jobs.store_storage_abilities(s.policy, ["sign", "signatures"])
+    jobs.store_storage_abilities(s.policy, ["sign", "signatures"])
+    assert s.policy.config_version == version + 1
+    jobs.store_storage_abilities(s.policy, None)  # an older agent: unchanged
+    assert jobs.storage_lists_signatures(s.policy)
+
+
 def test_du_retires_snapshots_it_no_longer_lists(session, sent):
     """A snapshot pruned without the prune's result arriving stayed "live"
     forever; du lists the whole repository, so what it omits is gone (lab,

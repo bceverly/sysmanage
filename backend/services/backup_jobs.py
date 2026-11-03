@@ -56,7 +56,12 @@ SYSTEM_ACTOR = "system:backup-scheduler"
 HOST_ACTIONS = ("capture", "snapshots", "estimate")
 # ``prepare`` is started by an administrator: the storage host gives the
 # repository its own dataset / subvolume and an export to that host only.
-STORAGE_ACTIONS = ("seal", "prune", "check", "du", "repack", "prepare", "protect")
+STORAGE_ACTIONS = (
+    "seal", "prune", "check", "du", "repack", "prepare", "protect", "signatures",
+)  # fmt: skip
+# restate ``snapshots`` on the STORAGE host, checked against the signer's
+# public key: which snapshots are signed, from the trusted side.
+SIGNATURES = "signatures"
 PREPARE = "prepare"
 # Read-only host jobs started from the UI (restate 2.1.0.4+): browse one
 # directory of a snapshot, and what changed since one.
@@ -318,7 +323,7 @@ def storage_configuration(
     policy: models.BackupPolicy, target: models.BackupTarget, host: models.Host
 ) -> Dict[str, Any]:
     """The storage host's jobs for ONE backed-up host's repository."""
-    return {
+    out = {
         "policy_id": str(policy.id),
         "role": "storage",
         "target": {
@@ -345,6 +350,39 @@ def storage_configuration(
             "protect": {},
         },
     }
+    if storage_lists_signatures(policy):
+        # Started after a lost catalog is rebuilt (du): which snapshots the
+        # signer signed, checked here rather than taken from the host.
+        out["jobs"][SIGNATURES] = {}
+        if getattr(target, "sign_public_key", None):
+            out["trusted_key"] = target.sign_public_key
+    return out
+
+
+STORAGE_ABILITIES = ("keep_yearly", "sign", SIGNATURES)
+
+
+def store_storage_abilities(policy: Optional[models.BackupPolicy], found: Any) -> None:
+    """What the storage host's restate offers (yearly retention): a policy
+    may keep yearly snapshots only where the prune that honors them runs.
+    An older agent reports nothing, which leaves what was known.  A storage
+    agent that newly lists signatures gets its job file on the next tick:
+    the configure it answered was built before the server knew."""
+    if policy is None or not isinstance(found, list):
+        return
+    could = storage_lists_signatures(policy)
+    policy.storage_abilities = json.dumps(sorted(set(found) & set(STORAGE_ABILITIES)))
+    if storage_lists_signatures(policy) and not could:
+        policy.config_version += 1
+
+
+def storage_lists_signatures(policy: models.BackupPolicy) -> bool:
+    """The storage host's agent reported it can list signatures there."""
+    try:
+        found = json.loads(policy.storage_abilities or "[]")
+    except ValueError:
+        return False
+    return isinstance(found, list) and SIGNATURES in found
 
 
 def seal_job(target: models.BackupTarget) -> Dict[str, Any]:

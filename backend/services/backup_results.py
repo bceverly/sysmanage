@@ -189,19 +189,6 @@ def _store_abilities(policy: Optional[models.BackupPolicy], found: Any) -> None:
         policy.host_abilities = json.dumps(sorted(set(found) & set(_ABILITIES)))
 
 
-_STORAGE_ABILITIES = ("keep_yearly", "sign")
-
-
-def _store_storage_abilities(policy: Optional[models.BackupPolicy], found: Any) -> None:
-    """What the storage host's restate offers (yearly retention): a policy
-    may keep yearly snapshots only where the prune that honors them runs.
-    An older agent reports nothing, which leaves what was known."""
-    if policy is not None and isinstance(found, list):
-        policy.storage_abilities = json.dumps(
-            sorted(set(found) & set(_STORAGE_ABILITIES))
-        )
-
-
 def _store_protects(policy: Optional[models.BackupPolicy], installed: Any) -> None:
     """Did the storage host install the ``protect`` job (its restate has it)?"""
     if policy is not None and isinstance(installed, list):
@@ -359,7 +346,7 @@ def _configured(db: Session, run: models.BackupRun, reply: Any) -> None:
     if role != "storage":
         return
     if isinstance(reply, dict):
-        _store_storage_abilities(_policy(db, run), reply.get("abilities"))
+        jobs.store_storage_abilities(_policy(db, run), reply.get("abilities"))
         _store_audit(_policy(db, run), reply.get("storage_audit"))
         if _store_nfs_path(_policy(db, run), reply.get("nfs_path")):
             # The host needs the new version now, not on the next tick: its
@@ -385,7 +372,7 @@ def _configured_self(db: Session, run: models.BackupRun, reply: Any) -> None:
     _store_hooks(policy, reply.get("hooks"))
     _store_abilities(policy, reply.get("abilities"))
     network_mounts.store_configured(policy, reply.get("network_mounts"))
-    _store_storage_abilities(policy, reply.get("storage_abilities"))
+    jobs.store_storage_abilities(policy, reply.get("storage_abilities"))
     _store_protects(policy, reply.get("installed"))
 
 
@@ -711,8 +698,22 @@ def _after_repack(db: Session, run: models.BackupRun, policy, result) -> None:
         _storage_next(db, policy, "du")
 
 
-def _size_snapshot(db: Session, policy, entry: Dict[str, Any]) -> None:
-    """One du entry's sizes onto that live snapshot of the policy, if any."""
+def _stamp_time(name: str) -> Optional[datetime]:
+    """A snapshot's time from its name (``20261103T184011Z``), naive UTC."""
+    try:
+        return datetime.strptime(name[:16], "%Y%m%dT%H%M%SZ")
+    except ValueError:
+        return None
+
+
+def _size_snapshot(db: Session, policy, entry: Dict[str, Any]) -> bool:
+    """One du entry's sizes onto that live snapshot of the policy; True when
+    the catalog lost it (lab, t14, 2026-11-03: a deleted policy cascaded the
+    rows) and du's listing of the repository put it back."""
+    sizes = {
+        field: _int(entry.get(field))
+        for field in ("bytes", "new_bytes", "unique_bytes")
+    }
     snapshot = (
         db.query(models.BackupSnapshot)
         .filter(
@@ -723,11 +724,13 @@ def _size_snapshot(db: Session, policy, entry: Dict[str, Any]) -> None:
         .first()
     )
     if snapshot is None:
-        return
-    for field in ("bytes", "new_bytes", "unique_bytes"):
-        value = _int(entry.get(field))
+        name = entry["name"][:255]
+        _upsert_snapshot(db, policy, name, dict(sizes, created_at=_stamp_time(name)))
+        return True
+    for field, value in sizes.items():
         if value is not None:
             setattr(snapshot, field, value)
+    return False
 
 
 def _after_du(db: Session, run: models.BackupRun, policy, result) -> None:
@@ -739,9 +742,9 @@ def _after_du(db: Session, run: models.BackupRun, policy, result) -> None:
     total = _int(usage.get("bytes"))
     if total is not None:
         policy.repository_bytes = total
-    for entry in usage.get("snapshots") or []:
-        if isinstance(entry, dict) and isinstance(entry.get("name"), str):
-            _size_snapshot(db, policy, entry)
+    added = [_size_snapshot(db, policy, e) for e in _named(usage.get("snapshots"))]
+    if any(added) and jobs.storage_lists_signatures(policy):
+        _storage_next(db, policy, jobs.SIGNATURES)  # their signatures too
     # du lists every snapshot in the repository, so one it does not list is
     # gone.  The prune's own "pruned" list was the only other source, and a
     # prune whose result never arrived left its snapshots "live" forever --
@@ -855,6 +858,7 @@ _AFTER = {
     "seal": _after_seal,
     "prune": _after_prune,
     "snapshots": _after_snapshots,
+    jobs.SIGNATURES: backup_signing.record_listing,
     "estimate": _after_estimate,
     "check": _after_check,
     "du": _after_du,

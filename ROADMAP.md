@@ -14103,7 +14103,7 @@ A **storage target** is a place repositories live, reached by hosts as a mount: 
 - [x] **Per-host exports:** NFSv4, one export per host restricted to that host's IP, `all_squash` + `anonuid` mapped to a dedicated `restate` user on the target (root on the client must not be root on the target); a host can reach only its own directory -- DONE (audit 2026-10-23): Prepare storage (24.5 part 3): own ZFS dataset / btrfs subvolume, export limited to the host's address and mapped to the backup account (FreeBSD sharenfs, Linux /etc/exports.d); a host can reach only its own repository (proven from t14: other paths under the NFSv4 root read EIO)
 - [x] **Append-only writes:** the host's access can create new packs and snapshots but cannot delete or rewrite existing ones -- through restate's append-only writer mode (sysmanage-todo.md item 18) plus target-side enforcement (directory permissions, NAS-side immutable snapshots of the tree, 24.5). Proven in 24.0 -- PROVEN 2026-10-23 with restate 2.1.0.3 (freebsd storage, ZFS; t14 host): capture ok in 52 s, then protect (12 files, 1 snapshot), seal, prune, du -- the chain end to end; from t14 as root, mounting its own export by hand: deleting, renaming, overwriting or chmod'ing a pack, deleting or renaming a snapshot, adding or removing files inside one, and renaming packs/ were all refused, while adding new files still works; the storage audit is ok on every check, append_only_layout included
 - [x] **On-demand mount:** the agent mounts `<target>/<dir>` when a job starts and unmounts after; the server verifies the mount before the first capture (writable, locking holds, append-only holds, free space) and on every run -- DONE 2026-10-22/23: the agent mounts the host's own export per job and unmounts after (24.5 part 4); before a capture writes anything a pre-flight checks the repository takes a new file, NFS locking works on it, and >= 1 GiB and 1% are free, off the event loop with a 30 s timeout, refusing the run with the reason otherwise; append-only is the storage check's (24.5)
-- [ ] **Encryption (Pro+, 24.6 -- not Community):** every repository initialized with `--encrypt-to <public key>`; hosts hold only the public key, the private key never lives on a backed-up host (24.6 / 24.8 key handling) -- 2026-10-20: not sent by the Community server; the agent accepts the armored public key as a top-level `encrypt_key` in `backup_configure`, to be filled from OpenBAO by the Pro+ `backup_engine` -- 2026-11-03 A LAPSE NEVER LOCKS ANYONE OUT OF THEIR OWN BACKUPS (Bryan: "please don't hold someone's safety hostage"): reading an encrypted policy's keys for a restore, browse, what-changed, diff or verification is open-source and works with no engine (`backend/services/backup_keys_read.py`, called by `backup_key_release`; the engine's `secret_keys` delegates to it), and the break-glass export is open-source too (`backend/services/backup_breakglass.py`, `GET/POST /api/v1/backups/break-glass`, a Community card on the Backups page shown when encrypted backups exist and the Pro+ panel is not loaded; the engine's route calls the same module, so the README and manifest are identical). Encrypted hosts keep backing up encrypted and restores keep checking signatures (`trusted_key`) after a lapse; making, rotating and turning on encryption, signing new snapshots (which now stops quietly instead of failing a sign job nightly) and verification stay Pro+. Tests: tests/test_backup_community_unlicensed.py, tests/services/test_backup_breakglass_oss.py. PROVEN 2026-11-03 on the lab with backup_engine hidden in the requesting process: a restore preview and a real staging restore of /etc/sysmanage-proof from t14's ENCRYPTED snapshot 20261103T140008Z both asked for the key (needs_key) and got it released (14:06:53, 14:07:16 UTC); the restored file matched the live one (root:adm 0640, same SHA-256) and t14 held no key file afterwards
+- [x] **Encryption (Pro+, 24.6 -- not Community):** every repository initialized with `--encrypt-to <public key>`; hosts hold only the public key, the private key never lives on a backed-up host (24.6 / 24.8 key handling) -- 2026-10-20: not sent by the Community server; the agent accepts the armored public key as a top-level `encrypt_key` in `backup_configure`, to be filled from OpenBAO by the Pro+ `backup_engine` -- 2026-11-03 A LAPSE NEVER LOCKS ANYONE OUT OF THEIR OWN BACKUPS (Bryan: "please don't hold someone's safety hostage"): reading an encrypted policy's keys for a restore, browse, what-changed, diff or verification is open-source and works with no engine (`backend/services/backup_keys_read.py`, called by `backup_key_release`; the engine's `secret_keys` delegates to it), and the break-glass export is open-source too (`backend/services/backup_breakglass.py`, `GET/POST /api/v1/backups/break-glass`, a Community card on the Backups page shown when encrypted backups exist and the Pro+ panel is not loaded; the engine's route calls the same module, so the README and manifest are identical). Encrypted hosts keep backing up encrypted and restores keep checking signatures (`trusted_key`) after a lapse; making, rotating and turning on encryption, signing new snapshots (which now stops quietly instead of failing a sign job nightly) and verification stay Pro+. Tests: tests/test_backup_community_unlicensed.py, tests/services/test_backup_breakglass_oss.py. PROVEN 2026-11-03 on the lab with backup_engine hidden in the requesting process: a restore preview and a real staging restore of /etc/sysmanage-proof from t14's ENCRYPTED snapshot 20261103T140008Z both asked for the key (needs_key) and got it released (14:06:53, 14:07:16 UTC); the restored file matched the live one (root:adm 0640, same SHA-256) and t14 held no key file afterwards
 - [x] **Local write cache:** restate keeps a plaintext write cache under `/var/cache/restate/repositories/` on each host even for encrypted repositories -- its size is reported per host, budgeted, and alerted on; the cache directory is mode 0700 and excluded from the host's own backup -- 2026-10-23: waits on restate reporting the cache's path and size in the capture result (asked 2026-10-23); then shown and budgeted per host -- 2026-10-23: coded: the capture result's cache size is stored per run and the host's Backup card shows "Write cache on this host" against the target's new "Write cache budget per host (GB)" (default 20, migration q60sealkeep) (gated on `restate features` listing it, so an older restate is never asked; not yet proven on the lab, waits on the restate 2.1.0.4 release); the alert is the Alerts item below (Pro+); 2026-10-24 on restate 2.2.0.0: only an ENCRYPTED repository has a write cache (restate(8): the capture's plain-text copy of what it wrote, so it needs no secret key), so t14's unencrypted capture reports `cache: null` and the card shows no line; restate(8) documents the directory as root's alone, and `/var/cache` is in restate's built-in expendable rules, so it is left out of the host's own backup; proving the size line waits on an encrypted repository (Pro+ encryption) -- audit 2026-10-25: ticked for what SysManage reports (size per run, the card line, the per-target budget); the cache exists only for an encrypted repository, so proving the line and its alert moved to 24.6 (new box there)
 - [x] **Community limit:** exactly one target; a second target is an Enterprise feature (25.3) and shows as such -- done 2026-10-20: a second `POST /backups/targets` is 409 with "This edition supports one backup target"
 
@@ -14150,7 +14150,7 @@ The Community feature set, complete on its own:
 Ransomware resistance (see the warning box): hosts append; the storage side deletes.
 
 - [x] **Storage-side runner:** `prune`, `check` (and `check --read-all` on its cadence) and `copy` (25.3) run on the **target's** managed host -- the NAS's own agent -- against the repository directory locally, never from the backed-up host (sysmanage-todo.md item 19). The storage host is always a managed host running the agent -- a storage target that cannot run the agent (a NAS appliance) is out of scope (Bryan 2026-10-23: not realistic) -- 2026-10-20: server + agent done for `seal` / `prune` / `check` on the target's own agent; `copy` is 25.3; storage-side `du` added 2026-10-20: after every good prune the storage host runs `restate du` (pack lists only, no key) and the server records the repository's size on the target (`backup_policy.repository_bytes`, no longer only the host's own capture report) and, per snapshot, its bytes, new bytes and unique bytes (what removing it alone would free -- the input for 24.8 capacity forecasting); migration q51backupdu bumps every policy's `config_version` so existing storage hosts are re-sent job files with `du`; the FreeBSD sudoers regex admits `du`; FreeBSD storage hosts added 2026-10-20 (a ZFS NAS without systemd): the agent's `backup/job_runner.py` starts `restate run /etc/restate/jobs.d/<policy>.<action>.conf` under daemon(8) (`daemon -f -p <pidfile> -o <log>`, only restate elevated), "running" = the pidfile is still locked (a reused pid cannot fake it), SIGTERM forwarded, and a run with no result file reports the end of restate's output; FreeBSD takes the storage role only (the host role is refused as `wrong_platform`); the FreeBSD sudoers rule is a regular expression admitting exactly `restate run` of a `<uuid>.<prune|check|copy>.conf` (a wildcard would also admit `--result PATH`, a root write anywhere), proven on FreeBSD 14.4 / sudo 1.9.17 to refuse extra options, traversal and other actions, with a test keeping the rule and the agent's job paths in step; daemon pidfile/SIGTERM behavior proven on the lab FreeBSD box; a real restate prune/check there waits on the 24.0 lab proof -- audit 2026-10-25: ticked: prune, check, `check --read-all` on its cadence, du, repack, protect and seal run on the target's own agent, proven on the lab FreeBSD ZFS host 2026-10-21..23 (prune / du / repack 10-21, protect + audit 10-23); `copy` is the 24.10 off-site replication box
-- [ ] **Encrypted repositories:** the storage-side runner prunes and checks without the private key (packs are opaque to it); `check --read-all` on an encrypted repository runs where the key may be used (24.8 key handling) or is reported as "metadata-only"
+- [x] **Encrypted repositories:** the storage-side runner prunes and checks without the private key (packs are opaque to it); `check --read-all` on an encrypted repository runs where the key may be used (24.8 key handling) or is reported as "metadata-only" -- DONE: the storage side prunes, seals and checks metadata without any key (lab and production, nightly since 2026-11-02 on the three encrypted production repositories); `check --read-all` runs on the backed-up host with its keys released for that job only (24.6 S4 / scheduled verification), proven on the lab 2026-11-02/03 with restate 2.2.0.17
 - [x] **Immutable snapshots on the target** (ZFS / btrfs snapshots of the backup tree, taken after each prune), retained independently of restate's retention, so even a compromised target agent cannot remove the last N days; configured and reported per target -- 2026-10-20: target `seal_mode` (`none` | `zfs_snapshot` + dataset) queues a storage-side `seal` after every good capture and BEFORE any prune (a failed seal holds the prune); the page warns "Not sealed (no immutable copies)"; ZFS snapshot retention is the operator's for now; waits on the 24.0 lab proof; btrfs added 2026-10-20: `seal_mode` `btrfs_snapshot` (migration q49backupfs, `backup_target.btrfs_snapshot_dir`) sends the seal job `{"mode": "btrfs_snapshot", "subvolume": <storage_path>, "snapshot_dir": <dir>}` and the agent runs `sudo -n btrfs subvolume snapshot -r <subvolume> <snapshot_dir>/sysmanage-<run_id>` (both paths validated plain, absolute, normalized, no option-looking parts, snapshot directory outside the subvolume, on the server and again on the agent; sudoers on ubuntu / centos / opensuse); btrfs snapshot retention is also the operator's for now; the storage host reports the filesystem under the storage path (type, mount, btrfs subvolume root) in its `backup_configure` reply and the target warns when it cannot snapshot (ext4, xfs, NFS ...) and errors when the seal mode cannot work there (ZFS seal off ZFS, btrfs seal off btrfs or on a plain directory, with the `btrfs subvolume create` fix) -- DONE 2026-10-23: seal retention -- the target's "Keep sealed snapshots for (days)" (migration q60sealkeep, default 14) goes with the seal job; after each seal the storage host removes its own older seals (ZFS `<dataset>@sysmanage-<run id>` by ZFS creation time, `zfs destroy -r`; btrfs seals from its own ledger), never the newest; a failed removal is reported but never fails the seal; narrow sudo rules (FreeBSD regex for exactly that destroy form)
 - [x] **Storage audit, then protection, then UI-initiated preparation** (Bryan 2026-10-22: commercial software, so the storage set-up is either documented and audited with warnings / errors, or an admin starts it from the UI; nothing hand-built on one lab) -- five parts in order: (1) a read-only audit, (2) restate `protect` plus a recursive ZFS seal, (3) a "Prepare storage for this host" action (own dataset / subvolume, per-host export restricted to the host's address and mapped to the service account, append-only ownership), (4) agent-managed on-demand mounts (24.1), (5) docs plus the lab proof. Part 1 done 2026-10-22: the storage host's agent runs `backup/storage_audit.py` on every configure and every storage-side job and reports findings (`error` | `warning` | `ok`): baseline (NFS server enabled and running, NFSv4 served, NFSv4 only, FreeBSD `vfs.nfsd.enable_locallocks=1`, the `V4:` root line, the service account exists) and per repository (own filesystem, own export, no wider export reaching it, export limited to the host's address, every client mapped to the service account with an explicit group, append-only layout: root-owned 1770 directories, root-owned read-only finished packs). The server keeps the latest audit per policy (migration q55backupaudit: `backup_target.service_account`, `backup_policy.storage_audit` / `storage_audit_at`), never from the backed-up host; the target card shows each problem with its fix and the hosts it touches, and an audit error marks the target as a problem. The service account is a target setting (default `restate`). The seal is now `zfs snapshot -r` so per-host child datasets are sealed too. First lab audit (freebsd, t14's repository): baseline ok; `export_shared` error (one export reaches every repository), `own_filesystem`, `export_own` and `append_only_layout` warnings -- exactly the gaps parts 2-3 close. Part 3 coded 2026-10-22, PROVEN on the lab the same day: "Prepare storage" on a host's Backups card queues a storage-side `prepare` run; the storage host's agent acts only on the policy it already validated (repository, the host's address, the service account) -- ZFS: a child dataset of the one mounted at the storage path (FreeBSD: `zfs create -o sharenfs="-mapall=ACCOUNT:ACCOUNT ADDRESS"`, re-run = `zfs set sharenfs`; Linux: plain `zfs create`); btrfs: `btrfs subvolume create`; other Linux filesystems: a directory; Linux exports through `/etc/exports.d/sysmanage-<policy>.exports` + `exportfs -ra`; FreeBSD without ZFS refused (`zfs_required`); then `root:ACCOUNT` mode 1770. It never moves data: a repository already holding files on the parent filesystem is refused (`not_empty`) with the steps to move it. Narrow sudo rules (FreeBSD regexes accepting exactly the planned `zfs create/set sharenfs` shapes, checked by a test; Ubuntu `zfs create *`, `btrfs subvolume create *`, `exportfs -ra`). The audit now knows an export never crosses into another filesystem (unless Linux `crossmnt` / `nohide`), so a parent export stops counting as `export_shared` once the repository is its own dataset. Address changes done 2026-10-22 (migration q56backupaddr: `backup_policy.storage_client_address`, plus a `config_version` bump -- q55 had not re-sent acknowledged job files, so the lab's storage host never got the host's address or the service account): a host whose address moves gets its storage job files re-sent, and when the storage host acknowledges the new address a repository that was prepared (its last ok `prepare` was for another address) is prepared again; one never prepared is left to the administrator. Part 4 coded 2026-10-22, PROVEN on the lab the same day: managed mounts -- the storage host's configure reply carries `nfs_path` (the repository's NFSv4 path: FreeBSD relative to the `V4:` root, Linux to an `fsid=0` export or the path itself), stored as `backup_policy.storage_nfs_path` (migration q57backupnfspath, which also re-sends); the host's job files then name `nfs: {server: <storage host address>, path}` and the host's agent mounts it at `<mount point>/<repo dir>` (`mount -t nfs4 -o vers=4,proto=tcp,hard,nosuid,nodev`) before a capture / estimate / listing / restore starts, refuses the run as `mount_failed` with the reason if it cannot, counts the runs using it, and unmounts after the last ends -- between jobs no repository is reachable from the host. A mount the operator made (fstab, autofs, of the share or the host's own export) is used as it is and never unmounted. Still open: pre-flight checks beyond "it mounted" (writable, locking, free space). Lab proof 2026-10-22 (freebsd storage, t14 host): t14's fstab automount removed; the agent mounted `192.168.4.212:/restate/t14-419718a7` (`nosuid,nodev,hard`, NFS 4.2) at 13:23:17, the capture ran ok in 53 s, it unmounted at 13:24:15, the seal followed. Then Prepare: the 18 GB repository moved aside, Prepare created `zroot/sysmanage-backups/restate/t14-419718a7` with `sharenfs=-mapall=restate:restate 192.168.4.196`, root:restate 1770; the contents copied back as root (`cp -Rp`), Prepare re-run; the shared `/srv/backups/restate` line removed from /etc/exports (only `V4:` left). The next capture mounted the new dataset (the parent needs no export for NFSv4 to reach it), ran ok in 57 s reusing 41.6 GB of existing packs, unmounted, and the recursive seal snapshotted both the parent and the child dataset. Audit after: every baseline and per-host check ok -- only `append_only_layout` warns (2,776 finished files the host could still delete; restate `protect`, part 2). Isolation: from t14, mounting `/restate`, `/` or another path under the NFSv4 root succeeds as a pseudo-filesystem, but every read of it is EIO -- nothing outside its own dataset is readable. Part 2 coded 2026-10-22 against restate 2.1.0.1 (not yet run on the lab): `protect` is a gated storage-side job (installed only where `restate features` lists the command; job key `group` = the target's service account); the storage configure reply's `installed` list sets `backup_policy.storage_protects` (migration q59backupprotect, which also re-sends job files), and the chain is capture -> protect -> seal-or-prune where it is set -- a failed protect is logged loudly but does not hold the seal back (an immutable copy is still worth taking). restate 2.1.0.1's full `check` of t14's moved repository: 695 packs, 0 damaged, "the repository is whole" (2.1.0.0 had flagged 5 seekable packs as damaged; a check bug, fixed). Part 2 lab, 2026-10-23: protect (2.1.0.1) locked the repository down -- 2,832 files, 9 snapshots; from t14 as root every delete/rename/overwrite/chmod of a pack or snapshot refused -- but FreeBSD's NFS server refuses a file made in a STICKY directory (after making it), so captures could not write. restate 2.1.0.2 protects with an NFSv4 ACL on ZFS instead (0770, `group@:D::deny`, `owner@:d:f/d:allow`); creates then work, but capture's own chmod of its temp pack drops the inherited delete entry (`aclmode=discard`), so renaming it into place fails (EPERM) -- reported to restate with a reproduction (create-then-rename works, create-chmod-rename does not). sysmanage side done: the audit accepts the ACL form, Prepare uses it on FreeBSD (narrow `setfacl` sudo rule), and new storage job files trigger a stand-alone protect (a restate upgrade can change how protect protects; a capture cannot run against the old form). Part 2 DONE 2026-10-23: restate 2.1.0.3 creates new packs without a chmod that drops the inherited delete entry; PROVEN 2026-10-23 with restate 2.1.0.3 (freebsd storage, ZFS; t14 host): capture ok in 52 s, then protect (12 files, 1 snapshot), seal, prune, du -- the chain end to end; from t14 as root, mounting its own export by hand: deleting, renaming, overwriting or chmod'ing a pack, deleting or renaming a snapshot, adding or removing files inside one, and renaming packs/ were all refused, while adding new files still works; the storage audit is ok on every check, append_only_layout included. Part 5 (docs) 2026-10-23: sysmanage-docs fleet-backup-storage.html rewritten around who does what -- the operator's one-time setup per platform (FreeBSD+ZFS, Linux), audited; Prepare storage; managed mounts; protect; the storage check's findings with their fixes; moving an existing repository onto its own filesystem -- and fleet-backups.html updated (protect, managed mounts, backup account, storage check, Services to pause, Prepare storage, new job kinds); 69 strings in 13 locales, all verified; screenshot seed now a ZFS target mid-migration with audits, hooks and protect/prepare runs (needs `make screenshots`). Still open: the parent export's removal is the operator's (documented) -- DONE (audit 2026-10-23): all five parts done and proven on the lab 2026-10-23
 - [x] **Scheduling:** storage-side jobs never overlap a capture on the same repository (restate exit 5 = retry later); prune runs after the night's captures, per target -- DONE (audit 2026-10-23): restate's repository lock + exit 5 busy with backoff; the storage chain (protect, seal, prune, du) follows each capture
@@ -14215,13 +14215,13 @@ How backups behave once they cover a real fleet (Community behavior; the multi-s
 #### 24.10 Docs, screenshots, i18n
 
 - [x] sysmanage-docs, Community: concepts (targets, policies, append-only), setup (FreeBSD and Linux storage hosts, Prepare storage, per-host exports, protect and seal), file restore, browse, What changed, the write cache and the dashboard card -- `administration/fleet-backups.html` and `administration/fleet-backup-storage.html`, plus the host-details walkthrough's Backup tab (audit 2026-10-25)
-- [ ] sysmanage-docs, Pro+: each Pro+ feature on its tier page, including package-level restore and the break-glass key procedure -- 2026-10-28: `professional-plus/fleet-backups-pro.html` covers encryption, key rotation, break-glass export, grandfather-father-son retention and backup alerts; the remaining Pro+ items (signing, scheduled verification, hook distribution, SLA report, compliance evidence, forecasting, drift timeline, package restore) join it as they ship; screenshots for it via `make screenshots`
+- [x] sysmanage-docs, Pro+: each Pro+ feature on its tier page, including package-level restore and the break-glass key procedure -- 2026-10-28: `professional-plus/fleet-backups-pro.html` covers encryption, key rotation, break-glass export, grandfather-father-son retention and backup alerts; the remaining Pro+ items (signing, scheduled verification, hook distribution, SLA report, compliance evidence, forecasting, drift timeline, package restore) join it as they ship; screenshots for it via `make screenshots` -- DONE 2026-11-03: `professional-plus/fleet-backups-pro.html` now also covers signing, scheduled verification, drift timeline, package restore, escrow and license lapse, tag policies and the break-glass procedure, with 11 Pro+/Enterprise screenshots from `make screenshots`, in 14 locales
 - [x] Screenshots through `make screenshots` (shotlist + seed data for hosts with snapshots, an overdue host, a restore plan) -- audit 2026-10-25: ticked: `screenshots/seed_backups.py` seeds hosts with snapshots, an overdue host, a failed one, wrong-platform hosts, a ZFS target mid-migration with audits, protect / seal / prepare runs and a restore plan; shotlist entries backups-hosts, -target, -policy, -restore and the host-detail tabs, reviewed 2026-10-23
 - [x] All new strings in 14 locales, verified; the docs roadmap page gets a "Fleet backup & recovery" card -- audit 2026-10-25: ticked: every Phase 24 frontend, backend gettext, agent and docs string is in 14 locales and passes i18n-verify; the docs roadmap page has the backup card (`coming.backup.body`)
 
 #### 24.11 Editions
 
-- [ ] **Community / OSS:**
+- [x] **Community / OSS:** -- DONE: all four shipped in the Community edition (agent integration 24.2, one target + schedule + keep-last-N + basic check 24.1/24.4, the Backups page and overdue status 24.4, append-only + storage-side runner 24.5); restore and key export also survive a license lapse (24.6, 2026-11-03)
   - the agent integration: optional-tool capability, the job-file + systemd-unit boundary, result reporting (24.2)
   - **one** backup target (24.1), per-host schedule and "Back up now", keep-last-N retention, a basic check (24.4)
   - the Backups page: per-host snapshot list, last good backup, overdue status on the host page and the dashboard (24.4)
@@ -14267,7 +14267,7 @@ The other half of "everything we care about is in one place we control": a house
 - [ ] **Deletion policy, stated plainly:** default keep everything ever downloaded; an explicit per-account option mirrors iCloud deletions (`--auto-delete`) with a warning that the seal is then the only copy of a deleted photo; `--keep-icloud-recent-days` (deleting from iCloud) is never offered -- BUILT 2026-11-03: keep everything by default; `--auto-delete` only with an explicit acknowledgment and a warning; `--keep-icloud-recent-days` never offered (a test asserts it never reaches argv)
 - [ ] **Getting photos back:** they are ordinary files on the storage host -- browse, copy, or import into Photos; the docs show how, and that XMP sidecars and EXIF carry dates, places and descriptions -- 2026-11-03: written in the new docs page (Administration, Backing up iCloud Photos, "Getting photos back")
 - [ ] **Security and roles:** a "Manage Cloud Backups" role (add accounts, enter codes, run now); every credential change, sign-in and run audited; the password never leaves OpenBAO except to the job that needs it; air-gapped installs hide the feature (it needs the internet, unlike the rest of this phase) -- BUILT 2026-11-03: role "Manage Cloud Backups" (q78 seeds it, granted to full-role holders); account changes, sign-ins, code entry, password and code releases and every run's result audited; air-gapped (`repository` role) hides it (API 404, section not rendered, tick skips)
-- [ ] Docs (setup, the Advanced Data Protection / "Access iCloud Data on the Web" requirement, the two-month sign-in, restore), screenshots, and every string in 14 locales -- 2026-11-03: docs page written (docs/administration/cloud-photos-backup.html, linked from Fleet Backups) in 14 locales (make i18n-fix, then 69 values the translator could not finish hand-translated, all verified); UI (85 keys) and server (32 msgids) strings hand-translated in 14 locales and verified; screenshots wait on the lab running the new code
+- [x] Docs (setup, the Advanced Data Protection / "Access iCloud Data on the Web" requirement, the two-month sign-in, restore), screenshots, and every string in 14 locales -- 2026-11-03: docs page written (docs/administration/cloud-photos-backup.html, linked from Fleet Backups) in 14 locales (make i18n-fix, then 69 values the translator could not finish hand-translated, all verified); UI (85 keys) and server (32 msgids) strings hand-translated in 14 locales and verified; screenshots wait on the lab running the new code -- DONE 2026-11-03: screenshots captured (`backups-cloud`, `backups-cloud-code`, `backups-cloud-enable`)
 
 #### 24.13 The storage host backs itself up (Community / OSS) (added 2026-11-01, Bryan)
 
@@ -14277,7 +14277,7 @@ The storage host keeps everyone else's backups, but today the Backups page shows
 - [x] **Never the pool or the backups:** the capture records the OS and never descends into the backups or the pool's other data (case data, archives); network mounts and automounts are left out as for any host (24.8 / network mounts); caches that rebuild themselves are excluded by default (e.g. an L2ARC backing file such as nas's `/var/lib/zfs-l2arc/cache0.img`, 120 GB) -- DONE 2026-11-03, not with `one_file_system`: on a root-on-ZFS system (FreeBSD's default) that would drop the OS's own datasets (/home, /usr/ports, /var/mail). Instead the agent writes `/etc/restate/rules.d/<policy>.self.rules` at every configure and before every capture (`self_backup.leave_out`): `ephemeral` for the storage path and everything under it, every ZFS dataset of a pool other than the one / is on (all of them when / is not on ZFS, as on nas), and present rebuildable caches (`/var/lib/zfs-l2arc`); it comes LAST in the capture's rules, so no "Also back up" pattern can bring the backups back. PROVEN (2026-11-03 lab proof on freebsd, root-on-ZFS, restate 2.2.0.17, with the job and rules files the new agent code builds for the `self` role, run by hand: the lab agents run the old code until Bryan updates and restarts them): the snapshot's /srv/backups is empty (restate list), /home/bceverly (zroot/home/bceverly), /usr/ports and /var/mail (their own datasets on the root pool) are in it; restate's built-in rules drop /var/log as expendable on every host. The other-pool and nas (OS on ext4, data on a ZFS pool) cases are unit-tested from nas's real mount table (agent tests/test_backup_self.py); freebsd has one pool -- 2026-11-03 through the server: a plan of `/srv/backups/**` from snapshot 20261103T131023Z matched nothing, while /etc/rc.conf was there
 - [x] **Never in the way of other hosts' backups:** its repository has its own lock, so other hosts keep capturing while it runs; it counts toward the target's concurrency cap and has its own schedule window, and storage-side jobs (seal, prune, check) treat it like any repository; protect and seal apply to it too -- PROVEN (2026-11-03 lab proof on freebsd, root-on-ZFS, restate 2.2.0.17, with the job and rules files the new agent code builds for the `self` role, run by hand: the lab agents run the old code until Bryan updates and restarts them): its repository has its own `lock`; a self capture 10:58:07-10:59:31 UTC (ok) enclosed t14's capture through the dev server's scheduler (10:58:06-10:58:46, ok, snapshot 20261103T105812Z) and t14's whole storage chain on freebsd (protect, seal, prune, du 10:58:48-10:59:07, all ok), nothing busy; an earlier full self capture (39 min) ran beside t14's encrypted verify on the same pool; protect then protected its 3 newer snapshots (3,912 files already); t14's seal (a recursive ZFS snapshot of the storage tree) sealed it with the rest. A capture counts toward the cap (`test_a_self_capture_counts_toward_the_targets_cap`); its storage chain is queued on the same machine (`test_a_self_capture_is_protected_sealed_and_pruned_on_the_same_machine`); prune and check of a self repository not run on the lab -- 2026-11-03 through the server: freebsd's self capture ran 13:10:23-13:49:07 UTC; t14's capture (13:11:15-13:11:55) and all of t14's storage jobs on freebsd (protect, seal, prune, du, to 13:12:18) ran inside it, all ok, none refused busy (target cap 2)
 - [ ] **Recovery runbook (docs, tested once):** the OS disk dies -> reinstall, `zpool import` the pool, restore the storage host's own repository from it (restate `buildsheet` gives the disk and package layout), reconnect the agent; the pool dies -> restore the pool from the off-site copy first -- 2026-11-03: written (Administration, Backup storage, section 9, "Recovering the storage host", five steps, 14 locales); its restore step tested for one file (2026-11-03 lab proof on freebsd, root-on-ZFS, restate 2.2.0.17, with the job and rules files the new agent code builds for the `self` role, run by hand: the lab agents run the old code until Bryan updates and restarts them): plan first, then /etc/rc.conf restored from 20261103T092521Z into a staging root, SHA-256 038cc5a2... identical with owner, mode and time; the whole runbook (a reinstall) not yet tested
-- [ ] Docs, screenshots and strings in 14 locales -- 2026-11-03: docs (section 9 of Backup storage) and strings in 14 locales done, hand-translated and verified; screenshots wait on the lab running the new code
+- [x] Docs, screenshots and strings in 14 locales -- 2026-11-03: docs (section 9 of Backup storage) and strings in 14 locales done, hand-translated and verified; screenshots wait on the lab running the new code -- DONE 2026-11-03: the storage host's "Configure self-backup" row is in `backups-hosts.png`, used in section 9
 
 ### Licensing summary
 
@@ -14312,7 +14312,7 @@ The storage host keeps everyone else's backups, but today the Backups page shows
 **Every phase**
 
 - [x] Every tier 402-clean when unlicensed, in both repos, with Community still able to back up and restore -- 2026-11-03, see 24.11 (one gap fixed; the encrypted-restore-after-lapse question is Bryan's)
-- [ ] Docs + 14-language i18n complete (24.10), including the break-glass key procedure, tested once
+- [x] Docs + 14-language i18n complete (24.10), including the break-glass key procedure, tested once -- DONE 2026-11-03: Community, Pro+ and storage pages complete with 20 backup screenshots and every string in 14 locales (all docs i18n gates and the GPU verifier pass); the break-glass procedure was tested once in the lab drill (export sealed to an operator key, restore with the SysManage server down)
 - [x] Home-screen card: **Backups** -- hosts with no good backup in N hours, incomplete or failed runs, unproven restore readiness and target space; links to the Backups page (card contract: Phase 37.1) -- 2026-10-25: the card exists since 2026-10-20 (24.4 overdue box); now titled "Backups needing attention", it counts hosts overdue, incomplete or failed plus the target once when its storage side has a problem (no storage host, stale seal / prune / check, a failed drive, critically full storage), red for a failure or a storage problem and yellow for overdue or incomplete (`backupSummaryLevel`), and opens the Backups page; "unproven restore readiness" joins it with the 25.1 restore-readiness box (Pro+ / Enterprise evidence); seen on the lab dashboard by Bryan 2026-10-25
 - [x] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before -- including whole i18n workstreams -- which made the backlog look far larger than it was and hid which gaps were real. *DONE 2026-11-03.* Phases 0-23 had NO unticked boxes, so the audit read the ticked items whose own note still said "pending", "still open", "deferred", "remains", "follow-up", "blocked on" or "to tick" (34 items, plus the 2 won't-do items) against the code in all four repos: 15 already resolved within their own entry, 6 correctly carried and tracked elsewhere, 5 stale notes for finished work now marked DONE (BSD service control, the SSO browser landing, the secrets and reports API namespaces, the glossary reload), 5 real leftovers tracked nowhere and moved (host-page license gating in Playwright and the missing management endpoints to Phase 29; tenant ticks across workers to 34.1; the CI failover test to 34.2; the pkgsrc port's missing py-psycopg to 30.6), 1 open decision moved (the pool + RLS tenancy tier, build or drop, Phase 29) and 1 business item moved (native-speaker translation review, Phase 29). Nothing claimed done was found undone. See Phase 29, "Carried forward by the Phase 24 audit".
 - [ ] **Pro+ engines built for every OS + architecture and verified in R2**
@@ -14846,7 +14846,7 @@ Highest value, lowest effort: don't *be* the MDM -- **ingest from the one they a
 
 **Estimated Size:** ~5,000 lines
 
-#### 27.3 Agent memory footprint -- measure, then minimize (all editions / OSS)
+#### 27.3 Memory footprint -- agent and server: measure, minimize, load only what is used (all editions / OSS)
 
 **Added 2026-10-13 (Bryan):** "measure the memory footprint of
 sysmanage-agent on all of our supported operating systems and see what we can
@@ -14887,8 +14887,102 @@ measures it today; no target is set until the numbers exist.
 - [ ] Docs: the measured footprint per OS on the agent requirements page;
       i18n for any new user-facing text.
 
-**Estimated Size:** ~1,500 lines (harness + reductions; the reductions depend
-on what the measurements find)
+
+##### Static modules: load only what this installation uses (added 2026-11-03, Bryan)
+
+"Divide open source into static modules -- present on disk but only loaded
+if the config says to load them, with a load-all shorthand that is the
+default -- so a user can fine-tune what gets loaded to take less RAM and CPU."
+Build it AFTER the measurements above: the harness tells us where the module
+boundaries pay (a module whose import costs 200 KB is not worth a switch; one
+that costs 15 MB is), and each module's measured saving is what the docs
+quote.
+
+- [ ] **Server: features become modules.** Each optional Community feature
+      (for example backups, cloud backup, hardware health, time sync, asset
+      discovery, firewall, antivirus, child hosts, scripts, reports,
+      maintenance windows -- the final list comes from the measurements) is a
+      module with a stable name, its routes, background ticks, websocket
+      message handlers, startup work and imports behind one registration
+      point.  A module that is not loaded is never imported: no routes, no
+      ticks, no memory.  A small core (auth, hosts, the queue, the agent
+      channel, settings, audit) always loads.
+- [ ] **`modules:` in sysmanage.yaml** -- `modules: all` (the default, and
+      what an absent key means, so nothing changes for anyone who does not
+      opt in), or a list of module names.  It is a bootstrap setting (read at
+      start; a change needs a restart), consistent with sysmanage.yaml being
+      bootstrap-only.  Unknown names and missing dependencies stop the server
+      at start with a plain message naming the module and what it needs
+      (e.g. cloud backup needs backups); never a silent partial load.
+- [ ] **The UI follows the server:** the server reports which modules are
+      loaded, and the web UI hides their navigation, host-detail tabs,
+      dashboard cards and settings, so nothing points at a feature that is
+      not there.  An API call to an unloaded module answers a clear
+      "module not loaded" (404 with a reason), not a 500.
+- [ ] **Licensed engines are unaffected by this switch:** Pro+ engines keep
+      loading by license; an OSS module an engine depends on is pulled in
+      automatically (and named at start) rather than leaving the engine
+      half-working.
+- [ ] **Agent: capabilities become modules** the same way --
+      `modules: all` (default) or a list in sysmanage-agent.yaml (for
+      example inventory, packages, updates, backups, cloud backup, hardware
+      health, time sync, firewall, antivirus, child hosts, scripts, discovery,
+      certificates).  An unloaded module is never imported and its collectors
+      and timers never run.  The agent reports its loaded modules in its
+      capabilities, so the server greys out the actions that host cannot do
+      and says why ("not loaded in this agent's configuration"), exactly as it
+      does for an unsupported OS today.
+- [ ] **Measured savings per module**, server and agent, recorded with the
+      harness above on Linux, FreeBSD and Windows (idle RSS and CPU with
+      everything loaded versus each module left out), so users choose with
+      real numbers.
+- [ ] **Config builders (sysmanage-docs `config-builder.html`):** a "Modules"
+      section in both the server and the agent builders, one checkbox per
+      module with its one-line purpose and measured cost, a "Select all"
+      that is ticked by default, dependencies ticked automatically, and
+      output that writes `modules: all` when everything is selected and the
+      explicit list otherwise.
+- [ ] **Documented thoroughly:** a "Choosing what to load" page (server and
+      agent) -- every module, what it does, what it depends on, its measured
+      RAM and CPU, what disappears from the UI when it is off, how to change
+      the list safely, and worked examples (a small home lab, a
+      patch-only fleet, a backup-only storage host); linked from the
+      installation guides and the requirements page; every string in 14
+      locales.
+
+##### Server memory as the fleet grows (added 2026-11-03, Bryan)
+
+"I would like to understand how scaling more hosts impacts the RAM usage of
+the server and ensure that we don't have any hidden bottlenecks there.  I
+shouldn't be seeing a massive increase in RAM consumption, say from going from
+9 machines to 20 on my home network."  Memory per host must be small and
+flat; anything that grows faster than the fleet is a bug.
+
+- [ ] **Measure the curve:** the server's resident memory (every worker, plus
+      PostgreSQL's per-connection memory and OpenBAO) at idle and under the
+      nightly peak, with the Phase 22 load harness (`tests/load`) at 0, 10,
+      20, 50, 100, 500 and 1,000 agents, single-tenant and multi-tenant;
+      the per-host slope and the fixed base reported separately.
+- [ ] **Hunt what scales with hosts:** per-connection websocket buffers and
+      tasks, per-host caches and in-memory maps with no bound, inventory
+      payloads held after they are stored, ORM sessions kept open, the
+      database pool (22 pool sizing) and per-tenant engines, queue backlogs
+      kept in memory, Pro+ engine state -- each found growth either bounded
+      or removed, with a test.
+- [ ] **A per-host budget, enforced:** a target for memory per added host
+      (set from the measurements) and a load-harness CI check that fails on a
+      regression of the slope, not just the base.
+- [ ] **Check it against the real fleets:** production (about 9 hosts) and
+      the lab before and after, so the docs' numbers are from real servers as
+      well as the harness.
+- [ ] Docs: server memory by fleet size (a table from the curve) on the
+      server requirements page, feeding the minimum configurations (Phase 29
+      documentation overhaul).
+
+**Estimated Size:** ~1,500 lines for the agent harness and reductions; ~2,500
+for server and agent static modules (registration point, config, UI gating,
+capability reporting, tests); ~800 for the server scaling study and its
+budget check; config builders and docs ~600 plus 14-locale strings
 
 #### 27.4 Fix it: compliance failures (Pro+; fleet-wide Enterprise)
 
@@ -15001,7 +15095,7 @@ install still needs PyPI at install time.
 
 ### Licensing summary
 
-- **Community / OSS:** the getting-started wizard (27.0, with licensed steps appearing only when licensed); the device model, fleet visibility and manual / self-report registration (27.1); the agent memory-footprint work (27.3) and per-architecture server packages (27.5), which are in every edition. You can *see* the devices you, or a companion app, report; no automated management, and no curated EOL or compliance.
+- **Community / OSS:** the getting-started wizard (27.0, with licensed steps appearing only when licensed); the device model, fleet visibility and manual / self-report registration (27.1); the memory-footprint and static-module work (27.3) and per-architecture server packages (27.5), which are in every edition. You can *see* the devices you, or a companion app, report; no automated management, and no curated EOL or compliance.
 - **Pro+ (Professional):** **visibility and compliance over the mobile you already manage**: ingestion from an existing UEM / MDM (27.2 ⭐) and Fix-it for compliance failures host by host (27.4). The companion inventory app (28.1), mobile EOL and patch compliance with alerting (28.2) and Android device inventory through the Android Management API (33.1, read only) follow in later phases. No device control.
 - **Enterprise:** Fix-it applied fleet-wide (27.4). Compliance *enforcement* (quarantine, force-update) and **being** the MDM -- native Apple MDM (Phase 32), Android policy and remote actions (33.1) and zero-touch enrollment (33.2) -- are later phases, not this one.
 
@@ -15016,6 +15110,13 @@ install still needs PyPI at install time.
 - [ ] Agent memory footprint (27.3) measured on every supported OS, reduced
       where the measurements showed it pays, and held by an enforced per-OS
       budget
+- [ ] Static modules (27.3) on the server and the agent: `modules: all` by
+      default, a trimmed list proven on the lab (unloaded modules never
+      imported, their UI hidden, the agent's actions greyed with the reason),
+      measured savings published, the config builders writing the setting
+- [ ] Server memory per added host measured to 1,000 agents and held by a
+      load-harness slope check; production and the lab confirm going from
+      ~9 to ~20 hosts adds only the per-host budget
 - [ ] Server packages built per architecture with vendored dependencies
       (27.5): the Launchpad-only `Architecture: any` switch is gone and a
       server `.deb` installs with PyPI unreachable
@@ -15803,6 +15904,52 @@ Flatpak runtimes, package caches.
 - [ ] **Docs** -- sysmanage-docs page (the safety model above, per-platform
       behavior, screenshots via `make screenshots`), 14 locales
 
+### Documentation overhaul (added 2026-11-03, Bryan)
+
+"Do a full audit of the documentation and clean up stuff that references
+phases (makes no sense to the user), reorder things on the page, make more
+common use items more prominent, add a feature index, add a search, in
+general make the documentation way better.  Include recommended minimum
+configurations in terms of disk, CPU and RAM."  The docs grew a page per
+feature as each phase shipped; they read like a build log, not a manual.
+Done at the GA because by then the feature set is the one users get.
+
+- [ ] **Audit every page** (all of sysmanage-docs, every locale): what it
+      covers, who it is for, whether it is still true, and whether a
+      screenshot is current -- recorded as a checklist so nothing is skipped
+- [ ] **No roadmap language for users:** remove every "Phase N", "slice",
+      "S3", "added in 24.6" and similar from user-facing pages (they stay in
+      the ROADMAP and release notes); say what the feature does and which
+      edition has it instead; a docs CI check fails on `Phase \d+` and
+      sub-phase numbers in rendered pages so it does not creep back
+- [ ] **Reorder for the reader:** within each page, the common task first
+      (what most people come for), reference and edge cases after; across
+      the site, navigation grouped by what people do (install, add hosts,
+      patch, back up, secure, automate, troubleshoot) rather than by when it
+      was built; the most used features (hosts, updates, backups, alerts,
+      scripts) one click from the docs home
+- [ ] **A feature index:** one page listing every feature alphabetically and
+      by area, each with a one-line description, its edition (Community /
+      Professional+ / Enterprise), and a link -- generated from a single
+      feature list so it cannot drift from the pages
+- [ ] **Search:** client-side, static (no server to run, works offline and
+      air-gapped, e.g. a prebuilt index with Lunr or Pagefind), across every
+      page in the reader's language, with results showing the page and the
+      matching section
+- [ ] **Recommended minimum configurations:** disk, CPU and RAM for the
+      server by fleet size (from the 27.3 server-scaling curve: e.g. up to
+      25, 100, 500, 1,000+ hosts; with PostgreSQL and OpenBAO on the same
+      machine or apart) and for the agent per OS (from the 27.3 agent
+      baseline), plus backup storage sizing (from the 24 forecast) -- stated
+      as "minimum" and "recommended", with the static-module trims (27.3)
+      shown as a way to go lower
+- [ ] **Consistency pass:** one name per thing (UI labels, docs and API
+      agree), American spelling, ASCII hyphens, every screenshot current via
+      `make screenshots`, every page reachable from the navigation, broken
+      links and orphan pages gone
+- [ ] **Every change in 14 locales**, verified like the rest of the docs
+
+
 ### Exit Criteria
 
 - [ ] All Phase 14-21 engines license-gated + 402-clean when unlicensed
@@ -15810,6 +15957,11 @@ Flatpak runtimes, package caches.
 - [ ] **Package & kernel hygiene** shipped (S1-S4 OSS, S5 Pro+) and proven on the lab: a host with a newly installed, not-yet-booted kernel keeps its running and last proven kernels through a cleanup, and `/boot` alerts fire
 - [ ] End-to-end: provision → enroll → content-view assign → config profile → advisor remediation, on one host, across all supported distros
 - [ ] 14-language i18n + docs complete; performance + security targets met
+- [ ] **Documentation overhaul** done: every page audited, no phase or slice
+      numbers on any user-facing page (enforced by a docs check), pages
+      reordered for the common task, a feature index, a working offline
+      search, and recommended minimum disk / CPU / RAM for the server by fleet
+      size and for the agent per OS
 - [ ] **Coverage parity reached:** all three frontends at **≥70% lines**
       (OSS / license-server / Pro+ components), matching the backend; the
       ratchet thresholds hold the parity line going forward

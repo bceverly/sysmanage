@@ -143,6 +143,53 @@ def record_signed(
     return row
 
 
+def record_listing(
+    db: Session, run: models.BackupRun, policy: models.BackupPolicy, result: Dict
+) -> None:
+    """A storage-side ``signatures`` run (restate ``snapshots`` checked
+    against the signer's key): each snapshot it found signed by a trusted
+    key is signed.  This puts back what a lost catalog forgot (lab, t14,
+    2026-11-03: a deleted policy cascaded the rows; du restored them as
+    unsigned).  It only ever adds a signature: a snapshot restate does not
+    vouch for keeps what the catalog says, and every restore is checked on
+    the host regardless.  Only the storage host runs it -- never take a
+    backed-up host's word for its own snapshots."""
+    if run.status != "ok":
+        logger.error(
+            "Backup policy %s: listing signatures on storage host %s ended %s (%s)",
+            policy.id,
+            run.host_id,
+            run.status,
+            run.message,
+        )
+        return
+    entries = result.get("snapshots")
+    for entry in entries if isinstance(entries, list) else []:
+        if not isinstance(entry, dict) or entry.get("trusted") is not True:
+            continue
+        name, signer = entry.get("name"), entry.get("signer")
+        if not isinstance(name, str) or not isinstance(signer, str) or not signer:
+            continue
+        row = (
+            db.query(models.BackupSnapshot)
+            .filter(
+                models.BackupSnapshot.policy_id == policy.id,
+                models.BackupSnapshot.name == name[:255],
+                models.BackupSnapshot.gone_at.is_(None),
+            )
+            .first()
+        )
+        if row is not None and not row.signed:
+            row.signed = True
+            row.signer = signer[:_FINGERPRINT_MAX]
+            logger.info(
+                "Backup snapshot %s of policy %s: signature by %s found on storage",
+                row.name,
+                policy.id,
+                row.signer,
+            )
+
+
 def _snapshot_name(value: Any) -> Optional[str]:
     if not isinstance(value, str) or not value:
         return None
