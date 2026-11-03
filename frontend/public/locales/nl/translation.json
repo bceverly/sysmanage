@@ -5736,12 +5736,16 @@
     "escrow": {
       "never": "Er is nog geen noodexport van sleutels gemaakt. Als de SysManage-server of OpenBAO verloren gaat, zijn de versleutelde back-ups zonder export niet te lezen.",
       "staleHosts": "De noodexport van sleutels bevat de nieuwste sleutels van {{count}} versleutelde host(s) ({{hosts}}) niet. Maak een nieuwe export en vernietig de oude.",
+      "staleHosts_one": "De noodexport van sleutels bevat de nieuwste sleutels van {{count}} versleutelde host ({{hosts}}) niet. Maak een nieuwe export en vernietig de oude.",
+      "staleHosts_other": "De noodexport van sleutels bevat de nieuwste sleutels van {{count}} versleutelde hosts ({{hosts}}) niet. Maak een nieuwe export en vernietig de oude.",
       "staleSigning": "Het ondertekenen van snapshots is ingeschakeld na de laatste noodexport van sleutels. Maak een nieuwe export zodat die de ondertekeningssleutel bevat.",
       "export": "Sleutels exporteren"
     },
     "breakGlass": {
       "button": "Noodexport van sleutels",
       "community": "{{count}} host(s) hebben versleutelde back-ups. Zonder Professional+-licentie worden ze versleuteld verder geback-upt en kunnen ze worden hersteld, en u kunt hier hun sleutels exporteren, verzegeld met uw eigen openbare OpenPGP-sleutel, voor een herstel als de SysManage-server niet beschikbaar is.",
+      "community_one": "{{count}} host heeft versleutelde back-ups. Zonder Professional+-licentie wordt hij versleuteld verder geback-upt en kan hij worden hersteld, en u kunt hier zijn sleutels exporteren, verzegeld met uw eigen openbare OpenPGP-sleutel, voor een herstel als de SysManage-server niet beschikbaar is.",
+      "community_other": "{{count}} hosts hebben versleutelde back-ups. Zonder Professional+-licentie worden ze versleuteld verder geback-upt en kunnen ze worden hersteld, en u kunt hier hun sleutels exporteren, verzegeld met uw eigen openbare OpenPGP-sleutel, voor een herstel als de SysManage-server niet beschikbaar is.",
       "download": "Exporteren en downloaden",
       "failed": "De sleutels konden niet worden geëxporteerd.",
       "key": "Uw OPENBARE OpenPGP-sleutel (in ASCII-armor-formaat)",

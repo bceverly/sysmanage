@@ -5736,12 +5736,16 @@
     "escrow": {
       "never": "尚未进行应急密钥导出。如果 SysManage 服务器或 OpenBAO 丢失，没有它就无法读取加密的备份。",
       "staleHosts": "应急密钥导出不包含 {{count}} 台加密主机（{{hosts}}）的最新密钥。请重新导出并销毁旧的导出。",
+      "staleHosts_one": "应急密钥导出不包含 {{count}} 台加密主机（{{hosts}}）的最新密钥。请重新导出并销毁旧的导出。",
+      "staleHosts_other": "应急密钥导出不包含 {{count}} 台加密主机（{{hosts}}）的最新密钥。请重新导出并销毁旧的导出。",
       "staleSigning": "快照签名是在上一次应急密钥导出之后开启的。请重新导出，使其包含签名密钥。",
       "export": "导出密钥"
     },
     "breakGlass": {
       "button": "应急密钥导出",
       "community": "{{count}} 台主机有加密备份。没有 Professional+ 许可证时，它们仍会以加密方式继续备份并且可以恢复；您可以在此导出它们的密钥，用您自己的 OpenPGP 公钥封存，以便在 SysManage 服务器不可用时进行恢复。",
+      "community_one": "{{count}} 台主机有加密备份。没有 Professional+ 许可证时，它们仍会以加密方式继续备份并且可以恢复；您可以在此导出它们的密钥，用您自己的 OpenPGP 公钥封存，以便在 SysManage 服务器不可用时进行恢复。",
+      "community_other": "{{count}} 台主机有加密备份。没有 Professional+ 许可证时，它们仍会以加密方式继续备份并且可以恢复；您可以在此导出它们的密钥，用您自己的 OpenPGP 公钥封存，以便在 SysManage 服务器不可用时进行恢复。",
       "download": "导出并下载",
       "failed": "无法导出密钥。",
       "key": "您的 OpenPGP 公钥（ASCII armor 格式）",

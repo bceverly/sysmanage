@@ -5736,12 +5736,16 @@
     "escrow": {
       "never": "尚未進行緊急金鑰匯出。如果 SysManage 伺服器或 OpenBAO 遺失，沒有它就無法讀取加密的備份。",
       "staleHosts": "緊急金鑰匯出不包含 {{count}} 台加密主機（{{hosts}}）的最新金鑰。請重新匯出並銷毀舊的匯出。",
+      "staleHosts_one": "緊急金鑰匯出不包含 {{count}} 台加密主機（{{hosts}}）的最新金鑰。請重新匯出並銷毀舊的匯出。",
+      "staleHosts_other": "緊急金鑰匯出不包含 {{count}} 台加密主機（{{hosts}}）的最新金鑰。請重新匯出並銷毀舊的匯出。",
       "staleSigning": "快照簽章是在上一次緊急金鑰匯出之後開啟的。請重新匯出，使其包含簽章金鑰。",
       "export": "匯出金鑰"
     },
     "breakGlass": {
       "button": "緊急金鑰匯出",
       "community": "{{count}} 台主機有加密備份。沒有 Professional+ 授權時，它們仍會以加密方式繼續備份並可還原；您可以在此匯出它們的金鑰，以您自己的 OpenPGP 公開金鑰封存，以便在 SysManage 伺服器無法使用時還原。",
+      "community_one": "{{count}} 台主機有加密備份。沒有 Professional+ 授權時，它們仍會以加密方式繼續備份並可還原；您可以在此匯出它們的金鑰，以您自己的 OpenPGP 公開金鑰封存，以便在 SysManage 伺服器無法使用時還原。",
+      "community_other": "{{count}} 台主機有加密備份。沒有 Professional+ 授權時，它們仍會以加密方式繼續備份並可還原；您可以在此匯出它們的金鑰，以您自己的 OpenPGP 公開金鑰封存，以便在 SysManage 伺服器無法使用時還原。",
       "download": "匯出並下載",
       "failed": "無法匯出金鑰。",
       "key": "您的 OpenPGP 公開金鑰（ASCII armor 格式）",

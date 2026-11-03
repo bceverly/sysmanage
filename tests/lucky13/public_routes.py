@@ -78,6 +78,10 @@ PUBLIC_ROUTES = {
     # Same credentials as the poll (connection token + X-Host-Token), and
     # releases only the asking host's own pending run's keys, once.
     ("POST", "/api/agent/backup-key"): _AGENT,
+    # iCloud backup (24.12): the same poll credentials, and each releases only
+    # the asking storage host's own running job's password or two-factor code.
+    ("POST", "/api/agent/cloud-backup-secret"): _AGENT,
+    ("POST", "/api/agent/cloud-backup-code"): _AGENT,
     (
         "POST",
         "/api/host/register",

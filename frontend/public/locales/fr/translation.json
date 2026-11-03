@@ -5736,12 +5736,16 @@
     "escrow": {
       "never": "Aucun export de clés d'urgence n'a été fait. Si le serveur SysManage ou OpenBAO est perdu, les sauvegardes chiffrées ne peuvent pas être lues sans lui.",
       "staleHosts": "L'export de clés d'urgence ne contient pas les clés les plus récentes de {{count}} hôte(s) chiffré(s) ({{hosts}}). Faites un nouvel export et détruisez l'ancien.",
+      "staleHosts_one": "L'export de clés d'urgence ne contient pas les clés les plus récentes de {{count}} hôte chiffré ({{hosts}}). Faites un nouvel export et détruisez l'ancien.",
+      "staleHosts_other": "L'export de clés d'urgence ne contient pas les clés les plus récentes de {{count}} hôtes chiffrés ({{hosts}}). Faites un nouvel export et détruisez l'ancien.",
       "staleSigning": "La signature des instantanés a été activée après le dernier export de clés d'urgence. Faites un nouvel export pour qu'il contienne la clé de signature.",
       "export": "Exporter les clés"
     },
     "breakGlass": {
       "button": "Export de clés d'urgence",
       "community": "{{count}} hôte(s) ont des sauvegardes chiffrées. Sans licence Professional+, elles continuent d'être sauvegardées chiffrées et peuvent être restaurées, et vous pouvez exporter ici leurs clés, scellées avec votre propre clé publique OpenPGP, pour une restauration lorsque le serveur SysManage est hors service.",
+      "community_one": "{{count}} hôte a des sauvegardes chiffrées. Sans licence Professional+, elles continuent d'être sauvegardées chiffrées et peuvent être restaurées, et vous pouvez exporter ici ses clés, scellées avec votre propre clé publique OpenPGP, pour une restauration lorsque le serveur SysManage est hors service.",
+      "community_other": "{{count}} hôtes ont des sauvegardes chiffrées. Sans licence Professional+, elles continuent d'être sauvegardées chiffrées et peuvent être restaurées, et vous pouvez exporter ici leurs clés, scellées avec votre propre clé publique OpenPGP, pour une restauration lorsque le serveur SysManage est hors service.",
       "download": "Exporter et télécharger",
       "failed": "Les clés n'ont pas pu être exportées.",
       "key": "Votre clé PUBLIQUE OpenPGP (au format ASCII armor)",

@@ -5736,12 +5736,16 @@
     "escrow": {
       "never": "No se ha hecho ninguna exportación de claves de emergencia. Si se pierde el servidor SysManage u OpenBAO, las copias de seguridad cifradas no se pueden leer sin ella.",
       "staleHosts": "La exportación de claves de emergencia no incluye las claves más recientes de {{count}} host(s) cifrado(s) ({{hosts}}). Haga una exportación nueva y destruya la anterior.",
+      "staleHosts_one": "La exportación de claves de emergencia no incluye las claves más recientes de {{count}} host cifrado ({{hosts}}). Haga una exportación nueva y destruya la anterior.",
+      "staleHosts_other": "La exportación de claves de emergencia no incluye las claves más recientes de {{count}} hosts cifrados ({{hosts}}). Haga una exportación nueva y destruya la anterior.",
       "staleSigning": "La firma de instantáneas se activó después de la última exportación de claves de emergencia. Haga una exportación nueva para que incluya la clave de firma.",
       "export": "Exportar las claves"
     },
     "breakGlass": {
       "button": "Exportación de claves de emergencia",
       "community": "{{count}} host(s) tienen copias de seguridad cifradas. Sin la licencia Professional+ siguen respaldándose cifradas y pueden restaurarse, y aquí puede exportar sus claves, selladas con su propia clave pública OpenPGP, para una restauración con el servidor SysManage caído.",
+      "community_one": "{{count}} host tiene copias de seguridad cifradas. Sin la licencia Professional+ sigue respaldándose cifrado y puede restaurarse, y aquí puede exportar sus claves, selladas con su propia clave pública OpenPGP, para una restauración con el servidor SysManage caído.",
+      "community_other": "{{count}} hosts tienen copias de seguridad cifradas. Sin la licencia Professional+ siguen respaldándose cifrados y pueden restaurarse, y aquí puede exportar sus claves, selladas con su propia clave pública OpenPGP, para una restauración con el servidor SysManage caído.",
       "download": "Exportar y descargar",
       "failed": "No se pudieron exportar las claves.",
       "key": "Su clave PÚBLICA OpenPGP (en formato ASCII armor)",

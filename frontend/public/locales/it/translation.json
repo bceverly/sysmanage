@@ -5736,12 +5736,16 @@
     "escrow": {
       "never": "Non è ancora stata fatta un'esportazione delle chiavi di emergenza. Se il server SysManage o OpenBAO va perso, senza di essa i backup cifrati non si possono leggere.",
       "staleHosts": "L'esportazione delle chiavi di emergenza non contiene le chiavi più recenti di {{count}} host cifrati ({{hosts}}). Crea una nuova esportazione e distruggi quella vecchia.",
+      "staleHosts_one": "L'esportazione delle chiavi di emergenza non contiene le chiavi più recenti di {{count}} host cifrato ({{hosts}}). Crea una nuova esportazione e distruggi quella vecchia.",
+      "staleHosts_other": "L'esportazione delle chiavi di emergenza non contiene le chiavi più recenti di {{count}} host cifrati ({{hosts}}). Crea una nuova esportazione e distruggi quella vecchia.",
       "staleSigning": "La firma degli snapshot è stata attivata dopo l'ultima esportazione delle chiavi di emergenza. Crea una nuova esportazione perché contenga la chiave di firma.",
       "export": "Esporta le chiavi"
     },
     "breakGlass": {
       "button": "Esportazione delle chiavi di emergenza",
       "community": "{{count}} host hanno backup cifrati. Senza la licenza Professional+ continuano a essere salvati cifrati e possono essere ripristinati, e qui può esportarne le chiavi, sigillate con la Sua chiave pubblica OpenPGP, per un ripristino con il server SysManage non disponibile.",
+      "community_one": "{{count}} host ha backup cifrati. Senza la licenza Professional+ continua a essere salvato cifrato e può essere ripristinato, e qui può esportarne le chiavi, sigillate con la Sua chiave pubblica OpenPGP, per un ripristino con il server SysManage non disponibile.",
+      "community_other": "{{count}} host hanno backup cifrati. Senza la licenza Professional+ continuano a essere salvati cifrati e possono essere ripristinati, e qui può esportarne le chiavi, sigillate con la Sua chiave pubblica OpenPGP, per un ripristino con il server SysManage non disponibile.",
       "download": "Esporta e scarica",
       "failed": "Impossibile esportare le chiavi.",
       "key": "La Sua chiave PUBBLICA OpenPGP (in formato ASCII armor)",

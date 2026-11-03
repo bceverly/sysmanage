@@ -5736,12 +5736,16 @@
     "escrow": {
       "never": "Nenhuma exportação de chaves de emergência foi feita. Se o servidor SysManage ou o OpenBAO for perdido, os backups criptografados não podem ser lidos sem ela.",
       "staleHosts": "A exportação de chaves de emergência não contém as chaves mais recentes de {{count}} host(s) criptografado(s) ({{hosts}}). Faça uma nova exportação e destrua a antiga.",
+      "staleHosts_one": "A exportação de chaves de emergência não contém as chaves mais recentes de {{count}} host criptografado ({{hosts}}). Faça uma nova exportação e destrua a antiga.",
+      "staleHosts_other": "A exportação de chaves de emergência não contém as chaves mais recentes de {{count}} hosts criptografados ({{hosts}}). Faça uma nova exportação e destrua a antiga.",
       "staleSigning": "A assinatura de snapshots foi ativada depois da última exportação de chaves de emergência. Faça uma nova exportação para que ela contenha a chave de assinatura.",
       "export": "Exportar as chaves"
     },
     "breakGlass": {
       "button": "Exportação de chaves de emergência",
       "community": "{{count}} host(s) têm backups criptografados. Sem a licença Professional+ eles continuam sendo copiados criptografados e podem ser restaurados, e aqui você pode exportar as chaves deles, seladas com a sua própria chave pública OpenPGP, para uma restauração com o servidor SysManage fora do ar.",
+      "community_one": "{{count}} host tem backups criptografados. Sem a licença Professional+ ele continua sendo copiado criptografado e pode ser restaurado, e aqui você pode exportar as chaves dele, seladas com a sua própria chave pública OpenPGP, para uma restauração com o servidor SysManage fora do ar.",
+      "community_other": "{{count}} hosts têm backups criptografados. Sem a licença Professional+ eles continuam sendo copiados criptografados e podem ser restaurados, e aqui você pode exportar as chaves deles, seladas com a sua própria chave pública OpenPGP, para uma restauração com o servidor SysManage fora do ar.",
       "download": "Exportar e baixar",
       "failed": "Não foi possível exportar as chaves.",
       "key": "Sua chave PÚBLICA OpenPGP (em formato ASCII armor)",

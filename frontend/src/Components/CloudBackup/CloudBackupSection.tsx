@@ -189,11 +189,11 @@ const CloudAccountRow: React.FC<RowProps> = ({ account, canManage, onConnect, on
             </TableCell>
             <TableCell>{formatTime(account.last_good_at)}</TableCell>
             <TableCell>
-                {account.photos_local == null ? '-' : t('cloudBackup.table.storedValue', '{{n}} items, {{size}}',
+                {account.photos_local == null ? '--' : t('cloudBackup.table.storedValue', '{{n}} items, {{size}}',
                     { n: account.photos_local, size: formatBytes(account.bytes_local) })}
             </TableCell>
             <TableCell>
-                {signedIn ? formatTime(account.session_expires_at) : '-'}
+                {signedIn ? formatTime(account.session_expires_at) : '--'}
                 {account.session_expiring && account.status !== 'needs_sign_in' && (
                     <Typography variant="caption" color="warning.main" sx={{ display: 'block' }}>
                         {t('cloudBackup.table.expiring', 'Ends soon: press Connect')}

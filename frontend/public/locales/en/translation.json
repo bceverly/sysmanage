@@ -5736,11 +5736,15 @@
     "escrow": {
       "never": "No break-glass key export has been made. If the SysManage server or OpenBAO is lost, the encrypted backups cannot be read without one.",
       "staleHosts": "The break-glass key export does not cover the newest keys of {{count}} encrypted host(s) ({{hosts}}). Make a new export and destroy the old one.",
+      "staleHosts_one": "The break-glass key export does not cover the newest keys of {{count}} encrypted host ({{hosts}}). Make a new export and destroy the old one.",
+      "staleHosts_other": "The break-glass key export does not cover the newest keys of {{count}} encrypted hosts ({{hosts}}). Make a new export and destroy the old one.",
       "staleSigning": "Snapshot signing was turned on after the last break-glass key export. Make a new export so it carries the signing key.",
       "export": "Export the keys"
     },
     "breakGlass": {
       "community": "{{count}} host(s) have encrypted backups. Without the Professional+ license they keep backing up encrypted and can still be restored, and you can export their keys here, sealed to your own OpenPGP public key, for a restore with the SysManage server down.",
+      "community_one": "{{count}} host has encrypted backups. Without the Professional+ license it keeps backing up encrypted and can still be restored, and you can export its keys here, sealed to your own OpenPGP public key, for a restore with the SysManage server down.",
+      "community_other": "{{count}} hosts have encrypted backups. Without the Professional+ license they keep backing up encrypted and can still be restored, and you can export their keys here, sealed to your own OpenPGP public key, for a restore with the SysManage server down.",
       "button": "Break-glass key export",
       "title": "Break-glass key export",
       "warning": "The file holds the SECRET keys of every encrypted backup. Keep it offline, away from the backups and the server, and destroy it when a newer export replaces it.",
