@@ -5308,7 +5308,8 @@
       "repack": "Reempacotar",
       "prepare": "Preparar armazenamento",
       "protect": "Proteger",
-      "verify": "Verificação com leitura completa"
+      "verify": "Verificação com leitura completa",
+      "diff": "Comparação de snapshots"
     },
     "card": {
       "lastCheck": "Última verificação",
@@ -5422,7 +5423,9 @@
       "hookMissing": "Este host não tem nenhum hook {{service}} para corrigir o que a pausa do serviço deixou nos arquivos restaurados. Faça isso manualmente.",
       "hookUnreadable": "O restate não conseguiu identificar a qual hook {{dir}} pertence, portanto nenhum hook foi executado.",
       "signed": "assinado",
-      "unsigned": "não assinado"
+      "unsigned": "não assinado",
+      "packages": "Colocar de volta primeiro os pacotes do snapshot, nas suas versões",
+      "packagesAck": "Instalar pacotes em {{host}} e remover os pacotes que o snapshot não tinha, para que corresponda a ele."
     },
     "run": {
       "busy": "Ocupado, será tentado novamente",
@@ -5657,6 +5660,39 @@
       "kept": "Incluídos no backup embora sejam montagens de rede, porque \"Incluir também no backup\" indica um caminho dentro deles: {{paths}}",
       "hint": "O melhor é fazer backup de um compartilhamento de rede no servidor a que ele pertence.",
       "skipped": "Excluídos do último backup pelo restate (montagens de rede neste host): {{paths}}"
+    },
+    "drift": {
+      "added": "adicionado",
+      "compare": "Comparar os backups mais recentes ainda não comparados",
+      "deleted": "excluído",
+      "everything": "Mostrar tudo, incluindo logs e caches",
+      "failed": "A comparação de {{from}} e {{to}} falhou",
+      "filesCount": "Arquivos: {{n}}",
+      "hidden": "Ocultos como alterações esperadas: {{n}}",
+      "ignore": "Ocultar também neste host (um padrão de caminho por linha)",
+      "ignoreError": "Não foi possível salvar os padrões.",
+      "installed": "instalado",
+      "intro": "O que mudou entre cada backup e o anterior: pacotes instalados, removidos ou atualizados, e as alterações de arquivos que nenhum pacote explica.",
+      "link": "O que mudou entre backups",
+      "loadError": "Não foi possível carregar a linha do tempo de desvios.",
+      "modified": "modificado",
+      "narrowed": "Mostrando apenas as alterações em {{path}} ou abaixo.",
+      "noFiles": "Nenhuma alteração de arquivo além das explicadas pelos pacotes.",
+      "none": "Nenhum backup foi comparado ainda.",
+      "packagesCount": "Pacotes: {{n}}",
+      "removed": "removido",
+      "running": "Uma comparação está em andamento.",
+      "title": "Linha do tempo de desvios",
+      "truncated": "Apenas as primeiras 1000 alterações de cada tipo são mantidas.",
+      "upgraded": "atualizado"
+    },
+    "packages": {
+      "counts": "Pacotes apt instalados à mão: {{apt}}; snaps: {{snaps}}; chaves de repositório: {{keys}}",
+      "hideScript": "Ocultar o script",
+      "removes": "Os pacotes que o snapshot não tinha são marcados como automáticos e removidos pelo apt. Tudo o que foi instalado neste host desde o backup pode ser removido, incluindo o agente do SysManage se tiver sido instalado depois.",
+      "showScript": "Mostrar o script completo ({{n}} linhas)",
+      "snaps": "Pacotes snap: {{names}}",
+      "title": "Pacotes a colocar de volta"
     }
   }
 }

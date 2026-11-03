@@ -29,6 +29,7 @@ from backend.services import backup_reach
 from backend.services import backup_first_fit as first_fit
 from backend.services import backup_forecast
 from backend.services import backup_jobs as jobs
+from backend.services import backup_package_restore as package_restore
 from backend.services import backup_storage_audit as storage_audit
 from backend.services import backup_storage_health as storage_health
 from backend.services import backup_storage_status as storage_status
@@ -184,6 +185,7 @@ def check_label(run: models.BackupRun) -> Optional[str]:
 
 
 def run_dict(run: models.BackupRun) -> Dict[str, Any]:
+    result = _json(run.result)
     return {
         "id": str(run.id),
         "policy_id": str(run.policy_id),
@@ -199,9 +201,13 @@ def run_dict(run: models.BackupRun) -> Dict[str, Any]:
         "restate_version": run.restate_version,
         "requested_by": run.requested_by,
         "progress": _json(run.progress),
-        "result": _json(run.result),
+        "result": result,
         "check_label": check_label(run),
         "parameters": _json(run.parameters),
+        # What a package restore's script will do (Pro+ 24.6), for the dialog.
+        "package_summary": (
+            package_restore.summary(result) if run.action == jobs.RESTORE else None
+        ),
     }
 
 

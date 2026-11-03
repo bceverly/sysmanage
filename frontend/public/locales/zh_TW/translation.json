@@ -5308,7 +5308,8 @@
       "repack": "重新打包",
       "prepare": "準備儲存",
       "protect": "保護",
-      "verify": "完整讀取驗證"
+      "verify": "完整讀取驗證",
+      "diff": "快照比較"
     },
     "card": {
       "lastCheck": "上次檢查",
@@ -5422,7 +5423,9 @@
       "hookMissing": "此主機沒有 {{service}} 掛鉤來修復暫停該服務在已還原檔案中留下的問題。請手動處理。",
       "hookUnreadable": "restate 無法判斷 {{dir}} 屬於哪個掛鉤，因此沒有執行任何掛鉤。",
       "signed": "已簽署",
-      "unsigned": "未簽署"
+      "unsigned": "未簽署",
+      "packages": "先依記錄的版本放回快照的套件",
+      "packagesAck": "在 {{host}} 上安裝套件，並移除快照中沒有的套件，使其與快照一致。"
     },
     "run": {
       "busy": "忙碌，將重試",
@@ -5657,6 +5660,39 @@
       "kept": "雖然是網路掛載，但仍會備份，因為「額外備份」中指定了其中的路徑：{{paths}}",
       "hint": "網路共用最好在擁有它的伺服器上備份。",
       "skipped": "restate 已從上次備份中排除（此主機上的網路掛載）：{{paths}}"
+    },
+    "drift": {
+      "added": "已新增",
+      "compare": "比較尚未比較的最新備份",
+      "deleted": "已刪除",
+      "everything": "顯示全部，包括日誌和快取",
+      "failed": "{{from}} 與 {{to}} 的比較失敗",
+      "filesCount": "檔案：{{n}}",
+      "hidden": "作為預期變化隱藏：{{n}}",
+      "ignore": "在此主機上另外隱藏（每行一個路徑模式）",
+      "ignoreError": "無法儲存這些模式。",
+      "installed": "已安裝",
+      "intro": "每次備份與前一次備份之間的變化：安裝、移除或升級的套件，以及沒有任何套件能解釋的檔案變化。",
+      "link": "備份之間的變化",
+      "loadError": "無法載入漂移時間軸。",
+      "modified": "已修改",
+      "narrowed": "僅顯示 {{path}} 及其下的變化。",
+      "noFiles": "除套件能解釋的變化外，沒有檔案變化。",
+      "none": "尚未比較任何備份。",
+      "packagesCount": "套件：{{n}}",
+      "removed": "已移除",
+      "running": "正在比較。",
+      "title": "漂移時間軸",
+      "truncated": "每種變化只保留前 1000 個。",
+      "upgraded": "已升級"
+    },
+    "packages": {
+      "counts": "手動安裝的 apt 套件：{{apt}}；snap：{{snaps}}；套件庫金鑰：{{keys}}",
+      "hideScript": "隱藏指令碼",
+      "removes": "快照中沒有的套件會被標記為自動安裝並由 apt 移除。自備份以來在此主機上安裝的任何內容都可能被移除，如果 SysManage 代理程式是之後安裝的，也包括它。",
+      "showScript": "顯示完整指令碼（{{n}} 行）",
+      "snaps": "snap：{{names}}",
+      "title": "要放回的套件"
     }
   }
 }

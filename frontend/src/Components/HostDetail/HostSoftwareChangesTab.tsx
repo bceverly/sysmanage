@@ -23,6 +23,8 @@ import HistoryIcon from '@mui/icons-material/History';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router';
+import DriftTimelineLink from '../Backups/DriftTimelineLink';
 import { InstallationHistoryItem } from './hostDetailTypes';
 import {
     formatDateTime,
@@ -44,6 +46,7 @@ const HostSoftwareChangesTab: React.FC<HostSoftwareChangesTabProps> = ({
     handleDeleteInstallation,
 }) => {
     const { t } = useTranslation();
+    const { hostId } = useParams<{ hostId: string }>();
     return (
                 <Grid container spacing={3}>
                     <Grid size={{ xs: 12 }}>
@@ -54,6 +57,7 @@ const HostSoftwareChangesTab: React.FC<HostSoftwareChangesTabProps> = ({
                                         <HistoryIcon sx={{ mr: 1 }} />
                                         {t('hostDetail.softwareInstallationHistory', 'Software Installation History')}
                                     </Typography>
+                                    {hostId && <DriftTimelineLink hostId={hostId} />}
                                 </Box>
 
                                 {(() => {

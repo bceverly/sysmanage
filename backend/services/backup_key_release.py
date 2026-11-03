@@ -43,7 +43,14 @@ logger = logging.getLogger(__name__)
 RELEASE_WINDOW = timedelta(hours=1)
 # ``sign`` runs on the STORAGE host and gets the snapshot signer's secret
 # key, not the repository's (Pro+ 24.6, backup_signing).
-KEYED_ACTIONS = (jobs.RESTORE, jobs.LIST, jobs.STATUS, jobs.VERIFY, backup_signing.SIGN)
+KEYED_ACTIONS = (
+    jobs.RESTORE,
+    jobs.LIST,
+    jobs.STATUS,
+    jobs.VERIFY,
+    jobs.DIFF,
+    backup_signing.SIGN,
+)
 
 
 class KeyRefused(Exception):

@@ -66,6 +66,8 @@ BROWSE_ACTIONS = (LIST, STATUS)
 # Pro+ scheduled verification: ``check --read-all`` on the backed-up host
 # (it holds the keys for one job; the storage host never does).
 VERIFY = "verify"
+# Pro+ drift timeline (24.7): two snapshots compared by package, on the host.
+DIFF = "diff"
 CONFIGURE = "configure"
 RESTORE = "restore"
 
@@ -118,7 +120,7 @@ def in_previous_repository(
 def encrypted(policy: models.BackupPolicy) -> bool:
     """The CURRENT repository is encrypted (its key is in OpenBAO).  The
     public key is sent whether or not backup_engine is loaded now: an
-    encrypted repository refuses a capture without it, so a lapsed licence
+    encrypted repository refuses a capture without it, so a lapsed license
     must not stop backups."""
     return bool(policy.encrypt_public_key)
 
@@ -258,7 +260,7 @@ def host_configuration(
     if getattr(target, "sign_public_key", None):
         # The snapshot signer's PUBLIC key (Pro+ 24.6): restores check each
         # snapshot's signature against it.  Sent like encrypt_key, whether or
-        # not backup_engine is loaded now -- a lapsed licence must not turn
+        # not backup_engine is loaded now -- a lapsed license must not turn
         # signature checking off.
         out["trusted_key"] = target.sign_public_key
     return out
@@ -462,9 +464,11 @@ def queue_restore(  # pylint: disable=too-many-arguments,too-many-positional-arg
     in_place: bool = False,
     previous: bool = False,
     needs_key: bool = False,
+    packages: bool = False,
 ) -> models.BackupRun:
     """Restore into the agent's staging directory, or (``in_place``) over the
-    host's own files; the agent chooses the root either way."""
+    host's own files; the agent chooses the root either way.  ``packages``
+    (Pro+ 24.6) puts the snapshot's packages back first."""
     return _queue(
         db,
         policy,
@@ -479,6 +483,7 @@ def queue_restore(  # pylint: disable=too-many-arguments,too-many-positional-arg
             "dry_run": bool(dry_run),
             "allow_unverified": bool(allow_unverified),
             "in_place": bool(in_place),
+            **({"packages": True} if packages else {}),
             **({"previous": True} if previous else {}),
             # Never the key itself (this goes through the queue and the run
             # row): the agent fetches it for this run (backup_key_release).

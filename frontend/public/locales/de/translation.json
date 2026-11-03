@@ -5308,7 +5308,8 @@
       "repack": "Neu packen",
       "prepare": "Speicher vorbereiten",
       "protect": "Schutz",
-      "verify": "Verifizierung mit vollständigem Lesen"
+      "verify": "Verifizierung mit vollständigem Lesen",
+      "diff": "Vergleich von Snapshots"
     },
     "card": {
       "lastCheck": "Letzte Prüfung",
@@ -5422,7 +5423,9 @@
       "hookMissing": "Dieser Host hat keinen Hook {{service}}, der beheben könnte, was das Pausieren des Dienstes in den wiederhergestellten Dateien hinterlassen hat. Erledigen Sie das von Hand.",
       "hookUnreadable": "restate konnte nicht erkennen, zu welchem Hook {{dir}} gehört, daher wurde kein Hook ausgeführt.",
       "signed": "signiert",
-      "unsigned": "nicht signiert"
+      "unsigned": "nicht signiert",
+      "packages": "Zuerst die Pakete des Snapshots in ihren Versionen zurücklegen",
+      "packagesAck": "Pakete auf {{host}} installieren und die Pakete, die der Snapshot nicht hatte, entfernen, damit er ihm entspricht."
     },
     "run": {
       "busy": "Belegt, wird wiederholt",
@@ -5657,6 +5660,39 @@
       "kept": "Werden gesichert, obwohl es Netzwerk-Mounts sind, weil \"Zusätzlich sichern\" einen Pfad darin nennt: {{paths}}",
       "hint": "Eine Netzwerkfreigabe sichern Sie am besten auf dem Server, dem sie gehört.",
       "skipped": "Von restate aus der letzten Sicherung ausgeschlossen (Netzwerk-Mounts auf diesem Host): {{paths}}"
+    },
+    "drift": {
+      "added": "hinzugefügt",
+      "compare": "Die neuesten noch nicht verglichenen Sicherungen vergleichen",
+      "deleted": "gelöscht",
+      "everything": "Alles anzeigen, auch Protokolle und Caches",
+      "failed": "Der Vergleich von {{from}} und {{to}} ist fehlgeschlagen",
+      "filesCount": "Dateien: {{n}}",
+      "hidden": "Als erwartete Änderungen ausgeblendet: {{n}}",
+      "ignore": "Auf diesem Host zusätzlich ausblenden (ein Pfadmuster pro Zeile)",
+      "ignoreError": "Die Muster konnten nicht gespeichert werden.",
+      "installed": "installiert",
+      "intro": "Was sich zwischen jeder Sicherung und der vorherigen geändert hat: installierte, entfernte oder aktualisierte Pakete und die Dateiänderungen, die kein Paket erklärt.",
+      "link": "Was sich zwischen Sicherungen geändert hat",
+      "loadError": "Die Drift-Zeitachse konnte nicht geladen werden.",
+      "modified": "geändert",
+      "narrowed": "Es werden nur Änderungen unter {{path}} angezeigt.",
+      "noFiles": "Keine Dateiänderungen außer denen, die die Pakete erklären.",
+      "none": "Es wurden noch keine Sicherungen verglichen.",
+      "packagesCount": "Pakete: {{n}}",
+      "removed": "entfernt",
+      "running": "Ein Vergleich läuft.",
+      "title": "Drift-Zeitachse",
+      "truncated": "Von jeder Art werden nur die ersten 1000 Änderungen aufbewahrt.",
+      "upgraded": "aktualisiert"
+    },
+    "packages": {
+      "counts": "Von Hand installierte apt-Pakete: {{apt}}; Snaps: {{snaps}}; Repository-Schlüssel: {{keys}}",
+      "hideScript": "Skript ausblenden",
+      "removes": "Pakete, die der Snapshot nicht hatte, werden als automatisch markiert und von apt entfernt. Alles, was seit der Sicherung auf diesem Host installiert wurde, kann entfernt werden, auch der SysManage-Agent, falls er später installiert wurde.",
+      "showScript": "Das ganze Skript anzeigen ({{n}} Zeilen)",
+      "snaps": "Snap-Pakete: {{names}}",
+      "title": "Zurückzulegende Pakete"
     }
   }
 }

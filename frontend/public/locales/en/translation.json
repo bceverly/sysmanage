@@ -5308,7 +5308,8 @@
       "repack": "Repack",
       "prepare": "Prepare storage",
       "protect": "Protect",
-      "verify": "Full-read verification"
+      "verify": "Full-read verification",
+      "diff": "Snapshot comparison"
     },
     "card": {
       "lastCheck": "Last check",
@@ -5422,7 +5423,9 @@
       "hookMissing": "This host has no {{service}} hook to put right what pausing it left in the restored files. Do that by hand.",
       "hookUnreadable": "restate could not tell which hook {{dir}} is for, so no hook was run.",
       "signed": "signed",
-      "unsigned": "not signed"
+      "unsigned": "not signed",
+      "packages": "Put the snapshot's packages back first, at their versions",
+      "packagesAck": "Install packages on {{host}}, and remove the packages the snapshot did not have, to match it."
     },
     "run": {
       "busy": "Busy, will retry",
@@ -5657,6 +5660,39 @@
       "kept": "Backed up although they are network mounts, because \"Also back up\" names a path inside them: {{paths}}",
       "hint": "A network share is best backed up on the server that owns it.",
       "skipped": "Left out of the last backup by restate (network mounts on this host): {{paths}}"
+    },
+    "drift": {
+      "added": "added",
+      "compare": "Compare the newest backups not yet compared",
+      "deleted": "deleted",
+      "everything": "Show everything, logs and caches included",
+      "failed": "The comparison of {{from}} and {{to}} failed",
+      "filesCount": "Files: {{n}}",
+      "hidden": "Hidden as expected churn: {{n}}",
+      "ignore": "Also hide on this host (one path pattern per line)",
+      "ignoreError": "The patterns could not be saved.",
+      "installed": "installed",
+      "intro": "What changed between each backup and the one before it: packages installed, removed or upgraded, and the file changes no package accounts for.",
+      "link": "What changed between backups",
+      "loadError": "Could not load the drift timeline.",
+      "modified": "modified",
+      "narrowed": "Showing changes at or beneath {{path}} only.",
+      "noFiles": "No file changes beyond what the packages account for.",
+      "none": "No backups have been compared yet.",
+      "packagesCount": "Packages: {{n}}",
+      "removed": "removed",
+      "running": "A comparison is running.",
+      "title": "Drift timeline",
+      "truncated": "Only the first 1000 changes of each kind are kept.",
+      "upgraded": "upgraded"
+    },
+    "packages": {
+      "counts": "apt packages installed by hand: {{apt}}; snaps: {{snaps}}; repository keys: {{keys}}",
+      "hideScript": "Hide the script",
+      "removes": "Packages the snapshot did not have are marked automatic and removed by apt. Anything installed on this host since the backup, the SysManage agent included if it was installed later, can be removed.",
+      "showScript": "Show the whole script ({{n}} lines)",
+      "snaps": "Snaps: {{names}}",
+      "title": "Packages to put back"
     }
   }
 }

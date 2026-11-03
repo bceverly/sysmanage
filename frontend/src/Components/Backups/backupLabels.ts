@@ -101,6 +101,7 @@ export const actionLabel = (t: TFunction, action: string): string => {
         prepare: t('backups.action.prepare', 'Prepare storage'),
         protect: t('backups.action.protect', 'Protect'),
         verify: t('backups.action.verify', 'Full-read verification'),
+        diff: t('backups.action.diff', 'Snapshot comparison'),
     };
     return labels[action] ?? action;
 };

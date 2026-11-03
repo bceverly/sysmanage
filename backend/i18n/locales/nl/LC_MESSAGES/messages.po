@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 15:53-0500\n"
+"POT-Creation-Date: 2026-11-02 17:20-0500\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -81,7 +81,7 @@ msgstr "U heeft geen toegang tot het geselecteerde account."
 #: backend/api/config_mgmt_remediation.py:137
 #: backend/api/hardware_health.py:231 backend/api/hardware_health.py:409
 #: backend/api/time_sync.py:66 backend/api/config_mgmt_jobs.py:168
-#: backend/api/posture.py:375 backend/api/backups.py:150
+#: backend/api/posture.py:375 backend/api/backups.py:154
 #: backend/api/config_mgmt_profiles.py:136
 #: backend/api/secrets/permissions.py:50 backend/api/asset_discovery.py:91
 #: backend/api/machines.py:151
@@ -196,8 +196,8 @@ msgstr "Ongeldige host-ID formaat"
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:55
 #: backend/api/updates/query_routes.py:124
-#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:162
-#: backend/api/backups.py:165 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:270 backend/api/backups.py:166
+#: backend/api/backups.py:169 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:224 backend/api/child_host_utils.py:110
 #: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
@@ -2519,7 +2519,7 @@ msgid "Failed to clear NVD API key"
 msgstr "Mislukt om de NVD API-sleutel te wissen"
 
 #: backend/api/backups_setup.py:94 backend/api/backups_equip.py:160
-#: backend/api/backups.py:565
+#: backend/api/backups.py:569
 msgid "Set up the backup target first"
 msgstr "Stel eerst het back-updoel in"
 
@@ -4084,82 +4084,82 @@ msgid "KVM network list requested. Results will be returned shortly."
 msgstr ""
 "KVM-netwerklijst aangevraagd. De resultaten worden binnenkort weergegeven."
 
-#: backend/api/backups.py:181
+#: backend/api/backups.py:185
 #, python-format
 msgid "%s must be an absolute path without '..'"
 msgstr "%s moet een absoluut pad zonder '..' zijn"
 
-#: backend/api/backups.py:186
+#: backend/api/backups.py:190
 #, python-format
 msgid "%s is out of range"
 msgstr "%s valt buiten het toegestane bereik"
 
-#: backend/api/backups.py:190
+#: backend/api/backups.py:194
 msgid "Host mount point"
 msgstr "Koppelpunt op de host"
 
-#: backend/api/backups.py:191 backend/api/backups.py:236
+#: backend/api/backups.py:195 backend/api/backups.py:240
 msgid "Storage path"
 msgstr "Opslagpad"
 
-#: backend/api/backups.py:192
+#: backend/api/backups.py:196
 msgid "Concurrent backups"
 msgstr "Gelijktijdige back-ups"
 
-#: backend/api/backups.py:193
+#: backend/api/backups.py:197
 msgid "Days to keep sealed snapshots"
 msgstr "Dagen dat verzegelde snapshots bewaard blijven"
 
-#: backend/api/backups.py:194
+#: backend/api/backups.py:198
 msgid "Write cache budget"
 msgstr "Budget voor de schrijfcache"
 
-#: backend/api/backups.py:195
+#: backend/api/backups.py:199
 msgid "Storage space warning"
 msgstr "Waarschuwing opslagruimte"
 
-#: backend/api/backups.py:196
+#: backend/api/backups.py:200
 msgid "Storage space critical"
 msgstr "Opslagruimte kritiek"
 
-#: backend/api/backups.py:200
+#: backend/api/backups.py:204
 msgid "The storage space warning must be below the critical level"
 msgstr ""
 "De waarschuwing voor opslagruimte moet lager zijn dan het kritieke niveau"
 
-#: backend/api/backups.py:202
+#: backend/api/backups.py:206
 msgid "The backup service account is not a valid account name"
 msgstr "Het back-upserviceaccount is geen geldige accountnaam"
 
-#: backend/api/backups.py:204
+#: backend/api/backups.py:208
 msgid "Unknown seal mode"
 msgstr "Onbekende verzegelmodus"
 
-#: backend/api/backups.py:206
+#: backend/api/backups.py:210
 msgid "A ZFS snapshot seal needs the dataset name"
 msgstr "Verzegelen met een ZFS-snapshot vereist de naam van de dataset"
 
-#: backend/api/backups.py:208
+#: backend/api/backups.py:212
 msgid "The ZFS dataset name is not valid"
 msgstr "De naam van de ZFS-dataset is ongeldig"
 
-#: backend/api/backups.py:215
+#: backend/api/backups.py:219
 msgid "A storage host needs the storage path"
 msgstr "Een opslaghost heeft het opslagpad nodig"
 
-#: backend/api/backups.py:232
+#: backend/api/backups.py:236
 msgid "A btrfs snapshot seal needs the snapshot directory"
 msgstr "Een verzegeling met btrfs-snapshots heeft de snapshotmap nodig"
 
-#: backend/api/backups.py:234
+#: backend/api/backups.py:238
 msgid "A btrfs snapshot seal needs the storage path"
 msgstr "Een verzegeling met btrfs-snapshots heeft het opslagpad nodig"
 
-#: backend/api/backups.py:237
+#: backend/api/backups.py:241
 msgid "Snapshot directory"
 msgstr "Snapshotmap"
 
-#: backend/api/backups.py:242
+#: backend/api/backups.py:246
 #, python-format
 msgid ""
 "%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
@@ -4168,35 +4168,35 @@ msgstr ""
 "%s moet een eenvoudig absoluut pad zijn (letters, cijfers, '_', '.', '-' en "
 "'/'; geen '/' aan het eind)"
 
-#: backend/api/backups.py:250
+#: backend/api/backups.py:254
 msgid "The snapshot directory must be outside the storage path"
 msgstr "De snapshotmap moet buiten het opslagpad liggen"
 
-#: backend/api/backups.py:254
+#: backend/api/backups.py:258
 msgid "Interval (hours)"
 msgstr "Interval (uren)"
 
-#: backend/api/backups.py:255
+#: backend/api/backups.py:259
 msgid "Window start hour"
 msgstr "Startuur van het tijdvenster"
 
-#: backend/api/backups.py:256
+#: backend/api/backups.py:260
 msgid "Snapshots to keep"
 msgstr "Te bewaren snapshots"
 
-#: backend/api/backups.py:257
+#: backend/api/backups.py:261
 msgid "Check interval (days)"
 msgstr "Controle-interval (dagen)"
 
-#: backend/api/backups.py:261
+#: backend/api/backups.py:265
 msgid "Quiesce hooks must be up to 10 short lowercase names"
 msgstr "Pauzehooks moeten maximaal 10 korte namen in kleine letters zijn"
 
-#: backend/api/backups.py:274
+#: backend/api/backups.py:278
 msgid "At most 50 path rules can be set"
 msgstr "Maximaal 50 padregels kunnen worden ingesteld"
 
-#: backend/api/backups.py:285
+#: backend/api/backups.py:289
 msgid ""
 "Each path rule is one line of up to 512 characters, without leading or "
 "trailing spaces or a leading #"
@@ -4204,106 +4204,108 @@ msgstr ""
 "Elke padregel is één regel van maximaal 512 tekens lang, zonder leidende of "
 "afsluitende spaties of een leidende #"
 
-#: backend/api/backups.py:293 backend/api/backups_browse.py:93
+#: backend/api/backups.py:297 backend/api/backups_drift.py:93
+#: backend/api/backups_browse.py:93
 msgid "The snapshot name is not valid"
 msgstr "De naam van de snapshot is ongeldig"
 
-#: backend/api/backups.py:295
+#: backend/api/backups.py:299
 msgid "At most 50 paths can be restored at once"
 msgstr "Er kunnen maximaal 50 paden tegelijk worden hersteld"
 
-#: backend/api/backups.py:298
+#: backend/api/backups.py:302
 msgid "A restore path is empty or too long"
 msgstr "Een herstelpad is leeg of te lang"
 
-#: backend/api/backups.py:300
+#: backend/api/backups.py:304
 msgid "A restore path must not contain '..'"
 msgstr "Een herstelpad mag geen '..' bevatten"
 
-#: backend/api/backups.py:306
+#: backend/api/backups.py:310
 msgid "A restore path must be absolute, such as /home/alice/notes.txt"
 msgstr "Een herstelpad moet absoluut zijn, zoals /home/alice/notes.txt"
 
-#: backend/api/backups.py:320
+#: backend/api/backups.py:324
 msgid "Name the paths to put back; a whole host is not restored in place"
 msgstr ""
 "Geef de terug te zetten paden op; een hele host wordt niet op de "
 "oorspronkelijke plek hersteld"
 
-#: backend/api/backups.py:326
+#: backend/api/backups.py:330
 msgid "Each path restored in place must be specific, such as /etc/nginx"
 msgstr ""
 "Elk pad dat op de oorspronkelijke plek wordt hersteld, moet specifiek zijn, "
 "zoals /etc/nginx"
 
-#: backend/api/backups.py:331
+#: backend/api/backups.py:335
 msgid "Confirm that the host's files at these paths will be replaced"
 msgstr "Bevestig dat de bestanden van de host op deze paden worden vervangen"
 
-#: backend/api/backups.py:351 backend/api/backups.py:354
+#: backend/api/backups.py:355 backend/api/backups.py:358
 msgid "Backup target not found"
 msgstr "Back-updoel niet gevonden"
 
-#: backend/api/backups.py:408
+#: backend/api/backups.py:412
 msgid "This edition supports one backup target; edit the existing one"
 msgstr "Deze editie ondersteunt één back-updoel; bewerk het bestaande"
 
-#: backend/api/backups.py:485
+#: backend/api/backups.py:489
 msgid "Remove the hosts' backup policies before the target"
 msgstr "Verwijder eerst het back-upbeleid van de hosts, daarna het doel"
 
-#: backend/api/backups.py:612
+#: backend/api/backups.py:616
 msgid "No backup policy"
 msgstr "Geen back-upbeleid"
 
-#: backend/api/backups.py:636
+#: backend/api/backups.py:640
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "Deze host kan nog geen back-ups uitvoeren (%s)"
 
-#: backend/api/backups.py:642
+#: backend/api/backups.py:646
 msgid "This host's backup is not configured yet"
 msgstr "De back-up van deze host is nog niet geconfigureerd"
 
-#: backend/api/backups.py:659
+#: backend/api/backups.py:663
 msgid "The backup storage host is not ready"
 msgstr "De opslaghost voor back-ups is niet gereed"
 
-#: backend/api/backups.py:674
+#: backend/api/backups.py:678
 msgid "Unknown backup action"
 msgstr "Onbekende back-upactie"
 
-#: backend/api/backups.py:687
+#: backend/api/backups.py:691
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr ""
 "Een versleutelde repository kan niet opnieuw worden ingepakt op de "
 "opslaghost"
 
-#: backend/api/backups.py:691
+#: backend/api/backups.py:695
 msgid "That backup job is already queued or running"
 msgstr "Die back-uptaak staat al in de wachtrij of wordt uitgevoerd"
 
-#: backend/api/backups.py:787 backend/api/backups_browse.py:78
+#: backend/api/backups.py:792 backend/api/backups_browse.py:78
 msgid "Snapshot not found"
 msgstr "Snapshot niet gevonden"
 
-#: backend/api/backups.py:794
+#: backend/api/backups.py:799
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "Deze snapshot is niet ondertekend; bevestig om hem toch te herstellen"
 
-#: backend/api/backups.py:845 backend/services/backup_key_release.py:117
+#: backend/api/backups.py:852 backend/services/backup_key_release.py:124
 msgid "Encrypted backups need the Professional+ backup engine"
 msgstr "Versleutelde back-ups hebben de Professional+-back-upengine nodig"
 
-#: backend/api/backups.py:850 backend/api/backups_browse.py:63
+#: backend/api/backups.py:857 backend/api/backups_drift.py:101
+#: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "De restate van deze host kan dit nog niet; werk restate bij"
 
-#: backend/api/backups.py:862
+#: backend/api/backups.py:869
 msgid "This snapshot's repository is no longer kept"
 msgstr "De repository van deze snapshot wordt niet meer bewaard"
 
-#: backend/api/backups.py:944 backend/api/backups.py:947
+#: backend/api/backups.py:954 backend/api/backups.py:957
 msgid "Backup run not found"
 msgstr "Back-uptaak niet gevonden"
 
@@ -4746,6 +4748,19 @@ msgstr "Deze aanvraag kon niet door de sub-host worden afgehandeld."
 #: backend/api/child_host_utils.py:41
 msgid "Permission denied: {} role required"
 msgstr "Toegang geweigerd: {} rol vereist"
+
+#: backend/api/backups_drift.py:54
+msgid "The drift timeline needs the Professional+ backup engine"
+msgstr ""
+"De tijdlijn van afwijkingen vereist de back-upengine van Professional+"
+
+#: backend/api/backups_drift.py:73 backend/api/backups_browse.py:95
+msgid "The path must be absolute"
+msgstr "Het pad moet absoluut zijn"
+
+#: backend/api/backups_drift.py:105
+msgid "A comparison of snapshots is already running"
+msgstr "Er loopt al een vergelijking van snapshots"
 
 #: backend/api/host_monitoring.py:206
 msgid "Certificate collection requested"
@@ -5460,10 +5475,6 @@ msgstr ""
 msgid "Machine link decided for host %s"
 msgstr "Link voor machine is bepaald voor host %s"
 
-#: backend/api/backups_browse.py:95
-msgid "The path must be absolute"
-msgstr "Het pad moet absoluut zijn"
-
 #: backend/api/backups_browse.py:129
 msgid "What changed compares with the current repository only"
 msgstr "Wat is veranderd vergelijkt alleen met de huidige repository"
@@ -5862,6 +5873,28 @@ msgstr "De doelen bevatten geen actieve host"
 msgid "At most 10000 hosts can be scanned in one job"
 msgstr "Er kunnen maximaal 10000 hosts in één taak worden gescand"
 
+#: backend/services/backup_package_restore.py:45
+msgid "Restoring packages needs the Professional+ backup engine"
+msgstr "Pakketten herstellen vereist de back-upengine van Professional+"
+
+#: backend/services/backup_package_restore.py:51
+msgid "This host's restate cannot restore packages yet; upgrade restate"
+msgstr ""
+"restate op deze host kan nog geen pakketten herstellen; werk restate bij"
+
+#: backend/services/backup_package_restore.py:59
+msgid "Packages are restored onto the host itself: choose into place"
+msgstr ""
+"Pakketten worden op de host zelf hersteld: kies terugzetten op hun plaats"
+
+#: backend/services/backup_package_restore.py:65
+msgid ""
+"Confirm that packages will be installed, and packages the snapshot did not "
+"have removed, to match the snapshot"
+msgstr ""
+"Bevestig dat pakketten worden geïnstalleerd en pakketten die de snapshot "
+"niet had worden verwijderd, zodat de host overeenkomt met de snapshot"
+
 #: backend/services/held_asset_tags.py:159
 #, python-format
 msgid "Held asset tag %s applied"
@@ -5882,36 +5915,36 @@ msgstr "Kies ten minste één host om te scannen"
 msgid "At most 500 hosts can be scanned in one request"
 msgstr "Er kunnen maximaal 500 hosts in één verzoek worden gescand"
 
-#: backend/services/backup_key_release.py:78
-#: backend/services/backup_key_release.py:149
+#: backend/services/backup_key_release.py:85
+#: backend/services/backup_key_release.py:156
 msgid "No such backup run for this host"
 msgstr "Geen dergelijke back-uptaak voor deze host"
 
-#: backend/services/backup_key_release.py:84
+#: backend/services/backup_key_release.py:91
 msgid "This backup run does not need a key"
 msgstr "Deze back-uptaak heeft geen sleutel nodig"
 
-#: backend/services/backup_key_release.py:86
+#: backend/services/backup_key_release.py:93
 msgid "This backup run has already ended"
 msgstr "Deze back-uptaak is al beëindigd"
 
-#: backend/services/backup_key_release.py:88
+#: backend/services/backup_key_release.py:95
 msgid "This backup run's key was already released"
 msgstr "De sleutel van deze back-uptaak is al vrijgegeven"
 
-#: backend/services/backup_key_release.py:95
+#: backend/services/backup_key_release.py:102
 msgid "This backup run is too old to release its key"
 msgstr "Deze back-uptaak is te oud om zijn sleutel vrij te geven"
 
-#: backend/services/backup_key_release.py:113
+#: backend/services/backup_key_release.py:120
 msgid "This host's backups are not encrypted"
 msgstr "De back-ups van deze host zijn niet versleuteld"
 
-#: backend/services/backup_key_release.py:147
+#: backend/services/backup_key_release.py:154
 msgid "Snapshot signing is not turned on"
 msgstr "Ondertekening van snapshots is niet ingeschakeld"
 
-#: backend/services/backup_key_release.py:152
+#: backend/services/backup_key_release.py:159
 msgid "Signed backups need the Professional+ backup engine"
 msgstr "Ondertekende back-ups vereisen de Professional+-back-upengine"
 

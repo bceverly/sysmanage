@@ -5308,7 +5308,8 @@
       "repack": "Reimpacchetta",
       "prepare": "Prepara archiviazione",
       "protect": "Protezione",
-      "verify": "Verifica con lettura completa"
+      "verify": "Verifica con lettura completa",
+      "diff": "Confronto di snapshot"
     },
     "card": {
       "lastCheck": "Ultima verifica",
@@ -5422,7 +5423,9 @@
       "hookMissing": "Questo host non ha alcun hook {{service}} per sistemare ciò che la sospensione del servizio ha lasciato nei file ripristinati. Fallo a mano.",
       "hookUnreadable": "restate non è riuscito a capire a quale hook appartiene {{dir}}, quindi non è stato eseguito alcun hook.",
       "signed": "firmato",
-      "unsigned": "non firmato"
+      "unsigned": "non firmato",
+      "packages": "Rimetti prima i pacchetti dello snapshot, nelle loro versioni",
+      "packagesAck": "Installa pacchetti su {{host}} e rimuovi i pacchetti che lo snapshot non aveva, perché corrisponda."
     },
     "run": {
       "busy": "Occupato, verrà ritentato",
@@ -5657,6 +5660,39 @@
       "kept": "Inclusi nel backup anche se sono mount di rete, perché \"Includi anche nel backup\" indica un percorso al loro interno: {{paths}}",
       "hint": "È meglio eseguire il backup di una condivisione di rete sul server a cui appartiene.",
       "skipped": "Esclusi dall'ultimo backup da restate (mount di rete su questo host): {{paths}}"
+    },
+    "drift": {
+      "added": "aggiunto",
+      "compare": "Confronta i backup più recenti non ancora confrontati",
+      "deleted": "eliminato",
+      "everything": "Mostra tutto, log e cache compresi",
+      "failed": "Il confronto di {{from}} e {{to}} non è riuscito",
+      "filesCount": "File: {{n}}",
+      "hidden": "Nascosti come modifiche previste: {{n}}",
+      "ignore": "Nascondi anche su questo host (un modello di percorso per riga)",
+      "ignoreError": "Impossibile salvare i modelli.",
+      "installed": "installato",
+      "intro": "Cosa è cambiato tra ogni backup e il precedente: pacchetti installati, rimossi o aggiornati, e le modifiche ai file che nessun pacchetto spiega.",
+      "link": "Cosa è cambiato tra i backup",
+      "loadError": "Impossibile caricare la cronologia del drift.",
+      "modified": "modificato",
+      "narrowed": "Sono mostrate solo le modifiche in {{path}} o al di sotto.",
+      "noFiles": "Nessuna modifica ai file oltre a quelle spiegate dai pacchetti.",
+      "none": "Nessun backup è stato ancora confrontato.",
+      "packagesCount": "Pacchetti: {{n}}",
+      "removed": "rimosso",
+      "running": "È in corso un confronto.",
+      "title": "Cronologia del drift",
+      "truncated": "Si conservano solo le prime 1000 modifiche di ogni tipo.",
+      "upgraded": "aggiornato"
+    },
+    "packages": {
+      "counts": "Pacchetti apt installati a mano: {{apt}}; snap: {{snaps}}; chiavi dei repository: {{keys}}",
+      "hideScript": "Nascondi lo script",
+      "removes": "I pacchetti che lo snapshot non aveva vengono contrassegnati come automatici e rimossi da apt. Tutto ciò che è stato installato su questo host dopo il backup può essere rimosso, compreso l'agente SysManage se è stato installato dopo.",
+      "showScript": "Mostra lo script completo ({{n}} righe)",
+      "snaps": "Snap: {{names}}",
+      "title": "Pacchetti da rimettere"
     }
   }
 }

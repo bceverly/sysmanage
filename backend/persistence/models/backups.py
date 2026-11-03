@@ -177,6 +177,10 @@ class BackupPolicy(Base):
     # has held is a BackupPolicyKey row.
     encrypt_rotated_at = Column(DateTime, nullable=True)
     repository_bytes = Column(BigInteger, nullable=True)
+    # Paths the drift timeline hides as expected churn on this host, restate
+    # patterns as a JSON list (q74, Pro+ 24.7); logs and caches are hidden by
+    # default besides.
+    drift_ignore = Column(Text, nullable=True)
     config_version = Column(Integer, nullable=False, default=1)
     host_acked_version = Column(Integer, nullable=False, default=0)
     storage_acked_version = Column(Integer, nullable=False, default=0)
@@ -257,6 +261,48 @@ class BackupSnapshot(Base):
     signer = Column(String(64), nullable=True)
     seen_at = Column(DateTime, nullable=False)
     gone_at = Column(DateTime, nullable=True)
+
+
+class BackupSnapshotDiff(Base):
+    """What changed between two snapshots of a host's repository (q74, Pro+
+    drift timeline, 24.7): restate ``diff --packages`` run on the host after
+    each capture, from the snapshot before it.  The counts are the whole
+    diff's; ``changes`` and ``packages`` (JSON) hold its first 1000 of each,
+    as restate's result does, flagged by the ``*_truncated`` columns.
+    ``status`` is ok, or failed with ``message``; a pair is compared once."""
+
+    __tablename__ = "backup_snapshot_diff"
+    __table_args__ = (
+        UniqueConstraint(
+            "policy_id", "from_snapshot", "to_snapshot", name="uq_backup_snapshot_diff"
+        ),
+    )
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    policy_id = Column(
+        GUID(),
+        ForeignKey(_POLICY_FK, ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    host_id = Column(
+        GUID(), ForeignKey(_HOST_FK, ondelete="CASCADE"), nullable=False, index=True
+    )
+    from_snapshot = Column(String(255), nullable=False)
+    to_snapshot = Column(String(255), nullable=False)
+    run_id = Column(GUID(), nullable=True)
+    status = Column(String(16), nullable=False)
+    message = Column(Text, nullable=True)
+    added = Column(Integer, nullable=True)
+    deleted = Column(Integer, nullable=True)
+    modified = Column(Integer, nullable=True)
+    packages_changed = Column(Integer, nullable=True)
+    explained = Column(Integer, nullable=True)
+    changes = Column(Text, nullable=True)
+    packages = Column(Text, nullable=True)
+    truncated = Column(Boolean, nullable=False, default=False)
+    packages_truncated = Column(Boolean, nullable=False, default=False)
+    computed_at = Column(DateTime, nullable=False)
 
 
 class BackupPolicyKey(Base):

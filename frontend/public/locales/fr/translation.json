@@ -5308,7 +5308,8 @@
       "repack": "Réempaqueter",
       "prepare": "Préparer le stockage",
       "protect": "Protéger",
-      "verify": "Vérification par lecture complète"
+      "verify": "Vérification par lecture complète",
+      "diff": "Comparaison d'instantanés"
     },
     "card": {
       "lastCheck": "Dernière vérification",
@@ -5422,7 +5423,9 @@
       "hookMissing": "Cet hôte n'a aucun hook {{service}} pour corriger ce que la mise en pause du service a laissé dans les fichiers restaurés. Faites-le à la main.",
       "hookUnreadable": "restate n'a pas pu déterminer à quel hook correspond {{dir}} ; aucun hook n'a donc été exécuté.",
       "signed": "signé",
-      "unsigned": "non signé"
+      "unsigned": "non signé",
+      "packages": "Remettre d'abord les paquets de l'instantané, dans leurs versions",
+      "packagesAck": "Installer des paquets sur {{host}} et supprimer les paquets que l'instantané n'avait pas, pour qu'il lui corresponde."
     },
     "run": {
       "busy": "Occupé, nouvelle tentative prévue",
@@ -5657,6 +5660,39 @@
       "kept": "Sauvegardés bien qu'il s'agisse de montages réseau, car « Sauvegarder aussi » cite un chemin à l'intérieur : {{paths}}",
       "hint": "Un partage réseau se sauvegarde de préférence sur le serveur auquel il appartient.",
       "skipped": "Exclus de la dernière sauvegarde par restate (montages réseau sur cet hôte) : {{paths}}"
+    },
+    "drift": {
+      "added": "ajouté",
+      "compare": "Comparer les sauvegardes les plus récentes pas encore comparées",
+      "deleted": "supprimé",
+      "everything": "Tout afficher, journaux et caches compris",
+      "failed": "La comparaison de {{from}} et {{to}} a échoué",
+      "filesCount": "Fichiers : {{n}}",
+      "hidden": "Masqués comme changements attendus : {{n}}",
+      "ignore": "Masquer aussi sur cet hôte (un motif de chemin par ligne)",
+      "ignoreError": "Les motifs n'ont pas pu être enregistrés.",
+      "installed": "installé",
+      "intro": "Ce qui a changé entre chaque sauvegarde et la précédente : paquets installés, supprimés ou mis à jour, et les modifications de fichiers qu'aucun paquet n'explique.",
+      "link": "Ce qui a changé entre les sauvegardes",
+      "loadError": "Impossible de charger la chronologie des dérives.",
+      "modified": "modifié",
+      "narrowed": "Seules les modifications dans {{path}} ou en dessous sont affichées.",
+      "noFiles": "Aucune modification de fichier en dehors de celles qu'expliquent les paquets.",
+      "none": "Aucune sauvegarde n'a encore été comparée.",
+      "packagesCount": "Paquets : {{n}}",
+      "removed": "supprimé",
+      "running": "Une comparaison est en cours.",
+      "title": "Chronologie des dérives",
+      "truncated": "Seules les 1000 premières modifications de chaque type sont conservées.",
+      "upgraded": "mis à jour"
+    },
+    "packages": {
+      "counts": "Paquets apt installés à la main : {{apt}} ; snaps : {{snaps}} ; clés de dépôt : {{keys}}",
+      "hideScript": "Masquer le script",
+      "removes": "Les paquets que l'instantané n'avait pas sont marqués comme automatiques et supprimés par apt. Tout ce qui a été installé sur cet hôte depuis la sauvegarde peut être supprimé, y compris l'agent SysManage s'il a été installé ensuite.",
+      "showScript": "Afficher le script complet ({{n}} lignes)",
+      "snaps": "Snaps : {{names}}",
+      "title": "Paquets à remettre en place"
     }
   }
 }

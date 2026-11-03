@@ -15,6 +15,7 @@ import { useVisiblePolling } from '../../hooks/useVisiblePolling';
 import { backupNow, getHostBackup } from '../../Services/backups';
 import type { BackupRun, HostBackup } from '../../Services/backups';
 import { hasPermission, SecurityRoles } from '../../Services/permissions';
+import { useModuleLicensed } from '../../hooks/useModuleLicensed';
 import BackupPolicyDialog from './BackupPolicyDialog';
 import BackupChangesDialog from './BackupChangesDialog';
 import BackupPrepareButton from './BackupPrepareButton';
@@ -58,6 +59,7 @@ const RUNNING_POLL_MS = 5000;
 const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const proLicensed = useModuleLicensed('backup_engine');
     const [data, setData] = useState<HostBackup | null>(null);
     const [canManage, setCanManage] = useState(false);
     const [canRestore, setCanRestore] = useState(false);
@@ -201,7 +203,9 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                 {changes && <BackupChangesDialog hostId={hostId} fqdn={data.fqdn} onClose={() => setChanges(false)} />}
                 {restoring && (
                     <RestoreFilesDialog open hostId={hostId} fqdn={data.fqdn}
-                        canBrowse={!!data.policy?.abilities?.includes('list')} onClose={() => setRestoring(false)} />
+                        canBrowse={!!data.policy?.abilities?.includes('list')}
+                        canPackages={proLicensed && !!data.policy?.abilities?.includes('packages')}
+                        onClose={() => setRestoring(false)} />
                 )}
             </CardContent>
         </Card>

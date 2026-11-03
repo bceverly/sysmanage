@@ -5308,7 +5308,8 @@
       "repack": "Opnieuw inpakken",
       "prepare": "Opslag voorbereiden",
       "protect": "Beveiligen",
-      "verify": "Verificatie met volledig lezen"
+      "verify": "Verificatie met volledig lezen",
+      "diff": "Vergelijking van snapshots"
     },
     "card": {
       "lastCheck": "Laatste controle",
@@ -5422,7 +5423,9 @@
       "hookMissing": "Deze host heeft geen hook {{service}} om te herstellen wat het pauzeren van de dienst in de herstelde bestanden heeft achtergelaten. Doe dat handmatig.",
       "hookUnreadable": "restate kon niet bepalen bij welke hook {{dir}} hoort, dus er is geen hook uitgevoerd.",
       "signed": "ondertekend",
-      "unsigned": "niet ondertekend"
+      "unsigned": "niet ondertekend",
+      "packages": "Eerst de pakketten van de snapshot terugzetten, in hun versies",
+      "packagesAck": "Pakketten installeren op {{host}} en de pakketten die de snapshot niet had verwijderen, zodat hij ermee overeenkomt."
     },
     "run": {
       "busy": "Bezet, wordt opnieuw geprobeerd",
@@ -5657,6 +5660,39 @@
       "kept": "Worden geback-upt hoewel het netwerkkoppelingen zijn, omdat \"Ook back-uppen\" een pad erin noemt: {{paths}}",
       "hint": "Een netwerkshare kunt u het beste back-uppen op de server waar die bij hoort.",
       "skipped": "Door restate uitgesloten van de laatste back-up (netwerkkoppelingen op deze host): {{paths}}"
+    },
+    "drift": {
+      "added": "toegevoegd",
+      "compare": "De nieuwste back-ups vergelijken die nog niet vergeleken zijn",
+      "deleted": "verwijderd",
+      "everything": "Alles tonen, logboeken en caches inbegrepen",
+      "failed": "De vergelijking van {{from}} en {{to}} is mislukt",
+      "filesCount": "Bestanden: {{n}}",
+      "hidden": "Verborgen als verwachte wijzigingen: {{n}}",
+      "ignore": "Ook op deze host verbergen (één padpatroon per regel)",
+      "ignoreError": "De patronen konden niet worden opgeslagen.",
+      "installed": "geïnstalleerd",
+      "intro": "Wat er tussen elke back-up en de vorige is veranderd: geïnstalleerde, verwijderde of bijgewerkte pakketten, en de bestandswijzigingen die geen pakket verklaart.",
+      "link": "Wat er tussen back-ups is veranderd",
+      "loadError": "De tijdlijn van afwijkingen kon niet worden geladen.",
+      "modified": "gewijzigd",
+      "narrowed": "Alleen wijzigingen in of onder {{path}} worden getoond.",
+      "noFiles": "Geen bestandswijzigingen buiten wat de pakketten verklaren.",
+      "none": "Er zijn nog geen back-ups vergeleken.",
+      "packagesCount": "Pakketten: {{n}}",
+      "removed": "verwijderd",
+      "running": "Er loopt een vergelijking.",
+      "title": "Tijdlijn van afwijkingen",
+      "truncated": "Alleen de eerste 1000 wijzigingen van elk soort worden bewaard.",
+      "upgraded": "bijgewerkt"
+    },
+    "packages": {
+      "counts": "Met de hand geïnstalleerde apt-pakketten: {{apt}}; snaps: {{snaps}}; repositorysleutels: {{keys}}",
+      "hideScript": "Het script verbergen",
+      "removes": "Pakketten die de snapshot niet had, worden als automatisch gemarkeerd en door apt verwijderd. Alles wat sinds de back-up op deze host is geïnstalleerd, kan worden verwijderd, ook de SysManage-agent als die later is geïnstalleerd.",
+      "showScript": "Het hele script tonen ({{n}} regels)",
+      "snaps": "Snap-pakketten: {{names}}",
+      "title": "Terug te zetten pakketten"
     }
   }
 }

@@ -36,6 +36,7 @@ import AsyncButton from '../AsyncButton';
 import { getRun, getSnapshots, restoreFiles } from '../../Services/backups';
 import SnapshotBrowser from './SnapshotBrowser';
 import RestoreNotes from './RestoreNotes';
+import PackageRestoreSummary from './PackageRestoreSummary';
 import type { BackupRun, BackupSnapshot } from '../../Services/backups';
 import { apiDetail, formatBytes, formatTime, runStatusLabel } from './backupLabels';
 
@@ -98,6 +99,7 @@ const RunOutcome: React.FC<{ run: BackupRun }> = ({ run }) => {
                     && ` - ${t('backups.restore.missing', 'Not in the snapshot: {{n}}', { n: result.missing.length })}`}
             </Typography>
             <RestoreNotes run={run} />
+            <PackageRestoreSummary run={run} />
             {result.content_read === false && (
                 <Typography variant="caption" display="block" color="text.secondary">
                     {t('backups.restore.planned',
@@ -123,8 +125,10 @@ const RestoreFilesDialog: React.FC<{
     fqdn: string;
     /** The host's restate can list a snapshot's folders (2.1.0.4+). */
     canBrowse?: boolean;
+    /** Packages can be put back first (Pro+ 24.6: the engine and the ability). */
+    canPackages?: boolean;
     onClose: () => void;
-}> = ({ open, hostId, fqdn, canBrowse = false, onClose }) => {
+}> = ({ open, hostId, fqdn, canBrowse = false, canPackages = false, onClose }) => {
     const { t } = useTranslation();
     const [snapshots, setSnapshots] = useState<BackupSnapshot[]>([]);
     const [snapshot, setSnapshot] = useState('');
@@ -137,6 +141,8 @@ const RestoreFilesDialog: React.FC<{
     const [browsing, setBrowsing] = useState(false);
     const [inPlace, setInPlace] = useState(false);
     const [placeAck, setPlaceAck] = useState(false);
+    const [packages, setPackages] = useState(false);
+    const [packagesAck, setPackagesAck] = useState(false);
 
     useEffect(() => {
         if (!open) return;
@@ -146,6 +152,8 @@ const RestoreFilesDialog: React.FC<{
         setAcknowledged(false);
         setInPlace(false);
         setPlaceAck(false);
+        setPackages(false);
+        setPackagesAck(false);
         getSnapshots(hostId)
             .then(rows => {
                 setSnapshots(rows);
@@ -185,6 +193,8 @@ const RestoreFilesDialog: React.FC<{
                 acknowledge_unsigned: acknowledged,
                 in_place: inPlace,
                 acknowledge_in_place: inPlace && placeAck,
+                packages,
+                acknowledge_packages: packages && packagesAck,
             });
             if (dryRun) {
                 setPreview(run);
@@ -206,6 +216,13 @@ const RestoreFilesDialog: React.FC<{
         setInPlace(place);
         setPlaceAck(false);
         setPreview(null);
+        if (!place) setPackages(false);  // packages go onto the host itself
+    };
+    const choosePackages = (wanted: boolean) => {
+        setPackages(wanted);
+        setPackagesAck(false);
+        setPreview(null);
+        if (wanted) setInPlace(true);
     };
     return (
         <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -278,6 +295,18 @@ const RestoreFilesDialog: React.FC<{
                             label={t('backups.restore.placeAck', 'Replace the files at these paths on {{host}}.', { host: fqdn })}
                         />
                     )}
+                    {canPackages && (
+                        <FormControlLabel
+                            control={<Checkbox checked={packages} onChange={e => choosePackages(e.target.checked)} />}
+                            label={t('backups.restore.packages', 'Put the snapshot\'s packages back first, at their versions')}
+                        />
+                    )}
+                    {packages && (
+                        <FormControlLabel
+                            control={<Checkbox checked={packagesAck} onChange={e => setPackagesAck(e.target.checked)} />}
+                            label={t('backups.restore.packagesAck', 'Install packages on {{host}}, and remove the packages the snapshot did not have, to match it.', { host: fqdn })}
+                        />
+                    )}
                     {preview && <RunOutcome run={preview} />}
                     {restore && (
                         <Box>
@@ -297,7 +326,8 @@ const RestoreFilesDialog: React.FC<{
                     {t('backups.restore.preview', 'Preview')}
                 </AsyncButton>
                 <AsyncButton variant="contained" color={inPlace ? 'warning' : 'primary'} onClick={() => send(false)}
-                    disabled={!previewDone || restore !== null || blocked || (inPlace && !placeAck)}>
+                    disabled={!previewDone || restore !== null || blocked || (inPlace && !placeAck)
+                        || (packages && !packagesAck)}>
                     {inPlace ? t('backups.restore.confirmPlace', 'Restore into place')
                         : t('backups.restore.confirm', 'Restore to staging')}
                 </AsyncButton>

@@ -25,6 +25,7 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Divider from '@mui/material/Divider';
 
 import BaselineDiffPanel from '../Components/BaselineDiffPanel';
+import DriftTimelineLink from '../Components/Backups/DriftTimelineLink';
 import ConfigRemediationRulesPanel from '../Components/ConfigRemediationRulesPanel';
 import FileWatchPanel from '../Components/FileWatchPanel';
 import { formatUTCTimestamp } from '../utils/dateUtils';
@@ -433,6 +434,7 @@ const ConfigDrift: React.FC = () => {
                     )}
                 </DialogContent>
                 <DialogActions>
+                    {detailHost && <DriftTimelineLink hostId={detailHost.host_id} />}
                     <Button onClick={() => setDetailHost(null)}>
                         {t('common.close', 'Close')}
                     </Button>

@@ -267,6 +267,23 @@ export interface BackupRun {
   staging_path?: string | null;
   /** A restore over the host's own files (24.9). */
   in_place?: boolean;
+  /** What a package restore's script will do (Pro+ 24.6), from its plan. */
+  package_summary?: PackageSummary | null;
+}
+
+/** The engine's reading of restate's ``restore --packages`` script. */
+export interface PackageSummary {
+  lines: number;
+  apt: string[];
+  apt_count: number;
+  manual_count: number;
+  auto_count: number;
+  /** apt then removes what the snapshot did not have. */
+  removes_unlisted: boolean;
+  snaps: string[];
+  flatpaks: string[];
+  repository_keys: number;
+  truncated: boolean;
 }
 
 export interface BackupHost {
@@ -380,6 +397,9 @@ export interface RestoreInput {
   /** Over the host's own files rather than into staging. */
   in_place?: boolean;
   acknowledge_in_place?: boolean;
+  /** The snapshot's packages put back first (Pro+ 24.6; in place only). */
+  packages?: boolean;
+  acknowledge_packages?: boolean;
 }
 
 const base = "/api/v1";
@@ -519,3 +539,69 @@ export const previewRetention = async (
   );
   return response.data;
 };
+
+/** One file change between two snapshots (restate ``diff``). */
+export interface DriftChange {
+  change: "A" | "D" | "M" | string;
+  path: string;
+  what?: string;
+}
+
+/** One package change (restate ``diff --packages``): Installed, Removed, Upgraded. */
+export interface DriftPackage {
+  change: "I" | "R" | "U" | string;
+  manager: string;
+  name: string;
+  arch?: string;
+  from?: string;
+  to?: string;
+  files?: number;
+}
+
+export interface DriftEntry {
+  from: string;
+  to: string;
+  status: "ok" | "failed" | string;
+  message: string | null;
+  computed_at: string | null;
+  added: number | null;
+  deleted: number | null;
+  modified: number | null;
+  packages_changed: number | null;
+  truncated: boolean;
+  packages_truncated: boolean;
+  changes: DriftChange[];
+  packages: DriftPackage[];
+  /** Changes left out as expected churn. */
+  hidden: number;
+}
+
+export interface DriftTimeline {
+  entries: DriftEntry[];
+  hide_expected: boolean;
+  expected: string[];
+  path: string | null;
+  ignore: string[];
+  missing: { from: string; to: string }[];
+  running: boolean;
+}
+
+/** The host's drift timeline (Pro+ backup_engine, 24.7).  HTTP 402 without it. */
+export const getDriftTimeline = async (
+  hostId: string, hideExpected = true, path?: string | null,
+): Promise<DriftTimeline> =>
+  (await axiosInstance.get<DriftTimeline>(`${base}/host/${hostId}/backup-drift`, {
+    params: { hide_expected: hideExpected, ...(path ? { path } : {}) },
+  })).data;
+
+/** Compare two snapshots now (the newest and the one before by default). */
+export const computeDrift = async (
+  hostId: string, fromSnapshot?: string, toSnapshot?: string,
+): Promise<BackupRun> =>
+  (await axiosInstance.post<BackupRun>(`${base}/host/${hostId}/backup-drift/compute`, {
+    from_snapshot: fromSnapshot ?? null, to_snapshot: toSnapshot ?? null,
+  })).data;
+
+/** The paths this host's timeline hides as expected churn. */
+export const setDriftIgnore = async (hostId: string, patterns: string[]): Promise<{ ignore: string[] }> =>
+  (await axiosInstance.put<{ ignore: string[] }>(`${base}/host/${hostId}/backup-drift/ignore`, { patterns })).data;

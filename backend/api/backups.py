@@ -52,6 +52,7 @@ from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import backup_jobs as jobs
+from backend.services import backup_package_restore as package_restore
 from backend.services import backup_reach as reach
 from backend.services import backup_storage_status as storage_fs
 from backend.services import backup_tick
@@ -137,6 +138,9 @@ class RestoreBody(BaseModel):
     # Over the host's own files rather than into staging (24.9).
     in_place: bool = False
     acknowledge_in_place: bool = False
+    # The snapshot's packages put back first (Pro+ 24.6; in place only).
+    packages: bool = False
+    acknowledge_packages: bool = False
 
 
 def _bad(message: str) -> HTTPException:
@@ -772,6 +776,7 @@ async def backup_restore(
     host = _host_or_404(db, host_id)
     _validate_restore(body)
     policy = _ready_policy(db, host)
+    package_restore.check(body, policy)
     # A restore (and its preview) mounts the repository on the host.
     reach.refuse_if_blocked(db, host)
     snapshot = (
@@ -806,6 +811,7 @@ async def backup_restore(
         in_place=body.in_place,
         previous=where == jobs.PREVIOUS,
         needs_key=key_needed(where, policy),
+        packages=body.packages,
     )
     _audit(
         db,
@@ -821,6 +827,7 @@ async def backup_restore(
             "exclude": body.exclude,
             "dry_run": body.dry_run,
             "in_place": body.in_place,
+            "packages": body.packages,
             "unsigned_acknowledged": not snapshot.signed and body.acknowledge_unsigned,
         },
     )
@@ -865,6 +872,9 @@ def _readable_repository(snapshot, policy, host) -> str:
 
 
 def _restore_audit_text(body: RestoreBody) -> str:
+    text = package_restore.audit_text(body)
+    if text:
+        return text
     if body.in_place:
         return (
             "Backup restore into place previewed"

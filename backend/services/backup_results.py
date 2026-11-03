@@ -30,6 +30,7 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session
 
 from backend.persistence import models
+from backend.services import backup_drift
 from backend.services import backup_first_fit as first_fit
 from backend.services import backup_jobs as jobs
 from backend.services import backup_network_mounts as network_mounts
@@ -178,7 +179,7 @@ def _store_hooks(policy: Optional[models.BackupPolicy], hooks: Any) -> None:
         policy.available_hooks = json.dumps(names[:64])
 
 
-_ABILITIES = ("list", "status", "cache", "decrypt", "verify")
+_ABILITIES = ("list", "status", "cache", "decrypt", "verify", "diff", "packages")
 
 
 def _store_abilities(policy: Optional[models.BackupPolicy], found: Any) -> None:
@@ -300,7 +301,7 @@ def _refused(db: Session, run: models.BackupRun, code: str) -> None:
     if (
         code == "not_configured"
         and policy is not None
-        and run.action not in jobs.BROWSE_ACTIONS
+        and run.action not in (*jobs.BROWSE_ACTIONS, jobs.DIFF)
     ):
         if str(run.host_id) == str(policy.host_id):
             policy.host_acked_version = 0
@@ -575,6 +576,7 @@ def _after_capture(
     repository = _int(result.get("repository_bytes"))
     if repository is not None:
         policy.repository_bytes = repository
+    backup_drift.after_capture(db, policy, run)  # Pro+ drift timeline (24.7)
     if run.snapshot and backup_signing.wanted(db, policy) and _sign(db, policy, run):
         return  # protect follows the sign (restate cannot sign protected)
     _protect_or_seal(db, policy)
@@ -820,6 +822,7 @@ def _after_prepare(db: Session, run: models.BackupRun, _policy_row, _result) -> 
 
 
 _AFTER = {
+    "diff": backup_drift.after_diff,
     "prepare": _after_prepare,
     "sign": _after_sign,
     "verify": _after_verify,

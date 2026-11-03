@@ -5308,7 +5308,8 @@
       "repack": "Reempaquetar",
       "prepare": "Preparar almacenamiento",
       "protect": "Proteger",
-      "verify": "Verificación con lectura completa"
+      "verify": "Verificación con lectura completa",
+      "diff": "Comparación de instantáneas"
     },
     "card": {
       "lastCheck": "Última comprobación",
@@ -5422,7 +5423,9 @@
       "hookMissing": "Este host no tiene ningún hook {{service}} que corrija lo que la pausa del servicio dejó en los archivos restaurados. Hágalo a mano.",
       "hookUnreadable": "restate no pudo determinar a qué hook corresponde {{dir}}, por lo que no se ejecutó ningún hook.",
       "signed": "firmada",
-      "unsigned": "sin firmar"
+      "unsigned": "sin firmar",
+      "packages": "Volver a poner primero los paquetes de la instantánea, en sus versiones",
+      "packagesAck": "Instalar paquetes en {{host}} y eliminar los paquetes que la instantánea no tenía, para que coincida con ella."
     },
     "run": {
       "busy": "Ocupado, se reintentará",
@@ -5657,6 +5660,39 @@
       "kept": "Se respaldan aunque son montajes de red, porque \"Incluir también en la copia de seguridad\" indica una ruta dentro de ellos: {{paths}}",
       "hint": "Lo mejor es respaldar un recurso compartido de red en el servidor al que pertenece.",
       "skipped": "Excluidos de la última copia de seguridad por restate (montajes de red en este host): {{paths}}"
+    },
+    "drift": {
+      "added": "añadido",
+      "compare": "Comparar las copias de seguridad más recientes aún no comparadas",
+      "deleted": "eliminado",
+      "everything": "Mostrar todo, incluidos registros y cachés",
+      "failed": "La comparación de {{from}} y {{to}} falló",
+      "filesCount": "Archivos: {{n}}",
+      "hidden": "Ocultos como cambios esperados: {{n}}",
+      "ignore": "Ocultar también en este host (un patrón de ruta por línea)",
+      "ignoreError": "No se pudieron guardar los patrones.",
+      "installed": "instalado",
+      "intro": "Qué cambió entre cada copia de seguridad y la anterior: paquetes instalados, eliminados o actualizados, y los cambios de archivos que ningún paquete explica.",
+      "link": "Qué cambió entre copias de seguridad",
+      "loadError": "No se pudo cargar la cronología de desviaciones.",
+      "modified": "modificado",
+      "narrowed": "Solo se muestran los cambios en {{path}} o por debajo.",
+      "noFiles": "Ningún cambio de archivos aparte de los que explican los paquetes.",
+      "none": "Aún no se ha comparado ninguna copia de seguridad.",
+      "packagesCount": "Paquetes: {{n}}",
+      "removed": "eliminado",
+      "running": "Hay una comparación en curso.",
+      "title": "Cronología de desviaciones",
+      "truncated": "Solo se conservan los primeros 1000 cambios de cada tipo.",
+      "upgraded": "actualizado"
+    },
+    "packages": {
+      "counts": "Paquetes apt instalados a mano: {{apt}}; snaps: {{snaps}}; claves de repositorio: {{keys}}",
+      "hideScript": "Ocultar el script",
+      "removes": "Los paquetes que la instantánea no tenía se marcan como automáticos y apt los elimina. Todo lo instalado en este host desde la copia de seguridad puede eliminarse, incluido el agente de SysManage si se instaló después.",
+      "showScript": "Mostrar el script completo ({{n}} líneas)",
+      "snaps": "Paquetes snap: {{names}}",
+      "title": "Paquetes que se volverán a poner"
     }
   }
 }

@@ -5308,7 +5308,8 @@
       "repack": "重新打包",
       "prepare": "准备存储",
       "protect": "保护",
-      "verify": "完整读取验证"
+      "verify": "完整读取验证",
+      "diff": "快照比较"
     },
     "card": {
       "lastCheck": "上次检查",
@@ -5422,7 +5423,9 @@
       "hookMissing": "此主机没有 {{service}} 钩子来修复暂停该服务在已还原文件中留下的问题。请手动处理。",
       "hookUnreadable": "restate 无法判断 {{dir}} 属于哪个钩子，因此没有运行任何钩子。",
       "signed": "已签名",
-      "unsigned": "未签名"
+      "unsigned": "未签名",
+      "packages": "先按记录的版本放回快照的软件包",
+      "packagesAck": "在 {{host}} 上安装软件包，并移除快照中没有的软件包，使其与快照一致。"
     },
     "run": {
       "busy": "忙碌，将重试",
@@ -5657,6 +5660,39 @@
       "kept": "虽然是网络挂载，但仍会备份，因为“额外备份”中指定了其中的路径：{{paths}}",
       "hint": "网络共享最好在拥有它的服务器上备份。",
       "skipped": "restate 已从上次备份中排除（此主机上的网络挂载）：{{paths}}"
+    },
+    "drift": {
+      "added": "已添加",
+      "compare": "比较尚未比较的最新备份",
+      "deleted": "已删除",
+      "everything": "显示全部，包括日志和缓存",
+      "failed": "{{from}} 与 {{to}} 的比较失败",
+      "filesCount": "文件：{{n}}",
+      "hidden": "作为预期变化隐藏：{{n}}",
+      "ignore": "在此主机上另外隐藏（每行一个路径模式）",
+      "ignoreError": "无法保存这些模式。",
+      "installed": "已安装",
+      "intro": "每次备份与前一次备份之间的变化：安装、移除或升级的软件包，以及没有任何软件包能解释的文件变化。",
+      "link": "备份之间的变化",
+      "loadError": "无法加载漂移时间线。",
+      "modified": "已修改",
+      "narrowed": "仅显示 {{path}} 及其下的变化。",
+      "noFiles": "除软件包能解释的变化外，没有文件变化。",
+      "none": "尚未比较任何备份。",
+      "packagesCount": "软件包：{{n}}",
+      "removed": "已移除",
+      "running": "正在比较。",
+      "title": "漂移时间线",
+      "truncated": "每种变化只保留前 1000 个。",
+      "upgraded": "已升级"
+    },
+    "packages": {
+      "counts": "手动安装的 apt 软件包：{{apt}}；snap：{{snaps}}；软件源密钥：{{keys}}",
+      "hideScript": "隐藏脚本",
+      "removes": "快照中没有的软件包会被标记为自动安装并由 apt 移除。自备份以来在此主机上安装的任何内容都可能被移除，如果 SysManage 代理是之后安装的，也包括它。",
+      "showScript": "显示完整脚本（{{n}} 行）",
+      "snaps": "snap：{{names}}",
+      "title": "要放回的软件包"
     }
   }
 }
