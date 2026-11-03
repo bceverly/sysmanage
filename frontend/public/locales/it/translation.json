@@ -5698,7 +5698,8 @@
     "policySource": {
       "own": "Criterio proprio di questo host",
       "tag": "Dal criterio per tag {{name}} (priorità {{priority}})",
-      "dialogNote": "Questo host segue il criterio per tag {{name}}. Salvando qui, queste impostazioni diventano il criterio proprio di questo host, che da quel momento prevale sempre; rimuova il criterio di questo host per riportarlo al criterio per tag."
+      "dialogNote": "Questo host segue il criterio per tag {{name}}. Salvando qui, queste impostazioni diventano il criterio proprio di questo host, che da quel momento prevale sempre; \"Usa il criterio per tag\" nella sua scheda di backup lo riporta al criterio per tag.",
+      "ownCovered": "Anche il criterio per tag {{name}} (priorità {{priority}}) si applica a questo host; il criterio proprio di questo host prevale. \"Usa il criterio per tag\" nella sua scheda di backup lo fa passare al criterio per tag, mantenendo repository, chiavi e cronologia."
     },
     "tagPolicies": {
       "add": "Aggiungi criterio per tag",
@@ -5739,15 +5740,27 @@
       "export": "Esporta le chiavi"
     },
     "breakGlass": {
-      "button": "Chiave di emergenza per l'esportazione",
-      "community": "{{count}} host hanno backup crittografati. Senza licenza Professional+, continuano a fare backup crittografati e possono ancora essere ripristinati, e puoi esportare le loro chiavi qui, sigillate con la tua chiave pubblica OpenPGP, per un ripristino con il server SysManage spento.",
+      "button": "Esportazione delle chiavi di emergenza",
+      "community": "{{count}} host hanno backup cifrati. Senza la licenza Professional+ continuano a essere salvati cifrati e possono essere ripristinati, e qui può esportarne le chiavi, sigillate con la Sua chiave pubblica OpenPGP, per un ripristino con il server SysManage non disponibile.",
       "download": "Esporta e scarica",
       "failed": "Impossibile esportare le chiavi.",
-      "key": "La tua chiave pubblica OpenPGP (armata)",
-      "reason": "Perché (viene registrato nell'audit log e nel README)",
-      "saved": "Lasciare vuoto per utilizzare la chiave escrow salvata {{fingerprint}}.",
-      "title": "Chiave di emergenza per l'esportazione",
-      "warning": "Il file contiene le chiavi SECRETE di ogni backup crittografato. Conservarlo offline, lontano dai backup e dal server, e distruggerlo quando una nuova esportazione lo sostituisce."
+      "key": "La Sua chiave PUBBLICA OpenPGP (in formato ASCII armor)",
+      "reason": "Motivo (registrato nel registro di audit e nel README)",
+      "saved": "Lasci vuoto per usare la chiave di deposito salvata {{fingerprint}}.",
+      "title": "Esportazione delle chiavi di emergenza",
+      "warning": "Il file contiene le chiavi SEGRETE di ogni backup cifrato. Lo conservi offline, lontano dai backup e dal server, e lo distrugga quando un'esportazione più recente lo sostituisce."
+    },
+    "useTag": {
+      "button": "Usa il criterio per tag",
+      "title": "Usa il criterio per tag",
+      "confirm": "Usa il criterio per tag",
+      "none": "(nessuno)",
+      "previewError": "Non è stato possibile verificare il criterio per tag.",
+      "error": "Non è stato possibile affidare l'host al suo criterio per tag.",
+      "intro": "Questo host seguirà il criterio per tag {{name}} (priorità {{priority}}). Il suo repository, le chiavi di cifratura, gli snapshot e la cronologia restano invariati.",
+      "replaces": "Queste impostazioni dell'host vengono sostituite:",
+      "change": "{{setting}}: {{from}} -> {{to}}",
+      "same": "Le sue impostazioni corrispondono già al criterio per tag."
     }
   }
 }

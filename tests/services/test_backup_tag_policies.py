@@ -115,7 +115,11 @@ def test_a_hosts_own_policy_always_wins(session, sent):
     outcome = tag_policies.resolve(session)
     assert outcome.applied == []
     assert s.policy.keep_last == 14 and s.policy.tag_policy_id is None
-    assert tag_policies.source_of(session, s.policy) == {"kind": "own"}
+    source = tag_policies.source_of(session, s.policy)
+    assert source["kind"] == "own"
+    assert (
+        source["tag_policy_available"]["name"] == "Everything"
+    )  # offered, not applied
 
 
 def test_an_unchanged_policy_is_not_re_sent(session, sent):
@@ -186,9 +190,10 @@ def test_configure_makes_a_tag_given_policy_the_hosts_own(session, sent):
     policy.tag_policy_id = None  # what put_policy does on save
     session.commit()
     tag_policies.resolve(session)
-    assert policy.tag_policy_id is None and tag_policies.source_of(session, policy) == {
-        "kind": "own"
-    }
+    source = tag_policies.source_of(session, policy)
+    assert policy.tag_policy_id is None and source["kind"] == "own"
+    # A tag policy still covers it, so the card offers "Use the tag policy".
+    assert source["tag_policy_available"]["name"] == "Own"
 
 
 def _body(tag, **over):

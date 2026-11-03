@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
-"Report-Msgid-Bugs-To:  \n"
+"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-11-03 08:53-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
@@ -233,9 +233,10 @@ msgstr ""
 #: backend/api/opentelemetry/grafana_connection.py:201
 #: backend/api/cve_refresh_settings.py:66 backend/api/scim.py:218
 #: backend/api/scim.py:228 backend/api/packages_operations.py:68
-#: backend/api/packages_operations.py:247 backend/api/license_management.py:116
-#: backend/api/secrets/permissions.py:39 backend/api/error_constants.py:22
-#: backend/api/child_host_utils.py:33 backend/api/child_host_utils.py:67
+#: backend/api/packages_operations.py:247
+#: backend/api/license_management.py:116 backend/api/secrets/permissions.py:39
+#: backend/api/error_constants.py:22 backend/api/child_host_utils.py:33
+#: backend/api/child_host_utils.py:67
 msgid "User not found"
 msgstr ""
 
@@ -655,8 +656,8 @@ msgstr ""
 
 #: backend/api/reports/endpoints.py:73
 msgid ""
-"Report generation requires a SysManage Professional+ license. Please upgrade "
-"to access this feature."
+"Report generation requires a SysManage Professional+ license. Please upgrade"
+" to access this feature."
 msgstr ""
 
 #: backend/api/reports/endpoints.py:154
@@ -785,8 +786,8 @@ msgstr ""
 
 #: backend/api/host_registration.py:239
 msgid ""
-"This host already belongs to a tenant. Re-register with its enrollment token "
-"instead of registering server-scoped."
+"This host already belongs to a tenant. Re-register with its enrollment token"
+" instead of registering server-scoped."
 msgstr ""
 
 #: backend/api/graylog_integration.py:177
@@ -1506,8 +1507,8 @@ msgstr ""
 
 #: backend/api/airgap_collector_runs.py:218
 msgid ""
-"Air-gap collection runs require the repository_mirroring_engine module to be "
-"loaded -- the collector reads each target's bundle from a snapshot of its "
+"Air-gap collection runs require the repository_mirroring_engine module to be"
+" loaded -- the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 
@@ -1576,8 +1577,8 @@ msgstr ""
 
 #: backend/api/airgap_collector_runs.py:668
 msgid ""
-"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
-"the collection to rebuild."
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
+" the collection to rebuild."
 msgstr ""
 
 #: backend/api/airgap_collector_runs.py:685
@@ -1614,8 +1615,8 @@ msgstr ""
 
 #: backend/api/package_compliance.py:73
 msgid ""
-"Package compliance profiles require a SysManage Professional license. Please "
-"upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
 msgstr ""
 
 #: backend/api/package_compliance.py:200
@@ -1893,8 +1894,8 @@ msgstr ""
 
 #: backend/api/external_idp.py:577 backend/api/external_idp.py:796
 msgid ""
-"No sysmanage account is linked to this IdP identity. Ask an administrator to "
-"provision your account first."
+"No sysmanage account is linked to this IdP identity. Ask an administrator to"
+" provision your account first."
 msgstr ""
 
 #: backend/api/external_idp.py:582 backend/api/external_idp.py:801
@@ -2065,8 +2066,8 @@ msgstr ""
 #: backend/api/opentelemetry/eligibility.py:111
 #: backend/api/opentelemetry/grafana_connection.py:88
 #: backend/api/opentelemetry/grafana_connection.py:231
-#: backend/api/packages_operations.py:97 backend/api/packages_operations.py:276
-#: backend/api/error_constants.py:119
+#: backend/api/packages_operations.py:97
+#: backend/api/packages_operations.py:276 backend/api/error_constants.py:119
 msgid "Host not found or not active"
 msgstr ""
 
@@ -2103,8 +2104,8 @@ msgstr ""
 
 #: backend/api/opentelemetry/deployment.py:152
 msgid ""
-"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
-"on the server."
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
+" on the server."
 msgstr ""
 
 #: backend/api/opentelemetry/deployment.py:179
@@ -2118,8 +2119,8 @@ msgstr ""
 
 #: backend/api/opentelemetry/deployment.py:264
 msgid ""
-"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
-"the server."
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
+" the server."
 msgstr ""
 
 #: backend/api/opentelemetry/deployment.py:291
@@ -2227,8 +2228,8 @@ msgstr ""
 
 #: backend/api/content_lifecycle.py:64
 msgid ""
-"Content lifecycle management requires a SysManage Professional+ (Enterprise) "
-"license. Please upgrade to access this feature."
+"Content lifecycle management requires a SysManage Professional+ (Enterprise)"
+" license. Please upgrade to access this feature."
 msgstr ""
 
 #: backend/api/content_lifecycle.py:121
@@ -2444,7 +2445,8 @@ msgstr ""
 msgid "Firewall deploy command sent successfully"
 msgstr ""
 
-#: backend/api/default_repositories.py:273 backend/api/antivirus_defaults.py:66
+#: backend/api/default_repositories.py:273
+#: backend/api/antivirus_defaults.py:66
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr ""
@@ -2561,7 +2563,8 @@ msgstr ""
 msgid "Agent authentication failed: invalid host ID"
 msgstr ""
 
-#: backend/api/message_handlers_core.py:98 backend/utils/host_validation.py:104
+#: backend/api/message_handlers_core.py:98
+#: backend/utils/host_validation.py:104
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr ""
@@ -2608,7 +2611,8 @@ msgid "Target '%(t)s' is not valid for %(f)s"
 msgstr ""
 
 #: backend/api/logging_settings.py:134
-msgid "Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
+msgid ""
+"Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
 msgstr ""
 
 #: backend/api/logging_settings.py:141
@@ -2924,8 +2928,8 @@ msgstr ""
 
 #: backend/api/backups_equip.py:68
 msgid ""
-"restate has no package the agent can install on this operating system; build "
-"and install it by hand (see restate's README)"
+"restate has no package the agent can install on this operating system; build"
+" and install it by hand (see restate's README)"
 msgstr ""
 
 #: backend/api/backups_equip.py:71
@@ -3178,7 +3182,8 @@ msgid ""
 "{command}"
 msgstr ""
 
-#: backend/api/ubuntu_pro_settings.py:76 backend/api/ubuntu_pro_settings.py:318
+#: backend/api/ubuntu_pro_settings.py:76
+#: backend/api/ubuntu_pro_settings.py:318
 msgid "Ubuntu Pro key must start with 'C' for contract-based keys"
 msgstr ""
 
@@ -3292,7 +3297,8 @@ msgstr ""
 
 #: backend/api/host.py:879
 #, python-format
-msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
+msgid ""
+"Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
 
 #: backend/api/agent_poll.py:119
@@ -3442,7 +3448,8 @@ msgstr ""
 
 #: backend/api/packages_operations.py:179
 #, python-format
-msgid "Queued installation of %(package_count)d packages on host %(host_fqdn)s"
+msgid ""
+"Queued installation of %(package_count)d packages on host %(host_fqdn)s"
 msgstr ""
 
 #: backend/api/packages_operations.py:199
@@ -3581,8 +3588,8 @@ msgstr ""
 
 #: backend/api/auth.py:391
 msgid ""
-"Multi-factor authentication is required for this account. Please enroll from "
-"your profile page before signing in."
+"Multi-factor authentication is required for this account. Please enroll from"
+" your profile page before signing in."
 msgstr ""
 
 #: backend/api/auth.py:480
@@ -3645,7 +3652,8 @@ msgstr ""
 
 #: backend/api/updates/os_upgrade_routes.py:352
 #, python-format
-msgid "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
+msgid ""
+"Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
 msgstr ""
 
 #: backend/api/updates/os_upgrade_routes.py:383
@@ -3722,7 +3730,8 @@ msgstr ""
 #: backend/api/dynamic_secrets.py:153
 #, python-format
 msgid ""
-"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, ttl=%(ttl)ds)"
+"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
+"ttl=%(ttl)ds)"
 msgstr ""
 
 #: backend/api/dynamic_secrets.py:186
@@ -3785,7 +3794,8 @@ msgstr ""
 
 #: backend/api/child_host_virtualization_enable.py:306
 msgid ""
-"VMM initialization requested. The agent will enable and start the vmd daemon."
+"VMM initialization requested. The agent will enable and start the vmd "
+"daemon."
 msgstr ""
 
 #: backend/api/child_host_virtualization_enable.py:348
@@ -3817,8 +3827,8 @@ msgstr ""
 
 #: backend/api/child_host_virtualization_enable.py:433
 msgid ""
-"bhyve initialization requested. The agent will load vmm.ko and configure the "
-"system for bhyve virtual machines."
+"bhyve initialization requested. The agent will load vmm.ko and configure the"
+" system for bhyve virtual machines."
 msgstr ""
 
 #: backend/api/child_host_virtualization_enable.py:474
@@ -3845,8 +3855,8 @@ msgstr ""
 
 #: backend/api/child_host_virtualization_enable.py:558
 msgid ""
-"KVM modules enable requested. The agent will load the KVM kernel modules via "
-"modprobe."
+"KVM modules enable requested. The agent will load the KVM kernel modules via"
+" modprobe."
 msgstr ""
 
 #: backend/api/child_host_virtualization_enable.py:600
@@ -3972,8 +3982,8 @@ msgstr ""
 #: backend/api/backups.py:246
 #, python-format
 msgid ""
-"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no "
-"trailing '/')"
+"%s must be a plain absolute path (letters, digits, '_', '.', '-' and '/'; no"
+" trailing '/')"
 msgstr ""
 
 #: backend/api/backups.py:254
@@ -4233,7 +4243,8 @@ msgid ""
 msgstr ""
 
 #: backend/api/reboot_orchestration.py:135
-msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgid ""
+"No running child hosts found. Use the standard reboot endpoint instead."
 msgstr ""
 
 #: backend/api/reboot_orchestration.py:204
@@ -4251,8 +4262,8 @@ msgstr ""
 
 #: backend/api/upgrade_profiles.py:74
 msgid ""
-"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
-"upgrade to access this feature."
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
+" upgrade to access this feature."
 msgstr ""
 
 #: backend/api/upgrade_profiles.py:196
@@ -4490,7 +4501,8 @@ msgstr ""
 #: backend/api/antivirus_status.py:346
 #, python-format
 msgid ""
-"Antivirus deployment initiated for %(success_count)d of %(total_count)d hosts"
+"Antivirus deployment initiated for %(success_count)d of %(total_count)d "
+"hosts"
 msgstr ""
 
 #: backend/api/antivirus_status.py:352
@@ -5025,7 +5037,8 @@ msgstr ""
 #: backend/api/enabled_package_managers.py:307
 #, python-format
 msgid ""
-"Package manager '%(package_manager)s' is already enabled for OS '%(os_name)s'"
+"Package manager '%(package_manager)s' is already enabled for OS "
+"'%(os_name)s'"
 msgstr ""
 
 #: backend/api/enabled_package_managers.py:382
@@ -5739,12 +5752,9 @@ msgstr ""
 #: backend/services/backup_escrow.py:247
 #, python-format
 msgid ""
-"SysManage rotated %(count)d backup encryption key(s) on schedule. A break-"
-"glass export made before this rotation does not hold the new keys, and "
-"backups taken from now on need them.\n"
+"SysManage rotated %(count)d backup encryption key(s) on schedule. A break-glass export made before this rotation does not hold the new keys, and backups taken from now on need them.\n"
 "\n"
-"Open Backups, then a host's Encryption panel, and use \"Break-glass key "
-"export\" to make a new export. Keep it offline, and destroy the old one."
+"Open Backups, then a host's Encryption panel, and use \"Break-glass key export\" to make a new export. Keep it offline, and destroy the old one."
 msgstr ""
 
 #: backend/services/config_mgmt_baseline.py:286
@@ -5901,4 +5911,16 @@ msgstr ""
 
 #: backend/vulnerability/cve_sources.py:71
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
+msgstr ""
+
+#: backend/api/backups_tag_policies.py
+msgid "This host has no backup policy"
+msgstr ""
+
+#: backend/api/backups_tag_policies.py
+msgid "This host already follows its tag policy"
+msgstr ""
+
+#: backend/api/backups_tag_policies.py
+msgid "No tag policy covers this host; there is nothing to switch to"
 msgstr ""

@@ -5698,7 +5698,8 @@
     "policySource": {
       "own": "Política propia de este host",
       "tag": "De la política de etiqueta {{name}} (prioridad {{priority}})",
-      "dialogNote": "Este host sigue la política de etiqueta {{name}}. Si guarda aquí, esta configuración pasa a ser la política propia de este host, que entonces siempre prevalece; elimine la política de este host para que vuelva a seguir la política de etiqueta."
+      "dialogNote": "Este host sigue la política de etiqueta {{name}}. Si guarda aquí, esta configuración pasa a ser la política propia de este host, que entonces siempre prevalece; \"Usar la política de etiqueta\" en su tarjeta de copia de seguridad lo devuelve a la política de etiqueta.",
+      "ownCovered": "La política de etiqueta {{name}} (prioridad {{priority}}) también se aplica a este host; la política propia de este host prevalece sobre ella. \"Usar la política de etiqueta\" en su tarjeta de copia de seguridad lo cambia, conservando su repositorio, sus claves y su historial."
     },
     "tagPolicies": {
       "add": "Añadir política de etiqueta",
@@ -5739,15 +5740,27 @@
       "export": "Exportar las claves"
     },
     "breakGlass": {
-      "button": "Llave de emergencia para exportar",
-      "community": "{{count}} host(es) tienen copias de seguridad cifradas. Sin la licencia Professional+, siguen haciendo copias de seguridad cifradas y aún pueden restaurarse, y puede exportar sus claves aquí, selladas con su clave pública OpenPGP, para una restauración con el servidor SysManage fuera de línea.",
+      "button": "Exportación de claves de emergencia",
+      "community": "{{count}} host(s) tienen copias de seguridad cifradas. Sin la licencia Professional+ siguen respaldándose cifradas y pueden restaurarse, y aquí puede exportar sus claves, selladas con su propia clave pública OpenPGP, para una restauración con el servidor SysManage caído.",
       "download": "Exportar y descargar",
       "failed": "No se pudieron exportar las claves.",
-      "key": "Su clave pública OpenPGP (armada)",
-      "reason": "¿Por qué (se registra en el registro de auditoría y en el README)?",
-      "saved": "Deje vacío para usar la clave de escrow guardada {{fingerprint}}.",
-      "title": "Llave de emergencia para exportar",
-      "warning": "El archivo contiene las claves SECRETAS de cada copia de seguridad cifrada. Guárdelo fuera línea, alejado de las copias de seguridad y del servidor, y destruyalo cuando una nueva exportación lo reemplace."
+      "key": "Su clave PÚBLICA OpenPGP (en formato ASCII armor)",
+      "reason": "Motivo (queda en el registro de auditoría y en el README)",
+      "saved": "Déjelo vacío para usar la clave de custodia guardada {{fingerprint}}.",
+      "title": "Exportación de claves de emergencia",
+      "warning": "El archivo contiene las claves SECRETAS de cada copia de seguridad cifrada. Guárdelo sin conexión, lejos de las copias de seguridad y del servidor, y destrúyalo cuando una exportación más reciente lo sustituya."
+    },
+    "useTag": {
+      "button": "Usar la política de etiqueta",
+      "title": "Usar la política de etiqueta",
+      "confirm": "Usar la política de etiqueta",
+      "none": "(ninguno)",
+      "previewError": "No se pudo comprobar la política de etiqueta.",
+      "error": "No se pudo pasar el host a su política de etiqueta.",
+      "intro": "Este host seguirá la política de etiqueta {{name}} (prioridad {{priority}}). Su repositorio, sus claves de cifrado, sus instantáneas y su historial se mantienen como están.",
+      "replaces": "Se reemplazan estos ajustes de este host:",
+      "change": "{{setting}}: {{from}} -> {{to}}",
+      "same": "Sus ajustes ya coinciden con la política de etiqueta."
     }
   }
 }

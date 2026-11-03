@@ -82,8 +82,9 @@ def _verified_state(db: Session, policy, now: datetime) -> Optional[str]:
 
 
 def _escrow_state(db: Session, host, policy) -> Optional[str]:
-    """One source of truth with the Encryption panel and the Backups banner."""
-    return backup_escrow.host_state(db, host, policy)
+    """One source of truth with the Encryption panel and the Backups banner,
+    signing included."""
+    return backup_escrow.posture_state(db, host, policy)
 
 
 def _verification_possible() -> bool:

@@ -3372,7 +3372,7 @@ msgstr "فشل في بدء تسجيل Ubuntu Pro: %s"
 
 #: backend/api/backups_breakglass.py:75
 msgid "Paste the OpenPGP public key to seal the export to"
-msgstr "قم بلصق مفتاح OpenPGP العام لتشفير التصدير"
+msgstr "الصق مفتاح OpenPGP العام الذي يُختم به التصدير"
 
 #: backend/api/packages_helpers.py:103
 #, python-format
@@ -5888,7 +5888,7 @@ msgstr "فشل gpg: %s"
 
 #: backend/services/backup_breakglass.py:193
 msgid "gpg is not installed on the SysManage server; install GnuPG"
-msgstr "غير مثبت gpg على خادم SysManage؛ قم بتثبيت GnuPG"
+msgstr "gpg غير مثبت على خادم SysManage؛ ثبّت GnuPG"
 
 #: backend/services/backup_breakglass.py:203
 #: backend/services/backup_breakglass.py:227
@@ -5898,7 +5898,7 @@ msgstr "لم يتمكن gpg من قراءة ذلك المفتاح العام"
 #: backend/services/backup_breakglass.py:211
 #: backend/services/backup_breakglass.py:218
 msgid "Paste one armored OpenPGP public key"
-msgstr "قم بلصق مفتاح عام OpenPGP محمي"
+msgstr "الصق مفتاح OpenPGP عاماً واحداً بصيغة ASCII المدرعة"
 
 #: backend/services/backup_breakglass.py:215
 #: backend/services/backup_escrow.py:181
@@ -5929,7 +5929,7 @@ msgstr "لا يحتفظ OpenBAO بمفتاح كل نسخة احتياطية لـ
 
 #: backend/services/backup_breakglass.py:423
 msgid "gpg did not seal the key export"
-msgstr "لم يقوم gpg بتشفير تصدير المفتاح"
+msgstr "لم يختم gpg تصدير المفاتيح"
 
 #: backend/services/backup_breakglass.py:434
 msgid "None of the chosen hosts has encrypted backups"
@@ -6120,6 +6120,19 @@ msgstr "ثغرات حزم pkgsrc في NetBSD (ما يقرؤه pkg_admin audit)"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "ثغرات macOS حسب إصدار نظام التشغيل، من بيانات NVD عن الإصدارات المتأثرة"
+
+#: backend/api/backups_tag_policies.py
+msgid "This host has no backup policy"
+msgstr "لا توجد سياسة نسخ احتياطي لهذا المضيف"
+
+#: backend/api/backups_tag_policies.py
+msgid "This host already follows its tag policy"
+msgstr "يتبع هذا المضيف سياسة العلامة الخاصة به بالفعل"
+
+#: backend/api/backups_tag_policies.py
+msgid "No tag policy covers this host; there is nothing to switch to"
+msgstr ""
+"لا توجد سياسة علامة تنطبق على هذا المضيف؛ لا يوجد ما يمكن التبديل إليه"
 
 #~ msgid "Encrypted backups need the Professional+ backup engine"
 #~ msgstr ""

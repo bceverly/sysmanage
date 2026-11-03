@@ -34,8 +34,24 @@ export const TagPolicyNote: React.FC<{ source?: PolicySource | null }> = ({ sour
     return (
         <Alert severity="info">
             {t('backups.policySource.dialogNote',
-                'This host follows the tag policy {{name}}. Saving here makes these settings this host\'s own, which then always win; remove this host\'s policy to return it to the tag policy.',
+                'This host follows the tag policy {{name}}. Saving here makes these settings this host\'s own, which then always win; "Use the tag policy" on its backup card returns it to the tag policy.',
                 { name: source.name ?? '' })}
         </Alert>
     );
 };
+
+/** The policy dialog's note for a host on its own policy that a tag policy
+ *  also covers: its own policy wins, and the card can hand it back. */
+export const OwnPolicyNote: React.FC<{ source?: PolicySource | null }> = ({ source }) => {
+    const { t } = useTranslation();
+    const available = source?.kind === 'own' ? source.tag_policy_available : undefined;
+    if (!available) return null;
+    return (
+        <Alert severity="info">
+            {t('backups.policySource.ownCovered',
+                'The tag policy {{name}} (priority {{priority}}) also covers this host; this host\'s own policy wins over it. "Use the tag policy" on its backup card switches it over, keeping its repository, keys and history.',
+                { name: available.name, priority: available.priority })}
+        </Alert>
+    );
+};
+

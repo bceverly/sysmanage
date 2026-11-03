@@ -135,6 +135,25 @@ def covering(db: Session) -> Dict[str, models.BackupTagPolicy]:
     return winners
 
 
+def winner_for(db: Session, host_id: Any) -> Optional[models.BackupTagPolicy]:
+    """The enabled tag policy that would govern one host, by the same order
+    ``covering`` uses (priority, then age, then name), or None."""
+    return (
+        db.query(models.BackupTagPolicy)
+        .join(models.HostTag, models.HostTag.tag_id == models.BackupTagPolicy.tag_id)
+        .filter(
+            models.HostTag.host_id == host_id,
+            models.BackupTagPolicy.enabled.is_(True),
+        )
+        .order_by(
+            models.BackupTagPolicy.priority,
+            models.BackupTagPolicy.created_at,
+            models.BackupTagPolicy.name,
+        )
+        .first()
+    )
+
+
 @dataclass
 class Outcome:
     """What one ``resolve`` pass did, for the API and the logs."""
@@ -293,7 +312,17 @@ def source_of(db: Session, policy: Optional[models.BackupPolicy]) -> Dict[str, A
     if policy is None:
         return {"kind": "none"}
     if policy.tag_policy_id is None:
-        return {"kind": "own"}
+        own: Dict[str, Any] = {"kind": "own"}
+        winner = winner_for(db, policy.host_id) if engine_loaded() else None
+        if winner is not None:
+            # A tag policy covers this host but its own policy wins: the
+            # card offers "Use the tag policy".
+            own["tag_policy_available"] = {
+                "id": str(winner.id),
+                "name": winner.name,
+                "priority": winner.priority,
+            }
+        return own
     tag_policy = (
         db.query(models.BackupTagPolicy)
         .filter(models.BackupTagPolicy.id == policy.tag_policy_id)
@@ -306,4 +335,94 @@ def source_of(db: Session, policy: Optional[models.BackupPolicy]) -> Dict[str, A
         "id": str(tag_policy.id),
         "name": tag_policy.name,
         "priority": tag_policy.priority,
+    }
+
+
+class HandoverRefused(Exception):
+    """A host cannot be handed to the tag policies; ``code`` says why."""
+
+    def __init__(self, code: str, message: str):
+        super().__init__(message)
+        self.code = code
+
+
+def _own_policy_and_winner(db: Session, host: models.Host):
+    """(the host's own policy, the tag policy that would govern it), or
+    HandoverRefused.  Only a host on its OWN policy can be handed over: a
+    tag-given one already follows the tags, and a host with no policy gets
+    one from the resolver without any handover."""
+    policy = (
+        db.query(models.BackupPolicy)
+        .filter(models.BackupPolicy.host_id == host.id)
+        .first()
+    )
+    if policy is None:
+        raise HandoverRefused("no_policy", "no_policy")
+    if policy.tag_policy_id is not None:
+        raise HandoverRefused("already_tag", "already_tag")
+    winner = winner_for(db, host.id)
+    if winner is None:
+        raise HandoverRefused("not_covered", "not_covered")
+    return policy, winner
+
+
+def handover_changes(policy: models.BackupPolicy, winner) -> List[Dict[str, Any]]:
+    """The host settings the tag policy would replace: ``{key, from, to}``."""
+    current = policy_settings(policy)
+    wanted = _wanted(settings_of(winner))
+    return [
+        {"key": key, "from": current[key], "to": wanted[key]}
+        for key in (*SCALARS, *COUNTS, *LISTS)
+        if current[key] != wanted[key]
+    ]
+
+
+def handover_preview(db: Session, host: models.Host) -> Dict[str, Any]:
+    """What "Use the tag policy" would do to this host -- for the
+    confirmation, which names the rule and every setting it replaces."""
+    policy, winner = _own_policy_and_winner(db, host)
+    return {
+        "tag_policy": {
+            "id": str(winner.id),
+            "name": winner.name,
+            "priority": winner.priority,
+        },
+        "changes": handover_changes(policy, winner),
+    }
+
+
+def use_tag_policy(db: Session, host: models.Host, actor: Any) -> Dict[str, Any]:
+    """Hand a host on its own policy back to the tag policies WITHOUT
+    removing its policy (2026-11-03): until now the only way back was to
+    delete the policy, which orphans an encrypted host's keys and its
+    repository.  Only the settings a tag policy controls change; the
+    repository, encryption (keys, key rows, the repository before an
+    encrypted one), snapshots, run history and the storage side's state are
+    the row's own and stay as they are."""
+    policy, winner = _own_policy_and_winner(db, host)
+    changes = handover_changes(policy, winner)
+    apply_settings(policy, settings_of(winner))
+    policy.tag_policy_id = winner.id
+    if policy.host_acked_version and changes:
+        policy.config_version += 1  # the hosts get the new job files
+    _audit(
+        db,
+        actor,
+        host,
+        "Backup policy handed to its tag policy",
+        {
+            "tag_policy": winner.name,
+            "priority": winner.priority,
+            "replaced": [change["key"] for change in changes],
+        },
+    )
+    db.flush()
+    return {
+        "tag_policy": {
+            "id": str(winner.id),
+            "name": winner.name,
+            "priority": winner.priority,
+        },
+        "changes": changes,
+        "source": source_of(db, policy),
     }

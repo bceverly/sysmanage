@@ -5698,7 +5698,8 @@
     "policySource": {
       "own": "Eigene Richtlinie dieses Hosts",
       "tag": "Aus der Tag-Richtlinie {{name}} (Priorität {{priority}})",
-      "dialogNote": "Dieser Host folgt der Tag-Richtlinie {{name}}. Wenn Sie hier speichern, werden diese Einstellungen zur eigenen Richtlinie dieses Hosts, die dann immer Vorrang hat; entfernen Sie die Richtlinie dieses Hosts, damit er wieder der Tag-Richtlinie folgt."
+      "dialogNote": "Dieser Host folgt der Tag-Richtlinie {{name}}. Wenn Sie hier speichern, werden diese Einstellungen zur eigenen Richtlinie dieses Hosts, die dann immer Vorrang hat; \"Tag-Richtlinie verwenden\" auf seiner Backup-Karte bringt ihn zur Tag-Richtlinie zurück.",
+      "ownCovered": "Die Tag-Richtlinie {{name}} (Priorität {{priority}}) gilt ebenfalls für diesen Host; die eigene Richtlinie dieses Hosts hat Vorrang. \"Tag-Richtlinie verwenden\" auf seiner Backup-Karte stellt ihn um und behält sein Repository, seine Schlüssel und seinen Verlauf."
     },
     "tagPolicies": {
       "add": "Tag-Richtlinie hinzufügen",
@@ -5739,15 +5740,27 @@
       "export": "Schlüssel exportieren"
     },
     "breakGlass": {
-      "button": "Bruchglas-Schlüssel-Export",
-      "community": "{{count}} Host(s) haben verschlüsselte Sicherungen. Ohne Professional+-Lizenz werden diese weiterhin verschlüsselt gesichert und können immer noch wiederhergestellt werden, und Sie können hier ihre Schlüssel exportieren, versiegelt mit Ihrer eigenen OpenPGP Öffentlichen Schlüssel, für eine Wiederherstellung bei Ausfall des SysManage-Servers.",
-      "download": "Exportieren und Herunterladen",
-      "failed": "Der Schlüssel konnte nicht exportiert werden.",
-      "key": "Ihre OpenPGP Öffentliche Schlüssel (armiert)",
-      "reason": "Warum (wird in den Audit-Log und die README aufgenommen)",
-      "saved": "Lassen Sie dieses Feld leer, um die gespeicherte Escrow-Schlüssel zu verwenden {{fingerprint}}.",
-      "title": "Bruchglas-Schlüssel-Export",
-      "warning": "Die Datei enthält die geheimen Schlüssel aller verschlüsselten Sicherungen. Bewahren Sie sie offline auf, fernab von den Sicherungen und dem Server, und zerstören Sie sie, wenn eine neuere Exportversion sie ersetzt."
+      "button": "Notfall-Schlüsselexport",
+      "community": "{{count}} Host(s) haben verschlüsselte Backups. Ohne Professional+-Lizenz werden sie weiterhin verschlüsselt gesichert und lassen sich wiederherstellen, und Sie können ihre Schlüssel hier exportieren, versiegelt mit Ihrem eigenen öffentlichen OpenPGP-Schlüssel, für eine Wiederherstellung bei ausgefallenem SysManage-Server.",
+      "download": "Exportieren und herunterladen",
+      "failed": "Die Schlüssel konnten nicht exportiert werden.",
+      "key": "Ihr ÖFFENTLICHER OpenPGP-Schlüssel (ASCII-Armor)",
+      "reason": "Grund (wird im Audit-Protokoll und in der README festgehalten)",
+      "saved": "Leer lassen, um den gespeicherten Treuhandschlüssel {{fingerprint}} zu verwenden.",
+      "title": "Notfall-Schlüsselexport",
+      "warning": "Die Datei enthält die GEHEIMEN Schlüssel aller verschlüsselten Backups. Bewahren Sie sie offline auf, getrennt von den Backups und dem Server, und vernichten Sie sie, sobald ein neuerer Export sie ersetzt."
+    },
+    "useTag": {
+      "button": "Tag-Richtlinie verwenden",
+      "title": "Tag-Richtlinie verwenden",
+      "confirm": "Tag-Richtlinie verwenden",
+      "none": "(keine)",
+      "previewError": "Die Tag-Richtlinie konnte nicht geprüft werden.",
+      "error": "Der Host konnte nicht an seine Tag-Richtlinie übergeben werden.",
+      "intro": "Dieser Host folgt dann der Tag-Richtlinie {{name}} (Priorität {{priority}}). Sein Repository, seine Verschlüsselungsschlüssel, Snapshots und sein Verlauf bleiben unverändert.",
+      "replaces": "Diese Einstellungen dieses Hosts werden ersetzt:",
+      "change": "{{setting}}: {{from}} -> {{to}}",
+      "same": "Seine Einstellungen entsprechen bereits der Tag-Richtlinie."
     }
   }
 }

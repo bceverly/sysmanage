@@ -5698,7 +5698,8 @@
     "policySource": {
       "own": "This host's own policy",
       "tag": "From tag policy {{name}} (priority {{priority}})",
-      "dialogNote": "This host follows the tag policy {{name}}. Saving here makes these settings this host's own, which then always win; remove this host's policy to return it to the tag policy."
+      "dialogNote": "This host follows the tag policy {{name}}. Saving here makes these settings this host's own, which then always win; \"Use the tag policy\" on its backup card returns it to the tag policy.",
+      "ownCovered": "The tag policy {{name}} (priority {{priority}}) also covers this host; this host's own policy wins over it. \"Use the tag policy\" on its backup card switches it over, keeping its repository, keys and history."
     },
     "tagPolicies": {
       "add": "Add tag policy",
@@ -5748,6 +5749,18 @@
       "reason": "Why (goes in the audit log and the README)",
       "download": "Export and download",
       "failed": "The keys could not be exported."
+    },
+    "useTag": {
+      "button": "Use the tag policy",
+      "title": "Use the tag policy",
+      "confirm": "Use the tag policy",
+      "none": "(none)",
+      "previewError": "The tag policy could not be checked.",
+      "error": "The host could not be handed to its tag policy.",
+      "intro": "This host will follow the tag policy {{name}} (priority {{priority}}). Its repository, encryption keys, snapshots and history stay as they are.",
+      "replaces": "These settings of this host are replaced:",
+      "change": "{{setting}}: {{from}} -> {{to}}",
+      "same": "Its settings already match the tag policy."
     }
   }
 }

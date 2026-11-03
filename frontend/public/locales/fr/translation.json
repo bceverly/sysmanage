@@ -5698,7 +5698,8 @@
     "policySource": {
       "own": "Politique propre à cet hôte",
       "tag": "Issue de la politique d'étiquette {{name}} (priorité {{priority}})",
-      "dialogNote": "Cet hôte suit la politique d'étiquette {{name}}. En enregistrant ici, ces paramètres deviennent la politique propre à cet hôte, qui l'emporte alors toujours ; supprimez la politique de cet hôte pour qu'il suive de nouveau la politique d'étiquette."
+      "dialogNote": "Cet hôte suit la politique d'étiquette {{name}}. En enregistrant ici, ces paramètres deviennent la politique propre à cet hôte, qui l'emporte alors toujours ; \"Utiliser la politique d'étiquette\" sur sa carte de sauvegarde le ramène à la politique d'étiquette.",
+      "ownCovered": "La politique d'étiquette {{name}} (priorité {{priority}}) s'applique aussi à cet hôte ; la politique propre à cet hôte l'emporte. \"Utiliser la politique d'étiquette\" sur sa carte de sauvegarde le fait basculer, en conservant son dépôt, ses clés et son historique."
     },
     "tagPolicies": {
       "add": "Ajouter une politique d'étiquette",
@@ -5739,15 +5740,27 @@
       "export": "Exporter les clés"
     },
     "breakGlass": {
-      "button": "Clé d'accès d'urgence à l'exportation",
-      "community": "{{count}} hôte(s) ont des sauvegardes chiffrées. Sans la licence Professional+, ils continuent de faire des sauvegardes chiffrées et peuvent toujours être restaurés, et vous pouvez exporter leurs clés ici, scellées à votre propre clé publique OpenPGP, pour une restauration avec le serveur SysManage hors ligne.",
+      "button": "Export de clés d'urgence",
+      "community": "{{count}} hôte(s) ont des sauvegardes chiffrées. Sans licence Professional+, elles continuent d'être sauvegardées chiffrées et peuvent être restaurées, et vous pouvez exporter ici leurs clés, scellées avec votre propre clé publique OpenPGP, pour une restauration lorsque le serveur SysManage est hors service.",
       "download": "Exporter et télécharger",
       "failed": "Les clés n'ont pas pu être exportées.",
-      "key": "Votre clé publique OpenPGP (armurée)",
-      "reason": "Pourquoi (enregistré dans le journal d'audit et dans le README)",
-      "saved": "Laissez vide pour utiliser la clé d'escrow sauvegardée {{fingerprint}}.",
-      "title": "Clé d'accès d'urgence à l'exportation",
-      "warning": "Le fichier contient les clés SECRètes de toutes les sauvegardes chiffrées. Conservez-le hors ligne, loin des sauvegardes et du serveur, et détruisez-le lorsque une nouvelle exportation le remplace."
+      "key": "Votre clé PUBLIQUE OpenPGP (au format ASCII armor)",
+      "reason": "Motif (consigné dans le journal d'audit et dans le README)",
+      "saved": "Laissez vide pour utiliser la clé de séquestre enregistrée {{fingerprint}}.",
+      "title": "Export de clés d'urgence",
+      "warning": "Le fichier contient les clés SECRÈTES de chaque sauvegarde chiffrée. Conservez-le hors ligne, à l'écart des sauvegardes et du serveur, et détruisez-le lorsqu'un export plus récent le remplace."
+    },
+    "useTag": {
+      "button": "Utiliser la politique d'étiquette",
+      "title": "Utiliser la politique d'étiquette",
+      "confirm": "Utiliser la politique d'étiquette",
+      "none": "(aucun)",
+      "previewError": "La politique d'étiquette n'a pas pu être vérifiée.",
+      "error": "L'hôte n'a pas pu être confié à sa politique d'étiquette.",
+      "intro": "Cet hôte suivra la politique d'étiquette {{name}} (priorité {{priority}}). Son dépôt, ses clés de chiffrement, ses instantanés et son historique restent inchangés.",
+      "replaces": "Ces paramètres de cet hôte sont remplacés :",
+      "change": "{{setting}}: {{from}} -> {{to}}",
+      "same": "Ses paramètres correspondent déjà à la politique d'étiquette."
     }
   }
 }

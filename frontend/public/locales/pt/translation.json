@@ -5698,7 +5698,8 @@
     "policySource": {
       "own": "Política própria deste host",
       "tag": "Da política de marcador {{name}} (prioridade {{priority}})",
-      "dialogNote": "Este host segue a política de marcador {{name}}. Ao salvar aqui, estas configurações passam a ser a política própria deste host, que então sempre prevalece; remova a política deste host para que ele volte a seguir a política de marcador."
+      "dialogNote": "Este host segue a política de marcador {{name}}. Ao salvar aqui, estas configurações passam a ser a política própria deste host, que então sempre prevalece; \"Usar a política de marcador\" no cartão de backup dele o devolve à política de marcador.",
+      "ownCovered": "A política de marcador {{name}} (prioridade {{priority}}) também se aplica a este host; a política própria deste host prevalece sobre ela. \"Usar a política de marcador\" no cartão de backup dele faz a troca, mantendo seu repositório, suas chaves e seu histórico."
     },
     "tagPolicies": {
       "add": "Adicionar política de marcador",
@@ -5739,15 +5740,27 @@
       "export": "Exportar as chaves"
     },
     "breakGlass": {
-      "button": "Chave de emergência para exportação",
-      "community": "{{count}} host(s) têm backups criptografados. Sem a licença Professional+, eles continuam fazendo backup criptografado e ainda podem ser restaurados, e você pode exportar suas chaves aqui, seladas com sua chave pública OpenPGP, para uma restauração com o servidor SysManage fora do ar.",
+      "button": "Exportação de chaves de emergência",
+      "community": "{{count}} host(s) têm backups criptografados. Sem a licença Professional+ eles continuam sendo copiados criptografados e podem ser restaurados, e aqui você pode exportar as chaves deles, seladas com a sua própria chave pública OpenPGP, para uma restauração com o servidor SysManage fora do ar.",
       "download": "Exportar e baixar",
       "failed": "Não foi possível exportar as chaves.",
-      "key": "Sua chave pública OpenPGP (armada)",
-      "reason": "Por que (vai para o log de auditoria e no README)",
-      "saved": "Deixe em branco para usar a chave de escuta salva {{fingerprint}}.",
-      "title": "Chave de emergência para exportação",
-      "warning": "O arquivo contém as chaves SECRETAS de todos os backups criptografados. Mantenha-o offline, longe dos backups e do servidor, e destrua-o quando uma nova exportação o substituir."
+      "key": "Sua chave PÚBLICA OpenPGP (em formato ASCII armor)",
+      "reason": "Motivo (fica registrado no log de auditoria e no README)",
+      "saved": "Deixe em branco para usar a chave de custódia salva {{fingerprint}}.",
+      "title": "Exportação de chaves de emergência",
+      "warning": "O arquivo contém as chaves SECRETAS de cada backup criptografado. Guarde-o off-line, longe dos backups e do servidor, e destrua-o quando uma exportação mais recente o substituir."
+    },
+    "useTag": {
+      "button": "Usar a política de marcador",
+      "title": "Usar a política de marcador",
+      "confirm": "Usar a política de marcador",
+      "none": "(nenhum)",
+      "previewError": "Não foi possível verificar a política de marcador.",
+      "error": "Não foi possível passar o host para sua política de marcador.",
+      "intro": "Este host passará a seguir a política de marcador {{name}} (prioridade {{priority}}). Seu repositório, suas chaves de criptografia, seus snapshots e seu histórico permanecem como estão.",
+      "replaces": "Estas configurações deste host serão substituídas:",
+      "change": "{{setting}}: {{from}} -> {{to}}",
+      "same": "Suas configurações já correspondem à política de marcador."
     }
   }
 }

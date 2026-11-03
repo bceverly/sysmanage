@@ -333,6 +333,16 @@ export interface PolicySource {
   id?: string;
   name?: string;
   priority?: number;
+  /** On its own policy while a tag policy covers it: that tag policy,
+   *  offered as "Use the tag policy". */
+  tag_policy_available?: { id: string; name: string; priority: number };
+}
+
+export interface TagPolicyHandover {
+  tag_policy: { id: string; name: string; priority: number };
+  /** The host settings the tag policy replaces. */
+  changes: { key: string; from: unknown; to: unknown }[];
+  source?: PolicySource;
 }
 
 export interface BackupReach {
@@ -448,6 +458,15 @@ export const saveTarget = async (
 
 export const getHostBackup = async (hostId: string): Promise<HostBackup> =>
   (await axiosInstance.get<HostBackup>(`${base}/host/${hostId}/backup`)).data;
+
+/** What "Use the tag policy" would change on this host (Pro+). */
+export const previewTagPolicyHandover = async (hostId: string): Promise<TagPolicyHandover> =>
+  (await axiosInstance.get<TagPolicyHandover>(`${base}/backups/host/${hostId}/use-tag-policy`)).data;
+
+/** Hand a host on its own policy back to its tag policy, keeping its
+ *  repository, keys and history (Pro+). */
+export const handOverToTagPolicy = async (hostId: string): Promise<TagPolicyHandover> =>
+  (await axiosInstance.post<TagPolicyHandover>(`${base}/backups/host/${hostId}/use-tag-policy`)).data;
 
 export const savePolicy = async (hostId: string, input: PolicyInput): Promise<BackupPolicy> =>
   (await axiosInstance.put<BackupPolicy>(`${base}/host/${hostId}/backup-policy`, input)).data;

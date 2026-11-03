@@ -5698,7 +5698,8 @@
     "policySource": {
       "own": "Eigen beleid van deze host",
       "tag": "Uit het labelbeleid {{name}} (prioriteit {{priority}})",
-      "dialogNote": "Deze host volgt het labelbeleid {{name}}. Als u hier opslaat, worden deze instellingen het eigen beleid van deze host, dat dan altijd voorgaat; verwijder het beleid van deze host om hem weer het labelbeleid te laten volgen."
+      "dialogNote": "Deze host volgt het labelbeleid {{name}}. Als u hier opslaat, worden deze instellingen het eigen beleid van deze host, dat dan altijd voorgaat; \"Het labelbeleid gebruiken\" op zijn back-upkaart brengt hem terug naar het labelbeleid.",
+      "ownCovered": "Het labelbeleid {{name}} (prioriteit {{priority}}) is ook op deze host van toepassing; het eigen beleid van deze host gaat voor. \"Het labelbeleid gebruiken\" op zijn back-upkaart zet hem over en behoudt zijn repository, sleutels en geschiedenis."
     },
     "tagPolicies": {
       "add": "Labelbeleid toevoegen",
@@ -5739,15 +5740,27 @@
       "export": "Sleutels exporteren"
     },
     "breakGlass": {
-      "button": "Breekglas-sleutel exporteren",
-      "community": "{{count}} host(s) hebben versleutelde back-ups. Zonder Professional+ licentie blijven ze back-ups maken die nog steeds kunnen worden hersteld, en u kunt hier hun sleutels exporteren, verzegeld aan uw eigen OpenPGP publieke sleutel, voor een herstel als de SysManage server niet beschikbaar is.",
+      "button": "Noodexport van sleutels",
+      "community": "{{count}} host(s) hebben versleutelde back-ups. Zonder Professional+-licentie worden ze versleuteld verder geback-upt en kunnen ze worden hersteld, en u kunt hier hun sleutels exporteren, verzegeld met uw eigen openbare OpenPGP-sleutel, voor een herstel als de SysManage-server niet beschikbaar is.",
       "download": "Exporteren en downloaden",
       "failed": "De sleutels konden niet worden geëxporteerd.",
-      "key": "Uw OpenPGP PUBLIEKE sleutel (gearmureerd)",
-      "reason": "Waarom (wordt vastgelegd in het auditlog en de README)",
-      "saved": "Laat leeg om de opgeslagen escrow-sleutel te gebruiken {{fingerprint}}.",
-      "title": "Breekglas-sleutel exporteren",
-      "warning": "Het bestand bevat de SECRETE sleutels van elke versleutelde back-up. Bewaar het offline, ver weg van de back-ups en de server, en vernietig het wanneer een nieuwere export het vervangt."
+      "key": "Uw OPENBARE OpenPGP-sleutel (in ASCII-armor-formaat)",
+      "reason": "Reden (wordt vastgelegd in het auditlogboek en de README)",
+      "saved": "Laat leeg om de opgeslagen escrowsleutel {{fingerprint}} te gebruiken.",
+      "title": "Noodexport van sleutels",
+      "warning": "Het bestand bevat de GEHEIME sleutels van elke versleutelde back-up. Bewaar het offline, gescheiden van de back-ups en de server, en vernietig het zodra een nieuwere export het vervangt."
+    },
+    "useTag": {
+      "button": "Het labelbeleid gebruiken",
+      "title": "Het labelbeleid gebruiken",
+      "confirm": "Het labelbeleid gebruiken",
+      "none": "(geen)",
+      "previewError": "Het labelbeleid kon niet worden gecontroleerd.",
+      "error": "De host kon niet aan zijn labelbeleid worden overgedragen.",
+      "intro": "Deze host volgt dan het labelbeleid {{name}} (prioriteit {{priority}}). Zijn repository, versleutelingssleutels, snapshots en geschiedenis blijven zoals ze zijn.",
+      "replaces": "Deze instellingen van deze host worden vervangen:",
+      "change": "{{setting}}: {{from}} -> {{to}}",
+      "same": "Zijn instellingen komen al overeen met het labelbeleid."
     }
   }
 }

@@ -21,7 +21,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from backend.api import backups_retention as retention
-from backend.api.backups import PolicyBody, _require, _validate_policy
+from backend.api.backups import PolicyBody, _host_or_404, _require, _validate_policy
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.persistence import models
@@ -264,5 +264,56 @@ async def apply_tag_policies(
     _require(current_user, SecurityRoles.MANAGE_BACKUPS)
     _engine_or_402()
     result = _apply_now(db, current_user)
+    db.commit()
+    return result
+
+
+def _handover_refusal(refused: tag_policies.HandoverRefused) -> HTTPException:
+    messages = {
+        "no_policy": _("This host has no backup policy"),
+        "already_tag": _("This host already follows its tag policy"),
+        "not_covered": _(
+            "No tag policy covers this host; there is nothing to switch to"
+        ),
+    }
+    return HTTPException(
+        status_code=409, detail=messages.get(refused.code, str(refused))
+    )
+
+
+@router.get("/backups/host/{host_id}/use-tag-policy")
+async def preview_use_tag_policy(
+    host_id: str,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """Which tag policy would govern this host, and which of its own
+    settings it would replace -- for the confirmation."""
+    _engine_or_402()
+    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
+    host = _host_or_404(db, host_id)
+    try:
+        return tag_policies.handover_preview(db, host)
+    except tag_policies.HandoverRefused as refused:
+        raise _handover_refusal(refused) from refused
+
+
+@router.post("/backups/host/{host_id}/use-tag-policy")
+async def use_tag_policy(
+    host_id: str,
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+) -> Dict[str, Any]:
+    """Hand a host on its own policy back to its tag policy, keeping its
+    policy row -- and with it the repository, encryption keys, snapshots
+    and history.  Configure makes it the host's own again."""
+    _engine_or_402()
+    _require(current_user, SecurityRoles.MANAGE_BACKUPS)
+    host = _host_or_404(db, host_id)
+    try:
+        result = tag_policies.use_tag_policy(db, host, current_user)
+    except tag_policies.HandoverRefused as refused:
+        raise _handover_refusal(refused) from refused
+    backup_tick.configure_now(db)
     db.commit()
     return result

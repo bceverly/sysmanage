@@ -31,7 +31,7 @@ import { useModuleLicensed } from '../../hooks/useModuleLicensed';
 import { VerificationField } from './VerificationStatus';
 import { NetworkMountsNote } from './NetworkMountsNote';
 import { localWindow } from './windowLocalTime';
-import { TagPolicyNote } from './PolicySource';
+import { OwnPolicyNote, TagPolicyNote } from './PolicySource';
 import type { PolicySource } from '../../Services/backups';
 
 // Sane defaults for a NEW policy (Bryan, 2026-10-29).  Community has only
@@ -163,6 +163,7 @@ const BackupPolicyDialog: React.FC<{
                 <Stack spacing={2} sx={{ mt: 1 }}>
                     {error && <Alert severity="error">{error}</Alert>}
                     <TagPolicyNote source={source} />
+                    <OwnPolicyNote source={source} />
                     <FormControlLabel
                         control={<Switch checked={form.enabled} onChange={e => set({ enabled: e.target.checked })} />}
                         label={t('backups.policy.enabled', 'Back up this host on a schedule')}

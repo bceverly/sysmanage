@@ -115,6 +115,23 @@ def test_turning_signing_on_after_the_export_makes_it_stale(session):
     assert state["stale_hosts"] == []
 
 
+def test_the_posture_check_counts_signing_like_the_banner(session):
+    """Banner stale but PM-BACKUP-KEY-ESCROW satisfied once signing went on
+    after the last export (lab, 2026-11-03): they must agree."""
+    s = _setup(session)
+    _encrypt(session, s)
+    _export(session, s.host, WHEN + timedelta(minutes=5))
+    assert escrow.posture_state(session, s.host, s.policy) == "ok"
+    s.target.signing_enabled_at = WHEN + timedelta(hours=1)
+    session.flush()
+    assert escrow.host_state(session, s.host, s.policy) == "ok"  # keys covered
+    assert escrow.posture_state(session, s.host, s.policy) == "failing"
+    with _engine():
+        assert escrow.status(session)["stale"]
+    _export(session, s.host, WHEN + timedelta(hours=2))
+    assert escrow.posture_state(session, s.host, s.policy) == "ok"
+
+
 def test_signing_alone_applies(session):
     s = _setup(session)
     s.target.signing_enabled_at = WHEN

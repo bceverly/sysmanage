@@ -285,3 +285,7 @@ re:^\{\{sensor\}\}: \{\{value\}\} \(\{\{status\}\}\)$
 de,es,nl,pt: hardwareHealth.kind.sensor
 nl: hardwareHealth.events.component
 nl: hardwareHealth.reason.deviceNotOnline
+
+# "Use the tag policy" confirmation (2026-11-03): one changed setting, pure
+# interpolation ("{{setting}}: {{from}} -> {{to}}") in every locale.
+backups.useTag.change

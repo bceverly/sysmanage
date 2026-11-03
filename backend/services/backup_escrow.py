@@ -98,6 +98,25 @@ def host_state(db: Session, host, policy) -> Optional[str]:
     return "ok" if since is None or exported > since else "failing"
 
 
+def signing_newer_than(db: Session, exported: Optional[datetime]) -> bool:
+    """Snapshot signing was turned on after ``exported`` (or there is no
+    export): the export lacks the signer's public key."""
+    target = jobs.the_target(db)
+    signing_at = _naive(getattr(target, "signing_enabled_at", None))
+    return signing_at is not None and (exported is None or exported < signing_at)
+
+
+def posture_state(db: Session, host, policy) -> Optional[str]:
+    """The advisor's PM-BACKUP-KEY-ESCROW view of one host: ``host_state``
+    plus signing, as the Backups banner counts it -- they disagreed on the
+    lab (banner stale, posture satisfied) once signing was turned on after
+    the last export (2026-11-03)."""
+    state = host_state(db, host, policy)
+    if state == "ok" and signing_newer_than(db, last_export_at(db, host.id)):
+        return "failing"
+    return state
+
+
 def _last_export_row(db: Session) -> Optional[models.AuditLog]:
     return (
         db.query(models.AuditLog)
@@ -153,7 +172,7 @@ def status(db: Session) -> Dict[str, Any]:
         export_host_id = str(rows[0][1].id)
     last = _last_export_row(db)
     last_at = _naive(last.timestamp) if last is not None else None
-    signing_stale = signing_at is not None and (last_at is None or last_at < signing_at)
+    signing_stale = signing_newer_than(db, last_at)
     return {
         "applies": applies,
         "encrypted_hosts": len(rows),

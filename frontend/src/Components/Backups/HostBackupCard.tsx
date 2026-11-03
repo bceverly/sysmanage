@@ -17,6 +17,7 @@ import type { BackupRun, HostBackup } from '../../Services/backups';
 import { hasPermission, SecurityRoles } from '../../Services/permissions';
 import { useModuleLicensed } from '../../hooks/useModuleLicensed';
 import { PolicySourceLine } from './PolicySource';
+import { UseTagPolicyButton } from './UseTagPolicy';
 import BackupPolicyDialog from './BackupPolicyDialog';
 import BackupChangesDialog from './BackupChangesDialog';
 import BackupPrepareButton from './BackupPrepareButton';
@@ -169,6 +170,9 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                         <Button size="small" onClick={() => setEditing(true)} disabled={unreachable(data)}>
                             {t('backups.hosts.configure', 'Configure')}
                         </Button>
+                    )}
+                    {canManage && (
+                        <UseTagPolicyButton hostId={hostId} source={data.policy_source} onDone={() => void load()} />
                     )}
                     {canManage && data.policy && (
                         <AsyncButton size="small" variant="outlined" onClick={runNow}
