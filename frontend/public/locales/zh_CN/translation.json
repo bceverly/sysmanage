@@ -5693,6 +5693,43 @@
       "showScript": "显示完整脚本（{{n}} 行）",
       "snaps": "snap：{{names}}",
       "title": "要放回的软件包"
+    },
+    "policySource": {
+      "own": "此主机自己的策略",
+      "tag": "来自标签策略 {{name}}（优先级 {{priority}}）",
+      "dialogNote": "此主机遵循标签策略 {{name}}。在此保存后，这些设置将成为此主机自己的策略，此后始终优先；如要恢复为标签策略，请删除此主机的策略。"
+    },
+    "tagPolicies": {
+      "add": "添加标签策略",
+      "addTitle": "添加标签策略",
+      "apply": "立即应用",
+      "applyError": "无法应用标签策略。",
+      "deleteError": "无法删除标签策略。",
+      "edit": "更改",
+      "editTitle": "更改标签策略",
+      "empty": "暂无标签策略。",
+      "enabled": "应用此标签策略",
+      "hostsCount": "带标签的 {{tagged}} 台中的 {{applied}} 台",
+      "hosts": "遵循它的主机",
+      "name": "名称",
+      "noTags": "请先为一些主机添加标签；标签策略适用于带有其标签的每台主机。",
+      "outcome": "已应用 {{applied}} 项，已删除 {{removed}} 项，已跳过 {{skipped}} 项。",
+      "paused": "已暂停",
+      "priority": "优先级",
+      "priorityHelp": "当多个标签策略适用于同一台主机时，数字最小者优先。主机自己的策略始终优先。",
+      "help": "带有该标签的每台主机都会获得这些设置。当多个策略适用于同一台主机时，优先级数字最小者优先；主机自己的策略（配置）始终优先。",
+      "quiesceHelp": "主机上没有的服务会在该主机上跳过。",
+      "remove": "删除",
+      "saved": "已保存。遵循它的主机：{{n}} 台。",
+      "saveError": "无法保存标签策略。",
+      "settings": "每台带标签主机的设置",
+      "tagColumn": "标签",
+      "tag": "带有该标签的主机",
+      "title": "按标签的策略",
+      "verifyDays": "完整读取检查间隔（天，0 = 关闭）"
+    },
+    "self": {
+      "configure": "配置自身备份"
     }
   }
 }

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 17:20-0500\n"
+"POT-Creation-Date: 2026-11-03 03:55-0500\n"
 "Language: es\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1349,9 +1349,10 @@ msgstr "Finalización de proceso solicitada. La lista se actualizará en breve."
 msgid "Invalid tag_id: %s"
 msgstr "tag_id no válido: %s"
 
-#: backend/api/broadcast.py:137 backend/api/error_constants.py:136
+#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:66
+#: backend/api/backups_tag_policies.py:70 backend/api/error_constants.py:136
 msgid "Tag not found"
-msgstr "Etiqueta no encontrada"
+msgstr "No se encontró la etiqueta"
 
 #: backend/api/broadcast.py:215
 #, python-format
@@ -2547,8 +2548,8 @@ msgstr "La clave API del NVD se eliminó correctamente"
 msgid "Failed to clear NVD API key"
 msgstr "No se pudo borrar la clave API de NVD"
 
-#: backend/api/backups_setup.py:94 backend/api/backups_equip.py:160
-#: backend/api/backups.py:569
+#: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:185
+#: backend/api/backups_equip.py:160 backend/api/backups.py:569
 msgid "Set up the backup target first"
 msgstr "Configure primero el destino de copia de seguridad"
 
@@ -2991,6 +2992,27 @@ msgstr "No hay versión publicada anterior con la que diferenciar"
 #, python-format
 msgid "No published version %s"
 msgstr "No existe ninguna versión publicada %s"
+
+#: backend/api/backups_tag_policies.py:52
+msgid "Backup policies by tag need the Professional+ backup engine"
+msgstr ""
+"Las políticas de copia de seguridad por etiqueta requieren el motor de "
+"copias de seguridad de Professional+"
+
+#: backend/api/backups_tag_policies.py:75
+msgid "Tag policy not found"
+msgstr "No se encontró la política de etiqueta"
+
+#: backend/api/backups_tag_policies.py:91 backend/api/backups_retention.py:65
+#: backend/api/backups_retention.py:101
+#, python-format
+msgid "%(field)s must be a whole number from 0 to %(max)d"
+msgstr "%(field)s debe ser un número entero de 0 a %(max)d"
+
+#: backend/api/backups_tag_policies.py:189
+#: backend/api/backups_tag_policies.py:223
+msgid "A tag policy has that name"
+msgstr "Ya hay una política de etiqueta con ese nombre"
 
 #: backend/api/image_mode_actions.py:75
 msgid ""
@@ -4327,61 +4349,61 @@ msgid "Remove the hosts' backup policies before the target"
 msgstr ""
 "Elimine las políticas de copias de seguridad de los hosts antes del destino"
 
-#: backend/api/backups.py:616
+#: backend/api/backups.py:617
 msgid "No backup policy"
 msgstr "No hay política de copias de seguridad"
 
-#: backend/api/backups.py:640
+#: backend/api/backups.py:641
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "Este host todavía no puede ejecutar copias de seguridad (%s)"
 
-#: backend/api/backups.py:646
+#: backend/api/backups.py:647
 msgid "This host's backup is not configured yet"
 msgstr "La copia de seguridad de este host todavía no está configurada"
 
-#: backend/api/backups.py:663
+#: backend/api/backups.py:664
 msgid "The backup storage host is not ready"
 msgstr "El host de almacenamiento de copias de seguridad no está listo"
 
-#: backend/api/backups.py:678
+#: backend/api/backups.py:679
 msgid "Unknown backup action"
 msgstr "Acción de copia de seguridad desconocida"
 
-#: backend/api/backups.py:691
+#: backend/api/backups.py:692
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr ""
 "Un repositorio cifrado no se puede reempaquetar en el host de almacenamiento"
 
-#: backend/api/backups.py:695
+#: backend/api/backups.py:696
 msgid "That backup job is already queued or running"
 msgstr "Esa tarea de copia de seguridad ya está en cola o en ejecución"
 
-#: backend/api/backups.py:792 backend/api/backups_browse.py:78
+#: backend/api/backups.py:793 backend/api/backups_browse.py:78
 msgid "Snapshot not found"
 msgstr "No se encontró la instantánea"
 
-#: backend/api/backups.py:799
+#: backend/api/backups.py:800
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr ""
 "Esta instantánea no está firmada; confirme para restaurarla de todos modos"
 
-#: backend/api/backups.py:852 backend/services/backup_key_release.py:124
+#: backend/api/backups.py:853 backend/services/backup_key_release.py:124
 msgid "Encrypted backups need the Professional+ backup engine"
 msgstr ""
 "Las copias de seguridad cifradas necesitan el motor de copias de seguridad "
 "de Professional+"
 
-#: backend/api/backups.py:857 backend/api/backups_drift.py:101
+#: backend/api/backups.py:858 backend/api/backups_drift.py:101
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "El restate de este host aún no puede hacer esto; actualice restate"
 
-#: backend/api/backups.py:869
+#: backend/api/backups.py:870
 msgid "This snapshot's repository is no longer kept"
 msgstr "El repositorio de esta instantánea ya no se conserva"
 
-#: backend/api/backups.py:954 backend/api/backups.py:957
+#: backend/api/backups.py:955 backend/api/backups.py:958
 msgid "Backup run not found"
 msgstr "No se encontró la tarea de copia de seguridad"
 
@@ -5551,11 +5573,6 @@ msgid "Grandfather-father-son retention needs the Professional+ backup engine"
 msgstr ""
 "La retención abuelo-padre-hijo necesita el motor de copias de seguridad de "
 "Professional+"
-
-#: backend/api/backups_retention.py:65 backend/api/backups_retention.py:101
-#, python-format
-msgid "%(field)s must be a whole number from 0 to %(max)d"
-msgstr "%(field)s debe ser un número entero de 0 a %(max)d"
 
 #: backend/api/backups_retention.py:108
 msgid "Scheduled verification needs the Professional+ backup engine"

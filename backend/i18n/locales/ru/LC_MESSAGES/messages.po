@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 17:20-0500\n"
+"POT-Creation-Date: 2026-11-03 03:55-0500\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1335,7 +1335,8 @@ msgstr "Запрошено завершение процесса. Список �
 msgid "Invalid tag_id: %s"
 msgstr "Неверный tag_id: %s"
 
-#: backend/api/broadcast.py:137 backend/api/error_constants.py:136
+#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:66
+#: backend/api/backups_tag_policies.py:70 backend/api/error_constants.py:136
 msgid "Tag not found"
 msgstr "Тег не найден"
 
@@ -2533,8 +2534,8 @@ msgstr "Ключ API NVD успешно очищен"
 msgid "Failed to clear NVD API key"
 msgstr "Не удалось очистить ключ API NVD"
 
-#: backend/api/backups_setup.py:94 backend/api/backups_equip.py:160
-#: backend/api/backups.py:569
+#: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:185
+#: backend/api/backups_equip.py:160 backend/api/backups.py:569
 msgid "Set up the backup target first"
 msgstr "Сначала настройте цель резервного копирования"
 
@@ -2977,6 +2978,27 @@ msgstr "Нет более ранней опубликованной версии
 #, python-format
 msgid "No published version %s"
 msgstr "Опубликованная версия %s не найдена"
+
+#: backend/api/backups_tag_policies.py:52
+msgid "Backup policies by tag need the Professional+ backup engine"
+msgstr ""
+"Для политик резервного копирования по тегам нужен модуль резервного "
+"копирования Professional+"
+
+#: backend/api/backups_tag_policies.py:75
+msgid "Tag policy not found"
+msgstr "Политика по тегу не найдена"
+
+#: backend/api/backups_tag_policies.py:91 backend/api/backups_retention.py:65
+#: backend/api/backups_retention.py:101
+#, python-format
+msgid "%(field)s must be a whole number from 0 to %(max)d"
+msgstr "%(field)s должно быть целым числом от 0 до %(max)d"
+
+#: backend/api/backups_tag_policies.py:189
+#: backend/api/backups_tag_policies.py:223
+msgid "A tag policy has that name"
+msgstr "Политика по тегу с таким названием уже есть"
 
 #: backend/api/image_mode_actions.py:75
 msgid ""
@@ -4276,60 +4298,60 @@ msgstr ""
 msgid "Remove the hosts' backup policies before the target"
 msgstr "Сначала удалите политики резервного копирования хостов, затем цель"
 
-#: backend/api/backups.py:616
+#: backend/api/backups.py:617
 msgid "No backup policy"
 msgstr "Нет политики резервного копирования"
 
-#: backend/api/backups.py:640
+#: backend/api/backups.py:641
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "Этот хост пока не может выполнять резервное копирование (%s)"
 
-#: backend/api/backups.py:646
+#: backend/api/backups.py:647
 msgid "This host's backup is not configured yet"
 msgstr "Резервное копирование этого хоста еще не настроено"
 
-#: backend/api/backups.py:663
+#: backend/api/backups.py:664
 msgid "The backup storage host is not ready"
 msgstr "Хост хранения резервных копий не готов"
 
-#: backend/api/backups.py:678
+#: backend/api/backups.py:679
 msgid "Unknown backup action"
 msgstr "Неизвестное действие резервного копирования"
 
-#: backend/api/backups.py:691
+#: backend/api/backups.py:692
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr "Зашифрованный репозиторий нельзя переупаковать на хосте хранения"
 
-#: backend/api/backups.py:695
+#: backend/api/backups.py:696
 msgid "That backup job is already queued or running"
 msgstr "Это задание резервного копирования уже в очереди или выполняется"
 
-#: backend/api/backups.py:792 backend/api/backups_browse.py:78
+#: backend/api/backups.py:793 backend/api/backups_browse.py:78
 msgid "Snapshot not found"
 msgstr "Снимок не найден"
 
-#: backend/api/backups.py:799
+#: backend/api/backups.py:800
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr ""
 "Этот снимок не подписан; подтвердите, чтобы всё равно восстановить его"
 
-#: backend/api/backups.py:852 backend/services/backup_key_release.py:124
+#: backend/api/backups.py:853 backend/services/backup_key_release.py:124
 msgid "Encrypted backups need the Professional+ backup engine"
 msgstr ""
 "Для зашифрованных резервных копий нужен модуль резервного копирования "
 "Professional+"
 
-#: backend/api/backups.py:857 backend/api/backups_drift.py:101
+#: backend/api/backups.py:858 backend/api/backups_drift.py:101
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "restate на этом хосте пока не умеет этого; обновите restate"
 
-#: backend/api/backups.py:869
+#: backend/api/backups.py:870
 msgid "This snapshot's repository is no longer kept"
 msgstr "Репозиторий этого снимка больше не хранится"
 
-#: backend/api/backups.py:954 backend/api/backups.py:957
+#: backend/api/backups.py:955 backend/api/backups.py:958
 msgid "Backup run not found"
 msgstr "Задание резервного копирования не найдено"
 
@@ -5483,11 +5505,6 @@ msgid "Grandfather-father-son retention needs the Professional+ backup engine"
 msgstr ""
 "Для хранения по схеме «дед-отец-сын» нужен модуль резервного копирования "
 "Professional+"
-
-#: backend/api/backups_retention.py:65 backend/api/backups_retention.py:101
-#, python-format
-msgid "%(field)s must be a whole number from 0 to %(max)d"
-msgstr "%(field)s должно быть целым числом от 0 до %(max)d"
 
 #: backend/api/backups_retention.py:108
 msgid "Scheduled verification needs the Professional+ backup engine"

@@ -5693,6 +5693,43 @@
       "showScript": "Het hele script tonen ({{n}} regels)",
       "snaps": "Snap-pakketten: {{names}}",
       "title": "Terug te zetten pakketten"
+    },
+    "policySource": {
+      "own": "Eigen beleid van deze host",
+      "tag": "Uit het labelbeleid {{name}} (prioriteit {{priority}})",
+      "dialogNote": "Deze host volgt het labelbeleid {{name}}. Als u hier opslaat, worden deze instellingen het eigen beleid van deze host, dat dan altijd voorgaat; verwijder het beleid van deze host om hem weer het labelbeleid te laten volgen."
+    },
+    "tagPolicies": {
+      "add": "Labelbeleid toevoegen",
+      "addTitle": "Een labelbeleid toevoegen",
+      "apply": "Nu toepassen",
+      "applyError": "Het labelbeleid kon niet worden toegepast.",
+      "deleteError": "Het labelbeleid kon niet worden verwijderd.",
+      "edit": "Wijzigen",
+      "editTitle": "Labelbeleid wijzigen",
+      "empty": "Nog geen labelbeleid.",
+      "enabled": "Dit labelbeleid toepassen",
+      "hostsCount": "{{applied}} van {{tagged}} met het label",
+      "hosts": "Hosts die het volgen",
+      "name": "Naam",
+      "noTags": "Geef eerst enkele hosts een label; een labelbeleid geldt voor elke host met dat label.",
+      "outcome": "{{applied}} toegepast, {{removed}} verwijderd, {{skipped}} overgeslagen.",
+      "paused": "Gepauzeerd",
+      "priority": "Prioriteit",
+      "priorityHelp": "Als meerdere labelbeleidsregels voor een host gelden, wint het laagste getal. Het eigen beleid van een host gaat altijd voor.",
+      "help": "Elke host met het label krijgt deze instellingen. Als er meerdere voor een host gelden, wint de laagste prioriteit; het eigen beleid van een host (Configureren) gaat altijd voor.",
+      "quiesceHelp": "Een dienst die een host niet heeft, wordt daar overgeslagen.",
+      "remove": "Verwijderen",
+      "saved": "Opgeslagen. Hosts die het volgen: {{n}}.",
+      "saveError": "Het labelbeleid kon niet worden opgeslagen.",
+      "settings": "Instellingen voor elke host met het label",
+      "tagColumn": "Label",
+      "tag": "Hosts met het label",
+      "title": "Beleid per label",
+      "verifyDays": "Volledige leescontrole elke (dagen, 0 = uit)"
+    },
+    "self": {
+      "configure": "Eigen back-up configureren"
     }
   }
 }

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-02 17:20-0500\n"
+"POT-Creation-Date: 2026-11-03 03:55-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1306,7 +1306,8 @@ msgstr ""
 msgid "Invalid tag_id: %s"
 msgstr ""
 
-#: backend/api/broadcast.py:137 backend/api/error_constants.py:136
+#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:66
+#: backend/api/backups_tag_policies.py:70 backend/api/error_constants.py:136
 msgid "Tag not found"
 msgstr ""
 
@@ -2409,8 +2410,8 @@ msgstr ""
 msgid "Failed to clear NVD API key"
 msgstr ""
 
-#: backend/api/backups_setup.py:94 backend/api/backups_equip.py:160
-#: backend/api/backups.py:569
+#: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:185
+#: backend/api/backups_equip.py:160 backend/api/backups.py:569
 msgid "Set up the backup target first"
 msgstr ""
 
@@ -2826,6 +2827,25 @@ msgstr ""
 #: backend/api/content_lifecycle_diff.py:120
 #, python-format
 msgid "No published version %s"
+msgstr ""
+
+#: backend/api/backups_tag_policies.py:52
+msgid "Backup policies by tag need the Professional+ backup engine"
+msgstr ""
+
+#: backend/api/backups_tag_policies.py:75
+msgid "Tag policy not found"
+msgstr ""
+
+#: backend/api/backups_tag_policies.py:91 backend/api/backups_retention.py:65
+#: backend/api/backups_retention.py:101
+#, python-format
+msgid "%(field)s must be a whole number from 0 to %(max)d"
+msgstr ""
+
+#: backend/api/backups_tag_policies.py:189
+#: backend/api/backups_tag_policies.py:223
+msgid "A tag policy has that name"
 msgstr ""
 
 #: backend/api/image_mode_actions.py:75
@@ -4023,57 +4043,57 @@ msgstr ""
 msgid "Remove the hosts' backup policies before the target"
 msgstr ""
 
-#: backend/api/backups.py:616
+#: backend/api/backups.py:617
 msgid "No backup policy"
 msgstr ""
 
-#: backend/api/backups.py:640
+#: backend/api/backups.py:641
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr ""
 
-#: backend/api/backups.py:646
+#: backend/api/backups.py:647
 msgid "This host's backup is not configured yet"
 msgstr ""
 
-#: backend/api/backups.py:663
+#: backend/api/backups.py:664
 msgid "The backup storage host is not ready"
 msgstr ""
 
-#: backend/api/backups.py:678
+#: backend/api/backups.py:679
 msgid "Unknown backup action"
 msgstr ""
 
-#: backend/api/backups.py:691
+#: backend/api/backups.py:692
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr ""
 
-#: backend/api/backups.py:695
+#: backend/api/backups.py:696
 msgid "That backup job is already queued or running"
 msgstr ""
 
-#: backend/api/backups.py:792 backend/api/backups_browse.py:78
+#: backend/api/backups.py:793 backend/api/backups_browse.py:78
 msgid "Snapshot not found"
 msgstr ""
 
-#: backend/api/backups.py:799
+#: backend/api/backups.py:800
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr ""
 
-#: backend/api/backups.py:852 backend/services/backup_key_release.py:124
+#: backend/api/backups.py:853 backend/services/backup_key_release.py:124
 msgid "Encrypted backups need the Professional+ backup engine"
 msgstr ""
 
-#: backend/api/backups.py:857 backend/api/backups_drift.py:101
+#: backend/api/backups.py:858 backend/api/backups_drift.py:101
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr ""
 
-#: backend/api/backups.py:869
+#: backend/api/backups.py:870
 msgid "This snapshot's repository is no longer kept"
 msgstr ""
 
-#: backend/api/backups.py:954 backend/api/backups.py:957
+#: backend/api/backups.py:955 backend/api/backups.py:958
 msgid "Backup run not found"
 msgstr ""
 
@@ -5167,11 +5187,6 @@ msgstr ""
 
 #: backend/api/backups_retention.py:52
 msgid "Grandfather-father-son retention needs the Professional+ backup engine"
-msgstr ""
-
-#: backend/api/backups_retention.py:65 backend/api/backups_retention.py:101
-#, python-format
-msgid "%(field)s must be a whole number from 0 to %(max)d"
 msgstr ""
 
 #: backend/api/backups_retention.py:108

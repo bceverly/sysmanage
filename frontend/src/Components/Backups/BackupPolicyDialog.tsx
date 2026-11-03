@@ -31,6 +31,8 @@ import { useModuleLicensed } from '../../hooks/useModuleLicensed';
 import { VerificationField } from './VerificationStatus';
 import { NetworkMountsNote } from './NetworkMountsNote';
 import { localWindow } from './windowLocalTime';
+import { TagPolicyNote } from './PolicySource';
+import type { PolicySource } from '../../Services/backups';
 
 // Sane defaults for a NEW policy (Bryan, 2026-10-29).  Community has only
 // keep-last, so a month of daily backups; with the Pro+ engine,
@@ -96,9 +98,11 @@ const BackupPolicyDialog: React.FC<{
     hostId: string;
     fqdn: string;
     policy: BackupPolicy | null;
+    /** Where its settings come from (24.6); a tag policy gets a note. */
+    source?: PolicySource | null;
     onClose: () => void;
     onSaved: () => void;
-}> = ({ open, hostId, fqdn, policy, onClose, onSaved }) => {
+}> = ({ open, hostId, fqdn, policy, source, onClose, onSaved }) => {
     const { t, i18n } = useTranslation();
     const gfsLicensed = useModuleLicensed('backup_engine');
     const initial = (): PolicyInput =>
@@ -158,6 +162,7 @@ const BackupPolicyDialog: React.FC<{
             <DialogContent>
                 <Stack spacing={2} sx={{ mt: 1 }}>
                     {error && <Alert severity="error">{error}</Alert>}
+                    <TagPolicyNote source={source} />
                     <FormControlLabel
                         control={<Switch checked={form.enabled} onChange={e => set({ enabled: e.target.checked })} />}
                         label={t('backups.policy.enabled', 'Back up this host on a schedule')}

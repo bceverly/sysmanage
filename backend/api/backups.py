@@ -587,6 +587,7 @@ async def put_policy(
         policy.config_version += 1
     _apply_policy(policy, body)
     retention.apply_gfs(policy, gfs)
+    policy.tag_policy_id = None  # Configure makes it this host's own (24.6)
     _audit(
         db,
         current_user,

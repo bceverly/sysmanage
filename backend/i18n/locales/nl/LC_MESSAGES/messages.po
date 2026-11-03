@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 17:20-0500\n"
+"POT-Creation-Date: 2026-11-03 03:55-0500\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1330,9 +1330,10 @@ msgstr "Procesbeëindiging aangevraagd. De lijst wordt binnenkort bijgewerkt."
 msgid "Invalid tag_id: %s"
 msgstr "Ongeldige tag_id: %s"
 
-#: backend/api/broadcast.py:137 backend/api/error_constants.py:136
+#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:66
+#: backend/api/backups_tag_policies.py:70 backend/api/error_constants.py:136
 msgid "Tag not found"
-msgstr "Tag niet gevonden"
+msgstr "Label niet gevonden"
 
 #: backend/api/broadcast.py:215
 #, python-format
@@ -2518,8 +2519,8 @@ msgstr "NVD API-sleutel succesvol gereset"
 msgid "Failed to clear NVD API key"
 msgstr "Mislukt om de NVD API-sleutel te wissen"
 
-#: backend/api/backups_setup.py:94 backend/api/backups_equip.py:160
-#: backend/api/backups.py:569
+#: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:185
+#: backend/api/backups_equip.py:160 backend/api/backups.py:569
 msgid "Set up the backup target first"
 msgstr "Stel eerst het back-updoel in"
 
@@ -2957,6 +2958,25 @@ msgstr "Geen eerder gepubliceerde versie om te vergelijken met"
 #, python-format
 msgid "No published version %s"
 msgstr "Geen gepubliceerde versie %s"
+
+#: backend/api/backups_tag_policies.py:52
+msgid "Backup policies by tag need the Professional+ backup engine"
+msgstr "Back-upbeleid per label vereist de back-upengine van Professional+"
+
+#: backend/api/backups_tag_policies.py:75
+msgid "Tag policy not found"
+msgstr "Labelbeleid niet gevonden"
+
+#: backend/api/backups_tag_policies.py:91 backend/api/backups_retention.py:65
+#: backend/api/backups_retention.py:101
+#, python-format
+msgid "%(field)s must be a whole number from 0 to %(max)d"
+msgstr "%(field)s moet een geheel getal van 0 tot %(max)d zijn"
+
+#: backend/api/backups_tag_policies.py:189
+#: backend/api/backups_tag_policies.py:223
+msgid "A tag policy has that name"
+msgstr "Er is al een labelbeleid met die naam"
 
 #: backend/api/image_mode_actions.py:75
 msgid ""
@@ -4253,59 +4273,59 @@ msgstr "Deze editie ondersteunt één back-updoel; bewerk het bestaande"
 msgid "Remove the hosts' backup policies before the target"
 msgstr "Verwijder eerst het back-upbeleid van de hosts, daarna het doel"
 
-#: backend/api/backups.py:616
+#: backend/api/backups.py:617
 msgid "No backup policy"
 msgstr "Geen back-upbeleid"
 
-#: backend/api/backups.py:640
+#: backend/api/backups.py:641
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "Deze host kan nog geen back-ups uitvoeren (%s)"
 
-#: backend/api/backups.py:646
+#: backend/api/backups.py:647
 msgid "This host's backup is not configured yet"
 msgstr "De back-up van deze host is nog niet geconfigureerd"
 
-#: backend/api/backups.py:663
+#: backend/api/backups.py:664
 msgid "The backup storage host is not ready"
 msgstr "De opslaghost voor back-ups is niet gereed"
 
-#: backend/api/backups.py:678
+#: backend/api/backups.py:679
 msgid "Unknown backup action"
 msgstr "Onbekende back-upactie"
 
-#: backend/api/backups.py:691
+#: backend/api/backups.py:692
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr ""
 "Een versleutelde repository kan niet opnieuw worden ingepakt op de "
 "opslaghost"
 
-#: backend/api/backups.py:695
+#: backend/api/backups.py:696
 msgid "That backup job is already queued or running"
 msgstr "Die back-uptaak staat al in de wachtrij of wordt uitgevoerd"
 
-#: backend/api/backups.py:792 backend/api/backups_browse.py:78
+#: backend/api/backups.py:793 backend/api/backups_browse.py:78
 msgid "Snapshot not found"
 msgstr "Snapshot niet gevonden"
 
-#: backend/api/backups.py:799
+#: backend/api/backups.py:800
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "Deze snapshot is niet ondertekend; bevestig om hem toch te herstellen"
 
-#: backend/api/backups.py:852 backend/services/backup_key_release.py:124
+#: backend/api/backups.py:853 backend/services/backup_key_release.py:124
 msgid "Encrypted backups need the Professional+ backup engine"
 msgstr "Versleutelde back-ups hebben de Professional+-back-upengine nodig"
 
-#: backend/api/backups.py:857 backend/api/backups_drift.py:101
+#: backend/api/backups.py:858 backend/api/backups_drift.py:101
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "De restate van deze host kan dit nog niet; werk restate bij"
 
-#: backend/api/backups.py:869
+#: backend/api/backups.py:870
 msgid "This snapshot's repository is no longer kept"
 msgstr "De repository van deze snapshot wordt niet meer bewaard"
 
-#: backend/api/backups.py:954 backend/api/backups.py:957
+#: backend/api/backups.py:955 backend/api/backups.py:958
 msgid "Backup run not found"
 msgstr "Back-uptaak niet gevonden"
 
@@ -5450,11 +5470,6 @@ msgstr "Mislukt om commerciële antivirusstatus op te halen: %s"
 #: backend/api/backups_retention.py:52
 msgid "Grandfather-father-son retention needs the Professional+ backup engine"
 msgstr "Grootvader-vader-zoon-retentie vereist de Professional+-back-upengine"
-
-#: backend/api/backups_retention.py:65 backend/api/backups_retention.py:101
-#, python-format
-msgid "%(field)s must be a whole number from 0 to %(max)d"
-msgstr "%(field)s moet een geheel getal van 0 tot %(max)d zijn"
 
 #: backend/api/backups_retention.py:108
 msgid "Scheduled verification needs the Professional+ backup engine"

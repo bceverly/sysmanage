@@ -5693,6 +5693,43 @@
       "showScript": "Show the whole script ({{n}} lines)",
       "snaps": "Snaps: {{names}}",
       "title": "Packages to put back"
+    },
+    "policySource": {
+      "own": "This host's own policy",
+      "tag": "From tag policy {{name}} (priority {{priority}})",
+      "dialogNote": "This host follows the tag policy {{name}}. Saving here makes these settings this host's own, which then always win; remove this host's policy to return it to the tag policy."
+    },
+    "tagPolicies": {
+      "add": "Add tag policy",
+      "addTitle": "Add a tag policy",
+      "apply": "Apply now",
+      "applyError": "The tag policies could not be applied.",
+      "deleteError": "The tag policy could not be removed.",
+      "edit": "Change",
+      "editTitle": "Change tag policy",
+      "empty": "No tag policies yet.",
+      "enabled": "Apply this tag policy",
+      "hostsCount": "{{applied}} of {{tagged}} tagged",
+      "hosts": "Hosts following it",
+      "name": "Name",
+      "noTags": "Add a tag to some hosts first; a tag policy covers every host with its tag.",
+      "outcome": "{{applied}} applied, {{removed}} removed, {{skipped}} skipped.",
+      "paused": "Paused",
+      "priority": "Priority",
+      "priorityHelp": "Where several tag policies cover a host, the lowest number wins. A host's own policy always wins.",
+      "help": "Every host with the tag gets these settings. Where several cover a host, the lowest priority wins; a host's own policy (Configure) always wins.",
+      "quiesceHelp": "A service a host does not have is skipped there.",
+      "remove": "Remove",
+      "saved": "Saved. Hosts following it: {{n}}.",
+      "saveError": "The tag policy could not be saved.",
+      "settings": "Settings for every tagged host",
+      "tagColumn": "Tag",
+      "tag": "Hosts with the tag",
+      "title": "Policies by tag",
+      "verifyDays": "Full-read check every (days, 0 = off)"
+    },
+    "self": {
+      "configure": "Configure self-backup"
     }
   }
 }

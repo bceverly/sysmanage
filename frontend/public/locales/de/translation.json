@@ -5693,6 +5693,43 @@
       "showScript": "Das ganze Skript anzeigen ({{n}} Zeilen)",
       "snaps": "Snap-Pakete: {{names}}",
       "title": "Zurückzulegende Pakete"
+    },
+    "policySource": {
+      "own": "Eigene Richtlinie dieses Hosts",
+      "tag": "Aus der Tag-Richtlinie {{name}} (Priorität {{priority}})",
+      "dialogNote": "Dieser Host folgt der Tag-Richtlinie {{name}}. Wenn Sie hier speichern, werden diese Einstellungen zur eigenen Richtlinie dieses Hosts, die dann immer Vorrang hat; entfernen Sie die Richtlinie dieses Hosts, damit er wieder der Tag-Richtlinie folgt."
+    },
+    "tagPolicies": {
+      "add": "Tag-Richtlinie hinzufügen",
+      "addTitle": "Tag-Richtlinie hinzufügen",
+      "apply": "Jetzt anwenden",
+      "applyError": "Die Tag-Richtlinien konnten nicht angewendet werden.",
+      "deleteError": "Die Tag-Richtlinie konnte nicht entfernt werden.",
+      "edit": "Ändern",
+      "editTitle": "Tag-Richtlinie ändern",
+      "empty": "Noch keine Tag-Richtlinien.",
+      "enabled": "Diese Tag-Richtlinie anwenden",
+      "hostsCount": "{{applied}} von {{tagged}} mit Tag",
+      "hosts": "Hosts, die ihr folgen",
+      "name": "Name",
+      "noTags": "Versehen Sie zuerst einige Hosts mit einem Tag; eine Tag-Richtlinie gilt für jeden Host mit ihrem Tag.",
+      "outcome": "{{applied}} angewendet, {{removed}} entfernt, {{skipped}} übersprungen.",
+      "paused": "Pausiert",
+      "priority": "Priorität",
+      "priorityHelp": "Gelten mehrere Tag-Richtlinien für einen Host, gewinnt die niedrigste Zahl. Die eigene Richtlinie eines Hosts hat immer Vorrang.",
+      "help": "Jeder Host mit dem Tag erhält diese Einstellungen. Gelten mehrere für einen Host, gewinnt die niedrigste Priorität; die eigene Richtlinie eines Hosts (Konfigurieren) hat immer Vorrang.",
+      "quiesceHelp": "Ein Dienst, den ein Host nicht hat, wird dort übersprungen.",
+      "remove": "Entfernen",
+      "saved": "Gespeichert. Hosts, die ihr folgen: {{n}}.",
+      "saveError": "Die Tag-Richtlinie konnte nicht gespeichert werden.",
+      "settings": "Einstellungen für jeden Host mit dem Tag",
+      "tagColumn": "Tag",
+      "tag": "Hosts mit dem Tag",
+      "title": "Richtlinien nach Tag",
+      "verifyDays": "Vollständige Leseprüfung alle (Tage, 0 = aus)"
+    },
+    "self": {
+      "configure": "Eigensicherung konfigurieren"
     }
   }
 }

@@ -16,6 +16,7 @@ import { backupNow, getHostBackup } from '../../Services/backups';
 import type { BackupRun, HostBackup } from '../../Services/backups';
 import { hasPermission, SecurityRoles } from '../../Services/permissions';
 import { useModuleLicensed } from '../../hooks/useModuleLicensed';
+import { PolicySourceLine } from './PolicySource';
 import BackupPolicyDialog from './BackupPolicyDialog';
 import BackupChangesDialog from './BackupChangesDialog';
 import BackupPrepareButton from './BackupPrepareButton';
@@ -136,6 +137,7 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                 </Typography>
                 {data.policy && (
                     <>
+                        <PolicySourceLine source={data.policy_source} />
                         <Typography variant="body2">
                             {t('backups.hosts.lastBackup', 'Last backup')}: {formatTime(data.last_good_capture?.finished_at)}
                             {data.last_good_capture && ` (${runStatusLabel(t, data.last_good_capture)})`}
@@ -198,6 +200,7 @@ const HostBackupCard: React.FC<{ hostId: string }> = ({ hostId }) => {
                 </Stack>
                 {editing && (
                     <BackupPolicyDialog open hostId={hostId} fqdn={data.fqdn} policy={data.policy}
+                        source={data.policy_source}
                         onClose={() => setEditing(false)} onSaved={() => void load()} />
                 )}
                 {changes && <BackupChangesDialog hostId={hostId} fqdn={data.fqdn} onClose={() => setChanges(false)} />}

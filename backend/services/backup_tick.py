@@ -42,6 +42,7 @@ from backend.persistence.tenant_context import tenant_scope
 from backend.services import backup_first_fit as first_fit
 from backend.services import backup_jobs as jobs
 from backend.services import backup_reach as reach
+from backend.services import backup_tag_policies as tag_policies
 from backend.services import backup_verify as verify
 from backend.services import queue_clock
 from backend.startup.leadership import singleton_task
@@ -220,6 +221,13 @@ def _configure(db, policy, target, host, storage_ready: bool) -> bool:
         )  # fmt: skip
         policy.config_version += 1
         policy.storage_client_address = jobs.host_address(host)
+    if jobs.is_self(policy, target):
+        # The storage host's own backup (24.13): ONE configure for both sides.
+        if policy.host_acked_version < policy.config_version and not jobs.pending(
+            db, policy.id, jobs.CONFIGURE, host.id
+        ):
+            jobs.queue_configure(db, policy, target, host, jobs.SELF_ROLE)
+        return policy.host_acked_version >= 1
     if (
         policy.host_acked_version < policy.config_version
         and not jobs.pending(db, policy.id, jobs.CONFIGURE, host.id)
@@ -427,7 +435,10 @@ def reconcile(db: Session, now: Optional[datetime] = None) -> int:
     target = jobs.the_target(db)
     if target is None:
         return 0
-    # First, so a rotated key's job files go out on this same pass.
+    # Tag policies first (Pro+ 24.6): a host tagged since the last pass gets
+    # its policy, and its job files, on this same pass.
+    tag_policies.resolve(db)
+    # Then keys, so a rotated key's job files go out on this same pass.
     rotate_keys(db, target, now)
     storage_ready = _eligible(jobs.storage_host(db, target))
     queued = start_requested(db)  # asked for first, then the schedule

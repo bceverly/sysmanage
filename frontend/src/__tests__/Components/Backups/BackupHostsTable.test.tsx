@@ -53,7 +53,9 @@ describe("the primary action follows the host's state", () => {
 
   test("a viewer who may only restore gets Restore files, and the storage host nothing", () => {
     expect(hostActions(host(), { ...all, canManage: false })).toEqual(["restore"]);
-    expect(hostActions(host({ policy: null }), { ...all, storageHost: true })).toEqual([]);
+    // The storage host without a policy offers only its own backup (24.13).
+    expect(hostActions(host({ policy: null }), { ...all, storageHost: true })).toEqual(["selfBackup"]);
+    expect(hostActions(host({ policy: null }), { ...all, storageHost: true, canManage: false })).toEqual([]);
   });
 });
 
@@ -90,12 +92,14 @@ describe("BackupHostsTable", () => {
     expect(item).toHaveAttribute("title", "Job files not confirmed by the storage host yet");
   });
 
-  test("the storage host is listed last, as such, with no actions or checkbox", () => {
+  test("the storage host is listed last, as such, offering only its own backup", () => {
     show([host({ host_id: "nas", fqdn: "nas.lab", policy: null, status: "no_policy", snapshot_count: 0 }),
           host({ host_id: "h2", fqdn: "zzz.lab" })], "nas");
     const rows = screen.getAllByRole("row");
     expect(within(rows[rows.length - 1]).getByText("Storage host")).toBeInTheDocument();
-    expect(within(rows[rows.length - 1]).queryByRole("button")).not.toBeInTheDocument();
+    // 24.13: one action, Configure self-backup; no checkbox for bulk actions.
+    expect(within(rows[rows.length - 1]).getAllByRole("button").map(b => b.textContent))
+      .toEqual(["Configure self-backup"]);
     expect(screen.getByLabelText("Select nas.lab")).toBeDisabled();
     expect(screen.queryByText("Not configured")).not.toBeInTheDocument();
   });

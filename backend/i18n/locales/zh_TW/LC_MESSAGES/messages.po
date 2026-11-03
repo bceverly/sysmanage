@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 17:20-0500\n"
+"POT-Creation-Date: 2026-11-03 03:55-0500\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1302,9 +1302,10 @@ msgstr "已要求終止程序。清單將很快更新。"
 msgid "Invalid tag_id: %s"
 msgstr "無效的 tag_id: %s"
 
-#: backend/api/broadcast.py:137 backend/api/error_constants.py:136
+#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:66
+#: backend/api/backups_tag_policies.py:70 backend/api/error_constants.py:136
 msgid "Tag not found"
-msgstr "標籤未找到"
+msgstr "找不到標籤"
 
 #: backend/api/broadcast.py:215
 #, python-format
@@ -2415,8 +2416,8 @@ msgstr "NVD API密鑰已成功清除"
 msgid "Failed to clear NVD API key"
 msgstr "無法清除 NVD API 金鑰"
 
-#: backend/api/backups_setup.py:94 backend/api/backups_equip.py:160
-#: backend/api/backups.py:569
+#: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:185
+#: backend/api/backups_equip.py:160 backend/api/backups.py:569
 msgid "Set up the backup target first"
 msgstr "請先設定備份目標"
 
@@ -2840,6 +2841,25 @@ msgstr "沒有較早的已發布版本進行比較"
 #, python-format
 msgid "No published version %s"
 msgstr "未發布版本 %s"
+
+#: backend/api/backups_tag_policies.py:52
+msgid "Backup policies by tag need the Professional+ backup engine"
+msgstr "依標籤的備份原則需要 Professional+ 備份引擎"
+
+#: backend/api/backups_tag_policies.py:75
+msgid "Tag policy not found"
+msgstr "找不到標籤原則"
+
+#: backend/api/backups_tag_policies.py:91 backend/api/backups_retention.py:65
+#: backend/api/backups_retention.py:101
+#, python-format
+msgid "%(field)s must be a whole number from 0 to %(max)d"
+msgstr "%(field)s 必須是 0 到 %(max)d 之間的整數"
+
+#: backend/api/backups_tag_policies.py:189
+#: backend/api/backups_tag_policies.py:223
+msgid "A tag policy has that name"
+msgstr "已有同名的標籤原則"
 
 #: backend/api/image_mode_actions.py:75
 msgid ""
@@ -4046,57 +4066,57 @@ msgstr "此版本僅支援一個備份目標；請編輯現有目標"
 msgid "Remove the hosts' backup policies before the target"
 msgstr "請先移除各主機的備份原則，再移除目標"
 
-#: backend/api/backups.py:616
+#: backend/api/backups.py:617
 msgid "No backup policy"
 msgstr "沒有備份原則"
 
-#: backend/api/backups.py:640
+#: backend/api/backups.py:641
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "此主機暫時無法執行備份（%s）"
 
-#: backend/api/backups.py:646
+#: backend/api/backups.py:647
 msgid "This host's backup is not configured yet"
 msgstr "此主機的備份尚未設定"
 
-#: backend/api/backups.py:663
+#: backend/api/backups.py:664
 msgid "The backup storage host is not ready"
 msgstr "備份儲存主機尚未就緒"
 
-#: backend/api/backups.py:678
+#: backend/api/backups.py:679
 msgid "Unknown backup action"
 msgstr "未知的備份操作"
 
-#: backend/api/backups.py:691
+#: backend/api/backups.py:692
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr "加密的存放庫無法在儲存主機上重新打包"
 
-#: backend/api/backups.py:695
+#: backend/api/backups.py:696
 msgid "That backup job is already queued or running"
 msgstr "該備份工作已在佇列中或正在執行"
 
-#: backend/api/backups.py:792 backend/api/backups_browse.py:78
+#: backend/api/backups.py:793 backend/api/backups_browse.py:78
 msgid "Snapshot not found"
 msgstr "找不到快照"
 
-#: backend/api/backups.py:799
+#: backend/api/backups.py:800
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "此快照未簽署；請確認以仍然還原它"
 
-#: backend/api/backups.py:852 backend/services/backup_key_release.py:124
+#: backend/api/backups.py:853 backend/services/backup_key_release.py:124
 msgid "Encrypted backups need the Professional+ backup engine"
 msgstr "加密備份需要 Professional+ 備份引擎"
 
-#: backend/api/backups.py:857 backend/api/backups_drift.py:101
+#: backend/api/backups.py:858 backend/api/backups_drift.py:101
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "此主機的 restate 尚不支援此操作；請升級 restate"
 
-#: backend/api/backups.py:869
+#: backend/api/backups.py:870
 msgid "This snapshot's repository is no longer kept"
 msgstr "此快照所在的存放庫已不再保留"
 
-#: backend/api/backups.py:954 backend/api/backups.py:957
+#: backend/api/backups.py:955 backend/api/backups.py:958
 msgid "Backup run not found"
 msgstr "找不到備份工作"
 
@@ -5200,11 +5220,6 @@ msgstr "無法取得商業防毒狀態：%s"
 #: backend/api/backups_retention.py:52
 msgid "Grandfather-father-son retention needs the Professional+ backup engine"
 msgstr "祖父-父-子（GFS）保留策略需要 Professional+ 備份引擎"
-
-#: backend/api/backups_retention.py:65 backend/api/backups_retention.py:101
-#, python-format
-msgid "%(field)s must be a whole number from 0 to %(max)d"
-msgstr "%(field)s 必須是 0 到 %(max)d 之間的整數"
 
 #: backend/api/backups_retention.py:108
 msgid "Scheduled verification needs the Professional+ backup engine"

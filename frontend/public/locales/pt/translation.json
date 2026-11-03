@@ -5693,6 +5693,43 @@
       "showScript": "Mostrar o script completo ({{n}} linhas)",
       "snaps": "Pacotes snap: {{names}}",
       "title": "Pacotes a colocar de volta"
+    },
+    "policySource": {
+      "own": "Política própria deste host",
+      "tag": "Da política de marcador {{name}} (prioridade {{priority}})",
+      "dialogNote": "Este host segue a política de marcador {{name}}. Ao salvar aqui, estas configurações passam a ser a política própria deste host, que então sempre prevalece; remova a política deste host para que ele volte a seguir a política de marcador."
+    },
+    "tagPolicies": {
+      "add": "Adicionar política de marcador",
+      "addTitle": "Adicionar uma política de marcador",
+      "apply": "Aplicar agora",
+      "applyError": "Não foi possível aplicar as políticas de marcador.",
+      "deleteError": "Não foi possível remover a política de marcador.",
+      "edit": "Alterar",
+      "editTitle": "Alterar a política de marcador",
+      "empty": "Ainda não há políticas de marcador.",
+      "enabled": "Aplicar esta política de marcador",
+      "hostsCount": "{{applied}} de {{tagged}} com o marcador",
+      "hosts": "Hosts que a seguem",
+      "name": "Nome",
+      "noTags": "Primeiro, adicione um marcador a alguns hosts; uma política de marcador abrange todos os hosts com o seu marcador.",
+      "outcome": "{{applied}} aplicadas, {{removed}} removidas, {{skipped}} ignoradas.",
+      "paused": "Pausada",
+      "priority": "Prioridade",
+      "priorityHelp": "Quando várias políticas de marcador abrangem um host, vence o número mais baixo. A política própria de um host sempre prevalece.",
+      "help": "Todos os hosts com o marcador recebem estas configurações. Quando várias abrangem um host, vence a prioridade mais baixa; a política própria de um host (Configurar) sempre prevalece.",
+      "quiesceHelp": "Um serviço que um host não tem é ignorado nesse host.",
+      "remove": "Remover",
+      "saved": "Salvo. Hosts que a seguem: {{n}}.",
+      "saveError": "Não foi possível salvar a política de marcador.",
+      "settings": "Configurações para cada host com o marcador",
+      "tagColumn": "Marcador",
+      "tag": "Hosts com o marcador",
+      "title": "Políticas por marcador",
+      "verifyDays": "Verificação com leitura completa a cada (dias, 0 = desativada)"
+    },
+    "self": {
+      "configure": "Configurar o backup deste host"
     }
   }
 }

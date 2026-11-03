@@ -181,11 +181,36 @@ class BackupPolicy(Base):
     # patterns as a JSON list (q74, Pro+ 24.7); logs and caches are hidden by
     # default besides.
     drift_ignore = Column(Text, nullable=True)
+    # The tag policy this host's settings come from (q75, Pro+ 24.6); NULL =
+    # the host's own policy, which always beats any tag policy.
+    tag_policy_id = Column(GUID(), nullable=True)
     config_version = Column(Integer, nullable=False, default=1)
     host_acked_version = Column(Integer, nullable=False, default=0)
     storage_acked_version = Column(Integer, nullable=False, default=0)
     restate_version = Column(String(64), nullable=True)
     storage_restate_version = Column(String(64), nullable=True)
+    created_at = Column(DateTime, nullable=False)
+    created_by = Column(String(255), nullable=True)
+    updated_at = Column(DateTime, nullable=False)
+
+
+class BackupTagPolicy(Base):
+    """A backup policy for every host carrying a tag (Pro+ 24.6, q75): its
+    settings are applied to each such host's own ``backup_policy`` row.  The
+    lowest ``priority`` wins where several cover a host; a host's own policy
+    beats them all."""
+
+    __tablename__ = "backup_tag_policy"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    name = Column(String(255), nullable=False, unique=True)
+    tag_id = Column(
+        GUID(), ForeignKey("tags.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    priority = Column(Integer, nullable=False, default=100)
+    enabled = Column(Boolean, nullable=False, default=True)
+    # JSON: the per-host policy fields (backups.PolicyBody).
+    settings = Column(Text, nullable=False)
     created_at = Column(DateTime, nullable=False)
     created_by = Column(String(255), nullable=True)
     updated_at = Column(DateTime, nullable=False)

@@ -267,6 +267,33 @@ def host_configuration(
 
 
 DEFAULT_SERVICE_ACCOUNT = "restate"
+# The storage host backing up its own OS (24.13): one policy, both sides.
+SELF_ROLE = "self"
+
+
+def is_self(policy: models.BackupPolicy, target: Optional[models.BackupTarget]) -> bool:
+    """The storage host's own policy: it captures itself, locally."""
+    return target is not None and str(policy.host_id) == str(target.storage_host_id)
+
+
+def self_configuration(
+    policy: models.BackupPolicy, target: models.BackupTarget, host: models.Host
+) -> Dict[str, Any]:
+    """The storage host's own backup: its capture side and its repository's
+    storage side in one configure, the repository on its own storage path,
+    written locally (no NFS mount, no export, no previous repository).  What
+    it leaves out -- the backups, the data pools -- its agent decides."""
+    capture_side = host_configuration(policy, target, host)
+    storage_side = storage_configuration(policy, target, host)
+    out = dict(capture_side)
+    out["role"] = SELF_ROLE
+    out["target"] = {
+        "mount_point": target.storage_path,
+        "repo_dir": policy_repo_dir(policy, host),
+        "service_account": target.service_account or DEFAULT_SERVICE_ACCOUNT,
+    }
+    out["jobs"] = {**capture_side["jobs"], **storage_side["jobs"]}
+    return out
 
 
 def nfs_source(
@@ -393,7 +420,10 @@ def queue_configure(
     actor: str = SYSTEM_ACTOR,
 ) -> models.BackupRun:
     """Send the host (or the storage host) this policy's job files."""
-    if role == "storage":
+    if role == SELF_ROLE:
+        payload = self_configuration(policy, target, host)
+        run_host = host.id
+    elif role == "storage":
         payload = storage_configuration(policy, target, host)
         run_host = target.storage_host_id
         policy.storage_client_address = payload["target"]["client_address"]

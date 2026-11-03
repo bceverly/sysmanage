@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 17:20-0500\n"
+"POT-Creation-Date: 2026-11-03 03:55-0500\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1305,7 +1305,8 @@ msgstr "프로세스 종료를 요청했습니다. 목록이 곧 업데이트됩
 msgid "Invalid tag_id: %s"
 msgstr "잘못된 tag_id: %s"
 
-#: backend/api/broadcast.py:137 backend/api/error_constants.py:136
+#: backend/api/broadcast.py:137 backend/api/backups_tag_policies.py:66
+#: backend/api/backups_tag_policies.py:70 backend/api/error_constants.py:136
 msgid "Tag not found"
 msgstr "태그를 찾을 수 없습니다"
 
@@ -2439,8 +2440,8 @@ msgstr "NVD API 키가 성공적으로 초기화되었습니다"
 msgid "Failed to clear NVD API key"
 msgstr "NVD API 키 지우기 실패"
 
-#: backend/api/backups_setup.py:94 backend/api/backups_equip.py:160
-#: backend/api/backups.py:569
+#: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:185
+#: backend/api/backups_equip.py:160 backend/api/backups.py:569
 msgid "Set up the backup target first"
 msgstr "먼저 백업 대상을 설정하세요"
 
@@ -2867,6 +2868,25 @@ msgstr "비교할 이전에 공개된 버전이 없습니다"
 #, python-format
 msgid "No published version %s"
 msgstr "공개된 버전 %s이 없습니다"
+
+#: backend/api/backups_tag_policies.py:52
+msgid "Backup policies by tag need the Professional+ backup engine"
+msgstr "태그별 백업 정책에는 Professional+ 백업 엔진이 필요합니다"
+
+#: backend/api/backups_tag_policies.py:75
+msgid "Tag policy not found"
+msgstr "태그 정책을 찾을 수 없습니다"
+
+#: backend/api/backups_tag_policies.py:91 backend/api/backups_retention.py:65
+#: backend/api/backups_retention.py:101
+#, python-format
+msgid "%(field)s must be a whole number from 0 to %(max)d"
+msgstr "%(field)s은(는) 0부터 %(max)d까지의 정수여야 합니다"
+
+#: backend/api/backups_tag_policies.py:189
+#: backend/api/backups_tag_policies.py:223
+msgid "A tag policy has that name"
+msgstr "같은 이름의 태그 정책이 이미 있습니다"
 
 #: backend/api/image_mode_actions.py:75
 msgid ""
@@ -4083,57 +4103,57 @@ msgstr "이 에디션은 백업 대상을 하나만 지원합니다. 기존 대�
 msgid "Remove the hosts' backup policies before the target"
 msgstr "대상을 삭제하기 전에 호스트의 백업 정책을 제거하세요"
 
-#: backend/api/backups.py:616
+#: backend/api/backups.py:617
 msgid "No backup policy"
 msgstr "백업 정책이 없습니다"
 
-#: backend/api/backups.py:640
+#: backend/api/backups.py:641
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "이 호스트는 아직 백업을 실행할 수 없습니다 (%s)"
 
-#: backend/api/backups.py:646
+#: backend/api/backups.py:647
 msgid "This host's backup is not configured yet"
 msgstr "이 호스트의 백업이 아직 구성되지 않았습니다"
 
-#: backend/api/backups.py:663
+#: backend/api/backups.py:664
 msgid "The backup storage host is not ready"
 msgstr "백업 스토리지 호스트가 준비되지 않았습니다"
 
-#: backend/api/backups.py:678
+#: backend/api/backups.py:679
 msgid "Unknown backup action"
 msgstr "알 수 없는 백업 작업입니다"
 
-#: backend/api/backups.py:691
+#: backend/api/backups.py:692
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr "암호화된 저장소는 스토리지 호스트에서 다시 압축할 수 없습니다"
 
-#: backend/api/backups.py:695
+#: backend/api/backups.py:696
 msgid "That backup job is already queued or running"
 msgstr "해당 백업 작업이 이미 대기 중이거나 실행 중입니다"
 
-#: backend/api/backups.py:792 backend/api/backups_browse.py:78
+#: backend/api/backups.py:793 backend/api/backups_browse.py:78
 msgid "Snapshot not found"
 msgstr "스냅샷을 찾을 수 없습니다"
 
-#: backend/api/backups.py:799
+#: backend/api/backups.py:800
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "이 스냅샷은 서명되지 않았습니다. 그래도 복원하려면 확인하세요"
 
-#: backend/api/backups.py:852 backend/services/backup_key_release.py:124
+#: backend/api/backups.py:853 backend/services/backup_key_release.py:124
 msgid "Encrypted backups need the Professional+ backup engine"
 msgstr "암호화된 백업에는 Professional+ 백업 엔진이 필요합니다"
 
-#: backend/api/backups.py:857 backend/api/backups_drift.py:101
+#: backend/api/backups.py:858 backend/api/backups_drift.py:101
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "이 호스트의 restate는 아직 이 작업을 할 수 없습니다. restate를 업그레이드하세요"
 
-#: backend/api/backups.py:869
+#: backend/api/backups.py:870
 msgid "This snapshot's repository is no longer kept"
 msgstr "이 스냅샷의 저장소는 더 이상 보관되지 않습니다"
 
-#: backend/api/backups.py:954 backend/api/backups.py:957
+#: backend/api/backups.py:955 backend/api/backups.py:958
 msgid "Backup run not found"
 msgstr "백업 작업을 찾을 수 없습니다"
 
@@ -5244,11 +5264,6 @@ msgstr "상업용 ANTIVIRUS 상태를 가져오는데 실패했습니다: %s"
 #: backend/api/backups_retention.py:52
 msgid "Grandfather-father-son retention needs the Professional+ backup engine"
 msgstr "GFS(조부-부-자) 보존에는 Professional+ 백업 엔진이 필요합니다"
-
-#: backend/api/backups_retention.py:65 backend/api/backups_retention.py:101
-#, python-format
-msgid "%(field)s must be a whole number from 0 to %(max)d"
-msgstr "%(field)s은(는) 0부터 %(max)d까지의 정수여야 합니다"
 
 #: backend/api/backups_retention.py:108
 msgid "Scheduled verification needs the Professional+ backup engine"

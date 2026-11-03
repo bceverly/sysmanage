@@ -5693,6 +5693,43 @@
       "showScript": "Afficher le script complet ({{n}} lignes)",
       "snaps": "Snaps : {{names}}",
       "title": "Paquets à remettre en place"
+    },
+    "policySource": {
+      "own": "Politique propre à cet hôte",
+      "tag": "Issue de la politique d'étiquette {{name}} (priorité {{priority}})",
+      "dialogNote": "Cet hôte suit la politique d'étiquette {{name}}. En enregistrant ici, ces paramètres deviennent la politique propre à cet hôte, qui l'emporte alors toujours ; supprimez la politique de cet hôte pour qu'il suive de nouveau la politique d'étiquette."
+    },
+    "tagPolicies": {
+      "add": "Ajouter une politique d'étiquette",
+      "addTitle": "Ajouter une politique d'étiquette",
+      "apply": "Appliquer maintenant",
+      "applyError": "Les politiques d'étiquette n'ont pas pu être appliquées.",
+      "deleteError": "La politique d'étiquette n'a pas pu être supprimée.",
+      "edit": "Modifier",
+      "editTitle": "Modifier la politique d'étiquette",
+      "empty": "Aucune politique d'étiquette pour l'instant.",
+      "enabled": "Appliquer cette politique d'étiquette",
+      "hostsCount": "{{applied}} sur {{tagged}} étiquetés",
+      "hosts": "Hôtes qui la suivent",
+      "name": "Nom",
+      "noTags": "Ajoutez d'abord une étiquette à quelques hôtes ; une politique d'étiquette couvre chaque hôte portant son étiquette.",
+      "outcome": "{{applied}} appliquées, {{removed}} supprimées, {{skipped}} ignorées.",
+      "paused": "En pause",
+      "priority": "Priorité",
+      "priorityHelp": "Quand plusieurs politiques d'étiquette couvrent un hôte, le plus petit nombre l'emporte. La politique propre à un hôte l'emporte toujours.",
+      "help": "Chaque hôte portant l'étiquette reçoit ces paramètres. Quand plusieurs couvrent un hôte, la priorité la plus basse l'emporte ; la politique propre à un hôte (Configurer) l'emporte toujours.",
+      "quiesceHelp": "Un service qu'un hôte n'a pas est ignoré sur cet hôte.",
+      "remove": "Supprimer",
+      "saved": "Enregistré. Hôtes qui la suivent : {{n}}.",
+      "saveError": "La politique d'étiquette n'a pas pu être enregistrée.",
+      "settings": "Paramètres pour chaque hôte étiqueté",
+      "tagColumn": "Étiquette",
+      "tag": "Hôtes portant l'étiquette",
+      "title": "Politiques par étiquette",
+      "verifyDays": "Vérification par lecture complète tous les (jours, 0 = désactivée)"
+    },
+    "self": {
+      "configure": "Configurer la sauvegarde de cet hôte"
     }
   }
 }

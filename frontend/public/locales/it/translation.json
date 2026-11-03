@@ -5693,6 +5693,43 @@
       "showScript": "Mostra lo script completo ({{n}} righe)",
       "snaps": "Snap: {{names}}",
       "title": "Pacchetti da rimettere"
+    },
+    "policySource": {
+      "own": "Criterio proprio di questo host",
+      "tag": "Dal criterio per tag {{name}} (priorità {{priority}})",
+      "dialogNote": "Questo host segue il criterio per tag {{name}}. Salvando qui, queste impostazioni diventano il criterio proprio di questo host, che da quel momento prevale sempre; rimuova il criterio di questo host per riportarlo al criterio per tag."
+    },
+    "tagPolicies": {
+      "add": "Aggiungi criterio per tag",
+      "addTitle": "Aggiungi un criterio per tag",
+      "apply": "Applica ora",
+      "applyError": "Non è stato possibile applicare i criteri per tag.",
+      "deleteError": "Non è stato possibile rimuovere il criterio per tag.",
+      "edit": "Modifica",
+      "editTitle": "Modifica il criterio per tag",
+      "empty": "Nessun criterio per tag.",
+      "enabled": "Applica questo criterio per tag",
+      "hostsCount": "{{applied}} su {{tagged}} con il tag",
+      "hosts": "Host che lo seguono",
+      "name": "Nome",
+      "noTags": "Aggiunga prima un tag ad alcuni host; un criterio per tag riguarda ogni host con il suo tag.",
+      "outcome": "{{applied}} applicati, {{removed}} rimossi, {{skipped}} saltati.",
+      "paused": "In pausa",
+      "priority": "Priorità",
+      "priorityHelp": "Quando più criteri per tag riguardano un host, vince il numero più basso. Il criterio proprio di un host prevale sempre.",
+      "help": "Ogni host con il tag riceve queste impostazioni. Quando più criteri riguardano un host, vince la priorità più bassa; il criterio proprio di un host (Configura) prevale sempre.",
+      "quiesceHelp": "Un servizio che un host non ha viene saltato su quell'host.",
+      "remove": "Rimuovi",
+      "saved": "Salvato. Host che lo seguono: {{n}}.",
+      "saveError": "Non è stato possibile salvare il criterio per tag.",
+      "settings": "Impostazioni per ogni host con il tag",
+      "tagColumn": "Tag",
+      "tag": "Host con il tag",
+      "title": "Criteri per tag",
+      "verifyDays": "Verifica con lettura completa ogni (giorni, 0 = disattivata)"
+    },
+    "self": {
+      "configure": "Configura il backup di questo host"
     }
   }
 }

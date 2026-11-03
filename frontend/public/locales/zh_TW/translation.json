@@ -5693,6 +5693,43 @@
       "showScript": "顯示完整指令碼（{{n}} 行）",
       "snaps": "snap：{{names}}",
       "title": "要放回的套件"
+    },
+    "policySource": {
+      "own": "此主機自己的原則",
+      "tag": "來自標籤原則 {{name}}（優先順序 {{priority}}）",
+      "dialogNote": "此主機遵循標籤原則 {{name}}。在此儲存後，這些設定會成為此主機自己的原則，之後一律優先；若要回到標籤原則，請移除此主機的原則。"
+    },
+    "tagPolicies": {
+      "add": "新增標籤原則",
+      "addTitle": "新增標籤原則",
+      "apply": "立即套用",
+      "applyError": "無法套用標籤原則。",
+      "deleteError": "無法移除標籤原則。",
+      "edit": "變更",
+      "editTitle": "變更標籤原則",
+      "empty": "目前沒有標籤原則。",
+      "enabled": "套用此標籤原則",
+      "hostsCount": "帶標籤的 {{tagged}} 台中的 {{applied}} 台",
+      "hosts": "遵循它的主機",
+      "name": "名稱",
+      "noTags": "請先為一些主機加上標籤；標籤原則會套用到帶有其標籤的每台主機。",
+      "outcome": "已套用 {{applied}} 項，已移除 {{removed}} 項，已略過 {{skipped}} 項。",
+      "paused": "已暫停",
+      "priority": "優先順序",
+      "priorityHelp": "當多個標籤原則適用於同一台主機時，數字最小者優先。主機自己的原則一律優先。",
+      "help": "帶有該標籤的每台主機都會取得這些設定。當多個原則適用於同一台主機時，優先順序數字最小者優先；主機自己的原則（設定）一律優先。",
+      "quiesceHelp": "主機上沒有的服務會在該主機上略過。",
+      "remove": "移除",
+      "saved": "已儲存。遵循它的主機：{{n}} 台。",
+      "saveError": "無法儲存標籤原則。",
+      "settings": "每台帶標籤主機的設定",
+      "tagColumn": "標籤",
+      "tag": "帶有該標籤的主機",
+      "title": "依標籤的原則",
+      "verifyDays": "完整讀取檢查間隔（天，0 = 關閉）"
+    },
+    "self": {
+      "configure": "設定自身備份"
     }
   }
 }

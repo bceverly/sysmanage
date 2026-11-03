@@ -26,6 +26,7 @@ from sqlalchemy.orm import Session
 from backend.persistence import models
 from backend.services import backup_equip
 from backend.services import backup_reach
+from backend.services import backup_tag_policies
 from backend.services import backup_first_fit as first_fit
 from backend.services import backup_forecast
 from backend.services import backup_jobs as jobs
@@ -293,6 +294,8 @@ def host_status(db: Session, host: models.Host, now=None) -> Dict[str, Any]:
         "reach": backup_reach.state(db, host),
         "coverage": coverage(host),
         "policy": policy_dict(policy) if policy else None,
+        # Where its settings come from (24.6): its own, or a tag policy.
+        "policy_source": backup_tag_policies.source_of(db, policy),
         "last_capture": None,
         "last_good_capture": None,
         "last_check": None,

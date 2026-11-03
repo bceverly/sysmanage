@@ -18,13 +18,14 @@ import type { BackupHost } from '../../Services/backups';
 import { apiDetail, reachMessage, unreachable } from './backupLabels';
 import { BackupPrepareDialog } from './BackupPrepareButton';
 
-export type HostAction = 'reach' | 'equip' | 'recheck' | 'configure' | 'backupNow' | 'prepare' | 'restore';
+export type HostAction = 'reach' | 'equip' | 'recheck' | 'configure' | 'selfBackup' | 'backupNow' | 'prepare' | 'restore';
 
 export interface ActionContext {
     canManage: boolean;
     canRestore: boolean;
     hasTarget: boolean;
-    /** The target's storage host, shown without host actions. */
+    /** The target's storage host without a policy: it offers only
+     *  "Configure self-backup" (24.13). */
     storageHost: boolean;
 }
 
@@ -69,7 +70,7 @@ const leadAction = (row: BackupHost): HostAction | undefined => {
 
 /** Every action this row offers, the primary one first. */
 export const hostActions = (row: BackupHost, ctx: ActionContext): HostAction[] => {
-    if (ctx.storageHost) return [];
+    if (ctx.storageHost) return ctx.canManage && ctx.hasTarget ? ['selfBackup'] : [];
     const all = ctx.canManage ? manageActions(row, ctx.hasTarget) : [];
     if (ctx.canRestore && row.snapshot_count > 0) all.push('restore');
     const lead = leadAction(row);
@@ -104,6 +105,8 @@ const label = (t: TFunction, action: HostAction): string => {
             return t('backups.equip.button', 'Equip for backup');
         case 'configure':
             return t('backups.hosts.configure', 'Configure');
+        case 'selfBackup':
+            return t('backups.self.configure', 'Configure self-backup');
         case 'backupNow':
             return t('backups.hosts.backupNow', 'Back up now');
         case 'prepare':
@@ -155,6 +158,7 @@ const BackupRowActions: React.FC<{
         setAnchor(null);
         switch (action) {
             case 'configure':
+            case 'selfBackup':
                 onConfigure(row);
                 return;
             case 'restore':

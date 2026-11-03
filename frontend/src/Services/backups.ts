@@ -323,6 +323,16 @@ export interface BackupHost {
   /** Can this host reach the backup storage (NFS port 2049 of the storage
    *  host)?  Null when not known yet, which never blocks. */
   reach?: BackupReach | null;
+  /** Where its settings come from (Pro+ 24.6): its own policy (Configure)
+   *  or a tag policy, by name and priority. */
+  policy_source?: PolicySource;
+}
+
+export interface PolicySource {
+  kind: "none" | "own" | "tag";
+  id?: string;
+  name?: string;
+  priority?: number;
 }
 
 export interface BackupReach {

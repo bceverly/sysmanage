@@ -15,6 +15,7 @@ import BackupTargetCard from '../Components/Backups/BackupTargetCard';
 import BackupHostsTable from '../Components/Backups/BackupHostsTable';
 import BackupClearJobs from '../Components/Backups/BackupClearJobs';
 import BackupRunsList from '../Components/Backups/BackupRunsList';
+import BackupTagPolicies from '../Components/Backups/BackupTagPolicies';
 import { statusColor, statusLabel } from '../Components/Backups/backupLabels';
 import { useVisiblePolling } from '../hooks/useVisiblePolling';
 
@@ -93,6 +94,7 @@ const Backups: React.FC = () => {
                         canRestore={canRestore} onChanged={changed} onError={setMessage} onNotice={setNotice} />
                 )}
             </Paper>
+            <BackupTagPolicies canManage={canManage} onChanged={changed} onNotice={setNotice} onError={setMessage} />
             <Paper variant="outlined" sx={{ p: 2, overflowX: 'auto' }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
                     <Typography variant="h6">{t('backups.runs.title', 'Recent jobs')}</Typography>

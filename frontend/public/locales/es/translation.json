@@ -5693,6 +5693,43 @@
       "showScript": "Mostrar el script completo ({{n}} líneas)",
       "snaps": "Paquetes snap: {{names}}",
       "title": "Paquetes que se volverán a poner"
+    },
+    "policySource": {
+      "own": "Política propia de este host",
+      "tag": "De la política de etiqueta {{name}} (prioridad {{priority}})",
+      "dialogNote": "Este host sigue la política de etiqueta {{name}}. Si guarda aquí, esta configuración pasa a ser la política propia de este host, que entonces siempre prevalece; elimine la política de este host para que vuelva a seguir la política de etiqueta."
+    },
+    "tagPolicies": {
+      "add": "Añadir política de etiqueta",
+      "addTitle": "Añadir una política de etiqueta",
+      "apply": "Aplicar ahora",
+      "applyError": "No se pudieron aplicar las políticas de etiqueta.",
+      "deleteError": "No se pudo eliminar la política de etiqueta.",
+      "edit": "Cambiar",
+      "editTitle": "Cambiar la política de etiqueta",
+      "empty": "Todavía no hay políticas de etiqueta.",
+      "enabled": "Aplicar esta política de etiqueta",
+      "hostsCount": "{{applied}} de {{tagged}} con la etiqueta",
+      "hosts": "Hosts que la siguen",
+      "name": "Nombre",
+      "noTags": "Primero añada una etiqueta a algunos hosts; una política de etiqueta abarca todos los hosts con su etiqueta.",
+      "outcome": "{{applied}} aplicadas, {{removed}} eliminadas, {{skipped}} omitidas.",
+      "paused": "En pausa",
+      "priority": "Prioridad",
+      "priorityHelp": "Cuando varias políticas de etiqueta abarcan un host, gana el número más bajo. La política propia de un host siempre prevalece.",
+      "help": "Todos los hosts con la etiqueta reciben esta configuración. Cuando varias abarcan un host, gana la prioridad más baja; la política propia de un host (Configurar) siempre prevalece.",
+      "quiesceHelp": "Un servicio que un host no tiene se omite en ese host.",
+      "remove": "Eliminar",
+      "saved": "Guardado. Hosts que la siguen: {{n}}.",
+      "saveError": "No se pudo guardar la política de etiqueta.",
+      "settings": "Configuración para cada host con la etiqueta",
+      "tagColumn": "Etiqueta",
+      "tag": "Hosts con la etiqueta",
+      "title": "Políticas por etiqueta",
+      "verifyDays": "Comprobación de lectura completa cada (días, 0 = desactivada)"
+    },
+    "self": {
+      "configure": "Configurar la copia de seguridad propia"
     }
   }
 }

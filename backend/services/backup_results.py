@@ -103,15 +103,16 @@ def _acknowledge(db: Session, run: models.BackupRun) -> None:
     version = _int(params.get("config_version"))
     if policy is None or version is None:
         return
-    if params.get("role") == "storage":
+    role = params.get("role")
+    if role in ("storage", jobs.SELF_ROLE):
         policy.storage_acked_version = max(policy.storage_acked_version or 0, version)
-    else:
+    if role != "storage":  # host, or self: both sides on one machine (24.13)
         policy.host_acked_version = max(policy.host_acked_version or 0, version)
 
 
 def _storage_filesystem(db: Session, run: models.BackupRun, reply: Any) -> None:
     """A storage host's configure reply says which filesystem it is on."""
-    if _parameters(run).get("role") != "storage":
+    if _parameters(run).get("role") not in ("storage", jobs.SELF_ROLE):
         return
     target = jobs.the_target(db)
     if target is not None and str(target.storage_host_id) == str(run.host_id):
@@ -346,6 +347,9 @@ def _configured(db: Session, run: models.BackupRun, reply: Any) -> None:
     _dismiss_superseded_configures(db, run)
     _storage_filesystem(db, run, reply)
     role = _parameters(run).get("role")
+    if role == jobs.SELF_ROLE:
+        _configured_self(db, run, reply)
+        return
     if isinstance(reply, dict):
         _configured_version(_policy(db, run), role, reply.get("restate_version"))
     if role == "host" and isinstance(reply, dict):
@@ -366,6 +370,23 @@ def _configured(db: Session, run: models.BackupRun, reply: Any) -> None:
     _reprotect(db, run)
     if not _prepare_new_repository(db, run):
         _reprepare(db, run)
+
+
+def _configured_self(db: Session, run: models.BackupRun, reply: Any) -> None:
+    """The storage host's own backup (24.13): one reply for both sides --
+    its capture side's hooks, abilities and network shares, its storage
+    side's abilities and protect job.  No export, so no audit or NFS path."""
+    policy = _policy(db, run)
+    if policy is None or not isinstance(reply, dict):
+        return
+    version = reply.get("restate_version")
+    _configured_version(policy, "host", version)
+    _configured_version(policy, "storage", version)
+    _store_hooks(policy, reply.get("hooks"))
+    _store_abilities(policy, reply.get("abilities"))
+    network_mounts.store_configured(policy, reply.get("network_mounts"))
+    _store_storage_abilities(policy, reply.get("storage_abilities"))
+    _store_protects(policy, reply.get("installed"))
 
 
 # --- backup_result --------------------------------------------------------
