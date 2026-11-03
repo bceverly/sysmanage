@@ -2,12 +2,12 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Handing a host its policy's decryption keys for ONE job (Pro+, 24.6 S4).
+"""Handing a host its policy's decryption keys for ONE job (24.6 S4).
 
 A restore, snapshot listing or what-changed of an encrypted repository needs
-the policy's secret key on the host for that run.  The key lives in OpenBAO;
-the Pro+ ``backup_engine`` reads it.  It never travels in the job's command:
-commands go through the database-backed message queue, and the run row keeps
+the policy's secret key on the host for that run.  The key lives in OpenBAO
+and is read by ``backup_keys_read`` in every edition.  It never travels in
+the job's command: commands go through the database-backed message queue, and the run row keeps
 its parameters, so a key there would sit in the server's database.  The run
 only says ``needs_key``; the agent then fetches the keys over HTTPS with its
 own host credentials (``POST /api/agent/backup-key``), and this module decides
@@ -18,7 +18,10 @@ whether to hand them over:
 * it was SENT within ``RELEASE_WINDOW`` (a window-held run is not stale), and
   its keys were not released
   before (``key_released_at``) -- a key is handed out once per run;
-* the policy's repository is encrypted, and backup_engine is loaded.
+* the policy's repository is encrypted.  The repository's keys are read in
+  every edition (backup_keys_read): a lapsed license never locks anyone out
+  of their own backups.  The snapshot SIGNER's key (sign runs) still needs
+  backup_engine -- signing is Pro+.
 
 Every release is audited with the run, the host and the key's fingerprint.
 """
@@ -35,6 +38,7 @@ from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
+from backend.services import backup_keys_read
 from backend.services import backup_signing
 from backend.services import queue_clock
 
@@ -118,14 +122,12 @@ def release(
         return _release_signer(db, run, policy, host_id, now)
     if policy is None or not jobs.encrypted(policy):
         raise KeyRefused(409, _("This host's backups are not encrypted"))
-    engine = module_loader.get_module("backup_engine")
-    if engine is None:
-        raise KeyRefused(
-            402, _("Encrypted backups need the Professional+ backup engine")
-        )
+    # In every edition, licensed or not: reading your own encrypted backups
+    # never needs the Pro+ engine ("please don't hold someone's safety
+    # hostage", Bryan, 2026-11-03).  Making and rotating keys still does.
     try:
-        keys = engine.secret_keys(policy, db=db)
-    except Exception as error:  # the engine's own message says why
+        keys = backup_keys_read.secret_keys(policy, db=db)
+    except Exception as error:  # the reader's own message says why
         logger.exception(
             "Backup key for run %s (host %s, policy %s) could not be read: %s",
             run.id,

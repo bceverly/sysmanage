@@ -47,10 +47,10 @@ from sqlalchemy.orm import Session
 from backend.api import backups_retention as retention
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
-from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
+from backend.services import backup_escrow
 from backend.services import backup_jobs as jobs
 from backend.services import backup_package_restore as package_restore
 from backend.services import backup_reach as reach
@@ -393,6 +393,7 @@ async def backups_summary(db: Session = Depends(get_tenant_db)) -> Dict[str, Any
         "attention": views.attention_count(data),
         "target_problem": views.target_problem(data),
         "total": sum(1 for row in data["hosts"] if row["policy"]),
+        "escrow_stale": backup_escrow.status(db)["stale"],  # Pro+ break-glass
     }
 
 
@@ -841,17 +842,12 @@ async def backup_restore(
 
 def key_needed(where: str, policy: models.BackupPolicy) -> bool:
     """Does reading this repository need the policy's secret key on the host
-    (Pro+ backup_engine, 24.6 S4)?  Then the run says ``needs_key`` and the
-    agent fetches the key for that run only (``/api/agent/backup-key``).
-    HTTP 409 when it cannot be handed over: no backup engine to read it from
-    OpenBAO, or a restate on the host that cannot take it (``decrypt_with``)."""
+    (24.6 S4)?  Then the run says ``needs_key`` and the agent fetches the key
+    for that run only (``/api/agent/backup-key``).  In every edition: a lapsed
+    license never locks anyone out of their own backups (Bryan, 2026-11-03).
+    HTTP 409 when the host's restate cannot take the key (``decrypt_with``)."""
     if not jobs.needs_secret_key(where, policy):
         return False
-    if module_loader.get_module("backup_engine") is None:
-        raise HTTPException(
-            status_code=409,
-            detail=_("Encrypted backups need the Professional+ backup engine"),
-        )
     if "decrypt" not in jobs.abilities(policy):
         raise HTTPException(
             status_code=409,

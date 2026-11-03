@@ -19,6 +19,7 @@ from fastapi import HTTPException
 
 from backend.api import backups as api
 from backend.api import backups_browse as browse
+from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
 from backend.services import backup_results as results
@@ -109,7 +110,7 @@ class _Engine:
 @pytest.fixture
 def loaded_engine(monkeypatch):
     loaded = {"backup_engine": _Engine()}
-    monkeypatch.setattr(api.module_loader, "get_module", loaded.get)
+    monkeypatch.setattr(module_loader, "get_module", loaded.get)
     return loaded
 
 
@@ -146,12 +147,20 @@ async def test_a_restore_reads_the_repository_that_holds_the_snapshot(
 
 
 @pytest.mark.asyncio
-async def test_without_the_engine_an_encrypted_snapshot_is_refused(session, sent):
+async def test_without_the_engine_an_encrypted_snapshot_still_restores(
+    session, sent, monkeypatch
+):
+    """A lapsed license never locks anyone out of their own backups ("please
+    don't hold someone's safety hostage", Bryan, 2026-11-03): the restore asks
+    for the key as it would licensed."""
+    monkeypatch.setattr(module_loader, "get_module", lambda _code: None)
     s = _setup(session)
     host = _keyed(session, s)
-    with pytest.raises(HTTPException) as refused:
-        await api.backup_restore(host, _restore("20261025T130000Z"), session, RESTORER)
-    assert refused.value.status_code == 409 and "backup engine" in refused.value.detail
+    out = await api.backup_restore(
+        host, _restore("20261025T130000Z"), session, RESTORER
+    )
+    run = session.query(models.BackupRun).filter_by(id=out["id"]).one()
+    assert json.loads(run.parameters)["needs_key"] is True
 
 
 @pytest.mark.asyncio

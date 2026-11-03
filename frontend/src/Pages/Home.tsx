@@ -29,6 +29,8 @@ interface DashboardCardProps {
     color: string;
     onClick: () => void;
     loading?: boolean;
+    /** A one-line warning under the gauge (the backups card's break-glass note). */
+    note?: string | null;
 }
 
 // Color constants
@@ -86,6 +88,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
     color,
     onClick,
     loading = false,
+    note = null,
 }) => (
     <Box
         height={250}
@@ -129,6 +132,11 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
                 />
             )}
         </Stack>
+        {note && !loading && (
+            <Typography align="center" variant="caption" color="warning.main" component="div">
+                {note}
+            </Typography>
+        )}
     </Box>
 );
 
@@ -155,6 +163,7 @@ const Dashboard = () => {
     const [backupsOut, setBackupsOut] = useState<number>(0);
     const [backupsTotal, setBackupsTotal] = useState<number>(0);
     const [backupsColor, setBackupsColor] = useState<string>(COLOR_GREEN);
+    const [backupsEscrowStale, setBackupsEscrowStale] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [cardVisibility, setCardVisibility] = useState<Record<string, boolean>>({
@@ -246,6 +255,7 @@ const Dashboard = () => {
         setBackupsOut(summary.attention);
         setBackupsTotal(summary.total);
         setBackupsColor(getBackupColor(summary));
+        setBackupsEscrowStale(Boolean(summary.escrow_stale));
     };
 
     const fetchData = useCallback(async (isInitialLoad = false) => {
@@ -497,6 +507,9 @@ const Dashboard = () => {
                             color={backupsColor}
                             onClick={() => void navigate('/backups')}
                             loading={loading}
+                            note={backupsEscrowStale
+                                ? t('dashboard.backupsEscrowStale', 'Break-glass key export out of date')
+                                : null}
                         />
                     </Grid>
                 )}

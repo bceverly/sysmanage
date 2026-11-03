@@ -378,6 +378,24 @@ export interface BackupSummary {
   attention: number;
   target_problem: boolean;
   total: number;
+  /** Pro+: the break-glass key export is missing or older than a key. */
+  escrow_stale?: boolean;
+}
+
+/** Break-glass escrow (Pro+ backup_engine, 24.6, 2026-11-03). */
+export interface EscrowStatus {
+  applies: boolean;
+  encrypted_hosts: number;
+  covered_hosts: number;
+  stale_hosts: string[];
+  signing_on: boolean;
+  signing_stale: boolean;
+  stale: boolean;
+  last_export: { at: string | null; by: string | null; recipient: string | null; reason: string | null } | null;
+  escrow_key: {
+    fingerprint: string; uid: string | null; saved_at: string | null; saved_by: string | null; public_key: string;
+  } | null;
+  export_host_id: string | null;
 }
 
 export interface BackupSnapshot {
@@ -615,3 +633,32 @@ export const computeDrift = async (
 /** The paths this host's timeline hides as expected churn. */
 export const setDriftIgnore = async (hostId: string, patterns: string[]): Promise<{ ignore: string[] }> =>
   (await axiosInstance.put<{ ignore: string[] }>(`${base}/host/${hostId}/backup-drift/ignore`, { patterns })).data;
+
+export const getEscrowStatus = async (): Promise<EscrowStatus> =>
+  (await axiosInstance.get<EscrowStatus>(`${base}/backups/escrow`)).data;
+
+/** Break-glass key export in every edition (2026-11-03): a lapsed license
+ * never locks anyone out of their own encrypted backups. */
+export interface BreakGlassInfo {
+  available: boolean;
+  encrypted_hosts: number;
+  escrow_key_fingerprint: string | null;
+}
+
+export const getBreakGlassInfo = async (): Promise<BreakGlassInfo> =>
+  (await axiosInstance.get<BreakGlassInfo>(`${base}/backups/break-glass`)).data;
+
+/** The sealed export as a file: ``recipient_key`` omitted = the saved escrow key. */
+export const exportBreakGlass = async (
+  reason: string,
+  recipientKey?: string,
+): Promise<{ blob: Blob; name: string }> => {
+  const response = await axiosInstance.post(
+    `${base}/backups/break-glass`,
+    { reason, recipient_key: recipientKey || undefined },
+    { responseType: 'blob' },
+  );
+  const disposition = String(response.headers?.['content-disposition'] ?? '');
+  const match = /filename="([^"]+)"/.exec(disposition);
+  return { blob: response.data as Blob, name: match?.[1] ?? 'sysmanage-backup-keys.tar.asc' };
+};

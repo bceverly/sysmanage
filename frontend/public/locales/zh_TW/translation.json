@@ -759,7 +759,8 @@
     "updates": "更新",
     "clocksOutOfBounds": "時鐘偏差超出閾值",
     "hardwareNeedsAttention": "需要注意的硬體",
-    "backupsAttention": "需要注意的備份"
+    "backupsAttention": "需要注意的備份",
+    "backupsEscrowStale": "緊急金鑰匯出已過時"
   },
   "dataGrid": {
     "columnVisibility": "欄位可見性",
@@ -5730,6 +5731,23 @@
     },
     "self": {
       "configure": "設定自身備份"
+    },
+    "escrow": {
+      "never": "尚未進行緊急金鑰匯出。如果 SysManage 伺服器或 OpenBAO 遺失，沒有它就無法讀取加密的備份。",
+      "staleHosts": "緊急金鑰匯出不包含 {{count}} 台加密主機（{{hosts}}）的最新金鑰。請重新匯出並銷毀舊的匯出。",
+      "staleSigning": "快照簽章是在上一次緊急金鑰匯出之後開啟的。請重新匯出，使其包含簽章金鑰。",
+      "export": "匯出金鑰"
+    },
+    "breakGlass": {
+      "button": "破玻璃鑰匙匯出",
+      "community": "{{count}} 主機有加密備份。沒有專業+ 授權，它們會繼續加密備份並仍可恢復，您可以在此處匯出其密鑰，封存至您自己的 OpenPGP 公開金鑰，以便在 SysManage 伺服器無法運作時恢復。",
+      "download": "匯出並下載",
+      "failed": "無法匯出密鑰。",
+      "key": "您的 OpenPGP 公開金鑰 (護甲格式)",
+      "reason": "原因（記錄在審計日誌和 README 中）",
+      "saved": "留空以使用已儲存的託管鍵 {{fingerprint}}。",
+      "title": "破玻璃鑰匙匯出",
+      "warning": "此檔案包含每個加密備份的 SECRET 密鑰。將它離線儲存，遠離備份和伺服器，並在取代時摧毀它。"
     }
   }
 }

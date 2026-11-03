@@ -759,7 +759,8 @@
     "updates": "Updates",
     "clocksOutOfBounds": "Klokken buiten de grenzen",
     "hardwareNeedsAttention": "Hardware die aandacht vereist",
-    "backupsAttention": "Back-ups die aandacht nodig hebben"
+    "backupsAttention": "Back-ups die aandacht nodig hebben",
+    "backupsEscrowStale": "Noodexport van sleutels verouderd"
   },
   "dataGrid": {
     "columnVisibility": "Kolomzichtbaarheid",
@@ -5730,6 +5731,23 @@
     },
     "self": {
       "configure": "Eigen back-up configureren"
+    },
+    "escrow": {
+      "never": "Er is nog geen noodexport van sleutels gemaakt. Als de SysManage-server of OpenBAO verloren gaat, zijn de versleutelde back-ups zonder export niet te lezen.",
+      "staleHosts": "De noodexport van sleutels bevat de nieuwste sleutels van {{count}} versleutelde host(s) ({{hosts}}) niet. Maak een nieuwe export en vernietig de oude.",
+      "staleSigning": "Het ondertekenen van snapshots is ingeschakeld na de laatste noodexport van sleutels. Maak een nieuwe export zodat die de ondertekeningssleutel bevat.",
+      "export": "Sleutels exporteren"
+    },
+    "breakGlass": {
+      "button": "Breekglas-sleutel exporteren",
+      "community": "{{count}} host(s) hebben versleutelde back-ups. Zonder Professional+ licentie blijven ze back-ups maken die nog steeds kunnen worden hersteld, en u kunt hier hun sleutels exporteren, verzegeld aan uw eigen OpenPGP publieke sleutel, voor een herstel als de SysManage server niet beschikbaar is.",
+      "download": "Exporteren en downloaden",
+      "failed": "De sleutels konden niet worden geëxporteerd.",
+      "key": "Uw OpenPGP PUBLIEKE sleutel (gearmureerd)",
+      "reason": "Waarom (wordt vastgelegd in het auditlog en de README)",
+      "saved": "Laat leeg om de opgeslagen escrow-sleutel te gebruiken {{fingerprint}}.",
+      "title": "Breekglas-sleutel exporteren",
+      "warning": "Het bestand bevat de SECRETE sleutels van elke versleutelde back-up. Bewaar het offline, ver weg van de back-ups en de server, en vernietig het wanneer een nieuwere export het vervangt."
     }
   }
 }

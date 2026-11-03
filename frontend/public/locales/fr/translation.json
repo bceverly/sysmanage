@@ -759,7 +759,8 @@
     "updates": "Mises à jour",
     "clocksOutOfBounds": "Horloges hors limites",
     "hardwareNeedsAttention": "Matériel nécessitant une attention",
-    "backupsAttention": "Sauvegardes nécessitant une attention"
+    "backupsAttention": "Sauvegardes nécessitant une attention",
+    "backupsEscrowStale": "Export de clés d'urgence obsolète"
   },
   "dataGrid": {
     "columnVisibility": "Visibilité des colonnes",
@@ -5730,6 +5731,23 @@
     },
     "self": {
       "configure": "Configurer la sauvegarde de cet hôte"
+    },
+    "escrow": {
+      "never": "Aucun export de clés d'urgence n'a été fait. Si le serveur SysManage ou OpenBAO est perdu, les sauvegardes chiffrées ne peuvent pas être lues sans lui.",
+      "staleHosts": "L'export de clés d'urgence ne contient pas les clés les plus récentes de {{count}} hôte(s) chiffré(s) ({{hosts}}). Faites un nouvel export et détruisez l'ancien.",
+      "staleSigning": "La signature des instantanés a été activée après le dernier export de clés d'urgence. Faites un nouvel export pour qu'il contienne la clé de signature.",
+      "export": "Exporter les clés"
+    },
+    "breakGlass": {
+      "button": "Clé d'accès d'urgence à l'exportation",
+      "community": "{{count}} hôte(s) ont des sauvegardes chiffrées. Sans la licence Professional+, ils continuent de faire des sauvegardes chiffrées et peuvent toujours être restaurés, et vous pouvez exporter leurs clés ici, scellées à votre propre clé publique OpenPGP, pour une restauration avec le serveur SysManage hors ligne.",
+      "download": "Exporter et télécharger",
+      "failed": "Les clés n'ont pas pu être exportées.",
+      "key": "Votre clé publique OpenPGP (armurée)",
+      "reason": "Pourquoi (enregistré dans le journal d'audit et dans le README)",
+      "saved": "Laissez vide pour utiliser la clé d'escrow sauvegardée {{fingerprint}}.",
+      "title": "Clé d'accès d'urgence à l'exportation",
+      "warning": "Le fichier contient les clés SECRètes de toutes les sauvegardes chiffrées. Conservez-le hors ligne, loin des sauvegardes et du serveur, et détruisez-le lorsque une nouvelle exportation le remplace."
     }
   }
 }

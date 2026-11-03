@@ -159,8 +159,8 @@ def test_an_encrypted_verification_gets_its_keys_once(session, sent, monkeypatch
     s = _setup(session)
     _encrypt(session, s)
     run = jobs.queue_verify(session, s.policy, s.host.id, needs_key=True)
-    monkeypatch.setattr(release.module_loader, "get_module",
-                        {"backup_engine": _Engine()}.get)  # fmt: skip
+    monkeypatch.setattr(release.backup_keys_read, "secret_keys",
+                        _Engine().secret_keys)  # fmt: skip
     assert release.release(session, str(s.host.id), str(run.id)) == [SECRET]
 
 

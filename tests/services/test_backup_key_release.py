@@ -2,9 +2,11 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-"""Releasing a run's decryption keys to its host (Pro+ backup_engine, S4):
-only the host's own pending keyed run, once, within the window, from the
-engine -- and over HTTPS, never through the queue."""
+"""Releasing a run's decryption keys to its host (24.6 S4): only the host's
+own pending keyed run, once, within the window, read from OpenBAO by the
+open-source reader -- licensed or not, since a lapse never locks anyone out
+of their own backups (2026-11-03) -- and over HTTPS, never through the
+queue."""
 
 import json
 from datetime import timedelta
@@ -24,7 +26,7 @@ from tests.services.test_backup_results import (  # noqa: F401  # pylint: disabl
 SECRET = "-----BEGIN PGP PRIVATE KEY BLOCK-----\nsec\n"
 
 
-class _Engine:
+class _Reader:
     def __init__(self, fail=None):
         self.fail, self.asked = fail, []
 
@@ -34,6 +36,10 @@ class _Engine:
         if self.fail:
             raise self.fail
         return [SECRET]
+
+
+# The verification tests stand the reader in for the engine's own uses.
+_Engine = _Reader
 
 
 def _keyed_run(session, s, **params):
@@ -50,9 +56,9 @@ def _keyed_run(session, s, **params):
 
 @pytest.fixture
 def loaded(monkeypatch):
-    found = {"backup_engine": _Engine()}
-    monkeypatch.setattr(release.module_loader, "get_module", found.get)
-    return found
+    reader = _Reader()
+    monkeypatch.setattr(release.backup_keys_read, "secret_keys", reader.secret_keys)
+    return {"reader": reader}
 
 
 def test_a_hosts_own_pending_run_gets_its_keys_once(session, sent, loaded):
@@ -72,7 +78,7 @@ def test_another_host_learns_nothing(session, sent, loaded):
         with pytest.raises(release.KeyRefused) as refused:
             release.release(session, host_id, run_id)
         assert refused.value.status == 404
-    assert loaded["backup_engine"].asked == []
+    assert loaded["reader"].asked == []
 
 
 @pytest.mark.parametrize(
@@ -96,22 +102,21 @@ def test_only_a_fresh_keyed_run_gets_a_key(session, sent, loaded, change):
     assert run.key_released_at is None
 
 
-def test_without_the_engine_no_key(session, sent, monkeypatch):
+def test_a_lapse_still_releases_the_keys(session, sent, loaded, monkeypatch):
+    """No backup_engine at all: reading your own encrypted backups still
+    works ("please don't hold someone's safety hostage", 2026-11-03)."""
     s = _setup(session)
     run = _keyed_run(session, s)
     monkeypatch.setattr(release.module_loader, "get_module", lambda code: None)
-    with pytest.raises(release.KeyRefused) as refused:
-        release.release(session, str(s.host.id), str(run.id))
-    assert refused.value.status == 402
+    assert release.release(session, str(s.host.id), str(run.id)) == [SECRET]
+    assert run.key_released_at is not None
 
 
 def test_an_openbao_failure_is_a_503_and_releases_nothing(session, sent, monkeypatch):
     s = _setup(session)
     run = _keyed_run(session, s)
-    failing = _Engine(fail=RuntimeError("OpenBAO is sealed"))
-    monkeypatch.setattr(
-        release.module_loader, "get_module", {"backup_engine": failing}.get
-    )
+    failing = _Reader(fail=RuntimeError("OpenBAO is sealed"))
+    monkeypatch.setattr(release.backup_keys_read, "secret_keys", failing.secret_keys)
     with pytest.raises(release.KeyRefused) as refused:
         release.release(session, str(s.host.id), str(run.id))
     assert refused.value.status == 503 and run.key_released_at is None

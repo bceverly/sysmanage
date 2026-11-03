@@ -29,6 +29,7 @@ from typing import Any, Dict, Optional
 
 from sqlalchemy.orm import Session
 
+from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.services import backup_jobs as jobs
 from backend.websocket.messages import CommandType
@@ -69,8 +70,15 @@ def storage_signs(policy: models.BackupPolicy) -> bool:
 
 
 def wanted(db: Session, policy: models.BackupPolicy) -> bool:
-    """Should this policy's new snapshots be signed?"""
-    return signing_on(target_of(db, policy)) and storage_signs(policy)
+    """Should this policy's new snapshots be signed?  Signing is Pro+: after a
+    lapse it stops quietly rather than failing a sign job after every
+    capture, and restores keep checking the signatures already made
+    (``trusted_key`` is sent in every edition)."""
+    return (
+        signing_on(target_of(db, policy))
+        and storage_signs(policy)
+        and module_loader.get_module("backup_engine") is not None
+    )
 
 
 def queue_sign(

@@ -48,7 +48,7 @@ def _actions(sent):
     return [p.get("action") for _h, c, p in sent if c == "backup_run"]
 
 
-def test_a_signed_target_signs_before_protect(session, sent):
+def test_a_signed_target_signs_before_protect(session, sent, loaded):
     s = _setup(session)
     _signing(session, s)
     _capture(session, s)
@@ -68,7 +68,7 @@ def test_a_signed_target_signs_before_protect(session, sent):
     assert _actions(sent)[-1] == "protect"
 
 
-def test_a_failed_or_refused_sign_never_holds_protect_back(session, sent):
+def test_a_failed_or_refused_sign_never_holds_protect_back(session, sent, loaded):
     s = _setup(session)
     _signing(session, s)
     _capture(session, s)

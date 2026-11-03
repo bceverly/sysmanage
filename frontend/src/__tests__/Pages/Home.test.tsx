@@ -131,4 +131,19 @@ describe('Home Page', () => {
     expect(values).toContain(7); // hosts
     expect(values).toContain(3); // reboot required
   });
+
+  test('the backups card notes a stale break-glass key export (Pro+)', async () => {
+    server.use(
+      http.get('/api/v1/backups/summary', () =>
+        HttpResponse.json({
+          configured: true, counts: { ok: 2 }, attention: 0, target_problem: false,
+          total: 2, escrow_stale: true,
+        }),
+      ),
+    );
+    await act(async () => {
+      render(<HomeWithRouter />);
+    });
+    expect(await screen.findByText('Break-glass key export out of date')).toBeInTheDocument();
+  });
 });

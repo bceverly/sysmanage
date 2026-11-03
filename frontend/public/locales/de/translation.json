@@ -759,7 +759,8 @@
     "updates": "Aktualisierungen",
     "clocksOutOfBounds": "Uhren außerhalb der Grenzwerte",
     "hardwareNeedsAttention": "Hardware mit Handlungsbedarf",
-    "backupsAttention": "Sicherungen, die Aufmerksamkeit erfordern"
+    "backupsAttention": "Sicherungen, die Aufmerksamkeit erfordern",
+    "backupsEscrowStale": "Notfall-Schlüsselexport veraltet"
   },
   "dataGrid": {
     "columnVisibility": "Spaltensichtbarkeit",
@@ -5730,6 +5731,23 @@
     },
     "self": {
       "configure": "Eigensicherung konfigurieren"
+    },
+    "escrow": {
+      "never": "Es wurde noch kein Notfall-Schlüsselexport erstellt. Gehen der SysManage-Server oder OpenBAO verloren, lassen sich die verschlüsselten Backups ohne ihn nicht lesen.",
+      "staleHosts": "Der Notfall-Schlüsselexport enthält die neuesten Schlüssel von {{count}} verschlüsselten Host(s) ({{hosts}}) nicht. Erstellen Sie einen neuen Export und vernichten Sie den alten.",
+      "staleSigning": "Das Signieren von Snapshots wurde nach dem letzten Notfall-Schlüsselexport eingeschaltet. Erstellen Sie einen neuen Export, damit er den Signaturschlüssel enthält.",
+      "export": "Schlüssel exportieren"
+    },
+    "breakGlass": {
+      "button": "Bruchglas-Schlüssel-Export",
+      "community": "{{count}} Host(s) haben verschlüsselte Sicherungen. Ohne Professional+-Lizenz werden diese weiterhin verschlüsselt gesichert und können immer noch wiederhergestellt werden, und Sie können hier ihre Schlüssel exportieren, versiegelt mit Ihrer eigenen OpenPGP Öffentlichen Schlüssel, für eine Wiederherstellung bei Ausfall des SysManage-Servers.",
+      "download": "Exportieren und Herunterladen",
+      "failed": "Der Schlüssel konnte nicht exportiert werden.",
+      "key": "Ihre OpenPGP Öffentliche Schlüssel (armiert)",
+      "reason": "Warum (wird in den Audit-Log und die README aufgenommen)",
+      "saved": "Lassen Sie dieses Feld leer, um die gespeicherte Escrow-Schlüssel zu verwenden {{fingerprint}}.",
+      "title": "Bruchglas-Schlüssel-Export",
+      "warning": "Die Datei enthält die geheimen Schlüssel aller verschlüsselten Sicherungen. Bewahren Sie sie offline auf, fernab von den Sicherungen und dem Server, und zerstören Sie sie, wenn eine neuere Exportversion sie ersetzt."
     }
   }
 }

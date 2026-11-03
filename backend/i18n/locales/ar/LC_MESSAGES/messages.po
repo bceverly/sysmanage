@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-03 03:55-0500\n"
+"POT-Creation-Date: 2026-11-03 08:53-0500\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1986,6 +1986,15 @@ msgstr "SAMLResponse أو RelayState مفقود."
 msgid "Invalid or expired SAML RelayState."
 msgstr "SAML RelayState غير صالح أو منتهي الصلاحية."
 
+#: backend/api/backups_escrow.py:57
+msgid "Break-glass escrow needs the Professional+ backup engine"
+msgstr ""
+"يتطلب حفظ المفاتيح لحالات الطوارئ محرك النسخ الاحتياطي في Professional+"
+
+#: backend/api/backups_escrow.py:61
+msgid "No backup target is set up yet"
+msgstr "لم يُعدّ هدف للنسخ الاحتياطي بعد"
+
 #: backend/api/config_mgmt_prereq.py:252 backend/api/packages_operations.py:76
 msgid "Permission denied: ADD_PACKAGE role required"
 msgstr " رفض الوصول: يتطلب دور ADD_PACKAGE"
@@ -2098,7 +2107,7 @@ msgstr "فشل الاتصال - خادم Grafana قد يكون غير متاح �
 msgid "Unexpected error checking Grafana health"
 msgstr "خطأ غير متوقع أثناء التحقق من صحة Grafana"
 
-#: backend/api/proplus_routes_stubs.py:69
+#: backend/api/proplus_routes_stubs.py:64
 msgid ""
 "Encrypted backups require a SysManage Professional+ license with the backup "
 "engine. Please upgrade to access this feature."
@@ -2106,7 +2115,7 @@ msgstr ""
 "تتطلب النسخ الاحتياطية المشفّرة ترخيص SysManage Professional+ مع محرك النسخ "
 "الاحتياطي. يُرجى الترقية للوصول إلى هذه الميزة."
 
-#: backend/api/proplus_routes_stubs.py:104
+#: backend/api/proplus_routes_stubs.py:120
 msgid ""
 "Host provisioning requires a SysManage Professional+ license with the "
 "provisioning engine. Please upgrade to access this feature."
@@ -2488,7 +2497,7 @@ msgid "Failed to clear NVD API key"
 msgstr "فشل في حذف مفتاح API NVD"
 
 #: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:185
-#: backend/api/backups_equip.py:160 backend/api/backups.py:569
+#: backend/api/backups_equip.py:160 backend/api/backups.py:570
 msgid "Set up the backup target first"
 msgstr "أعدّ وجهة النسخ الاحتياطي أولًا"
 
@@ -3361,6 +3370,10 @@ msgstr "فشل في إرسال أمر تسجيل: %s"
 msgid "Failed to initiate Ubuntu Pro enrollment: %s"
 msgstr "فشل في بدء تسجيل Ubuntu Pro: %s"
 
+#: backend/api/backups_breakglass.py:75
+msgid "Paste the OpenPGP public key to seal the export to"
+msgstr "قم بلصق مفتاح OpenPGP العام لتشفير التصدير"
+
 #: backend/api/packages_helpers.py:103
 #, python-format
 msgid "Failed to retrieve package summary: %s"
@@ -4181,66 +4194,61 @@ msgstr "أكّد أن ملفات المضيف الموجودة في هذه ال�
 msgid "Backup target not found"
 msgstr "لم يتم العثور على وجهة النسخ الاحتياطي"
 
-#: backend/api/backups.py:412
+#: backend/api/backups.py:413
 msgid "This edition supports one backup target; edit the existing one"
 msgstr "يدعم هذا الإصدار وجهة نسخ احتياطي واحدة؛ عدّل الوجهة الموجودة"
 
-#: backend/api/backups.py:489
+#: backend/api/backups.py:490
 msgid "Remove the hosts' backup policies before the target"
 msgstr "أزل سياسات النسخ الاحتياطي للمضيفات قبل حذف الوجهة"
 
-#: backend/api/backups.py:617
+#: backend/api/backups.py:618
 msgid "No backup policy"
 msgstr "لا توجد سياسة نسخ احتياطي"
 
-#: backend/api/backups.py:641
+#: backend/api/backups.py:642
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr "لا يستطيع هذا المضيف تشغيل النسخ الاحتياطي بعد (%s)"
 
-#: backend/api/backups.py:647
+#: backend/api/backups.py:648
 msgid "This host's backup is not configured yet"
 msgstr "لم تتم تهيئة النسخ الاحتياطي لهذا المضيف بعد"
 
-#: backend/api/backups.py:664
+#: backend/api/backups.py:665
 msgid "The backup storage host is not ready"
 msgstr "مضيف تخزين النسخ الاحتياطية غير جاهز"
 
-#: backend/api/backups.py:679
+#: backend/api/backups.py:680
 msgid "Unknown backup action"
 msgstr "إجراء نسخ احتياطي غير معروف"
 
-#: backend/api/backups.py:692
+#: backend/api/backups.py:693
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr "لا يمكن إعادة حزم مستودع مشفّر على مضيف التخزين"
 
-#: backend/api/backups.py:696
+#: backend/api/backups.py:697
 msgid "That backup job is already queued or running"
 msgstr "مهمة النسخ الاحتياطي هذه في قائمة الانتظار أو قيد التشغيل بالفعل"
 
-#: backend/api/backups.py:793 backend/api/backups_browse.py:78
+#: backend/api/backups.py:794 backend/api/backups_browse.py:78
 msgid "Snapshot not found"
 msgstr "لم يتم العثور على اللقطة"
 
-#: backend/api/backups.py:800
+#: backend/api/backups.py:801
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr "هذه اللقطة غير موقّعة؛ أكّد لاستعادتها على أي حال"
 
-#: backend/api/backups.py:853 backend/services/backup_key_release.py:124
-msgid "Encrypted backups need the Professional+ backup engine"
-msgstr ""
-"تحتاج النسخ الاحتياطية المشفّرة إلى محرك النسخ الاحتياطي في Professional+"
-
-#: backend/api/backups.py:858 backend/api/backups_drift.py:101
+#: backend/api/backups.py:854 backend/api/backups_drift.py:101
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr "لا يستطيع restate على هذا المضيف فعل ذلك بعد؛ حدّث restate"
 
-#: backend/api/backups.py:870
+#: backend/api/backups.py:866
 msgid "This snapshot's repository is no longer kept"
 msgstr "لم يعد مستودع هذه اللقطة محفوظًا"
 
-#: backend/api/backups.py:955 backend/api/backups.py:958
+#: backend/api/backups.py:951 backend/api/backups.py:954
 msgid "Backup run not found"
 msgstr "لم يتم العثور على مهمة النسخ الاحتياطي"
 
@@ -5814,6 +5822,14 @@ msgstr "تم تطبيق علامة الأصول المحجوزة %s"
 msgid "%(failed_count)d of %(total_count)d child host(s) failed to restart"
 msgstr "%(failed_count)d من %(total_count)d مستضياف فرعي فشل في إعادة التشغيل"
 
+#: backend/services/backup_keys_read.py:59
+msgid "This policy has no backup key in OpenBAO"
+msgstr "لا تحتوي هذه السياسة على مفتاح نسخ احتياطي في OpenBAO"
+
+#: backend/services/backup_keys_read.py:71
+msgid "OpenBAO does not hold this policy's backup key"
+msgstr "لا يحتفظ OpenBAO بمفتاح النسخ الاحتياطي لهذه السياسة"
+
 #: backend/services/malware_scans.py:165
 msgid "Choose at least one host to scan"
 msgstr "اختر مضيفًا واحدًا على الأقل لفحصه"
@@ -5822,36 +5838,36 @@ msgstr "اختر مضيفًا واحدًا على الأقل لفحصه"
 msgid "At most 500 hosts can be scanned in one request"
 msgstr "يمكن فحص 500 مضيف كحد أقصى في طلب واحد"
 
-#: backend/services/backup_key_release.py:85
-#: backend/services/backup_key_release.py:156
+#: backend/services/backup_key_release.py:89
+#: backend/services/backup_key_release.py:158
 msgid "No such backup run for this host"
 msgstr "لا توجد مهمة نسخ احتياطي كهذه لهذا المضيف"
 
-#: backend/services/backup_key_release.py:91
+#: backend/services/backup_key_release.py:95
 msgid "This backup run does not need a key"
 msgstr "لا تحتاج مهمة النسخ الاحتياطي هذه إلى مفتاح"
 
-#: backend/services/backup_key_release.py:93
+#: backend/services/backup_key_release.py:97
 msgid "This backup run has already ended"
 msgstr "انتهت مهمة النسخ الاحتياطي هذه بالفعل"
 
-#: backend/services/backup_key_release.py:95
+#: backend/services/backup_key_release.py:99
 msgid "This backup run's key was already released"
 msgstr "سبق إطلاق مفتاح مهمة النسخ الاحتياطي هذه"
 
-#: backend/services/backup_key_release.py:102
+#: backend/services/backup_key_release.py:106
 msgid "This backup run is too old to release its key"
 msgstr "مهمة النسخ الاحتياطي هذه قديمة جدًا لإطلاق مفتاحها"
 
-#: backend/services/backup_key_release.py:120
+#: backend/services/backup_key_release.py:124
 msgid "This host's backups are not encrypted"
 msgstr "النسخ الاحتياطية لهذا المضيف غير مشفّرة"
 
-#: backend/services/backup_key_release.py:154
+#: backend/services/backup_key_release.py:156
 msgid "Snapshot signing is not turned on"
 msgstr "توقيع اللقطات غير مفعّل"
 
-#: backend/services/backup_key_release.py:159
+#: backend/services/backup_key_release.py:161
 msgid "Signed backups need the Professional+ backup engine"
 msgstr "تتطلب النسخ الاحتياطية الموقّعة محرك النسخ الاحتياطي في Professional+"
 
@@ -5865,6 +5881,60 @@ msgid ""
 msgstr ""
 "لا يوجد لدى أي من المضيفين قائمة مراقبة ملفات، لذلك لا يوجد شيء لمقارنته"
 
+#: backend/services/backup_breakglass.py:175
+#, python-format
+msgid "gpg failed: %s"
+msgstr "فشل gpg: %s"
+
+#: backend/services/backup_breakglass.py:193
+msgid "gpg is not installed on the SysManage server; install GnuPG"
+msgstr "غير مثبت gpg على خادم SysManage؛ قم بتثبيت GnuPG"
+
+#: backend/services/backup_breakglass.py:203
+#: backend/services/backup_breakglass.py:227
+msgid "gpg could not read that public key"
+msgstr "لم يتمكن gpg من قراءة ذلك المفتاح العام"
+
+#: backend/services/backup_breakglass.py:211
+#: backend/services/backup_breakglass.py:218
+msgid "Paste one armored OpenPGP public key"
+msgstr "قم بلصق مفتاح عام OpenPGP محمي"
+
+#: backend/services/backup_breakglass.py:215
+#: backend/services/backup_escrow.py:181
+msgid "That is a SECRET key; paste the PUBLIC key (gpg --armor --export)"
+msgstr "هذا مفتاح سري؛ الصق المفتاح العام (gpg --armor --export)"
+
+#: backend/services/backup_breakglass.py:236
+msgid "Paste exactly one public key, not several"
+msgstr "قم بلصق مفتاح عام واحد فقط، وليس عدة مفاتيح"
+
+#: backend/services/backup_breakglass.py:239
+msgid "That key is expired, revoked or not valid"
+msgstr "انتهت صلاحية هذا المفتاح أو تم إلغاؤه أو أنه غير صحيح"
+
+#: backend/services/backup_breakglass.py:242
+msgid "That key cannot encrypt (it has no usable encryption key)"
+msgstr "لا يمكن لهذا المفتاح تشفير (ليس لديه مفتاح تشفير صالح)"
+
+#: backend/services/backup_breakglass.py:259
+#, python-format
+msgid "Say why the keys are exported, in %(min)d to %(max)d characters"
+msgstr "أدخل سبب تصدير المفاتيح، في %(min)d إلى %(max)d أحرف"
+
+#: backend/services/backup_breakglass.py:317
+#, python-format
+msgid "OpenBAO does not hold every backup key of %s; nothing was exported"
+msgstr "لا يحتفظ OpenBAO بمفتاح كل نسخة احتياطية لـ %s؛ لم يتم تصدير أي شيء"
+
+#: backend/services/backup_breakglass.py:423
+msgid "gpg did not seal the key export"
+msgstr "لم يقوم gpg بتشفير تصدير المفتاح"
+
+#: backend/services/backup_breakglass.py:434
+msgid "None of the chosen hosts has encrypted backups"
+msgstr "لا يوجد أي من المضيفين المختارين لديه نسخ احتياطية مشفرة"
+
 #: backend/services/backup_reach.py:96
 #, python-format
 msgid ""
@@ -5873,6 +5943,25 @@ msgid ""
 msgstr ""
 "لا يمكن لهذا المضيف الوصول إلى تخزين النسخ الاحتياطي (%(storage)s، "
 "%(address)s، منفذ NFS ‏%(port)s). تحتاج النسخ الاحتياطية إلى مسار شبكة إليه."
+
+#: backend/services/backup_escrow.py:185
+msgid "The backup engine is not available"
+msgstr "محرك النسخ الاحتياطي غير متاح"
+
+#: backend/services/backup_escrow.py:245
+msgid "Backup keys rotated: make a new break-glass export"
+msgstr "دُوّرت مفاتيح النسخ الاحتياطي: أنشئ تصديرًا طارئًا جديدًا للمفاتيح"
+
+#: backend/services/backup_escrow.py:247
+#, python-format
+msgid ""
+"SysManage rotated %(count)d backup encryption key(s) on schedule. A break-glass export made before this rotation does not hold the new keys, and backups taken from now on need them.\n"
+"\n"
+"Open Backups, then a host's Encryption panel, and use \"Break-glass key export\" to make a new export. Keep it offline, and destroy the old one."
+msgstr ""
+"دوّر SysManage عدد %(count)d من مفاتيح تشفير النسخ الاحتياطي حسب الجدول. لا يحتوي التصدير الطارئ المُجرى قبل هذا التدوير على المفاتيح الجديدة، والنسخ الاحتياطية المأخوذة من الآن فصاعدًا تحتاج إليها.\n"
+"\n"
+"افتح النسخ الاحتياطية، ثم لوحة \"التشفير\" لأحد المضيفين، واستخدم \"تصدير المفاتيح لحالات الطوارئ\" لإنشاء تصدير جديد. احفظه دون اتصال، وأتلف التصدير القديم."
 
 #: backend/services/config_mgmt_baseline.py:286
 #, python-format
@@ -6031,6 +6120,10 @@ msgstr "ثغرات حزم pkgsrc في NetBSD (ما يقرؤه pkg_admin audit)"
 msgid "macOS vulnerabilities by OS version, from NVD's affected-version data"
 msgstr ""
 "ثغرات macOS حسب إصدار نظام التشغيل، من بيانات NVD عن الإصدارات المتأثرة"
+
+#~ msgid "Encrypted backups need the Professional+ backup engine"
+#~ msgstr ""
+#~ "تحتاج النسخ الاحتياطية المشفّرة إلى محرك النسخ الاحتياطي في Professional+"
 
 #~ msgid ""
 #~ "This snapshot is encrypted; restoring or browsing it needs a restate that "

@@ -57,19 +57,35 @@ def _mount_backup_stubs(app, results: dict) -> int:
         return 0
     router = APIRouter(prefix="/v1/backup-encryption", tags=["backup-stubs"])
 
-    @router.get("/host/{host_id}")
-    @router.post("/host/{host_id}")
-    async def backup_encryption_stub(
-        host_id: str, current_user=Depends(get_current_user)
-    ):
-        del host_id
-        raise HTTPException(
+    def _unlicensed():
+        return HTTPException(
             status_code=402,
             detail=_(
                 "Encrypted backups require a SysManage Professional+ license "
                 "with the backup engine. Please upgrade to access this feature."
             ),
         )
+
+    # Every route the engine mounts under this prefix (backup_engine.pyx):
+    # only the host ones were stubbed, so rotation, the rotation settings,
+    # snapshot signing and the break-glass export answered 404 unlicensed
+    # (edition audit, 2026-11-03).
+    @router.get("/host/{host_id}")
+    @router.post("/host/{host_id}")
+    @router.post("/host/{host_id}/rotate")
+    async def backup_encryption_host_stub(
+        host_id: str, current_user=Depends(get_current_user)
+    ):
+        del host_id
+        raise _unlicensed()
+
+    @router.get("/settings")
+    @router.put("/settings")
+    @router.get("/signing")
+    @router.post("/signing")
+    @router.post("/break-glass")
+    async def backup_encryption_stub(current_user=Depends(get_current_user)):
+        raise _unlicensed()
 
     app.include_router(router, prefix="/api")
     logger.debug("Mounted backup engine 402 stub routes")

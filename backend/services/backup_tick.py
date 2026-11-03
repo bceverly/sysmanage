@@ -40,6 +40,7 @@ from backend.persistence import models
 from backend.persistence.partitions import iter_host_databases
 from backend.persistence.tenant_context import tenant_scope
 from backend.services import backup_first_fit as first_fit
+from backend.services import backup_escrow
 from backend.services import backup_jobs as jobs
 from backend.services import backup_reach as reach
 from backend.services import backup_tag_policies as tag_policies
@@ -507,10 +508,14 @@ def rotate_keys(db: Session, target, now: datetime) -> int:
     if not policies:
         return 0
     try:
-        return engine.rotate_due(db, target, policies, now=now, logger=logger)
+        rotated = engine.rotate_due(db, target, policies, now=now, logger=logger)
     except Exception:  # pylint: disable=broad-except
         logger.exception("Backup key rotation failed for target %s", target.id)
         return 0
+    # New keys an existing break-glass export lacks: tell the backup
+    # managers (when e-mail is configured), 2026-11-03.
+    backup_escrow.remind_after_rotation(db, rotated or 0)
+    return rotated
 
 
 def run_one_tick() -> int:

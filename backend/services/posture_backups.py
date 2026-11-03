@@ -26,10 +26,10 @@ What a host's backup status IS comes from the Backups page's own reading
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Optional
 
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from backend.persistence import models
+from backend.services import backup_escrow
 from backend.services import backup_jobs as jobs
 from backend.services import backup_verify
 from backend.services import backup_views as views
@@ -42,7 +42,7 @@ BACKUP_COVERAGE_KEYS = (
 )
 VERIFIED_WITHIN = timedelta(days=30)  # SYSMANAGE-BACKUP-1's max_age_days
 # The audit entry backup_engine writes for each host in a break-glass export.
-BREAK_GLASS_AUDIT = "Backup keys exported (break-glass)"
+BREAK_GLASS_AUDIT = backup_escrow.BREAK_GLASS_AUDIT
 
 _FAILING_STATUSES = ("failed", "overdue")
 
@@ -81,34 +81,9 @@ def _verified_state(db: Session, policy, now: datetime) -> Optional[str]:
     return "ok" if ended is not None and now - ended <= VERIFIED_WITHIN else "failing"
 
 
-def _newest_key_at(db: Session, policy) -> Optional[datetime]:
-    made = (
-        db.query(func.max(models.BackupPolicyKey.created_at))
-        .filter(models.BackupPolicyKey.policy_id == policy.id)
-        .scalar()
-    )
-    candidates = [
-        _naive(t) for t in (made, policy.encrypted_at, policy.encrypt_rotated_at) if t
-    ]
-    return max(candidates) if candidates else None
-
-
 def _escrow_state(db: Session, host, policy) -> Optional[str]:
-    if policy is None or not policy.encrypt_fingerprint:
-        return None
-    since = _newest_key_at(db, policy)
-    exported = (
-        db.query(func.max(models.AuditLog.timestamp))
-        .filter(
-            models.AuditLog.entity_id == str(host.id),
-            models.AuditLog.description == BREAK_GLASS_AUDIT,
-        )
-        .scalar()
-    )
-    exported = _naive(exported)
-    if exported is None:
-        return "failing"
-    return "ok" if since is None or exported > since else "failing"
+    """One source of truth with the Encryption panel and the Backups banner."""
+    return backup_escrow.host_state(db, host, policy)
 
 
 def _verification_possible() -> bool:

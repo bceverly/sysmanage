@@ -16,6 +16,8 @@ import BackupHostsTable from '../Components/Backups/BackupHostsTable';
 import BackupClearJobs from '../Components/Backups/BackupClearJobs';
 import BackupRunsList from '../Components/Backups/BackupRunsList';
 import BackupTagPolicies from '../Components/Backups/BackupTagPolicies';
+import BackupEscrowBanner from '../Components/Backups/BackupEscrowBanner';
+import BackupKeyExportCard from '../Components/Backups/BackupKeyExportCard';
 import { statusColor, statusLabel } from '../Components/Backups/backupLabels';
 import { useVisiblePolling } from '../hooks/useVisiblePolling';
 
@@ -71,6 +73,8 @@ const Backups: React.FC = () => {
     return (
         <Box>
             <Typography variant="h5" sx={{ mb: 2 }}>{t('backups.title', 'Backups')}</Typography>
+            <BackupEscrowBanner refreshKey={refreshKey} />
+            {canManage && <BackupKeyExportCard refreshKey={refreshKey} />}
             <BackupTargetCard target={data.target} hosts={data.hosts} versions={data.restate_versions}
                 canManage={canManage} onChanged={changed} />
             <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', rowGap: 1 }}>

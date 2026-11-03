@@ -32,6 +32,7 @@ vi.mock("../../../Services/backups", async (importOriginal) => {
     bulkEquipBackup: vi.fn(),
     bulkSetupBackups: vi.fn(),
     recheckBackup: vi.fn(),
+    getEscrowStatus: vi.fn().mockResolvedValue({ applies: false, stale: false }),
   };
 });
 

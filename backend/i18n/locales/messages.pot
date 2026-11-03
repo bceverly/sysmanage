@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-11-03 03:55-0500\n"
+"POT-Creation-Date: 2026-11-03 08:53-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1927,6 +1927,14 @@ msgstr ""
 msgid "Invalid or expired SAML RelayState."
 msgstr ""
 
+#: backend/api/backups_escrow.py:57
+msgid "Break-glass escrow needs the Professional+ backup engine"
+msgstr ""
+
+#: backend/api/backups_escrow.py:61
+msgid "No backup target is set up yet"
+msgstr ""
+
 #: backend/api/config_mgmt_prereq.py:252 backend/api/packages_operations.py:76
 msgid "Permission denied: ADD_PACKAGE role required"
 msgstr ""
@@ -2039,13 +2047,13 @@ msgstr ""
 msgid "Unexpected error checking Grafana health"
 msgstr ""
 
-#: backend/api/proplus_routes_stubs.py:69
+#: backend/api/proplus_routes_stubs.py:64
 msgid ""
 "Encrypted backups require a SysManage Professional+ license with the backup "
 "engine. Please upgrade to access this feature."
 msgstr ""
 
-#: backend/api/proplus_routes_stubs.py:104
+#: backend/api/proplus_routes_stubs.py:120
 msgid ""
 "Host provisioning requires a SysManage Professional+ license with the "
 "provisioning engine. Please upgrade to access this feature."
@@ -2411,7 +2419,7 @@ msgid "Failed to clear NVD API key"
 msgstr ""
 
 #: backend/api/backups_setup.py:94 backend/api/backups_tag_policies.py:185
-#: backend/api/backups_equip.py:160 backend/api/backups.py:569
+#: backend/api/backups_equip.py:160 backend/api/backups.py:570
 msgid "Set up the backup target first"
 msgstr ""
 
@@ -3247,6 +3255,10 @@ msgstr ""
 msgid "Failed to initiate Ubuntu Pro enrollment: %s"
 msgstr ""
 
+#: backend/api/backups_breakglass.py:75
+msgid "Paste the OpenPGP public key to seal the export to"
+msgstr ""
+
 #: backend/api/packages_helpers.py:103
 #, python-format
 msgid "Failed to retrieve package summary: %s"
@@ -4035,65 +4047,61 @@ msgstr ""
 msgid "Backup target not found"
 msgstr ""
 
-#: backend/api/backups.py:412
+#: backend/api/backups.py:413
 msgid "This edition supports one backup target; edit the existing one"
 msgstr ""
 
-#: backend/api/backups.py:489
+#: backend/api/backups.py:490
 msgid "Remove the hosts' backup policies before the target"
 msgstr ""
 
-#: backend/api/backups.py:617
+#: backend/api/backups.py:618
 msgid "No backup policy"
 msgstr ""
 
-#: backend/api/backups.py:641
+#: backend/api/backups.py:642
 #, python-format
 msgid "This host cannot run backups yet (%s)"
 msgstr ""
 
-#: backend/api/backups.py:647
+#: backend/api/backups.py:648
 msgid "This host's backup is not configured yet"
 msgstr ""
 
-#: backend/api/backups.py:664
+#: backend/api/backups.py:665
 msgid "The backup storage host is not ready"
 msgstr ""
 
-#: backend/api/backups.py:679
+#: backend/api/backups.py:680
 msgid "Unknown backup action"
 msgstr ""
 
-#: backend/api/backups.py:692
+#: backend/api/backups.py:693
 msgid "An encrypted repository cannot be repacked on the storage host"
 msgstr ""
 
-#: backend/api/backups.py:696
+#: backend/api/backups.py:697
 msgid "That backup job is already queued or running"
 msgstr ""
 
-#: backend/api/backups.py:793 backend/api/backups_browse.py:78
+#: backend/api/backups.py:794 backend/api/backups_browse.py:78
 msgid "Snapshot not found"
 msgstr ""
 
-#: backend/api/backups.py:800
+#: backend/api/backups.py:801
 msgid "This snapshot is not signed; confirm to restore it anyway"
 msgstr ""
 
-#: backend/api/backups.py:853 backend/services/backup_key_release.py:124
-msgid "Encrypted backups need the Professional+ backup engine"
-msgstr ""
-
-#: backend/api/backups.py:858 backend/api/backups_drift.py:101
+#: backend/api/backups.py:854 backend/api/backups_drift.py:101
 #: backend/api/backups_browse.py:63
 msgid "This host's restate cannot do this yet; upgrade restate"
 msgstr ""
 
-#: backend/api/backups.py:870
+#: backend/api/backups.py:866
 msgid "This snapshot's repository is no longer kept"
 msgstr ""
 
-#: backend/api/backups.py:955 backend/api/backups.py:958
+#: backend/api/backups.py:951 backend/api/backups.py:954
 msgid "Backup run not found"
 msgstr ""
 
@@ -5601,6 +5609,14 @@ msgstr ""
 msgid "%(failed_count)d of %(total_count)d child host(s) failed to restart"
 msgstr ""
 
+#: backend/services/backup_keys_read.py:59
+msgid "This policy has no backup key in OpenBAO"
+msgstr ""
+
+#: backend/services/backup_keys_read.py:71
+msgid "OpenBAO does not hold this policy's backup key"
+msgstr ""
+
 #: backend/services/malware_scans.py:165
 msgid "Choose at least one host to scan"
 msgstr ""
@@ -5609,36 +5625,36 @@ msgstr ""
 msgid "At most 500 hosts can be scanned in one request"
 msgstr ""
 
-#: backend/services/backup_key_release.py:85
-#: backend/services/backup_key_release.py:156
+#: backend/services/backup_key_release.py:89
+#: backend/services/backup_key_release.py:158
 msgid "No such backup run for this host"
 msgstr ""
 
-#: backend/services/backup_key_release.py:91
+#: backend/services/backup_key_release.py:95
 msgid "This backup run does not need a key"
 msgstr ""
 
-#: backend/services/backup_key_release.py:93
+#: backend/services/backup_key_release.py:97
 msgid "This backup run has already ended"
 msgstr ""
 
-#: backend/services/backup_key_release.py:95
+#: backend/services/backup_key_release.py:99
 msgid "This backup run's key was already released"
 msgstr ""
 
-#: backend/services/backup_key_release.py:102
+#: backend/services/backup_key_release.py:106
 msgid "This backup run is too old to release its key"
 msgstr ""
 
-#: backend/services/backup_key_release.py:120
+#: backend/services/backup_key_release.py:124
 msgid "This host's backups are not encrypted"
 msgstr ""
 
-#: backend/services/backup_key_release.py:154
+#: backend/services/backup_key_release.py:156
 msgid "Snapshot signing is not turned on"
 msgstr ""
 
-#: backend/services/backup_key_release.py:159
+#: backend/services/backup_key_release.py:161
 msgid "Signed backups need the Professional+ backup engine"
 msgstr ""
 
@@ -5651,11 +5667,84 @@ msgid ""
 "Neither host has a file watch list assigned, so there is nothing to compare."
 msgstr ""
 
+#: backend/services/backup_breakglass.py:175
+#, python-format
+msgid "gpg failed: %s"
+msgstr ""
+
+#: backend/services/backup_breakglass.py:193
+msgid "gpg is not installed on the SysManage server; install GnuPG"
+msgstr ""
+
+#: backend/services/backup_breakglass.py:203
+#: backend/services/backup_breakglass.py:227
+msgid "gpg could not read that public key"
+msgstr ""
+
+#: backend/services/backup_breakglass.py:211
+#: backend/services/backup_breakglass.py:218
+msgid "Paste one armored OpenPGP public key"
+msgstr ""
+
+#: backend/services/backup_breakglass.py:215
+#: backend/services/backup_escrow.py:181
+msgid "That is a SECRET key; paste the PUBLIC key (gpg --armor --export)"
+msgstr ""
+
+#: backend/services/backup_breakglass.py:236
+msgid "Paste exactly one public key, not several"
+msgstr ""
+
+#: backend/services/backup_breakglass.py:239
+msgid "That key is expired, revoked or not valid"
+msgstr ""
+
+#: backend/services/backup_breakglass.py:242
+msgid "That key cannot encrypt (it has no usable encryption key)"
+msgstr ""
+
+#: backend/services/backup_breakglass.py:259
+#, python-format
+msgid "Say why the keys are exported, in %(min)d to %(max)d characters"
+msgstr ""
+
+#: backend/services/backup_breakglass.py:317
+#, python-format
+msgid "OpenBAO does not hold every backup key of %s; nothing was exported"
+msgstr ""
+
+#: backend/services/backup_breakglass.py:423
+msgid "gpg did not seal the key export"
+msgstr ""
+
+#: backend/services/backup_breakglass.py:434
+msgid "None of the chosen hosts has encrypted backups"
+msgstr ""
+
 #: backend/services/backup_reach.py:96
 #, python-format
 msgid ""
 "This host cannot reach the backup storage (%(storage)s, %(address)s, NFS "
 "port %(port)s). Backups need a network path to it."
+msgstr ""
+
+#: backend/services/backup_escrow.py:185
+msgid "The backup engine is not available"
+msgstr ""
+
+#: backend/services/backup_escrow.py:245
+msgid "Backup keys rotated: make a new break-glass export"
+msgstr ""
+
+#: backend/services/backup_escrow.py:247
+#, python-format
+msgid ""
+"SysManage rotated %(count)d backup encryption key(s) on schedule. A break-"
+"glass export made before this rotation does not hold the new keys, and "
+"backups taken from now on need them.\n"
+"\n"
+"Open Backups, then a host's Encryption panel, and use \"Break-glass key "
+"export\" to make a new export. Keep it offline, and destroy the old one."
 msgstr ""
 
 #: backend/services/config_mgmt_baseline.py:286

@@ -759,7 +759,8 @@
     "updates": "Actualizaciones",
     "clocksOutOfBounds": "Relojes fuera de límites",
     "hardwareNeedsAttention": "Hardware que requiere atención",
-    "backupsAttention": "Copias de seguridad que requieren atención"
+    "backupsAttention": "Copias de seguridad que requieren atención",
+    "backupsEscrowStale": "Exportación de claves de emergencia desactualizada"
   },
   "dataGrid": {
     "columnVisibility": "Visibilidad de columnas",
@@ -5730,6 +5731,23 @@
     },
     "self": {
       "configure": "Configurar la copia de seguridad propia"
+    },
+    "escrow": {
+      "never": "No se ha hecho ninguna exportación de claves de emergencia. Si se pierde el servidor SysManage u OpenBAO, las copias de seguridad cifradas no se pueden leer sin ella.",
+      "staleHosts": "La exportación de claves de emergencia no incluye las claves más recientes de {{count}} host(s) cifrado(s) ({{hosts}}). Haga una exportación nueva y destruya la anterior.",
+      "staleSigning": "La firma de instantáneas se activó después de la última exportación de claves de emergencia. Haga una exportación nueva para que incluya la clave de firma.",
+      "export": "Exportar las claves"
+    },
+    "breakGlass": {
+      "button": "Llave de emergencia para exportar",
+      "community": "{{count}} host(es) tienen copias de seguridad cifradas. Sin la licencia Professional+, siguen haciendo copias de seguridad cifradas y aún pueden restaurarse, y puede exportar sus claves aquí, selladas con su clave pública OpenPGP, para una restauración con el servidor SysManage fuera de línea.",
+      "download": "Exportar y descargar",
+      "failed": "No se pudieron exportar las claves.",
+      "key": "Su clave pública OpenPGP (armada)",
+      "reason": "¿Por qué (se registra en el registro de auditoría y en el README)?",
+      "saved": "Deje vacío para usar la clave de escrow guardada {{fingerprint}}.",
+      "title": "Llave de emergencia para exportar",
+      "warning": "El archivo contiene las claves SECRETAS de cada copia de seguridad cifrada. Guárdelo fuera línea, alejado de las copias de seguridad y del servidor, y destruyalo cuando una nueva exportación lo reemplace."
     }
   }
 }

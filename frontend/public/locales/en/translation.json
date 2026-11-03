@@ -759,7 +759,8 @@
     "updates": "Updates",
     "clocksOutOfBounds": "Clocks out of bounds",
     "hardwareNeedsAttention": "Hardware needing attention",
-    "backupsAttention": "Backups needing attention"
+    "backupsAttention": "Backups needing attention",
+    "backupsEscrowStale": "Break-glass key export out of date"
   },
   "dataGrid": {
     "columnVisibility": "Column Visibility",
@@ -5730,6 +5731,23 @@
     },
     "self": {
       "configure": "Configure self-backup"
+    },
+    "escrow": {
+      "never": "No break-glass key export has been made. If the SysManage server or OpenBAO is lost, the encrypted backups cannot be read without one.",
+      "staleHosts": "The break-glass key export does not cover the newest keys of {{count}} encrypted host(s) ({{hosts}}). Make a new export and destroy the old one.",
+      "staleSigning": "Snapshot signing was turned on after the last break-glass key export. Make a new export so it carries the signing key.",
+      "export": "Export the keys"
+    },
+    "breakGlass": {
+      "community": "{{count}} host(s) have encrypted backups. Without the Professional+ license they keep backing up encrypted and can still be restored, and you can export their keys here, sealed to your own OpenPGP public key, for a restore with the SysManage server down.",
+      "button": "Break-glass key export",
+      "title": "Break-glass key export",
+      "warning": "The file holds the SECRET keys of every encrypted backup. Keep it offline, away from the backups and the server, and destroy it when a newer export replaces it.",
+      "key": "Your OpenPGP PUBLIC key (armored)",
+      "saved": "Leave empty to use the saved escrow key {{fingerprint}}.",
+      "reason": "Why (goes in the audit log and the README)",
+      "download": "Export and download",
+      "failed": "The keys could not be exported."
     }
   }
 }

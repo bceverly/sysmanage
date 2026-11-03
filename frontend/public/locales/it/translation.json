@@ -759,7 +759,8 @@
     "updates": "Aggiornamenti",
     "clocksOutOfBounds": "Orologi fuori dai limiti",
     "hardwareNeedsAttention": "Hardware che richiede attenzione",
-    "backupsAttention": "Backup che richiedono attenzione"
+    "backupsAttention": "Backup che richiedono attenzione",
+    "backupsEscrowStale": "Esportazione delle chiavi di emergenza non aggiornata"
   },
   "dataGrid": {
     "columnVisibility": "Visibilità colonne",
@@ -5730,6 +5731,23 @@
     },
     "self": {
       "configure": "Configura il backup di questo host"
+    },
+    "escrow": {
+      "never": "Non è ancora stata fatta un'esportazione delle chiavi di emergenza. Se il server SysManage o OpenBAO va perso, senza di essa i backup cifrati non si possono leggere.",
+      "staleHosts": "L'esportazione delle chiavi di emergenza non contiene le chiavi più recenti di {{count}} host cifrati ({{hosts}}). Crea una nuova esportazione e distruggi quella vecchia.",
+      "staleSigning": "La firma degli snapshot è stata attivata dopo l'ultima esportazione delle chiavi di emergenza. Crea una nuova esportazione perché contenga la chiave di firma.",
+      "export": "Esporta le chiavi"
+    },
+    "breakGlass": {
+      "button": "Chiave di emergenza per l'esportazione",
+      "community": "{{count}} host hanno backup crittografati. Senza licenza Professional+, continuano a fare backup crittografati e possono ancora essere ripristinati, e puoi esportare le loro chiavi qui, sigillate con la tua chiave pubblica OpenPGP, per un ripristino con il server SysManage spento.",
+      "download": "Esporta e scarica",
+      "failed": "Impossibile esportare le chiavi.",
+      "key": "La tua chiave pubblica OpenPGP (armata)",
+      "reason": "Perché (viene registrato nell'audit log e nel README)",
+      "saved": "Lasciare vuoto per utilizzare la chiave escrow salvata {{fingerprint}}.",
+      "title": "Chiave di emergenza per l'esportazione",
+      "warning": "Il file contiene le chiavi SECRETE di ogni backup crittografato. Conservarlo offline, lontano dai backup e dal server, e distruggerlo quando una nuova esportazione lo sostituisce."
     }
   }
 }

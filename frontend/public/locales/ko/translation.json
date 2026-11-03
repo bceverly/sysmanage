@@ -759,7 +759,8 @@
     "updates": "업데이트",
     "clocksOutOfBounds": "허용 범위를 벗어난 시계",
     "hardwareNeedsAttention": "조치가 필요한 하드웨어",
-    "backupsAttention": "주의가 필요한 백업"
+    "backupsAttention": "주의가 필요한 백업",
+    "backupsEscrowStale": "비상용 키 내보내기가 오래됨"
   },
   "dataGrid": {
     "columnVisibility": "열 표시",
@@ -5730,6 +5731,23 @@
     },
     "self": {
       "configure": "자체 백업 구성"
+    },
+    "escrow": {
+      "never": "아직 비상용 키 내보내기를 만들지 않았습니다. SysManage 서버나 OpenBAO를 잃으면 이것 없이는 암호화된 백업을 읽을 수 없습니다.",
+      "staleHosts": "비상용 키 내보내기에 암호화된 호스트 {{count}}개({{hosts}})의 최신 키가 들어 있지 않습니다. 새로 내보내고 이전 것은 폐기하세요.",
+      "staleSigning": "마지막 비상용 키 내보내기 이후에 스냅숏 서명이 켜졌습니다. 서명 키가 포함되도록 새로 내보내세요.",
+      "export": "키 내보내기"
+    },
+    "breakGlass": {
+      "button": "비상용 키 내보내기",
+      "community": "{{count}} 호스트는 암호화된 백업을 생성합니다. Professional+ 라이선스가 없는 경우에도 계속 암호화된 백업을 생성하고 복원할 수 있으며, SysManage 서버가 다운된 상태에서 복원을 위해 이 곳에 저장된 키를 내보내고 자신의 OpenPGP 공개 키로 봉인할 수 있습니다.",
+      "download": "내보내기 및 다운로드",
+      "failed": "키를 내보낼 수 없습니다.",
+      "key": "OpenPGP 공개 키 (암호화됨)",
+      "reason": "이유 (감사 로그와 README에 기록)",
+      "saved": "공백을 남겨 저장된 에스크로 키 사용 {{fingerprint}}.",
+      "title": "비상용 키 내보내기",
+      "warning": "파일은 모든 암호화된 백업의 비밀 키를 포함합니다. 오프라인 상태에서 보관하고, 백업과 서버로부터 분리하며, 새로운 내보내기가 대체할 때 파괴하세요."
     }
   }
 }

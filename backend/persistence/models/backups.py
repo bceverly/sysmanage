@@ -90,6 +90,13 @@ class BackupTarget(Base):
     sign_fingerprint = Column(String(64), nullable=True)
     sign_key_ref = Column(String(512), nullable=True)
     signing_enabled_at = Column(DateTime, nullable=True)
+    # The operator's break-glass escrow PUBLIC key (q76): exports default to
+    # it.  Only the public half -- never a secret -- so it lives here.
+    escrow_public_key = Column(Text, nullable=True)
+    escrow_fingerprint = Column(String(64), nullable=True)
+    escrow_uid = Column(String(255), nullable=True)
+    escrow_saved_at = Column(DateTime, nullable=True)
+    escrow_saved_by = Column(String(255), nullable=True)
     created_at = Column(DateTime, nullable=False)
     created_by = Column(String(255), nullable=True)
     updated_at = Column(DateTime, nullable=False)

@@ -759,7 +759,8 @@
     "updates": "更新",
     "clocksOutOfBounds": "时钟偏差超出阈值",
     "hardwareNeedsAttention": "需要关注的硬件",
-    "backupsAttention": "需要关注的备份"
+    "backupsAttention": "需要关注的备份",
+    "backupsEscrowStale": "应急密钥导出已过时"
   },
   "dataGrid": {
     "columnVisibility": "列可见性",
@@ -5730,6 +5731,23 @@
     },
     "self": {
       "configure": "配置自身备份"
+    },
+    "escrow": {
+      "never": "尚未进行应急密钥导出。如果 SysManage 服务器或 OpenBAO 丢失，没有它就无法读取加密的备份。",
+      "staleHosts": "应急密钥导出不包含 {{count}} 台加密主机（{{hosts}}）的最新密钥。请重新导出并销毁旧的导出。",
+      "staleSigning": "快照签名是在上一次应急密钥导出之后开启的。请重新导出，使其包含签名密钥。",
+      "export": "导出密钥"
+    },
+    "breakGlass": {
+      "button": "打破玻璃钥匙导出",
+      "community": "{{count}} 主机有加密备份。没有专业+ 许可证，它们会继续加密备份并仍然可以恢复，您可以在这里导出它们的密钥，密封到您自己的 OpenPGP 公共密钥，以便在 SysManage 服务器不可用时恢复。",
+      "download": "导出和下载",
+      "failed": "无法导出密钥。",
+      "key": "您的 OpenPGP 公共密钥 (带盔甲的)",
+      "reason": "原因（记录在审计日志和 README 中）",
+      "saved": "留空以使用已保存的密钥 {{fingerprint}}。",
+      "title": "打破玻璃钥匙导出",
+      "warning": "该文件包含每个加密备份的 SECRET 密钥。将它离线存储，远离备份和服务器，并在新导出替换时销毁它。"
     }
   }
 }

@@ -759,7 +759,8 @@
     "updates": "Atualizações",
     "clocksOutOfBounds": "Relógios fora dos limites",
     "hardwareNeedsAttention": "Hardware que requer atenção",
-    "backupsAttention": "Backups que precisam de atenção"
+    "backupsAttention": "Backups que precisam de atenção",
+    "backupsEscrowStale": "Exportação de chaves de emergência desatualizada"
   },
   "dataGrid": {
     "columnVisibility": "Visibilidade das colunas",
@@ -5730,6 +5731,23 @@
     },
     "self": {
       "configure": "Configurar o backup deste host"
+    },
+    "escrow": {
+      "never": "Nenhuma exportação de chaves de emergência foi feita. Se o servidor SysManage ou o OpenBAO for perdido, os backups criptografados não podem ser lidos sem ela.",
+      "staleHosts": "A exportação de chaves de emergência não contém as chaves mais recentes de {{count}} host(s) criptografado(s) ({{hosts}}). Faça uma nova exportação e destrua a antiga.",
+      "staleSigning": "A assinatura de snapshots foi ativada depois da última exportação de chaves de emergência. Faça uma nova exportação para que ela contenha a chave de assinatura.",
+      "export": "Exportar as chaves"
+    },
+    "breakGlass": {
+      "button": "Chave de emergência para exportação",
+      "community": "{{count}} host(s) têm backups criptografados. Sem a licença Professional+, eles continuam fazendo backup criptografado e ainda podem ser restaurados, e você pode exportar suas chaves aqui, seladas com sua chave pública OpenPGP, para uma restauração com o servidor SysManage fora do ar.",
+      "download": "Exportar e baixar",
+      "failed": "Não foi possível exportar as chaves.",
+      "key": "Sua chave pública OpenPGP (armada)",
+      "reason": "Por que (vai para o log de auditoria e no README)",
+      "saved": "Deixe em branco para usar a chave de escuta salva {{fingerprint}}.",
+      "title": "Chave de emergência para exportação",
+      "warning": "O arquivo contém as chaves SECRETAS de todos os backups criptografados. Mantenha-o offline, longe dos backups e do servidor, e destrua-o quando uma nova exportação o substituir."
     }
   }
 }
