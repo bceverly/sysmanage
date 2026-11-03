@@ -137,7 +137,7 @@ def test_an_unchanged_policy_is_not_re_sent(session, sent):
     assert policy.config_version == version
 
 
-def test_untagging_removes_what_the_tag_gave_but_a_paused_one_keeps_it(session, sent):
+def test_untagging_pauses_what_the_tag_gave_but_a_paused_one_keeps_it(session, sent):
     _setup(session)
     kept, gone = _host(session, fqdn="a.lab"), _host(session, fqdn="b.lab")
     paused_tag, live_tag = _tag(session, "paused"), _tag(session, "live")
@@ -151,8 +151,13 @@ def test_untagging_removes_what_the_tag_gave_but_a_paused_one_keeps_it(session, 
     session.commit()
     outcome = tag_policies.resolve(session)
     assert [r["fqdn"] for r in outcome.removed] == ["b.lab"]
-    assert _policy(session, gone) is None
+    # Kept as the host's own and paused, never deleted: the row holds the
+    # encryption keys and history (lab, 2026-11-03: t14).
+    left = _policy(session, gone)
+    assert left is not None and left.enabled is False and left.tag_policy_id is None
     assert _policy(session, kept) is not None  # paused, not torn down
+    again = tag_policies.resolve(session)
+    assert not again.removed and _policy(session, gone).enabled is False
 
 
 def test_an_unequipped_host_is_skipped_with_the_reason(session, sent):
@@ -221,7 +226,9 @@ async def test_the_api_creates_applies_changes_and_removes(session, sent):
     listed = await api.list_tag_policies(session, MANAGER)
     assert [p["name"] for p in listed["tag_policies"]] == ["Nightly"]
     gone = await api.delete_tag_policy(row_id, session, MANAGER)
-    assert gone["deleted"] and _policy(session, host) is None
+    assert gone["deleted"]
+    left = _policy(session, host)  # kept, paused, now the host's own
+    assert left.enabled is False and left.tag_policy_id is None and left.keep_last == 21
     audit = [r.description for r in session.query(models.AuditLog).all()]
     assert "Backup tag policy created" in audit and "Backup tag policy removed" in audit
 

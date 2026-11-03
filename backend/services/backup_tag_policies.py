@@ -14,9 +14,12 @@ the row the scheduler, the storage side and the results already run -- with
   passes);
 * a host's own policy -- one saved with Configure (``tag_policy_id`` NULL) --
   always beats every tag policy;
-* a host no tag policy covers any more loses the policy its tag gave it
-  (scheduling stops; the repository and its snapshots are left alone, as
-  when a policy is removed by hand).
+* a host no tag policy covers any more keeps its policy as its own, paused
+  (scheduling stops; Configure turns it back on).  It is never deleted: the
+  row carries the repository's encryption keys, their rotation history, the
+  run history and the snapshot list, and deleting it cascades all of them --
+  lab, 2026-11-03: removing a proof's tag policy deleted t14's policy, and an
+  encrypted, signed host was left with a blank, unencrypted one.
 
 ``resolve`` is idempotent: a policy whose settings already match is left
 alone, so its job files are not re-sent.  It runs when a tag policy is
@@ -249,9 +252,10 @@ def _apply_one(db, host, tag_policy, target, actor, outcome: Outcome) -> None:
 
 
 def _remove_uncovered(db, winners, actor, outcome: Outcome) -> None:
-    """A host no enabled tag policy covers loses the policy a tag gave it --
-    unless that tag policy still exists and is only switched off: switching
-    one off pauses it (its hosts keep what it last gave them)."""
+    """A host no enabled tag policy covers keeps the policy a tag gave it as
+    its own, paused -- unless that tag policy still exists and is only
+    switched off: switching one off pauses it (its hosts keep running what it
+    last gave them)."""
     paused = {
         str(row_id)
         for (row_id,) in db.query(models.BackupTagPolicy.id)
@@ -272,13 +276,16 @@ def _remove_uncovered(db, winners, actor, outcome: Outcome) -> None:
                 db,
                 actor,
                 host,
-                "Backup policy removed (no tag policy covers this host any more)",
+                "Backup policy paused (no tag policy covers this host any more); "
+                "its settings, keys and history are kept as the host's own",
                 {},
             )
         outcome.removed.append(
             {"host_id": str(policy.host_id), "fqdn": host.fqdn if host else None}
         )
-        db.delete(policy)
+        policy.tag_policy_id = None
+        policy.enabled = False
+        policy.config_version += 1
 
 
 def resolve(db: Session, actor: Any = None) -> Outcome:

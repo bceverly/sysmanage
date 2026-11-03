@@ -244,7 +244,7 @@ async def delete_tag_policy(
     current_user=Depends(require_authenticated_user),
 ) -> Dict[str, Any]:
     """The hosts it covered move to the next tag policy that covers them, or
-    lose the policy it gave them; their repositories are left alone."""
+    keep what it gave them as their own policy, paused; never deleted."""
     _require(current_user, SecurityRoles.MANAGE_BACKUPS)
     _engine_or_402()
     row = _row_or_404(db, policy_id)
